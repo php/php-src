@@ -376,6 +376,7 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	SG(request_info).query_string = safe_strdup(f->r->args);
 	SG(request_info).request_method = f->r->method;
 	SG(request_info).request_uri = safe_strdup(f->r->uri);
+	SG(request_info).path_translated = safe_strdup(f->r->filename);
 	f->r->no_local_copy = 1;
 	content_type = sapi_get_default_content_type(TSRMLS_C);
 	f->r->content_type = apr_pstrdup(f->r->pool, content_type);
