@@ -1,5 +1,12 @@
 #!/bin/sh
 
 ./scripts/preconfig
+if test -f mkinstalldirs; then
+    automake
+else
+    automake --add-missing
+fi
 aclocal
 autoconf
+(cd libzend;autoconf)
+
