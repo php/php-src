@@ -28,14 +28,14 @@ AC_DEFUN(AC_PDO_OCI_VERSION,[
 PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
 [  --with-pdo-oci[=DIR]         Include Oracle-oci support. Default DIR is ORACLE_HOME.])
 
-if test "$PDO_OCI" != "no"; then
+if test "$PHP_PDO_OCI" != "no"; then
   AC_MSG_CHECKING([Oracle Install-Dir])
-  if test "$PDO_OCI" = "yes" -o -z "$PDO_OCI"; then
+  if test "$PHP_PDO_OCI" = "yes" -o -z "$PHP_PDO_OCI"; then
     PDO_OCI_DIR=$ORACLE_HOME
   else
-    PDO_OCI_DIR=$PDO_OCI
+    PDO_OCI_DIR=$PHP_PDO_OCI
   fi
-  AC_MSG_RESULT($PDO_OCI_DIR :$PDO_OCI:)
+  AC_MSG_RESULT($PDO_OCI_DIR :$PHP_PDO_OCI:)
 
   if test -d "$PDO_OCI_DIR/rdbms/public"; then
     PHP_ADD_INCLUDE($PDO_OCI_DIR/rdbms/public)
