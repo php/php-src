@@ -712,7 +712,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 
 /* {{{ php_stream_ftp_url_stat
  */
-static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC)
+static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -723,7 +723,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, php_s
 	if (!ssb) return -1;
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL TSRMLS_CC);
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, context, &resource, NULL, NULL TSRMLS_CC);
 	if (!stream) {
 		goto stat_errexit;
 	}

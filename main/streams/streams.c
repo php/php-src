@@ -1458,14 +1458,45 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 /* }}} */
 
 /* {{{ _php_stream_stat_path */
-PHPAPI int _php_stream_stat_path(char *path, php_stream_statbuf *ssb TSRMLS_DC)
+PHPAPI int _php_stream_stat_path(char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper = NULL;
 	char *path_to_open = path;
+	int ret;
+
+	/* Try to hit the cache first */
+	if (flags & PHP_STREAM_URL_STAT_LINK) {
+		if (BG(CurrentLStatFile) && strcmp(path, BG(CurrentLStatFile)) == 0) {
+			memcpy(ssb, &BG(lssb), sizeof(php_stream_statbuf));
+			return 0;
+		}
+	} else {
+		if (BG(CurrentStatFile) && strcmp(path, BG(CurrentStatFile)) == 0) {
+			memcpy(ssb, &BG(ssb), sizeof(php_stream_statbuf));
+			return 0;
+		}
+	}
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (wrapper && wrapper->wops->url_stat) {
-		return wrapper->wops->url_stat(wrapper, path_to_open, ssb TSRMLS_CC);
+		ret = wrapper->wops->url_stat(wrapper, path_to_open, flags, ssb, context TSRMLS_CC);
+		if (ret == 0) {
+			/* Drop into cache */
+			if (flags & PHP_STREAM_URL_STAT_LINK) {
+				if (BG(CurrentLStatFile)) {
+					efree(BG(CurrentLStatFile));
+				}
+				BG(CurrentLStatFile) = estrdup(path);
+				memcpy(&BG(lssb), ssb, sizeof(php_stream_statbuf));
+			} else {
+				if (BG(CurrentStatFile)) {
+					efree(BG(CurrentStatFile));
+				}
+				BG(CurrentStatFile) = estrdup(path);
+				memcpy(&BG(ssb), ssb, sizeof(php_stream_statbuf));
+			}
+		}
+		return ret;
 	}
 	return -1;
 }

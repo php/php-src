@@ -99,7 +99,7 @@
 PHP_RINIT_FUNCTION(filestat)
 {
 	BG(CurrentStatFile)=NULL;
-	BG(CurrentStatLength)=0;
+	BG(CurrentLStatFile)=NULL;
 	return SUCCESS;
 }
 
@@ -107,6 +107,9 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 {
 	if (BG(CurrentStatFile)) {
 		efree (BG(CurrentStatFile));
+	}
+	if (BG(CurrentLStatFile)) {
+		efree (BG(CurrentLStatFile));
 	}
 	return SUCCESS;
 }
@@ -526,11 +529,16 @@ PHP_FUNCTION(clearstatcache)
 		efree(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
 	}
+	if (BG(CurrentLStatFile)) {
+		efree(BG(CurrentLStatFile));
+		BG(CurrentLStatFile) = NULL;
+	}
 }
 /* }}} */
 
 #define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
+#define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
 
 /* {{{ php_stat
  */
@@ -543,6 +551,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 #else
 	struct stat *stat_sb;
 #endif
+	php_stream_statbuf ssb;
 	int rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
@@ -559,65 +568,25 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_FALSE;
 	}
 
-	switch (type) {
-		case FS_IS_W:
-			RETURN_BOOL (!VCWD_ACCESS(filename, W_OK));
-		case FS_IS_R:
-			RETURN_BOOL (!VCWD_ACCESS(filename, R_OK));
-		case FS_IS_X:
-			RETURN_BOOL (!VCWD_ACCESS(filename, X_OK));
-		case FS_EXISTS:
-			RETURN_BOOL (!VCWD_ACCESS(filename, F_OK));
+
+	if (php_stream_stat_path_ex((char *)filename, (IS_LINK_OPERATION(type) ? PHP_STREAM_URL_STAT_LINK : 0), &ssb, NULL)) {
+		/* Error Occured */
+		if (!IS_EXISTS_CHECK(type)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
+		}
+		RETURN_FALSE;
 	}
 
-	stat_sb = &BG(sb);
-
-	if (!BG(CurrentStatFile) || strcmp(filename, BG(CurrentStatFile))) {
-		if (!BG(CurrentStatFile) || filename_length > BG(CurrentStatLength)) {
-			if (BG(CurrentStatFile)) {
-				efree(BG(CurrentStatFile));
-			}
-			BG(CurrentStatLength) = filename_length;
-			BG(CurrentStatFile) = estrndup(filename, filename_length);
-		} else {
-			memcpy(BG(CurrentStatFile), filename, filename_length+1);
-		}
-#if HAVE_SYMLINK
-		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
-#endif
-		if (VCWD_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
-			if (!IS_LINK_OPERATION(type) && (!IS_EXISTS_CHECK(type) || (errno != ENOENT && errno != ENOTDIR))) { /* fileexists() test must print no error */
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
-			}
-			efree(BG(CurrentStatFile));
-			BG(CurrentStatFile) = NULL;
-#if HAVE_SYMLINK
-			if (!IS_LINK_OPERATION(type))  /* Don't require success for link operation */
-#endif
-				RETURN_FALSE;
-		}
-	}
-
-#if HAVE_SYMLINK
-	if (IS_LINK_OPERATION(type) && !BG(lsb).st_mode) {
-		/* do lstat if the buffer is empty */
-		if (VCWD_LSTAT(filename, &BG(lsb)) == -1) {
-			if (!IS_EXISTS_CHECK(type) || (errno != ENOENT && errno != ENOTDIR)) { /* fileexists() test must print no error */
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Lstat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
-			}
-			RETURN_FALSE;
-		}
-	}
-#endif
+	stat_sb = &ssb.sb;
 
 
 #ifndef NETWARE
 	if (type >= FS_IS_W && type <= FS_IS_X) {
-		if(BG(sb).st_uid==getuid()) {
+		if(ssb.sb.st_uid==getuid()) {
 			rmask=S_IRUSR;
 			wmask=S_IWUSR;
 			xmask=S_IXUSR;
-		} else if(BG(sb).st_gid==getgid()) {
+		} else if(ssb.sb.st_gid==getgid()) {
 			rmask=S_IRGRP;
 			wmask=S_IWGRP;
 			xmask=S_IXGRP;
@@ -630,7 +599,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 				gids=(gid_t *)safe_emalloc(groups, sizeof(gid_t), 0);
 				n=getgroups(groups, gids);
 				for(i=0;i<n;i++){
-					if(BG(sb).st_gid==gids[i]) {
+					if(ssb.sb.st_gid==gids[i]) {
 						rmask=S_IRGRP;
 						wmask=S_IWGRP;
 						xmask=S_IXGRP;
@@ -643,46 +612,61 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	}
 #endif
 
+#ifndef NETWARE
+	if (IS_ABLE_CHECK(type) && getuid() == 0) {
+		/* root has special perms on plain_wrapper 
+		   But we don't know about root under Netware */
+		php_stream_wrapper *wrapper;
+
+		wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+		if (wrapper && wrapper->wops && wrapper->wops->label && strcmp(wrapper->wops->label, "plainfile") == 0) {
+			if (type == FS_IS_X) {
+				xmask = S_IXROOT;
+			} else {
+				RETURN_TRUE;
+			}
+		}
+	}
+#endif
+
 	switch (type) {
 	case FS_PERMS:
-		RETURN_LONG((long)BG(sb).st_mode);
+		RETURN_LONG((long)ssb.sb.st_mode);
 	case FS_INODE:
-		RETURN_LONG((long)BG(sb).st_ino);
+		RETURN_LONG((long)ssb.sb.st_ino);
 	case FS_SIZE:
 #if defined(NETWARE) && defined(NEW_LIBC)
 		RETURN_LONG((long)(stat_sb->st_size));
 #else
-		RETURN_LONG((long)BG(sb).st_size);
+		RETURN_LONG((long)ssb.sb.st_size);
 #endif
 	case FS_OWNER:
-		RETURN_LONG((long)BG(sb).st_uid);
+		RETURN_LONG((long)ssb.sb.st_uid);
 	case FS_GROUP:
-		RETURN_LONG((long)BG(sb).st_gid);
+		RETURN_LONG((long)ssb.sb.st_gid);
 	case FS_ATIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
 		RETURN_LONG((long)((stat_sb->st_atime).tv_sec));
 #else
-		RETURN_LONG((long)BG(sb).st_atime);
+		RETURN_LONG((long)ssb.sb.st_atime);
 #endif
 	case FS_MTIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
 		RETURN_LONG((long)((stat_sb->st_mtime).tv_sec));
 #else
-		RETURN_LONG((long)BG(sb).st_mtime);
+		RETURN_LONG((long)ssb.sb.st_mtime);
 #endif
 	case FS_CTIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
 		RETURN_LONG((long)((stat_sb->st_ctime).tv_sec));
 #else
-		RETURN_LONG((long)BG(sb).st_ctime);
+		RETURN_LONG((long)ssb.sb.st_ctime);
 #endif
 	case FS_TYPE:
-#if HAVE_SYMLINK
-		if (S_ISLNK(BG(lsb).st_mode)) {
+		if (S_ISLNK(ssb.sb.st_mode)) {
 			RETURN_STRING("link", 1);
 		}
-#endif
-		switch(BG(sb).st_mode&S_IFMT) {
+		switch(ssb.sb.st_mode & S_IFMT) {
 		case S_IFIFO: RETURN_STRING("fifo", 1);
 		case S_IFCHR: RETURN_STRING("char", 1);
 		case S_IFDIR: RETURN_STRING("dir", 1);
@@ -692,45 +676,23 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		case S_IFSOCK: RETURN_STRING("socket", 1);
 #endif
 		}
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", ssb.sb.st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
-#ifndef NETWARE	/* getuid is not available on NetWare */
-		if (getuid()==0) {
-			RETURN_TRUE; /* root */
-		}
-#endif	/* NETWARE */
-		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
+		RETURN_BOOL((ssb.sb.st_mode & wmask) != 0);
 	case FS_IS_R:
-#ifndef NETWARE	/* getuid is not available on NetWare */
-		if (getuid()==0) {
-			RETURN_TRUE; /* root */
-		}
-#endif	/* NETWARE */
-		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
+		RETURN_BOOL((ssb.sb.st_mode&rmask)!=0);
 	case FS_IS_X:
-#ifndef NETWARE	/* getuid is not available on NetWare */
-		if (getuid()==0) {
-			xmask = S_IXROOT; /* root */
-		}
-#endif	/* NETWARE */
-		RETURN_BOOL((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
+		RETURN_BOOL((ssb.sb.st_mode&xmask)!=0 && !S_ISDIR(ssb.sb.st_mode));
 	case FS_IS_FILE:
-		RETURN_BOOL(S_ISREG(BG(sb).st_mode));
+		RETURN_BOOL(S_ISREG(ssb.sb.st_mode));
 	case FS_IS_DIR:
-		RETURN_BOOL(S_ISDIR(BG(sb).st_mode));
+		RETURN_BOOL(S_ISDIR(ssb.sb.st_mode));
 	case FS_IS_LINK:
-#if HAVE_SYMLINK
-		RETURN_BOOL(S_ISLNK(BG(lsb).st_mode));
-#else
-		RETURN_FALSE;
-#endif
+		RETURN_BOOL(S_ISLNK(ssb.sb.st_mode));
 	case FS_EXISTS:
 		RETURN_TRUE; /* the false case was done earlier */
 	case FS_LSTAT:
-#if HAVE_SYMLINK
-		stat_sb = &BG(lsb);
-#endif
 		/* FALLTHROUGH */
 	case FS_STAT:
 		array_init(return_value);

@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . php_strip_whitespace(). strip whitespace & comments from a script. (Ilia)
   . php_check_syntax(). check php script for parse errors. (Ilia)
   . image_type_to_extension(). return extension based on image type. (Ilia)
+- Route stat() and family via streams API. (Sara)
 - Fixed __autoload() to preserve case of the passed class name. (Andi)
 - Fixed bug #26072 (--disable-libxml does not work). (Jani)
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
