@@ -11,7 +11,7 @@ PHP                                                                        NEWS
   also a constant. (Dmitry)
 - Fixed object's truth value conversion. It is always true unless
   ze1_compatibility_mode is on in which it behaves like in PHP 4. (Stas)
-- Improve out of memory handling in new memory manager. (Stas)
+- Improved out of memory handling in new memory manager. (Stas)
 - Fixed crash when an object references itself during destructor call. (Andi)
 - Fixed crash in foreach() when iterating over object properties or a method's
   return values. (Andi)
