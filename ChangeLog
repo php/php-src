@@ -1,3 +1,119 @@
+2003-10-05  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/dom/node.c:
+      fix crash building nodeName
+
+    * ext/dom/element.c:
+      fix crash accessing tagName without namespace
+
+    * ext/dom/document.c
+      ext/dom/dom_fe.h
+      ext/dom/element.c
+      ext/dom/examples/relaxNG.php
+      ext/dom/examples/relaxNG.rng
+      ext/dom/examples/relaxNG.xml
+      ext/dom/examples/relaxNG2.rng
+      ext/dom/examples/relaxNG3.rng
+      ext/dom/examples/shipping.php
+      ext/dom/examples/shipping.xml
+      ext/dom/examples/shipping.xsd:
+      Add schema and relaxNG validation support
+      domdocument->schemaValidate(string filename)
+      domdocument->schemaValidateSource(string xml)
+      domdocument->relaxNGValidate(string filename)
+      domdocument->relaxNGValidateSource(string xml)
+      
+      also fix domelement->setAttributeNS
+
+2003-10-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/array.c:
+      MFH: Fixed clobbering of the source array, when merging complex
+      multi-dimensional arrays. Bug reported by Lukas Smith.
+
+    * ext/standard/array.c:
+      Fixed clobbering of the source array, when merging complex
+      multi-dimensional arrays. Bug reported by Lukas Smith.
+
+2003-10-05  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+      use realpath instead of chdir
+      (Roman Neuhauser <neuhauser@bellavista.cz>)
+
+2003-10-05  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Autoloader.php
+      pear/PEAR/Builder.php
+      pear/PEAR/Command.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/DependencyDB.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php:
+      - Fixing #64
+
+2003-10-05  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/dom/xpath.c:
+      remove a debug printf
+
+2003-10-05  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR.php:
+      Don't reapply the error_message_prefix if an error
+      object is passed to raiseError()
+
+2003-10-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/file.c:
+      Fix the macro to prevent it from falling over in a mess
+
+    * ext/simplexml/tests/bug24392.phpt:
+      Fix test to make sure it can find the external xml file relatively to
+      the script file.
+
+2003-10-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/xpath.c:
+      fix segfault if xpath expression string is invalid
+
+    * ext/dom/document.c
+      ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/php_dom.c:
+      implement isDefaultNameSpace and baseURI
+      nodeName and tagName return qualified names
+      fix removeAttributeNode - takes domAttr as parameter
+      better uri and file handling for document load method
+      fix possible segfault when document is freed
+      set get_property_ptr_ptr handler to NULL
+
+2003-10-05  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_object_handlers.c:
+      Remove unused callback
+
+    * ext/com_dotnet/com_handlers.c
+      ext/dom/php_dom.c
+      ext/mono/php_mono.c
+      ext/simplexml/simplexml.c
+      ext/standard/math.c:
+      Sync with new API
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects_API.c:
+      Remove redundant callback, simplify API
+
+2003-10-05  Shane Caraveo  <shane@caraveo.com>
+
+    * (BEFORE_HANDLERS_RESHUFFLE)
+      ZendEngine2/zend_API.h:
+      this little piggy broke lots of things...eg. _function_check_flag in
+      reflection api.
+
 2003-10-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * NEWS:

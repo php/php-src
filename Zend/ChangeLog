@@ -1,3 +1,21 @@
+2003-10-05  Zeev Suraski  <zeev@zend.com>
+
+    * zend_object_handlers.c:
+      Remove unused callback
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects_API.c:
+      Remove redundant callback, simplify API
+
+2003-10-05  Shane Caraveo  <shane@caraveo.com>
+
+    * (BEFORE_HANDLERS_RESHUFFLE)
+      zend_API.h:
+      this little piggy broke lots of things...eg. _function_check_flag in
+      reflection api.
+
 2003-10-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * zend_API.c:
