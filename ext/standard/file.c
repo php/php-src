@@ -908,6 +908,7 @@ PHP_FUNCTION(fgetc) {
 	int issock=0;
 	int socketd=0;
 	void *what;
+	int result;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -922,10 +923,11 @@ PHP_FUNCTION(fgetc) {
 	}
 
 	buf = emalloc(sizeof(int));
-	if ((*buf = FP_FGETC(socketd, (FILE*)what, issock)) == EOF) {
+	if ((result = FP_FGETC(socketd, (FILE*)what, issock)) == EOF) {
 		efree(buf);
 		RETVAL_FALSE;
 	} else {
+		buf[0]=result;
 		buf[1]='\0';
 		return_value->value.str.val = buf; 
 		return_value->value.str.len = 1; 
