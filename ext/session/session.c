@@ -628,19 +628,18 @@ static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 	uint str_len;
 	ulong num_key;
 	int n;
-	zval **val = NULL;
+	zval **val;
 	int ret = 0;
 	
 	n = zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 0, pos);
 
 	switch (n) {
 		case HASH_KEY_IS_STRING:
-			if (zend_hash_find(&EG(symbol_table), str, str_len, (void **) &val) == SUCCESS && val) {
-				if (!PZVAL_IS_REF(*val)) {
-					(*val)->is_ref = 1;
-					(*val)->refcount += 1;
-					zend_hash_update(ht, str, str_len, val, sizeof(zval *), NULL);
-				}
+			if (zend_hash_find(&EG(symbol_table), str, str_len, 
+						(void **) &val) == SUCCESS 
+					&& val && Z_TYPE_PP(val) != IS_NULL) {
+				ZEND_SET_SYMBOL_WITH_LENGTH(ht, str, str_len, *val, 
+						(*val)->refcount + 1 , 1);
 				ret = 1;
 			}
 			break;
