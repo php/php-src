@@ -462,6 +462,18 @@ PHP_FUNCTION(yaz_search)
 		ZOOM_query_destroy (q);
 		RETVAL_TRUE;
 	}
+	if (!strcmp (type_str, "cql"))
+	{
+		ZOOM_query q = ZOOM_query_create ();
+		ZOOM_query_cql (q, query_str);
+		if (p->sort_criteria)
+			ZOOM_query_sortby (q, p->sort_criteria);
+        xfree (p->sort_criteria);
+        p->sort_criteria = 0;
+		p->zoom_set = ZOOM_connection_search (p->zoom_conn, q);
+		ZOOM_query_destroy (q);
+		RETVAL_TRUE;
+	}
 	else
 	{
 		RETVAL_FALSE;
