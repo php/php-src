@@ -278,7 +278,6 @@ _get_entity(void *user, const xmlChar *name)
 		if (ret == NULL)
 			ret = xmlGetDocEntity(parser->parser->myDoc, name);
 
-	
 		if (ret == NULL || (parser->parser->instate != XML_PARSER_ENTITY_VALUE && parser->parser->instate != XML_PARSER_ATTRIBUTE_VALUE)) {
 			if (ret == NULL || ret->etype == XML_INTERNAL_GENERAL_ENTITY || ret->etype == XML_INTERNAL_PARAMETER_ENTITY || ret->etype == XML_INTERNAL_PREDEFINED_ENTITY) {
 				if (parser->h_default) {
@@ -288,6 +287,12 @@ _get_entity(void *user, const xmlChar *name)
 					_build_entity(name, xmlStrlen(name), &entity, &len);
 					parser->h_default(parser->user, (const xmlChar *) entity, len);
 					xmlFree(entity);
+				} else {
+					/* expat will not expand internal entities if default handler is present otherwise
+					it will expand and pass them to cdata handler */
+					if (parser->h_cdata && ret) {
+						parser->h_cdata(parser->user, ret->content, xmlStrlen(ret->content));
+					}
 				}
 			} else {
 				if (ret->etype == XML_EXTERNAL_GENERAL_PARSED_ENTITY) {
