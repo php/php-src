@@ -1,4 +1,5 @@
 #!/bin/sh
+# $Id$
 
 supplied_flag=$1
 
@@ -25,4 +26,4 @@ else
   subdirs=''
 fi
 
-make -s -f build.mk AMFLAGS="$automake_flags" $subdirs
+${MAKE:-make} -s -f build.mk AMFLAGS="$automake_flags" $subdirs
