@@ -610,12 +610,12 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			list_entry new_le;
 
 			if (SybCtG(max_links)!=-1 && SybCtG(num_links)>=SybCtG(max_links)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Too many open links (%d)", SybCtG(num_links));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Too many open links (%ld)", SybCtG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (SybCtG(max_persistent)!=-1 && SybCtG(num_persistent)>=SybCtG(max_persistent)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Too many open persistent links (%d)", SybCtG(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Too many open persistent links (%ld)", SybCtG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -713,7 +713,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (SybCtG(max_links)!=-1 && SybCtG(num_links)>=SybCtG(max_links)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Too many open links (%d)", SybCtG(num_links));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Too many open links (%ld)", SybCtG(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -1437,7 +1437,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		
 		/* Retry deadlocks up until deadlock_retry_count times */		
 		if (sybase_ptr->deadlock && SybCtG(deadlock_retry_count) != -1 && ++deadlock_count > SybCtG(deadlock_retry_count)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Retried deadlock %d times [max: %d], giving up\n", deadlock_count- 1, SybCtG(deadlock_retry_count));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Retried deadlock %d times [max: %ld], giving up\n", deadlock_count- 1, SybCtG(deadlock_retry_count));
 			if (result != NULL) {
 				_free_sybase_result(result);
 			}
@@ -1904,7 +1904,7 @@ PHP_FUNCTION(sybase_result)
 	}
 
 	if (Z_LVAL_PP(row) < 0 || Z_LVAL_PP(row) >= result->num_rows) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Bad row offset (%d)", Z_LVAL_PP(row));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Bad row offset (%ld)", Z_LVAL_PP(row));
 		RETURN_FALSE;
 	}
 
