@@ -302,6 +302,31 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 #define FREENOW if(args) efree(args); if(key) efree(key)
 
+/* {{{ php_find_dbm
+ */
+dba_info *php_dba_find(const char* path TSRMLS_DC)
+{
+	list_entry *le;
+	dba_info *info;
+	int numitems, i;
+
+	numitems = zend_hash_next_free_element(&EG(regular_list));
+	for (i=1; i<numitems; i++) {
+		if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {
+			continue;
+		}
+		if (Z_TYPE_P(le) == le_db || Z_TYPE_P(le) == le_pdb) {
+			info = (dba_info *)(le->ptr);
+			if (!strcmp(info->path, path)) {
+				return (dba_info *)(le->ptr);
+			}
+		}
+	}
+
+	return NULL;
+}
+/* }}} */
+
 /* {{{ php_dba_open
  */
 static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
@@ -309,7 +334,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zval ***args = (zval ***) NULL;
 	int ac = ZEND_NUM_ARGS();
 	dba_mode_t modenr;
-	dba_info *info;
+	dba_info *info, *other;
 	dba_handler *hptr;
 	char *key = NULL, *error = NULL;
 	int keylen = 0;
@@ -451,8 +476,24 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->mode = modenr;
 	info->argc = ac - 3;
 	info->argv = args + 3;
+	info->flags = (hptr->flags & ~DBA_LOCK_ALL) | (lock_flag & DBA_LOCK_ALL);
+	info->lock.mode = lock_mode;
 
-	if (lock_mode) {
+	/* if any open call is a locking call:
+	 * check if we already habe a locking call open that should block this call
+	 * the problem is some systems would allow read during write
+	 */
+	if (hptr->flags & DBA_LOCK_ALL) {
+		if ((other = php_dba_find(info->path TSRMLS_CC)) != NULL) {
+			if (   ( (lock_mode&LOCK_EX)        && (other->lock.mode&(LOCK_EX|LOCK_SH)) )
+			    || ( (other->lock.mode&LOCK_EX) && (lock_mode&(LOCK_EX|LOCK_SH))        )
+			   ) {
+				error = "Unable to establish lock (database file already open)"; /* force failure exit */
+			}
+		}
+	}
+
+	if (!error && lock_mode) {
 		if (lock_dbf) {
 			info->lock.name = estrdup(info->path);
 			lock_file_mode = file_mode;
