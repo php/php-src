@@ -1,3 +1,14 @@
+2004-04-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c:
+      MFH: Open basedir & safe_mode exception when copying or attaching to a
+      memory only database.
+
+    * ext/sqlite/sqlite.c:
+      Open basedir & safe_mode exception when copying or attaching to a memory
+      only database.
+
 2004-04-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/user_filters.c:
