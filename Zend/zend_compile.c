@@ -952,6 +952,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 			}
 			break;
 	}
+	return FAILURE;
 }
 
 
