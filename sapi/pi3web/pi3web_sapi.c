@@ -77,7 +77,7 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 
 	lpCB = (LPCONTROL_BLOCK) SG(server_context);
 
-	PUTS("<table border=5 width=600>\n");
+	PUTS("<table border=0 cellpadding=3 cellspacing=1 width=600 align=center>\n");
 	PUTS("<tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">Pi3Web Server Information</th></tr>\n");
 	php_info_print_table_header(2, "Information Field", "Value");
 	php_info_print_table_row(2, "Pi3Web SAPI module version", "$Id$");
@@ -96,7 +96,7 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 
 	PUTS("</table><BR>");	
 
-	PUTS("<table border=5 width=\"600\">\n");
+	PUTS("<table border=0 cellpadding=3 cellspacing=1 width=600 align=center>\n");
 	PUTS("<tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Request Information</th></tr>\n");
 	php_info_print_table_row(2, "HTTP Request Line", lpCB->lpszReq);
 	PUTS("<tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Headers</th></tr>\n");
