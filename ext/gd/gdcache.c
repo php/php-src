@@ -38,11 +38,11 @@
 
 /* This just seems unessacary */
 #if (WIN32|WINNT)
-#define HAVE_LIBTTF 1
+#define ENABLE_GD_TTF
 #else
 #include "php_config.h"
 #endif
-#if HAVE_LIBTTF
+#ifdef ENABLE_GD_TTF
 
 #include "gdcache.h"
 
@@ -198,4 +198,4 @@ main(char *argv[], int argc)
 
 #endif
 
-#endif /* HAVE_LIBTTF */
+#endif /* ENABLE_GD_TTF */

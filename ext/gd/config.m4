@@ -48,6 +48,7 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
     GD_INCLUDE="-I/usr/pkg/include/gd"
   fi
   AC_CHECK_LIB(ttf, TT_Open_Face)
+  AC_CHECK_HEADERS(freetype.h)
   PHP_EXTENSION(gd)
   EXTRA_LIBS="$EXTRA_LIBS $GD_LIBS"
   INCLUDES="$INCLUDES $GD_INCLUDE"

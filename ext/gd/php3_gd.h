@@ -34,6 +34,11 @@
 #ifndef _PHP3_GD_H
 #define _PHP3_GD_H
 
+
+#if defined(HAVE_LIBTTF) && defined(HAVE_FREETYPE_H)
+#define ENABLE_GD_TTF
+#endif
+
 #if COMPILE_DL
 #undef HAVE_LIBGD
 #define HAVE_LIBGD 1
@@ -89,7 +94,7 @@ PHP_FUNCTION(imagesyfn);
 void php3_free_gd_font(gdFontPtr);
 void _php3_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
 PHP_FUNCTION(imagedashedline);
-#ifdef HAVE_LIBTTF
+#ifdef ENABLE_GD_TTF
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);
 #endif
