@@ -79,9 +79,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_globals_ctor(&sapi_globals TSRMLS_CC);
 #endif
 
-#ifdef VIRTUAL_DIR
 	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
-#endif
 
 #ifdef PHP_WIN32
 	tsrm_win32_startup();
@@ -93,9 +91,8 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 SAPI_API void sapi_shutdown(void)
 {
 	reentrancy_shutdown();
-#ifdef VIRTUAL_DIR
+
 	virtual_cwd_shutdown();
-#endif
 
 #ifdef PHP_WIN32
 	tsrm_win32_shutdown();

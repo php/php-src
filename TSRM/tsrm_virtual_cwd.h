@@ -200,13 +200,37 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group TSRMLS_
 
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
 
+#define REALPATH_CACHE
+#define REALPATH_CACHE_TTL  (2*60) /* 2 minutes */
+#define REALPATH_CACHE_SIZE 0      /* disabled while php.ini isn't loaded */
+
+#ifdef REALPATH_CACHE
+typedef struct _realpath_cache_bucket {
+	unsigned long                  key;
+	char                          *path;
+	int                            path_len;
+	char                          *realpath;
+	int                            realpath_len;
+	time_t                         expires;
+	struct _realpath_cache_bucket *next;	
+} realpath_cache_bucket;
+#endif
+
 typedef struct _virtual_cwd_globals {
 	cwd_state cwd;
+#ifdef REALPATH_CACHE
+	long                   realpath_cache_size;
+	long                   realpath_cache_size_limit;
+	long                   realpath_cache_ttl;
+	realpath_cache_bucket *realpath_cache[1024];
+#endif
 } virtual_cwd_globals;
 
 #ifdef ZTS
+extern ts_rsrc_id cwd_globals_id;
 # define CWDG(v) TSRMG(cwd_globals_id, virtual_cwd_globals *, v)
 #else
+extern virtual_cwd_globals cwd_globals;
 # define CWDG(v) (cwd_globals.v)
 #endif
 
