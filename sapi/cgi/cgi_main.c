@@ -787,8 +787,8 @@ static void init_request_info(TSRMLS_D)
 			} else {
 				/* make sure path_info/translated are empty */
 				script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME",script_path_translated TSRMLS_CC);
-				_sapi_cgibin_putenv("PATH_INFO",NULL TSRMLS_CC);
-				_sapi_cgibin_putenv("PATH_TRANSLATED",NULL TSRMLS_CC);
+				_sapi_cgibin_putenv("PATH_INFO", "" TSRMLS_CC);
+				_sapi_cgibin_putenv("PATH_TRANSLATED", "" TSRMLS_CC);
 			}
 			SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
 		} else {
