@@ -238,9 +238,6 @@ static void thttpd_request_ctor(TLS_D SLS_DC)
 	SG(request_info).content_type = TG(hc)->contenttype;
 	SG(request_info).content_length = TG(hc)->contentlength;
 	
-	SG(request_info).auth_user = NULL;
-	SG(request_info).auth_password = NULL;
-
 	php_handle_auth_data(TG(hc)->authorization SLS_CC);
 
 	TG(post_off) = TG(hc)->read_idx - TG(hc)->checked_idx;

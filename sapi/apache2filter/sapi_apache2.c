@@ -209,8 +209,7 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		apr_table_set(f->r->headers_in, "Connection", "close");
 		apr_table_unset(f->r->headers_out, "Content-Length");
 		auth = apr_table_get(f->r->headers_in, "Authorization");
-		if (auth)
-			php_handle_auth_data(auth SLS_CC);
+		php_handle_auth_data(auth SLS_CC);
 	}
 
 	/* moves data from bb to ctx->bb */
