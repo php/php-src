@@ -729,7 +729,6 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	xmlDoc *doc = (xmlDoc *) rsrc->ptr;
 
 	if (doc) {
-		node_list_wrapper_dtor(doc->children, 1 TSRMLS_CC);
 		node_wrapper_dtor((xmlNodePtr) doc);
 		xmlFreeDoc(doc);
 	}
