@@ -1,3 +1,140 @@
+2003-03-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/url_scanner_ex.c:
+      touch
+
+    * ext/standard/url_scanner_ex.re:
+      64bit issue fixed
+
+2003-03-10  J Smith  <jsmith@tutorbuddy.com>
+
+    * tests/classes/__set__get_001.phpt:
+      modified test to reflect change in var_dump().
+
+2003-03-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/bug22224.phpt
+      tests/lang/bug22231.phpt:
+      Modified the test to reflect the recent change on var_dump()
+
+2003-03-10  David Hill  <David.Hill@hp.com>
+
+    * ext/pgsql/pgsql.c
+      ext/standard/url_scanner.c
+      ext/standard/url_scanner_ex.c:
+      Correcting int/long mismatched - 64bit issues.
+
+2003-03-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/gd/libgd/gdft.c:
+      Fixed bug #22613 (imagettfbox() does not add the kerning distance to the
+      running position).
+      Fixed few possible memory leaks.
+
+2003-03-10  David Hill  <David.Hill@hp.com>
+
+    * ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.c
+      ext/sockets/sockets.c
+      ext/sockets/sockets.c:
+      fixing missed int to long with zend_parse_parameters
+
+2003-03-10  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/var.c:
+      Print the object handle (it's useful).
+
+2003-03-10  David Hill  <David.Hill@hp.com>
+
+    * ext/pfpro/php_pfpro.h
+      ext/skeleton/php_skeleton.h
+      ext/yaz/php_yaz.h
+      ext/zlib/php_zlib.h
+      main/php_globals.h:
+      64 bit corrections to parameters to OnUpdateInt Bug #20994 (Dave)
+
+2003-03-10  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4
+      configure.in:
+      - Always use the shtool mkdir.
+
+    * NEWS:
+      this is in the 4_3 branch
+
+2003-03-10  David Hill  <David.Hill@hp.com>
+
+    * (PHP_4_3)
+      ext/pfpro/php_pfpro.h
+      ext/skeleton/php_skeleton.h
+      ext/yaz/php_yaz.h
+      ext/zlib/php_zlib.h
+      main/php_globals.h:
+      64-bit corrections to parameters to OnUpdateInt Bug #20994 (Dave)
+
+2003-03-10  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/.cvsignore
+      sapi/apache2handler/CREDITS
+      sapi/apache2handler/EXPERIMENTAL
+      sapi/apache2handler/README
+      sapi/apache2handler/apache_config.c
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/php.sym
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c:
+      - MFH: apache2handler sapi module
+      - Changed apache2filter to use --with-apxs2filter
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4:
+      - Changed --with-apxs2 for apache2handler.
+      
+
+2003-03-10  Shane Caraveo  <shane@caraveo.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/time/mktime.phpt:
+      fix line endings in file
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      fix using stdin.  This was already fixed in php5.
+
+2003-03-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/fdf.c:
+      cs & ws fixes
+
+    * (PHP_4_3)
+      ext/fdf/fdf.c:
+      no c++ comments..
+
+2003-03-10  Shane Caraveo  <shane@caraveo.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/strings/bug21453.phpt:
+      line endings on win32 made the var_dump'ed string 4 bytes longer.  this
+      should work on all platforms.
+
+    * (PHP_4_3)
+      ext/standard/tests/reg/009.phpt:
+      splitting on whitespace will be different depending on platform, so be
+      specific with the line ending.
+
+    * (PHP_4_3)
+      ext/standard/tests/file/fopencookie.phpt:
+      make test happy by adding missing functions to avoid warnings, taken from
+      user_stream.c
+
 2003-03-09  Sara Golemon  <php@alphaweb.net>
 
     * ext/standard/basic_functions.c
