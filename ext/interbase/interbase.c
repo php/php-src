@@ -1411,13 +1411,13 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 	XSQLDA *in_sqlda = NULL, *out_sqlda = NULL;
 	BIND_BUF *bind_buf = NULL;
 	int rv = FAILURE;
-	
+
 	IB_RESULT = NULL;
 
 	if (argc > 0 && args != NULL) {
 		SEPARATE_ZVAL(args);
 	}
-	
+
 	/* allocate sqlda and output buffers */
 	if (ib_query->out_sqlda) { /* output variables in select, select for update */
 		IBDEBUG("Query wants XSQLDA for output");
@@ -1493,13 +1493,11 @@ PHP_FUNCTION(ibase_trans)
 	zval ***args;
 	char tpb[20], *tpbp = NULL;
 	long trans_argl = 0;
-	int tpb_len = 0, argn, link_id = 0, trans_n = 0, i;
+	int tpb_len = 0, argn, link_id, trans_n = 0;
 	ibase_db_link *ib_link;
 	ibase_tr_link *ib_trans;
-	
-	RESET_ERRMSG;
 
-	link_id = IBG(default_link);
+	RESET_ERRMSG;
 
 	/* TODO: multi-databases trans */
 	argn = ZEND_NUM_ARGS();
@@ -1516,9 +1514,9 @@ PHP_FUNCTION(ibase_trans)
 
 		/* Handle all database links, although we don't support multibase
 		   transactions yet, so only the last one is will be used. */
-		for (i = argn-1; i > 0 && Z_TYPE_PP(args[i]) == IS_RESOURCE; i--) {
-			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, args[i], -1, "InterBase link", le_link, le_plink);
-			link_id = Z_LVAL_PP(args[i]);
+		if (argn > 1) {
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, args[argn-1], -1, "InterBase link", le_link, le_plink);
+			link_id = Z_LVAL_PP(args[argn-1]);
 		}
 
 		/* First argument is transaction parameters */
@@ -1528,7 +1526,8 @@ PHP_FUNCTION(ibase_trans)
 		efree(args);
 	}
 
-	if (!link_id) {
+	if (argn < 2) {
+		link_id = IBG(default_link);
 		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, link_id, "InterBase link", le_link, le_plink);
 	}
 
@@ -1547,8 +1546,8 @@ PHP_FUNCTION(ibase_trans)
 			if (trans_argl & PHP_IBASE_REC_VERSION) {
 				tpb[tpb_len++] = isc_tpb_rec_version;
 			}else{
-				tpb[tpb_len++] = isc_tpb_no_rec_version; /* default in read_committed  */ 
-			}	
+				tpb[tpb_len++] = isc_tpb_no_rec_version; /* default in read_committed  */
+			}
 		} else if (trans_argl & PHP_IBASE_CONSISTENCY) {
 			tpb[tpb_len++] = isc_tpb_consistency;
 		} else {
