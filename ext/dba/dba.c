@@ -426,14 +426,22 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 */
 	strlcpy(mode, Z_STRVAL_PP(args[1]), sizeof(mode));
 	pmode = &mode[0];
-	if (pmode[0] && (pmode[1]=='d' || pmode[1]=='l')) { /* force lock on db file or lck file */
-		if (pmode[1]=='d') {
+	if (pmode[0] && (pmode[1]=='d' || pmode[1]=='l' || pmode[1]=='-')) { /* force lock on db file or lck file or disable locking */
+		switch (pmode[1]) {
+		case 'd':
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
 				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
 			}
 			lock_dbf = 1;
+			/* no break */
+		case 'l':
+			lock_flag = DBA_LOCK_ALL;
+			break;
+		default:
+		case '-':
+			lock_flag = 0;
+			break;
 		}
-		lock_flag = DBA_LOCK_ALL;
 	} else {
 		lock_flag = (hptr->flags&DBA_LOCK_ALL);
 	}
@@ -463,18 +471,23 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			lock_mode = 0;
 			file_mode = "";
 	}
-	if (*pmode=='d' || *pmode=='l') {
+	if (*pmode=='d' || *pmode=='l' || *pmode=='-') {
 		pmode++; /* done already - skip here */
 	}
 	if (*pmode=='t') {
 		pmode++;
+		if (!lock_flag) {
+			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "You cannot combine modifiers - (no lock) and t (test lock)", hptr->name);
+			FREENOW;
+			RETURN_FALSE;
+		}
 		if (!lock_mode) {
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (testing)", hptr->name);
+				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (test lock)", hptr->name);
 				FREENOW;
 				RETURN_FALSE;
 			} else {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (testing) obsolete", hptr->name);
+				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (test lock) obsolete", hptr->name);
 				FREENOW;
 				RETURN_FALSE;
 			}
@@ -788,3 +801,4 @@ PHP_FUNCTION(dba_list)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
+
