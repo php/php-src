@@ -3,7 +3,7 @@ dnl $Id$
 AC_MSG_CHECKING(whether to include fdftk support)
 AC_ARG_WITH(fdftk,
 [  --with-fdftk[=DIR]      Include fdftk support.
-                          DIR is the fdftk lib install directory,
+                          DIR is the fdftk install directory,
                           defaults to /usr/local.],
 [
   case "$withval" in
