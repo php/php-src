@@ -19,141 +19,51 @@
 #ifndef PHP_INI_H
 #define PHP_INI_H
 
-#define PHP_INI_USER	(1<<0)
-#define PHP_INI_PERDIR	(1<<1)
-#define PHP_INI_SYSTEM	(1<<2)
+#include "zend_ini.h"
 
-#define PHP_INI_ALL (PHP_INI_USER|PHP_INI_PERDIR|PHP_INI_SYSTEM)
+#define PHP_INI_USER	ZEND_INI_USER
+#define PHP_INI_PERDIR	ZEND_INI_PERDIR
+#define PHP_INI_SYSTEM	ZEND_INI_SYSTEM
 
-typedef struct _php_ini_entry php_ini_entry;
+#define PHP_INI_ALL 	ZEND_INI_ALL
 
-#define PHP_INI_MH(name) int name(php_ini_entry *entry, char *new_value, uint new_value_length, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage)
-#define PHP_INI_DISP(name) void name(php_ini_entry *ini_entry, int type)
+#define php_ini_entry	zend_ini_entry
 
-struct _php_ini_entry {
-	int module_number;
-	int modifyable;
-	char *name;
-	uint name_length;
-	PHP_INI_MH((*on_modify));
-	void *mh_arg1;
-	void *mh_arg2;
-	void *mh_arg3;
+#define PHP_INI_MH		ZEND_INI_MH
+#define PHP_INI_DISP	ZEND_INI_DISP
 
-	char *value;
-	uint value_length;
+#define PHP_INI_BEGIN		ZEND_INI_BEGIN
+#define PHP_INI_END			ZEND_INI_END
 
-	char *orig_value;
-	uint orig_value_length;
-	int modified;
+#define PHP_INI_ENTRY3_EX	ZEND_INI_ENTRY3_EX
+#define PHP_INI_ENTRY3		ZEND_INI_ENTRY3
+#define PHP_INI_ENTRY2_EX	ZEND_INI_ENTRY2_EX
+#define PHP_INI_ENTRY2		ZEND_INI_ENTRY2
+#define PHP_INI_ENTRY1_EX	ZEND_INI_ENTRY1_EX
+#define PHP_INI_ENTRY1		ZEND_INI_ENTRY1
+#define PHP_INI_ENTRY_EX	ZEND_INI_ENTRY_EX
+#define PHP_INI_ENTRY		ZEND_INI_ENTRY
 
-	void (*displayer)(php_ini_entry *ini_entry, int type);
-};
+#define STD_PHP_INI_ENTRY		STD_ZEND_INI_ENTRY
+#define STD_PHP_INI_ENTRY_EX	STD_ZEND_INI_ENTRY_EX
+#define STD_PHP_INI_BOOLEAN		STD_ZEND_INI_BOOLEAN
 
+#define PHP_INI_DISPLAY_ORIG	ZEND_INI_DISPLAY_ORIG
+#define PHP_INI_DISPLAY_ACTIVE	ZEND_INI_DISPLAY_ACTIVE
 
-int php_ini_mstartup(void);
-int php_ini_mshutdown(void);
-int php_ini_rshutdown(void);
+#define PHP_INI_STAGE_STARTUP		ZEND_INI_STAGE_STARTUP
+#define PHP_INI_STAGE_SHUTDOWN		ZEND_INI_STAGE_SHUTDOWN
+#define PHP_INI_STAGE_ACTIVATE		ZEND_INI_STAGE_ACTIVATE
+#define PHP_INI_STAGE_DEACTIVATE	ZEND_INI_STAGE_DEACTIVATE
+#define PHP_INI_STAGE_RUNTIME		ZEND_INI_STAGE_RUNTIME
 
-void php_ini_sort_entries(void);
+#define php_ini_boolean_displayer_cb	zend_ini_boolean_displayer_cb
+#define php_ini_color_displayer_cb		zend_ini_color_displayer_cb
 
-PHPAPI int php_register_ini_entries(php_ini_entry *ini_entry, int module_number);
-PHPAPI void php_unregister_ini_entries(int module_number);
-PHPAPI void php_ini_refresh_caches(int stage);
-PHPAPI int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);
-PHPAPI int php_restore_ini_entry(char *name, uint name_length, int stage);
-PHPAPI void display_ini_entries(zend_module_entry *module);
+#define php_alter_ini_entry		zend_alter_ini_entry
 
-PHPAPI long php_ini_long(char *name, uint name_length, int orig);
-PHPAPI double php_ini_double(char *name, uint name_length, int orig);
-PHPAPI char *php_ini_string(char *name, uint name_length, int orig);
-php_ini_entry *get_ini_entry(char *name, uint name_length);
-
-PHPAPI int php_ini_register_displayer(char *name, uint name_length, void (*displayer)(php_ini_entry *ini_entry, int type));
-PHPAPI PHP_INI_DISP(php_ini_boolean_displayer_cb);
-PHPAPI PHP_INI_DISP(php_ini_color_displayer_cb);
-PHPAPI PHP_INI_DISP(display_link_numbers);
-
-#define PHP_INI_BEGIN()		static php_ini_entry ini_entries[] = {
-#define PHP_INI_END()		{ 0, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, 0, NULL } };
-
-#define PHP_INI_ENTRY3_EX(name, default_value, modifyable, on_modify, arg1, arg2, arg3, displayer) \
-	{ 0, modifyable, name, sizeof(name), on_modify, arg1, arg2, arg3, default_value, sizeof(default_value)-1, NULL, 0, 0, displayer },
-
-#define PHP_INI_ENTRY3(name, default_value, modifyable, on_modify, arg1, arg2, arg3) \
-	PHP_INI_ENTRY3_EX(name, default_value, modifyable, on_modify, arg1, arg2, arg3, NULL)
-
-#define PHP_INI_ENTRY2_EX(name, default_value, modifyable, on_modify, arg1, arg2, displayer) \
-	PHP_INI_ENTRY3_EX(name, default_value, modifyable, on_modify, arg1, arg2, NULL, displayer)
-
-#define PHP_INI_ENTRY2(name, default_value, modifyable, on_modify, arg1, arg2) \
-	PHP_INI_ENTRY2_EX(name, default_value, modifyable, on_modify, arg1, arg2, NULL)
-
-#define PHP_INI_ENTRY1_EX(name, default_value, modifyable, on_modify, arg1, displayer) \
-	PHP_INI_ENTRY3_EX(name, default_value, modifyable, on_modify, arg1, NULL, NULL, displayer)
-
-#define PHP_INI_ENTRY1(name, default_value, modifyable, on_modify, arg1) \
-	PHP_INI_ENTRY1_EX(name, default_value, modifyable, on_modify, arg1, NULL)
-	
-#define PHP_INI_ENTRY_EX(name, default_value, modifyable, on_modify, displayer) \
-	PHP_INI_ENTRY3_EX(name, default_value, modifyable, on_modify, NULL, NULL, NULL, displayer)
-
-#define PHP_INI_ENTRY(name, default_value, modifyable, on_modify) \
-	PHP_INI_ENTRY_EX(name, default_value, modifyable, on_modify, NULL)
-
-#ifdef ZTS
-#define STD_PHP_INI_ENTRY(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr) \
-	PHP_INI_ENTRY2(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id)
-#define STD_PHP_INI_ENTRY_EX(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr, displayer) \
-	PHP_INI_ENTRY2_EX(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id, displayer)
-#define STD_PHP_INI_BOOLEAN(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr) \
-	PHP_INI_ENTRY3_EX(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id, NULL, php_ini_boolean_displayer_cb)
-#else
-#define STD_PHP_INI_ENTRY(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr) \
-	PHP_INI_ENTRY2(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr)
-#define STD_PHP_INI_ENTRY_EX(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr, displayer) \
-	PHP_INI_ENTRY2_EX(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, displayer)
-#define STD_PHP_INI_BOOLEAN(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr) \
-	PHP_INI_ENTRY3_EX(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, php_ini_boolean_displayer_cb)
-#endif
-
-#define INI_INT(name) php_ini_long((name), sizeof(name), 0)
-#define INI_FLT(name) php_ini_double((name), sizeof(name), 0)
-#define INI_STR(name) php_ini_string((name), sizeof(name), 0)
-#define INI_BOOL(name) ((zend_bool) INI_INT(name))
-
-#define INI_ORIG_INT(name)	php_ini_long((name), sizeof(name), 1)
-#define INI_ORIG_FLT(name)	php_ini_double((name), sizeof(name), 1)
-#define INI_ORIG_STR(name)	php_ini_string((name), sizeof(name), 1)
-#define INI_ORIG_BOOL(name) ((zend_bool) INI_ORIG_INT(name))
-
-
-#define REGISTER_INI_ENTRIES() php_register_ini_entries(ini_entries, module_number)
-#define UNREGISTER_INI_ENTRIES() php_unregister_ini_entries(module_number)
-#define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
-
-#define REGISTER_INI_DISPLAYER(name, displayer) php_ini_register_displayer((name), sizeof(name), displayer)
-#define REGISTER_INI_BOOLEAN(name) REGISTER_INI_DISPLAYER(name, php_ini_boolean_displayer_cb)
-
-pval *cfg_get_entry(char *name, uint name_length);
-
-PHPAPI int php_atoi(const char *str, int str_len);
-
-/* Standard message handlers */
-PHPAPI PHP_INI_MH(OnUpdateBool);
-PHPAPI PHP_INI_MH(OnUpdateInt);
-PHPAPI PHP_INI_MH(OnUpdateReal);
-PHPAPI PHP_INI_MH(OnUpdateString);
-PHPAPI PHP_INI_MH(OnUpdateStringUnempty);
-
-
-#define PHP_INI_DISPLAY_ORIG	1
-#define PHP_INI_DISPLAY_ACTIVE	2
-
-#define PHP_INI_STAGE_STARTUP		(1<<0)
-#define PHP_INI_STAGE_SHUTDOWN		(1<<1)
-#define PHP_INI_STAGE_ACTIVATE		(1<<2)
-#define PHP_INI_STAGE_DEACTIVATE	(1<<3)
-#define PHP_INI_STAGE_RUNTIME		(1<<4)
+#define php_ini_long	zend_ini_long
+#define php_ini_double	zend_ini_double
+#define php_ini_string	zend_ini_string
 
 #endif /* PHP_INI_H */

@@ -69,7 +69,7 @@ void UpdateIniFromRegistry(char *path)
 				continue;
 			}
 			/*printf("%s -> %s\n", namebuf, valuebuf);*/
-			php_alter_ini_entry(namebuf, namebuf_length+1, valuebuf, valuebuf_length+1, PHP_INI_PERDIR, PHP_INI_STAGE_ACTIVATE);
+			zend_alter_ini_entry(namebuf, namebuf_length+1, valuebuf, valuebuf_length+1, PHP_INI_PERDIR, PHP_INI_STAGE_ACTIVATE);
 		}
 
 		RegCloseKey(hKey);

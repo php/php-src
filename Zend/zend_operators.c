@@ -36,6 +36,30 @@
 #include "ext/bcmath/number.h"
 #endif
 
+ZEND_API int zend_atoi(const char *str, int str_len)
+{
+	int retval;
+
+	if (!str_len) {
+		str_len = strlen(str);
+	}
+	retval = atoi(str);
+	if (str_len>0) {
+		switch (str[str_len-1]) {
+			case 'k':
+			case 'K':
+				retval *= 1024;
+				break;
+			case 'm':
+			case 'M':
+				retval *= 1048576;
+				break;
+		}
+	}
+	return retval;
+}
+
+
 ZEND_API double zend_string_to_double(const char *number, zend_uint length)
 {
 	double divisor = 10.0;
@@ -1723,5 +1747,7 @@ static inline int is_numeric_string(char *str, int length, long *lval, double *d
 		}
 	}
 }
+
+
 
 #endif

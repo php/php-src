@@ -559,7 +559,7 @@ php_ns_config(php_ns_context *ctx, char global)
 				} while(*val == ' ');
 
 				Ns_Log(Debug, "PHP configuration option '%s=%s'", new_key, val);
-				php_alter_ini_entry(new_key, strlen(new_key) + 1, val, 
+				zend_alter_ini_entry(new_key, strlen(new_key) + 1, val, 
 						strlen(val) + 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
 				
 				efree(new_key);

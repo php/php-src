@@ -987,14 +987,14 @@ PHP_FUNCTION(session_set_cookie_params)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		convert_to_string_ex(path);
-		php_alter_ini_entry("session.cookie_path", sizeof("session.cookie_path"), Z_STRVAL_PP(path), Z_STRLEN_PP(path), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry("session.cookie_path", sizeof("session.cookie_path"), Z_STRVAL_PP(path), Z_STRLEN_PP(path), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
 		if (ZEND_NUM_ARGS() > 2) {
 			convert_to_string_ex(domain);
-			php_alter_ini_entry("session.cookie_domain", sizeof("session.cookie_domain"), Z_STRVAL_PP(domain), Z_STRLEN_PP(domain), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			zend_alter_ini_entry("session.cookie_domain", sizeof("session.cookie_domain"), Z_STRVAL_PP(domain), Z_STRLEN_PP(domain), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			if (ZEND_NUM_ARGS() > 3) {
 				convert_to_long_ex(secure);
-				php_alter_ini_entry("session.cookie_secure", sizeof("session.cookie_secure"), Z_BVAL_PP(secure)?"1":"0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+				zend_alter_ini_entry("session.cookie_secure", sizeof("session.cookie_secure"), Z_BVAL_PP(secure)?"1":"0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			}
 		}
 	}
@@ -1039,7 +1039,7 @@ PHP_FUNCTION(session_name)
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
-		php_alter_ini_entry("session.name", sizeof("session.name"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry("session.name", sizeof("session.name"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 	
 	RETVAL_STRING(old, 0);
@@ -1097,7 +1097,7 @@ PHP_FUNCTION(session_set_save_handler)
 	if (PS(nr_open_sessions) > 0)
 		RETURN_FALSE;
 	
-	php_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
 	mdata = emalloc(sizeof(*mdata));
 	
@@ -1128,7 +1128,7 @@ PHP_FUNCTION(session_save_path)
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
-		php_alter_ini_entry("session.save_path", sizeof("session.save_path"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry("session.save_path", sizeof("session.save_path"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 	
 	RETVAL_STRING(old, 0);
@@ -1176,7 +1176,7 @@ PHP_FUNCTION(session_cache_limiter)
 
 	if (ac == 1) {
 		convert_to_string_ex(p_cache_limiter);
-		php_alter_ini_entry("session.cache_limiter", sizeof("session.cache_limiter"), Z_STRVAL_PP(p_cache_limiter), Z_STRLEN_PP(p_cache_limiter), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_alter_ini_entry("session.cache_limiter", sizeof("session.cache_limiter"), Z_STRVAL_PP(p_cache_limiter), Z_STRLEN_PP(p_cache_limiter), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 	
 	RETVAL_STRING(old, 0);

@@ -1919,7 +1919,8 @@ PHP_FUNCTION(ini_set)
 		RETVAL_FALSE;
 	}
 
-	if (php_alter_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, (*new_value)->value.str.val, (*new_value)->value.str.len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)==FAILURE) {
+	if (zend_alter_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, (*new_value)->value.str.val, (*new_value)->value.str.len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)==FAILURE) {
+		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -1937,7 +1938,7 @@ PHP_FUNCTION(ini_restore)
 
 	convert_to_string_ex(varname);
 
-	php_restore_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, PHP_INI_STAGE_RUNTIME);
+	zend_restore_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, PHP_INI_STAGE_RUNTIME);
 }
 /* }}} */
 
