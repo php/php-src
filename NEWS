@@ -71,6 +71,7 @@ PHP                                                                        NEWS
 - Fixed bug #31683 (changes to $name in __get($name) override future 
   parameters). (Dmitry)
 - Fixed bug #31699 (unserialize() float problem on non-English locales). (Ilia)
+- Fixed bug #31562 (__autoload() problem with static variables). (Marcus)
 - Fixed bug #31651 (ReflectionClass::getDefaultProperties segfaults with arrays).
   (Marcus)
 - Fixed bug #31623 (OCILogin does not support password grace period).
