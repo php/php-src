@@ -2397,8 +2397,10 @@ PHP_FUNCTION(pg_escape_string)
 		return;
 	}
 
+	to = (char *)emalloc(len*2+1);
 	len = (int)PQescapeString(to, from, strlen(from));
 	if (len < 0) {
+		efree(to);
 		RETURN_FALSE;
 	}
 	RETURN_STRINGL(to, len, 0);
@@ -2418,9 +2420,11 @@ PHP_FUNCTION(pg_escape_bytea)
 
 	to = (char *)PQescapeBytea((unsigned char*)from, strlen(from), (size_t *)&len);
 	if (len < 0) {
+		/* Don't need to free "to" here*/
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(to, len, 0);
+	RETURN_STRINGL(to, len, 1);
+	free(to);
 }
 /* }}} */
 #endif
