@@ -460,11 +460,11 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					RETURN_FALSE;
 				}
 				convert_to_string(yyhost);
-				host = yyhost->value.str.val;
+				host = Z_STRVAL_P(yyhost);
 				user=passwd=charset=NULL;
-				hashed_details_length = yyhost->value.str.len+6+4;
+				hashed_details_length = Z_STRLEN_P(yyhost)+6+4;
 				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "sybase_%s___", yyhost->value.str.val);
+				sprintf(hashed_details, "sybase_%s___", Z_STRVAL_P(yyhost));
 			}
 			break;
 		case 2: {
@@ -475,12 +475,12 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 				convert_to_string(yyhost);
 				convert_to_string(yyuser);
-				host = yyhost->value.str.val;
-				user = yyuser->value.str.val;
+				host = Z_STRVAL_P(yyhost);
+				user = Z_STRVAL_P(yyuser);
 				passwd=charset=NULL;
-				hashed_details_length = yyhost->value.str.len+yyuser->value.str.len+6+4;
+				hashed_details_length = Z_STRLEN_P(yyhost)+Z_STRLEN_P(yyuser)+6+4;
 				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "sybase_%s_%s__", yyhost->value.str.val, yyuser->value.str.val);
+				sprintf(hashed_details, "sybase_%s_%s__", Z_STRVAL_P(yyhost), Z_STRVAL_P(yyuser));
 			}
 			break;
 		case 3: {
@@ -492,13 +492,13 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				convert_to_string(yyhost);
 				convert_to_string(yyuser);
 				convert_to_string(yypasswd);
-				host = yyhost->value.str.val;
-				user = yyuser->value.str.val;
-				passwd = yypasswd->value.str.val;
+				host = Z_STRVAL_P(yyhost);
+				user = Z_STRVAL_P(yyuser);
+				passwd = Z_STRVAL_P(yypasswd);
 				charset=NULL;
-				hashed_details_length = yyhost->value.str.len+yyuser->value.str.len+yypasswd->value.str.len+6+4;
+				hashed_details_length = Z_STRLEN_P(yyhost)+Z_STRLEN_P(yyuser)+Z_STRLEN_P(yypasswd)+6+4;
 				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "sybase_%s_%s_%s_", yyhost->value.str.val, yyuser->value.str.val, yypasswd->value.str.val);
+				sprintf(hashed_details, "sybase_%s_%s_%s_", Z_STRVAL_P(yyhost), Z_STRVAL_P(yyuser), Z_STRVAL_P(yypasswd));
 			}
 			break;
 		case 4: {
@@ -631,7 +631,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ptr = zend_list_find(link, &type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
-				return_value->value.lval = SybCtG(default_link) = link;
+				Z_LVAL_P(return_value) = SybCtG(default_link) = link;
 				return_value->type = IS_RESOURCE;
 				efree(hashed_details);
 				return;
@@ -656,7 +656,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, sybase_ptr, le_link);
 
 		/* add it to the hash */
-		new_index_ptr.ptr = (void *) return_value->value.lval;
+		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
 		new_index_ptr.type = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1, (void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			ct_close(sybase_ptr->connection, CS_UNUSED);
@@ -668,7 +668,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		SybCtG(num_links)++;
 	}
 	efree(hashed_details);
-	SybCtG(default_link)=return_value->value.lval;
+	SybCtG(default_link)=Z_LVAL_P(return_value);
 	zend_list_addref(SybCtG(default_link));
 }
 
@@ -849,8 +849,8 @@ PHP_FUNCTION(sybase_select_db)
 	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", le_link, le_plink);
 
 	convert_to_string(db);
-	cmdbuf = (char *) emalloc(sizeof("use ")+db->value.str.len+1);
-	sprintf(cmdbuf, "use %s", db->value.str.val); /* SAFE */
+	cmdbuf = (char *) emalloc(sizeof("use ")+Z_STRLEN_P(db)+1);
+	sprintf(cmdbuf, "use %s", Z_STRVAL_P(db)); /* SAFE */
 
 	if (exec_cmd(sybase_ptr, cmdbuf)==FAILURE) {
 		efree(cmdbuf);
@@ -1250,13 +1250,13 @@ PHP_FUNCTION(sybase_free_result)
 	}
 
 	if (sybase_result_index->type==IS_RESOURCE
-		&& sybase_result_index->value.lval==0) {
+		&& Z_LVAL_P(sybase_result_index)==0) {
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
-	zend_list_delete(sybase_result_index->value.lval);
+	zend_list_delete(Z_LVAL_P(sybase_result_index));
 	RETURN_TRUE;
 }
 
@@ -1283,7 +1283,7 @@ PHP_FUNCTION(sybase_num_rows)
 
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
-	return_value->value.lval = result->num_rows;
+	Z_LVAL_P(return_value) = result->num_rows;
 	return_value->type = IS_LONG;
 }
 
@@ -1302,7 +1302,7 @@ PHP_FUNCTION(sybase_num_fields)
 
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
-	return_value->value.lval = result->num_fields;
+	Z_LVAL_P(return_value) = result->num_fields;
 	return_value->type = IS_LONG;
 }
 
@@ -1333,7 +1333,7 @@ PHP_FUNCTION(sybase_fetch_row)
 		*field_content = result->data[result->cur_row][i];
 		INIT_PZVAL(field_content);
 		pval_copy_constructor(field_content);
-		zend_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(pval* ), NULL);
+		zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &field_content, sizeof(pval* ), NULL);
 	}
 	result->cur_row++;
 }
@@ -1366,13 +1366,13 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 		*tmp = result->data[result->cur_row][i];
 		INIT_PZVAL(tmp);
 		if (PG(magic_quotes_runtime) && tmp->type == IS_STRING) {
-			tmp->value.str.val = php_addslashes(tmp->value.str.val, tmp->value.str.len, &tmp->value.str.len, 0 TSRMLS_CC);
+			Z_STRVAL_P(tmp) = php_addslashes(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &Z_STRLEN_P(tmp), 0 TSRMLS_CC);
 		} else {
 			pval_copy_constructor(tmp);
 		}
-		zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *), NULL);
+		zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *) &tmp, sizeof(pval *), NULL);
 		tmp->refcount++;
-		zend_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval *), NULL);
+		zend_hash_update(Z_ARRVAL_P(return_value), result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval *), NULL);
 	}
 	result->cur_row++;
 }
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(sybase_fetch_object)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (return_value->type==IS_ARRAY) {
-		object_and_properties_init(return_value, &zend_standard_class_def, return_value->value.ht);
+		object_and_properties_init(return_value, &zend_standard_class_def, Z_ARRVAL_P(return_value));
 	}
 }
 /* }}} */
@@ -1412,12 +1412,12 @@ PHP_FUNCTION(sybase_data_seek)
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
 	convert_to_long(offset);
-	if (offset->value.lval<0 || offset->value.lval>=result->num_rows) {
+	if (Z_LVAL_P(offset)<0 || Z_LVAL_P(offset)>=result->num_rows) {
 		php_error(E_WARNING, "Sybase:  Bad row offset");
 		RETURN_FALSE;
 	}
 
-	result->cur_row = offset->value.lval;
+	result->cur_row = Z_LVAL_P(offset);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1486,7 +1486,7 @@ PHP_FUNCTION(sybase_fetch_field)
 				RETURN_FALSE;
 			}
 			convert_to_long(offset);
-			field_offset = offset->value.lval;
+			field_offset = Z_LVAL_P(offset);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -1534,7 +1534,7 @@ PHP_FUNCTION(sybase_field_seek)
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
 	convert_to_long(offset);
-	field_offset = offset->value.lval;
+	field_offset = Z_LVAL_P(offset);
 
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		php_error(E_WARNING, "Sybase:  Bad column offset");
@@ -1563,8 +1563,8 @@ PHP_FUNCTION(sybase_result)
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
 
 	convert_to_long(row);
-	if (row->value.lval<0 || row->value.lval>=result->num_rows) {
-		php_error(E_WARNING, "Sybase:  Bad row offset (%d)", row->value.lval);
+	if (Z_LVAL_P(row)<0 || Z_LVAL_P(row)>=result->num_rows) {
+		php_error(E_WARNING, "Sybase:  Bad row offset (%d)", Z_LVAL_P(row));
 		RETURN_FALSE;
 	}
 
@@ -1573,20 +1573,20 @@ PHP_FUNCTION(sybase_result)
 			int i;
 
 			for (i=0; i<result->num_fields; i++) {
-				if (!strcasecmp(result->fields[i].name, field->value.str.val)) {
+				if (!strcasecmp(result->fields[i].name, Z_STRVAL_P(field))) {
 					field_offset = i;
 					break;
 				}
 			}
 			if (i>=result->num_fields) { /* no match found */
-				php_error(E_WARNING, "Sybase:  %s field not found in result", field->value.str.val);
+				php_error(E_WARNING, "Sybase:  %s field not found in result", Z_STRVAL_P(field));
 				RETURN_FALSE;
 			}
 			break;
 		}
 		default:
 			convert_to_long(field);
-			field_offset = field->value.lval;
+			field_offset = Z_LVAL_P(field);
 			if (field_offset<0 || field_offset>=result->num_fields) {
 				php_error(E_WARNING, "Sybase:  Bad column offset specified");
 				RETURN_FALSE;
@@ -1594,7 +1594,7 @@ PHP_FUNCTION(sybase_result)
 			break;
 	}
 
-	*return_value = result->data[row->value.lval][field_offset];
+	*return_value = result->data[Z_LVAL_P(row)][field_offset];
 	pval_copy_constructor(return_value);
 }
 /* }}} */
@@ -1625,7 +1625,7 @@ PHP_FUNCTION(sybase_affected_rows)
 
 	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", le_link, le_plink);
 
-	return_value->value.lval = sybase_ptr->affected_rows;
+	Z_LVAL_P(return_value) = sybase_ptr->affected_rows;
 	return_value->type = IS_LONG;
 }
 /* }}} */
@@ -1658,7 +1658,7 @@ PHP_FUNCTION(sybase_min_client_severity)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(severity);
-	SybCtG(min_client_severity) = severity->value.lval;
+	SybCtG(min_client_severity) = Z_LVAL_P(severity);
 }
 /* }}} */
 
@@ -1673,7 +1673,7 @@ PHP_FUNCTION(sybase_min_server_severity)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(severity);
-	SybCtG(min_server_severity) = severity->value.lval;
+	SybCtG(min_server_severity) = Z_LVAL_P(severity);
 }
 /* }}} */
 
