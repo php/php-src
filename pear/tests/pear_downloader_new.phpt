@@ -68,6 +68,7 @@ if (!empty($home)) {
     putenv('HOME="'.$temp_path);
 }
 require_once "PEAR/Downloader.php";
+require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'download_test_classes.php.inc';
 
 // no UI is needed for these tests
 $ui = false;
@@ -92,9 +93,18 @@ function catchit($err)
 echo "Test simple direct url download:\n";
 
 $config = &PEAR_Config::singleton();
+// initialize fake pear channel
+require_once 'PEAR/ChannelFile.php';
+$chan = new PEAR_ChannelFile;
+$chan->setName('pear');
+$chan->setSummary('PEAR');
+$chan->setServer($server);
+$chan->setDefaultPEARProtocols();
+
+$reg = new PEAR_Registry($config->get('php_dir'), $chan);
 $packages = array("http://$server/get/pkg6-1.1.tgz");
 $options = array();
-$installer = &new PEAR_Downloader($ui, $options, $config);
+$installer = &new test_PEAR_Downloader($ui, $options, $config);
 $a = $installer->download($packages);
 $installpackages = $installer->getDownloadedPackages();
 var_dump($a, $installer->getErrorMsgs());
@@ -193,7 +203,7 @@ unset($installpackages[0]['file']);
 echo "\n================Test --alldeps\nTest preferred_state = stable\n";
 $installer->configSet('preferred_state', 'stable');
 
-$installer = &new PEAR_Downloader($ui, array('alldeps' => true), $config);
+$installer = &new test_PEAR_Downloader($ui, array('alldeps' => true), $config);
 $packages = array("http://$server/get/pkg1-1.1.tgz");
 $a = $installer->download($packages);
 $installpackages = $installer->getDownloadedPackages();
@@ -237,7 +247,7 @@ foreach ($installpackages as $package) {
 echo "\n================Test --onlyreqdeps\nTest preferred_state = stable\n";
 $config->set('preferred_state', 'stable');
 
-$installer = &new PEAR_Downloader($ui, array('onlyreqdeps' => true), $config);
+$installer = &new test_PEAR_Downloader($ui, array('onlyreqdeps' => true), $config);
 $packages = array("http://$server/get/pkg1-1.1.tgz");
 $a = $installer->download($packages);
 $installpackages = $installer->getDownloadedPackages();
@@ -319,7 +329,7 @@ array(1) {
       array(0) {
       }
       ["filelist"]=>
-      &array(3) {
+      array(3) {
         ["zoorb.php"]=>
         array(2) {
           ["role"]=>
@@ -351,7 +361,7 @@ array(1) {
       ["maintainers"]=>
       array(1) {
         [0]=>
-        &array(4) {
+        array(4) {
           ["handle"]=>
           string(8) "fakeuser"
           ["name"]=>
@@ -392,7 +402,7 @@ array(1) {
       array(0) {
       }
       ["filelist"]=>
-      &array(3) {
+      array(3) {
         ["zoorb.php"]=>
         array(2) {
           ["role"]=>
@@ -424,7 +434,7 @@ array(1) {
       ["maintainers"]=>
       array(1) {
         [0]=>
-        &array(4) {
+        array(4) {
           ["handle"]=>
           string(8) "fakeuser"
           ["name"]=>
@@ -555,7 +565,7 @@ pkg4-1.1
 pkg5-1.1
 pkg6-2.0b1
 Test preferred_state = alpha:
-skipping Package 'pkg3' optional dependency 'pkg4AndAHalf'
+skipping Package 'pear::pkg3' optional dependency 'pear::pkg4AndAHalf'
 NULL
 array(0) {
 }
