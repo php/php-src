@@ -5,7 +5,7 @@ strtotime() function
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Windows does not support dates prior to midnight (00:00:00), January 1, 1970');
 }
-if (!@putenv("TZ=Europe/Amsterdam") || getenv("TZ") != 'Europe/Amsterdam') {
+if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
 	die("skip unable to change TZ enviroment variable\n");
 }
 ?>
@@ -33,7 +33,7 @@ if (!@putenv("TZ=Europe/Amsterdam") || getenv("TZ") != 'Europe/Amsterdam') {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
 
-	putenv ("TZ=Europe/Amsterdam");
+	putenv ("TZ=US/Eastern");
 	foreach ($dates as $date) {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
@@ -61,9 +61,9 @@ if (!@putenv("TZ=Europe/Amsterdam") || getenv("TZ") != 'Europe/Amsterdam') {
 2001-12-21 00:00:00
 2001-12-21 12:16:00
 2001-12-21 12:16:00
-1970-01-01 00:59:59
+1969-12-31 18:59:59
 2001-10-22 21:19:58
-2001-10-23 01:19:58
-2001-10-23 01:32:58
-2001-10-22 21:19:58
-2001-10-22 21:06:58
+2001-10-22 19:19:58
+2001-10-22 19:32:58
+2001-10-22 15:19:58
+2001-10-22 15:06:58
