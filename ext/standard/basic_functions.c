@@ -23,6 +23,7 @@
 #include "php_ini.h"
 #include "internal_functions_registry.h"
 #include "php_standard.h"
+#include "phpmath.h"
 #include "ext/standard/info.h"
 #include "zend_operators.h"
 #include <stdarg.h>
@@ -568,9 +569,6 @@ static void php_putenv_destructor(putenv_entry *pe)
 }
 #endif
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 void test_class_startup(void);
 
@@ -599,8 +597,22 @@ PHP_MINIT_FUNCTION(basic)
 	basic_globals_ctor(BLS_C);
 #endif
 	
-	REGISTER_DOUBLE_CONSTANT("M_PI", M_PI, CONST_CS | CONST_PERSISTENT);
-	
+#define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
+	REGISTER_MATH_CONSTANT(M_E);
+	REGISTER_MATH_CONSTANT(M_LOG2E);
+	REGISTER_MATH_CONSTANT(M_LOG10E);
+	REGISTER_MATH_CONSTANT(M_LN2);
+	REGISTER_MATH_CONSTANT(M_LN10);
+	REGISTER_MATH_CONSTANT(M_PI);
+	REGISTER_MATH_CONSTANT(M_PI_2);
+	REGISTER_MATH_CONSTANT(M_PI_4);
+	REGISTER_MATH_CONSTANT(M_1_PI);
+	REGISTER_MATH_CONSTANT(M_2_PI);
+	REGISTER_MATH_CONSTANT(M_2_SQRTPI);
+	REGISTER_MATH_CONSTANT(M_SQRT2);
+	REGISTER_MATH_CONSTANT(M_SQRT1_2);
+
+
 	test_class_startup();
 	REGISTER_INI_ENTRIES();
 
