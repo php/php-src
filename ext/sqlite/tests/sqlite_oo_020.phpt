@@ -18,7 +18,7 @@ register_shutdown_function("cleanup");
 
 try {
 	$db = sqlite_factory();
-} catch(sqlite_exception $err) {
+} catch(SQLiteException $err) {
 	echo "Message: ".$err->getMessage()."\n";
 	echo "File: ".$err->getFile()."\n";
 	//echo "Line: ".$err->getLine()."\n";

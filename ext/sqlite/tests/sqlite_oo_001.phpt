@@ -12,6 +12,6 @@ $db = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-object(sqlite_db)#%d (0) {
+object(SQLiteDatabase)#%d (0) {
 }
 Done

@@ -719,15 +719,15 @@ static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg
 /* }}} */
 
 /* {{{ OO init/structure stuff */
-#define REGISTER_SQLITE_CLASS(name, parent) \
+#define REGISTER_SQLITE_CLASS(name, c_name, parent) \
 	{ \
 		zend_class_entry ce; \
-		INIT_CLASS_ENTRY(ce, "sqlite_" # name, sqlite_funcs_ ## name); \
-		ce.create_object = sqlite_object_new_ ## name; \
-		sqlite_ce_ ## name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
-		memcpy(&sqlite_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
-		sqlite_object_handlers_ ## name.clone_obj = NULL; \
-		sqlite_ce_ ## name->ce_flags |= ZEND_ACC_FINAL_CLASS; \
+		INIT_CLASS_ENTRY(ce, "SQLite" # name, sqlite_funcs_ ## c_name); \
+		ce.create_object = sqlite_object_new_ ## c_name; \
+		sqlite_ce_ ## c_name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
+		memcpy(&sqlite_object_handlers_ ## c_name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
+		sqlite_object_handlers_ ## c_name.clone_obj = NULL; \
+		sqlite_ce_ ## c_name->ce_flags |= ZEND_ACC_FINAL_CLASS; \
 	}
 
 zend_class_entry *sqlite_ce_db, *sqlite_ce_exception;
@@ -984,10 +984,10 @@ static int init_sqlite_globals(zend_sqlite_globals *g)
 
 PHP_MINIT_FUNCTION(sqlite)
 {
-	REGISTER_SQLITE_CLASS(db,        NULL);
-	REGISTER_SQLITE_CLASS(query,     NULL);
-	REGISTER_SQLITE_CLASS(ub_query,  NULL);
-	REGISTER_SQLITE_CLASS(exception, zend_exception_get_default());
+	REGISTER_SQLITE_CLASS(Database,   db,        NULL);
+	REGISTER_SQLITE_CLASS(Result,     query,     NULL);
+	REGISTER_SQLITE_CLASS(Unbuffered, ub_query,  NULL);
+	REGISTER_SQLITE_CLASS(Exception,  exception, zend_exception_get_default());
 	sqlite_object_handlers_query.get_class_entry = sqlite_get_ce_query;
 	sqlite_object_handlers_ub_query.get_class_entry = sqlite_get_ce_ub_query;
 	
