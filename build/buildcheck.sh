@@ -16,10 +16,12 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.18 2002-06-26 18:42:50 sniper Exp $ 
+# $Id: buildcheck.sh,v 1.19 2002-07-21 13:09:07 sas Exp $ 
 #
 
 echo "buildconf: checking installation..."
+
+stamp=$1
 
 # autoconf 2.13 or newer
 ac_version=`autoconf --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
@@ -37,6 +39,15 @@ echo "           to build PHP from CVS."
 exit 1
 else
 echo "buildconf: autoconf version $ac_version (ok)"
+fi
+
+
+if test "$1" = "2" && test "$2" -ge "50"; then
+  echo "buildconf: Your version of autoconf likely contains buggy cache code."
+  echo "           Running cvsclean for you."
+  echo "           To avoid this, install autoconf-2.13 and automake-1.5."
+  ./cvsclean
+  stamp=
 fi
 
 
@@ -90,5 +101,7 @@ if test "$am_prefix" != "$lt_prefix"; then
     echo "         directories.  This may cause aclocal to fail."
     echo "         continuing anyway"
 fi
+
+test -n "$stamp" && touch $stamp
 
 exit 0
