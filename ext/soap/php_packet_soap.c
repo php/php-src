@@ -116,19 +116,21 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	}
 
 	/* Parse content of <Body> element */
+	array_init(return_value);
 	resp = body->children;
-	if (fn != NULL) {
-	  /* Function has WSDL description */
-		sdlParamPtr *h_param, param = NULL;
-		xmlNodePtr val = NULL;
-		char *name, *ns = NULL;
-		zval* tmp;
-
-		if (fn->binding->bindingType == BINDING_SOAP) {
+	while (resp != NULL && resp->type != XML_ELEMENT_NODE) {
+		resp = resp->next;
+	}
+	if (resp != NULL) {
+		if (fn != NULL && fn->binding && fn->binding->bindingType == BINDING_SOAP) {
+		  /* Function has WSDL description */
+			sdlParamPtr *h_param, param = NULL;
+			xmlNodePtr val = NULL;
+			char *name, *ns = NULL;
+			zval* tmp;
 			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
 			int res_count = zend_hash_num_elements(fn->responseParameters);
 
-			array_init(return_value);
 			zend_hash_internal_pointer_reset(fn->responseParameters);
 			while (zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) == SUCCESS) {
 				param = (*h_param);
@@ -184,17 +186,10 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 				zend_hash_move_forward(fn->responseParameters);
 			}
-		}
-	} else {
-	  /* Function hasn't WSDL description */
-		cur = resp;
-		array_init(return_value);
-		while (cur && cur->type != XML_ELEMENT_NODE) {
-			cur = cur->next;
-		}
-		if (cur != NULL) {
+		} else {
+		  /* Function hasn't WSDL description */
 			xmlNodePtr val;
-			val = cur->children;
+			val = resp->children;
 			while (val != NULL) {
 				while (val && val->type != XML_ELEMENT_NODE) {
 					val = val->next;

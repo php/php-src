@@ -4,13 +4,82 @@
 #include "php_soap.h"
 #include "ext/session/php_session.h"
 
-int le_sdl = 0;
-int le_url = 0;
-int le_service = 0;
+static int le_sdl = 0;
+static int le_url = 0;
+static int le_service = 0;
 
 /* Local functions */
 static void function_to_string(sdlFunctionPtr function, smart_str *buf);
 static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
+
+static void clear_soap_fault(zval *obj TSRMLS_DC);
+static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
+
+static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
+static sdlFunctionPtr get_function(sdlPtr sdl, char *function_name);
+
+static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[], int *version TSRMLS_DC);
+static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret, int version TSRMLS_DC);
+static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, int version TSRMLS_DC);
+static xmlNodePtr seralize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style TSRMLS_DC);
+static xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style TSRMLS_DC);
+
+static void delete_service(void *service);
+static void delete_url(void *handle);
+
+#ifndef ZEND_ENGINE_2
+static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
+#endif
+
+static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+
+#define SOAP_SERVER_BEGIN_CODE() \
+	zend_bool old_handler = SOAP_GLOBAL(use_soap_error_handler);\
+	SOAP_GLOBAL(use_soap_error_handler) = 1;
+
+#define SOAP_SERVER_END_CODE() \
+	SOAP_GLOBAL(use_soap_error_handler) = old_handler
+
+#define HTTP_RAW_POST_DATA "HTTP_RAW_POST_DATA"
+
+#define ZERO_PARAM() \
+	if (ZEND_NUM_ARGS() != 0) \
+ 		WRONG_PARAM_COUNT;
+
+#define GET_THIS_OBJECT(o) \
+ 	o = getThis(); \
+	if (!o) { \
+		php_error(E_WARNING, "Cannot Get Class Info"); \
+		return; \
+	}
+
+#define FETCH_THIS_SDL(ss) \
+	{ \
+		zval *__thisObj,**__tmp; \
+		GET_THIS_OBJECT(__thisObj) \
+		if(FIND_SDL_PROPERTY(__thisObj,__tmp) != FAILURE) { \
+			FETCH_SDL_RES(ss,__tmp); \
+		} else { \
+			ss = NULL; \
+		} \
+	}
+
+#define FIND_SDL_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "sdl", sizeof("sdl"), (void **)&tmp)
+#define FETCH_SDL_RES(ss,tmp) ss = (sdlPtr) zend_fetch_resource(tmp TSRMLS_CC, -1, "sdl", NULL, 1, le_sdl)
+
+#define FETCH_THIS_SERVICE(ss) \
+	{ \
+		zval *__thisObj,**__tmp; \
+		GET_THIS_OBJECT(__thisObj) \
+		if(FIND_SERVICE_PROPERTY(__thisObj,__tmp) != FAILURE) { \
+			FETCH_SERVICE_RES(ss,__tmp); \
+		} else { \
+			ss = NULL; \
+		} \
+	}
+
+#define FIND_SERVICE_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "service", sizeof("service"), (void **)&tmp)
+#define FETCH_SERVICE_RES(ss,tmp) ss = (soapServicePtr) zend_fetch_resource(tmp TSRMLS_CC, -1, "service", NULL, 1, le_service)
 
 static zend_class_entry* soap_class_entry;
 static zend_class_entry* soap_server_class_entry;
@@ -381,89 +450,8 @@ PHP_MINIT_FUNCTION(soap)
 	old_error_handler = zend_error_cb;
 	zend_error_cb = soap_error_handler;
 
-#if HAVE_PHP_SESSION
-	php_session_register_serializer("soap",	PS_SERIALIZER_ENCODE_NAME(soap), PS_SERIALIZER_DECODE_NAME(soap));
-#endif
-
 	return SUCCESS;
 }
-
-#if HAVE_PHP_SESSION
-PS_SERIALIZER_ENCODE_FUNC(soap)
-{
-/*
-	char *key;
-	uint key_length;
-	ulong num_key;
-	zval **struc;
-
-    wddx_packet *packet;
-	PS_ENCODE_VARS;
-
-	packet = php_wddx_constructor();
-	if (!packet)
-		return FAILURE;
-
-	php_wddx_packet_start(packet, NULL, 0);
-	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
-
-	PS_ENCODE_LOOP(
-
-		php_wddx_serialize_var(packet, *struc, key, key_length);
-	);
-
-	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
-	php_wddx_packet_end(packet);
-	*newstr = php_wddx_gather(packet);
-	php_wddx_destructor(packet);
-
-	if (newlen)
-		*newlen = strlen(*newstr);
-*/
-	return SUCCESS;
-}
-
-PS_SERIALIZER_DECODE_FUNC(soap)
-{
-/*	zval *retval;
-	zval **ent;
-	char *key;
-	uint key_length;
-	char tmp[128];
-	ulong idx;
-	int hash_type;
-	int ret;
-	HashPosition pos;
-
-	if (vallen == 0)
-		return SUCCESS;
-
-	MAKE_STD_ZVAL(retval);
-
-	if ((ret = php_wddx_deserialize_ex((char *)val, vallen, retval)) == SUCCESS) {
-
-		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(retval), &pos);
-			 zend_hash_get_current_data_ex(Z_ARRVAL_P(retval), (void **) &ent, &pos) == SUCCESS;
-			 zend_hash_move_forward(Z_ARRVAL_P(retval), &pos)) {
-			hash_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(retval), &key, &key_length, &idx, 0, &pos);
-
-			switch (hash_type) {
-				case HASH_KEY_IS_LONG:
-					sprintf(tmp, "%ld", idx);
-					key = tmp;
-				case HASH_KEY_IS_STRING:
-					php_set_session_var(key, key_length-1, *ent, NULL TSRMLS_CC);
-					PS_ADD_VAR(key);
-			}
-		}
-	}
-
-	zval_ptr_dtor(&retval);
-*/
-	return TRUE;
-}
-#endif
-
 
 PHP_MINFO_FUNCTION(soap)
 {
@@ -1211,7 +1199,7 @@ PHP_METHOD(soapserver, handle)
 	SOAP_SERVER_END_CODE();
 }
 
-void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
 	char buffer[1024];
 	int buffer_len;
@@ -1659,7 +1647,7 @@ PHP_METHOD(soapobject, __getlastresponse)
 }
 
 #ifndef ZEND_ENGINE_2
-void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
+static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	pval *object = property_reference->object;
 	zend_overloaded_element *function_name = (zend_overloaded_element *)property_reference->elements_list->tail->data;
@@ -1687,7 +1675,7 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 }
 #endif
 
-void clear_soap_fault(zval *obj TSRMLS_DC)
+static void clear_soap_fault(zval *obj TSRMLS_DC)
 {
 	if (obj != NULL && obj->type == IS_OBJECT) {
 /*		zend_hash_del(obj->value.obj.properties, "__soap_fault", sizeof("__soap_fault"));*/
@@ -1707,7 +1695,7 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 	return fault;
 }
 
-void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC)
+static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC)
 {
 	if (Z_TYPE_P(obj) != IS_OBJECT) {
 		object_init_ex(obj, soap_fault_class_entry);
@@ -1729,7 +1717,7 @@ void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 	}
 }
 
-void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval ***parameters, int *version TSRMLS_DC)
+static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval ***parameters, int *version TSRMLS_DC)
 {
 	char* envelope_ns;
 	xmlNodePtr trav,env,head,body,func;
@@ -1851,7 +1839,7 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 	(*num_params) = num_of_params;
 }
 
-xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret, int version TSRMLS_DC)
+static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret, int version TSRMLS_DC)
 {
 	xmlDoc *doc;
 	xmlNode *envelope,*body,*method, *param;
@@ -1959,7 +1947,7 @@ xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, c
 	return doc;
 }
 
-xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, int version TSRMLS_DC)
+static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, int version TSRMLS_DC)
 {
 	xmlDoc *doc;
 	xmlNode *envelope, *body, *method;
@@ -2057,7 +2045,7 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 	return doc;
 }
 
-xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int index, char *name, int style TSRMLS_DC)
+static xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int index, char *name, int style TSRMLS_DC)
 {
 	char *paramName;
 	xmlNodePtr xmlParam;
@@ -2092,7 +2080,7 @@ xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int index, cha
 	return xmlParam;
 }
 
-xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style TSRMLS_DC)
+static xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style TSRMLS_DC)
 {
 	xmlNodePtr xmlParam;
 	encodePtr enc;
@@ -2110,7 +2098,7 @@ xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int styl
 	return xmlParam;
 }
 
-sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int response)
+static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int response)
 {
 	sdlParamPtr *tmp;
 	HashTable   *ht;
@@ -2137,7 +2125,7 @@ sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int 
 	return NULL;
 }
 
-sdlFunctionPtr get_function(sdlPtr sdl, char *function_name)
+static sdlFunctionPtr get_function(sdlPtr sdl, char *function_name)
 {
 	sdlFunctionPtr *tmp;
 	if (sdl != NULL) {
@@ -2225,12 +2213,12 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 	smart_str_0(buf);
 }
 
-void delete_url(void *handle)
+static void delete_url(void *handle)
 {
 	php_url_free((php_url*)handle);
 }
 
-void delete_service(void *data)
+static void delete_service(void *data)
 {
 	soapServicePtr service = (soapServicePtr)data;
 

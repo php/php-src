@@ -134,8 +134,9 @@ static xmlNodePtr sdl_to_xml_object(encodeType enc_type, zval *data, int style)
 		zval **prop;
  		tmp = *t;
 		if (zend_hash_find(Z_OBJPROP_P(data), tmp->name, strlen(tmp->name) + 1, (void **)&prop) == FAILURE) {
-			if (tmp->nillable == FALSE)
+			if (tmp->nillable == FALSE) {
 				php_error(E_ERROR, "Error encoding object to xml missing property \"%s\"", tmp->name);
+			}
 		} else {
 			xmlNodePtr newNode;
 			encodePtr enc;
@@ -588,17 +589,19 @@ static sdlPtr load_wsdl(char *struri)
 		zend_hash_internal_pointer_reset(&ctx.services);
 		for (i = 0; i < n; i++) {
 			xmlNodePtr *tmp, service;
+/*
 			xmlAttrPtr name;
+*/
 			xmlNodePtr trav, port;
 
 			zend_hash_get_current_data(&ctx.services, (void **)&tmp);
 			service = *tmp;
-
+/*
 			name = get_attribute(service->properties, "name");
 			if (!name) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No name associated with service");
 			}
-
+*/
 			trav = service->children;
 			FOREACHNODE(trav, "port", port) {
 				xmlAttrPtr type, name, bindingAttr, location;
@@ -609,12 +612,12 @@ static sdlPtr load_wsdl(char *struri)
 
 				tmpbinding = malloc(sizeof(sdlBinding));
 				memset(tmpbinding, 0, sizeof(sdlBinding));
-
+/*
 				name = get_attribute(port->properties, "name");
 				if (!name) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No name associated with port");
 				}
-
+*/
 				bindingAttr = get_attribute(port->properties, "binding");
 				if (bindingAttr == NULL) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No binding associated with port");
@@ -637,6 +640,12 @@ static sdlPtr load_wsdl(char *struri)
 					tmpbinding->bindingType = BINDING_SOAP;
 				} else if (address->ns && !strcmp(address->ns->href, WSDL_HTTP_NAMESPACE)) {
 					tmpbinding->bindingType = BINDING_HTTP;
+				} else {
+					if (address->ns) {
+						php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: PHP-SOAP doesn't support binding '%s'",address->ns->href);
+					} else {
+						php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown binding type");
+					}
 				}
 
 				parse_namespace(bindingAttr->children->content, &ctype, &ns);
@@ -655,14 +664,13 @@ static sdlPtr load_wsdl(char *struri)
 
 					soapBinding = malloc(sizeof(sdlSoapBinding));
 					memset(soapBinding, 0, sizeof(sdlSoapBinding));
+					soapBinding->style = SOAP_RPC;
 
 					soapBindingNode = get_node_ex(binding->children, "binding", WSDL_SOAP_NAMESPACE);
 					if (soapBindingNode) {
 						tmp = get_attribute(soapBindingNode->properties, "style");
 						if (tmp && !strcmp(tmp->children->content, "document")) {
 							soapBinding->style = SOAP_DOCUMENT;
-						} else {
-							soapBinding->style = SOAP_RPC;
 						}
 
 						tmp = get_attribute(soapBindingNode->properties, "transport");
@@ -672,15 +680,14 @@ static sdlPtr load_wsdl(char *struri)
 							}
 							soapBinding->transport = strdup(tmp->children->content);
 						}
-						tmpbinding->bindingAttributes = (void *)soapBinding;
 					}
+					tmpbinding->bindingAttributes = (void *)soapBinding;
 				}
 
 				name = get_attribute(binding->properties, "name");
 				if (name == NULL) {
 					php_error(E_ERROR, "Error parsing wsdl (Missing \"name\" attribute for \"binding\")");
 				}
-
 				tmpbinding->name = strdup(name->children->content);
 
 				type = get_attribute(binding->properties, "type");
@@ -763,6 +770,7 @@ static sdlPtr load_wsdl(char *struri)
 								php_error(E_ERROR, "Error parsing wsdl (Missing name for \"input\" of \"%s\")", op_name->children->content);
 							}
 
+							/* FIXME: may be input message name */
 							function->requestName = strdup(function->functionName);
 							function->requestParameters = malloc(sizeof(HashTable));
 							zend_hash_init(function->requestParameters, 0, NULL, delete_paramater, 1);
@@ -840,7 +848,7 @@ static sdlPtr load_wsdl(char *struri)
 
 						paramOrder = get_attribute(portTypeOperation->properties, "parameterOrder");
 						if (paramOrder) {
-
+							/* FIXME: */
 						}
 					}
 
@@ -850,6 +858,7 @@ static sdlPtr load_wsdl(char *struri)
 						xmlNodePtr part, trav3;
 						char *ns, *ctype;
 
+						/* FIXME: may be output message name */
 						function->responseName = malloc(strlen(function->functionName) + strlen("Response") + 1);
 						sprintf(function->responseName, "%sResponse", function->functionName);
 						function->responseParameters = malloc(sizeof(HashTable));
@@ -1020,7 +1029,9 @@ static void delete_binding(void *data)
 
 	if (binding->bindingType == BINDING_SOAP) {
 		sdlSoapBindingPtr soapBind = binding->bindingAttributes;
-		free(soapBind->transport);
+		if (soapBind && soapBind->transport) {
+			free(soapBind->transport);
+		}
 	}
 }
 
@@ -1183,6 +1194,31 @@ void delete_attribute(void *attribute)
 	if (attr->extraAttributes) {
 		zend_hash_destroy(attr->extraAttributes);
 		free(attr->extraAttributes);
+	}
+}
+
+void delete_restriction_var_int(void *rvi)
+{
+	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
+	if (ptr) {
+		if (ptr->id) {
+			free(ptr->id);
+		}
+		free(ptr);
+	}
+}
+
+void delete_schema_restriction_var_char(void *srvc)
+{
+	sdlRestrictionCharPtr ptr = *((sdlRestrictionCharPtr*)srvc);
+	if (ptr) {
+		if (ptr->id) {
+			free(ptr->id);
+		}
+		if (ptr->value) {
+			free(ptr->value);
+		}
+		free(ptr);
 	}
 }
 
