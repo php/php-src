@@ -97,4 +97,9 @@
 #define XmlUtf8Encode php_XmlUtf8Encode
 #endif
 
+#ifdef PHP_EXPORTS
+#define PCRE_STATIC
+#define XML_STATIC
+#endif
+
 #endif

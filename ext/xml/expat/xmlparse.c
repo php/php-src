@@ -9,7 +9,7 @@
 #ifdef COMPILED_FROM_DSP
 
 #include "winconfig.h"
-#define XMLPARSEAPI(type) type __cdecl
+#define XMLPARSEAPI(type) __declspec(dllexport) type __cdecl
 #include "expat.h"
 #undef XMLPARSEAPI
 
