@@ -567,7 +567,7 @@ class PEAR
     }
 
     // }}}
-    // {{{ assertExtension()
+    // {{{ loadExtension()
 
     /**
     * OS independant PHP extension load
