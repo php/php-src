@@ -147,7 +147,7 @@ ZEND_METHOD(exception, __construct)
 /* }}} */
 
 
-/* {{{ proto ErrorException::__construct(string message, int code, int severity [, $filename [, $lineno]])
+/* {{{ proto ErrorException::__construct(string message, int code, int severity [, string filename [, int lineno]])
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
