@@ -35,6 +35,6 @@ if test "$PHP_BZ2" != "no"; then
     -L$BZIP_DIR/lib
   ])
 
-  PHP_NEW_EXTENSION(bz2, bz2.c, $ext_shared)
+  PHP_NEW_EXTENSION(bz2, bz2.c bz2_filter.c, $ext_shared)
   PHP_SUBST(BZ2_SHARED_LIBADD)
 fi

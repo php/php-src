@@ -95,6 +95,10 @@ LINK32=link.exe
 
 SOURCE=.\bz2.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\bz2_filter.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
