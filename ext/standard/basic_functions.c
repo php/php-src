@@ -278,6 +278,8 @@ function_entry basic_functions[] = {
 	PHP_FE(get_magic_quotes_gpc,					NULL)
 	PHP_FE(get_magic_quotes_runtime,				NULL)
 	
+	PHP_FE(is_resource,								first_arg_allow_ref)
+	PHP_FE(is_bool,									first_arg_allow_ref)
 	PHP_FE(is_long,									first_arg_allow_ref)
 	PHP_FALIAS(is_int,			is_long,			first_arg_allow_ref)
 	PHP_FALIAS(is_integer,		is_long,			first_arg_allow_ref)
@@ -1524,6 +1526,16 @@ void php3_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 	}
 }
 
+
+PHP_FUNCTION(is_resource) 
+{
+	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_RESOURCE);
+}
+
+PHP_FUNCTION(is_bool) 
+{
+	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BOOL);
+}
 
 PHP_FUNCTION(is_long) 
 {
