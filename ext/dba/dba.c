@@ -191,9 +191,6 @@ static PHP_MINIT_FUNCTION(dba)
 	zend_hash_init(&ht_keys, 0, NULL, NULL, 1);
 	GLOBAL(le_db) = register_list_destructors(dba_close, NULL);
 	GLOBAL(le_pdb) = register_list_destructors(NULL, dba_close);
-	REGISTER_LONG_CONSTANT("DBA_BTREE", DBA_BTREE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DBA_HASH", DBA_HASH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("DBA_RECNO", DBA_RECNO, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 

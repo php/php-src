@@ -76,21 +76,6 @@ DBA_OPEN_FUNC(db2)
 		filemode = (*info->argv[0])->value.lval;
 	}
 
-	if(info->argc > 1
-	   && ((info->mode == DBA_CREAT && type != DB_UNKNOWN)
-	       || info->mode == DBA_TRUNC)) {
-		convert_to_long_ex(info->argv[1]);
-		switch ((*info->argv[1])->value.lval) {
-			case DBA_HASH:
-				type = DB_HASH;
-				break;
-			case DBA_BTREE:
-			default:
-				type = DB_BTREE;
-				break;
-		}
-	}
-
 	if(!db_open(info->path, type, gmode, filemode, NULL, NULL, &dbp)) {
 		info->dbf = malloc(sizeof(dba_db2_data));
 		memset(info->dbf, 0, sizeof(dba_db2_data));
