@@ -71,7 +71,7 @@ AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol)
 AC_ZEND_BROKEN_SPRINTF
 	
-AC_SUBST(ZEND_SCANNER_TYPE)
+AC_SUBST(ZEND_SCANNER)
 
 ])
 
@@ -159,6 +159,8 @@ if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
 else
   ZEND_SCANNER_TYPE=c
 fi  
+
+ZEND_SCANNER="libzend_${ZEND_SCANNER_TYPE}.la"
 
 if test "$ZEND_MEMORY_LIMIT" = "yes"; then
   AC_DEFINE(MEMORY_LIMIT, 1, [Memory limit])
