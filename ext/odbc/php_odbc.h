@@ -74,6 +74,8 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
 #define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
+#define SQLINTEGER ULONG
+#define SQLUMSALLINT USHORT
 
 #elif defined(HAVE_SAPDB) /* SAP DB */
 
