@@ -36,7 +36,7 @@ InterBase: BLOB test
     $bl_h = ibase_blob_open($row->V_BLOB);
 
 	$blob = '';    
-    while($piece = ibase_blob_get($bl_h, rand() % 1024))
+    while($piece = ibase_blob_get($bl_h, 1 + rand() % 1024))
         $blob .= $piece;
     if($blob != $blob_str)
 		echo " BLOB 1 fail (1)\n";
@@ -57,7 +57,7 @@ InterBase: BLOB test
 
     $bl_h = ibase_blob_create();
     $ftmp = fopen($name,"r");
-    while($piece = fread($ftmp, rand() % 1024)){
+    while($piece = fread($ftmp, 1 + rand() % 1024)){
     	ibase_blob_add($bl_h, $piece);
     }
     fclose($ftmp);
@@ -70,7 +70,7 @@ InterBase: BLOB test
     $row = ibase_fetch_object($q);
     $bl_h = ibase_blob_open($row->V_BLOB);
 	$blob = '';
-    while($piece = ibase_blob_get($bl_h, rand() % 1024))
+    while($piece = ibase_blob_get($bl_h, 1 + rand() % 1024))
         $blob .= $piece;
     if($blob != $blob_str)
 		echo " BLOB 2 fail\n";
