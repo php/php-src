@@ -86,6 +86,7 @@ PHP 4.0                                                                    NEWS
   the full path (Jani)
 - Added ImageCreateFromString() which creates an image stream out of 
   e.g. a MySQL blob. (Mathieu)
+- Fixed a crash bug in imagewbmp() (Jani)
 - Changed the sablot configuration file so that if you use any version of
   Sablotron below 0.44 you must use Sablotron's built-in Expat libraries.
   (Sterling)
