@@ -22,14 +22,6 @@
 #include "php_soap.h"
 #include "libxml/uri.h"
 
-typedef struct sdlCtx {
-	sdlPtr root;
-	HashTable messages;
-	HashTable bindings;
-	HashTable portTypes;
-	HashTable services;
-} sdlCtx;
-
 static void delete_binding(void *binding);
 static void delete_function(void *function);
 static void delete_paramater(void *paramater);
@@ -53,7 +45,7 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const char *type)
 	sdlTypePtr ret = NULL;
 	TSRMLS_FETCH();
 
-	if (sdl && sdl->elements) {
+	if (sdl->elements) {
 		xmlNsPtr nsptr;
 		char *ns, *cptype;
 		sdlTypePtr *sdl_type;
@@ -148,12 +140,12 @@ sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns)
 
 static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 {
-	sdlPtr tmpsdl = ctx->root;
+	sdlPtr tmpsdl = ctx->sdl;
 	xmlDocPtr wsdl;
 	xmlNodePtr root, definitions, trav;
 	xmlAttrPtr targetNamespace;
 
-	if (zend_hash_exists(&tmpsdl->docs, struri, strlen(struri)+1)) {
+	if (zend_hash_exists(&ctx->docs, struri, strlen(struri)+1)) {
 	  return;
 	}
 
@@ -165,7 +157,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Couldn't load from '%s'", struri);
 	}
 
-	zend_hash_add(&tmpsdl->docs, struri, strlen(struri)+1, (void**)&wsdl, sizeof(xmlDocPtr), NULL);
+	zend_hash_add(&ctx->docs, struri, strlen(struri)+1, (void**)&wsdl, sizeof(xmlDocPtr), NULL);
 
 	root = wsdl->children;
 	definitions = get_node(root, "definitions");
@@ -173,7 +165,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 		if (include) {
 			xmlNodePtr schema = get_node(root, "schema");
 			if (schema) {
-				load_schema(tmpsdl, schema);
+				load_schema(ctx, schema);
 				return;
 			}
 		}
@@ -195,7 +187,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 			xmlNodePtr schema;
 
 			FOREACHNODE(trav2, "schema", schema) {
-				load_schema(tmpsdl, schema);
+				load_schema(ctx, schema);
 			}
 			ENDFOREACH(trav2);
 
@@ -333,11 +325,11 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 
 		tmp = get_attribute(part->properties, "type");
 		if (tmp != NULL) {
-			h->encode = get_encoder_from_prefix(ctx->root, part, tmp->children->content);
+			h->encode = get_encoder_from_prefix(ctx->sdl, part, tmp->children->content);
 		} else {
 			tmp = get_attribute(part->properties, "element");
 			if (tmp != NULL) {
-				h->element = get_element(ctx->root, part, tmp->children->content);
+				h->element = get_element(ctx->sdl, part, tmp->children->content);
 				if (h->element) {
 					h->encode = h->element->encode;
 				}
@@ -424,11 +416,11 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 
 		type = get_attribute(part->properties, "type");
 		if (type != NULL) {
-			param->encode = get_encoder_from_prefix(ctx->root, part, type->children->content);
+			param->encode = get_encoder_from_prefix(ctx->sdl, part, type->children->content);
 		} else {
 			element = get_attribute(part->properties, "element");
 			if (element != NULL) {
-				param->element = get_element(ctx->root, part, element->children->content);
+				param->element = get_element(ctx->sdl, part, element->children->content);
 				if (param->element) {
 					param->encode = param->element->encode;
 				}
@@ -446,19 +438,20 @@ static sdlPtr load_wsdl(char *struri)
 	sdlCtx ctx;
 	int i,n;
 
-	ctx.root = malloc(sizeof(sdl));
-	memset(ctx.root, 0, sizeof(sdl));
-	ctx.root->source = strdup(struri);
-	zend_hash_init(&ctx.root->docs, 0, NULL, delete_document, 1);
-	zend_hash_init(&ctx.root->functions, 0, NULL, delete_function, 1);
+	memset(&ctx,0,sizeof(ctx));
+	ctx.sdl = malloc(sizeof(sdl));
+	memset(ctx.sdl, 0, sizeof(sdl));
+	ctx.sdl->source = strdup(struri);
+	zend_hash_init(&ctx.sdl->functions, 0, NULL, delete_function, 1);
 
+	zend_hash_init(&ctx.docs, 0, NULL, delete_document, 0);
 	zend_hash_init(&ctx.messages, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.bindings, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
 	load_wsdl_ex(struri,&ctx, 0);
-	schema_pass2(ctx.root);
+	schema_pass2(&ctx);
 
 	n = zend_hash_num_elements(&ctx.services);
 	if (n > 0) {
@@ -705,28 +698,28 @@ static sdlPtr load_wsdl(char *struri)
 						char *tmp = estrdup(function->functionName);
 						int  len = strlen(tmp);
 
-						zend_hash_add(&ctx.root->functions, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL);
+						zend_hash_add(&ctx.sdl->functions, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL);
 						efree(tmp);
 						if (function->requestName != NULL && strcmp(function->requestName,function->functionName) != 0) {
-							if (ctx.root->requests == NULL) {
-								ctx.root->requests = malloc(sizeof(HashTable));
-								zend_hash_init(ctx.root->requests, 0, NULL, NULL, 1);
+							if (ctx.sdl->requests == NULL) {
+								ctx.sdl->requests = malloc(sizeof(HashTable));
+								zend_hash_init(ctx.sdl->requests, 0, NULL, NULL, 1);
 							}
 							tmp = estrdup(function->requestName);
 							len = strlen(tmp);
-							zend_hash_add(ctx.root->requests, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL);
+							zend_hash_add(ctx.sdl->requests, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL);
 							efree(tmp);
 						}
 					}
 				}
 				ENDFOREACH(trav2);
 
-				if (!ctx.root->bindings) {
-					ctx.root->bindings = malloc(sizeof(HashTable));
-					zend_hash_init(ctx.root->bindings, 0, NULL, delete_binding, 1);
+				if (!ctx.sdl->bindings) {
+					ctx.sdl->bindings = malloc(sizeof(HashTable));
+					zend_hash_init(ctx.sdl->bindings, 0, NULL, delete_binding, 1);
 				}
 
-				zend_hash_add(ctx.root->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL);
+				zend_hash_add(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL);
 			}
 			ENDFOREACH(trav);
 
@@ -736,13 +729,13 @@ static sdlPtr load_wsdl(char *struri)
 		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Couldn't bind to service");
 	}
 
-	schema_pass3(ctx.root);
 	zend_hash_destroy(&ctx.messages);
 	zend_hash_destroy(&ctx.bindings);
 	zend_hash_destroy(&ctx.portTypes);
 	zend_hash_destroy(&ctx.services);
+	zend_hash_destroy(&ctx.docs);
 
-	return ctx.root;
+	return ctx.sdl;
 }
 
 sdlPtr get_sdl(char *uri)
@@ -767,13 +760,16 @@ void delete_sdl(void *handle)
 {
 	sdlPtr tmp = *((sdlPtr*)handle);
 
-	zend_hash_destroy(&tmp->docs);
 	zend_hash_destroy(&tmp->functions);
 	if (tmp->source) {
 		free(tmp->source);
 	}
 	if (tmp->target_ns) {
 		free(tmp->target_ns);
+	}
+	if (tmp->elements) {
+		zend_hash_destroy(tmp->elements);
+		free(tmp->elements);
 	}
 	if (tmp->encoders) {
 		zend_hash_destroy(tmp->encoders);
@@ -782,18 +778,6 @@ void delete_sdl(void *handle)
 	if (tmp->types) {
 		zend_hash_destroy(tmp->types);
 		free(tmp->types);
-	}
-	if (tmp->elements) {
-		zend_hash_destroy(tmp->elements);
-		free(tmp->elements);
-	}
-	if (tmp->attributes) {
-		zend_hash_destroy(tmp->attributes);
-		free(tmp->attributes);
-	}
-	if (tmp->attributeGroups) {
-		zend_hash_destroy(tmp->attributeGroups);
-		free(tmp->attributeGroups);
 	}
 	if (tmp->groups) {
 		zend_hash_destroy(tmp->groups);
@@ -827,6 +811,7 @@ static void delete_binding(void *data)
 			free(soapBind->transport);
 		}
 	}
+	free(binding);
 }
 
 static void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody body)
@@ -874,6 +859,7 @@ static void delete_function(void *data)
 		delete_sdl_soap_binding_function_body(soapFunction->output);
 		delete_sdl_soap_binding_function_body(soapFunction->falut);
 	}
+	free(function);
 }
 
 static void delete_paramater(void *data)
