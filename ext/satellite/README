@@ -1,0 +1,59 @@
+$Id$
+
+About Satellite
+---------------
+Satellite is CORBA support for PHP using ORBit.
+
+The original version was made by David Eriksson <eriksson@php.net> 
+during the summer 2000.
+
+
+Installation
+------------
+Read below about installing ORBit.
+
+Then create a directory on your server for your IDL files, and add
+an entry to your php.ini like this:
+
+  idl_directory = /var/idl
+
+Note: If you compile Satellite as a dynamic PHP extension you must have the
+      above line located before the extension=satellite.so line in php.ini!
+
+PHP as an Apache static module
+------------------------------
+Before linking Apache you must do either of these things:
+
+  a) Before running Apache's configure you set the environment variable
+     LIBS like this:
+
+     export LIBS="`orbit-config --libs client` `libIDL-config --libs`"
+
+  b) You edit apache/src/modules/php4/libphp4.module and
+     add `orbit-config --libs client` `libIDL-config --libs`
+     within the quotes on the line beginning with LIBS=
+
+
+What version of ORBit is required?
+----------------------------------
+You need the CVS version of ORBit to use Satellite!
+
+This does NOT work with ORBit 0.5.3 or earlier.
+
+
+How to install ORBit from CVS
+-----------------------------
+
+(1) Get it from CVS
+
+    CVS root:   :pserver:anonymous@anoncvs.gnome.org:/cvs/gnome
+    Password:   Empty string
+    Directory:	ORBit
+
+    More about GNOME:s CVS on http://www.gnome.org/start/source.html
+
+(2) Set the environment variable CERTIFIED_GNOMIE to whatever you like.
+
+(3) Run ./autogen.sh, gmake och gmake install
+
+
