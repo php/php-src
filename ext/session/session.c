@@ -287,13 +287,13 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 
 	PS_ENCODE_LOOP(
 			if (key_length > PS_BIN_MAX) continue;
-			smart_str_appendc(&buf, key_length);
+			smart_str_appendc(&buf, (unsigned char) key_length);
 			smart_str_appendl(&buf, key, key_length);
 			
 			php_var_serialize(&buf, struc, &var_hash);
 		} else {
 			if (key_length > PS_BIN_MAX) continue;
-			smart_str_appendc(&buf, (key_length & PS_BIN_UNDEF));
+			smart_str_appendc(&buf, (unsigned char) (key_length & PS_BIN_UNDEF));
 			smart_str_appendl(&buf, key, key_length);
 	);
 
@@ -353,7 +353,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 
 	PS_ENCODE_LOOP(
 			if (key_length + 1 > MAX_STR) continue;
-			smart_str_appendl(&buf, key, key_length);
+			smart_str_appendl(&buf, key, (unsigned char) key_length);
 			smart_str_appendc(&buf, PS_DELIMITER);
 			
 			php_var_serialize(&buf, struc, &var_hash);
