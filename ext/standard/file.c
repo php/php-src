@@ -588,30 +588,29 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 {
 	zval *callback = (zval*)context->notifier->ptr;
 	zval *retval = NULL;
-	zval zcode, zseverity, zmsg, zxcode, zsofar, zmax;
-	zval *ptrs[6] = {&zcode, &zseverity, &zmsg, &zxcode, &zsofar, &zmax};
-	zval **args[6] = {&ptrs[0], &ptrs[1], &ptrs[2], &ptrs[3], &ptrs[4], &ptrs[5]};
+	zval zvs[6];
+	zval *ps[6];
+	zval **ptps[6];
+	int i;
 	
-	INIT_ZVAL(zcode);
-	INIT_ZVAL(zseverity);
-	INIT_ZVAL(zmsg);
-	INIT_ZVAL(zxcode);
-	INIT_ZVAL(zsofar);
-	INIT_ZVAL(zmax);
-
-	ZVAL_LONG(&zcode, notifycode);
-	ZVAL_LONG(&zseverity, severity);
-	ZVAL_LONG(&zxcode, xcode);
-	ZVAL_LONG(&zsofar, bytes_sofar);
-	ZVAL_LONG(&zmax, bytes_max);
-
-	if (xmsg) {
-		ZVAL_STRING(&zmsg, xmsg, 0);
-	} else {
-		ZVAL_NULL(&zmsg);
+	for (i = 0; i < 6; i++) {
+		INIT_ZVAL(zvs[i]);
+		ps[i] = &zvs[i];
+		ptps[i] = &ps[i];
 	}
+		
+	ZVAL_LONG(ps[0], notifycode);
+	ZVAL_LONG(ps[1], severity);
+	if (xmsg) {
+		ZVAL_STRING(ps[2], xmsg, 0);
+	} else {
+		ZVAL_NULL(ps[2]);
+	}
+	ZVAL_LONG(ps[3], xcode);
+	ZVAL_LONG(ps[4], bytes_sofar);
+	ZVAL_LONG(ps[5], bytes_max);
 
-	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, args, 0, NULL TSRMLS_CC)) {
+	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, ptps, 0, NULL TSRMLS_CC)) {
 		zend_error(E_WARNING, "failed to call user notifier");
 	}
 	if (retval)
