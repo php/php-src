@@ -33,7 +33,7 @@
 #include "php_variables.h"
 #include "rfc1867.h"
 
-#undef DEBUG_FILE_UPLOAD
+#define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 #include "ext/mbstring/mbstring.h"
@@ -957,16 +957,22 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			while (!cancel_upload && (blen = multipart_buffer_read(mbuff, buff, sizeof(buff) TSRMLS_CC)))
 			{
 				if (PG(upload_max_filesize) > 0 && total_bytes > PG(upload_max_filesize)) {
-					sapi_module.sapi_error(E_WARNING, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
+#ifdef DEBUG_FILE_UPLOAD
+					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
+#endif
 					cancel_upload = UPLOAD_ERROR_A;
 				} else if (max_file_size && (total_bytes > max_file_size)) {
-					sapi_module.sapi_error(E_WARNING, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
+#ifdef DEBUG_FILE_UPLOAD
+					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
+#endif
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
 					wlen = fwrite(buff, 1, blen, fp);
 			
 					if (wlen < blen) {
-						sapi_module.sapi_error(E_WARNING, "Only %d bytes were written, expected to write %ld", wlen, blen);
+#ifdef DEBUG_FILE_UPLOAD
+						sapi_module.sapi_error(E_NOTICE, "Only %d bytes were written, expected to write %ld", wlen, blen);
+#endif
 						cancel_upload = UPLOAD_ERROR_C;
 					} else {
 						total_bytes += wlen;
