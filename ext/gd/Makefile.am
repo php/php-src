@@ -1,4 +1,3 @@
-## Process this file with automake to produce Makefile.in
 
 SRC=gd.c gdcache.c gdttf.c
 noinst_LTLIBRARIES=@GD_STATIC@

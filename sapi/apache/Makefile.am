@@ -1,4 +1,3 @@
-## Process this file with automake to produce Makefile.in
 
 APACHE_INCLUDE=@APACHE_INCLUDE@
 INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/Zend $(APACHE_INCLUDE)
