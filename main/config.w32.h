@@ -1,26 +1,20 @@
 /*
-	Build Configuration for Win32.
-	This has only been tested with MS VisualC++ 6 (and later).
-
+	Build Configuration Template for Win32.
 	$Id$
 */
 
 /* Default PHP / PEAR directories */
-#define CONFIGURATION_FILE_PATH "php.ini"
-#define PEAR_INSTALLDIR "c:\\php5\\pear"
-#define PHP_BINDIR "c:\\php5"
 #define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
-#define PHP_CONFIG_FILE_SCAN_DIR ""
-#define PHP_DATADIR "c:\\php5"
-#define PHP_EXTENSION_DIR "c:\\php5"
-#define PHP_INCLUDE_PATH	".;c:\\php5\\pear"
-#define PHP_LIBDIR "c:\\php5"
-#define PHP_LOCALSTATEDIR "c:\\php5"
-#define PHP_PREFIX "c:\\php5"
-#define PHP_SYSCONFDIR "c:\\php5"
-
-/* Enable / Disable BCMATH extension (default: enabled) */
-#define HAVE_BCMATH 1
+#define CONFIGURATION_FILE_PATH "php.ini"
+#define PEAR_INSTALLDIR "C:\\php5\\pear"
+#define PHP_BINDIR "C:\\php5"
+#define PHP_DATADIR "C:\\php5"
+#define PHP_EXTENSION_DIR "C:\\php5"
+#define PHP_INCLUDE_PATH	".;C:\\php5\\pear"
+#define PHP_LIBDIR "C:\\php5"
+#define PHP_LOCALSTATEDIR "C:\\php5"
+#define PHP_PREFIX "C:\\php5"
+#define PHP_SYSCONFDIR "C:\\php5"
 
 /* Enable / Disable crypt() function (default: enabled) */
 #define HAVE_CRYPT 1
@@ -29,64 +23,12 @@
 #define PHP_MD5_CRYPT 1
 #define PHP_BLOWFISH_CRYPT 0
 
-/* Enable / Disable CALENDAR extension (default: enabled) */
-#define HAVE_CALENDAR 1
-
-/* Enable / Disable CTYPE extension (default: enabled) */
-#define HAVE_CTYPE 1
-
-/* Enable / Disable FTP extension (default: enabled) */
-#define HAVE_FTP 1
-
-/* Enable / Disable MBSTRING extension (default: disabled) */
-/* #define HAVE_MBSTRING 0 */ 
-/* #define HAVE_MBREGEX  0 */ 
-/* #define HAVE_MBSTR_CN 0 */ 
-/* #define HAVE_MBSTR_JA 0 */ 
-/* #define HAVE_MBSTR_KR 0 */
-/* #define HAVE_MBSTR_RU 0 */
-/* #define HAVE_MBSTR_TW 0 */ 
-
-/* If you have the .Net SDK in your include path, define this
- * to compile .Net support into your COM extension. */
-#define HAVE_MSCOREE_H 0
-
-/* Enable / Disable ODBC extension (default: enabled) */
-#define HAVE_UODBC 1
-
-/* Enable / Disable PCRE extension (default: enabled) */
-#define HAVE_BUNDLED_PCRE	1
-#define HAVE_PCRE 1
-
-/* Enable / Disable SESSION extension (default: enabled) */
-#define HAVE_PHP_SESSION 1
-
-/* Enable / Disable TOKENIZER extension (default: enabled) */
-#define HAVE_TOKENIZER 1
-
-/* Enable / Disable WDDX extension (default: enabled) */
-#define HAVE_WDDX 1
-
-/* Enable / Disable XML extensions (default: enabled) */
-#define HAVE_LIBXML 1
-#define HAVE_DOM 1
-#define HAVE_SIMPLEXML 1
-#define HAVE_XML 1
-
-/* Enable / Disable ZLIB extension (default: enabled) */
-#define HAVE_ZLIB 1
-
-/* Enable / Disable SQLite extension (default: enabled) */
-#define HAVE_SQLITE 1
-
 /* PHP Runtime Configuration */
-#define FORCE_CGI_REDIRECT 1
 #define PHP_URL_FOPEN 1
 #define PHP_SAFE_MODE 0
 #define MAGIC_QUOTES 0
 #define USE_CONFIG_FILE 1
 #define DEFAULT_SHORT_OPEN_TAG "1"
-#define ENABLE_PATHINFO_CHECK 1
 
 /* Platform-Specific Configuration. Should not be changed. */
 #define PHP_SIGCHILD 0
@@ -143,7 +85,7 @@
 #define HAVE_LOCALECONV 1
 #define HAVE_LOCALE_H 1
 #ifndef HAVE_LIBBIND
-#define HAVE_SETVBUF 1
+# define HAVE_SETVBUF 1
 #endif
 #define HAVE_SHUTDOWN 1
 #define HAVE_SNPRINTF 1
@@ -188,13 +130,6 @@
 #define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
 #define HAVE_SQLDATASOURCES
-#define POSIX_MALLOC_THRESHOLD 10
-
-
-/*
- * defining HAVE_SOCKLEN_T prevents PHP from building with the latest platform SDK...
- * #define HAVE_SOCKLEN_T
- */
 
 /* Win32 supports strcoll */
 #define HAVE_STRCOLL 1
@@ -203,3 +138,129 @@
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
 
 #define HAVE_MBLEN
+
+#undef HAVE_ATOF_ACCEPTS_NAN
+#undef HAVE_ATOF_ACCEPTS_INF
+#define HAVE_HUGE_VAL_NAN 1
+
+/* values determined by configure.js */
+
+/* undefined */
+#define CONFIGURE_COMMAND "cscript /nologo configure.js "
+
+/* undefined */
+#define HAVE_ARPA_NAMESER_H 1
+
+/* undefined */
+#define HAVE_WSPIAPI_H 1
+
+/* undefined */
+#define HAVE_GETADDRINFO 1
+
+/* undefined */
+#define HAVE_GAI_STRERROR 1
+
+/* undefined */
+#define HAVE_IPV6 1
+
+/* undefined */
+#define MEMORY_LIMIT 0
+
+/* undefined */
+#define HAVE_NEWAPIS_H 1
+
+/* CGI redirect mode */
+#define FORCE_CGI_REDIRECT 1
+
+/* Pathinfo check */
+#define ENABLE_PATHINFO_CHECK 1
+
+/* undefined */
+#define PHP_FASTCGI 1
+
+/* Have BCMATH library */
+#define HAVE_BCMATH 1
+
+/* Have calendar */
+#define HAVE_CALENDAR 1
+
+/* Have COM_DOTNET support */
+#define HAVE_COM_DOTNET 1
+
+/* undefined */
+#define HAVE_MSCOREE_H 1
+
+/* Have ctype */
+#define HAVE_CTYPE 1
+
+/* Have FTP support */
+#define HAVE_FTP 1
+
+/* undefined */
+#define HAVE_GD_H 1
+
+/* GD support */
+#define HAVE_LIBGD 1
+
+/* undefined */
+#define HAVE_ICONV_H 1
+
+/* Define if iconv extension is enabled */
+#define HAVE_ICONV 1
+
+/* Define if libiconv is available */
+#define HAVE_LIBICONV 1
+
+/* Which iconv implementation to use */
+#define PHP_ICONV_IMPL "\"libiconv\""
+
+/* Whether iconv supports errno or not */
+#define ICONV_SUPPORTS_ERRNO 1
+
+/* undefined */
+#define HAVE_LIBXML_PARSER_H 1
+
+/* LibXML support */
+#define HAVE_LIBXML 1
+
+/* ODBC support */
+#define HAVE_UODBC 1
+
+/* Using bundled PCRE library */
+#define HAVE_BUNDLED_PCRE 1
+
+/* Have PCRE library */
+#define HAVE_PCRE 1
+
+/* Session support */
+#define HAVE_PHP_SESSION 1
+
+/* undefined */
+#define HAVE_SPL 1
+
+/* SQLite support */
+#define HAVE_SQLITE 1
+
+/* undefined */
+#define PHP_CONFIG_FILE_SCAN_DIR ""
+
+/* Tokenizer support */
+#define HAVE_TOKENIZER 1
+
+/* ZLIB support */
+#define HAVE_ZLIB 1
+
+/* undefined */
+#define HAVE_ZLIB_H 1
+
+/* DOM support */
+#define HAVE_DOM 1
+
+/* Simple XML support */
+#define HAVE_SIMPLEXML 1
+
+/* WDDX support */
+#define HAVE_WDDX 1
+
+/* XML support */
+#define HAVE_XML 1
