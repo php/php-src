@@ -1,3 +1,34 @@
+2004-01-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c:
+      Simplify detection of methods that must be called dynamic (with object)
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c:
+      Disallow calling __clone/__construct/__destruct static
+      Send an E_STRICT when calling a non static method static
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h:
+      Disallow static declaration of clone
+
+2004-01-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/pcntl/pcntl.c:
+      typofix (thanks to Mehdi Achour for noticing this)
+
+    * ZendEngine2/zend_constants.h
+      ZendEngine2/zend_ini.h
+      ext/mysqli/php_mysqli.h
+      ext/ncurses/php_ncurses.h
+      ext/session/php_session.h:
+      Silence some compile warnings
+
 2004-01-22  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/dom/tests/dom003.phpt:

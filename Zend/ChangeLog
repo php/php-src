@@ -1,3 +1,28 @@
+2004-01-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c:
+      Simplify detection of methods that must be called dynamic (with object)
+
+    * zend_execute.c
+      zend_execute_API.c:
+      Disallow calling __clone/__construct/__destruct static
+      Send an E_STRICT when calling a non static method static
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h:
+      Disallow static declaration of clone
+
+2004-01-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_constants.h
+      zend_ini.h:
+      Silence some compile warnings
+
 2004-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_default_classes.c:
