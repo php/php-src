@@ -147,6 +147,13 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_termname, NULL)
   PHP_FE(ncurses_longname, NULL)
   PHP_FE(ncurses_mousemask, second_args_force_ref)
+  PHP_FE(ncurses_waddstr, NULL)
+  PHP_FE(ncurses_wnoutrefresh, NULL)
+  PHP_FE(ncurses_wclear, NULL)
+  PHP_FE(ncurses_wcolor_set, NULL)
+  PHP_FE(ncurses_wgetch, NULL)
+  PHP_FE(ncurses_keypad, NULL)
+  PHP_FE(ncurses_wmove, NULL)
   {NULL, NULL, NULL}  /* Must be the last line in ncurses_functions[] */
 };
 

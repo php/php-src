@@ -34,7 +34,7 @@
 PHP_FUNCTION(ncurses_addch)
 {
 	long ch;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&ch)==FAILURE) {
         return;
 	}
@@ -56,7 +56,7 @@ PHP_FUNCTION(ncurses_color_set)
 #else
 	php_error(E_WARNING,"%s not supported in this build");
 	RETURN_FALSE;
-#endif  
+#endif
 }
 /* }}} */
 
@@ -77,7 +77,7 @@ PHP_FUNCTION(ncurses_delwin)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_end()
+/* {{{ proto int ncurses_end(void)
    Stop using ncurses, clean up the screen */
 PHP_FUNCTION(ncurses_end)
 {
@@ -85,7 +85,7 @@ PHP_FUNCTION(ncurses_end)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_getch()
+/* {{{ proto int ncurses_getch(void)
    Read a character from keyboard */
 PHP_FUNCTION(ncurses_getch)
 {
@@ -93,7 +93,7 @@ PHP_FUNCTION(ncurses_getch)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_has_colors()
+/* {{{ proto bool ncurses_has_colors(void)
    Check if terminal has colors */
 PHP_FUNCTION(ncurses_has_colors)
 {
@@ -101,7 +101,7 @@ PHP_FUNCTION(ncurses_has_colors)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_init()
+/* {{{ proto int ncurses_init(void)
    Initialize ncurses */
 PHP_FUNCTION(ncurses_init)
 {
@@ -126,7 +126,7 @@ PHP_FUNCTION(ncurses_init_pair)
 /* }}} */
 
 /* {{{ proto int ncurses_move(int y, int x)
-   Move output position */
+   Moves output position */
 PHP_FUNCTION(ncurses_move)
 {
 	long x, y;
@@ -148,9 +148,9 @@ PHP_FUNCTION(ncurses_newwin)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll",&rows,&cols,&y,&x)==FAILURE) {
 		return;
 	}
-  
+
 	*pwin=newwin(rows,cols,y,x);
-  
+
 	if(!*pwin) {
 		efree(pwin);
 		RETURN_FALSE;
@@ -168,7 +168,7 @@ PHP_FUNCTION(ncurses_refresh)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_start_color()
+/* {{{ proto int ncurses_start_color(void)
    Start using colors */
 PHP_FUNCTION(ncurses_start_color)
 {
@@ -176,7 +176,7 @@ PHP_FUNCTION(ncurses_start_color)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_standout()
+/* {{{ proto int ncurses_standout(void)
    Start using 'standout' attribute */
 PHP_FUNCTION(ncurses_standout)
 {
@@ -184,7 +184,7 @@ PHP_FUNCTION(ncurses_standout)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_standend()
+/* {{{ proto int ncurses_standend(void)
    Stop using 'standout' attribute */
 PHP_FUNCTION(ncurses_standend)
 {
@@ -192,7 +192,7 @@ PHP_FUNCTION(ncurses_standend)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_baudrate()
+/* {{{ proto int ncurses_baudrate(void)
    Returns baudrate of terminal */
 PHP_FUNCTION(ncurses_baudrate)
 {
@@ -200,7 +200,7 @@ PHP_FUNCTION(ncurses_baudrate)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_beep()
+/* {{{ proto int ncurses_beep(void)
    Let the terminal beep */
 PHP_FUNCTION(ncurses_beep)
 {
@@ -208,15 +208,15 @@ PHP_FUNCTION(ncurses_beep)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_can_change_color()
+/* {{{ proto bool ncurses_can_change_color(void)
    Check if we can change terminals colors */
 PHP_FUNCTION(ncurses_can_change_color)
 {
 	RETURN_LONG(can_change_color());
-} 
+}
 /* }}} */
 
-/* {{{ proto bool ncurses_cbreak()
+/* {{{ proto bool ncurses_cbreak(void)
    Switch of input buffering */
 PHP_FUNCTION(ncurses_cbreak)
 {
@@ -224,7 +224,7 @@ PHP_FUNCTION(ncurses_cbreak)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_clear()
+/* {{{ proto bool ncurses_clear(void)
    Clear screen */
 PHP_FUNCTION(ncurses_clear)
 {
@@ -232,7 +232,7 @@ PHP_FUNCTION(ncurses_clear)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_clrtobot()
+/* {{{ proto bool ncurses_clrtobot(void)
    Clear screen from current position to bottom */
 PHP_FUNCTION(ncurses_clrtobot)
 {
@@ -240,7 +240,7 @@ PHP_FUNCTION(ncurses_clrtobot)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_clrtoeol()
+/* {{{ proto bool ncurses_clrtoeol(void)
    Clear screen from current position to end of line */
 PHP_FUNCTION(ncurses_clrtoeol)
 {
@@ -248,7 +248,7 @@ PHP_FUNCTION(ncurses_clrtoeol)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_def_prog_mode()
+/* {{{ proto bool ncurses_def_prog_mode(void)
  */
 PHP_FUNCTION(ncurses_def_prog_mode)
 {
@@ -256,7 +256,7 @@ PHP_FUNCTION(ncurses_def_prog_mode)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_def_shell_mode()
+/* {{{ proto bool ncurses_def_shell_mode(void)
  */
 PHP_FUNCTION(ncurses_def_shell_mode)
 {
@@ -264,7 +264,7 @@ PHP_FUNCTION(ncurses_def_shell_mode)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_delch()
+/* {{{ proto bool ncurses_delch(void)
    Delete character at current position, move rest of line left */
 PHP_FUNCTION(ncurses_delch)
 {
@@ -272,7 +272,7 @@ PHP_FUNCTION(ncurses_delch)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_deleteln()
+/* {{{ proto bool ncurses_deleteln(void)
    Delete line at current position, move rest of screen up */
 PHP_FUNCTION(ncurses_deleteln)
 {
@@ -280,7 +280,7 @@ PHP_FUNCTION(ncurses_deleteln)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_doupdate()
+/* {{{ proto bool ncurses_doupdate(void)
    Write all prepared refreshes to terminal */
 PHP_FUNCTION(ncurses_doupdate)
 {
@@ -288,7 +288,7 @@ PHP_FUNCTION(ncurses_doupdate)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_echo()
+/* {{{ proto bool ncurses_echo(void)
    Activate keyboard input echo */
 PHP_FUNCTION(ncurses_echo)
 {
@@ -296,7 +296,7 @@ PHP_FUNCTION(ncurses_echo)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_erase()
+/* {{{ proto bool ncurses_erase(void)
    Erease terminal screen */
 PHP_FUNCTION(ncurses_erase)
 {
@@ -304,7 +304,7 @@ PHP_FUNCTION(ncurses_erase)
 }
 /* }}} */
 
-/* {{{ proto string ncurses_erasechar()
+/* {{{ proto string ncurses_erasechar(void)
    Returns current erase character */
 PHP_FUNCTION(ncurses_erasechar)
 {
@@ -317,7 +317,7 @@ PHP_FUNCTION(ncurses_erasechar)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_flash()
+/* {{{ proto bool ncurses_flash(void)
    Flash terminal screen (visual bell) */
 PHP_FUNCTION(ncurses_flash)
 {
@@ -325,7 +325,7 @@ PHP_FUNCTION(ncurses_flash)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_flushinp()
+/* {{{ proto bool ncurses_flushinp(void)
    Flush keyboard input buffer */
 PHP_FUNCTION(ncurses_flushinp)
 {
@@ -333,7 +333,7 @@ PHP_FUNCTION(ncurses_flushinp)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_has_ic()
+/* {{{ proto bool ncurses_has_ic(void)
    Check for insert- and delete-capabilities */
 PHP_FUNCTION(ncurses_has_ic)
 {
@@ -342,7 +342,7 @@ PHP_FUNCTION(ncurses_has_ic)
 /* }}} */
 
 
-/* {{{ proto bool ncurses_has_il()
+/* {{{ proto bool ncurses_has_il(void)
    Check for line insert- and delete-capabilities */
 PHP_FUNCTION(ncurses_has_il)
 {
@@ -350,7 +350,7 @@ PHP_FUNCTION(ncurses_has_il)
 }
 /* }}} */
 
-/* {{{ proto string ncurses_inch()
+/* {{{ proto string ncurses_inch(void)
    Get character and attribute at current position */
 PHP_FUNCTION(ncurses_inch)
 {
@@ -362,7 +362,7 @@ PHP_FUNCTION(ncurses_inch)
 	RETURN_STRINGL (temp, 1, 1);
 }
 
-	/* {{{ proto bool ncurses_insertln()
+	/* {{{ proto bool ncurses_insertln(void)
    Insert a line, move rest of screen down */
 PHP_FUNCTION(ncurses_insertln)
 {
@@ -370,7 +370,7 @@ PHP_FUNCTION(ncurses_insertln)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_isendwin()
+/* {{{ proto bool ncurses_isendwin(void)
    Ncurses is in endwin mode, normal screen output may be performed */
 PHP_FUNCTION(ncurses_isendwin)
 {
@@ -378,7 +378,7 @@ PHP_FUNCTION(ncurses_isendwin)
 }
 /* }}} */
 
-/* {{{ proto string ncurses_killchar()
+/* {{{ proto string ncurses_killchar(void)
    Returns current line kill character */
 PHP_FUNCTION(ncurses_killchar)
 {
@@ -391,7 +391,7 @@ PHP_FUNCTION(ncurses_killchar)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_nl()
+/* {{{ proto bool ncurses_nl(void)
    Translate newline and carriage return / line feed */
 PHP_FUNCTION(ncurses_nl)
 {
@@ -399,7 +399,7 @@ PHP_FUNCTION(ncurses_nl)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_nocbreak()
+/* {{{ proto bool ncurses_nocbreak(void)
    Switch terminal to cooked mode */
 PHP_FUNCTION(ncurses_nocbreak)
 {
@@ -407,7 +407,7 @@ PHP_FUNCTION(ncurses_nocbreak)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_noecho()
+/* {{{ proto bool ncurses_noecho(void)
    Switch off keyboard input echo */
 PHP_FUNCTION(ncurses_noecho)
 {
@@ -415,7 +415,7 @@ PHP_FUNCTION(ncurses_noecho)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_nonl()
+/* {{{ proto bool ncurses_nonl(void)
    Do not ranslate newline and carriage return / line feed */
 PHP_FUNCTION(ncurses_nonl)
 {
@@ -423,7 +423,7 @@ PHP_FUNCTION(ncurses_nonl)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_noraw()
+/* {{{ proto bool ncurses_noraw(void)
    Switch terminal out of raw mode */
 PHP_FUNCTION(ncurses_noraw)
 {
@@ -431,7 +431,7 @@ PHP_FUNCTION(ncurses_noraw)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_raw()
+/* {{{ proto bool ncurses_raw(void)
    Switch terminal into raw mode */
 PHP_FUNCTION(ncurses_raw)
 {
@@ -439,7 +439,7 @@ PHP_FUNCTION(ncurses_raw)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_resetty()
+/* {{{ proto bool ncurses_resetty(void)
    Restore saved terminal state */
 PHP_FUNCTION(ncurses_resetty)
 {
@@ -447,7 +447,7 @@ PHP_FUNCTION(ncurses_resetty)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_savetty()
+/* {{{ proto bool ncurses_savetty(void)
    Save terminal state */
 PHP_FUNCTION(ncurses_savetty)
 {
@@ -455,7 +455,7 @@ PHP_FUNCTION(ncurses_savetty)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_termattrs()
+/* {{{ proto bool ncurses_termattrs(void)
    Returns a logical OR of all attribute flags supported by terminal */
 PHP_FUNCTION(ncurses_termattrs)
 {
@@ -463,7 +463,7 @@ PHP_FUNCTION(ncurses_termattrs)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_use_default_colors()
+/* {{{ proto bool ncurses_use_default_colors(void)
    Assign terminal default colors to color id -1 */
 PHP_FUNCTION(ncurses_use_default_colors)
 {
@@ -471,7 +471,7 @@ PHP_FUNCTION(ncurses_use_default_colors)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_attr()
+/* {{{ proto bool ncurses_slk_attr(void)
  */
 PHP_FUNCTION(ncurses_slk_attr)
 {
@@ -479,7 +479,7 @@ PHP_FUNCTION(ncurses_slk_attr)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_clear()
+/* {{{ proto bool ncurses_slk_clear(void)
  */
 PHP_FUNCTION(ncurses_slk_clear)
 {
@@ -487,7 +487,7 @@ PHP_FUNCTION(ncurses_slk_clear)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_noutrefresh()
+/* {{{ proto bool ncurses_slk_noutrefresh(void)
  */
 PHP_FUNCTION(ncurses_slk_noutrefresh)
 {
@@ -495,7 +495,7 @@ PHP_FUNCTION(ncurses_slk_noutrefresh)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_refresh()
+/* {{{ proto bool ncurses_slk_refresh(void)
  */
 PHP_FUNCTION(ncurses_slk_refresh)
 {
@@ -503,7 +503,7 @@ PHP_FUNCTION(ncurses_slk_refresh)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_restore()
+/* {{{ proto bool ncurses_slk_restore(void)
  */
 PHP_FUNCTION(ncurses_slk_restore)
 {
@@ -511,7 +511,7 @@ PHP_FUNCTION(ncurses_slk_restore)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_touch()
+/* {{{ proto bool ncurses_slk_touch(void)
  */
 PHP_FUNCTION(ncurses_slk_touch)
 {
@@ -524,11 +524,11 @@ PHP_FUNCTION(ncurses_slk_touch)
 PHP_FUNCTION(ncurses_attroff)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(attroff(intarg));
 }
 /* }}} */
@@ -538,11 +538,11 @@ PHP_FUNCTION(ncurses_attroff)
 PHP_FUNCTION(ncurses_attron)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(attron(intarg));
 }
 /* }}} */
@@ -552,11 +552,11 @@ PHP_FUNCTION(ncurses_attron)
 PHP_FUNCTION(ncurses_attrset)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(attrset(intarg));
 }
 /* }}} */
@@ -566,11 +566,11 @@ PHP_FUNCTION(ncurses_attrset)
 PHP_FUNCTION(ncurses_bkgd)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(bkgd(intarg));
 }
 /* }}} */
@@ -580,11 +580,11 @@ PHP_FUNCTION(ncurses_bkgd)
 PHP_FUNCTION(ncurses_curs_set)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(curs_set(intarg));
 }
 /* }}} */
@@ -594,11 +594,11 @@ PHP_FUNCTION(ncurses_curs_set)
 PHP_FUNCTION(ncurses_delay_output)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(delay_output(intarg));
 }
 /* }}} */
@@ -865,7 +865,7 @@ PHP_FUNCTION(ncurses_bkgdset)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_filter()
+/* {{{ proto int ncurses_filter(void)
  */
 PHP_FUNCTION(ncurses_filter)
 {
@@ -873,7 +873,7 @@ PHP_FUNCTION(ncurses_filter)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_noqiflush()
+/* {{{ proto int ncurses_noqiflush(void)
    Do not flush on signal characters*/
 PHP_FUNCTION(ncurses_noqiflush)
 {
@@ -881,7 +881,7 @@ PHP_FUNCTION(ncurses_noqiflush)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_qiflush()
+/* {{{ proto int ncurses_qiflush(void)
    Flush on signal characters */
 PHP_FUNCTION(ncurses_qiflush)
 {
@@ -1402,8 +1402,8 @@ PHP_FUNCTION(ncurses_wrefresh)
 }
 /* }}} */
 
-/* {{{ proto string ncurses_termname()
-   returns terminal name */
+/* {{{ proto string ncurses_termname(void)
+   Returns terminal name */
 PHP_FUNCTION(ncurses_termname)
 {
 	char temp[15];
@@ -1413,8 +1413,8 @@ PHP_FUNCTION(ncurses_termname)
 }
 /* }}} */
 
-/* {{{ proto string ncurses_longname()
-   returns terminal description */
+/* {{{ proto string ncurses_longname(void)
+   Returns terminal description */
 PHP_FUNCTION(ncurses_longname)
 {
 	char temp[128];
@@ -1424,8 +1424,8 @@ PHP_FUNCTION(ncurses_longname)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_mousemask()
-   returns and sets mouse options */
+/* {{{ proto int ncurses_mousemask(int newmask, int oldmask)
+   Returns and sets mouse options */
 PHP_FUNCTION(ncurses_mousemask)
 {
 	ulong oldmask;
@@ -1446,6 +1446,141 @@ PHP_FUNCTION(ncurses_mousemask)
 	RETURN_LONG(retval);
 }
 /* }}} */
+
+/* {{{ proto int ncurses_wmove(resource WINDOW, int x, int y)
+  Moves windows output position */
+PHP_FUNCTION(ncurses_wmove)
+{
+	zval **handle, **x, **y;
+	WINDOW **win;
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &handle, &y, &x) == FAILURE){
+		WRONG_PARAM_COUNT;
+  }
+
+	FETCH_WINRES(win, handle);
+
+	convert_to_long_ex(x);
+	convert_to_long_ex(y);
+
+	RETURN_LONG(wmove(*win, Z_LVAL_PP(y), Z_LVAL_PP(x)));
+}
+
+/* {{{ proto int ncurses_keypad(resource WINDOW, bool bf)
+  Turns keypad on or off */
+PHP_FUNCTION(ncurses_keypad)
+{
+	zval **handle, **bf;
+	WINDOW **win;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &handle, &bf) == FAILURE){
+		WRONG_PARAM_COUNT;
+  }
+
+	FETCH_WINRES(win, handle);
+
+	convert_to_long_ex(bf);
+
+	RETURN_LONG(keypad(*win, Z_LVAL_PP(bf)));
+
+}
+/* }}} */
+
+/* {{{ proto int ncurses_wcolor_set(resource WINDOW, int color_pair)
+  Sets windows color pairings */
+PHP_FUNCTION(ncurses_wcolor_set)
+{
+	zval **handle, **color_pair, **opts;
+	WINDOW **win;
+
+#ifdef HAVE_NCURSES_COLOR_SET
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2,&handle, &color_pair) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+  FETCH_WINRES(win, handle);
+	convert_to_long_ex(color_pair);
+
+	RETURN_LONG(wcolor_set(*win, Z_LVAL_PP(color_pair), 0));
+#else
+	php_error(E_WARNING,"%s not supported in this build");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+/* {{{ proto int ncurses_wclear(resource WINDOW)
+  Clears window*/
+
+PHP_FUNCTION(ncurses_wclear)
+{
+	zval **handle;
+	WINDOW **win;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_WINRES(win, handle);
+
+	RETURN_LONG(wclear(*win));
+}
+/* }}} */
+
+/* {{{ proto int ncurses_wnoutrefresh(resource WINDOW)
+  Copies window to virtual screen*/
+PHP_FUNCTION(ncurses_wnoutrefresh)
+{
+	zval **handle;
+	WINDOW **win;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_WINRES(win, handle);
+
+	RETURN_LONG(wnoutrefresh(*win));
+}
+/* }}} */
+
+/* {{{ proto int ncurses_waddstr(resource WINDOW, string str, [int n])
+  Outputs text at current postion in window */
+PHP_FUNCTION(ncurses_waddstr)
+{
+	zval **handle, **str, **n;
+	WINDOW **win;
+
+	if (ZEND_NUM_ARGS() == 2) {
+		if (zend_get_parameters_ex(2, &handle, &str) == FAILURE)
+			WRONG_PARAM_COUNT;
+
+		FETCH_WINRES(win, handle);
+
+		RETURN_LONG(waddstr(*win, Z_STRVAL_PP(str)));
+	} else if (ZEND_NUM_ARGS() == 3) {
+		if (zend_get_parameters_ex(3, &handle, &str, &n) == FAILURE)
+			WRONG_PARAM_COUNT;
+
+		FETCH_WINRES(win, handle);
+		RETURN_LONG(waddnstr(*win, Z_STRVAL_PP(str), Z_LVAL_PP(n)));
+	} else
+		WRONG_PARAM_COUNT;
+}
+/* }}} */
+
+/* {{{ proto int ncurses_wgetch(resource WINDOW)
+  Reads a character from keyboard (window)*/
+PHP_FUNCTION(ncurses_wgetch)
+{
+	zval **handle;
+	WINDOW **win;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	FETCH_WINRES(win, handle);
+
+	RETURN_LONG(wgetch(*win));
+}
+/* }}} */
+
 
 /*
  * Local variables:

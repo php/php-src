@@ -135,6 +135,15 @@ PHP_FUNCTION(ncurses_keyok);
 PHP_FUNCTION(ncurses_termname);
 PHP_FUNCTION(ncurses_longname);
 PHP_FUNCTION(ncurses_mousemask);
+PHP_FUNCTION(ncurses_waddstr);
+PHP_FUNCTION(ncurses_wnoutrefresh);
+PHP_FUNCTION(ncurses_wclear);
+PHP_FUNCTION(ncurses_wcolor_set);
+PHP_FUNCTION(ncurses_wgetch);
+PHP_FUNCTION(ncurses_keypad);
+PHP_FUNCTION(ncurses_wmove);
+
+
 #endif
 
 /*
