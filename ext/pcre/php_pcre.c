@@ -112,7 +112,7 @@ static PHP_MINIT_FUNCTION(pcre)
 
 #ifdef NO_RECURSE
 	pcre_stack_malloc = php_pcre_malloc;
-	pcre_stack_free = php_pcre_stack_free;
+	pcre_stack_free = php_pcre_free;
 #endif
 	
 	return SUCCESS;
