@@ -11,9 +11,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Added support for unknown POST content types (Zeev)
 - Added "wddx" serialization handler for session module (Sascha)
   (automatically enabled, if you compile with --with-wddx)
-- Fixed deserializing objects (Thies)
-- PHP4 now serialized Objects as 'O' (not understood by PHP3), but deserializes
-  PHP3 serialized objects as expected. (Thies)
+- Fixed unserializing objects (Thies)
+- PHP 4.0 now serializes Objects as 'O' (not understood by PHP 3.0), but
+  unserializes PHP 3.0 serialized objects as expected. (Thies)
 - Made serialize/unserialize work on classes. If the class is known at 
   unserialize() time, you'll get back a fully working object! (Thies)
 - Reworked preg_* functions according to the new PCRE API, which also made
@@ -24,7 +24,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - OCI8 supports appending and positioning when saving LOBs (Thies)
 - Added metaphone support (Thies)
 - OCI8 doesn't use define callbacks any longer. (Thies) 
-- OCI8 Driver now supports LOBs like PHP3. (Thies)
+- OCI8 Driver now supports LOBs like PHP 3.0. (Thies)
 - var_dump now dumps the properties of an object (Thies)
 - Rewrote the GET/POST/Cookie data reader to support multi-dimensional
   arrays! (Zeev)
@@ -44,7 +44,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
   if it is set to Off, GET, POST and Cookie variables will not be inserted
   to the global scope.  Mostly makes sense when coupled with track_vars (Zeev)
 - Added versioning support for shared library (Sascha)
-  This allows concurrent use of PHP3 and PHP4 as Apache modules. See
+  This allows concurrent use of PHP 3.0 and PHP 4.0 as Apache modules. See
   the end of the INSTALL file for more information.
 - Added second parameter to array_keys which specifies search value
   for which the key should be returned (Andrey)
@@ -155,7 +155,7 @@ August 9 1999, Version 4.0 Beta 2
 - Fixed a bug in WDDX that would cause a crash if a number was passed in
   instead of a variable name (Andrey)
 - Ported strtotime() function from PHP 3.0 (Andrey)
-- Merged in gdttf stuff from php3 (Sascha)
+- Merged in gdttf stuff from PHP 3.0 (Sascha)
 - buildconf now checks your installation (Stig)
 - XML module now built dynamically with --with-xml=shared (Stig)
 - Added a check for freetype.h - fixed build on RedHat 6.0 (Zeev)
@@ -167,10 +167,10 @@ August 9 1999, Version 4.0 Beta 2
 - Removed --with-shared-apache (Sascha)
 - Added patch for reverse lookup table in base64_decode (Sascha)
   Submitted by bfranklin@dct.com
-- Merged in php3 version of str_replace (Sascha)
+- Merged in PHP 3.0 version of str_replace (Sascha)
 - Added DBA module (Sascha)
 - Added session id detection within REQUEST_URI (Sascha)
-- Merged in HP-UX/ANSI compatibility switch from php3 (Sascha)
+- Merged in HP-UX/ANSI compatibility switch from PHP 3.0 (Sascha)
 - Fixed rpath handling for utilitites built during Apache build (Sascha)
 - Added missing E_ error level constants (Zeev, Zend library)
 - Fixed a bug in sending multiple HTTP Cookies under Apache (Zeev)
