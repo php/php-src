@@ -77,7 +77,7 @@ static unsigned int ps_sd_hash(const char *data)
 	for (val = 0; *data; data++) {
 		val = (val << ONE_EIGTH) + *data;
 		if ((i = val & HIGH_BITS) != 0)
-			val = (val ^ (i >> THREE_QUARTERS)) & -HIGH_BITS;
+			val = (val ^ (i >> THREE_QUARTERS)) & ~HIGH_BITS;
 	}
 	
 	return val;
