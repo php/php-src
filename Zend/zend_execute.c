@@ -1361,14 +1361,14 @@ binary_assign_op_addr: {
 			case ZEND_JMPZNZ: {
 					znode *res = &opline->op1;
 					
-					if (!zend_is_true(get_zval_ptr(res, Ts, &EG(free_op1), BP_VAR_R))) {
+					if (zend_is_true(get_zval_ptr(res, Ts, &EG(free_op1), BP_VAR_R))) {
 #if DEBUG_ZEND>=2
-						printf("Conditional jmp on false to %d\n", opline->extended_value);
+						printf("Conditional jmp on true to %d\n", opline->extended_value);
 #endif
 						opline = &op_array->opcodes[opline->extended_value];
 					} else {
 #if DEBUG_ZEND>=2
-						printf("Conditional jmp on true to %d\n", opline->op2.u.opline_num);
+						printf("Conditional jmp on false to %d\n", opline->op2.u.opline_num);
 #endif
 						opline = &op_array->opcodes[opline->op2.u.opline_num];
 					}
