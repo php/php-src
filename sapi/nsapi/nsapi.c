@@ -80,6 +80,7 @@ typedef struct nsapi_request_context {
 	pblock	*pb;
 	Session	*sn;
 	Request	*rq;
+	int	read_post_bytes;
 } nsapi_request_context;
 
 /*
@@ -211,12 +212,20 @@ sapi_nsapi_read_post(char *buffer, uint count_bytes SLS_DC)
 	netbuf *nbuf = rc->sn->inbuf;
 
 	/*
+	 *	Yesss!
+	 */
+	count_bytes = MIN(count_bytes, SG(request_info).content_length-rc->read_post_bytes);
+	content_length = SG(request_info).content_length;
+
+#if 0
+	/*
 	 * Determine the content-length. This will tell us the limit we can read.
 	 */
 	content_length_str = pblock_findval("content-length", rc->rq->headers);
 	if (content_length_str != NULL) {
 		content_length = strtol(content_length_str, 0, 0);
 	}
+#endif
 
 	if (content_length <= 0)
 		return 0;
@@ -225,11 +234,13 @@ sapi_nsapi_read_post(char *buffer, uint count_bytes SLS_DC)
 	 * Gobble any pending data in the netbuf.
 	 */
 	length = nbuf->cursize - nbuf->pos;
+	length = MIN(count_bytes, length);
 	if (length > 0) {
 		memcpy(read_ptr, nbuf->inbuf + nbuf->pos, length);
 		bytes_read += length;
 		read_ptr += length;
 		content_length -= length;
+		nbuf->pos += length;
 	}
 
 	/*
@@ -249,6 +260,8 @@ sapi_nsapi_read_post(char *buffer, uint count_bytes SLS_DC)
 		content_length -= length;
 	}
 
+	if ( bytes_read > 0 )
+		rc->read_post_bytes += bytes_read;
 	return bytes_read;
 }
 
@@ -499,10 +512,12 @@ nsapi_module_main(NSLS_D SLS_DC)
 		"Parsing [%s]", SG(request_info).path_translated);
 #endif
 
+#if 0
 	result = php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
 	if (result == FAILURE) {
 		return FAILURE;
 	}
+#endif
 
 	nsapi_hash_environment(NSLS_C SLS_CC);
 	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
@@ -547,6 +562,7 @@ php4_execute(pblock *pb, Session *sn, Request *rq)
 	request_context->pb = pb;
 	request_context->sn = sn;
 	request_context->rq = rq;
+	request_context->read_post_bytes = 0;
 
 	SG(server_context) = request_context;
 
