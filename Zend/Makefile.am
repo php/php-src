@@ -14,6 +14,9 @@ libzend_a_SOURCES=\
 zend-scanner.c: zend-scanner.l
 	$(LEX) -Pzend -ozend-scanner.c -i zend-scanner.l
 
+zend-scanner.cc: zend-scanner.l
+	$(LEX) -+ -Sflex.skl -Pzend -ozend-scanner.cc -i zend-scanner.l
+
 zend-parser.h: zend-parser.c
 zend-parser.c: zend-parser.y
 	$(YACC) -p zend -v -d zend-parser.y -o zend-parser.c

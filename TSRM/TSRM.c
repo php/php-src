@@ -17,6 +17,10 @@
 #include "TSRM.h"
 #include <stdio.h>
 
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#endif
+
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
 
 struct _tsrm_tls_entry {
@@ -142,7 +146,7 @@ TSRM_FUNC ts_rsrc_id ts_allocate_id(size_t size, void (*ctor)(void *resource), v
 			if (p->count < id_count) {
 				int j;
 
-				p->storage = realloc(p->storage, sizeof(void *)*id_count);
+				p->storage = (void *) realloc(p->storage, sizeof(void *)*id_count);
 				for (j=p->count; j<id_count; j++) {
 					p->storage[j] = (void *) malloc(resource_types_table[j].size);
 					if (resource_types_table[j].ctor) {

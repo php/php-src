@@ -36,7 +36,11 @@
 
 #ifdef ZTS
 #include <fstream.h>
-#include <strstrea.h>
+# if WIN32||WINNT
+# include <strstrea.h>
+# else
+# include <strstream.h>
+# endif
 #endif
 
 #include "zend.h"
