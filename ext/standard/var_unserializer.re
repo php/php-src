@@ -190,6 +190,12 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int 
 			return 0;
 		}
 
+		if (Z_TYPE_P(key) != IS_LONG && Z_TYPE_P(key) != IS_STRING) {
+			zval_dtor(key);
+			FREE_ZVAL(key);
+			return 0;
+		}
+
 		ALLOC_INIT_ZVAL(data);
 
 		if (!php_var_unserialize(&data, p, max, var_hash TSRMLS_CC)) {
@@ -207,12 +213,6 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int 
 			case IS_STRING:
 				zend_hash_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
-			default:
-				zval_dtor(key);
-				FREE_ZVAL(key);
-				zval_dtor(data);
-				FREE_ZVAL(data);
-				return 0;
 		}
 		
 		zval_dtor(key);
