@@ -1,3 +1,32 @@
+2001-03-14  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/HTML/Menu.php: - code beatifiying
+    - minor inline doc update
+
+2001-03-14  James Moore  <James@phpuk.org>
+
+    * ext/standard/credits.c
+      ext/standard/credits.h
+      ext/standard/info.h: Adding webteam to credits.
+
+2001-03-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fbsql/CREDITS: Forgot this one..
+
+    * ext/fbsql/EXPERIMENTAL: Missing.
+
+2001-03-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/browscap.c: Fix ZTS build
+
+2001-03-14  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/article.c: Test parameter for existance before use.
+
+2001-03-14  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c: -fixed prototype and indention
+
 2001-03-13  Jani Taskinen  <sniper@iki.fi>
 
     * ext/zziplib/zziplib.c:
