@@ -297,7 +297,9 @@ PHP_MSHUTDOWN_FUNCTION(sybase)
 PHP_RSHUTDOWN_FUNCTION(sybase)
 {
 	efree(php_sybase_module.appname);
+	php_sybase_module.appname = NULL;
 	STR_FREE(php_sybase_module.server_message);
+	php_sybase_module.server_message = NULL;
 	return SUCCESS;
 }
 
