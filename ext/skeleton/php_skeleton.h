@@ -37,9 +37,9 @@ ZEND_END_MODULE_GLOBALS(extname)
 
 /* In every utility function you add that needs to use variables 
    in php_extname_globals, call TSRM_FETCH(); after declaring other 
-   variables used by that function, or better yet, pass in TSRMG_CC
+   variables used by that function, or better yet, pass in TSRMLS_CC
    after the last function argument and declare your utility function
-   with TSRMG_DC after the last declared argument.  Always refer to
+   with TSRMLS_DC after the last declared argument.  Always refer to
    the globals in your function as EXTNAME_G(variable).  You are 
    encouraged to rename these macros something shorter, see
    examples in any other php module directory.
