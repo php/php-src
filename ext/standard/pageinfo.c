@@ -49,9 +49,10 @@ static void php_statpage(BLS_D)
 
 	pstat = sapi_get_stat();
 
-	if (BG(page_uid)==-1) {
+	if (BG(page_uid)==-1 || BG(page_gid)==-1) {
 		if(pstat) {
 			BG(page_uid)   = pstat->st_uid;
+			BG(page_gid)   = pstat->st_gid;
 			BG(page_inode) = pstat->st_ino;
 			BG(page_mtime) = pstat->st_mtime;
 		} 
@@ -70,6 +71,14 @@ long php_getuid(void)
 }
 /* }}} */
 
+long php_getgid(void)
+{
+	BLS_FETCH();
+
+	php_statpage(BLS_C);
+	return (BG(page_gid));
+}
+
 /* {{{ proto int getmyuid(void)
    Get PHP script owner's UID */
 PHP_FUNCTION(getmyuid)
@@ -81,6 +90,21 @@ PHP_FUNCTION(getmyuid)
 		RETURN_FALSE;
 	} else {
 		RETURN_LONG(uid);
+	}
+}
+/* }}} */
+
+/* {{{ proto int getmygid(void)
+   Get PHP script owner's GID */
+PHP_FUNCTION(getmygid)
+{
+	long gid;
+	
+	gid = php_getgid();
+	if (gid < 0) {
+		RETURN_FALSE;
+	} else {
+		RETURN_LONG(gid);
 	}
 }
 /* }}} */

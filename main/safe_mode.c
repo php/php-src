@@ -29,6 +29,7 @@
 #include "ext/standard/pageinfo.h"
 #include "safe_mode.h"
 #include "SAPI.h"
+#include "php_globals.h"
 
 
 /*
@@ -46,7 +47,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 {
 	struct stat sb;
 	int ret;
-	long uid=0L, duid=0L;
+	long uid=0L, gid=0L, duid=0L, dgid=0L;
 	char *s;
 
 	if (!filename) {
@@ -120,6 +121,8 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	}
 	if (duid == (uid=php_getuid())) {
 		return 1;
+ 	} else if (PG(safe_mode_gid) && dgid == (gid=php_getgid())) {
+ 		return 1;
 	} else {
 		SLS_FETCH();
 
@@ -129,7 +132,11 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 			}
 		}
 
-		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", uid, filename, duid);
+ 		if (PG(safe_mode_gid)) {
+ 			php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid/gid is %ld/%ld is not allowed to access %s owned by uid/gid %ld/%ld", uid, gid, filename, duid, dgid);
+ 		} else {
+ 			php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", uid, filename, duid);
+ 		}			
 		return 0;
 	}
 }
