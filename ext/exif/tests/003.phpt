@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_read_data, Unicode user comment
 --SKIPIF--
-<?php if (!extension_loaded("exif")) print "skip";?>
+<?php if (!extension_loaded("exif") || !extension_loaded("mbstring")) print "skip";?>
 --INI--
 output_handler = 
 zlib.output_compression = Off
