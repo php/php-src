@@ -228,7 +228,7 @@ void php_var_serialize(pval *buf, pval **struc)
 								zend_hash_get_current_data(HASH_OF(retval_ptr), (void **) (&name));
 
 								if ((*name)->type != IS_STRING) {
-									php_error(E_NOTICE, "_sleep_ should return an array only containing the names of instance-variables to serialize.");
+									php_error(E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
 									continue;
 								}
 
