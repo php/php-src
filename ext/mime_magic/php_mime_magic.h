@@ -135,34 +135,6 @@ union record {
 #define pool void
 #define cmd_parms void
 
-static int apprentice(void);
-static int ascmagic(unsigned char *, int);
-static int is_tar(unsigned char *, int);
-static int softmagic(unsigned char *, int);
-static void tryit(unsigned char *, int, int);
-
-static int getvalue(struct magic *, char **);
-static int hextoint(int);
-static char *getstr(char *, char *, int, int *);
-static int parse(char *, int);
-
-static int match(unsigned char *, int);
-static int mget(union VALUETYPE *, unsigned char *,
-		struct magic *, int);
-static int mcheck(union VALUETYPE *, struct magic *);
-static void mprint(union VALUETYPE *, struct magic *);
-static int mconvert(union VALUETYPE *, struct magic *);
-static int magic_rsl_get(char **, char **);
-static int magic_process(char *);
-
-static long from_oct(int, char *);
-static int fsmagic(const char *fn);
-
-
-#if HAVE_ZLIB
-static int zmagic(unsigned char *, int);
-#endif
-
 /*
  * includes for ASCII substring recognition formerly "names.h" in file
  * command
@@ -394,8 +366,6 @@ typedef struct {
     unsigned suf_recursion;	/* recursion depth in suffix check */
 } magic_req_rec;
 
-static magic_req_rec *magic_set_config(void);
-static void magic_free_config(magic_req_rec *);
 
 
 
