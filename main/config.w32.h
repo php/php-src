@@ -21,7 +21,6 @@
 /* set to enable FTP support */
 #define HAVE_FTP 1
 
-
 /* set to enable bundled PCRE library */
 #define HAVE_BUNDLED_PCRE	1
 
@@ -34,6 +33,9 @@
 
 /* set to enable trans sid */
 #define TRANS_SID 1
+
+/* set to enable force cgi redirect */
+#define FORCE_CGI_REDIRECT 0
 
 /* should be added to runtime config*/
 #define PHP_URL_FOPEN 1
