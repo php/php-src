@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -51,7 +51,6 @@
 
 #include "safe_mode.h"
 #include "php3_realpath.h"
-#include "ext/standard/head.h"
 #include "ext/standard/php3_standard.h"
 #include "zend_compile.h"
 
@@ -88,9 +87,10 @@
 #include <sys/un.h>
 #endif
 
-static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd);
+static FILE *php3_fopen_url_wrapper(char *path, char *mode, int options, int *issock, int *socketd);
 
 int _php3_getftpresult(int socketd);
+
 
 /*
 	When open_basedir is not NULL, check if the given filename is located in
@@ -98,87 +98,117 @@ int _php3_getftpresult(int socketd);
 	
 	When open_basedir is NULL, always return 0
 */
-PHPAPI int _php3_check_open_basedir(char *path)
+PHPAPI int _php3_check_specific_open_basedir(char *basedir, char *path)
 {
 	char resolved_name[MAXPATHLEN];
+	char resolved_basedir[MAXPATHLEN];
 	char local_open_basedir[MAXPATHLEN];
 	int local_open_basedir_pos;
-	PLS_FETCH();
 	
-	/* Only check when open_basedir is available */
-	if (PG(open_basedir) && *PG(open_basedir)) {
-	
-		/* Special case basedir==".": Use script-directory */
-		if ((strcmp(PG(open_basedir), ".") == 0) && 
-			request_info.filename &&
-			*request_info.filename
-		) {
-			strcpy(local_open_basedir, request_info.filename);
-			local_open_basedir_pos = strlen(local_open_basedir) - 1;
+	/* Special case basedir==".": Use script-directory */
+	if ((strcmp(basedir, ".") == 0) && 
+		request_info.filename &&
+		*request_info.filename
+	) {
+		strcpy(local_open_basedir, request_info.filename);
+		local_open_basedir_pos = strlen(local_open_basedir) - 1;
 
-			/* Strip filename */
+		/* Strip filename */
+		while ((
+#if WIN32|WINNT
+			(local_open_basedir[local_open_basedir_pos] != '\\') ||
+#endif
+			(local_open_basedir[local_open_basedir_pos] != '/')
+			) &&
+			(local_open_basedir_pos >= 0)
+		) {
+			local_open_basedir[local_open_basedir_pos--] = 0;
+		}
+/* stripping unnecessary slashes is left 
+   as an exercise to the underlying OS */
+#if 0	
+		/* Strip double (back)slashes */
+		if (local_open_basedir_pos > 0) {
 			while ((
 #if WIN32|WINNT
-				(local_open_basedir[local_open_basedir_pos] != '\\') ||
+				(local_open_basedir[local_open_basedir_pos-1] == '\\') ||
 #endif
-				(local_open_basedir[local_open_basedir_pos] != '/')
+				(local_open_basedir[local_open_basedir_pos-1] == '/')
 				) &&
-				(local_open_basedir_pos >= 0)
+				(local_open_basedir_pos > 0)
 			) {
 				local_open_basedir[local_open_basedir_pos--] = 0;
 			}
-			
-#if 0
-			/* Strip double (back)slashes */
-			if (local_open_basedir_pos > 0) {
-				while ((
-#if WIN32|WINNT
-					(local_open_basedir[local_open_basedir_pos-1] == '\\') ||
-#endif
-					(local_open_basedir[local_open_basedir_pos-1] == '/')
-					) &&
-					(local_open_basedir_pos > 0)
-				) {
-					local_open_basedir[local_open_basedir_pos--] = 0;
-				}
-			}
-#endif
-
-		} else {
-			/* Else use the unmodified path */
-			strcpy(local_open_basedir, PG(open_basedir));
 		}
+#endif		
+	} else {
+		/* Else use the unmodified path */
+		strcpy(local_open_basedir, basedir);
+	}
 	
-		/* Resolve the real path into resolved_name */
-		if (_php3_realpath(path, resolved_name) != NULL) {
-			/* Check the path */
+	/* Resolve the real path into resolved_name */
+	if ((_php3_realpath(path, resolved_name) != NULL) && (_php3_realpath(local_open_basedir, resolved_basedir) != NULL)) {
+		/* Check the path */
 #if WIN32|WINNT
-			if (strncasecmp(local_open_basedir, resolved_name, strlen(local_open_basedir)) == 0) {
+		if (strncasecmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
 #else
-			if (strncmp(local_open_basedir, resolved_name, strlen(local_open_basedir)) == 0) {
+		if (strncmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
 #endif
-				/* File is in the right directory */
-				return 0;
-			} else {
-				php3_error(E_WARNING, "open_basedir restriction in effect. File is in wrong directory.");
-				return -1;
-			}
+			/* File is in the right directory */
+			return 0;
 		} else {
-			/* Unable to resolve the real path, return -1 */
-			php3_error(E_WARNING, "open_basedir restriction in effect. Unable to verify location of file.");
 			return -1;
 		}
 	} else {
-		/* open_basedir is not available, return 0 */
-		return 0;
+		/* Unable to resolve the real path, return -1 */
+		return -1;
 	}
+}
+
+PHPAPI int _php3_check_open_basedir(char *path)
+{
+	/* Only check when open_basedir is available */
+	if (PG(open_basedir) && *PG(open_basedir)) {
+		char *pathbuf;
+		char *ptr;
+		char *end;
+			
+		pathbuf = estrdup(PG(open_basedir));
+
+		ptr = pathbuf;
+
+		while (ptr && *ptr) {
+#if WIN32|WINNT
+			end = strchr(ptr, ';');
+#else
+			end = strchr(ptr, ':');
+#endif
+			if (end != NULL) {
+				*end = '\0';
+				end++;
+			}
+			
+			if (_php3_check_specific_open_basedir(ptr, path) == 0) {
+				efree(pathbuf);
+				return 0;
+			}
+			
+			ptr = end;
+		}
+		php3_error(E_WARNING, "open_basedir restriction in effect. File is in wrong directory.");
+		efree(pathbuf);
+		return -1;
+	}
+	
+	/* Nothing to check... */
+	return 0;
 }
 
 PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd)
 {
 	int cm=2;  /* checkuid mode: 2 = if file does not exist, check directory */
-	PLS_FETCH();
-
+	/* FIXME  Lets not get in the habit of doing stuff like this.  This should
+	be runtime enabled, NOT compile time. */
 #if PHP3_URL_FOPEN
 	if (!(options & IGNORE_URL)) {
 		return php3_fopen_url_wrapper(path, mode, options, issock, socketd);
@@ -199,17 +229,17 @@ PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock
 
 #if CGI_BINARY || FHTTPD || USE_SAPI
 
-PHPAPI FILE *php3_fopen_for_parser(void)
+FILE *php3_fopen_for_parser(void)
 {
 	FILE *fp;
 	struct stat st;
 	char *temp, *path_info, *fn;
 	int l;
 	PLS_FETCH();
-	SLS_FETCH();
+
 
 	fn = request_info.filename;
-	path_info = SG(request_info).request_uri;
+	path_info = request_info.path_info;
 #if HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir)
 		&& path_info && '/' == path_info[0] && '~' == path_info[1]) {
@@ -280,17 +310,17 @@ PHPAPI FILE *php3_fopen_for_parser(void)
 		fp = NULL;
 	}
 	if (!fp) {
-		php3_error(E_CORE_ERROR, "Unable to open %s", fn);
+		php3_error(E_ERROR, "Unable to open %s", fn);
 		STR_FREE(request_info.filename);	/* for same reason as above */
 		return NULL;
 	}
-	
-	temp = estrdup(fn);
+	_php3_hash_index_update(&include_names, 0, (void *) &fn, sizeof(char *), NULL);
+
+	temp = strdup(fn);
 	_php3_dirname(temp, strlen(temp));
-	if (*temp) {
+	if (*temp)
 		chdir(temp);
-	}
-	efree(temp);
+	free(temp);
 
 	return fp;
 }
@@ -417,7 +447,7 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
  * Otherwise, fopen is called as usual and the file pointer is returned.
  */
 
-static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd)
+static FILE *php3_fopen_url_wrapper(char *path, char *mode, int options, int *issock, int *socketd)
 {
 	url *resource;
 	int result;
@@ -443,10 +473,9 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 	FILE *fp = NULL;
 	struct sockaddr_in server;
 	unsigned short portno;
-	char winfeof;
 
 	if (!strncasecmp(path, "http://", 7)) {
-		resource = url_parse((char *) path);
+		resource = url_parse(path);
 		if (resource == NULL) {
 			php3_error(E_WARNING, "Invalid URL specified, %s", path);
 			*issock = BAD_URL;
@@ -463,9 +492,9 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			free_url(resource);
 			return NULL;
 		}
-		lookup_hostname(resource->host, &server.sin_addr);
+		server.sin_family = AF_INET;
 
-		if (server.sin_addr.s_addr == -1) {
+		if (lookup_hostname(resource->host, &server.sin_addr)) {
 			SOCK_FCLOSE(*socketd);
 			*socketd = 0;
 			free_url(resource);
@@ -553,8 +582,8 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		/* Read past http header */
 		body = 0;
 		location[0] = '\0';
-		while (!body && recv(*socketd, (char *) &winfeof, 1, MSG_PEEK)) {
-			if (SOCK_FGETC(buf, *socketd) == SOCK_RECV_ERR) {
+		while (!body && !SOCK_FEOF(*socketd)) {
+			if ((buf[0] = SOCK_FGETC(*socketd)) == EOF) {
 				SOCK_FCLOSE(*socketd);
 				*socketd = 0;
 				free_url(resource);
@@ -606,7 +635,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		*issock = 1;
 		return (fp);
 	} else if (!strncasecmp(path, "ftp://", 6)) {
-		resource = url_parse((char *) path);
+		resource = url_parse(path);
 		if (resource == NULL) {
 			php3_error(E_WARNING, "Invalid URL specified, %s", path);
 			*issock = BAD_URL;
@@ -628,9 +657,9 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			free_url(resource);
 			return NULL;
 		}
-		lookup_hostname(resource->host, &server.sin_addr);
+		server.sin_family = AF_INET;
 
-		if (server.sin_addr.s_addr == -1) {
+		if (lookup_hostname(resource->host, &server.sin_addr)) {
 			SOCK_FCLOSE(*socketd);
 			*socketd = 0;
 			free_url(resource);
@@ -840,9 +869,9 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			free_url(resource);
 			return NULL;
 		}
-		lookup_hostname(resource->host, &server.sin_addr);
+		server.sin_family = AF_INET;
 
-		if (server.sin_addr.s_addr == -1) {
+		if (lookup_hostname(resource->host, &server.sin_addr)) {
 			free_url(resource);
 			SOCK_FCLOSE(*socketd);
 			*socketd = 0;
@@ -881,17 +910,15 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		return (fp);
 
 	} else {
-		PLS_FETCH();
-
 		if (options & USE_PATH) {
-			fp = php3_fopen_with_path((char *) path, mode, PG(include_path), NULL);
+			fp = php3_fopen_with_path(path, mode, PG(include_path), NULL);
 		} else {
 			int cm=2;
 			if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;
 			if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!_php3_checkuid(path, cm))) {
 				fp = NULL;
 			} else {
-				if (_php3_check_open_basedir((char *) path)) {
+				if (_php3_check_open_basedir(path)) {
 					fp = NULL;
 				} else {
 					fp = fopen(path, mode);

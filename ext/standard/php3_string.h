@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -24,7 +24,7 @@
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stig Sæther Bakken <ssb@guardian.no>                        |
+   |          Stig Sæther Bakken <ssb@fast.no>                            |
    +----------------------------------------------------------------------+
  */
 
@@ -47,7 +47,8 @@ PHP_FUNCTION(str_replace);
 PHP_FUNCTION(chop);
 PHP_FUNCTION(trim);
 PHP_FUNCTION(ltrim);
-void soundex(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(similar_text);
+extern void soundex(INTERNAL_FUNCTION_PARAMETERS);
 
 PHP_FUNCTION(explode);
 PHP_FUNCTION(implode);
@@ -78,15 +79,30 @@ PHP_FUNCTION(newline_to_br);
 PHP_FUNCTION(setlocale);
 PHP_FUNCTION(stristr);
 PHP_FUNCTION(chunk_split);
+PHP_FUNCTION(strip_tags);
 PHP_FUNCTION(parsestr);
 PHP_FUNCTION(bin2hex);
 
+#if HAVE_CRYPT
+extern php3_module_entry crypt_module_entry;
+#define crypt_module_ptr &crypt_module_entry
+PHP_FUNCTION(crypt);
+extern int php3_minit_crypt(INIT_FUNC_ARGS);
+#else
+#define crypt_module_ptr NULL
+#endif
+
 extern PHPAPI char *_php3_strtoupper(char *s);
 extern PHPAPI char *_php3_strtolower(char *s);
-extern char *_StrTr(char *string, char *str_from, char *str_to);
+extern PHPAPI char *_php3_strtr(char *string, int len, char *str_from, char *str_to, int trlen);
 extern PHPAPI char *_php3_addslashes(char *string, int length, int *new_length, int freeit);
 extern PHPAPI void _php3_stripslashes(char *string, int *len);
 extern PHPAPI void _php3_dirname(char *str, int len);
 extern PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t);
+extern PHPAPI void _php3_trim(pval *str, pval * return_value);
+extern PHPAPI void _php3_strip_tags(char *rbuf, int state);
+extern PHPAPI void _php3_char_to_str(char *str,uint len,char from,char *to,int to_len,pval *result);
+extern PHPAPI void _php3_implode(pval *delim, pval *arr, pval *return_value);
+extern PHPAPI void _php3_explode(pval *delim, pval *str, pval *return_value); 
 
 #endif /* _PHPSTRING_H */

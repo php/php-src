@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -24,24 +24,20 @@
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stig Sæther Bakken <ssb@guardian.no>                        |
+   |          Stig Sæther Bakken <ssb@fast.no>                            |
    |          Zeev Suraski <bourbon@nevision.net.il>                      |
    +----------------------------------------------------------------------+
  */
-
 
 /* $Id$ */
 
 #include <stdio.h>
 #include "php.h"
-#include "reg.h"
-#include "post.h"
-#include "php3_string.h"
+#include "php_globals.h"
+#include "php3_standard.h"
 #if HAVE_SETLOCALE
 #include <locale.h>
 #endif
-#include "zend_execute.h"
-#include "php_globals.h"
 
 static char hexconvtab[] = "0123456789abcdef";
 
@@ -88,11 +84,13 @@ PHP_FUNCTION(bin2hex)
 	RETURN_STRINGL(new, newlen, 0);
 }
 
+
 /* {{{ proto int strlen(string str)
    Get string length */
-PHP_FUNCTION(strlen)
+void php3_strlen(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -104,7 +102,7 @@ PHP_FUNCTION(strlen)
 
 /* {{{ proto int strcmp(string str1, string str2)
    Binary safe string comparison */
-PHP_FUNCTION(strcmp)
+void php3_strcmp(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *s1,*s2;
 	
@@ -119,7 +117,7 @@ PHP_FUNCTION(strcmp)
 
 /* {{{ proto int strcasecmp(string str1, string str2)
    Binary safe case-insensitive string comparison */
-PHP_FUNCTION(strcasecmp)
+void php3_strcasecmp(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *s1,*s2;
 	
@@ -128,13 +126,13 @@ PHP_FUNCTION(strcasecmp)
 	}
 	convert_to_string(s1);
 	convert_to_string(s2);
-	RETURN_LONG(strcasecmp(s1->value.str.val,s2->value.str.val));
+	RETURN_LONG(zend_binary_strcasecmp(s1,s2));
 }
 /* }}} */
 
 /* {{{ proto int strspn(string str, string mask)
    Find length of initial segment consisting entirely of characters found in mask */
-PHP_FUNCTION(strspn)
+void php3_strspn(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *s1,*s2;
 	
@@ -149,7 +147,7 @@ PHP_FUNCTION(strspn)
 
 /* {{{ proto int strcspn(string str, string mask)
    Find length of initial segment consisting entirely of characters not found in mask */
-PHP_FUNCTION(strcspn)
+void php3_strcspn(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *s1,*s2;
 	
@@ -162,12 +160,17 @@ PHP_FUNCTION(strcspn)
 }
 /* }}} */
 
+/* {{{ proto string rtrim(string str)
+   An alias for chop */
+/* }}} */
+
 /* {{{ proto string chop(string str)
    Remove trailing whitespace */
-PHP_FUNCTION(chop)
+void php3_chop(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	register int i;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -192,12 +195,41 @@ PHP_FUNCTION(chop)
 }
 /* }}} */
 
+PHPAPI void _php3_trim(pval *str, pval * return_value)
+{
+	register int i;
+
+	int len = str->value.str.len;
+	int trimmed = 0;
+	char *c = str->value.str.val;
+	for (i = 0; i < len; i++) {
+		if (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' ||
+			c[i] == '\t' || c[i] == '\v') {
+			trimmed++;
+		} else {
+			break;
+		}
+	}
+	len-=trimmed;
+	c+=trimmed;
+	for (i = len - 1; i >= 0; i--) {
+		if (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' ||
+			c[i] == '\t' || c[i] == '\v') {
+			len--;
+		} else {
+			break;
+		}
+	}
+	RETVAL_STRINGL(c, len, 1);
+}
+
 /* {{{ proto string trim(string str)
    Strip whitespace from the beginning and end of a string */
-PHP_FUNCTION(trim)
+void php3_trim(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	register int i;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -235,57 +267,28 @@ PHP_FUNCTION(trim)
 
 /* {{{ proto string ltrim(string str)
    Strip whitespace from the beginning of a string */
-PHP_FUNCTION(ltrim)
+void php3_ltrim(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
-	register int i;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(str);
-
 	if (str->type == IS_STRING) {
-		int len = str->value.str.len;
-		int trimmed = 0;
-		char *c = str->value.str.val;
-		for (i = 0; i < len; i++) {
-			if (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' ||
-				c[i] == '\t' || c[i] == '\v') {
-				trimmed++;
-			} else {
-				break;
-			}
-		}
-		RETVAL_STRINGL(c+trimmed, len-trimmed, 1);
+		_php3_trim(str, return_value);
 		return;
 	}
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto array(string separator, string str)
-   Split a string on string separator and return array of components */
-PHP_FUNCTION(explode)
+void _php3_explode(pval *delim, pval *str, pval *return_value) 
 {
-	pval *str, *delim;
 	char *work_str, *p1, *p2;
 	int i = 0;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &delim, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string(str);
-	convert_to_string(delim);
-
-	if (strlen(delim->value.str.val)==0) {
-		/* the delimiter must be a valid C string that's at least 1 character long */
-		php3_error(E_WARNING,"Empty delimiter");
-		RETURN_FALSE;
-	}
-	if (array_init(return_value) == FAILURE) {
-		return;
-	}
 	work_str = p1 = estrndup(str->value.str.val,str->value.str.len);
 	p2 = strstr(p1, delim->value.str.val);
 	if (p2 == NULL) {
@@ -300,14 +303,80 @@ PHP_FUNCTION(explode)
 	}
 	efree(work_str);
 }
+
+/* {{{ proto array explode(string separator, string str)
+   Split a string on string separator and return array of components */
+void php3_explode(INTERNAL_FUNCTION_PARAMETERS)
+{
+	pval *str, *delim;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &delim, &str) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(str);
+	convert_to_string(delim);
+
+	if (strlen(delim->value.str.val)==0) {
+		/* the delimiter must be a valid C string that's at least 1 character long */
+		php3_error(E_WARNING,"Empty delimiter");
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		return;
+	}
+	_php3_explode(delim, str, return_value);
+}
 /* }}} */
+
+/* {{{ proto string join(array src, string glue)
+   An alias for implode */
+/* }}} */
+void _php3_implode(pval *delim, pval *arr, pval *return_value) 
+{
+	pval *tmp;
+	int len = 0, count = 0;
+	PLS_FETCH();
+
+	/* convert everything to strings, and calculate length */
+	_php3_hash_internal_pointer_reset(arr->value.ht);
+	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
+		convert_to_string(tmp);
+		if (tmp->type == IS_STRING && tmp->value.str.val != undefined_variable_string) {
+			len += tmp->value.str.len;
+			if (count>0) {
+				len += delim->value.str.len;
+			}
+			count++;
+		}
+		_php3_hash_move_forward(arr->value.ht);
+	}
+
+	/* do it */
+	return_value->value.str.val = (char *) emalloc(len + 1);
+	return_value->value.str.val[0] = '\0';
+	return_value->value.str.val[len] = '\0';
+	_php3_hash_internal_pointer_reset(arr->value.ht);
+	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
+		if (tmp->type == IS_STRING && tmp->value.str.val != undefined_variable_string) {
+			count--;
+			strcat(return_value->value.str.val, tmp->value.str.val);
+			if (count > 0) {
+				strcat(return_value->value.str.val, delim->value.str.val);
+			}
+		}
+		_php3_hash_move_forward(arr->value.ht);
+	}
+	return_value->type = IS_STRING;
+	return_value->value.str.len = len;
+}
+
 
 /* {{{ proto string implode(array src, string glue)
    Join array elements placing glue string between items and return one string */
-PHP_FUNCTION(implode)
+void php3_implode(INTERNAL_FUNCTION_PARAMETERS)
 {
-	pval *arg1, *arg2, *delim, **tmp, *arr;
-	int len = 0, count = 0;
+	pval *arg1, *arg2, *delim, *arr;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -325,42 +394,10 @@ PHP_FUNCTION(implode)
 				   get_active_function_name());
 		return;
 	}
-
-	/* convert everything to strings, and calculate length */
-	_php3_hash_internal_pointer_reset(arr->value.ht);
-	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
-		convert_to_string(*tmp);
-		if ((*tmp)->type == IS_STRING) {
-			len += (*tmp)->value.str.len;
-			if (count>0) {
-				len += delim->value.str.len;
-			}
-			count++;
-		}
-		_php3_hash_move_forward(arr->value.ht);
-	}
-
-	/* do it */
-	return_value->value.str.val = (char *) emalloc(len + 1);
-	return_value->value.str.val[0] = '\0';
-	return_value->value.str.val[len] = '\0';
-	_php3_hash_internal_pointer_reset(arr->value.ht);
-	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
-		if ((*tmp)->type == IS_STRING) {
-			count--;
-			strcat(return_value->value.str.val, (*tmp)->value.str.val);
-			if (count > 0) {
-				strcat(return_value->value.str.val, delim->value.str.val);
-			}
-		}
-		_php3_hash_move_forward(arr->value.ht);
-	}
-	return_value->type = IS_STRING;
-	return_value->refcount = 1;
-	return_value->is_ref = 0;
-	return_value->value.str.len = len;
+	_php3_implode(delim, arr, return_value) ;
 }
 /* }}} */
+
 
 #ifndef THREAD_SAFE
 char *strtok_string;
@@ -368,7 +405,7 @@ char *strtok_string;
 
 /* {{{ proto string strtok([string str,] string token)
    Tokenize a string */
-PHP_FUNCTION(strtok)
+void php3_strtok(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str, *tok;
 #ifndef THREAD_SAFE
@@ -378,6 +415,7 @@ PHP_FUNCTION(strtok)
 	char *token = NULL, *tokp=NULL;
 	char *first = NULL;
 	int argc;
+	PLS_FETCH();
 	
 	argc = ARG_COUNT(ht);
 
@@ -409,7 +447,7 @@ PHP_FUNCTION(strtok)
 		if (strtok_pos2) {
 			*strtok_pos2 = '\0';
 		}
-		RETVAL_STRING(strtok_pos1,1);
+		RETVAL_STRING(strtok_pos1, 1);
 #if 0
 		/* skip 'token' white space for next call to strtok */
 		while (strtok_pos2 && 
@@ -442,10 +480,11 @@ PHPAPI char *_php3_strtoupper(char *s)
 
 /* {{{ proto string strtoupper(string str)
    Make a string uppercase */
-PHP_FUNCTION(strtoupper)
+void php3_strtoupper(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	char *ret;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg)) {
 		WRONG_PARAM_COUNT;
@@ -473,10 +512,11 @@ PHPAPI char *_php3_strtolower(char *s)
 
 /* {{{ proto string strtolower(string str)
    Make a string lowercase */
-PHP_FUNCTION(strtolower)
+void php3_strtolower(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	char *ret;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str)) {
 		WRONG_PARAM_COUNT;
@@ -490,10 +530,11 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ proto string basename(string path)
    Return the filename component of the path */
-PHP_FUNCTION(basename)
+void php3_basename(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	char *ret, *c;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str)) {
 		WRONG_PARAM_COUNT;
@@ -542,10 +583,11 @@ PHPAPI void _php3_dirname(char *str, int len) {
 
 /* {{{ proto string dirname(string path)
    Return the directory name component of the path */
-PHP_FUNCTION(dirname)
+void php3_dirname(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	char *ret;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str)) {
 		WRONG_PARAM_COUNT;
@@ -559,7 +601,7 @@ PHP_FUNCTION(dirname)
 /* }}} */
 
 
-/* case-insensitve strstr */
+/* case insensitive strstr */
 PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t)
 {
 	int i, j, k, l;
@@ -574,12 +616,13 @@ PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t)
 	return NULL;
 }
 
-/* {{{ proto string strstr(string haystack, string needle)
+/* {{{ proto string stristr(string haystack, string needle)
    Find first occurrence of a string within another, case insensitive */
-PHP_FUNCTION(stristr)
+void php3_stristr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &haystack, &needle) ==
 		FAILURE) {
@@ -602,12 +645,17 @@ PHP_FUNCTION(stristr)
 }
 /* }}} */
 
+/* {{{ proto string strchr(string haystack, string needle)
+   An alias for strstr */
+/* }}} */
+
 /* {{{ proto string strstr(string haystack, string needle)
    Find first occurrence of a string within another */
-PHP_FUNCTION(strstr)
+void php3_strstr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &haystack, &needle) ==
 		FAILURE) {
@@ -635,13 +683,14 @@ PHP_FUNCTION(strstr)
 }
 /* }}} */
 
-/* {{{ proto int strpos(string haystack, string needle)
+/* {{{ proto int strpos(string haystack, string needle [, int offset])
    Find position of first occurrence of a string within another */
-PHP_FUNCTION(strpos)
+void php3_strpos(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle, *OFFSET;
 	int offset = 0;
 	char *found = NULL;
+	PLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
@@ -686,10 +735,11 @@ PHP_FUNCTION(strpos)
 
 /* {{{ proto int strrpos(string haystack, string needle)
    Find the last occurrence of a character in a string within another */
-PHP_FUNCTION(strrpos)
+void php3_strrpos(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &haystack, &needle) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -713,10 +763,11 @@ PHP_FUNCTION(strrpos)
 
 /* {{{ proto string strrchr(string haystack, string needle)
    Find the last occurrence of a character in a string within another */
-PHP_FUNCTION(strrchr)
+void php3_strrchr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &haystack, &needle) ==
 		FAILURE) {
@@ -742,7 +793,8 @@ PHP_FUNCTION(strrchr)
 /* }}} */
 
 static char *
-_php3_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen)
+_php3_chunk_split(char *src, int srclen, char *end, int endlen, 
+		int chunklen, int *destlen)
 {
 	char *dest;
 	char *p, *q;
@@ -770,13 +822,14 @@ _php3_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen)
 	}
 
 	*q = '\0';
+	if(destlen) *destlen = q - dest;
 
 	return(dest);
 }
 
 /* {{{ proto string chunk_split(string str [, int chunklen [, string ending]])
    Return split line */
-PHP_FUNCTION(chunk_split) 
+void php3_chunk_split(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	pval *p_str, *p_chunklen, *p_ending;
 	int argc;
@@ -784,13 +837,13 @@ PHP_FUNCTION(chunk_split)
 	char *end    = "\r\n";
 	int endlen   = 2;
 	int chunklen = 76;
+	int result_len;
+	PLS_FETCH();
 
 	argc = ARG_COUNT(ht);
-
-	if(!((argc == 1 && getParameters(ht, 1, &p_str) != FAILURE) ||
-		(argc == 2 && getParameters(ht, 2, &p_str, &p_chunklen) != FAILURE) ||
-		(argc == 3 && getParameters(ht, 3, &p_str, &p_chunklen,
-								   &p_ending) != FAILURE))) {
+	
+	if(argc < 1 || argc > 3 || getParameters(ht, argc, &p_str, 
+				&p_chunklen, &p_ending) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -812,10 +865,10 @@ PHP_FUNCTION(chunk_split)
 	}
 	
 	result = _php3_chunk_split(p_str->value.str.val, p_str->value.str.len,
-			end, endlen, chunklen);
+			end, endlen, chunklen, &result_len);
 	
 	if(result) {
-		RETVAL_STRING(result, 0);
+		RETVAL_STRINGL(result, result_len, 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -824,11 +877,12 @@ PHP_FUNCTION(chunk_split)
 
 /* {{{ proto string substr(string str, int start [, int length])
    Return part of a string */
-PHP_FUNCTION(substr)
+void php3_substr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *string, *from, *len;
 	int argc, l;
 	int f;
+	PLS_FETCH();
 	
 	argc = ARG_COUNT(ht);
 
@@ -872,22 +926,23 @@ PHP_FUNCTION(substr)
 		RETURN_FALSE;
 	}
 
+	/* Adjust l to match the actual string segment to be returned */
 	if((f+l) > (int)string->value.str.len) {
 		l = (int)string->value.str.len - f;
 	}
-
-	RETVAL_STRINGL(string->value.str.val + f, l, 1);
+	RETVAL_STRINGL(string->value.str.val + f,l,1);
 }
 /* }}} */
 
 /* {{{ proto string quotemeta(string str)
    Quote meta characters */
-PHP_FUNCTION(quotemeta)
+void php3_quotemeta(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	char *str, *old;
 	char *p, *q;
 	char c;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -928,9 +983,10 @@ PHP_FUNCTION(quotemeta)
 
 /* {{{ proto int ord(string character)
    Return ASCII value of character */
-PHP_FUNCTION(ord)
+void php3_ord(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -942,10 +998,11 @@ PHP_FUNCTION(ord)
 
 /* {{{ proto string chr(int ascii)
    Convert ASCII code to a character */
-PHP_FUNCTION(chr)
+void php3_chr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *num;
 	char temp[2];
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -957,9 +1014,9 @@ PHP_FUNCTION(chr)
 }
 /* }}} */
 
-/* {{{ proto string(string str)
+/* {{{ proto string ucfirst(string str)
    Make a string's first character uppercase */
-PHP_FUNCTION(ucfirst)
+void php3_ucfirst(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	
@@ -978,7 +1035,7 @@ PHP_FUNCTION(ucfirst)
 
 /* {{{ proto string ucwords(string str)
    Uppercase the first character of every word in a string */
-PHP_FUNCTION(ucwords)
+void php3_ucwords(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	char *r;
@@ -1003,14 +1060,33 @@ PHP_FUNCTION(ucwords)
 }
 /* }}} */
 
+PHPAPI char *_php3_strtr(char *string, int len, char *str_from, char *str_to, int trlen)
+{
+	int i;
+	unsigned char xlat[256];
+
+	if ((trlen < 1) || (len < 1))
+		return string;
+
+	for (i = 0; i < 256; xlat[i] = i, i++);
+
+	for (i = 0; i < trlen; i++) {
+		xlat[(unsigned char) str_from[i]] = str_to[i];
+	}
+
+	for (i = 0; i < len; i++) {
+		string[i] = xlat[(unsigned char) string[i]];
+	}
+
+	return string;
+}
+
 /* {{{ proto string strtr(string str, string from, string to)
    Translate characters in str using given translation tables */
-PHP_FUNCTION(strtr)
+void php3_strtr(INTERNAL_FUNCTION_PARAMETERS)
 {								/* strtr(STRING,FROM,TO) */
 	pval *str, *from, *to;
-	unsigned char xlat[256];
-	unsigned char *str_from, *str_to, *string;
-	int i, len1, len2;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &str, &from, &to) ==
 		FAILURE) {
@@ -1020,35 +1096,19 @@ PHP_FUNCTION(strtr)
 	convert_to_string(from);
 	convert_to_string(to);
 
-	string = (unsigned char*) str->value.str.val;
-	str_from = (unsigned char*) from->value.str.val;
-	str_to = (unsigned char*) to->value.str.val;
-
-	len1 = from->value.str.len;
-	len2 = to->value.str.len;
-
-	if (len1 > len2) {
-		str_from[len2] = '\0';
-		len1 = len2;
-	}
-	for (i = 0; i < 256; xlat[i] = i, i++);
-
-	for (i = 0; i < len1; i++) {
-		xlat[(unsigned char) str_from[i]] = str_to[i];
-	}
-
-	for (i = 0; i < str->value.str.len; i++) {
-		string[i] = xlat[(unsigned char) string[i]];
-	}
-
-	RETVAL_STRING((char *)string,1);
+	RETVAL_STRING(_php3_strtr(str->value.str.val,
+							  str->value.str.len,
+							  from->value.str.val,
+							  to->value.str.val,
+							  MIN(from->value.str.len,to->value.str.len)),
+				  1);
 }
 /* }}} */
 
 
 /* {{{ proto string strrev(string str)
    Reverse a string */
-PHP_FUNCTION(strrev)
+void php3_strrev(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	int i,len;
@@ -1073,14 +1133,87 @@ PHP_FUNCTION(strrev)
 }
 /* }}} */
 
+static void _php3_similar_str(const char *txt1, int len1, const char *txt2, 
+		int len2, int *pos1, int *pos2, int *max)
+{
+	char *p, *q;
+	char *end1 = (char *) txt1 + len1;
+	char *end2 = (char *) txt2 + len2;
+	int l;
+	
+	*max = 0;
+	for (p = (char *) txt1; p < end1; p++) {
+		for (q = (char *) txt2; q < end2; q++) {
+			for (l = 0; (p + l < end1) && (q + l < end2) && (p[l] == q[l]); 
+					l++);
+			if (l > *max) {
+				*max = l;
+				*pos1 = p - txt1;
+				*pos2 = q - txt2;
+			}
+		}
+	}
+}
 
+static int _php3_similar_char(const char *txt1, int len1, 
+		const char *txt2, int len2)
+{
+	int sum;
+	int pos1, pos2, max;
+
+	_php3_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
+	if ((sum = max)) {
+		if (pos1 && pos2)
+			sum += _php3_similar_char(txt1, pos1, txt2, pos2);
+		if ((pos1 + max < len1) && (pos2 + max < len2))
+			sum += _php3_similar_char(txt1 + pos1 + max, len1 - pos1 - max, 
+					txt2 + pos2 + max, len2 - pos2 -max);
+	}
+	return sum;
+}
+
+/* {{{ proto int similar_text(string str1, string str2 [, double percent])
+   Calculates the similarity between two strings */
+void php3_similar_text(INTERNAL_FUNCTION_PARAMETERS)
+{
+	pval *t1, *t2, *percent;
+	int ac = ARG_COUNT(ht);
+	int sim;
+	
+	if (ac < 2 || ac > 3 ||
+			getParameters(ht, ac, &t1, &t2, &percent) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_string(t1);
+	convert_to_string(t2);
+	if(ac > 2) {
+		convert_to_double(percent);
+	}
+	
+	if((t1->value.str.len + t2->value.str.len) == 0) {
+		if(ac > 2) 
+			percent->value.dval = 0;
+		RETURN_LONG(0);
+	}
+	
+	sim = _php3_similar_char(t1->value.str.val, t1->value.str.len, 
+			t2->value.str.val, t2->value.str.len);
+	
+	if (ac > 2) {
+		percent->value.dval = sim * 200.0 / (t1->value.str.len + t2->value.str.len);
+	}
+	
+	RETURN_LONG(sim);
+}
+/* }}} */
+	
 /* be careful, this edits the string in-place */
 PHPAPI void _php3_stripslashes(char *string, int *len)
 {
 	char *s, *t;
 	int l;
 	char escape_char='\\';
-	PLS_FETCH();
 
 	if (PG(magic_quotes_sybase)) {
 		escape_char='\'';
@@ -1125,7 +1258,7 @@ PHPAPI void _php3_stripslashes(char *string, int *len)
 
 /* {{{ proto string addslashes(string str)
    Escape single quote, double quotes and backslash characters in a string with backslashes */
-PHP_FUNCTION(addslashes)
+void php3_addslashes(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 
@@ -1140,9 +1273,10 @@ PHP_FUNCTION(addslashes)
 
 /* {{{ proto string stripslashes(string str)
    Strip backslashes from a string */
-PHP_FUNCTION(stripslashes)
+void php3_stripslashes(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1180,7 +1314,6 @@ PHPAPI char *_php3_addslashes(char *str, int length, int *new_length, int should
 	char *source,*target;
 	char *end;
 	char c;
-	PLS_FETCH();
 	
 	for (source=str,end=source+length,target=new_str; (c = *source) || source<end; source++) {
 		switch(c) {
@@ -1207,9 +1340,7 @@ PHPAPI char *_php3_addslashes(char *str, int length, int *new_length, int should
 		}
 	}
 	*target = 0;
-	if (new_length) {
-		*new_length = target - new_str;
-	}
+	if(new_length) *new_length = target - new_str;
 	if (should_free) {
 		STR_FREE(str);
 	}
@@ -1223,7 +1354,7 @@ PHPAPI char *_php3_addslashes(char *str, int length, int *new_length, int should
 #define _isblank(c) (((((unsigned char) c)==' ' || ((unsigned char) c)=='\t')) ? 1 : 0)
 #define _isnewline(c) (((((unsigned char) c)=='\n' || ((unsigned char) c)=='\r')) ? 1 : 0)
 
-static void _php3_char_to_str(char *str,uint len,char from,char *to,int to_len,pval *result)
+PHPAPI void _php3_char_to_str(char *str,uint len,char from,char *to,int to_len,pval *result)
 {
 	int char_count=0;
 	char *source,*target,*tmp,*source_end=str+len, *tmp_end=NULL;
@@ -1259,6 +1390,7 @@ static void _php3_char_to_str(char *str,uint len,char from,char *to,int to_len,p
 	*target = 0;
 }
 
+#if 1
 /*
  * this is a binary safe equivalent to strnstr
  * note that we don't check for the end in str_to_str but here
@@ -1277,6 +1409,12 @@ _php3_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	}
 	return NULL;
 }
+
+/*
+ * because of efficiency we use malloc/realloc/free here
+ * erealloc _will_ move your data around - it took me some time
+ * to find out ... Sascha Schumann <sas@schell.de> 981220
+ */
 
 static char *_php3_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
@@ -1328,22 +1466,79 @@ finish:
 	return new;
 }
 
+#else
+
+static char *_php3_memstr(char *s, char *c, size_t n, size_t m)
+{
+    char *p;
+
+    for(p = s; (p - s) < n; p++)
+        if(memcmp(p, c, m) == 0)
+            return p;
+    return NULL;
+}
+
+#define ATTCHSTR(st, sz) \
+    nl += sz; \
+    n = erealloc(n, nl + 1); \
+    memcpy(n + no, st, sz); \
+    no += sz
+
+
+static char *_php3_str_to_str(char *a, int al, char *b, int bl, char *c, int cl,
+        int *newlen)
+{
+    char *n = NULL, *p, *q;
+    int nl = 0;
+    int no = 0;
+
+	/* run through all occurences of b in a */
+	for(p = q = a; (p = _php3_memstr(p, b, al - (p - a), bl)); q = p) {
+		/* attach everything between the previous occ. and this one */
+		ATTCHSTR(q, p - q);
+		/* attach the replacement string c */
+		ATTCHSTR(c, cl);
+		/* jump over string b in a */
+		p += bl;
+	}
+	
+	/* anything left over ? */
+	if((al - (q - a)) > 0) {
+		ATTCHSTR(q, al - (q - a));
+	}
+
+	if(newlen) *newlen = nl;
+	n[nl] = '\0';
+
+	return n;
+}
+
+#undef ATTCHSTR
+#endif
+
 /* {{{ proto string str_replace(string needle, string str, string haystack)
    Replace all occurrences of needle in haystack with str */
-PHP_FUNCTION(str_replace)
+void php3_str_replace(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle, *str;
 	char *new;
 	int len = 0;
 
-	if(ARG_COUNT(ht) != 3 ||
+	if(ARG_COUNT(ht) != 3 || 
 			getParameters(ht, 3, &needle, &str, &haystack) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string(haystack);
 	convert_to_string(needle);
-	convert_to_string(str);                                                                                                                                         if(needle->value.str.len == 1) {                                                    _php3_char_to_str(haystack->value.str.val,haystack->value.str.len,needle->value.str.val[0],str->value.str.val, str->value.str.len ,return_value);
+	convert_to_string(str);
+
+	if(haystack->value.str.len == 0) {
+		RETURN_STRING(empty_string,1);
+	}
+
+	if(needle->value.str.len == 1) {
+		_php3_char_to_str(haystack->value.str.val,haystack->value.str.len,needle->value.str.val[0],str->value.str.val, str->value.str.len ,return_value);
 		return;
 	}
 
@@ -1352,10 +1547,10 @@ PHP_FUNCTION(str_replace)
 		RETURN_FALSE;
 	}
 
-	new = _php3_str_to_str(haystack->value.str.val, haystack->value.str.len,
-			needle->value.str.val, needle->value.str.len,
-			str->value.str.val, str->value.str.len,
-			&len);
+	new = _php3_str_to_str(haystack->value.str.val, haystack->value.str.len, 
+				needle->value.str.val, needle->value.str.len, 
+				str->value.str.val, str->value.str.len,
+				&len);
 	RETURN_STRINGL(new, len, 0);
 }
 /* }}} */
@@ -1529,15 +1724,15 @@ static void _php3_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
 
 /* {{{ proto string hebrev(string str [, int max_chars_per_line])
    Convert logical Hebrew text to visual text */
-PHP_FUNCTION(hebrev)
+void php3_hebrev(INTERNAL_FUNCTION_PARAMETERS)
 {
 	_php3_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 /* }}} */
 
-/* {{{ proto string hebrev(string str [, int max_chars_per_line])
+/* {{{ proto string hebrevc(string str [, int max_chars_per_line])
    Convert logical Hebrew text to visual text with newline conversion */
-PHP_FUNCTION(hebrev_with_conversion)
+void php3_hebrev_with_conversion(INTERNAL_FUNCTION_PARAMETERS)
 {
 	_php3_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
@@ -1545,7 +1740,7 @@ PHP_FUNCTION(hebrev_with_conversion)
 
 /* {{{ proto string nl2br(string str)
    Converts newlines to HTML line breaks */
-PHP_FUNCTION(newline_to_br)
+void php3_newline_to_br(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	
@@ -1559,9 +1754,27 @@ PHP_FUNCTION(newline_to_br)
 }
 /* }}} */
 
+/* {{{ proto string strip_tags(string str)
+   Strips HTML and PHP tags from a string */
+void php3_strip_tags(INTERNAL_FUNCTION_PARAMETERS)
+{
+	char *buf;
+	pval *str;
+	
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &str)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(str);
+	buf=estrdup(str->value.str.val);
+	_php3_strip_tags(buf,0);
+	RETURN_STRING(buf,0);
+}
+/* }}} */
+
+
 /* {{{ proto string setlocale(string category, string locale)
    Set locale information */
-PHP_FUNCTION(setlocale)
+void php3_setlocale(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *category, *locale;
 	int cat;
@@ -1602,6 +1815,102 @@ PHP_FUNCTION(setlocale)
 }
 /* }}} */
 
+/* A simple little state-machine to strip out html and php tags 
+	
+	State 0 is the output state, State 1 means we are inside a
+	normal html tag and state 2 means we are inside a php tag.
+
+	The state variable is passed in to allow a function like fgetss
+	to maintain state across calls to the function.
+
+	lc holds the last significant character read and br is a bracket
+	counter.
+*/
+void _php3_strip_tags(char *rbuf, int state) {
+	char *buf, *p, *rp, c, lc;
+	int br;
+
+	buf = estrdup(rbuf);
+	c = *buf;
+	lc = '\0';
+	p = buf;
+	rp = rbuf;
+	br = 0;
+
+	while (c) { /* This is not binary-safe.  Don't see why it should be */
+		switch (c) {
+			case '<':
+				if (state == 0) {
+					lc = '<';
+					state = 1;
+				}
+				break;
+
+			case '(':
+				if (state == 2) {
+					if (lc != '\"') {
+						lc = '(';
+						br++;
+					}
+				} else if (state == 0) {
+					*(rp++) = c;
+				}
+				break;	
+
+			case ')':
+				if (state == 2) {
+					if (lc != '\"') {
+						lc = ')';
+						br--;
+					}
+				} else if (state == 0) {
+					*(rp++) = c;
+				}
+				break;	
+
+			case '>':
+				if (state == 1) {
+					lc = '>';
+					state = 0;
+				} else if (state == 2) {
+					if (!br && lc != '\"' && *(p-1)=='?') {
+						state = 0;
+					}
+				}
+				break;
+
+			case '\"':
+				if (state == 2) {
+					if (lc == '\"') {
+						lc = '\0';
+					} else if (lc != '\\') {
+						lc = '\"';
+					}
+				} else if (state == 0) {
+					*(rp++) = c;
+				}
+				break;
+
+			case '?':
+				if (state==1 && *(p-1)=='<') {
+					br=0;
+					state=2;
+					break;
+				}
+				/* fall-through */
+
+			default:
+				if (state == 0) {
+					*(rp++) = c;
+				}	
+				break;
+		}
+		c = *(++p);
+	}	
+	*rp = '\0';
+	efree(buf);
+}
+
 /* {{{ proto void parsestr(string encoded_string)
    Parses GET/POST/COOKIE data and sets global variables. */
 PHP_FUNCTION(parsestr)
@@ -1618,6 +1927,7 @@ PHP_FUNCTION(parsestr)
 	}
 	php3_treat_data(PARSE_STRING, res);
 }
+/* }}} */
 
 /*
  * Local variables:

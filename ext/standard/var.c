@@ -491,7 +491,7 @@ PHP_FUNCTION(unserialize)
 	}
 }
 
-/* }}} *
+/* }}} */
 
 /*
  * Local variables:
