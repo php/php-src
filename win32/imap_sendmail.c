@@ -140,13 +140,13 @@ int imap_SendText(char *RPath, char *Subject, char *mailTo, char *data, char *he
 		if ((res = Post(Buffer)) != SUCCESS)
 			return (res);
 	}
-	if ((res = Ack()) != SUCCESS)
+	if ((res = Ack(NULL)) != SUCCESS)
 		return (res);
 
 	sprintf(Buffer, "MAIL FROM:<%s>\r\n", RPath);
 	if ((res = Post(Buffer)) != SUCCESS)
 		return (res);
-	if ((res = Ack()) != SUCCESS)
+	if ((res = Ack(NULL)) != SUCCESS)
 		return (res);
 
 	// Send mail to all rcpt's
@@ -160,7 +160,7 @@ int imap_SendText(char *RPath, char *Subject, char *mailTo, char *data, char *he
 			sprintf(Buffer, "RCPT TO:<%s@%s>\r\n", addr->mailbox, addr->host);
 			if ((res = Post(Buffer)) != SUCCESS)
 				return (res);
-			if ((res = Ack()) != SUCCESS)
+			if ((res = Ack(NULL)) != SUCCESS)
 				return (res);
 		}
 		addr = addr->next;
@@ -179,7 +179,7 @@ int imap_SendText(char *RPath, char *Subject, char *mailTo, char *data, char *he
 				sprintf(Buffer, "RCPT TO:<%s@%s>\r\n", addr->mailbox, addr->host);
 				if ((res = Post(Buffer)) != SUCCESS)
 					return (res);
-				if ((res = Ack()) != SUCCESS)
+				if ((res = Ack(NULL)) != SUCCESS)
 					return (res);
 			}
 			addr = addr->next;
@@ -198,7 +198,7 @@ int imap_SendText(char *RPath, char *Subject, char *mailTo, char *data, char *he
 				sprintf(Buffer, "RCPT TO:<%s@%s>\r\n", addr->mailbox, addr->host);
 				if ((res = Post(Buffer)) != SUCCESS)
 					return (res);
-				if ((res = Ack()) != SUCCESS)
+				if ((res = Ack(NULL)) != SUCCESS)
 					return (res);
 			}
 			addr = addr->next;
@@ -208,7 +208,7 @@ int imap_SendText(char *RPath, char *Subject, char *mailTo, char *data, char *he
 
 	if ((res = Post("DATA\r\n")) != SUCCESS)
 		return (res);
-	if ((res = Ack()) != SUCCESS)
+	if ((res = Ack(NULL)) != SUCCESS)
 		return (res);
 
 
@@ -249,7 +249,7 @@ int imap_SendText(char *RPath, char *Subject, char *mailTo, char *data, char *he
 	/*send termination dot */
 	if ((res = Post("\r\n.\r\n")) != SUCCESS)
 		return (res);
-	if ((res = Ack()) != SUCCESS)
+	if ((res = Ack(NULL)) != SUCCESS)
 		return (res);
 
 	return (SUCCESS);
