@@ -1439,6 +1439,9 @@ consult the installation file that came with this distribution, or visit \n\
 
 			if (script_file) {
 				/* override path_translated if -f on command line */
+				if (SG(request_info).path_translated) {
+					STR_FREE(SG(request_info).path_translated);
+				}
 				SG(request_info).path_translated = script_file;
 			}
 
