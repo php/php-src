@@ -732,7 +732,7 @@ PHP_FUNCTION(proc_open)
 			php_stream *stream;
 			int fd;
 
-			ZEND_FETCH_RESOURCE(stream, php_stream *, descitem, -1, "File-Handle", php_file_le_stream());
+			php_stream_from_zval(stream, descitem);
 
 			if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS)) {
 				goto exit_fail;

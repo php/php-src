@@ -476,7 +476,7 @@ PHP_FUNCTION(ftp_async_fget)
 	}
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
-	ZEND_FETCH_RESOURCE(stream, php_stream*, &z_file, -1, "File-Handle", php_file_le_stream());
+	php_stream_from_zval(stream, &z_file);
 	XTYPE(xtype, mode);
 
 	/* ignore autoresume if autoseek is switched off */
@@ -702,7 +702,7 @@ PHP_FUNCTION(ftp_fput)
 	}
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
-   	ZEND_FETCH_RESOURCE(stream, php_stream*, &z_file, -1, "File-Handle", php_file_le_stream());
+	php_stream_from_zval(stream, &z_file);
 	XTYPE(xtype, mode);
 
 	/* ignore autoresume if autoseek is switched off */
@@ -748,7 +748,7 @@ PHP_FUNCTION(ftp_async_fput)
 	}
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
-   	ZEND_FETCH_RESOURCE(stream, php_stream*, &z_file, -1, "File-Handle", php_file_le_stream());
+	php_stream_from_zval(stream, &z_file);
 	XTYPE(xtype, mode);
 
 	/* ignore autoresume if autoseek is switched off */

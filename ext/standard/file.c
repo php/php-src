@@ -1243,7 +1243,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 }
 /* }}} */
 
-/* {{{ proto mixed fscanf(string str, string format [, string ...])
+/* {{{ proto mixed fscanf(resource stream, string format [, string ...])
    Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {

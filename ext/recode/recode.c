@@ -184,28 +184,18 @@ PHP_FUNCTION(recode_file)
 	zval **input, **output;
 	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;
-	int    in_type, out_type;
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &req, &input, &output) == FAILURE) {
 	 	WRONG_PARAM_COUNT;
 	}
 
-	instream = zend_fetch_resource(input TSRMLS_CC,-1, "File-Handle", &in_type, 1, php_file_le_stream());
-
-	if (!instream) {
-		php_error(E_WARNING,"Unable to find input file identifier");
-		RETURN_FALSE;
-	}
+	php_stream_from_zval(instream, input);
+	php_stream_from_zval(outstream, output);
 
 	if (FAILURE == php_stream_cast(instream, PHP_STREAM_AS_STDIO, (void**)&in_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
 	}
 	
-	outstream = zend_fetch_resource(output TSRMLS_CC,-1, "File-Handle", &out_type, 1, php_file_le_stream());
-	if (!outstream) {
-		php_error(E_WARNING,"Unable to find output file identifier");
-		RETURN_FALSE;
-	}
 	if (FAILURE == php_stream_cast(outstream, PHP_STREAM_AS_STDIO, (void**)&out_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
 	}
