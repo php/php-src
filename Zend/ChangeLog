@@ -1,3 +1,29 @@
+2004-08-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      zend_highlight.c:
+      MFH: Fixed bug #29606 (php_strip_whitespace() prints to stdout rather then
+      returning the value).
+
+    * zend_highlight.c:
+      Fixed bug #29606 (php_strip_whitespace() prints to stdout rather then
+      returning the value).
+
+2004-08-10  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend.h:
+      - Back to -dev
+
+    * (PHP_5_0)
+      zend.h:
+      - 5.0.1RC1
+
+2004-08-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      - Fix warnings
+
 2004-08-07  Andi Gutmans  <andi@zend.com>
 
     * zend_alloc.h:
