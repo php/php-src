@@ -1584,8 +1584,8 @@ zend_module_entry yaz_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &yaz_module_entry; }
+#ifdef COMPILE_DL_YAZ
+ZEND_GET_MODULE(yaz)
 #endif
 
 
