@@ -145,7 +145,7 @@ static void spl_recursive_it_get_current_data(zend_object_iterator *iter, zval *
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)iter->data;
 	zend_object_iterator      *sub_iter = object->iterators[object->level].iterator;
 	
-	return sub_iter->funcs->get_current_data(sub_iter, data TSRMLS_CC);
+	sub_iter->funcs->get_current_data(sub_iter, data TSRMLS_CC);
 }
 
 static int spl_recursive_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
@@ -346,7 +346,7 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 		if (iterator->funcs->get_current_key(iterator, &str_key, &str_key_len, &int_key TSRMLS_CC) == HASH_KEY_IS_LONG) {
 			RETURN_LONG(int_key);
 		} else {
-			RETURN_STRINGL(str_key, str_key_len, 1);
+			RETURN_STRINGL(str_key, str_key_len-1, 0);
 		}
 	} else {
 		RETURN_NULL();
@@ -360,8 +360,7 @@ SPL_METHOD(RecursiveIteratorIterator, current)
 	zval                      **data;
 
 	iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
-	*return_value = **data;
-	return_value->refcount++;
+	REPLACE_ZVAL_VALUE(&return_value, *data, 1);
 }
 
 SPL_METHOD(RecursiveIteratorIterator, next)
