@@ -114,8 +114,8 @@ static int describe_columns(pdo_stmt_t *stmt TSRMLS_DC)
 
 static void param_dtor(void *data)
 {
-	TSRMLS_FETCH();
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data *)data;
+	TSRMLS_FETCH();
 
 	/* tell the driver that it is going away */
 	if (param->stmt->methods->param_hook) {
@@ -179,9 +179,9 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 	if (param->name) {
 		param->name = estrndup(param->name, param->namelen);
-		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), &pparam);
+		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), (void**)&pparam);
 	} else {
-		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), &pparam);
+		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
 	}
 
 	/* tell the driver we just created a parameter */
@@ -467,7 +467,7 @@ static PHP_METHOD(PDOStatement, rowCount)
 
 
 
-extern function_entry pdo_dbstmt_functions[] = {
+function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetch,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, bindParam,		second_arg_force_ref,	ZEND_ACC_PUBLIC)
@@ -607,7 +607,7 @@ zend_object_handlers pdo_dbstmt_object_handlers = {
 	NULL
 };
 
-void pdo_dbstmt_free_storage(void *object TSRMLS_DC)
+void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)object;
 
