@@ -94,14 +94,18 @@ PEAR_FILES = \
 	Net/SMTP.php \
 	Net/Socket.php \
 	Numbers/Roman.php \
+	PEAR.php \
+	PEAR/Common.php \
 	PEAR/Installer.php \
+	PEAR/Packager.php \
+	PEAR/Updater.php \
 	Payment/Verisign.php \
 	Schedule/At.php \
 	XML/Parser.php \
 	XML/RPC.php \
 	XML/RPC/Server.php
 
-install-data-local: PEAR.php
+install-data-local:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
 		for i in $(PEAR_SUBDIRS); do \
 			(set -x;$(mkinstalldirs) $(INSTALL_ROOT)$(peardir)/$$i); \
@@ -109,9 +113,6 @@ install-data-local: PEAR.php
 		for i in $(PEAR_FILES); do \
 			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
 			(set -x;$(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_ROOT)$(peardir)/$$dir); \
-		done; \
-		for i in PEAR.php; do \
-			(set -x;$(INSTALL_DATA) $$i $(INSTALL_ROOT)$(peardir)); \
 		done; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
@@ -183,6 +184,3 @@ scripts/phpize: scripts/phpize.in $(top_builddir)/config.status
 
 scripts/php-config: scripts/php-config.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/scripts/php-config CONFIG_HEADERS= $(top_builddir)/config.status)
-
-PEAR.php: PEAR.php.in $(top_builddir)/config.status
-	(cd ..;CONFIG_FILES=pear/PEAR.php CONFIG_HEADERS= $(top_builddir)/config.status)

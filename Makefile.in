@@ -50,7 +50,13 @@ install-modules:
 	rm -f modules/*.la && \
 	cp modules/* $(INSTALL_ROOT)$(moduledir) >/dev/null 2>&1 || true
 
-install-su: install-modules
+install-tester:
+	-$(mkinstalldirs) $(datadir)
+	$(INSTALL) -m 755 $(srcdir)/run-tests.php $(INSTALL_ROOT)$(datadir)
+
+install-pear: install-modules
 	(cd pear && $(MAKE) install)
+
+install-su: install-pear install-tester
 
 .NOEXPORT:
