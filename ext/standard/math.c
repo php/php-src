@@ -1011,7 +1011,7 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 
 	/* allow for thousand separators */
 	if (thousand_sep) {
-		integral += integral / 3;
+		integral += (integral-1) / 3;
 	}
 	
 	reslen = integral;
