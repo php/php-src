@@ -12,21 +12,21 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Brendan W. McAdams <brendan@plexmedia.com>                  |
+   | Authors: Brendan W. McAdams <bmcadams@php.net>             |
    |              Doug DeJulio <ddj@redhat.com>                           |
    +----------------------------------------------------------------------+
- */ 
-/* 
+ */
+/*
 *	cvvs.c $Revision$ - PHP4 Interface to the RedHat CCVS API
 *	 -------
 *	 Interfaces RedHat's CCVS [Credit Card Verification System] <http://www.redhat.com/products/ccvs/>
 *	 This code is ported from an original php3 interface written by RedHat's Doug DeJulio <ddj@redhat.com>
-*	 The code was subsequently ported to the Zend API by Brendan W. McAdams <brendan@plexmedia.com>
+*	 The code was subsequently ported to the Zend API by Brendan W. McAdams <bmcadams@php.net>
 *	 -------
 */
 
-/* 
-*	Code started on 2000.07.24@09.04.EST by Brendan W. McAdams <brendan@plexmedia.com>
+/*
+*	Code started on 2000.07.24@09.04.EST by Brendan W. McAdams <bmcadams@php.net>
 *	$Revision$
 */
 
@@ -38,21 +38,21 @@ static char const cvsid[] = "$Id$";
 #include <ccvs.h>
 
 
-	/* 
+	/*
 	*	Create the Zend Internal hash construct to track this modules functions
 	*
 	*	In case anyone is wondering why we use ccvs_<action> instead of cv_<action>,
-	*	it's because we are directly importing functions of the actual CCVS, which uses functions that are 
+	*	it's because we are directly importing functions of the actual CCVS, which uses functions that are
 	*	cv_<action>, and we had problems implementing ZEND_NAMED_FE calls (bug in NAMED_FE? investigate
 	* 	later).  We don't want our PHP calls to conflict with the C calls in the CCVS API.
-	*	   
-	*	BWM - 2000.07.27@16.41.EST - Added FALIAS Calls.  While I'm of the opinion that naming the 
-	* 	functions in PHP ccvs_<action> is much more readable and clear to anyone reading the code than 
-	*	cv_<action>, It strikes me that many people coming from php3 -> php4 will need backwards 
+	*
+	*	BWM - 2000.07.27@16.41.EST - Added FALIAS Calls.  While I'm of the opinion that naming the
+	* 	functions in PHP ccvs_<action> is much more readable and clear to anyone reading the code than
+	*	cv_<action>, It strikes me that many people coming from php3 -> php4 will need backwards
 	*  compatibility.  It was kind of careless to simply change the function calls (There were reasons other
-	*  than readability behind this; the ZEND_NAMED_FE macro was misbehaving) and not provide for 
-	*  backwards compatibility - this *IS* an API and should scale with compatibility. 
-	* 
+	*  than readability behind this; the ZEND_NAMED_FE macro was misbehaving) and not provide for
+	*  backwards compatibility - this *IS* an API and should scale with compatibility.
+	*
 	*/
 
 	function_entry ccvs_functions[] = {
@@ -101,10 +101,10 @@ static char const cvsid[] = "$Id$";
 		ccvs_functions,
 		NULL,NULL,NULL,NULL,
 		PHP_MINFO(ccvs),
-		STANDARD_MODULE_PROPERTIES                                                                 
-	};   
-		
-		
+		STANDARD_MODULE_PROPERTIES
+	};
+
+
 /* Full Functions (The actual CCVS functions and any internal php hooked functions such as MINFO) */
 
 PHP_FUNCTION(ccvs_init) /* cv_init() */
@@ -112,8 +112,8 @@ PHP_FUNCTION(ccvs_init) /* cv_init() */
   zval **name;
   void *vsess;
   char *p;
-  
-  if ((ZEND_NUM_ARGS() != 1) || (zend_get_parameters_ex(1, &name) != SUCCESS)) 
+
+  if ((ZEND_NUM_ARGS() != 1) || (zend_get_parameters_ex(1, &name) != SUCCESS))
   /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
     {
       WRONG_PARAM_COUNT;
@@ -121,33 +121,33 @@ PHP_FUNCTION(ccvs_init) /* cv_init() */
 
   convert_to_string_ex(name);
 
-  vsess = cv_init((*name)->value.str.val);  
-  
-  /* 
-  *		-- In the case that we don't run error checking on the return value... -- 
-  *		On 32 bit systems a failure of the cv_init call returns 0,0,0,0 ; on 64 bit systems its 0,0,0,0,0,0,0,0 
+  vsess = cv_init((*name)->value.str.val);
+
+  /*
+  *		-- In the case that we don't run error checking on the return value... --
+  *		On 32 bit systems a failure of the cv_init call returns 0,0,0,0 ; on 64 bit systems its 0,0,0,0,0,0,0,0
   *		This unconsistent error (not to mention a string of comma seperated zeros in and of itself) is hard to
-  * 	Trap for in PHP (or any language).  However, we can also grab cv_init to return CV_SESS_BAD on 
-  *		failure at the C API level, and return a set, fixed error code to the user which the user then knows to 
+  * 	Trap for in PHP (or any language).  However, we can also grab cv_init to return CV_SESS_BAD on
+  *		failure at the C API level, and return a set, fixed error code to the user which the user then knows to
   *		trap for... e.g. a NULL Value which PHP can then trap by:
   *		if (!($string = cv_init($config)) { or some such...
   */
-  	
+
   if (vsess == CV_SESS_BAD) /* if the cv_init() call failed... */
-  { 
-  	
+  {
+
   		p = ""; /* set p, the value we will return, to NULL */
-  	
-  } 
+
+  }
   else /* we got a valid session returned, which means it worked */
   {
-  
+
   p = hks_ptr_ptrtostring(vsess);   /* Convert the (void*) into a string representation. */
-	
+
   }
-  
+
   RETVAL_STRING(p, 1);
-  
+
   free(p);
   return;
 }
@@ -228,10 +228,10 @@ PHP_FUNCTION(ccvs_add) /* cv_add() */
 }
 
 /*
-*	cv_create can't be implemented because of vararg limits in PHP3's C API. 
+*	cv_create can't be implemented because of vararg limits in PHP3's C API.
 *	(COMMENT BY DDJ [from original code])
 *
-*	BWM: I looked into this, checking in on what cv_create was; it is a deprecated function left in for 
+*	BWM: I looked into this, checking in on what cv_create was; it is a deprecated function left in for
 *	backwards compatibility according
 *  to the CCVS C API ref.  I didn't try to implement it for that reason.  If anyone needs it, they can add it in
 *	themselves I'm sure.
@@ -515,24 +515,24 @@ PHP_FUNCTION(ccvs_textvalue) /* cv_textvalue() */
 }
 
 /*
-*	Our Info Function which reports info on this module out to PHP's phpinfo() function 
-*	Brendan W. McAdams <brendan@plexmedia.com> on 2000.07.26@16:22.EST
+*	Our Info Function which reports info on this module out to PHP's phpinfo() function
+*	Brendan W. McAdams <bmcadams@php.net> on 2000.07.26@16:22.EST
 */
 
 PHP_MINFO_FUNCTION(ccvs)
 {
     php_info_print_table_start();
     php_info_print_table_header(2, "RedHat CCVS support", "enabled");
-    php_info_print_table_row(2,"CCVS Support by","Brendan W. McAdams &lt;brendan@plexmedia.com&gt;<br>&amp; Doug DeJulio &lt;ddj@redhat.com&gt;");
+    php_info_print_table_row(2,"CCVS Support by","Brendan W. McAdams &lt;bmcadams@php.net&gt;<br>&amp; Doug DeJulio &lt;ddj@redhat.com&gt;");
     php_info_print_table_row(2,"Release ID",cvsid);
     php_info_print_table_row(2,"This Release Certified For CCVS Versions","3.0 and greater");
-    php_info_print_table_end();  
-    
+    php_info_print_table_end();
+
     /*  DISPLAY_INI_ENTRIES(); */
-    
+
     /*
     *	In the future, we will probably have entries in php.ini for runtime config, in which case we will
     *  Uncomment the DISPLAY_INI_ENTRIES call...
     */
-    
+
 }
