@@ -1976,12 +1976,6 @@ PHP_FUNCTION(fgetcsv)
 		delimiter = Z_STRVAL_PP(p_delim)[0];
 
 		convert_to_string_ex(p_enclosure);
-		/* Make sure that there is at least one character in string */
-		if (Z_STRLEN_PP(p_enclosure) < 1) {
-			php_error(E_WARNING, "%s() 4th parameter must be a character",
-					  get_active_function_name(TSRMLS_C));
-			return;
-		}
 		/* use first character from string */
 		enclosure = Z_STRVAL_PP(p_enclosure)[0];
 		
@@ -2042,13 +2036,13 @@ PHP_FUNCTION(fgetcsv)
 		/* 1. Strip any leading space */
 		while(isspace((int) *bptr) && (*bptr!=delimiter)) bptr++;
 		/* 2. Read field, leaving bptr pointing at start of next field */
-		if (*bptr == enclosure) {
+		if (enclosure && *bptr == enclosure) {
 			/* 2A. handle enclosure delimited field */
 			bptr++;		/* move on to first character in field */
 			while (*bptr) {
 				if (*bptr == enclosure) {
 					/* handle the enclosure */
-					if ( *(bptr+1) == '"') {
+					if ( *(bptr+1) == enclosure) {
 					/* embedded enclosure */
 						*tptr++ = *bptr; bptr +=2;
 					} else {
