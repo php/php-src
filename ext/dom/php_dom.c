@@ -35,6 +35,7 @@
 #define PHP_XPTR 2
 
 zend_object_handlers dom_object_handlers;
+zend_object_handlers dom_ze1_object_handlers;
 
 static HashTable classes;
 
@@ -333,7 +334,7 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 	
 	if (obj->clone == NULL) {
-		zend_error(E_CORE_ERROR, "Trying to clone uncloneable object of class %s", Z_OBJCE_P(zobject)->name);
+		php_error(E_ERROR, "Trying to clone an uncloneable object of class %s", Z_OBJCE_P(zobject)->name);
 	}		
 
 	obj->clone(obj->object, &new_object TSRMLS_CC);
@@ -346,10 +347,25 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	return retval;
 }
 
+zend_object_value dom_objects_ze1_clone_obj(zval *zobject TSRMLS_DC)
+{
+	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
+	/* Return zobject->value.obj just to satisfy compiler */
+	return zobject->value.obj;
+}
+
 static zend_function_entry dom_functions[] = {
 	PHP_FE(dom_import_simplexml, NULL)
 	{NULL, NULL, NULL}
 };
+
+static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
+	if (EG(ze1_compatibility_mode)) {
+		return &dom_ze1_object_handlers;
+	} else {
+		return &dom_object_handlers;
+	}
+}
 
 zend_module_entry dom_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -378,6 +394,12 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = NULL;
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
+
+	memcpy(&dom_ze1_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	dom_ze1_object_handlers.read_property = dom_read_property;
+	dom_ze1_object_handlers.write_property = dom_write_property;
+	dom_ze1_object_handlers.get_property_ptr_ptr = NULL;
+	dom_ze1_object_handlers.clone_obj = dom_objects_ze1_clone_obj;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
@@ -805,7 +827,7 @@ void dom_objects_free_storage(void *object TSRMLS_DC)
 }
 /* }}} */
 
-void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns)
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns TSRMLS_DC)
 {
 	dom_nnodemap_object *mapptr;
 	zval *baseobj = NULL;
@@ -816,7 +838,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 		baseobj->type = IS_OBJECT;
 		baseobj->is_ref = 1;
 		baseobj->value.obj.handle = basenode->handle;
-		baseobj->value.obj.handlers = &dom_object_handlers;
+		baseobj->value.obj.handlers = dom_get_obj_handlers(TSRMLS_C);
 		zval_copy_ctor(baseobj);
 	}
 	mapptr->baseobjptr = baseobj;
@@ -896,7 +918,7 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 
 	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t)dom_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
-	retval.handlers = &dom_object_handlers;
+	retval.handlers = dom_get_obj_handlers(TSRMLS_C);
 
 	return retval;
 }
@@ -913,7 +935,7 @@ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 
 	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t)dom_xpath_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
-	retval.handlers = &dom_object_handlers;
+	retval.handlers = dom_get_obj_handlers(TSRMLS_C);
 
 	return retval;
 }
@@ -977,7 +999,7 @@ zend_object_value dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_D
 
 	retval.handle = zend_objects_store_put(intern, dom_nnodemap_object_dtor, (zend_objects_free_object_storage_t)dom_nnodemap_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
-	retval.handlers = &dom_object_handlers;
+	retval.handlers = dom_get_obj_handlers(TSRMLS_C);
 
 	return retval;
 }
@@ -1014,7 +1036,7 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 		return_value->type = IS_OBJECT;
 		return_value->is_ref = 1;
 		return_value->value.obj.handle = intern->handle;
-		return_value->value.obj.handlers = &dom_object_handlers;
+		return_value->value.obj.handlers = dom_get_obj_handlers(TSRMLS_C);
 		zval_copy_ctor(return_value);
 		*found = 1;
 		return return_value;

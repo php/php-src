@@ -88,7 +88,7 @@ int dom_documenttype_entities_read(dom_object *obj, zval **retval TSRMLS_DC)
 	entityht = (xmlHashTable *) doctypep->entities;
 
 	intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
-	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, NULL);
+	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, NULL TSRMLS_CC);
 
 	return SUCCESS;
 }
@@ -121,7 +121,7 @@ int dom_documenttype_notations_read(dom_object *obj, zval **retval TSRMLS_DC)
 	notationht = (xmlHashTable *) doctypep->notations;
 
 	intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
-	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, NULL);
+	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, NULL TSRMLS_CC);
 
 	return SUCCESS;
 }
