@@ -29,6 +29,7 @@ PHP                                                                        NEWS
   is passed. (Tony)
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)   
+- Fixed bug #32238 (spl_array.c: void function cannot return value). (Johannes)
 - Fixed bug #32210 (proc_get_status() sets "running" always to true). (Ilia)
 - Fixed bug #32160 (file truncation in copy() when source & destination are
   the same). (Ilia)
