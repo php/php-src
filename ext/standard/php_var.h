@@ -36,20 +36,20 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t
 PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, php_serialize_data_t *var_hash TSRMLS_DC);
 
 #define PHP_VAR_SERIALIZE_INIT(var_hash) \
-   zend_hash_init(&(var_hash),10,NULL,NULL,0)
+   zend_hash_init(&(var_hash), 10, NULL, NULL, 0)
 #define PHP_VAR_SERIALIZE_DESTROY(var_hash) \
    zend_hash_destroy(&(var_hash))
 
 #define PHP_VAR_UNSERIALIZE_INIT(var_hash) \
-   zend_hash_init(&(var_hash),10,NULL,NULL,0)
+   zend_hash_init(&(var_hash), 10, NULL, NULL, 0)
 #define PHP_VAR_UNSERIALIZE_DESTROY(var_hash) \
    zend_hash_destroy(&(var_hash))
 
-#define PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash,ozval,nzval) \
+#define PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash, ozval, nzval) \
 if (var_hash) { \
     HashPosition pos; \
     zval **zval_ref; \
-    zend_hash_internal_pointer_reset_ex(var_hash,&pos); \
+    zend_hash_internal_pointer_reset_ex(var_hash, &pos); \
     while (zend_hash_get_current_data_ex(var_hash, (void **) &zval_ref, &pos) == SUCCESS) { \
         if (*zval_ref == ozval) { \
             char *string_key; \
@@ -60,10 +60,10 @@ if (var_hash) { \
             zend_hash_index_update(var_hash, num_key, &nzval, sizeof(zval *), NULL); \
             break; \
         }  \
-        zend_hash_move_forward_ex(var_hash,&pos); \
+        zend_hash_move_forward_ex(var_hash, &pos); \
     } \
 }
 
-PHPAPI zend_class_entry *php_create_empty_class(char *class_name,int len);
+PHPAPI zend_class_entry *php_create_empty_class(char *class_name, int len);
 
 #endif /* PHP_VAR_H */

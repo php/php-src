@@ -216,7 +216,7 @@ FILE *php_fopen_url_wrap_ftp(const char *path, char *mode, int options, int *iss
 		/* make sure we got a 227 response */
 		if (strncmp(tmp_line, "227", 3))
 			goto errexit;
-		/* parse pasv command (129,80,95,25,13,221) */
+		/* parse pasv command (129, 80, 95, 25, 13, 221) */
 		tpath = tmp_line;
 		/* skip over the "227 Some message " part */
 		for (tpath += 4; *tpath && !isdigit((int) *tpath); tpath++);

@@ -75,7 +75,7 @@
 
 /* {{{ php_iptc_put1
  */
-static int php_iptc_put1(FILE *fp,int spool,unsigned char c,unsigned char **spoolbuf TSRMLS_DC)
+static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **spoolbuf TSRMLS_DC)
 { 
 	if (spool > 0)
 		PUTC(c);
@@ -88,7 +88,7 @@ static int php_iptc_put1(FILE *fp,int spool,unsigned char c,unsigned char **spoo
 
 /* {{{ php_iptc_get1
  */
-static int php_iptc_get1(FILE *fp,int spool,unsigned char **spoolbuf TSRMLS_DC)
+static int php_iptc_get1(FILE *fp, int spool, unsigned char **spoolbuf TSRMLS_DC)
 { 	
 	int c;
 	char cc;
@@ -110,11 +110,11 @@ static int php_iptc_get1(FILE *fp,int spool,unsigned char **spoolbuf TSRMLS_DC)
 
 /* {{{ php_iptc_read_remaining
  */
-static int php_iptc_read_remaining(FILE *fp,int spool,unsigned char **spoolbuf TSRMLS_DC)
+static int php_iptc_read_remaining(FILE *fp, int spool, unsigned char **spoolbuf TSRMLS_DC)
 {
  	int c;
 
-  	while ((c = php_iptc_get1(fp,spool,spoolbuf TSRMLS_CC)) != EOF) continue;
+  	while ((c = php_iptc_get1(fp, spool, spoolbuf TSRMLS_CC)) != EOF) continue;
 
 	return M_EOI;
 }
@@ -122,21 +122,21 @@ static int php_iptc_read_remaining(FILE *fp,int spool,unsigned char **spoolbuf T
 
 /* {{{ php_iptc_skip_variable
  */
-static int php_iptc_skip_variable(FILE *fp,int spool,unsigned char **spoolbuf TSRMLS_DC)
+static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf TSRMLS_DC)
 { 
 	unsigned int  length;
-	int c1,c2;
+	int c1, c2;
 
-    if ((c1 = php_iptc_get1(fp,spool,spoolbuf TSRMLS_CC)) == EOF) return M_EOI;
+    if ((c1 = php_iptc_get1(fp, spool, spoolbuf TSRMLS_CC)) == EOF) return M_EOI;
 
-    if ((c2 = php_iptc_get1(fp,spool,spoolbuf TSRMLS_CC)) == EOF) return M_EOI;
+    if ((c2 = php_iptc_get1(fp, spool, spoolbuf TSRMLS_CC)) == EOF) return M_EOI;
 
 	length = (((unsigned char) c1) << 8) + ((unsigned char) c2);
 
 	length -= 2;
 
 	while (length--)
-		if (php_iptc_get1(fp,spool,spoolbuf TSRMLS_CC) == EOF) return M_EOI;
+		if (php_iptc_get1(fp, spool, spoolbuf TSRMLS_CC) == EOF) return M_EOI;
 
 	return 0;
 }
@@ -144,29 +144,29 @@ static int php_iptc_skip_variable(FILE *fp,int spool,unsigned char **spoolbuf TS
 
 /* {{{ php_iptc_next_marker
  */
-static int php_iptc_next_marker(FILE *fp,int spool,unsigned char **spoolbuf TSRMLS_DC)
+static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf TSRMLS_DC)
 {
     int c;
 
     /* skip unimportant stuff */
 
-    c = php_iptc_get1(fp,spool,spoolbuf TSRMLS_CC);
+    c = php_iptc_get1(fp, spool, spoolbuf TSRMLS_CC);
 
 	if (c == EOF) return M_EOI;
 
     while (c != 0xff) {
-        if ((c = php_iptc_get1(fp,spool,spoolbuf TSRMLS_CC)) == EOF)
+        if ((c = php_iptc_get1(fp, spool, spoolbuf TSRMLS_CC)) == EOF)
             return M_EOI; /* we hit EOF */
     }
 
     /* get marker byte, swallowing possible padding */
     do {
-        c = php_iptc_get1(fp,0,0 TSRMLS_CC);
+        c = php_iptc_get1(fp, 0, 0 TSRMLS_CC);
 		if (c == EOF)
             return M_EOI;       /* we hit EOF */
 		else
 		if (c == 0xff)
-			php_iptc_put1(fp,spool,(unsigned char)c,spoolbuf TSRMLS_CC);
+			php_iptc_put1(fp, spool, (unsigned char)c, spoolbuf TSRMLS_CC);
     } while (c == 0xff);
 
     return (unsigned int) c;
@@ -183,7 +183,7 @@ PHP_FUNCTION(iptcembed)
     FILE *fp;
 	unsigned int marker;
 	unsigned int spool = 0, done = 0, inx, len;	
-	unsigned char *spoolbuf=0,*poi=0;
+	unsigned char *spoolbuf=0, *poi=0;
 	struct stat sb;
 
     switch(ZEND_NUM_ARGS()){
@@ -214,7 +214,7 @@ PHP_FUNCTION(iptcembed)
 		RETURN_FALSE;
 	}
 
-    if ((fp = VCWD_FOPEN((*jpeg_file)->value.str.val,"rb")) == 0) {
+    if ((fp = VCWD_FOPEN((*jpeg_file)->value.str.val, "rb")) == 0) {
         php_error(E_WARNING, "Unable to open %s", (*jpeg_file)->value.str.val);
         RETURN_FALSE;
     }
@@ -222,7 +222,7 @@ PHP_FUNCTION(iptcembed)
 	len = (*iptcdata)->value.str.len;
 
 	if (spool < 2) {
-		fstat(fileno(fp),&sb);
+		fstat(fileno(fp), &sb);
 
 		poi = spoolbuf = emalloc(len + sizeof(psheader) + sb.st_size + 1024);
 
@@ -232,36 +232,36 @@ PHP_FUNCTION(iptcembed)
 		}
 	} 
 
-	if (php_iptc_get1(fp,spool,poi?&poi:0 TSRMLS_CC) != 0xFF) {
+	if (php_iptc_get1(fp, spool, poi?&poi:0 TSRMLS_CC) != 0xFF) {
 		fclose(fp);
 		RETURN_FALSE;
 	}
 
-	if (php_iptc_get1(fp,spool,poi?&poi:0 TSRMLS_CC) != 0xD8) {
+	if (php_iptc_get1(fp, spool, poi?&poi:0 TSRMLS_CC) != 0xD8) {
 		fclose(fp);
 		RETURN_FALSE;
 	}
 
 	while (!done) {
-		marker = php_iptc_next_marker(fp,spool,poi?&poi:0 TSRMLS_CC);
+		marker = php_iptc_next_marker(fp, spool, poi?&poi:0 TSRMLS_CC);
 
 		if (marker == M_EOI) { /* EOF */
 			break;
 		} else if (marker != M_APP13) { 
-			php_iptc_put1(fp,spool,(unsigned char)marker,poi?&poi:0 TSRMLS_CC);
+			php_iptc_put1(fp, spool, (unsigned char)marker, poi?&poi:0 TSRMLS_CC);
 		}
 
 		switch (marker) {
 			case M_APP13:
 				/* we are going to write a new APP13 marker, so don't output the old one */
-				php_iptc_skip_variable(fp,0,0 TSRMLS_CC);    
-				php_iptc_read_remaining(fp,spool,poi?&poi:0 TSRMLS_CC);
+				php_iptc_skip_variable(fp, 0, 0 TSRMLS_CC);    
+				php_iptc_read_remaining(fp, spool, poi?&poi:0 TSRMLS_CC);
 				done = 1;
 				break;
 
 			case M_APP0:
 				/* APP0 is in each and every JPEG, so when we hit APP0 we insert our new APP13! */
-				php_iptc_skip_variable(fp,spool,poi?&poi:0 TSRMLS_CC);
+				php_iptc_skip_variable(fp, spool, poi?&poi:0 TSRMLS_CC);
 
 				if (len & 1) len++; /* make the length even */
 
@@ -269,23 +269,23 @@ PHP_FUNCTION(iptcembed)
 				psheader[ 3 ] = (len+28)&0xff;
 
 				for (inx = 0; inx < 28; inx++)
-					php_iptc_put1(fp,spool,psheader[inx],poi?&poi:0 TSRMLS_CC);
+					php_iptc_put1(fp, spool, psheader[inx], poi?&poi:0 TSRMLS_CC);
 
-				php_iptc_put1(fp,spool,(unsigned char)(len>>8),poi?&poi:0 TSRMLS_CC);
-				php_iptc_put1(fp,spool,(unsigned char)(len&0xff),poi?&poi:0 TSRMLS_CC);
+				php_iptc_put1(fp, spool, (unsigned char)(len>>8), poi?&poi:0 TSRMLS_CC);
+				php_iptc_put1(fp, spool, (unsigned char)(len&0xff), poi?&poi:0 TSRMLS_CC);
 					
 				for (inx = 0; inx < len; inx++)
-					php_iptc_put1(fp,spool,(*iptcdata)->value.str.val[inx],poi?&poi:0 TSRMLS_CC);
+					php_iptc_put1(fp, spool, (*iptcdata)->value.str.val[inx], poi?&poi:0 TSRMLS_CC);
 				break;
 
 			case M_SOS:								
 				/* we hit data, no more marker-inserting can be done! */
-				php_iptc_read_remaining(fp,spool,poi?&poi:0 TSRMLS_CC);
+				php_iptc_read_remaining(fp, spool, poi?&poi:0 TSRMLS_CC);
 				done = 1;
 				break;
 			
 			default:
-				php_iptc_skip_variable(fp,spool,poi?&poi:0 TSRMLS_CC);
+				php_iptc_skip_variable(fp, spool, poi?&poi:0 TSRMLS_CC);
 				break;
 		}
 	}
@@ -293,7 +293,7 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-		RETVAL_STRINGL(spoolbuf,poi - spoolbuf,0);
+		RETVAL_STRINGL(spoolbuf, poi - spoolbuf, 0);
 	} else {
 		RETURN_TRUE;
 	}
@@ -350,7 +350,7 @@ PHP_FUNCTION(iptcparse)
 			inx += 2;
 		}
 
-		sprintf(key,"%d#%03d",(unsigned int) dataset,(unsigned int) recnum);
+		sprintf(key, "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
 
 		if ((len > length) || (inx + len) > length)
 			break;
@@ -362,7 +362,7 @@ PHP_FUNCTION(iptcparse)
 	  		}
 		}
 
-		if (zend_hash_find(return_value->value.ht,key,strlen(key) + 1,(void **) &element) == FAILURE) {
+		if (zend_hash_find(return_value->value.ht, key, strlen(key) + 1, (void **) &element) == FAILURE) {
 			ALLOC_ZVAL(values);
 			INIT_PZVAL(values);
 			if (array_init(values) == FAILURE) {
@@ -373,7 +373,7 @@ PHP_FUNCTION(iptcparse)
 			zend_hash_update(return_value->value.ht, key, strlen(key)+1, (void *) &values, sizeof(pval*), (void **) &element);
 		} 
 			
-		add_next_index_stringl(*element,buffer+inx,len,1);
+		add_next_index_stringl(*element, buffer+inx, len, 1);
 
 		inx += len;
 

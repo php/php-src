@@ -320,7 +320,7 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
+PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
     int gotXpg, gotSequential, value, i, flags;
@@ -457,7 +457,7 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
               break;
 	    case 'c':
 	    	/* we differ here with the TCL implementation in allowing for */
-	    	/* a character width specification,to be more consistent with */
+	    	/* a character width specification, to be more consistent with */
 	    	/* ANSI. since Zend auto allocates space for vars, this is no */
 	    	/* problem - cc                                               */
                 /*
@@ -496,7 +496,7 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
             goto error;
 	    default:
             {
-             php_error(E_WARNING,"bad scan conversion character \"%c\"", ch);
+             php_error(E_WARNING, "bad scan conversion character \"%c\"", ch);
              goto error;
            }
 	}
@@ -567,7 +567,7 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
         if (gotXpg) {
             php_error(E_WARNING, "\"%n$\" argument index out of range");
         } else {
-            php_error(E_WARNING,"different numbers of variable names and field specifiers");
+            php_error(E_WARNING, "different numbers of variable names and field specifiers");
         }
 
     error:
@@ -592,9 +592,9 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
  *		return_value set with the results of the scan
  */
 
-PHPAPI int php_sscanf_internal(	char *string,char *format,
-				int argCount,zval ***args,
-				int varStart,pval **return_value TSRMLS_DC)
+PHPAPI int php_sscanf_internal(	char *string, char *format,
+				int argCount, zval ***args,
+				int varStart, pval **return_value TSRMLS_DC)
 {
     int  numVars, nconversions, totalVars = -1;
     int  i, value, result;
@@ -623,8 +623,8 @@ PHPAPI int php_sscanf_internal(	char *string,char *format,
 	}
 	
 #if 0 
-	zend_printf("<br>in sscanf_internal : <br> string is \"%s\",format = \"%s\"<br> NumVars = %d. VarStart = %d<br>-------------------------<br>",
-					string,format,numVars,varStart);	
+	zend_printf("<br>in sscanf_internal : <br> string is \"%s\", format = \"%s\"<br> NumVars = %d. VarStart = %d<br>-------------------------<br>",
+					string, format, numVars, varStart);	
 #endif	
     /*
      * Check for errors in the format string.
@@ -642,7 +642,7 @@ PHPAPI int php_sscanf_internal(	char *string,char *format,
 	if (numVars) {
 		for (i = varStart;i < argCount;i++){
 			if ( ! PZVAL_IS_REF( *args[ i ] ) ) {	
-				php_error(E_WARNING,"Parameter %d to %s() must be passed by reference",
+				php_error(E_WARNING, "Parameter %d to %s() must be passed by reference",
 								i, get_active_function_name(TSRMLS_C));
 				scan_set_error_return(numVars, return_value);
 				return SCAN_ERROR_VAR_PASSED_BYVAL;
@@ -1230,7 +1230,7 @@ PHPAPI int php_sscanf_internal(	char *string,char *format,
 /* }}} */
 
 /* the compiler choked when i tried to make this a macro    */
-static inline void scan_set_error_return(int numVars,pval **return_value)
+static inline void scan_set_error_return(int numVars, pval **return_value)
 {
 	if (numVars) {
 		(*return_value)->type = IS_LONG;

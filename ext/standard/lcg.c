@@ -38,21 +38,21 @@ static int php_lcg_initialized = 0;
 #endif
 
 /*
- * combinedLCG() returns a pseudo random number in the range of (0,1).
+ * combinedLCG() returns a pseudo random number in the range of (0, 1).
  * The function combines two CGs with periods of 
  * 2^31 - 85 and 2^31 - 249. The period of this function
  * is equal to the product of both primes.
  */
 
-#define MODMULT(a,b,c,m,s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
+#define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
 
 double php_combined_lcg(TSRMLS_D)
 {
 	php_int32 q;
 	php_int32 z;
 
-	MODMULT(53668,40014,12211,2147483563L, LCG(s1));
-	MODMULT(52774,40692,3791, 2147483399L, LCG(s2));
+	MODMULT(53668, 40014, 12211, 2147483563L, LCG(s1));
+	MODMULT(52774, 40692, 3791, 2147483399L, LCG(s2));
 
 	z = LCG(s1) - LCG(s2);
 	if(z < 1) {

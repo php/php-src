@@ -10,15 +10,15 @@
 
 */
 
-CREDIT_LINE("AOLserver","Sascha Schumann");
-CREDIT_LINE("Apache 1.3","Rasmus Lerdorf, Zeev Suraski, Stig Bakken, David Sklar");
-CREDIT_LINE("Apache 2.0","Sascha Schumann");
-CREDIT_LINE("Caudium / Roxen","David Hedbor");
-CREDIT_LINE("CGI","Rasmus Lerdorf, Stig Bakken");
-CREDIT_LINE("fhttpd","Alex Belits");
-CREDIT_LINE("ISAPI","Andi Gutmans, Zeev Suraski");
-CREDIT_LINE("Java Servlet","Sam Ruby");
-CREDIT_LINE("NSAPI","Jayakumar Muthukumarasamy");
-CREDIT_LINE("phttpd","Thies C. Arntzen");
-CREDIT_LINE("pi3web","Holger Zimmermann");
-CREDIT_LINE("thttpd","Sascha Schumann");
+CREDIT_LINE("AOLserver", "Sascha Schumann");
+CREDIT_LINE("Apache 1.3", "Rasmus Lerdorf, Zeev Suraski, Stig Bakken, David Sklar");
+CREDIT_LINE("Apache 2.0", "Sascha Schumann");
+CREDIT_LINE("Caudium / Roxen", "David Hedbor");
+CREDIT_LINE("CGI", "Rasmus Lerdorf, Stig Bakken");
+CREDIT_LINE("fhttpd", "Alex Belits");
+CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
+CREDIT_LINE("Java Servlet", "Sam Ruby");
+CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy");
+CREDIT_LINE("phttpd", "Thies C. Arntzen");
+CREDIT_LINE("pi3web", "Holger Zimmermann");
+CREDIT_LINE("thttpd", "Sascha Schumann");

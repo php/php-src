@@ -301,12 +301,12 @@ PHP_FUNCTION(get_meta_tags)
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (zend_get_parameters_ex(1,&filename) == FAILURE) {
+		if (zend_get_parameters_ex(1, &filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (zend_get_parameters_ex(2,&filename,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2, &filename, &arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
@@ -322,7 +322,7 @@ PHP_FUNCTION(get_meta_tags)
 		if (md.issock != BAD_URL) {
 			char *tmp = estrndup(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename));
 			php_strip_url_passwd(tmp);
-			php_error(E_WARNING,"get_meta_tags(\"%s\") - %s", tmp, strerror(errno));
+			php_error(E_WARNING, "get_meta_tags(\"%s\") - %s", tmp, strerror(errno));
 			efree(tmp);
 		}
 		RETURN_FALSE;
@@ -347,7 +347,7 @@ PHP_FUNCTION(get_meta_tags)
 
 		if (tok == TOK_ID) {
 			if (tok_last == TOK_OPENTAG) {
-				in_meta_tag = !strcasecmp("meta",md.token_data);
+				in_meta_tag = !strcasecmp("meta", md.token_data);
 				md.in_meta = in_meta_tag;
 			} else if (tok_last == TOK_SLASH && in_tag) {
 				if (strcasecmp("head", md.token_data) == 0) {
@@ -357,7 +357,7 @@ PHP_FUNCTION(get_meta_tags)
 			} else if (tok_last == TOK_EQUAL && looking_for_val) {
 				if (saw_name) {
 					/* Get the NAME attr (Single word attr, non-quoted) */
-					temp = name = estrndup(md.token_data,md.token_len);
+					temp = name = estrndup(md.token_data, md.token_len);
 
 					while (temp && *temp) {
 						if (strchr(PHP_META_UNSAFE, *temp)) {
@@ -370,9 +370,9 @@ PHP_FUNCTION(get_meta_tags)
 				} else if (saw_content) {
 					/* Get the CONTENT attr (Single word attr, non-quoted) */
 					if (PG(magic_quotes_runtime)) {
-						value = php_addslashes(md.token_data,0,&md.token_len,0 TSRMLS_CC);
+						value = php_addslashes(md.token_data, 0, &md.token_len, 0 TSRMLS_CC);
 					} else {
-						value = estrndup(md.token_data,md.token_len);
+						value = estrndup(md.token_data, md.token_len);
 					}
 
 					have_content = 1;
@@ -395,7 +395,7 @@ PHP_FUNCTION(get_meta_tags)
 		} else if (tok == TOK_STRING && tok_last == TOK_EQUAL && looking_for_val) {
 			if (saw_name) {
 				/* Get the NAME attr (Quoted single/double) */
-				temp = name = estrndup(md.token_data,md.token_len);
+				temp = name = estrndup(md.token_data, md.token_len);
 
 				while (temp && *temp) {
 					if (strchr(PHP_META_UNSAFE, *temp)) {
@@ -408,9 +408,9 @@ PHP_FUNCTION(get_meta_tags)
 			} else if (saw_content) {
 				/* Get the CONTENT attr (Single word attr, non-quoted) */
 				if (PG(magic_quotes_runtime)) {
-					value = php_addslashes(md.token_data,0,&md.token_len,0 TSRMLS_CC);
+					value = php_addslashes(md.token_data, 0, &md.token_len, 0 TSRMLS_CC);
 				} else {
-					value = estrndup(md.token_data,md.token_len);
+					value = estrndup(md.token_data, md.token_len);
 				}
 
 				have_content = 1;
@@ -483,12 +483,12 @@ PHP_FUNCTION(file)
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (zend_get_parameters_ex(1,&filename) == FAILURE) {
+		if (zend_get_parameters_ex(1, &filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (zend_get_parameters_ex(2,&filename,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2, &filename, &arg2) == FAILURE) {
 				WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
@@ -499,12 +499,12 @@ PHP_FUNCTION(file)
 	}
 	convert_to_string_ex(filename);
 
-	fp = php_fopen_wrapper((*filename)->value.str.val,"rb", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
+	fp = php_fopen_wrapper((*filename)->value.str.val, "rb", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
 			char *tmp = estrndup(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename));
 			php_strip_url_passwd(tmp);
-			php_error(E_WARNING,"file(\"%s\") - %s", tmp, strerror(errno));
+			php_error(E_WARNING, "file(\"%s\") - %s", tmp, strerror(errno));
 			efree(tmp);
 		}
 		RETURN_FALSE;
@@ -647,12 +647,12 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (zend_get_parameters_ex(2,&arg1,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 3:
-		if (zend_get_parameters_ex(3,&arg1,&arg2,&arg3) == FAILURE) {
+		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg3);
@@ -663,7 +663,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	}
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
-	p = estrndup((*arg2)->value.str.val,(*arg2)->value.str.len);
+	p = estrndup((*arg2)->value.str.val, (*arg2)->value.str.len);
 
 	/*
 	 * We need a better way of returning error messages from
@@ -674,7 +674,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 		if (issock != BAD_URL) {
 			char *tmp = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
 			php_strip_url_passwd(tmp);
-			php_error(E_WARNING,"fopen(\"%s\",\"%s\") - %s", tmp, p, strerror(errno));
+			php_error(E_WARNING, "fopen(\"%s\", \"%s\") - %s", tmp, p, strerror(errno));
 			efree(tmp);
 		}
 		efree(p);
@@ -687,9 +687,9 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	if (issock) {
 		sock=emalloc(sizeof(int));
 		*sock=socketd;
-		ZEND_REGISTER_RESOURCE(return_value,sock,le_socket);
+		ZEND_REGISTER_RESOURCE(return_value, sock, le_socket);
 	} else {
-		ZEND_REGISTER_RESOURCE(return_value,fp,le_fopen);
+		ZEND_REGISTER_RESOURCE(return_value, fp, le_fopen);
 	}
 }
 
@@ -722,7 +722,7 @@ PHP_FUNCTION(popen)
 {
 	pval **arg1, **arg2;
 	FILE *fp;
-	char *p,*tmp = NULL;
+	char *p, *tmp = NULL;
 	char *b, buf[1024];
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -730,7 +730,7 @@ PHP_FUNCTION(popen)
 	}
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
-	p = estrndup((*arg2)->value.str.val,(*arg2)->value.str.len);
+	p = estrndup((*arg2)->value.str.val, (*arg2)->value.str.len);
 	if (PG(safe_mode)){
 		b = strchr((*arg1)->value.str.val,' ');
 		if (!b) {
@@ -746,30 +746,30 @@ PHP_FUNCTION(popen)
 			}
 		}
 		if (b) {
-			snprintf(buf,sizeof(buf),"%s%s",PG(safe_mode_exec_dir),b);
+			snprintf(buf, sizeof(buf), "%s%s", PG(safe_mode_exec_dir), b);
 		} else {
-			snprintf(buf,sizeof(buf),"%s/%s",PG(safe_mode_exec_dir),(*arg1)->value.str.val);
+			snprintf(buf, sizeof(buf), "%s/%s", PG(safe_mode_exec_dir), (*arg1)->value.str.val);
 		}
 
 		tmp = php_escape_shell_cmd(buf);
-		fp = VCWD_POPEN(tmp,p);
+		fp = VCWD_POPEN(tmp, p);
 		efree(tmp);
 
 		if (!fp) {
-			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",buf,p,strerror(errno));
+			php_error(E_WARNING, "popen(\"%s\", \"%s\") - %s", buf, p, strerror(errno));
 			RETURN_FALSE;
 		}
 	} else {
 		fp = VCWD_POPEN((*arg1)->value.str.val, p);
 		if (!fp) {
-			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",(*arg1)->value.str.val,p,strerror(errno));
+			php_error(E_WARNING, "popen(\"%s\", \"%s\") - %s", (*arg1)->value.str.val, p, strerror(errno));
 			efree(p);
 			RETURN_FALSE;
 		}
 	}
 	efree(p);
 
-	ZEND_REGISTER_RESOURCE(return_value,fp,le_popen);
+	ZEND_REGISTER_RESOURCE(return_value, fp, le_popen);
 }
 
 /* }}} */
@@ -785,7 +785,7 @@ PHP_FUNCTION(pclose)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",NULL,1,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", NULL, 1, le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	zend_list_delete((*arg1)->value.lval);
@@ -847,8 +847,8 @@ PHPAPI int php_set_sock_blocking(int socketd, int block)
 #ifdef PHP_WIN32
       /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
 	  flags = !block;
-	  if (ioctlsocket(socketd,FIONBIO,&flags)==SOCKET_ERROR){
-		  php_error(E_WARNING,"%s",WSAGetLastError());
+	  if (ioctlsocket(socketd, FIONBIO, &flags)==SOCKET_ERROR){
+		  php_error(E_WARNING, "%s", WSAGetLastError());
 		  ret = FALSE;
       }
 #else
@@ -1014,7 +1014,7 @@ PHP_FUNCTION(fgets)
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
-	memset(buf,0,len+1);
+	memset(buf, 0, len+1);
 
 #if HAVE_PHP_STREAM
 	if (type == le_stream)	{
@@ -1038,13 +1038,13 @@ PHP_FUNCTION(fgets)
 	}
 
 	if (PG(magic_quotes_runtime)) {
-		return_value->value.str.val = php_addslashes(buf,0,&return_value->value.str.len,1 TSRMLS_CC);
+		return_value->value.str.val = php_addslashes(buf, 0, &return_value->value.str.len, 1 TSRMLS_CC);
 	} else {
 		return_value->value.str.val = buf;
 		return_value->value.str.len = strlen(return_value->value.str.val);
 		/* resize buffer if it's much larger than the result */
 		if(return_value->value.str.len < len/2) {
-			return_value->value.str.val = erealloc(buf,return_value->value.str.len+1);
+			return_value->value.str.val = erealloc(buf, return_value->value.str.len+1);
 		}
 	}
 	return_value->type = IS_STRING;
@@ -1205,7 +1205,7 @@ PHP_FUNCTION(fscanf)
 		WRONG_PARAM_COUNT;
 	}
 	args = (zval ***)emalloc(argCount * sizeof(zval **));
-	if (!args || (zend_get_parameters_array_ex(argCount,args) == FAILURE)) {
+	if (!args || (zend_get_parameters_array_ex(argCount, args) == FAILURE)) {
 		efree( args );
 		WRONG_PARAM_COUNT;
 	}
@@ -1233,7 +1233,7 @@ PHP_FUNCTION(fscanf)
 	}
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
-	memset(buf,0,len+1);
+	memset(buf, 0, len+1);
 
 #if HAVE_PHP_STREAM
 	if (type == le_stream)	{
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(fscanf)
 	} 
 
 	convert_to_string_ex( format_string );
-	result = php_sscanf_internal( buf,(*format_string)->value.str.val,
+	result = php_sscanf_internal( buf, (*format_string)->value.str.val,
 			argCount, args, 2, &return_value TSRMLS_CC);
 	efree(args);
 	efree(buf);
@@ -1269,7 +1269,7 @@ PHP_FUNCTION(fscanf)
 PHP_FUNCTION(fwrite)
 {
 	pval **arg1, **arg2, **arg3=NULL;
-	int ret,type;
+	int ret, type;
 	int num_bytes;
 	int issock=0;
 	int socketd=0;
@@ -1319,14 +1319,14 @@ PHP_FUNCTION(fwrite)
 #endif
 	
 	if (issock){
-		ret = SOCK_WRITEL((*arg2)->value.str.val,num_bytes,socketd);
+		ret = SOCK_WRITEL((*arg2)->value.str.val, num_bytes, socketd);
 	} else {
 #ifdef HAVE_FLUSHIO
 		if (type == le_fopen) {
 			fseek((FILE*)what, 0, SEEK_CUR);
 		}
 #endif
-		ret = fwrite((*arg2)->value.str.val,1,num_bytes,(FILE*)what);
+		ret = fwrite((*arg2)->value.str.val, 1, num_bytes, (FILE*)what);
 	}
 	RETURN_LONG(ret);
 }
@@ -1338,7 +1338,7 @@ PHP_FUNCTION(fwrite)
 PHP_FUNCTION(fflush)
 {
 	pval **arg1;
-	int ret,type;
+	int ret, type;
 	int issock=0;
 	int socketd=0;
 	void *what;
@@ -1347,7 +1347,7 @@ PHP_FUNCTION(fflush)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",&type,4,le_fopen,le_popen,le_socket, le_stream);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 #if HAVE_PHP_STREAM
@@ -1385,7 +1385,7 @@ PHP_FUNCTION(fflush)
 PHP_FUNCTION(set_file_buffer)
 {
 	pval **arg1, **arg2;
-	int ret,type,buff;
+	int ret, type, buff;
 	void *what;
 
 	switch (ARG_COUNT(ht)) {
@@ -1402,7 +1402,7 @@ PHP_FUNCTION(set_file_buffer)
 
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",&type,2,le_fopen,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 2, le_fopen, le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	convert_to_long_ex(arg2);
@@ -1432,7 +1432,7 @@ PHP_FUNCTION(rewind)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", NULL, 2, le_fopen, le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	rewind((FILE*) what);
@@ -1454,7 +1454,7 @@ PHP_FUNCTION(ftell)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", NULL, 2, le_fopen, le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	ret = ftell((FILE*) what);
@@ -1481,7 +1481,7 @@ PHP_FUNCTION(fseek)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", NULL, 2, le_fopen, le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	convert_to_long_ex(arg2);
@@ -1514,7 +1514,7 @@ PHP_FUNCTION(mkdir)
 	}
 	ret = VCWD_MKDIR((*arg1)->value.str.val, mode);
 	if (ret < 0) {
-		php_error(E_WARNING,"MkDir failed (%s)", strerror(errno));
+		php_error(E_WARNING, "MkDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1538,7 +1538,7 @@ PHP_FUNCTION(rmdir)
 	}
 	ret = VCWD_RMDIR((*arg1)->value.str.val);
 	if (ret < 0) {
-		php_error(E_WARNING,"RmDir failed (%s)", strerror(errno));
+		php_error(E_WARNING, "RmDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1610,12 +1610,12 @@ PHP_FUNCTION(readfile)
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (zend_get_parameters_ex(1,&arg1) == FAILURE) {
+		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (zend_get_parameters_ex(2,&arg1,&arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
@@ -1630,12 +1630,12 @@ PHP_FUNCTION(readfile)
 	 * We need a better way of returning error messages from
 	 * php_fopen_wrapper().
 	 */
-	fp = php_fopen_wrapper((*arg1)->value.str.val,"rb", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
+	fp = php_fopen_wrapper((*arg1)->value.str.val, "rb", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
 	if (!fp && !socketd){
 		if (issock != BAD_URL) {
 			char *tmp = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
 			php_strip_url_passwd(tmp);
-			php_error(E_WARNING,"readfile(\"%s\") - %s", tmp, strerror(errno));
+			php_error(E_WARNING, "readfile(\"%s\") - %s", tmp, strerror(errno));
 			efree(tmp);
 		}
 		RETURN_FALSE;
@@ -1644,9 +1644,9 @@ PHP_FUNCTION(readfile)
 	if (issock) {
 		int *sock=emalloc(sizeof(int));
 		*sock = socketd;
-		rsrc_id = ZEND_REGISTER_RESOURCE(NULL,sock,php_file_le_socket());
+		rsrc_id = ZEND_REGISTER_RESOURCE(NULL, sock, php_file_le_socket());
 	} else {
-		rsrc_id = ZEND_REGISTER_RESOURCE(NULL,fp,php_file_le_fopen());
+		rsrc_id = ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_fopen());
 	}
 
 	size = php_passthru_fd(socketd, fp, issock TSRMLS_CC);
@@ -1700,7 +1700,7 @@ PHP_FUNCTION(fpassthru)
 	}
 
 	/* XXX: add stream support --Wez. */
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 3, le_fopen, le_popen, le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -1740,7 +1740,7 @@ PHP_FUNCTION(rename)
 	ret = VCWD_RENAME(old_name, new_name);
 
 	if (ret == -1) {
-		php_error(E_WARNING,"Rename failed (%s)", strerror(errno));
+		php_error(E_WARNING, "Rename failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -1789,7 +1789,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(fp TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(fp TSRMLS_CC,-1, "File-Handle", &type, 3, le_fopen, le_popen, le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket)
@@ -1810,21 +1810,21 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 PHP_NAMED_FUNCTION(php_if_fstat)
 {
 	zval **fp;
-	zval *stat_dev,*stat_ino,*stat_mode,*stat_nlink,*stat_uid,*stat_gid,*stat_rdev,
+	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
 	int type;
 	void *what;
 	struct stat stat_sb;
 	
-	char *stat_sb_names[13]={"dev","ino","mode","nlink","uid","gid","rdev",
-			      "size","atime","mtime","ctime","blksize","blocks"};
+	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
+			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &fp) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(fp TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(fp TSRMLS_CC,-1, "File-Handle", &type, 3, le_fopen, le_popen, le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (fstat(fileno((FILE *) what ), &stat_sb)) {
@@ -1859,34 +1859,34 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
 #endif
 	/* Store numeric indexes in propper order */
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_dev, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_ino, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_mode, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_nlink, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_uid, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_gid, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_rdev, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_size, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_atime, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_mtime, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_ctime, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_blksize, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_blocks, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_dev, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ino, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_mode, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_nlink, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_uid, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_gid, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_rdev, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_size, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_atime, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_mtime, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ctime, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blksize, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blocks, sizeof(zval *), NULL);
 
 	/* Store string indexes referencing the same zval*/
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[0],strlen(stat_sb_names[0])+1,(void *)&stat_dev, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[1],strlen(stat_sb_names[1])+1,(void *)&stat_ino, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[2],strlen(stat_sb_names[2])+1,(void *)&stat_mode, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[3],strlen(stat_sb_names[3])+1,(void *)&stat_nlink, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[4],strlen(stat_sb_names[4])+1,(void *)&stat_uid, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[5],strlen(stat_sb_names[5])+1,(void *)&stat_gid, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[6],strlen(stat_sb_names[6])+1,(void *)&stat_rdev, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[7],strlen(stat_sb_names[7])+1,(void *)&stat_size, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[8],strlen(stat_sb_names[8])+1,(void *)&stat_atime, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[9],strlen(stat_sb_names[9])+1,(void *)&stat_mtime, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[10],strlen(stat_sb_names[10])+1,(void *)&stat_ctime, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[11],strlen(stat_sb_names[11])+1,(void *)&stat_blksize, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value),stat_sb_names[12],strlen(stat_sb_names[12])+1,(void *)&stat_blocks, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0])+1, (void *)&stat_dev, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1])+1, (void *)&stat_ino, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2])+1, (void *)&stat_mode, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3])+1, (void *)&stat_nlink, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4])+1, (void *)&stat_uid, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5])+1, (void *)&stat_gid, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6])+1, (void *)&stat_rdev, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7])+1, (void *)&stat_size, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8])+1, (void *)&stat_atime, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9])+1, (void *)&stat_mtime, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10])+1, (void *)&stat_ctime, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11])+1, (void *)&stat_blksize, sizeof(zval *), NULL);
+	zend_hash_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12])+1, (void *)&stat_blocks, sizeof(zval *), NULL);
 }
 /* }}} */
 
@@ -1934,7 +1934,7 @@ PHP_FUNCTION(copy)
 PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 {
 	char buffer[8192];
-	int fd_s,fd_t,read_bytes;
+	int fd_s, fd_t, read_bytes;
 	int ret = FAILURE;
 
 #ifdef PHP_WIN32
@@ -1942,7 +1942,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 #else
 	if ((fd_s=VCWD_OPEN(src, O_RDONLY))==-1) {
 #endif
-		php_error(E_WARNING,"Unable to open '%s' for reading:  %s", src, strerror(errno));
+		php_error(E_WARNING, "Unable to open '%s' for reading:  %s", src, strerror(errno));
 		return FAILURE;
 	}
 #ifdef PHP_WIN32
@@ -1950,7 +1950,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 #else
 	if ((fd_t=VCWD_CREAT(dest, 0777))==-1) {
 #endif
-		php_error(E_WARNING,"Unable to create '%s':  %s", dest, strerror(errno));
+		php_error(E_WARNING, "Unable to create '%s':  %s", dest, strerror(errno));
 		close(fd_s);
 		return FAILURE;
 	}
@@ -1973,9 +1973,9 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 	}
 #endif
 
-	while ((read_bytes=read(fd_s,buffer,8192))!=-1 && read_bytes!=0) {
-		if (write(fd_t,buffer,read_bytes)==-1) {
-			php_error(E_WARNING,"Unable to write to '%s':  %s", dest, strerror(errno));
+	while ((read_bytes=read(fd_s, buffer, 8192))!=-1 && read_bytes!=0) {
+		if (write(fd_t, buffer, read_bytes)==-1) {
+			php_error(E_WARNING, "Unable to write to '%s':  %s", dest, strerror(errno));
 			goto cleanup;
 		}
 	}
@@ -2004,7 +2004,7 @@ PHP_FUNCTION(fread)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 3, le_fopen, le_popen, le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -2034,7 +2034,7 @@ PHP_FUNCTION(fread)
 	}
 	return_value->value.str.val[return_value->value.str.len] = 0;
 	if (PG(magic_quotes_runtime)) {
-		return_value->value.str.val = php_addslashes(return_value->value.str.val,return_value->value.str.len,&return_value->value.str.len,1 TSRMLS_CC);
+		return_value->value.str.val = php_addslashes(return_value->value.str.val, return_value->value.str.len, &return_value->value.str.len, 1 TSRMLS_CC);
 	}
 	return_value->type = IS_STRING;
 }
@@ -2085,7 +2085,7 @@ PHP_FUNCTION(fgetcsv)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(fd TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(fd TSRMLS_CC,-1, "File-Handle", &type, 3, le_fopen, le_popen, le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -2165,10 +2165,10 @@ PHP_FUNCTION(fgetcsv)
 
 					if (*bptr == 0) {       /* embedded line end? */
 						*(tptr-1)=0;            /* remove space character added on reading line */
-						strcat(temp,lineEnd);   /* add the embedded line end to the field */
+						strcat(temp, lineEnd);   /* add the embedded line end to the field */
 
 						/* read a new line from input, as at start of routine */
-						memset(buf,0,len+1);
+						memset(buf, 0, len+1);
 						if (FP_FGETS(buf, len, socketd, (FILE*)what, issock) == NULL) {
 							efree(lineEnd); efree(temp); efree(buf);
 							zval_dtor(return_value);
@@ -2254,7 +2254,7 @@ PHP_FUNCTION(fd_set)
 				WRONG_PARAM_COUNT;
 		}
 	/* XXX: add stream support --Wez. */
-		what = zend_fetch_resource(arg TSRMLS_CC,-1,"select",&type,3,le_fopen,le_socket,le_popen);
+		what = zend_fetch_resource(arg TSRMLS_CC,-1, "select", &type, 3, le_fopen, le_socket, le_popen);
 		ZEND_VERIFY_RESOURCE(what);
 		if(type == le_socket) {
 				fd = *(int *)what;
@@ -2275,7 +2275,7 @@ PHP_FUNCTION(fd_set)
 		FD_ZERO(&readfd);
 		for(i = 0; i < ARG_COUNT(ht); i++) {
 	/* XXX: add stream support --Wez. */
-				what = zend_fetch_resource(*args TSRMLS_CC,-1,"select",&type,3,le_fopen,le_socket,le_popen);
+				what = zend_fetch_resource(*args TSRMLS_CC,-1, "select", &type, 3, le_fopen, le_socket, le_popen);
 				ZEND_VERIFY_RESOURCE(what);
 				if(type == le_socket) {
 						fd = *(int *)what;
@@ -2308,7 +2308,7 @@ PHP_FUNCTION(select)
 	tv.tv_usec = (*timeout)->value.lval % 1000000;
 	/* XXX: add stream support --Wez. */
 
-	RETURN_LONG(select(max_fd + 1,&readfd,NULL,NULL,((*timeout)->value.lval <= 0) ? NULL : &tv));
+	RETURN_LONG(select(max_fd + 1, &readfd, NULL, NULL, ((*timeout)->value.lval <= 0) ? NULL : &tv));
 }
 /* }}} */
 
@@ -2325,7 +2325,7 @@ PHP_FUNCTION(fd_isset)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(fdarg TSRMLS_CC,-1,"select",&type,3,le_fopen,le_socket,le_popen);
+	what = zend_fetch_resource(fdarg TSRMLS_CC,-1, "select", &type, 3, le_fopen, le_socket, le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if(type == le_socket) {
@@ -2334,7 +2334,7 @@ PHP_FUNCTION(fd_isset)
 		fd = fileno((FILE *)what);
 	}
 
-	if(FD_ISSET(fd,&readfd)) {
+	if(FD_ISSET(fd, &readfd)) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -2386,11 +2386,11 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 	int ch = 0, compliment;
 	char buff[META_DEF_BUFSIZE + 1];
 
-	memset((void *)buff,0,META_DEF_BUFSIZE + 1);
+	memset((void *)buff, 0, META_DEF_BUFSIZE + 1);
 
-	while (md->ulc || (!FP_FEOF(md->socketd,md->fp,md->issock) && (ch = FP_FGETC(md->socketd,md->fp,md->issock)))) {
+	while (md->ulc || (!FP_FEOF(md->socketd, md->fp, md->issock) && (ch = FP_FGETC(md->socketd, md->fp, md->issock)))) {
 
-		if(FP_FEOF(md->socketd,md->fp,md->issock))
+		if(FP_FEOF(md->socketd, md->fp, md->issock))
 			break;
 
 		if (md->ulc) {
@@ -2415,8 +2415,8 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
         case '"':
             compliment = ch;
             md->token_len = 0;
-            while (!FP_FEOF(md->socketd,md->fp,md->issock) &&
-				   (ch = FP_FGETC(md->socketd,md->fp,md->issock)) &&
+            while (!FP_FEOF(md->socketd, md->fp, md->issock) &&
+				   (ch = FP_FGETC(md->socketd, md->fp, md->issock)) &&
 				   ch != compliment && ch != '<' && ch != '>') {
 
 				buff[(md->token_len)++] = ch;
@@ -2434,7 +2434,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 			/* We don't need to alloc unless we are in a meta tag */
 			if (md->in_meta) {
 				md->token_data = (char *) emalloc(md->token_len + 1);
-				memcpy(md->token_data,buff,md->token_len+1);
+				memcpy(md->token_data, buff, md->token_len+1);
 			}
 
 			return TOK_STRING;
@@ -2450,9 +2450,9 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
             if (isalnum(ch)) {
                 md->token_len = 0;
                 buff[(md->token_len)++] = ch;
-				while (!FP_FEOF(md->socketd,md->fp,md->issock) &&
-					   (ch = FP_FGETC(md->socketd,md->fp,md->issock)) &&
-					   (isalnum(ch) || strchr(PHP_META_HTML401_CHARS,ch))) {
+				while (!FP_FEOF(md->socketd, md->fp, md->issock) &&
+					   (ch = FP_FGETC(md->socketd, md->fp, md->issock)) &&
+					   (isalnum(ch) || strchr(PHP_META_HTML401_CHARS, ch))) {
 
 					buff[(md->token_len)++] = ch;
 
@@ -2467,7 +2467,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 				}
 
                 md->token_data = (char *) emalloc(md->token_len + 1);
-                memcpy(md->token_data,buff,md->token_len+1);
+                memcpy(md->token_data, buff, md->token_len+1);
 
 				return TOK_ID;
 			} else {

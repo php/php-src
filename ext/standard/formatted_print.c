@@ -463,7 +463,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 			if (currarg >= argc && format[inpos + 1] != '%') {
 				efree(result);
 				efree(args);
-				php_error(E_WARNING, "%s(): too few arguments",get_active_function_name(TSRMLS_C));
+				php_error(E_WARNING, "%s(): too few arguments", get_active_function_name(TSRMLS_C));
 				return NULL;
 			}
 			/* starting a new format specifier, reset variables */
@@ -652,7 +652,7 @@ PHP_FUNCTION(user_sprintf)
 	if ((result=php_formatted_print(ht, &len, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(result,len,1);
+	RETVAL_STRINGL(result, len, 1);
 	efree(result);
 }
 /* }}} */
@@ -667,7 +667,7 @@ PHP_FUNCTION(vsprintf)
 	if ((result=php_formatted_print(ht, &len, 1 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(result,len,1);
+	RETVAL_STRINGL(result, len, 1);
 	efree(result);
 }
 /* }}} */
@@ -682,7 +682,7 @@ PHP_FUNCTION(user_printf)
 	if ((result=php_formatted_print(ht, &len, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-	PHPWRITE(result,len);
+	PHPWRITE(result, len);
 	efree(result);
 }
 /* }}} */
@@ -697,7 +697,7 @@ PHP_FUNCTION(vprintf)
 	if ((result=php_formatted_print(ht, &len, 1 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-	PHPWRITE(result,len);
+	PHPWRITE(result, len);
 	efree(result);
 }
 /* }}} */

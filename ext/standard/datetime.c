@@ -85,7 +85,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	int i, gmadjust, seconds, arg_count = ZEND_NUM_ARGS();
 	int is_dst = -1;
 
-	if (arg_count > 7 || zend_get_parameters_array_ex(arg_count,arguments) == FAILURE) {
+	if (arg_count > 7 || zend_get_parameters_array_ex(arg_count, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* convert supplied arguments to longs */
@@ -99,7 +99,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	/*
 	** Set default time parameters with local time values,
 	** EVEN when some GMT time parameters are specified!
-	** This may give strange result, with PHP gmmktime(0,0,0),
+	** This may give strange result, with PHP gmmktime(0, 0, 0),
 	** which is assumed to return GMT midnight time
 	** for today (in localtime), so that the result time may be
 	** AFTER or BEFORE the current time.
@@ -439,7 +439,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_GMTOFF				
 				sprintf(tmp_buff, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( ta->tm_gmtoff % 3600));
 #else
-				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+',abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600));
+				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600));
 #endif
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
@@ -616,7 +616,7 @@ PHP_FUNCTION(getdate)
 
 	if (ZEND_NUM_ARGS() == 0) {
 		timestamp = time(NULL);
-	} else if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&timestamp_arg) == FAILURE) {
+	} else if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &timestamp_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long_ex(timestamp_arg);
@@ -711,7 +711,7 @@ PHP_FUNCTION(checkdate)
 	if (d < 1 || d > phpday_tab[isleap(y)][m - 1]) {
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;				/* True : This month,day,year arguments are valid */
+	RETURN_TRUE;				/* True : This month, day, year arguments are valid */
 }
 /* }}} */
 
@@ -721,7 +721,7 @@ PHP_FUNCTION(checkdate)
 void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **format_arg, **timestamp_arg;
-	char *format,*buf;
+	char *format, *buf;
 	time_t timestamp;
 	struct tm *ta, tmbuf;
 	int max_reallocs = 5;
@@ -729,13 +729,13 @@ void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			if (zend_get_parameters_ex(1,&format_arg)==FAILURE) {
+			if (zend_get_parameters_ex(1, &format_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
 			time(&timestamp);
 			break;
 		case 2:
-			if (zend_get_parameters_ex(2, &format_arg,&timestamp_arg)==FAILURE) {
+			if (zend_get_parameters_ex(2, &format_arg, &timestamp_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(timestamp_arg);
@@ -761,14 +761,14 @@ void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	}
 
 	buf = (char *) emalloc(buf_len);
-	while ((real_len=strftime(buf,buf_len,format,ta))==buf_len || real_len==0) {
+	while ((real_len=strftime(buf, buf_len, format, ta))==buf_len || real_len==0) {
 		buf_len *= 2;
 		buf = (char *) erealloc(buf, buf_len);
 		if(!--max_reallocs) break;
 	}
 	
 	if(real_len && real_len != buf_len) {
-		buf = (char *) erealloc(buf,real_len+1);
+		buf = (char *) erealloc(buf, real_len+1);
 		RETURN_STRINGL(buf, real_len, 0);
 	}
 	efree(buf);

@@ -51,7 +51,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 		sprintf(r, "%02x", digest[i]);
 	}
 	*r = '\0';
-	RETVAL_STRING(md5str,1);
+	RETVAL_STRING(md5str, 1);
 }
 /* }}} */
 

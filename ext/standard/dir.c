@@ -76,7 +76,7 @@ static zend_class_entry *dir_class_entry_ptr;
 	} else if ((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &id) == FAILURE) { \
 		WRONG_PARAM_COUNT; \
 	} else { \
-		ZEND_FETCH_RESOURCE(dirp,php_dir *,id,-1, "Directory", le_dirp); \
+		ZEND_FETCH_RESOURCE(dirp, php_dir *, id,-1, "Directory", le_dirp); \
 	} 
 
 static zend_function_entry php_dir_class_functions[] = {
@@ -169,7 +169,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 		RETURN_FALSE;
 	}
 
-	dirp->id = zend_list_insert(dirp,le_dirp);
+	dirp->id = zend_list_insert(dirp, le_dirp);
 
 	php_set_default_dir(dirp->id TSRMLS_CC);
 
@@ -189,7 +189,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 PHP_FUNCTION(opendir)
 {
-	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
 /* }}} */
@@ -198,7 +198,7 @@ PHP_FUNCTION(opendir)
 
 PHP_FUNCTION(getdir)
 {
-	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
 /* }}} */
@@ -306,7 +306,7 @@ PHP_FUNCTION(getcwd)
 #endif
 
 	if (ret) {
-		RETURN_STRING(path,1);
+		RETURN_STRING(path, 1);
 	} else {
 		RETURN_FALSE;
 	}

@@ -43,7 +43,7 @@
 
 #ifdef PHP_WIN32
 #include <process.h>
-extern char *crypt(char *__key,char *__salt);
+extern char *crypt(char *__key, char *__salt);
 #endif
 
 #include "php_lcg.h"

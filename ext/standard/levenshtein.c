@@ -31,8 +31,8 @@ static int reference_levdist(const char *s1, int l1,
 														 const char *s2, int l2, 
 														 int cost_ins, int cost_rep, int cost_del )
 {
-	int *p1,*p2,*tmp;
-	int i1,i2,c0,c1,c2;
+	int *p1, *p2, *tmp;
+	int i1, i2, c0, c1, c2;
 	
 	if(l1==0) return l2*cost_ins;
 	if(l2==0) return l1*cost_del;
@@ -77,9 +77,9 @@ static int reference_levdist(const char *s1, int l1,
 
 /* {{{ custom_levdist
  */
-static int custom_levdist(char *str1,char *str2,char *callback_name) 
+static int custom_levdist(char *str1, char *str2, char *callback_name) 
 {
-		php_error(E_WARNING,"the general Levenshtein support is not there yet");
+		php_error(E_WARNING, "the general Levenshtein support is not there yet");
 		/* not there yet */
 
 		return -1;
@@ -90,7 +90,7 @@ static int custom_levdist(char *str1,char *str2,char *callback_name)
    Calculate Levenshtein distance between two strings */
 PHP_FUNCTION(levenshtein)
 {
-	zval **str1, **str2, **cost_ins, **cost_rep, **cost_del,**callback_name;
+	zval **str1, **str2, **cost_ins, **cost_rep, **cost_del, **callback_name;
 	int distance=-1;
 
 	switch(ZEND_NUM_ARGS()) {
@@ -101,9 +101,9 @@ PHP_FUNCTION(levenshtein)
 		convert_to_string_ex(str1);
 		convert_to_string_ex(str2);
 
-		distance = reference_levdist((*str1)->value.str.val,(*str1)->value.str.len, 
-																 (*str2)->value.str.val,(*str2)->value.str.len,
-																 1,1,1);
+		distance = reference_levdist((*str1)->value.str.val, (*str1)->value.str.len, 
+																 (*str2)->value.str.val, (*str2)->value.str.len,
+																 1, 1, 1);
 
 		break;
 
@@ -117,8 +117,8 @@ PHP_FUNCTION(levenshtein)
 		convert_to_long_ex(cost_rep);
 		convert_to_long_ex(cost_del);
 		
-		distance = reference_levdist((*str1)->value.str.val,(*str1)->value.str.len, 
-																 (*str2)->value.str.val,(*str2)->value.str.len,
+		distance = reference_levdist((*str1)->value.str.val, (*str1)->value.str.len, 
+																 (*str2)->value.str.val, (*str2)->value.str.len,
 																 (*cost_ins)->value.lval,
 																 (*cost_rep)->value.lval,
 																 (*cost_del)->value.lval
@@ -145,7 +145,7 @@ PHP_FUNCTION(levenshtein)
 	}	
 
 	if(distance<0) {
-		php_error(E_WARNING,"levenshtein(): argument string(s) too long");
+		php_error(E_WARNING, "levenshtein(): argument string(s) too long");
 	}
 	
 	RETURN_LONG(distance);

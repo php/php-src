@@ -154,7 +154,7 @@ PHP_FUNCTION(disk_total_space)
 	double bytestotal = 0;
 #endif /* WINDOWS */
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&path)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &path)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -207,7 +207,7 @@ PHP_FUNCTION(disk_total_space)
 	}
 #else /* WINDOWS, OS/2 */
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs((*path)->value.str.val,&buf)) RETURN_FALSE;
+	if (statvfs((*path)->value.str.val, &buf)) RETURN_FALSE;
 	if (buf.f_frsize) {
 		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_frsize));
 	} else {
@@ -215,7 +215,7 @@ PHP_FUNCTION(disk_total_space)
 	}
 
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs((*path)->value.str.val,&buf)) RETURN_FALSE;
+	if (statfs((*path)->value.str.val, &buf)) RETURN_FALSE;
 	bytestotal = (((double)buf.f_bsize) * ((double)buf.f_blocks));
 #endif
 #endif /* WINDOWS */
@@ -257,7 +257,7 @@ PHP_FUNCTION(disk_free_space)
 	double bytesfree = 0;
 #endif /* WINDOWS */
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&path)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &path)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -310,14 +310,14 @@ PHP_FUNCTION(disk_free_space)
 	}
 #else /* WINDOWS, OS/2 */
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs((*path)->value.str.val,&buf)) RETURN_FALSE;
+	if (statvfs((*path)->value.str.val, &buf)) RETURN_FALSE;
 	if (buf.f_frsize) {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_frsize));
 	} else {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
 	}
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
-	if (statfs((*path)->value.str.val,&buf)) RETURN_FALSE;
+	if (statfs((*path)->value.str.val, &buf)) RETURN_FALSE;
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
 #endif
 #endif /* WINDOWS */
@@ -336,7 +336,7 @@ PHP_FUNCTION(chgrp)
 	struct group *gr=NULL;
 	int ret;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&group)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &filename, &group)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -384,7 +384,7 @@ PHP_FUNCTION(chown)
 	uid_t uid;
 	struct passwd *pw = NULL;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&user)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &filename, &user)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -428,7 +428,7 @@ PHP_FUNCTION(chmod)
 	int ret;
 	mode_t imode;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&mode)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &filename, &mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -472,7 +472,7 @@ PHP_FUNCTION(touch)
 	struct utimbuf *newtime = NULL;
 	int ac = ZEND_NUM_ARGS();
 
-	if (ac == 1 && zend_get_parameters_ex(1,&filename) != FAILURE) {
+	if (ac == 1 && zend_get_parameters_ex(1, &filename) != FAILURE) {
 #ifndef HAVE_UTIME_NULL
 		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
 		if (!newtime) {
@@ -482,7 +482,7 @@ PHP_FUNCTION(touch)
 		newtime->actime = time(NULL);
 		newtime->modtime = newtime->actime;
 #endif
-	} else if (ac == 2 && zend_get_parameters_ex(2,&filename,&filetime) != FAILURE) {
+	} else if (ac == 2 && zend_get_parameters_ex(2, &filename, &filetime) != FAILURE) {
 		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
 		if (!newtime) {
 			php_error(E_WARNING, "unable to emalloc memory for changing time");
@@ -550,12 +550,12 @@ PHP_FUNCTION(clearstatcache)
  */
 static void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value)
 {
-	zval *stat_dev,*stat_ino,*stat_mode,*stat_nlink,*stat_uid,*stat_gid,*stat_rdev,
+	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
 	struct stat *stat_sb;
-	int rmask=S_IROTH,wmask=S_IWOTH,xmask=S_IXOTH; /* access rights defaults to other */
-	char *stat_sb_names[13]={"dev","ino","mode","nlink","uid","gid","rdev",
-			      "size","atime","mtime","ctime","blksize","blocks"};
+	int rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
+	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
+			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
 	TSRMLS_FETCH();
 
 	stat_sb = &BG(sb);
@@ -606,13 +606,13 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 			wmask=S_IWGRP;
 			xmask=S_IXGRP;
 		} else {
-			int   groups,n,i;
+			int   groups, n, i;
 			gid_t *gids;
 
-			groups = getgroups(0,NULL);
+			groups = getgroups(0, NULL);
 			if(groups) {
 				gids=(gid_t *)emalloc(groups*sizeof(gid_t));
-				n=getgroups(groups,gids);
+				n=getgroups(groups, gids);
 				for(i=0;i<n;i++){
 					if(BG(sb).st_gid==gids[i]) {
 						rmask=S_IRGRP;
@@ -646,20 +646,20 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_TYPE:
 #if HAVE_SYMLINK
 		if (S_ISLNK(BG(lsb).st_mode)) {
-			RETURN_STRING("link",1);
+			RETURN_STRING("link", 1);
 		}
 #endif
 		switch(BG(sb).st_mode&S_IFMT) {
-		case S_IFIFO: RETURN_STRING("fifo",1);
-		case S_IFCHR: RETURN_STRING("char",1);
-		case S_IFDIR: RETURN_STRING("dir",1);
-		case S_IFBLK: RETURN_STRING("block",1);
-		case S_IFREG: RETURN_STRING("file",1);
+		case S_IFIFO: RETURN_STRING("fifo", 1);
+		case S_IFCHR: RETURN_STRING("char", 1);
+		case S_IFDIR: RETURN_STRING("dir", 1);
+		case S_IFBLK: RETURN_STRING("block", 1);
+		case S_IFREG: RETURN_STRING("file", 1);
 #if defined(S_IFSOCK) && !defined(ZEND_WIN32)&&!defined(__BEOS__)
-		case S_IFSOCK: RETURN_STRING("socket",1);
+		case S_IFSOCK: RETURN_STRING("socket", 1);
 #endif
 		}
-		php_error(E_WARNING,"Unknown file type (%d)",BG(sb).st_mode&S_IFMT);
+		php_error(E_WARNING, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
 		if (getuid()==0) {
@@ -724,34 +724,34 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
 #endif
 		/* Store numeric indexes in propper order */
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_dev, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_ino, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_mode, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_nlink, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_uid, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_gid, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_rdev, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_size, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_atime, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_mtime, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_ctime, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_blksize, sizeof(zval *), NULL);
-		zend_hash_next_index_insert(HASH_OF(return_value),(void *)&stat_blocks, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_dev, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ino, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_mode, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_nlink, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_uid, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_gid, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_rdev, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_size, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_atime, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_mtime, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ctime, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blksize, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blocks, sizeof(zval *), NULL);
 
 		/* Store string indexes referencing the same zval*/
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[0],strlen(stat_sb_names[0])+1,(void *)&stat_dev, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[1],strlen(stat_sb_names[1])+1,(void *)&stat_ino, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[2],strlen(stat_sb_names[2])+1,(void *)&stat_mode, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[3],strlen(stat_sb_names[3])+1,(void *)&stat_nlink, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[4],strlen(stat_sb_names[4])+1,(void *)&stat_uid, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[5],strlen(stat_sb_names[5])+1,(void *)&stat_gid, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[6],strlen(stat_sb_names[6])+1,(void *)&stat_rdev, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[7],strlen(stat_sb_names[7])+1,(void *)&stat_size, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[8],strlen(stat_sb_names[8])+1,(void *)&stat_atime, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[9],strlen(stat_sb_names[9])+1,(void *)&stat_mtime, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[10],strlen(stat_sb_names[10])+1,(void *)&stat_ctime, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[11],strlen(stat_sb_names[11])+1,(void *)&stat_blksize, sizeof(zval *), NULL);
-		zend_hash_update(HASH_OF(return_value),stat_sb_names[12],strlen(stat_sb_names[12])+1,(void *)&stat_blocks, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0])+1, (void *) &stat_dev, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1])+1, (void *) &stat_ino, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2])+1, (void *) &stat_mode, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3])+1, (void *) &stat_nlink, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4])+1, (void *) &stat_uid, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5])+1, (void *) &stat_gid, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6])+1, (void *) &stat_rdev, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7])+1, (void *) &stat_size, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8])+1, (void *) &stat_atime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9])+1, (void *) &stat_mtime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10])+1, (void *) &stat_ctime, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11])+1, (void *) &stat_blksize, sizeof(zval *), NULL);
+		zend_hash_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12])+1, (void *) &stat_blocks, sizeof(zval *), NULL);
 
 		return;
 	}
@@ -773,12 +773,12 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 
 /* {{{ proto int fileperms(string filename)
    Get file permissions */
-FileFunction(PHP_FN(fileperms),FS_PERMS)
+FileFunction(PHP_FN(fileperms), FS_PERMS)
 /* }}} */
 
 /* {{{ proto int fileinode(string filename)
    Get file inode */
-FileFunction(PHP_FN(fileinode),FS_INODE)
+FileFunction(PHP_FN(fileinode), FS_INODE)
 /* }}} */
 
 /* {{{ proto int filesize(string filename)
@@ -788,27 +788,27 @@ FileFunction(PHP_FN(filesize), FS_SIZE)
 
 /* {{{ proto int fileowner(string filename)
    Get file owner */
-FileFunction(PHP_FN(fileowner),FS_OWNER)
+FileFunction(PHP_FN(fileowner), FS_OWNER)
 /* }}} */
 
 /* {{{ proto int filegroup(string filename)
    Get file group */
-FileFunction(PHP_FN(filegroup),FS_GROUP)
+FileFunction(PHP_FN(filegroup), FS_GROUP)
 /* }}} */
 
 /* {{{ proto int fileatime(string filename)
    Get last access time of file */
-FileFunction(PHP_FN(fileatime),FS_ATIME)
+FileFunction(PHP_FN(fileatime), FS_ATIME)
 /* }}} */
 
 /* {{{ proto int filemtime(string filename)
    Get last modification time of file */
-FileFunction(PHP_FN(filemtime),FS_MTIME)
+FileFunction(PHP_FN(filemtime), FS_MTIME)
 /* }}} */
 
 /* {{{ proto int filectime(string filename)
    Get inode modification time of file */
-FileFunction(PHP_FN(filectime),FS_CTIME)
+FileFunction(PHP_FN(filectime), FS_CTIME)
 /* }}} */
 
 /* {{{ proto string filetype(string filename)
@@ -823,32 +823,32 @@ FileFunction(PHP_FN(is_writable), FS_IS_W)
 
 /* {{{ proto int is_readable(string filename)
    Returns true if file can be read */
-FileFunction(PHP_FN(is_readable),FS_IS_R)
+FileFunction(PHP_FN(is_readable), FS_IS_R)
 /* }}} */
 
 /* {{{ proto int is_executable(string filename)
    Returns true if file is executable */
-FileFunction(PHP_FN(is_executable),FS_IS_X)
+FileFunction(PHP_FN(is_executable), FS_IS_X)
 /* }}} */
 
 /* {{{ proto int is_file(string filename)
    Returns true if file is a regular file */
-FileFunction(PHP_FN(is_file),FS_IS_FILE)
+FileFunction(PHP_FN(is_file), FS_IS_FILE)
 /* }}} */
 
 /* {{{ proto int is_dir(string filename)
    Returns true if file is directory */
-FileFunction(PHP_FN(is_dir),FS_IS_DIR)
+FileFunction(PHP_FN(is_dir), FS_IS_DIR)
 /* }}} */
 
 /* {{{ proto int is_link(string filename)
    Returns true if file is symbolic link */
-FileFunction(PHP_FN(is_link),FS_IS_LINK)
+FileFunction(PHP_FN(is_link), FS_IS_LINK)
 /* }}} */
 
 /* {{{ proto bool file_exists(string filename)
    Returns true if filename exists */
-FileFunction(PHP_FN(file_exists),FS_EXISTS)
+FileFunction(PHP_FN(file_exists), FS_EXISTS)
 /* }}} */
 
 /* {{{ proto array lstat(string filename)
@@ -858,7 +858,7 @@ FileFunction(php_if_lstat, FS_LSTAT)
 
 /* {{{ proto array stat(string filename)
    Give information about a file */
-FileFunction(php_if_stat,FS_SIZE)
+FileFunction(php_if_stat, FS_SIZE)
 /* }}} */
 
 /*

@@ -59,7 +59,7 @@ static PHP_INI_MH(OnChangeCallback)
 	MAKE_STD_ZVAL(ASSERTG(callback));
 
 	if (new_value) {
-		ZVAL_STRINGL(ASSERTG(callback),new_value,new_value_length,1);
+		ZVAL_STRINGL(ASSERTG(callback), new_value, new_value_length, 1);
 	} else {
 		ZVAL_EMPTY_STRING(ASSERTG(callback));
 	}
@@ -188,9 +188,9 @@ PHP_FUNCTION(assert)
 		MAKE_STD_ZVAL(args[1]);
 		MAKE_STD_ZVAL(args[2]);
 
-		ZVAL_STRING(args[0],SAFE_STRING(filename),1);
-		ZVAL_LONG (args[1],lineno);
-		ZVAL_STRING(args[2],SAFE_STRING(myeval),1);
+		ZVAL_STRING(args[0], SAFE_STRING(filename), 1);
+		ZVAL_LONG (args[1], lineno);
+		ZVAL_STRING(args[2], SAFE_STRING(myeval), 1);
 		
 		MAKE_STD_ZVAL(retval);
 		ZVAL_FALSE(retval);
@@ -206,9 +206,9 @@ PHP_FUNCTION(assert)
 
 	if (ASSERTG(warning)) {
 		if (myeval) {
-			php_error(E_WARNING,"Assertion \"%s\" failed",myeval);
+			php_error(E_WARNING, "Assertion \"%s\" failed", myeval);
 		} else {
-			php_error(E_WARNING,"Assertion failed");
+			php_error(E_WARNING, "Assertion failed");
 		}
 	}
 
@@ -223,7 +223,7 @@ PHP_FUNCTION(assert)
 
 PHP_FUNCTION(assert_options)
 {
-	pval **what,**value;
+	pval **what, **value;
 	int oldint;
 	int ac = ZEND_NUM_ARGS();
 	
@@ -282,7 +282,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error(E_WARNING,"Unknown value %d.",Z_LVAL_PP(what));
+		php_error(E_WARNING, "Unknown value %d.", Z_LVAL_PP(what));
 		break;
 	}
 

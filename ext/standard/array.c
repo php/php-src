@@ -171,7 +171,7 @@ static int array_key_compare(const void *a, const void *b)
 
 static int array_reverse_key_compare(const void *a, const void *b)
 {
-	return array_key_compare(a,b)*-1;
+	return array_key_compare(a, b)*-1;
 }
 
 /* {{{ proto int krsort(array array_arg [, int sort_flags])
@@ -225,7 +225,7 @@ PHP_FUNCTION(ksort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_key_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_key_compare, 0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -303,7 +303,7 @@ static int array_data_compare(const void *a, const void *b)
 
 static int array_reverse_data_compare(const void *a, const void *b)
 {
-	return array_data_compare(a,b)*-1;
+	return array_data_compare(a, b)*-1;
 }
 
 static int array_natural_general_compare(const void *a, const void *b, int fold_case)
@@ -420,7 +420,7 @@ PHP_FUNCTION(asort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_data_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_data_compare, 0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -449,7 +449,7 @@ PHP_FUNCTION(arsort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare, 0) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -478,7 +478,7 @@ PHP_FUNCTION(sort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_data_compare,1) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_data_compare, 1) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -507,7 +507,7 @@ PHP_FUNCTION(rsort)
 		sort_type_val = Z_LVAL_PP(sort_type);
 	}
 	set_compare_func(sort_type_val TSRMLS_CC);
-	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare,1) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare, 1) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -979,7 +979,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 		
 			zval_ptr_dtor(&retval_ptr);
 		} else
-			php_error(E_WARNING,"Unable to call %s() - function does not exist",
+			php_error(E_WARNING, "Unable to call %s() - function does not exist",
 					  (*BG(array_walk_func_name))->value.str.val);
 
 		zend_hash_move_forward_ex(target_hash, &pos);
@@ -1331,7 +1331,7 @@ PHP_FUNCTION(range)
 {
 	zval **zlow, **zhigh;
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2,&zlow,&zhigh) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &zlow, &zhigh) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2039,7 +2039,7 @@ PHP_FUNCTION(array_count_values)
 				MAKE_STD_ZVAL(data);
 				Z_TYPE_P(data) = IS_LONG;
 				Z_LVAL_P(data) = 1;
-				zend_hash_index_update(Z_ARRVAL_P(return_value),Z_LVAL_PP(entry), &data, sizeof(data), NULL);
+				zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_PP(entry), &data, sizeof(data), NULL);
 			} else {
 				Z_LVAL_PP(tmp)++;
 			}
@@ -2052,7 +2052,7 @@ PHP_FUNCTION(array_count_values)
 				MAKE_STD_ZVAL(data);
 				Z_TYPE_P(data) = IS_LONG;
 				Z_LVAL_P(data) = 1;
-				zend_hash_update(Z_ARRVAL_P(return_value),Z_STRVAL_PP(entry),Z_STRLEN_PP(entry) + 1, &data, sizeof(data), NULL);
+				zend_hash_update(Z_ARRVAL_P(return_value), Z_STRVAL_PP(entry), Z_STRLEN_PP(entry) + 1, &data, sizeof(data), NULL);
 			} else {
 				Z_LVAL_PP(tmp)++;
 			}
@@ -2227,9 +2227,9 @@ PHP_FUNCTION(array_flip)
 		}
 
 		if (Z_TYPE_PP(entry) == IS_LONG) {
-			zend_hash_index_update(Z_ARRVAL_P(return_value),Z_LVAL_PP(entry), &data, sizeof(data), NULL);
+			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_PP(entry), &data, sizeof(data), NULL);
 		} else if (Z_TYPE_PP(entry) == IS_STRING) {
-			zend_hash_update(Z_ARRVAL_P(return_value),Z_STRVAL_PP(entry),Z_STRLEN_PP(entry) + 1, &data, sizeof(data), NULL);
+			zend_hash_update(Z_ARRVAL_P(return_value), Z_STRVAL_PP(entry), Z_STRLEN_PP(entry) + 1, &data, sizeof(data), NULL);
 		} else {
 			zval_ptr_dtor(&data); /* will free also zval structure */
 			php_error(E_WARNING, "Can only flip STRING and INTEGER values!");

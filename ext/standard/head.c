@@ -70,7 +70,7 @@ PHPAPI int php_header()
 
 
 
-/* php_set_cookie(name,value,expires,path,domain,secure) */
+/* php_set_cookie(name, value, expires, path, domain, secure) */
 /* {{{ proto void setcookie(string name [, string value [, int expires [, string path [, string domain [, string secure]]]]])
    Send a cookie */
 PHP_FUNCTION(setcookie)

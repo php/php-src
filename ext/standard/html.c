@@ -48,21 +48,21 @@ static entity_table_t ent_cp_1252[] = {
 };
 
 static entity_table_t ent_iso_8859_1[] = {
-	"nbsp","iexcl","cent","pound","curren","yen","brvbar",
-	"sect","uml","copy","ordf","laquo","not","shy","reg",
-	"macr","deg","plusmn","sup2","sup3","acute","micro",
-	"para","middot","cedil","sup1","ordm","raquo","frac14",
-	"frac12","frac34","iquest","Agrave","Aacute","Acirc",
-	"Atilde","Auml","Aring","AElig","Ccedil","Egrave",
-	"Eacute","Ecirc","Euml","Igrave","Iacute","Icirc",
-	"Iuml","ETH","Ntilde","Ograve","Oacute","Ocirc","Otilde",
-	"Ouml","times","Oslash","Ugrave","Uacute","Ucirc","Uuml",
-	"Yacute","THORN","szlig","agrave","aacute","acirc",
-	"atilde","auml","aring","aelig","ccedil","egrave",
-	"eacute","ecirc","euml","igrave","iacute","icirc",
-	"iuml","eth","ntilde","ograve","oacute","ocirc","otilde",
-	"ouml","divide","oslash","ugrave","uacute","ucirc",
-	"uuml","yacute","thorn","yuml"
+	"nbsp", "iexcl", "cent", "pound", "curren", "yen", "brvbar",
+	"sect", "uml", "copy", "ordf", "laquo", "not", "shy", "reg",
+	"macr", "deg", "plusmn", "sup2", "sup3", "acute", "micro",
+	"para", "middot", "cedil", "sup1", "ordm", "raquo", "frac14",
+	"frac12", "frac34", "iquest", "Agrave", "Aacute", "Acirc",
+	"Atilde", "Auml", "Aring", "AElig", "Ccedil", "Egrave",
+	"Eacute", "Ecirc", "Euml", "Igrave", "Iacute", "Icirc",
+	"Iuml", "ETH", "Ntilde", "Ograve", "Oacute", "Ocirc", "Otilde",
+	"Ouml", "times", "Oslash", "Ugrave", "Uacute", "Ucirc", "Uuml",
+	"Yacute", "THORN", "szlig", "agrave", "aacute", "acirc",
+	"atilde", "auml", "aring", "aelig", "ccedil", "egrave",
+	"eacute", "ecirc", "euml", "igrave", "iacute", "icirc",
+	"iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde",
+	"ouml", "divide", "oslash", "ugrave", "uacute", "ucirc",
+	"uuml", "yacute", "thorn", "yuml"
 };
 
 static entity_table_t ent_iso_8859_15[] = {
@@ -72,15 +72,15 @@ static entity_table_t ent_iso_8859_15[] = {
 	"micro", "para", "middot", NULL, /* zcaron */ "sup1", "ordm",
 	"raquo", "OElig", "oelig", "Yuml", "iquest", "Agrave", "Aacute",
 	"Acirc", "Atilde", "Auml", "Aring", "AElig", "Ccedil", "Egrave",
-	"Eacute","Ecirc","Euml","Igrave","Iacute","Icirc",
-	"Iuml","ETH","Ntilde","Ograve","Oacute","Ocirc","Otilde",
-	"Ouml","times","Oslash","Ugrave","Uacute","Ucirc","Uuml",
-	"Yacute","THORN","szlig","agrave","aacute","acirc",
-	"atilde","auml","aring","aelig","ccedil","egrave",
-	"eacute","ecirc","euml","igrave","iacute","icirc",
-	"iuml","eth","ntilde","ograve","oacute","ocirc","otilde",
-	"ouml","divide","oslash","ugrave","uacute","ucirc",
-	"uuml","yacute","thorn","yuml"
+	"Eacute", "Ecirc", "Euml", "Igrave", "Iacute", "Icirc",
+	"Iuml", "ETH", "Ntilde", "Ograve", "Oacute", "Ocirc", "Otilde",
+	"Ouml", "times", "Oslash", "Ugrave", "Uacute", "Ucirc", "Uuml",
+	"Yacute", "THORN", "szlig", "agrave", "aacute", "acirc",
+	"atilde", "auml", "aring", "aelig", "ccedil", "egrave",
+	"eacute", "ecirc", "euml", "igrave", "iacute", "icirc",
+	"iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde",
+	"ouml", "divide", "oslash", "ugrave", "uacute", "ucirc",
+	"uuml", "yacute", "thorn", "yuml"
 };
 
 struct html_entity_map {
@@ -394,7 +394,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		
 
 	new = php_escape_html_entities((*arg)->value.str.val, (*arg)->value.str.len, &len, all, quote_style, hint_charset);
-	RETVAL_STRINGL(new,len,0);
+	RETVAL_STRINGL(new, len, 0);
 }
 /* }}} */
 
@@ -417,7 +417,7 @@ void register_html_constants(INIT_FUNC_ARGS)
    Convert special characters to HTML entities */
 PHP_FUNCTION(htmlspecialchars)
 {
-	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -425,7 +425,7 @@ PHP_FUNCTION(htmlspecialchars)
    Convert all applicable characters to HTML entities */
 PHP_FUNCTION(htmlentities)
 {
-	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -478,15 +478,15 @@ PHP_FUNCTION(get_html_translation_table)
 			/* break thru */
 
 		case HTML_SPECIALCHARS:
-			ind[0]=38; add_assoc_string(return_value,ind,"&amp;",1);
+			ind[0]=38; add_assoc_string(return_value, ind, "&amp;", 1);
 			if(quote_style&ENT_QUOTES) {
-				ind[0]=39; add_assoc_string(return_value,ind,"&#039;",1);
+				ind[0]=39; add_assoc_string(return_value, ind, "&#039;", 1);
 			}
 			if(!(quote_style&ENT_NOQUOTES)) {
-				ind[0]=34; add_assoc_string(return_value,ind,"&quot;",1); 
+				ind[0]=34; add_assoc_string(return_value, ind, "&quot;", 1); 
 			}
-			ind[0]=60; add_assoc_string(return_value,ind,"&lt;",1);
-			ind[0]=62; add_assoc_string(return_value,ind,"&gt;",1);
+			ind[0]=60; add_assoc_string(return_value, ind, "&lt;", 1);
+			ind[0]=62; add_assoc_string(return_value, ind, "&gt;", 1);
 			break;
 	}
 }
