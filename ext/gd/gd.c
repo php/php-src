@@ -101,7 +101,8 @@ function_entry gd_functions[] = {
 #ifdef HAVE_GD_PNG
 	PHP_FE(imagecreatefrompng,						NULL)
 	PHP_FE(imagepng,								NULL)
-#else
+#endif
+#ifdef HAVE_GD_GIF
 	PHP_FE(imagecreatefromgif,						NULL)
 	PHP_FE(imagegif,								NULL)
 #endif
@@ -479,7 +480,9 @@ void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
-#else
+#endif /* HAVE_GD_PNG */
+
+#ifdef HAVE_GD_GIF
 
 /* {{{ proto int imagecreatefromgif(string filename)
 Create a new image from file or URL */
@@ -604,7 +607,7 @@ PHP_FUNCTION(imagegif )
 }
 /* }}} */
 
-#endif /* HAVE_IMAGECREATEFROMPNG */
+#endif /* HAVE_GD_GIF */
 
 /* {{{ proto int imagedestroy(int im)
 Destroy an image */

@@ -8,4 +8,7 @@
 #undef FREETYPE_4BIT_ANTIALIAS_HACK
 #undef HAVE_LIBFREETYPE
 #undef HAVE_LIBTTF
+
+/* Some versions of GD support both PNG and GIF. Set defines for both. */
 #undef HAVE_GD_PNG
+#undef HAVE_GD_GIF
