@@ -104,6 +104,34 @@ of independant tests. Set the environment variable REPORT_EXIT_STATUS to 1,
 and "make test" will set the exit status ("$?") to non-zero, when an
 individual test has failed.
 
+Example script to be run by cron(1):
+========== qa-test.sh =============
+#!/bin/sh
+
+CO_DIR=$HOME/cvs/php4
+MYMAIL=qa-test@domain.com
+TMPDIR=/var/tmp
+TODAY=`date +"%Y%m%d"`
+
+# Make sure compilation enviroment is correct
+CONFIGURE_OPTS='--disable-all --enable-cli --with-pcre'
+export MAKE=gmake
+export CC=gcc
+
+# Set test environment
+export NO_INTERACTIVITY=1
+export REPORT_EXIT_STATUS=1
+
+cd $CO_DIR
+cvs update . >>$TMPDIR/phpqatest.$TODAY
+./cvsclean ; ./buildconf ; ./configure $CONFIGURE_OPTS ; $MAKE
+$MAKE test >>$TMPDIR/phpqatest.$TODAY 2>&1
+if test $? -gt 0
+then
+        cat $TMPDIR/phpqatest.$TODAY | mail -s"PHP-QA Test Failed for $TODAY" $MYMAIL
+fi
+========== end of qa-test.sh =============
+
 NOTE: the exit status of run-tests.php will be 1 when
 REPORT_EXIT_STATUS is set. The result of "make test" may be higher
 than that. At present, gmake 3.79.1 returns 2, so it is
