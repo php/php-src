@@ -1,3 +1,48 @@
+1999-12-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c
+      ext/xml/xml.c
+      ext/ldap/ldap.c
+      TODO:
+    (PHP strtoupper, strtolower, substr_replace) Made binary-safe.
+
+1999-12-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c (php_set_session_var): logic fix:
+
+    gpc_globals set? Add it to the global symbol table
+    track_vars set? Add it to the HTTP_STATE_VARS array
+
+1999-12-09  Zeev Suraski  <zeev@php.net>
+
+    * sapi/apache/sapi_apache.c:
+1999-12-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO:
+    just went thru string.c and wrote down the functions that are obviously NOT binary-safe
+
+    * ext/standard/var.c: (unserialize) closed mem-leak
+
+    * ext/oracle/oracle.c
+      ext/oracle/php_oracle.h
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8.h: small cleanups in MINIT code
+    OCIInitialize is now called at the "right" spot again
+
+1999-12-09  Nick Gorham  <nick@easysoft.com>
+
+    * ext/odbc/php_odbc.c
+      NEWS:
+    Report all ODBC error's not just the top of the stack
+
+1999-12-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/config.m4
+      ext/domxml/config.m4
+      ext/cpdf/config.m4:
+    - improved configuration due to compile problems which suddently show up
+
 1999-12-08  Zeev Suraski  <zeev@php.net>
 
     * ext/session/session.c
