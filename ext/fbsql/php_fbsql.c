@@ -155,6 +155,17 @@ struct PHPFBLink
 #define FBSQL_NUM		1<<1
 #define FBSQL_BOTH		(FBSQL_ASSOC|FBSQL_NUM)
 
+#define FBSQL_LOCK_DEFERRED 0
+#define FBSQL_LOCK_OPTIMISTIC 1
+#define FBSQL_LOCK_PESSIMISTIC 2		// default
+
+#define FBSQL_ISO_READ_UNCOMMITED 0
+#define FBSQL_ISO_READ_NCOMMITED 1
+#define FBSQL_ISO_REPEATABLE_READ 2
+#define FBSQL_ISO_SERIALIZABLE 3		// default
+#define FBSQL_ISO_VERSIONED 4
+
+
 /* {{{ fbsql_functions[]
  */
 function_entry fbsql_functions[] = {
@@ -196,6 +207,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_field_flags,	NULL) 
 
 /*	Fontbase additions:  */
+	PHP_FE(fbsql_set_transaction,	NULL)
 	PHP_FE(fbsql_autocommit,	NULL)
 	PHP_FE(fbsql_commit,		NULL)
 	PHP_FE(fbsql_rollback,		NULL)
@@ -376,6 +388,18 @@ PHP_MINIT_FUNCTION(fbsql)
 	REGISTER_LONG_CONSTANT("FBSQL_ASSOC", FBSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_NUM",   FBSQL_NUM,   CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_BOTH",  FBSQL_BOTH,  CONST_CS | CONST_PERSISTENT);
+
+	/* Register Transaction constants */
+	REGISTER_LONG_CONSTANT("FBSQL_LOCK_DEFERRED", FBSQL_LOCK_DEFERRED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_LOCK_OPTIMISTIC", FBSQL_LOCK_OPTIMISTIC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_LOCK_PESSIMISTIC", FBSQL_LOCK_PESSIMISTIC, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FBSQL_ISO_READ_UNCOMMITED", FBSQL_ISO_READ_UNCOMMITED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_ISO_READ_NCOMMITED", FBSQL_ISO_READ_NCOMMITED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_ISO_REPEATABLE_READ", FBSQL_ISO_REPEATABLE_READ, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_ISO_SERIALIZABLE ", FBSQL_ISO_SERIALIZABLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_ISO_VERSIONED", FBSQL_ISO_VERSIONED, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 
@@ -425,8 +449,6 @@ PHP_MINFO_FUNCTION(fbsql)
 	DISPLAY_INI_ENTRIES();
 }
 
-/* {{{ php_fbsql_do_connect
- */
 static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 {
 	PHPFBLink* phpLink;
@@ -574,7 +596,6 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 	}
 	php_fbsql_set_default_link(return_value->value.lval TSRMLS_CC);
 }
-/* }}} */
 
 int phpfbFetchRow(PHPFBResult* result, int row)
 {
@@ -653,8 +674,6 @@ PHP_FUNCTION(fbsql_close)
 }
 /* }}} */
 
-/* {{{ php_fbsql_select_db
- */
 static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 {
 	unsigned port;
@@ -713,10 +732,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 	}
 	return 1;
 }
-/* }}} */
 
-/* {{{ phpfbestrdup
- */
 void phpfbestrdup(const char * s, int* length, char** value)
 {
 	int   l = s?strlen(s):0;
@@ -730,6 +746,35 @@ void phpfbestrdup(const char * s, int* length, char** value)
 		*value  = r;
 	}
 	*length = l;
+}
+
+/* {{{ proto void fbsql_set_transaction(resource link_identifier, int Locking, int Isolation)
+   Set the transaction locking and isolation */
+PHP_FUNCTION(fbsql_set_transaction)
+{
+	PHPFBLink* phpLink = NULL;
+	FBCMetaData* md;
+	zval **fbsql_link_index = NULL, **Locking = NULL, **Isolation = NULL;
+	char strSQL[1024];
+	char *strLocking[] = {"DEFERRED", "OPTIMISTIC", "PESSIMISTIC"};
+	char *strIsolation[] = {"READ UNCOMMITED", "READ NCOMMITED", "REPEATABLE READ", "SERIALIZABLE", "VERSIONED"};
+
+	switch (ZEND_NUM_ARGS()) {
+		case 3:
+			if (zend_get_parameters_ex(3, &fbsql_link_index, &Locking, &Isolation)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, -1, "FrontBase-Link", le_link, le_plink);
+
+	sprintf(strSQL, "SET TRANSACTION LOCKING %s, ISOLATION %s;", strLocking[Z_LVAL_PP(Locking)], strIsolation[Z_LVAL_PP(Isolation)]);
+
+	md = fbcdcExecuteDirectSQL(phpLink->connection, strSQL);
+	fbcmdRelease(md);
 }
 /* }}} */
 
