@@ -108,6 +108,8 @@ typedef struct _zend_hash_key {
 } zend_hash_key;
 
 
+typedef int (*apply_func_args_t)(void *pDest, int num_args, va_list args, zend_hash_key *hash_key);
+
 #define ZEND_STD_HASH_APPLIER		\
 	int (*)(void *element, int num_args, va_list args, zend_hash_key *hash_key)
 

@@ -807,7 +807,7 @@ ZEND_FUNCTION(get_declared_classes)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(CG(class_table), copy_class_name, 1, return_value);
+	zend_hash_apply_with_arguments(CG(class_table), (apply_func_args_t)copy_class_name, 1, return_value);
 }
 /* }}} */
 
