@@ -1601,7 +1601,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				*exception = *fault;
 				zval_copy_ctor(exception);
 				INIT_PZVAL(exception);
-				EG(exception) = exception;
+				zend_throw_exception_object(exception TSRMLS_CC);
 				zend_bailout();
 			} else {
 				old_error_handler(error_num, error_filename, error_lineno, format, args);
@@ -1916,7 +1916,7 @@ static void do_soap_call(zval* this_ptr,
 		*exception = *return_value;
 		zval_copy_ctor(exception);
 		INIT_PZVAL(exception);
-		EG(exception) = exception;
+		zend_throw_exception_object(exception TSRMLS_CC);
 	}
 #endif
 	SOAP_GLOBAL(sdl) = old_sdl;
