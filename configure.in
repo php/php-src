@@ -139,8 +139,8 @@ AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
 dnl AC_PROG_CC_STDC
 AC_PROG_CPP
-AC_PROG_CXX
-AC_PROG_CXXCPP
+dnl AC_PROG_CXX
+dnl AC_PROG_CXXCPP
 dnl check for -R, etc. switch
 AC_MSG_CHECKING([whether compiler supports -R])
 AC_CACHE_VAL(php_cv_cc_dashr,[
