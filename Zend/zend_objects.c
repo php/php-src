@@ -68,11 +68,9 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 	efree(object);
 }
 
-ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type)
+ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC)
 {	
 	zend_object_value retval;
-
-	TSRMLS_FETCH();
 
 	*object = emalloc(sizeof(zend_object));
 	(*object)->ce = class_type;
@@ -83,9 +81,8 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 	return retval;
 }
 
-ZEND_API zend_object *zend_objects_get_address(zval *zobject)
+ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }
 
@@ -96,8 +93,8 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 	zend_object *new_object;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
-	old_object = zend_objects_get_address(zobject);
-	retval = zend_objects_new(&new_object, old_object->ce);
+	old_object = zend_objects_get_address(zobject TSRMLS_CC);
+	retval = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);
 
 	if (old_object->ce->clone) {
 		zval *old_obj;
