@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   characters). (Moriyoshi)
 - Fixed bug #27798 (private / protected variables not exposed by 
   get_object_vars() inside class). (Marcus)
+- Fixed bug #27792 (Enabled large file support on Linux). (Edin)
 - Fixed bug #27183 (Userland stream wrapper segfaults on stream_write). 
   (Christian)
 
