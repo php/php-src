@@ -1,3 +1,40 @@
+2004-03-11  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/config.w32:
+      Hack to check for ming version 0.2 and 0.3 to inclue the right libs.
+
+2004-03-11  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2004-03-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      update
+
+2004-03-11  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_objects_API.c:
+      - Real fix for bug #27535 (Dmitry)
+
+    * ZendEngine2/zend_objects_API.c:
+      - Attempt to fix bug #27535
+
+2004-03-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/multi.c:
+      Readability++
+
+    * ext/curl/interface.c
+      ext/curl/multi.c
+      ext/curl/php_curl.h:
+      Fixed memory leak in the multi interface.
+      Fixed proto of curl_multi_exec().
+      Fixed crash in curl resource attached to curl multi resource is manually
+      freed via curl_close().
+
 2004-03-10  Frank M. Kromann  <frank@kromann.info>
 
     * ext/zlib/php_zlib.def:
