@@ -13,6 +13,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Sterling Hughes <sterling@php.net>                          |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -46,7 +47,6 @@ ZEND_FUNCTION(exception)
 {
 	char  *message = NULL;
 	long   code = 0;
-	zval  *tmp;
 	zval  *object;
 	int    argc = ZEND_NUM_ARGS(), message_len;
 
@@ -138,27 +138,19 @@ ZEND_API zend_class_entry *zend_exception_get_default(void)
 	return default_exception_ptr;
 }
 
-ZEND_API void zend_throw_exception(char *message, int duplicate TSRMLS_DC)
+ZEND_API void zend_throw_exception(char *message, long code TSRMLS_DC)
 {
 	zval *ex;
-	zval *tmp;
-	HashTable *properties;
 
 	MAKE_STD_ZVAL(ex);
 	object_init_ex(ex, default_exception_ptr);
-	properties = Z_OBJPROP_P(ex);
 
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_STRING(tmp, message, duplicate);
-	zend_hash_update(properties, "message", sizeof("message"), (void **) &tmp, sizeof(zval *), NULL);
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_STRING(tmp, zend_get_executed_filename(TSRMLS_C), 1);
-	zend_hash_update(properties, "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL);
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_LONG(tmp, zend_get_executed_lineno(TSRMLS_C));
-	zend_hash_update(properties, "line", sizeof("line"), (void **) &tmp, sizeof(zval *), NULL);
+	if (message) {
+		zend_update_property_string(default_exception_ptr, ex, "message", sizeof("message")-1, message TSRMLS_CC);
+	}
+	if (code) {
+		zend_update_property_long(default_exception_ptr, ex, "code", sizeof("code")-1, code TSRMLS_CC);
+	}
 
 	EG(exception) = ex;
 }

@@ -47,7 +47,7 @@
 
 /* Exception throwing macro */
 #define _DO_THROW(msg)                                                                                      \
-	zend_throw_exception(msg, 1 TSRMLS_CC);                                                                 \
+	zend_throw_exception(msg, 0 TSRMLS_CC);                                                                 \
 	return;                                                                                                 \
 
 /* Smart string macros */
