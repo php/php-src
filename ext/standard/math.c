@@ -138,7 +138,7 @@ PHP_FUNCTION(round)
 			return_val = (Z_TYPE_PP(value) == IS_LONG) ?
 							(double)Z_LVAL_PP(value) : Z_DVAL_PP(value);
 
-			f = pow(10.0, places);
+			f = pow(10.0, (double) places);
 
 			return_val *= f;
 			if (return_val >= 0.0)
