@@ -1,0 +1,538 @@
+Functions:
+
+Functions marked with 'u' do not work, or may not work correctly under windows.
+
+basic_functions
+	include
+	_include
+	isset
+
+	intval
+	doubleval
+	strval
+	short_tags
+	sleep						
+u	usleep				
+	ksort
+	asort
+	sort
+	count
+	chr
+	ord
+	flush
+	end
+	prev
+	next
+	reset
+	current
+	key
+	gettype
+	settype
+	min
+	max
+
+	addslashes
+	chop
+	pos
+
+	fsockopen
+	getimagesize
+	htmlspecialchars
+	md5
+
+	parse_url
+
+	parse_str
+	phpinfo
+	phpversion
+	strlen
+	strtok
+	strtoupper
+	strtolower
+	strchr
+	basename
+	dirname 
+	stripslashes
+	strstr
+	strrchr
+	substr
+	quotemeta
+	urlencode
+	urldecode
+	ucfirst
+	strtr
+	sprintf
+	printf
+
+	exec
+	system
+	escapeshellcmd
+	passthru
+
+	soundex
+
+	rand
+	srand
+	getrandmax
+	gethostbyaddr
+	gethostbyname
+	explode
+	implode
+	error_reporting
+	clearstatcache
+
+	get_current_user
+	getmyuid
+	getmypid
+u	getmyinode
+	getlastmod
+
+	base64_decode
+	base64_encode
+
+	abs
+	ceil
+	floor
+	sin
+	cos
+	tan
+	asin
+	acos
+	atan
+	pi
+	pow
+	exp
+	log
+	log10
+	sqrt
+	bindec
+	hexdec
+	octdec
+	decbin
+	decoct
+	dechex
+
+	getenv
+	putenv
+
+	time
+	mktime
+	date
+	gmdate
+	getdate
+	checkdate
+	microtime
+	uniqid
+
+u	linkinfo
+u	readlink
+u	symlink
+u	link
+u	unlink
+
+
+bcmath_functions
+	bcadd
+	bcsub
+	bcmul
+	bcdiv
+	bcmod
+	bcpow
+	bcsqrt
+	bcscale
+	bccomp
+
+dir_functions
+	opendir
+	closedir
+	chdir
+	rewinddir
+	readdir
+	dir
+
+dl_functions
+	dl(string module_name);  dynamicly load a module
+
+dns_functions
+	gethostbyaddr
+	gethostbyname
+
+file_functions
+	pclose
+	popen
+	readfile
+	rewind
+	rmdir
+	umask
+	fclose
+	feof
+	fgets
+	fgetss
+	fopen
+	fpassthru
+	fseek
+	ftell
+	fputs
+	mkdir
+	rename
+	copy
+	tempnam
+	file
+
+filestat_functions
+	fileatime
+	filectime
+u	filegroup
+u	fileinode
+	filemtime
+u	fileowner
+	fileperms
+	filesize
+	filetype
+	stat
+u	chown
+u	chgrp
+u	chmod
+	touch
+	file_exists
+	is_executable
+	is_dir
+	is_readable
+	is_writeable
+u	is_link
+
+header_functions
+	setcookie
+	header
+
+mail_functions
+	mail
+
+reg_functions
+	ereg
+	ereg_replace
+	eregi
+	eregi_replace
+	split
+	sql_regcase
+
+syslog_functions (writes to event log on win NT)
+	openlog
+	syslog
+	closelog
+
+The following are optional modules and may or may not be compiled into php, or may be compiled as a loadable module.
+
+odbc_functions (obsolete, use uodbc below)
+	sqlconnect
+	sqldisconnect
+	sqlfetch
+	sqlexecdirect
+	sqlgetdata
+	sqlfree
+	sqlrowcount
+
+uodbc_functions
+    (int) odbc_autocommit($connection_id, $OnOff)
+    (void) odbc_close($connection_id)
+    (void) odbc_close_all(void)
+    (int) odbc_commit($connection_id)
+    (int) odbc_connect($dsn, $user, $password)
+    (int) odbc_pconnect($dsn, $user, $password)
+    (string) odbc_cursor($result_id)
+    (int) odbc_do($connection_id, $query_string)
+    (int) odbc_exec($connection_id, $query_string)
+    (int) odbc_prepare($connection_id, $query_string)
+    (int) odbc_execute($result_id, $array)
+    (int) odbc_fetch_row($result_id, $row_number)
+    (int) odbc_fetch_into($result_id, $row_number, $array_ptr)
+    (int) odbc_field_len($result_id, $field_number)
+    (string) odbc_field_name($result_id, $field_number)
+    (string) odbc_field_type($result_id, $field)
+    (int) odbc_free_result($result_id)
+    (int) odbc_num_fields($result_id)
+    (int) odbc_num_rows($result_id)
+    (string) odbc_result($result_id, $field)
+    (int) odbc_result_all($result_id, $format)
+    (int) odbc_rollback($connection_id)
+
+msql_functions
+	msql_connect
+	msql_pconnect
+	msql_close
+	msql_select_db
+	msql_create_db
+	msql_drop_db
+	msql_query
+	msql
+	msql_list_dbs
+	msql_list_tables
+	msql_list_fields
+	msql_result
+	msql_num_rows
+	msql_num_fields
+	msql_fetch_row
+	msql_fetch_array
+	msql_fetch_object
+	msql_data_seek
+	msql_fetch_field
+	msql_field_seek
+	msql_free_result
+	msql_fieldname
+	msql_fieldtable
+	msql_fieldlen
+	msql_fieldtype
+	msql_fieldflags
+	msql_regcase
+	/* for downwards compatability */
+	msql_selectdb
+	msql_createdb
+	msql_dropdb
+	msql_freeresult
+	msql_numfields
+	msql_numrows
+	msql_listdbs
+	msql_listtables
+	msql_listfields
+	msql_dbname
+	msql_tablename
+
+ldap_functions
+	ldap_connect
+	ldap_bind
+	ldap_unbind
+	ldap_read
+	ldap_list
+	ldap_search
+	ldap_free_result
+	ldap_count_entries
+	ldap_first_entry
+	ldap_next_entry
+	ldap_get_entries
+	ldap_free_entry
+	ldap_first_attribute
+	ldap_next_attribute
+	ldap_get_attributes
+	ldap_get_values
+	ldap_get_dn
+	ldap_dn2ufn
+	ldap_add
+	ldap_delete
+	ldap_modify
+
+gd_functions
+	imagearc
+	imagechar
+	imagecharup
+	imagecolorallocate
+	imagecolorclosest
+	imagecolorexact
+	imagecolortransparent
+	imagecopyresized
+	imagecreate
+	imagecreatefromgif
+	imagedestroy
+	imagefill
+	imagefilledpolygon
+	imagefilledrectangle
+	imagefilltoborder
+	imagegif
+	imageinterlace
+	imageline
+	imagepolygon
+	imagerectangle
+	imagesetpixel
+	imagestring
+	imagestringup
+	imagesx
+	imagesy
+
+filepro_functions
+	filepro
+	filepro_rowcount
+	filepro_fieldname
+	filepro_fieldtype
+	filepro_fieldwidth
+	filepro_fieldcount
+	filepro_retrieve
+
+dbm_functions
+	dblist
+	dbmopen
+	dbmclose
+	dbminsert
+	dbmfetch
+	dbmreplace
+	dbmexists
+	dbmdelete
+	dbmfirstkey
+	dbmnextkey
+
+dbase_functions
+	dbase_open
+	dbase_create
+	dbase_close
+	dbase_numrecords
+	dbase_numfields
+	dbase_add_record
+	dbase_get_record
+	dbase_delete_record
+	dbase_pack
+
+calendar_functions
+	jdtogregorian
+	gregoriantojd
+	jdtojulian
+	juliantojd
+	jdtojewish
+	jewishtojd
+	jdtofrench
+	frenchtojd
+	jddayofweek
+	jdmonthname
+
+adabas_functions
+(int) ada_afetch($result_id, $rownumber, $result array)
+(int) ada_autocommit($connection_id, $OnOff)
+(void) ada_close($connection_id)
+    ada_closeall
+(int) ada_commit($connection_id)
+(int) ada_connect($dsn, $user, $password)
+(int) ada_exec($connection_id, $query_string)
+(int) ada_fetchrow($result_id, $row?number)
+    ada_fieldlen
+(string) ada_fieldname($result_id, $field_number)
+(string) ada_fieldtype($result_id, $field)
+(int) ada_freeresult($result_id)
+(int) ada_numfields($result_id)
+(int) ada_numrows($result_id)
+(string) ada_result($result_id, $field)
+(int) ada_resultall($result_id, $format)
+(int) ada_rollback($connection_id)
+***(int) ada_fieldnum($result_id, $field_name) (this function is not in 	adabase.c
+
+crypt_functions
+	crypt
+
+mysql_functions
+	mysql_connect
+	mysql_pconnect
+	mysql_close
+	mysql_select_db
+	mysql_create_db
+	mysql_drop_db
+	mysql_query
+	mysql
+	mysql_list_dbs
+	mysql_list_tables
+	mysql_list_fields
+	mysql_affected_rows
+	mysql_insert_id
+	mysql_result
+	mysql_num_rows
+	mysql_num_fields
+	mysql_fetch_row
+	mysql_fetch_array
+	mysql_fetch_object
+	mysql_data_seek
+	mysql_fetch_lengths
+	mysql_fetch_field
+	mysql_field_seek
+	mysql_free_result
+	mysql_fieldname
+	mysql_fieldtable
+	mysql_fieldlen
+	mysql_fieldtype
+	mysql_fieldflags
+	/* for downwards compatability */
+	mysql_selectdb
+	mysql_createdb
+	mysql_dropdb
+	mysql_freeresult
+	mysql_numfields
+	mysql_numrows
+	mysql_listdbs
+	mysql_listtables
+	mysql_listfields
+	mysql_dbname
+	mysql_tablename
+
+oracle_functions
+	ora_close
+	ora_commit
+	ora_commitoff
+	ora_commiton
+	ora_error
+	ora_errorcode
+	ora_exec
+	ora_fetch
+	ora_getcolumn
+	ora_logoff
+	ora_logon
+	ora_open
+	ora_parse
+	ora_rollback
+
+pgsql_functions
+	pg_connect
+	pg_pconnect
+	pg_close
+	pg_dbname
+	pg_errormessage
+	pg_options
+	pg_port
+	pg_tty
+	pg_host
+	pg_exec
+	pg_numrows
+	pg_numfields
+	pg_fieldname
+	pg_fieldsize
+	pg_fieldtype
+	pg_fieldnum
+	pg_result
+	pg_fieldprtlen
+	pg_getlastoid
+	pg_freeresult
+	pg_locreate
+	pg_lounlink
+	pg_loopen
+	pg_loclose
+	pg_loread
+	pg_lowrite
+	pg_loreadall
+
+sybase_functions
+	sybase_connect
+	sybase_pconnect
+	sybase_close
+	sybase_select_db
+	sybase_query
+	sybase_free_result
+	sybase_get_last_message
+	sybase_num_rows
+	sybase_num_fields
+	sybase_fetch_row
+	sybase_fetch_array
+	sybase_fetch_object
+	sybase_data_seek
+	sybase_fetch_field
+	sybase_field_seek
+	sybase_result
+
+sybase_old_functions
+	sybsql_seek
+	sybsql_exit
+	sybsql_dbuse
+	sybsql_query
+	sybsql_isrow
+	sybsql_result
+	sybsql_connect
+	sybsql_nextrow
+	sybsql_numrows
+	sybsql_getfield
+	sybsql_numfields
+	sybsql_fieldname
+	sybsql_result_all
+	sybsql_checkconnect
+

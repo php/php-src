@@ -1,0 +1,159 @@
+Installation Instructions for PHP3
+----------------------------------
+
+For the impatient here is a quick set of steps that will build PHP3
+as an Apache module for Apache 1.3.0 with MySQL support.  A more verbose 
+explanation follows.
+
+
+QUICK INSTALL
+
+gunzip apache_1.3.x.tar.gz
+tar xvf apache_1.3.x.tar
+gunzip php-3.0.x.tar.gz
+tar xvf php-3.0.x.tar
+cd apache_1.3.x
+./configure --prefix=/www
+cd ../php-3.0.x
+./configure --with-mysql --with-apache=../apache_1.3.x --enable-track-vars
+make
+make install
+cd ../apache_1.3.x
+./configure --prefix=/www --activate-module=src/modules/php3/libphp3.a
+ (The above line is correct!  Yes, we know libphp3.a does not exist at this
+  stage.  It isn't supposed to.  It will be created.)
+make
+ (you should now have an httpd binary which you can copy to your Apache bin dir)
+cd ../php-3.0.x
+cp php3.ini-dist /usr/local/lib/php3.ini
+You can edit /usr/local/lib/php3.ini file to set PHP options.
+Edit your httpd.conf or srm.conf file and add:
+  AddType application/x-httpd-php3 .php3
+
+
+VERBOSE INSTALL
+
+Installing PHP3 can be done in four simple steps:
+
+1. Unpack your distribution file.  
+
+   You will have downloaded a file named something like php3xn.tar.gz.
+   Unzip this file with a command like: gunzip php3xn.tar.gz
+
+   Next you have to untar it with: tar -xvf php3xn.tar
+
+   This will create a php-3.0.x directory.  cd into this new directory.
+
+2. Configure PHP3.
+
+   You now have to choose the options you would like.  There are quite
+   a few of them.  To see a list, type: ./configure --help
+
+   You can also use the supplied 'setup' script, which will ask you
+   a series of questions and automatically run the configure script
+   for you.
+
+   The only options that you are likely to want to use are the ones in
+   the last section entitled, "--enable and --with options recognized:"
+
+   A popular choice is to build the Apache module version.  You need
+   to know where the source code directory for your Apache server is
+   located.  Then use an option like: --with-apache=/usr/local/src/apache
+   if that is your Apache source code directory.  If you only specify
+   --with-apache, then it will default to look for your Apache source 
+   in /usr/local/etc/httpd.
+
+   NOTE: The directory you specify should be the top-level of the
+   unpacked Apache (or Stronghold) distribution. The configure program
+   will automatically look for httpd.h in different directories under that
+   location depending on which version of Apache, including Stronghold,
+   you are running.
+
+   For MySQL support, since newer versions of MySQL installs its various
+   components under /usr/local, this is the default.  If you have
+   changed the location you can specify it with: --with-mysql=/opt/local
+   for example.  Otherwise just use: --with-mysql
+
+   *NOTE*  If you are using Apache 1.3b6 or later, you should run the 
+   Apache Configure script at least once before compiling PHP.  It 
+   doesn't matter how you have Apache configured at this point.
+
+3. Compile and install the files.  Simply type: make install
+
+   For the Apache module version this will copy the appropriate files
+   to the src/modules/php3 directory in your Apache distribution if
+   you are using Apache 1.3.x.  If you are still running Apache 1.2.x
+   these files will be copied directly to the main src directory.
+
+   For Apache 1.3b6 and later, you can use the new APACI configuration
+   mechanism.  To automatically build Apache with PHP support, use:
+
+       cd apache_1.3.x
+       ./configure --prefix=/<path>/apache \
+                   --activate-module=src/modules/php3/libphp3.a
+       make
+       make install
+
+   If you do not wish to use this new configuration tool, the old
+   install procedure (src/Configure) will work fine.
+
+   If you are using the old Apache ./Configure script, you will have to 
+   edit the Apache src/Configuration file manually.  If you do not have 
+   this file, copy Configuration.tmpl to Configuration.
+
+   For Apache 1.3.x add:
+
+      AddModule modules/php3/libphp3.a
+
+   For Apache 1.3.x don't do anything else.  Just add this line and then
+   run "./Configure" followed by "make".
+
+   For Apache 1.2.x add:
+
+      Module php3_module mod_php3.o
+
+   For Apache 1.2.x you will also have to look in the libphp3.module file,
+   which was copied to the src directory. The EXTRA_LIBS line in the Apache
+   Configuration file needs to be set to use the same libs as specified on
+   the LIBS line in libphp3.module. You also need to make sure to add
+   "-L." to the beginning of the EXTRA_LIBS line.
+
+   So, as an example, your EXTRA_LIBS line might look like:
+
+	EXTRA_LIBS=-L. -lphp3 -lgdbm -ldb -L/usr/local/mysql/lib -lmysqlclient
+
+   NOTE: You should not enclose the EXTRA_LIBS line in double-quotes, as it
+   is in the libphp3.module file.
+
+   Also, look at the RULE_WANTHSREGEX setting in the libphp3.module file 
+   and set the WANTHSREGEX directive accordingly in your Configuration file.
+   This last step applies to versions of Apache prior to 1.3b3.
+
+   This is a bit of a hassle, but should serve as incentive to move to
+   Apache 1.3.x where this step has been eliminated.
+
+   Once you are satisfied with your Configuration settings, type: ./Configure
+   If you get errors, chances are that you forgot a library or made a typo
+   somewhere.  Re-edit Configuration and try again.  If it goes well,
+   type: make
+
+4. Setting up the server.
+   
+   You should now have a new httpd binary.  Shut down your existing server,
+   if you have one, and copy this new binary overtop of it.  Perhaps make
+   a backup of your previous one first.  Then edit your conf/srm.conf file
+   and add the line:
+
+      AddType application/x-httpd-php3 .php3
+
+   There is also an interesting feature which can be quite instructive and
+   helpful while debugging.  That is the option of having colour syntax
+   highlighting.  To enable this, add the following line:
+
+      AddType application/x-httpd-php3-source .phps
+
+   Any file ending in .phps will now be displayed with full colour syntax
+   highlighting instead of being executed.
+
+   When you are finished making changes to your srm.conf file, you can
+   start up your server.

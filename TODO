@@ -1,0 +1,100 @@
+$Id$
+
++----
+| * -- to be done
+| ? -- to be done sometime if possible
+| P -- in progress (name should appear in parentheses after task)
+| D -- delayed until later date (specify in parentheses after task)
+| U -- done, untested
+| V -- done
++----
+
+Configuration Issues
+--------------------
+* properly detect dbm routines when they're in libc
+* add the appropriate #define magic for memmove and friends (see
+  GNU autoconf info pages for details)
+* make it possible to disable support for some extensions (gd, dbm)
+* make it possible to build selected extensions so they are
+  dynamically-loadable
+
+Core Language Issues
+--------------------
+* go through PHP2's php.h and see how each special #define might be
+  applied/supported in PHP3
+* move Treatdata() to language-scanner.lex where hash_environment()
+  is called including a decision about priority of variables and moving
+  Treatdata() to use hash_add() instead of hash_update() for insertions
+  to the symbol table.
+* go through FIXME and XXX lines (egrep 'FIXME|XXX' *.[ch])
+* make lexer and parser thread-safe
+* verify that binary strings are handled correctly
+V don't evaluate truth expressions more than once
+V make unset() work on arrays (tricky)
+
+Core Functions
+--------------
+* go through all file functions and make sure they are opened in binary
+  mode in win32 if needed (ie copy)
+* go through all functions and look at PHP_SAFE_MODE issues
+* have a look at return codes of fsockopen() function - we should
+  probably RETURN_FALSE and then set an error code somewhere (Rasmus)
+* go through FIXME and XXX lines (egrep 'FIXME|XXX' functions/*.[ch])
+* add user-level flock() implementation to let people lock and unlock files 
+* add "'" modifier to sprintf to group thousands by comma
+* Add an improved eval() that doesn't "leak"
+? sorting of objects with a user-defined comparison function (like Perl)
+  (this shouldn't be expected before 3.1, if at all).
+
+
+Extensions
+----------
+* add version strings for all extensions
+* Oracle persistent connections
+U gd support for windows
+* Illustra support (APIS)
+? CQL++ support (http://www.cql.com/)
+? GNU SQL support (does anybody actually use this?)
+? DB2 support (http://www.sleepycat.com/)
+? Shore support (http://www.cs.wisc.edu/shore/)
+? PGP Interface (use PGPlib?)
+? more Perl-like regex handling?
+
+Server Support
+--------------
+P ISAPI (Shane)
+  * process cookies
+  * blocking functions
+  * make sure it's Microsoft-clean so it can be used with other ISAPI
+    implementations
+* WSAPI
+* NSAPI
+  * process cookies
+  * check POST method handling code
+  * use Netscape memory allocation inside emalloc() and company
+* FastCGI support - see http://fastcgi.idle.com/
+
+Win32 Specific
+--------------
+* implement some kind of syslog->file log support for win95.
+* change all file open/read/write functions from c library to win32 
+  api file functions.  The win32 api functions handle both disk files
+  and network files.  This will allow include and require to use http
+  or ftp files as the unix version does, and do away with my
+  workaround to support this.  (3.1?)
+* implement symlinks via windows shell links (shortcuts).  This will
+  work only at the script level and is not a c language level port.
+
+Testing
+-------
+* truss/strace a typical PHP request and see if there are some system
+  calls that could be optimized out
+* verify that regression tests exist for all core functions
+
+Miscellaneous
+-------------
+* remove hard-coded compilation options
+? locale issues - funny things happen in PHP2 when the locale is set to
+  use , instead of . as the decimal seperator.  ie. 1.5+1.5 = 1
+? SSI->PHP3 conversion script
+? SQL-based access logging (start with examples/log-*.php3)

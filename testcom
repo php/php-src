@@ -1,0 +1,9 @@
+<?
+$word = new COM("word.application") or die("Unable to instanciate Word");
+print "Loaded Word, version {$word->Version}\n";
+$word->Visible = 1;
+$word->Documents->Add();
+$word->Selection->TypeText("This is a test...");
+$word->Documents[1]->SaveAs("Useless test.doc");
+$word->Quit();
+?>

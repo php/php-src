@@ -1,0 +1,519 @@
+#!/bin/sh
+# 
+# +----------------------------------------------------------------------+
+# | PHP HTML Embedded Scripting Language Version 3.0                     |
+# +----------------------------------------------------------------------+
+# | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+# +----------------------------------------------------------------------+
+# | This program is free software; you can redistribute it and/or modify |
+# | it under the terms of one of the following licenses:                 |
+# |                                                                      |
+# |  A) the GNU General Public License as published by the Free Software |
+# |     Foundation; either version 2 of the License, or (at your option) |
+# |     any later version.                                               |
+# |                                                                      |
+# |  B) the PHP License as published by the PHP Development Team and     |
+# |     included in the distribution in the file: LICENSE                |
+# |                                                                      |
+# | This program is distributed in the hope that it will be useful,      |
+# | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
+# | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
+# | GNU General Public License for more details.                         |
+# |                                                                      |
+# | You should have received a copy of both licenses referred to here.   |
+# | If you did not, or have any questions about PHP licensing, please    |
+# | contact core@php.net.                                                |
+# +----------------------------------------------------------------------+
+# | Authors: Stig Sæther Bakken <ssb@guardian.no>                        |
+# | Updated By: Jim Winstead <jimw@php.net>                              |
+# |             Ariel Shkedi <ars@ziplink.net> or <as@altavista.net>     |
+# +----------------------------------------------------------------------+
+# 
+# $Id$
+
+if [ "$1" = "-q" ]; then
+    quiet_mode=on
+    shift
+fi
+
+if [ `echo -e "\n" | wc -l` = 2 ]; then
+# bash supports echo -e for handling escape sequences
+	ECHO_CMD="echo -e"
+elif test -f /bin/echo; then
+	ECHO_CMD="/bin/echo"
+elif test -f /usr/bin/echo; then
+	ECHO_CMD="/usr/bin/echo"
+else
+# fall back to the default echo - \n would most probably be displayed as-is
+	ECHO_CMD="echo"
+fi
+
+if echo '\c' | grep -s c >/dev/null 2>&1
+then
+    ECHO_N="echo -n"
+    ECHO_C=""
+else
+    ECHO_N="echo"
+    ECHO_C='\c'
+fi
+
+echo '
+  ***************************************************************************
+  *                                                                         *
+  *  Welcome to the PHP 3.0 setup script.  Use this script if you do not    *
+  *  want or know how to use the configure program.  See the INSTALL file   *
+  *  for further installation instructions.                                 *
+  *                                                                         *
+  *  You will now be asked a series of questions for your installation.     *
+  *  For each question, your options will be shown in parantheses, and      *
+  *  for some a default value is listed shown in brackets.                  *
+  *                                                                         *
+  ***************************************************************************
+'
+
+display_prompt()
+{
+    prm=$1
+    shift
+    typ=$1
+    shift
+    def=$1
+    shift
+    $ECHO_N "$prm $ECHO_C"
+    case $typ in
+	yesno) $ECHO_N "(yes/no) $ECHO_C";;
+        yesnodir) $ECHO_N "(\`yes', \`no' or dir) $ECHO_C";;
+        dir) $ECHO_N "(dir) $ECHO_C";;
+    esac
+    if test "$typ" = "yesnodir"; then
+	set $def
+	def=$1
+    fi
+    $ECHO_N "[$def] : $ECHO_C"
+}
+
+define_option()
+{
+    if test "$#" != "5"; then
+        echo "wrong number of arguments to define_option" >&2
+        return
+    fi
+    name=$1
+    shift
+    prompt=$1
+    shift
+    type=$1
+    shift
+    default=$1
+    shift
+    docstring=$1
+    optname=`echo $name | sed -e 's/[^a-zA-Z0-9_]/_/g'`
+    options="$options $optname"
+    eval "option_name_$optname='$name'"
+    eval "option_prompt_$optname='$prompt'"
+    eval "option_type_$optname='$type'"
+    eval "option_default_$optname='$default'"
+    eval "option_docstring_$optname='$docstring'"
+    answer=""
+    if [ "$quiet_mode" != "on" ]; then
+	show_help "$optname" "$type" "$default"
+    fi
+    while test "$answer" = ""; do
+        display_prompt "$prompt" "$type" "$default"
+    	read answer
+    	test -t || echo $answer # Echo the answer if it did not come
+    				# from a terminal.
+	if test "$type" = "yesnodir"; then
+	    set $default
+	    if test "$1" = "yes"; then
+		if test "$answer" = ""; then
+		    answer=yes
+		fi
+	    fi
+	    case "$answer" in
+	        */*) ;;
+		[Yy]*) dir=$2
+		       shift
+		       shift
+		       $ECHO_N "Enter $@ directory [$dir] : $ECHO_C"
+		       read answer
+		       test -t || echo $answer
+		       if test "$answer" = ""; then
+			   answer=$dir
+		       fi
+		       ;;
+	    esac
+	fi
+    	if test "$answer" = ""; then
+	    if test "$type" = "yesnodir"; then
+		set $default
+		answer=$1
+	    else
+		answer=$default
+	    fi
+        elif test "$answer" = "?"; then
+	    show_help "$optname" "$type" "$default"
+            answer=""
+    	fi
+    done
+    if test "$type" = "yesnodir"; then
+	set $default
+	if test $1 = "yes"; then
+	    case "$answer" in
+		"$2")  answer=yes;;
+		[Yy]*) answer=yes;;
+		[Nn]*) answer=no;;
+	    esac
+	else
+	    case "$answer" in
+		[Yy]*) answer=$2;;
+		[Nn]*) answer=no;;
+	    esac
+        fi
+    elif test "$type" = "yesno"; then
+	case "$answer" in
+	    [Yy]*) answer=yes;;
+	    [Nn]*) answer=no;;
+	esac
+    fi
+    eval "option_value_$optname='$answer'"
+}
+
+show_help()
+{
+    echo ''
+    ( eval "$ECHO_CMD \$option_docstring_$1" ;
+      if test "$2" = "yesnodir"; then
+	  set $3
+          echo "If you answer \`yes', the default directory is \`$2'."
+      fi ) 
+    echo ''
+}
+
+generate_config_command()
+{
+    configure_options=""
+    for optname in $options; do
+	eval "name=\$option_name_$optname"
+	eval "value=\$option_value_$optname"
+	eval "default=\$option_default_$optname"
+	set $default
+	if test "$value" != "$1"; then
+	    if test "$value" != "$2"; then
+		configure_options="$configure_options --$name=$value"
+	    else
+		configure_options="$configure_options --$name"
+	    fi
+	fi
+    done
+    echo "./configure$configure_options"
+}
+
+# now define all the options
+
+define_option with-apache 'Build as an Apache module?' yesnodir \
+    'no /usr/local/etc/httpd Apache base install' \
+'    Whether to build PHP as an Apache module.  If you are running\n
+    Apache, building PHP as a module will give better performance and\n
+    security. If you answer no PHP will be built as a CGI program.\n
+    The CGI version also enables Apache users to run different PHP3-enabled\n
+    pages under different user-ids.'
+
+define_option with-mod_charset 'Enable transfer tables used by mod_charset?' yesno no \
+'    Whether to respect transfer tables used by mod_charset when PHP compiled\n
+    as Apache module. It is required to allow mod_charset (aka Russian Apache)\n
+    to work properly.'
+
+define_option with-fhttpd 'Build as an fhttpd module?' yesnodir \
+    'no /usr/local/src/fhttpd fhttpd sources' \
+'    Whether to build PHP as fhttpd module.  If you are running\n
+    fhttpd, building PHP as a module will give better performance,\n
+    more control and remote execution capability. More info about fhttpd \n
+    can be found at http://phobos.illtel.denver.co.us/pub/fhttpd/.'
+
+define_option with-gd 'GD support?' yesnodir \
+    "yes /usr GD install" \
+'    Whether to include GD support.  If PHP can find the GD libraries\n
+    on your system, it will be included automatically.  You should enter\n
+    something here if you do not want to include GD support or if you\n
+    have installed GD in some unusual directory.'
+
+define_option with-oracle 'Oracle support?' yesnodir \
+    "no $oradir Oracle home" \
+'    Whether to build PHP with Oracle support.  Has been confirmed to\n
+    work with Oracle versions 7.0 to 7.3.  If you have not set up your\n
+    Oracle environment, enter what $ORACLE_HOME is usually set to here.\n
+    More info about Oracle can be found at http://www.oracle.com/.'
+
+define_option with-iodbc 'iODBC support?' yesnodir \
+    'no /usr/local iODBC install' \
+'    Whether to build PHP with iODBC support.  This feature was first\n
+    developed for iODBC Driver Manager, a freely redistributable ODBC\n
+    driver manager which runs under many flavors of UNIX.\n
+    More info about iODBC can be found on the FreeODBC Pages at \n
+    http://users.ids.net/~bjepson/freeODBC/.'
+
+define_option with-openlink 'OpenLink ODBC support?' yesnodir \
+    'no /usr/local/openlink OpenLink install' \
+'    Whether to build PHP with OpenLink ODBC support.  See
+     http://www.openlinksw.com/ for more information.'
+
+define_option with-adabas 'Adabas D support?' yesnodir \
+    'no /usr/local Adabas D install root' \
+'    Whether to build with Adabas D support.\n
+    More info about Adabas D can be found at http://www.adabas.com/.'
+
+define_option with-sybase 'Sybase support?' yesnodir \
+    'no /home/sybase Sybase install' \
+'     Whether to build PHP with Sybase support (DBLib only).\n
+     More info about Sybase can be found at http://www.sybase.com/.'
+
+define_option with-sybase-ct 'Sybase-CT support?' yesnodir \
+    'no /home/sybase Sybase-CT install' \
+'     Whether to build PHP with Sybase-CT support.'
+
+define_option with-mysql 'MySQL support?' yesnodir \
+    'no /usr/local MySQL install' \
+'    Whether to build PHP with MySQL support.\n
+    More info about MySQL can be found at http://www.tcx.se/.'
+
+define_option with-msql 'mSQL support?' yesnodir \
+    'no /usr/local/Hughes mSQL install' \
+'    Whether to build PHP with mSQL support.  PHP supports both mSQL 1.0 and\n
+    mSQL 2.0.  However, if you build PHP with mSQL 1.0 libraries, you will\n
+    only be able to access mSQL 1.0 databases, ditto for mSQL 2.0.\n
+    More info about mSQL can be found at http://www.hughes.com.au/.'
+
+define_option with-pgsql 'PostgreSQL support?' yesnodir \
+    'no /usr/local/pgsql PostgreSQL base install' \
+'    Whether to build PHP with PostgreSQL support.\n
+    More info about PostgreSQL can be found at\n
+    http://www.postgreSQL.org/.'
+
+define_option with-solid 'Solid support?' yesnodir \
+    'no /usr/local/solid Solid install' \
+'     Whether to build PHP with Solid support.\n
+     More information about Solid can be found at http://www.solidtech.com/.'
+
+define_option with-empress 'Empress support?' yesnodir \
+    "no $EMPRESSPATH Empress home" \
+'    Whether to build PHP with Empress support.  Has been confirmed to
+    work with Empress Version 8.10.  If you have not set up your
+    Empress environment, enter what $EMPRESSPATH is usually set to here.
+    More info about Empress can be found at http://www.empress.com/.'
+
+define_option with-informix 'Informix support?' yesnodir \
+    "no $INFORMIXDIR Informix home" \
+'    Whether to build PHP with Informix support. If you have not set up your\n
+    Informix environment, enter what $INFORMIXDIR is usually set to here.\n
+    You MUST set $INFORMIXDIR before trying to compile!\n
+    More info about Informix can be found at http://www.informix.com/.'
+
+define_option with-interbase 'InterBase support?' yesnodir \
+    'no /usr/interbase InterBase base install' \
+'     Whether to build PHP with InterBase support. More\n
+      information about InterBase can be found at http://www.interbase.com/.'
+
+define_option with-hyperwave 'Hyperwave support?' yesno no \
+'     Whether to build with Hyperwave support. More\n
+     information about Hyperwave can be found at http://www.hyperwave.com.'
+
+define_option with-ldap 'LDAP support?' yesnodir \
+    'no /usr/local/ldap LDAP base install' \
+'     Whether to build with LDAP (Lightweight Directory Access Protocol)\n
+     support.\n
+     More information about LDAP can be found in RFC1777 and RFC1778.'
+
+define_option with-imap 'IMAP support?' yesnodir \
+    'no /usr/local/imap IMAP base install' \
+'     Whether to build with IMAP (Internet Message Access Protocol)\n
+     support.\n
+     More information about LDAP can be found in RFC1777 and RFC1778.'
+
+define_option with-velocis 'Velocis support?' yesnodir \
+    'no /usr/local/velocis Velocis install' \
+'     Whether to build PHP with Velocis support.\n
+     More information about Velocis can be found at http://www.raima.com/.'
+
+define_option with-custom-odbc 'custom ODBC support?' yesnodir \
+    'no /usr/local CODBC install' \
+'    Whether to build PHP with CODBC support.  This feature was first
+    developed for Sybase SQL Anywhere 5.5 on QNX, but may be used for
+    any unknown ODBC driver on all flavors of UNIX.'
+
+if test "$option_value_with_iodbc" != "no" -o \
+        "$option_value_with_solid" != "no" -o \
+        "$option_value_with_adabas" != "no" -o \
+        "$option_value_with_velocis" != "no" -o \
+        "$option_value_with_custom_odbc" != "no"
+then
+define_option enable-unified-odbc 'Enable unified ODBC support?' yesno yes \
+'    Whether to enabled the unified ODBC support.  This is a database\n
+    module that compiles with the C API of several DBMSes that happen to\n
+    use ODBC as their C-API.  Has been tested with iODBC, Solid, Adabas D,\n
+    Empress, and Sybase SQL Anywhere. Requires that some one (and only one)\n
+    specific ODBC module is enabled, or some custom ODBC library specified\n
+    instead.'
+fi
+
+define_option with-dbase 'dBase support? ' yesno no \
+'    Whether to use the bundled dbase library.'
+
+define_option with-filepro 'filePro support? ' yesno no \
+'    Whether to use the bundled filePro library.  Read-access only.'
+
+define_option with-pdflib 'pdflib 0.6 support? ' yesnodir \
+    'no /usr/local pdflib install' \
+'    Whether to use the pdflib support to write .pdf-files.\n
+    Tested for version 0.6!'
+
+define_option with-fdftk 'Acrobat Forms (Ftf Toolkit 2.0) support? ' yesnodir \
+    'no /usr/local ftktk install' \
+'    Whether to use the Ftf Toolkit support to write/read .fdf-files.\n
+    Tested for version 2.0!'
+
+define_option with-zlib 'zlib (>= 1.0.9) support? ' yesnodir \
+    'no /usr zlib install' \
+'    Whether to use the zlib support to read/write .gz-files.\n
+    Requires zlib version >= 1.0.9!'
+
+define_option enable-sysvshm 'System V shared memory support? ' yesno no \
+'    Whether to use the System V shared memory (currently only solaris and linux).'
+
+define_option enable-sysvsem 'System V semaphores support? ' yesno no \
+'    Whether to use the System V semaphores (currently only solaris and linux).'
+
+
+define_option with-config-file-path 'Default config directory?' yesnodir \
+    'no /usr/local/lib Configuration file' \
+'    Directory where the PHP3 configuration file (php3.ini) is\n
+    located.'
+
+# systems should be system's
+define_option with-system-regex 'Use the system regex library?' yesno no \
+"    Whether to use the systems regular expression library rather than\n
+    the bundled one. If you are building PHP3 as a server module, you must\n
+    use the same library when building PHP3 as when linking the server.\n
+    Enable this if the systems library provides special features you need.\n
+    It is recommended that you use the bundled library if possible."
+
+define_option enable-debug 'Compile with debug information?' yesno yes \
+'    Whether to enable debug information.  Answering "no" here will make\n
+    PHP run faster, but it will be harder to trace bugs.  You are \n
+    encouraged to leave debugging on while PHP 3.0 is in alpha and \n
+    beta state.'
+
+define_option enable-safe-mode 'Enable safe mode by default?' yesno no \
+"    Whether to enable PHP safe mode.  This imposes several\n
+    restrictions on what PHP can do, such as opening only files within\n
+    the document root.  Read the Security chapter of the documentation\n
+    for more information.  CGI users should always enable secure mode.\n
+    This only sets the default, it may be enabled or disabled in the\n
+    configuration file later. "
+
+# broken configure.in doesn't check apache (bug?)
+#if test "$option_value_with_apache" != "no"; then
+#  defexecdir="$option_value_with_apache/php-bin"
+#else
+  defexecdir=/usr/local/bin
+#fi
+
+define_option with-exec-dir 'Default safe mode exec dir?' dir "$defexecdir" \
+"    The directory where executables that may be run from safe mode\n
+    are located."
+
+define_option enable-track-vars 'Enable variable tracking by default?' yesno \
+    no \
+'    Enable the HTTP_GET_VARS, HTTP_POST_VARS and HTTP_COOKIE_VARS arrays by\n
+    default (can be turned on or off in the configuration file).'
+
+define_option enable-magic-quotes 'Enable magic quotes by default?' yesno no \
+'    Whether to magic quotes by default. This can be changed in the\n
+    configuration file.'
+
+define_option enable-debugger 'Enable PHP remote debugger?' yesno no \
+"    Whether to enable PHP remote debugging support.  This feature\n
+    is still under development."
+
+define_option enable-bcmath 'Enable bc style precision math functions' yesno \
+    no \
+'    Enables bc style arbitrary precision math functions.'
+
+# configure.in only checks these if it's a cgi so setup does the same
+if test "$option_value_with_apache" = "no"; then
+# outputing the bank line isn't really possible, but it would be nice
+define_option enable-force-cgi-redirect 'Enable redirect checking?' yesno no \
+'    When using PHP as a CGI binary, this will make PHP always first check\n
+    that it is used by redirection (for example under Apache, by using\n
+    Action directives). This makes sure that the PHP binary cannot be used\n
+    to bypass standard web server authentication procedures by calling it\n
+    directly, like http://my.host/cgi-bin/php/secret/doc.html. This\n
+    example accesses http://my.host/secret/doc.html but does not honour\n
+    any security settings enforced by httpd for directory /secret.\n
+ \n
+    Not enabling this option disables the check and enables bypassing\n
+    httpd security and authentication settings. Do this only if your server\n
+    software is unable to indicate that a safe redirection was done and\n
+    all your files under your document root and user directories may be\n
+    accessed by anyone. (See the doc_root and user_dir options in the\n
+    configuartion file).'
+
+define_option enable-discard-path 'Enable discard path?' yesno no \
+'    If this is enabled, the PHP CGI binary can safely be placed outside\n
+     of the web tree and people will not be able to circumvent .htaccess\n
+     security.'
+fi
+
+define_option enable-memory-limit 'Enable memory limit?' yesno no \
+'    Compile with memory limit support.'
+
+define_option enable-short-tags 'Allow short tag by default?' yesno yes \
+"    Whether to enable the short form of the PHP HTML embed tags.\n
+    The short form is \"<? code; ?>\", while the long form is\n
+    \"<?php code; ?>\".  If you plan on using XML on your site, you\n
+    should disable the short form. This is the default and can be overridden\n
+    in the configuration file."
+
+define_option enable-url-fopen-wrapper 'Enable URL fopen wrappers?' yesno yes \
+"    Enable the URL-aware fopen wrapper that allows accessing files via http\n
+    or ftp."
+
+# only the cgi version of PHP is installed to bindir
+if test "$option_value_with_apache" = "no"; then
+define_option bindir 'Install php in:' dir "/usr/local/bin" \
+"    Directory where PHP should be installed."
+fi
+
+echo '
+
+  ***************************************************************************
+  *                                                                         *
+  *                      Running configure...                               *
+  *                                                                         *
+  ***************************************************************************
+'
+if test ! -f configure; then
+    autoconf
+fi
+
+command=`generate_config_command`
+mv do-conf do-conf.bak > /dev/null 2>&1
+echo $command > do-conf
+chmod +x do-conf
+echo $command
+eval $command
+
+echo '
+  ***************************************************************************
+  *                                                                         *
+  *  Configuration options were saved in do-conf, if desired you can        *
+  *  edit this file and then run it. Run ./configure --help for a list      *
+  *  of options.                                                            *
+  *                                                                         *
+  *  Read the INSTALL file for more information and for help in             *
+  *  configuring apache. See the web site at: http://www.php.net/ for       *
+  *  documentation and more. If desired copy the php3.ini-dist file to      *
+  *  your config directory/php3.ini and edit it.                            *
+  *                                                                         *
+  ***************************************************************************
+'

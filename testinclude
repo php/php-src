@@ -1,0 +1,5 @@
+<?
+print "Before include...\n";
+$retval = include("testarray");
+print "After include, include returned $retval\n";
+?>

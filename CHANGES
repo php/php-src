@@ -1,0 +1,624 @@
+Noticeable Changes between PHP/FI 2.0 and PHP 3.0
+=================================================
+
+This file was designed to be viewed with a tab size of 4 characters.
+
+This file is divided into 4 sections:
+1.  Downwards incompatible language changes.  This section includes all of
+    the changes in the core language which may require people to modify
+    their scripts before using them with PHP 3.0.  It does NOT list
+    changes made in the behavior of specific functions.
+2.  New language features.  This section includes all of the new additions
+    to the core language, that may be used to enhance scripts designed for
+    PHP 3.0.  Likewise, it does not include a listing of new functions.
+3.  Structural changes not directly effecting the end user.  The core
+    of PHP 3.0 is a complete rewrite.  As such, many issues effecting
+    PHP/FI 2.0 were addressed and vastly improved in this version,
+    resulting in a much more stable and efficient implementation.  This
+    section lists these changes in design.
+4.  Other changes that don't fit in any of the above categories.
+
+Please remember that PHP 3.0's core is a complete rewrite, and thus,
+there may be other undocumented incompatibilities we haven't thought
+of ourselves.  If you think you've found a incompatibility (or a new
+feature) which is not listed here, please mail us at
+php-dev@php.iquest.net.
+
+
+
+												- Zeev
+
+------------------------------------------------------------------------------
+
+Downwards incompatible language changes
+=======================================
+
+[1]	The close-PHP tag has changed from > to ?>
+
+	This means that instead of writing:
+
+	<?echo $title;>
+
+	You should write:
+
+	<?echo $title;?>
+
+	PHP3 also includes support for a longer-form start tag that is
+	XML-compliant:
+
+	<?php echo $title;?>
+
+	The ability to use the short start tag ('<?') can be turned on and
+	off using the short_tags() function. Whether it is enabled or not by
+	default is a compile-time option (normally set to enabled by default).
+
+
+[2]	Semicolons in if/elseif/else must be replaced with colons.
+
+	For example, the equivalent of:
+
+		if (expr);
+		  statements
+		  ...
+		elseif (expr);
+		  statements
+		  ...
+		else;
+		  statements
+		endif;
+
+	in PHP 3.0 would be:
+
+		if (expr):
+		  statements
+		  ...
+		elseif (expr):
+		  statements
+		  ...
+		else:
+		  statements
+		endif;
+
+	Note that the endif is followed by a semicolon and not a colon even in
+	PHP 3.0, which marks the end of the entire IF sentence.
+
+	Also note that the implementation of the colon-mode and curly-braces
+	mode in PHP 3.0 is identical, one isn't buggier than the other (note
+	that I'm not saying they're not buggy, though :)
+
+
+[3]	Semicolons in while loops must also be replaced with colons.
+
+	For example, the equivalent of:
+
+		while (expr);
+		  statements
+		  ...
+		endwhile;
+
+	in PHP 3.0 would be:
+
+		while (expr):
+		  statements
+		  ...
+		endwhile;
+
+	Note that the endwhile is followed by a semicolon and not a colon even
+	in PHP 3.0, which marks the end of the WHILE sentence.  As with the IF
+	statement, the implementation of the colon-mode and curly-braces mode
+	in PHP 3.0 is identical, one isn't buggier than the other.
+
+	Also note that failing to change the semicolon to a colon can result in
+	scripts that get stuck in the while loop because the loop-condition never
+	changes.
+
+
+[4]	$foo[0] is no longer identical to $foo.
+
+	In PHP/FI 2.0, a side-effect of the implementation caused $foo[0] to be
+	identical to $foo.  This is not the case in PHP 3.0.
+
+
+[5]	Expressions determine their types differently.
+
+	The way expressions are evaluated has changed radically in PHP 3.0.
+	Expressions are no longer given the type of the left argument, but are
+	assigned types taking both types into account, and regardless of which
+	is on the left side and which is on the right side.  On simple scripts
+	that should probably not effect you, but if you've relied on this fact
+	(even without realizing you do) it may change the way your scripts work.
+	Consider the next example:
+
+		$a[0]=5;
+		$a[1]=7;
+
+		$key = key($a);
+		while ("" != $key) {
+			echo "$key\n";
+			next($a);
+		}
+
+
+	In PHP/FI 2.0, this would display both of $a's indices.  In PHP 3.0, it
+	wouldn't display anything.  The reason is that in PHP/FI 2.0, because the
+	left argument's type was string, a string comparison was made, and indeed
+	"" does not equal "0", and the loop went through.  In PHP 3.0, when a
+	string is compared with an integer, an integer comparison is made (the
+	string is converted to an integer).  This results in comparing atoi("")
+	which is 0, and $key which is also 0, and since 0==0, the loop doesn't
+	go through even once.  The fix for this is simple, by replacing the
+	while statement with:
+
+		while ("" != stringval($key)) {
+
+	This would first convert the integer 0 to a string "0", and then
+	compare "" and "0", which are not equal, and the loop would go through
+	as expected.  As mentioned later, casting operators are supported in
+	PHP 3.0 for a quicker and more readable way of changing variables'
+	types. For example, you could use:
+
+		while ("" != (string)$key) {
+
+
+[6]	The structure of error messages has changed.
+
+	Although the error messages are usually more accurate, you won't be shown
+	the actual line of text and actual place in which the error occured.
+	You'll be supplied with the line number in which the error has occured,
+	though.
+
+
+[7]	The format string argument to echo is no longer supported.
+
+	Use printf(format,arg1,arg2,arg3,...) instead (unlimited arguments).
+
+
+[8]	The use of read-mode $array[] is no longer supported.
+
+	That is, you cannot traverse an array by having a loop that does $data =
+	$array[].  Use current() and next() instead.  Also, $array1[] = $array2
+	does not append the values of $array2 to $array1, but appends $array2
+	as the last entry of $array1 (see the multidimensional array support).
+
+
+[9]	Apache versions older than 1.2 are not supported anymore.
+
+	The apache module requires apache 1.2 or later (1.3-beta is supported).
+
+
+[10] Indirect references inside quoted strings
+
+	PHP2-style indirect reference inside quoted strings is no longer
+    supported.  That is, if $foo="bar", and $bar="abc", in PHP2,
+    "$$foo" would print out "abc".  In PHP3, this would print
+    "$bar" (the contents of $foo is replaced with "bar").
+    To use indirect reference in PHP3 inside quoted strings, you should use 
+    the new notation: "${$foo}".  The standard $$foo notation will work
+    outside of the quoted string.
+
+[11]
+		Some functions have changed names, are missing, or have been deprecated
+		by other functions
+
+	As a whole new rewrite, written by many more people and supporting many
+	more APIs than it's predecessor, there's a good chance some of the functions
+	you're used to from PHP/FI 2 aren't available in release 3, or have changed
+	names.  Many functions that do exist behave a bit differently, mainly
+	because they return different values for errors (false) but also for other
+	reasons.  We can't list all of these functions here, simply because drawing
+	a full comparison between the function sets of the two versions is way too
+	much work.  If a converted PHP/FI 2 script doesn't work for you, nothing
+	can replace the good old human eye going over the code, doublechecking
+	with the online manual that each function still does what you expected it
+	to do.
+
+[12]	Other incompatibilities.
+
+	It's not too unlikely that other documented behavior of PHP2 has changed
+	in this release.  If you think you've found an example, please mail
+	us at php-dev@php.iquest.net.  Even if you've found an undocumented
+	feature of PHP2 that stopped working in PHP3, we'd like to know about it
+	(although it's more than likely that it will not be supported).
+
+
+
+------------------------------------------------------------------------------
+
+
+New Language Features
+=====================
+
+[1]	Expressions
+
+	PHP 3.0 includes a rich implementation of expressions, much more advanced
+	than this of 2.0.  Just about any complex C-like or perl-like expression
+	would work.  Support was added for assignment operators (+=, -=, *= etc),
+	pre and post increment/decerement (e.g. $i++, ++$i) and the questionmark
+	operator ( (expr?expr:expr) ).  Every assignment is now an expression
+	with a value, which means stuff like $a = $b = $c = $d = 0;  would work.
+	It is difficult to describe the power of expressions within a few lines
+	of text, but if you're familiar with them, you probably get the picture.
+
+
+[2]	for loops are now supported.
+
+	for loops were fairly difficult to implement (in fact, we didn't find
+	any parallel interpreter that supports for loops anywhere (no, perl is
+	not an interpreter)).  The bottom line is that for loops work, and are
+	around 5% slower than comparable while loops (that may vary), but often
+	they're much nicer.
+
+	The syntax is identical to the one of C:
+
+		for (expr; expr; expr) statement;
+
+	or
+
+		for (expr; expr; expr) { statements ... }
+
+	The first expression is executed the first time the loop is encountered,
+	the loop is run as long as the second expression is evaluated as TRUE,
+	and after each iteration, the 3rd expression is evaluated.
+
+	Colon-mode FOR loops are also supported:
+	for (expr; expr; expr):
+		statements
+		...
+	endfor;
+
+
+[3]	do..while(expr) loops are now supported.
+
+	Like with its C parallel, the statements inside a do..while loop are
+	run once the first time the loop is encountered, and then as long as
+	the expression evaluates as true.
+
+	For example:
+
+		do {
+			statements;
+		} while ($i++ < $max);
+
+
+[4]	break and continue statements are now supported inside loops.
+
+	You can break out of loops, or continue to the next iteration of the
+	loop using these statements.  A special feature of PHP is the ability
+	to specify an expression argument to break or continue, which specifies
+	how many loops you want to break out from or continue to.  For example:
+
+		for ($i=0; $i<10; $i++) {
+			for ($j=0; $j<10; $j++) {
+				if ($j>5)
+					break;
+				if ($i>5)
+					break 2;
+			}
+		}
+	
+	The first break statement would end the inner loop every time $j is
+	greater than 5.  The second break statement would end both the inner
+	and outer loop when $i is greater than 5.
+
+	Note:  For this matter, switch statements are considered as loops.  So
+	if you write "break 2;" inside a switch statement, you would be asking
+	to break out of the switch, and the innermost loop in which is nested.
+
+
+[5]	Switched to C-style declaration of functions.
+
+	Here's a pretty useless function which makes a good example:
+
+		function concat($str1,$str2)
+		{
+			return $str1.$str2;
+		}
+
+	NOTE:	The old style function definition is still supported, to
+			allow easier upgrading from PHP/FI 2.0 scripts.  Simply
+			change 'function' to 'old_function' for these functions.
+
+
+[6]	OOP support
+
+	Classes and inheritance are supported to a limited extent in PHP 3.0.
+	Here's how to declare a simple class:
+
+		class simple_class {
+			var $property1,$property2;
+			var $property3=5;
+
+			function display() {
+				printf("p1=%d, p2=%d, p3=%d\n",
+					$this->property1,
+					$this->property2,
+					$this->property3);
+			}
+			function init($p1,$p2) {
+				$this->property1 = $p1;
+				$this->property2 = $p2;
+			}
+		};
+
+	Here's how to create an object of that class:
+
+		$obj = new simple_class;
+
+	At this point, $obj is an object with 2 uninitialized variables, 1
+	initialized variable, and 2 member functions.  No protection is made on
+	the internals of the object, and using its properties is simple:
+
+		$obj->property1 = 7;
+
+	would assign 7 to $property1 inside $obj.  Calling member functions is
+	also simple:
+
+		$obj->display()
+
+	would run the display() member function of $obj.  Note that the
+	implementation of display() uses the special variable $this, which is
+	replaced with the object the function is called on.
+
+	Inheritance is pretty simple too:
+
+		class complex_class extends simple_class {
+			var $property4="test";
+
+			function display() {
+				printf("p1=%d, p2=%d, p3=%d, p4=%d\n",
+					$this->property1,
+					$this->property2,
+					$this->property3,
+					$this->property4);
+			}
+		}	
+
+	Basically, the class complex_class inherits everything from its parent,
+	simple_class, except properties or member functions which override the
+	ones in the parent.  In this example, since we supply an alternative
+	display() function, it would be used with complex_class objects instead
+	of the display() function that was declared in simple_class.  On the other
+	hand, since we don't supply an alternative init() function, complex_class
+	objects would have the same init() function as simple_class objects do.
+
+	As with expressions, it's impossible to teach OOP in a few lines, and
+	personally I'm unclear as to how useful this would be in day to day
+	scripting.  If you like this, play with this until you figure it out :)
+
+	Objects can reside in arrays, and can contain arrays.  However,
+	a limitation of the current implementation doesn't allow an object
+	to contain an array of objects (actually, this is allowed, but
+	there's no way to address the properties of such an object directly,
+	but only indirectly).  For example, assuming $a[3] is an object,
+	$a[3]->b[2] is an object as well, you can't address the properties
+	of $a[3]->b[2] (i.e. you can't write $a[3]->b[2]->foo = "bar", for
+	instance).  
+
+
+[7]	Function pointers are now supported.
+
+	A simple illustrative example:
+
+		$func_ptr = "time";
+		$current_time = $func_ptr();
+
+	is identical to
+
+		$current_time = time();
+
+
+[8]	Indirect references are much more powerful.
+
+	For example, one can use the dollar operator an infinite amount of times:
+
+		$a = "b";
+		$b = "c";
+		$c = "d";
+		$d = "e";
+		$e = "Testing\n";
+
+		echo $$$$$a;
+
+	Would display $e's content, which is "Testing\n".
+
+	In addition, one can use complex expressions to generate variable names
+	using a perl-like notation:
+
+		$i="123";
+		${"test".$i} = 5;
+
+	would assign 5 to $test123.
+
+[9]	A string concatenation operator was added, '+' no longer concatenates strings.
+
+	A perl-like string concatenation operator was added, the '.' operator.
+	It converts both of its arguments to strings, and concatenates them.
+	For example:
+
+		$result = "abcd".5;
+
+	assigns "abcd5" to result.  Note that under PHP 3.0, the '+' operator
+	no longer performs concatenation if its arguments are strings.  Use
+	the '.' operator instead.
+
+[10]	Supports passing function arguments by references instead of by value.
+
+	Support for passing function arguments by reference instead of by value
+	has been added.  This doesn't result in having to change the function
+	implementations in any way, but, when calling the function, you can
+	decide on whether the variable you supply would actually be changed by
+	the function, or a copy of it.
+
+	Example:
+
+		function inc($arg)
+		{
+			$arg++;
+		}
+
+		$i=0;
+		inc($i);  # here $i in the outer scope wouldn't change, and remain 0
+		inc(&$i); # here $i is passed by reference, and would change to 1
+
+
+[11]	Support for multidimensional arrays.
+
+	(Or as Andi calls them, 'hyperdimensional variables'.)
+
+	The easiest way to define this support of PHP 3.0 is inductive -
+	arrays can contain any type of variables, including other arrays.
+	A simple example:
+
+		$a[0]=5;
+		$a[1]["testing"]=17;
+		$b["foo"]=$a;
+
+	Ok, so it may be not so simple.  Play with it, it's pretty powerful.
+
+
+[12]	Array initialization is now supported.
+
+	For example, let's say you want to initialize a lookup table to convert
+	number to month names:
+
+		$months = array("January", "February", "March",
+						"April", "May", "June", "July", "August",
+				 		"September", "October", "November", "December");
+
+	would assign $months[0] to be January, $months[1] to be February, etc.
+	Alternately, you may want the count to start at '1' instead of 0.
+	You can do so easily:
+
+		$months = array(1=>"January", "February", "March",
+						"April", "May", "June", "July", "August",
+						"September", "October", "November", "December");
+
+	Also, you can specify an index for every entry, not just the first one:
+
+		$first_names = array("Doe"=>"John", "Gates"=>"William",
+							"Clinton"=>"Bill" });
+
+	would assign $first_names["Doe"]="John", etc.
+
+
+[13]	Perl style lists now supported.
+
+	Multiple values from arrays may now be assigned into several
+	variables using one assignment.  For example:
+	
+		$str = "johndoe:x:555:555:Doe, John:/home/johndoe:/bin/tcsh";
+		
+		list($username,$passwd,$uid,$gid,$realname,$homedir,$shell) = 
+			explode(":",$str);
+	
+	Would assign 'johndoe' into $username, 'x' into $passwd, etc.
+
+
+[14]	Colons are supported in 'case' and 'default' statements.
+
+	For example:
+
+		switch($value) {
+			case 'A':
+				statement;
+				break;
+			case 'B':
+				statement;
+				break;
+			case 'C':
+				statement;
+				/* fall-through */
+			default:
+				statement;
+		}
+	
+	Semicolons are still supported, but when writing new scripts, they
+	should be phased out in favour of colons.
+
+
+------------------------------------------------------------------------------
+
+
+Non Language Related New Features
+=================================
+
+[1]	Persistent resource lists.
+
+	In plain english this means that there's now an easy way of writing the
+	SQL drivers so that they don't open and close the SQL link every time,
+	but instead open it the first time it's required, and then use it on
+	every later hit.  As of PHP 3.0a1, only the MySQL, mSQL and PostgresSQL
+	drivers have been changed (rewritten) to take advantage of this option.
+	To use it, use mysql_pconnect() instead of mysql_connect() (or the
+	equivalents for the two other databases).
+
+
+[2]	Configuration file.
+
+	PHP now has its own configuration file, and many compile-time options
+	of PHP2 are now configurable at runtime.
+
+
+[3]	Syntax Highlighting.
+
+	A syntax highlighter has been built into PHP 3.0, which means PHP 3.0 can
+	display your code, syntax highlighted, instead of executing it.
+	There are currently two ways to use the syntax highlighter.  One is to
+	use the show_source() statement.  This statement is identical to the
+	include() statement, except instead of executing the file, it displays
+	its source syntax highlighted.
+	The second way is possible only when running as an apache module, and is
+	to define a special extension for PHP 3.0 source files (e.g. .php3s)
+	and instruct apache to automatically syntax highlight them.
+
+
+[4]	Loadable modules.
+
+	This would have a huge impact on the Windows version, and would probably
+	be used in the UNIX environment as well.  One can now add PHP internal
+	functions in runtime by loading a dynamic module.  This is known to work
+	under Solaris, Linux and Win32 at this time, but would be ported to any
+	other capable platform if an incompatability is found.
+
+
+------------------------------------------------------------------------------
+
+
+Other Interesting Issues
+========================
+
+
+[1]	Improved performance.
+
+	The performance of PHP 3.0 is much better than the one of PHP/FI 2.0.
+	Memory consumption has been dramatically reduced in many cases, due
+	to the use of an internal memory manager, instead of apache's pools.
+	Speedwise, PHP 3.0 is somewhere between 2 and 3 times faster than
+	PHP/FI 2.0.
+
+
+[2]	More reliable parser.
+
+	After PHP 3.0 is well tested, it'll be pretty safe to say that it's
+	more reliable than PHP/FI 2.0 is.  While PHP/FI 2.0 performed well on
+	simple, and fairly complex scripts, a fundamental design difference
+	from PHP 3.0 makes it more prone to errors.  In PHP 3.0, obscure parser
+	problems are much less likely.
+
+
+[3]	Improved C API.
+
+	If you're a C coder, adding functionality to PHP was never easier.
+	A pretty well documented API is available (apidoc.txt), and you no longer
+	have to touch the parser or scanner code when adding your function.
+	Also, it's more complicated to 'go wrong' when implementing a PHP3
+	function than it was in PHP2 (no stack to maintain) - but of course,
+	you can mess up here too :)
+
+
+[4]	Name change.
+
+	PHP/FI 2.0 was renamed to PHP 3.0, and the meaning has changed from
+	'Personal Home Pages / Forms Interpreter' to 'PHP: Hypertext Preprocessor'.
+	'Personal' home pages was an understatement for PHP/FI 2.0, and is
+	definitely an understatement for PHP 3.0.
