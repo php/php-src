@@ -1245,12 +1245,15 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		} else {
 			internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		}
-		if (ptr->flags&ZEND_ACC_ABSTRACT) {
+		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {
-				scope->ce_flags |= ZEND_ACC_ABSTRACT_CLASS;
+				scope->ce_flags |= ZEND_ACC_ABSTRACT;
+				if (!(scope->ce_flags & ZEND_ACC_INTERFACE)) {
+					scope->ce_flags |= ZEND_ACC_ABSTRACT_CLASS;
+				}
 			}
 		} else {
-			if (scope && scope->ce_flags&ZEND_ACC_INTERFACE) {
+			if (scope && (scope->ce_flags & ZEND_ACC_INTERFACE)) {
 				zend_error(error_type, "Interface %s cannot contain non abstract method %s()", scope->name, ptr->fname);
 				return FAILURE;
 			}
