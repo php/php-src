@@ -23,7 +23,7 @@ GetImageSize()
 	var_dump($result);
 ?>
 --EXPECT--
-array(10) {
+array(11) {
   ["test1pix.bmp"]=>
   array(6) {
     [0]=>
@@ -38,6 +38,23 @@ array(10) {
     int(24)
     ["mime"]=>
     string(9) "image/bmp"
+  }
+  ["test1pix.jp2"]=>
+  array(7) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(1)
+    [2]=>
+    int(10)
+    [3]=>
+    string(20) "width="1" height="1""
+    ["bits"]=>
+    int(8)
+    ["channels"]=>
+    int(3)
+    ["mime"]=>
+    string(9) "image/jp2"
   }
   ["test1pix.jpc"]=>
   array(7) {
