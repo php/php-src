@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP version 4.x                                                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2002 The PHP Group                                |
+   | Copyright (c) 1997, 1998, 1999, 2000, 2001 The PHP Group             |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,6 @@ PHP_RINIT_FUNCTION(msession);
 PHP_RSHUTDOWN_FUNCTION(msession);
 PHP_MINFO_FUNCTION(msession);
 
-PHP_FUNCTION(confirm_msession_compiled);	/* For testing, remove later. */
 PHP_FUNCTION(msession_connect);
 PHP_FUNCTION(msession_disconnect);
 PHP_FUNCTION(msession_lock);
@@ -62,6 +61,7 @@ PHP_FUNCTION(msession_list);
 PHP_FUNCTION(msession_uniq);
 PHP_FUNCTION(msession_randstr);
 PHP_FUNCTION(msession_plugin);
+PHP_FUNCTION(msession_call);
 
 /* 
   	Declare any global variables you may need between the BEGIN
