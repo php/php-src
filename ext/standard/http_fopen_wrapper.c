@@ -148,6 +148,10 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 
 	/* authz header if it was specified */
 	if (resource->user && resource->pass)	{
+		/* decode the strings first */
+		php_url_decode(resource->user, strlen(resource->user));
+		php_url_decode(resource->pass, strlen(resource->pass));
+
 		/* scratch is large enough, since it was made large enough for the whole URL */
 		strcpy(scratch, resource->user);
 		strcat(scratch, ":");
