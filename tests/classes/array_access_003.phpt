@@ -50,6 +50,8 @@ var_dump($obj[2]);
 ===DONE===
 --EXPECTF--
 object::offsetGet(1)
+
+Strict Standards: Only variable references should be returned by reference in %sarray_access_003.php on line %d
 string(6) "fooBar"
 object::offsetGet(2)
 int(1)
