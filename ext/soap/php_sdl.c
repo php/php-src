@@ -75,7 +75,6 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const char *type)
 static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const char *type)
 {
 	sdlTypePtr ret = NULL;
-	TSRMLS_FETCH();
 
 	if (sdl->elements) {
 		xmlNsPtr nsptr;

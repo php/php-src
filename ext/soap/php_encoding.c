@@ -314,7 +314,6 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 zval *master_to_zval(encodePtr encode, xmlNodePtr data)
 {
 	zval *ret = NULL;
-	TSRMLS_FETCH();
 
 	if (encode == NULL) {
 		encode = get_conversion(UNKNOWN_TYPE);
@@ -1379,7 +1378,6 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 static xmlNodePtr guess_array_map(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	encodePtr enc = NULL;
-	TSRMLS_FETCH();
 
 	if (data && Z_TYPE_P(data) == IS_ARRAY) {
 		if (is_map(data)) {
@@ -1512,7 +1510,6 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 
 	 			if (zdata) {
 	 				if (enc == NULL) {
-						TSRMLS_FETCH();
  						xparam = master_to_xml(get_conversion((*zdata)->type), (*zdata), style, xmlParam);
  					} else {
  						xparam = master_to_xml(enc, (*zdata), style, xmlParam);
@@ -1982,7 +1979,6 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 {
 	xmlNodePtr xmlParam;
 	int i;
-	TSRMLS_FETCH();
 
 	xmlParam = xmlNewNode(NULL,"BOGUS");
 	xmlAddChild(parent, xmlParam);
@@ -2040,7 +2036,6 @@ static zval *to_zval_map(encodeTypePtr type, xmlNodePtr data)
 {
 	zval *ret, *key, *value;
 	xmlNodePtr trav, item, xmlKey, xmlValue;
-	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
@@ -2085,7 +2080,6 @@ static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, x
 {
 	encodePtr  enc;
 	xmlNodePtr ret;
-	TSRMLS_FETCH();
 
 	if (data) {
 		enc = get_conversion(data->type);
