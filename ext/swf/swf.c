@@ -228,7 +228,7 @@ PHP_FUNCTION(swf_openfile)
 	}
 
 #ifdef VIRTUAL_DIR
-	if (virtual_filepath(na, &tmpna TSRMLS_CC)) {
+	if (virtual_filepath_ex(na, &tmpna, NULL TSRMLS_CC)) {
 		if (free_na) {
 			efree(na);
 		}
