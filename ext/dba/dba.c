@@ -81,7 +81,7 @@ typedef struct dba_handler {
 	char *name;
 	int (*open)(dba_info * TSRMLS_DC);
 	void (*close)(dba_info *);
-	char* (*fetch)(dba_info *, char *, int, int *);
+	char* (*fetch)(dba_info *, char *, int, int, int *);
 	int (*update)(dba_info *, char *, int, char *, int, int);
 	int (*exists)(dba_info *, char *, int);
 	int (*delete)(dba_info *, char *, int);
@@ -112,11 +112,34 @@ typedef struct dba_handler {
 	} 															\
 	convert_to_string_ex(key)
 
+#define DBA_GET2_3												\
+	zval **key; 												\
+	zval **tmp; 												\
+	int skip = 0;  												\
+	switch(ac) {												\
+	case 2: 													\
+		if (zend_get_parameters_ex(ac, &key, &id) != SUCCESS) { \
+			WRONG_PARAM_COUNT; 									\
+		} 														\
+		break;  												\
+	case 3: 													\
+		if (zend_get_parameters_ex(ac, &key, &tmp, &id) != SUCCESS) { \
+			WRONG_PARAM_COUNT; 									\
+		} 														\
+		convert_to_long_ex(tmp);								\
+		skip = Z_LVAL_PP(tmp);  								\
+		break;  												\
+	default:													\
+		WRONG_PARAM_COUNT; 										\
+	} 															\
+	convert_to_string_ex(key)
+
 #define DBA_ID_GET 												\
 	ZEND_FETCH_RESOURCE2(info, dba_info *, id, -1, "DBA identifier", le_db, le_pdb);
 	
-#define DBA_ID_GET1 DBA_ID_PARS; DBA_GET1; DBA_ID_GET
-#define DBA_ID_GET2 DBA_ID_PARS; DBA_GET2; DBA_ID_GET
+#define DBA_ID_GET1   DBA_ID_PARS; DBA_GET1;   DBA_ID_GET
+#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_ID_GET
+#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_ID_GET
 
 /* a DBA handler must have specific routines */
 
@@ -412,15 +435,18 @@ PHP_FUNCTION(dba_exists)
 }
 /* }}} */
 
-/* {{{ proto string dba_fetch(string key, int handle)
+/* {{{ proto string dba_fetch(string key, [int skip ,] int handle)
    Fetches the data associated with key */
 PHP_FUNCTION(dba_fetch)
 {
 	char *val;
 	int len = 0;
-	DBA_ID_GET2;
+	DBA_ID_GET2_3;
 
-	if((val = info->hnd->fetch(info, VALLEN(key), &len)) != NULL) {
+	if (ac==3 && strcmp(info->hnd->name, "cdb")) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s does not support optional skip parameter", info->hnd->name);
+	}
+	if((val = info->hnd->fetch(info, VALLEN(key), skip, &len)) != NULL) {
 		RETURN_STRINGL(val, len, 0);
 	} 
 	RETURN_FALSE;
