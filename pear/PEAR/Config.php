@@ -93,6 +93,7 @@ class PEAR_Config extends PEAR
      * @var array layer => array(infotype => value, ...)
      */
     var $configuration_info = array(
+        // Internet Access
         'master_server' => array(
             'type' => 'string',
             'default' => 'pear.php.net',
@@ -100,6 +101,14 @@ class PEAR_Config extends PEAR
             'prompt' => 'PEAR server',
             'group' => 'Internet Access',
             ),
+        'http_proxy' => array(
+            'type' => 'string',
+            'default' => '',
+            'doc' => 'HTTP proxy (host:port) to use when downloading packages',
+            'prompt' => 'HTTP Proxy Server Address',
+            'group' => 'Internet Access',
+            ),
+        // File Locations
         'php_dir' => array(
             'type' => 'directory',
             'default' => PEAR_CONFIG_DEFAULT_PHPDIR,
@@ -121,6 +130,13 @@ class PEAR_Config extends PEAR
             'prompt' => 'PEAR documentation directory',
             'group' => 'File Locations',
             ),
+        'bin_dir' => array(
+            'type' => 'directory',
+            'default' => PEAR_CONFIG_DEFAULT_BINDIR,
+            'doc' => 'directory where executables are installed',
+            'prompt' => 'PEAR executables directory',
+            'group' => 'File Locations',
+            ),
         'data_dir' => array(
             'type' => 'directory',
             'default' => PEAR_CONFIG_DEFAULT_DATADIR,
@@ -135,13 +151,7 @@ class PEAR_Config extends PEAR
             'prompt' => 'PEAR test directory',
             'group' => 'File Locations (Advanced)',
             ),
-        'bin_dir' => array(
-            'type' => 'directory',
-            'default' => PEAR_CONFIG_DEFAULT_BINDIR,
-            'doc' => 'directory where executables are installed',
-            'prompt' => 'PEAR executables directory',
-            'group' => 'File Locations',
-            ),
+        // Maintainers
         'username' => array(
             'type' => 'string',
             'default' => '',
@@ -156,6 +166,7 @@ class PEAR_Config extends PEAR
             'prompt' => 'PEAR password (for package maintainers)',
             'group' => 'Maintainers',
             ),
+        // Advanced
         'verbose' => array(
             'type' => 'integer',
             'default' => 1,
@@ -175,13 +186,6 @@ class PEAR_Config extends PEAR
                 'stable', 'beta', 'alpha', 'devel', 'snapshot'),
             'prompt' => 'Preferred Package State',
             'group' => 'Advanced',
-            ),
-        'http_proxy' => array(
-            'type' => 'string',
-            'default' => '',
-            'doc' => 'HTTP proxy (host:port) to use when downloading packages',
-            'prompt' => 'HTTP Proxy Server Address',
-            'group' => 'Internet Access',
             ),
         'umask' => array(
             'type' => 'int',
