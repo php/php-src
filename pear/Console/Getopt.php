@@ -82,6 +82,7 @@ class Console_Getopt {
         }
         if (isset($args[0]{0}) && $args[0]{0} != '-') {
             array_shift($args);
+            $args = array_values($args);
         }
         reset($args);
         while (list($i, $arg) = each($args)) {
