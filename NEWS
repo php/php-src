@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- A bug fixed when tryint to return NULL strings.
+  Added a new example of building search frontend based on mnoGoSearch
+  extension.
 - Fix for LONG_VARCHAR type crashing submitted by Walter Franzini.
   (walter@sys-net.it)
 - Made in_array() and search_array() allow the needle to be an array in
