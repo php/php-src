@@ -35,22 +35,7 @@
 #if HAVE_WDDX
 #include "dlist.h"
 
-#define WDDX_PACKET_S			"<wddxPacket version='0.9'>"
-#define WDDX_PACKET_E			"</wddxPacket>"
-#define WDDX_HEADER				"<header/>"
-#define WDDX_HEADER_COMMENT		"<header comment='%s'/>"
-#define WDDX_DATA_S				"<data>"
-#define WDDX_DATA_E				"</data>"
-#define WDDX_STRING_S			"<string>"
-#define WDDX_STRING_E			"</string>"
-#define WDDX_CHAR				"<char code='%02X'/>"
-#define WDDX_NUMBER				"<number>%s</number>"
-#define WDDX_ARRAY_S			"<array length='%d'>"
-#define WDDX_ARRAY_E			"</array>"
-#define WDDX_VAR_S				"<var name='%s'>"
-#define WDDX_VAR_E				"</var>"
-#define WDDX_STRUCT_S			"<struct>"
-#define WDDX_STRUCT_E			"</struct>"
+#include "php_wddx_api.h"
 
 #define WDDX_BUF_LEN			256
 
@@ -65,12 +50,15 @@
 #define	EL_PACKET				"wddxPacket"
 #define EL_VERSION				"version"
 
+#define _php_wddx_deserialize(a,b) \
+	_php_wddx_deserialize_ex((a)->value.str.val, (a)->value.str.len, (b))
+
 static int le_wddx;
 
-typedef struct {
+struct _wddx_packet {
 	DLIST *packet_head;
 	int packet_length;
-} wddx_packet;
+};
 
 typedef struct {
 	zval *data;
@@ -91,7 +79,6 @@ typedef struct {
 
 
 /* {{{ function prototypes */
-static void _php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name);
 static void _php_wddx_process_data(void *user_data, const char *s, int len);
 /* }}} */
 
@@ -205,7 +192,7 @@ static void _php_free_packet_chunk(char **chunk_ptr)
 
 
 /* {{{ _php_wddx_destructor */
-static void _php_wddx_destructor(wddx_packet *packet)
+void _php_wddx_destructor(wddx_packet *packet)
 {
 	dlst_kill(packet->packet_head, (void (*)(void *))_php_free_packet_chunk);
 	efree(packet);
@@ -224,7 +211,7 @@ int php_minit_wddx(INIT_FUNC_ARGS)
 
 
 /* {{{ _php_wddx_add_chunk */
-static void _php_wddx_add_chunk(wddx_packet *packet, char *str)
+void _php_wddx_add_chunk(wddx_packet *packet, char *str)
 {
 	char **chunk_ptr;
 	
@@ -237,7 +224,7 @@ static void _php_wddx_add_chunk(wddx_packet *packet, char *str)
 
 
 /* {{{ _php_wddx_gather */
-static char* _php_wddx_gather(wddx_packet *packet)
+char* _php_wddx_gather(wddx_packet *packet)
 {
 	char **chunk;
 	char *buf;
@@ -256,7 +243,7 @@ static char* _php_wddx_gather(wddx_packet *packet)
 
 
 /* {{{ void _php_wddx_packet_start */
-static void _php_wddx_packet_start(wddx_packet *packet, char *comment)
+void _php_wddx_packet_start(wddx_packet *packet, char *comment)
 {
 	char tmp_buf[WDDX_BUF_LEN];
 	
@@ -274,7 +261,7 @@ static void _php_wddx_packet_start(wddx_packet *packet, char *comment)
 
 
 /* {{{ int _php_wddx_packet_end */
-static void _php_wddx_packet_end(wddx_packet *packet)
+void _php_wddx_packet_end(wddx_packet *packet)
 {
 	_php_wddx_add_chunk(packet, WDDX_DATA_E);
 	_php_wddx_add_chunk(packet, WDDX_PACKET_E);	
@@ -385,7 +372,7 @@ static void _php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 
 
 /* {{{ void _php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name) */
-static void _php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name)
+void _php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name)
 {
 	char tmp_buf[WDDX_BUF_LEN];
 	
@@ -607,8 +594,8 @@ static void _php_wddx_process_data(void *user_data, const char *s, int len)
 /* }}} */
 
 
-/* {{{ void _php_wddx_deserialize(zval *packet, zval *return_value) */
-static void _php_wddx_deserialize(zval *packet, zval *return_value)
+/* {{{ void _php_wddx_deserialize_ex(char *value, int vallen, zval *return_value) */
+void _php_wddx_deserialize_ex(char *value, int vallen, zval *return_value)
 {
 	wddx_stack stack;
 	XML_Parser parser;
@@ -621,7 +608,7 @@ static void _php_wddx_deserialize(zval *packet, zval *return_value)
 	XML_SetElementHandler(parser, _php_wddx_push_element, _php_wddx_pop_element);
 	XML_SetCharacterDataHandler(parser, _php_wddx_process_data);
 	
-	XML_Parse(parser, packet->value.str.val, packet->value.str.len, 1);
+	XML_Parse(parser, value, vallen, 1);
 	
 	XML_ParserFree(parser);
 
@@ -723,6 +710,18 @@ PHP_FUNCTION(wddx_serialize_vars)
 }
 /* }}} */
 
+wddx_packet *_php_wddx_constructor(void)
+{
+	wddx_packet *packet;
+
+	packet = emalloc(sizeof(wddx_packet));
+	if(!packet) return NULL;
+
+	packet->packet_head = dlst_init();
+	packet->packet_length = 0;
+
+	return packet;
+}
 
 /* {{{ proto int wddx_packet_start([ string comment ])
    Starts a WDDX packet with optional comment and returns the packet id */
@@ -739,14 +738,11 @@ PHP_FUNCTION(wddx_packet_start)
 		WRONG_PARAM_COUNT;
 	}
 
-	packet = emalloc(sizeof(wddx_packet));
+	packet = _php_wddx_constructor();
 	if (!packet) {
 		zend_error(E_WARNING, "Unable to allocate memory in wddx_packet_start");
 		RETURN_FALSE;
 	}
-	
-	packet->packet_head = dlst_init();
-	packet->packet_length = 0;
 	
 	if (argc == 1) {
 		convert_to_string(comment);
