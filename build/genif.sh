@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.1 2000-12-20 17:21:37 sas Exp $
+# $Id: genif.sh,v 1.2 2001-03-30 14:02:20 sas Exp $
 # replacement for genif.pl
 
 infile="$1"
@@ -23,7 +23,7 @@ olddir=`pwd`
 cd $srcdir
 
 for ext in ${1+"$@"} ; do
-	module_ptrs="	phpext_${ext}_ptr,\\\n$module_ptrs"
+	module_ptrs="	phpext_${ext}_ptr,@NEWLINE@$module_ptrs"
 	header_list="$header_list ext/$ext/*.h"
 done
 
@@ -35,7 +35,7 @@ cat $infile | \
 	sed \
 	-e "s'@EXT_INCLUDE_CODE@'$includes'" \
 	-e "s'@EXT_MODULE_PTRS@'$module_ptrs'" \
-	-e 's/[\]n/\
+	-e 's/@NEWLINE@/\
 /g'
 
 
