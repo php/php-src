@@ -40,8 +40,8 @@ char *_php3_regreplace(const char *pattern, const char *replace, const char *str
 
 PHP_FUNCTION(ereg);
 PHP_FUNCTION(eregi);
-PHP_FUNCTION(eregireplace);
-PHP_FUNCTION(eregreplace);
+PHP_FUNCTION(eregi_replace);
+PHP_FUNCTION(ereg_replace);
 PHP_FUNCTION(split);
 PHPAPI PHP_FUNCTION(sql_regcase);
 

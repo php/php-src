@@ -696,6 +696,7 @@ PHP_FUNCTION(wddx_serialize_vars)
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
 	
 	for (i=0; i<argc; i++) {
+		convert_to_string(args[i]);
 		_php_wddx_add_var(packet, args[i]);
 	}	
 	
@@ -815,6 +816,7 @@ PHP_FUNCTION(wddx_add_vars)
 	}
 		
 	for (i=1; i<argc; i++) {
+		convert_to_string(args[i]);
 		_php_wddx_add_var(packet, args[i]);
 	}
 

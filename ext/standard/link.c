@@ -183,11 +183,11 @@ PHP_FUNCTION(unlink)
 /* }}} */
 
 function_entry link_functions[] = {
-	{"readlink",		php3_readlink,		NULL},
-	{"linkinfo",		php3_linkinfo,		NULL},
-	{"symlink",			php3_symlink,		NULL},
-	{"link",			php3_link,			NULL},
-	{"unlink",			php3_unlink,		NULL},
+	PHP_FE(readlink,								NULL)
+	PHP_FE(linkinfo,								NULL)
+	PHP_FE(symlink,									NULL)
+	PHP_FE(link,									NULL)
+	PHP_FE(unlink,									NULL)
 	{NULL, NULL, NULL}
 };
 

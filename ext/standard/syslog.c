@@ -257,10 +257,10 @@ PHP_FUNCTION(syslog)
 
 
 function_entry syslog_functions[] = {
-	{"openlog",					php3_openlog,					NULL},
-	{"syslog",					php3_syslog,					NULL},
-	{"closelog",				php3_closelog,					NULL},
-	{"define_syslog_variables",	php3_define_syslog_variables,	NULL},
+	PHP_FE(openlog,									NULL)
+	PHP_FE(syslog,									NULL)
+	PHP_FE(closelog,								NULL)
+	PHP_FE(define_syslog_variables,					NULL)
 	{NULL, NULL, NULL}
 };
 

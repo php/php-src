@@ -3,6 +3,8 @@
 # do some version checking for the tools we use
 if test "$1" = "--force"; then
     shift
+elif test -r buildconf.stamp ; then 
+    :
 else
     echo "buildconf: checking installation..."
 
@@ -42,15 +44,34 @@ else
 	echo "buildconf: automake version $am_version (ok)"
     fi
 
-    # The stuff from libtool we need is in CVS right now, so it is
-    # not required to run buildconf.
+    # libtool 1.2f or newer
+    lt_pversion=`libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/ .*//'`
+    if test "$lt_pversion" = ""; then
+	echo "buildconf: libtool not found."
+	echo "           You need libtool version 1.3 or newer installed"
+	echo "           to build PHP from CVS."
+	exit 1
+    fi
+    lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
+    IFS=.; set $lt_version; IFS=' '
+    if test "$1" -gt "1" || test "$2" -ge "3" || test "$2" = "2" -a "$3" = "f"
+    then
+	echo "buildconf: libtool version $lt_pversion (ok)"
+    else
+	echo "buildconf: libtool version $lt_pversion found."
+	echo "           You need libtool version 1.2f or newer installed"
+	echo "           to build PHP from CVS."
+	exit 1
+    fi
+    
+    touch buildconf.stamp
 fi
 
 if test "$1" = "--copy"; then
     automake_flags=--copy
 fi
 
-if ! test -d libzend; then
+if test ! -d libzend; then
     if test -d ../libzend; then
 	echo "buildconf: linking ../libzend to ./libzend"
         ln -s ../libzend .
@@ -60,7 +81,7 @@ if ! test -d libzend; then
 	exit 1
     fi
 fi
-if ! test -d TSRM; then
+if test ! -d TSRM; then
     if test -d ../TSRM; then
 	echo "buildconf: linking ../TSRM to ./TSRM"
         ln -s ../TSRM .
@@ -72,6 +93,8 @@ if ! test -d TSRM; then
 fi
 
 ./scripts/preconfig
+
+libtoolize --automake $automake_flags --force
 
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal

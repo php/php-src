@@ -83,8 +83,8 @@ extern int le_fp;
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 
 function_entry fsock_functions[] = {
-      PHP_FE(fsockopen, third_and_fourth_args_force_ref)
-      PHP_FE(pfsockopen, third_and_fourth_args_force_ref)
+      PHP_FE(fsockopen, 							third_and_fourth_args_force_ref)
+      PHP_FE(pfsockopen, 							third_and_fourth_args_force_ref)
       {NULL, NULL, NULL}
 };
 
@@ -248,7 +248,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	switch(arg_count) {
 		case 5:
 			convert_to_double(args[4]);
-			conv = args[4]->value.dval * 1000000.0;
+			conv = (unsigned long) (args[4]->value.dval * 1000000.0);
 			timeout.tv_sec = conv / 1000000;
 			timeout.tv_usec = conv % 1000000;
 			/* fall-through */

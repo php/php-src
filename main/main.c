@@ -359,6 +359,9 @@ PHPAPI void php3_error(int type, const char *format,...)
 
 				error_filename = zend_get_compiled_filename();
 				error_lineno = CG(zend_lineno);
+				if (!error_filename) {
+					error_filename = zend_get_executed_filename(ELS_C);
+				}
 			}
 			break;
 		case E_ERROR:
@@ -371,6 +374,10 @@ PHPAPI void php3_error(int type, const char *format,...)
 			error_filename = NULL;
 			error_lineno = 0;
 			break;
+	}
+
+	if (!error_filename) {
+		error_filename = "Unknown";
 	}
 		
 	if (EG(error_reporting) & type || (type & E_CORE)) {
@@ -501,7 +508,7 @@ static void php3_unset_timeout()
 }
 
 
-void php3_set_time_limit(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(set_time_limit)
 {
 	pval *new_timeout;
 	PLS_FETCH();
@@ -768,11 +775,10 @@ int php_module_startup(sapi_module_struct *sf)
 	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id);
 #endif
 #if (WIN32|WINNT) && !(USE_SAPI)
-	WORD wVersionRequested;
+	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
-
-	wVersionRequested = MAKEWORD(2, 0);
 #endif
+	ELS_FETCH();
 
 	SG(server_context) = NULL;
 	SG(request_info).request_method = NULL;
@@ -782,6 +788,8 @@ int php_module_startup(sapi_module_struct *sf)
 		return SUCCESS;
 	}
 
+	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	
 	sapi_module = *sf;
 
 	zend_output_startup();

@@ -2,6 +2,28 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed a problem with the PHP error handler that could result in a crash
+  on certain operating systems (Zeev)
+- Apache php_flag values only recognized 'On' (case sensitive) - changed
+  to case insensitive (Zeev)
+- Fixed a memory leak with switch statement containing return statements
+  (Andi & Zeev, libzend)
+- Fixed a crash problem in switch statements that had a string offset
+  as a conditional (Andi & Zeev, libzend)
+- Imported PHP3 fixes for rand() and mt_rand() (Rasmus)
+- Added function entries for strip_tags() and similar_text() (Andrey)
+- Fixed a bug in WDDX that would cause a crash if a number was passed in
+  instead of a variable name (Andrey)
+- Ported strtotime() function from PHP3 (Andrey)
+- Merged in gdttf stuff from php3 (Sascha)
+- buildconf now checks your installation (Stig)
+- XML module now built dynamically with --with-xml=shared (Stig)
+- Added a check for freetype.h - fixed build on RedHat 6.0 (Zeev)
+- Fixed array_walk() to work in PHP4 (Andrey)
+- Ported all remaining date() format options from PHP3 (Andrey)
+- $php_errormsg now works (Andrey)
+- Added locale support for Perl Compatible Regexp functions (Andrey)
+- Informix module ported (Danny)
 - Removed --with-shared-apache (Sascha)
 - Added patch for reverse lookup table in base64_decode (Sascha)
   Submitted by bfranklin@dct.com

@@ -29,6 +29,9 @@
 #include "php_globals.h"
 
 #include <time.h>
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 #include <stdio.h>
 
 char *mon_full_names[] =
@@ -61,6 +64,8 @@ static int phpday_tab[2][12] =
 };
 
 #define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
+
+extern PHPAPI time_t parsedate(char *p, struct timeval *now);
 
 PHP_FUNCTION(time)
 {
@@ -550,6 +555,32 @@ PHP_FUNCTION(strftime)
 	RETURN_FALSE;
 }
 #endif
+
+/* {{{ proto int strtotime(string time, int now) */
+PHP_FUNCTION(strtotime)
+{
+	pval	*timep, *nowp;
+	int 	 ac;
+	struct timeval tv;
+
+	ac = ARG_COUNT(ht);
+
+	if (ac < 1 || ac > 2 || getParameters(ht, ac, &timep, &nowp)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string(timep);
+	if (ac == 2) {
+		convert_to_long(nowp);
+		tv.tv_sec = nowp->value.lval;
+		tv.tv_usec = 0;
+		RETURN_LONG(parsedate(timep->value.str.val, &tv));
+	} else {
+		RETURN_LONG(parsedate(timep->value.str.val, NULL));
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

@@ -28,7 +28,7 @@ typedef union _temp_variable {
 	zval tmp_var;
 	zval **var;
 	struct {
-		zval **var_dummy; /* a dummy */
+		zval tmp_var; /* a dummy */
 
 		zval *str;
 		int offset;

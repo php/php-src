@@ -588,7 +588,6 @@ void do_free(znode *op1 CLS_DC)
 			&& opline->result.u.var == op1->u.var) {
 			opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 		} else {
-
 			/* This should be an object instanciation
 			 * Find JMP_NO_CTOR, mark the preceding ASSIGN and the
 			 * proceeding INIT_FCALL_BY_NAME as unused
@@ -833,9 +832,27 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 }
 
 
-void do_return(znode *expr CLS_DC)
+static void generate_free_switch_expr(zend_switch_entry *switch_entry CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+
+	opline->opcode = ZEND_SWITCH_FREE;
+	opline->op1 = switch_entry->cond;
+	SET_UNUSED(opline->op2);
+}
+
+
+void do_return(znode *expr CLS_DC)
+{
+	zend_op *opline;
+	
+#ifdef ZTS
+	zend_stack_apply_with_argument(&CG(switch_cond_stack), (void (*)(void *element, void *)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN CLS_CC);
+#else
+	zend_stack_apply(&CG(switch_cond_stack), (void (*)(void *element)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN);
+#endif
+
+	opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_RETURN;
 	if (expr) {
@@ -1096,7 +1113,10 @@ void do_switch_end(znode *case_list CLS_DC)
 	CG(active_op_array)->current_brk_cont = CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].parent;
 
 	/* emit free for the switch condition*/
-	do_free(&switch_entry_ptr->cond CLS_CC);
+	opline = get_next_op(CG(active_op_array) CLS_CC);
+	opline->opcode = ZEND_SWITCH_FREE;
+	opline->op1 = switch_entry_ptr->cond;
+	SET_UNUSED(opline->op2);
 	if (switch_entry_ptr->cond.op_type == IS_CONST) {
 		zval_dtor(&switch_entry_ptr->cond.u.constant);
 	}

@@ -54,7 +54,7 @@ extern php3_module_entry php3_header_module_entry;
 
 extern int php3_init_head(INIT_FUNC_ARGS);
 PHP_FUNCTION(Header);
-PHP_FUNCTION(SetCookie);
+PHP_FUNCTION(setcookie);
 PHP_FUNCTION(headers_sent);
 
 void php4i_add_header_information(char *header_information, uint header_length);

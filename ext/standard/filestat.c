@@ -442,39 +442,40 @@ FileFunction(php3_fileatime,5)
 FileFunction(php3_filemtime,6)
 FileFunction(php3_filectime,7)
 FileFunction(php3_filetype, 8)
-FileFunction(php3_iswritable, 9)
-FileFunction(php3_isreadable,10)
-FileFunction(php3_isexec,11)
-FileFunction(php3_isfile,12)
-FileFunction(php3_isdir,13)
-FileFunction(php3_islink,14)
-FileFunction(php3_fileexists,15)
+FileFunction(php3_is_writable, 9)
+FileFunction(php3_is_readable,10)
+FileFunction(php3_is_executable,11)
+FileFunction(php3_is_file,12)
+FileFunction(php3_is_dir,13)
+FileFunction(php3_is_link,14)
+FileFunction(php3_file_exists,15)
 FileFunction(php3_lstat,16)
 FileFunction(php3_stat,17)
 
 function_entry php3_filestat_functions[] = {
-	{"fileatime",	php3_fileatime,		NULL},
-	{"filectime",	php3_filectime,		NULL},
-	{"filegroup",	php3_filegroup,		NULL},
-	{"fileinode",	php3_fileinode,		NULL},
-	{"filemtime",	php3_filemtime,		NULL},
-	{"fileowner",	php3_fileowner,		NULL},
-	{"fileperms",	php3_fileperms,		NULL},
-	{"filesize",	php3_filesize,		NULL},
-	{"filetype",	php3_filetype,		NULL},
-	{"file_exists",	php3_fileexists,	NULL},
-	{"is_writeable",php3_iswritable,	NULL},
-	{"is_readable",	php3_isreadable,	NULL},
-	{"is_executable",php3_isexec,		NULL},
-	{"is_file",		php3_isfile,		NULL},
-	{"is_dir",		php3_isdir,			NULL},
-	{"is_link",		php3_islink,		NULL},
-	{"stat",		php3_stat,			NULL},
-	{"lstat",		php3_lstat,			NULL},
-	{"chown",		php3_chown,			NULL},
-	{"chgrp",		php3_chgrp,			NULL},
-	{"chmod",		php3_chmod,			NULL},
-	{"touch",		php3_touch,			NULL},
+	PHP_FE(fileatime,								NULL)
+	PHP_FE(filectime,								NULL)
+	PHP_FE(filegroup,								NULL)
+	PHP_FE(fileinode,								NULL)
+	PHP_FE(filemtime,								NULL)
+	PHP_FE(fileowner,								NULL)
+	PHP_FE(fileperms,								NULL)
+	PHP_FE(filesize,								NULL)
+	PHP_FE(filetype,								NULL)
+	PHP_FE(file_exists,								NULL)
+	PHP_FE(is_writable,								NULL)
+	PHP_FE(is_readable,								NULL)
+	PHP_FE(is_executable,							NULL)
+	PHP_FE(is_file,									NULL)
+	PHP_FE(is_dir,									NULL)
+	PHP_FE(is_link,									NULL)
+	PHP_FE(stat,									NULL)
+	PHP_FE(lstat,									NULL)
+	PHP_FE(chown,									NULL)
+	PHP_FE(chgrp,									NULL)
+	PHP_FE(chmod,									NULL)
+	PHP_FE(touch,									NULL)
+	PHP_FE(clearstatcache,							NULL)
 	{NULL, NULL, NULL}
 };
 

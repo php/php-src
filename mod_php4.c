@@ -425,7 +425,7 @@ CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, c
 {
 	char bool_val[2];
 
-	if (!strcmp(arg2, "On")) {
+	if (!strcasecmp(arg2, "On")) {
 		bool_val[0] = '1';
 	} else {
 		bool_val[0] = '0';
