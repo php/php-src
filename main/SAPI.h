@@ -264,7 +264,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader);
 SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 
-#define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL
+#define STANDARD_SAPI_MODULE_PROPERTIES
 
 #endif /* SAPI_H */
 
