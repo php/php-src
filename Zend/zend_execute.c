@@ -3444,7 +3444,7 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (container) {
 		HashTable *ht;
 
-		switch (EX(opline)->opcode) {
+		switch (EX(opline)->extended_value) {
 			case ZEND_UNSET_DIM:
 				switch (Z_TYPE_PP(container)) {
 					case IS_ARRAY:
@@ -4092,8 +4092,7 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_INCLUDE_OR_EVAL] = zend_include_or_eval_handler;
 
 	zend_opcode_handlers[ZEND_UNSET_VAR] = zend_unset_var_handler;
-	zend_opcode_handlers[ZEND_UNSET_DIM] = zend_unset_dim_obj_handler;
-	zend_opcode_handlers[ZEND_UNSET_OBJ] = zend_unset_dim_obj_handler;
+	zend_opcode_handlers[ZEND_UNSET_DIM_OBJ] = zend_unset_dim_obj_handler;
 
 	zend_opcode_handlers[ZEND_FE_RESET] = zend_fe_reset_handler;
 	zend_opcode_handlers[ZEND_FE_FETCH] = zend_fe_fetch_handler;

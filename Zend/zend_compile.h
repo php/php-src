@@ -571,8 +571,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_INCLUDE_OR_EVAL		73
 									
 #define ZEND_UNSET_VAR				74
-#define ZEND_UNSET_DIM				75
-#define ZEND_UNSET_OBJ				76
+#define ZEND_UNSET_DIM_OBJ			75
 									
 #define ZEND_FE_RESET				77
 #define ZEND_FE_FETCH				78
@@ -669,6 +668,11 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_LOCAL			1
 #define ZEND_FETCH_STATIC			2
 #define ZEND_FETCH_STATIC_MEMBER	3
+
+
+/* obj/dim unsets */
+#define ZEND_UNSET_DIM				1
+#define ZEND_UNSET_OBJ				2
 
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0

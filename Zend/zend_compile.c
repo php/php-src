@@ -2901,10 +2901,12 @@ void zend_do_unset(znode *variable TSRMLS_DC)
 			last_op->opcode = ZEND_UNSET_VAR;
 			break;
 		case ZEND_FETCH_DIM_UNSET:
-			last_op->opcode = ZEND_UNSET_DIM;
+			last_op->opcode = ZEND_UNSET_DIM_OBJ;
+			last_op->extended_value = ZEND_UNSET_DIM;
 			break;
 		case ZEND_FETCH_OBJ_UNSET:
-			last_op->opcode = ZEND_UNSET_OBJ;
+			last_op->opcode = ZEND_UNSET_DIM_OBJ;
+			last_op->extended_value = ZEND_UNSET_OBJ;
 			break;
 
 	}
