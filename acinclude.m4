@@ -1455,6 +1455,45 @@ int main(void) {
   fi
 ])
 
+AC_DEFUN([PHP_BROKEN_GLIBC_FOPEN_APPEND],[
+  AC_MSG_CHECKING([for broken libc stdio])
+  AC_TRY_RUN([
+#include <stdio.h>
+int main(int argc, char *argv[])
+{
+  FILE *fp;
+  long position;
+  char *filename = "/tmp/phpglibccheck";
+  
+  fp = fopen(filename, "w");
+  if (fp == NULL) {
+	  perror("fopen");
+	  exit(2);
+  }
+  fputs("foobar", fp);
+  fclose(fp);
+
+  fp = fopen(filename, "a+");
+  position = ftell(fp);
+  fclose(fp);
+  unlink(filename);
+  if (position == 0)
+	return 1;
+  return 0;
+}
+],
+[have_broken_glibc_fopen_append=no],
+[have_broken_glibc_fopen_append=yes ])
+
+  if test "$have_broken_glibc_fopen_append" = "yes"; then
+	AC_MSG_RESULT(yes)
+	AC_DEFINE(HAVE_BROKEN_GLIBC_FOPEN_APPEND,1, [Define if your glibc borks on fopen with mode a+])
+  else
+	AC_MSG_RESULT(no)
+  fi
+])
+
+
 AC_DEFUN([PHP_FOPENCOOKIE],[
 	AC_CHECK_FUNC(fopencookie, [ have_glibc_fopencookie=yes ])
 
