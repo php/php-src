@@ -338,14 +338,19 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		char *new_path;
 		int new_path_length;
   
-		new_path_length = GetFullPathName(path, 0, 0, &dummy) + 1;
+		new_path_length = GetLongPathName(path, dummy, 0) + 1;
+		if (new_path_length == 0) {
+			return 1;
+		}
 		new_path = (char *) malloc(new_path_length);
 		if (!new_path) {
 			return 1;
 		}
 		
-		GetFullPathName(path, new_path_length, new_path, &dummy);
-		free(path);
+		if (GetLongPathName(path, new_path, new_path_length) == 0) {
+			free(new_path);
+			return 1;
+		}
 		path = new_path;
 		path_length = new_path_length;
 	}
