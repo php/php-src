@@ -4,7 +4,6 @@ PHP 4.0                                                                    NEWS
 ?? ??? 200?, Version 4.0.6
 - Fixed a rare possible crash when generating extended information. (Dmitri
   Dmitrienko, Zend Engine)
-- Ported Documentation structure from phpdoc. (James Moore)
 - Improved virtual() to support PHP-enabled URIs. (Zeev)
 - Fixed undefined behavior when using floating point keys in array()
   expressions. (Zeev, Zend Engine)
