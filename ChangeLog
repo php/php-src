@@ -1,3 +1,70 @@
+2000-02-25  Sam Ruby  <rubys@us.ibm.com>
+
+    * php4dllts.dsp: Need to include php_ticks.c in the windows build
+
+    * main.c: Win32 build error:
+
+      warning C4020: 'sapi_activate' : too many actual parameters
+
+    * SAPI.c: Build failure on Win32:
+      error C2198: 'sapi_apply_default_charset' : too few actual parameters
+
+2000-02-25  Stig Bakken  <ssb@fast.no>
+
+    * .cvsignore: let's not ignore Zend/TSRM
+
+    * build/rules.mk
+      build/rules_pear.mk
+      ext/standard/array.c
+      sapi/apache/mod_php4.c
+      .cvsignore
+      Makefile.in
+      SAPI.c
+      SAPI.h
+      configure.in
+      main.c
+      php.ini-dist
+      php_globals.h
+      php_ticks.c
+      php_ticks.h
+      php_version.h:    Implemented default_charset and default_mimetype configuration directives.
+    Started implementing ticks in PHP.
+
+    * pear/DB.php: add a note about include return values
+
+2000-02-25  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/datetime.c: Make 4-diogit date RFC 2068 compliant
+
+2000-02-25  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/metaphone.c: Breaks funclist.txt
+
+2000-02-25  Thies C. Arntzen  <thies@digicol.de>
+
+    * SAPI.c: fix obvious crash.
+
+    stig, in sgi-mode i still "only" get:
+
+    (haven't touched my .ini file in ages - and don't plan to)
+
+    X-Powered-By: PHP/4.0b5-dev
+    Content-type: iso-8859-1   <<< where is text/html?
+
+2000-02-25  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/domxml/domxml.c: More protos.
+
+2000-02-25  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/Makefile.in
+      ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/gdt1.c
+      ext/gd/gdt1.h
+      ext/gd/php_gd.h:
+    Ported T1lib support from PHP3.
+
 2000-02-24  Stig Bakken  <ssb@fast.no>
 
     * SAPI.c
