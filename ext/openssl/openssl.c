@@ -2838,9 +2838,6 @@ PHP_FUNCTION(openssl_sign)
 		RETURN_FALSE;
 	}
 
-	siglen = EVP_PKEY_size(pkey);
-	sigbuf = emalloc(siglen + 1);
-
 	switch (signature_algo) {
 		case OPENSSL_ALGO_SHA1:
 			mdtype = (EVP_MD *) EVP_sha1();
@@ -2854,8 +2851,15 @@ PHP_FUNCTION(openssl_sign)
 		case OPENSSL_ALGO_MD2:
 			mdtype = (EVP_MD *) EVP_md2();
 			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm.");
+			RETURN_FALSE;
+			break;
 	}
-	
+
+	siglen = EVP_PKEY_size(pkey);
+	sigbuf = emalloc(siglen + 1);
+
 	EVP_SignInit(&md_ctx, mdtype);
 	EVP_SignUpdate(&md_ctx, data, data_len);
 	if (EVP_SignFinal (&md_ctx, sigbuf, &siglen, pkey)) {
