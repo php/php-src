@@ -44,6 +44,14 @@
 #endif
 #endif
 
+#if HAVE_UTIME
+# ifdef PHP_WIN32
+#  include <sys/utime.h>
+# else
+#  include <utime.h>
+# endif
+#endif
+
 #ifdef PHP_EXPORTS
 #define CWD_EXPORTS
 #endif
