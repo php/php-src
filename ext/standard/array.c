@@ -980,8 +980,37 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 		
 			zval_ptr_dtor(&retval_ptr);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist",
+			if (Z_TYPE_PP(BG(array_walk_func_name)) == IS_STRING) { 
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist",
 					  (*BG(array_walk_func_name))->value.str.val);
+			} else if (Z_TYPE_PP(BG(array_walk_func_name)) == IS_ARRAY) {
+				char *obj_name = NULL;
+				zval **obj;
+				zval **mt_name;
+
+				if (zend_hash_index_find(Z_ARRVAL_PP(BG(array_walk_func_name)),
+						0, (void **)&obj) == SUCCESS
+					&& zend_hash_index_find(Z_ARRVAL_PP(BG(array_walk_func_name)),
+						1, (void **)&mt_name) == SUCCESS
+					&& Z_TYPE_PP(mt_name) == IS_STRING) {	
+					switch (Z_TYPE_PP(obj)) {
+						case IS_OBJECT:
+							obj_name = Z_OBJ_PP(obj)->ce->name;
+							break;
+
+						case IS_STRING:
+							obj_name = Z_STRVAL_PP(obj);
+							break;
+					}
+				}
+
+				if (obj_name != NULL) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s::%s() - function does not exist",
+						obj_name, Z_STRVAL_PP(mt_name));
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid function name");
+				}
+			}
 		}
 
 		zend_hash_move_forward_ex(target_hash, &pos);
