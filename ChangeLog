@@ -1,3 +1,66 @@
+2001-05-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/file.c: munmap() file in RSHUTDOWN, if PHPWRITE fails.
+
+2001-05-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - Fix for bug #10890 (MFH)
+    - Fixed bugs in the mcrypt extension that caused crashes 
+
+    * ext/mcrypt/mcrypt.c: - Fix for bug #10890
+    - Fixed bugs in the mcrypt extension that caused crashes 
+
+2001-05-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4:
+    First try at using Apache's export list when building a DSO.
+
+2001-05-18  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/gd/gd.c:
+     Added the IMG_ARC_ROUNDED option for the ImageFilledArc() function, which
+     specified that the drawn curve should be rounded. 
+
+    * ext/gd/gd.c: remove more php3 ts stuff
+
+    * ext/gd/gd_ctx.c: should be using the function here.
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/gd/php_gd.h: Remove the remnants of old global macro's
+
+2001-05-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/file.c: Files should be shared among processes.
+
+2001-05-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ctype/ctype.c: a small proto clarification
+
+2001-05-18  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/pcrelib/Makefile.in
+      ext/pcre/config.m4:
+    Move -DSUPPORT_UTF8 flag into the appropriate Makefile so as not to pollute
+    the global namespace.
+
+2001-05-18  Thies C. Arntzen  <thies@thieso.net>
+
+    * build/rules_common.mk
+      sapi/cgi/cgi_main.c: revert parts of last commit - stupid me!
+
+    * NEWS
+      build/rules_common.mk
+      sapi/cgi/cgi_main.c:
+    --enable-memory-usage-info id deprecated. use --enable-memory-limit instead!
+
+2001-05-18  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c:
+    - completed list of error messages (thanks to Torben Wilson)
+
 2001-05-17  James Moore  <James@phpuk.org>
 
     * sapi/cgi/getopt.c:
