@@ -444,7 +444,7 @@ static size_t _php_curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 		return -1;
 	}
 
-	strncpy(buf, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+	strlcpy(buf, Z_STRVAL_P(retval), buflen);
 
 	zval_ptr_dtor(&argv[0]);
 	zval_ptr_dtor(&argv[1]);
