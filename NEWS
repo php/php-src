@@ -25,6 +25,8 @@ PHP 4                                                                      NEWS
   (gavin at ipalsoftware dot com, Ilia)
 - Fixed bug #28525 (gmp_powm() does not work with hexadecimal string modulo
   represented as a string). (pickett at sumu dot org, Ilia)
+- Fixed bug #28466 (mbstring_convert_variables() array separation problem).
+  (Moriyoshi)
 - Fixed bug #28175 (Allow bundled GD to compile against freetype 2.1.2).
   (Elf, Ilia)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
