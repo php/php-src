@@ -22,12 +22,18 @@
 #include "php.h"				/*php specific */
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef NETWARE
 #include <winsock.h>
+#else	/* NETWARE */
+#include <netware\sendmail_nw.h>
+#endif	/* NETWARE */
 #include "time.h"
 #include <string.h>
+#ifndef NETWARE
 #include <malloc.h>
 #include <memory.h>
 #include <winbase.h>
+#endif	/* NETWARE */
 #include "sendmail.h"
 #include "php_ini.h"
 
@@ -69,17 +75,25 @@ char Buffer[MAIL_BUFFER_SIZE];
 
 /* socket related data */
 SOCKET sc;
+#ifndef NETWARE
 WSADATA Data;
 struct hostent *adr;
+#endif	/* NETWARE */
 SOCKADDR_IN sock_in;
+#ifndef NETWARE
 int WinsockStarted;
 /* values set by the constructor */
 char *AppName;
+#endif	/* NETWARE */
 char MailHost[HOST_NAME_LEN];
 char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
+#ifndef NETWARE
 char *php_mailer = "PHP 4 WIN32";
+#else
+char *php_mailer = "PHP 4 NetWare";
+#endif	/* NETWARE */
 
 char *get_header(char *h, char *headers);
 
@@ -201,7 +215,9 @@ int TSendMail(char *host, int *error, char **error_message,
 	char *headers_lc = NULL; /* headers_lc is only created if we've a header at all */
 	TSRMLS_FETCH();
 
+#ifndef NETWARE
 	WinsockStarted = FALSE;
+#endif
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
@@ -305,7 +321,14 @@ void TSMClose()
 	*/
 
 	shutdown(sc, 0); 
+#ifndef NETWARE
 	closesocket(sc);
+#else
+	/* closesocket commented out since it was giving undefined symbol linker error
+	 * close added in its place
+	 */
+	close(sc);
+#endif	/* NETWARE */
 }
 
 
@@ -775,7 +798,11 @@ int MailConnect()
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
+#ifndef NETWARE
 int Post(LPCSTR msg)
+#else
+int Post(char *msg)
+#endif
 {
 	int len = strlen(msg);
 	int slen;
@@ -862,7 +889,11 @@ int Ack(char **server_response)
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
+#ifndef NETWARE
 unsigned long GetAddr(LPSTR szHost)
+#else
+unsigned long GetAddr(char * szHost)
+#endif
 {
 	LPHOSTENT lpstHost;
 	u_long lAddr = INADDR_ANY;
@@ -878,7 +909,11 @@ unsigned long GetAddr(LPSTR szHost)
 
 			lpstHost = gethostbyname(szHost);
 			if (lpstHost) {		/* success */
+#ifndef NETWARE
 				lAddr = *((u_long FAR *) (lpstHost->h_addr));
+#else
+				lAddr = *((u_long *) (lpstHost->h_addr));
+#endif	/* NETWARE */
 			} else {
 				lAddr = INADDR_ANY;		/* failure */
 			}
