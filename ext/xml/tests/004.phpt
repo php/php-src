@@ -4,6 +4,8 @@ XML parser case folding test
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
+chdir(dirname(__FILE__));
+
 $xp = xml_parser_create();
 xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
 xml_set_element_handler($xp, "start_element", "end_element");

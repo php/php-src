@@ -4,6 +4,7 @@ XML parser test, object tuple callbacks
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
+chdir(dirname(__FILE__));
 
 $xml_parser = xml_parser_create();
 $obj = new myclass;
