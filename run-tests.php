@@ -102,10 +102,10 @@ function create_modules_2_test_list() {
 
 
 
-function in_path($program)
+function in_path($program, $windows_p)
 {
     global $HTTP_ENV_VARS;
-    if (substr(PHP_OS, 0, 3) == "WIN") {
+    if ($windows_p) {
         $delim = ";";
         $ext = ".exe";
     } else {
@@ -114,6 +114,10 @@ function in_path($program)
     }
     $slash = DIRECTORY_SEPARATOR;
     $path_components = explode($delim, $HTTP_ENV_VARS['PATH']);
+    if ($windows_p) {
+	$cwd = getcwd() . DIRECTORY_SEPARATOR;
+	array_unshift($path_components, "{$cwd}Release_TS_Inline", "{$cwd}Release_TS");
+    }
     foreach ($path_components as $path) {
         $test = "{$path}{$slash}php{$ext}";
         if (@is_executable($test)) {
@@ -156,7 +160,7 @@ function initialize()
         $php = getcwd() . "/php{$ext}";
     }
     if (empty($php)) {
-        $php = in_path("php");
+        $php = in_path("php", $windows_p);
     }
     if (empty($php)) {
         dowriteln("Unable to find PHP executable (php{$ext}).");
