@@ -27,6 +27,7 @@ typedef int (*verify_path_func)(const cwd_state *);
 
 CWD_API void virtual_cwd_startup();
 CWD_API void virtual_cwd_shutdown();
+CWD_API void virtual_cwd_activate(char *filename);
 CWD_API char *virtual_getcwd_ex(int *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API int virtual_chdir(char *path);

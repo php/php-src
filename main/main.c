@@ -619,7 +619,11 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
 	
 	zend_activate(CLS_C ELS_CC);
-	sapi_activate(SLS_C);	
+	sapi_activate(SLS_C);
+
+#ifdef VIRTUAL_DIR
+	virtual_cwd_activate(SG(request_info).path_translated);
+#endif
 
 	php_set_timeout(PG(max_execution_time));
 	

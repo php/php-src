@@ -145,6 +145,13 @@ CWD_API void virtual_cwd_startup()
 	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, cwd_globals_dtor);
 }
 
+CWD_API void virtual_cwd_activate(char *filename)
+{
+	if (filename) {
+		virtual_chdir_file(filename);
+	}
+}
+
 CWD_API void virtual_cwd_shutdown()
 {
 #ifndef ZTS
