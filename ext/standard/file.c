@@ -1801,6 +1801,32 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 
 	array_init(return_value);
 
+	add_next_index_long(return_value, stat_sb.st_dev);
+	add_next_index_long(return_value, stat_sb.st_ino);
+	add_next_index_long(return_value, stat_sb.st_mode);
+	add_next_index_long(return_value, stat_sb.st_nlink);
+	add_next_index_long(return_value, stat_sb.st_uid);
+	add_next_index_long(return_value, stat_sb.st_gid);
+#ifdef HAVE_ST_RDEV
+	add_next_index_long(return_value, stat_sb.st_rdev);
+#else
+	add_next_index_long(return_value, -1);
+#endif
+	add_next_index_long(return_value, stat_sb.st_size);
+	add_next_index_long(return_value, stat_sb.st_atime);
+	add_next_index_long(return_value, stat_sb.st_mtime);
+	add_next_index_long(return_value, stat_sb.st_ctime);
+#ifdef HAVE_ST_BLKSIZE
+	add_next_index_long(return_value, stat_sb.st_blksize);
+#else
+	add_next_index_long(return_value, -1);
+#endif
+#ifdef HAVE_ST_BLOCKS
+	add_next_index_long(return_value, stat_sb.st_blocks);
+#else
+	add_next_index_long(return_value, -1);
+#endif
+	/* Support string references as well as numerical*/
 	add_assoc_long ( return_value , "dev" , stat_sb.st_dev );
 	add_assoc_long ( return_value , "ino" , stat_sb.st_ino );
 	add_assoc_long ( return_value , "mode" , stat_sb.st_mode );

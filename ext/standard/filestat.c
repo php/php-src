@@ -618,6 +618,30 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #else
 		add_next_index_long(return_value, -1);
 #endif
+		/* Support string references as well as numerical*/
+		add_assoc_long ( return_value , "dev" , stat_sb->st_dev );
+		add_assoc_long ( return_value , "ino" , stat_sb->st_ino );
+		add_assoc_long ( return_value , "mode" , stat_sb->st_mode );
+		add_assoc_long ( return_value , "nlink" , stat_sb->st_nlink );
+		add_assoc_long ( return_value , "uid" , stat_sb->st_uid );
+		add_assoc_long ( return_value , "gid" , stat_sb->st_gid );
+
+#ifdef HAVE_ST_RDEV
+		add_assoc_long ( return_value, "rdev" , stat_sb->st_rdev );
+#endif
+#ifdef HAVE_ST_BLKSIZE
+		add_assoc_long ( return_value , "blksize" , stat_sb->st_blksize );
+#endif
+
+		add_assoc_long ( return_value , "size" , stat_sb->st_size );
+		add_assoc_long ( return_value , "atime" , stat_sb->st_atime );
+		add_assoc_long ( return_value , "mtime" , stat_sb->st_mtime );
+		add_assoc_long ( return_value , "ctime" , stat_sb->st_ctime );
+
+#ifdef HAVE_ST_BLOCKS
+		add_assoc_long ( return_value , "blocks" , stat_sb->st_blocks );
+#endif
+
 		return;
 	}
 	php_error(E_WARNING, "didn't understand stat call");
