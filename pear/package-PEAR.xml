@@ -33,7 +33,7 @@
   <release>
     <version>1.0RC1</version>
     <state>stable</state>
-    <date>2002-10-03</date>
+    <date>2002-10-13</date>
     <notes>
 New Features, Installer:
 * new command: "pear search"
@@ -46,6 +46,7 @@ New Features, Installer:
 * XML-RPC results may now be cached (see
   cache_dir and cache_ttl config)
 * HTTP proxy authorization support
+* install/upgrade install-root support
 
 Bugfixes, Installer:
 * fix for XML-RPC bug that made some remote
@@ -59,6 +60,8 @@ Bugfixes, Installer:
   "PHP/4.2.1" as user agent
 * bending over a little more to figure out how
   PHP is installed
+* "platform" file attribute was not included
+  during "pear package"
 
 New Features, PEAR Library:
 * added PEAR::loadExtension($ext)
