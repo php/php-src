@@ -360,7 +360,7 @@ zval *master_to_zval(encodePtr encode, xmlNodePtr data)
 			}
 		}
 	}
-	master_to_zval_int(encode, data);
+	return master_to_zval_int(encode, data);
 }
 
 #ifdef HAVE_PHP_DOMXML
@@ -955,8 +955,19 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 	xmlNodePtr trav;
 	sdlPtr sdl;
 	sdlTypePtr sdlType = type->sdl_type;
+	zend_class_entry *ce = ZEND_STANDARD_CLASS_DEF_PTR;
 	TSRMLS_FETCH();
 
+	if (SOAP_GLOBAL(class_map) && type->type_str) {
+		zval             **classname;
+		zend_class_entry  *tmp;
+
+		if (zend_hash_find(SOAP_GLOBAL(class_map), type->type_str, strlen(type->type_str)+1, (void**)&classname) == SUCCESS &&
+		    Z_TYPE_PP(classname) == IS_STRING &&
+		    (tmp = zend_fetch_class(Z_STRVAL_PP(classname), Z_STRLEN_PP(classname), ZEND_FETCH_CLASS_AUTO TSRMLS_CC)) != NULL) {
+			ce = tmp; 
+		}
+	}
 	sdl = SOAP_GLOBAL(sdl);
 	if (sdlType) {
 		if (sdlType->kind == XSD_TYPEKIND_RESTRICTION &&
@@ -975,7 +986,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 
 				MAKE_STD_ZVAL(ret);
 
-				object_init(ret);
+				object_init_ex(ret, ce);
 				base = master_to_zval_int(enc, data);
 #ifdef ZEND_ENGINE_2
 				base->refcount--;
@@ -984,7 +995,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 			} else {
 				MAKE_STD_ZVAL(ret);
 				FIND_XML_NULL(data, ret);
-				object_init(ret);
+				object_init_ex(ret, ce);
 			}
 		} else if (sdlType->kind == XSD_TYPEKIND_EXTENSION &&
 		           sdlType->encode &&
@@ -1000,7 +1011,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 
 				MAKE_STD_ZVAL(ret);
 
-				object_init(ret);
+				object_init_ex(ret, ce);
 				base = master_to_zval_int(sdlType->encode, data);
 #ifdef ZEND_ENGINE_2
 				base->refcount--;
@@ -1010,7 +1021,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 		} else {
 			MAKE_STD_ZVAL(ret);
 			FIND_XML_NULL(data, ret);
-			object_init(ret);
+			object_init_ex(ret, ce);
 		}
 		if (sdlType->model) {
 			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
@@ -1056,7 +1067,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 
 		MAKE_STD_ZVAL(ret);
 		FIND_XML_NULL(data, ret);
-		object_init(ret);
+		object_init_ex(ret, ce);
 
 		trav = data->children;
 

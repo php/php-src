@@ -101,6 +101,10 @@ SOURCE=.\php_http.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_packet_soap.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_schema.c
 # End Source File
 # Begin Source File
@@ -126,6 +130,10 @@ SOURCE=.\php_encoding.h
 # Begin Source File
 
 SOURCE=.\php_http.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_packet_soap.h
 # End Source File
 # Begin Source File
 
