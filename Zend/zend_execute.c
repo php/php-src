@@ -2076,7 +2076,7 @@ send_by_ref:
 					if (EX(opline)->op1.op_type == IS_UNUSED) {
 						if (EG(namespace)) {
 							ce = EG(namespace);
-							if (zend_hash_find(&ce->constants, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
+							if (zend_hash_find(&ce->constants_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
 								zval_update_constant(value, (void *) 1 TSRMLS_CC);
 								EX(Ts)[EX(opline)->result.u.var].tmp_var = **value;
 								zval_copy_ctor(&EX(Ts)[EX(opline)->result.u.var].tmp_var);
@@ -2095,7 +2095,7 @@ send_by_ref:
 					
 					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
 					
-					if (zend_hash_find(&ce->constants, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
+					if (zend_hash_find(&ce->constants_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
 						zval_update_constant(value, (void *) 1 TSRMLS_CC);
 						EX(Ts)[EX(opline)->result.u.var].tmp_var = **value;
 						zval_copy_ctor(&EX(Ts)[EX(opline)->result.u.var].tmp_var);

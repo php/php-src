@@ -328,7 +328,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				}
 				last = cur;
 			}
-			if (zend_hash_find(&ce->constants, last, strlen(last)+1, (void **) &value) == FAILURE) {
+			if (zend_hash_find(&ce->constants_table, last, strlen(last)+1, (void **) &value) == FAILURE) {
 				zend_error(E_ERROR, "Invalid class! Improve this error message");
 			}
 			const_value = **value;

@@ -1281,7 +1281,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	/* STATIC_MEMBERS_FIXME */
 	zend_hash_merge(&ce->static_members, &parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
-	zend_hash_merge(&ce->constants, &parent_ce->constants, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
+	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
 	ce->parent = parent_ce;
 	if (!ce->handle_property_get)
@@ -1389,7 +1389,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					zend_hash_destroy(&ce->function_table);
 					zend_hash_destroy(&ce->default_properties);
 					zend_hash_destroy(&ce->static_members);
-					zend_hash_destroy(&ce->constants);
+					zend_hash_destroy(&ce->constants_table);
 					return FAILURE;
 				}
 				return SUCCESS;
@@ -1723,7 +1723,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry.static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_init(&new_class_entry.constants, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry.constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
 
 	new_class_entry.constructor = NULL;
 
@@ -1752,7 +1752,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 			zend_hash_copy(&new_class_entry.static_members, &parent_class->static_members, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 			/* copy constants */
-			zend_hash_copy(&new_class_entry.constants, &parent_class->constants, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+			zend_hash_copy(&new_class_entry.constants_table, &parent_class->constants_table, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 			new_class_entry.constructor = parent_class->constructor;
 
@@ -1839,7 +1839,7 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 				zend_hash_update(&CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
 				break;
 			case T_CONST:
-				zend_hash_update(&CG(active_class_entry)->constants, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+				zend_hash_update(&CG(active_class_entry)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
 				break;
 		}
 	}
