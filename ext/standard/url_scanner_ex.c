@@ -162,7 +162,7 @@ yy5:
 yy6:	yych = *++YYCURSOR;
 yy7:
 #line 113
-	{ bash = p; goto done; }
+	{ bash = p - 1; goto done; }
 yy8:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
