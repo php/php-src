@@ -42,6 +42,9 @@ PHP_FUNCTION(curl_version);
 PHP_FUNCTION(curl_init);
 PHP_FUNCTION(curl_setopt);
 PHP_FUNCTION(curl_exec);
+#if LIBCURL_VERSION_NUM >= 0x070401
+PHP_FUNCTION(curl_getinfo);
+#endif
 PHP_FUNCTION(curl_error);
 PHP_FUNCTION(curl_errno);
 PHP_FUNCTION(curl_close);
@@ -56,7 +59,7 @@ typedef struct {
 } php_curl;
 
 typedef struct {
-	int le_curl;
+
 } php_curl_globals;
 
 #ifdef ZTS
