@@ -2645,7 +2645,7 @@ PHP_FUNCTION(mb_convert_case)
 }
 /* }}} */
 
-/* {{{ proto string mb_strtoupper(string sourcestring, [, string encoding])
+/* {{{ proto string mb_strtoupper(string sourcestring [, string encoding])
  *  Returns a uppercased version of sourcestring
  */
 PHP_FUNCTION(mb_strtoupper)
@@ -2668,7 +2668,7 @@ PHP_FUNCTION(mb_strtoupper)
 }
 /* }}} */
 
-/* {{{ proto string mb_strtolower(string sourcestring, [, string encoding])
+/* {{{ proto string mb_strtolower(string sourcestring [, string encoding])
  *  Returns a lowercased version of sourcestring
  */
 PHP_FUNCTION(mb_strtolower)
