@@ -737,8 +737,71 @@ function_entry dbase_functions[] = {
 	PHP_FE(dbase_get_record_with_names,				NULL)
 	PHP_FE(dbase_delete_record,						NULL)
 	PHP_FE(dbase_pack,								NULL)
+	PHP_FE(dbase_get_header_info,					NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
+
+/* Added by Zak Greant <zak@php.net> */
+/* {{{ proto array dbase_get_header_info(int database_handle)
+ */
+PHP_FUNCTION(dbase_get_header_info)
+{
+	zval		**dbh_id, *row;
+	dbfield_t	*dbf, *cur_f;
+	dbhead_t	*dbh;
+	int 		dbh_type;
+	DBase_TLS_VARS;	
+
+	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &dbh_id) == FAILURE)) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(dbh_id);
+
+	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
+	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value)==FAILURE) {
+		RETURN_FALSE;
+	}
+
+	dbf = dbh->db_fields;
+	for (cur_f = dbf; cur_f < &dbh->db_fields[dbh->db_nfields]; ++cur_f) {
+		MAKE_STD_ZVAL(row);
+		array_init(row);
+		
+		add_next_index_zval(return_value, row);
+		
+		/* field name */
+		add_assoc_string(row, "name", cur_f->db_fname, 1);
+		
+		/* field type */
+		switch (cur_f->db_type) {
+			case 'C': add_assoc_string(row, "type", "character", 1);	break;
+			case 'D': add_assoc_string(row, "type", "date", 1); 		break;
+			case 'I': add_assoc_string(row, "type", "integer", 1); 		break;
+			case 'N': add_assoc_string(row, "type", "number", 1); 		break;
+			case 'L': add_assoc_string(row, "type", "boolean", 1);		break;
+			case 'M': add_assoc_string(row, "type", "memo", 1);			break;
+			default:  add_assoc_string(row, "type", "unknown", 1);		break;
+		}
+		
+		/* length of field */
+		add_assoc_long(row, "length", cur_f->db_flen);
+		
+		/* number of decimals in field */
+		add_assoc_long(row, "decimal places", cur_f->db_fdc);
+
+		/* format for printing %s etc */
+		add_assoc_string(row, "printf format", cur_f->db_format, 1);
+		
+		/* offset within record */
+		add_assoc_long(row, "record offset", cur_f->db_foffset);
+	}
+}
 /* }}} */
 
 zend_module_entry dbase_module_entry = {
