@@ -188,6 +188,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	dom_object *nnmap;
 	dom_nnodemap_object *objmap;
 	int ret, previndex=1;
+	HashTable *nodeht;
+	pval **entry;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
@@ -199,18 +201,26 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	intern = (dom_object *)zend_object_store_get_object(curobj TSRMLS_CC);
 	if (intern != NULL && intern->ptr != NULL) {
 		if (objmap->ht == NULL) {
-			curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
-			if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-				curnode = curnode->next;
-			} else {
-				/* Nav the tree evey time as this is LIVE */
-				basenode = dom_object_get_node(objmap->baseobj);
-				if (basenode && (basenode->type == XML_DOCUMENT_NODE || basenode->type == XML_HTML_DOCUMENT_NODE)) {
-					basenode = xmlDocGetRootElement((xmlDoc *) basenode);
-				} else {
-					basenode = basenode->children;
+			if (objmap->nodetype == DOM_NODESET) {
+				nodeht = HASH_OF(objmap->baseobjptr);
+				zend_hash_move_forward(nodeht);
+				if (zend_hash_get_current_data(nodeht, (void **) &entry)==SUCCESS) {
+					curattr = *entry;
 				}
-				curnode = dom_get_elements_by_tag_name_ns_raw(basenode, objmap->ns, objmap->local, &previndex, iter->index);
+			} else {
+				curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
+				if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+					curnode = curnode->next;
+				} else {
+					/* Nav the tree evey time as this is LIVE */
+					basenode = dom_object_get_node(objmap->baseobj);
+					if (basenode && (basenode->type == XML_DOCUMENT_NODE || basenode->type == XML_HTML_DOCUMENT_NODE)) {
+						basenode = xmlDocGetRootElement((xmlDoc *) basenode);
+					} else {
+						basenode = basenode->children;
+					}
+					curnode = dom_get_elements_by_tag_name_ns_raw(basenode, objmap->ns, objmap->local, &previndex, iter->index);
+				}
 			}
 		} else {
 			if (objmap->nodetype == XML_ENTITY_NODE) {
@@ -243,9 +253,11 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TS
 {
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
-	xmlNodePtr nodep, curnode;
+	xmlNodePtr nodep, curnode=NULL;
 	zval *curattr = NULL;
 	int ret, curindex = 0;
+	HashTable *nodeht;
+	pval **entry;
 
 	php_dom_iterator *iterator = emalloc(sizeof(php_dom_iterator));
 
@@ -256,20 +268,28 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TS
 	intern = (dom_object *)zend_object_store_get_object(object TSRMLS_CC);
 	objmap = (dom_nnodemap_object *)intern->ptr;
 	if (objmap->ht == NULL) {
-		nodep = (xmlNode *)dom_object_get_node(objmap->baseobj);
-		if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-			if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
-				curnode = (xmlNodePtr) nodep->properties;
-			} else {
-				curnode = (xmlNodePtr) nodep->children;
+		if (objmap->nodetype == DOM_NODESET) {
+			nodeht = HASH_OF(objmap->baseobjptr);
+			zend_hash_internal_pointer_reset(nodeht);
+			if (zend_hash_get_current_data(nodeht, (void **) &entry)==SUCCESS) {
+				curattr = *entry;
 			}
 		} else {
-			if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-				nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+			nodep = (xmlNode *)dom_object_get_node(objmap->baseobj);
+			if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+				if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
+					curnode = (xmlNodePtr) nodep->properties;
+				} else {
+					curnode = (xmlNodePtr) nodep->children;
+				}
 			} else {
-				nodep = nodep->children;
+				if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+					nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+				} else {
+					nodep = nodep->children;
+				}
+				curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &curindex, 0);
 			}
-			curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &curindex, 0);
 		}
 	} else {
 		curnode = php_dom_libxml_hash_iter(objmap->ht, 0);

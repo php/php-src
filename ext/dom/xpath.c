@@ -128,10 +128,20 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	RETURN_TRUE;
 }
 
+static void dom_xpath_iter(zval *baseobj, dom_object *intern)
+{
+	dom_nnodemap_object *mapptr;
+
+	mapptr = (dom_nnodemap_object *)intern->ptr;
+	mapptr->baseobjptr = baseobj;
+	mapptr->nodetype = DOM_NODESET;
+
+}
+
 /* {{{ proto domnodelist dom_xpath_query(string expr [,domNode context]); */
 PHP_FUNCTION(dom_xpath_query)
 {
-	zval *id, *context = NULL;
+	zval *id, *retval, *context = NULL;
 	xmlXPathContextPtr ctxp;
 	xmlNodePtr nodep = NULL;
 	xmlXPathObjectPtr xpathobjp;
@@ -200,6 +210,10 @@ PHP_FUNCTION(dom_xpath_query)
 	if (! xpathobjp) {
 		RETURN_FALSE;
 	}
+
+	MAKE_STD_ZVAL(retval);
+	array_init(retval);
+
 	if (xpathobjp->type ==  XPATH_NODESET) {
 		int i;
 		xmlNodeSetPtr nodesetp;
@@ -208,8 +222,6 @@ PHP_FUNCTION(dom_xpath_query)
 			xmlXPathFreeObject (xpathobjp);
 			RETURN_FALSE;
 		}
-
-		array_init(return_value);
 
 		for (i = 0; i < nodesetp->nodeNr; i++) {
 			xmlNodePtr node = nodesetp->nodeTab[i];
@@ -236,9 +248,13 @@ PHP_FUNCTION(dom_xpath_query)
 				node->ns = curns;
 			}
 			child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
-			add_next_index_zval(return_value, child);
+			add_next_index_zval(retval, child);
 		}
 	}
+
+	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
+	intern = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	dom_xpath_iter(retval, intern);
 
 	xmlXPathFreeObject(xpathobjp);
 }
