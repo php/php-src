@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Dec 2004, Version 4.3.10
+- Fixed bug #31034 (Problem with non-existing iconv header file). (Derick)
 - Fixed bug #31024 (Crash in fgetcsv() with negative length). (Ilia)
 - Fixed bug #31019 (Logic error mssql library checking). (Frank)
 
