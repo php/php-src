@@ -1139,7 +1139,7 @@ PHP_FUNCTION(ucwords)
 {
 	zval **str;
 	char *r;
-	char *r_end;
+	int i, new_word = 1;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1151,18 +1151,18 @@ PHP_FUNCTION(ucwords)
 	}
 	*return_value=**str;
 	zval_copy_ctor(return_value);
-	*return_value->value.str.val = toupper((unsigned char)*return_value->value.str.val);
-
 	r=return_value->value.str.val;
-	r_end = r + (*str)->value.str.len;
-	while(++r<r_end){
-		if(isspace(*r)) {
-			if(r < r_end){
-				r++;
-				*r=toupper((unsigned char)*r);
-			} else {
-				break;
-			}
+
+	for (i = 0; i < (*str)->value.str.len; i++, r++) {
+		/* Alpha char preceeded by white space? Uppercase it. */
+		if (new_word && isalpha(*r)) {
+			*r = toupper((unsigned char)*r);
+		}
+		/* Find a word boundary. */
+		if (isspace(*r)) {
+			new_word = 1;
+		} else {
+			new_word = 0;
 		}
 	}
 }
@@ -2568,3 +2568,10 @@ PHP_FUNCTION(substr_count)
 	RETURN_LONG(count);
 }
 /* }}} */	
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
