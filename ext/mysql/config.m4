@@ -22,6 +22,7 @@ AC_DEFUN(PHP_MYSQL_SOCK,[
       /var/run/mysqld/mysqld.sock \
       /var/tmp/mysql.sock \
       /var/lib/mysql/mysql.sock \
+      /var/mysql/mysql.sock \
       ; do
     if test -r $i; then
       MYSQL_SOCK=$i
