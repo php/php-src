@@ -179,7 +179,7 @@ PS_GC_FUNC(sqlite)
 	 * we need to occassionaly do so manually to prevent the sessions database 
 	 * from endlessly growing.
 	 */
-	if ((int) ((float) PS(gc_divisor) * PS(gc_divisor) * php_combined_lcg(TSRMLS_C)) < PS(gc_probability) {
+	if ((int) ((float) PS(gc_divisor) * PS(gc_divisor) * php_combined_lcg(TSRMLS_C)) < PS(gc_probability)) {
 		rv = sqlite_exec_printf(db, "VACUUM", NULL, NULL, NULL);
 	}
 	return SQLITE_RETVAL(rv);
