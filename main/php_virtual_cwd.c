@@ -211,7 +211,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size)
 
 
 /* returns 0 for ok, 1 for error */
-static int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path)
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path)
 {
 	int path_length = strlen(path);
 	char *ptr, *path_copy;

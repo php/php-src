@@ -973,6 +973,28 @@ PHPAPI char *php_strip_url_passwd(char *url)
 }
 
 
+#if 1
+
+PHPAPI char *expand_filepath(char *filepath)
+{
+	cwd_state new_state;
+	char cwd[MAXPATHLEN+1];
+	char *result;
+
+	result = getcwd(cwd, MAXPATHLEN);	
+	if (!result) {
+		cwd[0] = '\0';
+	}
+
+	new_state.cwd = strdup(cwd);
+	new_state.cwd_length = strlen(cwd);
+
+	virtual_file_ex(&new_state, filepath, NULL);
+	return new_state.cwd;
+}
+
+#else
+
 PHPAPI char *expand_filepath(char *filepath)
 {
 	char *retval = NULL;
@@ -1012,6 +1034,8 @@ PHPAPI char *expand_filepath(char *filepath)
 	}
 	return retval;
 }
+
+#endif
 
 /*
  * Local variables:
