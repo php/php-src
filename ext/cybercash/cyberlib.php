@@ -36,7 +36,7 @@
    $more=list($key,$val)=each($CCNVList);
    while(!$done)
    {
-     $pairs.=chop($key)."=".urlencode(chop($val));
+     $pairs.=rtrim($key)."=".urlencode(rtrim($val));
      
      $more=list($key,$val)=each($CCNVList);
      if($more)

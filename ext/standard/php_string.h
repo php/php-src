@@ -27,7 +27,7 @@
 PHP_FUNCTION(strspn);
 PHP_FUNCTION(strcspn);
 PHP_FUNCTION(str_replace);
-PHP_FUNCTION(chop);
+PHP_FUNCTION(rtrim);
 PHP_FUNCTION(trim);
 PHP_FUNCTION(ltrim);
 PHP_FUNCTION(soundex);
