@@ -220,7 +220,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	} else {
 		if(zobj->ce->__set && !zobj->in_set) {
 			zobj->in_set = 1; /* prevent circular setting */
-			if(zend_std_call_setter(object, member, value) != SUCCESS) {
+			if(zend_std_call_setter(object, member, value TSRMLS_CC) != SUCCESS) {
 //				zend_error(E_NOTICE,"Cannot set undefined property: %s", Z_STRVAL_P(member));
 			}
 			setter_done = 1;
