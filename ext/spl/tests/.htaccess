@@ -1,0 +1,3 @@
+<IfModule mod_autoindex.c>
+    IndexIgnore .??* *~ *# HEADER* README* RCS CVS *,v *,t *.php
+</IfModule>
