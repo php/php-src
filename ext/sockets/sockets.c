@@ -1169,7 +1169,7 @@ PHP_FUNCTION(bind)
 			sa->sin_addr.s_addr = addr_buf.s_addr;
 		}
 
-		ret = bind(Z_LVAL_PP(arg0), (struct sockaddr *) sa, sizeof(sa_storage));
+		ret = bind(Z_LVAL_PP(arg0), (struct sockaddr *) sa, length);
 	} else {
 		RETURN_LONG(-EPROTONOSUPPORT);
 	}
