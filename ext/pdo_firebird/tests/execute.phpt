@@ -2,12 +2,17 @@
 PDO_Firebird: prepare/execute/binding
 --SKIPIF--
 <?php include("skipif.inc"); ?>
+--INI--
+ibase.timestampformat=%Y-%m-%d %H:%M:%S
 --FILE--
 <?php /* $Id$ */
 
 	require("testdb.inc");
     
 	$db = new PDO("firebird:dbname=$test_base",$user,$password) or die;
+
+	var_dump($db->getAttribute(PDO_ATTR_CONNECTION_STATUS));
+
 	$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_WARNING);
 
 	$db->exec("CREATE TABLE ddl (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
@@ -38,6 +43,7 @@ PDO_Firebird: prepare/execute/binding
 	
 ?>
 --EXPECT--
+bool(true)
 int(1)
 array(6) {
   ["ID"]=>

@@ -277,7 +277,6 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*len = sprintf(*ptr, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
 #endif
 					break;
-			
 				case SQL_FLOAT:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], double, *len);
 					*(double*)*ptr = *(float*)var->sqldata;
@@ -298,9 +297,8 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 						isc_decode_timestamp((ISC_TIMESTAMP*)var->sqldata, &t);
 						fmt = INI_STR("ibase.timestampformat");
 					}
-					
+
 					/* convert the timestamp into a string */
-					
 					*len = 80;	/* TODO enough ? */
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, *len);
 					*len = strftime(*ptr, *len, fmt, &t);

@@ -30,6 +30,8 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
+#define _GNU_SOURCE
+
 /* map driver specific error message to PDO error */
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC) /* {{{ */
 {
@@ -353,7 +355,6 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	switch (attr) {
-
 		case PDO_ATTR_AUTOCOMMIT:
 
 			convert_to_long(val);
@@ -382,16 +383,73 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 }
 /* }}} */
 
-/* called by PDO to get a driver-specific dbh attribute */
-static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
+/* callback to used to report database server info */
+static void firebird_info_cb(void *arg, char const *s) /* {{{ */
 {
-	return 0;
+	if (arg) {
+		if (*(char*)arg) { /* second call */
+			strcat(arg, " ");
+		}
+		strcat(arg, s);
+	}
 }
 /* }}} */
 
+/* called by PDO to get a driver-specific dbh attribute */
+static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	switch (attr) {
+		char tmp[200] = "Firebird 1.0/Interbase 6";
+		info_func_t info_func;
+		
+		case PDO_ATTR_AUTOCOMMIT:
+			ZVAL_LONG(val,dbh->auto_commit);
+			return 1;
+
+		case PDO_ATTR_CONNECTION_STATUS:
+			ZVAL_BOOL(val, !isc_version(&H->db, firebird_info_cb, NULL));
+			return 1;
+
+		case PDO_ATTR_CLIENT_VERSION: {
+#if defined(__GNUC__) || defined(PHP_WIN32)
+#ifdef __GNUC__
+			info_func_t info_func = (info_func_t)dlsym(RTLD_DEFAULT, "isc_get_client_version");
+#else
+			HMODULE l = GetModuleHandle("fbclient");
+
+			if (!l && !(l = GetModuleHandle("gds32"))) {
+				return 0;
+			}
+			info_func = (info_func_t)GetProcAddress(l, "isc_get_client_version");
+#endif
+			if (info_func) {
+				info_func(tmp);
+			}
+			ZVAL_STRING(val,tmp,1);
+#else
+			ZVAL_NULL(val);
+#endif
+			}
+			return 1;
+			
+		case PDO_ATTR_SERVER_VERSION:
+		case PDO_ATTR_SERVER_INFO:
+			*tmp = 0;
+			
+			if (!isc_version(&H->db, firebird_info_cb, (void*)tmp)) {
+				ZVAL_STRING(val,tmp,1);
+				return 1;
+			}
+	}
+	return 0;
+}       
+/* }}} */
+        
 /* called by PDO to retrieve driver-specific information about an error that has occurred */
 static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC) /* {{{ */
-{
+{       
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	ISC_STATUS *s = H->isc_status;
 	char buf[400];
@@ -407,7 +465,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 		add_next_index_string(info, buf, 1);
 	} else {
 		add_next_index_long(info, -999);
-		add_next_index_string(info, H->last_app_error,1);
+		add_next_index_string(info, const_cast(H->last_app_error),1);
 	}
 	return 1;
 }
