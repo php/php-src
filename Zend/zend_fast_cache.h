@@ -117,7 +117,7 @@ typedef struct _zend_fast_cache_list_entry {
 #define FREE_ZVAL_REL(z)	\
 	ZEND_FAST_FREE_REL(z, ZVAL_CACHE_LIST)
 
-/* fast cache for HashTable's */
+/* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
 	ZEND_FAST_ALLOC(ht, HashTable, HASHTABLE_CACHE_LIST)
 
