@@ -2,6 +2,18 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Allow for three expression types to be sent to functions which are requesting
+  the function argument to be passed by reference (only c. was previously
+  supported):
+  a. func(new myclass());
+  b. func(func2()); where func2() returns a reference, i.e. is defined as
+     function &func2(...)
+     {
+      ...
+     }
+  c. func($var); where func() is defined as function func(&$var) {...}
+  You CAN'T count on any other expressions to be passable by reference.
+  (Andi, Zend Engine)
 - Made ldap_get_entries() return an array even if there are no entries
   in search result. (Jani)
 - Fixed bad mod_perl interaction which caused segfaults when using LFS (Sascha)
