@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
 - Fixed bug #29821 (Fixed possible crashes in convert_uudecode() on invalid
   data). (Ilia)
+- Fixed bug #29808 (array_count_values() breaks with numeric strings). (Ilia)
 - Fixed bug #29737 (ip2long should return -1 if IP is 255.255.255.255 and FALSE
   on error). (Tony)
 - Fixed bug #29711 (Changed ext/xml to default to UTF-8 output). (Rob)
