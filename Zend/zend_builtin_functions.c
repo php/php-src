@@ -938,7 +938,7 @@ ZEND_FUNCTION(get_defined_vars)
 	zend_hash_apply_with_arguments(&EG(symbol_table), (apply_func_args_t)copy_variable_name, 1, globals);
 	zend_hash_apply_with_arguments(EG(active_symbol_table), (apply_func_args_t)copy_variable_name, 1, current);
 
-	if (zend_hash_add(return_value->value.ht, "globals", sizeof("globals"), (void **)&current, sizeof(zval *), NULL) == FAILURE) {
+	if (zend_hash_add(return_value->value.ht, "globals", sizeof("globals"), (void **)&globals, sizeof(zval *), NULL) == FAILURE) {
 		zend_error(E_WARNING, "Cannot add gobal variables to return value from get_defined_vars()");
 		RETURN_FALSE;
 	}
