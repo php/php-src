@@ -1,3 +1,80 @@
+2001-12-23  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php:
+    added the <license> tag under <release> for the package.xml file
+
+2001-12-23  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c: Major cleanup
+
+    * ext/msession/msession-test.php:
+    A php script which shows how to use msession with PHP sessions
+
+    * ext/msession/README: Added php.ini entry info.
+
+2001-12-23  Zeev Suraski  <zeev@zend.com>
+
+    * win32/install.txt: Update installation instructions (Marco Kaiser)
+
+2001-12-23  Stig Venaas  <venaas@uninett.no>
+
+    * EXTENSIONS: changed address
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    Made ldap_set_option work with NULL as link, added option
+    LDAP_OPT_DEBUG_LEVEL for those that support it, and made sure the rebind
+    code is currently included for OpenLDAP only.
+
+2001-12-23  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/reg.c: - Fix tiny leak.
+
+2001-12-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    added function overload in mbstring to add multibyte support for string and mail functions.
+
+2001-12-23  Alex Waugh  <alex@alexwaugh.com>
+
+    * ext/mysql/libmysql/acinclude.m4
+      ext/mysql/php_mysql.c: Check for ushort
+
+2001-12-23  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/storage.php: Call-time pass-by-reference fixes
+
+2001-12-23  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/README
+      ext/msession/msession.c
+      ext/msession/php_msession.h:
+    Renamed msession_getdata and msession_setdata to
+    msession_get_data and msession_set_data respectively.
+
+2001-12-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/zip/zip.c:
+    - Fix for bug 14554 - segfault upon zip_entry_open. (patch by
+      phpbug@robin.pfft.net)
+
+    * NEWS: - Last fixes to NEWS
+
+2001-12-23  Alex Waugh  <alex@alexwaugh.com>
+
+    * ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      main/fopen_wrappers.c
+      main/network.c: Undefine AF_UNIX under RISC OS
+
+    * ext/mysql/libmysql/acinclude.m4: Cache results of check for int8
+
+2001-12-23  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php:
+    Fixed getXML() method to not barf when no bodies
+
 2001-12-22  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/msession/msession.c: re-added prototype folding hooks
