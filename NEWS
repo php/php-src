@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- fgets($fp) (with no length parameter) now uses a buffer as long as the
+  the next line available from the $fp. Previously, there was a 1KB limit.
+  (Wez)
 - Changed registry entries under "HKLM\SOFTWARE\PHP\Per Directory Values" to
   work also with administrative directives such as safe_mode, open_basedir,
   etc. (Claudio Felber) 
