@@ -3413,6 +3413,9 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 	while (i < len) {
 		switch (c) {
 			case '<':
+				if (isspace(*(p + 1))) {
+					goto reg_char;
+				}
 				if (state == 0) {
 					lc = '<';
 					state = 1;
@@ -3552,6 +3555,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 
 				/* fall-through */
 			default:
+reg_char:
 				if (state == 0) {
 					*(rp++) = c;
 				} else if (allow && state == 1) {
