@@ -1171,7 +1171,7 @@ dnl  fi
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
     echo "|                                                                    |"
-    echo "| Please go read http://www.php.net/manual/en/faq.build.php#AEN79212 |"
+    echo "| Please go read http://www.php.net/faq.build#faq.build.apxs         |"
     echo "| and make the changes described there and try again.                |"
   fi
 
