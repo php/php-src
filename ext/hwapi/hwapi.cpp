@@ -919,19 +919,19 @@ static HW_API_replace_In *make_HW_API_replace_In(zval *arg1) {
 				break;
 			case IS_OBJECT:
 				if(!strcmp(key, "object")) {
-					if(!((*keydata)->value.obj.ce->name, "hw_api_object")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setObject(*obj);
 					}
 				} else if(!strcmp(key, "parameters")) {
-					if(!((*keydata)->value.obj.ce->name, "hw_api_object")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setParameters(*obj);
 					}
 				} else if(!strcmp(key, "content")) {
-					if(!((*keydata)->value.obj.ce->name, "hw_api_content")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_content")) {
 						HW_API_Content *obj;
 						obj = (HW_API_Content *) php_hwapi_get_object(*keydata, le_hwapi_contentp);
 						in->setContent(*obj);
@@ -1045,19 +1045,19 @@ static HW_API_insertDocument_In *make_HW_API_insertDocument_In(zval *arg1) {
 		switch((*keydata)->type) {
 			case IS_OBJECT:
 				if(!strcmp(key, "object")) {
-					if(!((*keydata)->value.obj.ce->name, "HW_API_Object")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setObject(*obj);
 					}
 				} else if(!strcmp(key, "parameters")) {
-					if(!((*keydata)->value.obj.ce->name, "HW_API_Object")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setParameters(*obj);
 					}
 				} else if(!strcmp(key, "content")) {
-					if(!((*keydata)->value.obj.ce->name, "HW_API_Content")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_content")) {
 						HW_API_Content *obj;
 						obj = (HW_API_Content *) php_hwapi_get_object(*keydata, le_hwapi_contentp);
 						in->setContent(*obj);
@@ -1116,13 +1116,13 @@ static HW_API_insertCollection_In *make_HW_API_insertCollection_In(zval *arg1) {
 				break;
 			case IS_OBJECT:
 				if(!strcmp(key, "object")) {
-					if(!((*keydata)->value.obj.ce->name, "HW_API_Object")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setObject(*obj);
 					}
 				} else if(!strcmp(key, "parameters")) {
-					if(!((*keydata)->value.obj.ce->name, "HW_API_Object")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setParameters(*obj);
@@ -1177,13 +1177,13 @@ static HW_API_insertAnchor_In *make_HW_API_insertAnchor_In(zval *arg1) {
 				break;
 			case IS_OBJECT:
 				if(!strcmp(key, "object")) {
-					if(!((*keydata)->value.obj.ce->name, "HW_API_Object")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setObject(*obj);
 					}
 				} else if(!strcmp(key, "parameters")) {
-					if(!((*keydata)->value.obj.ce->name, "HW_API_Object")) {
+					if(!strcmp((*keydata)->value.obj.ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setParameters(*obj);
