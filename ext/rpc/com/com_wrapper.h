@@ -23,29 +23,27 @@ typedef struct comval_ {
 
 END_EXTERN_C()
 
-#define ZVAL_COM(z,o) {																	\
-			zval *handle;																\
-																						\
-			/* OBJECTS_FIXME */															\
-			Z_TYPE_P(z) = IS_OBJECT;													\
-			Z_OBJCE_P(z) = &COM_class_entry;											\
-																						\
-			ALLOC_HASHTABLE(Z_OBJPROP_P(z));											\
-			zend_hash_init(Z_OBJPROP_P(z), 0, NULL, ZVAL_PTR_DTOR, 0);					\
-																						\
-			ALLOC_ZVAL(handle);															\
-			INIT_PZVAL(handle);															\
-			ZVAL_LONG(handle, zend_list_insert((o), IS_COM));							\
-																						\
-			zval_copy_ctor(handle);														\
-			zend_hash_index_update(Z_OBJPROP_P(z), 0, &handle, sizeof(zval *), NULL);	\
+#define ZVAL_COM(z,o) {																\
+			zval *handle;															\
+			HashTable *properties;													\
+																					\
+			ALLOC_HASHTABLE(properties);											\
+			zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);					\
+																					\
+			ALLOC_ZVAL(handle);														\
+			INIT_PZVAL(handle);														\
+			ZVAL_LONG(handle, zend_list_insert((o), IS_COM));						\
+																					\
+			zval_copy_ctor(handle);													\
+			zend_hash_index_update(properties, 0, &handle, sizeof(zval *), NULL);	\
+			object_and_properties_init(z, &COM_class_entry, properties);			\
 		}
 
 #define RETVAL_COM(o)	ZVAL_COM(&return_value, o);
-#define RETURN_COM(o)	RETVAL_COM(o)													\
+#define RETURN_COM(o)	RETVAL_COM(o)												\
 						return;
 
-#define ALLOC_COM(z)	(z) = (comval *) emalloc(sizeof(comval));						\
+#define ALLOC_COM(z)	(z) = (comval *) emalloc(sizeof(comval));					\
 						C_REFCOUNT(z) = 0;
 
 #define FREE_COM(z)		efree(z);
