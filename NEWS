@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed 'Z' flag in date() to adjust for daylight savings time. (Andrei)
+- Fixed var_dump() not to modify the internal order of array elements (Zeev)
+- Fixed stripcslashes() to remove to strip \ in unknown escapes instead of
+  leaving it. (Andrei)
+- Changed WDDX to always serialize arrays as structs. (Andrei)
 - Fixed include_once() to issue a warning in case the supplied file name is
   not found (Zeev, Zend Engine)
 - Fixed a bug in get_declared_classes() which could return the same class
