@@ -125,6 +125,7 @@ typedef struct {
 typedef struct {
 	int    still_running;
 	CURLM *multi;
+	zend_llist easyh;
 } php_curlm;
 
 void _php_curl_cleanup_handle(php_curl *);

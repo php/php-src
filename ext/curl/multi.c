@@ -62,6 +62,8 @@ PHP_FUNCTION(curl_multi_init)
 	mh = ecalloc(1, sizeof(php_curlm));
 	mh->multi = curl_multi_init();
 
+	zend_llist_init(&(*mh).easyh, sizeof(zval *), (llist_dtor_func_t) ZVAL_PTR_DTOR, 0);
+
 	ZEND_REGISTER_RESOURCE(return_value, mh, le_curl_multi_handle);
 }
 /* }}} */
@@ -86,7 +88,9 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	_php_curl_cleanup_handle(ch);
 	ch->uses++;
-	
+
+	zend_llist_add_element(&(*mh).easyh, &z_ch);
+
 	RETURN_LONG((long) curl_multi_add_handle(mh->multi, ch->cp));	
 }
 /* }}} */
@@ -152,7 +156,7 @@ PHP_FUNCTION(curl_multi_select)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_exec(resource mh) 
+/* {{{ proto int curl_multi_exec(resource mh, int &still_running) 
    Run the sub-connections of the current cURL handle */
 PHP_FUNCTION(curl_multi_exec)
 {
@@ -252,10 +256,10 @@ void _php_curl_multi_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	php_curlm *mh = (php_curlm *) rsrc->ptr;
 	if (mh) {
 		curl_multi_cleanup(mh->multi);
+		zend_llist_clean(&(*mh).easyh);
 		efree(mh);
 		rsrc->ptr = NULL;
 	}
-	/* XXX: keep track of all curl handles and zval_ptr_dtor them here */
 }
 
 #endif
