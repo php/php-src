@@ -70,6 +70,11 @@ static SWFMovieClip getSprite(zval *id TSRMLS_DC);
 static SWFSound getSound(zval *id TSRMLS_DC);
 static SWFSoundInstance getSoundInstance(zval *id TSRMLS_DC);
 
+#define PHP_MING_FILE_CHK(file) \
+	if ((PG(safe_mode) && !php_checkuid((file), NULL, CHECKUID_CHECK_FILE_AND_DIR)) || php_check_open_basedir((file) TSRMLS_CC)) {	\
+		RETURN_FALSE;	\
+	}	\
+
 /* {{{ proto void ming_setcubicthreshold (int threshold)
    Set cubic threshold (?) */
 PHP_FUNCTION(ming_setCubicThreshold)
@@ -340,6 +345,7 @@ PHP_FUNCTION(swfbitmap_init)
 	
 	if (Z_TYPE_PP(zfile) != IS_RESOURCE) {
 		convert_to_string_ex(zfile);
+		PHP_MING_FILE_CHK(Z_STRVAL_PP(zfile));
 		input = newSWFInput_buffer(Z_STRVAL_PP(zfile), Z_STRLEN_PP(zfile));
 		zend_list_addref(zend_list_insert(input, le_swfinputp));
 	} else {
@@ -1411,6 +1417,7 @@ PHP_FUNCTION(swffont_init)
 		font = loadSWFFontFromFile(file);
 		php_stream_close(stream);
 	} else {
+		PHP_MING_FILE_CHK(Z_STRVAL_PP(zfile));
 		font = (SWFFont)newSWFBrowserFont(Z_STRVAL_PP(zfile));
 	}
 
@@ -1743,6 +1750,7 @@ PHP_FUNCTION(swfsound_init)
 	if(Z_TYPE_PP(zfile) != IS_RESOURCE)
 	{
 		convert_to_string_ex(zfile);
+		PHP_MING_FILE_CHK(Z_STRVAL_PP(zfile));
 		input = newSWFInput_buffer(Z_STRVAL_PP(zfile), Z_STRLEN_PP(zfile));
 		zend_list_addref(zend_list_insert(input, le_swfinputp));
 	}
@@ -2357,6 +2365,7 @@ PHP_FUNCTION(swfmovie_importFont)
 	convert_to_string_ex(libswf);
 	convert_to_string_ex(name);
 	movie = getMovie(getThis() TSRMLS_CC);
+	PHP_MING_FILE_CHK(Z_STRVAL_PP(libswf));
 	res = SWFMovie_importFont(movie, Z_STRVAL_PP(libswf), Z_STRVAL_PP(name));
 
 	if(res != NULL)
