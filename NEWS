@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Made preg_quote() binary-safe. (Andrei)
+- Made quotemeta() binary-safe. (Andrei)
+- Added UDP support in fsockopen() (Evan).
 - Added --disable-pear option (Andrei)
 - Renamed libzend repository to Zend (Zeev)
 - Added support for thttpd (Sascha)
