@@ -37,6 +37,9 @@ class PEAR_Builder extends PEAR_Common
 
     var $current_callback = null;
 
+    // used for msdev builds
+    var $_lastline = null;
+    var $_firstline = null;
     // }}}
     // {{{ constructor
 
@@ -54,6 +57,99 @@ class PEAR_Builder extends PEAR_Common
     }
 
     // }}}
+    
+    // {{{ _build_win32()
+
+    /**
+     * Build an extension from source on windows.
+     * requires msdev
+     */
+    function _build_win32($descfile, $callback = null)
+    {
+        if (PEAR::isError($info = $this->infoFromDescriptionFile($descfile))) {
+            return $info;
+        }
+        $dir = dirname($descfile);
+        $old_cwd = getcwd();
+
+        if (!@chdir($dir)) {
+            return $this->raiseError("could not chdir to $dir");
+        }
+        $this->log(2, "building in $dir");
+
+        $dsp = $info['package'].'.dsp';
+        if (!@is_file("$dir/$dsp")) {
+            return $this->raiseError("The DSP $dsp does not exist.");
+        }
+        // XXX TODO: make release build type configurable
+        $command = 'msdev '.$dsp.' /MAKE "'.$info['package']. ' - Release"';
+        
+        $this->current_callback = $callback;
+        $err = $this->_runCommand($command, array(&$this, 'msdevCallback'));
+        if (PEAR::isError($err)) {
+            return $err;
+        }
+        
+        // figure out the build platform and type
+        $platform = 'Win32';
+        $buildtype = 'Release';
+        if (preg_match('/.*?'.$info['package'].'\s-\s(\w+)\s(.*?)-+/i',$this->_firstline,$matches)) {
+            $platform = $matches[1];
+            $buildtype = $matches[2];
+        }
+
+        if (preg_match('/(.*)?\s-\s(\d+).*?(\d+)/',$this->_lastline,$matches)) {
+            if ($matches[2]) {
+                // there were errors in the build
+                return $this->raiseError("There were errors during compilation.");
+            }
+            $out = $matches[1];
+        } else {
+            return $this->raiseError("Did not understand the completion status returned from msdev.exe.");
+        }
+        
+        // msdev doesn't tell us the output directory :/
+        // open the dsp, find /out and use that directory
+        $dsptext = join(file($dsp),'');
+        
+        // this regex depends on the build platform and type having been
+        // correctly identified above.
+        $regex ='/.*?!IF\s+"\$\(CFG\)"\s+==\s+("'.
+                    $info['package'].'\s-\s'.
+                    $platform.'\s'.
+                    $buildtype.'").*?'.
+                    '\/out:"(.*?)"/is';
+
+        if ($dsptext && preg_match($regex,$dsptext,$matches)) {
+            // what we get back is a relative path to the output file itself.
+            $outfile = realpath($matches[2]);
+        } else {
+            return $this->raiseError("Could not retrieve output information from $dsp.");
+        }
+        if (@copy($outfile, "$dir/$out")) {
+            $outfile = "$dir/$out";
+        }
+        
+        $built_files[] = array(
+            'file' => "$outfile",
+            'php_api' => $this->php_api_version,
+            'zend_mod_api' => $this->zend_module_api_no,
+            'zend_ext_api' => $this->zend_extension_api_no,
+            );
+
+        return $built_files;
+    }
+    // }}}
+    
+    // {{{ msdevCallback()
+    function msdevCallback($what, $data)
+    {
+        if (!$this->_firstline)
+            $this->_firstline = $data;
+        $this->_lastline = $data;
+    }
+    // }}}
+    
     // {{{ build()
 
     /**
@@ -81,6 +177,9 @@ class PEAR_Builder extends PEAR_Common
      */
     function build($descfile, $callback = null)
     {
+        if (PEAR_OS == "Windows") {
+            return $this->_build_win32($descfile,$callback);
+        }
         if (PEAR_OS != 'Unix') {
             return $this->raiseError("building extensions not supported on this platform");
         }
