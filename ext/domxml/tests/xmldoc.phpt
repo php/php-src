@@ -13,7 +13,7 @@ if(!$dom) {
 var_dump($dom);
 ?>
 --EXPECTF--
-object(domdocument)(9) {
+object(domdocument)#%d (9) {
   ["name"]=>
   string(9) "#document"
   ["url"]=>
