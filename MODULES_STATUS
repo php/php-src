@@ -17,3 +17,4 @@ iptc                Working
 informix            Working
 zlib                Working
 sysvshm				Working
+odbc                Working (except for persistent connections)

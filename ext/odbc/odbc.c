@@ -480,7 +480,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 }
 
 /* Main User Functions */
-/* {{{ proto odbc_close_all(void)
+/* {{{ proto void odbc_close_all(void)
    Close all ODBC connections */
 PHP_FUNCTION(odbc_close_all)
 {
@@ -499,7 +499,7 @@ PHP_FUNCTION(odbc_close_all)
 }
 /* }}} */
 
-/* {{{ proto odbc_binmode(int result_id, int mode)
+/* {{{ proto int odbc_binmode(int result_id, int mode)
    Handle binary column data */
 PHP_FUNCTION(odbc_binmode)
 {
@@ -507,7 +507,7 @@ PHP_FUNCTION(odbc_binmode)
 }
 /* }}} */
 
-/* {{{ proto odbc_longreadlen(int result_id, int length)
+/* {{{ proto int odbc_longreadlen(int result_id, int length)
    Handle LONG columns */
 PHP_FUNCTION(odbc_longreadlen)
 {
@@ -517,7 +517,7 @@ PHP_FUNCTION(odbc_longreadlen)
 
 
 
-/* {{{ proto odbc_prepare(int connection_id, string query)
+/* {{{ proto int odbc_prepare(int connection_id, string query)
    Prepares a statement for execution */
 PHP_FUNCTION(odbc_prepare)
 {
@@ -587,7 +587,7 @@ PHP_FUNCTION(odbc_prepare)
 /*
  * Execute prepared SQL statement. Supports only input parameters.
  */
-/* {{{ proto odbc_execute(int result_id [, array parameters_array])
+/* {{{ proto int odbc_execute(int result_id [, array parameters_array])
    Execute a prepared statement */
 PHP_FUNCTION(odbc_execute)
 { 
@@ -639,10 +639,6 @@ PHP_FUNCTION(odbc_execute)
 			RETURN_FALSE;
 		}
 
-       /* if(pval_copy_constructor(arg2) == FAILURE){
-			RETURN_FALSE;
-		}
-		*/
 		zend_hash_internal_pointer_reset(arg2->value.ht);
         params = (params_t *)emalloc(sizeof(params_t) * result->numparams);
 		
@@ -657,8 +653,6 @@ PHP_FUNCTION(odbc_execute)
 			if ((*tmp)->type != IS_STRING) {
 				php_error(E_WARNING,"Error converting parameter");
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-				//zend_hash_destroy(arg2->value.ht);
-				//efree(arr.value.ht);
 				efree(params);
 				RETURN_FALSE;
 			}
@@ -674,7 +668,7 @@ PHP_FUNCTION(odbc_execute)
 				ctype = SQL_C_CHAR;
 
 			if ((*tmp)->value.str.val[0] == '\'' && 
-				(*tmp)->value.str.val[(*tmp)->value.str.len - 2] == '\'') {
+				(*tmp)->value.str.val[(*tmp)->value.str.len - 1] == '\'') {
 				filename = &(*tmp)->value.str.val[1];
 				filename[(*tmp)->value.str.len - 2] = '\0';
 
@@ -686,9 +680,6 @@ PHP_FUNCTION(odbc_execute)
 							close(params[i].fp);
 						}
 					}
-					/*zend_hash_destroy(arr.value.ht);
-					efree(arr.value.ht);
-					*/
 					efree(params);
 					RETURN_FALSE;
 				}
@@ -767,7 +758,7 @@ PHP_FUNCTION(odbc_execute)
 }
 /* }}} */
 
-/* {{{ proto odbc_cursor(int result_id)
+/* {{{ proto string odbc_cursor(int result_id)
    Get cursor name */
 PHP_FUNCTION(odbc_cursor)
 {
@@ -834,7 +825,7 @@ PHP_FUNCTION(odbc_cursor)
 }
 /* }}} */
 
-/* {{{ proto odbc_exec(int connection_id, string query [, int flags])
+/* {{{ proto int odbc_exec(int connection_id, string query [, int flags])
    Prepare and execute an SQL statement */
 PHP_FUNCTION(odbc_exec)
 {
@@ -936,7 +927,7 @@ PHP_FUNCTION(odbc_exec)
 }
 /* }}} */
 
-/* {{{ proto odbc_fetch_into(int result_id [, int rownumber], array result_array)
+/* {{{ proto int odbc_fetch_into(int result_id [, int rownumber], array result_array)
    Fetch one result row into an array */ 
 PHP_FUNCTION(odbc_fetch_into)
 {
@@ -949,7 +940,7 @@ PHP_FUNCTION(odbc_fetch_into)
 	UDWORD      crow;
 	UWORD       RowStatus[1];
 	SDWORD      rownum = -1;
-	pval     *arg1, *arg2, *arr, tmp;
+	pval     *arg1, *arg2, *arr, *tmp;
 	
 	numArgs = ARG_COUNT(ht);
 
@@ -1029,8 +1020,10 @@ PHP_FUNCTION(odbc_fetch_into)
 		result->fetched++;
 
 	for (i = 0; i < result->numcols; i++) {
-		tmp.type = IS_STRING;
-		tmp.value.str.len = 0;
+		tmp = (pval *) emalloc(sizeof(pval));
+		tmp->refcount=1;
+		tmp->type = IS_STRING;
+		tmp->value.str.len = 0;
         sql_c_type = SQL_C_CHAR;
        
         switch(result->values[i].coltype){
@@ -1038,14 +1031,14 @@ PHP_FUNCTION(odbc_fetch_into)
             case SQL_VARBINARY:
             case SQL_LONGVARBINARY:
                 if (result->binmode <= 0){
-                    tmp.value.str.val = empty_string;
+                    tmp->value.str.val = empty_string;
                     break;
                 }
                 if (result->binmode == 1) sql_c_type = SQL_C_BINARY; 
             case SQL_LONGVARCHAR:
                 if (IS_SQL_LONG(result->values[i].coltype) && 
                    result->longreadlen <= 0){
-                    tmp.value.str.val = empty_string;
+                    tmp->value.str.val = empty_string;
                     break;
                 }
         
@@ -1059,26 +1052,26 @@ PHP_FUNCTION(odbc_fetch_into)
 					RETURN_FALSE;
 				}
 				if (rc == SQL_SUCCESS_WITH_INFO){
-					tmp.value.str.len = result->longreadlen;
+					tmp->value.str.len = result->longreadlen;
 				} else if (result->values[i].vallen == SQL_NULL_DATA){
-					tmp.value.str.val = empty_string;
+					tmp->value.str.val = empty_string;
 					break;
 				} else {
-					tmp.value.str.len = result->values[i].vallen;
+					tmp->value.str.len = result->values[i].vallen;
 				}
-				tmp.value.str.val = estrndup(buf, tmp.value.str.len);
+				tmp->value.str.val = estrndup(buf, tmp->value.str.len);
 				break;
 
 			default:
 				if (result->values[i].vallen == SQL_NULL_DATA){
-					tmp.value.str.val = empty_string;
+					tmp->value.str.val = empty_string;
 					break;
 				}
-				tmp.value.str.len = result->values[i].vallen;
-				tmp.value.str.val = estrndup(result->values[i].value,tmp.value.str.len);
+				tmp->value.str.len = result->values[i].vallen;
+				tmp->value.str.val = estrndup(result->values[i].value,tmp->value.str.len);
 				break;
 		}
-		zend_hash_index_update(arr->value.ht, i, (void *) &tmp, sizeof(pval), NULL);
+		zend_hash_index_update(arr->value.ht, i, &tmp, sizeof(pval *), NULL);
 	}
 	if (buf) efree(buf);
 	RETURN_LONG(result->numcols);	
@@ -1120,7 +1113,7 @@ PHP_FUNCTION(solid_fetch_prev)
 }
 #endif
 
-/* {{{ proto odbc_fetch_row(int result_id [, int row_number])
+/* {{{ proto int odbc_fetch_row(int result_id [, int row_number])
    Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
@@ -1182,7 +1175,7 @@ PHP_FUNCTION(odbc_fetch_row)
 }	
 /* }}} */
 
-/* {{{ proto odbc_result(int result_id, mixed field)
+/* {{{ proto string odbc_result(int result_id, mixed field)
    Get result data */ 
 PHP_FUNCTION(odbc_result)
 {
@@ -1362,7 +1355,7 @@ PHP_FUNCTION(odbc_result)
 }
 /* }}} */
 
-/* {{{ proto odbc_result_all(int result_id [, string format])
+/* {{{ proto int odbc_result_all(int result_id [, string format])
    Print result as HTML table */
 PHP_FUNCTION(odbc_result_all)
 {
@@ -1495,7 +1488,7 @@ PHP_FUNCTION(odbc_result_all)
 }
 /* }}} */
 
-/* {{{ proto odbc_free_result(int result_id)
+/* {{{ proto int odbc_free_result(int result_id)
    Free resources associated with a result */
 PHP_FUNCTION(odbc_free_result)
 {
@@ -1510,7 +1503,7 @@ PHP_FUNCTION(odbc_free_result)
 }
 /* }}} */
 
-/* {{{ proto odbc_connect(string DSN, string user, string password [, int cursor_option])
+/* {{{ proto int odbc_connect(string DSN, string user, string password [, int cursor_option])
    Connect to a datasource */
 PHP_FUNCTION(odbc_connect)
 {
@@ -1518,7 +1511,7 @@ PHP_FUNCTION(odbc_connect)
 }
 /* }}} */
 
-/* {{{ proto odbc_connect(string DSN, string user, string password [, int cursor_option])
+/* {{{ proto int odbc_pconnect(string DSN, string user, string password [, int cursor_option])
    Establish a persistant connection to a datasource */
 PHP_FUNCTION(odbc_pconnect)
 {
@@ -1805,7 +1798,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	return_value->type = IS_LONG;
 }
 
-/* {{{ proto odbc_close(int connection_id)
+/* {{{ proto void odbc_close(int connection_id)
    Close an ODBC connection */
 PHP_FUNCTION(odbc_close)
 {
@@ -1829,7 +1822,7 @@ PHP_FUNCTION(odbc_close)
 }
 /* }}} */
 
-/* {{{ proto odbc_num_rows(int result_id)
+/* {{{ proto int odbc_num_rows(int result_id)
    Get number of rows in a result */
 PHP_FUNCTION(odbc_num_rows)
 {
@@ -1852,7 +1845,7 @@ PHP_FUNCTION(odbc_num_rows)
 }
 /* }}} */
 
-/* {{{ proto odbc_num_fields(int result_id)
+/* {{{ proto int odbc_num_fields(int result_id)
    Get number of columns in a result */
 PHP_FUNCTION(odbc_num_fields)
 {
@@ -1872,7 +1865,7 @@ PHP_FUNCTION(odbc_num_fields)
 }
 /* }}} */
 
-/* {{{ proto odbc_field_name(int result_id, int field_number)
+/* {{{ proto string odbc_field_name(int result_id, int field_number)
    Get a column name */
 PHP_FUNCTION(odbc_field_name)
 {
@@ -1909,7 +1902,7 @@ PHP_FUNCTION(odbc_field_name)
 }
 /* }}} */
 
-/* {{{ proto odbc_field_type(int result_id, int field_number)
+/* {{{ proto string odbc_field_type(int result_id, int field_number)
    Get the datatype of a column */
 PHP_FUNCTION(odbc_field_type)
 {
@@ -1945,7 +1938,7 @@ PHP_FUNCTION(odbc_field_type)
 }
 /* }}} */
 
-/* {{{ proto odbc_field_len(int result_id, int field_number)
+/* {{{ proto int odbc_field_len(int result_id, int field_number)
    Get the length of a column */   
 PHP_FUNCTION(odbc_field_len)
 {
@@ -1980,7 +1973,7 @@ PHP_FUNCTION(odbc_field_len)
 }
 /* }}} */
 
-/* {{{ proto odbc_field_num(int result_id, string field_name)
+/* {{{ proto int odbc_field_num(int result_id, string field_name)
    Return column number */
 PHP_FUNCTION(odbc_field_num)
 {
@@ -2017,8 +2010,9 @@ PHP_FUNCTION(odbc_field_num)
 }
 /* }}} */
 
-/* {{{ proto odbc_autocommit(int connection_id, int OnOff)
-   Toggle autocommit mode */
+/* {{{ proto int odbc_autocommit(int connection_id, int OnOff)
+   Toggle autocommit mode 
+   There can be problems with pconnections!*/
 PHP_FUNCTION(odbc_autocommit)
 {
 	odbc_connection *curr_conn;
@@ -2070,7 +2064,7 @@ PHP_FUNCTION(odbc_autocommit)
 }
 /* }}} */
 
-/* {{{ proto odbc_commit(int connection_id)
+/* {{{ proto int odbc_commit(int connection_id)
    Commit an ODBC transaction */
 PHP_FUNCTION(odbc_commit)
 {
@@ -2078,7 +2072,7 @@ PHP_FUNCTION(odbc_commit)
 }
 /* }}} */
 
-/* {{{ proto odbc_rollback(int connection_id)
+/* {{{ proto int odbc_rollback(int connection_id)
    Rollback a transaction */
 PHP_FUNCTION(odbc_rollback)
 {
@@ -2087,11 +2081,11 @@ PHP_FUNCTION(odbc_rollback)
 /* }}} */
 
 
-/* {{{ proto odbc_setoption(int conn_id|result_id, int which, int option, int value)
+/* {{{ proto int odbc_setoption(int conn_id|result_id, int which, int option, int value)
    Sets connection or statement options */
 /* This one has to be used carefully. We can't allow to set connection options for
    persistent connections. I think that SetStmtOption is of little use, since most
-   of those can only be specified for not already prepared/executed statements.
+   of those can only be specified before preparing/executing statements.
    On the other hand, they can be made connection wide default through SetConnectOption
    - but will be overidden by calls to SetStmtOption() in odbc_prepare/odbc_do
 */
