@@ -1238,6 +1238,10 @@ PHPAPI PHP_FUNCTION(fwrite)
 			break;
 	}
 
+	if (!num_bytes) {
+		RETURN_LONG(0);
+	}
+
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (PG(magic_quotes_runtime)) {
@@ -1572,7 +1576,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 }
 /* }}} */
 
-/* {{{ proto int fstat(resource fp)
+/* {{{ proto array fstat(resource fp)
    Stat() on a filehandle */
 PHP_NAMED_FUNCTION(php_if_fstat)
 {
