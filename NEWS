@@ -41,7 +41,6 @@ PHP 4                                                                      NEWS
 - Fixed several 64-bit problems. (Dave)
 - Fixed several errors in hwapi extension. Objects weren't handled properly.
   (Uwe)
-- Fixed bug #23657 (Missing initialization in browscap module init) (Ilia)
 - Fixed bug #23606 (Unable to build --with-db4 (db4.1.25)). (Marcus)
 - Fixed bug #23567 (pfsockopen() returns dead connections). (Wez)
 - Fixed bug #23527 (PostScript Type 1 fonts do not render properly).
