@@ -18,7 +18,6 @@
 
 #include "php.h"
 
-#include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -35,12 +34,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#endif
-#if HAVE_PWD_H
-#ifdef PHP_WIN32
-#include "win32/pwd.h"
-#else
-#include <pwd.h>
 #endif
 #endif
 #ifdef HAVE_SYS_TIME_H
@@ -87,18 +80,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-
-#ifndef MAXPATHLEN
-# ifdef PATH_MAX
-#  define MAXPATHLEN PATH_MAX
-# else
-#  define MAXPATHLEN 255
-# endif
-#endif
 
 static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **opened_path_p)
 {
