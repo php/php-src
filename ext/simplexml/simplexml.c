@@ -84,7 +84,18 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value TSRMLS_DC)
 static inline int 
 match_ns(php_sxe_object *sxe, xmlNodePtr node, xmlChar *name)
 {
-	if (!xmlStrcmp(node->ns->prefix, name) || !xmlStrcmp((xmlChar *) xmlHashLookup(sxe->nsmap, node->ns->href), name)) {
+	xmlChar *prefix;
+	
+	prefix = xmlHashLookup(sxe->nsmap, node->ns->href);
+	if (prefix == NULL) {
+		prefix = node->ns->prefix;
+	}
+
+	if (prefix == NULL) {
+		return 0;
+	}
+
+	if (!xmlStrcmp(prefix, name)) {
 		return 1;
 	}
 
@@ -139,7 +150,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 		if (node->ns) {
 			if (node->parent->ns) {
 				if (!xmlStrcmp(node->ns->href, node->parent->ns->href)) {
-					goto next_iter;
+					goto this_iter;
 				}
 			}
 			
@@ -150,6 +161,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 				goto next_iter;
 			}
 		}
+this_iter:
 
 		if (!xmlStrcmp(node->name, name)) {
 			APPEND_PREV_ELEMENT(counter, value);
