@@ -36,7 +36,7 @@
     </maintainer>
     <maintainer>
       <user>pajoye</user>
-      <role>developer</role>
+      <role>lead</role>
       <name>Pierre-Alain Joye</name>
       <email>pajoye@pearfr.org</email>
     </maintainer>
@@ -54,6 +54,7 @@
     <notes>
 Installer:
  * fix Bug #1186 raise a notice error on PEAR::Common $_packageName
+ * fix Bug #1249 display the right state when using --force option
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
