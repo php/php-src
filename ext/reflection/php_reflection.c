@@ -3063,6 +3063,7 @@ static int add_extension_class(zend_class_entry **pce, int num_args, va_list arg
 	int add_reflection_class = va_arg(args, int);
 
 	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
+		TSRMLS_FETCH();
 		if (add_reflection_class) {
 			ALLOC_ZVAL(zclass);
 			reflection_class_factory(*pce, zclass TSRMLS_CC);
