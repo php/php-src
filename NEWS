@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fixed signal() bug that could cause the Apache master process to
+  die. (Thies)
 - Added session_set_cookie_params() function. (Andrei)
 - If header information is sent after output has already been sent, the warning
   message will now state the filename and line number at which the first output
