@@ -503,7 +503,7 @@ void do_begin_variable_parse(CLS_D)
 }
 
 
-void do_end_variable_parse(int type CLS_DC)
+void do_end_variable_parse(int type, int arg_offset CLS_DC)
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
@@ -532,6 +532,11 @@ void do_end_variable_parse(int type CLS_DC)
 				break;
 			case BP_VAR_IS:
 				opline->opcode += 6; /* 3+3 */
+				break;
+			case BP_VAR_FUNC_ARG:
+				opline->opcode += 9; /* 3+3+3 */
+				opline->extended_value = arg_offset;
+				break;
 		}
 		le = le->next;
 	}
@@ -872,13 +877,13 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 		switch(op) {
 			case ZEND_SEND_VAR:
 				if (function_ptr) {
-					do_end_variable_parse(BP_VAR_R CLS_CC);
+					do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
 				} else {
-					do_end_variable_parse(BP_VAR_W CLS_CC);
+					do_end_variable_parse(BP_VAR_FUNC_ARG, offset CLS_CC);
 				}
 				break;
 			case ZEND_SEND_REF:
-				do_end_variable_parse(BP_VAR_W CLS_CC);
+				do_end_variable_parse(BP_VAR_W, 0 CLS_CC);
 				break;
 		}
 	}
@@ -1820,7 +1825,7 @@ void do_indirect_references(znode *result, znode *num_references, znode *variabl
 {
 	int i;
 
-	do_end_variable_parse(BP_VAR_R CLS_CC);
+	do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
 	for (i=1; i<num_references->u.constant.value.lval; i++) {
 		fetch_simple_variable_ex(result, variable, 0, ZEND_FETCH_R CLS_CC);
 		*variable = *result;
@@ -1853,7 +1858,7 @@ void do_isset_or_isempty(int type, znode *result, znode *variable CLS_DC)
 {
 	zend_op *opline;
 
-	do_end_variable_parse(BP_VAR_IS CLS_CC);
+	do_end_variable_parse(BP_VAR_IS, 0 CLS_CC);
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_ISSET_ISEMPTY;

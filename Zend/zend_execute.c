@@ -69,6 +69,13 @@ static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_o
 static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array);
 
 
+#define ARG_SHOULD_BE_SENT_BY_REF(offset)									\
+	(function_being_called													\
+		&& function_being_called->common.arg_types							\
+		&& offset<=function_being_called->common.arg_types[0]				\
+		&& function_being_called->common.arg_types[offset]==BYREF_FORCE)
+	
+
 static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_free ELS_DC)
 {
 	switch(node->op_type) {
@@ -1151,6 +1158,16 @@ binary_assign_op_addr: {
 			case ZEND_FETCH_RW:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_RW ELS_CC);
 				break;
+			case ZEND_FETCH_FUNC_ARG:
+				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value)) {
+					/* Behave like FETCH_W */
+					zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
+				} else {
+					/* Behave like FETCH_R */
+					zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+					AI_USE_PTR(Ts[opline->result.u.var].var);
+				}
+				break;
 			case ZEND_FETCH_IS:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
 				break;
@@ -1170,6 +1187,16 @@ binary_assign_op_addr: {
 			case ZEND_FETCH_DIM_IS:
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
 				break;
+			case ZEND_FETCH_DIM_FUNC_ARG:
+				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value)) {
+					/* Behave like FETCH_DIM_W */
+					zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
+				} else {
+					/* Behave like FETCH_DIM_R, except for locking used for list() */
+					zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+					AI_USE_PTR(Ts[opline->result.u.var].var);
+				}
+				break;
 			case ZEND_FETCH_OBJ_R:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
@@ -1182,6 +1209,15 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_OBJ_IS:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
+				break;
+			case ZEND_FETCH_OBJ_FUNC_ARG:
+				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value)) {
+					/* Behave like FETCH_OBJ_W */
+					zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
+				} else {
+					zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+					AI_USE_PTR(Ts[opline->result.u.var].var);
+				}
 				break;
 			case ZEND_FETCH_DIM_TMP_VAR:
 				zend_fetch_dimension_address_from_tmp_var(&opline->result, &opline->op1, &opline->op2, Ts ELS_CC);
@@ -1532,10 +1568,7 @@ do_fcall_common:
 				break;
 			case ZEND_SEND_VAL: 
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
-					&& function_being_called
-					&& function_being_called->common.arg_types
-					&& opline->op2.u.opline_num<=function_being_called->common.arg_types[0]
-					&& function_being_called->common.arg_types[opline->op2.u.opline_num]==BYREF_FORCE) {
+					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num)) {
 						zend_error(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.u.opline_num);
 				}
 				{
@@ -1548,10 +1581,7 @@ do_fcall_common:
 				break;
 			case ZEND_SEND_VAR:
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
-					&& function_being_called
-					&& function_being_called->common.arg_types
-					&& opline->op2.u.opline_num<=function_being_called->common.arg_types[0]
-					&& function_being_called->common.arg_types[opline->op2.u.opline_num]==BYREF_FORCE) {
+					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num)) {
 						goto send_by_ref;
 				}
 				{
