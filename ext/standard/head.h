@@ -27,5 +27,6 @@ PHP_FUNCTION(setcookie);
 PHP_FUNCTION(headers_sent);
 
 PHPAPI int php_header(void);
+PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure TSRMLS_DC);
 
 #endif
