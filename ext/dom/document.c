@@ -85,39 +85,6 @@ zend_function_entry php_dom_document_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ void add_domdocument_properties(zval *id) */
-void add_domdocument_properties(zval *id TSRMLS_DC) {
-	add_property_bool(id, "formatOutput", 0);
-	add_property_bool(id, "validateOnParse", 0);
-	add_property_bool(id, "resolveExternals", 0);
-	add_property_bool(id, "preserveWhiteSpace", 1);
-	add_property_bool(id, "substituteEntities", 0);
-}
-/* }}} end add_domdocument_properties */
-
-/* {{{ static int dom_document_get_property_int(zval *id, char *property TSRMLS_DC) */
-static int dom_document_get_property_int(zval *id, char *property TSRMLS_DC) {
-	zval *format, *member;
-	zend_object_handlers *std_hnd;
-	int retformat = 0;
-
-	MAKE_STD_ZVAL(member);
-	ZVAL_STRING(member, property, 1);
-
-	std_hnd = zend_get_std_object_handlers();
-	format = std_hnd->read_property(id, member, 0 TSRMLS_CC);
-
-	if (format->type == IS_BOOL) {
-		retformat = Z_BVAL_P(format);
-	}
-
-	zval_dtor(member);
-	FREE_ZVAL(member);
-
-	return retformat;
-}
-/* }}} end dom_document_get_property_int */
-
 static void php_dom_validate_error(void *ctx, const char *msg, ...)
 {
 	char *buf;
@@ -386,8 +353,6 @@ int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-
-
 /* {{{ proto strict_error_checking	boolean	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-strictErrorChecking
@@ -395,9 +360,12 @@ Since: DOM Level 3
 */
 int dom_document_strict_error_checking_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
+	dom_doc_props *doc_prop;
+
 	ALLOC_ZVAL(*retval);
 	if (obj->document) {
-		ZVAL_BOOL(*retval, obj->document->stricterror);
+		doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(*retval, doc_prop->stricterror);
 	} else {
 		ZVAL_FALSE(*retval);
 	}
@@ -406,11 +374,11 @@ int dom_document_strict_error_checking_read(dom_object *obj, zval **retval TSRML
 
 int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	int stricterror;
+	dom_doc_props *doc_prop;
 
 	if (obj->document && newval->type == IS_BOOL) {
-		stricterror = Z_LVAL_P(newval);
-		obj->document->stricterror = stricterror;
+		doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->stricterror = Z_LVAL_P(newval);
 	}
 
 	return SUCCESS;
@@ -418,6 +386,158 @@ int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRML
 
 /* }}} */
 
+/* {{{ proto formatOutput	boolean	
+readonly=no
+*/
+int dom_document_format_output_read(dom_object *obj, zval **retval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	ALLOC_ZVAL(*retval);
+	if (obj->document) {
+		doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(*retval, doc_prop->formatoutput);
+	} else {
+		ZVAL_FALSE(*retval);
+	}
+	return SUCCESS;
+}
+
+int dom_document_format_output_write(dom_object *obj, zval *newval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	if (obj->document && newval->type == IS_BOOL) {
+		doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->formatoutput = Z_LVAL_P(newval);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ proto validateonParse	boolean	
+readonly=no
+*/
+int	dom_document_validate_on_parse_read(dom_object *obj, zval **retval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	ALLOC_ZVAL(*retval);
+	if (obj->document) {
+		doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(*retval, doc_prop->validateonparse);
+	} else {
+		ZVAL_FALSE(*retval);
+	}
+	return SUCCESS;
+}
+
+int dom_document_validate_on_parse_write(dom_object *obj, zval *newval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	if (obj->document && newval->type == IS_BOOL) {
+		doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->validateonparse = Z_LVAL_P(newval);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+
+/* {{{ proto resolveExternals	boolean	
+readonly=no
+*/
+int dom_document_resolve_externals_read(dom_object *obj, zval **retval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	ALLOC_ZVAL(*retval);
+	if (obj->document) {
+		doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(*retval, doc_prop->resolveexternals);
+	} else {
+		ZVAL_FALSE(*retval);
+	}
+	return SUCCESS;
+}
+
+int dom_document_resolve_externals_write(dom_object *obj, zval *newval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	if (obj->document && newval->type == IS_BOOL) {
+		doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->resolveexternals = Z_LVAL_P(newval);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+
+/* {{{ proto preserveWhiteSpace	boolean	
+readonly=no
+*/
+int dom_document_preserve_whitespace_read(dom_object *obj, zval **retval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	ALLOC_ZVAL(*retval);
+	if (obj->document) {
+		doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(*retval, doc_prop->preservewhitespace);
+	} else {
+		ZVAL_FALSE(*retval);
+	}
+	return SUCCESS;
+}
+
+int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	if (obj->document && newval->type == IS_BOOL) {
+		doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->preservewhitespace = Z_LVAL_P(newval);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+
+/* {{{ proto substituteEntities	boolean	
+readonly=no
+*/
+int dom_document_substitue_entities_read(dom_object *obj, zval **retval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	ALLOC_ZVAL(*retval);
+	if (obj->document) {
+		doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(*retval, doc_prop->substituteentities);
+	} else {
+		ZVAL_FALSE(*retval);
+	}
+	return SUCCESS;
+}
+
+int dom_document_substitue_entities_write(dom_object *obj, zval *newval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	if (obj->document && newval->type == IS_BOOL) {
+		doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->substituteentities = Z_LVAL_P(newval);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
 
 
 /* {{{ proto document_uri	string	
@@ -1078,8 +1198,6 @@ PHP_FUNCTION(dom_document_document)
 
 		php_dom_set_object(intern, (xmlNodePtr) docp TSRMLS_CC);
 	}
-
-	add_domdocument_properties(id TSRMLS_CC);
 }
 /* }}} end dom_document_document */
 
@@ -1088,18 +1206,24 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt;
 	char *directory = NULL;
+	dom_doc_props *doc_props;
+	dom_object *intern;
+	dom_ref_obj *document = NULL;
 	int validate, resolve_externals, keep_blanks, substitute_ent;
 
 	if (id != NULL) {
-		validate = dom_document_get_property_int(id, "validateOnParse" TSRMLS_CC);
-		resolve_externals = dom_document_get_property_int(id, "resolveExternals" TSRMLS_CC);
-		keep_blanks = dom_document_get_property_int(id, "preserveWhiteSpace" TSRMLS_CC);
-		substitute_ent = dom_document_get_property_int(id, "substituteEntities" TSRMLS_CC);
-	} else {
-		validate = 0;
-		resolve_externals = 0;
-		keep_blanks = 1;
-		substitute_ent = 0;
+		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+		document = intern->document;
+	}
+
+	doc_props = dom_get_doc_props(document);
+	validate = doc_props->validateonparse;
+	resolve_externals = doc_props->resolveexternals;
+	keep_blanks = doc_props->preservewhitespace;
+	substitute_ent = doc_props->substituteentities;
+
+	if (document == NULL) {
+		efree(doc_props);
 	}
 
 	xmlInitParser();
@@ -1123,7 +1247,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	ctxt->recovery = 0;
 	ctxt->validate = validate;
-    ctxt->loadsubset = resolve_externals;
+    ctxt->loadsubset = (resolve_externals * XML_COMPLETE_ATTRS);
     ctxt->keepBlanks = keep_blanks;
 	ctxt->replaceEntities = substitute_ent;
 
@@ -1153,6 +1277,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	zval *id, *rv = NULL;
 	xmlDoc *docp = NULL, *newdoc;
+	dom_doc_props *doc_prop;
 	dom_object *intern;
 	char *source;
 	int source_len, refcount, ret;
@@ -1178,8 +1303,11 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 		if (intern != NULL) {
 			docp = (xmlDocPtr) dom_object_get_node(intern);
+			doc_prop = NULL;
 			if (docp != NULL) {
 				decrement_node_ptr(intern TSRMLS_CC);
+				doc_prop = intern->document->doc_props;
+				intern->document->doc_props = NULL;
 				refcount = decrement_document_reference(intern TSRMLS_CC);
 				if (refcount != 0) {
 					docp->_private = NULL;
@@ -1187,6 +1315,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 			}
 			intern->document = NULL;
 			increment_document_reference(intern, newdoc TSRMLS_CC);
+			intern->document->doc_props = doc_prop;
 		}
 
 		php_dom_set_object(intern, (xmlNodePtr) newdoc TSRMLS_CC);
@@ -1227,6 +1356,7 @@ PHP_FUNCTION(dom_document_save)
 	xmlDoc *docp;
 	int file_len, bytes, format;
 	dom_object *intern;
+	dom_doc_props *doc_props;
 	char *file;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
@@ -1240,7 +1370,9 @@ PHP_FUNCTION(dom_document_save)
 	}
 
 	/* encoding handled by property on doc */
-	format = dom_document_get_property_int(id, "formatOutput" TSRMLS_CC);
+
+	doc_props = dom_get_doc_props(intern->document);
+	format = doc_props->formatoutput;
 	bytes = xmlSaveFormatFileEnc(file, docp, NULL, format);
 
 	if (bytes == -1) {
@@ -1262,6 +1394,7 @@ PHP_FUNCTION(dom_document_savexml)
 	xmlBufferPtr buf;
 	xmlChar *mem;
 	dom_object *intern, *nodeobj;
+	dom_doc_props *doc_props;
 	int size, format;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
@@ -1270,7 +1403,8 @@ PHP_FUNCTION(dom_document_savexml)
 		return;
 	}
 
-	format = dom_document_get_property_int(id, "formatOutput" TSRMLS_CC);
+	doc_props = dom_get_doc_props(intern->document);
+	format = doc_props->formatoutput;
 
 	if (nodep != NULL) {
 		/* Dump contents of Node */
@@ -1341,6 +1475,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zval *id, *rv = NULL;
 	xmlDoc *docp = NULL, *newdoc;
 	dom_object *intern;
+	dom_doc_props *doc_prop;
 	char *source;
 	int source_len, refcount, ret;
 
@@ -1366,8 +1501,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 		if (intern != NULL) {
 			docp = (xmlDocPtr) dom_object_get_node(intern);
+			doc_prop = NULL;
 			if (docp != NULL) {
 				decrement_node_ptr(intern TSRMLS_CC);
+				doc_prop = intern->document->doc_props;
+				intern->document->doc_props = NULL;
 				refcount = decrement_document_reference(intern TSRMLS_CC);
 				if (refcount != 0) {
 					docp->_private = NULL;
@@ -1375,6 +1513,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			}
 			intern->document = NULL;
 			increment_document_reference(intern, newdoc TSRMLS_CC);
+			intern->document->doc_props = doc_prop;
 		}
 
 		php_dom_set_object(intern, (xmlNodePtr) newdoc TSRMLS_CC);
@@ -1412,6 +1551,7 @@ PHP_FUNCTION(dom_document_save_html_file)
 	xmlDoc *docp;
 	int file_len, bytes, format;
 	dom_object *intern;
+	dom_doc_props *doc_props;
 	char *file;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
@@ -1425,7 +1565,9 @@ PHP_FUNCTION(dom_document_save_html_file)
 	}
 
 	/* encoding handled by property on doc */
-	format = dom_document_get_property_int(id, "formatOutput" TSRMLS_CC);
+
+	doc_props = dom_get_doc_props(intern->document);
+	format = doc_props->formatoutput;
 	bytes = htmlSaveFileFormat(file, docp, NULL, format);
 
 	if (bytes == -1) {

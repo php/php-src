@@ -114,15 +114,45 @@ int dom_node_children_valid(xmlNodePtr node) {
 }
 /* }}} end dom_node_children_valid */
 
-int dom_get_strict_error(dom_ref_obj *document) {
-	if (document) {
-		return document->stricterror;
+/* {{{ dom_get_doc_props() */
+dom_doc_propsptr dom_get_doc_props(dom_ref_obj *document)
+{
+	dom_doc_props *doc_props;
+
+	if (document && document->doc_props) {
+		return document->doc_props;
 	} else {
-		return 1;
+		doc_props = emalloc(sizeof(dom_doc_props));
+		doc_props->formatoutput = 0;
+		doc_props->validateonparse = 0;
+		doc_props->resolveexternals = 0;
+		doc_props->preservewhitespace = 1;
+		doc_props->substituteentities = 0;
+		doc_props->stricterror = 1;
+		if (document) {
+			document->doc_props = doc_props;
+		}
+		return doc_props;
 	}
 }
+/* }}} */
 
-/* {{{ int increment_document_reference(dom_object *object) */
+/* {{{ dom_get_strict_error() */
+int dom_get_strict_error(dom_ref_obj *document) {
+	int stricterror;
+	dom_doc_props *doc_props;
+
+	doc_props = dom_get_doc_props(document);
+	stricterror = doc_props->stricterror;
+	if (document == NULL) {
+		efree(doc_props);
+	}
+
+	return stricterror;
+}
+/* }}} */
+
+/* {{{ increment_document_reference() */
 int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC) {
 	int ret_refcount = -1;
 
@@ -134,7 +164,7 @@ int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC) {
 		object->document = emalloc(sizeof(dom_ref_obj));
 		object->document->ptr = docp;
 		object->document->refcount = ret_refcount;
-		object->document->stricterror = 1;
+		object->document->doc_props = NULL;
 	}
 
 	return ret_refcount;
@@ -152,6 +182,9 @@ int decrement_document_reference(dom_object *object TSRMLS_DC) {
 			if (object->document->ptr != NULL) {
 				xmlFreeDoc((xmlDoc *) object->document->ptr);
 				object->document->ptr = NULL;
+			}
+			if (object->document->doc_props != NULL) {
+				efree(object->document->doc_props);
 			}
 			efree(object->document);
 		}
@@ -465,6 +498,12 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_document_prop_handlers, "strictErrorChecking", dom_document_strict_error_checking_read, dom_document_strict_error_checking_write TSRMLS_CC);
 	dom_register_prop_handler(&dom_document_prop_handlers, "documentURI", dom_document_document_uri_read, dom_document_document_uri_write TSRMLS_CC);
 	dom_register_prop_handler(&dom_document_prop_handlers, "config", dom_document_config_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_document_prop_handlers, "formatOutput", dom_document_format_output_read, dom_document_format_output_write TSRMLS_CC);
+	dom_register_prop_handler(&dom_document_prop_handlers, "validateOnParse", dom_document_validate_on_parse_read, dom_document_validate_on_parse_write TSRMLS_CC);
+	dom_register_prop_handler(&dom_document_prop_handlers, "resolveExternals", dom_document_resolve_externals_read, dom_document_resolve_externals_write TSRMLS_CC);
+	dom_register_prop_handler(&dom_document_prop_handlers, "preserveWhiteSpace", dom_document_preserve_whitespace_read, dom_document_preserve_whitespace_write TSRMLS_CC);
+	dom_register_prop_handler(&dom_document_prop_handlers, "substituteEntities", dom_document_substitue_entities_read, dom_document_substitue_entities_write TSRMLS_CC);
+
 	zend_hash_merge(&dom_document_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler), 0);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_document_prop_handlers, sizeof(dom_document_prop_handlers), NULL);
 
@@ -1074,10 +1113,7 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 	}
 
 	object_init_ex(wrapper, ce);
-	/* Add object properties not needing function calls */
-	if (obj->type == XML_DOCUMENT_NODE || obj->type == XML_HTML_DOCUMENT_NODE) {
-		add_domdocument_properties(wrapper TSRMLS_CC);
-	}
+
 	intern = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
 	if (obj->doc != NULL) {
 		if (domobj != NULL) {

@@ -51,6 +51,16 @@ int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRML
 int dom_document_document_uri_read(dom_object *obj, zval **retval TSRMLS_DC);
 int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC);
 int dom_document_config_read(dom_object *obj, zval **retval TSRMLS_DC);
+int dom_document_format_output_read(dom_object *obj, zval **retval TSRMLS_DC);
+int dom_document_format_output_write(dom_object *obj, zval *newval TSRMLS_DC);
+int	dom_document_validate_on_parse_read(dom_object *obj, zval **retval TSRMLS_DC);
+int dom_document_validate_on_parse_write(dom_object *obj, zval *newval TSRMLS_DC);
+int dom_document_resolve_externals_read(dom_object *obj, zval **retval TSRMLS_DC);
+int dom_document_resolve_externals_write(dom_object *obj, zval *newval TSRMLS_DC);
+int dom_document_preserve_whitespace_read(dom_object *obj, zval **retval TSRMLS_DC);
+int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_DC);
+int dom_document_substitue_entities_read(dom_object *obj, zval **retval TSRMLS_DC);
+int dom_document_substitue_entities_write(dom_object *obj, zval *newval TSRMLS_DC);
 
 /* documenttype properties */
 int dom_documenttype_name_read(dom_object *obj, zval **retval TSRMLS_DC);

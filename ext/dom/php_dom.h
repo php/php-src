@@ -66,6 +66,7 @@ extern zend_module_entry dom_module_entry;
 void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC);
 dom_object *dom_object_get_data(xmlNodePtr obj);
 xmlNodePtr dom_object_get_node(dom_object *obj);
+dom_doc_propsptr dom_get_doc_props(dom_ref_obj *document);
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #if defined(LIBXML_XPATH_ENABLED)
 zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC);
@@ -86,7 +87,6 @@ void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local
 void php_dom_create_implementation(zval **retval  TSRMLS_DC);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 int dom_has_feature(char *feature, char *version);
-void add_domdocument_properties(zval *id TSRMLS_DC);
 int dom_node_is_read_only(xmlNodePtr node);
 int dom_node_children_valid(xmlNodePtr node);
 
