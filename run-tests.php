@@ -139,6 +139,7 @@ INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
 More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
 save_text($info_file, $php_info);
 $ini_overwrites = array(
+		'mbstring.script_encoding=pass',
 		'output_handler=',
 		'zlib.output_compression=Off',
 		'open_basedir=',
