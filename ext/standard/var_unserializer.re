@@ -473,7 +473,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "O:" uiv ":" ["]	{
-	size_t len, len2, maxlen;
+	size_t len, len2, len3, maxlen;
 	int elements;
 	char *class_name;
 	zend_class_entry *ce;
@@ -503,6 +503,13 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 	if (*(YYCURSOR+1) != ':') {
 		*p = YYCURSOR+1;
+		return 0;
+	}
+
+	len3 = strspn(class_name, "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	if (len3 != len)
+	{
+		*p = YYCURSOR + len3 - len;
 		return 0;
 	}
 
