@@ -120,11 +120,11 @@ PHP_FUNCTION(apache_child_terminate)
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
 		RETURN_TRUE;
 	} else { /* tell them to get lost! */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "apache_child_terminate is disabled");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is disabled");
 		RETURN_FALSE;
 	}
 #else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "apache_child_terminate() is not supported in this build");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is not supported in this build");
 		RETURN_FALSE;
 #endif
 }
