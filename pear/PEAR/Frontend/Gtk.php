@@ -21,6 +21,10 @@
 
 require_once "PEAR.php";
 
+/**
+ * @nodep GtkWindow
+ * @nodep gdk
+ */
 class PEAR_Frontend_Gtk extends PEAR
 {
     // {{{ properties
