@@ -1,3 +1,20 @@
+1999-10-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Add missing initialization entry
+
+    * ext/mcrypt/mcrypt.c: Support current mcrypt. Tested with libmcrypt-2.2.4
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    Change session.lifetime to session.cookie_lifetime. And:
+
+1999-10-31  Sam Ruby  <rubys@us.ibm.com>
+
+    * configuration-parser.y:
+1999-10-31  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-10-30  Rasmus Lerdorf  <rasmus@php.net>
 
     * php_regex.h: typing in the dark
