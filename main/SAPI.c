@@ -41,6 +41,9 @@ SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 
 static sapi_post_content_type_reader supported_post_content_types[] = {
 	{ DEFAULT_POST_CONTENT_TYPE,	sizeof(DEFAULT_POST_CONTENT_TYPE)-1,	sapi_read_standard_form_data },
+#if HAVE_FDFLIB
+	{ "application/vnd.fdf",	sizeof("application/vnd.fdf")-1,	sapi_read_standard_form_data },
+#endif
 	{ NULL, 0, NULL }
 };
 
@@ -67,7 +70,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_module = *sf;
 	zend_hash_init(&known_post_content_types, 5, NULL, NULL, 1);
 
-	sapi_register_post_reader(supported_post_content_types);
+	sapi_register_post_readers(supported_post_content_types);
 
 #ifdef ZTS
 	sapi_globals_id = ts_allocate_id(sizeof(sapi_globals_struct), NULL, NULL);
