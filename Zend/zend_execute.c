@@ -1911,7 +1911,11 @@ send_by_ref:
 							case IS_STRING:
 								zend_hash_update(array_ptr->value.ht, offset->value.str.val, offset->value.str.len+1, &expr_ptr, sizeof(zval *), NULL);
 								break;
+							case IS_NULL:
+								zend_hash_update(array_ptr->value.ht, "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
+								break;
 							default:
+								zval_ptr_dtor(&expr_ptr);
 								/* do nothing */
 								break;
 						}
