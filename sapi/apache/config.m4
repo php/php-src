@@ -1,6 +1,22 @@
 dnl
 dnl $Id$
 dnl
+AC_DEFUN([PHP_APACHE_FD_CHECK], [
+AC_CACHE_CHECK([for member fd in BUFF *],ac_cv_php_fd_in_buff,[
+  save=$CPPFLAGS
+  if test -n "$APXS_INCLUDEDIR"; then
+    CPPFLAGS="$CPPFLAGS -I$APXS_INCLUDEDIR"
+  else
+    CPPFLAGS="$CPPFLAGS $APACHE_INCLUDE"
+  fi
+  AC_TRY_COMPILE([#include <httpd.h>],[conn_rec *c; int fd = c->client->fd;],[
+    ac_cv_php_fd_in_buff=yes],[ac_cv_php_fd_in_buff=no],[ac_cv_php_fd_in_buff=no])
+  CPPFLAGS=$save
+])
+if test "$ac_cv_php_fd_in_buff" = "yes"; then
+  AC_DEFINE(PHP_APACHE_HAVE_CLIENT_FD,1,[ ])
+fi
+])
 
 AC_MSG_CHECKING(for Apache 1.x module support via DSO through APXS)
 AC_ARG_WITH(apxs,
@@ -220,33 +236,6 @@ AC_ARG_WITH(apache,
 
 fi
 
-if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
-  APXS_EXP=-bE:sapi/apache/mod_php5.exp
-fi
-
-PHP_SUBST(APXS_EXP)
-PHP_SUBST(APACHE_INCLUDE)
-PHP_SUBST(APACHE_TARGET)
-PHP_SUBST(APXS)
-PHP_SUBST(APXS_LDFLAGS)
-PHP_SUBST(APACHE_INSTALL)
-PHP_SUBST(STRONGHOLD)
-
-AC_CACHE_CHECK([for member fd in BUFF *],ac_cv_php_fd_in_buff,[
-  save=$CPPFLAGS
-  if test -n "$APXS_INCLUDEDIR"; then
-    CPPFLAGS="$CPPFLAGS -I$APXS_INCLUDEDIR"
-  else
-    CPPFLAGS="$CPPFLAGS $APACHE_INCLUDE"
-  fi
-  AC_TRY_COMPILE([#include <httpd.h>],[conn_rec *c; int fd = c->client->fd;],[
-    ac_cv_php_fd_in_buff=yes],[ac_cv_php_fd_in_buff=no],[ac_cv_php_fd_in_buff=no])
-  CPPFLAGS=$save
-])
-if test "$ac_cv_php_fd_in_buff" = "yes"; then
-  AC_DEFINE(PHP_APACHE_HAVE_CLIENT_FD,1,[ ])
-fi
-  
 AC_MSG_CHECKING(for mod_charset compatibility option)
 AC_ARG_WITH(mod_charset,
 [  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache).],
@@ -257,14 +246,29 @@ AC_ARG_WITH(mod_charset,
   AC_MSG_RESULT(no)
 ])
 
+dnl Build as static module
 if test -n "$APACHE_MODULE"; then
   PHP_TARGET_RDYNAMIC
   $php_shtool mkdir -p sapi/apache
   PHP_OUTPUT(sapi/apache/libphp5.module)
 fi
 
+dnl General
 if test -n "$APACHE_INSTALL"; then
+  if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
+    APXS_EXP=-bE:sapi/apache/mod_php5.exp
+  fi
+
+  PHP_APACHE_FD_CHECK
   INSTALL_IT=$APACHE_INSTALL
+
+  PHP_SUBST(APXS_EXP)
+  PHP_SUBST(APACHE_INCLUDE)
+  PHP_SUBST(APACHE_TARGET)
+  PHP_SUBST(APXS)
+  PHP_SUBST(APXS_LDFLAGS)
+  PHP_SUBST(APACHE_INSTALL)
+  PHP_SUBST(STRONGHOLD)
 fi
 
 dnl ## Local Variables:
