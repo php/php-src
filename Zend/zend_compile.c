@@ -367,13 +367,24 @@ void zend_do_echo(znode *arg TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 }
 
-void zend_do_abstract_method(TSRMLS_D)
+void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	if (modifiers->u.constant.value.lval & ZEND_ACC_ABSTRACT) {
+		if (body->u.constant.value.lval & ZEND_ACC_ABSTRACT) {
+			zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_RAISE_ABSTRACT_ERROR;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
+			opline->opcode = ZEND_RAISE_ABSTRACT_ERROR;
+			SET_UNUSED(opline->op1);
+			SET_UNUSED(opline->op2);
+		} else {
+			/* we had code in the function body */
+			zend_error(E_COMPILE_ERROR, "Abstract function %s() cannot contain body", function_name->u.constant.value.str.val);
+		}
+	} else {
+		if (body->u.constant.value.lval & ZEND_ACC_ABSTRACT) {
+			zend_error(E_COMPILE_ERROR, "Non-abstract method %s() must contain body", function_name->u.constant.value.str.val);
+		}
+	}
 }
 
 
@@ -899,7 +910,8 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 
 int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 {
-	if ((new_modifier->u.constant.value.lval & ZEND_ACC_PPP_MASK)
+	if ((current_access_type->u.constant.value.lval & ZEND_ACC_PPP_MASK)
+		&& (new_modifier->u.constant.value.lval & ZEND_ACC_PPP_MASK)
 		&& ((current_access_type->u.constant.value.lval & ZEND_ACC_PPP_MASK) != (new_modifier->u.constant.value.lval & ZEND_ACC_PPP_MASK))) {
 		zend_error(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
 	}
@@ -2179,6 +2191,10 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	zend_property_info property_info;
 	zend_property_info *existing_property_info;
 	HashTable *target_symbol_table;
+
+	if (access_type & ZEND_ACC_ABSTRACT) {
+		zend_error(E_COMPILE_ERROR, "Properties cannot be declared abstract");
+	}
 
 	if (zend_hash_find(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, (void **) &existing_property_info)==SUCCESS) {
 		if (!(existing_property_info->flags & ZEND_ACC_IMPLICIT_PUBLIC)) {
