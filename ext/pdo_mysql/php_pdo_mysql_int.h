@@ -27,6 +27,8 @@
 typedef struct {
 	MYSQL 		*server;
 	int	last_err;
+	unsigned int mysql_errno;
+	char *mysql_error;
 	unsigned attached:1;
 	unsigned _reserved:31;
 } pdo_mysql_db_handle;
@@ -54,7 +56,14 @@ typedef struct {
 extern pdo_driver_t pdo_mysql_driver;
 
 extern int _pdo_mysql_error(char *what, int mysql_errno, const char *file, int line TSRMLS_DC);
-#define pdo_mysql_error(w,s)	_pdo_mysql_error(w, s, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_mysql_error(s) \
+	s->mysql_errno = mysql_errno(s->server);	\
+	if (s->mysql_error) {	\
+		efree(s->mysql_error);	\
+	}	\
+	s->mysql_error = estrdup(mysql_error(s->server));
+
+
 extern int mysql_handle_error(pdo_dbh_t *dbh, pdo_mysql_db_handle *H, int errcode);
 
 extern struct pdo_stmt_methods mysql_stmt_methods;

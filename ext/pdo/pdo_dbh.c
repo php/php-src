@@ -287,10 +287,31 @@ static PHP_METHOD(PDO, affectedRows)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(dbh->affected_rows);
+	if (!dbh->methods->affected) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver affected rows retrieval.");
+	} else {
+		RETURN_LONG(dbh->methods->affected(dbh));
+	}
 }
 /* }}} */
 
+/* {{{ proto int PDO::lastInsertId()
+   Returns the number id of rows that we affected by the last call to PDO::exec().  Not always meaningful. */
+static PHP_METHOD(PDO, lastInsertId)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (ZEND_NUM_ARGS()) {
+		RETURN_FALSE;
+	}
+
+	if (!dbh->methods->last_id) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver last inserted id retrieval.");
+	} else {
+		RETURN_LONG(dbh->methods->last_id(dbh));
+	}
+}
+/* }}} */
 
 function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
@@ -300,6 +321,7 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, exec,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, affectedRows,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, lastInsertId,	NULL,					ZEND_ACC_PUBLIC)
 
 	{NULL, NULL, NULL}
 };

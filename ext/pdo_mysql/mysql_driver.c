@@ -55,6 +55,10 @@ static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 		mysql_close(H->server);
 		H->server = NULL;
 	}
+	if (H->mysql_error) {
+		efree(H->mysql_error);
+		H->mysql_error = NULL;
+	}
 	return 0;
 }
 /* }}} */
@@ -71,11 +75,31 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	return 1;
 }
 
-static int mysql_handle_doer(pdo_dbh_t *dbh, const char *sql TSRMLS_DC)
+static int mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 
-	return 0;
+	if (mysql_real_query(H->server, sql, sql_len)) {
+		pdo_mysql_error(H);
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+static long pdo_mysql_affected_rows(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+	my_ulonglong afr = mysql_affected_rows(H->server);
+
+	return afr == (my_ulonglong) - 1 ? 0 : (long) afr;
+}
+
+static long pdo_mysql_last_insert_id(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+
+	return (long) mysql_insert_id(H->server);
 }
 
 static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen  TSRMLS_DC)
@@ -95,7 +119,13 @@ static struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
 	mysql_handle_preparer,
 	mysql_handle_doer,
-	mysql_handle_quoter
+	mysql_handle_quoter,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	pdo_mysql_affected_rows,
+	pdo_mysql_last_insert_id
 };
 
 static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
@@ -120,7 +150,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	/* allocate an environment */
 	
 	/* handle for the server */
-	dbh->driver_data = H->server = mysql_init(NULL);
+	H->server = mysql_init(NULL);
+	dbh->driver_data = H;
 	if(vars[2].optval && strcmp("localhost", vars[2].optval)) {
 		host = vars[2].optval;
 		port = atoi(vars[3].optval); 
@@ -131,8 +162,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	dbname = vars[1].optval;
 	if(mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, 0) == NULL) 
 	{
-		H->last_err = mysql_errno(H->server);
-		pdo_mysql_error("pdo_mysql_handle_factory", H->last_err);
+		pdo_mysql_error(H);
 		goto cleanup;
 	}
 
@@ -152,10 +182,6 @@ cleanup:
 		if (vars[i].freeme) {
 			efree(vars[i].optval);
 		}
-	}
-
-	if (!ret) {
-		mysql_handle_closer(dbh TSRMLS_CC);
 	}
 
 	return ret;
