@@ -22,15 +22,15 @@
 
 require_once 'PEAR.php';
 require_once 'Archive/Tar.php';
-require_once 'Experimental/System.php';
+require_once 'System.php';
 
 /**
-* TODO:
-*   - check in inforFromDescFile that the minimal data needed is present
-*     (pack name, version, files, others?)
-*   - perhaps use parser folding to be less restrictive with the format
-*     of the package.xml file
-*/
+ * TODO:
+ *   - check in inforFromDescFile that the minimal data needed is present
+ *     (pack name, version, files, others?)
+ *   - perhaps use parser folding to be less restrictive with the format
+ *     of the package.xml file
+ */
 class PEAR_Common extends PEAR
 {
     // {{{ properties
