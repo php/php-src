@@ -395,6 +395,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	if (cgi || request_info.filename) {
 		file_handle.filename = request_info.filename;
 		file_handle.handle.fp = php3_fopen_for_parser();
+		SG(request_info).path_translated = file_handle.filename;
 	}
 
 	if (cgi && !file_handle.handle.fp) {
