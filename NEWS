@@ -35,8 +35,9 @@ PHP                                                                        NEWS
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default) (Georg)
 - Fixed bug #29291 (get_class_vars() return names with NULLs). (Marcus)
 - Fixed bug #29264 (gettext extension not working). (Edin)
-- Fixed buf #29258 (variant_date_from_timestamp() does not honour
+- Fixed bug #29258 (variant_date_from_timestamp() does not honour
   timezone).  (Wez)
+- Fixed bug #29256 (error when sending large packets on a socket). (Dmitry)
 - Fixed bug #29236 (memory error when wsdl-cache is enabled). (Dmitry)
 - Fixed bug #29132 ($_SERVER["PHP_AUTH_USER"] isn't defined). (Stefan)
 - Fixed bug #29119 (html_entity_decode() misbehaves with UTF-8). (Moriyoshi)
