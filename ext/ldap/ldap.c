@@ -94,7 +94,7 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_dn2ufn,									NULL)
 	PHP_FE(ldap_add,									NULL)
 	PHP_FE(ldap_delete,									NULL)
-	PHP_FE(ldap_modify,									NULL)
+	PHP_FALIAS(ldap_modify,		ldap_mod_replace,		NULL)
 
 /* additional functions for attribute based modifications, Gerrit Thomson */
 	PHP_FE(ldap_mod_add,								NULL)
@@ -1413,15 +1413,6 @@ PHP_FUNCTION(ldap_add)
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD);
 }
 /* }}} */
-
-/* {{{ proto int ldap_modify(int link, string dn, array entry)
-   Modify an LDAP entry */
-PHP_FUNCTION(ldap_modify)
-{
-	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE); 
-}
-/* }}} */
-
 
 /* three functions for attribute base modifications, gerrit Thomson */
 
