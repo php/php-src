@@ -1,3 +1,30 @@
+2003-03-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/file.c:
+      fix segfault in file_set_contents() when the file could not successfully
+      be opened.
+
+2003-03-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mysqli/mysqli.c:
+      Add missing initialization
+
+2003-03-21  James Cox  <james@imajes.info>
+
+    * run-tests.php:
+      updating for new list
+
+2003-03-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Builder.php:
+      - abort install when an extension fails to build (patch by ja at
+        morrdusk dot net)
+
+2003-03-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xml/xml.c:
+      This broke the xml extension, and pres2, commented out for now
+
 2003-03-20  Hartmut Holzgraefe  <hartmut@six.de>
 
     * scripts/ext_skel_ng/extension_parser.php:
