@@ -12,7 +12,8 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Wez Furlong <wez@thebrainroom.com>                           |
+  | Authors: Wez Furlong <wez@thebrainroom.com>                          |
+  |          Tal Peer <tal@php.net>                                      |
   +----------------------------------------------------------------------+
 
   $Id$ 
