@@ -64,7 +64,9 @@
 #if HAVE_LIBEXPAT && HAVE_WDDX
 #include "ext/wddx/php_wddx.h"
 #endif
+#if HAVE_MYSQL
 #include "ext/mysql/php_mysql.h"
+#endif
 #include "ext/mbstring/mbstring.h"
 #if HAVE_OVERLOAD
 #include "ext/overload/php_overload.h"
@@ -87,7 +89,9 @@ zend_module_entry *php_builtin_extensions[] = {
 #if defined(MBSTR_ENC_TRANS)
 	phpext_mbstring_ptr,
 #endif
+#if HAVE_MYSQL
 	phpext_mysql_ptr,
+#endif
 #if HAVE_UODBC
 	phpext_odbc_ptr,
 #endif
