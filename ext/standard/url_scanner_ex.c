@@ -158,7 +158,7 @@ yy3:
 yy4:	yych = *++YYCURSOR;
 yy5:
 #line 112
-	{ sep = separator; goto done; }
+	{ sep = separator; goto scan; }
 yy6:	yych = *++YYCURSOR;
 yy7:
 #line 113
