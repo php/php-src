@@ -60,7 +60,6 @@ PHP_FUNCTION(usort);
 PHP_FUNCTION(uasort);
 PHP_FUNCTION(uksort);
 PHP_FUNCTION(array_walk);
-PHP_FUNCTION(array_map);
 PHP_FUNCTION(count);
 PHP_FUNCTION(flush);
 PHP_FUNCTION(end);

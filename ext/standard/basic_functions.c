@@ -3139,41 +3139,6 @@ PHP_FUNCTION(array_reverse)
 /* }}} */
 
 
-/* {{{ proto array array_map(array input, string value_exp [, string key_exp] */
-PHP_FUNCTION(array_map)
-{
-	zval**		input;
-	zval**		value_exp;
-	zval**		key_exp = NULL;
-	zval**		entry;
-	int			argc;
-	
-	argc = ARG_COUNT(ht);
-	
-	if (argc < 2 || argc > 3 || getParametersEx(ht, &input, &value_exp, &key_exp) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if ((*input)->type != IS_ARRAY) {
-		php_error(E_WARNING, "First argument to %s() should be an array",
-				get_active_function_name());
-		return;
-	}
-	
-	convert_to_string_ex(value_exp);
-	if (key_exp)
-		convert_to_string_ex(key_exp);
-	
-	zend_hash_internal_pointer_reset((*input)->value.ht);
-	while(zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
-		
-		
-		zend_hash_move_forward((*input)->value.ht);
-	}		
-}
-
-/* }}} */
-
 /*
  * Local variables:
  * tab-width: 4
