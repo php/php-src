@@ -541,11 +541,11 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
  * \brief recursive SimpleXML_Element iterator
  *
  * The SimpleXMLIterator implements the RecursiveIterator interface. This 
- * allows to iterate over all elements using foreach or an appropriate while
- * construct just like SimpleXMLElement does. But using the foreach construct,
- * you will also iterate over the subelements, because for every element which
- * has subelements hasChildren() returns true what results in a call to 
- * getChildren() which then returns the iterator for that sub element.
+ * allows iteration over all elements using foreach or an appropriate while
+ * construct, just like SimpleXMLElement does. When using the foreach construct,
+ * you will also iterate over the subelements. For every element which
+ * has subelements, hasChildren() returns true.  This will trigger a call to
+ * getChildren() which returns the iterator for that sub element.
  */
 class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 {
