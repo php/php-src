@@ -22,6 +22,20 @@
 #include "zend_ini_parser.h"
 #include "zend_ini_scanner.h"
 
+#ifdef ZTS
+# ifdef HAVE_STDIOSTR_H
+#  include <stdiostr.h>
+# endif
+# ifdef HAVE_STDIOSTREAM_H
+#  include <stdiostream.h>
+# endif
+# ifdef ZEND_WIN32
+#  include <strstrea.h>
+# else
+#  include <strstream.h>
+# endif
+#endif
+
 #undef YYSTYPE
 #define YYSTYPE zval
 
@@ -59,8 +73,54 @@ int ini_lex(zval *ini_lval)
 	return CG(ini_scanner)->lex_scan(ini_lval);
 }
 
+ZendIniFlexLexer::~ZendIniFlexLexer()
+{
+	if (yy_start_stack) {
+		yy_flex_free(yy_start_stack);
+	}
+}
+
+int yyFlexLexer::yylex()
+{
+	fprintf(stderr, "Error:  yyFlexLexer::yylex() called\n");
+	return -1;
+}
+
 #endif
 
+
+int zend_ini_open_file_for_scanning(zend_file_handle *fh)
+{
+	FILE *fp;
+	CLS_FETCH();
+
+	switch (fh->type) {
+		case ZEND_HANDLE_FP:
+			fp = fh->handle.fp;
+			break;
+		case ZEND_HANDLE_FILENAME:
+			fp = zend_fopen(fh->filename, NULL);
+			break;
+		default:
+			return FAILURE;
+	}
+
+#ifdef ZTS
+	if (!fp) {
+		return FAILURE;
+	}
+	fh->handle.is = new istdiostream(fp);
+	fh->type = ZEND_HANDLE_STDIOSTREAM;
+
+	CG(ini_scanner) = new ZendIniFlexLexer;
+	CG(ini_scanner)->switch_streams(fh->handle.is, &cout);
+#else
+	init_cfg_scanner();
+	yyin = fp;
+	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+#endif
+	return SUCCESS;
+}
 
 %}
 
