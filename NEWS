@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jan 2004, Version 4.3.5
+03 Feb 2004, Version 4.3.5RC2
 - Changed "allow_url_fopen" php.ini option to be PHP_INI_SYSTEM. (Sara)
 - Improved the sybase_ct module: (Timm)
   . Added ability to define a message handler not only globally, but also per 
