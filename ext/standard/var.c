@@ -430,6 +430,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 			zend_bool incomplete_class = 0;
 			char *class_name = NULL;
 			size_t name_len = 0;
+			int pi;
 			
 			INIT_PZVAL(*rval);
 
@@ -459,8 +460,8 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 					}
 					(*p) += 2;
 					class_name = emalloc(i + 1);
-					if (i > 0) {
-						memcpy(class_name, *p, i);
+					for(pi=0;pi<i;pi++) {
+						class_name[pi] = tolower((*p)[pi]);
 					}
 					class_name[i] = 0;
 					(*p) += i;
