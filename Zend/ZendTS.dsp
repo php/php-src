@@ -155,10 +155,6 @@ SOURCE=.\zend_extensions.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_gcc_inline.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend_hash.c
 # End Source File
 # Begin Source File
