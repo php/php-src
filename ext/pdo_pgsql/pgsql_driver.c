@@ -169,12 +169,28 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 
 static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
 {
-	*quoted = emalloc(2*unquotedlen + 3);
-	(*quoted)[0] = '\'';
-	*quotedlen = PQescapeString(*quoted + 1, unquoted, unquotedlen);
-	(*quoted)[*quotedlen + 1] = '\'';
-	(*quoted)[*quotedlen + 2] = '\0';
-	*quotedlen += 2;
+	unsigned char *escaped;
+	
+	switch (paramtype) {
+		case PDO_PARAM_LOB:
+			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
+			escaped = PQescapeBytea(unquoted, unquotedlen, quotedlen);
+			*quotedlen += 1;
+			*quoted = emalloc(*quotedlen + 1);
+			memcpy((*quoted)+1, escaped, *quotedlen-2);
+			(*quoted)[0] = '\'';
+			(*quoted)[*quotedlen-1] = '\'';
+			(*quoted)[*quotedlen] = '\0';
+			free(escaped);
+			break;
+		default:
+			*quoted = emalloc(2*unquotedlen + 3);
+			(*quoted)[0] = '\'';
+			*quotedlen = PQescapeString(*quoted + 1, unquoted, unquotedlen);
+			(*quoted)[*quotedlen + 1] = '\'';
+			(*quoted)[*quotedlen + 2] = '\0';
+			*quotedlen += 2;
+	}
 	return 1;
 }
 
