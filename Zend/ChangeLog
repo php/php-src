@@ -1,3 +1,27 @@
+2004-08-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_highlight.c:
+      MFH: Fixed bug #29607 (highlighting code with HEREDOC produces invalid
+      output).
+
+    * (PHP_5_0)
+      zend_highlight.c:
+      Fixed bug #29607 (highlighting code with HEREDOC produces invalid output).
+
+2004-08-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      More meaningfull error message
+
+2004-08-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      zend_alloc.h:
+      - MFH: Patch to allow the Zend memory allocators to be disabled.
+
+    * zend_alloc.h:
+      - Added missing defines.
+
 2004-08-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
