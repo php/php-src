@@ -811,7 +811,6 @@ ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2)
 ZEND_API int concat_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
-	zval *orig_op1=op1, *orig_op2=op2;
 	int use_copy1, use_copy2;
 
 

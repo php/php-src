@@ -104,6 +104,7 @@ ZEND_API void *_emalloc(size_t size)
 		p->filename = filename;
 		p->lineno = lineno;
 		p->magic = MEM_BLOCK_START_MAGIC;
+		p->reported = 0;
 #endif
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		p->persistent = 0;
@@ -126,6 +127,7 @@ ZEND_API void *_emalloc(size_t size)
 	p->filename = filename;
 	p->lineno = lineno;
 	p->magic = MEM_BLOCK_START_MAGIC;
+	p->reported = 0;
 	*((long *)(((char *) p) + sizeof(mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size))) = MEM_BLOCK_END_MAGIC;
 #endif
 #if MEMORY_LIMIT
@@ -340,11 +342,8 @@ ZEND_API void start_memory_manager(void)
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 {
 	mem_header *p, *t;
-#if ZEND_DEBUG
-	char *last_filename = NULL;
-	uint last_lineno = 0;
-	uint leak_count=0, total_bytes=0;
-	unsigned char had_leaks=0;
+#ifdef ZEND_DEBUG
+	int had_leaks=0;
 #endif
 	ALS_FETCH();
 
@@ -353,25 +352,26 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	while (t) {
 		if (!t->cached || clean_cache) {
 #if ZEND_DEBUG
-			if (!t->cached) {
-				had_leaks = 1;
-				if (last_filename != t->filename || last_lineno!=t->lineno) {
-					/* flush old leak */
-					if (leak_count>0) {
-						if (!silent && leak_count>1) {
-							zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (long) (leak_count-1));
-						}
-						leak_count=0;
-						total_bytes=0;
-					}
-					last_filename = t->filename;
-					last_lineno = t->lineno;
-					if (!silent) {
-						zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, t);
+			if (!t->cached && !t->reported) {
+				mem_header *iterator;
+				int total_leak=0, total_leak_count=0;
+
+				had_leaks=1;
+				if (!silent) {
+					zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, t);
+				}
+				t->reported = 1;
+				for (iterator=t->pNext; iterator; iterator=iterator->pNext) {
+					if (iterator->filename==t->filename
+						&& iterator->lineno==t->lineno) {
+						total_leak += iterator->size;
+						total_leak_count++;
+						iterator->reported = 1;
 					}
 				}
-				leak_count++;
-				total_bytes += t->size;
+				if (!silent && total_leak_count>0) {
+					zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (long) (total_leak_count));
+				}
 			}
 #endif
 			p = t->pNext;
@@ -382,10 +382,8 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 			t = t->pNext;
 		}
 	}
-#if ZEND_DEBUG
-	if (!silent && leak_count>1) {
-		zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (long) (leak_count-1));
-	}
+
+#ifdef ZEND_DEBUG
 	if (had_leaks) {
 		ELS_FETCH();
 
