@@ -2674,7 +2674,7 @@ send_by_ref:
 
 								if (file_handle.handle.fp) {
 									if( !opened_path ) {
-										opened_path = file_handle.opened_path = estrdup(inc_filename->value.str.val);
+										opened_path = file_handle.opened_path = estrndup(inc_filename->value.str.val, inc_filename->value.str.len);
 									}	
 								
 									if (zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
