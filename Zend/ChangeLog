@@ -1,3 +1,61 @@
+2003-07-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c:
+      Fix __clone().
+      
+
+    * tests/bug20240.phpt:
+      Use both destructor and shutdown
+
+    * zend_execute_API.c:
+      small bugfix
+
+    * tests/bug24436.php
+      tests/bug24436.phpt:
+      Rename  test to correct  extension
+
+    * zend_execute.c:
+      __clone might not be defined
+
+    * zend_execute.c:
+      Fix __clone visibility
+
+    * zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c:
+      Fix destructor visibility
+
+2003-07-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/bug24436.php:
+      - Added test for bug #24436
+
+2003-07-01  George Schlossnagle  <george@omniti.com>
+
+    * zend_reflection_api.c:
+      Timm Friebe's patches for code celanup and additional functions.
+
+2003-07-01  Jani Taskinen  <sniper@iki.fi>
+
+    * tests/.cvsignore
+      tests/bug21478.phpt
+      tests/zend2.php
+      tests/zend2.php.txt:
+      Missing .cvsignore, broken test, renamed zend2.php -> zend2.php.txt
+
+2003-07-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_reflection_api.c:
+      ZTS fixes.
+
+2003-07-01  George Schlossnagle  <george@omniti.com>
+
+    * zend_reflection_api.c:
+      more incremental changes.  add anything that needs a class factory.
+
+    * zend_reflection_api.c:
+      all the easy parts of Reflection_Class
+
 2003-06-30  Shane Caraveo  <shane@caraveo.com>
 
     * zend_operators.h:
