@@ -431,12 +431,6 @@ int main(int argc, char *argv[])
 
 	cli_sapi_module.executable_location = argv[0];
 
-	/* startup after we get the above ini override se we get things right */
-	if (php_module_startup(&cli_sapi_module, NULL, 0)==FAILURE) {
-		goto err;
-	}
-	module_started = 1;
-
 #ifdef ZTS
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
@@ -444,6 +438,18 @@ int main(int argc, char *argv[])
 	sapi_globals = ts_resource(sapi_globals_id);
 	tsrm_ls = ts_resource(0);
 #endif
+
+	/* startup after we get the above ini override se we get things right */
+	if (php_module_startup(&cli_sapi_module, NULL, 0)==FAILURE) {
+		/* there is no way to see if we must call zend_ini_deactivate()
+		 * since we cannot check if EG(ini_directives) has been initialised
+		 * because the executor's constructor does not set initialize it.
+		 * Apart from that there seems no need for zend_ini_deactivate() yet.
+		 * So we goto out_err.*/
+		exit_status = 1;
+		goto out_err;
+	}
+	module_started = 1;
 
 	zend_first_try {
 		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
