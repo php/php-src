@@ -88,3 +88,4 @@
 #define PHP_LDAP_LIBS		""
 #define PHP_VELOCIS_INCLUDE     ""
 #define PHP_VELOCIS_LIBS        ""
+#define PHP_EXTENSION_DIR       "@EXTENSION_DIR@"
