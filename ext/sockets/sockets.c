@@ -266,6 +266,7 @@ static int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
 
 	set_errno(0);
 
+	*t = '\0';
 	while (*t != '\n' && *t != '\r' && n < maxlen) {
 		if (m > 0) {
 			t++;
@@ -828,6 +829,11 @@ PHP_FUNCTION(socket_read)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &length, &type) == FAILURE)
 		return;
 
+	/* overflow check */
+	if ((length + 1) < 2) {
+		RETURN_FALSE;
+	}
+
 	tmpbuf = emalloc(length + 1);
 	
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
@@ -1225,6 +1231,11 @@ PHP_FUNCTION(socket_recv)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &php_sock_res, -1, le_socket_name, le_socket);
 
+	/* overflow check */
+	if ((len + 1) < 2) {
+		RETURN_FALSE;
+	}
+
 	recv_buf = emalloc(len + 1);
 	memset(recv_buf, 0, len + 1);
 
@@ -1300,6 +1311,11 @@ PHP_FUNCTION(socket_recvfrom)
 		return;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
+
+	/* overflow check */
+	if ((arg3 + 2) < 3) {
+		RETURN_FALSE;
+	}
 
 	recv_buf = emalloc(arg3 + 2);
 	memset(recv_buf, 0, arg3 + 2);
