@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to		  |
    | license@php.net so we can mail you a copy immediately.				  |
    +----------------------------------------------------------------------+
-   | Authors: Kristian Koehntopp (kris@koehntopp.de)					  |
+   | Authors: Kristian Koehntopp <kris@koehntopp.de>					  |
    +----------------------------------------------------------------------+
  */
  
@@ -34,7 +34,6 @@
 extern char *program_name;
 char *program_name = "php";
 #endif
-
 /* }}} */
 
 #define SAFE_STRING(s) ((s)?(s):"")
