@@ -333,6 +333,7 @@ unsetenv \
 usleep \
 utime \
 vsnprintf \
+mkstemp \
 )
 
 AC_REPLACE_FUNCS(strlcat strlcpy)
