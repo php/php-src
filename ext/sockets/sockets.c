@@ -225,7 +225,7 @@ PHP_MINIT_FUNCTION(sockets)
 PHP_MINFO_FUNCTION(sockets)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "sockets support", "enabled");
+	php_info_print_table_row(2, "sockets support", "enabled");
 	php_info_print_table_end();
 }
 
@@ -359,7 +359,7 @@ PHP_FUNCTION(fd_zero)
 }
 /* }}} */
 
-/* {{{ proto void select(int max_fd, resource readfds, resource writefds, resource exceptfds, int tv_sec, int tv_usec)
+/* {{{ proto int select(int max_fd, resource readfds, resource writefds, resource exceptfds, int tv_sec, int tv_usec)
    Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 /* See select(2) man page for details.
 
@@ -872,7 +872,7 @@ PHP_FUNCTION(connect)
 
 	switch(sa.sa_family) {
 		case AF_INET: {
-			sin = &sa;
+			sin = (struct sockaddr_in *)&sa;
 
 			if (argc != 3) {
 				WRONG_PARAM_COUNT;
@@ -897,7 +897,7 @@ PHP_FUNCTION(connect)
 			break;
 		}
 	case AF_UNIX: {
-			sun = &sa;
+			sun = (struct sockaddr_un *)&sa;
 			snprintf(sun->sun_path, 108, "%s", Z_STRVAL_PP(addr));
 			ret = connect(Z_LVAL_PP(sockfd), (struct sockaddr *) sun, SUN_LEN(sun));
 			break;
