@@ -2814,7 +2814,7 @@ PHP_FUNCTION(ibase_blob_info)
 			RETURN_FALSE;
 		}
 
-		if (_php_ibase_blob_info(ib_blob_id->bl_handle, &bl_info)) {
+		if (_php_ibase_blob_info(ib_blob_id->bl_handle, &bl_info TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
 		if (isc_close_blob(IB_STATUS, &ib_blob_id->bl_handle)) {
