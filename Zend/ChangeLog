@@ -1,3 +1,10 @@
+2002-09-16  Andrei Zmievski  <andrei@php.net>
+
+    * zend_API.h
+      zend_builtin_functions.c
+      zend_API.c
+      zend_execute_API.c: MFZE1
+
 2002-09-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_highlight.c: Make zend actually strip comments. Bug #18151
