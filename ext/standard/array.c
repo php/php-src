@@ -888,6 +888,8 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	args[1] = &key;
 	args[2] = userdata;
 
+	zend_hash_internal_pointer_reset(target_hash);
+
 	/* Iterate through hash */
 	while(zend_hash_get_current_data(target_hash, (void **)&args[0]) == SUCCESS) {
 		/* Set up the key */
