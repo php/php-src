@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
+   | Authors: Stig Sæther Bakken <ssb@fast.no>                              |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
-   |	        Kevin N. Shallow <kshallow@tampabay.rr.com> Birdstep Support |
+   |	      Kevin N. Shallow <kshallow@tampabay.rr.com> Birdstep Support|
    +----------------------------------------------------------------------+
 */
 
@@ -221,7 +221,7 @@ typedef struct odbc_result_value {
 } odbc_result_value;
 
 typedef struct odbc_result {
-    ODBC_SQL_STMT_T stmt;
+	ODBC_SQL_STMT_T stmt;
 	int id;
 	odbc_result_value *values;
 	SWORD numcols;
@@ -229,8 +229,8 @@ typedef struct odbc_result {
 # if HAVE_SQL_EXTENDED_FETCH
 	int fetch_abs;
 # endif
-    long longreadlen;
-    int binmode;
+	long longreadlen;
+	int binmode;
 	int fetched;
 	odbc_connection *conn_ptr;
 } odbc_result;
