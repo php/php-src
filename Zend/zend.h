@@ -164,6 +164,13 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_FORMAT(type, idx, first)
 #endif
 
+#if ZEND_GCC_VERSION >= 3000
+# define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
+#else
+# define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
+#endif
+
+
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX))
 # define do_alloca(p) alloca(p)
 # define free_alloca(p)
@@ -347,8 +354,8 @@ struct _zend_class_entry {
 
 #include "zend_stream.h"
 typedef struct _zend_utility_functions {
-	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_FORMAT(printf, 4, 0);
-	int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+	int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	int (*write_function)(const char *str, uint str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path);
 	void (*message_handler)(long message, void *data);
@@ -485,13 +492,13 @@ ZEND_API void free_estring(char **str_p);
 
 
 BEGIN_EXTERN_C()
-extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
-extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_FORMAT(printf, 4, 0);
+extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 
