@@ -42,14 +42,13 @@ extern PHPAPI int core_globals_id;
 extern ZEND_API struct _php_core_globals core_globals;
 #endif
 
-typedef struct _php_http_globals {
-	zval *post;
-	zval *get;
-	zval *cookie;
-	zval *server;
-	zval *environment;
-	zval *post_files;
-} php_http_globals;
+
+#define TRACK_VARS_POST		1
+#define TRACK_VARS_GET		2
+#define TRACK_VARS_COOKIE	3
+#define TRACK_VARS_SERVER	4
+#define TRACK_VARS_ENV		5
+#define TRACK_VARS_FILES	6
 
 struct _php_tick_function_entry;
 
@@ -103,11 +102,10 @@ struct _php_core_globals {
 
 	zend_llist tick_functions;
 
-	php_http_globals http_globals;
+	zval *http_globals[6];
 
 	zend_bool expose_php;
 
-	zend_bool track_vars;
 	zend_bool register_globals;
 	zend_bool register_argc_argv;
 

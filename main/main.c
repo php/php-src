@@ -225,7 +225,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("short_open_tag",		"1",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("sql.safe_mode",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			sql_safe_mode,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("track_vars",			"1",		PHP_INI_ALL,		OnUpdateBool,			track_vars,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("y2k_compliance",		"0",		PHP_INI_ALL,		OnUpdateBool,			y2k_compliance,			php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("arg_separator",			"&",		PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,			php_core_globals,	core_globals)
@@ -922,12 +921,10 @@ static inline void php_register_server_variables(ELS_D SLS_DC PLS_DC)
 {
 	zval *array_ptr=NULL;
 
-	if (PG(track_vars)) {
-		ALLOC_ZVAL(array_ptr);
-		array_init(array_ptr);
-		INIT_PZVAL(array_ptr);
-		PG(http_globals).server = array_ptr;
-	}
+	ALLOC_ZVAL(array_ptr);
+	array_init(array_ptr);
+	INIT_PZVAL(array_ptr);
+	PG(http_globals)[TRACK_VARS_SERVER] = array_ptr;
 
 	/* Server variables */
 	if (sapi_module.register_server_variables) {
@@ -954,8 +951,31 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 	char *p;
 	unsigned char _gpc_flags[3] = {0,0,0};
 	zend_bool have_variables_order;
+	zval *dummy_track_vars_array;
+	zend_bool initialized_dummy_track_vars_array=0;
+	int i;
+	char *track_vars_names[] = {
+		"HTTP_POST_VARS",
+		"HTTP_GET_VARS",
+		"HTTP_COOKIE_VARS",
+		"HTTP_SERVER_VARS",
+		"HTTP_ENV_VARS",
+		"HTTP_POST_FILES",
+		NULL
+	};
+	int track_vars_names_length[] = {
+		sizeof("HTTP_POST_VARS"),
+		sizeof("HTTP_GET_VARS"),
+		sizeof("HTTP_COOKIE_VARS"),
+		sizeof("HTTP_SERVER_VARS"),
+		sizeof("HTTP_ENV_VARS"),
+		sizeof("HTTP_POST_FILES")
+	};
 
-	PG(http_globals).post = PG(http_globals).get = PG(http_globals).cookie = PG(http_globals).server = PG(http_globals).environment = PG(http_globals).post_files = NULL;
+
+	for (i=0; i<6; i++) {
+		PG(http_globals)[i] = NULL;
+	}
 
 	if (PG(variables_order)) {
 		p = PG(variables_order);
@@ -1008,25 +1028,18 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 		php_register_server_variables(ELS_C SLS_CC PLS_CC);
 	}
 
-	if (PG(http_globals).post) {
-		zend_hash_update(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), &PG(http_globals).post, sizeof(zval *), NULL);
+	for (i=0; i<6; i++) {
+		if (!PG(http_globals)[i] && !initialized_dummy_track_vars_array) {
+			ALLOC_ZVAL(dummy_track_vars_array);
+			array_init(dummy_track_vars_array);
+			INIT_PZVAL(dummy_track_vars_array);
+			initialized_dummy_track_vars_array = 1;
+		} else {
+			dummy_track_vars_array->refcount++;
+			PG(http_globals)[i] = dummy_track_vars_array;
+		}
+		zend_hash_update(&EG(symbol_table), track_vars_names[i], track_vars_names_length[i], &PG(http_globals)[i], sizeof(zval *), NULL);
 	}
-	if (PG(http_globals).get) {
-		zend_hash_update(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), &PG(http_globals).get, sizeof(zval *), NULL);
-	}
-	if (PG(http_globals).cookie) {
-		zend_hash_update(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), &PG(http_globals).cookie, sizeof(zval *), NULL);
-	}
-	if (PG(http_globals).server) {
-		zend_hash_update(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &PG(http_globals).server, sizeof(zval *), NULL);
-	}
-	if (PG(http_globals).environment) {
-		zend_hash_update(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), &PG(http_globals).environment, sizeof(zval *), NULL);
-	}
-	if (PG(http_globals).post_files) {
-		zend_hash_update(&EG(symbol_table), "HTTP_POST_FILES", sizeof("HTTP_POST_FILES"), &PG(http_globals).post_files, sizeof(zval *),NULL);
-	}
-
 	return SUCCESS;
 }
 
@@ -1036,9 +1049,6 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 	pval *arr, *argc, *tmp;
 	int count = 0;
 	char *ss, *space;
-
-	if (!PG(register_globals) && !PG(track_vars))
-		return;
 	
 	ALLOC_ZVAL(arr);
 	array_init(arr);
@@ -1084,15 +1094,12 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	}
 
-	if (PG(track_vars)) {
-		if (PG(register_globals)) {
-			arr->refcount++;
-			argc->refcount++;
-		}
-		zend_hash_update(track_vars_array->value.ht, "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
-		zend_hash_update(track_vars_array->value.ht, "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
+	if (PG(register_globals)) {
+		arr->refcount++;
+		argc->refcount++;
 	}
-
+	zend_hash_update(track_vars_array->value.ht, "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
+	zend_hash_update(track_vars_array->value.ht, "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
 }
 
 

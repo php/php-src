@@ -181,6 +181,7 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
+; Note - track_vars is ALWAYS enabled as of PHP 4.0.3
 variables_order		=	"EGPCS"	; This directive describes the order in which PHP registers
 								; GET, POST, Cookie, Environment and Built-in variables (G, P,
 								; C, E & S respectively, often referred to as EGPCS or GPC).
@@ -192,12 +193,14 @@ register_globals	=	On		; Whether or not to register the EGPCS variables as globa
 								; most sense when coupled with track_vars - in which case you can
 								; access all of the GPC variables through the $HTTP_*_VARS[],
 								; variables.
+								; You should do your best to write your scripts so that they do
+								; not require register_globals to be on;  Using form variables
+								; as globals can easily lead to possible security problems, if
+								; the code is not very well thought of.
 register_argc_argv	=	On		; This directive tells PHP whether to declare the argv&argc
 								; variables (that would contain the GET information).  If you
 								; don't use these variables, you should turn it off for
 								; increased performance
-track_vars			=	On		; enable the $HTTP_*_VARS[] arrays, where * is one of
-								; ENV, POST, GET, COOKIE or SERVER.
 gpc_order			=	"GPC"	; This directive is deprecated.  Use variables_order instead.
 
 ; Magic quotes

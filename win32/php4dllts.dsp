@@ -153,6 +153,10 @@ SOURCE=..\main\mergesort.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\network.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_content_types.c
 # End Source File
 # Begin Source File

@@ -182,9 +182,8 @@ register_globals	=	Off		; Whether or not to register the EGPCS variables as glob
 register_argc_argv	=	Off		; This directive tells PHP whether to declare the argv&argc
 								; variables (that would contain the GET information).  If you
 								; don't use these variables, you should turn it off for
-								; increased performance
-track_vars			=	On		; enable the $HTTP_*_VARS[] arrays, where * is one of
-								; ENV, POST, GET, COOKIE or SERVER.
+								; increased performance (you should try not to use it anyway,
+								; for less likelihood of security bugs in your code).
 gpc_order			=	"GPC"	; This directive is deprecated.  Use variables_order instead.
 
 ; Magic quotes

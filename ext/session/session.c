@@ -244,16 +244,14 @@ static void php_set_session_var(char *name, size_t namelen,
 	zval_copy_ctor(state_val_copy);
 	state_val_copy->refcount = 0;
 
-	if (PG(register_globals) && PG(track_vars)) {
+	if (PG(register_globals)) {
 		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 2, PS(http_session_vars)->value.ht, &EG(symbol_table));
 	} else {
 		if (PG(register_globals)) {
 			zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, &EG(symbol_table));
 		}
 
-		if (PG(track_vars)) {
-			zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, PS(http_session_vars)->value.ht);
-		}
+		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, PS(http_session_vars)->value.ht);
 	}
 }
 
@@ -261,7 +259,7 @@ static int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS
 {
 	HashTable *ht = &EG(symbol_table);
 
-	if (!PG(register_globals) && PG(track_vars))
+	if (!PG(register_globals))
 		ht = PS(http_session_vars)->value.ht;
 
 	return zend_hash_find(ht, name, namelen + 1, (void **)state_var);
@@ -523,8 +521,7 @@ static void _php_session_decode(const char *val, int vallen PSLS_DC)
 {
 	PLS_FETCH();
 
-	if (PG(track_vars))
-		php_session_track_init();
+	php_session_track_init();
 	if (PS(serializer)->decode(val, vallen PSLS_CC) == FAILURE) {
 		_php_session_destroy(PSLS_C);
 		php_error(E_WARNING, "Failed to decode session object. Session has been destroyed.");
@@ -844,8 +841,6 @@ static void _php_session_start(PSLS_D)
 	char *p;
 	int send_cookie = 1;
 	int define_sid = 1;
-	zend_bool register_globals;
-	zend_bool track_vars;
 	int module_number = PS(module_number);
 	int nrand;
 	int lensess;
@@ -856,39 +851,13 @@ static void _php_session_start(PSLS_D)
 
 	lensess = strlen(PS(session_name));
 	
-	register_globals = INI_BOOL("register_globals");
-	track_vars = INI_BOOL("track_vars");
 
-	if (!register_globals && !track_vars) {
-		php_error(E_ERROR, "The session module will not work if you have disabled track_vars and register_globals. At least one of them must be enabled.");
-		return;
-	}
-
-	if (!track_vars && PS(use_cookies))
-		php_error(E_NOTICE, "Because track_vars is disabled, the session module will not be able to determine whether the user has sent a cookie. SID will always be defined.");
-	
 	/*
-	 * If our only resource is the global symbol_table, then check it.
-	 * If track_vars are enabled, we prefer these, because they are more
-	 * reliable, and we always know whether the user has accepted the 
-	 * cookie.
-	 */
-	
-	if (register_globals && 
-			!track_vars &&
-			!PS(id) &&
-			zend_hash_find(&EG(symbol_table), PS(session_name),
-				lensess + 1, (void **) &ppid) == SUCCESS) {
-		PPID2SID;
-		send_cookie = 0;
-	}
-	
-	/*
-     * Now check the track_vars. Cookies are preferred, because initially
+     * Cookies are preferred, because initially
 	 * cookie and get variables will be available. 
 	 */
 
-	if (!PS(id) && track_vars) {
+	if (!PS(id)) {
 		if (zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS",
 					sizeof("HTTP_COOKIE_VARS"), (void **) &data) == SUCCESS &&
 				(*data)->type == IS_ARRAY &&
@@ -1244,7 +1213,7 @@ static void php_register_var(zval** entry PSLS_DC PLS_DC)
 	} else {
 		convert_to_string_ex(entry);
 
-		if (!PG(track_vars) || strcmp((*entry)->value.str.val, "HTTP_SESSION_VARS") != 0)
+		if (strcmp((*entry)->value.str.val, "HTTP_SESSION_VARS") != 0)
 			PS_ADD_VARL((*entry)->value.str.val, (*entry)->value.str.len);
 	}
 }

@@ -102,12 +102,10 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 
 	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
 
-	if (PG(track_vars)) {
-		ALLOC_ZVAL(http_post_files);
-		array_init(http_post_files);
-		INIT_PZVAL(http_post_files);
-		PG(http_globals).post_files = http_post_files;
-	}
+	ALLOC_ZVAL(http_post_files);
+	array_init(http_post_files);
+	INIT_PZVAL(http_post_files);
+	PG(http_globals)[TRACK_VARS_POST] = http_post_files;
 
 	ptr = buf;
 	rem = cnt;
