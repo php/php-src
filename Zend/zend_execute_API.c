@@ -157,7 +157,6 @@ void init_executor(TSRMLS_D)
 
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator TSRMLS_CC);
 	EG(opline_ptr) = NULL;
-	EG(garbage_ptr) = 0;
 
 	zend_hash_init(&EG(included_files), 5, NULL, NULL, 0);
 
@@ -251,12 +250,6 @@ void shutdown_executor(TSRMLS_D)
 		   not contain objects and thus are not probelmatic */
 		zend_hash_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
 		zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
-
-		while (EG(garbage_ptr)) {
-			if (EG(garbage)[--EG(garbage_ptr)]->refcount==1) {
-				zval_ptr_dtor(&EG(garbage)[EG(garbage_ptr)]);
-			}
-		}
 
 		zend_ptr_stack_destroy(&EG(argument_stack));
 
@@ -571,9 +564,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_function_state *original_function_state_ptr;
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
-	zval *orig_free_op1, *orig_free_op2;
-	int (*orig_unary_op)(zval *result, zval *op1);
-	int (*orig_binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 	zend_class_entry *current_scope;
 	zend_class_entry *calling_scope = NULL;
 	zval *current_this;
@@ -840,10 +830,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(return_value_ptr_ptr) = fci->retval_ptr_ptr;
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 		original_opline_ptr = EG(opline_ptr);
-		orig_free_op1 = EG(free_op1);
-		orig_free_op2 = EG(free_op2);
-		orig_unary_op = EG(unary_op);
-		orig_binary_op = EG(binary_op);
 		zend_execute(EG(active_op_array) TSRMLS_CC);
 		if (!fci->symbol_table) {
 			zend_hash_destroy(EG(active_symbol_table));
@@ -853,10 +839,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(active_op_array) = original_op_array;
 		EG(return_value_ptr_ptr)=original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
-		EG(free_op1) = orig_free_op1;
-		EG(free_op2) = orig_free_op2;
-		EG(unary_op) = orig_unary_op;
-		EG(binary_op) = orig_binary_op;
 	} else {
 		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
 		if (EX(function_state).function->common.scope) {
