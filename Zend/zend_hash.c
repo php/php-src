@@ -104,16 +104,15 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 #define SET_INCONSISTENT(n)
 #endif
 
-#define HASH_APPLY_BEGIN(ht)															\
+#define HASH_PROTECT_RECURSION(ht)														\
 	if ((ht)->bApplyProtection) {														\
-		if ((ht)->nApplyCount>=3) {														\
-			zend_error(E_WARNING, "Nesting level too deep - recursive dependency?");	\
-			return;																		\
+		if ((ht)->nApplyCount++ >= 3) {													\
+			zend_error(E_ERROR, "Nesting level too deep - recursive dependency?");		\
 		}																				\
-		(ht)->nApplyCount++;															\
 	}
 
-#define HASH_APPLY_END(ht)																\
+
+#define HASH_UNPROTECT_RECURSION(ht)																\
 	(ht)->nApplyCount--;
 
 
@@ -694,7 +693,7 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func)
 
 	IS_CONSISTENT(ht);
 
-	HASH_APPLY_BEGIN(ht);
+	HASH_PROTECT_RECURSION(ht);
 	p = ht->pListHead;
 	while (p != NULL) {
 		if (apply_func(p->pData)) {
@@ -703,7 +702,7 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func)
 			p = p->pListNext;
 		}
 	}
-	HASH_APPLY_END(ht);
+	HASH_UNPROTECT_RECURSION(ht);
 }
 
 
@@ -713,7 +712,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 
 	IS_CONSISTENT(ht);
 
-	HASH_APPLY_BEGIN(ht);
+	HASH_PROTECT_RECURSION(ht);
 	p = ht->pListHead;
 	while (p != NULL) {
 		if (apply_func(p->pData, argument)) {
@@ -722,7 +721,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 			p = p->pListNext;
 		}
 	}
-	HASH_APPLY_END(ht);
+	HASH_UNPROTECT_RECURSION(ht);
 }
 
 
@@ -734,7 +733,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, int (*destruct)(void
 
 	IS_CONSISTENT(ht);
 
-	HASH_APPLY_BEGIN(ht);
+	HASH_PROTECT_RECURSION(ht);
 
 	va_start(args, num_args);
 	p = ht->pListHead;
@@ -750,7 +749,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, int (*destruct)(void
 	}
 	va_end(args);
 
-	HASH_APPLY_END(ht);
+	HASH_UNPROTECT_RECURSION(ht);
 }
 
 
@@ -1157,8 +1156,13 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 	IS_CONSISTENT(ht1);
 	IS_CONSISTENT(ht2);
 
+	HASH_PROTECT_RECURSION(ht1); 
+	HASH_PROTECT_RECURSION(ht2); 
+
 	result = ht1->nNumOfElements - ht2->nNumOfElements;
 	if (result!=0) {
+		HASH_UNPROTECT_RECURSION(ht1); 
+		HASH_UNPROTECT_RECURSION(ht2); 
 		return result;
 	}
 
@@ -1169,21 +1173,29 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 
 	while (p1) {
 		if (ordered && !p2) {
+			HASH_UNPROTECT_RECURSION(ht1); 
+			HASH_UNPROTECT_RECURSION(ht2); 
 			return 1; /* That's not supposed to happen */
 		}
 		if (ordered) {
 			if (p1->nKeyLength==0 && p2->nKeyLength==0) { /* numeric indices */
 				result = p1->h - p2->h;
 				if (result!=0) {
+					HASH_UNPROTECT_RECURSION(ht1); 
+					HASH_UNPROTECT_RECURSION(ht2); 
 					return result;
 				}
 			} else { /* string indices */
 				result = p1->nKeyLength - p2->nKeyLength;
 				if (result!=0) {
+					HASH_UNPROTECT_RECURSION(ht1); 
+					HASH_UNPROTECT_RECURSION(ht2); 
 					return result;
 				}
 				result = memcmp(p1->arKey, p2->arKey, p1->nKeyLength);
 				if (result!=0) {
+					HASH_UNPROTECT_RECURSION(ht1); 
+					HASH_UNPROTECT_RECURSION(ht2); 
 					return result;
 				}
 			}
@@ -1191,16 +1203,22 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 		} else {
 			if (p1->nKeyLength==0) { /* numeric index */
 				if (zend_hash_index_find(ht2, p1->h, &pData2)==FAILURE) {
+					HASH_UNPROTECT_RECURSION(ht1); 
+					HASH_UNPROTECT_RECURSION(ht2); 
 					return 1;
 				}
 			} else { /* string index */
 				if (zend_hash_find(ht2, p1->arKey, p1->nKeyLength, &pData2)==FAILURE) {
+					HASH_UNPROTECT_RECURSION(ht1); 
+					HASH_UNPROTECT_RECURSION(ht2); 
 					return 1;
 				}
 			}
 		}
 		result = compar(p1->pData, pData2);
 		if (result!=0) {
+			HASH_UNPROTECT_RECURSION(ht1); 
+			HASH_UNPROTECT_RECURSION(ht2); 
 			return result;
 		}
 		p1 = p1->pListNext;
@@ -1208,7 +1226,9 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 			p2 = p2->pListNext;
 		}
 	}
-
+	
+	HASH_UNPROTECT_RECURSION(ht1); 
+	HASH_UNPROTECT_RECURSION(ht2); 
 	return 0;
 }
 
