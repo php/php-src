@@ -379,8 +379,8 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 {
 	php_per_dir_entry tmp;
 
-	zend_hash_merge((HashTable *) basev, (HashTable *) addv, (void (*)(void *)) copy_per_dir_entry, &tmp, sizeof(php_per_dir_entry), 1);
-	return basev;
+	zend_hash_merge((HashTable *) addv, (HashTable *) basev, (void (*)(void *)) copy_per_dir_entry, &tmp, sizeof(php_per_dir_entry), 0);
+	return addv;
 }
 
 
