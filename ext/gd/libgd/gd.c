@@ -2047,6 +2047,7 @@ gdImageCopyResampled (gdImagePtr dst,
 	  float sx, sy;
 	  float spixels = 0.0f;
 	  float red = 0.0f, green = 0.0f, blue = 0.0f, alpha = 0.0f;
+	  float alpha_factor, alpha_sum = 0.0f, contrib_sum = 0.0f;
 	  sy1 = ((float)(y - dstY)) * (float)srcH /
 	    (float)dstH;
 	  sy2 = ((float)(y + 1 - dstY)) * (float) srcH /
@@ -2104,10 +2105,13 @@ gdImageCopyResampled (gdImagePtr dst,
 						 src,
 						 (int) sx + srcX,
 						 (int) sy + srcY);
-		  red += gdTrueColorGetRed (p) * pcontribution;
-		  green += gdTrueColorGetGreen (p) * pcontribution;
-		  blue += gdTrueColorGetBlue (p) * pcontribution;
+		  alpha_factor = ((gdAlphaMax - gdTrueColorGetAlpha(p))) * pcontribution;
+		  red += gdTrueColorGetRed (p) * alpha_factor;
+		  green += gdTrueColorGetGreen (p) * alpha_factor;
+		  blue += gdTrueColorGetBlue (p) * alpha_factor;
 		  alpha += gdTrueColorGetAlpha (p) * pcontribution;
+		  alpha_sum += alpha_factor;
+		  contrib_sum += pcontribution;
 		  spixels += xportion * yportion;
 		  sx += 1.0f;
 		}
@@ -2122,6 +2126,13 @@ gdImageCopyResampled (gdImagePtr dst,
 	      blue /= spixels;
 	      alpha /= spixels;
 	    }
+          if ( alpha_sum != 0.0f)
+            {
+              if( contrib_sum != 0.0f ) alpha_sum /= contrib_sum;
+              red /= alpha_sum;
+              green /= alpha_sum;
+              blue /= alpha_sum;
+            }
 	  /* Clamping to allow for rounding errors above */
 	  if (red > 255.0f)
 	    {
