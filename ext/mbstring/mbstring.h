@@ -49,18 +49,18 @@
 #ifdef COMPILE_DL_MBSTRING
 #undef HAVE_MBSTRING
 #define HAVE_MBSTRING 1
-#undef MBSTRING_API
-#define MBSTRING_API
-
 #endif
 
 #ifdef PHP_WIN32
-#undef MBSTRING_API
-#ifdef MBSTRING_EXPORTS
-#define MBSTRING_API __declspec(dllexport)
+# undef MBSTRING_API
+# ifdef MBSTRING_EXPORTS
+#  define MBSTRING_API __declspec(dllexport)
+# else
+#  define MBSTRING_API __declspec(dllimport)
+# endif
 #else
-#define MBSTRING_API __declspec(dllimport)
-#endif
+# undef MBSTRING_API
+# define MBSTRING_API /* nothing special */
 #endif
 
 
