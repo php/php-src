@@ -36,6 +36,7 @@ extern zend_module_entry overload_module_entry;
 
 PHP_MINIT_FUNCTION(overload);
 PHP_MSHUTDOWN_FUNCTION(overload);
+PHP_RSHUTDOWN_FUNCTION(overload);
 PHP_MINFO_FUNCTION(overload);
 
 PHP_FUNCTION(overload);

@@ -50,6 +50,19 @@
 #define SET_HANDLER  "__set"
 #define CALL_HANDLER "__call"
 
+#define DISABLE_HANDLERS(ce)          \
+	(ce).handle_property_get  = NULL; \
+	(ce).handle_property_set  = NULL; \
+	(ce).handle_function_call = NULL;
+
+typedef struct _oo_class_data {
+	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
+	zval (*handle_property_get)(zend_property_reference *property_reference);
+	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
+	HashTable getters;
+	HashTable setters;
+} oo_class_data;
+
 ZEND_DECLARE_MODULE_GLOBALS(overload)
 
 function_entry overload_functions[] = {
@@ -64,7 +77,7 @@ zend_module_entry overload_module_entry = {
 	PHP_MINIT(overload),
 	PHP_MSHUTDOWN(overload),
 	NULL,
-	NULL,
+	PHP_RSHUTDOWN(overload),
 	PHP_MINFO(overload),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -73,19 +86,6 @@ zend_module_entry overload_module_entry = {
 #ifdef COMPILE_DL_OVERLOAD
 ZEND_GET_MODULE(overload)
 #endif
-
-typedef struct _oo_class_data {
-	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
-	zval (*handle_property_get)(zend_property_reference *property_reference);
-	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
-	HashTable getters;
-	HashTable setters;
-} oo_class_data;
-
-#define DISABLE_HANDLERS(ce)          \
-	(ce).handle_property_get  = NULL; \
-	(ce).handle_property_set  = NULL; \
-	(ce).handle_function_call = NULL;
 
 static void overloaded_class_dtor(oo_class_data *oo_data)
 {
@@ -96,8 +96,8 @@ static void overloaded_class_dtor(oo_class_data *oo_data)
 /* {{{ php_overload_init_globals */
 static void php_overload_init_globals(zend_overload_globals *overload_globals TSRMLS_DC)
 {
-	zend_hash_init_ex(&overload_globals->overloaded_classes, 10, NULL,
-					  (dtor_func_t)overloaded_class_dtor, 1, 0);
+	zend_hash_init(&overload_globals->overloaded_classes, 10, NULL,
+				   (dtor_func_t)overloaded_class_dtor, 1);
 }
 /* }}} */
 
@@ -108,8 +108,7 @@ static void php_overload_destroy_globals(zend_overload_globals *overload_globals
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
- */
+/* {{{ PHP_MINIT_FUNCTION(overload) */
 PHP_MINIT_FUNCTION(overload)
 {
 	ZEND_INIT_MODULE_GLOBALS(overload, php_overload_init_globals, php_overload_destroy_globals);
@@ -121,6 +120,7 @@ PHP_MINIT_FUNCTION(overload)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION(overload) */
 PHP_MSHUTDOWN_FUNCTION(overload)
 {
 #ifdef ZTS
@@ -131,9 +131,18 @@ PHP_MSHUTDOWN_FUNCTION(overload)
 
 	return SUCCESS;
 }
+/* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
- */
+/* {{{ PHP_RSHUTDOWN_FUNCTION(overload) */
+PHP_RSHUTDOWN_FUNCTION(overload)
+{
+	zend_hash_clean(&OOG(overloaded_classes));
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(overload)
 {
 	php_info_print_table_start();
