@@ -1,3 +1,62 @@
+2002-07-20  derick  <derick@pb1.pair.com>
+
+    * NEWS: - Typos
+
+    * configure.in: - Merge Sascha's builds tools fix
+
+    * main/rfc1867.c:
+    - Merge Stefans patch that fixes the remote vulnarability
+
+    * NEWS
+      configure.in
+      main/php_version.h: - Update NEWS and version numbers
+
+2002-07-20  James Cox  <imajes@pb1.pair.com>
+
+    * buildconf: proper patch to cvsclean for bad autoconf.
+
+2002-07-20  Sascha Schumann  <sas@pb1.pair.com>
+
+    * configure.in:
+    MFH fix for wrongly detected CPP on platforms such as Solaris where
+    a package might be installed which actually does not contain a real
+    compiler.
+
+2002-07-20  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: I love rock'n'roll...laalalaa (britney sucks)
+
+2002-07-20  Sascha Schumann  <sas@pb1.pair.com>
+
+    * buildconf: reverse bad patch
+
+    james, when you send me email about your patch which does not work,
+    why don't you wait for a reply first before committing the non-working
+    stuff?
+
+2002-07-20  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/pgsql/pgsql.c: Fixed php_pgsql_convert's bool type handling.
+
+    * ext/pgsql/pgsql.c: Hmm. My PostgreSQL returns "bool" for boolean now.
+
+    * ext/pgsql/pgsql.c:
+    Fixed convetion when null string is passed to php_pgsql_convert()
+
+    * ext/pgsql/pgsql.c: Fixed crash.
+
+2002-07-20  James Cox  <imajes@pb1.pair.com>
+
+    * buildconf:
+    more work for buildconf. forces a cvsclean if using a bad am. more ZE/zE2 tests.
+
+2002-07-20  Sascha Schumann  <sas@pb1.pair.com>
+
+    * acinclude.m4
+      configure.in: Improve/fix handling of --disable-rpath
+
+    Might or might not fix #18374
+
 2002-07-19  jason  <jason@pb1.pair.com>
 
     * main/network.c
