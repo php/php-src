@@ -304,7 +304,7 @@ JNIEXPORT jlong JNICALL Java_net_php_servlet_define
 	ELS_FETCH();
 
 	MAKE_STD_ZVAL(pzval);
-	(pval*)(long)addr = pzval;
+	addr = (jlong)(long) pzval;
 
 	zend_hash_add(&EG(symbol_table), (char*)nameAsUTF, 
 		strlen(nameAsUTF)+1, &pzval, sizeof(pval *), NULL);
