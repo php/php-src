@@ -1,3 +1,14 @@
+2003-03-17  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_extensions.c:
+      MFZE1
+
+2003-03-17  Jani Taskinen  <sniper@iki.fi>
+
+    * Makefile.am:
+      Added missing zend_mm.c file and renamed zend_object_API.c ->
+      zend_objects_API.c
+
 2003-03-13  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
