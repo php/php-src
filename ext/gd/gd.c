@@ -2699,10 +2699,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 #endif
 
 #if !HAVE_GD_STRINGFTEX
-	if (extended)	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "gdImageStringFTEx not supported in this PHP build");
-		RETURN_FALSE;
-	}
+	assert(!extended);
 #endif
 	
 	argc = ZEND_NUM_ARGS();
