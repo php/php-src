@@ -1432,6 +1432,7 @@ overloaded_function_call_cont:
 					varptr->refcount++;
 					//zend_hash_next_index_insert_ptr(function_state.function_symbol_table, varptr, sizeof(zval *), NULL);
 					zend_ptr_stack_push(&EG(argument_stack), varptr);
+					FREE_OP(&opline->op1, free_op1);  /* for string offsets */
 				}
 				break;
 send_by_ref:
