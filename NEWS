@@ -11,6 +11,7 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Modified log() to accept multiple bases. (Jason)
 - Added gd_info() which returns an array of gd support information. (Marcus)
 - Implemented features/changes requested in Bug #16960 (Timm):
   . Added a new function sybase_unbuffered_query()
@@ -154,7 +155,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #11643 (Session related, fix SID redefinition). (Ilia)
 - Fixed bug #18556 (Scripting Engine, problem with locales like tr_TR). (Ilia)
 - Changed y2k_compliance to default to 1 now. (Sascha)
-- Added platform independent socket error constants for better error handling.
+- Added platform independent socket error constants for better error handling. (Jason)
 - Fixed include(), require() and GD functions to work with remote files under
   win32. Fixed bug #18609 (ImageCreateFromJPEG can't fetch from a URL. (Wez)
 - Update output of phpinfo() to use more CSS to reduce the file size, do
