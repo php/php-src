@@ -1317,8 +1317,12 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	
 	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 
-	if (stream && self->is_pipe) {
-		stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+	if (stream) {
+		if (self->is_pipe) {
+			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+		} else {
+			stream->position = ftell(file);
+		}
 	}
 
 	return stream;
@@ -2412,6 +2416,16 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 				}
 		}
 	}
+
+	if (stream && stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a')) {
+		fpos_t newpos = 0;
+
+		/* if opened for append, we need to revise our idea of the initial file position */
+		if (0 == stream->ops->seek(stream, 0, SEEK_CUR, &newpos TSRMLS_CC)) {
+			stream->position = newpos;
+		}
+	}
+	
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		display_wrapper_errors(wrapper, path, "failed to create stream" TSRMLS_CC);
 	}

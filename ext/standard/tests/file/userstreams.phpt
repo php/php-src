@@ -97,7 +97,11 @@ class mystream
 
 		$split = parse_url($path);
 		$this->varname = $split["host"];
-		$this->position = 0;
+
+		if (strchr($mode, 'a'))
+			$this->position = strlen($GLOBALS[$this->varname]);
+		else
+			$this->position = 0;
 		
 		return true;
 	}
@@ -301,6 +305,15 @@ while(!feof($fp)) {
 if ($fail_count == 0) {
 	echo "FGETS: OK\n";
 }
+
+/* One final test to see if the position is respected when opened for append */
+$fp = fopen("test://lyrics", "a+");
+rewind($fp);
+var_dump(ftell($fp));
+$data = fgets($fp);
+fclose($fp);
+echo $data . "\n";
+
 ?>
 --EXPECT--
 Not Registered
@@ -308,3 +321,5 @@ Registered
 Registered
 SEEK: OK
 FGETS: OK
+int(0)
+...and the road becomes my bride
