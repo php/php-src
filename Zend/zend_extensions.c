@@ -114,13 +114,6 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 #if ZEND_EXTENSIONS_SUPPORT
 	zend_extension extension;
 
-	if (new_extension->startup) {
-		if (new_extension->startup(new_extension)!=SUCCESS) {
-			DL_UNLOAD(handle);
-			return FAILURE;
-		}
-	}
-
 	extension = *new_extension;
 	extension.handle = handle;
 
@@ -146,10 +139,28 @@ static void zend_extension_shutdown(zend_extension *extension)
 }
 
 
-int zend_startup_extensions()
+static void zend_extension_startup(zend_extension *extension)
 {
+	if (extension->startup) {
+		if (extension->startup(extension)!=SUCCESS) {
+			DL_UNLOAD(extension->handle);
+		}
+	}
+}
+
+
+int zend_startup_extensions_mechanism()
+{
+	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
 	last_resource_number = 0;
+	return SUCCESS;
+}
+
+
+int zend_startup_extensions()
+{
+	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_startup);
 	return SUCCESS;
 }
 
@@ -163,7 +174,7 @@ void zend_shutdown_extensions()
 
 void zend_extension_dtor(zend_extension *extension)
 {
-#if ZEND_EXTENSIONS_SUPPORT
+#if ZEND_EXTENSIONS_SUPPORT && !ZEND_DEBUG
 	if (extension->handle) {
 		DL_UNLOAD(extension->handle);
 	}
