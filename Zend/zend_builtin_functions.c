@@ -905,48 +905,16 @@ ZEND_FUNCTION(get_defined_functions)
 }
 /* }}} */
 
-static int copy_variable_name(zval *varname, int num_args, va_list args, zend_hash_key *hash_key)
-{
-	zval *ar = va_arg(args, zval *);
-	
-	if (hash_key->nKeyLength != 0 && hash_key->arKey[0] != 0) {
-		add_next_index_stringl(ar, hash_key->arKey, hash_key->nKeyLength-1, 1);
-	}
-	
-	return 0;
-}
-
 /* {{{ proto array get_defined_vars(void)
-   Returns a two-dimensional associative array of all defined variable names */
+   Returns an associative array of names and values of all currently defined variable names (variables in the current scope) */
 ZEND_FUNCTION(get_defined_vars)
 {	
-	zval *globals;
-	zval *current;
-
-	if (ZEND_NUM_ARGS() != 0) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
+	zval *tmp;
 	
-	MAKE_STD_ZVAL(globals);
-	array_init(globals);
-
-	MAKE_STD_ZVAL(current);
-	array_init(current);
-
 	array_init(return_value);
 	
-	zend_hash_apply_with_arguments(&EG(symbol_table), (apply_func_args_t)copy_variable_name, 1, globals);
-	zend_hash_apply_with_arguments(EG(active_symbol_table), (apply_func_args_t)copy_variable_name, 1, current);
-
-	if (zend_hash_add(return_value->value.ht, "globals", sizeof("globals"), (void **)&globals, sizeof(zval *), NULL) == FAILURE) {
-		zend_error(E_WARNING, "Cannot add gobal variables to return value from get_defined_vars()");
-		RETURN_FALSE;
-	}
-	
-	if (zend_hash_add(return_value->value.ht, "current", sizeof("current"), (void **)&current, sizeof(zval *), NULL) == FAILURE) {
-		zend_error(E_WARNING, "Cannot add current variables to return value from get_defined_vars()");
-		RETURN_FALSE;
-	}
+    zend_hash_copy(return_value->value.ht, EG(active_symbol_table),
+                   (copy_ctor_func_t)zval_add_ref, &tmp, sizeof(zval *));
 }
 /* }}} */
 
