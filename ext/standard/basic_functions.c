@@ -3141,8 +3141,9 @@ PHP_FUNCTION(array_merge)
 /* }}} */
 
 
-/* {{{ proto array array_keys(array input)
-   Return just the keys from the input array */
+/* {{{ proto array array_keys(array input [, mixed search_value])
+   Return just the keys from the input array, optionally only
+   for the specified search_value */
 PHP_FUNCTION(array_keys)
 {
 	zval		*input,			/* Input array */
