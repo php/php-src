@@ -82,7 +82,7 @@ typedef struct {
 #define JG_FETCH() php_java_globals *java_globals = ts_resource(java_globals_id)
 #define JG_D       php_java_globals *java_globals
 #define JG_DC      , JG_D
-#define JG_C       dir_globals
+#define JG_C       java_globals
 #define JG_CC      , JG_C
 int java_globals_id;
 #else
@@ -276,58 +276,114 @@ static int jvm_create() {
 
 /***************************************************************************/
 
-static jobjectArray _java_makeArray(int argc, pval** argv) {
-  JG_FETCH();
+static jobject _java_makeObject(pval* arg JG_DC) {
+  JNIEnv *jenv = JG(jenv);
+  jobject result;
+  pval **handle;
+  int type;
+  jmethodID makeArg;
+  jclass hashClass;
+
+  switch (arg->type) {
+    case IS_STRING:
+      result=(*jenv)->NewByteArray(jenv,arg->value.str.len);
+      (*jenv)->SetByteArrayRegion(jenv,(jbyteArray)arg,0,
+        arg->value.str.len, arg->value.str.val);
+      break;
+
+    case IS_OBJECT:
+      zend_hash_index_find(arg->value.obj.properties, 0, (void*)&handle);
+      result = zend_list_find((*handle)->value.lval, &type);
+      break;
+
+    case IS_BOOL:
+      makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
+        "(Z)Ljava/lang/Object;");
+      result = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
+        (jboolean)(arg->value.lval));
+      break;
+
+    case IS_LONG:
+      makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
+        "(J)Ljava/lang/Object;");
+      result = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
+        (jlong)(arg->value.lval));
+      break;
+
+    case IS_DOUBLE:
+      makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
+        "(D)Ljava/lang/Object;");
+      result = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
+        (jdouble)(arg->value.dval));
+      break;
+
+    case IS_ARRAY:
+      {
+      jobject jkey, jval;
+      zval **value;
+      zval key;
+      char *string_key;
+      ulong num_key;
+      jobject jold;
+      jmethodID put, init;
+
+      hashClass = (*jenv)->FindClass(jenv, "java/util/Hashtable");
+      init = (*jenv)->GetMethodID(jenv, hashClass, "<init>", "()V");
+      result = (*jenv)->NewObject(jenv, hashClass, init);
+
+      put = (*jenv)->GetMethodID(jenv, hashClass, "put",
+        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+
+      /* Iterate through hash */
+      zend_hash_internal_pointer_reset(arg->value.ht);
+      while(zend_hash_get_current_data(arg->value.ht, (void**)&value) == SUCCESS) {
+        jval = _java_makeObject(*value JG_CC);
+
+        switch (zend_hash_get_current_key(arg->value.ht, &string_key, &num_key)) {
+          case HASH_KEY_IS_STRING:
+            key.type = IS_STRING;
+            key.value.str.val = string_key;
+            key.value.str.len = strlen(string_key);
+            jkey = _java_makeObject(&key JG_CC);
+            efree(string_key);
+            break;
+          case HASH_KEY_IS_LONG:
+            key.type = IS_LONG;
+            key.value.lval = num_key;
+            jkey = _java_makeObject(&key JG_CC);
+            break;
+          default: /* HASH_KEY_NON_EXISTANT */
+            jkey = 0;
+        }
+        jold = (*jenv)->CallObjectMethod(jenv, result, put, jkey, jval);
+        if ((*value)->type != IS_OBJECT) (*jenv)->DeleteLocalRef(jenv, jval);
+        zend_hash_move_forward(arg->value.ht);
+      }
+
+      break;
+      }
+
+    default:
+      result=0;
+  }
+
+  return result;
+}
+
+/***************************************************************************/
+
+static jobjectArray _java_makeArray(int argc, pval** argv JG_DC) {
   JNIEnv *jenv = JG(jenv);
 
   jclass objectClass = (*jenv)->FindClass(jenv, "java/lang/Object");
   jobjectArray result = (*jenv)->NewObjectArray(jenv, argc, objectClass, 0);
   jobject arg;
-  jmethodID makeArg;
   int i;
-  pval **handle;
-  int type;
 
   for (i=0; i<argc; i++) {
-    switch (argv[i]->type) {
-      case IS_STRING:
-        arg=(*jenv)->NewByteArray(jenv,argv[i]->value.str.len);
-        (*jenv)->SetByteArrayRegion(jenv,(jbyteArray)arg,0,
-          argv[i]->value.str.len, argv[i]->value.str.val);
-        break;
-
-      case IS_OBJECT:
-        zend_hash_index_find(argv[i]->value.obj.properties, 0, (void*)&handle);
-        arg = zend_list_find((*handle)->value.lval, &type);
-        break;
-
-      case IS_BOOL:
-        makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
-          "(Z)Ljava/lang/Object;");
-        arg = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
-          (jboolean)(argv[i]->value.lval));
-        break;
-
-      case IS_LONG:
-        makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
-          "(J)Ljava/lang/Object;");
-        arg = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
-          (jlong)(argv[i]->value.lval));
-        break;
-
-      case IS_DOUBLE:
-        makeArg = (*jenv)->GetMethodID(jenv, JG(reflect_class), "MakeArg",
-          "(D)Ljava/lang/Object;");
-        arg = (*jenv)->CallObjectMethod(jenv, JG(php_reflect), makeArg,
-          (jdouble)(argv[i]->value.dval));
-        break;
-
-      default:
-        arg=0;
-    }
+    arg = _java_makeObject(argv[i] JG_CC);
     (*jenv)->SetObjectArrayElement(jenv, result, i, arg);
-    if (argv[i]->type != IS_OBJECT)
-    (*jenv)->DeleteLocalRef(jenv, arg);
+    if (argv[i]->type != IS_OBJECT) (*jenv)->DeleteLocalRef(jenv, arg);
   }
   return result;
 }
@@ -382,7 +438,7 @@ void java_call_function_handler
     (pval*)(long)result = object;
 
     (*jenv)->CallVoidMethod(jenv, JG(php_reflect), co,
-      className, _java_makeArray(arg_count-1, arguments+1), result);
+      className, _java_makeArray(arg_count-1, arguments+1 JG_CC), result);
 
     (*jenv)->DeleteLocalRef(jenv, className);
 
@@ -403,7 +459,7 @@ void java_call_function_handler
     (pval*)(long)result = return_value;
 
     (*jenv)->CallVoidMethod(jenv, JG(php_reflect), invoke,
-      obj, method, _java_makeArray(arg_count, arguments), result);
+      obj, method, _java_makeArray(arg_count, arguments JG_CC), result);
 
     (*jenv)->DeleteLocalRef(jenv, method);
 
@@ -508,8 +564,9 @@ pval java_get_property_handler
 int java_set_property_handler
   (zend_property_reference *property_reference, pval *value)
 {
+  JG_FETCH();
   pval presult = _java_getset_property
-    (property_reference, _java_makeArray(1, &value));
+    (property_reference, _java_makeArray(1, &value JG_CC));
   return checkError(&presult) ? FAILURE : SUCCESS;
 }
 

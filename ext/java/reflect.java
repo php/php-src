@@ -236,7 +236,6 @@ public class reflect {
   public void Invoke
     (Object object, String method, Object args[], long result)
   {
-
     try {
       Vector matches = new Vector();
 
@@ -284,7 +283,6 @@ public class reflect {
   public void GetSetProp
     (Object object, String prop, Object args[], long result)
   {
-System.out.println(object + "." + prop);
     try {
 
       for (Class jclass = object.getClass();;jclass=(Class)object) {
