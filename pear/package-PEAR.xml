@@ -36,6 +36,10 @@
     <date>2002-12-13</date>
     <notes>
 * fixed "info" shortcut (conflicted with "install")
+* added "php_bin" config parameter
+* all "non-personal" config parameters now use
+  environment variables for defaults (very useful
+  to override the default php_dir on Windows!)
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -82,12 +86,6 @@
 	</file>
       </dir>
     </filelist>
-    <warning>
-If you are upgrading to 1.0b3 or newer from 1.0b2 or older, your "pear"
-command will probably stop working.  To fix, either use go-pear,
-or edit the first line of your installed "pear" and replace "@php_bin@"
-with the path to your PHP CLI or CGI binary.
-</warning>
     <deps>
       <dep type="php" rel="ge" version="4.1"/>
       <dep type="pkg" rel="ge" version="0.4">Archive_Tar</dep>
