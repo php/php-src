@@ -263,7 +263,7 @@ PHP_FUNCTION(zip_entry_open)
 }
 /* }}} */
 
-/* {{{ proto string zip_read(resource zip_ent)
+/* {{{ proto string zip_entry_read(resource zip_ent)
    Read X bytes from an opened zip entry */
 PHP_FUNCTION(zip_entry_read)
 {
@@ -288,7 +288,7 @@ PHP_FUNCTION(zip_entry_read)
 }
 /* }}} */
 
-/* {{{ proto void zip_close(resource zip_ent)
+/* {{{ proto void zip_entry_close(resource zip_ent)
    Close a zip entry */
 PHP_FUNCTION(zip_entry_close)
 {
