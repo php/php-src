@@ -28,7 +28,9 @@
 
 #include <pshpack1.h>
 
+
 #ifdef CLIB_STAT_PATCH
+
 /***************** stat structure taken from CLib and modified ***************/
 struct stat 
 {
