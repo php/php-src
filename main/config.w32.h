@@ -59,7 +59,7 @@
 
 /* Undefine if you want stricter XML/SGML compliance by default */
 /* this disables "<?expression?>" and "<?=expression?>" */
-#define DEFAULT_SHORT_OPEN_TAG 1
+#define DEFAULT_SHORT_OPEN_TAG "1"
 
 
 /* ----------------------------------------------------------------
