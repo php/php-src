@@ -1014,8 +1014,8 @@ PHPAPI void php_session_start(TSRMLS_D)
 	   '<session-name>=<session-id>' to allow URLs of the form
 	   http://yoursite/<session-name>=<session-id>/script.php */
 
-	if (!PS(use_only_cookies) && !PS(id) &&
-			zend_hash_find(&EG(symbol_table), "REQUEST_URI",
+	if (!PS(use_only_cookies) && !PS(id) && PG(http_globals)[TRACK_VARS_SERVER] &&
+			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI",
 				sizeof("REQUEST_URI"), (void **) &data) == SUCCESS &&
 			Z_TYPE_PP(data) == IS_STRING &&
 			(p = strstr(Z_STRVAL_PP(data), PS(session_name))) &&
@@ -1032,7 +1032,8 @@ PHPAPI void php_session_start(TSRMLS_D)
 	
 	if (PS(id) &&
 			PS(extern_referer_chk)[0] != '\0' &&
-			zend_hash_find(&EG(symbol_table), "HTTP_REFERER",
+			PG(http_globals)[TRACK_VARS_SERVER] &&
+			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER",
 				sizeof("HTTP_REFERER"), (void **) &data) == SUCCESS &&
 			Z_TYPE_PP(data) == IS_STRING &&
 			Z_STRLEN_PP(data) != 0 &&
