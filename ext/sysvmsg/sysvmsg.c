@@ -262,7 +262,7 @@ PHP_FUNCTION(msg_receive)
 	long realflags = 0;
 	zend_bool do_unserialize = 1;
 	sysvmsg_queue_t *mq = NULL;
-	struct msgbuf *messagebuffer = NULL; /* buffer to transmit */
+	struct php_msgbuf *messagebuffer = NULL; /* buffer to transmit */
 	int result;
 	
 	RETVAL_FALSE;
@@ -289,7 +289,7 @@ PHP_FUNCTION(msg_receive)
 	
 	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
-	messagebuffer = (struct msgbuf*)emalloc(sizeof(struct msgbuf) + maxsize);
+	messagebuffer = (struct php_msgbuf*)emalloc(sizeof(struct php_msgbuf) + maxsize);
 	
 	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
 		
@@ -340,7 +340,7 @@ PHP_FUNCTION(msg_send)
 	long msgtype;
 	zend_bool do_serialize = 1, blocking = 1;
 	sysvmsg_queue_t * mq = NULL;
-	struct msgbuf * messagebuffer = NULL; /* buffer to transmit */
+	struct php_msgbuf * messagebuffer = NULL; /* buffer to transmit */
 	int result;
 	int message_len = 0;
 	
@@ -360,15 +360,15 @@ PHP_FUNCTION(msg_send)
 		php_var_serialize(&msg_var, &message, &var_hash TSRMLS_CC);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
 		
-		/* NB: msgbuf is 1 char bigger than a long, so there is no need to
+		/* NB: php_msgbuf is 1 char bigger than a long, so there is no need to
 		 * allocate the extra byte. */
-		messagebuffer = emalloc(sizeof(struct msgbuf) + msg_var.len);
+		messagebuffer = emalloc(sizeof(struct php_msgbuf) + msg_var.len);
 		memcpy(messagebuffer->mtext, msg_var.c, msg_var.len + 1);
 		message_len = msg_var.len;
 		smart_str_free(&msg_var);
 	} else {
 		convert_to_string_ex(&message);
-		messagebuffer = emalloc(sizeof(struct msgbuf) + Z_STRLEN_P(message));
+		messagebuffer = emalloc(sizeof(struct php_msgbuf) + Z_STRLEN_P(message));
 		memcpy(messagebuffer->mtext, Z_STRVAL_P(message), Z_STRLEN_P(message) + 1);
 		message_len = Z_STRLEN_P(message);
 	}
