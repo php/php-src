@@ -30,7 +30,7 @@ LDAP_DIR = P:/APPS/script/sw/cldapsdk
 
 # Apache directory
 ifndef APACHE_DIR
-APACHE_DIR = $(PROJECT_ROOT)/netware/apache_1.3.22/src
+APACHE_DIR = P:/APPS/script/sw/Apache1.3.xSource
 endif
 
 
