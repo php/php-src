@@ -663,12 +663,14 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
+	zend_bool free_tmp = 0;
 
  	if (varname->type != IS_STRING) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
+		free_tmp = 1;
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
@@ -711,7 +713,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 	}
 
 
-	if (varname == &tmp_varname) {
+	if (free_tmp) {
 		zval_dtor(varname);
 	}
 	T(opline->result.u.var).var.ptr_ptr = retval;
