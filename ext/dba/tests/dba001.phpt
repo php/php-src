@@ -7,12 +7,14 @@ DBA File Creation Test
 --FILE--
 <?php
 	require_once('test.inc');
+	echo "database handler: $handler\n";
 	if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
-    	echo "database file created with $handler.\n";
+    	echo "database file created\n";
+		dba_close($db_file);
 	} else {
     	echo "$db_file does not exist\n";
     }
-	dba_close($db_file);
 ?>
 --EXPECTF--
-database file created with %s.
+database handler: %s
+database file created

@@ -7,6 +7,7 @@ DBA FirstKey/NextKey with 2 deletes
 --FILE--
 <?php
 	require_once('test.inc');
+	echo "database handler: $handler\n";
 	if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
 		dba_insert("key1", "Content String 1", $db_file);
 		dba_insert("key2", "Content String 2", $db_file);
@@ -30,5 +31,6 @@ DBA FirstKey/NextKey with 2 deletes
 		echo "Error creating database\n";
 	}
 ?>
---EXPECT--
+--EXPECTF--
+database handler: %s
 3NYNYY
