@@ -1201,7 +1201,7 @@ PHP_FUNCTION(getimagesize)
 		WRONG_PARAM_COUNT;
 	}
 
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 
 	if (!stream) {
 		RETURN_FALSE;
