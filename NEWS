@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
+- Fixed MacOSX shared extensions crashing on Apache startup (Rasmus)
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Fixed bug #31454 (session_set_save_handler crashes PHP when supplied
   non-existent object ref). (Tony)
