@@ -22,6 +22,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
+#include "modules.h"
 
 #include "SAPI.h"
 
@@ -88,6 +89,7 @@ extern int ap_php_optind;
 
 static int _print_module_info ( zend_module_entry *module, void *arg ) {
 	php_printf("%s\n", module->name);
+	return 0;
 }
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
