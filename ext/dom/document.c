@@ -1546,7 +1546,7 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zval *id;
 	xmlDoc *docp;
 	dom_object *intern;
-	char *source = NULL, *valid_file = NULL, *directory = NULL;
+	char *source = NULL, *valid_file = NULL;
 	int source_len = 0;
 	xmlSchemaParserCtxtPtr  parser;
 	xmlSchemaPtr            sptr;
@@ -1629,7 +1629,7 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zval *id;
 	xmlDoc *docp;
 	dom_object *intern;
-	char *source = NULL, *valid_file = NULL, *directory = NULL;
+	char *source = NULL, *valid_file = NULL;
 	int source_len = 0;
 	xmlRelaxNGParserCtxtPtr parser;
 	xmlRelaxNGPtr           sptr;
