@@ -2935,7 +2935,7 @@ PHP_FUNCTION(pdf_setcolor) {
 			}
 			break;
 		case 7:
-			if(zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+			if(zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			break;
