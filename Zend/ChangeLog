@@ -1,3 +1,8 @@
+2004-04-29  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      Fix bug #27876
+
 2004-04-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_exceptions.h:
