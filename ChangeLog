@@ -1,3 +1,35 @@
+2004-04-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/CREDITS:
+      An oumlaut doesn't work here, need ASCII only
+
+2004-04-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/curl/curl.c:
+      MFH: Fixed bug #28196 (missing error constants in cURL extension).
+
+    * ext/curl/interface.c:
+      Fixed bug #28196 (missing error constants in cURL extension).
+
+    * ext/dom/documentfragment.c
+      ext/msession/reqclient.h
+      ext/oci8/php_oci8.h
+      ext/w32api/w32api.c
+      sapi/milter/php_milter.c:
+      C++ comments.
+
+2004-04-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      another down...
+
+2004-04-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fix bug #27876
+
 2004-04-28  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/com_dotnet/com_extension.c:
