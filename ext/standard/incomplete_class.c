@@ -82,8 +82,8 @@ static int incomplete_class_has_property(zval *object, zval *member, int check_e
 	return 0;
 }
 
-static union _zend_function *incomplete_class_get_method(zval **object_ptr, char *method, int method_len TSRMLS_DC) {
-	incomplete_class_message(*object_ptr, E_ERROR TSRMLS_CC);
+static union _zend_function *incomplete_class_get_method(zval *object_ptr, char *method, int method_len TSRMLS_DC) {
+	incomplete_class_message(object_ptr, E_ERROR TSRMLS_CC);
 	return NULL;
 }
 
