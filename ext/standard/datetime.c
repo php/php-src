@@ -686,7 +686,7 @@ PHP_FUNCTION(strftime)
 #if HAVE_STRFTIME
 	_php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 #else
-    PHP_NOT_IN_THIS_BUILD;
+    PHP_NOT_IN_THIS_BUILD();
 #endif
 }
 /* }}} */
@@ -698,7 +698,7 @@ PHP_FUNCTION(gmstrftime)
 #if HAVE_STRFTIME
 	_php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 #else
-    PHP_NOT_IN_THIS_BUILD;
+    PHP_NOT_IN_THIS_BUILD();
 #endif
 }
 /* }}} */

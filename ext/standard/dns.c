@@ -207,7 +207,7 @@ PHP_FUNCTION(checkdnsrr)
 	}
 	RETURN_TRUE;
 #else
-    PHP_NOT_IN_THIS_BUILD;
+    PHP_NOT_IN_THIS_BUILD();
 #endif
 }
 /* }}} */
@@ -315,7 +315,7 @@ PHP_FUNCTION(getmxrr)
 	}
 	RETURN_TRUE;
 #else
-    PHP_NOT_IN_THIS_BUILD;
+    PHP_NOT_IN_THIS_BUILD();
 #endif
 }
 /* }}} */
