@@ -37,18 +37,6 @@ ZEND_API zend_executor_globals executor_globals;
 
 #define SET_UNUSED(op)  (op).op_type = IS_UNUSED
 
-static int is_not_internal_function(zend_function *function)
-{
-	return(function->type != ZEND_INTERNAL_FUNCTION);
-}
-
-
-static int is_not_internal_class(zend_class_entry *ce)
-{
-	return(ce->type != ZEND_INTERNAL_CLASS);
-}
-
-
 static void free_filename(void *p)
 {
 	efree(*((char **) p));
@@ -124,8 +112,6 @@ void shutdown_compiler(CLS_D)
 	zend_stack_destroy(&CG(object_stack));
 	zend_stack_destroy(&CG(declare_stack));
 	zend_llist_destroy(&CG(filenames_list));
-	zend_hash_apply(CG(function_table), (int (*)(void *)) is_not_internal_function);
-	zend_hash_apply(CG(class_table), (int (*)(void *)) is_not_internal_class);
 	zend_llist_destroy(&CG(open_files));
 	zend_hash_destroy(&CG(used_files));
 }
