@@ -318,7 +318,7 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 	php_printf("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\" />\n", charset);
 */
 	PUTS("</head>\n");
-	PUTS("<body><center>\n");
+	PUTS("<body><div class=\"center\">\n");
 }
 /* }}} */
 
@@ -586,7 +586,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		}
 	}
 	if (PG(html_errors)) {
-		PUTS("</center></body></html>");
+		PUTS("</div></body></html>");
 	}	
 }
 /* }}} */
