@@ -1,14 +1,6 @@
 #!/bin/sh
 # $Id$
 
-acv=`autoconf --version | grep GNU |cut -d ' ' -f 4`     
-res=`expr $acv '>=' 2.5`
-
-if test $res = 1; then
-    echo "cleaning checkout to force rebuild, due to bad autoconf"
-    ./cvsclean
-fi
-
 while test $# -gt 0; do
     if test "$1" = "--copy"; then
         automake_flags=--copy
@@ -27,19 +19,6 @@ if test -z "$ZENDDIR"; then
     echo "using default Zend directory"
 fi
  
-## build.mk does not check aclocal exit status yet
-##
-#mv aclocal.m4 aclocal.m4.old 2>/dev/null
-#aclocal
-#if test "$?" != "0" -a "$am_prefix" != "$lt_prefix"; then
-#    echo "buildconf: ERROR: aclocal failed, probably because automake and"
-#    echo "           libtool are installed with different prefixes;"
-#    echo "           automake is installed in $am_prefix, but libtool in $lt_prefix."
-#    echo "           Please re-install automake and/or libtool with a common prefix"
-#    echo "           and try again."
-#    exit 1
-#fi
-
 rm -f generated_lists
 
 ${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR"

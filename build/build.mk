@@ -40,7 +40,7 @@ generated_lists:
 		$(ZENDDIR)/acinclude.m4 ext/*/config*.m4 sapi/*/config.m4 >> $@
 
 $(STAMP): build/buildcheck.sh
-	@build/buildcheck.sh && touch $(STAMP)
+	@build/buildcheck.sh $(STAMP)
 
 snapshot:
 	distname='$(DISTNAME)'; \
