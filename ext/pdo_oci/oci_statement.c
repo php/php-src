@@ -29,6 +29,7 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_oci.h"
 #include "php_pdo_oci_int.h"
+#include "Zend/zend_extensions.h"
 
 #define STMT_CALL(name, params)	\
 	S->last_err = name params; \

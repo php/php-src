@@ -29,6 +29,7 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_oci.h"
 #include "php_pdo_oci_int.h"
+#include "Zend/zend_exceptions.h"
 
 static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC) /* {{{ */
 {
