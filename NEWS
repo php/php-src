@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   then 1 character long. (Ilia)
 - Fixed handling of return values from storred procedures in mssql_execute()
   with multiple result sets returned. (Frank)
+- Fixed bug #28196 (missing error constants in cURL extension). (Ilia)
 - Fixed bug #28187 (parse_url() not handling embedded IPv6 in URLs). (Sara)
 - Fixed bug #28147 (Crash with drawing anti-aliased lines). (Derick)
 - Fixed bug #28112 (sqlite_query() crashing apache on malformed query). (Ilia,
