@@ -59,13 +59,14 @@
 *    of null, when the right thing may be no value at all. (SOAP)     *
 **********************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
 #include "php_xmlrpc.h"
-#ifndef PHP_WIN32
-#include "php_config.h"
-#endif
 #include "xmlrpc.h"
 
 #define PHP_EXT_VERSION "0.51"
