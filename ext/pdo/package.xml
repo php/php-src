@@ -47,8 +47,8 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.2.2</version>
-  <date>2005-02-11</date>
+  <version>0.2.3</version>
+  <date>2005-02-13</date>
 
   <notes>
 Note that PDO on its own is useless.
@@ -68,6 +68,10 @@ http://snaps.php.net/win32/PECL_5_0/
 
 - Added PDO::quote($string).  Closes PECL Bug #3393
 - Fixed PDO::query() for drivers using bound parameter emulation.
+- Fixed PECL Bug #3434, crash when using odbc with named parameters.
+
+* Note: this release bumps the API number; you will need to rebuild
+  your PDO drivers
 
   </notes>
 
