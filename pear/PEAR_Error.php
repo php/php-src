@@ -39,17 +39,13 @@ class PEAR_Error
 	var $trigger_error = false;
 	
 	var $message = '';
-	var $file    = '';
-	var $line    = 0;
 	
 	/*
 	 * constructor, set the basics...
 	 */
-	function PEAR_Error ($message, $file = __FILE__, $line = __LINE__)
+	function PEAR_Error ($message)
 	{
 		$this->message = $message;
-		$this->file    = $file;
-		$this->line    = $line;
 	}
 	
 	/*
