@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Updated Zend garbage collection with a much more thorough method.
+  (Andi, Zend library)
 - Added the ability to use variable references in the array() construct.
   For example, array("foo" => &$foo). (Andi, Zend library)
 - Added array_reverse() function (Andrei)
