@@ -70,6 +70,12 @@ PHP_FUNCTION(dl)
 
 #ifdef HAVE_LIBDL
 
+#ifdef ZTS
+#define USING_ZTS 1
+#else
+#define USING_ZTS 0
+#endif
+
 void php_dl(pval *file,int type,pval *return_value)
 {
 	void *handle;
@@ -126,6 +132,17 @@ void php_dl(pval *file,int type,pval *return_value)
 		RETURN_FALSE;
 	}
 	module_entry = get_module();
+	if ((module_entry->zend_debug != ZEND_DEBUG) || (module_entry->zts != USING_ZTS)) {
+		php_error(E_CORE_WARNING,
+					"%s: Unable to initialize module\n"
+					"Module compiled with debug=%d, thread-safety=%d\n"
+					"PHP compiled with debug=%d, thread-safety=%d\n"
+					"These options need to match\n",
+					module_entry->name, module_entry->zend_debug, module_entry->zts,
+					ZEND_DEBUG, USING_ZTS);
+		DL_UNLOAD(handle);
+		RETURN_FALSE;
+	}
 	module_entry->type = type;
 	module_entry->module_number = zend_next_free_module();
 	if (module_entry->module_startup_func) {
