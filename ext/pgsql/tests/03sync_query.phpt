@@ -20,7 +20,7 @@ for ($i=0; $i < $rows; $i++)
 }
 for ($i=0; $i < $rows; $i++) 
 {
-	pg_fetch_object($result, $i, PGSQL_ASSOC);
+	pg_fetch_object($result);
 }
 for ($i=0; $i < $rows; $i++) 
 {
