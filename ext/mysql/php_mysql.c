@@ -18,54 +18,46 @@
  
 /* $Id$ */
 
-
 /* TODO:
  *
  * ? Safe mode implementation
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+# include "config.h"
 #endif
 
 #include "php.h"
 #include "php_globals.h"
-#include "php_mysql.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 
 #if HAVE_MYSQL
 
 #ifdef PHP_WIN32
-#include <winsock.h>
-#define signal(a, b) NULL
+# include <winsock.h>
+# define signal(a, b) NULL
 #elif defined(NETWARE)
-#include <sys/socket.h>
-#define signal(a, b) NULL
+# include <sys/socket.h>
+# define signal(a, b) NULL
 #else
-#include "build-defs.h"
-#if HAVE_SIGNAL_H
-#include <signal.h>
+# include "build-defs.h"
+# if HAVE_SIGNAL_H
+#  include <signal.h>
+# endif
+# if HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+# endif
+# include <netdb.h>
+# include <netinet/in.h>
 #endif
 
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#include <netdb.h>
-#include <netinet/in.h>
-#endif
-
-#ifndef HAVE_USHORT
-#undef ushort
-typedef unsigned short ushort;
-#endif
+#include <mysql.h>
+#include "php_ini.h"
+#include "php_mysql.h"
 
 /* True globals, no need for thread safety */
 static int le_result, le_link, le_plink;
-
-#include "php_ini.h"
-
-# include <mysql.h>
 
 #ifdef HAVE_MYSQL_REAL_CONNECT
 # ifdef HAVE_ERRMSG_H
@@ -76,13 +68,13 @@ static int le_result, le_link, le_plink;
 #define SAFE_STRING(s) ((s)?(s):"")
 
 #if MYSQL_VERSION_ID > 32199
-#define mysql_row_length_type unsigned long
-#define HAVE_MYSQL_ERRNO
+# define mysql_row_length_type unsigned long
+# define HAVE_MYSQL_ERRNO
 #else
-#define mysql_row_length_type unsigned int
-#	ifdef mysql_errno
-#	define HAVE_MYSQL_ERRNO
-#	endif
+# define mysql_row_length_type unsigned int
+# ifdef mysql_errno
+#  define HAVE_MYSQL_ERRNO
+# endif
 #endif
 
 #if MYSQL_VERSION_ID >= 32032
@@ -121,7 +113,6 @@ static int _rollback_mysql_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_mysql_conn *link;
 	char	query[128];
-	int		i;
 
 	/* check if its a persistent link */
 	if (Z_TYPE_P(rsrc) != le_plink) 
@@ -153,7 +144,7 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_list_dbs,								NULL)
 	PHP_FE(mysql_list_tables,							NULL)
 	PHP_FE(mysql_list_fields,							NULL)
-	PHP_FE(mysql_list_processes,					NULL)
+	PHP_FE(mysql_list_processes,						NULL)
 	PHP_FE(mysql_error,									NULL)
 #ifdef HAVE_MYSQL_ERRNO
 	PHP_FE(mysql_errno,									NULL)
