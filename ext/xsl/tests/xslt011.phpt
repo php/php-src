@@ -17,7 +17,9 @@ $dom = new domDocument();
   
   $xml = new DomDocument();
   $xml->load(dirname(__FILE__)."/xslt011.xml");
+  $proc->registerPhpFunctions();
   print $proc->transformToXml($xml);
+ 
   function foobar($id, $secondArg = "" ) {
     if (is_array($id)) {
         return $id[0]->value . " - " . $secondArg;
@@ -40,10 +42,10 @@ $dom = new domDocument();
 --EXPECTF--
 Test 11: php:function Support
 
-Notice: Object of class foo could not be converted to string in %s on line 15
+Warning: xsltprocessor::transformToXml(): A PHP Object can not be converted to a string in %s on line 16
 <?xml version="1.0"?>
 foobar - secondArg
 foobar - 
 this is from an external DomDocument
 from the Input Document
-Object
+
