@@ -1463,10 +1463,6 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 	}
 
 	points = (gdPointPtr) emalloc(npoints * sizeof(gdPoint));
-	if (points == NULL) {
-		php_error(E_WARNING, "ImagePolygon: Memory allocation fault");
-		RETURN_FALSE;
-	}
 
 	for (i = 0; i < npoints; i++) {
 		if (zend_hash_index_find((*POINTS)->value.ht, (i * 2), (void **) &var) == SUCCESS) {
