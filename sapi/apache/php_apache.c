@@ -105,18 +105,21 @@ zend_module_entry apache_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ proto string apache_child_terminate()
+/* {{{ proto bool string apache_child_terminate(void)
    Terminate apache process after this request */
 PHP_FUNCTION(apache_child_terminate)
 {
 #ifndef MULTITHREAD
 	if (AP(terminate_child)) {
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
+		RETURN_TRUE;
 	} else { /* tell them to get lost! */
 		php_error(E_WARNING, "apache.child_terminate is disabled");
+		RETURN_FALSE;
 	}
 #else
 		php_error(E_WARNING, "apache_child_terminate() is not supported in this build");
+		RETURN_FALSE;
 #endif
 }
 /* }}} */
@@ -271,7 +274,7 @@ PHP_MINFO_FUNCTION(apache)
 }
 /* }}} */
 
-/* {{{ proto int virtual(string filename)
+/* {{{ proto bool virtual(string filename)
    Perform an Apache sub-request */
 /* This function is equivalent to <!--#include virtual...-->
  * in mod_include. It does an Apache sub-request. It is useful
@@ -343,7 +346,7 @@ PHP_FUNCTION(getallheaders)
 }
 /* }}} */
 
-/* {{{ proto int apache_setenv(string variable, string value [, boolean walk_to_top])
+/* {{{ proto bool apache_setenv(string variable, string value [, bool walk_to_top])
    Set an Apache subprocess_env variable */
 PHP_FUNCTION(apache_setenv)
 {
@@ -365,7 +368,7 @@ PHP_FUNCTION(apache_setenv)
 }
 /* }}} */
 
-/* {{{ proto class apache_lookup_uri(string URI)
+/* {{{ proto object apache_lookup_uri(string URI)
    Perform a partial request of the given URI to obtain information about it */
 PHP_FUNCTION(apache_lookup_uri)
 {
