@@ -19,7 +19,7 @@ exif.encode_unicode=ISO-8859-15
             copy of test1.jpg as a thumbnail.
   test3.jpg is the same as test2.jpg but with a UNICODE UserComment: &Auml;&Ouml;&&Uuml;&szlig;&auml;&ouml;&uuml;
 */
-var_dump(exif_read_data(dirname(__FILE__).'./test3.jpg','',true,false));
+var_dump(exif_read_data(dirname(__FILE__).'/test3.jpg','',true,false));
 ?>
 --EXPECTF--
 array(5) {
