@@ -3,6 +3,11 @@
     * zend_hash.c:
       Remove bogus patch - the number of elements is unrelated
 
+2003-08-12  Zeev Suraski  <zeev@zend.com>
+
+    * zend_hash.c:
+      Remove bogus patch - the number of elements is unrelated
+
 2003-08-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_hash.c
