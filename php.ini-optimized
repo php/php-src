@@ -241,22 +241,38 @@ upload_max_filesize = 2M		    ; Maximum allowed size for uploaded files
 ; needs to go here.  Specify the location of the extension with the extension_dir directive above.
 
 
+
 ;Windows Extensions
-;extension=php_mysql.dll
-;extension=php_nsmail.dll
+;Note that MySQL and ODBC support is now built in, so no dll is needed for it.
+;
 ;extension=php_calendar.dll
+;extension=php_cpdf.dll
+;extension=php_cybercash.dll
+;extension=php_db.dll
 ;extension=php_dbase.dll
-;extension=php_filepro.dll
+;extension=php_domxml.dll
+;extension=php_dotnet.dll
+;extension=php_exif.dll
+;extension=php_fdf.dll
+;extension=php_ftp.dll
 ;extension=php_gd.dll
-;extension=php_dbm.dll
-;extension=php_mssql.dll
-;extension=php_zlib.dll
-;extension=php_filepro.dll
-;extension=php_imap4r2.dll
+;extension=php_gettext.dll
+;extension=php_ifx.dll
+;extension=php_imap.dll
+;extension=php_interbase.dll
+,extension=php_java.dll
 ;extension=php_ldap.dll
-;extension=php_crypt.dll
-;extension=php_msql2.dll
-;extension=php_odbc.dll
+;extension=php_mhash.dll
+;extension=php_mssql65.dll
+;extension=php_mssql70.dll
+;extension=php_oci8.dll
+;extension=php_oracle.dll
+;extension=php_pdf.dll
+;extension=php_pgsql.dll
+;extension=php_sablot.dll
+;extension=php_swf.dll
+;extension=php_sybase_ct.dll
+;extension=php_zlib.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
