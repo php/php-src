@@ -98,12 +98,23 @@ int zend_auto_global_arm(zend_auto_global *auto_global TSRMLS_DC)
 }
 
 
+int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC)
+{
+	zend_auto_global *auto_global;
+
+	if (zend_hash_find(CG(auto_globals), varname, varname_length+1, (void **) &auto_global)==FAILURE) {
+		return FAILURE;
+	}
+	auto_global->armed = 0;
+	return SUCCESS;
+}
+
+
 static void init_compiler_declarables(TSRMLS_D)
 {
 	CG(declarables).ticks.type = IS_LONG;
 	CG(declarables).ticks.value.lval = 0;
 }
-
 
 
 void zend_init_compiler_data_structures(TSRMLS_D)
