@@ -30,12 +30,13 @@
 
 #include "php_session.h"
 #include "mod_mm.h"
+#include "SAPI.h"
 
 #ifdef ZTS
 # error mm is not thread-safe
 #endif
 
-#define PS_MM_FILE "session_mm"
+#define PS_MM_FILE "session_mm_"
 
 /* For php_uint32 */
 #include "ext/standard/basic_functions.h"
@@ -247,7 +248,8 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	int len = strlen(PS(save_path));
+	int save_path_len = strlen(PS(save_path));
+	int mod_name_len = strlen(sapi_module.name);
 	char *ps_mm_path;
 	int ret;
 
@@ -255,17 +257,18 @@ PHP_MINIT_FUNCTION(ps_mm)
    	if (!ps_mm_instance)
 		return FAILURE;
 	
-	ps_mm_path = do_alloca(len + 1 + sizeof(PS_MM_FILE)); /* Directory + '/' + File + \0 */
+	ps_mm_path = do_alloca(save_path_len + 1 + sizeof(PS_MM_FILE) + mod_name_len + 1); /* Directory + '/' + File + Module Name + \0 */
 
-	memcpy(ps_mm_path, PS(save_path), len + 1);
+	memcpy(ps_mm_path, PS(save_path), save_path_len + 1);
 
-	if (len > 0 && ps_mm_path[len - 1] != DEFAULT_SLASH) {
-		ps_mm_path[len] = DEFAULT_SLASH;
-		ps_mm_path[len+1] = '\0';
+	if (save_path_len > 0 && ps_mm_path[save_path_len - 1] != DEFAULT_SLASH) {
+		ps_mm_path[save_path_len] = DEFAULT_SLASH;
+		ps_mm_path[save_path_len+1] = '\0';
 	}
 
 	strcat(ps_mm_path, PS_MM_FILE);
-
+	strcat(ps_mm_path, sapi_module.name);
+	
 	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
 		
 	free_alloca(ps_mm_path);
