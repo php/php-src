@@ -24,9 +24,6 @@
 #include "php_ini.h"
 #include "php_dbx.h"
 #include "ext/standard/info.h"
-#if !(WIN32|WINNT)
-#include "php_config.h"
-#endif
 
 /*/ defines for supported databases /*/
 #define DBX_UNKNOWN 0
