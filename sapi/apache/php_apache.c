@@ -343,7 +343,6 @@ PHP_FUNCTION(getallheaders)
     table_entry *tenv;
     int i;
     TSRMLS_FETCH();
-    TSRMLS_FETCH();
 	
     if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
