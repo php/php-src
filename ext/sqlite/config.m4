@@ -2,6 +2,9 @@ dnl $Id$
 dnl config.m4 for extension sqlite
 dnl vim:et:ts=2:sw=2
 
+PHP_ARG_ENABLE(sqlite-utf8, whether to enable UTF-8 support in sqlite (default: ISO-8859-1),
+[  --enable-sqlite-utf8    Enable UTF-8 support for SQLite], no, no)
+
 PHP_ARG_WITH(sqlite, for sqlite support,
 [  --with-sqlite           Include sqlite support], yes)
 
@@ -68,11 +71,15 @@ if test "$PHP_SQLITE" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libsqlite/src)
     AC_CHECK_SIZEOF(char *,4)
     AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
-    dnl use latin 1 for now; the utf-8 handling in funcs.c uses assert(),
-    dnl which is a bit silly and something we want to avoid
-    SQLITE_ENCODING="ISO8859"
-    dnl SQLITE_ENCODING="UTF-8"
-    dnl AC_DEFINE(SQLITE_UTF8,1,[if SQLite should use utf-8 encoding])
+    dnl use latin 1 for SQLite older than 2.8.9; the utf-8 handling 
+    dnl in funcs.c uses assert(), which is a bit silly and something 
+    dnl we want to avoid. This assert() was removed in SQLite 2.8.9.
+    if test "$PHP_SQLITE_UTF8" = "yes"; then
+        SQLITE_ENCODING="UTF-8"
+        AC_DEFINE(SQLITE_UTF8, 1, [ ])
+    else
+        SQLITE_ENCODING="ISO8859"
+    fi
     PHP_SUBST(SQLITE_ENCODING)
 
     AC_PATH_PROG(LEMON,lemon,no)
