@@ -42,6 +42,21 @@ AC_DEFUN(PHP_GD_XPM,[
         AC_CHECK_LIB(gd, gdImageCreateFromXpm, [AC_DEFINE(HAVE_GD_XPM, 1, [ ])])
 ])
 
+
+AC_DEFUN(PHP_GD_CHECK_VERSION,[
+        AC_CHECK_LIB(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13,1,[ ]) ])
+        AC_CHECK_LIB(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15,1,[ ]) ])
+        AC_CHECK_LIB(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,1,[ ]) ])
+        AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
+        AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
+        AC_CHECK_LIB(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,  1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromGif,   [AC_DEFINE(HAVE_GD_GIF,  1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromXbm,   [AC_DEFINE(HAVE_GD_XBM,  1, [ ])])
+        AC_CHECK_LIB(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
+])
+
+
 AC_MSG_CHECKING(whether to enable truetype string function in gd)
 AC_ARG_ENABLE(gd-native-ttf,
 [  --enable-gd-imgstrttf  Enable TrueType string function in gd],[
@@ -71,7 +86,8 @@ AC_ARG_WITH(gd,
 
   case "$withval" in
     no)
-      AC_MSG_RESULT(no) ;;
+      AC_MSG_RESULT(no) 
+    ;;
     yes)
       AC_DEFINE(HAVE_LIBGD,1,[ ])
       if test "$shared" = "yes"; then
@@ -81,29 +97,23 @@ AC_ARG_WITH(gd,
         AC_MSG_RESULT(yes (static))
         AC_ADD_LIBRARY(gd)
       fi
-        old_LDFLAGS=$LDFLAGS
-		old_LIBS=$LIBS
-        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1,[ ]) ])
-        AC_CHECK_LIB(gd, gdImagePaletteCopy, [ AC_DEFINE(HAVE_LIBGD15,1,[ ]) ])
-        AC_CHECK_LIB(gd, gdImageColorClosestHWB, [ AC_DEFINE(HAVE_COLORCLOSESTHWB,1,[ ]) ])
-		AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
-		AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
-        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
-dnl Some versions of GD support both PNG and GIF. Check for both.
-        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
-        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
-        AC_CHECK_LIB(gd, gdImageCreateFromXbm, [AC_DEFINE(HAVE_GD_XBM, 1, [ ])])
-        AC_CHECK_LIB(gd, gdImageWBMP, [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
-        
-        LIBS=$old_LIBS
-        LDFLAGS=$old_LDFLAGS
-        if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
-          AC_ADD_LIBRARY(png)
-          AC_ADD_LIBRARY(z)
-        fi
 
-        ac_cv_lib_gd_gdImageLine=yes
-      ;;
+      old_LDFLAGS=$LDFLAGS
+      old_LIBS=$LIBS
+
+dnl Check the capabilities of GD lib...
+      PHP_GD_CHECK_VERSION
+        
+      LIBS=$old_LIBS
+      LDFLAGS=$old_LDFLAGS
+      if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
+        AC_ADD_LIBRARY(png)
+        AC_ADD_LIBRARY(z)
+      fi
+
+      ac_cv_lib_gd_gdImageLine=yes
+    ;;
+
     *)
 dnl A whole whack of possible places where this might be
       test -f $withval/include/gd1.3/gd.h && GD_INCLUDE="$withval/include/gd1.3"
@@ -139,14 +149,9 @@ dnl A whole whack of possible places where this might be
         old_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -L$GD_LIB"
 		old_LIBS=$LIBS
-        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1, [ ]) ])
-		AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
-		AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
-        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
-        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1, [ ])])
-        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1, [ ])])
-        AC_CHECK_LIB(gd, gdImageCreateFromXbm, [AC_DEFINE(HAVE_GD_XBM, 1, [ ])])
-        AC_CHECK_LIB(gd, gdImageWBMP, [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
+
+dnl Check the capabilities of GD lib...
+        PHP_GD_CHECK_VERSION
         
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
@@ -158,9 +163,11 @@ dnl A whole whack of possible places where this might be
         ac_cv_lib_gd_gdImageLine=yes
       else
         AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $withval])
-      fi ;;
+      fi 
+    ;;
   esac
 ],[])
+
 
 if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   CHECK_TTF="yes"
