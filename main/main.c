@@ -190,6 +190,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference",	"1",	PHP_INI_ALL,	OnUpdateBool,	allow_call_time_pass_reference, php_core_globals, core_globals)
 	PHP_INI_ENTRY("precision",			"14",		PHP_INI_ALL,		OnSetPrecision)
 	STD_PHP_INI_BOOLEAN("output_buffering",	"0",	PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	output_buffering,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("implicit_flush",	"0",	PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	implicit_flush,		php_core_globals,	core_globals)
 
 	PHP_INI_ENTRY_EX("highlight.comment",	HL_COMMENT_COLOR,	PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.default",	HL_DEFAULT_COLOR,	PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
@@ -728,6 +729,8 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 
 	if (PG(output_buffering)) {
 		php_start_ob_buffering();
+	} else if (PG(implicit_flush)) {
+		php_start_implicit_flush();
 	}
 
 	if (SG(request_info).auth_user) {

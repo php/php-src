@@ -56,6 +56,12 @@ output_buffering	= Off	; Output buffering allows you to send header lines (inclu
 							; You can enable output buffering by in runtime by calling the output
 							; buffering functions, or enable output buffering for all files
 							; by setting this directive to On.
+implicit_flush		= Off	; Implicit flush tells PHP to tell the output layer to flush itself
+							; automatically after every output block.  This is equivalent to
+							; calling the PHP function flush() after each and every call to print()
+							; or echo() and each and every HTML block.
+							; Turning this option on has serious performance implications, and
+							; is generally recommended for debugging purposes only.
 allow_call_time_pass_reference	= On	; whether to enable the ability to force arguments to be 
 										; passed by reference at function-call time.  This method
 										; is deprecated, and is likely to be unsupported in future
