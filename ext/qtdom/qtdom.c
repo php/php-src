@@ -108,7 +108,7 @@ PHP_MINFO_FUNCTION(qtdom)
 /* {{{ qdom_find_attributes
  * Helper function for creating the attributes, returns the number 
  * of attributes found or -1 if an error occured */
-int qdom_find_attributes( zval **children, struct qdom_attribute *attr )
+static int qdom_find_attributes( zval **children, struct qdom_attribute *attr TSRMLS_DC)
 {
     zval *child;
     struct qdom_node *node;
@@ -142,7 +142,7 @@ int qdom_find_attributes( zval **children, struct qdom_attribute *attr )
    Helper function for recursively going trough the QDomNode tree and creating
    the same in PHP objects. Returns the number of children or -1 if an error
    occured. */
-int qdom_find_children( zval **children, struct qdom_node *orig_node )
+static int qdom_find_children( zval **children, struct qdom_node *orig_node TSRMLS_DC)
 {
     zval *child;
     struct qdom_node *node, *tmp_node, *child_node;
@@ -174,7 +174,7 @@ int qdom_find_children( zval **children, struct qdom_node *orig_node )
         if ( num_attrs > 0 )
         {
             struct qdom_attribute *attr = qdom_do_node_attributes( node );
-            if ( qdom_find_attributes( &a_children, attr ) > 0 )
+            if ( qdom_find_attributes( &a_children, attr TSRMLS_CC) > 0 )
             {
                 zend_hash_update(child->value.obj.properties,
                                  "attributes", sizeof("attributes"),
@@ -190,7 +190,7 @@ int qdom_find_children( zval **children, struct qdom_node *orig_node )
         {
             child_node = qdom_do_copy_node( node );
             child_node = qdom_do_first_child( child_node );
-            if ( qdom_find_children( &n_children, child_node ) > 0 )
+            if ( qdom_find_children( &n_children, child_node TSRMLS_CC) > 0 )
             {
                 zend_hash_update(child->value.obj.properties,
                                  "children", sizeof("children"),
@@ -241,7 +241,7 @@ PHP_FUNCTION(qdom_tree)
         add_property_stringl(return_value, "doctype", (char *) qdom_type_name, strlen(qdom_type_name), 1);
 
     node = doc->Children;
-    if ( qdom_find_children( &children, node ) > 0 )
+    if ( qdom_find_children( &children, node TSRMLS_CC) > 0 )
     {
         add_property_long(return_value, "type", node->Type);
         zend_hash_update(return_value->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);

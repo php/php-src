@@ -20,9 +20,6 @@
 #ifndef PHP_QTDOM_H
 #define PHP_QTDOM_H
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
 #if HAVE_QTDOM
 
 extern zend_module_entry qtdom_module_entry;
@@ -55,19 +52,10 @@ ZEND_BEGIN_MODULE_GLOBALS(qtdom)
 ZEND_END_MODULE_GLOBALS(qtdom)
 */
 
-/* In every function that needs to use variables in php_qtdom_globals,
-   do call QTDOMLS_FETCH(); after declaring other variables used by
-   that function, and always refer to them as QTDOMG(variable).
-   You are encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
-
 #ifdef ZTS
-#define QTDOMG(v) (qtdom_globals->v)
-#define QTDOMLS_FETCH() php_qtdom_globals *qtdom_globals = ts_resource(qtdom_globals_id)
+# define QTDOMG(v) TSRMG(qtdom_globals_id, zend_qtdom_globals *, v)
 #else
-#define QTDOMG(v) (qtdom_globals.v)
-#define QTDOMLS_FETCH()
+# define QTDOMG(v) (qtdom_globals.v)
 #endif
 
 #else
