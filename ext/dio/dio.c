@@ -215,6 +215,11 @@ PHP_FUNCTION(dio_read)
 
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
+	if (bytes <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0.");
+		RETURN_FALSE;
+	}
+
 	data = emalloc(bytes + 1);
 	res = read(f->fd, data, bytes);
 	if (res <= 0) {
