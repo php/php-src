@@ -104,7 +104,7 @@ static char *sapi_thttpd_read_cookies(SLS_D)
 
 #define BUF_SIZE 512
 #define ADD_STRING(name)										\
-	php_register_variable(name, buf, track_vars_array ELS_C PLS_CC)
+	php_register_variable(name, buf, track_vars_array ELS_CC PLS_CC)
 
 static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
 {
@@ -112,11 +112,11 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 	TLS_FETCH();
 
 	php_register_variable("PHP_SELF", TG(hc)->decodedurl, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array ELS_C PLS_CC);
-	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array ELS_C PLS_CC);
-	php_register_variable("REQUEST_METHOD", SG(request_info).request_method, track_vars_array ELS_C PLS_CC);
-	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array ELS_C PLS_CC);
-	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array ELS_C PLS_CC);
+	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array ELS_CC PLS_CC);
+	php_register_variable("REQUEST_METHOD", SG(request_info).request_method, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array ELS_CC PLS_CC);
 
 	buf[BUF_SIZE] = '\0';
 	
@@ -135,7 +135,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 
 #define CONDADD(name, field) 							\
 	if (TG(hc)->field[0]) {								\
-		php_register_variable(#name, TG(hc)->field, track_vars_array ELS_C PLS_C); \
+		php_register_variable(#name, TG(hc)->field, track_vars_array ELS_CC PLS_C); \
 	}
 
 	CONDADD(HTTP_REFERER, referer);
@@ -153,7 +153,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 	}
 
 	if (TG(hc)->authorization[0])
-		php_register_variable("AUTH_TYPE", "Basic", track_vars_array ELS_C PLS_C);
+		php_register_variable("AUTH_TYPE", "Basic", track_vars_array ELS_CC PLS_C);
 }
 
 static sapi_module_struct sapi_module = {
