@@ -179,13 +179,16 @@ static void register_standard_class()
 #ifdef ZTS
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 {
+	zend_function tmp_func;
+	zend_class_entry tmp_class;
+
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->function_table, 100, NULL, (void (*)(void *)) destroy_zend_function, 1);
-	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, NULL, 0);
+	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, &tmp_func, sizeof(zend_function));
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->class_table, 10, NULL, (void (*)(void *)) destroy_zend_class, 1);
-	zend_hash_copy(compiler_globals->class_table, global_class_table, NULL, NULL, 0);
+	zend_hash_copy(compiler_globals->class_table, global_class_table, zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 }
 
 
@@ -210,12 +213,18 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals)
 }
 
 
+static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
+{
+	start_memory_manager();
+}
+
 #endif
 
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 {
 #ifdef ZTS
+	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
 
 	tsrm_startup(1,1,0);
@@ -259,7 +268,12 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 #ifdef ZTS
 	compiler_globals_id = ts_allocate_id(sizeof(zend_compiler_globals), (void (*)(void *)) compiler_globals_ctor, (void (*)(void *)) compiler_globals_dtor);
 	executor_globals_id = ts_allocate_id(sizeof(zend_executor_globals), (void (*)(void *)) executor_globals_ctor, (void (*)(void *)) executor_globals_dtor);
+	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
+	zend_hash_destroy(compiler_globals->function_table);
+	zend_hash_destroy(compiler_globals->class_table);
+	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
+	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
 #endif
 
 	init_resource_plist(ELS_C);

@@ -321,6 +321,8 @@ void do_extended_info(CLS_D);
 void do_extended_fcall_begin(CLS_D);
 void do_extended_fcall_end(CLS_D);
 
+#define INITIAL_OP_ARRAY_SIZE 64
+
 
 /* helper functions in zend-scanner.l */
 BEGIN_EXTERN_C()
@@ -330,19 +332,15 @@ ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ..
 ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, va_list files);
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
 ZEND_API zend_op_array *compile_filename(zval *filename CLS_DC);
-inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
-END_EXTERN_C()
-
-#define INITIAL_OP_ARRAY_SIZE 64
-
-
-BEGIN_EXTERN_C()
+ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 END_EXTERN_C()
 
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry *ce);
+void zend_class_add_ref(zend_class_entry *ce);
+
 zend_op *get_next_op(zend_op_array *op_array CLS_DC);
 int get_next_op_number(zend_op_array *op_array);
 int print_class(zend_class_entry *class_entry);

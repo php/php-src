@@ -67,7 +67,7 @@ static void html_puts(char *s, uint len)
 
 
 
-void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini)
+ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
 	zval token;
 	int token_type;

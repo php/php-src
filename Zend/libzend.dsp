@@ -31,17 +31,15 @@ RSC=rc.exe
 !IF  "$(CFG)" == "libzend - Win32 Release"
 
 # PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "Release"
 # PROP BASE Intermediate_Dir "Release"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDebug" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDebug" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "TSRM_EXPORTS" /D "LIBZEND_EXPORTS" /D "WIN32" /D "_MBCS" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40d /d "NDebug"
 # ADD RSC /l 0x40d /d "NDebug"
@@ -55,17 +53,15 @@ LIB32=link.exe -lib
 !ELSEIF  "$(CFG)" == "libzend - Win32 Debug"
 
 # PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir "Debug"
 # PROP BASE Intermediate_Dir "Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug" /D "_LIB" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40d /d "_Debug"
 # ADD RSC /l 0x40d /d "_Debug"
 BSC32=bscmake.exe
@@ -175,6 +171,10 @@ SOURCE=.\zend_variables.c
 # Begin Source File
 
 SOURCE=.\config.w32.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FlexLexer.h
 # End Source File
 # Begin Source File
 
@@ -312,6 +312,14 @@ BuildCmds= \
 SOURCE=".\zend-scanner.l"
 
 !IF  "$(CFG)" == "libzend - Win32 Release"
+
+# Begin Custom Build
+InputPath=".\zend-scanner.l"
+
+"zend-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -i -Pzend -ozend-scanner.c zend-scanner.l
+
+# End Custom Build
 
 !ELSEIF  "$(CFG)" == "libzend - Win32 Debug"
 

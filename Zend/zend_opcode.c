@@ -24,6 +24,7 @@
 #include "zend_extensions.h"
 #include "zend_API.h"
 
+
 static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array)
 {
 	if (extension->op_array_ctor) {
@@ -128,6 +129,12 @@ ZEND_API void destroy_zend_class(zend_class_entry *ce)
 			zend_hash_destroy(&ce->default_properties);
 			break;
 	}
+}
+
+
+void zend_class_add_ref(zend_class_entry *ce)
+{
+	(*ce->refcount)++;
 }
 
 

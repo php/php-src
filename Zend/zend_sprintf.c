@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #endif
 
+#if BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...)
 {
 	va_list args;
@@ -32,3 +33,4 @@ int zend_sprintf(char *buffer, const char *format, ...)
 
 	return strlen(buffer);
 }
+#endif

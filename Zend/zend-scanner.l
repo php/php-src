@@ -145,7 +145,7 @@ inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
 
 
 BEGIN_EXTERN_C()
-inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
+ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 {
 #ifndef ZTS
 	FILE *tmp;
@@ -170,8 +170,7 @@ inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	yyin = tmp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 	BEGIN(INITIAL);
-	
-#else
+	#else
 	ifstream *input_file = new ifstream(file_handle->filename);
 	CG(ZFL) = new ZendFlexLexer;
 

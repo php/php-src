@@ -46,7 +46,7 @@ static void handle_whitespace(int *emit_whitespace)
 }
 
 
-void zend_indent()
+ZEND_API void zend_indent()
 {
 	zval token;
 	int token_type;
