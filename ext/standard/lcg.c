@@ -42,6 +42,11 @@ static int php_lcg_initialized = 0;
  * The function combines two CGs with periods of 
  * 2^31 - 85 and 2^31 - 249. The period of this function
  * is equal to the product of both primes.
+ * 
+ * There are only about 65k distinct starting values, that's
+ * not much... If PHP is running as CGI, randomness is quite bad.
+ * If it is run as a module, it's long-livin', so no problem in that
+ * case.
  */
 
 #define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
@@ -103,5 +108,5 @@ PHP_FUNCTION(lcg_value)
  * c-basic-offset: 4
  * End:
  * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim<600: sw=8 ts=8 tw=78
  */
