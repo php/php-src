@@ -1081,11 +1081,11 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <ST_COMMENT>[^*]+ {
-	HANDLE_NEWLINES(yytext, yyleng);
 	yymore();
 }
 
 <ST_COMMENT>"*/" {
+	HANDLE_NEWLINES(yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_COMMENT;
 }
