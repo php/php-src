@@ -256,6 +256,9 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 			(var)->refcount = (*orig_var)->refcount;													\
 			(var)->is_ref = 1;																			\
 																										\
+			if (_refcount) {																			\
+				(var)->refcount += _refcount-1;															\
+			}																							\
 			zval_dtor(*orig_var);																		\
 			**orig_var = *(var);																		\
 			efree(var);																					\
