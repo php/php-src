@@ -81,7 +81,8 @@ TSRM_API void tsrm_shutdown(void);
 TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* fetches the requested resource for the current thread */
-TSRM_API void *ts_resource(ts_rsrc_id id);
+TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
+#define ts_resource(id)			ts_resource_ex(id, NULL)
 
 /* frees all resources allocated for the current thread */
 TSRM_API void ts_free_thread(void);

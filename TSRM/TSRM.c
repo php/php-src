@@ -206,13 +206,18 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 
 
 /* fetches the requested resource for the current thread */
-void *ts_resource(ts_rsrc_id id)
+void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 {
-	THREAD_T thread_id = tsrm_thread_id();
+	THREAD_T thread_id;
 	int hash_value;
 	tsrm_tls_entry *thread_resources;
 	void *resource;
 
+	if (th_id) {
+		thread_id = *th_id;
+	} else {
+		thread_id = tsrm_thread_id();
+	}
 	tsrm_debug("Fetching resource id %d for thread %ld\n", id, (long) thread_id);
 	tsrm_mutex_lock(tsmm_mutex);
 
