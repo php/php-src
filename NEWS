@@ -32,6 +32,7 @@ PHP 4                                                                      NEWS
 - Added KOI8-R, CP866, and CP1251 support for htmlentities(). 
   (Antony Dovgal, Moriyoshi)
 - Added domdocument->free() to free XML-documents from memory. (Rob Richards)
+- Fixed a bug in error reporting with the CLI for start-up errors. (Derick)
 - Fixed spurious fsync calls during socket communication. (Sascha)
 - Fixed a possible vhost issue in thttpd. (Sascha, dgl@dgl.cx)
 - Fixed including from HTTP URLs. (Sascha)

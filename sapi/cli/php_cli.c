@@ -238,6 +238,13 @@ static char* sapi_cli_read_cookies(TSRMLS_D)
 	return NULL;
 }
 
+static int sapi_cli_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+{
+	/* We do nothing here, this function is needed to prevent that the fallback
+	 * header handling is called. */
+	return SAPI_HEADER_SENT_SUCCESSFULLY;
+}
+
 static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
 {
 	if (sapi_header) {
@@ -301,7 +308,7 @@ static sapi_module_struct cli_sapi_module = {
 	php_error,						/* error handler */
 
 	NULL,							/* header handler */
-	NULL,							/* send headers handler */
+	sapi_cli_send_headers,			/* send headers handler */
 	sapi_cli_send_header,			/* send header handler */
 
 	NULL,				            /* read POST data */
