@@ -209,9 +209,9 @@ function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(fetch,mysqli_fetch,NULL)
 	PHP_FALIAS(param_count,mysqli_param_count,NULL)
 	PHP_FALIAS(send_long_data,mysqli_send_long_data,NULL)
-	PHP_FALIAS(stmt_close,mysqli_stmt_close,NULL)
-	PHP_FALIAS(stmt_errno,mysqli_stmt_errno,NULL)
-	PHP_FALIAS(stnt_error,mysqli_stmt_error,NULL)
+	PHP_FALIAS(close,mysqli_stmt_close,NULL)
+	PHP_FALIAS(errno,mysqli_stmt_errno,NULL)
+	PHP_FALIAS(error,mysqli_stmt_error,NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
