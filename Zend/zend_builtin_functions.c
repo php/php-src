@@ -42,6 +42,7 @@ static ZEND_FUNCTION(define);
 static ZEND_FUNCTION(defined);
 static ZEND_FUNCTION(get_class);
 static ZEND_FUNCTION(get_parent_class);
+static ZEND_FUNCTION(property_exists);
 static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(class_exists);
 static ZEND_FUNCTION(function_exists);
@@ -99,6 +100,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(defined,			NULL)
 	ZEND_FE(get_class,			NULL)
 	ZEND_FE(get_parent_class,	NULL)
+	ZEND_FE(property_exists,    NULL)
 	ZEND_FE(method_exists,		NULL)
 	ZEND_FE(class_exists,		NULL)
 	ZEND_FE(function_exists,	NULL)
@@ -751,6 +753,28 @@ ZEND_FUNCTION(get_class_methods)
 		ZVAL_STRING(method_name, mptr->common.function_name, 1);
 		zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
 		zend_hash_move_forward_ex(&ce->function_table, &pos);
+	}
+}
+/* }}} */
+
+
+/* {{{ proto bool property_exists(object obj, string property_name)
+   Checks if the object has a property */
+ZEND_FUNCTION(property_exists)
+{
+	zval **object, **property;
+	
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &object, &property)==FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	if ((*object)->type != IS_OBJECT) {
+		RETURN_FALSE;
+	}
+
+	if (Z_OBJ_HANDLER_PP(object, has_property) && Z_OBJ_HANDLER_PP(object, has_property)(*object, *property, 1 TSRMLS_CC)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
