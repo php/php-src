@@ -1,3 +1,51 @@
+2001-03-17  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c
+      main/php_ini.c
+      main/php_ini.h:
+    Recode delayed loading in a much simpler way (switched back to php_ini.c 1.49)
+
+2001-03-17  Stephen van Egmond  <svanegmond@home.com>
+
+    * ext/standard/php_string.h:
+    fixed a (C++) warning about implicit conversion from void*
+
+2001-03-17  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/file.php:
+    GarbageCollection didn't work properly (wanted to delete files, relative
+    paths don't work in deconstructors)
+
+    * pear/Cache.php
+      pear/Cache/Output.php:
+    GarbageCollection was moved into a PEAR-Deconstructor
+
+2001-03-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - MFH (memleak fix)
+
+2001-03-17  Anil Madhavapeddy  <anil@recoil.org>
+
+    * ltconfig:
+    Update libtool to support OpenBSD 2.8+ wrt shared libraries and
+    library dependencies.  Tested on i386/sparc.
+
+2001-03-17  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php4ts.dsw: fix dependencys
+
+2001-03-17  James Moore  <James@phpuk.org>
+
+    * ext/standard/credits.h
+      ext/standard/info.h
+      ext/standard/credits.c: MFH for website team credits.
+
+2001-03-17  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c: MFH
+
+    * ext/standard/output.c: Fix the output buffering bug Andre found
+
 2001-03-16  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/array.c
