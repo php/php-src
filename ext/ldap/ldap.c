@@ -1006,7 +1006,7 @@ PHP_FUNCTION(ldap_get_values_len)
 	}
 	
 	for (i=0; i<num_values; i++) {
-//		add_next_index_stringl(return_value, ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len, 1);
+		add_next_index_stringl(return_value, ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len, 1);
 	}
 	
 	add_assoc_long(return_value, "count", num_values);
