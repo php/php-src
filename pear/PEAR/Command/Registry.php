@@ -284,6 +284,36 @@ installed package.'
                         $info[$key] = $dstr;
                         break;
                     }
+                    case 'provides' : {
+                        $debug = $this->config->get('verbose');
+                        if ($debug < 2) {
+                            $pstr = 'Classes: ';
+                        } else {
+                            $pstr = '';
+                        }
+                        foreach ($info[$key] as $p) {
+                            if ($debug < 2 && $p['type'] != "class") {
+                                continue;
+                            }
+                            // Only print classes when verbosity mode is < 2
+                            if ($debug < 2) {
+                                if ($i++ > 0) {
+                                    $pstr .= ", ";
+                                }
+                                $pstr .= $p['name'];
+                            } else {
+                                if ($i++ > 0) {
+                                    $pstr .= "\n";
+                                }
+                                $pstr .= ucfirst($p['type']) . " " . $p['name'];
+                                if (isset($p['explicit']) && $p['explicit'] == 1) {
+                                    $pstr .= " (explicit)";
+                                }
+                            }
+                        }
+                        $info[$key] = $pstr;
+                        break;
+                    }
                     default: {
                         $info[$key] = implode(", ", $info[$key]);
                         break;
