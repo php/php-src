@@ -1,3 +1,21 @@
+2001-12-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/var.c: - Remove debug code
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c:
+    - Added var_export, which shows a representation of a variable, much like
+      var_dump, but in such a way you can use it as PHP code.
+    - Added var_export, which shows a representation of a variable, much like
+      var_dump, but in such a way you can use it as PHP code. 
+
+2001-12-08  Thies C. Arntzen  <thies@thieso.net>
+
+    * sapi/cgi/cgi_main.c:
+    - Added -w option to the cgi-version. This will remove all comments and
+      whitespace from teh script. 
+
 2001-12-07  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/overload/overload.c:
