@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed a bug in ldap_get_entries() and ldap_get_attributes. (Jani)
 - Fix #4591. Register the appname as PHP 4.0, not 3.0
   Credit to andrew@digitalpulp.com. (Joey)
 - For the pfpro extension: defaulthost, defaultport, defaulttimeout, and
