@@ -10,6 +10,7 @@
 #endif
 
 #include "zend.h"
+#include "zend_stack.h"
 #include "php_regex.h"
 
 #include "httpd.h"
