@@ -1421,37 +1421,6 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
 }
 
 
-/* {{{ getChildren()
- */ 
-SXE_METHOD(getChildren)
-{
-	php_sxe_object *sxe;
-	xmlNodePtr      node;
-	xmlNodePtr      child;
-	zval           *value = NULL;
-
-	if (ZEND_NUM_ARGS() != 0) {
-		RETURN_FALSE;
-	}
-
-	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
-	GET_NODE(sxe, node);
-
-	array_init(return_value);
-	if (node) {
-		child = node->children;
-		while (child) {
-			if (node->type == XML_ELEMENT_NODE) {
-				MAKE_STD_ZVAL(value);
-				_node_as_zval(sxe, child, value TSRMLS_CC);
-				add_next_index_zval(return_value, value);
-			}
-			child = child->next;
-		}
-	}
-}
-/* }}} */
-
 /* {{{ proto simplemxml_element simplexml_import_dom(domNode node)
    Get a simplexml_element object from dom to allow for processing */
 PHP_FUNCTION(simplexml_import_dom)
@@ -1541,7 +1510,6 @@ static zend_function_entry sxe_functions[] = {
 	SXE_ME(validate_schema_file,   NULL, ZEND_ACC_PUBLIC)
 #endif
 	SXE_ME(xsearch,                NULL, ZEND_ACC_PUBLIC)
-	SXE_ME(getChildren,            NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(attributes,             NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
