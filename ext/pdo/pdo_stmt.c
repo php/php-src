@@ -203,7 +203,7 @@ static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value TSRMLS_DC) /* {
 {
 	if (Z_TYPE(stmt->lazy_object_ref) == IS_NULL) {
 		Z_TYPE(stmt->lazy_object_ref) = IS_OBJECT;
-		Z_OBJ_HANDLE(stmt->lazy_object_ref) = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, pdo_row_free_storage, NULL TSRMLS_CC);
+		Z_OBJ_HANDLE(stmt->lazy_object_ref) = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_row_free_storage, NULL TSRMLS_CC);
 		Z_OBJ_HT(stmt->lazy_object_ref) = &pdo_row_object_handlers;
 		stmt->refcount++;
 	}
@@ -1869,10 +1869,8 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 	efree(stmt);
 }
 
-void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
+void pdo_dbstmt_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)object;
-
 	if (--stmt->refcount == 0) {
 		free_statement(stmt TSRMLS_CC);
 	}
@@ -1890,7 +1888,7 @@ zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
 	ALLOC_HASHTABLE(stmt->properties);
 	zend_hash_init(stmt->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-	retval.handle = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, pdo_dbstmt_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbstmt_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &pdo_dbstmt_object_handlers;
 
 	return retval;
@@ -2190,10 +2188,8 @@ zend_object_handlers pdo_row_object_handlers = {
 	NULL
 };
 
-void pdo_row_free_storage(zend_object *object TSRMLS_DC)
+void pdo_row_free_storage(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)object;
-
 	ZVAL_NULL(&stmt->lazy_object_ref);
 	
 	if (--stmt->refcount == 0) {
@@ -2205,7 +2201,7 @@ zend_object_value pdo_row_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 
-	retval.handle = zend_objects_store_put(NULL, (zend_objects_store_dtor_t)zend_objects_destroy_object, pdo_row_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(NULL, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_row_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &pdo_row_object_handlers;
 
 	return retval;
