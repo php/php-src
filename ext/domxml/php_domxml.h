@@ -49,10 +49,10 @@ PHP_FUNCTION(domxml_dumpmem);
 
 /* Class Node methods */
 PHP_FUNCTION(domxml_attributes);
-PHP_FUNCTION(domxml_getattr);
-PHP_FUNCTION(domxml_setattr);
+PHP_FUNCTION(domxml_get_attribute);
+PHP_FUNCTION(domxml_set_attribute);
 PHP_FUNCTION(domxml_children);
-PHP_FUNCTION(domxml_lastchild);
+PHP_FUNCTION(domxml_last_child);
 PHP_FUNCTION(domxml_parent);
 PHP_FUNCTION(domxml_node);
 PHP_FUNCTION(domxml_new_child);
