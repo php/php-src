@@ -35,10 +35,10 @@
 
 #if HAVE_XML
 
-int xml_parser_inited = 0;
-
 #include "php_xml.h"
 # include "ext/standard/head.h"
+
+PHP_XML_API int xml_parser_inited = 0;
 
 /* Short-term TODO list:
  * - Implement XML_ExternalEntityParserCreate()
