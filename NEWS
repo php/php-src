@@ -35,6 +35,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug in GD's truecolor TTF handling. (Derick)
 - Fixed several 64-bit problems. (Dave)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
+- Fixed bug #23152 ($http_response_header empty on invalid URLs) (Ilia)
 - Fixed bug #23102 (integer overflow in exif_iif_add_value()). (Ilia)
 - Fixed bug #23093 (highlight_string() crashed with __FUNCTION__). (Jani)
 - Fixed bug #23071 (when DST in effect, date("T") crashed PHP). (Scott MacVicar, Jani)
