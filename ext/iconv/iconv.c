@@ -641,7 +641,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 			}
 		}
 
-		if (cnt >= offset) {
+		if (cnt >= (unsigned int)offset) {
 			if (cd2 == NULL) {
 				cd2 = icv_open(enc, GENERIC_SUPERSET_NAME);
 
@@ -790,7 +790,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 			}
 		}
 		if (offset >= 0) {
-			if (cnt >= offset) {
+			if (cnt >= (unsigned int)offset) {
 				if (_php_iconv_memequal(buf, ndl_buf_p, sizeof(buf))) {
 					if (match_ofs == (unsigned int)-1) {
 						match_ofs = cnt;
