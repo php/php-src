@@ -649,7 +649,7 @@ static void *php_create_dir(pool *p, char *dummy)
 	HashTable *per_dir_info;
 
 	per_dir_info = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(per_dir_info, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1);
+	zend_hash_init_ex(per_dir_info, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1, 0);
 	register_cleanup(p, (void *) per_dir_info, (void (*)(void *)) php_destroy_per_dir_info, (void (*)(void *)) zend_hash_destroy);
 
 	return per_dir_info;
