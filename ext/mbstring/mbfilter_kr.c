@@ -132,6 +132,8 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		s = ucs_a3_uhc_table[c - ucs_a3_uhc_table_min];
 	} else if (c >= ucs_i_uhc_table_min && c < ucs_i_uhc_table_max) {
 		s = ucs_i_uhc_table[c - ucs_i_uhc_table_min];
+	} else if (c >= ucs_s_uhc_table_min && c < ucs_s_uhc_table_max) {
+		s = ucs_s_uhc_table[c - ucs_s_uhc_table_min];
 	} else if (c >= ucs_r1_uhc_table_min && c < ucs_r1_uhc_table_max) {
 		s = ucs_r1_uhc_table[c - ucs_r1_uhc_table_min];
 	} else if (c >= ucs_r2_uhc_table_min && c < ucs_r2_uhc_table_max) {
@@ -217,7 +219,7 @@ retry:
 		}
 		if (flag > 0 && c > 0x20 && c < 0x7f) {
 			if (flag == 1){
-				w = (c1 - 0x21)*178 + (c - 0x21) + 0x54;
+				w = (c1 - 0x21)*190 + (c - 0x41) + 0x80;
 				if (w >= 0 && w < uhc2_ucs_table_size) {
 					w = uhc2_ucs_table[w];
 				} else {
@@ -419,7 +421,7 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 				w = 0;
 			}			
 		} else if ( c1 >= 0xa1 && c1 <= 0xc6 && flag > 0){
-			w = (c1 - 0xa1)*178 + (c - ofst1[flag-1] + ofst2[flag-1]);			
+			w = (c1 - 0xa1)*190 + (c - ofst1[flag-1] + ofst2[flag-1]);			
 			if (w >= 0 && w < uhc2_ucs_table_size) {
 				w = uhc2_ucs_table[w];
 			} else {
