@@ -1068,10 +1068,11 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 }
 
 
-ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar)
+ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered)
 {
 	Bucket *p1, *p2;
 	int result;
+	void *pData2;
 
 	IS_CONSISTENT(ht1);
 	IS_CONSISTENT(ht2);
@@ -1080,31 +1081,52 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 	if (result!=0) {
 		return result;
 	}
-	p1 = ht1->pListHead;
-	p2 = ht2->pListHead;
 
-	while (p1 && p2) {
-		if (p1->nKeyLength==0 && p2->nKeyLength==0) { /* numeric indices */
-			result = p1->h - p2->h;
-			if (result!=0) {
-				return result;
+	p1 = ht1->pListHead;
+	if (ordered) {
+		p2 = ht2->pListHead;
+	}
+
+	while (p1) {
+		if (ordered && !p2) {
+			return 1; /* That's not supposed to happen */
+		}
+		if (ordered) {
+			if (p1->nKeyLength==0 && p2->nKeyLength==0) { /* numeric indices */
+				result = p1->h - p2->h;
+				if (result!=0) {
+					return result;
+				}
+			} else { /* string indices */
+				result = p1->nKeyLength - p2->nKeyLength;
+				if (result!=0) {
+					return result;
+				}
+				result = memcmp(p1->arKey, p2->arKey, p1->nKeyLength);
+				if (result!=0) {
+					return result;
+				}
 			}
-		} else { /* string indices */
-			result = p1->nKeyLength - p2->nKeyLength;
-			if (result!=0) {
-				return result;
-			}
-			result = memcmp(p1->arKey, p2->arKey, p1->nKeyLength);
-			if (result!=0) {
-				return result;
+			pData2 = p2->pData;
+		} else {
+			if (p1->nKeyLength==0) { /* numeric index */
+				if (zend_hash_index_find(ht2, p1->h, &pData2)==FAILURE) {
+					return 1;
+				}
+			} else { /* string index */
+				if (zend_hash_find(ht2, p1->arKey, p1->nKeyLength, &pData2)==FAILURE) {
+					return 1;
+				}
 			}
 		}
-		result = compar(p1->pData, p2->pData);
+		result = compar(p1->pData, pData2);
 		if (result!=0) {
 			return result;
 		}
 		p1 = p1->pListNext;
-		p2 = p2->pListNext;
+		if (ordered) {
+			p2 = p2->pListNext;
+		}
 	}
 
 	return 0;
