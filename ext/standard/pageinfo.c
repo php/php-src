@@ -38,19 +38,17 @@
 #include <process.h>
 #endif
 
-#ifndef THREAD_SAFE
-static long page_uid   = -1;
-static long page_inode = -1;
-static long page_mtime = -1;
-#endif
+#include "ext/standard/basic_functions.h"
 
 static void _php3_statpage(void)
 {
 #if !APACHE
 	char *path;
 	struct stat sb;
+	BLS_FETCH();
 #else
 	request_rec *r;
+	BLS_FETCH();
 	SLS_FETCH();
 	
 	r = ((request_rec *) SG(server_context));
@@ -62,11 +60,11 @@ static void _php3_statpage(void)
 	   values. We can afford it, and it means we don't have to
 	   worry about resetting the static variables after every
 	   hit. */
-	page_uid   = r ->finfo.st_uid;
-	page_inode = r->finfo.st_ino;
-	page_mtime = r->finfo.st_mtime;
+	BG(page_uid)   = r ->finfo.st_uid;
+	BG(page_inode) = r->finfo.st_ino;
+	BG(page_mtime) = r->finfo.st_mtime;
 #else
-	if (page_uid == -1) {
+	if (BG(page_uid) == -1) {
 		SLS_FETCH();
 
 		path = SG(request_info).path_translated;
@@ -75,9 +73,9 @@ static void _php3_statpage(void)
 				php_error(E_WARNING, "Unable to find file:  '%s'", path);
 				return;
 			}
-			page_uid   = sb.st_uid;
-			page_inode = sb.st_ino;
-			page_mtime = sb.st_mtime;
+			BG(page_uid)   = sb.st_uid;
+			BG(page_inode) = sb.st_ino;
+			BG(page_mtime) = sb.st_mtime;
 		}
 	}
 #endif
@@ -85,8 +83,10 @@ static void _php3_statpage(void)
 
 long _php3_getuid(void)
 {
+	BLS_FETCH();
+
 	_php3_statpage();
-	return (page_uid);
+	return (BG(page_uid));
 }
 
 /* {{{ proto int getmyuid(void)
@@ -123,11 +123,13 @@ PHP_FUNCTION(getmypid)
    Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
 {
+	BLS_FETCH();
+
 	_php3_statpage();
-	if (page_inode < 0) {
+	if (BG(page_inode) < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(page_inode);
+		RETURN_LONG(BG(page_inode));
 	}
 }
 /* }}} */
@@ -136,11 +138,13 @@ PHP_FUNCTION(getmyinode)
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
+	BLS_FETCH();
+
 	_php3_statpage();
-	if (page_mtime < 0) {
+	if (BG(page_mtime) < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(page_mtime);
+		RETURN_LONG(BG(page_mtime));
 	}
 }
 /* }}} */
