@@ -386,7 +386,9 @@ class PEAR_Common extends PEAR
         $xml = $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
 
         $tar = new Archive_Tar($file, true);
-        $tar->extractList($xml);
+        if (!$tar->extractList($xml)) {
+            return $this->raiseError('could not extract the package.xml file');
+        }
         $info = $this->infoFromDescriptionFile($xml);
         unlink($xml);
         return $info;
