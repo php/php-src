@@ -473,7 +473,8 @@ ftp_chdir(ftpbuf_t *ftp, const char *dir)
 		return 0;
 	}
 
-	efree(ftp->pwd);
+	if (ftp->pwd)
+		efree(ftp->pwd);
 
 	if (!ftp_putcmd(ftp, "CWD", dir)) {
 		return 0;
@@ -494,7 +495,8 @@ ftp_cdup(ftpbuf_t *ftp)
 		return 0;
 	}
 
-	efree(ftp->pwd);
+	if (ftp->pwd)
+		efree(ftp->pwd);
 
 	if (!ftp_putcmd(ftp, "CDUP", NULL)) {
 		return 0;
