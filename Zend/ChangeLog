@@ -1,3 +1,12 @@
+2004-04-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      MFB: Revert patch for bug #27782.
+
+    * zend_execute.c
+      tests/bug27731.phpt:
+      Fixed reversed condition for error reporting.
+
 2004-03-31  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c:
