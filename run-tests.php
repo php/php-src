@@ -484,7 +484,7 @@ TEST $file
 		"-d 'disable_functions='",
 		"-d 'error_reporting=2047'",
 		"-d 'display_errors=0'",
-		"-d 'log_errors=1'",
+		"-d 'log_errors=0'",
 		"-d 'html_errors=0'",
 		"-d 'docref_root=/phpmanual/'",
 		"-d 'docref_ext=.html'",
