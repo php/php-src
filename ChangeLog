@@ -1,3 +1,66 @@
+2003-01-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/filestat.c:
+      - Change Warnings to Notices
+
+2003-01-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c:
+      CS fixes.
+
+2003-01-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/standard/browscap.c
+      ext/wddx/wddx.c:
+      Fix ZTS-ZE2 (After Cygwin now for the rest)
+
+    * ext/exif/tests/exif003.phpt
+      ext/exif/tests/exif004.phpt:
+      better to check for existance first
+
+    * ext/dbx/dbx.c
+      ext/imap/php_imap.c
+      ext/standard/browscap.c
+      ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/var_unserializer.c
+      ext/wddx/wddx.c:
+      Fix ZTS-ZE2 build
+
+2003-01-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      Forgot to include these functions in the list
+
+2003-01-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS:
+      - Fix typo
+
+2003-01-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Fixed cut'n'paste failure
+
+    * NEWS:
+      NEWS update for new iconv functions
+
+    * ext/iconv/tests/iconv_mime_encode.phpt:
+      Added test case for iconv_mime_encode()
+
+2003-01-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * (PHP_4_3)
+      ext/pgsql/pgsql.c:
+      - MFH: Fixed bug #21232 (Unresolved references to PQsetnonblocking). (Patch
+      by
+        Floyd <floyd@studiodust.com>)
+
+    * ext/pgsql/pgsql.c:
+      - Fixed bug #21232 (Unresolved references to PQsetnonblocking). (Patch by
+        Floyd <floyd@studiodust.com>)
+
 2003-01-03  Alex Waugh  <alex@alexwaugh.com>
 
     * acinclude.m4:
