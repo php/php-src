@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-/* pdflib 2.02 is subject to the ALADDIN FREE PUBLIC LICENSE. 
-   Copyright (C) 1997 Thomas Merz. */
+/* pdflib 2.02 ... 3.0x is subject to the ALADDIN FREE PUBLIC LICENSE.
+   Copyright (C) 1997-1999 Thomas Merz. 2000-2001 PDFlib GmbH */
 /* Note that there is no code from the pdflib package in this file */
 
 #include "php.h"
@@ -46,93 +46,134 @@
 
 #include "php_pdf.h"
 
-static int le_pdf_image, le_outline, le_pdf;
+static int le_pdf;
+
+/*
+ * to adopt the php way of error handling to PDFlib
+ * The image related functions in PDFlib return -1 on error
+ * but they may return 0 (FALSE) in normal cases
+ * so this offset will repair this
+ */
+#define PDFLIB_IMAGE_OFFSET	1
+#define PDFLIB_FONT_OFFSET	1
 
 function_entry pdf_functions[] = {
-	PHP_FE(pdf_set_info,			NULL)
-	PHP_FE(pdf_set_info_creator,	NULL)	/* deprecated */
-	PHP_FE(pdf_set_info_title,		NULL)	/* deprecated */
-	PHP_FE(pdf_set_info_subject,	NULL)	/* deprecated */
-	PHP_FE(pdf_set_info_author,		NULL)	/* deprecated */
-	PHP_FE(pdf_set_info_keywords,	NULL)	/* deprecated */
-	PHP_FE(pdf_open,				NULL)
-	PHP_FE(pdf_close,				NULL)
-	PHP_FE(pdf_begin_page,			NULL)
-	PHP_FE(pdf_end_page,			NULL)
-	PHP_FE(pdf_show,				NULL)
-	PHP_FE(pdf_show_xy,				NULL)
-	PHP_FE(pdf_show_boxed,			NULL)
-	PHP_FE(pdf_skew,				NULL)
-	PHP_FE(pdf_set_font,			NULL)
-	PHP_FE(pdf_set_leading,			NULL)	/* deprecated */
-	PHP_FE(pdf_set_text_rendering,	NULL)	/* deprecated */
-	PHP_FE(pdf_set_horiz_scaling,	NULL)	/* deprecated */
-	PHP_FE(pdf_set_text_rise,		NULL)	/* deprecated */
-	PHP_FE(pdf_set_text_pos,		NULL)
-	PHP_FE(pdf_set_char_spacing,	NULL)	/* deprecated */
-	PHP_FE(pdf_set_word_spacing,	NULL)	/* deprecated */
-	PHP_FE(pdf_get_font,			NULL)
-	PHP_FE(pdf_get_fontname,		NULL)
-	PHP_FE(pdf_get_fontsize,		NULL)
-	PHP_FE(pdf_continue_text,		NULL)
-	PHP_FE(pdf_stringwidth,			NULL)
-	PHP_FE(pdf_save,				NULL)
-	PHP_FE(pdf_restore,				NULL)
-	PHP_FE(pdf_translate,			NULL)
-	PHP_FE(pdf_scale,				NULL)
-	PHP_FE(pdf_rotate,				NULL)
-	PHP_FE(pdf_setflat,				NULL)
-	PHP_FE(pdf_setlinejoin,			NULL)
-	PHP_FE(pdf_setlinecap,			NULL)
-	PHP_FE(pdf_setmiterlimit,		NULL)
-	PHP_FE(pdf_setlinewidth,		NULL)
-	PHP_FE(pdf_setdash,				NULL)
-	PHP_FE(pdf_moveto,				NULL)
-	PHP_FE(pdf_lineto,				NULL)
-	PHP_FE(pdf_curveto,				NULL)
-	PHP_FE(pdf_circle,				NULL)
-	PHP_FE(pdf_arc,					NULL)
-	PHP_FE(pdf_rect,				NULL)
-	PHP_FE(pdf_closepath,			NULL)
-	PHP_FE(pdf_stroke,				NULL)
-	PHP_FE(pdf_closepath_stroke,	NULL)
-	PHP_FE(pdf_fill,				NULL)
-	PHP_FE(pdf_fill_stroke,			NULL)
-	PHP_FE(pdf_closepath_fill_stroke,	NULL)
-	PHP_FE(pdf_endpath, 			NULL)
-	PHP_FE(pdf_clip, 				NULL)
-	PHP_FE(pdf_set_parameter,		NULL)
-	PHP_FE(pdf_get_parameter,		NULL)
-	PHP_FE(pdf_set_value,			NULL)
-	PHP_FE(pdf_get_value,			NULL)
-	PHP_FE(pdf_setgray_fill,		NULL)
-	PHP_FE(pdf_setgray_stroke,		NULL)
-	PHP_FE(pdf_setgray, 			NULL)
-	PHP_FE(pdf_setrgbcolor_fill,	NULL)
-	PHP_FE(pdf_setrgbcolor_stroke,	NULL)
-	PHP_FE(pdf_setrgbcolor, 		NULL)
-	PHP_FE(pdf_add_outline,			NULL)
-	PHP_FALIAS(pdf_add_bookmark, pdf_add_outline, NULL)
-	PHP_FE(pdf_set_transition,		NULL)	/* deprecated */
-	PHP_FE(pdf_set_duration,		NULL)	/* deprecated */
-	PHP_FE(pdf_open_jpeg,			NULL)	/* deprecated */
-	PHP_FE(pdf_open_tiff,			NULL)	/* deprecated */
-	PHP_FE(pdf_open_png,			NULL)	/* deprecated */
-	PHP_FE(pdf_open_gif,			NULL)	/* deprecated */
-	PHP_FE(pdf_open_image_file,		NULL)
+	/* sorry for sorting this stuff like the pdflib manual,
+	   but this helps me to see what is done :) RJS 
+	   I'll try to avoid rearanging the sources below that => new functions to the end */
+	PHP_FE(pdf_new, NULL)		/* new function */
+	PHP_FE(pdf_delete, NULL)	/* new function */
+	PHP_FE(pdf_open_file, NULL)	/* new function */
+	PHP_FE(pdf_get_buffer, NULL)	/* new function */
+	PHP_FE(pdf_close, NULL)
+	PHP_FE(pdf_begin_page, NULL)
+	PHP_FE(pdf_end_page, NULL)
+	PHP_FE(pdf_get_value, NULL)
+	PHP_FE(pdf_set_value, NULL)
+	PHP_FE(pdf_get_parameter, NULL)
+	PHP_FE(pdf_set_parameter, NULL)
+	PHP_FE(pdf_findfont, NULL)	/* new function */
+	PHP_FE(pdf_setfont, NULL)	/* new function */
+	PHP_FE(pdf_show, NULL)
+	PHP_FE(pdf_show_xy, NULL)
+	PHP_FE(pdf_continue_text, NULL)
+	PHP_FE(pdf_show_boxed, NULL)
+	PHP_FE(pdf_stringwidth, NULL)	/* new parameters: [int font, float size] */
+	PHP_FE(pdf_set_text_pos, NULL)
+	PHP_FE(pdf_setdash, NULL)
+	PHP_FE(pdf_setpolydash, NULL)	/* new function: not yet finished */
+	PHP_FE(pdf_setflat, NULL)
+	PHP_FE(pdf_setlinejoin, NULL)
+	PHP_FE(pdf_setlinecap, NULL)
+	PHP_FE(pdf_setmiterlimit, NULL)
+	PHP_FE(pdf_setlinewidth, NULL)
+	PHP_FE(pdf_save, NULL)
+	PHP_FE(pdf_restore, NULL)
+	PHP_FE(pdf_translate, NULL)
+	PHP_FE(pdf_scale, NULL)
+	PHP_FE(pdf_rotate, NULL)
+	PHP_FE(pdf_skew, NULL)
+	PHP_FE(pdf_concat, NULL)	/* new function */
+	PHP_FE(pdf_moveto, NULL)
+	PHP_FE(pdf_lineto, NULL)
+	PHP_FE(pdf_curveto, NULL)
+	PHP_FE(pdf_circle, NULL)
+	PHP_FE(pdf_arc, NULL)
+	PHP_FE(pdf_rect, NULL)
+	PHP_FE(pdf_closepath, NULL)
+	PHP_FE(pdf_stroke, NULL)
+	PHP_FE(pdf_closepath_stroke, NULL)
+	PHP_FE(pdf_fill, NULL)
+	PHP_FE(pdf_fill_stroke, NULL)
+	PHP_FE(pdf_closepath_fill_stroke, NULL)
+	PHP_FE(pdf_clip, NULL)
+	PHP_FE(pdf_endpath, NULL)
+	PHP_FE(pdf_setgray_fill, NULL)
+	PHP_FE(pdf_setgray_stroke, NULL)
+	PHP_FE(pdf_setgray, NULL)
+	PHP_FE(pdf_setrgbcolor_fill, NULL)
+	PHP_FE(pdf_setrgbcolor_stroke, NULL)
+	PHP_FE(pdf_setrgbcolor, NULL)
+	PHP_FE(pdf_open_image_file, NULL)  /* new parameters: [char *stringpram, int intparam] */
+	PHP_FE(pdf_open_CCITT, NULL)	/* new function */
+	PHP_FE(pdf_open_image, NULL)	/* new function */
+	PHP_FE(pdf_close_image, NULL)
+	PHP_FE(pdf_place_image, NULL)
+	PHP_FE(pdf_add_bookmark, NULL)
+	PHP_FE(pdf_set_info, NULL)
+	PHP_FE(pdf_attach_file, NULL)	/* new function */
+	PHP_FE(pdf_add_note, NULL)	/* new function */
+	PHP_FE(pdf_add_pdflink, NULL)
+	PHP_FE(pdf_add_locallink, NULL)	/* new function */
+	PHP_FE(pdf_add_launchlink, NULL)/* new function */
+	PHP_FE(pdf_add_weblink, NULL)
+	PHP_FE(pdf_set_border_style, NULL)
+	PHP_FE(pdf_set_border_color, NULL)
+	PHP_FE(pdf_set_border_dash, NULL)
+
+	/* End of the official PDFLIB V3.x API */
+
+	/* aliases for compatibility reasons */
+	PHP_FALIAS(pdf_add_outline, pdf_add_bookmark, NULL)
+
+	/* old font handling */
+	PHP_FE(pdf_set_font, NULL)		/* deprecated */
+	PHP_FE(pdf_get_font, NULL)		/* deprecated */
+	PHP_FE(pdf_get_fontname, NULL)		/* deprecated */
+	PHP_FE(pdf_get_fontsize, NULL)		/* deprecated */
+
+	/* old way of starting a PDF document */
+	PHP_FE(pdf_open, NULL)			/* deprecated */
+
+	/* old stuff for setting infos */
+	PHP_FE(pdf_set_info_creator, NULL)	/* deprecated */
+	PHP_FE(pdf_set_info_title, NULL)	/* deprecated */
+	PHP_FE(pdf_set_info_subject, NULL)	/* deprecated */
+	PHP_FE(pdf_set_info_author, NULL)	/* deprecated */
+	PHP_FE(pdf_set_info_keywords, NULL)	/* deprecated */
+	PHP_FE(pdf_set_leading, NULL)   	/* deprecated */
+	PHP_FE(pdf_set_text_rendering, NULL)	/* deprecated */
+	PHP_FE(pdf_set_horiz_scaling, NULL)	/* deprecated */
+	PHP_FE(pdf_set_text_rise, NULL)		/* deprecated */
+	PHP_FE(pdf_set_char_spacing, NULL)	/* deprecated */
+	PHP_FE(pdf_set_word_spacing, NULL)	/* deprecated */
+	PHP_FE(pdf_set_transition, NULL)	/* deprecated */
+	PHP_FE(pdf_set_duration, NULL)		/* deprecated */
+	PHP_FE(pdf_get_image_height, NULL)	/* deprecated */
+	PHP_FE(pdf_get_image_width, NULL)	/* deprecated */
+
+	/* old stuff for opening images */
+	PHP_FE(pdf_open_jpeg, NULL)		/* deprecated */
+	PHP_FE(pdf_open_tiff, NULL)		/* deprecated */
+	PHP_FE(pdf_open_png, NULL)		/* deprecated */
+	PHP_FE(pdf_open_gif, NULL)		/* deprecated */
+
+	/* some more stuff for compatibility */
+	PHP_FE(pdf_add_annotation, NULL)
 #if HAVE_LIBGD13
-	PHP_FE(pdf_open_memory_image,	NULL)
+	PHP_FE(pdf_open_memory_image, NULL)
 #endif
-	PHP_FE(pdf_close_image,			NULL)
-	PHP_FE(pdf_place_image,			NULL)
-	PHP_FE(pdf_add_weblink,			NULL)
-	PHP_FE(pdf_add_pdflink,			NULL)
-	PHP_FE(pdf_add_annotation,		NULL)
-	PHP_FE(pdf_set_border_style,	NULL)
-	PHP_FE(pdf_set_border_color,	NULL)
-	PHP_FE(pdf_set_border_dash,		NULL)
-	PHP_FE(pdf_get_image_height,	NULL)
-	PHP_FE(pdf_get_image_width,		NULL)
+
 	{NULL, NULL, NULL}
 };
 
@@ -160,7 +201,9 @@ static void _free_pdf_image(zend_rsrc_list_entry *rsrc)
 static void _free_pdf_doc(zend_rsrc_list_entry *rsrc)
 {
 	PDF *pdf = (PDF *)rsrc->ptr;
-	PDF_close(pdf);
+	/* RJS: TODO:
+	   check whether pdf-Pointer is still valid, before pdf_delete()
+	   + remove php-resource */
 	PDF_delete(pdf);
 }
 
@@ -174,6 +217,14 @@ static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 {
 	switch (type){
 		case PDF_NonfatalError:
+			/*
+			 * PDFlib warings should be visible to the user
+			 * If he decides to live with PDFlib warnings
+			 * he may user the PDFlib function
+			 * pdf_set_parameter($p, "warning" 0) to switch off
+			 * the warnings inside PDFlib
+			 */
+			php_error(E_WARNING,"Internal PDFlib warning: %s", shortmsg);
 			return;
 		case PDF_MemoryError: /* give up in all other cases */
 		case PDF_IOError:
@@ -188,7 +239,7 @@ static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 		case PDF_UnknownError:
 		default:
 			if (p !=NULL) PDF_delete(p); /* clean up PDFlib */
-			php_error(E_ERROR,"Internal pdflib error: %s", shortmsg);
+			php_error(E_ERROR,"PDFlib error: %s", shortmsg);
 		}
 }
 
@@ -222,27 +273,25 @@ PHP_MINFO_FUNCTION(pdf)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PDF Support", "enabled" );
-	php_info_print_table_row(2, "PDFLib Version", tmp );
+	php_info_print_table_row(2, "PDFlib GmbH Version", tmp );
 	php_info_print_table_row(2, "CJK Font Support", "yes" );
-#ifdef PDF_OPEN_MEM_SUPPORTED
 	php_info_print_table_row(2, "In-memory PDF Creation Support", "yes" );
-#else
-	php_info_print_table_row(2, "In-memory PDF Creation Support", "no" );
-#endif
 	php_info_print_table_end();
 
 }
 
 PHP_MINIT_FUNCTION(pdf)
 {
-	le_pdf_image = zend_register_list_destructors_ex(_free_pdf_image, NULL, "pdf image", module_number);
-	le_outline = zend_register_list_destructors_ex(_free_outline, NULL, "pdf outline", module_number);
 	le_pdf = zend_register_list_destructors_ex(_free_pdf_doc, NULL, "pdf document", module_number);
+
+	/* this does something like setlocale("C", ...) in PDFlib 3.x */
+	PDF_boot();
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(pdf)
 {
+	PDF_shutdown();
 	return SUCCESS;
 }
 
@@ -326,7 +375,9 @@ PHP_FUNCTION(pdf_set_info_keywords) {
 
 
 /* {{{ proto int pdf_open([int filedesc])
-   Opens a new pdf document. If filedesc is NULL, document is created in memory. This is not yet fully supported.*/
+   Opens a new pdf document. If filedesc is NULL, document is created in memory.
+   This is the old interface, only for compatibility 
+   use pdf_new + pdf_open_file instead */
 PHP_FUNCTION(pdf_open) 
 {
 	zval **file;
@@ -337,18 +388,14 @@ PHP_FUNCTION(pdf_open)
 	if(argc > 1) 
 		WRONG_PARAM_COUNT;
 	if (argc != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
-#if defined PDF_OPEN_MEM_SUPPORTED
 		fp = NULL;
-#else
-		php_error(E_WARNING, "Your version of pdflib does not support in memory creation of PDF documents. You have to pass a file handle to pdf_open()");
-		WRONG_PARAM_COUNT;
-#endif
 	} else {
 		ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
 		/* XXX should do a zend_list_addref for <fp> here! */
 	}
 
 	pdf = PDF_new2(custom_errorhandler, pdf_emalloc, pdf_realloc, pdf_efree, NULL);
+	PDF_set_parameter(pdf, "imagewarning", "true");
 
 	if(fp) {
 		if (PDF_open_fp(pdf, fp) < 0) RETURN_FALSE;
@@ -374,7 +421,8 @@ PHP_FUNCTION(pdf_close)
 
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
 
-	zend_list_delete((*arg1)->value.lval);
+	PDF_close(pdf);
+
 	RETURN_TRUE;
 }
 
@@ -533,7 +581,7 @@ PHP_FUNCTION(pdf_set_font)
 	convert_to_string_ex(arg4);
 
 	font = PDF_findfont(pdf, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg4), embed);
-	if (font < 0) {
+	if (font == -1) {
 		php_error(E_WARNING,"Font %s not found", Z_STRVAL_PP(arg2));
 		RETURN_FALSE;
 	}
@@ -598,20 +646,27 @@ PHP_FUNCTION(pdf_get_value)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, argv[0], -1, "pdf document", le_pdf);
 
 	convert_to_string_ex(argv[1]);
+	if(argc == 3)
+	    convert_to_double_ex(argv[2]);
 
-	if(0 == (strncmp(Z_STRVAL_PP(argv[1]), "image", 5))) {
-		int *pdf_image;
+	if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "imagewidth"))) {
 		if(argc < 3) WRONG_PARAM_COUNT;
-
-		ZEND_FETCH_RESOURCE(pdf_image, int *, argv[2], -1, "pdf image", le_pdf_image);
-		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), *pdf_image);
-
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), Z_DVAL_PP(argv[2])-PDFLIB_IMAGE_OFFSET);
+	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "imageheight"))) {
+		if(argc < 3) WRONG_PARAM_COUNT;
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), Z_DVAL_PP(argv[2])-PDFLIB_IMAGE_OFFSET);
+	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "resx"))) {
+		if(argc < 3) WRONG_PARAM_COUNT;
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), Z_DVAL_PP(argv[2])-PDFLIB_IMAGE_OFFSET);
+	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "resy"))) {
+		if(argc < 3) WRONG_PARAM_COUNT;
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), Z_DVAL_PP(argv[2])-PDFLIB_IMAGE_OFFSET);
+	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "font"))) {
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), 0.0)+PDFLIB_IMAGE_OFFSET;
 	} else {
-
 		if(argc < 3) {
-			value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), 0.0);
+		    value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), 0.0);
 		} else {
-			convert_to_double_ex(argv[2]);
 			value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), Z_DVAL_PP(argv[2]));
 		}
 	}
@@ -635,7 +690,7 @@ PHP_FUNCTION(pdf_get_font)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
 	
 	font = (int) PDF_get_value(pdf, "font", 0);
-	RETURN_LONG(font);
+	RETURN_LONG(font+PDFLIB_FONT_OFFSET);
 }
 /* }}} */
 
@@ -764,22 +819,42 @@ PHP_FUNCTION(pdf_continue_text)
 }
 /* }}} */
 
-/* {{{ proto double pdf_stringwidth(int pdfdoc, string text)
+/* {{{ proto double pdf_stringwidth(int pdfdoc, string text [, int font, double size])
    Returns width of text in current font*/
 PHP_FUNCTION(pdf_stringwidth)
 {
-	zval **arg1, **arg2;
-	double width;
+	zval **arg1, **arg2, **arg3, **arg4;
+	int font;
+	double width, size;
 	PDF *pdf;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	switch (ZEND_NUM_ARGS()) {
+	case 2:
+		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+			WRONG_PARAM_COUNT;
+		break;
+	case 4:
+		if (zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(arg3);
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
 
 	convert_to_string_ex(arg2);
-	width = (double) PDF_stringwidth(pdf, Z_STRVAL_PP(arg2), PDF_get_value(pdf, "font", 0), PDF_get_value(pdf, "fontsize", 0));
+	if (ZEND_NUM_ARGS() == 2) {
+	    font = PDF_get_value(pdf, "font", 0)+PDFLIB_FONT_OFFSET;
+	    size = PDF_get_value(pdf, "fontsize", 0);
+	} else {
+	    convert_to_long_ex(arg3);
+	    font = Z_LVAL_PP(arg3);
+	    convert_to_double_ex(arg4);
+	    size = Z_DVAL_PP(arg4);
+	}
+	width = (double) PDF_stringwidth(pdf, Z_STRVAL_PP(arg2), font-PDFLIB_FONT_OFFSET, size);
 	RETURN_DOUBLE((double) width);
 }
 /* }}} */
@@ -913,10 +988,12 @@ PHP_FUNCTION(pdf_setflat)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
 
 	convert_to_double_ex(arg2);
+	/* pdflib will do this for you, will throw some exception
 	if((Z_LVAL_PP(arg2) > 100) && (Z_LVAL_PP(arg2) < 0)) {
 		php_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
 		RETURN_FALSE;
 	}
+	*/
 
 	PDF_setflat(pdf, (float) Z_DVAL_PP(arg2));
 	RETURN_TRUE;
@@ -937,10 +1014,12 @@ PHP_FUNCTION(pdf_setlinejoin)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
 
 	convert_to_long_ex(arg2);
+	/* pdflib will do this for you, will throw some exception
 	if((Z_LVAL_PP(arg2) > 2) && (Z_LVAL_PP(arg2) < 0)) {
 		php_error(E_WARNING,"Parameter of pdf_setlinejoin() must be between 0 and 2");
 		RETURN_FALSE;
 	}
+	*/
 
 	PDF_setlinejoin(pdf, Z_LVAL_PP(arg2));
 	RETURN_TRUE;
@@ -961,10 +1040,12 @@ PHP_FUNCTION(pdf_setlinecap)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
 
 	convert_to_long_ex(arg2);
+	/* pdflib will do this for you, will throw some exception
 	if((Z_LVAL_PP(arg2) > 2) && (Z_LVAL_PP(arg2) < 0)) {
 		php_error(E_WARNING,"Parameter of pdf_setlinecap() must be > 0 and <= 2");
 		RETURN_FALSE;
 	}
+	*/
 
 	PDF_setlinecap(pdf, Z_LVAL_PP(arg2));
 	RETURN_TRUE;
@@ -985,10 +1066,12 @@ PHP_FUNCTION(pdf_setmiterlimit)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
 
 	convert_to_double_ex(arg2);
+	/* pdflib will do this for you, will throw some exception
 	if(Z_DVAL_PP(arg2) < 1) {
 		php_error(E_WARNING,"Parameter of pdf_setmiterlimit() must be >= 1");
 		RETURN_FALSE;
 	}
+	*/
 
 	PDF_setmiterlimit(pdf, (float) Z_DVAL_PP(arg2));
 	RETURN_TRUE;
@@ -1342,11 +1425,6 @@ PHP_FUNCTION(pdf_set_parameter)
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
 
-    if (Z_STRVAL_PP(arg2) == "compatibility") {
-		php_error(E_ERROR,"Compatibility modes not supported at this time");
-		RETURN_FALSE;
-	}
-	
 	PDF_set_parameter(pdf, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3));
 	RETURN_TRUE;
 }
@@ -1499,12 +1577,12 @@ PHP_FUNCTION(pdf_setrgbcolor)
 }
 /* }}} */
 
-/* {{{ proto int pdf_add_outline(int pdfdoc, string text [, int parent, int open]);
+/* {{{ proto int pdf_add_bookmark(int pdfdoc, string text [, int parent, int open]);
    Add bookmark for current page */
-PHP_FUNCTION(pdf_add_outline)
+PHP_FUNCTION(pdf_add_bookmark)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
-	int *outline, *parent, parentid, open, id;
+	int parentid, open, id;
 	PDF *pdf;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1532,12 +1610,8 @@ PHP_FUNCTION(pdf_add_outline)
 	convert_to_string_ex(arg2);
 
 	if (ZEND_NUM_ARGS() > 2) {
-		ZEND_FETCH_RESOURCE(parent, int *, arg3, -1, "pdf outline", le_outline);
-		if (parent) {
-			parentid = *parent;
-		} else {
-			parentid = 0;
-		}
+		convert_to_long_ex(arg3);
+		parentid = Z_LVAL_PP(arg3);
 
 		if (ZEND_NUM_ARGS() > 3) {
 			convert_to_long_ex(arg4);
@@ -1550,10 +1624,10 @@ PHP_FUNCTION(pdf_add_outline)
 		open = 0;
 	}
 
+	/* will never return 0 */
 	id = PDF_add_bookmark(pdf, Z_STRVAL_PP(arg2), parentid, open);
-	outline  = (int *) emalloc(sizeof(int));
-	*outline = id;
-	ZEND_REGISTER_RESOURCE(return_value, outline, le_outline);
+
+	RETURN_LONG(id);
 }
 /* }}} */
 
@@ -1647,14 +1721,7 @@ static void _php_pdf_open_image(INTERNAL_FUNCTION_PARAMETERS, char *type)
         
 	pdf_image = PDF_open_image_file(pdf, type, image, "", 0);
 
-	if(pdf_image < 0) {
-		php_error(E_WARNING, "Could not open image");
-		RETURN_FALSE;
-	}
-
-	img = (int *) emalloc(sizeof(int));
-	*img = pdf_image;
-	ZEND_REGISTER_RESOURCE(return_value, img, le_pdf_image);
+	RETURN_LONG(pdf_image+PDFLIB_IMAGE_OFFSET);
 }
 
 /* {{{ proto int pdf_open_gif(int pdf, string giffile)
@@ -1689,16 +1756,25 @@ PHP_FUNCTION(pdf_open_tiff)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_image_file(int pdf, string type, string file)
+/* {{{ proto int pdf_open_image_file(int pdf, string type, string file, string stringparam, int intparam)
    Opens an image file of the given type and returns an image for placement in a pdf document */
 PHP_FUNCTION(pdf_open_image_file)
 {
-	zval **arg1, **arg2, **arg3;
+	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	PDF *pdf;
-	int pdf_image, *img;
+	int pdf_image, argc;
 	char *image;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	switch ((argc = ZEND_NUM_ARGS())) {
+	case 3:
+		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+			WRONG_PARAM_COUNT;
+		break;
+	case 5:
+		if (zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE)
+			WRONG_PARAM_COUNT;
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1713,16 +1789,21 @@ PHP_FUNCTION(pdf_open_image_file)
 	image = Z_STRVAL_PP(arg3);
 #endif  
 
-	pdf_image = PDF_open_image_file(pdf, Z_STRVAL_PP(arg2), image, "", 0);
-
-	if(pdf_image < 0) {
-		php_error(E_WARNING, "Could not open image: %s", image);
-		RETURN_FALSE;
+	if (argc == 3) {
+		pdf_image = PDF_open_image_file(pdf, Z_STRVAL_PP(arg2), image, "", 0);
+	} else {
+	    convert_to_string_ex(arg4);
+	    convert_to_long_ex(arg5);
+		pdf_image = PDF_open_image_file(pdf, Z_STRVAL_PP(arg2), image, Z_STRVAL_PP(arg4), Z_LVAL_PP(arg5));
 	}
 
-	img = (int *) emalloc(sizeof(int));
-	*img = pdf_image;
-	ZEND_REGISTER_RESOURCE(return_value, img, le_pdf_image);
+	if (pdf_image == -1) {
+	    /* pdflib will do this for you, will throw some exception
+	    php_error(E_WARNING, "Could not open image: %s", image);
+	    */
+	    RETURN_FALSE;
+	}
+	RETURN_LONG(pdf_image+PDFLIB_IMAGE_OFFSET);
 
 }
 /* }}} */
@@ -1765,35 +1846,33 @@ PHP_FUNCTION(pdf_open_memory_image)
 	efree(buffer);
 
 	if(pdf_image == -1) {
+		/* pdflib will do this for you, will throw some exception
 		php_error(E_WARNING, "Could not open image");
+		*/
 		efree(buffer);
 		RETURN_FALSE;
 	}
 
-	img = (int *) emalloc(sizeof(int));
-	*img = pdf_image;
-	ZEND_REGISTER_RESOURCE(return_value, img, le_pdf_image);
+	RETURN_LONG(pdf_image+PDFLIB_IMAGE_OFFSET);
 }
 /* }}} */
 #endif /* HAVE_LIBGD13 */
 
-/* {{{ proto void pdf_close_image(int pdfimage)
+/* {{{ proto void pdf_close_image(int *pdf, int pdfimage)
    Closes the pdf image */
 PHP_FUNCTION(pdf_close_image)
 {
 	zval **arg1, **arg2;
 	PDF *pdf;
-	int *pdf_image;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
-	ZEND_FETCH_RESOURCE(pdf_image, int *, arg2, -1, "pdf image", le_pdf_image);
+	convert_to_long_ex(arg2);
 
-	PDF_close_image(pdf, *pdf_image);
-	RETURN_TRUE;
+	PDF_close_image(pdf, Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
 }
 /* }}} */
 
@@ -1803,19 +1882,19 @@ PHP_FUNCTION(pdf_place_image)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	PDF *pdf;
-	int *pdf_image;
 
 	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
-	ZEND_FETCH_RESOURCE(pdf_image, int *, arg2, -1, "pdf image", le_pdf_image);
 
+	convert_to_long_ex(arg2);
 	convert_to_double_ex(arg3);
 	convert_to_double_ex(arg4);
 	convert_to_double_ex(arg5);
-	PDF_place_image(pdf, *pdf_image, (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4), Z_DVAL_PP(arg5));
+
+	PDF_place_image(pdf, Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET, (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4), Z_DVAL_PP(arg5));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1826,16 +1905,16 @@ PHP_FUNCTION(pdf_get_image_width)
 {
 	zval **arg1, **arg2;
 	PDF *pdf;
-	int *pdf_image, width;
+	int width;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
-	ZEND_FETCH_RESOURCE(pdf_image, int *, arg2, -1, "pdf image", le_pdf_image);
+	convert_to_long_ex(arg2);
 
-	width = PDF_get_value(pdf, "imagewidth", *pdf_image);
+	width = PDF_get_value(pdf, "imagewidth", Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
 	RETURN_LONG(width);
 }
 /* }}} */
@@ -1846,16 +1925,16 @@ PHP_FUNCTION(pdf_get_image_height)
 {
 	zval **arg1, **arg2;
 	PDF *pdf;
-	int *pdf_image, height;
+	int height;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
-	ZEND_FETCH_RESOURCE(pdf_image, int *, arg2, -1, "pdf image", le_pdf_image);
+	convert_to_long_ex(arg2);
 
-	height = PDF_get_value(pdf, "imageheight", *pdf_image);
+	height = PDF_get_value(pdf, "imageheight", Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
 	RETURN_LONG(height);
 }
 /* }}} */
@@ -1981,7 +2060,7 @@ PHP_FUNCTION(pdf_set_border_dash)
 /* }}} */
 
 /* {{{ proto void pdf_add_annotation(int pdfdoc, double xll, double yll, double xur, double xur, string title, string text)
-   Sets annotation */
+   Sets annotation (depreciated use pdf_add_note instead)*/
 PHP_FUNCTION(pdf_add_annotation)
 {
 	zval **argv[7];
@@ -2007,6 +2086,481 @@ PHP_FUNCTION(pdf_add_annotation)
 					  Z_STRVAL_PP(argv[6]),
 					  Z_STRVAL_PP(argv[5]),
 					  "note", 1);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* RJS: START OF NEW CODE */
+
+/* {{{ proto PDF *pdf_new()
+    Create a new PDF object */
+PHP_FUNCTION(pdf_new) {
+	PDF *pdf;
+
+	pdf = PDF_new2(custom_errorhandler, pdf_emalloc, pdf_realloc, pdf_efree, NULL);
+	PDF_set_parameter(pdf, "imagewarning", "true");
+
+	ZEND_REGISTER_RESOURCE(return_value, pdf, le_pdf);
+}
+
+/* }}} */
+
+/* {{{ proto void pdf_delete(int pdfdoc)
+
+   Deletes the pdf object */
+PHP_FUNCTION(pdf_delete) {
+	zval **arg1;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	PDF_delete(pdf);
+	zend_list_delete(Z_LVAL_PP(arg1));
+
+	RETURN_TRUE;
+}
+
+/* }}} */
+
+/* {{{ proto int pdf_open_file(int pdfdoc [, char *filename])
+
+   Opens a new pdf document. If filename is NULL, document is created in memory.
+   This is not yet fully supported. */
+
+PHP_FUNCTION(pdf_open_file) {
+	zval **arg1, **arg2;
+	int pdf_file;
+	char *filename;
+	int argc;
+	PDF *pdf;
+
+	if((argc = ZEND_NUM_ARGS()) > 2)
+		WRONG_PARAM_COUNT;
+
+	if (argc == 1) {
+		if (zend_get_parameters_ex(1, &arg1) == FAILURE)
+			WRONG_PARAM_COUNT;
+	} else {
+		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+			WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	if (argc == 2) {
+		convert_to_string_ex(arg2);
+#ifdef VIRTUAL_DIR
+		virtual_filepath(Z_STRVAL_PP(arg2), &filename);
+#else
+		filename = Z_STRVAL_PP(arg2);
+#endif
+		pdf_file = PDF_open_file(pdf, filename);
+	} else {
+		/* open in memory */
+		pdf_file = PDF_open_file(pdf, "");
+	}
+
+	if (pdf_file == -1)
+	    RETURN_FALSE;
+
+	RETURN_TRUE;
+}
+
+/* }}} */
+
+/* {{{ proto const char *pdf_get_buffer(int pdfdoc)
+
+   Fetch the full buffer containig the generated PDF data */
+PHP_FUNCTION(pdf_get_buffer) {
+	zval **arg1;
+	long size;
+	PDF *pdf;
+	const char *buffer;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	buffer = PDF_get_buffer(pdf, &size);
+
+	RETURN_STRINGL((char *)buffer, size, 0);
+}
+
+/* }}} */
+
+/* {{{ proto int pdf_findfont(int pdfdoc, string fontname, string encoding [, int embed])
+   Prepare the font fontname for later use with pdf_setfont */
+PHP_FUNCTION(pdf_findfont) {
+	zval **arg1, **arg2, **arg3, **arg4;
+	int id, embed, font;
+	const char *fontname, *encoding;
+	PDF *pdf;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 3:
+		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		embed = 0;
+		break;
+	case 4:
+		if (zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(arg4);
+		embed = Z_LVAL_PP(arg4);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_string_ex(arg2);
+	fontname = Z_STRVAL_PP(arg2);
+
+	convert_to_string_ex(arg3);
+	encoding = Z_STRVAL_PP(arg3);
+
+	font = PDF_findfont(pdf, fontname, encoding, embed);
+	if (font == -1) {
+		/* pdflib will do this for you, will throw some exception
+		php_error(E_WARNING,"Font %s not found", fontname);
+		*/
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(font+PDFLIB_FONT_OFFSET);
+}
+/* }}} */
+
+/* {{{ proto void pdf_setfont(int pdfdoc, int font, float fontsize)
+   Set the curren font in the fiven fontsize */
+PHP_FUNCTION(pdf_setfont) {
+	zval **arg1, **arg2, **arg3;
+	int font, argc;
+	float fontsize;
+	PDF *pdf;
+
+	if(argc != 3)
+		WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_long_ex(arg2);
+	font = Z_LVAL_PP(arg2);
+
+	convert_to_double_ex(arg3);
+	fontsize = (float)Z_DVAL_PP(arg3);
+
+	PDF_setfont(pdf, font+PDFLIB_FONT_OFFSET, fontsize);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_setpolydash(int pdfdoc, double *darray)
+   Sets more complicated dash pattern 
+   RJS: TODO: not yet working, dont know how to handle this pointer to an array ... 
+   maybe we have to ommit this from the interface ??? */
+PHP_FUNCTION(pdf_setpolydash) {
+	zval **arg1, **arg2;
+	HashTable *array;
+	int len, i;
+	float *darray;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_array_ex(arg2);
+	array = Z_ARRVAL_PP(arg2);
+	len = zend_hash_num_elements(array);
+
+	if (NULL == (darray = emalloc(len * sizeof(double)))) {
+	    RETURN_FALSE;
+	}
+	zend_hash_internal_pointer_reset(array);
+	for (i=0; i<len; i++) {
+	    zval *keydata, **keydataptr;
+
+	    zend_hash_get_current_data(array, (void **) &keydataptr);
+	    keydata = *keydataptr;
+	    if (keydata->type == IS_DOUBLE) {
+		darray[i] = (float) keydata->value.dval;
+	    } else if (keydata->type == IS_LONG) {
+		darray[i] = (float) keydata->value.lval;
+	    } else {
+		php_error(E_WARNING,"PDFlib set_polydash: illegal darray value");
+	    }
+	    zend_hash_move_forward(array);
+	}
+
+	PDF_setpolydash(pdf, darray, len);
+
+	efree(darray);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_concat(int pdf, double a, double b, double c, double d, double e, double f)
+   Concatenate a matrix to the curren transformation matrix for text and graphics */
+PHP_FUNCTION(pdf_concat) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_double_ex(arg6);
+
+	PDF_concat(pdf,
+	    (float) Z_DVAL_PP(arg2),
+	    (float) Z_DVAL_PP(arg3),
+	    (float) Z_DVAL_PP(arg4),
+	    (float) Z_DVAL_PP(arg5),
+	    (float) Z_DVAL_PP(arg6),
+	    (float) Z_DVAL_PP(arg7));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int pdf_open_CCITT(int pdf, string filename, int width, int height, int BitReverse, int K, Int Blackls1)
+   Open an Image file with raw CCITTG3 or G4 compresed bitmap data */
+PHP_FUNCTION(pdf_open_CCITT) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
+	PDF *pdf;
+	int pdf_image, *img;
+	char *image;
+
+	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_string_ex(arg2);
+#ifdef VIRTUAL_DIR
+	virtual_filepath(Z_STRVAL_PP(arg2), &image);
+#else
+	image = Z_STRVAL_PP(arg2);
+#endif  
+
+	convert_to_long_ex(arg3);
+	convert_to_long_ex(arg4);
+	convert_to_long_ex(arg5);
+	convert_to_long_ex(arg6);
+	convert_to_long_ex(arg7);
+
+	pdf_image = PDF_open_CCITT(pdf,
+	    image,
+	    Z_LVAL_PP(arg3),
+	    Z_LVAL_PP(arg4),
+	    Z_LVAL_PP(arg5),
+	    Z_LVAL_PP(arg6),
+	    Z_LVAL_PP(arg7));
+
+	RETURN_LONG(pdf_image+PDFLIB_IMAGE_OFFSET);
+}
+/* }}} */
+
+/* {{{ proto int pdf_open_image(int pdf, string type, string source,
+	string data, long length, int width, int height, int components,
+	int bpc, string params)
+   Opens an image of the given type and returns an image for placement in a pdf document */
+PHP_FUNCTION(pdf_open_image) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10;
+	PDF *pdf;
+	int pdf_image, *img;
+	const char *image;
+
+	if (ZEND_NUM_ARGS() != 10 || zend_get_parameters_ex(10, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_string_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_string_ex(arg4);
+	convert_to_long_ex(arg5);
+	convert_to_long_ex(arg6);
+	convert_to_long_ex(arg7);
+	convert_to_long_ex(arg8);
+	convert_to_long_ex(arg9);
+	convert_to_string_ex(arg10);
+
+#ifdef VIRTUAL_DIR
+	virtual_filepath(Z_STRVAL_PP(arg4), &image);
+#else
+	image = Z_STRVAL_PP(arg4);
+#endif  
+
+	pdf_image = PDF_open_image(pdf,
+		Z_STRVAL_PP(arg2),
+		Z_STRVAL_PP(arg3),
+		image,
+		Z_LVAL_PP(arg5),
+		Z_LVAL_PP(arg6),
+		Z_LVAL_PP(arg7),
+		Z_LVAL_PP(arg8),
+		Z_LVAL_PP(arg9),
+		Z_STRVAL_PP(arg10));
+
+	RETURN_LONG(pdf_image+PDFLIB_IMAGE_OFFSET);
+}
+/* }}} */
+
+/* {{{ proto void pdf_attach_file(int pdf, double lly, double lly,
+	double urx, double ury, string filename,
+	string description, string author, string mimetype, string icon)
+   Add a file attachment annotation at the rectangle specified by his lower left and upper right corners */
+PHP_FUNCTION(pdf_attach_file) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10;
+	PDF *pdf;
+	int attach;
+
+	if (ZEND_NUM_ARGS() != 10 || zend_get_parameters_ex(10, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_long_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_long_ex(arg4);
+	convert_to_long_ex(arg5);
+	convert_to_string_ex(arg6);
+	convert_to_string_ex(arg7);
+	convert_to_string_ex(arg8);
+	convert_to_string_ex(arg9);
+	convert_to_string_ex(arg10);
+
+	PDF_attach_file(pdf,
+		(float) Z_DVAL_PP(arg2),
+		(float) Z_DVAL_PP(arg3),
+		(float) Z_DVAL_PP(arg4),
+		(float) Z_DVAL_PP(arg5),
+		Z_STRVAL_PP(arg6),
+		Z_STRVAL_PP(arg7),
+		Z_STRVAL_PP(arg8),
+		Z_STRVAL_PP(arg9),
+		Z_STRVAL_PP(arg10));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_add_note(int pdfdoc, double llx, double lly, double urx, double ury, string contents, string title, string icon, int open)
+   Sets annotation */
+PHP_FUNCTION(pdf_add_note) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 9 || zend_get_parameters_ex(9, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_string_ex(arg6);
+	convert_to_string_ex(arg7);
+	convert_to_string_ex(arg8);
+	convert_to_long_ex(arg9);
+
+	PDF_add_note(pdf,
+		 (float) Z_DVAL_PP(arg2),
+		 (float) Z_DVAL_PP(arg3),
+		 (float) Z_DVAL_PP(arg4),
+		 (float) Z_DVAL_PP(arg5),
+		 Z_STRVAL_PP(arg6),
+		 Z_STRVAL_PP(arg7),
+		 Z_STRVAL_PP(arg8),
+		 Z_LVAL_PP(arg9));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_add_locallink(int pdfdoc, double llx, double lly, double urx, double ury, int page, string dest)
+   Adds link to web resource */
+PHP_FUNCTION(pdf_add_locallink) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_long_ex(arg6);
+	convert_to_string_ex(arg7);
+
+	PDF_add_locallink(pdf,
+		(float) Z_DVAL_PP(arg2),
+		(float) Z_DVAL_PP(arg3),
+		(float) Z_DVAL_PP(arg4),
+		(float) Z_DVAL_PP(arg5),
+		Z_LVAL_PP(arg6),
+		Z_STRVAL_PP(arg7));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_add_launchlink(int pdfdoc, double llx, double lly, double urx, double ury, string filename)
+   Adds link to web resource */
+PHP_FUNCTION(pdf_add_launchlink) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf document", le_pdf);
+
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_string_ex(arg6);
+
+	PDF_add_launchlink(pdf,
+		(float) Z_DVAL_PP(arg2),
+		(float) Z_DVAL_PP(arg3),
+		(float) Z_DVAL_PP(arg4),
+		(float) Z_DVAL_PP(arg5),
+		Z_STRVAL_PP(arg6));
 
 	RETURN_TRUE;
 }

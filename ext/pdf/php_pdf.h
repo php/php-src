@@ -35,97 +35,116 @@ extern zend_module_entry pdf_module_entry;
 extern PHP_MINFO_FUNCTION(pdf);
 extern PHP_MINIT_FUNCTION(pdf);
 extern PHP_MSHUTDOWN_FUNCTION(pdf);
-PHP_FUNCTION(pdf_set_info);
-PHP_FUNCTION(pdf_set_info_creator);
-PHP_FUNCTION(pdf_set_info_title);
-PHP_FUNCTION(pdf_set_info_subject);
-PHP_FUNCTION(pdf_set_info_author);
-PHP_FUNCTION(pdf_set_info_keywords);
-PHP_FUNCTION(pdf_open);
+PHP_FUNCTION(pdf_new);		/* new function */
+PHP_FUNCTION(pdf_delete);	/* new function */
+PHP_FUNCTION(pdf_open_file);
+PHP_FUNCTION(pdf_get_buffer);	/* new function */
 PHP_FUNCTION(pdf_close);
 PHP_FUNCTION(pdf_begin_page);
 PHP_FUNCTION(pdf_end_page);
+PHP_FUNCTION(pdf_get_value);
+PHP_FUNCTION(pdf_set_value);
+PHP_FUNCTION(pdf_get_parameter);
+PHP_FUNCTION(pdf_set_parameter);
+PHP_FUNCTION(pdf_findfont);	/* new function */
+PHP_FUNCTION(pdf_setfont);	/* new function */
 PHP_FUNCTION(pdf_show);
 PHP_FUNCTION(pdf_show_xy);
-#if PDFLIB_MAJORVERSION >= 3 | (PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 20)
-PHP_FUNCTION(pdf_show_boxed);
-PHP_FUNCTION(pdf_skew);
-#endif
-PHP_FUNCTION(pdf_set_font);
-PHP_FUNCTION(pdf_get_font);
-PHP_FUNCTION(pdf_get_fontname);
-PHP_FUNCTION(pdf_get_fontsize);
-PHP_FUNCTION(pdf_set_leading);
-PHP_FUNCTION(pdf_set_text_rendering);
-PHP_FUNCTION(pdf_set_horiz_scaling);
-PHP_FUNCTION(pdf_set_text_rise);
-#if PDFLIB_MAJORVERSION < 3 & PDFLIB_MINORVERSION < 30
-PHP_FUNCTION(pdf_set_text_matrix);
-#endif
-PHP_FUNCTION(pdf_set_text_pos);
-PHP_FUNCTION(pdf_set_char_spacing);
-PHP_FUNCTION(pdf_set_word_spacing);
 PHP_FUNCTION(pdf_continue_text);
-PHP_FUNCTION(pdf_stringwidth);
-PHP_FUNCTION(pdf_save);
-PHP_FUNCTION(pdf_restore);
-PHP_FUNCTION(pdf_translate);
-PHP_FUNCTION(pdf_scale);
-PHP_FUNCTION(pdf_rotate);
+PHP_FUNCTION(pdf_show_boxed);
+PHP_FUNCTION(pdf_stringwidth);	/* new parameters: [int font, float size] */
+PHP_FUNCTION(pdf_set_text_pos);
+PHP_FUNCTION(pdf_setdash);
+PHP_FUNCTION(pdf_setpolydash);	/* new function: not yet finished */
 PHP_FUNCTION(pdf_setflat);
 PHP_FUNCTION(pdf_setlinejoin);
 PHP_FUNCTION(pdf_setlinecap);
 PHP_FUNCTION(pdf_setmiterlimit);
 PHP_FUNCTION(pdf_setlinewidth);
-PHP_FUNCTION(pdf_setdash);
+PHP_FUNCTION(pdf_save);
+PHP_FUNCTION(pdf_restore);
+PHP_FUNCTION(pdf_translate);
+PHP_FUNCTION(pdf_scale);
+PHP_FUNCTION(pdf_rotate);
+PHP_FUNCTION(pdf_skew);
+PHP_FUNCTION(pdf_concat);	/* new function */
 PHP_FUNCTION(pdf_moveto);
-PHP_FUNCTION(pdf_curveto);
 PHP_FUNCTION(pdf_lineto);
+PHP_FUNCTION(pdf_curveto);
 PHP_FUNCTION(pdf_circle);
 PHP_FUNCTION(pdf_arc);
 PHP_FUNCTION(pdf_rect);
 PHP_FUNCTION(pdf_closepath);
-PHP_FUNCTION(pdf_closepath_stroke);
 PHP_FUNCTION(pdf_stroke);
+PHP_FUNCTION(pdf_closepath_stroke);
 PHP_FUNCTION(pdf_fill);
 PHP_FUNCTION(pdf_fill_stroke);
 PHP_FUNCTION(pdf_closepath_fill_stroke);
-PHP_FUNCTION(pdf_endpath);
 PHP_FUNCTION(pdf_clip);
-PHP_FUNCTION(pdf_set_parameter);
-PHP_FUNCTION(pdf_get_parameter);
-PHP_FUNCTION(pdf_set_value);
-PHP_FUNCTION(pdf_get_value);
+PHP_FUNCTION(pdf_endpath);
 PHP_FUNCTION(pdf_setgray_fill);
 PHP_FUNCTION(pdf_setgray_stroke);
 PHP_FUNCTION(pdf_setgray);
 PHP_FUNCTION(pdf_setrgbcolor_fill);
 PHP_FUNCTION(pdf_setrgbcolor_stroke);
 PHP_FUNCTION(pdf_setrgbcolor);
-PHP_FUNCTION(pdf_add_outline);
-PHP_FUNCTION(pdf_set_transition);
-PHP_FUNCTION(pdf_set_duration);
-PHP_FUNCTION(pdf_open_jpeg);
-PHP_FUNCTION(pdf_open_tiff);
-PHP_FUNCTION(pdf_open_png);
-PHP_FUNCTION(pdf_open_gif);
-PHP_FUNCTION(pdf_open_image_file);
-#if HAVE_LIBGD13
-PHP_FUNCTION(pdf_open_memory_image);
-#endif
+PHP_FUNCTION(pdf_open_image_file);  /* new parameters: [char *stringpram, int intparam] */
+PHP_FUNCTION(pdf_open_CCITT);	/* new function */
+PHP_FUNCTION(pdf_open_image);	/* new function: checkit not yet completeted :( */
 PHP_FUNCTION(pdf_close_image);
 PHP_FUNCTION(pdf_place_image);
-PHP_FUNCTION(pdf_put_image);
-PHP_FUNCTION(pdf_execute_image);
-PHP_FUNCTION(pdf_add_weblink);
+PHP_FUNCTION(pdf_add_bookmark);
+PHP_FUNCTION(pdf_set_info);
+PHP_FUNCTION(pdf_attach_file);	/* new function */
+PHP_FUNCTION(pdf_add_note);	/* new function */
 PHP_FUNCTION(pdf_add_pdflink);
-PHP_FUNCTION(pdf_add_annotation);
+PHP_FUNCTION(pdf_add_locallink);	/* new function */
+PHP_FUNCTION(pdf_add_launchlink);	/* new function */
+PHP_FUNCTION(pdf_add_weblink);
 PHP_FUNCTION(pdf_set_border_style);
 PHP_FUNCTION(pdf_set_border_color);
 PHP_FUNCTION(pdf_set_border_dash);
-PHP_FUNCTION(pdf_get_image_width);
-PHP_FUNCTION(pdf_get_image_height);
 
+/* RJS:
+   End of the official PDFLIB V3.x API */
+
+/* old font handling */
+PHP_FUNCTION(pdf_set_font);		/* deprecated */
+PHP_FUNCTION(pdf_get_font);		/* deprecated */
+PHP_FUNCTION(pdf_get_fontname);		/* deprecated */
+PHP_FUNCTION(pdf_get_fontsize);		/* deprecated */
+
+/* old way of starting a PDF document */
+PHP_FUNCTION(pdf_open);			/* deprecated */
+
+/* old stuff for setting infos */
+PHP_FUNCTION(pdf_set_info_creator);	/* deprecated */
+PHP_FUNCTION(pdf_set_info_title);	/* deprecated */
+PHP_FUNCTION(pdf_set_info_subject);	/* deprecated */
+PHP_FUNCTION(pdf_set_info_author);	/* deprecated */
+PHP_FUNCTION(pdf_set_info_keywords);	/* deprecated */
+PHP_FUNCTION(pdf_set_leading);   	/* deprecated */
+PHP_FUNCTION(pdf_set_text_rendering);	/* deprecated */
+PHP_FUNCTION(pdf_set_horiz_scaling);	/* deprecated */
+PHP_FUNCTION(pdf_set_text_rise);		/* deprecated */
+PHP_FUNCTION(pdf_set_char_spacing);	/* deprecated */
+PHP_FUNCTION(pdf_set_word_spacing);	/* deprecated */
+PHP_FUNCTION(pdf_set_transition);	/* deprecated */
+PHP_FUNCTION(pdf_set_duration);		/* deprecated */
+PHP_FUNCTION(pdf_get_image_height);	/* deprecated */
+PHP_FUNCTION(pdf_get_image_width);	/* deprecated */
+
+/* old stuff for opening images */
+PHP_FUNCTION(pdf_open_jpeg);		/* deprecated */
+PHP_FUNCTION(pdf_open_tiff);		/* deprecated */
+PHP_FUNCTION(pdf_open_png);		/* deprecated */
+PHP_FUNCTION(pdf_open_gif);		/* deprecated */
+
+/* some more stuff for compatibility */
+PHP_FUNCTION(pdf_add_annotation);
+#if HAVE_LIBGD13
+PHP_FUNCTION(pdf_open_memory_image);
+#endif
 
 #ifdef ZTS
 #define PDFG(v) (pdf_globals->v)
