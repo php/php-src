@@ -1292,7 +1292,7 @@ PHP_FUNCTION(socket_recv)
 		zval_dtor(buf);
 		Z_TYPE_P(buf) = IS_NULL;
 	} else {
-		recv_buf[retval+1] = '\0';
+		recv_buf[retval] = '\0';
 
 		/* Rebuild buffer zval */
 		zval_dtor(buf);
