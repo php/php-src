@@ -36,6 +36,9 @@
 
 #ifdef TSRM_WIN32
 # include <windows.h>
+#elif defined(NETWARE)
+# include <nks/thread.h>
+# include <nks/synch.h>
 #elif defined(GNUPTH)
 # include <pth.h>
 #elif defined(PTHREADS)
@@ -50,6 +53,9 @@ typedef int ts_rsrc_id;
 #ifdef TSRM_WIN32
 # define THREAD_T DWORD
 # define MUTEX_T CRITICAL_SECTION *
+#elif defined(NETWARE)
+# define THREAD_T NXThreadId_t
+# define MUTEX_T NXMutex_t *
 #elif defined(GNUPTH)
 # define THREAD_T pth_t
 # define MUTEX_T pth_mutex_t *
