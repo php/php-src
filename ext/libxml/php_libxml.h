@@ -37,14 +37,40 @@ extern zend_module_entry libxml_module_entry;
 #define PHP_LIBXML_API
 #endif
 
-
+#include <libxml/tree.h>
 
 typedef struct {
 	zval *stream_context;
 } php_libxml_globals;
 
-	
+typedef struct _php_libxml_ref_obj {
+	void *ptr;
+	int   refcount;
+	void *doc_props;
+} php_libxml_ref_obj;
+
+typedef struct _php_libxml_node_ptr {
+	xmlNodePtr node;
+	int	refcount;
+	void *_private;
+} php_libxml_node_ptr;
+
+typedef struct _php_libxml_node_object {
+	zend_object  std;
+	php_libxml_node_ptr *node;
+	php_libxml_ref_obj *document;
+	HashTable *properties;
+} php_libxml_node_object;
+
 PHP_FUNCTION(libxml_set_streams_context);
+int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data TSRMLS_DC);
+int php_libxml_decrement_node_ptr(php_libxml_node_object *object TSRMLS_DC);
+int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp TSRMLS_DC);
+int php_libxml_decrement_doc_ref(php_libxml_node_object *object TSRMLS_DC);
+/* When an explicit freeing of node and children is required */
+void php_libxml_node_free_resource(xmlNodePtr node TSRMLS_DC);
+/* When object dtor is called as node may still be referenced */
+void php_libxml_node_decrement_resource(php_libxml_node_object *object TSRMLS_DC);
 
 #endif /* HAVE_LIBXML */
 
