@@ -1,3 +1,121 @@
+2002-04-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/isapi/php4isapi.c: - MFH for bug in Sambar 5.2
+
+    * sapi/isapi/php4isapi.c:
+    - Gaurd for problems in fault servers (fixes problem with Sambar 5.2)
+
+2002-04-18  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/README:
+    Document the new PHPINIDir directive in the apache2filter/README.
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    This patch implements a new Apache2 directive called PHPINIDir that
+    allows the specification of the php.ini directory from within the Apache
+    configuration. If left unset, the default is to defer to the hard-coded
+    php paths. When set, the supplied path is made relative to Apache's
+    internal ServerRoot setting.
+
+    Example:
+    PHPINIDir "conf"
+
+2002-04-18  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Command.php: * Add API documentation.
+
+2002-04-18  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/internal_functions_win32.c: Allow for PCRE to be disabled.
+
+    * ext/mysql/php_mysql.c: Make use of HAVE_MYSQL. Reviewed by: Sterling.
+
+    * main/internal_functions_win32.c: Conditionally include mbstring.h.
+
+2002-04-18  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Fix an intermittent SEGV when an error bubbled up from PHP before our
+    server context was set. Now if that happens we simply don't log against
+    any particular server config (vhost).
+
+    Obtained from bug report by:  Balazs Nagy <js@iksz.hu>
+
+2002-04-18  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h
+      main/internal_functions_win32.c:
+    Add HAVE_CALENDAR, HAVE_COM, HAVE_SESSION and HAVE_TOKENIZER to enable/disable these extensions, respectively. It is now possible to build PHP on Win32 with just ext/standard and ext/pcre. The latter is needed by the former, because at least the aggregation functions use PCRE.
+
+2002-04-18  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Fix an intermittent SEGV when an error bubbled up from PHP before our
+    server context was set. Now if that happens we simply don't log against
+    any particular server config (vhost).
+
+    Obtained from bug report by:  Balazs Nagy <js@iksz.hu>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    It makes more sense to do the null-pointer check *before* trying to use it.
+    (Also fix a typo that Cliff pointed out: "safe" --> "save".)
+
+    Obtained from:  Ryan Morgan <rmorgan@covalent.net>
+
+2002-04-18  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/xslt/sablot.c: Removed redefinition of MIN()
+
+    * ext/dbx/dbx.c: Removing unused variable
+
+2002-04-18  Stig Bakken  <ssb@fast.no>
+
+    * pear/pear.m4: * another file that should not have been MFH'ed
+
+2002-04-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/dba/config.m4
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c: - Make DBA compile as a shared module
+
+    * ext/dba/config.m4
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c: - MFH: Make DBA compile as a shared module again
+
+2002-04-18  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h: Some cleanup for the Win32 build configuration.
+
+2002-04-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/tests/general_functions/003.phpt
+      ext/standard/levenshtein.c: MFH fix for #16473
+
+2002-04-18  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c
+      ext/com/COM.c: MFH
+
+    * ext/com/conversion.c: whitespace fixes
+
+2002-04-18  Alan Brown  <abrown@pobox.com>
+
+    * ext/com/COM.c:
+    Missing break; causes fallthrough which actually causes heap corruption in the debugging version despite being just plain wrong. Also placed a default "Unavailable" message when the object does not populate the EXCEPINFO structure. Also removed a minor memory leak.
+
+    * ext/com/conversion.c:
+    When V_BSTR() is NULL, we pass a NULL pointer into php_OLECHAR_to_char() which reports an exception. Better to map a NULL string pointer to ZVAL_NULL.
+
 2002-04-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * main/internal_functions_win32.c: Whitespace fixes.
