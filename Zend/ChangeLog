@@ -1,3 +1,9 @@
+2005-01-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Add ReclectionClass:hasProperty(), ReflectionClass::hasConstant()
+        to complete api (johannes@php.net)
+
 2005-01-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c:
