@@ -33,6 +33,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
+#include "zend_default_classes.h"
 
 #if HAVE_MYSQL
 
@@ -1882,7 +1883,7 @@ PHP_FUNCTION(mysql_num_fields)
 
 /* {{{ php_mysql_fetch_hash
  */
-static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, int expected_args)
+static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, int expected_args, int into_object)
 {
 	zval **result, **arg2;
 	MYSQL_RES *mysql_result;
@@ -1890,30 +1891,52 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	MYSQL_FIELD *mysql_field;
 	mysql_row_length_type *mysql_row_lengths;
 	int i;
+	zval            *res, *ctor_params = NULL;
+	zend_class_entry *ce;
 
-	if (ZEND_NUM_ARGS() > expected_args) {
-		WRONG_PARAM_COUNT;
-	}
+	if (into_object) {
+		char *class_name;
+		int class_name_len;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &result)==FAILURE) {
-				RETURN_FALSE;
-			}
-			if (!result_type) {
-				result_type = MYSQL_BOTH;
-			}
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &result, &arg2)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(arg2);
-			result_type = Z_LVAL_PP(arg2);
-			break;
-		default:
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|sz", &res, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+			return;
+		}
+		result = &res;
+		if (ZEND_NUM_ARGS() < 2) {
+			ce = zend_standard_class_def;
+		} else {
+			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+		}
+		if (!ce) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find class '%s'", class_name);
+			return;
+		}
+		result_type = MYSQL_ASSOC;
+	} else {
+		if (ZEND_NUM_ARGS() > expected_args) {
 			WRONG_PARAM_COUNT;
-			break;
+		}
+	
+		switch (ZEND_NUM_ARGS()) {
+			case 1:
+				if (zend_get_parameters_ex(1, &result)==FAILURE) {
+					RETURN_FALSE;
+				}
+				if (!result_type) {
+					result_type = MYSQL_BOTH;
+				}
+				break;
+			case 2:
+				if (zend_get_parameters_ex(2, &result, &arg2)==FAILURE) {
+					RETURN_FALSE;
+				}
+				convert_to_long_ex(arg2);
+				result_type = Z_LVAL_PP(arg2);
+				break;
+			default:
+				WRONG_PARAM_COUNT;
+				break;
+		}
 	}
 
 	if ((result_type & MYSQL_BOTH) == 0) {
@@ -1963,6 +1986,70 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 			}
 		}
 	}
+
+	if (into_object) {
+		zval dataset = *return_value;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr; 
+	
+		object_and_properties_init(return_value, ce, NULL);
+		zend_merge_properties(return_value, Z_ARRVAL(dataset), 1 TSRMLS_CC);
+	
+		if (ce->constructor) {
+			fci.size = sizeof(fci);
+			fci.function_table = &ce->function_table;
+			fci.function_name = NULL;
+			fci.symbol_table = NULL;
+			fci.object_pp = &return_value;
+			fci.retval_ptr_ptr = &retval_ptr;
+			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
+					HashTable *ht = Z_ARRVAL_P(ctor_params);
+					Bucket *p;
+	
+					fci.param_count = 0;
+					fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
+					p = ht->pListHead;
+					while (p != NULL) {
+						fci.params[fci.param_count++] = (zval**)p->pData;
+						p = p->pListNext;
+					}
+				} else {
+					/* Two problems why we throw exceptions here: PHP is typeless
+					 * and hence passing one argument that's not an array could be
+					 * by mistake and the other way round is possible, too. The 
+					 * single value is an array. Also we'd have to make that one
+					 * argument passed by reference.
+					 */
+					zend_throw_exception(zend_exception_get_default(), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
+					return;
+				}
+			} else {
+				fci.param_count = 0;
+				fci.params = NULL;
+			}
+			fci.no_separation = 1;
+
+			fcc.initialized = 1;
+			fcc.function_handler = ce->constructor;
+			fcc.calling_scope = EG(scope);
+			fcc.object_pp = &return_value;
+		
+			if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+				zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
+			} else {
+				if (retval_ptr) {
+					zval_ptr_dtor(&retval_ptr);
+				}
+			}
+			if (fci.params) {
+				efree(fci.params);
+			}
+		} else if (ctor_params) {
+			zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
+		}
+	}
 }
 /* }}} */
 
@@ -1970,16 +2057,16 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
    Gets a result row as an enumerated array */
 PHP_FUNCTION(mysql_fetch_row)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_NUM, 1);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_NUM, 1, 0);
 }
 /* }}} */
 
 
-/* {{{ proto object mysql_fetch_object(resource result [, int result_type])
+/* {{{ proto object mysql_fetch_object(resource result [, string class_name [, NULL|array ctor_params]])
    Fetch a result row as an object */
 PHP_FUNCTION(mysql_fetch_object)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC, 2);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC, 2, 1);
 
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
@@ -1992,7 +2079,7 @@ PHP_FUNCTION(mysql_fetch_object)
    Fetch a result row as an array (associative, numeric or both) */
 PHP_FUNCTION(mysql_fetch_array)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 2);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 2, 0);
 }
 /* }}} */
 
@@ -2001,7 +2088,7 @@ PHP_FUNCTION(mysql_fetch_array)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysql_fetch_assoc)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC, 1);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC, 1, 0);
 }
 /* }}} */
 
