@@ -74,7 +74,6 @@ void php_var_dump(zval **struc, int level TSRMLS_DC)
 			php_printf("%sint(%ld)\n", COMMON, Z_LVAL_PP(struc));
 			break;
 		case IS_DOUBLE: {
-				TSRMLS_FETCH();
 
 				php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc));
 			}
@@ -100,7 +99,6 @@ head_done:
 			break;
 		case IS_RESOURCE: {
 			char *type_name;
-			TSRMLS_FETCH();
 
 			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			php_printf("%sresource(%ld) of type (%s)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
@@ -358,10 +356,8 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 	} 
 }
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash)
+PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	php_var_serialize_intern(buf, struc, var_hash TSRMLS_CC);
 	smart_str_0(buf);
 }
@@ -369,7 +365,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash)
 /* }}} */
 /* {{{ php_var_unserialize */
 
-PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, HashTable *var_hash)
+PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, HashTable *var_hash TSRMLS_DC)
 {
 	const char *q;
 	char *str;
@@ -378,7 +374,6 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 	ulong id;
 	HashTable *myht;
 	zval **rval_ref;
-	TSRMLS_FETCH();
 
 	if (var_hash && **p != 'R') {  /* references aren't counted by serializer! */
 		zend_hash_next_index_insert(var_hash, rval, sizeof(*rval), NULL);
@@ -567,13 +562,13 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 				ALLOC_INIT_ZVAL(key);
 				ALLOC_INIT_ZVAL(data);
 
-				if (!php_var_unserialize(&key, p, max, NULL)) {
+				if (!php_var_unserialize(&key, p, max, NULL TSRMLS_CC)) {
 					zval_dtor(key);
 					FREE_ZVAL(key);
 					FREE_ZVAL(data);
 					return 0;
 				}
-				if (!php_var_unserialize(&data, p, max, var_hash)) {
+				if (!php_var_unserialize(&data, p, max, var_hash TSRMLS_CC)) {
 					zval_dtor(key);
 					FREE_ZVAL(key);
 					zval_dtor(data);
@@ -629,7 +624,7 @@ PHP_FUNCTION(serialize)
 	return_value->value.str.len = 0;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
-	php_var_serialize(&buf, struc, &var_hash);
+	php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	RETVAL_STRINGL(buf.c, buf.len, 0);
 }
@@ -656,7 +651,7 @@ PHP_FUNCTION(unserialize)
 		}
 
 		PHP_VAR_UNSERIALIZE_INIT(var_hash);
-		if (!php_var_unserialize(&return_value, &p, p + Z_STRLEN_PP(buf),  &var_hash)) {
+		if (!php_var_unserialize(&return_value, &p, p + Z_STRLEN_PP(buf),  &var_hash TSRMLS_CC)) {
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 			zval_dtor(return_value);
 			php_error(E_NOTICE, "unserialize() failed at offset %d of %d bytes",p - Z_STRVAL_PP(buf),Z_STRLEN_PP(buf));

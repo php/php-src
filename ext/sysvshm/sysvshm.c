@@ -245,7 +245,7 @@ PHP_FUNCTION(shm_put_var)
 	/* setup string-variable and serialize */
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
-	php_var_serialize(&shm_var,arg_var,&var_hash);
+	php_var_serialize(&shm_var,arg_var,&var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	/* insert serialized variable into shared memory */
 	ret=php_put_shm_data(shm_list_ptr->ptr,key,shm_var.c,shm_var.len);
@@ -301,7 +301,7 @@ PHP_FUNCTION(shm_get_var)
 	shm_data=&shm_var->mem;
 	
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if(php_var_unserialize(&return_value, (const char **) &shm_data, shm_data+shm_var->length,&var_hash)!=1) {
+	if(php_var_unserialize(&return_value, (const char **) &shm_data, shm_data+shm_var->length,&var_hash TSRMLS_CC)!=1) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		php_error(E_WARNING, "variable data in shared memory is corruped");
 		RETURN_FALSE;

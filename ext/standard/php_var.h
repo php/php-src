@@ -32,8 +32,8 @@ void php_var_dump(zval **struc, int level TSRMLS_DC);
 /* typdef HashTable php_serialize_data_t; */
 #define php_serialize_data_t HashTable
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash);
-PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, php_serialize_data_t *var_hash);
+PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC);
+PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, php_serialize_data_t *var_hash TSRMLS_DC);
 
 #define PHP_VAR_SERIALIZE_INIT(var_hash) \
    zend_hash_init(&(var_hash),10,NULL,NULL,0)
