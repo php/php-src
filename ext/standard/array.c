@@ -1966,7 +1966,7 @@ PHP_FUNCTION(array_slice)
 /* }}} */
 
 
-PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive)
+PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC)
 {
 	zval	  **src_entry,
 			  **dest_entry;
@@ -1984,13 +1984,13 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive)
 								   (void **)&dest_entry) == SUCCESS) {
 					if (*src_entry == *dest_entry) {
 						zend_error(E_WARNING, "%s(): recursion detected",
-								   get_active_function_name());
+								   get_active_function_name(TSRMLS_C));
 						return 0;
 					}
 					convert_to_array_ex(dest_entry);
 					convert_to_array_ex(src_entry);
 					if (!php_array_merge(Z_ARRVAL_PP(dest_entry),
-									Z_ARRVAL_PP(src_entry), recursive))
+									Z_ARRVAL_PP(src_entry), recursive TSRMLS_CC))
 						return 0;
 				} else {
 					(*src_entry)->refcount++;
@@ -2036,7 +2036,7 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 	for (i=0; i<argc; i++) {
 		SEPARATE_ZVAL(args[i]);
 		convert_to_array_ex(args[i]);
-		php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive);
+		php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive TSRMLS_CC);
 	}
 	
 	efree(args);
