@@ -1630,8 +1630,27 @@ PHP_FUNCTION(mysqli_stmt_error)
 }
 /* }}} */
 
+/* {{{ bool resource mysqli_stmt_store_result(stmt)
+*/
+PHP_FUNCTION(mysqli_stmt_store_result)
+{
+	STMT *stmt;
+	zval *mysql_stmt;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt"); 
+	
+	if (mysql_stmt_store_result(stmt->stmt)){
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
 /* {{{ proto int mysqli_thread_id(resource link)
 */
+
 PHP_FUNCTION(mysqli_thread_id)
 {
 	MYSQL *mysql;
