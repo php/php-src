@@ -12,19 +12,32 @@ case "$EXTRA_VERSION" in
 esac
 
 devok=0
+pecl_args=0
 
-while test $# -gt 0; do
-  if test "$1" = "--copy"; then
-    automake_flags=--copy
-  fi
+# Import 'gold' extensions from PECL
+GOLDEN='tidy'
 
-  if test "$1" = "--force"; then
-    devok=1
-    echo "Forcing buildconf"
-  fi
+for i in $*; do
+	if test "$i" = "--pecl-import"; then
+		pecl_args=1
+	elif test "$i" = "--copy"; then
+		automake_flags=--copy
+		pecl_args=0
+	elif test "$i" = "--force"; then
+		devok=1
+		echo "Forcing buildconf"
+		pecl_args=0
+	elif test $pecl_args -eq 1; then
+		# Allow the developer to specify some custom PECL extensions to fetch
+		GOLDEN=$GOLDEN" "$i
+	fi
+done;
 
-  shift
+cd ext;
+for ext in $GOLDEN; do
+	cvs co -d $ext pecl/$ext;
 done
+cd ..;
 
 if test "$dev" = "0" -a "$devok" = "0"; then
   echo "You should not run buildconf in a release package."
