@@ -109,7 +109,7 @@ enum mbfl_no_language {
 	mbfl_no_language_korean,		/* ko */
 	mbfl_no_language_dutch,			/* nl */
 	mbfl_no_language_polish,		/* pl */
-	mbfl_no_language_portuguese,	/* pt */
+	mbfl_no_language_portuguese,	        /* pt */
 	mbfl_no_language_swedish,		/* sv */
 	mbfl_no_language_chinese,		/* zh */
 	mbfl_no_language_max
@@ -167,6 +167,12 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_8859_13,
 	mbfl_no_encoding_8859_14,
 	mbfl_no_encoding_8859_15,
+	mbfl_no_encoding_euc_cn,
+	mbfl_no_encoding_cp936,
+	mbfl_no_encoding_euc_tw,
+	mbfl_no_encoding_big5,
+	mbfl_no_encoding_euc_kr,
+	mbfl_no_encoding_uhc,
 	mbfl_no_encoding_charset_max
 };
 
@@ -210,7 +216,7 @@ typedef struct _mbfl_encoding {
 #define MBFL_ENCTYPE_MWC4LE		0x00000800
 #define MBFL_ENCTYPE_SHFTCODE	0x00001000
 
-/* wchar plane, spesial charactor */
+/* wchar plane, special charactor */
 #define MBFL_WCSPLANE_MASK			0xffff
 #define MBFL_WCSPLANE_UCS2MAX		0x00010000
 #define MBFL_WCSPLANE_SUPMIN		0x00010000
@@ -233,7 +239,11 @@ typedef struct _mbfl_encoding {
 #define MBFL_WCSPLANE_8859_15		0x70f00000		/*  00h - FFh */
 #define MBFL_WCSPLANE_KSC5601		0x70f10000		/*  2121h - 7E7Eh */
 #define MBFL_WCSPLANE_GB2312		0x70f20000		/*  2121h - 7E7Eh */
-#define MBFL_WCSGROUP_MASK			0xffffff
+#define MBFL_WCSPLANE_WINCP936		0x70f30000		/*  2121h - 9898h */
+#define MBFL_WCSPLANE_BIG5		0x70f40000		/*  2121h - 9898h */
+#define MBFL_WCSPLANE_CNS11643		0x70f50000		/*  2121h - 9898h */
+#define MBFL_WCSPLANE_UHC		0x70f60000		/*  8141h - fefeh */
+#define MBFL_WCSGROUP_MASK                0xffffff
 #define MBFL_WCSGROUP_UCS4MAX		0x70000000
 #define MBFL_WCSGROUP_WCHARMAX		0x78000000
 #define MBFL_WCSGROUP_THROUGH		0x78000000		/* 000000h - FFFFFFh */

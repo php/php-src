@@ -81,12 +81,30 @@
 
 /* $Id$ */
 
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "php_globals.h"
 
 #include <stdlib.h>
 #include "mbfilter.h"
+
+#if defined(HAVE_MBSTR_JA)
 #include "mbfilter_ja.h"
+#endif
+#if defined(HAVE_MBSTR_CN)
+#include "mbfilter_cn.h"
+#endif
+#if defined(HAVE_MBSTR_TW)
+#include "mbfilter_tw.h"
+#endif
+#if defined(HAVE_MBSTR_KR)
+#include "mbfilter_kr.h"
+#endif
+
 #include "zend.h"
 
 #ifdef PHP_WIN32
@@ -137,9 +155,20 @@ static mbfl_language mbfl_language_english = {
 	mbfl_no_encoding_8bit
 };
 
+static mbfl_language mbfl_language_chinese = {
+	mbfl_no_language_chinese,
+	"Chinese",
+	"zh",
+	NULL,
+	mbfl_no_encoding_2022jp,
+	mbfl_no_encoding_base64,
+	mbfl_no_encoding_7bit
+};
+
 static mbfl_language *mbfl_language_ptr_table[] = {
 	&mbfl_language_uni,
 	&mbfl_language_japanese,
+	&mbfl_language_chinese,
 	&mbfl_language_english,
 	NULL
 };
@@ -203,6 +232,121 @@ static const unsigned char mblen_table_sjis[] = { /* 0x80-0x9f,0xE0-0xFF */
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
 };
 
+
+static const unsigned char mblen_table_euccn[] = { /* 0xA1-0xFE */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+};
+
+static const unsigned char mblen_table_cp936[] = { /* 0x81-0xFE */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+};
+
+static const unsigned char mblen_table_euctw[] = { /* 0xA1-0xFE */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+};
+
+static const unsigned char mblen_table_big5[] = { /* 0x81-0xFE */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+};
+
+
+static const unsigned char mblen_table_euckr[] = { /* 0xA1-0xFE */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+};
+
+static const unsigned char mblen_table_uhc[] = { /* 0x81-0xFE */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+};
 
 /* encoding structure */
 static const char *mbfl_encoding_pass_aliases[] = {"none", NULL};
@@ -475,6 +619,7 @@ static mbfl_encoding mbfl_encoding_ascii = {
 	MBFL_ENCTYPE_SBCS
 };
 
+#if defined(HAVE_MBSTR_JA)
 static const char *mbfl_encoding_euc_jp_aliases[] = {"EUC", "EUC_JP", "eucJP", "x-euc-jp", NULL};
 
 static mbfl_encoding mbfl_encoding_euc_jp = {
@@ -536,6 +681,83 @@ static mbfl_encoding mbfl_encoding_2022jp = {
 	NULL,
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
 };
+#endif /* HAVE_MBSTR_JA */
+
+
+#if defined(HAVE_MBSTR_CN)
+static const char *mbfl_encoding_euc_cn_aliases[] = {"EUC_CN", "eucCN", "x-euc-cn", NULL};
+
+static mbfl_encoding mbfl_encoding_euc_cn = {
+	mbfl_no_encoding_euc_cn,
+	"EUC-CN",
+	"EUC-CN",
+	(const char *(*)[])&mbfl_encoding_euc_cn_aliases,
+	mblen_table_euccn,
+	MBFL_ENCTYPE_MBCS
+};
+
+static const char *mbfl_encoding_cp936_aliases[] = {"CP-936", NULL};
+
+static mbfl_encoding mbfl_encoding_cp936 = {
+	mbfl_no_encoding_cp936,
+	"CP936",
+	"CP936",
+	(const char *(*)[])&mbfl_encoding_cp936_aliases,
+	mblen_table_cp936,
+	MBFL_ENCTYPE_MBCS
+};
+
+#endif /* HAVE_MBSTR_CN */
+
+#if defined(HAVE_MBSTR_TW)
+static const char *mbfl_encoding_euc_tw_aliases[] = {"EUC_TW", "eucTW", "x-euc-tw", NULL};
+
+static mbfl_encoding mbfl_encoding_euc_tw = {
+	mbfl_no_encoding_euc_tw,
+	"EUC-TW",
+	"EUC-TW",
+	(const char *(*)[])&mbfl_encoding_euc_tw_aliases,
+	mblen_table_euctw,
+	MBFL_ENCTYPE_MBCS
+};
+
+static const char *mbfl_encoding_big5_aliases[] = {"big5", "CP950", NULL};
+
+static mbfl_encoding mbfl_encoding_big5 = {
+	mbfl_no_encoding_big5,
+	"BIG-5",
+	"BIG-5",
+	(const char *(*)[])&mbfl_encoding_big5_aliases,
+	mblen_table_big5,
+	MBFL_ENCTYPE_MBCS
+};
+
+#endif /* HAVE_MBSTR_TW */
+
+#if defined(HAVE_MBSTR_KR)
+static const char *mbfl_encoding_euc_kr_aliases[] = {"EUC_KR", "eucKR", "x-euc-kr", NULL};
+
+static mbfl_encoding mbfl_encoding_euc_kr = {
+	mbfl_no_encoding_euc_kr,
+	"EUC-KR",
+	"EUC-KR",
+	(const char *(*)[])&mbfl_encoding_euc_kr_aliases,
+	mblen_table_euckr,
+	MBFL_ENCTYPE_MBCS
+};
+
+static const char *mbfl_encoding_uhc_aliases[] = {"CP949", NULL};
+
+static mbfl_encoding mbfl_encoding_uhc = {
+	mbfl_no_encoding_uhc,
+	"UHC",
+	"UHC",
+	(const char *(*)[])&mbfl_encoding_uhc_aliases,
+	mblen_table_uhc,
+	MBFL_ENCTYPE_MBCS
+};
+
+#endif /* HAVE_MBSTR_KR */
 
 static const char *mbfl_encoding_cp1252_aliases[] = {"cp1252", NULL};
 
@@ -720,12 +942,14 @@ static mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_utf7,
 	&mbfl_encoding_utf7imap,
 	&mbfl_encoding_ascii,
+#if defined(HAVE_MBSTR_JA)
 	&mbfl_encoding_euc_jp,
 	&mbfl_encoding_sjis,
 	&mbfl_encoding_eucjp_win,
 	&mbfl_encoding_sjis_win,
 	&mbfl_encoding_jis,
 	&mbfl_encoding_2022jp,
+#endif
 	&mbfl_encoding_cp1252,
 	&mbfl_encoding_8859_1,
 	&mbfl_encoding_8859_2,
@@ -740,6 +964,18 @@ static mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_8859_13,
 	&mbfl_encoding_8859_14,
 	&mbfl_encoding_8859_15,
+#if defined(HAVE_MBSTR_CN)
+	&mbfl_encoding_euc_cn,
+	&mbfl_encoding_cp936,
+#endif
+#if defined(HAVE_MBSTR_TW)
+	&mbfl_encoding_euc_tw,
+	&mbfl_encoding_big5,
+#endif
+#if defined(HAVE_MBSTR_KR)
+	&mbfl_encoding_euc_kr,
+	&mbfl_encoding_uhc,
+#endif
 	NULL
 };
 
@@ -825,12 +1061,30 @@ static void mbfl_filt_ident_false_ctor(mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_utf8(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_ascii(int c, mbfl_identify_filter *filter TSRMLS_DC);
+#if defined(HAVE_MBSTR_JA)
 static int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_sjiswin(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_jis(int c, mbfl_identify_filter *filter TSRMLS_DC);
-static int mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter TSRMLS_DC);
+#endif /* HAVE_MBSTR_JA */
+
+#if defined(HAVE_MBSTR_CN)
+static int mbfl_filt_ident_euccn(int c, mbfl_identify_filter *filter TSRMLS_DC);
+static int mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter TSRMLS_DC);
+#endif /* HAVE_MBSTR_CN */
+
+#if defined(HAVE_MBSTR_TW)
+static int mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter TSRMLS_DC);
+static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter TSRMLS_DC);
+#endif /* HAVE_MBSTR_TW */
+
+#if defined(HAVE_MBSTR_KR)
+static int mbfl_filt_ident_euckr(int c, mbfl_identify_filter *filter TSRMLS_DC);
+static int mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter TSRMLS_DC);
+#endif /* HAVE_MBSTR_KR */
+
+static int mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter TSRMLS_DC);
 
@@ -1221,6 +1475,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_ascii = {
 	mbfl_filt_conv_wchar_ascii,
 	mbfl_filt_conv_common_flush };
 
+#if defined(HAVE_MBSTR_JA)
 static struct mbfl_convert_vtbl vtbl_eucjp_wchar = {
 	mbfl_no_encoding_euc_jp,
 	mbfl_no_encoding_wchar,
@@ -1316,6 +1571,109 @@ static struct mbfl_convert_vtbl vtbl_wchar_sjiswin = {
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_sjiswin,
 	mbfl_filt_conv_common_flush };
+#endif /* HAVE_MBSTR_JA */
+
+#if defined(HAVE_MBSTR_CN)
+static struct mbfl_convert_vtbl vtbl_euccn_wchar = {
+	mbfl_no_encoding_euc_cn,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_euccn_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_euccn = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_euc_cn,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_euccn,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_cp936_wchar = {
+	mbfl_no_encoding_cp936,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_cp936_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_cp936 = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_cp936,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_cp936,
+	mbfl_filt_conv_common_flush };
+#endif /* HAVE_MBSTR_CN */
+
+#if defined(HAVE_MBSTR_TW)
+static struct mbfl_convert_vtbl vtbl_euctw_wchar = {
+	mbfl_no_encoding_euc_tw,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_euctw_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_euctw = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_euc_tw,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_euctw,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_big5_wchar = {
+	mbfl_no_encoding_big5,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_big5_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_big5 = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_big5,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_big5,
+	mbfl_filt_conv_common_flush };
+#endif /* HAVE_MBSTR_TW */
+
+#if defined(HAVE_MBSTR_KR)
+static struct mbfl_convert_vtbl vtbl_euckr_wchar = {
+	mbfl_no_encoding_euc_kr,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_euckr_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_euckr = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_euc_kr,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_euckr,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_uhc_wchar = {
+	mbfl_no_encoding_uhc,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_uhc_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_uhc = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_uhc,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_uhc,
+	mbfl_filt_conv_common_flush };
+#endif /* HAVE_MBSTR_KR */
 
 static struct mbfl_convert_vtbl vtbl_cp1252_wchar = {
 	mbfl_no_encoding_cp1252,
@@ -1546,6 +1904,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_15 = {
 static struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_utf8_wchar,
 	&vtbl_wchar_utf8,
+#if defined(HAVE_MBSTR_JA)
 	&vtbl_eucjp_wchar,
 	&vtbl_wchar_eucjp,
 	&vtbl_sjis_wchar,
@@ -1558,6 +1917,25 @@ static struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_eucjpwin,
 	&vtbl_sjiswin_wchar,
 	&vtbl_wchar_sjiswin,
+#endif
+#if defined(HAVE_MBSTR_CN)
+	&vtbl_euccn_wchar,
+	&vtbl_wchar_euccn,
+	&vtbl_cp936_wchar,
+	&vtbl_wchar_cp936,
+#endif
+#if defined(HAVE_MBSTR_TW)
+	&vtbl_euctw_wchar,
+	&vtbl_wchar_euctw,
+	&vtbl_big5_wchar,
+	&vtbl_wchar_big5,
+#endif
+#if defined(HAVE_MBSTR_KR)
+	&vtbl_euckr_wchar,
+	&vtbl_wchar_euckr,
+	&vtbl_uhc_wchar,
+	&vtbl_wchar_uhc,
+#endif
 	&vtbl_cp1252_wchar,
 	&vtbl_wchar_cp1252,
 	&vtbl_ascii_wchar,
@@ -1655,6 +2033,7 @@ static struct mbfl_identify_vtbl vtbl_identify_utf7 = {
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf7 };
 
+#if defined(HAVE_MBSTR_JA)
 static struct mbfl_identify_vtbl vtbl_identify_eucjp = {
 	mbfl_no_encoding_euc_jp,
 	mbfl_filt_ident_common_ctor,
@@ -1690,6 +2069,49 @@ static struct mbfl_identify_vtbl vtbl_identify_2022jp = {
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_2022jp };
+#endif /* HAVE_MBSTR_JA */
+
+#if defined(HAVE_MBSTR_CN)
+static struct mbfl_identify_vtbl vtbl_identify_euccn = {
+	mbfl_no_encoding_euc_cn,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_euccn };
+
+static struct mbfl_identify_vtbl vtbl_identify_cp936 = {
+	mbfl_no_encoding_cp936,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_cp936 };
+#endif /* HAVE_MBSTR_CN */
+
+#if defined(HAVE_MBSTR_TW)
+static struct mbfl_identify_vtbl vtbl_identify_euctw = {
+	mbfl_no_encoding_euc_tw,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_euctw };
+
+static struct mbfl_identify_vtbl vtbl_identify_big5 = {
+	mbfl_no_encoding_big5,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_big5 };
+#endif /* HAVE_MBSTR_TW */
+
+#if defined(HAVE_MBSTR_KR)
+static struct mbfl_identify_vtbl vtbl_identify_euckr = {
+	mbfl_no_encoding_euc_kr,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_euckr };
+
+static struct mbfl_identify_vtbl vtbl_identify_uhc = {
+	mbfl_no_encoding_uhc,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_uhc };
+#endif /* HAVE_MBSTR_KR */
 
 static struct mbfl_identify_vtbl vtbl_identify_cp1252 = {
 	mbfl_no_encoding_cp1252,
@@ -1785,12 +2207,26 @@ static struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf8,
 	&vtbl_identify_utf7,
 	&vtbl_identify_ascii,
+#if defined(HAVE_MBSTR_JA)
 	&vtbl_identify_eucjp,
 	&vtbl_identify_sjis,
 	&vtbl_identify_eucjpwin,
 	&vtbl_identify_sjiswin,
 	&vtbl_identify_jis,
 	&vtbl_identify_2022jp,
+#endif
+#if defined(HAVE_MBSTR_CN)
+	&vtbl_identify_euccn,
+	&vtbl_identify_cp936,
+#endif
+#if defined(HAVE_MBSTR_TW)
+	&vtbl_identify_euctw,
+	&vtbl_identify_big5,
+#endif
+#if defined(HAVE_MBSTR_KR)
+	&vtbl_identify_euckr,
+	&vtbl_identify_uhc,
+#endif
 	&vtbl_identify_cp1252,
 	&vtbl_identify_8859_1,
 	&vtbl_identify_8859_2,
@@ -5075,6 +5511,7 @@ mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter TSRMLS_DC)
 	return c;
 }
 
+#if defined(HAVE_MBSTR_JA)
 static int
 mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter TSRMLS_DC)
 {
@@ -5268,6 +5705,207 @@ retry:
 
 	return c;
 }
+#endif /* HAVE_MBSTR_JA */
+
+#if defined(HAVE_MBSTR_CN)
+static int
+mbfl_filt_ident_euccn(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	switch (filter->status) {
+	case  0:	/* latin */
+		if (c >= 0 && c < 0x80) {	/* ok */
+			;
+		} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
+			filter->status = 1;
+		} else {							/* bad */
+			filter->flag = 1;
+		}
+		break;
+
+	case  1:	/* got lead byte */
+		if (c < 0xa1 || c > 0xfe) {		/* bad */
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		break;
+
+	default:
+		filter->status = 0;
+		break;
+	}
+
+	return c;
+}
+
+static int
+mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	if (filter->status) {		/* kanji second char */
+		if (c < 0x40 || c > 0xfe || c == 0x7f) {	/* bad */
+		    filter->flag = 1;
+		}
+		filter->status = 0;
+	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
+		;
+	} else if (c > 0x80 && c < 0xff) {	/* DBCS lead byte */
+		filter->status = 1;
+	} else {							/* bad */
+		filter->flag = 1;
+	}
+
+	return c;
+}
+
+#endif /* HAVE_MBSTR_CN */
+
+#if defined(HAVE_MBSTR_TW)
+static int
+mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	switch (filter->status) {
+	case  0:	/* latin */
+		if (c >= 0 && c < 0x80) {	/* ok */
+			;
+		} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
+			filter->status = 1;
+		} else if (c == 0x8e) {	/* DBCS lead byte */
+			filter->status = 2;
+		} else {							/* bad */
+			filter->flag = 1;
+		}
+		break;
+
+	case  1:	/* got lead byte */
+		if (c < 0xa1 || c > 0xfe) {		/* bad */
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		break;
+
+	case  2:	/* got lead byte */
+		if (c >= 0xa1 && c < 0xaf) {	/* ok */
+			filter->status = 3;
+		} else {
+			filter->flag = 1; /* bad */
+		}
+		break;
+
+	case  3:	/* got lead byte */
+		if (c < 0xa1 || c > 0xfe) {		/* bad */
+			filter->flag = 1;
+		}
+		filter->status = 4;
+		break;
+
+	case  4:	/* got lead byte */
+		if (c < 0xa1 || c > 0xfe) {		/* bad */
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		break;
+
+	default:
+		filter->status = 0;
+		break;
+	}
+
+	return c;
+}
+
+static int
+mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	if (filter->status) {		/* kanji second char */
+		if (c < 0x40 || (c > 0x7e && c < 0xa1) ||c > 0xfe) {	/* bad */
+		    filter->flag = 1;
+		}
+		filter->status = 0;
+	} else if (c >= 0 && c < 0x80) {	/* latin  ok */
+		;
+	} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
+		filter->status = 1;
+	} else {							/* bad */
+		filter->flag = 1;
+	}
+
+	return c;
+}
+
+#endif /* HAVE_MBSTR_TW */
+
+#if defined(HAVE_MBSTR_KR)
+static int
+mbfl_filt_ident_euckr(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	switch (filter->status) {
+	case  0:	/* latin */
+		if (c >= 0 && c < 0x80) {	/* ok */
+			;
+		} else if (c > 0xa0 && c < 0xff) {	/* DBCS lead byte */
+			filter->status = 1;
+		} else {							/* bad */
+			filter->flag = 1;
+		}
+		break;
+
+	case  1:	/* got lead byte */
+		if (c < 0xa1 || c > 0xfe) {		/* bad */
+			filter->flag = 1;
+		}
+		filter->status = 0;
+		break;
+
+	default:
+		filter->status = 0;
+		break;
+	}
+
+	return c;
+}
+
+static int
+mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	switch (filter->status) {
+	case 0: /* latin */
+		if (c >= 0 && c < 0x80) { /* ok */
+			;
+		} else if (c >= 0x81 && c <= 0xa0) {	/* dbcs first char */
+		    filter->status= 1;
+		} else if (c >= 0xa1 && c <= 0xc6) {	/* dbcs first char */
+		    filter->status= 2;
+		} else if (c >= 0xc7 && c <= 0xfe) {	/* dbcs first char */
+		    filter->status= 3;
+		} else { /* bad */
+			filter->flag = 1;
+		}		
+
+	case 1:
+	case 2:
+		if (c < 0x41 || (c > 0x5a && c < 0x61)
+			|| (c > 0x7a && c < 0x81) || c > 0xfe) {	/* bad */
+		    filter->flag = 1;
+		}
+		filter->status = 0;
+		break;
+
+	case 3:
+		if (c < 0xa1 || c > 0xfe) {	/* bad */
+		    filter->flag = 1;
+		}
+		filter->status = 0;
+		break;
+
+	default:
+		filter->status = 0;
+		break;
+	}
+
+	return c;
+}
+
+#endif /* HAVE_MBSTR_KR */
+
 
 /* We only distinguish the MS extensions to ISO-8859-1.
  * Actually, this is pretty much a NO-OP, since the identification
@@ -8232,3 +8870,10 @@ mbfl_html_numeric_entity(
 
 	return result;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

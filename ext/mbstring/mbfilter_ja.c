@@ -79,8 +79,14 @@
 
 /* $Id$ */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "php_globals.h"
+
+#if defined(HAVE_MBSTR_JA)
 
 #include "mbfilter.h"
 #include "mbfilter_ja.h"
@@ -1274,3 +1280,12 @@ mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter TSRMLS_DC)
 	filter->status &= 0xff;
 	return 0;
 }
+
+#endif /* HAVE_MBSTR_JA */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
