@@ -901,6 +901,22 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 }
 
 
+void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_DC)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_FETCH_CLASS;
+	if (class_entry) {
+		opline->op1 = *class_entry;
+	} else {
+		SET_UNUSED(opline->op1);
+	}
+	opline->op2 = *class_name;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->result.op_type = IS_CONST; /* FIXME: Hack so that INIT_FCALL_BY_NAME still knows this is a class */
+	*result = opline->result;
+}
+
 void zend_do_begin_class_member_function_call(znode *class_name, znode *function_name TSRMLS_DC)
 {
 	unsigned char *ptr = NULL;
@@ -1644,30 +1660,29 @@ void zend_do_default_before_statement(znode *case_list, znode *default_token TSR
 }
 
 
-void zend_do_begin_class_declaration(znode *class_name, znode *parent_class_name TSRMLS_DC)
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *opline;
 	int runtime_inheritance = 0;
+	zend_class_entry new_class_entry;
 
-	if (CG(active_class_entry)) {
-		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
-		return;
-	}
-	CG(class_entry).type = ZEND_USER_CLASS;
-	CG(class_entry).name = class_name->u.constant.value.str.val;
-	CG(class_entry).name_length = class_name->u.constant.value.str.len;
-	CG(class_entry).refcount = (int *) emalloc(sizeof(int));
-	*CG(class_entry).refcount = 1;
-	CG(class_entry).constants_updated = 0;
+	class_token->u.previously_active_class_entry = CG(active_class_entry);
+	new_class_entry.type = ZEND_USER_CLASS;
+	new_class_entry.name = class_name->u.constant.value.str.val;
+	new_class_entry.name_length = class_name->u.constant.value.str.len;
+	new_class_entry.refcount = (int *) emalloc(sizeof(int));
+	*new_class_entry.refcount = 1;
+	new_class_entry.constants_updated = 0;
 	
-	zend_str_tolower(CG(class_entry).name, CG(class_entry).name_length);
+	zend_str_tolower(new_class_entry.name, new_class_entry.name_length);
 
-	zend_hash_init(&CG(class_entry).function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
-	zend_hash_init(&CG(class_entry).default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry.function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
+	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
+	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 
-	CG(class_entry).handle_function_call = NULL;
-	CG(class_entry).handle_property_set = NULL;
-	CG(class_entry).handle_property_get = NULL;
+	new_class_entry.handle_function_call = NULL;
+	new_class_entry.handle_property_set = NULL;
+	new_class_entry.handle_property_get = NULL;
 
 	/* code for inheritance from parent class */
 	if (parent_class_name) {
@@ -1679,29 +1694,38 @@ void zend_do_begin_class_declaration(znode *class_name, znode *parent_class_name
 		CG(active_ce_parent_class_name).value.str.val = estrndup(parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len);
 		CG(active_ce_parent_class_name).value.str.len = parent_class_name->u.constant.value.str.len;
 
-		if (zend_hash_find(CG(class_table), parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len+1, (void **) &parent_class)==SUCCESS) {
+		if (zend_hash_find(CG(active_class_entry)?&CG(active_class_entry)->class_table:CG(class_table), parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len+1, (void **) &parent_class)==SUCCESS) {
 			/* copy functions */
-			zend_hash_copy(&CG(class_entry).function_table, &parent_class->function_table, (copy_ctor_func_t) function_add_ref, &tmp_zend_function, sizeof(zend_function));
+			zend_hash_copy(&new_class_entry.function_table, &parent_class->function_table, (copy_ctor_func_t) function_add_ref, &tmp_zend_function, sizeof(zend_function));
 
 			/* copy default properties */
-			zend_hash_copy(&CG(class_entry).default_properties, &parent_class->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+			zend_hash_copy(&new_class_entry.default_properties, &parent_class->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 			/* copy overloaded handlers */
-			CG(class_entry).handle_function_call = parent_class->handle_function_call;
-			CG(class_entry).handle_property_get  = parent_class->handle_property_get;
-			CG(class_entry).handle_property_set  = parent_class->handle_property_set;
+			new_class_entry.handle_function_call = parent_class->handle_function_call;
+			new_class_entry.handle_property_get  = parent_class->handle_property_get;
+			new_class_entry.handle_property_set  = parent_class->handle_property_set;
 
-			CG(class_entry).parent = parent_class;
+			new_class_entry.parent = parent_class;
 
 			zval_dtor(&parent_class_name->u.constant);
 		} else {
 			runtime_inheritance = 1;
-			CG(class_entry).parent = NULL;
+			new_class_entry.parent = NULL;
 		}
 	} else {
-		CG(class_entry).parent = NULL;
+		new_class_entry.parent = NULL;
 	}
 
+	if (CG(active_class_entry)) {
+		if (runtime_inheritance) {
+			zend_error(E_ERROR, "Only first level classes can inherit from undefined classes");
+		}
+		zend_hash_update(&CG(active_class_entry)->class_table, new_class_entry.name, new_class_entry.name_length+1, &new_class_entry, sizeof(zend_class_entry), (void **) &CG(active_class_entry));
+		return;
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
 	opline->op1.op_type = IS_CONST;
 	build_runtime_defined_function_key(&opline->op1.u.constant, &class_name->u.constant, opline TSRMLS_CC);
@@ -1711,32 +1735,32 @@ void zend_do_begin_class_declaration(znode *class_name, znode *parent_class_name
 	if (runtime_inheritance) {
 		char *full_class_name;
 
-		opline->op2.u.constant.value.str.len = parent_class_name->u.constant.value.str.len+1+CG(class_entry).name_length;
+		opline->op2.u.constant.value.str.len = parent_class_name->u.constant.value.str.len+1+new_class_entry.name_length;
 		full_class_name = opline->op2.u.constant.value.str.val = (char *) emalloc(opline->op2.u.constant.value.str.len+1);
 
 		memcpy(full_class_name, parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len);
 		full_class_name += parent_class_name->u.constant.value.str.len;
 		full_class_name[0] = ':';
 		full_class_name++;
-		memcpy(full_class_name, CG(class_entry).name, CG(class_entry).name_length);
+		memcpy(full_class_name, new_class_entry.name, new_class_entry.name_length);
 		zval_dtor(&parent_class_name->u.constant);
-		full_class_name += CG(class_entry).name_length;
+		full_class_name += new_class_entry.name_length;
 		full_class_name[0] = 0;
 		opline->extended_value = ZEND_DECLARE_INHERITED_CLASS;
 	} else {
-		opline->op2.u.constant.value.str.val = estrndup(CG(class_entry).name, CG(class_entry).name_length);
-		opline->op2.u.constant.value.str.len = CG(class_entry).name_length;
+		opline->op2.u.constant.value.str.val = estrndup(new_class_entry.name, new_class_entry.name_length);
+		opline->op2.u.constant.value.str.len = new_class_entry.name_length;
 		opline->extended_value = ZEND_DECLARE_CLASS;
 	}
 	
-	zend_hash_update(CG(class_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &CG(class_entry), sizeof(zend_class_entry), (void **) &CG(active_class_entry));
+	zend_hash_update(CG(class_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &new_class_entry, sizeof(zend_class_entry), (void **) &CG(active_class_entry));
 }
 
 
-void zend_do_end_class_declaration(TSRMLS_D)
+void zend_do_end_class_declaration(znode *class_token TSRMLS_DC)
 {
 	do_inherit_parent_constructor(CG(active_class_entry));
-	CG(active_class_entry) = NULL;
+	CG(active_class_entry) = class_token->u.previously_active_class_entry;
 	if (CG(active_ce_parent_class_name).value.str.val) {
 		efree(CG(active_ce_parent_class_name).value.str.val);
 		CG(active_ce_parent_class_name).value.str.val = NULL;

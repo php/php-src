@@ -277,6 +277,7 @@ struct _zend_class_entry {
 
 	HashTable function_table;
 	HashTable default_properties;
+	HashTable class_table;
 	zend_function_entry *builtin_functions;
 
 	/* handlers */
