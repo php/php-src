@@ -377,8 +377,8 @@ PHP_FUNCTION(pi)
 /* }}} */
 
 
-/* {{{ proto bool is_finite(double val)
-   Returns whether double is finite */
+/* {{{ proto bool is_finite(float val)
+   Returns whether argument is finite */
 PHP_FUNCTION(is_finite)
 {
 	double dval;
@@ -391,8 +391,8 @@ PHP_FUNCTION(is_finite)
 }
 /* }}} */
 
-/* {{{ proto bool is_infinite(double val)
-   Returns whether double is infinite */
+/* {{{ proto bool is_infinite(float val)
+   Returns whether argument is infinite */
 PHP_FUNCTION(is_infinite)
 {
 	double dval;
@@ -404,8 +404,8 @@ PHP_FUNCTION(is_infinite)
 }
 /* }}} */
 
-/* {{{ proto bool is_nan(double val)
-   Returns whether double is not a number */
+/* {{{ proto bool is_nan(float val)
+   Returns whether argument is not a number */
 PHP_FUNCTION(is_nan)
 {
 	double dval;
@@ -1046,8 +1046,8 @@ PHP_FUNCTION(number_format)
 }
 /* }}} */
 
-/* {{{ proto double fmod(double x, double y)
-   Returns the remainder of dividing x by y as a double */
+/* {{{ proto float fmod(float x, float y)
+   Returns the remainder of dividing x by y as a float */
 PHP_FUNCTION(fmod)
 {
 	double num1, num2;
