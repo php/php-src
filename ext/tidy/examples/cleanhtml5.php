@@ -21,7 +21,7 @@
       $tidy = tidy_parse_file($_SERVER['argv'][1]);
     }
     
-    $tidy->clean_repair();
+    $tidy->cleanRepair();
     
     if(!empty($tidy->error_buf)) {
         

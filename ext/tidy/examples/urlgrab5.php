@@ -22,12 +22,10 @@
 	    }
 	}
 		    
-	if($node->has_children()) {
+	if($node->hasChildren()) {
 
 	    foreach($node->child as $c) {
-
 		dump_nodes($c, $urls);
-		
 	    }
 
 	}
@@ -36,6 +34,6 @@
     }
 
     $a = tidy_parse_file($_SERVER['argv'][1]);
-    $a->clean_repair();
+    $a->cleanRepair();
     print_r(dump_nodes($a->html()));
 ?>
