@@ -179,7 +179,7 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_object (object result [, string class_name [, NULL|array ctor_params]])
+/* {{{ proto object mysqli_fetch_object (object result [, string class_name [, NULL|array ctor_params]])
    Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object) 
 {
