@@ -1089,6 +1089,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 {
 	int i, j;
 	CS_INT retcode;
+	TSRMLS_FETCH();
 	
 	/* We've already fetched everything */
 	if (result->last_retcode == CS_END_DATA || result->last_retcode == CS_END_RESULTS) {
