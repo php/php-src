@@ -64,7 +64,7 @@ zend_module_entry curl_module_entry = {
 	"curl",
 	curl_functions,
 	PHP_MINIT(curl),
-	NULL,
+	PHP_MSHUTDOWN(curl),
 	NULL,
 	NULL,
 	PHP_MINFO(curl),
@@ -228,8 +228,20 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT("CURLE_TELNET_OPTION_SYNTAX",        CURLE_TELNET_OPTION_SYNTAX);
 	REGISTER_CURL_CONSTANT("CURLE_ALREADY_COMPLETE",            CURLE_ALREADY_COMPLETE);
 
+	if (curl_global_init(0) != CURLE_OK) {
+		return FAILURE;
+	}
+	
 	return SUCCESS;
 }
+
+PHP_MSHUTDOWN_FUNCTION(curl)
+{
+	curl_global_cleanup();
+
+	return SUCCESS;
+}
+
 
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
