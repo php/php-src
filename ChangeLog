@@ -1,3 +1,67 @@
+2000-04-19  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c: Fix Win32 compilation.  Hillarious April 1st joke!
+
+2000-04-19  Colin Viebrock  <cmv@privateworld.com>
+
+    * logos.h
+      main.c: *** empty log message ***
+
+    * ext/standard/info.c
+      ext/standard/info.h: A little easter egg for April 1st ... :)
+
+2000-04-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Modified entry.
+
+    * ext/standard/basic_functions.c: Just a type cast is sufficient.
+
+2000-04-19  Frank M. Kromann  <fmk@swwwing.com>
+
+    * sapi/cgi/cgi_main.c: SIGPIPE is unknown on WIN32 platforms
+
+2000-04-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/calendar/config.m4: Make ext/calendar optional.
+
+2000-04-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * sapi/cgi/cgi_main.c:
+    ignore SIGPIPE in standalone-mode so that one can actually use fsockopen() *and* have the remote side close the socket whithout PHP dying!
+
+2000-04-19  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.c
+      NEWS: author fixes
+
+    * sapi/isapi/php4isapi.c:
+    Improve performance of the PHP_SELF registration under ISAPI
+
+    * NEWS
+      main.c
+      php.ini-dist
+      php.ini-optimized: Support E_USER_* error types
+
+2000-04-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Some fixes.
+
+    * NEWS: Fix attribution
+
+2000-04-19  Zeev Suraski  <zeev@php.net>
+
+    * ext/ldap/ldap.c: Kill warning
+
+    * ext/imap/php_imap.c: Fix a couple of _ex()'s
+
+2000-04-19  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/file.c: fgetcsv() patch from Nick Talbott
+
+2000-04-19  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c: phpcredits() update.
+
 2000-04-18  Evan Klinger  <evan715@home.com>
 
     * ext/standard/basic_functions.c:
