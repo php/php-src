@@ -58,6 +58,8 @@ ps_module ps_mod_files = {
 	PS_MOD(files)
 };
 
+/* If you change the logic here, please also update the error message in
+ * ps_files_open() appropriately */
 static int ps_files_valid_key(const char *key)
 {
 	size_t len;
@@ -135,8 +137,11 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 
 		ps_files_close(data);
 		
-		if (!ps_files_valid_key(key) || 
-				!ps_files_path_create(buf, sizeof(buf), data, key))
+		if (!ps_files_valid_key(key)) {
+			php_error(E_WARNING, "The session id contains illegal characters, valid characters are only a-z, A-Z and 0-9");
+			return;
+		}
+		if (!ps_files_path_create(buf, sizeof(buf), data, key))
 			return;
 		
 		data->lastkey = estrdup(key);
