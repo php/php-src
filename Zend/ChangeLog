@@ -1,3 +1,63 @@
+2003-06-30  Shane Caraveo  <shane@caraveo.com>
+
+    * zend_operators.h:
+      this fixes including this header in a c++ file (vs6)
+
+2003-06-30  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_compile.c:
+      nuke "main" as a reserved keyword
+
+2003-06-30  Andi Gutmans  <andi@zend.com>
+
+    * zend.c
+      zend_API.c
+      zend_compile.c
+      zend_constants.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_mm.c
+      zend_opcode.c
+      zend_reflection_api.c:
+      - ZE coding style requires if ( instead of if(
+
+2003-06-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_reflection_api.c:
+      ZTS fixes. Remove unused local variables.
+
+2003-06-30  George Schlossnagle  <george@omniti.com>
+
+    * Makefile.am
+      Zend.dsp
+      ZendTS.dsp
+      zend_default_classes.c
+      zend_reflection_api.c
+      zend_reflection_api.h:
+      added support for Reflection_Function, the first part of
+      the reflection api
+
+2003-06-30  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_builtin_functions.c:
+      move the check down a little so it catches all cases
+
+    * zend_builtin_functions.c:
+      Fix bug #24399 from an excellent test case by edin
+
+2003-06-30  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Semantically it's a refcount increase, not a lock...
+
+    * zend_execute.c:
+      Fix 'global' implementation (fixes, at least, bug #24396
+
+2003-06-30  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_operators.c:
+      revert back the optimization for now.
+
 2003-06-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_object_handlers.c:
