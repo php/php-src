@@ -30,6 +30,7 @@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 srcdir = @srcdir@
+abs_srcdir = @abs_srcdir@
 VPATH = @srcdir@
 bindir = @bindir@
 
@@ -57,7 +58,7 @@ CPPFLAGS = @CPPFLAGS@
 DEFS = @DEFS@
 CFLAGS = @CFLAGS@ @DEBUG_CFLAGS@ $(PROF_CFLAGS)
 COMPILE = $(CC) $(CFLAGS) $(CFLAGS_SHLIB) $(CPPFLAGS) $(INCLUDE) $(DEFS) @STRONGHOLD@ 
-LDFLAGS = @RPATHS@ @LDFLAGS@ $(LDFLAGS_SHLIB) $(LDFLAGS_SHLIB_EXPORT) -L$(ZEND_DIR)
+LDFLAGS = @VERSION_SCRIPT@ @RPATHS@ @LDFLAGS@ $(LDFLAGS_SHLIB) $(LDFLAGS_SHLIB_EXPORT) -L$(ZEND_DIR)
 REGCFLAGS = $(CFLAGS)
 RANLIB = @RANLIB@
 YACC = @YACC@
@@ -114,7 +115,7 @@ libmodphp4-so.a: all-recursive $(OBJS) @REGEX_LIB@
 libphp4.so: $(srcdir)/mod_php4.c libmodphp4-so.a @REGEX_LIB@
 	-@test -f ./mod_php4.c || test -L ./mod_php4.c || $(LN_S) $(srcdir)/mod_php4.c ./mod_php4.c
 	-@test -f ./mod_php4.c || test -h ./mod_php4.c || $(LN_S) $(srcdir)/mod_php4.c ./mod_php4.c
-	$(APXS) $(INCLUDE) -c -o libphp4.so @RPATHS@ ./mod_php4.c libmodphp4-so.a $(APXS_LDFLAGS) $(APXS_EXP)
+	$(APXS) $(INCLUDE) -c -o libphp4.so @VERSION_SCRIPT@ @RPATHS@ ./mod_php4.c libmodphp4-so.a $(APXS_LDFLAGS) $(APXS_EXP)
 
 regex/libregex.a:
 	(cd regex; $(MAKE) lib)
