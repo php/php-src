@@ -37,7 +37,7 @@ AC_ARG_WITH(caudium,
 		   while(!catch(pike=readlink(pike)) && tries--)
 		     ;
 		   write(combine_path(dirname(orig), pike)); '`
-		AC_ADD_INCLUDE($PIKE_INCLUDE_DIR)
+		PHP_ADD_INCLUDE($PIKE_INCLUDE_DIR)
 		if test "$prefix" != "NONE"; then
 		   PIKE_C_INCLUDE=$prefix/include/`basename ${PIKE}`
 		else
@@ -66,7 +66,7 @@ AC_ARG_WITH(caudium,
                       fi
 		      
 		      if test "$PIKE_TEST_VER" = "${PIKE_CMAJOR_VERSION}.${PIKE_CMINOR_VERSION}.${PIKE_CBUILD_VERSION}"; then
-		         AC_ADD_INCLUDE($PIKE_C_INCLUDE)
+		         PHP_ADD_INCLUDE($PIKE_C_INCLUDE)
 				 PIKE_INCLUDE_DIR="$PIKE_INCLUDE_DIR, $PIKE_C_INCLUDE"
 		         AC_MSG_RESULT(found)
 		      else

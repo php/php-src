@@ -21,7 +21,7 @@ if test "$PHP_FDFTK" != "no"; then
     AC_MSG_ERROR(Please reinstall the fdftk distribution)
   fi
 
-  AC_ADD_INCLUDE($FDFTK_DIR/include)
+  PHP_ADD_INCLUDE($FDFTK_DIR/include)
   
   old_LIBS=$LIBS
   LIBS="$LIBS -L$FDFTK_DIR/lib -lm"
@@ -30,7 +30,7 @@ if test "$PHP_FDFTK" != "no"; then
   LIBS=$old_LIBS
 
   PHP_SUBST(FDFTK_SHARED_LIBADD)
-  AC_ADD_LIBRARY_WITH_PATH(FdfTk, $FDFTK_DIR/lib, FDFTK_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(FdfTk, $FDFTK_DIR/lib, FDFTK_SHARED_LIBADD)
 
   PHP_EXTENSION(fdf, $ext_shared)
 fi

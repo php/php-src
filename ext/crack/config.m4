@@ -22,8 +22,8 @@ if test "$PHP_CRACK" != "no"; then
 		AC_MSG_ERROR(Cannot find a cracklib header file)
 	fi
 
-    AC_ADD_INCLUDE($CRACK_INCLUDEDIR)
-	AC_ADD_LIBRARY_WITH_PATH(crack, $CRACK_LIBDIR)
+    PHP_ADD_INCLUDE($CRACK_INCLUDEDIR)
+	PHP_ADD_LIBRARY_WITH_PATH(crack, $CRACK_LIBDIR)
 
 	PHP_EXTENSION(crack, $ext_shared)
 

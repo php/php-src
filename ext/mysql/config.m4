@@ -51,7 +51,7 @@ if test "$PHP_MYSQL" = "yes"; then
   PHP_SUBST(MYSQL_LIBADD)
   PHP_SUBST(MYSQL_SUBDIRS)
   LIB_BUILD($ext_builddir/libmysql,$ext_shared,yes)
-  AC_ADD_INCLUDE($ext_srcdir/libmysql)
+  PHP_ADD_INCLUDE($ext_srcdir/libmysql)
   MYSQL_MODULE_TYPE="builtin"
 elif test "$PHP_MYSQL" != "no"; then
   for i in $PHP_MYSQL; do
@@ -77,14 +77,14 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find mysqlclient library under $MYSQL_DIR)
   fi
 
-  AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
 
   dnl Check if mysql_config is found. If yes, use the LIBS provided by it..
   if test -x "$MYSQL_DIR/bin/mysql_config"; then
     PHP_EVAL_LIBLINE($MYSQL_DIR/bin/mysql_config --libs)   
   fi
 
-  AC_ADD_INCLUDE($MYSQL_INC_DIR)
+  PHP_ADD_INCLUDE($MYSQL_INC_DIR)
 else
   MYSQL_MODULE_TYPE="none"
 fi

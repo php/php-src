@@ -14,7 +14,7 @@ AC_ARG_WITH(apxs2,
                   fi
                 fi
 	else
-		AC_EXPAND_PATH($withval, APXS)
+		PHP_EXPAND_PATH($withval, APXS)
 	fi
 
     if $APXS -q CFLAGS >/dev/null 2>&1; then
@@ -27,7 +27,7 @@ AC_ARG_WITH(apxs2,
 
 	APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
 	APXS_CFLAGS=`$APXS -q CFLAGS`
-	AC_ADD_INCLUDE($APXS_INCLUDEDIR)
+	PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
 	if `echo $APXS_CFLAGS|grep USE_HSREGEX>/dev/null`; then
 		APACHE_HAS_REGEX=yes
 	fi

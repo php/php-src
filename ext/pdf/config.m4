@@ -20,11 +20,11 @@ PHP_ARG_WITH(pdflib,whether to include PDFlib support,
       LIBS=$old_LIBS
       LDFLAGS=$old_LDFLAGS
       PHP_SUBST(PDFLIB_SHARED_LIBADD)
-      AC_ADD_LIBRARY(pdf, PDFLIB_SHARED_LIBADD)
-      AC_ADD_LIBRARY(tiff)
-      AC_ADD_LIBRARY(png)
-      AC_ADD_LIBRARY(jpeg)
-      AC_ADD_LIBRARY(z)
+      PHP_ADD_LIBRARY(pdf, PDFLIB_SHARED_LIBADD)
+      PHP_ADD_LIBRARY(tiff)
+      PHP_ADD_LIBRARY(png)
+      PHP_ADD_LIBRARY(jpeg)
+      PHP_ADD_LIBRARY(z)
       ;;
     no)
       ;;
@@ -45,10 +45,10 @@ PHP_ARG_WITH(pdflib,whether to include PDFlib support,
             LIBS="$LIBS -L$withval/lib"
             AC_CHECK_LIB(z,deflate, [PDFLIB_LIBS="-L$withval/lib -lz"],[AC_MSG_RESULT(no)],)
             LIBS=$old_LIBS
-            AC_ADD_LIBRARY_WITH_PATH(z, $withval/lib)
+            PHP_ADD_LIBRARY_WITH_PATH(z, $withval/lib)
           ],[
             AC_CHECK_LIB(z,deflate, ,[AC_MSG_RESULT(no, try --with-zlib=<DIR>)],)
-            AC_ADD_LIBRARY(z)
+            PHP_ADD_LIBRARY(z)
             LIBS="$LIBS -lz"
           ])
         else
@@ -66,11 +66,11 @@ PHP_ARG_WITH(pdflib,whether to include PDFlib support,
           LIBS="$LIBS -L$withval/lib"
           AC_CHECK_LIB(jpeg,jpeg_read_header, [PDFLIB_LIBS="$PDFLIB_LIBS -L$withval/lib -ljpeg"],[AC_MSG_RESULT(no)],)
           LIBS=$old_LIBS
-          AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
+          PHP_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
           LIBS="$LIBS -L$withval/lib -ljpeg"
         ],[
           AC_CHECK_LIB(jpeg,jpeg_read_header, ,[AC_MSG_RESULT(no, try --with-jpeg-dir=<DIR>)],)
-          AC_ADD_LIBRARY(jpeg)
+          PHP_ADD_LIBRARY(jpeg)
           LIBS="$LIBS -ljpeg"
         ]) 
 
@@ -83,11 +83,11 @@ PHP_ARG_WITH(pdflib,whether to include PDFlib support,
           LIBS="$LIBS -L$withval/lib"
           AC_CHECK_LIB(png,png_create_info_struct, [PDFLIB_LIBS="$PDFLIB_LIBS -L$withval/lib -lpng"],[AC_MSG_RESULT(no)],)
           LIBS=$old_LIBS
-          AC_ADD_LIBRARY_WITH_PATH(png, $withval/lib)
+          PHP_ADD_LIBRARY_WITH_PATH(png, $withval/lib)
           LIBS="$LIBS -L$withval/lib -lpng"
         ],[
           AC_CHECK_LIB(png,png_create_info_struct, ,[AC_MSG_RESULT(no, try --with-png-dir=<DIR>)],)
-          AC_ADD_LIBRARY(png)
+          PHP_ADD_LIBRARY(png)
           LIBS="$LIBS -lpng"
         ]) 
 
@@ -100,11 +100,11 @@ PHP_ARG_WITH(pdflib,whether to include PDFlib support,
           LIBS="$LIBS -L$withval/lib"
           AC_CHECK_LIB(tiff,TIFFOpen, [PDFLIB_LIBS="$PDFLIB_LIBS -L$withval/lib -ltiff"],[AC_MSG_RESULT(no)],)
           LIBS=$old_LIBS
-          AC_ADD_LIBRARY_WITH_PATH(tiff, $withval/lib)
+          PHP_ADD_LIBRARY_WITH_PATH(tiff, $withval/lib)
           LIBS="$LIBS -L$withval/lib -ltiff"
         ],[
           AC_CHECK_LIB(tiff,TIFFOpen, ,[AC_MSG_RESULT(no, Try --with-tiff-dir=<DIR>)],)
-          AC_ADD_LIBRARY(tiff)
+          PHP_ADD_LIBRARY(tiff)
           LIBS="$LIBS -ltiff"
         ]) 
         withval=$old_withval
@@ -119,7 +119,7 @@ PHP_ARG_WITH(pdflib,whether to include PDFlib support,
         ])
         LIBS=$old_LIBS
         PHP_SUBST(PDFLIB_SHARED_LIBADD)
-        AC_ADD_LIBRARY_WITH_PATH(pdf, $withval/lib, PDFLIB_SHARED_LIBADD)
-        AC_ADD_INCLUDE($PDFLIB_INCLUDE)
+        PHP_ADD_LIBRARY_WITH_PATH(pdf, $withval/lib, PDFLIB_SHARED_LIBADD)
+        PHP_ADD_INCLUDE($PDFLIB_INCLUDE)
       fi ;;
   esac

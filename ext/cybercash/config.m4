@@ -17,8 +17,8 @@ AC_ARG_WITH(cybercash,
 	AC_CHECK_LIB(mckcrypto,base64_encode,[AC_DEFINE(HAVE_MCK,1,[ ])],
 		[AC_MSG_ERROR(Please reinstall the CyberCash MCK - cannot find mckcrypto lib)])
 	LIBS="$old_LIBS"
-	AC_ADD_LIBRARY_WITH_PATH(mckcrypto, $MCK_DIR/lib)
-	AC_ADD_INCLUDE($MCK_DIR)
+	PHP_ADD_LIBRARY_WITH_PATH(mckcrypto, $MCK_DIR/lib)
+	PHP_ADD_INCLUDE($MCK_DIR)
       else
         AC_MSG_RESULT(no)
       fi

@@ -87,16 +87,16 @@ AC_ARG_WITH(adabas,
     withval=/usr/local
   fi
   if test "$withval" != "no"; then
-    AC_ADD_INCLUDE($withval/incl)
-    AC_ADD_LIBPATH($withval/lib)
+    PHP_ADD_INCLUDE($withval/incl)
+    PHP_ADD_LIBPATH($withval/lib)
     ODBC_OBJS="$withval/lib/odbclib.a"
     ODBC_LIB="$abs_builddir/ext/odbc/libodbc_adabas.a"
     $srcdir/build/shtool mkdir -f -p ext/odbc
     rm -f "$ODBC_LIB"
     cp "$ODBC_OBJS" "$ODBC_LIB"
-	AC_ADD_LIBRARY(sqlptc)
-	AC_ADD_LIBRARY(sqlrte)
-    AC_ADD_LIBRARY_WITH_PATH(odbc_adabas, $abs_builddir/ext/odbc)
+	PHP_ADD_LIBRARY(sqlptc)
+	PHP_ADD_LIBRARY(sqlrte)
+    PHP_ADD_LIBRARY_WITH_PATH(odbc_adabas, $abs_builddir/ext/odbc)
     ODBC_TYPE=adabas
     AC_DEFINE(HAVE_ADABAS,1,[ ])
     AC_MSG_RESULT(yes)
@@ -119,10 +119,10 @@ AC_ARG_WITH(sapdb,
     withval=/usr/local
   fi
   if test "$withval" != "no"; then
-    AC_ADD_INCLUDE($withval/incl)
-	AC_ADD_LIBPATH($withval/lib)
-	AC_ADD_LIBRARY(sqlod)
-	AC_ADD_LIBRARY(sqlrte)
+    PHP_ADD_INCLUDE($withval/incl)
+	PHP_ADD_LIBPATH($withval/lib)
+	PHP_ADD_LIBRARY(sqlod)
+	PHP_ADD_LIBRARY(sqlrte)
     ODBC_TYPE=sapdb
     AC_DEFINE(HAVE_SAPDB,1,[ ])
     AC_MSG_RESULT(yes)
@@ -306,8 +306,8 @@ AC_ARG_WITH(iodbc,
     withval=/usr/local
   fi
   if test "$withval" != "no"; then
-    AC_ADD_LIBRARY_WITH_PATH(iodbc, $withval/lib)
-    AC_ADD_INCLUDE($withval/include)
+    PHP_ADD_LIBRARY_WITH_PATH(iodbc, $withval/lib)
+    PHP_ADD_INCLUDE($withval/include)
     ODBC_TYPE=iodbc
     AC_DEFINE(HAVE_IODBC,1,[ ])
     AC_MSG_RESULT(yes)
@@ -453,8 +453,8 @@ AC_ARG_WITH(dbmaker,
         ODBC_SHARED="odbc.la"
     else
         AC_MSG_RESULT(yes (static))
-        AC_ADD_LIBRARY_WITH_PATH(dmapic, $ODBC_LIBDIR)
-        AC_ADD_INCLUDE($ODBC_INCDIR)
+        PHP_ADD_LIBRARY_WITH_PATH(dmapic, $ODBC_LIBDIR)
+        PHP_ADD_INCLUDE($ODBC_INCDIR)
         ODBC_STATIC="libphpext_odbc.la"
     fi
 

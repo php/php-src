@@ -23,10 +23,10 @@ if test "$PHP_CURL" != "no"; then
     easy.h should be in <curl-dir>/include/curl/)
   fi
 
-  AC_ADD_INCLUDE($CURL_DIR/include)
+  PHP_ADD_INCLUDE($CURL_DIR/include)
 
   PHP_SUBST(CURL_SHARED_LIBADD)
-  AC_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/lib, CURL_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/lib, CURL_SHARED_LIBADD)
 
   AC_CHECK_LIB(curl,curl_easy_perform, 
   [ 

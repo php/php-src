@@ -24,7 +24,7 @@ AC_ARG_WITH(apxs,
                   fi
                 fi
 	else
-		AC_EXPAND_PATH($withval, APXS)
+		PHP_EXPAND_PATH($withval, APXS)
 	fi
 
     if $APXS -q CFLAGS >/dev/null 2>&1; then
@@ -47,7 +47,7 @@ AC_ARG_WITH(apxs,
 		-D*) CPPFLAGS="$CPPFLAGS $flag";;
 		esac
 	done
-	AC_ADD_INCLUDE($APXS_INCLUDEDIR)
+	PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
 	PHP_SAPI=apache
 	APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
 	PHP_BUILD_SHARED
@@ -75,7 +75,7 @@ AC_ARG_WITH(apache,
 	fi
 	if test "$withval" != "no"; then
 		APACHE_MODULE=yes
-		AC_EXPAND_PATH($withval, withval)
+		PHP_EXPAND_PATH($withval, withval)
 		# For Apache 1.2.x
 		if test -f $withval/src/httpd.h; then 
 			APACHE_INCLUDE=-I$withval/src

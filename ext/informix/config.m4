@@ -17,16 +17,16 @@ WARNING: You asked for Informix support, but don't have \\\$INFORMIXDIR
       if test "$PHP_INFORMIX" = "yes"; then
         IFX_INCDIR=$INFORMIXDIR/incl/esql
         if test -z "$IFX_LIBDIR"; then
-          AC_ADD_LIBPATH($INFORMIXDIR/lib, INFORMIX_SHARED_LIBADD)
-          AC_ADD_LIBPATH($INFORMIXDIR/lib/esql, INFORMIX_SHARED_LIBADD)
+          PHP_ADD_LIBPATH($INFORMIXDIR/lib, INFORMIX_SHARED_LIBADD)
+          PHP_ADD_LIBPATH($INFORMIXDIR/lib/esql, INFORMIX_SHARED_LIBADD)
         else
           IFX_LIBDIR="$IFX_LIBDIR"
         fi
       else
         IFX_INCDIR=$PHP_INFORMIX/incl/esql
         if test -z "$IFX_LIBDIR"; then
-          AC_ADD_LIBPATH($PHP_INFORMIX/lib, INFORMIX_SHARED_LIBADD)
-          AC_ADD_LIBPATH($PHP_INFORMIX/lib/esql, INFORMIX_SHARED_LIBADD)
+          PHP_ADD_LIBPATH($PHP_INFORMIX/lib, INFORMIX_SHARED_LIBADD)
+          PHP_ADD_LIBPATH($PHP_INFORMIX/lib/esql, INFORMIX_SHARED_LIBADD)
         else
           IFX_LIBDIR="$IFX_LIBDIR"
         fi
@@ -73,8 +73,8 @@ WARNING: You specified Informix base install directory that is different
       for i in $IFX_LIBS; do
         case "$i" in
         *.o)
-            AC_ADD_LIBPATH($abs_builddir/ext/informix, INFORMIX_SHARED_LIBADD)
-            AC_ADD_LIBRARY(php_ifx, 1, INFORMIX_SHARED_LIBADD)
+            PHP_ADD_LIBPATH($abs_builddir/ext/informix, INFORMIX_SHARED_LIBADD)
+            PHP_ADD_LIBRARY(php_ifx, 1, INFORMIX_SHARED_LIBADD)
             $srcdir/build/shtool mkdir -p ext/informix
             cd ext/informix
             ar r libphp_ifx.a $i
@@ -82,7 +82,7 @@ WARNING: You specified Informix base install directory that is different
             cd ../..;;
         -l*)
             lib=`echo $i|sed 's/^-l//'`
-            AC_ADD_LIBRARY($lib, 1, INFORMIX_SHARED_LIBADD);;
+            PHP_ADD_LIBRARY($lib, 1, INFORMIX_SHARED_LIBADD);;
         *)
             IFX_LIBADD="$IFX_LIBADD $i";;
         esac

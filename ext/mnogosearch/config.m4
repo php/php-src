@@ -40,7 +40,7 @@ PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
 	AC_MSG_ERROR(udm-config script not found in $MNOGOSEARCH_BINDIR)
     fi
     
-    AC_ADD_INCLUDE($MNOGOSEARCH_INCDIR)
+    PHP_ADD_INCLUDE($MNOGOSEARCH_INCDIR)
     
     AC_DEFINE(HAVE_MNOGOSEARCH,1,[ ])
     

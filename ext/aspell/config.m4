@@ -11,8 +11,8 @@ AC_ARG_WITH(aspell,
       ASPELL_DIR=$withval
     fi
 
-    AC_ADD_INCLUDE($ASPELL_DIR/include)
-    AC_ADD_LIBRARY_WITH_PATH(aspell, $ASPELL_DIR/lib)
+    PHP_ADD_INCLUDE($ASPELL_DIR/include)
+    PHP_ADD_LIBRARY_WITH_PATH(aspell, $ASPELL_DIR/lib)
 
     if test ! -f "$ASPELL_DIR/include/aspell-c.h"; then
       AC_MSG_ERROR(Could not find aspell-c.h in $ASPELL_DIR/include - please copy it manually from the aspell sources to $ASPELL_DIR/include)

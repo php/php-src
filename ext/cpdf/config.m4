@@ -14,9 +14,9 @@ AC_ARG_WITH(cpdflib,
       PHP_EXTENSION(cpdf)
       AC_CHECK_LIB(cpdf, cpdf_open, [AC_DEFINE(HAVE_CPDFLIB,1,[Whether you have cpdflib])],
         [AC_MSG_ERROR(Cpdf module requires cpdflib >= 2.)])
-      AC_ADD_LIBRARY(cpdf)
-      AC_ADD_LIBRARY(tiff)
-      AC_ADD_LIBRARY(jpeg)
+      PHP_ADD_LIBRARY(cpdf)
+      PHP_ADD_LIBRARY(tiff)
+      PHP_ADD_LIBRARY(jpeg)
       ;;
     *)
       test -f $withval/include/cpdflib.h && CPDFLIB_INCLUDE="$withval/include"
@@ -35,7 +35,7 @@ AC_ARG_WITH(cpdflib,
           fi
           LIBS="$LIBS -L$withval/lib"
           AC_CHECK_LIB(jpeg,jpeg_read_header, ,[AC_MSG_RESULT(no)],)
-          AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
+          PHP_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
         ],[
           AC_MSG_RESULT(no)
           AC_MSG_WARN(If configure fails try --with-jpeg-dir=<DIR>)
@@ -50,7 +50,7 @@ AC_ARG_WITH(cpdflib,
           fi
           LIBS="$LIBS -L$withval/lib"
           AC_CHECK_LIB(tiff,TIFFOpen, ,[AC_MSG_RESULT(no)],)
-          AC_ADD_LIBRARY_WITH_PATH(tiff, $withval/lib)
+          PHP_ADD_LIBRARY_WITH_PATH(tiff, $withval/lib)
         ],[
           AC_MSG_RESULT(no)
           AC_MSG_WARN(If configure fails try --with-tiff-dir=<DIR>)
@@ -61,8 +61,8 @@ AC_ARG_WITH(cpdflib,
         AC_CHECK_LIB(cpdf, cpdf_open, [AC_DEFINE(HAVE_CPDFLIB,1,[Whether you have cpdflib])],
           [AC_MSG_ERROR(Cpdflib module requires cpdflib >= 2.)])
         LIBS=$old_LIBS
-        AC_ADD_LIBRARY_WITH_PATH(cpdf, $withval/lib)
-        AC_ADD_INCLUDE($CPDFLIB_INCLUDE)
+        PHP_ADD_LIBRARY_WITH_PATH(cpdf, $withval/lib)
+        PHP_ADD_INCLUDE($CPDFLIB_INCLUDE)
       else
         AC_MSG_RESULT(no)
       fi ;;

@@ -24,10 +24,10 @@ if test "$PHP_SWF" != "no"; then
    libswf.a should be in <swf-dir>/lib)
   fi
 
-  AC_ADD_INCLUDE($SWF_DIR/include)
+  PHP_ADD_INCLUDE($SWF_DIR/include)
 
   PHP_SUBST(SWF_SHARED_LIBADD)
-  AC_ADD_LIBRARY_WITH_PATH(swf, $SWF_DIR/lib, SWF_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(swf, $SWF_DIR/lib, SWF_SHARED_LIBADD)
   AC_DEFINE(HAVE_SWF,1,[ ])
 
   PHP_EXTENSION(swf, $ext_shared)
