@@ -1,8 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
-- mailparse extension has moved to PECL. (Wez/Jim)
 - ATTENTION!! register_globals defaults to 'off' now !!!
+- Moved ext/mailparse to PECL. (Wez/Jim)
 - Fixed pg_last_notice() crash. (Yasuo)
 - Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is
   enabled. (Jason)
@@ -24,6 +24,9 @@ PHP 4                                                                      NEWS
           $r=socket_select($rfds, $wfds, NULL, 1);
           print "Ready to read:\n"; var_dump($rfds);
     ?>
+- Fixed segfault in ibase_close() if user does not free the resultset.
+  Bugs #15419, #15992. (daniela)
+- Fixed pg_last_notice() crash. (Yasuo)
 - Added optional 3rd parameter "int encoding_mode" to gzencode() and fixed 
   parameters to conform documentation. (Stefan)
 - Changed read_exif_data() to be an alias of exif_read_data(). (Marcus)
