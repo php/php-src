@@ -19,39 +19,113 @@
 // $Id$
 
 require_once "System.php";
+require_once "PEAR.php";
+
+define("PEAR_REGISTRY_ERROR_LOCK", -2);
 
 /**
  * Administration class used to maintain the installed package database.
  */
-class PEAR_Registry
+class PEAR_Registry extends PEAR
 {
     // {{{ properties
 
-    var $statedir;
+    /** Directory where registry files are stored.
+     * @var string
+     */
+    var $statedir = '';
+
+    /** File where the file map is stored
+     * @var string
+     */
+    var $filemap = '';
+
+    /** Name of file used for locking the registry
+     * @var string
+     */
+    var $lockfile = '';
+
+    /** File descriptor used during locking
+     * @var resource
+     */
+    var $lock_fp = null;
+
+    /** Mode used during locking
+     * @var int
+     */
+    var $lock_mode = 0; // XXX UNUSED
 
     // }}}
 
     // {{{ PEAR_Registry
 
+    /**
+     * PEAR_Registry constructor.
+     *
+     * @param string (optional) PEAR install directory (for .php files)
+     *
+     * @access public
+     */
     function PEAR_Registry($pear_install_dir = PEAR_INSTALL_DIR)
     {
-        $this->statedir = $pear_install_dir . "/.registry";
+        parent::PEAR();
+        $ds = DIRECTORY_SEPARATOR;
+        $this->statedir = $pear_install_dir.$ds.".registry";
+        $this->filemap  = $pear_install_dir.$ds.".filemap";
+        $this->lockfile = $pear_install_dir.$ds.".lock";
+        if (!file_exists($this->filemap)) {
+            $this->_rebuildFileMap();
+        }
+    }
+
+    // }}}
+    // {{{ _PEAR_Registry
+
+    /**
+     * PEAR_Registry destructor.  Makes sure no locks are forgotten.
+     *
+     * @access private
+     */
+    function _PEAR_Registry()
+    {
+        parent::_PEAR();
+        if (is_resource($this->lock_fp)) {
+            $this->_unlock();
+        }
     }
 
     // }}}
 
     // {{{ _assertStateDir()
 
+    /**
+     * Make sure the directory where we keep registry files exists.
+     *
+     * @return bool TRUE if directory exists, FALSE if it could not be
+     * created
+     *
+     * @access private
+     */
     function _assertStateDir()
     {
         if (!@is_dir($this->statedir)) {
-            System::mkdir("-p {$this->statedir}");
+            return System::mkdir("-p {$this->statedir}");
         }
+        return true;
     }
 
     // }}}
     // {{{ _packageFileName()
 
+    /**
+     * Get the name of the file where data for a given package is stored.
+     *
+     * @param string package name
+     *
+     * @return string registry file name
+     *
+     * @access public
+     */
     function _packageFileName($package)
     {
         return "{$this->statedir}/{$package}.reg";
@@ -80,39 +154,83 @@ class PEAR_Registry
     }
 
     // }}}
+    // {{{ _rebuildFileMap()
 
-    // {{{ packageExists()
+    function _rebuildFileMap()
+    {
+        $packages = $this->listPackages();
+        $files = array();
+        foreach ($packages as $package) {
+            $version = $this->packageInfo($package, "version");
+            $filelist = $this->packageInfo($package, "filelist");
+            if (!is_array($filelist)) {
+                continue;
+            }
+            foreach ($filelist as $name => $attrs) {
+                if (isset($attrs['role']) && $attrs['role'] != 'php') {
+                    continue;
+                }
+                if (isset($attrs['baseinstalldir'])) {
+                    $file = $attrs['baseinstalldir'].DIRECTORY_SEPARATOR.$name;
+                } else {
+                    $file = $name;
+                }
+                $file = preg_replace(',^/+,', '', $file);
+                $files[$file] = $package;
+            }
+        }
+        $this->_assertStateDir();
+        $fp = @fopen($this->filemap, "w");
+        if (!$fp) {
+            return false;
+        }
+        fwrite($fp, serialize($files));
+        fclose($fp);
+        return true;
+    }
 
-    function packageExists($package)
+    // }}}
+    // {{{ _lock()
+
+    function _lock($mode = LOCK_EX)
+    {
+        if ($mode != LOCK_UN && is_resource($this->lock_fp)) {
+            // XXX does not check type of lock (LOCK_SH/LOCK_EX)
+            return true;
+        }
+        $this->lock_fp = @fopen($this->lockfile, "w");
+        if (!is_resource($this->lock_fp)) {
+            return null;
+        }
+        return (int)flock($this->lock_fp, $mode);
+    }
+
+    // }}}
+    // {{{ _unlock()
+
+    function _unlock()
+    {
+        $ret = $this->_lock(LOCK_UN);
+        $this->lock_fp = null;
+        return $ret;
+    }
+
+    // }}}
+    // {{{ _packageExists()
+
+    function _packageExists($package)
     {
         return file_exists($this->_packageFileName($package));
     }
 
     // }}}
-    // {{{ addPackage()
+    // {{{ _packageInfo()
 
-    function addPackage($package, $info)
-    {
-        if ($this->packageExists($package)) {
-            return false;
-        }
-        $fp = $this->_openPackageFile($package, "w");
-        if ($fp === null) {
-            return false;
-        }
-        fwrite($fp, serialize($info));
-        $this->_closePackageFile($fp);
-        return true;
-    }
-
-    // }}}
-    // {{{ packageInfo()
-
-    function packageInfo($package = null, $key = null)
+    function _packageInfo($package = null, $key = null)
     {
         if ($package === null) {
-            return array_map(array($this, "packageInfo"),
-                             $this->listPackages());
+            return array_map(array($this, "_packageInfo"),
+                             $this->_listPackages());
         }
         $fp = $this->_openPackageFile($package, "r");
         if ($fp === null) {
@@ -131,40 +249,9 @@ class PEAR_Registry
     }
 
     // }}}
-    // {{{ deletePackage()
+    // {{{ _listPackages()
 
-    function deletePackage($package)
-    {
-        $file = $this->_packageFileName($package);
-        return @unlink($file);
-    }
-
-    // }}}
-    // {{{ updatePackage()
-
-    function updatePackage($package, $info, $merge = true)
-    {
-        $oldinfo = $this->packageInfo($package);
-        if (empty($oldinfo)) {
-            return false;
-        }
-        $fp = $this->_openPackageFile($package, "w");
-        if ($fp === null) {
-            return false;
-        }
-        if ($merge) {
-            fwrite($fp, serialize(array_merge($oldinfo, $info)));
-        } else {
-            fwrite($fp, serialize($info));
-        }
-        $this->_closePackageFile($fp);
-        return true;
-    }
-
-    // }}}
-    // {{{ listPackages()
-
-    function listPackages()
+    function _listPackages()
     {
         $pkglist = array();
         $dp = @opendir($this->statedir);
@@ -178,6 +265,116 @@ class PEAR_Registry
             $pkglist[] = substr($ent, 0, -4);
         }
         return $pkglist;
+    }
+
+    // }}}
+
+    // {{{ packageExists()
+
+    function packageExists($package)
+    {
+        if (!$this->_lock(LOCK_SH)) {
+            return $this->raiseError("could not acquire shared lock", PEAR_REGISTRY_ERROR_LOCK);
+        }
+        $ret = $this->_packageExists($package);
+        $this->_unlock();
+        return $ret;
+    }
+
+    // }}}
+    // {{{ packageInfo()
+
+    function packageInfo($package = null, $key = null)
+    {
+        if (!$this->_lock(LOCK_SH)) {
+            return $this->raiseError("could not acquire shared lock", PEAR_REGISTRY_ERROR_LOCK);
+        }
+        $ret = $this->_packageInfo($package, $key);
+        $this->_unlock();
+        return $ret;
+    }
+
+    // }}}
+    // {{{ listPackages()
+
+    function listPackages()
+    {
+        if (!$this->_lock(LOCK_SH)) {
+            return $this->raiseError("could not acquire shared lock", PEAR_REGISTRY_ERROR_LOCK);
+        }
+        $ret = $this->_listPackages();
+        $this->_unlock();
+        return $ret;
+    }
+
+    // }}}
+    // {{{ addPackage()
+
+    function addPackage($package, $info)
+    {
+        if ($this->packageExists($package)) {
+            return false;
+        }
+        if (!$this->_lock(LOCK_EX)) {
+            return $this->raiseError("could not acquire exclusive lock", PEAR_REGISTRY_ERROR_LOCK);
+        }
+        $fp = $this->_openPackageFile($package, "w");
+        if ($fp === null) {
+            $this->_unlock();
+            return false;
+        }
+        fwrite($fp, serialize($info));
+        $this->_closePackageFile($fp);
+        $this->_unlock();
+        return true;
+    }
+
+    // }}}
+    // {{{ deletePackage()
+
+    function deletePackage($package)
+    {
+        if (!$this->_lock(LOCK_EX)) {
+            return $this->raiseError("could not acquire exclusive lock", PEAR_REGISTRY_ERROR_LOCK);
+        }
+        $file = $this->_packageFileName($package);
+        $ret = @unlink($file);
+        $this->_rebuildFileMap();
+        $this->_unlock();
+        return $ret;
+    }
+
+    // }}}
+    // {{{ updatePackage()
+
+    function updatePackage($package, $info, $merge = true)
+    {
+        $oldinfo = $this->packageInfo($package);
+        if (empty($oldinfo)) {
+            return false;
+        }
+        if (!$this->_lock(LOCK_EX)) {
+            return $this->raiseError("could not acquire exclusive lock", PEAR_REGISTRY_ERROR_LOCK);
+        }
+        if (!file_exists($this->filemap)) {
+            $this->_rebuildFileMap();
+        }
+        $fp = $this->_openPackageFile($package, "w");
+        if ($fp === null) {
+            $this->_unlock();
+            return false;
+        }
+        if ($merge) {
+            fwrite($fp, serialize(array_merge($oldinfo, $info)));
+        } else {
+            fwrite($fp, serialize($info));
+        }
+        $this->_closePackageFile($fp);
+        if (isset($info['filelist'])) {
+            $this->_rebuildFileMap();
+        }
+        $this->_unlock();
+        return true;
     }
 
     // }}}
