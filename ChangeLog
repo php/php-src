@@ -1,3 +1,85 @@
+2001-02-01  Colin Viebrock  <colin@easydns.com>
+
+    * pear/DB/common.php: fix here too
+
+    * pear/PEAR.php.in: trigger_error() should be ($msg,$level), no?
+
+2001-02-01  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/zlib/zlib.c: ws-only
+
+    * ext/zlib/zlib.c:
+    - When using the ob_gzhandler() PHP now automagically also sets the
+      Content-Lengh correctly which enables browsers to use the HTTP
+      Keep-Alive feature. 
+
+2001-02-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/zlib/zlib.c: Fix a huge memory leak in the ob_gzhandler.
+
+2001-02-01  Colin Viebrock  <colin@easydns.com>
+
+    * php.ini-dist:
+    While we're fixing the ini files, change these to web-safe colours
+    ... this always bugged me :)
+
+2001-02-01  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gd/gd_ctx.c
+      ext/gd/php_gd.h
+      ext/gd/gd.c:
+    Allow usage of GD contexts and not tempfiles in output functions
+
+2001-02-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: No need for CLS_FETCH().
+
+2001-02-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pcre/php_pcre.c: Fix broken ZTS build
+
+2001-02-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * build/rules_pear.mk: Add cvsclean target for standalone extensions.
+
+2001-02-01  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/Makefile.in
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    UDM_PARAM_CHARSET parameter in Udm_Set_Agent_Param() has been added to
+    set local charset you are using. Example updated also.
+
+2001-02-01  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c: Add utility function
+
+2001-02-01  Stig Bakken  <ssb@fast.no>
+
+    * ext/mysql/php_mysql.c: did someone poop in the code? :-)
+
+2001-02-01  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c: ­ some modification from Rainer Schaaf
+       * fixed prototype for pdf_new()
+       * MINFO: included Revision of pdf.c, removed info about CJK + in-memory, this is
+         standard with V3.x)
+       * repaired PDF_open_CCITT
+       * repaired PDF_setfont
+       * eliminated many compiler warnings.
+       * former resource "pdf document" is now called "pdf object"
+
+2001-02-01  Jon Parise  <jon@csh.rit.edu>
+
+    * php.ini-dist: Massive reformatting.
+
+2001-02-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+    Modified /F handling to allow calling object methods.
+
 2001-01-31  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/mysql/php_mysql.c: Only two lines are allowed here.
