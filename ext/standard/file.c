@@ -582,9 +582,9 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 }
 /* }}} */
 
-/* {{{ proto resource file_get_meta_data(resource fp)
+/* {{{ proto resource stream_get_meta_data(resource fp)
     Retrieves header/meta data from streams/file pointers */
-PHP_FUNCTION(file_get_meta_data)
+PHP_FUNCTION(stream_get_meta_data)
 {
 	zval **arg1;
 	php_stream *stream;
@@ -639,6 +639,7 @@ PHP_FUNCTION(file_get_meta_data)
 }
 /* }}} */
 
+/* {{{ stream_select related functions */
 static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, int *max_fd TSRMLS_DC)
 {
 	zval **elem;
@@ -664,9 +665,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, int *max_fd T
 			}
 		}
 	}
-
 	return 1;
-
 }
 
 static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
@@ -708,9 +707,8 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	Z_ARRVAL_P(stream_array) = new_hash;
 	
 	return 1;
-
 }
-
+/* }}} */
 
 /* {{{ proto int stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec])
    Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
@@ -762,7 +760,6 @@ PHP_FUNCTION(stream_select)
 	RETURN_LONG(retval);
 }
 /* }}} */
-
 
 /* {{{ stream_context related functions */
 static void user_space_stream_notifier(php_stream_context *context, int notifycode, int severity,
@@ -1205,10 +1202,10 @@ PHP_FUNCTION(set_socket_blocking)
 }
 /* }}} */
 
-/* {{{ proto bool socket_set_timeout(int socket_descriptor, int seconds, int microseconds)
-   Set timeout on socket read to seconds + microseonds */
+/* {{{ proto bool stream_set_timeout(resource stream, int seconds, int microseconds)
+   Set timeout on stream read to seconds + microseonds */
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
-PHP_FUNCTION(socket_set_timeout)
+PHP_FUNCTION(stream_set_timeout)
 {
 	zval **socket, **seconds, **microseconds;
 	struct timeval t;
@@ -1232,8 +1229,7 @@ PHP_FUNCTION(socket_set_timeout)
 	else
 		t.tv_usec = 0;
 
-	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
-		php_stream_sock_set_timeout(stream, &t TSRMLS_CC);
+	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t)) {
 		RETURN_TRUE;
 	}
 
@@ -1513,9 +1509,9 @@ PHPAPI PHP_FUNCTION(fflush)
 }
 /* }}} */
 
-/* {{{ proto int set_file_buffer(resource fp, int buffer)
+/* {{{ proto int stream_set_write_buffer(resource fp, int buffer)
    Set file write buffer */
-PHP_FUNCTION(set_file_buffer)
+PHP_FUNCTION(stream_set_write_buffer)
 {
 	zval **arg1, **arg2;
 	int ret;
@@ -1541,12 +1537,12 @@ PHP_FUNCTION(set_file_buffer)
 
 	/* if buff is 0 then set to non-buffered */
 	if (buff == 0) {
-		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
+		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_WRITE_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
 	} else {
-		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_BUFFER, PHP_STREAM_BUFFER_FULL, &buff);
+		ret = php_stream_set_option(stream, PHP_STREAM_OPTION_WRITE_BUFFER, PHP_STREAM_BUFFER_FULL, &buff);
 	}
 
-	RETURN_LONG(ret);
+	RETURN_LONG(ret == 0 ? 0 : EOF);
 }
 /* }}} */
 
@@ -1717,7 +1713,6 @@ PHP_FUNCTION(readfile)
 }
 /* }}} */
 
-
 /* {{{ proto int umask([int mask])
    Return or change the umask */
 PHP_FUNCTION(umask)
@@ -1744,7 +1739,6 @@ PHP_FUNCTION(umask)
 }
 
 /* }}} */
-
 
 /* {{{ proto int fpassthru(resource fp)
    Output all remaining data from a file pointer */

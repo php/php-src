@@ -151,12 +151,12 @@ class mystream {
 
 }
 
-if (@file_register_wrapper("bogus", "class_not_exist"))
+if (@stream_register_wrapper("bogus", "class_not_exist"))
 	die("Registered a non-existant class!!!???");
 
-if (!file_register_wrapper("test", "mystream"))
+if (!stream_register_wrapper("test", "mystream"))
 	die("test wrapper registration failed");
-if (!file_register_wrapper("bogon", "uselessstream"))
+if (!stream_register_wrapper("bogon", "uselessstream"))
 	die("bogon wrapper registration failed");
 
 echo "Registered\n";
@@ -248,7 +248,7 @@ foreach($line_lengths as $line_length) {
 
 		if ($rr != $ur || $rline != $uline || $rpa != $position || $upa != $position) {
 			$fail_count++;
-			$dat = file_get_wrapper_data($fp);
+			$dat = stream_get_meta_data($fp);
 			var_dump($dat);
 			break;
 		}

@@ -124,7 +124,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 
 	/* avoid buffering issues while reading header */
 	if (options & STREAM_WILL_CAST)
-		chunk_size = php_stream_sock_set_chunk_size(stream, 1 TSRMLS_CC);
+		chunk_size = php_stream_set_chunk_size(stream, 1);
 	
 	php_stream_context_set(stream, context);
 
@@ -389,7 +389,7 @@ out:
 		stream->wrapperdata = response_header;
 		php_stream_notify_progress_init(context, 0, file_size);
 		if (options & STREAM_WILL_CAST)
-			php_stream_sock_set_chunk_size(stream, chunk_size TSRMLS_CC);
+			php_stream_set_chunk_size(stream, chunk_size);
 		/* as far as streams are concerned, we are now at the start of
 		 * the stream */
 		stream->position = 0;

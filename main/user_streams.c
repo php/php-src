@@ -335,9 +335,9 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 }
 
 
-/* {{{ proto bool file_register_wrapper(string protocol, string classname)
+/* {{{ proto bool stream_register_wrapper(string protocol, string classname)
    Registers a custom URL protocol handler class */
-PHP_FUNCTION(file_register_wrapper)
+PHP_FUNCTION(stream_register_wrapper)
 {
 	char *protocol, *classname;
 	int protocol_len, classname_len;
