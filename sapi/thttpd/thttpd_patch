@@ -1,6 +1,6 @@
 diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
 --- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
-+++ thttpd-2.21b-cool/Makefile.in	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/Makefile.in	Thu May 15 18:38:35 2003
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -40,7 +40,7 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  
 diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
 --- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
-+++ thttpd-2.21b-cool/config.h	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/config.h	Thu May 15 18:38:35 2003
 @@ -82,6 +82,11 @@
  */
  #define IDLE_READ_TIMELIMIT 60
@@ -64,7 +64,7 @@ diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  ** index pages for directories that don't have an explicit index file.
 diff -ur thttpd-2.21b/configure thttpd-2.21b-cool/configure
 --- thttpd-2.21b/configure	Sat Apr 21 02:07:14 2001
-+++ thttpd-2.21b-cool/configure	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/configure	Thu May 15 18:38:35 2003
 @@ -1021,7 +1021,7 @@
  fi
  echo "$ac_t""$CPP" 1>&6
@@ -76,7 +76,7 @@ diff -ur thttpd-2.21b/configure thttpd-2.21b-cool/configure
  echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
 diff -ur thttpd-2.21b/configure.in thttpd-2.21b-cool/configure.in
 --- thttpd-2.21b/configure.in	Sat Apr 21 02:06:23 2001
-+++ thttpd-2.21b-cool/configure.in	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/configure.in	Thu May 15 18:38:35 2003
 @@ -64,7 +64,7 @@
  	AC_MSG_RESULT(no)   
  fi
@@ -88,7 +88,7 @@ diff -ur thttpd-2.21b/configure.in thttpd-2.21b-cool/configure.in
  
 diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
 --- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
-+++ thttpd-2.21b-cool/fdwatch.c	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/fdwatch.c	Thu May 15 18:38:35 2003
 @@ -419,6 +419,7 @@
      if ( pollfds == (struct pollfd*) 0 || poll_fdidx == (int*) 0 ||
  	 poll_rfdidx == (int*) 0 )
@@ -119,7 +119,7 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
      }
 diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 --- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Tue May  6 21:14:56 2003
++++ thttpd-2.21b-cool/libhttpd.c	Thu May 15 18:38:50 2003
 @@ -56,6 +56,10 @@
  #include <unistd.h>
  #include <stdarg.h>
@@ -737,7 +737,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
      ** is prohibited.
-@@ -3594,32 +3746,47 @@
+@@ -3594,32 +3746,46 @@
  	hc->end_byte_loc = hc->sb.st_size - 1;
  
      figure_mime( hc );
@@ -755,10 +755,11 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 +    else if ( !nocache && hc->if_modified_since != (time_t) -1 &&
  	 hc->if_modified_since >= hc->sb.st_mtime )
  	{
- 	hc->method = METHOD_HEAD;
+-	hc->method = METHOD_HEAD;
  	send_mime(
- 	    hc, 304, err304title, hc->encodings, "", hc->type, hc->sb.st_size,
+-	    hc, 304, err304title, hc->encodings, "", hc->type, hc->sb.st_size,
 -	    hc->sb.st_mtime );
++	    hc, 304, err304title, hc->encodings, "", hc->type, -1,
 +	    hc->sb.st_mtime, 0, 0 );
  	}
      else
@@ -791,7 +792,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	}
  
      return 0;
-@@ -3638,6 +3805,9 @@
+@@ -3638,6 +3804,9 @@
      return r;
      }
  
@@ -801,7 +802,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  
  static void
  make_log_entry( httpd_conn* hc, struct timeval* nowP )
-@@ -3648,88 +3818,62 @@
+@@ -3648,88 +3817,62 @@
  
      if ( hc->hs->no_log )
  	return;
@@ -936,7 +937,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      }
  
  
-@@ -3840,7 +3984,24 @@
+@@ -3840,7 +3983,24 @@
      {
  #ifdef HAVE_GETNAMEINFO
      static char str[200];
@@ -961,10 +962,9 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      if ( getnameinfo( &saP->sa, sockaddr_len( saP ), str, sizeof(str), 0, 0, NI_NUMERICHOST ) != 0 )
  	{
  	str[0] = '?';
-Only in thttpd-2.21b-cool: libhttpd.c~
 diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
 --- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b-cool/libhttpd.h	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/libhttpd.h	Thu May 15 18:38:35 2003
 @@ -69,6 +69,8 @@
      char* server_hostname;
      int port;
@@ -1026,7 +1026,7 @@ diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
  ** mallocced strings.
 diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 --- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
-+++ thttpd-2.21b-cool/mime_encodings.txt	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/mime_encodings.txt	Thu May 15 18:38:35 2003
 @@ -3,6 +3,6 @@
  # A list of file extensions followed by the corresponding MIME encoding.
  # Extensions not found in the table proceed to the mime_types table.
@@ -1038,7 +1038,7 @@ diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
  uu	x-uuencode
 diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 --- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
-+++ thttpd-2.21b-cool/mime_types.txt	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/mime_types.txt	Thu May 15 18:38:35 2003
 @@ -1,135 +1,138 @@
 -# mime_types.txt
 -#
@@ -1289,7 +1289,7 @@ diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +ice	x-conference/x-cooltalk
 diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
 --- thttpd-2.21b/mmc.c	Fri Apr 13 23:02:15 2001
-+++ thttpd-2.21b-cool/mmc.c	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/mmc.c	Thu May 15 18:38:35 2003
 @@ -70,6 +70,9 @@
      unsigned int hash;
      int hash_idx;
@@ -1392,7 +1392,7 @@ diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
  	else
 diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
 --- thttpd-2.21b/mmc.h	Fri Apr 13 07:36:54 2001
-+++ thttpd-2.21b-cool/mmc.h	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/mmc.h	Thu May 15 18:38:35 2003
 @@ -31,8 +31,9 @@
  /* Returns an mmap()ed area for the given file, or (void*) 0 on errors.
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
@@ -1406,7 +1406,7 @@ diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
 diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 --- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b-cool/thttpd.c	Tue May  6 21:13:57 2003
++++ thttpd-2.21b-cool/thttpd.c	Thu May 15 18:38:35 2003
 @@ -53,6 +53,10 @@
  #endif
  #include <unistd.h>
@@ -2330,3 +2330,15 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +    }
 +}
 +
+diff -ur thttpd-2.21b/version.h thttpd-2.21b-cool/version.h
+--- thttpd-2.21b/version.h	Tue Apr 24 04:05:23 2001
++++ thttpd-2.21b-cool/version.h	Thu May 15 18:40:00 2003
+@@ -3,7 +3,7 @@
+ #ifndef _VERSION_H_
+ #define _VERSION_H_
+ 
+-#define SERVER_SOFTWARE "thttpd/2.21b 23apr2001"
++#define SERVER_SOFTWARE "thttpd/2.21b 23apr2001 Built-in PHP"
+ #define SERVER_ADDRESS "http://www.acme.com/software/thttpd/"
+ 
+ #endif /* _VERSION_H_ */
