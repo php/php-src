@@ -441,3 +441,23 @@ int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
 
 	return php_com_do_invoke_by_id(obj, dispid, flags, v, nargs, args TSRMLS_CC);
 }
+
+PHP_FUNCTION(com_create_guid)
+{
+	GUID retval;
+	OLECHAR *guid_string;
+
+	if (ZEND_NUM_ARGS() != 0) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
+		Z_TYPE_P(return_value) = IS_STRING;
+		Z_STRVAL_P(return_value) = php_com_olestring_to_string(guid_string, &Z_STRLEN_P(return_value), CP_ACP, 0);
+
+		CoTaskMemFree(guid_string);
+	} else {
+		RETURN_FALSE;
+	}
+}
+

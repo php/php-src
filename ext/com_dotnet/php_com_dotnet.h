@@ -40,7 +40,7 @@ PHP_RINIT_FUNCTION(com_dotnet);
 PHP_RSHUTDOWN_FUNCTION(com_dotnet);
 PHP_MINFO_FUNCTION(com_dotnet);
 
-PHP_FUNCTION(confirm_com_dotnet_compiled);
+PHP_FUNCTION(com_create_guid);
 
 ZEND_BEGIN_MODULE_GLOBALS(com_dotnet)
 	zend_bool allow_dcom;

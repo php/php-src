@@ -60,6 +60,7 @@ function_entry com_dotnet_functions[] = {
 	PHP_FE(variant_get_type, NULL)
 	PHP_FE(variant_set_type, NULL)
 	PHP_FE(variant_cast, NULL)
+	PHP_FE(com_create_guid, NULL)
 	{ NULL, NULL, NULL }
 };
 
