@@ -31,9 +31,9 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0b3</version>
+    <version>1.0</version>
     <state>stable</state>
-    <date>2002-12-13</date>
+    <date>2002-12-27</date>
     <notes>
 * fixed "info" shortcut (conflicted with "install")
 * added "php_bin" config parameter
@@ -93,6 +93,23 @@
     </deps>
   </release>
   <changelog>
+  <release>
+    <version>1.0b3</version>
+    <state>stable</state>
+    <date>2002-12-13</date>
+    <notes>
+* fixed "info" shortcut (conflicted with "install")
+* added "php_bin" config parameter
+* all "non-personal" config parameters now use
+  environment variables for defaults (very useful
+  to override the default php_dir on Windows!)
+</notes>
+    <deps>
+      <dep type="php" rel="ge" version="4.1"/>
+      <dep type="pkg" rel="ge" version="0.4">Archive_Tar</dep>
+      <dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
+    </deps>
+  </release>
    <release>
      <version>1.0b2</version>
      <state>stable</state>
