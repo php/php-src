@@ -15,6 +15,7 @@
 | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
 |          Mike Jackson <mhjack@tscnet.com>                            |
 |          Steven Lawrance <slawrance@technologist.com>                |
+|          Harrie Hazewinkel <harrie@lisanza.net>                      |
 +----------------------------------------------------------------------+
 */
 
@@ -37,6 +38,12 @@ PHP_FUNCTION(snmprealwalk);
 PHP_FUNCTION(snmp_get_quick_print);
 PHP_FUNCTION(snmp_set_quick_print);
 PHP_FUNCTION(snmpset);
+PHP_FUNCTION(snmpv3get);
+PHP_FUNCTION(snmpv3getnext);
+PHP_FUNCTION(snmpv3walk);
+PHP_FUNCTION(snmpv3realwalk);
+PHP_FUNCTION(snmpv3set);
+PHP_FUNCTION(snmpv3getbulk);
 PHP_MINFO_FUNCTION(snmp);
 #else
 
