@@ -505,6 +505,7 @@ function_entry basic_functions[] = {
 	PHP_FE(chmod,					NULL)
 	PHP_FE(touch,					NULL)
 	PHP_FE(clearstatcache,			NULL)
+	PHP_FE(disk_total_space,		NULL)
 	PHP_FE(disk_free_space,			NULL)
 	PHP_FALIAS(diskfreespace,	disk_free_space,	NULL)
 
