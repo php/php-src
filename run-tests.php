@@ -316,28 +316,39 @@ TEST $file
     putenv("CONTENT_LENGTH=");
     
     // Check if test should be skipped.
-	
-    if (trim($section_text['SKIPIF'])) {
-		save_text($tmp_skipif, $section_text['SKIPIF']);
-		$output = `$php $tmp_skipif`;
-		@unlink($tmp_skipif);
-		if(trim($output)=='skip') {
-			echo "SKIP $tested\n";
-			return 'SKIPPED';
+	if (array_key_exists('SKIPIF', $section_text)) {
+	    if (trim($section_text['SKIPIF'])) {
+			save_text($tmp_skipif, $section_text['SKIPIF']);
+			$output = `$php $tmp_skipif`;
+			@unlink($tmp_skipif);
+			if(trim($output)=='skip') {
+				echo "SKIP $tested\n";
+				return 'SKIPPED';
+			}
 		}
+	}
+
+	// Any special ini settings    
+	$ini_settings = '';
+	if (array_key_exists('INI', $section_text)) {
+		foreach(preg_split( "/[\n\r]+/", $section_text['INI']) as $setting)
+			if (strlen($setting))
+				$ini_settings .= " -d '$setting'";
 	}
     
     // We've satisfied the preconditions - run the test!
-    
     save_text($tmp_file,$section_text['FILE']);
-    $query_string = trim($section_text['GET']);
+	if (array_key_exists('GET', $section_text))
+	    $query_string = trim($section_text['GET']);
+	else
+		$query_string = '';
 
     putenv("REDIRECT_STATUS=1");
     putenv("QUERY_STRING=$query_string");
     putenv("PATH_TRANSLATED=$tmp_file");
     putenv("SCRIPT_FILENAME=$tmp_file");
 
-    if (!empty($section_text['POST'])) {
+    if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
     
         $post = trim($section_text['POST']);
         save_text($tmp_post,$post);
@@ -347,7 +358,7 @@ TEST $file
         putenv("CONTENT_TYPE=application/x-www-form-urlencoded");
         putenv("CONTENT_LENGTH=$content_length");
         
-        $cmd = "$php -f $tmp_file 2>&1 < $tmp_post";
+        $cmd = "$php$ini_settings -f $tmp_file 2>&1 < $tmp_post";
         
     } else {
     
@@ -355,7 +366,7 @@ TEST $file
         putenv("CONTENT_TYPE=");
         putenv("CONTENT_LENGTH=");
 
-        $cmd = "$php -f $tmp_file 2>&1";
+        $cmd = "$php$ini_settings -f $tmp_file 2>&1";
         
     }
 
