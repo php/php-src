@@ -1,9 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Added dba handler inifiles to support ini files. (Marcus)
-- Input Filter support added. See  README.input_filter. (Rasmus)
-- Updated IFX_VERSION entry to work with new Version output of ESQL/C (Corne')
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
@@ -17,6 +14,8 @@ PHP 4                                                                      NEWS
 - Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length. (Marcus)
+- Added DBA handler 'inifiles' to support ini files. (Marcus)
+- Added filter support. See README.input_filter. (Rasmus)
 - Added session.hash_function and session.hash_bits_per_character. (Sascha)
 - Added lightweight streaming input abstraction to the Zend Engine scanners
   that provides uniform support for include()'ing data from PHP streams across
