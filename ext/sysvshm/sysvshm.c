@@ -354,14 +354,15 @@ int php_put_shm_data(sysvshm_chunk_head *ptr,long key,char *data, long len) {
 	long shm_varpos;	
 
 	total_size=((long)(len+sizeof(sysvshm_chunk)-1)/4)*4+4;    /* 4-byte alligment */
+
+	if((shm_varpos=php_check_shm_data(ptr,key))>0) {
+		php_remove_shm_data(ptr, shm_varpos);	
+	}
 	
 	if(ptr->free<total_size) {
 		return -1;   /* not enough memeory */
 	}
 
-	if((shm_varpos=php_check_shm_data(ptr,key))>0) {
-		php_remove_shm_data(ptr, shm_varpos);	
-	}
 	shm_var=(sysvshm_chunk*)((char *)ptr+ptr->end);	
 	shm_var->key=key;
 	shm_var->length=len;
