@@ -96,7 +96,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     // }}}
     // {{{ list-remote
 
-    function doListRemote($command, $options, $params)
+    function doRemoteList($command, $options, $params)
     {
         $r = new PEAR_Remote($this->config);
         $available = $r->call('package.listAll', true);
