@@ -706,12 +706,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} 
 			fclose(fp);
 			
-			if(cancel_upload) {
-
-				if(cancel_upload == 1) {
-					if (filename) efree(filename);
-					SAFE_RETURN;
-				}
+			if(cancel_upload || total_bytes == 0) {
 
 				if(temp_filename) {
 					unlink(temp_filename);
