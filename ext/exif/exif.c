@@ -66,7 +66,7 @@
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h" 
 
-#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING) 
+#if defined(PHP_WIN32) || (HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING))
 #define EXIF_USE_MBSTRING 1
 #else
 #define EXIF_USE_MBSTRING 0
