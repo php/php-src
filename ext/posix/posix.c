@@ -653,7 +653,7 @@ PHP_FUNCTION(posix_getcwd)
 		already supported by PHP.
  */
 
-/* {{{ proto bool posix_mkfifo(void)
+/* {{{ proto bool posix_mkfifo(string pathname, int mode)
    Make a FIFO special file (POSIX.1, 5.4.2) */
 #ifdef HAVE_MKFIFO
 PHP_FUNCTION(posix_mkfifo)
