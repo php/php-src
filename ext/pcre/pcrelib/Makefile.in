@@ -1,0 +1,11 @@
+
+DEPTH     = ../../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME = libpcre.la
+LTLIBRARY_SOURCES = maketables.c get.c study.c pcre.c
+
+include $(topsrcdir)/build/ltlib.mk
+
