@@ -74,6 +74,9 @@
 #define UDM_PARAM_HLBEG			19
 #define UDM_PARAM_HLEND			20
 #define UDM_PARAM_SYNONYM		21
+#define UDM_PARAM_SEARCHD		22
+#define UDM_PARAM_QSTRING		23
+#define UDM_PARAM_REMOTE_ADDR		24
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -271,6 +274,10 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_HLEND",	UDM_PARAM_HLEND,CONST_CS | CONST_PERSISTENT);	
 	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SYNONYM",	UDM_PARAM_SYNONYM,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCHD",	UDM_PARAM_SEARCHD,CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_QSTRING",	UDM_PARAM_QSTRING,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_REMOTE_ADDR",	UDM_PARAM_REMOTE_ADDR,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -693,6 +700,27 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				RETURN_FALSE;
 			} else UdmSynonymListSort(&(Agent->Conf->SynList));
 			break;
+			
+		case UDM_PARAM_SEARCHD:
+			UdmSDCLientListAdd(&(Agent->Conf->sdcl),val);
+			{
+				size_t i;
+				for(i=0;i<Agent->Conf->sdcl.nclients;i++){
+					UdmSDCLientListAdd(&Agent->sdcl,Agent->Conf->sdcl.Clients[i].addr);
+				}
+			}
+			
+			break;
+
+		case UDM_PARAM_QSTRING:
+			UdmReplaceStrVar(Agent->Conf->vars,"QUERY_STRING",val,UDM_VARSRC_GLOBAL);
+			
+			break;
+
+		case UDM_PARAM_REMOTE_ADDR:
+			UdmReplaceStrVar(Agent->Conf->vars,"IP",val,UDM_VARSRC_GLOBAL);
+			
+			break;			
 #endif
 			
 		case UDM_PARAM_STOPTABLE:
