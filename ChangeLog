@@ -1,3 +1,15 @@
+1999-12-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main.c:
+    * ext/mysql/php_mysql.c:
+1999-12-02  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: *** empty log message ***
+
+1999-12-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * buildconf: Let user override default setting of ``make''
+
 1999-12-01  Sascha Schumann  <sascha@schumann.cx>
 
     * acinclude.m4:
