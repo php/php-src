@@ -16,9 +16,9 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)                          
 REM ----------------------------------------------------------------------
 REM 
-REM  $Id$
+REM  $Id: pear.bat,v 1.1 2001/10/12 19:43:58 alexmerz Exp $
 
-REM change this three lines to match you paths
+REM change this four lines to match the paths of your system
 REM -------------------
 set PHP_PATH=e:\apache\php
 set PEAR_INSTALL_DIR=e:\apache\php\pear
