@@ -35,14 +35,14 @@
 #if defined(LIBXML_XPATH_ENABLED)
 
 zend_function_entry php_dom_xpath_class_functions[] = {
-	PHP_FALIAS(domxpath, dom_xpath_xpath, NULL)
+	PHP_ME(domxpath, __construct, NULL, ZEND_ACC_PUBLIC)
 	PHP_FALIAS(register_namespace, dom_xpath_register_ns, NULL)
 	PHP_FALIAS(query, dom_xpath_query, NULL)
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto domxpath dom_xpath_xpath(domDocument doc); */
-PHP_FUNCTION(dom_xpath_xpath)
+/* {{{ proto void DomXPath::__construct(domDocument doc); */
+PHP_METHOD(domxpath, __construct)
 {
 	zval *id, *doc;
 	xmlDocPtr docp = NULL;
@@ -72,7 +72,7 @@ PHP_FUNCTION(dom_xpath_xpath)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp TSRMLS_CC);
 	}
 }
-/* }}} end dom_xpath_xpath */
+/* }}} end DomXPath::__construct */
 
 /* {{{ proto domdocument document	document */
 int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)

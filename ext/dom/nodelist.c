@@ -160,6 +160,7 @@ PHP_FUNCTION(dom_nodelist_item)
 
 		if (itemnode) {
 			DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+			return;
 		}
 	}
 
