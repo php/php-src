@@ -919,6 +919,7 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		if (element) {
 			char *data;
 			int data_len;
+			int should_copy=0;
 
 			if (PG(magic_quotes_runtime)) {
 				data = php_addslashes(element,element_len,&data_len,0);
@@ -928,12 +929,13 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 			
 			if (result_type & PGSQL_NUM) {
-				add_index_stringl(return_value, i, data, data_len, 0);
+				add_index_stringl(return_value, i, data, data_len, should_copy);
+				should_copy=1;
 			}
 			
 			if (result_type & PGSQL_ASSOC) {
 				field_name = PQfname(pgsql_result,i);
-				add_assoc_stringl(return_value, field_name, data, data_len, 1);
+				add_assoc_stringl(return_value, field_name, data, data_len, should_copy);
 			}
         } else {
             /* NULL field, don't set it */
