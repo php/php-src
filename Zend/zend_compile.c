@@ -1119,7 +1119,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 	last_op = &CG(active_op_array)->opcodes[last_op_number];
 
 	if ((last_op->op2.op_type == IS_CONST) && (last_op->op2.u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1)
-		&& !strncasecmp(last_op->op2.u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME))) {
+		&& !zend_binary_strncasecmp(last_op->op2.u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME))) {
 		last_op->opcode = ZEND_CLONE;
 		left_bracket->op_type = IS_UNUSED;
 		zval_dtor(&last_op->op2.u.constant); 
