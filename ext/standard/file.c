@@ -1994,7 +1994,7 @@ PHP_FUNCTION(fgetcsv)
 			bptr++;	/* move on to first character in field */
 			
 			/* Check if there is an end to the enclosure */
-			if( !strchr(bptr, enclosure) ) {
+			if (!strchr(bptr, enclosure)) {
 				continue;
 			}
 		
