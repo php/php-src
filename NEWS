@@ -11,6 +11,9 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Fixed bug #20110 (added sanity check to prevent include/require functions
+  from trying to include directories). (Ilia)
+- Fixed bug #20108 (segmentation fault on printf("%1.1s", "string")). (Ilia)
 - Added dba_handlers() that returns an array of installed handlers. (Marcus)
 - Added Oracle (oci8) support to dbx module. (Marc)
 - Updated FDF extension to work with Adode fdftk 5.0. (Hartmut)
