@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 5.0.0
 
+
 ?? ??? 2003, PHP 5 Beta 2
 - Added new COM extension with integrated .Net support. (Wez)
 - Improved the Interbase extension: (Ard Biesheuvel)
