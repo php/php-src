@@ -340,7 +340,7 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 		 * An intuitive brigade bug detection
 		 * (http://bugs.php.net/18648)  
 		 *
-		 * This has something to do with the issue mentioned in this thread
+		 * This has something to do with the issue mentioned in the thread
 		 * on dev@httpd.apache.org:
 		 *
 		 * http://marc.theaimsgroup.com/?l=apr-dev&m=104039770818472&w=2
@@ -373,7 +373,7 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 {
 	char *content_type;
 	const char *auth;
-	
+
 	PG(during_request_startup) = 0;
 	SG(sapi_headers).http_response_code = 200;
 	SG(request_info).content_type = apr_table_get(f->r->headers_in, "Content-Type");
@@ -387,15 +387,20 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	f->r->content_type = apr_pstrdup(f->r->pool, content_type);
 	SG(request_info).post_data = ctx->post_data;
 	SG(request_info).post_data_length = ctx->post_len;
+
 	efree(content_type);
 	apr_table_unset(f->r->headers_out, "Content-Length");
 	apr_table_unset(f->r->headers_out, "Last-Modified");
 	apr_table_unset(f->r->headers_out, "Expires");
 	apr_table_unset(f->r->headers_out, "ETag");
 	apr_table_unset(f->r->headers_in, "Connection");
-	auth = apr_table_get(f->r->headers_in, "Authorization");
-	php_handle_auth_data(auth TSRMLS_CC);
-
+	if (!PG(safe_mode)) {
+		auth = apr_table_get(f->r->headers_in, "Authorization");
+		php_handle_auth_data(auth TSRMLS_CC);
+	} else {
+		SG(request_info).auth_user = NULL;
+		SG(request_info).auth_password = NULL;
+	}
 	php_request_startup(TSRMLS_C);
 }
 
