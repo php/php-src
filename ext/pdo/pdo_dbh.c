@@ -257,13 +257,14 @@ fail:
 }
 /* }}} */
 
-/* {{{ proto bool PDO::exec(string query)
-   Execute a query that does not return a row set */
+/* {{{ proto long PDO::exec(string query)
+   Execute a query that does not return a row set, returning the number of affected rows */
 static PHP_METHOD(PDO, exec)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *statement;
 	long statement_len;
+	long ret;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &statement, &statement_len)) {
 		RETURN_FALSE;
@@ -272,28 +273,16 @@ static PHP_METHOD(PDO, exec)
 	if (!statement_len) {
 		RETURN_FALSE;
 	}
-
-	RETURN_BOOL(dbh->methods->doer(dbh, statement, statement_len TSRMLS_CC));
-}
-/* }}} */
-
-/* {{{ proto int PDO::affectedRows()
-   Returns the number of rows that we affected by the last call to PDO::exec().  Not always meaningful. */
-static PHP_METHOD(PDO, affectedRows)
-{
-	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	if (ZEND_NUM_ARGS()) {
+	ret = dbh->methods->doer(dbh, statement, statement_len TSRMLS_CC);
+	if(ret == -1) {
 		RETURN_FALSE;
 	}
-
-	if (!dbh->methods->affected) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver affected rows retrieval.");
-	} else {
-		RETURN_LONG(dbh->methods->affected(dbh TSRMLS_CC));
+    else {
+		RETURN_LONG(ret);
 	}
 }
 /* }}} */
+
 
 /* {{{ proto int PDO::lastInsertId()
    Returns the number id of rows that we affected by the last call to PDO::exec().  Not always meaningful. */
@@ -320,7 +309,6 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, rollBack,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, exec,			NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, affectedRows,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, lastInsertId,	NULL,					ZEND_ACC_PUBLIC)
 
 	{NULL, NULL, NULL}

@@ -114,7 +114,7 @@ typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh TSRMLS_DC);
 typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, long options, zval *driver_options TSRMLS_DC);
 
 /* execute a statement (that does not return a result set) */
-typedef int (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC);
+typedef long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC);
 
 /* quote a string */
 typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen TSRMLS_DC);
@@ -124,9 +124,6 @@ typedef int (*pdo_dbh_txn_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
 /* setting and getting of attributes */
 typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC);
-
-/* return affected rows */
-typedef long (*pdo_dbh_affected_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
 /* return last insert id */
 typedef long (*pdo_dbh_last_id_func)(pdo_dbh_t *dbh TSRMLS_DC);
@@ -140,7 +137,6 @@ struct pdo_dbh_methods {
 	pdo_dbh_txn_func		commit;
 	pdo_dbh_txn_func		rollback;
 	pdo_dbh_set_attr_func	set_attribute;
-	pdo_dbh_affected_func		affected;
 	pdo_dbh_last_id_func		last_id;
 };
 
