@@ -222,7 +222,7 @@ static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2
 					zval *new_zval = &EG(uninitialized_zval);
 
 					new_zval->refcount++;
-					zend_hash_update_ptr(ht, prop_ptr->value.str.val, prop_ptr->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
+					zend_hash_update(ht, prop_ptr->value.str.val, prop_ptr->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
 				}
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
@@ -513,7 +513,7 @@ static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_v
 					zval *new_zval = &EG(uninitialized_zval);
 
 					new_zval->refcount++;
-					zend_hash_update_ptr(target_symbol_table, varname->value.str.val, varname->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
+					zend_hash_update(target_symbol_table, varname->value.str.val, varname->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
 				}
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
@@ -567,7 +567,7 @@ fetch_string_dim:
 							zval *new_zval = &EG(uninitialized_zval);
 
 							new_zval->refcount++;
-							zend_hash_update_ptr(ht, offset_key, offset_key_length+1, new_zval, sizeof(zval *), (void **) &retval);
+							zend_hash_update(ht, offset_key, offset_key_length+1, &new_zval, sizeof(zval *), (void **) &retval);
 						}
 						break;
 				}
@@ -705,7 +705,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 				zval *new_zval = &EG(uninitialized_zval);
 
 				new_zval->refcount++;
-				zend_hash_next_index_insert_ptr(container->value.ht, new_zval, sizeof(zval *), (void **) retval);
+				zend_hash_next_index_insert(container->value.ht, &new_zval, sizeof(zval *), (void **) retval);
 			} else {
 				*retval = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, type ELS_CC);
 			}
@@ -1614,8 +1614,9 @@ do_fcall_common:
 							&& object.ptr
 							&& fbc->type!=ZEND_OVERLOADED_FUNCTION) {
 							zval **this_ptr;
+							zval *null_ptr = NULL;
 
-							zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), NULL, sizeof(zval *), (void **) &this_ptr);
+							zend_hash_update(function_state.function_symbol_table, "this", sizeof("this"), &null_ptr, sizeof(zval *), (void **) &this_ptr);
 							if (!PZVAL_IS_REF(object.ptr)) {
 								zend_error(E_WARNING,"Problem with method call. Report this bug\n");
                 			}

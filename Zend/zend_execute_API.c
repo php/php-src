@@ -398,7 +398,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 			ALLOC_ZVAL(dummy);
 			INIT_ZVAL(*dummy);
 			
-			zend_hash_update_ptr(EG(active_symbol_table), "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
+			zend_hash_update(EG(active_symbol_table), "this", sizeof("this"), &dummy, sizeof(zval *), (void **) &this_ptr);
 			zend_assign_to_variable_reference(NULL, this_ptr, &object, NULL ELS_CC);
 		}
 		original_return_value = EG(return_value_ptr_ptr);

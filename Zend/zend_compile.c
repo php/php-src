@@ -1857,7 +1857,7 @@ void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment
 			ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
 			zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 		}
-		zend_hash_update_ptr(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, tmp, sizeof(zval *), NULL);
+		zend_hash_update(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, &tmp, sizeof(zval *), NULL);
 	}
 
 
