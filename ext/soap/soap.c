@@ -2299,11 +2299,10 @@ PHP_METHOD(SoapClient, __doRequest)
 	    &version) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "wrong parameters");
 	}
-	if (send_http_soap_request(this_ptr, buf, buf_size, location, action, version TSRMLS_CC)) {
-		if (get_http_soap_response(this_ptr, &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value) TSRMLS_CC)) {
-			return_value->type = IS_STRING;
-			return;
-		}
+	if (make_http_soap_request(this_ptr, buf, buf_size, location, action, version,
+	    &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value) TSRMLS_CC)) {
+		return_value->type = IS_STRING;
+		return;
 	}
 	RETURN_NULL();
 }

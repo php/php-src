@@ -186,7 +186,14 @@ static int in_domain(const char *host, const char *domain)
   }
 }
 
-int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *location, char *soapaction, int soap_version TSRMLS_DC)
+int make_http_soap_request(zval  *this_ptr, 
+                           char  *buf,
+                           int    buf_size,
+                           char  *location, 
+                           char  *soapaction, 
+                           int    soap_version,
+                           char **buffer, 
+                           int   *buffer_len TSRMLS_DC)
 {
 	char *request;
 	smart_str soap_headers = {0};
@@ -196,9 +203,61 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 	zval **trace, **tmp;
 	int use_proxy = 0;
 	int use_ssl;
+	char *http_headers, *http_body, *content_type, *http_version, *cookie_itt;
+	int http_header_size, http_body_size, http_close;
+	char *connection;
+	int http_1_1 = 0;
+	int http_status = 0;
+	char *content_encoding;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
+	}
+
+  request = buf;
+  request_size = buf_size;
+	/* Compress request */
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "compression", sizeof("compression"), (void **)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_LONG) {
+		int level = Z_LVAL_PP(tmp) & 0x0f;
+		int kind  = Z_LVAL_PP(tmp) & SOAP_COMPRESSION_DEFLATE;
+
+	  if ((Z_LVAL_PP(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
+			smart_str_append_const(&soap_headers,"Accept-Encoding: gzip, deflate\r\n");
+	  }
+	  if (level > 0) {
+			zval func;
+			zval retval;
+ 			zval param1, param2, param3;
+			zval *params[3];
+			int n;
+
+			params[0] = &param1;
+			INIT_PZVAL(params[0]);
+			params[1] = &param2;
+			INIT_PZVAL(params[1]);
+			params[2] = &param3;
+			INIT_PZVAL(params[2]);
+			ZVAL_STRINGL(params[0], buf, buf_size, 0);
+			ZVAL_LONG(params[1], level);
+	    if (kind == SOAP_COMPRESSION_DEFLATE) {
+	    	n = 2;
+				ZVAL_STRING(&func, "gzcompress", 0);
+				smart_str_append_const(&soap_headers,"Content-Encoding: deflate\r\n");
+	    } else {
+	      n = 3;
+				ZVAL_STRING(&func, "gzencode", 0);
+				smart_str_append_const(&soap_headers,"Content-Encoding: gzip\r\n");
+				ZVAL_LONG(params[2], 1);
+	    }
+			if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, n, params TSRMLS_CC) == SUCCESS &&
+			    Z_TYPE(retval) == IS_STRING) {
+				request = Z_STRVAL(retval);
+				request_size = Z_STRLEN(retval);
+			} else {
+				if (request != buf) {efree(request);}
+				return FALSE;
+			}
+	  }
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"), (void **)&tmp) == SUCCESS) {
@@ -213,10 +272,11 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 	if (location != NULL && location[0] != '\000') {
 		phpurl = php_url_parse(location);
 	}
+
+try_again:	
 	if (phpurl == NULL || phpurl->host == NULL) {
-	  if (phpurl != NULL) {
-	  	php_url_free(phpurl);
-	  }
+	  if (phpurl != NULL) {php_url_free(phpurl);}
+		if (request != buf) {efree(request);}
 		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
@@ -226,12 +286,14 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 		use_ssl = 1;
 	} else if (phpurl->scheme == NULL || strcmp(phpurl->scheme, "http") != 0) {
 		php_url_free(phpurl);
+		if (request != buf) {efree(request);}
 		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
 #ifdef ZEND_ENGINE_2
 	if (use_ssl && php_stream_locate_url_wrapper("https://", NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) == NULL) {
 		php_url_free(phpurl);
+		if (request != buf) {efree(request);}
 		add_soap_fault(this_ptr, "HTTP", "SSL support not available in this build", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
@@ -239,6 +301,7 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 #ifndef HAVE_OPENSSL_EXT
 	if (use_ssl) {
 		php_url_free(phpurl);
+		if (request != buf) {efree(request);}
 		add_soap_fault(this_ptr, "HTTP", "SSL support not available in this build", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
@@ -288,6 +351,7 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 			add_property_long(this_ptr, "_use_proxy", use_proxy);
 		} else {
 			php_url_free(phpurl);
+			if (request != buf) {efree(request);}
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL TSRMLS_CC);
 			return FALSE;
 		}
@@ -337,59 +401,6 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 				smart_str_appends(&soap_headers, soapaction);
 				smart_str_append_const(&soap_headers, "\"\r\n");
 			}
-		}
-
-	  request = buf;
-	  request_size = buf_size;
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "compression", sizeof("compression"), (void **)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_LONG) {
-			int level = Z_LVAL_PP(tmp) & 0x0f;
-			int kind  = Z_LVAL_PP(tmp) & SOAP_COMPRESSION_DEFLATE;
-
-		  if ((Z_LVAL_PP(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
-				smart_str_append_const(&soap_headers,"Accept-Encoding: gzip, deflate\r\n");
-		  }
-		  if (level > 0) {
-				zval func;
-				zval retval;
-  			zval param1, param2, param3;
-				zval *params[3];
-				int n;
-
-
-				params[0] = &param1;
-				INIT_PZVAL(params[0]);
-				params[1] = &param2;
-				INIT_PZVAL(params[1]);
-				params[2] = &param3;
-				INIT_PZVAL(params[2]);
-				ZVAL_STRINGL(params[0], buf, buf_size, 0);
-				ZVAL_LONG(params[1], level);
-		    if (kind == SOAP_COMPRESSION_DEFLATE) {
-		    	n = 2;
-					ZVAL_STRING(&func, "gzcompress", 0);
-					smart_str_append_const(&soap_headers,"Content-Encoding: deflate\r\n");
-		    } else {
-		      n = 3;
-					ZVAL_STRING(&func, "gzencode", 0);
-					smart_str_append_const(&soap_headers,"Content-Encoding: gzip\r\n");
-					ZVAL_LONG(params[2], 1);
-		      /* (SOAP_COMPRESSION_GZIP */
-		    }
-				if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, n, params TSRMLS_CC) == SUCCESS &&
-				    Z_TYPE(retval) == IS_STRING) {
-					request = Z_STRVAL(retval);
-					request_size = Z_STRLEN(retval);
-				} else {
-					if (request != buf) {efree(request);}
-					smart_str_free(&soap_headers);
-					php_stream_close(stream);
-					zend_hash_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"));
-					zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-					zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
-					add_soap_fault(this_ptr, "HTTP", "Compression Failed", NULL, NULL TSRMLS_CC);
-					return FALSE;
-				}
-		  }
 		}
 		smart_str_append_const(&soap_headers,"Content-Length: ");
 		smart_str_append_long(&soap_headers, request_size);
@@ -480,32 +491,9 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 		smart_str_free(&soap_headers);
 
 	}
-	if (request != buf) {efree(request);}
-
-	return TRUE;
-}
-
-int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS_DC)
-{
-	char *http_headers, *http_body, *content_type, *http_version, *cookie_itt;
-	int http_header_size, http_body_size, http_close;
-	php_stream *stream;
-	zval **trace, **tmp;
-	char *connection;
-	int http_1_1 = 0;
-	int http_status = 0;
-	char *content_encoding;
-
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"), (void **)&tmp) == SUCCESS) {
-		php_stream_from_zval_no_verify(stream,tmp);
-	} else {
-		stream = NULL;
-	}
-	if (stream == NULL) {
-	  return FALSE;
-	}
 
 	if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
+		if (request != buf) {efree(request);}
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
@@ -530,15 +518,47 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 			http_status = atoi(tmp);
 		}
 
-		/*
-		Try and process any respsone that is xml might contain fault code
-
-		Maybe try and test for some of the 300's 400's specfics but not
-		right now.
-
+		/* Process HTTP status codes */
 		if (http_status >= 200 && http_status < 300) {
 		} else if (http_status >= 300 && http_status < 400) {
-			add_soap_fault(this_ptr, "HTTP", "HTTTP redirection is not supported", NULL, NULL TSRMLS_CC);
+			char *loc;
+
+			if ((loc = get_http_header_value(http_headers,"Location: ")) != NULL) {
+			  php_url *new_url  = php_url_parse(loc);
+			  char *body;
+			  int body_size;
+
+				if (new_url != NULL) {
+					if (get_http_body(stream, http_headers, &body, &body_size TSRMLS_CC)) {
+						efree(body);
+					} else {
+						php_stream_close(stream);
+						zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+						stream = NULL;
+					}
+					efree(http_version);
+					efree(http_headers);
+					efree(loc);
+					if (new_url->scheme == NULL && new_url->path != NULL) {						
+					  new_url->scheme = estrdup(phpurl->scheme);
+					  new_url->host = estrdup(phpurl->host);
+					  new_url->port = phpurl->port;
+						if (new_url->path[0] != '/') {
+						  char *p = strrchr(phpurl->path, '/');
+						  char *s = emalloc((p - phpurl->path) + strlen(new_url->path) + 2);
+
+						  strncpy(s, phpurl->path, (p - phpurl->path) + 1);
+						  s[(p - phpurl->path) + 1] = 0;
+						  strcat(s, new_url->path);
+						  efree(new_url->path);
+						  new_url->path = s;
+						} 
+					}
+					phpurl = new_url;
+					goto try_again;
+				}
+			}
+/*
 		} else if (http_status == 400) {
 			add_soap_fault(this_ptr, "HTTP", "Bad Request", NULL, NULL TSRMLS_CC);
 		} else if (http_status == 401) {
@@ -555,13 +575,14 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 			add_soap_fault(this_ptr, "HTTP", "Server Error", NULL, NULL TSRMLS_CC);
 		} else {
 			add_soap_fault(this_ptr, "HTTP", "Unsupported HTTP status code", NULL, NULL TSRMLS_CC);
+*/
 		}
-		*/
 
 		/* Try and get headers again */
 		if (http_status == 100) {
 			efree(http_headers);
 			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
+				if (request != buf) {efree(request);}
 				php_stream_close(stream);
 				zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 				zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
@@ -576,13 +597,98 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		efree(http_version);
 	}
 
+	/* Grab and send back every cookie */
+
+	/* Not going to worry about Path: because
+	   we shouldn't be changing urls so path dont
+	   matter too much
+	*/
+	cookie_itt = strstr(http_headers,"Set-Cookie: ");
+	while (cookie_itt) {
+		char *end_pos, *cookie;
+		char *eqpos, *sempos;
+		zval **cookies;
+
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE) {
+			zval *tmp_cookies;
+			MAKE_STD_ZVAL(tmp_cookies);
+			array_init(tmp_cookies);
+			zend_hash_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), &tmp_cookies, sizeof(zval *), (void **)&cookies);
+		}
+
+		end_pos = strstr(cookie_itt,"\r\n");
+		cookie = get_http_header_value(cookie_itt,"Set-Cookie: ");
+
+		eqpos = strstr(cookie, "=");
+		sempos = strstr(cookie, ";");
+		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
+			smart_str name = {0};
+			int cookie_len;
+			zval *zcookie;
+
+			if (sempos != NULL) {
+				cookie_len = sempos-(eqpos+1);
+			} else {
+				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
+			}
+
+			smart_str_appendl(&name, cookie, eqpos - cookie);
+			smart_str_0(&name);
+
+			ALLOC_INIT_ZVAL(zcookie);
+			array_init(zcookie);
+			add_index_stringl(zcookie, 0, eqpos + 1, cookie_len, 1);
+
+			if (sempos != NULL) {
+				char *options = cookie + cookie_len+1;
+				while (*options) {
+					while (*options == ' ') {options++;}
+					sempos = strstr(options, ";");
+					if (strstr(options,"path=") == options) {
+						eqpos = options + sizeof("path=")-1;
+						add_index_stringl(zcookie, 1, eqpos, sempos?(sempos-eqpos):strlen(eqpos), 1);
+					} else if (strstr(options,"domain=") == options) {
+						eqpos = options + sizeof("domain=")-1;
+						add_index_stringl(zcookie, 2, eqpos, sempos?(sempos-eqpos):strlen(eqpos), 1);
+					} else if (strstr(options,"secure") == options) {
+						add_index_bool(zcookie, 3, 1);
+					}
+					if (sempos != NULL) {
+						options = sempos+1;
+					} else {
+					  break;
+					}
+				}
+			}
+			if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 1)) {
+				char *c = strrchr(phpurl->path, '/');
+				if (c) {
+					add_index_stringl(zcookie, 1, phpurl->path, c-phpurl->path, 1);
+				}
+			}
+			if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 2)) {
+				add_index_string(zcookie, 2, phpurl->host, 1);
+			}
+
+			add_assoc_zval_ex(*cookies, name.c, name.len+1, zcookie);
+			smart_str_free(&name);
+		}
+
+		cookie_itt = strstr(cookie_itt + sizeof("Set-Cookie: "), "Set-Cookie: ");
+		efree(cookie);
+	}
+
 	if (!get_http_body(stream, http_headers, &http_body, &http_body_size TSRMLS_CC)) {
+		if (request != buf) {efree(request);}
 		php_stream_close(stream);
+		efree(http_headers);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
+
+	if (request != buf) {efree(request);}
 
 	/* See if the server requested a close */
 	http_close = TRUE;
@@ -644,95 +750,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		efree(content_type);
 	}
 
-	/* Grab and send back every cookie */
-
-	/* Not going to worry about Path: because
-	   we shouldn't be changing urls so path dont
-	   matter too much
-	*/
-	cookie_itt = strstr(http_headers,"Set-Cookie: ");
-	if (cookie_itt &&
-		  zend_hash_find(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"), (void **)&tmp) == SUCCESS) {
-
-	  php_url *phpurl = (php_url*)zend_fetch_resource(tmp TSRMLS_CC, -1, "httpurl", NULL, 1, le_url);
-
-	  if (phpurl) {
-			while (cookie_itt) {
-				char *end_pos, *cookie;
-				char *eqpos, *sempos;
-				zval **cookies;
-
-				if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE) {
-					zval *tmp_cookies;
-					MAKE_STD_ZVAL(tmp_cookies);
-					array_init(tmp_cookies);
-					zend_hash_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), &tmp_cookies, sizeof(zval *), (void **)&cookies);
-				}
-
-				end_pos = strstr(cookie_itt,"\r\n");
-				cookie = get_http_header_value(cookie_itt,"Set-Cookie: ");
-
-				eqpos = strstr(cookie, "=");
-				sempos = strstr(cookie, ";");
-				if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
-					smart_str name = {0};
-					int cookie_len;
-					zval *zcookie;
-
-					if (sempos != NULL) {
-						cookie_len = sempos-(eqpos+1);
-					} else {
-						cookie_len = strlen(cookie)-(eqpos-cookie)-1;
-					}
-
-					smart_str_appendl(&name, cookie, eqpos - cookie);
-					smart_str_0(&name);
-
-					ALLOC_INIT_ZVAL(zcookie);
-					array_init(zcookie);
-					add_index_stringl(zcookie, 0, eqpos + 1, cookie_len, 1);
-
-					if (sempos != NULL) {
-						char *options = cookie + cookie_len+1;
-						while (*options) {
-							while (*options == ' ') {options++;}
-							sempos = strstr(options, ";");
-							if (strstr(options,"path=") == options) {
-								eqpos = options + sizeof("path=")-1;
-								add_index_stringl(zcookie, 1, eqpos, sempos?(sempos-eqpos):strlen(eqpos), 1);
-							} else if (strstr(options,"domain=") == options) {
-								eqpos = options + sizeof("domain=")-1;
-								add_index_stringl(zcookie, 2, eqpos, sempos?(sempos-eqpos):strlen(eqpos), 1);
-							} else if (strstr(options,"secure") == options) {
-								add_index_bool(zcookie, 3, 1);
-							}
-							if (sempos != NULL) {
-								options = sempos+1;
-							} else {
-							  break;
-							}
-						}
-					}
-	        if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 1)) {
-	          char *c = strrchr(phpurl->path, '/');
-	          if (c) {
-							add_index_stringl(zcookie, 1, phpurl->path, c-phpurl->path, 1);
-						}
-	        }
-	        if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 2)) {
-						add_index_string(zcookie, 2, phpurl->host, 1);
-	        }
-
-					add_assoc_zval_ex(*cookies, name.c, name.len+1, zcookie);
-					smart_str_free(&name);
-				}
-
-				cookie_itt = strstr(cookie_itt + sizeof("Set-Cookie: "), "Set-Cookie: ");
-				efree(cookie);
-			}
-		}
-	}
-
+	/* Decompress response */
 	content_encoding = get_http_header_value(http_headers,"Content-Encoding: ");
 	if (content_encoding) {
 		zval func;
