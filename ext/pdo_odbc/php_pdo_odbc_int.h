@@ -149,6 +149,10 @@ extern SQLUINTEGER pdo_odbc_pool_on;
 extern SQLUINTEGER pdo_odbc_pool_mode;
 #endif
 
+enum {
+	PDO_ODBC_ATTR_USE_CURSOR_LIBRARY = PDO_ATTR_DRIVER_SPECIFIC,
+};
+
 /*
  * Local variables:
  * tab-width: 4
