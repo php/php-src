@@ -48,7 +48,7 @@ AC_DEFUN(PTHREADS_FLAGS,[
   esac
 
   if test -n "$PTHREAD_FLAGS"; then
-    CFLAGS="$CFLAS $PTHREAD_FLAGS"
+    CPPFLAGS="$CPPFLAGS $PTHREAD_FLAGS"
   fi
   
 ])dnl
