@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added functions pg_loimport(), pg_loexport(). (Jouni)
+- Add SWF support to getimagesize() function (Derick Rethans)
+- Add support for both indexed and non-indexed arrays of file uploads
+  eg. name="file[]" type="file" (Rasmus)
 - Added create_function(), which gives the ability to create functions
   on-the-fly (Zeev, Zend Engine)
 - Added support for comparisons of arrays (with arrays) and objects (with
