@@ -1670,6 +1670,9 @@ PHP_MINIT_FUNCTION(domxml)
 	REGISTER_LONG_CONSTANT("DOMXML_LOAD_COMPLETE_ATTRS",DOMXML_LOAD_COMPLETE_ATTRS,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOMXML_LOAD_DONT_KEEP_BLANKS",DOMXML_LOAD_DONT_KEEP_BLANKS,		CONST_CS | CONST_PERSISTENT);
 	xmlSetGenericErrorFunc(xmlGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
+#if (defined(LIBXML_THREAD_ENABLED) && LIBXML_VERSION >= 20510)
+	xmlThrDefSetGenericErrorFunc(xmlGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
+#endif
 #if HAVE_DOMXSLT
 	xsltSetGenericErrorFunc(xsltGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
 #if HAVE_DOMEXSLT
