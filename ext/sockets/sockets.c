@@ -341,7 +341,7 @@ static char *php_strerror(int error) {
 #ifndef PHP_WIN32
 	if (error < -10000) {
 		error += 10000;
-		error=-error;
+		error = -error;
 
 #ifdef HAVE_HSTRERROR
 		buf = hstrerror(error);
