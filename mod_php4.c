@@ -214,7 +214,7 @@ static void init_request_info(SLS_D)
 		authorization = table_get(r->headers_in, "Authorization");
 	}
 	if (authorization
-		&& !auth_type(r)
+/* 		&& !auth_type(r) */
 		&& !strcmp(getword(r->pool, &authorization, ' '), "Basic")) {
 		tmp = uudecode(r->pool, authorization);
 		SG(request_info).auth_user = getword_nulls_nc(r->pool, &tmp, ':');
