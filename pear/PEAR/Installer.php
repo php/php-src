@@ -199,6 +199,7 @@ class PEAR_Installer extends PEAR_Common
             default:
                 return $this->raiseError("Invalid role `$atts[role]' for file $file");
         }
+        $save_destdir = $dest_dir;
         if (!empty($atts['baseinstalldir'])) {
             $dest_dir .= DIRECTORY_SEPARATOR . $atts['baseinstalldir'];
         }
@@ -315,7 +316,8 @@ class PEAR_Installer extends PEAR_Common
         }
         $this->addFileOperation("rename", array($dest_file, $final_dest_file));
         // Store the full path where the file was installed for easy unistall
-        $this->addFileOperation("installed_as", array($file, $installed_as));
+        $this->addFileOperation("installed_as", array($file, $installed_as,
+                                $save_destdir, dirname(substr($dest_file, strlen($save_destdir)))));
 
         //$this->log(2, "installed: $dest_file");
         return PEAR_INSTALLER_OK;
@@ -410,6 +412,14 @@ class PEAR_Installer extends PEAR_Common
                     break;
                 case 'installed_as':
                     $this->pkginfo['filelist'][$data[0]]['installed_as'] = $data[1];
+                    if (!isset($this->pkginfo['filelist']['dirtree'][dirname($data[1])])) {
+                        $this->pkginfo['filelist']['dirtree'][dirname($data[1])] = true;
+                        while(!empty($data[3]) && $data[3] != '/' && $data[3] != '\\') {
+                            $this->pkginfo['filelist']['dirtree']
+                                [$this->_prependPath($data[3], $data[2])] = true;
+                            $data[3] = dirname($data[3]);
+                        }
+                    }
                     break;
             }
         }
@@ -1052,6 +1062,16 @@ class PEAR_Installer extends PEAR_Common
     // }}}
     // {{{ uninstall()
 
+    /**
+     * Uninstall a package
+     *
+     * This method removes all files installed by the application, and then
+     * removes any empty directories.
+     * @param string package name
+     * @param array Command-line options.  Possibilities include:
+     *
+     *              - installroot: base installation dir, if not the default
+     */
     function uninstall($package, $options = array())
     {
         $php_dir = $this->config->get('php_dir');
@@ -1087,10 +1107,29 @@ class PEAR_Installer extends PEAR_Common
         if (!$this->commitFileTransaction()) {
             $this->rollbackFileTransaction();
             return $this->raiseError("uninstall failed");
+        } else {
+            $this->startFileTransaction();
+            // attempt to delete empty directories
+            uksort($filelist['dirtree'], array($this, '_sortDirs'));
+            foreach($filelist['dirtree'] as $dir => $notused) {
+                $this->addFileOperation('rmdir', array($dir));
+            }
+            if (!$this->commitFileTransaction()) {
+                $this->rollbackFileTransaction();
+            }
         }
 
         // Register that the package is no longer installed
         return $this->registry->deletePackage($package);
+    }
+
+    // }}}
+    // {{{ _sortDirs()
+    function _sortDirs($a, $b)
+    {
+        if (strnatcmp($a, $b) == -1) return 1;
+        if (strnatcmp($a, $b) == 1) return -1;
+        return 0;
     }
 
     // }}}
