@@ -161,6 +161,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_array_query, NULL)
 	PHP_FE(sqlite_single_query, NULL)
 	PHP_FE(sqlite_fetch_array, NULL)
+	PHP_FE(sqlite_fetch_object, NULL)
 	PHP_FE(sqlite_fetch_single, NULL)
 	PHP_FALIAS(sqlite_fetch_string, sqlite_fetch_single, NULL)
 	PHP_FE(sqlite_fetch_all, NULL)
@@ -214,6 +215,7 @@ function_entry sqlite_funcs_db[] = {
 
 function_entry sqlite_funcs_query[] = {
 	PHP_ME_MAPPING(fetch_array, sqlite_fetch_array, NULL)
+	PHP_ME_MAPPING(fetch_object, sqlite_fetch_object, NULL)
 	PHP_ME_MAPPING(fetch_single, sqlite_fetch_single, NULL)
 	PHP_ME_MAPPING(fetch_all, sqlite_fetch_all, NULL)
 	PHP_ME_MAPPING(column, sqlite_column, NULL)
@@ -236,6 +238,7 @@ function_entry sqlite_funcs_query[] = {
 
 function_entry sqlite_funcs_ub_query[] = {
 	PHP_ME_MAPPING(fetch_array, sqlite_fetch_array, NULL)
+	PHP_ME_MAPPING(fetch_object, sqlite_fetch_object, NULL)
 	PHP_ME_MAPPING(fetch_single, sqlite_fetch_single, NULL)
 	PHP_ME_MAPPING(fetch_all, sqlite_fetch_all, NULL)
 	PHP_ME_MAPPING(column, sqlite_column, NULL)
@@ -1159,7 +1162,7 @@ PHP_FUNCTION(sqlite_factory)
 	php_set_error_handling(EH_THROW, sqlite_ce_exception TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+		php_std_error_handling();
 		RETURN_NULL();
 	}
 	if (errmsg) {
@@ -1167,18 +1170,18 @@ PHP_FUNCTION(sqlite_factory)
 	}
 
 	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+		php_std_error_handling();
 		RETURN_NULL();
 	}
 
 	if (php_check_open_basedir(filename TSRMLS_CC)) {
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+		php_std_error_handling();
 		RETURN_NULL();
 	}
 
 	php_sqlite_open(filename, mode, NULL, return_value, errmsg, return_value TSRMLS_CC);
 
-	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+	php_std_error_handling();
 }
 /* }}} */
 
@@ -1657,6 +1660,84 @@ PHP_FUNCTION(sqlite_fetch_array)
 	}
 
 	php_sqlite_fetch_array(res, mode, decode_binary, 1, return_value TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto object sqlite_fetch_object(resource result [, string class_name [, bool decode_binary]])
+   Fetches the next row from a result set as an object. */
+PHP_FUNCTION(sqlite_fetch_object)
+{
+	zval *zres;
+	zend_bool decode_binary = 1;
+	struct php_sqlite_result *res;
+	zval *object = getThis();
+	char *class_name;
+	int class_name_len;
+	zend_class_entry *ce;
+	zval dataset;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval *retval_ptr;
+
+	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
+	if (object) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &class_name, &class_name_len, &decode_binary)) {
+			php_std_error_handling();
+			return;
+		}
+		RES_FROM_OBJECT(res, object);
+		if (!ZEND_NUM_ARGS()) {
+			ce = zend_standard_class_def;
+		} else {
+			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+		}
+	} else {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|sb", &zres, &class_name, &class_name_len, &decode_binary)) {
+			php_std_error_handling();
+			return;
+		}
+		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+		if (ZEND_NUM_ARGS() < 2) {
+			ce = zend_standard_class_def;
+		} else {
+			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+		}
+	}
+
+	if (!ce) {
+		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not find class '%s'", class_name);
+		php_std_error_handling();
+		return;
+	}
+
+	php_sqlite_fetch_array(res, PHPSQLITE_ASSOC, decode_binary, 1, &dataset TSRMLS_CC);
+
+	object_and_properties_init(return_value, ce, Z_ARRVAL(dataset));
+
+	php_std_error_handling(); /* before calling the ctor */
+
+	if (ce->constructor) {
+		fci.size = sizeof(fci);
+		fci.function_table = &ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_pp = &return_value;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+	
+		fcc.initialized = 1;
+		fcc.function_handler = ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.object_pp = &return_value;
+	
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not execute %s::%s()", class_name, ce->constructor->common.function_name);
+		} else {
+			zval_ptr_dtor(&retval_ptr);
+		}
+	}
 }
 /* }}} */
 
