@@ -319,12 +319,12 @@ zend_mm_finished_searching_for_block:
 		if (true_size > (heap->block_size - ZEND_MM_ALIGNED_SEGMENT_SIZE - ZEND_MM_ALIGNED_HEADER_SIZE)) {
 			/* Make sure we add a memory block which is big enough */
 			if (zend_mm_add_memory_block(heap, true_size + ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_HEADER_SIZE)) {
-				zend_error(E_ERROR, "Out of memory: cannot allocate %d bytes!", true_size);
+				zend_error(E_ERROR, "Out of memory: cannot allocate %zd bytes!", true_size);
 				return NULL;
 			}
 		} else {
 			if (zend_mm_add_memory_block(heap, heap->block_size)) {
-				zend_error(E_ERROR, "Out of memory: cannot allocate %d bytes!", heap->block_size);
+				zend_error(E_ERROR, "Out of memory: cannot allocate %zd bytes!", heap->block_size);
 				return NULL;
 			}
 		}
