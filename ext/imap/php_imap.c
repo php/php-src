@@ -112,7 +112,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_qprint,								NULL)
 	PHP_FE(imap_8bit,								NULL)
 	PHP_FE(imap_binary,								NULL)
-	PHP_FE(imap_utf8,      						 	NULL)
+	PHP_FE(imap_utf8,								NULL)
 	PHP_FE(imap_status,								NULL)
 	PHP_FE(imap_mailboxmsginfo,						NULL)
 	PHP_FE(imap_setflag_full,						NULL)
@@ -137,18 +137,18 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_get_quota,							NULL)
 	PHP_FE(imap_get_quotaroot,						NULL)
 	PHP_FE(imap_set_quota,							NULL)
- 	PHP_FE(imap_setacl,								NULL)
- 	PHP_FE(imap_getacl,								NULL)
+	PHP_FE(imap_setacl,								NULL)
+	PHP_FE(imap_getacl,								NULL)
 #endif
 
 	PHP_FE(imap_mail,								NULL)
 
-	PHP_FALIAS(imap_header, 		imap_headerinfo,	NULL)
-	PHP_FALIAS(imap_listmailbox, 	imap_list,			NULL)
-	PHP_FALIAS(imap_getmailboxes, 	imap_list_full,		NULL)
-	PHP_FALIAS(imap_scanmailbox, 	imap_listscan,		NULL)
-	PHP_FALIAS(imap_listsubscribed, imap_lsub,			NULL)
-	PHP_FALIAS(imap_getsubscribed, 	imap_lsub_full,		NULL)
+	PHP_FALIAS(imap_header,			imap_headerinfo,	NULL)
+	PHP_FALIAS(imap_listmailbox,	imap_list,			NULL)
+	PHP_FALIAS(imap_getmailboxes,	imap_list_full,		NULL)
+	PHP_FALIAS(imap_scanmailbox,	imap_listscan,		NULL)
+	PHP_FALIAS(imap_listsubscribed,	imap_lsub,			NULL)
+	PHP_FALIAS(imap_getsubscribed,	imap_lsub_full,		NULL)
 	PHP_FALIAS(imap_fetchtext,		imap_body,			NULL)
 	PHP_FALIAS(imap_scan,			imap_listscan,		NULL)
 	PHP_FALIAS(imap_create,			imap_createmailbox,	NULL)
@@ -1821,8 +1821,7 @@ PHP_FUNCTION(imap_fetchbody)
 		/* only perform the check if the msgno is a message number and not a UID */
 		PHP_IMAP_CHECK_MSGNO(Z_LVAL_PP(msgno));
 	}
- 
- 
+
 	body = mail_fetchbody_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), Z_STRVAL_PP(sec), &len, myargc==4 ? Z_LVAL_PP(flags) : NIL);
 
 	if (!body) {
