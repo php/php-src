@@ -296,12 +296,16 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		} else if (wFlags & DISPATCH_PROPERTYPUT) {
 			zend_update_property(Z_OBJCE_P(disp->object), disp->object, Z_STRVAL_PP(name), Z_STRLEN_PP(name)+1, *params[0] TSRMLS_CC);
 		} else if (wFlags & DISPATCH_METHOD) {
-			if (SUCCESS == call_user_function_ex(EG(function_table), &disp->object, *name,
-					&retval, pdp->cArgs, params, 1, NULL TSRMLS_CC)) {
-				ret = S_OK;
-			} else {
+			zend_try {
+				if (SUCCESS == call_user_function_ex(EG(function_table), &disp->object, *name,
+							&retval, pdp->cArgs, params, 1, NULL TSRMLS_CC)) {
+					ret = S_OK;
+				} else {
+					ret = DISP_E_EXCEPTION;
+				}
+			} zend_catch {
 				ret = DISP_E_EXCEPTION;
-			}
+			} zend_end_try();
 		} else {
 			trace("Don't know how to handle this invocation %08x\n", wFlags);
 		}

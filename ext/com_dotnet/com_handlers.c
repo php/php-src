@@ -286,15 +286,27 @@ static void function_dtor(void *pDest)
 	}
 }
 
+static PHP_FUNCTION(com_method_handler)
+{
+	Z_OBJ_HANDLER_P(getThis(), call_method)(
+			((zend_internal_function*)EG(function_state_ptr)->function)->function_name,
+			INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 static union _zend_function *com_method_get(zval *object, char *name, int len TSRMLS_DC)
 {
 	zend_internal_function f, *fptr = NULL;
 	php_com_dotnet_object *obj;
 	union _zend_function *func;
+	DISPID dummy;
 
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) != VT_DISPATCH) {
+		return NULL;
+	}
+
+	if (FAILED(php_com_get_id_of_name(obj, name, len, &dummy TSRMLS_CC))) {
 		return NULL;
 	}
 
@@ -306,7 +318,10 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 		f.scope = obj->ce;
 		f.fn_flags = 0;
 		f.function_name = estrndup(name, len);
+		f.handler = PHP_FN(com_method_handler);
 
+		fptr = &f;
+		
 		if (obj->typeinfo) {
 			/* look for byref params */
 			ITypeComp *comp;
@@ -346,6 +361,9 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 						case DESCKIND_TYPECOMP:
 							ITypeComp_Release(bindptr.lptcomp);
 							break;
+
+						case DESCKIND_NONE:
+							break;
 					}
 					if (TI) {
 						ITypeInfo_Release(TI);
@@ -356,21 +374,27 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 			}
 		}
 
-		/* save this method in the cache */
-		if (!obj->method_cache) {
-			ALLOC_HASHTABLE(obj->method_cache);
-			zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
-		}
+		if (fptr) {
+			/* save this method in the cache */
+			if (!obj->method_cache) {
+				ALLOC_HASHTABLE(obj->method_cache);
+				zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
+			}
 
-		zend_hash_update(obj->method_cache, name, len, &f, sizeof(f), (void**)&fptr);
+			zend_hash_update(obj->method_cache, name, len, &f, sizeof(f), (void**)&fptr);
+		}
 	}
 
-	/* duplicate this into a new chunk of emalloc'd memory,
-	 * since the engine will efree it */
-	func = emalloc(sizeof(*fptr));
-	memcpy(func, fptr, sizeof(*fptr));
+	if (fptr) {
+		/* duplicate this into a new chunk of emalloc'd memory,
+		 * since the engine will efree it */
+		func = emalloc(sizeof(*fptr));
+		memcpy(func, fptr, sizeof(*fptr));
 
-	return func;
+		return func;
+	}
+
+	return NULL;
 }
 
 static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
