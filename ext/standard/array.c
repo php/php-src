@@ -1421,78 +1421,133 @@ PHP_FUNCTION(array_fill)
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
-	zval *zlow, *zhigh;
-	long step = 1;
+	zval *zlow, *zhigh, *zstep = NULL;
+	int err = 0, is_step_double = 0;
+	double step = 1.0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|l", &zlow,
-							  &zhigh, &step) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|z", &zlow, &zhigh, &zstep) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	/* We only want positive step values. */
-	if (step < 0) {
-		step *= -1;
-	}
+	if (zstep) {
+		if (Z_TYPE_P(zstep) == IS_DOUBLE || (Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE)) {
+			is_step_double = 1;
+		}
+
+		convert_to_double_ex(&zstep);
+		step = Z_DVAL_P(zstep);
+
+		/* We only want positive step values. */
+		if (step < 0.0) {
+			step *= -1;
+		}
+	}	
 
 	/* Initialize the return_value as an array. */
 	array_init(return_value);
 
 	/* If the range is given as strings, generate an array of characters. */
 	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING) {
+		int type1, type2;
 		unsigned char *low, *high;
+		long lstep = (long) step;
 
+		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRLEN_P(zlow), NULL, NULL, 0);
+		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRLEN_P(zhigh), NULL, NULL, 0);
+		
+		if (type1 == IS_DOUBLE || type2 == IS_DOUBLE || is_step_double) {
+			goto double_str;
+		} else if (type1 == IS_LONG || type2 == IS_LONG) {
+			goto long_str;
+		}
+		
 		convert_to_string_ex(&zlow);
 		convert_to_string_ex(&zhigh);
 		low = (unsigned char *)Z_STRVAL_P(zlow);
 		high = (unsigned char *)Z_STRVAL_P(zhigh);
 
 		if (*low > *high) {		/* Negative steps */
-			if (*low - *high < step || step <= 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "step exceeds the specified range");
-				zval_dtor(return_value);
-				RETURN_FALSE;
+			if (*low - *high < lstep || lstep <= 0) {
+				err = 1;
+				goto err;
 			}
 			for (; *low >= *high; (*low) -= (unsigned int)step) {
 				add_next_index_stringl(return_value, low, 1, 1);
 			}
-		} else {				/* Positive steps */
-			if (*high - *low < step || step <= 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "step exceeds the specified range");
-				zval_dtor(return_value);
-				RETURN_FALSE;
+		} else if (*high > *low) {	/* Positive steps */
+			if (*high - *low < lstep || lstep <= 0) {
+				err = 1;
+				goto err;
 			}
-			for (; *low <= *high; (*low) += (unsigned int)step) {
+			for (; *low <= *high; (*low) += (unsigned int)lstep) {
 				add_next_index_stringl(return_value, low, 1, 1);
 			}
+		} else {
+			add_next_index_stringl(return_value, low, 1, 1);
+		}
+	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
+		double low, high;
+double_str:		
+		convert_to_double_ex(&zlow);
+		convert_to_double_ex(&zhigh);
+		low = Z_DVAL_P(zlow);
+		high = Z_DVAL_P(zhigh);
+		
+		if (low > high) { 		/* Negative steps */
+			if (low - high < step || step <= 0) {
+				err = 1;
+				goto err;
+			}
+			for (; low >= high; low -= step) {
+				add_next_index_double(return_value, low);
+			}	
+		} else if (high > low) { 	/* Positive steps */
+			if (high - low < step || step <= 0) {
+				err = 1;
+				goto err;
+			}
+			for (; low <= high; low += step) {
+				add_next_index_double(return_value, low);
+			}	
+		} else {
+			add_next_index_double(return_value, low);
 		}
 	} else {
 		int low, high;
-
+		long lstep;
+long_str:
 		convert_to_long_ex(&zlow);
 		convert_to_long_ex(&zhigh);
 		low = Z_LVAL_P(zlow);
 		high = Z_LVAL_P(zhigh);
-
+		lstep = (long) step;
+				
 		if (low > high) { 		/* Negative steps */
-			if (low - high < step || step <= 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "step exceeds the specified range");
-				zval_dtor(return_value);
-				RETURN_FALSE;
+			if (low - high < lstep || lstep <= 0) {
+				err = 1;
+				goto err;
 			}
-			for (; low >= high; low -= step) {
+			for (; low >= high; low -= lstep) {
 				add_next_index_long(return_value, low);
 			}	
-		} else {				/* Positive steps */
-			if (high - low < step || step <= 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "step exceeds the specified range");
-				zval_dtor(return_value);
-				RETURN_FALSE;
+		} else if (high > low) { 	/* Positive steps */
+			if (high - low < lstep || lstep <= 0) {
+				err = 1;
+				goto err;
 			}
-			for (; low <= high; low += step) {
+			for (; low <= high; low += lstep) {
 				add_next_index_long(return_value, low);
 			}	
+		} else {
+			add_next_index_long(return_value, low);
 		}
 	}
+err:
+	if (err) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "step exceeds the specified range");
+		zval_dtor(return_value);
+		RETURN_FALSE;
+	}		
 }
 /* }}} */
 
