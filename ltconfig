@@ -1439,7 +1439,7 @@ else
     hardcode_libdir_flag_spec='${wl}-rpath ${wl}$libdir'
     hardcode_libdir_separator=:
     ;;
-  rhapsody*|darwin*)
+  rhapsody*)
     archive_cmds='$CC -bundle -undefined suppress -o $lib $libobjs $deplibs $linkopts'
     hardcode_libdir_flags_spec='-L$libdir'
     hardcode_direct=yes
@@ -1498,7 +1498,9 @@ else
 
   sysv5*)
     no_undefined_flag=' -z text'
-    archive_cmds='$CC -G${allow_undefined_flag} -h $soname -o $lib $libobjs $deplibs $linkopts'
+    # $CC -shared without GNU ld will not create a library from C++
+    # object files and a static libstdc++, better avoid it by now
+    archive_cmds='$LD -G${allow_undefined_flag} -h $soname -o $lib $libobjs $deplibs $linkopts'
     archive_expsym_cmds='$echo "{ global:" > $lib.exp~cat $export_symbols | sed -e "s/\(.*\)/\1;/" >> $lib.exp~$echo "local: *; };" >> $lib.exp~
 		$LD -G${allow_undefined_flag} -M $lib.exp -h $soname -o $lib $libobjs $deplibs $linkopts~$rm $lib.exp'
     hardcode_libdir_flag_spec=
@@ -2051,7 +2053,7 @@ osf3* | osf4* | osf5*)
   sys_lib_dlsearch_path_spec="$sys_lib_search_path_spec"
   ;;
 
-rhapsody*|darwin*)
+rhapsody*)
   version_type=sunos
   library_names_spec='${libname}.so'
   soname_spec='${libname}.so'
@@ -2099,7 +2101,7 @@ sysv4 | sysv4.2uw2* | sysv4.3* | sysv5*)
   soname_spec='${libname}${release}.so$major'
   shlibpath_var=LD_LIBRARY_PATH
   case "$host_vendor" in
-    sco|sequent)
+    sequent)
       file_magic_cmd='/bin/file'
       deplibs_check_method='file_magic ELF [0-9][0-9]*-bit [LM]SB (shared object|dynamic lib )'
       ;;
