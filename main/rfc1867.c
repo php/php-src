@@ -371,11 +371,12 @@ static char *php_mime_get_hdr_value(zend_llist header, char *key)
 	}
 	
 	entry = zend_llist_get_first(&header);
-	do {
+	while (entry) {
 		if (!strcasecmp(entry->key, key)) {
 			return entry->value;
 		}
-	} while ((entry = zend_llist_get_next(&header)));
+		entry = zend_llist_get_next(&header);
+	}
 	
 	return NULL;
 }
@@ -726,7 +727,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			cancel_upload = 0;
 
 			if(strlen(filename) == 0) {
-				sapi_module.sapi_error(E_WARNING, "No file uploaded");
+				sapi_module.sapi_error(E_NOTICE, "No file uploaded");
 				cancel_upload = UPLOAD_ERROR_D;
 			}
 
