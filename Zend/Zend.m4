@@ -43,6 +43,7 @@ string.h \
 unistd.h \
 stdarg.h \
 sys/types.h \
+sys/time.h \
 signal.h \
 unix.h \
 dlfcn.h)
