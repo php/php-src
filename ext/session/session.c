@@ -543,21 +543,19 @@ static char *_php_create_id(int *newlen TSRMLS_DC)
 	return estrdup(buf);
 }
 
-static int php_session_initialize(TSRMLS_D)
+static void php_session_initialize(TSRMLS_D)
 {
 	char *val;
 	int vallen;
 	
 	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		php_error(E_ERROR, "Failed to initialize session module");
-		return FAILURE;
+		return;
 	}
-	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == FAILURE) {
-		return FAILURE;
+	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == SUCCESS) {
+		php_session_decode(val, vallen TSRMLS_CC);
+		efree(val);
 	}
-	php_session_decode(val, vallen TSRMLS_CC);
-	efree(val);
-	return SUCCESS;
 }
 
 
@@ -948,10 +946,11 @@ static void php_session_start(TSRMLS_D)
 	}
 
 	php_session_cache_limiter(TSRMLS_C);
-	if (php_session_initialize(TSRMLS_C) == SUCCESS && 
-		PS(mod_data) && PS(gc_probability) > 0) {
+	php_session_initialize(TSRMLS_C);
+
+	if (PS(mod_data) && PS(gc_probability) > 0) {
 		int nrdels = -1;
-		
+
 		nrand = (int) (100.0*php_combined_lcg(TSRMLS_C));
 		if (nrand < PS(gc_probability)) {
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
@@ -962,7 +961,6 @@ static void php_session_start(TSRMLS_D)
 		}
 	}
 }
-
 
 static zend_bool php_session_destroy(TSRMLS_D)
 {
