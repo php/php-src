@@ -523,8 +523,6 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	smart_str str = {0};
 	zval **args[5];
 	int i, connect_type = 0;
-	char *msgbuf;
-	PGresult *pg_result;
 
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 5
 			|| zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
@@ -943,7 +941,6 @@ PHP_FUNCTION(pg_query)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 	pgsql_result_handle *pg_result;
-	char *msgbuf;
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -2406,7 +2403,6 @@ PHP_FUNCTION(pg_end_copy)
 	int id = -1;
 	PGconn *pgsql;
 	int result = 0;
-	char *msgbuf;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -2447,7 +2443,6 @@ PHP_FUNCTION(pg_put_line)
 	int id = -1;
 	PGconn *pgsql;
 	int result = 0;
-	char *msgbuf;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -2501,7 +2496,6 @@ PHP_FUNCTION(pg_copy_to)
 	char *csv = (char *)NULL;
 	int ret;
 	int argc = ZEND_NUM_ARGS();
-	char *msgbuf;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rs|ss",
 							  &pgsql_link, &table_name, &table_name_len,
@@ -2612,7 +2606,6 @@ PHP_FUNCTION(pg_copy_from)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 	int argc = ZEND_NUM_ARGS();
-	char *msgbuf;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rs/a|ss",
 							  &pgsql_link, &table_name, &table_name_len, &pg_rows,
