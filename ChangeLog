@@ -1,3 +1,48 @@
+2005-03-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/ingres_ii/config.w32
+      ext/ingres_ii/config.w32:
+      
+      Added config.w32 (modified version, original by: Grant.Croker at ca dot
+      com)
+
+2005-03-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Readd revised version of Jani's fix:
+        'errors with -d having a check for invalid ini entries'
+      - Add -v for verbose mode
+
+2005-03-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * sapi/cli/php_cli.c:
+      Revert bad idea. (no more error for invalid -d options)
+
+    * run-tests.php:
+      revert
+
+    * run-tests.php:
+      Fix stupid typos
+
+    * run-tests.php:
+      Fix errors with -d having a check for invalid ini entries
+
+2005-03-18  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_0)
+      pear/go-pear-list.php:
+      update to newest packages
+
+    * pear/go-pear-list.php
+      pear/go-pear-list.php:
+      update to Archive_Tar 1.3.1
+
+2005-03-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.dsp:
+      - Add missing entries.
+
 2005-03-17  Harrie Hazewinkel  <harrie@lisanza.net>
 
     * (PHP_5_0)
