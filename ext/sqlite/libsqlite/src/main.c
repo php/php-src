@@ -764,7 +764,8 @@ static int sqliteDefaultBusyCallback(
 #if SQLITE_MIN_SLEEP_MS==1
   int delay = 10;
   int prior_delay = 0;
-  int timeout = (int)Timeout;
+  /* We seem to be called by a generic cb mechanism which passes void ptrs */
+  int timeout = (int)(long)Timeout;
   int i;
 
   for(i=1; i<count; i++){ 
@@ -783,7 +784,7 @@ static int sqliteDefaultBusyCallback(
   sqliteOsSleep(delay);
   return 1;
 #else
-  int timeout = (int)Timeout;
+  int timeout = (int)(long)Timeout;
   if( (count+1)*1000 > timeout ){
     return 0;
   }
