@@ -717,6 +717,8 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	
 	php_output_startup();
 
+	PG(post_request_startup_ok) = PG(pre_request_shutdown_ok) = 0;
+
 #if APACHE
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup
