@@ -115,7 +115,7 @@ SOURCE=.\getopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\internal_functions.c
+SOURCE=.\internal_functions_win32.c
 # End Source File
 # Begin Source File
 
