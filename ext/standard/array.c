@@ -3044,7 +3044,7 @@ out:
 	efree(args);
 }
 
-/* {{{ proto array array_intersect_key(array arr1, array arr2 [, array ...], callback data_compare_func)
+/* {{{ proto array array_intersect_key(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). Equivalent of array_intersect_assoc() but does not do compare of the data. */
 PHP_FUNCTION(array_intersect_key)
 {
