@@ -319,8 +319,10 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 
 ZEND_API void start_memory_manager(ALS_D)
 {
+#if 0
 	int i, j;
 	void *cached_entries[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
+#endif
 
 	AG(phead) = AG(head) = NULL;
 	
