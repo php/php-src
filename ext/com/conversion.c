@@ -758,6 +758,8 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				}
 				else
 				{
+					TSRMLS_FETCH();
+
 					ALLOC_COM(obj);
 					php_COM_set(obj, V_DISPATCH(var_arg), TRUE);
 
