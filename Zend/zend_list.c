@@ -274,13 +274,13 @@ void plist_entry_destructor(void *ptr)
 	if (zend_hash_index_find(&list_destructors, le->type,(void **) &ld)==SUCCESS) {
 		switch (ld->type) {
 			case ZEND_RESOURCE_LIST_TYPE_STD:
-				if (ld->list_dtor) {
-					(ld->list_dtor)(le->ptr);
+				if (ld->plist_dtor) {
+					(ld->plist_dtor)(le->ptr);
 				}
 				break;
 			case ZEND_RESOURCE_LIST_TYPE_EX:
-				if (ld->list_dtor_ex) {
-					ld->list_dtor_ex(le);
+				if (ld->plist_dtor_ex) {
+					ld->plist_dtor_ex(le);
 				}
 				break;
 				EMPTY_SWITCH_DEFAULT_CASE()
