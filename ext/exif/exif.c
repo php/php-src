@@ -68,6 +68,9 @@
 #include "ext/mbstring/mbstring.h"
 #endif
 
+/* needed for ssize_t definition */
+#include <sys/types.h>
+
 typedef unsigned char uchar;
 
 #ifndef safe_emalloc
