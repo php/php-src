@@ -301,9 +301,9 @@ PHP_FUNCTION(mime_content_type)
 
 	magic_set_config();
 
-	if(OK != magic_process(filename)) {
+	if(MIME_MAGIC_OK != magic_process(filename)) {
 		RETVAL_FALSE;
-	} else if(OK != magic_rsl_get(&content_type, &content_encoding)) {
+	} else if(MIME_MAGIC_OK != magic_rsl_get(&content_type, &content_encoding)) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_STRING(content_type, 1);
@@ -998,10 +998,10 @@ static int magic_process(char *filename)
      * first try judging the file based on its filesystem status
      */
     switch ((result = fsmagic(filename))) {
-    case DONE:
+    case MIME_MAGIC_DONE:
 		magic_rsl_putchar('\n');
-		return OK;
-    case OK:
+		return MIME_MAGIC_OK;
+    case MIME_MAGIC_OK:
 		break;
     default:
 		/* fatal error, bail out */
@@ -1013,7 +1013,7 @@ static int magic_process(char *filename)
 		php_error(E_WARNING,
 					  MODNAME ": can't read `%s'", filename);
 		/* let some other handler decide what the problem is */
-		return DECLINED;
+		return MIME_MAGIC_DECLINED;
     }
 
     /*
@@ -1022,7 +1022,7 @@ static int magic_process(char *filename)
     if ((nbytes = read(fd, (char *) buf, sizeof(buf) - 1)) == -1) {
 		php_error(E_WARNING,
 					  MODNAME ": read failed: %s", filename);
-		return ERROR;
+		return MIME_MAGIC_ERROR;
     }
 
     if (nbytes == 0)
@@ -1035,7 +1035,7 @@ static int magic_process(char *filename)
     (void) close(fd);
     (void) magic_rsl_putchar('\n');
 
-    return OK;
+    return MIME_MAGIC_OK;
 }
 
 static void tryit(unsigned char *buf, int nb, int checkzmagic)
@@ -1070,8 +1070,8 @@ static void tryit(unsigned char *buf, int nb, int checkzmagic)
 
 
 /*
- * return DONE to indicate it's been handled
- * return OK to indicate it's a regular file still needing handling
+ * return MIME_MAGIC_DONE to indicate it's been handled
+ * return MIME_MAGIC_OK to indicate it's a regular file still needing handling
  * other returns indicate a failure of some sort
  */
 static int fsmagic(const char *fn)
@@ -1083,14 +1083,14 @@ static int fsmagic(const char *fn)
     switch (finfo.st_mode & S_IFMT) {
     case S_IFDIR:
 		magic_rsl_puts(DIR_MAGIC_TYPE);
-		return DONE;
+		return MIME_MAGIC_DONE;
     case S_IFCHR:
 		/*
 		 * (void) magic_rsl_printf(r,"character special (%d/%d)",
 		 * major(sb->st_rdev), minor(sb->st_rdev));
 		 */
 		(void) magic_rsl_puts(MIME_BINARY_UNKNOWN);
-		return DONE;
+		return MIME_MAGIC_DONE;
 #ifdef S_IFBLK
     case S_IFBLK:
 		/*
@@ -1098,7 +1098,7 @@ static int fsmagic(const char *fn)
 		 * major(sb->st_rdev), minor(sb->st_rdev));
 		 */
 		(void) magic_rsl_puts(MIME_BINARY_UNKNOWN);
-		return DONE;
+		return MIME_MAGIC_DONE;
 		/* TODO add code to handle V7 MUX and Blit MUX files */
 #endif
 #ifdef    S_IFIFO
@@ -1107,7 +1107,7 @@ static int fsmagic(const char *fn)
 		 * magic_rsl_puts(r,"fifo (named pipe)");
 		 */
 		(void) magic_rsl_puts(MIME_BINARY_UNKNOWN);
-		return DONE;
+		return MIME_MAGIC_DONE;
 #endif
 #ifdef    S_IFLNK
     case S_IFLNK:
@@ -1116,13 +1116,13 @@ static int fsmagic(const char *fn)
 		 */
 		php_error(E_WARNING,
 					  MODNAME ": broken symlink (%s)", fn);
-		return ERROR;
+		return MIME_MAGIC_ERROR;
 #endif
 #ifdef    S_IFSOCK
 #ifndef __COHERENT__
     case S_IFSOCK:
 		magic_rsl_puts(MIME_BINARY_UNKNOWN);
-		return DONE;
+		return MIME_MAGIC_DONE;
 #endif
 #endif
     case S_IFREG:
@@ -1130,7 +1130,7 @@ static int fsmagic(const char *fn)
     default:
 		php_error(E_WARNING,
 					  MODNAME ": invalid mode 0%o.", (unsigned int)finfo.st_mode);
-		return ERROR;
+		return MIME_MAGIC_ERROR;
     }
 
     /*
@@ -1138,9 +1138,9 @@ static int fsmagic(const char *fn)
      */
     if (finfo.st_size == 0) {
 		magic_rsl_puts(MIME_TEXT_UNKNOWN);
-		return DONE;
+		return MIME_MAGIC_DONE;
     }
-    return OK;
+    return MIME_MAGIC_OK;
 }
 
 /*
@@ -1979,7 +1979,7 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
     /* check if we have a result */
     if (!req_dat || !req_dat->head) {
 		/* empty - no match, we defer to other Apache modules */
-		return DECLINED;
+		return MIME_MAGIC_DECLINED;
     }
 
     /* start searching for the type and encoding */
@@ -1999,7 +1999,7 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
 				}
 				else if (state == rsl_type) {
 					/* whitespace: type has no slash! */
-					return DECLINED;
+					return MIME_MAGIC_DECLINED;
 				}
 				else if (state == rsl_subtype) {
 					/* whitespace: end of MIME type */
@@ -2021,7 +2021,7 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
 					/* abandon malfunctioning module */
 					php_error(E_WARNING,
 								  MODNAME ": bad state %d (ws)", state);
-					return DECLINED;
+					return MIME_MAGIC_DECLINED;
 				}
 				/* NOTREACHED */
 			}
@@ -2065,7 +2065,7 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
 					/* abandon malfunctioning module */
 					php_error(E_WARNING,
 								  MODNAME ": bad state %d (ns)", state);
-					return DECLINED;
+					return MIME_MAGIC_DECLINED;
 				}
 				/* NOTREACHED */
 			}
@@ -2077,7 +2077,7 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
     if (state != rsl_subtype && state != rsl_separator &&
 		state != rsl_encoding) {
 		/* defer to other modules */
-		return DECLINED;
+		return MIME_MAGIC_DECLINED;
     }
 
     /* save the info in the request record */
@@ -2103,11 +2103,11 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
     /* detect memory allocation errors */
     if (!content_type ||
 		(state == rsl_encoding && !*content_encoding)) {
-		return ERROR;
+		return MIME_MAGIC_ERROR;
     }
 
     /* success! */
-    return OK;
+    return MIME_MAGIC_OK;
 }
 
 /*
