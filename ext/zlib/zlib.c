@@ -19,8 +19,17 @@
 /* $Id$ */
 #define IS_EXT_MODULE
 
+#include "php_config.h"
+
+#if HAVE_FOPENCOOKIE 
+#define _GNU_SOURCE
+#include "libio.h"
+#endif 
+
 #include "php.h"
 
+
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -74,6 +83,9 @@ int zlib_globals_id;
 static php_zlib_globals zlib_globals;
 #endif
 
+#if HAVE_FOPENCOOKIE 
+static FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
+#endif 
 
 /* True globals, no need for thread safety */
 static int le_zp;
@@ -133,11 +145,20 @@ PHP_MINIT_FUNCTION(zlib)
         ZLIBG(gzgetss_state)=0;
 #endif
 	le_zp = register_list_destructors(phpi_destructor_gzclose,NULL);
+
+#if HAVE_FOPENCOOKIE
+	php_register_url_wrapper("zlib",zlib_fopen_wrapper);
+#endif
+
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(zlib)
 {
+#if HAVE_FOPENCOOKIE
+	php_unregister_url_wrapper("zlib"); 
+#endif
+	
 	return SUCCESS;
 }
 
@@ -145,6 +166,9 @@ PHP_MINFO_FUNCTION(zlib)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "ZLib Support", "enabled");
+#if HAVE_FOPENCOOKIE
+	php_info_print_table_row(2, "'zlib:' fopen wrapper", "enabled");
+#endif
 	php_info_print_table_row(2, "Compiled Version", ZLIB_VERSION );
 	php_info_print_table_row(2, "Linked Version", (char *)zlibVersion() );
 	php_info_print_table_end();
@@ -734,6 +758,68 @@ PHP_FUNCTION(gzuncompress)
 	}
 }
 /* }}} */
+
+#if HAVE_FOPENCOOKIE
+struct gz_cookie {
+	gzFile gz_file;
+};
+
+static ssize_t gz_reader(void *cookie, char *buffer, size_t size)
+{
+	return gzread(((struct gz_cookie *)cookie)->gz_file,buffer,size); 
+}
+
+static ssize_t gz_writer(void *cookie, char *buffer, size_t size) {
+	return gzwrite(((struct gz_cookie *)cookie)->gz_file,buffer,size); 
+}
+
+static int gz_seeker(void *cookie,fpos_t *position, int whence) {
+	return (*position=gzseek(((struct gz_cookie *)cookie)->gz_file,*position,whence)); 
+}
+
+static int gz_cleaner(void *cookie) {
+	gzclose(((struct gz_cookie *)cookie)->gz_file);
+	efree(cookie);
+	cookie=NULL;  
+}
+
+
+static cookie_io_functions_t gz_cookie_functions =   
+{ gz_reader 
+, gz_writer
+, gz_seeker
+, gz_cleaner
+};
+
+static FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+{
+	struct gz_cookie *gc = NULL;
+
+	gc = (struct gz_cookie *)emalloc(sizeof(struct gz_cookie));
+
+	if(gc) {
+		*issock = 0;
+		
+		while(*path!=':') 
+			path++;
+		
+		path++;
+
+		gc->gz_file = gzopen(path,mode);
+		
+		if(gc->gz_file) {
+			return fopencookie(gc,mode,gz_cookie_functions);		
+		} else {
+			efree(gc);
+			return NULL;
+		}
+	}
+	errno = ENOENT;
+	return NULL;
+}
+
+
+#endif
 
 
 
