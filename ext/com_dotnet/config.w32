@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("com_dotnet", "COM and .Net support", "yes");
+ARG_ENABLE("com-dotnet", "COM and .Net support", "yes");
 
 if (PHP_COM_DOTNET == "yes") {
 	EXTENSION("com_dotnet", "com_com.c com_dotnet.c com_extension.c \
