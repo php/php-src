@@ -1768,7 +1768,7 @@ PHP_FUNCTION(mssql_init)
 /* }}} */
 
 /* {{{ proto int mssql_bind(int stmt, string param_name, mixed var, int type 
-		[, int is_output[, int is_null[, int maxlen]])
+		[, int is_output[, int is_null[, int maxlen]]])
    Adds a parameter to a stored procedure or a remote stored procedure  */
 PHP_FUNCTION(mssql_bind)
 {
