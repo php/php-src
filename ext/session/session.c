@@ -95,23 +95,45 @@ static PHP_INI_MH(OnUpdateSerializer)
 }
 
 
+static PHP_INI_MH(OnUpdateStringCopy)
+{
+	char **p;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+	p = (char **) (base+(size_t) mh_arg1);
+
+	if(*p) {
+		STR_FREE(*p);
+	}
+
+	if(stage != PHP_INI_STAGE_DEACTIVATE) {
+	  *p = estrdup(new_value);
+	}
+	return SUCCESS;
+}
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("session.save_path",			"/tmp",			PHP_INI_ALL, OnUpdateString,		save_path,			php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.name",				"PHPSESSID",	PHP_INI_ALL, OnUpdateString,		session_name,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.save_path",			"/tmp",			PHP_INI_ALL, OnUpdateStringCopy,		save_path,			php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.name",				"PHPSESSID",	PHP_INI_ALL, OnUpdateStringCopy,		session_name,		php_ps_globals,	ps_globals)
 	PHP_INI_ENTRY("session.save_handler",			"files",		PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",		"0",			PHP_INI_ALL, OnUpdateBool,			auto_start,			php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_probability",		"1",			PHP_INI_ALL, OnUpdateInt,			gc_probability,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_maxlifetime",		"1440",			PHP_INI_ALL, OnUpdateInt,			gc_maxlifetime,		php_ps_globals,	ps_globals)
 	PHP_INI_ENTRY("session.serialize_handler",		"php",			PHP_INI_ALL, OnUpdateSerializer)
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",	"0",			PHP_INI_ALL, OnUpdateInt,			cookie_lifetime,	php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_path",		"/",			PHP_INI_ALL, OnUpdateString,		cookie_path,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_domain",		"",				PHP_INI_ALL, OnUpdateString,		cookie_domain,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_path",		"/",			PHP_INI_ALL, OnUpdateStringCopy,		cookie_path,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_domain",		"",				PHP_INI_ALL, OnUpdateStringCopy,		cookie_domain,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",		"1",			PHP_INI_ALL, OnUpdateBool,			use_cookies,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.referer_check",		"",				PHP_INI_ALL, OnUpdateString,		extern_referer_chk,	php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.entropy_file",		"",				PHP_INI_ALL, OnUpdateString,		entropy_file,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.referer_check",		"",				PHP_INI_ALL, OnUpdateStringCopy,		extern_referer_chk,	php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.entropy_file",		"",				PHP_INI_ALL, OnUpdateStringCopy,		entropy_file,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.entropy_length",		"0",			PHP_INI_ALL, OnUpdateInt,			entropy_length,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cache_limiter",		"nocache",		PHP_INI_ALL, OnUpdateString,		cache_limiter,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.cache_limiter",		"nocache",		PHP_INI_ALL, OnUpdateStringCopy,		cache_limiter,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",		"180",			PHP_INI_ALL, OnUpdateInt,			cache_expire,		php_ps_globals,	ps_globals)
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
@@ -1403,17 +1425,12 @@ static void php_rinit_session_globals(PSLS_D)
 {		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(define_sid) = 0;
-	PS(save_path) = estrdup(INI_STR("session.save_path"));
-	PS(session_name) = estrdup(INI_STR("session.name"));
-	PS(entropy_file) = estrdup(INI_STR("session.entropy_file"));
-	PS(extern_referer_chk) = estrdup(INI_STR("session.referer_check"));
 	PS(id) = NULL;
-	PS(cookie_path) = estrdup(INI_STR("session.cookie_path"));
-	PS(cookie_domain) = estrdup(INI_STR("session.cookie_domain"));
-	PS(cache_limiter) = estrdup(INI_STR("session.cache_limiter"));
 	PS(nr_open_sessions) = 0;
 	PS(mod_data) = NULL;
 }
+
+#define FREE_NULL(x) efree(x); (x) = NULL;
 
 static void php_rshutdown_session_globals(PSLS_D)
 {
@@ -1421,13 +1438,13 @@ static void php_rshutdown_session_globals(PSLS_D)
 		PS(mod)->close(&PS(mod_data));
 	if (PS(id)) 
 		efree(PS(id));
-	efree(PS(entropy_file));
-	efree(PS(extern_referer_chk));
-	efree(PS(save_path));
-	efree(PS(session_name));
-	efree(PS(cache_limiter));
-	efree(PS(cookie_path));
-	efree(PS(cookie_domain));
+	FREE_NULL(PS(entropy_file));
+	FREE_NULL(PS(extern_referer_chk));
+	FREE_NULL(PS(save_path));
+	FREE_NULL(PS(session_name));
+	FREE_NULL(PS(cache_limiter));
+	FREE_NULL(PS(cookie_path));
+	FREE_NULL(PS(cookie_domain));
 	zend_hash_destroy(&PS(vars));
 }
 
