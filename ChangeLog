@@ -1,3 +1,41 @@
+2000-11-09  Colin Viebrock  <colin@easydns.com>
+
+    * NEWS: oops, forgot to document it :)
+
+    * ext/standard/datetime.c:
+    some changes, and added 'r' flag which generates an RFC822 compatible date string.
+
+2000-11-09  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec: - fix crash when using blob_in_file mode (danny).
+
+2000-11-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c
+      ext/hyperwave/php_hyperwave.h: - Some more comments
+    - Initial support to just include anchors into documents
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - Started support for XPath/XPtr (completely untested)
+
+2000-11-09  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Crypt/HCEMD5.php: beware maxint on 32-bit platforms
+
+2000-11-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: Beutifying the output of configure a bit.
+
+    * ext/gd/config.m4: Remove duplicate check for xpm support.
+
+    * ext/gd/config.m4: Fix to get jpeg/xpm support everytime.
+
+    * ext/curl/curl.c: Remove duplicates (when curl-7.4.1 is used).
+
+    * ext/gd/config.m4: Fixed bug: #5460
+
 2000-11-08  Marc Pohl  <m.pohl@gmx.de>
 
     * ext/zlib/php_zlib.h
