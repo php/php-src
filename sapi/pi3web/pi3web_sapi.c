@@ -23,6 +23,8 @@
 
 /* $Id$ */
 
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+
 #include "pi3web_sapi.h"
 #include "php.h"
 #include "php_main.h"
