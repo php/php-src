@@ -604,7 +604,7 @@ char *_php3_number_format(double d,int dec,char dec_point,char thousand_sep)
 	
 	tmplen=php_sprintf(tmpbuf,"%.*f",dec,d);
 
-	if (!isdigit(tmpbuf[0])) {
+	if (!isdigit((int)tmpbuf[0])) {
 		return tmpbuf;
 	}
 
