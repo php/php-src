@@ -39,6 +39,7 @@
 #include "http_main.h"
 #include "util_script.h"
 #include "http_core.h"
+#include "ap_mpm.h"
 #if !defined(WIN32) && !defined(WINNT)
 #include "unixd.h"
 #endif
@@ -356,14 +357,12 @@ PHP_MINFO_FUNCTION(apache)
 	char *apv = php_apache_get_version();
 	smart_str tmp1 = {0};
 	char tmp[1024];
-	int n;
+	int n, max_requests;
 	char *p;
 	server_rec *serv = ((php_struct *) SG(server_context))->r->server;
 #if !defined(WIN32) && !defined(WINNT)
 	AP_DECLARE_DATA extern unixd_config_rec unixd_config;
-	extern int ap_max_requests_per_child;
 #endif
-	AP_DECLARE_DATA extern const char *ap_server_root;
 	
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
@@ -395,11 +394,10 @@ PHP_MINFO_FUNCTION(apache)
 #if !defined(WIN32) && !defined(WINNT)
 	sprintf(tmp, "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
 	php_info_print_table_row(2, "User/Group", tmp);
-	sprintf(tmp, "Per Child: %d - Keep Alive: %s - Max Per Connection: %d", ap_max_requests_per_child, (serv->keep_alive ? "on":"off"), serv->keep_alive_max);
-#else
-	sprintf(tmp, "Keep Alive: %s - Max Per Connection: %d", (serv->keep_alive ? "on":"off"), serv->keep_alive_max);
 #endif
 
+	ap_mpm_query(AP_MPMQ_MAX_REQUESTS_DAEMON, &max_requests);
+	sprintf(tmp, "Per Child: %d - Keep Alive: %s - Max Per Connection: %d", max_requests, (serv->keep_alive ? "on":"off"), serv->keep_alive_max);
 	php_info_print_table_row(2, "Max Requests", tmp);
 
 	sprintf(tmp, "Connection: %lld - Keep-Alive: %lld", (serv->timeout / 1000000), (serv->keep_alive_timeout / 1000000));
