@@ -818,8 +818,8 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 }
 /* }}} */
 
-/* {{{ reflection_class_factory */
-static void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
+/* {{{ zend_reflection_class_factory */
+ZEND_API void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	zval *name;
@@ -1643,7 +1643,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 			return;
 		}
 		free_alloca(lcname);
-		reflection_class_factory(*pce, return_value TSRMLS_CC);
+		zend_reflection_class_factory(*pce, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -2046,7 +2046,7 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
 	METHOD_NOTSTATIC;
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	reflection_class_factory(mptr->common.scope, return_value TSRMLS_CC);
+	zend_reflection_class_factory(mptr->common.scope, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -2662,7 +2662,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 	   	for (i=0; i < ce->num_interfaces; i++) {
 			zval *interface;
 			ALLOC_ZVAL(interface);
-			reflection_class_factory(ce->interfaces[i], interface TSRMLS_CC);
+			zend_reflection_class_factory(ce->interfaces[i], interface TSRMLS_CC);
 			add_next_index_zval(return_value, interface);
 		}
 	}
@@ -2680,7 +2680,7 @@ ZEND_METHOD(reflection_class, getParentClass)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	
 	if (ce->parent) {
-		reflection_class_factory(ce->parent, return_value TSRMLS_CC);
+		zend_reflection_class_factory(ce->parent, return_value TSRMLS_CC);
 	} else {
 		RETURN_FALSE;
 	}
@@ -3138,7 +3138,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	reflection_class_factory(ref->ce, return_value TSRMLS_CC);
+	zend_reflection_class_factory(ref->ce, return_value TSRMLS_CC);
 }
 
 /* {{{ proto public static mixed ReflectionExtension::export(string name, [, bool return]) throws ReflectionException
@@ -3338,7 +3338,7 @@ static int add_extension_class(zend_class_entry **pce, int num_args, va_list arg
 		TSRMLS_FETCH();
 		if (add_reflection_class) {
 			ALLOC_ZVAL(zclass);
-			reflection_class_factory(*pce, zclass TSRMLS_CC);
+			zend_reflection_class_factory(*pce, zclass TSRMLS_CC);
 			add_assoc_zval_ex(class_array, (*pce)->name, (*pce)->name_length + 1, zclass);
 		} else {
 			add_next_index_stringl(class_array, (*pce)->name, (*pce)->name_length + 1, 1);

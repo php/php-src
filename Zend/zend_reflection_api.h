@@ -24,6 +24,7 @@
 BEGIN_EXTERN_C()
 
 ZEND_API void zend_register_reflection_api(TSRMLS_D);
+ZEND_API void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC);
 	
 END_EXTERN_C()
 
