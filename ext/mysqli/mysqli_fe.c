@@ -206,7 +206,6 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(set_local_infile_default,mysqli_set_local_infile_default,NULL)
 	PHP_FALIAS(set_local_infile_handler,mysqli_set_local_infile_handler,NULL)
 	PHP_FALIAS(master_query,mysqli_master_query,NULL)
-	PHP_FALIAS(mysqli, mysqli_connect, NULL)
 	PHP_FALIAS(multi_query,mysqli_multi_query,NULL)
 	PHP_FALIAS(more_results,mysqli_more_results, NULL)
 	PHP_FALIAS(next_result, mysqli_next_result, NULL)
