@@ -313,7 +313,6 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		*param = *(params[i]);
 		INIT_PZVAL(param);
 		zval_copy_ctor(param);
-		//zend_hash_next_index_insert_ptr(function_state.function_symbol_table, param, sizeof(zval *), NULL);
 		zend_ptr_stack_push(&EG(argument_stack), param);
 	}
 
