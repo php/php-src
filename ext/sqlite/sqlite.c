@@ -44,7 +44,7 @@
 #include "zend_default_classes.h"
 
 #ifdef HAVE_SPL
-#include "ext/spl/spl.h"
+#include "ext/spl/php_spl.h"
 #include "ext/spl/spl_functions.h"
 #endif
 
