@@ -24,7 +24,6 @@
  */
 
 /*	SB's list:
-	- BLOBs
 	- API for a more natural FB connect semantic
 	- Connect & set session 
 	- Autoreconnect when disconnected
@@ -64,7 +63,7 @@
 #include "php_fbsql.h"
 #include <signal.h>
 
-static int le_result, le_link, le_plink;
+static int le_result, le_link, le_plink, le_lob;
 
 struct PHPFBResult;
 typedef struct PHPFBResult PHPFBResult;
@@ -211,6 +210,9 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_commit,		NULL)
 	PHP_FE(fbsql_rollback,		NULL)
 
+	PHP_FE(fbsql_create_blob,	NULL)
+	PHP_FE(fbsql_create_clob,	NULL)
+
 	PHP_FE(fbsql_hostname,		NULL)
 	PHP_FE(fbsql_database,		NULL)
 	PHP_FE(fbsql_database_password,	NULL)
@@ -250,6 +252,7 @@ ZEND_GET_MODULE(fbsql)
 static void phpfbReleaseResult (zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc TSRMLS_DC);
+static void phpfbReleaseLOB (zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -312,6 +315,16 @@ static void phpfbReleasePLink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		free(link);
 		FB_SQL_G(linkCount)--;
 		FB_SQL_G(persistantCount)--;
+	}
+}
+
+static void phpfbReleaseLOB(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	FBCBlobHandle *lobHandle = (FBCBlobHandle *)rsrc->ptr;
+
+	if (lobHandle)
+	{
+		fbcbhRelease(lobHandle);
 	}
 }
 
@@ -379,9 +392,10 @@ PHP_MINIT_FUNCTION(fbsql)
 
 	fbcInitialize();
 
-	le_result   = zend_register_list_destructors_ex(phpfbReleaseResult, NULL, "fbsql result", module_number);
-	le_link     = zend_register_list_destructors_ex(phpfbReleaseLink, NULL, "fbsql link", module_number);
-	le_plink    = zend_register_list_destructors_ex(NULL, phpfbReleasePLink, "fbsql plink", module_number);
+	le_result	= zend_register_list_destructors_ex(phpfbReleaseResult, NULL, "fbsql result", module_number);
+	le_link		= zend_register_list_destructors_ex(phpfbReleaseLink, NULL, "fbsql link", module_number);
+	le_plink	= zend_register_list_destructors_ex(NULL, phpfbReleasePLink, "fbsql plink", module_number);
+	le_lob		= zend_register_list_destructors_ex(phpfbReleaseLOB, NULL, "fbsql lob handle", module_number);
 	Z_TYPE(fbsql_module_entry) = type;
 
 	REGISTER_LONG_CONSTANT("FBSQL_ASSOC", FBSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
@@ -897,6 +911,61 @@ PHP_FUNCTION(fbsql_rollback)
 	}
 	else
 		RETURN_FALSE;
+}
+/* }}} */
+
+
+static void php_fbsql_create_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
+{
+	PHPFBLink* phpLink = NULL;
+	FBCBlobHandle *lobHandle;
+	zval	**lob_data, **fbsql_link_index = NULL;
+	int id;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &lob_data)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			CHECK_LINK(id);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &lob_data, &fbsql_link_index)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
+
+	switch (lob_type) {
+		case 0 : // BLOB
+				lobHandle = fbcdcWriteBLOB(phpLink->connection, Z_STRVAL_PP(lob_data), Z_STRLEN_PP(lob_data));
+			break;
+		case 1 : // CLOB
+				lobHandle = fbcdcWriteCLOB(phpLink->connection, Z_STRVAL_PP(lob_data));
+			break;
+	}
+	ZEND_REGISTER_RESOURCE(return_value, lobHandle, le_lob);
+}
+
+/* {{{ proto resource fbsql_create_blob(string blob_data [, resource link_identifier])
+	*/
+PHP_FUNCTION(fbsql_create_blob)
+{
+	php_fbsql_create_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto resource fbsql_create_clob(string clob_data [, resource link_identifier])
+	*/
+PHP_FUNCTION(fbsql_create_clob)
+{
+	php_fbsql_create_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -2131,33 +2200,32 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 
 		case FB_CLOB:
 		case FB_BLOB:
-/*      {
-			unsigned char* bytes = (unsigned char*)data;
-			if (*bytes == '\1')
-			{  /* Direct
-				unsigned int   l   = *((unsigned int*)(bytes+1));
-				unsigned char* ptr = *((unsigned char**)(bytes+5));
-				unsigned int   i;
-				mf(file, "%4d:", l);
-				for (i=0; i < l; i++)
-				{
-					if (i)
-					{
-						if ((i % 32) == 0) 
-							mf(file, "\n     %*d:", lw+4, i);
-						else if ((i % 4) == 0) 
-							mf(file, "  ");
-					}
-					mf(file, "%02x", *ptr++);
-				}
+		{
+			if (*((unsigned char*) data) == '\1')
+			{  // Direct
+				*length = ((FBCBlobDirect *)data)->blobSize;
+
+				*value = emalloc(*length + 1);
+				strncpy(*value, (char *)((FBCBlobDirect *)data)->blobData, *length);
 			}
 			else
 			{
-				mf(file, "%s", bytes+1);
+				FBCBlobHandle *lobHandle;
+				char *handle = (char *)(&((unsigned char*)data)[1]);
+
+				lobHandle = fbcbhInitWithHandle(handle);
+				*length = fbcbhBlobSize(lobHandle);
+
+				*value = emalloc(*length + 1);
+				if (dtc == FB_BLOB) 
+					strncpy(*value, (char *)fbcdcReadBLOB(result->link->connection, lobHandle), *length);
+				else
+ 					strncpy(*value, (char *)fbcdcReadCLOB(result->link->connection, lobHandle), *length);
+				fbcbhRelease(lobHandle); 
 			}
 		}
 		break;
-*/
+
 		default:
 			php_error(E_WARNING, "Unimplemented type");
 		break;
