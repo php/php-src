@@ -835,7 +835,7 @@ PHP_FUNCTION(get_html_translation_table)
 			for (j=0; entity_map[j].charset != cs_terminator; j++)	{
 				if (entity_map[j].charset != charset)
 					continue;
-				for (i = 0; i < entity_map[j].endchar - entity_map[j].basechar; i++)
+				for (i = 0; i <= entity_map[j].endchar - entity_map[j].basechar; i++)
 				{
 					char buffer[16];
 
