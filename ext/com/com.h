@@ -19,19 +19,28 @@ typedef struct comval_ {
 		ITypeInfo *typeinfo;
 		IEnumVARIANT *enumvariant;
 	} i;
+	IDispatch *sinkdispatch;
+	GUID sinkid;
+	DWORD sinkcookie;
 } comval;
 
 END_EXTERN_C()
 
 #define ZVAL_COM(z,o) {																\
-			zval *handle;															\
+			zval *handle = NULL;													\
+			ZVAL_COM_EX(z,o,handle)													\
+		}
+
+#define ZVAL_COM_EX(z,o,handle) {													\
 			HashTable *properties;													\
 																					\
 			ALLOC_HASHTABLE(properties);											\
 			zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);					\
 																					\
-			MAKE_STD_ZVAL(handle);													\
-			ZVAL_LONG(handle, zend_list_insert((o), IS_COM));						\
+			if (handle == NULL) {													\
+				MAKE_STD_ZVAL(handle);												\
+			}																		\
+			ZVAL_RESOURCE(handle, zend_list_insert((o), IS_COM));						\
 																					\
 			zval_copy_ctor(handle);													\
 			zend_hash_index_update(properties, 0, &handle, sizeof(zval *), NULL);	\
@@ -42,7 +51,7 @@ END_EXTERN_C()
 #define RETURN_COM(o)	RETVAL_COM(o)												\
 						return;
 
-#define ALLOC_COM(z)	(z) = (comval *) emalloc(sizeof(comval));					\
+#define ALLOC_COM(z)	(z) = (comval *) ecalloc(1, sizeof(comval));					\
 						C_REFCOUNT(z) = 0;
 
 #define FREE_COM(z)		php_COM_destruct(z TSRMLS_CC);

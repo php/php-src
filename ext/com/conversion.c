@@ -56,7 +56,7 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage T
 		case IS_OBJECT:
 			if (!strcmp(Z_OBJCE_P(pval_arg)->name, "VARIANT")) {
 				type = VT_VARIANT|VT_BYREF;
-			} else if (!strcmp(Z_OBJCE_P(pval_arg)->name, "COM")) {
+			} else {
 				type = VT_DISPATCH;
 			}
 			break;
@@ -155,6 +155,12 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 		}
 	} else {
 		switch (V_VT(var_arg)) {
+
+			case VT_NULL:
+			case VT_VOID:
+				ZVAL_NULL(pval_arg);
+				break; 
+			
 			case VT_UI1:
 				convert_to_long_ex(&pval_arg);
 				V_UI1(var_arg) = (unsigned char) Z_LVAL_P(pval_arg);
@@ -211,6 +217,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 
 						/** @todo
 						case IS_STRING:
+						*/
 							/* string representation of a time value */
 
 						default:
@@ -262,7 +269,14 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 				break;
 
 			case VT_DISPATCH:
-				comval_to_variant(pval_arg, var_arg TSRMLS_CC);
+				if (!strcmp(Z_OBJCE_P(pval_arg)->name, "COM")) {
+					comval_to_variant(pval_arg, var_arg TSRMLS_CC);
+				} else {
+					V_DISPATCH(var_arg) = php_COM_export_object(pval_arg TSRMLS_CC);
+					if (V_DISPATCH(var_arg)) {
+						V_VT(var_arg) = VT_DISPATCH;
+					}
+				}
 				if (V_VT(var_arg) != VT_DISPATCH) {
 					VariantInit(var_arg);
 				}
@@ -437,7 +451,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 				break;
 
 			default:
-				php_error(E_WARNING, "Type not supported or not yet implemented.");
+				php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
 		}
 	}
 }
@@ -705,9 +719,10 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 					ZVAL_NULL(pval_arg);
 				} else {
 					ALLOC_COM(obj);
-					php_COM_set(obj, &V_DISPATCH(var_arg), TRUE TSRMLS_CC);
+					php_COM_set(obj, &V_DISPATCH(var_arg), FALSE TSRMLS_CC);
 					
 					ZVAL_COM(pval_arg, obj);
+					VariantInit(var_arg);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
 				}
 			}
 			break;

@@ -15,9 +15,10 @@
    | Author: Zeev Suraski <zeev@zend.com>                                 |
    |         Harald Radi  <h.radi@nme.at>                                 |
    |         Alan Brown   <abrown@pobox.com>                              |
+   |         Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
-
+/* $Id$ */
 /*
  * This module implements support for COM components that support the IDispatch
  * interface.  Both local (COM) and remote (DCOM) components can be accessed.
@@ -57,6 +58,7 @@
 
 #include <iostream.h>
 #include <math.h>
+#include <ocidl.h>
 
 #include "php.h"
 #include "php_ini.h"
@@ -65,11 +67,12 @@
 #include "php_VARIANT.h"
 
 static ITypeLib *php_COM_find_typelib(char *search_string, int mode TSRMLS_DC);
-static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC);
 static int do_COM_offget(VARIANT *result, comval *array, pval *property, int cleanup TSRMLS_DC);
 static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, int cleanup TSRMLS_DC);
 static void php_register_COM_class(TSRMLS_D);
 static void php_COM_init(int module_number TSRMLS_DC);
+static char *php_string_from_clsid(const CLSID *clsid TSRMLS_DC);
+static int com_enable_events(comval *obj, int enable);
 
 static int le_comval;
 static int codepage;
@@ -77,6 +80,9 @@ static int codepage;
 #ifdef _DEBUG
 int resourcecounter = 1;
 #endif
+
+static unsigned char arg1and2_force_ref[] =
+                       { 2, BYREF_FORCE, BYREF_FORCE };
 
 function_entry COM_functions[] = {
 	PHP_FE(com_load,                                NULL)
@@ -87,6 +93,9 @@ function_entry COM_functions[] = {
 	PHP_FE(com_propput,                             NULL)
 	PHP_FE(com_load_typelib,                        NULL)
 	PHP_FE(com_isenum,                              NULL)
+	PHP_FE(com_event_sink,							arg1and2_force_ref)
+	PHP_FE(com_message_pump,                        NULL)
+	PHP_FE(com_print_typeinfo,                      NULL)
 
 	PHP_FALIAS(com_get,         com_propget,        NULL)
 	PHP_FALIAS(com_propset,     com_propput,        NULL)
@@ -261,7 +270,7 @@ PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanup 
 	C_REFCOUNT(obj) = 1;
 	C_DISPATCH(obj) = pDisp;
 	C_HASTLIB(obj) = SUCCEEDED(C_DISPATCH_VT(obj)->GetTypeInfo(C_DISPATCH(obj), 0, LANG_NEUTRAL, &C_TYPEINFO(obj)));
-
+	
 	dispparams.rgvarg = NULL;
 	dispparams.rgdispidNamedArgs = NULL;
 	dispparams.cArgs = 0;
@@ -272,9 +281,11 @@ PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanup 
 	if (C_HASENUM(obj) = SUCCEEDED(C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), DISPID_NEWENUM, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
 															  DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, var_result, NULL, NULL))) {
 		if (V_VT(var_result) == VT_UNKNOWN) {
+			V_UNKNOWN(var_result)->lpVtbl->AddRef(V_UNKNOWN(var_result));
 			C_HASENUM(obj) = SUCCEEDED(V_UNKNOWN(var_result)->lpVtbl->QueryInterface(V_UNKNOWN(var_result), &IID_IEnumVARIANT,
 																					 (void**)&C_ENUMVARIANT(obj)));
 		} else if (V_VT(var_result) == VT_DISPATCH) {
+			V_DISPATCH(var_result)->lpVtbl->AddRef(V_DISPATCH(var_result));
 			C_HASENUM(obj) = SUCCEEDED(V_DISPATCH(var_result)->lpVtbl->QueryInterface(V_DISPATCH(var_result), &IID_IEnumVARIANT,
 																					  (void**)&C_ENUMVARIANT(obj)));
 		}
@@ -358,6 +369,10 @@ PHPAPI HRESULT php_COM_destruct(comval *obj TSRMLS_DC)
 {
 	HRESULT hr = S_OK;
 
+	com_enable_events(obj, FALSE);
+	if (obj->sinkdispatch)
+		obj->sinkdispatch->lpVtbl->Release(obj->sinkdispatch);
+	
 	if (C_ISREFD(obj)) {
 		C_REFCOUNT(obj) = 1;
 		hr = php_COM_release(obj TSRMLS_CC);
@@ -507,40 +522,34 @@ PHP_FUNCTION(com_load)
 			server_name = NULL;
 		} else if (Z_TYPE_P(server_name) == IS_ARRAY) {
 			pval **tmp;
-			/* DAB: 22 Sept 2001 */
-			/* Aha - we have a number of possible */
-			/* arguments. They are in the hash */
-			/* By name: Server, Domain, Username, Password */
-			/* Flags. */
-			/* This has been crafted to maintian maximum backward */
-			/* compatability, If the server name is specified as a */
-			/* string, then the function shoule behave as before */
-			/* by defaulting username and password and using the */
-			/* (I believe) incorrect CLSCTX_SERVER instantiation */
-			/* paramter. However if server is specified in this array */
-			/* then we use either CLSCTX_REMOTE_SERVER or whatever */
-			/* flags are specified in the array */
+			/* DAB: 22 Sept 2001
+			 * Aha - we have a number of possible arguments.
+			 * They are in the hash By name: Server, Domain, Username, Password
+			 * Flags.
+			 * This has been crafted to maintian maximum backward compatability.
+			 * If the server name is specified as a string, then the function
+			 * should behave as before by defaulting username and password and
+			 * using the (I believe) incorrect CLSCTX_SERVER instantiation
+			 * paramter. However if server is specified in this array then we
+			 * use either CLSCTX_REMOTE_SERVER or whatever flags are specified
+			 * in the array */
 			HashTable *ht = Z_ARRVAL(*server_name);
 			if (FAILURE == zend_hash_find(ht, "Server", 7, (void **) &tmp)) {
 				server_name = NULL;
 			} else {
 				server_name = *tmp;
 				convert_to_string_ex(&server_name);
-				/* CLSCTX_SERVER includes INPROC and LOCAL */
-				/* SERVER. This means that any local server */
-				/* will be instantiated BEFORE even looking */
-				/* on a remote server. Thus if we have a */
-				/* server name, probably we want to access */
-				/* a remote machine or we would not have */
-				/* bothered specifying it. So it would be */
-				/* wrong to to connect locally. Futher, */
-				/* unless the name passed is a GUID, there has */
-				/* to be something to map the Prog.Id to GUID */
-				/* and unless that has been modified to remove */
-				/* the information about local instantiation */
-				/* CLSCTX_SERVER would force a local instantiation */
-				/* This setting can be overridden below if the user */
-				/* specifies a flags element */
+				/* CLSCTX_SERVER includes INPROC and LOCAL SERVER. This means
+				 * that any local server will be instantiated BEFORE even
+				 * looking on a remote server. Thus if we have a server name,
+				 * probably we want to access a remote machine or we would not
+				 * have bothered specifying it. So it would be wrong to to
+				 * connect locally. Futher, unless the name passed is a GUID,
+				 * there has to be something to map the Prog.Id to GUID and
+				 * unless that has been modified to remove the information
+				 * about local instantiation CLSCTX_SERVER would force a local
+				 * instantiation This setting can be overridden below if the
+				 * user specifies a flags element */
 				flags = CLSCTX_REMOTE_SERVER;
 			}
 			if (FAILURE == zend_hash_find(ht, "Username", 9, (void **) &tmp)) {
@@ -709,7 +718,7 @@ PHP_FUNCTION(com_load)
 		}
 	}
 
-	RETURN_LONG(zend_list_insert(obj, IS_COM));
+	RETURN_RESOURCE(zend_list_insert(obj, IS_COM));
 }
 /* }}} */
 
@@ -1004,6 +1013,461 @@ PHP_FUNCTION(com_addref)
 }
 /* }}} */
 
+/* {{{ proto bool com_message_pump([int timeoutms])
+   Process COM messages, sleeping for up to timeoutms milliseconds */
+PHP_FUNCTION(com_message_pump)
+{
+	long timeoutms = 0;
+	MSG msg;
+	DWORD result;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timeoutms) == FAILURE)
+		RETURN_FALSE;
+	
+	result = MsgWaitForMultipleObjects(0, NULL, FALSE, timeoutms, QS_ALLINPUT);
+
+	if (result == WAIT_OBJECT_0) {
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		/* we processed messages */
+		RETVAL_TRUE;
+	} else {
+		/* we did not process messages (timed out) */
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+
+static int com_enable_events(comval *obj, int enable)
+{
+	if (obj->sinkdispatch) {
+		IConnectionPointContainer *cont;
+		IConnectionPoint *point;
+		
+		if (SUCCEEDED(C_DISPATCH_VT(obj)->QueryInterface(C_DISPATCH(obj), &IID_IConnectionPointContainer, (void**)&cont))) {
+			
+			if (SUCCEEDED(cont->lpVtbl->FindConnectionPoint(cont, &obj->sinkid, &point))) {
+
+				if (enable) {
+					point->lpVtbl->Advise(point, (IUnknown*)obj->sinkdispatch, &obj->sinkcookie);
+				} else {
+					point->lpVtbl->Unadvise(point, obj->sinkcookie);
+				}
+				point->lpVtbl->Release(point);
+			}
+			cont->lpVtbl->Release(cont);
+		}
+	}
+	return 0;
+}
+
+static const struct {
+	VARTYPE vt;
+	const char *name;
+} vt_names[] = {
+	{ VT_NULL,		"VT_NULL" },
+	{ VT_EMPTY,		"VT_EMPTY" },
+	{ VT_UI1,		"VT_UI1" },
+	{ VT_I2,		"VT_I2" },
+	{ VT_I4,		"VT_I4" },
+	{ VT_R4,		"VT_R4" },
+	{ VT_R8,		"VT_R8" },
+	{ VT_BOOL,		"VT_BOOL" },
+	{ VT_ERROR,		"VT_ERROR" },
+	{ VT_CY,		"VT_CY" },
+	{ VT_DATE,		"VT_DATE" },
+	{ VT_BSTR,		"VT_BSTR" },
+	{ VT_DECIMAL,	"VT_DECIMAL" },
+	{ VT_UNKNOWN,	"VT_UNKNOWN" },
+	{ VT_DISPATCH,	"VT_DISPATCH" },
+	{ VT_VARIANT,	"VT_VARIANT" },
+	{ VT_I1,		"VT_I1" },
+	{ VT_UI2,		"VT_UI2" },
+	{ VT_UI4,		"VT_UI4" },
+	{ VT_INT,		"VT_INT" },
+	{ VT_UINT,		"VT_UINT" },
+	{ VT_ARRAY,		"VT_ARRAY" },
+	{ VT_BYREF,		"VT_BYREF" },
+	{ VT_VOID,		"VT_VOID" },
+	{ VT_PTR,		"VT_PTR" },
+	{ VT_HRESULT,	"VT_HRESULT" },
+	{ 0, NULL }
+};
+
+static inline const char *vt_to_string(VARTYPE vt)
+{
+	int i;
+	for (i = 0; vt_names[i].name != NULL; i++) {
+		if (vt_names[i].vt == vt)
+			return vt_names[i].name;
+	}
+	return "?";
+}
+
+static int process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid TSRMLS_DC)
+{
+	TYPEATTR *attr;
+	FUNCDESC *func;
+	int i;
+	OLECHAR *olename;
+	char *ansiname = NULL;
+	unsigned int ansinamelen;
+	int ret = 0;
+
+	if (FAILED(typeinfo->lpVtbl->GetTypeAttr(typeinfo, &attr)))
+		return 0;
+
+	/* verify that it is suitable */
+	if (id_to_name == NULL || attr->typekind == TKIND_DISPATCH) {
+
+		if (guid)
+			memcpy(guid, &attr->guid, sizeof(GUID));
+		
+		if (printdef) {
+			char *guidstring;
+
+			typeinfo->lpVtbl->GetDocumentation(typeinfo, MEMBERID_NIL, &olename, NULL, NULL, NULL);
+			ansiname = php_OLECHAR_to_char(olename, &ansinamelen, codepage TSRMLS_CC);
+			SysFreeString(olename);
+
+			guidstring = php_string_from_clsid(&attr->guid TSRMLS_CC);
+			php_printf("class %s { /* GUID=%s */\n", ansiname, guidstring);
+			efree(guidstring);
+
+			efree(ansiname);
+		}
+
+		if (id_to_name)
+			zend_hash_init(id_to_name, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+		/* So we've got the dispatch interface; lets list the event methods */
+		for (i = 0; i < attr->cFuncs; i++) {
+			zval *tmp;
+			DISPID lastid = 0;	/* for props */
+			int isprop;
+
+			if (FAILED(typeinfo->lpVtbl->GetFuncDesc(typeinfo, i, &func)))
+				break;
+
+			isprop = (func->invkind & DISPATCH_PROPERTYGET || func->invkind & DISPATCH_PROPERTYPUT);
+
+			if (!isprop || lastid != func->memid) {
+
+				lastid = func->memid;
+				
+				typeinfo->lpVtbl->GetDocumentation(typeinfo, func->memid, &olename, NULL, NULL, NULL);
+				ansiname = php_OLECHAR_to_char(olename, &ansinamelen, codepage TSRMLS_CC);
+				SysFreeString(olename);
+
+				if (printdef) {
+					int j;
+					char *funcdesc;
+					unsigned int funcdesclen, cnames = 0;
+					BSTR *names;
+
+					names = (BSTR*)emalloc((func->cParams + 1) * sizeof(BSTR));
+
+					typeinfo->lpVtbl->GetNames(typeinfo, func->memid, names, func->cParams + 1, &cnames);
+					/* first element is the function name */
+					SysFreeString(names[0]);
+
+					php_printf("\t/* DISPID=%d */\n", func->memid);
+
+					if (func->elemdescFunc.tdesc.vt != VT_VOID) {
+						php_printf("\t/* %s [%d] */\n",
+								vt_to_string(func->elemdescFunc.tdesc.vt),
+								func->elemdescFunc.tdesc.vt
+								);
+					}
+
+					if (isprop) {
+
+						typeinfo->lpVtbl->GetDocumentation(typeinfo, func->memid, NULL, &olename, NULL, NULL);
+						if (olename) {
+							funcdesc = php_OLECHAR_to_char(olename, &funcdesclen, codepage TSRMLS_CC);
+							SysFreeString(olename);
+							php_printf("\t/* %s */\n", funcdesc);
+							efree(funcdesc);
+						}
+
+						php_printf("\tvar $%s;\n\n", ansiname);
+
+					} else {
+						/* a function */
+
+						php_printf("\tfunction %s(\n", ansiname);
+
+						for (j = 0; j < func->cParams; j++) {
+							ELEMDESC *elem = &func->lprgelemdescParam[j];
+
+							php_printf("\t\t/* %s [%d] ", vt_to_string(elem->tdesc.vt), elem->tdesc.vt);
+
+							if (elem->paramdesc.wParamFlags & PARAMFLAG_FIN)
+								php_printf("[in]");
+							if (elem->paramdesc.wParamFlags & PARAMFLAG_FOUT)
+								php_printf("[out]");
+
+							if (elem->tdesc.vt == VT_PTR) {
+								/* what does it point to ? */
+								php_printf(" --> %s [%d] ",
+										vt_to_string(elem->tdesc.lptdesc->vt),
+										elem->tdesc.lptdesc->vt
+										);
+							}
+
+							/* when we handle prop put and get, this will look nicer */
+							if (j+1 < (int)cnames) {
+								funcdesc = php_OLECHAR_to_char(names[j+1], &funcdesclen, codepage TSRMLS_CC);
+								SysFreeString(names[j+1]);
+							} else {
+								funcdesc = "???";
+							}
+
+							php_printf(" */ %s%s%c\n",
+									elem->tdesc.vt == VT_PTR ? "&$" : "$",
+									funcdesc,
+									j == func->cParams - 1 ? ' ' : ','
+									);
+
+							if (j+1 < (int)cnames)
+								efree(funcdesc);
+						}
+
+						php_printf("\t\t)\n\t{\n");
+
+						typeinfo->lpVtbl->GetDocumentation(typeinfo, func->memid, NULL, &olename, NULL, NULL);
+						if (olename) {
+							funcdesc = php_OLECHAR_to_char(olename, &funcdesclen, codepage TSRMLS_CC);
+							SysFreeString(olename);
+							php_printf("\t\t/* %s */\n", funcdesc);
+							efree(funcdesc);
+						}
+
+						php_printf("\t}\n");
+					}
+
+					efree(names);
+				}
+
+				if (id_to_name) {
+					zend_str_tolower(ansiname, ansinamelen);
+					MAKE_STD_ZVAL(tmp);
+					ZVAL_STRINGL(tmp, ansiname, ansinamelen, 0);
+					zend_hash_index_update(id_to_name, func->memid, (void*)&tmp, sizeof(zval *), NULL);
+				}
+			}
+			typeinfo->lpVtbl->ReleaseFuncDesc(typeinfo, func);
+
+		}
+
+		if (printdef)
+			php_printf("}\n");
+
+		ret = 1;
+	} else {
+		zend_error(E_WARNING, "Thats not a dispatchable interface!! type kind = %08x\n", attr->typekind);
+	}
+
+	typeinfo->lpVtbl->ReleaseTypeAttr(typeinfo, attr);
+
+	return ret;
+}
+
+static ITypeInfo *locate_typeinfo(char *typelibname, comval *obj, char *dispname, int sink TSRMLS_DC)
+{
+	ITypeInfo *typeinfo = NULL;
+	ITypeLib *typelib = NULL;
+	int gotguid = 0;
+	GUID iid;
+
+	if (obj) {
+		if (dispname == NULL && sink) {
+			IProvideClassInfo2 *pci2;
+			IProvideClassInfo *pci;
+
+			if (SUCCEEDED(C_DISPATCH_VT(obj)->QueryInterface(C_DISPATCH(obj), &IID_IProvideClassInfo2, (void**)&pci2))) {
+				gotguid = SUCCEEDED(pci2->lpVtbl->GetGUID(pci2, GUIDKIND_DEFAULT_SOURCE_DISP_IID, &iid));
+				pci2->lpVtbl->Release(pci2);
+			}
+			if (!gotguid && SUCCEEDED(C_DISPATCH_VT(obj)->QueryInterface(C_DISPATCH(obj), &IID_IProvideClassInfo, (void**)&pci))) {
+				/* examine the available interfaces */
+				/* TODO: write some code here */
+				pci->lpVtbl->Release(pci);
+			}
+		} else if (dispname && C_HASTLIB(obj)) {
+			unsigned int idx;
+			/* get the library from the object; the rest will be dealt with later */
+			C_TYPEINFO_VT(obj)->GetContainingTypeLib(C_TYPEINFO(obj), &typelib, &idx);	
+		} else if (typelibname == NULL) {
+			C_DISPATCH_VT(obj)->GetTypeInfo(C_DISPATCH(obj), 0, LANG_NEUTRAL, &typeinfo);
+		}
+	} else if (typelibname) {
+		/* Fetch the typelibrary and use that to look things up */
+		typelib = php_COM_find_typelib(typelibname, CONST_CS TSRMLS_CC);
+	} 
+
+	if (!gotguid && dispname && typelib) {
+		unsigned short cfound;
+		MEMBERID memid;
+		OLECHAR *olename = php_char_to_OLECHAR(dispname, strlen(dispname), CP_ACP TSRMLS_CC);
+		
+		cfound = 1;
+		if (FAILED(typelib->lpVtbl->FindName(typelib, olename, 0, &typeinfo, &memid, &cfound)) || cfound == 0) {
+			CLSID coclass;
+			ITypeInfo *coinfo;
+			
+			/* assume that it might be a progid instead */
+			if (SUCCEEDED(CLSIDFromProgID(olename, &coclass)) &&
+					SUCCEEDED(typelib->lpVtbl->GetTypeInfoOfGuid(typelib, &coclass, &coinfo))) {
+
+				/* enumerate implemented interfaces and pick the one as indicated by sink */
+				TYPEATTR *attr;
+				int i;
+
+				coinfo->lpVtbl->GetTypeAttr(coinfo, &attr);
+
+				for (i = 0; i < attr->cImplTypes; i++) {
+					HREFTYPE rt;
+					int tf;
+
+					if (FAILED(coinfo->lpVtbl->GetImplTypeFlags(coinfo, i, &tf)))
+						continue;
+
+					if ((sink && tf == (IMPLTYPEFLAG_FSOURCE|IMPLTYPEFLAG_FDEFAULT)) ||
+						(!sink && (tf & IMPLTYPEFLAG_FSOURCE) == 0)) {
+
+						/* flags match what we are looking for */
+
+						if (SUCCEEDED(coinfo->lpVtbl->GetRefTypeOfImplType(coinfo, i, &rt)))
+							if (SUCCEEDED(coinfo->lpVtbl->GetRefTypeInfo(coinfo, rt, &typeinfo)))
+								break;
+						
+					}
+				}
+				
+				coinfo->lpVtbl->ReleaseTypeAttr(coinfo, attr);
+				coinfo->lpVtbl->Release(coinfo);
+			}
+		}
+
+		
+		efree(olename);
+	} else if (gotguid) {
+		typelib->lpVtbl->GetTypeInfoOfGuid(typelib, &iid, &typeinfo);
+	}
+
+	if (typelib)
+		typelib->lpVtbl->Release(typelib);
+
+	return typeinfo;
+}
+
+/* {{{ proto bool com_print_typeinfo(mixed comobject | string typelib, string dispinterface, bool wantsink)
+   Print out a PHP class definition for a dispatchable interface */
+PHP_FUNCTION(com_print_typeinfo)
+{
+	zval *arg1;
+	char *ifacename = NULL;
+	char *typelibname = NULL;
+	int ifacelen;
+	zend_bool wantsink = 0;
+	comval *obj = NULL;
+	ITypeInfo *typeinfo;
+	
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/s!b", &arg1, &ifacename,
+				&ifacelen, &wantsink)) {
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(arg1) == IS_OBJECT && (Z_OBJCE_P(arg1) == &COM_class_entry || !strcmp(Z_OBJCE_P(arg1)->name, "COM"))) {
+		zval **tmp;
+		zend_hash_index_find(Z_OBJPROP_P(arg1), 0, (void**)&tmp);
+		ZEND_FETCH_RESOURCE(obj, comval*, tmp, -1, "comval", IS_COM);
+	} else if (Z_TYPE_P(arg1) == IS_RESOURCE) {
+		ZEND_FETCH_RESOURCE(obj, comval*, &arg1, -1, "comval", IS_COM);
+	} else {
+		convert_to_string(arg1);
+		typelibname = Z_STRVAL_P(arg1);
+	}
+
+	typeinfo = locate_typeinfo(typelibname, obj, ifacename, wantsink TSRMLS_CC);
+	if (typeinfo) {
+		process_typeinfo(typeinfo, NULL, 1, NULL TSRMLS_CC);
+		typeinfo->lpVtbl->Release(typeinfo);
+		RETURN_TRUE;
+	} else {
+		zend_error(E_WARNING, "Unable to find typeinfo using the parameters supplied");
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool com_event_sink(mixed comobject, object sinkobject [, mixed sinkinterface])
+   Connect events from a COM object to a PHP object */
+PHP_FUNCTION(com_event_sink)
+{
+	zval *object, *sinkobject, *sink=NULL;
+	char *dispname = NULL, *typelibname = NULL;
+	zend_bool gotguid = 0;
+	comval *obj;
+	ITypeInfo *typeinfo = NULL;
+
+	RETVAL_FALSE;
+	
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|z/", &object, &sinkobject, &sink)) {
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(object) == IS_OBJECT && (Z_OBJCE_P(object) == &COM_class_entry || !strcmp(Z_OBJCE_P(object)->name, "COM"))) {
+		zval **tmp;
+		zend_hash_index_find(Z_OBJPROP_P(object), 0, (void**)&tmp);
+		ZEND_FETCH_RESOURCE(obj, comval*, tmp, -1, "comval", IS_COM);
+	} else {
+		ZEND_FETCH_RESOURCE(obj, comval*, &object, -1, "comval", IS_COM);
+	}
+
+	if (sink && Z_TYPE_P(sink) == IS_ARRAY) {
+		/* 0 => typelibname, 1 => dispname */
+		zval **tmp;
+
+		if (zend_hash_index_find(Z_ARRVAL_P(sink), 0, (void**)&tmp) == SUCCESS)
+			typelibname = Z_STRVAL_PP(tmp);
+		if (zend_hash_index_find(Z_ARRVAL_P(sink), 1, (void**)&tmp) == SUCCESS)
+			dispname = Z_STRVAL_PP(tmp);
+	} else if (sink != NULL) {
+		convert_to_string(sink);
+		dispname = Z_STRVAL_P(sink);
+	}
+	
+	typeinfo = locate_typeinfo(typelibname, obj, dispname, 1 TSRMLS_CC);
+
+	if (typeinfo) {
+		HashTable *id_to_name;
+		
+		ALLOC_HASHTABLE(id_to_name);
+		
+		if (process_typeinfo(typeinfo, id_to_name, 0, &obj->sinkid TSRMLS_CC)) {
+
+			/* Create the COM wrapper for this sink */
+			obj->sinkdispatch = php_COM_export_as_sink(sinkobject, &obj->sinkid, id_to_name TSRMLS_CC);
+
+			/* Now hook it up to the source */
+			com_enable_events(obj, TRUE);
+			RETVAL_TRUE;
+
+		} else {
+			FREE_HASHTABLE(id_to_name);
+		}
+	}
+	
+	if (typeinfo)
+		typeinfo->lpVtbl->Release(typeinfo);
+	
+}
+/* }}} */
 
 static int do_COM_offget(VARIANT *result, comval *array, pval *property, int cleanup TSRMLS_DC)
 {
@@ -1122,33 +1586,36 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 			php_error(E_WARNING,"PropPut() failed: %s", error_message);
 		}
 		LocalFree(error_message);
-		efree(propname);
 
 		FREE_VARIANT(var_result);
-		FREE_VARIANT(new_value);
+
+		efree(new_value);
+		efree(propname);
 
 		RETURN_NULL();
 	}
 
-	dispparams.cArgs = 0;
-	dispparams.cNamedArgs = 0;
+	if (return_value) {
+		dispparams.cArgs = 0;
+		dispparams.cNamedArgs = 0;
 
-	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result, &ErrString TSRMLS_CC);
+		hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result, &ErrString TSRMLS_CC);
 
-	if (SUCCEEDED(hr)) {
-		php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
-	} else {
-		*return_value = *value;
-		zval_copy_ctor(return_value);
-	}
+		if (SUCCEEDED(hr)) {
+			php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
+		} else {
+			*return_value = *value;
+			zval_copy_ctor(return_value);
+		}
 
-	if (ErrString) {
-		pefree(ErrString, 1);
+		if (ErrString) {
+			pefree(ErrString, 1);
+		}
 	}
 
 	FREE_VARIANT(var_result);
-	FREE_VARIANT(new_value);
 
+	efree(new_value); // FREE_VARIANT does a VariantClear() which is not desired here !
 	efree(propname);
 }
 
@@ -1322,6 +1789,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 			obj = obj_prop;
 			php_COM_set(obj, &V_DISPATCH(var_result), TRUE TSRMLS_CC);
+			VariantInit(var_result);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
 		} else {
 			php_variant_to_pval(var_result, &return_value, codepage TSRMLS_CC);
 
@@ -1329,7 +1797,6 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 			obj_prop = NULL;
 		}
 
-		VariantInit(var_result);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
 		pval_destructor(&overloaded_property->element);
 	}
 
@@ -1346,7 +1813,6 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 PHPAPI int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value)
 {
-	pval result;
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 	pval **comval_handle;
@@ -1416,12 +1882,26 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 	FREE_VARIANT(var_result);
 
 	overloaded_property = (zend_overloaded_element *) element->data;
-	do_COM_propput(&result, obj, &overloaded_property->element, value TSRMLS_CC);
+	do_COM_propput(NULL, obj, &overloaded_property->element, value TSRMLS_CC);
 	FREE_COM(obj_prop);
 
 	pval_destructor(&overloaded_property->element);
 
 	return SUCCESS;
+}
+
+/* create an overloaded COM object from a dispatch pointer */
+PHPAPI zval *php_COM_object_from_dispatch(IDispatch *disp, zval *val TSRMLS_DC)
+{
+	comval *obj;
+	zval *zobj;
+	
+	ALLOC_COM(obj);
+	MAKE_STD_ZVAL(zobj);
+	php_COM_set(obj, &disp, FALSE TSRMLS_CC);
+	ZVAL_COM_EX(zobj, obj, val);
+	
+	return zobj;
 }
 
 
@@ -1526,6 +2006,10 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode TSRMLS_DC)
 	 */
 
 	search_string = php_strtok_r(search_string, ",", &strtok_buf);
+
+	if (search_string == NULL)
+		return NULL;
+	
 	major = php_strtok_r(NULL, ",", &strtok_buf);
 	minor = php_strtok_r(NULL, ",", &strtok_buf);
 
@@ -1672,7 +2156,7 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode TSRMLS_DC)
 }
 
 
-static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
+PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 {
 	ITypeComp *TypeComp;
 	int i;
@@ -1754,7 +2238,6 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 	return SUCCESS;
 }
 
-
 /* {{{ proto bool com_isenum(object com_module)
    Grabs an IEnumVariant */
 PHP_FUNCTION(com_isenum)
@@ -1800,11 +2283,18 @@ static void php_COM_init(int module_number TSRMLS_DC)
 	php_register_COM_class(TSRMLS_C);
 }
 
+PHPAPI ZEND_DECLARE_MODULE_GLOBALS(com)
+
+static void php_com_init_globals(zend_com_globals *com_globals)
+{
+}
 
 PHP_MINIT_FUNCTION(COM)
 {
+	ZEND_INIT_MODULE_GLOBALS(com, php_com_init_globals, NULL);
 	php_COM_init(module_number TSRMLS_CC);
 	php_VARIANT_init(module_number TSRMLS_CC);
+	php_COM_dispatch_init(module_number TSRMLS_CC);
 
 	REGISTER_LONG_CONSTANT("CLSCTX_INPROC_SERVER",  CLSCTX_INPROC_SERVER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CLSCTX_INPROC_HANDLER", CLSCTX_INPROC_HANDLER, CONST_CS | CONST_PERSISTENT);
@@ -1817,7 +2307,6 @@ PHP_MINIT_FUNCTION(COM)
 
 	return SUCCESS;
 }
-
 
 PHP_MSHUTDOWN_FUNCTION(COM)
 {
@@ -1835,7 +2324,7 @@ zend_module_entry COM_module_entry = {
     PHP_MSHUTDOWN(COM),
     NULL,
     NULL,
-    PHP_MINFO(COM),
+	PHP_MINFO(COM),
     NO_VERSION_YET,
     STANDARD_MODULE_PROPERTIES
 };
