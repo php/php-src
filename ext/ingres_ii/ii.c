@@ -541,8 +541,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 }
 
 /* {{{ proto resource ii_connect([string database [, string username [, string password]]])
-   Open a connection to an Ingres II database
-   the syntax of database is [node_id::]dbname[/svr_class] */
+   Open a connection to an Ingres II database the syntax of database is [node_id::]dbname[/svr_class] */
 PHP_FUNCTION(ii_connect)
 {
   php_ii_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -550,8 +549,7 @@ PHP_FUNCTION(ii_connect)
 /* }}} */
 
 /* {{{ proto resource ii_pconnect([string database [, string username [, string password]]])
-   Open a persistent connection to an Ingres II database
-   the syntax of database is [node_id::]dbname[/svr_class] */
+   Open a persistent connection to an Ingres II database the syntax of database is [node_id::]dbname[/svr_class] */
 PHP_FUNCTION(ii_pconnect)
 {
   php_ii_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -584,8 +582,9 @@ PHP_FUNCTION(ii_close)
 /* }}} */
 
 /* {{{ proto bool ii_query(string query [, resource link])
-   Send a SQL query to Ingres II
-   Unsupported query types :
+   Send a SQL query to Ingres II */
+/* This should go into the documentation */
+/* Unsupported query types:
    - close
    - commit
    - connect
@@ -667,8 +666,9 @@ PHP_FUNCTION(ii_query)
 /* }}} */
 
 /* {{{ proto int ii_num_rows([resource link])
-   Return the number of rows affected/returned by the last query
-   Warning : don't call ii_num_rows() before ii_fetch_xx(),
+   Return the number of rows affected/returned by the last query */
+
+/* Warning : don't call ii_num_rows() before ii_fetch_xx(),
    or ii_fetch_xx() wouldn't find any data */
 PHP_FUNCTION(ii_num_rows)
 {
@@ -861,8 +861,7 @@ static char *php_ii_field_name(II_LINK *ii_link, int index)
 }
 
 /* {{{ proto string ii_field_name(int index [, resource link])
-   Return the name of a field in a query result
-   index must be >0 and <= ii_num_fields() */
+   Return the name of a field in a query result index must be >0 and <= ii_num_fields() */
 PHP_FUNCTION(ii_field_name)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_NAME);
@@ -870,8 +869,7 @@ PHP_FUNCTION(ii_field_name)
 /* }}} */
 
 /* {{{ proto string ii_field_type(int index [, resource link])
-   Return the type of a field in a query result
-   index must be >0 and <= ii_num_fields() */
+   Return the type of a field in a query result index must be >0 and <= ii_num_fields() */
 PHP_FUNCTION(ii_field_type)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_TYPE);
@@ -879,8 +877,7 @@ PHP_FUNCTION(ii_field_type)
 /* }}} */
 
 /* {{{ proto string ii_field_nullable(int index [, resource link])
-   Return true if the field is nullable and false otherwise
-   index must be >0 and <= ii_num_fields() */
+   Return true if the field is nullable and false otherwise index must be >0 and <= ii_num_fields() */
 PHP_FUNCTION(ii_field_nullable)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_NULLABLE);
@@ -888,8 +885,7 @@ PHP_FUNCTION(ii_field_nullable)
 /* }}} */
 
 /* {{{ proto string ii_field_length(int index [, resource link])
-   Return the length of a field in a query result
-   index must be >0 and <= ii_num_fields() */
+   Return the length of a field in a query result index must be >0 and <= ii_num_fields() */
 PHP_FUNCTION(ii_field_length)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_LENGTH);
@@ -897,8 +893,7 @@ PHP_FUNCTION(ii_field_length)
 /* }}} */
 
 /* {{{ proto string ii_field_precision(int index [, resource link])
-   Return the precision of a field in a query result
-   index must be >0 and <= ii_num_fields() */
+   Return the precision of a field in a query result index must be >0 and <= ii_num_fields() */
 PHP_FUNCTION(ii_field_precision)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_PRECISION);
@@ -906,8 +901,7 @@ PHP_FUNCTION(ii_field_precision)
 /* }}} */
 
 /* {{{ proto string ii_field_scale(int index [, resource link])
-   Return the scale of a field in a query result
-   index must be >0 and <= ii_num_fields() */
+   Return the scale of a field in a query result index must be >0 and <= ii_num_fields() */
 PHP_FUNCTION(ii_field_scale)
 {
   php_ii_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, II_FIELD_INFO_SCALE);
@@ -1135,9 +1129,7 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 }
 
 /* {{{ proto array ii_fetch_array([int result_type [, resource link]])
-   Fetch a row of result into an array
-   result_type can be II_NUM for enumerated array, II_ASSOC for
-   associative array, or II_BOTH (default) */
+   Fetch a row of result into an array result_type can be II_NUM for enumerated array, II_ASSOC for associative array, or II_BOTH (default) */
 PHP_FUNCTION(ii_fetch_array)
 {
   zval **result_type, **link;
@@ -1166,7 +1158,7 @@ PHP_FUNCTION(ii_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto array ii_fetch_row([resource link]])
+/* {{{ proto array ii_fetch_row([resource link])
    Fetch a row of result into an enumerated array */
 PHP_FUNCTION(ii_fetch_row)
 {
@@ -1192,9 +1184,7 @@ PHP_FUNCTION(ii_fetch_row)
 /* }}} */
 
 /* {{{ proto array ii_fetch_object([int result_type [, resource link]])
-   Fetch a row of result into an object
-   result_type can be II_NUM for enumerated object, II_ASSOC for
-   associative object, or II_BOTH (default) */
+   Fetch a row of result into an object result_type can be II_NUM for enumerated object, II_ASSOC for associative object, or II_BOTH (default) */
 PHP_FUNCTION(ii_fetch_object)
 {
   zval **result_type, **link;
