@@ -226,10 +226,13 @@ class PEAR
      * @access  public
      * @return  bool    true if parameter is an error
      */
-    function isError($data) {
-        return (bool)(is_object($data) &&
-                      (get_class($data) == 'pear_error' ||
-                      is_subclass_of($data, 'pear_error')));
+    function isError($data, $code = null)
+    {
+        if (is_object($data) && (get_class($data) == 'pear_error' ||
+                                 is_subclass_of($data, 'pear_error'))) {
+            return $code === null ? true : $data->getCode() == $code;
+        }
+        return false;
     }
 
     // }}}
