@@ -294,10 +294,10 @@ void pass_include_eval(zend_op_array *op_array)
 
 	while (opline<end) {
 		if (opline->op1.op_type==IS_CONST) {
-			opline->op1.u.constant.is_ref = 1;
+			opline->op1.u.constant.EA = 1;
 		}
 		if (opline->op2.op_type==IS_CONST) {
-			opline->op2.u.constant.is_ref = 1;
+			opline->op2.u.constant.EA = 1;
 		}
 		opline++;
 	}

@@ -144,7 +144,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 		postdata_ptr->value.str.val = (char *) estrdup(buf);
 		postdata_ptr->value.str.len = cnt;
 		postdata_ptr->refcount=1;
-		postdata_ptr->is_ref=0;
+		postdata_ptr->EA=0;
 		_php3_hash_add(&symbol_table, "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), postdata_ptr, sizeof(pval *),NULL);
 	}
 #endif
@@ -225,7 +225,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 		if (_php3_hash_find(EG(active_symbol_table), var, var_len+1, (void **) &arr_ptr) == FAILURE) {
 			arr1 = (pval *) emalloc(sizeof(pval));
 			arr1->refcount=1;
-			arr1->is_ref=0;
+			arr1->EA=0;
 			if (array_init(arr1)==FAILURE) {
 				return;
 			}
@@ -233,7 +233,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 			if (track_vars_array) {
 				arr2 = (pval *) emalloc(sizeof(pval));
 				arr2->refcount=1;
-				arr2->is_ref=0;
+				arr2->EA=0;
 				if (array_init(arr2)==FAILURE) {
 					return;
 				}
@@ -244,7 +244,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 				if (--(*arr_ptr) > 0) {
 					*arr_ptr = (pval *) emalloc(sizeof(pval));
 					(*arr_ptr)->refcount=1;
-					(*arr_ptr)->is_ref=0;
+					(*arr_ptr)->EA=0;
 				} else {
 					pval_destructor(*arr_ptr);
 				}
@@ -254,7 +254,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 				if (track_vars_array) {
 					arr2 = (pval *) emalloc(sizeof(pval));
 					arr2->refcount=1;
-					arr2->is_ref=0;
+					arr2->EA=0;
 					if (array_init(arr2)==FAILURE) {
 						return;
 					}
@@ -270,7 +270,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 		/* Now create the element */
 		entry = (pval *) emalloc(sizeof(pval));
 		entry->refcount=1;
-		entry->is_ref=0;
+		entry->EA=0;
 		entry->value.str.val = val;
 		entry->value.str.len = val_len;
 		entry->type = IS_STRING;
@@ -304,7 +304,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 		
 		entry->type = IS_STRING;
 		entry->refcount=1;
-		entry->is_ref=0;
+		entry->EA=0;
 		entry->value.str.val = val;
 		entry->value.str.len = val_len;
 		_php3_hash_update(EG(active_symbol_table), var, var_len+1, (void *) &entry, sizeof(pval *),NULL);
@@ -333,7 +333,7 @@ void php3_treat_data(int arg, char *str)
 				array_ptr = (pval *) emalloc(sizeof(pval));
 				array_init(array_ptr);
 				array_ptr->refcount=1;
-				array_ptr->is_ref=0;
+				array_ptr->EA=0;
 				switch (arg) {
 					case PARSE_POST:
 						_php3_hash_add(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), &array_ptr, sizeof(pval *),NULL);
