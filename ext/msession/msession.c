@@ -63,6 +63,7 @@
  */
 
 #if HAVE_MSESSION
+#ifdef HAVE_PHP_SESSION
 /* If the PHP Session module is compiled or available, include support */
 PS_FUNCS(msession);
 
@@ -1170,7 +1171,6 @@ PHP_FUNCTION(msession_call)
 
 #ifdef HAVE_PHP_SESSION
 
-#ifdef HAVE_PHP_SESSION
 PS_OPEN_FUNC(msession)
 {
 	ELOG( "ps_open_msession");
