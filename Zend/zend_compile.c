@@ -62,29 +62,29 @@ static void zend_destroy_property_info_internal(zend_property_info *property_inf
 	free(property_info->name);
 }
 
-static void build_runtime_defined_function_key(zval *result, char *name, int name_length, zend_op *opline TSRMLS_DC)
+static void build_runtime_defined_function_key(zval *result, char *name, int name_length TSRMLS_DC)
 {
-	char lineno_buf[32];
-	uint lineno_len;
+	char char_pos_buf[32];
+	uint char_pos_len;
 	char *filename;
 
-	lineno_len = zend_sprintf(lineno_buf, "%d", opline->lineno);
+	char_pos_len = zend_sprintf(char_pos_buf, "%x", zend_get_last_accepting_character_position());
 	if (CG(active_op_array)->filename) {
 		filename = CG(active_op_array)->filename;
 	} else {
 		filename = "-";
 	}
 
-	/* NULL, name length, filename length, line number length */
-	result->value.str.len = 1+name_length+strlen(filename)+lineno_len;
+	/* NULL, name length, filename length, last accepting char position length */
+	result->value.str.len = 1+name_length+strlen(filename)+char_pos_len;
 	result->value.str.val = (char *) emalloc(result->value.str.len+1);
 #ifdef ZEND_MULTIBYTE
 	/* must be binary safe */
 	result->value.str.val[0] = '\0';
 	memcpy(result->value.str.val+1, name, name_length);
-	sprintf(result->value.str.val+1+name_length, "%s%s", filename, lineno_buf);
+	sprintf(result->value.str.val+1+name_length, "%s%s", filename, char_pos_buf);
 #else
-	sprintf(result->value.str.val, "%c%s%s%s", '\0', name, filename, lineno_buf);
+	sprintf(result->value.str.val, "%c%s%s%s", '\0', name, filename, char_pos_buf);
 #endif /* ZEND_MULTIBYTE */
 	result->type = IS_STRING;
 	result->refcount = 1;
@@ -1052,7 +1052,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 		opline->opcode = ZEND_DECLARE_FUNCTION;
 		opline->op1.op_type = IS_CONST;
-		build_runtime_defined_function_key(&opline->op1.u.constant, lcname, name_len, opline TSRMLS_CC);
+		build_runtime_defined_function_key(&opline->op1.u.constant, lcname, name_len TSRMLS_CC);
 		opline->op2.op_type = IS_CONST;
 		opline->op2.u.constant.type = IS_STRING;
 		opline->op2.u.constant.value.str.val = lcname;
@@ -2337,7 +2337,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->op1.op_type = IS_CONST;
-	build_runtime_defined_function_key(&opline->op1.u.constant, lcname, new_class_entry->name_length, opline TSRMLS_CC);
+	build_runtime_defined_function_key(&opline->op1.u.constant, lcname, new_class_entry->name_length TSRMLS_CC);
 	
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_STRING;
