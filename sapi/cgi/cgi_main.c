@@ -278,7 +278,7 @@ static void sapi_cgibin_flush(void *server_context)
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *)server_context;
 		if (
-#ifdef PHP_WIN32
+#ifndef PHP_WIN32
 		!parent && 
 #endif
 		(!request || FCGX_FFlush(request->out) == -1)) {
