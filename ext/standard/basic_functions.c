@@ -480,7 +480,6 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(show_source, 		highlight_file,							NULL)
 	PHP_FE(highlight_string,												NULL)
 	PHP_FE(php_strip_whitespace,												NULL)
-	PHP_FE(php_check_syntax,												second_arg_force_ref)
 
 	PHP_FE(ini_get,															NULL)
 	PHP_FE(ini_get_all,														NULL)
@@ -2424,49 +2423,6 @@ PHP_FUNCTION(php_strip_whitespace)
 
 	php_ob_get_buffer(return_value TSRMLS_CC);
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
-
-	return;
-}
-/* }}} */
-
-/* {{{ proto bool php_check_syntax(string file_name [, &$error_message])
-   Check the syntax of the specified file. */
-PHP_FUNCTION(php_check_syntax)
-{
-	char *filename;
-	int filename_len;
-	zval *errm=NULL;
-	zend_file_handle file_handle = {0};
-
-	int old_errors = PG(display_errors);
-	int log_errors = PG(log_errors);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &filename, &filename_len, &errm) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
-	file_handle.free_filename = 0;
-	file_handle.opened_path = NULL;	
-
-	PG(log_errors) = PG(display_errors) = 0;
-
-	if (php_lint_script(&file_handle TSRMLS_CC) != SUCCESS) {
-		if (errm) {
-			char *error_str;
-
-			zval_dtor(errm);
-			spprintf(&error_str, 0, "%s in %s on line %d", PG(last_error_message), PG(last_error_file), PG(last_error_lineno));
-			ZVAL_STRING(errm, error_str, 0);
-		}
-		RETVAL_FALSE;
-	} else {
-		RETVAL_TRUE;
-	}
-
-	PG(display_errors) = old_errors;
-	PG(log_errors) = log_errors;
 
 	return;
 }
