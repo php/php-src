@@ -916,6 +916,9 @@ int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 		&& ((current_access_type->u.constant.value.lval & ZEND_ACC_PPP_MASK) != (new_modifier->u.constant.value.lval & ZEND_ACC_PPP_MASK))) {
 		zend_error(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
 	}
+	if (((current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval) & (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) == (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) {
+		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
+	}
 	if (((current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval) & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) {
 		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on a private class member");
 	}
@@ -974,7 +977,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			fn_flags |= ZEND_ACC_PUBLIC;
 		}
 
-		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, name, name_len))) {
+		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, name, name_len)) && !CG(active_class_entry)->constructor) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
