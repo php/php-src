@@ -1892,7 +1892,9 @@ binary_assign_op_addr_obj:
 
 					EX(fbc) = EX(fbc_constructor);
 					if(EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-						EX(calling_scope) = Z_OBJCE_P(EX(object));
+						/*  The scope should be the scope of the class where the constructor
+							was initially declared in */
+						EX(calling_scope) = EX(fbc)->common.scope;
 					} else {
 						EX(calling_scope) = NULL;
 					}

@@ -1476,16 +1476,25 @@ ZEND_API void function_add_ref(zend_function *function)
 
 static void do_inherit_parent_constructor(zend_class_entry *ce)
 {
-	if (ce->parent
-		&& !zend_hash_exists(&ce->function_table, ce->name, ce->name_length+1)) {
-		zend_function *function;
+	zend_function *function;
 
+	if (!ce->parent || ce->constructor) {
+		return;
+	}
+
+	if (!zend_hash_exists(&ce->function_table, ce->name, ce->name_length+1)) {
 		if (zend_hash_find(&ce->parent->function_table, ce->parent->name, ce->parent->name_length+1, (void **) &function)==SUCCESS) {
 			/* inherit parent's constructor */
 			zend_hash_update(&ce->function_table, ce->name, ce->name_length+1, function, sizeof(zend_function), NULL);
 			function_add_ref(function);
 		}
 	}
+	if (zend_hash_find(&ce->parent->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), (void **) &function)==SUCCESS) {
+		/* inherit parent's constructor */
+		zend_hash_update(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), function, sizeof(zend_function), NULL);
+		function_add_ref(function);
+	}
+	ce->constructor = ce->parent->constructor;
 }
 
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
