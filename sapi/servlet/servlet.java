@@ -63,15 +63,22 @@ public class servlet extends HttpServlet {
     if (!request.getMethod().equals("POST")) {
       result = request.getQueryString();
     } else { 
-      Enumeration e = request.getParameterNames();
+      Enumeration enum = request.getParameterNames();
       String concat = "";
       result = "";
 
-      while (e.hasMoreElements()) {
-        String name  = (String)e.nextElement();
+      while (enum.hasMoreElements()) {
+        String name  = (String)enum.nextElement();
         String value = request.getParameter(name);
 
-        result += concat + name + "=" + URLEncoder.encode(value);
+        try {
+          result += concat + name + "=" + URLEncoder.encode(value, "UTF-8");
+        }
+
+        catch (Exception e) {
+          e.printStackTrace(System.err);
+        }
+
         concat = "&";
       }
     }
