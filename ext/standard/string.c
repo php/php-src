@@ -875,7 +875,7 @@ PHP_FUNCTION(implode)
 		ZVAL_STRINGL(delim, _IMPL_EMPTY, sizeof(_IMPL_EMPTY) - 1, 0);
 
 		if (Z_TYPE_PP(arg1) != IS_ARRAY) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument to implode must be an array");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument to implode must be an array.");
 			return;
 		}
 
