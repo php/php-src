@@ -37,6 +37,10 @@
 
 #include <sqlite.h>
 
+#ifndef safe_emalloc
+#define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(sqlite)
 
 extern int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out);
@@ -289,7 +293,7 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 	efree(callable);
 	
 	if (argc > 1) {
-		zargs = (zval ***)emalloc((argc - 1) * sizeof(zval **));
+		zargs = (zval ***)safe_emalloc((argc - 1), sizeof(zval **), 0);
 		
 		for (i = 0; i < argc-1; i++) {
 			zargs[i] = emalloc(sizeof(zval *));
@@ -359,7 +363,7 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 	}
 
 	if (argc > 0) {
-		zargs = (zval ***)emalloc(argc * sizeof(zval **));
+		zargs = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 		
 		for (i = 0; i < argc; i++) {
 			zargs[i] = emalloc(sizeof(zval *));
@@ -435,7 +439,7 @@ static void php_sqlite_agg_step_function_callback(sqlite_func *func, int argc, c
 	}
 	
 	zargc = argc + 1;
-	zargs = (zval ***)emalloc(zargc * sizeof(zval **));
+	zargs = (zval ***)safe_emalloc(zargc, sizeof(zval **), 0);
 		
 	/* first arg is always the context zval */
 	context_p = (zval **)sqlite_aggregate_context(func, sizeof(*context_p));
