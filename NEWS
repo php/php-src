@@ -2,9 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
-- Renamed "PECL" to "PEAR" (PHP Extension and Add-on Repository).
+- Renamed "PECL" to "PEAR" (PHP Extension and Add-on Repository) (Stig)
 - buildconf now uses build.mk
-- Disable symlinks to urls
+- Disable symlinks to urls (Rasmus)
 - Informix driver now reflects version of ESQL/C used  (Danny)
 - Modified session_register() to take variable number of arguments (Andrei)
 - Fixed file descriptor leak in thread safe mode (Zeev, Zend library)
