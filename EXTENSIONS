@@ -276,6 +276,11 @@ PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           mbstring
+PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
 EXTENSION:           mcal
 PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org>
 MAINTENANCE:         Odd Fixes
