@@ -233,9 +233,6 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 	     zend_hash_get_current_data(sax_handlers, (void **) &handler) == SUCCESS;
 		 zend_hash_move_forward(sax_handlers)) {
 
-		/* Allocate the handler */
-		SEPARATE_ZVAL(handler);
-
 		key_type = zend_hash_get_current_key(sax_handlers, &string_key, &num_key, 0);
 		if (key_type == HASH_KEY_IS_LONG) {
 			convert_to_string_ex(handler);
@@ -246,18 +243,21 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 
 		/* Document handlers (document start, document end) */
 		if (strcasecmp(string_key, "document") == 0) {
+			SEPERATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).doc_start, 
 			                          &XSLT_SAX(handle).doc_end, 
 			                          handler);
 		}
 		/* Element handlers, start of an element, and end of an element */
 		else if (strcasecmp(string_key, "element") == 0) {
+			SEPERATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).element_start, 
 			                          &XSLT_SAX(handle).element_end, 
 			                          handler);
 		}
 		/* Namespace handlers, start of a namespace, end of a namespace */
 		else if (strcasecmp(string_key, "namespace") == 0) {
+			SEPERATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).namespace_start, 
 			                          &XSLT_SAX(handle).namespace_end, 
 			                          handler);
@@ -317,8 +317,6 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 	for (zend_hash_internal_pointer_reset(scheme_handlers);
 	     zend_hash_get_current_data(scheme_handlers, (void **) &handler) == SUCCESS;
 	     zend_hash_move_forward(scheme_handlers)) {
-
-		SEPARATE_ZVAL(handler);
 
 		key_type = zend_hash_get_current_key(scheme_handlers, &string_key, &num_key, 0);
 		if (key_type == HASH_KEY_IS_LONG) {
