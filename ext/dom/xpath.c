@@ -169,7 +169,7 @@ PHP_FUNCTION(dom_xpath_query)
 		nodep = xmlDocGetRootElement(docp);
 	}
 
-	if (docp != nodep->doc) {
+	if (nodep && docp != nodep->doc) {
 		php_error(E_WARNING, "Node From Wrong Document");
 		RETURN_FALSE;
 	}
