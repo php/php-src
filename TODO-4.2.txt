@@ -1,3 +1,6 @@
+* Change the odbc_fetch_into() function to require ALWAYS the first two
+  parameters ($conn_id and $array), and make the third (row) be optional.
+
 * Remove --with-openlink configure option (--with-iodbc replaces it).
 
 * Always build CGI (--disable-cgi option to disable).
