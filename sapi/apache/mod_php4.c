@@ -119,7 +119,7 @@ void php_save_umask(void)
 
 static int sapi_apache_ub_write(const char *str, uint str_length)
 {
-	int ret;
+	int ret=0;
 	SLS_FETCH();
 		
 	if (SG(server_context)) {
