@@ -1,3 +1,25 @@
+2003-02-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_stream.c:
+      -cough*
+      Fix another stupid mistake.
+
+2003-02-20  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_opcode.c:
+      Allow namespaces to have a number of parts. I.e., now you can do:
+      namespace foo {
+      	function abc() {}
+      }
+      ...
+      namespace foo {
+      	functio def() {}
+      }
+
 2003-02-19  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_stream.c:
