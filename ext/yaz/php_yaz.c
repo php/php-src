@@ -185,7 +185,7 @@ static int order_associations;
 
 /*
   when id = 0, it means all targes...
-  id = yaz_connect(zurl, user,group, pass);
+  id = yaz_connect(zurl, user, group, pass);
   yaz_set_db(id, db)
   yaz_error(id)
   yaz_errno(id)
@@ -827,15 +827,38 @@ static int do_event (int *id)
 	return no;
 }
 
-/* {{{ proto int yaz_connect(string zurl)
-   Create target with given zurl. Returns positive id if succesful. */
+/* {{{ proto int yaz_connect(string zurl [, string user [, string group, string pass]])
+   Create target with given zurl. Returns positive id if successful. */
 PHP_FUNCTION(yaz_connect)
 {
 	int i;
 	char *cp;
-	char *zurl_str;
-	pval **zurl;
-	if (ZEND_NUM_ARGS() < 1 || zend_get_parameters_ex (1, &zurl) == FAILURE)
+	char *zurl_str, *user_str = 0, *group_str = 0, *pass_str = 0;
+	pval **zurl, **user = 0, **group = 0, **pass = 0;
+	if (ZEND_NUM_ARGS() == 1)
+	{
+		if (zend_get_parameters_ex (1, &zurl) == FAILURE)
+			WRONG_PARAM_COUNT;
+	}
+	else if (ZEND_NUM_ARGS() == 2)
+	{
+		if (zend_get_parameters_ex (2, &zurl, &user) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_string_ex (user);
+		user_str = (*user)->value.str.val;
+	}
+	else if (ZEND_NUM_ARGS() == 4)
+	{
+		if (zend_get_parameters_ex (4, &zurl, &user, &group, &pass) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_string_ex (user);
+		user_str = (*user)->value.str.val;
+		convert_to_string_ex (group);
+		group_str = (*group)->value.str.val;
+		convert_to_string_ex (pass);
+		pass_str = (*pass)->value.str.val;
+	}
+	else
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -882,6 +905,14 @@ PHP_FUNCTION(yaz_connect)
 	shared_associations[i]->error = 0;
 	shared_associations[i]->numberOfRecordsRequested = 10;
 	shared_associations[i]->resultSetStartPoint = 1;
+	if (user && !group && !pass)
+		shared_associations[i]->auth_open = xstrdup (user_str);
+	if (user && group && pass)
+	{
+		shared_associations[i]->user = xstrdup (user_str);
+		shared_associations[i]->group = xstrdup (group_str);
+		shared_associations[i]->pass = xstrdup (pass_str);
+	}
 	RETURN_LONG(i+1);
 }
 /* }}} */
@@ -1539,13 +1570,14 @@ PHP_MSHUTDOWN_FUNCTION(yaz)
 #if PHP_YAZ_DEBUG
 	php_log_err ("PHP_MSHUTDOWN_FUNCTION yaz");
 #endif
-	if (!shared_associations)
-		return SUCCESS;
-	for (i = 0; i<MAX_ASSOC; i++)
-		yaz_association_destroy (shared_associations[i]);
-	xfree (shared_associations);
-	shared_associations = 0;
-	nmem_exit();
+	if (shared_associations)
+	{
+		for (i = 0; i<MAX_ASSOC; i++)
+			yaz_association_destroy (shared_associations[i]);
+		xfree (shared_associations);
+		shared_associations = 0;
+		nmem_exit();
+	}
 	return SUCCESS;
 }
 
@@ -1558,9 +1590,21 @@ PHP_MINFO_FUNCTION(yaz)
 
 PHP_RSHUTDOWN_FUNCTION(yaz)
 {
+	int i;
 #if PHP_YAZ_DEBUG
 	php_log_err ("PHP_RSHUTDOWN yaz");
 #endif
+	if (shared_associations)
+	{
+		for (i = 0; i<MAX_ASSOC; i++)
+			if (shared_associations[i] &&
+				(shared_associations[i]->user ||
+				 shared_associations[i]->auth_open))
+			{
+				yaz_association_destroy(shared_associations[i]);
+				shared_associations[i] = 0;
+			}
+	}
 	return SUCCESS;
 }
 
