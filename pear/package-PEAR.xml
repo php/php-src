@@ -31,21 +31,45 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.91-dev</version>
+    <version>0.91</version>
     <state>beta</state>
-    <date>2002-06-15</date>
+    <date>2002-09-10</date>
     <notes>
-New Features:
-* Added PEAR::loadExtension($ext) - OS independant PHP extension load
-* Added PEAR::delExpect() API method. It allows to unset one or more expected error codes
-* System::mkTemp() automatically remove created tmp files/dirs at script shutdown
-* New command "pear search"
-* New command "pear upgrade-all"
-Fixed Bugs:
-* fix for XML-RPC bug that made some remote commands fail
-* fix problems under Windows with the DIRECTORY_SEPARATOR
-* lot of other minor fixes
-* --force option did not work on "pear install Package"
+New Features, Installer:
+* new command: "pear search"
+* new command: "pear upgrade-all"
+* new command: "pear config-help"
+* new command: "pear sign"
+* Windows support for "pear build" (requires
+  msdev)
+* new dependency type: "zend"
+* XML-RPC results may now be cached (see
+  cache_dir and cache_ttl config)
+
+Bugfixes, Installer:
+* fix for XML-RPC bug that made some remote
+  commands fail
+* fix problems under Windows with
+  DIRECTORY_SEPARATOR
+* lots of other minor fixes
+* --force option did not work for "pear install
+  Package"
+* http downloader used "4.2.1" rather than
+  "PHP/4.2.1" as user agent
+* bending over a little more to figure out how
+  PHP is installed
+
+New Features, PEAR Library:
+* added PEAR::loadExtension($ext)
+* added PEAR::delExpect()
+* System::mkTemp() now cleans up at shutdown
+* defined PEAR_ZE2 constant (boolean)
+* added PEAR::throwError() with a simpler API
+  than raiseError()
+
+Bugfixes, PEAR Library:
+* ZE2 compatibility fixes
+* use getenv() as fallback for $_ENV
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -69,7 +93,6 @@ Fixed Bugs:
         <file role="php" name="Dependency.php"/>
         <dir name="Frontend">
           <file role="php" name="CLI.php"/>
-          <file role="php" name="Gtk.php"/>
         </dir>
         <file role="php" name="Builder.php"/>
         <file role="php" name="Installer.php"/>
