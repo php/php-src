@@ -524,7 +524,7 @@ if (!getenv('NO_INTERACTION')) {
 					break;
 				}
 			}
-			$ldd = shell_exec("ldd $php");
+			$ldd = shell_exec("ldd $php 2>/dev/null");
 		}
 		$failed_tests_data .= "Automake:\n$automake\n";
 		$failed_tests_data .= "Autoconf:\n$autoconf\n";
