@@ -84,11 +84,11 @@ Exceptions:
     php_error_docref1() or php_error_docref2(). For example, file functions 
     should display the name of the file opened:
 
-    php_error_docref1("function.fopen", filename
-                      TSRMLS_CC, E_WHATEVER, "Desc.");
+    php_error_docref1("function.fopen" TSRMLS_CC, filename, 
+                      E_WHATEVER, "Desc.");
 
-    php_error_docref2("function.fopen", filename, openmode
-                      TSRMLS_CC, E_WHATEVER, "Desc.");
+    php_error_docref2("function.fopen" TSRMLS_CC, filename, openmode, 
+                      E_WHATEVER, "Desc.");
 
     Fixing ("unifying") existing php_error() message is a good thing [tm].
 
