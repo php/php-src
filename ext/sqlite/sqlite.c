@@ -413,13 +413,14 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 		return;
 	}
 	
-	ZVAL_STRING(&funcname, (char*)argv[0], 0);
+	ZVAL_STRING(&funcname, (char*)argv[0], 1);
 
-	if (!zend_is_callable(&funcname, 0, &callable)) {
-		spprintf(&errbuf, 0, "function `%s' is not callable", callable);
+	if (!zend_make_callable(&funcname, &callable TSRMLS_CC)) {
+		spprintf(&errbuf, 0, "function `%s' is not funcname", callable);
 		sqlite_set_result_error(func, errbuf, -1);
 		efree(errbuf);
 		efree(callable);
+		zval_dtor(&funcname);
 		return;
 	}
 	efree(callable);
@@ -441,6 +442,7 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 			argc-1,
 			zargs,
 			0, NULL TSRMLS_CC);
+	zval_dtor(&funcname);
 
 	if (res == SUCCESS) {
 		if (retval == NULL) {
