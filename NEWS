@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Make error_prepend_string and error_append_string work
 - array_walk() now automatically resets the array. (Andrei)
 - Added natural comparison/sorting routines strnatcmp(), strnatcasecmp(),
   natsort(), and natcasesort(). These are useful for comparing and sorting
