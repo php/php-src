@@ -147,7 +147,7 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 						}
 					}
 				} else {
-					ZEND_PUTS(string_key);
+					ZEND_WRITE(string_key, str_len-1);
 				}
 				break;
 			case HASH_KEY_IS_LONG:
