@@ -204,7 +204,7 @@ typedef struct _zend_utility_values {
 
 
 /* data types */
-#define IS_NULL	0
+#define IS_NULL		0
 #define IS_LONG		1
 #define IS_DOUBLE	2
 #define IS_STRING	3
@@ -212,9 +212,13 @@ typedef struct _zend_utility_values {
 #define IS_OBJECT	5
 #define IS_BC 		6 /* for parser internal use only */
 #define IS_BOOL		7
-#define IS_RESOURCE 8
+#define IS_RESOURCE	8
 #define IS_CONSTANT	9
-#define IS_METHOD	10 /* for overloaded function calls */
+
+/* overloaded elements data types */
+#define OE_IS_ARRAY	(1<<0)
+#define OE_IS_OBJECT	(1<<1)
+#define OE_IS_METHOD	(1<<2)
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions);
 void zend_shutdown(void);
