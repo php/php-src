@@ -107,11 +107,11 @@ AC_ARG_ENABLE(debug,
 
 AC_DEFUN(LIBZEND_OTHER_CHECKS,[
 
-AC_ARG_ENABLE(experimental-zts,
-[  --enable-experimental-zts   This will most likely break your build],[
-  ZEND_EXPERIMENTAL_ZTS=$enableval
+AC_ARG_ENABLE(maintainer-zts,
+[  --enable-maintainer-zts   Enable thread safety - for code maintainers only],[
+  ZEND_MAINTAINER_ZTS=$enableval
 ],[
-  ZEND_EXPERIMENTAL_ZTS=no
+  ZEND_MAINTAINER_ZTS=no
 ])  
 
 AC_ARG_ENABLE(inline-optimization,
@@ -130,7 +130,7 @@ AC_ARG_ENABLE(memory-limit,
 ])
 
 AC_MSG_CHECKING(whether to enable thread-safety)
-AC_MSG_RESULT($ZEND_EXPERIMENTAL_ZTS)
+AC_MSG_RESULT($ZEND_MAINTAINER_ZTS)
 
 AC_MSG_CHECKING(whether to enable inline optimization for GCC)
 AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
@@ -156,7 +156,7 @@ fi
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
-if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
+if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   CFLAGS="$CFLAGS -DZTS"
   LIBZEND_CPLUSPLUS_CHECKS
