@@ -1,3 +1,169 @@
+2003-06-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/hyperwave/hg_comm.c
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+      Fix compile warnings (mostly MFH from 5.0 branch)
+
+2003-06-05  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dom/CREDITS:
+      add CREDITS file
+
+2003-06-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/domxml/php_domxml.c:
+      Avoid unnecessary zval separation
+
+2003-06-05  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/php_dom.c:
+      fix a bunch of memory overruns, and uninitialized variable uses
+      fixes crash on sample script rob sent me
+
+2003-06-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/xsl/xsltprocessor.c:
+      Avoid unnecesary zval separation
+
+2003-06-05  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dom/document.c:
+      version length too
+
+    * ext/dom/document.c:
+      initialize the encoding length
+
+2003-06-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/xsl/php_xsl.c:
+      WS fix
+
+2003-06-05  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dom/examples/dom1.inc
+      ext/dom/examples/dom1.php:
+      add tests/ files as examples that you can run and play around with
+
+    * ext/dom/.cvsignore
+      ext/xsl/.cvsignore:
+      add .cvsignore file
+
+    * ext/xml/xml.c:
+      prevent double destroy and double init badness
+
+    * ext/dom/php_dom.c:
+      fig segv on make install (double destroy badness)
+
+2003-06-05  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/config.m4
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsl.dsp
+      ext/xsl/xsl_fe.h
+      ext/xsl/xsltprocessor.c:
+      Inital cut of new xsl extension
+      interoperates with new dom extension
+      PHP5 only
+
+    * ext/dom/TODO
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/config.m4
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/documenttype.c
+      ext/dom/dom.dsp
+      ext/dom/dom_ce.h
+      ext/dom/dom_fe.h
+      ext/dom/dom_properties.h
+      ext/dom/domconfiguration.c
+      ext/dom/domerror.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domexception.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domlocator.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entity.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/notation.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/typeinfo.c
+      ext/dom/userdatahandler.c
+      ext/dom/xml_common.h
+      ext/dom/tests/dom001.phpt
+      ext/dom/tests/dom_test.inc
+      ext/dom/tests/skipif.inc:
+      Inital cut of new dom extension
+      PHP5 only
+
+2003-06-05  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/mime_magic/mime_magic.c:
+      ... as suggested by Wez
+
+2003-06-05  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/array.c:
+      fix array_key_exists() from HANDLE_NUMERIC() changes
+      
+
+2003-06-05  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/package-PEAR.xml:
+      - Advancing myself
+
+    * pear/package.dtd:
+      - Add optional dependency to the DTD
+
+    * pear/PEAR/Installer.php:
+      - Commit support for optional dependencies
+      
+
+    * pear/PEAR/Command/Registry.php:
+      - Add support for <provides />
+      
+
+2003-06-05  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      WS
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      NEWS:
+      Hopefully this list grows..
+
+    * (PHP_4_3)
+      ext/standard/config.m4:
+      MFH: fix regex issues with apache2handler
+
+    * ext/standard/config.m4:
+      Fix the regex issues with apache2handler
+
 2003-06-04  Andrei Zmievski  <andrei@gravitonic.com>
 
     * (PHP_4)
