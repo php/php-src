@@ -1,6 +1,11 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Updated the sockets extension to use resources instead of longs for the Socket
+  descriptors.
+  The socket functions have been renamed to conform with the PHP standard
+  instead of their C counterparts.
+  The sockets extension is now usable under Win32 (Daniel)
 - Added disk_total_space() to return the total size of a filesystem.
   (Patch from Steven Bower)
 - Renamed diskfreespace() to disk_free_space() to conform to established
