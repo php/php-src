@@ -389,20 +389,64 @@ PHPAPI FILE *php_fopen_primary_script(void)
 PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path)
 {
 	char *pathbuf, *ptr, *end;
+	char *exec_fname;
 	char trypath[MAXPATHLEN];
+	char trydir[MAXPATHLEN];
+	char safe_mode_include_dir[MAXPATHLEN];
 	struct stat sb;
 	FILE *fp;
+	int path_length;
 	int filename_length;
+	int safe_mode_include_dir_length;
+	int exec_fname_length;
 	PLS_FETCH();
+	ELS_FETCH();
 
 	if (opened_path) {
 		*opened_path = NULL;
 	}
+	
+	if(!filename) {
+		return NULL;
+	}
 
 	filename_length = strlen(filename);
-
-	/* Absolute & relative path open */
-	if ((*filename == '.') || (IS_ABSOLUTE_PATH(filename, filename_length))) {
+	
+	/* Relative path open */
+	if (*filename == '.') {
+		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
+			return NULL;
+		}
+		return php_fopen_and_set_opened_path(filename, mode, opened_path);
+	}
+	
+	/*
+	 * files in safe_mode_include_dir (or subdir) are excluded from
+	 * safe mode GID/UID checks
+	 */
+	*safe_mode_include_dir       = 0;
+	safe_mode_include_dir_length = 0;
+	if(PG(safe_mode_include_dir) && VCWD_REALPATH(PG(safe_mode_include_dir), safe_mode_include_dir)) {
+		safe_mode_include_dir_length = strlen(safe_mode_include_dir);
+	}
+	
+	/* Absolute path open */
+	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
+		/* Check to see if file is in safe_mode_include_dir (or subdir) */
+		if (PG(safe_mode) && *safe_mode_include_dir && VCWD_REALPATH(filename, trypath)) {
+#ifdef PHP_WIN32
+			if (strncasecmp(safe_mode_include_dir, trypath, safe_mode_include_dir_length) == 0)
+#else
+			if (strncmp(safe_mode_include_dir, trypath, safe_mode_include_dir_length) == 0)
+#endif
+			{
+				/* absolute path matches safe_mode_include_dir */
+				fp = php_fopen_and_set_opened_path(trypath, mode, opened_path);
+				if (fp) {
+					return fp;
+				}
+			}
+		}
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
@@ -415,7 +459,31 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		}
 		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}
-	pathbuf = estrdup(path);
+
+	/* check in provided path */
+	/* append the calling scripts' current working directory
+	 * as a fall back case
+	 */
+	exec_fname = zend_get_executed_filename(ELS_C);
+	exec_fname_length = strlen(exec_fname);
+	path_length = strlen(path);
+
+	while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length])) {
+	}
+	if (exec_fname && exec_fname[0] == '[') {
+		/* [no active file] */
+		exec_fname_length = 0;
+	}
+	
+	pathbuf = (char *) emalloc(exec_fname_length + path_length +1 +1);
+	memcpy(pathbuf, path, path_length);
+#ifdef PHP_WIN32
+	pathbuf[path_length] = ';';
+#else
+	pathbuf[path_length] = ':';
+#endif
+	memcpy(pathbuf+path_length+1, exec_fname, exec_fname_length);
+	pathbuf[path_length + exec_fname_length +1] = '\0';
 
 	ptr = pathbuf;
 
@@ -430,6 +498,22 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			end++;
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
+		/* Check to see trypath is in safe_mode_include_dir (or subdir) */
+		if (PG(safe_mode) && *safe_mode_include_dir && VCWD_REALPATH(trypath, trydir)) {
+#ifdef PHP_WIN32
+			if (strncasecmp(safe_mode_include_dir, trydir, safe_mode_include_dir_length) == 0)
+#else
+			if (strncmp(safe_mode_include_dir, trydir, safe_mode_include_dir_length) == 0)
+#endif
+			{
+				/* trypath is in safe_mode_include_dir */
+				fp = php_fopen_and_set_opened_path(trydir, mode, opened_path);
+				if (fp) {
+					efree(pathbuf);
+					return fp;
+				}
+			}
+		}
 		if (PG(safe_mode)) {
 			if (VCWD_STAT(trypath, &sb) == 0 && (!php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM))) {
 				efree(pathbuf);
@@ -442,37 +526,10 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			return fp;
 		}
 		ptr = end;
-	}
+	} /* end provided path */
 
 	efree(pathbuf);
-
-	{
-		char *exec_fname;
-		int exec_fname_len;
-		ELS_FETCH();
-
-		exec_fname = zend_get_executed_filename(ELS_C);
-		exec_fname_len = strlen(exec_fname);
-
-		pathbuf = (char *) emalloc(exec_fname_len+filename_length+1+1); /* Over allocate to save time */
-		memcpy(pathbuf, exec_fname, exec_fname_len+1);
-
-		while ((--exec_fname_len >= 0) && !IS_SLASH(pathbuf[exec_fname_len])) {
-		}
-		pathbuf[exec_fname_len] = DEFAULT_SLASH;
-		memcpy(&pathbuf[exec_fname_len+1], filename, filename_length+1);
-
-		if (PG(safe_mode)) {
-			if (VCWD_STAT(pathbuf, &sb) == 0 && (!php_checkuid(pathbuf, mode, CHECKUID_CHECK_MODE_PARAM))) {
-				efree(pathbuf);
-				return NULL;
-			}
-		}
-		fp = php_fopen_and_set_opened_path(pathbuf, mode, opened_path);
-		efree(pathbuf);
-		return fp;
-	}
-	return NULL; /* Not really needed anymore */
+	return NULL;
 }
 /* }}} */
  

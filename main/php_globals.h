@@ -68,6 +68,7 @@ struct _php_core_globals {
 	zend_bool implicit_flush;
 
 	zend_bool safe_mode;
+	char *safe_mode_include_dir;
 	zend_bool safe_mode_gid;
 	zend_bool sql_safe_mode;
 	zend_bool enable_dl;
