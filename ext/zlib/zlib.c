@@ -96,12 +96,6 @@ typedef struct zlib_global_struct{
 #endif
 	int gzgetss_state;
 	int le_zp;
-#if PHP_31
-	int magic_quotes_runtime;
-	int	safe_mode;
-	char *include_path;
-	char *doc_root;
-#endif
 #if defined(THREAD_SAFE)
 }zlib_global_struct;
 #endif
@@ -118,12 +112,6 @@ void *zlib_mutex;
 #else
 #define ZLIB_GLOBAL(a) a
 #define ZLIB_TLS_VARS
-#endif
-
-#if PHP_31
-# define ZLIB_INI(a) ZLIB_GLOBAL(a)
-#else
-# define ZLIB_INI(a) php3_ini.a
 #endif
 
 function_entry php3_zlib_functions[] = {
@@ -173,12 +161,6 @@ int php3_minit_zlib(INIT_FUNC_ARGS)
 		return FAILURE;
 	}
 #endif
-	/* get our ini variables here */
-	cfg_get_long("safe_mode",&ZLIB_INI(safe_mode));
-	cfg_get_long("magic_quotes_runtime",&ZLIB_INI(magic_quotes_runtime));
-	cfg_get_string("doc_root",&ZLIB_INI(doc_root));
-	cfg_get_string("include_path",&ZLIB_INI(include_path));
-
 	ZLIB_GLOBAL(le_zp) = register_list_destructors(gzclose,NULL);
 	return SUCCESS;
 }
@@ -214,11 +196,11 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 static gzFile php3_gzopen_wrapper(char *path, char *mode, int options)
 {
 	ZLIB_TLS_VARS;
-	if (options & USE_PATH && ZLIB_INI(include_path) != NULL) {
-		return php3_gzopen_with_path(path, mode, ZLIB_INI(include_path), NULL);
+	if (options & USE_PATH && PG(include_path) != NULL) {
+		return php3_gzopen_with_path(path, mode, PG(include_path), NULL);
 	}
 	else {
-		if (options & ENFORCE_SAFE_MODE && ZLIB_INI(safe_mode) && (!_php3_checkuid(path,1))) {
+		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!_php3_checkuid(path,1))) {
 			return NULL;
 		}
 		if (_php3_check_open_basedir(path)) return NULL;
@@ -244,7 +226,7 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 	
 	/* Relative path open */
 	if (*filename == '.') {
-		if (ZLIB_INI(safe_mode) &&(!_php3_checkuid(filename,2))) {
+		if (PG(safe_mode) &&(!_php3_checkuid(filename,2))) {
 			return(NULL);
 		}
 		if (_php3_check_open_basedir(filename)) return NULL;
@@ -261,8 +243,8 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 #else
 	if (*filename == '/') {
 #endif
-		if (ZLIB_INI(safe_mode)) {
-			snprintf(trypath,MAXPATHLEN,"%s%s",ZLIB_INI(doc_root),filename);
+		if (PG(safe_mode)) {
+			snprintf(trypath,MAXPATHLEN,"%s%s",PG(doc_root),filename);
 			if (!_php3_checkuid(trypath,2)) {
 				return(NULL);
 			}
@@ -279,7 +261,7 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 	}
 
 	if (!path || (path && !*path)) {
-		if (ZLIB_INI(safe_mode) &&(!_php3_checkuid(filename,2))) {
+		if (PG(safe_mode) &&(!_php3_checkuid(filename,2))) {
 			return(NULL);
 		}
 		if (_php3_check_open_basedir(filename)) return NULL;
@@ -305,7 +287,7 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 			end++;
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
-		if (ZLIB_INI(safe_mode)) {
+		if (PG(safe_mode)) {
 			if (stat(trypath,&sb) == 0 &&(!_php3_checkuid(trypath,2))) {
 				efree(pathbuf);
 				return(NULL);
@@ -372,7 +354,7 @@ void php3_gzfile(INTERNAL_FUNCTION_PARAMETERS) {
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf,0,8191);
 	while((int)gzgets(zp, buf, 8191)) {
-		if (ZLIB_INI(magic_quotes_runtime)) {
+		if (PG(magic_quotes_runtime)) {
 			int len;
 			
 			slashed = _php3_addslashes(buf,0,&len,0); /* 0 = don't free source string */
@@ -512,7 +494,7 @@ void php3_gzgets(INTERNAL_FUNCTION_PARAMETERS) {
 		efree(buf);
 		RETVAL_FALSE;
 	} else {
-		if (ZLIB_INI(magic_quotes_runtime)) {
+		if (PG(magic_quotes_runtime)) {
 			return_value->value.str.val = _php3_addslashes(buf,0,&return_value->value.str.len,1);
 		} else {
 			return_value->value.str.val = buf;
@@ -717,7 +699,7 @@ void php3_gzwrite(INTERNAL_FUNCTION_PARAMETERS) {
 	}
 
 	/* strip slashes only if the length wasn't specified explicitly */
-	if (!arg3 && ZLIB_INI(magic_quotes_runtime)) {
+	if (!arg3 && PG(magic_quotes_runtime)) {
 		_php3_stripslashes(arg2->value.str.val,&num_bytes);
 	}
 
@@ -911,7 +893,7 @@ void php3_gzread(INTERNAL_FUNCTION_PARAMETERS)
 	return_value->value.str.len = gzread(zp, return_value->value.str.val, len);
 	return_value->value.str.val[return_value->value.str.len] = 0;
 
-	if (ZLIB_INI(magic_quotes_runtime)) {
+	if (PG(magic_quotes_runtime)) {
 		return_value->value.str.val = _php3_addslashes(return_value->value.str.val,return_value->value.str.len,&return_value->value.str.len,1);
 	}
 	return_value->type = IS_STRING;
