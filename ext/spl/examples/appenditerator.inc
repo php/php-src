@@ -14,7 +14,7 @@
  * @author  Marcus Boerger
  * @version 1.0
  */
-class AppendIterator implements Iterator
+class AppendIterator implements OuterIterator
 {
 	/** @internal array of inner iterators */
 	private $iterators;
