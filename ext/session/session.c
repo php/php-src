@@ -115,9 +115,12 @@ static void php_session_end_output_handler(TSRMLS_D)
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
-	if(!PS(mod)) {
-		php_error(E_ERROR,"Cannot find save handler %s",new_value);
-	}
+/* Following lines are commented out to prevent bogus error message at
+   start up. i.e. Save handler modules are not initilzied before Session
+   module. */
+/*  	if(!PS(mod)) { */
+/*  		php_error(E_ERROR,"Cannot find save handler %s",new_value); */
+/*  	} */
 	return SUCCESS;
 }
 
