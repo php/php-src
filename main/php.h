@@ -359,8 +359,6 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #endif
 #endif /* !XtOffsetOf */
 
-PHPAPI PHP_FUNCTION(warn_not_available);
-
 #endif
 
 /*

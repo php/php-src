@@ -59,8 +59,6 @@ static zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline_clear_history, 		NULL)
 #ifdef HAVE_LIBREADLINE
 	PHP_FE(readline_list_history, 		NULL)
-#else
-	PHP_FALIAS(readline_list_history, warn_not_available,			NULL)
 #endif
 	PHP_FE(readline_read_history, 		NULL)
 	PHP_FE(readline_write_history, 		NULL)
