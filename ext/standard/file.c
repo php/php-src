@@ -1731,8 +1731,6 @@ PHP_FUNCTION(fstat)
 PHP_FUNCTION(copy)
 {
 	pval **source, **target;
-	char buffer[8192];
-	int fd_s,fd_t,read_bytes;
 	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &source, &target) == FAILURE) {
@@ -1746,40 +1744,56 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 	
-#ifdef PHP_WIN32
-	if ((fd_s=V_OPEN((Z_STRVAL_PP(source),O_RDONLY|_O_BINARY)))==-1) {
-#else
-	if ((fd_s=V_OPEN((Z_STRVAL_PP(source),O_RDONLY)))==-1) {
-#endif
-		php_error(E_WARNING,"Unable to open '%s' for reading:  %s", Z_STRVAL_PP(source), strerror(errno));
+	if (php_copy_file(Z_STRVAL_PP(source), Z_STRVAL_PP(target))==SUCCESS) {
+		RETURN_TRUE;
+	} else {
 		RETURN_FALSE;
 	}
+}
+
+/* }}} */
+
+
+PHPAPI int php_copy_file(char *src, char *dest)
+{
+	char buffer[8192];
+	int fd_s,fd_t,read_bytes;
+
 #ifdef PHP_WIN32
-	if ((fd_t=V_OPEN((Z_STRVAL_PP(target),_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE)))==-1){
+	if ((fd_s=V_OPEN((src,O_RDONLY|_O_BINARY)))==-1) {
 #else
-	if ((fd_t=V_CREAT(Z_STRVAL_PP(target),0777))==-1) {
+	if ((fd_s=V_OPEN((src,O_RDONLY)))==-1) {
 #endif
-		php_error(E_WARNING,"Unable to create '%s':  %s", Z_STRVAL_PP(target), strerror(errno));
+		php_error(E_WARNING,"Unable to open '%s' for reading:  %s", src, strerror(errno));
+		return FAILURE;
+	}
+#ifdef PHP_WIN32
+	if ((fd_t=V_OPEN((dest,_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE)))==-1) {
+#else
+	if ((fd_t=V_CREAT((dest,0777))==-1) {
+#endif
+		php_error(E_WARNING,"Unable to create '%s':  %s", dest, strerror(errno));
 		close(fd_s);
-		RETURN_FALSE;
+		return FAILURE;
 	}
 
 	while ((read_bytes=read(fd_s,buffer,8192))!=-1 && read_bytes!=0) {
 		if (write(fd_t,buffer,read_bytes)==-1) {
-			php_error(E_WARNING,"Unable to write to '%s':  %s", Z_STRVAL_PP(target), strerror(errno));
+			php_error(E_WARNING,"Unable to write to '%s':  %s", dest, strerror(errno));
 			close(fd_s);
 			close(fd_t);
-			RETURN_FALSE;
+			return FAILURE;
 		}
 	}
 	
 	close(fd_s);
 	close(fd_t);
+	return SUCCESS;
+}	
 
-	RETVAL_TRUE;
-}
 
-/* }}} */
+
+
 /* {{{ proto int fread(int fp, int length)
    Binary-safe file read */
 
