@@ -1,3 +1,114 @@
+2001-07-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_smart_str.h:
+    Allow extensions to define custom prealloc sizes
+
+2001-07-11  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: Herr sascha's reccomendation.
+
+    * ext/curl/curl.c:
+    Return proper length, thanks for excellent reports by Colin.
+
+2001-07-11  Zeev Suraski  <zeev@zend.com>
+
+    * main/fopen_wrappers.c: Remove unreferenced variable
+
+2001-07-11  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/output.c: use ZVAL_* macros
+
+    * ext/zlib/zlib.c: gzencode() now zero-terminates its buffer.
+
+2001-07-11  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/session/session.c:
+    workaround to make ext/session well behaved with 'make test' and E_ALL
+
+    * ext/session/session.c
+      ext/session/php_session.h: cleanup in preparation for session_readonly()
+
+    * run-tests.php:
+    once again, make test would not work right with error_reporting=E_ALL
+
+2001-07-11  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/sybase/php_sybase_db.c
+      ext/xml/xml.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/mssql/php_mssql.c
+      ext/oci8/oci8.c
+      ext/standard/assert.c
+      ext/standard/url.c
+      ext/com/COM.c
+      ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/java/java.c
+      ext/msql/php_msql.c: ZVAL_BOOL(v,0) -> ZVAL_FALSE(v)
+
+2001-07-11  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c: More correct pseudo-fix
+
+2001-07-11  Zeev Suraski  <zeev@zend.com>
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/xml/xml.c
+      ext/sybase/php_sybase_db.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/standard/url.c
+      ext/com/COM.c
+      ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/java/java.c: Nuke zval_reset
+
+2001-07-11  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB.php:
+    added LOCK/UNLOCK to mainps queries (reported by Erik Hjortsberg)
+
+2001-07-11  Zeev Suraski  <zeev@zend.com>
+
+    * ext/xml/xml.c
+      ext/standard/url.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/com/COM.c
+      ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/java/java.c: var_reset -> ZVAL_RESET
+
+2001-07-11  Shane Caraveo  <shane@php.net>
+
+    * ext/standard/var.c:
+    prevent php from crashing when serializing circular data.
+
+    This script produced the crash.
+    <?
+    $hash["test_key"] = "test_value";
+    $hash["hash_key"] = &$hash;
+    echo serialize($hash);
+    ?>
+
+2001-07-11  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/XML/RPC.php:
+    * Patch for RPC.php (Submited by: yavor shahpasov <yavo@itena.com.cy>)
+
+2001-07-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Wrap lines.
+
+    * ext/wddx/wddx.c:
+    Modified to work with the new parameter parsing API as a demonstration.
+
+2001-07-11  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: fix.
+
 2001-07-10  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/fbsql/php_fbsql.c:
