@@ -1467,7 +1467,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
 #ifdef PHP_WIN32
-		if (protocol && path[n+1] == '/' && path[n+2] == '/' && path[n+4] != ':')	{
+		if (protocol && path[n+1] == '/' && path[n+2] == '/' && path[n+3] != '\0' && path[n+3] != '/' && path[n+4] != ':')	{
 #else
 		if (protocol && path[n+1] == '/' && path[n+2] == '/' && path[n+3] != '/')	{
 #endif
