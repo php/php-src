@@ -611,7 +611,7 @@ static int _close_pconn_with_id(list_entry *le, int *id)
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30)
+#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_OPENLINK)
 	/* this seems to be necessary for Solid2.3 ( tested by 
 	 * tammy@synchronis.com) and Solid 3.0 (tested by eric@terra.telemediair.nl)
 	 * Solid does not seem to declare a SQLINTEGER, but it does declare a
