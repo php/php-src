@@ -18,8 +18,8 @@
  */
 class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
 {
-	protected $hasChildren;
-	protected $getChildren;
+	private $hasChildren;
+	private $getChildren;
 
 	/** Construct from another iterator
 	 *
