@@ -1,10 +1,10 @@
 <!--
-     $Id: package.dtd,v 1.28 2002-11-26 22:52:34 ssb Exp $
+     $Id: package.dtd,v 1.29 2002-12-27 17:19:31 ssb Exp $
 
-     This is the PEAR package description, version 1.0b9.
+     This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
 
-         "-//PHP Group//DTD PEAR Package 1.0b10//EN//XML"
+         "-//PHP Group//DTD PEAR Package 1.0//EN//XML"
 
      Copyright (c) 1997-2002 The PHP Group             
 
