@@ -212,6 +212,19 @@ PHP_SUBST(APXS_LDFLAGS)
 PHP_SUBST(APACHE_INSTALL)
 PHP_SUBST(STRONGHOLD)
 
+AC_CACHE_CHECK([for member fd in BUFF *],ac_cv_php_fd_in_buff,[
+  save=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS $APACHE_INCLUDE"
+  AC_TRY_COMPILE([#include <httpd.h>],[conn_rec *c; int fd = c->client->fd;],[
+    ac_cv_php_fd_in_buff=yes],[ac_cv_php_fd_in_buff=no],[ac_cv_php_fd_in_buff=no])
+  CPPFLAGS=$save
+],[
+  if test "$ac_cv_php_fd_in_buff" = "yes"; then
+    AC_DEFINE(PHP_APACHE_HAVE_CLIENT_FD, 1, [ ])
+  fi
+])
+
+  
 AC_MSG_CHECKING(for mod_charset compatibility option)
 AC_ARG_WITH(mod_charset,
 [  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache).],

@@ -348,6 +348,7 @@ static char *php_apache_getenv(char *name, size_t name_len TSRMLS_DC)
  */
 static int sapi_apache_get_fd(int *nfd TSRMLS_DC)
 {
+#if PHP_APACHE_HAVE_CLIENT_FD
 	request_rec *r = SG(server_context);
 	int fd;
 
@@ -357,6 +358,7 @@ static int sapi_apache_get_fd(int *nfd TSRMLS_DC)
 		if (nfd) *nfd = fd;
 		return SUCCESS;
 	}
+#endif
 	return FAILURE;
 }
 /* }}} */
