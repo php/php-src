@@ -1,3 +1,19 @@
+2003-12-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      Free is needed in non ZTS too
+
+    * zend.c:
+      Fix memleaks in ZTS mode
+
+    * zend.c:
+      Fix memleaks
+
+2003-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_constants.c:
+      Do not copy extra byte.
+
 2003-12-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend.h:
