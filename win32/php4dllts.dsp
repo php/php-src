@@ -2319,6 +2319,14 @@ SOURCE=..\main\streams\xp_socket.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\ext\com_dotnet\com_saproxy.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com_dotnet\com_wrapper.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\com_dotnet\php_com_dotnet.h
 # End Source File
 # Begin Source File
