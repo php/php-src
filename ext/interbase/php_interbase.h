@@ -153,6 +153,9 @@ typedef struct {
 	int in_array_cnt, out_array_cnt;
 	unsigned short dialect;
 	int cursor_open;
+	char statement_type;
+	char *query;
+	int trans_res_id;
 } ibase_query;
 
 typedef struct {
