@@ -8,4 +8,4 @@
 #define LOCK_NB 4
 #define LOCK_UN 8
 
-extern int flock(int fd, int op);
+PHPAPI int flock(int fd, int op);
