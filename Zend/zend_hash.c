@@ -71,8 +71,10 @@ static void _zend_is_inconsistent(HashTable *ht,char *file, int line)
     }
 }
 #define IS_CONSISTENT(a) _zend_is_inconsistent(a,__FILE__,__LINE__);
+#define SET_INCONSISTENT(n) ht->inconsistent = n;
 #else
 #define IS_CONSISTENT(a)
+#define SET_INCONSISTENT(n)
 #endif
 
 /* Generated on an Octa-ALPHA 300MHz CPU & 2.5GB RAM monster */
@@ -103,9 +105,7 @@ ZEND_API int zend_hash_init(HashTable *ht, uint nSize, ulong(*pHashFunction) (ch
 {
 	uint i;
 
-#if ZEND_DEBUG
-	ht->inconsistent = 0;
-#endif
+	SET_INCONSISTENT(0);
 	
 	for (i = 0; i < nNumPrimeNumbers; i++) {
 		if (nSize <= PrimeNumbers[i]) {
@@ -775,9 +775,7 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 
 	IS_CONSISTENT(ht);
 
-#if ZEND_DEBUG
-    ht->inconsistent=1;
-#endif
+	SET_INCONSISTENT(1);
 
 	p = ht->pListHead;
 	while (p != NULL) {
@@ -801,9 +799,7 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 	}
 	pefree(ht->arBuckets,ht->persistent);
 
-#if ZEND_DEBUG
-    ht->inconsistent=2;
-#endif
+	SET_INCONSISTENT(2);
 }
 
 
@@ -813,9 +809,7 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 
 	IS_CONSISTENT(ht);
 
-#if ZEND_DEBUG
-    ht->inconsistent=3;
-#endif
+	SET_INCONSISTENT(3);
 
 	p = ht->pListHead;
 	while (p != NULL) {
@@ -838,9 +832,7 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 	ht->nNextFreeElement = 0;
 	ht->pInternalPointer = NULL;
 
-#if ZEND_DEBUG
-    ht->inconsistent=0; /* OK - consistent again! */
-#endif
+	SET_INCONSISTENT(0);
 }
 
 
