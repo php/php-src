@@ -671,7 +671,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 		}
 		if (PG(html_errors)) {
 			PUTS("<th>");
-			PUTS(php_info_html_esc(row_element TSRMLS_CC));
+			PUTS(row_element);
 			PUTS("</th>");
 		} else {
 			PUTS(row_element);
