@@ -493,7 +493,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 	if (op2->u.fetch_type == ZEND_FETCH_LOCAL) {
 		FREE_OP(op1, free_op1);
 	} else if (op2->u.fetch_type == ZEND_FETCH_STATIC) {
-		zval_update_constant(*retval);
+		zval_update_constant(retval);
 	}
 
 	if (varname == &tmp_varname) {
