@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.2
+- Fixed array_rand() on thread-safe platforms such as Windows. (Edin)
 - Report the right exit code after a call to exit(). (Edin)
 
 13 May 2002, Version 4.2.1
