@@ -52,7 +52,7 @@ Windows Manual installation from zip binary distribution
   OmniHTTPd 2.0b1 and up
   Oreilly Website Pro
   Xitami
-  Netscape Enterprise Server, iPlanet
+  SunONE Webserver, Netscape Enterprise Server, iPlanet
 
  PHP 4 for Windows comes in two flavours - a CGI executable (php.exe),
  and several SAPI modules (for exapmle php4isapi.dll). The latter form
@@ -556,59 +556,69 @@ Web server configuration
 
 ----------------------------------------------------------
 
- Installing PHP on Windows with Netscape servers.
+ Installing PHP on Windows with Netscape/iPlanet/SunONE servers.
 
 
-  To Install PHP as CGI (for Netscape Enterprise Server, iPlanet, perhaps Fastrack)
-
-   Copy php4ts.dll to your systemroot (the directory where you installed windows)
-
-   Make a file assocition from the command line (type the 2 following lines)
-    assoc .php=PHPScript
-    ftype PHPScript=c:\php\php.exe %1 %*
-
-   In the Netscape Enterprise Administration Server create a dummy shellcgi
-   directory and remove it just after (this step creates 5 important lines in
-   obj.conf and allow the web server to handle shellcgi scripts)
-
-   In the Netscape Enterprise Administration Server create a new mime type
-   (Category:type,Content-Type:magnus-internal/shellcgi,File Suffix:php)
-
-   Do it for each web server instance you want php to run
-
-   More details http://benoit.noss.free.fr/php/install-php.html
-
-
-  To Install PHP as NSAPI (for Netscape Enterprise Server, iPlanet, perhaps Fastrack)
-
-   Copy php4ts.dll to your systemroot (the directory where you installed windows)
-
-   Make a file assocition from the command line (type the 2 following lines)
-    assoc .php=PHPScript
-    ftype PHPScript=c:\php\php.exe %1 %*
-
-   In the Netscape Enterprise Administration Server create a new mime type
-    (Category:type,Content-Type:magnus-internal/x-httpd-php,File Suffix:php)
-
-   Stop your web service and edit obj.conf
-    At the end of the Init section, place these 2 lines (necessarily after mime type init!)
-    Init fn="load-modules" funcs="php4_init,php4_close,php4_execute,php4_auth_trans" shlib="c:/php/sapi/php4nsapi.dll"
-    Init fn="php4_init" errorString="Failed to initialise PHP!"
-
-   In The < Object name="default" > section, place this line necessarily after all 'ObjectType' and before all 'AddLog' lines!
-    Service fn="php4_execute" type="magnus-internal/x-httpd-php"
-
-   At the end of the file, create a new object called x-httpd-php, by inserting this lines
-    <Object name="x-httpd-php">
-    ObjectType fn="force-type" type="magnus-internal/x-httpd-php"
-    Service fn=php4_execute
-    </Object>
-
-   Restart your web service and apply changes
-
-   Do it for each web server instance you want php to run
-
-   More details http://benoit.noss.free.fr/php/install-php4.html
+  These instructions are targetted at Netscape Enterprise Web Server and
+  SUN/Netscape Alliance iPlanet Web Server/SunONE Webserver.
+  On other web servers your milage may vary.
+  
+  Firstly you may need to add some paths to the LD_LIBRARY_PATH
+  environment for Netscape to find all the shared libs. This is best done
+  in the start script for your Netscape server.  Windows users can
+  probably skip this step. The start script is located in:
+  
+      <path-to-netscape-server>\https-servername\start
+  
+  
+  Netscape/iPlanet/SunONE config files are located in:
+  
+      <path-to-server>\https-servername\config
+  
+  
+  Add the following line to mime.types (you can do that by the administration server):
+  
+      type=magnus-internal/x-httpd-php	exts=php
+  
+  
+  Place the following two lines after mime.types init in
+  <path-to-server>\https-servername\config\obj.conf (for servers < 6) or
+  for iPlanet/SunONE Web Server 6.0 and above however at the end of the
+  <path-to-server>\https-servername\config\magnus.conf file:
+  
+      Init fn="load-modules" funcs="php4_init,php4_execute,php4_auth_trans" shlib="c:/path/to/PHP4/php4nsapi.dll"
+      Init fn=php4_init errorString="Failed to initialize PHP!" [php_ini="c:/path/to/php.ini"]
+   
+  In obj.conf (for virtual server classes [SunONE 6.0+] in their vserver.obj.conf):
+  
+      <Object name="default">
+      .
+      .
+      .
+      # NOTE this next line should happen after all 'ObjectType' and before
+      # all 'AddLog' lines
+      # You can modify some entries in php.ini request specific by adding it to the Service
+      # directive, e.g. doc_root="/path"
+      # For boolean ini-keys please use 0/1 as value, NOT "On","Off",... (this will not work
+      # correctly), e.g. zlib.output_compression=1 instead of zlib.output_compression="On"
+  
+      Service fn="php4_execute" type="magnus-internal/x-httpd-php" [inikey=value ...]
+      .
+      .
+      .
+      </Object>
+  
+  This is only needed if you want to configure a directory that only consists of
+  PHP scripts (same like a cgi-bin directory):
+  
+      <Object name="x-httpd-php">
+      ObjectType fn="force-type" type="magnus-internal/x-httpd-php"
+      Service fn="php4_execute" [inikey=value ...]
+      </Object>
+  
+  After that you can configure a directory in the Administration server and assign it
+  the style "x-httpd-php". All files in it will get executed as PHP. This is nice to
+  hide PHP usage by renaming files to .html
 
 ----------------------------------------------------------
 
