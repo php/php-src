@@ -238,43 +238,8 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	
 	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
-		switch (op) {
-			case ZEND_ASSIGN_ADD:
-				last_op->opcode = ZEND_ASSIGN_ADD_OBJ;
-				break;
-			case ZEND_ASSIGN_SUB:
-				last_op->opcode = ZEND_ASSIGN_SUB_OBJ;
-				break;
-			case ZEND_ASSIGN_MUL:
-				last_op->opcode = ZEND_ASSIGN_MUL_OBJ;
-				break;
-			case ZEND_ASSIGN_DIV:
-				last_op->opcode = ZEND_ASSIGN_DIV_OBJ;
-				break;
-			case ZEND_ASSIGN_MOD:
-				last_op->opcode = ZEND_ASSIGN_MOD_OBJ;
-				break;
-			case ZEND_ASSIGN_SL:
-				last_op->opcode = ZEND_ASSIGN_SL_OBJ;
-				break;
-			case ZEND_ASSIGN_SR:
-				last_op->opcode = ZEND_ASSIGN_SR_OBJ;
-				break;
-			case ZEND_ASSIGN_CONCAT:
-				last_op->opcode = ZEND_ASSIGN_CONCAT_OBJ;
-				break;
-			case ZEND_ASSIGN_BW_OR:
-				last_op->opcode = ZEND_ASSIGN_BW_OR_OBJ;
-				break;
-			case ZEND_ASSIGN_BW_AND:
-				last_op->opcode = ZEND_ASSIGN_BW_AND_OBJ;
-				break;
-			case ZEND_ASSIGN_BW_XOR:
-				last_op->opcode = ZEND_ASSIGN_BW_XOR_OBJ;
-				break;
-			default:
-				zend_error(E_COMPILE_ERROR, "Unknown binary op opcode %d", op);
-		}
+		last_op->opcode = op;
+		last_op->extended_value = ZEND_ASSIGN_OBJ;
 
 		zend_do_op_data(opline, op2 TSRMLS_CC);
 		SET_UNUSED(opline->result);

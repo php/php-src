@@ -1418,34 +1418,6 @@ int zend_bool_not_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-inline int zend_binary_assign_op_helper(void *binary_op_arg, ZEND_OPCODE_HANDLER_ARGS)
-{
-	zval **var_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_RW);
-	int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) = binary_op_arg;
-
-	if (!var_ptr) {
-		zend_error(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
-	}
-
-	if (*var_ptr == EG(error_zval_ptr)) {
-		EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
-		SELECTIVE_PZVAL_LOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr, &EX(opline)->result);
-		AI_USE_PTR(EX_T(EX(opline)->result.u.var).var);
-		NEXT_OPCODE();
-	}
-	
-	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
-
-	binary_op(*var_ptr, *var_ptr, get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R) TSRMLS_CC);
-	EX_T(EX(opline)->result.u.var).var.ptr_ptr = var_ptr;
-	SELECTIVE_PZVAL_LOCK(*var_ptr, &EX(opline)->result);
-	FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
-	AI_USE_PTR(EX_T(EX(opline)->result.u.var).var);
-
-	NEXT_OPCODE();
-}
-
-
 static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *op_data = EX(opline)+1;
@@ -1521,6 +1493,41 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 
 	/* assign_obj has two opcodes! */
 	EX(opline)++;
+	NEXT_OPCODE();
+}
+
+
+inline int zend_binary_assign_op_helper(void *binary_op_arg, ZEND_OPCODE_HANDLER_ARGS)
+{
+	zval **var_ptr;
+	int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+
+	if (EX(opline)->extended_value == ZEND_ASSIGN_OBJ) {
+		return zend_binary_assign_op_obj_helper(binary_op_arg, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
+
+	var_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_RW);
+	binary_op = binary_op_arg;
+
+	if (!var_ptr) {
+		zend_error(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
+	}
+
+	if (*var_ptr == EG(error_zval_ptr)) {
+		EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
+		SELECTIVE_PZVAL_LOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr, &EX(opline)->result);
+		AI_USE_PTR(EX_T(EX(opline)->result.u.var).var);
+		NEXT_OPCODE();
+	}
+	
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+
+	binary_op(*var_ptr, *var_ptr, get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R) TSRMLS_CC);
+	EX_T(EX(opline)->result.u.var).var.ptr_ptr = var_ptr;
+	SELECTIVE_PZVAL_LOCK(*var_ptr, &EX(opline)->result);
+	FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
+	AI_USE_PTR(EX_T(EX(opline)->result.u.var).var);
+
 	NEXT_OPCODE();
 }
 
@@ -4205,18 +4212,6 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_IMPORT_FUNCTION] = zend_import_function_handler;
 	zend_opcode_handlers[ZEND_IMPORT_CLASS] = zend_import_class_handler;
 	zend_opcode_handlers[ZEND_IMPORT_CONST] = zend_import_const_handler;
-
-	zend_opcode_handlers[ZEND_ASSIGN_ADD_OBJ] = zend_assign_add_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_SUB_OBJ] = zend_assign_sub_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_MUL_OBJ] = zend_assign_mul_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_DIV_OBJ] = zend_assign_div_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_MOD_OBJ] = zend_assign_mod_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_SL_OBJ] = zend_assign_sl_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_SR_OBJ] = zend_assign_sr_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_CONCAT_OBJ] = zend_assign_concat_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_BW_OR_OBJ] = zend_assign_bw_or_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_BW_AND_OBJ] = zend_assign_bw_and_obj_handler;
-	zend_opcode_handlers[ZEND_ASSIGN_BW_XOR_OBJ] = zend_assign_bw_xor_obj_handler;
 
 	zend_opcode_handlers[ZEND_PRE_INC_OBJ] = zend_pre_inc_obj_handler;
 	zend_opcode_handlers[ZEND_PRE_DEC_OBJ] = zend_pre_dec_obj_handler;
