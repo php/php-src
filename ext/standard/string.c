@@ -3003,8 +3003,7 @@ PHP_FUNCTION(strnatcmp)
 /* }}} */
 
 /* {{{ proto array localeconv( void )
-   Returns all the information stored in the lconv struct defined
-   in locale.h based on the currently selected locale */
+   Returns numeric formatting information based on the current locale */
 PHP_FUNCTION(localeconv)
 {
 	zval *grouping, *mon_grouping;
