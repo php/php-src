@@ -100,6 +100,8 @@ PHP_MSHUTDOWN_FUNCTION(bcmath)
 	_bc_free_num_ex(&BCG(_one_), 1);
 	_bc_free_num_ex(&BCG(_two_), 1);
 
+	UNREGISTER_INI_ENTRIES();
+
 	return SUCCESS;
 }
 /* }}} */

@@ -409,6 +409,7 @@ PHP_MSHUTDOWN_FUNCTION(soap)
 	zend_hash_destroy(&SOAP_GLOBAL(defEnc));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncIndex));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncNs));
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
