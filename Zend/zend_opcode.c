@@ -107,6 +107,33 @@ ZEND_API void destroy_zend_function(zend_function *function)
 	}
 }
 
+static void zend_cleanup_op_array_data(zend_op_array *op_array)
+{
+	if (op_array->static_variables) {
+		zend_hash_clean(op_array->static_variables);
+	}
+}
+
+ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
+{
+	if(function->type == ZEND_USER_FUNCTION) {
+		zend_cleanup_op_array_data((zend_op_array *) function);
+	}	
+	return 0;
+}
+
+ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
+{
+	if((*pce)->type == ZEND_USER_CLASS) {
+		/* Clean all parts that can contain run-time data */
+		/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
+		   not contain objects and thus are not probelmatic */
+		zend_hash_clean((*pce)->static_members);
+		zend_hash_apply(&(*pce)->class_table, (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
+		zend_hash_apply(&(*pce)->function_table, (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
+	}
+	return 0;
+}
 
 ZEND_API void destroy_zend_class(zend_class_entry **pce)
 {
