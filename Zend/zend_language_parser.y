@@ -274,6 +274,12 @@ unticked_class_declaration_statement:
 			'{'
 				class_statement_list
 			'}' { zend_do_end_class_declaration(&$1, &$2 TSRMLS_CC); }
+	|	interface_entry T_STRING
+			{ zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); } 
+			interface_extends_list
+			'{'
+				class_statement_list
+			'}' { zend_do_end_class_declaration(&$1, &$2 TSRMLS_CC); }
 ;
 
 
@@ -281,12 +287,20 @@ class_entry_type:
 		T_CLASS			{  $$.u.constant.value.lval = 0; }
 	|	T_ABSTRACT T_CLASS { $$.u.constant.value.lval = ZEND_ACC_ABSTRACT_CLASS; }
 	|	T_FINAL T_CLASS { $$.u.constant.value.lval = ZEND_ACC_FINAL_CLASS; }
-	|	T_INTERFACE		{ $$.u.constant.value.lval = ZEND_ACC_INTERFACE; }
 ;
 
 extends_from:
 		/* empty */					{ $$.op_type = IS_UNUSED; }
 	|	T_EXTENDS fully_qualified_class_name	{ $$ = $2; }
+;
+
+interface_entry:
+	T_INTERFACE		{ $$.u.constant.value.lval = ZEND_ACC_INTERFACE; }
+;
+
+interface_extends_list:
+		/* empty */
+	|	T_EXTENDS interface_list
 ;
 
 implements_list:
