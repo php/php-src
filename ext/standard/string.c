@@ -3531,6 +3531,10 @@ PHP_FUNCTION(str_repeat)
 	
 	/* Initialize the result string */	
 	result_len = Z_STRLEN_PP(input_str) * Z_LVAL_PP(mult);
+	if (result_len < 1 || result_len > 2147483647) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may not create strings longer then 2147483647 bytes");
+		RETURN_FALSE;
+	}
 	result = (char *)emalloc(result_len + 1);
 	
 	/* Heavy optimization for situations where input string is 1 byte long */
