@@ -181,6 +181,8 @@ typedef struct {
 	HashTable *user;
 
     OCIEnv *pEnv;
+
+	int in_call;
 } php_oci_globals;
 
 extern zend_module_entry oci8_module_entry;

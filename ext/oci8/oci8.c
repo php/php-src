@@ -563,7 +563,7 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 {
     oci_debug("START php_rshutdown_oci");
 
-#if 0 
+#if 0
 	/* XXX free all statements, rollback all outstanding transactions */
 
 	zend_hash_apply(OCI(user),(int (*)(void *))_session_cleanup);
@@ -649,7 +649,11 @@ _oci_bind_post_exec(void *data)
 		zval *val = bind->zval;
 		zval_dtor(val);
 		ZVAL_NULL(val);
+	} else if (bind->zval->type == IS_STRING) {
+		bind->zval->value.str.val = realloc(bind->zval->value.str.val, bind->zval->value.str.len+1);
+		bind->zval->value.str.val[ bind->zval->value.str.len ] = '\0';
 	}
+
 
 	return 0;
 }
