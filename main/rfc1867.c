@@ -939,6 +939,25 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} else {
 				is_anonymous = 0;
 			}
+			
+			/* New Rule: never repair potential malicious user input */
+			if (!skip_upload) {
+				char *tmp = param;
+				long c = 0;
+				
+				while (*tmp) {
+					if (*tmp == '[') {
+						c++;
+					} else if (*tmp == ']') {
+						c--;
+					}
+					if (c < 0) {
+						skip_upload = 1;
+						break;
+					}
+					tmp++;				
+				}
+			}
 
 			if (!skip_upload) {
 				/* Handle file */
@@ -1013,10 +1032,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			 * start_arr is set to point to 1st [
 			 */
 			is_arr_upload =	(start_arr = strchr(param,'[')) && (param[strlen(param)-1] == ']');
-			/* handle unterminated [ */
-			if (!is_arr_upload && start_arr) {
-				*start_arr = '_';
-			}
 
 			if (is_arr_upload) {
 				array_len = strlen(start_arr);
