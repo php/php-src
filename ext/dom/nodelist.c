@@ -71,6 +71,8 @@ int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 			} else {
 				if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 					nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+				} else {
+					nodep = nodep->children;
 				}
 				curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, -1);
 			}
@@ -129,6 +131,8 @@ PHP_FUNCTION(dom_nodelist_item)
 				} else {
 					if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 						nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+					} else {
+						nodep = nodep->children;
 					}
 					itemnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, index);
 				}
