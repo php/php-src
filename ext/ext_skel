@@ -58,6 +58,9 @@ cat >.cvsignore <<eof
 .deps
 Makefile.in
 Makefile
+*.lo
+*.la
+.libs
 eof
 
 $ECHO_N " config.h.stub$ECHO_C"
