@@ -2129,7 +2129,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *c
 	}
 
 	if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error(E_COMPILE_ERROR, "Class %s cannot extend from interfac %s", ce->name, parent_ce->name);
+		zend_error(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ce->name, parent_ce->name);
 	}
 
 	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
