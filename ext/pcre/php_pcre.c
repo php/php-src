@@ -35,6 +35,8 @@
 #define PREG_PATTERN_ORDER	0
 #define PREG_SET_ORDER		1
 
+#define	PREG_SPLIT_NO_EMPTY	(1<<0)
+
 #define PREG_REPLACE_EVAL	(1<<0)
 
 #ifdef ZTS
@@ -109,6 +111,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -886,13 +889,14 @@ PHP_FUNCTION(preg_replace)
 /* }}} */
 
 
-/* {{{ proto array preg_split(string pattern, string subject [, int limit ]) 
+/* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]]) 
     split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
 {
 	zval		   **regex,				/* Regular expression to split by */
 				   **subject,			/* Subject string to split */
-				   **limit;				/* Number of pieces to return */
+				   **limit,				/* Number of pieces to return */
+				   **flags;
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	int			 	*offsets;			/* Array of subpattern offsets */
@@ -901,6 +905,7 @@ PHP_FUNCTION(preg_split)
 	int			 	 preg_options = 0;	/* Custom preg options */
 	int				 argc;				/* Argument count */
 	int				 limit_val;			/* Integer value of limit */
+	int				 no_empty = 0;		/* If NO_EMPTY flag is set */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				 start_offset;		/* Where the new search starts */
 	int				 g_notempty = 0;	/* If the match should not be empty */
@@ -909,7 +914,7 @@ PHP_FUNCTION(preg_split)
 
 	/* Get function parameters and do error checking */	
 	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 3 || getParametersEx(argc, &regex, &subject, &limit) == FAILURE) {
+	if (argc < 1 || argc > 4 || getParametersEx(argc, &regex, &subject, &limit, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -919,6 +924,11 @@ PHP_FUNCTION(preg_split)
 	}
 	else
 		limit_val = -1;
+	
+	if (argc == 4) {
+		convert_to_long_ex(flags);
+		no_empty = (*flags)->value.lval & PREG_SPLIT_NO_EMPTY;
+	}
 	
 	/* Make sure we're dealing with strings */
 	convert_to_string_ex(regex);
@@ -956,10 +966,11 @@ PHP_FUNCTION(preg_split)
 		/* If something matched */
 		if (count > 0) {
 			match = (*subject)->value.str.val + offsets[0];
-		
-			/* Add the piece to the return value */
-			add_next_index_stringl(return_value, last_match,
-								   &(*subject)->value.str.val[offsets[0]]-last_match, 1);
+
+			if (!no_empty || &(*subject)->value.str.val[offsets[0]] != last_match)
+				/* Add the piece to the return value */
+				add_next_index_stringl(return_value, last_match,
+									   &(*subject)->value.str.val[offsets[0]]-last_match, 1);
 			
 			last_match = &(*subject)->value.str.val[offsets[1]];
 			
@@ -988,9 +999,10 @@ PHP_FUNCTION(preg_split)
 		start_offset = offsets[1];
 	}
 	
-	/* Add the last piece to the return value */
-	add_next_index_string(return_value,
-						  &(*subject)->value.str.val[start_offset], 1);
+	if (!no_empty || start_offset != (*subject)->value.str.len)
+		/* Add the last piece to the return value */
+		add_next_index_string(return_value,
+							  &(*subject)->value.str.val[start_offset], 1);
 	
 	/* Clean up */
 	efree(offsets);

@@ -1402,7 +1402,7 @@ PHP_FUNCTION(max)
 	}
 }
 
-static pval *php_array_walk_func_name;
+static zval **php_array_walk_func_name;
 
 static int php_array_walk(HashTable *target_hash, zval **userdata)
 {
@@ -1433,8 +1433,8 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 		}
 		
 		/* Call the userland function */
-		call_user_function_ex(CG(function_table), NULL, php_array_walk_func_name,
-						   &retval, (*userdata) ? 3 : 2, args, 0);
+		call_user_function_ex(CG(function_table), NULL, *php_array_walk_func_name,
+						   &retval, userdata ? 3 : 2, args, 0);
 		
 		/* Clean up the key */
 		if (zend_hash_get_current_key_type(target_hash) == HASH_KEY_IS_STRING)
@@ -1450,27 +1450,27 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 /* {{{ proto array_walk(array input, string funcname [, mixed userdata])
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk) {
-	int   argc;
-	zval *array,
-		 *userdata = NULL,
-		 *old_walk_func_name;
+	int    argc;
+	zval **array,
+		 **userdata = NULL,
+		 **old_walk_func_name;
 	HashTable *target_hash;
 
 	argc = ARG_COUNT(ht);
 	old_walk_func_name = php_array_walk_func_name;
 	if (argc < 2 || argc > 3 ||
-		getParameters(ht, argc, &array, &php_array_walk_func_name, &userdata) == FAILURE) {
+		getParametersEx(argc, &array, &php_array_walk_func_name, &userdata) == FAILURE) {
 		php_array_walk_func_name = old_walk_func_name;
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in array_walk() call");
 		php_array_walk_func_name = old_walk_func_name;
 		return;
 	}
-	convert_to_string(php_array_walk_func_name);
-	php_array_walk(target_hash, &userdata);
+	convert_to_string_ex(php_array_walk_func_name);
+	php_array_walk(target_hash, userdata);
 	php_array_walk_func_name = old_walk_func_name;
 	RETURN_TRUE;
 }
@@ -2472,9 +2472,9 @@ PHP_FUNCTION(compact)
 
 
 /* HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
-						   zval **list, int list_count, HashTable **removed) */
+						   zval ***list, int list_count, HashTable **removed) */
 HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
-						zval **list, int list_count, HashTable **removed)
+						zval ***list, int list_count, HashTable **removed)
 {
 	HashTable 	*out_hash = NULL;	/* Output hashtable */
 	int			 num_in,			/* Number of entries in the input hashtable */
@@ -2539,7 +2539,7 @@ HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
 		/* ..for each one, create a new zval, copy entry into it
 		   and copy it into the output hash */
 		for (i=0; i<list_count; i++) {
-			entry = list[i];
+			entry = *list[i];
 			entry->refcount++;
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 		}
@@ -2565,9 +2565,9 @@ HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
-	zval	   **args,		/* Function arguments array */
-				*stack,		/* Input array */
-				*new_var;	/* Variable to be pushed */
+	zval	  ***args,		/* Function arguments array */
+			    *stack,		/* Input array */
+			    *new_var;	/* Variable to be pushed */
 	int			 i,			/* Loop counter */
 				 argc;		/* Number of function arguments */
 
@@ -2578,23 +2578,23 @@ PHP_FUNCTION(array_push)
 	}
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval **)emalloc(argc * sizeof(zval *));
-	if (getParametersArray(ht, argc, args) == FAILURE) {
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (getParametersArrayEx(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
 
 	/* Get first argument and check that it's an array */	
-	stack = args[0];
+	stack = *args[0];
 	if (stack->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to push() needs to be an array");
+		zend_error(E_WARNING, "First argument to array_push() needs to be an array");
 		RETURN_FALSE;
 	}
 
 	/* For each subsequent argument, make it a reference, increase refcount,
 	   and add it to the end of the array */
 	for (i=1; i<argc; i++) {
-		new_var = args[i];
+		new_var = *args[i];
 		new_var->refcount++;
 	
 		zend_hash_next_index_insert(stack->value.ht, &new_var, sizeof(zval *), NULL);
@@ -2610,39 +2610,39 @@ PHP_FUNCTION(array_push)
 /* {{{ void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int which_end) */
 static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 {
-	zval		*stack,			/* Input stack */
+	zval	   **stack,			/* Input stack */
 			   **val;			/* Value to be popped */
 	HashTable	*new_hash;		/* New stack */
 	
 	/* Get the arguments and do error-checking */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &stack) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &stack) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (stack->type != IS_ARRAY) {
+	if ((*stack)->type != IS_ARRAY) {
 		zend_error(E_WARNING, "The argument needs to be an array");
 		return;
 	}
 
-	if (zend_hash_num_elements(stack->value.ht) == 0) {
+	if (zend_hash_num_elements((*stack)->value.ht) == 0) {
 		return;
 	}
 		
 	/* Get the first or last value and copy it into the return value */
 	if (off_the_end)
-		zend_hash_internal_pointer_end(stack->value.ht);
+		zend_hash_internal_pointer_end((*stack)->value.ht);
 	else
-		zend_hash_internal_pointer_reset(stack->value.ht);
-	zend_hash_get_current_data(stack->value.ht, (void **)&val);
+		zend_hash_internal_pointer_reset((*stack)->value.ht);
+	zend_hash_get_current_data((*stack)->value.ht, (void **)&val);
 	*return_value = **val;
 	zval_copy_ctor(return_value);
 	INIT_PZVAL(return_value);
 	
 	/* Delete the first or last value */
-	new_hash = _phpi_splice(stack->value.ht, (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
-	zend_hash_destroy(stack->value.ht);
-	efree(stack->value.ht);
-	stack->value.ht = new_hash;
+	new_hash = _phpi_splice((*stack)->value.ht, (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
+	zend_hash_destroy((*stack)->value.ht);
+	efree((*stack)->value.ht);
+	(*stack)->value.ht = new_hash;
 }
 /* }}} */
 
@@ -2669,7 +2669,7 @@ PHP_FUNCTION(array_shift)
    Pushes elements onto the beginning of the array */
 PHP_FUNCTION(array_unshift)
 {
-	zval	   **args,		/* Function arguments array */
+	zval	  ***args,		/* Function arguments array */
 				*stack;		/* Input stack */
 	HashTable	*new_hash;	/* New hashtable for the stack */
 	int			 argc;		/* Number of function arguments */
@@ -2682,16 +2682,16 @@ PHP_FUNCTION(array_unshift)
 	}
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval **)emalloc(argc * sizeof(zval *));
-	if (getParametersArray(ht, argc, args) == FAILURE) {
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (getParametersArrayEx(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
 	
 	/* Get first argument and check that it's an array */
-	stack = args[0];
+	stack = *args[0];
 	if (stack->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to push() needs to be an array");
+		zend_error(E_WARNING, "First argument to array_unshift() needs to be an array");
 		RETURN_FALSE;
 	}
 
@@ -2709,14 +2709,14 @@ PHP_FUNCTION(array_unshift)
 /* }}} */
 
 
-/* {{{ proto array array_splice(array input, int offset [, int length, mixed var [, ...] ])
+/* {{{ proto array array_splice(array input, int offset [, int length [, array replacement]])
    Removes the elements designated by offset and length and replace them with
-   var's if supplied */
+   supplied array */
 PHP_FUNCTION(array_splice)
 {
-	zval	   **args,				/* Function arguments array */
+	zval	  ***args,				/* Function arguments array */
 				*array,				/* Input array */
-			   **repl = NULL;		/* Replacement elements */
+			  ***repl = NULL;		/* Replacement elements */
 	HashTable	*new_hash = NULL;	/* Output array's hash */
 	Bucket		*p;					/* Bucket used for traversing hash */
 	int			 argc,				/* Number of function arguments */
@@ -2732,39 +2732,39 @@ PHP_FUNCTION(array_splice)
 	}
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval **)emalloc(argc * sizeof(zval *));
-	if (getParametersArray(ht, argc, args) == FAILURE) {
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (getParametersArrayEx(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}	
 
 	/* Get first argument and check that it's an array */
-	array = args[0];
+	array = *args[0];
 	if (array->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to splice() should be an array");
+		zend_error(E_WARNING, "First argument to array_splice() should be an array");
 		efree(args);
 		return;
 	}
 	
 	/* Get the next two arguments.  If length is omitted,
 	   it's assumed to be until the end of the array */
-	convert_to_long(args[1]);
-	offset = args[1]->value.lval;
+	convert_to_long_ex(args[1]);
+	offset = (*args[1])->value.lval;
 	if (argc > 2) {
-		convert_to_long(args[2]);
-		length = args[2]->value.lval;
+		convert_to_long_ex(args[2]);
+		length = (*args[2])->value.lval;
 	} else
 		length = zend_hash_num_elements(array->value.ht);
 
 	if (argc == 4) {
 		/* Make sure the last argument, if passed, is an array */
-		convert_to_array(args[3]);
+		convert_to_array_ex(args[3]);
 		
 		/* Create the array of replacement elements */
-		repl_num = zend_hash_num_elements(args[3]->value.ht);
-		repl = (zval **)emalloc(repl_num * sizeof(zval *));
-		for (p=args[3]->value.ht->pListHead, i=0; p; p=p->pListNext, i++) {
-			repl[i] = *((zval **)p->pData);
+		repl_num = zend_hash_num_elements((*args[3])->value.ht);
+		repl = (zval ***)emalloc(repl_num * sizeof(zval **));
+		for (p=(*args[3])->value.ht->pListHead, i=0; p; p=p->pListNext, i++) {
+			repl[i] = ((zval **)p->pData);
 		}
 	}
 	
@@ -2793,9 +2793,9 @@ PHP_FUNCTION(array_splice)
    Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
 {
-	zval		*input,			/* Input array */
-				*offset,		/* Offset to get elements from */
-				*length,		/* How many elements to get */
+	zval	   **input,			/* Input array */
+			   **offset,		/* Offset to get elements from */
+			   **length,		/* How many elements to get */
 			   **entry;			/* An array entry */
 	int			 offset_val,	/* Value of the offset argument */
 				 length_val,	/* Value of the length argument */
@@ -2809,31 +2809,31 @@ PHP_FUNCTION(array_slice)
 
 	/* Get the arguments and do error-checking */	
 	argc = ARG_COUNT(ht);
-	if (argc < 2 || argc > 3 || getParameters(ht, argc, &input, &offset, &length)) {
+	if (argc < 2 || argc > 3 || getParametersEx(argc, &input, &offset, &length)) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (input->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to slice() should be an array");
+	if ((*input)->type != IS_ARRAY) {
+		zend_error(E_WARNING, "First argument to array_slice() should be an array");
 		return;
 	}
 	
 	/* Make sure offset and length are integers and assume
 	   we want all entries from offset to the end if length
 	   is not passed */
-	convert_to_long(offset);
-	offset_val = offset->value.lval;
+	convert_to_long_ex(offset);
+	offset_val = (*offset)->value.lval;
 	if (argc == 3) {
-		convert_to_long(length);
-		length_val = length->value.lval;
+		convert_to_long_ex(length);
+		length_val = (*length)->value.lval;
 	} else
-		length_val = zend_hash_num_elements(input->value.ht);
+		length_val = zend_hash_num_elements((*input)->value.ht);
 	
 	/* Initialize returned array */
 	array_init(return_value);
 	
 	/* Get number of entries in the input hash */
-	num_in = zend_hash_num_elements(input->value.ht);
+	num_in = zend_hash_num_elements((*input)->value.ht);
 	
 	/* Clamp the offset.. */
 	if (offset_val > num_in)
@@ -2852,20 +2852,20 @@ PHP_FUNCTION(array_slice)
 	
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
-	zend_hash_internal_pointer_reset(input->value.ht);
+	zend_hash_internal_pointer_reset((*input)->value.ht);
 	while(pos < offset_val &&
-		  zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+		  zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
 		pos++;
-		zend_hash_move_forward(input->value.ht);
+		zend_hash_move_forward((*input)->value.ht);
 	}
 	
 	/* Copy elements from input array to the one that's returned */
 	while(pos < offset_val+length_val &&
-		  zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+		  zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
 		
 		(*entry)->refcount++;
 
-		switch (zend_hash_get_current_key(input->value.ht, &string_key, &num_key)) {
+		switch (zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key)) {
 			case HASH_KEY_IS_STRING:
 				zend_hash_update(return_value->value.ht, string_key, strlen(string_key)+1,
 								 entry, sizeof(zval *), NULL);
@@ -2878,7 +2878,7 @@ PHP_FUNCTION(array_slice)
 				break;
 		}
 		pos++;
-		zend_hash_move_forward(input->value.ht);
+		zend_hash_move_forward((*input)->value.ht);
 	}
 }
 /* }}} */
@@ -2888,7 +2888,7 @@ PHP_FUNCTION(array_slice)
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
-	zval	   **args = NULL,
+	zval	  ***args = NULL,
 			   **entry;
 	HashTable	*hash;
 	int			 argc,
@@ -2903,8 +2903,8 @@ PHP_FUNCTION(array_merge)
 	}
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval **)emalloc(argc * sizeof(zval *));
-	if (getParametersArray(ht, argc, args) == FAILURE) {
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (getParametersArrayEx(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -2912,11 +2912,11 @@ PHP_FUNCTION(array_merge)
 	array_init(return_value);
 	
 	for (i=0; i<argc; i++) {
-		if (args[i]->type != IS_ARRAY) {
+		if ((*args[i])->type != IS_ARRAY) {
 			zend_error(E_WARNING, "Skipping argument #%d to array_merge(), since it's not an array", i+1);
 			continue;
 		}
-		hash = args[i]->value.ht;
+		hash = (*args[i])->value.ht;
 		
 		zend_hash_internal_pointer_reset(hash);
 		while(zend_hash_get_current_data(hash, (void **)&entry) == SUCCESS) {
@@ -2949,8 +2949,8 @@ PHP_FUNCTION(array_merge)
    for the specified search_value */
 PHP_FUNCTION(array_keys)
 {
-	zval		*input,			/* Input array */
-				*search_value,	/* Value to search for */
+	zval	   **input,			/* Input array */
+			   **search_value,	/* Value to search for */
 			   **entry,			/* An entry in the input array */
 				 res,			/* Result of comparison */
 				*new_val;		/* New value */
@@ -2962,11 +2962,11 @@ PHP_FUNCTION(array_keys)
 	
 	/* Get arguments and do error-checking */
 	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
-		getParameters(ht, ARG_COUNT(ht), &input, &search_value) == FAILURE) {
+		getParametersEx(ARG_COUNT(ht), &input, &search_value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (input->type != IS_ARRAY) {
+	if ((*input)->type != IS_ARRAY) {
 		zend_error(E_WARNING, "First argument to array_keys() should be an array");
 		return;
 	}
@@ -2976,18 +2976,17 @@ PHP_FUNCTION(array_keys)
 	add_key = 1;
 	
 	/* Go through input array and add keys to the return array */
-	zend_hash_internal_pointer_reset(input->value.ht);
-	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+	zend_hash_internal_pointer_reset((*input)->value.ht);
+	while(zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
 		if (search_value != NULL) {
-     		is_equal_function(&res, search_value, *entry);
+     		is_equal_function(&res, *search_value, *entry);
 			add_key = zval_is_true(&res);
 		}
 	
 		if (add_key) {	
-			new_val = (zval *)emalloc(sizeof(zval));
-			INIT_PZVAL(new_val);
+			MAKE_STD_ZVAL(new_val);
 
-			switch (zend_hash_get_current_key(input->value.ht, &string_key, &num_key)) {
+			switch (zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key)) {
 				case HASH_KEY_IS_STRING:
 					new_val->type = IS_STRING;
 					new_val->value.str.val = string_key;
@@ -3005,7 +3004,7 @@ PHP_FUNCTION(array_keys)
 			}
 		}
 
-		zend_hash_move_forward(input->value.ht);
+		zend_hash_move_forward((*input)->value.ht);
 	}
 }
 /* }}} */
@@ -3015,15 +3014,15 @@ PHP_FUNCTION(array_keys)
    Return just the values from the input array */
 PHP_FUNCTION(array_values)
 {
-	zval		*input,		/* Input array */
+	zval	   **input,		/* Input array */
 			   **entry;		/* An entry in the input array */
 	
 	/* Get arguments and do error-checking */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, ARG_COUNT(ht), &input) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(ARG_COUNT(ht), &input) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (input->type != IS_ARRAY) {
+	if ((*input)->type != IS_ARRAY) {
 		zend_error(E_WARNING, "Argument to array_values() should be an array");
 		return;
 	}
@@ -3032,14 +3031,14 @@ PHP_FUNCTION(array_values)
 	array_init(return_value);
 
 	/* Go through input array and add values to the return array */	
-	zend_hash_internal_pointer_reset(input->value.ht);
-	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+	zend_hash_internal_pointer_reset((*input)->value.ht);
+	while(zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
 		
 		(*entry)->refcount++;
 		zend_hash_next_index_insert(return_value->value.ht, entry,
 											sizeof(zval *), NULL);
 
-		zend_hash_move_forward(input->value.ht);
+		zend_hash_move_forward((*input)->value.ht);
 	}
 }
 /* }}} */
