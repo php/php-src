@@ -159,6 +159,7 @@ if test "$enable_thread_safety" = "yes" ; then
 AC_CHECK_LIB(C, cin)
 AC_CHECK_LIB(g++, cin)
 AC_CHECK_LIB(stdc++, cin)
+AC_CHECK_LIB(cxx, cin)
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
