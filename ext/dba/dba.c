@@ -260,7 +260,7 @@ static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 /* {{{ PHP_INI
  */
-ZEND_API ZEND_INI_MH(OnUpdateDefaultHandler)
+ZEND_INI_MH(OnUpdateDefaultHandler)
 {
 	dba_handler *hptr;
 
