@@ -231,7 +231,6 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromGd2,   [AC_DEFINE(HAVE_GD_GD2,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateTrueColor, [AC_DEFINE(HAVE_LIBGD20,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdFreeFontCache, 	[AC_DEFINE(HAVE_LIBGD204,            1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageSetTile,         [AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageEllipse,         [AC_DEFINE(HAVE_GD_IMAGEELLIPSE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageSetBrush,        [AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
@@ -243,6 +242,15 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
   PHP_CHECK_LIBRARY(gd, gdImageGifCtx,          [AC_DEFINE(HAVE_GD_GIF_CTX,          1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 ])
 
+dnl
+dnl Check for gd 2.0.4 greater availability
+dnl
+
+AC_TRY_COMPILE([
+ #include <gd.h>
+], [gdIOCtx *ctx; ctx->ctx.gd_free = 1;],[],
+[AC_DEFINE(HAVE_LIBGD204, 1, [ ])]
+)
 
 dnl
 dnl Main GD configure
