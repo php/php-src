@@ -1192,18 +1192,17 @@ PHP_FUNCTION(sqlite_popen)
 			}
 
 			/* all set */
-			efree(fullpath);
-			efree(hashkey);
-			return;
+			goto done;
 		}
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Some other type of persistent resource is using this hash key!?");
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto done;
 	}
 
 	/* now we need to open the database */
 	php_sqlite_open(fullpath, (int)mode, hashkey, return_value, errmsg, NULL TSRMLS_CC);
-
+done:
 	efree(fullpath);
 	efree(hashkey);
 }
@@ -1252,6 +1251,7 @@ PHP_FUNCTION(sqlite_open)
 				RETURN_FALSE;
 			}
 		}
+
 	}
 
 	php_sqlite_open(fullpath ? fullpath : filename, (int)mode, NULL, return_value, errmsg, object TSRMLS_CC);
@@ -1268,7 +1268,7 @@ PHP_FUNCTION(sqlite_open)
 PHP_FUNCTION(sqlite_factory)
 {
 	long mode = 0666;
-	char *filename;
+	char *filename, *fullname = NULL;
 	long filename_len;
 	zval *errmsg = NULL;
 
@@ -1283,19 +1283,26 @@ PHP_FUNCTION(sqlite_factory)
 	}
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
-		if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		/* resolve the fully-qualified path name to use as the hash key */
+		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+	
+		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			efree(fullpath);
 			php_std_error_handling();
 			RETURN_NULL();
 		}
 	
-		if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+			efree(fullpath);
 			php_std_error_handling();
 			RETURN_NULL();
 		}
 	}
 
-	php_sqlite_open(filename, (int)mode, NULL, return_value, errmsg, return_value TSRMLS_CC);
-
+	php_sqlite_open(fullpath ? fullpath : filename, (int)mode, NULL, return_value, errmsg, return_value TSRMLS_CC);
+	if (fullpath) {
+		efree(fullpath);
+	}
 	php_std_error_handling();
 }
 /* }}} */
@@ -1575,7 +1582,7 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 		RETURN_FALSE;
 	}
 
-	sqlite_exec(db->db, "PRAGMA show_datatypes = ON", NULL, NULL, &errtext);
+	sqlite_exec(db->db, "PRAGMA show_datatypes = ON", NULL, NULL, NULL);
 
 	db->last_err_code = sqlite_compile(db->db, sql, &tail, &res.vm, &errtext);
 
@@ -1605,7 +1612,7 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 	}
 
 done:
-	sqlite_exec(db->db, "PRAGMA show_datatypes = OFF", NULL, NULL, &errtext);
+	sqlite_exec(db->db, "PRAGMA show_datatypes = OFF", NULL, NULL, NULL);
 }
 /* }}} */
 
