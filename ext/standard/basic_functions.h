@@ -95,6 +95,7 @@ PHP_FUNCTION(unregister_tick_function);
 
 PHP_FUNCTION(is_uploaded_file);
 PHP_FUNCTION(move_uploaded_file);
+PHP_FUNCTION(read_uploaded_file);
 
 /* From the INI parser */
 PHP_FUNCTION(parse_ini_file);

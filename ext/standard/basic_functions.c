@@ -527,6 +527,7 @@ function_entry basic_functions[] = {
 	PHP_FE(parse_ini_file,													NULL)
 	PHP_FE(is_uploaded_file,												NULL)
 	PHP_FE(move_uploaded_file,												NULL)
+	PHP_FE(read_uploaded_file,												NULL)
 
 	/* functions from type.c */
 	PHP_FE(intval,															NULL)
@@ -2348,6 +2349,75 @@ PHP_FUNCTION(move_uploaded_file)
 		php_error(E_WARNING, "Unable to move '%s' to '%s'", Z_STRVAL_PP(path), Z_STRVAL_PP(new_path));
 	}
 	RETURN_BOOL(successful);
+}
+/* }}} */
+
+/* {{{ proto string read_uploaded_file(string path)
+    Read a file if and only if it was created by an upload and return it content or FALSE if error */
+PHP_FUNCTION(read_uploaded_file)
+{
+	zval **file;
+	FILE *fp;
+	int issock = 0, socketd = 0;
+	int fd;
+	struct stat sbuf;
+	size_t len, rlen;
+
+	if (!SG(rfc1867_uploaded_files)) {
+		RETURN_FALSE;
+	}
+ 
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) != SUCCESS) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	convert_to_string_ex(file);
+
+	if (!zend_hash_exists(SG(rfc1867_uploaded_files), Z_STRVAL_PP(file), Z_STRLEN_PP(file) + 1)) {
+		php_error(E_WARNING, "'%s' is not uploaded file", Z_STRVAL_PP(file));
+		RETURN_FALSE;
+	}
+
+	fp = php_fopen_wrapper(Z_STRVAL_PP(file), "rb", 0, &issock, &socketd, NULL TSRMLS_CC);
+ 
+	if (!fp) {
+		php_error(E_WARNING, "%s(): Can not open file '%s'", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(file));
+		RETURN_FALSE;
+	}
+ 
+	fd = fileno(fp);
+ 
+	if (fstat(fd, &sbuf) != 0) {
+		php_error(E_WARNING, "%s(): fstat failed", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+ 
+	len = sbuf.st_size;
+ 
+	Z_STRVAL_P(return_value) = emalloc(len + 1);
+ 
+	if (!Z_STRVAL_P(return_value)) {
+		php_error(E_WARNING, "%s(): Cannot allocate %i bytes", get_active_function_name(TSRMLS_C), len);
+		RETURN_FALSE;
+	}
+
+	rlen = fread(Z_STRVAL_P(return_value), 1, len, fp);
+
+	fclose(fp);
+ 
+	if (rlen != len) {
+		php_error(E_WARNING, "%s(): Can not read '%s'", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(file));
+		efree(Z_STRVAL_P(return_value));
+		RETURN_FALSE;
+	}
+
+	Z_STRLEN_P(return_value) = rlen;
+	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
+
+	if (PG(magic_quotes_runtime)) {
+		Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value),
+		Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
+	}
+	Z_TYPE_P(return_value) = IS_STRING;
 }
 /* }}} */
 
