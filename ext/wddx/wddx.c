@@ -1014,6 +1014,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 				decoded = xml_utf8_decode(s, len, &decoded_len, "ISO-8859-1");
 
 				if (Z_STRLEN_P(ent->data) == 0) {
+					STR_FREE(Z_STRVAL_P(ent->data));
 					Z_STRVAL_P(ent->data) = estrndup(decoded, decoded_len);
 					Z_STRLEN_P(ent->data) = decoded_len;
 				} else {
