@@ -973,11 +973,12 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 		url_to = p + 3;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(url_from, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (PG(safe_mode) && (!php_checkuid(url_from, NULL, CHECKUID_CHECK_FILE_AND_DIR) ||
+				!php_checkuid(url_to, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		return 0;
 	}
 
-	if (php_check_open_basedir(url_from TSRMLS_CC)) {
+	if (php_check_open_basedir(url_from TSRMLS_CC) || php_check_open_basedir(url_to TSRMLS_CC)) {
 		return 0;
 	}
 
