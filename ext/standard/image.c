@@ -242,15 +242,6 @@ static unsigned int php_next_marker(int socketd, FILE *fp, int issock)
 {
 	int c;
 
-	/* skip unimportant stuff */
-
-	c = FP_FGETC(socketd,fp,issock);
-
-	while (c != 0xff) {
-		if ((c = FP_FGETC(socketd,fp,issock)) == EOF)
-			return M_EOI; /* we hit EOF */
-	}
-
 	/* get marker byte, swallowing possible padding */
 	do {
 		if ((c = FP_FGETC(socketd,fp,issock)) == EOF)
