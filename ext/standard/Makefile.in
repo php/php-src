@@ -1,9 +1,4 @@
 
-DEPTH	  = ../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 LTLIBRARY_NAME = libstandard.la
 LTLIBRARY_SOURCES=\
 	array.c base64.c basic_functions.c browscap.c crypt.c cyr_convert.c datetime.c \
@@ -14,7 +9,7 @@ LTLIBRARY_SOURCES=\
 	syslog.c type.c uniqid.c url.c url_scanner.c var.c output.c assert.c \
 	strnatcmp.c
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk
 
 parsedate.c: $(srcdir)/parsedate.y
 

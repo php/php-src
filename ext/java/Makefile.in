@@ -1,9 +1,4 @@
 
-DEPTH	  = ../..
-topsrcdir = @topsrcdir@
-srcdir	  = @srcdir@
-VPATH	  = @srcdir@
-
 LTLIBRARY_SHARED_NAME  = libphp_java.la
 LTLIBRARY_SOURCES      = java.c
 LTLIBRARY_DEPENDENCIES = php_java.jar
@@ -16,7 +11,7 @@ EXTRA_INCLUDES = $(JAVA_INCLUDE)
 
 make_shared = yes
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk
 
 php_java.jar : reflect.java
 	@test -d net || mkdir net

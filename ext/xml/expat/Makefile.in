@@ -1,13 +1,8 @@
 
-DEPTH     = ../../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 LTLIBRARY_NAME          = libexpat.la
 LTLIBRARY_DEPENDENCIES  = xmltok/libexpat_tok.la xmlparse/libexpat_parse.la
 LTLIBRARY_LIBADD        = $(LTLIBRARY_DEPENDENCIES)
 
 SUBDIRS = xmltok xmlparse
 	
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk

@@ -1,16 +1,10 @@
-# $Id$
-
-DEPTH     = ../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
 
 LTLIBRARY_NAME    = libinformix.la
 LTLIBRARY_SOURCES = ifx.c
 LTLIBRARY_LIBADD  = $(IFX_LIBS)
 CLEANFILES        = ifx.c
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk
 
 ifx.c: $(srcdir)/ifx.ec
 	(if test -d $(INFORMIXDIR); then \

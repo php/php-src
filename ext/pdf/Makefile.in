@@ -1,11 +1,5 @@
-# $Id$
-
-DEPTH     = ../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
 
 LTLIBRARY_NAME    = libpdf.la
 LTLIBRARY_SOURCES = pdf.c
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk

@@ -1,9 +1,4 @@
 
-DEPTH     = ../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 LTLIBRARY_NAME          = libxml.la
 LTLIBRARY_SOURCES       = xml.c
 LTLIBRARY_LIBADD        = expat/libexpat.la
@@ -12,4 +7,4 @@ LTLIBRARY_SHARED_LIBADD = $(XML_LIBS)
 
 SUBDIRS = expat
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk
