@@ -284,14 +284,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	char *cvt;
 	register int i = 0, j = 0;
 	int sign, decpt;
-	char decimal_point = '.';
-#ifdef HAVE_LOCALECONV
-	struct lconv l;
-
-	localeconv_r(&l);
-
-	decimal_point = l.decimal_point[0];
-#endif
+	char decimal_point = EG(float_separator)[0];
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
 				  *buffer, pos, size, number, width, padding, alignment, fmt));
@@ -611,14 +604,13 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				case 'e':
 				case 'f':
 					/* XXX not done */
-					convert_to_double_ex(args[argnum]);
 					php_sprintf_appenddouble(&result, &outpos, &size,
 											 Z_DVAL_PP(args[argnum]),
 											 width, padding, alignment,
 											 precision, adjusting,
 											 format[inpos], always_sign);
 					break;
-
+					
 				case 'c':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_appendchar(&result, &outpos, &size,
