@@ -52,6 +52,7 @@ PEAR_FILES = \
 	DB.php \
 	DB/common.php \
 	DB/ibase.php \
+	DB/ifx.php \
 	DB/msql.php \
 	DB/mssql.php \
 	DB/mysql.php \
