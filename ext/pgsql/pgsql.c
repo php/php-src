@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@zend.com>                                |
-   |          Jouni Ahto <jah@cultnet.fi> (large object interface)        |
+   |          Jouni Ahto <jah@mork.net> (large object interface)          |
    +----------------------------------------------------------------------+
  */
  
@@ -78,7 +78,14 @@ function_entry pgsql_functions[] = {
 };
 
 zend_module_entry pgsql_module_entry = {
-	"pgsql", pgsql_functions, PHP_MINIT(pgsql), PHP_MSHUTDOWN(pgsql), PHP_RINIT(pgsql), NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"pgsql",
+	pgsql_functions,
+	PHP_MINIT(pgsql),
+	PHP_MSHUTDOWN(pgsql),
+	PHP_RINIT(pgsql),
+	NULL,
+	PHP_MINFO(pgsql),
+	STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_PGSQL
@@ -178,6 +185,22 @@ PHP_RINIT_FUNCTION(pgsql)
 }
 
 
+PHP_MINFO_FUNCTION(pgsql)
+{
+	char buf[32];
+	PGLS_FETCH();
+
+	php_info_print_table_start();
+	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
+	sprintf(buf, "%ld", PGG(num_persistent));
+	php_info_print_table_row(2, "Active Persistent Links", buf);
+	sprintf(buf, "%ld", PGG(num_links));
+	php_info_print_table_row(2, "Active Links", buf);
+	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
+
+}
 void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
 	char *host=NULL,*port=NULL,*options=NULL,*tty=NULL,*dbname=NULL,*connstring=NULL;
