@@ -1,3 +1,46 @@
+2004-11-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      main/streams/streams.c:
+      support file:/// under windows again
+
+    * main/streams/streams.c:
+      add support for file://localhost/
+      support file:/// under windows again
+
+2004-11-11  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_5_0)
+      ext/interbase/ibase_query.c:
+      MFH: fix return value of ibase_execute()
+
+2004-11-11  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/standard/Makefile.frag
+      ext/standard/Makefile.frag:
+      MFH: fix #30751 (phpinfo() shows the same ini path after reconfigure with
+      --with-config-file-path)
+
+    * ext/standard/Makefile.frag:
+      fix #30751 (phpinfo() shows the same ini path after reconfigure with
+      --with-config-file-path)
+
+2004-11-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      main/rfc1867.c
+      main/rfc1867.c:
+      MFH: Fixed bug #30750 (Meaningful error message when upload directory is
+      not
+      accessible).
+
+    * main/rfc1867.c:
+      Fixed bug #30750 (Meaningful error message when upload directory is not
+      accessible).
+
 2004-11-10  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/proc_open.c:
