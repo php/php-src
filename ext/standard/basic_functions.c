@@ -475,6 +475,7 @@ function_entry basic_functions[] = {
 	PHP_FE(dechex,															NULL)
 	PHP_FE(base_convert,													NULL)
 	PHP_FE(number_format,													NULL)
+	PHP_FE(fmod,															NULL)
 	PHP_FE(ip2long,															NULL)
 	PHP_FE(long2ip,															NULL)
 

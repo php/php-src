@@ -1046,6 +1046,21 @@ PHP_FUNCTION(number_format)
 }
 /* }}} */
 
+/* {{{ proto double fmod(double x, double y)
+   Returns the remainder of dividing x by y as a double */
+PHP_FUNCTION(fmod)
+{
+	double num1, num2;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd",  &num1, &num2) == FAILURE) {
+		return;
+	}
+	
+	Z_DVAL_P(return_value) = fmod(num1, num2);
+	Z_TYPE_P(return_value) = IS_DOUBLE;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
