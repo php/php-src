@@ -550,7 +550,7 @@ default_socket_timeout = 60
 
 
 ;Windows Extensions
-;Note that MySQL and ODBC support is now built in, so no dll is needed for it.
+;Note that ODBC support is now built in, so no dll is needed for it.
 ;
 ;extension=php_bz2.dll
 ;extension=php_cpdf.dll
