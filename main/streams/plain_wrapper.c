@@ -157,14 +157,14 @@ typedef struct {
 
 PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path STREAMS_DC TSRMLS_DC)
 {
-	FILE *fp = php_open_temporary_file(dir, pfx, opened_path TSRMLS_CC);
+	int fd = php_open_temporary_fd(dir, pfx, opened_path TSRMLS_CC);
 
-	if (fp)	{
-		php_stream *stream = php_stream_fopen_from_file_rel(fp, "r+b");
+	if (fd != -1)	{
+		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b");
 		if (stream) {
 			return stream;
 		}
-		fclose(fp);
+		close(fd);
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate stream");
 
@@ -176,10 +176,10 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 {
 	char *opened_path = NULL;
-	FILE *fp = php_open_temporary_file(NULL, "php", &opened_path TSRMLS_CC);
+	int fd = php_open_temporary_fd(NULL, "php", &opened_path TSRMLS_CC);
 
-	if (fp)	{
-		php_stream *stream = php_stream_fopen_from_file_rel(fp, "r+b");
+	if (fd != -1)	{
+		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b");
 		if (stream) {
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
@@ -188,7 +188,7 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 			
 			return stream;
 		}
-		fclose(fp);
+		close(fd);
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate stream");
 
@@ -493,9 +493,6 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD:
-			/* fetch the fileno rather than using data->fd, since we may
-			 * have zeroed that member if someone requested the FILE*
-			 * first (see above case) */
 			PHP_STDIOP_GET_FD(fd, data);
 
 			if (fd < 0) {
