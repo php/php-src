@@ -628,12 +628,12 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
  * relevant fields into the statbuf provided */
 static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 {
-	zval *elem;
+	zval **elem;
 
 #define STAT_PROP_ENTRY(name)                        \
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
-		convert_to_long(elem);                                                                   \
-		ssb->sb.st_##name = Z_LVAL_P(elem);                                                      \
+		convert_to_long(*elem);                                                                   \
+		ssb->sb.st_##name = Z_LVAL_PP(elem);                                                      \
 	}
 
 	STAT_PROP_ENTRY(dev);
