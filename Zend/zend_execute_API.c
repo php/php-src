@@ -314,7 +314,8 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 	} else if (p->type == IS_CONSTANT_ARRAY) {
 		zval **element;
 		char *str_index;
-		ulong str_index_len, num_index;
+		uint str_index_len;
+		ulong num_index;
 
 		SEPARATE_ZVAL(pp);
 		p = *pp;
