@@ -138,9 +138,7 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 		pdo_mysql_error(S->H);
 		return 0;
 	}
-	if (S->current_data[colno]) {
-		*ptr = estrndup(S->current_data[colno], S->current_lengths[colno] +1);
-	}
+	*ptr = S->current_data[colno];
 	*len = S->current_lengths[colno];
 	return 1;
 }
