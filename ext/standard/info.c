@@ -37,11 +37,17 @@
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
 
 
-static int _display_module_info(php3_module_entry *module)
+static int _display_module_info(zend_module_entry *module, void *arg)
 {
-	if (module->info_func) {
+	int show_info_func = *((int *) arg);
+
+	if (show_info_func && module->info_func) {
 		php_printf("<hr><h2>%s</h2>\n", module->name);
 		module->info_func(module);
+	} else if (!show_info_func && !module->info_func) {
+		php_printf("<tr><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+		php_printf(module->name);
+		php_printf("</td><tr>\n");
 	}
 	return 0;
 }
@@ -123,7 +129,16 @@ PHPAPI void php_print_info(int flag)
 	}
 
 	if (flag & PHP_INFO_MODULES) {
-		zend_hash_apply(&module_registry,(int (*)(void *)) _display_module_info);
+		int show_info_func;
+
+		show_info_func = 1;
+		zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _display_module_info, &show_info_func);
+
+		SECTION("Additional Modules");
+		PUTS("<table border=5 width=\"600\">\n");
+		show_info_func = 0;
+		zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _display_module_info, &show_info_func);
+		PUTS("</table>\n");
 	}
 
 	if (flag & PHP_INFO_ENVIRONMENT) {
