@@ -123,7 +123,7 @@ zend_module_entry apache_module_entry = {
    Get and set Apache request notes */
 PHP_FUNCTION(apache_child_terminate)
 {
-#ifndef MULTITREAD
+#ifndef MULTITHREAD
 	if (AP(terminate_child)) {
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
 	} else { /* tell them to get lost! */
