@@ -1,3 +1,50 @@
+2004-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sysvshm/sysvshm.c:
+      Fixed compile warning.
+
+2004-11-22  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+      Adding fbsql_set_characterset.
+      Change PHP_INI_USER to PHP_INI_ALL on fbsql.batchsize
+
+2004-11-22  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      ext/oci8/oci8.c:
+      - Don't use that ZTS connection pooling code until decided what to do with
+      - this problem.
+
+    * ext/oci8/oci8.c:
+      - Don't reuse Oracle connections in multi-threaded environments until
+      - we decide to either not support ZTS connection pooling (kind of
+      - pointless as PHP isn't stable in ZTS mode) or fix the 100% reproducable
+      - crash bug on oci_connect() under Windows most probably due to this
+      - problem.
+
+2004-11-22  Derick Rethans  <php@derickrethans.nl>
+
+    * tests/lang/bug30862.phpt:
+      - Added test case for bug #30862.
+
+2004-11-22  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_0)
+      ext/mssql/config.m4:
+      MFH: Fix #30860 configure fails when tds is compiled as shared
+
+    * ext/mssql/config.m4
+      ext/mssql/config.m4:
+      Fix #30860 configure fails when tds is compiled as shared
+
+2004-11-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/iconv/tests/translit-utf8.phpt
+      ext/iconv/tests/translit-utf8.phpt:
+      Test was fixed.
+
 2004-11-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/com_dotnet/com_saproxy.c:
