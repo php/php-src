@@ -391,27 +391,29 @@ class System
     function tmpdir()
     {
         if (OS_WINDOWS) {
-            if (System::_myenv('TEMP')) {
-                return System::_myenv('TEMP');
+            if (getenv('TEMP')) {
+                return getenv('TEMP');
             }
-            if (System::_myenv('TMP')) {
-                return System::_myenv('TMP');
+            if (getenv('TMP')) {
+                return getenv('TMP');
             }
-            if (System::_myenv('windir')) {
-                return System::_myenv('windir') . '\temp';
+            if (getenv('windir')) {
+                return getenv('windir') . '\temp';
             }
-            return System::_myenv('SystemRoot') . '\temp';
+            return getenv('SystemRoot') . '\temp';
         }
-        if (System::_myenv('TMPDIR')) {
-            return System::_myenv('TMPDIR');
+        if (getenv('TMPDIR')) {
+            return getenv('TMPDIR');
         }
         return '/tmp';
     }
 
     /**
+    * (pajoye) Removed, problem with php.ini-recommanded, E removed
+    *
     * (cox) I always get $_ENV empty in both Windows and Linux
     * with all PHP version <= 4.2.1
-    */
+
     function _myenv($var)
     {
         if (!empty($_ENV)) {
@@ -419,6 +421,7 @@ class System
         }
         return getenv($var);
     }
+    */
 
     /**
     * The "type" command (show the full path of a command)
