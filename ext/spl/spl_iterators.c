@@ -85,6 +85,9 @@ typedef struct _spl_recursive_it_object {
 	spl_sub_iterator         *iterators;
 	int                      level;
 	RecursiveIteratorMode    mode;
+	zend_function            *beginChildren;
+	zend_function            *endChildren;
+	zend_class_entry         *ce;
 } spl_recursive_it_object;
 
 typedef struct _spl_recursive_it_iterator {
@@ -228,7 +231,7 @@ next_step:
 				if (sub_iter->funcs->rewind) {
 					sub_iter->funcs->rewind(sub_iter TSRMLS_CC);
 				}
-				zend_call_method_with_0_params(&zthis, NULL, NULL, "beginchildren", NULL);
+				zend_call_method_with_0_params(&zthis, object->ce, &object->beginChildren, "beginchildren", NULL);
 				goto next_step;
 		}
 		/* no more elements */
@@ -236,7 +239,7 @@ next_step:
 			iterator->funcs->dtor(iterator TSRMLS_CC);
 			zval_ptr_dtor(&object->iterators[object->level].zobject);
 			object->level--;
-			zend_call_method_with_0_params(&zthis, NULL, NULL, "endchildren", NULL);
+			zend_call_method_with_0_params(&zthis, object->ce, &object->endChildren, "endchildren", NULL);
 		} else {
 			return; /* done completeley */
 		}
@@ -251,7 +254,7 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 		sub_iter = object->iterators[object->level].iterator;
 		sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
 		zval_ptr_dtor(&object->iterators[object->level--].zobject);
-		zend_call_method_with_0_params(&zthis, NULL, NULL, "endchildren", NULL);
+		zend_call_method_with_0_params(&zthis, object->ce, &object->endChildren, "endchildren", NULL);
 	}
 	erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->iterators[0].state = RS_START;
@@ -314,6 +317,9 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	intern->iterators = emalloc(sizeof(spl_sub_iterator));
 	intern->level = 0;
 	intern->mode = mode;
+	intern->beginChildren = NULL;
+	intern->endChildren = NULL;
+	intern->ce = Z_OBJCE_P(object);
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator TSRMLS_CC);
 	iterator->refcount++;
