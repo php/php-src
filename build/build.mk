@@ -22,11 +22,15 @@
 
 ZENDDIR = $(shell if test -d "ZendEngine2"; then echo ZendEngine2; else echo Zend; fi)
 
+SUBDIRS = $(ZENDDIR) TSRM
+
 STAMP = buildmk.stamp
 
 ALWAYS = generated_lists
 
+
 all: $(STAMP) $(ALWAYS)
+	echo $(SUBDIRS)
 	@$(MAKE) AMFLAGS=$(AMFLAGS) -s -f build/build2.mk
 
 generated_lists:
