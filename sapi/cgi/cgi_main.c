@@ -278,8 +278,8 @@ static void init_request_info(SLS_D)
 	/* a hack for apache nt because it does not appear to set argv[1] and sets
 	   script filename to php.exe thus makes us parse php.exe instead of file.php
 	   requires we get the info from path translated.  This can be removed at
-	   such a time taht apache nt is fixed */
-	if (script_filename) {
+	   such a time that apache nt is fixed */
+	if (!script_filename) {
 		script_filename = getenv("PATH_TRANSLATED");
 	}
 #endif
