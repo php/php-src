@@ -378,7 +378,7 @@ PHP_FUNCTION(glob)
 			cwd[0] = '\0';
 		}
 		cwd_skip = strlen(cwd)+1;
-		snprintf(work_pattern, MAXPATHLEN, "%s/%s", cwd, pattern);
+		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, pattern);
 		pattern = work_pattern;
 	} 
 #endif
