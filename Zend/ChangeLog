@@ -1,3 +1,12 @@
+2004-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.h
+      zend_execute_API.c:
+      Improove debug capabilities
+
+    * zend_reflection_api.c:
+      Fix some casing issues
+
 2004-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_interfaces.c:
