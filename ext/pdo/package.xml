@@ -29,17 +29,26 @@
    <role>lead</role>
   </maintainer>
  </maintainers>
+
+<!-- pear is still broken -->
+<configureoptions>
+  <configureoption name="with-broken-pear-install" default="yes" prompt="the pear installer has a bug; press enter to find out more"/>
+</configureoptions>
+
+ 
  <description>
   PDO provides a uniform data access interface, sporting advanced features such
   as prepared statements and bound parameters.  PDO drivers are dynamically
   loadable and may be developed independently from the core, but still accessed
   using the same API.
+
+  Read the documentation at http://www.php.net/pdo for more information.
  </description>
  <license>PHP</license>
  <release>
-  <state>alpha</state>
+  <state>beta</state>
   <version>0.2</version>
-  <date>2005-01-20</date>
+  <date>2005-02-08</date>
 
   <notes>
 Note that PDO on its own is useless.
@@ -51,7 +60,7 @@ before using PDO.
 You can obtain it from http://snaps.php.net.
 
 If you are running on Windows, you should download:
-http://snaps.php.net/win32/php5-win32-latest.zip
+http://snaps.php.net/win32/php5.0-win32-latest.zip
 http://snaps.php.net/win32/PECL_5_0/php_pdo.dll
 
 You can find additional PDO drivers at:
@@ -79,7 +88,7 @@ http://snaps.php.net/win32/PECL_5_0/
    <file role="doc" name="CREDITS"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge" version="5.0.0"/>
+   <dep type="php" rel="ge" version="5.0.3"/>
   </deps>
  </release>
 </package>
