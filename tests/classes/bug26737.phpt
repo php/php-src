@@ -18,4 +18,4 @@ $data = serialize($foo);
 var_dump(str_replace("\0", '\0', $data));
 ?>
 --EXPECT--
-string(114) "O:3:"foo":3:{s:12:"\0foo\0private";s:7:"private";s:12:"\0*\0protected";s:9:"protected";s:6:"public";s:6:"public";}"
+string(76) "O:3:"foo":3:{s:7:"private";N;s:9:"protected";R:2;s:6:"public";s:6:"public";}"
