@@ -69,8 +69,12 @@ static int le_result,le_link,le_plink;
 
 #if MYSQL_VERSION_ID > 32199
 #define mysql_row_length_type unsigned long
+#define HAVE_MYSQL_ERRNO
 #else
 #define mysql_row_length_type unsigned int
+#	ifdef mysql_errno
+#	define HAVE_MYSQL_ERRNO
+#	endif
 #endif
 
 #define MYSQL_ASSOC		1<<0
@@ -90,7 +94,7 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_list_tables,							NULL)
 	PHP_FE(mysql_list_fields,							NULL)
 	PHP_FE(mysql_error,									NULL)
-#ifdef mysql_errno
+#ifdef HAVE_MYSQL_ERRNO
 	PHP_FE(mysql_errno,									NULL)
 #endif
 	PHP_FE(mysql_affected_rows,							NULL)
@@ -492,7 +496,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 #if APACHE
 			handler=signal(SIGPIPE,SIG_IGN);
 #endif
-#if defined(mysql_errno) && defined(CR_SERVER_GONE_ERROR)
+#if defined(HAVE_MYSQL_ERRNO) && defined(CR_SERVER_GONE_ERROR)
 			mysql_stat(le->ptr);
 			if (mysql_errno((MYSQL *)le->ptr) == CR_SERVER_GONE_ERROR) {
 #else
@@ -1108,7 +1112,7 @@ PHP_FUNCTION(mysql_error)
 
 /* {{{ proto int mysql_errno([int link_identifier])
    Returns the number of the error message from previous MySQL operation */
-#ifdef mysql_errno
+#ifdef HAVE_MYSQL_ERRNO
 PHP_FUNCTION(mysql_errno)
 {
 	pval *mysql_link;
