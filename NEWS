@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - Fixed __autoload() to preserve case of the passed class name. (Andi)
 - Fixed bug #26072 (--disable-libxml does not work). (Jani)
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
+- Fixed bug #26001 (serialize crashes when accessing an overloaded object that 
+  has no properties (NULL hashtable)). (Wez)
+- Fixed bug #25664 (COM crashes when calling a Delphi implementations of 
+  ITypeInfo). (Wez)
 - Fixed bug #24394 (Serializing cross-referenced objects causes segfault).
   (Moriyoshi)
 - Fixed bug #26156 (REPLACE_ZVAL_VALUE works on uninit stack-based zvals).
