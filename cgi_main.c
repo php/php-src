@@ -3,6 +3,8 @@
 
 #include "SAPI.h"
 
+#if CGI_BINARY
+
 #include <stdio.h>
 #include "php.h"
 #ifdef MSVC5
@@ -362,3 +364,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	php_module_shutdown();
 	return SUCCESS;
 }
+
+
+#endif
