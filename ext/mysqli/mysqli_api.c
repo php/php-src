@@ -1342,10 +1342,11 @@ PHP_FUNCTION(mysqli_prepare)
  */
 PHP_FUNCTION(mysqli_prepare_result)
 {
-	STMT		*stmt;
-	MYSQL_RES	*result;
-	zval 		*mysql_stmt;
-	PR_STMT		*prstmt;
+	STMT			*stmt;
+	MYSQL_RES		*result;
+	zval 			*mysql_stmt;
+	PR_STMT			*prstmt = NULL;
+	MYSQLI_RESOURCE	*mysqli_resource;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
@@ -1356,7 +1357,10 @@ PHP_FUNCTION(mysqli_prepare_result)
 		RETURN_FALSE;
 	}
 
-	MYSQLI_RETURN_RESOURCE(result, mysqli_result_class_entry);	
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)result;
+	mysqli_resource->prinfo = (void *)prstmt;
+	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);	
 }
 /* }}} */
 
