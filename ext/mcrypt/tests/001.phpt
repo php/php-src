@@ -6,6 +6,7 @@ Bug #8040
 --GET--
 --FILE--
 <?php
+	error_reporting (E_ALL ^ E_NOTICE);
 	echo MCRYPT_TWOFISH."\n";
 	echo MCRYPT_MODE_CBC."\n";
 ?>
@@ -17,10 +18,10 @@ Bug #8040
 
 <?php
 	define ("CIPHER", MCRYPT_TWOFISH);
-	define ("MODE1", MCRYPT_MODE_CBC);
-	define ("MODE2", MCRYPT_CBC);
+	define ("MODE2", MCRYPT_MODE_CBC);
+	define ("MODE3", MCRYPT_CBC);
 
-	printf ("cipher=".CIPHER. " mode1=".MODE1. " mode2=". MODE2."\n");
+	printf ("cipher=".CIPHER. " mode1=".MODE2. " mode2=". MODE3."\n");
 ?>
 --EXPECT--
 twofish
