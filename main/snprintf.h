@@ -34,6 +34,10 @@ int php_sprintf (char* s, const char* format, ...);
 #define sprintf php_sprintf
 #endif
 
+typedef enum {
+	NO = 0, YES = 1
+} boolean_e;
+
 #ifdef HAVE_GCVT
 
 #define ap_php_ecvt ecvt
@@ -42,16 +46,12 @@ int php_sprintf (char* s, const char* format, ...);
 
 #else
 
-extern char * ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag);
-extern char * ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign);
-extern char * ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign);
-extern char * ap_php_gcvt(double number, int ndigit, char *buf);
+extern char * ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf);
+extern char * ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf);
+extern char * ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf);
+extern char * ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform);
 
 #endif
-
-typedef enum {
-	NO = 0, YES = 1
-} boolean_e;
 
 #define WIDE_INT		long
 typedef WIDE_INT wide_int;
