@@ -151,6 +151,7 @@ $installpackages = $installer->getDownloadedPackages();
 var_dump(get_class($a), $installer->getErrorMsgs(), $installpackages[0]['info']['version']);
 
 $installer->configSet('preferred_state', 'beta');
+$installer->setOptions(array());
 
 echo "Test automatic version resolution (beta):\n";
 $packages = array("stabilitytoolow");
@@ -180,8 +181,8 @@ $forinstall = &new PEAR_Installer($ui);
 $forinstall->setOptions(array());
 $installer->setOptions(array());
 
-$forinstall->doDownload(array('pkg6'));
-$pkgs = $forinstall->getDownloadedPackages();
+$installer->doDownload(array('pkg6'));
+$pkgs = $installer->getDownloadedPackages();
 $forinstall->install($pkgs[0]['file']);
 $installer->doDownload(array('pkg6'));
 var_dump(get_class($a), $installer->getErrorMsgs());
@@ -284,14 +285,14 @@ array(0) {
 array(0) {
 }
 Test download of a non-existing package version:
-Caught error: No release with version '1976.9.2' found for 'pear::pkg1'
+Caught error: No release of 'pear::pkg1' with version '1976.9.2' found, latest release is version '2.0b1', stability 'beta', use --force to install
 string(10) "pear_error"
 array(0) {
 }
 array(0) {
 }
 Test download of a non-existing package release state:
-Caught error: No release with state 'snapshot' found for 'pear::pkg1'
+Caught error: No release of 'pear::pkg1' with state 'snapshot' found, latest release is version '2.0b1', stability 'beta', use --force to install
 string(10) "pear_error"
 array(0) {
 }
@@ -305,14 +306,14 @@ array(0) {
 array(0) {
 }
 Test automatic version resolution (stable):
-Caught error: pear::stabilitytoolow is state 'devel' which is less stable than state 'stable', use --force to install
+Caught error: No release of 'pear::stabilitytoolow' within preferred_state of 'stable' found, latest release is version '3.0dev', stability 'devel', use --force to install
 string(10) "pear_error"
 array(0) {
 }
 array(0) {
 }
 Test automatic version resolution (stable) with --force:
-Warning: pear::stabilitytoolow is state 'devel' which is less stable than state 'stable'
+Warning: No release of 'pear::stabilitytoolow' within preferred_state of 'stable' found, latest release, version '3.0dev', stability 'devel' will be downloaded
 bool(false)
 array(0) {
 }
@@ -343,7 +344,7 @@ array(0) {
 }
 string(5) "2.0b1"
 Test download attempt if a version is already installed with upgrade, same version:
-Package 'pear::pkg6-2.0b1' already installed, skipping
+Package 'pear::pkg6', version '2.0b1' already installed, skipping
 bool(false)
 array(0) {
 }

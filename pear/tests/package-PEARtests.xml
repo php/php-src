@@ -13,13 +13,13 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>2.0</version>
-    <date>2004-06-01</date>
+    <version>2.1</version>
+    <date>2004-06-04</date>
     <license>PHP License</license>
     <state>stable</state>
     <notes>Installation package.xml for PEAR package tests</notes>
     <deps>
-      <dep type="pkg" rel="ge" version="1.4.0dev5">PEAR</dep>
+      <dep type="pkg" rel="ge" version="1.4.0dev6">PEAR</dep>
       <dep type="pkg" rel="ge" version="1.1">Archive_Tar</dep>
       <dep type="pkg" rel="ge" version="1.2">Console_Getopt</dep>
       <dep type="pkg" rel="ge" version="1.1.0">XML_RPC</dep>
