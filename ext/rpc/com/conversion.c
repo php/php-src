@@ -380,6 +380,9 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 				}
 				break;
 
+			case VT_VARIANT:
+				php_error(E_WARNING,"VT_VARIANT is invalid. Use VT_VARIANT|VT_BYREF instead.");
+				/* break missing intentionally */
 			case VT_VARIANT|VT_BYREF:
 				{
 					int tp;
