@@ -13,7 +13,7 @@
 **
 ** This file implements an in-core database using Red-Black balanced
 ** binary trees.
-**
+** 
 ** It was contributed to SQLite by anonymous on 2003-Feb-04 23:24:49 UTC.
 */
 #include "btree.h"
@@ -99,7 +99,9 @@ struct RbtCursor {
   BtRbTree *pTree;
   int       iTree;          /* Index of pTree in pRbtree */
   BtRbNode *pNode;
+  RbtCursor *pShared;       /* List of all cursors on the same Rbtree */
   u8 eSkip;                 /* Determines if next step operation is a no-op */
+  u8 wrFlag;                /* True if this cursor is open for writing */
 };
 
 /*
@@ -111,7 +113,8 @@ struct RbtCursor {
 #define SKIP_INVALID  3   /* Calls to Next() and Previous() are invalid */
 
 struct BtRbTree {
-  BtRbNode *pHead;   /* Head of the tree, or NULL */
+  RbtCursor *pCursors;     /* All cursors pointing to this tree */
+  BtRbNode *pHead;         /* Head of the tree, or NULL */
 };
 
 struct BtRbNode {
@@ -138,6 +141,33 @@ static int memRbtreeClearTable(Rbtree* tree, int n);
 static int memRbtreeNext(RbtCursor* pCur, int *pRes);
 static int memRbtreeLast(RbtCursor* pCur, int *pRes);
 static int memRbtreePrevious(RbtCursor* pCur, int *pRes);
+
+
+/*
+** This routine checks all cursors that point to the same table
+** as pCur points to.  If any of those cursors were opened with
+** wrFlag==0 then this routine returns SQLITE_LOCKED.  If all
+** cursors point to the same table were opened with wrFlag==1
+** then this routine returns SQLITE_OK.
+**
+** In addition to checking for read-locks (where a read-lock 
+** means a cursor opened with wrFlag==0) this routine also NULLs
+** out the pNode field of all other cursors.
+** This is necessary because an insert 
+** or delete might change erase the node out from under
+** another cursor.
+*/
+static int checkReadLocks(RbtCursor *pCur){
+  RbtCursor *p;
+  assert( pCur->wrFlag );
+  for(p=pCur->pTree->pCursors; p; p=p->pShared){
+    if( p!=pCur ){
+      if( p->wrFlag==0 ) return SQLITE_LOCKED;
+      p->pNode = 0;
+    }
+  }
+  return SQLITE_OK;
+}
 
 /*
  * The key-compare function for the red-black trees. Returns as follows:
@@ -235,7 +265,7 @@ static char *append_val(char * orig, char const * val)
     return sqliteStrDup( val );
   } else{
     char * ret = 0;
-    sqliteSetString(&ret, orig, val, 0);
+    sqliteSetString(&ret, orig, val, (char*)0);
     sqliteFree( orig );
     return ret;
   }
@@ -276,12 +306,16 @@ static char *append_node(char * orig, BtRbNode *pNode, int indent)
 
 /*
  * Print a representation of a node to stdout. This function is only included
- * so you can call it from within a debugger if things get really bad.
+ * so you can call it from within a debugger if things get really bad.  It
+ * is not called from anyplace in the code.
  */
 static void print_node(BtRbNode *pNode)
 {
     char * str = append_node(0, pNode, 0);
     printf("%s", str);
+
+    /* Suppress a warning message about print_node() being unused */
+    (void)print_node;
 }
 
 /* 
@@ -632,6 +666,7 @@ static int memRbtreeDropTable(Rbtree* tree, int n)
   memRbtreeClearTable(tree, n);
   pTree = sqliteHashInsert(&tree->tblHash, 0, n, 0);
   assert(pTree);
+  assert( pTree->pCursors==0 );
   sqliteFree(pTree);
 
   if( tree->eTransState != TRANS_ROLLBACK ){
@@ -664,7 +699,7 @@ static int memRbtreeKeyCompare(RbtCursor* pCur, const void *pKey, int nKey,
 
 /*
  * Get a new cursor for table iTable of the supplied Rbtree. The wrFlag
- * parameter is ignored, all cursors are capable of write-operations. 
+ * parameter indicates that the cursor is open for writing.
  *
  * Note that RbtCursor.eSkip and RbtCursor.pNode both initialize to 0.
  */
@@ -674,12 +709,17 @@ static int memRbtreeCursor(
   int wrFlag,
   RbtCursor **ppCur
 ){
+  RbtCursor *pCur;
   assert(tree);
-  *ppCur = sqliteMalloc(sizeof(RbtCursor));
-  (*ppCur)->pTree  = sqliteHashFind(&tree->tblHash, 0, iTable);
-  (*ppCur)->pRbtree = tree;
-  (*ppCur)->iTree  = iTable;
-  (*ppCur)->pOps = &sqliteRbtreeCursorOps;
+  pCur = *ppCur = sqliteMalloc(sizeof(RbtCursor));
+  pCur->pTree  = sqliteHashFind(&tree->tblHash, 0, iTable);
+  pCur->pRbtree = tree;
+  pCur->iTree  = iTable;
+  pCur->pOps = &sqliteRbtreeCursorOps;
+  pCur->wrFlag = wrFlag;
+  pCur->pShared = pCur->pTree->pCursors;
+  pCur->pTree->pCursors = pCur;
+  
 
   assert( (*ppCur)->pTree );
   return SQLITE_OK;
@@ -707,9 +747,14 @@ static int memRbtreeInsert(
   ** not in a transaction */
   assert( pCur->pRbtree->eTransState != TRANS_NONE );
 
+  /* Make sure some other cursor isn't trying to read this same table */
+  if( checkReadLocks(pCur) ){
+    return SQLITE_LOCKED; /* The table pCur points to has a read lock */
+  }
+
   /* Take a copy of the input data now, in case we need it for the 
    * replace case */
-  pData = sqliteMalloc(nData);
+  pData = sqliteMallocRaw(nData);
   memcpy(pData, pDataInput, nData);
 
   /* Move the cursor to a node near the key to be inserted. If the key already
@@ -727,7 +772,7 @@ static int memRbtreeInsert(
   if( match ){
     BtRbNode *pNode = sqliteMalloc(sizeof(BtRbNode));
     pNode->nKey = nKey;
-    pNode->pKey = sqliteMalloc(nKey);
+    pNode->pKey = sqliteMallocRaw(nKey);
     memcpy(pNode->pKey, pKey, nKey);
     pNode->nData = nData;
     pNode->pData = pData; 
@@ -762,7 +807,7 @@ static int memRbtreeInsert(
       pOp->eOp = ROLLBACK_DELETE;
       pOp->iTab = pCur->iTree;
       pOp->nKey = pNode->nKey;
-      pOp->pKey = sqliteMalloc( pOp->nKey );
+      pOp->pKey = sqliteMallocRaw( pOp->nKey );
       memcpy( pOp->pKey, pNode->pKey, pOp->nKey );
       btreeLogRollbackOp(pCur->pRbtree, pOp);
     }
@@ -776,7 +821,7 @@ static int memRbtreeInsert(
       BtRollbackOp *pOp = sqliteMalloc( sizeof(BtRollbackOp) );
       pOp->iTab = pCur->iTree;
       pOp->nKey = pCur->pNode->nKey;
-      pOp->pKey = sqliteMalloc( pOp->nKey );
+      pOp->pKey = sqliteMallocRaw( pOp->nKey );
       memcpy( pOp->pKey, pCur->pNode->pKey, pOp->nKey );
       pOp->nData = pCur->pNode->nData;
       pOp->pData = pCur->pNode->pData;
@@ -864,6 +909,11 @@ static int memRbtreeDelete(RbtCursor* pCur)
   /* It is illegal to call sqliteRbtreeDelete() if we are
   ** not in a transaction */
   assert( pCur->pRbtree->eTransState != TRANS_NONE );
+
+  /* Make sure some other cursor isn't trying to read this same table */
+  if( checkReadLocks(pCur) ){
+    return SQLITE_LOCKED; /* The table pCur points to has a read lock */
+  }
 
   pZ = pCur->pNode;
   if( !pZ ){
@@ -978,7 +1028,7 @@ static int memRbtreeClearTable(Rbtree* tree, int n)
         sqliteFree( pNode->pKey );
         sqliteFree( pNode->pData );
       }else{
-        BtRollbackOp *pRollbackOp = sqliteMalloc(sizeof(BtRollbackOp));
+        BtRollbackOp *pRollbackOp = sqliteMallocRaw(sizeof(BtRollbackOp));
         pRollbackOp->eOp = ROLLBACK_INSERT;
         pRollbackOp->iTab = n;
         pRollbackOp->nKey = pNode->nKey;
@@ -1142,6 +1192,16 @@ static int memRbtreeData(RbtCursor *pCur, int offset, int amt, char *zBuf)
 
 static int memRbtreeCloseCursor(RbtCursor* pCur)
 {
+  if( pCur->pTree->pCursors==pCur ){
+    pCur->pTree->pCursors = pCur->pShared;
+  }else{
+    RbtCursor *p = pCur->pTree->pCursors;
+    while( p && p->pShared!=pCur ){ p = p->pShared; }
+    assert( p!=0 );
+    if( p ){
+      p->pShared = pCur->pShared;
+    }
+  }
   sqliteFree(pCur);
   return SQLITE_OK;
 }
@@ -1174,21 +1234,6 @@ static char *memRbtreeIntegrityCheck(Rbtree* tree, int* aRoot, int nRoot)
   }
 
   return msg;
-}
-
-/*
- * Close the supplied Rbtree. Delete everything associated with it.
- */
-static int memRbtreeClose(Rbtree* tree)
-{
-  HashElem *p;
-  while( (p=sqliteHashFirst(&tree->tblHash))!=0 ){
-    tree->eTransState = TRANS_ROLLBACK;
-    memRbtreeDropTable(tree, sqliteHashKeysize(p));
-  }
-  sqliteHashClear(&tree->tblHash);
-  sqliteFree(tree);
-  return SQLITE_OK;
 }
 
 static int memRbtreeSetCacheSize(Rbtree* tree, int sz)
@@ -1235,6 +1280,22 @@ static int memRbtreeCommit(Rbtree* tree){
 }
 
 /*
+ * Close the supplied Rbtree. Delete everything associated with it.
+ */
+static int memRbtreeClose(Rbtree* tree)
+{
+  HashElem *p;
+  memRbtreeCommit(tree);
+  while( (p=sqliteHashFirst(&tree->tblHash))!=0 ){
+    tree->eTransState = TRANS_ROLLBACK;
+    memRbtreeDropTable(tree, sqliteHashKeysize(p));
+  }
+  sqliteHashClear(&tree->tblHash);
+  sqliteFree(tree);
+  return SQLITE_OK;
+}
+
+/*
  * Execute and delete the supplied rollback-list on pRbtree.
  */
 static void execute_rollback_list(Rbtree *pRbtree, BtRollbackOp *pList)
@@ -1244,6 +1305,7 @@ static void execute_rollback_list(Rbtree *pRbtree, BtRollbackOp *pList)
   int res;
 
   cur.pRbtree = pRbtree;
+  cur.wrFlag = 1;
   while( pList ){
     switch( pList->eOp ){
       case ROLLBACK_INSERT:
@@ -1325,7 +1387,6 @@ static int memRbtreeRollbackCkpt(Rbtree* tree)
   tree->pCheckRollback = 0;
   tree->pCheckRollbackTail = 0;
   tree->eTransState = TRANS_INTRANSACTION;
-  return SQLITE_OK;
   return SQLITE_OK;
 }
 

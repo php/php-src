@@ -343,6 +343,7 @@ void sqlitePragma(Parse *pParse, Token *pLeft, Token *pRight, int minusFlag){
         { OP_ColumnName,  2, 0,       "type"},
         { OP_ColumnName,  3, 0,       "notnull"},
         { OP_ColumnName,  4, 0,       "dflt_value"},
+        { OP_ColumnName,  5, 0,       "pk"},
       };
       int i;
       sqliteVdbeAddOpList(v, ArraySize(tableInfoPreface), tableInfoPreface);
@@ -357,7 +358,8 @@ void sqlitePragma(Parse *pParse, Token *pLeft, Token *pRight, int minusFlag){
         sqliteVdbeAddOp(v, OP_Integer, pTab->aCol[i].notNull, 0);
         sqliteVdbeAddOp(v, OP_String, 0, 0);
         sqliteVdbeChangeP3(v, -1, pTab->aCol[i].zDflt, P3_STATIC);
-        sqliteVdbeAddOp(v, OP_Callback, 5, 0);
+        sqliteVdbeAddOp(v, OP_Integer, pTab->aCol[i].isPrimKey, 0);
+        sqliteVdbeAddOp(v, OP_Callback, 6, 0);
       }
     }
   }else
@@ -416,6 +418,45 @@ void sqlitePragma(Parse *pParse, Token *pLeft, Token *pRight, int minusFlag){
     }
   }else
 
+  if( sqliteStrICmp(zLeft, "foreign_key_list")==0 ){
+    FKey *pFK;
+    Table *pTab;
+    pTab = sqliteFindTable(db, zRight, 0);
+    if( pTab ){
+      v = sqliteGetVdbe(pParse);
+      pFK = pTab->pFKey;
+    }
+    if( pTab && pFK ){
+      int i = 0; 
+      static VdbeOp indexListPreface[] = {
+        { OP_ColumnName,  0, 0,       "id"},
+        { OP_ColumnName,  1, 0,       "seq"},
+        { OP_ColumnName,  2, 0,       "table"},
+        { OP_ColumnName,  3, 0,       "from"},
+        { OP_ColumnName,  4, 0,       "to"},
+      };
+
+      sqliteVdbeAddOpList(v, ArraySize(indexListPreface), indexListPreface);
+      while(pFK){
+        int j;
+        for(j=0; j<pFK->nCol; j++){
+          sqliteVdbeAddOp(v, OP_Integer, i, 0);
+          sqliteVdbeAddOp(v, OP_Integer, j, 0);
+          sqliteVdbeAddOp(v, OP_String, 0, 0);
+          sqliteVdbeChangeP3(v, -1, pFK->zTo, P3_STATIC);
+          sqliteVdbeAddOp(v, OP_String, 0, 0);
+          sqliteVdbeChangeP3(v, -1, pTab->aCol[pFK->aCol[j].iFrom].zName,
+                             P3_STATIC);
+          sqliteVdbeAddOp(v, OP_String, 0, 0);
+          sqliteVdbeChangeP3(v, -1, pFK->aCol[j].zCol, P3_STATIC);
+          sqliteVdbeAddOp(v, OP_Callback, 5, 0);
+        }
+        ++i;
+        pFK = pFK->pNextFrom;
+      }
+    }
+  }else
+
   if( sqliteStrICmp(zLeft, "database_list")==0 ){
     int i;
     static VdbeOp indexListPreface[] = {
@@ -437,6 +478,8 @@ void sqlitePragma(Parse *pParse, Token *pLeft, Token *pRight, int minusFlag){
       sqliteVdbeAddOp(v, OP_Callback, 3, 0);
     }
   }else
+
+
   /*
   **   PRAGMA temp_store
   **   PRAGMA temp_store = "default"|"memory"|"file"
@@ -509,28 +552,149 @@ void sqlitePragma(Parse *pParse, Token *pLeft, Token *pRight, int minusFlag){
 #endif
 
   if( sqliteStrICmp(zLeft, "integrity_check")==0 ){
+    int i, j, addr;
+
+    /* Code that initializes the integrity check program.  Set the
+    ** error count 0
+    */
+    static VdbeOp initCode[] = {
+      { OP_Integer,     0, 0,        0},
+      { OP_MemStore,    0, 1,        0},
+      { OP_ColumnName,  0, 0,        "integrity_check"},
+    };
+
+    /* Code to do an BTree integrity check on a single database file.
+    */
     static VdbeOp checkDb[] = {
       { OP_SetInsert,   0, 0,        "2"},
-      { OP_Integer,     0, 0,        0},   
+      { OP_Integer,     0, 0,        0},    /* 1 */
       { OP_OpenRead,    0, 2,        0},
-      { OP_Rewind,      0, 7,        0},
+      { OP_Rewind,      0, 7,        0},    /* 3 */
       { OP_Column,      0, 3,        0},    /* 4 */
       { OP_SetInsert,   0, 0,        0},
-      { OP_Next,        0, 4,        0},
+      { OP_Next,        0, 4,        0},    /* 6 */
       { OP_IntegrityCk, 0, 0,        0},    /* 7 */
-      { OP_ColumnName,  0, 0,        "integrity_check"},
-      { OP_Callback,    1, 0,        0},
-      { OP_SetInsert,   1, 0,        "2"},
-      { OP_Integer,     1, 0,        0},
-      { OP_OpenRead,    1, 2,        0},
-      { OP_Rewind,      1, 17,       0},
-      { OP_Column,      1, 3,        0},    /* 14 */
-      { OP_SetInsert,   1, 0,        0},
-      { OP_Next,        1, 14,       0},
-      { OP_IntegrityCk, 1, 1,        0},    /* 17 */
+      { OP_Dup,         0, 1,        0},
+      { OP_String,      0, 0,        "ok"},
+      { OP_StrEq,       0, 12,       0},    /* 10 */
+      { OP_MemIncr,     0, 0,        0},
+      { OP_String,      0, 0,        "*** in database "},
+      { OP_String,      0, 0,        0},    /* 13 */
+      { OP_String,      0, 0,        " ***\n"},
+      { OP_Pull,        3, 0,        0},
+      { OP_Concat,      4, 1,        0},
       { OP_Callback,    1, 0,        0},
     };
-    sqliteVdbeAddOpList(v, ArraySize(checkDb), checkDb);
+
+    /* Code that appears at the end of the integrity check.  If no error
+    ** messages have been generated, output OK.  Otherwise output the
+    ** error message
+    */
+    static VdbeOp endCode[] = {
+      { OP_MemLoad,     0, 0,        0},
+      { OP_Integer,     0, 0,        0},
+      { OP_Ne,          0, 0,        0},    /* 2 */
+      { OP_String,      0, 0,        "ok"},
+      { OP_Callback,    1, 0,        0},
+    };
+
+    /* Initialize the VDBE program */
+    sqliteVdbeAddOpList(v, ArraySize(initCode), initCode);
+
+    /* Do an integrity check on each database file */
+    for(i=0; i<db->nDb; i++){
+      HashElem *x;
+
+      /* Do an integrity check of the B-Tree
+      */
+      addr = sqliteVdbeAddOpList(v, ArraySize(checkDb), checkDb);
+      sqliteVdbeChangeP1(v, addr+1, i);
+      sqliteVdbeChangeP2(v, addr+3, addr+7);
+      sqliteVdbeChangeP2(v, addr+6, addr+4);
+      sqliteVdbeChangeP2(v, addr+7, i);
+      sqliteVdbeChangeP2(v, addr+10, addr+ArraySize(checkDb));
+      sqliteVdbeChangeP3(v, addr+13, db->aDb[i].zName, P3_STATIC);
+
+      /* Make sure all the indices are constructed correctly.
+      */
+      sqliteCodeVerifySchema(pParse, i);
+      for(x=sqliteHashFirst(&db->aDb[i].tblHash); x; x=sqliteHashNext(x)){
+        Table *pTab = sqliteHashData(x);
+        Index *pIdx;
+        int loopTop;
+
+        if( pTab->pIndex==0 ) continue;
+        sqliteVdbeAddOp(v, OP_Integer, i, 0);
+        sqliteVdbeAddOp(v, OP_OpenRead, 1, pTab->tnum);
+        sqliteVdbeChangeP3(v, -1, pTab->zName, P3_STATIC);
+        for(j=0, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, j++){
+          if( pIdx->tnum==0 ) continue;
+          sqliteVdbeAddOp(v, OP_Integer, pIdx->iDb, 0);
+          sqliteVdbeAddOp(v, OP_OpenRead, j+2, pIdx->tnum);
+          sqliteVdbeChangeP3(v, -1, pIdx->zName, P3_STATIC);
+        }
+        sqliteVdbeAddOp(v, OP_Integer, 0, 0);
+        sqliteVdbeAddOp(v, OP_MemStore, 1, 1);
+        loopTop = sqliteVdbeAddOp(v, OP_Rewind, 1, 0);
+        sqliteVdbeAddOp(v, OP_MemIncr, 1, 0);
+        for(j=0, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, j++){
+          int k, jmp2;
+          static VdbeOp idxErr[] = {
+            { OP_MemIncr,     0,  0,  0},
+            { OP_String,      0,  0,  "rowid "},
+            { OP_Recno,       1,  0,  0},
+            { OP_String,      0,  0,  " missing from index "},
+            { OP_String,      0,  0,  0},    /* 4 */
+            { OP_Concat,      4,  0,  0},
+            { OP_Callback,    1,  0,  0},
+          };
+          sqliteVdbeAddOp(v, OP_Recno, 1, 0);
+          for(k=0; k<pIdx->nColumn; k++){
+            int idx = pIdx->aiColumn[k];
+            if( idx==pTab->iPKey ){
+              sqliteVdbeAddOp(v, OP_Recno, 1, 0);
+            }else{
+              sqliteVdbeAddOp(v, OP_Column, 1, idx);
+            }
+          }
+          sqliteVdbeAddOp(v, OP_MakeIdxKey, pIdx->nColumn, 0);
+          if( db->file_format>=4 ) sqliteAddIdxKeyType(v, pIdx);
+          jmp2 = sqliteVdbeAddOp(v, OP_Found, j+2, 0);
+          addr = sqliteVdbeAddOpList(v, ArraySize(idxErr), idxErr);
+          sqliteVdbeChangeP3(v, addr+4, pIdx->zName, P3_STATIC);
+          sqliteVdbeChangeP2(v, jmp2, sqliteVdbeCurrentAddr(v));
+        }
+        sqliteVdbeAddOp(v, OP_Next, 1, loopTop+1);
+        sqliteVdbeChangeP2(v, loopTop, sqliteVdbeCurrentAddr(v));
+        for(j=0, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, j++){
+          static VdbeOp cntIdx[] = {
+             { OP_Integer,      0,  0,  0},
+             { OP_MemStore,     2,  1,  0},
+             { OP_Rewind,       0,  0,  0},  /* 2 */
+             { OP_MemIncr,      2,  0,  0},
+             { OP_Next,         0,  0,  0},  /* 4 */
+             { OP_MemLoad,      1,  0,  0},
+             { OP_MemLoad,      2,  0,  0},
+             { OP_Eq,           0,  0,  0},  /* 7 */
+             { OP_MemIncr,      0,  0,  0},
+             { OP_String,       0,  0,  "wrong # of entries in index "},
+             { OP_String,       0,  0,  0},  /* 10 */
+             { OP_Concat,       2,  0,  0},
+             { OP_Callback,     1,  0,  0},
+          };
+          if( pIdx->tnum==0 ) continue;
+          addr = sqliteVdbeAddOpList(v, ArraySize(cntIdx), cntIdx);
+          sqliteVdbeChangeP1(v, addr+2, j+2);
+          sqliteVdbeChangeP2(v, addr+2, addr+5);
+          sqliteVdbeChangeP1(v, addr+4, j+2);
+          sqliteVdbeChangeP2(v, addr+4, addr+3);
+          sqliteVdbeChangeP2(v, addr+7, addr+ArraySize(cntIdx));
+          sqliteVdbeChangeP3(v, addr+10, pIdx->zName, P3_STATIC);
+        }
+      } 
+    }
+    addr = sqliteVdbeAddOpList(v, ArraySize(endCode), endCode);
+    sqliteVdbeChangeP2(v, addr+2, addr+ArraySize(endCode));
   }else
 
   {}

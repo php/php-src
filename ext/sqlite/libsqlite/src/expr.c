@@ -160,7 +160,7 @@ ExprList *sqliteExprListDup(ExprList *p){
   if( p==0 ) return 0;
   pNew = sqliteMalloc( sizeof(*pNew) );
   if( pNew==0 ) return 0;
-  pNew->nExpr = p->nExpr;
+  pNew->nExpr = pNew->nAlloc = p->nExpr;
   pNew->a = sqliteMalloc( p->nExpr*sizeof(p->a[0]) );
   if( pNew->a==0 ) return 0;
   for(i=0; i<p->nExpr; i++){
@@ -189,7 +189,7 @@ SrcList *sqliteSrcListDup(SrcList *p){
   nByte = sizeof(*p) + (p->nSrc>0 ? sizeof(p->a[0]) * (p->nSrc-1) : 0);
   pNew = sqliteMalloc( nByte );
   if( pNew==0 ) return 0;
-  pNew->nSrc = p->nSrc;
+  pNew->nSrc = pNew->nAlloc = p->nSrc;
   for(i=0; i<p->nSrc; i++){
     pNew->a[i].zDatabase = sqliteStrDup(p->a[i].zDatabase);
     pNew->a[i].zName = sqliteStrDup(p->a[i].zName);
@@ -209,7 +209,7 @@ IdList *sqliteIdListDup(IdList *p){
   if( p==0 ) return 0;
   pNew = sqliteMalloc( sizeof(*pNew) );
   if( pNew==0 ) return 0;
-  pNew->nId = p->nId;
+  pNew->nId = pNew->nAlloc = p->nId;
   pNew->a = sqliteMalloc( p->nId*sizeof(p->a[0]) );
   if( pNew->a==0 ) return 0;
   for(i=0; i<p->nId; i++){
@@ -235,6 +235,8 @@ Select *sqliteSelectDup(Select *p){
   pNew->nLimit = p->nLimit;
   pNew->nOffset = p->nOffset;
   pNew->zSelect = 0;
+  pNew->iLimit = -1;
+  pNew->iOffset = -1;
   return pNew;
 }
 
@@ -251,21 +253,22 @@ ExprList *sqliteExprListAppend(ExprList *pList, Expr *pExpr, Token *pName){
       sqliteExprDelete(pExpr);
       return 0;
     }
+    pList->nAlloc = 0;
   }
-  if( (pList->nExpr & 7)==0 ){
-    int n = pList->nExpr + 8;
+  if( pList->nAlloc<=pList->nExpr ){
     struct ExprList_item *a;
-    a = sqliteRealloc(pList->a, n*sizeof(pList->a[0]));
+    pList->nAlloc = pList->nAlloc*2 + 4;
+    a = sqliteRealloc(pList->a, pList->nAlloc*sizeof(pList->a[0]));
     if( a==0 ){
       sqliteExprDelete(pExpr);
       return pList;
     }
     pList->a = a;
   }
-  if( pExpr || pName ){
+  if( pList->a && (pExpr || pName) ){
     i = pList->nExpr++;
+    memset(&pList->a[i], 0, sizeof(pList->a[i]));
     pList->a[i].pExpr = pExpr;
-    pList->a[i].zName = 0;
     if( pName ){
       sqliteSetNString(&pList->a[i].zName, pName->z, pName->n, 0);
       sqliteDequote(pList->a[i].zName);
@@ -307,6 +310,7 @@ int sqliteExprIsConstant(Expr *p){
     case TK_STRING:
     case TK_INTEGER:
     case TK_FLOAT:
+    case TK_VARIABLE:
       return 1;
     default: {
       if( p->pLeft && !sqliteExprIsConstant(p->pLeft) ) return 0;
@@ -324,22 +328,26 @@ int sqliteExprIsConstant(Expr *p){
 }
 
 /*
-** If the given expression codes a constant integer, return 1 and put
-** the value of the integer in *pValue.  If the expression is not an
-** integer, return 0 and leave *pValue unchanged.
+** If the given expression codes a constant integer that is small enough
+** to fit in a 32-bit integer, return 1 and put the value of the integer
+** in *pValue.  If the expression is not an integer or if it is too big
+** to fit in a signed 32-bit integer, return 0 and leave *pValue unchanged.
 */
 int sqliteExprIsInteger(Expr *p, int *pValue){
   switch( p->op ){
     case TK_INTEGER: {
-      *pValue = atoi(p->token.z);
-      return 1;
+      if( sqliteFitsIn32Bits(p->token.z) ){
+        *pValue = atoi(p->token.z);
+        return 1;
+      }
+      break;
     }
     case TK_STRING: {
       const char *z = p->token.z;
       int n = p->token.n;
       if( n>0 && z[0]=='-' ){ z++; n--; }
       while( n>0 && *z && isdigit(*z) ){ z++; n--; }
-      if( n==0 ){
+      if( n==0 && sqliteFitsIn32Bits(p->token.z) ){
         *pValue = atoi(p->token.z);
         return 1;
       }
@@ -911,6 +919,7 @@ int sqliteExprType(Expr *p){
     case TK_STRING:
     case TK_NULL:
     case TK_CONCAT:
+    case TK_VARIABLE:
       return SQLITE_SO_TEXT;
 
     case TK_LT:
@@ -964,6 +973,8 @@ int sqliteExprType(Expr *p){
   return SQLITE_SO_NUM;
 }
 
+/* Run */
+
 /*
 ** Generate code into the current Vdbe to evaluate the given
 ** expression and leave the result on the top of stack.
@@ -1009,16 +1020,10 @@ void sqliteExprCode(Parse *pParse, Expr *pExpr){
       break;
     }
     case TK_INTEGER: {
-      int iVal = atoi(pExpr->token.z);
-      char zBuf[30];
-      sprintf(zBuf,"%d",iVal);
-      if( strlen(zBuf)!=pExpr->token.n 
-            || strncmp(pExpr->token.z,zBuf,pExpr->token.n)!=0 ){
-        /* If the integer value cannot be represented exactly in 32 bits,
-        ** then code it as a string instead. */
+      if( !sqliteFitsIn32Bits(pExpr->token.z) ){
         sqliteVdbeAddOp(v, OP_String, 0, 0);
       }else{
-        sqliteVdbeAddOp(v, OP_Integer, iVal, 0);
+        sqliteVdbeAddOp(v, OP_Integer, atoi(pExpr->token.z), 0);
       }
       sqliteVdbeChangeP3(v, -1, pExpr->token.z, pExpr->token.n);
       break;
@@ -1038,6 +1043,10 @@ void sqliteExprCode(Parse *pParse, Expr *pExpr){
     }
     case TK_NULL: {
       sqliteVdbeAddOp(v, OP_String, 0, 0);
+      break;
+    }
+    case TK_VARIABLE: {
+      sqliteVdbeAddOp(v, OP_Variable, pExpr->iTable, 0);
       break;
     }
     case TK_LT:
@@ -1081,7 +1090,11 @@ void sqliteExprCode(Parse *pParse, Expr *pExpr){
     case TK_UPLUS: {
       Expr *pLeft = pExpr->pLeft;
       if( pLeft && pLeft->op==TK_INTEGER ){
-        sqliteVdbeAddOp(v, OP_Integer, atoi(pLeft->token.z), 0);
+        if( sqliteFitsIn32Bits(pLeft->token.z) ){
+          sqliteVdbeAddOp(v, OP_Integer, atoi(pLeft->token.z), 0);
+        }else{
+          sqliteVdbeAddOp(v, OP_String, 0, 0);
+        }
         sqliteVdbeChangeP3(v, -1, pLeft->token.z, pLeft->token.n);
       }else if( pLeft && pLeft->op==TK_FLOAT ){
         sqliteVdbeAddOp(v, OP_String, 0, 0);
@@ -1097,7 +1110,7 @@ void sqliteExprCode(Parse *pParse, Expr *pExpr){
         Token *p = &pExpr->pLeft->token;
         char *z = sqliteMalloc( p->n + 2 );
         sprintf(z, "-%.*s", p->n, p->z);
-        if( pExpr->pLeft->op==TK_INTEGER ){
+        if( pExpr->pLeft->op==TK_INTEGER && sqliteFitsIn32Bits(z) ){
           sqliteVdbeAddOp(v, OP_Integer, atoi(z), 0);
         }else{
           sqliteVdbeAddOp(v, OP_String, 0, 0);
