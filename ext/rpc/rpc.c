@@ -34,8 +34,14 @@ static void rpc_unset_property(zval *, zval * TSRMLS_DC);
 static HashTable* rpc_get_properties(zval * TSRMLS_DC);
 static union _zend_function* rpc_get_method(zval *, char *, int TSRMLS_DC);
 static union _zend_function* rpc_get_constructor(zval * TSRMLS_DC);
+static zend_class_entry** rpc_get_class_entry(zval *object TSRMLS_DC);
 static int rpc_get_classname(zval *, char **, zend_uint *, int  TSRMLS_DC);
 static int rpc_compare(zval *, zval * TSRMLS_DC);
+/**/
+
+/* pseudo handler */
+static void rpc_internal_get(rpc_internal *, char *, zend_uint, zval *);
+static void rpc_internal_set(rpc_internal *, char *, zend_uint, zval *);
 /**/
 
 static zend_object_handlers rpc_handlers = {
@@ -55,6 +61,7 @@ static zend_object_handlers rpc_handlers = {
 	rpc_get_method,
 	NULL,
 	rpc_get_constructor,
+	rpc_get_class_entry,
 	rpc_get_classname,
 	rpc_compare
 };
@@ -83,8 +90,8 @@ zend_module_entry rpc_module_entry = {
 /* }}} */
 
 static HashTable *handlers;
-static WormHashTable *instance;
-static WormHashTable *classes;
+static TsHashTable *instance;
+static TsHashTable *classes;
 static zend_llist *classes_list;
 
 #ifdef COMPILE_DL_RPC
@@ -107,13 +114,13 @@ static void rpc_globals_ctor(zend_rpc_globals *rpc_globals TSRMLS_DC)
 ZEND_MINIT_FUNCTION(rpc)
 {
 	handlers = (HashTable *) pemalloc(sizeof(HashTable), TRUE);
-	instance = (WormHashTable *) pemalloc(sizeof(WormHashTable), TRUE);
-	classes = (WormHashTable *) pemalloc(sizeof(WormHashTable), TRUE);
+	instance = (TsHashTable *) pemalloc(sizeof(TsHashTable), TRUE);
+	classes = (TsHashTable *) pemalloc(sizeof(TsHashTable), TRUE);
 	classes_list = (zend_llist *) pemalloc(sizeof(zend_llist), TRUE);
 
 	zend_hash_init(handlers, 0, NULL, NULL, TRUE);	
-	zend_worm_hash_init(instance, 0, NULL, rpc_instance_dtor, TRUE);
-	zend_worm_hash_init(classes, 0, NULL, NULL, TRUE);
+	zend_ts_hash_init(instance, 0, NULL, rpc_instance_dtor, TRUE);
+	zend_ts_hash_init(classes, 0, NULL, NULL, TRUE);
 	zend_llist_init(classes_list, sizeof(rpc_class_hash **), rpc_class_dtor, TRUE);
 
 	FOREACH_HANDLER {
@@ -149,8 +156,8 @@ ZEND_MINIT_FUNCTION(rpc)
 ZEND_MSHUTDOWN_FUNCTION(rpc)
 {
 	/* destroy instances first */
-	zend_worm_hash_destroy(instance);
-	zend_worm_hash_destroy(classes);
+	zend_ts_hash_destroy(instance);
+	zend_ts_hash_destroy(classes);
 
 	zend_llist_destroy(classes_list);
 	zend_hash_destroy(handlers);
@@ -197,8 +204,8 @@ static void rpc_class_dtor(void *pDest)
 
 	hash = (rpc_class_hash **) pDest;
 
-	zend_worm_hash_destroy(&((*hash)->methods));
-	zend_worm_hash_destroy(&((*hash)->properties));
+	zend_ts_hash_destroy(&((*hash)->methods));
+	zend_ts_hash_destroy(&((*hash)->properties));
 
 	free((*hash)->name.str);
 	pefree((*hash), TRUE);
@@ -249,7 +256,7 @@ static zend_object_value rpc_create_object(zend_class_entry *class_type TSRMLS_D
 	tsrm_mutex_lock(instance->mx_writer);
 	{
 		zov->handle = zend_hash_next_free_element(&(instance->hash));
-		zend_worm_hash_next_index_insert(instance, &intern, sizeof(rpc_internal *), NULL);
+		zend_ts_hash_next_index_insert(instance, &intern, sizeof(rpc_internal *), NULL);
 	}
 	tsrm_mutex_unlock(instance->mx_writer);
 
@@ -274,7 +281,7 @@ static void rpc_del_ref(zval *object TSRMLS_DC)
 		}
 
 		if (RPC_REFCOUNT(intern) == 0) {
-			zend_worm_hash_index_del(instance, Z_OBJ_HANDLE(*object));
+			zend_ts_hash_index_del(instance, Z_OBJ_HANDLE(*object));
 		}
 	}
 }
@@ -289,7 +296,7 @@ static void rpc_delete(zval *object TSRMLS_DC)
 		}
 
 		if (RPC_CLONECOUNT(intern) == 0) {
-			zend_worm_hash_index_del(instance, Z_OBJ_HANDLE_P(object));
+			zend_ts_hash_index_del(instance, Z_OBJ_HANDLE_P(object));
 		}
 	}
 }
@@ -313,23 +320,43 @@ static zend_object_value rpc_clone(zval *object TSRMLS_DC)
 
 static zval* rpc_read(zval *object, zval *member, int type TSRMLS_DC)
 {
-//	GET_INTERNAL(intern);
+	zval *return_value;
+	GET_INTERNAL(intern);
 
-	/* FIXME */
-	return NULL;
+	/* seting up the return value and decrease the refcounter as we don't
+	 * keep a reference to this zval.
+	 */
+	MAKE_STD_ZVAL(return_value);
+	ZVAL_DELREF(return_value);
+	ZVAL_NULL(return_value);
+
+	if ((*intern)->hash && Z_TYPE_P(member) == IS_LONG) {
+		rpc_internal_get(*intern, NULL, Z_LVAL_P(member), return_value);
+	} else if (Z_TYPE_P(member) == IS_STRING) {
+		rpc_internal_get(*intern, Z_STRVAL_P(member), Z_STRLEN_P(member), return_value);
+	} else {
+		/* TODO: exception here */
+	}
+
+	return return_value;
 }
 
 static void rpc_write(zval *object, zval *member, zval *value TSRMLS_DC)
 {
-//	GET_INTERNAL(intern);
-	/* FIXME */
+	GET_INTERNAL(intern);
+
+	if ((*intern)->hash && Z_TYPE_P(member) == IS_LONG) {
+		rpc_internal_set(*intern, NULL, Z_LVAL_P(member), value);
+	} else if (Z_TYPE_P(member) == IS_STRING) {
+		rpc_internal_set(*intern, Z_STRVAL_P(member), Z_STRLEN_P(member), value);
+	} else {
+		/* TODO: exception here */
+	}
 }
 
 static zval** rpc_get_property(zval *object, zval *member TSRMLS_DC)
 {
-/* no idea how to return an object - wait for andi */
-
-//	GET_INTERNAL(intern);
+	GET_INTERNAL(intern);
 
 	/* FIXME */
 	return NULL;
@@ -373,7 +400,7 @@ static union _zend_function* rpc_get_method(zval *object, char *method, int meth
 	zend_function *function;
 	GET_INTERNAL(intern);
 
-	if (zend_worm_hash_find(&((*intern)->function_table), method, method_len + 1, &function) != SUCCESS) {
+	if (zend_ts_hash_find(&((*intern)->function_table), method, method_len + 1, &function) != SUCCESS) {
 		zend_internal_function *zif;
 
 		zif = (zend_internal_function *) emalloc(sizeof(zend_internal_function));
@@ -384,7 +411,7 @@ static union _zend_function* rpc_get_method(zval *object, char *method, int meth
 		zif->type = ZEND_INTERNAL_FUNCTION;
 
 		/* add new method to the method table */
-		zend_worm_hash_add(&((*intern)->function_table), method, method_len + 1, zif, sizeof(zend_function), &function);
+		zend_ts_hash_add(&((*intern)->function_table), method, method_len + 1, zif, sizeof(zend_function), &function);
 		efree(zif);
 	}
 
@@ -396,7 +423,7 @@ static union _zend_function* rpc_get_constructor(zval *object TSRMLS_DC)
 	zend_function *rpc_ctor;
 	GET_INTERNAL(intern);
 	
-	if (zend_worm_hash_find(&((*intern)->function_table), (*intern)->ce->name, (*intern)->ce->name_length + 1, &rpc_ctor) != SUCCESS) {
+	if (zend_ts_hash_find(&((*intern)->function_table), (*intern)->ce->name, (*intern)->ce->name_length + 1, &rpc_ctor) != SUCCESS) {
 		zend_internal_function *zif;
 
 		zif = (zend_internal_function *) emalloc(sizeof(zend_internal_function));
@@ -408,11 +435,18 @@ static union _zend_function* rpc_get_constructor(zval *object TSRMLS_DC)
 		zif->handler = ZEND_FN(rpc_load);
 
 		/* add new constructor to the method table */
-		zend_worm_hash_add(&((*intern)->function_table), (*intern)->ce->name, (*intern)->ce->name_length + 1, zif, sizeof(zend_function), &rpc_ctor);
+		zend_ts_hash_add(&((*intern)->function_table), (*intern)->ce->name, (*intern)->ce->name_length + 1, zif, sizeof(zend_function), &rpc_ctor);
 		efree(zif);
 	}
 
 	return rpc_ctor;
+}
+
+static zend_class_entry** rpc_get_class_entry(zval *object TSRMLS_DC)
+{
+	GET_INTERNAL(intern);
+
+	return &((*intern)->ce);
 }
 
 static int rpc_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
@@ -490,12 +524,12 @@ ZEND_FUNCTION(rpc_load)
 				GET_CTOR_SIGNATURE(intern, hash_val, num_args, arg_types);
 
 				/* check if already hashed */	
-				if (zend_worm_hash_find(classes, hash_val.str, hash_val.len + 1, (void **) &class_hash_find) != SUCCESS) {
+				if (zend_ts_hash_find(classes, hash_val.str, hash_val.len + 1, (void **) &class_hash_find) != SUCCESS) {
 					class_hash = pemalloc(sizeof(rpc_class_hash), TRUE);
 
 					/* set up the cache */
-					zend_worm_hash_init(&(class_hash->methods), 0, NULL, rpc_string_dtor, TRUE);
-					zend_worm_hash_init(&(class_hash->properties), 0, NULL, rpc_string_dtor, TRUE);
+					zend_ts_hash_init(&(class_hash->methods), 0, NULL, rpc_string_dtor, TRUE);
+					zend_ts_hash_init(&(class_hash->properties), 0, NULL, rpc_string_dtor, TRUE);
 
 
 					/* do hashing */
@@ -508,17 +542,17 @@ ZEND_FUNCTION(rpc_load)
 					 * also track all instaces in a llist for destruction later on, because there might be duplicate entries in
 					 * the hashtable and we can't determine if a pointer references to an already freed element
 					 */
-					zend_worm_hash_add(classes, hash_val.str, hash_val.len + 1, &class_hash, sizeof(rpc_class_hash *), (void **) &class_hash_find);
+					zend_ts_hash_add(classes, hash_val.str, hash_val.len + 1, &class_hash, sizeof(rpc_class_hash *), (void **) &class_hash_find);
 					tsrm_mutex_lock(classes->mx_writer);
 					zend_llist_add_element(classes_list, class_hash_find);
 					tsrm_mutex_unlock(classes->mx_writer);
 
 					if (class_hash->name.str) {
 						/* register string hashcode */
-						zend_worm_hash_add(classes, class_hash->name.str, class_hash->name.len + 1, &class_hash, sizeof(rpc_class_hash *), NULL);
+						zend_ts_hash_add(classes, class_hash->name.str, class_hash->name.len + 1, &class_hash, sizeof(rpc_class_hash *), NULL);
 					} else if (!class_hash->name.str && ((*(*intern)->handlers)->hash_type & HASH_AS_INT)) {
 						/* register int hashcode */
-						zend_worm_hash_index_update(classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL);
+						zend_ts_hash_index_update(classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL);
 					}
 				} else {
 					class_hash = *class_hash_find;
@@ -529,18 +563,18 @@ ZEND_FUNCTION(rpc_load)
 		}
 	} else {
 		/* integer classname (hashcode) */
-		if (zend_worm_hash_index_find(classes, (*intern)->class_name_len, (void**) &class_hash_find) != SUCCESS) {
+		if (zend_ts_hash_index_find(classes, (*intern)->class_name_len, (void**) &class_hash_find) != SUCCESS) {
 			class_hash = pemalloc(sizeof(rpc_class_hash), TRUE);
 
 			/* set up the cache */
 			class_hash->name.str = NULL;
 			class_hash->name.len = (*intern)->class_name_len;
 
-			zend_worm_hash_init(&(class_hash->methods), 0, NULL, rpc_string_dtor, TRUE);
-			zend_worm_hash_init(&(class_hash->properties), 0, NULL, rpc_string_dtor, TRUE);
+			zend_ts_hash_init(&(class_hash->methods), 0, NULL, rpc_string_dtor, TRUE);
+			zend_ts_hash_init(&(class_hash->properties), 0, NULL, rpc_string_dtor, TRUE);
 
 			/* register int hashcode, we don't know more */
-			zend_worm_hash_index_update(classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL);
+			zend_ts_hash_index_update(classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL);
 		} else {
 			class_hash = *class_hash_find;
 		}
@@ -584,7 +618,7 @@ ZEND_FUNCTION(rpc_call)
 		GET_CLASS(ce);
 
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 2 TSRMLS_CC, "Ol", &object, *ce, &hash_len) != SUCCESS) {
-			if (zend_parse_parameters_ex(0, 2 TSRMLS_CC, "Os", &object, *ce, &hash, &hash_len) != SUCCESS) {
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 2 TSRMLS_CC, "Os", &object, *ce, &hash, &hash_len) != SUCCESS) {
 				/* none of the two possibilities */
 				/* TODO: exception */
 				php_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
@@ -618,14 +652,13 @@ ZEND_FUNCTION(rpc_call)
 				GET_METHOD_SIGNATURE(intern, method_hash, hash_val, num_args, arg_types);
 
 				/* check if already hashed */	
-				if (zend_worm_hash_find(&((*intern)->hash->methods), hash_val.str, hash_val.len + 1, (void **) &method_hash_find) != SUCCESS) {
-					if ((*(*intern)->handlers)->rpc_hash(hash, hash_len, &(method_hash->str), &(method_hash->len),
-														 num_args, arg_types, METHOD) != SUCCESS) {
+				if (zend_ts_hash_find(&((*intern)->hash->methods), hash_val.str, hash_val.len + 1, (void **) &method_hash_find) != SUCCESS) {
+					if ((*(*intern)->handlers)->rpc_hash(hash, hash_len, &(method_hash->str), &(method_hash->len), num_args, arg_types, METHOD) != SUCCESS) {
 						/* TODO: exception */
 					}
 
 					/* register with non-hashed key */
-					zend_worm_hash_add(&((*intern)->hash->methods), hash_val.str, hash_val.len + 1, &method_hash, sizeof(rpc_string *), NULL);
+					zend_ts_hash_add(&((*intern)->hash->methods), hash_val.str, hash_val.len + 1, &method_hash, sizeof(rpc_string *), NULL);
 				} else {
 					pefree(method_hash, TRUE);
 					method_hash = *method_hash_find;
@@ -653,12 +686,107 @@ ZEND_FUNCTION(rpc_call)
 
 ZEND_FUNCTION(rpc_set)
 {
-	/* FIXME */
+	zval *object, *value;
+	char *property = NULL;
+	int property_len;
+	rpc_internal **intern;
+	/* get class entry */
+	GET_CLASS(ce);
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 3 TSRMLS_CC, "Olz", &object, *ce, &property_len, &value) != SUCCESS) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 3 TSRMLS_CC, "Osz", &object, *ce, &property, &property_len, &value) != SUCCESS) {
+			/* none of the two possibilities */
+			/* TODO: exception */
+			php_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
+		}
+	}
+
+	GET_INTERNAL_EX(intern, object);
+	if (!property && !(*intern)->hash) {
+		/* TODO: exception here */
+	} else {
+		rpc_internal_set(*intern, property, property_len, value);
+	}
 }
 
 ZEND_FUNCTION(rpc_get)
 {
-	/* FIXME */
+	zval *object;
+	char *property = NULL;
+	int property_len;
+	rpc_internal **intern;
+	/* get class entry */
+	GET_CLASS(ce);
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 2 TSRMLS_CC, "Ol", &object, *ce, &property_len) != SUCCESS) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 2 TSRMLS_CC, "Os", &object, *ce, &property, &property_len) != SUCCESS) {
+			/* none of the two possibilities */
+			/* TODO: exception */
+			php_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
+		}
+	}
+
+	GET_INTERNAL_EX(intern, object);
+	if (!property && !(*intern)->hash) {
+		/* TODO: exception here */
+	} else {
+		rpc_internal_get(*intern, property, property_len, return_value);
+	}
+}
+
+static void rpc_internal_get(rpc_internal *intern, char *property, zend_uint property_len, zval *return_value)
+{
+	int retval;
+	rpc_string *property_hash, **property_hash_find;
+
+	Z_TYPE_P(return_value) = IS_NULL;
+
+	property_hash = (rpc_string *) pemalloc(sizeof(rpc_string), TRUE);
+	property_hash->str = property;
+	property_hash->len = property_len;
+	
+	if (intern->hash) {
+		/* cache method table lookups */
+	
+		if (!property && !((*intern->handlers)->hash_type & HASH_AS_INT)) {
+			/* TODO: exception */
+		} else if(property) {
+			/* check if already hashed */	
+			if (zend_ts_hash_find(&(intern->hash->properties), property, property_len + 1, (void **) &property_hash_find) != SUCCESS) {
+				if ((*intern->handlers)->rpc_hash(property, property_len, &(property_hash->str), &(property_hash->len), 0, NULL, PROPERTY) != SUCCESS) {
+					/* TODO: exception */
+				}
+
+				/* register with non-hashed key */
+				zend_ts_hash_add(&(intern->hash->properties), property, property_len + 1, &property_hash, sizeof(rpc_string *), NULL);
+			} else {
+				pefree(property_hash, TRUE);
+				property_hash = *property_hash_find;
+			}
+		}
+	}
+
+
+	tsrm_mutex_lock(intern->mx_handler);
+	retval = (*intern->handlers)->rpc_get(property_hash->str, property_hash->len, return_value, intern->data);
+	tsrm_mutex_unlock(intern->mx_handler);
+
+	if (retval != SUCCESS) {
+		/* TODO: exception here */
+	}
+}
+
+static void rpc_internal_set(rpc_internal *intern, char *property, zend_uint property_len, zval *value)
+{
+	int retval;
+
+	tsrm_mutex_lock(intern->mx_handler);
+	retval = (*intern->handlers)->rpc_set(property, property_len, value, intern->data);
+	tsrm_mutex_unlock(intern->mx_handler);
+
+	if (retval != SUCCESS) {
+		/* TODO: exception here */
+	}
 }
 
 /*

@@ -10,7 +10,7 @@
 									/* TODO: exception */							\
 								}
 
-#define GET_INTERNAL_EX(intern, object)	zend_worm_hash_index_find(instance, object->value.obj.handle, (void **) &intern)
+#define GET_INTERNAL_EX(intern, object)	zend_ts_hash_index_find(instance, object->value.obj.handle, (void **) &intern)
 
 #define GET_CLASS(ce)	char *key;																				\
 						int key_len;																			\

@@ -6,7 +6,7 @@ static int com_ctor(char *, zend_uint, void **, int , zval ***);
 static int com_dtor(void **);
 static int com_call(char *, zend_uint, void **, zval **, int, zval ***);
 static int com_get(char *, zend_uint, zval *, void **);
-static int com_set(char *, zend_uint, zval *, zval *, void **);
+static int com_set(char *, zend_uint, zval *, void **);
 static int com_compare(void **, void **);
 static int com_get_classname(char **, zend_uint *, void **);
 static int com_has_property(char *, zend_uint, void **);
@@ -79,7 +79,7 @@ static int com_get(char *property_name, zend_uint property_name_len, zval *retur
 	return SUCCESS;
 }
 
-static int com_set(char *property_name, zend_uint property_name_len, zval *value, zval *return_value, void **data)
+static int com_set(char *property_name, zend_uint property_name_len, zval *value, void **data)
 {
 	return SUCCESS;
 }
