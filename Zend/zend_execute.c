@@ -1977,7 +1977,7 @@ send_by_ref:
 					switch (opline->op2.u.constant.value.lval) {
 						case ZEND_INCLUDE_ONCE:
 						case ZEND_REQUIRE_ONCE: {
-								char *opened_path;
+								char *opened_path=NULL;
 								int dummy = 1;
 								zend_file_handle file_handle;
 
