@@ -344,7 +344,7 @@ PHP_MINIT_FUNCTION(file)
 
 /* }}} */
 /* {{{ proto bool flock(int fp, int operation)
-   portable file locking */
+   Portable file locking */
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
@@ -387,7 +387,7 @@ PHP_FUNCTION(flock)
 
 /* }}} */
 /* {{{ proto array get_meta_tags(string filename [, int use_include_path])
-	Extracts all meta tag content attributes from a file and returns an array */
+   Extracts all meta tag content attributes from a file and returns an array */
 
 PHP_FUNCTION(get_meta_tags)
 {
@@ -613,8 +613,8 @@ PHP_FUNCTION(tempnam)
 }
 
 /* }}} */
-/* {{{ proto int tmpfile()
-   Create a temporary file that will be deleted automatically after use. */
+/* {{{ proto int tmpfile(void)
+   Create a temporary file that will be deleted automatically after use */
 PHP_FUNCTION(tmpfile)
 {
 	FILE *fp;
@@ -693,7 +693,7 @@ PHP_FUNCTION(fopen)
 
 /* }}} */	
 /* {{{ proto int fclose(int fp)
-	Close an open file pointer */
+   Close an open file pointer */
 
 PHP_FUNCTION(fclose)
 {
@@ -1603,7 +1603,7 @@ PHP_FUNCTION(fread)
 
 /* }}} */
 /* {{{ proto array fgetcsv(int fp, int length)
-   get line from file pointer and parse for CSV fields */
+   Get line from file pointer and parse for CSV fields */
  
 PHP_FUNCTION(fgetcsv) {
 	char *temp, *tptr, *bptr;

@@ -80,7 +80,7 @@ static int php_minit_lcg(INIT_FUNC_ARGS)
 }
 
 /* {{{ proto double lcg_value()
-   returns a value from the combined linear congruential generator */
+   Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {
 	RETURN_DOUBLE(php_combined_lcg());
