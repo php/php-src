@@ -91,8 +91,8 @@ static void php_mb_regex_free_cache(mb_regex_t *pre)
 }
 /* }}} */
 
-/* {{{ php_mb_regex_globals_ctor */
-void php_mb_regex_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
+/* {{{ _php_mb_regex_globals_ctor */
+void _php_mb_regex_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
 {
 	MBSTRG(default_mbctype) = MBCTYPE_EUC;
 	MBSTRG(current_mbctype) = MBCTYPE_EUC;
@@ -105,8 +105,8 @@ void php_mb_regex_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_mb_regex_globals_dtor */
-void php_mb_regex_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC) 
+/* {{{ _php_mb_regex_globals_dtor */
+void _php_mb_regex_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC) 
 {
 	zend_hash_destroy(&MBSTRG(ht_rc));
 }

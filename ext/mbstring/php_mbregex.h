@@ -85,8 +85,8 @@ PHP_MINIT_FUNCTION(mb_regex);
 PHP_MSHUTDOWN_FUNCTION(mb_regex);
 PHP_RINIT_FUNCTION(mb_regex);
 PHP_RSHUTDOWN_FUNCTION(mb_regex);
-void php_mb_regex_globals_ctor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
-void php_mb_regex_globals_dtor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
+void _php_mb_regex_globals_ctor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
+void _php_mb_regex_globals_dtor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
 
 PHP_FUNCTION(mb_regex_encoding);
 PHP_FUNCTION(mb_ereg);
