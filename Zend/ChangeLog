@@ -1,3 +1,22 @@
+2002-04-23  Harald Radi  <h.radi@nme.at>
+
+    * zend_hash.c
+      zend_hash.h
+      zend_opcode.c
+      zend_operators.c
+      zend_operators.h
+      zend_ts_hash.c
+      zend_ts_hash.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_API.c
+      zend_API.h
+      zend.h: some type cleanup work
+
 2002-04-22  Harald Radi  <h.radi@nme.at>
 
     * zend_object_handlers.c
