@@ -1,3 +1,83 @@
+2003-01-12  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * zend_modules.h:
+      fix wrong dereferenciation
+
+2003-01-12  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c:
+      fix inheritance
+
+    * zend_API.h:
+      Remove handle_property from here too
+
+    * zend.c
+      zend.h
+      zend_compile.c:
+      RIP handle_* functions. ZE2 will use __ handlers instead.
+
+    * zend_object_handlers.c:
+      Move Z_OBJ_P here.
+
+    * zend_operators.h:
+      Remove Z_OBJ - it's internal to Zend objects, no generic function except
+      those in zend_object_handlers.c should use it.
+      Add Z_OBJ_HANDLER macro for easy access to handlers
+
+2003-01-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.c
+      zend.h
+      zend_builtin_functions.c:
+      ZTS fixes.
+
+2003-01-12  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c:
+      add get_class_name handler
+
+    * zend.c:
+      Use generic handlers instead of Z_OBJ
+
+2003-01-12  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * zend_modules.h:
+      
+
+    * zend_ini.h
+      zend_ini_entry.h
+      zend_modules.h:
+      partially revert previous commit and
+      change zend_modules.h to include
+      a forward declaration to zend_ini_entry
+
+    * zend_ini.h
+      zend_ini_entry.h
+      zend_modules.h:
+      added zend_ini_entry to zend_modules_entry as
+      discussed with zeev
+
+    * zend_builtin_functions.c:
+      fix 'use of uninitialized variable' warning
+
+2003-01-12  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_objects_API.c:
+      validate handle
+
+2003-01-12  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_ini.c
+      zend_ini.h
+      zend_variables.c:
+      Implemented compatibility mode
+      To enable - zend2.implicit_clone = on in php.ini or using ini_set()
+
 2003-01-11  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c:

@@ -1,3 +1,100 @@
+2003-01-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug21600.phpt:
+      
+      Added test case for bug #21600
+
+    * ext/standard/filters.c:
+      Fixed a bug of the base64 decoder that a sequence of intervening
+      characters that are supposed to be ignored by the decoder cause output
+      corruption.
+
+2003-01-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/aggregation.c:
+      ZE2 compatibility
+
+2003-01-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.c:
+      ZTS fixes.
+
+2003-01-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/aggregation.c:
+      Disable ZE2-incompatible parts
+
+    * ext/standard/var.c:
+      remove unneeded var
+
+2003-01-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Fixed infinite loop bug when an invalid quoted-printable escape sequence
+      appears in the streem.
+
+    * ext/standard/filters.c:
+      Fixed error msg format so it correctly reports the actual filter name
+
+2003-01-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-recommended:
+      recommending SHA-1 as hash function
+
+    * php.ini-dist:
+      sync entries
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/session/php_session.h
+      ext/session/session.c:
+      add INI setting session.hash_function
+      add support for creating session ids using SHA-1
+      source more entropy for session ids
+
+    * ext/session/mod_files.c:
+      handle ERANGE from strtol properly
+
+2003-01-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      . Updated quoted-printable filter by a neater implementation.
+      . Changed emalloc family functions to pemalloc ones for persistent
+      filters.
+      . Changed base64 and quoted-printable filter names to
+      "convert.base64-encode",
+        "convert.base64-decode", "convert.quoted-printable-encode", and
+        "convert.quoted-printable-decode" respectively for the consistency that
+        may be requested later.
+
+2003-01-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS:
+      - Update NEWS to show 5.0.0
+
+2003-01-12  Jan Lehnardt  <jan@dasmoped.net>
+
+    * run-tests.php:
+       - fix typo
+
+2003-01-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/rpc/java/config.m4
+      sapi/servlet/Makefile.frag
+      sapi/servlet/config.m4
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.java:
+      Patch by Giuseppe Tanzilli <g.tanzilli@gruppocsf.com>.
+
+2003-01-12  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      Release skiped results. This will free memory on the server.
+      Make mssql_execute work for stored procedures with and without returning
+      result sets
+
 2003-01-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/sybase_ct/php_sybase_ct.c:
