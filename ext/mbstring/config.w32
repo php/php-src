@@ -13,8 +13,9 @@ if (PHP_MBSTRING == "yes") {
 	
 	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", null,
 		"-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
-		/D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 /D HAVE_STDARG_PROTOTYPES=1 \
-		/D HAVE_CONFIG_H /D HAVE_STDLIB_H /D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /D EXPORT");
+		-Iext/mbstring/oniguruma /D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 \
+		/D HAVE_STDARG_PROTOTYPES=1 /D HAVE_CONFIG_H /D HAVE_STDLIB_H \
+		/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /D EXPORT");
 	
 	ADD_SOURCES("ext/mbstring/libmbfl/filters", "html_entities.c \
 		mbfilter_7bit.c mbfilter_ascii.c mbfilter_base64.c mbfilter_big5.c \
@@ -41,13 +42,13 @@ if (PHP_MBSTRING == "yes") {
 
 	AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
 	AC_DEFINE('HAVE_MBSTR_CN', 1, 'CN');
-	AC_DEFINE('HAVE_MBSTR_JA', 1, 'CN');
-	AC_DEFINE('HAVE_MBSTR_KR', 1, 'CN');
-	AC_DEFINE('HAVE_MBSTR_RU', 1, 'CN');
-	AC_DEFINE('HAVE_MBSTR_TW', 1, 'CN');
-	AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
+	AC_DEFINE('HAVE_MBSTR_JA', 1, 'JA');
+	AC_DEFINE('HAVE_MBSTR_KR', 1, 'KR');
+	AC_DEFINE('HAVE_MBSTR_RU', 1, 'RU');
+	AC_DEFINE('HAVE_MBSTR_TW', 1, 'TW');
 
 	if (PHP_MBREGEX == "yes") {
+		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
 		ADD_SOURCES("ext/mbstring/oniguruma", "regcomp.c regerror.c \
 			regenc.c regexec.c reggnu.c regparse.c regposerr.c", "mbstring");
 		ADD_SOURCES("ext/mbstring/oniguruma/enc", "ascii.c big5.c \
