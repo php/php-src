@@ -75,6 +75,7 @@
 
 #include "php.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -577,8 +578,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 	/*
 	 * Flag variables
 	 */
-	boolean_e is_long;
-	boolean_e is_size_t;
+	length_modifier_e modifier;
 	boolean_e alternate_form;
 	boolean_e print_sign;
 	boolean_e print_blank;
@@ -669,17 +669,43 @@ static int format_converter(register buffy * odp, const char *fmt,
 			/*
 			 * Modifier check
 			 */
-			if (*fmt == 'l') {
-				is_long = YES;
-				is_size_t = NO;
-				fmt++;
-			} else if (*fmt == 'z') {
-				is_size_t = YES;
-				is_long = NO;
-				fmt++;
-			} else {
-				is_size_t = NO;
-				is_long = NO;
+			switch (*fmt) {
+				case 'l':
+					fmt++;
+#if SIZEOF_LONG_LONG
+					if (*fmt == 'l') {
+						fmt++;
+						modifier = LM_LONG_LONG;
+					} else
+#endif
+						modifier = LM_LONG;
+					break;
+				case 'z':
+					modifier = LM_SIZE_T;
+					break;
+				case 'j':
+#if SIZEOF_INTMAX_T
+					modifier = LM_INTMAX_T;
+#else
+					modifier = LM_SIZE_T;
+#endif
+					break;
+				case 't':
+#if SIZEOF_PTRDIFF_T
+					modifier = LM_PTRDIFF_T;
+#else
+					modifier = LM_SIZE_T;
+#endif
+					break;
+				case 'h':
+					fmt++;
+					if (*fmt == 'h') {
+						fmt++;
+					}
+					/* these are promoted to int, so no break */
+				default:				
+					modifier = LM_STD;
+					break;
 			}
 
 			/*
@@ -695,12 +721,32 @@ static int format_converter(register buffy * odp, const char *fmt,
 			 */
 			switch (*fmt) {
 				case 'u':
-					if (is_long)
-						i_num = va_arg(ap, u_wide_int);
-					else if (is_size_t)
-						i_num = (wide_int) va_arg(ap, size_t);
-					else
-						i_num = (wide_int) va_arg(ap, unsigned int);
+					switch(modifier) {
+						default:
+							i_num = (wide_int) va_arg(ap, unsigned int);
+							break;
+						case LM_LONG:
+							i_num = (wide_int) va_arg(ap, unsigned long int);
+							break;
+						case LM_SIZE_T:
+							i_num = (wide_int) va_arg(ap, size_t);
+							break;
+#if SIZEOF_LONG_LONG
+						case LM_LONG_LONG:
+							i_num = (wide_int) va_arg(ap, u_wide_int);
+							break;
+#endif
+#if SIZEOF_INTMAX_T
+						case LM_INTMAX_T:
+							i_num = (wide_int) va_arg(ap, uintmax_t);
+							break;
+#endif
+#if SIZEOF_PTRDIFF_T
+						case LM_PTRDIFF_T:
+							i_num = (wide_int) va_arg(ap, ptrdiff_t);
+							break;
+#endif
+					}
 					/*
 					 * The rest also applies to other integer formats, so fall
 					 * into that case.
@@ -711,13 +757,37 @@ static int format_converter(register buffy * odp, const char *fmt,
 					 * Get the arg if we haven't already.
 					 */
 					if ((*fmt) != 'u') {
-						if (is_long)
-							i_num = va_arg(ap, wide_int);
-						else if (is_size_t)
-							i_num = (wide_int) va_arg(ap, size_t);
-						else
-							i_num = (wide_int) va_arg(ap, int);
-					};
+						switch(modifier) {
+							default:
+								i_num = (wide_int) va_arg(ap, int);
+								break;
+							case LM_LONG:
+								i_num = (wide_int) va_arg(ap, long int);
+								break;
+							case LM_SIZE_T:
+#if SIZEOF_SSIZE_T
+								i_num = (wide_int) va_arg(ap, ssize_t);
+#else
+								i_num = (wide_int) va_arg(ap, size_t);
+#endif
+								break;
+#if SIZEOF_LONG_LONG
+							case LM_LONG_LONG:
+								i_num = (wide_int) va_arg(ap, wide_int);
+								break;
+#endif
+#if SIZEOF_INTMAX_T
+							case LM_INTMAX_T:
+								i_num = (wide_int) va_arg(ap, intmax_t);
+								break;
+#endif
+#if SIZEOF_PTRDIFF_T
+							case LM_PTRDIFF_T:
+								i_num = (wide_int) va_arg(ap, ptrdiff_t);
+								break;
+#endif
+						}
+					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -734,12 +804,32 @@ static int format_converter(register buffy * odp, const char *fmt,
 
 
 				case 'o':
-					if (is_long)
-						ui_num = va_arg(ap, u_wide_int);
-					else if (is_size_t)
-						ui_num = (u_wide_int) va_arg(ap, size_t);
-					else
-						ui_num = (u_wide_int) va_arg(ap, unsigned int);
+					switch(modifier) {
+						default:
+							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							break;
+						case LM_LONG:
+							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							break;
+						case LM_SIZE_T:
+							ui_num = (u_wide_int) va_arg(ap, size_t);
+							break;
+#if SIZEOF_LONG_LONG
+						case LM_LONG_LONG:
+							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							break;
+#endif
+#if SIZEOF_INTMAX_T
+						case LM_INTMAX_T:
+							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							break;
+#endif
+#if SIZEOF_PTRDIFF_T
+						case LM_PTRDIFF_T:
+							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
+							break;
+#endif
+					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -752,12 +842,32 @@ static int format_converter(register buffy * odp, const char *fmt,
 
 				case 'x':
 				case 'X':
-					if (is_long)
-						ui_num = (u_wide_int) va_arg(ap, u_wide_int);
-					else if (is_size_t)
-						ui_num = (u_wide_int) va_arg(ap, size_t);
-					else
-						ui_num = (u_wide_int) va_arg(ap, unsigned int);
+					switch(modifier) {
+						default:
+							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							break;
+						case LM_LONG:
+							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							break;
+						case LM_SIZE_T:
+							ui_num = (u_wide_int) va_arg(ap, size_t);
+							break;
+#if SIZEOF_LONG_LONG
+						case LM_LONG_LONG:
+							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							break;
+#endif
+#if SIZEOF_INTMAX_T
+						case LM_INTMAX_T:
+							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							break;
+#endif
+#if SIZEOF_PTRDIFF_T
+						case LM_PTRDIFF_T:
+							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
+							break;
+#endif
+					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -865,7 +975,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 					 */
 				case 'p':
 					if (sizeof(char *) <= sizeof(u_wide_int)) {
-						ui_num = (u_wide_int) va_arg(ap, char *);
+						ui_num = (u_wide_int)((size_t) va_arg(ap, char *));
 						s = ap_php_conv_p2(ui_num, 4, 'x', 
 								&num_buf[NUM_BUF_SIZE], &s_len);
 						if (i_num != 0) {

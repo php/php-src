@@ -83,12 +83,35 @@ typedef enum {
 	NO = 0, YES = 1
 } boolean_e;
 
+typedef enum {
+	LM_STD = 0,
+#if SIZEOF_INTMAX_T
+	LM_INTMAX_T,
+#endif
+#if SIZEOF_PTRDIFF_T
+	LM_PTRDIFF_T,
+#endif
+#if SIZEOF_LONG_LONG
+	LM_LONG_LONG,
+#endif
+	LM_SIZE_T,
+	LM_LONG
+} length_modifier_e;
+
 extern char * ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf);
 extern char * ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf);
 extern char * ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf);
 extern char * ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform);
 
-#define WIDE_INT		long
+#if SIZEOF_LONG_LONG_INT
+# define WIDE_INT		long long int
+#elif SIZEOF_LONG_LONG
+# define WIDE_INT		long long
+#elif _WIN64
+# define WIDE_INT		__int64
+#else
+# define WIDE_INT		long
+#endif
 typedef WIDE_INT wide_int;
 typedef unsigned WIDE_INT u_wide_int;
 
