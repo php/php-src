@@ -83,6 +83,7 @@ PHP_FUNCTION(pg_fetch_object);
 PHP_FUNCTION(pg_fetch_result);
 PHP_FUNCTION(pg_fetch_row);
 PHP_FUNCTION(pg_fetch_all);
+PHP_FUNCTION(pg_data_seek);
 PHP_FUNCTION(pg_affected_rows);
 PHP_FUNCTION(pg_get_result);
 PHP_FUNCTION(pg_result_status);

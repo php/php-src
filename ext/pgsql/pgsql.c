@@ -100,6 +100,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_fetch_array,	NULL)
 	PHP_FE(pg_fetch_object,	NULL)
 	PHP_FE(pg_fetch_all,	NULL)
+	PHP_FE(pg_data_seek,	NULL)
 	PHP_FE(pg_affected_rows,NULL)
 	PHP_FE(pg_get_result,	NULL)
 	PHP_FE(pg_result_status,NULL)
@@ -1415,6 +1416,37 @@ PHP_FUNCTION(pg_fetch_all)
 	}
 }
 /* }}} */
+
+/* {{{ proto mixed pg_data_seek(resource result, int offset)
+   Set internal row offset */
+PHP_FUNCTION(pg_data_seek)
+{
+	zval *result;
+	int row;
+	PGresult *pgsql_result;
+	pgsql_result_handle *pg_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l",
+							  &result, &row) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, &result, -1, "PostgreSQL result", le_result);
+
+	/* Let see if we are better to have another function for this */
+	/* if offset is omitted, return current position */
+/* 	if (ZEND_NUM_ARGS() == 1) */
+/* 		RETURN_LONG(pg_result->row); */
+
+	if (row < 0 || row >= PQntuples(pg_result))
+		RETURN_FALSE;
+	
+	/* seek to offset */
+	pg_result->row = row;
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 #define PHP_PG_DATA_LENGTH 1
 #define PHP_PG_DATA_ISNULL 2
