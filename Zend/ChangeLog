@@ -1,3 +1,12 @@
+2003-10-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h:
+      Add oo support function zend_class_implements()
+
+    * zend_default_classes.c:
+      Fix cast function
+
 2003-10-14  Andi Gutmans  <andi@zend.com>
 
     * zend_mm.c:
