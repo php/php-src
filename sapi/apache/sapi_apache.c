@@ -89,6 +89,9 @@ int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC ELS_DC
 		(void) php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	}
 	
+        if (setjmp(EG(bailout))!=0) {
+		return OK;
+	}
 	php_header();			/* Make sure headers have been sent */
 	php_end_ob_buffers(1);
 	return (OK);
