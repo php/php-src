@@ -86,6 +86,7 @@ PHP_FUNCTION(mail)
 	char *subject=NULL, *extra_cmd=NULL;
 	int to_len, message_len, headers_len;
 	int subject_len, extra_cmd_len, i;
+	char *to_r, *subject_r;
 
 	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE.");
@@ -103,45 +104,51 @@ PHP_FUNCTION(mail)
 	}
 
 	if (to_len > 0) {
+		to_r = estrndup(to, to_len);
 		for (; to_len; to_len--) {
-			if (!isspace((unsigned char) to[to_len - 1])) {
+			if (!isspace((unsigned char) to_r[to_len - 1])) {
 				break;
 			}
-			to[to_len - 1] = '\0';
+			to_r[to_len - 1] = '\0';
 		}
-		for (i = 0; to[i]; i++) {
-			if (iscntrl((unsigned char) to[i])) {
+		for (i = 0; to_r[i]; i++) {
+			if (iscntrl((unsigned char) to_r[i])) {
 				/* According to RFC 822, section 3.1.1 long headers may be separated into
 				 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
 				 * To prevent these separators from being replaced with a space, we use the
 				 * SKIP_LONG_HEADER_SEP to skip over them.
 				 */
-				SKIP_LONG_HEADER_SEP(to, i);
-				to[i] = ' ';
+				SKIP_LONG_HEADER_SEP(to_r, i);
+				to_r[i] = ' ';
 			}
 		}
+	} else {
+		to_r = to;
 	}
 
 	if (subject_len > 0) {
+		subject_r = estrndup(subject, subject_len);
 		for (; subject_len; subject_len--) {
-			if (!isspace((unsigned char) subject[subject_len - 1])) {
+			if (!isspace((unsigned char) subject_r[subject_len - 1])) {
 				break;
 			}
-			subject[subject_len - 1] = '\0';
+			subject_r[subject_len - 1] = '\0';
 		}
 		for(i = 0; subject[i]; i++) {
-			if (iscntrl((unsigned char) subject[i])) {
-				SKIP_LONG_HEADER_SEP(subject, i);
-				subject[i] = ' ';
+			if (iscntrl((unsigned char) subject_r[i])) {
+				SKIP_LONG_HEADER_SEP(subject_r, i);
+				subject_r[i] = ' ';
 			}
 		}
+	} else {
+		subject_r = subject;
 	}
 
 	if (extra_cmd) {
 		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 	
-	if (php_mail(to, subject, message, headers, extra_cmd TSRMLS_CC)) {
+	if (php_mail(to_r, subject_r, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -149,6 +156,12 @@ PHP_FUNCTION(mail)
 
 	if (extra_cmd) {
 		efree (extra_cmd);
+	}
+	if (to_len > 0) {
+		efree(to_r);
+	}
+	if (subject_len > 0) {
+		efree(subject_r);
 	}
 }
 /* }}} */

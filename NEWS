@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   on request shutdown). (Wez)
 - Fixed multibyte regex engine to properly handle ".*" pattern under
   POSIX compatible mode. (K.Kosako <kosako at sofnec.co.jp>, Moriyoshi)
+- Fixed bug #25923 (mail() modifies the to & subject arguments). (Ilia)
 - Fixed bug #25895 (Incorrect detection of safe_mode limited ini options).
   (Ilia)
 - Fixed bug #25836 (last key of multi-dimensional array passed via GPC not
