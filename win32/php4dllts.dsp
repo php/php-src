@@ -17,10 +17,10 @@ CFG=php4dllts - Win32 Debug_TS
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "php4dllts - Win32 Debug_TS" (basierend auf  "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TS" (basierend auf  "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TS_inline" (basierend auf  "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TSDbg" (basierend auf  "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TSDbg" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
