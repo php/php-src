@@ -259,13 +259,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		struct sockaddr_in server;
 
 		memset(&server, 0, sizeof(server));
-		if(Z_STRLEN_PP(args[0]) >= 6 &&
-		   (*args[0])->value.str.val[0] == 'u' &&
-		   (*args[0])->value.str.val[1] == 'd' &&
-		   (*args[0])->value.str.val[2] == 'p' &&
-		   (*args[0])->value.str.val[3] == ':' &&
-		   (*args[0])->value.str.val[4] == '/' &&
-		   (*args[0])->value.str.val[5] == '/') {
+		if(Z_STRLEN_PP(args[0]) >= 6 && !memcmp(Z_STRVAL_PP(args[0]), "udp://", sizeof("udp://")-1)) {
 			udp = 1;
 		}
 		
