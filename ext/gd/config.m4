@@ -16,7 +16,6 @@ AC_DEFUN(PHP_GD_JPEG,[
           AC_MSG_RESULT(no)
           AC_MSG_WARN(If configure fails try --with-jpeg-dir=<DIR>)
         ]) 
-        AC_CHECK_LIB(gd, gdImageCreateFromJpeg, [AC_DEFINE(HAVE_GD_JPG, 1, [ ])])
 ])
 
 
@@ -39,7 +38,6 @@ AC_DEFUN(PHP_GD_XPM,[
           AC_MSG_RESULT(no)
           AC_MSG_WARN(If configure fails try --with-xpm-dir=<DIR>)
         ]) 
-        AC_CHECK_LIB(gd, gdImageCreateFromXpm, [AC_DEFINE(HAVE_GD_XPM, 1, [ ])])
 ])
 
 
@@ -54,6 +52,8 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
         AC_CHECK_LIB(gd, gdImageCreateFromGif,   [AC_DEFINE(HAVE_GD_GIF,  1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromXbm,   [AC_DEFINE(HAVE_GD_XBM,  1, [ ])])
         AC_CHECK_LIB(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM, 1, [ ])])
 ])
 
 
@@ -69,6 +69,7 @@ AC_ARG_ENABLE(gd-native-ttf,
 ],[
   AC_MSG_RESULT(no)
 ])
+
 
 shared=no
 AC_MSG_CHECKING(whether to include GD support)
