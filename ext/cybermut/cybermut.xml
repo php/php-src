@@ -158,7 +158,7 @@ if ($mac_ok) {
 
   $result=creditmut_creerreponsecm("OK");
   } else {
-  $result=creditmut_creerreponsecm("Document Falsifié");}
+  $result=creditmut_creerreponsecm("Document Falsifie");}
  
 ?>
      </programlisting>
