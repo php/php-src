@@ -313,7 +313,7 @@ ZEND_API int zend_fetch_list_dtor_id(char *type_name)
 	HashPosition pos;
 
 	zend_hash_internal_pointer_reset_ex(&list_destructors, &pos);
-	while(zend_hash_get_current_data_ex(&list_destructors, (void **)&lde, &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(&list_destructors, (void **)&lde, &pos) == SUCCESS) {
 		if (strcmp(type_name, lde->type_name) == 0) {
 #if 0
 			printf("Found resource id %d for resource type %s\n", (*lde).resource_id, type_name);

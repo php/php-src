@@ -444,7 +444,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						 * the value of an assignment to a string offset is undefined
 						Ts[result->u.var].var = &T->EA.data.str_offset.str;
 						*/
-					} while(0);
+					} while (0);
 					/* zval_ptr_dtor(&T->EA.data.str_offset.str); Nuke this line if it doesn't cause a leak */
 					T->tmp_var.type = IS_STRING;
 				}
@@ -1778,7 +1778,7 @@ binary_assign_op_addr_obj:
 						ulong dummy;
 
 						zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
-						while(zend_hash_get_current_data_ex(&ce->constants_table, (void **)&import_constant, &pos) == SUCCESS) {
+						while (zend_hash_get_current_data_ex(&ce->constants_table, (void **)&import_constant, &pos) == SUCCESS) {
 							key_type = zend_hash_get_current_key_ex(&ce->constants_table, &key, &key_length, &dummy, 0, &pos);
 
 							c.value = **import_constant;
