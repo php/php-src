@@ -30,12 +30,14 @@ static int php_ub_body_write_no_header(const char *str, uint str_length);
 static int php_b_body_write(const char *str, uint str_length);
 
 static void php_ob_init(uint initial_size, uint block_size);
-static void php_ob_destroy();
+static void php_ob_destroy(void);
 static void php_ob_append(const char *text, uint text_length);
+#if 0
 static void php_ob_prepend(const char *text, uint text_length);
-static inline void php_ob_send();
+#endif
+static inline void php_ob_send(void);
 
-void php_start_ob_buffering();
+void php_start_ob_buffering(void);
 void php_end_ob_buffering(int send_buffer);
 int php_ob_get_buffer(pval *p);
 
@@ -58,7 +60,7 @@ typedef struct {
 #define OLS_FETCH() php_output_globals *output_globals = ts_resource(output_globals_id)
 int output_globals_id;
 #else
-#define OLS_D
+#define OLS_D void
 #define OLS_C
 #define OG(v) (output_globals.v)
 #define OLS_FETCH()
@@ -188,7 +190,7 @@ PHPAPI void php_end_ob_buffering(int send_buffer)
  * Output buffering - implementation
  */
 
-static inline void php_ob_allocate()
+static inline void php_ob_allocate(void)
 {
 	OLS_FETCH();
 
@@ -241,7 +243,7 @@ static void php_ob_append(const char *text, uint text_length)
 	target[text_length]=0;
 }
 
-
+#if 0
 static void php_ob_prepend(const char *text, uint text_length)
 {
 	char *p, *start;
@@ -260,7 +262,7 @@ static void php_ob_prepend(const char *text, uint text_length)
 	memcpy(OG(ob_buffer), text, text_length);
 	OG(ob_buffer)[OG(ob_text_length)]=0;
 }
-
+#endif
 
 static inline void php_ob_send()
 {

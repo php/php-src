@@ -33,6 +33,8 @@
 #include "zend_execute.h"
 #include "php_globals.h"
 
+int php_tag_find(char *tag, int len, char *set);
+
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
 

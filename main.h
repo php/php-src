@@ -38,7 +38,7 @@ PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 
 PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC);
 
-extern void php3_call_shutdown_functions(void);
+extern void php_call_shutdown_functions(void);
 
 
 /* configuration module */

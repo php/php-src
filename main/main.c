@@ -793,7 +793,7 @@ void php_request_shutdown(void *dummy)
 	sapi_send_headers();
 	php_end_ob_buffering(SG(request_info).headers_only?0:1);
 
-	php3_call_shutdown_functions();
+	php_call_shutdown_functions();
 	
 	php_ini_rshutdown();
 

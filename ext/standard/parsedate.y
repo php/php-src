@@ -70,6 +70,7 @@ extern time_t timezone;
 #define yytable		date_yytable
 #define yycheck		date_yycheck
 #define yyparse		date_parse
+#define yyparse		date_parse
 #define yylex		date_lex
 #define yyerror		date_error
 
@@ -101,6 +102,8 @@ typedef struct _TIMEINFO {
     long usec;
     long tzone;
 } TIMEINFO;
+
+int GetTimeInfo(TIMEINFO *Now);
 
 typedef char const      *STRING;
 typedef char * const    CSTRING;
@@ -151,9 +154,9 @@ static time_t	yyRelMonth;
 static time_t	yyRelSeconds;
 
 
-extern struct tm	*localtime();
+extern struct tm	*localtime(const time_t *timep);
 
-static void		date_error();
+static void		date_error(char *s);
 %}
 
 %expect 6
@@ -526,8 +529,7 @@ static TABLE	TimezoneTable[] = {
 
 /* ARGSUSED */
 static void
-date_error(s)
-    char	*s;
+date_error(char *s)
 {
     /* NOTREACHED */
 }
@@ -594,11 +596,7 @@ int GetTimeInfo(TIMEINFO *Now)
 
 
 static time_t
-ToSeconds(Hours, Minutes, Seconds, Meridian)
-    time_t	Hours;
-    time_t	Minutes;
-    time_t	Seconds;
-    MERIDIAN	Meridian;
+ToSeconds(time_t Hours, time_t Minutes, time_t Seconds, MERIDIAN Meridian)
 {
     if (Minutes < 0 || Minutes > 59 || Seconds < 0 || Seconds > 61)
 	return -1;
@@ -619,15 +617,7 @@ ToSeconds(Hours, Minutes, Seconds, Meridian)
 
 
 static time_t
-Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, dst)
-    time_t	Month;
-    time_t	Day;
-    time_t	Year;
-    time_t	Hours;
-    time_t	Minutes;
-    time_t	Seconds;
-    MERIDIAN	Meridian;
-    DSTMODE	dst;
+Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes, time_t Seconds, MERIDIAN Meridian, DSTMODE dst)
 {
     static int	DaysNormal[13] = {
 	0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
@@ -683,9 +673,7 @@ Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, dst)
 
 
 static time_t
-DSTcorrect(Start, Future)
-    time_t	Start;
-    time_t	Future;
+DSTcorrect(time_t Start, time_t Future)
 {
     time_t	StartDay;
     time_t	FutureDay;
@@ -697,9 +685,7 @@ DSTcorrect(Start, Future)
 
 
 static time_t
-RelativeMonth(Start, RelMonth)
-    time_t	Start;
-    time_t	RelMonth;
+RelativeMonth(time_t Start, time_t RelMonth)
 {
     struct tm	*tm, tmbuf;
     time_t	Month;
@@ -870,7 +856,11 @@ static int date_lex(void)
 
 time_t parsedate(char *p, TIMEINFO *now)
 {
-    extern int		date_parse();
+#ifdef YYPARSE_PARAM
+	extern int date_parse (void *);
+#else
+	extern int date_parse (void);
+#endif
     struct tm		*tm, tmbuf;
     TIMEINFO		ti;
     time_t		Start;
