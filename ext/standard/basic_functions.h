@@ -128,6 +128,7 @@ PHP_FUNCTION(shift);
 PHP_FUNCTION(unshift);
 PHP_FUNCTION(splice);
 PHP_FUNCTION(slice);
+PHP_FUNCTION(array_merge);
 
 #if HAVE_PUTENV
 typedef struct {
