@@ -32,18 +32,17 @@ else
     ECHO_C='\c'
 fi
 
-ECHO_E="echo -e"	# Any portability problems? If, how to test.
-
 echo "Creating directory"
 
 mkdir $extname || givup "Cannot create directory $extname"
 
+if [ ! -z $functions ]; then
+    echo $functions
+    cat $functions | awk -v extname=$extname -f ./skeleton/create_stubs
+fi
+
 cd $extname
 chmod 755 .
-
-if [ ! -z $functions ]; then
-    cat $functions | awk -f ../skeleton/create_stubs
-fi
 
 $ECHO_N "Creating basic files:$ECHO_C"
 
@@ -129,6 +128,14 @@ if [ ! -z $functions ]; then
     rm function_entries
     rm function_declarations
     rm function_stubs
+    if [ -f function_warning ]; then
+	rm function_warning
+	warning="
+NOTE! Because some arguments to functions were resources, the code generated
+cannot yet be compiled without editing. Please consider this to be step 4.5
+in the instructions above. 
+"
+    fi
 fi
 
 chmod 644 *
@@ -151,5 +158,5 @@ To use your new extension, you will have to execute the following steps:
 Repeat steps 3-6 until you are satisfied with ext/$extname/config.m4 and
 step 6 confirms that your module is compiled in PHP. Then, start writing
 code and repeat the last two steps as often as necessary.
-
+$warning
 eof
