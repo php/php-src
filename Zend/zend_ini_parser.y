@@ -27,13 +27,6 @@
 #include "zend_ini_scanner.h"
 #include "zend_extensions.h"
 
-
-#if WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <winbase.h>
-#endif
-
 #define YYSTYPE zval
 
 #ifdef ZTS
