@@ -1,3 +1,43 @@
+2000-09-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * EXTENSIONS: - The mcrypt extension also works with 2.4.4 since php 4.0.2
+
+2000-09-07  Stig Venaas  <venaas@uninett.no>
+
+    * main/network.c
+      configure.in: Better IPv6 checking
+
+2000-09-07  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/dir.c: Fix readdir bug in libc5
+
+2000-09-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/DB/common.php
+      pear/DB/storage.php
+      pear/PEAR.php.in
+      pear/tests/DB_Error.phpt:
+    - Converted __string_value() to toString(), since the former is obsolete.
+    - Made sure DB results are freed where necessary.
+    - Made DB::getAssoc() use $params if passed.
+    - Implemented DB::getAll().
+
+    * NEWS: Wrap long lines.
+
+2000-09-07  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: -
+
+    * main/php.h: - Smarter detection of MAXPATHLEN
+
+2000-09-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/sockets/php_sockets.h: make ZTS mode compile
+
+2000-09-07  Zeev Suraski  <zeev@zend.com>
+
+    * main/rfc1867.c: Send $HTTP_POST_FILES to the right place
+
 2000-09-06  Sascha Schumann  <sascha@schumann.cx>
 
     * main/php_version.h: 4.0.3-dev
