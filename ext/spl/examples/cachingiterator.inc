@@ -24,7 +24,11 @@ class CachingIterator
 		if ($this->more = $this->it->hasMore()) {
 			$this->current = $this->it->current();
 			$this->key = $this->it->key();
-			$this->strvalue = (string)$this->current;
+			if (is_object($this->current)) {
+				$this->strvalue = $this->current->__toString();
+			} else {
+				$this->strvalue = (string)$this->current;
+			}
 		} else {
 			$this->current = NULL;
 			$this->key = NULL;
