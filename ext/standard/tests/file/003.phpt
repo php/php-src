@@ -1,5 +1,5 @@
 --TEST--
-is_file/file_exist
+is_*() and file_exists() return values are boolean.
 --POST--
 --GET--
 --FILE--
@@ -7,5 +7,11 @@ is_file/file_exist
 --EXPECT--
 bool(false)
 bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
 bool(true)
 bool(true)

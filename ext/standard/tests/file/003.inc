@@ -1,19 +1,27 @@
 <?php
 
+$funcs = array(
+	'is_writable',
+	'is_readable',
+	'is_executable',
+	'is_file',
+	'file_exists',
+);
+
 $filename="";
 
-$bb = is_file($filename);
-var_dump($bb);
+foreach ($funcs as $test) {
+	$bb = $test($filename);
+	var_dump($bb);
+	clearstatcache();
+}
 
-$aa = file_exists($filename);
-var_dump($aa);
+$filename="run-tests.php";
 
-$filename="php.ini-dist";
-
-$bb = is_file($filename);
-var_dump($bb);
-
-$aa = file_exists($filename);
-var_dump($aa);
+foreach ($funcs as $test) {
+	$bb = $test($filename);
+	var_dump($bb);
+	clearstatcache();
+}
 
 ?>
