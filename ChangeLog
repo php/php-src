@@ -1,3 +1,98 @@
+2002-09-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ncurses/ncurses_functions.c:
+    Prevent possible problems with two resource ids referencing the same
+    panel.
+
+2002-09-29  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/nsapi/config.m4: Possible fix for #19290
+
+2002-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c: Fixed a mem leak inside the path resolving code.
+
+2002-09-29  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update
+
+2002-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/math/floorceil.phpt:
+    Removed the ceil(-0.5); test. The return value is depedant on system's
+    libc and even when proper value '-0' is returned, var_dump() converts
+    it to 0 anyway.
+
+2002-09-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/session/session.c
+      main/main.c: ws fix
+
+2002-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/math/floorceil.phpt:
+    Corrected ceil(-0.5) output value, it is 0 not -0.
+
+2002-09-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fribidi/fribidi.c: Make it compile with the latest _release_ too..
+
+2002-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c:
+    Fixed a crash, which would occur when save_handler is invalid.
+
+2002-09-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.global: Fix some typos
+
+    * sapi/fastcgi/Makefile.frag
+      sapi/fastcgi/config.m4
+      win32/phpembed.dsp
+      main/php_embed.c
+      main/php_embed.h
+      sapi/cgi/Makefile.frag
+      sapi/cgi/config.m4
+      sapi/cli/Makefile.frag
+      sapi/cli/config.m4
+      sapi/embed/config.m4
+      sapi/embed/php_embed.c
+      sapi/embed/php_embed.h
+      Makefile.global
+      acinclude.m4
+      configure.in:
+    Follow Yasuo's suggestion and build sapi program's under the sapi-specific
+    directory.
+
+    Move sapi-specific makefile fragments to their respective directory.
+
+    Create an embed sapi module which resides in its own dir now.
+
+2002-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c: Fixed bug #17281
+
+    * ext/session/session.c: Fixed bugs #16995 and #19392
+
+    * NEWS: Bug fixing news.
+
+    * ext/gd/libgd/gd.c: Fixed bug #19366
+
+2002-09-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_embed.c
+      main/php_embed.h: - Fix Edin's name
+
+2002-09-29  Edin Kadribasic  <edink@proventum.net>
+
+    * main/php_embed.c
+      main/php_embed.h
+      win32/phpembed.dsp
+      Makefile.global
+      configure.in:
+    Added php/embed toolkit for embedding PHP engine into C/C++ applications.
+    See my post to php-dev on the subject.
+
 2002-09-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS: Bug fixing news
