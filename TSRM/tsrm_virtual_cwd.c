@@ -591,7 +591,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	free(free_path);
 
 #ifdef REALPATH_CACHE
-	if (ret == 0 && use_realpath && CWDG(realpath_cache_size_limit)) {
+	if (use_realpath && CWDG(realpath_cache_size_limit)) {
 		realpath_cache_add(orig_path, orig_path_len, state->cwd, state->cwd_length, t TSRMLS_CC);
 	}
 #endif
