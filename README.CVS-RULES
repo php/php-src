@@ -89,6 +89,15 @@ The lines above marked with @ will go into NEWS file automagically, and the
 # lines will be omitted from the ChangeLog. Alternatively, you might want
 to modify NEWS file directly and not use the @ lines.
 
+If you fix some bugs, you should note the bug ID numbers in your
+commit message. Bug ID should be prefixed by "#" for easier access to
+bug report when developers are browsing CVS via. LXR or Bonsai.
+
+Example:
+
+Fixed pgsql notice handler double free crash bug. Bug #14016
+@ Fixed pgsql notice handler double free crash bug. Bug #14016
+
 If you don't see your messages in ChangeLog and NEWS right away, don't worry!
 These files are updated once a day, so your stuff will not show up until
 somewhat later. Don't go adding stuff to NEWS by hand if you already put @
