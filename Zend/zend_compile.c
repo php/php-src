@@ -3406,22 +3406,6 @@ again:
 }
 
 
-static void zval_ptr_dtor_internal(zval **zval_ptr)
-{
-#if DEBUG_ZEND>=2
-	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
-#endif
-	(*zval_ptr)->refcount--;
-	if ((*zval_ptr)->refcount==0) {
-		zval_dtor(*zval_ptr);
-		free(*zval_ptr);
-	} else if ((*zval_ptr)->refcount == 1) {
-		(*zval_ptr)->is_ref = 0;
-	}
-}
-
-#define ZVAL_PTR_DTOR_INTERNAL (void (*)(void *)) zval_ptr_dtor_internal
-
 void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC)
 {
 	zend_bool persistent_hashes = (ce->type == ZEND_INTERNAL_CLASS) ? 1 : 0;
@@ -3433,7 +3417,7 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 	ce->doc_comment = NULL;
 	ce->doc_comment_len = 0;
 
-	zend_hash_init_ex(&ce->default_properties, 0, NULL, persistent_hashes ? ZVAL_PTR_DTOR_INTERNAL : ZVAL_PTR_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->default_properties, 0, NULL, persistent_hashes ? ZVAL_INTERNAL_PTR_DTOR : ZVAL_PTR_DTOR, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
 
 	if (persistent_hashes) {

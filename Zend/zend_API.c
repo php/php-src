@@ -1629,6 +1629,16 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 	} else {
 		target_symbol_table = &ce->default_properties;
 	}
+	switch(Z_TYPE_P(property)) {
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY:
+		case IS_OBJECT:
+		case IS_RESOURCE:
+			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			break;
+		default:
+			break;
+	}
 	switch (access_type & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PRIVATE: {
 				char *priv_name;
@@ -1688,6 +1698,21 @@ ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int na
 	}
 	INIT_PZVAL(property);
 	ZVAL_LONG(property, value);
+	return zend_declare_property(ce, name, name_length, property, access_type);
+}
+
+ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int name_length, char *value, int access_type)
+{
+	zval *property;
+	int len = strlen(value);
+	
+	if (ce->type & ZEND_INTERNAL_CLASS) {
+		property = malloc(sizeof(zval));
+	} else {
+		ALLOC_ZVAL(property);
+	}
+	INIT_PZVAL(property);
+	ZVAL_STRINGL(property, zend_strndup(value, len), len, 0);
 	return zend_declare_property(ce, name, name_length, property, access_type);
 }
 
