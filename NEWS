@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Improved virtual() to support PHP-enabled URIs (Zeev)
+- Fixed undefined behavior when using floating point keys in array()
+  expressions (Zeev, Zend Engine)
+- Fixed a possible crash in case of parse errors in include files or eval
+  statements (Zeev, Zend Engine)
 - Added --with-layout configure option (Stig)
 - Improved interactive mode - supports function calls, and works in
   multithreaded builds (Zeev, Zend Engine)
