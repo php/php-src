@@ -2204,9 +2204,6 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->name = class_name->u.constant.value.str.val;
 	new_class_entry->name_length = class_name->u.constant.value.str.len;
 
-	new_class_entry->parent = NULL;
-	new_class_entry->num_interfaces = 0;
-
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 	new_class_entry->filename = zend_get_compiled_filename(TSRMLS_C);
 	new_class_entry->line_start = zend_get_compiled_lineno(TSRMLS_C);
@@ -3354,6 +3351,8 @@ void zend_init_namespace(zend_namespace *ns TSRMLS_DC)
 	zend_hash_init_ex(&ns->constants_table, 10, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
 
 	ns->parent = NULL;
+	ns->num_interfaces = 0;
+	ns->interfaces = NULL;
 	ns->ns = NULL;
 	ns->constructor = NULL;
 	ns->destructor = NULL;
@@ -3523,6 +3522,9 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 		ce->create_object = NULL;
 	}
 
+	ce->parent = NULL;
+	ce->num_interfaces = 0;
+	ce->interfaces = NULL;
 	ce->ns = CG(active_namespace);
 }
 
