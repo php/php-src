@@ -1,9 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2003, Version 4.3.5
-- Fixed header handler in NSAPI SAPI (header->replace was ignored,
-  send_default_content_type now sends value from php.ini).
-  (Uwe Schindler)
+- Fixed header handler in NSAPI SAPI module (header->replace was ignored,
+  send_default_content_type now sends value from php.ini). (Uwe Schindler)
 - Fixed bug #26025 (Segfault on glob() without GLOB_NOCHECK or GLOB_NOMAGIC
   under *BSD platforms). (Moriyoshi)
 
