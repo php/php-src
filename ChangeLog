@@ -1,3 +1,304 @@
+2000-08-22  Dan Kalowsky  <dkalowsky@wgate.com>
+
+    * ext/odbc/config.m4
+      ext/odbc/php_odbc.h:
+    cleaned up the PHP/SOLID integration code, and corrected some minor assumptions on my part for the 3.5 EE systems.  also removed a series of warnings on builds within the ODBC functions, and corrected header order.  include of the SS_LINUX and SS_FBX defines, needed to make solid headers completely happy with the wchar.h situation.
+
+    THIS DOES NOT FIX BUG ID #4615
+
+2000-08-22  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/parsedate.y:
+    'const' is problematic in code in the final section of a Bison file (Bison defines
+    it away)
+
+2000-08-22  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/cpdf/cpdf.dsp: Adding ..\..\..\bindlib_w32 to include path
+
+2000-08-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/xml/php_xml.h
+      ext/xml/xml.c:
+    - Added ability for each xml_set_*_handler() function to take the
+      array($obj, 'method') syntax for the handler argument as well
+      as the normal function name. 
+
+    * ext/standard/array.c:
+    - Updated array_walk() to be able to accept array($obj, 'method')
+      syntax for the walk function. 
+
+2000-08-22  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/pgsql/pgsql.dsp: some fixes
+
+    * php_modules.dsw: added cpdf and domxml
+
+    * ext/domxml/domxml.dsp: projectfile for the domxml extension
+
+2000-08-22  Andi Gutmans  <andi@php.net>
+
+    * ext/mysql/libmysql/ctype-sjis.c
+      ext/mysql/libmysql/ctype-tis620.c
+      ext/mysql/libmysql/ctype-ujis.c
+      ext/mysql/libmysql/ctype.c
+      ext/mysql/libmysql/ctype_autoconf.c
+      ext/mysql/libmysql/ctype_extra_sources.c
+      ext/mysql/libmysql/raid.h
+      ext/mysql/libmysql/README
+      ext/mysql/libmysql/charset.c
+      ext/mysql/libmysql/config-win.h
+      ext/mysql/libmysql/ctype-big5.c
+      ext/mysql/libmysql/ctype-czech.c
+      ext/mysql/libmysql/ctype-euc_kr.c
+      ext/mysql/libmysql/ctype-gb2312.c
+      ext/mysql/libmysql/ctype-gbk.c: - Remove new libmysql files
+
+    * ext/mysql/libmysql/string.c
+      ext/mysql/libmysql/strinstr.c
+      ext/mysql/libmysql/strmake.c
+      ext/mysql/libmysql/strmov.c
+      ext/mysql/libmysql/strnmov.c
+      ext/mysql/libmysql/strto.c
+      ext/mysql/libmysql/strtoll.c
+      ext/mysql/libmysql/strtoull.c
+      ext/mysql/libmysql/strxmov.c
+      ext/mysql/libmysql/thr_alarm.h
+      ext/mysql/libmysql/thr_mutex.c
+      ext/mysql/libmysql/typelib.c
+      ext/mysql/libmysql/violite.c
+      ext/mysql/libmysql/violite.h
+      ext/mysql/libmysql/Makefile.in
+      ext/mysql/libmysql/array.c
+      ext/mysql/libmysql/bchange.c
+      ext/mysql/libmysql/bmove_upp.c
+      ext/mysql/libmysql/dbug.c
+      ext/mysql/libmysql/dbug.h
+      ext/mysql/libmysql/default.c
+      ext/mysql/libmysql/dll.c
+      ext/mysql/libmysql/errmsg.c
+      ext/mysql/libmysql/errmsg.h
+      ext/mysql/libmysql/errors.c
+      ext/mysql/libmysql/get_password.c
+      ext/mysql/libmysql/global.h
+      ext/mysql/libmysql/int2str.c
+      ext/mysql/libmysql/is_prefix.c
+      ext/mysql/libmysql/libmysql.c
+      ext/mysql/libmysql/list.c
+      ext/mysql/libmysql/longlong2str.c
+      ext/mysql/libmysql/m_ctype.h
+      ext/mysql/libmysql/m_string.h
+      ext/mysql/libmysql/mf_casecnv.c
+      ext/mysql/libmysql/mf_dirname.c
+      ext/mysql/libmysql/mf_fn_ext.c
+      ext/mysql/libmysql/mf_format.c
+      ext/mysql/libmysql/mf_loadpath.c
+      ext/mysql/libmysql/mf_pack.c
+      ext/mysql/libmysql/mf_path.c
+      ext/mysql/libmysql/mf_unixpath.c
+      ext/mysql/libmysql/mf_wcomp.c
+      ext/mysql/libmysql/mulalloc.c
+      ext/mysql/libmysql/my_alarm.h
+      ext/mysql/libmysql/my_alloc.c
+      ext/mysql/libmysql/my_compress.c
+      ext/mysql/libmysql/my_config.h
+      ext/mysql/libmysql/my_create.c
+      ext/mysql/libmysql/my_delete.c
+      ext/mysql/libmysql/my_dir.h
+      ext/mysql/libmysql/my_div.c
+      ext/mysql/libmysql/my_error.c
+      ext/mysql/libmysql/my_fopen.c
+      ext/mysql/libmysql/my_getwd.c
+      ext/mysql/libmysql/my_init.c
+      ext/mysql/libmysql/my_list.h
+      ext/mysql/libmysql/my_malloc.c
+      ext/mysql/libmysql/my_messnc.c
+      ext/mysql/libmysql/my_net.c
+      ext/mysql/libmysql/my_net.h
+      ext/mysql/libmysql/my_once.c
+      ext/mysql/libmysql/my_open.c
+      ext/mysql/libmysql/my_pthread.c
+      ext/mysql/libmysql/my_pthread.h
+      ext/mysql/libmysql/my_read.c
+      ext/mysql/libmysql/my_realloc.c
+      ext/mysql/libmysql/my_static.c
+      ext/mysql/libmysql/my_static.h
+      ext/mysql/libmysql/my_sys.h
+      ext/mysql/libmysql/my_tempnam.c
+      ext/mysql/libmysql/my_thr_init.c
+      ext/mysql/libmysql/my_write.c
+      ext/mysql/libmysql/mysql.h
+      ext/mysql/libmysql/mysql_com.h
+      ext/mysql/libmysql/mysql_version.h
+      ext/mysql/libmysql/mysqld_error.h
+      ext/mysql/libmysql/mysys_err.h
+      ext/mysql/libmysql/mysys_priv.h
+      ext/mysql/libmysql/net.c
+      ext/mysql/libmysql/password.c
+      ext/mysql/libmysql/safemalloc.c
+      ext/mysql/libmysql/str2int.c
+      ext/mysql/libmysql/strcend.c
+      ext/mysql/libmysql/strcont.c
+      ext/mysql/libmysql/strfill.c: - Try and revert libmysql for 4.0.2
+
+2000-08-22  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/cpdf/cpdf.dsp: projectfile for the clibpdf extension
+
+    * php_modules.dsw: added interbase, pdf and sybase_ct
+
+    * ext/interbase/interbase.dsp: minor fixes
+
+2000-08-22  Frank M. Kromann  <fmk@swwwing.com>
+
+    * win32/php4dll.dsp: Removing php_realpath.c from win32 project
+
+2000-08-22  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/sybase_ct/sybase_ct.dsp:
+    projectfile to build the sybase_ct extension
+
+    * ext/pdf/pdf.dsp: projectfile to build the pdf extension
+
+    * sapi/aolserver/php4aolserver.dsp: little fixes
+
+2000-08-22  MySQL Team  <mysql-all@mysql.com>
+
+    * ext/mysql/libmysql/raid.h:
+    Interface for 'raid' files (ont in use by PHP)
+
+    * ext/mysql/libmysql/Makefile.in
+      ext/mysql/libmysql/README
+      ext/mysql/libmysql/array.c
+      ext/mysql/libmysql/bchange.c
+      ext/mysql/libmysql/bmove_upp.c
+      ext/mysql/libmysql/charset.c
+      ext/mysql/libmysql/config-win.h
+      ext/mysql/libmysql/ctype-big5.c
+      ext/mysql/libmysql/ctype-czech.c
+      ext/mysql/libmysql/ctype-euc_kr.c
+      ext/mysql/libmysql/ctype-gb2312.c
+      ext/mysql/libmysql/ctype-gbk.c
+      ext/mysql/libmysql/ctype-sjis.c
+      ext/mysql/libmysql/ctype-tis620.c
+      ext/mysql/libmysql/ctype-ujis.c
+      ext/mysql/libmysql/ctype.c
+      ext/mysql/libmysql/ctype_autoconf.c
+      ext/mysql/libmysql/ctype_extra_sources.c
+      ext/mysql/libmysql/dbug.c
+      ext/mysql/libmysql/dbug.h
+      ext/mysql/libmysql/default.c
+      ext/mysql/libmysql/dll.c
+      ext/mysql/libmysql/errmsg.c
+      ext/mysql/libmysql/errmsg.h
+      ext/mysql/libmysql/errors.c
+      ext/mysql/libmysql/get_password.c
+      ext/mysql/libmysql/global.h
+      ext/mysql/libmysql/int2str.c
+      ext/mysql/libmysql/is_prefix.c
+      ext/mysql/libmysql/libmysql.c
+      ext/mysql/libmysql/list.c
+      ext/mysql/libmysql/longlong2str.c
+      ext/mysql/libmysql/m_ctype.h
+      ext/mysql/libmysql/m_string.h
+      ext/mysql/libmysql/mf_casecnv.c
+      ext/mysql/libmysql/mf_dirname.c
+      ext/mysql/libmysql/mf_fn_ext.c
+      ext/mysql/libmysql/mf_format.c
+      ext/mysql/libmysql/mf_loadpath.c
+      ext/mysql/libmysql/mf_pack.c
+      ext/mysql/libmysql/mf_path.c
+      ext/mysql/libmysql/mf_unixpath.c
+      ext/mysql/libmysql/mf_wcomp.c
+      ext/mysql/libmysql/mulalloc.c
+      ext/mysql/libmysql/my_alarm.h
+      ext/mysql/libmysql/my_alloc.c
+      ext/mysql/libmysql/my_compress.c
+      ext/mysql/libmysql/my_config.h
+      ext/mysql/libmysql/my_create.c
+      ext/mysql/libmysql/my_delete.c
+      ext/mysql/libmysql/my_dir.h
+      ext/mysql/libmysql/my_div.c
+      ext/mysql/libmysql/my_error.c
+      ext/mysql/libmysql/my_fopen.c
+      ext/mysql/libmysql/my_getwd.c
+      ext/mysql/libmysql/my_init.c
+      ext/mysql/libmysql/my_list.h
+      ext/mysql/libmysql/my_malloc.c
+      ext/mysql/libmysql/my_messnc.c
+      ext/mysql/libmysql/my_net.c
+      ext/mysql/libmysql/my_net.h
+      ext/mysql/libmysql/my_once.c
+      ext/mysql/libmysql/my_open.c
+      ext/mysql/libmysql/my_pthread.c
+      ext/mysql/libmysql/my_pthread.h
+      ext/mysql/libmysql/my_read.c
+      ext/mysql/libmysql/my_realloc.c
+      ext/mysql/libmysql/my_static.c
+      ext/mysql/libmysql/my_static.h
+      ext/mysql/libmysql/my_sys.h
+      ext/mysql/libmysql/my_tempnam.c
+      ext/mysql/libmysql/my_thr_init.c
+      ext/mysql/libmysql/my_write.c
+      ext/mysql/libmysql/mysql.h
+      ext/mysql/libmysql/mysql_com.h
+      ext/mysql/libmysql/mysql_version.h
+      ext/mysql/libmysql/mysqld_error.h
+      ext/mysql/libmysql/mysys_err.h
+      ext/mysql/libmysql/mysys_priv.h
+      ext/mysql/libmysql/net.c
+      ext/mysql/libmysql/password.c
+      ext/mysql/libmysql/safemalloc.c
+      ext/mysql/libmysql/str2int.c
+      ext/mysql/libmysql/strcend.c
+      ext/mysql/libmysql/strcont.c
+      ext/mysql/libmysql/strfill.c
+      ext/mysql/libmysql/string.c
+      ext/mysql/libmysql/strinstr.c
+      ext/mysql/libmysql/strmake.c
+      ext/mysql/libmysql/strmov.c
+      ext/mysql/libmysql/strnmov.c
+      ext/mysql/libmysql/strto.c
+      ext/mysql/libmysql/strtoll.c
+      ext/mysql/libmysql/strtoull.c
+      ext/mysql/libmysql/strxmov.c
+      ext/mysql/libmysql/thr_alarm.h
+      ext/mysql/libmysql/thr_mutex.c
+      ext/mysql/libmysql/typelib.c
+      ext/mysql/libmysql/violite.c
+      ext/mysql/libmysql/violite.h:
+    New files for MySQL 3.23.23 client library. New files are for qouting
+    using different character sets.
+
+2000-08-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/README
+      sapi/aolserver/aolserver.c:
+    Disable php_value and add note about reliability
+
+    * TODO: Add note about need to fix INI system
+
+    * sapi/aolserver/README: AOLserver CVS uses PREFIX.
+
+    * sapi/pi3web/pi3web_sapi.c
+      sapi/aolserver/aolserver.c: Set file_handle.opened_path to NULL
+
+    * INSTALL: Add note about installing PHP on web servers other than Apache.
+
+2000-08-22  Andi Gutmans  <andi@php.net>
+
+    * ext/gd/gd.c: - Cleanup imagetransparent in the GD library
+
+2000-08-22  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c:
+    Fix a crash in imap_fetchheader(). FT_PREFETCHTEXT isn't the only flag that
+    you can pass to mail_fetchheader_full().
+
+2000-08-22  Rasmus Lerdorf  <rasmus@php.net>
+
+    * configure.in: Slight Darwin tweak from Fred
+
 2000-08-21  Daniel Beulshausen  <daniel@php4win.de>
 
     * sapi/apache/php4apache.dsp:
