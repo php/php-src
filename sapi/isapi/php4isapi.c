@@ -380,14 +380,15 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 #ifdef PHP_WIN32
 	{
 		HSE_URL_MAPEX_INFO humi;
-		DWORD plen = 1;
+		DWORD path_len = 2;
+		char path[] = "/";
 
-		if (lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_MAP_URL_TO_PATH_EX, "/", &plen, (LPDWORD) &humi)) {
-				/* Remove trailing \  */
-				if(humi.lpszPath[strlen(humi.lpszPath) - 1] == '\\') {
-					humi.lpszPath[strlen(humi.lpszPath) - 1] = '\0';
-				}
-				php_register_variable("DOCUMENT_ROOT", humi.lpszPath, track_vars_array ELS_CC PLS_CC);
+		if (lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_MAP_URL_TO_PATH_EX, path, &path_len, (LPDWORD) &humi)) {
+			/* Remove trailing \  */
+			if (humi.lpszPath[path_len-2] == '\\') {
+				humi.lpszPath[path_len-2] = 0;
+			}
+			php_register_variable("DOCUMENT_ROOT", humi.lpszPath, track_vars_array ELS_CC PLS_CC);
 		}
 	}
 #endif
@@ -461,8 +462,6 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType, LP
 				if (auth_password && auth_password[0]) {
 					SG(request_info).auth_password = estrdup(auth_password);
 				}
-				auth_user[0] = 0;
-				auth_password[0] = 0;
 				return SF_STATUS_REQ_HANDLED_NOTIFICATION;
 			}
 			break;
