@@ -20,11 +20,11 @@
 // $Id$
 //
 
-define('PEAR_ERROR_RETURN', 0);
-define('PEAR_ERROR_PRINT', 1);
-define('PEAR_ERROR_TRIGGER', 2);
-define('PEAR_ERROR_DIE', 3);
-define('PEAR_ERROR_CALLBACK', 4);
+define('PEAR_ERROR_RETURN', 1);
+define('PEAR_ERROR_PRINT', 2);
+define('PEAR_ERROR_TRIGGER', 4);
+define('PEAR_ERROR_DIE', 8);
+define('PEAR_ERROR_CALLBACK', 16);
 
 define('PHP_BINDIR', '@prefix@/bin');
 define('PEAR_INSTALL_DIR', '@PEAR_INSTALLDIR@');
@@ -177,44 +177,45 @@ class PEAR_Error
 	 */
 	function PEAR_Error($message = 'unknown error',
 						$code = 0,
-						$mode = PEAR_ERROR_RETURN,
-						$level = E_USER_NOTICE)
+						$mode = null,
+						$options = null)
 	{
+		if ($mode === null) {
+			$mode = PEAR_ERROR_RETURN;
+		}
 		$this->message = $message;
 		$this->code    = $code;
 		$this->mode    = $mode;
-		if ($mode == PEAR_ERROR_CALLBACK) {
+		if ($mode & PEAR_ERROR_CALLBACK) {
 			$this->level = E_USER_NOTICE;
-			$this->callback = $level;
+			$this->callback = $options;
 		} else {
-			$this->level = $level;
-			$this->callback = false;
+			if ($options === null) {
+				$options = E_USER_NOTICE;
+			}
+			$this->level = $options;
+			$this->callback = null;
 		}
-		switch ($this->mode) {
-			case PEAR_ERROR_PRINT:
-				print $this->getMessage();
-				break;
-			case PEAR_ERROR_TRIGGER:
-				trigger_error($this->getMessage(), $this->level);
-				break;
-			case PEAR_ERROR_DIE:
-				die($this->getMessage());
-				break;
-			case PEAR_ERROR_CALLBACK:
-				if (is_string($this->callback) && strlen($this->callback)) {
-					call_user_func($this->callback, $this);
-				} elseif (is_array($this->callback) &&
-						  sizeof($this->callback) == 2 &&
-						  is_object($this->callback[0]) &&
-						  is_string($this->callback[1]) &&
-						  strlen($this->callback[1])) {
-					call_user_method($this->callback[1], $this->callback[0],
-									 $this);
-				}
-				break;
-			case PEAR_ERROR_RETURN:
-			default:
-				break;
+		if ($this->mode & PEAR_ERROR_PRINT) {
+			print $this->getMessage();
+		}
+		if ($this->mode & PEAR_ERROR_TRIGGER) {
+			trigger_error($this->getMessage(), $this->level);
+		}
+		if ($this->mode & PEAR_ERROR_DIE) {
+			die($this->getMessage());
+		}
+		if ($this->mode & PEAR_ERROR_CALLBACK) {
+			if (is_string($this->callback) && strlen($this->callback)) {
+				call_user_func($this->callback, $this);
+			} elseif (is_array($this->callback) &&
+					  sizeof($this->callback) == 2 &&
+					  is_object($this->callback[0]) &&
+					  is_string($this->callback[1]) &&
+					  strlen($this->callback[1])) {
+				call_user_method($this->callback[1], $this->callback[0],
+								 $this);
+			}
 		}
 	}
 
@@ -283,19 +284,43 @@ class PEAR_Error
 	 * @return string a string with an object "summary"
 	 */
 	function toString() {
-		$modes = array(PEAR_ERROR_RETURN => "return",
-					   PEAR_ERROR_PRINT => "print",
-					   PEAR_ERROR_TRIGGER => "trigger",
-					   PEAR_ERROR_DIE => "die",
-					   PEAR_ERROR_CALLBACK => "callback");
+		$modes = array();
 		$levels = array(E_USER_NOTICE => "notice",
 						E_USER_WARNING => "warning",
 						E_USER_ERROR => "error");
-		return sprintf("[%s: message=\"%s\" code=%d mode=%s level=%s prefix=\"%s\" prepend=\"%s\" append=\"%s\"]",
+		if ($this->mode & PEAR_ERROR_CALLBACK) {
+			if (is_array($this->callback)) {
+				$callback = get_class($this->callback[0]) . "::" .
+					$this->callback[1];
+			} else {
+				$callback = $this->callback;
+			}
+			return sprintf('[%s: message="%s" code=%d mode=callback '.
+						   'callback=%s prefix="%s" prepend="%s" append="%s"]',
+						   get_class($this), $this->message, $this->code,
+						   $callback, $this->error_message_prefix,
+						   $this->error_prepend, $this->error_append);
+		}
+		if ($this->mode & PEAR_ERROR_CALLBACK) {
+			$modes[] = "callback";
+		}
+		if ($this->mode & PEAR_ERROR_PRINT) {
+			$modes[] = "print";
+		}
+		if ($this->mode & PEAR_ERROR_TRIGGER) {
+			$modes[] = "trigger";
+		}
+		if ($this->mode & PEAR_ERROR_DIE) {
+			$modes[] = "die";
+		}
+		if ($this->mode & PEAR_ERROR_RETURN) {
+			$modes[] = "return";
+		}
+		return sprintf('[%s: message="%s" code=%d mode=%s level=%s prefix="%s" prepend="%s" append="%s"]',
 					   get_class($this), $this->message, $this->code,
-					   $modes[$this->mode], $levels[$this->level],
-					   $this->error_message_prefix, $this->error_prepend,
-					   $this->error_append);
+					   implode("|", $modes), $levels[$this->level],
+					   $this->error_message_prefix,
+					   $this->error_prepend, $this->error_append);
 	}
 
     // }}}
