@@ -361,14 +361,31 @@ SPL_METHOD(Array, offsetSet)
 } /* }}} */
 
 /* {{{ proto bool ArrayObject::append(mixed $newval)
- Appends the value. */
+ Appends the value (cannot be called for objects). */
 SPL_METHOD(Array, append)
 {
+	zval *object = getThis();
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+	HashTable *aht = HASH_OF(intern->array);
+
 	zval *value;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 		return;
 	}
-	spl_array_write_dimension(getThis(), NULL, value TSRMLS_CC);
+
+	if (!aht) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
+		return;
+	}
+	
+	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name);
+	}
+
+	spl_array_write_dimension(object, NULL, value TSRMLS_CC);
+	if (!intern->pos) {
+		intern->pos = aht->pListTail;
+	}
 } /* }}} */
 
 /* {{{ proto bool ArrayObject::offsetUnset(mixed $index)
