@@ -26,7 +26,9 @@ PHP                                                                        NEWS
 - Fixed segfault in mysqli_fetch_field_direct() when invalid field offset 
   is passed. (Tony)
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
-  of true. (Tony)
+  of true. (Tony)   
+- Fixed bug #32130 (ArrayIterator::seek() does not throw an Exception on 
+  invalid index). (Marcus)
 - Fixed bug #32081 (in mysqli default socket value is not being used). (Ilia)
 - Fixed bug #32021 (Crash caused by range('', 'z')). (Derick)
 - Fixed bug #32011 (Fragments which replaced Nodes are not globaly useable).
