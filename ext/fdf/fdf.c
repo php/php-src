@@ -76,6 +76,7 @@ function_entry fdf_functions[] = {
 	PHP_FE(fdf_get_status,							NULL)
 	PHP_FE(fdf_set_file,							NULL)
 	PHP_FE(fdf_get_file,							NULL)
+	PHP_FE(fdf_add_template,							NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -89,14 +90,18 @@ php3_module_entry fdf_module_entry = {
 DLEXPORT php3_module_entry *get_module(void) { return &fdf_module_entry; }
 #endif
 
+static void phpi_FDFClose(FDFDoc fdf) {
+	(void)FDFClose(fdf);
+}
+
 PHP_MINIT_FUNCTION(fdf)
 {
 	FDFErc err;
-	FDF_GLOBAL(le_fdf) = register_list_destructors(FDFClose, NULL);
+	FDF_GLOBAL(le_fdf) = register_list_destructors(phpi_FDFClose, NULL);
 	err = FDFInitialize();
 	if(err == FDFErcOK)
-		printf("FDFINitital executed\n");
-	return SUCCESS;
+		return SUCCESS;
+	return FAILURE;
 }
 
 PHP_MINFO_FUNCTION(fdf)
@@ -110,8 +115,8 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 	FDFErc err;
 	err = FDFFinalize();
 	if(err == FDFErcOK)
-		printf("FDFFinalize executed\n");
-	return SUCCESS;
+		return SUCCESS;
+	return FAILURE;
 }
 
 /* {{{ proto int fdf_open(string filename)
@@ -160,7 +165,7 @@ PHP_FUNCTION(fdf_close) {
 		RETURN_FALSE;
 	}
 
-//	FDFClose(fdf);
+/*	FDFClose(fdf); */
 	php3_list_delete(id);
 
 	RETURN_TRUE;
@@ -512,6 +517,48 @@ PHP_FUNCTION(fdf_save) {
 
 	RETURN_TRUE;
 } /* }}} */
+
+/* {{{ proto void fdf_add_template(int fdfdoc, int newpage, string filename, string template, int rename)
+   Adds a template to the FDF*/
+PHP_FUNCTION(fdf_add_template) {
+	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	int id, type;
+	FDFDoc fdf;
+	FDFErc err;
+	pdfFileSpecRec filespec;
+	FDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_long(arg2);
+	convert_to_string(arg3);
+	convert_to_string(arg4);
+	convert_to_long(arg5);
+	id=arg1->value.lval;
+	fdf = php3_list_find(id,&type);
+	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	filespec.FS = NULL;
+	filespec.F = arg3->value.str.val;
+	filespec.Mac = NULL;
+	filespec.DOS = NULL;
+	filespec.Unix = NULL;
+	filespec.ID[0] = NULL;
+	filespec.ID[1] = NULL;
+	filespec.bVolatile = false;
+	err = FDFAddTemplate(fdf, arg2->value.lval, &filespec, arg4->value.str.val, arg5->value.lval);
+	if(err != FDFErcOK)
+		printf("Aiii, error\n");
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 #endif
 
