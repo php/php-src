@@ -337,7 +337,7 @@ SPL_METHOD(Array, offsetExists)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &index) == FAILURE) {
 		return;
 	}
-	RETURN_BOOL(spl_array_has_dimension(getThis(), index, 1 TSRMLS_CC) == SUCCESS);
+	RETURN_BOOL(spl_array_has_dimension(getThis(), index, 1 TSRMLS_CC));
 } /* }}} */
 
 /* {{{ proto bool ArrayObject::offsetGet(mixed $index)
