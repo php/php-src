@@ -40,10 +40,13 @@ Open:
 
 	format was zero.  The zval appeared to be fubar'ed.
 
-    The current do_crash script does not cause a segfault.  An older
-    version does however:
+    When one comments out the (unused) line
 
-	    <URL:http://schumann.cx/do_crash_ob_start.txt>
+        $maxa = array_fill(100,1000,&$maxn);
+
+    in the current test script, the segfault can be reproduced (it probably
+    influences the heap layout, so that ob_start does not scribble over 
+    important memory).
 
 
 Methodology
