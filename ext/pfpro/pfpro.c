@@ -419,6 +419,9 @@ PHP_FUNCTION(pfpro_process)
 
 				default:
 					php_error(E_ERROR, "pfpro_process() array keys must be strings or integers");
+					if (parmlist) {
+						efree(parmlist);
+					}
 					efree(args);
 					RETURN_FALSE;
 			}
@@ -462,6 +465,9 @@ PHP_FUNCTION(pfpro_process)
 
 				default:
 					php_error(E_ERROR, "pfpro_process() array values must be strings, ints or floats");
+					if (parmlist) {
+						efree(parmlist);
+					}
 					efree(args);
 					RETURN_FALSE;
 			}
@@ -483,10 +489,7 @@ PHP_FUNCTION(pfpro_process)
 	/* Allocate the array for the response now - so we catch any errors
 	   from this BEFORE we knock it off to the bank */
 
-	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "pfpro_process() unable to create array");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 #if PFPRO_VERSION < 3
 	/* Blank the response buffer */
@@ -514,7 +517,7 @@ PHP_FUNCTION(pfpro_process)
 		efree(address);
 	}
 
-	if (pass) {
+	if (parmlist) {
 		efree(parmlist);
 	}
 
