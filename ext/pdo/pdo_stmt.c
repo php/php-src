@@ -699,7 +699,7 @@ static PHP_METHOD(PDOStatement, fetch)
 }
 /* }}} */
 
-/* {{{ proto mixed PDOStatement::fetchObject(string class_name [, NULL|array ctor_args]])
+/* {{{ proto mixed PDOStatement::fetchObject(string class_name [, NULL|array ctor_args])
    Fetches the next row and returns it as an object. */
 static PHP_METHOD(PDOStatement, fetchObject)
 {
@@ -781,32 +781,78 @@ static PHP_METHOD(PDOStatement, fetchSingle)
 }
 /* }}} */
 
-/* {{{ proto array PDOStatement::fetchAll([int $how = PDO_FETCH_BOTH])
+/* {{{ proto array PDOStatement::fetchAll([int $how = PDO_FETCH_BOTH [, string class_name [, NULL|array ctor_args]]])
    Returns an array of all of the results. */
 static PHP_METHOD(PDOStatement, fetchAll)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long how = PDO_FETCH_USE_DEFAULT;
 	zval *data;
+	char *class_name;
+	int class_name_len;
+	zend_class_entry *old_ce;
+	zval *old_ctor_args, *ctor_args;
+	int error = 0;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &how)) {
+	old_ce = stmt->fetch.cls.ce;
+	old_ctor_args = stmt->fetch.cls.ctor_args;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lsz", &how, &class_name, &class_name_len, &ctor_args)) {
 		RETURN_FALSE;
 	}
 	
-	PDO_STMT_CLEAR_ERR();
-	MAKE_STD_ZVAL(data);
-	if (!do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC)) {
-		FREE_ZVAL(data);
-		PDO_HANDLE_STMT_ERR();
-		RETURN_FALSE;
+	switch(ZEND_NUM_ARGS()) {
+	case 0:
+	case 1:
+		stmt->fetch.cls.ce = zend_standard_class_def;
+		break;
+	case 3:
+		if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
+			zend_throw_exception(pdo_exception_ce, "Parameter ctor_args must either be NULL or an array ", 0 TSRMLS_CC);
+			error = 1;
+			break;
+		}
+		if (Z_TYPE_P(ctor_args) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
+			stmt->fetch.cls.ctor_args = ctor_args;
+		} else {
+			stmt->fetch.cls.ctor_args = NULL;
+		}
+		/* no break */
+	case 2:
+		stmt->fetch.cls.ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+
+		if (!stmt->fetch.cls.ce) {
+			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not find class '%s'", class_name);
+			error = 1;
+			break;
+		}
 	}
 
-	array_init(return_value);
-	do {
-		add_next_index_zval(return_value, data);
+	if (!error)
+	{
+		PDO_STMT_CLEAR_ERR();
 		MAKE_STD_ZVAL(data);
-	} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC));
-	FREE_ZVAL(data);
+		if (!do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC)) {
+			FREE_ZVAL(data);
+			PDO_HANDLE_STMT_ERR();
+			error = 1;
+		}
+	}
+	if (!error) {
+		array_init(return_value);
+		do {
+			add_next_index_zval(return_value, data);
+			MAKE_STD_ZVAL(data);
+		} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC));
+		FREE_ZVAL(data);
+	}
+
+	stmt->fetch.cls.ce = old_ce;
+	stmt->fetch.cls.ctor_args = old_ctor_args;
+	
+	if (error) {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
