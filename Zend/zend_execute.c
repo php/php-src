@@ -1298,38 +1298,32 @@ binary_assign_op_addr: {
 					zend_op *original_opline = opline;
 					int retval = zend_is_true(get_zval_ptr(&original_opline->op1, Ts, &EG(free_op1), BP_VAR_R));
 					
+					FREE_OP(&original_opline->op1, EG(free_op1));
+					Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
+					Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
 					if (!retval) {
 #if DEBUG_ZEND>=2
 						printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
 						opline = &op_array->opcodes[opline->op2.u.opline_num];
-						FREE_OP(&original_opline->op1, EG(free_op1));
-						Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
-						Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
 						continue;
 					}
-					FREE_OP(&original_opline->op1, EG(free_op1));
-					Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
-					Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
 				}
 				NEXT_OPCODE();
 			case ZEND_JMPNZ_EX: {
 					zend_op *original_opline = opline;
 					int retval = zend_is_true(get_zval_ptr(&original_opline->op1, Ts, &EG(free_op1), BP_VAR_R));
 					
+					FREE_OP(&original_opline->op1, EG(free_op1));
+					Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
+					Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
 					if (retval) {
 #if DEBUG_ZEND>=2
 						printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
 #endif
 						opline = &op_array->opcodes[opline->op2.u.opline_num];
-						FREE_OP(&original_opline->op1, EG(free_op1));
-						Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
-						Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
 						continue;
 					}
-					FREE_OP(&original_opline->op1, EG(free_op1));
-					Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
-					Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
 				}
 				NEXT_OPCODE();
 			case ZEND_FREE:
@@ -1560,9 +1554,10 @@ do_fcall_common:
 							zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
 						}
 					}
-					object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-						fbc = zend_ptr_stack_pop(&EG(arg_types_stack));
+						zend_ptr_stack_n_pop(&EG(arg_types_stack), 2, &object.ptr, &fbc);
+					} else {
+						object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 					}
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
