@@ -117,6 +117,7 @@ typedef struct _sapi_globals_struct {
 	HashTable *rfc1867_uploaded_files;
 	long post_max_size;
     int options;
+    zend_bool sapi_started;
 } sapi_globals_struct;
 
 

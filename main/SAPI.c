@@ -382,6 +382,7 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 		SG(sapi_headers).mimetype = NULL;
 	}
 	sapi_send_headers_free(TSRMLS_C);
+    SG(sapi_started) = 0;
 }
 
 
