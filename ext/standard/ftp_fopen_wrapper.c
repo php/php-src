@@ -352,7 +352,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		hoststart = ip;
 		
 		/* pull out the MSB of the port */
-		portno = (unsigned short) strtol(tpath, &ttpath, 10) * 256;
+		portno = (unsigned short) strtoul(tpath, &ttpath, 10) * 256;
 		if (ttpath == NULL) {
 			/* didn't get correct response from PASV */
 			goto errexit;
@@ -362,7 +362,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 			goto errexit;
 		tpath++;
 		/* pull out the LSB of the port */
-		portno += (unsigned short) strtol(tpath, &ttpath, 10);
+		portno += (unsigned short) strtoul(tpath, &ttpath, 10);
 	} else {
 		/* parse epsv command (|||6446|) */
 		for (i = 0, tpath = tmp_line + 4; *tpath; tpath++) {
@@ -375,7 +375,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		if (i < 3)
 			goto errexit;
 		/* pull out the port */
-		portno = (unsigned short) strtol(tpath + 1, &ttpath, 10);
+		portno = (unsigned short) strtoul(tpath + 1, &ttpath, 10);
 	}
 	
 	if (ttpath == NULL) {
