@@ -399,13 +399,11 @@ PHP_FUNCTION(glob)
 		RETURN_FALSE;
 	}
 
-#ifndef GLOB_NOMATCH
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
 		array_init(return_value);
 		return;
 	}
-#endif
 
 	/* we assume that any glob pattern will match files from one directory only
 	   so checking the dirname of the first match should be sufficient */
