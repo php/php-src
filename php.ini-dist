@@ -538,7 +538,6 @@ default_socket_timeout = 60
 ;extension=php_dba.dll
 ;extension=php_dbase.dll
 ;extension=php_dbx.dll
-;extension=php_domxml.dll
 ;extension=php_exif.dll
 ;extension=php_fdf.dll
 ;extension=php_filepro.dll
@@ -572,7 +571,7 @@ default_socket_timeout = 60
 ;extension=php_sybase_ct.dll
 ;extension=php_w32api.dll
 ;extension=php_xmlrpc.dll
-;extension=php_xslt.dll
+;extension=php_xsl.dll
 ;extension=php_yaz.dll
 ;extension=php_zip.dll
 
