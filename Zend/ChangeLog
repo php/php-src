@@ -1,3 +1,19 @@
+2003-08-07  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/bug21478.phpt:
+      Add missing right parensis
+
+2003-08-07  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute_API.c:
+      Clarify use of original_function_state_ptr
+
+2003-08-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      - Fix warnings
+      - Fix code
+
 2003-08-06  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute_API.c:
