@@ -326,15 +326,19 @@ PHPAPI int php_printf(const char *format, ...)
 
 
 /* extended error handling function */
-static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list orig_args)
+static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
 	char buffer[1024];
-	zend_bool buffer_ok = 0;
-	int size = 0;
+	int buffer_len;
 	ELS_FETCH();
 	PLS_FETCH();
 
-	if (EG(error_reporting) & type || (type & E_CORE)) {
+	buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
+	buffer[sizeof(buffer)-1]=0;
+
+	/* display/log the error if necessary */
+	if ((EG(error_reporting) & type || (type & E_CORE))
+		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
 		char *error_type_str;
 
 		switch (type) {
@@ -364,64 +368,56 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				break;
 		}
 
-		/* get include file name */
-		if (PG(log_errors) || PG(display_errors) || (!module_initialized)) {
-			size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
-			buffer_ok = 1;
-			va_end(orig_args);
-			
-			buffer[sizeof(buffer) - 1] = 0;
-
-			if (!module_initialized || PG(log_errors)) {
-				char log_buffer[1024];
+		if (!module_initialized || PG(log_errors)) {
+			char log_buffer[1024];
 
 #ifdef PHP_WIN32
-				if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
-					MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
-				}
-#endif
-				snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-				php_log_err(log_buffer);
-			}
-			if (module_initialized && PG(display_errors)) {
-				char *prepend_string = INI_STR("error_prepend_string");
-				char *append_string = INI_STR("error_append_string");
-				char *error_format;
-
-				error_format = PG(html_errors) ?
-					"<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n"
-					: "\n%s: %s in %s on line %d\n";
-
-				if (prepend_string) {
-					PUTS(prepend_string);
-				}
-				php_printf(error_format, error_type_str, buffer,
-						   error_filename, error_lineno);
-				if (append_string) {
-					PUTS(append_string);
-				}
-			}
-#if ZEND_DEBUG
-			{
-				zend_bool trigger_break;
-
-				switch (type) {
-					case E_ERROR:
-					case E_CORE_ERROR:
-					case E_COMPILE_ERROR:
-					case E_USER_ERROR:
-						trigger_break=1;
-						break;
-					default:
-						trigger_break=0;
-						break;
-				}
-				zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
+				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
 			}
 #endif
+			snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+			php_log_err(log_buffer);
 		}
+		if (module_initialized && PG(display_errors)) {
+			char *prepend_string = INI_STR("error_prepend_string");
+			char *append_string = INI_STR("error_append_string");
+			char *error_format;
+
+			error_format = PG(html_errors) ?
+				"<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n"
+				: "\n%s: %s in %s on line %d\n";
+
+			if (prepend_string) {
+				PUTS(prepend_string);
+			}
+			php_printf(error_format, error_type_str, buffer,
+					   error_filename, error_lineno);
+			if (append_string) {
+				PUTS(append_string);
+			}
+		}
+#if ZEND_DEBUG
+		{
+			zend_bool trigger_break;
+
+			switch (type) {
+				case E_ERROR:
+				case E_CORE_ERROR:
+				case E_COMPILE_ERROR:
+				case E_USER_ERROR:
+					trigger_break=1;
+					break;
+				default:
+					trigger_break=0;
+					break;
+			}
+			zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+		}
+#endif
 	}
 
+	/* Bail out if we can't recover */
 	switch (type) {
 		case E_CORE_ERROR:
 			if(!module_initialized) {
@@ -440,21 +436,15 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			break;
 	}
 
+	/* Log if necessary */
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		pval *tmp;
 
-		if (!buffer_ok) {
-			size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
-			buffer[sizeof(buffer) - 1] = 0;
-			va_end(orig_args);
-		}
-
 		ALLOC_ZVAL(tmp);
 		INIT_PZVAL(tmp);
-		tmp->value.str.val = (char *) estrndup(buffer, size);
-		tmp->value.str.len = size;
+		tmp->value.str.val = (char *) estrndup(buffer, buffer_len);
+		tmp->value.str.len = buffer_len;
 		tmp->type = IS_STRING;
-
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
 	}
 }
