@@ -24,7 +24,6 @@
 #define NO_REGEX_EXTRA_H
 #ifdef WIN32
 #include <winsock2.h>
-#define PHP_EXPORTS
 #include <stddef.h>
 #endif
 
@@ -60,27 +59,23 @@
 /*#include "mod_php4.h"*/
 
 
-PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC)
+int apache_php_module_main(request_rec *r, int fd, int display_source_mode CLS_DC ELS_DC PLS_DC SLS_DC)
 {
 	zend_file_handle file_handle;
-#ifdef ZTS
-	zend_compiler_globals cg;
-	zend_executor_globals eg;
-	php_core_globals pcg;
-
-	zend_compiler_globals *compiler_globals=&cg;
-	zend_executor_globals *executor_globals=&eg;
-	php_core_globals *core_globals=&pcg;
-	memset(&cg,0,sizeof(zend_compiler_globals));
-	memset(&eg,0,sizeof(zend_executor_globals));
-	memset(&pcg,0,sizeof(php_core_globals));
-#endif
 
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return FAILURE;
 	}
+#ifdef PHP_WIN32
+	/* sending a file handle to another dll is not working
+	// so let zend open it. 
+	*/
+	file_handle.type = ZEND_HANDLE_FILENAME;
+	file_handle.handle.fd = 0;
+#else
 	file_handle.type = ZEND_HANDLE_FD;
 	file_handle.handle.fd = fd;
+#endif
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 

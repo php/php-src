@@ -64,7 +64,7 @@
 # include "mod_dav.h"
 #endif
 
-PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC);
+int apache_php_module_main(request_rec *r, int fd, int display_source_mode CLS_DC ELS_DC PLS_DC SLS_DC);
 void php_save_umask(void);
 void php_restore_umask(void);
 int sapi_apache_read_post(char *buffer, uint count_bytes SLS_DC);
@@ -106,8 +106,9 @@ typedef struct _php_per_dir_entry {
 	int type;
 } php_per_dir_entry;
 
+/* handled apropriately in apache_php_module_main */
+/* popenf isn't working on Windows, use open instead
 #if WIN32|WINNT
-/* popenf isn't working on Windows, use open instead*/
 # ifdef popenf
 #  undef popenf
 # endif
@@ -116,9 +117,8 @@ typedef struct _php_per_dir_entry {
 #  undef pclosef
 # endif
 # define pclosef(p,f) close(f)
-#else
-# define php_popenf(p,n,f,m) popenf((p),(n),(f),(m))
 #endif
+*/
 
 php_apache_info_struct php_apache_info;		/* active config */
 
@@ -239,10 +239,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 	table_entry *elts = (table_entry *) arr->elts;
 	char *script_filename=NULL;
-/*	Theses are already in parameters?
-	ELS_FETCH();
-	PLS_FETCH();
-*/
+
 	for (i = 0; i < arr->nelts; i++) {
 		char *val;
 
@@ -264,31 +261,12 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array ELS_CC PLS_CC);
 }
 
-static int
-php_apache_startup(sapi_module_struct *sapi_module)
+static int php_apache_startup(sapi_module_struct *sapi_module)
 {
-#ifdef PHP_WIN32
-	/* this is needed because apache reloads this dll twice due
-	// to a colision.  A better way to do this is to define the load
-	// address for the dll, but am not sure what it should be.
-	// this is just a quick hack to get it working.
-	*/
-	static int php_apache_started=0;
-	static int apache_startup_success = FAILURE;
-	if (php_apache_started>0) return apache_startup_success;
-	php_apache_started=1;
-#endif
-
     if(php_module_startup(sapi_module) == FAILURE
             || zend_startup_module(&apache_module_entry) == FAILURE) {
-#ifdef PHP_WIN32
-		apache_startup_success = FAILURE;
-#endif
         return FAILURE;
     } else {
-#ifdef PHP_WIN32
-		apache_startup_success = SUCCESS;
-#endif
         return SUCCESS;
     }
 }
@@ -449,6 +427,8 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	HashTable *per_dir_conf;
 	SLS_FETCH();
 	ELS_FETCH();
+	CLS_FETCH();
+	PLS_FETCH();
 
 	if (setjmp(EG(bailout))!=0) {
 		return OK;
@@ -516,7 +496,7 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	add_cgi_vars(r);
 
 	init_request_info(SLS_C);
-	apache_php_module_main(r, fd, display_source_mode SLS_CC);
+	apache_php_module_main(r, fd, display_source_mode CLS_CC ELS_CC PLS_CC SLS_CC);
 
 	/* Done, restore umask, turn off timeout, close file and return */
 	php_restore_umask();
@@ -591,6 +571,9 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 
 	if (!apache_php_initialized) {
 		apache_php_initialized = 1;
+#ifdef ZTS
+		tsrm_startup(1, 1, 0);
+#endif
 		sapi_startup(&sapi_module);
 		php_apache_startup(&sapi_module);
 	}
@@ -677,6 +660,9 @@ static void apache_php_module_shutdown_wrapper(void)
 {
 	apache_php_initialized = 0;
 	sapi_module.shutdown(&sapi_module);
+#ifdef ZTS
+	tsrm_shutdown();
+#endif
 }
 
 
@@ -685,6 +671,9 @@ void php_init_handler(server_rec *s, pool *p)
 	register_cleanup(p, NULL, (void (*)(void *))apache_php_module_shutdown_wrapper, (void (*)(void *))php_module_shutdown_for_exec);
 	if (!apache_php_initialized) {
 		apache_php_initialized = 1;
+#ifdef ZTS
+		tsrm_startup(1, 1, 0);
+#endif
 		sapi_startup(&sapi_module);
 		php_apache_startup(&sapi_module);
 	}
@@ -792,32 +781,6 @@ module MODULE_VAR_EXPORT php4_module =
 };
 
 
-#ifdef PHP_WIN32
-__declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
-{
-	switch (fdwReason) {
-		case DLL_PROCESS_ATTACH:
-			tsrm_startup(1, 1, 0);
-			sapi_startup(&sapi_module);
-			if (sapi_module.startup) {
-				sapi_module.startup(&sapi_module);
-			}
-			break;
-		case DLL_THREAD_ATTACH:
-			break;
-		case DLL_THREAD_DETACH:
-			ts_free_thread();
-			break;
-		case DLL_PROCESS_DETACH:
-			if (sapi_module.shutdown) {
-				sapi_module.shutdown(&sapi_module);
-			}
-			tsrm_shutdown();
-			break;
-	}
-	return TRUE;
-}
-#endif
 /*
  * Local variables:
  * tab-width: 4
