@@ -1189,7 +1189,7 @@ static int process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int prin
 
 					if (elem->paramdesc.wParamFlags & PARAMFLAG_FIN)
 						php_printf("[in]");
-					if (elem->paramdesc.wParamFlags & PARAMFLAG_FIN)
+					if (elem->paramdesc.wParamFlags & PARAMFLAG_FOUT)
 						php_printf("[out]");
 
 					if (elem->tdesc.vt == VT_PTR) {
@@ -1266,7 +1266,6 @@ static ITypeInfo *locate_typeinfo(char *typelibname, comval *obj, char *dispname
 
 	if (obj) {
 		if (dispname == NULL && sink) {
-			/* Looking for the default sink interface */
 			IProvideClassInfo2 *pci2;
 			IProvideClassInfo *pci;
 
