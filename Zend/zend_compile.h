@@ -676,6 +676,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_VERIFY_INSTANCEOF		145
 #define ZEND_VERIFY_ABSTRACT_CLASS	146
 
+#define ZEND_ASSIGN_DIM				147
+
 /* end of block */
 /* END: OPCODES */
 

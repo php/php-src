@@ -281,9 +281,8 @@ static inline zval *get_obj_zval_ptr(znode *op, temp_variable *Ts, zval **freeop
 	return get_zval_ptr(op, Ts, freeop, type);
 }
 
-static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, znode *value_op, temp_variable *Ts TSRMLS_DC)
+static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode *op2, znode *value_op, temp_variable *Ts, int opcode TSRMLS_DC)
 {
-	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W TSRMLS_CC);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval *free_value;
@@ -336,7 +335,11 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 		value->is_ref = 0;
 		value->refcount = 0;
 	}
-	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
+	if (opcode == ZEND_ASSIGN_OBJ) {
+		Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
+	} else {
+		Z_OBJ_HT_P(object)->write_dimension(object, property, value TSRMLS_CC);
+	}
 	if (property == &tmp) {
 		zval_dtor(property);
 	}
@@ -2006,8 +2009,34 @@ int zend_make_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_assign_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *op_data = EX(opline)+1;
-	zend_assign_to_object(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, &op_data->op1, EX(Ts) TSRMLS_CC);
+	zval **object_ptr = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
+
+	zend_assign_to_object(&EX(opline)->result, object_ptr, &EX(opline)->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_OBJ TSRMLS_CC);
 	/* assign_obj has two opcodes! */
+	EX(opline)++;
+	NEXT_OPCODE();
+}
+
+
+int zend_assign_dim_handler(ZEND_OPCODE_HANDLER_ARGS)
+	{
+	zend_op *op_data = EX(opline)+1;
+	zval **object_ptr = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
+
+	if ((*object_ptr)->type == IS_OBJECT) {
+		zend_assign_to_object(&EX(opline)->result, object_ptr, &EX(opline)->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_DIM TSRMLS_CC);
+		/* assign_dim has two opcodes! */
+	} else {
+		zval *value;
+		zend_op *data_opline = EX(opline)+1;
+
+		(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
+		zend_fetch_dimension_address(&data_opline->op2, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
+
+		/* opline points to the data op at this point */
+		value = get_zval_ptr(&data_opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	 	zend_assign_to_variable(&EX(opline)->result, &data_opline->op2, &EX(opline)->op2, value, (EG(free_op1)?IS_TMP_VAR:EX(opline)->op1.op_type), EX(Ts) TSRMLS_CC);
+	}
 	EX(opline)++;
 	NEXT_OPCODE();
 }
@@ -4234,6 +4263,8 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_ADD_INTERFACE] = zend_add_interface_handler;
 	zend_opcode_handlers[ZEND_VERIFY_INSTANCEOF] = zend_verify_instanceof_handler;
 	zend_opcode_handlers[ZEND_VERIFY_ABSTRACT_CLASS] = zend_verify_abstract_class;
+
+	zend_opcode_handlers[ZEND_ASSIGN_DIM] = zend_assign_dim_handler;
 }
 
 /*

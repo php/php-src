@@ -24,39 +24,48 @@
 
 union _zend_function;
 
-typedef zval *(*zend_object_read_property_t)(zval *object, zval *member TSRMLS_DC);
 /* Used to fetch property from the object, read-only */
-typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value TSRMLS_DC);
+typedef zval *(*zend_object_read_property_t)(zval *object, zval *member TSRMLS_DC);
+
 /* Used to set property of the object */
+typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value TSRMLS_DC);
 
-typedef zval **(*zend_object_get_property_ptr_t)(zval *object, zval *member TSRMLS_DC);
+/* Used to set dimension of the object */
+typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *value TSRMLS_DC);
+
 /* Used to create pointer to the property of the object, for future r/w access via get/set */
-typedef zval **(*zend_object_get_property_zval_ptr_t)(zval *object, zval *member TSRMLS_DC);
+typedef zval **(*zend_object_get_property_ptr_t)(zval *object, zval *member TSRMLS_DC);
+
 /* Used to create pointer to the property of the object, for future direct r/w access */
-typedef void (*zend_object_set_t)(zval **property, zval *value TSRMLS_DC);
+typedef zval **(*zend_object_get_property_zval_ptr_t)(zval *object, zval *member TSRMLS_DC);
+
 /* Used to set object value (most probably used in combination with
-typedef the result of the get_property_ptr) */
-typedef zval* (*zend_object_get_t)(zval *property TSRMLS_DC);
+ * typedef the result of the get_property_ptr)
+ */
+typedef void (*zend_object_set_t)(zval **property, zval *value TSRMLS_DC);
+
 /* Used to get object value (most probably used in combination with
-the result of the get_property_ptr or when converting object value to
-one of the basic types) */
+ * the result of the get_property_ptr or when converting object value to
+ * one of the basic types)
+ */
+typedef zval* (*zend_object_get_t)(zval *property TSRMLS_DC);
 
-typedef int (*zend_object_has_property_t)(zval *object, zval *member, int check_empty TSRMLS_DC);
 /* Used to check if a property of the object exists */
-typedef void (*zend_object_unset_property_t)(zval *object, zval *member TSRMLS_DC);
+typedef int (*zend_object_has_property_t)(zval *object, zval *member, int check_empty TSRMLS_DC);
+
 /* Used to remove a property of the object */
+typedef void (*zend_object_unset_property_t)(zval *object, zval *member TSRMLS_DC);
 
-typedef HashTable *(*zend_object_get_properties_t)(zval *object TSRMLS_DC);
 /* Used to get hash of the properties of the object, as hash of zval's */
+typedef HashTable *(*zend_object_get_properties_t)(zval *object TSRMLS_DC);
 
-typedef int (*zend_object_call_method_t)(char *method, INTERNAL_FUNCTION_PARAMETERS);
 /* Used to call methods */
 /* args on stack! */
-/* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback fror this.
-*/
+/* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
+ */
+typedef int (*zend_object_call_method_t)(char *method, INTERNAL_FUNCTION_PARAMETERS);
 typedef union _zend_function *(*zend_object_get_method_t)(zval *object, char *method, int method_len TSRMLS_DC);
 typedef union _zend_function *(*zend_object_get_constructor_t)(zval *object TSRMLS_DC);
-/* Get method parameter mask - by value/by reference, etc. */
 
 /* Object maintenance/destruction */
 typedef void (*zend_object_add_ref_t)(zval *object TSRMLS_DC);
@@ -79,6 +88,7 @@ typedef struct _zend_object_handlers {
 	/* individual object functions */
 	zend_object_read_property_t              read_property;
 	zend_object_write_property_t             write_property;
+	zend_object_write_dimension_t            write_dimension;
 	zend_object_get_property_ptr_t           get_property_ptr;
 	zend_object_get_property_zval_ptr_t      get_property_zval_ptr;
 	zend_object_get_t                        get;
