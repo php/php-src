@@ -498,6 +498,15 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 				zfd.opened_path = NULL;
 
 				php_execute_script(&zfd TSRMLS_CC);
+#ifdef MEMORY_LIMIT
+				{
+					char *mem_usage;
+ 
+					mem_usage = apr_psprintf(ctx->r->pool, "%u", AG(allocated_memory_peak));
+					AG(allocated_memory_peak) = 0;
+					apr_table_set(ctx->r->notes, "mod_php_memory_usage", mem_usage);
+				}
+#endif
 			} else { 
 				zend_syntax_highlighter_ini syntax_highlighter_ini;
 				
