@@ -337,7 +337,6 @@ ZEND_FUNCTION(dbx_query)
     zval * info;
     long info_flags;
     zval * data;
-    zval * dummy;
     zval ** row_ptr;
     zval ** inforow_ptr;
 
@@ -466,8 +465,10 @@ ZEND_FUNCTION(dbx_query)
             /* associate results with fieldnames */
             if (info_flags & DBX_RESULT_ASSOC) {
                 zval **columnname_ptr, **actual_ptr, **reference_ptr;
+                zval * dummy;
+                ALLOC_ZVAL(dummy);
+                INIT_ZVAL(*dummy);
                 for (col_index=0; col_index<rv_column_count->value.lval; ++col_index) {
-                    MAKE_STD_ZVAL(dummy);
                     zend_hash_index_find((*inforow_ptr)->value.ht, col_index, (void **) &columnname_ptr);
                     zend_hash_index_find((*row_ptr)->value.ht, col_index, (void **) &actual_ptr);
                     zend_hash_update((*row_ptr)->value.ht, (*columnname_ptr)->value.str.val, (*columnname_ptr)->value.str.len + 1, &dummy, sizeof(zval *), (void **) &reference_ptr);
@@ -482,18 +483,6 @@ ZEND_FUNCTION(dbx_query)
         }
     /* add row_count property */
     add_property_long(return_value, "rows", row_count);
-    /* free original resultset /
-    {
-    int number_of_arguments=1;
-    zval ** arguments[1];
-    zval * returned_zval=NULL;
-
-    arguments[0]=&rv_result_handle;
-    dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_free_result", &returned_zval, number_of_arguments, arguments);
-    if (!returned_zval || returned_zval->type!=IS_RESOURCE) {
-        if (returned_zval) zval_ptr_dtor(&returned_zval);
-        }
-    }*/
 }
 /* }}} */
 
