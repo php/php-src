@@ -203,6 +203,18 @@ diff -ur thttpd-2.21b-orig/thttpd.c thttpd-2.21b/thttpd.c
  	    hc->responselen = newlen;
  	    sz = 0;
  	    }
+diff -ur thttpd-2.21b-plain/mime_encodings.txt thttpd-2.21b/mime_encodings.txt
+--- thttpd-2.21b-plain/mime_encodings.txt	Wed May 10 03:22:28 2000
++++ thttpd-2.21b/mime_encodings.txt	Mon Dec 10 15:10:25 2001
+@@ -3,6 +3,6 @@
+ # A list of file extensions followed by the corresponding MIME encoding.
+ # Extensions not found in the table proceed to the mime_types table.
+ 
+-Z	x-compress
+-gz	x-gzip
++Z	compress
++gz	gzip
+ uu	x-uuencode
 diff -ur thttpd-2.21b-plain/libhttpd.c thttpd-2.21b/libhttpd.c
 --- thttpd-2.21b-plain/libhttpd.c	Tue Apr 24 00:42:40 2001
 +++ thttpd-2.21b/libhttpd.c	Mon Dec 10 14:32:26 2001
