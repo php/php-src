@@ -1738,14 +1738,23 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			cert = (X509*)what;
 			free_cert = 0;
 		} else if (type == le_key) {
+			int is_priv;
+
+			is_priv = php_openssl_is_private_key((EVP_PKEY*)what TSRMLS_CC);
+
 			/* check whether it is actually a private key if requested */
-			if (!public_key && !php_openssl_is_private_key((EVP_PKEY*)what TSRMLS_CC)) {
+			if (!public_key && !ispriv) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param is a public key");
 				return NULL;
 			}
-			
-			/* got the key - return it */
-			return (EVP_PKEY*)what;
+
+			if (public_key && is_priv) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Don't know how to get public key from this private key");
+				return NULL;
+			} else {
+				/* got the key - return it */
+				return (EVP_PKEY*)what;
+			}
 		}
 
 		/* other types could be used here - eg: file pointers and read in the data from them */
