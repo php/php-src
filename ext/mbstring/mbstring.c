@@ -128,6 +128,12 @@ static const enum mbfl_no_encoding php_mb_default_identify_list_ru[] = {
 	mbfl_no_encoding_cp866
 };
 
+static const enum mbfl_no_encoding php_mb_default_identify_list_hy[] = {
+	mbfl_no_encoding_ascii,
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_armscii8
+};
+
 static const enum mbfl_no_encoding php_mb_default_identify_list_neut[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_utf8
@@ -140,6 +146,7 @@ static const php_mb_nls_ident_list php_mb_default_identify_list[] = {
 	{ mbfl_no_language_traditional_chinese, php_mb_default_identify_list_tw_hk, sizeof(php_mb_default_identify_list_tw_hk) / sizeof(php_mb_default_identify_list_tw_hk[0]) },
 	{ mbfl_no_language_simplified_chinese, php_mb_default_identify_list_cn, sizeof(php_mb_default_identify_list_cn) / sizeof(php_mb_default_identify_list_cn[0]) },
 	{ mbfl_no_language_russian, php_mb_default_identify_list_ru, sizeof(php_mb_default_identify_list_ru) / sizeof(php_mb_default_identify_list_ru[0]) },
+	{ mbfl_no_language_armenian, php_mb_default_identify_list_hy, sizeof(php_mb_default_identify_list_hy) / sizeof(php_mb_default_identify_list_hy[0]) },
 	{ mbfl_no_language_neutral, php_mb_default_identify_list_neut, sizeof(php_mb_default_identify_list_neut) / sizeof(php_mb_default_identify_list_neut[0]) }
 };
 
@@ -876,6 +883,9 @@ PHP_RINIT_FUNCTION(mbstring)
 				break;
 			case mbfl_no_language_german:
 				default_enc = "ISO-8859-15";
+				break;
+			case mbfl_no_language_armenian:
+				default_enc = "ArmSCII-8";
 				break;
 			case mbfl_no_language_english:
 			default:

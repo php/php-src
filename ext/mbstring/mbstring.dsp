@@ -366,6 +366,10 @@ SOURCE=.\libmbfl\filters\mbfilter_koi8r.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\libmbfl\filters\mbfilter_armscii8.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\libmbfl\mbfl\mbfilter_pass.c
 # End Source File
 # Begin Source File
@@ -479,6 +483,10 @@ SOURCE=.\libmbfl\nls\nls_uni.c
 # Begin Source File
 
 SOURCE=.\libmbfl\nls\nls_zh.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\nls\nls_hy.c
 # End Source File
 # End Group
 # Begin Group "Header Files No. 1"
@@ -667,6 +675,10 @@ SOURCE=.\libmbfl\filters\mbfilter_koi8r.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\libmbfl\filters\mbfilter_armscii8.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\libmbfl\mbfl\mbfilter_pass.h
 # End Source File
 # Begin Source File
@@ -791,6 +803,10 @@ SOURCE=.\libmbfl\nls\nls_zh.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\libmbfl\nls\nls_hy.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\libmbfl\filters\unicode_prop.h
 # End Source File
 # Begin Source File
@@ -876,6 +892,10 @@ SOURCE=.\libmbfl\filters\unicode_table_jis.h
 # Begin Source File
 
 SOURCE=.\libmbfl\filters\unicode_table_koi8r.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libmbfl\filters\unicode_table_armscii8.h
 # End Source File
 # Begin Source File
 
