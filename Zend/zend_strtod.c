@@ -101,6 +101,14 @@
 #include <stdint.h>
 #endif
 
+#ifndef HAVE_INT32_T
+# if SIZEOF_INT == 4
+typedef int int32_t;
+# elif SIZEOF_LONG == 4
+typedef long int int32_t;
+# endif
+#endif
+
 #ifndef HAVE_UINT32_T
 # if SIZEOF_INT == 4
 typedef unsigned int uint32_t;
