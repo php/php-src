@@ -623,6 +623,8 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_get_line,												NULL)
 	PHP_FE(stream_wrapper_register,											NULL)
 	PHP_FALIAS(stream_register_wrapper, stream_wrapper_register,			NULL)
+	PHP_FE(stream_wrapper_unregister,										NULL)
+	PHP_FE(stream_wrapper_restore,											NULL)
 	PHP_FE(stream_get_wrappers,												NULL)
 	PHP_FE(stream_get_transports,											NULL)
 	PHP_FE(get_headers,													NULL)
