@@ -98,13 +98,13 @@ PHP_FUNCTION(fbsql_get_autostart_info);
 //PHP_FUNCTION(fbsql_set_autostart_info);
 
 static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type);
-static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant);
+static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 ZEND_BEGIN_MODULE_GLOBALS(fbsql)
    long allowPersistent;
    long generateWarnings;
    long autoCommit;
-   long maxPersistant;
+   long maxPersistent;
    long maxLinks;
    long maxConnections;
    long maxResults;
@@ -114,7 +114,7 @@ ZEND_BEGIN_MODULE_GLOBALS(fbsql)
    char *databasePassword;
    char *userName;
    char *userPassword;
-   long persistantCount;
+   long persistentCount;
    long linkCount;
    long linkIndex;
 
