@@ -755,11 +755,13 @@ ZEND_FUNCTION(trigger_error)
 /* }}} */
 
 
-/* {{{ proto int set_error_handler(string error_handler)
-   Sets a user-defined error handler function */
+/* {{{ proto string set_error_handler(string error_handler)
+   Sets a user-defined error handler function.  Returns the previously defined
+   error handler, or false on error */
 ZEND_FUNCTION(set_error_handler)
 {
 	zval **error_handler;
+	zend_bool had_orig_error_handler=0;
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &error_handler)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -767,7 +769,8 @@ ZEND_FUNCTION(set_error_handler)
 
 	convert_to_string_ex(error_handler);
 	if (EG(user_error_handler)) {
-		zval_dtor(EG(user_error_handler));
+		had_orig_error_handler = 1;
+		*return_value = *EG(user_error_handler);
 	} else {
 		ALLOC_ZVAL(EG(user_error_handler));
 	}
@@ -781,7 +784,9 @@ ZEND_FUNCTION(set_error_handler)
 	*EG(user_error_handler) = **error_handler;
 	zval_copy_ctor(EG(user_error_handler));
 
-	RETURN_TRUE;
+	if (!had_orig_error_handler) {
+		RETURN_STRINGL("", 0, 1);
+	}
 }
 /* }}} */
 
