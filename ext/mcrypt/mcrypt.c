@@ -177,7 +177,7 @@ typedef enum {
 } iv_source;
 
 /* {{{ proto string mcrypt_create_iv(int size, int source)
-   Create an initializing vector (iv) */
+   Create an initializing vector (IV) */
 PHP_FUNCTION(mcrypt_create_iv)
 {
 	pval **size, **psource;
