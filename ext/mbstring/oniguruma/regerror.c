@@ -1,10 +1,32 @@
 /**********************************************************************
-
   regerror.c -  Oniguruma (regular expression library)
-
-  Copyright (C) 2002-2004  K.Kosako (kosako@sofnec.co.jp)
-
 **********************************************************************/
+/*-
+ * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 #include "regint.h"
 #include <stdio.h> /* for vsnprintf() */
 
@@ -56,8 +78,8 @@ onig_error_code_to_format(int code)
     p = "empty char-class"; break;
   case ONIGERR_PREMATURE_END_OF_CHAR_CLASS:
     p = "premature end of char-class"; break;
-  case ONIGERR_END_PATTERN_AT_BACKSLASH:
-    p = "end pattern at backslash"; break;
+  case ONIGERR_END_PATTERN_AT_ESCAPE:
+    p = "end pattern at escape"; break;
   case ONIGERR_END_PATTERN_AT_META:
     p = "end pattern at meta"; break;
   case ONIGERR_END_PATTERN_AT_CONTROL:
@@ -145,7 +167,9 @@ onig_error_code_to_format(int code)
   case ONIGERR_GROUP_NUMBER_OVER_FOR_CAPTURE_HISTORY:
     p = "group number is too big for capture history"; break;
   case ONIGERR_INVALID_CHAR_PROPERTY_NAME:
-    p = "invalid character property name"; break;
+    p = "invalid character property name {%n}"; break;
+  case ONIGERR_NOT_SUPPORTED_ENCODING_COMBINATION:
+    p = "not supported encoding combination"; break;
   case ONIGERR_OVER_THREAD_PASS_LIMIT_COUNT:
     p = "over thread pass limit count"; break;
 
@@ -184,6 +208,7 @@ onig_error_code_to_str(s, code, va_alist)
   case ONIGERR_MULTIPLEX_DEFINITION_NAME_CALL:
   case ONIGERR_INVALID_GROUP_NAME:
   case ONIGERR_INVALID_CHAR_IN_GROUP_NAME:
+  case ONIGERR_INVALID_CHAR_PROPERTY_NAME:
     einfo = va_arg(vargs, OnigErrorInfo*);
     len = einfo->par_end - einfo->par;
     q = onig_error_code_to_format(code);
@@ -218,7 +243,7 @@ onig_error_code_to_str(s, code, va_alist)
 
   default:
     q = onig_error_code_to_format(code);
-    len = strlen(q);
+    len = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, q);
     xmemcpy(s, q, len);
     s[len] = '\0';
     break;
@@ -245,7 +270,8 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
 #endif
 {
   int n, need, len;
-  UChar *p, *s;
+  UChar *p, *s, *bp;
+  char bs[6];
   va_list args;
 
   va_init_list(args, fmt);
@@ -256,29 +282,41 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
 
   if (n + need < bufsize) {
     strcat(buf, ": /");
-    s = buf + strlen(buf);
+    s = buf + onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, buf);
 
     p = pat;
     while (p < (UChar* )pat_end) {
-      if (*p == MC_ESC) {
+      if (*p == MC_ESC(enc)) {
 	*s++ = *p++;
-	len = enc_len(enc, *p);
+	len = enc_len(enc, p);
 	while (len-- > 0) *s++ = *p++;
       }
       else if (*p == '/') {
-	*s++ = MC_ESC;
+	*s++ = (unsigned char )MC_ESC(enc);
 	*s++ = *p++;
       }
-      else if (ONIGENC_IS_MBC_HEAD(enc, *p)) {
-	len = enc_len(enc, *p);
-	while (len-- > 0) *s++ = *p++;
+      else if (ONIGENC_IS_MBC_HEAD(enc, p)) {
+        len = enc_len(enc, p);
+        if (ONIGENC_MBC_MINLEN(enc) == 1) {
+          while (len-- > 0) *s++ = *p++;
+        }
+        else { /* for UTF16 */
+          int blen;
+
+          while (len-- > 0) {
+            sprintf(bs, "\\%03o", *p++ & 0377);
+            blen = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
+            bp = bs;
+            while (blen-- > 0) *s++ = *bp++;
+          }
+        }
       }
       else if (!ONIGENC_IS_CODE_PRINT(enc, *p) &&
 	       !ONIGENC_IS_CODE_SPACE(enc, *p)) {
-	char b[5];
-	sprintf(b, "\\%03o", *p & 0377);
-	len = strlen(b);
-	while (len-- > 0) *s++ = *p++;
+	sprintf(bs, "\\%03o", *p++ & 0377);
+	len = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
+        bp = bs;
+	while (len-- > 0) *s++ = *bp++;
       }
       else {
 	*s++ = *p++;

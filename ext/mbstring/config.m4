@@ -96,6 +96,12 @@ int main() { return foo(10, "", 3.14); }
       oniguruma/reggnu.c
       oniguruma/regparse.c
       oniguruma/regenc.c
+      oniguruma/regext.c
+      oniguruma/regsyntax.c
+      oniguruma/regtrav.c
+      oniguruma/regversion.c
+      oniguruma/st.c
+      oniguruma/enc/unicode.c
       oniguruma/enc/ascii.c
       oniguruma/enc/utf8.c
       oniguruma/enc/euc_jp.c
@@ -120,6 +126,10 @@ int main() { return foo(10, "", 3.14); }
       oniguruma/enc/koi8.c
       oniguruma/enc/koi8_r.c
       oniguruma/enc/big5.c
+      oniguruma/enc/utf16_be.c
+      oniguruma/enc/utf16_le.c
+      oniguruma/enc/utf32_be.c
+      oniguruma/enc/utf32_le.c
     ])
   fi
 ])
@@ -164,6 +174,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/filters/mbfilter_iso8859_13.c
      libmbfl/filters/mbfilter_iso8859_14.c
      libmbfl/filters/mbfilter_iso8859_15.c
+     libmbfl/filters/mbfilter_iso8859_16.c
      libmbfl/filters/mbfilter_iso8859_2.c
      libmbfl/filters/mbfilter_iso8859_3.c
      libmbfl/filters/mbfilter_iso8859_4.c
@@ -261,3 +272,5 @@ if test "$PHP_MBSTRING" != "no"; then
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION
 fi
+
+# vim600: sts=2 sw=2 et

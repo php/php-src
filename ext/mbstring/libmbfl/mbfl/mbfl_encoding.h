@@ -97,6 +97,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_cp1251,
 	mbfl_no_encoding_cp866,
 	mbfl_no_encoding_koi8r,
+	mbfl_no_encoding_8859_16,
 	mbfl_no_encoding_charset_max
 };
 

@@ -1,14 +1,61 @@
 /**********************************************************************
-
   big5.c -  Oniguruma (regular expression library)
-
-  Copyright (C) 2003-2004  K.Kosako (kosako@sofnec.co.jp)
-
 **********************************************************************/
+/*-
+ * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 #include "regenc.h"
 
+static int EncLen_BIG5[] = {
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+};
+
+static int
+big5_mbc_enc_len(const UChar* p)
+{
+  return EncLen_BIG5[*p];
+}
+
 static OnigCodePoint
-big5_mbc_to_code(UChar* p, UChar* end)
+big5_mbc_to_code(const UChar* p, const UChar* end)
 {
   return onigenc_mbn_mbc_to_code(ONIG_ENCODING_BIG5, p, end);
 }
@@ -20,15 +67,23 @@ big5_code_to_mbc(OnigCodePoint code, UChar *buf)
 }
 
 static int
-big5_mbc_to_lower(UChar* p, UChar* lower)
+big5_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end,
+                      UChar* lower)
 {
-  return onigenc_mbn_mbc_to_lower(ONIG_ENCODING_BIG5, p, lower);
+  return onigenc_mbn_mbc_to_normalize(ONIG_ENCODING_BIG5, flag,
+                                      pp, end, lower);
 }
 
 static int
-big5_code_is_ctype(OnigCodePoint code, unsigned int ctype)
+big5_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
 {
-  return onigenc_mb2_code_is_ctype(ONIG_ENCODING_BIG5, code, ctype);
+  return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_BIG5, flag, pp, end);
+}
+
+static int
+big5_is_code_ctype(OnigCodePoint code, unsigned int ctype)
+{
+  return onigenc_mb2_is_code_ctype(ONIG_ENCODING_BIG5, code, ctype);
 }
 
 static const char BIG5_CAN_BE_TRAIL_TABLE[256] = {
@@ -50,16 +105,16 @@ static const char BIG5_CAN_BE_TRAIL_TABLE[256] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0
 };
 
-#define BIG5_ISMB_FIRST(byte)  (OnigEncodingBIG5.len_table[byte] > 1)
+#define BIG5_ISMB_FIRST(byte)  (EncLen_BIG5[byte] > 1)
 #define BIG5_ISMB_TRAIL(byte)  BIG5_CAN_BE_TRAIL_TABLE[(byte)]
 
 static UChar*
-big5_left_adjust_char_head(UChar* start, UChar* s)
+big5_left_adjust_char_head(const UChar* start, const UChar* s)
 {
-  UChar *p;
+  const UChar *p;
   int len;
 
-  if (s <= start) return s;
+  if (s <= start) return (UChar* )s;
   p = s;
 
   if (BIG5_ISMB_TRAIL(*p)) {
@@ -70,53 +125,44 @@ big5_left_adjust_char_head(UChar* start, UChar* s)
       }
     } 
   }
-  len = enc_len(ONIG_ENCODING_BIG5, *p);
-  if (p + len > s) return p;
+  len = enc_len(ONIG_ENCODING_BIG5, p);
+  if (p + len > s) return (UChar* )p;
   p += len;
-  return p + ((s - p) & ~1);
+  return (UChar* )(p + ((s - p) & ~1));
 }
 
 static int
-big5_is_allowed_reverse_match(UChar* s, UChar* end)
+big5_is_allowed_reverse_match(const UChar* s, const UChar* end)
 {
-  UChar c = *s;
+  const UChar c = *s;
 
   return (BIG5_ISMB_TRAIL(c) ? FALSE : TRUE);
 }
 
 OnigEncodingType OnigEncodingBIG5 = {
+  big5_mbc_enc_len,
+  "Big5",     /* name */
+  2,          /* max enc length */
+  1,          /* min enc length */
+  ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE,
   {
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1
+      (OnigCodePoint )'\\'                       /* esc */
+    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */
+    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anytime '*'  */
+    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* zero or one time '?' */
+    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* one or more time '+' */
+    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar anytime */
   },
-  "Big5",    /* name */
-  2,         /* max byte length */
-  FALSE,     /* is_fold_match */
-  ONIGENC_CTYPE_SUPPORT_LEVEL_SB,  /* ctype_support_level */
-  FALSE,     /* is continuous sb mb codepoint */
+  onigenc_is_mbc_newline_0x0a,
   big5_mbc_to_code,
   onigenc_mb2_code_to_mbclen,
   big5_code_to_mbc,
-  big5_mbc_to_lower,
-  onigenc_mbn_mbc_is_case_ambig,
-  big5_code_is_ctype,
-  onigenc_nothing_get_ctype_code_range,
+  big5_mbc_to_normalize,
+  big5_is_mbc_ambiguous,
+  onigenc_ascii_get_all_pair_ambig_codes,
+  onigenc_nothing_get_all_comp_ambig_codes,
+  big5_is_code_ctype,
+  onigenc_not_support_get_ctype_code_range,
   big5_left_adjust_char_head,
-  big5_is_allowed_reverse_match,
-  onigenc_nothing_get_all_fold_match_code,
-  onigenc_nothing_get_fold_match_info
+  big5_is_allowed_reverse_match
 };
