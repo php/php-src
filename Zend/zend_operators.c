@@ -175,6 +175,9 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				(holder) = (*(op));											\
 				zval_copy_ctor(&(holder));									\
 				convert_to_long_base(&(holder), 10);						\
+				if ((holder).type == IS_LONG) {								\
+					(op) = &(holder);										\
+				}															\
 				break;														\
 		}																	\
 	}
@@ -262,7 +265,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
 		if (Z_OBJ_HT_P(op)->cast_object(op, op, ctype, 1 TSRMLS_CC) == SUCCESS) {			\
 			op->type = ctype;																\
-			return;																			\
 		}																					\
 	} else {																				\
 		if(Z_OBJ_HT_P(op)->get) {															\
@@ -273,7 +275,6 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				*op = *newop;																\
 				FREE_ZVAL(newop);															\
 				conv_func(op);																\
-				return;																		\
 			}																				\
 		}																					\
 	}
@@ -322,7 +323,11 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 				TSRMLS_FETCH();
 
 				convert_object_to_type(op, IS_LONG, convert_to_long);
-					
+
+				if (op->type == IS_LONG) {
+					return;
+				}
+
 				if (EG(ze1_compatibility_mode)) {
 					HashTable *ht = Z_OBJPROP_P(op);
 					if (ht) {
@@ -330,8 +335,11 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 					}
 					zval_dtor(op);
 					ZVAL_LONG(op, retval);
+					return;
+				} else {
+					/* we cannot convert it to long */
+					return;
 				}
-				break;
 			}
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
@@ -382,6 +390,10 @@ ZEND_API void convert_to_double(zval *op)
 				TSRMLS_FETCH();
 				
 				convert_object_to_type(op, IS_DOUBLE, convert_to_double);
+
+				if (op->type == IS_DOUBLE) {
+					return;
+				}
 
 				if (EG(ze1_compatibility_mode)) {
 					HashTable *ht = Z_OBJPROP_P(op);
@@ -467,6 +479,10 @@ ZEND_API void convert_to_boolean(zval *op)
 				TSRMLS_FETCH();
 
 				convert_object_to_type(op, IS_BOOL, convert_to_double);
+
+				if (op->type == IS_BOOL) {
+					return;
+				}
 					
 				if (EG(ze1_compatibility_mode)) {
 					HashTable *ht = Z_OBJPROP_P(op);
@@ -542,6 +558,10 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			
 			convert_object_to_type(op, IS_STRING, convert_to_string);
 
+			if (op->type == IS_STRING) {
+				return;
+			}
+
 			zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name);
 			zval_dtor(op);
 			op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
@@ -608,6 +628,10 @@ ZEND_API void convert_to_array(zval *op)
 					}
 				} else {
 					convert_object_to_type(op, IS_ARRAY, convert_to_array);
+
+					if (op->type == IS_ARRAY) {
+						return;
+					}
 				}
 				zval_dtor(op);
 				op->type = IS_ARRAY;
@@ -1276,6 +1300,16 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
+	if (op1->type==IS_OBJECT && op2->type==IS_OBJECT) {
+		/* If the handlers array is not identical, fall through
+		 * and perform get() or cast() if implemented
+		 */
+		if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2)) {
+			zend_compare_objects(result, op1, op2 TSRMLS_CC);
+			COMPARE_RETURN_AND_FREE(SUCCESS);
+		}
+	}
+
 	zendi_convert_scalar_to_number(op1, op1_copy, result);
 	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
@@ -1293,11 +1327,6 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	}
 	if (op1->type==IS_ARRAY && op2->type==IS_ARRAY) {
 		zend_compare_arrays(result, op1, op2 TSRMLS_CC);
-		COMPARE_RETURN_AND_FREE(SUCCESS);
-	}
-
-	if (op1->type==IS_OBJECT && op2->type==IS_OBJECT) {
-		zend_compare_objects(result, op1, op2 TSRMLS_CC);
 		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
@@ -1379,8 +1408,16 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2) && Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2)) {
-				result->value.lval = 1;
+			if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2)) {
+				if (EG(ze1_compatibility_mode)) {
+					zend_compare_objects(result, op1, op2 TSRMLS_CC);
+					/* comparison returns 0 in case of equality and
+					 * 1 in case of ineqaulity, we need to reverse it
+					 */
+					result->value.lval = !result->value.lval;
+				} else {
+					result->value.lval = (Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2));
+				}
 			} else {
 				result->value.lval = 0;
 			}
@@ -1884,15 +1921,6 @@ ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2 TSRMLS_DC)
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 {
 	result->type = IS_LONG;
-	if (Z_OBJ_HT_P(o1) != Z_OBJ_HT_P(o2)) {
-		result->value.lval = 1;	/* Comparing objects of different types is pretty much meaningless */
-		return;
-	}
-
-	if (EG(ze1_compatibility_mode) && Z_OBJPROP_P(o1) && Z_OBJPROP_P(o2)) {
-		zend_compare_symbol_tables(result, Z_OBJPROP_P(o1), Z_OBJPROP_P(o2) TSRMLS_CC);
-		return;
-	}
 
 	if (Z_OBJ_HT_P(o1)->compare_objects == NULL) {
 		if (Z_OBJ_HANDLE_P(o1) == Z_OBJ_HANDLE_P(o2)) {
