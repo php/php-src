@@ -1317,6 +1317,7 @@ XMLRPC_VECTOR_TYPE xmlrpc_str_as_vector_type(const char* str)
 int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype)
 {
    int bSuccess = FAILURE;
+   TSRMLS_FETCH();
 
    /* we only really care about strings because they can represent
     * base64 and datetime.  all other types have corresponding php types
@@ -1366,6 +1367,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype)
 XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval** newvalue)
 {
    XMLRPC_VALUE_TYPE type = xmlrpc_none;
+   TSRMLS_FETCH();
 
    if (value) {
       switch (Z_TYPE_P(value)) {
