@@ -26,7 +26,7 @@ AC_DEFUN(AC_PREFERRED_DB_LIB,[
 
 
 PHP_ARG_WITH(db, for xDBM support,
-[  --with-db               Include old xDBM support (deprecated)])
+[  --with-db               Include old xDBM support (deprecated use --with-dba)])
 
 if test "$PHP_DB" != "no"; then
 

@@ -1235,6 +1235,17 @@ cat <<X
 X
   fi
 
+  if test "$PHP_DB" != "no"; then
+cat <<X
++--------------------------------------------------------------------+
+|                        *** WARNING ***                             |
+|                                                                    |
+| You chose to compile PHP with DB extension. This extension is      |
+| deprecated and does not support databse locking correctly. Please  |
+| use DBA extension which is a full operational superset.            |
+X
+  fi
+
   if test "$MYSQL_MODULE_TYPE" = "builtin" && test "$PHP_SAPI" != "cgi" && test "$PHP_SAPI" != "cli" && test "$php_multiple_shlib_versions_ok" != "yes"; then
 cat <<X
 +--------------------------------------------------------------------+
