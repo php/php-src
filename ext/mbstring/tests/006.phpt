@@ -14,6 +14,6 @@ long
 OK_NONE
 none
 == INVALID PARAMETER ==
-ERR:
+ERR: Warning
 OK_BAD_NAME
 

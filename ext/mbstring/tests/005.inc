@@ -32,7 +32,7 @@ $r = mb_detect_order('BAD_NAME');
 ($r === FALSE) ? print "OK_BAD_STR\n" : print "NG_BAD_STR\n";
 print implode(', ', mb_detect_order()) . "\n";
 
-$a[] = 'BAD_NAME';
+$a = array('BAD_NAME');
 $r = mb_detect_order($a);
 ($r ===	FALSE) ? print "OK_BAD_ARRAY\n" : print "NG_BAD_ARRAY\n";
 print implode(', ', mb_detect_order()) . "\n";

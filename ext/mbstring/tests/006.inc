@@ -28,6 +28,5 @@ print mb_substitute_character() . "\n";
 print "== INVALID PARAMETER ==\n";
 $r = mb_substitute_character('BAD_NAME');
 ($r === FALSE) ? print "OK_BAD_NAME\n" : print("NG_BAD_NAME: ".gettype($r)." $r\n");
-print mb_substitute_character() . "\n";
 
 ?>
