@@ -369,12 +369,12 @@ ZEND_API void start_memory_manager(ALS_D)
 	 * will yield an endless recursion calling to alloc_globals_ctor()
 	 */
 	for (i=1; i<MAX_CACHED_MEMORY; i++) {
-		for (j=0; j<MAX_CACHED_ENTRIES; j++) {
+		for (j=0; j<PRE_INIT_CACHE_ENTRIES; j++) {
 			cached_entries[i][j] = emalloc(8*i);
 		}
 	}
 	for (i=1; i<MAX_CACHED_MEMORY; i++) {
-		for (j=0; j<MAX_CACHED_ENTRIES; j++) {
+		for (j=0; j<PRE_INIT_CACHE_ENTRIES; j++) {
 			efree(cached_entries[i][j]);
 		}
 	}
