@@ -234,8 +234,8 @@ PHP_FUNCTION(zip_entry_open)
 	ZZIP_DIR *archive_p = NULL;
 	php_zzip_dirent *entry = NULL;
 
-	if (ZEND_NUM_ARGS() != 2 ||
-		zend_get_parameters_ex(3, &zzip_dp, &zzip_ent, &mode) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 || 
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &zzip_dp, &zzip_ent, &mode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
