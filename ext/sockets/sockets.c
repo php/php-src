@@ -272,7 +272,7 @@ PHP_FUNCTION(fd_alloc)
 }
 /* }}} */
 
-/* {{{ proto bool fd_dealloc(void)
+/* {{{ proto bool fd_dealloc(int set)
    De-allocates a file descriptor set */
 PHP_FUNCTION(fd_dealloc)
 {
