@@ -140,7 +140,7 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
         AC_TRY_LINK([
 #include "$THIS_INCLUDE"
         ],[
-          (void)db_create((DB**)0, (DB_ENV*)0, 0);
+          $3;
         ],[
           AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
@@ -329,8 +329,10 @@ AC_ARG_WITH(dbm,
             fi
             AC_DEFINE(DBA_DBM,1,[ ]) 
             THIS_LIBS=$LIB
-            break
           ])
+          if test -n "$THIS_LIBS"; then
+            break
+          fi
         ])
       done
     fi
@@ -352,7 +354,7 @@ AC_DEFUN(PHP_DBA_BUILTIN_CDB,[
 
 AC_ARG_WITH(cdb,
 [  --with-cdb[=DIR]          DBA: Include CDB support],[
-  if test "$withval" = "yes"; then
+  if test "$withval" = "yes" -o "$HAVE_DBA" = "1"; then
     PHP_DBA_BUILTIN_CDB
   elif test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
