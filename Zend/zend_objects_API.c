@@ -218,7 +218,7 @@ ZEND_API void zend_objects_proxy_clone(zend_proxy_object *object, zend_proxy_obj
 ZEND_API zval *zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
 {
 	zend_proxy_object *pobj = emalloc(sizeof(zend_proxy_object));
-	zval *retval, **pretval;
+	zval *retval;
 
 	pobj->object = object;
 	pobj->property = member;
