@@ -721,8 +721,6 @@ SPL_METHOD(Array, seek)
 
 int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 {
-	*count = 0;
-
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = HASH_OF(intern->array);
 	HashPosition pos;
