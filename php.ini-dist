@@ -397,11 +397,6 @@ default_mimetype = "text/html"
 ; Always populate the $HTTP_RAW_POST_DATA variable.
 ;always_populate_raw_post_data = On
 
-; Allow handling of WebDAV http requests within PHP scripts (eg.
-; PROPFIND, PROPPATCH, MOVE, COPY, etc..)
-; If you want to get the post data of those requests, you have to
-; set always_populate_raw_post_data as well.
-;allow_webdav_methods = On
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
