@@ -38,11 +38,12 @@ int main() {
 }
 ],[
 	AC_MSG_RESULT(yes)
-	PHP_DEFINE(ICONV_SUPPORTS_ERRNO)
+        AC_DEFINE(ICONV_SUPPORTS_ERRNO,1,[Whether iconv supports error no or not])
 ],[
 	AC_MSG_RESULT(no)
 ])
 
+    AC_DEFINE(HAVE_ICONV,1,[Whether to build ICONV support or not])
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared)
     PHP_SUBST(ICONV_SHARED_LIBADD)
   ], [
