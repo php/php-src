@@ -250,8 +250,9 @@ static int sapi_pi3web_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 		}
 		total_read += cbRead;
 	}
-//	removed after re-testing POST with Pi3Web 2.0.2
-//	SG(read_post_bytes) += total_read;
+	
+	/* removed after re-testing POST with Pi3Web 2.0.2 */
+	/* SG(read_post_bytes) += total_read; */
 	return total_read;
 }
 
