@@ -21,7 +21,7 @@ PEAR_SUBDIRS = \
 	Net \
 	PEAR \
 	PEAR/Command \
-	PEAR/CommandUI \
+	PEAR/Frontend \
 	Schedule \
 	XML 
 
