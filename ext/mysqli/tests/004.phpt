@@ -15,7 +15,7 @@ mysqli fetch char/text
 	mysqli_query($link, "INSERT INTO test_bind_fetch VALUES ('1234567890', 'this is a test')");
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, &$c1, &$c2);
+	mysqli_bind_result($stmt, $c1, $c2);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 

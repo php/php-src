@@ -24,9 +24,9 @@ mysqli connect
                                                               '2010-07-10', 
                                                               '2020','1999-12-29')");
 
-	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_result");
 
-  	mysqli_bind_result($stmt,&$c1, &$c2, &$c3, &$c4, &$c5, &$c6, &$c7);
+	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_result");
+  	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
  	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 

@@ -13,14 +13,14 @@ mysqli bind_param+bind_result char/text
   	mysqli_query($link,"CREATE TABLE test_bind_fetch(c1 char(10), c2 text)");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_fetch VALUES (?,?)");
-	mysqli_bind_param($stmt, &$q1, MYSQLI_BIND_STRING, &$q2, MYSQLI_BIND_STRING);
+	mysqli_bind_param($stmt, array(MYSQLI_BIND_STRING, MYSQLI_BIND_STRING), $q1, $q2);
 	$q1 = "1234567890";
 	$q2 = "this is a test";
 	mysqli_execute($stmt);
 	mysqli_stmt_close($stmt);
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, &$c1, &$c2);
+	mysqli_bind_result($stmt, $c1, $c2);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 

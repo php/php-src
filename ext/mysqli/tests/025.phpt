@@ -19,8 +19,10 @@ mysqli bind_param/bind_result tinyint values
                                                      c7 tinyint)");
 
 	$stmt = mysqli_prepare ($link, "INSERT INTO test_bind_fetch VALUES(?,?,?,?,?,?,?)");
-	mysqli_bind_param($stmt,&$c1, MYSQLI_BIND_INT,&$c2, MYSQLI_BIND_INT,&$c3, MYSQLI_BIND_INT,&$c4, MYSQLI_BIND_INT,
-				&$c5, MYSQLI_BIND_INT,&$c6, MYSQLI_BIND_INT,&$c7, MYSQLI_BIND_INT);
+	mysqli_bind_param($stmt, array(MYSQLI_BIND_INT,MYSQLI_BIND_INT,MYSQLI_BIND_INT,
+				       MYSQLI_BIND_INT,MYSQLI_BIND_INT,MYSQLI_BIND_INT,
+ 				       MYSQLI_BIND_INT),
+				$c1,$c2,$c3,$c4,$c5,$c6,$c7);
 
 	$c1 = -23;
 	$c2 = 300;
@@ -38,7 +40,7 @@ mysqli bind_param/bind_result tinyint values
 	$c1 = $c2 = $c3 = $c4 = $c5 = $c6 = $c7 = NULL;
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, &$c1, &$c2, &$c3, &$c4, &$c5, &$c6, &$c7);
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 

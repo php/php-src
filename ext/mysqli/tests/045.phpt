@@ -10,7 +10,7 @@ mysqli_bind_result (SHOW)
 	$stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
 
 	mysqli_execute($stmt);
-	mysqli_bind_result($stmt, &$c1, &$c2); 	
+	mysqli_bind_result($stmt, $c1, $c2); 	
 	mysqli_fetch($stmt);
 	mysqli_stmt_close($stmt);	
 	$test = array ($c1,$c2);

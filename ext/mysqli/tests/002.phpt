@@ -21,7 +21,7 @@ mysqli bind_result 1
 	$rc = mysqli_query($link,"INSERT INTO test_fetch_null(col1,col10, col11) VALUES(1,'foo1', 1000),(2,'foo2', 88),(3,'foo3', 389789)");
 
 	$stmt = mysqli_prepare($link, "SELECT col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11 from test_fetch_null");
-	mysqli_bind_result($stmt, &$c1, &$c2, &$c3, &$c4, &$c5, &$c6, &$c7, &$c8, &$c9, &$c10, &$c11); 
+	mysqli_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $c10, $c11); 
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);

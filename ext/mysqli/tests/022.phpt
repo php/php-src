@@ -14,7 +14,7 @@ mysqli bind_param/bind_result char/text long
 
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_fetch VALUES (?,?)");
-	mysqli_bind_param($stmt, &$a1, MYSQLI_BIND_STRING, &$a2, MYSQLI_BIND_STRING);
+	mysqli_bind_param($stmt, array(MYSQLI_BIND_STRING, MYSQLI_BIND_STRING), $a1, $a2);
 
 	$a1 = "1234567890";
 	$a2 = str_repeat("A1", 32000);
@@ -23,7 +23,7 @@ mysqli bind_param/bind_result char/text long
 	mysqli_stmt_close($stmt);
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch");
-	mysqli_bind_result($stmt, &$c1, &$c2);
+	mysqli_bind_result($stmt, $c1, $c2);
 	mysqli_execute($stmt);
 	mysqli_fetch($stmt);
 
