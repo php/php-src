@@ -192,9 +192,9 @@ SAPI_API void sapi_activate(SLS_D)
 			sapi_read_post_data(SLS_C);
 		}
 		SG(request_info).cookie_data = sapi_module.read_cookies(SLS_C);
-	}
-	if (sapi_module.activate) {
-		sapi_module.activate(SLS_C);
+		if (sapi_module.activate) {
+			sapi_module.activate(SLS_C);
+		}
 	}
 }
 
