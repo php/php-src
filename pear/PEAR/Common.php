@@ -254,6 +254,26 @@ class PEAR_Common extends PEAR
 
     // }}}
 
+    // {{{ _unIndent()
+
+    function _unIndent($str)
+    {
+        // remove leading newlines
+        $str = preg_replace('/^[\r\n]+/', '', $str);
+        // find whitespace at the beginning of the first line
+        $indent_len = strspn($str, " \t");
+        $indent = substr($str, 0, $indent_len);
+        $data = '';
+        // remove the same amount of whitespace from following lines
+        foreach (explode("\n", $str) as $line) {
+            if (substr($line, 0, $indent_len) == $indent) {
+                $data .= substr($line, $indent_len) . "\n";
+            }
+        }
+        return $data;
+    }
+
+    // }}}
     // {{{ _element_start()
 
     /**
@@ -461,6 +481,7 @@ class PEAR_Common extends PEAR
                 $this->pkginfo['summary'] = $data;
                 break;
             case 'description':
+                $data = $this->_unIndent($this->cdata);
                 $this->pkginfo['description'] = $data;
                 break;
             case 'user':
@@ -490,17 +511,7 @@ class PEAR_Common extends PEAR
             case 'notes':
                 // try to "de-indent" release notes in case someone
                 // has been over-indenting their xml ;-)
-                $data = preg_replace('/^[\r\n]+/', '', $this->cdata);
-                $indent_len = strspn($data, " \t");
-                $indent = substr($data, 0, $indent_len);
-                $newdata = '';
-                foreach (explode("\n", $data) as $line) {
-                    print "indent_len=$indent_len\n";
-                    if (substr($line, 0, $indent_len) == $indent) {
-                        $newdata .= substr($line, $indent_len) . "\n";
-                    }
-                }
-                $data = $newdata;
+                $data = $this->_unIndent($this->cdata);
                 if ($this->in_changelog) {
                     $this->current_release['release_notes'] = $data;
                 } else {
