@@ -2217,41 +2217,6 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
-int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
-
-	if (EX(opline)->op1.op_type == IS_VAR) {
-		SELECTIVE_PZVAL_LOCK(*EX_T(EX(opline)->op1.u.var).var.ptr_ptr, &EX(opline)->op1);
-	}
-
-	/* We are not handling overloaded classes right now */
-	EX(object) = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	if (!PZVAL_IS_REF(EX(object))) {
-		EX(object)->refcount++; /* For $this pointer */
-	} else {
-		zval *this_ptr;
-
-		ALLOC_ZVAL(this_ptr);
-		*this_ptr = *EX(object);
-		INIT_PZVAL(this_ptr);
-		zval_copy_ctor(this_ptr);
-		EX(object) = this_ptr;
-	}
-
-	EX(fbc) = EX(fbc_constructor);
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-		/*  The scope should be the scope of the class where the constructor
-			was initially declared in */
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
-	}
-
-	NEXT_OPCODE();
-}
-
-
 /* Ensures that we're allowed to call a private method.
  * Will update EX(fbc) with the correct handler as necessary.
  */
@@ -2303,6 +2268,57 @@ inline int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope, i
 		ce = ce->parent;
 	}
 	return 0;
+}
+
+
+int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
+
+	if (EX(opline)->op1.op_type == IS_VAR) {
+		SELECTIVE_PZVAL_LOCK(*EX_T(EX(opline)->op1.u.var).var.ptr_ptr, &EX(opline)->op1);
+	}
+
+	/* We are not handling overloaded classes right now */
+	EX(object) = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	if (!PZVAL_IS_REF(EX(object))) {
+		EX(object)->refcount++; /* For $this pointer */
+	} else {
+		zval *this_ptr;
+
+		ALLOC_ZVAL(this_ptr);
+		*this_ptr = *EX(object);
+		INIT_PZVAL(this_ptr);
+		zval_copy_ctor(this_ptr);
+		EX(object) = this_ptr;
+	}
+
+	EX(fbc) = EX(fbc_constructor);
+	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
+		if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
+			/* No further checks necessary, most common case */
+		} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+			/* Ensure that if we're calling a private function, we're allowed to do so.
+			 */
+			if (EX(object)->value.obj.handlers->get_class_entry(EX(object) TSRMLS_CC) != EG(scope)) {
+				zend_error(E_ERROR, "Call to private constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+			}
+		} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
+			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 */
+			if (!zend_check_protected(EG(scope), EX(fbc)->common.scope, EX(fbc)->common.fn_flags)) {
+				zend_error(E_ERROR, "Call to protected constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+			}
+		}
+
+		/*  The scope should be the scope of the class where the constructor
+			was initially declared in */
+		EX(calling_scope) = EX(fbc)->common.scope;
+	} else {
+		EX(calling_scope) = NULL;
+	}
+
+	NEXT_OPCODE();
 }
 
 
@@ -3004,7 +3020,7 @@ int zend_switch_free_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & ZEND_ACC_ABSTRACT) {
-		zend_error(E_ERROR, "Cannot instanciate abstract class %s", EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
+		zend_error(E_ERROR, "Cannot instantiate abstract class %s", EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
 	}
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
