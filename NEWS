@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   is not valid. (Derick)
 - Fixed memory leak in memory manager. (Andi)
 - Fixed problem with exceptions returning from include(). (Dmitry)
+- Fixed bug #28641 (Instance of Interface). (Marcus)
 - Fixed bug #28311 (Transparency detection code is off by 1).
   (Ilia, pikeman at pikeman dot sytes dot net)
 - Fixed bug #28304 (Missing bounds check inside imagefilter()). (Ilia)
