@@ -74,7 +74,9 @@
 #if HAVE_MYSQL
 #include "ext/mysql/php_mysql.h"
 #endif
+#if defined(MBSTR_ENC_TRANS)
 #include "ext/mbstring/mbstring.h"
+#endif
 #if HAVE_OVERLOAD
 #include "ext/overload/php_overload.h"
 #endif
