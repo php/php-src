@@ -76,10 +76,12 @@ MYSQLI_MAP_PROPERTY_LONG(link_field_count_read, MYSQL, field_count);
 MYSQLI_MAP_PROPERTY_STRING(link_host_read, MYSQL, host);
 MYSQLI_MAP_PROPERTY_STRING(link_host_info_read, MYSQL, host_info);
 MYSQLI_MAP_PROPERTY_STRING(link_info_read, MYSQL, info);
+MYSQLI_MAP_PROPERTY_LONG(link_insert_id_read, MYSQL, last_used_con->insert_id);
 MYSQLI_MAP_PROPERTY_LONG(link_port_read, MYSQL, port);
 MYSQLI_MAP_PROPERTY_LONG(link_protocol_version_read, MYSQL, protocol_version);
 MYSQLI_MAP_PROPERTY_LONG(link_server_capabilities_read, MYSQL, server_capabilities);
 MYSQLI_MAP_PROPERTY_LONG(link_server_language_read, MYSQL, server_language);
+MYSQLI_MAP_PROPERTY_LONG(link_server_status_read, MYSQL, server_status);
 MYSQLI_MAP_PROPERTY_STRING(link_server_version_read, MYSQL, server_version);
 MYSQLI_MAP_PROPERTY_STRING(link_sqlstate_read, MYSQL, net.sqlstate);
 MYSQLI_MAP_PROPERTY_LONG(link_thread_id_read, MYSQL, thread_id);
@@ -148,7 +150,9 @@ mysqli_property_entry mysqli_link_property_entries[] = {
 	{"host", link_host_read, NULL},
 	{"host_info", link_host_info_read, NULL},
 	{"info", link_info_read, NULL},
+	{"insert_id", link_insert_id_read, NULL},
 	{"server_capabilities", link_server_capabilities_read, NULL},
+	{"server_status", link_server_status_read, NULL},
 	{"server_version", link_server_version_read, NULL},
 	{"sqlstate", link_sqlstate_read, NULL},
 	{"port", link_port_read, NULL},
