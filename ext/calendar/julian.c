@@ -147,7 +147,7 @@
 
 #include "sdncal.h"
 
-#define SDN_OFFSET         32083
+#define JULIAN_SDN_OFFSET         32083
 #define DAYS_PER_5_MONTHS  153
 #define DAYS_PER_4_YEARS   1461
 
@@ -169,7 +169,7 @@ void SdnToJulian(
 		*pDay = 0;
 		return;
 	}
-	temp = (sdn + SDN_OFFSET) * 4 - 1;
+	temp = (sdn + JULIAN_SDN_OFFSET) * 4 - 1;
 
 	/* Calculate the year and day of year (1 <= dayOfYear <= 366). */
 	year = temp / DAYS_PER_4_YEARS;
@@ -236,7 +236,7 @@ long int JulianToSdn(
 	return ((year * DAYS_PER_4_YEARS) / 4
 			+ (month * DAYS_PER_5_MONTHS + 2) / 5
 			+ inputDay
-			- SDN_OFFSET);
+			- JULIAN_SDN_OFFSET);
 }
 
 /*
