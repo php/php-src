@@ -555,7 +555,6 @@ ZEND_FUNCTION(dbx_query)
    Returns a row (index and assoc based on query) on success and returns 0 on failure or no more rows */
 ZEND_FUNCTION(dbx_fetch_row)
 {
-	int min_number_of_arguments=1;
 	int number_of_arguments=1;
 	zval **arguments[1];
 
