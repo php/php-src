@@ -854,7 +854,7 @@ int php_module_startup(sapi_module_struct *sf)
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
 
 #if HAVE_SETLOCALE
-	setlocale(LC_CTYPE, "");
+	setlocale(LC_ALL, "");
 #endif
 
 #ifdef PHP_WIN32
