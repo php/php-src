@@ -115,9 +115,9 @@ in.  The default layer is "user".
         if (sizeof($params) < 1 || sizeof($params) > 2) {
             return $this->raiseError("config-get expects 1 or 2 parameters");
         } elseif (sizeof($params) == 1) {
-            $this->ui->outputData("$params[0] = " . $this->config->get($params[0]), $command);
+            $this->ui->outputData("$params[0]=" . $this->config->get($params[0]), $command);
         } else {
-            $data = "($params[1])$params[0] = " .$this->config->get($params[0], $params[1]);
+            $data = "$params[1].$params[0]=" .$this->config->get($params[0], $params[1]);
             $this->ui->outputData($data, $command);
         }
         return true;
