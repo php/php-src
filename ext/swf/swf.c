@@ -168,10 +168,19 @@ PHP_FUNCTION(swf_openfile)
 	convert_to_double_ex(b);
 	
 	na = Z_STRVAL_PP(name);
+
+#ifdef VIRTUAL_DIR
+	if (virtual_filepath(na, &na)) {
+		return;
+	}
+#endif
 	
 	swf_openfile((strcasecmp("php://stdout", na)==0) ? fileno(stdout) : na,
 			 (float)Z_DVAL_PP(sizeX), (float)Z_DVAL_PP(sizeY),
       		 	 (float)Z_DVAL_PP(frameRate), (float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b));
+#ifdef VIRTUAL_DIR
+	free(na);
+#endif
 }
 /* }}} */
 
