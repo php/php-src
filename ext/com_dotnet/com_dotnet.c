@@ -152,7 +152,8 @@ PHP_FUNCTION(com_dotnet_create_instance)
 				SUCCEEDED(IUnknown_QueryInterface(V_UNKNOWN(&retval), &IID_IObjectHandle, &handle))) {
 			VARIANT unwrapped;
 
-			if (SUCCEEDED(IObjectHandle_Unwrap(handle, &unwrapped))) {
+			hr = IObjectHandle_Unwrap(handle, &unwrapped);
+			if (SUCCEEDED(hr)) {
 				/* unwrapped is now the dispatch pointer we want */
 				V_DISPATCH(&obj->v) = V_DISPATCH(&unwrapped);
 				V_VT(&obj->v) = VT_DISPATCH;
