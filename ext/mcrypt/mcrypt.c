@@ -1463,6 +1463,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 		n = read_bytes;
 		close(fd);
 		if (n < size) {
+			efree(iv);
 			php_error(E_WARNING, "%s(): Could not gather sufficient random data", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
