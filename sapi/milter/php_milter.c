@@ -1076,7 +1076,7 @@ int main(int argc, char *argv[])
 			ap_php_optind++;
 		}
 
-		// check if file exists, exit else
+		/* check if file exists, exit else */
 		
 		if (dofork) {
 			switch(fork()) {
