@@ -40,6 +40,14 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     define('PEAR_OS', 'Unix'); // blatant assumption
 }
 
+if (!defined("DIRECTORY_SEPARATOR")) {
+    if (OS_WINDOWS) {
+        define("DIRECTORY_SEPARATOR", "\\");
+    } else {
+        define("DIRECTORY_SEPARATOR", "/");
+    }
+}
+
 $_PEAR_default_error_mode = PEAR_ERROR_RETURN;
 $_PEAR_default_error_options = E_USER_NOTICE;
 $_PEAR_default_error_callback = '';
@@ -76,6 +84,7 @@ class PEAR
     var $_default_error_mode = null;
     var $_default_error_options = null;
     var $_default_error_handler = '';
+    var $_error_class = 'PEAR_Error';
 
     // }}}
 
@@ -86,11 +95,14 @@ class PEAR
      * $_PEAR_destructor_object_list for destructor emulation if a
      * destructor object exists.
      */
-    function PEAR()
+    function PEAR($error_class = null)
     {
         $classname = get_class($this);
         if ($this->_debug) {
             print "PEAR constructor called, class=$classname\n";
+        }
+        if ($error_class !== null) {
+            $this->_error_class = $error_class;
         }
         while ($classname) {
             $destructor = "_$classname";
@@ -219,10 +231,10 @@ class PEAR
     // {{{ raiseError()
 
     /**
-     * This method is a wrapper that returns an instance of PEAR_Error
-     * with this object's default error handling applied.  If the
-     * $mode and $options parameters are not specified, the object's
-     * defaults are used.
+     * This method is a wrapper that returns an instance of the
+     * configured error class with this object's default error
+     * handling applied.  If the $mode and $options parameters are not
+     * specified, the object's defaults are used.
      *
      * @param $message  a text error message
      * @param $code     a numeric error code (it is up to your class
@@ -285,7 +297,8 @@ class PEAR
                 }
             }
         }
-        return new PEAR_Error($message, $code, $mode, $options, $userinfo);
+        $ec = $this->_error_class;
+        return new $ec($message, $code, $mode, $options, $userinfo);
     }
 
     // }}}
@@ -502,6 +515,18 @@ class PEAR_Error
     }
 
     // }}}
+    // {{{ addUserInfo()
+
+    function addUserInfo($info)
+    {
+        if (empty($this->userinfo)) {
+            $this->userinfo = $info;
+        } else {
+            $this->userinfo .= " ** $info";
+        }
+    }
+
+    // }}}
     // {{{ toString()
 
     /**
@@ -524,7 +549,7 @@ class PEAR_Error
             }
             return sprintf('[%s: message="%s" code=%d mode=callback '.
                            'callback=%s prefix="%s" prepend="%s" append="%s" '.
-                           'debug="%s"]',
+                           'info="%s"]',
                            get_class($this), $this->message, $this->code,
                            $callback, $this->error_message_prefix,
                            $this->error_prepend, $this->error_append,
