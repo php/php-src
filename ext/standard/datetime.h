@@ -44,6 +44,7 @@ PHP_FUNCTION(checkdate);
 #if HAVE_STRFTIME
 PHP_FUNCTION(strftime);
 #endif
+PHP_FUNCTION(strtotime);
 
 extern char *php3_std_date(time_t t);
 void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);

@@ -1159,7 +1159,7 @@ $ifdef HAVE_IFX_IUS;
 $endif;
                 ) {
             
-               int bid;
+               int bid = 0;
                if(fieldtype==SQLTEXT) {
                    bid=php3_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,list);
                    locator=php3_intifx_get_blobloc(bid,list);
@@ -1243,9 +1243,6 @@ EXEC SQL BEGIN DECLARE SECTION;
     long sqlerrd[6];
     int e;
 
-$ifdef HAVE_IFX_IUS;
-    fixed binary 'blob' ifx_lo_t *slocator;
-$endif;
 
 EXEC SQL END DECLARE SECTION;
 
@@ -1643,7 +1640,7 @@ $ifdef HAVE_IFX_IUS;
 $endif;
                ) {
             
-               int bid;
+               int bid = 0;
                if(fieldtype==SQLTEXT) {
                    bid=php3_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,list);
                    locator=php3_intifx_get_blobloc(bid,list);
@@ -3143,7 +3140,7 @@ EXEC SQL END DECLARE SECTION;
 
     int type;
 
-    int i, locind;
+    int i;
     
     IFXLS_FETCH();
 
@@ -3777,7 +3774,7 @@ static char* php3_intifx_create_tmpfile(long bid) {
  if ((blobdir = getenv("php3_blobdir")) == NULL)
    blobdir=".";
  
- sprintf(filename,"blb%d",bid);
+ sprintf(filename,"blb%d",(int)bid);
  blobfile=tempnam(blobdir,filename);
  free(blobdir);
  retval=emalloc(strlen(blobfile)+1);
@@ -4257,17 +4254,17 @@ PHP_FUNCTION(ifxus_create_slob) {
  mode=pmode->value.lval;
  
  create_mode=0;
- if(mode&1!=0)   
+ if((mode&1) !=0)   
   create_mode|=LO_RDONLY;
- if(mode&2!=0)   
+ if((mode&2) !=0)   
   create_mode|=LO_WRONLY;
- if(mode&4!=0)   
+ if((mode&4) !=0)   
   create_mode|=LO_APPEND;
- if(mode&8!=0)   
+ if((mode&8) !=0)   
   create_mode|=LO_RDWR;
- if(mode&16!=0)   
+ if((mode&16) !=0)   
   create_mode|=LO_BUFFER;
- if(mode&32!=0)   
+ if((mode&32) !=0)   
   create_mode|=LO_NOBUFFER;
 
   
@@ -4467,7 +4464,6 @@ static long php3_intifxus_close_slob(long bid, HashTable *list) {
    opens an slob-object */
 PHP_FUNCTION(ifxus_open_slob) {
  pval *pbid,*pmode;
- long id;
  long mode,create_mode;
   
  if (ARG_COUNT(ht)!=2 || getParameters(ht, 1, &pbid,&pmode)==FAILURE) {
@@ -4478,17 +4474,17 @@ PHP_FUNCTION(ifxus_open_slob) {
  mode=pmode->value.lval;
  
  create_mode=0;
- if(mode&1!=0)   
+ if((mode&1) !=0)   
   create_mode|=LO_RDONLY;
- if(mode&2!=0)   
+ if((mode&2) !=0)   
   create_mode|=LO_WRONLY;
- if(mode&4!=0)   
+ if((mode&4) !=0)   
   create_mode|=LO_APPEND;
- if(mode&8!=0)   
+ if((mode&8) !=0)   
   create_mode|=LO_RDWR;
- if(mode&16!=0)   
+ if((mode&16) !=0)   
   create_mode|=LO_BUFFER;
- if(mode&32!=0)   
+ if((mode&32) !=0)   
   create_mode|=LO_NOBUFFER;
 
  RETURN_LONG(php3_intifxus_open_slob(pbid->value.lval,create_mode,list));
@@ -4550,7 +4546,6 @@ static long php3_intifxus_open_slob(long bid, long create_mode, HashTable *list)
 */
 static long php3_intifxus_new_slob(HashTable *list) {
  IFX_IDRES *Ifx_slob;
- int errcode;
  
 
  Ifx_slob=emalloc(sizeof(IFX_IDRES));
@@ -4578,7 +4573,7 @@ static long php3_intifxus_new_slob(HashTable *list) {
 */
 static ifx_lo_t *php3_intifxus_get_slobloc(long bid, HashTable *list) {
  IFX_IDRES *Ifx_slob;
- int errcode, type;
+ int type;
  
  Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
  if (type!=IFXG(le_idresult)  || Ifx_slob->type!=TYPE_SLOB) {

@@ -84,6 +84,7 @@ function_entry basic_functions[] = {
 #if HAVE_STRFTIME
 	{"strftime",		php3_strftime,				NULL},
 #endif
+	PHP_FE(strtotime, NULL)
 	{"date",		php3_date,					NULL},
 	{"gmdate",		php3_gmdate,				NULL},
 	{"getdate",		php3_getdate,				NULL},
@@ -110,6 +111,8 @@ function_entry basic_functions[] = {
 	{"trim",		php3_trim,					NULL},
 	{"ltrim",		php3_ltrim,					NULL},
 	{"rtrim",		php3_chop,					NULL},
+	PHP_FE(strip_tags, NULL)
+	PHP_FE(similar_text, NULL)
 	{"pos",			array_current,				first_arg_force_ref},
 
 	{"getimagesize",		php3_getimagesize,	NULL},
