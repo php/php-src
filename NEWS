@@ -7,7 +7,7 @@ PHP 4                                                                      NEWS
 - Fixed FastCGI IIS document root problem. (Shane)
 - Fixed corruption of multibyte character including 0x5c as second
   byte in multipart/form-data. (Rui)
-- Fixed possible crash in imagerotate() when AN invalid color index
+- Fixed possible crash in imagerotate() when an invalid color index
   is used for background color. (Pierre-Alain Joye)
 - Fixed bug #24313 (file_exist() warning on non-existent files
   when open_basedir is used). (Ilia)
