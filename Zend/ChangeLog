@@ -1,3 +1,9 @@
+2004-07-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_constants.c:
+      Do not use alloca() where it can be easily abused by the users.
+      
+
 2004-06-25  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_stream.c
