@@ -516,8 +516,6 @@ void do_begin_variable_parse(CLS_D)
 {
 	zend_llist fetch_list;
 
-	/* zend_llist_init(&fetch_list, sizeof(int), NULL, 0);
-	zend_stack_push(&CG(bp_stack), (void *) &fetch_list, sizeof(zend_llist));*/
 	zend_llist_init(&fetch_list, sizeof(zend_op), NULL, 0);
 	zend_stack_push(&CG(bp_stack), (void *) &fetch_list, sizeof(zend_llist));
 }
@@ -567,7 +565,7 @@ void do_end_variable_parse(int type, int arg_offset CLS_DC)
 }
 
 
-zend_bool is_method_call(CLS_D)
+static zend_bool is_method_call(CLS_D)
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *cur;
