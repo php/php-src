@@ -205,11 +205,7 @@ int php_init_config(void)
 		PG(open_basedir) = open_basedir;
 
 		if (!cfgin) {
-# ifdef PHP_WIN32
-			return FAILURE;
-# else
 			return SUCCESS;  /* having no configuration file is ok */
-# endif
 		}
 
 		if (opened_path) {
