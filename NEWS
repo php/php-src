@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.3
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #30356 (str_ireplace() does not work on all strings). (Ilia)
 - Fixed bug #30344 (Reflection::getModifierNames() returns too long strings).
   (Marcus)
 - Fixed bug #30282 (segfault when using unknown/unsupported 
