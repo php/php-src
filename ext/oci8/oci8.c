@@ -250,6 +250,11 @@ PHP_FUNCTION(oci_execute);
 PHP_FUNCTION(oci_fetch);
 PHP_FUNCTION(oci_cancel);
 PHP_FUNCTION(ocifetchinto);
+PHP_FUNCTION(oci_fetch_object);
+PHP_FUNCTION(oci_fetch_row);
+PHP_FUNCTION(oci_fetch_assoc);
+PHP_FUNCTION(oci_fetch_array);
+PHP_FUNCTION(ocifetchstatement);
 PHP_FUNCTION(oci_fetch_all);
 PHP_FUNCTION(oci_free_statement);
 PHP_FUNCTION(oci_internal_debug);
@@ -375,6 +380,10 @@ static zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_execute,                 NULL)
 	PHP_FE(oci_cancel,                  NULL)
 	PHP_FE(oci_fetch,                   NULL)
+    PHP_FE(oci_fetch_object,            NULL)
+    PHP_FE(oci_fetch_row,               NULL)
+    PHP_FE(oci_fetch_assoc,             NULL)
+    PHP_FE(oci_fetch_array,             NULL)
 	PHP_FE(ocifetchinto,                second_arg_force_ref)
 	PHP_FE(oci_fetch_all,               second_arg_force_ref)
 	PHP_FE(oci_free_statement,          NULL)
@@ -3176,6 +3185,121 @@ CLEANUP:
 
 /* }}} */
 
+/* {{{ php_oci_fetch_row() */
+static void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args)
+{
+        zval **stmt, **arg2, **arg3;
+        oci_statement *statement;
+        oci_out_column *column;
+        ub4 nrows = 1;
+        int i, used;
+
+        if (ZEND_NUM_ARGS() > expected_args) {
+                WRONG_PARAM_COUNT;
+        }
+
+        if (expected_args > 2) {
+            /* only for ocifetchinto BC */
+
+            switch (ZEND_NUM_ARGS()) {
+                    case 2:
+                            if (zend_get_parameters_ex(2, &stmt, &arg2)==FAILURE) {
+                                    RETURN_FALSE;
+                            }
+                            if (!mode) {
+                                mode = OCI_NUM;
+                            }
+                            break;
+                    case 3:
+                            if (zend_get_parameters_ex(3, &stmt, &arg2, &arg3)==FAILURE) {
+                                    RETURN_FALSE;
+                            }
+                            convert_to_long_ex(arg3);
+                            mode = Z_LVAL_PP(arg3);
+                            break;
+                    default:
+                            WRONG_PARAM_COUNT;
+                            break;
+
+            }
+        }
+        else {
+            switch (ZEND_NUM_ARGS()) {
+                    case 1:
+                            if (zend_get_parameters_ex(1, &stmt)==FAILURE) {
+                                    RETURN_FALSE;
+                            }
+                            if (!mode) {
+                                    mode = OCI_BOTH;
+                            }
+                            break;
+                    case 2:
+                            if (zend_get_parameters_ex(2, &stmt, &arg2)==FAILURE) {
+                                    RETURN_FALSE;
+                            }
+                            convert_to_long_ex(arg2);
+                            mode = Z_LVAL_PP(arg2);
+                            break;
+                    default:
+                            WRONG_PARAM_COUNT;
+                            break;
+            }
+        }
+
+        OCI_GET_STMT(statement,stmt);
+
+        if (!oci_fetch(statement, nrows, "OCIFetchInto" TSRMLS_CC)) {
+                RETURN_FALSE;
+        }
+
+        array_init(return_value);
+
+        for (i = 0; i < statement->ncolumns; i++) {
+                column = oci_get_col(statement, i + 1, 0);
+                if (column == NULL) {
+                        continue;
+                }
+                if ((column->indicator == -1) && ((mode & OCI_RETURN_NULLS) == 0)) {
+                        continue;
+                }
+
+                if (!(column->indicator == -1)) {
+                        zval *element;
+                        MAKE_STD_ZVAL(element);
+                        _oci_make_zval(element,statement,column,"OCIFetchInto",mode TSRMLS_CC);
+
+                        if (mode & OCI_NUM || !(mode & OCI_ASSOC)) {
+                                add_index_zval(return_value, i, element);
+                        }
+                        if (mode & OCI_ASSOC) {
+                                if (mode & OCI_NUM) {
+                                        ZVAL_ADDREF(element);
+                                }
+                                add_assoc_zval(return_value, column->name, element);
+                        }
+                }
+                else {
+                        if (mode & OCI_NUM || !(mode & OCI_ASSOC)) {
+                                add_index_null(return_value, i);
+                        }
+                        if (mode & OCI_ASSOC) {
+                                add_assoc_null(return_value, column->name);
+                        }
+                }
+        }
+
+        if (expected_args > 2) {
+            /* only for ocifetchinto BC
+             * in all other cases we return array, not long
+             * */
+            REPLACE_ZVAL_VALUE(arg2, return_value, 1); /* copy return_value to given reference */
+            zval_dtor(return_value);
+            RETURN_LONG(statement->ncolumns);
+        }
+}
+
+/* }}} */
+
 /************************* EXTENSION FUNCTIONS *************************/
 
 /* {{{ proto bool oci_define_by_name(resource stmt, string name, mixed &var [, int type])
@@ -5258,63 +5382,9 @@ PHP_FUNCTION(oci_fetch)
 
 PHP_FUNCTION(ocifetchinto)
 {
-	zval **stmt, **array, *element, **fmode;
-	oci_statement *statement;
-	oci_out_column *column;
-	ub4 nrows = 1;
-	int i, used;
-	int mode = OCI_NUM;
-	int ac = ZEND_NUM_ARGS();
-	
-	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &stmt, &array, &fmode) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	switch (ac) {
-	case 3:
-		convert_to_long_ex(fmode);
-		mode = Z_LVAL_PP(fmode);
-		/* possible breakthru */
-	}
-
-	OCI_GET_STMT(statement,stmt);
-
-	if (!oci_fetch(statement, nrows, "OCIFetchInto" TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-	
-	zval_dtor(*array);
-	array_init(*array);
-
-	for (i = 0; i < statement->ncolumns; i++) {
-		column = oci_get_col(statement, i + 1, 0);
-		if (column == NULL) {
-			continue;
-		}
-		
-		if ((column->indicator == -1) && ((mode & OCI_RETURN_NULLS) == 0)) {
-			continue;
-		}
-		
-		used = 0;
-		MAKE_STD_ZVAL(element);
-		_oci_make_zval(element,statement,column,"OCIFetchInto",mode TSRMLS_CC);
-		
-		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) {
-			zend_hash_index_update(Z_ARRVAL_PP(array),i,(void *)&element,sizeof(zval*),NULL);
-			used=1;
-		}
-
-		if (mode & OCI_ASSOC) {
-			if (used) {
-				element->refcount++;
-			}
-		  	zend_hash_update(Z_ARRVAL_PP(array),column->name,column->name_len+1,(void *)&element,sizeof(zval*),NULL);
-		}
-	}
-
-	RETURN_LONG(statement->ncolumns);
+    php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 3);
 }
+
 
 /* }}} */
 
@@ -5448,6 +5518,42 @@ PHP_FUNCTION(oci_fetch_all)
 	RETURN_LONG(rows);
 }
 
+/* }}} */
+
+/* {{{ proto object oci_fetch_object( resource stmt )
+   Fetch a result row as an object */
+PHP_FUNCTION(oci_fetch_object)
+{
+    php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, OCI_ASSOC, 2);
+
+    if (Z_TYPE_P(return_value) == IS_ARRAY) {
+        object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
+    }
+}
+/* }}} */
+
+/* {{{ proto object oci_fetch_row( resource stmt )
+   Fetch a result row as an enumerated array */
+PHP_FUNCTION(oci_fetch_row)
+{
+    php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, OCI_NUM, 1);
+}
+/* }}} */
+
+/* {{{ proto object oci_fetch_assoc( resource stmt )
+   Fetch a result row as an associative array */
+PHP_FUNCTION(oci_fetch_assoc)
+{
+    php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, OCI_ASSOC, 1);
+}
+/* }}} */
+
+/* {{{ proto object oci_fetch_array( resource stmt [, int mode ])
+   Fetch a result row as an array */
+PHP_FUNCTION(oci_fetch_array)
+{
+    php_oci_fetch_row(INTERNAL_FUNCTION_PARAM_PASSTHRU, OCI_BOTH, 2);
+}
 /* }}} */
 
 /* {{{ proto bool oci_free_statement(resource stmt)
