@@ -350,7 +350,8 @@ AC_TYPE_UID_T
 
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
-[AC_TRY_COMPILE([#include <sys/socket.h>
+[AC_TRY_COMPILE([ #include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>], [struct sockaddr_in6 s; int i=AF_INET6; s],
   ac_cv_ipv6_support=yes, ac_cv_ipv6_support=no)])
 if test "$ac_cv_ipv6_support" = yes; then
