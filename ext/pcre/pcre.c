@@ -47,6 +47,7 @@ function_entry pcre_functions[] = {
 	PHP_FE(preg_match_all,	third_arg_force_ref)
 	PHP_FE(preg_replace,	NULL)
 	PHP_FE(preg_split,		NULL)
+	PHP_FE(preg_quote,		NULL)
 	{NULL, 		NULL, 		NULL}
 };
 
@@ -839,6 +840,70 @@ PHP_FUNCTION(preg_split)
 	
 	/* Clean up */
 	efree(offsets);
+}
+/* }}} */
+
+
+/* {{{ proto string preg_quote(string str) */
+PHP_FUNCTION(preg_quote)
+{
+	zval 	*in_str_arg;	/* Input string argument */
+	char 	*in_str,		/* Input string */
+			*out_str,		/* Output string with quoted characters */
+		 	*p,				/* Iterator for input string */
+			*q,				/* Iterator for output string */
+		 	 c;				/* Current character */
+	
+	/* Get the arguments and check for errors */
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &in_str_arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Make sure we're working with strings */
+	convert_to_string(in_str_arg);
+	in_str = in_str_arg->value.str.val;
+
+	/* Nothing to do if we got an empty string */
+	if (!*in_str) {
+		RETVAL_STRING(empty_string, 0);
+	}
+	
+	/* Allocate enough memory so that even if each character
+	   is quoted, we won't run out of room */
+	out_str = emalloc(2 * in_str_arg->value.str.len + 1);
+	
+	/* Go through the string and quote necessary characters */
+	for(p = in_str, q = out_str; (c = *p); p++) {
+		switch(c) {
+			case '.':
+			case '\\':
+			case '+':
+			case '*':
+			case '?':
+			case '[':
+			case '^':
+			case ']':
+			case '$':
+			case '(':
+			case ')':
+			case '{':
+			case '}':
+			case '=':
+			case '!':
+			case '>':
+			case '<':
+			case '|':
+			case ':':
+				*q++ = '\\';
+				/* break is missing _intentionally_ */
+			default:
+				*q++ = c;
+		}
+	}
+	*q = '\0';
+	
+	/* Reallocate string and return it */
+	RETVAL_STRING(erealloc(out_str, q - out_str + 1), 0);
 }
 /* }}} */
 
