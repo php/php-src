@@ -2003,8 +2003,6 @@ binary_assign_op_addr_obj:
 						function_name_strlen = tmp.value.str.len;
 					}
 					
-					EX(calling_scope) = EG(scope);
-					
 					if ((EX(object).ptr = EG(This))) {
 						EX(object).ptr->refcount++;
 					}
@@ -2054,7 +2052,6 @@ binary_assign_op_addr_obj:
 						function_name_strlen = tmp.value.str.len;
 					}
 					
-					EX(calling_scope) = EG(scope);
 
 					do {
 						if (EG(scope)) {
@@ -2062,13 +2059,14 @@ binary_assign_op_addr_obj:
 								if ((EX(object).ptr = EG(This))) {
 									EX(object).ptr->refcount++;
 								}
+								EX(calling_scope) = EG(scope);
 								break;
 							}
 						}
 						if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
 							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 						}
-						EX(calling_scope) = NULL;
+						EX(calling_scope) = function->common.scope;
 						EX(object).ptr = NULL;
 					} while (0);
 					
@@ -2094,6 +2092,7 @@ binary_assign_op_addr_obj:
 								if ((EX(object).ptr = EG(This))) {
 									EX(object).ptr->refcount++;
 								}
+								EX(calling_scope) = EG(scope);
 								break;
 							}
 						}
@@ -2101,9 +2100,9 @@ binary_assign_op_addr_obj:
 							zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
 						}
 						EX(object).ptr = NULL;
+						EX(calling_scope) = EX(function_state).function->common.scope;
 					} while (0);
 
-					EX(calling_scope) = EG(scope);
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 					
 					goto do_fcall_common;
