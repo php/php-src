@@ -1105,7 +1105,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, isc_db
 	
 	for (i = 0; i < sqlda->sqld; i++, var++) {
 		unsigned short dim;
-		unsigned long ar_size;
+		unsigned long ar_size = 1;
 		
 		if ((var->sqltype & ~1) == SQL_ARRAY) {
 			ISC_ARRAY_DESC *ar_desc = &IB_ARRAY[i].ar_desc;
@@ -1121,7 +1121,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, isc_db
 				case blr_text:
 				case blr_text2:
 					IB_ARRAY[i].el_type = SQL_TEXT;
-					IB_ARRAY[i].el_size = ar_desc->array_desc_length + 1;
+					IB_ARRAY[i].el_size = ar_desc->array_desc_length;
 					break;
 				case blr_short:
 					IB_ARRAY[i].el_type = SQL_SHORT;
@@ -1165,8 +1165,12 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, isc_db
 					break;
 #endif						
 				case blr_varying:
-				case blr_varying2:	/* changed to SQL_TEXT ? */
-					/* sql_type = SQL_VARYING; Why? FIXME: ??? */
+				case blr_varying2:
+					/**
+					 * IB has a strange way of handling VARCHAR arrays. It doesn't store
+					 * the length in the first short, as with VARCHAR fields. It does, 
+					 * however, expect the extra short to be allocated for each element.
+					 */
 					IB_ARRAY[i].el_type = SQL_TEXT;
 					IB_ARRAY[i].el_size = ar_desc->array_desc_length + sizeof(short);
 					break;
@@ -1174,7 +1178,12 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, isc_db
 				case blr_blob_id:
 				case blr_cstring:
 				case blr_cstring2:
-					/* FIXME */
+					/**
+					 * These types are mentioned as array types in the manual, but I 
+					 * wouldn't know how to create an array field with any of these
+					 * types. I assume these types are not applicable to arrays, and
+					 * were mentioned erroneously.
+					 */
 				default:
 					_php_ibase_module_error("Unsupported array type %d in relation '%s' column '%s'" TSRMLS_CC, ar_desc->array_desc_dtype, var->relname, var->sqlname);
 					efree(IB_ARRAY);
@@ -1182,7 +1191,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, isc_db
 					return FAILURE;
 			} /* switch array_desc_type */
 			
-			ar_size = 1; /* calculate elements count */
+			/* calculate elements count */
 			for (dim = 0; dim < ar_desc->array_desc_dimensions; dim++) {
 				ar_size *= 1 + ar_desc->array_desc_bounds[dim].array_bound_upper - ar_desc->array_desc_bounds[dim].array_bound_lower;
 			}
@@ -1323,48 +1332,64 @@ static int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC)
 /* {{{ _php_ibase_bind_array() */
 static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, ibase_array *array, int dim TSRMLS_DC)
 {
-	int 
-		u_bound = array->ar_desc.array_desc_bounds[dim].array_bound_upper,
+	zval null_val, *pnull_val = &null_val;
+	int u_bound = array->ar_desc.array_desc_bounds[dim].array_bound_upper,
 		l_bound = array->ar_desc.array_desc_bounds[dim].array_bound_lower,
 		dim_len = 1 + u_bound - l_bound;
+
+	ZVAL_NULL(pnull_val);
 
 	if (dim < array->ar_desc.array_desc_dimensions) {
 		unsigned long slice_size = buf_size / dim_len;
 		unsigned short i;
+		zval **subval = &val;
 				
-		if (Z_TYPE_P(val) != IS_ARRAY || zend_hash_num_elements(Z_ARRVAL_P(val)) != dim_len) {
-			_php_ibase_module_error("Array parameter binding argument must fit perfectly (mismatch at depth %d)" TSRMLS_CC, dim+1);
-			return FAILURE;
+		if (Z_TYPE_P(val) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
 		}
 
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
-
 		for (i = 0; i < dim_len; ++i) { 
-			zval **subval;
-			
-			if (zend_hash_get_current_data(Z_ARRVAL_P(val), (void *) &subval) == FAILURE ||
-				_php_ibase_bind_array(*subval, buf, slice_size, array, dim + 1 TSRMLS_CC) == FAILURE) {
 
+			if (Z_TYPE_P(val) == IS_ARRAY &&
+				zend_hash_get_current_data(Z_ARRVAL_P(val), (void *) &subval) == FAILURE)
+			{
+				subval = &pnull_val;
+			}
+				
+			if (_php_ibase_bind_array(*subval, buf, slice_size, array, dim + 1 TSRMLS_CC) == FAILURE) 
+			{
 				return FAILURE;
 			}
 			buf += slice_size;
-			zend_hash_move_forward(Z_ARRVAL_P(val));
+
+			if (Z_TYPE_P(val) == IS_ARRAY) {
+				zend_hash_move_forward(Z_ARRVAL_P(val));
+			}
 		}
 
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
+		if (Z_TYPE_P(val) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
+		}
 
 	} else {
 		/* expect a single value */
-		if (array->ar_desc.array_desc_scale < 0) {
+		if (Z_TYPE_P(val) == IS_NULL) {
+			memset(buf, 0, buf_size);
+		} else if (array->ar_desc.array_desc_scale < 0) {
 
 			/* no coercion for array types */
+			double l;
 			
-			switch (array->el_type) {
-				double l;
+			convert_to_double(val);
 
+			if (Z_DVAL_P(val) > 0) {
+				l = Z_DVAL_P(val) * pow(10, -array->ar_desc.array_desc_scale) + .5;
+			} else {
+				l = Z_DVAL_P(val) * pow(10, -array->ar_desc.array_desc_scale) - .5;
+			}
+
+			switch (array->el_type) {
 				case SQL_SHORT:
-					convert_to_double(val);
-					l = Z_DVAL_P(val) * pow(10, -array->ar_desc.array_desc_scale);
 					if (l > SHRT_MAX || l < SHRT_MIN) {
 						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
 						return FAILURE;
@@ -1372,8 +1397,6 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, i
 					*(short*) buf = (short) l;
 					break;
 				case SQL_LONG:
-					convert_to_double(val);
-					l = Z_DVAL_P(val) * pow(10, -array->ar_desc.array_desc_scale);
 					if (l > ISC_LONG_MAX || l < ISC_LONG_MIN) {
 						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
 						return FAILURE;
@@ -1386,12 +1409,16 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, i
 						long double l;
 						
 						convert_to_string(val);
-
+						
 						if (!sscanf(Z_STRVAL_P(val), "%" LL_MASK "f", &l)) {
 							_php_ibase_module_error("Cannot convert '%s' to long double" TSRMLS_CC, Z_STRVAL_P(val));
 							return FAILURE;
+						}
+						
+						if (l > 0) {
+							*(ISC_INT64 *) buf = (ISC_INT64) (l * pow(10, -array->ar_desc.array_desc_scale) + .5);
 						} else {
-							*(ISC_INT64 *) buf = (ISC_INT64)(l * pow(10, -array->ar_desc.array_desc_scale));
+							*(ISC_INT64 *) buf = (ISC_INT64) (l * pow(10, -array->ar_desc.array_desc_scale) - .5);
 						}
 					}
 					break;
@@ -2559,7 +2586,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 			goto _sql_long;
 #else
 			if (scale == 0) {
-				l = sprintf(string_data, "%.0" LL_MASK "d", *(ISC_INT64 *) data);
+				l = sprintf(string_data, "%" LL_MASK "d", *(ISC_INT64 *) data);
 				ZVAL_STRINGL(val,string_data,l,1);
 			} else {
 				ISC_INT64 n = *(ISC_INT64 *) data, f = scales[-scale];
@@ -2698,6 +2725,14 @@ static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_siz
 								ib_array->ar_desc.array_desc_scale,
 								flag TSRMLS_CC) == FAILURE) {
 			return FAILURE;
+		}
+		
+		/* fix for peculiar handling of VARCHAR arrays;
+		   truncate the field to the cstring length */
+		if (ib_array->ar_desc.array_desc_dtype == blr_varying ||
+			ib_array->ar_desc.array_desc_dtype == blr_varying2) {
+				
+			Z_STRLEN_P(ar_zval) = strlen(Z_STRVAL_P(ar_zval));
 		}
 	}
 	return SUCCESS;
