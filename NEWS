@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? ??? 20??, Version 4.?.?
 - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
   them sort based on the current locale. (Derick)
+- Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
+  (Ilia)
 - Fixed bug #32567 (ext/gmp fails to compile in threadsafe mode). (Tony)
 - Fixed bug #32538 (ext/swf/swf.c does not compile with gcc-3.4.x or newer).
   (adam dot greenfield at gmail dot com)
