@@ -120,7 +120,7 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool 
 	uint initial_size, block_size;
 
 	if (OG(ob_lock)) {
-		php_error(E_ERROR, "%s() Cannot use output buffering in output buffering display handlers", get_active_function_name(TSRMLS_C));
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		return FAILURE;
 	}
 	if (chunk_size) {
@@ -366,7 +366,7 @@ static int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
 {
 	if (php_ob_handler_used(handler_set TSRMLS_CC))
 	{
-		php_error(E_WARNING, "%s() output handler '%s' conflicts with '%s'", get_active_function_name(TSRMLS_C), handler_new, handler_set);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler '%s' conflicts with '%s'", handler_new, handler_set);
 		return 1;
 	}
 	return 0;
@@ -386,7 +386,7 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 	/* apply rules */
 	if (!handler_gz || !handler_mb || !handler_ic) {
 		if (php_ob_handler_used(handler_name TSRMLS_CC)) {
-			php_error(E_WARNING, "%s() output handler '%s' cannot be used twice", get_active_function_name(TSRMLS_C), handler_name);
+			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler '%s' cannot be used twice", handler_name);
 			return FAILURE;
 		}
 		if (!handler_gz && php_ob_init_conflict(handler_name, "zlib output compression" TSRMLS_CC))
@@ -508,7 +508,7 @@ PHP_FUNCTION(ob_list_handlers)
 	}
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Unable to initialize array");
 		RETURN_FALSE;
 	}
 	if (OG(ob_nesting_level)) {
@@ -718,8 +718,7 @@ PHP_FUNCTION(ob_flush)
 			WRONG_PARAM_COUNT;
 
 	if (!OG(ob_nesting_level)) {
-		php_error(E_NOTICE, "%s() failed to flush buffer. No buffer to flush.",
-				  get_active_function_name(TSRMLS_C));
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer. No buffer to flush.");
 		RETURN_FALSE;
 	}
 		
@@ -737,13 +736,11 @@ PHP_FUNCTION(ob_clean)
 
 	
 	if (!OG(ob_nesting_level)) {
-		php_error(E_NOTICE, "%s() failed to delete buffer. No buffer to delete.",
-				  get_active_function_name(TSRMLS_C));
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
 		RETURN_FALSE;
 	}
-	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error(E_NOTICE, "%s() failed to delete buffer %s.",
-				  get_active_function_name(TSRMLS_C), OG(active_ob_buffer).handler_name);
+	if (!OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
 	
@@ -760,13 +757,11 @@ PHP_FUNCTION(ob_end_flush)
 			WRONG_PARAM_COUNT;
 	
 	if (!OG(ob_nesting_level)) {
-		php_error(E_NOTICE, "%s() failed to delete and flush buffer. No buffer to delete or flush.",
-				  get_active_function_name(TSRMLS_C));
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush.");
 		RETURN_FALSE;
 	}
 	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error(E_NOTICE, "%s() failed to delete buffer %s.",
-				  get_active_function_name(TSRMLS_C), OG(active_ob_buffer).handler_name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
 	
@@ -783,13 +778,11 @@ PHP_FUNCTION(ob_end_clean)
 			WRONG_PARAM_COUNT;
 		
 	if (!OG(ob_nesting_level)) {
-		php_error(E_NOTICE, "%s() failed to delete buffer. No buffer to delete.",
-				  get_active_function_name(TSRMLS_C));
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
 		RETURN_FALSE;
 	}
 	if (OG(ob_nesting_level) && !OG(active_ob_buffer).status && !OG(active_ob_buffer).erase) {
-		php_error(E_NOTICE, "%s() failed to delete buffer %s.",
-				  get_active_function_name(TSRMLS_C), OG(active_ob_buffer).handler_name);
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
 	
@@ -846,9 +839,12 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 
 	if (ob_buffer->internal_output_handler) {
 		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_INTERNAL);
+		add_assoc_long(elem, "buffer_size", ob_buffer->internal_output_handler_buffer_size);
 	}
 	else {
 		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
+		add_assoc_long(elem, "initial_size", ob_buffer->size);
+		add_assoc_long(elem, "chunk_size", ob_buffer->chunk_size);
 	}
 	add_assoc_long(elem, "status", ob_buffer->status);
 	add_assoc_string(elem, "name", ob_buffer->handler_name, 1);
