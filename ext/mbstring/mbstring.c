@@ -81,14 +81,14 @@ static sapi_post_entry mbstr_post_entries[] = {
 };
 
 function_entry mbstring_functions[] = {
-	PHP_FE(mbstr_internal_encoding,		NULL)
-	PHP_FE(mbstr_http_input,				NULL)
-	PHP_FE(mbstr_http_output,			NULL)
-	PHP_FE(mbstr_detect_order,			NULL)
-	PHP_FE(mbstr_substitute_character,	NULL)
-	PHP_FE(mbstr_gpc_handler,			NULL)
-	PHP_FE(mbstr_output_handler,			NULL)
-	PHP_FE(mbstr_preferred_mime_name,	NULL)
+	PHP_FE(mb_internal_encoding,		NULL)
+	PHP_FE(mb_http_input,				NULL)
+	PHP_FE(mb_http_output,			NULL)
+	PHP_FE(mb_detect_order,			NULL)
+	PHP_FE(mb_substitute_character,	NULL)
+	PHP_FE(mb_gpc_handler,			NULL)
+	PHP_FE(mb_output_handler,			NULL)
+	PHP_FE(mb_preferred_mime_name,	NULL)
 	PHP_FE(mb_strlen,					NULL)
 	PHP_FE(mb_strpos,					NULL)
 	PHP_FE(mb_strrpos,				NULL)
@@ -96,15 +96,15 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_strcut,					NULL)
 	PHP_FE(mb_strwidth,				NULL)
 	PHP_FE(mb_strimwidth,				NULL)
-	PHP_FE(mbstr_convert_encoding,		NULL)
-	PHP_FE(mbstr_detect_encoding,		NULL)
-	PHP_FE(mbstr_convert_kana,			NULL)
-	PHP_FE(mbstr_encode_mimeheader,		NULL)
-	PHP_FE(mbstr_decode_mimeheader,		NULL)
-	PHP_FE(mbstr_convert_variables,		third_and_rest_force_ref)
-	PHP_FE(mbstr_encode_numericentity,		NULL)
-	PHP_FE(mbstr_decode_numericentity,		NULL)
-	PHP_FE(mbstr_send_mail,					NULL)
+	PHP_FE(mb_convert_encoding,		NULL)
+	PHP_FE(mb_detect_encoding,		NULL)
+	PHP_FE(mb_convert_kana,			NULL)
+	PHP_FE(mb_encode_mimeheader,		NULL)
+	PHP_FE(mb_decode_mimeheader,		NULL)
+	PHP_FE(mb_convert_variables,		third_and_rest_force_ref)
+	PHP_FE(mb_encode_numericentity,		NULL)
+	PHP_FE(mb_decode_numericentity,		NULL)
+	PHP_FE(mb_send_mail,					NULL)
 	PHP_FALIAS(mbstrlen,	mb_strlen,	NULL)
 	PHP_FALIAS(mbstrpos,	mb_strpos,	NULL)
 	PHP_FALIAS(mbstrrpos,	mb_strrpos,	NULL)
@@ -112,14 +112,14 @@ function_entry mbstring_functions[] = {
 	PHP_FALIAS(mbstrcut,	mb_strcut,	NULL)
 	PHP_FALIAS(mbstrwidth,	mb_strwidth,	NULL)
 	PHP_FALIAS(mbstrimwidth,	mb_strimwidth,	NULL)
-	PHP_FALIAS(i18n_internal_encoding,	mbstr_internal_encoding,	NULL)
-	PHP_FALIAS(i18n_http_input,			mbstr_http_input,		NULL)
-	PHP_FALIAS(i18n_http_output,		mbstr_http_output,		NULL)
-	PHP_FALIAS(i18n_convert,			mbstr_convert_encoding,	NULL)
-	PHP_FALIAS(i18n_discover_encoding,	mbstr_detect_encoding,	NULL)
-	PHP_FALIAS(i18n_mime_header_encode,	mbstr_encode_mimeheader,	NULL)
-	PHP_FALIAS(i18n_mime_header_decode,	mbstr_decode_mimeheader,	NULL)
-	PHP_FALIAS(i18n_ja_jp_hantozen,		mbstr_convert_kana,		NULL)
+	PHP_FALIAS(i18n_internal_encoding,	mb_internal_encoding,	NULL)
+	PHP_FALIAS(i18n_http_input,			mb_http_input,		NULL)
+	PHP_FALIAS(i18n_http_output,		mb_http_output,		NULL)
+	PHP_FALIAS(i18n_convert,			mb_convert_encoding,	NULL)
+	PHP_FALIAS(i18n_discover_encoding,	mb_detect_encoding,	NULL)
+	PHP_FALIAS(i18n_mime_header_encode,	mb_encode_mimeheader,	NULL)
+	PHP_FALIAS(i18n_mime_header_decode,	mb_decode_mimeheader,	NULL)
+	PHP_FALIAS(i18n_ja_jp_hantozen,		mb_convert_kana,		NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -391,6 +391,7 @@ php_mbstring_init_globals(zend_mbstring_globals *pglobals)
 	pglobals->http_input_identify_get = mbfl_no_encoding_invalid;
 	pglobals->http_input_identify_post = mbfl_no_encoding_invalid;
 	pglobals->http_input_identify_cookie = mbfl_no_encoding_invalid;
+	pglobals->http_input_identify_string = mbfl_no_encoding_invalid;
 	pglobals->http_input_list = NULL;
 	pglobals->http_input_list_size = 0;
 	pglobals->detect_order_list = NULL;
@@ -444,10 +445,7 @@ PHP_RINIT_FUNCTION(mbstring)
 	MBSTRG(current_http_output_encoding) = MBSTRG(http_output_encoding);
 	MBSTRG(current_filter_illegal_mode) = MBSTRG(filter_illegal_mode);
 	MBSTRG(current_filter_illegal_substchar) = MBSTRG(filter_illegal_substchar);
-	MBSTRG(http_input_identify) = mbfl_no_encoding_invalid;
-	MBSTRG(http_input_identify_get) = mbfl_no_encoding_invalid;
-	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
-	MBSTRG(http_input_identify_cookie) = mbfl_no_encoding_invalid;
+
 	n = 0;
 	if (MBSTRG(detect_order_list)) {
 		list = MBSTRG(detect_order_list);
@@ -503,9 +501,9 @@ PHP_MINFO_FUNCTION(mbstring)
 
 
 
-/* {{{ proto string mbstr_internal_encoding([string encoding])
+/* {{{ proto string mb_internal_encoding([string encoding])
    Sets the current internal encoding or Returns the current internal encoding as a string. */
-PHP_FUNCTION(mbstr_internal_encoding)
+PHP_FUNCTION(mb_internal_encoding)
 {
 	pval **arg1;
 	char *name;
@@ -536,9 +534,9 @@ PHP_FUNCTION(mbstr_internal_encoding)
 /* }}} */
 
 
-/* {{{ proto string mbstr_http_input([string type])
+/* {{{ proto string mb_http_input([string type])
    Returns the input encoding. */
-PHP_FUNCTION(mbstr_http_input)
+PHP_FUNCTION(mb_http_input)
 {
 	pval **arg1;
 	int result, retname, n, *entry;
@@ -562,6 +560,10 @@ PHP_FUNCTION(mbstr_http_input)
 		case 'C':
 		case 'c':
 			result = MBSTRG(http_input_identify_cookie);
+			break;
+		case 'S':
+		case 's':
+			result = MBSTRG(http_input_identify_string);
 			break;
 		case 'I':
 		case 'i':
@@ -600,9 +602,9 @@ PHP_FUNCTION(mbstr_http_input)
 /* }}} */
 
 
-/* {{{ proto string mbstr_http_output([string encoding])
+/* {{{ proto string mb_http_output([string encoding])
    Sets the current output_encoding or Returns the current output_encoding as a string. */
-PHP_FUNCTION(mbstr_http_output)
+PHP_FUNCTION(mb_http_output)
 {
 	pval **arg1;
 	char *name;
@@ -633,9 +635,9 @@ PHP_FUNCTION(mbstr_http_output)
 /* }}} */
 
 
-/* {{{ proto array mbstr_detect_order([mixed encoding-list])
+/* {{{ proto array mb_detect_order([mixed encoding-list])
    Sets the current detect_order or Return the current detect_order as a array. */
-PHP_FUNCTION(mbstr_detect_order)
+PHP_FUNCTION(mb_detect_order)
 {
 	pval **arg1;
 	int n, size, *list, *entry;
@@ -685,9 +687,9 @@ PHP_FUNCTION(mbstr_detect_order)
 /* }}} */
 
 
-/* {{{ proto mixed mbstr_substitute_character([mixed substchar])
+/* {{{ proto mixed mb_substitute_character([mixed substchar])
    Sets the current substitute_character or Returns the current substitute_character. */
-PHP_FUNCTION(mbstr_substitute_character)
+PHP_FUNCTION(mb_substitute_character)
 {
 	pval **arg1;
 	MBSTRLS_FETCH();
@@ -726,9 +728,9 @@ PHP_FUNCTION(mbstr_substitute_character)
 /* }}} */
 
 
-/* {{{ proto string mbstr_preferred_mime_name(string encoding)
+/* {{{ proto string mb_preferred_mime_name(string encoding)
    Return the preferred MIME name (charset) as a string. */
-PHP_FUNCTION(mbstr_preferred_mime_name)
+PHP_FUNCTION(mb_preferred_mime_name)
 {
 	pval **arg1;
 	enum mbfl_no_encoding no_encoding;
@@ -852,7 +854,7 @@ static php_mbstr_encoding_handler(zval *arg, char *res, char *separator) {
 			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
 		} else {
-			php_error(E_WARNING, "Unable to create converter in php_mbstr_encoding_handler()");
+			php_error(E_WARNING, "Unable to create converter in php_mb_encoding_handler()");
 		}
 	}
 
@@ -873,6 +875,8 @@ static php_mbstr_encoding_handler(zval *arg, char *res, char *separator) {
 		}
 		n+=2;
 	}
+	MBSTRG(http_input_identify) = from_encoding;
+
 	if (convd != NULL) {
 		mbfl_buffer_converter_delete(convd);
 	}
@@ -887,7 +891,15 @@ static php_mbstr_encoding_handler(zval *arg, char *res, char *separator) {
 
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 {
+	MBSTRLS_FETCH();
+
+	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
+
 	php_mbstr_encoding_handler(arg, SG(request_info).post_data, "&");
+
+	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
+		MBSTRG(http_input_identify_post) = MBSTRG(http_input_identify);
+	}
 }
 
 /* http input processing */
@@ -897,7 +909,8 @@ void mbstr_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 	const char *c_var;
 	pval *array_ptr;
 	int free_buffer=0;
-	
+	MBSTRLS_FETCH();
+
 	switch (arg) {
 		case PARSE_POST:
 		case PARSE_GET:
@@ -953,17 +966,49 @@ void mbstr_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 	}
 
 	switch (arg) {
-		case PARSE_POST:
-		case PARSE_GET:
-		case PARSE_STRING:
-			separator = (char *) estrdup(PG(arg_separator).input);
-			break;
-		case PARSE_COOKIE:
-			separator = ";\0";
-			break;
+	case PARSE_POST:
+	case PARSE_GET:
+	case PARSE_STRING:
+		separator = (char *) estrdup(PG(arg_separator).input);
+		break;
+	case PARSE_COOKIE:
+		separator = ";\0";
+		break;
 	}
 	
+	switch(arg) {
+	case PARSE_POST:
+		MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
+		break;
+	case PARSE_GET:
+		MBSTRG(http_input_identify_get) = mbfl_no_encoding_invalid;
+		break;
+	case PARSE_COOKIE:
+		MBSTRG(http_input_identify_cookie) = mbfl_no_encoding_invalid;
+		break;
+	case PARSE_STRING:
+		MBSTRG(http_input_identify_string) = mbfl_no_encoding_invalid;
+		break;
+	}
+
 	php_mbstr_encoding_handler(array_ptr, res, separator);
+
+	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
+		switch(arg){
+		case PARSE_POST:
+			MBSTRG(http_input_identify_post) = MBSTRG(http_input_identify);
+			break;
+		case PARSE_GET:
+			MBSTRG(http_input_identify_get) = MBSTRG(http_input_identify);
+			break;
+		case PARSE_COOKIE:
+			MBSTRG(http_input_identify_cookie) = MBSTRG(http_input_identify);
+			break;
+		case PARSE_STRING:
+			MBSTRG(http_input_identify_string) = MBSTRG(http_input_identify);
+			break;
+		}
+	}
 
 	if(arg != PARSE_COOKIE) {
 		efree(separator);
@@ -974,9 +1019,9 @@ void mbstr_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 	}
 }
 
-/* {{{ proto array mbstr_gpc_handler(string query, int type)
+/* {{{ proto array mb_gpc_handler(string query, int type)
     */
-PHP_FUNCTION(mbstr_gpc_handler)
+PHP_FUNCTION(mb_gpc_handler)
 {
 	pval **arg_str;
 	char *var, *val, *strtok_buf, **val_list;
@@ -1076,7 +1121,7 @@ PHP_FUNCTION(mbstr_gpc_handler)
 			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
 		} else {
-			php_error(E_WARNING, "Unable to create converter in mbstr_gpc_handler()");
+			php_error(E_WARNING, "Unable to create converter in mb_gpc_handler()");
 		}
 	}
 
@@ -1111,9 +1156,9 @@ PHP_FUNCTION(mbstr_gpc_handler)
 
 
 
-/* {{{ proto string mbstr_output_handler(string contents, int status)
+/* {{{ proto string mb_output_handler(string contents, int status)
    Returns string in output buffer converted to the http_output encoding */
-PHP_FUNCTION(mbstr_output_handler)
+PHP_FUNCTION(mb_output_handler)
 {
 	pval **arg_string, **arg_status;
 	mbfl_string string, result, *ret;
@@ -1629,9 +1674,9 @@ PHP_FUNCTION(mb_strimwidth)
 
 
 
-/* {{{ proto string mbstr_convert_encoding(string str, string to-encoding [, mixed from-encoding])
+/* {{{ proto string mb_convert_encoding(string str, string to-encoding [, mixed from-encoding])
    Returns converted string in desired encoding */
-PHP_FUNCTION(mbstr_convert_encoding)
+PHP_FUNCTION(mb_convert_encoding)
 {
 	pval **arg_str, **arg_new, **arg_old;
 	mbfl_string string, result, *ret;
@@ -1691,13 +1736,13 @@ PHP_FUNCTION(mbstr_convert_encoding)
 			if (from_encoding != mbfl_no_encoding_invalid) {
 				string.no_encoding = from_encoding;
 			} else {
-				php_error(E_WARNING, "Unable to detect encoding in mbstr_convert_encoding()");
+				php_error(E_WARNING, "Unable to detect encoding in mb_convert_encoding()");
 				from_encoding = mbfl_no_encoding_pass;
 				to_encoding = from_encoding;
 				string.no_encoding = from_encoding;
 			}
 		} else {
-			php_error(E_WARNING, "illegal from-encoding in mbstr_convert_encoding()");
+			php_error(E_WARNING, "illegal from-encoding in mb_convert_encoding()");
 		}
 		if (list != NULL) {
 			efree((void *)list);
@@ -1707,7 +1752,7 @@ PHP_FUNCTION(mbstr_convert_encoding)
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
 	if (convd == NULL) {
-		php_error(E_WARNING, "Unable to create converter in mbstr_convert_encoding()");
+		php_error(E_WARNING, "Unable to create converter in mb_convert_encoding()");
 		RETURN_FALSE;
 	}
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
@@ -1727,9 +1772,9 @@ PHP_FUNCTION(mbstr_convert_encoding)
 
 
 
-/* {{{ proto string mbstr_detect_encoding(string str [, mixed encoding_list])
+/* {{{ proto string mb_detect_encoding(string str [, mixed encoding_list])
     Encoding of the given string is returned (as a string) */
-PHP_FUNCTION(mbstr_detect_encoding)
+PHP_FUNCTION(mb_detect_encoding)
 {
 	pval **arg_str, **arg_list;
 	mbfl_string string;
@@ -1794,9 +1839,9 @@ PHP_FUNCTION(mbstr_detect_encoding)
 
 
 
-/* {{{ proto string mbstr_encode_mimeheader(string str [, string charset [, string transfer-encoding [, string linefeed]]])
+/* {{{ proto string mb_encode_mimeheader(string str [, string charset [, string transfer-encoding [, string linefeed]]])
     Convert the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= */
-PHP_FUNCTION(mbstr_encode_mimeheader)
+PHP_FUNCTION(mb_encode_mimeheader)
 {
 	pval **argv[4];
 	enum mbfl_no_encoding charset, transenc;
@@ -1866,9 +1911,9 @@ PHP_FUNCTION(mbstr_encode_mimeheader)
 
 
 
-/* {{{ proto string mbstr_decode_mimeheader(string string)
+/* {{{ proto string mb_decode_mimeheader(string string)
     Decodes the MIME "encoded-word" in the string */
-PHP_FUNCTION(mbstr_decode_mimeheader)
+PHP_FUNCTION(mb_decode_mimeheader)
 {
 	pval **arg_str;
 	mbfl_string string, result, *ret;
@@ -1895,9 +1940,9 @@ PHP_FUNCTION(mbstr_decode_mimeheader)
 
 
 
-/* {{{ proto string mbstr_convert_kana(string str [,string option] [, string encoding])
+/* {{{ proto string mb_convert_kana(string str [,string option] [, string encoding])
     Conversion between full-width character and half-width character (Japanese) */
-PHP_FUNCTION(mbstr_convert_kana)
+PHP_FUNCTION(mb_convert_kana)
 {
 	pval **arg1, **arg2, **arg3;
 	int argc, opt, i, n;
@@ -2012,9 +2057,9 @@ PHP_FUNCTION(mbstr_convert_kana)
 
 
 
-/* {{{ proto string mbstr_convert_variables(string to-encoding, mixed from-encoding, mixed ...)
+/* {{{ proto string mb_convert_variables(string to-encoding, mixed from-encoding, mixed ...)
   Convert the string resource in variables to desired encoding */
-PHP_FUNCTION(mbstr_convert_variables)
+PHP_FUNCTION(mb_convert_variables)
 {
 	pval ***args, **hash_entry;
 	HashTable *target_hash;
@@ -2114,7 +2159,7 @@ PHP_FUNCTION(mbstr_convert_variables)
 			mbfl_encoding_detector_delete(identd);
 		}
 		if (from_encoding == mbfl_no_encoding_invalid) {
-			php_error(E_WARNING, "Unable to detect encoding in mbstr_convert_variables()");
+			php_error(E_WARNING, "Unable to detect encoding in mb_convert_variables()");
 			from_encoding = mbfl_no_encoding_pass;
 		}
 	}
@@ -2126,7 +2171,7 @@ PHP_FUNCTION(mbstr_convert_variables)
 	if (from_encoding != mbfl_no_encoding_pass) {
 		convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0);
 		if (convd == NULL) {
-			php_error(E_WARNING, "Unable to create converter in mbstr_convert_variables()");
+			php_error(E_WARNING, "Unable to create converter in mb_convert_variables()");
 			RETURN_FALSE;
 		}
 		mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
@@ -2267,18 +2312,18 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	efree((void *)convmap);
 }
 
-/* {{{ proto string mbstr_encode_numericentity(string string, array convmap [, string encoding])
+/* {{{ proto string mb_encode_numericentity(string string, array convmap [, string encoding])
    Convert specified characters to HTML numeric entities */
-PHP_FUNCTION(mbstr_encode_numericentity)
+PHP_FUNCTION(mb_encode_numericentity)
 {
 	php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
 
-/* {{{ proto string mbstr_decode_numericentity(string string, array convmap [, string encoding])
+/* {{{ proto string mb_decode_numericentity(string string, array convmap [, string encoding])
    Convert HTML numeric entities to character code */
-PHP_FUNCTION(mbstr_decode_numericentity)
+PHP_FUNCTION(mb_decode_numericentity)
 {
 	php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -2287,9 +2332,9 @@ PHP_FUNCTION(mbstr_decode_numericentity)
 
 
 #if HAVE_SENDMAIL
-/* {{{ proto int mbstr_send_mail(string to, string subject, string message [, string additional_headers])
+/* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers])
    Send an email message with MIME scheme */
-PHP_FUNCTION(mbstr_send_mail)
+PHP_FUNCTION(mb_send_mail)
 {
 	int argc, n;
 	pval **argv[4];
@@ -2336,7 +2381,7 @@ PHP_FUNCTION(mbstr_send_mail)
 	if (Z_STRVAL_PP(argv[0])) {
 		to = Z_STRVAL_PP(argv[0]);
 	} else {
-		php_error(E_WARNING, "No to field in mbstr_send_mail()");
+		php_error(E_WARNING, "No to field in mb_send_mail()");
 		err = 1;
 	}
 
@@ -2357,7 +2402,7 @@ PHP_FUNCTION(mbstr_send_mail)
 			subject = Z_STRVAL_PP(argv[1]);
 		}
 	} else {
-		php_error(E_WARNING, "No subject field in mbstr_send_mail()");
+		php_error(E_WARNING, "No subject field in mb_send_mail()");
 		err = 1;
 	}
 
@@ -2379,7 +2424,7 @@ PHP_FUNCTION(mbstr_send_mail)
 		}
 	} else {
 		/* this is not really an error, so it is allowed. */
-		php_error(E_WARNING, "No message string in mbstr_send_mail()");
+		php_error(E_WARNING, "No message string in mb_send_mail()");
 		message = NULL;
 	}
 
@@ -2429,7 +2474,7 @@ PHP_FUNCTION(mbstr_send_mail)
 
 #else	/* HAVE_SENDMAIL */
 
-PHP_FUNCTION(mbstr_send_mail)
+PHP_FUNCTION(mb_send_mail)
 {
 	RETURN_FALSE;
 }
