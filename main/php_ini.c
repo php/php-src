@@ -121,8 +121,9 @@ static void pvalue_config_destructor(zval *pvalue)
     }
 }
 
-static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, php_extension_lists *extension_lists)
+static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg_list)
 {
+	php_extension_lists *extension_lists =(php_extension_lists * )arg_list;
 	switch (callback_type) {
 		case ZEND_INI_PARSER_ENTRY: {
 				zval *entry;
@@ -163,6 +164,7 @@ static void php_startup_loaded_extension_cb(void *arg){
 int php_startup_loaded_extensions(void)
 {
 	zend_llist_apply(php_load_extension_list, php_startup_loaded_extension_cb);
+	return SUCCESS;
 }
 
 static void php_load_function_extension_cb(void *arg)
@@ -171,7 +173,7 @@ static void php_load_function_extension_cb(void *arg)
 
 	if(! php_load_extension_list) {
 		php_load_extension_list=(zend_llist*)malloc(sizeof(zend_llist));
-		zend_llist_init(php_load_extension_list, sizeof(char **), free_estring, 1);
+		zend_llist_init(php_load_extension_list, sizeof(char **), (void(*)(void *))free_estring, 1);
 	}
 
 	zend_llist_add_element(php_load_extension_list, &extension);
@@ -207,8 +209,8 @@ int php_init_config(char *php_ini_path_override)
 		 be loaded in linked lists and process theese immediately 
 		 *after* we have finished setting up the ini mechanism
 		 */
-	zend_llist_init(&extension_lists.engine   , sizeof(char **), free_estring, 1);
-	zend_llist_init(&extension_lists.functions, sizeof(char **), free_estring, 1);
+	zend_llist_init(&extension_lists.engine   , sizeof(char **), (void(*)(void *))free_estring, 1);
+	zend_llist_init(&extension_lists.functions, sizeof(char **), (void(*)(void *))free_estring, 1);
 	
 	safe_mode_state = PG(safe_mode);
 	open_basedir = PG(open_basedir);
