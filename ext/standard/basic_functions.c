@@ -424,6 +424,10 @@ function_entry basic_functions[] = {
 	PHP_FE(proc_get_status,													NULL)
 #endif
 
+#ifdef HAVE_NICE
+	PHP_FE(nice,														NULL)	
+#endif
+
 	PHP_FE(rand,															NULL)
 	PHP_FE(srand,															NULL)
 	PHP_FE(getrandmax,														NULL)
