@@ -263,8 +263,8 @@ static const char * EXIF_ERROR_FSREALLOC = "%s(): Illegal reallocating of undefi
 /* {{{ format description defines
    Describes format descriptor
 */
-static int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
-#define NUM_FORMATS 12
+static int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8, 1};
+#define NUM_FORMATS 13
 
 #define TAG_FMT_BYTE       1
 #define TAG_FMT_STRING     2
@@ -278,6 +278,7 @@ static int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8}
 #define TAG_FMT_SRATIONAL 10
 #define TAG_FMT_SINGLE    11
 #define TAG_FMT_DOUBLE    12
+#define TAG_FMT_IFD       13
 
 #ifdef EXIF_DEBUG
 static char *exif_get_tagformat(int format)
@@ -295,6 +296,7 @@ static char *exif_get_tagformat(int format)
 		case TAG_FMT_SRATIONAL: return "SRATIONAL";
 		case TAG_FMT_SINGLE:    return "SINGLE";
 		case TAG_FMT_DOUBLE:    return "DOUBLE";
+		case TAG_FMT_IFD:       return "IFD";
 	}
 	return "*Illegal";
 }
@@ -381,7 +383,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_TILE_LENGTH                 0x0143
 #define TAG_TILE_OFFSETS                0x0144
 #define TAG_TILE_BYTE_COUNTS            0x0145
-#define TAG_SUB_IFDS                    0x014A
+#define TAG_SUB_IFD                     0x014A
 #define TAG_INK_SETMPUTER               0x014C
 #define TAG_INK_NAMES                   0x014D
 #define TAG_NUMBER_OF_INKS              0x014E
@@ -408,6 +410,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_REFERENCE_BLACK_WHITE       0x0214
 /* 0x0301 - 0x0302 */
 /* 0x0320 */
+/* 0x0343 */
 /* 0x5001 - 0x501B */
 /* 0x5021 - 0x503B */
 /* 0x5090 - 0x5091 */
@@ -575,7 +578,7 @@ static const tag_info_array tag_table_IFD = {
   { 0x0143, "TileLength"},
   { 0x0144, "TileOffsets"},
   { 0x0145, "TileByteCounts"},
-  { 0x014A, "SubIFDs"},
+  { 0x014A, "SubIFD"},
   { 0x014C, "InkSet"},
   { 0x014D, "InkNames"},
   { 0x014E, "NumberOfInks"},
@@ -586,7 +589,12 @@ static const tag_info_array tag_table_IFD = {
   { 0x0154, "SMinSampleValue"},
   { 0x0155, "SMaxSampleValue"},
   { 0x0156, "TransferRange"},
+  { 0x0157, "ClipPath"},
+  { 0x0158, "XClipPathUnits"},
+  { 0x0159, "YClipPathUnits"},
+  { 0x015A, "Indexed"},
   { 0x015B, "JPEGTables"},
+  { 0x015F, "OPIProxy"},
   { 0x0200, "JPEGProc"},
   { 0x0201, "JPEGInterchangeFormat"},
   { 0x0202, "JPEGInterchangeFormatLength"},
@@ -600,6 +608,7 @@ static const tag_info_array tag_table_IFD = {
   { 0x0212, "YCbCrSubSampling"},
   { 0x0213, "YCbCrPositioning"},
   { 0x0214, "ReferenceBlackWhite"},
+/*{ 0x02BC, "Photoshop/RDF"},*/
   { 0x0301, "Gamma"}, 
   { 0x0302, "ICCProfileDescriptor"}, 
   { 0x0303, "SRGBRenderingIntent"}, 
@@ -668,6 +677,7 @@ static const tag_info_array tag_table_IFD = {
   { 0x5112, "PixelPerUnitY"}, 
   { 0x5113, "PaletteHistogram"}, 
   { 0x1000, "RelatedImageFileFormat"},
+  { 0x800D, "ImageID"},
   { 0x828D, "CFARepeatPatternDim"},
   { 0x828E, "CFAPattern"},
   { 0x828F, "BatteryLevel"},
@@ -675,6 +685,9 @@ static const tag_info_array tag_table_IFD = {
   { 0x829A, "ExposureTime"},
   { 0x829D, "FNumber"},
   { 0x83BB, "IPTC/NAA"},
+  { 0x84E3, "IT8RasterPadding"},
+  { 0x84E5, "IT8ColorTable"},
+  { 0x8649, "ImageResourceInformation"}, /* PhotoShop */
   { 0x8769, "Exif_IFD_Pointer"},
   { 0x8773, "ICC_Profile"},
   { 0x8822, "ExposureProgram"},
@@ -1708,7 +1721,7 @@ static void add_assoc_image_info(pval *value, int sub_array, image_info_type *im
 	pval 			 *tmpi, *array = NULL;
 
 #ifdef EXIF_DEBUG
-		php_error(E_NOTICE, "%s(): Adding %d infos from section %s", get_active_function_name(TSRMLS_C), image_info->info_list[section_index].count, exif_get_sectionname(section_index));
+/*		php_error(E_NOTICE, "%s(): Adding %d infos from section %s", get_active_function_name(TSRMLS_C), image_info->info_list[section_index].count, exif_get_sectionname(section_index));*/
 #endif
 	if (image_info->info_list[section_index].count) {
 		if (sub_array) {
@@ -1730,7 +1743,7 @@ static void add_assoc_image_info(pval *value, int sub_array, image_info_type *im
 				name = uname;
 			}
 #ifdef EXIF_DEBUG
-/*			php_error(E_NOTICE, "%s(): Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", get_active_function_name(TSRMLS_C), info_tag, exif_get_tagname(info_tag, buffer, -12, exif_get_tag_table(section_index) TSRMLS_CC), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
+/*		php_error(E_NOTICE, "%s(): Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", get_active_function_name(TSRMLS_C), info_tag, exif_get_tagname(info_tag, buffer, -12, exif_get_tag_table(section_index) TSRMLS_CC), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
 #endif
 			if (info_data->length==0) {
 				add_assoc_null(tmpi, name);
@@ -1922,7 +1935,7 @@ static void add_assoc_image_info(pval *value, int sub_array, image_info_type *im
 #define M_APP11 0xEB
 #define M_APP12 0xEC
 #define M_APP13 0xED    /* IPTC International Press Telecommunications Council */
-#define M_APP14 0xEE
+#define M_APP14 0xEE    /* Software, Copyright?                     */
 #define M_APP15 0xEF
 #define M_JPG0  0xF0
 #define M_JPG1  0xF1
@@ -2501,7 +2514,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	format = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
 	components = php_ifd_get32u(dir_entry+4, ImageInfo->motorola_intel);
 
-	if (!format || format >= NUM_FORMATS) {
+	if (!format || format > NUM_FORMATS) {
 		/* (-1) catches illegal zero case as unsigned underflows to positive large. */
 		php_error(E_WARNING, "%s(): process tag(x%04X=%s): Illegal format code 0x%04X, suppose BYTE", get_active_function_name(TSRMLS_C), tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), format);
 		format = TAG_FMT_BYTE;
@@ -2714,6 +2727,15 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 					case 3: ImageInfo->FocalplaneUnits = 10;   break;  /* centimeter */
 					case 4: ImageInfo->FocalplaneUnits = 1;    break;  /* milimeter  */
 					case 5: ImageInfo->FocalplaneUnits = .001; break;  /* micrometer */
+				}
+				break;
+
+			case TAG_SUB_IFD:
+				if (format==TAG_FMT_IFD) {
+					/* If this is called we are either in a TIFFs thumbnail or a JPEG where we cannot handle it */
+					/* TIFF thumbnail: our data structure cannot store a thumbnail of a thumbnail */
+					/* JPEG do we have the data area and what to do with it */
+					php_error(E_NOTICE, "%s(): skip SUB IFD", get_active_function_name(TSRMLS_C));
 				}
 				break;
 
@@ -3280,7 +3302,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					/*entry_length = php_ifd_get32u(dir_entry+4, ImageInfo->motorola_intel);*/
 					if (entry_tag == TAG_EXIF_IFD_POINTER ||
 						entry_tag == TAG_INTEROP_IFD_POINTER ||
-						entry_tag == TAG_GPS_IFD_POINTER
+						entry_tag == TAG_GPS_IFD_POINTER ||
+						entry_tag == TAG_SUB_IFD
 					) {
 						switch(entry_tag) {
 							case TAG_EXIF_IFD_POINTER:
@@ -3295,12 +3318,38 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 								ImageInfo->sections_found |= FOUND_INTEROP;
 								sub_section_index = SECTION_INTEROP;
 								break;
+							case TAG_SUB_IFD:
+								ImageInfo->sections_found |= FOUND_THUMBNAIL;
+								sub_section_index = SECTION_THUMBNAIL;
+								break;
 						}
 						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
 						php_error(E_NOTICE, "%s(): Next IFD: %s @x%04X", get_active_function_name(TSRMLS_C), exif_get_sectionname(sub_section_index), entry_offset);
 #endif
 						exif_process_IFD_in_TIFF(ImageInfo, entry_offset, sub_section_index TSRMLS_CC);
+						if (section_index!=SECTION_THUMBNAIL && entry_tag==TAG_SUB_IFD) {
+							if (ImageInfo->Thumbnail.filetype != IMAGE_FILETYPE_UNKNOWN
+							&&  ImageInfo->Thumbnail.size
+							&&  ImageInfo->Thumbnail.offset
+							&&  ImageInfo->read_thumbnail
+							) {
+#ifdef EXIF_DEBUG
+								php_error(E_NOTICE, "%s(): Read THUMBNAIL @0x%04X + 0x%04X", get_active_function_name(TSRMLS_C), ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
+#endif
+								ImageInfo->Thumbnail.data = emalloc(ImageInfo->Thumbnail.size);
+								if (!ImageInfo->Thumbnail.data) {
+									EXIF_ERRLOG_EALLOC
+								} else {
+									php_stream_seek(ImageInfo->infile, ImageInfo->Thumbnail.offset, SEEK_SET);
+									fgot = php_stream_read(ImageInfo->infile, ImageInfo->Thumbnail.data, ImageInfo->Thumbnail.size);
+									if (fgot < ImageInfo->Thumbnail.size) {
+										EXIF_ERRLOG_THUMBEOF
+									}
+									exif_thumbnail_build(ImageInfo TSRMLS_CC);
+								}
+							}
+						}
 #ifdef EXIF_DEBUG
 						php_error(E_NOTICE, "%s(): Next IFD: %s done", get_active_function_name(TSRMLS_C), exif_get_sectionname(sub_section_index));
 #endif
@@ -3312,6 +3361,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 						}
 					}
 				}
+				/* If we had a thumbnail in a SUB_IFD we have ANOTHER image in NEXT IFD */
 				if (next_offset && section_index != SECTION_THUMBNAIL) {
 					/* this should be a thumbnail IFD */
 					/* the thumbnail itself is stored at Tag=StripOffsets */
@@ -3805,4 +3855,3 @@ PHP_FUNCTION(exif_imagetype)
  * vim600: sw=4 ts=4 tw=78 fdm=marker
  * vim<600: sw=4 ts=4 tw=78
  */
-
