@@ -797,17 +797,16 @@ PHP_FUNCTION(curl_setopt)
 				
 				postval = Z_STRVAL_PP(current);
 				if (*postval == '@') {
-					error = curl_formadd(&first, 
-										 &last, 
+					error = curl_formadd(&first, &last, 
 										 CURLFORM_COPYNAME, string_key,
-										 CURLFORM_NAMELENGTH, string_key_len,
-					                     CURLFORM_FILE, ++postval, 
+										 CURLFORM_NAMELENGTH, string_key_len - 1,
+										 CURLFORM_FILE, ++postval, 
 										 CURLFORM_END);
 				}
 				else {
 					error = curl_formadd(&first, &last, 
 										 CURLFORM_COPYNAME, string_key,
-										 CURLFORM_NAMELENGTH, string_key_len,
+										 CURLFORM_NAMELENGTH, string_key_len - 1,
 										 CURLFORM_PTRCONTENTS, postval, 
 										 CURLFORM_CONTENTSLENGTH, Z_STRLEN_PP(current),
 										 CURLFORM_END);
