@@ -483,7 +483,7 @@ Changes in the Zend Engine 2.0
 
         <?php
         class foo {
-          static $my_static = 5;
+            static $my_static = 5;
         }
 
         print foo::$my_static;
@@ -534,57 +534,66 @@ Changes in the Zend Engine 2.0
 
     * __autoload(). TBD.
 
-    * Method calls and property accesses can be overloaded by class 
-	  methods  __call(), __get() and __set(). 
-	  Examples:
+    * Method calls and property accesses can be overloaded
+      by class methods  __call(), __get() and __set().
 
-	  <?php
-		class Setter {
-		  var $n;
-		  var $x = array("a"=>1,"b"=>2,"c"=>3);
-		  function __get($nm) {
-			print "Getting [$nm]\n";
-			if(isset($this->x[$nm])) {
-			  $r = $this->x[$nm];
-			  print "Returning: $r\n";
-			  return $r;
-			} else {
-			  print "Nothing!\n";
-			}
-		  }
-	      function __set($nm, $val) {
-        	print "Setting [$nm] to $val\n";
-        	if(isset($this->x[$nm])) {
-              $this->x[$nm] = $val;
-              print "OK!\n";
-        	} else {
-	          print "Not OK!\n";
-			}
-		  }
-		}
+      __get() and __set() Example:
 
-		$foo = new Setter();
-		$foo->n = 1;
-		$foo->a = 100;
-		$foo->a++;
-		$foo->z++;
-		var_dump($foo);
-	  ?>
+    	  <?php
+    		class Setter {
+      		  public $n;
+      		  public $x = array('a' => 1, 'b' => 2, 'c' => 3);
 
-	  <?php
-		class Caller {
-    	  var $x = array(1,2,3);
-		  function __call($m, $a) {
-			print "Method $m called:\n";
-			var_dump($a);
-			return $this->x;
-		  }
-		}
+      		  function __get($nm) {
+          			print "Getting [$nm]\n";
 
-		$foo = new Caller();
-	    $a = $foo->test(1, "2", 3.4, true);
-		var_dump($a);
-	  ?>
+          			if(isset($this->x[$nm])) {
+            			  $r = $this->x[$nm];
+            			  print "Returning: $r\n";
+            			  return $r;
+          			} else {
+            			  print "Nothing!\n";
+          			}
+      		  }
+
+    	      function __set($nm, $val) {
+              	print "Setting [$nm] to $val\n";
+
+              	if(isset($this->x[$nm])) {
+                    $this->x[$nm] = $val;
+                    print "OK!\n";
+              	} else {
+        	          print "Not OK!\n";
+          			}
+      		  }
+    		}
+
+    		$foo = new Setter();
+    		$foo->n = 1;
+    		$foo->a = 100;
+    		$foo->a++;
+    		$foo->z++;
+    		var_dump($foo);
+    	  ?>
+
+      __call() Example:
+
+    	  <?php
+    		class Caller {
+        	  var $x = array(1, 2, 3);
+
+      		  function __call($m, $a) {
+          			print "Method $m called:\n";
+          			var_dump($a);
+          			return $this->x;
+      		  }
+    		}
+
+    		$foo = new Caller();
+  	    $a = $foo->test(1, '2', 3.4, true);
+    		var_dump($a);
+        ?>
+
 
 Changes in the Zend Engine 1.0
 
