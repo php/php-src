@@ -1260,7 +1260,7 @@ sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto simplemxml_element simplexml_load_file(string filename [, string class_name])
+/* {{{ proto simplemxml_element simplexml_load_file(string filename [, string class_name [, int options]])
    Load a filename and return a simplexml_element object to allow for processing */
 PHP_FUNCTION(simplexml_load_file)
 {
@@ -1269,14 +1269,19 @@ PHP_FUNCTION(simplexml_load_file)
 	int             filename_len;
 	xmlDocPtr       docp;
 	char           *classname = "";
-	int             classname_len = 0;
+	int             classname_len = 0, options=0;
 	zend_class_entry *ce= sxe_class_entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &filename, &filename_len, &classname, &classname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &filename, &filename_len, &classname, &classname_len, &options) == FAILURE) {
 		return;
 	}
 
+#if LIBXML_VERSION >= 20600
+	docp = xmlReadFile(filename, NULL, options);
+#else
 	docp = xmlParseFile(filename);
+#endif
+
 	if (! docp) {
 		RETURN_FALSE;
 	}
@@ -1298,7 +1303,7 @@ PHP_FUNCTION(simplexml_load_file)
 }
 /* }}} */
 
-/* {{{ proto simplemxml_element simplexml_load_string(string data [, string class_name])
+/* {{{ proto simplemxml_element simplexml_load_string(string data [, string class_name [, int options]])
    Load a string and return a simplexml_element object to allow for processing */
 PHP_FUNCTION(simplexml_load_string)
 {
@@ -1307,14 +1312,19 @@ PHP_FUNCTION(simplexml_load_string)
 	int             data_len;
 	xmlDocPtr       docp;
 	char           *classname = "";
-	int             classname_len = 0;
+	int             classname_len = 0, options=0;
 	zend_class_entry *ce= sxe_class_entry;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &data, &data_len, &classname, &classname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &data, &data_len, &classname, &classname_len, &options) == FAILURE) {
 		return;
 	}
 
+#if LIBXML_VERSION >= 20600
+	docp = xmlReadMemory(data, data_len, NULL, NULL, options);
+#else
 	docp = xmlParseMemory(data, data_len);
+#endif
+
 	if (! docp) {
 		RETURN_FALSE;
 	}
