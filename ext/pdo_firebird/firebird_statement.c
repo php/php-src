@@ -125,7 +125,8 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* called by PDO to fetch the next row from a statement */
-static int firebird_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
+	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
