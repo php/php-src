@@ -38,7 +38,7 @@ AC_ARG_WITH(mysql,
 		fi
 		MYSQL_INCLUDE=-I$MYSQL_INCDIR
 		if test -n "$APXS"; then
-			MYSQL_LFLAGS="'${apxs_runpath_switch}$MYSQL_LIBDIR' -L$MYSQL_LIBDIR"
+			MYSQL_LFLAGS="${apxs_runpath_switch}$MYSQL_LIBDIR' -L$MYSQL_LIBDIR"
 		else
 			MYSQL_LFLAGS="${ld_runpath_switch}$MYSQL_LIBDIR -L$MYSQL_LIBDIR"
 		fi

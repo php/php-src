@@ -96,7 +96,7 @@ AC_CACHE_VAL(php_cv_cc_dashr,[
 AC_MSG_RESULT($php_cv_cc_dashr)
 if test $php_cv_cc_dashr = "yes"; then
 	ld_runpath_switch="-R"
-	apxs_runpath_switch="-Wl,-R"
+	apxs_runpath_switch="-Wl,-R'"
 else
 	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
 	AC_CACHE_VAL(php_cv_cc_rpath,[
@@ -107,11 +107,11 @@ else
 	AC_MSG_RESULT($php_cv_cc_rpath)
 	if test $php_cv_cc_rpath = "yes"; then
 		ld_runpath_switch="-Wl,-rpath,"
-		apxs_runpath_switch="-Wl,-rpath "
+		apxs_runpath_switch="-Wl,'-rpath "
 	else
 		dnl something innocuous
 		ld_runpath_switch="-L"
-		apxs_runpath_switch="-L"
+		apxs_runpath_switch="-L'"
 	fi
 fi
 
@@ -325,12 +325,14 @@ AC_ARG_WITH(apxs,
     LDFLAGS_SHLIB_EXPORT=`perl -V:ccdlflags | cut -d\' -f2`
     PHP_LIBS=
     STRONGHOLD=
+    INCLUDES="$INCLUDES $APACHE_INCLUDE"
     AC_DEFINE(APACHE)
     AC_SUBST(APXS)
     AC_SUBST(APXS_LDFLAGS)
     AC_SUBST(BINNAME)
     AC_SUBST(INSTALL_IT)
     AC_SUBST(PHP_LIBS)
+    AC_SUBST(APACHE_INCLUDE)
     AC_DEFINE(HAVE_AP_CONFIG_H)
 	AC_DEFINE(HAVE_AP_COMPAT_H)
     AC_MSG_RESULT(yes)

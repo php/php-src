@@ -37,6 +37,9 @@
 /* Define if you have the bind library (-lbind). */
 #define HAVE_LIBBIND 0
 
+/* Define if you have Netscape LDAP instead of umich ldap or openldap*/
+#define HAVE_NSLDAP 0
+
 /* Define if you want safe mode enabled by default. */
 #define PHP_SAFE_MODE 0
 
