@@ -22,7 +22,10 @@
 
 #ifdef TRANS_SID
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -107,7 +110,7 @@ static char *check_tag_arg[] = {
 	NULL
 };
 
-static inline void tag_arg(url_adapt_state_t *ctx PLS_CC)
+static inline void tag_arg(url_adapt_state_t *ctx PLS_DC)
 {
 	char f = 0;
 	int i;
@@ -585,7 +588,7 @@ yy45:
 #ifdef DEBUG
 						printf("PARA(%s)\n", ctx->para.c);
 #endif
-						tag_arg(ctx PLS_DC);
+						tag_arg(ctx PLS_CC);
 						arg_start = YYCURSOR;
 						GO(STATE_NEXT_ARG);
 						NEXT;
@@ -626,7 +629,7 @@ yy54:
 #ifdef DEBUG
 						printf("PARA(%s)\n", ctx->para.c);
 #endif
-						tag_arg(ctx PLS_DC);
+						tag_arg(ctx PLS_CC);
 						arg_start = YYCURSOR;
 						GO(STATE_NEXT_ARG);
 						NEXT;
