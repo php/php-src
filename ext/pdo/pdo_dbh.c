@@ -317,10 +317,8 @@ static PHP_FUNCTION(dbh_constructor)
 }
 /* }}} */
 
-/* {{{ proto object PDO::prepare(string statment [, int options [, array driver_options]])
+/* {{{ proto object PDO::prepare(string statment [, array driver_options])
    Prepares a statement for execution and returns a statement object */
-/* TODO: options will be a PDO specific bitmask controlling such things as
- * cursor type. */
 static PHP_METHOD(PDO, prepare)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -328,10 +326,9 @@ static PHP_METHOD(PDO, prepare)
 	char *statement;
 	int statement_len;
 	zval *driver_options = NULL;
-	long options = 0;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|la", &statement,
-			&statement_len, &options, &driver_options)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &statement,
+			&statement_len, &driver_options)) {
 		RETURN_FALSE;
 	}
 	
@@ -342,7 +339,7 @@ static PHP_METHOD(PDO, prepare)
 	stmt->query_stringlen = statement_len;
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
 
-	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options, driver_options TSRMLS_CC)) {
+	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, driver_options TSRMLS_CC)) {
 		/* prepared; create a statement object for PHP land to access it */
 		Z_TYPE_P(return_value) = IS_OBJECT;
 		Z_OBJ_HANDLE_P(return_value) = zend_objects_store_put(stmt, NULL, pdo_dbstmt_free_storage, NULL TSRMLS_CC);
@@ -627,7 +624,6 @@ static PHP_METHOD(PDO, query)
 	char *statement;
 	int statement_len;
 	zval *driver_options = NULL;
-	long options = 0;
 
 	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s", &statement,
 			&statement_len)) {
@@ -641,7 +637,7 @@ static PHP_METHOD(PDO, query)
 	stmt->query_stringlen = statement_len;
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
 
-	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options, driver_options TSRMLS_CC)) {
+	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, driver_options TSRMLS_CC)) {
 		/* prepared; create a statement object for PHP land to access it */
 		Z_TYPE_P(return_value) = IS_OBJECT;
 		Z_OBJ_HANDLE_P(return_value) = zend_objects_store_put(stmt, NULL, pdo_dbstmt_free_storage, NULL TSRMLS_CC);

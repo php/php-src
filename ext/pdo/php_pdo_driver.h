@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050117
+#define PDO_DRIVER_API	20050120
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -189,7 +189,7 @@ typedef struct {
 typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
 /* prepare a statement and stash driver specific portion into stmt */
-typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, long options, zval *driver_options TSRMLS_DC);
+typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC);
 
 /* execute a statement (that does not return a result set) */
 typedef long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC);
