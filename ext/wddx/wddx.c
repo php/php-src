@@ -68,7 +68,7 @@
 static int le_wddx;
 
 struct _wddx_packet {
-	DLIST *packet_head;
+	zend_llist *packet_head;
 	int packet_length;
 };
 
@@ -199,10 +199,11 @@ static int wddx_stack_destroy(wddx_stack *stack)
 
 
 /* {{{ _php_free_packet_chunk */
-static void _php_free_packet_chunk(char **chunk_ptr)
+static void _php_free_packet_chunk(void *data)
 {
-	if ((*chunk_ptr))
-		efree((*chunk_ptr));
+	char **chunk_ptr = (char **)data;
+	if (*chunk_ptr)
+		efree(*chunk_ptr);
 }
 /* }}} */
 
@@ -210,7 +211,8 @@ static void _php_free_packet_chunk(char **chunk_ptr)
 /* {{{ php_wddx_destructor */
 void php_wddx_destructor(wddx_packet *packet)
 {
-	dlst_kill(packet->packet_head, (void (*)(void *))_php_free_packet_chunk);
+	zend_llist_destroy(packet->packet_head);
+	efree(packet->packet_head);
 	efree(packet);
 }
 /* }}} */
@@ -229,12 +231,13 @@ int php_minit_wddx(INIT_FUNC_ARGS)
 /* {{{ php_wddx_add_chunk */
 void php_wddx_add_chunk(wddx_packet *packet, char *str)
 {
-	char **chunk_ptr;
-	
-	chunk_ptr = (char**)dlst_newnode(sizeof(char *));
-	(*chunk_ptr) = estrdup(str);
-	dlst_insertafter(packet->packet_head, chunk_ptr, PHP_DLST_TAIL(packet->packet_head));
-	packet->packet_length += strlen(str);
+	char *chunk;
+	int len;
+
+	len = strlen(str);
+	chunk = estrndup(str, len);
+	zend_llist_add_element(packet->packet_head, &chunk);
+	packet->packet_length += len;
 }
 /* }}} */
 
@@ -242,15 +245,15 @@ void php_wddx_add_chunk(wddx_packet *packet, char *str)
 /* {{{ php_wddx_gather */
 char* php_wddx_gather(wddx_packet *packet)
 {
-	char **chunk;
+	char **chunk_ptr;
 	char *buf;
 	
 	buf = (char *)emalloc(packet->packet_length+1);	
 	buf[0] = '\0';
-	for(chunk=dlst_first(packet->packet_head);
-		chunk!=NULL;
-		chunk = dlst_next(chunk)) {
-		strcat(buf, *chunk);
+	for(chunk_ptr =  zend_llist_get_first(packet->packet_head);
+		chunk_ptr != NULL;
+		chunk_ptr =  zend_llist_get_next(packet->packet_head)) {
+		strcat(buf, *chunk_ptr);
 	}
 	
 	return buf;
@@ -372,29 +375,29 @@ static void php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 
 	target_hash = HASH_OF(var);
 	
-	zend_hash_internal_pointer_reset(target_hash);
-
-	hash_type = zend_hash_get_current_key(target_hash, &key, &idx);	
-
-	if (hash_type == HASH_KEY_IS_STRING) {
+	/* If variable is an object, always use struct and serialize its classname */
+	if (var->type == IS_OBJECT) {
 		php_wddx_add_chunk(packet, WDDX_STRUCT_S);
-		efree(key);
-	} else {
-		sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
-		php_wddx_add_chunk(packet, tmp_buf);
-	}
-
-	/* If variable is an object, serialize its classname */
-	if (var->type == IS_OBJECT)
-	{
 		sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
 		php_wddx_add_chunk(packet, tmp_buf);
 		php_wddx_add_chunk(packet, WDDX_STRING_S);
 		php_wddx_add_chunk(packet, var->value.obj.ce->name);
 		php_wddx_add_chunk(packet, WDDX_STRING_E);
 		php_wddx_add_chunk(packet, WDDX_VAR_E);
+	} else {
+		zend_hash_internal_pointer_reset(target_hash);
+
+		hash_type = zend_hash_get_current_key(target_hash, &key, &idx);	
+
+		if (hash_type == HASH_KEY_IS_STRING) {
+			php_wddx_add_chunk(packet, WDDX_STRUCT_S);
+			efree(key);
+		} else {
+			sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
+			php_wddx_add_chunk(packet, tmp_buf);
+		}
 	}
-			
+
 	while(zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS) {
 		if (hash_type == HASH_KEY_IS_STRING) {
 			ent_type = zend_hash_get_current_key(target_hash, &key, &idx);
@@ -412,7 +415,7 @@ static void php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 		zend_hash_move_forward(target_hash);
 	}
 	
-	if (hash_type == HASH_KEY_IS_STRING)
+	if (var->type == IS_OBJECT || hash_type == HASH_KEY_IS_STRING)
 		php_wddx_add_chunk(packet, WDDX_STRUCT_E);
 	else
 		php_wddx_add_chunk(packet, WDDX_ARRAY_E);
@@ -828,7 +831,9 @@ wddx_packet *php_wddx_constructor(void)
 	packet = emalloc(sizeof(wddx_packet));
 	if(!packet) return NULL;
 
-	packet->packet_head = dlst_init();
+	packet->packet_head = (zend_llist *)emalloc(sizeof(zend_llist));
+	zend_llist_init(packet->packet_head, sizeof(char *),
+					_php_free_packet_chunk, 0);
 	packet->packet_length = 0;
 
 	return packet;
