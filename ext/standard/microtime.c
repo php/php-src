@@ -107,20 +107,15 @@ PHP_FUNCTION(gettimeofday)
    Returns an array of usage statistics */
 PHP_FUNCTION(getrusage)
 {
-	struct rusage usg;
-	int ac = ZEND_NUM_ARGS();
-	pval **pwho;
+	struct rusage usg = {0};
+	long pwho = 0;
 	int who = RUSAGE_SELF;
 
-	if(ac == 1 &&
-		zend_get_parameters_ex(ac, &pwho) != FAILURE) {
-		convert_to_long_ex(pwho);
-		if(Z_LVAL_PP(pwho) == 1)
-			who = RUSAGE_CHILDREN;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) != FAILURE && pwho == 1) {
+		who = RUSAGE_CHILDREN;
 	}
 
-	memset(&usg, 0, sizeof(usg));
-	if(getrusage(who, &usg) == -1) {
+	if (getrusage(who, &usg) == -1) {
 		RETURN_FALSE;
 	}
 
