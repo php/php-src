@@ -21,8 +21,12 @@ class LimitIterator implements Iterator
 	{
 		$this->it->rewind();
 		$this->index = 0;
-		while($this->index < $this->offset && $this->it->hasMore()) {
-			$this->next();
+		if (is_a($this->it, 'SeekableIterator')) {
+			$this->index = $this->it->seek($this->offset);
+		} else {
+			while($this->index < $this->offset && $this->it->hasMore()) {
+				$this->next();
+			}
 		}
 	}
 	
