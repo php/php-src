@@ -48,7 +48,7 @@
 #define PGSQL_ESCAPE_STRING   1
 #define PGSQL_ESCAPE_BYTEA    2
 
-#define CHECK_DEFAULT_LINK(x) if (x == -1) { php_error(E_WARNING, "%s: no PostgreSQL link opened yet", get_active_function_name(TSRMLS_C)); }
+#define CHECK_DEFAULT_LINK(x) if (x == -1) { php_error(E_WARNING, "%s() no PostgreSQL link opened yet", get_active_function_name(TSRMLS_C)); }
 
 /* {{{ pgsql_functions[]
  */
@@ -493,12 +493,14 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			list_entry new_le;
 			
 			if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
-				php_error(E_WARNING,"PostgreSQL:  Too many open links (%d)",PGG(num_links));
+				php_error(E_WARNING,"%s() cannot create new link. Too many open links (%d)",
+						  get_active_function_name(TSRMLS_C), PGG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (PGG(max_persistent)!=-1 && PGG(num_persistent)>=PGG(max_persistent)) {
-				php_error(E_WARNING,"PostgreSQL:  Too many open persistent links (%d)",PGG(num_persistent));
+				php_error(E_WARNING,"%s() cannot create new link. Too many open persistent links (%d)",
+						  get_active_function_name(TSRMLS_C), PGG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -510,7 +512,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				pgsql=PQsetdb(host,port,options,tty,dbname);
 			}
 			if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-				php_error(E_WARNING,"Unable to connect to PostgreSQL server:  %s",PQerrorMessage(pgsql));
+				php_error(E_WARNING,"%s() unable to connect to PostgreSQL server: %s",
+						  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
@@ -553,7 +556,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					PQreset(le->ptr);
 				}
 				if (le->ptr==NULL || PQstatus(le->ptr)==CONNECTION_BAD) {
-					php_error(E_WARNING,"PostgreSQL link lost, unable to reconnect");
+					php_error(E_WARNING,"%s() PostgreSQL link lost, unable to reconnect",
+							  get_active_function_name(TSRMLS_C));
 					zend_hash_del(&EG(persistent_list),hashed_details,hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
@@ -593,7 +597,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
-			php_error(E_WARNING,"PostgreSQL:  Too many open links (%d)",PGG(num_links));
+			php_error(E_WARNING,"%s() cannot create new link. Too many open links (%d)",
+					  get_active_function_name(TSRMLS_C), PGG(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -603,7 +608,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			pgsql = PQsetdb(host,port,options,tty,dbname);
 		}
 		if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
-			php_error(E_WARNING,"Unable to connect to PostgreSQL server:  %s",PQerrorMessage(pgsql));
+			php_error(E_WARNING,"%s() unable to connect to PostgreSQL server: %s",
+					  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -861,7 +867,8 @@ PHP_FUNCTION(pg_query)
 		case PGRES_BAD_RESPONSE:
 		case PGRES_NONFATAL_ERROR:
 		case PGRES_FATAL_ERROR:
-			php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
+			php_error(E_WARNING, "%s() query failed:  %s",
+					  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 			RETURN_FALSE;
 			break;
 		case PGRES_COMMAND_OK: /* successful command that did not return rows */
@@ -1344,7 +1351,8 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			break;
 	}
 	if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
-		php_error(E_WARNING, "%s() bad column offset specified");
+		php_error(E_WARNING, "%s() bad column offset specified",
+				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -1552,7 +1560,8 @@ PHP_FUNCTION(pg_lo_create)
 	*/
 
 	if ((pgsql_oid = lo_creat(pgsql, INV_READ|INV_WRITE))==0) {
-		php_error(E_WARNING,"Unable to create PostgreSQL large object");
+		php_error(E_WARNING, "%s() unable to create PostgreSQL large object",
+				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -1595,7 +1604,8 @@ PHP_FUNCTION(pg_lo_unlink)
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
 	if (lo_unlink(pgsql, pgsql_oid) == -1) {
-		php_error(E_WARNING, "Unable to delete PostgreSQL large object %d", (int) pgsql_oid);
+		php_error(E_WARNING, "%s() unable to delete PostgreSQL large object %d",
+				  get_active_function_name(TSRMLS_C), (int) pgsql_oid);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1668,17 +1678,20 @@ PHP_FUNCTION(pg_lo_open)
 		if (create) {
 			if ((pgsql_oid = lo_creat(pgsql, INV_READ|INV_WRITE)) == 0) {
 				efree(pgsql_lofp);
-				php_error(E_WARNING,"Unable to create PostgreSQL large object");
+				php_error(E_WARNING, "%s() unable to create PostgreSQL large object",
+						  get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			} else {
 				if ((pgsql_lofd = lo_open(pgsql, pgsql_oid, pgsql_mode)) == -1) {
 					if (lo_unlink(pgsql, pgsql_oid) == -1) {
 						efree(pgsql_lofp);
-						php_error(E_WARNING,"Something's really messed up!!! Your database is badly corrupted in a way NOT related to PHP.");
+						php_error(E_WARNING, "%s() Something's really messed up!!! Your database is badly corrupted in a way NOT related to PHP",
+								  get_active_function_name(TSRMLS_C));
 						RETURN_FALSE;
 					}
 					efree(pgsql_lofp);
-					php_error(E_WARNING,"Unable to open PostgreSQL large object");
+					php_error(E_WARNING, "%s() unable to open PostgreSQL large object",
+							  get_active_function_name(TSRMLS_C));
 					RETURN_FALSE;
 				} else {
 					pgsql_lofp->conn = pgsql;
@@ -1689,7 +1702,8 @@ PHP_FUNCTION(pg_lo_open)
 			}
 		} else {
 			efree(pgsql_lofp);
-			php_error(E_WARNING,"Unable to open PostgreSQL large object");
+			php_error(E_WARNING,"%s() unable to open PostgreSQL large object",
+					  get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 	} else {
@@ -1725,7 +1739,8 @@ PHP_FUNCTION(pg_lo_close)
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, pgsql_lofp, -1, "PostgreSQL large object", le_lofp);
 	
 	if (lo_close((PGconn *)pgsql->conn, pgsql->lofd) < 0) {
-		php_error(E_WARNING,"Unable to close PostgreSQL large object descriptor %d", pgsql->lofd);
+		php_error(E_WARNING, "%s() unable to close PostgreSQL large object descriptor %d",
+				  get_active_function_name(TSRMLS_C), pgsql->lofd);
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
@@ -2078,7 +2093,8 @@ PHP_FUNCTION(pg_end_copy)
 	result = PQendcopy(pgsql);
 
 	if (result!=0) {
-		php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
+		php_error(E_WARNING, "%s() PostgreSQL query failed: %s",
+				  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2119,7 +2135,8 @@ PHP_FUNCTION(pg_put_line)
 	result = PQputline(pgsql, Z_STRVAL_PP(query));
 
 	if (result==EOF) {
-		php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
+		php_error(E_WARNING, "%s() PostgreSQL query failed: %s",
+				  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2187,7 +2204,7 @@ PHP_FUNCTION(pg_copy_to)
 				while (!copydone)
 				{
 					if ((ret = PQgetline(pgsql, copybuf, COPYBUFSIZ))) {
-						php_error(E_WARNING, "%s() query failed:  %s",
+						php_error(E_WARNING, "%s() query failed: %s",
 								  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 						RETURN_FALSE;
 					}
@@ -2222,7 +2239,7 @@ PHP_FUNCTION(pg_copy_to)
 					}
 				}
 				if (PQendcopy(pgsql)) {
-					php_error(E_WARNING, "%s() query failed:  %s",
+					php_error(E_WARNING, "%s() query failed: %s",
 							  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 					RETURN_FALSE;
 				}
@@ -2236,7 +2253,7 @@ PHP_FUNCTION(pg_copy_to)
 			break;
 		default:
 			PQclear(pgsql_result);
-			php_error(E_WARNING, "%s() query failed:  %s",
+			php_error(E_WARNING, "%s() query failed: %s",
 					  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
 			RETURN_FALSE;
 			break;
@@ -2487,7 +2504,8 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			}
 			break;
 		default:
-			php_error(E_ERROR,"Pgsql module error. Report this error");
+			php_error(E_ERROR,"%s() PostgreSQL module error. Report this error",
+					  get_active_function_name(TSRMLS_C));
 			break;
 	}
 	if (PQsetnonblocking(pgsql, 0)) {
