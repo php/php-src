@@ -48,6 +48,7 @@
 #include "php_db4.h"
 #include "php_flatfile.h"
 #include "php_inifile.h"
+#include "php_qdbm.h"
 
 /* {{{ dba_functions[]
  */
@@ -253,6 +254,9 @@ static dba_handler handler[] = {
 #if DBA_FLATFILE
 	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL|DBA_NO_APPEND) /* No lock in lib */
 #endif
+#if DBA_QDBM
+	DBA_HND(qdbm, DBA_LOCK_EXT)
+#endif
 	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -270,6 +274,8 @@ static dba_handler handler[] = {
 #define DBA_DEFAULT "ndbm"
 #elif DBA_DBM
 #define DBA_DEFAULT "dbm"
+#elif DBA_QDBM
+#define DBA_DEFAULT "qdbm"
 #else
 #define DBA_DEFAULT ""
 #endif
