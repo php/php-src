@@ -1545,7 +1545,7 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var,
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_CATCH;
 	opline->op1 = *catch_class;
-	SET_UNUSED(opline->op1); /* FIXME: Define IS_CLASS or something like that */
+/*	SET_UNUSED(opline->op1); *//* FIXME: Define IS_CLASS or something like that */
 	opline->op2 = *catch_var;
 
 	if (first_catch) {
