@@ -119,11 +119,8 @@ AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
 dnl AC_PROG_CC_STDC
 AC_PROG_CPP
-
 AC_AIX
-
-dnl AC_PROG_CXX
-dnl AC_PROG_CXXCPP
+AC_PROG_LN_S
 
 dnl Support systems with system libraries in e.g. /usr/lib64
 AC_ARG_WITH(libdir,
@@ -133,75 +130,11 @@ AC_ARG_WITH(libdir,
 dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
 
+dnl Checks for some support/generator progs
 PHP_PROG_RE2C
-AC_PROG_LN_S
-
-dnl Some vendors force mawk before gawk; mawk is broken so we don't like that,
-dnl and check manually
-dnl AC_PROG_AWK
-AC_CHECK_PROGS(AWK, gawk nawk awk mawk, bork, /usr/xpg4/bin/:$PATH)
-case "$AWK" in
-	*mawk)
-		AC_MSG_WARN([mawk is known to have problems on some systems.  You should install GNU awk])
-		;;
-	*gawk)
-		;;
-	bork)
-		AC_MSG_ERROR([Could not find awk; Install GNU awk])
-		;;
-	*)
-		AC_MSG_CHECKING([if $AWK is broken])
-		if ! $AWK 'function foo() {}' >/dev/null 2>&1 ; then
-			AC_MSG_RESULT([yes])
-			AC_MSG_ERROR([You should install GNU awk])
-		else
-			AC_MSG_RESULT([no - good!])
-		fi
-		;;
-esac
-
-AC_PROG_YACC
-if test "$YACC" != "bison -y"; then
-    AC_MSG_WARN([You will need bison if you want to regenerate the PHP parsers.])
-else
-    AC_MSG_CHECKING([bison version])
-    set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'|tr -d a-z`
-    if test "${1}" -ne "1" -o "(" "${2}" != "28" -a "${2}" != "35" -a "${2}" != "75" -a "${2}" != "875" ")"; then
-      AC_MSG_WARN([You will need bison 1.28, 1.35, 1.75 or 1.875 if you want to regenerate the Zend parser (found ${1}.${2}).])
-    fi
-    AC_MSG_RESULT(${1}.${2} (ok))
-fi
-AC_PROG_LEX
-if test -n "$LEX"; then
-  AC_DECL_YYTEXT
-  :
-fi
-dnl ## Make flex scanners use const if they can, even if __STDC__ is not
-dnl ## true, for compilers like Sun's that only set __STDC__ true in
-dnl ## "limit-to-ANSI-standard" mode, not in "ANSI-compatible" mode
-AC_C_CONST
-if test "$ac_cv_c_const" = "yes" ; then
-  LEX_CFLAGS="-DYY_USE_CONST"
-fi
-
-AC_MSG_CHECKING([flex version])
-if test "$LEX" ;then
-	flexvers=`echo "" | $LEX -V -v --version 2>/dev/null | 
-		sed -e 's/^.* //' -e 's/\./ /g'`
-	if test ! -z "$flexvers"; then
-		set $flexvers
-		if test "${1}" != "2" -o "${2}" != "5" -o "${3}" != "4"; then
-			AC_MSG_WARN(You will need flex 2.5.4 if you want to regenerate Zend/PHP lexical parsers.)
-		fi
-	fi
-AC_MSG_RESULT(${1}.${2}.${3} (ok))
-else
-	AC_MSG_WARN(You will need flex 2.5.4 or later if you want to regenerate Zend/PHP lexical parsers.)
-fi
-
-dnl Check whether byte ordering is bigendian
-PHP_C_BIGENDIAN
-
+PHP_PROG_AWK
+PHP_PROG_BISON
+PHP_PROG_LEX
 
 dnl Platform-specific compile settings.
 dnl -------------------------------------------------------------------------
@@ -255,7 +188,6 @@ sinclude(Zend/Zend.m4)
 sinclude(TSRM/tsrm.m4)
 
 
-
 divert(2)
 
 dnl ## Diversion 2 is where we set PHP-specific options and come up
@@ -272,7 +204,6 @@ PHP_HELP_SEPARATOR([SAPI modules:])
 PHP_SHLIB_SUFFIX_NAME
 PHP_SAPI=default
 PHP_BUILD_PROGRAM
-
 
 
 dnl SAPI configuration.
@@ -310,16 +241,20 @@ dnl ## includes what regex library is used and whether debugging or short
 dnl ## tags are enabled, and the default behaviour of php.ini options.
 
 
-
 dnl Starting system checks.
 dnl -------------------------------------------------------------------------
 
 PHP_CONFIGURE_PART(Running system checks)
 
-PHP_MISSING_TIME_R_DECL
+dnl Find sendmail binary
 PHP_PROG_SENDMAIL
+
 dnl Check whether the system uses EBCDIC (not ASCII) as its native codeset
 PHP_EBCDIC
+
+dnl Check whether the system byte ordering is bigendian
+PHP_C_BIGENDIAN
+
 dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary
 dnl and source packages.  This should be harmless on other OSs.
 if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
@@ -369,7 +304,6 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 
-PHP_MISSING_FCLOSE_DECL
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS([ \
 inttypes.h \
@@ -452,6 +386,9 @@ dnl -------------------------------------------------------------------------
 AC_STRUCT_TM
 AC_STRUCT_TIMEZONE
 
+PHP_MISSING_TIME_R_DECL
+PHP_MISSING_FCLOSE_DECL
+
 PHP_TM_GMTOFF
 PHP_STRUCT_FLOCK
 PHP_SOCKLEN_T
@@ -505,8 +442,6 @@ AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 #include <sys/socket.h>
 #include <netinet/in.h>], [struct sockaddr_in6 s; struct in6_addr t=in6addr_any; int i=AF_INET6; s; t.s6_addr[0] = 0;],
   [ac_cv_ipv6_support=yes], [ac_cv_ipv6_support=no])])
-
-
 
 dnl Checks for library functions.
 dnl -------------------------------------------------------------------------
@@ -644,28 +579,7 @@ dnl PHP_AC_BROKEN_SNPRINTF
 PHP_DECLARED_TIMEZONE
 PHP_TIME_R_TYPE
 PHP_READDIR_R_TYPE
-
-dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
-dnl AC_MSG_CHECKING([for in_addr_t])
-AC_CACHE_VAL(ac_cv_type_$1,
-[AC_EGREP_CPP(dnl
-changequote(<<,>>)dnl
-<<in_addr_t[^a-zA-Z_0-9]>>dnl
-changequote([,]), [#include <sys/types.h>
-#if STDC_HEADERS
-#include <stdlib.h>
-#include <stddef.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
-
-dnl AC_MSG_RESULT([$ac_cv_type_in_addr_t])
-if test $ac_cv_type_in_addr_t = no; then
-  AC_DEFINE(in_addr_t, u_int, [ ])
-fi
-
-
+PHP_CHECK_IN_ADDR_T
 
 divert(4)
 
@@ -1018,6 +932,7 @@ TSRM_BASIC_CHECKS
 if test "$PHP_THREAD_SAFETY" = "yes"; then
   TSRM_THREADS_CHECKS
 fi
+
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $LIBS"
@@ -1164,7 +1079,6 @@ PHP_SUBST(localstatedir)
 PHP_SUBST(datadir)
 PHP_SUBST(sysconfdir)
 
-PHP_SUBST(AWK)
 PHP_SUBST(CC)
 PHP_SUBST(CFLAGS)
 PHP_SUBST(CFLAGS_CLEAN)
@@ -1174,7 +1088,6 @@ PHP_SUBST(CPPFLAGS)
 PHP_SUBST(CXX)
 PHP_SUBST(CXXFLAGS)
 PHP_SUBST(CXXFLAGS_CLEAN)
-PHP_SUBST(CXX_PHP_COMPILE)
 PHP_SUBST_OLD(DEBUG_CFLAGS)
 PHP_SUBST(DEFS)
 PHP_SUBST_OLD(EXTENSION_DIR)
@@ -1186,23 +1099,18 @@ PHP_SUBST_OLD(INCLUDES)
 PHP_SUBST_OLD(EXTRA_INCLUDES)
 PHP_SUBST_OLD(INCLUDE_PATH)
 PHP_SUBST_OLD(INSTALL_IT)
-PHP_SUBST(LEX)
-PHP_SUBST(LEX_OUTPUT_ROOT)
 PHP_SUBST(LFLAGS)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
 PHP_SUBST_OLD(PEAR_INSTALLDIR)
 PHP_SUBST(PHP_BUILD_DATE)
-PHP_SUBST(PHP_COMPILE)
 PHP_SUBST_OLD(PHP_LDFLAGS)
 PHP_SUBST_OLD(PHP_LIBS)
 PHP_SUBST(OVERALL_TARGET)
 PHP_SUBST(PHP_RPATHS)
 PHP_SUBST(PHP_SAPI)
 PHP_SUBST_OLD(PHP_VERSION)
-PHP_SUBST(PROG_SENDMAIL)
-PHP_SUBST(RE2C)
 PHP_SUBST(SHELL)
 PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(TSRM_DIR)
@@ -1210,7 +1118,6 @@ PHP_SUBST(TSRM_LIB)
 PHP_SUBST(WARNING_LEVEL)
 PHP_SUBST(PHP_FRAMEWORKS)
 PHP_SUBST(PHP_FRAMEWORKPATH)
-PHP_SUBST_OLD(YACC)
 PHP_SUBST_OLD(SHLIB_SUFFIX_NAME)
 
 old_CC=$CC
