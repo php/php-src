@@ -27,6 +27,10 @@
 # include <stdarg.h>
 #endif
 
+#ifdef __cplusplus
+#include <istream.h>;
+#endif
+
 #include "zend_llist.h"
 
 #define DEBUG_ZEND 0
