@@ -865,13 +865,11 @@ int main(int argc, char *argv[])
 		if (cli_sapi_module.php_ini_path_override) {
 			free(cli_sapi_module.php_ini_path_override);
 		}
-
-	} zend_catch {
-		exit_status = EG(exit_status);
 	} zend_end_try();
 
 out:
 	php_request_shutdown((void *) 0);
+	exit_status = EG(exit_status);
 out_err:	
 	if (module_started) {
 		php_module_shutdown(TSRMLS_C);
