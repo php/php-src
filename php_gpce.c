@@ -28,7 +28,7 @@
 #include "zend_globals.h"
 
 
-void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
+void php_register_variable(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
 {
 	char *p = NULL;
 	char *ip;		/* index pointer */
@@ -265,7 +265,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				/* FIXME: XXX: not binary safe, discards returned length */
 				php_url_decode(var, strlen(var));
 				php_url_decode(val, strlen(val));
-				php_parse_gpc_data(val,var,array_ptr ELS_CC PLS_CC);
+				php_register_variable(val,var,array_ptr ELS_CC PLS_CC);
 			}
 			if (arg == PARSE_COOKIE) {
 				var = strtok_r(NULL, ";", &strtok_buf);
