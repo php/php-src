@@ -45,6 +45,9 @@
 #define YY_DECL int ini_lex(zval *ini_lval)
 #endif
 
+#include "zend_istdiostream.h"
+
+
 #ifndef ZTS
 static char *ini_filename;
 
