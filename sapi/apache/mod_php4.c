@@ -548,11 +548,23 @@ static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
 }
 
 
+static zend_bool should_overwrite_per_dir_entry(php_per_dir_entry *orig_per_dir_entry, php_per_dir_entry *new_per_dir_entry)
+{
+	if (orig_per_dir_entry->type==PHP_INI_SYSTEM
+		&& new_per_dir_entry->type!=PHP_INI_SYSTEM) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+
 static void php_destroy_per_dir_info(HashTable *per_dir_info)
 {
 	zend_hash_destroy(per_dir_info);
 	free(per_dir_info);
 }
+
 
 static void *php_create_dir(pool *p, char *dummy)
 {
@@ -570,8 +582,9 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 {
 	php_per_dir_entry tmp;
 
-	zend_hash_merge((HashTable *) addv, (HashTable *) basev, (void (*)(void *)) copy_per_dir_entry, &tmp, sizeof(php_per_dir_entry), 0);
-	return addv;
+	zend_hash_merge_ex((HashTable *) basev, (HashTable *) addv, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (zend_bool (*)(void *, void *)) should_overwrite_per_dir_entry);
+	/*zend_hash_merge((HashTable *) addv, (HashTable *) basev, (void (*)(void *)) copy_per_dir_entry, &tmp, sizeof(php_per_dir_entry), 0);*/
+	return basev;
 }
 
 
