@@ -1,3 +1,56 @@
+2001-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h: Add simplistic ircg_channel_mode() function
+
+    * ext/ircg/ircg.c: D'oh. Check IRCG_API_VERSION after including if_irc.h.
+
+    * ext/ircg/README.txt: Remove some dated information.
+
+    * ext/ircg/ircg.c: Add default message for channel modes
+
+    * ext/ircg/ircg.c: Move binary compat check to the module init function;
+
+    Add initial support for channel modes.
+
+    * ext/ircg/ircg.c:
+    Safety check for now, this can later be used to add real binary
+    compatibility by increasing the size of php_irconn_t appropiately.
+
+    * ext/ircg/ircg.c:
+    There are some subtle changes which are not recognized by the compiler,
+    so bark, if someone tries to build against anything older than IRCG 2.0b1.
+
+2001-03-07  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/zlib/zlib.c: add missing globals fetches
+
+2001-03-07  Frank M. Kromann  <frank@frontbase.com>
+
+    * main/main.c: Removing a compiler warning
+
+2001-03-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: That came from php-gtk.
+
+2001-03-07  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cgi/cgi_main.c: Fixed the help for other options too.
+
+2001-03-07  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c:
+    Added support for Zeus SSL client certificate information.
+    Added SERVER_SIGNATURE to the environment.
+
+    Submitted by: daniel@zeus.com
+
+2001-03-07  Zeev Suraski  <zeev@zend.com>
+
+    * php.ini-dist
+      php.ini-optimized
+      NEWS: Update .ini's and NEWS
+
 2001-03-06  Zeev Suraski  <zeev@zend.com>
 
     * ext/zlib/php_zlib.h
