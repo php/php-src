@@ -260,6 +260,8 @@ php_apache_sapi_flush(void *server_context)
 	r = ctx->r;
 	brigade = ctx->brigade;
 
+	r->status = SG(sapi_headers).http_response_code;
+
 	/* Send a flush bucket down the filter chain. */
 	bucket = apr_bucket_flush_create(r->connection->bucket_alloc);
 	APR_BRIGADE_INSERT_TAIL(brigade, bucket);

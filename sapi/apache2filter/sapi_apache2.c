@@ -236,7 +236,9 @@ php_apache_sapi_flush(void *server_context)
 	 * then don't bother flushing. */
 	if (!server_context)
 		return;
-    
+
+	ctx->r->status = SG(sapi_headers).http_response_code;
+
 	f = ctx->f;
 
 	/* Send a flush bucket down the filter chain. The current default
