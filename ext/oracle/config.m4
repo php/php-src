@@ -2,7 +2,7 @@ dnl $Id$
 
 AC_DEFUN(AC_ORACLE_VERSION,[
   AC_MSG_CHECKING([Oracle version])
-  if test -f "$ORACLE_DIR/orainst/unix.rgs"; then
+  if test -s "$ORACLE_DIR/orainst/unix.rgs"; then
   	ORACLE_VERSION=`grep '"ocommon"' $ORACLE_DIR/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
 	test -z "$ORACLE_VERSION" && ORACLE_VERSION=7.3
   elif test -f $ORACLE_DIR/lib/libclntsh.s?.8.0; then
