@@ -207,14 +207,38 @@ static php_stream_filter_factory strfilter_tolower_factory = {
 /* }}} */
 
 /* {{{ base64 stream filter implementation */
-typedef struct _php_base64_filter
-{
+
+typedef enum _php_conv_err_t {
+	PHP_CONV_ERR_SUCCESS = SUCCESS,
+	PHP_CONV_ERR_UNKNOWN,
+	PHP_CONV_ERR_TOO_BIG,
+	PHP_CONV_ERR_INVALID_SEQ,
+	PHP_CONV_ERR_UNEXPECTED_EOS
+} php_conv_err_t;
+
+typedef struct _php_conv php_conv;
+
+typedef php_conv_err_t (*php_conv_convert_func)(php_conv *, const char **, size_t *, char **, size_t *);
+typedef void (*php_conv_dtor_func)(php_conv *);
+
+struct _php_conv {
+	php_conv_convert_func convert_op;
+	php_conv_dtor_func dtor;
+};
+
+#define php_conv_convert(a, b, c, d, e) ((php_conv *)(a))->convert_op((php_conv *)(a), (b), (c), (d), (e))
+#define php_conv_dtor(a) ((php_conv *)a)->dtor((a))
+
+/* {{{ php_conv_base64_encode */
+typedef struct _php_conv_base64_encode {
+	php_conv _super;
+
 	unsigned char erem[3];
 	size_t erem_len;
-	unsigned int urem;
-	unsigned int urem_nbits;
-	unsigned int ustat;
-} php_base64_filter;
+} php_conv_base64_encode;
+
+static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
+static void php_conv_base64_encode_dtor(php_conv_base64_encode *inst);
 
 static unsigned char b64_tbl_enc[256] = {
 	'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
@@ -235,7 +259,152 @@ static unsigned char b64_tbl_enc[256] = {
 	'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
 };
 
-static unsigned int b64_tbl_unenc[256] = {
+static php_conv_err_t php_conv_base64_encode_ctor(php_conv_base64_encode *inst)
+{
+	inst->_super.convert_op = (php_conv_convert_func) php_conv_base64_encode_convert;
+	inst->_super.dtor = (php_conv_dtor_func) php_conv_base64_encode_dtor;
+	inst->erem_len = 0;
+	return SUCCESS;
+}
+
+static void php_conv_base64_encode_dtor(php_conv_base64_encode *inst)
+{
+	/* do nothing */
+}
+
+static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
+{
+	register size_t ocnt, icnt;
+	register unsigned char *ps, *pd;
+	size_t nbytes_written;
+
+	pd = (unsigned char *)(*out_pp);
+	ocnt = *out_left_p;
+	nbytes_written = 0;
+
+	if (in_pp != NULL && in_left_p != NULL) { 
+		ps = (unsigned char *)(*in_pp);
+		icnt = *in_left_p;
+	
+		/* consume the remainder first */
+		switch (inst->erem_len) {
+			case 1:
+				if (icnt >= 2) {
+					if (ocnt < 4) {
+						return PHP_CONV_ERR_TOO_BIG;
+					}
+					*(pd++) = b64_tbl_enc[(inst->erem[0] >> 2)];
+					*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[0] << 4) | (ps[0] >> 4)];
+					*(pd++) = b64_tbl_enc[(unsigned char)(ps[0] << 2) | (ps[1] >> 6)];
+					*(pd++) = b64_tbl_enc[ps[1]];
+					ocnt -= 4;
+					ps += 2;
+					icnt -= 2;
+					inst->erem_len = 0;
+				}
+				break;
+
+			case 2: 
+				if (icnt >= 1) {
+					if (ocnt < 4) {
+						return PHP_CONV_ERR_TOO_BIG;
+					}
+					*(pd++) = b64_tbl_enc[(inst->erem[0] >> 2)];
+					*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[0] << 4) | (inst->erem[1] >> 4)];
+					*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[1] << 2) | (ps[0] >> 6)];
+					*(pd++) = b64_tbl_enc[ps[0]];
+					ocnt -= 4;
+					ps += 1;
+					icnt -= 1;
+					inst->erem_len = 0;
+				}
+				break;
+		}
+
+		while (icnt >= 3) {
+			if (ocnt < 4) {
+				*in_pp = (const char *)ps;
+				*in_left_p = icnt;
+				*out_pp = (char *)pd;
+				*out_left_p = ocnt;
+
+				return PHP_CONV_ERR_TOO_BIG;
+			}
+			*(pd++) = b64_tbl_enc[ps[0] >> 2];
+			*(pd++) = b64_tbl_enc[(unsigned char)(ps[0] << 4) | (ps[1] >> 4)];
+			*(pd++) = b64_tbl_enc[(unsigned char)(ps[1] << 2) | (ps[2] >> 6)];
+			*(pd++) = b64_tbl_enc[ps[2]];
+
+			ps += 3;
+			icnt -=3;
+			ocnt -= 4;
+		}
+
+		for (;icnt > 0; icnt--) {
+			inst->erem[inst->erem_len++] = *(ps++);
+		}
+
+		*in_pp = (const char *)ps;
+		*in_left_p = icnt;
+		*out_pp = (char *)pd;
+		*out_left_p = ocnt;
+	} else {
+		switch (inst->erem_len) {
+			case 0:
+				/* do nothing */
+				break;
+
+			case 1:
+				if (ocnt < 4) {
+					return PHP_CONV_ERR_TOO_BIG;
+				}
+				*(pd++) = b64_tbl_enc[(inst->erem[0] >> 2)];
+				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[0] << 4)];
+				*(pd++) = '=';
+				*(pd++) = '=';
+				inst->erem_len = 0;
+				ocnt -= 4;
+				break;
+
+			case 2: 
+				if (ocnt < 4) {
+					return PHP_CONV_ERR_TOO_BIG;
+				}
+				*(pd++) = b64_tbl_enc[(inst->erem[0] >> 2)];
+				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[0] << 4) | (inst->erem[1] >> 4)];
+				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[1] << 2)];
+				*(pd++) = '=';
+				inst->erem_len = 0;
+				ocnt -=4;
+				break;
+
+			default:
+				/* should not happen... */
+				return PHP_CONV_ERR_UNKNOWN;
+		}
+		*out_pp = (char *)pd;
+		*out_left_p = ocnt;
+	}
+
+	return PHP_CONV_ERR_SUCCESS;
+}
+
+/* }}} */
+
+/* {{{ php_conv_base64_decode */
+typedef struct _php_conv_base64_decode {
+	php_conv _super;
+
+	unsigned int urem;
+	unsigned int urem_nbits;
+	unsigned int ustat;
+	int eos;
+} php_conv_base64_decode;
+
+static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
+static void php_conv_base64_decode_dtor(php_conv_base64_decode *inst);
+
+static unsigned int b64_tbl_dec[256] = {
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 64, 64, 63,
@@ -254,128 +423,88 @@ static unsigned int b64_tbl_unenc[256] = {
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
 };
 
-
-static int php_base64_filter_ctor(php_base64_filter *inst)
+static int php_conv_base64_decode_ctor(php_conv_base64_decode *inst)
 {
-	inst->erem_len = 0;
+	inst->_super.convert_op = (php_conv_convert_func) php_conv_base64_decode_convert;
+	inst->_super.dtor = (php_conv_dtor_func) php_conv_base64_decode_dtor;
+
+	inst->urem = 0;
 	inst->urem_nbits = 0;
 	inst->ustat = 0;
+	inst->eos = 0;
 	return SUCCESS;
 }
 
-static void php_base64_filter_dtor(php_base64_filter *inst)
+static void php_conv_base64_decode_dtor(php_conv_base64_decode *inst)
 {
 	/* do nothing */
 }
 
-static size_t strfilter_base64_write(php_stream *stream, php_stream_filter *thisfilter,
-			const char *buf, size_t count TSRMLS_DC)
+static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
 {
-	register size_t chunk_left, bcnt;
-	register unsigned char *ps, *pd;
-	size_t nbytes_written;
-	char chunk[1024];
-	php_base64_filter *inst = (php_base64_filter *)thisfilter->abstract;
+	php_conv_err_t err;
 
-	bcnt = count;
-	ps = (unsigned char *)buf;
-	pd = chunk;
-	chunk_left = sizeof(chunk);
-	nbytes_written = 0;
- 
-	/* consume the remainder first */
-	switch (inst->erem_len) {
-		case 1:
-			if (bcnt >= 2) {
-				*(pd++) = b64_tbl_enc[(inst->erem[0] >> 2)];
-				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[0] << 4) | (ps[0] >> 4)];
-				*(pd++) = b64_tbl_enc[(unsigned char)(ps[0] << 2) | (ps[1] >> 6)];
-				*(pd++) = b64_tbl_enc[ps[1]];
-				chunk_left -= 4;
-				ps += 2;
-				bcnt -= 2;
-				inst->erem_len = 0;
-			}
-			break;
-
-		case 2: 
-			if (bcnt >= 1) {
-				*(pd++) = b64_tbl_enc[(inst->erem[0] >> 2)];
-				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[0] << 4) | (inst->erem[1] >> 4)];
-				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[1] << 2) | (ps[0] >> 6)];
-				*(pd++) = b64_tbl_enc[ps[0]];
-				chunk_left -= 4;
-				ps += 1;
-				bcnt -= 1;
-				inst->erem_len = 0;
-			}
-			break;
-	}
-
-	while (bcnt >= 3) {
-		*(pd++) = b64_tbl_enc[ps[0] >> 2];
-		*(pd++) = b64_tbl_enc[(unsigned char)(ps[0] << 4) | (ps[1] >> 4)];
-		*(pd++) = b64_tbl_enc[(unsigned char)(ps[1] << 2) | (ps[2] >> 6)];
-		*(pd++) = b64_tbl_enc[ps[2]];
-
-		ps += 3;
-		bcnt -=3;
-		chunk_left -= 4;
-
-		if (chunk_left < 4) {
-			nbytes_written += php_stream_filter_write_next(stream, thisfilter, chunk, sizeof(chunk) - chunk_left);
-			pd = chunk;
-			chunk_left = sizeof(chunk);
-		}
-	}
-
-	nbytes_written += php_stream_filter_write_next(stream, thisfilter, chunk, sizeof(chunk) - chunk_left);
-
-	for (;bcnt > 0; bcnt--) {
-		inst->erem[inst->erem_len++] = *(ps++);
-	}
-
-	return count;
-}
-
-static size_t strfilter_base64_read(php_stream *stream, php_stream_filter *thisfilter,
-			char *buf, size_t count TSRMLS_DC)
-{
 	unsigned int urem, urem_nbits;
 	unsigned int pack, pack_bcnt;
-	size_t nbytes_consumed, nbytes_decoded;
+	unsigned char *ps, *pd;
+	size_t icnt, ocnt;
 	unsigned int ustat;
 
 	const static unsigned int nbitsof_pack = 8;
 
-	static unsigned char bmask[9] = {
-		0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
+	static unsigned int bmask[17] = {
+		0x0000, 0x0001, 0x0003, 0x0007, 0x000f, 0x001f, 0x003f, 0x007f,
+		0x00ff, 0x01ff, 0x03ff, 0x07ff, 0x0fff, 0x1fff, 0x3fff, 0x7fff,
+		0xffff
 	};
 
-	count = php_stream_filter_read_next(stream, thisfilter, buf, count);
+	if (in_pp == NULL || in_left_p == NULL) {
+		if (inst->eos || inst->urem_nbits == 0) { 
+			return SUCCESS;
+		}
+		return PHP_CONV_ERR_UNEXPECTED_EOS;
+	}
 
-	urem = ((php_base64_filter *)thisfilter->abstract)->urem;
-	urem_nbits = ((php_base64_filter *)thisfilter->abstract)->urem_nbits;
-	ustat = ((php_base64_filter *)thisfilter->abstract)->ustat;
+	err = PHP_CONV_ERR_SUCCESS;
+
+	ps = (unsigned char *)*in_pp;
+	pd = (unsigned char *)*out_pp;
+	icnt = *in_left_p;
+	ocnt = *out_left_p;
+
+	urem = inst->urem;
+	urem_nbits = inst->urem_nbits;
+	ustat = inst->ustat;
 
 	pack = 0;
 	pack_bcnt = nbitsof_pack;
-	nbytes_consumed = nbytes_decoded = 0;
 
-	while (nbytes_consumed < count) {
-		pack_bcnt -= urem_nbits;
-		pack |= (urem << pack_bcnt);
-		urem_nbits = 0;
-
+	for (;;) {
+		if (pack_bcnt >= urem_nbits) {
+			pack_bcnt -= urem_nbits;
+			pack |= (urem << pack_bcnt);
+			urem_nbits = 0;
+		} else {
+			urem_nbits -= pack_bcnt;
+			pack |= (urem >> urem_nbits);
+			urem &= bmask[urem_nbits];
+			pack_bcnt = 0;
+		}
 		if (pack_bcnt > 0) {
-			unsigned int i = b64_tbl_unenc[(unsigned int)((unsigned char *)buf)[nbytes_consumed++]];
+			unsigned int i;
 
+			if (icnt < 1) {
+				break;
+			}
+
+			i = b64_tbl_dec[(unsigned int)*(ps++)];
+			icnt--;
 			ustat |= i & 0x80;
 
 			if (!(i & 0xc0)) {
 				if (ustat) {
-					php_error(E_WARNING, "stream filter(%s): invalid base64 sequence", thisfilter->fops->label);
-					return 0;
+					err = PHP_CONV_ERR_INVALID_SEQ;
+					break;
 				}
 				if (6 <= pack_bcnt) {
 					pack_bcnt -= 6;
@@ -389,23 +518,238 @@ static size_t strfilter_base64_read(php_stream *stream, php_stream_filter *thisf
 				}
 			} else if (ustat) {
 				if (pack_bcnt == 8 || pack_bcnt == 2) {
-					php_error(E_WARNING, "stream filter(%s): unexpected end of stream", thisfilter->fops->label);
-					return 0;
+					err = PHP_CONV_ERR_INVALID_SEQ;
+					break;
 				}
+				inst->eos = 1;
 			}
 		}
-
 		if ((pack_bcnt | ustat) == 0) {
-			((unsigned char *)buf)[nbytes_decoded++] = pack;
+			if (ocnt < 1) {
+				urem |= (pack << urem_nbits);
+				urem_nbits += 8;
+
+				err = PHP_CONV_ERR_TOO_BIG;
+				break;
+			}
+			*(pd++) = pack;
+			ocnt--;
 			pack = 0;
 			pack_bcnt = nbitsof_pack;
 		}
 	}
-	((php_base64_filter *)thisfilter->abstract)->urem = urem;
-	((php_base64_filter *)thisfilter->abstract)->urem_nbits = urem_nbits;
-	((php_base64_filter *)thisfilter->abstract)->ustat = ustat;
 
-	return nbytes_decoded;
+	inst->urem = urem;
+	inst->urem_nbits = urem_nbits;
+	inst->ustat = ustat;
+
+	*in_pp = (const char *)ps;
+	*in_left_p = icnt;
+	*out_pp = (char *)pd;
+	*out_left_p = ocnt;
+
+	return err;
+}
+/* }}} */
+
+typedef struct _php_base64_filter {
+	php_conv *write_cd;
+	php_conv *read_cd;
+
+	/* ring buffer for read operation */
+	char read_buf[4096];
+	size_t read_buf_left;
+} php_base64_filter;
+
+static int php_base64_filter_ctor(php_base64_filter *inst, int write_conv_mode, int read_conv_mode)
+{
+	php_conv *write_cd = NULL;
+	php_conv *read_cd = NULL;
+
+	/* FIXME: I'll have to replace this ugly dup'ed code by something neat
+	   (factories?) in the near future. */ 
+	switch (write_conv_mode) {
+		case 1:
+			write_cd = emalloc(sizeof(php_conv_base64_encode));
+			if (php_conv_base64_encode_ctor((php_conv_base64_encode *)write_cd)) {
+				efree(write_cd);
+				write_cd = NULL;
+				goto out_failure;
+			}
+			break;
+
+		case 2:
+			write_cd = emalloc(sizeof(php_conv_base64_decode));
+			if (php_conv_base64_decode_ctor((php_conv_base64_decode *)write_cd)) {
+				efree(write_cd);
+				write_cd = NULL;
+				goto out_failure;
+			}
+			break;
+
+		default:
+			write_cd = NULL;
+			break;
+	}
+
+	switch (read_conv_mode) {
+		case 1:
+			read_cd = emalloc(sizeof(php_conv_base64_encode));
+			if (php_conv_base64_encode_ctor((php_conv_base64_encode *)read_cd)) {
+				efree(read_cd);
+				read_cd = NULL;
+				goto out_failure;
+			}
+			break;
+
+		case 2:
+			read_cd = emalloc(sizeof(php_conv_base64_decode));
+			if (php_conv_base64_decode_ctor((php_conv_base64_decode *)read_cd)) {
+				efree(read_cd);
+				read_cd = NULL;
+				goto out_failure;
+			}
+			break;
+
+		default:
+			read_cd = NULL;
+			break;
+	}
+
+	inst->write_cd = write_cd;
+	inst->read_cd = read_cd;
+
+	inst->read_buf_left = 0;
+
+	return SUCCESS;
+
+out_failure:
+	if (write_cd != NULL) {
+		php_conv_dtor(write_cd);
+		efree(write_cd);
+	}
+	if (read_cd != NULL) {
+		php_conv_dtor(read_cd);
+		efree(read_cd);
+	}
+	return FAILURE;
+}
+
+static void php_base64_filter_dtor(php_base64_filter *inst)
+{
+	if (inst->write_cd != NULL) {
+		php_conv_dtor(inst->write_cd);
+		efree(inst->write_cd);
+	}
+
+	if (inst->read_cd != NULL) {
+		php_conv_dtor(inst->read_cd);
+		efree(inst->read_cd);
+	}
+}
+
+static size_t strfilter_base64_write(php_stream *stream, php_stream_filter *thisfilter,
+			const char *buf, size_t count TSRMLS_DC)
+{
+	php_base64_filter *inst = (php_base64_filter *)thisfilter->abstract;
+
+	if (inst->write_cd != NULL) {
+		char bucket_buf[2048];
+		size_t out_left, in_left;
+		const char *in_p;
+		char *out_p;
+
+		in_p = buf;
+		in_left = count;
+		out_p = bucket_buf;
+		out_left = sizeof(bucket_buf);
+
+		while (in_left > 0) {
+			php_conv_err_t err;
+
+			err = php_conv_convert(inst->write_cd, &in_p, &in_left, &out_p, &out_left);
+			switch (err) {
+				case PHP_CONV_ERR_TOO_BIG:
+					php_stream_filter_write_next(stream, thisfilter, bucket_buf, sizeof(bucket_buf) - out_left);
+					out_p = bucket_buf;
+					out_left = sizeof(bucket_buf);
+					break;
+
+				case PHP_CONV_ERR_UNKNOWN:
+					php_error(E_WARNING, "stream filter(%s): unknown error", thisfilter->fops->label, err);
+					return 0;
+
+				case PHP_CONV_ERR_INVALID_SEQ:
+					php_error(E_WARNING, "stream filter(%s): invalid base64 sequence", thisfilter->fops->label, err);
+					return 0;
+	
+ 				case PHP_CONV_ERR_UNEXPECTED_EOS:
+					php_error(E_WARNING, "stream filter(%s): unexpected end of stream", thisfilter->fops->label, err);
+					return 0;
+
+				default:
+					break;
+			}
+		}
+		php_stream_filter_write_next(stream, thisfilter, bucket_buf, sizeof(bucket_buf) - out_left);
+		return (size_t)(count - in_left);
+	}	
+	return php_stream_filter_write_next(stream, thisfilter, buf, count);
+}
+
+static size_t strfilter_base64_read(php_stream *stream, php_stream_filter *thisfilter,
+			char *buf, size_t count TSRMLS_DC)
+{
+	php_base64_filter *inst = (php_base64_filter *)thisfilter->abstract;
+	size_t retval;
+
+	if (inst->read_cd != NULL) {
+		php_conv_err_t err = PHP_CONV_ERR_SUCCESS;
+		size_t out_left;
+		const char *in_p;
+		char *out_p;
+	
+		in_p = inst->read_buf + (sizeof(inst->read_buf) - inst->read_buf_left);
+		out_p = buf;
+		out_left = count;
+
+		while (out_left > 0 && err != PHP_CONV_ERR_TOO_BIG) {
+			if (inst->read_buf_left == 0) { 
+				inst->read_buf_left = php_stream_filter_read_next(stream, thisfilter, inst->read_buf, sizeof(inst->read_buf));
+				in_p = inst->read_buf;
+			}
+			if (inst->read_buf_left == 0) {			
+				/* reached end of stream */ 
+				err = php_conv_convert(inst->read_cd, NULL, NULL, &out_p, &out_left);
+				if (err == PHP_CONV_ERR_SUCCESS) {
+					break;
+				}
+			} else {
+				err = php_conv_convert(inst->read_cd, &in_p, &(inst->read_buf_left), &out_p, &out_left);
+			}
+
+			switch (err) {
+				case PHP_CONV_ERR_UNKNOWN:
+					php_error(E_WARNING, "stream filter(%s): unknown error", thisfilter->fops->label, err);
+					return 0;
+
+				case PHP_CONV_ERR_INVALID_SEQ:
+					php_error(E_WARNING, "stream filter(%s): invalid base64 sequence", thisfilter->fops->label, err);
+					return 0;
+
+				case PHP_CONV_ERR_UNEXPECTED_EOS:
+					php_error(E_WARNING, "stream filter(%s): unexpected end of stream", thisfilter->fops->label, err);
+					return 0;
+
+				default:
+					break;
+			}
+		}
+		retval = (size_t)(count - out_left);
+	} else {
+		retval = php_stream_filter_read_next(stream, thisfilter, buf, count);
+	}
+	return retval;
 }
 
 static int strfilter_base64_flush(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC)
@@ -413,27 +757,30 @@ static int strfilter_base64_flush(php_stream *stream, php_stream_filter *thisfil
 	if (closing) {
 		php_base64_filter *inst = (php_base64_filter *)thisfilter->abstract;
 
-		char chunk[4];
-		unsigned char *pd = chunk;
+		if (inst->write_cd != NULL) {
+			php_conv_err_t err;
+			char bucket_buf[1024];
+			char *out_p;
+			size_t out_left;
 
-		switch (inst->erem_len) {
-			case 1:
-				*(pd++) = b64_tbl_enc[(inst->erem[0] >> 2)];
-				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[0] << 4)];
-				*(pd++) = '=';
-				*(pd++) = '=';
-				inst->erem_len = 0;
-				php_stream_filter_write_next(stream, thisfilter, chunk, sizeof(chunk));
-				break;
+			out_p = bucket_buf;
+			out_left = sizeof(bucket_buf);
 
-			case 2: 
-				*(pd++) = b64_tbl_enc[(inst->erem[0] >> 2)];
-				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[0] << 4) | (inst->erem[1] >> 4)];
-				*(pd++) = b64_tbl_enc[(unsigned char)(inst->erem[1] << 2)];
-				*(pd++) = '=';
-				inst->erem_len = 0;
-				php_stream_filter_write_next(stream, thisfilter, chunk, sizeof(chunk));
-				break;
+			for (;;) {
+				err = php_conv_convert(inst->write_cd, NULL, NULL, &out_p, &out_left);
+				if (err == PHP_CONV_ERR_SUCCESS) {
+					break;
+				} else if (err == PHP_CONV_ERR_TOO_BIG) {
+					php_stream_filter_write_next(stream, thisfilter, bucket_buf, sizeof(bucket_buf) - out_left);
+					out_p = bucket_buf;
+					out_left = sizeof(bucket_buf);
+				} else {
+					php_error(E_WARNING, "stream filter(%s): unknown error", thisfilter->fops->label);
+					return 0;
+				}
+			}
+
+			php_stream_filter_write_next(stream, thisfilter, bucket_buf, sizeof(bucket_buf) - out_left);
 		}
 	}
 	return php_stream_filter_flush_next(stream, thisfilter, closing);
@@ -446,35 +793,54 @@ static int strfilter_base64_eof(php_stream *stream, php_stream_filter *thisfilte
 
 static void strfilter_base64_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	php_base64_filter_dtor((php_base64_filter *)thisfilter->abstract);
-
 	assert(thisfilter->abstract != NULL);
+
+	php_base64_filter_dtor((php_base64_filter *)thisfilter->abstract);
 	efree(thisfilter->abstract);
 }
 
-static php_stream_filter_ops strfilter_base64_ops = {
+static php_stream_filter_ops strfilter_base64_encode_ops = {
 	strfilter_base64_write,
 	strfilter_base64_read,
 	strfilter_base64_flush,
 	strfilter_base64_eof,
 	strfilter_base64_dtor,
-	"string.base64"
+	"string.base64.encode"
+};
+
+static php_stream_filter_ops strfilter_base64_decode_ops = {
+	strfilter_base64_write,
+	strfilter_base64_read,
+	strfilter_base64_flush,
+	strfilter_base64_eof,
+	strfilter_base64_dtor,
+	"string.base64.decode"
 };
 
 static php_stream_filter *strfilter_base64_create(const char *filtername, const char *filterparams,
 		int filterparamslen, int persistent TSRMLS_DC)
 {
 	php_base64_filter *inst;
+	php_stream_filter *retval = NULL;
 
 	inst = emalloc(sizeof(php_base64_filter));
-	assert(inst);
+	assert(inst != NULL);
 
-	if (php_base64_filter_ctor(inst) != SUCCESS) {
-		efree(inst);
-		return NULL;
-	}	
+	if (strcasecmp(filtername, strfilter_base64_encode_ops.label) == 0) {
+		if (php_base64_filter_ctor(inst, 1, 2) != SUCCESS) {
+			efree(inst);
+			return NULL;
+		}	
+		retval = php_stream_filter_alloc(&strfilter_base64_encode_ops, inst, persistent);
+	} else {
+		if (php_base64_filter_ctor(inst, 2, 1) != SUCCESS) {
+			efree(inst);
+			return NULL;
+		}	
+		retval = php_stream_filter_alloc(&strfilter_base64_decode_ops, inst, persistent);
+	}
 	
-	return php_stream_filter_alloc(&strfilter_base64_ops, inst, persistent);
+	return retval;
 }
 
 static php_stream_filter_factory strfilter_base64_factory = {
@@ -490,13 +856,13 @@ static size_t strfilter_quoted_printable_write(php_stream *stream, php_stream_fi
 	char chunk[4096];
 	size_t chunk_len;
 	unsigned char *ps;
-	unsigned int bcnt;
+	unsigned int icnt;
 	static char qp_digits[] = "0123456789ABCDEF";
 
 	chunk_len = 0;
 
 	ps = (unsigned char *)buf;
-	for (bcnt = count; bcnt > 0; bcnt--) {
+	for (icnt = count; icnt > 0; icnt--) {
 		unsigned int c = *(ps++);
 
 		if ((c >= 33 && c <= 60) || (c >= 62 && c <= 126)) { 
@@ -524,17 +890,17 @@ static size_t strfilter_quoted_printable_read(php_stream *stream, php_stream_fil
 			char *buf, size_t count TSRMLS_DC)
 {
 	size_t nbytes_decoded;
-	size_t bcnt;
+	size_t icnt;
 	unsigned char *ps, *pd;
 	unsigned int scan_stat = (unsigned int)thisfilter->abstract;
 	unsigned int v;
 
-	bcnt = php_stream_filter_read_next(stream, thisfilter, buf, count);
+	icnt = php_stream_filter_read_next(stream, thisfilter, buf, count);
 	nbytes_decoded = 0; 
 	ps = pd = (unsigned char *)buf;
 	v = 0;
 
-	for (;bcnt > 0; bcnt--) {
+	for (;icnt > 0; icnt--) {
 		switch (scan_stat) {
 			case 0:
 				if (*ps == '=') {
@@ -595,7 +961,8 @@ static const struct {
 	{ &strfilter_rot13_ops, &strfilter_rot13_factory },
 	{ &strfilter_toupper_ops, &strfilter_toupper_factory },
 	{ &strfilter_tolower_ops, &strfilter_tolower_factory },
-	{ &strfilter_base64_ops, &strfilter_base64_factory },
+	{ &strfilter_base64_decode_ops, &strfilter_base64_factory },
+	{ &strfilter_base64_encode_ops, &strfilter_base64_factory },
 	{ &strfilter_quoted_printable_ops, &strfilter_quoted_printable_factory },
 	/* additional filters to go here */
 	{ NULL, NULL }
