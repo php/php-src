@@ -369,6 +369,9 @@ static void tokenize(zval *return_value TSRMLS_DC)
 		if (destroy && Z_TYPE(token) != IS_NULL) {
 			zval_dtor(&token);
 		}
+		if (token_type == T_END_HEREDOC) {
+			efree(Z_STRVAL(token));
+		}
 		ZVAL_NULL(&token);
 	}
 }
