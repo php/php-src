@@ -36,7 +36,7 @@
 		echo "Error creating database\n";
 	}
 	if ($handler != 'cdb') {
-		$db_writer = dba_open($db_filename, 'w'.$lock_flag, $handler);
+		$db_writer = dba_open($db_filename, 'c'.$lock_flag, $handler);
 		if (($dba_reader = @dba_open($db_filename, 'r'.$lock_flag.($lock_flag ? 't' : ''), $handler))===false) {
 			echo "Read during write: not allowed\n";
 		} else {
