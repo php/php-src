@@ -1,3 +1,42 @@
+2000-05-11  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c:
+    SQL_INT64 binding support in prepared and executed queries.
+    Fixed a (probably) longtime bug with binding to DECIMAL/NUMERIC stored as
+    scaled integer.
+
+2000-05-11  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c: Prototype adapted
+
+    * ext/odbc/php_odbc.c:
+    Restoring old parameter ordering in odbc_fetch_into()
+
+2000-05-11  Andi Gutmans  <andi@php.net>
+
+    * ext/imap/php_imap.c:
+    - Remove unneeded object_init(return_value) from three places
+
+2000-05-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Typo.
+
+2000-05-11  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/odbc/php_odbc.c: Fixed some typos.
+
+2000-05-11  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    Forcing passing by reference for array in odbc_fetch_into()
+    Added function odbc_column_scale(), new alias odbc_column_precision for odbc_column_len
+    Added better description in Prototypes for some functions
+
+2000-05-11  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/config.m4: build error on Unix
+
 2000-05-10  Danny Heijl  <Danny.Heijl@cevi.be>
 
     * ext/informix/ifx.ec:
