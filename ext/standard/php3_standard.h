@@ -66,7 +66,7 @@
 #include "post.h"
 #include "mime.h"
 
-#define standard_module_ptr basic_functions_module_ptr
+#define phpext_standard_ptr basic_functions_module_ptr
 
 /*
  * Local variables:

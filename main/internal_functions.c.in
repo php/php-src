@@ -40,88 +40,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "ext/standard/php3_standard.h"
-#include "ext/gd/php3_gd.h"
-#include "ext/dbase/dbase.h"
-#include "ext/odbc/php3_odbc.h"
-#include "ext/gettext/php3_gettext.h"
+@EXT_INCLUDE_CODE@
 
-#include "ext/informix/php3_ifx.h"
-#include "ext/ldap/php3_ldap.h"
-#include "ext/mysql/php3_mysql.h"
-#include "ext/bcmath/php3_bcmath.h"
-#include "ext/msql/php3_msql.h"
-#include "ext/oracle/php3_oci8.h"
-#include "ext/oracle/oracle.h"
-#include "ext/pgsql/php3_pgsql.h"
-#include "ext/sybase/php3_sybase.h"
-#include "ext/sybase/php3_sybase-ct.h"
-#include "ext/imap/imap.h"
-#include "ext/standard/head.h"
-#include "ext/standard/post.h"
-#include "ext/hyperwave/hw.h"
-#include "ext/filepro/filepro.h"
-#include "ext/db/db.h"
-#include "dl/snmp/php3_snmp.h"
-#include "ext/zlib/php3_zlib.h"
-#include "ext/com/php3_COM.h"
-#include "ext/interbase/php3_interbase.h"
-#include "ext/xml/php3_xml.h"
-#include "ext/pdf/php3_pdf.h"
-#include "ext/fdf/php3_fdf.h"
-#include "ext/sysvsem/php3_sysvsem.h"
-#include "ext/sysvshm/php3_sysvshm.h"
-#include "ext/dav/php3_dav.h"
-#include "ext/mcrypt/php_mcrypt.h"
+/* SNMP has to be moved to ext */
+/* #include "dl/snmp/php3_snmp.h" */
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
 unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
 
-zend_module_entry *php3_builtin_modules[] = 
-{
-	basic_functions_module_ptr,
-	dl_module_ptr,
-	php3_dir_module_ptr,
-	php3_filestat_module_ptr,
-	php3_file_module_ptr,
-	php3_header_module_ptr,
-	mcrypt_module_ptr,
-	mail_module_ptr,
-	syslog_module_ptr,
-	mysql_module_ptr,
-	msql_module_ptr,
-	pgsql_module_ptr,
-	ifx_module_ptr,
-	ldap_module_ptr,
-	filepro_module_ptr,
-	sybase_module_ptr,
-	sybct_module_ptr,
-	odbc_module_ptr,
-	dbase_module_ptr,
-	hw_module_ptr,
-	regexp_module_ptr,
-	gd_module_ptr,
-	oci8_module_ptr,
-	oracle_module_ptr,
-	apache_module_ptr,
-	crypt_module_ptr,
-	dbm_module_ptr,
-	bcmath_module_ptr,
-	snmp_module_ptr,
-	pack_module_ptr,
-	php3_zlib_module_ptr,
-	COM_module_ptr,
-	php3_imap_module_ptr,
-	php3_ibase_module_ptr,
-	xml_module_ptr,
-	pdf_module_ptr,
-	fdf_module_ptr,
-	sysvsem_module_ptr,
-	sysvshm_module_ptr,
-	phpdav_module_ptr,
-	php3_gettext_module_ptr,
+zend_module_entry *php3_builtin_modules[] = {
+@EXT_MODULE_PTRS@
 };
 
 	

@@ -34,7 +34,7 @@ VPATH = @srcdir@
 bindir = @bindir@
 
 ZEND_DIR = $(srcdir)/libzend
-SUBDIRS=$(srcdir)/libzend ext
+SUBDIRS=$(srcdir)/libzend ext @TSRM_DIR@
 
 CC = @CC@
 AR = ar rc
@@ -43,7 +43,7 @@ INSTALL_IT = @INSTALL_IT@
 EXTRA_LIBS = @EXTRA_LIBS@
 EXT_LIBS = @EXT_LIBS@
 INCLUDES = @INCLUDES@
-INCLUDE = -I$(srcdir) -I. -I$(ZEND_DIR) $(INCLUDES)
+INCLUDE = -I$(srcdir) -I. -I$(ZEND_DIR) -I$(srcdir)/TSRM $(INCLUDES)
 PROF_CFLAGS =
 CFLAGS_SHLIB = @CFLAGS_SHLIB@
 LDFLAGS_SHLIB = @LDFLAGS_SHLIB@
@@ -83,20 +83,20 @@ maintainer-clean-depend-recursive:
 	done && test -z "$$fail"
 
 # CGI binary or fhttpd module
-php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@
+php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@ @TSRM_LIB@
 	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS)
 
 # Apache modules
 libphp3.a libmodphp3.a: all-recursive $(OBJS)
 	$(AR) $@.tmp $(OBJS)
-	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a $(srcdir)/libzend/libzend.a
+	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a libzend/libzend.a @TSRM_LIB@
 	@rm -f $@.tmp
 	$(RANLIB) $(BINNAME)
 
 # Apache modules
 libmodphp3-so.a: all-recursive $(OBJS)
 	$(AR) $@.tmp $(OBJS)
-	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a $(srcdir)/libzend/libzend.a
+	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a libzend/libzend.a @TSRM_LIB@
 	@rm -f $@.tmp
 	$(RANLIB) libmodphp3-so.a
 

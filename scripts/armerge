@@ -65,7 +65,7 @@ for archive in $in_archives; do
     if test "$dir" = "."; then
 	ext_files=$files
     else
-	prefix=`echo $dir | sed -e 's#/#_#g'`_
+	prefix=`echo $dir | sed -e 's#^\./##' -e 's#/#_#g'`_
 	prefix=`echo $prefix | sed -e 's#^\.\._##g'`
 	ext_files=""
 	for file in $files; do

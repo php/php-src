@@ -1,9 +1,5 @@
-*** Testing assignments and variable aliasing: ***<br>
-<?php 
-  /* This test tests assignments to variables using other variables as variable-names */
-  $a = "b"; 
-	print "hey";
-  $$a = "test"; 
-  $$$a = "blah"; 
-	print "hey";
-?>
+a
+b
+@c@
+d
+e
