@@ -2,6 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added second argument to preg_quote() which allows quoting of
+  one additional character, usually the regex delimiter. (Andrei)
+- Uncommitted outstanding OCI8 transactions are now rolled back
+  before the connection is closed. (Thies)
+- ignore_user_abort() & friends should now work in CGI mode as well.
+  (Patch by daniel.braun@ercom.fr)
 - Added extension YAZ (dickmeiss).
 - Fixed a crash bug triggered by certain cases of class redeclarations
   (Stanislav & Zeev, Zend Engine)
