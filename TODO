@@ -20,13 +20,7 @@ Zend
 
 global
 ------
-    * when used in standalone (skell-script like) mode don't urldecode
-      arguments passed to php. right now it's not possible to say
-        /usr/local/bin/php somescript.php dog+cat.txt
-      as "dog+cat.txt" will arrive in php as "dog cat.txt". 
     * make everything on the language-level independent of your locale setings.
-    * always build the standalone executable as well as the chosen SAPI 
-      target.
     * make sure all source files have the "right" copyright.
     * the following modules still use PHP3_TLS_*() macros (and thereby don't 
       work in ZTS mode): ext/db/db.c, ext/gd/gd.c
