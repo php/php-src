@@ -1,3 +1,8 @@
+2004-06-17  Sara Golemon  <php@alphaweb.net>
+
+    * zend_builtin_functions.c:
+      String length in parse_parameters should be int
+
 2004-06-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
