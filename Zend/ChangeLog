@@ -1,3 +1,22 @@
+2005-03-11  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      acconfig.h:
+      NetWare LibC's sys/types.h does not include sys/select.h implicitly as it
+      is the case with Linux LibC
+
+2005-03-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug32252.phpt:
+      - Add new test
+
+    * tests/bug27145.phpt
+      tests/bug27145.phpt:
+      - Irrelevant
+
+    * zend_object_handlers.c:
+      - Don't touch refcount/is_ref
+
 2005-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug28442.phpt
