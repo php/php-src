@@ -1200,7 +1200,6 @@ PHP_METHOD(soapserver, handle)
 
 		zval_dtor(&function_name);
 		xmlFreeDoc(doc_return);
-		efree(fn_name);
 
 		php_write(buf, size TSRMLS_CC);
 		xmlFree(buf);
@@ -1981,7 +1980,11 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 		}
 
 		if (function != NULL) {
-			param_count = zend_hash_num_elements(function->responseParameters);
+			if (function->responseParameters) {
+				param_count = zend_hash_num_elements(function->responseParameters);
+			} else {
+			  param_count = 0;
+			}
 		} else {
 		  param_count = 1;
 		}
@@ -2219,9 +2222,8 @@ static xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, i
 	if (param != NULL) {
 		enc = param->encode;
 	} else {
-  		enc = get_conversion(val->type);
+		enc = get_conversion(val->type);
 	}
-
 	xmlParam = master_to_xml(enc, val, style);
 	if (!strcmp(xmlParam->name, "BOGUS")) {
 		xmlNodeSetName(xmlParam, paramName);

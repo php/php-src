@@ -45,7 +45,6 @@ static int is_map(zval *array);
 static void get_array_type(xmlNodePtr node, zval *array, smart_str *out_type TSRMLS_DC);
 
 static void get_type_str(xmlNodePtr node, const char* ns, const char* type, smart_str* ret);
-static void set_ns_and_type(xmlNodePtr node, encodeType type);
 static void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type);
 
 encode defaultEncoding[] = {
@@ -179,6 +178,9 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style)
 {
 	xmlNodePtr node = NULL;
 
+	if (encode == NULL) {
+		encode = get_conversion(UNKNOWN_TYPE);		
+	}
 	if (encode->to_xml_before) {
 		data = encode->to_xml_before(encode->details, data);
 	}
@@ -1598,7 +1600,7 @@ static xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style)
 	return to_xml_datetime_ex(type, data, "--%m--", style);
 }
 
-static void set_ns_and_type(xmlNodePtr node, encodeType type)
+void set_ns_and_type(xmlNodePtr node, encodeType type)
 {
 	set_ns_and_type_ex(node, type.ns, type.type_str);
 }
@@ -1794,21 +1796,35 @@ static void get_type_str(xmlNodePtr node, const char* ns, const char* type, smar
 			smart_str_appendl(ret, prefix, strlen(prefix));
 			smart_str_appendc(ret, ':');
 		} else  if (node != NULL) {
-			smart_str* prefix = encode_new_ns();
-			smart_str xmlns = {0};
+			xmlAttrPtr attr = node->properties;
 
-			smart_str_appendl(&xmlns, "xmlns:", 6);
-			smart_str_append(&xmlns, prefix);
-			smart_str_0(&xmlns);
+			while (attr != NULL) {
+				if (strncmp(attr->name,"xmlns:",sizeof("xmlns:")-1) == 0 &&
+				    strcmp(attr->children->content,ns) == 0) {
+					break;
+				}
+			  attr = attr->next;
+			}
+			if (attr == NULL) {
+				smart_str* prefix = encode_new_ns();
+				smart_str xmlns = {0};
 
-			xmlSetProp(node, xmlns.c, ns);
+				smart_str_appendl(&xmlns, "xmlns:", 6);
+				smart_str_append(&xmlns, prefix);
+				smart_str_0(&xmlns);
 
-			smart_str_append(ret, prefix);
-			smart_str_appendc(ret, ':');
+				xmlSetProp(node, xmlns.c, ns);
 
-			smart_str_free(&xmlns);
-			smart_str_free(prefix);
-			efree(prefix);
+				smart_str_append(ret, prefix);
+				smart_str_appendc(ret, ':');
+
+				smart_str_free(&xmlns);
+				smart_str_free(prefix);
+				efree(prefix);
+			} else {
+				smart_str_appends(ret, attr->name + sizeof("xmlns:")-1);
+				smart_str_appendc(ret, ':');
+			}
 		} else {
 			php_error(E_ERROR,"Unknown namespace '%s'",ns);
 		}

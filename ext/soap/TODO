@@ -100,7 +100,7 @@ Schema
 ------
 - <include>, <import>, <redefine>
 - support for user defined simple types
-  - restiction
+  ? restiction
 	  + base
 	  + enumeration
 		+ length (for string, anyURI, hexBinary, base64Binary and derived)
@@ -114,8 +114,8 @@ Schema
 		- maxInclusive (for numeric, date types)
 		- totalDigits (for decimal)
 		- fractionDigits (for decimal)
-	- list ???
-	- union ???
+	? list
+	? union
 - support for user defined complex types
   - simpleContent extension   
   + base

@@ -6,7 +6,7 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypePtr cur_type);
 static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr cur_type);
 static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, sdlTypePtr cur_type);
-static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type);
+static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type, int simpleType);
 static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type);
 static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
 static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
@@ -123,11 +123,44 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, 
 	}
 
 	name = get_attribute(simpleType->properties, "name");
-	if (name != NULL) {
+	if (cur_type != NULL) {
+		/* Anonymous type inside <element> or <restriction> */
 		sdlTypePtr newType, *ptr;
 
 		newType = malloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
+		newType->kind = XSD_TYPEKIND_SIMPLE;
+		if (name != NULL) {
+			newType->name = strdup(name->children->content);
+			newType->namens = strdup(ns->children->content);
+		} else {
+			newType->name = strdup(cur_type->name);
+			newType->namens = strdup(cur_type->namens);
+		}
+
+		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
+
+		if (sdl->encoders == NULL) {
+			sdl->encoders = malloc(sizeof(HashTable));
+			zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 1);
+		}
+		cur_type->encode = malloc(sizeof(encode));
+		memset(cur_type->encode, 0, sizeof(encode));
+		cur_type->encode->details.ns = strdup(newType->namens);
+		cur_type->encode->details.type_str = strdup(newType->name);
+		cur_type->encode->details.sdl_type = *ptr;
+		cur_type->encode->to_xml = sdl_guess_convert_xml;
+		cur_type->encode->to_zval = sdl_guess_convert_zval;
+		zend_hash_next_index_insert(sdl->encoders,  &cur_type->encode, sizeof(encodePtr), NULL);
+
+		cur_type =*ptr;
+
+	} else if (name != NULL) {
+		sdlTypePtr newType, *ptr;
+
+		newType = malloc(sizeof(sdlType));
+		memset(newType, 0, sizeof(sdlType));
+		newType->kind = XSD_TYPEKIND_SIMPLE;
 		newType->name = strdup(name->children->content);
 		newType->namens = strdup(ns->children->content);
 
@@ -143,17 +176,6 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, 
 		cur_type = (*ptr);
 
 		create_encoder(sdl, cur_type, ns->children->content, name->children->content);
-	} else if (cur_type != NULL) {
-		sdlTypePtr newType, *ptr;
-
-		newType = malloc(sizeof(sdlType));
-		memset(newType, 0, sizeof(sdlType));
-		newType->name = strdup(cur_type->name);
-		newType->namens = strdup(cur_type->namens);
-
-		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
-		cur_type->encode = create_encoder(sdl, *ptr, (char *)(*ptr)->namens, (char *)(*ptr)->name);
-		cur_type =*ptr;
 	} else {
 		php_error(E_ERROR, "Error parsing schema (simpleType has no 'name' attribute)");
 	}
@@ -171,17 +193,21 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, 
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"restriction")) {
-			schema_restriction_simpleContent(sdl, tsn, trav, cur_type);
+			schema_restriction_simpleContent(sdl, tsn, trav, cur_type, 1);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"list")) {
+			cur_type->kind = XSD_TYPEKIND_LIST;
 			schema_list(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"union")) {
+			cur_type->kind = XSD_TYPEKIND_UNION;
 			schema_union(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else {
 			php_error(E_ERROR, "Error parsing schema (unexpected <%s> in simpleType)",trav->name);
 		}
+	} else {
+		php_error(E_ERROR, "Error parsing schema (expected <restriction>, <list> or <union> in simpleType)");
 	}
 	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
 		trav = trav->next;
@@ -208,7 +234,30 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
 
 	itemType = get_attribute(listType->properties, "itemType");
 	if (itemType != NULL) {
-		/*FIXME*/
+		char *type, *ns;
+		xmlNsPtr nsptr;
+
+		parse_namespace(itemType->children->content, &type, &ns);
+		nsptr = xmlSearchNs(listType->doc, listType, ns);
+		if (nsptr != NULL) {
+			sdlTypePtr newType, *tmp;
+
+			newType = malloc(sizeof(sdlType));
+			memset(newType, 0, sizeof(sdlType));
+
+			newType->name = strdup(type);
+			newType->namens = strdup(nsptr->href);
+
+			newType->encode = get_create_encoder(sdl, newType, (char *)nsptr->href, type);
+
+			if (cur_type->elements == NULL) {
+				cur_type->elements = malloc(sizeof(HashTable));
+				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 1);
+			}
+			zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);			
+		}
+		if (type) {efree(type);}
+		if (ns) {efree(ns);}
 	}
 
 	trav = listType->children;
@@ -223,7 +272,25 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
 		trav = trav->next;
 	}
 	if (trav != NULL && node_is_equal(trav,"simpleType")) {
-		/*FIXME*/
+		sdlTypePtr newType, *tmp;
+
+		if (itemType != NULL) {
+			php_error(E_ERROR, "Error parsing schema (element have both 'itemType' attribute and subtype)");
+		}
+
+		newType = malloc(sizeof(sdlType));
+		memset(newType, 0, sizeof(sdlType));
+
+		newType->name = strdup("anonymous");
+		newType->namens = strdup(tsn->children->content);
+
+		if (cur_type->elements == NULL) {
+			cur_type->elements = malloc(sizeof(HashTable));
+			zend_hash_init(cur_type->elements, 0, NULL, delete_type, 1);
+		}
+		zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);			
+
+		schema_simpleType(sdl, tsn, trav, newType);
 	  trav = trav->next;
 	}
 	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
@@ -246,11 +313,51 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
 static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr itemType;
+	xmlAttrPtr memberTypes;
 
-	itemType = get_attribute(unionType->properties, "memberTypes");
-	if (itemType != NULL) {
-		/*FIXME*/
+	memberTypes = get_attribute(unionType->properties, "memberTypes");
+	if (memberTypes != NULL) {
+		char *str, *start, *end, *next;
+		char *type, *ns;
+		xmlNsPtr nsptr;
+
+		str = estrdup(memberTypes->children->content);
+		whiteSpace_collapse(str);
+		start = str;
+		while (start != NULL && *start != '\0') {
+			end = strchr(start,' ');
+			if (end == NULL) {
+			  next = NULL;
+			} else {
+			  *end = '\0';
+			  next = end+1;
+			}
+
+			parse_namespace(start, &type, &ns);
+			nsptr = xmlSearchNs(unionType->doc, unionType, ns);
+			if (nsptr != NULL) {
+				sdlTypePtr newType, *tmp;
+
+				newType = malloc(sizeof(sdlType));
+				memset(newType, 0, sizeof(sdlType));
+
+				newType->name = strdup(type);
+				newType->namens = strdup(nsptr->href);
+
+				newType->encode = get_create_encoder(sdl, newType, (char *)nsptr->href, type);
+
+				if (cur_type->elements == NULL) {
+					cur_type->elements = malloc(sizeof(HashTable));
+					zend_hash_init(cur_type->elements, 0, NULL, delete_type, 1);
+				}
+				zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);			
+			}
+			if (type) {efree(type);}
+			if (ns) {efree(ns);}
+
+			start = next;
+		}
+		efree(str);
 	}
 
 	trav = unionType->children;
@@ -264,7 +371,26 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTyp
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE) {
 			if (node_is_equal(trav,"simpleType")) {
-				/*FIXME*/
+				sdlTypePtr newType, *tmp;
+
+				if (memberTypes != NULL) {
+					php_error(E_ERROR, "Error parsing schema (union have both 'memberTypes' attribute and subtypes)");
+				}
+				
+				newType = malloc(sizeof(sdlType));
+				memset(newType, 0, sizeof(sdlType));
+
+				newType->name = strdup("anonymous");
+				newType->namens = strdup(tsn->children->content);
+
+				if (cur_type->elements == NULL) {
+					cur_type->elements = malloc(sizeof(HashTable));
+					zend_hash_init(cur_type->elements, 0, NULL, delete_type, 1);
+				}
+				zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);			
+
+				schema_simpleType(sdl, tsn, trav, newType);
+
 			} else {
 				php_error(E_ERROR, "Error parsing schema (unexpected <%s> in union)",trav->name);
 			}
@@ -304,7 +430,7 @@ static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompT
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav, "restriction")) {
-			schema_restriction_simpleContent(sdl, tsn, trav, cur_type);
+			schema_restriction_simpleContent(sdl, tsn, trav, cur_type, 0);
 			trav = trav->next;
 		} else if (node_is_equal(trav, "extension")) {
 			schema_extension_simpleContent(sdl, tsn, trav, cur_type);
@@ -326,14 +452,20 @@ static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompT
 }
 
 /*
-<restriction
+simpleType:<restriction
+  base = QName
+  id = ID
+  {any attributes with non-schema namespace . . .}>
+  Content: (annotation?, (simpleType?, (minExclusive | minInclusive | maxExclusive | maxInclusive | totalDigits | fractionDigits | length | minLength | maxLength | enumeration | whiteSpace | pattern)*)?)
+</restriction>
+simpleContent:<restriction
   base = QName
   id = ID
   {any attributes with non-schema namespace . . .}>
   Content: (annotation?, (simpleType?, (minExclusive | minInclusive | maxExclusive | maxInclusive | totalDigits | fractionDigits | length | minLength | maxLength | enumeration | whiteSpace | pattern)*)?, ((attribute | attributeGroup)*, anyAttribute?))
 </restriction>
 */
-static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type)
+static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type, int simpleType)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr base;
@@ -350,6 +482,8 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 		}
 		if (type) {efree(type);}
 		if (ns) {efree(ns);}
+	} else if (!simpleType) {
+		php_error(E_ERROR, "Error parsing schema (restriction has no 'base' attribute)");
 	}
 
 	if (cur_type->restrictions == NULL) {
@@ -411,21 +545,23 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 		}
 	  trav = trav->next;
 	}
-	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE) {
-			if (node_is_equal(trav,"attribute")) {
-				schema_attribute(sdl, tsn, trav, cur_type);
-			} else if (node_is_equal(trav,"attributeGroup")) {
-				schema_attributeGroupRef(sdl, tsn, trav, cur_type);
-			} else if (node_is_equal(trav,"anyAttribute")) {
-				/* TODO: <anyAttribute> support */
-				trav = trav->next;
-				break;
-			} else {
-				php_error(E_ERROR, "Error parsing schema (unexpected <%s> in restriction)",trav->name);
+	if (!simpleType) {
+		while (trav != NULL) {
+			if (trav->type == XML_ELEMENT_NODE) {
+				if (node_is_equal(trav,"attribute")) {
+					schema_attribute(sdl, tsn, trav, cur_type);
+				} else if (node_is_equal(trav,"attributeGroup")) {
+					schema_attributeGroupRef(sdl, tsn, trav, cur_type);
+				} else if (node_is_equal(trav,"anyAttribute")) {
+					/* TODO: <anyAttribute> support */
+					trav = trav->next;
+					break;
+				} else {
+					php_error(E_ERROR, "Error parsing schema (unexpected <%s> in restriction)",trav->name);
+				}
 			}
+			trav = trav->next;
 		}
-		trav = trav->next;
 	}
 	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
 		trav = trav->next;
@@ -482,11 +618,14 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNode
 			schema_group(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
+			cur_type->kind = XSD_TYPEKIND_ALL;
 			schema_all(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"choice")) {
+			cur_type->kind = XSD_TYPEKIND_CHOICE;
 			schema_choice(sdl, tsn, trav, cur_type);
 			trav = trav->next;
+			cur_type->kind = XSD_TYPEKIND_SEQUENCE;
 		} else if (node_is_equal(trav,"sequence")) {
 			schema_sequence(sdl, tsn, trav, cur_type);
 			trav = trav->next;
@@ -673,12 +812,15 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
 			schema_group(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
+			cur_type->kind = XSD_TYPEKIND_ALL;
 			schema_all(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"choice")) {
+			cur_type->kind = XSD_TYPEKIND_CHOICE;
 			schema_choice(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"sequence")) {
+			cur_type->kind = XSD_TYPEKIND_SEQUENCE;
 			schema_sequence(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		}
@@ -772,19 +914,28 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
 		trav = trav->next;
 	}
-	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE) {
-			if (node_is_equal(trav,"choice")) {
-				schema_choice(sdl, tsn, trav, cur_type);
-			} else if (node_is_equal(trav,"sequence")) {
-				schema_sequence(sdl, tsn, trav, cur_type);
-			} else if (node_is_equal(trav,"all")) {
-				schema_all(sdl, tsn, trav, cur_type);
-			} else {
-				php_error(E_ERROR, "Error parsing schema (unexpected <%s> in group)",trav->name);
-			}
+	if (trav != NULL) {
+		if (node_is_equal(trav,"choice")) {
+			cur_type->kind = XSD_TYPEKIND_CHOICE;
+			schema_choice(sdl, tsn, trav, cur_type);
+			trav = trav->next;
+		} else if (node_is_equal(trav,"sequence")) {
+			cur_type->kind = XSD_TYPEKIND_SEQUENCE;
+			schema_sequence(sdl, tsn, trav, cur_type);
+			trav = trav->next;
+		} else if (node_is_equal(trav,"all")) {
+			cur_type->kind = XSD_TYPEKIND_ALL;
+			schema_all(sdl, tsn, trav, cur_type);
+			trav = trav->next;
+		} else {
+			php_error(E_ERROR, "Error parsing schema (unexpected <%s> in group)",trav->name);
 		}
+	}
+	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
 		trav = trav->next;
+	}
+	if (trav != NULL) {
+		php_error(E_ERROR, "Error parsing schema (unexpected <%s> in group)",trav->name);
 	}
 	return TRUE;
 }
@@ -821,12 +972,16 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
 			if (node_is_equal(trav,"element")) {
 				schema_element(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"grouop")) {
+				/*FIXME*/
 				schema_group(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"choice")) {
+				/*FIXME*/
 				schema_choice(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"sequence")) {
+				/*FIXME*/
 				schema_sequence(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"any")) {
+				/*FIXME*/
 				schema_any(sdl, tsn, trav, cur_type);
 			} else {
 				php_error(E_ERROR, "Error parsing schema (unexpected <%s> in choice)",trav->name);
@@ -866,12 +1021,16 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 			if (node_is_equal(trav,"element")) {
 				schema_element(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"grouop")) {
+				/*FIXME*/
 				schema_group(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"choice")) {
+				/*FIXME*/
 				schema_choice(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"sequence")) {
+				/*FIXME*/
 				schema_sequence(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"any")) {
+				/*FIXME*/
 				schema_any(sdl, tsn, trav, cur_type);
 			} else {
 				php_error(E_ERROR, "Error parsing schema (unexpected <%s> in sequence)",trav->name);
@@ -959,42 +1118,59 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 	}
 
 	name = get_attribute(attrs, "name");
-	if (name) {
+	if (cur_type != NULL) {
+		/* Anonymous type inside <element> */
 		sdlTypePtr newType, *ptr;
 
 		newType = malloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
+		newType->kind = XSD_TYPEKIND_COMPLEX;
+		if (name != NULL) {
+			newType->name = strdup(name->children->content);
+			newType->namens = strdup(ns->children->content);
+		} else {
+			newType->name = strdup(cur_type->name);
+			newType->namens = strdup(cur_type->namens);
+		}
+
+		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
+
+		if (sdl->encoders == NULL) {
+			sdl->encoders = malloc(sizeof(HashTable));
+			zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 1);
+		}
+		cur_type->encode = malloc(sizeof(encode));
+		memset(cur_type->encode, 0, sizeof(encode));
+		cur_type->encode->details.ns = strdup(newType->namens);
+		cur_type->encode->details.type_str = strdup(newType->name);
+		cur_type->encode->details.sdl_type = *ptr;
+		cur_type->encode->to_xml = sdl_guess_convert_xml;
+		cur_type->encode->to_zval = sdl_guess_convert_zval;
+		zend_hash_next_index_insert(sdl->encoders,  &cur_type->encode, sizeof(encodePtr), NULL);
+
+		cur_type =*ptr;
+
+	} else if (name) {
+		sdlTypePtr newType, *ptr;
+
+		newType = malloc(sizeof(sdlType));
+		memset(newType, 0, sizeof(sdlType));
+		newType->kind = XSD_TYPEKIND_COMPLEX;
 		newType->name = strdup(name->children->content);
 		newType->namens = strdup(ns->children->content);
 
-		if (cur_type == NULL) {
-			zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
-		} else {
-			if (cur_type->elements == NULL) {
-				cur_type->elements = malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 1);
-			}
-			zend_hash_update(cur_type->elements, newType->name, strlen(newType->name) + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
-		}
+		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
 
 		cur_type = (*ptr);
 		create_encoder(sdl, cur_type, ns->children->content, name->children->content);
+/*
 		if (cur_type->encode == NULL) {
 			cur_type->encode = get_conversion(SOAP_ENC_OBJECT);
 		}
-	} else if (cur_type != NULL) {
-		sdlTypePtr newType, *ptr;
-
-		newType = malloc(sizeof(sdlType));
-		memset(newType, 0, sizeof(sdlType));
-		newType->name = strdup(cur_type->name);
-		newType->namens = strdup(cur_type->namens);
-
-		zend_hash_next_index_insert(sdl->types,  &newType, sizeof(sdlTypePtr), (void **)&ptr);
-		cur_type->encode = create_encoder(sdl, *ptr, (char *)(*ptr)->namens, (char *)(*ptr)->name);
-		cur_type =*ptr;
+*/
 	} else {
 		php_error(E_ERROR, "Error parsing schema (complexType has no 'name' attribute)");
+		return FALSE;
 	}
 
 	trav = compType->children;
@@ -1020,12 +1196,15 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 				schema_group(sdl, tsn, trav, cur_type);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"all")) {
+				cur_type->kind = XSD_TYPEKIND_ALL;
 				schema_all(sdl, tsn, trav, cur_type);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"choice")) {
+				cur_type->kind = XSD_TYPEKIND_CHOICE;
 				schema_choice(sdl, tsn, trav, cur_type);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"sequence")) {
+				cur_type->kind = XSD_TYPEKIND_SEQUENCE;
 				schema_sequence(sdl, tsn, trav, cur_type);
 				trav = trav->next;
 			}
@@ -1078,7 +1257,7 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
-	xmlAttrPtr attrs, curattr, name, ns, type;
+	xmlAttrPtr attrs, curattr, ns, name, type, ref = NULL;
 
 	attrs = element->properties;
 	ns = get_attribute(attrs, "targetNamespace");
@@ -1087,8 +1266,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 	}
 
 	name = get_attribute(attrs, "name");
-	if (!name) {
-		name = get_attribute(attrs, "ref");
+	if (name == NULL) {
+		name = ref = get_attribute(attrs, "ref");
 	}
 
 	if (name) {
@@ -1099,8 +1278,30 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		newType = malloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
 
-		newType->name = strdup(name->children->content);
-		newType->namens = strdup(tsn->children->content);
+		if (ref) {
+			smart_str nscat = {0};
+			char *type, *ns;
+			xmlNsPtr nsptr;
+
+			parse_namespace(ref->children->content, &type, &ns);
+			nsptr = xmlSearchNs(element->doc, element, ns);
+			if (nsptr != NULL) {
+				smart_str_appends(&nscat, nsptr->href);
+				smart_str_appendc(&nscat, ':');
+				newType->namens = strdup(nsptr->href);
+			}
+			smart_str_appends(&nscat, type);
+			newType->name = strdup(type);
+			smart_str_0(&nscat);
+			if (type) {efree(type);}
+			if (ns) {efree(ns);}
+			newType->ref = estrdup(nscat.c);
+			smart_str_free(&nscat);
+		} else {
+			newType->name = strdup(name->children->content);
+			newType->namens = strdup(ns->children->content);
+		}
+
 		newType->nillable = FALSE;
 		newType->min_occurs = 1;
 		newType->max_occurs = 1;
@@ -1122,9 +1323,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		smart_str_0(&key);
 		zend_hash_update(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 		cur_type = (*tmp);
-/*
-		create_encoder(sdl, cur_type, ns->children->content, name->children->content);
-*/
 		smart_str_free(&key);
 	} else {
 		php_error(E_ERROR, "Error parsing schema (element has no 'name' nor 'ref' attributes)");
@@ -1160,15 +1358,13 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 
 	/* type = QName */
 	type = get_attribute(attrs, "type");
-/*
-	if (!curattr) {
-		curattr = name;
-	}
-*/
 	if (type) {
 		char *cptype, *str_ns;
 		xmlNsPtr nsptr;
 
+		if (ref != NULL) {
+			php_error(E_ERROR, "Error parsing schema (element have both 'ref' and 'type' attributes)");
+		}
 		parse_namespace(type->children->content, &cptype, &str_ns);
 		nsptr = xmlSearchNs(element->doc, element, str_ns);
 		if (nsptr != NULL) {
@@ -1190,9 +1386,19 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"simpleType")) {
+			if (ref != NULL) {
+				php_error(E_ERROR, "Error parsing schema (element have both 'ref' attribute and subtype)");
+			} else if (type != NULL) {
+				php_error(E_ERROR, "Error parsing schema (element have both 'type' attribute and subtype)");
+			}
 			schema_simpleType(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"complexType")) {
+			if (ref != NULL) {
+				php_error(E_ERROR, "Error parsing schema (element have both 'ref' attribute and subtype)");
+			} else if (type != NULL) {
+				php_error(E_ERROR, "Error parsing schema (element have both 'type' attribute and subtype)");
+			}
 			schema_complexType(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		}
@@ -1370,6 +1576,50 @@ static int schema_attributeGroupRef(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrG
 		/*FIXME*/
 	} else {
 		php_error(E_ERROR, "Error parsing schema (attributeGroup has no 'ref' attribute)");
+	}
+	return TRUE;
+}
+
+static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type)
+{
+	sdlTypePtr *tmp;
+
+	if (type->ref != NULL) {
+		if (zend_hash_find(sdl->elements, type->ref, strlen(type->ref)+1, (void**)&tmp) == SUCCESS) {			
+			type->encode = (*tmp)->encode;
+			/* TODO: nillable minOccurs, maxOccurs */
+		} else {
+			php_error(E_ERROR, "Error parsing schema (unresolved element 'ref' attribute)");
+		}
+		efree(type->ref);
+		type->ref = NULL;
+	}
+	if (type->elements) {
+		zend_hash_internal_pointer_reset(type->elements);
+		while (zend_hash_get_current_data(type->elements,(void**)&tmp) == SUCCESS) {
+			schema_type_fixup(sdl,*tmp);
+			zend_hash_move_forward(type->elements);
+		}
+	}
+}
+
+int schema_pass2(sdlPtr sdl)
+{
+	sdlTypePtr *type;
+
+	if (sdl->elements) {
+		zend_hash_internal_pointer_reset(sdl->elements);
+		while (zend_hash_get_current_data(sdl->elements,(void**)&type) == SUCCESS) {
+			schema_type_fixup(sdl,*type);
+			zend_hash_move_forward(sdl->elements);
+		}
+	}
+	if (sdl->types) {
+		zend_hash_internal_pointer_reset(sdl->types);
+		while (zend_hash_get_current_data(sdl->types,(void**)&type) == SUCCESS) {
+			schema_type_fixup(sdl,*type);
+			zend_hash_move_forward(sdl->types);
+		}
 	}
 	return TRUE;
 }

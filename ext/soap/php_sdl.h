@@ -90,7 +90,19 @@ struct _sdlRestrictions {
 	sdlRestrictionCharPtr pattern;
 };
 
+typedef enum _sdlTypeKind {
+	XSD_TYPEKIND_UNKNOWN,
+	XSD_TYPEKIND_SIMPLE,
+	XSD_TYPEKIND_COMPLEX,
+	XSD_TYPEKIND_LIST,
+	XSD_TYPEKIND_UNION,
+	XSD_TYPEKIND_ALL,
+	XSD_TYPEKIND_SEQUENCE,
+	XSD_TYPEKIND_CHOICE
+} sdlTypeKind;
+
 struct _sdlType {
+	sdlTypeKind kind;
 	char *name;
 	char *namens;
 	int nillable;
@@ -100,6 +112,7 @@ struct _sdlType {
 	HashTable *attributes;				/* array of sdlAttributePtr */
 	sdlRestrictionsPtr restrictions;
 	encodePtr encode;
+	char *ref;
 };
 
 struct _sdlParam {

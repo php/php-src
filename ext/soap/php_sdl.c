@@ -28,7 +28,7 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type)
 	return enc;
 }
 
-encodePtr get_encoder_from_element(sdlPtr sdl, xmlNodePtr node, const char *type)
+static encodePtr get_encoder_from_element(sdlPtr sdl, xmlNodePtr node, const char *type)
 {
 	encodePtr enc = NULL;
 	TSRMLS_FETCH();
@@ -161,6 +161,75 @@ encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const 
 	return enc;
 }
 
+static zval* to_zval_list(encodeType enc, xmlNodePtr data) {
+	zval *ret;
+	MAKE_STD_ZVAL(ret);
+	FIND_XML_NULL(data, ret);
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			whiteSpace_collapse(data->children->content);
+			ZVAL_STRING(ret, data->children->content, 1);
+		} else {
+			php_error(E_ERROR,"Violation of encoding rules");
+		}
+	} else {
+		ZVAL_EMPTY_STRING(ret);
+	}
+	return ret;
+}
+
+static xmlNodePtr to_xml_list(encodeType enc, zval *data, int style) {
+	xmlNodePtr ret;
+
+	ret = xmlNewNode(NULL, "BOGUS");
+	FIND_ZVAL_NULL(data, ret, style);
+	if (Z_TYPE_P(data) == IS_ARRAY) {
+		zval **tmp;
+		smart_str list = {0};
+		HashTable *ht = Z_ARRVAL_P(data);
+
+		zend_hash_internal_pointer_reset(ht);
+		while (zend_hash_get_current_data(ht, (void**)&tmp) == SUCCESS) {
+			if (list.len != 0) {
+				smart_str_appendc(&list, ' ');
+			}
+			if (Z_TYPE_PP(tmp) == IS_STRING) {
+				smart_str_appendl(&list, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+			} else {
+				zval copy = **tmp;
+				zval_copy_ctor(&copy);
+				convert_to_string(&copy);
+				smart_str_appendl(&list, Z_STRVAL(copy), Z_STRLEN(copy));
+				zval_dtor(&copy);
+			}
+			zend_hash_move_forward(ht);
+		}
+		smart_str_0(&list);
+		xmlNodeSetContentLen(ret, list.c, list.len);
+		smart_str_free(&list);
+	} else if (Z_TYPE_P(data) == IS_STRING) {
+		xmlNodeSetContentLen(ret, Z_STRVAL_P(data), Z_STRLEN_P(data));
+	} else {
+		zval tmp = *data;
+
+		zval_copy_ctor(&tmp);
+		convert_to_string(&tmp);
+		xmlNodeSetContentLen(ret, Z_STRVAL(tmp), Z_STRLEN(tmp));
+		zval_dtor(&tmp);
+	}
+	return ret;
+}
+
+static zval* to_zval_union(encodeType enc, xmlNodePtr data) {
+	/*FIXME*/
+	return to_zval_list(enc, data);
+}
+
+static xmlNodePtr to_xml_union(encodeType enc, zval *data, int style) {
+	/*FIXME*/
+	return to_xml_list(enc,data,style);
+}
+
 zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 {
 	sdlTypePtr type;
@@ -209,6 +278,10 @@ zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 				return master_to_zval(get_conversion(UNKNOWN_TYPE), data);
 			}
 		}
+	} else if (type->kind == XSD_TYPEKIND_LIST) {
+		return to_zval_list(enc, data);
+	} else if (type->kind == XSD_TYPEKIND_UNION) {
+		return to_zval_union(enc, data);
 	} else if (type->elements) {
 		return to_zval_object(enc, data);
 	}	else {
@@ -258,11 +331,17 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 				ret = master_to_xml(get_conversion(UNKNOWN_TYPE), data, style);
 			}
 		}
-	}
-	else if (type->elements) {
+	} else if (type->kind == XSD_TYPEKIND_LIST) {
+		ret = to_xml_list(enc, data, style);
+	} else if (type->kind == XSD_TYPEKIND_UNION) {
+		ret = to_xml_union(enc, data, style);
+	} else if (type->elements) {
 		ret = to_xml_object(enc, data, style);
 	}	else {
 		ret = guess_xml_convert(enc, data, style);
+	}
+	if (style == SOAP_ENCODED) {
+		set_ns_and_type(ret, enc);
 	}
 	return ret;
 }
@@ -427,6 +506,8 @@ static sdlPtr load_wsdl(char *struri)
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
 	load_wsdl_ex(struri,&ctx, 0);
+
+	schema_pass2(ctx.root);
 
 	n = zend_hash_num_elements(&ctx.services);
 	if (n > 0) {
@@ -688,6 +769,7 @@ static sdlPtr load_wsdl(char *struri)
 								sdlParamPtr param;
 
 								param = malloc(sizeof(sdlParam));
+								memset(param,0,sizeof(sdlParam));
 								param->order = 0;
 
 								name = get_attribute(part->properties, "name");
@@ -783,6 +865,7 @@ static sdlPtr load_wsdl(char *struri)
 								xmlAttrPtr element, type, name;
 
 								param = malloc(sizeof(sdlParam));
+								memset(param, 0, sizeof(sdlParam));
 								param->order = 0;
 
 								name = get_attribute(part->properties, "name");
