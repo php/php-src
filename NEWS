@@ -5,7 +5,6 @@ PHP                                                                        NEWS
   . ext/fribidi
 - Renamed stream_register_wrapper() to stream_wrapper_register(). (Derick)
 - Fixed dirname() and strip_tags() to be binary-safe. (Moriyoshi)
-- Fixed bug #23765 (file uploads ignored due to case sensitivity). (Sara)
 - Fixed bug #22386 (Using browscap causes segfault). (Jay)
 - Fixed bug #22895 (PHP cli outputs errors in text AND html). (Marcus)
 - Fixed bug #22059 (ftp_chdir causes segfault). (Sara)
