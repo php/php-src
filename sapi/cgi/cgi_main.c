@@ -1152,7 +1152,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 	if( children ) {
 		int running = 0;
-		int i;
 		pid_t pid;
 
 		/* Create a process group for ourself & children */
