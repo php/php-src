@@ -79,6 +79,7 @@ static void print_hash(HashTable *ht, int indent)
 {
 	zval **tmp;
 	char *string_key;
+	Bucket *save_internal_pointer;
 	unsigned long num_key;
 	int i;
 
@@ -87,6 +88,7 @@ static void print_hash(HashTable *ht, int indent)
 	}
 	ZEND_PUTS("(\n");
 	indent += PRINT_ZVAL_INDENT;
+	save_internal_pointer = ht->pInternalPointer;
 	zend_hash_internal_pointer_reset(ht);
 	while (zend_hash_get_current_data(ht, (void **) &tmp) == SUCCESS) {
 		for (i=0; i<indent; i++) {
@@ -112,6 +114,7 @@ static void print_hash(HashTable *ht, int indent)
 		ZEND_PUTS(" ");
 	}
 	ZEND_PUTS(")\n");
+	ht->pInternalPointer = save_internal_pointer;
 }
 
 
