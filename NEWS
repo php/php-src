@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added version info to the dll and exe files created under Windows. (jtate)
 - Added "log_errors_max_len" php.ini option which controls maximum length for 
   error messages. (Marcus)
 - Added __FUNCTION__ and __CLASS__ constants. (Jani, Zend Engine)
