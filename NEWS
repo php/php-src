@@ -1,6 +1,14 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2003, Version 4.3.3
+- Improved NSAPI SAPI module (Uwe Schindler)
+  . php4_init (magnus.conf): new parameter to set alternate path to php.ini.
+    (php_ini="/path/to/php.ini")
+  . php4_execute (obj.conf): support for additional php.ini values.
+    Allows different settings per virtual server. 
+    (See sapi/nsapi/nsapi-readme.txt for more information)
+  . Added support for virtual()
+  . Synced $_SERVER variables to be similar to Apache variables
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
 - Added new command line parameters -B, -F, -R and -E which allow to process 
   stdin line by line (See 'php -h' or 'man php' for more). (Marcus)
