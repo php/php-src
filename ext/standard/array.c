@@ -233,13 +233,11 @@ PHP_FUNCTION(ksort)
 /* }}} */
 
 
-int php_count_recursive(zval *array, long mode)
+static int php_count_recursive(zval *array, long mode TSRMLS_DC)
 {
 	long cnt = 0;
 	zval **element;
 	HashTable *target_hash;
-
-	TSRMLS_FETCH();
 
 	target_hash = HASH_OF(array);
 
@@ -252,7 +250,7 @@ int php_count_recursive(zval *array, long mode)
 			for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 				 zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **) &element, &pos) == SUCCESS;
 				 zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)) {
-				cnt += php_count_recursive(*element, COUNT_RECURSIVE);
+				cnt += php_count_recursive(*element, COUNT_RECURSIVE TSRMLS_CC);
 			}
 		}
 	}
@@ -275,7 +273,7 @@ PHP_FUNCTION(count)
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
-			RETURN_LONG (php_count_recursive (array, mode));
+			RETURN_LONG (php_count_recursive (array, mode) TSRMLS_CC);
 			break;
 		default:
 			RETURN_LONG(1);
