@@ -668,7 +668,8 @@ PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len
 /* If buf == NULL, the buffer will be allocated automatically and will be of an
  * appropriate length to hold the line, regardless of the line length, memory
  * permitting */
-PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
+PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
+		size_t *returned_len TSRMLS_DC)
 {
 	size_t avail = 0;
 	size_t current_buf_size = 0;
@@ -772,6 +773,8 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 	}
 	
 	buf[0] = '\0';
+	if (returned_len)
+		*returned_len = total_copied;
 
 	return bufstart;
 }
