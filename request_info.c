@@ -104,6 +104,8 @@ int php3_init_request_info(void *conf)
 
 	r = ((request_rec *) SG(server_context));
 	SG(request_info).query_string = r->args;
+	SG(request_info).path_translated = r->filename;
+	SG(request_info).request_uri = r->uri;
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
 
