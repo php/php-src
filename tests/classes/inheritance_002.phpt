@@ -4,73 +4,65 @@ Constructor precedence
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
-  namespace php4 {
-    class Base {
-      function Base() {
-        var_dump('Base constructor');
-      }
-    }
+class Base_php4 {
+  function Base_php4() {
+    var_dump('Base constructor');
+  }
+}
 
-    class Child extends Base {
-      function Child() {
-        var_dump('Child constructor');
-        parent::Base();
-      }
-    }
+class Child_php4 extends Base_php4 {
+  function Child_php4() {
+    var_dump('Child constructor');
+    parent::Base_php4();
+  }
+}
+
+class Base_php5 {
+  function __construct() {
+    var_dump('Base constructor');
   }
   
-  namespace php5 {
-    class Base {
-      function __construct() {
-        var_dump('Base constructor');
-      }
-      
-      function Base() {
-        var_dump('I should not be called');
-      }
-    }
-
-    class Child extends Base {
-      function __construct() {
-        var_dump('Child constructor');
-        parent::__construct();
-      }
-      
-      function Child() {
-        var_dump('I should not be called');
-      }
-    }
+  function Base_php5() {
+    var_dump('I should not be called');
   }
+}
 
-  namespace mixed1 {
-    class Child extends php4::Base {
-      function __construct() {
-        var_dump('Child constructor');
-        parent::Base();
-      }
-    }
+class Child_php5 extends Base_php5 {
+  function __construct() {
+    var_dump('Child constructor');
+    parent::__construct();
   }
   
-  namespace mixed2 {
-    class Child extends php5::Base {
-      function Child() {
-        var_dump('Child constructor');
-        parent::__construct();
-      }
-    }
+  function Child_php5() {
+    var_dump('I should not be called');
   }
-  
-  echo "### PHP4 style\n";
-  $c4= new php4::Child();
+}
 
-  echo "### PHP5 style\n";
-  $c5= new php5::Child();
-  
-  echo "### Mixed style 1\n";
-  $cm= new mixed1::Child();
+class Child_mx1 extends Base_php4 {
+  function __construct() {
+    var_dump('Child constructor');
+    parent::Base_php4();
+  }
+}
 
-  echo "### Mixed style 2\n";
-  $cm= new mixed2::Child();
+class Child_mx2 extends Base_php5 {
+  function Child_mx2() {
+    var_dump('Child constructor');
+    parent::__construct();
+  }
+}
+
+echo "### PHP4 style\n";
+$c4= new Child_php4();
+
+echo "### PHP5 style\n";
+$c5= new Child_php5();
+
+echo "### Mixed style 1\n";
+$cm= new Child_mx1();
+
+echo "### Mixed style 2\n";
+$cm= new Child_mx2();
 ?>
 --EXPECT--
 ### PHP4 style
