@@ -396,7 +396,7 @@ mssql.min_message_severity	=	10	; minimum message severity to display
 mssql.compatability_mode	= Off	; compatability mode with old versions of PHP 3.0.
 
 [Assertion]
-;assert.active				=	On	; assert(expr); does nothing by default
+;assert.active				=	On	; assert(expr); active by default
 ;assert.warning				=	On	; issue a PHP warning for each failed assertion.
 ;assert.bail				=	Off	; don't bail out by default.
 ;assert.callback			=	0	; user-function to be called if an assertion fails.
