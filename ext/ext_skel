@@ -108,13 +108,17 @@ cat <<eof
 
 To use your new extension, you will have to execute the following steps:
 
-    $ cd ..
-    $ vi ext/$extname/config.m4
-    $ ./buildconf
-    $ ./configure --[with|enable]-$extname
-    $ make
-    $ vi ext/$extname/$extname.c
+1.  $ cd ..
+2.  $ vi ext/$extname/config.m4
+3.  $ ./buildconf
+4.  $ ./configure --[with|enable]-$extname
+5.  $ make
+6.  $ ./php -f ext/$extname/$extname.php
+7.  $ vi ext/$extname/$extname.c
+8.  $ make
 
-Repeat the last two steps as often as necessary.
+Repeat steps 3-6 until you are satisfied with ext/$extname/config.m4 and
+step 6 confirms that your module is compiled in PHP. Then, start writing
+code and repeat the last two steps as often as necessary.
 
 eof
