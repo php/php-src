@@ -285,8 +285,6 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define PUTC_H(c)					(php_header_write(&(c), 1), (c))
 
 
-#include "zend_operators.h"
-#include "zend_variables.h"
 #include "zend_constants.h"
 
 /* connection status states */
