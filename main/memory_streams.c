@@ -266,6 +266,7 @@ typedef struct {
 
 static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t count) { /* {{{ */
 	php_stream_temp_data *ts;
+	TSRMLS_FETCH();
 
 	assert(stream != NULL);
 	ts = stream->abstract;
