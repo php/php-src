@@ -292,6 +292,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
+		op_array->namespace = CG(active_namespace);
 		compiler_result = zendparse(TSRMLS_C);
 		zend_do_return(&retval_znode, 0 TSRMLS_CC);
 		CG(in_compilation) = original_in_compilation;
@@ -405,6 +406,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	} else {
 		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(active_op_array) = op_array;
+		op_array->namespace = CG(active_namespace);
 		BEGIN(ST_IN_SCRIPTING);
 		compiler_result = zendparse(TSRMLS_C);
 
@@ -481,6 +483,7 @@ ENCAPSED_TOKENS [\[\]{}$]
 ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
+NAMESPACE_NAME ({LABEL}":")+{LABEL}
 
 %option noyylineno
 %option noyywrap
@@ -616,6 +619,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"extends" {
 	return T_EXTENDS;
+}
+
+<ST_IN_SCRIPTING>"namespace" {
+	return T_NAMESPACE;
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"->" {
@@ -1094,6 +1101,21 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_STRING;
 }
 
+<ST_IN_SCRIPTING>{NAMESPACE_NAME} {
+	int i;
+
+	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
+	
+	/* Nuke this code */
+	for (i=0; i<yyleng; i++) {
+		if (zendlval->value.str.val[i] == ':') {
+			zendlval->value.str.val[i] = '_';
+		}
+	}
+	return T_NAMESPACE_NAME;
+}
 
 <ST_HEREDOC>{ENCAPSED_STRING} {
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);

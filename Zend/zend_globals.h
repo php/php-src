@@ -70,7 +70,7 @@ struct _zend_compiler_globals {
 	zend_stack declare_stack;
 
 	zend_class_entry *active_class_entry;
-	zval active_ce_parent_class_name;
+	zend_namespace *active_namespace;
 
 	/* variables for list() compilation */
 	zend_llist list_llist;
@@ -88,9 +88,11 @@ struct _zend_compiler_globals {
 
 	zend_op_array *active_op_array;
 
-	zend_class_entry main_class;
+	zend_namespace global_namespace;
+	
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
+	HashTable namespace_table; /* namespaces */
 
 	HashTable filenames_table;
 
@@ -167,7 +169,8 @@ struct _zend_executor_globals {
 	HashTable *zend_constants;	/* constants table */
 
 	zend_class_entry *scope;
-	zend_class_entry *main_class_ptr;
+	zend_namespace *global_namespace_ptr;
+	zend_namespace *active_namespace;
 
 	zval *This;
 

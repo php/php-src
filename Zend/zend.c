@@ -29,9 +29,9 @@
 #include "zend_ini.h"
 
 #ifdef ZTS
-#	define GLOBAL_FUNCTION_TABLE	&global_main_class.function_table
-#	define GLOBAL_CLASS_TABLE		&global_main_class.class_table
-#	define GLOBAL_CONSTANTS_TABLE	&global_main_class.constants_table
+#	define GLOBAL_FUNCTION_TABLE	&global_namespace.function_table
+#	define GLOBAL_CLASS_TABLE		&global_namespace.class_table
+#	define GLOBAL_CONSTANTS_TABLE	&global_namespace.constants_table
 #	define GLOBAL_AUTO_GLOBALS_TABLE	global_auto_globals_table
 #else
 #	define GLOBAL_FUNCTION_TABLE	CG(function_table)
@@ -92,6 +92,7 @@ ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
 ZEND_API int alloc_globals_id;
 zend_class_entry global_main_class;
+zend_namespace global_namespace;
 HashTable *global_auto_globals_table;
 #endif
 
@@ -401,11 +402,11 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->compiled_filename = NULL;
 
-	compiler_globals->function_table = &compiler_globals->main_class.function_table;
+	compiler_globals->function_table = &compiler_globals->global_namespace.function_table;
 	zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_copy(compiler_globals->function_table, GLOBAL_FUNCTION_TABLE, NULL, &tmp_func, sizeof(zend_function));
 
-	compiler_globals->class_table = &compiler_globals->main_class.class_table;
+	compiler_globals->class_table = &compiler_globals->global_namespace.class_table;
 	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
 	zend_hash_copy(compiler_globals->class_table, GLOBAL_CLASS_TABLE, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry *));
 
@@ -551,8 +552,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO)-1;
 
 #ifndef ZTS
-	GLOBAL_FUNCTION_TABLE = &compiler_globals.main_class.function_table;
-	GLOBAL_CLASS_TABLE = &compiler_globals.main_class.class_table;
+	GLOBAL_FUNCTION_TABLE = &compiler_globals.global_namespace.function_table;
+	GLOBAL_CLASS_TABLE = &compiler_globals.global_namespace.class_table;
+	compiler_globals.global_namespace.static_members = NULL;
 #endif
 	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);

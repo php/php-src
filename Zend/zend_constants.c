@@ -80,7 +80,7 @@ void clean_module_constants(int module_number TSRMLS_DC)
 
 int zend_startup_constants(TSRMLS_D)
 {
-	EG(zend_constants) = &CG(main_class).constants_table;
+	EG(zend_constants) = &CG(global_namespace).constants_table;
 
 	if (zend_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1)==FAILURE) {
 		return FAILURE;
