@@ -19,8 +19,7 @@ ARG_ENABLE('zts', 'Thread safety', 'yes');
 // Configures the hard-coded installation dir
 ARG_ENABLE('prefix', 'where PHP will be installed', 'C:\\php5');
 
-DEFINE("BASE_INCLUDES", "/I . /I main /I regex /I Zend /I TSRM \
-/I $(PHP_BUILD)\\include");
+DEFINE("BASE_INCLUDES", "/I . /I main /I regex /I Zend /I TSRM ");
 
 // CFLAGS for building the PHP dll
 DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP4DLLTS_EXPORTS /D PHP_EXPORTS \
@@ -89,18 +88,32 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 // that we need
 ARG_WITH('php-build', 'Path to where you extracted http://www.php.net/extra/win32build.zip. Assumes that it is a sibling of this source dir (..\\php_build) if not specified', 'no');
 
-if (PHP_PHP_BUILD == "no") {
-	if (FSO.FolderExists("..\\php_build")) {
-		PHP_PHP_BUILD = "..\\php_build";
+var php_usual_include_suspects = "..\\php_build\\include;..\\win32build\\include;..\\bindlib_w32";
+var php_usual_lib_suspects = "..\\php_build\\lib;..\\win32build\\lib;..\\bindlib_w32";
+
+// Poke around for some headers
+function probe_basic_headers()
+{
+	var p;
+
+	if (PHP_PHP_BUILD != "no") {
+		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
+		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
+	}
+
+	p = CHECK_HEADER_ADD_INCLUDE("arpa\\nameser.h", "CFLAGS", php_usual_include_suspects);
+
+	// hack to catch common location of libs
+	if (typeof(p) == "string") {
+		p = p.replace(new RegExp("include$"), "lib");
+		ADD_FLAG("LDFLAGS", '/libpath:"' + p + '" ');
+		php_usual_lib_suspects += ";" + p;
 	}
 }
 
-if (!FSO.FolderExists(PHP_PHP_BUILD)) {
-	WARNING("Could not find the php_build dir; please specify it\r\n\
-using the --with-php-build option to configure");
-}
+probe_basic_headers();
 
-DEFINE("PHP_BUILD", PHP_PHP_BUILD);
+//DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 
 STDOUT.WriteBlankLines(1);
 STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
