@@ -51,7 +51,8 @@ define('PEAR_CONFIG_DEFAULT_DATADIR',
 define('PEAR_CONFIG_DEFAULT_TESTDIR',
        PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
 
-define('PEAR_CONFIG_DEFAULT_CACHEDIR', (System::tmpdir()).'/pear/cache');
+define('PEAR_CONFIG_DEFAULT_CACHEDIR',
+         System::tmpdir() . DIRECTORY_SEPARATOR . 'pear' . DIRECTORY_SEPARATOR . 'cache');
 
 if (@is_dir(PHP_SYSCONFDIR)) {
     define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
