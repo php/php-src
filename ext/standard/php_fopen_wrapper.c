@@ -29,6 +29,7 @@
 #include "php_globals.h"
 #include "php_standard.h"
 #include "php_fopen_wrappers.h"
+#include "SAPI.h"
 
 static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
