@@ -1162,6 +1162,7 @@ ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 {
 	int name_len;
 	char *lcname;
+	zend_module_entry *module_ptr;
 	
 	if (!module) {
 		return FAILURE;
@@ -1173,12 +1174,13 @@ ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 	name_len = strlen(module->name);
 	lcname = zend_str_tolower_dup(module->name, name_len);
 
-	if (zend_hash_add(&module_registry, lcname, name_len+1, (void *)module, sizeof(zend_module_entry), NULL)==FAILURE) {
+	if (zend_hash_add(&module_registry, lcname, name_len+1, (void *)module, sizeof(zend_module_entry), (void**)&module_ptr)==FAILURE) {
 		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
 		efree(lcname);
 		return FAILURE;
 	}
 	efree(lcname);
+	module = module_ptr;
 
 	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load", module->name);
