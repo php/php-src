@@ -676,6 +676,9 @@ TEST $file
 	$shortname = str_replace($cwd.'/', '', $file);
 	$tested = trim($section_text['TEST'])." [$shortname]";
 
+	echo "TEST $tested\r";
+	flush();
+
 	$tmp = realpath(dirname($file));
 	$tmp_skipif = $tmp . uniqid('/phpt.');
 	$tmp_file   = ereg_replace('\.phpt$','.php',$file);
