@@ -76,7 +76,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.serialize_handler", "php", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.extern_referer_check", "", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.entropy_file", "", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session.entropy_length", "", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.entropy_length", "0", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 PS_SERIALIZER_FUNCS(php);
@@ -374,10 +374,11 @@ static void _php_session_send_cookie(PSLS_D)
 	}
 	cookie = ecalloc(len + 1, 1);
 	
-	snprintf(cookie, len, COOKIE_FMT, PS(session_name), PS(id));
+	len = snprintf(cookie, len, COOKIE_FMT, PS(session_name), PS(id));
 	if (PS(lifetime) > 0) {
 		strcat(cookie, COOKIE_EXPIRES);
 		strcat(cookie, date_fmt);
+		len += strlen(COOKIE_EXPIRES) + strlen(date_fmt);
 		efree(date_fmt);
 	}
 
