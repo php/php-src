@@ -551,7 +551,7 @@ scalar_object_property:
 
 object_dim_list:
 		object_dim_list ']' '[' dim_offset { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
-	|	T_STRING { znode tmp_znode, res;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&res, &tmp_znode, &$1 CLS_CC);  $1 = res; } '[' expr { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
+	|	T_STRING { znode tmp_znode, res;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&res, &tmp_znode, &$1 CLS_CC);  $1 = res; } '[' dim_offset { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
 ;
 
 
