@@ -197,7 +197,8 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	size_t result;
 	typedef unsigned int ucs4_t;
 
-	in_size = in_len;
+	*out = NULL;
+	*out_len = 0;
 
 	/*
 	  This is not the right way to get output size...
@@ -208,17 +209,16 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	*/
 	out_size = in_len * sizeof(ucs4_t) + 15;
 	out_left = out_size;
-	
+
+	in_size = in_len;
+
 	cd = icv_open(out_charset, in_charset);
 	
 	if (cd == (iconv_t)(-1)) {
-		*out = NULL;
-		*out_len = 0;
 		return PHP_ICONV_ERR_UNKNOWN;
 	}
 
 	out_buffer = (char *) emalloc(out_size + 1);
-	*out = out_buffer;
 	out_p = out_buffer;
 	
 	result = icv(cd, (const char **) &in_p, &in_size, (char **)
@@ -226,15 +226,15 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	
 	if (result == (size_t)(-1)) {
 		efree(out_buffer);
-		*out = NULL;
-		*out_len = 0;
 		return PHP_ICONV_ERR_UNKNOWN;
 	}
 	
 	*out_len = out_size - out_left;
 	out_buffer[*out_len] = '\0';
+	*out = out_buffer;
+
 	icv_close(cd);
-	
+
 	return PHP_ICONV_ERR_SUCCESS;
 
 #else
@@ -247,14 +247,15 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	size_t bsz, result = 0;
 	php_iconv_err_t retval = PHP_ICONV_ERR_SUCCESS;
 
+	*out = NULL;
+	*out_len = 0;
+
 	cd = icv_open(out_charset, in_charset);
 
 	if (cd == (iconv_t)(-1)) {
 		if (errno == EINVAL) {
-			*out = NULL;
 			return PHP_ICONV_ERR_WRONG_CHARSET;
 		} else {
-			*out = NULL;
 			return PHP_ICONV_ERR_CONVERTER;
 		}
 	}
@@ -305,8 +306,6 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 				/* other error */
 				retval = PHP_ICONV_ERR_UNKNOWN;
 				efree(out_buf);
-				*out = NULL;
-				*out_len = 0;
 				return PHP_ICONV_ERR_UNKNOWN;
 		}
 	}
