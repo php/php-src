@@ -974,7 +974,7 @@ ZEND_METHOD(reflection, getModifierNames)
 }
 /* }}} */
 
-/* {{{ proto public static mixed Reflection_Function::export(string name, [, bool return]) throws Exception
+/* {{{ proto public static mixed Reflection_Function::export(string name, [, bool return]) throws Reflection_Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_function, export)
 {
@@ -1248,7 +1248,7 @@ ZEND_METHOD(reflection_function, getParameters)
 }
 /* }}} */
 
-/* {{{ proto public static mixed Reflection_Parameter::export(mixed function, mixed parameter, [, bool return]) throws Exception
+/* {{{ proto public static mixed Reflection_Parameter::export(mixed function, mixed parameter, [, bool return]) throws Reflection_Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_parameter, export)
 {
@@ -1461,7 +1461,7 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 }
 /* }}} */
 
-/* {{{ proto public static mixed Reflection_Method::export(mixed class, string name, [, bool return]) throws Exception
+/* {{{ proto public static mixed Reflection_Method::export(mixed class, string name, [, bool return]) throws Reflection_Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_method, export)
 {
@@ -1753,7 +1753,7 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
 }
 /* }}} */
 
-/* {{{ proto public static mixed Reflection_Class::export(mixed argument, [, bool return]) throws Exception
+/* {{{ proto public static mixed Reflection_Class::export(mixed argument, [, bool return]) throws Reflection_Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_class, export)
 {
@@ -1812,7 +1812,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 }
 /* }}} */
 
-/* {{{ proto public Reflection_Class::__construct(mixed argument) throws Exception
+/* {{{ proto public Reflection_Class::__construct(mixed argument) throws Reflection_Exception
    Constructor. Takes a string or an instance as an argument */
 ZEND_METHOD(reflection_class, __construct)
 {
@@ -2487,7 +2487,7 @@ ZEND_METHOD(reflection_class, isIterateable)
 }
 /* }}} */
 
-/* {{{ proto public static mixed Reflection_Object::export(mixed argument, [, bool return]) throws Exception
+/* {{{ proto public static mixed Reflection_Object::export(mixed argument, [, bool return]) throws Reflection_Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_object, export)
 {
@@ -2495,7 +2495,7 @@ ZEND_METHOD(reflection_object, export)
 }
 /* }}} */
 
-/* {{{ proto public Reflection_Object::__construct(mixed argument) throws Exception
+/* {{{ proto public Reflection_Object::__construct(mixed argument) throws Reflection_Exception
    Constructor. Takes an instance as an argument */
 ZEND_METHOD(reflection_object, __construct)
 {
@@ -2503,7 +2503,7 @@ ZEND_METHOD(reflection_object, __construct)
 }
 /* }}} */
 
-/* {{{ proto public static mixed Reflection_Property::export(mixed class, string name, [, bool return]) throws Exception
+/* {{{ proto public static mixed Reflection_Property::export(mixed class, string name, [, bool return]) throws Reflection_Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_property, export)
 {
@@ -2783,7 +2783,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	reflection_class_factory(ref->ce, return_value TSRMLS_CC);
 }
 
-/* {{{ proto public static mixed Reflection_Extension::export(string name, [, bool return]) throws Exception
+/* {{{ proto public static mixed Reflection_Extension::export(string name, [, bool return]) throws Reflection_Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
 {
