@@ -1,0 +1,1113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns:s1="http://soapinterop.org/xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:s0="http://soapinterop.org/" xmlns:s3="http://soapinterop.org/echoheader/" xmlns:soap12enc="http://www.w3.org/2002/06/soap-envelope" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s2="http://soapinterop.org" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="http://soapinterop.org/" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://soapinterop.org/">
+      <s:import namespace="http://soapinterop.org/xsd" />
+      <s:import namespace="http://soapinterop.org/echoheader/" />
+      <s:element name="echoVoid">
+        <s:complexType />
+      </s:element>
+      <s:element name="echoVoidResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="echoInteger">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="inputInteger" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoIntegerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="return" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoFloat">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="inputFloat" type="s:float" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoFloatResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="return" type="s:float" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoString">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputString" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoStringResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoBase64">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputBase64" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoBase64Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoDate">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="inputDate" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoDateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="return" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoComplexType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputComplexType" type="s1:SOAPComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoComplexTypeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" type="s1:SOAPComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoIntegerMultiOccurs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputIntegerMultiOccurs" type="s0:ArrayOfInt" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfInt">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="int" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="echoIntegerMultiOccursResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="unbounded" name="return" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoFloatMultiOccurs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputFloatMultiOccurs" type="s0:ArrayOfFloat" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfFloat">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="float" type="s:float" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="echoFloatMultiOccursResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="unbounded" name="return" type="s:float" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoStringMultiOccurs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputStringMultiOccurs" type="s0:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="echoStringMultiOccursResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="unbounded" name="return" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoComplexTypeMultiOccurs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputComplexTypeMultiOccurs" type="s1:ArrayOfSOAPComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SOAPComplexType" nillable="true" type="s1:SOAPComplexType" />
+      <s:element name="echoComplexTypeMultiOccursResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="unbounded" name="return" type="s1:SOAPComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoDecimal">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="inputDecimal" type="s:decimal" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoDecimalResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="return" type="s:decimal" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoBoolean">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="inputBoolean" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoBooleanResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="return" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoHexBinary">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputHexBinary" type="s:hexBinary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoHexBinaryResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" type="s:hexBinary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoComplexTypeAsSimpleTypes">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputComplexType" type="s1:SOAPComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoComplexTypeAsSimpleTypesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="outputString" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="outputInteger" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="outputFloat" type="s:float" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoSimpleTypesAsComplexType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputString" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="inputInteger" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="inputFloat" type="s:float" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoSimpleTypesAsComplexTypeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" type="s1:SOAPComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoNestedComplexType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputComplexType" type="s1:SOAPComplexTypeComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoNestedComplexTypeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" type="s1:SOAPComplexTypeComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoNestedMultiOccurs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputComplexType" type="s1:SOAPMultiOccursComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoNestedMultiOccursResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" type="s1:SOAPMultiOccursComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoChoice">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputChoice" type="s1:ChoiceComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoChoiceResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" type="s1:ChoiceComplexType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoEnum">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="inputEnum" type="s1:Enum" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoEnumResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="return" type="s1:Enum" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoAnyType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputAnyType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoAnyTypeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoAnyElement">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="inputAny">
+              <s:complexType>
+                <s:sequence>
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoAnyElementResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="return">
+              <s:complexType>
+                <s:sequence>
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="echoVoidSoapHeaderResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="echoMeComplexTypeRequest" type="s3:echoMeComplexTypeRequest" />
+      <s:element name="echoMeStringRequest" type="s3:echoMeStringRequest" />
+      <s:element name="echoMeComplexTypeResponse" type="s3:echoMeComplexTypeResponse" />
+      <s:element name="echoMeStringResponse" type="s3:echoMeStringResponse" />
+    </s:schema>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://soapinterop.org/xsd">
+      <s:import namespace="http://soapinterop.org/" />
+      <s:complexType name="SOAPComplexType">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="varInt" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="varString" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="varFloat" type="s:float" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSOAPComplexType">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" ref="s0:SOAPComplexType" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SOAPComplexTypeComplexType">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="varString" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="varInt" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="varFloat" type="s:float" />
+          <s:element minOccurs="0" maxOccurs="1" name="varComplexType" type="s1:SOAPComplexType" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SOAPMultiOccursComplexType">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="varString" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="varInt" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="varFloat" type="s:float" />
+          <s:element minOccurs="0" maxOccurs="1" name="varMultiOccurs" type="s1:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ChoiceComplexType">
+        <s:sequence>
+          <s:choice minOccurs="1" maxOccurs="1">
+            <s:element minOccurs="0" maxOccurs="1" name="name0" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="name1" type="s:string" />
+          </s:choice>
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="Enum">
+        <s:restriction base="s:string">
+          <s:enumeration value="BitOne" />
+          <s:enumeration value="BitTwo" />
+          <s:enumeration value="BitThree" />
+          <s:enumeration value="BitFour" />
+          <s:enumeration value="BitFive" />
+        </s:restriction>
+      </s:simpleType>
+    </s:schema>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://soapinterop.org">
+      <s:element name="echoVoidSoapHeader">
+        <s:complexType />
+      </s:element>
+    </s:schema>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://soapinterop.org/echoheader/">
+      <s:complexType name="echoMeComplexTypeRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="varString" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="varInt" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="varFloat" type="s:float" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="echoMeStringRequest">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="varString" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="echoMeComplexTypeResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="varString" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="varInt" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="varFloat" type="s:float" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="echoMeStringResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="varString" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+    </s:schema>
+  </types>
+  <message name="echoVoidSoapIn">
+    <part name="parameters" element="s0:echoVoid" />
+  </message>
+  <message name="echoVoidSoapOut">
+    <part name="parameters" element="s0:echoVoidResponse" />
+  </message>
+  <message name="echoIntegerSoapIn">
+    <part name="parameters" element="s0:echoInteger" />
+  </message>
+  <message name="echoIntegerSoapOut">
+    <part name="parameters" element="s0:echoIntegerResponse" />
+  </message>
+  <message name="echoFloatSoapIn">
+    <part name="parameters" element="s0:echoFloat" />
+  </message>
+  <message name="echoFloatSoapOut">
+    <part name="parameters" element="s0:echoFloatResponse" />
+  </message>
+  <message name="echoStringSoapIn">
+    <part name="parameters" element="s0:echoString" />
+  </message>
+  <message name="echoStringSoapOut">
+    <part name="parameters" element="s0:echoStringResponse" />
+  </message>
+  <message name="echoBase64SoapIn">
+    <part name="parameters" element="s0:echoBase64" />
+  </message>
+  <message name="echoBase64SoapOut">
+    <part name="parameters" element="s0:echoBase64Response" />
+  </message>
+  <message name="echoDateSoapIn">
+    <part name="parameters" element="s0:echoDate" />
+  </message>
+  <message name="echoDateSoapOut">
+    <part name="parameters" element="s0:echoDateResponse" />
+  </message>
+  <message name="echoComplexTypeSoapIn">
+    <part name="parameters" element="s0:echoComplexType" />
+  </message>
+  <message name="echoComplexTypeSoapOut">
+    <part name="parameters" element="s0:echoComplexTypeResponse" />
+  </message>
+  <message name="echoIntegerMultiOccursSoapIn">
+    <part name="parameters" element="s0:echoIntegerMultiOccurs" />
+  </message>
+  <message name="echoIntegerMultiOccursSoapOut">
+    <part name="parameters" element="s0:echoIntegerMultiOccursResponse" />
+  </message>
+  <message name="echoFloatMultiOccursSoapIn">
+    <part name="parameters" element="s0:echoFloatMultiOccurs" />
+  </message>
+  <message name="echoFloatMultiOccursSoapOut">
+    <part name="parameters" element="s0:echoFloatMultiOccursResponse" />
+  </message>
+  <message name="echoStringMultiOccursSoapIn">
+    <part name="parameters" element="s0:echoStringMultiOccurs" />
+  </message>
+  <message name="echoStringMultiOccursSoapOut">
+    <part name="parameters" element="s0:echoStringMultiOccursResponse" />
+  </message>
+  <message name="echoComplexTypeMultiOccursSoapIn">
+    <part name="parameters" element="s0:echoComplexTypeMultiOccurs" />
+  </message>
+  <message name="echoComplexTypeMultiOccursSoapOut">
+    <part name="parameters" element="s0:echoComplexTypeMultiOccursResponse" />
+  </message>
+  <message name="echoDecimalSoapIn">
+    <part name="parameters" element="s0:echoDecimal" />
+  </message>
+  <message name="echoDecimalSoapOut">
+    <part name="parameters" element="s0:echoDecimalResponse" />
+  </message>
+  <message name="echoBooleanSoapIn">
+    <part name="parameters" element="s0:echoBoolean" />
+  </message>
+  <message name="echoBooleanSoapOut">
+    <part name="parameters" element="s0:echoBooleanResponse" />
+  </message>
+  <message name="echoHexBinarySoapIn">
+    <part name="parameters" element="s0:echoHexBinary" />
+  </message>
+  <message name="echoHexBinarySoapOut">
+    <part name="parameters" element="s0:echoHexBinaryResponse" />
+  </message>
+  <message name="echoComplexTypeAsSimpleTypesSoapIn">
+    <part name="parameters" element="s0:echoComplexTypeAsSimpleTypes" />
+  </message>
+  <message name="echoComplexTypeAsSimpleTypesSoapOut">
+    <part name="parameters" element="s0:echoComplexTypeAsSimpleTypesResponse" />
+  </message>
+  <message name="echoSimpleTypesAsComplexTypeSoapIn">
+    <part name="parameters" element="s0:echoSimpleTypesAsComplexType" />
+  </message>
+  <message name="echoSimpleTypesAsComplexTypeSoapOut">
+    <part name="parameters" element="s0:echoSimpleTypesAsComplexTypeResponse" />
+  </message>
+  <message name="echoNestedComplexTypeSoapIn">
+    <part name="parameters" element="s0:echoNestedComplexType" />
+  </message>
+  <message name="echoNestedComplexTypeSoapOut">
+    <part name="parameters" element="s0:echoNestedComplexTypeResponse" />
+  </message>
+  <message name="echoNestedMultiOccursSoapIn">
+    <part name="parameters" element="s0:echoNestedMultiOccurs" />
+  </message>
+  <message name="echoNestedMultiOccursSoapOut">
+    <part name="parameters" element="s0:echoNestedMultiOccursResponse" />
+  </message>
+  <message name="echoChoiceSoapIn">
+    <part name="parameters" element="s0:echoChoice" />
+  </message>
+  <message name="echoChoiceSoapOut">
+    <part name="parameters" element="s0:echoChoiceResponse" />
+  </message>
+  <message name="echoEnumSoapIn">
+    <part name="parameters" element="s0:echoEnum" />
+  </message>
+  <message name="echoEnumSoapOut">
+    <part name="parameters" element="s0:echoEnumResponse" />
+  </message>
+  <message name="echoAnyTypeSoapIn">
+    <part name="parameters" element="s0:echoAnyType" />
+  </message>
+  <message name="echoAnyTypeSoapOut">
+    <part name="parameters" element="s0:echoAnyTypeResponse" />
+  </message>
+  <message name="echoAnyElementSoapIn">
+    <part name="parameters" element="s0:echoAnyElement" />
+  </message>
+  <message name="echoAnyElementSoapOut">
+    <part name="parameters" element="s0:echoAnyElementResponse" />
+  </message>
+  <message name="echoVoidSoapHeaderSoapIn">
+    <part name="parameters" element="s2:echoVoidSoapHeader" />
+  </message>
+  <message name="echoVoidSoapHeaderSoapOut">
+    <part name="parameters" element="s0:echoVoidSoapHeaderResponse" />
+  </message>
+  <message name="echoVoidSoapHeaderechoMeComplexTypeRequest">
+    <part name="echoMeComplexTypeRequest" element="s0:echoMeComplexTypeRequest" />
+  </message>
+  <message name="echoVoidSoapHeaderechoMeComplexTypeResponse">
+    <part name="echoMeComplexTypeResponse" element="s0:echoMeComplexTypeResponse" />
+  </message>
+  <message name="echoVoidSoapHeaderechoMeStringRequest">
+    <part name="echoMeStringRequest" element="s0:echoMeStringRequest" />
+  </message>
+  <message name="echoVoidSoapHeaderechoMeStringResponse">
+    <part name="echoMeStringResponse" element="s0:echoMeStringResponse" />
+  </message>
+  <portType name="Round4XSDTestSoap">
+    <operation name="echoVoid">
+      <input message="s0:echoVoidSoapIn" />
+      <output message="s0:echoVoidSoapOut" />
+    </operation>
+    <operation name="echoInteger">
+      <input message="s0:echoIntegerSoapIn" />
+      <output message="s0:echoIntegerSoapOut" />
+    </operation>
+    <operation name="echoFloat">
+      <input message="s0:echoFloatSoapIn" />
+      <output message="s0:echoFloatSoapOut" />
+    </operation>
+    <operation name="echoString">
+      <input message="s0:echoStringSoapIn" />
+      <output message="s0:echoStringSoapOut" />
+    </operation>
+    <operation name="echoBase64">
+      <input message="s0:echoBase64SoapIn" />
+      <output message="s0:echoBase64SoapOut" />
+    </operation>
+    <operation name="echoDate">
+      <input message="s0:echoDateSoapIn" />
+      <output message="s0:echoDateSoapOut" />
+    </operation>
+    <operation name="echoComplexType">
+      <input message="s0:echoComplexTypeSoapIn" />
+      <output message="s0:echoComplexTypeSoapOut" />
+    </operation>
+    <operation name="echoIntegerMultiOccurs">
+      <input message="s0:echoIntegerMultiOccursSoapIn" />
+      <output message="s0:echoIntegerMultiOccursSoapOut" />
+    </operation>
+    <operation name="echoFloatMultiOccurs">
+      <input message="s0:echoFloatMultiOccursSoapIn" />
+      <output message="s0:echoFloatMultiOccursSoapOut" />
+    </operation>
+    <operation name="echoStringMultiOccurs">
+      <input message="s0:echoStringMultiOccursSoapIn" />
+      <output message="s0:echoStringMultiOccursSoapOut" />
+    </operation>
+    <operation name="echoComplexTypeMultiOccurs">
+      <input message="s0:echoComplexTypeMultiOccursSoapIn" />
+      <output message="s0:echoComplexTypeMultiOccursSoapOut" />
+    </operation>
+    <operation name="echoDecimal">
+      <input message="s0:echoDecimalSoapIn" />
+      <output message="s0:echoDecimalSoapOut" />
+    </operation>
+    <operation name="echoBoolean">
+      <input message="s0:echoBooleanSoapIn" />
+      <output message="s0:echoBooleanSoapOut" />
+    </operation>
+    <operation name="echoHexBinary">
+      <input message="s0:echoHexBinarySoapIn" />
+      <output message="s0:echoHexBinarySoapOut" />
+    </operation>
+    <operation name="echoComplexTypeAsSimpleTypes">
+      <input message="s0:echoComplexTypeAsSimpleTypesSoapIn" />
+      <output message="s0:echoComplexTypeAsSimpleTypesSoapOut" />
+    </operation>
+    <operation name="echoSimpleTypesAsComplexType">
+      <input message="s0:echoSimpleTypesAsComplexTypeSoapIn" />
+      <output message="s0:echoSimpleTypesAsComplexTypeSoapOut" />
+    </operation>
+    <operation name="echoNestedComplexType">
+      <input message="s0:echoNestedComplexTypeSoapIn" />
+      <output message="s0:echoNestedComplexTypeSoapOut" />
+    </operation>
+    <operation name="echoNestedMultiOccurs">
+      <input message="s0:echoNestedMultiOccursSoapIn" />
+      <output message="s0:echoNestedMultiOccursSoapOut" />
+    </operation>
+    <operation name="echoChoice">
+      <input message="s0:echoChoiceSoapIn" />
+      <output message="s0:echoChoiceSoapOut" />
+    </operation>
+    <operation name="echoEnum">
+      <input message="s0:echoEnumSoapIn" />
+      <output message="s0:echoEnumSoapOut" />
+    </operation>
+    <operation name="echoAnyType">
+      <input message="s0:echoAnyTypeSoapIn" />
+      <output message="s0:echoAnyTypeSoapOut" />
+    </operation>
+    <operation name="echoAnyElement">
+      <input message="s0:echoAnyElementSoapIn" />
+      <output message="s0:echoAnyElementSoapOut" />
+    </operation>
+    <operation name="echoVoidSoapHeader">
+      <input message="s0:echoVoidSoapHeaderSoapIn" />
+      <output message="s0:echoVoidSoapHeaderSoapOut" />
+    </operation>
+  </portType>
+  <binding name="Round4XSDTestSoap" type="s0:Round4XSDTestSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="echoVoid">
+      <soap:operation soapAction="http://soapinterop.org/echoVoid" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoInteger">
+      <soap:operation soapAction="http://soapinterop.org/echoInteger" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoFloat">
+      <soap:operation soapAction="http://soapinterop.org/echoFloat" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoString">
+      <soap:operation soapAction="http://soapinterop.org/echoString" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoBase64">
+      <soap:operation soapAction="http://soapinterop.org/echoBase64" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoDate">
+      <soap:operation soapAction="http://soapinterop.org/echoDate" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoComplexType">
+      <soap:operation soapAction="http://soapinterop.org/echoComplexType" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoIntegerMultiOccurs">
+      <soap:operation soapAction="http://soapinterop.org/echoIntegerMultiOccurs" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoFloatMultiOccurs">
+      <soap:operation soapAction="http://soapinterop.org/echoFloatMultiOccurs" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoStringMultiOccurs">
+      <soap:operation soapAction="http://soapinterop.org/echoStringMultiOccurs" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoComplexTypeMultiOccurs">
+      <soap:operation soapAction="http://soapinterop.org/echoComplexTypeMultiOccurs" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoDecimal">
+      <soap:operation soapAction="http://soapinterop.org/echoDecimal" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoBoolean">
+      <soap:operation soapAction="http://soapinterop.org/echoBoolean" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoHexBinary">
+      <soap:operation soapAction="http://soapinterop.org/echoHexBinary" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoComplexTypeAsSimpleTypes">
+      <soap:operation soapAction="http://soapinterop.org/echoComplexTypeAsSimpleTypes" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoSimpleTypesAsComplexType">
+      <soap:operation soapAction="http://soapinterop.org/echoSimpleTypesAsComplexType" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoNestedComplexType">
+      <soap:operation soapAction="http://soapinterop.org/echoNestedComplexType" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoNestedMultiOccurs">
+      <soap:operation soapAction="http://soapinterop.org/echoNestedMultiOccurs" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoChoice">
+      <soap:operation soapAction="http://soapinterop.org/echoChoice" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoEnum">
+      <soap:operation soapAction="http://soapinterop.org/echoEnum" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoAnyType">
+      <soap:operation soapAction="http://soapinterop.org/echoAnyType" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoAnyElement">
+      <soap:operation soapAction="http://soapinterop.org/echoAnyElement" style="document" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoVoidSoapHeader">
+      <soap:operation soapAction="http://soapinterop.org" style="document" />
+      <input>
+        <soap:body use="literal" />
+        <soap:header message="s0:echoVoidSoapHeaderechoMeComplexTypeRequest" part="echoMeComplexTypeRequest" use="literal" />
+        <soap:header message="s0:echoVoidSoapHeaderechoMeStringRequest" part="echoMeStringRequest" use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+        <soap:header message="s0:echoVoidSoapHeaderechoMeComplexTypeResponse" part="echoMeComplexTypeResponse" use="literal" />
+        <soap:header message="s0:echoVoidSoapHeaderechoMeStringResponse" part="echoMeStringResponse" use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <binding name="Round4XSDTestSoap12" type="s0:Round4XSDTestSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+    <operation name="echoVoid">
+      <soap12:operation soapAction="http://soapinterop.org/echoVoid" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoInteger">
+      <soap12:operation soapAction="http://soapinterop.org/echoInteger" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoFloat">
+      <soap12:operation soapAction="http://soapinterop.org/echoFloat" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoString">
+      <soap12:operation soapAction="http://soapinterop.org/echoString" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoBase64">
+      <soap12:operation soapAction="http://soapinterop.org/echoBase64" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoDate">
+      <soap12:operation soapAction="http://soapinterop.org/echoDate" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoComplexType">
+      <soap12:operation soapAction="http://soapinterop.org/echoComplexType" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoIntegerMultiOccurs">
+      <soap12:operation soapAction="http://soapinterop.org/echoIntegerMultiOccurs" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoFloatMultiOccurs">
+      <soap12:operation soapAction="http://soapinterop.org/echoFloatMultiOccurs" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoStringMultiOccurs">
+      <soap12:operation soapAction="http://soapinterop.org/echoStringMultiOccurs" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoComplexTypeMultiOccurs">
+      <soap12:operation soapAction="http://soapinterop.org/echoComplexTypeMultiOccurs" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoDecimal">
+      <soap12:operation soapAction="http://soapinterop.org/echoDecimal" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoBoolean">
+      <soap12:operation soapAction="http://soapinterop.org/echoBoolean" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoHexBinary">
+      <soap12:operation soapAction="http://soapinterop.org/echoHexBinary" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoComplexTypeAsSimpleTypes">
+      <soap12:operation soapAction="http://soapinterop.org/echoComplexTypeAsSimpleTypes" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoSimpleTypesAsComplexType">
+      <soap12:operation soapAction="http://soapinterop.org/echoSimpleTypesAsComplexType" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoNestedComplexType">
+      <soap12:operation soapAction="http://soapinterop.org/echoNestedComplexType" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoNestedMultiOccurs">
+      <soap12:operation soapAction="http://soapinterop.org/echoNestedMultiOccurs" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoChoice">
+      <soap12:operation soapAction="http://soapinterop.org/echoChoice" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoEnum">
+      <soap12:operation soapAction="http://soapinterop.org/echoEnum" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoAnyType">
+      <soap12:operation soapAction="http://soapinterop.org/echoAnyType" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoAnyElement">
+      <soap12:operation soapAction="http://soapinterop.org/echoAnyElement" style="document" />
+      <input>
+        <soap12:body use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+      </output>
+    </operation>
+    <operation name="echoVoidSoapHeader">
+      <soap12:operation soapAction="http://soapinterop.org" style="document" />
+      <input>
+        <soap12:body use="literal" />
+        <soap12:header message="s0:echoVoidSoapHeaderechoMeComplexTypeRequest" part="echoMeComplexTypeRequest" use="literal" />
+        <soap12:header message="s0:echoVoidSoapHeaderechoMeStringRequest" part="echoMeStringRequest" use="literal" />
+      </input>
+      <output>
+        <soap12:body use="literal" />
+        <soap12:header message="s0:echoVoidSoapHeaderechoMeComplexTypeResponse" part="echoMeComplexTypeResponse" use="literal" />
+        <soap12:header message="s0:echoVoidSoapHeaderechoMeStringResponse" part="echoMeStringResponse" use="literal" />
+      </output>
+    </operation>
+  </binding>
+  <service name="Round4XSDTest">
+    <documentation>These operations implement DOC/LIT SOAP operations, for interop testing. Please email johnko@microsoft.com with any questions/coments.</documentation>
+    <port name="Round4XSDTestSoap" binding="s0:Round4XSDTestSoap">
+      <soap:address location="test://" />
+    </port>
+    <port name="Round4XSDTestSoap12" binding="s0:Round4XSDTestSoap12">
+      <soap12:address location="http://mssoapinterop.org/asmx/xsd/round4xsd.asmx" />
+    </port>
+  </service>
+</definitions>

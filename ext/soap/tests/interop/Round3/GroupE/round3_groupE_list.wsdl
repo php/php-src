@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="WSDLInteropTestList" 
+    targetNamespace="http://soapinterop.org/WSDLInteropTestList" 
+    xmlns="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+    xmlns:tns="http://soapinterop.org/WSDLInteropTestList" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    xmlns:xsd1="http://soapinterop.org/xsd" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <types>
+        <schema targetNamespace="http://soapinterop.org/xsd" 
+            xmlns="http://www.w3.org/2001/XMLSchema" 
+            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+           
+            <complexType name="List">
+                <all>
+                    <element name="varInt" type="xsd:int"/>
+                    <element name="varString" type="xsd:string"/>
+		    <element name="child" type = "xsd1:List"/>
+                </all>
+            </complexType>           
+        </schema>
+    </types>
+
+    <message name="echoLinkedList">
+        <part name="param0" type="xsd1:List"/>
+    </message>
+    <message name="echoLinkedListResponse">
+        <part name="return" type="xsd1:List"/>
+    </message>
+    <portType name="WSDLInteropTestListPortType">
+        <operation name="echoLinkedList">
+            <input message="tns:echoLinkedList"/>
+            <output message="tns:echoLinkedListResponse"/>
+        </operation>        
+    </portType>
+    <binding name="WSDLInteropTestListBinding" 
+        type="tns:WSDLInteropTestListPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="echoLinkedList">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+                    namespace="http://soapinterop.org/WSDLInteropTestRpcEnc" use="encoded"/>
+            </input>
+            <output>
+                <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" 
+                    namespace="http://soapinterop.org/WSDLInteropTestRpcEnc" use="encoded"/>
+            </output>
+        </operation>
+      
+    </binding>
+    <service name="WSDLInteropTestListService">
+        <port binding="tns:WSDLInteropTestListBinding" 
+            name="WSDLInteropTestListPort">
+            <soap:address 
+                location="round3_groupE_list.inc"/>
+		</port>
+	</service>
+</definitions>

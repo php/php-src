@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+	xmlns="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:tns="http://soapinterop.org/wsdl"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:ns2="http://soapinterop.org/types"
+	targetNamespace="http://soapinterop.org/wsdl">
+
+	<message name="echoVoidRequest"/>
+	<message name="echoVoidResponse"/>
+	<message name="HeaderRequest">
+		<part name="param" type="xsd:string"/>
+	</message>
+
+	<portType name="SOAPFaultPortType">
+		<operation name="echoVersionMismatchFault" parameterOrder="">
+			<input message="tns:echoVoidRequest"/>
+			<output message="tns:echoVoidResponse"/>
+		</operation>
+
+		<operation name="echoMustUnderstandFault" parameterOrder="">
+			<input message="tns:echoVoidRequest"/>
+			<output message="tns:echoVoidResponse"/>
+		</operation>
+	</portType>
+
+	<binding name="SOAPFaultBinding" type="tns:SOAPFaultPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc"/>
+		<!--
+			If the server receives an envelope with an incorrect
+			namespace, then a fault with VersionMismatch fault code
+			is populated in the SOAP response
+		-->
+		<operation name="echoVersionMismatchFault">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<soap:operation soapAction=""/>
+		</operation>
+
+		<operation name="echoMustUnderstandFault">
+			<input>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+				<soap:header
+					message="tns:HeaderRequest"
+					part="param"
+					use="encoded"
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</input>
+			<output>
+				<soap:body
+					encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+					use="encoded"
+					namespace="http://soapinterop.org/wsdl"/>
+			</output>
+			<soap:operation soapAction=""/>
+		</operation>
+
+	</binding>
+
+	<service name="SOAPFaultService">
+		<port name="SOAPFaultPort" binding="tns:SOAPFaultBinding">
+			<soap:address location="test://"/>
+		</port>
+	</service>
+</definitions>
+
+

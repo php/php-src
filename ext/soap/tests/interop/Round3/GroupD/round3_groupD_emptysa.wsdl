@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="SoapInterop" targetNamespace="http://soapinterop/" 
+		xmlns:wsdlns="http://soapinterop/" 
+		xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns="http://schemas.xmlsoap.org/wsdl/">
+	<types/>
+	<message name="echoStringRequest">
+		<part name="a" type="xsd:string"/>
+	</message>
+	<message name="echoStringResponse">
+		<part name="Result" type="xsd:string"/>
+	</message>
+	<portType name="SoapInteropEmptySAPortType">
+		<operation name="echoString" parameterOrder="a">
+			<input message="wsdlns:echoStringRequest"/>
+			<output message="wsdlns:echoStringResponse"/>
+		</operation>
+	</portType>
+	<binding name="SoapInteropEmptySABinding" type="wsdlns:SoapInteropEmptySAPortType">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="echoString">
+			<soap:operation soapAction=""/>
+			<input>
+				<soap:body use="encoded" namespace="http://soapinterop/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</input>
+			<output>
+				<soap:body use="encoded" namespace="http://soapinterop/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="EmptySA">
+		<port name="SoapInteropEmptySAPort" binding="wsdlns:SoapInteropEmptySABinding">
+			<soap:address location="round3_groupD_emptysa.inc"/>
+		</port>
+	</service>
+</definitions>
