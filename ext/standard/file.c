@@ -2427,9 +2427,6 @@ enclosure:
 		if ((p = memchr(p2, delimiter, (e - p2)))) {
 			p2 = s;
 			s = p + 1;
-			if (*p2 == enclosure) {
-				p2++;
-			}
 
 			/* copy data to buffer */
 			buf2 = erealloc(buf2, buf2_len + (p - p2) + 1);
