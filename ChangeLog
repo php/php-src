@@ -1,3 +1,82 @@
+2003-04-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/gd.c:
+      Collate version handling and bump up version (noticed by Peter Neuman)
+
+2003-04-05  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+      Useful for adding and parsing (well-balanced) document fragments.
+      - Bumped up API version number
+
+2003-04-05  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+      --enable-all is not useful at all, removed from help
+
+    * ext/sockets/php_sockets.h:
+      Better ifdef it out here too
+
+2003-04-05  Sara Golemon  <php@alphaweb.net>
+
+    * ext/openssl/xp_ssl.c:
+      Debug watches probably don't belong in CVS.
+
+2003-04-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      GD news.
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_io.h
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gdcache.c
+      ext/gd/libgd/gdcache.h
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdkanji.c:
+      Syncronized bunbled GD library with gd 2.0.12
+      
+
+2003-04-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Include ldd output
+
+2003-04-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-dist
+      php.ini-recommended:
+      dividend -> divisor
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      dividend -> divisor
+      
+      Submitted by: Jesus M. Castagnetto <jmcastagnetto@yahoo.com>
+
+2003-04-05  Brian France  <list@firehawksystems.com>
+
+    * ext/curl/multi.c:
+      
+      	Added HAVE_CONFIG_H check so the phpize build method works
+
+2003-04-05  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/xp_socket.c:
+      Add IPv6 support to stream_socket_client/server()
+
+2003-04-05  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/package-PEAR.xml:
+      what? maintainer is not a valid role :)
+
 2003-04-04  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/streamsfuncs.c:
