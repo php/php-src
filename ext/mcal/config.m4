@@ -7,7 +7,7 @@ if test "$PHP_MCAL" != "no"; then
   if test "$PHP_MCAL" = "yes"; then
     MCAL_DIR=/usr/local
   else
-    MCAL_DIR=$PHP_MCAL
+    AC_EXPAND_PATH($PHP_MCAL, MCAL_DIR)
   fi
     
   AC_ADD_INCLUDE($MCAL_DIR)
