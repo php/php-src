@@ -80,7 +80,7 @@
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
-#define OPTSTRING "ac:d:ef:g:hilmnqs?vz:"
+#define OPTSTRING "aCc:d:ef:g:hilmnqs?vz:"
 
 static int _print_module_info ( zend_module_entry *module, void *arg ) {
 	php_printf("%s\n", module->name);
@@ -246,6 +246,7 @@ static void php_cgi_usage(char *argv0)
 				"  -s             Display colour syntax highlighted source.\n"
 				"  -f <file>      Parse <file>.  Implies `-q'\n"
 				"  -v             Version number\n"
+                "  -C             Do not chdir to the script's directory\n"
 				"  -c <path>      Look for php.ini file in this directory\n"
 #if SUPPORT_INTERACTIVE
 				"  -a             Run interactively\n"
@@ -525,7 +526,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif
 					break;
 				
-			  case 'd':	/* define ini entries on command line */
+			case 'C': /* don't chdir to the script directory */
+					SG(options) |= SAPI_OPTION_NO_CHDIR;
+					break;
+			case 'd': /* define ini entries on command line */
 					define_command_line_ini_entry(ap_php_optarg);
 					break;
 					

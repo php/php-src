@@ -25,6 +25,8 @@
 #include "zend_operators.h"
 #include <sys/stat.h>
 
+#define SAPI_OPTION_NO_CHDIR 1
+
 #define SAPI_POST_BLOCK_SIZE 4000
 
 #ifdef PHP_WIN32
@@ -109,6 +111,7 @@ typedef struct {
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
 	long post_max_size;
+    int options;
 } sapi_globals_struct;
 
 
