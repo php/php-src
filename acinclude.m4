@@ -147,6 +147,8 @@ AC_DEFUN(AC_CHECK_CC_OPTION,[
 ])
 
 AC_DEFUN(PHP_HSREGEX,[
+
+test -z "$HSREGEX" && HSREGEX="$WANT_HSREGEX"		
 AC_MSG_CHECKING(whether to use bundled regex library)
 AC_MSG_RESULT($HSREGEX)
 
