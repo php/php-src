@@ -11,6 +11,13 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Fixed bug #18868 (improved the check for availability of realpath()). (Ilia)
+- Fixed width/height detection of bmp images using getimagesize() function on
+  big endian systems and added code to retrieve bmp bit depth. (Ilia)
+- Fixed bug #20035 (line counting error when script starts with #! in 
+  cgi/cli/fastcgi sapis). (Ilia)
+- Fixed bug #20235 (incorrect handling of symlinks on ZTS build). (Ilia)
+- Added sanity checks to headers_sent() & image_type_to_mime_type(). (Ilia)
 - Added an aditional parameter to the jdtojewish() function which makes
   the function return the symbolic hebrew name. (Moshe Doron, Derick)
 - Fixed bug #20169 (implode() clobbers first argument). (Moriyoshi)
