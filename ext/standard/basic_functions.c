@@ -1015,7 +1015,7 @@ PHP_MINIT_FUNCTION(basic)
 #else
 	basic_globals_ctor(&basic_globals TSRMLS_CC);
 #ifdef PHP_WIN32
-	php_win32_core_globals_ctor(&php_win32_core_globals TSRMLS_CC);
+	php_win32_core_globals_ctor(&the_php_win32_core_globals TSRMLS_CC);
 #endif
 #endif
 

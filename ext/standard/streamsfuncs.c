@@ -1212,7 +1212,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 
 	if (ZEND_NUM_ARGS() >= 3) {
 		if (zsessstream) {
-			php_stream_from_zval(sessstream, zsessstream);
+			php_stream_from_zval(sessstream, &zsessstream);
 		}
 		
 		if (php_stream_xport_crypto_setup(stream, cryptokind, sessstream TSRMLS_CC) < 0) {
