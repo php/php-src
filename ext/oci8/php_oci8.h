@@ -47,7 +47,7 @@
 typedef struct {
 	int num;
 	int persistent;
-	int open;
+	int is_open;
 	char *dbname;
     OCIServer *pServer;
 #if 0
@@ -58,7 +58,7 @@ typedef struct {
 typedef struct {
 	int num;
 	int persistent;
-	int open;
+	int is_open;
 	int exclusive;
 	char *hashed_details;
 	oci_server *server;
@@ -67,7 +67,7 @@ typedef struct {
 
 typedef struct {
 	int id;
-	int open;
+	int is_open;
 	oci_session *session;
     OCISvcCtx *pServiceContext;
 	sword error;
