@@ -1250,7 +1250,7 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	self->file = file;
 	self->is_pipe = 0;
 	self->is_process_pipe = 0;
-
+	self->temp_file_name = NULL;
 	self->fd = fileno(file);
 
 #ifdef S_ISFIFO
@@ -1273,6 +1273,7 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self->is_pipe = 1;
 	self->is_process_pipe = 1;
 	self->fd = fileno(file);
+	self->temp_file_name = NULL;
 
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
@@ -1342,6 +1343,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			ret = fclose(data->file);
 		}
 		if (data->temp_file_name) {
+			printf("temp: %s\n", data->temp_file_name);
 			unlink(data->temp_file_name);
 			efree(data->temp_file_name);
 		}
