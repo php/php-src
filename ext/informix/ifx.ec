@@ -1652,13 +1652,12 @@ PHP_FUNCTION(ifx_errormsg)
 
 	maxmsglen = 255;
 	msglen = maxmsglen;     /* Some bug fix, rgetlmsg doesnt always set the value */
-	ifx_errmsg = (char *)malloc(maxmsglen + 1);
+	ifx_errmsg = (char *)emalloc(maxmsglen + 1);
 	if (ifx_errorcode != 0) {
 		rgetlmsg(ifx_errorcode, ifx_errmsg, maxmsglen, &msglen);
 		if (msglen > maxmsglen) {
-			maxmsglen = msglen + 1;
-			free(ifx_errmsg);
-			ifx_errmsg = (char *)malloc(maxmsglen + 1);
+			maxmsglen = msglen;
+			ifx_errmsg = (char *)erealloc(ifx_errmsg, maxmsglen + 1);
 			rgetlmsg(ifx_errorcode, ifx_errmsg, maxmsglen, &msglen);
 		}
 	} else {
@@ -1667,7 +1666,7 @@ PHP_FUNCTION(ifx_errormsg)
 	
 	returnmsg = (char *) emalloc(strlen(ifx_errmsg) + 128);
 	sprintf(returnmsg, ifx_errmsg, sqlca.sqlerrm);
-	free(ifx_errmsg);
+	efree(ifx_errmsg);
 	RETURN_STRING(returnmsg,0); 
 }
 /* }}} */
