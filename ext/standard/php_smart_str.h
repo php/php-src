@@ -19,6 +19,8 @@
 #ifndef PHP_SMART_STR_H
 #define PHP_SMART_STR_H
 
+#include "php_smart_str_public.h"
+
 #define smart_str_0(x) ((x)->c[(x)->len] = '\0')
 
 #define smart_str_alloc(d,n) {\
