@@ -590,6 +590,9 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			/* EOF, or temporary end of data (for non-blocking mode). */
 			break;
 		}
+
+		/* just break anyway, to avoid greedy read */
+		break;
 	}
 
 	if (didread > 0) {
