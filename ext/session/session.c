@@ -946,9 +946,8 @@ static void php_session_reset_id(TSRMLS_D)
 {
 	int module_number = PS(module_number);
 	
-	if (PS(use_cookies) && PS(send_cookie)) {
+	if (PS(use_cookies)) {
 		php_session_send_cookie(TSRMLS_C);
-		PS(send_cookie) = 0;
 	}
 
 	/* if the SID constant exists, destroy it. */
