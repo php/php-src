@@ -42,7 +42,7 @@ dnl  found_iconv=no
   fi
   
   if test "$found_iconv" = "no"; then
-    AC_MSG_ERROR(iconv not found, in order to build xmlrpc you need the iconv library)
+    AC_MSG_ERROR([iconv not found, in order to build xmlrpc you need the iconv library])
   fi
   
 fi
