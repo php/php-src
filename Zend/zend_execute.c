@@ -211,13 +211,13 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *
 					switch (type) {
 						case BP_VAR_R:
 						case BP_VAR_UNSET:
-							zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
+							zend_error(E_NOTICE, "Undefined variable:  %s", cv->name);
 							/* break missing intentionally */
 						case BP_VAR_IS:
 							return &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
-							zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
+							zend_error(E_NOTICE, "Undefined variable:  %s", cv->name);
 							/* break missing intentionally */
 						case BP_VAR_W:
 							zend_get_cv_address(cv, ptr, Ts TSRMLS_CC);
@@ -331,13 +331,13 @@ static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, zend_free_o
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
+					zend_error(E_NOTICE, "Undefined variable:  %s", cv->name);
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					return &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
+					zend_error(E_NOTICE, "Undefined variable:  %s", cv->name);
 					/* break missing intentionally */
 				case BP_VAR_W:
 					zend_get_cv_address(cv, ptr, Ts TSRMLS_CC);
