@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 08 Apr 2004, Version 4.3.6RC3
+- Fixed a crash in multi-threaded environments when a thread is shutdown by
+  the web server. (Stas)
 - Fixed a bug that prevented building of the GD extension against external GD
   lib 1.X. (Ilia, Edin, Nick Talbott).
 - Synchronized bundled GD library with GD 2.0.22. (Ilia)
