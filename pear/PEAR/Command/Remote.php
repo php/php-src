@@ -25,6 +25,32 @@ require_once 'PEAR/Remote.php';
 
 class PEAR_Command_Remote extends PEAR_Command_Common
 {
+    // {{{ command definitions
+
+    var $commands = array(
+        'remote-package-info' => array(
+            'summary' => 'Information About Remote Packages',
+            'function' => 'doRemotePackageInfo',
+            'options' => array(),
+            ),
+        'list-upgrades' => array(
+            'summary' => 'List Available Upgrades',
+            'function' => 'doListUpgrades',
+            'options' => array(),
+            ),
+        'list-remote-packages' => array(
+            'summary' => 'List Remote Packages',
+            'function' => 'doListRemotePackages',
+            'options' => array(),
+            ),
+        'download' => array(
+            'summary' => 'Download Package',
+            'function' => 'doDownload',
+            'options' => array(),
+            ),
+        );
+
+    // }}}
     // {{{ constructor
 
     /**
@@ -39,167 +65,66 @@ class PEAR_Command_Remote extends PEAR_Command_Common
 
     // }}}
 
-    // {{{ getCommands()
+    // {{{ remote-package-info
 
-    /**
-     * Return a list of all the commands defined by this class.
-     * @return array list of commands
-     * @access public
-     */
-    function getCommands()
+    function doRemotePackageInfo($command, $options, $params)
     {
-        return array('remote-package-info' => 'Information About Remote Package',
-                     'list-upgrades' => 'List Available Upgrades',
-                     'list-remote-packages' => 'List Remote Packages',
-                     'download' => 'Download Package');
     }
 
     // }}}
-    // {{{ run()
+    // {{{ list-remote-packages
 
-    /**
-     * Execute the command.
-     *
-     * @param string command name
-     *
-     * @param array option_name => value
-     *
-     * @param array list of additional parameters
-     *
-     * @return bool TRUE on success, FALSE for unknown commands, or
-     * a PEAR error on failure
-     *
-     * @access public
-     */
-    function run($command, $options, $params)
+    function doListRemotePackages($command, $options, $params)
     {
-        $failmsg = '';
-        $remote = &new PEAR_Remote($this->config);
-        switch ($command) {
-            // {{{ remote-package-info
-
-            case 'remote-package-info': {
-                break;
-            }
-
-            // }}}
-            // {{{ list-remote-packages
-
-            case 'list-remote-packages': {
-                $r = new PEAR_Remote($this->config);
-                $available = $r->call('package.listAll', true);
-                if (PEAR::isError($available)) {
-                    return $this->raiseError($available);
-                }
-                $i = $j = 0;
-                $this->ui->startTable(
-                    array('caption' => 'Available packages:',
-                          'border' => true));
-                foreach ($available as $name => $info) {
-                    if ($i++ % 20 == 0) {
-                        $this->ui->tableRow(
-                            array('Package', 'Version'),
-                            array('bold' => true));
-                    }
-                    $this->ui->tableRow(array($name, $info['stable']));
-                }
-                if ($i == 0) {
-                    $this->ui->tableRow(array('(no packages installed yet)'));
-                }
-                $this->ui->endTable();
-                break;
-            }
-
-            // }}}
-            // {{{ download
-
-            case 'download': {
-                //$params[0] -> The package to download
-                if (count($params) != 1) {
-                    return PEAR::raiseError("download expects one argument: the package to download");
-                }
-                $server = $this->config->get('master_server');
-                if (!ereg('^http://', $params[0])) {
-                    $pkgfile = "http://$server/get/$params[0]";
-                } else {
-                    $pkgfile = $params[0];
-                }
-                $this->bytes_downloaded = 0;
-                $saved = PEAR_Common::downloadHttp($pkgfile, $this->ui, '.',
-                                                   array(&$this, 'downloadCallback'));
-                if (PEAR::isError($saved)) {
-                    return $this->raiseError($saved);
-                }
-                $fname = basename($saved);
-                $this->ui->displayLine("File $fname downloaded ($this->bytes_downloaded bytes)");
-                break;
-            }
-
-            // }}}
-            // {{{ list-upgrades
-
-            case 'list-upgrades': {
-                include_once "PEAR/Registry.php";
-                if (empty($params[0])) {
-                    $state = $this->config->get('preferred_state');
-                } else {
-                    $state = $params[0];
-                }
-                $caption = 'Available Upgrades';
-                if (empty($state) || $state == 'any') {
-                    $latest = $remote->call("package.listLatestReleases");
-                } else {
-                    $latest = $remote->call("package.listLatestReleases", $state);
-                    $caption .= ' (' . $state . ')';
-                }
-                $caption .= ':';
-                if (PEAR::isError($latest)) {
-                    return $latest;
-                }
-                $reg = new PEAR_Registry($this->config->get('php_dir'));
-                $inst = array_flip($reg->listPackages());
-                $this->ui->startTable(array('caption' => $caption,
-                                            'border' => 1));
-                $this->ui->tableRow(array('Package', 'Version', 'Size'),
-                                array('bold' => true));
-                foreach ($latest as $package => $info) {
-                    if (!isset($inst[$package])) {
-                        // skip packages we don't have installed
-                        continue;
-                    }
-                    extract($info);
-                    $inst_version = $reg->packageInfo($package, 'version');
-                    if (version_compare($version, $inst_version, "le")) {
-                        // installed version is up-to-date
-                        continue;
-                    }
-                    if ($filesize >= 20480) {
-                        $filesize += 1024 - ($filesize % 1024);
-                        $fs = sprintf("%dkB", $filesize / 1024);
-                    } elseif ($filesize > 0) {
-                        $filesize += 103 - ($filesize % 103);
-                        $fs = sprintf("%.1fkB", $filesize / 1024.0);
-                    } else {
-                        $fs = "  -"; // XXX center instead
-                    }
-                    $this->ui->tableRow(array($package, $version, $fs));
-                }
-                $this->ui->endTable();
-                break;
-            }
-
-            // }}}
-            default: {
-                return false;
-            }
+        $r = new PEAR_Remote($this->config);
+        $available = $r->call('package.listAll', true);
+        if (PEAR::isError($available)) {
+            return $this->raiseError($available);
         }
-        if ($failmsg) {
-            return $this->raiseError($failmsg);
+        $i = $j = 0;
+        $this->ui->startTable(
+            array('caption' => 'Available packages:',
+                  'border' => true));
+        foreach ($available as $name => $info) {
+            if ($i++ % 20 == 0) {
+                $this->ui->tableRow(
+                    array('Package', 'Version'),
+                    array('bold' => true));
+            }
+            $this->ui->tableRow(array($name, $info['stable']));
         }
+        if ($i == 0) {
+            $this->ui->tableRow(array('(no packages installed yet)'));
+        }
+        $this->ui->endTable();
         return true;
     }
 
     // }}}
+    // {{{ download
+
+    function doDownload($command, $options, $params)
+    {
+        //$params[0] -> The package to download
+        if (count($params) != 1) {
+            return PEAR::raiseError("download expects one argument: the package to download");
+        }
+        $server = $this->config->get('master_server');
+        if (!ereg('^http://', $params[0])) {
+            $pkgfile = "http://$server/get/$params[0]";
+        } else {
+            $pkgfile = $params[0];
+        }
+        $this->bytes_downloaded = 0;
+        $saved = PEAR_Common::downloadHttp($pkgfile, $this->ui, '.',
+                                           array(&$this, 'downloadCallback'));
+        if (PEAR::isError($saved)) {
+            return $this->raiseError($saved);
+        }
+        $fname = basename($saved);
+        $this->ui->displayLine("File $fname downloaded ($this->bytes_downloaded bytes)");
+        return true;
+    }
 
     function downloadCallback($msg, $params = null)
     {
@@ -207,6 +132,63 @@ class PEAR_Command_Remote extends PEAR_Command_Common
             $this->bytes_downloaded = $params;
         }
     }
+
+    // }}}
+    // {{{ list-upgrades
+
+    function doListUpgrades($command, $options, $params)
+    {
+        include_once "PEAR/Registry.php";
+        $remote = new PEAR_Remote($this->config);
+        if (empty($params[0])) {
+            $state = $this->config->get('preferred_state');
+        } else {
+            $state = $params[0];
+        }
+        $caption = 'Available Upgrades';
+        if (empty($state) || $state == 'any') {
+            $latest = $remote->call("package.listLatestReleases");
+        } else {
+            $latest = $remote->call("package.listLatestReleases", $state);
+            $caption .= ' (' . $state . ')';
+        }
+        $caption .= ':';
+        if (PEAR::isError($latest)) {
+            return $latest;
+        }
+        $reg = new PEAR_Registry($this->config->get('php_dir'));
+        $inst = array_flip($reg->listPackages());
+        $this->ui->startTable(array('caption' => $caption,
+                                    'border' => 1));
+        $this->ui->tableRow(array('Package', 'Version', 'Size'),
+                            array('bold' => true));
+        foreach ($latest as $package => $info) {
+            if (!isset($inst[$package])) {
+                // skip packages we don't have installed
+                continue;
+            }
+            extract($info);
+            $inst_version = $reg->packageInfo($package, 'version');
+            if (version_compare($version, $inst_version, "le")) {
+                // installed version is up-to-date
+                continue;
+            }
+            if ($filesize >= 20480) {
+                $filesize += 1024 - ($filesize % 1024);
+                $fs = sprintf("%dkB", $filesize / 1024);
+            } elseif ($filesize > 0) {
+                $filesize += 103 - ($filesize % 103);
+                $fs = sprintf("%.1fkB", $filesize / 1024.0);
+            } else {
+                $fs = "  -"; // XXX center instead
+            }
+            $this->ui->tableRow(array($package, $version, $fs));
+        }
+        $this->ui->endTable();
+        return true;
+    }
+
+    // }}}
 }
 
 ?>
