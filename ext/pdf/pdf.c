@@ -257,12 +257,8 @@ ZEND_GET_MODULE(pdf)
  */
 static void _free_pdf_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	/* RJS: TODO:
 	PDF *pdf = (PDF *)rsrc->ptr;
-	   check whether pdf-Pointer is still valid, before pdf_delete()
-	   + remove php-resource */
-	/* PDF_delete(pdf);
-*/
+	PDF_delete(pdf);
 }
 /* }}} */
 
