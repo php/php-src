@@ -525,6 +525,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 						}
 						convert_to_string_ex(z_user);
 						convert_to_string_ex(z_passwd);
+						convert_to_boolean_ex(z_new_link);
 						user = Z_STRVAL_PP(z_user);
 						passwd = Z_STRVAL_PP(z_passwd);
 						new_link = Z_BVAL_PP(z_new_link);
@@ -535,6 +536,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 						}
 						convert_to_string_ex(z_user);
 						convert_to_string_ex(z_passwd);
+						convert_to_long_ex(z_client_flags);
 						user = Z_STRVAL_PP(z_user);
 						passwd = Z_STRVAL_PP(z_passwd);
 						client_flags = Z_LVAL_PP(z_client_flags);
@@ -547,6 +549,8 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					}
 					convert_to_string_ex(z_user);
 					convert_to_string_ex(z_passwd);
+					convert_to_boolean_ex(z_new_link);
+					convert_to_long_ex(z_client_flags);
 					user = Z_STRVAL_PP(z_user);
 					passwd = Z_STRVAL_PP(z_passwd);
 					new_link = Z_BVAL_PP(z_new_link);
