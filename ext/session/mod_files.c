@@ -156,7 +156,7 @@ static void ps_files_open(ps_files *data, const char *key)
 static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 {
 	DIR *dir;
-	char dentry[sizeof(struct dirent) + MAXPATHLEN + 1];
+	char dentry[sizeof(struct dirent) + MAXPATHLEN];
 	struct dirent *entry = (struct dirent *) &dentry;
 	struct stat sbuf;
 	char buf[MAXPATHLEN];
