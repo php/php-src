@@ -2726,8 +2726,12 @@ PHP_FUNCTION(str_replace)
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
-			MAKE_STD_ZVAL(result);
-			php_str_replace_in_subject(*search, *replace, subject_entry, result);
+			if (Z_TYPE_PP(subject_entry) != IS_ARRAY && Z_TYPE_PP(subject_entry) != IS_OBJECT) {
+				MAKE_STD_ZVAL(result);
+				php_str_replace_in_subject(*search, *replace, subject_entry, result);
+			} else {
+				result = *subject_entry;
+			}
 			/* Add to return array */
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
 												&string_key_len, &num_key, 0, NULL)) {
