@@ -535,6 +535,9 @@ PHP_FUNCTION(tempnam)
 
 	t = tempnam(d,p);
 	efree(d);
+	if(!t) {
+		RETURN_FALSE;
+	}
 	RETURN_STRING(t,1);
 }
 /* }}} */
