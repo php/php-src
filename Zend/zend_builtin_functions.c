@@ -968,12 +968,20 @@ ZEND_FUNCTION(set_error_handler)
 {
 	zval **error_handler;
 	zend_bool had_orig_error_handler=0;
-
+	char *error_handler_name;
+ 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &error_handler)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	convert_to_string_ex(error_handler);
+	if (!zend_is_callable(*error_handler, 0, &error_handler_name)) {
+		zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
+				   get_active_function_name(TSRMLS_C), error_handler_name);
+		efree(error_handler_name);
+		return;
+	}
+	efree(error_handler_name);
+
 	if (EG(user_error_handler)) {
 		had_orig_error_handler = 1;
 		*return_value = *EG(user_error_handler);
