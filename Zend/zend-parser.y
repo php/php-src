@@ -69,6 +69,7 @@
 %token T_LNUMBER
 %token T_DNUMBER
 %token T_STRING
+%token T_STRING_VARNAME
 %token T_VARIABLE
 %token T_NUM_STRING
 %token T_INLINE_HTML
@@ -452,6 +453,7 @@ static_scalar: /* compile-time evaluated scalars */
 
 scalar:
 		T_STRING 					{ do_fetch_constant(&$$, &$1, ZEND_RT CLS_CC); }
+	|	T_STRING_VARNAME			{ $$ = $1; }
 	|	common_scalar			{ $$ = $1; }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	'\'' encaps_list '\''	{ $$ = $2; }
