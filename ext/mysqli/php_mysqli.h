@@ -179,6 +179,7 @@ PHP_FUNCTION(mysqli_get_client_info);
 PHP_FUNCTION(mysqli_get_host_info);
 PHP_FUNCTION(mysqli_get_proto_info);
 PHP_FUNCTION(mysqli_get_server_info);
+PHP_FUNCTION(mysqli_get_server_version);
 PHP_FUNCTION(mysqli_info);
 PHP_FUNCTION(mysqli_insert_id);
 PHP_FUNCTION(mysqli_init);
