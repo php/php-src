@@ -1,6 +1,6 @@
 
 dnl TSRM_CHECK_GCC_ARG(ARG, ACTION-IF-FOUND, ACTION-IF-NOT_FOUND)	
-AC_DEFUN(TSRM_CHECK_GCC_ARG,[
+AC_DEFUN([TSRM_CHECK_GCC_ARG],[
   gcc_arg_name=[ac_cv_gcc_arg]translit($1,A-Z-,a-z_)
   AC_CACHE_CHECK([whether $CC supports $1], [ac_cv_gcc_arg]translit($1,A-Z-,a-z_), [
   echo 'void somefunc() { };' > conftest.c
@@ -21,7 +21,7 @@ AC_DEFUN(TSRM_CHECK_GCC_ARG,[
   fi
 ])
 
-AC_DEFUN(TSRM_BASIC_CHECKS,[
+AC_DEFUN([TSRM_BASIC_CHECKS],[
 
 AC_REQUIRE([AC_PROG_CC])dnl
 dnl AC_REQUIRE([AM_PROG_CC_STDC])dnl
@@ -33,7 +33,7 @@ AC_CHECK_HEADERS(stdarg.h)
 ])
 
 
-AC_DEFUN(TSRM_CHECK_PTH,[
+AC_DEFUN([TSRM_CHECK_PTH],[
 
 AC_MSG_CHECKING(for GNU Pth)
 PTH_PREFIX="`$1 --prefix`"
@@ -50,7 +50,7 @@ AC_MSG_RESULT(yes - installed in $PTH_PREFIX)
 
 ])
 
-AC_DEFUN(TSRM_CHECK_ST,[
+AC_DEFUN([TSRM_CHECK_ST],[
   if test -r "$1/include/st.h"; then
     CPPFLAGS="$CPPFLAGS -I$1/include"
     LDFLAGS="$LDFLAGS -L$1/lib"
@@ -70,7 +70,7 @@ AC_DEFUN(TSRM_CHECK_ST,[
 sinclude(threads.m4)
 sinclude(TSRM/threads.m4)
 
-AC_DEFUN(TSRM_CHECK_PTHREADS,[
+AC_DEFUN([TSRM_CHECK_PTHREADS],[
 		
 PTHREADS_CHECK
 
@@ -89,7 +89,7 @@ fi
 ])
 
 
-AC_DEFUN(TSRM_THREADS_CHECKS,[
+AC_DEFUN([TSRM_THREADS_CHECKS],[
 
 dnl For the thread implementations, we always use --with-*
 dnl to maintain consistency

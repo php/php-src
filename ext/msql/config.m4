@@ -5,7 +5,7 @@ dnl
 dnl
 dnl Test mSQL version by checking if msql.h has "IDX_TYPE" defined.
 dnl
-AC_DEFUN(PHP_MSQL_VERSION,[
+AC_DEFUN([PHP_MSQL_VERSION],[
   AC_MSG_CHECKING([mSQL version])
   ac_php_oldcppflags=$CPPFLAGS
   CPPFLAGS="$INCLUDES $CPPFLAGS"

@@ -5,7 +5,7 @@ divert(3)dnl
 dnl
 dnl Check if flush should be called explicitly after buffered io
 dnl
-AC_DEFUN(AC_FLUSH_IO,[
+AC_DEFUN([AC_FLUSH_IO],[
   AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], ac_cv_flush_io,[
   AC_TRY_RUN( [
 #include <stdio.h>
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 dnl
 dnl Check for crypt() capabilities
 dnl
-AC_DEFUN(AC_CRYPT_CAP,[
+AC_DEFUN([AC_CRYPT_CAP],[
 
   if test "$ac_cv_func_crypt" = "no"; then
   AC_CHECK_LIB(crypt, crypt, [

@@ -2,7 +2,7 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PHP_PGSQL_CHECK_FUNCTIONS,[
+AC_DEFUN([PHP_PGSQL_CHECK_FUNCTIONS],[
 ])
 
 PHP_ARG_WITH(pgsql,for PostgreSQL support,

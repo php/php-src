@@ -2,7 +2,7 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(IMAP_INC_CHK,[if test -r "$i$1/c-client.h"; then
+AC_DEFUN([IMAP_INC_CHK],[if test -r "$i$1/c-client.h"; then
     AC_DEFINE(HAVE_IMAP2000, 1, [ ])
     IMAP_DIR=$i
     IMAP_INC_DIR=$i$1
@@ -13,7 +13,7 @@ AC_DEFUN(IMAP_INC_CHK,[if test -r "$i$1/c-client.h"; then
 	break
 ])
 
-AC_DEFUN(IMAP_LIB_CHK,[
+AC_DEFUN([IMAP_LIB_CHK],[
   str="$IMAP_DIR/$1/lib$lib.*"
   for i in `echo $str`; do
     test -r $i && IMAP_LIBDIR=$IMAP_DIR/$1 && break 2
@@ -21,7 +21,7 @@ AC_DEFUN(IMAP_LIB_CHK,[
 ])
 
 dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok, extra-libs)
-AC_DEFUN(PHP_IMAP_TEST_BUILD, [
+AC_DEFUN([PHP_IMAP_TEST_BUILD], [
   PHP_TEST_BUILD([$1], [$2], [$3], [$4],
   [
     void mm_log(void){}
@@ -42,7 +42,7 @@ AC_DEFUN(PHP_IMAP_TEST_BUILD, [
   ])
 ])
 
-AC_DEFUN(PHP_IMAP_KRB_CHK, [
+AC_DEFUN([PHP_IMAP_KRB_CHK], [
   AC_ARG_WITH(kerberos,
   [  --with-kerberos[=DIR]     IMAP: Include Kerberos support. DIR is the Kerberos install dir.],[
     PHP_KERBEROS=$withval
@@ -89,7 +89,7 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
 
 ])
 
-AC_DEFUN(PHP_IMAP_SSL_CHK, [
+AC_DEFUN([PHP_IMAP_SSL_CHK], [
   AC_ARG_WITH(imap-ssl,
   [  --with-imap-ssl=<DIR>     IMAP: Include SSL support. DIR is the OpenSSL install dir.],[
     PHP_IMAP_SSL=$withval
