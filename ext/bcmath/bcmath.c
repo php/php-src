@@ -60,7 +60,15 @@ static long bc_precision;
 
 PHP_MINIT_FUNCTION(bcmath)
 {
+	extern bc_num _zero_;
+	extern bc_num _one_;
+	extern bc_num _two_;
+
 	init_numbers();
+	persist_alloc(_zero_);
+	persist_alloc(_one_);
+	persist_alloc(_two_);
+
 	return SUCCESS;
 }
 
