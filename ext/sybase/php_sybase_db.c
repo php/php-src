@@ -1286,7 +1286,7 @@ PHP_FUNCTION(sybase_result)
 			break;
 	}
 
-	*return_value = *Z_LVAL_P(result->data[row][field_offset]);
+	*return_value = *result->data[Z_LVAL_P(row)][field_offset];
 	pval_copy_constructor(return_value);
 }
 /* }}} */
