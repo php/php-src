@@ -122,19 +122,25 @@
 	}
 
 #ifndef HAVE_STRLCPY
+BEGIN_EXTERN_C();
 PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz);
+END_EXTERN_C();
 #undef strlcpy
 #define strlcpy php_strlcpy
 #endif
 
 #ifndef HAVE_STRLCAT
+BEGIN_EXTERN_C();
 PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
+END_EXTERN_C();
 #undef strlcat
 #define strlcat php_strlcat
 #endif
 
 #ifndef HAVE_STRTOK_R
+BEGIN_EXTERN_C();
 char *strtok_r(char *s, const char *delim, char **last);
+END_EXTERN_C();
 #endif
 
 #ifndef HAVE_SOCKLEN_T
@@ -266,12 +272,14 @@ ssize_t pwrite(int, void *, size_t, off64_t);
 ssize_t pread(int, void *, size_t, off64_t);
 #endif
 
+BEGIN_EXTERN_C();
 void phperror(char *error);
 PHPAPI int php_write(void *buf, uint size TSRMLS_DC);
 PHPAPI int php_printf(const char *format, ...);
 PHPAPI void php_log_err(char *log_message TSRMLS_DC);
 int Debug(char *format, ...);
 int cfgparse(void);
+END_EXTERN_C();
 
 #define php_error zend_error
 
@@ -281,6 +289,7 @@ typedef enum {
 	EH_THROW
 } error_handling_t;
 
+BEGIN_EXTERN_C();
 PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC);
 
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC) ;
@@ -289,6 +298,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...);
 PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...);
 PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...);
+END_EXTERN_C();
 
 #define php_error_docref php_error_docref0
 
@@ -302,6 +312,7 @@ PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, 
 #define php_memnstr zend_memnstr
 
 /* functions */
+BEGIN_EXTERN_C();
 int php_startup_internal_extensions(void);
 
 int php_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
@@ -311,7 +322,7 @@ PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userda
 PHPAPI int cfg_get_long(char *varname, long *result);
 PHPAPI int cfg_get_double(char *varname, double *result);
 PHPAPI int cfg_get_string(char *varname, char **result);
-
+END_EXTERN_C();
 
 /* PHP-named Zend macro wrappers */
 #define PHP_FN					ZEND_FN
