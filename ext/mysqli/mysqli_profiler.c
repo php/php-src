@@ -447,7 +447,7 @@ PHP_FUNCTION(mysqli_profiler)
 				RETURN_FALSE;
 			}
 			if (!(connection = php_mysqli_create_socket(name, port))) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to host %s on port %d, name, port");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to host %s on port %d", name, port);
 				RETURN_FALSE;
 			}	
 			prmain = ecalloc(1, sizeof(PR_MAIN));
