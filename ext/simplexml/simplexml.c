@@ -724,7 +724,7 @@ sxe_class_name_get(zval *object, char **class_name, zend_uint *class_name_len, i
 
 /* {{{ cast_object()
  */
-static void
+static int
 cast_object(zval *object, int type, char *contents TSRMLS_DC)
 {
 	if (contents) {
@@ -744,18 +744,22 @@ cast_object(zval *object, int type, char *contents TSRMLS_DC)
 		case IS_DOUBLE:
 			convert_to_double(object);
 			break;
+		default:
+			return FAILURE;
 	}
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ sxe_object_cast()
  */
-static void
+static int
 sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
 	php_sxe_object *sxe;
 	char           *contents = NULL;
 	zval free_obj;
+	int rv;
 
 	sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
 	if (should_free) {
@@ -774,7 +778,7 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 		}
 	} 
 
-	cast_object(writeobj, type, contents TSRMLS_CC);
+	rv = cast_object(writeobj, type, contents TSRMLS_CC);
 
 	if (contents) {
 		xmlFree(contents);
@@ -782,6 +786,7 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 	if (should_free) {
 		zval_dtor(&free_obj);
 	}
+	return rv;
 }
 /* }}} */
 
