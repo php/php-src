@@ -1,3 +1,162 @@
+2002-10-10  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: SP
+
+2002-10-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php:
+    * the actual implementation of the installroot option
+
+2002-10-10  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * tests/lang/034.phpt: Sorry, shouldn't use undo on packetloss connections
+
+2002-10-10  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/array.c: revert patch
+
+2002-10-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h.in: Break it again (after 4.3.0-pre1 :-)
+
+2002-10-10  Andrei Zmievski  <andrei@php.net>
+
+    * main/php_version.h
+      configure.in: Back to 4.3.0-dev.
+
+2002-10-10  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/iconv/tests/translit-failure.phpt:
+    Another small test for iconv transliteration, from GNU libiconv testkit
+
+2002-10-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * makedist: - Argh... test before commit
+
+2002-10-10  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/string.c: ws fixes
+
+2002-10-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS: Bug fix news.
+
+2002-10-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * makedist: - Fix typo
+
+    * makedist: - Update makedist script
+
+2002-10-10  Andrei Zmievski  <andrei@php.net>
+
+    * tests/lang/034.phpt: Fix the test after Ilia's patch.
+
+2002-10-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h.in: Revert to revision 1.13 for 4.3.0-pre1.
+
+2002-10-10  Andrei Zmievski  <andrei@php.net>
+
+    * configure.in
+      main/php_version.h: Update to 4.3.0-pre1.
+
+2002-10-10  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/tests/025.inc: Fixed the encoding
+
+    * ext/mbstring/tests/022.inc
+      ext/mbstring/tests/023.inc
+      ext/mbstring/tests/024.inc
+      ext/mbstring/tests/025.inc
+      ext/mbstring/tests/025.phpt
+      ext/mbstring/tests/021.inc:
+    Updated the test cases so that they use mb_regex_set_options.
+    Added a test for mb_regex_set_options.
+
+2002-10-10  Jon Parise  <jon@csh.rit.edu>
+
+    * CODING_STANDARDS:
+    Adding a new item (number 11) that explains why it's important to use
+    emalloc() and friends in place of the standard C library functions.
+
+2002-10-10  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/php_mbregex.c: Fixed mb_regex_set_options()
+
+    * ext/mbstring/config.m4: --disable-mbregex had no effect
+
+2002-10-10  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/iconv/tests/translit-utf8.phpt: It used to be 003
+
+    * tests/lang/034.phpt:
+    Fix platform dependencies, setlocale output, bug #19836
+
+    Testing numerics, so set numeric. If the platform doesn't support this
+    category, passing this test is more likely to be coincedence than expected
+    behavior.
+
+2002-10-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/formatted_print.c
+      ext/standard/string.c:
+    This patch fixes handling of floats on locales where decimal point is not a
+    '.'. Problem is best demonstrated by bug #17079.
+
+2002-10-10  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * run-tests.php:
+    When you say string, match at least one char in EXPECTF section
+    Plus a little protection against globbing like ext/foo/tests/* or worse.
+
+
+    * ext/ctype/tests/002.phpt:
+    Fix platform dependencies, setlocale output, bug #19836
+
+2002-10-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pfpro/pfpro.c: Fixed a few more memory leaks.
+
+2002-10-10  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Fixed entry
+
+2002-10-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/css.c
+      ext/standard/info.c:
+    - Fix the text alignment to be about same in any browser.
+
+    * ext/fribidi/fribidi.c: Be consistent with other extensions.
+
+    * ext/pfpro/pfpro.c
+      ext/pfpro/php_pfpro.h:
+    - Cleaned up some code and used the proper macros for ZTS stuff.
+    - Fixed a memleak.
+    - Fixed a bug in pfpro_process() when response contains only 2 entries.
+      (random garbage added in the end of the value + key sometimes wrong)
+
+
+2002-10-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Install.php:
+    * add --installroot / -R option to install/upgrade commands
+
+    * pear/PEAR/Common.php: * $this->destdir is not used
+
+    * pear/packages/XML_RPC-1.0.3.tar
+      pear/packages/XML_RPC-1.0.4.tar: * upgrade XML_RPC to 1.0.4
+
+    * pear/package-PEAR.xml: * fix Archive_Tar dependency
+
+    * pear/PEAR/Command/Common.php:
+    * options displayed in "pear help" did not have option parameters listed
+
+2002-10-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pfpro/config.m4:
+    - Fixed the payflowpro version check and cleaned up this a bit.
+
 2002-10-09  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/css.c: Revert previous change, it did not fix anything.

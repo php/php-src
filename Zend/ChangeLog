@@ -1,3 +1,13 @@
+2002-10-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Fugbix typo.
+
+2002-10-10  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c: add comment
+
+    * zend_object_handlers.c: fix memory leaks
+
 2002-10-09  Stanislav Malyshev  <stas@zend.com>
 
     * zend_object_handlers.c: Fix object write handler behaviour:
