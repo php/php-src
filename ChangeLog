@@ -1,3 +1,19 @@
+2003-11-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/standard/parsedate.y:
+      debug mode no longer needed
+
+2003-11-20  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/head.c:
+      - Fix Windows build
+
+2003-11-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Removed entries which no longer have no function
+
 2003-11-19  Sara Golemon  <php@alphaweb.net>
 
     * NEWS
