@@ -124,7 +124,7 @@
 /* #undef gid_t */
 
 /* Define if you have alloca, as a function or macro.  */
-#define HAVE_ALLOCA 1
+/* #define HAVE_ALLOCA 1 */
 
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 /* #undef HAVE_ALLOCA_H */
