@@ -313,8 +313,9 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           printer
-MAINTENANCE:         Unknown
-STATUS:              Experimental
+PRIMARY MAINTAINER:  Daniel Beulshausen <daniel@php4win.de>
+MAINTENANCE:         Maintained
+STATUS:              Working
 SINCE:               4.0.4
 COMMENT:             Only for Win32
 -------------------------------------------------------------------------------
