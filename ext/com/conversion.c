@@ -424,7 +424,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 }
 
 
-PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage TSRMLS_DC)
+PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TSRMLS_DC)
 {
 	/* Changed the function to return a value for recursive error testing */
 	/* Existing calls will be unaffected by the change - so it */
@@ -494,7 +494,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			/* If SafeArrayGetElement proclaims to allocate */
 			/* memory for a BSTR, so the recursive call frees */
 			/* the string correctly */
-			if (FAILURE == php_variant_to_pval(&vv, element, persistent, codepage TSRMLS_CC)) {
+			if (FAILURE == php_variant_to_pval(&vv, element, codepage TSRMLS_CC)) {
 				/* Error occurred setting up array element */
 				/* Error was displayed by the recursive call */
 				FREE_ZVAL(element);
@@ -562,7 +562,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				OLECHAR *unicode_str;
 				switch (VarBstrFromDec(&V_DECIMAL(var_arg), LOCALE_SYSTEM_DEFAULT, 0, &unicode_str)) {
 					case S_OK:
-						Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(unicode_str, &Z_STRLEN_P(pval_arg), persistent, codepage TSRMLS_CC);
+						Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(unicode_str, &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
 						Z_TYPE_P(pval_arg) = IS_STRING;
 						break;
 
@@ -599,15 +599,15 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			break;
 
 		case VT_VARIANT:
-			php_variant_to_pval(V_VARIANTREF(var_arg), pval_arg, persistent, codepage TSRMLS_CC);
+			php_variant_to_pval(V_VARIANTREF(var_arg), pval_arg, codepage TSRMLS_CC);
 			break;
 
 		case VT_BSTR:
 			if (V_ISBYREF(var_arg)) {
-				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage TSRMLS_CC);
+				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
 				efree(V_BSTRREF(var_arg));
 			} else {
-				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage TSRMLS_CC);
+				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
 			}
 
 			Z_TYPE_P(pval_arg) = IS_STRING;
@@ -752,7 +752,7 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRML
 }
 
 
-PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage TSRMLS_DC)
+PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int codepage TSRMLS_DC)
 {
 	char *C_str;
 	uint length = 0;
@@ -761,12 +761,12 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int per
 	uint reqSize = WideCharToMultiByte(codepage, WC_COMPOSITECHECK, unicode_str, -1, NULL, 0, NULL, NULL);
 
 	if (reqSize) {
-		C_str = (char *) pemalloc(sizeof(char) * reqSize, persistent);
+		C_str = (char *) emalloc(sizeof(char) * reqSize);
 
 		/* convert string */
 		length = WideCharToMultiByte(codepage, WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
 	} else {
-		C_str = (char *) pemalloc(sizeof(char), persistent);
+		C_str = (char *) emalloc(sizeof(char));
 		*C_str = 0;
 
 		php_error(E_WARNING,"Error in php_OLECHAR_to_char()");

@@ -132,13 +132,14 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 			switch (hr)	{
 				case DISP_E_EXCEPTION: {
 						int srclen;
-						char *src = php_OLECHAR_to_char(ExceptInfo.bstrSource, &srclen, 1, codepage TSRMLS_CC);
+						char *src = php_OLECHAR_to_char(ExceptInfo.bstrSource, &srclen, codepage TSRMLS_CC);
 						int desclen;
-						char *desc = php_OLECHAR_to_char(ExceptInfo.bstrDescription, &desclen, 1, codepage TSRMLS_CC);
+						char *desc = php_OLECHAR_to_char(ExceptInfo.bstrDescription, &desclen, codepage TSRMLS_CC);
+
 						*ErrString = pemalloc(srclen+desclen+50, 1);
 						sprintf(*ErrString, "<b>Source</b>: %s <b>Description</b>: %s", src, desc);
-						pefree(src, 1);
-						pefree(desc, 1);
+						efree(src);
+						efree(desc);
 						SysFreeString(ExceptInfo.bstrSource);
 						SysFreeString(ExceptInfo.bstrDescription);
 						SysFreeString(ExceptInfo.bstrHelpFile);
@@ -329,7 +330,7 @@ static char *php_string_from_clsid(const CLSID *clsid TSRMLS_DC)
 	char *clsid_str;
 
 	StringFromCLSID(clsid, &ole_clsid);
-	clsid_str = php_OLECHAR_to_char(ole_clsid, NULL, 0, codepage TSRMLS_CC);
+	clsid_str = php_OLECHAR_to_char(ole_clsid, NULL, codepage TSRMLS_CC);
 	LocalFree(ole_clsid);
 
 	return clsid_str;
@@ -379,7 +380,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 		ITypeLib *pTL;
 		char *typelib_name;
 		char *modifier, *ptr;
-		int mode = CONST_CS;
+		int mode = CONST_CS | CONST_PERSISTENT;
 
 		if (typelib_name_buffer[0]==';') {
 			continue;
@@ -801,7 +802,7 @@ PHP_FUNCTION(com_invoke)
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(var_result, return_value, FALSE, codepage TSRMLS_CC);
+	php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
 
 	FREE_VARIANT(var_result);
 	efree(arguments);
@@ -1001,7 +1002,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result, &ErrString TSRMLS_CC);
 
 	if (SUCCEEDED(hr)) {
-		php_variant_to_pval(var_result, return_value, FALSE, codepage TSRMLS_CC);
+		php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
 	} else {
 		*return_value = *value;
 		zval_copy_ctor(return_value);
@@ -1046,7 +1047,7 @@ PHP_FUNCTION(com_propget)
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(var_result, return_value, FALSE, codepage TSRMLS_CC);
+	php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
 
 	FREE_VARIANT(var_result);
 }
@@ -1187,7 +1188,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 			obj = obj_prop;
 			php_COM_set(obj, &V_DISPATCH(var_result), TRUE TSRMLS_CC);
 		} else {
-			php_variant_to_pval(var_result, &return_value, FALSE, codepage TSRMLS_CC);
+			php_variant_to_pval(var_result, &return_value, codepage TSRMLS_CC);
 
 			FREE_COM(obj_prop);
 			obj_prop = NULL;
@@ -1348,7 +1349,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		if (do_COM_invoke(obj , &function_name->element, var_result, arguments, arg_count TSRMLS_CC) == FAILURE) {
 			RETVAL_FALSE;
 		} else {
-			php_variant_to_pval(var_result, return_value, FALSE, codepage TSRMLS_CC);
+			php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
 		}
 
 		FREE_VARIANT(var_result);
@@ -1553,7 +1554,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 			char *EnumId;
 
 			TypeLib->lpVtbl->GetDocumentation(TypeLib, i, &bstr_EnumId, NULL, NULL, NULL);
-			EnumId = php_OLECHAR_to_char(bstr_EnumId, NULL, 0, codepage);
+			EnumId = php_OLECHAR_to_char(bstr_EnumId, NULL, codepage);
 			printf("Enumeration %d - %s:\n", i, EnumId);
 			efree(EnumId);
 #endif
@@ -1563,19 +1564,20 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 			j=0;
 			while(SUCCEEDED(TypeInfo->lpVtbl->GetVarDesc(TypeInfo, j, &pVarDesc))) {
 				BSTR bstr_ids;
-				char *ids;
 				zend_constant c;
 				zval exists, results;
+				char *const_name;
 
 				TypeInfo->lpVtbl->GetNames(TypeInfo, pVarDesc->memid, &bstr_ids, 1, &NameCount);
 				if (NameCount!=1) {
 					j++;
 					continue;
 				}
-				ids = php_OLECHAR_to_char(bstr_ids, NULL, TRUE, codepage TSRMLS_CC);
+				const_name = php_OLECHAR_to_char(bstr_ids, &c.name_len, codepage TSRMLS_CC);
+				c.name = zend_strndup(const_name, c.name_len);
+				efree(const_name);
+				c.name_len++; /* length should include the NULL */
 				SysFreeString(bstr_ids);
-				c.name_len = strlen(ids)+1;
-				c.name = ids;
 				
 				/* Before registering the contsnt, let's see if we can find it */
 				if (zend_get_constant(c.name, c.name_len-1, &exists TSRMLS_CC)) {
@@ -1584,12 +1586,16 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 					if (!compare_function(&results, &c.value, &exists TSRMLS_CC) && INI_INT("com.autoregister_verbose")) {
 						php_error(E_WARNING,"Type library value %s is already defined and has a different value", c.name);
 					}
-					free(ids);
+					free(c.name);
 					j++;
 					continue;
 				}
 
-				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, mode & CONST_PERSISTENT, codepage TSRMLS_CC);
+				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, codepage TSRMLS_CC);
+				if (mode & CONST_PERSISTENT) {
+					zval_persist(&c.value TSRMLS_CC);
+					mode |= CONST_EFREE_PERSISTENT;
+				}
 				c.flags = mode;
 
 				zend_register_constant(&c TSRMLS_CC);
