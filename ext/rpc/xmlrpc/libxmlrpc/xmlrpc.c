@@ -42,16 +42,31 @@ static const char rcsid[] = "#(@) $Id$";
  * CREATION DATE
  *   9/1999 - 10/2000
  * HISTORY
+ *   $Log$
+ *   Revision 1.22  2002/03/09 23:15:44  danda
+ *   add fault interrogation funcs
+ *
+ *   Revision 1.21  2002/03/09 22:27:41  danda
+ *   win32 build patches contributed by Jeff Lawson
+ *
+ *   Revision 1.20  2002/02/13 20:58:50  danda
+ *   patch to make source more windows friendly, contributed by Jeff Lawson
+ *
+ *   Revision 1.19  2001/10/12 23:25:54  danda
+ *   default to writing xmlrpc
+ *
+ *   Revision 1.18  2001/09/29 21:58:05  danda
+ *   adding cvs log to history section
+ *
+ *   10/15/2000 -- danda -- adding robodoc documentation
+ *   08/2000 -- danda -- PHP C extension that uses XMLRPC                     
+ *   08/2000 -- danda -- support for two vocabularies: danda-rpc and xml-rpc
  *   09/1999 -- danda -- Initial API, before I even knew of standard XMLRPC vocab. Response only.
- *   06/2000 -- danda -- played with expat-ensor from www.ensor.org.  Cool, but some flaws.
  *   07/2000 -- danda -- wrote new implementation to be compatible with xmlrpc standard and
  *                       incorporated some ideas from ensor, most notably the separation of
  *                       xml dom from xmlrpc api.
- *   08/2000 -- danda -- support for two vocabularies: danda-rpc and xml-rpc
- *   08/2000 -- danda -- PHP C extension that uses XMLRPC                     
- *   10/15/2000 -- danda -- adding robodoc documentation
+ *   06/2000 -- danda -- played with expat-ensor from www.ensor.org.  Cool, but some flaws.
  * TODO
- *   Server method introspection. (Enumerate available methods, describe I/O)
  * PORTABILITY
  *   Coded on RedHat Linux 6.2.  Builds on Solaris x86.  Should build on just
  *   about anything with minor mods.
@@ -116,6 +131,7 @@ static const char rcsid[] = "#(@) $Id$";
 #include "xml_element.h"
 #include "xmlrpc_private.h"
 #include "xmlrpc_introspection_private.h"
+#include "system_methods_private.h"
 
 
 
@@ -127,7 +143,6 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
    struct tm tm;
    int n;
    int i;
-   time_t t;
 	char buf[18];
 
 	if (strchr (text, '-')) {
@@ -625,7 +640,8 @@ char* XMLRPC_REQUEST_ToXML(XMLRPC_REQUEST request, int* buf_len) {
 		if (request->output.version == xmlrpc_version_simple) {
 			root_elem = DANDARPC_REQUEST_to_xml_element (request);
 		}
-		else if (request->output.version == xmlrpc_version_1_0) {
+		else if (request->output.version == xmlrpc_version_1_0 ||
+					request->output.version == xmlrpc_version_none) {
 			root_elem = XMLRPC_REQUEST_to_xml_element (request);
 		}
 		else if (request->output.version == xmlrpc_version_soap_1_1) {
@@ -2382,7 +2398,7 @@ int XMLRPC_ServerRegisterMethod(XMLRPC_SERVER server, const char *name, XMLRPC_C
 
 /*******/
 
-inline server_method* find_method(XMLRPC_SERVER server, const char* name) {
+server_method* find_method(XMLRPC_SERVER server, const char* name) {
    server_method* sm;
 
    q_iter qi = Q_Iter_Head_F(&server->methodlist);
@@ -2649,7 +2665,7 @@ XMLRPC_CASE_COMPARISON XMLRPC_SetDefaultIdCaseComparison(XMLRPC_CASE_COMPARISON 
 
 
 /*-******************
-* Utility API funcs *
+* Fault API funcs   *
 ********************/
 
 /****f* UTILITY/XMLRPC_UtilityCreateFault
@@ -2683,6 +2699,7 @@ XMLRPC_CASE_COMPARISON XMLRPC_SetDefaultIdCaseComparison(XMLRPC_CASE_COMPARISON 
  *   simplerpc serialization, meaning that there will be no "<fault>" element in that
  *   serialization. There will simply be a standard struct with 2 child elements.  
  *   imho, the "<fault>" element is unnecessary and/or out of place as part of the standard API.
+ *
  * SOURCE
  */
 XMLRPC_VALUE XMLRPC_UtilityCreateFault(int fault_code, const char* fault_string) {
@@ -2747,6 +2764,147 @@ XMLRPC_VALUE XMLRPC_UtilityCreateFault(int fault_code, const char* fault_string)
 }
 
 /*******/
+
+
+/****f* FAULT/XMLRPC_ValueIsFault
+ * NAME
+ *   XMLRPC_ValueIsFault
+ * SYNOPSIS
+ *   int XMLRPC_ValueIsFault (XMLRPC_VALUE value)
+ * FUNCTION
+ *   Determines if a value encapsulates a fault "object"
+ * INPUTS
+ *   value  any XMLRPC_VALUE
+ * RESULT
+ *   1 if it is a fault, else 0
+ * SEE ALSO
+ *   XMLRPC_ResponseIsFault ()
+ * SOURCE
+ */
+int XMLRPC_ValueIsFault (XMLRPC_VALUE value) {
+   if( XMLRPC_VectorGetValueWithID(value, "faultCode") &&
+       XMLRPC_VectorGetValueWithID(value, "faultString") ) {
+      return 1;
+   }
+   return 0;
+}
+/*******/
+
+
+/****f* FAULT/XMLRPC_ResponseIsFault
+ * NAME
+ *   XMLRPC_ResponseIsFault
+ * SYNOPSIS
+ *   int XMLRPC_ResponseIsFault (XMLRPC_REQUEST response)
+ * FUNCTION
+ *   Determines if a response contains an encapsulated fault "object"
+ * INPUTS
+ *   value  any XMLRPC_REQUEST. typically of type xmlrpc_request_response
+ * RESULT
+ *   1 if it contains a fault, else 0
+ * SEE ALSO
+ *   XMLRPC_ValueIsFault ()
+ * SOURCE
+ */
+int XMLRPC_ResponseIsFault(XMLRPC_REQUEST response) {
+   return XMLRPC_ValueIsFault( XMLRPC_RequestGetData(response) );
+}
+
+/*******/
+
+/****f* FAULT/XMLRPC_GetValueFaultCode
+ * NAME
+ *   XMLRPC_GetValueFaultCode
+ * SYNOPSIS
+ *   int XMLRPC_GetValueFaultCode (XMLRPC_VALUE value)
+ * FUNCTION
+ *   returns fault code from a struct, if any
+ * INPUTS
+ *   value  XMLRPC_VALUE of type xmlrpc_vector_struct.
+ * RESULT
+ *   fault code, else 0.
+ * BUGS
+ *   impossible to distinguish faultCode == 0 from faultCode not present.
+ * SEE ALSO
+ *   XMLRPC_GetResponseFaultCode ()
+ * SOURCE
+ */
+int XMLRPC_GetValueFaultCode (XMLRPC_VALUE value) {
+   return XMLRPC_VectorGetIntWithID(value, "faultCode");
+}
+
+/*******/
+
+/****f* FAULT/XMLRPC_GetResponseFaultCode
+ * NAME
+ *   XMLRPC_GetResponseFaultCode
+ * SYNOPSIS
+ *   int XMLRPC_GetResponseFaultCode(XMLRPC_REQUEST response)
+ * FUNCTION
+ *   returns fault code from a response, if any
+ * INPUTS
+ *   response  XMLRPC_REQUEST. typically of type xmlrpc_request_response.
+ * RESULT
+ *   fault code, else 0.
+ * BUGS
+ *   impossible to distinguish faultCode == 0 from faultCode not present.
+ * SEE ALSO
+ *   XMLRPC_GetValueFaultCode ()
+ * SOURCE
+ */
+int XMLRPC_GetResponseFaultCode(XMLRPC_REQUEST response) {
+   return XMLRPC_GetValueFaultCode( XMLRPC_RequestGetData(response) );
+}
+
+/*******/
+
+
+/****f* FAULT/XMLRPC_GetValueFaultString
+ * NAME
+ *   XMLRPC_GetValueFaultString
+ * SYNOPSIS
+ *   const char* XMLRPC_GetValueFaultString (XMLRPC_VALUE value)
+ * FUNCTION
+ *   returns fault string from a struct, if any
+ * INPUTS
+ *   value  XMLRPC_VALUE of type xmlrpc_vector_struct.
+ * RESULT
+ *   fault string, else 0.
+ * SEE ALSO
+ *   XMLRPC_GetResponseFaultString ()
+ * SOURCE
+ */
+const char* XMLRPC_GetValueFaultString (XMLRPC_VALUE value) {
+   return XMLRPC_VectorGetStringWithID(value, "faultString");
+}
+
+/*******/
+
+/****f* FAULT/XMLRPC_GetResponseFaultString
+ * NAME
+ *   XMLRPC_GetResponseFaultString
+ * SYNOPSIS
+ *   const char* XMLRPC_GetResponseFaultString (XMLRPC_REQUEST response)
+ * FUNCTION
+ *   returns fault string from a response, if any
+ * INPUTS
+ *   response  XMLRPC_REQUEST. typically of type xmlrpc_request_response.
+ * RESULT
+ *   fault string, else 0.
+ * SEE ALSO
+ *   XMLRPC_GetValueFaultString ()
+ * SOURCE
+ */
+const char* XMLRPC_GetResponseFaultString (XMLRPC_REQUEST response) {
+   return XMLRPC_GetValueFaultString( XMLRPC_RequestGetData(response) );
+}
+
+/*******/
+
+
+/*-******************
+* Utility API funcs *
+********************/
 
 
 /****f* UTILITY/XMLRPC_Free

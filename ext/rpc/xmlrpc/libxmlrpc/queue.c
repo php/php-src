@@ -367,6 +367,7 @@ int Q_PushTail(queue *q, void *d)
 
       return True_;
    }
+   return False_;
 }
 
 

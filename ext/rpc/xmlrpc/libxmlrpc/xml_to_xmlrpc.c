@@ -71,11 +71,30 @@ XMLRPC_VALUE xml_element_to_XMLRPC_REQUEST_worker(XMLRPC_REQUEST request, XMLRPC
       current_val = XMLRPC_CreateValueEmpty();
    }
 
-   if (el->name) {
-      if (!strcmp(el->name, ELEM_DATA) /* should be ELEM_ARRAY, but there is an extra level. weird */
-          || ((!strcmp(el->name, ELEM_PARAMS)) && 
-              (XMLRPC_RequestGetRequestType(request) == xmlrpc_request_call))    /* this "PARAMS" concept is silly.  dave?! */
-          || !strcmp(el->name, ELEM_FAULT)) {  /* so is this "FAULT" nonsense. */
+	if (el->name) {
+
+      /* first, deal with the crazy/stupid fault format */
+      if (!strcmp(el->name, ELEM_FAULT)) {
+			xml_element* fault_value = (xml_element*)Q_Head(&el->children);
+			XMLRPC_SetIsVector(current_val, xmlrpc_vector_struct);
+
+         if(fault_value) {
+            xml_element* fault_struct = (xml_element*)Q_Head(&fault_value->children);
+            if(fault_struct) {
+               xml_element* iter = (xml_element*)Q_Head(&fault_struct->children);
+
+               while (iter) {
+                  XMLRPC_VALUE xNextVal = XMLRPC_CreateValueEmpty();
+                  xml_element_to_XMLRPC_REQUEST_worker(request, current_val, xNextVal, iter);
+                  XMLRPC_AddValueToVector(current_val, xNextVal);
+                  iter = (xml_element*)Q_Next(&fault_struct->children);
+               }
+            }
+         }
+      }
+		else if (!strcmp(el->name, ELEM_DATA)	/* should be ELEM_ARRAY, but there is an extra level. weird */
+			 || (!strcmp(el->name, ELEM_PARAMS) && 
+				  (XMLRPC_RequestGetRequestType(request) == xmlrpc_request_call)) ) {		/* this "PARAMS" concept is silly.  dave?! */
          xml_element* iter = (xml_element*)Q_Head(&el->children);
          XMLRPC_SetIsVector(current_val, xmlrpc_vector_array);
 

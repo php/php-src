@@ -80,6 +80,7 @@ PHP_FUNCTION(xmlrpc_decode_request);
 PHP_FUNCTION(xmlrpc_encode_request);
 PHP_FUNCTION(xmlrpc_get_type);
 PHP_FUNCTION(xmlrpc_set_type);
+PHP_FUNCTION(xmlrpc_is_fault);
 PHP_FUNCTION(xmlrpc_server_create);
 PHP_FUNCTION(xmlrpc_server_destroy);
 PHP_FUNCTION(xmlrpc_server_register_method);
