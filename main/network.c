@@ -113,6 +113,9 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 				*(struct sockaddr_in *)*sap =
 					*((struct sockaddr_in *)sai->ai_addr);
                         } break;
+			default: 
+				*sap = NULL;
+				break;
                         }
 			sap++;
                 } while ((sai = sai->ai_next) != NULL);
