@@ -11,6 +11,11 @@ $sep = DIRECTORY_SEPARATOR;
 /*******************
         mkDir
 ********************/
+// Single directory creation
+System::mkDir('singledir');
+if( !is_dir('singledir') ){
+    print "System::mkDir('singledir'); failed\n";
+}
 
 // Multiple directory creation
 System::mkDir('dir1 dir2 dir3');
