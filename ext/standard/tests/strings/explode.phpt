@@ -19,6 +19,14 @@ var_dump(@explode("somestring", "otherstring"));
 var_dump(@explode("a", "aaaaaa"));
 var_dump(@explode("==", str_repeat("-=".ord(0)."=-", 10)));
 var_dump(@explode("=", str_repeat("-=".ord(0)."=-", 10)));
+//////////////////////////////////////
+var_dump(explode(":","a lazy dog:jumps:over:",-1));
+var_dump(explode(":","a lazy dog:jumps:over", -1));
+var_dump(explode(":","a lazy dog:jumps:over", -2));
+var_dump(explode(":","a lazy dog:jumps:over:",-4));
+var_dump(explode(":","a lazy dog:jumps:over:",-40000000000000));
+var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-1));
+var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-2));
 ?>
 --EXPECTF--
 26d4e18734cb2582df5055e2175223df
@@ -111,4 +119,36 @@ array(21) {
   string(2) "48"
   [20]=>
   string(1) "-"
+}
+array(3) {
+  [0]=>
+  string(10) "a lazy dog"
+  [1]=>
+  string(5) "jumps"
+  [2]=>
+  string(4) "over"
+}
+array(2) {
+  [0]=>
+  string(10) "a lazy dog"
+  [1]=>
+  string(5) "jumps"
+}
+array(1) {
+  [0]=>
+  string(10) "a lazy dog"
+}
+array(0) {
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  string(10) "a lazy dog"
+  [1]=>
+  string(11) "jumps::over"
+}
+array(1) {
+  [0]=>
+  string(10) "a lazy dog"
 }
