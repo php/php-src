@@ -76,7 +76,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 
 
 /* {{{ proto int shm_attach(int key [, int memsize [, int perm]])
-   Return an id for the shared memory with the given key */
+   Creates or open a shared memory segment */
 PHP_FUNCTION(shm_attach)
 {
 	pval **arg_key,**arg_size,**arg_flag;
@@ -151,7 +151,7 @@ PHP_FUNCTION(shm_attach)
 
 
 /* {{{ proto int shm_detach(int shm_identifier)
-   Releases the shared memory attachment with the given id */
+   Disconnects from shared memory segment */
 PHP_FUNCTION(shm_detach)
 {
 	pval **arg_id;
@@ -170,8 +170,8 @@ PHP_FUNCTION(shm_detach)
 	RETURN_TRUE;
 }
 /* }}} */
-/* {{{ proto int shm_remove(int key)
-   Removes the shared memory with the given key */
+/* {{{ proto int shm_remove(int shm_identifier)
+   Removes shared memory from Unix systems */
 PHP_FUNCTION(shm_remove)
 {
 	pval **arg_key;
@@ -202,7 +202,7 @@ PHP_FUNCTION(shm_remove)
 
 
 /* {{{ proto int shm_put_var(int shm_identifier, int variable_key, mixed_variable)
-   Insert a variable into shared memory */
+   Inserts or updates a variable in shared memory */
 PHP_FUNCTION(shm_put_var)
 {
 	pval **arg_id, **arg_key, **arg_var;
@@ -249,7 +249,7 @@ PHP_FUNCTION(shm_put_var)
 
 
 /* {{{ proto mixed shm_get_var(int id, int variable_key)
-   Returns a variable into shared memory */
+   Returns a variable from shared memory */
 PHP_FUNCTION(shm_get_var)
 {
 	pval **arg_id, **arg_key;
