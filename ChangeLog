@@ -1,3 +1,52 @@
+2004-02-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/pcre/php_pcre.c:
+      MFH(r-1.153): POSIX / ISO compliancy.
+
+2004-02-01  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_blobs.c:
+      No explicit inline (fixes Win32 linkage issue)
+
+    * ext/interbase/interbase.h:
+      Whoops line endings
+
+    * ext/interbase/ibase_blobs.c
+      ext/interbase/ibase_events.c
+      ext/interbase/ibase_service.c
+      ext/interbase/interbase.c
+      ext/interbase/interbase.h
+      ext/interbase/php_interbase.h:
+      Remove extension internals from php_interbase.h
+
+    * ext/interbase/config.m4
+      ext/interbase/config.w32:
+      Test for Interbase version 6 API in 'configure'
+
+    * ext/interbase/config.m4
+      ext/interbase/config.w32
+      ext/interbase/ibase_blobs.c
+      ext/interbase/ibase_events.c
+      ext/interbase/ibase_service.c
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Added backup/restore functions
+      Split interbase.c into several files
+
+2004-02-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/pcre/php_pcre.c:
+      ZTS fix.
+
+2004-02-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/pcre/tests/bug27103.phpt:
+      - Forgot to add test case.
+
+    * ext/pcre/php_pcre.h:
+      - Binary compatibility stuff, for safety.
+
 2004-01-31  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/PEAR/Command/Package.php:
