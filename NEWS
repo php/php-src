@@ -12,6 +12,9 @@ PHP 4                                                                      NEWS
 22 Apr 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
 - Note: Apache2 support is EXPERIMENTAL.
+- PostgreSQL functions are renamed, but all old function names are available.
+  Old function names will be available long enough. User can safely use old 
+  function names. (Yasuo)
 - Moved ext/mailparse to PECL. See http://thebrainroom.com/opensource/php/
   for more information and to download the extension. (Wez/Jim)
 - Fixed pg_last_notice() crash. (Yasuo)
@@ -37,7 +40,6 @@ PHP 4                                                                      NEWS
     ?>
 - Fixed segfault in ibase_close() if user does not free the resultset.
   Bugs #15419, #15992. (daniela)
-- Fixed pg_last_notice() crash. (Yasuo)
 - Added optional 3rd parameter "int encoding_mode" to gzencode() and fixed 
   parameters to conform documentation. (Stefan)
 - Changed read_exif_data() to be an alias of exif_read_data(). (Marcus)
