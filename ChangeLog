@@ -1,3 +1,20 @@
+2001-04-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/file.c: ws pollution removed.
+
+2001-04-07  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/yp/yp.c:
+    Fix compilation (strict compilers require constant initializers).
+
+2001-04-07  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * ext/standard/basic_functions.c: fix proto
+
+2001-04-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/fdf.c: fixed protos
+
 2001-04-06  Jani Taskinen  <sniper@iki.fi>
 
     * ext/fdf/fdf.c
