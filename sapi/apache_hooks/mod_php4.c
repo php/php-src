@@ -874,7 +874,7 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 	php_per_dir_config *a = (php_per_dir_config *) addv;
 	php_per_dir_config *b = (php_per_dir_config *) basev;
 	/* This function *must* return addv, and not modify basev */
-	zend_hash_merge_ex((HashTable *) a->ini_settings, (HashTable *) b->ini_settings, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (zend_bool (*)(void *, void *)) should_overwrite_per_dir_entry);
+	zend_hash_merge_ex((HashTable *) a->ini_settings, (HashTable *) b->ini_settings, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
 	a->headers_handlers = (a->headers_handlers.top)?a->headers_handlers:b->headers_handlers;
 	a->auth_handlers = (a->auth_handlers.top)?a->auth_handlers:b->auth_handlers;
 	a->access_handlers = (a->access_handlers.top)?a->access_handlers:b->access_handlers;
