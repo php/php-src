@@ -1,3 +1,207 @@
+2003-02-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/rpc/com/com_wrapper.c:
+      fix rpc_error call
+
+2003-02-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c
+      ext/standard/file.h:
+      Merged the flags for the file() function into a single flag.
+
+2003-02-10  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/handler.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h
+      ext/rpc/rpc_proxy.c
+      ext/rpc/com/com.c
+      ext/rpc/com/com_wrapper.c
+      ext/rpc/com/conversion.c
+      ext/rpc/com/variant.c
+      ext/rpc/com/variant.h:
+      a bunch of fixes
+
+    * ext/rpc/skeleton/skeleton.c:
+      s/com/skeleton/ is not always a good idea
+
+2003-02-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/rpc/com/com.c:
+      byref really means that we want the zval...
+
+2003-02-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/SAPI.c:
+      Fixed possible snprintf problem
+
+    * (PHP_4_3)
+      main/SAPI.c:
+      MFH: fixed possible buffer overflow in 64bit systems
+
+    * main/SAPI.c:
+      Fixed possible buffer overflow in 64bit systems
+
+    * NEWS
+      NEWS:
+      dot dot dot..
+
+    * NEWS:
+      MFB: Fixed typo
+
+    * (PHP_4_3)
+      NEWS:
+      Fixed typo
+
+2003-02-10  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug 22141
+
+2003-02-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/SAPI.c:
+      Jani happification
+
+    * NEWS:
+      New function
+
+2003-02-10  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      Partial MFH.  Deprecated BM algo for str_replace can hang execution.  See
+      Bug#22141
+
+2003-02-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/apache2filter/sapi_apache2.c:
+      Removed unnecessary code
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      main/SAPI.c:
+      Fixed zlib.output_compression so it can work even if zlib extension is
+      built as shared
+
+2003-02-10  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * Makefile.global:
+      MFB: disable output buffering
+
+    * (PHP_4_3)
+      Makefile.global:
+      Make sure we're not buffering stuff
+
+2003-02-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/rpc/com/com.c:
+      Implement com_describe
+
+2003-02-10  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      acinclude.m4
+      config.guess
+      config.sub
+      configure.in
+      ltmain.sh:
+      - MFH: libtool upgrade to 1.4.3
+
+    * acinclude.m4
+      configure.in
+      ltmain.sh:
+      - Updated libtool to 1.4.3 which has test for the sed problem..
+
+2003-02-10  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/pgsql/pgsql.c:
+      Correct the spelling of 'supported'.
+
+2003-02-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php:
+      - update PEAR::isError phpdoc
+
+    * pear/PEAR.php:
+      - PEAR::isError accepts second parameter that will be matched against
+        the error code.  PEAR::isError($obj, FOO) will return true if $obj
+        is an error object, and $obj->getCode() returns FOO.
+
+    * pear/install-pear.txt:
+      - the "a" in "pear" is "application" now
+
+2003-02-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/rpc/com/com_wrapper.c:
+      Error reporting clean up
+
+    * ext/rpc/rpc.c:
+      Newly created objects should use a separate function_table from the global
+      class entry table.
+      For objects instantiated via new, make sure that intern->function_table
+      uses the newly created table when the class is registered.
+      For generic per-object hashing, copy the ce->function_table into
+      intern->function_table.
+
+    * ext/rpc/com/com.c
+      ext/rpc/com/com_wrapper.c:
+      Error reporting leaks and cleanup
+
+2003-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * tests/lang/bug21961.phpt:
+      Fix the test
+
+2003-02-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/openssl.c:
+      Add additional optional parameter to openssl_pkcs7_encrypt to specify the
+      cipher.  The cipher can be one of the constants listed below.
+      
+      Based on a patch from:
+      stefan at cuba dot ionum dot ch
+      
+       	OPENSSL_CIPHER_RC2_40,   (the default)
+       	OPENSSL_CIPHER_RC2_128,
+       	OPENSSL_CIPHER_RC2_64,
+       	OPENSSL_CIPHER_DES,
+       	OPENSSL_CIPHER_3DES,
+      
+      proto bool openssl_pkcs7_encrypt(string infile, string outfile,
+         mixed recipcerts, array headers [, long flags [, long cipher]])
+
+2003-02-10  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * (PHP_4_3)
+      NEWS:
+      18 times the speed of light
+
+2003-02-10  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/fdf/fdf.c:
+      proto fixes
+
+2003-02-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/notes/php_notes.c:
+      some win32 fixes by Kai
+
+2003-02-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/installer/gen-nsis.php
+      win32/installer/setini.php:
+      Fix php.ini customization.
+      Apparently, it seems that running the php script with output captured to
+      the log prevented it from working correctly.
+      
+      Also, deletes the php.ini when uninstalled.
+      
+      TODO: The defaults install and activate all extensions.  This is a problem
+      for those extension that require non-bundled .dlls (such as OCI).
+
 2003-02-09  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)

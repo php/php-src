@@ -1,3 +1,50 @@
+2003-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix zend_initialize_class_data()
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_compile.c
+      zend_compile.h:
+      Centralize class initialization
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      - Treat $this->foo inside class X as an implicit 'public $foo' if X::$foo
+        is not explicitly declared
+      - Forbid multiple declaration of the same variable
+
+    * zend_execute.c:
+      whitespace
+
+    * zend_API.c
+      zend_compile.c:
+      Add missing destructors
+
+2003-02-10  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c:
+      update static constants too
+
+2003-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * zend_builtin_functions.c:
+      Fix get_parent_class()
+
+    * zend_object_handlers.c:
+      Restore missing check
+
+    * zend_execute.c
+      zend_execute_API.c:
+      Add ability to reference self:: and parent:: in constant initializers
+      (bug #21849)
+
+    * zend_execute.c:
+      Remove redundant code
+
 2003-02-09  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute.c:
