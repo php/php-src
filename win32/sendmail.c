@@ -18,9 +18,6 @@
  *
  */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"				/*php specific */
 #include <stdio.h>
 #include <stdlib.h>

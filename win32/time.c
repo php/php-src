@@ -13,9 +13,7 @@
 
 
 /* Include stuff ************************************************************ */
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
+
 #include "time.h"
 #include "unistd.h"
 #include "signal.h"

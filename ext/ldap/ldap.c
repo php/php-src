@@ -32,15 +32,6 @@
 
 /* $Id$ */
 #define IS_EXT_MODULE
-#if !PHP_31 && defined(THREAD_SAFE)
-#undef THREAD_SAFE
-#endif
-#ifdef THREAD_SAFE
-#include "tls.h"
-DWORD ldapTLS;
-static int numthreads=0;
-void *ldap_mutex;
-#endif
 
 #include "php.h"
 

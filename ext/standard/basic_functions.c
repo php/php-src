@@ -30,9 +30,7 @@
 
 
 #define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
+
 #include "php.h"
 #include "php_ini.h"
 #include "internal_functions_registry.h"

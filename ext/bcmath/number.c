@@ -55,9 +55,6 @@
 
 *************************************************************************/
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #if 0
 #include "bcdefs.h"
 #include "proto.h"

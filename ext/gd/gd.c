@@ -35,9 +35,7 @@
    Cold Spring Harbor Labs. */
 
 /* Note that there is no code from the gd package in this file */
-#ifdef THREAD_SAFE
-# include "tls.h"
-#endif
+
 #include "php.h"
 #include "ext/standard/head.h"
 #include <math.h>

@@ -50,9 +50,6 @@
  *  Lift a leg, Yunie.  Luv ya forever!!!!
  */
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"				/*php specific */
 #include "syslog.h"
 #include <stdio.h>

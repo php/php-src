@@ -28,9 +28,6 @@
 #endif
 #define IS_EXT_MODULE
 
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
 #include "php.h"
 
 #include <stdio.h>

@@ -30,9 +30,6 @@
 #include "dl/phpdl.h"
 #endif
 
-#if defined(THREAD_SAFE)
-#include "tls.h"
-#endif
 #include <stdlib.h>
 
 #include "php.h"

@@ -27,9 +27,7 @@
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
-#ifdef THREAD_SAFE
-#include "tls.h"
-#endif
+
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/php3_standard.h"
