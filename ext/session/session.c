@@ -835,8 +835,8 @@ static void php_session_start(TSRMLS_D)
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
-			PPID2SID;
-			PS(apply_trans_sid) = 0;
+		    PPID2SID;
+		    PS(apply_trans_sid) = 0;
 			send_cookie = 0;
 		}
 
@@ -891,14 +891,16 @@ static void php_session_start(TSRMLS_D)
 		efree(PS(id));
 		PS(id) = NULL;
 		send_cookie = 1;
-		PS(apply_trans_sid) = 1;
+		if (PS(use_trans_sid))
+			PS(apply_trans_sid) = 1;
 	}
 	
 	if (!PS(id))
 		PS(id) = _php_create_id(NULL TSRMLS_CC);
 	
 	if (!PS(use_cookies) && send_cookie) {
-		PS(apply_trans_sid) = 1;
+		if (PS(use_trans_sid))
+			PS(apply_trans_sid) = 1;
 		send_cookie = 0;
 	}
 	
