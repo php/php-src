@@ -209,6 +209,10 @@ SOURCE=..\main\php_scandir.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_sprintf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
