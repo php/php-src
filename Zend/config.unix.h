@@ -23,6 +23,7 @@
 #	define DL_HANDLE		void *
 #	define ZEND_EXTENSIONS_SUPPORT 1
 #else
+#	define DL_HANDLE		void *
 #	define ZEND_EXTENSIONS_SUPPORT 0
 #endif
 
