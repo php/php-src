@@ -1,3 +1,8 @@
+2004-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c:
+      - Fix handling of exceptions in dtors
+
 2004-09-05  Zeev Suraski  <zeev@zend.com>
 
     * zend.c
