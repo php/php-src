@@ -406,8 +406,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	/* set a DBLOGIN record */	
 	if ((sybase.login=dblogin())==NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Unable to allocate login record");
-		efree(hashed_details);
-		RETURN_FALSE;
+		goto err;
 	}
 	
 	if (user) {
@@ -439,29 +438,20 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 
 			if (php_sybase_module.max_links!=-1 && php_sybase_module.num_links>=php_sybase_module.max_links) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Too many open links (%d)",php_sybase_module.num_links);
-				efree(hashed_details);
-				dbloginfree(sybase.login);
-				RETURN_FALSE;
+				goto err_login;
 			}
 			if (php_sybase_module.max_persistent!=-1 && php_sybase_module.num_persistent>=php_sybase_module.max_persistent) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Too many open persistent links (%d)",php_sybase_module.num_persistent);
-				efree(hashed_details);
-				dbloginfree(sybase.login);
-				RETURN_FALSE;
+				goto err_login;
 			}
 			/* create the link */
 			if ((sybase.link=PHP_SYBASE_DBOPEN(sybase.login,host))==FAIL) {
 				/*php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
-				efree(hashed_details);
-				dbloginfree(sybase.login);
-				RETURN_FALSE;
+				goto err_login;
 			}
 
 			if (dbsetopt(sybase.link,DBBUFFER,"2",-1)==FAIL) {
-				efree(hashed_details);
-				dbloginfree(sybase.login);
-				dbclose(sybase.link);
-				RETURN_FALSE;
+				goto err_link;
 			}
 
 			/* hash it up */
@@ -471,18 +461,14 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			new_le.ptr = sybase_ptr;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
 				free(sybase_ptr);
-				efree(hashed_details);
-				dbloginfree(sybase.login);
-				RETURN_FALSE;
+				goto err_link;
 			}
 			php_sybase_module.num_persistent++;
 			php_sybase_module.num_links++;
 		} else {  /* we do */
 			if (Z_TYPE_P(le) != php_sybase_module.le_plink) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Hashed persistent link is not a Sybase link!");
-				efree(hashed_details);
-				dbloginfree(sybase.login);
-				RETURN_FALSE;
+				goto err_login;
 			}
 			
 			sybase_ptr = (sybase_link *) le->ptr;
@@ -491,15 +477,11 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				if ((sybase_ptr->link=PHP_SYBASE_DBOPEN(sybase_ptr->login,host))==FAIL) {
 					/*php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Link to server lost, unable to reconnect");*/
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
-					efree(hashed_details);
-					dbloginfree(sybase.login);
-					RETURN_FALSE;
+					goto err_login;
 				}
 				if (dbsetopt(sybase_ptr->link,DBBUFFER,"2",-1)==FAIL) {
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
-					efree(hashed_details);
-					dbloginfree(sybase.login);
-					RETURN_FALSE;
+					goto err_login;
 				}
 			}
 		}
@@ -518,9 +500,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			void *ptr;
 
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
-				efree(hashed_details);
-				dbloginfree(sybase.login);
-				RETURN_FALSE;
+				goto err_login;
 			}
 			link = (int) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
@@ -536,23 +516,16 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		}
 		if (php_sybase_module.max_links!=-1 && php_sybase_module.num_links>=php_sybase_module.max_links) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Too many open links (%d)",php_sybase_module.num_links);
-			efree(hashed_details);
-			dbloginfree(sybase.login);
-			RETURN_FALSE;
+			goto err_login;
 		}
 		
 		if ((sybase.link=PHP_SYBASE_DBOPEN(sybase.login,host))==NULL) {
 			/*php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
-			efree(hashed_details);
-			dbloginfree(sybase.login);
-			RETURN_FALSE;
+			goto err_login;
 		}
 
 		if (dbsetopt(sybase.link,DBBUFFER,"2",-1)==FAIL) {
-			efree(hashed_details);
-			dbloginfree(sybase.login);
-			dbclose(sybase.link);
-			RETURN_FALSE;
+			goto err_link;
 		}
 		
 		/* add it to the list */
@@ -565,15 +538,21 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
-			efree(hashed_details);
-			dbloginfree(sybase.login);
-			dbclose(sybase.link);
-			RETURN_FALSE;
+			goto err_link;
 		}
 		php_sybase_module.num_links++;
 	}
 	efree(hashed_details);
 	php_sybase_module.default_link=Z_LVAL_P(return_value);
+	return;
+
+err_link:
+	dbclose(sybase.link);
+err_login:
+	dbloginfree(sybase.login);
+err:
+	efree(hashed_details);
+	RETURN_FALSE;
 }
 
 
