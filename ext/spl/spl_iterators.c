@@ -1240,7 +1240,7 @@ SPL_METHOD(CachingIterator, hasNext)
 } /* }}} */
 
 /* {{{ proto string CachingIterator::__toString()
-   Retrun the string representation of the current element */
+   Return the string representation of the current element */
 SPL_METHOD(CachingIterator, __toString)
 {
 	spl_dual_it_object   *intern;
@@ -1295,7 +1295,7 @@ SPL_METHOD(CachingRecursiveIterator, hasChildren)
 } /* }}} */
 
 /* {{{ proto CachingRecursiveIterator CachingRecursiveIterator::getChildren()
-  Return the inenr iteraor's children as a CachingRecursiveIterator */
+  Return the inner iterator's children as a CachingRecursiveIterator */
 SPL_METHOD(CachingRecursiveIterator, getChildren)
 {
 	spl_dual_it_object   *intern;
