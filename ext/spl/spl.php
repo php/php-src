@@ -358,8 +358,10 @@ class LimitIetrator implements Iterator
 	
 	/** Seek to a specific position if available or throw an exception.
 	 * If the inner iterator is an instance of SeekableIterator its seek()
-	 * method will be used. Otherwise the iterator will me manually forwared
-	 * and rewinded first if necessary.
+	 * method will be used. Otherwise the iterator will be rewinded if
+	 * necessary and then manually forwared element by element.
+	 *
+	 * \param $position index to seek to.
 	 */
 	function seek($position);
 	
