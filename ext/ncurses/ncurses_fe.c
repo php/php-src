@@ -162,6 +162,31 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_wgetch, NULL)
   PHP_FE(ncurses_keypad, NULL)
   PHP_FE(ncurses_wmove, NULL)
+
+	PHP_FE(ncurses_newpad,		NULL)
+	PHP_FE(ncurses_prefresh,	NULL)
+	PHP_FE(ncurses_pnoutrefresh,	NULL)
+	PHP_FE(ncurses_wstandout,		NULL)
+	PHP_FE(ncurses_wstandend,		NULL)
+	PHP_FE(ncurses_wattrset,		NULL)
+	PHP_FE(ncurses_wattron,		NULL)
+	PHP_FE(ncurses_wattroff,		NULL)
+	
+#if HAVE_NCURSES_PANEL
+	PHP_FE(ncurses_update_panels,	NULL)
+	PHP_FE(ncurses_panel_window,	NULL)
+	PHP_FE(ncurses_panel_below,	NULL)
+	PHP_FE(ncurses_panel_above,	NULL)
+	PHP_FE(ncurses_replace_panel,	NULL)
+	PHP_FE(ncurses_move_panel,	NULL)
+	PHP_FE(ncurses_bottom_panel,	NULL)
+	PHP_FE(ncurses_top_panel,	NULL)
+	PHP_FE(ncurses_show_panel,	NULL)
+	PHP_FE(ncurses_hide_panel,	NULL)
+	PHP_FE(ncurses_del_panel,	NULL)
+	PHP_FE(ncurses_new_panel,	NULL)
+#endif
+  
   {NULL, NULL, NULL}  /* Must be the last line in ncurses_functions[] */
 };
 

@@ -21,7 +21,13 @@
 
 #include <curses.h>
 
-extern int le_ncurses;
+extern int le_ncurses_windows;
+
+#if HAVE_NCURSES_PANEL
+# include <panel.h>
+extern int le_ncurses_panels;
+#endif
+
 
 extern zend_module_entry ncurses_module_entry;
 #define phpext_ncurses_ptr &ncurses_module_entry
