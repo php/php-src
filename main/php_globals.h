@@ -73,8 +73,6 @@ struct _php_core_globals {
 	char *upload_tmp_dir;
 	long upload_max_filesize;
 	
-	char *current_dir;
-
 	char *auto_prepend_file;
 	char *auto_append_file;
 
