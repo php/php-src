@@ -390,14 +390,16 @@ PHPAPI int php_printf(const char *format, ...)
 /* {{{ php_verror */
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC)
 {
-	char *buffer = NULL, *docref_buf = NULL, *function, *p;
+	char *buffer = NULL, *docref_buf = NULL, *ref = NULL, *target = NULL;
+	char *docref_target = "", *docref_root = "";
+	char *function, *p;
 	
 	vspprintf(&buffer, 0, format, args);
 	if (buffer) {
 		if (!docref) {
 			function = get_active_function_name(TSRMLS_C);
 			if (function) {
-				spprintf(&docref_buf, 0, "function.%s%s", function, PG(docref_ext));
+				spprintf(&docref_buf, 0, "function.%s", function);
 				if (docref_buf) {
 					while((p=strchr(docref_buf, '_'))!=NULL) *p = '-';
 					docref = docref_buf;
@@ -405,11 +407,39 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			}
 		}
 		if (docref) {
-			if (PG(html_errors) && PG(docref_ext)) {
-				php_error(type, "%s(%s) [<a href='%s%s'>%s</a>]: %s", get_active_function_name(TSRMLS_C), params, PG(docref_root), docref, docref, buffer);
-			} else {
-				php_error(type, "%s(%s) [%s%s]: %s", get_active_function_name(TSRMLS_C), params, PG(docref_root), docref, buffer);
+			if (strncmp(docref, "http://", 7)) {
+				docref_root = PG(docref_root);
+				/* now check copy of extension */
+				ref = estrdup(docref);
+				if (ref) {
+					if (docref_buf) {
+						efree(docref_buf);
+					}
+					docref_buf = ref;
+					p = strrchr(ref, '#');
+					if (p) {
+						target = estrdup(p);
+						if (target) {
+							docref_target = target;
+							*p = '\0';
+						}
+					}
+					if ((!p || target) && PG(docref_ext) && strlen(PG(docref_ext))) {
+						spprintf(&docref_buf, 0, "%s%s", ref, PG(docref_ext));
+						if (docref_buf) {
+							efree(ref);
+							docref = docref_buf;
+						}
+					}
+				}
 			}
+			if (PG(html_errors)) {
+				php_error(type, "%s(%s) [<a href='%s%s%s'>%s</a>]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref, docref_target, buffer);
+			} else {
+				php_error(type, "%s(%s) [%s%s%s]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, buffer);
+			}
+			if (target)
+				efree(target);
 		} else {                                
 			docref = get_active_function_name(TSRMLS_C);
 			if (!docref)
