@@ -1160,6 +1160,9 @@ PHP_RINIT_FUNCTION(basic)
 	/* Setup default context */
 	FG(default_context) = NULL;
 
+	/* Default to global wrappers only */
+	FG(stream_wrappers) = NULL;
+
 	return SUCCESS;
 }
 
@@ -1195,6 +1198,12 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		zend_llist_destroy(BG(user_tick_functions));
 		efree(BG(user_tick_functions));
 		BG(user_tick_functions) = NULL;
+	}
+
+	if (FG(stream_wrappers)) {
+		zend_hash_destroy(FG(stream_wrappers));
+		efree(FG(stream_wrappers));
+		FG(stream_wrappers) = NULL;
 	}
 
 	PHP_RSHUTDOWN(user_filters)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
