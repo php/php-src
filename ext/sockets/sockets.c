@@ -1130,6 +1130,7 @@ PHP_FUNCTION(bind)
 	if (sock_type->sa_family == AF_UNIX) {
 		struct sockaddr_un *sa = (struct sockaddr_un *) sock_type;
 		memset(sa, 0, sizeof(sa_storage)); /* This is safe -> sock_type = &sa_storage -> sa = sock_type */
+		sa->sun_family = AF_UNIX;
 		snprintf(sa->sun_path, 108, "%s", Z_STRVAL_PP(arg1));
 		ret = bind(Z_LVAL_PP(arg0), (struct sockaddr *) sa, SUN_LEN(sa));
 	} else if (sock_type->sa_family == AF_INET) {
