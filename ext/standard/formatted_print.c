@@ -25,6 +25,10 @@
 #include "zend_execute.h"
 #include <stdio.h>
 
+#ifdef HAVE_LOCALE_H
+#include <locale.h>
+#endif
+
 #define ALIGN_LEFT 0
 #define ALIGN_RIGHT 1
 #define ADJ_WIDTH 1
@@ -274,6 +278,14 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	char *cvt;
 	register int i = 0, j = 0;
 	int sign, decpt;
+	char decimal_point = '.';
+#ifdef HAVE_LOCALECONV
+	struct lconv l;
+
+	localeconv_r(&l);
+
+	decimal_point = l.decimal_point[0];
+#endif
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
 				  *buffer, pos, size, number, width, padding, alignment, fmt));
@@ -308,7 +320,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			numbuf[i++] = '0';
 			if (precision > 0) {
 				int k = precision;
-				numbuf[i++] = '.';
+				numbuf[i++] = decimal_point;
 				while ((decpt++ < 0) && k--) {
 					numbuf[i++] = '0';
 				}
@@ -317,12 +329,12 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			while (decpt-- > 0)
 				numbuf[i++] = cvt[j++];
 			if (precision > 0)
-				numbuf[i++] = '.';
+				numbuf[i++] = decimal_point;
 		}
 	} else {
 		numbuf[i++] = cvt[j++];
 		if (precision > 0)
-			numbuf[i++] = '.';
+			numbuf[i++] = decimal_point;
 	}
 
 	while (cvt[j]) {
