@@ -29,14 +29,10 @@
 extern zend_module_entry ibase_module_entry;
 #define phpext_interbase_ptr &ibase_module_entry
 
+#ifndef ISC_INT64_FORMAT
 #ifdef PHP_WIN32
-#define PHP_IBASE_API __declspec(dllexport)
-#ifndef ISC_INT64_FORMAT
 #define ISC_INT64_FORMAT "I64"
-#endif
 #else
-#define PHP_IBASE_API
-#ifndef ISC_INT64_FORMAT
 #define ISC_INT64_FORMAT "ll"
 #endif
 #endif
@@ -162,8 +158,6 @@ typedef struct _php_ibase_varchar {
 	short var_len;
 	char var_str[1];
 } IBASE_VCHAR;
-
-/* extern ibase_module php_ibase_module; */
 
 enum php_interbase_option {
 	PHP_IBASE_DEFAULT 			= 0,
