@@ -849,11 +849,10 @@ PHP_FUNCTION(msql_result)
 			return_value->value.str.len = (sql_row[field_offset]?strlen(sql_row[field_offset]):0);
 			return_value->value.str.val = (char *) safe_estrndup(sql_row[field_offset],return_value->value.str.len);
 		}
+		return_value->type = IS_STRING;
 	} else {
 		ZVAL_FALSE(return_value);
 	}
-	
-	return_value->type = IS_STRING;
 }
 /* }}} */
 
