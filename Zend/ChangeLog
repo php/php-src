@@ -1,3 +1,8 @@
+2003-09-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_compile.c:
+      Remove redundant '\n'
+
 2003-09-26  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * zend_alloc.c:
