@@ -692,8 +692,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	if (cgi && !file_handle.handle.fp) {
-		file_handle.handle.fp = VCWD_FOPEN(argv0, "rb");
-		if(!file_handle.handle.fp) {
+		if(!argv0 || !(file_handle.handle.fp = VCWD_FOPEN(argv0, "rb"))) {
 			PUTS("No input file specified.\n");
 			php_request_shutdown((void *) 0);
 			php_module_shutdown();
