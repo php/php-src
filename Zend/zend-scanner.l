@@ -990,9 +990,15 @@ TLS_VARS;
 }
 
 
-<IN_SCRIPTING>"<<"{LABEL}("\r")?"\n" {
-	CG(heredoc_len) = yyleng-2-1-(yytext[yyleng-2]=='\r'?1:0);
-	CG(heredoc) = estrndup(yytext+2, CG(heredoc_len));
+<IN_SCRIPTING>"<<<"{TABS_AND_SPACES}{LABEL}("\r")?"\n" {
+	char *s;
+	CG(heredoc_len) = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
+	s = yytext+3;
+	while ((*s == ' ') || (*s == '\t')) {
+		s++;
+		CG(heredoc_len)--;
+	}
+	CG(heredoc) = estrndup(s, CG(heredoc_len));
 	BEGIN(HEREDOC);
 	return ZEND_HEREDOC;
 }
