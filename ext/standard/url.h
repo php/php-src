@@ -20,7 +20,7 @@
 #ifndef URL_H
 #define URL_H
 
-typedef struct url {
+typedef struct php_url {
 	char *scheme;
 	char *user;
 	char *pass;
@@ -29,10 +29,10 @@ typedef struct url {
 	char *path;
 	char *query;
 	char *fragment;
-} url;
+} php_url;
 
-void free_url(url *);
-extern url *url_parse(char *);
+void free_url(php_url *);
+extern php_url *url_parse(char *);
 extern int php_url_decode(char *, int); /* return value: length of decoded string */
 extern char *php_url_encode(char *, int);
 extern int php_raw_url_decode(char *, int); /* return value: length of decoded string */
