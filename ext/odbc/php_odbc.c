@@ -2925,7 +2925,9 @@ PHP_FUNCTION(odbc_columns)
 	/* 
 	 * Needed to make MS Access happy
 	 */
-	if (table && strlen(table) && schema && !strlen(schema)) schema = NULL;
+	if (table && strlen(table) && schema && !strlen(schema)) {
+		schema = NULL;
+	}
 
 	rc = SQLColumns(result->stmt, 
 			cat, cat_len,
