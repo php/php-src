@@ -215,10 +215,6 @@ SOURCE=.\FlexLexer.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_modules.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend.h
 # End Source File
 # Begin Source File
@@ -299,6 +295,10 @@ SOURCE=.\zend_llist.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_modules.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_operators.h
 # End Source File
 # Begin Source File
@@ -330,8 +330,7 @@ InputDir=.
 InputPath=.\zend_ini_parser.y
 
 BuildCmds= \
-	bison --output=zend_ini_parser.c -v -d -p ini_ zend_ini_parser.y \
-	
+	bison --output=zend_ini_parser.c -v -d -p ini_ zend_ini_parser.y
 
 "$(InputDir)\zend_ini_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -356,8 +355,7 @@ InputDir=.
 InputPath=".\zend_language_parser.y"
 
 BuildCmds= \
-	bison --output=zend_language_parser.c -v -d -p zend zend_language_parser.y \
-	
+	bison --output=zend_language_parser.c -v -d -p zend zend_language_parser.y
 
 "$(InputDir)\zend_language_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -373,8 +371,7 @@ InputDir=.
 InputPath=".\zend_language_parser.y"
 
 BuildCmds= \
-	bison --output=zend_language_parser.c -v -d -p zend zend_language_parser.y \
-	
+	bison --output=zend_language_parser.c -v -d -p zend zend_language_parser.y
 
 "$(InputDir)\zend_language_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -390,8 +387,7 @@ InputDir=.
 InputPath=".\zend_language_parser.y"
 
 BuildCmds= \
-	bison --output=zend_language_parser.c -v -d -p zend zend_language_parser.y \
-	
+	bison --output=zend_language_parser.c -v -d -p zend zend_language_parser.y
 
 "$(InputDir)\zend_language_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)

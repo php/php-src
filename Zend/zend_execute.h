@@ -49,7 +49,7 @@ typedef union _temp_variable {
 
 ZEND_API extern void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
 
-void init_executor(CLS_D TSRMLS_DC);
+void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
@@ -62,7 +62,7 @@ static inline void safe_free_zval_ptr(zval *p)
 	}
 }
 
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC TSRMLS_DC);
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 static inline int i_zend_is_true(zval *op)
 {
 	int result;
@@ -127,7 +127,7 @@ static inline int zend_ptr_stack_get_arg(int requested_arg, void **data TSRMLS_D
 	return SUCCESS;
 }
 
-void execute_new_code(CLS_D);
+void execute_new_code(TSRMLS_D);
 
 
 /* services */

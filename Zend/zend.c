@@ -250,7 +250,7 @@ static void register_standard_class(void)
 }
 
 
-static void zend_set_default_compile_time_values(CLS_D)
+static void zend_set_default_compile_time_values(TSRMLS_D)
 {
 	/* default compile-time values */
 	CG(asp_tags) = 0;
@@ -276,7 +276,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
 	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 
-	zend_set_default_compile_time_values(CLS_C);
+	zend_set_default_compile_time_values(TSRMLS_C);
 
 	CG(interactive) = 0;
 }
@@ -316,9 +316,9 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS
 }
 
 
-static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
+static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 {
-	start_memory_manager(ALS_C);
+	start_memory_manager(TSRMLS_C);
 }
 
 #endif
@@ -348,7 +348,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, NULL);
 #else
-	start_memory_manager(ALS_C);
+	start_memory_manager(TSRMLS_C);
 #endif
 
 #ifdef __FreeBSD__
@@ -406,7 +406,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
 #else
 	zend_startup_constants();
-	zend_set_default_compile_time_values(CLS_C);
+	zend_set_default_compile_time_values(TSRMLS_C);
 	EG(user_error_handler) = NULL;
 #endif
 	zend_register_standard_constants(TSRMLS_C);
@@ -468,7 +468,6 @@ void zenderror(char *error)
 BEGIN_EXTERN_C()
 ZEND_API void _zend_bailout(char *filename, uint lineno)
 {
-	CLS_FETCH();
 	TSRMLS_FETCH();
 
 	if (!EG(bailout_set)) {
@@ -510,12 +509,12 @@ ZEND_API char *get_zend_version()
 }
 
 
-void zend_activate(CLS_D TSRMLS_DC)
+void zend_activate(TSRMLS_D)
 {
 	EG(bailout_set) = 0;
-	init_compiler(CLS_C TSRMLS_CC);
-	init_executor(CLS_C TSRMLS_CC);
-	startup_scanner(CLS_C);
+	init_compiler(TSRMLS_C);
+	init_executor(TSRMLS_C);
+	startup_scanner(TSRMLS_C);
 }
 
 
@@ -534,21 +533,21 @@ void zend_deactivate_modules()
 	} zend_end_try();
 }
 
-void zend_deactivate(CLS_D TSRMLS_DC)
+void zend_deactivate(TSRMLS_D)
 {
 	/* we're no longer executing anything */
 	EG(opline_ptr) = NULL; 
 	EG(active_symbol_table) = NULL;
 
 	zend_try {
-		shutdown_scanner(CLS_C);
+		shutdown_scanner(TSRMLS_C);
 	} zend_end_try();
 
 	/* shutdown_executor() takes care of its own bailout handling */
 	shutdown_executor(TSRMLS_C);
 
 	zend_try {
-		shutdown_compiler(CLS_C);
+		shutdown_compiler(TSRMLS_C);
 	} zend_end_try();
 
 	zend_try {
@@ -589,7 +588,6 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	uint error_lineno;
 	zval *orig_user_error_handler;
 	TSRMLS_FETCH();
-	CLS_FETCH();
 
 	/* Obtain relevant filename and lineno */
 	switch (type) {
@@ -608,8 +606,8 @@ ZEND_API void zend_error(int type, const char *format, ...)
 		case E_USER_WARNING:
 		case E_USER_NOTICE:
 			if (zend_is_compiling()) {
-				error_filename = zend_get_compiled_filename(CLS_C);
-				error_lineno = zend_get_compiled_lineno(CLS_C);
+				error_filename = zend_get_compiled_filename(TSRMLS_C);
+				error_lineno = zend_get_compiled_lineno(TSRMLS_C);
 			} else if (zend_is_executing()) {
 				error_filename = zend_get_executed_filename(TSRMLS_C);
 				error_lineno = zend_get_executed_lineno(TSRMLS_C);
@@ -711,7 +709,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	va_end(args);
 
 	if (type==E_PARSE) {
-		zend_init_compiler_data_structures(CLS_C);
+		zend_init_compiler_data_structures(TSRMLS_C);
 	}
 }
 
@@ -742,7 +740,7 @@ ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ..
 }
 
 
-ZEND_API int zend_execute_scripts(int type CLS_DC TSRMLS_DC, int file_count, ...)
+ZEND_API int zend_execute_scripts(int type TSRMLS_DC, int file_count, ...)
 {
 	va_list files;
 	int i;
@@ -755,8 +753,8 @@ ZEND_API int zend_execute_scripts(int type CLS_DC TSRMLS_DC, int file_count, ...
 		if (!file_handle) {
 			continue;
 		}
-		EG(active_op_array) = zend_compile_file(file_handle, ZEND_INCLUDE CLS_CC);
-		zend_destroy_file_handle(file_handle CLS_CC);
+		EG(active_op_array) = zend_compile_file(file_handle, ZEND_INCLUDE TSRMLS_CC);
+		zend_destroy_file_handle(file_handle TSRMLS_CC);
 		if (EG(active_op_array)) {
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			zval_ptr_dtor(EG(return_value_ptr_ptr));
@@ -783,12 +781,11 @@ ZEND_API char *zend_make_compiled_string_description(char *name)
 	char *cur_filename;
 	int cur_lineno;
 	char *compiled_string_description;
-	CLS_FETCH();
 	TSRMLS_FETCH();
 
 	if (zend_is_compiling()) {
-		cur_filename = zend_get_compiled_filename(CLS_C);
-		cur_lineno = zend_get_compiled_lineno(CLS_C);
+		cur_filename = zend_get_compiled_filename(TSRMLS_C);
+		cur_lineno = zend_get_compiled_lineno(TSRMLS_C);
 	} else if (zend_is_executing()) {
 		cur_filename = zend_get_executed_filename(TSRMLS_C);
 		cur_lineno = zend_get_executed_lineno(TSRMLS_C);

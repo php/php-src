@@ -72,21 +72,21 @@ char *zend_ini_scanner_get_filename()
 
 int zend_ini_scanner_get_lineno()
 {
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	return CG(ini_scanner)->lineno();
 }
 
 char *zend_ini_scanner_get_filename()
 {
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	return CG(ini_scanner)->filename;
 }
 
 int ini_lex(zval *ini_lval)
 {
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	return CG(ini_scanner)->lex_scan(ini_lval);
 }
@@ -110,7 +110,7 @@ int yyFlexLexer::yylex()
 int zend_ini_open_file_for_scanning(zend_file_handle *fh)
 {
 	FILE *fp;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
@@ -152,7 +152,7 @@ void zend_ini_close_file(zend_file_handle *fh)
 			break;
 #ifdef ZTS
 		case ZEND_HANDLE_STDIOSTREAM: {
-				CLS_FETCH();
+				TSRMLS_FETCH();
 				delete CG(ini_scanner);
 			}
 			break;

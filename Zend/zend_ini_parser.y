@@ -123,7 +123,7 @@ static void ini_error(char *str)
 	char *error_buf;
 	int error_buf_len;
 	char *currently_parsed_filename = zend_ini_scanner_get_filename();
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	error_buf_len = 128+strlen(currently_parsed_filename); /* should be more than enough */
 	error_buf = (char *) emalloc(error_buf_len);
@@ -147,7 +147,7 @@ int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_
 {
 	zend_ini_parser_param ini_parser_param;
 	int retval;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;

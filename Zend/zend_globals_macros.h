@@ -27,22 +27,12 @@ typedef struct _zend_alloc_globals zend_alloc_globals;
 
 /* Compiler */
 #ifdef ZTS
-# define CLS_D	zend_compiler_globals *compiler_globals
-# define CLS_DC	, CLS_D
-# define CLS_C	compiler_globals
-# define CLS_CC , CLS_C
-# define CG(v) (((zend_compiler_globals *) compiler_globals)->v)
-# define CLS_FETCH()	zend_compiler_globals *compiler_globals = (zend_compiler_globals *) ts_resource(compiler_globals_id)
+# define CG(v) TSRMG(compiler_globals_id, zend_compiler_globals *, v)
 BEGIN_EXTERN_C()
 int zendparse(void *compiler_globals);
 END_EXTERN_C()
 #else
-# define CLS_D	void
-# define CLS_DC
-# define CLS_C
-# define CLS_CC
 # define CG(v) (compiler_globals.v)
-# define CLS_FETCH()
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
 int zendparse(void);
 #endif
@@ -59,19 +49,9 @@ extern ZEND_API zend_executor_globals executor_globals;
 
 /* Memory Manager */
 #ifdef ZTS
-# define ALS_D	zend_alloc_globals *alloc_globals
-# define ALS_DC	, ALS_D
-# define ALS_C	alloc_globals
-# define ALS_CC , ALS_C
-# define AG(v) (((zend_alloc_globals *) alloc_globals)->v)
-# define ALS_FETCH()	zend_alloc_globals *alloc_globals = (zend_alloc_globals *) ts_resource(alloc_globals_id)
+# define AG(v) TSRMG(alloc_globals_id, zend_alloc_globals *, v)
 #else
-# define ALS_D	void
-# define ALS_DC
-# define ALS_C
-# define ALS_CC
 # define AG(v) (alloc_globals.v)
-# define ALS_FETCH()
 extern ZEND_API zend_alloc_globals alloc_globals;
 #endif
 

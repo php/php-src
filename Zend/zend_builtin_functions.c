@@ -926,7 +926,6 @@ ZEND_FUNCTION(create_function)
 	zval **z_function_args, **z_function_code;
 	int retval;
 	char *eval_name;
-	CLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &z_function_args, &z_function_code)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -945,7 +944,7 @@ ZEND_FUNCTION(create_function)
 	sprintf(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(%s){%s}", Z_STRVAL_PP(z_function_args), Z_STRVAL_PP(z_function_code));
 
 	eval_name = zend_make_compiled_string_description("runtime-created function");
-	retval = zend_eval_string(eval_code, NULL, eval_name CLS_CC TSRMLS_CC);
+	retval = zend_eval_string(eval_code, NULL, eval_name TSRMLS_CC);
 	efree(eval_code);
 	efree(eval_name);
 

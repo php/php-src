@@ -23,10 +23,7 @@
 
 #include <stdio.h>
 
-#ifdef ZTS
 #include "../TSRM/TSRM.h"
-#endif
-
 #include "zend_globals_macros.h"
 
 #define MEM_BLOCK_START_MAGIC	0x7312F8DCL
@@ -117,7 +114,7 @@ ZEND_API int _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit);
 
-ZEND_API void start_memory_manager(ALS_D);
+ZEND_API void start_memory_manager(TSRMLS_D);
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache);
 
 #if ZEND_DEBUG

@@ -2036,7 +2036,7 @@ send_by_ref:
 					int return_value_used;
 					zval *inc_filename = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					zval tmp_inc_filename;
-					CLS_FETCH();
+					TSRMLS_FETCH();
 
 					if (inc_filename->type!=IS_STRING) {
 						tmp_inc_filename = *inc_filename;
@@ -2062,8 +2062,8 @@ send_by_ref:
 
 								if (file_handle.handle.fp) {
 									if (!opened_path || zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
-										new_op_array = zend_compile_file(&file_handle, (opline->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) CLS_CC);
-										zend_destroy_file_handle(&file_handle CLS_CC);
+										new_op_array = zend_compile_file(&file_handle, (opline->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
+										zend_destroy_file_handle(&file_handle TSRMLS_CC);
 										opened_path = NULL; /* zend_destroy_file_handle() already frees it */
 									} else {
 										fclose(file_handle.handle.fp);
@@ -2083,12 +2083,12 @@ send_by_ref:
 							break;
 						case ZEND_INCLUDE:
 						case ZEND_REQUIRE:
-							new_op_array = compile_filename(opline->op2.u.constant.value.lval, inc_filename CLS_CC TSRMLS_CC);
+							new_op_array = compile_filename(opline->op2.u.constant.value.lval, inc_filename TSRMLS_CC);
 							break;
 						case ZEND_EVAL: {
 								char *eval_desc = zend_make_compiled_string_description("eval()'d code");
 
-								new_op_array = compile_string(inc_filename, eval_desc CLS_CC);
+								new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
 								efree(eval_desc);
 							}
 							break;
