@@ -90,6 +90,7 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 #define ADD_VEC(str,l) vec[n].iov_base=str;len += (vec[n].iov_len=l); n++
+#define ADD_VEC_S(str) ADD_VEC((str), sizeof(str)-1)
 #define COMBINE_HEADERS 30
 
 static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
@@ -154,17 +155,20 @@ static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
 
 static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-	char buf[1024];
+	char buf[1024], *p;
 	struct iovec vec[COMBINE_HEADERS];
+	
 	int n = 0;
 	zend_llist_position pos;
 	sapi_header_struct *h;
 	size_t len = 0;
 	
 	if (!SG(sapi_headers).http_status_line) {
-		sprintf(buf, "HTTP/1.1 %d Code\r\n",  /* SAFE */
+		ADD_VEC_S("HTTP/1.1 ");
+		p = smart_str_print_long(buf+sizeof(buf)-1, 
 				SG(sapi_headers).http_response_code);
-		ADD_VEC(buf, strlen(buf));
+		ADD_VEC(p, strlen(p));
+		ADD_VEC_S(" HTTP\r\n");
 	} else {
 		ADD_VEC(SG(sapi_headers).http_status_line, 
 				strlen(SG(sapi_headers).http_status_line));
@@ -239,8 +243,9 @@ static char *sapi_thttpd_read_cookies(TSRMLS_D)
 }
 
 #define BUF_SIZE 512
-#define ADD_STRING(name)										\
+#define ADD_STRING_EX(name,buf)									\
 	php_register_variable(name, buf, track_vars_array TSRMLS_CC)
+#define ADD_STRING(name) ADD_STRING_EX((name), buf)
 
 static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 {
@@ -261,32 +266,21 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 		php_register_variable("SERVER_PROTOCOL", "HTTP/1.0", track_vars_array TSRMLS_CC);
 	}
 
-#ifdef HAVE_GETNAMEINFO
-	switch (TG(hc)->client_addr.sa.sa_family) {
-		case AF_INET: xsa_len = sizeof(struct sockaddr_in); break;
-		case AF_INET6: xsa_len = sizeof(struct sockaddr_in6); break;
-		default: xsa_len = 0;
-	}
+	p = httpd_ntoa(&TG(hc)->client_addr);	
+	
+	ADD_STRING_EX("REMOTE_ADDR", p);
+	ADD_STRING_EX("REMOTE_HOST", p);
 
-	if (getnameinfo(&TG(hc)->client_addr.sa, xsa_len, buf, sizeof(buf), 0, 0, NI_NUMERICHOST) == 0) {
-#else
-	p = inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr);
-		
-	/* string representation of IPs are never larger than 512 bytes */
-	if (p) {
-		memcpy(buf, p, strlen(p) + 1);
-#endif
-		ADD_STRING("REMOTE_ADDR");
-		ADD_STRING("REMOTE_HOST");
-	}
+	ADD_STRING_EX("SERVER_PORT",
+			smart_str_print_long(buf + sizeof(buf) - 1,
+				TG(hc)->hs->port));
 
-	snprintf(buf, BUF_SIZE, "%d", TG(hc)->hs->port);
-	ADD_STRING("SERVER_PORT");
-
-	snprintf(buf, BUF_SIZE, "/%s", TG(hc)->pathinfo);
+	buf[0] = '/';
+	memcpy(buf + 1, TG(hc)->pathinfo, strlen(TG(hc)->pathinfo) + 1);
 	ADD_STRING("PATH_INFO");
 
-	snprintf(buf, BUF_SIZE, "/%s", TG(hc)->origfilename);
+	buf[0] = '/';
+	memcpy(buf + 1, TG(hc)->origfilename, strlen(TG(hc)->origfilename) + 1);
 	ADD_STRING("SCRIPT_NAME");
 
 #define CONDADD(name, field) 							\
@@ -307,8 +301,9 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 	CONDADD(SERVER_PROTOCOL, protocol);
 
 	if (TG(hc)->contentlength != -1) {
-		sprintf(buf, "%ld", (long) TG(hc)->contentlength);
-		ADD_STRING("CONTENT_LENGTH");
+		ADD_STRING_EX("CONTENT_LENGTH",
+				smart_str_print_long(buf + sizeof(buf) - 1, 
+					TG(hc)->contentlength));
 	}
 
 	if (TG(hc)->authorization[0])
