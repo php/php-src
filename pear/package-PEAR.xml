@@ -35,11 +35,8 @@
     <state>stable</state>
     <date>2002-12-27</date>
     <notes>
-* fixed "info" shortcut (conflicted with "install")
-* added "php_bin" config parameter
-* all "non-personal" config parameters now use
-  environment variables for defaults (very useful
-  to override the default php_dir on Windows!)
+* set default cache_ttl to 1 hour
+* added "clear-cache" command
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
