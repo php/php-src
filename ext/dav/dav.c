@@ -35,6 +35,8 @@
 
 #if HAVE_MOD_DAV
 
+#error The DAV support in PHP needs to be completely rewritten.  Everything has changed
+
 # include "mod_dav.h"
 #include "ext/standard/info.h"
 

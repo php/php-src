@@ -135,7 +135,7 @@ static char *php_string_from_clsid(CLSID *clsid)
 	char *clsid_str;
 
 	StringFromCLSID(clsid, &ole_clsid);
-	//s_clsid = OLE2A(ole_clsid);
+	/*s_clsid = OLE2A(ole_clsid);*/
 	clsid_str = php_OLECHAR_to_char(ole_clsid, NULL, 0);
 	LocalFree(ole_clsid);
 
@@ -270,7 +270,7 @@ PHP_FUNCTION(COM_load)
 	hr=CLSIDFromProgID(ProgID, &clsid);
 	efree(ProgID);
 
-	// obtain CLSID
+	/* obtain CLSID */
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);	
 		php_error(E_WARNING,"Invalid ProgID:  %s\n", error_message);
@@ -278,7 +278,7 @@ PHP_FUNCTION(COM_load)
 		RETURN_FALSE;
 	}
 
-	// obtain IDispatch
+	/* obtain IDispatch */
 	if (!server_name) {
 		hr=CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (void **) &i_dispatch);
 	} else {
@@ -447,15 +447,15 @@ static void php_pval_to_variant(pval *pval_arg, VARIANTARG *var_arg)
 	case IS_LONG:
 	case IS_BOOL:
 		if (pval_arg->is_ref == 0) {
-			var_arg->vt = VT_I4;	// assuming 32-bit platform
+			var_arg->vt = VT_I4;	/* assuming 32-bit platform */
 			var_arg->lVal = pval_arg->value.lval;
 		} else {
-			var_arg->vt = VT_I4 | VT_BYREF; // assuming 32-bit platform
+			var_arg->vt = VT_I4 | VT_BYREF; /* assuming 32-bit platform */
 			var_arg->plVal = &(pval_arg->value.lval);
 		}
 		break;
 	case IS_DOUBLE:
-		var_arg->vt = VT_R8;  // assuming 64-bit double precision
+		var_arg->vt = VT_R8;  /* assuming 64-bit double precision */
 		var_arg->dblVal = pval_arg->value.dval;
 		break;
 	case IS_STRING:
@@ -523,7 +523,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 		return FAILURE;
 	}
 
-//	variant_args = dispparams.rgvarg;
+/*	variant_args = dispparams.rgvarg; */
 
 	for (current_arg=0; current_arg<arg_count; current_arg++) {
 		current_variant = arg_count - current_arg - 1;
@@ -1035,7 +1035,7 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 				c.flags = mode;
 
 				zend_register_constant(&c ELS_CC);
-				//printf("%s -> %ld\n", ids, pVarDesc->lpvarValue->lVal);
+				/*printf("%s -> %ld\n", ids, pVarDesc->lpvarValue->lVal);*/
 				j++;
 			}
 			TypeInfo->lpVtbl->Release(TypeInfo);

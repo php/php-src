@@ -24,7 +24,7 @@
 
 #if HAVE_DOMXML
 #include "ext/standard/info.h"
-//#define newcode
+/*#define newcode*/
 
 static int le_domxmldocp;
 static int le_domxmldtdp;
@@ -108,7 +108,7 @@ zend_module_entry php_domxml_module_entry = {
 };
 
 void _free_node(xmlNode *tmp) {
-//fprintf(stderr, "Freeing node: %s\n", tmp->name);
+/*fprintf(stderr, "Freeing node: %s\n", tmp->name);*/
 }
 
 PHP_MINIT_FUNCTION(domxml)
@@ -129,7 +129,7 @@ PHP_MINIT_FUNCTION(domxml)
 	*/
 	le_domxmlnodep = register_list_destructors(_free_node, NULL);
 	le_domxmlattrp = register_list_destructors(NULL, NULL);
-//	le_domxmlnsp = register_list_destructors(NULL, NULL);
+/*	le_domxmlnsp = register_list_destructors(NULL, NULL); */
 
 	INIT_CLASS_ENTRY(domxmldoc_class_entry, "DomDocument", php_domxmldoc_class_functions);
 	INIT_CLASS_ENTRY(domxmldtd_class_entry, "Dtd", php_domxmldtd_class_functions);
@@ -320,7 +320,7 @@ PHP_MINFO_FUNCTION(domxml)
 	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
 	php_info_print_table_start();
 	php_info_print_table_row(2, "DOM/XML Support", "enabled");
-//	php_info_print_table_row(2, "libmxl Version", LIBXML_VERSION );
+/*	php_info_print_table_row(2, "libmxl Version", LIBXML_VERSION ); */
 	php_info_print_table_end();
 }
 
@@ -376,7 +376,7 @@ PHP_FUNCTION(domxml_attrname)
 		object_init_ex(pattr, domxmlattr_class_entry_ptr);
 		add_property_resource(pattr, "attribute", ret);
 		add_property_stringl(pattr, "name", (char *) attr->name, strlen(attr->name), 1);
-//		add_property_stringl(pattr, "content", (char *) attr->val->content, strlen(attr->val->content), 1);
+/*		add_property_stringl(pattr, "content", (char *) attr->val->content, strlen(attr->val->content), 1); */
 		zend_hash_next_index_insert(return_value->value.ht, &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
 	}
@@ -918,7 +918,7 @@ PHP_FUNCTION(domxml_dumpmem)
 	zval *id, **tmp;
 	int id_to_find;
 	xmlDoc *docp;
-//	char *mem;
+/*	char *mem; */
 	xmlChar *mem;
 	int size;
 	int type;
@@ -1181,11 +1181,11 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
 	while(ns) {
 		zval *pattr;
 		MAKE_STD_ZVAL(pattr);
-//		ret = zend_list_insert(attr, le_domxmlattrp);
+/*		ret = zend_list_insert(attr, le_domxmlattrp); */
 
 		/* construct an object with some methods */
 		object_init_ex(pattr, domxmlns_class_entry_ptr);
-//		add_property_resource(pattr, "attribute", ret);
+/*		add_property_resource(pattr, "attribute", ret); */
 		if(ns->href)
 			add_property_stringl(pattr, "href", (char *) ns->href, strlen(ns->href), 1);
 		if(ns->prefix)
@@ -1214,7 +1214,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 	}
 
 	/* create an php array for the children */
-//	MAKE_STD_ZVAL(*attributes); // Don't do this if *attributes are the return_value
+/*	MAKE_STD_ZVAL(*attributes); *//* Don't do this if *attributes are the return_value */
 	if (array_init(*attributes) == FAILURE) {
 		return -1;
 	}
@@ -1262,7 +1262,7 @@ static int node_children(zval **children, xmlNode *nodep)
 
 		/* Each child is a node object */
 		MAKE_STD_ZVAL(child);
-//		ret = zend_list_insert(last, le_domxmlnodep);
+/*		ret = zend_list_insert(last, le_domxmlnodep); */
 
 		/* construct a node object for each child */
 		object_init_ex(child, domxmlnode_class_entry_ptr);
@@ -1275,7 +1275,7 @@ static int node_children(zval **children, xmlNode *nodep)
 		add_property_long(child, "type", last->type);
 		if(last->content)
 			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
-//		add_property_resource(child, "node", ret);
+/*		add_property_resource(child, "node", ret); */
 
 		/* Get the namespace of the current node and add it as a property */
 /*		if(!node_namespace(&namespace, last))
@@ -1283,7 +1283,7 @@ static int node_children(zval **children, xmlNode *nodep)
 */
 
 		/* Get the attributes of the current node and add it as a property */
-		MAKE_STD_ZVAL(attributes); // Because it was taken out of node_attributes()
+		MAKE_STD_ZVAL(attributes); /* Because it was taken out of node_attributes() */
 		if(0 <= node_attributes(&attributes, last))
 			zend_hash_update(child->value.obj.properties, "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
 

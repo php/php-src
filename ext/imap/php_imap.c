@@ -20,6 +20,7 @@
    |          Rasmus Lerdorf      <rasmus@lerdorf.on.ca>                  |
    |          Chuck Hagenbuch     <chuck@horde.org>                       |
    |          Andrew Skalski      <askalski@chekinc.com>                  |
+   |          Hartmut Holzgraefe  <hartmut@six.de>                        |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
@@ -1026,6 +1027,8 @@ PHP_FUNCTION(imap_close)
 		}	
 		imap_le_struct->flags = flags;
 	}
+  mail_close_it(imap_le_struct);
+
 	zend_list_delete(ind);
 	RETURN_TRUE;
 }

@@ -74,7 +74,7 @@ typedef struct {
 extern PHP_HW_API php_hw_globals hw_globals;
 #endif
 
-//extern hw_module php_hw_module;
+/*extern hw_module php_hw_module;*/
 
 typedef struct {
         int size;

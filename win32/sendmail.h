@@ -1,4 +1,4 @@
-#if !defined(sendmail_h)		// Sentry, use file only if it's not already included.
+#if !defined(sendmail_h)		/* Sentry, use file only if it's not already included. */
 #define sendmail_h
 #include <windows.h>
 
@@ -6,8 +6,8 @@
 #define MAX_APPNAME_LENGHT 100
 #define  MAX_ERROR_INDEX		17
 #define  MIN_ERROR_INDEX		0
-#define  MAIL_BUFFER_SIZE		(1024*4)	// 4k buffer
-// Return values
+#define  MAIL_BUFFER_SIZE		(1024*4)	/* 4k buffer */
+/* Return values */
 #define	SUCCESS 0
 #define	FAILED_TO_PARSE_ARGUMENTS 1
 #define	FAILED_TO_OPEN_MAILFILE 2
@@ -43,4 +43,4 @@ unsigned long GetAddr(LPSTR szHost);
 
 
 
-#endif							// sendmail_h
+#endif							/* sendmail_h */

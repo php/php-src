@@ -822,12 +822,14 @@ PHP_FUNCTION(gzuncompress)
 		WRONG_PARAM_COUNT;                                         
 	}
 	convert_to_string_ex(data);
-	
-	// zlib::uncompress() wants to know the output data length
-	// if none was given as a parameter
-	// we try from input length * 2 up to input length * 2^8
-	// doubling it whenever it wasn't big enough
-	// that should be eneugh for all real life cases	
+
+	/*
+	 zlib::uncompress() wants to know the output data length
+	 if none was given as a parameter
+	 we try from input length * 2 up to input length * 2^8
+	 doubling it whenever it wasn't big enough
+	 that should be eneugh for all real life cases	
+	*/
 	do {
 		length=plength?plength:(*data)->value.str.len*(1<<factor++);
 		s2 = (char *) erealloc(s1,length);

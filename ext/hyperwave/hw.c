@@ -42,7 +42,7 @@
 #include "php_ini.h"
 #include "php_hyperwave.h"
 
-//hw_module php_hw_module;
+/*hw_module php_hw_module;*/
 
 #define HW_ATTR_NONE	1
 #define HW_ATTR_LANG	2
@@ -375,9 +375,11 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 		attrname = php_strtok_r(NULL, "\n", &strtok_buf);
 	}
 	if(NULL == sarr){
-//		spec_arr->refcount--;
-//		zend_hash_destroy(spec_arr->value.ht);
-//		efree(spec_arr->value.ht);
+/*
+		spec_arr->refcount--;
+		zend_hash_destroy(spec_arr->value.ht);
+		efree(spec_arr->value.ht);
+*/
 		zval_dtor(spec_arr);
 		efree(spec_arr);
 	}
@@ -546,7 +548,7 @@ static char * make_objrec_from_array(HashTable *lht) {
 	*objrec = '\0';
 	for(i=0; i<count; i++) {
 		keytype = zend_hash_get_current_key(lht, &key, &length);
-//		if(HASH_KEY_IS_STRING == keytype) {
+/*		if(HASH_KEY_IS_STRING == keytype) { */
 			zend_hash_get_current_data(lht, (void **) &keydataptr);
 			keydata = *keydataptr;
 			switch(keydata->type) {
@@ -598,7 +600,7 @@ static char * make_objrec_from_array(HashTable *lht) {
 			if(HASH_KEY_IS_STRING == keytype) efree(key);
 			objrec = realloc(objrec, strlen(objrec)+strlen(str)+1);
 			strcat(objrec, str);
-//		}
+/*		} */
 		zend_hash_move_forward(lht);
 	}
 	return objrec;

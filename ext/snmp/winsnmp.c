@@ -201,7 +201,7 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
         /* Free the variable bindings that have been allocated.*/
         SnmpUtilVarBindListFree(&variableBindings);
         SnmpUtilOidFree(&root);
-	} // end if (operation)
+	} /* end if (operation) */
 
 
 	/* Close SNMP session with the remote agent.*/
