@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Fixed Bug #26927 (preg_quote() does not escape \0). (Ilia)
 - Fixed bug #26909 (crash in imap_mime_header_decode() when no encoding is 
   used). (Ilia)
+- Fixed bug #26892 (ORA-21301 in ocinewcollection() call). (Antony)
 - Fixed bug #26878 (problem with multiple references to the same variable 
   with different types). (Ilia)
 - Fixed bug #26896 (ext/ftp does not work as shared extension). (Jani)
