@@ -320,7 +320,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 
 		out_p = (d)->c + (d)->len;
 
-		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == -1) {
+		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
 			switch (errno) { 
 				case EINVAL:
@@ -574,7 +574,7 @@ static php_iconv_err_t _php_iconv_strlen(unsigned int *pretval, const char *str,
 
 		prev_in_left = in_left;
 
-		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == -1) {
+		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 			if (prev_in_left == in_left) {
 				break;
 			}
@@ -683,7 +683,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 			--len;
 		}
 
-		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == -1) {
+		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 			if (prev_in_left == in_left) {
 				break;
 			}
@@ -785,7 +785,7 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 
 		prev_in_left = in_left;
 
-		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == -1) {
+		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 			if (prev_in_left == in_left) {
 #if ICONV_SUPPORTS_ERRNO
 				switch (errno) {
@@ -1000,7 +1000,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 				out_p = buf;
 				out_left = out_size = (char_cnt - 2) / 4 * 3;
 
-				if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == -1) {
+				if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
 					switch (errno) {
 						case EINVAL:
@@ -1064,7 +1064,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					out_p = buf;
 					out_left = out_size = 1;
 
-					if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == -1) {
+					if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
 						switch (errno) {
 							case EINVAL:
