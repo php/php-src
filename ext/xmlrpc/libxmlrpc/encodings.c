@@ -57,11 +57,10 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
    char* outbuf = 0;
 
    if(src && src_len && from_enc && to_enc) {
-      int outlenleft = src_len;
+      size_t outlenleft = src_len;
+      size_t inlenleft = src_len;
       int outlen = src_len;
-      int inlenleft = src_len;
       iconv_t ic = iconv_open(to_enc, from_enc);
-      char* src_ptr = (char*)src;
       char* out_ptr = 0;
 
       if(ic != (iconv_t)-1) {
@@ -71,7 +70,7 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
          if(outbuf) {
             out_ptr = (char*)outbuf;
             while(inlenleft) {
-               st = iconv(ic, &src_ptr, &inlenleft, &out_ptr, &outlenleft);
+               st = iconv(ic, &src, &inlenleft, &out_ptr, &outlenleft);
                if(st == -1) {
                   if(errno == E2BIG) {
                      int diff = out_ptr - outbuf;
