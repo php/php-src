@@ -226,7 +226,7 @@ typedef struct {
     char *tpb_ptr;
 } ISC_TEB;
 
-/* Fill ib_link and trans_n with the correct database link and transaction slot number.
+/* Fill ib_link and trans with the correct database link and transaction.
  */
 static void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id, ibase_db_link **ib_link, ibase_trans **trans)
 {
@@ -1778,22 +1778,38 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 	switch (ZEND_NUM_ARGS()) {
 
 		ibase_db_link *ib_link;
-		zval **trans_arg;
+		zval **arg;
 
 		case 0:
 			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
+			if (ib_link->trans == NULL) {
+				/* this link doesn't have a default transaction */
+				_php_ibase_module_error("Default link has no default transaction");
+				RETURN_FALSE;
+			}
 			trans = ib_link->trans->trans;
 			break;
 
 		case 1: 
-			if (zend_get_parameters_ex(1, &trans_arg) == FAILURE) {
+			if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 				RETURN_FALSE;
 			}
-			ZEND_FETCH_RESOURCE(trans, ibase_trans *, trans_arg, -1, "InterBase transaction", le_trans);
+			/* one id was passed, could be db or trans id */
+			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, arg, &ib_link, &trans);
+			if (trans != NULL) {			
+				convert_to_long_ex(arg);
+				res_id = Z_LVAL_PP(arg);
 
-			convert_to_long_ex(trans_arg);
-			res_id = Z_LVAL_PP(trans_arg);
+			} else {
+				ZEND_FETCH_RESOURCE(ib_link, ibase_db_link *, arg, -1, "InterBase transaction", le_trans);
 
+				if (ib_link->trans == NULL) {
+					/* this link doesn't have a default transaction */
+					_php_ibase_module_error("Link has no default transaction");
+					RETURN_FALSE;
+				}
+				trans = ib_link->trans->trans;
+			}
 			break;
 
 		default:
@@ -1955,8 +1971,7 @@ PHP_FUNCTION(ibase_query)
 			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, args[0], &ib_link, &trans);
 			break;	
 		case 3:
-			/* two ids were passed, first should be link and second should be trans;
-			*/
+			/* two ids were passed, first should be link and second should be trans; */
 			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link*, args[0], -1, "InterBase link", le_link, le_plink);
 			ZEND_FETCH_RESOURCE(trans, ibase_trans*, args[1], -1, "InterBase transaction", le_trans);
 			break;
