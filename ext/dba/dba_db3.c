@@ -78,10 +78,6 @@ DBA_OPEN_FUNC(db3)
 		dba_db3_data *data;
 
 		data = emalloc(sizeof(*data));
-		if (!data) {
-			*error = "Out of memory";
-			return FAILURE;
-		}
 		data->dbp = dbp;
 		data->cursor = NULL;
 		info->dbf = data;

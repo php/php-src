@@ -65,12 +65,8 @@ DBA_OPEN_FUNC(ndbm)
 
 	dbf = dbm_open(info->path, gmode, filemode);
 	
-	if(dbf) {
-		pinfo->dbf = dbf;
-		return SUCCESS;
-	}
-	*error = "Out of memory";
-	return FAILURE;
+	pinfo->dbf = dbf;
+	return SUCCESS;
 }
 
 DBA_CLOSE_FUNC(ndbm)

@@ -68,11 +68,8 @@ DBA_OPEN_FUNC(flatfile)
 	int retries = 0;
 #endif
 
-	info->dbf = ecalloc(sizeof(flatfile), 1);
-	if (!info->dbf) {
-		*error = "Out of memory";
-		return FAILURE;
-	}
+	info->dbf = emalloc(sizeof(flatfile));
+	memset(info->dbf, 0, sizeof(flatfile));
 
 	switch(info->mode) {
 		case DBA_READER:

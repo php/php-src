@@ -59,12 +59,8 @@ DBA_OPEN_FUNC(gdbm)
 	dbf = gdbm_open(info->path, 0, gmode, filemode, NULL);
 	
 	if(dbf) {
-		info->dbf = ecalloc(sizeof(dba_gdbm_data), 1);
-		if (!info->dbf) {
-			*error = "Out of memory";
-			gdbm_close(dbf);
-			return FAILURE;
-		}
+		info->dbf = emalloc(sizeof(dba_gdbm_data));
+		memset(info->dbf, 0, sizeof(dba_gdbm_data));
 		((dba_gdbm_data *) info->dbf)->dbf = dbf;
 		return SUCCESS;
 	}
