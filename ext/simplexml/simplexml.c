@@ -578,6 +578,29 @@ PHP_FUNCTION(simplexml_load_file)
 }
 /* }}} */
 
+/* {{{ proto simplemxml_element simplexml_load_string(string data)
+   Load a string and return a simplexml_element object to allow for processing */
+PHP_FUNCTION(simplexml_load_string)
+{
+	php_sxe_object *sxe;
+	char           *data;
+	int             data_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &data_len) == FAILURE) {
+		return;
+	}
+
+	sxe = php_sxe_object_new(TSRMLS_C);
+	sxe->document = xmlParseMemory(data, data_len);
+	if (sxe->document == NULL) {
+		RETURN_FALSE;
+	}
+
+	return_value->type = IS_OBJECT;
+	return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto bool simplexml_save_document_file(string filename, simplexml_element node)
    Save a XML document to a file from a SimpleXML node */
 PHP_FUNCTION(simplexml_save_document_file)
@@ -623,6 +646,7 @@ PHP_FUNCTION(simplexml_save_document_string)
 
 function_entry simplexml_functions[] = {
 	PHP_FE(simplexml_load_file, NULL)
+	PHP_FE(simplexml_load_string, NULL)
 	PHP_FE(simplexml_save_document_file, NULL)
 	PHP_FE(simplexml_save_document_string, first_arg_force_ref)
 	{NULL, NULL, NULL}
