@@ -619,11 +619,7 @@ object_property:
 object_dim_list:
 		object_dim_list '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
 	|	object_dim_list '{' expr '}'		{ fetch_string_offset(&$$, &$1, &$3 CLS_CC); }
-	|	property_name { $$ = $1; }
-;
-
-property_name:
-	variable_name { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
+	|	variable_name { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
 ;
 
 variable_name:
