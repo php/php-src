@@ -120,7 +120,7 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	strcpy(hdr_line, "GET ");
 	
 	/* tell remote http which file to get */
-	if (resource->path != NULL) {
+	if (resource->path != NULL && strlen(resource->path)) {
 		strlcat(hdr_line, resource->path, sizeof(hdr_line));
 	} else {
 		strlcat(hdr_line, "/", sizeof(hdr_line));
