@@ -87,7 +87,6 @@ void php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 void php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list);
 void php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
-PHP_FUNCTION(pgsql_fetch_hash);
 void php3_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 
 
