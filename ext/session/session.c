@@ -1374,7 +1374,8 @@ PHP_FUNCTION(session_set_save_handler)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument %d is not a valid callback", i+1);
 			efree(name);
 			RETURN_FALSE;
-		}		
+		}
+		efree(name);
 	}
 	
 	zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
