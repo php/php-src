@@ -213,6 +213,8 @@ static void tidy_doc_update_properties(PHPTidyObj * TSRMLS_DC);
 static void tidy_add_default_properties(PHPTidyObj *, tidy_obj_type TSRMLS_DC);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType * TSRMLS_DC);
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes);
+static int _php_tidy_set_tidy_opt(TidyDoc, char *, zval *);
+static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options);
 
 void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
 void _php_tidy_register_tags(INIT_FUNC_ARGS);
