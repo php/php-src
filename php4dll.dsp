@@ -795,5 +795,17 @@ InputPath=".\configuration-scanner.l"
 
 # End Source File
 # End Group
+# Begin Group "Text Files"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\ChangeLog
+# End Source File
+# Begin Source File
+
+SOURCE=.\LICENSE
+# End Source File
+# End Group
 # End Target
 # End Project

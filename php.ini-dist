@@ -38,9 +38,16 @@ short_open_tag	=	On	; allow the <? tag.  otherwise, only <?php and <script> tags
 asp_tags		=	Off ; allow ASP-style <% %> tags
 precision		=	14	; number of significant digits displayed in floating point numbers
 y2k_compliance	=	Off	; whether to be year 2000 compliant (will cause problems with non y2k compliant browsers)
+output_buffering	= Off	; Output buffering allows you to send header lines (including cookies)
+							; even after you send body content, in the price of slowing PHP's
+							; output layer a bit.
+							; You can enable output buffering by in runtime by calling the output
+							; buffering functions, or enable output buffering for all files
+							; by setting this directive to On.
 ; Safe Mode
 safe_mode		=	Off
 safe_mode_exec_dir	=
+
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in <font color=???> would work.
 highlight.string	=	#DD0000
 highlight.comment	=	#FF8000
@@ -48,6 +55,7 @@ highlight.keyword	=	#007700
 highlight.bg		=	#FFFFFF
 highlight.default	=	#0000BB
 highlight.html		=	#000000
+
 ; Misc
 allow_builtin_links	=	Off		; Sets whether phpinfo() will generate built-in links that display the PHP
 								; and Zend logos, and tells PHP whether to honor them or not.
