@@ -565,7 +565,7 @@ int zendlex(znode *zendlval CLS_DC);
 		(ai).ptr = NULL; \
 	}
 
-#define PZVAL_IS_REF(z)		((z)->EA.is_ref)
+#define PZVAL_IS_REF(z)		((z)->is_ref)
 
 #define PZVAL_LOCK(z)	((z)->refcount++)
 #define PZVAL_UNLOCK(z)	((z)->refcount--)

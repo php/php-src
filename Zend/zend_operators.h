@@ -72,7 +72,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
 #define convert_to_long_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_LONG) {							\
-		if (!(*ppzv)->EA.is_ref) {							\
+		if (!(*ppzv)->is_ref) {							\
 			SEPARATE_ZVAL(ppzv);							\
 		}													\
 		convert_to_long(*ppzv);								\
@@ -80,7 +80,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
 #define convert_to_double_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_DOUBLE) {							\
-		if (!(*ppzv)->EA.is_ref) {							\
+		if (!(*ppzv)->is_ref) {							\
 			SEPARATE_ZVAL(ppzv);							\
 		}													\
 		convert_to_double(*ppzv);							\
@@ -88,7 +88,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
 #define convert_to_string_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_STRING) {							\
-		if (!(*ppzv)->EA.is_ref) {							\
+		if (!(*ppzv)->is_ref) {							\
 			SEPARATE_ZVAL(ppzv);							\
 		}													\
 		convert_to_string(*ppzv);							\
@@ -96,7 +96,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
 #define convert_to_array_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_ARRAY) {							\
-		if (!(*ppzv)->EA.is_ref) {							\
+		if (!(*ppzv)->is_ref) {							\
 			SEPARATE_ZVAL(ppzv);							\
 		}													\
 		convert_to_array(*ppzv);							\
@@ -104,7 +104,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
 #define convert_to_object_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_OBJECT) {							\
-		if (!(*ppzv)->EA.is_ref) {							\
+		if (!(*ppzv)->is_ref) {							\
 			SEPARATE_ZVAL(ppzv);							\
 		}													\
 		convert_to_object(*ppzv);							\
@@ -112,7 +112,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
 #define convert_to_boolean_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_BOOL) {							\
-		if (!(*ppzv)->EA.is_ref) {							\
+		if (!(*ppzv)->is_ref) {							\
 			SEPARATE_ZVAL(ppzv);							\
 		}													\
 		convert_to_boolean(*ppzv);							\

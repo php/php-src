@@ -228,11 +228,11 @@ ZEND_FUNCTION(each)
 	entry = *entry_ptr;
 
 	/* add value elements */
-	if (entry->EA.is_ref) {
+	if (entry->is_ref) {
 		tmp = (zval *)emalloc(sizeof(zval));
 		*tmp = *entry;
 		zval_copy_ctor(tmp);
-		tmp->EA.is_ref=0;
+		tmp->is_ref=0;
 		tmp->refcount=0;
 		entry=tmp;
 	}
