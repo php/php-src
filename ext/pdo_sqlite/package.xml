@@ -24,8 +24,8 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.2.1</version>
-  <date>2005-02-10</date>
+  <version>0.2.2</version>
+  <date>2005-02-12</date>
 
   <notes>
     You need to install the PDO core module before you can make use of this one.
@@ -35,6 +35,7 @@
 
     - setting PDO_ATTR_TIMEOUT controls the busy timeout
     - Fixed PECL Bug #3391; cannot bind NULL parameters	
+    - Fixed build problem when building the bundled sqlite library
   </notes>
 
   <filelist>
