@@ -1589,6 +1589,12 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				}
 				(*func_p)(im, i, fp);
 				break;
+			case PHP_GDIMG_TYPE_GD:
+				if(im->trueColor){
+					gdImageTrueColorToPalette(im,1,255);
+				}
+				(*func_p)(im, fp);
+				break;
 			default:
 				(*func_p)(im, fp);
 				break;
