@@ -559,6 +559,25 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define	ZEND_IMPORT_CLASS			117
 #define	ZEND_IMPORT_CONST			118
 
+#define ZEND_ASSIGN_ADD_OBJ			121
+#define ZEND_ASSIGN_SUB_OBJ			122
+#define ZEND_ASSIGN_MUL_OBJ			123
+#define ZEND_ASSIGN_DIV_OBJ			124
+#define ZEND_ASSIGN_MOD_OBJ			125
+#define ZEND_ASSIGN_SL_OBJ			126
+#define ZEND_ASSIGN_SR_OBJ			127
+#define ZEND_ASSIGN_CONCAT_OBJ		128
+#define ZEND_ASSIGN_BW_OR_OBJ		129
+#define ZEND_ASSIGN_BW_AND_OBJ		130
+#define ZEND_ASSIGN_BW_XOR_OBJ		131
+									
+#define ZEND_PRE_INC_OBJ			132
+#define ZEND_PRE_DEC_OBJ			133
+#define ZEND_POST_INC_OBJ			134
+#define ZEND_POST_DEC_OBJ			135
+								 	
+#define ZEND_ASSIGN_OBJ				136
+#define ZEND_MAKE_VAR				137
 /* end of block */
 
 

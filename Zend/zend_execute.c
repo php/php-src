@@ -39,10 +39,14 @@
 	switch (opcode) { \
 		case ZEND_PRE_INC: \
 		case ZEND_POST_INC: \
+		case ZEND_PRE_INC_OBJ: \
+		case ZEND_POST_INC_OBJ: \
 			(op) = increment_function; \
 			break; \
 		case ZEND_PRE_DEC: \
 		case ZEND_POST_DEC: \
+		case ZEND_PRE_DEC_OBJ: \
+		case ZEND_POST_DEC_OBJ: \
 			(op) = decrement_function; \
 			break; \
 		default: \
@@ -184,7 +188,12 @@ static inline zval **zend_fetch_property_address_inner(zval *object, znode *op2,
 			break;
 	}
 
-	retval = Z_OBJ_HT_P(object)->get_property_ptr(object, prop_ptr TSRMLS_CC);
+	if(Z_OBJ_HT_P(object)->get_property_ptr != NULL) {
+		retval = Z_OBJ_HT_P(object)->get_property_ptr(object, prop_ptr TSRMLS_CC);
+	} else {
+		zend_error(E_WARNING, "This object doesn't support property references");
+		retval = &EG(error_zval_ptr);
+	}
 	
 	if (prop_ptr == &tmp) {
 		zval_dtor(prop_ptr);
@@ -268,6 +277,134 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 	}
 }
 
+static inline void make_real_object(zval **object_ptr) {
+	if ((*object_ptr)->type == IS_NULL
+		|| ((*object_ptr)->type == IS_BOOL && (*object_ptr)->value.lval==0)
+		|| ((*object_ptr)->type == IS_STRING && (*object_ptr)->value.str.len == 0)) {
+		if (!PZVAL_IS_REF(*object_ptr)) {
+			SEPARATE_ZVAL(object_ptr);
+		}
+		zend_error(E_NOTICE, "Creating default object from empty value");
+		object_init(*object_ptr);
+	}
+}
+	
+static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, zval *value, temp_variable *Ts TSRMLS_DC)
+{
+	zval **object_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval *object;
+	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+	zval tmp;
+	zval **retval = &Ts[result->u.var].var.ptr;
+
+	make_real_object(object_ptr);
+	object = *object_ptr;
+	
+	if (object->type != IS_OBJECT) {
+		zend_error(E_WARNING, "Attempt to assign property of non-object");
+		FREE_OP(Ts, op2, EG(free_op2));
+		*retval = EG(uninitialized_zval_ptr);
+
+		SELECTIVE_PZVAL_LOCK(*retval, result);
+		return;
+	}
+	
+	/* here we are sure we are dealing with an object */
+	switch (op2->op_type) {
+		case IS_CONST:
+			/* already a constant string */
+			break;
+		case IS_VAR:
+			tmp = *property;
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			property = &tmp;
+			break;
+		case IS_TMP_VAR:
+			convert_to_string(property);
+			break;
+	}
+
+	/* here property is a string */
+	PZVAL_UNLOCK(value);
+	
+	Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
+	if (property == &tmp) {
+		zval_dtor(property);
+	}
+	
+	FREE_OP(Ts, op2, EG(free_op2));
+	if (result) {
+		Ts[result->u.var].var.ptr = value;
+		Ts[result->u.var].var.ptr_ptr = NULL; /* see if we can nuke this */
+		SELECTIVE_PZVAL_LOCK(value, result);
+	}
+}
+
+static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op2, zval *value, temp_variable *Ts, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) TSRMLS_DC) {
+	zval **object_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval *object;
+	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+	zval tmp;
+	zval **retval = &Ts[result->u.var].var.ptr;
+
+	Ts[result->u.var].var.ptr_ptr = NULL;
+	make_real_object(object_ptr);
+	object = *object_ptr;
+	
+	if (object->type != IS_OBJECT) {
+		zend_error(E_WARNING, "Attempt to assign property of non-object");
+		FREE_OP(Ts, op2, EG(free_op2));
+		*retval = EG(uninitialized_zval_ptr);
+
+		SELECTIVE_PZVAL_LOCK(*retval, result);
+		return;
+	}
+	
+	/* here we are sure we are dealing with an object */
+	switch (op2->op_type) {
+		case IS_CONST:
+			/* already a constant string */
+			break;
+		case IS_VAR:
+			tmp = *property;
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			property = &tmp;
+			break;
+		case IS_TMP_VAR:
+			convert_to_string(property);
+			break;
+	}
+
+	/* here property is a string */
+	PZVAL_UNLOCK(value);
+	
+	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
+		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
+		SEPARATE_ZVAL_IF_NOT_REF(zptr);
+
+		binary_op(*zptr, *zptr, value);
+		*retval = *zptr;
+		SELECTIVE_PZVAL_LOCK(*retval, result);
+	} else {
+		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+		SEPARATE_ZVAL_IF_NOT_REF(&z);
+		binary_op(z, z, value);
+		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+		*retval = z;
+		SELECTIVE_PZVAL_LOCK(*retval, result);
+		if(z->refcount <= 1) {
+			zval_dtor(z);
+		}
+	}
+
+	if (property == &tmp) {
+		zval_dtor(property);
+	}
+	
+	FREE_OP(Ts, op2, EG(free_op2));
+}
 
 static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2, zval *value, int type, temp_variable *Ts TSRMLS_DC)
 {
@@ -884,6 +1021,89 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 	return;
 }
 
+static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp_variable * Ts, int (*incdec_op)(zval *) TSRMLS_DC)
+{
+	zval **object_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval *object;
+	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+	zval **retval = &Ts[result->u.var].var.ptr;
+
+	make_real_object(object_ptr);
+	object = *object_ptr;
+	
+	if (object->type != IS_OBJECT) {
+		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+		FREE_OP(Ts, op2, EG(free_op2));
+		*retval = EG(uninitialized_zval_ptr);
+
+		SELECTIVE_PZVAL_LOCK(*retval, result);
+		return;
+	}
+	
+	/* here we are sure we are dealing with an object */
+
+	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
+		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
+		SEPARATE_ZVAL_IF_NOT_REF(zptr);
+
+		incdec_op(*zptr);
+		*retval = *zptr;
+		SELECTIVE_PZVAL_LOCK(*retval, result);
+	} else {
+		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+		SEPARATE_ZVAL_IF_NOT_REF(&z);
+		incdec_op(z);
+		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+		if(z->refcount <= 1) {
+			zval_dtor(z);
+		}
+	}
+	
+	FREE_OP(Ts, op2, EG(free_op2));
+}
+
+static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, temp_variable * Ts, int (*incdec_op)(zval *) TSRMLS_DC)
+{
+	zval **object_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval *object;
+	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+	zval *retval = &Ts[result->u.var].tmp_var;
+
+	make_real_object(object_ptr);
+	object = *object_ptr;
+	
+	if (object->type != IS_OBJECT) {
+		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+		FREE_OP(Ts, op2, EG(free_op2));
+		*retval = *EG(uninitialized_zval_ptr);
+		return;
+	}
+	
+	/* here we are sure we are dealing with an object */
+
+	if(Z_OBJ_HT_P(object)->get_property_zval_ptr) {
+		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
+		SEPARATE_ZVAL_IF_NOT_REF(zptr);
+
+		*retval = **zptr;
+		zendi_zval_copy_ctor(*retval);
+
+		incdec_op(*zptr);
+	} else {
+		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+		SEPARATE_ZVAL_IF_NOT_REF(&z);
+		*retval = *z;
+		zendi_zval_copy_ctor(*retval);
+		incdec_op(z);
+		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+		if(z->refcount <= 1) {
+			zval_dtor(z);
+		}
+	}
+	
+	FREE_OP(Ts, op2, EG(free_op2));
+}
+
 
 #if ZEND_INTENSIVE_DEBUGGING
 
@@ -1102,6 +1322,59 @@ binary_assign_op_addr: {
 					AI_USE_PTR(EX(Ts)[EX(opline)->result.u.var].var);
 				}
 				NEXT_OPCODE();
+
+			case ZEND_ASSIGN_ADD_OBJ:
+				EG(binary_op) = add_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_SUB_OBJ:
+				EG(binary_op) = sub_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_MUL_OBJ:
+				EG(binary_op) = mul_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_DIV_OBJ:
+				EG(binary_op) = div_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_MOD_OBJ:
+				EG(binary_op) = mod_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_SL_OBJ:
+				EG(binary_op) = shift_left_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_SR_OBJ:
+				EG(binary_op) = shift_right_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_CONCAT_OBJ:
+				EG(binary_op) = concat_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_BW_OR_OBJ:
+				EG(binary_op) = bitwise_or_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_BW_AND_OBJ:
+				EG(binary_op) = bitwise_and_function;
+				goto binary_assign_op_addr_obj;
+			case ZEND_ASSIGN_BW_XOR_OBJ:
+				EG(binary_op) = bitwise_xor_function;
+				/* Fall through */
+binary_assign_op_addr_obj:
+				zend_assign_to_object_op(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts)[EX(opline)->extended_value].var.ptr, EX(Ts), EG(binary_op) TSRMLS_CC);
+				NEXT_OPCODE();
+			case ZEND_PRE_INC_OBJ:
+			case ZEND_PRE_DEC_OBJ: {
+				int (*incdec_op)(zval *op);
+
+				get_incdec_op(incdec_op, EX(opline)->opcode);
+				zend_pre_incdec_property(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), incdec_op TSRMLS_CC);
+			}
+			NEXT_OPCODE();
+			case ZEND_POST_INC_OBJ:
+			case ZEND_POST_DEC_OBJ: {
+				int (*incdec_op)(zval *op);
+
+				get_incdec_op(incdec_op, EX(opline)->opcode);
+				zend_post_incdec_property(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), incdec_op TSRMLS_CC);
+			}
+			NEXT_OPCODE();
 			case ZEND_PRE_INC:
 			case ZEND_PRE_DEC:
 			case ZEND_POST_INC:
@@ -1260,6 +1533,35 @@ binary_assign_op_addr: {
 			case ZEND_FETCH_DIM_TMP_VAR:
 				zend_fetch_dimension_address_from_tmp_var(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts) TSRMLS_CC);
 				AI_USE_PTR(EX(Ts)[EX(opline)->result.u.var].var);
+				NEXT_OPCODE();
+			case ZEND_MAKE_VAR: {
+				zval *value, *value2;
+
+				value = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+				switch(EX(opline)->op1.op_type) {
+					case IS_TMP_VAR:
+						value2 = value;
+						ALLOC_ZVAL(value);
+						*value = *value2;
+						value->is_ref = 0;
+						value->refcount = 0; /* lock will increase this */
+						break;
+					case IS_CONST:
+						value2 = value;
+						ALLOC_ZVAL(value);
+						*value = *value2;
+						zval_copy_ctor(value);
+						value->is_ref = 0;
+						value->refcount = 0; /* lock will increase this */
+						break;
+				}
+				
+				EX(Ts)[EX(opline)->result.u.var].var.ptr = value;
+				PZVAL_LOCK(EX(Ts)[EX(opline)->result.u.var].var.ptr);
+			}
+			NEXT_OPCODE();
+			case ZEND_ASSIGN_OBJ:
+				zend_assign_to_object(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts)[EX(opline)->extended_value].var.ptr, EX(Ts) TSRMLS_CC);
 				NEXT_OPCODE();
 			case ZEND_ASSIGN: {
 					zval *value;
