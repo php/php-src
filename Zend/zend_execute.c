@@ -612,7 +612,20 @@ static void print_refcount(zval *p, char *str)
 	print_refcount(NULL, NULL);
 }
 
-static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_variable *Ts, int type TSRMLS_DC)
+static inline HashTable *zend_find_inherited_static(zend_class_entry *ce, zval *variable)
+{
+	zend_class_entry *orig_ce = ce;
+	
+	while (ce) {
+		if (zend_hash_exists(ce->static_members, Z_STRVAL_P(variable), Z_STRLEN_P(variable)+1)) {
+			return ce->static_members;
+		}
+		ce = ce->parent;
+	}
+	return orig_ce->static_members;
+}
+
+static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_variable *Ts, int type, zval *variable TSRMLS_DC)
 {
 	switch (opline->op2.u.EA.type) {
 		case ZEND_FETCH_LOCAL:
@@ -634,7 +647,13 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 			return EG(active_op_array)->static_variables;
 			break;
 		case ZEND_FETCH_STATIC_MEMBER:
-			return Ts[opline->op2.u.var].EA.class_entry->static_members;
+			if(Ts[opline->op2.u.var].EA.class_entry->parent) {
+				/* if inherited, try to look up */
+				return zend_find_inherited_static(Ts[opline->op2.u.var].EA.class_entry, variable);
+			} else {
+				/* if class is not inherited, no point in checking */
+				return Ts[opline->op2.u.var].EA.class_entry->static_members;
+			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
@@ -650,16 +669,16 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 	zval tmp_varname;
 	HashTable *target_symbol_table;
 
-	target_symbol_table = zend_get_target_symbol_table(opline, Ts, type TSRMLS_CC);
-	if (!target_symbol_table) {
-		return;
-	}
-
  	if (varname->type != IS_STRING) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
+	}
+
+	target_symbol_table = zend_get_target_symbol_table(opline, Ts, type, varname TSRMLS_CC);
+	if (!target_symbol_table) {
+		return;
 	}
 
 	if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &retval) == FAILURE) {
@@ -2811,7 +2830,6 @@ send_by_ref:
 					HashTable *target_symbol_table;
 		
 					variable = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
 
 					if (variable->type != IS_STRING) {
 						tmp = *variable;
@@ -2819,6 +2837,8 @@ send_by_ref:
 						convert_to_string(&tmp);
 						variable = &tmp;
 					}
+
+					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS, variable TSRMLS_CC);
 
 					zend_hash_del(target_symbol_table, variable->value.str.val, variable->value.str.len+1);
 
@@ -2987,8 +3007,6 @@ send_by_ref:
 					zend_bool isset = 1;
 					HashTable *target_symbol_table;
 		
-					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
-
 					if (variable->type != IS_STRING) {
 						tmp = *variable;
 						zval_copy_ctor(&tmp);
@@ -2996,6 +3014,8 @@ send_by_ref:
 						variable = &tmp;
 					}
 					
+					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS, variable TSRMLS_CC);
+
 					if (zend_hash_find(target_symbol_table, variable->value.str.val, variable->value.str.len+1, (void **) &value) == FAILURE) {
 						isset = 0;
 					}
