@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added clickable error messages that direct to a page describing the
+  error or function causing the error in detail. (Yasuo, Wez, Marcus)
 - Added a default timeout to PHP streams (kalowsky, Ilia A <ilia@prohost.org>.
 - Added odbc_data_source() functionality to identify DB ServerName, and a 
   description of it gathered from the DSN. (kalowsky)
