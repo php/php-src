@@ -40,6 +40,7 @@ API_EXPORT(int) regcomp(regex_t *, const char *, int);
 
 
 /* === regerror.c === */
+#define	REG_OKAY	 0
 #define	REG_NOMATCH	 1
 #define	REG_BADPAT	 2
 #define	REG_ECOLLATE	 3

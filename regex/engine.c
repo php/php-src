@@ -71,12 +71,12 @@ regmatch_t pmatch[];
 int eflags;
 {
 	register char *endp;
-	register unsigned int i;
+	register int i;
 	struct match mv;
 	register struct match *m = &mv;
 	register char *dp;
-	register const sopno gf = g->firststate+1;	/* +1 for OEND */
-	register const sopno gl = g->laststate;
+	const register sopno gf = g->firststate+1;	/* +1 for OEND */
+	const register sopno gl = g->laststate;
 	char *start;
 	char *stop;
 
@@ -613,7 +613,7 @@ sopno lev;			/* PLUS nesting level */
 	/* "can't happen" */
 	assert(nope);
 	/* NOTREACHED */
-	return( NULL );
+	return((char *)NULL);	/* dummy */
 }
 
 /*
@@ -822,7 +822,7 @@ register states aft;		/* states already known reachable after */
 	register sopno pc;
 	register onestate here;		/* note, macros know this name */
 	register sopno look;
-	register int i;
+	register long i;
 
 	for (pc = start, INIT(here, pc); pc != stop; pc++, INC(here)) {
 		s = g->strip[pc];

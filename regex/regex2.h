@@ -42,11 +42,11 @@
  * In state representations, an operator's bit is on to signify a state
  * immediately *preceding* "execution" of that operator.
  */
-typedef unsigned long sop;	/* strip operator */
+typedef long sop;		/* strip operator */
 typedef long sopno;
-#define	OPRMASK	0xf8000000
-#define	OPDMASK	0x07ffffff
-#define	OPSHIFT	((unsigned)27)
+#define	OPRMASK	0x7c000000
+#define	OPDMASK	0x03ffffff
+#define	OPSHIFT	(26)
 #define	OP(n)	((n)&OPRMASK)
 #define	OPND(n)	((n)&OPDMASK)
 #define	SOP(op, opnd)	((op)|(opnd))
@@ -67,11 +67,11 @@ typedef long sopno;
 #define	OLPAREN	(13<<OPSHIFT)	/* (		fwd to )		*/
 #define	ORPAREN	(14<<OPSHIFT)	/* )		back to (		*/
 #define	OCH_	(15<<OPSHIFT)	/* begin choice	fwd to OOR2		*/
-#define	OOR1	(16u<<OPSHIFT)	/* | pt. 1	back to OOR1 or OCH_	*/
-#define	OOR2	(17u<<OPSHIFT)	/* | pt. 2	fwd to OOR2 or O_CH	*/
-#define	O_CH	(18u<<OPSHIFT)	/* end choice	back to OOR1		*/
-#define	OBOW	(19u<<OPSHIFT)	/* begin word	-			*/
-#define	OEOW	(20u<<OPSHIFT)	/* end word	-			*/
+#define	OOR1	(16<<OPSHIFT)	/* | pt. 1	back to OOR1 or OCH_	*/
+#define	OOR2	(17<<OPSHIFT)	/* | pt. 2	fwd to OOR2 or O_CH	*/
+#define	O_CH	(18<<OPSHIFT)	/* end choice	back to OOR1		*/
+#define	OBOW	(19<<OPSHIFT)	/* begin word	-			*/
+#define	OEOW	(20<<OPSHIFT)	/* end word	-			*/
 
 /*
  * Structure for [] character-set representation.  Character sets are
@@ -97,6 +97,8 @@ typedef struct {
 #define	CHsub(cs, c)	((cs)->ptr[(uch)(c)] &= ~(cs)->mask, (cs)->hash -= (c))
 #define	CHIN(cs, c)	((cs)->ptr[(uch)(c)] & (cs)->mask)
 #define	MCadd(p, cs, cp)	mcadd(p, cs, cp)	/* regcomp() internal fns */
+#define	MCsub(p, cs, cp)	mcsub(p, cs, cp)
+#define	MCin(p, cs, cp)	mcin(p, cs, cp)
 
 /* stuff for character categories */
 typedef unsigned char cat_t;
