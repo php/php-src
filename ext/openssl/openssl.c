@@ -216,12 +216,12 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	MAKE_STD_ZVAL(subitem);
 	array_init(subitem);
 
-	for (i = 0; i < X509_NAME_entry_count(name); i++)	{
+	for (i = 0; i < X509_NAME_entry_count(name); i++) {
 		ne	= X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
 		str = X509_NAME_ENTRY_get_data(ne);
 		nid = OBJ_obj2nid(obj);
-		if (shortname)	{
+		if (shortname) {
 			sn = (char*)OBJ_nid2sn(nid);
 			add_assoc_stringl(subitem, sn, str->data, str->length, 1);
 		}
@@ -253,8 +253,8 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC)
 	char * thestr;
 	long gmadjust = 0;
 
-	if (timestr->length < 13)	{
-		zend_error(E_WARNING, "%s(): extension author too lazy to parse %s correctly", get_active_function_name(TSRMLS_C), timestr->data);
+	if (timestr->length < 13) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%extension author too lazy to parse %s correctly", timestr->data);
 		return (time_t)-1;
 	}
 
@@ -317,9 +317,8 @@ static inline int php_openssl_config_check_syntax(
 	
 	X509V3_set_ctx_test(&ctx);
 	X509V3_set_conf_lhash(&ctx, config);
-	if (!X509V3_EXT_add_conf(config, &ctx, (char *)section, NULL))	{
-		zend_error(E_WARNING, "%s(): Error loading %s section %s of %s",
-				get_active_function_name(TSRMLS_C),
+	if (!X509V3_EXT_add_conf(config, &ctx, (char *)section, NULL)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error loading %s section %s of %s",
 				section_label,
 				section,
 				config_filename);
@@ -340,16 +339,14 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC)
 		return SUCCESS;
 	
 	sktmp = CONF_get_section(req->req_config, str);
-	if (sktmp == NULL)	{
-		zend_error(E_WARNING, "%s(): problem loading oid section %s",
-				get_active_function_name(TSRMLS_C), str);
+	if (sktmp == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "problem loading oid section %s", str);
 		return FAILURE;
 	}
-	for (i = 0; i < sk_CONF_VALUE_num(sktmp); i++)	{
+	for (i = 0; i < sk_CONF_VALUE_num(sktmp); i++) {
 		cnf = sk_CONF_VALUE_value(sktmp, i);
-		if (OBJ_create(cnf->value, cnf->name, cnf->name) == NID_undef)	{
-			zend_error(E_WARNING, "%s(): problem creating object %s=%s",
-					get_active_function_name(TSRMLS_C),
+		if (OBJ_create(cnf->value, cnf->name, cnf->name) == NID_undef) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "problem creating object %s=%s",
 					cnf->name, cnf->value);
 			return FAILURE;
 		}
@@ -400,7 +397,7 @@ static int php_openssl_parse_config(
 	str = CONF_get_string(req->req_config, NULL, "oid_file");
 	if (str && !php_openssl_safe_mode_chk(str TSRMLS_CC)) {
 		BIO *oid_bio = BIO_new_file(str, "r");
-		if (oid_bio)	{
+		if (oid_bio) {
 			OBJ_create_objects(oid_bio);
 			BIO_free(oid_bio);
 		}
@@ -419,7 +416,7 @@ static int php_openssl_parse_config(
 
 	SET_OPTIONAL_LONG_ARG("private_key_type", req->priv_key_type, OPENSSL_KEYTYPE_DEFAULT);
 
-	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), "encrypt_key", sizeof("encrypt_key"), (void**)&item) == SUCCESS)	{
+	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), "encrypt_key", sizeof("encrypt_key"), (void**)&item) == SUCCESS) {
 		req->priv_key_encrypt = Z_BVAL_PP(item);
 	}
 	else	{
@@ -445,9 +442,8 @@ static int php_openssl_parse_config(
 
 	/* set the string mask */
 	str = CONF_get_string(req->req_config, req->section_name, "string_mask");
-	if (str && !ASN1_STRING_set_default_mask_asc(str))	{
-		zend_error(E_WARNING, "%s(): Invalid global string mask setting %s",
-				get_active_function_name(TSRMLS_C), str);
+	if (str && !ASN1_STRING_set_default_mask_asc(str)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid global string mask setting %s", str);
 		return FAILURE;
 	}
 
@@ -461,15 +457,15 @@ static int php_openssl_parse_config(
 
 static void php_openssl_dispose_config(struct php_x509_request * req TSRMLS_DC)
 {
-	if (req->priv_key)	{
+	if (req->priv_key) {
 		EVP_PKEY_free(req->priv_key);
 		req->priv_key = NULL;
 	}
-	if (req->global_config)	{
+	if (req->global_config) {
 		CONF_free(req->global_config);
 		req->global_config = NULL;
 	}
-	if (req->req_config)	{
+	if (req->req_config) {
 		CONF_free(req->req_config);
 		req->req_config = NULL;
 	}
@@ -487,15 +483,15 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 #endif
 	if (file == NULL)
 		file = RAND_file_name(buffer, sizeof(buffer));
-	else if (RAND_egd(file) > 0)	{
+	else if (RAND_egd(file) > 0) {
 		/* if the given filename is an EGD socket, don't
 		 * write anything back to it */
 		*egdsocket = 1;
 		return SUCCESS;
 	}
-	if (file == NULL || !RAND_load_file(file, -1))	{
-		if (RAND_status() == 0)	{
-			zend_error(E_WARNING, "unable to load random state; not enough random data!");
+	if (file == NULL || !RAND_load_file(file, -1)) {
+		if (RAND_status() == 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to load random state; not enough random data!");
 			return FAILURE;
 		}
 		return FAILURE;
@@ -507,15 +503,15 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 static int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded)
 {
 	char buffer[MAXPATHLEN];
-	if (egdsocket || !seeded)	{
+	if (egdsocket || !seeded) {
 		/* if we did not manage to read the seed file, we should not write
 		 * a low-entropy seed file back */
 		return FAILURE;
 	}
 	if (file == NULL)
 		file = RAND_file_name(buffer, sizeof(buffer));
-	if (file == NULL || !RAND_write_file(file))	{
-		zend_error(E_WARNING, "unable to write random state");
+	if (file == NULL || !RAND_write_file(file)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to write random state");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -641,7 +637,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 	if (resourceval)
 		*resourceval = -1;
 
-	if (Z_TYPE_PP(val) == IS_RESOURCE)	{
+	if (Z_TYPE_PP(val) == IS_RESOURCE) {
 		/* is it an x509 resource ? */
 		void * what;
 		int type;
@@ -664,7 +660,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 	/* force it to be a string and check if it refers to a file */
 	convert_to_string_ex(val);
 
-	if (Z_STRLEN_PP(val) > 7 && memcmp(Z_STRVAL_PP(val), "file://", 7) == 0)	{
+	if (Z_STRLEN_PP(val) > 7 && memcmp(Z_STRVAL_PP(val), "file://", 7) == 0) {
 		/* read cert from the named file */
 		BIO *in;
 
@@ -692,7 +688,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 		BIO_free(in);
 	}
 
-	if (cert && makeresource && resourceval)	{
+	if (cert && makeresource && resourceval) {
 		*resourceval = zend_list_insert(cert, le_x509);
 	}
 	return cert;
@@ -718,8 +714,8 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	RETVAL_FALSE;
 
 	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
-	if (cert == NULL)	{
-		zend_error(E_WARNING, "cannot get cert from parameter 1");
+	if (cert == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 1");
 		return;
 	}
 
@@ -728,7 +724,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	}
 
 	bio_out = BIO_new_file(filename, "w");
-	if (bio_out)	{
+	if (bio_out) {
 		if (!notext)
 			X509_print(bio_out, cert);
 		PEM_write_bio_X509(bio_out, cert);
@@ -736,7 +732,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		RETVAL_TRUE;
 	}
 	else
-		zend_error(E_WARNING, "error opening file %s", filename);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error opening file %s", filename);
 
 	if (certresource == -1 && cert)
 		X509_free(cert);
@@ -765,8 +761,8 @@ PHP_FUNCTION(openssl_x509_export)
 	RETVAL_FALSE;
 
 	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
-	if (cert == NULL)	{
-		zend_error(E_WARNING, "cannot get cert from parameter 1");
+	if (cert == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 1");
 		return;
 	}
 
@@ -807,7 +803,7 @@ PHP_FUNCTION(openssl_x509_check_private_key)
 		RETURN_FALSE;
 	
 	key = php_openssl_evp_from_zval(&zkey, 0, "", 1, &keyresource TSRMLS_CC);
-	if (key)	{
+	if (key) {
 		RETVAL_BOOL(X509_check_private_key(cert, key));
 	}
 
@@ -875,7 +871,7 @@ PHP_FUNCTION(openssl_x509_parse)
 
 	/* NOTE: the purposes are added as integer keys - the keys match up to the X509_PURPOSE_SSL_XXX defines
 	   in x509v3.h */
-	for (i = 0; i < X509_PURPOSE_get_count(); i++)	{
+	for (i = 0; i < X509_PURPOSE_get_count(); i++) {
 		int id, purpset;
 		char * pname;
 		X509_PURPOSE * purp;
@@ -918,7 +914,7 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
    TSRMLS_FETCH();
 
 	if(!(stack = sk_X509_new_null())) {
-		zend_error(E_ERROR, "%s(): memory allocation failure", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "memory allocation failure");
 		goto end;
 	}
 
@@ -927,13 +923,13 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 	}
 
 	if(!(in=BIO_new_file(certfile, "r"))) {
-		zend_error(E_WARNING, "%s(): error opening the file, %s", get_active_function_name(TSRMLS_C), certfile);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error opening the file, %s", certfile);
 		goto end;
 	}
 
 	/* This loads from a file, a stack of x509/crl/pkey sets */
 	if(!(sk=PEM_X509_INFO_read_bio(in, NULL, NULL, NULL))) {
-		zend_error(E_WARNING, "%s(): error reading the file, %s", get_active_function_name(TSRMLS_C), certfile);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error reading the file, %s", certfile);
 		goto end;
 	}
 
@@ -949,7 +945,7 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 		X509_INFO_free(xi);
 	}
 	if(!sk_X509_num(stack)) {
-		zend_error(E_WARNING, "%s(): no certificates in file, %s", get_active_function_name(TSRMLS_C), certfile);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no certificates in file, %s", certfile);
 		sk_X509_free(stack);
 		goto end;
 	}
@@ -972,7 +968,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 	csc = X509_STORE_CTX_new();
 	if (csc == NULL)
 	{
-		zend_error(E_ERROR, "%s(): memory allocation failure", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "memory allocation failure");
 		return 0;
 	}
 	X509_STORE_CTX_init(csc, ctx, x, untrustedchain);
@@ -1006,7 +1002,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 
 	RETVAL_LONG(-1);
 
-	if (untrusted)	{
+	if (untrusted) {
 		untrustedchain = load_all_certs_from_file(untrusted);
 		if (untrustedchain == NULL)
 			goto clean_exit;
@@ -1048,9 +1044,9 @@ static X509_STORE * setup_verify(zval * calist TSRMLS_DC)
 	if (store == NULL)
 		return NULL;
 
-	if (calist && (Z_TYPE_P(calist) == IS_ARRAY))	{
+	if (calist && (Z_TYPE_P(calist) == IS_ARRAY)) {
 		zend_hash_internal_pointer_reset_ex(HASH_OF(calist), &pos);
-		for (;; zend_hash_move_forward_ex(HASH_OF(calist), &pos))	{
+		for (;; zend_hash_move_forward_ex(HASH_OF(calist), &pos)) {
 			zval ** item;
 			struct stat sb;
 
@@ -1059,15 +1055,15 @@ static X509_STORE * setup_verify(zval * calist TSRMLS_DC)
 
 			convert_to_string_ex(item);
 
-			if (VCWD_STAT(Z_STRVAL_PP(item), &sb) == -1)	{
-				zend_error(E_WARNING, "%s() unable to stat %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(item));
+			if (VCWD_STAT(Z_STRVAL_PP(item), &sb) == -1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to stat %s", Z_STRVAL_PP(item));
 				continue;
 			}
 
-			if ((sb.st_mode & S_IFREG) == S_IFREG)	{
+			if ((sb.st_mode & S_IFREG) == S_IFREG) {
 				file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
 				if (file_lookup == NULL || !X509_LOOKUP_load_file(file_lookup, Z_STRVAL_PP(item), X509_FILETYPE_PEM))
-					zend_error(E_WARNING, "%s() error loading file %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(item));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "error loading file %s", Z_STRVAL_PP(item));
 				else
 					nfiles++;
 				file_lookup = NULL;
@@ -1075,19 +1071,19 @@ static X509_STORE * setup_verify(zval * calist TSRMLS_DC)
 			else	{
 				dir_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
 				if (dir_lookup == NULL || !X509_LOOKUP_add_dir(dir_lookup, Z_STRVAL_PP(item), X509_FILETYPE_PEM))
-					zend_error(E_WARNING, "%s() error loading directory %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(item));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "error loading directory %s", Z_STRVAL_PP(item));
 				else
 					ndirs++;
 				dir_lookup = NULL;
 			}
 		}
 	}
-	if (nfiles == 0)	{
+	if (nfiles == 0) {
 		file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
 		if (file_lookup)
 			X509_LOOKUP_load_file(file_lookup, NULL, X509_FILETYPE_DEFAULT);
 	}
-	if (ndirs == 0)	{
+	if (ndirs == 0) {
 		dir_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
 		if (dir_lookup)
 			X509_LOOKUP_add_dir(dir_lookup, NULL, X509_FILETYPE_DEFAULT);
@@ -1110,7 +1106,7 @@ PHP_FUNCTION(openssl_x509_read)
 	x509 = php_openssl_x509_from_zval(&cert, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
 
 	if (x509 == NULL) {
-		zend_error(E_WARNING, "%s() supplied parameter cannot be coerced into an X509 certificate!", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied parameter cannot be coerced into an X509 certificate!");
 		RETURN_FALSE;
 	}
 }
@@ -1156,7 +1152,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			return FAILURE;
 	}
 	/* setup the version number: version 1 */
-	if (X509_REQ_set_version(csr, 0L))	{
+	if (X509_REQ_set_version(csr, 0L)) {
 		int i, nid;
 		char * type;
 		CONF_VALUE * v;
@@ -1167,7 +1163,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 		subj = X509_REQ_get_subject_name(csr);
 		/* apply values from the dn hash */
 		zend_hash_internal_pointer_reset_ex(HASH_OF(dn), &hpos);
-		while(zend_hash_get_current_data_ex(HASH_OF(dn), (void**)&item, &hpos) == SUCCESS)	{
+		while(zend_hash_get_current_data_ex(HASH_OF(dn), (void**)&item, &hpos) == SUCCESS) {
 			char * strindex; int strindexlen;
 			long intindex;
 			
@@ -1175,25 +1171,26 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 			convert_to_string_ex(item);
 
-			if (strindex)	{
+			if (strindex) {
 				int nid;
 
 				nid = OBJ_txt2nid(strindex);
-				if (nid != NID_undef)	{
+				if (nid != NID_undef) {
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC,
 								(unsigned char*)Z_STRVAL_PP(item), -1, -1, 0))
 					{
-						zend_error(E_WARNING, "dn: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
 						return FAILURE;
 					}
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", strindex);
 				}
-				else	zend_error(E_WARNING, "dn: %s is not a recognized name", strindex);
 			}
 			zend_hash_move_forward_ex(HASH_OF(dn), &hpos);
 		}
 
 		/* Finally apply defaults from config file */
-		for(i = 0; i < sk_CONF_VALUE_num(dn_sk); i++)	{
+		for(i = 0; i < sk_CONF_VALUE_num(dn_sk); i++) {
 			int len;
 			char buffer[200];
 			
@@ -1204,7 +1201,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			if (len < sizeof("_default"))
 				continue;
 			len -= sizeof("_default") - 1;
-			if (strcmp("_default", type + len) != 0)	{
+			if (strcmp("_default", type + len) != 0) {
 				continue;
 			}
 			
@@ -1214,8 +1211,8 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 		
 			/* Skip past any leading X. X: X, etc to allow for multiple
 			 * instances */
-			for (str = type; *str; str++)	{
-				if (*str == ':' || *str == ',' || *str == '.')	{
+			for (str = type; *str; str++) {
+				if (*str == ':' || *str == ',' || *str == '.') {
 					str++;
 					if (*str)
 						type = str;
@@ -1229,40 +1226,41 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			zend_printf("%s not already set; using default of %s\n", type, v->value);
 			if (!X509_NAME_add_entry_by_txt(subj, type, MBSTRING_ASC, (unsigned char*)v->value, -1, -1, 0))
 			{
-				zend_error(E_WARNING, "add_entry_by_txt %s -> %s (failed)", type, v->value);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "add_entry_by_txt %s -> %s (failed)", type, v->value);
 				return FAILURE;
 			}
-			if (!X509_NAME_entry_count(subj))	{
-				zend_error(E_WARNING, "no objects specified in config file");
+			if (!X509_NAME_entry_count(subj)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "no objects specified in config file");
 				return FAILURE;
 			}
 		}
-		if (attribs)	{
+		if (attribs) {
 			zend_hash_internal_pointer_reset_ex(HASH_OF(attribs), &hpos);
-			while(zend_hash_get_current_data_ex(HASH_OF(attribs), (void**)&item, &hpos) == SUCCESS)	{
+			while(zend_hash_get_current_data_ex(HASH_OF(attribs), (void**)&item, &hpos) == SUCCESS) {
 				char * strindex; int strindexlen;
 				long intindex;
 
 				zend_hash_get_current_key_ex(HASH_OF(attribs), &strindex, &strindexlen, &intindex, 0, &hpos);
 				convert_to_string_ex(item);
 
-				if (strindex)	{
+				if (strindex) {
 					int nid;
 
 					nid = OBJ_txt2nid(strindex);
-					if (nid != NID_undef)	{
+					if (nid != NID_undef) {
 						if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_ASC,
 									(unsigned char*)Z_STRVAL_PP(item), -1, -1, 0))
 						{
-							zend_error(E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, Z_STRVAL_PP(item));
 							return FAILURE;
 						}
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "dn: %s is not a recognized name", strindex);
 					}
-					else	zend_error(E_WARNING, "dn: %s is not a recognized name", strindex);
 				}
 				zend_hash_move_forward_ex(HASH_OF(attribs), &hpos);
 			}
-			for (i = 0; i < sk_CONF_VALUE_num(attr_sk); i++)	{
+			for (i = 0; i < sk_CONF_VALUE_num(attr_sk); i++) {
 				v = sk_CONF_VALUE_value(attr_sk, i);
 				/* if it is already set, skip this */
 				nid = OBJ_txt2nid(v->name);
@@ -1272,7 +1270,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				if (!X509_REQ_add1_attr_by_txt(csr, v->name, MBSTRING_ASC,
 							(unsigned char*)v->value, -1))
 				{
-					zend_error(E_WARNING, "add1_attr_by_txt %s -> %s (failed)", v->name, v->value);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "add1_attr_by_txt %s -> %s (failed)", v->name, v->value);
 					return FAILURE;
 				}
 			}
@@ -1295,12 +1293,12 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 	if (resourceval)
 		*resourceval = -1;
 
-	if (Z_TYPE_PP(val) == IS_RESOURCE)	{
+	if (Z_TYPE_PP(val) == IS_RESOURCE) {
 		void * what;
 		int type;
 
 		what = zend_fetch_resource(val TSRMLS_CC, -1, "OpenSSL X.509 CSR", &type, 1, le_csr);
-		if (what)	{
+		if (what) {
 			if (resourceval)
 				*resourceval = Z_LVAL_PP(val);
 			return (X509_REQ*)what;
@@ -1345,8 +1343,8 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	RETVAL_FALSE;
 
 	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
-	if (csr == NULL)	{
-		zend_error(E_WARNING, "cannot get CSR from parameter 1");
+	if (csr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get CSR from parameter 1");
 		return;
 	}
 
@@ -1355,14 +1353,14 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	}
 
 	bio_out = BIO_new_file(filename, "w");
-	if (bio_out)	{
+	if (bio_out) {
 		if (!notext)
 			X509_REQ_print(bio_out, csr);
 		PEM_write_bio_X509_REQ(bio_out, csr);
 		RETVAL_TRUE;
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error opening file %s", filename);
 	}
-	else
-		zend_error(E_WARNING, "error opening file %s", filename);
 
 	if (csr_resource == -1 && csr)
 		X509_REQ_free(csr);
@@ -1391,8 +1389,8 @@ PHP_FUNCTION(openssl_csr_export)
 	RETVAL_FALSE;
 
 	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
-	if (csr == NULL)	{
-		zend_error(E_WARNING, "cannot get CSR from parameter 1");
+	if (csr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get CSR from parameter 1");
 		return;
 	}
 
@@ -1435,24 +1433,24 @@ PHP_FUNCTION(openssl_csr_sign)
 	PHP_SSL_REQ_INIT(&req);
 	
 	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
-	if (csr == NULL)	{
-		zend_error(E_WARNING, "cannot get CSR from parameter 1");
+	if (csr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get CSR from parameter 1");
 		return;
 	}
-	if (zcert)	{
+	if (zcert) {
 		cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
-		if (cert == NULL)	{
-			zend_error(E_WARNING, "cannot get cert from parameter 2");
+		if (cert == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 2");
 			goto cleanup;
 		}
 	}
 	priv_key = php_openssl_evp_from_zval(&zpkey, 0, "", 1, &keyresource TSRMLS_CC);
-	if (priv_key == NULL)	{
-		zend_error(E_WARNING, "cannot get private key from parameter 3");
+	if (priv_key == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get private key from parameter 3");
 		goto cleanup;
 	}
-	if (cert && !X509_check_private_key(cert, priv_key))	{
-		zend_error(E_WARNING, "private key does not correspond to signing cert");
+	if (cert && !X509_check_private_key(cert, priv_key)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "private key does not correspond to signing cert");
 		goto cleanup;
 	}
 	
@@ -1461,26 +1459,26 @@ PHP_FUNCTION(openssl_csr_sign)
 
 	/* Check that the request matches the signature */
 	key = X509_REQ_get_pubkey(csr);
-	if (key == NULL)	{
-		zend_error(E_WARNING, "error unpacking public key");
+	if (key == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error unpacking public key");
 		goto cleanup;
 	}
 	i = X509_REQ_verify(csr, key);
 
-	if (i < 0)	{
-		zend_error(E_WARNING, "Signature verification problems");
+	if (i < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Signature verification problems");
 		goto cleanup;
 	}
-	else if (i==0)	{
-		zend_error(E_WARNING, "Signature did not match the certificate request");
+	else if (i==0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Signature did not match the certificate request");
 		goto cleanup;
 	}
 	
 	/* Now we can get on with it */
 	
 	new_cert = X509_new();
-	if (new_cert == NULL)	{
-		zend_error(E_WARNING, "No memory");
+	if (new_cert == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No memory");
 		goto cleanup;
 	}
 	/* Version 3 cert */
@@ -1504,7 +1502,7 @@ PHP_FUNCTION(openssl_csr_sign)
 	if (!i)
 		goto cleanup;
 
-	if (req.request_extensions_section)	{
+	if (req.request_extensions_section) {
 		X509V3_CTX ctx;
 		
 		X509V3_set_ctx(&ctx, cert, new_cert, csr, NULL, 0);
@@ -1514,8 +1512,8 @@ PHP_FUNCTION(openssl_csr_sign)
 	}
 
 	/* Now sign it */
-	if (!X509_sign(new_cert, priv_key, req.digest))	{
-		zend_error(E_WARNING, "failed to sign it");
+	if (!X509_sign(new_cert, priv_key, req.digest)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to sign it");
 		goto cleanup;
 	}
 	
@@ -1564,7 +1562,7 @@ PHP_FUNCTION(openssl_csr_new)
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS)
 	{
 		/* Generate or use a private key */
-		if (Z_TYPE_P(out_pkey) != IS_NULL)	{
+		if (Z_TYPE_P(out_pkey) != IS_NULL) {
 			req.priv_key = php_openssl_evp_from_zval(&out_pkey, 0, NULL, 0, &key_resource TSRMLS_CC);
 			if (req.priv_key != NULL)
 				we_made_the_key = 0;
@@ -1572,11 +1570,11 @@ PHP_FUNCTION(openssl_csr_new)
 		if (req.priv_key == NULL)	
 			php_openssl_generate_private_key(&req TSRMLS_CC);
 		if (req.priv_key == NULL)	
-			zend_error(E_WARNING, "Unable to generate a private key");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to generate a private key");
 		else	{
 			csr = X509_REQ_new();
-			if (csr)	{
-				if (php_openssl_make_REQ(&req, csr, dn, attribs TSRMLS_CC) == SUCCESS)	{
+			if (csr) {
+				if (php_openssl_make_REQ(&req, csr, dn, attribs TSRMLS_CC) == SUCCESS) {
 					X509V3_CTX ext_ctx;
 
 					X509V3_set_ctx(&ext_ctx, NULL, NULL, csr, NULL, 0);
@@ -1586,20 +1584,20 @@ PHP_FUNCTION(openssl_csr_new)
 					if (req.request_extensions_section && !X509V3_EXT_REQ_add_conf(req.req_config,
 								&ext_ctx, req.request_extensions_section, csr))
 					{
-						zend_error(E_WARNING, "Error loading extension section %s", req.request_extensions_section);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error loading extension section %s", req.request_extensions_section);
 					}
 					else	{
 						RETVAL_TRUE;
 						
-						if (X509_REQ_sign(csr, req.priv_key, req.digest))	{
+						if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
 
 							RETVAL_RESOURCE(zend_list_insert(csr, le_csr));
 							csr = NULL;			
+						} else {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error signing request");
 						}
-						else
-							zend_error(E_WARNING, "Error signing request");
 
-						if (we_made_the_key)	{
+						if (we_made_the_key) {
 							/* and a resource for the private key */
 							ZVAL_RESOURCE(out_pkey, zend_list_insert(req.priv_key, le_key));
 						}
@@ -1643,26 +1641,26 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 	if (resourceval)
 		*resourceval = -1;
 
-	if (Z_TYPE_PP(val) == IS_ARRAY)	{
+	if (Z_TYPE_PP(val) == IS_ARRAY) {
 		zval ** zphrase;
 		
 		/* get passphrase */
 
-		if (zend_hash_index_find(HASH_OF(*val), 1, (void **)&zphrase) == FAILURE)	{
-			zend_error(E_WARNING, "%s(): key array must be of the form array(0 => key, 1 => phrase)", get_active_function_name(TSRMLS_C));
+		if (zend_hash_index_find(HASH_OF(*val), 1, (void **)&zphrase) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key array must be of the form array(0 => key, 1 => phrase)");
 			return NULL;
 		}
 		convert_to_string_ex(zphrase);
 		passphrase = Z_STRVAL_PP(zphrase);
 
 		/* now set val to be the key param and continue */
-		if (zend_hash_index_find(HASH_OF(*val), 0, (void **)&val) == FAILURE)	{
-			zend_error(E_WARNING, "%s(): key array must be of the form array(0 => key, 1 => phrase)", get_active_function_name(TSRMLS_C));
+		if (zend_hash_index_find(HASH_OF(*val), 0, (void **)&val) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key array must be of the form array(0 => key, 1 => phrase)");
 			return NULL;
 		}
 	}
 
-	if (Z_TYPE_PP(val) == IS_RESOURCE)	{
+	if (Z_TYPE_PP(val) == IS_RESOURCE) {
 		void * what;
 		int type;
 
@@ -1673,12 +1671,12 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		if (resourceval)
 			*resourceval = Z_LVAL_PP(val);
 
-		if (type == le_x509)	{
+		if (type == le_x509) {
 			/* extract key from cert, depending on public_key param */
 			cert = (X509*)what;
 			free_cert = 0;
 		}
-		else if (type == le_key)	{
+		else if (type == le_key) {
 			/* got the key - return it */
 			return (EVP_PKEY*)what;
 		}
@@ -1695,14 +1693,14 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			filename = Z_STRVAL_PP(val) + 7;
 
 		/* it's an X509 file/cert of some kind, and we need to extract the data from that */
-		if (public_key)	{
+		if (public_key) {
 			cert = php_openssl_x509_from_zval(val, 0, &cert_res TSRMLS_CC);
 			free_cert = (cert_res == -1);
 			/* actual extraction done later */
 		}
 		else	{
 			/* we want the private key */
-			if (filename)	{
+			if (filename) {
 				BIO *in;
 				if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
 					return NULL;
@@ -1726,7 +1724,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		}
 	}
 
-	if (public_key && cert && key == NULL)	{
+	if (public_key && cert && key == NULL) {
 		/* extract public key from X509 cert */
 		key = (EVP_PKEY *) X509_get_pubkey(cert);
 	}
@@ -1734,7 +1732,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 	if (free_cert && cert)
 		X509_free(cert);
 
-	if (key && makeresource && resourceval)	{
+	if (key && makeresource && resourceval) {
 		*resourceval = ZEND_REGISTER_RESOURCE(NULL, key, le_key);
 	}
 	return key;
@@ -1748,8 +1746,8 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 	int egdsocket, seeded;
 	EVP_PKEY * return_val = NULL;
 	
-	if (req->priv_key_bits < MIN_KEY_LENGTH)	{
-		zend_error(E_WARNING, "private key length is too short; it needs to be at least %d bits, not %d",
+	if (req->priv_key_bits < MIN_KEY_LENGTH) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "private key length is too short; it needs to be at least %d bits, not %d",
 				MIN_KEY_LENGTH, req->priv_key_bits);
 		return NULL;
 	}
@@ -1757,20 +1755,20 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 	randfile = CONF_get_string(req->req_config, req->section_name, "RANDFILE");
 	php_openssl_load_rand_file(randfile, &egdsocket, &seeded);
 	
-	if ((req->priv_key = EVP_PKEY_new()) != NULL)	{
-		switch(req->priv_key_type)	{
+	if ((req->priv_key = EVP_PKEY_new()) != NULL) {
+		switch(req->priv_key_type) {
 			case OPENSSL_KEYTYPE_RSA:
 				if (EVP_PKEY_assign_RSA(req->priv_key, RSA_generate_key(req->priv_key_bits, 0x10001, NULL, NULL)))
 					return_val = req->priv_key;
 				break;
 			default:
-				zend_error(E_WARNING, "Unsupported private key type");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported private key type");
 		}
 	}
 
 	php_openssl_write_rand_file(randfile, egdsocket, seeded);
 	
-	if (return_val == NULL)	{
+	if (return_val == NULL) {
 		EVP_PKEY_free(req->priv_key);
 		req->priv_key = NULL;
 		return NULL;
@@ -1795,7 +1793,7 @@ PHP_FUNCTION(openssl_pkey_new)
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS)
 	{
-		if (php_openssl_generate_private_key(&req TSRMLS_CC))	{
+		if (php_openssl_generate_private_key(&req TSRMLS_CC)) {
 			/* pass back a key resource */
 			RETVAL_RESOURCE(zend_list_insert(req.priv_key, le_key));
 			/* make sure the cleanup code doesn't zap it! */
@@ -1826,8 +1824,8 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 
 	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
 
-	if (key == NULL)	{
-		zend_error(E_WARNING, "cannot get key from parameter 1");
+	if (key == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get key from parameter 1");
 		RETURN_FALSE;
 	}
 	
@@ -1846,7 +1844,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		else
 			cipher = NULL;
 		
-		if (PEM_write_bio_PrivateKey(bio_out, key, cipher, passphrase, passphrase_len, NULL, NULL))	{
+		if (PEM_write_bio_PrivateKey(bio_out, key, cipher, passphrase, passphrase_len, NULL, NULL)) {
 			/* Success!
 			 * If returning the output as a string, do so now */
 			RETVAL_TRUE;
@@ -1854,7 +1852,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	}
 	PHP_SSL_REQ_DISPOSE(&req);
 
-	if (key_resource == -1 && key)	{
+	if (key_resource == -1 && key) {
 		EVP_PKEY_free(key);
 	}
 	if (bio_out)
@@ -1881,8 +1879,8 @@ PHP_FUNCTION(openssl_pkey_export)
 
 	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_CC);
 
-	if (key == NULL)	{
-		zend_error(E_WARNING, "cannot get key from parameter 1");
+	if (key == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get key from parameter 1");
 		RETURN_FALSE;
 	}
 	
@@ -1897,7 +1895,7 @@ PHP_FUNCTION(openssl_pkey_export)
 		else
 			cipher = NULL;
 		
-		if (PEM_write_bio_PrivateKey(bio_out, key, cipher, passphrase, passphrase_len, NULL, NULL))	{
+		if (PEM_write_bio_PrivateKey(bio_out, key, cipher, passphrase, passphrase_len, NULL, NULL)) {
 			/* Success!
 			 * If returning the output as a string, do so now */
 
@@ -1911,7 +1909,7 @@ PHP_FUNCTION(openssl_pkey_export)
 	}
 	PHP_SSL_REQ_DISPOSE(&req);
 
-	if (key_resource == -1 && key)	{
+	if (key_resource == -1 && key) {
 		EVP_PKEY_free(key);
 	}
 	if (bio_out)
@@ -2001,7 +1999,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 				&extracerts, &extracerts_len) == FAILURE)
 		return;
 	
-	if (extracerts)	{
+	if (extracerts) {
 		others = load_all_certs_from_file(extracerts);
 		if (others == NULL)
 			goto clean_exit;
@@ -2022,7 +2020,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	if (in == NULL)
 		goto clean_exit;
 	p7 = SMIME_read_PKCS7(in, &datain);
-	if (p7 == NULL)	{
+	if (p7 == NULL) {
 #if DEBUG_SMIME
 		zend_printf("SMIME_read_PKCS7 failed\n");
 #endif
@@ -2032,7 +2030,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	zend_printf("Calling PKCS7 verify\n");
 #endif
 
-	if (PKCS7_verify(p7, others, store, datain, NULL, flags))	{
+	if (PKCS7_verify(p7, others, store, datain, NULL, flags)) {
 
 		RETVAL_TRUE;
 
@@ -2044,7 +2042,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 			}
 		
 			certout = BIO_new_file(signersfilename, "w");
-			if (certout)	{
+			if (certout) {
 				int i;
 				signers = PKCS7_get0_signers(p7, NULL, flags);
 
@@ -2055,8 +2053,8 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 				sk_X509_free(signers);
 			}
 			else	{
-				zend_error(E_WARNING, "%s(): signature OK, but cannot open %s for writing",
-					  	get_active_function_name(TSRMLS_C), signersfilename);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "signature OK, but cannot open %s for writing",
+					  	signersfilename);
 				RETVAL_LONG(-1);
 			}
 		}
@@ -2113,16 +2111,16 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	recipcerts = sk_X509_new_null();
 
 	/* get certs */
-	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY)	{
+	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
 		zend_hash_internal_pointer_reset_ex(HASH_OF(zrecipcerts), &hpos);
-		while(zend_hash_get_current_data_ex(HASH_OF(zrecipcerts), (void**)&zcertval, &hpos) == SUCCESS)	{
+		while(zend_hash_get_current_data_ex(HASH_OF(zrecipcerts), (void**)&zcertval, &hpos) == SUCCESS) {
 			long certresource;
 
 			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource TSRMLS_CC);
 			if (cert == NULL)
 				goto clean_exit;
 
-			if (certresource != -1)	{
+			if (certresource != -1) {
 				/* we shouldn't free this particular cert, as it is a resource.
 					make a copy and push that on the stack instead */
 				cert = X509_dup(cert);
@@ -2142,7 +2140,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		if (cert == NULL)
 			goto clean_exit;
 
-		if (certresource != -1)	{
+		if (certresource != -1) {
 			/* we shouldn't free this particular cert, as it is a resource.
 				make a copy and push that on the stack instead */
 			cert = X509_dup(cert);
@@ -2163,9 +2161,9 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		goto clean_exit;
 
 	/* tack on extra headers */
-	if (zheaders)	{
+	if (zheaders) {
 		zend_hash_internal_pointer_reset_ex(HASH_OF(zheaders), &hpos);
-		while(zend_hash_get_current_data_ex(HASH_OF(zheaders), (void**)&zcertval, &hpos) == SUCCESS)	{
+		while(zend_hash_get_current_data_ex(HASH_OF(zheaders), (void**)&zcertval, &hpos) == SUCCESS) {
 			zend_hash_get_current_key_ex(HASH_OF(zheaders), &strindex, &strindexlen, &intindex, 0, &hpos);
 
 			convert_to_string_ex(zcertval);
@@ -2228,21 +2226,21 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	
 	RETVAL_FALSE;
 
-	if (extracertsfilename)	{
+	if (extracertsfilename) {
 		others = load_all_certs_from_file(extracertsfilename);
 		if (others == NULL)
 			goto clean_exit;
 	}
 
 	privkey = php_openssl_evp_from_zval(&zprivkey, 0, "", 0, &keyresource TSRMLS_CC);
-	if (privkey == NULL)	{
-		zend_error(E_WARNING, "%s(): error getting private key", get_active_function_name(TSRMLS_C));
+	if (privkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error getting private key");
 		goto clean_exit;
 	}
 
 	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
-	if (cert == NULL)	{
-		zend_error(E_WARNING, "%s(): error getting cert", get_active_function_name(TSRMLS_C));
+	if (cert == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error getting cert");
 		goto clean_exit;
 	}
 
@@ -2251,29 +2249,29 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	}
 
 	infile = BIO_new_file(infilename, "r");
-	if (infile == NULL)	{
-		zend_error(E_WARNING, "%s(): error opening input file %s!", get_active_function_name(TSRMLS_C), infilename);
+	if (infile == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error opening input file %s!", infilename);
 		goto clean_exit;
 	}
 
 	outfile = BIO_new_file(outfilename, "w");
-	if (outfile == NULL)	{
-		zend_error(E_WARNING, "%s(): error opening output file %s!", get_active_function_name(TSRMLS_C), outfilename);
+	if (outfile == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error opening output file %s!", outfilename);
 		goto clean_exit;
 	}
 
 	p7 = PKCS7_sign(cert, privkey, others, infile, flags);
-	if (p7 == NULL)	{
-		zend_error(E_WARNING, "%s(): error creating PKCS7 structure!", get_active_function_name(TSRMLS_C));
+	if (p7 == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error creating PKCS7 structure!");
 		goto clean_exit;
 	}
 
 	BIO_reset(infile);
 
 	/* tack on extra headers */
-	if (zheaders)	{
+	if (zheaders) {
 		zend_hash_internal_pointer_reset_ex(HASH_OF(zheaders), &hpos);
-		while(zend_hash_get_current_data_ex(HASH_OF(zheaders), (void**)&hval, &hpos) == SUCCESS)	{
+		while(zend_hash_get_current_data_ex(HASH_OF(zheaders), (void**)&hval, &hpos) == SUCCESS) {
 			zend_hash_get_current_key_ex(HASH_OF(zheaders), &strindex, &strindexlen, &intindex, 0, &hpos);
 
 			convert_to_string_ex(hval);
@@ -2325,14 +2323,14 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 	RETVAL_FALSE;
 
 	cert = php_openssl_x509_from_zval(&recipcert, 0, &certresval TSRMLS_CC);
-	if (cert == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to coerce parameter 3 to x509 cert", get_active_function_name(TSRMLS_C));
+	if (cert == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to coerce parameter 3 to x509 cert");
 		goto clean_exit;
 	}
 
 	key = php_openssl_evp_from_zval(recipkey ? &recipkey : &recipcert, 0, "", 0, &keyresval TSRMLS_CC);
-	if (key == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to get private key", get_active_function_name(TSRMLS_C));
+	if (key == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to get private key");
 		goto clean_exit;
 	}
 	
@@ -2341,11 +2339,11 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 	}
 
 	in = BIO_new_file(infilename, "r");
-	if (in == NULL)	{
+	if (in == NULL) {
 		goto clean_exit;
 	}
 	out = BIO_new_file(outfilename, "w");
-	if (out == NULL)	{
+	if (out == NULL) {
 		goto clean_exit;
 	}
 
@@ -2391,9 +2389,8 @@ PHP_FUNCTION(openssl_private_encrypt)
 
 	pkey = php_openssl_evp_from_zval(&key, 0, "", 0, &keyresource TSRMLS_CC);
 
-	if (pkey == NULL)	{
-		zend_error(E_WARNING, "%s(): key param is not a valid private key",
-				get_active_function_name(TSRMLS_C));
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key param is not a valid private key");
 		RETURN_FALSE;
 	}
 	
@@ -2410,7 +2407,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 						padding) == cryptedlen);
 			break;
 		default:
-			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key type not supported in this PHP build!");
 	}
 
 	if (successful) {
@@ -2448,8 +2445,8 @@ PHP_FUNCTION(openssl_private_decrypt)
 	RETVAL_FALSE;
 	
 	pkey = php_openssl_evp_from_zval(&key, 0, "", 0, &keyresource TSRMLS_CC);
-	if (pkey == NULL)	{
-		zend_error(E_WARNING, "%s(): key parameter is not a valid private key", get_active_function_name(TSRMLS_C));
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key parameter is not a valid private key");
 		RETURN_FALSE;
 	}
 	
@@ -2471,8 +2468,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 			}
 			break;
 		default:
-			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!",
-					get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key type not supported in this PHP build!");
 	}
 
 	efree(crypttemp);
@@ -2512,8 +2508,8 @@ PHP_FUNCTION(openssl_public_encrypt)
 	RETVAL_FALSE;
 	
 	pkey = php_openssl_evp_from_zval(&key, 1, NULL, 0, &keyresource TSRMLS_CC);
-	if (pkey == NULL)	{
-		zend_error(E_WARNING, "%s(): key parameter is not a valid public key", get_active_function_name(TSRMLS_C));
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key parameter is not a valid public key");
 		RETURN_FALSE;
 	}
 
@@ -2530,8 +2526,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 						padding) == cryptedlen);
 			break;
 		default:
-			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!",
-					get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key type not supported in this PHP build!");
 
 	}
 
@@ -2570,8 +2565,8 @@ PHP_FUNCTION(openssl_public_decrypt)
 	RETVAL_FALSE;
 	
 	pkey = php_openssl_evp_from_zval(&key, 1, NULL, 0, &keyresource TSRMLS_CC);
-	if (pkey == NULL)	{
-		zend_error(E_WARNING, "%s(): key parameter is not a valid public key", get_active_function_name(TSRMLS_C));
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key parameter is not a valid public key");
 		RETURN_FALSE;
 	}
 
@@ -2594,8 +2589,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 			break;
 			
 		default:
-			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!",
-					get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "key type not supported in this PHP build!");
 		 
 	}
 
@@ -2623,7 +2617,7 @@ PHP_FUNCTION(openssl_error_string)
 	char buf[512];
 	unsigned long val;
 
-	if (ZEND_NUM_ARGS() != 0)	{
+	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2655,8 +2649,8 @@ PHP_FUNCTION(openssl_sign)
 		return;
 
 	pkey = php_openssl_evp_from_zval(&key, 0, "", 0, &keyresource TSRMLS_CC);
-	if (pkey == NULL)	{
-		zend_error(E_WARNING, "%s(): supplied key param cannot be coerced into a private key", get_active_function_name(TSRMLS_C));
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param cannot be coerced into a private key");
 		RETURN_FALSE;
 	}
 
@@ -2696,8 +2690,8 @@ PHP_FUNCTION(openssl_verify)
 		return;
 	
 	pkey = php_openssl_evp_from_zval(&key, 1, NULL, 0, &keyresource TSRMLS_CC);
-	if (pkey == NULL)	{
-		zend_error(E_WARNING, "%s(): supplied key param cannot be coerced into a public key", get_active_function_name(TSRMLS_C));
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param cannot be coerced into a public key");
 		RETURN_FALSE;
 	}
 
@@ -2733,7 +2727,7 @@ PHP_FUNCTION(openssl_seal)
 	pubkeysht = HASH_OF(pubkeys);
 	nkeys = pubkeysht ? zend_hash_num_elements(pubkeysht) : 0;
 	if (!nkeys) {
-		zend_error(E_WARNING,
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"Fourth argument to openssl_seal() must be a non-empty array");
 		RETURN_FALSE;
 	}
@@ -2749,8 +2743,8 @@ PHP_FUNCTION(openssl_seal)
 	while (zend_hash_get_current_data_ex(pubkeysht, (void **) &pubkey,
 				&pos) == SUCCESS) {
 		pkeys[i] = php_openssl_evp_from_zval(pubkey, 1, NULL, 0, &key_resources[i] TSRMLS_CC);
-		if (pkeys[i] == NULL)	{
-			zend_error(E_WARNING, "%s(): not a public key (%dth member of pubkeys)", get_active_function_name(TSRMLS_C), i);
+		if (pkeys[i] == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "not a public key (%dth member of pubkeys)", i);
 			RETVAL_FALSE;
 			goto clean_exit;
 		}
@@ -2801,7 +2795,7 @@ PHP_FUNCTION(openssl_seal)
 
 		zval_dtor(ekeys);
 		if (array_init(ekeys) == FAILURE) {
-			zend_error(E_ERROR, "Cannot initialize return value");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot initialize return value");
 			RETVAL_FALSE;
 			efree(buf);
 			goto clean_exit;
@@ -2859,9 +2853,8 @@ PHP_FUNCTION(openssl_open)
 		return;
 
 	pkey = php_openssl_evp_from_zval(&privkey, 0, "", 0, &keyresource TSRMLS_CC);
-	if (pkey == NULL)	{
-		zend_error(E_WARNING, "%s(): unable to coerce parameter 4 into a private key",
-				get_active_function_name(TSRMLS_C));
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to coerce parameter 4 into a private key");
 		RETURN_FALSE;
 	}
 	buf = emalloc(data_len + 1);
