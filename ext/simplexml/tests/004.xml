@@ -4,9 +4,11 @@
 %incent;
 ]>
 <sxe id="elem1">
+ Plain text.
  <elem1 attr1='first'>
   <!-- comment -->
   <elem2>
+   <![CDATA[CDATA block]]>
    <elem3>
     <elem4>
      <?test processing instruction ?>

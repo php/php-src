@@ -1,11 +1,11 @@
 --TEST--
-SimpleXML: Simple document
+SimpleXML and CDATA
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php 
 
-$sxe = simplexml_load_file(dirname(__FILE__).'/sxe.xml');
+$sxe = simplexml_load_file(dirname(__FILE__).'/004.xml');
 
 print_r($sxe);
 
@@ -25,6 +25,11 @@ simplexml_element Object
                 (
                     [elem3] => simplexml_element Object
                         (
+                            [included-entity] => simplexml_element Object
+                                (
+                                    [included-entity] => This is text included from an entity
+                                )
+
                             [elem4] => simplexml_element Object
                                 (
                                     [test] => simplexml_element Object
