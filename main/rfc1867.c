@@ -786,7 +786,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	zend_llist header;
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
-		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %d bytes exceeds the limit of %d bytes", SG(request_info).content_length, SG(post_max_size));
+		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
 
@@ -981,7 +981,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			
 					if (wlen < blen) {
 #if DEBUG_FILE_UPLOAD
-						sapi_module.sapi_error(E_NOTICE, "Only %d bytes were written, expected to write %ld", wlen, blen);
+						sapi_module.sapi_error(E_NOTICE, "Only %d bytes were written, expected to write %d", wlen, blen);
 #endif
 						cancel_upload = UPLOAD_ERROR_C;
 					} else {
