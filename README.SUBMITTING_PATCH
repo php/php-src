@@ -3,7 +3,8 @@ Submitting Patch for PHP
 
 This document describes how to submit a patch for PHP. Since you are
 reading this document, you are willing to submit a patch for PHP.
-Please keep reading! Submitting a patch for PHP is easy.
+Please keep reading! Submitting a patch for PHP is easy. The hard
+part is making it acceptable for inclusion into our repository. :-)
 
 How to create patch?  
 -------------------- 
@@ -32,6 +33,8 @@ Tips for creating patch
 ----------------------- 
 If you would like to fix multiple bugs. It is easier for us if you
 could create 1 patch for 1 bug, but this is not strictly required.
+Note though that you might get little response, if your patch is
+too hard to review.
 
 If you would like change/add many lines, it is better to ask module
 maintainer and/or php-dev@lists.php.net, or pear-dev@lists.php.net if
@@ -83,34 +86,38 @@ If you are patching a module, you should also send the patch to the
 maintainer. Official module maintainers are listed in EXTENSION file 
 in source.
 
-If you are pachting PEAR, send the patch to pear-dev@lists.php.net.
+If you are patching PEAR, send the patch to pear-dev@lists.php.net.
 
-Make sure you add "[PATCH]" prefix to mail subject. Please make sure
-attach the patch file even if the patch is really short one. If you 
-create a test script for your patch, attach it to the same mail. 
-Finally, explain what has been fixed/added/changed by your patch.
+Please add the prefix "[PATCH]" to your email subject and make sure
+to include the patch as a MIME attachment even if it is short. 
+Test scripts should be included in the same email.
+Explain what has been fixed/added/changed by your patch.
 
-If you know bug ID that can be closed by your patch, please note the
-bug ID number also.
+Finally, add the bug Id(s) which can be closed by your patch, if any.
 
 
-How long it will take to get response?
+What happens after you submit your patch
 -------------------------------------- 
-Since we are volunteers, it may take more than a few days to get
-response. If you didn't get any response in a few days, please let us
-know you have been submitted the patch, but you didn't get any
-response.
+If your patch is easy to review and has obviously no side-effects,
+it might take up to a few hours until someone commits it.
+
+Because this is a volunteer-driven effort, more complex patches will
+require more patience on your side. 
+
+If you did not receive any feedback in a few days, please consider
+resubmitting the description of your patch, along-side with
+these questions:
+
+- Is my patch too hard to review? Because of which factors?
+- Should I split it up in multiple parts?
+- Are there any unwanted whitespace changes?
 
 
 What happens when your patch is applied?
 ---------------------------------------- 
-When your patch is applied, it will be noted that the patch is
-submitted by you. You may see your email address in ChangeLog file. If
-your patch is important to be noted in NEWS file, your patch
-description and email address will be noted.
-
-If you would not like to be noted in ChangeLog and NEWS file, please
-let us know when you submit your patch.
+Your name will be included together with your email address in the CVS 
+commit log. If your patch affects end-users, a brief description
+and your name might be added to the NEWS file.
 
 
 Thank you for submitting patch for PHP!
