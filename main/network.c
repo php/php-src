@@ -58,7 +58,7 @@
 #endif
 
 #ifndef HAVE_INET_ATON
-int		 inet_aton(const char *, struct in_addr *);
+int inet_aton(const char *, struct in_addr *);
 #endif
 
 #include "php_network.h"
