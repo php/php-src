@@ -92,7 +92,7 @@ static int php_check_dots(const char *element, int n)
 	(len >= 2 && !php_check_dots(element, len))
 
 #define IS_DIRECTORY_CURRENT(element, len) \
-	(len == 1 && ptr[0] == '.')
+	(len == 1 && element[0] == '.')
 
 #elif defined(NETWARE)
 /* NetWare has strtok() (in LibC) and allows both slashes in paths, like Windows --
@@ -111,12 +111,12 @@ static int php_check_dots(const char *element, int n)
 
 #ifndef IS_DIRECTORY_UP
 #define IS_DIRECTORY_UP(element, len) \
-	(len == 2 && memcmp(element, "..", 2) == 0)
+	(len == 2 && element[0] == '.' && element[1] == '.')
 #endif
 
 #ifndef IS_DIRECTORY_CURRENT
 #define IS_DIRECTORY_CURRENT(element, len) \
-	(len == 1 && ptr[0] == '.')
+	(len == 1 && element[0] == '.')
 #endif
 
 /* define this to check semantics */
