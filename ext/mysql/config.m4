@@ -69,6 +69,7 @@ elif test "$PHP_MYSQL" != "no"; then
   fi
 
   MYSQL_MODULE_TYPE="external"
+
   for i in lib lib/mysql; do
     MYSQL_LIB_CHK($i)
   done
@@ -77,15 +78,25 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find mysqlclient library under $MYSQL_DIR)
   fi
 
-  PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
-
   dnl Check if mysql_config is found. If yes, use the LIBS provided by it..
   if test -x "$MYSQL_DIR/bin/mysql_config"; then
-    PHP_EVAL_LIBLINE($MYSQL_DIR/bin/mysql_config --libs)   
+    MYSQL_LIBS=`$echo $MYSQL_DIR/bin/mysql_config --libs   | sed -e "s/'//g"`
+    MYSQL_INCLUDE=`$echo $MYSQL_DIR/bin/mysql_config --cflags | sed -e "s/'//g"`
+    AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "`$MYSQL_DIR/bin/mysql_config --socket`", [Default mysql unix socket])
+  else
+    MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient"
+    MYSQL_INCLUDE="-I$MYSQL_INC_DIR"
+    PHP_MYSQL_SOCK
   fi
 
-  PHP_ADD_INCLUDE($MYSQL_INC_DIR)
+  PHP_EVAL_LIBLINE($MYSQL_LIBS, MYSQL_SHARED_LIBADD)
+  PHP_EVAL_INCLINE($MYSQL_INCLUDE)
+
 else
   MYSQL_MODULE_TYPE="none"
 fi
+
 PHP_SUBST(MYSQL_SHARED_LIBADD)
+PHP_SUBST_OLD(MYSQL_MODULE_TYPE)
+PHP_SUBST_OLD(MYSQL_LIBS)
+PHP_SUBST_OLD(MYSQL_INCLUDE)

@@ -337,8 +337,9 @@ PHP_MINFO_FUNCTION(mysql)
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
 #ifndef PHP_WIN32
+	php_info_print_table_row(2, "MYSQL_MODULE_TYPE", PHP_MYSQL_TYPE);
+	php_info_print_table_row(2, "MYSQL_SOCKET", MYSQL_UNIX_ADDR);
 	php_info_print_table_row(2, "MYSQL_INCLUDE", PHP_MYSQL_INCLUDE);
-	php_info_print_table_row(2, "MYSQL_LFLAGS", PHP_MYSQL_LFLAGS);
 	php_info_print_table_row(2, "MYSQL_LIBS", PHP_MYSQL_LIBS);
 #endif
 	php_info_print_table_end();
