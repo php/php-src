@@ -1498,7 +1498,11 @@ PHP_FUNCTION(pdf_setgray_fill)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
 
 	convert_to_double_ex(arg2);
+#if (PDFLIB_MAJORVERSION >= 4)
+	PDF_setcolor(pdf, "fill", "gray", (float) Z_DVAL_PP(arg2), 0, 0, 0);
+#else
 	PDF_setgray_fill(pdf, (float) Z_DVAL_PP(arg2));
+#endif
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1517,7 +1521,11 @@ PHP_FUNCTION(pdf_setgray_stroke)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
 
 	convert_to_double_ex(arg2);
+#if (PDFLIB_MAJORVERSION >= 4)
+	PDF_setcolor(pdf, "stroke", "gray", (float) Z_DVAL_PP(arg2), 0, 0, 0);
+#else
 	PDF_setgray_stroke(pdf, (float) Z_DVAL_PP(arg2));
+#endif
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1536,7 +1544,11 @@ PHP_FUNCTION(pdf_setgray)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
 
 	convert_to_double_ex(arg2);
+#if (PDFLIB_MAJORVERSION >= 4)
+	PDF_setcolor(pdf, "both", "gray", (float) Z_DVAL_PP(arg2), 0, 0, 0);
+#else
 	PDF_setgray(pdf, (float) Z_DVAL_PP(arg2));
+#endif
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1557,7 +1569,11 @@ PHP_FUNCTION(pdf_setrgbcolor_fill)
 	convert_to_double_ex(arg2);
 	convert_to_double_ex(arg3);
 	convert_to_double_ex(arg4);
+#if (PDFLIB_MAJORVERSION >= 4)
+	PDF_setcolor(pdf, "fill", "rgb", (float) Z_DVAL_PP(arg2), (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4), 0);
+#else
 	PDF_setrgbcolor_fill(pdf, (float) Z_DVAL_PP(arg2), (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4));
+#endif
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1578,7 +1594,11 @@ PHP_FUNCTION(pdf_setrgbcolor_stroke)
 	convert_to_double_ex(arg2);
 	convert_to_double_ex(arg3);
 	convert_to_double_ex(arg4);
+#if (PDFLIB_MAJORVERSION >= 4)
+	PDF_setcolor(pdf, "stroke", "rgb", (float) Z_DVAL_PP(arg2), (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4), 0);
+#else
 	PDF_setrgbcolor_stroke(pdf, (float) Z_DVAL_PP(arg2), (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4));
+#endif
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1599,7 +1619,11 @@ PHP_FUNCTION(pdf_setrgbcolor)
 	convert_to_double_ex(arg2);
 	convert_to_double_ex(arg3);
 	convert_to_double_ex(arg4);
+#if (PDFLIB_MAJORVERSION >= 4)
+	PDF_setcolor(pdf, "both", "rgb", (float) Z_DVAL_PP(arg2), (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4), 0);
+#else
 	PDF_setrgbcolor(pdf, (float) Z_DVAL_PP(arg2), (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4));
+#endif
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2179,11 +2203,7 @@ PHP_FUNCTION(pdf_open_file) {
 
 	if (argc == 2) {
 		convert_to_string_ex(arg2);
-#ifdef VIRTUAL_DIR
-		virtual_filepath(Z_STRVAL_PP(arg2), &filename);
-#else
 		filename = Z_STRVAL_PP(arg2);
-#endif
 		pdf_file = PDF_open_file(pdf, filename);
 	} else {
 		/* open in memory */
