@@ -1,3 +1,63 @@
+2001-02-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/oci8/config.m4
+      ext/oracle/config.m4:
+    This should make detecting the version of Oracle libs a bit more accurate
+    to avoid the 'missing libcore4' errors. (e.g. on AIX)
+    Bug reports: #9027, #8905
+
+2001-02-14  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/RFC822.php:
+    current php4 cvs doesn't like having a limit of 0 specified in preg_split;
+    it seems to take it as meaning no matches at all.
+
+2001-02-14  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/mnogosearch/config.m4: Fix build.
+
+2001-02-14  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/config.m4:
+    mnoGoSearch config.m4 freebsd compatibility fix.
+
+    * ext/mnogosearch/config.m4
+      ext/mnogosearch/php_mnogo.c:
+    Added mnogosearch version checking into config.m4.
+    Some proto fixes.
+
+2001-02-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:
+    ocifreedesc() now spits a NOTICE when called the "wrong" way.
+
+2001-02-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Added the notification of the chroot function addition
+
+    * ext/standard/dir.c: - Added an extra chdir("/"); as sugested by Sascha
+
+    * ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/php_dir.h:
+    - Added the chroot function for changing root in a script.
+
+2001-02-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO:
+    Add note about removing the requirement that you need to include the
+    respective class definition before using a session variable of the type
+    object.
+
+    This has been the best suggestion so far and is very likely to be adopted
+    in the near future.
+
+    Submitted by: Hartmut Holzgraefe
+
+2001-02-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * NEWS: *** empty log message ***
+
 2001-02-13  Colin Viebrock  <colin@easydns.com>
 
     * pear/Crypt/CBC.php: initialize two variables
