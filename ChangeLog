@@ -2,17 +2,17 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
-- fixed a crash that would occur if wddx_deserialize did not receive
+- Fixed a crash that would occur if wddx_deserialize did not receive
   a valid packet (Andrey)
 - Fixed a bugglet when redefining a class at run-time (Andi, Zend library)
-- Fix sem_get() on AIX (Sascha)
-- Make fopen() work with URL's in Win32 (Andi & Zeev)
-- Fix for include_path for Win32 (Andi, Zend library)
+- Fixed sem_get() on AIX (Sascha)
+- Fixed fopen() to work with URL's in Win32 (Andi & Zeev)
+- Fixed include_path for Win32 (Andi, Zend library)
 - Fixed bug in ISAPI header sending function (Charles)
 - Fixed memory leak when using undefined values (Andi & Zeev, Zend library)
 - Added output_buffering directive to php.ini, to enable output buffering
   for all PHP scripts (default is off).
-- Fix some more class inheritance issues (Zeev, Zend library)
+- Fixed some more class inheritance issues (Zeev, Zend library)
 - Fixed Apache build wrt to shared modules on FreeBSD/Linux (Sascha)
 - Added session.extern_referer_chk which checks whether session ids were
   referred to by an external site and eliminates them (Sascha)
