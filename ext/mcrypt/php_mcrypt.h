@@ -60,15 +60,11 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size);
 PHP_FUNCTION(mcrypt_module_get_supported_key_sizes);
 PHP_FUNCTION(mcrypt_module_close);
 
-#ifdef ZTS
 ZEND_BEGIN_MODULE_GLOBALS(mcrypt)
 	int le_h;
+	char *modes_dir;
+	char *algorithms_dir;
 ZEND_END_MODULE_GLOBALS(mcrypt)
-#else
-typedef struct mcrypt_global_struct {
-	int le_h;
-} mcrypt_global_struct;
-#endif
 
 #ifdef ZTS
 # define MCLS_D        zend_mcrypt_globals *mcrypt_globals
