@@ -1,7 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2000, Version 4.0.3-dev
+05 Oct 2000, Version 4.0.3
 - Added support for trans sid under Win32 (Daniel)
 - IPv6 support in fopen (Stig Venaas)
 - Added the shmop extension. It allows more general ways of shared memory
