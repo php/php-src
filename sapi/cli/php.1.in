@@ -90,7 +90,12 @@ contains the number of the actual line being processed. Further more
 the paramters \-B and \-E can be used to execute 
 .IR code
 (see \-r) before and
-after all input lines have been processed respectively.
+after all input lines have been processed respectively. Notice that the
+input is read from
+.B STDIN
+and therefore reading from 
+.B STDIN 
+explicitly changes the next input line or skips input lines.
 .LP
 If none of \-r \-f \-B \-R \-F or \-E is present but a single parameter is given 
 then this parameter is taken as the filename to parse and execute (same as 
