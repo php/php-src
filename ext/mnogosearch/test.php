@@ -22,7 +22,7 @@
 // Stage 1: allocate UdmSearch agent, set DBAddr and DBMode
 // DBMode is optional, "single" by default
 
-	$udm=Udm_Alloc_Agent("mysql://udm:udm@localhost/udm/",'crc-multi');
+	$udm=Udm_Alloc_Agent("mysql://udm:udm@localhost/udm/",'single');	
 	
 // Stage 2: set search parameters
 
@@ -38,21 +38,30 @@
 //	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPTABLE,"stopword");
 //	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPFILE,"stop.txt");
 	Udm_Set_Agent_Param($udm,UDM_PARAM_WEIGHT_FACTOR,"F9421");
-	Udm_Set_Agent_Param($udm,UDM_PARAM_WORD_MATCH,UDM_MATCH_SUBSTR);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_WORD_MATCH,UDM_MATCH_WORD);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_PHRASE_MODE,UDM_PHRASE_DISABLED);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_MIN_WORD_LEN,2);
-	Udm_Set_Agent_Param($udm,UDM_PARAM_MAX_WORD_LEN,5);
-	
-	if (!Udm_Set_Agent_Param($udm,UDM_PARAM_ISPELL_MODE,UDM_ISPELL_MODE_DB)) {
-		printf("Error #%d: '%s'\n",$errno,Udm_Error($udm));
-		exit;
-	}
+	Udm_Set_Agent_Param($udm,UDM_PARAM_MAX_WORD_LEN,16);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_PREFIX,UDM_PREFIX_DISABLED);
+
+//	if (! Udm_Load_Ispell_Data($udm,UDM_ISPELL_TYPE_DB,'','',1)) {
+//		printf("Error #%d: '%s'\n",Udm_Errno($udm),Udm_Error($udm));
+//		exit;
+//	}
+
+//	if ((! Udm_Load_Ispell_Data($udm,UDM_ISPELL_TYPE_AFFIX,'en','/opt/udm/ispell/en.aff',0)) ||
+//         (! Udm_Load_Ispell_Data($udm,UDM_ISPELL_TYPE_SPELL,'en','/opt/udm/ispell/en.dict',1))) {
+//		printf("Error #%d: '%s'\n",Udm_Errno($udm),Udm_Error($udm));
+//		exit;
+//	}
+
 
 // Stage 3: add search limits
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_URL,"http://www.mydomain.com/%");
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_TAG,"01");
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_CAT,"01");
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_LANG,"en");
+//	Udm_Add_Search_Limit($udm,UDM_LIMIT_DATE,"<908012006");
 
 //      Udm_Clear_Search_Limits($udm);
 	
@@ -79,8 +88,8 @@
 
 		printf("Searchtime: ".$searchtime."\n\n");
 
-		printf("Documents %d(%d)-%d(%d) from %d total found; %s\n\n",
-			$first,$first_doc,$first+$rows-1,$last_doc,$total,$wordinfo);
+		printf("Documents %d-%d from %d total found; %s\n\n",
+			$first_doc,$last_doc,$total,$wordinfo);
 
 		// Fetch all rows
 		for($i=0;$i<$rows;$i++){
@@ -103,7 +112,10 @@
 		Udm_Free_Res($res);
 	}
 
-//Stage 6: free UdmSearch agent
+//Stage 6: free ispell data if loaded before
+//	Udm_Free_Ispell_Data($udm);
+
+//Stage 7: free UdmSearch agent
 
 	Udm_Free_Agent($udm);
 ?>
