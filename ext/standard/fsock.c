@@ -648,7 +648,7 @@ char *php_sock_fgets(char *buf, size_t maxlen, int socket)
 
 	if(!p) {
 		if(sock->is_blocked) {
-			while(!p && !sock->eof && TOREAD(sock) < maxlen) {
+			while(!p && !sock->eof && !sock->timeout_event && TOREAD(sock) < maxlen) {
 				php_sockread_internal(sock);
 				SEARCHCR();
 			}
