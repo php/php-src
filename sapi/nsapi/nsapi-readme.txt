@@ -34,7 +34,7 @@ for iPlanet/SunONE Web Server 6.0 and above however at the end of the
 The "shlib" will vary depending on your OS:
 
 	Unix: "<path-to-server>/bin/libphp4.so".
-	Windows: "c:/path/to/PHP4/nsapiPHP4.dll"
+	Windows: "c:/path/to/PHP4/php4nsapi.dll"
 
 
 In obj.conf (for virtual server classes [SunONE 6.0] in their vserver.obj.conf):
