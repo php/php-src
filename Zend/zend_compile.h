@@ -282,10 +282,10 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *function
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 
-void zend_do_try(znode *try_token CLS_DC);
-void zend_do_begin_catch(znode *try_token, znode *catch_var CLS_DC);
-void zend_do_end_catch(znode *try_token CLS_DC);
-void zend_do_throw(znode *expr CLS_DC);
+void zend_do_try(znode *try_token TSRMLS_DC);
+void zend_do_begin_catch(znode *try_token, znode *catch_var TSRMLS_DC);
+void zend_do_end_catch(znode *try_token TSRMLS_DC);
+void zend_do_throw(znode *expr TSRMLS_DC);
 
 ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
