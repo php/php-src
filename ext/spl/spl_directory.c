@@ -455,17 +455,27 @@ SPL_METHOD(RecursiveDirectoryIterator, next)
 }
 /* }}} */
 
-/* {{{ proto bool RecursiveDirectoryIterator::hasChildren()
+/* {{{ proto bool RecursiveDirectoryIterator::hasChildren([bool $allow_links = false])
    Returns whether current entry is a directory and not '.' or '..' */
 SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 {
+	zend_bool allow_links = 0;
 	zval *object = getThis();
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
 	
 	if (!strcmp(intern->entry.d_name, ".") || !strcmp(intern->entry.d_name, "..")) {
 		RETURN_BOOL(0);
 	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &allow_links) == FAILURE) {
+			return;
+		}
 		spl_dir_get_path_name(intern);
+		if (!allow_links) {
+			php_stat(intern->path_name, intern->path_name_len, FS_IS_LINK, return_value TSRMLS_CC);
+			if (zend_is_true(return_value)) {
+				RETURN_BOOL(0);
+			}
+		}
 		php_stat(intern->path_name, intern->path_name_len, FS_IS_DIR, return_value TSRMLS_CC);
     }
 }
