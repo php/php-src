@@ -19,17 +19,23 @@
 
 #include "zend.h"
 #include "zend_ini_parser.h"
+#include "zend_ini_scanner.h"
 
 #undef YYSTYPE
 #define YYSTYPE zval
 
-#define YY_DECL cfglex(zval *cfglval)
+#ifdef ZTS
+#define YY_DECL int ZendIniFlexLexer::lex_scan(zval *inilval CLS_DC)
+#else
+#define YY_DECL int ini_lex_scan(zval *inilval CLS_DC)
+#endif
 
-
+#ifndef ZTS
 void init_cfg_scanner()
 {
-	cfglineno=1;
+	inilineno=1;
 }
+#endif
 
 
 %}
@@ -68,17 +74,17 @@ void init_cfg_scanner()
 
 
 <INITIAL>[ ]*("true"|"on"|"yes")[ ]* {
-	cfglval->value.str.val = zend_strndup("1",1);
-	cfglval->value.str.len = 1;
-	cfglval->type = IS_STRING;
+	inilval->value.str.val = zend_strndup("1",1);
+	inilval->value.str.len = 1;
+	inilval->type = IS_STRING;
 	return CFG_TRUE;
 }
 
 
 <INITIAL>[ ]*("false"|"off"|"no"|"none")[ ]* {
-	cfglval->value.str.val = zend_strndup("",0);
-	cfglval->value.str.len = 0;
-	cfglval->type = IS_STRING;
+	inilval->value.str.val = zend_strndup("",0);
+	inilval->value.str.len = 0;
+	inilval->type = IS_STRING;
 	return CFG_FALSE;
 }
 
@@ -95,9 +101,9 @@ void init_cfg_scanner()
 	yytext++;
 	yyleng--;
 
-	cfglval->value.str.val = zend_strndup(yytext,yyleng);
-	cfglval->value.str.len = yyleng;
-	cfglval->type = IS_STRING;
+	inilval->value.str.val = zend_strndup(yytext,yyleng);
+	inilval->value.str.len = yyleng;
+	inilval->type = IS_STRING;
 	return SECTION;
 }
 
@@ -111,9 +117,9 @@ void init_cfg_scanner()
 	/* eat leading " */
 	yytext++;
 
-	cfglval->value.str.val = zend_strndup(yytext, yyleng - 2);
-	cfglval->value.str.len = yyleng - 2;
-	cfglval->type = IS_STRING;
+	inilval->value.str.val = zend_strndup(yytext, yyleng - 2);
+	inilval->value.str.len = yyleng - 2;
+	inilval->type = IS_STRING;
 	return TC_ENCAPSULATED_STRING;
 }
 
@@ -145,9 +151,9 @@ void init_cfg_scanner()
 		}
 	}
 	if (yyleng!=0) {
-		cfglval->value.str.val = zend_strndup(yytext,yyleng);
-		cfglval->value.str.len = yyleng;
-		cfglval->type = IS_STRING;
+		inilval->value.str.val = zend_strndup(yytext,yyleng);
+		inilval->value.str.len = yyleng;
+		inilval->type = IS_STRING;
 		return TC_STRING;
 	} else {
 		/* whitespace */
