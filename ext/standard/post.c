@@ -112,7 +112,7 @@ void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_
 		}
 
 		/* Create the element */
-		array_element = (pval *) emalloc(sizeof(pval));
+		array_element = ALLOC_ZVAL();
 		INIT_PZVAL(array_element);
 		array_element->value.str.val = val;
 		array_element->value.str.len = val_len;
@@ -315,7 +315,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 		case PARSE_GET:
 		case PARSE_COOKIE:
 			if (PG(track_vars)) {
-				array_ptr = (pval *) emalloc(sizeof(pval));
+				array_ptr = ALLOC_ZVAL();
 				array_init(array_ptr);
 				INIT_PZVAL(array_ptr);
 				switch (arg) {
@@ -369,7 +369,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	if((NULL != SG(request_info).content_type) && (0 == strcmp(SG(request_info).content_type, "application/vnd.fdf"))) {
 		pval *tmp;
 
-		tmp = (pval *) emalloc(sizeof(pval));
+		tmp = ALLOC_ZVAL();
 		tmp->value.str.len = SG(request_info).post_data_length;
 		tmp->value.str.val = estrndup(SG(request_info).post_data, SG(request_info).post_data_length);
 		tmp->type = IS_STRING;

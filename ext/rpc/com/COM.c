@@ -416,7 +416,7 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			pval_arg->refcount=1;
 			zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-			handle = (pval *) emalloc(sizeof(pval));
+			handle = ALLOC_ZVAL();
 			handle->type = IS_LONG;
 			handle->value.lval = zend_list_insert(var_arg->pdispVal, le_idispatch);
 			pval_copy_constructor(handle);
@@ -915,7 +915,7 @@ void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_r
 			var_reset(object);
 			return;
 		}
-		object_handle  = (pval *) emalloc(sizeof(pval));
+		object_handle  = ALLOC_ZVAL();
 		*object_handle = *return_value;
 		pval_copy_constructor(object_handle);
 		INIT_PZVAL(object_handle);

@@ -192,7 +192,7 @@ dav_call_handler(char *funcName, int argc, pval **argv)
 		HashTable *function_table;
 
 		func = php3i_string_pval(funcName);
-		retval = emalloc(sizeof(pval));
+		retval = ALLOC_ZVAL();
 		function_table = php3i_get_function_table();
 		if (call_user_function(function_table, NULL, func, retval, argc, argv) == FAILURE) {
 			php3tls_pval_destructor(retval);
