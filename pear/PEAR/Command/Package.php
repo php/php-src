@@ -91,14 +91,23 @@ use the "slide" option to move the release tag.
 Run regression tests with PHP\'s regression testing script (run-tests.php).',
             ),
         'package-dependencies' => array(
-                                        'summary' => 'Show package dependencies',
-                                        'function' => 'doPackageDependencies',
-                                        'shortcut' => 'pd',
-                                        'options' => array(),
-                                        'doc' => '
+            'summary' => 'Show package dependencies',
+            'function' => 'doPackageDependencies',
+            'shortcut' => 'pd',
+            'options' => array(),
+            'doc' => '
 List all depencies the package has.'
-                                        ),
+            ),
+        'sign' => array(
+            'summary' => 'Sign a package distribution file',
+            'function' => 'doSign',
+            'shortcut' => 'si',
+            'options' => array(),
+            'doc' => '<package-file>
+Signs a package distribution (.tar or .tgz) file with GnuPG.',
+            ),
         );
+
     var $output;
 
     /**
@@ -278,7 +287,7 @@ List all depencies the package has.'
 
         $obj = new PEAR_Common();
         if (PEAR::isError($info = $obj->infoFromAny($params[0]))) {
-            return $info;
+            return $this->raiseError($info);
         }
 
         if (is_array($info['release_deps'])) {
@@ -324,5 +333,47 @@ List all depencies the package has.'
         // Fallback
         $this->ui->outputData("This package does not have any dependencies.", $command);
     }
+
+    function doSign($command, $options, $params)
+    {
+        // should move most of this code into PEAR_Packager
+        // so it'll be easy to implement "pear package --sign"
+        if (sizeof($params) != 1) {
+            return $this->raiseError("bad parameter(s), try \"help $command\"");
+        }
+        if (!file_exists($params[0])) {
+            return $this->raiseError("file does not exist: $params[0]");
+        }
+        $obj = new PEAR_Common;
+        $info = $obj->infoFromTgzFile($params[0]);
+        if (PEAR::isError($info)) {
+            return $this->raiseError($info);
+        }
+        include_once "Archive/Tar.php";
+        include_once "System.php";
+        $tar = new Archive_Tar($params[0]);
+        $tmpdir = System::mktemp('-d pearsign');
+        if (!$tar->extractList('package.xml package.sig', $tmpdir)) {
+            return $this->raiseError("failed to extract tar file");
+        }
+        if (file_exists("$tmpdir/package.sig")) {
+            return $this->raiseError("package already signed");
+        }
+        @unlink("$tmpdir/package.sig");
+        $input = $this->ui->userDialog($command,
+                                       array('GnuPG Passphrase'),
+                                       array('password'));
+        $gpg = popen("gpg --batch --passphrase-fd 0 --armor --detach-sign --output $tmpdir/package.sig $tmpdir/package.xml 2>/dev/null", "w");
+        if (!$gpg) {
+            return $this->raiseError("gpg command failed");
+        }
+        fwrite($gpg, "$input[0]\r");
+        if (pclose($gpg) || !file_exists("$tmpdir/package.sig")) {
+            return $this->raiseError("gpg sign failed");
+        }
+        $tar->addModify("$tmpdir/package.sig", '', $tmpdir);
+        return true;
+    }
 }
+
 ?>
