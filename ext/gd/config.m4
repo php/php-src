@@ -41,7 +41,7 @@ PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
 [  --enable-gd-native-ttf    GD: Enable TrueType string function.], no, no)
 
 PHP_ARG_ENABLE(gd-jis-conv, whether to enable JIS-mapped Japanese font support in GD,
-[  --enable-gd-jis-conv      GD: Enable JIS-mapped Japanese font suppert.], no, no)
+[  --enable-gd-jis-conv      GD: Enable JIS-mapped Japanese font support.], no, no)
 
 dnl  
 dnl Checks for the configure options 
