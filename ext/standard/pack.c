@@ -86,8 +86,8 @@ static void php_pack(pval **val, int size, int *map, char *output)
 /* pack() idea stolen from Perl (implemented formats behave the same as there)
  * Implemented formats are A,a,h,H,c,C,s,S,i,I,l,L,n,N,f,d,x,X,@.
  */
-/* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, ...]])
-   Takes 1 or more arguments and packs them into a binary string according to the format argument */
+/* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
+   Takes one or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
 	pval ***argv;
