@@ -27,6 +27,12 @@
 #include "sqlfront.h"
 #include "sqldb.h"
 
+#ifdef PHP_WIN32
+#define PHP_MSSQL_API __declspec(dllexport)
+#else
+#define PHP_MSSQL_API
+#endif
+
 #if MSSQL65
 #define MSSQL_VERSION "6.5"
 #elif MSSQL70
@@ -47,7 +53,7 @@
 #define DLEXPORT
 #endif
 
-#ifdef ZTS
+#ifdef __ZTS
 #include "TSRM.h"
 #endif
 
@@ -95,7 +101,6 @@ typedef struct {
 	long allow_persistent;
 	char *appname;
 	char *server_message;
-	int le_link,le_plink,le_result;
 	long min_error_severity, min_message_severity;
 	long cfg_min_error_severity, cfg_min_message_severity;
 	long compatability_mode, connect_timeout;
@@ -136,7 +141,7 @@ typedef struct mssql_result {
 # define MSSQLLS_CC
 # define MS_SQL_G(v)	(mssql_globals.v)
 # define MSSQLLS_FETCH()
-extern ZEND_API php_mssql_globals mssql_globals;
+extern PHP_MSSQL_API php_mssql_globals mssql_globals;
 #endif
 
 #else
