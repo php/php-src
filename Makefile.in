@@ -135,7 +135,7 @@ distclean: clean distclean-recursive
 	-rm -f *-parser.[ch] *-scanner.c *.output
 	-rm -f config.status config.cache config.log
 	-rm -f Makefile Makefile.depend php_config.h build-defs.h
-	-rm -f libphp4.module stamp-h
+	-rm -f libphp4.module stamp-h buildconf.stamp
 	-rm -f regex/*.o regex/*.a regex/*.ih
 	-rm -f doc/checkdoc doc/funcparse doc/version.ent
 	-rm -f do-conf test/test.log
