@@ -65,8 +65,8 @@ int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC);
 #define SPL_ME(class_name, function_name, arg_info, flags) \
 	PHP_ME( spl_ ## class_name, function_name, arg_info, flags)
 	
-#define SPL_ABSTRACT_ME(class_name, arg_info, flags) \
-	ZEND_ABSTRACT_ME( spl_ ## class_name, arg_info, flags)
+#define SPL_ABSTRACT_ME(class_name, function_name, arg_info) \
+	ZEND_ABSTRACT_ME( spl_ ## class_name, function_name, arg_info)
 
 #define SPL_METHOD(class_name, function_name) \
 	PHP_METHOD(spl_ ## class_name, function_name)
