@@ -1,3 +1,36 @@
+2004-04-02  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/parsedate.y:
+      - Fixed expected shift/reduce conflict count nu,ber
+
+2004-04-02  Sara Golemon  <php@alphaweb.net>
+
+    * win32/install.txt:
+      Update sample SAPI locations.  BugFix# 27829
+
+2004-04-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      ext/standard/tests/file/fgetcsv.phpt:
+      Fixed bug #27730.
+
+2004-04-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/lang/bug22367.phpt:
+      Test file was fixed (implicit cloning strict warnings)
+
+2004-04-02  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      - Fixed unintialized variables.
+
+2004-04-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bug #27742 (WDSL SOAP Parsing Schema bug)
+
 2004-04-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/zend_builtin_functions.c
