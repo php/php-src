@@ -39,7 +39,6 @@
 #endif
 
 #include <errno.h>
-#include <limits.h>
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_language_parser.h"

@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <limits.h>
 #include <ctype.h>
 #include <math.h>
 
