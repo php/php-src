@@ -1859,6 +1859,7 @@ PHP_FUNCTION(highlight_file)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &filename, &i) == FAILURE) {
 		return;
 	}
+	convert_to_string(filename);
 
 	if (i) {
 		php_start_ob_buffer (NULL, 0 TSRMLS_CC);
@@ -1891,6 +1892,7 @@ PHP_FUNCTION(highlight_string)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &expr, &i) == FAILURE) {
 		return;
 	}
+	convert_to_string(expr);
 
 	if (i) {
 		php_start_ob_buffer (NULL, 0 TSRMLS_CC);
