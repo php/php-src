@@ -602,6 +602,7 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_copy_to_stream,											NULL)
 	PHP_FE(stream_get_contents,												NULL)
 	PHP_FE(fgetcsv,															NULL)
+	PHP_FE(fputcsv,															NULL)
 	PHP_FE(flock,											 third_arg_force_ref)
 	PHP_FE(get_meta_tags,													NULL)
 	PHP_FE(stream_set_write_buffer,											NULL)
