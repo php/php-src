@@ -125,8 +125,8 @@ Changes in the Zend Engine 2.0
         $o->test();
         ?>
 
-      Abstract classes cannot be instantiated and must not contain 
-      abstract methods.
+      Classes that do not have abstract methods can be declared abstract
+      to prevent them from being instantiated.
 
       Old code that has no user-defined classes or functions named 
       'abstract' should run without modifications.
