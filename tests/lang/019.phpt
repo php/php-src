@@ -7,7 +7,7 @@ eval() test
 
 error_reporting(0);
 
-eval("cfunction test() { echo \"hey, this is a function inside an eval()!\\n\"; }");
+eval("function test() { echo \"hey, this is a function inside an eval()!\\n\"; }");
 
 $i=0;
 while ($i<10) {

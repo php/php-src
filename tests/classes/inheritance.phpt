@@ -10,19 +10,19 @@ Classes inheritance test
 class foo {
   var $a;
   var $b;
-  cfunction display() {
+  function display() {
   	echo "This is class foo\n";
     echo "a = ".$this->a."\n";
     echo "b = ".$this->b."\n";
   }
-  cfunction mul() {
+  function mul() {
     return $this->a*$this->b;
   }
 };
 
 class bar extends foo {
   var $c;
-  cfunction display() {  /* alternative display function for class bar */
+  function display() {  /* alternative display function for class bar */
     echo "This is class bar\n";
     echo "a = ".$this->a."\n";
     echo "b = ".$this->b."\n";
