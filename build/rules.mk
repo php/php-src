@@ -26,14 +26,14 @@
 
 include $(top_builddir)/config_vars.mk
 
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
+COMPILE = $(CC) $(DEFS) $(PRE_INCLUDES) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS)  $(PRE_INCLUDES) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@
 mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
-SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c $< && touch $@
+SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CC) $(DEFS)  $(PRE_INCLUDES)  $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c $< && touch $@
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I$(top_builddir)
 
 moduledir    = $(EXTENSION_DIR)
@@ -88,7 +88,7 @@ install-p: $(targets) $(install_targets)
 distclean-p depend-p clean-p:
 
 depend: depend-recursive
-	test "`echo *.c`" = '*.c' || perl $(top_srcdir)/build/mkdep.perl $(CPP) $(INCLUDES) $(EXTRA_INCLUDES) *.c > $(builddir)/.deps
+	test "`echo *.c`" = '*.c' || perl $(top_srcdir)/build/mkdep.perl $(CPP)  $(PRE_INCLUDES) $(INCLUDES) $(EXTRA_INCLUDES) *.c > $(builddir)/.deps
 
 clean: clean-recursive clean-x
 
