@@ -1,3 +1,31 @@
+2004-12-16  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_strtod.c
+      zend_strtod.c:
+      - MF43: Make it compile on HPUX on Itanium 2
+
+    * zend_strtod.c
+      zend_strtod.c:
+      - MF43: Fixed bug #31107 (strtod on solaris9/intel)
+
+2004-12-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      ChangeLog:
+      - MFH: Fix typo (avaliable -> available). (bug #28725)
+
+    * ChangeLog:
+      - Fix typo (avaliable -> available). (bug #28725)
+
+2004-12-16  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_strtod.c:
+      - MF43: Fixed bug #31110 and #31111 (Zend/zend_strtod.c problems)
+
+    * (PHP_5_0)
+      zend_strtod.c:
+      - Fixed bug #31110 and #31111 (Zend/zend_strtod.c problems)
+
 2004-12-15  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
