@@ -75,7 +75,7 @@ top_builddir = $(DEPTH)
 
 all: all-recursive $(targets)
 
-depend-recursive clean-recursive all-recursive install-recursive:
+distclean-recursive depend-recursive clean-recursive all-recursive install-recursive:
 	@target=`echo $@|sed s/-recursive//`; \
 	if test '$(NO_RECURSION)' != "$$target"; then \
 		list='$(SUBDIRS)'; for i in $$list; do \
@@ -87,10 +87,16 @@ depend-recursive clean-recursive all-recursive install-recursive:
 depend: depend-recursive
 	test "`echo *.c`" = '*.c' || perl $(top_srcdir)/build/mkdep.perl $(CPP) $(INCLUDES) *.c > .deps
 
-clean: clean-recursive
+clean: clean-recursive clean-x
+
+clean-x:
 	rm -f $(targets) *.lo *.la *.o $(CLEANFILES)
 	rm -rf .libs
 
+distclean: distclean-recursive clean-x
+	rm -f config.cache config.log config.status config_vars.mk libtool \
+	php_config.h stamp-h Makefile build-defs.h php4.spec libphp4.module
+	
 install: install-recursive $(targets) $(install_targets)
 
 install-modules:
@@ -103,4 +109,5 @@ install-modules:
 include $(srcdir)/.deps
 
 .PHONY: all-recursive clean-recursive install-recursive \
-$(install_targets) install all clean depend depend-recursive shared
+$(install_targets) install all clean depend depend-recursive shared \
+distclean-recursive distclean clean-x
