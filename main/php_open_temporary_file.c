@@ -104,7 +104,7 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
 		return NULL;
 	}
 
-	if (*path+strlen(path)-1 == '/') {
+	if (path[strlen(path)-1] == '/') {
 		trailing_slash = "";
 	} else {
 		trailing_slash = "/";
