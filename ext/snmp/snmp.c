@@ -367,7 +367,7 @@ PHP_FUNCTION(snmp_set_quick_print)
 
 /* {{{ proto int snmpset(string host, string community, string object_id, string type, mixed value [, int timeout [, int retries]]) 
 Set the value of a SNMP object */
-PHP_FUNCTION(php3_snmpset) {
+PHP_FUNCTION(snmpset) {
 	_php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11);
 }
 /* }}} */
