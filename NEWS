@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- New mbstring encoding/decoding HTML-ENTITIES. (marcus)
+- New parameter 'L' for mb_http_input() to retrieve input encoding as
 - Added the ability for declare() compiler modifications to occur globally
   by using an empty statement. (Jason, Zend Engine)
   i.e.  
