@@ -119,7 +119,7 @@ static void php3i_to64(char *s, long v, int n)	{
 
 PHP_FUNCTION(crypt)
 {
-	char salt[PHP3_MAX_SALT_LEN];
+	char salt[PHP3_MAX_SALT_LEN+1];
 	pval *arg1, *arg2;
 
 	salt[0]='\0';
