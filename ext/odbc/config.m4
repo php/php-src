@@ -28,7 +28,7 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
   esac
 
   if test -f $1/scl${ac_solid_os}30.a; then
-    ac_solid_verion=30
+    ac_solid_version=30
     ac_solid_prefix=scl
   elif test -f $1/scl${ac_solid_os}23.a; then
     ac_solid_version=23
@@ -40,16 +40,7 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
 
   ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so | cut -d' ' -f1`
  if test ! -f $ODBC_LIBS; then
-   echo $ODBC_LIBS
    ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
- fi
- if test ! -f $ODBC_LIBS; then
-     echo $ODBC_LIBS
-     ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so| cut -d' ' -f1`
- fi
- if test ! -f $ODBC_LIBS; then
-    $ODBC_LIBS
-     ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
  fi
 if test ! -f $ODBC_LIBS; then
      ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.so | cut -d' ' -f1`
@@ -146,9 +137,13 @@ AC_ARG_WITH(solid,
     ODBC_LIBDIR=$withval/lib
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=solid
-    if test -f $ODBC_LIBDIR/libsolodbc.a; then
+    if test -f $ODBC_LIBDIR/soc*35.a; then
       AC_DEFINE(HAVE_SOLID_35,1,[ ])
-    else
+	fi
+	if test -f $ODBC_LIBDIR/scl*30.a; then
+	  AC_DEFINE(HAVE_SOLID_30,1,[ ])
+	fi
+	if test -f $ODBC_LIBDIR/scl*23.a; then
       AC_DEFINE(HAVE_SOLID,1,[ ])
     fi
     AC_MSG_RESULT(yes)
