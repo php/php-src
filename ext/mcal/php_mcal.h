@@ -65,6 +65,7 @@ PHP_FUNCTION(mcal_date_valid);
 PHP_FUNCTION(mcal_time_valid);
 PHP_FUNCTION(mcal_day_of_week);
 PHP_FUNCTION(mcal_day_of_year);
+PHP_FUNCTION(mcal_week_of_year);
 PHP_FUNCTION(mcal_date_compare);
 PHP_FUNCTION(mcal_event_init);
 PHP_FUNCTION(mcal_next_recurrence);
