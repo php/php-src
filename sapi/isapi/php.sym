@@ -1,0 +1,4 @@
+GetFilterVersion
+HttpFilterProc
+GetExtensionVersion
+HttpExtensionProc

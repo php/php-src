@@ -1,30 +1,28 @@
 dnl ## $Id$ -*- sh -*-
 
-dnl AC_MSG_CHECKING(for Zeus ISAPI support)
-dnl AC_ARG_WITH(zeus,
-dnl [  --with-zeus=DIR         Build PHP as an ISAPI module for use with Zeus.],
-dnl [
-dnl 	if test "$withval" != "no"; then
-dnl 		AC_MSG_RESULT(yes)
-dnl 		if test "${enable_thread_safety}" != "yes"; then
-dnl 			AC_MSG_ERROR(You must specify --enable-thread-safety to build as an ISAPI module)
-dnl 		fi
-dnl 		if test "$withval" = "yes"; then
-dnl 			zeuspath=/usr/local/zeus # the default
-dnl 		fi
-dnl 		if ! test -f "$zeuspath/web/include/httpext.h"; then
-dnl 			AC_MSG_ERROR(Unable to find httpext.h in $zeuspath/web/include)
-dnl 		fi
-dnl 		AC_DEFINE(WITH_ZEUS)
-dnl 		AC_ADD_INCLUDE($zeuspath/web/include)
-dnl 		PHP_SAPI=isapi
-dnl 		PHP_BUILD_SHARED
-dnl 	else
-dnl 		AC_MSG_RESULT(no)
-dnl 	fi
-dnl ],[
-dnl 	AC_MSG_RESULT(no)
-dnl ])
+RESULT=no
+AC_MSG_CHECKING(for Zeus ISAPI support)
+AC_ARG_WITH(zeus,
+[  --with-zeus=DIR         Build PHP as an ISAPI module for use with Zeus.],
+[
+	enable_thread_safety=yes
+	passthru="$passthru --enable-thread-safety"
+	if test "$withval" = "yes"; then
+		ZEUSPATH=/usr/local/zeus # the default
+	else
+		ZEUSPATH=$withval
+	fi
+	if ! test -f "$ZEUSPATH/web/include/httpext.h"; then
+		AC_MSG_ERROR(Unable to find httpext.h in $ZEUSPATH/web/include)
+	fi
+	AC_DEFINE(WITH_ZEUS)
+	AC_ADD_INCLUDE($ZEUSPATH/web/include)
+	PHP_SAPI=isapi
+	PHP_BUILD_SHARED
+	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED $ZEUSPATH/web/bin/"
+	RESULT=yes
+])
+AC_MSG_RESULT($RESULT)
 
 dnl ## Local Variables:
 dnl ## tab-width: 4
