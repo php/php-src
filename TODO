@@ -43,9 +43,6 @@ global
       (DONE ?)
     * Use arg_separator.input to implode args in the CGI sapi extension
       and arg_separator.input to explode in php_build_argv(). (DONE?)
-    * Change the odbc_fetch_into() function to require ALWAYS the first two
-      parameters ($conn_id and $array), and make the third (row) be optional.
-    * Remove --with-openlink configure option (--with-iodbc replaces it).
     * Implement flush feature suitable for nested output buffers.
 
     For PHP 5.0.0
