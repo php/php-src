@@ -1,0 +1,65 @@
+RFC: subpackages
+Sept. 17, 2003
+Greg Beaver
+
+The Problem:
+------------
+Many PEAR packages consist of a core and several ancillary self-contained program elements.  Examples are:
+
+MDB/DB and database drivers
+Log and log classes
+Cache and Cache drivers
+phpDocumentor and Converters
+HTML_QuickForm and HTML_QuickForm_Controller
+
+In most cases, not all packages need be installed.  The most common example of this is DB: how many people need to use every single database driver?  Most of them just eat up disk space, except on multi-user installations.
+
+In addition, each ancillary program element may have a different stability level (sqlite driver may be beta quality, while the mysql driver is stable).  Currently, this results in a contradiction: the core is stable, but one driver is not.  What is the stability of the package?  stable or beta?  People who want to only install and use stable packages may be deceived by a package that is marked stable and contains an alpha-quality driver, for example.
+
+Plus, many PEAR packages are criticized for their bloat.
+
+The Solution:
+-------------
+Subpackages will allow the solving of all of these problems.  Note that subpackaging does not address other problems, such as bundling together related packages (PFC packages, for example, or packages needed for a framework that need not have any dependencies).  Subpackages are a dependency relation.  In other words, if Package Foo depends on Bar, Foo is not necessarily a subpackage of Bar, but might be.  However, if Foo does not depend on Bar, Foo is definitively NOT a subpackage of Bar.
+
+In other words, subpackages by definition cannot function without the presence of the core package (DB drivers are pretty pointless without DB).
+
+Note that with the presence of subpackages, a subpackages can be released with a new version number without need to release a new version of the core, allowing rapid development on unstable subpackages, and slower development on stable components.
+
+How to differentiate a subpackage from a normal dependency:
+-----------------------------------------------------------
+An addition should be made to the package.dtd file for package.xml files.  A new dependency type, "spkg" should be used to define a subpackage dependency.  This dependency type should be used by subpackages to definitively link to a parent package as a subpackage.
+
+example package Foo_Bar's package.xml dependency:
+
+<dep type="spkg" rel="has">Foo</dep> <!-- this subpackage works with all Foo -->
+-or-
+<dep type="spkg" rel="ge" version="1.5">Foo</dep> <!-- works with v1.5 or newer -->
+
+All rel values would be available including "not" if a particular version of the parent package must not be installed due to a bug affecting this particular subpackage (rare case).
+
+package Foo's package.xml dependencies may contain an optional dependency on the subpackage:
+
+<dep type="pkg" rel="has" optional="yes">Foo_Bar</dep>
+
+standard subpackages must be listed as optional dependencies in package.xml to allow easy installation with the --alldeps switch, but third party subpackages need not be listed as optional dependencies (if someone releases a custom DB driver or specialized phpDocumentor converter, for example, on their own website)
+
+Note that a required subpackage must be bundled as part of the core, and is not a subpackage - a subpackage MUST be an optional dependency.
+
+Naming/Path Conventions:
+------------------------
+Subpackages must reside in a subdirectory of the parent package, just as they would under normal circumstances as part of the package.  Foo's subpackage Bar must be named Foo_Bar, and reside in Foo/Bar.php as per PEAR conventions.
+
+pear.php.net changes:
+---------------------
+Subpackages would not be listed globally, but instead on the package page as optional components.
+
+Documentation for subpackages will reside as part of the main package's documentation.
+
+PEAR Installer changes:
+-----------------------
+pear info/remote-info would list available subpackages (remote-info only) and installed subpackages (info only)
+
+pear list would list top-level packages, with some indication of packages that have subpackages (an asterisk or something).  pear list PackageWithSubpackages would list subpackages as well
+
+pear uninstall PackageWithSubpackages would automatically uninstall any subpackages without requiring --force or other switches, as if they were simply a part of the main application.  This is due to the fact that they would be simply a part of the package if PEAR didn't support subpackages.
