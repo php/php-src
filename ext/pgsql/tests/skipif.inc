@@ -8,10 +8,6 @@
 
 include("config.inc");
 
-if (!extension_loaded("pgsql") && ini_get("enable_dl")) {
-  $dlext = (substr(PHP_OS, 0, 3) == "WIN") ? ".dll" : ".so";
-  @dl("pgsql$dlext");
-}
 if (!extension_loaded("pgsql")) {
     die("skip\n");
 }
