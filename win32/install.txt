@@ -118,15 +118,9 @@ Windows Manual installation from zip binary distribution
    Choose which extensions you would like to load when PHP
    starts, noting that several extensions are already built
    into the Windows release, see the section about
-   Windows extensions for details of the built in extensions.
+   Windows extensions for details of the built-in extensions.
    You can uncomment the: 'extension=php_*.dll' lines
    in php.ini to load these extensions.
-   Some extensions require you to have additional libraries
-   installed on your system for the module to work correctly.
-   The PHP FAQ at www.php.net/FAQ.php has more information on
-   where to get supporting libraries. You can also load a
-   module dynamically in your script using dl. See the section
-   about Windows extensions.
 
    Note that on a new installation it is advisable to first get
    PHP working and tested without any extensions before enabling
@@ -144,13 +138,6 @@ Windows Manual installation from zip binary distribution
    contains support files for SNMP. This directory should be moved to
    DRIVE:\usr\mibs (DRIVE being the drive where PHP is installed.)
 
-   Some DLLs are required for some PHP extensions. Please copy them to
-   your to your windows/system (Win9.x) or winnt/system32 (WinNT, Win2000)
-   directory. If you already have these DLLs installed on your system,
-   overwrite them only if something is not working correctly.
-   Before overwriting them, it is a good idea to back them or move them to
-   another folder - just in case something goes wrong.
-
 
 Installation of Windows extensions
 ==================================
@@ -160,12 +147,23 @@ Installation of Windows extensions
  The following table describes some of the extensions available. As
  described in the manual installation steps, you can choose which
  extensions you would like to load when PHP starts by uncommenting the:
- extension=php_*.dll' lines in php.ini. Some
- extensions require you to have additional libraries installed on
- your system for the module to work correctly. The PHP
- FAQ at at www.php.net/FAQ.php has more information on
- where to get supporting libraries. You can also load a module
- dynamically in your script using dl.
+ extension=php_*.dll' lines in php.ini.
+
+
+ ATTENTION! ATTENTION! ATTENTION!
+   Some extra DLLs are required for some PHP extensions. Please copy the
+   bundled dlls from the 'dlls/' directory in distribution package to your
+   windows/system (Win9.x) or winnt/system32 (WinNT, Win2000) directory.
+   If you already have these DLLs installed on your system,
+   overwrite them only if something is not working correctly.
+   Before overwriting them, it is a good idea to backup them or move them to
+   another folder - just in case something goes wrong.
+
+   Also note that some extensions need 3rd party libraries, 
+   e.g. php_oci8.dll needs the Oracle 8 client libraries to be installed
+   on your system. These are not bundled with PHP distribution.
+ ATTENTION! ATTENTION! ATTENTION!
+
 
  The DLLs for PHP extensions are prefixed with 'php_'.  This
  prevents confusion between PHP extensions and their supporting
@@ -173,29 +171,23 @@ Installation of Windows extensions
 
  Note:
  In PHP 4.0.5 MySQL, ODBC, FTP, Calendar, BCMath, COM, PCRE,
- Session, WDDX and XML support is <emphasis>built-in</emphasis>.
- You don't need to load any additional extensions in order to
- use these functions.
+ Session, WDDX and XML support is built-in. You don't need to
+ load any additional extensions in order to use these functions.
 
- PHP Extensions
+ Examples of PHP Extensions
 
-  php_calendar.dll  Calendar conversion functions
-  php_crypt.dll     Crypt functions
   php_dbase.dll     dBase functions
-  php_dbm.dll       Berkeley DB2 library
   php_filepro.dll   Read-only access to Filepro databases
   php_gd.dll        GD library functions for GIF manipulation
   php_hyperwave.dll HyperWave functions
-  php_imap4r2.dll   IMAP 4 functions
+  php_imap.dll      IMAP functions
   php_ldap.dll      LDAP functions
-  php_msql1.dll     mSQL 1 client
-  php_msql2.dll     mSQL 2 client
   php_mssql.dll     MSSQL client (requires MSSQL DB-Libraries)
-  php3_mysql.dll    (built into PHP 4) MySQL functions
-  php_nsmail.dll    Netscape mail functions
-  php_oci73.dll     Oracle functions
   php_snmp.dll      SNMP get and walk functions (NT only!)
   php_zlib.dll      ZLib compression functions
+
+ For more information see the section about Windows extensions at
+ http://www.php.net/manual/en/install-windows.php#install.windows.extensions
 
 
 Web server configuration
@@ -586,11 +578,11 @@ Problems?
   able to help you. You should check out the archive first, in case
   someone already answered someone else who had the same problem as
   you. The archives are available from the support page on www.php.net
-  To subscribe to the PHP installation
-  mailing list, send an empty mail to
+  To subscribe to the PHP installation mailing list, send an empty mail to:
+
   php-install-subscribe@lists.php.net
-  The mailing list address is
-  php-install@lists.php.net
+
+  The mailing list address is php-install@lists.php.net
 
   If you want to get help on the mailing list, please try to be
   precise and give the necessary details about your environment
@@ -605,10 +597,9 @@ Bug reports
  If you think you have found a bug in PHP, please report it.  The
  PHP developers probably don't know about it, and unless you
  report it, chances are it won't be fixed. You can report bugs
- using the bug-tracking system at
- http://bugs.php.net/
+ using the bug-tracking system at http://bugs.php.net/
 
  Read the Bugs-Dos-And-Donts at
  http://bugs.php.net/bugs-dos-and-donts.php
- before submitting any bug reports!
+ _BEFORE_ submitting any bug reports!
 
