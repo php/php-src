@@ -1,6 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- new idate() function.
+  new date_sunrise() function.
+  new date_sunset() function.
+- Added support for long options in CLI & CGI (e.g. --version). (Marcus)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Fixed bug #22059 (ftp_chdir causes segfault). (Sara)
