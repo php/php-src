@@ -41,6 +41,9 @@ ZEND_API void convert_scalar_to_number(zval *op)
 			case IS_DOUBLE:
 			case IS_LONG:
 				break;
+			case IS_BOOL:
+				op->type = IS_LONG;
+				break;
 #if WITH_BCMATH
 			case IS_BC:
 				op->type = IS_DOUBLE; /* may have lost significant digits */
@@ -73,6 +76,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		} \
 		(op) = &(holder); \
 	} else if ((op)->type==IS_BOOL || (op)->type==IS_RESOURCE) { \
+		(holder) = *(op); \
 		(holder).type = IS_LONG; \
 		(op) = &(holder); \
 	}
