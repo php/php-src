@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Informix module ported (Danny)
 - Removed --with-shared-apache (Sascha)
 - Added patch for reverse lookup table in base64_decode (Sascha)
   Submitted by bfranklin@dct.com
