@@ -610,7 +610,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	efree(lcname);
 	RETURN_FALSE;
 }
-/* }}} */
+
 
 /* {{{ proto bool is_subclass_of(object object, string class_name)
     Returns true if the object has this class as one of its parents */
@@ -955,6 +955,7 @@ ZEND_FUNCTION(restore_error_handler)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
 
 static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
@@ -1186,6 +1187,7 @@ ZEND_FUNCTION(get_defined_constants)
 	array_init(return_value);
 	zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) add_constant_info, return_value TSRMLS_CC);
 }
+/* }}} */
 
 
 /* {{{ proto void debug_backtrace(void)
@@ -1251,6 +1253,7 @@ ZEND_FUNCTION(debug_backtrace)
 		}
 	}
 }
+/* }}} */
 
 
 /* {{{ proto bool extension_loaded(string extension_name)
