@@ -1,3 +1,21 @@
+2001-11-23  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php:
+    Added a new method executeQuery() that prepares and execute a statement
+    (don't you do that too many times?)
+
+    * pear/DB/IDEAS: more IDEAS-TODO
+
+2001-11-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/php_mysql.c:
+    - Reverse slight mistake (patch by Markus Fischer)
+
+2001-11-23  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/zlib/zlib.c:
+    restriction is relaxed because output handler couldn't be used even if zlib.output_compression is set to off.
+
 2001-11-22  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/mcal/php_mcal.c: - Beautifying
