@@ -60,7 +60,6 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 void php_var_dump(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht = NULL;
-	zend_object *object = NULL;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -93,7 +92,6 @@ void php_var_dump(zval **struc, int level TSRMLS_DC)
 		php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
 		goto head_done;
 	case IS_OBJECT:
-		object = Z_OBJ_PP(struc);
 		myht = Z_OBJPROP_PP(struc);
 		if (myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
