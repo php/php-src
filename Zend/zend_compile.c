@@ -2519,6 +2519,7 @@ static void do_verify_abstract_class(TSRMLS_D)
 
 	opline->opcode = ZEND_VERIFY_ABSTRACT_CLASS;
 	opline->op1 = CG(implementing_class);
+	SET_UNUSED(opline->op2);
 }
 
 
