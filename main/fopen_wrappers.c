@@ -82,15 +82,12 @@
 #endif
 /* }}} */
 
-typedef FILE * (*php_fopen_url_wrapper_t) (const char *, char *, int, int *, int *, char **) ;
-
-static FILE *php_fopen_url_wrapper(const char *, char *, int, int *, int *, char **);
-
-HashTable fopen_url_wrappers_hash;
+static FILE *php_fopen_url_wrapper(const char *, char *, int, int *, int *, char ** TSRMLS_DC);
+static HashTable fopen_url_wrappers_hash;
 
 /* {{{ php_register_url_wrapper
  */
-PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path) TSRMLS_DC)
+PHPAPI int php_register_url_wrapper(char *protocol, php_fopen_url_wrapper_t wrapper TSRMLS_DC)
 {
 	if(PG(allow_url_fopen)) {
 		return zend_hash_add(&fopen_url_wrappers_hash, protocol, strlen(protocol), &wrapper, sizeof(wrapper), NULL);
@@ -226,10 +223,9 @@ PHPAPI int php_check_open_basedir(char *path TSRMLS_DC)
 
 /* {{{ php_fopen_and_set_opened_path
  */
-static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_path)
+static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_path TSRMLS_DC)
 {
 	FILE *fp;
-	TSRMLS_FETCH();
 
 	if (php_check_open_basedir((char *)path TSRMLS_CC)) {
 		return NULL;
@@ -244,43 +240,42 @@ static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **
 
 /* {{{ php_fopen_wrapper
  */
-PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
-    if(!path) return NULL;
-	if(!*path) return NULL;
-
 	if (opened_path) {
 		*opened_path = NULL;
 	}
 
+    if(!path || !*path) {
+		return NULL;
+	}
+
+
 	if(PG(allow_url_fopen)) {
 		if (!(options & IGNORE_URL)) {
-			return php_fopen_url_wrapper(path, mode, options, issock, socketd, opened_path);
+			return php_fopen_url_wrapper(path, mode, options, issock, socketd, opened_path TSRMLS_CC);
 		}
 	}
 
 	if (options & USE_PATH && PG(include_path) != NULL) {
-		return php_fopen_with_path(path, mode, PG(include_path), opened_path);
+		return php_fopen_with_path(path, mode, PG(include_path), opened_path TSRMLS_CC);
 	} else {
 		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_fopen_and_set_opened_path(path, mode, opened_path);
+		return php_fopen_and_set_opened_path(path, mode, opened_path TSRMLS_CC);
 	}
 }
 /* }}} */
 
 /* {{{ php_fopen_primary_script
  */
-PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
+PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 {
 	FILE *fp;
 	struct stat st;
 	char *path_info, *filename;
 	int length;
-	TSRMLS_FETCH();
 
 	filename = SG(request_info).path_translated;
 	path_info = SG(request_info).request_uri;
@@ -375,7 +370,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
  * Tries to open a file with a PATH-style list of directories.
  * If the filename starts with "." or "/", the path is ignored.
  */
-PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path)
+PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path TSRMLS_DC)
 {
 	char *pathbuf, *ptr, *end;
 	char *exec_fname;
@@ -388,7 +383,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	int filename_length;
 	int safe_mode_include_dir_length;
 	int exec_fname_length;
-	TSRMLS_FETCH();
 
 	if (opened_path) {
 		*opened_path = NULL;
@@ -405,7 +399,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_fopen_and_set_opened_path(filename, mode, opened_path);
+		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
 	
 	/*
@@ -429,7 +423,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 #endif
 			{
 				/* absolute path matches safe_mode_include_dir */
-				fp = php_fopen_and_set_opened_path(trypath, mode, opened_path);
+				fp = php_fopen_and_set_opened_path(trypath, mode, opened_path TSRMLS_CC);
 				if (fp) {
 					return fp;
 				}
@@ -438,14 +432,14 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_fopen_and_set_opened_path(filename, mode, opened_path);
+		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
 
 	if (!path || (path && !*path)) {
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_fopen_and_set_opened_path(filename, mode, opened_path);
+		return php_fopen_and_set_opened_path(filename, mode, opened_path TSRMLS_CC);
 	}
 
 	/* check in provided path */
@@ -491,7 +485,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 #endif
 			{
 				/* trypath is in safe_mode_include_dir */
-				fp = php_fopen_and_set_opened_path(trydir, mode, opened_path);
+				fp = php_fopen_and_set_opened_path(trydir, mode, opened_path TSRMLS_CC);
 				if (fp) {
 					efree(pathbuf);
 					return fp;
@@ -504,7 +498,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 				return NULL;
 			}
 		}
-		fp = php_fopen_and_set_opened_path(trypath, mode, opened_path);
+		fp = php_fopen_and_set_opened_path(trypath, mode, opened_path TSRMLS_CC);
 		if (fp) {
 			efree(pathbuf);
 			return fp;
@@ -519,13 +513,12 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
  
 /* {{{ php_fopen_url_wrapper
  */
-static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
 {
 	FILE *fp = NULL;
 	const char *p;
 	const char *protocol=NULL;
 	int n=0;
-
 
 	for (p=path; isalnum((int)*p); p++) {
 		n++;
@@ -542,13 +535,11 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 			protocol=NULL;
 		}
 		if (wrapper) {
-			return (*wrapper)(path, mode, options, issock, socketd, opened_path);	
+			return (*wrapper)(path, mode, options, issock, socketd, opened_path TSRMLS_CC);
 		}
 	} 
 
 	if (!protocol || !strncasecmp(protocol, "file",n)){
-		TSRMLS_FETCH();
-		
 		*issock = 0;
 		
 		if(protocol) {
@@ -562,12 +553,12 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 		}		
 
 		if (options & USE_PATH) {
-			fp = php_fopen_with_path((char *) path, mode, PG(include_path), opened_path);
+			fp = php_fopen_with_path((char *) path, mode, PG(include_path), opened_path TSRMLS_CC);
 		} else {
 			if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM))) {
 				fp = NULL;
 			} else {
-				fp = php_fopen_and_set_opened_path(path, mode, opened_path);
+				fp = php_fopen_and_set_opened_path(path, mode, opened_path TSRMLS_CC);
 			}
 		}
 		return (fp);

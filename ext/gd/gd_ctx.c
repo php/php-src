@@ -49,7 +49,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	if ((argc == 2) || (argc == 3 && Z_STRLEN_PP(file))) {
-		if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
+		if (!fn || fn == empty_string || php_check_open_basedir(fn TSRMLS_CC)) {
 			php_error(E_WARNING, "%s: invalid filename '%s'", get_active_function_name(TSRMLS_C), fn);
 			RETURN_FALSE;
 		}

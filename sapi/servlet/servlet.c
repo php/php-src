@@ -348,7 +348,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		 */
 		SETSTRING( SG(request_info).path_translated, pathTranslated );
 #ifdef VIRTUAL_DIR
-		retval = php_fopen_primary_script(&file_handle);
+		retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 #else
 		/*
 		 * The java runtime doesn't like the working directory to be
@@ -356,7 +356,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		 * in the hopes that Java doesn't notice.
 		 */
 		getcwd(cwd,MAXPATHLEN);
-		retval = php_fopen_primary_script(&file_handle);
+		retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 		chdir(cwd);
 #endif
 		

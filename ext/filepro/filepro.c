@@ -218,7 +218,7 @@ PHP_FUNCTION(filepro)
 		RETURN_FALSE;
 	}
 	
-	if (php_check_open_basedir(workbuf)) {
+	if (php_check_open_basedir(workbuf TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -316,7 +316,7 @@ PHP_FUNCTION(filepro_rowcount)
 		RETURN_FALSE;
 	}
 	
-	if (php_check_open_basedir(workbuf)) {
+	if (php_check_open_basedir(workbuf TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -540,7 +540,7 @@ PHP_FUNCTION(filepro_retrieve)
 		RETURN_FALSE;
 	}
 	
-	if (php_check_open_basedir(workbuf)) {
+	if (php_check_open_basedir(workbuf TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 

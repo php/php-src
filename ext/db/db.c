@@ -307,7 +307,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 		return NULL;
 	}
 
-	if (php_check_open_basedir(filename)) {
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
 		return NULL;
 	}
 

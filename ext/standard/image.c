@@ -436,7 +436,7 @@ PHP_FUNCTION(getimagesize)
 		break;
 	}
 
-	fp = php_fopen_wrapper(Z_STRVAL_PP(arg1), "rb", IGNORE_PATH|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper(Z_STRVAL_PP(arg1), "rb", IGNORE_PATH|ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
 
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {

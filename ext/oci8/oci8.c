@@ -2930,7 +2930,7 @@ PHP_FUNCTION(ocisavelobfile)
 
 		convert_to_string_ex(arg);
 
-		if (php_check_open_basedir((*arg)->value.str.val)) {
+		if (php_check_open_basedir((*arg)->value.str.val TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
 
@@ -3050,7 +3050,7 @@ PHP_FUNCTION(ociwritelobtofile)
 		}
 
 		if (filename && *filename) {
-			if (php_check_open_basedir(filename)) {
+			if (php_check_open_basedir(filename TSRMLS_CC)) {
 				goto bail;
 			}
 

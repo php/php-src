@@ -59,7 +59,7 @@ static COOKIE_IO_FUNCTIONS_T gz_cookie_functions =
 , gz_closer
 };
 
-FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
 {
 	struct gz_cookie *gc = NULL;
 	FILE *fp;
@@ -75,7 +75,7 @@ FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *
 		
 		path++;
 
-		fp = php_fopen_wrapper(path, mode, options|IGNORE_URL, &fissock, &fsocketd, NULL);
+		fp = php_fopen_wrapper(path, mode, options|IGNORE_URL, &fissock, &fsocketd, NULL TSRMLS_CC);
 		
 		if (!fp) {
 			free(gc);

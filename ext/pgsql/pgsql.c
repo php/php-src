@@ -1436,7 +1436,7 @@ PHP_FUNCTION(pg_trace)
     ZEND_FETCH_RESOURCE2(pgsql, PGconn *, z_pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	convert_to_string_ex(z_filename);
 
-	fp = php_fopen_wrapper(Z_STRVAL_PP(z_filename), mode, ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper(Z_STRVAL_PP(z_filename), mode, ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
 
 	if (!fp) {
 		php_error(E_WARNING, "Unable to open %s for logging", Z_STRVAL_PP(z_filename));

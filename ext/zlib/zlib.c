@@ -165,7 +165,7 @@ PHP_MINIT_FUNCTION(zlib)
 #if HAVE_FOPENCOOKIE
 
 	if(PG(allow_url_fopen)) {
-		php_register_url_wrapper("zlib",zlib_fopen_wrapper TSRMLS_CC);
+		php_register_url_wrapper("zlib", zlib_fopen_wrapper TSRMLS_CC);
 	}
 #endif
 
@@ -229,12 +229,12 @@ PHP_MINFO_FUNCTION(zlib)
 
 /* {{{ php_gzopen_wrapper
  */
-static gzFile php_gzopen_wrapper(char *path, char *mode, int options)
+static gzFile php_gzopen_wrapper(char *path, char *mode, int options TSRMLS_DC)
 {
 	FILE *f;
 	int issock=0, socketd=0;
 
-	f = php_fopen_wrapper(path, mode, options, &issock, &socketd, NULL);
+	f = php_fopen_wrapper(path, mode, options, &issock, &socketd, NULL TSRMLS_CC);
 
 	if (!f) {
 		return NULL;
@@ -272,7 +272,7 @@ PHP_FUNCTION(gzfile)
 	}
 	convert_to_string_ex(filename);
 
-	zp = php_gzopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
+	zp = php_gzopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (!zp) {
 		php_error(E_WARNING,"gzFile(\"%s\") - %s",(*filename)->value.str.val,strerror(errno));
 		RETURN_FALSE;
@@ -332,7 +332,7 @@ PHP_FUNCTION(gzopen)
 	 * We need a better way of returning error messages from
 	 * php_gzopen_wrapper().
 	 */
-	zp = php_gzopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE);
+	zp = php_gzopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (!zp) {
 		php_error(E_WARNING,"gzopen(\"%s\",\"%s\") - %s",
 					(*arg1)->value.str.val, p, strerror(errno));
@@ -640,7 +640,7 @@ PHP_FUNCTION(readgzfile)
 	 * We need a better way of returning error messages from
 	 * php_gzopen_wrapper().
 	 */
-	zp = php_gzopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
+	zp = php_gzopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (!zp){
 		php_error(E_WARNING,"ReadGzFile(\"%s\") - %s",(*arg1)->value.str.val,strerror(errno));
 		RETURN_FALSE;
