@@ -47,31 +47,8 @@
 
 /* Exception throwing macro */
 #define _DO_THROW(msg)                                                                                      \
-	{                                                                                                       \
-    extern zend_class_entry *default_exception_ptr;                                                         \
-	zval *ex;                                                                                               \
-	zval *tmp;                                                                                              \
-	MAKE_STD_ZVAL(ex);                                                                                      \
-	object_init_ex(ex, default_exception_ptr);                                                              \
-                                                                                                            \
-	MAKE_STD_ZVAL(tmp);                                                                                     \
-	ZVAL_STRING(tmp, (msg), 1);                                                                             \
-	zend_hash_update(Z_OBJPROP_P(ex), "message", sizeof("message"), (void **) &tmp, sizeof(zval *), NULL);  \
-	tmp = NULL;                                                                                             \
-                                                                                                            \
-	MAKE_STD_ZVAL(tmp);                                                                                     \
-	ZVAL_STRING(tmp, zend_get_executed_filename(TSRMLS_C), 1);                                              \
-	zend_hash_update(Z_OBJPROP_P(ex), "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL);        \
-	tmp = NULL;                                                                                             \
-                                                                                                            \
-	MAKE_STD_ZVAL(tmp);                                                                                     \
-	ZVAL_LONG(tmp, zend_get_executed_lineno(TSRMLS_C));                                                     \
-	zend_hash_update(Z_OBJPROP_P(ex), "line", sizeof("line"), (void **) &tmp, sizeof(zval *), NULL);        \
-	tmp = NULL;                                                                                             \
-                                                                                                            \
-	EG(exception) = ex;                                                                                     \
+	zend_throw_exception(msg, 1 TSRMLS_CC);                                                                 \
 	return;                                                                                                 \
-	}
 
 /* Smart string macros */
 
