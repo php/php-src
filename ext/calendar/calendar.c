@@ -299,7 +299,7 @@ PHP_FUNCTION(jdtogregorian)
 	SdnToGregorian((*julday)->value.lval, &year, &month, &day);
 	sprintf(date, "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date,1);
+	RETURN_STRING(date, 1);
 }
 /* }}} */
 
@@ -318,7 +318,7 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(day);
 	convert_to_long_ex(year);
 
-	jdate = GregorianToSdn((*year)->value.lval, (*month)->value.lval,(*day)->value.lval);
+	jdate = GregorianToSdn((*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
 
 	RETURN_LONG(jdate);
 }
@@ -340,7 +340,7 @@ PHP_FUNCTION(jdtogregorian)
 	SdnToJulian((*julday)->value.lval, &year, &month, &day);
 	sprintf(date, "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date,1);
+	RETURN_STRING(date, 1);
 }
 /* }}} */
 
@@ -359,7 +359,7 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(day);
 	convert_to_long_ex(year);
 
-	jdate = JulianToSdn((*year)->value.lval,(*month)->value.lval, (*day)->value.lval);
+	jdate = JulianToSdn((*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
 
 	RETURN_LONG(jdate);
 }
@@ -382,7 +382,7 @@ PHP_FUNCTION(jdtogregorian)
 	SdnToJewish((*julday)->value.lval, &year, &month, &day);
 	sprintf(date, "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date,1);
+	RETURN_STRING(date, 1);
 }
 /* }}} */
 
@@ -401,7 +401,7 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(day);
 	convert_to_long_ex(year);
 
-	jdate = JewishToSdn((*year)->value.lval,(*month)->value.lval, (*day)->value.lval);
+	jdate = JewishToSdn((*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
 
 	RETURN_LONG(jdate);
 }
@@ -424,7 +424,7 @@ PHP_FUNCTION(jdtogregorian)
 	SdnToFrench((*julday)->value.lval, &year, &month, &day);
 	sprintf(date, "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date,1);
+	RETURN_STRING(date, 1);
 }
 /* }}} */
 
@@ -443,7 +443,7 @@ PHP_FUNCTION(jdtogregorian)
 	convert_to_long_ex(day);
 	convert_to_long_ex(year);
 
-	jdate = FrenchToSdn((*year)->value.lval,(*month)->value.lval,(*day)->value.lval);
+	jdate = FrenchToSdn((*year)->value.lval, (*month)->value.lval, (*day)->value.lval);
 
 	RETURN_LONG(jdate);
 }
@@ -456,9 +456,9 @@ PHP_FUNCTION(jdtogregorian)
 	pval *julday, *mode;
 	int day;
 	char *daynamel, *daynames;
-	int myargc=ZEND_NUM_ARGS(),mymode=0;
+	int myargc=ZEND_NUM_ARGS(), mymode=0;
 	
-	if ((myargc < 1) || (myargc > 2) || (zend_get_parameters(ht,myargc, &julday, &mode) != SUCCESS)) {
+	if ((myargc < 1) || (myargc > 2) || (zend_get_parameters(ht, myargc, &julday, &mode) != SUCCESS)) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -474,10 +474,10 @@ PHP_FUNCTION(jdtogregorian)
 
 		switch (mymode) {
 			case CAL_DOW_SHORT:
-				RETURN_STRING(daynamel,1);
+				RETURN_STRING(daynamel, 1);
 				break;
 			case CAL_DOW_LONG:
-				RETURN_STRING(daynames,1);
+				RETURN_STRING(daynames, 1);
 				break;
 			case CAL_DOW_DAYNO:
 			default:
@@ -504,33 +504,33 @@ PHP_FUNCTION(jdtogregorian)
 
 	switch((*mode)->value.lval) {
 		case CAL_MONTH_GREGORIAN_LONG:			/* gregorian or julian month */
-			SdnToGregorian((*julday)->value.lval,&year, &month, &day);
+			SdnToGregorian((*julday)->value.lval, &year, &month, &day);
 			monthname = MonthNameLong[month];
 			break;
 		case CAL_MONTH_JULIAN_SHORT:			/* gregorian or julian month */
-			SdnToJulian((*julday)->value.lval, &year,&month, &day);
+			SdnToJulian((*julday)->value.lval, &year, &month, &day);
 			monthname = MonthNameShort[month];
 			break;
 		case CAL_MONTH_JULIAN_LONG:			/* gregorian or julian month */
-			SdnToJulian((*julday)->value.lval, &year,&month, &day);
+			SdnToJulian((*julday)->value.lval, &year, &month, &day);
 			monthname = MonthNameLong[month];
 			break;
 		case CAL_MONTH_JEWISH:			/* jewish month */
-			SdnToJewish((*julday)->value.lval, &year,&month, &day);
+			SdnToJewish((*julday)->value.lval, &year, &month, &day);
 			monthname = JewishMonthName[month];
 			break;
 		case CAL_MONTH_FRENCH:			/* french month */
-			SdnToFrench((*julday)->value.lval, &year,&month, &day);
+			SdnToFrench((*julday)->value.lval, &year, &month, &day);
 			monthname = FrenchMonthName[month];
 			break;
 		default:			/* default gregorian */
 		case CAL_MONTH_GREGORIAN_SHORT:			/* gregorian or julian month */
-			SdnToGregorian((*julday)->value.lval,&year, &month, &day);
+			SdnToGregorian((*julday)->value.lval, &year, &month, &day);
 			monthname = MonthNameShort[month];
 			break;
 	}
 
-	RETURN_STRING(monthname,1);
+	RETURN_STRING(monthname, 1);
 }
 /* }}} */
 

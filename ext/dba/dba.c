@@ -51,7 +51,7 @@ function_entry dba_functions[] = {
 	PHP_FE(dba_nextkey, NULL)
 	PHP_FE(dba_optimize, NULL)
 	PHP_FE(dba_sync, NULL)
-	{NULL,NULL,NULL}
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
@@ -299,7 +299,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		keylen = 0;
 		
 		for(i = 0; i < ac; i++) {
-			memcpy(key+keylen,Z_STRVAL_PP(args[i]),Z_STRLEN_PP(args[i]));
+			memcpy(key+keylen, Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]));
 			keylen += Z_STRLEN_PP(args[i]);
 		}
 		
@@ -332,7 +332,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			modenr = DBA_TRUNC;
 			break;
 		default:
-			php_error(E_WARNING,"illegal DBA mode: %s",(*args[1])->value.str.val);
+			php_error(E_WARNING, "illegal DBA mode: %s", (*args[1])->value.str.val);
 			FREENOW;
 			RETURN_FALSE;
 	}

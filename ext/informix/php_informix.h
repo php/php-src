@@ -101,8 +101,8 @@ PHP_FUNCTION(ifxus_tell_slob);
 
 ZEND_BEGIN_MODULE_GLOBALS(ifx)
 	long default_link;
-	long num_links,num_persistent;
-	long max_links,max_persistent;
+	long num_links, num_persistent;
+	long max_links, max_persistent;
 	long allow_persistent;
 	char *default_host, *default_user, *default_password;
 	int connectionid;

@@ -17,6 +17,15 @@
 * -----------------
 *
 * $Log$
+* Revision 1.2  2000/07/02 23:46:41  sas
+* Change header protection macros to conform to standard.
+*
+* Draft 3 of IEEE 1003.1 200x, "2.2 The Compilation Environment"
+*
+*   All identifiers that begin with an underscore and either an uppercase
+*   letter or another underscore are always reserved for any use by the
+*   implementation.
+*
 * Revision 1.1  1999/04/21 23:37:47  ssb
 * moved db
 *
@@ -141,35 +150,35 @@
 #define  NUMELE(a)    (sizeof(a)/sizeof(*(a)))
 #define  LASTELE(a)    ((a) + (NUMELE(a)-1))
 #ifdef  LDATA
-#define  TOOHIGH(a,p)  ((long)PHYS(p) - (long)PHYS(a) > (long)(NUMELE(a)-1))
-#define  TOOLOW(a,p)    ((long)PHYS(p) - (long)PHYS(a) < 0)
+#define  TOOHIGH(a, p)  ((long)PHYS(p) - (long)PHYS(a) > (long)(NUMELE(a)-1))
+#define  TOOLOW(a, p)    ((long)PHYS(p) - (long)PHYS(a) < 0)
 #else
-#define  TOOHIGH(a,p)  ((long)(p) - (long)(a) > (long)(NUMELE(a)-1))
-#define  TOOLOW(a,p)    ((long)(p) - (long)(a) < 0)
+#define  TOOHIGH(a, p)  ((long)(p) - (long)(a) > (long)(NUMELE(a)-1))
+#define  TOOLOW(a, p)    ((long)(p) - (long)(a) < 0)
 #endif
-#define  INBOUNDS(a,p)  ( ! (TOOHIGH(a,p) || TOOLOW(a,p)) )
+#define  INBOUNDS(a, p)  ( ! (TOOHIGH(a, p) || TOOLOW(a, p)) )
 
-#define  _IS(t,x) (((t)1 << (x)) != 0)  /* Evaluates true if the width of */
+#define  _IS(t, x) (((t)1 << (x)) != 0)  /* Evaluates true if the width of */
                     /* variable of type t is < x.    */
                     /* The != 0 assures that the      */
                     /* answer is 1 or 0          */
 
-#define  NBITS(t) (4 * (1 + _IS(t,4) + _IS(t,8) + _IS(t,12) + _IS(t,16) \
-             + _IS(t,20) + _IS(t,24) + _IS(t,28) + _IS(t,32)))
+#define  NBITS(t) (4 * (1 + _IS(t, 4) + _IS(t, 8) + _IS(t, 12) + _IS(t, 16) \
+             + _IS(t, 20) + _IS(t, 24) + _IS(t, 28) + _IS(t, 32)))
 
 #define  MAXINT      (((unsigned)~0) >> 1)
 
 #ifndef  MAX
-#    define MAX(a,b)  ( ((a) > (b)) ? (a) : (b))
+#    define MAX(a, b)  ( ((a) > (b)) ? (a) : (b))
 #endif
 #ifndef  MIN
-#    define MIN(a,b) ( ((a) < (b)) ? (a) : (b))
+#    define MIN(a, b) ( ((a) < (b)) ? (a) : (b))
 #endif
 #ifndef  ABS
 #    define ABS(a)  ((a) >= 0 ? (a) : -(a))
 #endif
 
-#define  RANGE(a,b,c)  ( (a) <= (b) && (b) <= (c) )
+#define  RANGE(a, b, c)  ( (a) <= (b) && (b) <= (c) )
 
 /* General typedefs  */
 

@@ -75,7 +75,7 @@ PHP_MINIT_FUNCTION(dbase)
 #if defined(THREAD_SAFE)
 	dbase_global_struct *dbase_globals;
 #ifdef COMPILE_DL_DBASE
-	CREATE_MUTEX(dbase_mutex,"DBase_TLS");
+	CREATE_MUTEX(dbase_mutex, "DBase_TLS");
 	SET_MUTEX(dbase_mutex);
 	numthreads++;
 	if (numthreads==1){
@@ -123,7 +123,7 @@ PHP_FUNCTION(dbase_open)
 	int handle;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbf_name,&options)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &dbf_name, &options)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(dbf_name);
@@ -157,7 +157,7 @@ PHP_FUNCTION(dbase_close)
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &dbh_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -181,7 +181,7 @@ PHP_FUNCTION(dbase_numrecords)
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &dbh_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -204,7 +204,7 @@ PHP_FUNCTION(dbase_numfields)
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &dbh_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -227,7 +227,7 @@ PHP_FUNCTION(dbase_pack)
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &dbh_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -257,7 +257,7 @@ PHP_FUNCTION(dbase_add_record)
 	int i;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbh_id,&fields)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &dbh_id, &fields)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -331,7 +331,7 @@ PHP_FUNCTION(dbase_replace_record)
 	int i;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht,3,&dbh_id,&fields,&recnum)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &dbh_id, &fields, &recnum)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -395,7 +395,7 @@ PHP_FUNCTION(dbase_delete_record)
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &dbh_id, &record)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -433,7 +433,7 @@ PHP_FUNCTION(dbase_get_record)
 	size_t cursize = 0;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &dbh_id, &record)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -471,7 +471,7 @@ PHP_FUNCTION(dbase_get_record)
 	        switch (cur_f->db_type) {
 		case 'C':
 		case 'D':
-			add_next_index_string(return_value,str_value,1);
+			add_next_index_string(return_value, str_value, 1);
 			break;
 		case 'N':	/* FALLS THROUGH */
 		case 'L':	/* FALLS THROUGH */
@@ -495,10 +495,10 @@ PHP_FUNCTION(dbase_get_record)
 
 	/* mark whether this record was deleted */
 	if (data[0] == '*') {
-		add_assoc_long(return_value,"deleted",1);
+		add_assoc_long(return_value, "deleted", 1);
 	}
 	else {
-		add_assoc_long(return_value,"deleted",0);
+		add_assoc_long(return_value, "deleted", 0);
 	}
 
 	free(data);
@@ -517,7 +517,7 @@ PHP_FUNCTION(dbase_get_record_with_names)
 	char *data, *fnp, *str_value;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &dbh_id, &record)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -550,14 +550,14 @@ PHP_FUNCTION(dbase_get_record_with_names)
 		switch (cur_f->db_type) {
 			case 'C':
 			case 'D':
-				add_assoc_string(return_value,cur_f->db_fname,str_value,1);
+				add_assoc_string(return_value, cur_f->db_fname, str_value, 1);
 				break;
 			case 'N':       /* FALLS THROUGH */
 			case 'L':       /* FALLS THROUGH */
 				if (cur_f->db_fdc == 0) {
-					add_assoc_long(return_value,cur_f->db_fname,strtol(str_value, NULL, 10));
+					add_assoc_long(return_value, cur_f->db_fname, strtol(str_value, NULL, 10));
 				} else {
-					add_assoc_double(return_value,cur_f->db_fname,atof(str_value));
+					add_assoc_double(return_value, cur_f->db_fname, atof(str_value));
 				}
 				break;
 			case 'M':
@@ -573,9 +573,9 @@ PHP_FUNCTION(dbase_get_record_with_names)
 
 	/* mark whether this record was deleted */
 	if (data[0] == '*') {
-		add_assoc_long(return_value,"deleted",1);
+		add_assoc_long(return_value, "deleted", 1);
 	} else {
-		add_assoc_long(return_value,"deleted",0);
+		add_assoc_long(return_value, "deleted", 0);
 	}
 
 	free(data);
@@ -595,7 +595,7 @@ PHP_FUNCTION(dbase_create)
 	int i, rlen, handle;
 	DBase_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&filename,&fields)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &filename, &fields)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(filename);
@@ -682,7 +682,7 @@ PHP_FUNCTION(dbase_create)
 		copy_crimp(cur_f->db_fname, (*value)->value.str.val, (*value)->value.str.len);
 
 		/* field type */
-		if (zend_hash_index_find(Z_ARRVAL_PP (field), 1,(void **)&value) == FAILURE) {
+		if (zend_hash_index_find(Z_ARRVAL_PP (field), 1, (void **)&value) == FAILURE) {
 			php_error(E_WARNING, "expected field type as sececond element of list in field %d", i);
 			RETURN_FALSE;
 		}
@@ -707,7 +707,7 @@ PHP_FUNCTION(dbase_create)
 		case 'N':
 		case 'C':
 			/* field length */
-			if (zend_hash_index_find(Z_ARRVAL_PP (field), 2,(void **)&value) == FAILURE) {
+			if (zend_hash_index_find(Z_ARRVAL_PP (field), 2, (void **)&value) == FAILURE) {
 				php_error(E_WARNING, "expected field length as third element of list in field %d", i);
 				free_dbf_head(dbh);
 				RETURN_FALSE;

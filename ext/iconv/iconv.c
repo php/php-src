@@ -38,13 +38,13 @@
 
 
 #if HAVE_LIBICONV
-#define icv_open(a,b) libiconv_open(a,b)
+#define icv_open(a, b) libiconv_open(a, b)
 #define icv_close(a) libiconv_close(a)
-#define icv(a,b,c,d,e) libiconv(a,b,c,d,e)
+#define icv(a, b, c, d, e) libiconv(a, b, c, d, e)
 #else
-#define icv_open(a,b) iconv_open(a,b)
+#define icv_open(a, b) iconv_open(a, b)
 #define icv_close(a) iconv_close(a)
-#define icv(a,b,c,d,e) iconv(a,b,c,d,e)
+#define icv(a, b, c, d, e) iconv(a, b, c, d, e)
 #endif
 
 
@@ -225,17 +225,17 @@ PHP_FUNCTION(iconv_set_encoding)
 	convert_to_string_ex(type);
 	convert_to_string_ex(charset);
 
-	if(!strcasecmp("input_encoding",Z_STRVAL_PP(type))) {
+	if(!strcasecmp("input_encoding", Z_STRVAL_PP(type))) {
 		if (ICONVG(input_encoding)) {
 			free(ICONVG(input_encoding));
 		}
 		ICONVG(input_encoding) = estrndup(Z_STRVAL_PP(charset), Z_STRLEN_PP(charset));
-	} else if(!strcasecmp("output_encoding",Z_STRVAL_PP(type))) {
+	} else if(!strcasecmp("output_encoding", Z_STRVAL_PP(type))) {
 		if (ICONVG(output_encoding)) {
 			free(ICONVG(output_encoding));
 		}
 		ICONVG(output_encoding) = estrndup(Z_STRVAL_PP(charset), Z_STRLEN_PP(charset));
-	} else if(!strcasecmp("internal_encoding",Z_STRVAL_PP(type))) {
+	} else if(!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
 		if (ICONVG(internal_encoding)) {
 			free(ICONVG(internal_encoding));
 		}
@@ -261,7 +261,7 @@ PHP_FUNCTION(iconv_get_encoding)
 
 	convert_to_string_ex(type);
 
-	if (argc == 0 || !strcasecmp("all",Z_STRVAL_PP(type))) {
+	if (argc == 0 || !strcasecmp("all", Z_STRVAL_PP(type))) {
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
@@ -271,11 +271,11 @@ PHP_FUNCTION(iconv_get_encoding)
 						 ICONVG(output_encoding), 1);
 		add_assoc_string(return_value, "internal_encoding", 
 						 ICONVG(internal_encoding), 1);
-	} else if (!strcasecmp("input_encoding",Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("input_encoding", Z_STRVAL_PP(type))) {
 		RETVAL_STRING(ICONVG(input_encoding), 1);
-	} else if (!strcasecmp("output_encoding",Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("output_encoding", Z_STRVAL_PP(type))) {
 		RETVAL_STRING(ICONVG(output_encoding), 1);
-	} else if (!strcasecmp("internal_encoding",Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
 		RETVAL_STRING(ICONVG(internal_encoding), 1);
 	} else {
 		RETURN_FALSE;

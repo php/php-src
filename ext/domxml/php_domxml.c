@@ -312,9 +312,9 @@ static zval *dom_object_get_data(void *obj) {
 		sprintf(tmp, "%08X", obj);
 		fprintf(stderr, "Trying getting %s from object ...", tmp);
 		if(((xmlNodePtr) obj)->_private)
-		fprintf(stderr," found\n");
+		fprintf(stderr, " found\n");
 		else
-		fprintf(stderr," not found\n"); */
+		fprintf(stderr, " not found\n"); */
 	return((zval *) (((xmlNodePtr) obj)->_private));
 }
 
@@ -423,9 +423,9 @@ static zval *xpath_object_get_data(void *obj)
 	sprintf(tmp, "%08X", obj);
 	fprintf(stderr, "Trying getting %s from hash ...", tmp); 
 	if(((xmlXPathObjectPtr) obj)->user)
-		fprintf(stderr," found\n"); 
+		fprintf(stderr, " found\n"); 
 	else
-		fprintf(stderr," not found\n"); */
+		fprintf(stderr, " not found\n"); */
 	return((zval *) (((xmlXPathObjectPtr) obj)->user));
 }
 
@@ -506,9 +506,9 @@ static zval *xpath_context_get_data(void *obj)
 	sprintf(tmp, "%08X", obj);
 	fprintf(stderr, "Trying getting %s from hash ...", tmp); 
 	if(((xmlXPathContextPtr) obj)->user)
-		fprintf(stderr," found\n"); 
+		fprintf(stderr, " found\n"); 
 	else
-		fprintf(stderr," not found\n"); */
+		fprintf(stderr, " not found\n"); */
 	return((zval *) (((xmlXPathContextPtr) obj)->user));
 }
 
@@ -2599,7 +2599,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 }
 /* }}} */
 
-/* {{{ proto int xpath_eval([int xpathctx_handle,] string str)
+/* {{{ proto int xpath_eval([int xpathctx_handle, ] string str)
    Evaluate the XPath Location Path in the given string */
 PHP_FUNCTION(xpath_eval)
 {
@@ -2607,7 +2607,7 @@ PHP_FUNCTION(xpath_eval)
 }
 /* }}} */
 
-/* {{{ proto int xpath_eval_expression([int xpathctx_handle,] string str)
+/* {{{ proto int xpath_eval_expression([int xpathctx_handle, ] string str)
    Evaluate the XPath Location Path in the given string */
 PHP_FUNCTION(xpath_eval_expression)
 {
@@ -2617,7 +2617,7 @@ PHP_FUNCTION(xpath_eval_expression)
 #endif /* defined(LIBXML_XPATH_ENABLED) */
 
 #if defined(LIBXML_XPTR_ENABLED)
-/* {{{ proto int xptr_eval([int xpathctx_handle,] string str)
+/* {{{ proto int xptr_eval([int xpathctx_handle, ] string str)
    Evaluate the XPtr Location Path in the given string */
 PHP_FUNCTION(xptr_eval)
 {

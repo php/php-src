@@ -45,11 +45,11 @@ function_entry crack_functions[] = {
 zend_module_entry crack_module_entry = {
 	"crack",
 	crack_functions,
-	ZEND_MINIT(crack),
-	ZEND_MSHUTDOWN(crack),
-	ZEND_RINIT(crack),
-	ZEND_RSHUTDOWN(crack),
-	PHP_MINFO(crack),
+	ZEND_MODULE_STARTUP_N(crack),
+	ZEND_MODULE_SHUTDOWN_N(crack),
+	ZEND_MODULE_ACTIVATE_N(crack),
+	ZEND_MODULE_DEACTIVATE_N(crack),
+	ZEND_MODULE_INFO_N(crack),
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -91,7 +91,7 @@ void _close_crack_dict(PWDICT *pwdict)
 	PWClose(pwdict);
 }
 
-ZEND_MINIT_FUNCTION(crack)
+ZEND_MODULE_STARTUP_D(crack)
 {
 	REGISTER_INI_ENTRIES();
 
@@ -100,13 +100,13 @@ ZEND_MINIT_FUNCTION(crack)
 	return SUCCESS;
 }
 
-ZEND_MSHUTDOWN_FUNCTION(crack)
+ZEND_MODULE_SHUTDOWN_D(crack)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
-ZEND_RINIT_FUNCTION(crack)
+ZEND_MODULE_ACTIVATE_D(crack)
 {
 	CRACKG(last_message) = NULL;
 	CRACKG(current_id) = -1;
@@ -114,7 +114,7 @@ ZEND_RINIT_FUNCTION(crack)
 	return SUCCESS;
 }
 
-ZEND_RSHUTDOWN_FUNCTION(crack)
+ZEND_MODULE_DEACTIVATE_D(crack)
 {
 	if (NULL != CRACKG(last_message)) {
 		efree(CRACKG(last_message));
@@ -122,7 +122,7 @@ ZEND_RSHUTDOWN_FUNCTION(crack)
 	return SUCCESS;
 }
 
-PHP_MINFO_FUNCTION(crack)
+ZEND_MODULE_INFO_D(crack)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "crack support", "enabled");
@@ -185,7 +185,7 @@ ZEND_FUNCTION(crack_closedict)
 }
 /* }}} */
 
-/* {{{ proto string crack_check([int dictionary,] string password)
+/* {{{ proto string crack_check([int dictionary, ] string password)
    Performs an obscure check with the given password */
 ZEND_FUNCTION(crack_check)
 {

@@ -210,28 +210,28 @@ static char *php_get_info_db(void)
 	temp[0]='\0';
 
 #ifdef DB_VERSION_STRING /* using sleepycat dbm */
-	strcat(temp,DB_VERSION_STRING);
+	strcat(temp, DB_VERSION_STRING);
 #endif
 
 #if GDBM
-	sprintf(temp1,"%s",gdbm_version);
-	strcat(temp,temp1);
+	sprintf(temp1, "%s", gdbm_version);
+	strcat(temp, temp1);
 #endif
 
 #if NDBM && !GDBM
-	strcat(temp,"ndbm support enabled");
+	strcat(temp, "ndbm support enabled");
 #endif	
 
 #if !GDBM && !NDBM
-	strcat(temp,"flat file support enabled");
+	strcat(temp, "flat file support enabled");
 #endif	
 
 #if NFS_HACK
-	strcat(temp,"NFS hack in effect");
+	strcat(temp, "NFS hack in effect");
 #endif
 
 	if (!*temp)
-		strcat(temp,"No database support");
+		strcat(temp, "No database support");
 
 	return temp;
 }
@@ -253,7 +253,7 @@ PHP_MINFO_FUNCTION(db)
 PHP_FUNCTION(dblist)
 {
 	char *str = php_get_info_db();
-	RETURN_STRING(str,1);
+	RETURN_STRING(str, 1);
 }
 /* }}} */
 
@@ -265,7 +265,7 @@ PHP_FUNCTION(dbmopen)
 	dbm_info *info=NULL;
 	int ret;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht,2,&filename,&mode)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht, 2, &filename, &mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -336,16 +336,16 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 		strcat(lockfn, ".lck");
 
 #if NFS_HACK 
-		while((last_try = VCWD_STAT(lockfn,&sb))==0) {
+		while((last_try = VCWD_STAT(lockfn, &sb))==0) {
 			retries++;
 			php_sleep(1);
 			if (retries>30) break;
 		}	
 		if (last_try!=0) {
-			lockfd = open(lockfn,O_RDWR|O_CREAT,0644);
+			lockfd = open(lockfn, O_RDWR|O_CREAT, 0644);
 			close(lockfd);
 		} else {
-			php_error(E_WARNING, "File appears to be locked [%s]\n",lockfn);
+			php_error(E_WARNING, "File appears to be locked [%s]\n", lockfn);
 			return -1;
 		}
 #else /* NFS_HACK */
@@ -353,10 +353,10 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 		lockfd = VCWD_OPEN_MODE(lockfn, O_RDWR|O_CREAT, 0644);
 
 		if (lockfd) {
-			flock(lockfd,LOCK_EX);
+			flock(lockfd, LOCK_EX);
 			close(lockfd);
 		} else {
-			php_error(E_WARNING, "Unable to establish lock: %s",filename);
+			php_error(E_WARNING, "Unable to establish lock: %s", filename);
 		}
 #endif /* else NFS_HACK */
 
@@ -385,7 +385,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 		return info;
 	} else {
 #if GDBM 
-		php_error(E_WARNING, "dbmopen_gdbm(%s): %d [%s], %d [%s]",filename,gdbm_errno,gdbm_strerror(gdbm_errno),errno,strerror(errno));
+		php_error(E_WARNING, "dbmopen_gdbm(%s): %d [%s], %d [%s]", filename, gdbm_errno, gdbm_strerror(gdbm_errno), errno, strerror(errno));
 		if (gdbm_errno)
 			ret = gdbm_errno;
 		else if (errno)
@@ -395,13 +395,13 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 #else 
 #if NDBM 
 #if PHP_DEBUG
-		php_error(E_WARNING, "dbmopen_ndbm(%s): errno = %d [%s]\n",filename,errno,strerror(errno));
+		php_error(E_WARNING, "dbmopen_ndbm(%s): errno = %d [%s]\n", filename, errno, strerror(errno));
 #endif
 		if (errno) ret=errno;
 		else ret = -1;
 #else
 #if PHP_DEBUG
-		php_error(E_WARNING, "dbmopen_flatfile(%s): errno = %d [%s]\n",filename,errno,strerror(errno));
+		php_error(E_WARNING, "dbmopen_flatfile(%s): errno = %d [%s]\n", filename, errno, strerror(errno));
 #endif
 		if (errno) ret=errno;
 		else ret = -1;
@@ -426,7 +426,7 @@ PHP_FUNCTION(dbmclose)
 {
 	pval *id;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht,1,&id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
@@ -455,7 +455,7 @@ int php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 #else
 	if (info->lockfn) {
 		lockfd = VCWD_OPEN_MODE(info->lockfn, O_RDWR, 0644);
-		flock(lockfd,LOCK_UN);
+		flock(lockfd, LOCK_UN);
 		close(lockfd);
 	}
 #endif
@@ -485,7 +485,7 @@ PHP_FUNCTION(dbminsert)
 	dbm_info *info;
 	int ret;
 
-	if (ZEND_NUM_ARGS()!=3||zend_get_parameters(ht,3,&id,&key,&value) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3||zend_get_parameters(ht, 3, &id, &key, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -545,7 +545,7 @@ PHP_FUNCTION(dbmreplace)
 	dbm_info *info;
 	int ret;
 
-	if (ZEND_NUM_ARGS()!=3||zend_get_parameters(ht,3,&id,&key,&value) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3||zend_get_parameters(ht, 3, &id, &key, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -607,7 +607,7 @@ PHP_FUNCTION(dbmfetch)
 	dbm_info *info;
 	char *ret;
 
-	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht, 2, &id, &key)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -683,7 +683,7 @@ PHP_FUNCTION(dbmexists)
 	dbm_info *info;
 	int ret;
 
-	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht, 2, &id, &key)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -732,7 +732,7 @@ PHP_FUNCTION(dbmdelete)
 	dbm_info *info;
 	int ret;
 
-	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht, 2, &id, &key)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -780,7 +780,7 @@ PHP_FUNCTION(dbmfirstkey)
 	dbm_info *info;
 	char *ret;
 
-	if (ZEND_NUM_ARGS()!=1||zend_get_parameters(ht,1,&id)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1||zend_get_parameters(ht, 1, &id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -841,7 +841,7 @@ PHP_FUNCTION(dbmnextkey)
 	dbm_info *info;
 	char *ret;
 
-	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht, 2, &id, &key)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -920,20 +920,20 @@ int flatfile_store(FILE *dbf, datum key_datum, datum value_datum, int mode) {
 		if (flatfile_findkey(dbf, key_datum)) {
 			return 1;
 		}
-		fseek(dbf,0L,SEEK_END);
-		fprintf(dbf,"%d\n",key_datum.dsize);
+		fseek(dbf, 0L, SEEK_END);
+		fprintf(dbf, "%d\n", key_datum.dsize);
 		fflush(dbf);
-		ret = write(fileno(dbf),key_datum.dptr,key_datum.dsize);
-		fprintf(dbf,"%d\n",value_datum.dsize);
+		ret = write(fileno(dbf), key_datum.dptr, key_datum.dsize);
+		fprintf(dbf, "%d\n", value_datum.dsize);
 		fflush(dbf);
-		ret = write(fileno(dbf),value_datum.dptr,value_datum.dsize);
+		ret = write(fileno(dbf), value_datum.dptr, value_datum.dsize);
 	} else { /* DBM_REPLACE */
-		flatfile_delete(dbf,key_datum);
-		fprintf(dbf,"%d\n",key_datum.dsize);
+		flatfile_delete(dbf, key_datum);
+		fprintf(dbf, "%d\n", key_datum.dsize);
 		fflush(dbf);
-		ret = write(fileno(dbf),key_datum.dptr,key_datum.dsize);
-		fprintf(dbf,"%d\n",value_datum.dsize);
-		ret = write(fileno(dbf),value_datum.dptr,value_datum.dsize);
+		ret = write(fileno(dbf), key_datum.dptr, key_datum.dsize);
+		fprintf(dbf, "%d\n", value_datum.dsize);
+		ret = write(fileno(dbf), value_datum.dptr, value_datum.dsize);
 	}
 
 	if (ret>0)
@@ -949,7 +949,7 @@ datum flatfile_fetch(FILE *dbf, datum key_datum) {
 	int num=0, buf_size=1024;
 	char *buf;	
 
-	if (flatfile_findkey(dbf,key_datum)) {
+	if (flatfile_findkey(dbf, key_datum)) {
 		buf = emalloc((buf_size+1) * sizeof(char));
 		if (fgets(buf, 15, dbf)) {
 			num = atoi(buf);
@@ -957,7 +957,7 @@ datum flatfile_fetch(FILE *dbf, datum key_datum) {
 				buf_size+=num;
 				buf = emalloc((buf_size+1)*sizeof(char));
 			}
-			read(fileno(dbf),buf,num);
+			read(fileno(dbf), buf, num);
 			value_datum.dptr = buf;
 			value_datum.dsize = num;
 		}
@@ -1006,7 +1006,7 @@ int flatfile_delete(FILE *dbf, datum key_datum) {
 		}	
 
 		/* read in the length of the value */
-		if (!fgets(buf,15,dbf))
+		if (!fgets(buf, 15, dbf))
 			break;
 		num = atoi(buf);
 		if (num > buf_size) {
@@ -1037,7 +1037,7 @@ int flatfile_findkey(FILE *dbf, datum key_datum) {
 	rewind(dbf);
 	buf = emalloc((buf_size+1)*sizeof(char));
 	while (!feof(dbf)) {
-		if (!fgets(buf,15,dbf)) break;
+		if (!fgets(buf, 15, dbf)) break;
 		num = atoi(buf);
 		if (num > buf_size) {
 			if (buf) efree(buf);
@@ -1048,12 +1048,12 @@ int flatfile_findkey(FILE *dbf, datum key_datum) {
 		if (num<0) break;
 		*(buf+num) = '\0';
 		if (size == num) {
-			if (!memcmp(buf,key,size)) {
+			if (!memcmp(buf, key, size)) {
 				ret = 1;
 				break;
 			}
 		}	
-		if (!fgets(buf,15,dbf))
+		if (!fgets(buf, 15, dbf))
 			break;
 		num = atoi(buf);
 		if (num > buf_size) {
@@ -1080,28 +1080,28 @@ datum flatfile_firstkey(FILE *dbf) {
 	rewind(dbf);
 	buf.dptr = emalloc((buf_size+1)*sizeof(char));
 	while(!feof(dbf)) {
-		if (!fgets(buf.dptr,15,dbf)) break;
+		if (!fgets(buf.dptr, 15, dbf)) break;
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf.dptr) efree(buf.dptr);
 			buf.dptr = emalloc((buf_size+1)*sizeof(char));
 		}
-		num=read(fileno(dbf),buf.dptr,num);
+		num=read(fileno(dbf), buf.dptr, num);
 		if (num<0) break;
 		buf.dsize = num;
 		if (*(buf.dptr)!=0) {
 			CurrentFlatFilePos = ftell(dbf);
 			return(buf);
 		}
-		if (!fgets(buf.dptr,15,dbf)) break;
+		if (!fgets(buf.dptr, 15, dbf)) break;
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf.dptr) efree(buf.dptr);
 			buf.dptr = emalloc((buf_size+1)*sizeof(char));
 		}
-		num=read(fileno(dbf),buf.dptr,num);
+		num=read(fileno(dbf), buf.dptr, num);
 		if (num<0) break;
 	}
 	if (buf.dptr) efree(buf.dptr);
@@ -1117,26 +1117,26 @@ datum flatfile_nextkey(FILE *dbf) {
 	int num;
 	int buf_size=1024;
 
-	fseek(dbf,CurrentFlatFilePos,SEEK_SET);
+	fseek(dbf, CurrentFlatFilePos, SEEK_SET);
 	buf.dptr = emalloc((buf_size+1)*sizeof(char));
 	while(!feof(dbf)) {
-		if (!fgets(buf.dptr,15,dbf)) break;
+		if (!fgets(buf.dptr, 15, dbf)) break;
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf.dptr) efree(buf.dptr);
 			buf.dptr = emalloc((buf_size+1)*sizeof(char));
 		}
-		num=read(fileno(dbf),buf.dptr,num);
+		num=read(fileno(dbf), buf.dptr, num);
 		if (num<0) break;
-		if (!fgets(buf.dptr,15,dbf)) break;
+		if (!fgets(buf.dptr, 15, dbf)) break;
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			if (buf.dptr) efree(buf.dptr);
 			buf.dptr = emalloc((buf_size+1)*sizeof(char));
 		}
-		num=read(fileno(dbf),buf.dptr,num);
+		num=read(fileno(dbf), buf.dptr, num);
 		if (num<0) break;
 		buf.dsize = num;
 		if (*(buf.dptr)!=0) {
@@ -1168,7 +1168,7 @@ PHP_MINIT_FUNCTION(db)
 		}
 	}
 	PHP_MUTEX_UNLOCK(dbm_mutex);
-	if(!PHP3_TLS_THREAD_INIT(DbmTls,dbm_globals,dbm_global_struct)){
+	if(!PHP3_TLS_THREAD_INIT(DbmTls, dbm_globals, dbm_global_struct)){
 		PHP_MUTEX_FREE(dbm_mutex);
 		return FAILURE;
 	}
@@ -1223,7 +1223,7 @@ function_entry dbm_functions[] = {
 	PHP_FE(dbmdelete,								NULL)
 	PHP_FE(dbmfirstkey,								NULL)
 	PHP_FE(dbmnextkey,								NULL)
-	{NULL,NULL,NULL}
+	{NULL, NULL, NULL}
 };
 /* }}} */
 

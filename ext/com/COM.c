@@ -544,7 +544,7 @@ PHP_FUNCTION(com_load)
 		{
 			efree(obj);
 			error_message = php_COM_error_message(hr);  
-			php_error(E_WARNING,"Invalid ProgID or Moniker:  %s\n", error_message);
+			php_error(E_WARNING, "Invalid ProgID or Moniker:  %s\n", error_message);
 			LocalFree(error_message);
 			RETURN_FALSE;
 		}
@@ -583,7 +583,7 @@ PHP_FUNCTION(com_load)
 		{
 			error_message = php_COM_error_message(hr);
 			clsid_str = php_string_from_clsid(&clsid);
-			php_error(E_WARNING,"Unable to obtain IDispatch interface for CLSID %s:  %s",clsid_str,error_message);
+			php_error(E_WARNING, "Unable to obtain IDispatch interface for CLSID %s:  %s", clsid_str, error_message);
 			LocalFree(error_message);
 			efree(clsid_str);
 			efree(obj);
@@ -668,7 +668,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 
 			default:
 				/* TODO: complain about wrong arg count */
-				php_error(E_WARNING,"Wrong argument count to IEnumVariant::Next()\n");
+				php_error(E_WARNING, "Wrong argument count to IEnumVariant::Next()\n");
 
 				return FAILURE;
 		}
@@ -690,7 +690,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		if(FAILED(hr = C_ENUMVARIANT_VT(obj)->Next(C_ENUMVARIANT(obj), count, pSA->pvData, &count)))
 		{
 			char *error_message = php_COM_error_message(hr);
-			php_error(E_WARNING,"IEnumVariant::Next() failed:  %s\n", error_message);
+			php_error(E_WARNING, "IEnumVariant::Next() failed:  %s\n", error_message);
 			efree(error_message);
 			SafeArrayDestroy(pSA);
 			VariantInit(var_result);
@@ -703,7 +703,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 			if(FAILED(SafeArrayRedim(pSA, rgsabound)))
 			{
 				char *error_message = php_COM_error_message(hr);
-				php_error(E_WARNING,"IEnumVariant::Next() failed:  %s\n", error_message);
+				php_error(E_WARNING, "IEnumVariant::Next() failed:  %s\n", error_message);
 				efree(error_message);
 				SafeArrayDestroy(pSA);
 				VariantInit(var_result);
@@ -718,7 +718,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		if(FAILED(hr = C_ENUMVARIANT_VT(obj)->Reset(C_ENUMVARIANT(obj))))
 		{
 			char *error_message = php_COM_error_message(hr);
-			php_error(E_WARNING,"IEnumVariant::Next() failed:  %s\n", error_message);
+			php_error(E_WARNING, "IEnumVariant::Next() failed:  %s\n", error_message);
 			efree(error_message);
 			return FAILURE;
 		}
@@ -740,13 +740,13 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 				break;
 
 			default:
-				php_error(E_WARNING,"Wrong argument count to IEnumVariant::Skip()\n");
+				php_error(E_WARNING, "Wrong argument count to IEnumVariant::Skip()\n");
 				return FAILURE;
 		}
 		if(FAILED(hr = C_ENUMVARIANT_VT(obj)->Skip(C_ENUMVARIANT(obj), count)))
 		{
 			char *error_message = php_COM_error_message(hr);
-			php_error(E_WARNING,"IEnumVariant::Next() failed:  %s\n", error_message);
+			php_error(E_WARNING, "IEnumVariant::Next() failed:  %s\n", error_message);
 			efree(error_message);
 			return FAILURE;
 		}
@@ -762,7 +762,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		if(FAILED(hr))
 		{
 			error_message = php_COM_error_message(hr);
-			php_error(E_WARNING,"Unable to lookup %s:  %s\n", Z_STRVAL_P(function_name), error_message);
+			php_error(E_WARNING, "Unable to lookup %s:  %s\n", Z_STRVAL_P(function_name), error_message);
 			LocalFree(error_message);
 			efree(funcname);
 			return FAILURE;
@@ -789,7 +789,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		if(FAILED(hr))
 		{
 			error_message = php_COM_error_message(hr);
-			php_error(E_WARNING,"Invoke() failed:  %s\n", error_message);
+			php_error(E_WARNING, "Invoke() failed:  %s\n", error_message);
 			LocalFree(error_message);
 			return FAILURE;
 		}
@@ -827,7 +827,7 @@ PHP_FUNCTION(com_invoke)
 	obj = (comval *)zend_list_find(Z_LVAL_P(object), &type);
 	if(!obj || (type != IS_COM))
 	{
-		php_error(E_WARNING,"%d is not a COM object handler", Z_STRVAL_P(function_name));
+		php_error(E_WARNING, "%d is not a COM object handler", Z_STRVAL_P(function_name));
 		RETURN_FALSE;
 	}
 
@@ -868,7 +868,7 @@ PHP_FUNCTION(com_release)
 	obj = (comval *)zend_list_find(Z_LVAL_P(object), &type);
 	if(!obj || (type != IS_COM))
 	{
-		php_error(E_WARNING,"%d is not a COM object handler");
+		php_error(E_WARNING, "%d is not a COM object handler");
 		RETURN_FALSE;
 	}
 
@@ -900,7 +900,7 @@ PHP_FUNCTION(com_addref)
 	obj = (comval *)zend_list_find(Z_LVAL_P(object), &type);
 	if(!obj || (type != IS_COM))
 	{
-		php_error(E_WARNING,"%d is not a COM object handler");
+		php_error(E_WARNING, "%d is not a COM object handler");
 		RETURN_FALSE;
 	}
 
@@ -941,7 +941,7 @@ static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, 
 	if(FAILED(hr))
 	{
 		error_message = php_COM_error_message(hr);
-		php_error(E_WARNING,"Unable to lookup %s:  %s\n", Z_STRVAL_P(arg_property), error_message);
+		php_error(E_WARNING, "Unable to lookup %s:  %s\n", Z_STRVAL_P(arg_property), error_message);
 		LocalFree(error_message);
 		efree(propname);
 		if(cleanup)
@@ -959,7 +959,7 @@ static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, 
 	if(FAILED(hr))
 	{
 		error_message = php_COM_error_message(hr);
-		php_error(E_WARNING,"PropGet() failed:  %s\n", error_message);
+		php_error(E_WARNING, "PropGet() failed:  %s\n", error_message);
 		LocalFree(error_message);
 		efree(propname);
 		if(cleanup)
@@ -1000,7 +1000,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 	if(FAILED(hr))
 	{
 		error_message = php_COM_error_message(hr);
-		php_error(E_WARNING,"Unable to lookup %s:  %s\n", Z_STRVAL_P(arg_property), error_message);
+		php_error(E_WARNING, "Unable to lookup %s:  %s\n", Z_STRVAL_P(arg_property), error_message);
 		LocalFree(error_message);
 		efree(propname);
 		RETURN_FALSE;
@@ -1017,7 +1017,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 	if(FAILED(hr))
 	{
 		error_message = php_COM_error_message(hr);
-		php_error(E_WARNING,"PropPut() failed:  %s\n", error_message);
+		php_error(E_WARNING, "PropPut() failed:  %s\n", error_message);
 		LocalFree(error_message);
 		efree(propname);
 		RETURN_FALSE;
@@ -1062,7 +1062,7 @@ PHP_FUNCTION(com_propget)
 	obj = (comval *)zend_list_find(Z_LVAL_P(arg_comval), &type);
 	if(!obj || (type != IS_COM))
 	{
-		php_error(E_WARNING,"%d is not a COM object handler", Z_LVAL_P(arg_comval));
+		php_error(E_WARNING, "%d is not a COM object handler", Z_LVAL_P(arg_comval));
 	}
 	convert_to_string_ex(&arg_property);
 
@@ -1094,7 +1094,7 @@ PHP_FUNCTION(com_propput)
 	obj = (comval *)zend_list_find(Z_LVAL_P(arg_comval), &type);
 	if(!obj || (type != IS_COM))
 	{
-		php_error(E_WARNING,"%d is not a COM object handler", Z_LVAL_P(arg_comval));
+		php_error(E_WARNING, "%d is not a COM object handler", Z_LVAL_P(arg_comval));
 	}
 	convert_to_string_ex(&arg_property);
 
@@ -1483,7 +1483,7 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 			/* at each version for a string match to the */
 			/* supplied argument */
 
-			if(ERROR_SUCCESS != RegOpenKey(HKEY_CLASSES_ROOT, "TypeLib",&hkey))
+			if(ERROR_SUCCESS != RegOpenKey(HKEY_CLASSES_ROOT, "TypeLib", &hkey))
 			{
 				/* This is pretty bad - better bail */
 				return NULL;
@@ -1634,7 +1634,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 					/* Check to see if they are the same */
 					if (!compare_function(&results, &c.value, &exists TSRMLS_CC) && INI_INT("com.autoregister_verbose"))
 					{
-						php_error(E_WARNING,"Type library value %s is already defined and has a different value", c.name);
+						php_error(E_WARNING, "Type library value %s is already defined and has a different value", c.name);
 					}
 					free(ids);
 					j++;
@@ -1678,7 +1678,7 @@ PHP_FUNCTION(com_isenum)
 	obj = (comval *) zend_list_find(Z_LVAL_PP(comval_handle), &type);
 	if(!obj || (type != IS_COM))
 	{
-		php_error(E_WARNING,"%s is not a COM object handler", "");
+		php_error(E_WARNING, "%s is not a COM object handler", "");
 		RETURN_FALSE;
 	}
 

@@ -271,7 +271,7 @@ PHP_FUNCTION(filepro)
 	}
 	fclose(fp);
 		
-	FP_GLOBAL(fp_database) = estrndup(dir->value.str.val,dir->value.str.len);
+	FP_GLOBAL(fp_database) = estrndup(dir->value.str.val, dir->value.str.len);
 
 	RETVAL_TRUE;
 }
@@ -367,7 +367,7 @@ PHP_FUNCTION(filepro_fieldname)
 	
 	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp; lp = lp->next, i++) {
 		if (i == fno->value.lval) {
-			RETURN_STRING(lp->name,1);
+			RETURN_STRING(lp->name, 1);
 		}
 	}
 
@@ -408,7 +408,7 @@ PHP_FUNCTION(filepro_fieldtype)
 	
 	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp; lp = lp->next, i++) {
 		if (i == fno->value.lval) {
-			RETURN_STRING(lp->format,1);
+			RETURN_STRING(lp->format, 1);
 		}
 	}
 	php_error(E_WARNING,
@@ -559,7 +559,7 @@ PHP_FUNCTION(filepro_retrieve)
     }
     readbuf[lp->width] = '\0';
     fclose(fp);
-	RETURN_STRING(readbuf,1);
+	RETURN_STRING(readbuf, 1);
 }
 /* }}} */
 

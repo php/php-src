@@ -157,7 +157,7 @@ static int jvm_create(TSRMLS_D)
   jobject local_php_reflect;
   jthrowable error;
 
-  jint (JNICALL *JNI_CreateVM)(const void*,const void*,void*);
+  jint (JNICALL *JNI_CreateVM)(const void*, const void*, void*);
 #ifndef JNI_12
   jint (JNICALL *JNI_DefaultArgs)(void*);
 #endif
@@ -189,7 +189,7 @@ static int jvm_create(TSRMLS_D)
   else
 #endif
 
-  JNI_CreateVM = (jint (JNICALL *)(const void*,const void*,void*))
+  JNI_CreateVM = (jint (JNICALL *)(const void*, const void*, void*))
     DL_FETCH_SYMBOL(dl_handle, "JNI_CreateJavaVM");
 
   if (!JNI_CreateVM) {
@@ -282,8 +282,8 @@ static jobject _java_makeObject(pval* arg TSRMLS_DC)
 
   switch (arg->type) {
     case IS_STRING:
-      result=(*jenv)->NewByteArray(jenv,arg->value.str.len);
-      (*jenv)->SetByteArrayRegion(jenv,(jbyteArray)result,0,
+      result=(*jenv)->NewByteArray(jenv, arg->value.str.len);
+      (*jenv)->SetByteArrayRegion(jenv, (jbyteArray)result, 0,
         arg->value.str.len, arg->value.str.val);
       break;
 
@@ -422,7 +422,7 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
   if (!JG(jenv)) return;
   jenv = JG(jenv);
 
-  if (!strcmp("java",function_name->element.value.str.val)) {
+  if (!strcmp("java", function_name->element.value.str.val)) {
 
     /* construct a Java object:
        First argument is the class name.  Any additional arguments will
@@ -531,7 +531,7 @@ static pval _java_getset_property
   /* get the object */
   zend_hash_index_find(property_reference->object->value.obj.properties,
     0, (void **) &pobject);
-  obj = zend_list_find((*pobject)->value.lval,&type);
+  obj = zend_list_find((*pobject)->value.lval, &type);
   result = (jlong)(long) &presult;
   presult.type = IS_NULL;
 
@@ -702,7 +702,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
   ALLOC_ZVAL(handle);
   handle->type = IS_LONG;
   handle->value.lval =
-    zend_list_insert((*jenv)->NewGlobalRef(jenv,value), le_jobject);
+    zend_list_insert((*jenv)->NewGlobalRef(jenv, value), le_jobject);
   pval_copy_constructor(handle);
   INIT_PZVAL(handle);
   zend_hash_index_update(presult->value.obj.properties, 0,
