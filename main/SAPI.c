@@ -596,6 +596,11 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					char *ptr = colon_offset+1;
 					int ptr_len=0, result_len = 0;
 
+					/* skip white space */
+					while (isspace(*ptr)) {
+						ptr++;
+					}
+
 					myuid = php_getuid();
 
 					ptr_len = strlen(ptr);
