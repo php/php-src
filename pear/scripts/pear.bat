@@ -16,16 +16,16 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)                         
 REM ----------------------------------------------------------------------
 REM
-REM  $Id: pear.bat,v 1.4 2001/10/13 06:22:09 mj Exp $
+REM  $Id: pear.bat,v 1.7 2002/04/09 09:59:17 imajes Exp $
 
 REM change this four lines to match the paths of your system
 REM -------------------
 set PHP_PATH=c:\php
 set PEAR_INSTALL_DIR=c:\php\pear
 set PEAR_EXTENSION_DIR=c:\php\extensions
-set PEAR_DOC_DIR=c:\php\pear
+set PEAR_DOC_DIR=c:\php\pear\docs
 REM -------------------
 set DIRECTORY_SEPARATOR=\
 
-%PHP_PATH%\php.exe -q %PEAR_INSTALL_DIR%\scripts\pearwin.php %1 %2 %3 %4 %5 %6
+%PHP_PATH%\php.exe -q %PEAR_INSTALL_DIR%\scripts\pear.in %1 %2 %3 %4 %5 %6 %7 %8 %9
 @ECHO ON

@@ -28,9 +28,6 @@ require_once "PEAR/Installer.php";
  */
 class PEAR_Command_Install extends PEAR_Command_Common
 {
-    // {{{ properties
-    // }}}
-
     // {{{ constructor
 
     /**
@@ -57,27 +54,68 @@ class PEAR_Command_Install extends PEAR_Command_Common
         return array('install', 'uninstall', 'upgrade');
     }
 
+    function getHelp($command)
+    {
+        switch ($command) {
+            case 'install':
+                $ret = array('<pear package>',
+                             'Installs a PEAR package created by the "package" command');
+                break;
+            case 'uninstall':
+                $ret = array('<package>',
+                             'Uninstalls a previously installed PEAR package');
+                break;
+            case 'upgrade':
+                $ret = array('<pear package>',
+                             'Upgrades a PEAR package installed in the system');
+                break;
+        }
+        $ret[0] = "[-n] [-f] [-s] [-Z] {$ret[0]}";
+        $ret[1] = "{$ret[1]}\n" .
+                  "   -f    forces the installation of the package\n".
+                  "         when it is already installed\n".
+                  "   -n    do not take care of package dependencies\n".
+                  "   -s    soft update: install or upgrade only if needed\n".
+                  "   -Z    no compression: download plain .tar files";
+        return $ret;
+    }
+
+    // }}}
+    // {{{ getOptions()
+
+    function getOptions()
+    {
+        return array('f', 'n', 's', 'Z');
+    }
+
     // }}}
     // {{{ run()
 
     function run($command, $options, $params)
     {
-        $installer = &new PEAR_Installer($this->config->get('php_dir'),
-                                         $this->config->get('ext_dir'),
-                                         $this->config->get('doc_dir'));
+        $installer = &new PEAR_Installer($this->config);
+        $installer->setFrontend($this->ui);
         $installer->debug = $this->config->get('verbose');
 
         $failmsg = '';
         $opts = array();
+        if (isset($options['f'])) {
+            $opts['force'] = true;
+        }
+        if (isset($options['n'])) {
+            $opts['nodeps'] = true;
+        }
+        if (isset($options['s'])) {
+            $opts['soft'] = true;
+        }
+        if (isset($options['Z'])) {
+            $opts['nocompress'] = true;
+        }
         switch ($command) {
             case 'upgrade':
                 $opts['upgrade'] = true;
                 // fall through
             case 'install': {
-                if (isset($options['f'])) {
-                    $opts['force'] = true;
-                }
-                // XXX The ['nodeps'] option is still missing
                 if ($installer->install(@$params[0], $opts, $this->config)) {
                     $this->ui->displayLine("install ok");
                 } else {
@@ -104,11 +142,6 @@ class PEAR_Command_Install extends PEAR_Command_Common
     }
 
     // }}}
-
-    function getOptions()
-    {
-        return array('f');
-    }
 }
 
 ?>

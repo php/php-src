@@ -1,4 +1,22 @@
 <?php
+//
+// +----------------------------------------------------------------------+
+// | PHP Version 4                                                        |
+// +----------------------------------------------------------------------+
+// | Copyright (c) 1997-2002 The PHP Group                                |
+// +----------------------------------------------------------------------+
+// | This source file is subject to version 2.02 of the PHP license,      |
+// | that is bundled with this package in the file LICENSE, and is        |
+// | available at through the world-wide-web at                           |
+// | http://www.php.net/license/2_02.txt.                                 |
+// | If you did not receive a copy of the PHP license and are unable to   |
+// | obtain it through the world-wide-web, please send a note to          |
+// | license@php.net so we can mail you a copy immediately.               |
+// +----------------------------------------------------------------------+
+// | Author: Stig Bakken <ssb@fast.no>                                    |
+// +----------------------------------------------------------------------+
+//
+// $Id$
 
 require_once 'PEAR/Command/Common.php';
 require_once 'PEAR/Packager.php';
@@ -20,6 +38,26 @@ class PEAR_Command_Package extends PEAR_Command_Common
 
     // }}}
 
+    // {{{ _displayValidationResults()
+
+    function _displayValidationResults($err, $warn, $strict = false)
+    {
+        foreach ($err as $e) {
+            $this->ui->displayLine("Error: $e");
+        }
+        foreach ($warn as $w) {
+            $this->ui->displayLine("Warning: $w");
+        }
+        $this->ui->displayLine(sprintf('Validation: %d error(s), %d warning(s)',
+                                       sizeof($err), sizeof($warn)));
+        if ($strict && sizeof($err) > 0) {
+            $this->ui->displayLine("Fix these errors and try again.");
+            return false;
+        }
+        return true;
+    }
+
+    // }}}
     // {{{ getCommands()
 
     /**
@@ -30,8 +68,43 @@ class PEAR_Command_Package extends PEAR_Command_Common
     function getCommands()
     {
         return array('package',
+                     'package-info',
                      'package-list',
-                     'package-info');
+                     'package-validate',
+                     'cvstag');
+    }
+
+    // }}}
+    // {{{ getOptions()
+
+    function getOptions()
+    {
+        return array('Z', 'n' /*, 'f', 'd', 'q', 'Q'*/);
+    }
+
+    // }}}
+    // {{{ getHelp()
+
+    function getHelp($command)
+    {
+        switch ($command) {
+            case 'package':
+                return array('[<package.xml>]',
+                             'Creates a PEAR package from its description file (usually '.
+                             'named as package.xml)');
+            case 'package-list':
+                return array('<pear package>',
+                             'List the contents of a PEAR package');
+            case 'packge-info':
+                return array('<pear package>',
+                             'Shows information about a PEAR package');
+            case 'package-validate':
+                return array('<package.(tgz|tar|xml)>',
+                             'Verifies a package or description file');
+            case 'cvstag':
+                return array('<package.xml>',
+                             'Runs "cvs tag" on files contained in a release');
+        }
     }
 
     // }}}
@@ -58,13 +131,19 @@ class PEAR_Command_Package extends PEAR_Command_Common
             // {{{ package
 
             case 'package': {
-                $pkginfofile = isset($params[0]) ? $params[0] : null;
+                $pkginfofile = isset($params[0]) ? $params[0] : 'package.xml';
                 ob_start();
                 $packager =& new PEAR_Packager($this->config->get('php_dir'),
                                                $this->config->get('ext_dir'),
                                                $this->config->get('doc_dir'));
                 $packager->debug = $this->config->get('verbose');
-                $result = $packager->Package($pkginfofile);
+                $err = $warn = array();
+                $packager->validatePackageInfo($pkginfofile, $err, $warn);
+                if (!$this->_displayValidationResults($err, $warn, true)) {
+                    break;
+                }
+                $compress = empty($options['Z']) ? true : false;
+                $result = $packager->Package($pkginfofile, $compress);
                 $output = ob_get_contents();
                 ob_end_clean();
                 $lines = explode("\n", $output);
@@ -72,9 +151,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
                     $this->ui->displayLine($line);
                 }
                 if (PEAR::isError($result)) {
-                    $this->ui->displayLine("Package failed!");
-                } else {
-                    $this->ui->displayLine("Package ok.");
+                    $this->ui->displayLine("Package failed: ".$result->getMessage());
                 }
                 break;
             }
@@ -83,7 +160,14 @@ class PEAR_Command_Package extends PEAR_Command_Common
             // {{{ package-list
 
             case 'package-list': {
+                // $params[0] -> the PEAR package to list its contents
+                if (sizeof($params) != 1) {
+                    $failmsg = "Command package-list requires a valid PEAR package filename ".
+                               " as the first argument. Try the command \"help package-list\"";
+                    break;
+                }
                 $obj = new PEAR_Common();
+
                 if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
                     return $info;
                 }
@@ -96,9 +180,9 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 foreach ($list as $file => $att) {
                     if (isset($att['baseinstalldir'])) {
                         $dest = $att['baseinstalldir'] . DIRECTORY_SEPARATOR .
-                                basename($file);
+                                $file;
                     } else {
-                        $dest = basename($file);
+                        $dest = $file;
                     }
                     switch ($att['role']) {
                         case 'test':
@@ -205,6 +289,89 @@ class PEAR_Command_Package extends PEAR_Command_Common
             }
 
             // }}}
+            // {{{ package-validate
+
+            case 'package-validate': {
+                if (sizeof($params) < 1) {
+                    $params[0] = "package.xml";
+                }
+                $obj = new PEAR_Common;
+                $info = null;
+                if (file_exists($params[0])) {
+                    $fp = fopen($params[0], "r");
+                    $test = fread($fp, 5);
+                    fclose($fp);
+                    if ($test == "<?xml") {
+                        $info = $obj->infoFromDescriptionFile($params[0]);
+                    }
+                }
+                if (empty($info)) {
+                    $info = $obj->infoFromTgzFile($params[0]);
+                }
+                if (PEAR::isError($info)) {
+                    return $this->raiseError($info);
+                }
+                $obj->validatePackageInfo($info, $err, $warn);
+                $this->_displayValidationResults($err, $warn);
+                break;
+            }
+
+            // }}}
+            // {{{ cvstag
+
+            case 'cvstag': {
+                if (sizeof($params) < 1) {
+                    $help = $this->getHelp($command);
+                    return $this->raiseError("$command: missing parameter: $help[0]");
+                }
+                $obj = new PEAR_Common;
+                $info = $obj->infoFromDescriptionFile($params[0]);
+                if (PEAR::isError($info)) {
+                    return $this->raiseError($info);
+                }
+                $err = $warn = array();
+                $obj->validatePackageInfo($info, $err, $warn);
+                if (!$this->_displayValidationResults($err, $warn, true)) {
+                    break;
+                }
+                $version = $info['version'];
+                $cvsversion = preg_replace('/[^a-z0-9]/i', '_', $version);
+                $cvstag = "RELEASE_$cvsversion";
+                $files = array_keys($info['filelist']);
+                $command = "cvs";
+                /* until the getopt bug is fixed, these won't work:
+                if (isset($options['q'])) {
+                    $command .= ' -q';
+                }
+                if (isset($options['Q'])) {
+                    $command .= ' -Q';
+                }
+                */
+                $command .= ' tag';
+                if (isset($options['f'])) {
+                    $command .= ' -f';
+                }
+                /* neither will this one:
+                if (isset($options['d'])) {
+                    $command .= ' -d';
+                }
+                */
+                $command .= ' ' . $cvstag . ' ' . escapeshellarg($params[0]);
+                foreach ($files as $file) {
+                    $command .= ' ' . escapeshellarg($file);
+                }
+                $this->ui->displayLine("+ $command");
+                if (empty($options['n'])) {
+                    $fp = popen($command, "r");
+                    while ($line = fgets($fp, 1024)) {
+                        $this->ui->displayLine(rtrim($line));
+                    }
+                    pclose($fp);
+                }
+                break;
+            }
+
+            // }}}
             default: {
                 return false;
             }
@@ -216,7 +383,6 @@ class PEAR_Command_Package extends PEAR_Command_Common
     }
 
     // }}}
-
 
 }
 

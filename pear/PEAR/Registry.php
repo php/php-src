@@ -57,7 +57,7 @@ class PEAR_Registry extends PEAR
 
     // }}}
 
-    // {{{ PEAR_Registry
+    // {{{ constructor
 
     /**
      * PEAR_Registry constructor.
@@ -79,7 +79,7 @@ class PEAR_Registry extends PEAR
     }
 
     // }}}
-    // {{{ _PEAR_Registry
+    // {{{ destructor
 
     /**
      * PEAR_Registry destructor.  Makes sure no locks are forgotten.
@@ -208,26 +208,36 @@ class PEAR_Registry extends PEAR
      */
     function _lock($mode = LOCK_EX)
     {
-        if ($mode != LOCK_UN && is_resource($this->lock_fp)) {
-            // XXX does not check type of lock (LOCK_SH/LOCK_EX)
-            return true;
-        }
-        if (PEAR::isError($err = $this->_assertStateDir())) {
-            return $err;
-        }
-        $this->lock_fp = @fopen($this->lockfile, 'w');
-        if (!is_resource($this->lock_fp)) {
-            return $this->raiseError("could not create lock file: $php_errormsg");
-        }
-        if (!(int)flock($this->lock_fp, $mode)) {
-            switch ($mode) {
-                case LOCK_SH: $str = 'shared';    break;
-                case LOCK_EX: $str = 'exclusive'; break;
-                case LOCK_UN: $str = 'unlock';    break;
-                default:      $str = 'unknown';   break;
+        if(!strstr(php_uname(), 'Windows 95/98')) {    
+            if ($mode != LOCK_UN && is_resource($this->lock_fp)) {
+                // XXX does not check type of lock (LOCK_SH/LOCK_EX)
+                return true;
             }
-            return $this->raiseError("could not acquire $str lock ($this->lockfile)",
-                                     PEAR_REGISTRY_ERROR_LOCK);
+            if (PEAR::isError($err = $this->_assertStateDir())) {
+                return $err;
+            }
+            $open_mode = 'w';
+            // XXX People reported problems with LOCK_SH and 'w'
+            if ($mode === LOCK_SH) {
+                if (@!is_file($this->lockfile)) {
+                    touch($this->lockfile);
+                }
+                $open_mode = 'r';
+            }
+            $this->lock_fp = @fopen($this->lockfile, $open_mode);
+            if (!is_resource($this->lock_fp)) {
+                return $this->raiseError("could not create lock file: $php_errormsg");
+            }
+            if (!(int)flock($this->lock_fp, $mode)) {
+                switch ($mode) {
+                    case LOCK_SH: $str = 'shared';    break;
+                    case LOCK_EX: $str = 'exclusive'; break;
+                    case LOCK_UN: $str = 'unlock';    break;
+                    default:      $str = 'unknown';   break;
+                }
+                return $this->raiseError("could not acquire $str lock ($this->lockfile)",
+                                         PEAR_REGISTRY_ERROR_LOCK);
+            }
         }
         return true;
     }

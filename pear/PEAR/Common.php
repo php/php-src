@@ -57,16 +57,49 @@ class PEAR_Common extends PEAR
     var $pkginfo = array();
 
     /**
-     * Permitted maintainer roles
+     * Valid maintainer roles
      * @var array
      */
     var $maintainer_roles = array('lead','developer','contributor','helper');
 
     /**
-     * Permitted release states
+     * Valid release states
      * @var array
      */
-    var $releases_states  = array('alpha','beta','stable','snapshot','devel');
+    var $release_states  = array('alpha','beta','stable','snapshot','devel');
+
+    /**
+     * Valid dependency types
+     * @var array
+     */
+    var $dependency_types  = array('pkg','ext','php','prog','ldlib','rtlib','os','websrv','sapi');
+
+    /**
+     * Valid dependency relations
+     * @var array
+     */
+    var $dependency_relations  = array('has','eq','lt','le','gt','ge');
+
+    /**
+     * Valid file roles
+     * @var array
+     */
+    var $file_roles  = array('php','ext','test','doc','data','extsrc','script');
+
+    /**
+     * Valid replacement types
+     * @var array
+     */
+    var $replacement_types  = array('php-const', 'pear-config');
+
+    /**
+     * User Interface object (PEAR_Frontend_* class).  If null,
+     * log() uses print.
+     * @var object
+     */
+    var $ui = null;
+
+    var $current_path = null;
 
     // }}}
 
@@ -159,7 +192,11 @@ class PEAR_Common extends PEAR
     function log($level, $msg)
     {
         if ($this->debug >= $level) {
-            print "$msg\n";
+            if (is_object($this->ui)) {
+                $this->ui->displayLine($msg);
+            } else {
+                print "$msg\n";
+            }
         }
     }
 
@@ -168,13 +205,13 @@ class PEAR_Common extends PEAR
 
     /**
      * Create and register a temporary directory.
-     * 
+     *
      * @param string (optional) Directory to use as tmpdir.  Will use
      * system defaults (for example /tmp or c:\windows\temp) if not
      * specified
      *
      * @return string name of created directory
-     * 
+     *
      * @access public
      */
     function mkTempDir($tmpdir = '')
@@ -192,6 +229,15 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+    // {{{ setFrontend()
+
+    function setFrontend(&$ui)
+    {
+        $this->ui = &$ui;
+    }
+
+    // }}}
+
     // {{{ _element_start()
 
     /**
@@ -247,7 +293,7 @@ class PEAR_Common extends PEAR
     function _element_end($xp, $name)
     {
     }
-    
+
     // }}}
 
     // Support for package DTD v1.0:
@@ -284,6 +330,34 @@ class PEAR_Common extends PEAR
                     $this->dir_role = $attribs['role'];
                 }
                 break;
+            case 'file':
+                if (isset($attribs['name'])) {
+                    $path = '';
+                    if (count($this->dir_names)) {
+                        foreach ($this->dir_names as $dir) {
+                            $path .= $dir . DIRECTORY_SEPARATOR;
+                        }
+                    }
+                    $path .= $attribs['name'];
+                    unset($attribs['name']);
+                    $this->current_path = $path;
+                    $this->filelist[$path] = $attribs;
+                    // Set the baseinstalldir only if the file don't have this attrib
+                    if (!isset($this->filelist[$path]['baseinstalldir']) &&
+                        isset($this->dir_install))
+                    {
+                        $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
+                    }
+                    // Set the Role
+                    if (!isset($this->filelist[$path]['role']) && isset($this->dir_role)) {
+                        $this->filelist[$path]['role'] = $this->dir_role;
+                    }
+                }
+                break;
+            case 'replace':
+                $this->filelist[$this->current_path]['replacements'][] = $attribs;
+                break;
+
             case 'libfile':
                 $this->lib_atts = $attribs;
                 $this->lib_atts['role'] = 'extsrc';
@@ -368,11 +442,7 @@ class PEAR_Common extends PEAR
                 $this->current_maintainer['email'] = $data;
                 break;
             case 'role':
-                if (!in_array($data, $this->maintainer_roles)) {
-                    trigger_error("The maintainer role: '$data' is not valid", E_USER_WARNING);
-                } else {
-                    $this->current_maintainer['role'] = $data;
-                }
+                $this->current_maintainer['role'] = $data;
                 break;
             case 'version':
                 $data = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $data);
@@ -397,9 +467,7 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'state':
-                if (!in_array($data, $this->releases_states)) {
-                    trigger_error("The release state: '$data' is not valid", E_USER_WARNING);
-                } elseif ($this->in_changelog) {
+                if ($this->in_changelog) {
                     $this->current_release['release_state'] = $data;
                 } else {
                     $this->pkginfo['release_state'] = $data;
@@ -420,24 +488,25 @@ class PEAR_Common extends PEAR
                 array_pop($this->dir_names);
                 break;
             case 'file':
-                $this->current_file = $data;
-                $path = '';
-                if (count($this->dir_names)) {
-                    foreach ($this->dir_names as $dir) {
-                        $path .= $dir . DIRECTORY_SEPARATOR;
+                if ($data) {
+                    $path = '';
+                    if (count($this->dir_names)) {
+                        foreach ($this->dir_names as $dir) {
+                            $path .= $dir . DIRECTORY_SEPARATOR;
+                        }
                     }
-                }
-                $path .= $this->current_file;
-                $this->filelist[$path] = $this->current_attributes;
-                // Set the baseinstalldir only if the file don't have this attrib
-                if (!isset($this->filelist[$path]['baseinstalldir']) &&
-                    isset($this->dir_install))
-                {
-                    $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
-                }
-                // Set the Role
-                if (!isset($this->filelist[$path]['role']) && isset($this->dir_role)) {
-                    $this->filelist[$path]['role'] = $this->dir_role;
+                    $path .= $data;
+                    $this->filelist[$path] = $this->current_attributes;
+                    // Set the baseinstalldir only if the file don't have this attrib
+                    if (!isset($this->filelist[$path]['baseinstalldir']) &&
+                        isset($this->dir_install))
+                    {
+                        $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
+                    }
+                    // Set the Role
+                    if (!isset($this->filelist[$path]['role']) && isset($this->dir_role)) {
+                        $this->filelist[$path]['role'] = $this->dir_role;
+                    }
                 }
                 break;
             case 'libfile':
@@ -504,7 +573,9 @@ class PEAR_Common extends PEAR
      */
     function _pkginfo_cdata_1_0($xp, $data)
     {
-        $this->cdata .= $data;
+        if (isset($this->cdata)) {
+            $this->cdata .= $data;
+        }
     }
 
     // }}}
@@ -527,7 +598,12 @@ class PEAR_Common extends PEAR
         if (!@is_file($file)) {
             return $this->raiseError('tgz :: could not open file');
         }
-        $tar = new Archive_Tar($file, true);
+        if (substr($file, -4) == '.tar') {
+            $compress = false;
+        } else {
+            $compress = true;
+        }
+        $tar = new Archive_Tar($file, $compress);
         $content = $tar->listContent();
         if (!is_array($content)) {
             return $this->raiseError('tgz :: could not get contents of package');
@@ -694,6 +770,7 @@ class PEAR_Common extends PEAR
      */
     function _makeReleaseXml($pkginfo, $changelog = false)
     {
+        // XXX QUOTE ENTITIES IN PCDATA, OR EMBED IN CDATA BLOCKS!!
         $indent = $changelog ? "  " : "";
         $ret = "$indent  <release>\n";
         if (!empty($pkginfo['version'])) {
@@ -709,9 +786,9 @@ class PEAR_Common extends PEAR
             $ret .= "$indent    <state>$pkginfo[release_state]</state>\n";
         }
         if (!empty($pkginfo['release_notes'])) {
-            $ret .= "$indent    <notes>$pkginfo[release_notes]</notes>\n";
+            $ret .= "$indent    <notes>".htmlspecialchars($pkginfo['release_notes'])."</notes>\n";
         }
-        if (sizeof($pkginfo['release_deps']) > 0) {
+        if (isset($pkginfo['release_deps']) && sizeof($pkginfo['release_deps']) > 0) {
             $ret .= "$indent    <deps>\n";
             foreach ($pkginfo['release_deps'] as $dep) {
                 $ret .= "$indent      <dep type=\"$dep[type]\" rel=\"$dep[rel]\"";
@@ -729,20 +806,38 @@ class PEAR_Common extends PEAR
         if (isset($pkginfo['filelist'])) {
             $ret .= "$indent    <filelist>\n";
             foreach ($pkginfo['filelist'] as $file => $fa) {
-                if ($fa['role'] == 'extsrc') {
+                if (@$fa['role'] == 'extsrc') {
                     $ret .= "$indent      <libfile>\n";
                     $ret .= "$indent        <libname>$file</libname>\n";
                     $ret .= "$indent        <sources>$fa[sources]</sources>\n";
                     $ret .= "$indent      </libfile>\n";
                 } else {
-                    $ret .= "$indent      <file role=\"$fa[role]\"";
+                    @$ret .= "$indent      <file role=\"$fa[role]\"";
                     if (isset($fa['baseinstalldir'])) {
-                        $ret .= " baseinstalldir=\"$fa[baseinstalldir]\"";
+                        $ret .= ' baseinstalldir="' .
+                             htmlspecialchars($fa['baseinstalldir']) . '"';
                     }
                     if (isset($fa['md5sum'])) {
                         $ret .= " md5sum=\"$fa[md5sum]\"";
                     }
-                    $ret .= ">$file</file>\n";
+                    if (!empty($fa['install-as'])) {
+                        $ret .= ' install-as="' .
+                             htmlspecialchars($fa['install-as']) . '"';
+                    }
+                    $ret .= ' name="' . htmlspecialchars($file) . '"';
+                    if (empty($fa['replacements'])) {
+                        $ret .= "/>\n";
+                    } else {
+                        $ret .= ">\n";
+                        foreach ($fa['replacements'] as $r) {
+                            $ret .= "$indent        <replace";
+                            foreach ($r as $k => $v) {
+                                $ret .= " $k=\"" . htmlspecialchars($v) .'"';
+                            }
+                            $ret .= "/>\n";
+                        }
+                        @$ret .= "$indent      </file>\n";
+                    }
                 }
             }
             $ret .= "$indent    </filelist>\n";
@@ -752,5 +847,142 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+    // {{{ validatePackageInfo()
+
+    function validatePackageInfo($info, &$errors, &$warnings)
+    {
+        if (is_string($info) && file_exists($info)) {
+            $tmp = substr($info, -4);
+            if ($tmp == '.xml') {
+                $info = $this->infoFromDescriptionFile($info);
+            } elseif ($tmp == '.tar' || $tmp == '.tgz') {
+                $info = $this->infoFromTgzFile($info);
+            } else {
+                $fp = fopen($params[0], "r");
+                $test = fread($fp, 5);
+                fclose($fp);
+                if ($test == "<?xml") {
+                    $info = $obj->infoFromDescriptionFile($params[0]);
+                } else {
+                    $info = $obj->infoFromTgzFile($params[0]);
+                }
+            }
+            if (PEAR::isError($info)) {
+                return $this->raiseError($info);
+            }
+        }
+        if (!is_array($info)) {
+            return false;
+        }
+        $errors = array();
+        $warnings = array();
+        if (empty($info['package'])) {
+            $errors[] = 'missing package name';
+        }
+        if (empty($info['summary'])) {
+            $errors[] = 'missing summary';
+        } elseif (strpos(trim($info['summary']), "\n") !== false) {
+            $warnings[] = 'summary should be on a single line';
+        }
+        if (empty($info['description'])) {
+            $errors[] = 'missing description';
+        }
+        if (empty($info['release_license'])) {
+            $errors[] = 'missing license';
+        }
+        if (empty($info['version'])) {
+            $errors[] = 'missing version';
+        }
+        if (empty($info['release_state'])) {
+            $errors[] = 'missing release state';
+        } elseif (!in_array($info['release_state'], $this->release_states)) {
+            $errors[] = "invalid release state `$info[release_state]', should be one of: ".implode(' ', $this->release_states);
+        }
+        if (empty($info['release_date'])) {
+            $errors[] = 'missing release date';
+        } elseif (!preg_match('/^\d{4}-\d\d-\d\d$/', $info['release_date'])) {
+            $errors[] = "invalid release date `$info[release_date]', format is YYYY-MM-DD";
+        }
+        if (empty($info['release_notes'])) {
+            $errors[] = "missing release notes";
+        }
+        if (empty($info['maintainers'])) {
+            $errors[] = 'no maintainer(s)';
+        } else {
+            $i = 1;
+            foreach ($info['maintainers'] as $m) {
+                if (empty($m['handle'])) {
+                    $errors[] = "maintainer $i: missing handle";
+                }
+                if (empty($m['role'])) {
+                    $errors[] = "maintainer $i: missing role";
+                } elseif (!in_array($m['role'], $this->maintainer_roles)) {
+                    $errors[] = "maintainer $i: invalid role `$m[role]', should be one of: ".implode(' ', $this->maintainer_roles);
+                }
+                if (empty($m['name'])) {
+                    $errors[] = "maintainer $i: missing name";
+                }
+                if (empty($m['email'])) {
+                    $errors[] = "maintainer $i: missing email";
+                }
+                $i++;
+            }
+        }
+        if (!empty($info['deps'])) {
+            $i = 1;
+            foreach ($info['deps'] as $d) {
+                if (empty($d['type'])) {
+                    $errors[] = "depenency $i: missing type";
+                } elseif (!in_array($d['type'], $this->dependency_types)) {
+                    $errors[] = "depenency $i: invalid type, should be one of: ".implode(' ', $this->depenency_types);
+                }
+                if (empty($d['rel'])) {
+                    $errors[] = "dependency $i: missing relation";
+                } elseif (!in_array($d['rel'], $this->dependency_relations)) {
+                    $errors[] = "dependency $i: invalid relation, should be one of: ".implode(' ', $this->dependency_relations);
+                }
+                if ($d['rel'] != 'has' && empty($d['version'])) {
+                    $warnings[] = "dependency $i: missing version";
+                } elseif ($d['rel'] == 'has' && !empty($d['version'])) {
+                    $warnings[] = "dependency $i: version ignored for `has' dependencies";
+                }
+                if ($d['type'] == 'php' && !empty($d['name'])) {
+                    $warnings[] = "dependency $i: name ignored for php type dependencies";
+                } elseif ($d['type'] != 'php' && empty($d['name'])) {
+                    $errors[] = "dependency $i: missing name";
+                }
+                $i++;
+            }
+        }
+        if (empty($info['filelist'])) {
+            $errors[] = 'no files';
+        } else {
+            foreach ($info['filelist'] as $file => $fa) {
+                if (empty($fa['role'])) {
+                    $errors[] = "$file: missing role";
+                } elseif (!in_array($fa['role'], $this->file_roles)) {
+                    $errors[] = "$file: invalid role, should be one of: ".implode(' ', $this->file_roles);
+                } elseif ($fa['role'] == 'extsrc' && empty($fa['sources'])) {
+                    $errors[] = "$file: no source files";
+                }
+                // (ssb) Any checks we can do for baseinstalldir?
+                // (cox) Perhaps checks that either the target dir and baseInstall
+                //       doesn't cointain "../../"
+            }
+        }
+        return true;
+    }
+
+    // }}}
+    /**
+    * Get the valid roles for a PEAR package maintainer
+    *
+    * @static
+    */
+    function getUserRoles()
+    {
+        $common = &new PEAR_Common;
+        return $common->maintainer_roles;
+    }
 }
 ?>

@@ -1,10 +1,10 @@
 <!--
-     $Id: package.dtd,v 1.17.2.1 2002-04-09 18:04:28 ssb Exp $
+     $Id: package.dtd,v 1.17.2.2 2002-04-09 19:04:08 ssb Exp $
 
-     This is the PEAR package description, version 1.0b4.
+     This is the PEAR package description, version 1.0b6.
      It should be used with the informal public identifier:
 
-         "-//PHP Group//DTD PEAR Package 1.0b4//EN//XML"
+         "-//PHP Group//DTD PEAR Package 1.0b6//EN//XML"
 
      Copyright (c) 1997-2002 The PHP Group             
 
@@ -59,14 +59,21 @@
 <!ATTLIST dir name           CDATA #REQUIRED
               baseinstalldir CDATA #IMPLIED>
 
-<!ELEMENT file (#PCDATA)>
-<!ATTLIST file role           (php|ext|test|doc|data) 'php'
+<!ELEMENT file (replace*)>
+<!ATTLIST file role           (php|ext|test|doc|data|script) 'php'
                debug          (na|on|off)        'na'
                threaded       (na|on|off)        'na'
                format         CDATA              #IMPLIED
                baseinstalldir CDATA              #IMPLIED
                platform       CDATA              #IMPLIED
-               md5sum         CDATA              #IMPLIED>
+               md5sum         CDATA              #IMPLIED
+               name           CDATA              #REQUIRED
+               install-as     CDATA              #IMPLIED>
+
+<!ELEMENT replace EMPTY>
+<!ATTLIST replace from        CDATA              #REQUIRED
+                  to          CDATA              #REQUIRED
+                  type        CDATA              #REQUIRED>
 
 <!ELEMENT libfile (libname|sources|includes|libadd)+>
 
@@ -80,6 +87,6 @@
 
 <!ELEMENT dep (#PCDATA)>
 <!ATTLIST dep
-	type    (pkg|ext|php|prog|ldlib|ltlib|os|websrv|sapi) #REQUIRED
+	type    (pkg|ext|php|prog|ldlib|rtlib|os|websrv|sapi) #REQUIRED
 	rel     (has|eq|lt|le|gt|ge)                          'has'
 	version CDATA                                         #IMPLIED>

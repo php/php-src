@@ -34,6 +34,12 @@ $GLOBALS['_PEAR_Command_commandlist'] = array();
 $GLOBALS['_PEAR_Command_uiclass'] = 'PEAR_Frontend_CLI';
 
 /**
+ * Instance of $_PEAR_Command_uiclass.
+ * @var object
+ */
+$GLOBALS['_PEAR_Command_uiobject'] = null;
+
+/**
 * The options accepted by the commands
 * @var string the options
 */
@@ -204,6 +210,15 @@ class PEAR_Command
             PEAR_Command::registerCommands();
         }
         return $GLOBALS['_PEAR_Command_commandopts'];
+    }
+
+    function getHelp($command)
+    {
+        $cmds = PEAR_Command::getCommands();
+        if (isset($cmds[$command])) {
+            return call_user_func(array($cmds[$command], 'getHelp'), $command);
+        }
+        return false;
     }
 }
 

@@ -38,48 +38,60 @@ class PEAR_Installer extends PEAR_Common
 {
     // {{{ properties
 
-    /** name of the package directory, for example Foo-1.0 */
+    /** name of the package directory, for example Foo-1.0
+     * @var string
+     */
     var $pkgdir;
 
-    /** directory where PHP code files go */
+    /** directory where PHP code files go
+     * @var string
+     */
     var $phpdir;
 
-    /** directory where PHP extension files go */
+    /** directory where PHP extension files go
+     * @var string
+     */
     var $extdir;
 
-    /** directory where documentation goes */
+    /** directory where documentation goes
+     * @var string
+     */
     var $docdir;
 
     /** directory where the package wants to put files, relative
-     *  to one of the three previous dirs
+     *  to one of the previous dirs
+     * @var string
      */
     var $destdir = '';
 
-    /** debug level (integer) */
+    /** debug level
+     * @var int
+     */
     var $debug = 1;
 
-    /** temporary directory */
+    /** temporary directory
+     * @var string
+     */
     var $tmpdir;
 
-    /** PEAR_Registry object used by the installer */
+    /** PEAR_Registry object used by the installer
+     * @var object
+     */
     var $registry;
+
+    /** PEAR_Config object used by the installer
+     * @var object
+     */
+    var $config;
 
     // }}}
 
     // {{{ constructor
 
-    function PEAR_Installer($phpdir = PEAR_INSTALL_DIR,
-                            $extdir = PEAR_EXTENSION_DIR,
-                            $docdir = null)
+    function PEAR_Installer(&$config)
     {
         $this->PEAR();
-        $this->phpdir = $phpdir;
-        $this->extdir = $extdir;
-        if ($docdir === null) {
-            $docdir = PHP_DATADIR . DIRECTORY_SEPARATOR . 'pear' .
-                      DIRECTORY_SEPARATOR . 'doc';
-        }
-        $this->docdir = $docdir;
+        $this->config = &$config;
     }
 
     // }}}
@@ -88,11 +100,11 @@ class PEAR_Installer extends PEAR_Common
 
     function _deletePackageFiles($package)
     {
-        $info = $this->registry->packageInfo($package);
-        if ($info == null) {
+        $filelist = $this->registry->packageInfo($package, 'filelist');
+        if ($filelist == null) {
             return $this->raiseError("$package not installed");
         }
-        foreach ($info['filelist'] as $file => $props) {
+        foreach ($filelist as $file => $props) {
             $path = $props['installed_as'];
             // XXX TODO: do a "rmdir -p dirname($path)" to maintain clean the fs
             if (!@unlink($path)) {
@@ -108,30 +120,40 @@ class PEAR_Installer extends PEAR_Common
 
     function _installFile($file, $atts, $tmp_path)
     {
-        $type = strtolower($atts['role']);
-        switch ($type) {
-            case 'test':
+        switch ($atts['role']) {
+            case 'test': case 'data': case 'ext':
                 // don't install test files for now
-                $this->log(2, "+ Test file $file won't be installed yet");
+                $this->log(2, "+ $file: $atts[role] file not installed yet");
                 return true;
-                break;
             case 'doc':
-                $dest_dir = $this->docdir . DIRECTORY_SEPARATOR .
-                            $this->pkginfo['package'];
+                $dest_dir = $this->config->get('doc_dir') .
+                     DIRECTORY_SEPARATOR . $this->pkginfo['package'];
                 break;
+            case 'extsrc':
+                // don't install test files for now
+                $this->log(2, "+ $file: no support for building extensions yet");
+                return true;
             case 'php':
-            default: {
-                $dest_dir = $this->phpdir;
-                if (isset($atts['baseinstalldir'])) {
-                    $dest_dir .= DIRECTORY_SEPARATOR . $atts['baseinstalldir'];
-                }
-                if (dirname($file) != '.') {
-                    $dest_dir .= DIRECTORY_SEPARATOR . dirname($file);
-                }
+                $dest_dir = $this->config->get('php_dir');
+                break;
+            case 'script': {
+                $dest_dir = $this->config->get('bin_dir');
                 break;
             }
+            default:
+                break;
         }
-        $dest_file = $dest_dir . DIRECTORY_SEPARATOR . basename($file);
+        if (isset($atts['baseinstalldir'])) {
+            $dest_dir .= DIRECTORY_SEPARATOR . $atts['baseinstalldir'];
+        }
+        if (dirname($file) != '.') {
+            $dest_dir .= DIRECTORY_SEPARATOR . dirname($file);
+        }
+        if (empty($atts['install-as'])) {
+            $dest_file = $dest_dir . DIRECTORY_SEPARATOR . basename($file);
+        } else {
+            $dest_file = $dest_dir . DIRECTORY_SEPARATOR . $atts['install-as'];
+        }
         if (!@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
                 $this->log(0, "failed to mkdir $dest_dir");
@@ -140,13 +162,55 @@ class PEAR_Installer extends PEAR_Common
             $this->log(2, "+ created dir $dest_dir");
         }
         $orig_file = $tmp_path . DIRECTORY_SEPARATOR . $file;
-        $orig_perms = fileperms($orig_file);
-        if (!@copy($orig_file, $dest_file)) {
-            $this->log(0, "failed to copy $orig_file to $dest_file");
-            return false;
+        if (empty($atts['replacements'])) {
+            if (!@copy($orig_file, $dest_file)) {
+                $this->log(0, "failed to copy $orig_file to $dest_file");
+                return false;
+            }
+            $this->log(2, "+ copy $orig_file to $dest_file");
+        } else {
+            $fp = fopen($orig_file, "r");
+            $contents = fread($fp, filesize($orig_file));
+            fclose($fp);
+            $subst_from = $subst_to = array();
+            foreach ($atts['replacements'] as $a) {
+                $to = '';
+                if ($a['type'] == 'php-const') {
+                    if (preg_match('/^[a-z0-9_]+$/i', $a['to'])) {
+                        eval("\$to = $a[to];");
+                    } else {
+                        $this->log(0, "invalid php-const replacement: $a[to]");
+                        continue;
+                    }
+                } elseif ($a['type'] == 'pear-config') {
+                    $to = $this->config->get($a['to']);
+                }
+                if ($to) {
+                    $subst_from = $a['from'];
+                    $subst_to = $to;
+                }
+            }
+            if (sizeof($subst_from)) {
+                $contents = str_replace($subst_from, $subst_to, $contents);
+            }
+            $wp = @fopen($dest_file, "w");
+            if (!is_resource($wp)) {
+                $this->log(0, "failed to create $dest_file");
+                return false;
+            }
+            fwrite($wp, $contents);
+            fclose($wp);
         }
-        chmod($dest_file, $orig_perms);
-        $this->log(2, "+ copy $orig_file to $dest_file");
+        if (!OS_WINDOWS) {
+            if ($atts['role'] == 'script') {
+                $mode = 0755;
+            } else {
+                $mode = 0644;
+            }
+            if (!@chmod($dest_file, $mode)) {
+                $this->log(0, "failed to change mode of $dest_file");
+            }
+        }
 
         // Store the full path where the file was installed for easy unistall
         $this->pkginfo['filelist'][$file]['installed_as'] = $dest_file;
@@ -171,9 +235,10 @@ class PEAR_Installer extends PEAR_Common
         // recognized options:
         // - register_only : update registry but don't install files
         // - upgrade       : upgrade existing install
+        // - soft          : fail silently
         //
         if (empty($this->registry)) {
-            $this->registry = new PEAR_Registry($this->phpdir);
+            $this->registry = &new PEAR_Registry($this->config->get('php_dir'));
         }
         $oldcwd = getcwd();
         $need_download = false;
@@ -182,11 +247,17 @@ class PEAR_Installer extends PEAR_Common
         } elseif (!@is_file($pkgfile)) {
             if (preg_match('/^[A-Z][A-Za-z0-9_]+$/', $pkgfile)) {
                 // valid package name
+                if ($this->registry->packageExists($pkgfile)) {
+                    return $this->raiseError("$pkgfile already installed");
+                }
                 if ($config === null) {
                     $pkgfile = "http://pear.php.net/get/$pkgfile";
                 } else {
                     $pkgfile = "http://" . $config->get('master_server') .
                          "/get/$pkgfile";
+                }
+                if (!extension_loaded("zlib")) {
+                    $pkgfile .= '?uncompress=yes';
                 }
                 $need_download = true;
             } else {
@@ -260,7 +331,7 @@ class PEAR_Installer extends PEAR_Common
         //  ==> XXX This part should be removed later on
         $flag_old_format = false;
         if (!is_file($descfile)) {
-          // ----- Look for old package .tgz archive format
+          // ----- Look for old package archive format
           // In this format the package.xml file was inside the package directory name
           $dp = opendir($tmpdir);
           do {
@@ -291,7 +362,9 @@ class PEAR_Installer extends PEAR_Common
         if (isset($pkginfo['release_deps']) && !isset($options['nodeps'])) {
             $error = $this->checkDeps($pkginfo);
             if ($error) {
-                $this->log(0, $error);
+                if (empty($options['soft'])) {
+                    $this->log(0, $error);
+                }
                 return $this->raiseError('Dependencies failed');
             }
         }
@@ -314,7 +387,7 @@ class PEAR_Installer extends PEAR_Common
             }
             if (empty($options['register_only'])) {
                 // when upgrading, remove old release's files first:
-                $this->_deletePackageFiles($package);
+                $this->_deletePackageFiles($pkgname);
             }
         }
 
@@ -323,7 +396,7 @@ class PEAR_Installer extends PEAR_Common
         // info from the package it self we want to access from _installFile
         $this->pkginfo = $pkginfo;
         if (empty($options['register_only'])) {
-            if (!is_dir($this->phpdir)) {
+            if (!is_dir($this->config->get('php_dir'))) {
                 chdir($oldcwd);
                 return $this->raiseError("no script destination directory\n",
                                          null, PEAR_ERROR_DIE);
@@ -365,7 +438,7 @@ class PEAR_Installer extends PEAR_Common
     function uninstall($package)
     {
         if (empty($this->registry)) {
-            $this->registry = new PEAR_Registry($this->phpdir);
+            $this->registry = new PEAR_Registry($this->config->get('php_dir'));
         }
 
         // Delete the files
@@ -380,7 +453,7 @@ class PEAR_Installer extends PEAR_Common
 
     function checkDeps(&$pkginfo)
     {
-        $deps = new PEAR_Dependency;
+        $deps = &new PEAR_Dependency($this->registry);
         $errors = null;
         if (is_array($pkginfo['release_deps'])) {
             foreach($pkginfo['release_deps'] as $dep) {

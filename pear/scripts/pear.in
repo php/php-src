@@ -19,26 +19,31 @@
 // +----------------------------------------------------------------------+
 //
 
+ini_set('allow_url_fopen', true);
+set_time_limit(0);
+ob_implicit_flush(true);
+ini_set('track_errors', true);
+ini_set('html_errors', false);
+
 require_once 'PEAR.php';
-require_once "PEAR/Config.php";
-require_once "PEAR/Command.php";
-require_once "Console/Getopt.php";
+require_once 'PEAR/Config.php';
+require_once 'PEAR/Command.php';
+require_once 'Console/Getopt.php';
 
 PEAR_Command::setFrontendType('CLI');
 $all_commands = PEAR_Command::getCommands();
 $cmd_options  = PEAR_Command::getOptions();
-
-$progname = basename($argv[0]);
-
-PEAR::setErrorHandling(PEAR_ERROR_DIE, "$progname: %s\n");
-$argv = Console_Getopt::readPHPArgv();
+$ui = &PEAR_Command::getFrontendObject();
+$progname = basename(__FILE__);
 
 // XXX change Getopt to use raiseError() ?
+$argv = Console_Getopt::readPHPArgv();
 $options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v" . $cmd_options);
 if (PEAR::isError($options)) {
     usage($options);
 }
 
+PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, array($ui, "displayFatalError"));
 $opts = $options[0];
 
 $pear_user_config = '';
@@ -124,23 +129,37 @@ if ($ok === false) {
     PEAR::raiseError("unknown command `$command'");
 }
 
-exit;
-
 // {{{ usage()
 
 function usage($error = null, $helpsubject = null)
 {
     global $progname, $all_commands;
     $stderr = fopen('php://stderr', 'w');
+    fputs($stderr, "\n");
     if (PEAR::isError($error)) {
         fputs($stderr, $error->getMessage());
     } elseif ($error !== null) {
         fputs($stderr, $error);
     }
-    fputs($stderr,
-        "Usage: $progname [options] command [command-options] <parameters>\n");
-    if ($helpsubject == "options") {
-        fputs($stderr,
+    if ($helpsubject != null) {
+        $put = cmdHelp($helpsubject);
+    } else {
+        $put =
+            "Usage: $progname [options] command [command-options] <parameters>\n".
+            "Type \"$progname help options\" to list all options.\n".
+            "Type \"$progname help <command>\" to get the help for the specified command.\n".
+            "Commands:\n   " . implode("\n   ", array_keys($all_commands));
+    }
+    fputs($stderr, "$put\n\n");
+    fclose($stderr);
+    exit;
+}
+
+function cmdHelp($command)
+{
+    global $progname, $all_commands, $config;
+    if ($command == "options") {
+        return
         "Options:\n".
         "     -v         increase verbosity level (default 1)\n".
         "     -q         be quiet, decrease verbosity level\n".
@@ -151,54 +170,11 @@ function usage($error = null, $helpsubject = null)
         "     -s         store user configuration\n".
         "     -S         store system configuration\n".
         "     -u foo     unset `foo' in the user configuration\n".
-        "     -h, -?     display help/usage (this message)\n");
-    } else {
-        fputs($stderr,
-              "Type \"$progname help options\" to list all options.\n");
+        "     -h, -?     display help/usage (this message)\n";
+    } elseif ($help = PEAR_Command::getHelp($command)) {
+        return "Usage : $progname $command {$help[0]}\n{$help[1]}";
     }
-    fputs($stderr,
-          "Commands:\n   " . implode("\n   ", array_keys($all_commands)) .
-          "\n");
-    fclose($stderr);
-    exit;
-}
-
-// }}}
-// {{{ present_array()
-
-function present_array(&$arr, $keys = null)
-{
-    if ($keys === null) {
-        $keys = array_keys($arr);
-    }
-    $longest_key = max(array_map("strlen", array_keys($arr))) + 2;
-    $format_string = "%{$longest_key}s : %s\n";
-    foreach ($keys as $k) {
-        if (is_array($arr[$k])) {
-            foreach ($arr[$k] as $i => $value) {
-                $x = "$k #$i";
-                $cont = array();
-                foreach(array_keys($value) as $val) {
-                    $cont[] = "$val=" . $value[$val];
-                }
-                $v = implode(", ", $cont);
-                printf($format_string, $x, $v);
-            }
-            continue;
-        } else {
-            $v = $arr[$k];
-            printf($format_string, $k, $v);
-        }
-    }
-}
-
-// }}}
-// {{{ heading()
-
-function heading($text)
-{
-    $l = strlen(trim($text));
-    print rtrim($text) . "\n" . str_repeat("=", $l) . "\n";
+    return "No such command";
 }
 
 // }}}
