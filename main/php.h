@@ -228,31 +228,6 @@ char *strerror(int);
 #define PHP_RSHUTDOWN_FUNCTION(module)	int PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
 #define PHP_MINFO_FUNCTION(module)	void PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 
-#define PHP_BEGIN_MODULE_GLOBALS(module_name)      \
-    typedef struct _php_##module_name##_globals {
-#define PHP_END_MODULE_GLOBALS(module_name)        \
-		    } php_##module_name##_globals;
-
-#ifdef ZTS
-
-#define PHP_DECLARE_MODULE_GLOBALS(module_name)                            \
-    ts_rsrc_id module_name##_globals_id;
-#define PHP_EXTERN_MODULE_GLOBALS(module_name)                             \
-    extern ts_rsrc_id module_name##_globals_id;
-#define PHP_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)   \
-    ts_allocate_id(&module_name##_globals_id, sizeof(php_##module_name##_globals), (ts_allocate_ctor) globals_ctor, (ts_allocate_dtor) globals_dtor);
-
-#else
-
-#define PHP_DECLARE_MODULE_GLOBALS(module_name)                            \
-    php_##module_name##_globals module_name##_globals;
-#define PHP_EXTERN_MODULE_GLOBALS(module_name)                             \
-    extern php_##module_name##_globals module_name##_globals;
-#define PHP_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)   \
-    globals_ctor(&module_name##_globals);
-
-#endif
-
 /* global variables */
 extern pval *data;
 #if !defined(PHP_WIN32)
