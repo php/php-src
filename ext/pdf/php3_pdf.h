@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -33,17 +33,16 @@
 
 #if HAVE_PDFLIB
 
-#include <pdf.h>
+#include <pdflib.h>
 
 extern int le_fp;
 
 extern php3_module_entry pdf_module_entry;
 #define pdf_module_ptr &pdf_module_entry
 
-void php3_info_pdf(ZEND_MODULE_INFO_FUNC_ARGS);
-extern int php3_minit_pdf(INIT_FUNC_ARGS);
+extern PHP_MINFO_FUNCTION(pdf);
+extern PHP_MINIT_FUNCTION(pdf);
 extern int php3_mend_pdf(void);
-PHP_FUNCTION(pdf_get_info);
 PHP_FUNCTION(pdf_set_info_creator);
 PHP_FUNCTION(pdf_set_info_title);
 PHP_FUNCTION(pdf_set_info_subject);
@@ -100,10 +99,24 @@ PHP_FUNCTION(pdf_setrgbcolor);
 PHP_FUNCTION(pdf_add_outline);
 PHP_FUNCTION(pdf_set_transition);
 PHP_FUNCTION(pdf_set_duration);
+PHP_FUNCTION(pdf_open_jpeg);
+#if HAVE_LIBGD13
+PHP_FUNCTION(pdf_open_memory_image);
+#endif
+PHP_FUNCTION(pdf_open_gif);
+PHP_FUNCTION(pdf_close_image);
+PHP_FUNCTION(pdf_place_image);
+PHP_FUNCTION(pdf_put_image);
+PHP_FUNCTION(pdf_execute_image);
+PHP_FUNCTION(pdf_add_weblink);
+PHP_FUNCTION(pdf_add_pdflink);
+PHP_FUNCTION(pdf_add_annotation);
+PHP_FUNCTION(pdf_set_border_style);
+PHP_FUNCTION(pdf_set_border_color);
+PHP_FUNCTION(pdf_get_image_width);
+PHP_FUNCTION(pdf_get_image_height);
 #else
 #define pdf_module_ptr NULL
 #endif
-
 #define phpext_pdf_ptr pdf_module_ptr
-
 #endif /* _PHP3_PDF_H */

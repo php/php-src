@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of the GNU General Public License as published by |
@@ -36,7 +36,7 @@
 #define F_DISTRIBUTED 0x80000000
 #define F_COMPRESSED  0x40000000
 #define F_VERSION     0x00003fff
-#define VERSION       717L     /* 7.05 */
+#define HW_VERSION       717L     /* 7.17 */
 
 #define HEADER_LENGTH 12
 
@@ -53,6 +53,7 @@
 #define GETANCHORS_MESSAGE            8
 #define GETOBJBYQUERY_MESSAGE         9
 #define GETOBJBYQUERYCOLL_MESSAGE    10
+#define OBJECTBYIDQUERY_MESSAGE      11
 #define GETTEXT_MESSAGE              12
 #define INSDOC_MESSAGE               14
 #define INSCOLL_MESSAGE              17
@@ -87,6 +88,18 @@
 #define MOVE                          1
 #define DOCUMENT                      0
 #define COLLECTION                    1
+
+
+#if WIN32|WINNT
+# define SOCK_ERR INVALID_SOCKET
+# define SOCK_CONN_ERR SOCKET_ERROR
+# define HWSOCK_FCLOSE(s) closesocket(s)
+#else
+# define SOCK_ERR -1
+# define SOCK_CONN_ERR -1
+# define HWSOCK_FCLOSE(s) close(s)
+#endif
+
 
 /* Low error messages */
 #define LE_MALLOC                    -1
@@ -132,9 +145,9 @@ typedef struct {
 typedef int hw_objectID;
 typedef char hw_objrec;
 
-void set_swap(int do_swap);
+extern void set_swap(int do_swap);
 extern int  open_hg_connection(char *server_name, int port);
-void close_hg_connection(int sockfd);
+extern void close_hg_connection(int sockfd);
 extern int initialize_hg_connection(int sockfd, int *do_swap, int *version, char **userdata, char **server_string, char *username, char *password);
 
 extern int send_ready(int sockfd);
@@ -150,10 +163,12 @@ extern int getrellink(int sockfd, int rootID, int thisID, int destID, char **rel
 
 extern int send_deleteobject(int sockfd, hw_objectID objectID);
 extern int send_changeobject(int sockfd, hw_objectID objectID, char *mod);
+extern int send_groupchangeobject(int sockfd, hw_objectID objectID, char *mod);
 extern int send_getobject(int sockfd, hw_objectID objectID, char **attributes);
 extern int send_getandlock(int sockfd, hw_objectID objectID, char **attributes);
+extern int send_lock(int sockfd, hw_objectID objectID);
 extern int send_unlock(int sockfd, hw_objectID objectID);
-extern int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **objattr, char **bodytag, char **text, int *count);
+extern int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **objattr, char **bodytag, char **text, int *count, char *urlprefix);
 extern int send_edittext(int sockfd, char *objattr, char *text);
 extern int send_getcgi(int sockfd, hw_objectID objectID, char *cgi_env_str, char **objattr, char **text, int *count);
 extern int send_getremote(int sockfd, hw_objectID objectID, char **objattr, char **text, int *count);
@@ -168,6 +183,7 @@ extern int send_getchilddoccoll(int sockfd, hw_objectID objectID, hw_objectID **
 extern int send_getchilddoccollobj(int sockfd, hw_objectID objectID, hw_objrec ***childrec, int *count);
 extern int send_getanchors(int sockfd, hw_objectID objectID, hw_objectID **anchorIDs, int *count);
 extern int send_getanchorsobj(int sockfd, hw_objectID objectID, char ***childrec, int *count);
+extern int send_objectbyidquery(int sockfd, hw_objectID *IDs, int *count, char *query, char ***objrecs);
 extern int send_getobjbyquery(int sockfd, char *query, int maxhits, hw_objectID **childIDs, int *count);
 extern int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec, int *count);
 extern int send_getobjbyquerycoll(int sockfd, hw_objectID collID, char *query, int maxhits, hw_objectID **childIDs, int *count);
@@ -176,9 +192,9 @@ extern int send_identify(int sockfd, char *name, char *passwd, char **userdata);
 extern int send_getparents(int sockfd, hw_objectID objectID, hw_objectID **childIDs, int *count);
 extern int send_children(int sockfd, hw_objectID objectID, hw_objectID **childIDs, int *count);
 extern int send_getparentsobj(int sockfd, hw_objectID objectID, char ***childrec, int *count);
-extern int send_pipedocument(int sockfd, char *hostname, hw_objectID objectID, int mode, int rootid, char** objattr, char **bodytag, char **text, int *count);
+extern int send_pipedocument(int sockfd, char *hostname, hw_objectID objectID, int mode, int rootid, char** objattr, char **bodytag, char **text, int *count, char *urlprefix);
 extern int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str, char **objattr, char **text, int *count);
-extern int send_putdocument(int sockfd, char *hostname, hw_objectID objectID, char *objectRec, char *text, int count);
+extern int send_putdocument(int sockfd, char *hostname, hw_objectID parentID, char *objectRec, char *text, int count, hw_objectID *objectID);
 extern int send_inscoll(int sockfd, hw_objectID objectID, char *objrec, hw_objectID *new_objectID);
 extern int send_insertobject(int sockfd, char *objrec, char *parms, hw_objectID *objectID);
 extern int send_insdoc(int sockfd, hw_objectID objectID, char *objrec, char *text, hw_objectID *new_objectID);

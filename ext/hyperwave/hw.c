@@ -23,16 +23,22 @@
 
 #include <stdlib.h>
 
-#if !(WIN32|WINNT)
-#include "php_config.h"
-#endif
 #include "php.h"
+#include "php_globals.h"
+#include "ext/standard/php3_standard.h"
 #include "ext/standard/head.h"
+#include "ext/standard/info.h"
+#include "SAPI.h"
+
+#if WIN32|WINNT
+#include <winsock.h>
+#else
+#include "build-defs.h"
+#endif
 
 #if HYPERWAVE
 
-
-#include "hw.h"
+#include "php3_hyperwave.h"
 
 #if APACHE
 #  ifndef DEBUG
@@ -72,6 +78,7 @@ function_entry hw_functions[] = {
 	PHP_FE(hw_cp,									NULL)
 	PHP_FE(hw_deleteobject,							NULL)
 	PHP_FE(hw_changeobject,							NULL)
+	PHP_FE(hw_modifyobject,							NULL)
 	PHP_FE(hw_docbyanchor,							NULL)
 	PHP_FE(hw_docbyanchorobj,						NULL)
 	PHP_FE(hw_getobjectbyquery,						NULL)
@@ -88,14 +95,11 @@ function_entry hw_functions[] = {
 	PHP_FE(hw_free_document,						NULL)
 	PHP_FE(hw_new_document,							NULL)
 	PHP_FE(hw_output_document,						NULL)
-	PHP_FE(hw_outputdocument,						NULL)
 	PHP_FE(hw_document_size,						NULL)
-	PHP_FE(hw_documentsize,							NULL)
 	PHP_FE(hw_document_attributes,					NULL)
-	PHP_FE(hw_documentattributes,					NULL)
 	PHP_FE(hw_document_bodytag,						NULL)
-	PHP_FE(hw_documentbodytag,						NULL)
 	PHP_FE(hw_document_content,						NULL)
+	PHP_FE(hw_document_setcontent,						NULL)
 	PHP_FE(hw_objrec2array,							NULL)
 	PHP_FE(hw_array2objrec,							NULL)
 	PHP_FE(hw_incollections,						NULL)
@@ -219,11 +223,14 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 ** creates an array return value from object record
 */
 int make_return_array_from_objrec(pval **return_value, char *objrec) {
-	pval title_arr, desc_arr;
 	char *attrname, *str, *temp, language[3], *title;
-	int iTitle, iDesc;
+	int iTitle, iDesc, iKeyword;
+	pval title_arr;
+	pval desc_arr;
+	pval keyword_arr;
 	int hasTitle = 0;
 	int hasDescription = 0;
+	int hasKeyword = 0;
 
 	if (array_init(*return_value) == FAILURE) {
 		(*return_value)->type = IS_STRING;
@@ -232,37 +239,37 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 		return -1;
 	}
 
-	/* Array for titles. Only if we have at least one title */
-/*	if(0 == strncmp(objrec, "Title=", 6)) { */
-		if (array_init(&title_arr) == FAILURE) {
-			return -1;
-		}
-		hasTitle = 1;
-/*	} */
-
-	/* Array for Descriptions. Only if we have at least one description */
-/*	if(0 == strncmp(objrec, "Description=", 12)) { */
-		if (array_init(&desc_arr) == FAILURE) {
-			return -1;
-		}
-		hasDescription = 1;
-/*	} */
-
-	/* Fill Array of titles and descriptions */
+	/* Fill Array of titles, descriptions and keywords */
 	temp = estrdup(objrec);
 	attrname = strtok(temp, "\n");
 	while(attrname != NULL) {
 		str = attrname;
 		iTitle = 0;
 		iDesc = 0;
+		iKeyword = 0;
 		if(0 == strncmp(attrname, "Title=", 6)) {
+			if ((hasTitle == 0) && (array_init(&title_arr) == FAILURE)) {
+				return -1;
+			}
+			hasTitle = 1;
 			str += 6;
 			iTitle = 1;
 		} else if(0 == strncmp(attrname, "Description=", 12)) {
+			if ((hasDescription == 0) && (array_init(&desc_arr) == FAILURE)) {
+				return -1;
+			}
+			hasDescription = 1;
 			str += 12;
 			iDesc = 1;
-		}
-		if(iTitle || iDesc) {			/* Poor error check if end of string */
+		} else if(0 == strncmp(attrname, "Keyword=", 8)) {
+			if ((hasKeyword == 0) && (array_init(&keyword_arr) == FAILURE)) {
+				return -1;
+			}
+			hasKeyword = 1;
+			str += 8;
+			iKeyword = 1;
+		} 
+		if(iTitle || iDesc || iKeyword) {	/* Poor error check if end of string */
 			if(str[2] == ':') {
 				str[2] = '\0';
 				strcpy(language, str);
@@ -271,13 +278,12 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 				strcpy(language, "xx");
 
 			title = str;
-/*			while((*str != '=') && (*str != '\0'))
-				str++;
-			*str = '\0';
-*/			if(iTitle)
+			if(iTitle)
 				add_assoc_string(&title_arr, language, title, 1);
-			else
+			else if(iDesc)
 				add_assoc_string(&desc_arr, language, title, 1);
+			else if(iKeyword)
+				add_assoc_string(&keyword_arr, language, title, 1);
 		}
 		attrname = strtok(NULL, "\n");
 	}
@@ -297,14 +303,22 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 		/* The description array can now be freed, but I don't know how */
 	}
 
+	if(hasKeyword) {
+	/* Add the keyword array, if we have one */
+		zend_hash_update((*return_value)->value.ht, "Keyword", 8, &keyword_arr, sizeof(pval), NULL);
+
+		/* The keyword array can now be freed, but I don't know how */
+	}
+
 	/* All other attributes. Make a another copy first */
 	temp = estrdup(objrec);
 	attrname = strtok(temp, "\n");
 	while(attrname != NULL) {
 		str = attrname;
-		/* We don't want to insert titles a second time */
+		/* We don't want to insert titles, descr., keywords a second time */
 		if((0 != strncmp(attrname, "Title=", 6)) &&
-		   (0 != strncmp(attrname, "Description=", 12))) {
+		   (0 != strncmp(attrname, "Description=", 12)) &&
+		   (0 != strncmp(attrname, "Keyword=", 8))) {
 			while((*str != '=') && (*str != '\0'))
 				str++;
 			*str = '\0';
@@ -318,10 +332,11 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	return(0);
 }
 
+#define BUFFERLEN 1024
 static char * make_objrec_from_array(HashTable *lht) {
 	int i, count, keytype;
 	ulong length;
-	char *key, str[1024], *objrec = NULL;
+	char *key, str[BUFFERLEN], *objrec = NULL;
 	pval *keydata;
 
 	if(NULL == lht)
@@ -339,11 +354,43 @@ static char * make_objrec_from_array(HashTable *lht) {
 			zend_hash_get_current_data(lht, (void **) &keydata);
 			switch(keydata->type) {
 				case IS_STRING:
-					sprintf(str, "%s=%s\n", key, keydata->value.str.val);
+					snprintf(str, BUFFERLEN, "%s=%s\n", key, keydata->value.str.val);
 					break;
 				case IS_LONG:
-					sprintf(str, "%s=0x%lX\n", key, keydata->value.lval);
+					snprintf(str, BUFFERLEN, "%s=0x%lX\n", key, keydata->value.lval);
 					break;
+				case IS_ARRAY: {
+					int i, len, keylen, count;
+					char *strarr, *ptr, *ptr1;
+					count = zend_hash_num_elements(keydata->value.ht);
+					if(count > 0) {
+						strarr = make_objrec_from_array(keydata->value.ht);
+						len = strlen(strarr) - 1;
+						keylen = strlen(key);
+						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1)))) {
+							free(objrec);
+							return(NULL);
+						}
+						ptr1 = ptr;
+						*ptr1 = '\0';
+						strcpy(ptr1, key);
+						ptr1 += keylen;
+						*ptr1++ = '=';
+						for(i=0; i<len; i++) {
+							*ptr1++ = strarr[i];
+							if(strarr[i] == '\n') {
+								strcpy(ptr1, key);
+								ptr1 += keylen;
+								*ptr1++ = '=';
+							} else if(strarr[i] == '=')
+								ptr1[-1] = ':';
+						}
+						*ptr1++ = '\n';
+						*ptr1 = '\0';
+						strncpy(str, ptr, 1023);
+					}
+					break;
+				}
 			}
 			efree(key);
 			objrec = realloc(objrec, strlen(objrec)+strlen(str)+1);
@@ -353,6 +400,7 @@ static char * make_objrec_from_array(HashTable *lht) {
 	}
 	return objrec;
 }
+#undef BUFFERLEN
 
 static int * make_ints_from_array(HashTable *lht) {
 	int i, count;
@@ -382,8 +430,7 @@ static int * make_ints_from_array(HashTable *lht) {
 	return objrec;
 }
 
-PHP_MINIT_FUNCTION(hw)
-{
+PHP_MINIT_FUNCTION(hw) {
 
 	if (cfg_get_long("hw.allow_persistent",&php3_hw_module.allow_persistent)==FAILURE) {
 		php3_hw_module.allow_persistent=1;
@@ -402,6 +449,7 @@ PHP_MINIT_FUNCTION(hw)
 	return SUCCESS;
 }
 
+#define BUFFERLEN 30
 static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	pval *argv[4];
@@ -415,7 +463,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *password = NULL;
 	char *hashed_details;
 	char *str = NULL;
-	char buffer[20];
+	char buffer[BUFFERLEN];
 	int hashed_details_length;
 	hw_connection *ptr;
 	int do_swap;
@@ -424,10 +472,6 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	argc = ARG_COUNT(ht);
 	switch(argc) {
 		case 2:
-			if (getParametersArray(ht, argc, argv) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
 		case 4:
 			if (getParametersArray(ht, argc, argv) == FAILURE) {
 				WRONG_PARAM_COUNT;
@@ -456,7 +500,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	/* Create identifier string for connection */
-	sprintf(buffer, "%d", port);
+	snprintf(buffer, BUFFERLEN, "%d", port);
 	hashed_details_length = strlen(host)+strlen(buffer)+8;
 	if(NULL == (hashed_details = (char *) emalloc(hashed_details_length+1))) {
 		if(host) efree(host);
@@ -465,7 +509,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		php_error(E_ERROR, "Could not get memory for connection details");
 		RETURN_FALSE;
 	}
-	sprintf(hashed_details,"hw_%s_%d",host,port);
+	sprintf(hashed_details, "hw_%s_%d", host, port);
 
 	if (persistent) {
 		list_entry *le;
@@ -662,6 +706,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ptr->username = NULL;
 	efree(userdata);
 }
+#undef BUFFERLEN
 
 /* Start of user level functions */
 /* ***************************** */
@@ -839,6 +884,18 @@ PHP_FUNCTION(hw_errormsg)
 		case LOCKED:
 			sprintf(errstr, "Object locked; try again later");
 			break;
+		case NOTREMOVED:
+			sprintf(errstr, "Attribute not removed");
+			break;
+		case CHANGEBASEFLD:
+			sprintf(errstr, "Change of base-attribute");
+			break;
+		case FLDEXISTS:
+			sprintf(errstr, "Attribute exists");
+			break;
+		case NOLANGUAGE:
+			sprintf(errstr, "No or unknown language specified");
+			break;
 		default:
 			sprintf(errstr, "Unknown error: %d", ptr->lasterror);
 		}
@@ -846,7 +903,7 @@ PHP_FUNCTION(hw_errormsg)
 }
 /* }}} */
 
-/* {{{ proto hw_root(void)
+/* {{{ proto int hw_root(void)
    Returns object id of root collection */
 PHP_FUNCTION(hw_root)
 {
@@ -909,6 +966,11 @@ PHP_FUNCTION(hw_who) {
 
 	ptr = object;
 
+php_printf("%s\n", ptr);
+	/* Skip first two lines, they just contain:
+        Users in Database
+
+        */
         while((*ptr != '\0') && (*ptr != '\n'))
 		ptr++;
         while((*ptr != '\0') && (*ptr != '\n'))
@@ -935,7 +997,7 @@ PHP_FUNCTION(hw_who) {
 		}
 
 		ptr = attrname;
-		if(*ptr == '*')
+		if(*ptr++ == '*')
 			add_assoc_long(&user_arr, "self", 1);
 		else
 			add_assoc_long(&user_arr, "self", 0);
@@ -1007,6 +1069,8 @@ PHP_FUNCTION(hw_who) {
 }
 /* }}} */
 
+/* {{{ proto string hw_dummy(int link, int id, int msgid)
+   ??? */
 PHP_FUNCTION(hw_dummy) {
 	pval *arg1, *arg2, *arg3;
 	int link, id, type, msgid;
@@ -1039,21 +1103,35 @@ php_printf("%s", object);
 	return_value->type = IS_STRING;
 	}
 }
+/* }}} */
 
 /* {{{ proto string hw_getobject(int link, int objid)
    Returns object record  */
 PHP_FUNCTION(hw_getobject) {
-	pval *arg1, *arg2;
-	int link, id, type;
+	pval *argv[3];
+	int argc, link, id, type, multi;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	argc = ARG_COUNT(ht);
+	if(argc < 2 || argc > 3)
 		WRONG_PARAM_COUNT;
+	if (getParametersArray(ht, argc, argv) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long(argv[0]);
+	if(argv[1]->type == IS_ARRAY) {
+		multi = 1;
+		convert_to_array(argv[1]);
+	} else {
+		multi = 0;
+		convert_to_long(argv[1]);
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+
+	if(argc == 3) {
+		convert_to_string(argv[2]);
+	}
+
+	link=argv[0]->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1061,16 +1139,52 @@ PHP_FUNCTION(hw_getobject) {
 	}
 
 	set_swap(ptr->swap_on);
-	{
-	char *object = NULL;
-	if (0 != (ptr->lasterror = send_getobject(ptr->socket, id, &object)))
-		RETURN_FALSE;
+	if(multi) {
+		char **objects = NULL;
+		int count, *ids, i;
+		HashTable *lht;
+		pval *keydata;
 
-	RETURN_STRING(object, 0);
-	/*
-	make_return_array_from_objrec(&return_value, object);
-	efree(object);
-	*/
+		lht = argv[1]->value.ht;
+        	if(0 == (count = zend_hash_num_elements(lht)))
+			RETURN_FALSE;
+		ids = emalloc(count * sizeof(hw_objectID));
+
+		zend_hash_internal_pointer_reset(lht);
+		for(i=0; i<count; i++) {
+			zend_hash_get_current_data(lht, (void **) &keydata);
+			switch(keydata->type) {
+				case IS_LONG:
+					ids[i] = keydata->value.lval;
+					break;
+				default:
+					ids[i] = keydata->value.lval;
+			}
+			zend_hash_move_forward(lht);
+		}
+
+		if (0 != (ptr->lasterror = send_objectbyidquery(ptr->socket, ids, &count, argv[2]->value.str.val, &objects))) {
+			efree(ids);
+			RETURN_FALSE;
+			}
+		efree(ids);
+		if (array_init(return_value) == FAILURE) {
+			efree(objects);
+			RETURN_FALSE;
+		}
+
+		for(i=0; i<count; i++) {
+			add_index_string(return_value, i, objects[i], 0);
+		}
+		efree(objects);
+		
+	} else {
+		char *object = NULL;
+		id=argv[1]->value.lval;
+		if (0 != (ptr->lasterror = send_getobject(ptr->socket, id, &object)))
+			RETURN_FALSE;
+
+		RETURN_STRING(object, 0);
 	}
 }
 /* }}} */
@@ -1132,7 +1246,6 @@ PHP_FUNCTION(hw_getandlock) {
 	set_swap(ptr->swap_on);
 	{
 	char *object = NULL;
-	char *attrname, *str;
 	if (0 != (ptr->lasterror = send_getandlock(ptr->socket, id, &object)))
 		RETURN_FALSE;
 
@@ -1197,12 +1310,14 @@ PHP_FUNCTION(hw_deleteobject) {
 /* }}} */
 
 /* {{{ proto void hw_changeobject(int link, int objid, array attributes)
-   Changes attributes of an object */
+   Changes attributes of an object (obsolete) */
+#define BUFFERLEN 200
 PHP_FUNCTION(hw_changeobject) {
 	pval *arg1, *arg2, *arg3;
 	int link, id, type, i;
 	hw_connection *ptr;
-	char *modification, *oldobjrec, buf[200];
+	char *modification, *oldobjrec, buf[BUFFERLEN];
+	char *tmp;
 	HashTable *newobjarr;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
@@ -1221,13 +1336,13 @@ PHP_FUNCTION(hw_changeobject) {
 	}
 
 	/* get the old object record */
-	if(0 != (ptr->lasterror = send_getobject(ptr->socket, id, &oldobjrec)))
+	if(0 != (ptr->lasterror = send_getandlock(ptr->socket, id, &oldobjrec)))
 		RETURN_FALSE;
 
 	zend_hash_internal_pointer_reset(newobjarr);
 	modification = strdup("");
 	for(i=0; i<zend_hash_num_elements(newobjarr); i++) {
-		char *key, *str, *str1, newattribute[200];
+		char *key, *str, *str1, newattribute[BUFFERLEN];
 		pval *data;
 		int j, noinsert=1;
 		ulong ind;
@@ -1237,24 +1352,24 @@ PHP_FUNCTION(hw_changeobject) {
 		switch(data->type) {
 			case IS_STRING:
 				if(strlen(data->value.str.val) == 0)
-					noinsert = 0;
+					snprintf(newattribute, BUFFERLEN, "rem %s", key);
 				else
-					sprintf(newattribute, "%s=%s", key, data->value.str.val);
+					snprintf(newattribute, BUFFERLEN, "add %s=%s", key, data->value.str.val);
+				noinsert = 0;
 				break;
 			default:
-				sprintf(newattribute, "%s", "");
+				newattribute[0] = '\0';
 		}
-
 		if(!noinsert) {
 			modification = fnInsStr(modification, 0, "\\");
 			modification = fnInsStr(modification, 0, newattribute);
-			modification = fnInsStr(modification, 0, "add ");
+/*			modification = fnInsStr(modification, 0, "add "); */
 
 			/* Retrieve the old attribute from object record */
 			if(NULL != (str = strstr(oldobjrec, key))) {
 				str1 = str;
 				j = 0;
-				while((str1 != NULL) && (*str1 != '\n')) {
+				while((str1 != NULL) && (*str1 != '\n') && (j < BUFFERLEN-1)) {
 					buf[j++] = *str1++;
 				}
 				buf[j] = '\0';
@@ -1270,12 +1385,246 @@ PHP_FUNCTION(hw_changeobject) {
 
 	set_swap(ptr->swap_on);
 	modification[strlen(modification)-1] = '\0';
-/*	php_printf("0x%X, %s", id, modification); */
-	if (0 != (ptr->lasterror = send_changeobject(ptr->socket, id, modification)))
+	if (0 != (ptr->lasterror = send_changeobject(ptr->socket, id, modification))) {
+		free(modification);
+		send_unlock(ptr->socket, id);
 		RETURN_FALSE;
+	}
+	free(modification);
+	if (0 != (ptr->lasterror = send_unlock(ptr->socket, id))) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+#undef BUFFERLEN
+/* }}} */
+
+/* {{{ proto void hw_modifyobject(int link, int objid, array remattributes, array addattributes, [int mode])
+   Modifies attributes of an object */
+#define BUFFERLEN 200
+PHP_FUNCTION(hw_modifyobject) {
+	pval *argv[5];
+	int argc;
+	int link, id, type, i, mode;
+	hw_connection *ptr;
+	char *modification;
+	HashTable *remobjarr, *addobjarr;
+
+	argc = ARG_COUNT(ht);
+	if((argc > 5) || (argc < 4))
+		WRONG_PARAM_COUNT;
+
+	if (getParametersArray(ht, argc, argv) == FAILURE)
+	if(argc < 4) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(argv[0]); /* Connection */
+	convert_to_long(argv[1]); /* object ID */
+	convert_to_array(argv[2]); /* Array with attributes to remove */
+	convert_to_array(argv[3]); /* Array with attributes to add */
+	if(argc == 5) {
+		convert_to_long(argv[4]);
+		mode = argv[4]->value.lval;
+	} else
+		mode = 0;
+	link=argv[0]->value.lval;
+	id=argv[1]->value.lval;
+	remobjarr=argv[2]->value.ht;
+	addobjarr=argv[3]->value.ht;
+	ptr = php3_list_find(link,&type);
+	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	modification = strdup("");
+	if(addobjarr != NULL) {
+		zend_hash_internal_pointer_reset(addobjarr);
+		for(i=0; i<zend_hash_num_elements(addobjarr); i++) {
+			char *key, addattribute[BUFFERLEN];
+			pval *data;
+			int noinsert=1;
+			ulong ind;
+
+			zend_hash_get_current_key(addobjarr, &key, &ind);
+			zend_hash_get_current_data(addobjarr, (void *) &data);
+			switch(data->type) {
+				case IS_STRING:
+					if(strlen(data->value.str.val) > 0) {
+						snprintf(addattribute, BUFFERLEN, "add %s=%s", key, data->value.str.val);
+/* fprintf(stderr, "add: %s\n", addattribute); */
+						noinsert = 0;
+					}
+					break;
+				case IS_ARRAY: {
+					int i, len, keylen, count;
+					char *strarr, *ptr, *ptr1;
+					count = zend_hash_num_elements(data->value.ht);
+					if(count > 0) {
+						strarr = make_objrec_from_array(data->value.ht);
+						len = strlen(strarr) - 1;
+						keylen = strlen(key);
+						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1+4)))) {
+							if(modification)
+								free(modification);
+							RETURN_FALSE;
+						}
+						ptr1 = ptr;
+						*ptr1 = '\0';
+						strcpy(ptr1, "add ");
+						ptr1 += 4;
+						strcpy(ptr1, key);
+						ptr1 += keylen;
+						*ptr1++ = '=';
+						for(i=0; i<len; i++) {
+							*ptr1++ = strarr[i];
+							if(strarr[i] == '\n') {
+								ptr1[-1] = '\\';
+								strcpy(ptr1, "add ");
+								ptr1 += 4;
+								strcpy(ptr1, key);
+								ptr1 += keylen;
+								*ptr1++ = '=';
+							} else if(strarr[i] == '=')
+								ptr1[-1] = ':';
+						}
+						*ptr1 = '\0';
+						strncpy(addattribute, ptr, BUFFERLEN);
+						noinsert = 0;
+					}
+					break;
+				}
+			}
+			if(!noinsert) {
+				modification = fnInsStr(modification, 0, "\\");
+				modification = fnInsStr(modification, 0, addattribute);
+			}
+			efree(key);
+			zend_hash_move_forward(addobjarr);
+		}
+	}
+
+	if(remobjarr != NULL) {
+		int nr;
+		zend_hash_internal_pointer_reset(remobjarr);
+		nr = zend_hash_num_elements(remobjarr);
+		for(i=0; i<nr; i++) {
+			char *key, remattribute[BUFFERLEN];
+			pval *data;
+			int noinsert=1;
+			ulong ind;
+
+			zend_hash_get_current_key(remobjarr, &key, &ind);
+			zend_hash_get_current_data(remobjarr, (void *) &data);
+			switch(data->type) {
+				case IS_STRING:
+					if(strlen(data->value.str.val) > 0) {
+						snprintf(remattribute, BUFFERLEN, "rem %s=%s", key, data->value.str.val);
+						noinsert = 0;
+					} else {
+						snprintf(remattribute, BUFFERLEN, "rem %s", key);
+						noinsert = 0;
+ 					}
+					break;
+				case IS_ARRAY: {
+					int i, len, keylen, count;
+					char *strarr, *ptr, *ptr1;
+					count = zend_hash_num_elements(data->value.ht);
+					if(count > 0) {
+						strarr = make_objrec_from_array(data->value.ht);
+						len = strlen(strarr) - 1;
+						keylen = strlen(key);
+						if(NULL == (ptr = malloc(len + 1 + count*(keylen+1+4)))) {
+							if(modification)
+								free(modification);
+							RETURN_FALSE;
+						}
+						ptr1 = ptr;
+						*ptr1 = '\0';
+						strcpy(ptr1, "rem ");
+						ptr1 += 4;
+						strcpy(ptr1, key);
+						ptr1 += keylen;
+						*ptr1++ = '=';
+						for(i=0; i<len; i++) {
+							*ptr1++ = strarr[i];
+							if(strarr[i] == '\n') {
+								ptr1[-1] = '\\';
+								strcpy(ptr1, "rem ");
+								ptr1 += 4;
+								strcpy(ptr1, key);
+								ptr1 += keylen;
+								*ptr1++ = '=';
+							} else if(strarr[i] == '=')
+								ptr1[-1] = ':';
+						}
+						*ptr1++ = '\n';
+						*ptr1 = '\0';
+						strncpy(remattribute, ptr, BUFFERLEN);
+						noinsert = 0;
+					}
+					break;
+				}
+			}
+			if(!noinsert) {
+				modification = fnInsStr(modification, 0, "\\");
+				modification = fnInsStr(modification, 0, remattribute);
+			}
+			efree(key);
+			zend_hash_move_forward(remobjarr);
+		}
+	}
+
+	set_swap(ptr->swap_on);
+	modification[strlen(modification)-1] = '\0';
+	if(strlen(modification) == 0) {
+		ptr->lasterror = 0;
+		free(modification);
+		RETURN_TRUE;
+	}
+/*	fprintf(stderr, "modifyobject: %s\n", modification);*/
+	switch(mode) {
+		case 0:
+			if (0 == (ptr->lasterror = send_lock(ptr->socket, id))) {
+				if (0 == (ptr->lasterror = send_changeobject(ptr->socket, id, modification))) {
+					if (0 != (ptr->lasterror = send_unlock(ptr->socket, id))) {
+						php_error(E_WARNING,"Aiii, Changeobject failed and couldn't unlock object (id = 0x%X)", id);
+						free(modification);
+						RETURN_FALSE;
+					}
+					free(modification);
+					RETURN_FALSE;
+				} else {
+					send_unlock(ptr->socket, id);
+					free(modification);
+					RETURN_FALSE;
+				}
+			} else {
+				php_error(E_WARNING,"Could not lock object (id = 0x%X)", id);
+				free(modification);
+				RETURN_FALSE;
+			}
+			break;
+		case 1:
+/* WARNING: send_groupchangobject() only works right, if each attribute
+   can be modified. Doing a changeobject recursively often tries to
+   modify objects which cannot be modified e.g. because an attribute cannot
+   be removed. In such a case no further modification on that object is done.
+   Doing a 'rem Rights\add Rights=R:a' will fail completely if the attribute
+   Rights is not there already. The object locking is done in send_groupchangeobject();
+*/
+			if (0 != (ptr->lasterror = send_groupchangeobject(ptr->socket, id, modification))) {
+				free(modification);
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			php_error(E_WARNING,"hw_modifyobject: Mode must be 0 or 1 (recursive)");
+	}
 	free(modification);
 	RETURN_TRUE;
 }
+#undef BUFFERLEN
 /* }}} */
 
 void php3_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
@@ -1285,6 +1634,7 @@ void php3_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 	hw_connection *ptr;
 	int collIDcount, docIDcount, i, *docIDs, *collIDs;
 
+fprintf(stderr, "Copy/Move %d\n", mvcp);
 	switch(mvcp) {
 		case MOVE: /* Move also has fromID */
 			if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
@@ -1356,7 +1706,6 @@ void php3_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 		}
 	}
 	efree(objvIDs);
-
 	if (0 != (ptr->lasterror = send_mvcpdocscoll(ptr->socket, docIDs, docIDcount, from, dest, mvcp))) {
 		efree(collIDs);
 		efree(docIDs);
@@ -1395,6 +1744,7 @@ PHP_FUNCTION(hw_gettext) {
 	pval *argv[3];
 	int argc, link, id, type, mode;
 	int rootid = 0;
+	char *urlprefix;
 	hw_document *doc;
 	hw_connection *ptr;
 
@@ -1407,12 +1757,21 @@ PHP_FUNCTION(hw_gettext) {
 
 	convert_to_long(argv[0]);
 	convert_to_long(argv[1]);
+	mode = 0;
+	urlprefix = NULL;
 	if(argc == 3) {
-		convert_to_long(argv[2]);
-		rootid = argv[2]->value.lval;
-		mode = 1;
-	} else
-		mode = 0;
+		switch(argv[2]->type) {
+			case IS_LONG:
+				convert_to_long(argv[2]);
+				rootid = argv[2]->value.lval;
+				mode = 1;
+				break;
+			case IS_STRING:	
+				convert_to_string(argv[2]);
+				urlprefix = argv[2]->value.str.val;
+				break;
+		}
+	}
 	link=argv[0]->value.lval;
 	id=argv[1]->value.lval;
 	ptr = php3_list_find(link,&type);
@@ -1428,7 +1787,7 @@ PHP_FUNCTION(hw_gettext) {
 	char *bodytag = NULL;
 	int count;
 	/* !!!! memory for object and attributes is allocated with malloc !!!! */
-	if (0 != (ptr->lasterror = send_gettext(ptr->socket, id, mode, rootid, &attributes, &bodytag, &object, &count)))
+	if (0 != (ptr->lasterror = send_gettext(ptr->socket, id, mode, rootid, &attributes, &bodytag, &object, &count, urlprefix)))
 		RETURN_FALSE;
 	doc = malloc(sizeof(hw_document));
 	doc->data = object;
@@ -1445,7 +1804,7 @@ PHP_FUNCTION(hw_gettext) {
    Modifies text document */
 PHP_FUNCTION(hw_edittext) {
 	pval *arg1, *arg2;
-	int link, id, doc, type;
+	int link, doc, type;
 	hw_connection *ptr;
 	hw_document *docptr;
 
@@ -1457,18 +1816,16 @@ PHP_FUNCTION(hw_edittext) {
 	link=arg1->value.lval;
 	ptr = php3_list_find(link,&type);
 
-	/* FIXME id is not set anywhere */
 	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find socket identifier %d",link);
 		RETURN_FALSE;
 	}
 
 	doc=arg2->value.lval;
 	docptr = php3_list_find(doc,&type);
 
-	/* FIXME id is not set anywhere */
 	if(!docptr || (type!=php3_hw_module.le_document)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find document identifier %d", doc);
 		RETURN_FALSE;
 	}
 
@@ -1484,12 +1841,14 @@ PHP_FUNCTION(hw_edittext) {
 
 /* {{{ proto hwdoc hw_getcgi(int link, int objid)
    Returns the output of a cgi script */
+#define BUFFERLEN 1000
+/* FIX ME: The buffer cgi_env_str should be allocated dynamically */
 PHP_FUNCTION(hw_getcgi) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_document *doc;
 	hw_connection *ptr;
-	char cgi_env_str[1000];
+	char cgi_env_str[BUFFERLEN];
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1519,12 +1878,12 @@ PHP_FUNCTION(hw_getcgi) {
 	   requires.
 	*/
 #if (WIN32|WINNT)
-	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
+	snprintf(cgi_env_str, BUFFERLEN, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     getenv("REQUEST_METHOD"),
 	                     getenv("PATH_INFO"),
 	                     getenv("QUERY_STRING"));
 #else
-	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
+	snprintf(cgi_env_str, BUFFERLEN, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     SG(request_info).request_method,
 	                     SG(request_info).request_uri,
 	                     SG(request_info).query_string);
@@ -1541,10 +1900,11 @@ PHP_FUNCTION(hw_getcgi) {
 	return_value->type = IS_LONG;
 	}
 }
+#undef BUFFERLEN
 /* }}} */
 
-/* {{{ proto hwdoc hw_getremote(int link, int objid)
-   Returns the output of a remote document */
+/* {{{ proto int hw_getremote(int link, int objid)
+   Returns the content of a remote document */
 PHP_FUNCTION(hw_getremote) {
 	pval *arg1, *arg2;
 	int link, id, type;
@@ -1583,8 +1943,8 @@ PHP_FUNCTION(hw_getremote) {
 }
 /* }}} */
 
-/* {{{ proto [array|hwdoc] hw_getremotechildren(int link, int objid)
-   Returns the remote document if only one or an array of object records */
+/* {{{ proto [array|int] hw_getremotechildren(int link, string objrec)
+   Returns the remote document or an array of object records */
 PHP_FUNCTION(hw_getremotechildren) {
 	pval *arg1, *arg2;
 	int link, type, i;
@@ -1610,15 +1970,61 @@ PHP_FUNCTION(hw_getremotechildren) {
 	if (0 != (ptr->lasterror = send_getremotechildren(ptr->socket, objrec, &remainder, &offsets, &count)))
 		RETURN_FALSE;
 
+/*
+for(i=0;i<count;i++)
+  php_printf("offset[%d] = %d--\n", i, offsets[i]);
+php_printf("count = %d, remainder = <HR>%s---<HR>", count, remainder);
+*/
+	/* The remainder depends on the number of returned objects and
+	   whether the MimeType of the object to retrieve is set. If
+	   the MimeType is set the result will start with the
+	   HTTP header 'Content-type: mimetype', otherwise it will be
+	   a list of object records and therefore starts with
+	   'ObjectID=0'. In the first case the offset and count are somewhat
+	   strange. Quite often count had a value of 6 which appears to be
+	   meaningless, but if you sum up the offsets you get the length
+	   of the remainder which is the lenght of the document.
+	   The document must have been chopped up into 6 pieces, each ending
+	   with 'ServerId=0xYYYYYYYY'.
+	   In the second case the offset contains the lenght of
+	   each object record; count contains the number of object records.
+	   Even if a remote object has children
+	   (several sql statements) but the MimeType is set, it will
+	   return a document in the format of MimeType. On the other
+	   hand a remote object does not have any children but just
+	   returns a docuement will not be shown unless the MimeType
+	   is set. It returns the pure object record of the object without
+	   the SQLStatement attribute. Quite senseless.
+           Though, this behavior depends on how the hgi gateway in Hyperwave
+	   is implemented.
+	*/
 	if(strncmp(remainder, "ObjectID=0 ", 10)) {
 		hw_document *doc;
-		remainder[offsets[0]-18] = '\0';
-/*php_printf("offset = %d, remainder = %s---", offsets[0], remainder);*/
+		char *ptr;
+		int i, j, len;
+		/* For some reason there is always the string
+		   'SeverId=0xYYYYYYYY' at the end, so we cut it off.
+		   The document may as well be divided into several pieces
+		   and each of them has the ServerId at the end.
+		   The following will put the pieces back together and
+		   strip the ServerId. count contains the number of pieces.
+		*/
+		for(i=0, len=0; i<count; i++)
+			len += offsets[i]-18;
+/*fprintf(stderr,"len = %d\n", len); */
 		doc = malloc(sizeof(hw_document));
-		doc->data = strdup(remainder);
+		doc->data = malloc(len+1);
+		ptr = doc->data;
+		for(i=0, j=0; i<count; i++) {
+			memcpy((char *)ptr, (char *)&remainder[j], offsets[i]-18);
+/*fprintf(stderr,"rem = %s\n", &remainder[j]); */
+			j += offsets[i];
+			ptr += offsets[i] - 18;
+		}
+		*ptr = '\0';
 		doc->attributes = strdup(objrec);
 		doc->bodytag = NULL;
-		doc->size = offsets[0]-18;
+		doc->size = strlen(doc->data);
 		return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
 		return_value->type = IS_LONG;
 	} else {
@@ -1675,10 +2081,7 @@ PHP_FUNCTION(hw_pipedocument) {
 	hw_connection *ptr;
 	hw_document *doc;
 #if APACHE
-	server_rec *serv;
-	SLS_FETCH();
-	
-	serv = ((request_rec *) SG(server_context))->server;
+	server_rec *serv = ((request_rec *) SG(server_context))->server;
 #endif
 
 	argc = ARG_COUNT(ht);
@@ -1720,9 +2123,9 @@ PHP_FUNCTION(hw_pipedocument) {
 #if APACHE
   serv->server_hostname,
 #else
-  getenv("HOST"),
+  getenv("HOSTNAME"),
 #endif
-   id, mode, rootid, &attributes, &bodytag, &object, &count)))
+   id, mode, rootid, &attributes, &bodytag, &object, &count, NULL)))
 		RETURN_FALSE;
 
 	doc = malloc(sizeof(hw_document));
@@ -1730,14 +2133,17 @@ PHP_FUNCTION(hw_pipedocument) {
 	doc->attributes = attributes;
 	doc->bodytag = bodytag;
 	doc->size = count;
-fprintf(stderr, "size = %d\n", count);
+/* fprintf(stderr, "size = %d\n", count); */
 	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
 	return_value->type = IS_LONG;
 	}
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto hwdoc hw_pipecgi(int link, int objid)
    Returns output of cgi script */
+#define BUFFERLEN 1000
+/* FIX ME: The buffer cgi_env_str should be allocated dynamically */
 PHP_FUNCTION(hw_pipecgi) {
 	pval *arg1, *arg2;
 	int link, id, type;
@@ -1745,10 +2151,7 @@ PHP_FUNCTION(hw_pipecgi) {
 	hw_document *doc;
 	char cgi_env_str[1000];
 #if APACHE
-	server_rec *serv;
-	SLS_FETCH();
-	
-	serv = ((request_rec *) SG(server_context))->server;
+	server_rec *serv = ((request_rec *) SG(server_context))->server;
 #endif
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
@@ -1771,12 +2174,12 @@ PHP_FUNCTION(hw_pipecgi) {
 	int count;
 
 #if (WIN32|WINNT)
-	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
+	snprintf(cgi_env_str, BUFFERLEN, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     getenv("REQUEST_METHOD"),
 	                     getenv("PATH_INFO"),
 	                     getenv("QUERY_STRING"));
 #else
-	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
+	snprintf(cgi_env_str, BUFFERLEN, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     SG(request_info).request_method,
 	                     SG(request_info).request_uri,
 	                     SG(request_info).query_string);
@@ -1786,7 +2189,7 @@ PHP_FUNCTION(hw_pipecgi) {
 #if APACHE
   serv->server_hostname,
 #else
-  getenv("HOST"),
+  getenv("HOSTNAME"),
 #endif
   id, cgi_env_str, &attributes, &object, &count)))
 		RETURN_FALSE;
@@ -1799,7 +2202,9 @@ PHP_FUNCTION(hw_pipecgi) {
 	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
 	return_value->type = IS_LONG;
 	}
-}  /* }}} */
+}
+#undef BUFFERLEN
+/* }}} */
 
 /* {{{ proto void hw_insertdocument(int link, int parentid, hwdoc doc) 
    Insert new document */
@@ -1808,11 +2213,9 @@ PHP_FUNCTION(hw_insertdocument) {
 	int link, id, doc, type;
 	hw_connection *ptr;
 	hw_document *docptr;
+	hw_objectID objid;
 #if APACHE
-	server_rec *serv;
-	SLS_FETCH();
-	
-	serv = ((request_rec *) SG(server_context))->server;
+	server_rec *serv = ((request_rec *) SG(server_context))->server;
 #endif
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
@@ -1842,19 +2245,21 @@ PHP_FUNCTION(hw_insertdocument) {
 #if APACHE
   serv->server_hostname,
 #else
-  getenv("HOST"),
+  getenv("HOSTNAME"),
 #endif
-             id, docptr->attributes, docptr->data, docptr->size))) {
+             id, docptr->attributes, docptr->data, docptr->size, &objid))) {
 		RETURN_FALSE;
 		}
 	}
-	RETURN_TRUE;
-}  /* }}} */
+	RETURN_LONG(objid);
+}
+/* }}} */
 
-/* {{{ proto hwdoc hw_new_document(int link, string data, string objrec, int size)
+/* {{{ proto hwdoc hw_new_document(string objrec, string data, int size)
    Create a new document */
 PHP_FUNCTION(hw_new_document) {
 	pval *arg1, *arg2, *arg3;
+	char *ptr;
 	hw_document *doc;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
@@ -1866,14 +2271,23 @@ PHP_FUNCTION(hw_new_document) {
 	convert_to_long(arg3);
 
 	doc = malloc(sizeof(hw_document));
-	doc->data = malloc(arg3->value.lval);
+	if(NULL == doc)
+		RETURN_FALSE;
+	doc->data = malloc(arg3->value.lval+1);
+	if(NULL == doc->data) {
+		free(doc);
+		RETURN_FALSE;
+	}
         memcpy(doc->data, arg2->value.str.val, arg3->value.lval);
+	ptr = doc->data;
+	ptr[arg3->value.lval] = '\0';
 	doc->attributes = strdup(arg1->value.str.val);
 	doc->bodytag = NULL;
 	doc->size = arg3->value.lval;
 	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
 	return_value->type = IS_LONG;
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto void hw_free_document(hwdoc doc)
    Frees memory of document */
@@ -1894,15 +2308,19 @@ PHP_FUNCTION(hw_free_document) {
 	}
 	php3_list_delete(id);
 	RETURN_TRUE;
-}  /* }}} */
+}
+/* }}} */
+
+/* {{{ proto void hw_outputdocument(hwdoc doc)
+   An alias for hw_output_document */
+/* }}} */
 
 /* {{{ proto void hw_output_document(hwdoc doc)
    Prints document */
 PHP_FUNCTION(hw_output_document) {
 	pval *arg1;
-	int id, type, count;
+	int id, type;
 	hw_document *ptr;
-	char *ptr1;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1915,15 +2333,16 @@ PHP_FUNCTION(hw_output_document) {
 		RETURN_FALSE;
 	}
 
-	ptr1 = ptr->data;
-	count = 0;
-	while(count < ptr->size) {
-		php3_write(ptr1++, 1);
-		count++;
-	}
+	php3_header();
+	php3_write(ptr->data, ptr->size);
 
 	RETURN_TRUE;
-}  /* }}} */
+}
+/* }}} */
+
+/* {{{ proto string hw_documentbodytag(hwdoc doc [, string prefix])
+   An alias for hw_document_bodytag */
+/* }}} */
 
 /* {{{ proto string hw_document_bodytag(hwdoc doc [, string prefix])
    Return bodytag prefixed by prefix */
@@ -1962,7 +2381,8 @@ PHP_FUNCTION(hw_document_bodytag) {
 	} else {
 		RETURN_STRING(ptr->bodytag, 1);
 	}
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto string hw_document_content(hwdoc doc)
    Returns content of document */
@@ -1987,9 +2407,50 @@ PHP_FUNCTION(hw_document_content) {
 	}
 
 	RETURN_STRING(ptr->data, 1);
-}  /* }}} */
+}
+/* }}} */
 
-/* {{{ proto int hw_document_content(hwdoc doc)
+/* {{{ proto int hw_document_setcontent(hwdoc doc, string content)
+   Sets/replaces content of document */
+PHP_FUNCTION(hw_document_setcontent) {
+	pval *argv[2];
+	int id, type, argc;
+	hw_document *ptr;
+	char *str;
+
+	argc = ARG_COUNT(ht);
+	if(argc != 2)
+		WRONG_PARAM_COUNT;
+		
+	if (getParametersArray(ht, argc, argv) == FAILURE)
+		RETURN_FALSE;
+	
+	convert_to_long(argv[0]);
+	convert_to_string(argv[1]);
+	id=argv[0]->value.lval;
+	ptr = php3_list_find(id,&type);
+	if(!ptr || (type!=php3_hw_module.le_document)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	str = ptr->data;
+	if(NULL != (ptr->data = strdup(argv[1]->value.str.val))) {
+		ptr->size = strlen(ptr->data);
+		free(str);
+		RETURN_TRUE;
+	} else {
+		ptr->data = str;
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int hw_documentsize(hwdoc doc)
+   An alias for hw_document_size */
+/* }}} */
+
+/* {{{ proto int hw_document_size(hwdoc doc)
    Returns size of document */
 PHP_FUNCTION(hw_document_size) {
 	pval *arg1;
@@ -2008,9 +2469,14 @@ PHP_FUNCTION(hw_document_size) {
 	}
 
 	RETURN_LONG(ptr->size);
-}  /* }}} */
+}
+/* }}} */
 
-/* {{{ proto string hw_document_content(hwdoc doc)
+/* {{{ proto string hw_documentattributes(hwdoc doc)
+   An alias for hw_document_attributes */
+/* }}} */
+
+/* {{{ proto string hw_document_attributes(hwdoc doc)
    Returns object record of document */
 PHP_FUNCTION(hw_document_attributes) {
 	pval *arg1;
@@ -2030,7 +2496,8 @@ PHP_FUNCTION(hw_document_attributes) {
 
 	RETURN_STRING(ptr->attributes, 1);
 /*	make_return_array_from_objrec(&return_value, ptr->attributes); */
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getparentsobj(int link, int objid)
    Returns array of parent object records */
@@ -2057,14 +2524,15 @@ PHP_FUNCTION(hw_getparentsobj) {
 	set_swap(ptr->swap_on);
 
 	if (0 != (ptr->lasterror = send_getparentsobj(ptr->socket, id, &childObjRecs, &count))) {
-		php_error(E_WARNING, "send_command (getparentsobj) returned -1\n");
+		php_error(E_WARNING, "send_command (getparentsobj) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
 	/* create return value and free all memory */
 	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
 		RETURN_FALSE;
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getparents(int link, int objid)
    Returns array of parent object ids */
@@ -2093,7 +2561,7 @@ PHP_FUNCTION(hw_getparents) {
 	int i;
 
 	if (0 != (ptr->lasterror = send_getparents(ptr->socket, id, &childIDs, &count))) {
-		php_error(E_WARNING, "send_command (getparents) returned -1\n");
+		php_error(E_WARNING, "send_command (getparents) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2108,7 +2576,8 @@ PHP_FUNCTION(hw_getparents) {
 	efree(childIDs);
 	}
 
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_children(int link, int objid)
    Returns array of children object ids */
@@ -2137,7 +2606,7 @@ PHP_FUNCTION(hw_children) {
 	int i;
 
 	if (0 != (ptr->lasterror = send_children(ptr->socket, id, &childIDs, &count))){
-		php_error(E_WARNING, "send_command (getchildcoll) returned -1\n");
+		php_error(E_WARNING, "send_command (getchildcoll) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2152,9 +2621,10 @@ PHP_FUNCTION(hw_children) {
 	efree(childIDs);
 	}
 		
-}  /* }}} */
+}
+/* }}} */
 
-/* {{{ proto array hw_children(int link, int objid)
+/* {{{ proto array hw_childrenobj(int link, int objid)
    Returns array of children object records */
 PHP_FUNCTION(hw_childrenobj) {
 	pval *arg1, *arg2;
@@ -2179,16 +2649,17 @@ PHP_FUNCTION(hw_childrenobj) {
 	set_swap(ptr->swap_on);
 
 	if (0 != (ptr->lasterror = send_childrenobj(ptr->socket, id, &childObjRecs, &count))) {
-		php_error(E_WARNING, "send_command (getchildcollobj) returned -1\n");
+		php_error(E_WARNING, "send_command (getchildcollobj) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
 	/* create return value and free all memory */
 	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
 		RETURN_FALSE;
-}  /* }}} */
+}
+/* }}} */
 
-/* {{{ proto array hw_childcoll(int link, int objid)
+/* {{{ proto array hw_getchildcoll(int link, int objid)
    Returns array of child collection object ids */
 PHP_FUNCTION(hw_getchildcoll) {
 	pval *arg1, *arg2;
@@ -2215,7 +2686,7 @@ PHP_FUNCTION(hw_getchildcoll) {
 	int i;
 
 	if (0 != (ptr->lasterror = send_getchildcoll(ptr->socket, id, &childIDs, &count))){
-		php_error(E_WARNING, "send_command (getchildcoll) returned -1\n");
+		php_error(E_WARNING, "send_command (getchildcoll) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2230,9 +2701,10 @@ PHP_FUNCTION(hw_getchildcoll) {
 	efree(childIDs);
 	}
 		
-}  /* }}} */
+}
+/* }}} */
 
-/* {{{ proto array hw_childcollobj(int link, int objid)
+/* {{{ proto array hw_getchildcollobj(int link, int objid)
    Returns array of child collection object records */
 PHP_FUNCTION(hw_getchildcollobj) {
 	pval *arg1, *arg2;
@@ -2257,14 +2729,15 @@ PHP_FUNCTION(hw_getchildcollobj) {
 	set_swap(ptr->swap_on);
 
 	if (0 != (ptr->lasterror = send_getchildcollobj(ptr->socket, id, &childObjRecs, &count))) {
-		php_error(E_WARNING, "send_command (getchildcollobj) returned -1\n");
+		php_error(E_WARNING, "send_command (getchildcollobj) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
 	/* create return value and free all memory */
 	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
 		RETURN_FALSE;
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto int hw_docbyanchor(int link, int anchorid)
    Returns objid of document belonging to anchorid */
@@ -2294,7 +2767,8 @@ PHP_FUNCTION(hw_docbyanchor) {
 
 	RETURN_LONG(objectID);
 	}
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_docbyanchorobj(int link, int anchorid)
    Returns object record of document belonging to anchorid */
@@ -2328,7 +2802,8 @@ PHP_FUNCTION(hw_docbyanchorobj) {
 	efree(object);
 	*/
 	}
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getobjectbyquery(int link, string query, int maxhits)
    Search for query and return maxhits objids */
@@ -2358,7 +2833,7 @@ PHP_FUNCTION(hw_getobjectbyquery) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getobjbyquery(ptr->socket, query, maxhits, &childIDs, &count))) {
-		php_error(E_WARNING, "send_command (getchildcoll) returned -1\n");
+		php_error(E_WARNING, "send_command (getobjectbyquery) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2370,7 +2845,8 @@ PHP_FUNCTION(hw_getobjectbyquery) {
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, childIDs[i]);
 	efree(childIDs);
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getobjectbyqueryobj(int link, string query, int maxhits)
    Search for query and return maxhits object records */
@@ -2400,14 +2876,15 @@ PHP_FUNCTION(hw_getobjectbyqueryobj) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getobjbyqueryobj(ptr->socket, query, maxhits, &childObjRecs, &count))) {
-		php_error(E_WARNING, "send_command (getchildcoll) returned -1\n");
+		php_error(E_WARNING, "send_command (getobjectbyqueryobj) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
 	/* create return value and free all memory */
 	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
 		RETURN_FALSE;
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getobjectbyquerycoll(int link, int collid, string query, int maxhits)
    Search for query in collection and return maxhits objids */
@@ -2439,7 +2916,7 @@ PHP_FUNCTION(hw_getobjectbyquerycoll) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getobjbyquerycoll(ptr->socket, id, query, maxhits, &childIDs, &count))) {
-		php_error(E_WARNING, "send_command (getchildcoll) returned -1\n");
+		php_error(E_WARNING, "send_command (getobjectbyquerycoll) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2451,7 +2928,8 @@ PHP_FUNCTION(hw_getobjectbyquerycoll) {
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, childIDs[i]);
 	efree(childIDs);
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getobjectbyquerycollobj(int link, int collid, string query, int maxhits)
    Search for query in collection and return maxhits object records */
@@ -2483,14 +2961,15 @@ PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getobjbyquerycollobj(ptr->socket, id, query, maxhits, &childObjRecs, &count))) {
-		php_error(E_WARNING, "send_command (getchildcoll) returned -1\n");
+		php_error(E_WARNING, "send_command (getobjectbyquerycollobj) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
 	/* create return value and free all memory */
 	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
 		RETURN_FALSE;
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getchilddoccoll(int link, int objid)
    Returns all children ids which are documents */
@@ -2516,7 +2995,7 @@ PHP_FUNCTION(hw_getchilddoccoll) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getchilddoccoll(ptr->socket, id, &childIDs, &count))) {
-		php_error(E_WARNING, "send_command (getchilddoccoll) returned -1\n");
+		php_error(E_WARNING, "send_command (getchilddoccoll) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2528,7 +3007,8 @@ PHP_FUNCTION(hw_getchilddoccoll) {
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, childIDs[i]);
 	efree(childIDs);
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getchilddoccollobj(int link, int objid)
    Returns all children object records which are documents */
@@ -2554,7 +3034,7 @@ PHP_FUNCTION(hw_getchilddoccollobj) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getchilddoccollobj(ptr->socket, id, &childObjRecs, &count))) {
-		php_error(E_WARNING, "send_command (getchilddoccollobj) returned -1\n");
+		php_error(E_WARNING, "send_command (getchilddoccollobj) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2562,7 +3042,8 @@ PHP_FUNCTION(hw_getchilddoccollobj) {
 	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
 		RETURN_FALSE;
 
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getanchors(int link, int objid)
    Return all anchors of object */
@@ -2588,7 +3069,7 @@ PHP_FUNCTION(hw_getanchors) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getanchors(ptr->socket, id, &anchorIDs, &count))) {
-		php_error(E_WARNING, "send_command (getanchors) returned -1\n");
+		php_error(E_WARNING, "send_command (getanchors) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2600,7 +3081,8 @@ PHP_FUNCTION(hw_getanchors) {
 	for(i=0; i<count; i++)
 		add_index_long(return_value, i, anchorIDs[i]);
 	efree(anchorIDs);
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto array hw_getanchorsobj(int link, int objid)
    Return all object records of anchors of object */
@@ -2626,14 +3108,15 @@ PHP_FUNCTION(hw_getanchorsobj) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getanchorsobj(ptr->socket, id, &anchorObjRecs, &count))) {
-		php_error(E_WARNING, "send_command (getanchors) returned -1\n");
+		php_error(E_WARNING, "send_command (getanchors) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
 	/* create return value and free all memory */
 	if( 0 > make_return_objrec(&return_value, anchorObjRecs, count))
 		RETURN_FALSE;
-}  /* }}} */
+}
+/* }}} */
 
 /* {{{ proto string hw_getusername(int link)
    Returns the current user name */
@@ -2656,8 +3139,8 @@ PHP_FUNCTION(hw_getusername) {
 	return_value->value.str.val = estrdup(ptr->username);
 	return_value->value.str.len = strlen(ptr->username);
 	return_value->type = IS_STRING;
-}  /* }}} */
-
+}
+/* }}} */
 
 /* {{{ proto void hw_identify(int link, string username, string password)
    Identifies at Hyperwave server */
@@ -2687,7 +3170,7 @@ PHP_FUNCTION(hw_identify) {
 	char *str;
 
 	if (0 != (ptr->lasterror = send_identify(ptr->socket, name, passwd, &userdata))) {
-		php_error(E_WARNING, "send_identify returned -1\n");
+		php_error(E_WARNING, "send_identify returned %d\n", ptr->lasterror);
 		if(ptr->username) free(ptr->username);
 		ptr->username = NULL;
 		RETURN_FALSE;
@@ -2730,7 +3213,7 @@ PHP_FUNCTION(hw_array2objrec) {
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
+	convert_to_array(arg1);
 	objrec = make_objrec_from_array(arg1->value.ht);
 	if(objrec) {
 		retobj = estrdup(objrec);
@@ -2840,7 +3323,7 @@ PHP_FUNCTION(hw_inscoll) {
 }
 /* }}} */
 
-/* {{{ proto void hw_inscoll(int link, int parentid, array objarr [, string text])
+/* {{{ proto void hw_insdoc(int link, int parentid, string objrec [, string text])
    Inserts document */
 PHP_FUNCTION(hw_insdoc) {
 	pval *argv[4];
@@ -2906,7 +3389,7 @@ PHP_FUNCTION(hw_getsrcbydestobj) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_getsrcbydest(ptr->socket, id, &childObjRecs, &count))) {
-		php_error(E_WARNING, "send_command (getsrcbydest) returned -1\n");
+		php_error(E_WARNING, "send_command (getsrcbydest) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2944,7 +3427,7 @@ PHP_FUNCTION(hw_getrellink) {
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = getrellink(ptr->socket, rootid, sourceid, destid, &anchorstr))) {
-		php_error(E_WARNING, "command (getrellink) returned -1\n");
+		php_error(E_WARNING, "command (getrellink) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 
@@ -2958,6 +3441,8 @@ PHP_MINFO_FUNCTION(hw)
 	php_printf("HG-CSP Version: 7.17");
 }
 
+/* {{{ proto void hw_connection_info(int link)
+   Prints information about the connection to Hyperwave server */
 PHP_FUNCTION(hw_connection_info)
 {
 	pval *arg1;
@@ -2977,6 +3462,7 @@ PHP_FUNCTION(hw_connection_info)
 	
 	php_printf("Hyperwave Info:\nhost=%s,\nserver string=%s\nversion=%d\nswap=%d\n", ptr->hostname, ptr->server_string, ptr->version, ptr->swap_on);
 }
+/* }}} */
 
 void print_msg(hg_msg *msg, char *str, int txt)
 {
@@ -3006,5 +3492,6 @@ void print_msg(hg_msg *msg, char *str, int txt)
 /*
  * Local variables:
  * tab-width: 4
+ * c-basic-offset: 4
  * End:
  */

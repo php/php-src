@@ -21,12 +21,9 @@
 /* #define HW_DEBUG */
 
 #include <stdlib.h>
-
-#if WIN32|WINNT
-#include "win95nt.h"
-#else
-#include "php_config.h"
-#endif
+#include "php.h"
+#include "php_globals.h"
+#include "SAPI.h"
 
 #if HYPERWAVE
 
@@ -51,8 +48,7 @@
 #include <alloc.h>
 #include "hg_comm.h"
 #include "dlist.h"
-#include "php.h"
-#include "head.h"
+#include "ext/standard/head.h"
 
 static int set_nonblocking(int fd);
 static int set_blocking(int fd);
@@ -68,14 +64,14 @@ static char *build_msg_str(char *buf, char *str);
 static int   swap(int val);
 
 
-int version      = VERSION;
+int version      = HW_VERSION;
 /* F_DISTRIBUTED has the effect that all object ids are
    virtual. This means whenever an object is requested a
    new id is generated for this session. Wavemaster and
    Harmony set this flag. How do I know? tcpdump tells
    a lot if investigate the output.
-  int version      = VERSION | F_DISTRIBUTED; */
-/* int version   = VERSION | F_DISTRIBUTED | F_COMPRESSED; */
+  int version      = HW_VERSION | F_DISTRIBUTED; */
+/* int version   = HW_VERSION | F_DISTRIBUTED | F_COMPRESSED; */
 static int msgid        =  1;
 static int sock_flags   = -1;
 static int non_blocking =  0;
@@ -157,7 +153,7 @@ ANCHOR *fnAddAnchor(DLIST *pAnchorList,
 	cur_ptr->keyword = NULL;
 	cur_ptr->fragment = NULL;
 
-	dlst_insertafter(pAnchorList, cur_ptr, DLST_HEAD(pAnchorList));
+	dlst_insertafter(pAnchorList, cur_ptr, PHP_DLST_HEAD(pAnchorList));
 
 	return(cur_ptr);
 }
@@ -244,192 +240,199 @@ DLIST *fnCreateAnchorList(char **anchors, char **docofanchorrec, char **reldestr
 			docofanchorptr = docofanchorrec[i];
 			reldestptr = reldestrec[i];
 	
-			/* Determine Position. Doesn't matter if Src or Dest */
+			/* Determine Position. Doesn't matter if Src or Dest
+			   The Position field should always be there. Though there
+			   are case in which the position has no meaning, e.g. if
+			   a document is annotated and the annotation text doesn't
+			   contain a link of type annotation,
+			   In such a case the Position has the value 'invisible' */
 			str = strstr(object, "Position");
 			str += 9;
-			sscanf(str, "0x%X 0x%X", &start, &end);
+			if(0 != strncmp(str, "invisible", 9)) {
+				sscanf(str, "0x%X 0x%X", &start, &end);
+		
+				/* Determine ObjectID */
+				objectID = 0;
+				if(NULL != (str = strstr(object, "ObjectID"))) {
+					str += 9;
+					sscanf(str, "0x%X", &objectID);
+				}
+		
+				cur_ptr = fnAddAnchor(pAnchorList, objectID, start, end);
+		
+				/* Determine Type of Anchor */
+				str = strstr(object, "TAnchor");
+				str += 8;
+				if(*str == 'S') {
+					char destdocname[200];
+					char nameanchor[200];
+					cur_ptr->tanchor = 1;
+		
+					cur_ptr->destdocname = NULL;
+					if(NULL != (str = strstr(object, "Dest"))) {
+						char *tempptr;
 	
-			/* Determine ObjectID */
-			objectID = 0;
-			if(NULL != (str = strstr(object, "ObjectID"))) {
-				str += 9;
-				sscanf(str, "0x%X", &objectID);
-			}
-	
-			cur_ptr = fnAddAnchor(pAnchorList, objectID, start, end);
-	
-			/* Determine Type of Anchor */
-			str = strstr(object, "TAnchor");
-			str += 8;
-			if(*str == 'S') {
-				char destdocname[200];
-				char nameanchor[200];
-				cur_ptr->tanchor = 1;
-	
-				cur_ptr->destdocname = NULL;
-				if(NULL != (str = strstr(object, "Dest"))) {
-					char *tempptr;
-
-					/* No need to care about the value of Dest, because we take the info
-					   from docofanchorptr.
-					   Since the anchor has a destination there are two possibilities.
-					   1. The destination is an anchor or
-					   2. or the destination is a document already.
-					   In both cases docofanchorptr has the proper info because GETDOCBYANCHOR
-					   is such a nice message.
-					*/
-					switch(anchormode) {
-						case 0:
-							tempptr = docofanchorptr;
-							break;
-						default:
-							tempptr = reldestptr;
-					}
-					if(NULL != tempptr) {
-						/* It's always nice to deal with names, so let's first check
-					  		for a name. If there is none we take the ObjectID.
+						/* No need to care about the value of Dest, because we take the info
+						   from docofanchorptr.
+						   Since the anchor has a destination there are two possibilities.
+						   1. The destination is an anchor or
+						   2. or the destination is a document already.
+						   In both cases docofanchorptr has the proper info because GETDOCBYANCHOR
+						   is such a nice message.
 						*/
-						if(NULL != (str = strstr(tempptr, "Name="))) {
-							str += 5;
-						} else if(NULL != (str = strstr(tempptr, "ObjectID="))) {
-							str += 9;
+						switch(anchormode) {
+							case 0:
+								tempptr = docofanchorptr;
+								break;
+							default:
+								tempptr = reldestptr;
 						}
-						if(sscanf(str, "%s\n", destdocname)) {
-							cur_ptr->destdocname = estrdup(destdocname);
-						}
-						destid = 0;
-						if(NULL != (str = strstr(tempptr, "ObjectID="))) {
-							str += 9;
-							sscanf(str, "0x%X", &destid);
+						if(NULL != tempptr) {
+							/* It's always nice to deal with names, so let's first check
+						  		for a name. If there is none we take the ObjectID.
+							*/
+							if(NULL != (str = strstr(tempptr, "Name="))) {
+								str += 5;
+							} else if(NULL != (str = strstr(tempptr, "ObjectID="))) {
+								str += 9;
+							}
+							if(sscanf(str, "%s\n", destdocname)) {
+								cur_ptr->destdocname = estrdup(destdocname);
+							}
+							destid = 0;
+							if(NULL != (str = strstr(tempptr, "ObjectID="))) {
+								str += 9;
+								sscanf(str, "0x%X", &destid);
+							}
 						}
 					}
-				}
-	
-				/* Get the Id of the anchor destination and the document id that belongs
-				   to that anchor. We need that soon in order to determine if the anchor
-				   points to a document or a dest anchor in a document.
-				*/
-				anchordestid = 0;
-				if(NULL != (str = strstr(object, "Dest="))) {
-					str += 5;
-					sscanf(str, "0x%X", &anchordestid);
-				}
-				
-				/* if anchordestid != destid then the destination is an anchor in a document whose
-				   name (objectID) is already in destdocname. We will have to extend the link
-				   by '#...'
-				*/
-				cur_ptr->nameanchor = NULL;
-				if(anchordestid != destid) {
+		
+					/* Get the Id of the anchor destination and the document id that belongs
+					   to that anchor. We need that soon in order to determine if the anchor
+					   points to a document or a dest anchor in a document.
+					*/
+					anchordestid = 0;
 					if(NULL != (str = strstr(object, "Dest="))) {
 						str += 5;
+						sscanf(str, "0x%X", &anchordestid);
+					}
+					
+					/* if anchordestid != destid then the destination is an anchor in a document whose
+					   name (objectID) is already in destdocname. We will have to extend the link
+					   by '#...'
+					*/
+					cur_ptr->nameanchor = NULL;
+					if(anchordestid != destid) {
+						if(NULL != (str = strstr(object, "Dest="))) {
+							str += 5;
+							if(sscanf(str, "%s\n", nameanchor))
+								cur_ptr->nameanchor = estrdup(nameanchor);
+						}
+					}
+		
+					if(!cur_ptr->destdocname) {
+					cur_ptr->link = NULL;
+					if(NULL != (str = strstr(object, "Hint=URL:"))) {
+						str += 9;
+						if(sscanf(str, "%s\n", link))
+							cur_ptr->link = estrdup(link);
+					} else if(NULL != (str = strstr(object, "Hint="))) {
+						str += 5;
+						if(sscanf(str, "%s\n", link))
+							cur_ptr->link = estrdup(link);
+					}
+					}
+		
+					cur_ptr->fragment = NULL;
+					if(NULL != (str = strstr(object, "Fragment="))) {
+						str += 9;
+						if(sscanf(str, "%s\n", link))
+							cur_ptr->fragment = estrdup(link);
+					}
+		
+					cur_ptr->htmlattr = NULL;
+					if(NULL != (str = strstr(object, "HtmlAttr="))) {
+						str += 9;
+						str1 = str;
+						while((*str1 != '\n') && (*str1 != '\0'))
+							str1++;
+						cur_ptr->htmlattr = emalloc(str1 - str + 1);
+						strncpy(cur_ptr->htmlattr, str, str1 - str);
+						cur_ptr->htmlattr[str1 - str] = '\0';
+					}
+		
+					if(NULL != (str = strstr(object, "LinkType="))) {
+						str += 9;
+						if(strncmp(str, "background", 10) == 0)
+							cur_ptr->linktype=HW_BACKGROUND_LINK;
+						else
+						if(strncmp(str, "intag", 5) == 0) {
+							cur_ptr->linktype=HW_INTAG_LINK;
+							cur_ptr->tagattr = NULL;
+							if(NULL != (str = strstr(object, "TagAttr="))) {
+								str += 8;
+								str1 = str;
+								while((*str1 != '\n') && (*str1 != '\0'))
+									str1++;
+								cur_ptr->tagattr = emalloc(str1 - str + 1);
+								memcpy(cur_ptr->tagattr, str, str1 - str);
+								cur_ptr->tagattr[str1 - str] = '\0';
+							}
+						} else
+						if(strncmp(str, "applet", 6) == 0) {
+							cur_ptr->linktype=HW_APPLET_LINK;
+							cur_ptr->codebase = NULL;
+							if(NULL != (str = strstr(object, "CodeBase="))) {
+								str += 9;
+								str1 = str;
+								while((*str1 != '\n') && (*str1 != '\0'))
+									str1++;
+								cur_ptr->codebase = emalloc(str1 - str + 1);
+								memcpy(cur_ptr->codebase, str, str1 - str);
+								cur_ptr->codebase[str1 - str] = '\0';
+							}
+							cur_ptr->code = NULL;
+							if(NULL != (str = strstr(object, "Code="))) {
+								str += 5;
+								str1 = str;
+								while((*str1 != '\n') && (*str1 != '\0'))
+									str1++;
+								cur_ptr->code = emalloc(str1 - str + 1);
+								memcpy(cur_ptr->code, str, str1 - str);
+								cur_ptr->code[str1 - str] = '\0';
+							}
+						} else
+							cur_ptr->linktype=HW_DEFAULT_LINK;
+					} else
+						cur_ptr->linktype=HW_DEFAULT_LINK;
+		
+				} else { /* Destination Anchor */
+					char nameanchor[200];
+		
+					cur_ptr->tanchor = 2;
+					cur_ptr->link = NULL;
+		
+					/* Here is the only additional info for the name attribute */
+					cur_ptr->nameanchor = NULL;
+					if(NULL != (str = strstr(object, "ObjectID="))) {
+						str += 9;
 						if(sscanf(str, "%s\n", nameanchor))
 							cur_ptr->nameanchor = estrdup(nameanchor);
 					}
+		
+					cur_ptr->keyword = NULL;
+					if(NULL != (str = strstr(object, "Keyword="))) {
+						str += 8;
+						if(sscanf(str, "%s\n", nameanchor))
+							cur_ptr->keyword = estrdup(nameanchor);
+					}
+		
 				}
-	
-				if(!cur_ptr->destdocname) {
-				cur_ptr->link = NULL;
-				if(NULL != (str = strstr(object, "Hint=URL:"))) {
-					str += 9;
-					if(sscanf(str, "%s\n", link))
-						cur_ptr->link = estrdup(link);
-				} else if(NULL != (str = strstr(object, "Hint="))) {
-					str += 5;
-					if(sscanf(str, "%s\n", link))
-						cur_ptr->link = estrdup(link);
-				}
-				}
-	
-				cur_ptr->fragment = NULL;
-				if(NULL != (str = strstr(object, "Fragment="))) {
-					str += 9;
-					if(sscanf(str, "%s\n", link))
-						cur_ptr->fragment = estrdup(link);
-				}
-	
-				cur_ptr->htmlattr = NULL;
-				if(NULL != (str = strstr(object, "HtmlAttr="))) {
-					str += 9;
-					str1 = str;
-					while((*str1 != '\n') && (*str1 != '\0'))
-						str1++;
-					cur_ptr->htmlattr = emalloc(str1 - str + 1);
-					strncpy(cur_ptr->htmlattr, str, str1 - str);
-					cur_ptr->htmlattr[str1 - str] = '\0';
-				}
-	
-				if(NULL != (str = strstr(object, "LinkType="))) {
-					str += 9;
-					if(strncmp(str, "background", 10) == 0)
-						cur_ptr->linktype=HW_BACKGROUND_LINK;
-					else
-					if(strncmp(str, "intag", 5) == 0) {
-						cur_ptr->linktype=HW_INTAG_LINK;
-						cur_ptr->tagattr = NULL;
-						if(NULL != (str = strstr(object, "TagAttr="))) {
-							str += 8;
-							str1 = str;
-							while((*str1 != '\n') && (*str1 != '\0'))
-								str1++;
-							cur_ptr->tagattr = emalloc(str1 - str + 1);
-							memcpy(cur_ptr->tagattr, str, str1 - str);
-							cur_ptr->tagattr[str1 - str] = '\0';
-						}
-					} else
-					if(strncmp(str, "applet", 6) == 0) {
-						cur_ptr->linktype=HW_APPLET_LINK;
-						cur_ptr->codebase = NULL;
-						if(NULL != (str = strstr(object, "CodeBase="))) {
-							str += 9;
-							str1 = str;
-							while((*str1 != '\n') && (*str1 != '\0'))
-								str1++;
-							cur_ptr->codebase = emalloc(str1 - str + 1);
-							memcpy(cur_ptr->codebase, str, str1 - str);
-							cur_ptr->codebase[str1 - str] = '\0';
-						}
-						cur_ptr->code = NULL;
-						if(NULL != (str = strstr(object, "Code="))) {
-							str += 5;
-							str1 = str;
-							while((*str1 != '\n') && (*str1 != '\0'))
-								str1++;
-							cur_ptr->code = emalloc(str1 - str + 1);
-							memcpy(cur_ptr->code, str, str1 - str);
-							cur_ptr->code[str1 - str] = '\0';
-						}
-					} else
-						cur_ptr->linktype=HW_DEFAULT_LINK;
-				} else
-					cur_ptr->linktype=HW_DEFAULT_LINK;
-	
-			} else { /* Destination Anchor */
-				char nameanchor[200];
-	
-				cur_ptr->tanchor = 2;
-				cur_ptr->link = NULL;
-	
-				/* Here is the only additional info for the name attribute */
-				cur_ptr->nameanchor = NULL;
-				if(NULL != (str = strstr(object, "ObjectID="))) {
-					str += 9;
-					if(sscanf(str, "%s\n", nameanchor))
-						cur_ptr->nameanchor = estrdup(nameanchor);
-				}
-	
-				cur_ptr->keyword = NULL;
-				if(NULL != (str = strstr(object, "Keyword="))) {
-					str += 8;
-					if(sscanf(str, "%s\n", nameanchor))
-						cur_ptr->keyword = estrdup(nameanchor);
-				}
-	
+		
+				efree(anchors[i]);
+				if(docofanchorrec[i]) efree(docofanchorrec[i]);
+				if(reldestrec[i]) efree(reldestrec[i]);
 			}
-	
-			efree(anchors[i]);
-			if(docofanchorrec[i]) efree(docofanchorrec[i]);
-			if(reldestrec[i]) efree(reldestrec[i]);
 		}
 	}
 	return pAnchorList;
@@ -443,31 +446,39 @@ DLIST *fnCreateAnchorList(char **anchors, char **docofanchorrec, char **reldestr
 *            DList *pAnchorList: list of anchors                       *
 * Return: Text with anchors                                            *
 ***********************************************************************/
-char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag) {
+#define BUFFERLEN 200
+char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char *urlprefix) {
 	ANCHOR *cur_ptr;
-	char bgstr[100], istr[200];
+	char bgstr[BUFFERLEN], istr[BUFFERLEN];
 	char *scriptname;
 	char *newtext;
 	int offset = 0;
 	int laststart=0;
 
+/* The following is very tricky and depends on how rewriting is setup on your webserver.
+   If you skip the scriptname in the url you will have to map each hyperwave name to http://<hwname>.
+   This may not always be a good idea. The best solution is probably to provide a prefix for such
+   a case which is an optional parameter to hw_gettext hw_pipedocument.
+*/
+	if(urlprefix) {
+		scriptname = urlprefix;
+	} else {
 #if APACHE
-	{
-	int j;
-	SLS_FETCH();
-	
-	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
-	table_entry *elts = (table_entry *)arr->elts;
+		{
+		int j;
+		array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
+		table_entry *elts = (table_entry *)arr->elts;
 
-	for (j=0; j < arr->nelts; j++) {
-		if(0 == strcmp(elts[j].key, "SCRIPT_NAME"))
-		break;
-	}
-	scriptname = elts[j].val;
-	}
+		for (j=0; j < arr->nelts; j++) {
+			if(0 == strcmp(elts[j].key, "SCRIPT_NAME"))
+			break;
+		}
+		scriptname = elts[j].val;
+		}
 #else
-	scriptname = getenv("SCRIPT_FILENAME");
+		scriptname = getenv("SCRIPT_FILENAME");
 #endif
+	}
 
 	newtext = text;
 	bgstr[0] = '\0';
@@ -483,57 +494,57 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag) {
 				/* The link is only set if the Link points to an external document */
 				switch(cur_ptr->linktype) {
 					case HW_BACKGROUND_LINK:
-						sprintf(bgstr, " background='%s'", cur_ptr->link);
+						snprintf(bgstr, BUFFERLEN, " background='%s'", cur_ptr->link);
 						break;
 					case HW_INTAG_LINK:
-						sprintf(istr, " %s='%s' start=%d", cur_ptr->tagattr, cur_ptr->link, cur_ptr->start);
+						snprintf(istr, BUFFERLEN, " %s='%s' start=%d", cur_ptr->tagattr, cur_ptr->link, cur_ptr->start);
 						offset -= 4; /* because there is no closing tag </A> */
 /*						laststart = cur_ptr->start; */
 						break;
 					case HW_APPLET_LINK:
 						if(cur_ptr->codebase)
-						  sprintf(istr, " CODEBASE='%s' CODE='%s'", cur_ptr->codebase, cur_ptr->code);
+						  snprintf(istr, BUFFERLEN, " CODEBASE='%s' CODE='%s'", cur_ptr->codebase, cur_ptr->code);
 						else
-						  sprintf(istr, " CODEBASE='/' CODE='%s'", cur_ptr->code);
+						  snprintf(istr, BUFFERLEN, " CODEBASE='/' CODE='%s'", cur_ptr->code);
 						break;
 					default:
 						newtext = fnInsStr(newtext, cur_ptr->end+offset, "</A>");
-						sprintf(istr, "<A HREF='%s' %s offset=%d>", cur_ptr->link, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr, offset);
+						snprintf(istr, BUFFERLEN, "<A HREF='%s' %s>", cur_ptr->link, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
 				}
 			} else {
 				switch(cur_ptr->linktype) {
 					case HW_BACKGROUND_LINK:
 						if(NULL != cur_ptr->destdocname)
-							sprintf(bgstr, " background='%s/%s'", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname);
+							snprintf(bgstr, BUFFERLEN, " background='%s/%s'", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname);
 						else
-							sprintf(bgstr, "");
+							bgstr[0] = '\0';
 						break;
 					case HW_INTAG_LINK:
 						if(cur_ptr->fragment)
-/*							sprintf(istr, " %s='%s/%s#%s'", cur_ptr->tagattr, scriptname == NULL ? "." : scriptname, cur_ptr->destdocname, cur_ptr->fragment);*/
-							sprintf(istr, " %s='#%s'", cur_ptr->tagattr, cur_ptr->fragment);
+/*							snprintf(istr, BUFFERLEN, " %s='%s/%s#%s'", cur_ptr->tagattr, scriptname == NULL ? "." : scriptname, cur_ptr->destdocname, cur_ptr->fragment);*/
+							snprintf(istr, BUFFERLEN, " %s='#%s'", cur_ptr->tagattr, cur_ptr->fragment);
 						else
-							sprintf(istr, " %s='%s/%s'", cur_ptr->tagattr, scriptname == NULL ? "." : scriptname, cur_ptr->destdocname);
+							snprintf(istr, BUFFERLEN, " %s='%s/%s'", cur_ptr->tagattr, scriptname == NULL ? "." : scriptname, cur_ptr->destdocname); 
 						offset -= 4; /* because there is no closing tag </A> */
 /*						laststart = cur_ptr->start; */
 						break;
 					case HW_APPLET_LINK:
 						if(cur_ptr->codebase)
-/*						  sprintf(istr, " CODEBASE='%s%s' CODE='%s'", scriptname == NULL ? "" : scriptname, cur_ptr->codebase, cur_ptr->code); */
-						  sprintf(istr, " CODEBASE='%s' CODE='%s'", cur_ptr->codebase, cur_ptr->code);
+/*						  snprintf(istr, BUFFERLEN, " CODEBASE='%s%s' CODE='%s'", scriptname == NULL ? "" : scriptname, cur_ptr->codebase, cur_ptr->code); */
+						  snprintf(istr, BUFFERLEN, " CODEBASE='%s' CODE='%s'", cur_ptr->codebase, cur_ptr->code);
 						else
-						  sprintf(istr, " CODEBASE='/' CODE='%s'", cur_ptr->code);
+						  snprintf(istr, BUFFERLEN, " CODEBASE='/' CODE='%s'", cur_ptr->code);
 						break;
 					default:
 						newtext = fnInsStr(newtext, cur_ptr->end+offset, "</A>");
 
 						if(cur_ptr->nameanchor)
-							sprintf(istr, "<A HREF='%s/%s#%s' %s>", scriptname == NULL ? "schade" : scriptname, cur_ptr->destdocname, cur_ptr->nameanchor, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s#%s' %s>", scriptname == NULL ? "schade" : scriptname, cur_ptr->destdocname, cur_ptr->nameanchor, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
 						else
 						if(cur_ptr->fragment)
-							sprintf(istr, "<A HREF='%s/%s#%s' %s>", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname, cur_ptr->fragment, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s#%s' %s>", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname, cur_ptr->fragment, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
 						else
-							sprintf(istr, "<A HREF='%s/%s' %s offset=%d>", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr, offset);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s' %s>", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
 				}
 			}
 			newtext = fnInsStr(newtext, cur_ptr->start, istr);
@@ -550,9 +561,9 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag) {
 			   instead of the destdocname
 			*/
 			if(cur_ptr->keyword)
-				sprintf(istr, "<A NAME='%s'>", cur_ptr->keyword);
+				snprintf(istr, BUFFERLEN, "<A NAME='%s'>", cur_ptr->keyword);
 			else if(cur_ptr->nameanchor)
-				sprintf(istr, "<A NAME='%s'>", cur_ptr->nameanchor);
+				snprintf(istr, BUFFERLEN, "<A NAME='%s'>", cur_ptr->nameanchor);
 			newtext = fnInsStr(newtext, cur_ptr->start, istr);
 			/* In case there are several TAGS nested, we accumulate the offset
 			   You wonder what the 4 means? It's the length of </A> */
@@ -561,10 +572,11 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag) {
 		}
 		cur_ptr = (ANCHOR *) dlst_prev(cur_ptr);
 	}
-	sprintf(istr, "<BODY %s>", bgstr);
+	snprintf(istr, BUFFERLEN, "<BODY %s>", bgstr);
 	*bodytag = estrdup(istr);
 	return(newtext);
 }
+#undef BUFFERLEN
 	
 /***********************************************************************
 * Function fnAttributeValue()                                          *
@@ -661,7 +673,7 @@ static int fnCOpenDataCon(int sockfd, int *port)
   /*
   ** Open a TCP socket (an Internet stream socket)
   */
-  if((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+  if((fd = socket(AF_INET, SOCK_STREAM, 0)) == SOCK_ERR)
     {
     return(-1);
     }
@@ -929,7 +941,7 @@ int open_hg_connection(char *server_name, int port)
 		server_addr.sin_port = htons(HG_SERVER_PORT); 
 	bcopy(hp->h_addr, (char *) &server_addr.sin_addr, hp->h_length);
 
-	if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 )  {
+	if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) == SOCK_ERR )  {
 		return(-2);
 	}
 
@@ -939,8 +951,8 @@ int open_hg_connection(char *server_name, int port)
 	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 #endif /* SUN */
 
-	if (connect(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
-		close(sockfd);
+	if (connect(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) != 0) {
+		HWSOCK_FCLOSE(sockfd);
 		return(-3);
 	} 
 
@@ -949,6 +961,7 @@ int open_hg_connection(char *server_name, int port)
 #endif
 
 	if ( set_nonblocking(sockfd) == -1 )  {
+		HWSOCK_FCLOSE(sockfd);
 		return(-4);
 	}
 
@@ -1008,7 +1021,7 @@ int initialize_hg_connection(int sockfd, int *do_swap, int *version, char **user
 		return(-9);
 	}   
 
-	if ((ready_msg->version_msgid & F_VERSION) < VERSION)
+	if ((ready_msg->version_msgid & F_VERSION) < HW_VERSION)
 		return(-8);
 	*version = ready_msg->version_msgid;
 	*server_string = strdup(ready_msg->buf+4);
@@ -1151,38 +1164,38 @@ hg_msg *recv_hg_msg(int sockfd)
 	hg_msg *msg;
 
 	if ( (msg = (hg_msg *)emalloc(sizeof(hg_msg))) == NULL )  {
-/*		php_printf("recv_hg_msg"); */
+/*		php3_printf("recv_hg_msg"); */
 		lowerror = LE_MALLOC;
 		return(NULL);
 	}
 
 	if ( hg_read_exact(sockfd, (char *)&(msg->length), 4) == -1 )  {
-/*		php_printf("recv_hg_msg: hg_read (1) returned -1\n"); */
+/*		php3_printf("recv_hg_msg: hg_read (1) returned -1\n"); */
 		efree(msg);
 		return(NULL);
 	}
 
 	if ( hg_read_exact(sockfd, (char *)&(msg->version_msgid), 4) == -1 )  {
-/*		php_printf("recv_hg_msg: hg_read (2) returned -1\n"); */
+/*		php3_printf("recv_hg_msg: hg_read (2) returned -1\n"); */
 		efree(msg);
 		return(NULL);
 	}
 
 	if ( hg_read_exact(sockfd, (char *)&(msg->msg_type), 4) == -1 )  {
-/*		php_printf("recv_hg_msg: hg_read (3) returned -1\n"); */
+/*		php3_printf("recv_hg_msg: hg_read (3) returned -1\n"); */
 		efree(msg);
 		return(NULL);
 	}
 
 	if ( msg->length > HEADER_LENGTH )  {
 		if ( (msg->buf = (char *) emalloc(msg->length-HEADER_LENGTH)) == NULL )  {
-/*			php_printf("recv_hg_msg"); */
+/*			php3_printf("recv_hg_msg"); */
 			lowerror = LE_MALLOC;
 			efree(msg);
 			return(NULL);
 		}
 		if ( hg_read_exact(sockfd, msg->buf, msg->length-HEADER_LENGTH) == -1 )  {
-/*			php_printf("recv_hg_msg: hg_read (4) returned -1\n"); */
+/*			php3_printf("recv_hg_msg: hg_read (4) returned -1\n"); */
 			efree(msg->buf);
 			efree(msg);
 			return(NULL);
@@ -1192,7 +1205,7 @@ hg_msg *recv_hg_msg(int sockfd)
 		msg->buf = NULL;  
 
 #ifdef HW_DEBUG
-	php_printf("<B>   Recv msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
+	php3_printf("<B>   Recv msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
 #endif
 	return(msg);
 }
@@ -1203,11 +1216,11 @@ hg_msg *recv_ready(int sockfd)
 	hg_msg *ready_msg;
 
 	if ( (ready_msg = recv_hg_msg(sockfd)) == NULL )  {
-/*		php_printf("recv_ready: recv_hg_msg returned NULL\n"); */
+/*		php3_printf("recv_ready: recv_hg_msg returned NULL\n"); */
 		return(NULL);
 	}    
 	if ( ready_msg->msg_type != READY_MESSAGE )  {
-/*		php_printf("recv_ready: recv_hg_msg returned wrong message: %d, %d  \n", ready_msg->length, ready_msg->msg_type); */
+/*		php3_printf("recv_ready: recv_hg_msg returned wrong message: %d, %d  \n", ready_msg->length, ready_msg->msg_type); */
 		efree(ready_msg);
 		return(NULL);
 	}
@@ -1339,7 +1352,6 @@ static int bh_send_changeobject(int sockfd, hw_objectID objectID, char *mod) {
 	build_msg_header(&msg, length, msgid++, CHANGEOBJECT_MESSAGE);
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
-/*		perror("send_command"); */
 		lowerror = LE_MALLOC;
 		return(-1);
 	}
@@ -1376,6 +1388,29 @@ int send_changeobject(int sockfd, hw_objectID objectID, char *modification)
 	return(uh_send_changeobject(sockfd));
 }
 
+int send_groupchangeobject(int sockfd, hw_objectID objectID, char *modification)
+{
+	hw_objectID *childIDs;
+	int count, i, error;
+
+	if(0 == (error = send_lock(sockfd, objectID))) {
+		send_changeobject(sockfd, objectID, modification);
+		send_unlock(sockfd, objectID);
+	}/* else
+		fprintf(stderr, "Could not lock 0x%X (error = %d)\n", objectID, error); */
+
+	if(0 == send_children(sockfd, objectID, &childIDs, &count)) {
+/*		fprintf(stderr, "Changing Children of 0x%X\n", objectID); */
+		for(i=0; i<count; i++)
+			if(0 > send_groupchangeobject(sockfd, childIDs[i], modification))
+/*				fprintf(stderr, "Cannot change 0x%X\n", objectID) */;
+		if(childIDs)
+			efree(childIDs);
+	}/*  else
+		fprintf(stderr, "No Children of 0x%X\n", objectID);  */
+	return(0);
+}
+
 static int bh_send_getobject(int sockfd, hw_objectID objectID) {
 	hg_msg msg;
 	int  length;
@@ -1386,7 +1421,6 @@ static int bh_send_getobject(int sockfd, hw_objectID objectID) {
 	build_msg_header(&msg, length, msgid++, GETOBJECT_MESSAGE);
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
-/*		perror("send_command"); */
 		lowerror = LE_MALLOC;
 		return(-1);
 	}
@@ -1475,6 +1509,41 @@ int send_getandlock(int sockfd, hw_objectID objectID, char **attributes)
 	return error;
 }
 
+int send_lock(int sockfd, hw_objectID objectID)
+{
+	hg_msg msg, *retmsg;
+	int  length, error;
+	char *tmp;
+
+	length = HEADER_LENGTH + sizeof(hw_objectID);
+
+	build_msg_header(&msg, length, msgid++, GETANDLOCK_MESSAGE);
+
+	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+		lowerror = LE_MALLOC;
+		return(-1);
+	}
+
+	tmp = build_msg_int(msg.buf, objectID);
+
+	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+		efree(msg.buf);
+		return(-1);
+	}
+
+	efree(msg.buf);
+	retmsg = recv_hg_msg(sockfd);
+	if ( retmsg == NULL )  {
+		return(-1);
+	}
+
+	error = *((int *) retmsg->buf);
+
+	efree(retmsg->buf);
+	efree(retmsg);
+	return error;
+}
+
 int send_insertobject(int sockfd, char *objrec, char *parms, hw_objectID *objectID)
 {
 	hg_msg msg, *retmsg;
@@ -1522,7 +1591,7 @@ int send_insertobject(int sockfd, char *objrec, char *parms, hw_objectID *object
 
 int send_unlock(int sockfd, hw_objectID objectID)
 {
-	hg_msg msg, *retmsg;
+	hg_msg msg;
 	int  length, error;
 	char *tmp;
 
@@ -1544,16 +1613,7 @@ int send_unlock(int sockfd, hw_objectID objectID)
 	}
 
 	efree(msg.buf);
-	retmsg = recv_hg_msg(sockfd);
-	if ( retmsg == NULL )  {
-		return(-1);
-	}
-
-	error = (int) *(retmsg->buf);
-
-	efree(retmsg->buf);
-	efree(retmsg);
-	return error;
+	return 0;
 }
 
 int send_incollections(int sockfd, int retcol, int cobjids, hw_objectID *objectIDs, int ccollids, hw_objectID *collIDs, int *count, hw_objectID **retIDs)
@@ -1716,7 +1776,7 @@ int send_insdoc(int sockfd, hw_objectID objectID, char *objrec, char *text, hw_o
 int send_getdestforanchorsobj(int sockfd, char **anchorrec, char ***destrec, int count);
 int send_getreldestforanchorsobj(int sockfd, char **anchorrec, char ***reldestrec, int count, int rootID, int thisID);
 
-int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **objattr, char **bodytag, char **text, int *count)
+int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **objattr, char **bodytag, char **text, int *count, char *urlprefix)
 {
 	hg_msg msg, *retmsg;
 	int  length, *ptr, ancount, error;
@@ -1827,7 +1887,7 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 				char *newtext;
 				char *body;
 
-				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body);
+				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
 				dlst_kill(pAnchorList, fnDeleteAnchor);
 				*bodytag = strdup(body);
 				efree(body);
@@ -1848,22 +1908,22 @@ int send_edittext(int sockfd, char *objattr, char *text)
 	char *tmp, *path, *objid;
 	hw_objectID objectID; 
 
-	objid = fnAttributeValue(objattr, "ObjectID=");
+	objid = fnAttributeValue(objattr, "ObjectID");
 	if(objid == NULL)
 		return(-1);
 	if(!sscanf(objid, "0x%x", &objectID))
-		return(-1);
+		return(-2);
 
-	path = fnAttributeValue(objattr, "Path=");
+	path = fnAttributeValue(objattr, "Path");
 	if(path == NULL)
-		return(-1);
-	length = HEADER_LENGTH + sizeof(hw_objectID) + strlen(path) + 1 + 1 + strlen(text) + 1;
+		return(-3);
 
+	length = HEADER_LENGTH + sizeof(hw_objectID) + strlen(path) + 1 + 1 + strlen(text) + 1;
 	build_msg_header(&msg, length, msgid++, EDITTEXT_MESSAGE);
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
 		lowerror = LE_MALLOC;
-		return(-1);
+		return(-4);
 	}
 
 	tmp = build_msg_int(msg.buf, objectID);
@@ -1876,20 +1936,20 @@ int send_edittext(int sockfd, char *objattr, char *text)
 
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
 		efree(msg.buf);
-		return(-1);
+		return(-5);
 	}
 
 	efree(msg.buf);
 	retmsg = recv_hg_msg(sockfd);
 	if (retmsg == NULL) {
 		*text = '\0';
-		return(-1);
+		return(-6);
 	}
 
 	ptr = (int *) retmsg->buf;
 	error = *ptr;
-	efree(retmsg);
 	efree(retmsg->buf);
+	efree(retmsg);
 	return(error);
 }
 
@@ -2009,7 +2069,6 @@ int send_getremote(int sockfd, hw_objectID objectID, char **objattr, char **text
 	build_msg_header(&msg, length, msgid++, GETOBJECT_MESSAGE);
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
-/*		perror("send_command"); */
 		lowerror = LE_MALLOC;
 		return(-1);
 	}
@@ -2045,7 +2104,6 @@ int send_getremote(int sockfd, hw_objectID objectID, char **objattr, char **text
 	build_msg_header(&msg, length, msgid++, GETREMOTE_MESSAGE);
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
-/*		perror("send_command"); */
 		lowerror = LE_MALLOC;
 		return(-1);
 	}
@@ -2355,7 +2413,6 @@ int send_children(int sockfd, hw_objectID objectID, hw_objectID **childIDs, int 
 	build_msg_header(&msg, length, msgid++, CHILDREN_MESSAGE);
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
-/*		perror("send_command"); */
 		lowerror = LE_MALLOC;
 		return(-1);
 	}
@@ -3096,7 +3153,7 @@ int send_getreldestforanchorsobj(int sockfd, char **anchorrec, char ***reldestre
 				if(anchorrec[i]) efree(anchorrec[i]);
 				anchorrec[i] = NULL;
 			} else {
-				int j, k, *retthisIDs, *retdestIDs, equaltill, mincount, countthis, countdest, destdocid;
+				int j, *retthisIDs, *retdestIDs, equaltill, mincount, countthis, countdest, destdocid;
 				char destdocname[200];
 				char anchorstr[300];
 				char temp[200];
@@ -3114,6 +3171,7 @@ int send_getreldestforanchorsobj(int sockfd, char **anchorrec, char ***reldestre
 				send_incollections(sockfd, 1, 1, &thisID, 1, &rootID, &countthis, &retthisIDs);
 				send_incollections(sockfd, 1, 1, &destdocid, 1, &rootID, &countdest, &retdestIDs);
 
+/*
 fprintf(stderr, "%d: ", thisID);
 for(k=0; k<countthis; k++)
 	fprintf(stderr,"%d, ", retthisIDs[k]);
@@ -3122,6 +3180,7 @@ fprintf(stderr,"%d: ", destdocid);
 for(k=0; k<countdest; k++)
 	fprintf(stderr,"%d: %d, ", destdocid, retdestIDs[k]);
 fprintf(stderr,"\n");
+*/
 
 				mincount = (countthis < countdest) ? countthis : countdest;
 				for(j=0; (j<mincount) && (retthisIDs[j]==retdestIDs[j]); j++)
@@ -3132,7 +3191,7 @@ fprintf(stderr,"\n");
 					strcat(anchorstr, "../");
 				strcat(anchorstr, "./");
 				for(j=equaltill; j<countdest; j++) {
-					char *temprec, tempname[100], objectidstr[100];
+					char *temprec, tempname[100];
 					send_getobject(sockfd, retdestIDs[j], &temprec);
 					if(NULL != (str = strstr(temprec, "Name="))) {
 						str += 5;
@@ -3149,10 +3208,10 @@ fprintf(stderr,"\n");
 							*strptr = '_';
 						strptr++;
 					}
-fprintf(stderr, "Adding '%s' to '%s'\n", temp, anchorstr);
+/* fprintf(stderr, "Adding '%s' to '%s'\n", temp, anchorstr); */
 					strcat(anchorstr, temp);
 					strcat(anchorstr, "/");
-fprintf(stderr, "Is now '%s'\n", anchorstr);
+/* fprintf(stderr, "Is now '%s'\n", anchorstr); */
 					efree(temprec);
 				}
 				/* if the anchor destination is a collection it may not be added anymore. */
@@ -3170,7 +3229,7 @@ fprintf(stderr, "Is now '%s'\n", anchorstr);
 				strcat(anchorstr, "\n");
 				sprintf(temp, "ObjectID=0x%x", destdocid);
 				strcat(anchorstr, temp);
-fprintf(stderr, "%s\n", anchorstr);
+/* fprintf(stderr, "%s\n", anchorstr); */
 				efree(retthisIDs);
 				efree(retdestIDs);
 				reldestptr[i] = estrdup(anchorstr);
@@ -3233,7 +3292,7 @@ int fn_findpath(int sockfd, int *retIDs, int count, int id) {
 * document with id destID.                                          *
 ********************************************************************/
 int getrellink(int sockfd, int rootID, int thisID, int destID, char **reldeststr) {
-	int i, j, k, *retthisIDs, *retdestIDs, equaltill, count, mincount, countthis, countdest, destdocid;
+	int i, j, k, *retthisIDs, *retdestIDs, equaltill, count, mincount, countthis, countdest;
 	char anchorstr[300];
 	char temp[200];
 	char *strptr;
@@ -3300,7 +3359,7 @@ fprintf(stderr, "first unequal = %d\n", j);
 		strcat(anchorstr, "../");
 	strcat(anchorstr, "./");
 	for(j=equaltill; j<countdest; j++) {
-		char *temprec, *str, tempname[100], objectidstr[100];
+		char *temprec, *str, tempname[100];
 		if(0 == send_getobject(sockfd, retdestIDs[j], &temprec)) {
 			if(NULL != (str = strstr(temprec, "Name="))) {
 				str += 5;
@@ -3384,6 +3443,100 @@ int send_identify(int sockfd, char *name, char *passwd, char **userdata) {
 	*userdata = (char *) retmsg->buf;
 	efree(retmsg);
 
+	return(0);
+}
+
+int send_objectbyidquery(int sockfd, hw_objectID *IDs, int *count, char *query, char ***objrecs)
+{
+	hg_msg msg, *retmsg;
+	int  length, error;
+	char *tmp, *str;
+	int *ptr, i, *ptr1;
+	int *offsets, *childIDs;
+	char **childrec;
+
+	length = HEADER_LENGTH + sizeof(int) + sizeof(int) + *count * sizeof(hw_objectID);
+	if(query)
+		length = length + strlen(query) + 1;
+
+	build_msg_header(&msg, length, msgid++, OBJECTBYIDQUERY_MESSAGE);
+
+	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+		lowerror = LE_MALLOC;
+		return(-1);
+	}
+
+	tmp = build_msg_int(msg.buf, 1);
+	tmp = build_msg_int(tmp, *count);
+	for(i=0; i<*count; i++)
+		tmp = build_msg_int(tmp, IDs[i]);
+	if(query)
+		tmp = build_msg_str(tmp, query);
+
+	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+		efree(msg.buf);
+		return(-1);
+	}
+	efree(msg.buf);
+	retmsg = recv_hg_msg(sockfd);
+	if ( retmsg == NULL ) 
+		return(-1);
+
+	ptr = (int *) retmsg->buf;
+	if(ptr == NULL) {
+		if(retmsg) efree(retmsg);
+		return -1;
+	}
+	if(*ptr++ != 0) {
+		error = *((int *) retmsg->buf);
+		efree(retmsg->buf);
+		efree(retmsg);
+		return error;
+	}
+
+	*count = *ptr++;
+	if(NULL != (childIDs = emalloc(*count * sizeof(hw_objectID)))) {
+		ptr1 = childIDs;
+		for(i=0; i<*count; ptr++, i++)
+			ptr1[i] = *ptr;
+		if(NULL != (offsets = emalloc(*count * sizeof(int)))) {
+			ptr1 = offsets;
+			for(i=0; i<*count; ptr++, i++)
+				ptr1[i] = *ptr;
+		} else {
+			efree(retmsg->buf);
+			efree(retmsg);
+			efree(childIDs);
+			lowerror = LE_MALLOC;
+			return(-1);
+		}
+	} else {
+		efree(retmsg->buf);
+		efree(retmsg);
+		lowerror = LE_MALLOC;
+		return(-1);
+	}
+
+	str = (char *)ptr;
+	if(NULL == (childrec = (char **) emalloc(*count * sizeof(hw_objrec *)))) {
+		efree(offsets);
+		efree(childIDs);
+		efree(retmsg->buf);
+		efree(retmsg);
+		lowerror = LE_MALLOC;
+		return(-1);
+	} else {
+		for(i=0; i<*count; i++) {
+			childrec[i] = estrdup(str);
+			str += offsets[i];
+		}
+		*objrecs = childrec;
+	}
+
+	efree(retmsg->buf);
+	efree(retmsg);
+	efree(childIDs);
+	efree(offsets);
 	return(0);
 }
 
@@ -3909,7 +4062,7 @@ int send_getparentsobj(int sockfd, hw_objectID objectID, char ***childrec, int *
 	return(0);
 }
 
-int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, int rootid, char **objattr, char **bodytag, char **text, int *count)
+int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, int rootid, char **objattr, char **bodytag, char **text, int *count, char *urlprefix)
 {
 	hg_msg msg, *retmsg;
 	int	length, len;
@@ -3933,13 +4086,13 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php_error(E_WARNING, "gethostbyname failed for %s", host);
-			close(fd);
-			return(-1);
+			php3_error(E_WARNING, "gethostbyname failed for %s", host);
+			HWSOCK_FCLOSE(fd);
+			return(-2);
 		}
 	} else {
-		close(fd);
-		return(-1);
+		HWSOCK_FCLOSE(fd);
+		return(-2);
 	}
 	 
 	switch(hostptr->h_addrtype) {
@@ -3951,20 +4104,20 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 			hostip = inet_ntoa(*ptr1);
 			break;
 		default:
-			close(fd);
-			return(-1);
+			HWSOCK_FCLOSE(fd);
+			return(-3);
 			break;
 	}
 	 
 	/* Bottom half of send_getobject */
 	if(0 > bh_send_getobject(sockfd, objectID)) {
-		close(fd);
-		return -1;
+		HWSOCK_FCLOSE(fd);
+		return -4;
 	}
 
 	/* Upper half of send_getobject */
 	if(0 > (error = uh_send_getobject(sockfd, &attributes))) {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return error;
 	}
 
@@ -3973,7 +4126,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL ) {
 		lowerror = LE_MALLOC;
-		return(-1);
+		return(-5);
 	}
 
 	tmp = build_msg_int(msg.buf, objectID);
@@ -3984,8 +4137,8 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )	{
 		if(attributes) efree(attributes);
 		efree(msg.buf);
-		close(fd);
-		return(-1);
+		HWSOCK_FCLOSE(fd);
+		return(-6);
 	}
 	efree(msg.buf);
 
@@ -3993,8 +4146,8 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	retmsg = recv_hg_msg(sockfd);
 	if ( retmsg == NULL ) {
 		if(attributes) efree(attributes);
-		close(fd);
-		return(-1);
+		HWSOCK_FCLOSE(fd);
+		return(-7);
 	}
 
 	ptr = (int *) retmsg->buf;
@@ -4003,7 +4156,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 		efree(retmsg);
 		if(retmsg->buf) efree(retmsg->buf);
 		if(attributes) efree(attributes);
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(error);
 	}
 
@@ -4015,12 +4168,12 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
         */
 	len = sizeof(serv_addr);
 	if((newfd = accept(fd, (struct sockaddr *) &serv_addr, &len)) < 0) {
-/*		php_printf("client: can't open data connection to server\n"); */
+/*		php3_printf("client: can't open data connection to server\n"); */
 		if(attributes) efree(attributes);
-		close(fd);
-		return(-1);
+		HWSOCK_FCLOSE(fd);
+		return(-8);
 	} else {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 	}
 
 	/* First of all read the header */
@@ -4044,7 +4197,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	}
 
 	/* close the data connection */
-	close(newfd);
+	HWSOCK_FCLOSE(newfd);
 
 	documenttype = fnAttributeValue(attributes, "DocumentType");
 
@@ -4071,7 +4224,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 				char *newtext;
 				char *body;
 
-				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body);
+				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
 				dlst_kill(pAnchorList, fnDeleteAnchor);
 				*bodytag = strdup(body);
 				efree(body);
@@ -4110,12 +4263,12 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php_error(E_WARNING, "gethostbyname failed for %s", host);
-			close(fd);
+			php3_error(E_WARNING, "gethostbyname failed for %s", host);
+			HWSOCK_FCLOSE(fd);
 			return(-1);
 		}
 	} else {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 	 
@@ -4128,19 +4281,19 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 			hostip = inet_ntoa(*ptr1);
 			break;
 		default:
-/*			php_printf(stderr, "unknown address type\n"); */
+/*			php3_printf(stderr, "unknown address type\n"); */
 			break;
 	}
 	 
 	/* Bottom half of send_getobject */
 	if(0 > bh_send_getobject(sockfd, objectID)) {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return -1;
 	}
 
 	/* Upper half of send_getobject */
 	if(0 > (error = uh_send_getobject(sockfd, &attributes))) {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return error;
 	}
 
@@ -4167,7 +4320,7 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )	{
 		if(attributes) efree(attributes);
 		efree(msg.buf);
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 	efree(msg.buf);
@@ -4176,7 +4329,7 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	retmsg = recv_hg_msg(sockfd);
 	if ( retmsg == NULL ) {
 		if(attributes) efree(attributes);
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 
@@ -4185,7 +4338,7 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 		efree(retmsg);
 		if(retmsg->buf) efree(retmsg->buf);
 		if(attributes) efree(attributes);
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 
@@ -4198,10 +4351,10 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	len = sizeof(serv_addr);
 	if((newfd = accept(fd, (struct sockaddr *) &serv_addr, &len)) < 0) {
 		if(attributes) efree(attributes);
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	} else {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 	}
 
 	/* First of all read the header */
@@ -4224,7 +4377,7 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	}
 
 	/* close the data connection */
-	close(newfd);
+	HWSOCK_FCLOSE(newfd);
 
 	documenttype = fnAttributeValue(attributes, "DocumentType");
 
@@ -4238,7 +4391,7 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	return(0);
 }
 
-int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectRec, char *text, int count)
+int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectRec, char *text, int count, hw_objectID *objectID)
 {
 	hg_msg msg, *retmsg;
 	int length, len;
@@ -4246,7 +4399,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	struct sockaddr_in serv_addr;
 	struct hostent *hostptr;
 	char *hostip = NULL;
-	int newfd, fd, port, objectID, error;
+	int newfd, fd, port, error;
 	int *ptr;
 
 	/* First of all we have to insert the document record */
@@ -4278,7 +4431,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	ptr = (int *) retmsg->buf;
 	if(0 == (error = *ptr)) {
 		ptr++;
-		objectID = *ptr;
+		*objectID = *ptr;
 	} else {
 		efree(retmsg);
 		if(retmsg->buf) efree(retmsg->buf);
@@ -4293,7 +4446,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php_error(E_WARNING, "gethostbyname failed for %s", host);
+			php3_error(E_WARNING, "gethostbyname failed for %s", host);
 			/* close(fd); fd is not set yet */
 			return(-1);
 		}
@@ -4331,7 +4484,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 		return(-1);
 	}
 
-	tmp = build_msg_int(msg.buf, objectID);
+	tmp = build_msg_int(msg.buf, *objectID);
 	tmp = build_msg_int(tmp, port);
 	tmp = build_msg_str(tmp, hostip);
 	tmp = build_msg_str(tmp, "Hyperwave");
@@ -4339,7 +4492,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )	{
 		efree(msg.buf);
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 	efree(msg.buf);
@@ -4349,10 +4502,10 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
         */
 	len = sizeof(serv_addr);
 	if((newfd = accept(fd, (struct sockaddr *) &serv_addr, &len)) < 0) {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	} else {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 	}
 
 	/* First of all write the header. According to the documentation
@@ -4364,24 +4517,24 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	sprintf(header, "HGHDR\nsz=%d\nref=12345678\n", count);
 	len = strlen(header) + 1;
 	if(len != write_to(newfd, header, len, wtimeout)) {
-		close(newfd);
+		HWSOCK_FCLOSE(newfd);
 		return(-1);
 	}
 
 	/* And now the document */
 	if(count != write_to(newfd, text, count, wtimeout)) {
-		close(newfd);
+		HWSOCK_FCLOSE(newfd);
 		return(-1);
 	}
 	
  	/* The data connection has to be close before the return
 	   msg can be read. The server will not sent it before. */
-	close(newfd);
+	HWSOCK_FCLOSE(newfd);
 
 	/* Just check if the command was understood */
 	retmsg = recv_hg_msg(sockfd);
 	if ( retmsg == NULL ) {
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 
@@ -4389,7 +4542,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	if((ptr == NULL) || (*ptr != 0)) {
 		efree(retmsg);
 		if(retmsg->buf) efree(retmsg->buf);
-		close(fd);
+		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 
@@ -4511,9 +4664,9 @@ int send_getsrcbydest(int sockfd, hw_objectID objectID, char ***childrec, int *c
 	return(0);
 }
 
-char *get_hw_info(hw_connection *conn)
-	{
-	char temp[200];
+#define BUFFERLEN 200
+char *get_hw_info(hw_connection *conn) {
+	char temp[BUFFERLEN];
 	int len;
 	struct sockaddr_in serv_addr;
 
@@ -4521,18 +4674,19 @@ char *get_hw_info(hw_connection *conn)
 	if(getsockname(conn->socket, (struct sockaddr *)&serv_addr, &len) < 0)
 		return(NULL);
 
-	sprintf(temp, "%s, %s, %d, %s, %d, %d", conn->server_string, conn->hostname,
+	snprintf(temp, BUFFERLEN, "%s, %s, %d, %s, %d, %d", conn->server_string, conn->hostname,
                                       conn->version, conn->username,
                                       serv_addr.sin_port, conn->swap_on);
 	return(estrdup(temp));
-	}
+}
+#undef BUFFERLEN
 
 static int send_hg_msg(int sockfd, hg_msg *msg, int length)
 {
      char *buf, *tmp;
 
 #ifdef HW_DEBUG
-	php_printf("<B>Sending msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
+	php3_printf("<B>Sending msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
 #endif
      if ( length < HEADER_LENGTH )  {
 /*          fprintf(stderr, "send_hg_msg: bad msg\n"); */
@@ -4644,7 +4798,7 @@ static char *build_msg_int(char *buf, int val) {
 	int tmp;
 
 #ifdef HW_DEBUG
-	php_printf("   Added int to header: <B>%d</B><BR>\n", val);
+	php3_printf("   Added int to header: <B>%d</B><BR>\n", val);
 #endif
 	tmp = swap_on ? swap(val) : val;
 	memcpy(buf, (char *)&tmp, 4);
@@ -4658,7 +4812,7 @@ static char *build_msg_str(char *buf, char *str)
      int len = strlen(str)+1;
 
 #ifdef HW_DEBUG
-	php_printf("   Added str to header: <B>%s</B> (%d)<BR>\n", str, strlen(str));
+	php3_printf("   Added str to header: <B>%s</B> (%d)<BR>\n", str, strlen(str));
 #endif
 
      memcpy(buf, str, len);
@@ -4682,8 +4836,8 @@ static int swap(int val)
 
 void close_hg_connection(int sockfd)
 {
-     shutdown(sockfd, 2);
-     close(sockfd);
+	shutdown(sockfd, 2);
+	HWSOCK_FCLOSE(sockfd);
 }
 
 #endif

@@ -198,6 +198,12 @@ PHP_MSHUTDOWN_FUNCTION(gd)
 	return SUCCESS;
 }
 
+/* Need this for cpdf. See also comment in file.c php3i_get_le_fp() */
+PHPAPI int phpi_get_le_gd(void){
+	GD_TLS_VARS;
+	return GD_GLOBAL(le_gd);
+}
+
 /********************************************************************/
 /* gdImageColorResolve is a replacement for the old fragment:       */
 /*                                                                  */
