@@ -2016,6 +2016,16 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 {
 	php_stdio_stream_data *self;
 	php_stream *stream;
+#if defined(S_ISFIFO) || defined(S_ISSOCK)
+	struct stat sb;
+	int stat_ok;
+
+	stat_ok = fd >= 0 && fstat(fd, &sb) == 0;
+
+	if (stat_ok && S_ISSOCK(sb.st_mode)) {
+		return _php_stream_sock_open_from_socket(fd, persistent_id STREAMS_CC TSRMLS_CC);
+	}
+#endif
 
 	self = pemalloc_rel_orig(sizeof(*self), persistent_id);
 	memset(self, 0, sizeof(*self));
@@ -2027,9 +2037,8 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 
 #ifdef S_ISFIFO
 	/* detect if this is a pipe */
-	if (self->fd >= 0) {
-		struct stat sb;
-		self->is_pipe = (fstat(self->fd, &sb) == 0 && S_ISFIFO(sb.st_mode)) ? 1 : 0;
+	if (stat_ok) {
+		self->is_pipe = S_ISFIFO(sb.st_mode) ? 1 : 0;
 	}
 #elif defined(PHP_WIN32)
 	{
