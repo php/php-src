@@ -72,27 +72,27 @@ static char *isapi_server_variables[] = {
 	"HTTPS_SERVER_ISSUER",
 	"HTTPS_SERVER_SUBJECT",
 	"HTTPS",
-	"PATH_INFO",
 	"PATH_TRANSLATED",
 	"QUERY_STRING",
 	"REMOTE_ADDR",
 	"REMOTE_HOST",
 	"REMOTE_USER",
 	"REQUEST_METHOD",
-	"REQUEST_URI",
-	"SCRIPT_NAME",
 	"SERVER_NAME",
 	"SERVER_PORT",
 	"SERVER_PORT_SECURE",
 	"SERVER_PROTOCOL",
 	"SERVER_SOFTWARE",
-	"URL",
 #ifndef WITH_ZEUS
 	"APPL_MD_PATH",
 	"APPL_PHYSICAL_PATH",
 	"INSTANCE_ID",
 	"INSTANCE_META_PATH",
 	"LOGON_USER",
+	"PATH_INFO",
+	"REQUEST_URI",
+	"SCRIPT_NAME",
+	"URL",
 #else
 	"DOCUMENT_ROOT",
 #endif
@@ -332,6 +332,34 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 		}
 		p++;
 	}
+
+#ifdef WITH_ZEUS
+    /*
+     * Zeus' map module translates the given URL onto the PHP ISAPI libray;
+     * from an internal point of view, SCRIPT_NAME and URL are correct,
+     * but from the end-users point of view, it is not... We need to
+     * reconstruct the SCRIPT_NAME and URL from PATH_INFO, and then
+     * finally clear out PATH_INFO.
+     */
+    variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+    if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_INFO", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
+        php_register_variable( "SCRIPT_NAME", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+        /* append query string to give url... extra byte for '?' */
+        if ( strlen(lpECB->lpszQueryString) + variable_len + 1 < ISAPI_SERVER_VAR_BUF_SIZE ) {
+			/* append query string only if it is present... */
+			if ( strlen(lpECB->lpszQueryString) ) {
+				static_variable_buf[ variable_len - 1 ] = '?';
+				strcpy( static_variable_buf + variable_len, lpECB->lpszQueryString );
+			}
+            php_register_variable( "URL", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+            php_register_variable( "REQUEST_URI", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+        }
+    }
+    variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+    if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_TRANSLATED", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
+        php_register_variable( "SCRIPT_FILENAME", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+    }
+#endif
 
 	/* PHP_SELF support */
 	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
