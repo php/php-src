@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(xml,whether to enable XML support,
-[  --disable-xml           Disable XML support. Requires libxml2.], yes)
+[  --disable-xml           Disable XML support.], yes)
 
 PHP_ARG_WITH(libxml-dir, libxml install dir,
 [  --with-libxml-dir=DIR     XML: libxml install prefix], no, no)
