@@ -188,11 +188,11 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_elem_set_attribute,									NULL)
 	PHP_FE(domxml_node_children,										NULL)
 	PHP_FE(domxml_node_has_attributes,										NULL)
-
 	PHP_FE(domxml_node_new_child,										NULL)
 	PHP_FE(domxml_node,													NULL)
 	PHP_FE(domxml_node_unlink_node,										NULL)
 	PHP_FE(domxml_node_set_content,										NULL)
+	PHP_FE(domxml_node_get_content,										NULL)
 	PHP_FE(domxml_new_xmldoc,											NULL)
 
 #if defined(LIBXML_XPATH_ENABLED)
@@ -302,6 +302,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(unlink,					domxml_node_unlink_node,		NULL)
 	PHP_FALIAS(replace_node,				domxml_node_replace_node,			NULL)
 	PHP_FALIAS(set_content,				domxml_node_set_content,		NULL)
+	PHP_FALIAS(get_content,				domxml_node_get_content,		NULL)
 	PHP_FALIAS(text_concat,				domxml_node_text_concat,		NULL)
 	PHP_FALIAS(set_name,				domxml_node_set_name,			NULL)
 	PHP_FALIAS(node_name,				domxml_node_name,				NULL)
@@ -2024,6 +2025,30 @@ PHP_FUNCTION(domxml_node_set_content)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto string domxml_node_get_content()
+   Gets content of a node.
+   
+   "Read the value of a node, this can be either the text carried directly by
+this node if it's a TEXT node or the aggregate string of the values carried by
+this node child's (TEXT and ENTITY_REF). Entity references are substituted."
+   */
+PHP_FUNCTION(domxml_node_get_content)
+{
+	zval *id;
+	xmlNode *nodep;
+    xmlChar *mem;
+
+    DOMXML_PARAM_NONE(nodep, id, le_domxmlnodep);
+    mem = xmlNodeGetContent(nodep);
+    if (!mem) {
+        RETURN_FALSE;
+    }
+        
+    RETURN_STRING(mem,1);
+}
+/* }}} */
+
 
 /* End of Methods DomNode }}} */
 
