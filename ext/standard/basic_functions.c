@@ -966,10 +966,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	memset(&BG(url_adapt_state), 0, sizeof(BG(url_adapt_state)));
 	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
 
-#ifdef PHP_WIN32
-	CoInitialize(NULL);
-#endif
-
 	BG(incomplete_class) = php_create_incomplete_class(TSRMLS_C);
 }
 
@@ -980,9 +976,6 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	if (BG(sm_allowed_env_vars)) {
 		free(BG(sm_allowed_env_vars));
 	}
-#ifdef PHP_WIN32
-	CoUninitialize();
-#endif
 }
 
 
@@ -1115,6 +1108,10 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 
 PHP_RINIT_FUNCTION(basic)
 {
+#ifdef PHP_WIN32
+	CoInitialize(NULL);
+#endif
+
 	memset(BG(strtok_table), 0, 256);
 	BG(strtok_string) = NULL;
 	BG(strtok_zval) = NULL;
@@ -1195,6 +1192,10 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	if (BG(mmap_file)) {
 		munmap(BG(mmap_file), BG(mmap_len));
 	}
+#endif
+
+#ifdef PHP_WIN32
+	CoUninitialize();
 #endif
 
 	return SUCCESS;
