@@ -690,7 +690,8 @@ static int scheme_getall(void *user_data, SablotHandle proc, const char *scheme,
 	zval       *argv[3];                           /* Arguments to the scheme getall function */
 	zval       *retval;                            /* Return value from the scheme getall function */
 	php_xslt   *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If the scheme handler get all function doesn't
 	   exist, exit out */
 	if (!XSLT_SCHEME(handle).get_all) {
@@ -767,7 +768,8 @@ static int  scheme_open(void *user_data, SablotHandle proc, const char *scheme, 
 	zval      *argv[3];                            /* Arguments to the scheme open function */
 	zval      *retval;                             /* The return value from the scheme open function */
 	php_xslt  *handle = (php_xslt *) user_data;    /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If no open handler exists, let's exit */
 	if (!XSLT_SCHEME(handle).open) {
 		return 0;
@@ -809,7 +811,8 @@ static int  scheme_get(void *user_data, SablotHandle proc, int fd, char *buffer,
 	zval       *argv[3];                           /* Arguments to the scheme get function  */
 	zval       *retval;                            /* Return value from the scheme get function */
 	php_xslt   *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If no get handler exists, let's exit */
 	if (!XSLT_SCHEME(handle).get) {
 		return 0;
@@ -852,7 +855,8 @@ static int  scheme_put(void *user_data, SablotHandle proc, int fd, const char *b
 	zval       *argv[3];                            /* Arguments to the scheme put function */
 	zval       *retval;                             /* Return value from the scheme put function */
 	php_xslt   *handle = (php_xslt *) user_data;    /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If no put handler exists, let's exit */
 	if (!XSLT_SCHEME(handle).put) {
 		return 0;
@@ -895,7 +899,8 @@ static int  scheme_close(void *user_data, SablotHandle proc, int fd)
 	zval       *argv[2];                           /* Arguments to the scheme close function*/
 	zval       *retval;                            /* Return value from the scheme close function */
 	php_xslt   *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* if no close handler exists, exit */
 	if (!XSLT_SCHEME(handle).close) {
 		return 0;
@@ -932,7 +937,8 @@ static SAX_RETURN sax_startdoc(void *ctx)
 	zval       *argv[1];                    /* Arguments to the sax start doc function */
 	zval       *retval;                     /* Return value from sax start doc function */
 	php_xslt   *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* if no document start function exists, exit */
 	if (!XSLT_SAX(handle).doc_start) {
 		return;
@@ -964,7 +970,8 @@ static SAX_RETURN sax_startelement(void *ctx,
 	zval       *retval;                      /* Return value from the sax start element function */
 	php_xslt   *handle = (php_xslt *) ctx;   /* A PHP-XSLT processor */
 	char      **p;                           /* Pointer to attributes */
-
+    TSRMLS_FETCH();
+    
 	/* If no element start function is found, exit */
 	if (!XSLT_SAX(handle).element_start) {
 		return;
@@ -1008,7 +1015,8 @@ static SAX_RETURN sax_endelement(void *ctx, const char *name)
 	zval        *argv[2];                   /* Arguments to the sax end element function */
 	zval        *retval;                    /* Return value from the sax end element function */
 	php_xslt    *handle = (php_xslt *) ctx; /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If no element end function exists, exit */
 	if (!XSLT_SAX(handle).element_end) {
 		return;
@@ -1043,7 +1051,8 @@ static SAX_RETURN sax_startnamespace(void *ctx,
 	zval       *argv[3];                    /* Arguments to the sax start namespace function */
 	zval       *retval;                     /* Return value from the sax start namespace function */
 	php_xslt   *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* if no namespace start function exists, exit */
 	if (!XSLT_SAX(handle).namespace_start) {
 		return;
@@ -1079,7 +1088,8 @@ static SAX_RETURN sax_endnamespace(void *ctx, const char *prefix)
 	zval        *argv[2];                    /* Arguments to the sax end namespace function */
 	zval        *retval;                     /* Return value from the sax end namespace function */
 	php_xslt    *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If no namespace end function exists, exit */
 	if (!XSLT_SAX(handle).namespace_end) {
 		return;
@@ -1112,7 +1122,8 @@ static SAX_RETURN sax_comment(void *ctx, const char *contents)
 	zval        *argv[2];                    /* Arguments to the sax comment function */
 	zval        *retval;                     /* Return value from the sax comment function */
 	php_xslt    *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* if no comment function exists, exit */
 	if (!XSLT_SAX(handle).comment) {
 		return;
@@ -1147,7 +1158,8 @@ static SAX_RETURN sax_pi(void *ctx,
 	zval        *argv[3];                    /* Arguments to the sax processing instruction function */
 	zval        *retval;                     /* Return value from the sax processing instruction function */
 	php_xslt    *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If no processing instructions function exists, exit */
 	if (!XSLT_SAX(handle).pi) {
 		return;
@@ -1185,7 +1197,8 @@ static SAX_RETURN sax_characters(void *ctx,
 	zval         *argv[2];                    /* Arguments to the sax characters function */
 	zval         *retval;                     /* Return value to the sax characters function */
 	php_xslt     *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If no characters function exists, exit */
 	if (!XSLT_SAX(handle).characters) {
 		return;
@@ -1218,7 +1231,8 @@ static SAX_RETURN sax_enddoc(void *ctx)
 	zval        *argv[1];                    /* Arguments to the end document function */
 	zval        *retval;                     /* Return value from the end document function */
 	php_xslt    *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
-
+    TSRMLS_FETCH();
+    
 	/* If no end document function exists, exit */
 	if (!XSLT_SAX(handle).doc_end) {
 		return;
@@ -1399,7 +1413,8 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 	if (XSLT_ERROR(handle)) {
 		zval   *argv[4];   /* Arguments to the error function */
 		zval   *retval;    /* Return value from the error function */
-
+        TSRMLS_FETCH();
+        
 		/* Allocate and initialize */
 		MAKE_STD_ZVAL(argv[0]);
 		MAKE_STD_ZVAL(argv[1]);
