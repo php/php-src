@@ -1,3 +1,139 @@
+2001-03-23  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/DB/MAINTAINERS
+      pear/DB/ifx.php: Adding an Informix (ifx) database implementation.
+
+    Submitted by: "Tomas V.V.Cox" <cox@idecnet.com>
+
+2001-03-23  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Output.php:
+    GarbageCollection was moved into a PEAR-Deconstructor
+    (from the HEAD Branch)
+
+    * pear/Cache/Container/file.php:
+    just the changes from the HEAD dev here. rather important
+
+2001-03-23  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.dsp
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/php_dbx.h
+      ext/dbx/Makefile.in
+      ext/dbx/dbx.c: Fixed compile errors for PostgreSQL support (Mc)
+    Removed globals that Rui put in, and changed the dbx_get_row
+    to include a row_number (which PostgreSQL expects) (Mc)
+    Added source files to Makefile.in and dbx.dsp (Mc)
+
+2001-03-23  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Wrap lines.
+
+2001-03-23  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h: changed license of PostgreSQL module in ext/dbx.
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/php_dbx.h: added initial support for PostgreSQL to ext/dbx.
+
+2001-03-23  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/.cvsignore
+      ext/dbx/LICENSE
+      ext/dbx/dbx.c
+      ext/dbx/dbx.dsp
+      ext/dbx/dbx.h
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/php_dbx.h:
+    Changed header for source files, now point to PHP license (Mc)
+    Found another // comment and replaced with /**/ (Mc)
+    Removed proprietary license (in favor of php license) (Mc)
+    Added .cvsignore file, I hope it works correctly (Mc)
+
+2001-03-23  Romolo Manfredini  <romolo@bicnet.it>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c:
+    Added target ownership check in function copy for safe_mode operations
+
+2001-03-23  Daniel Beulshausen  <daniel@php4win.de>
+
+    * NEWS: update news
+
+2001-03-23  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Select.php: forgot the license header
+
+    * pear/HTML/Select.php:
+    original commit. Basic html select loaded manually, from a DB result, or an array
+
+2001-03-23  Stephen van Egmond  <svanegmond@home.com>
+
+    * configure.in:
+    Added configuration for detecting the BeOS thread implementation
+    (which will be used once I get my patches into Zend to use bthreads).
+
+    Also, a check for a library distributed with the new BeOS networking
+    environment.
+
+    * ext/standard/microtime.c:
+    Simple patch to deal with lack of fields in the BeOS implementation of rusage.
+
+2001-03-23  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Table.php:
+    moved the display method to HTML_Common and updated some comments
+
+    * pear/HTML/Common.php:
+    updated some comments, added display method, and added the toHtml abstract method
+
+2001-03-23  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/pgsql/mktable.inc
+      pear/DB/tests/ibase/mktable.inc
+      pear/DB/tests/mysql/mktable.inc
+      pear/DB/tests/oci8/002.phpt
+      pear/DB/tests/oci8/007.phpt
+      pear/DB/tests/oci8/009.phpt
+      pear/DB/tests/oci8/010.phpt
+      pear/DB/tests/oci8/connect.inc
+      pear/DB/tests/oci8/mktable.inc
+      pear/DB/tests/oci8/skipif.inc
+      pear/DB/tests/odbc/mktable.inc
+      pear/DB/STATUS
+      pear/DB/common.php
+      pear/DB/oci8.php
+      pear/DB/tests/errors.inc
+      pear/DB/tests/fetchrow.inc
+      pear/DB/tests/numrows.inc
+      pear/DB/tests/sequences.inc
+      pear/DB.php
+      pear/PEAR.php.in:
+    * fixed Oracle tests, fixed some bugs in DB_oci8, all tests but
+      errorNative() pass now (but that may be a bug in the test :-)
+    * implemented numRows() emulation in DB_oci8 that is available
+      in "optimize portability" mode only
+
+2001-03-23  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Common.php:
+    removed the pass by reference on the second parameter of _updateAttrArray
+
+2001-03-23  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Removing extra check for warnings.
+
 2001-03-22  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/fbsql/php_fbsql.c: Adding warning when query fails
