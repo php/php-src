@@ -4,16 +4,12 @@
 ARG_WITH("pgsql", "PostgreSQL support", "no");
 
 if (PHP_PGSQL != "no") {
-	if (!PHP_PGSQL_SHARED) {
-		ERROR("Cannot build pgsql as a static extension until someone fixes its bogus PHPAPI usage\r\nuse --with-pgsql=shared instead.");
+	if (CHECK_LIB("libpq.lib", "pgsql", PHP_PGSQL) &&
+		CHECK_HEADER_ADD_INCLUDE("libpq-fe.h", "CFLAGS_PGSQL", PHP_PHP_BUILD + "\\include\\pgsql;" + PHP_PGSQL)) {
+		EXTENSION("pgsql", "pgsql.c");
+		AC_DEFINE('HAVE_PGSQL', 1, 'Have PostgreSQL library');
+		ADD_FLAG("CFLAGS_PGSQL", "/D HAVE_PQCMDTUPLES /D HAVE_PQCLIENTENCODING /D HAVE_PQESCAPE /D HAVE_PG_CONFIG_H /D PGSQL_EXPORTS");
 	} else {
-		if (CHECK_LIB("libpq.lib", "pgsql", PHP_PGSQL) &&
-				CHECK_HEADER_ADD_INCLUDE("postgres.h", "CFLAGS_PGSQL", PHP_PHP_BUILD + "\\include\\pgsql;" + PHP_PHP_BUILD + "\\postgresql\\src\\include;" + PHP_PGSQL)) {
-			EXTENSION("pgsql", "pgsql.c");
-			AC_DEFINE('HAVE_PGSQL', 1, 'Have PostgreSQL library');
-			ADD_FLAG("CFLAGS_PGSQL", "/D HAVE_PQCMDTUPLES /D HAVE_PQCLIENTENCODING /D HAVE_PQESCAPE /D HAVE_PG_CONFIG_H");
-		} else {
-			WARNING("pgsql not enabled; libraries and headers not found");
-		}
+		WARNING("pgsql not enabled; libraries and headers not found");
 	}
 }

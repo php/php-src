@@ -3315,7 +3315,7 @@ PHP_FUNCTION(pg_get_pid)
 /* {{{ php_pgsql_meta_data
  * TODO: Add meta_data cache for better performance
  */
-PHPAPI int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC) 
 {
 	PGresult *pg_result;
 	char *tmp_name;
@@ -3574,7 +3574,7 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC)
 /* {{{ php_pgsql_convert
  * check and convert array values (fieldname=>vlaue pair) for sql
  */
-PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC) 
 {
 	HashPosition pos;
 	char *field = NULL;
@@ -4212,7 +4212,7 @@ static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, ulong opt T
 
 /* {{{ php_pgsql_insert
  */
-PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, ulong opt, char **sql TSRMLS_DC)
+PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, ulong opt, char **sql TSRMLS_DC)
 {
 	zval **val, *converted = NULL;
 	char buf[256];
@@ -4391,7 +4391,7 @@ static inline int build_assignment_string(smart_str *querystr, HashTable *ht, co
 
 /* {{{ php_pgsql_update
  */
-PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, ulong opt, char **sql TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, ulong opt, char **sql TSRMLS_DC) 
 {
 	zval *var_converted = NULL, *ids_converted = NULL;
 	smart_str querystr = {0};
@@ -4497,7 +4497,7 @@ PHP_FUNCTION(pg_update)
 
 /* {{{ php_pgsql_delete
  */
-PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, ulong opt, char **sql TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, ulong opt, char **sql TSRMLS_DC) 
 {
 	zval *ids_converted = NULL;
 	smart_str querystr = {0};
@@ -4586,7 +4586,7 @@ PHP_FUNCTION(pg_delete)
 
 /* {{{ php_pgsql_result2array
  */
-PHPAPI int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC) 
 {
 	zval *row;
 	char *field_name, *element, *data;
@@ -4628,7 +4628,7 @@ PHPAPI int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC
 
 /* {{{ php_pgsql_select
  */
-PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, ulong opt, char **sql TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, ulong opt, char **sql TSRMLS_DC) 
 {
 	zval *ids_converted = NULL;
 	smart_str querystr = {0};
