@@ -1,8 +1,5 @@
 --TEST--
 Testing register_shutdown_function()
---POST--
---GET--
-ab+cd+ef+123+test
 --FILE--
 <?php 
 

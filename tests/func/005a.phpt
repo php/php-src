@@ -1,7 +1,5 @@
 --TEST--
 Testing register_shutdown_function() with timeout. (Bug: #21513)
---POST--
---GET--
 --FILE--
 <?php
 
