@@ -259,6 +259,35 @@ Changes in the Zend Engine 2.0
       Old code that does not take advantage of namespaces will run
       without modifications.
 
+    * import statement.
+
+      With the new import statement it is possible to import classes
+      and methods from other classes (namespaces) to the current scope.
+
+      Example:
+
+        <?php
+        class MyClass {
+          function hello() {
+            print "Hello, World\n";
+          }
+
+          class MyClass2 {
+            function hello() {
+              print "Hello, World in MyClass2\n";
+            }
+          }
+        }
+
+        import function hello, class MyClass2 from MyClass;
+
+        MyClass2::hello();
+        hello();
+        ?>
+
+      Old code that has no user-defined function 'import' will run
+      without modifications.
+
     * Unified Constructors.
 
       The Zend Engine allows developers to declare constructor methods
