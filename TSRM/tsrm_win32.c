@@ -149,6 +149,11 @@ static HANDLE dupHandle(HANDLE fh, BOOL inherit) {
 
 TSRM_API FILE *popen(const char *command, const char *type)
 {
+	return popen_ex(command, type, NULL, NULL);
+}
+
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env)
+{
 	FILE *stream = NULL;
 	int fno, str_len = strlen(type), read, mode;
 	STARTUPINFO startup;
@@ -190,7 +195,7 @@ TSRM_API FILE *popen(const char *command, const char *type)
 
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c "));
 	sprintf(cmd, "%s /c %s", TWG(comspec), command);
-	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS, NULL, NULL, &startup, &process)) {
+	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS, env, cwd, &startup, &process)) {
 		return NULL;
 	}
 	free(cmd);
