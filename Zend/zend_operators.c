@@ -172,7 +172,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(op) = &(holder);											\
 				break;														\
 			case IS_RESOURCE:												\
-				zend_list_delete((op)->value.lval);							\
+				/*zend_list_delete((op)->value.lval);*/							\
 				(holder).value.lval = (op)->value.lval;						\
 				(holder).type = IS_LONG;									\
 				(op) = &(holder);											\
@@ -208,7 +208,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0);	\
 				break;												\
 			case IS_RESOURCE:										\
-				zend_list_delete((op)->value.lval);					\
+				/*zend_list_delete((op)->value.lval);*/					\
 				(holder).value.lval = (op)->value.lval;				\
 				break;												\
 			case IS_BOOL:											\
@@ -233,7 +233,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(holder).value.lval = 0;							\
 				break;												\
 			case IS_RESOURCE:										\
-				zend_list_delete((op)->value.lval);					\
+				/*zend_list_delete((op)->value.lval);*/					\
 				/* break missing intentionally */					\
 			case IS_LONG:											\
 				(holder).value.lval = ((op)->value.lval ? 1 : 0);	\
