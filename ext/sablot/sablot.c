@@ -1506,76 +1506,81 @@ static void _php_sablot_standard_error(php_sablot_error *errors, php_sablot_erro
 
 /* {{{ Sablotron Scheme Handler functions */
 
-static int _php_sablot_sh_getAll(void *userData, SablotHandle p, const char *scheme, const char *rest, char **buffer, int *byteCount) {
-	php_sablot *handle = (php_sablot *)userData;
+static int _php_sablot_sh_getAll(void *userData, SablotHandle p, const char *scheme, const char *rest, char **buffer, int *byteCount) 
+{
+	php_sablot *handle = (php_sablot *) userData;
+	ELS_FETCH();
 
 	if (handle->getAllHandler) {
-    	zval *retval;
-		zval *args[4];
-		char *mybuff;
-	    int i;
-        int argc;
-
-        argc=4;
-		args[0] = _php_sablot_resource_zval(handle->index);
-		args[1] = _php_sablot_string_zval(scheme);
-		args[2] = _php_sablot_string_zval(rest);
-		args[3] = _php_sablot_string_zval("");
+		zval *retval,
+		     *argv[4];
+		int   idx,
+		      argc = 4;
 
 		MAKE_STD_ZVAL(retval);
 
-    	if (call_user_function(EG(function_table), NULL, handle->getAllHandler, retval, argc, args) == FAILURE) {
-        	php_error(E_WARNING, "Sorry, couldn't call %s handler", "scheme getAll");
-    	}
+		argv[0] = _php_sablot_resource_zval(handle->index);
+		argv[1] = _php_sablot_string_zval(scheme);
+		argv[2] = _php_sablot_string_zval(rest);
+		argv[3] = _php_sablot_string_zval("");
 
-    	zval_dtor(retval);
-    	efree(retval);
+		if (call_user_function(EG(function_table),
+		                       NULL,
+		                       handle->getAllHandler,
+		                       retval,
+		                       argc,
+		                       argv) == FAILURE) {
+			php_error(E_WARNING, "Sorry couldn't call function, %s, with handler of type %s",
+			          handle->getAllHandler->value.str.val, "Scheme GetALL");
+		}
 
-        /**
-         * do not destroy xml data.
-         */
-		*buffer=Z_STRVAL_P(args[3]);
-		*byteCount=Z_STRLEN_P(args[3]);
-        /**
-         * destroy zvals
-         */
-	    for (i=0; i<3; i++) {
-		    zval_del_ref(&(args[i]));
-	    }
+		zval_dtor(retval);
+		efree(retval);
+
+		*buffer    = Z_STRVAL_P(argv[3]);
+		*byteCount = Z_STRLEN_P(argv[3]);
+
+		for (idx = 1; idx < 3; idx++) {
+			zval_del_ref(&(argv[idx]));
+		}
 	}
-};
 
-static int _php_sablot_sh_freeMemory(void *userData, SablotHandle p, char *buffer) {
-    /**
-     * here we should destroy the buffer containing the xml data
-     * buffer to zval and zval-del_ref
-     * we should destroy the zval not the pointer.
-     */
-};
 
-static int _php_sablot_sh_open(void *userData, SablotHandle p, const char *scheme, const char *rest, int *handle) {
-    /**
-     * Not implemented
-     */
-};
+	return(0);
+}
 
-static int _php_sablot_sh_get(void *userData, SablotHandle p, int handle, char *buffer, int *byteCount) {
+static int _php_sablot_sh_freeMemory(void *userData, SablotHandle p, char *buffer) 
+{
+	/** Not implemented **/
+}
+
+static int _php_sablot_sh_open(void *userData, SablotHandle p, const char *scheme, const char *rest, int *handle) 
+{
     /**
      * Not implemented
      */
-};
+}
 
-static int _php_sablot_sh_put(void *userData, SablotHandle p, int handle, const char *buffer, int *byteCount) {
+static int _php_sablot_sh_get(void *userData, SablotHandle p, int handle, char *buffer, int *byteCount)
+{
     /**
      * Not implemented
      */
-};
+}
 
-static int _php_sablot_sh_close(void *userData, SablotHandle p, int handle) {
+static int _php_sablot_sh_put(void *userData, SablotHandle p, int handle, const char *buffer, int *byteCount)
+{
     /**
      * Not implemented
      */
-};
+}
+
+static int _php_sablot_sh_close(void *userData, SablotHandle p, int handle) 
+{
+    /**
+     * Not implemented
+     */
+}
 
 /* }}} */
 
