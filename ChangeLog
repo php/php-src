@@ -1,3 +1,39 @@
+2001-11-07  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/ITX.php: * Remove evil tabs caused by a previous patch
+
+    * pear/HTML/ITX.php: * Patch by Dietrich Ayala <dietrich@ganx4.com>
+
+2001-11-07  James Moore  <James@phpuk.org>
+
+    * ext/w32api/test_dll/test_dll.def
+      ext/w32api/test_dll/test_dll.dsp
+      ext/w32api/test_dll/test_dll.dsw
+      ext/w32api/test_dll/dll_test.h
+      ext/w32api/test_dll/test.php
+      ext/w32api/test_dll/test_dll.c
+      ext/w32api/examples/uptime.php
+      ext/w32api/php_w32api.h
+      ext/w32api/w32api.c
+      ext/w32api/w32api.dsp
+      ext/w32api/TODO
+      ext/w32api/README
+      ext/w32api/CREDITS
+      ext/w32api/EXPERIMENTAL
+      ext/w32api/.cvsignore:  - Add generic Win 32 API extension (jmoore)
+
+    * ext/standard/datetime.c:
+     - Fix Bug 9878 (patch by bfoddy@mediaone.net) (jmoore)
+
+2001-11-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Registry.php:
+    * store registry data in PEAR_INSTALL_DIR/.registry instead of /var/something
+
+    * pear/scripts/pear.in: * fix "list" command
+
+    * pear/PEAR/Config.php: typo
+
 2001-11-06  Chuck Hagenbuch  <chuck@horde.org>
 
     * pear/Log.php: fix the singleton and factory methods for
