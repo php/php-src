@@ -93,20 +93,6 @@ static PHP_MINFO_FUNCTION(COM)
 	DISPLAY_INI_ENTRIES();
 }
 
-PHPAPI int php_COM_check_ref(i_dispatch *obj)
-{
-	if(!obj->referenced)
-	{
-		php_error(E_WARNING, "Object is already released. Calling AddRef() but maybe it doesn't exist anymore.");
-		php_COM_addref(obj);
-		return FALSE;
-	}
-	else
-	{
-		return TRUE;
-	}
-}
-
 PHPAPI HRESULT php_COM_invoke(i_dispatch *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult)
 {
 	HRESULT hr;
@@ -201,16 +187,14 @@ PHPAPI HRESULT php_COM_clone(i_dispatch *obj, i_dispatch *clone, int cleanup)
 {
 	HRESULT hr;
 
-	php_COM_check_ref(clone);
-
 	obj->typelib = clone->typelib;
 	obj->i.dispatch = clone->i.dispatch;
 	obj->i.typeinfo = clone->i.typeinfo;
 
-	if(cleanup)
+	if(cleanup || !obj->referenced)
 	{
 		obj->referenced = clone->referenced;
-		clone->referenced = FALSE;
+		clone->referenced = 0;
 	}
 	else
 	{
