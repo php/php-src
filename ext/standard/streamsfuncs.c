@@ -250,7 +250,7 @@ PHP_FUNCTION(stream_socket_accept)
 
 	if (peername) {
 		zval_dtor(peername);
-		ZVAL_STRING(peername, NULL, 0);
+		ZVAL_STRING(peername, "", 0);
 	}
 
 	if (0 == php_stream_xport_accept(stream, &clistream,
