@@ -398,8 +398,8 @@ PHP_FUNCTION(pow)
 	zend_get_parameters_ex(ZEND_NUM_ARGS(),&zbase,&zexp);
 	convert_scalar_to_number_ex(zbase);
 	convert_scalar_to_number_ex(zexp);
-	if (Z_TYPE_PP(zbase) != IS_LONG && Z_TYPE_PP(zbase) != IS_DOUBLE ||
-		Z_TYPE_PP(zexp ) != IS_LONG && Z_TYPE_PP(zexp ) != IS_DOUBLE) {
+	if ((Z_TYPE_PP(zbase) != IS_LONG && Z_TYPE_PP(zbase) != IS_DOUBLE) ||
+		(Z_TYPE_PP(zexp ) != IS_LONG && Z_TYPE_PP(zexp ) != IS_DOUBLE)) {
 		php_error(E_WARNING,"Invalid argument(s) passed to pow()");
 		RETURN_FALSE;
 	}
