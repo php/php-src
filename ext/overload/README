@@ -54,6 +54,21 @@ class OO {
         var_dump($f1, $f2, $f3);
         return $f1 + $f2;
     }
+
+    function __get_foo(&$prop_value)
+    {
+        $prop_value = 'Bam bam bam!';
+        return true;
+    }
+
+    function __set_count($prop_value)
+    {
+        if ($prop_value >= 1 && $prop_value <= 100) {
+			$this->elem['COUNT'] = $prop_value;
+			return true;
+        } else
+            return false;
+    }
 }
 
 overload('OO');
@@ -71,6 +86,10 @@ $o->a = array($val);
 var_dump($o->a[0]->prop);
 
 var_dump($o->whatever(1, 2, 'a'));
+
+var_dump($o->foo);
+$o->count = 100;
+var_dump($o->COUNT);
 
 ?>
 
