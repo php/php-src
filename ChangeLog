@@ -1,3 +1,24 @@
+2004-06-19  Jan Lehnardt  <jan@dasmoped.net>
+
+    * scripts/phpize.in:
+      - do it right (phpize path issue)
+
+    * scripts/phpize.in:
+      - phpize now can handle directories with spaces in their name (#28847)
+
+2004-06-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Reflection_* -> Reflection*. Patch by Timm Friebe.
+
+2004-06-19  Stefan Esser  <sesser@suspekt.org>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c
+      ext/ncurses/ncurses_functions.c
+      ext/w32api/w32api.c:
+      Fixed some 64bit and other zend_parse_parameters bugs
+
 2004-06-18  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_4_3)

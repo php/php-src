@@ -1,3 +1,8 @@
+2004-06-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_reflection_api.c:
+      Reflection_* -> Reflection*. Patch by Timm Friebe.
+
 2004-06-18  Sara Golemon  <php@alphaweb.net>
 
     * zend_execute.c:
