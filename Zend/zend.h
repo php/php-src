@@ -270,7 +270,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_CONSTANT_ARRAY	9
 
 /* Special data type to temporarily mark large numbers */
-#define FLAG_IS_BC	9 /* for parser internal use only */
+#define FLAG_IS_BC	10 /* for parser internal use only */
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY	(1<<0)
