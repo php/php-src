@@ -735,6 +735,7 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (node->parent == NULL) {
 		/* Attribute Nodes ccontain accessible children 
 		attr_list_wrapper_dtor(node->properties); */
+		xmlSetTreeDoc(node, NULL);
 		node_list_wrapper_dtor((xmlNodePtr) node->properties, 0 TSRMLS_CC);
 		node_list_wrapper_dtor(node->children, 0 TSRMLS_CC);
 		node_wrapper_dtor(node);
