@@ -1112,8 +1112,8 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 
 	if (CG(active_class_entry)
 		&& !strcmp(CG(active_op_array)->function_name, ZEND_CLONE_FUNC_NAME)
-		&& (CG(active_op_array)->num_args != 1 || strcmp(CG(active_op_array)->arg_info[0].name, "that")!=0)) {
-		zend_error(E_COMPILE_ERROR, "The clone method must be declared as __clone($that)");
+		&& CG(active_op_array)->num_args != 0) {
+		zend_error(E_COMPILE_ERROR, "The clone method cannot accept any arguments");
 	}
 
 	CG(active_op_array)->line_end = zend_get_compiled_lineno(TSRMLS_C);
