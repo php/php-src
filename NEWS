@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Added disk_total_space() to return the total size of a filesystem.
+  (Patch from Steven Bower)
+- Renamed diskfreespace() to disk_free_space() to conform to established
+  naming conventions. (jon)
 - Fix for bug 2181. Now zero is returned instead of an unset value for
   7-bit encoding and plain text body type. (Vlad)
 - Fixed a bug in call_user_*() functions that would not allow calling
