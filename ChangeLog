@@ -1,3 +1,209 @@
+2001-10-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.in
+      pear/XML/RPC.php:
+    * include the PEAR version of usefulinc's xmlrpc library in this release
+      too, with security fix (in case people overwrite their old installation)
+
+    * pear/scripts/phptar.in
+      pear/tests/pear_error.phpt
+      pear/tests/pear_versioncmp.phpt
+      pear/Net/Socket.php
+      pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/PEAR/WebInstaller.php
+      pear/XML/Parser.php
+      pear/Math/Fraction.php
+      pear/Math/Util.php
+      pear/Mail/mime.php
+      pear/Mail/mimeDecode.php
+      pear/Mail/smtp.php
+      pear/HTML/Menu.php
+      pear/HTML/Menu_Browser.php
+      pear/HTML/Page.php
+      pear/Mail/RFC822.php
+      pear/File/Find.php
+      pear/HTML/Form.php
+      pear/DB/tests/pgsql/004.phpt
+      pear/DB/tests/pgsql/005.phpt
+      pear/DB/tests/pgsql/006.phpt
+      pear/DB/tests/pgsql/007.phpt
+      pear/DB/tests/pgsql/008.phpt
+      pear/DB/tests/pgsql/009.phpt
+      pear/DB/tests/pgsql/011.phpt
+      pear/DB/tests/pgsql/01connect.phpt
+      pear/DB/tests/pgsql/02fetch.phpt
+      pear/DB/tests/pgsql/03simplequery.phpt
+      pear/DB/tests/pgsql/04numcols.phpt
+      pear/DB/tests/pgsql/05sequences.phpt
+      pear/DB/tests/pgsql/06prepexec.phpt
+      pear/DB/tests/pgsql/07errornative.phpt
+      pear/DB/tests/pgsql/08affectedrows.phpt
+      pear/DB/tests/pgsql/09numrows.phpt
+      pear/DB/tests/pgsql/10errormap.phpt
+      pear/DB/tests/pgsql/11transact.phpt
+      pear/Experimental/System.php
+      pear/DB/tests/odbc/003.phpt
+      pear/DB/tests/odbc/004.phpt
+      pear/DB/tests/odbc/006.phpt
+      pear/DB/tests/odbc/007.phpt
+      pear/DB/tests/odbc/009.phpt
+      pear/DB/tests/odbc/010.phpt
+      pear/DB/tests/odbc/01connect.phpt
+      pear/DB/tests/odbc/02fetch.phpt
+      pear/DB/tests/odbc/03simplequery.phpt
+      pear/DB/tests/odbc/04numcols.phpt
+      pear/DB/tests/odbc/06prepexec.phpt
+      pear/DB/tests/odbc/07errornative.phpt
+      pear/DB/tests/odbc/09numrows.phpt
+      pear/DB/tests/odbc/10errormap.phpt
+      pear/DB/tests/pgsql/001.phpt
+      pear/DB/tests/pgsql/002.phpt
+      pear/DB/tests/pgsql/003.phpt
+      pear/DB/tests/oci8/001.phpt
+      pear/DB/tests/oci8/002.phpt
+      pear/DB/tests/oci8/003.phpt
+      pear/DB/tests/oci8/004.phpt
+      pear/DB/tests/oci8/005.phpt
+      pear/DB/tests/oci8/006.phpt
+      pear/DB/tests/oci8/007.phpt
+      pear/DB/tests/oci8/008.phpt
+      pear/DB/tests/oci8/009.phpt
+      pear/DB/tests/oci8/010.phpt
+      pear/DB/tests/oci8/01connect.phpt
+      pear/DB/tests/oci8/02fetch.phpt
+      pear/DB/tests/oci8/03simplequery.phpt
+      pear/DB/tests/oci8/04numcols.phpt
+      pear/DB/tests/oci8/05sequences.phpt
+      pear/DB/tests/oci8/06prepexec.phpt
+      pear/DB/tests/oci8/07errornative.phpt
+      pear/DB/tests/oci8/08affectedrows.phpt
+      pear/DB/tests/oci8/09numrows.phpt
+      pear/DB/tests/oci8/10errormap.phpt
+      pear/DB/tests/odbc/001.phpt
+      pear/DB/tests/odbc/002.phpt
+      pear/DB/tests/ibase/002.phpt
+      pear/DB/tests/ibase/003.phpt
+      pear/DB/tests/ibase/004.phpt
+      pear/DB/tests/ibase/006.phpt
+      pear/DB/tests/ibase/010.phpt
+      pear/DB/tests/ibase/01connect.phpt
+      pear/DB/tests/ibase/02fetch.phpt
+      pear/DB/tests/ibase/03simplequery.phpt
+      pear/DB/tests/ibase/04numcols.phpt
+      pear/DB/tests/ibase/06prepexec.phpt
+      pear/DB/tests/ibase/10errormap.phpt
+      pear/DB/tests/mysql/001.phpt
+      pear/DB/tests/mysql/002.phpt
+      pear/DB/tests/mysql/003.phpt
+      pear/DB/tests/mysql/004.phpt
+      pear/DB/tests/mysql/005.phpt
+      pear/DB/tests/mysql/006.phpt
+      pear/DB/tests/mysql/007.phpt
+      pear/DB/tests/mysql/008.phpt
+      pear/DB/tests/mysql/009.phpt
+      pear/DB/tests/mysql/010.phpt
+      pear/DB/tests/mysql/012.phpt
+      pear/DB/tests/mysql/01connect.phpt
+      pear/DB/tests/mysql/02fetch.phpt
+      pear/DB/tests/mysql/03simplequery.phpt
+      pear/DB/tests/mysql/04numcols.phpt
+      pear/DB/tests/mysql/05sequences.phpt
+      pear/DB/tests/mysql/06prepexec.phpt
+      pear/DB/tests/mysql/07errornative.phpt
+      pear/DB/tests/mysql/08affectedrows.phpt
+      pear/DB/tests/mysql/09numrows.phpt
+      pear/DB/tests/mysql/10errormap.phpt
+      pear/DB/tests/mysql/12tableinfo.phpt
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB/tests/ibase/001.phpt
+      pear/DB/STATUS
+      pear/DB/common.php
+      pear/DB/fbsql.php
+      pear/DB/ibase.php
+      pear/DB/ifx.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/Benchmark/Iterate.php
+      pear/Cache/Container/file.php
+      pear/Cache/DB.php
+      pear/Cache/Graphics.php
+      pear/Console/Getopt.php
+      pear/package.dtd
+      pear/CODING_STANDARDS
+      pear/DB.php
+      pear/Makefile.in
+      pear/PEAR.php: MFH
+
+2001-10-09  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/sybase.php:
+    Fix a problem with fetchInto (patch mostly from Steve_Joiner@focusppo.com)
+
+2001-10-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/storage.php:
+    * fixed DB_storage bug when using multiple key columns
+
+2001-10-09  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h: Added ldap_start_tls() function
+
+2001-10-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/xslt/xslt.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/tux/php_tux.c
+      ext/fribidi/fribidi.c
+      ext/hyperwave/hg_comm.c
+      ext/mcal/php_mcal.c: - More <br> to <br /> fixes
+
+2001-10-09  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Experimental/System.php: Added the "cat" command:
+    1) $var = System::cat('sample.txt test.txt');
+    2) System::cat('sample.txt test.txt > final.txt');
+    3) System::cat('sample.txt test.txt >> final.txt');
+
+2001-10-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Make the information available whether we are using HTTP/1.1
+
+2001-10-09  Rainer Schaaf  <rjs@pdflib.com>
+
+    * ext/pdf/config.m4: added new configure option --with-pdflib3
+
+    Therefore --with-pdflib will only work with PDFlib 4.x from now on, if one wants
+    to build PHP with PDFlib V3.x he has to use the new option --with-pdflib3.
+
+    This makes configuration of PDFlib much easier, as no additional libraries
+    are needed anymore. This is possible, because PDFlib has built in libraries
+    for tiff/jpg/zlib since V4.
+
+2001-10-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/apache/php_apache.c: - Changed <br> to - in PHP_INFO output.
+
+2001-10-09  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/file.php: MFH (was a 9->10 char unix time bug...)
+
+2001-10-09  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ming/ming.c: Fixed some protos.
+
+2001-10-09  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php: more clean up/fixes
+
 2001-10-08  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/fbsql/php_fbsql.c: use strdup to alloc memory refeed with free!
