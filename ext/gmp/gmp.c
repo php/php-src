@@ -88,11 +88,11 @@ function_entry gmp_functions[] = {
 zend_module_entry gmp_module_entry = {
 	"gmp",
 	gmp_functions,
-	ZEND_MINIT(gmp),
-	ZEND_MSHUTDOWN(gmp),
+	ZEND_MODULE_STARTUP_N(gmp),
+	ZEND_MODULE_SHUTDOWN_N(gmp),
 	NULL,		/* Replace with NULL if there's nothing to do at request start */
 	NULL,	    /* Replace with NULL if there's nothing to do at request end */
-	ZEND_MINFO(gmp),
+	ZEND_MODULE_INFO_N(gmp),
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -135,7 +135,7 @@ static void gmp_efree(void *ptr, size_t size)
 
 /* {{{ ZEND_MINIT_FUNCTION
  */
-ZEND_MINIT_FUNCTION(gmp)
+ZEND_MODULE_STARTUP_D(gmp)
 {
 	le_gmp = zend_register_list_destructors_ex(_php_gmpnum_free, NULL, GMP_RESOURCE_NAME, module_number);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
@@ -150,7 +150,7 @@ ZEND_MINIT_FUNCTION(gmp)
 
 /* {{{ ZEND_MSHUTDOWN_FUNCTION
  */
-ZEND_MSHUTDOWN_FUNCTION(gmp)
+ZEND_MODULE_SHUTDOWN_D(gmp)
 {
 	return SUCCESS;
 }
@@ -158,7 +158,7 @@ ZEND_MSHUTDOWN_FUNCTION(gmp)
 
 /* {{{ ZEND_MINFO_FUNCTION
  */
-ZEND_MINFO_FUNCTION(gmp)
+ZEND_MODULE_INFO_D(gmp)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "gmp support", "enabled");

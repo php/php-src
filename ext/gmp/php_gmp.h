@@ -33,9 +33,9 @@ extern zend_module_entry gmp_module_entry;
 #define GMP_API
 #endif
 
-ZEND_MINIT_FUNCTION(gmp);
-ZEND_MSHUTDOWN_FUNCTION(gmp);
-ZEND_MINFO_FUNCTION(gmp);
+ZEND_MODULE_STARTUP_D(gmp);
+ZEND_MODULE_SHUTDOWN_D(gmp);
+ZEND_MODULE_INFO_D(gmp);
 
 ZEND_FUNCTION(gmp_init);
 ZEND_FUNCTION(gmp_intval);
