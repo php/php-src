@@ -201,6 +201,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_error,			NULL)
 	PHP_FE(fbsql_errno,			NULL)
 	PHP_FE(fbsql_affected_rows,	NULL)
+	PHP_FE(fbsql_rows_fetched,	NULL)
 	PHP_FE(fbsql_insert_id,		NULL)
 	PHP_FE(fbsql_result,		NULL)
 	PHP_FE(fbsql_next_result,	NULL)
@@ -297,9 +298,9 @@ static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 			fbcmdRelease(md);
 		}
 		if (result->rowHandler)		fbcrhRelease(result->rowHandler);
-		if (result->ResultmetaData)	fbcmdRelease(result->ResultmetaData);
 		if (result->list)			fbcplRelease(result->list);
 		if (result->array)			fbaRelease(result->array);
+		if (result->ResultmetaData)	fbcmdRelease(result->ResultmetaData);
 		efree(result);
 	}
 }
@@ -369,7 +370,7 @@ static int php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link);
+static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link, long batch_size);
 
 /* {{{ PHP_INI
  */
@@ -381,7 +382,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_links",					"128",		PHP_INI_SYSTEM, OnUpdateLong,	maxLinks,         zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_connections",				"128",		PHP_INI_SYSTEM, OnUpdateLong,	maxConnections,   zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_results",					"128",		PHP_INI_SYSTEM, OnUpdateLong,	maxResults,       zend_fbsql_globals, fbsql_globals, display_link_numbers)
-	STD_PHP_INI_ENTRY_EX ("fbsql.batchSize",					"1000",		PHP_INI_SYSTEM, OnUpdateLong,	batchSize,		  zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX ("fbsql.batchsize",					"1000",		PHP_INI_USER,   OnUpdateLong,	batchSize,		  zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY    ("fbsql.default_host",					NULL,		PHP_INI_SYSTEM, OnUpdateString, hostName,         zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_ENTRY    ("fbsql.default_user",					"_SYSTEM",	PHP_INI_SYSTEM, OnUpdateString, userName,         zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_ENTRY    ("fbsql.default_password",				"",         PHP_INI_SYSTEM, OnUpdateString, userPassword,     zend_fbsql_globals, fbsql_globals)
@@ -650,8 +651,9 @@ int phpfbFetchRow(PHPFBResult* result, unsigned int row)
 	if (result->rowHandler == NULL)
 	{
 		void *rawData = fbcdcFetch(result->link->connection, result->batchSize, result->fetchHandle);
-		if (rawData == NULL)
+		if (rawData == NULL) {
 			result->rowCount = 0;
+		}
 		else
 			result->rowHandler = fbcrhInitWith(rawData, result->metaData);
 	}
@@ -767,7 +769,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message");
 			}
 			link->errorText = strdup(emg);
-			link->errorNo = fbcemdErrorCodeAtIndex(emd, 0);;
+			link->errorNo = fbcemdErrorCodeAtIndex(emd, 0);
 			free(emg);
 			fbcemdRelease(emd);
 			fbcmdRelease(md);
@@ -1231,7 +1233,12 @@ PHP_FUNCTION(fbsql_database)
 		if (phpLink->databaseName) free(phpLink->databaseName);
 		phpLink->databaseName = strdup(Z_STRVAL_PP(dbname));
 	}
-	RETURN_STRING(phpLink->databaseName, 1);
+	if (phpLink->databaseName) {
+		RETURN_STRING(phpLink->databaseName, 1);
+	}
+	else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -1474,7 +1481,7 @@ PHP_FUNCTION(fbsql_change_user)
 
 	sprintf(buffer, "SET AUTHORIZATION %s;", userName);
 
-	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, buffer, phpLink);
+	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, buffer, phpLink, 0);
 	if (Z_LVAL_P(return_value))
 	{
 		free(phpLink->userName);
@@ -1488,10 +1495,10 @@ PHP_FUNCTION(fbsql_change_user)
 PHP_FUNCTION(fbsql_create_db)
 {
 	PHPFBLink* phpLink = NULL;
-	zval	**fbsql_link_index = NULL, **database_name;
+	zval	**fbsql_link_index = NULL, **database_name, **database_options = NULL;
 	int id;
 	int i, status;
-	char *databaseName;
+	char *databaseName, *databaseOptions;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1506,6 +1513,14 @@ PHP_FUNCTION(fbsql_create_db)
 				RETURN_FALSE;
 			}
 			id = -1;
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &database_name, &fbsql_link_index, &database_options)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			convert_to_string_ex(database_options);
+			databaseOptions = Z_STRVAL_PP(database_options);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -1530,7 +1545,7 @@ PHP_FUNCTION(fbsql_create_db)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not create %s@%s, database is %s", databaseName, phpLink->hostName, txt);
 		RETURN_FALSE;
 	}
-	if (!fbcehCreateDatabaseNamedWithOptions(phpLink->execHandler, databaseName, ""))
+	if (!fbcehCreateDatabaseNamedWithOptions(phpLink->execHandler, databaseName, databaseOptions))
 	{
 		char* error = fbechErrorMessage(phpLink->execHandler);
 		if (FB_SQL_G(generateWarnings))
@@ -1632,15 +1647,15 @@ PHP_FUNCTION(fbsql_drop_db)
 }
 /* }}} */
 
-/* {{{ proto bool fbsql_start_db(string database_name [, resource link_identifier])
+/* {{{ proto bool fbsql_start_db(string database_name [, resource link_identifier [, string database_options]])
    Start a database on the server */
 PHP_FUNCTION(fbsql_start_db)
 {
 	PHPFBLink* phpLink = NULL;
-	zval	**fbsql_link_index = NULL, **database_name;
+	zval	**fbsql_link_index = NULL, **database_name, **database_options;
 	int id;
 	int i, status;
-	char *databaseName;
+	char *databaseName, *databaseOptions = NULL;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1655,6 +1670,14 @@ PHP_FUNCTION(fbsql_start_db)
 				RETURN_FALSE;
 			}
 			id = -1;
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &database_name, &fbsql_link_index, &database_options)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			convert_to_string_ex(database_options);
+			databaseOptions = Z_STRVAL_PP(database_options);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -1682,7 +1705,7 @@ PHP_FUNCTION(fbsql_start_db)
 
 	if (status == FBStopped)
 	{
-		if (!fbcehStartDatabaseNamed (phpLink->execHandler, databaseName))
+		if (!fbcehStartDatabaseNamedWithOptions(phpLink->execHandler, databaseName, databaseOptions))
 		{
 			char* error = fbechErrorMessage(phpLink->execHandler);
 			if (FB_SQL_G(generateWarnings))
@@ -1855,12 +1878,12 @@ int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql)
 }
 /* }}} */
 
-static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
+static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link, long batch_size)
 {
 	PHPFBResult* result = NULL;
 	FBCMetaData*   md, *meta;
 	char*          tp;
-	char*          fh; 
+	char*          fh = NULL;
 	unsigned int   sR = 1, cR = 0;
 
 	meta = fbcdcExecuteDirectSQL(link->connection, sql);
@@ -1887,13 +1910,13 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 		}
 		else if ((fh = fbcmdFetchHandle(md)) || tp[0] == 'E' || (tp[0] == 'U' && fh))
 		{
-			result = emalloc(sizeof(PHPFBResult));
+			result = (PHPFBResult *)emalloc(sizeof(PHPFBResult));
 			result->link        = link;
-			result->fetchHandle = fh;
+			result->rowHandler  = NULL;
+			result->fetchHandle = NULL;
 			result->ResultmetaData    = meta;
 			result->metaData    = md;
-			result->rowHandler  = NULL;
-			result->batchSize   = FB_SQL_G(batchSize);
+			result->batchSize   = batch_size > 0 ? batch_size : FB_SQL_G(batchSize);
 			result->rowCount    = 0x7fffffff;
 			result->columnCount = 0;
 			result->rowIndex    = 0;
@@ -1909,7 +1932,6 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 			{
 				result->columnCount = fbcmdColumnCount(md);
 				result->fetchHandle = fh;
-				result->batchSize   = FB_SQL_G(batchSize);
 			}
 			else 
 			{
@@ -1938,13 +1960,13 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 	}
 }
 
-/* {{{ proto resource fbsql_query(string query [, resource link_identifier])
+/* {{{ proto resource fbsql_query(string query [, resource link_identifier [, long batch_size]])
    Send one or more SQL statements to the server and execute them */
 PHP_FUNCTION(fbsql_query)
 {
 	PHPFBLink* phpLink = NULL;
-	zval	**fbsql_link_index = NULL, **query;
-	int id;
+	zval	**fbsql_link_index = NULL, **query, **batch_size;
+	int id, bs = 0;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1960,6 +1982,14 @@ PHP_FUNCTION(fbsql_query)
 			}
 			id = -1;
 			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &query, &fbsql_link_index, &batch_size)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			convert_to_long_ex(batch_size);
+			bs = Z_LVAL_PP(batch_size);
+			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
@@ -1968,7 +1998,7 @@ PHP_FUNCTION(fbsql_query)
 
 	convert_to_string_ex(query);
 
-	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_STRVAL_PP(query), phpLink);
+	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_STRVAL_PP(query), phpLink, bs);
 }
 /* }}} */
 
@@ -2004,7 +2034,7 @@ PHP_FUNCTION(fbsql_db_query)
 	convert_to_string_ex(dbname);
 
 	if (php_fbsql_select_db(Z_STRVAL_PP(dbname), phpLink TSRMLS_CC)) {
-		phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_STRVAL_PP(query), phpLink);
+		phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_STRVAL_PP(query), phpLink, 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -2096,7 +2126,7 @@ PHP_FUNCTION(fbsql_list_tables)
 		php_fbsql_select_db(databaseName, phpLink TSRMLS_CC);
 	}
 
-	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, sql, phpLink);
+	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, sql, phpLink, 0);
 }
 /* }}} */
 
@@ -2141,7 +2171,7 @@ PHP_FUNCTION(fbsql_list_fields)
 
 	sprintf(sql, "SELECT * FROM %s WHERE 1=0;", tableName);
 
-	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, sql, phpLink);
+	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, sql, phpLink, 0);
 }
 /* }}} */
 
@@ -2252,6 +2282,36 @@ PHP_FUNCTION(fbsql_affected_rows)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	RETURN_LONG(phpLink->affectedRows);
+}
+/* }}} */
+
+/* {{{ proto int fbsql_affected_rows([resource link_identifier])
+   Get the number of rows affected by the last statement */
+PHP_FUNCTION(fbsql_rows_fetched)
+{
+	PHPFBResult* phpResult = NULL;
+	zval	**result = NULL;
+	int id;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &result)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(phpResult, PHPFBResult *, result, id, "FrontBase-Result", le_result);
+
+	if (!phpResult->rowHandler) {
+		RETURN_FALSE;
+	}
+	else {
+		RETURN_LONG(fbcrhRowCount(phpResult->rowHandler));
+	}
 }
 /* }}} */
 
