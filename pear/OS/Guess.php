@@ -71,6 +71,10 @@
 
 // }}}
 
+/* TODO:
+ * - define endianness, to allow matchSignature("bigend") etc.
+ */
+
 class OS_Guess
 {
     var $sysname;
