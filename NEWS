@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Release Candidate 1
+- Don't default to iso-8859-1 since this confuses some browsers
+- Make it possible to specify both a port and a socket in mysql_[p]connect
 - Added --disable-pic for disabling generating PIC for shared objects
   on platforms which support it (i.e. Linux) (Sascha)
 - serialize()/unserialize() now call __sleep() and __wakeup() when
