@@ -1,6 +1,17 @@
 <?php
 
-/** \brief seekable iterator
+/** @file seekableiterator.inc
+ * @ingroup Internal
+ * @brief class SeekableIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @brief seekable iterator
+ * @author  Marcus Boerger
+ * @version 1.0
  *
  * Turns a normal iterator ino a seekable iterator. When there is a way
  * to seek on an iterator LimitIterator can use this to efficiently rewind
