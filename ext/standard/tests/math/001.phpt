@@ -17,7 +17,7 @@ $tests = <<<TESTS
  1.5 === abs("-1.5")
 -LONG_MIN+1 === abs(LONG_MIN-1)
 -LONG_MIN   === abs(LONG_MIN)
--LONG_MIN-1 === abs(LONG_MIN+1)
+-(LONG_MIN+1) === abs(LONG_MIN+1)
 -1 === ceil(-1.5)
  2 === ceil( 1.5)
 -2 === floor(-1.5)
