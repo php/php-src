@@ -2565,7 +2565,7 @@ PHP_FUNCTION(mb_strimwidth)
 /* {{{ MBSTRING_API char *php_mb_convert_encoding() */
 MBSTRING_API char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC)
 {
-	mbfl_string string, result, *ret;
+	mbfl_string string, result, *ret = NULL;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_buffer_converter *convd;
 	int size, *list;
@@ -3789,7 +3789,7 @@ MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length
 {
 	mbfl_string string;
 	enum mbfl_no_encoding *elist;
-	enum mbfl_no_encoding encoding;
+	enum mbfl_no_encoding encoding = mbfl_no_encoding_invalid;
 	mbfl_encoding_detector *identd = NULL; 
 
 	int size, *list;
