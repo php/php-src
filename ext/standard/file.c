@@ -247,12 +247,17 @@ PHP_FUNCTION(flock)
 		RETURN_FALSE;
 	}
 
+	if (arg_count == 3) {
+		convert_to_long_ex(arg3);
+		Z_LVAL_PP(arg3) = 0;
+	}
+
 	/* flock_values contains all possible actions
 	   if (arg2 & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (Z_LVAL_PP(arg2) & 4 ? LOCK_NB : 0);
 	if (flock(fd, act)) {
 		if (errno == EWOULDBLOCK && arg_count == 3) {
-			ZVAL_LONG(*arg3, 1);
+			Z_LVAL_PP(arg3) = 1;
 		} else {
 			RETURN_FALSE;
 		}	
