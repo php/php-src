@@ -4085,8 +4085,8 @@ int zend_goto_handler(ZEND_OPCODE_HANDLER_ARGS)
 		return 0;
 	}
 
-	zval_dtor(&tmp);
 	zend_error(E_ERROR, "Unknown label %s", Z_STRVAL_P(label));
+	zval_dtor(&tmp);
 	NEXT_OPCODE();
 }
 
