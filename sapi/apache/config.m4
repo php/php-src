@@ -29,7 +29,6 @@ AC_ARG_WITH(apxs,
 	AC_DEFINE(HAVE_AP_CONFIG_H)
 	AC_DEFINE(HAVE_AP_COMPAT_H)
 	AC_MSG_RESULT(yes)
-	PHP_OUTPUT(sapi/apache/Makefile)
 ],[
 	AC_MSG_RESULT(no)
 ])
@@ -49,7 +48,6 @@ AC_ARG_WITH(apache,
 	fi
 	if test "$withval" != "no"; then
 		APACHE_MODULE=yes
-		PHP_OUTPUT(sapi/apache/Makefile)
 		AC_EXPAND_PATH($withval, withval)
 		# For Apache 1.2.x
 		if test -f $withval/src/httpd.h; then 
