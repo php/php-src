@@ -74,19 +74,33 @@ static int  le_xslt;
 /* {{{ xslt_functions[]
  */
 function_entry xslt_functions[] = {
-	PHP_FE(xslt_create,              NULL)
-	PHP_FE(xslt_set_sax_handlers,    NULL)
-	PHP_FE(xslt_set_scheme_handlers, NULL)
-	PHP_FE(xslt_set_error_handler,   NULL)
-	PHP_FE(xslt_set_base,		 NULL)
+	PHP_FE(xslt_sax_create,              NULL)
+	PHP_FE(xslt_sax_set_sax_handlers,    NULL)
+	PHP_FE(xslt_sax_set_scheme_handlers, NULL)
+	PHP_FE(xslt_sax_process,             NULL)
+	PHP_FE(xslt_sax_set_base,            NULL)
+	PHP_FE(xslt_sax_set_log,             NULL)
+	PHP_FE(xslt_sax_set_error_handler,   NULL)
 #ifdef HAVE_SABLOT_SET_ENCODING
-	PHP_FE(xslt_set_encoding,        NULL)
+	PHP_FE(xslt_sax_set_encoding,        NULL)
 #endif
-	PHP_FE(xslt_set_log,             NULL)
-	PHP_FE(xslt_process,             NULL)
-	PHP_FE(xslt_error,               NULL)
-	PHP_FE(xslt_errno,               NULL)
-	PHP_FE(xslt_free,                NULL)
+	PHP_FE(xslt_sax_free,                NULL)
+
+	PHP_FE(xslt_error,                   NULL)
+	PHP_FE(xslt_errno,                   NULL)
+
+	PHP_FALIAS(xslt_create,              xslt_sax_create,              NULL)
+	PHP_FALIAS(xslt_set_sax_handlers,    xslt_sax_set_sax_handlers,    NULL)
+	PHP_FALIAS(xslt_set_scheme_handlers, xslt_sax_set_scheme_handlers, NULL)
+	PHP_FALIAS(xslt_set_error_handler,   xslt_sax_set_error_handler,   NULL)
+	PHP_FALIAS(xslt_set_log,             xslt_sax_set_log,             NULL)
+	PHP_FALIAS(xslt_set_base,            xslt_sax_set_base,            NULL)
+	PHP_FALIAS(xslt_process,             xslt_sax_process,             NULL)
+	PHP_FALIAS(xslt_free,                xslt_sax_free,                NULL)
+#ifdef HAVE_SABLOT_SET_ENCODING
+	PHP_FALIAS(xslt_set_encoding,        xslt_sax_set_encoding,        NULL)
+#endif
+
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -164,9 +178,9 @@ PHP_MINFO_FUNCTION(xslt)
 }
 /* }}} */
 
-/* {{{ proto resource xslt_create(void) 
+/* {{{ proto resource xslt_sax_create(void) 
    Create a new XSLT processor */
-PHP_FUNCTION(xslt_create)
+PHP_FUNCTION(xslt_sax_create)
 {
 	php_xslt     *handle;      /* The php -> sablotron handle */
 	SablotHandle  processor;   /* The sablotron processor */
@@ -200,9 +214,9 @@ PHP_FUNCTION(xslt_create)
 }
 /* }}} */
 
-/* {{{ proto void xslt_set_sax_handlers(resource processor, array handlers)
+/* {{{ proto void xslt_sax_set_sax_handlers(resource processor, array handlers)
    Set the SAX handlers to be called when the XML document gets processed */
-PHP_FUNCTION(xslt_set_sax_handlers)
+PHP_FUNCTION(xslt_sax_set_sax_handlers)
 {
 	zval       **processor_p,      /* Resource pointer to the php->sablotron handle */
 	           **sax_handlers_p,   /* Pointer to the sax handlers php array */
@@ -284,9 +298,9 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 }
 /* }}} */
 
-/* {{{ proto void xslt_set_scheme_handlers(resource processor, array handlers)
+/* {{{ proto void xslt_sax_set_scheme_handlers(resource processor, array handlers)
    Set the scheme handlers for the XSLT processor */
-PHP_FUNCTION(xslt_set_scheme_handlers)
+PHP_FUNCTION(xslt_sax_set_scheme_handlers)
 {
 	zval                   **processor_p,       /* Resource pointer to the php->sablotron handle */
 	                       **scheme_handlers_p, /* Pointer to the scheme handler array */
@@ -359,7 +373,7 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 
 /* {{{ proto void xslt_set_error_handler(resource processor, mixed error_func)
    Set the error handler, to be called when an XSLT error happens */
-PHP_FUNCTION(xslt_set_error_handler)
+PHP_FUNCTION(xslt_sax_set_error_handler)
 {
 	zval      **processor_p,   /* Resource Pointer to a PHP-XSLT processor */
 	          **error_func;    /* Name of the user defined error function */
@@ -378,7 +392,7 @@ PHP_FUNCTION(xslt_set_error_handler)
 
 /* {{{ proto void xslt_set_base(resource processor, string base)
    Sets the base URI for all XSLT transformations */
-PHP_FUNCTION(xslt_set_base)
+PHP_FUNCTION(xslt_sax_set_base)
 {
 	zval     **processor_p,  /* Resource Pointer to a PHP-XSLT processor */
 	         **base;         /* The base URI for the transformation */
@@ -396,9 +410,9 @@ PHP_FUNCTION(xslt_set_base)
 }
 /* }}} */
 
-/* {{{ proto void xslt_set_encoding(resource processor, string encoding)
+/* {{{ proto void xslt_sax_set_encoding(resource processor, string encoding)
    Set the output encoding for the current stylesheet */
-PHP_FUNCTION(xslt_set_encoding)
+PHP_FUNCTION(xslt_sax_set_encoding)
 {
 /* The user has to explicitly compile sablotron with sablotron 
    encoding functions in order for SablotSetEncoding to be 
@@ -423,9 +437,9 @@ PHP_FUNCTION(xslt_set_encoding)
 }
 /* }}} */
 
-/* {{{ proto void xslt_set_log(resource processor, string logfile)
+/* {{{ proto void xslt_sax_set_log(resource processor, string logfile)
    Set the log file to write the errors to (defaults to stderr) */
-PHP_FUNCTION(xslt_set_log)
+PHP_FUNCTION(xslt_sax_set_log)
 {
 	zval      **processor_p,             /* Resource pointer to a PHP-XSLT processor */
 	          **logfile;                 /* Path to the logfile */
@@ -459,9 +473,9 @@ PHP_FUNCTION(xslt_set_log)
 }
 /* }}} */
 
-/* {{{ proto string xslt_process(resource processor, string xml, string xslt[, mixed result[, array args[, array params]]])
+/* {{{ proto string xslt_sax_process(resource processor, string xml, string xslt[, mixed result[, array args[, array params]]])
    Perform the xslt transformation */
-PHP_FUNCTION(xslt_process)
+PHP_FUNCTION(xslt_sax_process)
 {
 	zval       **processor_p,    /* Resource Pointer to a PHP-XSLT processor */
 	           **xml_p,          /* A zval pointer to the XML data */
@@ -595,9 +609,9 @@ PHP_FUNCTION(xslt_error)
 }
 /* }}} */
 
-/* {{{ proto void xslt_free(resource processor)
+/* {{{ proto void xslt_sax_free(resource processor)
    Free the xslt processor up */
-PHP_FUNCTION(xslt_free)
+PHP_FUNCTION(xslt_sax_free)
 {
 	zval     **processor_p;   /* Resource pointer to a php-xslt processor */
 	php_xslt  *handle;        /* A PHP-XSLT processor */
@@ -1285,7 +1299,7 @@ static SAX_RETURN sax_enddoc(void *ctx)
 
 
 /* {{{ _error_parse()
-   Parse an char ** array into an _error_fields structure */
+   Parse a char ** array into an _error_fields structure */
 #define MIN(__a, __b) ((__a) < (__b) ? (__a) : (__b))
 
 struct _error_fields {
