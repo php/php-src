@@ -2222,15 +2222,14 @@ PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 
 				php_variant_to_pval(pVarDesc->lpvarValue, &value, codepage TSRMLS_CC);
 				 /* we only import enumerations (=int) */
-				if (value.type == IS_LONG) {
+				if (Z_TYPE(value) == IS_LONG) {
 					c.flags = mode;
 					c.value.type = IS_LONG;
-					c.value.value.lval = value.value.lval;
+					c.value.value.lval = Z_LVAL(value);
 					c.module_number = 0; /* the module number is not available here */
 
 					zend_register_constant(&c TSRMLS_CC);
 				}
-				efree(value);
 
 				j++;
 			}
