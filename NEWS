@@ -1,10 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Added command line parameters -B, -F, -R and -E which allow to process
-  stdin line by line (See php -h for more). (marcus)
-- Added XBM support for bundled gd library. (marcus)
-- Added XBM support for GetImageSize(). (helly)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
@@ -12,6 +8,8 @@ PHP 4                                                                      NEWS
   (Marcus)
 - Improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Improved array_search() to accept objects as a needle under ZE2. (Moriyoshi)
+- Added command line parameters -B, -F, -R and -E which allow to process
+  stdin line by line (See php -h for more). (Marcus)
 - Added string.base64 stream filter. (Moriyoshi)
 - Added domxml_node_get_path() (Lukas Schröder)
 - Added iconv related functions (Moriyoshi)
@@ -25,6 +23,8 @@ PHP 4                                                                      NEWS
   . Support for float modifier.
   . Detection of numeric values inside strings passed as high & low.
   . Proper handle the situations where high == low.
+- Added XBM support for GetImageSize(). (Marcus)
+- Added XBM support for bundled GD library. (Marcus)
 - Added imagefilter() function which allows application of various filters.
   This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)
 - Added imageistruecolor(), only available with GD2. (Pierre-Alain Joye)
