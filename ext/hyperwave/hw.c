@@ -1046,12 +1046,12 @@ PHP_FUNCTION(hw_errormsg)
 		RETURN_FALSE;
 	}
 
-	switch(ptr->lasterror) {
+	switch (ptr->lasterror) {
 		case 0:
 			sprintf(errstr, "No error");
 			break;
 		case NOACCESS:
-			sprintf(errstr, "No access");
+			sprintf(errstr, "Access denied");
 			break;
 		case NODOCS:
 			sprintf(errstr, "No documents");
@@ -1107,17 +1107,197 @@ PHP_FUNCTION(hw_errormsg)
 		case LOCKED:
 			sprintf(errstr, "Object locked; try again later");
 			break;
-		case NOTREMOVED:
-			sprintf(errstr, "Attribute not removed");
-			break;
 		case CHANGEBASEFLD:
 			sprintf(errstr, "Change of base-attribute");
+			break;
+		case NOTREMOVED:
+			sprintf(errstr, "Attribute not removed");
 			break;
 		case FLDEXISTS:
 			sprintf(errstr, "Attribute exists");
 			break;
+		case CMDSYNTAX:
+			sprintf(errstr, "Syntax error in command");
+			break;
 		case NOLANGUAGE:
 			sprintf(errstr, "No or unknown language specified");
+			break;
+		case WRGTYPE:
+			sprintf(errstr, "Wrong type in object");
+			break;
+		case WRGVERSION:
+			sprintf(errstr, "Client version too old");
+			break;
+		case CONNECTION:
+			sprintf(errstr, "No connection to other server");
+			break;
+		case SYNC:
+			sprintf(errstr, "Synchronization error");
+			break;
+		case NOPATH:
+			sprintf(errstr, "No path entry");
+			break;
+		case WRGPATH:
+			sprintf(errstr, "Wrong path entry");
+			break;
+		case PASSWD:
+			sprintf(errstr, "Wrong password (server-to-server server authentication)");
+			break;
+		case LC_NO_MORE_USERS:
+			sprintf(errstr, "No more users for license");
+			break;
+		case LC_NO_MORE_DOCS:
+			sprintf(errstr, "No more documents for this session and license");
+			break;
+		case RSERV_NRESP:
+			sprintf(errstr, "Remote server not responding");
+			break;
+		case Q_OVERFLOW:
+			sprintf(errstr, "Query overflow");
+			break;
+		case USR_BREAK:
+			sprintf(errstr, "Break by user");
+			break;
+		case N_IMPL:
+			sprintf(errstr, "Not implemented");
+			break;
+		case WRG_VALUE:
+			sprintf(errstr, "Wrong value");
+			break;
+		case INSUFF_FUNDS:
+			sprintf(errstr, "Insufficient funds");
+			break;
+		case REORG:
+			sprintf(errstr, "Reorganization in progress");
+			break;
+		case USER_LIMIT:
+			sprintf(errstr, "Limit of simultaneous users reached");
+			break;
+		case FTCONNECT:
+			sprintf(errstr, "No connection to fulltext server");
+			break;
+		case FTTIMEOUT:
+			sprintf(errstr, "Connection timed out");
+			break;
+		case FTINDEX:
+			sprintf(errstr, "Something wrong with fulltext index");
+			break;
+		case FTSYNTAX:
+			sprintf(errstr, "Query syntax error");
+			break;
+		case REQUESTPENDING:
+			sprintf(errstr, "Request pending");
+			break;
+		case NOCONNECTION:
+			sprintf(errstr, "No connection to document server");
+			break;
+		case WRONGVERSION:
+			sprintf(errstr, "Wrong protocol version");
+			break;
+		case NOTINITIALIZED:
+			sprintf(errstr, "Not initialized");
+			break;
+		case BADREQUEST:
+			sprintf(errstr, "Bad request");
+			break;
+		case BADLRN:
+			sprintf(errstr, "Bad document number");
+			break;
+		case OPENSTORE_WRITE:
+			sprintf(errstr, "Cannot write to local store");
+			break;
+		case OPENSTORE_READ:
+			sprintf(errstr, "Cannot read from local store");
+			break;
+		case READSTORE:
+			sprintf(errstr, "Store read error");
+			break;
+		case WRITESTORE:
+			sprintf(errstr, "Write error");
+			break;
+		case CLOSESTORE:
+			sprintf(errstr, "Close error");
+			break;
+		case BADPATH:
+			sprintf(errstr, "Bad path");
+			break;
+		case NOPATHDC:
+			sprintf(errstr, "No path");
+			break;
+		case OPENFILE:
+			sprintf(errstr, "Cannot open file");
+			break;
+		case READFILE:
+			sprintf(errstr, "Cannot read from file // same");
+			break;
+		case WRITEFILE:
+			sprintf(errstr, "Cannot write to file");
+			break;
+		case CONNECTCLIENT:
+			sprintf(errstr, "Could not connect to client");
+			break;
+		case ACCEPT:
+			sprintf(errstr, "Could not accept connection");
+			break;
+		case READSOCKET:
+			sprintf(errstr, "Could not read from socket");
+			break;
+		case WRITESOCKET:
+			sprintf(errstr, "Could not write to socket");
+			break;
+		case TOOMUCHDATA:
+			sprintf(errstr, "Received too much data");
+			break;
+		case TOOFEWDATA:
+			sprintf(errstr, "Received too few data // ...");
+			break;
+		case NOTIMPLEMENTED:
+			sprintf(errstr, "Not implemented");
+			break;
+		case USERBREAK:
+			sprintf(errstr, "User break");
+			break;
+		case INTERNAL:
+			sprintf(errstr, "Internal error");
+			break;
+		case INVALIDOBJECT:
+			sprintf(errstr, "Invalid object");
+			break;
+		case JOBTIMEOUT:
+			sprintf(errstr, "Job timed out");
+			break;
+		case OPENPORT:
+			sprintf(errstr, "Cannot open port // ... for several resons");
+			break;
+		case NODATA:
+			sprintf(errstr, "Received no data");
+			break;
+		case NOPORT:
+			sprintf(errstr, "No port to handle this request");
+			break;
+		case NOTCACHED:
+			sprintf(errstr, "Document not cached");
+			break;
+		case BADCACHETYPE:
+			sprintf(errstr, "Bad cache type");
+			break;
+		case OPENCACHE_WRITE:
+			sprintf(errstr, "Cannot write to cache");
+			break;
+		case OPENCACHE_READ:
+			sprintf(errstr, "Cannot read from cache // same");
+			break;
+		case NOSOURCE:
+			sprintf(errstr, "Do not know what to read");
+			break;
+		case CLOSECACHE:
+			sprintf(errstr, "Could not insert into cache");
+			break;
+		case CONNECTREMOTE:
+			sprintf(errstr, "Could not connect to remote server");
+			break;
+		case LOCKREFUSED:
+			sprintf(errstr, "Lock refused // could not lock the stores");
 			break;
 		default:
 			sprintf(errstr, "Unknown error: %d", ptr->lasterror);
