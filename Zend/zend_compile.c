@@ -975,6 +975,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 	op_array.scope = CG(active_class_entry);
 	op_array.ns = CG(active_namespace);
+	op_array.prototype = NULL;
 
 	op_array.line_start = CG(zend_lineno);
 
