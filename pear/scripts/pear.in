@@ -21,6 +21,7 @@
 require_once 'PEAR.php';
 require_once 'PEAR/Config.php';
 require_once 'PEAR/Remote.php';
+require_once 'PEAR/Registry.php';
 require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -29,7 +30,7 @@ PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
 // {{{ config file and option parsing
 
-$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sS");
+$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqv");
 if (PEAR::isError($options)) {
     usage($options);
 }
@@ -58,6 +59,7 @@ foreach ($opts as $opt) {
 $config = new PEAR_Config($pear_user_config, $pear_default_config);
 $store_user_config = false;
 $store_default_config = false;
+$verbose = 0;
 
 foreach ($opts as $opt) {
     $param = $opt[1];
@@ -75,6 +77,12 @@ foreach ($opts as $opt) {
             break;
         case 'S':
             $store_default_config = true;
+            break;
+        case 'v':
+            $verbose++;
+            break;
+        case 'q':
+            $verbose--;
             break;
     }
 }
@@ -109,9 +117,28 @@ $script_dir = $config->get("php_dir");
 $ext_dir    = $config->get("ext_dir");
 $doc_dir    = $config->get("doc_dir");
 
+$command = $options[1][1];
+$rest = array_slice($options[1], 2);
+
+$command_options = array(
+    "list" => "v",
+);
+
+if (isset($command_options[$command])) {
+    $tmp = Console_Getopt::getopt($rest, $command_options[$command]);
+    if (PEAR::isError($tmp)) {
+        usage($tmp);
+    }
+    $cmdopt = $tmp[0];
+    $cmdargs = $tmp[1];
+} else {
+    $cmdopt = array();
+    $cmdargs = $rest;
+}
+
+
 // }}}
 
-$command = $options[1][1];
 switch ($command) {
     // {{{ install
 
@@ -145,12 +172,38 @@ switch ($command) {
     }
 
     // }}}
-    // {{{ list-packages
+    // {{{ list
 
-    case 'list-packages': {
+    case 'list': {
+        $reg = new PEAR_Registry;
+        $installed = $reg->packageInfo();
+        $i = $j = 0;
+        print "Installed packages:\n===================\n";
+        foreach ($installed as $package) {
+            if ($i++ % 20 == 0) {
+                if ($j++ > 0) {
+                    print "\n";
+                }
+                printf("%-20s %-10s %-15s %s\n",
+                       "Package", "Stable", "Lead", "Category");
+                print str_repeat("=", 75)."\n";
+            }
+            $stable = $package['stable'];
+            printf("%-20s %-10s %-15s %s\n", $package['name'],
+                   $stable ? $stable : "???",
+                   $package['lead'], $package['category']);
+        }
+        break;
+    }
+
+    // }}}
+    // {{{ list-remote
+
+    case 'list-remote': {
         $remote = new PEAR_Remote($config);
         $result = $remote->call('package.listAll');
         $i = $j = 0;
+        print "Available packages:\n===================\n";
         foreach ($result as $package) {
             if ($i++ % 20 == 0) {
                 if ($j++ > 0) {
@@ -190,14 +243,20 @@ function usage($error = null)
     fputs($stderr,
           "Usage: pear [options] command <parameters>\n".
           "Options:\n".
-          "     -v        set verbosity level to <n> (0-2, default 1)\n".
-          "     -p <dir>  set script install dir (absolute path)\n".
-          "     -e <dir>  set extension install dir (absolute path)\n".
-          "     -d <dir>  set documentation dest dir (absolute path)\n".
-          "     -h, -?    display help/usage (this message)\n".
+          "     -v         increase verbosity level (default 1)\n".
+          "     -q         be quiet, decrease verbosity level\n".
+          "     -c file    find user configuration in `file'\n".
+          "     -C file    find system configuration in `file'\n".
+          "     -d foo=bar set user config variable `foo' to `bar'\n".
+          "     -D foo=bar set system config variable `foo' to `bar'\n".
+          "     -s         store user configuration\n".
+          "     -s         store system configuration\n".
+          "     -h, -?     display help/usage (this message)\n".
           "Commands:\n".
           "   install <package file>\n".
           "   package [package info file]\n".
+          "   list\n".
+          "   list-remote\n".
           "\n");
     fclose($stderr);
     exit;

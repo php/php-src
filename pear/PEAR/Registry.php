@@ -156,8 +156,11 @@ class PEAR_Registry
 
     function listPackages()
     {
-        $dp = opendir($this->statedir);
         $pkglist = array();
+        $dp = @opendir($this->statedir);
+        if (!$dp) {
+            return $pkglist;
+        }
         while ($ent = readdir($dp)) {
             if ($ent{0} == "." || substr($ent, -4) != ".inf") {
                 continue;
