@@ -956,11 +956,10 @@ static struct gfxinfo *php_handle_wbmp(php_stream * stream TSRMLS_DC)
 
 /* {{{ php_get_xbm
  */
-#define MAX_XBM_LINE_SIZE 255
 static int php_get_xbm(php_stream *stream, struct gfxinfo **result TSRMLS_DC)
 {
-    char fline[MAX_XBM_LINE_SIZE];
-    char iname[MAX_XBM_LINE_SIZE];
+    char *fline;
+    char *iname;
     char *type;
     int value;
     unsigned int width = 0, height = 0;
@@ -971,12 +970,8 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result TSRMLS_DC)
 	if (php_stream_rewind(stream)) {
 		return 0;
 	}
-	while (php_stream_gets(stream, fline, MAX_XBM_LINE_SIZE)) {
-		fline[MAX_XBM_LINE_SIZE-1] = '\0';
-		if (strlen(fline) == MAX_XBM_LINE_SIZE-1) {
-			return 0;
-		}
-	
+	while ((fline=php_stream_gets(stream, NULL, 0)) != NULL) {
+		iname = estrdup(fline); /* simple way to get necessary buffer of required size */
 		if (sscanf(fline, "#define %s %d", iname, &value) == 2) {
 			if (!(type = strrchr(iname, '_'))) {
 				type = iname;
@@ -987,16 +982,23 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result TSRMLS_DC)
 			if (!strcmp("width", type)) {
 				width = (unsigned int) value;
 				if (height) {
+					efree(iname);
 					break;
 				}
 			}
 			if (!strcmp("height", type)) {
 				height = (unsigned int) value;
 				if (width) {
+					efree(iname);
 					break;
 				}
 			}
 		}
+		efree(fline);
+		efree(iname);
+	}
+	if (fline) {
+		efree(fline);
 	}
 
 	if (width && height) {
