@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Fixed some modules to allow using output-buffering. (Thies)
 - Added the chroot() function (Derick)
 - PostgreSQL now does a rollback at the end of a request on every
   persistent connection. This is done by doing an "empty" transaction
