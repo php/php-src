@@ -345,11 +345,8 @@ CWD_API FILE *virtual_fopen(char *path, const char *mode)
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 
-	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
+	virtual_file_ex(&new_state, path, NULL);
 
-	if (retval) {
-		return NULL;
-	}
 	f = fopen(new_state.cwd, mode);
 	CWD_STATE_FREE(&new_state);
 	return f;
