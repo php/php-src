@@ -216,6 +216,10 @@ struct _pdo_dbh_t {
 	const char *data_source;
 	unsigned long data_source_len;
 
+	/* the number of rows affected by last $dbh->exec().  Not always
+	 * meaningful */
+	int affected_rows;
+
 #if 0
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;

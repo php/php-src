@@ -262,10 +262,8 @@ fail:
 static PHP_METHOD(PDO, exec)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
-	pdo_stmt_t *stmt;
 	char *statement;
 	long statement_len;
-	int rows;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &statement, &statement_len)) {
 		RETURN_FALSE;
@@ -275,15 +273,24 @@ static PHP_METHOD(PDO, exec)
 		RETURN_FALSE;
 	}
 
-	rows = dbh->methods->doer(dbh, statement, statement_len TSRMLS_CC);
-
-	if (rows >= 0) {
-		RETURN_LONG(rows);
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(dbh->methods->doer(dbh, statement, statement_len TSRMLS_CC));
 }
 /* }}} */
+
+/* {{{ proto int PDO::affectedRows()
+   Returns the number of rows that we affected by the last call to PDO::exec().  Not always meaningful. */
+static PHP_METHOD(PDO, affectedRows)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (ZEND_NUM_ARGS()) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(dbh->affected_rows);
+}
+/* }}} */
+
 
 function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
@@ -292,6 +299,7 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, rollBack,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, exec,			NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, affectedRows,	NULL,					ZEND_ACC_PUBLIC)
 
 	{NULL, NULL, NULL}
 };
