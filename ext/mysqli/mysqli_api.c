@@ -1142,7 +1142,7 @@ PHP_FUNCTION(mysqli_param_count)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_ping(object link)
+/* {{{ proto bool mysqli_ping(object link)
    Ping a server connection or reconnect if there is no connection */
 PHP_FUNCTION(mysqli_ping)
 {
@@ -1156,7 +1156,10 @@ PHP_FUNCTION(mysqli_ping)
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
 	rc = mysql_ping(mysql);
 	MYSQLI_REPORT_MYSQL_ERROR(mysql);
-	RETURN_LONG(rc);
+	if (rc) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
