@@ -401,6 +401,10 @@ SOURCE=.\ext\standard\lcg.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\levenshtein.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\link.c
 # End Source File
 # Begin Source File

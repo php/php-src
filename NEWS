@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1-dev
+- Moved to virtual current working directory support. This highly improves the
+  functionality and stability of multi-threaded versions of PHP (Andi, Sascha)
 
 22 May 2000, Version 4.0.0 Release
 - Allow the writing of flash files to stdout.
