@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Hartmut Holzgraefe  <hartmut@six.de>                         |
+  | Author: Hartmut Holzgraefe  <hholzgra@php.net>                       |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -274,7 +274,7 @@ PHP_MINIT_FUNCTION(mime_magic)
 PHP_MSHUTDOWN_FUNCTION(mime_magic)
 {
 	UNREGISTER_INI_ENTRIES();
-	if (mime_global.magic != NULL && (int)mime_global.magic != -1) {
+	if (mime_global.magic != NULL && mime_global.magic != (struct magic *) -1) {
 		struct magic *iter = mime_global.magic;
 		while (iter != NULL) {
 			struct magic *iter_next = iter->next;	
@@ -312,7 +312,7 @@ PHP_FUNCTION(mime_content_type)
 		return;
 	}
 
-	if ((int) conf->magic == -1) {
+	if (conf->magic == (struct magic *)-1) {
 		php_error(E_ERROR, MODNAME " could not be initialized, magic file %s is not avaliable",  conf->magicfile);
 		RETURN_FALSE;
 	} 
@@ -358,7 +358,7 @@ static int apprentice(void)
     fname = conf->magicfile; /* todo cwd? */
     f = fopen(fname, "rb");
     if (f == NULL) {
-		*(int *)&conf->magic = -1;
+		conf->magic = (struct magic *)-1;
 		return -1;
     }
 
