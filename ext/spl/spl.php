@@ -146,6 +146,20 @@ class LogicException extends Exception
 }
 
 /** @ingroup SPL
+ * @brief Exception thrown when a function call was illegal.
+ */
+class BadFunctionCallException extends LogicException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception thrown when a method call was illegal.
+ */
+class BadMethodCallException extends BadFunctionCallException
+{
+}
+
+/** @ingroup SPL
  * @brief Exception that denotes a value not in the valid domain was used.
  *
  * This kind of exception should be used to inform about domain erors in 
