@@ -1,3 +1,183 @@
+2004-11-03  Derick Rethans  <php@derickrethans.nl>
+
+    * configure.in
+      ext/standard/formatted_print.c
+      ext/standard/php_string.h
+      ext/standard/scanf.c
+      ext/standard/string.c
+      tests/lang/034.phpt
+      tests/lang/bug30638.phpt:
+      - Fixed bug #30630: Added a BSD based strtod function that is
+        locale-independent. (PHP part)
+
+    * (PHP_4_3)
+      configure.in
+      configure.in
+      ext/standard/formatted_print.c
+      ext/standard/formatted_print.c
+      ext/standard/php_string.h
+      ext/standard/php_string.h
+      ext/standard/scanf.c
+      ext/standard/scanf.c
+      ext/standard/string.c
+      ext/standard/string.c
+      tests/lang/034.phpt
+      tests/lang/034.phpt
+      tests/lang/bug30638.phpt:
+      - MFH: Fixed bug #30630: Added a BSD based strtod function that is
+        locale-independent. (PHP part)
+
+    * tests/lang/bug30638.phpt
+      tests/lang/bug30638.phpt:
+        1.1.4;
+      file bug30638.phpt was initially added on branch PHP_5_0.
+
+2004-11-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/Zend.m4:
+      - Don't show grep outputs
+
+2004-11-03  Derick Rethans  <php@derickrethans.nl>
+
+    * Zend/zend_strtod.c
+      Zend/zend_strtod.c
+      Zend/zend_strtod.h
+      Zend/zend_strtod.h:
+      
+      file zend_strtod.c was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      Zend/zend_execute_API.c
+      Zend/zend_globals.h
+      Zend/zend_ini.c
+      Zend/zend_language_scanner.l
+      Zend/zend_operators.c
+      Zend/zend_operators.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h:
+      - MFH: Fixed bug #30630: Added a BSD based strtod function that is
+        locale-independent.
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.h:
+      - Fixed bug #30630: Added a BSD based strtod function that is
+        locale-independent.
+
+2004-11-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * configure.in
+      ZendEngine2/Zend.m4
+      ZendEngine2/zend.h
+      ZendEngine2/zend_execute.c:
+      - Checks for Darwin'ish systems that uses Mach-O, which apparently doesn't
+        support weak symbol aliasing at this time.
+
+2004-11-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/iptc.c:
+      emalloc() failures are handled by zend engine.
+
+2004-11-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Trying to invoke function not methot here
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix invokeargs() with static methods
+
+2004-11-03  Joe Orton  <jorton@redhat.com>
+
+    * ext/bz2/config.m4
+      ext/cpdf/config.m4
+      ext/curl/config.m4
+      ext/dba/config.m4
+      ext/fam/config.m4
+      ext/gd/config.m4
+      ext/gettext/config.m4
+      ext/gmp/config.m4
+      ext/iconv/config.m4
+      ext/imap/config.m4
+      ext/ldap/config.m4
+      ext/mbstring/config.m4
+      ext/mysql/config.m4
+      ext/ncurses/config.m4
+      ext/odbc/config.m4
+      ext/pcre/config.m4
+      ext/pgsql/config.m4
+      ext/pspell/config.m4
+      ext/readline/config.m4
+      ext/recode/config.m4
+      ext/session/config.m4
+      ext/sqlite/config.m4
+      ext/xml/config.m4
+      ext/xmlrpc/config.m4
+      ext/xsl/config.m4
+      ext/zlib/config0.m4:
+      Update extensions to use /path/to/$PHP_LIBDIR rather than /path/to/lib
+      to support multi-ABI platforms.
+
+    * acinclude.m4
+      configure.in:
+      Core changes to support multi-ABI platforms with libraries in
+      /usr/lib64 rather than /usr/lib.
+      
+      * configure.in: Add --with-libdir flag; define PHP_LIBDIR.
+      
+      * acinclude.m4 (PHP_REMOVE_USR_LIB, PHP_RUNPATH_SWITCH,
+      PHP_ADD_LIBPATH): Check for /usr/$PHP_LIBDIR rather than /usr/lib.
+      (PHP_SETUP_OPENSSL, PHP_SETUP_ICONV): Use /path/to/$PHP_LIBDIR in
+      place of /path/to/lib.
+
+2004-11-03  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/oci8/oci8.c:
+      fix bug #30654 (persistent connection is deleted from hash if there was
+      exclusive connection with the same credentials)
+      No need for MFB here - 5.x.x branches work fine.
+
+2004-11-03  Joe Orton  <jorton@redhat.com>
+
+    * ext/openssl/xp_ssl.c:
+      Remove unused variable.
+
+    * acinclude.m4:
+      Fix extraction of httpd version if httpd is linked against -lefence.
+
+2004-11-03  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      fix overloaded calls not returning result, e.g.:
+      <? new Java('foo'); ?>
+
+2004-11-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Fixed "isset() and the new VM" bug.
+
+2004-11-03  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/standard/basic_functions.c:
+      fix build
+
 2004-11-02  Andrey Hristov  <php@hristov.com>
 
     * ext/standard/basic_functions.c
