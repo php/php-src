@@ -42,7 +42,6 @@ test Object
     [p3] => test:3
     [p4] => A
     [p5] => test:5
-    [p1:protected] => base:1
     [p2] => base:2
     [p6:private] => base:6
 )
@@ -53,7 +52,6 @@ test Object
     [p3] => test:3
     [p4] => test:4
     [p5] => clone:5
-    [p1:protected] => base:1
     [p2] => base:2
     [p6:private] => base:6
 )
