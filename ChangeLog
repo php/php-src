@@ -1,3 +1,62 @@
+2003-03-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug22592.phpt:
+      
+      Added test for bug22592
+
+2003-03-15  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_profiler.c:
+      lots of proto stuff
+
+    * scripts/ext_skel_ng/extension_parser.php:
+      docbook fixes
+
+    * scripts/ext_skel_ng/php_constant.php:
+      thinko fix to kill warnings
+
+    * scripts/ext_skel_ng/php_resource.php:
+      docbook typo fix
+
+    * scripts/ext_skel_ng/php_function.php:
+      make sure the function name in the proto matches the function
+
+2003-03-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      fix Bug #21751 - the parameter was wrong when this code was introduced
+
+2003-03-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/cast.c
+      main/streams/plain_wrapper.c
+      main/streams/xp_socket.c:
+      64bit fixes
+
+    * ext/openssl/openssl.c:
+      fix proto
+
+    * (PHP_4_3)
+      main/network.c
+      main/streams.c:
+      64 bit fixes
+
+2003-03-15  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      And this never existed in any release either..
+
+    * (PHP_4_3)
+      php.ini-dist
+      php.ini-recommended:
+      MFH: "allow_webdav_methods" does not exist / is not needed anymore
+
+    * php.ini-dist
+      php.ini-recommended:
+      "allow_webdav_methods" does not exist / is not needed anymore
+
 2003-03-14  Jay Smith  <jsmith@tutorbuddy.com>
 
     * ext/standard/browscap.c:
