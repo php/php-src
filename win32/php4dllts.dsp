@@ -246,6 +246,14 @@ SOURCE=..\main\strlcpy.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\snprintf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\user_streams.c
 # End Source File
 # End Group
@@ -331,6 +339,14 @@ SOURCE=..\main\php_regex.h
 # Begin Source File
 
 SOURCE=..\main\php_streams.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\snprintf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.h
 # End Source File
 # Begin Source File
 

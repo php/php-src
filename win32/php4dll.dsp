@@ -215,6 +215,14 @@ SOURCE=..\main\strlcat.c
 
 SOURCE=..\main\strlcpy.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\main\snprintf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -290,6 +298,14 @@ SOURCE=..\main\php_ticks.h
 # Begin Source File
 
 SOURCE=..\main\php_variables.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\snprintf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.h
 # End Source File
 # Begin Source File
 
