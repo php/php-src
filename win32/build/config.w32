@@ -21,7 +21,12 @@ ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
 ARG_ENABLE('zts', 'Thread safety', 'yes');
 
 // Configures the hard-coded installation dir
-ARG_ENABLE('prefix', 'where PHP will be installed', 'C:\\php5');
+if (PHP_DEBUG == "yes") {
+	ARG_ENABLE('prefix', 'where PHP will be installed', 'C:\\php5\\debug');
+} else {
+	ARG_ENABLE('prefix', 'where PHP will be installed', 'C:\\php5');
+}
+DEFINE('PHP_PREFIX', PHP_PREFIX);
 
 DEFINE("BASE_INCLUDES", "/I . /I main /I regex /I Zend /I TSRM ");
 

@@ -99,3 +99,7 @@ snap: build-snap build-dist
 msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)"
 
+install: all
+	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >null
+	@copy $(BUILD_DIR)\*.dll $(PHP_PREFIX) /y >null
+	
