@@ -1,3 +1,30 @@
+2000-05-10  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    -  fix for SQLLVARCHAR provided by Alan Shepherd. (Danny)
+
+2000-05-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Move to past RC2.
+
+2000-05-10  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/php_imap.c:
+    fix for segfault. patch from Jade Nicoletti <nicoletti@nns.ch>.
+
+2000-05-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-dist
+      php.ini-optimized: Fix register_argc_argv entry.
+
+    Submitted by: André Langhorst <A.Langhorst@itbnet.de>
+
+2000-05-10  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/dl.c:
+    revert last patch - you can only specify the dl() path relative to extension_dir
+    again
+
 2000-05-09  Jouni Ahto  <jah@mork.net>
 
     * ext/interbase/interbase.c
