@@ -203,11 +203,19 @@ List all depencies the package has.'
         if (sizeof($params) != 1) {
             return $this->raiseError("bad parameter(s), try \"help $command\"");
         }
-
         $obj = new PEAR_Common();
         if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
             return $info;
         }
+        $data = &PEAR_Command_Package::_infoForDisplaying($info);
+        $this->ui->outputData($data, $command);
+    }
+
+    /**
+    * @static
+    */
+    function &_infoForDisplaying($info)
+    {
         unset($info['filelist']);
         unset($info['changelog']);
         $keys = array_keys($info);
@@ -270,8 +278,7 @@ List all depencies the package has.'
             $key = ucwords(str_replace('_', ' ', $key));
             $data['data'][] = array($key, $value);
         }
-        $this->ui->outputData($data, $command);
-        return true;
+        return $data;
     }
 
     function doPackageValidate($command, $options, $params)
