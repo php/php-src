@@ -3535,7 +3535,7 @@ PHPAPI char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes
 
 	if (nbytes == (size_t)-1) {
 		while (*p != '\0') {
-			if (*p == c) {
+			if ((unsigned int)*p == c) {
 				last = (char *)p;
 			}
 			p += php_mb_mbchar_bytes_ex(p, enc);
@@ -3544,7 +3544,7 @@ PHPAPI char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes
 		register size_t bcnt = nbytes;
 		register size_t nbytes_char;
 		while (bcnt > 0) {
-			if (*p == c) {
+			if ((unsigned int)*p == c) {
 				last = (char *)p;
 			}
 			nbytes_char = php_mb_mbchar_bytes_ex(p, enc);
