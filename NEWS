@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added session_set_cookie_params() function. (Andrei)
+- If header information is sent after output has already been sent, the warning
+  message will now state the filename and line number at which the first output
+  was made (Zeev)
 - Added the XML Expat library to the standard PHP source distribution thanks
   to its author James Clark (Andi & Zeev)
 - Added XML support to the default Win32 build (Andi & Zeev)
