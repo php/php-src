@@ -99,7 +99,9 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_field_type, NULL)
 	PHP_FE(odbc_field_num, NULL)
 	PHP_FE(odbc_free_result, NULL)
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 	PHP_FE(odbc_next_result, NULL)
+#endif
 	PHP_FE(odbc_num_fields, NULL)
 	PHP_FE(odbc_num_rows, NULL)
 	PHP_FE(odbc_result, NULL)
@@ -2260,6 +2262,7 @@ PHP_FUNCTION(odbc_num_rows)
 }
 /* }}} */
 
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 /* {{{ proto bool odbc_next_result(int result_id)
    Checks if multiple results are avaiable */
 PHP_FUNCTION(odbc_next_result)
@@ -2307,6 +2310,7 @@ PHP_FUNCTION(odbc_next_result)
 	}
 }
 /* }}} */
+#endif
 
 /* {{{ proto int odbc_num_fields(int result_id)
    Get number of columns in a result */
