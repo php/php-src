@@ -186,5 +186,7 @@ AC_DEFUN(PHP_SOLARIS_PIC_WEIRDNESS,[
 	*)
 	  AC_MSG_RESULT(no);;
     esac
+  else
+    AC_MSG_RESULT(no)
   fi
 ])
