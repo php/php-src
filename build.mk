@@ -44,6 +44,6 @@ dist:
 
 cvsclean:
 	@for i in `find . -follow -name .cvsignore`; do \
-		(cd `dirname $$i` && rm -rf `cat .cvsignore`); \
+		(cd `dirname $$i` && (rm -f `cat .cvsignore` *.o *.a; rm -rf .libs .deps)); \
 	done
 	@rm -f $(SUBDIRS) 2>/dev/null || true
