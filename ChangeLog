@@ -1,3 +1,40 @@
+2000-09-17  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/math.c: Fix decbin
+
+    * ext/standard/string.c: Add empty string checks to add?slashes
+
+2000-09-17  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen-wrappers.c:
+    - Fix doc_root problem. If you need to limit under which directories the
+      scripts should reside use open_basedir.
+
+2000-09-16  Zak Greant  <zak@nucleus.com>
+
+    * ext/standard/filestat.c:
+    Thought that I had just committed something really stupid.
+    On closer inspection, realized that the proto comments
+    for chown and chgrp were reversed. :)
+    I did not realize this and had only fixed chown previously
+
+    * ext/standard/filestat.c: trivial change
+    corrected mistake in proto comment for chown fold
+
+2000-09-15  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/sockets.c: Changed assignment in read() to be more sane.
+
+2000-09-15  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.h:
+    Remove CVS conflict. Zeev, I assume you wanted context inside the globals?
+
+2000-09-15  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README:
+    Indicate the Sun's JDK 1.2.2 now works...and complete a sentence.
+
 2000-09-16  Zak Greant  <zak@nucleus.com>
 
     * ext/standard/filestat.c:
