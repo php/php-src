@@ -803,7 +803,7 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Temporary Lob support", "disabled" );
 #endif
 
-#ifdef HAVE_OCI8_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	php_info_print_table_row(2, "Collections support", "enabled" );
 #else
 	php_info_print_table_row(2, "Collections support", "disabled" );

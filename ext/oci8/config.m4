@@ -143,7 +143,7 @@ if test "$PHP_OCI8" != "no"; then
   dnl
   PHP_CHECK_LIBRARY(clntsh, OCICollAssign,
   [
-    AC_DEFINE(HAVE_OCI8_COLLECTIONS,1,[ ])
+    AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
   ], [], [
     -L$OCI8_DIR/lib $OCI8_SHARED_LIBADD
   ])
