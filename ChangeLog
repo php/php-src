@@ -1,3 +1,31 @@
+2003-12-30  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      fixed a bug in mysqli_num_rows (added support for longlong values)
+
+    * ext/mysqli/mysqli_prop.c:
+      fixed a bug in insert_id property
+
+2003-12-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/oci8/oci8.dsp:
+      Fix the include path for Zend
+
+2003-12-30  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/ZEND_CHANGES:
+      - Fix typos
+
+2003-12-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/ZEND_CHANGES:
+      Update
+
+2003-12-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/tests/bug26696.phpt:
+      Added test case for bug #26696.
+
 2003-12-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/formatted_print.c

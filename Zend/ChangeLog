@@ -1,3 +1,18 @@
+2003-12-30  Andi Gutmans  <andi@zend.com>
+
+    * ZEND_CHANGES:
+      - Fix typos
+
+2003-12-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZEND_CHANGES:
+      Update
+
+2003-12-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/bug26696.phpt:
+      Added test case for bug #26696.
+
 2003-12-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:
