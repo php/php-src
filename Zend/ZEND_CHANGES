@@ -84,7 +84,7 @@ shamelessly lying about it.  Here's why:
 
 * static variable initializers only accept scalar values
   (in PHP 3.0 they accepted any valid expression).  The impact
-  should be somewhere in between void and non existant, since
+  should be somewhere in between void and non existent, since
   initializing a static variable with anything but a simple
   static value makes no sense at all.
 

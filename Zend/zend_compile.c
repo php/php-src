@@ -681,7 +681,7 @@ void do_free(znode *op1 CLS_DC)
 			opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 		} else {
 			while (opline>CG(active_op_array)->opcodes) {
-				/* This should be an object instanciation
+				/* This should be an object instantiation
 				 * Find JMP_NO_CTOR, mark the preceding ASSIGN and the
 				 * proceeding INIT_FCALL_BY_NAME as unused
 				 */
