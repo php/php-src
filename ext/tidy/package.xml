@@ -14,7 +14,7 @@
    <user>iliaa</user>
    <name>Ilia Alshanetsky</name>
    <email>ilia@php.net</email>
-   <role>lead</role>
+   <role>developer</role>
   </maintainer>
  </maintainers>
  <description>
@@ -44,6 +44,7 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
    <file role="doc" name="examples/cleanhtml.php"/>
    <file role="doc" name="examples/dumpit.php"/>
    <file role="doc" name="examples/urlgrab.php"/>
+   <file role="doc" name="libtidy.txt"/>
    
    <file role="test" name="tests/001.phpt"/>
    <file role="test" name="tests/002.phpt"/>
@@ -59,6 +60,6 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
   </deps>
  </release>
 </package>
-<!--
+!--
 vim:et:ts=1:sw=1
 -->
