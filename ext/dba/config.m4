@@ -141,34 +141,28 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
   for LIB in $2; do
     PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
       AC_CHECK_LIB($LIB, $3, [
-        AC_TRY_RUN([
+      AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
-int main() {
-  return (DB_VERSION_MAJOR == $1) ? 0 : 1;
-}
+          yes
+#endif
         ],[
           THIS_LIBS=$LIB
           break
-        ],[ ],[
-          THIS_LIBS=$LIB
-          break
-        ])
+        ],[ ])
       ])
     ])
   done
   if test "$1" = "4"; then
     AC_MSG_CHECKING(for db4 minor version and patch level)
-    AC_TRY_RUN([
+    AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
-int main() {
-  return (DB_VERSION_MINOR != 1 || DB_VERSION_PATCH >= 25) ? 0 : 1;
-}
+#if DB_VERSION_MINOR != 1 || DB_VERSION_PATCH >= 25
+      yes
+#endif
     ],[
       AC_MSG_RESULT(ok)
     ],[
       AC_MSG_ERROR(Version 4.1 requires patch level 25)
-    ],[
-      AC_MSG_RESULT(crosscompiling)
     ])
   fi
   if test -n "$THIS_LIBS"; then
@@ -366,7 +360,7 @@ AC_DBA_STD_RESULT(cdb)
 AC_DEFUN(PHP_DBA_BUILTIN_FLATFILE,[
   PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
   AC_DEFINE(DBA_FLATFILE, 1, [ ])
-  flat_sources="dba_flatfile.c libflatfile/flatfile.c"
+  flat_sources="libflatfile/flatfile.c"
   THIS_RESULT="builtin"
 ])
 
@@ -389,7 +383,7 @@ AC_MSG_CHECKING(whether to enable DBA interface)
 if test "$HAVE_DBA" = "1"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c $cdb_sources $flat_sources, $ext_shared)
+  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c dba_flatfile.c $cdb_sources $flat_sources, $ext_shared)
   PHP_SUBST(DBA_SHARED_LIBADD)
 else
   AC_MSG_RESULT(no)
