@@ -109,8 +109,8 @@ PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
 
-char *mbstr_strrchr(const char *s, char c TSRMLS_DC);
-int php_mb_is_leadbyte(const char *s TSRMLS_DC);
+PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC);
+PHPAPI int php_mb_is_leadbyte(const char *s TSRMLS_DC);
 PHPAPI int php_mb_encoding_translation(TSRMLS_D);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)

@@ -498,7 +498,6 @@ php_mbregex_free_cache(mb_regex_t *pre)
 /* }}} */
 #endif
 
-
 /* {{{ php.ini directive handler */
 static PHP_INI_MH(OnUpdate_mbstring_language)
 {
@@ -1019,7 +1018,6 @@ PHP_MINFO_FUNCTION(mbstring)
 }
 /* }}} */
 
-
 /* {{{ proto string mb_language([string language])
    Sets the current language or Returns the current language as a string */
 PHP_FUNCTION(mb_language)
@@ -1050,8 +1048,6 @@ PHP_FUNCTION(mb_language)
 	}
 }
 /* }}} */
-
-
 
 /* {{{ proto string mb_internal_encoding([string encoding])
    Sets the current internal encoding or Returns the current internal encoding as a string */
@@ -1086,7 +1082,6 @@ PHP_FUNCTION(mb_internal_encoding)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto false|string mb_http_input([string type])
    Returns the input encoding */
@@ -1180,7 +1175,6 @@ PHP_FUNCTION(mb_http_input)
 }
 /* }}} */
 
-
 /* {{{ proto string mb_http_output([string encoding])
    Sets the current output_encoding or returns the current output_encoding as a string */
 PHP_FUNCTION(mb_http_output)
@@ -1211,7 +1205,6 @@ PHP_FUNCTION(mb_http_output)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto bool|array mb_detect_order([mixed encoding-list])
    Sets the current detect_order or Return the current detect_order as a array */
@@ -1273,7 +1266,6 @@ PHP_FUNCTION(mb_detect_order)
 }
 /* }}} */
 
-
 /* {{{ proto mixed mb_substitute_character([mixed substchar])
    Sets the current substitute_character or returns the current substitute_character */
 PHP_FUNCTION(mb_substitute_character)
@@ -1323,7 +1315,6 @@ PHP_FUNCTION(mb_substitute_character)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto string mb_preferred_mime_name(string encoding)
    Return the preferred MIME name (charset) as a string */
@@ -1519,8 +1510,8 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 #define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
-/* {{{ char *mbstr_strrchr() */
-char *mbstr_strrchr(const char *s, char c TSRMLS_DC){
+/* {{{ PHPAPI char *php_mb_strrchr() */
+PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC){
 	unsigned char *p = (unsigned char *)s, *last = NULL;
 	while(*p++) {
 		if (*p == c) {
@@ -1852,8 +1843,6 @@ PHP_FUNCTION(mb_parse_str)
 }
 /* }}} */
 
-
-
 /* {{{ proto string mb_output_handler(string contents, int status)
    Returns string in output buffer converted to the http_output encoding */
 PHP_FUNCTION(mb_output_handler)
@@ -1948,8 +1937,6 @@ PHP_FUNCTION(mb_output_handler)
 }
 /* }}} */
 
-
-
 /* {{{ proto int mb_strlen(string str [, string encoding])
    Get character numbers of a string */
 PHP_FUNCTION(mb_strlen)
@@ -1999,8 +1986,6 @@ PHP_FUNCTION(mb_strlen)
 	}
 }
 /* }}} */
-
-
 
 /* {{{ proto int mb_strpos(string haystack, string needle [, int offset [, string encoding]])
    Find position of first occurrence of a string within another */
@@ -2088,8 +2073,6 @@ PHP_FUNCTION(mb_strpos)
 }
 /* }}} */
 
-
-
 /* {{{ proto int mb_strrpos(string haystack, string needle [, string encoding])
    Find the last occurrence of a character in a string within another */
 PHP_FUNCTION(mb_strrpos)
@@ -2147,8 +2130,6 @@ PHP_FUNCTION(mb_strrpos)
 	}
 }
 /* }}} */
-
-
 
 /* {{{ proto string mb_substr(string str, int start [, int length [, string encoding]])
    Returns part of a string */
@@ -2237,8 +2218,6 @@ PHP_FUNCTION(mb_substr)
 }
 /* }}} */
 
-
-
 /* {{{ proto string mb_strcut(string str, int start [, int length [, string encoding]])
    Returns part of a string */
 PHP_FUNCTION(mb_strcut)
@@ -2320,8 +2299,6 @@ PHP_FUNCTION(mb_strcut)
 }
 /* }}} */
 
-
-
 /* {{{ proto int mb_strwidth(string str [, string encoding])
    Gets terminal width of a string */
 PHP_FUNCTION(mb_strwidth)
@@ -2360,8 +2337,6 @@ PHP_FUNCTION(mb_strwidth)
 	}
 }
 /* }}} */
-
-
 
 /* {{{ proto string mb_strimwidth(string str, int start, int width [, string trimmarker [, string encoding]])
    Trim the string in terminal width */
@@ -2525,8 +2500,6 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 }
 /* }}} */
 
-
-
 /* {{{ proto string mb_convert_encoding(string str, string to-encoding [, mixed from-encoding])
    Returns converted string in desired encoding */
 PHP_FUNCTION(mb_convert_encoding)
@@ -2602,7 +2575,6 @@ PHP_FUNCTION(mb_convert_encoding)
 }
 /* }}} */
 
-
 /* {{{ proto string mb_convert_case(string sourcestring, int mode [, string encoding])
    Returns a case-folded version of sourcestring */
 PHP_FUNCTION(mb_convert_case)
@@ -2673,7 +2645,6 @@ PHP_FUNCTION(mb_strtolower)
 	RETURN_FALSE;
 }
 /* }}} */
-
 
 /* {{{ proto string mb_detect_encoding(string str [, mixed encoding_list])
    Encodings of the given string is returned (as a string) */
@@ -2749,8 +2720,6 @@ PHP_FUNCTION(mb_detect_encoding)
 }
 /* }}} */
 
-
-
 /* {{{ proto string mb_encode_mimeheader(string str [, string charset [, string transfer-encoding [, string linefeed]]])
    Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= */
 PHP_FUNCTION(mb_encode_mimeheader)
@@ -2820,8 +2789,6 @@ PHP_FUNCTION(mb_encode_mimeheader)
 }
 /* }}} */
 
-
-
 /* {{{ proto string mb_decode_mimeheader(string string)
    Decodes the MIME "encoded-word" in the string */
 PHP_FUNCTION(mb_decode_mimeheader)
@@ -2847,8 +2814,6 @@ PHP_FUNCTION(mb_decode_mimeheader)
 	}
 }
 /* }}} */
-
-
 
 /* {{{ proto string mb_convert_kana(string str [, string option] [, string encoding])
    Conversion between full-width character and half-width character (Japanese) */
@@ -3196,7 +3161,6 @@ detect_end:
 }
 /* }}} */
 
-
 /* {{{ HTML numeric entity */
 /* {{{ static void php_mbstr_numericentity_exec() */
 static void
@@ -3281,7 +3245,6 @@ PHP_FUNCTION(mb_encode_numericentity)
 }
 /* }}} */
 
-
 /* {{{ proto string mb_decode_numericentity(string string, array convmap [, string encoding])
    Converts HTML numeric entities to character code */
 PHP_FUNCTION(mb_decode_numericentity)
@@ -3289,7 +3252,6 @@ PHP_FUNCTION(mb_decode_numericentity)
 	php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 /* }}} */
 
 /* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
