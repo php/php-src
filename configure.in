@@ -790,7 +790,7 @@ changequote([,])
 
 PHP_CONFIGURE_PART(Generating files)
 
-PHP_FAST_GENERATE
+PHP_GEN_CONFIG_VARS
 touch .deps
 
 #libphp4.module 
@@ -799,6 +799,8 @@ AC_OUTPUT([php4.spec Zend/Makefile
 		   $PHP_OUTPUT_FILES
 		   ], [], [
 
+PHP_GEN_MAKEFILES
+		   
 if test ! -f $srcdir/ext/bcmath/number.c; then
 	echo "creating number.c"
 	echo "/* Dummy File */" > $srcdir/ext/bcmath/number.c

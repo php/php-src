@@ -262,13 +262,16 @@ AC_DEFUN(PHP_MKDIR_P_CHECK,[
   ])
 ])
 
-AC_DEFUN(PHP_FAST_GENERATE,[
+AC_DEFUN(PHP_GEN_CONFIG_VARS,[
   PHP_MKDIR_P_CHECK
   echo creating config_vars.mk
   > config_vars.mk
   for i in $PHP_VAR_SUBST; do
     eval echo "$i = \$$i" >> config_vars.mk
   done
+])
+
+AC_DEFUN(PHP_GEN_MAKEFILES,[
   $SHELL $srcdir/build/fastgen.sh $srcdir $ac_cv_mkdir_p $PHP_FAST_OUTPUT_FILES
 ])
 
