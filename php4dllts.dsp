@@ -140,40 +140,40 @@ SOURCE=".\fopen-wrappers.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\internal_functions_win32.c
+SOURCE=.\core\internal_functions_win32.c
 # ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
 # End Source File
 # Begin Source File
 
-SOURCE=.\main.c
+SOURCE=.\core\main.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\mergesort.c
+SOURCE=.\core\mergesort.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_content_types.c
+SOURCE=.\core\php_content_types.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_ini.c
+SOURCE=.\core\php_ini.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_realpath.c
+SOURCE=.\core\php_realpath.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_ticks.c
+SOURCE=.\core\php_ticks.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_variables.c
+SOURCE=.\core\php_variables.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_virtual_cwd.c
+SOURCE=.\core\php_virtual_cwd.c
 # End Source File
 # Begin Source File
 
@@ -181,27 +181,27 @@ SOURCE=.\ext\standard\quot_print.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\reentrancy.c
+SOURCE=.\core\reentrancy.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\rfc1867.c
+SOURCE=.\core\rfc1867.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\safe_mode.c
+SOURCE=.\core\safe_mode.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAPI.c
+SOURCE=.\core\SAPI.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\strlcat.c
+SOURCE=.\core\strlcat.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\strlcpy.c
+SOURCE=.\core\strlcpy.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -209,7 +209,7 @@ SOURCE=.\strlcpy.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\config.w32.h
+SOURCE=.\core\config.w32.h
 # End Source File
 # Begin Source File
 
@@ -225,63 +225,63 @@ SOURCE=.\ext\standard\cyr_convert.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\getopt.h
+SOURCE=.\core\getopt.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\internal_functions_registry.h
+SOURCE=.\core\internal_functions_registry.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\logos.h
+SOURCE=.\core\logos.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\main.h
+SOURCE=.\core\main.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\output.h
+SOURCE=.\core\output.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php.h
+SOURCE=.\core\php.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php3_compat.h
+SOURCE=.\core\php3_compat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_compat.h
+SOURCE=.\core\php_compat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_content_types.h
+SOURCE=.\core\php_content_types.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_globals.h
+SOURCE=.\core\php_globals.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_ini.h
+SOURCE=.\core\php_ini.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_realpath.h
+SOURCE=.\core\php_realpath.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_regex.h
+SOURCE=.\core\php_regex.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_variables.h
+SOURCE=.\core\php_variables.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_virtual_cwd.h
+SOURCE=.\core\php_virtual_cwd.h
 # End Source File
 # Begin Source File
 
@@ -289,19 +289,19 @@ SOURCE=.\ext\standard\quot_print.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\rfc1867.h
+SOURCE=.\core\rfc1867.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\safe_mode.h
+SOURCE=.\core\safe_mode.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SAPI.h
+SOURCE=.\core\SAPI.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win95nt.h
+SOURCE=.\core\win95nt.h
 # End Source File
 # End Group
 # End Group
@@ -808,10 +808,6 @@ SOURCE=.\ext\xml\expat\xmltok\xmltok.c
 # Begin Source File
 
 SOURCE=.\ext\xml\expat\xmltok\asciitab.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\hashtable.h
 # End Source File
 # Begin Source File
 
