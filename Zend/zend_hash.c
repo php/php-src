@@ -722,9 +722,9 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t de
 
 	HASH_PROTECT_RECURSION(ht);
 
-	va_start(args, num_args);
 	p = ht->pListHead;
 	while (p != NULL) {
+		va_start(args, num_args);
 		hash_key.arKey = p->arKey;
 		hash_key.nKeyLength = p->nKeyLength;
 		hash_key.h = p->h;
@@ -733,8 +733,8 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t de
 		} else {
 			p = p->pListNext;
 		}
+		va_end(args);
 	}
-	va_end(args);
 
 	HASH_UNPROTECT_RECURSION(ht);
 }
