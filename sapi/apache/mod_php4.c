@@ -457,7 +457,7 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 
 	/* Make sure file exists */
 	if (filename == NULL && r->finfo.st_mode == 0) {
-		return NOT_FOUND;
+		return DECLINED;
 	}
 
 	/* If PHP parser engine has been turned off with an "engine off"
