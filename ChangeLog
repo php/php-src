@@ -1,3 +1,69 @@
+2001-05-03  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Experimental/XML/Xml2obj.php:
+    This class takes an xml file and maps it to an objects tree. It doesn't
+    need DOM support, and the resultant tree is more easy (and limited) to handle.
+    Note that it's experimental and waiting for comments.
+
+2001-05-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/image.c:
+    - Applied a patch that enables getimagesize to return the size of .bmp and
+      .psd files (Patch by Paul Jongsma <paulj@webtic.com>)
+    - Added support to getimagesize to return dimensions of BMP and PSD
+      files 
+
+2001-05-03  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * TODO-4.1.txt: Added streams stuff
+
+2001-05-03  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c:
+    add crash guard (valid message number check) to imap_body().
+
+    * ext/imap/php_imap.c:
+    removing references to IMSP module, which will probably never be ported to
+    php4 (lack of a publically available library implementing it).
+
+    * ext/imap/php_imap.c:
+    Fix for #8359. imap_fetchheader should never return the full message; the
+    FT_PREFETCHTEXT flag is just a hint to c-client that you'll be asking for
+    the message text next.
+
+2001-05-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_mm.c
+      ext/session/modules.c
+      ext/session/php_session.h
+      ext/session/session.c:
+    add an interface for registering storage modules at run-time.
+
+2001-05-03  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: fixed leaky code
+
+2001-05-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: Replace slow strlcpy with a quick memcpy.
+
+2001-05-03  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+    Some fixes in Udm_Cat_List and Udm_Cat_Path functions.
+
+2001-05-03  Jani Taskinen  <sniper@iki.fi>
+
+    * build/buildcheck.sh: Fix bug #10589
+
+2001-05-03  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/iconv/.cvsignore
+      ext/mbstring/.cvsignore: added .cvsignore.
+
+    * ext/mbstring/mbstring.c:
+    deleted some function aliases.
+
 2001-05-02  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/ext_skel
