@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed an initialization problem in the MS-SQL problem that could cause
+  a crash in mssql_query() (Zeev)
+- Upgraded PCRE to version 3.2 and fixed a bug when anchored pattern
+  matched an empty string. (Andrei)
 - Fixed a bug that prevented PHP from paying attention to the extension_dir
   directive with extensions that were loaded from the php.ini file (Zeev)
 - Changed set_error_handler() to return the name of the previously defined
