@@ -1255,7 +1255,7 @@ static void throw_list_applier(long *opline_num, long *catch_opline)
 	}
 }
 
-void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var TSRMLS_DC)
+void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, zend_bool first_catch TSRMLS_DC)
 {
 	long catch_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
@@ -1266,11 +1266,12 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var 
 	SET_UNUSED(opline->op1); /* FIXME: Define IS_CLASS or something like that */
 	opline->op2 = *catch_var;
 
-	zend_llist_apply_with_argument(CG(throw_list), (llist_apply_with_arg_func_t) throw_list_applier, &CG(catch_begin) TSRMLS_CC);
-	zend_llist_destroy(CG(throw_list));
-	efree(CG(throw_list));
-	CG(throw_list) = (void *) try_token->throw_list;
-
+	if (first_catch) {
+		zend_llist_apply_with_argument(CG(throw_list), (llist_apply_with_arg_func_t) throw_list_applier, &CG(catch_begin) TSRMLS_CC);
+		zend_llist_destroy(CG(throw_list));
+		efree(CG(throw_list));
+		CG(throw_list) = (void *) try_token->throw_list;
+	}
 	try_token->u.opline_num = catch_op_number;
 }
 
