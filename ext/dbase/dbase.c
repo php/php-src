@@ -563,7 +563,7 @@ PHP_FUNCTION(dbase_get_record_with_names) {
 /* {{{ proto bool dbase_create(string filename, array fields)
    Creates a new dBase-format database file */
 PHP_FUNCTION(dbase_create) {
-	pval *filename, *fields, *field, **value;
+	pval *filename, *fields, **field, **value;
 	int fd;
 	dbhead_t *dbh;
 
@@ -633,20 +633,20 @@ PHP_FUNCTION(dbase_create) {
 
 	for (i = 0, cur_f = dbf; i < num_fields; i++, cur_f++) {
 		/* look up the first field */
-		if (zend_hash_index_find(fields->value.ht, i, (void **)&value) == FAILURE) {
+		if (zend_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
 			php_error(E_WARNING, "unable to find field %d", i);
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
 
-		if (field->type != IS_ARRAY) {
+		if (Z_TYPE_PP (field) != IS_ARRAY) {
 			php_error(E_WARNING, "second parameter must be array of arrays");
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
 
 		/* field name */
-		if (zend_hash_index_find(field->value.ht, 0, (void **)&value) == FAILURE) {
+		if (zend_hash_index_find(Z_ARRVAL_PP(field), 0, (void **)&value) == FAILURE) {
 			php_error(E_WARNING, "expected field name as first element of list in field %d", i);
 			free_dbf_head(dbh);
 			RETURN_FALSE;
@@ -660,7 +660,7 @@ PHP_FUNCTION(dbase_create) {
 		copy_crimp(cur_f->db_fname, (*value)->value.str.val, (*value)->value.str.len);
 
 		/* field type */
-		if (zend_hash_index_find(field->value.ht,1,(void **)&value) == FAILURE) {
+		if (zend_hash_index_find(Z_ARRVAL_PP (field), 1,(void **)&value) == FAILURE) {
 			php_error(E_WARNING, "expected field type as sececond element of list in field %d", i);
 			RETURN_FALSE;
 		}
@@ -685,7 +685,7 @@ PHP_FUNCTION(dbase_create) {
 		case 'N':
 		case 'C':
 			/* field length */
-			if (zend_hash_index_find(field->value.ht,2,(void **)&value) == FAILURE) {
+			if (zend_hash_index_find(Z_ARRVAL_PP (field), 2,(void **)&value) == FAILURE) {
 				php_error(E_WARNING, "expected field length as third element of list in field %d", i);
 				free_dbf_head(dbh);
 				RETURN_FALSE;
@@ -694,7 +694,7 @@ PHP_FUNCTION(dbase_create) {
 			cur_f->db_flen = (*value)->value.lval;
 
 			if (cur_f->db_type == 'N') {
-				if (zend_hash_index_find(field->value.ht,3,(void **)&value) == FAILURE) {
+				if (zend_hash_index_find(Z_ARRVAL_PP (field), 3, (void **)&value) == FAILURE) {
 					php_error(E_WARNING, "expected field precision as fourth element of list in field %d", i);
 					free_dbf_head(dbh);
 					RETURN_FALSE;
