@@ -617,7 +617,8 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 <LOOKING_FOR_PROPERTY>. {
-	unput(yytext[0]);
+	/*unput(yytext[0]);*/
+	yyless(1);
 	yy_pop_state();
 }
 
@@ -1161,9 +1162,10 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 <DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"$"[^a-zA-Z_\x7f-\xff{] {
 	zendlval->value.chval = yytext[0];
 	if (yyleng == 2) {
-		unput(yytext[1]);
+		yyless(1);
+		/*unput(yytext[1]);
 		yytext[1] = 0;
-		yyleng--;
+		yyleng--;*/
 	}
 	return T_CHARACTER;	
 }
@@ -1177,7 +1179,8 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 <DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"{$" {
 	zendlval->value.chval = yytext[0];
 	yy_push_state(IN_SCRIPTING);
-	unput('$');
+	/*unput('$');*/
+	yyless(1);
 	return T_CURLY_OPEN;
 }
 
