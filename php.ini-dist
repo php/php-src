@@ -83,7 +83,9 @@ y2k_compliance = Off
 ; after you send body content, at the price of slowing PHP's output layer a
 ; bit.  You can enable output buffering during runtime by calling the output
 ; buffering functions.  You can also enable output buffering for all files by
-; setting this directive to On.
+; setting this directive to On.  If you wish to limit the size of the buffer
+; to a certain size - you can use a maximum number of bytes instead of 'On', as
+; a value for this directive (e.g., output_buffering=4096).
 output_buffering = Off
 
 ; You can redirect all of the output of your scripts to a function.  For
