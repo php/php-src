@@ -560,9 +560,9 @@ re_set_syntax(syntax)
   do {									\
     if (current_mbctype == MBCTYPE_UTF8) {				\
       int n = mbclen(c) - 1;						\
-      c &= (1<<(MBRE_BYTEWIDTH-2-n)) - 1;					\
+      c &= (1<<(MBRE_BYTEWIDTH-2-n)) - 1;				\
       while (n--) {							\
-	c = c << 6 | *p++ & ((1<<6)-1);					\
+	c = c << 6 | (*p++ & ((1<<6)-1));				\
       }									\
     }									\
     else {								\
@@ -1351,7 +1351,6 @@ re_compile_pattern(pattern, size, bufp)
   int *stackb = stacka;
   int *stackp = stackb;
   int *stacke = stackb + 40;
-  int *stackt;
 
   /* Counts ('s as they are encountered.  Remembered for the matching ),
      where it becomes the register number to put in the stop_memory
@@ -1592,8 +1591,8 @@ re_compile_pattern(pattern, size, bufp)
 	  case 'W':
 	    for (c = 0; c < (1 << MBRE_BYTEWIDTH); c++) {
 	      if (SYNTAX(c) != Sword &&
-		  (current_mbctype && !re_mbctab[c] ||
-		  !current_mbctype && SYNTAX(c) != Sword2))
+		  ((current_mbctype && !re_mbctab[c]) ||
+		  (!current_mbctype && SYNTAX(c) != Sword2)))
 		SET_LIST_BIT(c);
 	    }
 	    had_char_class = 1;
@@ -1781,12 +1780,12 @@ re_compile_pattern(pattern, size, bufp)
 
       /* Discard any character set/class bitmap bytes that are all
 	 0 at the end of the map. Decrement the map-length byte too.  */
-      while ((int)b[-1] > 0 && b[b[-1] - 1] == 0) 
+      while ((int)b[-1] > 0 && b[(int)b[-1] - 1] == 0) 
 	b[-1]--; 
       if (b[-1] != (1 << MBRE_BYTEWIDTH) / MBRE_BYTEWIDTH)
-	memmove(&b[b[-1]], &b[(1 << MBRE_BYTEWIDTH) / MBRE_BYTEWIDTH],
+	memmove(&b[(int)b[-1]], &b[(1 << MBRE_BYTEWIDTH) / MBRE_BYTEWIDTH],
 		2 + EXTRACT_UNSIGNED(&b[(1 << MBRE_BYTEWIDTH) / MBRE_BYTEWIDTH])*8);
-      b += b[-1] + 2 + EXTRACT_UNSIGNED(&b[b[-1]])*8;
+      b += b[-1] + 2 + EXTRACT_UNSIGNED(&b[(int)b[-1]])*8;
       break;
 
     case '(':
@@ -2307,9 +2306,9 @@ re_compile_pattern(pattern, size, bufp)
 	while ((int)b[-1] > 0 && b[b[-1] - 1] == 0) 
 	  b[-1]--; 
 	if (b[-1] != (1 << MBRE_BYTEWIDTH) / MBRE_BYTEWIDTH)
-	  memmove(&b[b[-1]], &b[(1 << MBRE_BYTEWIDTH) / MBRE_BYTEWIDTH],
+	  memmove(&b[(int)b[-1]], &b[(1 << MBRE_BYTEWIDTH) / MBRE_BYTEWIDTH],
 		  2 + EXTRACT_UNSIGNED(&b[(1 << MBRE_BYTEWIDTH) / MBRE_BYTEWIDTH])*8);
-	b += b[-1] + 2 + EXTRACT_UNSIGNED(&b[b[-1]])*8;
+	b += b[-1] + 2 + EXTRACT_UNSIGNED(&b[(int)b[-1]])*8;
 	break;
 
       case 'w':
@@ -2667,6 +2666,7 @@ insert_jump_n(op, from, to, current_end, n)
 
    If you call this function, you must zero out pending_exact.  */
 
+#if 0
 static void
 insert_op(op, there, current_end)
      int op;
@@ -2680,7 +2680,7 @@ insert_op(op, there, current_end)
 
   there[0] = (char)op;
 }
-
+#endif
 
 /* Open up space at location THERE, and insert operation OP followed by
    NUM_1 and NUM_2.  CURRENT_END gives the end of the storage in use, so
@@ -3173,6 +3173,8 @@ re_compile_fastmap(bufp)
 
       case begpos:
       case unused:	/* pacify gcc -Wall */
+	break;
+      case fail:
 	break;
       }
 
@@ -4398,6 +4400,9 @@ re_match(bufp, string_arg, size, pos, regs)
 	  while (--mcnt);
 	}
 	SET_REGS_MATCHED;
+	break;
+      case fail:
+	goto fail;
 	break;
       }
 #ifdef RUBY
