@@ -24,8 +24,7 @@
 
 #include <zlib.h>
 
-
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	int gzgetss_state;
 
 	/* variables for transparent gzip encoding */
@@ -35,7 +34,7 @@ typedef struct {
 	int ob_gzhandler_status;
 	int ob_gzip_coding;
 	int output_compression;
-} php_zlib_globals;
+ZEND_END_MODULE_GLOBALS(zlib)
 
 extern zend_module_entry php_zlib_module_entry;
 #define zlib_module_ptr &php_zlib_module_entry
@@ -70,7 +69,6 @@ int php_enable_output_compression(int buffer_size);
 
 
 #ifdef ZTS
-#define ZLIBG(v) (zlib_globals->v)
 #define ZLIBG(v) TSRMG(zlib_globals_id, zend_zlib_globals *, v)
 #else
 #define ZLIBG(v) (zlib_globals.v)
