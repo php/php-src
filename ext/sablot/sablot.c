@@ -27,6 +27,7 @@
 #include <string.h>
 
 /* PHP Includes */
+#include "ext/standard/info.h"
 #include "ext/standard/php_output.h"
 #include "php_sablot.h"
 
@@ -233,8 +234,7 @@ PHP_FUNCTION(xslt_transform)
 		 **result_uri,
 	     **xslt_params, 
 		 **xslt_args, 
-		 **result, 
-		 **value;
+		 **result;
 	char **args   = NULL,
 	     **params = NULL,
 	     *tResult = NULL;
@@ -407,8 +407,7 @@ PHP_FUNCTION(xslt_run)
 		 **data_file, 
 	     **xslt_result, 
 		 **xslt_params, 
-		 **xslt_args, 
-		 **value;
+		 **xslt_args;
 	php_sablot *handle;
 	char **args   = NULL,
 	     **params = NULL,
@@ -615,8 +614,7 @@ PHP_FUNCTION(xslt_set_sax_handler)
 {
 	zval **xh, 
 	     **handlers, 
-		 **indiv_handlers, 
-		 **handler;
+		 **indiv_handlers;
 	php_sablot *handle;
 	HashTable *handlers_list;
 	char *string_key = NULL;
@@ -789,8 +787,7 @@ static void _php_sablot_handler_pair(php_sablot *handle, zval **first_func, zval
 static void _php_sablot_call_handler_function(zval *handlerName, int argc, zval **args, char *function_name)
 {
 	zval *retval;
-	int result, 
-	    i;
+	int i;
 	ELS_FETCH();
 	MAKE_STD_ZVAL(retval);
 	
