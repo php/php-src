@@ -52,6 +52,8 @@ class PEAR_Command_Package extends PEAR_Command_Common
     {
         $failmsg = '';
         switch ($command) {
+            // {{{ package
+
             case 'package': {
                 $pkginfofile = isset($params[0]) ? $params[0] : null;
                 ob_start();
@@ -73,6 +75,10 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 }
                 break;
             }
+
+            // }}}
+            // {{{ package-list
+
             case 'package-list': {
                 include_once "PEAR/Common.php";
                 $obj = new PEAR_Common();
@@ -114,6 +120,10 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 $this->ui->endTable();
                 break;
             }
+
+            // }}}
+            // {{{ package-info
+
             case 'package-info': {
                 include_once "PEAR/Common.php";
                 $obj = new PEAR_Common();
@@ -192,6 +202,8 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 $this->ui->endTable();
                 break;
             }
+
+            // }}}
             default: {
                 return false;
             }
