@@ -153,6 +153,7 @@ PHP_METHOD(soapserver,map);
 /* Client Functions */
 PHP_METHOD(soapobject, soapobject);
 PHP_METHOD(soapobject, __login);
+PHP_METHOD(soapobject, __useproxy);
 PHP_METHOD(soapobject, __isfault);
 PHP_METHOD(soapobject, __getfault);
 PHP_METHOD(soapobject, __call);
@@ -202,6 +203,7 @@ static zend_function_entry soap_server_functions[] = {
 static zend_function_entry soap_client_functions[] = {
 	PHP_ME(soapobject, soapobject, NULL, 0)
 	PHP_ME(soapobject, __login, NULL, 0)
+	PHP_ME(soapobject, __useproxy, NULL, 0)
 	PHP_ME(soapobject, __isfault, NULL, 0)
 	PHP_ME(soapobject, __getfault, NULL, 0)
 	PHP_ME(soapobject, __call, NULL, 0)
@@ -1160,6 +1162,7 @@ PHP_METHOD(soapserver, handle)
 		php_end_ob_buffer(0, 0 TSRMLS_CC);
 
 		/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
+		xmlSetDocCompressMode(doc_return, 1);
 		xmlDocDumpMemory(doc_return, &buf, &size);
 
 		if (size == 0) {
@@ -1452,7 +1455,7 @@ zend_try {
 	 		request = seralize_function_call(thisObj, NULL, function, call_uri, real_args, arg_count, soap_version TSRMLS_CC);
 
 	 		if (soap_action == NULL) {
-				smart_str_appendl(&action, Z_STRVAL_PP(uri), Z_STRLEN_PP(uri));
+				smart_str_appends(&action, call_uri);
 				smart_str_appendc(&action, '#');
 				smart_str_appends(&action, function);
 			} else {
@@ -1516,6 +1519,29 @@ PHP_METHOD(soapobject, __login)
 	add_property_stringl(this_ptr,"_password",login_pass,login_pass_len, 1);
 }
 
+PHP_METHOD(soapobject, __useproxy)
+{
+  char *proxy_host;
+  char *proxy_name = NULL;
+  char *proxy_pass = NULL;
+  int proxy_host_len;
+  int proxy_name_len;
+  int proxy_pass_len;
+  long proxy_port;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ss",
+	    &proxy_host, &proxy_host_len, &proxy_port, &proxy_name, &proxy_name_len, &proxy_pass, &proxy_pass_len) == FAILURE) {
+		return;
+	}
+	add_property_stringl(this_ptr,"_proxy_host",proxy_host,proxy_host_len, 1);
+	add_property_long(this_ptr,"_proxy_port",proxy_port);
+	if (proxy_name) {
+		add_property_stringl(this_ptr,"_proxy_login",proxy_name,proxy_name_len, 1);
+	}
+	if (proxy_pass) {
+		add_property_stringl(this_ptr,"_proxy_password",proxy_pass,proxy_pass_len, 1);
+	}
+}
 
 PHP_METHOD(soapobject, __call)
 {
