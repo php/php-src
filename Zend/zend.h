@@ -332,6 +332,9 @@ struct _zend_class_entry {
 	/* handlers */
 	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
 
+	zend_class_entry **interfaces;
+	zend_uint num_interfaces;
+
 	/* old handlers */
 #if 0
 	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);

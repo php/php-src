@@ -92,6 +92,7 @@ typedef struct _zend_brk_cont_element {
 #define ZEND_ACC_STATIC		0x01
 #define ZEND_ACC_ABSTRACT	0x02
 #define ZEND_ACC_FINAL		0x04
+#define ZEND_ACC_INTERFACE	0x08
 
 /* The order of those must be kept - public < protected < private */
 #define ZEND_ACC_PUBLIC		0x10
@@ -308,7 +309,7 @@ void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 
 int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier);
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, zend_uint fn_flags TSRMLS_DC);
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, zend_uchar pass_type TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
@@ -326,10 +327,12 @@ void zend_do_end_catch(znode *try_token TSRMLS_DC);
 void zend_do_throw(znode *expr TSRMLS_DC);
 
 ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
-ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC);
-ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC);
+ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC);
+ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC);
+void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
+void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface);
 void zend_do_early_binding(TSRMLS_D);
 
 void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC);
@@ -657,6 +660,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_RAISE_ABSTRACT_ERROR	142
 
 #define ZEND_START_NAMESPACE		143
+
+#define ZEND_ADD_INTERFACE			144
 
 /* end of block */
 

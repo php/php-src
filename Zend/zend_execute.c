@@ -3113,7 +3113,14 @@ int zend_switch_free_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & ZEND_ACC_ABSTRACT) {
-		zend_error(E_ERROR, "Cannot instantiate abstract class %s", EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
+		char *class_type;
+
+		if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & ZEND_ACC_INTERFACE) {
+			class_type = "interface";
+		} else {
+			class_type = "abstract_class";
+		}
+		zend_error(E_ERROR, "Cannot instantiate %s %s", class_type, EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
 	}
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
@@ -3875,14 +3882,14 @@ int zend_ext_fcall_end_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_declare_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	do_bind_class(EX(opline), EG(function_table), EG(class_table) TSRMLS_CC);
+	EX_T(EX(opline)->result.u.var).EA.class_entry = do_bind_class(EX(opline), EG(function_table), EG(class_table) TSRMLS_CC);
 	NEXT_OPCODE();
 }
 
 
 int zend_declare_inherited_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	do_bind_inherited_class(EX(opline), EG(function_table), EG(class_table), EX_T(EX(opline)->extended_value).EA.class_entry TSRMLS_CC);
+	EX_T(EX(opline)->result.u.var).EA.class_entry = do_bind_inherited_class(EX(opline), EG(function_table), EG(class_table), EX_T(EX(opline)->extended_value).EA.class_entry TSRMLS_CC);
 	NEXT_OPCODE();
 }
 
@@ -3909,8 +3916,14 @@ int zend_ticks_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_instanceof_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *expr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	instanceof_function(&EX_T(EX(opline)->result.u.var).tmp_var, expr,
-						 EX_T(EX(opline)->op2.u.var).EA.class_entry TSRMLS_CC);
+	zend_bool result;
+
+	if (Z_TYPE_P(expr) == IS_OBJECT) {
+		result = instanceof_function(Z_OBJCE_P(expr), EX_T(EX(opline)->op2.u.var).EA.class_entry TSRMLS_CC);
+	} else {
+		result = 0;
+	}
+	ZVAL_BOOL(&EX_T(EX(opline)->result.u.var).tmp_var, result);
 	FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 	NEXT_OPCODE();
 }
@@ -3948,6 +3961,23 @@ int zend_start_namespace_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if(EG(active_namespace) != *pns) {
 		zend_switch_namespace(*pns TSRMLS_CC);
 	}
+	NEXT_OPCODE();
+}
+
+
+int zend_add_interface_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+	zend_class_entry *iface = EX_T(EX(opline)->op2.u.var).EA.class_entry;
+
+	if (!(iface->ce_flags & ZEND_ACC_INTERFACE)) {
+		zend_error(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name, iface->name);
+	}
+
+	ce->interfaces[EX(opline)->extended_value] = iface;
+
+	zend_do_implement_interface(ce, iface);
+
 	NEXT_OPCODE();
 }
 
@@ -4126,6 +4156,8 @@ void zend_init_opcodes_handlers()
 
 	zend_opcode_handlers[ZEND_RAISE_ABSTRACT_ERROR] = zend_raise_abstract_error_handler;
 	zend_opcode_handlers[ZEND_START_NAMESPACE] = zend_start_namespace_handler;
+
+	zend_opcode_handlers[ZEND_ADD_INTERFACE] = zend_add_interface_handler;
 }
 
 /*
