@@ -1,3 +1,16 @@
+2003-02-25  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Get the bits right - final/private fix
+
+2003-02-25  Jani Taskinen  <sniper@iki.fi>
+
+    * acconfig.h:
+      Do not redefine zend_isnan if it is already defined.
+
+    * Zend.m4:
+      - Fixed bug #14245 ('make install' fails on AIX when using --with-apxs).
+
 2003-02-24  Stanislav Malyshev  <stas@zend.com>
 
     * zend_compile.c:

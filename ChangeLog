@@ -1,3 +1,167 @@
+2003-02-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/exec.c:
+      Made shell_exec() use streams, this simplifies the code and in some cases
+      makes it a little faster too.
+
+    * ext/standard/url.c:
+      MFH (forgot to put this fix into the 5.X tree).
+
+2003-02-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      NEWS update
+
+    * ext/standard/file.c:
+      Set fgetss() free from the length parameter
+
+    * (PHP_4_3)
+      NEWS:
+      BFN: the fix was actually done by Ilia.
+
+    * (PHP_4_3)
+      ext/standard/html.c:
+      MFH(r1.72): int / long change
+      Fixed bug #22301 (htmlspecialchars crashes on Tru64)
+
+2003-02-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/bug22414.phpt:
+      Fixed test.
+
+    * ext/standard/exec.c
+      ext/standard/tests/file/bug22414.phpt:
+      Fixed bug #22414 and added a test case for it.
+
+2003-02-25  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/config.m4:
+      Cleanup
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      configure.in:
+      MFH: Fixed bug #21224 (apache configure fails when using
+      --enable-versioning)
+
+    * configure.in:
+      - Fixed bug #21224 (apache configure fails when using --enable-versioning)
+
+    * (PHP_4_3)
+      main/php.h
+      main/php_sprintf.c
+      main/snprintf.c
+      main/snprintf.h:
+      MFH: Fixed bug #20256 (snprintf() not defined on some systems)
+
+    * main/php.h
+      main/php_sprintf.c
+      main/snprintf.c
+      main/snprintf.h:
+      Fixed bug #20256 (snprintf() not defined)
+
+2003-02-25  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+      Tabify
+
+    * ext/yaz/php_yaz.c:
+      yaz_search supports query type cql
+
+2003-02-25  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+      typofix
+
+    * ext/curl/interface.c
+      ext/curl/multi.c:
+      (hope) fix some win32 build errors
+
+2003-02-25  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/CREDITS
+      ext/informix/ifx.ec
+      ext/informix/php_informix.h
+      ext/informix/php_informix_includes.h:
+      - Added Corne' Cornelius to CREDITS/Authors
+
+2003-02-25  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/pi3web/pi3web_sapi.c:
+      Another win32 build fix.
+
+    * sapi/activescript/php4activescript.c
+      sapi/activescript/scriptengine.cpp:
+      (hopefully) fix the build..
+
+    * (PHP_4_3)
+      configure.in:
+      MFH: Fixed bug #14245 ('make install' fails on AIX when using --with-apxs).
+
+    * configure.in:
+      - Fixed bug #14245 ('make install' fails on AIX when using --with-apxs).
+
+2003-02-25  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/config.m4:
+      - Changed IFX_VERSION to work with Major versions with more then one digit
+
+2003-02-25  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/oci8/config.m4:
+      fix bug #22324, libjdbcoci8.so is not necessarily needed..
+
+2003-02-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Fixed bug #22402 (opening of ftp for read/write could fail due to invalid
+      return code handling).
+      Solution suggested by jan@jancm.org
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.c:
+      MFH (fix for crash in gdImageCopyMergeGray()).
+
+    * ext/gd/libgd/gd.c:
+      Fixed a crash in gdImageCopyMergeGray().
+
+2003-02-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Common.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Command/Package.php:
+      - fixed <provides> generation, provides elements are now included for
+        every non-private class, function and method
+
+    * ext/tokenizer/tokenizer.c:
+      - add new ZE2 tokens
+
+2003-02-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams/plain_wrapper.c:
+      Fixed various compiler warnings.
+
+    * main/streams/plain_wrapper.c:
+      Use native flock() whenever possible.
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams/plain_wrapper.c:
+      Added locking to streams.
+      Allow PHP to automatically release locks on files when terminating the
+      stream.
+      Fixed bugs in the handling of the 3rd optional parameter to flock().
+
 2003-02-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * main/streams/memory.c:
