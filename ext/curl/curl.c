@@ -45,42 +45,6 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
-#ifdef PHP_WIN32
-/* {{{ win32_cleanup()
-   Clean-up allocated socket data on win32 systems */
-static void win32_cleanup()
-{
-	WSACleanup();
-}
-/* }}} */
-
-/* {{{ win32_init()
-   Initialize WSA stuff on Win32 systems */
-static CURLcode win32_init()
-{
-	WSADATA wsa_data;
-	WORD    requested_version = MAKEWORD(1, 1);
-	int     error;
-	
-	error = WSAStartup(requested_version, &wsa_data);
-	if (error != 0) {
-		return CURLE_FAILED_INIT;
-	}
-	
-	if (LOBYTE(wsa_data.wVersion) != 1 || HIBYTE(wsa_data.wVersion) != 1) {
-		WSACleanup();
-		return CURLE_FAILED_INIT;
-	}
-	
-	return CURLE_OK;
-}
-/* }}} */
-#else
-static CURLcode win32_init(void) { return CURLE_OK; }
-#define win32_cleanup()
-#endif
-
-
 function_entry curl_functions[] = {
 	PHP_FE(curl_init,     NULL)
 	PHP_FE(curl_version,  NULL)
@@ -97,7 +61,7 @@ zend_module_entry curl_module_entry = {
 	"curl",
 	curl_functions,
 	PHP_MINIT(curl),
-	PHP_MSHUTDOWN(curl),
+	NULL,
 	NULL,
 	NULL,
 	PHP_MINFO(curl),
@@ -261,16 +225,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT("CURLE_TELNET_OPTION_SYNTAX",        CURLE_TELNET_OPTION_SYNTAX);
 	REGISTER_CURL_CONSTANT("CURLE_ALREADY_COMPLETE",            CURLE_ALREADY_COMPLETE);
 
-	if (win32_init() != CURLE_OK) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(curl)
-{
-	win32_cleanup();
 	return SUCCESS;
 }
 
