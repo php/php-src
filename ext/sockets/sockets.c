@@ -1100,6 +1100,8 @@ PHP_FUNCTION(socket_iovec_alloc)
 		vector_array[i].iov_base	= (char*)emalloc(Z_LVAL_PP(args[j]));
 		vector_array[i].iov_len		= Z_LVAL_PP(args[j]);
 	}
+	
+	efree(args);
 
 	vector = emalloc(sizeof(php_iovec_t));
 	vector->iov_array = vector_array;
@@ -1122,7 +1124,7 @@ PHP_FUNCTION(socket_iovec_fetch)
 
 	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, &iovec_id, -1, le_iov_name, le_iov);
 
-	if (iovec_position > vector->count) {
+	if (iovec_position >= vector->count) {
 		php_error(E_WARNING, "%s() can't access a vector position past the amount of vectors set in the array", get_active_function_name(TSRMLS_C));
 		RETURN_EMPTY_STRING();
 	}
@@ -1146,7 +1148,7 @@ PHP_FUNCTION(socket_iovec_set)
 
 	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, &iovec_id, -1, le_iov_name, le_iov);
 
-	if (iovec_position > vector->count) {
+	if (iovec_position >= vector->count) {
 		php_error(E_WARNING, "%s() can't access a vector position outside of the vector array bounds", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
