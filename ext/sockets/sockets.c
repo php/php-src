@@ -230,7 +230,7 @@ PHP_MINFO_FUNCTION(sockets)
 }
 
 /* {{{ proto resource fd_alloc(void)
-   Allocate a file descriptor set */
+   Allocates a file descriptor set */
 PHP_FUNCTION(fd_alloc)
 {
 	fd_set *set;
@@ -247,7 +247,7 @@ PHP_FUNCTION(fd_alloc)
 /* }}} */
 
 /* {{{ proto void fd_dealloc(void)
-   De-allocate a file descriptor set */
+   De-allocates a file descriptor set */
 /*   ** BUG: This is currently a no-op! */
 PHP_FUNCTION(fd_dealloc)
 {
@@ -256,7 +256,7 @@ PHP_FUNCTION(fd_dealloc)
 /* }}} */
 
 /* {{{ proto bool fd_set(int fd, resource set)
-   Add a file descriptor to a set */
+   Adds a file descriptor to a set */
 PHP_FUNCTION(fd_set)
 {
 	zval **set, **fd;
@@ -282,8 +282,8 @@ PHP_FUNCTION(fd_set)
 }
 /* }}} */
 
-/* {{{ proto bool fd_clear(long fd, resource set)
-   Clear a file descriptor from a set */
+/* {{{ proto bool fd_clear(int fd, resource set)
+   Clears a file descriptor from a set */
 PHP_FUNCTION(fd_clear)
 {
 	zval **set, **fd;
@@ -309,8 +309,8 @@ PHP_FUNCTION(fd_clear)
 }
 /* }}} */
 
-/* {{{ proto bool fd_isset(long fd, resource set)
-   Check to see if a file descriptor is set within the file descrirptor set */
+/* {{{ proto bool fd_isset(int fd, resource set)
+   Checks to see if a file descriptor is set within the file descrirptor set */
 PHP_FUNCTION(fd_isset)
 {
 	zval **set, **fd;
@@ -339,7 +339,7 @@ PHP_FUNCTION(fd_isset)
 /* }}} */
 
 /* {{{ proto void fd_zero(resource set)
-   Clear a file descriptor set */
+   Clears a file descriptor set */
 PHP_FUNCTION(fd_zero)
 {
 	zval **set;
@@ -359,8 +359,8 @@ PHP_FUNCTION(fd_zero)
 }
 /* }}} */
 
-/* {{{ proto void select(long max_fd, resource readfds, resource writefds, resource exceptfds, long tv_sec, long tv_usec)
-   Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec. */
+/* {{{ proto void select(int max_fd, resource readfds, resource writefds, resource exceptfds, int tv_sec, int tv_usec)
+   Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 /* See select(2) man page for details.
 
    From man page:
@@ -532,7 +532,7 @@ PHP_FUNCTION(listen)
 /* }}} */
 
 /* {{{ proto bool close(int fd)
-   Close a file descriptor */
+   Closes a file descriptor */
 PHP_FUNCTION(close)
 {
 	zval **fd;
@@ -711,7 +711,7 @@ PHP_FUNCTION(gethostbyname)
 
 #endif
 
-/* {{{ proto long getpeername(long fd, string &addr, long &port)
+/* {{{ proto int getpeername(int fd, string &addr, int &port)
    Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the remote side of a socket */
 
 PHP_FUNCTION(getpeername)
@@ -1001,7 +1001,7 @@ PHP_FUNCTION(bind)
 /* }}} */
 
 /* {{{ proto resource build_iovec(int num_vectors [, int ...])
-   Build a 'struct iovec' for use with sendmsg, recvmsg, writev, and readv */
+   Builds a 'struct iovec' for use with sendmsg, recvmsg, writev, and readv */
 /* First parameter is number of vectors, each additional parameter is the
    length of the vector to create.
  */
@@ -1043,7 +1043,7 @@ PHP_FUNCTION(build_iovec)
 }
 /* }}} */
 
-/* {{{ proto string fetch_iovec(resource iovec_id, long iovec_position)
+/* {{{ proto string fetch_iovec(resource iovec_id, int iovec_position)
    Returns the data held in the iovec specified by iovec_id[iovec_position] */
 PHP_FUNCTION(fetch_iovec)
 {
@@ -1067,7 +1067,7 @@ PHP_FUNCTION(fetch_iovec)
 }
 /* }}} */
 
-/* {{{ proto bool set_iovec(resource iovec_id, long iovec_position, string new_val)
+/* {{{ proto bool set_iovec(resource iovec_id, int iovec_position, string new_val)
    Sets the data held in iovec_id[iovec_position] to new_val */
 PHP_FUNCTION(set_iovec)
 {
@@ -1098,7 +1098,7 @@ PHP_FUNCTION(set_iovec)
 }
 /* }}} */
 
-/* {{{ proto bool add_iovec(resource iovec_id, long iov_len)
+/* {{{ proto bool add_iovec(resource iovec_id, int iov_len)
    Adds a new vector to the scatter/gather array */
 PHP_FUNCTION(add_iovec)
 {
@@ -1128,7 +1128,7 @@ PHP_FUNCTION(add_iovec)
 
 /* }}} */
 
-/* {{{ proto bool delete_iovec(resource iovec_id, long iov_pos)
+/* {{{ proto bool delete_iovec(resource iovec_id, int iov_pos)
    Deletes a vector from an array of vectors */
 PHP_FUNCTION(delete_iovec)
 {
@@ -1188,7 +1188,7 @@ PHP_FUNCTION(free_iovec)
 }
 /* }}} */
 
-/* {{{ proto long readv(long fd, resource iovec_id)
+/* {{{ proto int readv(int fd, resource iovec_id)
    Reads from an fd, using the scatter-gather array defined by iovec_id */
 PHP_FUNCTION(readv)
 {
@@ -1232,8 +1232,8 @@ PHP_FUNCTION(writev)
 }
 /* }}} */
 
-/* {{{ proto int recv(int fd, string buf, int len, long flags)
-   Receive data from a connected socket */
+/* {{{ proto int recv(int fd, string buf, int len, int flags)
+   Receives data from a connected socket */
 /* May be used with SOCK_DGRAM sockets. */
 PHP_FUNCTION(recv)
 {
@@ -1271,7 +1271,7 @@ PHP_FUNCTION(recv)
 /* }}} */
 
 /* {{{ proto int send(int fd, string buf, int len, int flags)
-   Send data to a connected socket */
+   Sends data to a connected socket */
 /* May be used with SOCK_DGRAM sockets. */
 PHP_FUNCTION(send)
 {
@@ -1294,7 +1294,7 @@ PHP_FUNCTION(send)
 /* }}} */
 
 /* {{{ proto int recvfrom(int fd, string &buf, int len, int flags, string &name [, int &port])
-   Receive data from a socket, connected or not */
+   Receives data from a socket, connected or not */
 PHP_FUNCTION(recvfrom)
 {
 	zval **fd, **buf, **len, **flags, **name, **port;
