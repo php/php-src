@@ -1,5 +1,5 @@
-#ifndef _PHP3_COM_H
-#define _PHP3_COM_H
+#ifndef _PHP_COM_H
+#define _PHP_COM_H
 
 #if WIN32|WINNT
 
@@ -10,7 +10,7 @@ PHP_FUNCTION(COM_invoke);
 
 PHP_FUNCTION(com_propget);
 PHP_FUNCTION(com_propput);
-extern php3_module_entry COM_module_entry;
+extern zend_module_entry COM_module_entry;
 #define COM_module_ptr &COM_module_entry
 
 #else
@@ -21,4 +21,4 @@ extern php3_module_entry COM_module_entry;
 
 #define phpext_COM_ptr COM_module_ptr
 
-#endif  /* _PHP3_COM_H */
+#endif  /* _PHP_COM_H */

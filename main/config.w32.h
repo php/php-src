@@ -85,6 +85,9 @@
 /* Define if you have the usleep function.  */
 #undef HAVE_USLEEP
 
+
+#define HAVE_GETCWD 1
+
 #define NEED_ISBLANK 1
 /* ----------------------------------------------------------------
    The following may be changed and played with right now, but
