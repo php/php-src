@@ -20,11 +20,6 @@
 // $Id$
 //
 
-// TODO:
-// - Build strong tests
-// - Error reporting (now shows standar php errors)
-// - Write doc
-
 require_once 'PEAR.php';
 require_once 'Console/Getopt.php';
 
@@ -32,17 +27,24 @@ require_once 'Console/Getopt.php';
 * System offers cross plattform compatible system functions
 *
 * Static functions for different operations. Should work under
-* Unix and Windows. The names and usage has been taken from its repectively
-* GNU commands.
+* Unix and Windows. The names and usage has been taken from its respectively
+* GNU commands. The functions will return (bool) false on error and will
+* trigger the error with the PHP trigger_error() function (you can silence
+* the error by prefixing a '@' sign after the function call).
 *
-* Example usage: System::rm('-r file1 dir1');
+* Documentation on this class you can find in:
+* http://pear.php.net/manual/
 *
-* ------------------- EXPERIMENTAL STATUS -------------------
+* Example usage:
+* if (!@System::rm('-r file1 dir1')) {
+*    print "could not delete file1 or dir1";
+* }
 *
 * @package  System
 * @author   Tomas V.V.Cox <cox@idecnet.com>
 * @version  $Revision$
 * @access   public
+* @see      http://pear.php.net/manual/
 */
 class System extends PEAR
 {
@@ -61,6 +63,23 @@ class System extends PEAR
             $argv = preg_split('/\s+/', $argv);
         }
         return Console_Getopt::getopt($argv, $short_options);
+    }
+
+    /**
+    * Output errors with PHP trigger_error(). You can silence the errors
+    * with prefixing a "@" sign to the function call: @System::mkdir(..);
+    *
+    * @param mixed $error a PEAR error or a string with the error message
+    * @return bool false
+    * @access private
+    */
+    function raiseError($error)
+    {
+        if (PEAR::isError($error)) {
+            $error = $error->getMessage();
+        }
+        trigger_error($error, E_USER_WARNING);
+        return false;
     }
 
     /**
@@ -91,6 +110,7 @@ class System extends PEAR
     {
         $struct = array('dirs' => array(), 'files' => array());
         if (($dir = @opendir($sPath)) === false) {
+            System::raiseError("Could not open dir $sPath");
             return $struct; // XXX could not open error
         }
         $struct['dirs'][] = $sPath; // XXX don't add if '.' or '..' ?
@@ -149,45 +169,49 @@ class System extends PEAR
     {
         $opts = System::_parseArgs($args, 'rf'); // "f" do nothing but like it :-)
         if (PEAR::isError($opts)) {
-            return $opts;
+            return System::raiseError($opts);
         }
         foreach($opts[0] as $opt) {
             if ($opt[0] == 'r') {
                 $do_recursive = true;
             }
         }
+        $ret = true;
         if (isset($do_recursive)) {
             $struct = System::_multipleToStruct($opts[1]);
-            if (PEAR::isError($struct)) {
-                return $struct;
-            }
             foreach($struct['files'] as $file) {
-                unlink($file); // XXXX Works under Windows?
+                if (!unlink($file)) {
+                    $ret = false;
+                }
             }
             foreach($struct['dirs'] as $dir) {
-                rmdir($dir);
+                if (!rmdir($dir)) {
+                    $ret = false;
+                }
             }
         } else {
             foreach ($opts[1] as $file) {
-                $delete = (is_dir($file)) ? 'rmdir' : 'unlink'; // XXXX Windows?
-                $delete($file);
+                $delete = (is_dir($file)) ? 'rmdir' : 'unlink';
+                if (!$delete($file)) {
+                    $ret = false;
+                }
             }
         }
-        return true;
+        return $ret;
     }
 
     /**
     * Make directories
     *
     * @param    string  $args    the name of the director(y|ies) to create
-    * @return   mixed   PEAR_Error or true for success
+    * @return   bool    True for success
     * @access   public
     */
     function mkDir($args)
     {
         $opts = System::_parseArgs($args, 'pm:');
         if (PEAR::isError($opts)) {
-            return $opts;
+            return System::raiseError($opts);
         }
         $mode = 0777; // default mode
         foreach($opts[0] as $opt) {
@@ -257,13 +281,14 @@ class System extends PEAR
         }
         if (isset($mode)) {
             if (!$outputfd = fopen($outputfile, $mode)) {
-                return $this->raiseError("Could not open $outputfile");
+                return System::raiseError("Could not open $outputfile");
             }
             $ret = true;
         }
-        foreach($files as $file) {
+        foreach ($files as $file) {
             if (!$fd = fopen($file, 'r')) {
-                return $this->raiseError("Could not open $file");
+                System::raiseError("Could not open $file");
+                continue;
             }
             while(!feof($fd)) {
                 $cont = fread($fd, 2048);
@@ -299,14 +324,15 @@ class System extends PEAR
     *           c:\windows\temp or /tmp will be used.
     *
     * @param   string  $args  The arguments
-    * @return  mixed   the full path of the created (file|dir) or a PEAR_Error
+    * @return  mixed   the full path of the created (file|dir) or false
+    * @see System::tmpdir()
     * @access  public
     */
     function mktemp($args = null)
     {
         $opts = System::_parseArgs($args, 't:d');
         if (PEAR::isError($opts)) {
-            return $opts;
+            return System::raiseError($opts);
         }
         foreach($opts[0] as $opt) {
             if($opt[0] == 'd') {
@@ -319,17 +345,25 @@ class System extends PEAR
         if (!isset($tmpdir)) {
             $tmpdir = System::tmpdir();
         }
-        System::mkDir("-p $tmpdir");
+        if (!System::mkDir("-p $tmpdir")) {
+            return false;
+        }
         $tmp = tempnam($tmpdir, $prefix);
-        if(isset($tmp_is_dir)) {
+        if (isset($tmp_is_dir)) {
             unlink($tmp); // be careful possible race condition here
             if (!mkdir($tmp, 0700)) {
-                return $this->raiseError("Unable to create temporary directory $tmpdir");
+                return System::raiseError("Unable to create temporary directory $tmpdir");
             }
         }
         return $tmp;
     }
 
+    /**
+    * Get the path of the temporal directory set in the system
+    * by looking in its environments variables.
+    *
+    * @return string The temporal directory on the system
+    */
     function tmpdir()
     {
         if (OS_WINDOWS){
