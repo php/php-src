@@ -31,17 +31,3 @@ if test "$PHP_SABLOT" != "no"; then
 
   PHP_EXTENSION(sablot, $ext_shared)
 fi
-
-AC_MSG_CHECKING(whether to enable descriptive error messages)
-AC_ARG_ENABLE(sablot-errors-descriptive,
-[  --enable-sablot-errors-descriptive  Enable Descriptive errors],[
-  if test "$enableval" = "yes" ; then
-    AC_DEFINE(SABLOT_ERRORS, 1, [ ])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
-
