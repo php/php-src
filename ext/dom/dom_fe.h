@@ -126,6 +126,7 @@ PHP_FUNCTION(dom_document_save);
 PHP_FUNCTION(dom_document_loadxml);
 PHP_FUNCTION(dom_document_savexml);
 PHP_FUNCTION(dom_document_validate);
+PHP_FUNCTION(dom_document_xinclude);
 
 #if defined(LIBXML_HTML_ENABLED)
 PHP_FUNCTION(dom_document_load_html);

@@ -81,6 +81,7 @@ zend_function_entry php_dom_document_class_functions[] = {
 	PHP_FALIAS(saveXML, dom_document_savexml, NULL)
 	PHP_FALIAS(domdocument, dom_document_document, NULL)
 	PHP_FALIAS(validate, dom_document_validate, NULL)
+	PHP_FALIAS(xinclude, dom_document_xinclude, NULL)
 #if defined(LIBXML_HTML_ENABLED)
 	PHP_FALIAS(loadHTML, dom_document_load_html, NULL)
 	PHP_FALIAS(loadHTMLFile, dom_document_load_html_file, NULL)
@@ -1510,6 +1511,28 @@ PHP_FUNCTION(dom_document_savexml)
 	}
 }
 /* }}} end dom_document_savexml */
+
+/* {{{ proto int dom_document_xinclude()
+   Substitutues xincludes in a DomDocument */
+PHP_FUNCTION(dom_document_xinclude)
+{
+	zval *id;
+	xmlDoc *docp;
+	int err; 
+	dom_object *intern;
+
+	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
+
+	err = xmlXIncludeProcess (docp);
+	
+	if (err) {
+		RETVAL_LONG(err);
+	} else {
+		RETVAL_FALSE;
+	}
+    
+}
+
 
 /* {{{ proto string domnode dom_document_validate();
 Since: DOM extended
