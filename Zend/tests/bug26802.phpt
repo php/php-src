@@ -3,47 +3,35 @@ Bug #26802 (Can't call static method using a variable)
 --FILE--
 <?php
 
-function func() {
+function global_func()
+{
 	echo __METHOD__ . "\n";
 }
 
-function work() {
-	echo __METHOD__ . "\n";
-}
-
-$function = 'func';
+$function = 'global_func';
 $function();
 
 class foo
 {
-	static $method = 'func';
-
-	static public function bar() {
-		echo __METHOD__ . "\n";
-	}
+	static $method = 'global_func';
 	
-	static public function func() {
+	static public function foo_func()
+	{
 		echo __METHOD__ . "\n";
 	}
 }
-
-foo::bar();
-
-$static_method = "foo::bar";
-
-$static_method();
 
 /* The following is a BC break with PHP 4 where it would 
  * call foo::fail. In PHP 5 we first evaluate static class 
  * properties and then do the function call.
  */
-$method = 'fail';
+$method = 'foo_func';
 foo::$method();
+
+
 ?>
 ===DONE===
 --EXPECT--
-func
-foo::bar
-foo::bar
-func
+global_func
+foo::foo_func
 ===DONE===
