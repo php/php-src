@@ -693,7 +693,7 @@ PHP_FUNCTION(fdf_set_javascript_action)
 }
 /* }}} */
 
-/* {{{ fdf_set_encoding(int fdf_document, string encoding)
+/* {{{ proto bool fdf_set_encoding(int fdf_document, string encoding)
    Sets FDF encoding (either "Shift-JIS" or "Unicode") */  
 PHP_FUNCTION(fdf_set_encoding) 
 {
