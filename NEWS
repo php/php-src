@@ -6,16 +6,17 @@ PHP 4                                                                      NEWS
   and gmp_fact() to prevent SIGFPE. (Tony)
 - Changed phpize not to require libtool. (Jani)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
-- Fixed bug #32373 (segfault in bzopen() if supplied path to non-existent 
-  file). (Tony)
-- Fixed bug #32340 (insert_before($node,NULL) does not return). (Rob) 
-- Fixed bug #32114 (DOM crashing when attribute appended to Document). (Rob)
   Fixed bugs:
+  . Bug #32311 (mb_encode_mimeheader() does not properly escape characters)
   . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
   . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
   . Bug #30573 (compiler warnings in libmbfl due to invalid type cast)
   . Bug #30549 (incorrect character translations for some ISO8859 charsets)
   . Bug #28220 (mb_strwidth() returns wrong width values for some hangul chars)
+- Fixed bug #32373 (segfault in bzopen() if supplied path to non-existent 
+  file). (Tony)
+- Fixed bug #32340 (insert_before($node,NULL) does not return). (Rob) 
+- Fixed bug #32114 (DOM crashing when attribute appended to Document). (Rob)
 - Fixed several leaks in ext/browscap and sapi/embed. (Andrei)
 - Fixed several leaks in ext/filepro. (Tony)
 - Fixed build system to always use bundled libtool files. (Jani)  
