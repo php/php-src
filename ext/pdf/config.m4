@@ -30,7 +30,7 @@ PHP_ARG_WITH(tiff-dir, for the location of libtiff,
 if test "$PHP_PDFLIB" != "no"; then
 
   PHP_NEW_EXTENSION(pdf, pdf.c, $ext_shared)
-  PHP_SUBST(PDFLIB_SHARED_LIBADD)
+  PHP_SUBST(PDF_SHARED_LIBADD)
 
   dnl #
   dnl # Optional libraries for PDFlib 
@@ -40,7 +40,7 @@ if test "$PHP_PDFLIB" != "no"; then
   if test "$PHP_JPEG_DIR" != "no"; then
     PHP_CHECK_LIBRARY(jpeg,jpeg_read_header, 
     [
-      PHP_ADD_LIBRARY_WITH_PATH(jpeg, $PHP_JPEG_DIR/lib, PDFLIB_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(jpeg, $PHP_JPEG_DIR/lib, PDF_SHARED_LIBADD)
     ],[
       AC_MSG_ERROR([libjpeg not found!])
     ],[
@@ -54,7 +54,7 @@ if test "$PHP_PDFLIB" != "no"; then
   if test "$PHP_PNG_DIR" != "no"; then
     PHP_CHECK_LIBRARY(png,png_create_info_struct, 
     [
-      PHP_ADD_LIBRARY_WITH_PATH(png, $PHP_PNG_DIR/lib, PDFLIB_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(png, $PHP_PNG_DIR/lib, PDF_SHARED_LIBADD)
     ],[
       AC_MSG_ERROR([libpng not found!])
     ],[
@@ -68,7 +68,7 @@ if test "$PHP_PDFLIB" != "no"; then
   if test "$PHP_TIFF_DIR" != "no"; then
     PHP_CHECK_LIBRARY(tiff,TIFFOpen, 
     [
-      PHP_ADD_LIBRARY_WITH_PATH(tiff, $PHP_TIFF_DIR/lib, PDFLIB_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(tiff, $PHP_TIFF_DIR/lib, PDF_SHARED_LIBADD)
     ],[
       AC_MSG_ERROR([libtiff not found!])
     ],[
@@ -84,7 +84,7 @@ if test "$PHP_PDFLIB" != "no"; then
     AC_MSG_RESULT([no. If configure fails, try --with-zlib-dir=<DIR>])
   else           
     AC_MSG_RESULT([$PHP_ZLIB_DIR])
-    PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, PDFLIB_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, PDF_SHARED_LIBADD)
   fi
 
   dnl #
@@ -95,7 +95,7 @@ if test "$PHP_PDFLIB" != "no"; then
     yes)
       AC_CHECK_LIB(pdf, PDF_show_boxed, [
         AC_DEFINE(HAVE_PDFLIB,1,[ ])
-        PHP_ADD_LIBRARY(pdf,, PDFLIB_SHARED_LIBADD)
+        PHP_ADD_LIBRARY(pdf,, PDF_SHARED_LIBADD)
       ],[
         AC_MSG_ERROR([
 PDFlib extension requires at least pdflib 3.x. You may also need libtiff, libjpeg, libpng and libz.
@@ -110,7 +110,7 @@ See config.log for more information.
         PHP_CHECK_LIBRARY(pdf, PDF_show_boxed, 
         [
           AC_DEFINE(HAVE_PDFLIB,1,[ ]) 
-          PHP_ADD_LIBRARY_WITH_PATH(pdf, $PHP_PDFLIB/lib, PDFLIB_SHARED_LIBADD)
+          PHP_ADD_LIBRARY_WITH_PATH(pdf, $PHP_PDFLIB/lib, PDF_SHARED_LIBADD)
           PHP_ADD_INCLUDE($PHP_PDFLIB/include)
         ],[
           AC_MSG_ERROR([
@@ -119,7 +119,7 @@ Use the options --with-tiff-dir=<DIR>, --with-jpeg-dir=<DIR>, --with-png-dir=<DI
 See config.log for more information.
 ])
         ],[
-          -L$PHP_PDFLIB/lib $PDFLIB_SHARED_LIBADD
+          -L$PHP_PDFLIB/lib $PDF_SHARED_LIBADD
         ])
       else
         AC_MSG_ERROR([pdflib.h not found! Check the path passed to --with-pdflib=<PATH>. PATH should be the install prefix directory.])
