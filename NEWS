@@ -3,8 +3,8 @@ PHP 4                                                                      NEWS
 ? ? ??? 2002, Version 4.3.0
 - Make the glue argument to implode() optional, if it is not specified
   default to using "". (Sterling)
-- Added regression test for bugs #17791 and #17931 (Melvyn)
-- Fixed fields argument to contain correct info. (Lenar Lohmus)
+- Fixed fields argument to contain correct info for xslt_set_error_handler.
+  . Patch by Lenar Lohmus.
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
