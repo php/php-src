@@ -143,6 +143,14 @@
 		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
 	}
 
+#define ADD_PROPERTY_BOOL(_table, _key, _bool) \
+    { \
+       zval *tmp; \
+       MAKE_STD_ZVAL(tmp); \
+       ZVAL_BOOL(tmp, _bool); \
+       zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
+   }
+
 #define TIDY_SAFE_MODE_CHECK(filename) \
 if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)) { \
 	RETURN_FALSE; \
@@ -720,6 +728,9 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 
 			ADD_PROPERTY_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
 			ADD_PROPERTY_LONG(obj->std.properties, type, tidyNodeGetType(obj->node));
+			ADD_PROPERTY_LONG(obj->std.properties, line, tidyNodeLine(obj->node));
+            ADD_PROPERTY_LONG(obj->std.properties, column, tidyNodeColumn(obj->node));
+            ADD_PROPERTY_BOOL(obj->std.properties, proprietary, tidyNodeIsProp(obj->ptdoc->doc, obj->node));
 
 			switch(tidyNodeGetType(obj->node)) {
 				case TidyNode_Root:
