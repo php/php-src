@@ -772,7 +772,7 @@ PHP_FAST_GENERATE
 
 #libphp4.module 
 AC_OUTPUT([php4.spec Zend/Makefile 
-           scripts/mkextlib build-defs.h
+           build-defs.h
 		   $PHP_OUTPUT_FILES
 		   ], [], [
 
