@@ -694,7 +694,7 @@ Changes in the Zend Engine 2.0
                 }
             }
                 
-            class Oject implements IteratorAggregate {
+            class Object implements IteratorAggregate {
             
                 public $max = 3;
             
