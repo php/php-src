@@ -3,7 +3,7 @@
 
 ARG_WITH("soap", "SOAP support", "no");
 
-if (PHP_SOAP == "yes" && PHP_LIBXML == "yes") {
+if (PHP_SOAP != "no" && PHP_LIBXML == "yes") {
 	EXTENSION('soap', 'soap.c php_encoding.c php_http.c php_packet_soap.c php_schema.c php_sdl.c php_xml.c');
 	AC_DEFINE('HAVE_PHP_SOAP', 1, "SOAP support");
 
