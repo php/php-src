@@ -26,24 +26,26 @@
 		target2=target
 		sub("\.(c|cpp)$", ".lo", target);
 		sub("\.(c|cpp)$", ".slo", target2);
-		deplist=""
 
 		for (e in used)
 			delete used[e]
 		
 		cmdx=cmd " " filenames[i]
+		done=0
 		while ((cmdx | getline) > 0) {
-			sub(top_srcdir, "$(top_srcdir)", $0)
-			sub(top_builddir, "$(top_builddir)", $0)
-			if (match($0, "^# [0-9]* \".*\.h\"") != 0  \
-					&& match($3, "^\"/") == 0          \
-					&& !($3 in used)) {
-				deplist=deplist " \\\n\t" substr($3,2,length($3)-2)
-				used[$3] = 1;
+			if (match($0, "^# [0-9]* \".*\.h\"") != 0) {
+				sub(top_srcdir, "$(top_srcdir)", $3)
+				sub(top_builddir, "$(top_builddir)", $3)
+				if (substr($3,2,1) != "/" && used[$3] != 1) {
+					if (done == 0)
+						printf("%s", target " " target2 ":")
+					done=1
+					printf("%s", " \\\n\t" substr($3,2,length($3)-2))
+					used[$3] = 1;
+				}	
 			}
 		}
-
-		if (deplist != "")
-			print target " " target2 ":" deplist "\n";
+		if (done == 1)
+			printf("\n\n")
 	}
 } 
