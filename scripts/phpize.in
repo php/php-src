@@ -139,6 +139,9 @@ case "$1" in
   *)
      phpize_check_configm4 0
 
+     phpize_get_api_numbers
+     phpize_print_api_numbers
+
      phpize_copy_files
 
      phpize_replace_prefix
