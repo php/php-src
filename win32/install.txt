@@ -595,6 +595,22 @@ Web server configuration
 
 ----------------------------------------------------------
 
+ Installing PHP on The Sambar Server
+
+  This section contains notes and hints specific to Sambar
+
+   Find the file called mappings.ini (config directory) in your Sambar
+   install directory
+
+   Open mappings.ini and add the following line under [isapi]
+
+   *.php = c:\php\php4isapi.dll
+    Note: The above assumes that PHP was installed in c:\php
+
+   Restart the server
+
+----------------------------------------------------------
+
 Problems?
 =========
 
