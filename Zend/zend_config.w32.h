@@ -55,6 +55,7 @@ typedef unsigned int uint;
 #define HAVE_STDARG_H	1
 #define HAVE_SNPRINTF	1
 #define HAVE_VSNPRINTF	1
+#define HAVE_STRCOLL	1
 
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
