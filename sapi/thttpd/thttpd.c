@@ -42,17 +42,26 @@ static php_thttpd_globals thttpd_globals;
 static int sapi_thttpd_ub_write(const char *str, uint str_length)
 {
 	int n;
+	uint sent = 0;	
 	TLS_FETCH();
 	
-	n = send(TG(hc)->conn_fd, str, str_length, 0);
+	while (str_length > 0) {
+		n = send(TG(hc)->conn_fd, str, str_length, 0);
 
-	if (n == -1 && errno == EPIPE) {
-		php_handle_aborted_connection();
+		if (n == -1 && errno == EPIPE)
+			php_handle_aborted_connection();
+		if (n == -1 && errno == EAGAIN)
+			continue;
+		if (n <= 0) 
+			return n;
+
+		TG(hc)->bytes += n;
+		str += n;
+		sent += n;
+		str_length -= n;
 	}
 
-	TG(hc)->bytes += n;
-
-	return n;
+	return sent;
 }
 
 static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
