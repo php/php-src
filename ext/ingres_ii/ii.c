@@ -143,10 +143,9 @@ static int _rollback_transaction(II_LINK *link)
   return 0;
 }
 
-static void _close_ii_link(II_LINK *link)
+static void _close_ii_link(II_LINK *link TSRMLS_DC)
 {
   IIAPI_DISCONNPARM disconnParm;
-  TSRMLS_FETCH();
 
   if(link->tranHandle && _rollback_transaction(link)) {
     php_error(E_WARNING,"Ingres II:  Unable to rollback transaction !!");
@@ -171,7 +170,7 @@ static void php_close_ii_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	II_LINK *link = (II_LINK *)rsrc->ptr;
 
-	_close_ii_link(link);
+	_close_ii_link(link TSRMLS_CC);
 }
 
 
@@ -181,7 +180,7 @@ static void _close_ii_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	II_LINK *link = (II_LINK *)rsrc->ptr;
 	
-	_close_ii_link(link);
+	_close_ii_link(link TSRMLS_CC);
 	IIG(num_persistent)--;
 }
 
@@ -223,9 +222,8 @@ static void _clean_ii_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 /* sets the default link
 */
-static void php_ii_set_default_link(int id)
+static void php_ii_set_default_link(int id TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 
 	if (IIG(default_link)!=-1) {
 		zend_list_delete(IIG(default_link));
@@ -531,7 +529,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	zend_list_addref((int) link);
 	return_value->value.lval = (int) link;
 
-	php_ii_set_default_link((int) link);
+	php_ii_set_default_link((int) link TSRMLS_CC);
 
 	return_value->type = IS_RESOURCE;
 	efree(hashed_details);
@@ -588,7 +586,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
   }
 
   efree(hashed_details);
-  php_ii_set_default_link(return_value->value.lval);
+  php_ii_set_default_link(return_value->value.lval TSRMLS_CC);
 }
 
 /* {{{ proto resource ingres_connect([string database [, string username [, string password]]])
@@ -836,6 +834,7 @@ static void php_ii_field_info(INTERNAL_FUNCTION_PARAMETERS, int info_type)
       fun_name = "ii_field_scale";
       break;
     default:
+      fun_name = "foobar";
       break;
     }
     php_error(E_WARNING,"Ingres II:  %s() called with wrong index (%d)",fun_name,index);
@@ -990,15 +989,15 @@ PHP_FUNCTION(ingres_field_scale)
 
 /* Fetch a row of result
 */
-static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int result_type TSRMLS_DC)
+static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int result_type)
 {
   IIAPI_GETCOLPARM getColParm;
   IIAPI_DATAVALUE *columnData;
   IIAPI_CONVERTPARM convertParm;
   int i,j,k;
   int more;
-  double value_double;
-  long value_long;
+  double value_double=0;
+  long value_long=0;
   char *value_char_p;
   int len, should_copy, correct_length;
 
@@ -1197,8 +1196,7 @@ PHP_FUNCTION(ingres_fetch_array)
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
 
-  php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link,
-	       (argc == 0 ? II_BOTH : Z_LVAL_PP(result_type)) TSRMLS_CC);
+  php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link, (argc == 0 ? II_BOTH : Z_LVAL_PP(result_type)));
 }
 /* }}} */
 
@@ -1222,7 +1220,7 @@ PHP_FUNCTION(ingres_fetch_row)
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
 
-  php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link, II_NUM TSRMLS_CC);
+  php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link, II_NUM);
 }
 /* }}} */
 
@@ -1250,8 +1248,7 @@ PHP_FUNCTION(ingres_fetch_object)
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
 
-  php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link,
-	       (argc == 0 ? II_BOTH : Z_LVAL_PP(result_type)) TSRMLS_CC);
+  php_ii_fetch(INTERNAL_FUNCTION_PARAM_PASSTHRU, ii_link, (argc == 0 ? II_BOTH : Z_LVAL_PP(result_type)));
   if(Z_TYPE_P(return_value)==IS_ARRAY) {
     convert_to_object(return_value);
   }

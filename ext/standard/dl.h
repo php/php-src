@@ -23,7 +23,7 @@
 #ifndef DL_H
 #define DL_H
 
-void php_dl(pval *file,int type,pval *return_value);
+void php_dl(pval *file,int type,pval *return_value TSRMLS_DC);
 
 
 /* dynamic loading functions */
