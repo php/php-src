@@ -40,8 +40,6 @@
 
 #include "php_apache.h"
 
-extern module **ap_loaded_modules;
-
 static request_rec *php_apache_lookup_uri(char *filename TSRMLS_DC)
 {
 	php_struct *ctx;
@@ -341,6 +339,9 @@ PHP_MINFO_FUNCTION(apache)
 			smart_str_appends(&tmp1, s);
 		}
 		smart_str_appendc(&tmp1, ' ');
+	}
+	if ((tmp1.len - 1) >= 0) {
+		tmp1.c[tmp1.len - 1] = '\0';
 	}
             
 	php_info_print_table_start();
