@@ -113,7 +113,7 @@ void php_dl(pval *file,int type,pval *return_value)
 			error_type = E_CORE_ERROR;
 		}
 #if MSVC5
-		php_error(error_type,"Unable to load dynamic library '%s'<br>\n%s",libpath,php3_win_err());
+		php_error(error_type,"Unable to load dynamic library '%s'<br>\n%s",libpath,php_win_err());
 #else
 		php_error(error_type,"Unable to load dynamic library '%s' - %s",libpath,dlerror());
 #endif

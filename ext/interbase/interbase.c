@@ -62,7 +62,7 @@ zend_module_entry ibase_module_entry =
 /* {{{ thread safety stuff */
 #if defined(THREAD_SAFE)
 typedef ibase_global_struct{
-        ibase_module php3_ibase_module;
+        ibase_module php_ibase_module;
 } ibase_global_struct;
 
 #define IBASE_GLOBAL(a) ibase_globals->a
@@ -74,41 +74,41 @@ typedef ibase_global_struct{
 #else
 #define IBASE_GLOBAL(a) a
 #define IBASE_TLS_VARS
-ibase_module php3_ibase_module;
+ibase_module php_ibase_module;
 #endif
 /* }}} */
 
-/* {{{ _php3_ibase_close_link() */
-static void _php3_ibase_close_link(isc_db_handle db)
+/* {{{ php_ibase_close_link() */
+static void php_ibase_close_link(isc_db_handle db)
 {
 	ISC_STATUS status[20];
 	IBASE_TLS_VARS;
 
 	isc_detach_database(status, &db);
-	IBASE_GLOBAL(php3_ibase_module).num_links--;
+	IBASE_GLOBAL(php_ibase_module).num_links--;
 }
 /* }}} */
 
-/* {{{ _php3_ibase_close_plink() */
-static void _php3_ibase_close_plink(isc_db_handle db)
+/* {{{ php_ibase_close_plink() */
+static void php_ibase_close_plink(isc_db_handle db)
 {
 	ISC_STATUS status[20];
 	IBASE_TLS_VARS;
 
 	isc_detach_database(status, &db);
-	php3_ibase_module.num_persistent--;
-	php3_ibase_module.num_links--;
+	php_ibase_module.num_persistent--;
+	php_ibase_module.num_links--;
 }
 /* }}} */
 
-/* {{{ _php3_ibase_free_result() */
-static void _php3_ibase_free_result(ibase_result_handle *result)
+/* {{{ php_ibase_free_result() */
+static void php_ibase_free_result(ibase_result_handle *result)
 {
 	int i;
 	ISC_STATUS status[20];
 	IBASE_TLS_VARS;
 
-	if (!IBASE_GLOBAL(php3_ibase_module).manualtransactions && result->commitok) {
+	if (!IBASE_GLOBAL(php_ibase_module).manualtransactions && result->commitok) {
 		isc_commit_transaction(status, &result->trans);
 	}
 	if (result->sqlda != NULL) {
@@ -123,8 +123,8 @@ static void _php3_ibase_free_result(ibase_result_handle *result)
 }
 /* }}} */
 
-/* {{{ _php3_ibase_free_query() */
-static void _php3_ibase_free_query(ibase_query_handle *query)
+/* {{{ php_ibase_free_query() */
+static void php_ibase_free_query(ibase_query_handle *query)
 {
 	int i;
 	ISC_STATUS status[20];
@@ -148,37 +148,37 @@ PHP_MINIT_FUNCTION(ibase)
 {
 	IBASE_TLS_VARS;
 
-	if (cfg_get_long("ibase.allow_persistent", &IBASE_GLOBAL(php3_ibase_module).allow_persistent) == FAILURE) {
-		IBASE_GLOBAL(php3_ibase_module).allow_persistent = 1;
+	if (cfg_get_long("ibase.allow_persistent", &IBASE_GLOBAL(php_ibase_module).allow_persistent) == FAILURE) {
+		IBASE_GLOBAL(php_ibase_module).allow_persistent = 1;
 	}
-	if (cfg_get_long("ibase.max_persistent", &IBASE_GLOBAL(php3_ibase_module).max_persistent) == FAILURE) {
-		IBASE_GLOBAL(php3_ibase_module).max_persistent = -1;
+	if (cfg_get_long("ibase.max_persistent", &IBASE_GLOBAL(php_ibase_module).max_persistent) == FAILURE) {
+		IBASE_GLOBAL(php_ibase_module).max_persistent = -1;
 	}
-	if (cfg_get_long("ibase.max_links", &IBASE_GLOBAL(php3_ibase_module).max_links) == FAILURE) {
-		IBASE_GLOBAL(php3_ibase_module).max_links = -1;
+	if (cfg_get_long("ibase.max_links", &IBASE_GLOBAL(php_ibase_module).max_links) == FAILURE) {
+		IBASE_GLOBAL(php_ibase_module).max_links = -1;
 	}
 	/*
-	if (cfg_get_long("ibase.manualtransactions", &IBASE_GLOBAL(php3_ibase_module).manualtransactions) == FAILURE) {
-		IBASE_GLOBAL(php3_ibase_module).manualtransactions = 0;
+	if (cfg_get_long("ibase.manualtransactions", &IBASE_GLOBAL(php_ibase_module).manualtransactions) == FAILURE) {
+		IBASE_GLOBAL(php_ibase_module).manualtransactions = 0;
 	}
 	*/
-	IBASE_GLOBAL(php3_ibase_module).manualtransactions = 0;
-	if (cfg_get_string("ibase.default_user", &IBASE_GLOBAL(php3_ibase_module).default_user) == FAILURE
-		|| IBASE_GLOBAL(php3_ibase_module).default_user[0] == 0) {
-		IBASE_GLOBAL(php3_ibase_module).default_user = "";
+	IBASE_GLOBAL(php_ibase_module).manualtransactions = 0;
+	if (cfg_get_string("ibase.default_user", &IBASE_GLOBAL(php_ibase_module).default_user) == FAILURE
+		|| IBASE_GLOBAL(php_ibase_module).default_user[0] == 0) {
+		IBASE_GLOBAL(php_ibase_module).default_user = "";
 	}
-	if (cfg_get_string("ibase.default_password", &IBASE_GLOBAL(php3_ibase_module).default_password) == FAILURE
-		|| IBASE_GLOBAL(php3_ibase_module).default_password[0] == 0) {	
-		IBASE_GLOBAL(php3_ibase_module).default_password = "";
+	if (cfg_get_string("ibase.default_password", &IBASE_GLOBAL(php_ibase_module).default_password) == FAILURE
+		|| IBASE_GLOBAL(php_ibase_module).default_password[0] == 0) {	
+		IBASE_GLOBAL(php_ibase_module).default_password = "";
 	}
-	if (cfg_get_string("ibase.timeformat", &IBASE_GLOBAL(php3_ibase_module).timeformat) == FAILURE) {
-		IBASE_GLOBAL(php3_ibase_module).timeformat = "%Y-%m-%d %H:%M:%S";
+	if (cfg_get_string("ibase.timeformat", &IBASE_GLOBAL(php_ibase_module).timeformat) == FAILURE) {
+		IBASE_GLOBAL(php_ibase_module).timeformat = "%Y-%m-%d %H:%M:%S";
 	}
-	IBASE_GLOBAL(php3_ibase_module).num_persistent=0;
-	IBASE_GLOBAL(php3_ibase_module).le_result = register_list_destructors(_php3_ibase_free_result, NULL);
-	IBASE_GLOBAL(php3_ibase_module).le_query = register_list_destructors(_php3_ibase_free_query, NULL);
-	IBASE_GLOBAL(php3_ibase_module).le_link = register_list_destructors(_php3_ibase_close_link, NULL);
-	IBASE_GLOBAL(php3_ibase_module).le_plink = register_list_destructors(NULL, _php3_ibase_close_plink);
+	IBASE_GLOBAL(php_ibase_module).num_persistent=0;
+	IBASE_GLOBAL(php_ibase_module).le_result = register_list_destructors(php_ibase_free_result, NULL);
+	IBASE_GLOBAL(php_ibase_module).le_query = register_list_destructors(php_ibase_free_query, NULL);
+	IBASE_GLOBAL(php_ibase_module).le_link = register_list_destructors(php_ibase_close_link, NULL);
+	IBASE_GLOBAL(php_ibase_module).le_plink = register_list_destructors(NULL, php_ibase_close_plink);
 	return SUCCESS;
 }
 
@@ -186,18 +186,18 @@ PHP_RINIT_FUNCTION(ibase)
 {
 	IBASE_TLS_VARS;
 
-	IBASE_GLOBAL(php3_ibase_module).default_link=-1;
-	IBASE_GLOBAL(php3_ibase_module).num_links = php3_ibase_module.num_persistent;
+	IBASE_GLOBAL(php_ibase_module).default_link=-1;
+	IBASE_GLOBAL(php_ibase_module).num_links = php_ibase_module.num_persistent;
 	return SUCCESS;
 }
 
 /* TODO IF NEEDED
 
-int php3_mfinish_ibase(void)
+int php_mfinish_ibase(void)
 {
 }
 
-int php3_rfinish_ibase(void)
+int php_rfinish_ibase(void)
 {
 }
 */
@@ -248,8 +248,8 @@ static int _php_ibase_attach_db(char *server, char *uname, int uname_len, char *
 }
 /* }}} */
 
-/* {{{ _php3_ibase_connect() */
-static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+/* {{{ php_ibase_connect() */
+static void php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	pval *server, *uname, *passwd;
 
@@ -260,8 +260,8 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length;
 	IBASE_TLS_VARS;
 
-	ib_uname = IBASE_GLOBAL(php3_ibase_module).default_user;
-	ib_passwd = IBASE_GLOBAL(php3_ibase_module).default_password;
+	ib_uname = IBASE_GLOBAL(php_ibase_module).default_user;
+	ib_passwd = IBASE_GLOBAL(php_ibase_module).default_password;
 	ib_uname_len = ib_uname ? strlen(ib_uname) : 0;
 	ib_passwd_len = ib_passwd ? strlen(ib_passwd) : 0;
 
@@ -325,13 +325,13 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
 			list_entry new_le;
 			
-			if (IBASE_GLOBAL(php3_ibase_module).max_links!=-1 && IBASE_GLOBAL(php3_ibase_module).num_links>=IBASE_GLOBAL(php3_ibase_module).max_links) {
-				php_error(E_WARNING,"InterBase: Too many open links (%d)", IBASE_GLOBAL(php3_ibase_module).num_links);
+			if (IBASE_GLOBAL(php_ibase_module).max_links!=-1 && IBASE_GLOBAL(php_ibase_module).num_links>=IBASE_GLOBAL(php_ibase_module).max_links) {
+				php_error(E_WARNING,"InterBase: Too many open links (%d)", IBASE_GLOBAL(php_ibase_module).num_links);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
-			if (IBASE_GLOBAL(php3_ibase_module).max_persistent!=-1 && IBASE_GLOBAL(php3_ibase_module).num_persistent>=IBASE_GLOBAL(php3_ibase_module).max_persistent) {
-				php_error(E_WARNING,"InterBase: Too many open persistent links (%d)", IBASE_GLOBAL(php3_ibase_module).num_persistent);
+			if (IBASE_GLOBAL(php_ibase_module).max_persistent!=-1 && IBASE_GLOBAL(php_ibase_module).num_persistent>=IBASE_GLOBAL(php_ibase_module).max_persistent) {
+				php_error(E_WARNING,"InterBase: Too many open persistent links (%d)", IBASE_GLOBAL(php_ibase_module).num_persistent);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -344,23 +344,23 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			/* hash it up */
-			new_le.type = php3_ibase_module.le_plink;
+			new_le.type = php_ibase_module.le_plink;
 			new_le.ptr = db_handle;
 			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
-			IBASE_GLOBAL(php3_ibase_module).num_links++;
-			IBASE_GLOBAL(php3_ibase_module).num_persistent++;
+			IBASE_GLOBAL(php_ibase_module).num_links++;
+			IBASE_GLOBAL(php_ibase_module).num_persistent++;
 		} else {
-			if (le->type != IBASE_GLOBAL(php3_ibase_module).le_plink) {
+			if (le->type != IBASE_GLOBAL(php_ibase_module).le_plink) {
 				RETURN_FALSE;
 			}
 			/* TODO: ensure that the link did not die */
 
 			db_handle = (isc_db_handle) le->ptr;
 		}
-		return_value->value.lval = zend_list_insert(db_handle, IBASE_GLOBAL(php3_ibase_module).le_plink);
+		return_value->value.lval = zend_list_insert(db_handle, IBASE_GLOBAL(php_ibase_module).le_plink);
 		return_value->type = IS_LONG;
 	} else {
 		list_entry *index_ptr, new_index_ptr;
@@ -379,8 +379,8 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			link = (int) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
-			if (ptr && (type==IBASE_GLOBAL(php3_ibase_module).le_link || type==IBASE_GLOBAL(php3_ibase_module).le_plink)) {
-				return_value->value.lval = IBASE_GLOBAL(php3_ibase_module).default_link = link;
+			if (ptr && (type==IBASE_GLOBAL(php_ibase_module).le_link || type==IBASE_GLOBAL(php_ibase_module).le_plink)) {
+				return_value->value.lval = IBASE_GLOBAL(php_ibase_module).default_link = link;
 				return_value->type = IS_LONG;
 				efree(hashed_details);
 				return;
@@ -388,8 +388,8 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				zend_hash_del(list,hashed_details,hashed_details_length+1);
 			}
 		}
-		if (IBASE_GLOBAL(php3_ibase_module).max_links!=-1 && IBASE_GLOBAL(php3_ibase_module).num_links>=IBASE_GLOBAL(php3_ibase_module).max_links) {
-			php_error(E_WARNING,"InterBase:  Too many open links (%d)", IBASE_GLOBAL(php3_ibase_module).num_links);
+		if (IBASE_GLOBAL(php_ibase_module).max_links!=-1 && IBASE_GLOBAL(php_ibase_module).num_links>=IBASE_GLOBAL(php_ibase_module).max_links) {
+			php_error(E_WARNING,"InterBase:  Too many open links (%d)", IBASE_GLOBAL(php_ibase_module).num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -401,7 +401,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		/* add it to the list */
-		return_value->value.lval = zend_list_insert(db_handle, IBASE_GLOBAL(php3_ibase_module).le_link);
+		return_value->value.lval = zend_list_insert(db_handle, IBASE_GLOBAL(php_ibase_module).le_link);
 		return_value->type = IS_LONG;
 
 		/* add it to the hash */
@@ -411,10 +411,10 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
-		IBASE_GLOBAL(php3_ibase_module).num_links++;
+		IBASE_GLOBAL(php_ibase_module).num_links++;
 	}
 	efree(hashed_details);
-	IBASE_GLOBAL(php3_ibase_module).default_link=return_value->value.lval;
+	IBASE_GLOBAL(php_ibase_module).default_link=return_value->value.lval;
 }
 /* }}} */
 
@@ -422,7 +422,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
    Open a connection to an InterBase database */
 PHP_FUNCTION(ibase_connect)
 {
-	_php3_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -430,7 +430,7 @@ PHP_FUNCTION(ibase_connect)
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
 {
-	_php3_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -445,7 +445,7 @@ PHP_FUNCTION(ibase_close)
 	
 	switch (ARG_COUNT(ht)) {
 		case 0:
-			id = IBASE_GLOBAL(php3_ibase_module).default_link;
+			id = IBASE_GLOBAL(php_ibase_module).default_link;
 			break;
 		case 1:
 			if (getParameters(ht, 1, &ibase_link) == FAILURE) {
@@ -460,7 +460,7 @@ PHP_FUNCTION(ibase_close)
 	}
 	
 	db_handle = (isc_db_handle) zend_list_find(id, &type);
-	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
+	if (type!=IBASE_GLOBAL(php_ibase_module).le_link && type!=IBASE_GLOBAL(php_ibase_module).le_plink) {
 		php_error(E_WARNING, "%d is not an InterBase link index",id);
 		RETURN_FALSE;
 	}
@@ -470,8 +470,8 @@ PHP_FUNCTION(ibase_close)
 }
 /* }}} */
 
-/* {{{ _php3_ibase_prepare() */
-static XSQLDA *_php3_ibase_prepare(isc_db_handle db, isc_tr_handle tr, isc_stmt_handle *query_handle, char *query)
+/* {{{ php_ibase_prepare() */
+static XSQLDA *php_ibase_prepare(isc_db_handle db, isc_tr_handle tr, isc_stmt_handle *query_handle, char *query)
 {
 	ISC_STATUS status[20];
 	XSQLDA *isqlda;
@@ -517,8 +517,8 @@ static XSQLDA *_php3_ibase_prepare(isc_db_handle db, isc_tr_handle tr, isc_stmt_
 }
 /* }}} */
 
-/* {{{ _php3_ibase_execute() */
-static XSQLDA *_php3_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle query_handle, XSQLDA *isqlda, ISC_STATUS *status)
+/* {{{ php_ibase_execute() */
+static XSQLDA *php_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle query_handle, XSQLDA *isqlda, ISC_STATUS *status)
 {
 	int i, coltype;
 	static char query_info[] = { isc_info_sql_stmt_type };
@@ -614,7 +614,7 @@ static XSQLDA *_php3_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle quer
 			php_error(E_WARNING, "InterBase: couldn't execute query");
 		}
 		/*
-		if (!php3_ibase_module.manualtransactions) {
+		if (!php_ibase_module.manualtransactions) {
 			if(0) {
 				isc_commit_transaction(status, tr_handle);
 			} else {
@@ -647,7 +647,7 @@ PHP_FUNCTION(ibase_query)
 			if (getParameters(ht, 1, &query) == FAILURE) {
 				RETURN_FALSE;
 			}
-			id = IBASE_GLOBAL(php3_ibase_module).default_link;
+			id = IBASE_GLOBAL(php_ibase_module).default_link;
 			break;
 		case 2:
 			if (getParameters(ht, 2, &ibase_link, &query) == FAILURE) {
@@ -662,21 +662,21 @@ PHP_FUNCTION(ibase_query)
 	}
 	
 	db_handle = (isc_db_handle) zend_list_find(id, &type);
-	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
+	if (type!=IBASE_GLOBAL(php_ibase_module).le_link && type!=IBASE_GLOBAL(php_ibase_module).le_plink) {
 		php_error(E_WARNING, "%d is not an InterBase link index", id);
 		RETURN_FALSE;
 	}
 	
 	convert_to_string(query);
 
-	if (!IBASE_GLOBAL(php3_ibase_module).manualtransactions) {
+	if (!IBASE_GLOBAL(php_ibase_module).manualtransactions) {
 		if (isc_start_transaction(status, &tr_handle, 1, &db_handle, 0, NULL)) {
 			php_error(E_WARNING, "InterBase: couldn't start transaction");
 			RETURN_FALSE;
 		}
 	}
 
-	isqlda = _php3_ibase_prepare(db_handle, tr_handle, &query_handle, query->value.str.val);
+	isqlda = php_ibase_prepare(db_handle, tr_handle, &query_handle, query->value.str.val);
 	if (isqlda != NULL) {
 		isc_rollback_transaction(status, &tr_handle);
 		isc_dsql_free_statement(status, &query_handle, DSQL_drop);
@@ -684,24 +684,24 @@ PHP_FUNCTION(ibase_query)
 		RETURN_FALSE;
 	}
 
-	osqlda = _php3_ibase_execute(tr_handle, query_handle, isqlda, status);
+	osqlda = php_ibase_execute(tr_handle, query_handle, isqlda, status);
 	if (osqlda != NULL) {
 		ibase_result = (ibase_result_handle *) emalloc(sizeof(ibase_result_handle));
 		ibase_result->result = query_handle;
 		ibase_result->sqlda = osqlda;
 		ibase_result->trans = tr_handle;
 		ibase_result->commitok = 1;
-		return_value->value.lval = zend_list_insert(ibase_result, php3_ibase_module.le_result);
+		return_value->value.lval = zend_list_insert(ibase_result, php_ibase_module.le_result);
 		return_value->type = IS_LONG;
 	} else {
 		if (status[0] == 1 && status[1]) {
-			if (!IBASE_GLOBAL(php3_ibase_module).manualtransactions) {
+			if (!IBASE_GLOBAL(php_ibase_module).manualtransactions) {
 				isc_rollback_transaction(status, &tr_handle);
 				isc_dsql_free_statement(status, &query_handle, DSQL_drop);
 				RETURN_FALSE;
 			}
 		} else {
-			if (!IBASE_GLOBAL(php3_ibase_module).manualtransactions) {
+			if (!IBASE_GLOBAL(php_ibase_module).manualtransactions) {
 				isc_commit_transaction(status, &tr_handle);
 				isc_dsql_free_statement(status, &query_handle, DSQL_drop);
 				RETURN_FALSE;
@@ -739,7 +739,7 @@ PHP_FUNCTION(ibase_fetch_row)
 	convert_to_long(result);
 	ibase_result = (ibase_result_handle *) zend_list_find(result->value.lval, &type);
 	
-	if (type!=IBASE_GLOBAL(php3_ibase_module).le_result) {
+	if (type!=IBASE_GLOBAL(php_ibase_module).le_result) {
 		php_error(E_WARNING,"%d is not an InterBase result index", result->value.lval);
 		RETURN_FALSE;
 	}
@@ -841,7 +841,7 @@ PHP_FUNCTION(ibase_fetch_row)
 					isc_decode_date((ISC_QUAD *) var[i].sqldata, t);
 					/*
 #if HAVE_STRFTIME
-					collen = (int) strftime(string_data, 255, IBASE_GLOBAL(php3_ibase_module).timeformat, t);
+					collen = (int) strftime(string_data, 255, IBASE_GLOBAL(php_ibase_module).timeformat, t);
 #else
 					*/
 					collen = sprintf(string_data, "%4d-%02d-%02d %02d:%02d:%02d", t->tm_year+1900, t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
@@ -892,7 +892,7 @@ PHP_FUNCTION(ibase_free_result)
 	
 	ibase_result = (ibase_result_handle *) zend_list_find(result->value.lval,&type);
 	
-	if (type!=IBASE_GLOBAL(php3_ibase_module).le_result) {
+	if (type!=IBASE_GLOBAL(php_ibase_module).le_result) {
 		php_error(E_WARNING,"%d is not an InterBase result index",result->value.lval);
 		RETURN_FALSE;
 	}
@@ -920,7 +920,7 @@ PHP_FUNCTION(ibase_prepare)
 			if (getParameters(ht, 1, &query) == FAILURE) {
 				RETURN_FALSE;
 			}
-			id = IBASE_GLOBAL(php3_ibase_module).default_link;
+			id = IBASE_GLOBAL(php_ibase_module).default_link;
 			break;
 		case 2:
 			if (getParameters(ht, 2, &ibase_link, &query) == FAILURE) {
@@ -935,27 +935,27 @@ PHP_FUNCTION(ibase_prepare)
 	}
 	
 	db_handle = (isc_db_handle) zend_list_find(id, &type);
-	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
+	if (type!=IBASE_GLOBAL(php_ibase_module).le_link && type!=IBASE_GLOBAL(php_ibase_module).le_plink) {
 		php_error(E_WARNING, "%d is not an InterBase link index", id);
 		RETURN_FALSE;
 	}
 	
 	convert_to_string(query);
 
-	if (!IBASE_GLOBAL(php3_ibase_module).manualtransactions) {
+	if (!IBASE_GLOBAL(php_ibase_module).manualtransactions) {
 		if (isc_start_transaction(status, &tr_handle, 1, &db_handle, 0, NULL)) {
 			php_error(E_WARNING, "InterBase: couldn't start transaction");
 			RETURN_FALSE;
 		}
 	}
 
-	isqlda = _php3_ibase_prepare(db_handle, tr_handle, &query_handle, query->value.str.val);
+	isqlda = php_ibase_prepare(db_handle, tr_handle, &query_handle, query->value.str.val);
 	ibase_query = (ibase_query_handle *) emalloc(sizeof(ibase_query_handle));
 	ibase_query->query = query_handle;
 	ibase_query->sqlda = isqlda;
 	ibase_query->trans = tr_handle;
 	ibase_query->alloced = 0;
-	return_value->value.lval = zend_list_insert(ibase_query, php3_ibase_module.le_query);
+	return_value->value.lval = zend_list_insert(ibase_query, php_ibase_module.le_query);
 	return_value->type = IS_LONG;
 }
 /* }}} */
@@ -980,7 +980,7 @@ PHP_FUNCTION(ibase_bind)
 	
 	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval,&type);
 	
-	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
+	if (type!=IBASE_GLOBAL(php_ibase_module).le_query) {
 		php_error(E_WARNING,"%d is not an InterBase query index",query->value.lval);
 		RETURN_FALSE;
 	}
@@ -1043,16 +1043,16 @@ PHP_FUNCTION(ibase_execute)
 	
 	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval,&type);
 	
-	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
+	if (type!=IBASE_GLOBAL(php_ibase_module).le_query) {
 		php_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
 		RETURN_FALSE;
 	}
 
-	osqlda = _php3_ibase_execute(ibase_query->trans, ibase_query->query, ibase_query->sqlda, status);
+	osqlda = php_ibase_execute(ibase_query->trans, ibase_query->query, ibase_query->sqlda, status);
 	ibase_result = (ibase_result_handle *) emalloc(sizeof(ibase_result_handle));
 	ibase_result->result = ibase_query->query;
 	ibase_result->sqlda = osqlda;
-	return_value->value.lval = zend_list_insert(ibase_result, IBASE_GLOBAL(php3_ibase_module).le_result);
+	return_value->value.lval = zend_list_insert(ibase_result, IBASE_GLOBAL(php_ibase_module).le_result);
 	return_value->type = IS_LONG;
 }
 /* }}} */
@@ -1077,7 +1077,7 @@ PHP_FUNCTION(ibase_free_query)
 	
 	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval, &type);
 	
-	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
+	if (type!=IBASE_GLOBAL(php_ibase_module).le_query) {
 		php_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
 		RETURN_FALSE;
 	}

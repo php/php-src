@@ -39,8 +39,8 @@ typedef struct {
 	int gzgetss_state;
 } php_zlib_globals;
 
-extern zend_module_entry php3_zlib_module_entry;
-#define zlib_module_ptr &php3_zlib_module_entry
+extern zend_module_entry php_zlib_module_entry;
+#define zlib_module_ptr &php_zlib_module_entry
 
 extern PHP_MINIT_FUNCTION(zlib);
 extern PHP_MSHUTDOWN_FUNCTION(zlib);
