@@ -17,7 +17,7 @@ if (PHP_MSSQL == "yes") {
 ARG_WITH("freetds", "mssql support with freetds", "no");
 
 if (PHP_FREETDS == "yes") {
-	if (CHECK_LIB("sybdb.lib", "freetds", PHP_PHP_BUILD + "\\freetds") &&
+	if (CHECK_LIB("dblib.lib", "freetds", PHP_PHP_BUILD + "\\freetds") &&
 			CHECK_HEADER_ADD_INCLUDE("sybfront.h", "CFLAGS_FREETDS", PHP_PHP_BUILD + "\\freetds;" + PHP_FREETDS)) {
 		EXTENSION("freetds", "php_mssql.c");
 		ADD_FLAG("CFLAGS_FREETDS", "/D DBNTWIN32=1 /D MSSQL70=1");
