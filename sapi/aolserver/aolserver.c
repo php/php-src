@@ -502,6 +502,8 @@ php_ns_request_handler(void *context, Ns_Conn *conn)
 	
 	NSG(conn) = conn;
 	
+	SG(server_context) = global_context;
+
 	php_ns_request_ctor(NSLS_C SLS_CC);
 	
 	status = php_ns_module_main(NSLS_C SLS_CC);
