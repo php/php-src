@@ -1,5 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Jan 2004, Version 4.3.5
+- Fixed bug #26878 (problem with multiple references to the same variable 
+  with different types). (Ilia)
+- Fixed bug #26896 (ext/ftp does not work as shared extension). (Jani)
+
 12 Jan 2004, Version 4.3.5RC1
 - Synchronized bundled GD library with GD 2.0.17
 - Upgraded PCRE library to version 4.5. (Andrei)
@@ -10,7 +15,6 @@ PHP 4                                                                      NEWS
 - Added a warning when creating temp stream fails with ftp_(n)list(). (Sara)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
-- Fixed bug #26896 (ext/ftp does not work as shared extension). (Jani)
 - Fixed bug #26864 (pg_(update|delete) ignore PGSQL_DML_EXEC option). (Ilia)
 - Fixed bug #26847 (memory leak in mail() when to/subject contain only spaces).
   (Ilia)

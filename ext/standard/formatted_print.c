@@ -499,7 +499,8 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 	currarg = 1;
 
 	while (inpos<Z_STRLEN_PP(args[0])) {
-		int expprec = 0;
+		int expprec = 0, multiuse = 0;
+		zval *tmp;
 
 		PRINTF_DEBUG(("sprintf: format[%d]='%c'\n", inpos, format[inpos]));
 		PRINTF_DEBUG(("sprintf: outpos=%d\n", outpos));
@@ -537,7 +538,8 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zero is not a valid argument number");
 						return NULL;
 					}
-	
+
+					multiuse = 1;
 					inpos++;  /* skip the '$' */
 				} else {
 					argnum = currarg++;
@@ -608,29 +610,37 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 			}
 			PRINTF_DEBUG(("sprintf: format character='%c'\n", format[inpos]));
 			/* now we expect to find a type specifier */
+ 			if (multiuse) {
+ 				MAKE_STD_ZVAL(tmp);
+ 				*tmp = **(args[argnum]);
+ 				zval_copy_ctor(tmp);
+ 			} else {
+ 				tmp = *(args[argnum]);
+ 			}
+
 			switch (format[inpos]) {
 				case 's':
-					convert_to_string_ex(args[argnum]);
+					convert_to_string(tmp);
 					php_sprintf_appendstring(&result, &outpos, &size,
-											 Z_STRVAL_PP(args[argnum]),
+											 Z_STRVAL_P(tmp),
 											 width, precision, padding,
 											 alignment,
-											 Z_STRLEN_PP(args[argnum]),
+											 Z_STRLEN_P(tmp),
 											 0, expprec);
 					break;
 
 				case 'd':
-					convert_to_long_ex(args[argnum]);
+					convert_to_long(tmp);
 					php_sprintf_appendint(&result, &outpos, &size,
-										  Z_LVAL_PP(args[argnum]),
+										  Z_LVAL_P(tmp),
 										  width, padding, alignment,
 										  always_sign);
 					break;
 
 				case 'u':
-					convert_to_long_ex(args[argnum]);
+					convert_to_long(tmp);
 					php_sprintf_appenduint(&result, &outpos, &size,
-										  Z_LVAL_PP(args[argnum]),
+										  Z_LVAL_P(tmp),
 										  width, padding, alignment,
 										  always_sign);
 					break;
@@ -638,9 +648,9 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				case 'e':
 				case 'f':
 					/* XXX not done */
-					convert_to_double_ex(args[argnum]);
+					convert_to_double(tmp);
 					php_sprintf_appenddouble(&result, &outpos, &size,
-											 Z_DVAL_PP(args[argnum]),
+											 Z_DVAL_P(tmp),
 											 width, padding, alignment,
 											 precision, adjusting,
 											 format[inpos], always_sign
@@ -648,39 +658,39 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					break;
 					
 				case 'c':
-					convert_to_long_ex(args[argnum]);
+					convert_to_long(tmp);
 					php_sprintf_appendchar(&result, &outpos, &size,
-										(char) Z_LVAL_PP(args[argnum]) TSRMLS_CC);
+										(char) Z_LVAL_P(tmp) TSRMLS_CC);
 					break;
 
 				case 'o':
-					convert_to_long_ex(args[argnum]);
+					convert_to_long(tmp);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 Z_LVAL_PP(args[argnum]),
+										 Z_LVAL_P(tmp),
 										 width, padding, alignment, 3,
 										 hexchars, expprec);
 					break;
 
 				case 'x':
-					convert_to_long_ex(args[argnum]);
+					convert_to_long(tmp);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 Z_LVAL_PP(args[argnum]),
+										 Z_LVAL_P(tmp),
 										 width, padding, alignment, 4,
 										 hexchars, expprec);
 					break;
 
 				case 'X':
-					convert_to_long_ex(args[argnum]);
+					convert_to_long(tmp);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 Z_LVAL_PP(args[argnum]),
+										 Z_LVAL_P(tmp),
 										 width, padding, alignment, 4,
 										 HEXCHARS, expprec);
 					break;
 
 				case 'b':
-					convert_to_long_ex(args[argnum]);
+					convert_to_long(tmp);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 Z_LVAL_PP(args[argnum]),
+										 Z_LVAL_P(tmp),
 										 width, padding, alignment, 1,
 										 hexchars, expprec);
 					break;
@@ -691,6 +701,9 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					break;
 				default:
 					break;
+			}
+			if (multiuse) {
+				zval_ptr_dtor(&tmp);
 			}
 			inpos++;
 		}
