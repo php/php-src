@@ -392,13 +392,13 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 }
 
 
-int zend_init_rsrc_list_dtors()
+int zend_init_rsrc_list_dtors(void)
 {
 	return zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
 }
 
 
-void zend_destroy_rsrc_list_dtors()
+void zend_destroy_rsrc_list_dtors(void)
 {
 	zend_hash_destroy(&list_destructors);
 }
