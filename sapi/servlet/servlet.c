@@ -54,10 +54,7 @@
 #ifdef PHP_WIN32
 #include <io.h>
 #include <fcntl.h>
-#include "win32/syslog.h"
 #include "win32/php_registry.h"
-#else
-#include <syslog.h>
 #endif
 
 #include "zend_compile.h"
