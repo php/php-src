@@ -519,14 +519,14 @@ PHP_RINIT_FUNCTION(oci)
     return SUCCESS;
 }
 
-static int _session_pcleanup(oci_session *session)
+static int _session_pcleanup(oci_session *session TSRMLS_DC)
 {
 	_oci_close_session(session);
 
 	return 1;
 }
 
-static int _server_pcleanup(oci_server *server)
+static int _server_pcleanup(oci_server *server TSRMLS_DC)
 {
 	_oci_close_server(server);
 
@@ -539,8 +539,8 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 
     oci_debug("START php_mshutdown_oci");
 
-	zend_hash_apply(OCI(user), (apply_func_t)_session_pcleanup);
-	zend_hash_apply(OCI(server), (apply_func_t)_server_pcleanup);
+	zend_hash_apply(OCI(user), (apply_func_t)_session_pcleanup TSRMLS_CC);
+	zend_hash_apply(OCI(server), (apply_func_t)_server_pcleanup TSRMLS_CC);
 
 	zend_hash_destroy(OCI(user));
 	zend_hash_destroy(OCI(server));
@@ -562,8 +562,8 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 #if 0
 	/* XXX free all statements, rollback all outstanding transactions */
 
-	zend_hash_apply(OCI(user), (apply_func_t) _session_cleanup);
-	zend_hash_apply(OCI(server), (apply_func_t) _server_cleanup);
+	zend_hash_apply(OCI(user), (apply_func_t) _session_cleanup TSRMLS_CC);
+	zend_hash_apply(OCI(server), (apply_func_t) _server_cleanup TSRMLS_CC);
 #endif
 
     oci_debug("END   php_rshutdown_oci");
@@ -622,7 +622,7 @@ _oci_bind_hash_dtor(void *data)
 /* {{{ _oci_bind_pre_exec() */
 
 static int
-_oci_bind_pre_exec(void *data)
+_oci_bind_pre_exec(void *data TSRMLS_DC)
 {
 	oci_bind *bind = (oci_bind *) data;
 
@@ -637,7 +637,7 @@ _oci_bind_pre_exec(void *data)
 /* {{{ _oci_bind_post_exec() */
 
 static int
-_oci_bind_post_exec(void *data)
+_oci_bind_post_exec(void *data TSRMLS_DC)
 {
 	oci_bind *bind = (oci_bind *) data;
 
@@ -1319,6 +1319,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 	int dtype;
 	dvoid *buf;
 	oci_descriptor *descr;
+	TSRMLS_FETCH();
 
 	statement->error = 
 		oci_error(statement->pError,
@@ -1346,7 +1347,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 		   we don't want to execute!!! */
 
 		if (statement->binds) {
-			zend_hash_apply(statement->binds, (apply_func_t) _oci_bind_pre_exec);
+			zend_hash_apply(statement->binds, (apply_func_t) _oci_bind_pre_exec TSRMLS_CC);
 		}
 
 		statement->error = 
@@ -1361,7 +1362,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 									 NULL,
 									 mode));
 		if (statement->binds) {
-			zend_hash_apply(statement->binds, (apply_func_t) _oci_bind_post_exec);
+			zend_hash_apply(statement->binds, (apply_func_t) _oci_bind_post_exec TSRMLS_CC);
 		}
 
 		oci_handle_error(statement->conn, statement->error);
@@ -1612,7 +1613,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 /* {{{ oci_fetch() */
 
 static int
-_oci_column_pre_fetch(void *data)
+_oci_column_pre_fetch(void *data TSRMLS_DC)
 {
 	oci_out_column *col = (oci_out_column *) data;
 	
@@ -1631,7 +1632,7 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 	oci_out_column *column;
 
 	if (statement->columns) {
-		zend_hash_apply(statement->columns, (apply_func_t) _oci_column_pre_fetch);
+		zend_hash_apply(statement->columns, (apply_func_t) _oci_column_pre_fetch TSRMLS_CC);
 	}
 
 	statement->error =
@@ -2338,7 +2339,7 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 /* {{{ _oci_close_server()
  */
 
-static int _oci_session_cleanup(void *data)
+static int _oci_session_cleanup(void *data TSRMLS_DC)
 {
 	list_entry *le = (list_entry *) data;
 	if (le->type == le_session) {
@@ -2356,12 +2357,11 @@ _oci_close_server(oci_server *server)
 	char *dbname;
 	int oldopen;
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	oldopen = server->is_open;
 	server->is_open = 2;
 	if (! OCI(shutdown)) {
-		zend_hash_apply(&EG(regular_list), _oci_session_cleanup);
+		zend_hash_apply(&EG(regular_list), (apply_func_t) _oci_session_cleanup TSRMLS_CC);
 	}
 	server->is_open = oldopen;
 
@@ -3917,7 +3917,7 @@ PHP_FUNCTION(ocilogoff)
 
 	connection->is_open = 0;
 
-	zend_hash_apply(list, (apply_func_t) _stmt_cleanup);
+	zend_hash_apply(list, (apply_func_t) _stmt_cleanup TSRMLS_CC);
 
 	if (zend_list_delete(connection->id) == SUCCESS) {
 		RETURN_TRUE;

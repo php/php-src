@@ -553,7 +553,7 @@ ZEND_FUNCTION(get_class_vars)
 		efree(lcname);
 		array_init(return_value);
 		if (!ce->constants_updated) {
-			zend_hash_apply_with_argument(&ce->default_properties, (int (*)(void *,void *)) zval_update_constant, (void *) 1);
+			zend_hash_apply_with_argument(&ce->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 			ce->constants_updated = 1;
 		}
 		zend_hash_copy(return_value->value.ht, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
@@ -1008,14 +1008,14 @@ ZEND_FUNCTION(get_resource_type)
 }
 
 
-static int add_extension_info(zend_module_entry *module, void *arg)
+static int add_extension_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
 	zval *name_array = (zval *)arg;
 	add_next_index_string(name_array, module->name, 1);
 	return 0;
 }
 
-static int add_constant_info(zend_constant *constant, void *arg)
+static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC)
 {
 	zval *name_array = (zval *)arg;
 	zval *const_val;
@@ -1037,7 +1037,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void*)) add_extension_info, return_value);
+	zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) add_extension_info, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1051,7 +1051,7 @@ ZEND_FUNCTION(get_defined_constants)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_argument(EG(zend_constants), (int (*)(void *, void*)) add_constant_info, return_value);
+	zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) add_constant_info, return_value TSRMLS_CC);
 }
 
 

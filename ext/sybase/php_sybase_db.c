@@ -125,7 +125,7 @@ static int php_sybase_message_handler(DBPROCESS *dbproc,DBINT msgno,int msgstate
 }
 
 
-static int _clean_invalid_results(list_entry *le)
+static int _clean_invalid_results(list_entry *le TSRMLS_DC)
 {
 	if (le->type == php_sybase_module.le_result) {
 		sybase_link *sybase_ptr = ((sybase_result *) le->ptr)->sybase_ptr;
@@ -177,7 +177,7 @@ static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
       will *not* be in a consistent state. thies@thieso.net
     */
 
-	zend_hash_apply(&EG(regular_list), (apply_func_t) _clean_invalid_results);
+	zend_hash_apply(&EG(regular_list), (apply_func_t) _clean_invalid_results TSRMLS_CC);
 	dbclose(sybase_ptr->link);
 	dbloginfree(sybase_ptr->login);
 	efree(sybase_ptr);

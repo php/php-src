@@ -158,12 +158,12 @@ ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data))
 }
 
 
-ZEND_API void zend_llist_apply(zend_llist *l, void (*func)(void *data))
+ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC)
 {
 	zend_llist_element *element;
 
 	for (element=l->head; element; element=element->next) {
-		func(element->data);
+		func(element->data TSRMLS_CC);
 	}
 }
 
@@ -205,24 +205,24 @@ ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
 }
 
 
-ZEND_API void zend_llist_apply_with_argument(zend_llist *l, void (*func)(void *data, void *arg), void *arg)
+ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg_func_t func, void *arg TSRMLS_DC)
 {
 	zend_llist_element *element;
 
 	for (element=l->head; element; element=element->next) {
-		func(element->data, arg);
+		func(element->data, arg TSRMLS_CC);
 	}
 }
 
 
-ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func, int num_args, ...)
+ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func TSRMLS_DC, int num_args, ...)
 {
 	zend_llist_element *element;
 	va_list args;
 
 	va_start(args, num_args);
 	for (element=l->head; element; element=element->next) {
-		func(element->data, num_args, args);
+		func(element->data, num_args, args TSRMLS_CC);
 	}
 	va_end(args);
 }

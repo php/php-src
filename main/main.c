@@ -128,7 +128,7 @@ static PHP_INI_MH(OnUpdateErrorReporting)
 
 /* {{{ php_disable_functions
  */
-static void php_disable_functions()
+static void php_disable_functions(TSRMLS_D)
 {
 	char *func;
 	char *new_value_dup = strdup(INI_STR("disable_functions"));	/* This is an intentional leak,
@@ -137,7 +137,7 @@ static void php_disable_functions()
 
 	func = strtok(new_value_dup, ", ");
 	while (func) {
-		zend_disable_function(func, strlen(func));
+		zend_disable_function(func, strlen(func) TSRMLS_CC);
 		func = strtok(NULL, ", ");
 	}
 }
@@ -655,7 +655,7 @@ int php_request_startup(TSRMLS_D)
 		/* PG(during_request_startup) = 0; */
 
 		php_hash_environment(TSRMLS_C);
-		zend_activate_modules();
+		zend_activate_modules(TSRMLS_C);
 		PG(modules_activated)=1;
 	} zend_catch {
 		retval = FAILURE;
@@ -909,10 +909,10 @@ int php_module_startup(sapi_module_struct *sf)
 	   which is always an internal extension and to be initialized
        ahead of all other internals
 	 */
-	php_ini_delayed_modules_startup();
+	php_ini_delayed_modules_startup(TSRMLS_C);
 
 	/* disable certain functions as requested by php.ini */
-	php_disable_functions();
+	php_disable_functions(TSRMLS_C);
 
 	zend_startup_extensions();
 
@@ -961,7 +961,7 @@ void php_module_shutdown()
 	php_shutdown_ticks(TSRMLS_C);
 	sapi_flush();
 
-	zend_shutdown();
+	zend_shutdown(TSRMLS_C);
 	php_shutdown_fopen_wrappers();
 	php_shutdown_info_logos();
 	UNREGISTER_INI_ENTRIES();

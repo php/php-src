@@ -101,7 +101,7 @@ static inline int i_zend_is_true(zval *op)
 	return result;
 }
 
-ZEND_API int zval_update_constant(zval **pp, void *arg);
+ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC);
 
 /* dedicated Zend executor functions - do not use! */
 static inline void zend_ptr_stack_clear_multiple(TSRMLS_D)

@@ -51,7 +51,7 @@ void zend_copy_constants(HashTable *target, HashTable *source)
 }
 
 
-static int clean_non_persistent_constant(zend_constant *c)
+static int clean_non_persistent_constant(zend_constant *c TSRMLS_DC)
 {
 	if (c->flags & CONST_PERSISTENT) {
 		return 0;
@@ -61,7 +61,7 @@ static int clean_non_persistent_constant(zend_constant *c)
 }
 
 
-static int clean_module_constant(zend_constant *c, int *module_number)
+static int clean_module_constant(zend_constant *c, int *module_number TSRMLS_DC)
 {
 	if (c->module_number == *module_number) {
 		return 1;
@@ -73,7 +73,7 @@ static int clean_module_constant(zend_constant *c, int *module_number)
 
 void clean_module_constants(int module_number TSRMLS_DC)
 {
-	zend_hash_apply_with_argument(EG(zend_constants), (int (*)(void *,void *)) clean_module_constant, (void *) &module_number);
+	zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) clean_module_constant, (void *) &module_number TSRMLS_CC);
 }
 
 
@@ -156,7 +156,7 @@ int zend_shutdown_constants(TSRMLS_D)
 
 void clean_non_persistent_constants(TSRMLS_D)
 {
-	zend_hash_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant);
+	zend_hash_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant TSRMLS_CC);
 }
 
 

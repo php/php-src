@@ -106,7 +106,7 @@ static void sapi_fastcgi_flush( void *server_context )
 }
 
 
-static void sapi_fastcgi_send_header(sapi_header_struct *sapi_header, void *server_context)
+static void sapi_fastcgi_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
 {
 	if( sapi_header ) {
 #ifdef DEBUG_FASTCGI

@@ -61,9 +61,9 @@ static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_v
 static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC);
 static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC);
 static void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1, znode *op2, temp_variable *Ts TSRMLS_DC);
-static void zend_extension_statement_handler(zend_extension *extension, zend_op_array *op_array);
-static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array);
-static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array);
+static void zend_extension_statement_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
+static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
+static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC);
 
 #define RETURN_VALUE_USED(opline) (!((opline)->result.u.EA.type & EXT_TYPE_UNUSED))
 
@@ -473,7 +473,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 
 
 /* Utility Functions for Extensions */
-static void zend_extension_statement_handler(zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_statement_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->statement_handler) {
 		extension->statement_handler(op_array);
@@ -481,7 +481,7 @@ static void zend_extension_statement_handler(zend_extension *extension, zend_op_
 }
 
 
-static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->fcall_begin_handler) {
 		extension->fcall_begin_handler(op_array);
@@ -489,7 +489,7 @@ static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_o
 }
 
 
-static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->fcall_end_handler) {
 		extension->fcall_end_handler(op_array);
@@ -561,7 +561,7 @@ static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_v
 	if (op2->u.fetch_type == ZEND_FETCH_LOCAL) {
 		FREE_OP(op1, free_op1);
 	} else if (op2->u.fetch_type == ZEND_FETCH_STATIC) {
-		zval_update_constant(retval, (void *) 1);
+		zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	}
 
 	if (varname == &tmp_varname) {
@@ -937,19 +937,19 @@ static void call_overloaded_function(temp_variable *T, int arg_count, zval *retu
 #if ZEND_INTENSIVE_DEBUGGING
 
 #define CHECK_SYMBOL_TABLES()														\
-	zend_hash_apply(&EG(symbol_table), (apply_func_t) zend_check_symbol);				\
+	zend_hash_apply(&EG(symbol_table), (apply_func_t) zend_check_symbol TSRMLS_CC);	\
 	if (&EG(symbol_table)!=EG(active_symbol_table)) {								\
-		zend_hash_apply(EG(active_symbol_table), (apply_func_t) zend_check_symbol);	\
+		zend_hash_apply(EG(active_symbol_table), (apply_func_t) zend_check_symbol TSRMLS_CC);	\
 	}
 
-static int zend_check_symbol(zval **pz)
+static int zend_check_symbol(zval **pz TSRMLS_DC)
 {
 	if ((*pz)->type>9) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
 	} else if ((*pz)->type==IS_ARRAY) {
-		zend_hash_apply((*pz)->value.ht, (apply_func_t) zend_check_symbol);
+		zend_hash_apply((*pz)->value.ht, (apply_func_t) zend_check_symbol TSRMLS_CC);
 	} else if ((*pz)->type==IS_OBJECT) {
-		zend_hash_apply((*pz)->value.obj.properties, (apply_func_t) zend_check_symbol);
+		zend_hash_apply((*pz)->value.obj.properties, (apply_func_t) zend_check_symbol TSRMLS_CC);
 	}
 
 	return 0;
@@ -1793,7 +1793,7 @@ send_by_ref:
 								zval_copy_ctor(default_value);
 							}
 							default_value->refcount=1;
-							zval_update_constant(&default_value, 0);
+							zval_update_constant(&default_value, 0 TSRMLS_CC);
 							default_value->refcount=0;
 							default_value->is_ref=0;
 							param = &default_value;
@@ -2375,17 +2375,17 @@ send_by_ref:
 				NEXT_OPCODE();
 			case ZEND_EXT_STMT: 
 				if (!EG(no_extensions)) {
-					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_statement_handler, op_array);
+					zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_statement_handler, op_array TSRMLS_CC);
 				}
 				NEXT_OPCODE();
 			case ZEND_EXT_FCALL_BEGIN:
 				if (!EG(no_extensions)) {
-					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_fcall_begin_handler, op_array);
+					zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_begin_handler, op_array TSRMLS_CC);
 				}
 				NEXT_OPCODE();
 			case ZEND_EXT_FCALL_END:
 				if (!EG(no_extensions)) {
-					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_fcall_end_handler, op_array);
+					zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_end_handler, op_array TSRMLS_CC);
 				}
 				NEXT_OPCODE();
 			case ZEND_DECLARE_FUNCTION_OR_CLASS:

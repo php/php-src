@@ -142,9 +142,8 @@ static int sapi_servlet_ub_write(const char *str, uint str_length)
 }
 
 
-static void sapi_servlet_send_header(sapi_header_struct *sapi_header, void *server_context)
+static void sapi_servlet_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 	if (!sapi_header) return;
 	if (!SG(server_context)) return;
 

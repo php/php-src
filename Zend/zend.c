@@ -431,7 +431,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 }
 
 
-void zend_shutdown()
+void zend_shutdown(TSRMLS_D)
 {
 #ifdef ZEND_WIN32
 	zend_shutdown_timeout_thread();
@@ -445,7 +445,7 @@ void zend_shutdown()
 	free(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
 	free(GLOBAL_CLASS_TABLE);
-	zend_shutdown_extensions();
+	zend_shutdown_extensions(TSRMLS_C);
 	free(zend_version_info);
 #ifndef ZTS
 	zend_shutdown_constants();
@@ -520,9 +520,9 @@ void zend_activate(TSRMLS_D)
 }
 
 
-void zend_activate_modules(void)
+void zend_activate_modules(TSRMLS_D)
 {
-	zend_hash_apply(&module_registry, (apply_func_t) module_registry_request_startup);
+	zend_hash_apply(&module_registry, (apply_func_t) module_registry_request_startup TSRMLS_CC);
 }
 
 void zend_deactivate_modules(TSRMLS_D)
@@ -530,7 +530,7 @@ void zend_deactivate_modules(TSRMLS_D)
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
 	zend_try {
-		zend_hash_apply(&module_registry, (apply_func_t) module_registry_cleanup);
+		zend_hash_apply(&module_registry, (apply_func_t) module_registry_cleanup TSRMLS_CC);
 	} zend_end_try();
 }
 

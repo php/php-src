@@ -204,7 +204,7 @@ extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handl
 
 void zend_activate(TSRMLS_D);
 void zend_deactivate(TSRMLS_D);
-void zend_activate_modules(void);
+void zend_activate_modules(TSRMLS_D);
 void zend_deactivate_modules(TSRMLS_D);
 
 
@@ -383,9 +383,9 @@ void zend_class_add_ref(zend_class_entry *ce);
 zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC);
 void init_op(zend_op *op TSRMLS_DC);
 int get_next_op_number(zend_op_array *op_array);
-int print_class(zend_class_entry *class_entry);
+int print_class(zend_class_entry *class_entry TSRMLS_DC);
 void print_op_array(zend_op_array *op_array, int optimizations);
-int pass_two(zend_op_array *op_array);
+int pass_two(zend_op_array *op_array TSRMLS_DC);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC);

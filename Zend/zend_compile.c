@@ -766,7 +766,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 {
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
-	pass_two(CG(active_op_array));
+	pass_two(CG(active_op_array) TSRMLS_CC);
 	CG(active_op_array) = function_token->u.op_array;
 
 	/* Pop the switch and foreach seperators */

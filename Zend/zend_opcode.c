@@ -27,7 +27,7 @@
 #include "zend_API.h"
 
 
-static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_ctor) {
 		extension->op_array_ctor(op_array);
@@ -35,7 +35,7 @@ static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend
 }
 
 
-static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_dtor) {
 		extension->op_array_dtor(op_array);
@@ -89,7 +89,7 @@ void init_op_array(zend_op_array *op_array, int type, int initial_ops_size TSRML
 
 	op_array->start_op = NULL;
 
-	zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_ctor_handler, op_array);
+	zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array TSRMLS_CC);
 }
 
 
@@ -138,6 +138,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = op_array->opcodes+op_array->last;
+	TSRMLS_FETCH();
 
 	if (op_array->static_variables) {
 		zend_hash_destroy(op_array->static_variables);
@@ -176,7 +177,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(op_array->brk_cont_array);
 	}
 	if (op_array->done_pass_two) {
-		zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_dtor_handler, op_array);
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array TSRMLS_CC);
 	}
 }
 
@@ -256,7 +257,7 @@ static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC)
 
 
 
-static void zend_extension_op_array_handler(zend_extension *extension, zend_op_array *op_array)
+static void zend_extension_op_array_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_handler) {
 		extension->op_array_handler(op_array);
@@ -264,10 +265,9 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 }
 
 
-int pass_two(zend_op_array *op_array)
+int pass_two(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
-	TSRMLS_FETCH();
 
 	if (op_array->type!=ZEND_USER_FUNCTION && op_array->type!=ZEND_EVAL_CODE) {
 		return 0;
@@ -276,7 +276,7 @@ int pass_two(zend_op_array *op_array)
 		zend_update_extended_info(op_array TSRMLS_CC);
 	}
 	if (CG(handle_op_arrays)) {
-		zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_handler, op_array);
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_handler, op_array TSRMLS_CC);
 	}
 
 	opline = op_array->opcodes;
@@ -299,10 +299,10 @@ int pass_two(zend_op_array *op_array)
 }
 
 
-int print_class(zend_class_entry *class_entry)
+int print_class(zend_class_entry *class_entry TSRMLS_DC)
 {
 	printf("Class %s:\n", class_entry->name);
-	zend_hash_apply(&class_entry->function_table, (apply_func_t) pass_two);
+	zend_hash_apply(&class_entry->function_table, (apply_func_t) pass_two TSRMLS_CC);
 	printf("End of class %s.\n\n", class_entry->name);
 	return 0;
 }

@@ -65,7 +65,6 @@ long _crack_open_dict(char *dictpath TSRMLS_DC)
 {
 	PWDICT *pwdict;
 	long resource;
-	TSRMLS_FETCH();
 
 	if (CRACKG(current_id) != -1) {
 		zend_error(E_WARNING, "Can not use more than one open dictionary with this implementation of libcrack");

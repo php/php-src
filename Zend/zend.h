@@ -304,7 +304,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define BYREF_FORCE_REST 3
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
-void zend_shutdown(void);
+void zend_shutdown(TSRMLS_D);
 
 void zend_set_utility_values(zend_utility_values *utility_values);
 

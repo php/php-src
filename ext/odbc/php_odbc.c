@@ -644,9 +644,8 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 	RETURN_TRUE;
 }
 
-static int _close_pconn_with_id(list_entry *le, int *id)
+static int _close_pconn_with_id(list_entry *le, int *id TSRMLS_DC)
 {
-
 	if(le->type == le_pconn && (((odbc_connection *)(le->ptr))->id == *id)){
 		return 1;
 	}else{
@@ -733,7 +732,7 @@ PHP_FUNCTION(odbc_close_all)
 				zend_list_delete(i);
 				/* Delete the persistent connection */
 				zend_hash_apply_with_argument(&EG(persistent_list), 
-					(int (*)(void *, void *)) _close_pconn_with_id, (void *) &i);
+					(apply_func_arg_t) _close_pconn_with_id, (void *) &i TSRMLS_CC);
 			}
 		}
 	}
@@ -2222,7 +2221,7 @@ PHP_FUNCTION(odbc_close)
 	
 	if(is_pconn){
 		zend_hash_apply_with_argument(&EG(persistent_list),
-			(int (*)(void *, void *)) _close_pconn_with_id, (void *) &((*pv_conn)->value.lval));	
+			(apply_func_arg_t) _close_pconn_with_id, (void *) &((*pv_conn)->value.lval) TSRMLS_CC);	
 	}
 }
 /* }}} */

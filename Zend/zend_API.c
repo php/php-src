@@ -569,9 +569,10 @@ ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC)
 ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	if (!class_type->constants_updated) {
-		zend_hash_apply_with_argument(&class_type->default_properties, (int (*)(void *,void *)) zval_update_constant, (void *) 1);
+		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 		class_type->constants_updated = 1;
 	}
 	
@@ -1100,7 +1101,7 @@ void module_destructor(zend_module_entry *module)
 	TSRMLS_FETCH();
 
 	if (module->type == MODULE_TEMPORARY) {
-		zend_clean_module_rsrc_dtors(module->module_number);
+		zend_clean_module_rsrc_dtors(module->module_number TSRMLS_CC);
 		clean_module_constants(module->module_number TSRMLS_CC);
 		if (module->request_shutdown_func)
 			module->request_shutdown_func(module->type, module->module_number TSRMLS_CC);
@@ -1126,11 +1127,9 @@ void module_destructor(zend_module_entry *module)
 
 
 /* call request startup for all modules */
-int module_registry_request_startup(zend_module_entry *module)
+int module_registry_request_startup(zend_module_entry *module TSRMLS_DC)
 {
 	if (module->request_startup_func) {
-		TSRMLS_FETCH();
-
 #if 0
 		zend_printf("%s:  Request startup\n",module->name);
 #endif
@@ -1146,10 +1145,8 @@ int module_registry_request_startup(zend_module_entry *module)
 /* for persistent modules - call request shutdown and flag NOT to erase
  * for temporary modules - do nothing, and flag to erase
  */
-int module_registry_cleanup(zend_module_entry *module)
+int module_registry_cleanup(zend_module_entry *module TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	switch(module->type) {
 		case MODULE_PERSISTENT:
 			if (module->request_shutdown_func) {
@@ -1271,10 +1268,8 @@ static zend_function_entry disabled_function[] =  {
 };
 
 
-ZEND_API int zend_disable_function(char *function_name, uint function_name_length)
+ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (zend_hash_del(CG(function_table), function_name, function_name_length+1)==FAILURE) {
 		return FAILURE;
 	}

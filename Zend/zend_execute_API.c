@@ -74,7 +74,7 @@ static void zend_handle_sigsegv(int dummy)
 #endif
 
 
-static void zend_extension_activator(zend_extension *extension)
+static void zend_extension_activator(zend_extension *extension TSRMLS_DC)
 {
 	if (extension->activate) {
 		extension->activate();
@@ -82,7 +82,7 @@ static void zend_extension_activator(zend_extension *extension)
 }
 
 
-static void zend_extension_deactivator(zend_extension *extension)
+static void zend_extension_deactivator(zend_extension *extension TSRMLS_DC)
 {
 	if (extension->deactivate) {
 		extension->deactivate();
@@ -90,13 +90,13 @@ static void zend_extension_deactivator(zend_extension *extension)
 }
 
 
-static int is_not_internal_function(zend_function *function)
+static int is_not_internal_function(zend_function *function TSRMLS_DC)
 {
 	return(function->type != ZEND_INTERNAL_FUNCTION);
 }
 
 
-static int is_not_internal_class(zend_class_entry *ce)
+static int is_not_internal_class(zend_class_entry *ce TSRMLS_DC)
 {
 	return(ce->type != ZEND_INTERNAL_CLASS);
 }
@@ -130,7 +130,7 @@ void init_executor(TSRMLS_D)
 	zend_hash_init(&EG(symbol_table), 50, NULL, ZVAL_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table);
 
-	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_activator);
+	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator TSRMLS_CC);
 	EG(opline_ptr) = NULL;
 	EG(garbage_ptr) = 0;
 
@@ -160,7 +160,7 @@ void shutdown_executor(TSRMLS_D)
 			efree(*EG(symtable_cache_ptr));
 			EG(symtable_cache_ptr)--;
 		}
-		zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_deactivator);
+		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator TSRMLS_CC);
 
 		zend_hash_destroy(&EG(symbol_table));
 
@@ -173,8 +173,8 @@ void shutdown_executor(TSRMLS_D)
 		zend_ptr_stack_destroy(&EG(argument_stack));
 
 		/* Destroy all op arrays */
-		zend_hash_apply(EG(function_table), (apply_func_t) is_not_internal_function);
-		zend_hash_apply(EG(class_table), (apply_func_t) is_not_internal_class);
+		zend_hash_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
+		zend_hash_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
 	} zend_end_try();
 
 	zend_destroy_rsrc_list(TSRMLS_C); /* must be destroyed after the main symbol table and
@@ -271,12 +271,11 @@ ZEND_API int zend_is_true(zval *op)
 }
 
 
-ZEND_API int zval_update_constant(zval **pp, void *arg)
+ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 {
 	zval *p = *pp;
 	zend_bool inline_change = (zend_bool) (unsigned long) arg;
 	zval const_value;
-	TSRMLS_FETCH();
 
 	if (p->type == IS_CONSTANT) {
 		int refcount;
@@ -340,7 +339,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 			}
 			zend_hash_del(p->value.ht, str_index, str_index_len);
 		}
-		zend_hash_apply_with_argument(p->value.ht, (int (*)(void *,void *)) zval_update_constant, (void *) 1);
+		zend_hash_apply_with_argument(p->value.ht, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 	}
 	return 0;
 }

@@ -184,10 +184,8 @@ void php_DOTNET_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_propert
 	}
 }
 
-void php_register_DOTNET_class(void)
+void php_register_DOTNET_class(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	INIT_OVERLOADED_CLASS_ENTRY(dotnet_class_entry, "DOTNET", NULL,
 								php_DOTNET_call_function_handler,
 								php_COM_get_property_handler,
@@ -210,11 +208,14 @@ static PHP_MINFO_FUNCTION(DOTNET)
 PHP_MINIT_FUNCTION(DOTNET)
 {
 	HRESULT hr;
+
 	CoInitialize(0);
 	hr = dotnet_init();
-	if (FAILED(hr)) return hr;
+	if (FAILED(hr)) {
+		return hr;
+	}
 
-	php_register_DOTNET_class();
+	php_register_DOTNET_class(TSRMLS_C);
 	return SUCCESS;
 }
 
