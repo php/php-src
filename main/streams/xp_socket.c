@@ -282,6 +282,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 				return FAILURE;
 			}
 			return SUCCESS;
+		case PHP_STREAM_AS_FD_FOR_SELECT:
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD:
 			if (ret)

@@ -388,6 +388,8 @@ PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
 #define PHP_STREAM_AS_FD		1
 /* cast as a socketd */
 #define PHP_STREAM_AS_SOCKETD	2
+/* cast as fd/socket for select purposes */
+#define PHP_STREAM_AS_FD_FOR_SELECT 3
 
 /* try really, really hard to make sure the cast happens (avoid using this flag if possible) */
 #define PHP_STREAM_CAST_TRY_HARD	0x80000000
