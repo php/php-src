@@ -1,3 +1,35 @@
+2000-05-05  Andrei Zmievski  <andrei@ispi.net>
+
+    * tests/testarray: Testing.
+
+2000-05-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Fix a bug introduced when the SAPI checks were moved.
+
+    INCLUDES were overwritten, so i.e. APXS builds failed.
+
+    * ext/standard/config.m4
+      configure.in:
+    Move dlopen in -ldl check to configure.in. This should ensure that if libdl
+    exists, it will be always found. We define HAVE_LIBDL now always, if the
+    function dlopen is found.
+
+    * ext/standard/crypt.c:
+    Put in a hack, so that users can compile PHP, even if the configure-time
+    checks failed to detect the capabilities of crypt().
+
+2000-05-05  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c:
+    - Fix problem with sapi_globals being used before it is initialized.
+
+    * ext/com/COM.c
+      sapi/cgi/cgi_main.c: - Make Windows compile again.
+
+2000-05-05  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: testing
+
 2000-05-04  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/session/session.c:
