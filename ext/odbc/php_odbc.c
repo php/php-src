@@ -943,10 +943,21 @@ PHP_FUNCTION(odbc_execute)
 			else
 				ctype = SQL_C_CHAR;
 
-			if (Z_STRVAL_PP(tmp)[0] == '\'' && 
+			if (Z_STRLEN_PP(tmp) > 2 &&
+				Z_STRVAL_PP(tmp)[0] == '\'' &&
 				Z_STRVAL_PP(tmp)[Z_STRLEN_PP(tmp) - 1] == '\'') {
-				filename = &Z_STRVAL_PP(tmp)[1];
-				filename[Z_STRLEN_PP(tmp) - 2] = '\0';
+				filename = estrndup(&Z_STRVAL_PP(tmp)[1], Z_STRLEN_PP(tmp) - 2);
+				filename[strlen(filename)] = '\0';
+
+				/* Check for safe mode. */
+				if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+						RETURN_FALSE;
+					}
+
+				/* Check the basedir */
+				if (php_check_open_basedir(filename TSRMLS_CC)) {
+					RETURN_FALSE;
+				}
 
                 if ((params[i-1].fp = open(filename,O_RDONLY)) == -1) {
 					php_error(E_WARNING,"Can't open file %s", filename);
@@ -957,8 +968,11 @@ PHP_FUNCTION(odbc_execute)
 						}
 					}
 					efree(params);
+					efree(filename);
 					RETURN_FALSE;
 				}
+
+				efree(filename);
 
 				params[i-1].vallen = SQL_LEN_DATA_AT_EXEC(0);
 
