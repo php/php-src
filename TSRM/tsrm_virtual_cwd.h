@@ -47,6 +47,7 @@
 typedef unsigned short mode_t;
 
 #define DEFAULT_SLASH '\\'
+#define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define COPY_WHEN_ABSOLUTE 2
 #define IS_ABSOLUTE_PATH(path, len) \
@@ -60,6 +61,7 @@ typedef unsigned short mode_t;
 #endif
 
 #define DEFAULT_SLASH '/'
+#define DEFAULT_DIR_SEPARATOR	':'
 #define IS_SLASH(c)	((c) == '/')
 
 #endif
