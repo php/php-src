@@ -16,6 +16,17 @@ is probably wrong.
 You will need phoenix installed and built to compile this
 module.
 
+To use msession-test.php, msession must be the default session
+handler in PHP. The easiest way to do that is in the php.ini
+file as:
+
+[Session]
+session.save_handler = msession
+session.save_path = localhost
+
+The session.save.path is the host name of the server running
+msessiond.
+
 12/22/2001
 Changed msession_getdata(...) to msession_get_data(...)
 Changed msession_setdata(...) to msession_set_data(...)
