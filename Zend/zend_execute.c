@@ -1063,19 +1063,6 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	EX(function_state).function_symbol_table = NULL;
 #endif
 	
-	if (op_array->uses_globals) {
-		zval *globals;
-
-		ALLOC_ZVAL(globals);
-		globals->refcount=1;
-		globals->is_ref=1;
-		globals->type = IS_ARRAY;
-		globals->value.ht = &EG(symbol_table);
-		if (zend_hash_add(EG(active_symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL)==FAILURE) {
-			FREE_ZVAL(globals);
-		}
-	}
-
 	while (1) {
 #ifdef ZEND_WIN32
 		if (EG(timed_out)) {
