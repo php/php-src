@@ -39,20 +39,6 @@
 #define OIDOID      26
 
 
-static void _pdo_pgsql_free_lobs(pdo_stmt_t *stmt TSRMLS_DC)
-{
-	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-	int i;
-
-	for (i=0; i<stmt->column_count; i++) {
-		if (S->cols[i].lobval) {
-			free(S->cols[i].lobval);
-			S->cols[i].lobval = NULL;
-			S->cols[i].lobval = 0;
-		}
-	}
-}
-
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
@@ -77,7 +63,6 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 	
 	if(S->cols) {
-		_pdo_pgsql_free_lobs(stmt TSRMLS_CC);
 		efree(S->cols);
 		S->cols = NULL;
 	}
@@ -140,9 +125,6 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-
-	/* free any allocated lob objects from the previos fetch operation */
-	_pdo_pgsql_free_lobs(stmt TSRMLS_CC);
 
 	if (S->cursor_name) {
 		char *ori_str = NULL;
@@ -224,10 +206,12 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC)
+static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees  TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
+	char *tmp_ptr;
+	size_t tmp_len;
 
 	if (!S->result) {
 		return 0;
@@ -256,9 +240,11 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 				break;
 				
 			case PDO_PARAM_LOB:
-				S->cols[colno].lobval = PQunescapeBytea(*ptr, &(S->cols[colno].loblen));
-				*ptr = S->cols[colno].lobval;
-				*len = S->cols[colno].loblen;
+				tmp_ptr = PQunescapeBytea(*ptr, &tmp_len);
+				*ptr = estrndup(tmp_ptr, tmp_len);
+				*len = tmp_len;
+				caller_frees = 1;
+				free(tmp_ptr);
 				break;
 		}
 	}
