@@ -1201,7 +1201,10 @@ PHP_RINIT_FUNCTION(session)
 		return SUCCESS;
 	}
 
-	_php_session_start(PSLS_C);
+
+	if (INI_INT("session.auto_start")) {
+		_php_session_start(PSLS_C);
+	}
 
 	php_register_pre_request_shutdown(_php_session_shutdown, NULL);
 
