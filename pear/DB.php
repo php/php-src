@@ -413,7 +413,7 @@ class DB
 	    $dsn = $arr[1];
         }
 
-        if (preg_match("|^([^:]+):([^@]+)@?(.*)$|", $dsn, $arr)) {
+        if (preg_match("|^([^:]+):([^@]*)@?(.*)$|", $dsn, $arr)) {
 	    $parsed["username"] = urldecode($arr[1]);
 	    $parsed["password"] = urldecode($arr[2]);
 	    $dsn = $arr[3];
