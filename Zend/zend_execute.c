@@ -2500,6 +2500,10 @@ send_by_ref:
 					zval tmp, *variable = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					zval **object;
 					zend_bool unset_object;
+					HashTable *target_symbol_table;
+
+					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
+					/* Need to handle target_symbol_table == NULL */
 
 					if (variable->type != IS_STRING) {
 						tmp = *variable;
@@ -2511,7 +2515,7 @@ send_by_ref:
 					unset_object = (EX(opline)->extended_value == ZEND_UNSET_OBJ);
 					
 					if (unset_object) {
-						if (zend_hash_find(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1, (void **)&object) == FAILURE) {
+						if (zend_hash_find(target_symbol_table, variable->value.str.val, variable->value.str.len+1, (void **)&object) == FAILURE) {
 							zend_error(E_ERROR, "Cannot delete non-existing object");
 						}
 						if (Z_TYPE_PP(object) != IS_OBJECT) {
@@ -2520,7 +2524,7 @@ send_by_ref:
 						(*object)->value.obj.handlers->delete_obj((*object)->value.obj.handle);
 					}
 
-					zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
+					zend_hash_del(target_symbol_table, variable->value.str.val, variable->value.str.len+1);
 
 					if (variable == &tmp) {
 						zval_dtor(&tmp);
@@ -2721,6 +2725,7 @@ send_by_ref:
 					HashTable *target_symbol_table;
 
 					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
+					/* Need to handle target_symbol_table == NULL */
 
 					if (variable->type != IS_STRING) {
 						tmp = *variable;
