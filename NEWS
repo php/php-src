@@ -1,6 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added concepts to IRCG: bailout-on-trivial issue, write output to
+  files, fetch a ressource upon connection end. (Sascha)
+- Fixed POST-related bugs in thttpd, added QUERY_STRING, HTTP_HOST,
+  HTTP_ACCEPT_LANGUAGE to the script environment, improved patch
+  to send correct MIME types, and added support for /nocache/. (Sascha)
 - Fixed several bugs and memleaks in the domxml extension. (Markus)
 - Added var_export() which outputs a representation of a variable as reusable 
   PHP code. (Derick)
