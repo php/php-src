@@ -1,3 +1,50 @@
+2004-06-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/dio/config.w32
+      ext/dio/dio.c:
+      Allow compilation on Win32.
+      Need to implement a few Windows specific functions.
+
+2004-06-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix Bug #28694 ReflectionExtension::getFunctions() crashes PHP
+
+2004-06-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/info.c:
+      Correct alt text for easter egg logo.
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/libgd/gdft.c:
+      MFH: Fixed bug #28175 (Allow bundled GD to compile against freetype 2.1.2).
+
+    * ext/gd/libgd/gdft.c:
+      Fixed bug #28175 (Allow bundled GD to compile against freetype 2.1.2).
+
+    * (PHP_4_3)
+      NEWS
+      ext/gmp/gmp.c:
+      MFH: Fixed bug #28525 (gmp_powm() does not work with hexadecimal string
+      modulo represented as a string).
+
+    * ext/gmp/gmp.c:
+      Fixed bug #28525 (gmp_powm() does not work with hexadecimal string modulo
+      represented as a string).
+      Patch by: pickett at sumu dot org
+
+    * (PHP_4_3)
+      win32/readdir.c:
+      MFH: Fixed memory leak on error in win32's opendir() emulation.
+
+    * win32/readdir.c:
+      Fixed memory leak on error in win32's opendir() emulation. (Patch by Wez)
+
 2004-06-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * NEWS:
