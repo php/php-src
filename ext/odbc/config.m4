@@ -317,8 +317,8 @@ AC_ARG_WITH(openlink,
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/odbcsdk/include
     ODBC_LIBDIR=$withval/odbcsdk/lib
-    ODBC_LFLAGS=-L$OPENLINK_LIBDIR
-    ODBC_INCLUDE=-I$OPENLINK_INCDIR
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-liodbc
     ODBC_TYPE=openlink
     AC_DEFINE(HAVE_OPENLINK)
