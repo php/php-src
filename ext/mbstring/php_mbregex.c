@@ -519,6 +519,17 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 	char *description = NULL;
 	char pat_buf[2];
 
+	const mbfl_encoding *enc;
+
+	{
+		const char *current_enc_name;
+		current_enc_name = php_mbregex_mbctype2name(MBSTRG(current_mbctype));
+		if (current_enc_name == NULL ||
+			(enc = mbfl_name2encoding(current_enc_name)) == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error"); 
+			RETURN_FALSE;
+		}
+	}
 	eval = 0;
 	{
 		char *option_str = NULL;
@@ -592,12 +603,13 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 			/* copy the part of the string before the match */
 			_php_mb_regex_strbuf_ncat(&outdev, (const unsigned char *)&string[pos], regs.beg[0] - pos);
 			/* copy replacement and backrefs */
-			/* FIXME: this code (\\digit replacement) is not mbyte aware! */ 
 			i = 0;
 			p = replace;
 			while (i < replace_len) {
+				int fwd = (int) php_mb_mbchar_bytes_ex(p, enc);
 				n = -1;
-				if (p[0] == '\\' && p[1] >= '0' && p[1] <= '9') {
+				if ((replace_len - i) >= 2 && fwd == 1 &&
+					p[0] == '\\' && p[1] >= '0' && p[1] <= '9') {
 					n = p[1] - '0';
 				}
 				if (n >= 0 && n < regs.num_regs) {
@@ -608,8 +620,8 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 					i += 2;
 				} else {
 					_php_mb_regex_strbuf_ncat(pdevice, (const unsigned char *)p, 1);
-					p++;
-					i++;
+					p += fwd;
+					i += fwd;
 				}
 			}
 			if (eval) {
