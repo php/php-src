@@ -324,7 +324,7 @@ void java_call_function_handler
 {
   pval *object = property_reference->object;
   zend_overloaded_element *function_name = (zend_overloaded_element *)
-    property_reference->elements_list.tail->data;
+    property_reference->elements_list->tail->data;
 
   int arg_count = ARG_COUNT(ht);
   jlong result = 0;
@@ -393,7 +393,7 @@ static pval _java_getset_property
   int type;
 
   /* get the property name */
-  zend_llist_element *element = property_reference->elements_list.head;
+  zend_llist_element *element = property_reference->elements_list->head;
   zend_overloaded_element *property=(zend_overloaded_element *)element->data;
   jstring propName =
     (*jenv)->NewStringUTF(jenv, property->element.value.str.val);

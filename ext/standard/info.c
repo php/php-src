@@ -168,10 +168,10 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
 #endif
 		if (sapi_module.name) {
-			php_info_print_table_row(2, "SAPI", sapi_module.name );
+			php_info_print_table_row(2, "Server API", sapi_module.name );
 		}
 
-		php_info_print_table_row(2, "php.ini Path", CONFIGURATION_FILE_PATH );
+		php_info_print_table_row(2, "Configuration File (php.ini) Path", CONFIGURATION_FILE_PATH );
 
 #if ZEND_DEBUG
 		php_info_print_table_row(2, "ZEND_DEBUG", "enabled" );
