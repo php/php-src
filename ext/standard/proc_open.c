@@ -179,7 +179,7 @@ static void _php_free_envp(php_process_env_t env, int is_persistent)
 }
 /* }}} */
 
-
+/* {{{ proc_open_rsrc_dtor */
 static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	struct php_process_handle *proc = (struct php_process_handle*)rsrc->ptr;
@@ -227,6 +227,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	pefree(proc, proc->is_persistent);
 	
 }
+/* }}} */
 
 /* {{{ php_make_safe_mode_command */
 static int php_make_safe_mode_command(char *cmd, char **safecmd, int is_persistent TSRMLS_DC)
@@ -290,12 +291,13 @@ static int php_make_safe_mode_command(char *cmd, char **safecmd, int is_persiste
 }
 /* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION(proc_open) */
 PHP_MINIT_FUNCTION(proc_open)
 {
 	le_proc_open = zend_register_list_destructors_ex(proc_open_rsrc_dtor, NULL, "process", module_number);
 	return SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ proto int proc_terminate(resource process [, long signal])
    kill a process opened by proc_open */
@@ -321,7 +323,6 @@ PHP_FUNCTION(proc_terminate)
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
-
 
 /* {{{ proto int proc_close(resource process)
    close a process opened by proc_open */
