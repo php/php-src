@@ -93,12 +93,17 @@ CREATING THE M4 CONFIGURATION FILE
 PHP_ARG_ENABLE(foobar,whether to enable foobar,
 [  --enable-foobar            Enable foobar])
 
-PHP_EXTENSION(foobar, $ext_shared)
+if test "$PHP_FOOBAR" != "no"; then
+  PHP_EXTENSION(foobar, $ext_shared)
+fi
 ------------------------------------------------------------------------------
 
   PHP_ARG_ENABLE will automatically set the correct variables, so
   that the extension will be enabled by PHP_EXTENSION in shared mode.
 
+  Please use always PHP_ARG_ENABLE or PHP_ARG_WITH. Even if you do not
+  plan to distribute your module with PHP, these facilities allow you
+  to integrate your module easily into the main PHP module framework.
 
 CREATING SOURCE FILES
 
