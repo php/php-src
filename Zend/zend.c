@@ -143,16 +143,9 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			expr_copy->value.str.len = sizeof("Array")-1;
 			expr_copy->value.str.val = estrndup("Array", expr_copy->value.str.len);
 			break;
-		case IS_OBJECT: {
-				zval function_name;
-				ZVAL_STRING(&function_name,"__string_value",1);
-
-				if (call_user_function(NULL, expr, &function_name, expr_copy, 0, NULL)==FAILURE) {
-					expr_copy->value.str.len = sizeof("Object")-1;
-					expr_copy->value.str.val = estrndup("Object", expr_copy->value.str.len);
-				}
-				efree(function_name.value.str.val);
-			}
+		case IS_OBJECT:
+			expr_copy->value.str.len = sizeof("Object")-1;
+			expr_copy->value.str.val = estrndup("Object", expr_copy->value.str.len);
 			break;
 		default:
 			*expr_copy = *expr;
