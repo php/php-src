@@ -82,15 +82,8 @@ static void spl_dir_object_dtor(void *object, zend_object_handle handle TSRMLS_D
 }
 /* }}} */
 
-/* {{{ spl_dir_object_clone */
-static void spl_dir_object_clone(void *object, void **object_clone TSRMLS_DC)
-{
-	/* TODO */
-}
-/* }}} */
-
 /* {{{ spl_dir_object_new */
-static zend_object_value spl_dir_object_new(zend_class_entry *class_type TSRMLS_DC)
+static zend_object_value spl_dir_object_new_ex(zend_class_entry *class_type, spl_dir_object **obj TSRMLS_DC)
 {
 	zend_object_value retval;
 	spl_dir_object *intern;
@@ -99,14 +92,62 @@ static zend_object_value spl_dir_object_new(zend_class_entry *class_type TSRMLS_
 	intern = emalloc(sizeof(spl_dir_object));
 	memset(intern, 0, sizeof(spl_dir_object));
 	intern->std.ce = class_type;
+	*obj = intern;
 
 	ALLOC_HASHTABLE(intern->std.properties);
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, spl_dir_object_dtor, spl_dir_object_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, spl_dir_object_dtor, NULL TSRMLS_CC);
 	retval.handlers = &spl_dir_handlers;
 	return retval;
+}
+/* }}} */
+
+/* {{{ spl_dir_object_new */
+static zend_object_value spl_dir_object_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	spl_dir_object *tmp;
+	return spl_dir_object_new_ex(class_type, &tmp TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ spl_dir_open */
+static void spl_dir_open(spl_dir_object* intern, char *path TSRMLS_DC)
+{
+	intern->dirp = php_stream_opendir(path, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+
+	intern->path = estrdup(path);
+
+	if (intern->dirp == NULL) {
+		/* throw exception: should've been already happened */
+		intern->entry.d_name[0] = '\0';
+	} else {
+		if (!php_stream_readdir(intern->dirp, &intern->entry)) {
+			intern->entry.d_name[0] = '\0';
+		}
+	}
+}
+/* }}} */
+
+/* {{{ spl_dir_object_clone */
+static zend_object_value spl_dir_object_clone(zval *zobject TSRMLS_DC)
+{
+	zend_object_value new_obj_val;
+	zend_object *old_object;
+	zend_object *new_object;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
+	spl_dir_object *intern;
+
+	old_object = zend_objects_get_address(zobject TSRMLS_CC);
+	new_obj_val = spl_dir_object_new_ex(old_object->ce, &intern TSRMLS_CC);
+	new_object = &intern->std;
+
+	spl_dir_open(intern, ((spl_dir_object*)old_object)->path TSRMLS_CC);
+
+	zend_objects_clone_members(new_object, new_obj_val, old_object, handle TSRMLS_CC);
+
+	return new_obj_val;
 }
 /* }}} */
 
@@ -123,6 +164,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_STD_CLASS_EX(dir, spl_dir_object_new, spl_dir_class_functions);
 	REGISTER_SPL_IMPLEMENT(dir, sequence);
 	memcpy(&spl_dir_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	spl_dir_handlers.clone_obj = spl_dir_object_clone;
 	spl_dir_handlers.get_class_entry = spl_dir_get_ce;
 
 	return SUCCESS;
@@ -146,18 +188,7 @@ SPL_CLASS_FUNCTION(dir, __construct)
 	}
 
 	intern = (spl_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
-	intern->dirp = php_stream_opendir(path, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
-
-	intern->path = estrdup(path);
-
-	if (intern->dirp == NULL) {
-		/* throw exception: should've been already happened */
-		intern->entry.d_name[0] = '\0';
-	} else {
-		if (!php_stream_readdir(intern->dirp, &intern->entry)) {
-			intern->entry.d_name[0] = '\0';
-		}
-	}
+	spl_dir_open(intern, path TSRMLS_CC);
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
