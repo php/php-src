@@ -30,7 +30,7 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
-static int free_cols(pdo_odbc_stmt *S TSRMLS_DC)
+static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S TSRMLS_DC)
 {
 	int i;
 
@@ -58,7 +58,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->stmt = SQL_NULL_HANDLE;
 	}
 
-	free_cols(S TSRMLS_CC);
+	free_cols(stmt, S TSRMLS_CC);
 
 	efree(S);
 
@@ -266,7 +266,7 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	SQLSMALLINT colcount;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 
-	free_cols(S TSRMLS_CC);
+	free_cols(stmt, S TSRMLS_CC);
 
 	rc = SQLMoreResults(S->stmt);
 
