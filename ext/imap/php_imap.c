@@ -3166,7 +3166,7 @@ PHP_FUNCTION(imap_mail_compose)
 	BODY *bod=NULL, *topbod=NULL;
 	PART *mypart=NULL, *toppart=NULL, *part;
 	PARAMETER *param, *disp_param = NULL, *custom_headers_param = NULL, *tmp_param = NULL;
-	char tmp[8 * MAILTMPLEN], *mystring=NULL, *t=NULL, *tempstring=NULL, *tempstring_2=NULL;
+	char tmp[8 * MAILTMPLEN], *mystring=NULL, *t=NULL, *tempstring=NULL;
 	int myargc = ZEND_NUM_ARGS();
 
 	if (myargc != 2 || zend_get_parameters_ex(myargc, &envelope, &body) == FAILURE) {
@@ -3204,6 +3204,10 @@ PHP_FUNCTION(imap_mail_compose)
 		convert_to_string_ex(pvalue);
 		rfc822_parse_adrlist (&env->reply_to, Z_STRVAL_PP(pvalue), "NO HOST");
 	}
+        if (zend_hash_find(Z_ARRVAL_PP(envelope), "in_reply_to", sizeof("in_reply_to"), (void **) &pvalue)== SUCCESS) {
+                convert_to_string_ex(pvalue);
+		env->in_reply_to=cpystr(Z_STRVAL_PP(pvalue));
+        }
 	if (zend_hash_find(Z_ARRVAL_PP(envelope), "subject", sizeof("subject"), (void **) &pvalue)== SUCCESS) {
 		convert_to_string_ex(pvalue);
 		env->subject=cpystr(Z_STRVAL_PP(pvalue));
@@ -3401,17 +3405,12 @@ PHP_FUNCTION(imap_mail_compose)
 		tempstring = emalloc(strlen(tmp) + 1);
 		strcpy(tempstring, tmp);
 		do {
-			tempstring_2 = emalloc(strlen(tempstring) + strlen(custom_headers_param->value) + strlen(CRLF) + 1);
-			sprintf(tempstring_2, "%s%s%s", tempstring, custom_headers_param->value, CRLF);
-			efree(tempstring);
-			tempstring = emalloc(strlen(tempstring_2) + 1);
-			strcpy(tempstring, tempstring_2);
-			efree(tempstring_2);
+			tempstring = erealloc(tempstring, strlen(tempstring) + strlen(custom_headers_param->value) + strlen(CRLF) + 1);
+			sprintf(tempstring, "%s%s%s", tempstring, custom_headers_param->value, CRLF);
 		} while ((custom_headers_param = custom_headers_param->next));
 
 		mystring = emalloc(strlen(tempstring) + strlen(CRLF) + 1);
-		strcpy(mystring, tempstring);
-		strcat(mystring, CRLF);
+		sprintf(mystring, "%s%s", tempstring, CRLF);
 		efree(tempstring);
 	} else {
 		mystring = emalloc(strlen(tmp) + 1);
