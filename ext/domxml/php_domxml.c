@@ -3714,6 +3714,11 @@ PHP_FUNCTION(domxml_dump_node)
 		RETURN_FALSE;
 	}
 
+	if (docp->type != XML_DOCUMENT_NODE && docp->type != XML_HTML_DOCUMENT_NODE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Object has to be a DomDocument Node");
+		RETURN_FALSE;
+	}
+
 	buf = xmlBufferCreate();
 	if (!buf) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch buffer");
