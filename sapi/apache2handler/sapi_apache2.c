@@ -567,7 +567,9 @@ zend_first_try {
 
 		rv = ap_pass_brigade(r->output_filters, brigade);
 		if (rv != APR_SUCCESS || r->connection->aborted) {
+zend_first_try {
 			php_handle_aborted_connection();
+} zend_end_try();
 		}
 		apr_brigade_cleanup(brigade);
 	} else {
