@@ -1343,7 +1343,7 @@ PHP_FUNCTION(pathinfo)
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {
-		RETVAL_ZVAL(tmp, 1, 0);
+		RETURN_ZVAL(tmp, 0, 1);
 	} else {
 		zval **element;
 		if (zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **) &element) == SUCCESS) {
@@ -4486,8 +4486,7 @@ PHP_FUNCTION(str_pad)
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
 	if (num_pad_chars < 0) {
-		RETVAL_ZVAL(*input, 1, 0);
-		return;
+		RETURN_ZVAL(*input, 1, 0);
 	}
 
 	/* Setup the padding string values if specified. */
