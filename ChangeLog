@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed ldap_search(), ldap_read() and ldap_list() (Zeev)
 - Fixed Apache information in phpinfo() (sam@breakfree.com)
 - Improved register_shutdown_function() - you may now supply arguments that
   will be passed to the shutdown function (Zeev)
