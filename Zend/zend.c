@@ -327,7 +327,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 #ifdef __FreeBSD__
 	/* FreeBSD floating point precision fix */
-	fpsetmask(FP_X_IMP);
+	fpsetmask(~FP_X_IMP);
 #endif
 		
 	/* Set up utility functions and values */
