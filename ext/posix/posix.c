@@ -616,7 +616,7 @@ PHP_FUNCTION(posix_ttyname)
 
 	switch (Z_TYPE_P(z_fd)) {
 		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(Z_RESVAL_P(z_fd), &fd)) {
+			if (!php_posix_stream_get_fd(Z_RESVAL_P(z_fd), &fd TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 			break;
@@ -646,7 +646,7 @@ PHP_FUNCTION(posix_isatty)
 
 	switch (Z_TYPE_P(z_fd)) {
 		case IS_RESOURCE:
-			if (!php_posix_stream_get_fd(Z_RESVAL_P(z_fd), &fd)) {
+			if (!php_posix_stream_get_fd(Z_RESVAL_P(z_fd), &fd TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 			break;
