@@ -927,8 +927,8 @@ dnl
 dnl internal, don't use
 AC_DEFUN(PHP_ADD_LIBRARY_SKELETON,[
   case $1 in
-  c|c_r|pthread*) ;;
-  *) ifelse($3,,[
+  c|c_r|pthread*[)] ;;
+  *[)] ifelse($3,,[
     PHP_X_ADD_LIBRARY($1,$2,$5)
   ],[
     if test "$ext_shared" = "yes"; then
@@ -1470,4 +1470,65 @@ AC_DEFUN(PHP_SETUP_ICONV, [
     $2
 ifelse([$3],[],,[else $3])
   fi
+])
+
+AC_DEFUN(PHP_DEF_HAVE,[AC_DEFINE([HAVE_]translit($1,a-z_-,A-Z__), 1, [ ])])
+
+dnl
+dnl PHP_CHECK_FUNC_LIB(func, libs)
+dnl This macro checks whether 'func' or '__func' exists
+dnl in the specified library.
+dnl Defines HAVE_func and HAVE_library if found and adds the library to LIBS.
+dnl This should be called in the ACTION-IF-NOT-FOUND part of PHP_CHECK_FUNC
+dnl
+
+dnl autoconf undefines the builtin "shift" :-(
+dnl If possible, we use the builtin shift anyway, otherwise we use
+dnl the ubercool definition I have tested so far with FreeBSD/GNU m4
+ifdef([builtin],[builtin(define, phpshift, [builtin(shift, $@)])],[
+define([phpshift],[ifelse(index([$@],[,]),-1,,[substr([$@],incr(index([$@],[,])))])])
+])
+
+AC_DEFUN(PHP_CHECK_FUNC_LIB,[
+  ifelse($2,,:,[
+  unset ac_cv_lib_$2[]_$1
+  unset ac_cv_lib_$2[]___$1
+  unset found
+  AC_CHECK_LIB($2, $1, [found=yes], [
+    AC_CHECK_LIB($2, __$1, [found=yes], [found=no])
+  ])
+
+  if test "$found" = "yes"; then
+    PHP_ADD_LIBRARY($2)
+    PHP_DEF_HAVE($1)
+    PHP_DEF_HAVE(lib$2)
+    ac_cv_func_$1=yes
+  else
+    PHP_CHECK_FUNC_LIB($1,phpshift(phpshift($@)))
+  fi
+  ])
+])
+
+dnl
+dnl PHP_CHECK_FUNC(func, ...)
+dnl This macro checks whether 'func' or '__func' exists
+dnl in the default libraries and as a fall back in the specified library.
+dnl Defines HAVE_func and HAVE_library if found and adds the library to LIBS.
+dnl
+AC_DEFUN(PHP_CHECK_FUNC,[
+  unset ac_cv_func_$1
+  unset ac_cv_func___$1
+  unset found
+  
+  AC_CHECK_FUNC($1, [found=yes],[ AC_CHECK_FUNC(__$1,[found=yes],[found=no]) ])
+
+  case $found in
+  yes) 
+    PHP_DEF_HAVE($1)
+    ac_cv_func_$1=yes
+  ;;
+  ifelse($#,1,,[
+    *) PHP_CHECK_FUNC_LIB($@) ;;
+  ])
+  esac
 ])
