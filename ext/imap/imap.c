@@ -80,11 +80,11 @@ extern char *cpystr(const char *string);
 extern unsigned long find_rightmost_bit (unsigned long *valptr);
 void fs_give (void **block);
 void *fs_get (size_t size);
-int add_assoc_object(pval *arg, char *key, pval *tmp);
+static int add_assoc_object(pval *arg, char *key, pval *tmp);
 int add_next_index_object(pval *arg, pval *tmp);
 void imap_add_body( pval *arg, BODY *body );
 
-typedef struct php3_imap_le_struct {
+typedef struct php_imap_le_struct {
 	MAILSTREAM *imap_stream;
 	long flags;
 } pils;
@@ -146,13 +146,13 @@ function_entry imap_functions[] = {
 };
 
 
-php3_module_entry php3_imap_module_entry = {
-	IMAPVER, imap_functions, PHP_MINIT(imap), NULL, NULL, NULL,PHP_MINFO(imap), 0, 0, 0, NULL
+zend_module_entry imap_module_entry = {
+	IMAPVER, imap_functions, PHP_MINIT(imap), NULL, NULL, NULL,PHP_MINFO(imap), STANDARD_MODULE_PROPERTIES
 };
 
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &php3_imap_module_entry; }
+DLEXPORT php3_module_entry *get_module(void) { return &imap_module_entry; }
 #endif
 
 /* 
