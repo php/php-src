@@ -27,6 +27,7 @@
 #define yy_more_flag SCNG(_yy_more_flag)
 #define yy_more_len SCNG(_yy_more_len)
 
+#include <errno.h>
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_ini_parser.h"
