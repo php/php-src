@@ -103,7 +103,11 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	} else { /* CHECKUID_ALLOW_ONLY_DIR */
 		s = strrchr(filename, DEFAULT_SLASH);
 
-		if (s) {
+		if (s == filename) {
+			/* root dir */
+			path[0] = DEFAULT_SLASH;
+			path[1] = '\0';
+		} else if (s) {
 			*s = '\0';
 			VCWD_REALPATH(filename, path);
 			*s = DEFAULT_SLASH;
