@@ -1,3 +1,78 @@
+2004-10-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c:
+      Revert for now
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_handlers.h:
+      - Revert automatic pass arg_info
+
+    * ext/standard/var.c:
+      speling
+
+2004-10-08  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix BC break with default in switch() having to be at the end.
+
+2004-10-08  Christian Stocker  <chregu@bitflux.ch>
+
+    * (PHP_5_0)
+      NEWS
+      main/streams/userspace.c:
+      MFH
+      Fixed bug #27183 (Userland stream wrapper segfaults on stream_write).
+
+    * NEWS:
+      this NEWS entry should have gone into PHP_5_0 branch. sorry
+
+2004-10-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+2004-10-08  Christian Stocker  <chregu@bitflux.ch>
+
+    * NEWS
+      main/streams/userspace.c:
+      - Fixed bug #27183 (Userland stream wrapper segfaults on stream_write)
+      Was applied to PHP 4 ages ago, but not to PHP 5 branch
+
+2004-10-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      ext/mbstring/config.m4:
+      - MFH(r-1.53): Avoid doubly symbol definition. Codes in the removed file
+      has
+        never been used anywhere.
+
+    * ext/mbstring/config.m4:
+      - Avoid doubly symbol definition. Codes in the removed file has never been
+        used anywhere.
+
+2004-10-08  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * sapi/cli/php_getopt.h:
+      As NetWare LibC has optind and optarg macros defined in unistd.h our local
+      variables were getting mistakenly preprocessed so undeffing optind and
+      optarg
+
+    * TSRM/tsrm_virtual_cwd.h:
+      removed redundant CLIB_STAT_PATCH checks. defined the IS_ABSOLUTE_PATH
+      macros to suit the NetWare filesystem convention
+
+    * TSRM/tsrm_virtual_cwd.c:
+      removed redundant NEW_LIBC checks and added the code to recognize the file
+      naming convention in NetWare(supports Windows based drive names like sys:
+      data: and unix like / (sys: being root)
+
+    * ZendEngine2/acconfig.h
+      ZendEngine2/zend_config.nw.h:
+      explicitly including sys/select.h as NetWare LibC sys/types.h does not
+      include sys/select.h implicitly as other LibC
+
 2004-10-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
