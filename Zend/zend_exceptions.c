@@ -390,6 +390,7 @@ static void zend_register_default_exception(TSRMLS_D)
 	default_exception_ptr = zend_register_internal_class(&ce TSRMLS_CC);
 	default_exception_ptr->create_object = zend_default_exception_new; 
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	default_exception_handlers.clone_obj = NULL;
 	default_exception_handlers.cast_object = zend_cast_exception;
 
 	zend_declare_property_string(default_exception_ptr, "message", sizeof("message")-1, "Unknown exception", ZEND_ACC_PROTECTED TSRMLS_CC);

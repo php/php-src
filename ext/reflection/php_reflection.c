@@ -3039,6 +3039,7 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	zend_class_entry _reflection_entry;
 
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	reflection_object_handlers.clone_obj = NULL;
 
 	INIT_CLASS_ENTRY(_reflection_entry, "reflection_exception", reflection_exception_functions);
 	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default(), NULL TSRMLS_CC);
