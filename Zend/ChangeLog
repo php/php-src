@@ -1,3 +1,16 @@
+2003-09-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Revert - need to look for a better solution
+
+    * zend_execute.c:
+      Bugfix #25547
+
+2003-09-15  Zeev Suraski  <zeev@zend.com>
+
+    * zend_operators.c:
+      Simplify / fix
+
 2003-09-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c:

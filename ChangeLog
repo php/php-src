@@ -1,3 +1,109 @@
+2003-09-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/bz2/bz2.c:
+      MFH: Fixed bug #25106 (Added more stringent checks on bzopen() mode).
+
+    * ext/bz2/bz2.c:
+      Fixed bug #25106 (Added more stringent checks on bzopen() mode).
+      In some cases bz2 may fail to open the file, but stream wrappers will
+      still
+      create an empty file, remove this file.
+      Change virtual_filepath to virtual_filepath_ex, which allows BZ2_bzfopen()
+      to work without having to resort to stream wrappers.
+
+2003-09-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      Revert - need to look for a better solution
+
+2003-09-15  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-PEAR.xml:
+      - Added new notes and split them
+      - Upgraded me as <lead>
+      
+
+2003-09-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug25547.phpt:
+      
+      Test for bug #25547
+
+    * ZendEngine2/zend_execute.c:
+      Bugfix #25547
+
+2003-09-15  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/System.php:
+      - Implemented the find command (currently supported args:
+        -type f, -type d, -maxdepth, -name)
+      * Fixed recursion deep level in _dirToStruct()
+
+2003-09-15  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Common.php:
+      pear install net_socket will work now - before it would only work with pear
+      install Net_socket
+
+2003-09-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c:
+      validate encoding against valid handlers
+
+2003-09-15  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/fam/fam.c:
+      proto descriptions
+
+2003-09-15  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      Simplify / fix
+
+2003-09-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/gd/gd.c:
+      FREETYPE_PATCH is not always defined.
+
+2003-09-15  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Installer.php:
+      Now empty directories are removed on uninstall, so uninstallation is
+      complete and correct
+
+2003-09-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      crap removal
+
+2003-09-15  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      mistaken include_once 'Remote.php' - not sure why it worked at all
+
+    * pear/PEAR/Installer.php:
+      move registration of installed location to post-commit
+
+    * pear/tests/pear_installer2.phpt:
+      add testing for baseinstalldir attribute
+
+    * pear/tests/pear_installer2.phpt:
+      add testing for install-as attribute
+
+2003-09-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/datetime.c:
+      MFH: Fixed bug #25530 (checkdate incorrectly handles floats)
+
+    * ext/standard/datetime.c:
+      Fixed bug #25530 (checkdate incorrectly handles floats)
+
 2003-09-14  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/tests/pear_installer2.phpt:
