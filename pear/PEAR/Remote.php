@@ -290,7 +290,8 @@ class PEAR_Remote extends PEAR
                     ($lastkey + 1) == count($php_val)) {
                     $is_continous = true;
                     reset($php_val);
-                    for ($expect = 0; $expect < count($php_val); $expect++) {
+                    $size = count($php_val);
+                    for ($expect = 0; $expect < $size; $expect++, next($php_val)) {
                         if (key($php_val) !== $expect) {
                             $is_continous = false;
                             break;
