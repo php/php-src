@@ -444,7 +444,7 @@ PHP_RSHUTDOWN_FUNCTION(gd)
 {
 #if defined(HAVE_GD_THREAD_SAFE) || defined(HAVE_GD_BUNDLED)
 	gdFontCacheShutdown();
-#else 
+#else
 	gdFreeFontCache();
 #endif
 	return SUCCESS;
@@ -831,7 +831,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;
 	}
-	
+
 	im = gdImageCreateTrueColor(Z_LVAL_PP(x_size), Z_LVAL_PP(y_size));
 
 	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
@@ -2390,12 +2390,12 @@ PHP_FUNCTION(imagearc)
 	if (e < 0) {
 		e %= 360;
 	}
-	
+
 	st = Z_LVAL_PP(ST);
 	if (st < 0) {
 		st %= 360;
 	}
-	
+
 	gdImageArc(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), st, e, Z_LVAL_PP(col));
 	RETURN_TRUE;
 }
@@ -2983,7 +2983,7 @@ PHP_FUNCTION(imagecopyresized)
 	dstY = Z_LVAL_PP(DY);
 	dstH = Z_LVAL_PP(DH);
 	dstW = Z_LVAL_PP(DW);
-	
+
 	if (dstW <= 0 || dstH <= 0 || srcW <= 0 || srcH <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid image dimensions");
 		RETURN_FALSE;

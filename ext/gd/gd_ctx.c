@@ -21,7 +21,7 @@
 #include "php_gd.h"
 
 #define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
-	
+
 static void _php_image_output_putc(struct gdIOCtx *ctx, int c)
 {
 	TSRMLS_FETCH();
@@ -41,8 +41,8 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx)
 	}
 }
 
-/* {{{ _php_image_output_ctx */	
-static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)()) 
+/* {{{ _php_image_output_ctx */
+static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
 	zval **imgind, **file, **quality;
 	gdImagePtr im;
@@ -56,11 +56,11 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	 * The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
 	 * from imagey<type>().
 	 */
-	
+
 	if (argc < 2 && image_type == PHP_GDIMG_TYPE_XBM) {
 		WRONG_PARAM_COUNT;
 	}
-	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &quality) == FAILURE) 
+	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &quality) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -97,7 +97,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		ctx->gd_free = _php_image_output_ctxfree;
 #else
 		ctx->free = _php_image_output_ctxfree;
-#endif		
+#endif
 
 #if APACHE && defined(CHARSET_EBCDIC)
 		/* XXX this is unlikely to work any more thies@thieso.net */
@@ -133,17 +133,17 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			break;
 	}
 
-#if HAVE_LIBGD204	
+#if HAVE_LIBGD204
 	ctx->gd_free(ctx);
 #else
 	ctx->free(ctx);
-#endif		
+#endif
 
 	if(fp) {
 		fflush(fp);
 		fclose(fp);
 	}
-	
+
     RETURN_TRUE;
 }
 /* }}} */

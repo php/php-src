@@ -1,8 +1,8 @@
-/* 
+/*
  * $Id$
  *
- * Caches of pointers to user structs in which the least-recently-used 
- * element is replaced in the event of a cache miss after the cache has 
+ * Caches of pointers to user structs in which the least-recently-used
+ * element is replaced in the event of a cache miss after the cache has
  * reached a given size.
  *
  * John Ellson  (ellson@lucent.com)  Oct 31, 1997
@@ -17,17 +17,17 @@
  * The head structure has a pointer to the most-recently-used
  * element, and elements are moved to this position in the list each
  * time they are used.  The head also contains pointers to three
- * user defined functions: 
- *		- a function to test if a cached userdata matches some keydata 
- *		- a function to provide a new userdata struct to the cache 
+ * user defined functions:
+ *		- a function to test if a cached userdata matches some keydata
+ *		- a function to provide a new userdata struct to the cache
  *          if there has been a cache miss.
  *		- a function to release a userdata struct when it is
  *          no longer being managed by the cache
  *
  * In the event of a cache miss the cache is allowed to grow up to
  * a specified maximum size.  After the maximum size is reached then
- * the least-recently-used element is discarded to make room for the 
- * new.  The most-recently-returned value is always left at the 
+ * the least-recently-used element is discarded to make room for the
+ * new.  The most-recently-returned value is always left at the
  * beginning of the list after retrieval.
  *
  * In the current implementation the cache is traversed by a linear
@@ -59,9 +59,9 @@ gdCacheCreate(
 	int					size,
 	gdCacheTestFn_t		gdCacheTest,
 	gdCacheFetchFn_t	gdCacheFetch,
-	gdCacheReleaseFn_t	gdCacheRelease ) 
+	gdCacheReleaseFn_t	gdCacheRelease )
 {
-	gdCache_head_t *head; 
+	gdCache_head_t *head;
 
 	head = (gdCache_head_t *)pemalloc(sizeof(gdCache_head_t), 1);
 	head->mru = NULL;
