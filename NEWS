@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 200?, Version 5.0.0
 
 ?? ??? 2003, PHP 5 Beta 2
+- Upgraded bundled PCRE library to version 4.3. (Andrei)
+- Added a new parameter to preg_match* that can be used to specify the starting
+  offset in the subject string to match from. (Andrei)
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
 
