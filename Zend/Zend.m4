@@ -6,8 +6,8 @@ if test "$YACC" != "bison -y"; then
 else
     AC_MSG_CHECKING(bison version)
     set `bison --version| sed -e 's/^GNU Bison version //' -e 's/\./ /'`
-    if test "${1}" = "1" -a "${2}" -lt "25"; then
-        AC_MSG_WARN(You will need bison 1.25 if you want to regenerate the Zend parser (found ${1}.${2}).)
+    if test "${1}" = "1" -a "${2}" -lt "28"; then
+        AC_MSG_WARN(You will need bison 1.28 if you want to regenerate the Zend parser (found ${1}.${2}).)
     fi
     AC_MSG_RESULT(${1}.${2} (ok))
 fi
