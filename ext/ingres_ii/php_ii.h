@@ -12,6 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
+   | Contributed by ECL IP'S Software & Services                          |
+   |                http://www.eclips-software.com                        |
+   |                mailto://idev@eclips-software.com                     |
    | Author: David Hénot <henot@php.net>                                  |
    +----------------------------------------------------------------------+
  */
