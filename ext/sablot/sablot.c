@@ -1520,7 +1520,7 @@ static int _php_sablot_sh_getAll(void *userData, SablotHandle p, const char *sch
 		                       argc,
 		                       argv TSRMLS_CC) == FAILURE) {
 			php_error(E_WARNING, "Sorry couldn't call function, %s, with handler of type %s",
-			          handle->getAllHZ_STRVAL_P(andler), "Scheme GetALL");
+			          Z_STRVAL_P(handle->getAllHandler), "Scheme GetALL");
 		}
 
 		zval_dtor(retval);
