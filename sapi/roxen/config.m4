@@ -2,8 +2,9 @@ dnl ## $Id$ -*- sh -*-
 
 RESULT=no
 AC_MSG_CHECKING(for Roxen/Pike support)
-AC_ARG_WITH(roxen,
-[  --with-roxen=DIR],
+AC_ARG_WITH(roxen, 
+[  --with-roxen=DIR        Build PHP as a Pike module. DIR is the base Roxen
+                          directory, normally /usr/local/roxen/server.],
 [
 	if test ! -d $withval ; then
 		AC_MSG_ERROR(You did not specify a directory)
@@ -30,12 +31,32 @@ AC_ARG_WITH(roxen,
 	PHP_BUILD_SHARED
 	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED $PIKE_MODULE_DIR/PHP4.so"
 	RESULT="yes
-	Pike binary user:      $PIKE
+	Pike binary used:      $PIKE
 	Pike include dir:      $PIKE_INCLUDE_DIR
 	Pike module directory: $PIKE_MODULE_DIR"
 ])
 AC_MSG_RESULT($RESULT)
 
+if test "$RESULT" != "no" ; then 
+ RESULT=no
+ AC_MSG_CHECKING(if Roxen should use ZTS)
+ AC_ARG_ENABLE(roxen-zts, 
+ [  --enable-roxen-zts      Build the Roxen module using Zend Thread Safety.
+                          This is not required to run the module in a threaded
+                          Roxen and it doesn't improve performance. PHP calls
+                          are normally made in a serialized mode.],
+ [
+ 	PHP_BUILD_THREAD_SAFE
+	AC_DEFINE(ROXEN_USE_ZTS)
+	RESULT="yes
+	***   You have choosen to compile with PHP thread safety
+	***   enabled. This is not a requirement for the Roxen
+	***   PHP module, even if Roxen runs in multi-threaded mode.
+	***   It will as a matter of fact make performance worse."
+
+ ])
+ AC_MSG_RESULT($RESULT)
+fi
 dnl ## Local Variables:
 dnl ## tab-width: 4
 dnl ## End:

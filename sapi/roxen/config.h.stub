@@ -3,3 +3,10 @@
  * It is currently VERY EXPERIMENTAL and not finished.
  */
 #undef HAVE_ROXEN
+
+
+/* Comment to use the Roxen "serializing" instead of PHP's ZTS.
+ * It seems like the Roxen PHP-global mutex lock works better,
+ * performance wise.
+ */
+#undef ROXEN_USE_ZTS
