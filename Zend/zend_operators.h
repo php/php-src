@@ -232,7 +232,9 @@ ZEND_API int zend_atoi(const char *str, int str_len);
 #define Z_STRVAL(zval)		(zval).value.str.val
 #define Z_STRLEN(zval)		(zval).value.str.len
 #define Z_ARRVAL(zval)		(zval).value.ht
-#define Z_OBJ(zval)			(zval).value.obj.handlers->get_address((zval).value.obj.handle)
+#define Z_OBJ_HANDLE(zval)  (zval).value.obj.handle
+#define Z_OBJ_HT(zval)      (zval).value.obj.handlers
+#define Z_OBJ(zval)			zend_objects_get_address(&(zval))
 #define Z_OBJPROP(zval)		Z_OBJ(zval)->properties
 #define Z_OBJCE(zval)		Z_OBJ(zval)->ce
 #define Z_RESVAL(zval)		(zval).value.lval
@@ -247,6 +249,8 @@ ZEND_API int zend_atoi(const char *str, int str_len);
 #define Z_OBJPROP_P(zval_p)		Z_OBJPROP(*zval_p)
 #define Z_OBJCE_P(zval_p)		Z_OBJCE(*zval_p)
 #define Z_RESVAL_P(zval_p)		Z_RESVAL(*zval_p)
+#define Z_OBJ_HANDLE_P(zval_p)  Z_OBJ_HANDLE(*zval_p)
+#define Z_OBJ_HT_P(zval_p)      Z_OBJ_HT(*zval_p)
 
 #define Z_LVAL_PP(zval_pp)		Z_LVAL(**zval_pp)
 #define Z_BVAL_PP(zval_pp)		Z_BVAL(**zval_pp)
@@ -258,6 +262,8 @@ ZEND_API int zend_atoi(const char *str, int str_len);
 #define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
 #define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)
 #define Z_RESVAL_PP(zval_pp)	Z_RESVAL(**zval_pp)
+#define Z_OBJ_HANDLE_PP(zval_p) Z_OBJ_HANDLE(**zval_p)
+#define Z_OBJ_HT_PP(zval_p)     Z_OBJ_HT(**zval_p)
 
 #define Z_TYPE(zval)		(zval).type
 #define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)

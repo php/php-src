@@ -3,16 +3,7 @@
 #include "zend_variables.h"
 #include "zend_API.h"
 
-#define ZEND_DEBUG_OBJECTS 0
-
-static zend_object_handlers zoh = {
-	zend_objects_get_address,
-	NULL,
-	zend_objects_add_ref,
-	zend_objects_del_ref,
-	zend_objects_delete_obj,
-	zend_objects_clone_obj
-};
+#define ZEND_DEBUG_OBJECTS 1
 
 void zend_objects_init(zend_objects *objects, zend_uint init_size)
 {
@@ -38,7 +29,7 @@ static inline void zend_objects_call_destructor(zend_object *object, zend_object
 		MAKE_STD_ZVAL(obj);
 		obj->type = IS_OBJECT;
 		obj->value.obj.handle = handle;
-		obj->value.obj.handlers = &zoh;
+		obj->value.obj.handlers = &std_object_handlers;
 		zval_copy_ctor(obj);
 
 
@@ -110,25 +101,27 @@ zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class
 	(*object)->ce = class_type;
 
 	retval.handle = handle;
-	retval.handlers = &zoh;
+	retval.handlers = &std_object_handlers;
 #if ZEND_DEBUG_OBJECTS
 	fprintf(stderr, "Allocated object id #%d\n", handle);
 #endif
 	return retval;
 }
 
-zend_object *zend_objects_get_address(zend_object_handle handle)
+zend_object *zend_objects_get_address(zval *zobject)
 {
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	TSRMLS_FETCH();
-
+	
 	if (!EG(objects).object_buckets[handle].valid) {
 		zend_error(E_ERROR, "Trying to access invalid object");
 	}
 	return &EG(objects).object_buckets[handle].bucket.obj.object;
 }
 
-void zend_objects_add_ref(zend_object_handle handle)
+void zend_objects_add_ref(zval *object)
 {
+	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
 	TSRMLS_FETCH();
 
 	if (!EG(objects).object_buckets[handle].valid) {
@@ -141,9 +134,10 @@ void zend_objects_add_ref(zend_object_handle handle)
 #endif
 }
 
-void zend_objects_delete_obj(zend_object_handle handle)
+void zend_objects_delete_obj(zval *zobject)
 {
 	zend_object *object;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	TSRMLS_FETCH();
 
 	if (!EG(objects).object_buckets[handle].valid) {
@@ -170,8 +164,9 @@ void zend_objects_delete_obj(zend_object_handle handle)
 			EG(objects).free_list_head = handle;													\
 			EG(objects).object_buckets[handle].valid = 0;
 
-void zend_objects_del_ref(zend_object_handle handle)
+void zend_objects_del_ref(zval *zobject)
 {
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	TSRMLS_FETCH();
 
 	if (--EG(objects).object_buckets[handle].bucket.obj.refcount == 0) {
@@ -202,11 +197,12 @@ void zend_objects_del_ref(zend_object_handle handle)
 #endif
 }
 
-zend_object_value zend_objects_clone_obj(zend_object_handle handle)
+zend_object_value zend_objects_clone_obj(zval *zobject)
 {
 	zend_object_value retval;
 	zend_object *old_object;
 	zend_object *new_object;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
 	TSRMLS_FETCH();
 
@@ -232,7 +228,7 @@ zend_object_value zend_objects_clone_obj(zend_object_handle handle)
 		MAKE_STD_ZVAL(old_obj);
 		old_obj->type = IS_OBJECT;
 		old_obj->value.obj.handle = handle;
-		old_obj->value.obj.handlers = &zoh; /* If we reached here than the handlers are zoh */
+		old_obj->value.obj.handlers = &std_object_handlers; /* If we reached here than the handlers are standrd */
 		zval_copy_ctor(old_obj);
 
 		/* FIXME: Optimize this so that we use the old_object->ce->clone function pointer instead of the name */

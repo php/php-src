@@ -65,6 +65,7 @@ static inline void safe_free_zval_ptr(zval *p)
 }
 
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
+
 static inline int i_zend_is_true(zval *op)
 {
 	int result;
@@ -93,7 +94,8 @@ static inline int i_zend_is_true(zval *op)
 			result = (zend_hash_num_elements(op->value.ht)?1:0);
 			break;
 		case IS_OBJECT:
-			result = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
+			/* OBJ-TBI */
+			result = 1;
 			break;
 		default:
 			result = 0;

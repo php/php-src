@@ -1373,13 +1373,14 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	new_class_entry.destructor = NULL;
 	new_class_entry.clone = NULL;
 
+	new_class_entry.create_object = NULL;
 	new_class_entry.handle_function_call = NULL;
 	new_class_entry.handle_property_set = NULL;
 	new_class_entry.handle_property_get = NULL;
 
 	new_class_entry.parent = NULL;
 
-	if (zend_hash_update(class_table, new_class_entry.name, name_length+1, &new_class_entry, sizeof(zend_class_entry), ce) == FAILURE) {
+	if (zend_hash_update(class_table, new_class_entry.name, name_length+1, &new_class_entry, sizeof(zend_class_entry), (void **)ce) == FAILURE) {
 		zend_error(E_ERROR, "Can't create class. Fatal error, please report!");
 	}
 }
@@ -1396,7 +1397,7 @@ static int create_nested_class(HashTable *class_table, char *path, zend_class_en
 
 	cur = tsrm_strtok_r(path, ":", &temp);
 
-	if (zend_hash_find(class_table, cur, strlen(cur)+1, &ce) == FAILURE) {
+	if (zend_hash_find(class_table, cur, strlen(cur)+1, (void **)&ce) == FAILURE) {
 		create_class(class_table, cur, strlen(cur), &ce);
 	}
 
@@ -1407,7 +1408,7 @@ static int create_nested_class(HashTable *class_table, char *path, zend_class_en
 		if (!cur) {
 			break;
 		}
-		if (zend_hash_find(&ce->class_table, last, strlen(last)+1, &ce) == FAILURE) {
+		if (zend_hash_find(&ce->class_table, last, strlen(last)+1, (void **)&ce) == FAILURE) {
 			create_class(&ce->class_table, last, strlen(last), &ce);
 		}
 		last = cur;
@@ -1862,6 +1863,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry.destructor = NULL;
 	new_class_entry.clone = NULL;
 
+	new_class_entry.create_object = NULL;
 	new_class_entry.handle_function_call = NULL;
 	new_class_entry.handle_property_set = NULL;
 	new_class_entry.handle_property_get = NULL;

@@ -491,7 +491,8 @@ ZEND_FUNCTION(defined)
 ZEND_FUNCTION(get_class)
 {
 	zval **arg;
-	zend_class_entry *ce;
+	char *name;
+	int name_len;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -500,8 +501,12 @@ ZEND_FUNCTION(get_class)
 		RETURN_FALSE;
 	}
 
-	ce = Z_OBJCE_PP(arg);
-	RETURN_STRINGL(ce->name, ce->name_length, 1);
+	if(Z_OBJ_HT_PP(arg)->get_class_name == NULL ||
+	   Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(name, name_len, 1);
 }
 /* }}} */
 
@@ -517,9 +522,16 @@ ZEND_FUNCTION(get_parent_class)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if (Z_TYPE_PP(arg) == IS_OBJECT)
-	   ce = Z_OBJCE_PP(arg);
-	else if (Z_TYPE_PP(arg) == IS_STRING) {
+	if (Z_TYPE_PP(arg) == IS_OBJECT) {
+		char *name;
+		zend_uint name_length;
+		
+		if(Z_OBJ_HT_PP(arg)->get_class_name == NULL ||
+		   Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) != SUCCESS) {
+			RETURN_FALSE;
+		}
+		RETURN_STRINGL(name, name_length, 1);
+	} else if (Z_TYPE_PP(arg) == IS_STRING) {
 		SEPARATE_ZVAL(arg);
 		zend_str_tolower(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
 		zend_hash_find(EG(class_table), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg)+1, (void **)&ce);
@@ -532,6 +544,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 }
 /* }}} */
+
 
 static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 {
@@ -546,8 +559,14 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	if (Z_TYPE_PP(obj) != IS_OBJECT) {
 		RETURN_FALSE;
 	}
+	
+	/* TBI!! new object handlers */
+	if(!IS_ZEND_STD_OBJECT(**obj)) {
+		RETURN_FALSE;
+	}
 
 	convert_to_string_ex(class_name);
+
 	lcname = estrndup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
 	zend_str_tolower(lcname, Z_STRLEN_PP(class_name));
 
@@ -564,9 +583,10 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	efree(lcname);
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool is_subclass_of(object object, string class_name)
-   Returns true if the object has this class as one of its parents */
+    Returns true if the object has this class as one of its parents */
 ZEND_FUNCTION(is_subclass_of)
 {
 	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -630,9 +650,12 @@ ZEND_FUNCTION(get_object_vars)
 	if ((*obj)->type != IS_OBJECT) {
 		RETURN_FALSE;
 	}
+	if(Z_OBJ_HT_PP(obj)->get_properties == NULL) {
+		RETURN_FALSE;
+	}
 
 	array_init(return_value);
-	zend_hash_copy(return_value->value.ht, Z_OBJPROP_PP(obj),
+	zend_hash_copy(return_value->value.ht, Z_OBJ_HT_PP(obj)->get_properties(*obj TSRMLS_CC),
 				   (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 }
 /* }}} */
@@ -653,9 +676,13 @@ ZEND_FUNCTION(get_class_methods)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if (Z_TYPE_PP(class) == IS_OBJECT)
+	if (Z_TYPE_PP(class) == IS_OBJECT) {
+		/* TBI!! new object handlers */
+		if(!IS_ZEND_STD_OBJECT(**class)) {
+			RETURN_FALSE;
+		}
 		ce = Z_OBJCE_PP(class);
-	else if (Z_TYPE_PP(class) == IS_STRING) {
+	} else if (Z_TYPE_PP(class) == IS_STRING) {
 		SEPARATE_ZVAL(class);
 		zend_str_tolower(Z_STRVAL_PP(class), Z_STRLEN_PP(class));
 		zend_hash_find(EG(class_table), Z_STRVAL_PP(class), Z_STRLEN_PP(class)+1, (void **)&ce);
@@ -692,6 +719,12 @@ ZEND_FUNCTION(method_exists)
 	if ((*klass)->type != IS_OBJECT) {
 		RETURN_FALSE;
 	}
+
+	/* TBI!! new object handlers */
+	if(!IS_ZEND_STD_OBJECT(**klass)) {
+		RETURN_FALSE;
+	}
+
 	convert_to_string_ex(method_name);
 	lcname = estrndup((*method_name)->value.str.val, (*method_name)->value.str.len);
 	zend_str_tolower(lcname, (*method_name)->value.str.len);

@@ -90,6 +90,7 @@
 		class_container.constructor = NULL;							\
 		class_container.destructor = NULL;							\
 		class_container.clone = NULL;								\
+		class_container.create_object = NULL;	 					\
 		class_container.handle_function_call = NULL;				\
 		class_container.handle_property_get = NULL;					\
 		class_container.handle_property_set = NULL;					\
@@ -103,6 +104,7 @@
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
 		class_container.clone = NULL;							\
+		class_container.create_object = NULL;	 				\
 		class_container.handle_function_call = handle_fcall;	\
 		class_container.handle_property_get = handle_propget;	\
 		class_container.handle_property_set = handle_propset;	\
@@ -406,7 +408,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount, _is_ref)		\
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount, _is_ref)
 
-#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? Z_OBJPROP_P(p) : NULL)))
+#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p) TSRMLS_CC) : NULL)))
 #define ZVAL_IS_NULL(z) ((z)->type==IS_NULL)
 
 /* For compatibility */

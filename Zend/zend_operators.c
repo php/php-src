@@ -202,7 +202,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);				\
 				break;												\
 			case IS_OBJECT:											\
-				(holder).value.lval = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);	\
+				(holder).value.lval = 1; /* TBI!! */				\
 				break;												\
 			case IS_BOOL:											\
 			case IS_RESOURCE:										\
@@ -245,7 +245,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);	\
 				break;												\
 			case IS_OBJECT:											\
-				(holder).value.lval = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);	\
+				(holder).value.lval = 1; /* TBI!! */				\
 				break;												\
 			default:												\
 				(holder).value.lval = 0;							\
@@ -294,9 +294,8 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 			op->value.lval = tmp;
 			break;
 		case IS_OBJECT:
-			tmp = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
 			zval_dtor(op);
-			op->value.lval = tmp;
+			op->value.lval = 1; /* TBI!! */
 			break;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
@@ -342,9 +341,8 @@ ZEND_API void convert_to_double(zval *op)
 			op->value.dval = tmp;
 			break;
 		case IS_OBJECT:
-			tmp = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
 			zval_dtor(op);
-			op->value.dval = tmp;
+			op->value.dval = 1; /* TBI!! */
 			break;			
 		default:
 			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", op->type);
@@ -403,9 +401,8 @@ ZEND_API void convert_to_boolean(zval *op)
 			op->value.lval = tmp;
 			break;
 		case IS_OBJECT:
-			tmp = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
 			zval_dtor(op);
-			op->value.lval = tmp;
+			op->value.lval = 1; /* TBI!! */
 			break;
 		default:
 			zval_dtor(op);
@@ -510,6 +507,8 @@ static void convert_scalar_to_array(zval *op, int type)
 
 ZEND_API void convert_to_array(zval *op)
 {
+	TSRMLS_FETCH();
+
 	switch(op->type) {
 		case IS_ARRAY:
 			return;
@@ -522,7 +521,9 @@ ZEND_API void convert_to_array(zval *op)
 
 				ALLOC_HASHTABLE(ht);
 				zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
-				zend_hash_copy(ht, Z_OBJPROP_P(op), (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+				if(Z_OBJ_HT_P(op)->get_properties) {
+					zend_hash_copy(ht, Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC), (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+				}
 				zval_dtor(op);
 				op->type = IS_ARRAY;
 				op->value.ht = ht;
@@ -1253,14 +1254,10 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJCE_P(op1) != Z_OBJCE_P(op2)) {
-				result->value.lval = 0;
+			if(Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2) && Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2)) {
+				result->value.lval = 1;
 			} else {
-				if (zend_hash_compare(Z_OBJPROP_P(op1), Z_OBJPROP_P(op2), (compare_func_t) hash_zval_identical_function, 1 TSRMLS_CC)==0) {
-					result->value.lval = 1;
-				} else {
-					result->value.lval = 0;
-				}
+				result->value.lval = 0;
 			}
 			break;
 		default:
@@ -1712,6 +1709,11 @@ static int hash_zval_compare_function(const zval **z1, const zval **z2 TSRMLS_DC
 	return result.value.lval;
 }
 
+ZEND_API int zend_compare_symbol_tables_i(HashTable *ht1, HashTable *ht2 TSRMLS_DC)
+{
+	return zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0 TSRMLS_CC);
+}
+
 
 
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC)
@@ -1729,10 +1731,20 @@ ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2 TSRMLS_DC)
 
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 {
-	if (Z_OBJCE_P(o1) != Z_OBJCE_P(o2)) {
+	result->type = IS_LONG;
+	if (Z_OBJ_HT_P(o1) != Z_OBJ_HT_P(o2)) {
 		result->value.lval = 1;	/* Comparing objects of different types is pretty much meaningless */
-		result->type = IS_LONG;
 		return;
 	}
-	zend_compare_symbol_tables(result, Z_OBJPROP_P(o1), Z_OBJPROP_P(o2) TSRMLS_CC);
+
+	if(Z_OBJ_HT_P(o1)->compare_objects == NULL) {
+		if(Z_OBJ_HANDLE_P(o1) == Z_OBJ_HANDLE_P(o2)) {
+			result->value.lval = 0;
+		} else {
+			result->value.lval = 1;
+		}			
+		return;
+	} else {
+		result->value.lval = Z_OBJ_HT_P(o1)->compare_objects(o1, o2 TSRMLS_CC);
+	}
 }
