@@ -562,7 +562,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				break;
 		}
 		/* disable local infile option for open_basedir */
-		if (PG(open_basedir)) {
+		if (PG(open_basedir) && strlen(PG(open_basedir))) {
 			client_flags ^= CLIENT_LOCAL_FILES;
 		}
 
