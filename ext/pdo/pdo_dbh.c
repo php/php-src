@@ -370,6 +370,40 @@ static PHP_METHOD(PDO, lastInsertId)
 }
 /* }}} */
 
+/* {{{ proto int PDO::errorCode()
+   Fetch the error code associated with the last operation on the database handle */
+static PHP_METHOD(PDO, errorCode)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (ZEND_NUM_ARGS()) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(dbh->error_code);
+}
+/* }}} */
+
+/* {{{ proto int PDO::errorInfo()
+   Fetch extended error information associated with the last operation on the database handle */
+static PHP_METHOD(PDO, errorInfo)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (ZEND_NUM_ARGS()) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	add_next_index_long(return_value, dbh->error_code);
+
+	if (dbh->methods->fetch_err) {
+		dbh->methods->fetch_err(dbh, NULL, return_value TSRMLS_CC);
+	}
+}
+/* }}} */
+
+
 function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, beginTransaction,NULL,					ZEND_ACC_PUBLIC)
@@ -378,6 +412,8 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, exec,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, lastInsertId,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, errorCode,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 
 	{NULL, NULL, NULL}
 };
