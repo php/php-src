@@ -1,3 +1,12 @@
+2000-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/shmop/php_shmop.h
+      ext/shmop/shmop.c: Move static declaration to source file.
+
+2000-10-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: - Fixed returning of empty LOB fields in OCI8. 
+
 2000-10-06  Sebastian Bergmann  <sb@phpopentracker.de>
 
     * php.ini-dist
