@@ -530,7 +530,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset, zval *return_all TSRMLS_DC)
 {
 	int flags = how & PDO_FETCH_FLAGS;
-	zend_class_entry * ce = NULL;
+	zend_class_entry * ce;
 
 	how = how & ~PDO_FETCH_FLAGS;
 	if (how == PDO_FETCH_USE_DEFAULT) {
@@ -580,50 +580,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				
 				object_init_ex(return_value, ce);
 
-				if (ce->constructor) {
-					zend_fcall_info fci;
-					zend_fcall_info_cache fcc;
-					zval *retval_ptr; 
-
-					fci.size = sizeof(fci);
-					fci.function_table = &ce->function_table;
-					fci.function_name = NULL;
-					fci.symbol_table = NULL;
-					fci.object_pp = &return_value;
-					fci.retval_ptr_ptr = &retval_ptr;
-					if (stmt->fetch.cls.ctor_args) {
-						HashTable *ht = Z_ARRVAL_P(stmt->fetch.cls.ctor_args);
-						Bucket *p;
-		
-						fci.param_count = 0;
-						fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
-						p = ht->pListHead;
-						while (p != NULL) {
-							fci.params[fci.param_count++] = (zval**)p->pData;
-							p = p->pListNext;
-						}
-					} else {
-						fci.param_count = 0;
-						fci.params = NULL;
-					}
-					fci.no_separation = 1;
-			
-					fcc.initialized = 1;
-					fcc.function_handler = ce->constructor;
-					fcc.calling_scope = EG(scope);
-					fcc.object_pp = &return_value;
-			
-					if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-						zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
-					} else {
-						if (retval_ptr) {
-							zval_ptr_dtor(&retval_ptr);
-						}
-					}
-					if (fci.params) {
-						efree(fci.params);
-					}
-				} else if (stmt->fetch.cls.ctor_args) {
+				if (!ce->constructor && stmt->fetch.cls.ctor_args) {
 					zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", ce->name);
 				}
 				break;
@@ -689,10 +646,59 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 
 				case PDO_FETCH_OBJ:
 				case PDO_FETCH_INTO:
+					zend_update_property(NULL, return_value,
+						stmt->columns[i].name, stmt->columns[i].namelen,
+						val TSRMLS_CC);
+					break;
+
 				case PDO_FETCH_CLASS:
 					zend_update_property(ce, return_value,
 						stmt->columns[i].name, stmt->columns[i].namelen,
 						val TSRMLS_CC);
+					if (ce->constructor) {
+						zend_fcall_info fci;
+						zend_fcall_info_cache fcc;
+						zval *retval_ptr; 
+	
+						fci.size = sizeof(fci);
+						fci.function_table = &ce->function_table;
+						fci.function_name = NULL;
+						fci.symbol_table = NULL;
+						fci.object_pp = &return_value;
+						fci.retval_ptr_ptr = &retval_ptr;
+						if (stmt->fetch.cls.ctor_args) {
+							HashTable *ht = Z_ARRVAL_P(stmt->fetch.cls.ctor_args);
+							Bucket *p;
+			
+							fci.param_count = 0;
+							fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
+							p = ht->pListHead;
+							while (p != NULL) {
+								fci.params[fci.param_count++] = (zval**)p->pData;
+								p = p->pListNext;
+							}
+						} else {
+							fci.param_count = 0;
+							fci.params = NULL;
+						}
+						fci.no_separation = 1;
+				
+						fcc.initialized = 1;
+						fcc.function_handler = ce->constructor;
+						fcc.calling_scope = EG(scope);
+						fcc.object_pp = &return_value;
+				
+						if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+							zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
+						} else {
+							if (retval_ptr) {
+								zval_ptr_dtor(&retval_ptr);
+							}
+						}
+						if (fci.params) {
+							efree(fci.params);
+						}
+					}
 					break;
 			}
 		}
