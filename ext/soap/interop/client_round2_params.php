@@ -59,7 +59,7 @@ class SOAP_Test {
         if ($params) {
         $v = array_values($params);
         if (gettype($v[0]) == 'object' &&
-            (get_class($v[0]) == 'soapvar' || get_class($v[0]) == 'soapparam'))
+            (get_class($v[0]) == 'SoapVar' || get_class($v[0]) == 'SoapParam'))
             $this->type = 'soapval';
         }
     }
@@ -146,7 +146,7 @@ function make_2d($x, $y)
 }
 
 function soap_value($name, $value, $type, $type_name=NULL, $type_ns=NULL) {
-    return new soapparam(new soapvar($value,$type,$type_name,$type_ns),$name);
+    return new SoapParam(new SoapVar($value,$type,$type_name,$type_ns),$name);
 }
 
 class SOAPStruct {
@@ -217,7 +217,7 @@ $soap_tests['base'][] = new SOAP_Test('echoIntegerArray', array('inputIntegerArr
 $soap_tests['base'][] = new SOAP_Test('echoIntegerArray',
         array('inputIntegerArray' =>
             soap_value('inputIntegerArray',
-                       array(new soapvar(12345,XSD_INT),new soapvar(654321,XSD_INT)),
+                       array(new SoapVar(12345,XSD_INT),new SoapVar(654321,XSD_INT)),
                     SOAP_ENC_ARRAY,"ArrayOfint","http://soapinterop.org/xsd")));
 
 //***********************************************************
@@ -233,7 +233,7 @@ $soap_tests['base'][] = new SOAP_Test('echoFloatArray', array('inputFloatArray' 
 $soap_tests['base'][] = new SOAP_Test('echoFloatArray',
         array('inputFloatArray' =>
             soap_value('inputFloatArray',
-                       array(new soapvar(123.45,XSD_FLOAT),new soapvar(654.321,XSD_FLOAT)),
+                       array(new SoapVar(123.45,XSD_FLOAT),new SoapVar(654.321,XSD_FLOAT)),
                     SOAP_ENC_ARRAY,"ArrayOffloat","http://soapinterop.org/xsd")));
 //***********************************************************
 // Base echoStruct
@@ -251,9 +251,9 @@ $soap_tests['base'][] = new SOAP_Test('echoStructArray', array('inputStructArray
         $soapstruct,$soapstruct,$soapstruct)));
 $soap_tests['base'][] = new SOAP_Test('echoStructArray', array('inputStructArray' =>
          soap_value('inputStructArray',array(
-           new soapvar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
-           new soapvar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
-           new soapvar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd")),
+           new SoapVar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
+           new SoapVar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
+           new SoapVar($soapstruct,SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd")),
          SOAP_ENC_ARRAY,"ArrayOfSOAPStruct","http://soapinterop.org/xsd")));
 
 
