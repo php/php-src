@@ -1133,7 +1133,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 }
 
 /* private API; don't use in extensions */
-int _php_network_is_stream_alive(php_stream *stream)
+int _php_network_is_stream_alive(php_stream *stream TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	int alive = 1;

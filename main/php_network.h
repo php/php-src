@@ -156,7 +156,7 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, con
 /* }}} */
 
 /* private API; don't use in extensions */
-int _php_network_is_stream_alive(php_stream *stream);
+int _php_network_is_stream_alive(php_stream *stream TSRMLS_DC);
 
 #ifdef HAVE_OPENSSL_EXT
 PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method, php_stream *session_stream TSRMLS_DC);

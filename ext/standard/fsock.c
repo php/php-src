@@ -160,7 +160,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		switch(php_stream_from_persistent_id(hashkey, &stream TSRMLS_CC)) {
 			case PHP_STREAM_PERSISTENT_SUCCESS:
-				if (_php_network_is_stream_alive(stream)) {
+				if (_php_network_is_stream_alive(stream TSRMLS_CC)) {
 					php_stream_to_zval(stream, return_value);
 				} else {
 					/* it died; we need to replace it */
