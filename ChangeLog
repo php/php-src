@@ -1,3 +1,42 @@
+1999-11-08  Jakub Skopal  <j@kubs.cz>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+    "sybase" is definitelly six characters long :-)
+
+1999-11-08  Stig Bakken  <ssb@fast.no>
+
+    * configure.in
+      makedist: Cleaned up makedist a bit more.
+
+    * .cvsignore: ignore distribution files
+
+1999-11-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * build.mk
+      buildconf
+      ltconfig
+      ltmain.sh:
+    Add libtool files to CVS. Advantages:
+
+    - PHP-specific changes are easier to maintain
+    - it removes one dependency for users (i.e. GNU vs. FreeBSD ports)
+
+    I have not removed the libtool check in buildconf, since libzend/TSRM still
+    depend on a local version of libtool.
+
+    * ext/snmp/snmp.c:
+    Remove prototype. The prototype was not necessary for UCD SNMP 3.5.3, and
+    broke the build for UCD SNMP 4.0.1.
+
+1999-11-08  Stig Bakken  <ssb@fast.no>
+
+    * configure.in
+      php.h: (PHP tempnam) now uses mkstemp() if available
+
+1999-11-08  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-11-07  changelog  <changelog@www>
 
     * ChangeLog: ChangeLog update
