@@ -45,7 +45,7 @@ if (PHP_PDO_MSSQL != "no") {
 					CHECK_HEADER_ADD_INCLUDE("sqlfront.h", "CFLAGS_PDO_MSSQL",
 					pdo_mssql_locations[i] + "\\DevTools\\Include",
 					null, null, true)) {
-				pdo_mssql_locations[i].match(new RegExp("(\d)"));
+				pdo_mssql_locations[i].match(new RegExp("(\\d)"));
 				PDO_DBLIB_FLAVOUR = RegExp.$1 + 0;
 				break;
 			}
