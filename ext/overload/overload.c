@@ -62,7 +62,7 @@ zend_module_entry overload_module_entry = {
 	"overload",
 	overload_functions,
 	PHP_MINIT(overload),
-	NULL,
+	PHP_MSHUTDOWN(overload),
 	NULL,
 	NULL,
 	PHP_MINFO(overload),
@@ -74,17 +74,35 @@ zend_module_entry overload_module_entry = {
 ZEND_GET_MODULE(overload)
 #endif
 
-/* {{{ php_overload_init_globals
- */
-static void php_overload_init_globals(zend_overload_globals *overload_globals)
+typedef struct _oo_class_data {
+	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
+	zval (*handle_property_get)(zend_property_reference *property_reference);
+	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
+	HashTable getters;
+	HashTable setters;
+} oo_class_data;
+
+#define DISABLE_HANDLERS(ce)          \
+	(ce).handle_property_get  = NULL; \
+	(ce).handle_property_set  = NULL; \
+	(ce).handle_function_call = NULL;
+
+static void overloaded_class_dtor(oo_class_data *oo_data)
 {
-	zend_hash_init_ex(&overload_globals->overloaded_classes, 10, NULL, NULL, 1, 0);
+	zend_hash_destroy(&oo_data->getters);
+	zend_hash_destroy(&oo_data->setters);
+}
+
+/* {{{ php_overload_init_globals */
+static void php_overload_init_globals(zend_overload_globals *overload_globals TSRMLS_DC)
+{
+	zend_hash_init_ex(&overload_globals->overloaded_classes, 10, NULL,
+					  (dtor_func_t)overloaded_class_dtor, 1, 0);
 }
 /* }}} */
 
-/* {{{ php_overload_destroy_globals
- */
-static void php_overload_destroy_globals(zend_overload_globals *overload_globals)
+/* {{{ php_overload_destroy_globals */
+static void php_overload_destroy_globals(zend_overload_globals *overload_globals TSRMLS_DC)
 {
 	zend_hash_destroy(&overload_globals->overloaded_classes);
 }
@@ -103,6 +121,17 @@ PHP_MINIT_FUNCTION(overload)
 }
 /* }}} */
 
+PHP_MSHUTDOWN_FUNCTION(overload)
+{
+#ifdef ZTS
+	ts_free_id(overload_globals_id);
+#else
+	php_overload_destroy_globals(&overload_globals TSRMLS_CC);
+#endif
+
+	return SUCCESS;
+}
+
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(overload)
@@ -117,17 +146,6 @@ PHP_MINFO_FUNCTION(overload)
 }
 /* }}} */
 
-typedef struct _oo_class_data {
-	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
-	zval (*handle_property_get)(zend_property_reference *property_reference);
-	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
-} oo_class_data;
-
-#define DISABLE_HANDLERS(ce)          \
-	(ce).handle_property_get  = NULL; \
-	(ce).handle_property_set  = NULL; \
-	(ce).handle_function_call = NULL;
-
 /*
  * In all three handlers, we save the original CE of the object, and replace it
  * with a temporary one that has all handlers turned off. This is to avoid
@@ -136,7 +154,7 @@ typedef struct _oo_class_data {
  * class. After invoking the callback we restore the object's CE.
  */
 
-/* {{{ int call_get_handler() */
+/* {{{ static int call_get_handler() */
 static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSRMLS_DC)
 {
 	int call_result;
@@ -145,7 +163,13 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	zval get_handler;
 	zval **args[2];
 	zval *retval = NULL;
-	oo_class_data oo_data;
+	zval **accessor_name;
+	oo_class_data *oo_data;
+
+	if (zend_hash_index_find(&OOG(overloaded_classes), (long)Z_OBJCE_P(object), (void**)&oo_data) == FAILURE) {
+		php_error(E_WARNING, "internal problem trying to get property");
+		return 0;
+	}
 
 	temp_ce = *Z_OBJCE_P(object);
 	DISABLE_HANDLERS(temp_ce);
@@ -156,6 +180,23 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	result_ptr->refcount = 1;
 	ZVAL_NULL(result_ptr);
 
+	if (zend_hash_find(&oo_data->getters, Z_STRVAL_P(prop_name),
+					   Z_STRLEN_P(prop_name)+1, (void **)&accessor_name) == SUCCESS) {
+		args[0] = &result_ptr;
+
+		call_result = call_user_function_ex(NULL,
+											&object,
+											*accessor_name,
+											&retval,
+											1, args,
+											0, NULL TSRMLS_CC);
+		Z_OBJCE_P(object) = orig_ce;
+
+		if (call_result == FAILURE || !retval) {
+			php_error(E_WARNING, "unable to call %s::" GET_HANDLER "_%s() handler", Z_OBJCE_P(object)->name, Z_STRVAL_P(prop_name));
+			return 0;
+		}
+	} else {
 	ZVAL_STRINGL(&get_handler, GET_HANDLER, sizeof(GET_HANDLER)-1, 0);
 	args[0] = &prop_name;
 	args[1] = &result_ptr;
@@ -169,8 +210,9 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	Z_OBJCE_P(object) = orig_ce;
 
 	if (call_result == FAILURE || !retval) {
-		php_error(E_WARNING, "unable to call %s::" GET_HANDLER "() handler", orig_ce->name);
+			php_error(E_WARNING, "unable to call %s::" GET_HANDLER "() handler", Z_OBJCE_P(object)->name);
 		return 0;
+	}
 	}
 
 	if (zval_is_true(retval)) {
@@ -182,12 +224,7 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	zval_ptr_dtor(&retval);
 	zval_dtor(result_ptr);
 
-	if (zend_hash_index_find(&OOG(overloaded_classes), (long)Z_OBJCE_P(object), (void*)&oo_data) == FAILURE) {
-		php_error(E_WARNING, "internal problem trying to get property");
-		return 0;
-	}
-
-	if (!oo_data.handle_property_get) {
+	if (!oo_data->handle_property_get) {
 		return 0;
 	}
 
@@ -197,7 +234,7 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 }
 /* }}} */
 
-/* {{{ int call_set_handler() */
+/* {{{ static int call_set_handler() */
 int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 {
 	int call_result;
@@ -206,7 +243,13 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	zval *value_copy;
 	zval **args[2];
 	zval *retval = NULL;
-	oo_class_data oo_data;
+	zval **accessor_name;
+	oo_class_data *oo_data;
+
+	if (zend_hash_index_find(&OOG(overloaded_classes), (long)Z_OBJCE_P(object), (void**)&oo_data) == FAILURE) {
+		php_error(E_WARNING, "internal problem trying to set property");
+		return 0;
+	}
 
 	temp_ce = *Z_OBJCE_P(object);
 	DISABLE_HANDLERS(temp_ce);
@@ -220,20 +263,39 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 		zval_copy_ctor(value_copy);
 		value = value_copy;
 	}
-	args[0] = &prop_name;
-	args[1] = &value;
 
-	call_result = call_user_function_ex(NULL,
-										&object,
-										&set_handler,
-										&retval,
-										2, args,
-										0, NULL TSRMLS_CC);
-	Z_OBJCE_P(object) = orig_ce;
+	if (zend_hash_find(&oo_data->setters, Z_STRVAL_P(prop_name),
+					   Z_STRLEN_P(prop_name)+1, (void **)&accessor_name) == SUCCESS) {
+		args[0] = &value;
 
-	if (call_result == FAILURE || !retval) {
-		php_error(E_WARNING, "unable to call %s::" SET_HANDLER "() handler", orig_ce->name);
-		return 0;
+		call_result = call_user_function_ex(NULL,
+											&object,
+											*accessor_name,
+											&retval,
+											1, args,
+											0, NULL TSRMLS_CC);
+		Z_OBJCE_P(object) = orig_ce;
+
+		if (call_result == FAILURE || !retval) {
+			php_error(E_WARNING, "unable to call %s::" SET_HANDLER "_%s() handler", Z_OBJCE_P(object)->name, Z_STRVAL_P(prop_name));
+			return 0;
+		}
+	} else {
+		args[0] = &prop_name;
+		args[1] = &value;
+
+		call_result = call_user_function_ex(NULL,
+											&object,
+											&set_handler,
+											&retval,
+											2, args,
+											0, NULL TSRMLS_CC);
+		Z_OBJCE_P(object) = orig_ce;
+
+		if (call_result == FAILURE || !retval) {
+			php_error(E_WARNING, "unable to call %s::" SET_HANDLER "() handler", orig_ce->name);
+			return 0;
+		}
 	}
 
 	if (zval_is_true(retval)) {
@@ -243,12 +305,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 
 	zval_ptr_dtor(&retval);
 
-	if (zend_hash_index_find(&OOG(overloaded_classes), (long)Z_OBJCE_P(object), (void*)&oo_data) == FAILURE) {
-		php_error(E_WARNING, "internal problem trying to set property");
-		return 0;
-	}
-
-	if (!oo_data.handle_property_set) {
+	if (!oo_data->handle_property_set) {
 		return 0;
 	}
 
@@ -388,14 +445,17 @@ static int overload_set_property(zend_property_reference *property_reference, zv
 							   (void **)&object) == FAILURE) {
 
 				if (element == property_reference->elements_list->tail) {
-					if (!call_set_handler(*object,
+					if (Z_OBJCE_PP(object)->handle_property_set == overload_set_property &&
+						call_set_handler(*object,
 										  &overloaded_property->element,
 										  value TSRMLS_CC)) {
 						CLEANUP_OO_CHAIN();
+						return SUCCESS;
+					} else {
+						php_error(E_WARNING, "Unable to set property: %s", Z_STRVAL(overloaded_property->element));
+						CLEANUP_OO_CHAIN();
 						return FAILURE;
 					}
-					CLEANUP_OO_CHAIN();
-					return SUCCESS;
 				}
 
 				if (Z_OBJCE_PP(object)->handle_property_get == overload_get_property &&
@@ -434,6 +494,10 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 	zval call_handler, method_name, *method_name_ptr = &method_name;
 	zend_overloaded_element *method = (zend_overloaded_element *)property_reference->elements_list->tail->data;
 
+	/*
+	 * We don't use the call handler if the invoked method exists in object's
+	 * method table.
+	 */
 	if (zend_hash_exists(&Z_OBJCE_P(object)->function_table,
 						 Z_STRVAL(method->element),
 						 Z_STRLEN(method->element) + 1)) {
@@ -528,6 +592,34 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 }
 /* }}} */
 
+/* {{{ static int locate_accessors() */
+static int locate_accessors(zend_function *method, oo_class_data *oo_data TSRMLS_DC)
+{
+	zval *accessor_name;
+	char *function_name = method->common.function_name;
+	int function_name_len = strlen(method->common.function_name);
+
+	if (!strncmp(function_name, GET_HANDLER "_", sizeof(GET_HANDLER "_")-1)) {
+		MAKE_STD_ZVAL(accessor_name);
+		ZVAL_STRINGL(accessor_name, function_name, function_name_len, 1);
+		zend_hash_update(&oo_data->getters,
+						 function_name + sizeof(GET_HANDLER "_") - 1, 
+						 function_name_len - sizeof(GET_HANDLER "_") + 2,
+						 (void *)&accessor_name, sizeof(zval *), NULL);
+
+	} else if (!strncmp(function_name, SET_HANDLER "_", sizeof(SET_HANDLER "_")-1)) {
+		MAKE_STD_ZVAL(accessor_name);
+		ZVAL_STRINGL(accessor_name, function_name, function_name_len, 1);
+		zend_hash_update(&oo_data->setters,
+						 function_name + sizeof(SET_HANDLER "_") - 1, 
+						 function_name_len - sizeof(SET_HANDLER "_") + 2,
+						 (void *)&accessor_name, sizeof(zval *), NULL);
+	}
+
+	return 0;
+}
+/* }}} */
+
 /* {{{ proto void overload(string class_entry)
     Enables property and method call overloading for a class. */
 PHP_FUNCTION(overload)
@@ -552,13 +644,20 @@ PHP_FUNCTION(overload)
 		RETURN_TRUE;
 	}
 
-	if (zend_hash_exists(&ce->function_table, GET_HANDLER, sizeof(GET_HANDLER))) {
+	zend_hash_init(&oo_data.getters, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&oo_data.setters, 10, NULL, ZVAL_PTR_DTOR, 0);
+
+	zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t)locate_accessors, (void *)&oo_data TSRMLS_CC);
+	
+	if (zend_hash_exists(&ce->function_table, GET_HANDLER, sizeof(GET_HANDLER)) ||
+		zend_hash_num_elements(&oo_data.getters)) {
 		oo_data.handle_property_get = ce->handle_property_get;
 		ce->handle_property_get = overload_get_property;
 	} else
 		oo_data.handle_property_get = NULL;
 
-	if (zend_hash_exists(&ce->function_table, SET_HANDLER, sizeof(SET_HANDLER))) {
+	if (zend_hash_exists(&ce->function_table, SET_HANDLER, sizeof(SET_HANDLER)) ||
+		zend_hash_num_elements(&oo_data.setters)) {
 		oo_data.handle_property_set = ce->handle_property_set;
 		ce->handle_property_set = overload_set_property;
 	} else
