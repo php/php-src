@@ -233,6 +233,15 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_parser,												NULL)
 	PHP_FE(domxml_parser_add_chunk,										NULL)
 	PHP_FE(domxml_parser_end,											NULL)
+	PHP_FE(domxml_parser_start_element,											NULL)
+	PHP_FE(domxml_parser_end_element,											NULL)
+	PHP_FE(domxml_parser_comment,											NULL)
+	PHP_FE(domxml_parser_characters,											NULL)
+	PHP_FE(domxml_parser_cdata_block,											NULL)
+	PHP_FE(domxml_parser_start_document,											NULL)
+	PHP_FE(domxml_parser_end_document,											NULL)
+	PHP_FE(domxml_parser_get_document,											NULL)
+
 #if defined(LIBXML_XPATH_ENABLED)
 	PHP_FE(xpath_new_context,											NULL)
 	PHP_FE(xpath_eval,													NULL)
@@ -317,6 +326,15 @@ static function_entry php_domxmlparser_class_functions[] = {
 	PHP_FALIAS(add_chunk,				domxml_parser_add_chunk,		NULL)
 	PHP_FALIAS(end,						domxml_parser_end,				NULL)
 	PHP_FALIAS(set_keep_blanks,			domxml_parser_set_keep_blanks,	NULL)
+	PHP_FALIAS(start_element,				domxml_parser_start_element,		NULL)
+	PHP_FALIAS(end_element,				domxml_parser_end_element,		NULL)
+	PHP_FALIAS(characters,				domxml_parser_characters,		NULL)
+	PHP_FALIAS(cdata_block,				domxml_parser_cdata_block,		NULL)
+	PHP_FALIAS(comment,				domxml_parser_comment,		NULL)
+	PHP_FALIAS(start_document,				domxml_parser_start_document,		NULL)
+	PHP_FALIAS(end_document,				domxml_parser_end_document,		NULL)
+	PHP_FALIAS(get_document,				domxml_parser_get_document,		NULL)
+
 	{NULL, NULL, NULL}
 };
 
@@ -999,6 +1017,49 @@ static zval *php_xmlparser_new(xmlParserCtxtPtr obj, int *found TSRMLS_DC)
 	return (wrapper);
 }
 
+/* {{{ php_xmlparser_make_params()
+   Translates a PHP array to a xmlparser parameters array */
+static char **php_xmlparser_make_params(zval *idvars)
+{
+	HashTable *parht;
+	int parsize;
+	zval **value;
+	char *expr, *string_key = NULL;
+	ulong num_key;
+	char **params = NULL;
+	int i = 0;
+
+	parht = HASH_OF(idvars);
+	parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
+	params = (char **)emalloc(parsize);
+	memset((char *)params, 0, parsize);
+
+	for (zend_hash_internal_pointer_reset(parht);
+		zend_hash_get_current_data(parht, (void **)&value) == SUCCESS;
+		zend_hash_move_forward(parht)) {
+
+		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
+			php_error(E_WARNING, "Invalid argument or parameter array to %s",
+					  get_active_function_name(TSRMLS_C));
+			return NULL;
+		}
+		else {
+			SEPARATE_ZVAL(value);
+			convert_to_string_ex(value);
+			expr = Z_STRVAL_PP(value);
+	
+			if (expr) {
+				params[i++] = string_key;
+				params[i++] = expr;
+			}
+		}
+	}
+
+	params[i++] = NULL;
+
+	return params;
+}
+/* end parser stuff */
 
 void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
@@ -3949,6 +4010,149 @@ PHP_FUNCTION(domxml_parser)
 }
 /* }}} */
 
+/* {{{ proto bool domxml_parser_start_document()
+   starts a document*/
+PHP_FUNCTION(domxml_parser_start_document)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *chunk;
+	int chunk_len, error;
+	xmlChar **atts;
+	
+	DOMXML_PARAM_NONE(parserp, id, le_domxmlparserp);
+	startDocument(parserp);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_end_document()
+   ends a document */
+PHP_FUNCTION(domxml_parser_end_document)
+{
+	zval *id, *rv;
+	xmlParserCtxtPtr parserp;
+	int error, ret;
+	
+	DOMXML_PARAM_NONE(parserp, id, le_domxmlparserp);
+	endDocument(parserp);
+	
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_start_element(string tagname, array attributes)
+   Starts an element and adds attributes*/
+PHP_FUNCTION(domxml_parser_start_element)
+{
+	zval *id,*params = NULL;
+	xmlParserCtxtPtr parserp;
+	char *tagname;
+	int tagname_len, error;
+	char **atts = NULL;
+		
+	DOMXML_PARAM_THREE(parserp, id, le_domxmlparserp,"s|a", &tagname, &tagname_len, &params);
+	if (params != NULL) {
+		atts = php_xmlparser_make_params(params);
+	}
+	if (parserp->myDoc == NULL) {
+		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+	startElement(parserp, (xmlChar *) tagname,  (const xmlChar **) atts);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_end_element(string tagname)
+   Ends an element */
+PHP_FUNCTION(domxml_parser_end_element)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *tagname;
+	int tagname_len, error;
+	
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &tagname, &tagname_len);
+
+	if (parserp->myDoc == NULL) {
+		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	endElement(parserp, (xmlChar *) tagname);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_comment(string comment)
+   Adds a comment */
+PHP_FUNCTION(domxml_parser_comment)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *comment;
+	int comment_len, error;
+	
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &comment, &comment_len);
+
+	if (parserp->myDoc == NULL) {
+		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	comment(parserp, (xmlChar *) comment);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_cdata_block(string chunk)
+   adds a cdata block */
+PHP_FUNCTION(domxml_parser_cdata_block)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *chunk;
+	int chunk_len, error;
+	
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &chunk, &chunk_len);
+
+	if (parserp->myDoc == NULL) {
+		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	cdataBlock(parserp, (xmlChar *) chunk, chunk_len);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_characters(string characters)
+   Adds characters */
+PHP_FUNCTION(domxml_parser_characters)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *characters;
+	int characters_len, error;
+	
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &characters, &characters_len);
+
+	if (parserp->myDoc == NULL) {
+		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	characters(parserp, (xmlChar *) characters, characters_len);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto bool domxml_parser_add_chunk(string chunk)
    adds xml-chunk to parser */
 PHP_FUNCTION(domxml_parser_add_chunk)
@@ -3994,6 +4198,27 @@ PHP_FUNCTION(domxml_parser_end)
 }
 /* }}} */
 
+
+/* {{{ proto object domxml_parser_get_document()
+   Returns DomDocument from parser */
+PHP_FUNCTION(domxml_parser_get_document)
+{
+	zval *id,*rv = NULL;
+	xmlParserCtxtPtr parserp;
+	char *chunk = NULL;
+	int chunk_len = 0, error;
+	int ret;
+
+	DOMXML_PARAM_NONE(parserp, id, le_domxmlparserp);
+
+	if (parserp->myDoc != NULL) {
+		DOMXML_RET_OBJ(rv, (xmlNodePtr) parserp->myDoc, &ret);
+	}
+	else {
+		RETVAL_FALSE
+	}
+}
+/* }}} */
 /* {{{ proto bool domxml_parser_set_keep_blanks(bool mode)
    Determines how to handle blanks */
 PHP_FUNCTION(domxml_parser_set_keep_blanks)
@@ -4620,6 +4845,7 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params TSRMLS_DC)
 
 	return params;
 }
+/* }}} */
 
 /* {{{ proto object domxml_xslt_process(object xslstylesheet, object xmldoc [, array xslt_parameters [, bool xpath_parameters [, string profileFilename]]])
    Perform an XSLT transformation */
