@@ -66,6 +66,9 @@ extern php_stream_wrapper php_stream_gzip_wrapper;
 
 #define phpext_zlib_ptr zlib_module_ptr
 
+#define CODING_GZIP		1
+#define CODING_DEFLATE	2
+
 #endif /* PHP_ZLIB_H */
 
 /*
