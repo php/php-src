@@ -254,7 +254,7 @@ void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC)
 	fetch_simple_variable_ex(result, varname, bp, ZEND_FETCH_W TSRMLS_CC);
 }
 
-void zend_do_fetch_static_member(znode *class  TSRMLS_DC)
+void zend_do_fetch_static_member(znode *class TSRMLS_DC)
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
