@@ -7,10 +7,11 @@ PHP_ARG_WITH(mysqli, for MySQLi support,
                           pathname to mysql_config.])
 
 PHP_ARG_WITH(embedded_mysqli, for embedded MySQLi support,
-[  --with-embedded-mysqli[=FILE]    Include embedded MySQLi support. FILE is the optional 
+[  --with-embedded-mysqli[=FILE]
+                          Include embedded MySQLi support. FILE is the optional 
                           pathname to mysql_config.])
 
-if test "$PHP_MYSQLI" != "no" '-o' "$PHP_EMBEDDED_MYSQLI" != "no"; then
+if test "$PHP_MYSQLI" != "no" || test "$PHP_EMBEDDED_MYSQLI" != "no"; then
 
   if test "$PHP_MYSQL" = "yes"; then
     AC_MSG_ERROR([--with-mysql (using bundled libs) can not be used together with --with-mysqli.])
@@ -29,7 +30,7 @@ if test "$PHP_MYSQLI" != "no" '-o' "$PHP_EMBEDDED_MYSQLI" != "no"; then
   if test "$PHP_MYSQLI" != "no"; then
     MYSQL_LIB_CFG='--libs'
   else
-	AC_DEFINE([HAVE_EMBEDDED_MYSQLI],[1], [embedded MySQL support enabled])
+	AC_DEFINE(HAVE_EMBEDDED_MYSQLI, 1, [embedded MySQL support enabled])
     MYSQL_LIB_CFG='--libmysqld-libs'
   fi
   
