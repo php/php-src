@@ -269,13 +269,13 @@ END {
 		proto = proto closeopts ")\n   " fcomments[i] " */\nPHP_FUNCTION(" funcs[i] ")\n{"
 		if (maxargs[i]) {
 			zvals = zvals ";"
-			fetchargs = fetchargs ") == FAILURE)" closefetch "{\n\t\tWRONG_PARAM_COUNT;\n\t}\n"
+			fetchargs = fetchargs ") == FAILURE)" closefetch "{\n\t\tZEND_WRONG_PARAM_COUNT();\n\t}\n"
 		}
 		if (assign_params) funcvals = ints doubles floats strings
 		if (resources) funcvals = funcvals "\t???LS_FETCH();\n"
 		if (useswitch[i]) {
 			if (check_argc_in_switch[i]) {
-				check_argc = "\t\tdefault:\n\t\t\tWRONG_PARAM_COUNT;\n"
+				check_argc = "\t\tdefault:\n\t\t\tZEND_WRONG_PARAM_COUNT();\n"
 			} else {
 				check_argc = ""
 			}
