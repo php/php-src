@@ -32,10 +32,6 @@
 #include "zend_fast_cache.h"
 #include "zend_execute_locks.h"
 
-#if defined(HAVE_ALLOCA) && defined(HAVE_ALLOCA_H)
-# include <alloca.h>
-#endif
-
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free ELS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts ELS_CC)
 
