@@ -27,6 +27,9 @@ define('PEAR_DEPENDENCY_UPGRADE_MINOR',  -3);
 define('PEAR_DEPENDENCY_UPGRADE_MAJOR',  -4);
 define('PEAR_DEPENDENCY_BAD_DEPENDENCY', -5);
 define('PEAR_DEPENDENCY_MISSING_OPTIONAL', -6);
+define('PEAR_DEPENDENCY_CONFLICT_OPTIONAL',       -7);
+define('PEAR_DEPENDENCY_UPGRADE_MINOR_OPTIONAL',  -8);
+define('PEAR_DEPENDENCY_UPGRADE_MAJOR_OPTIONAL',  -9);
 
 /**
  * Dependency check for PEAR packages
@@ -115,9 +118,10 @@ class PEAR_Dependency
     /**
      * Package dependencies check method
      *
+     * @param string $errmsg    Empty string, it will be populated with an error message, if any
      * @param string $name      Name of the package to test
-     * @param string $version   The package version required
-     * @param string $relation  How to compare versions with eachother
+     * @param string $req       The package version required
+     * @param string $relation  How to compare versions with each other
      * @param bool   $opt       Whether the relationship is optional
      *
      * @return mixed bool false if no error or the error string
@@ -125,8 +129,8 @@ class PEAR_Dependency
     function checkPackage(&$errmsg, $name, $req = null, $relation = 'has',
                           $opt = false)
     {
-        if (substr($relation, 0, 2) == 'v.') {
-            $relation = substr($relation, 2);
+        if (is_string($req) && substr($req, 0, 2) == 'v.') {
+            $req = substr($req, 2);
         }
         switch ($relation) {
             case 'has':
@@ -140,7 +144,7 @@ class PEAR_Dependency
                 }
                 return false;
             case 'not':
-                if (!$this->registry->packageExists($name)) {
+                if ($this->registry->packageExists($name)) {
                     $errmsg = "conflicts with package `$name'";
                     return PEAR_DEPENDENCY_CONFLICT;
                 }
@@ -155,10 +159,11 @@ class PEAR_Dependency
                 if (!$this->registry->packageExists($name)
                     || !version_compare("$version", "$req", $relation))
                 {
-                    $code = $this->codeFromRelation($relation, $version, $req);
+                    $code = $this->codeFromRelation($relation, $version, $req, $opt);
                     if ($opt) {
-                        $errmsg = "package `$name' version $req is recommended to utilize some features.";
-                        return PEAR_DEPENDENCY_MISSING_OPTIONAL;
+                        $errmsg = "package `$name' version " . $this->signOperator($relation) .
+                            " $req is recommended to utilize some features.  Installed version is $version";
+                        return $code;
                     }
                     $errmsg = "requires package `$name' " .
                         $this->signOperator($relation) . " $req";
@@ -196,6 +201,9 @@ class PEAR_Dependency
             }
             foreach ($deps as $dep) {
                 if ($dep['type'] == 'pkg' && strcasecmp($dep['name'], $package) == 0) {
+                    if ($dep['rel'] == 'ne') {
+                        continue;
+                    }
                     if (isset($dep['optional']) && $dep['optional'] == 'yes') {
                         $warning .= "\nWarning: Package '$pkg' optionally depends on '$package'";
                     } else {
@@ -216,15 +224,26 @@ class PEAR_Dependency
      * @param string $name        Name of the extension to test
      * @param string $req_ext_ver Required extension version to compare with
      * @param string $relation    How to compare versions with eachother
-     * @param bool   $opt       Whether the relationship is optional
+     * @param bool   $opt         Whether the relationship is optional
      *
      * @return mixed bool false if no error or the error string
      */
     function checkExtension(&$errmsg, $name, $req = null, $relation = 'has',
         $opt = false)
     {
-        // XXX (ssb): could we avoid loading the extension here?
-        if (!PEAR::loadExtension($name)) {
+        if ($relation == 'not') {
+            if (extension_loaded($name)) {
+                $errmsg = "conflicts with  PHP extension '$name'";
+                return PEAR_DEPENDENCY_CONFLICT;
+            } else {
+                return false;
+            }
+        }
+
+        if (!extension_loaded($name)) {
+            if ($relation == 'ne') {
+                return false;
+            }
             if ($opt) {
                 $errmsg = "'$name' PHP extension is recommended to utilize some features";
                 return PEAR_DEPENDENCY_MISSING_OPTIONAL;
@@ -236,19 +255,20 @@ class PEAR_Dependency
             return false;
         }
         $code = false;
-        if (substr($relation, 0, 2) == 'v.') {
-            $ext_ver = phpversion($name);
-            $operator = substr($relation, 2);
-            // Force params to be strings, otherwise the comparation will fail (ex. 0.9==0.90)
-            settype($req, "string");
-            if (!version_compare("$ext_ver", "$req", $operator)) {
-                $errmsg = "'$name' PHP extension version " .
-                    $this->signOperator($operator) . " $req is required";
-                $code = $this->codeFromRelation($relation, $ext_ver, $req);
-                if ($opt) {
-                    $errmsg = "'$name' PHP extension version $req is recommended to utilize some features";
-                    return PEAR_DEPENDENCY_MISSING_OPTIONAL;
-                }
+        if (is_string($req) && substr($req, 0, 2) == 'v.') {
+            $req = substr($req, 2);
+        }
+        $ext_ver = phpversion($name);
+        $operator = $relation;
+        // Force params to be strings, otherwise the comparation will fail (ex. 0.9==0.90)
+        if (!version_compare("$ext_ver", "$req", $operator)) {
+            $errmsg = "'$name' PHP extension version " .
+                $this->signOperator($operator) . " $req is required";
+            $code = $this->codeFromRelation($relation, $ext_ver, $req, $opt);
+            if ($opt) {
+                $errmsg = "'$name' PHP extension version " . $this->signOperator($operator) .
+                    " $req is recommended to utilize some features";
+                return $code;
             }
         }
         return $code;
@@ -424,9 +444,10 @@ class PEAR_Dependency
      * @param  string Relation
      * @param  string Version
      * @param  string Requirement
+     * @param  bool   Optional dependency indicator
      * @return integer
      */
-    function codeFromRelation($relation, $version, $req)
+    function codeFromRelation($relation, $version, $req, $opt = false)
     {
         $code = PEAR_DEPENDENCY_BAD_DEPENDENCY;
         switch ($relation) {
@@ -435,13 +456,16 @@ class PEAR_Dependency
                 $have_major = preg_replace('/\D.*/', '', $version);
                 $need_major = preg_replace('/\D.*/', '', $req);
                 if ($need_major > $have_major) {
-                    $code = PEAR_DEPENDENCY_UPGRADE_MAJOR;
+                    $code = $opt ? PEAR_DEPENDENCY_UPGRADE_MAJOR_OPTIONAL :
+                                   PEAR_DEPENDENCY_UPGRADE_MAJOR;
                 } else {
-                    $code = PEAR_DEPENDENCY_UPGRADE_MINOR;
+                    $code = $opt ? PEAR_DEPENDENCY_UPGRADE_MINOR_OPTIONAL :
+                                   PEAR_DEPENDENCY_UPGRADE_MINOR;
                 }
                 break;
             case 'lt': case 'le': case 'ne':
-                $code = PEAR_DEPENDENCY_CONFLICT;
+                $code = $opt ? PEAR_DEPENDENCY_CONFLICT_OPTIONAL :
+                               PEAR_DEPENDENCY_CONFLICT;
                 break;
         }
         return $code;
