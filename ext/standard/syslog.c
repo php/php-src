@@ -216,8 +216,8 @@ PHP_FUNCTION(openlog)
 	long option, facility;
 	int ident_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll", &ident, &option,
-							  &facility) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll", &ident,
+							  &ident_len, &option, &facility) == FAILURE) {
 		return;
 	}
 	if (BG(syslog_device)) {
