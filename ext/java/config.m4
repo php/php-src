@@ -18,7 +18,7 @@ AC_ARG_WITH(java,
     fi
 
     if test "$withval" = "yes"; then
-      withval=`cd \`which javac\`/../..;pwd`
+      withval=`cd \`dirname \\\`which javac\\\`\`/..;pwd`
     fi
 
     if test -d $withval/lib/kaffe; then
