@@ -20,6 +20,7 @@ AC_DEFUN(IMAP_LIB_CHK,[
 		done
 		])
 
+
 PHP_ARG_WITH(kerberos,for Kerberos support in IMAP,
 [  --with-kerberos[=DIR]   Include Kerberos support in IMAP.])
 
@@ -58,6 +59,8 @@ if test "$PHP_IMAP" != "no"; then
       fi
     done
 
+    AC_CHECK_LIB(pam, pam_start) 
+    
     PHP_EXPAND_PATH($IMAP_DIR, IMAP_DIR)
 
     if test -z "$IMAP_DIR"; then
@@ -81,13 +84,8 @@ if test "$PHP_IMAP" != "no"; then
     fi
 
     PHP_ADD_INCLUDE($IMAP_INC_DIR)
-    if test "$ext_shared" = "yes"; then
-      PHP_ADD_LIBRARY_WITH_PATH($IMAP_LIB, $IMAP_LIBDIR, IMAP_SHARED_LIBADD)
-      PHP_SUBST(IMAP_SHARED_LIBADD)
-    else
-      PHP_ADD_LIBPATH($IMAP_LIBDIR)
-      PHP_ADD_LIBRARY_DEFER($IMAP_LIB)
-    fi
+    PHP_ADD_LIBRARY_WITH_PATH($IMAP_LIB, $IMAP_LIBDIR, IMAP_SHARED_LIBADD)
+    PHP_SUBST(IMAP_SHARED_LIBADD)
 
     if test "$PHP_KERBEROS" != "no"; then
       AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
@@ -99,11 +97,10 @@ if test "$PHP_IMAP" != "no"; then
     fi
 
     if test "$PHP_IMAP_SSL" != "no"; then
-      old_LIBS=$LIBS
-      old_LDFLAGS=$LDFLAGS
-      
-      LIBS="-lssl -lcrypto -lc-client"
-      LDFLAGS="-L$IMAP_LIBDIR -L$PHP_SSL_LIBDIR"
+      PHP_ADD_LIBPATH($PHP_SSL_LIBDIR, IMAP_SHARED_LIBADD)
+      PHP_ADD_LIBRARY(ssl,, IMAP_SHARED_LIBADD)
+      PHP_ADD_LIBRARY(crypto,, IMAP_SHARED_LIBADD)
+
       AC_TRY_RUN([
         void mm_log(void){}
         void mm_dlog(void){}
@@ -126,13 +123,7 @@ if test "$PHP_IMAP" != "no"; then
           return 0;
         }
       ],[
-        LIBS=$old_LIBS
-        LDFLAGS=$old_LDFLAGS
-
         AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
-        PHP_ADD_LIBPATH($PHP_SSL_LIBDIR, IMAP_SHARED_LIBADD)
-        PHP_ADD_LIBRARY(ssl,, IMAP_SHARED_LIBADD)
-        PHP_ADD_LIBRARY(crypto,, IMAP_SHARED_LIBADD)
       ], [
         AC_MSG_ERROR(This c-client library does not support SSL. Recompile or remove --with-imap-ssl from configure line.)
       ])
