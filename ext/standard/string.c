@@ -818,42 +818,28 @@ PHP_FUNCTION(explode)
  */
 PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value) 
 {
-	zval **tmp;
-	char *tmp_str;
-	int len = 0, count = 0, target = 0;
-	HashPosition pos;
+	zval         **tmp;
+	HashPosition   pos;
+	smart_str      implstr = {0};
+	int            numelems, i = 0;
 
-	/* convert everything to strings, and calculate length */
+	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
+
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **) &tmp, &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), 
+										 (void **) &tmp,
+										 &pos) == SUCCESS) {
 		convert_to_string_ex(tmp);
-		len += Z_STRLEN_PP(tmp);
-		if (count > 0) {
-			len += Z_STRLEN_P(delim);
-		}
 
-		count++;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);
-	}
-
-	/* do it */
-	tmp_str = (char *) emalloc(len + 1);
-	tmp_str[0] = 0;
-
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **) &tmp, &pos) == SUCCESS) {
-		count--;
-		memcpy(tmp_str + target, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-		target += Z_STRLEN_PP(tmp); 
-		if (count > 0) {
-			memcpy(tmp_str + target, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
-			target += Z_STRLEN_P(delim);
+		smart_str_appendl(&implstr, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+		if (++i != numelems) {
+			smart_str_appendl(&implstr, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);
 	}
-	tmp_str[len] = 0;
-	
-	RETURN_STRINGL(tmp_str, len, 0);
+	smart_str_0(&implstr);
+
+	RETURN_STRINGL(implstr.c, implstr.len, 0);
 }
 /* }}} */
 
