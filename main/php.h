@@ -220,7 +220,10 @@ char *strerror(int);
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#ifdef __GNUC__
+#define PHP_GCC_VERSION ZEND_GCC_VERSION
+#define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
+
+#if PHP_GCC_VERSION >= 2007
 # define PHP_ATTRIBUTE_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
 #else
 # define PHP_ATTRIBUTE_FORMAT(type, idx, first)
