@@ -2486,9 +2486,9 @@ EXEC SQL END DECLARE SECTION;
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-    
+
 	IFXG(sv_sqlcode) = 0;
-    
+
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 
 	if (strcmp(Ifx_Result->cursorid, "") == 0) {
@@ -2883,7 +2883,7 @@ EXEC SQL END DECLARE SECTION;
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-    
+
 	IFXG(sv_sqlcode = 0);
 
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
@@ -2899,8 +2899,8 @@ EXEC SQL END DECLARE SECTION;
 	cursorid   = Ifx_Result->cursorid;
 	statemid   = Ifx_Result->statemid;
 	descrpid   = Ifx_Result->descrpid;
-    
-    EXEC SQL set connection :ifx;
+
+	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
 
 	EXEC SQL free :statemid;
@@ -3043,20 +3043,19 @@ static long php_intifx_create_blob(long type, long mode, char* param, long len, 
 
 		if (*param && param != "") {
 
-                        /* 
-                         * copy the filename in param to filename in loc_fname 
-                         * otherwise we'll unlink non-temporary files
-                         * 
-                         * loc_fname gets filled by php_intifx_init_blob_infile
-                         */
-
-                        if (Ifx_blob->BLOB.blob_data.loc_fname != NULL) {
-                                if (php_copy_file(param, Ifx_blob->BLOB.blob_data.loc_fname TSRMLS_CC) == FAILURE)   {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource file. File copy failed: %s", param);
+			/* 
+			 * copy the filename in param to filename in loc_fname 
+			 * otherwise we'll unlink non-temporary files
+			 * 
+			 * loc_fname gets filled by php_intifx_init_blob_infile
+			 */
+			if (Ifx_blob->BLOB.blob_data.loc_fname != NULL) {
+				if (php_copy_file(param, Ifx_blob->BLOB.blob_data.loc_fname TSRMLS_CC) == FAILURE)   {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not create blob-resource file. File copy failed: %s", param);
 					return -1;
 				}
-                                Ifx_blob->BLOB.blob_data.loc_size = -1;
-                        }
+				Ifx_blob->BLOB.blob_data.loc_size = -1;
+			}
 		}
 	}
 
@@ -3648,7 +3647,7 @@ static long php_intifx_count_descriptors(char *p_statemid TSRMLS_DC)
 	if (ifx_check() >= 0)   {
 
 		ret = s_da->sqld;
-               
+
 		/*
 		 * Thanks to DBD-Informix
 		 */
