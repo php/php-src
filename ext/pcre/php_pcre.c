@@ -568,7 +568,7 @@ static int _preg_do_eval(char *eval_str, char *subject, int *offsets,
 			walk++;
 		}
 	}
-	
+
 	/* Run the code */
 	zend_eval_string(code, &retval CLS_CC ELS_CC);
 	convert_to_string(&retval);
