@@ -1,6 +1,6 @@
 diff -Nur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
 --- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
-+++ thttpd-2.21b-cool/Makefile.in	Fri Jul 26 18:12:50 2002
++++ thttpd-2.21b-cool/Makefile.in	Sat Sep  7 15:43:49 2002
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -40,7 +40,7 @@ diff -Nur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
 diff -Nur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
 --- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
-+++ thttpd-2.21b-cool/config.h	Fri Jul 26 18:12:50 2002
++++ thttpd-2.21b-cool/config.h	Sat Sep  7 15:43:49 2002
 @@ -82,6 +82,11 @@
  */
  #define IDLE_READ_TIMELIMIT 60
@@ -64,7 +64,7 @@ diff -Nur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  ** index pages for directories that don't have an explicit index file.
 diff -Nur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
 --- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
-+++ thttpd-2.21b-cool/fdwatch.c	Fri Jul 26 18:12:50 2002
++++ thttpd-2.21b-cool/fdwatch.c	Sat Sep 21 19:15:38 2002
 @@ -460,7 +460,7 @@
  
      ridx = 0;
@@ -87,7 +87,7 @@ diff -Nur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
      }
 diff -Nur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 --- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Fri Jul 26 18:12:50 2002
++++ thttpd-2.21b-cool/libhttpd.c	Sat Sep 21 18:17:49 2002
 @@ -85,6 +85,8 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -420,19 +420,29 @@ diff -Nur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
      ** is prohibited.
-@@ -3611,14 +3671,18 @@
+@@ -3611,14 +3671,27 @@
  	}
      else
  	{
+-	hc->file_address = mmc_map( hc->expnfilename, &(hc->sb), nowP );
 +		char *extraheads = "";
- 	hc->file_address = mmc_map( hc->expnfilename, &(hc->sb), nowP );
++		int nocache = 0;
++
++		if (strncmp(hc->decodedurl, "/nocache/", sizeof("/nocache/")-1) == 0) {
++			extraheads = "Expires: Thu, 19 Nov 1981 08:52:00 GMT\r\n"
++				"Cache-Control: no-store, no-cache, must-revalidate, "
++				"post-check=0, pre-check=0\r\n"
++				"Pragma: no-cache\r\n";
++
++			nocache = 1;
++		}
++		
++	hc->file_address = mmc_map( hc->expnfilename, &(hc->sb), nowP, nocache );
  	if ( hc->file_address == (char*) 0 )
  	    {
  	    httpd_send_err( hc, 500, err500title, "", err500form, hc->encodedurl );
  	    return -1;
  	    }
-+	if (strncmp(hc->decodedurl, "/nocache/", sizeof("/nocache/")-1) == 0) 
-+		extraheads = "Expires: Thu, 19 Nov 1981 08:52:00 GMT\r\nCache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0\r\nPragma: no-cache\r\n";
 +
  	send_mime(
 -	    hc, 200, ok200title, hc->encodings, "", hc->type, hc->sb.st_size,
@@ -442,7 +452,7 @@ diff -Nur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  
 diff -Nur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
 --- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b-cool/libhttpd.h	Fri Jul 26 18:12:50 2002
++++ thttpd-2.21b-cool/libhttpd.h	Sat Sep  7 15:43:49 2002
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -471,7 +481,7 @@ diff -Nur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
  ** mallocced strings.
 diff -Nur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 --- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
-+++ thttpd-2.21b-cool/mime_encodings.txt	Fri Jul 26 18:12:50 2002
++++ thttpd-2.21b-cool/mime_encodings.txt	Sat Sep  7 15:43:49 2002
 @@ -3,6 +3,6 @@
  # A list of file extensions followed by the corresponding MIME encoding.
  # Extensions not found in the table proceed to the mime_types table.
@@ -483,7 +493,7 @@ diff -Nur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
  uu	x-uuencode
 diff -Nur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 --- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
-+++ thttpd-2.21b-cool/mime_types.txt	Fri Jul 26 18:12:50 2002
++++ thttpd-2.21b-cool/mime_types.txt	Sat Sep  7 15:43:49 2002
 @@ -1,135 +1,138 @@
 -# mime_types.txt
 -#
@@ -732,9 +742,95 @@ diff -Nur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +avi	video/x-msvideo
 +movie	video/x-sgi-movie
 +ice	x-conference/x-cooltalk
+diff -Nur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
+--- thttpd-2.21b/mmc.c	Fri Apr 13 23:02:15 2001
++++ thttpd-2.21b-cool/mmc.c	Sat Sep 21 19:19:15 2002
+@@ -70,6 +70,7 @@
+     unsigned int hash;
+     int hash_idx;
+     struct MapStruct* next;
++	char nocache;
+     } Map;
+ 
+ 
+@@ -93,7 +94,7 @@
+ 
+ 
+ void*
+-mmc_map( char* filename, struct stat* sbP, struct timeval* nowP )
++mmc_map( char* filename, struct stat* sbP, struct timeval* nowP, int nocache )
+     {
+     time_t now;
+     struct stat sb;
+@@ -167,12 +168,13 @@
+     m->ctime = sb.st_ctime;
+     m->refcount = 1;
+     m->reftime = now;
++	m->nocache = (char) nocache;
+ 
+     /* Avoid doing anything for zero-length files; some systems don't like
+     ** to mmap them, other systems dislike mallocing zero bytes.
+     */
+     if ( m->size == 0 )
+-	m->addr = (void*) 1;	/* arbitrary non-NULL address */
++	m->addr = (void*) 5;	/* arbitrary non-NULL address */
+     else
+ 	{
+ #ifdef HAVE_MMAP
+@@ -231,27 +233,32 @@
+ void
+ mmc_unmap( void* addr, struct stat* sbP, struct timeval* nowP )
+     {
+-    Map* m = (Map*) 0;
++    Map* m = (Map*) 0, **mm = &maps;
+ 
+     /* Find the Map entry for this address.  First try a hash. */
+     if ( sbP != (struct stat*) 0 )
+ 	{
+ 	m = find_hash( sbP->st_ino, sbP->st_dev, sbP->st_size, sbP->st_ctime );
+-	if ( m != (Map*) 0 && m->addr != addr )
++	if ( m != (Map*) 0 && ( m->addr != addr || m->nocache == 1 ) )
+ 	    m = (Map*) 0;
+ 	}
+     /* If that didn't work, try a full search. */
+     if ( m == (Map*) 0 )
+-	for ( m = maps; m != (Map*) 0; m = m->next )
++	for ( m = maps; m != (Map*) 0; m = m->next ) {
+ 	    if ( m->addr == addr )
+ 		break;
++		mm = &m->next;
++	}
+     if ( m == (Map*) 0 )
+ 	syslog( LOG_ERR, "mmc_unmap failed to find entry!" );
+     else if ( m->refcount <= 0 )
+ 	syslog( LOG_ERR, "mmc_unmap found zero or negative refcount!" );
+     else
+ 	{
+-	--m->refcount;
++	if ( --m->refcount == 0 && m->nocache == 1 ) {
++		really_unmap( mm );
++		return;
++	}
+ 	if ( nowP != (struct timeval*) 0 )
+ 	    m->reftime = nowP->tv_sec;
+ 	else
+diff -Nur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
+--- thttpd-2.21b/mmc.h	Fri Apr 13 07:36:54 2001
++++ thttpd-2.21b-cool/mmc.h	Sat Sep 21 18:18:17 2002
+@@ -31,8 +31,9 @@
+ /* Returns an mmap()ed area for the given file, or (void*) 0 on errors.
+ ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
+ ** Same for the current time.
++** Set nocache to 1, if this entry is supposed to be removed quickly.
+ */
+-extern void* mmc_map( char* filename, struct stat* sbP, struct timeval* nowP );
++extern void* mmc_map( char* filename, struct stat* sbP, struct timeval* nowP, int nocache );
+ 
+ /* Done with an mmap()ed area that was returned by mmc_map().
+ ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
 diff -Nur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 --- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b-cool/thttpd.c	Fri Jul 26 18:14:25 2002
++++ thttpd-2.21b-cool/thttpd.c	Sat Sep 21 19:15:38 2002
 @@ -95,6 +95,7 @@
      httpd_conn* hc;
      int tnums[MAXTHROTTLENUMS];         /* throttle indexes */
