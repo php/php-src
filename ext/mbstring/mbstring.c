@@ -44,7 +44,7 @@
  *    Rui Hirokawa <rui_hirokawa@ybb.ne.jp>
  */
 
-
+/* {{{ includes */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -76,11 +76,13 @@
 #if HAVE_MBREGEX
 #include "mbregex.h"
 #endif
+/* }}} */
 
 #ifdef ZTS
 MUTEX_T mbregex_locale_mutex = NULL;
 #endif
 
+/* {{{ php_mbstr_default_identify_list[] */
 #if defined(HAVE_MBSTR_JA)
 static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
@@ -90,7 +92,6 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_sjis
 };
 #endif
-
 
 #if defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
 static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
@@ -137,6 +138,7 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 #endif
 
 static const int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_identify_list)/sizeof(enum mbfl_no_encoding);
+/* }}} */
 
 static const unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
 static const unsigned char second_args_force_ref[]    = { 2, BYREF_NONE, BYREF_FORCE };
@@ -144,18 +146,23 @@ static const unsigned char second_args_force_ref[]    = { 2, BYREF_NONE, BYREF_F
 static const unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 #endif
 
+/* {{{ sapi_post_entry mbstr_post_entries[] */
 static sapi_post_entry mbstr_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data, php_mbstr_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
 };
+/* }}} */
 
+/* {{{ sapi_post_entry php_post_entries[] */
 static sapi_post_entry php_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
 };
+/* }}} */
 
+/* {{{ mb_overload_def mb_ovld[] */
 static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
 	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", "mb_orig_strlen"},
@@ -173,6 +180,7 @@ static const struct mb_overload_def mb_ovld[] = {
 #endif
 	{0, NULL, NULL, NULL}
 }; 
+/* }}} */
 
 #if HAVE_MBREGEX
 struct def_mbctype_tbl {
@@ -189,6 +197,7 @@ const struct def_mbctype_tbl mbctype_tbl[] = {
 };
 #endif
 
+/* {{{ function_entry mbstring_functions[] */
 function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_case,				NULL)
 	PHP_FE(mb_strtoupper,				NULL)
@@ -265,7 +274,9 @@ function_entry mbstring_functions[] = {
 #endif
 	{ NULL, NULL, NULL }
 };
+/* }}} */
 
+/* {{{ zend_module_entry mbstring_module_entry */
 zend_module_entry mbstring_module_entry = {
     STANDARD_MODULE_HEADER,
 	"mbstring",
@@ -278,6 +289,7 @@ zend_module_entry mbstring_module_entry = {
     NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 
@@ -285,8 +297,8 @@ ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 ZEND_GET_MODULE(mbstring)
 #endif
 
-
-/*  Return 0 if input contains any illegal encoding, otherwise 1.
+/* {{{ static int php_mb_parse_encoding_list()
+ *  Return 0 if input contains any illegal encoding, otherwise 1.
  *  Even if any illegal encoding is detected the result may contain a list 
  *  of parsed encodings.
  */
@@ -392,14 +404,16 @@ php_mb_parse_encoding_list(const char *value, int value_length, int **return_lis
 
 	return ret;
 }
+/* }}} */
 
-/* {{{ php_mb_check_encoding_list */
+/* {{{ PHPAPI php_mb_check_encoding_list */
 PHPAPI int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC) {
 	return php_mb_parse_encoding_list(encoding_list, strlen(encoding_list), NULL, NULL, 0);	
 }
 /* }}} */
 
-/*  Return 0 if input contains any illegal encoding, otherwise 1.
+/* {{{ php_mb_parse_encoding_array
+ *  Return 0 if input contains any illegal encoding, otherwise 1.
  *  Even if any illegal encoding is detected the result may contain a list 
  *  of parsed encodings.
  */
@@ -472,18 +486,20 @@ php_mb_parse_encoding_array(zval *array, int **return_list, int *return_size, in
 
 	return ret;
 }
+/* }}} */
 
 #if HAVE_MBREGEX
+/* {{{ php_mbregex_free_cache */
 static void
 php_mbregex_free_cache(mb_regex_t *pre) 
 {
 	mbre_free_pattern(pre);
 }
-
+/* }}} */
 #endif
 
 
-/* php.ini directive handler */
+/* {{{ php.ini directive handler */
 static PHP_INI_MH(OnUpdate_mbstring_language)
 {
 	enum mbfl_no_language no_language;
@@ -535,7 +551,9 @@ static PHP_INI_MH(OnUpdate_mbstring_language)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_detect_order) */
 static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 {
 	int *list, size;
@@ -552,7 +570,9 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_input) */
 static PHP_INI_MH(OnUpdate_mbstring_http_input)
 {
 	int *list, size;
@@ -569,8 +589,9 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_output) */
 static PHP_INI_MH(OnUpdate_mbstring_http_output)
 {
 	enum mbfl_no_encoding no_encoding;
@@ -587,7 +608,9 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
 	enum mbfl_no_encoding no_encoding;
@@ -618,7 +641,9 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ ZEND_MULTIBYTE stuff */
 #ifdef ZEND_MULTIBYTE
 static PHP_INI_MH(OnUpdate_mbstring_script_encoding)
 {
@@ -637,7 +662,9 @@ static PHP_INI_MH(OnUpdate_mbstring_script_encoding)
 	return SUCCESS;
 }
 #endif /* ZEND_MULTIBYTE */
+/* }}} */
 
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_substitute_character) */
 static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 {
 	if (new_value != NULL) {
@@ -653,7 +680,9 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation) */
 static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 {
 	if (new_value == NULL) {
@@ -682,8 +711,9 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 
 	return SUCCESS;
 }
+/* }}} */
 
-/* php.ini directive registration */
+/* {{{ php.ini directive registration */
 PHP_INI_BEGIN()
 	 PHP_INI_ENTRY("mbstring.language", NULL, PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
 	 PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
@@ -701,9 +731,9 @@ PHP_INI_BEGIN()
 	 PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_encoding_translation, 
 	 encoding_translation, zend_mbstring_globals, mbstring_globals)					 
 PHP_INI_END()
+/* }}} */
 
-
-/* module global initialize handler */
+/* {{{ module global initialize handler */
 static void
 php_mb_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 {
@@ -746,7 +776,9 @@ php_mb_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 	MBSTRG(search_regs) = (struct mbre_registers*)0;
 #endif
 }
+/* }}} */
 
+/* {{{ static void mbstring_globals_dtor() */
 static void
 mbstring_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
 {
@@ -754,7 +786,9 @@ mbstring_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
 	zend_hash_destroy(&MBSTRG(ht_rc));
 #endif
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION(mbstring) */
 PHP_MINIT_FUNCTION(mbstring)
 {
 #ifdef ZTS
@@ -789,8 +823,9 @@ PHP_MINIT_FUNCTION(mbstring)
 #endif
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_MSHUTDOWN_FUNCTION(mbstring) */
 PHP_MSHUTDOWN_FUNCTION(mbstring)
 {
 	UNREGISTER_INI_ENTRIES();
@@ -829,8 +864,9 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_RINIT_FUNCTION(mbstring) */
 PHP_RINIT_FUNCTION(mbstring)
 {
 	int n, *list=NULL, *entry;
@@ -890,8 +926,9 @@ PHP_RINIT_FUNCTION(mbstring)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_RSHUTDOWN_FUNCTION(mbstring) */
 PHP_RSHUTDOWN_FUNCTION(mbstring)
 {
 	const struct mb_overload_def *p;
@@ -951,8 +988,9 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_MINFO_FUNCTION(mbstring) */
 PHP_MINFO_FUNCTION(mbstring)
 {
 	php_info_print_table_start();
@@ -979,7 +1017,7 @@ PHP_MINFO_FUNCTION(mbstring)
 
 	DISPLAY_INI_ENTRIES();
 }
-
+/* }}} */
 
 
 /* {{{ proto string mb_language([string language])
@@ -1316,6 +1354,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 }
 /* }}} */
 
+/* {{{ static void php_mbstr_encoding_handler() */
 static void
 php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 {
@@ -1462,7 +1501,9 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 	}
 
 }
+/* }}} */
 
+/* {{{ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler) */
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 {
 	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
@@ -1473,11 +1514,12 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 		MBSTRG(http_input_identify_post) = MBSTRG(http_input_identify);
 	}
 }
-
+/* }}} */
 
 #define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
+/* {{{ char *mbstr_strrchr() */
 char *mbstr_strrchr(const char *s, char c TSRMLS_DC){
 	unsigned char *p = (unsigned char *)s, *last = NULL;
 	while(*p++) {
@@ -1494,7 +1536,9 @@ char *mbstr_strrchr(const char *s, char c TSRMLS_DC){
 	}
 	return last;
 }
+/* }}} */
 
+/* {{{ PHPAPI int php_mb_is_mb_leadbyte() */
 PHPAPI int php_mb_is_mb_leadbyte(const char *s TSRMLS_DC){
 	unsigned char *p = (unsigned char *)s;
 	if (MBSTRG(current_language) == mbfl_no_language_japanese 
@@ -1503,8 +1547,10 @@ PHPAPI int php_mb_is_mb_leadbyte(const char *s TSRMLS_DC){
 	}
 	return 0;
 }
+/* }}} */
 
-/* http input processing */
+/* {{{ SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
+ * http input processing */
 SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 {
 	char *res = NULL, *separator=NULL;
@@ -1619,6 +1665,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		efree(res);
 	}
 }
+/* }}} */
 
 /* {{{ proto bool mb_parse_str(string encoded_string [, array result])
    Parses GET/POST/COOKIE data and sets global variables */
@@ -3150,7 +3197,8 @@ detect_end:
 /* }}} */
 
 
-/* HTML numeric entity */
+/* {{{ HTML numeric entity */
+/* {{{ static void php_mbstr_numericentity_exec() */
 static void
 php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
@@ -3223,6 +3271,7 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 	efree((void *)convmap);
 }
+/* }}} */
 
 /* {{{ proto string mb_encode_numericentity(string string, array convmap [, string encoding])
    Converts specified characters to HTML numeric entities */
@@ -3241,11 +3290,12 @@ PHP_FUNCTION(mb_decode_numericentity)
 }
 /* }}} */
 
+/* }}} */
 
-
-#if HAVE_SENDMAIL
 /* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
-   Sends an email message with MIME scheme */
+ *  Sends an email message with MIME scheme
+ */
+#if HAVE_SENDMAIL
 PHP_FUNCTION(mb_send_mail)
 {
 	int argc, n;
@@ -3386,7 +3436,6 @@ PHP_FUNCTION(mb_send_mail)
 	}
 	mbfl_memory_device_clear(&device TSRMLS_CC);
 }
-/* }}} */
 
 #else	/* HAVE_SENDMAIL */
 
@@ -3396,6 +3445,8 @@ PHP_FUNCTION(mb_send_mail)
 }
 
 #endif	/* HAVE_SENDMAIL */
+
+/* }}} */
 
 /* {{{ proto string mb_get_info([string type])
    Returns the current settings of mbstring */
@@ -3457,12 +3508,15 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
+/* {{{ PHPAPI int php_mb_encoding_translation() */
 PHPAPI int php_mb_encoding_translation(TSRMLS_D) 
 {
 	return MBSTRG(encoding_translation);
 }
+/* }}} */
 
 #ifdef ZEND_MULTIBYTE
+/* {{{ PHPAPI int php_mb_set_zend_encoding() */
 PHPAPI int php_mb_set_zend_encoding(TSRMLS_D)
 {
 	/* 'd better use mbfl_memory_device? */
@@ -3519,9 +3573,10 @@ PHPAPI int php_mb_set_zend_encoding(TSRMLS_D)
 
 	return 0;
 }
+/* }}} */
 
-/*
- *	mb_detect_encoding (interface for Zend Engine)
+/* {{{ char *php_mb_encoding_detector()
+ * Interface for Zend Engine
  */
 char* php_mb_encoding_detector(const char *arg_string, int arg_length, char *arg_list TSRMLS_DC)
 {
@@ -3558,11 +3613,9 @@ char* php_mb_encoding_detector(const char *arg_string, int arg_length, char *arg
 		return NULL;
 	}
 }
+/* }}} */
 
-
-/*
- *	mb_convert_encoding (interface for Zend Engine)
- */
+/*	{{{ int php_mb_encoding_converter() */
 int php_mb_encoding_converter(char **to, int *to_length, const char *from,
 		int from_length, const char *encoding_to, const char *encoding_from 
 		TSRMLS_DC)
@@ -3606,9 +3659,9 @@ int php_mb_encoding_converter(char **to, int *to_length, const char *from,
 
 	return ret ? 0 : -1;
 }
+/* }}} */
 
-
-/*
+/* {{{ int php_mb_oddlen()
  *	returns number of odd (e.g. appears only first byte of multibyte
  *	character) chars
  */
@@ -3627,7 +3680,7 @@ int php_mb_oddlen(const char *string, int length, const char *encoding TSRMLS_DC
 
 	return mbfl_oddlen(&mb_string);
 }
-
+/* }}} */
 #endif /* ZEND_MULTIBYTE */
 
 #endif	/* HAVE_MBSTRING */
@@ -3637,4 +3690,6 @@ int php_mb_oddlen(const char *string, int length, const char *encoding TSRMLS_DC
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: fdm=marker
+ * vim: noet sw=4 ts=4
  */
