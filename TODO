@@ -29,6 +29,7 @@ global
     * banish the legacy of php3_ prefixes
     * implement javadoc based function docs template system
     * use thread-safe resolver functions (either require BIND 8 or adns)
+    * check for incorrect *_r (time related) on HPSUX
     * provide optional IPv6 support
     * make SAPI conform to CGI/1.1. Currently, all SAPI modules
       define REMOTE_ADDR etc. themselves and reach only various level
