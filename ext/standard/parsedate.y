@@ -28,6 +28,10 @@
 #include <malloc.h>
 #endif
 
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <time.h>
