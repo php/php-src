@@ -276,11 +276,12 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 			RETVAL_STRINGL(buf, l, 1);
 		}
 	} else {
-		int b, i;
+		size_t b;
 
-		while ((b = fread(buf, 1, buflen, fp)) > 0) {
-			for (i = 0; i < b; i++)
-				if (output) (void)PUTC(buf[i]);
+		while ((b = fread(buf, buflen, 1, fp)) > 0) {
+			if (output) {
+				PHPWRITE(buf, b);
+			}
 		}
 	}
 
