@@ -217,11 +217,6 @@ SOURCE=.\libgd\gd_gd2.c
 
 SOURCE=.\libgd\gd_gif_in.c
 
-# End Source File
-# Begin Source File
-
-SOURCE=.\libgd\gd_gif_out.c
-
 !IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
@@ -233,6 +228,10 @@ SOURCE=.\libgd\gd_gif_out.c
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_gif_out.c
 # End Source File
 # Begin Source File
 
