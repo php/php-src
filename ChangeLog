@@ -1,3 +1,86 @@
+2000-03-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * acconfig.h.in: Nuke DEBUG.
+
+2000-03-11  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/recode/php_recode.h
+      ext/recode/recode.c
+      ext/recode/setup.stub
+      acinclude.m4
+      ext/recode/Makefile.in
+      ext/recode/config.m4: - Added additional DEFER macro.
+    - First stab at porting the recode module. Still having problems
+      with the _ex() functions, they core - why?
+
+2000-03-11  Andi Gutmans  <andi@php.net>
+
+    * ext/mhash/php_mhash.h
+      ext/imap/imap.c
+      ext/mcal/php_mcal.c
+      ext/mcrypt/php_mcrypt.h
+      ext/cybercash/cybercash.h
+      ext/gettext/php_gettext.h
+      ext/icap/php_icap.c:
+    - Oops I commited a name change for consistency of Zend/modules.h to
+      Zend/zend_modules.h before it being finished. Revert it
+
+    * ext/mhash/php_mhash.h
+      ext/odbc/php_odbc.c
+      ext/standard/dns.c
+      ext/mcrypt/php_mcrypt.h
+      ext/mcal/php_mcal.c
+      ext/icap/php_icap.c
+      ext/imap/imap.c
+      ext/dbase/dbf_ndx.c
+      ext/gettext/php_gettext.h
+      build-defs.h.in
+      configure.in
+      dl/log/log_sql.c
+      ext/cybercash/cybercash.h
+      ext/db/db.c
+      php.h
+      win95nt.h: - Don't define DEBUG anymore. Everyone should use PHP_DEBUG.
+      There are 2-3 third-party libs in PHP which use DEBUG and I left them
+      this way (primary example is pcrelib).
+    - Please test things and Andrei, can you check that pcrelib stopped
+      printing the warning messages?
+
+    * ext/standard/dl.c:
+    - Don't load modules which have different debug and ZTS information than
+      PHP() (untested). Not sure how to handle API version. Should it also not
+      load? It probably should but it might bite us at some point.
+     Prevent from loading dynamic PHP modules which were compiled with different
+      debug and thread safety modes than PHP, which resulted in a crash (Andi)
+
+2000-03-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ltconfig
+      ltmain.sh
+      patch-aa
+      patch-ab: Upgrade to libtool 1.3.4
+
+2000-03-11  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/Makefile.in: Unix classpath fixes
+
+2000-03-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: mkextlib is not created anymore
+
+    * configure.in: We don't need mkextlib anymore
+
+2000-03-11  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/php_mcal.c:
+    switching the order of arguments of mcal_week_of_day() to be more flexible -
+    day, month, year now so that month and year can be defaulted at some point.
+    this is also consistent with the library function.
+
+    * ext/mcal/php_mcal.c
+      ext/mcal/php_mcal.h:
+    Add mcal_week_of_year(), submitted by jtaskine@hit.fi.
+
 2000-03-10  Andrei Zmievski  <andrei@ispi.net>
 
     * .cvsignore: Add generated file.
