@@ -1400,7 +1400,7 @@ binary_assign_op_addr: {
 					
 					FREE_OP(&original_opline->op1, EG(free_op1));
 					Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
-					Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
+					Ts[original_opline->result.u.var].tmp_var.type = IS_BOOL;
 					if (!retval) {
 #if DEBUG_ZEND>=2
 						printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
@@ -1416,7 +1416,7 @@ binary_assign_op_addr: {
 					
 					FREE_OP(&original_opline->op1, EG(free_op1));
 					Ts[original_opline->result.u.var].tmp_var.value.lval = retval;
-					Ts[original_opline->result.u.var].tmp_var.type = IS_LONG;
+					Ts[original_opline->result.u.var].tmp_var.type = IS_BOOL;
 					if (retval) {
 #if DEBUG_ZEND>=2
 						printf("Conditional jmp to %d\n", opline->op2.u.opline_num);
@@ -1844,7 +1844,7 @@ send_by_ref:
 			case ZEND_BOOL:
 				/* PHP 3.0 returned "" for false and 1 for true, here we use 0 and 1 for now */
 				Ts[opline->result.u.var].tmp_var.value.lval = zend_is_true(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R));
-				Ts[opline->result.u.var].tmp_var.type = IS_LONG;
+				Ts[opline->result.u.var].tmp_var.type = IS_BOOL;
 				FREE_OP(&opline->op1, EG(free_op1));
 				NEXT_OPCODE();
 			case ZEND_BRK:
