@@ -32,8 +32,9 @@
 #include "Zend/zend_API.h"
 #include "Zend/zend_hash.h"
 #include "safe_mode.h"
-#include "zend_default_classes.h"
-#include "zend_object_handlers.h"
+#include "Zend/zend_default_classes.h"
+#include "Zend/zend_object_handlers.h"
+#include "Zend/zend_hash.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy)
 
@@ -176,6 +177,52 @@ void php_tidy_free(void *buf)
 void php_tidy_panic(ctmbstr msg)
 {
 	zend_error(E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
+}
+
+static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
+{
+	TidyOption opt;
+	
+	opt = tidyGetOptionByName(doc, optname);
+
+	if (!opt) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
+		return FAILURE;
+	}
+	
+	if (tidyOptIsReadOnly(opt)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted to set read-only option '%s'", optname);
+		return FAILURE;
+	}
+
+	switch(tidyOptGetType(opt)) {
+		case TidyString:
+			convert_to_string_ex(&value);
+			if (tidyOptSetValue(doc, tidyOptGetId(opt), Z_STRVAL_P(value))) {
+				return SUCCESS;
+			}
+			break;
+
+		case TidyInteger:
+			convert_to_long_ex(&value);
+			if (tidyOptSetInt(doc, tidyOptGetId(opt), Z_LVAL_P(value))) {
+				return SUCCESS;
+			}
+			break;
+
+		case TidyBoolean:
+			convert_to_long_ex(&value);
+			if (tidyOptSetBool(doc,  tidyOptGetId(opt), Z_LVAL_P(value))) {
+				return SUCCESS;
+			}
+			break;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of Tidy configuration constant to set");
+			break;
+	}	
+	
+	return FAILURE;
 }
 
 static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
@@ -478,10 +525,6 @@ static void tidy_globals_ctor(zend_tidy_globals *g TSRMLS_DC)
 {
 }
 
-static void tidy_globals_dtor(zend_tidy_globals *g TSRMLS_DC)
-{
-}
-
 static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRMLS_DC)
 {
 
@@ -640,19 +683,41 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 	tidy_add_default_properties(newobj, is_node TSRMLS_CC);
 }
 
+static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
+{
+	char *opt_name;
+	zval **opt_val;
+	ulong opt_indx;
+	
+	for (zend_hash_internal_pointer_reset(ht_options);
+		 zend_hash_get_current_data(ht_options, (void **)&opt_val) == SUCCESS;
+		 zend_hash_move_forward(ht_options)) {
+		
+		if(zend_hash_get_current_key(ht_options, &opt_name, &opt_indx, FALSE) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not retrieve key from array");
+		}
+		
+		_php_tidy_set_tidy_opt(doc, opt_name, *opt_val);
+					
+	}
+	
+	return SUCCESS;
+}
+
 static void php_tidy_parse_file(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char *inputfile;
 	int input_len;
 	zend_bool use_include_path = 0;
 	char *contents;
-
+	zval *options = NULL;
+	
 	zend_bool is_object = FALSE;
 
 	zval *object = getThis();
 	PHPTidyObj *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &inputfile, &input_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ab", &inputfile, &input_len, &options, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -673,6 +738,10 @@ static void php_tidy_parse_file(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
+	if(options) {
+		_php_tidy_apply_config_array(obj->ptdoc->doc, HASH_OF(options));		
+	}
+	
 	if (tidyParseString(obj->ptdoc->doc, contents) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
 		RETVAL_FALSE;
@@ -803,13 +872,14 @@ PHP_FUNCTION(tidy_parse_string)
 {
 	char *input;
 	int input_len;
-
+	zval *options = NULL;
+	
 	zend_bool is_object = FALSE;
 
 	zval *object = getThis();
 	PHPTidyObj *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &input, &input_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &input, &input_len, &options) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -826,6 +896,10 @@ PHP_FUNCTION(tidy_parse_string)
 		obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
 	}
 
+	if(options) {
+		_php_tidy_apply_config_array(obj->ptdoc->doc, HASH_OF(options));
+	}
+	
 	if (tidyParseString(obj->ptdoc->doc, input) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
 		return;
@@ -866,7 +940,7 @@ PHP_FUNCTION(tidy_get_output)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_parse_file(string file [, bool use_include_path])
+/* {{{ proto boolean tidy_parse_file(string file [, array config_options [, bool use_include_path]])
    Parse markup in file or URI */
 PHP_FUNCTION(tidy_parse_file)
 {
@@ -1237,7 +1311,6 @@ PHP_FUNCTION(tidy_setopt)
 	zval *value;
 	char *optname;
 	int optname_len;
-	TidyOption opt;
 
 	if (object) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &optname, &optname_len, &value) == FAILURE) {
@@ -1251,45 +1324,10 @@ PHP_FUNCTION(tidy_setopt)
 
 	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
-
-	if (!opt) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
-		RETURN_FALSE;
+	if(_php_tidy_set_tidy_opt(obj->ptdoc->doc, optname, value) == SUCCESS) {
+		RETURN_TRUE;
 	}
-
-	if (tidyOptIsReadOnly(opt)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted to set read-only option '%s'", optname);
-		RETURN_FALSE;
-	}
-
-	switch(tidyOptGetType(opt)) {
-		case TidyString:
-			convert_to_string_ex(&value);
-			if (tidyOptSetValue(obj->ptdoc->doc, tidyOptGetId(opt), Z_STRVAL_P(value))) {
-				RETURN_TRUE;
-			}
-			break;
-
-		case TidyInteger:
-			convert_to_long_ex(&value);
-			if (tidyOptSetInt(obj->ptdoc->doc, tidyOptGetId(opt), Z_LVAL_P(value))) {
-				RETURN_TRUE;
-			}
-			break;
-
-		case TidyBoolean:
-			convert_to_long_ex(&value);
-			if (tidyOptSetBool(obj->ptdoc->doc,  tidyOptGetId(opt), Z_LVAL_P(value))) {
-				RETURN_TRUE;
-			}
-			break;
-
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of Tidy configuration constant to set");
-			break;
-	}
-
+	
 	RETURN_FALSE;
 }
 /* }}} */
