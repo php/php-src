@@ -51,7 +51,8 @@ if test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so -a \
 	echo "* Please correct this by creating the following links and reconfiguring:"
 	echo "* $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a -> $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a"
 	echo "* $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so -> $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so"
-	echo "*********************************************************************"else
+	echo "*********************************************************************"
+else
 	ODBC_LFLAGS=-L$1
 	ODBC_LIBS=-l${ac_solid_prefix}${ac_solid_os}${ac_solid_version}
 fi
