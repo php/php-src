@@ -982,6 +982,7 @@ PHP_FUNCTION(mysqli_info)
    Initialize mysqli and return a resource for use with mysql_real_connect */
 PHP_FUNCTION(mysqli_init)
 {
+	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql = (MY_MYSQL *)calloc(1, sizeof(MY_MYSQL));
 
 	if (!(mysql->mysql = mysql_init(NULL))) {
@@ -989,7 +990,7 @@ PHP_FUNCTION(mysqli_init)
 		RETURN_FALSE;
 	}
 
-	MYSQLI_RESOURCE *mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
 }
