@@ -1290,7 +1290,7 @@ PS_OPEN_FUNC(msession)
 {
 	int port;
 	int len = strlen(save_path)+1;
-	char * path = alloca(len);
+	char * path = emalloc(len);
 	char * szport;
 
 	strcpy(path, save_path);
@@ -1309,7 +1309,13 @@ PS_OPEN_FUNC(msession)
 	
 	ELOG( "ps_open_msession");
 	PS_SET_MOD_DATA((void *)1); /* session.c needs a non-zero here! */
-	return PHPMsessionConnect(path, port) ? SUCCESS : FAILURE;
+	if (PHPMsessionConnect(path, port)) {
+		efree(path);
+		return SUCCESS;
+	} else {
+		efree(path);
+		return FAILURE;
+	}
 }
 
 PS_CLOSE_FUNC(msession)
