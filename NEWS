@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . ext/db (Jani, Derick)
   . ext/mcal (Jani, Derick)
   . ext/qtdom (Jani, Derick)
+- Added support for MacRoman encoding to htmlentities(). (Marcus Bointon)
 - Added possibility to call PHP functions as XSLT-functions. (Christian)
 - Added possibility to prevent PHP from registering variables when
   input filter support is used. (Derick)
