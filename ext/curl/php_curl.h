@@ -53,19 +53,23 @@ PHP_FUNCTION(curl_close);
 
 typedef struct {
 	zval         *func;
+	FILE         *fp;
 	smart_str     buf;
 	int           method;
 } php_curl_write;
 
 typedef struct {
 	zval         *func;
+	FILE         *fp;
 	long          fd;
 	int           method;
 } php_curl_read;
 
 typedef struct {
-	zval *write_header;
-	zval *passwd;
+	php_curl_write *write;
+	php_curl_read  *read;
+	zval           *write_header;
+	zval           *passwd;
 } php_curl_handlers;
 
 struct _php_curl_error  {
@@ -81,8 +85,6 @@ struct _php_curl_free {
 
 typedef struct {
 	CURL                    *cp;
-	php_curl_write          *write;
-	php_curl_read           *read;
 	php_curl_handlers       *handlers;
 	struct _php_curl_error   err;
 	struct _php_curl_free    to_free;
