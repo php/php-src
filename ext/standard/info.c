@@ -53,6 +53,56 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 }
 
 
+static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
+{
+	zval **data, **tmp;
+	char *string_key;
+	ulong num_key;
+
+	if (zend_hash_find(&EG(symbol_table), name, name_length+1, (void **) &data)!=FAILURE
+		&& ((*data)->type==IS_ARRAY)) {
+		zend_hash_internal_pointer_reset((*data)->value.ht);
+		while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
+			zval tmp2, *value_ptr;
+
+			if ((*tmp)->type != IS_STRING) {
+				tmp2 = **tmp;
+				zval_copy_ctor(&tmp2);
+				convert_to_string(&tmp2);
+				value_ptr = &tmp2;
+			} else {
+				value_ptr = *tmp;
+			}
+			PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
+			PUTS(name);
+			PUTS("[\"");
+			switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
+				case HASH_KEY_IS_STRING:
+					PUTS(string_key);
+					efree(string_key);
+					break;
+				case HASH_KEY_IS_LONG:
+					php_printf("%ld",num_key);
+					break;
+			}
+			PUTS("\"]</b></td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+			if ((*tmp)->type == IS_ARRAY) {
+				PUTS("<pre>");
+				zend_print_zval_r(*tmp, 0);
+				PUTS("</pre>");
+			} else {
+				PUTS(value_ptr->value.str.val);
+			}
+			PUTS("</td></tr>\n");
+			zend_hash_move_forward((*data)->value.ht);
+			if (value_ptr==&tmp2) {
+				zval_dtor(value_ptr);
+			}
+		}
+	}
+}
+
+
 PHPAPI void php_print_info(int flag)
 {
 	char **env,*tmp1,*tmp2;
@@ -171,9 +221,7 @@ PHPAPI void php_print_info(int flag)
 	}
 
 	if (flag & PHP_INFO_VARIABLES) {
-		pval **data, **tmp;
-		char *string_key;
-		ulong num_key;
+		pval **data;
 
 		SECTION("PHP Variables");
 
@@ -191,87 +239,11 @@ PHPAPI void php_print_info(int flag)
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", (*data)->value.str.val);
 		}
-		if (zend_hash_find(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), (void **) &data)!=FAILURE
-			&& ((*data)->type==IS_ARRAY)) {
-			zend_hash_internal_pointer_reset((*data)->value.ht);
-			while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
-				zval tmp2, *value_ptr;
-
-				if ((*tmp)->type != IS_STRING) {
-					tmp2 = **tmp;
-					zval_copy_ctor(&tmp2);
-					convert_to_string(&tmp2);
-					value_ptr = &tmp2;
-				} else {
-					value_ptr = *tmp;
-				}
-				PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>HTTP_GET_VARS[\"");
-				switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
-					case HASH_KEY_IS_STRING:
-						PUTS(string_key);
-						efree(string_key);
-						break;
-					case HASH_KEY_IS_LONG:
-						php_printf("%ld",num_key);
-						break;
-				}
-				PUTS("\"]</b></td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-				if ((*tmp)->type == IS_ARRAY) {
-					PUTS("<pre>");
-					zend_print_zval_r(*tmp, 0);
-					PUTS("</pre>");
-				} else {
-					PUTS(value_ptr->value.str.val);
-				}
-				PUTS("</td></tr>\n");
-				zend_hash_move_forward((*data)->value.ht);
-				if (value_ptr==&tmp2) {
-					zval_dtor(value_ptr);
-				}
-			}
-		}
-		if (zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), (void **) &data)!=FAILURE
-			&& ((*data)->type==IS_ARRAY)) {
-			zend_hash_internal_pointer_reset((*data)->value.ht);
-			while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
-				convert_to_string(*tmp);
-				PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>HTTP_POST_VARS[\"");
-				switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
-					case HASH_KEY_IS_STRING:
-						PUTS(string_key);
-						efree(string_key);
-						break;
-					case HASH_KEY_IS_LONG:
-						php_printf("%ld",num_key);
-						break;
-				}
-				PUTS("\"]</b></td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-				PUTS((*tmp)->value.str.val);
-				PUTS("</td></tr>\n");
-				zend_hash_move_forward((*data)->value.ht);
-			}
-		}
-		if (zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), (void **) &data)!=FAILURE
-			&& ((*data)->type==IS_ARRAY)) {
-			zend_hash_internal_pointer_reset((*data)->value.ht);
-			while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
-				convert_to_string(*tmp);
-				PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>HTTP_COOKIE_VARS[\"");
-				switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
-					case HASH_KEY_IS_STRING:
-						PUTS(string_key);
-						efree(string_key);
-						break;
-					case HASH_KEY_IS_LONG:
-						php_printf("%ld",num_key);
-						break;
-				}
-				PUTS("\"]</b></td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-				PUTS((*tmp)->value.str.val);
-				PUTS("</td></tr>\n");
-				zend_hash_move_forward((*data)->value.ht);
-			}
-		}
+		php_print_gpcse_array("HTTP_GET_VARS", sizeof("HTTP_GET_VARS")-1 ELS_CC);
+		php_print_gpcse_array("HTTP_POST_VARS", sizeof("HTTP_POST_VARS")-1 ELS_CC);
+		php_print_gpcse_array("HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS")-1 ELS_CC);
+		php_print_gpcse_array("HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS")-1 ELS_CC);
+		php_print_gpcse_array("HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS")-1 ELS_CC);
 		PUTS("</table>\n");
 	}
 
