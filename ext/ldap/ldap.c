@@ -636,7 +636,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	if (Z_TYPE_PP(link) == IS_ARRAY) {
 		int i, nlinks, nbases, nfilters, *rcs;
 		ldap_linkdata **lds;
-		zval **entry;
+		zval **entry, *resource;
 		
 		nlinks = zend_hash_num_elements(Z_ARRVAL_PP(link));
 		if (nlinks == 0) {
@@ -728,15 +728,17 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 		/* Collect results from the searches */
 		for (i=0; i<nlinks; i++) {
+			MAKE_STD_ZVAL(resource);
 			if (rcs[i] != -1) {
 				rcs[i] = ldap_result(lds[i]->link, LDAP_RES_ANY, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
 			}
 			if (rcs[i] != -1) {
-				add_next_index_long(return_value, zend_list_insert(ldap_res, le_result));
+				ZEND_REGISTER_RESOURCE(resource, ldap_res, le_result);
+				add_next_index_zval(return_value, resource);
 			} else {
 				add_next_index_bool(return_value, 0);
 			}
-		};
+		}
 		efree(lds);
 		efree(rcs);
 		return;
