@@ -1,6 +1,7 @@
 #! /bin/sh
 
 prefix="@prefix@"
+version="@VERSION@"
 includedir="@includedir@/php"
 includes="-I$includedir -I$includedir/main -I$includedir/Zend"
 if test '@TSRM_DIR@' != ''; then
@@ -15,8 +16,10 @@ case "$1" in
 	echo $includes;;
 --extension-dir)
 	echo $extension_dir;;
+--version)
+	echo $version;;
 *)
-	echo "Usage: $0 [--prefix|--includes|--extension-dir]"
+	echo "Usage: $0 [--prefix|--includes|--extension-dir|--version]"
 	exit 1;;
 esac
 
