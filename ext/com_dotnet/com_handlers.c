@@ -306,7 +306,7 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 
 static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval **args = NULL;
+	zval ***args = NULL;
 	php_com_dotnet_object *obj;
 	int nargs;
 	VARIANT v;
@@ -321,13 +321,13 @@ static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	nargs = ZEND_NUM_ARGS();
 
 	if (nargs) {
-		args = (zval **)safe_emalloc(sizeof(zval *), nargs, 0);
-		zend_get_parameters_array(ht, nargs, args);
+		args = (zval ***)safe_emalloc(sizeof(zval *), nargs, 0);
+		zend_get_parameters_array_ex(nargs, args);
 	}
 
 	VariantInit(&v);
 
-	if (SUCCESS == php_com_do_invoke(obj, method, -1, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
+	if (SUCCESS == php_com_do_invoke_byref(obj, method, -1, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
 		php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
 		ret = SUCCESS;
 		VariantClear(&v);
