@@ -1271,9 +1271,9 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 	strtok_buf = NULL;
 	var = php_strtok_r(res, separator, &strtok_buf);
 	while (var)  {
+		len_list[n] = php_url_decode(var, strlen(var));
 		val = strchr(var, '=');
 		val_list[n] = var;
-		len_list[n] = php_url_decode(var, strlen(var));
 		n++;
 		if (val) { /* have a value */
 			*val++ = '\0';
