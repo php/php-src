@@ -186,6 +186,13 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 
 	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_key, "key", &retval);
 
+	if (!retval) {
+		*str_key = "";
+		*str_key_len = 0;
+		*int_key = 0;
+		zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name);
+		return HASH_KEY_IS_LONG;
+	}
 	switch (retval->type) {
 		default: 
 			zend_error(E_WARNING, "Illegal type returned from %s::key()", iter->ce->name);
