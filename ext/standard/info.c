@@ -169,9 +169,11 @@ PHPAPI void php_print_info(int flag)
 #endif
 		php_info_print_table_row(2, "php.ini Path", CONFIGURATION_FILE_PATH );
 
-/* this causes seg faults
-		php_info_print_table_row(2, "ZEND_DEBUG", ZEND_DEBUG );
-*/
+#ifdef ZEND_DEBUG
+		php_info_print_table_row(2, "ZEND_DEBUG", "true" );
+#else
+		php_info_print_table_row(2, "ZEND_DEBUG", "false" );
+#endif
 
 		if (sapi_module.name)
 			php_info_print_table_row(2, "SAPI", sapi_module.name );
