@@ -41,7 +41,7 @@ zend_module_entry extname_module_entry = {
 	PHP_RSHUTDOWN(extname),	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(extname),
 #if ZEND_MODULE_API_NO >= 20010901
-    FOO_VERSION,          /* extension version number (string) */
+	"0.1", /* Replace with version number for your extension */
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
