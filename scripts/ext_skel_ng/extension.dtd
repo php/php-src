@@ -72,6 +72,7 @@
 <!ELEMENT deps (with|lib|header|file|program)*>
 <!ATTLIST deps
   language (c|cpp) "c"
+  platform   (unix|win32|all) "all"
 >
 <!ELEMENT with (#PCDATA)>
 <!ATTLIST with
@@ -84,6 +85,7 @@
   name       CDATA #REQUIRED
   function   CDATA #REQUIRED
   searchpath CDATA #IMPLIED
+  platform   (unix|win32|all) "all"
 >
 <!ELEMENT header (#PCDATA)>
 <!ATTLIST header
