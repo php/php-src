@@ -245,9 +245,6 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	soap_globals->sdls = malloc(sizeof(HashTable));
 	zend_hash_init(soap_globals->sdls, 0, NULL, delete_sdl, 1);
 
-	soap_globals->services = malloc(sizeof(HashTable));
-	zend_hash_init(soap_globals->services, 0, NULL, delete_service, 1);
-
 	soap_globals->defEnc = malloc(sizeof(HashTable));
 	zend_hash_init(soap_globals->defEnc, 0, NULL, NULL, 1);
 
@@ -288,13 +285,11 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	/* hash by namespace */
 	zend_hash_add(soap_globals->defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
 	zend_hash_add(soap_globals->defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
-	zend_hash_add(soap_globals->defEncNs, APACHE_NAMESPACE, sizeof(APACHE_NAMESPACE), APACHE_NS_PREFIX, sizeof(APACHE_NS_PREFIX), NULL);
 	zend_hash_add(soap_globals->defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE), SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX), NULL);
 	zend_hash_add(soap_globals->defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE), SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX), NULL);
 
 	/* and by prefix */
 	zend_hash_add(soap_globals->defEncPrefix, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), XSD_NAMESPACE, sizeof(XSD_NAMESPACE), NULL);
-	zend_hash_add(soap_globals->defEncPrefix, APACHE_NS_PREFIX, sizeof(APACHE_NS_PREFIX), APACHE_NAMESPACE, sizeof(APACHE_NAMESPACE), NULL);
 	zend_hash_add(soap_globals->defEncPrefix, SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX), SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE), NULL);
 	zend_hash_add(soap_globals->defEncPrefix, SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX), SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE), NULL);
 
@@ -316,7 +311,6 @@ PHP_MSHUTDOWN_FUNCTION(soap)
 {
 	zend_error_cb = old_error_handler;
 	zend_hash_destroy(SOAP_GLOBAL(sdls));
-	zend_hash_destroy(SOAP_GLOBAL(services));
 	zend_hash_destroy(SOAP_GLOBAL(defEnc));
 	zend_hash_destroy(SOAP_GLOBAL(defEncIndex));
 	zend_hash_destroy(SOAP_GLOBAL(defEncNs));
@@ -497,7 +491,7 @@ PHP_FUNCTION(soap_encode_to_zval)
 	}
 
 	node = (xmlNodePtr)Z_LVAL_PP(addr);
-	ret = master_to_zval(get_conversion(UNKNOWN_TYPE), node);
+	ret = master_to_zval(NULL, node);
 	*return_value = *ret;
 }
 #endif
@@ -1903,7 +1897,7 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 						php_error(E_ERROR, "Error cannot find parameter");
 					}
 					if (param == NULL) {
-						enc = get_conversion(UNKNOWN_TYPE);
+						enc = NULL;
 					} else {
 						enc = (*param)->encode;
 					}
@@ -2049,7 +2043,6 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 	if (use == SOAP_ENCODED) {
 		xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
-		xmlSetProp(envelope, "xmlns:" APACHE_NS_PREFIX , APACHE_NAMESPACE);
 		if (version == SOAP_1_1) {
 			xmlSetProp(envelope, "xmlns:"SOAP_1_1_ENC_NS_PREFIX, SOAP_1_1_ENC_NAMESPACE);
 			xmlSetProp(envelope, SOAP_1_1_ENV_NS_PREFIX":encodingStyle", SOAP_1_1_ENC_NAMESPACE);
@@ -2140,7 +2133,6 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 	if (use == SOAP_ENCODED) {
 		xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
 		xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		xmlSetProp(envelope, "xmlns:" APACHE_NS_PREFIX , APACHE_NAMESPACE);
 		if (version == SOAP_1_1) {
 			xmlSetProp(envelope, "xmlns:"SOAP_1_1_ENC_NS_PREFIX, SOAP_1_1_ENC_NAMESPACE);
 			xmlSetProp(envelope, SOAP_1_1_ENV_NS_PREFIX":encodingStyle", SOAP_1_1_ENC_NAMESPACE);

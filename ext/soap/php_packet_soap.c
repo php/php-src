@@ -109,9 +109,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 		tmp = get_node(fault->children,"detail");
 		if (tmp != NULL) {
-			encodePtr enc;
-			enc = get_conversion(UNKNOWN_TYPE);
-			details = master_to_zval(enc, tmp);
+			details = master_to_zval(NULL, tmp);
 		}
 
 		add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
@@ -180,7 +178,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					if (param != NULL) {
 						tmp = master_to_zval(param->encode, val);
 					} else {
-						tmp = master_to_zval(get_conversion(UNKNOWN_TYPE), val);
+						tmp = master_to_zval(NULL, val);
 					}
 				}
 				add_assoc_zval(return_value, param->paramName, tmp);
@@ -199,10 +197,8 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					val = val->next;
 				}
 				if (val != NULL) {
-					encodePtr enc;
 					zval *tmp;
-					enc = get_conversion(UNKNOWN_TYPE);
-					tmp = master_to_zval(enc, val);
+					tmp = master_to_zval(NULL, val);
 					if (val->name) {
 						add_assoc_zval(return_value, (char*)val->name, tmp);
 					} else {

@@ -25,6 +25,73 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type);
 
 static void delete_model(void *handle);
+static void delete_type(void *data);
+static void delete_attribute(void *attribute);
+static void delete_restriction_var_int(void *rvi);
+static void delete_schema_restriction_var_char(void *srvc);
+
+static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
+{
+	smart_str nscat = {0};
+	encodePtr enc, *enc_ptr;
+
+	if (sdl->encoders == NULL) {
+		sdl->encoders = malloc(sizeof(HashTable));
+		zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 1);
+	}
+	smart_str_appends(&nscat, ns);
+	smart_str_appendc(&nscat, ':');
+	smart_str_appends(&nscat, type);
+	smart_str_0(&nscat);
+	if (zend_hash_find(sdl->encoders, nscat.c, nscat.len + 1, (void**)&enc_ptr) == SUCCESS) {
+		enc = *enc_ptr;
+		if (enc->details.ns) {
+			free(enc->details.ns);
+		}
+		if (enc->details.type_str) {
+			free(enc->details.type_str);
+		}
+	} else {
+		enc_ptr = NULL;
+		enc = malloc(sizeof(encode));
+	}
+	memset(enc, 0, sizeof(encode));
+
+	enc->details.ns = strdup(ns);
+	enc->details.type_str = strdup(type);
+	enc->details.sdl_type = cur_type;
+	enc->to_xml = sdl_guess_convert_xml;
+	enc->to_zval = sdl_guess_convert_zval;
+
+	if (enc_ptr == NULL) {
+		zend_hash_update(sdl->encoders, nscat.c, nscat.len + 1, &enc, sizeof(encodePtr), NULL);
+	}
+	smart_str_free(&nscat);
+	return enc;
+}
+
+static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
+{
+	encodePtr enc = NULL;
+	smart_str nscat = {0};
+	TSRMLS_FETCH();
+
+	smart_str_appends(&nscat, ns);
+	smart_str_appendc(&nscat, ':');
+	smart_str_appends(&nscat, type);
+	smart_str_0(&nscat);
+
+	enc = get_conversion_from_href_type(nscat.c);
+	if (enc == NULL) {
+		enc = get_conversion_from_href_type_ex(sdl->encoders, nscat.c, nscat.len);
+	}
+	if (enc == NULL) {
+		enc = create_encoder(sdl, cur_type, ns, type);
+	}
+
+	smart_str_free(&nscat);
+	return enc;
+}
 
 static int is_blank(const char* str)
 {
@@ -718,7 +785,7 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNode
 
 static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr)
 {
-	xmlAttrPtr fixed, value, id;
+	xmlAttrPtr fixed, value;
 
 	if ((*valptr) == NULL) {
 		(*valptr) = malloc(sizeof(sdlRestrictionInt));
@@ -733,11 +800,6 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 			(*valptr)->fixed = TRUE;
 	}
 
-	id = get_attribute(val->properties, "id");
-	if (id != NULL) {
-		(*valptr)->id = strdup(id->children->content);
-	}
-
 	value = get_attribute(val->properties, "value");
 	if (value == NULL) {
 		php_error(E_ERROR, "Error parsing wsdl (missing restriction value)");
@@ -750,7 +812,7 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 
 static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr)
 {
-	xmlAttrPtr fixed, value, id;
+	xmlAttrPtr fixed, value;
 
 	if ((*valptr) == NULL) {
 		(*valptr) = malloc(sizeof(sdlRestrictionChar));
@@ -764,11 +826,6 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 		    !strcmp(fixed->children->content, "1")) {
 			(*valptr)->fixed = TRUE;
 		}
-	}
-
-	id = get_attribute(val->properties, "id");
-	if (id != NULL) {
-		(*valptr)->id = strdup(id->children->content);
 	}
 
 	value = get_attribute(val->properties, "value");
@@ -1527,6 +1584,9 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 	attrs = element->properties;
 	attr = get_attribute(attrs, "nillable");
 	if (attr) {
+		if (ref != NULL) {
+			php_error(E_ERROR, "Error parsing schema (element have both 'ref' and 'nillable' attributes)");
+		}
 		if (!stricmp(attr->children->content, "true") ||
 			!stricmp(attr->children->content, "1")) {
 			cur_type->nillable = TRUE;
@@ -1535,6 +1595,24 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		}
 	} else {
 		cur_type->nillable = FALSE;
+	}
+
+	attr = get_attribute(attrs, "fixed");
+	if (attr) {
+		if (ref != NULL) {
+			php_error(E_ERROR, "Error parsing schema (element have both 'ref' and 'fixed' attributes)");
+		}
+		cur_type->fixed = strdup(attr->children->content);
+	}
+
+	attr = get_attribute(attrs, "default");
+	if (attr) {
+		if (ref != NULL) {
+			php_error(E_ERROR, "Error parsing schema (element have both 'ref' and 'fixed' attributes)");
+		} else if (ref != NULL) {
+			php_error(E_ERROR, "Error parsing schema (element have both 'default' and 'fixed' attributes)");
+		}
+		cur_type->def = strdup(attr->children->content);
 	}
 
 	/* type = QName */
@@ -1703,9 +1781,15 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		} else if (attr_is_equal_ex(attr, "fixed", SCHEMA_NAMESPACE)) {
 			newAttr->fixed = strdup(attr->children->content);
 		} else if (attr_is_equal_ex(attr, "form", SCHEMA_NAMESPACE)) {
-			newAttr->form = strdup(attr->children->content);
+			if (strcmp(attr->children->content,"qualified") == 0) {
+			  newAttr->form = XSD_FORM_QUALIFIED;
+			} else if (strcmp(attr->children->content,"unqualified") == 0) {
+			  newAttr->form = XSD_FORM_UNQUALIFIED;
+			} else {
+			  newAttr->form = XSD_FORM_DEFAULT;
+			}
 		} else if (attr_is_equal_ex(attr, "id", SCHEMA_NAMESPACE)) {
-			newAttr->id = strdup(attr->children->content);
+			/* skip */
 		} else if (attr_is_equal_ex(attr, "name", SCHEMA_NAMESPACE)) {
 			newAttr->name = strdup(attr->children->content);
 		} else if (attr_is_equal_ex(attr, "ref", SCHEMA_NAMESPACE)) {
@@ -1713,7 +1797,15 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		} else if (attr_is_equal_ex(attr, "type", SCHEMA_NAMESPACE)) {
 			/* already processed */
 		} else if (attr_is_equal_ex(attr, "use", SCHEMA_NAMESPACE)) {
-			newAttr->use = strdup(attr->children->content);
+			if (strcmp(attr->children->content,"prohibited") == 0) {
+			  newAttr->use = XSD_USE_PROHIBITED;
+			} else if (strcmp(attr->children->content,"required") == 0) {
+			  newAttr->use = XSD_USE_REQUIRED;
+			} else if (strcmp(attr->children->content,"optional") == 0) {
+			  newAttr->use = XSD_USE_OPTIONAL;
+			} else {
+			  newAttr->use = XSD_USE_DEFAULT;
+			}
 		} else {
 			xmlNsPtr nsPtr = attr_find_ns(attr);
 
@@ -1885,11 +1977,11 @@ static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 				if ((*tmp)->fixed != NULL && attr->fixed == NULL) {
 					attr->fixed = strdup((*tmp)->fixed);
 				}
-				if ((*tmp)->form != NULL && attr->form == NULL) {
-					attr->form = strdup((*tmp)->form);
+				if (attr->form == XSD_FORM_DEFAULT) {
+					attr->form = (*tmp)->form;
 				}
-				if ((*tmp)->use != NULL && attr->use == NULL) {
-					attr->use = strdup((*tmp)->use);
+				if (attr->use == XSD_USE_DEFAULT) {
+					attr->use  = (*tmp)->use;
 				}
 				if ((*tmp)->extraAttributes != NULL) {
 				  xmlNodePtr node;
@@ -1929,9 +2021,7 @@ static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTa
 							memcpy(newAttr, *tmp_attr, sizeof(sdlAttribute));
 							if (newAttr->def) {newAttr->def = strdup(newAttr->def);}
 							if (newAttr->fixed) {newAttr->fixed = strdup(newAttr->fixed);}
-							if (newAttr->form) {newAttr->form = strdup(newAttr->form);}
 							if (newAttr->name) {newAttr->name = strdup(newAttr->name);}
-							if (newAttr->use) {newAttr->use = strdup(newAttr->use);}
 							if (newAttr->extraAttributes) {
 							  xmlNodePtr node;
 								HashTable *ht = malloc(sizeof(HashTable));
@@ -2120,3 +2210,89 @@ static void delete_model(void *handle)
 	}
 	free(tmp);
 }
+
+static void delete_type(void *data)
+{
+	sdlTypePtr type = *((sdlTypePtr*)data);
+	if (type->name) {
+		free(type->name);
+	}
+	if (type->namens) {
+		free(type->namens);
+	}
+	if (type->def) {
+		free(type->def);
+	}
+	if (type->fixed) {
+		free(type->fixed);
+	}
+	if (type->elements) {
+		zend_hash_destroy(type->elements);
+		free(type->elements);
+	}
+	if (type->attributes) {
+		zend_hash_destroy(type->attributes);
+		free(type->attributes);
+	}
+	if (type->restrictions) {
+		delete_restriction_var_int(&type->restrictions->minExclusive);
+		delete_restriction_var_int(&type->restrictions->minInclusive);
+		delete_restriction_var_int(&type->restrictions->maxExclusive);
+		delete_restriction_var_int(&type->restrictions->maxInclusive);
+		delete_restriction_var_int(&type->restrictions->totalDigits);
+		delete_restriction_var_int(&type->restrictions->fractionDigits);
+		delete_restriction_var_int(&type->restrictions->length);
+		delete_restriction_var_int(&type->restrictions->minLength);
+		delete_restriction_var_int(&type->restrictions->maxLength);
+		delete_schema_restriction_var_char(&type->restrictions->whiteSpace);
+		delete_schema_restriction_var_char(&type->restrictions->pattern);
+		if (type->restrictions->enumeration) {
+			zend_hash_destroy(type->restrictions->enumeration);
+			free(type->restrictions->enumeration);
+		}
+		free(type->restrictions);
+	}
+	free(type);
+}
+
+static void delete_attribute(void *attribute)
+{
+	sdlAttributePtr attr = *((sdlAttributePtr*)attribute);
+
+	if (attr->def) {
+		free(attr->def);
+	}
+	if (attr->fixed) {
+		free(attr->fixed);
+	}
+	if (attr->name) {
+		free(attr->name);
+	}
+	if (attr->ref) {
+		free(attr->ref);
+	}
+	if (attr->extraAttributes) {
+		zend_hash_destroy(attr->extraAttributes);
+		free(attr->extraAttributes);
+	}
+}
+
+static void delete_restriction_var_int(void *rvi)
+{
+	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
+	if (ptr) {
+		free(ptr);
+	}
+}
+
+static void delete_schema_restriction_var_char(void *srvc)
+{
+	sdlRestrictionCharPtr ptr = *((sdlRestrictionCharPtr*)srvc);
+	if (ptr) {
+		if (ptr->value) {
+			free(ptr->value);
+		}
+		free(ptr);
+	}
+}
+

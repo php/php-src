@@ -15,8 +15,8 @@
 #define SOAP_LITERAL 2
 
 struct _sdl {
-	HashTable docs;              /* pointer to the parsed xml file */
-	HashTable functions;         /* array of sdlFunction */
+	HashTable  docs;             /* pointer to the parsed xml file */
+	HashTable  functions;        /* array of sdlFunction */
 	HashTable *types;            /* array of sdlTypesPtr */
 	HashTable *elements;         /* array of sdlTypesPtr */
 	HashTable *encoders;         /* array of encodePtr */
@@ -25,33 +25,33 @@ struct _sdl {
 	HashTable *attributes;       /* array of sdlAttributePtr */
 	HashTable *attributeGroups;  /* array of sdlTypesPtr */
 	HashTable *groups;           /* array of sdlTypesPtr */
-	char *target_ns;
-	char *source;
+	char      *target_ns;
+	char      *source;
 };
 
 struct _sdlBinding {
 	char *name;
 	char *location;
-	int bindingType;
+	int   bindingType;
 	void *bindingAttributes; /* sdlSoapBindingPtr */
 };
 
 /* Soap Binding Specfic stuff */
 struct _sdlSoapBinding {
 	char *transport;
-	int style;
+	int   style;
 };
 
 struct _sdlSoapBindingFunctionBody {
 	char *ns;
-	int use;
+	int   use;
 	char *parts;         /* not implemented yet */
 	char *encodingStyle; /* not implemented yet */
 };
 
 struct _sdlSoapBindingFunction {
 	char *soapAction;
-	int style;
+	int   style;
 
 	sdlSoapBindingFunctionBody input;
 	sdlSoapBindingFunctionBody output;
@@ -59,15 +59,13 @@ struct _sdlSoapBindingFunction {
 };
 
 struct _sdlRestrictionInt {
-	int value;
-	char fixed;
-	char *id;
+	int   value;
+	char  fixed;
 };
 
 struct _sdlRestrictionChar {
 	char *value;
-	char fixed;
-	char *id;
+	char  fixed;
 };
 
 struct _sdlRestrictions {
@@ -119,44 +117,59 @@ typedef enum _sdlTypeKind {
 } sdlTypeKind;
 
 struct _sdlType {
-	sdlTypeKind kind;
-	char *name;
-	char *namens;
-	int nillable;
-	HashTable *elements;             /* array of sdlTypePtr */
-	HashTable *attributes;           /* array of sdlAttributePtr */
-	sdlRestrictionsPtr restrictions;
-	encodePtr encode;
-	char *ref;
-	sdlContentModelPtr model;
+	sdlTypeKind         kind;
+	char               *name;
+	char               *namens;
+	int                 nillable;
+	HashTable          *elements;             /* array of sdlTypePtr */
+	HashTable          *attributes;           /* array of sdlAttributePtr */
+	sdlRestrictionsPtr  restrictions;
+	encodePtr           encode;
+	sdlContentModelPtr  model;
+	char               *def;
+	char               *fixed;
+	char               *ref;
 };
 
 struct _sdlParam {
-	int order;
-	encodePtr encode;
-	char *paramName;
+	int        order;
+	encodePtr  encode;
+	char      *paramName;
 };
 
 struct _sdlFunction {
-	char *functionName;
-	char *requestName;
-	char *responseName;
-	HashTable *requestParameters;  /* array of sdlParamPtr */
-	HashTable *responseParameters; /* array of sdlParamPtr (this should only be one) */
-	struct _sdlBinding* binding;
-	void* bindingAttributes;       /* sdlSoapBindingFunctionPtr */
+	char               *functionName;
+	char               *requestName;
+	char               *responseName;
+	HashTable          *requestParameters;  /* array of sdlParamPtr */
+	HashTable          *responseParameters; /* array of sdlParamPtr (this should only be one) */
+	struct _sdlBinding *binding;
+	void               *bindingAttributes;  /* sdlSoapBindingFunctionPtr */
 };
 
+typedef enum _sdlUse {
+	XSD_USE_DEFAULT,
+	XSD_USE_OPTIONAL,
+	XSD_USE_PROHIBITED,
+	XSD_USE_REQUIRED
+} sdlUse;
+
+typedef enum _sdlForm {
+	XSD_FORM_DEFAULT,
+	XSD_FORM_QUALIFIED,
+	XSD_FORM_UNQUALIFIED
+} sdlForm;
+
+
 struct _sdlAttribute {
-	char *def;
-	char *fixed;
-	char *form;
-	char *id;
-	char *name;
-	char *ref;
-	char *use;
+	char      *name;
+	char      *ref;
+	char      *def;
+	char      *fixed;
+	sdlForm    form;
+	sdlUse     use;
 	HashTable *extraAttributes;			/* array of xmlNodePtr */
-	encodePtr encode;
+	encodePtr  encode;
 };
 
 sdlPtr get_sdl(char *uri);
@@ -164,20 +177,10 @@ sdlPtr get_sdl(char *uri);
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);
 encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat);
-encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type);
-encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type);
 
 sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type);
 sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 
-xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style);
-zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
-
 void delete_sdl(void *handle);
-void delete_type(void *type);
-void delete_attribute(void *attribute);
-void delete_mapping(void *data);
-void delete_restriction_var_int(void *rvi);
-void delete_schema_restriction_var_char(void *srvc);
 
 #endif
