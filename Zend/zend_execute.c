@@ -1946,11 +1946,15 @@ int zend_fetch_dim_unset_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	*/
 	zend_fetch_dimension_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-	PZVAL_UNLOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr);
-	if (EX_T(EX(opline)->result.u.var).var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
-		SEPARATE_ZVAL_IF_NOT_REF(EX_T(EX(opline)->result.u.var).var.ptr_ptr);
+	if (EX_T(EX(opline)->result.u.var).EA.type == IS_STRING_OFFSET) {
+		zend_error(E_WARNING, "Cannot unset string offsets");
+	} else {
+		PZVAL_UNLOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr);
+		if (EX_T(EX(opline)->result.u.var).var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
+			SEPARATE_ZVAL_IF_NOT_REF(EX_T(EX(opline)->result.u.var).var.ptr_ptr);
+		}
+		PZVAL_LOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr);
 	}
-	PZVAL_LOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr);
 	NEXT_OPCODE();
 }
 
