@@ -431,36 +431,42 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			}
 			break;
 		case PHP_CURL_USER: {
-			zval *argv[3];
-			zval *retval;
+			zval **argv[3];
+			zval  *handle = NULL;
+			zval  *zfd = NULL;
+			zval  *zlength = NULL;
+			zval  *retval_ptr;
 			int   length;
 			int   error;
 			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
-			MAKE_STD_ZVAL(argv[0]);
-			MAKE_STD_ZVAL(argv[1]);
-			MAKE_STD_ZVAL(argv[2]);
-			MAKE_STD_ZVAL(retval);
+			MAKE_STD_ZVAL(handle);
+			MAKE_STD_ZVAL(zfd);
+			MAKE_STD_ZVAL(zlength);
 
-			ZVAL_RESOURCE(argv[0], ch->id);
+			ZVAL_RESOURCE(handle, ch->id);
 			zend_list_addref(ch->id);
-			ZVAL_RESOURCE(argv[1], t->fd);
+			ZVAL_RESOURCE(zfd, t->fd);
 			zend_list_addref(t->fd);
-			ZVAL_LONG(argv[2], (int) size * nmemb);
+			ZVAL_LONG(zlength, (int) size * nmemb);
 
-			error = call_user_function(EG(function_table), NULL, t->func_name, retval, 3, argv TSRMLS_CC);
+			argv[0] = &handle;
+			argv[1] = &zfd;
+			argv[2] = &zlength;
+
+			error = fast_call_user_function(EG(function_table), NULL, t->func_name, &retval_ptr, 3, argv, 0, NULL, &t->func_ptr TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_READFUNCTION"); 
 				length = -1;
 			} else {
-				memcpy(data, Z_STRVAL_P(retval), size * nmemb);
-				length = Z_STRLEN_P(retval);
+				memcpy(data, Z_STRVAL_P(retval_ptr), size * nmemb);
+				length = Z_STRLEN_P(retval_ptr);
 			}
 
-			zval_ptr_dtor(&argv[0]);
-			zval_ptr_dtor(&argv[1]);
-			zval_ptr_dtor(&argv[2]);
-			zval_ptr_dtor(&retval);
+			zval_ptr_dtor(argv[0]);
+			zval_ptr_dtor(argv[1]);
+			zval_ptr_dtor(argv[2]);
+			zval_ptr_dtor(&retval_ptr);
 			break;
 		}
 	}
@@ -491,28 +497,32 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 		case PHP_CURL_FILE:
 			return fwrite(data, size, nmemb, t->fp);
 		case PHP_CURL_USER: {
-			zval *argv[2];
-			zval *retval;
+			zval **argv[2];
+			zval  *handle = NULL;
+			zval  *zdata = NULL;
+			zval  *retval_ptr;
 			int   error;
 
-			MAKE_STD_ZVAL(argv[0]);
-			MAKE_STD_ZVAL(argv[1]);
-			MAKE_STD_ZVAL(retval);
+			MAKE_STD_ZVAL(handle);
+			MAKE_STD_ZVAL(zdata);
 
-			ZVAL_RESOURCE(argv[0], ch->id);
+			ZVAL_RESOURCE(handle, ch->id);
 			zend_list_addref(ch->id);
-			ZVAL_STRINGL(argv[1], data, length, 1);
+			ZVAL_STRINGL(zdata, data, length, 1);
 
-			error = call_user_function(EG(function_table), NULL, t->func_name, retval, 2, argv TSRMLS_CC);
+			argv[0] = &handle;
+			argv[1] = &zdata;
+			
+			error = fast_call_user_function(EG(function_table), NULL, t->func_name, &retval_ptr, 2, argv, 0, NULL, &t->func_ptr TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
 			} else {
-				length = Z_LVAL_P(retval);
+				length = Z_LVAL_P(retval_ptr);
 			}
-			zval_ptr_dtor(&argv[0]);
-			zval_ptr_dtor(&argv[1]);
-			zval_ptr_dtor(&retval);
+			zval_ptr_dtor(argv[0]);
+			zval_ptr_dtor(argv[1]);
+			zval_ptr_dtor(&retval_ptr);
 			break;
 		}
 		case PHP_CURL_IGNORE:
