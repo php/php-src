@@ -1,3 +1,35 @@
+2004-10-04  Andi Gutmans  <andi@zend.com>
+
+    * zend_API.h
+      zend_execute_API.c:
+      - Rename delete_global_variable() to zend_delete_global_variable()
+
+    * Zend.m4
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_opcode.c
+      zend_vm.h
+      zend_vm_handlers.h
+      zend_vm_spec.h:
+      - Commit the variable fetch optimization.
+      - Extensions which delete global variables need to use new special
+      function
+      - delete_global_variable() (I'm about to rename it) to remove them.
+      - Will post to internals@ or via commit messages if there's anything else.
+
+2004-10-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      - Bugfix #27798
+
+    * tests/bug27798.phpt:
+      
+      - Add new test
+
 2004-10-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
