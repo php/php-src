@@ -18,10 +18,11 @@
  */
 
 #include "php.h"
+#include "php_ini.h"
+#include "php_config.h"
 
 #if HAVE_ICONV
 
-#include "php_ini.h"
 #include "php_iconv.h"
 #include "ext/standard/info.h"
 
@@ -76,10 +77,17 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("iconv.internal_encoding",		ICONV_INTERNAL_ENCODING,		PHP_INI_ALL,		OnUpdateString,  internal_encoding,		zend_iconv_globals,  iconv_globals)
 PHP_INI_END()
 
+static void
+php_iconv_init_globals(zend_iconv_globals *iconv_globals)
+{
+	iconv_globals->input_encoding = NULL;
+	iconv_globals->output_encoding = NULL;
+	iconv_globals->internal_encoding = NULL;
+}
 
 PHP_MINIT_FUNCTION(iconv)
 {
-	ZEND_INIT_MODULE_GLOBALS(iconv, NULL, NULL);
+	ZEND_INIT_MODULE_GLOBALS(iconv, php_iconv_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
