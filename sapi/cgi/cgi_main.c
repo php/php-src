@@ -304,7 +304,7 @@ static void init_request_info(TSRMLS_D)
 	   php_destroy_request_info()! */
 #if DISCARD_PATH
 	if (script_filename) {
-		SG(request_info).path_translated = strdup(script_filename);
+		SG(request_info).path_translated = estrdup(script_filename);
 	} else {
 		SG(request_info).path_translated = NULL;
 	}
@@ -538,7 +538,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 						break;
 
   				case 'f': /* parse file */
-						script_file = strdup(ap_php_optarg);
+						script_file = estrdup(ap_php_optarg);
 						no_headers = 1;
 						break;
 
@@ -687,7 +687,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 		if (!cgi) {
 			if (!SG(request_info).path_translated && argc > ap_php_optind) {
-				SG(request_info).path_translated = strdup(argv[ap_php_optind]);
+				SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
 			}
 		} else {
 		/* If for some reason the CGI interface is not setting the
@@ -703,7 +703,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			env_path_translated = getenv("PATH_TRANSLATED");
 #endif
 			if(env_path_translated) {
-				SG(request_info).path_translated = strdup(env_path_translated);
+				SG(request_info).path_translated = estrdup(env_path_translated);
 			}
 		}
 		if (cgi || SG(request_info).path_translated) {
@@ -768,11 +768,13 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif
 		}
 
+		if (SG(request_info).path_translated) {
+			persist_alloc(SG(request_info).path_translated);
+		}
+
 		php_request_shutdown((void *) 0);
 
-		if (SG(request_info).path_translated) {
-			free(SG(request_info).path_translated);
-		}
+		STR_FREE(SG(request_info).path_translated);
 
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);
