@@ -360,7 +360,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type CLS
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
 		compiler_result = zendparse(CLS_C);
-		do_return(&retval_znode, 0 CLS_CC);
+		zend_do_return(&retval_znode, 0 CLS_CC);
 		restore_lexical_state(&original_lex_state CLS_CC);
 		CG(in_compilation) = original_in_compilation;
 		if (compiler_result==1) { /* parser error */
@@ -489,7 +489,7 @@ zend_op_array *compile_string(zval *source_string, char *filename CLS_DC)
 			CG(unclean_shutdown)=1;
 			retval = NULL;
 		} else {
-			do_return(NULL, 0 CLS_CC);
+			zend_do_return(NULL, 0 CLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array);
 			retval = op_array;
