@@ -466,7 +466,7 @@ class testHarness {
 			'safe_mode'=>'0',
 			'disable_functions'=>'',
 			'output_buffering'=>'Off',
-			'error_reporting'=>'2047',
+			'error_reporting'=>'4095',
 			'display_errors'=>'1',
 			'log_errors'=>'0',
 			'html_errors'=>'0',
