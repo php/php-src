@@ -49,6 +49,7 @@
 #include "ext/standard/php_output.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
+#include "ext/calendar/php_calendar.h"
 #include "ext/com/php_COM.h"
 #include "ext/ftp/php_ftp.h"
 #include "ext/standard/reg.h"
@@ -67,6 +68,7 @@ zend_module_entry *php_builtin_extensions[] = {
 	phpext_bcmath_ptr,
 #endif
 	phpext_standard_ptr,
+	phpext_calendar_ptr,
 	COM_module_ptr,
 	phpext_ftp_ptr,
 	phpext_pcre_ptr,

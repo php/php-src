@@ -15,18 +15,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "calendar"=..\ext\calendar\calendar.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "cpdf"=..\ext\cpdf\cpdf.dsp - Package Owner=<4>
 
 Package=<5>

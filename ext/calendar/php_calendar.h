@@ -1,12 +1,8 @@
 #ifndef PHP_CALENDAR_H
 #define PHP_CALENDAR_H
 
-
-
 extern zend_module_entry calendar_module_entry;
-#define  calendar_module_ptr & calendar_module_entry
-
-
+#define	calendar_module_ptr &calendar_module_entry
 
 /* Functions */
 
