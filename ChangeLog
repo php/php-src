@@ -1,3 +1,26 @@
+2001-01-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: This probably should have a NEWS entry
+
+    * main/fopen-wrappers.c
+      main/network.c
+      main/php_open_temporary_file.c
+      configure.in
+      ext/mysql/libmysql/libmysql.c
+      ext/standard/basic_functions.c
+      ext/standard/dns.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/fsock.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/mail.c
+      ext/standard/syslog.c:    BeOS patch from svanegmond@bang.dhs.org modified somewhat by Rasmus
+
+2001-01-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bz2/config.m4: Remove double 'yes' output.
+
 2001-01-20  Sterling Hughes  <Sterling.Hughes@pentap.net>
 
     * ext/sablot/sablot.c:
