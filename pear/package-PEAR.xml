@@ -47,19 +47,13 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.3b3</version>
-    <date>2003-10-20</date>
+    <version>1.3b4</version>
+    <date>2003-10-30</date>
     <state>beta</state>
     <notes>
-OS/Guess.php:
-* Bug #25174 Wrong handling of readlink() in OS/Guess.php
-
 PEAR Installer:
 
-* Bug #25413 Add local installed packages to list-all (Christian DickMann)
-* Bug #23221 Pear installer - extension re-install segfault
-* Better error detecting and reporting in "install/upgrade"
-* Various other bugfixes and cleanups
+* Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
 
     </notes>
     <provides type="class" name="OS_Guess" />
