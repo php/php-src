@@ -1,3 +1,222 @@
+2003-02-19  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/rpc/skeleton/php_skeleton.h
+      ext/rpc/skeleton/skeleton.c
+      ext/rpc/skeleton/skeleton.h:
+      Add folding markers and editor directive blocks.
+
+2003-02-19  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/mbstring/mb_gpc.c
+      ext/mbstring/mb_gpc.h:
+      Fix mbstring input_filter
+
+    * README.input_filter
+      ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c
+      main/SAPI.c
+      main/SAPI.h
+      main/php_content_types.c
+      main/php_variables.c
+      main/rfc1867.c:
+      Input Filter support.  See README.input_filter for details.
+
+2003-02-19  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_scandir.c
+      main/php_scandir.h:
+      MFB
+
+    * (PHP_4_3)
+      main/php_scandir.c
+      main/php_scandir.h:
+      dirent.h needs to be included always.
+
+2003-02-19  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * main/main.c:
+      prevent xdebug from crashing
+
+2003-02-19  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * scripts/ext_skel_ng/extension.xml
+      scripts/ext_skel_ng/extension_parser.php
+      scripts/ext_skel_ng/php_function.php:
+      code for the special functions MINIT, MSHUTDOWN, RINIT, RSHUTDOWN, MINFO
+      and for private internal C helper functions may now be embedded into
+      the XML specification
+
+2003-02-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      typo..
+
+    * NEWS:
+      News about the ZE stream thing
+
+2003-02-19  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * scripts/ext_skel_ng/extension.xml:
+      test specifications for MINIT and friends
+
+    * scripts/ext_skel_ng/extension.dtd:
+      <code> inside <function> was supported but missing from the DTD,
+      added "role" attribute to support "internal" functions like
+      MINIT and stuff, "private" C functions not to be published as
+      PHP functions and "public" implemenations of PHP functions
+
+2003-02-19  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_pgsql.c:
+      Fix for bug #22221: pgsql version for dbx_query suppressed a warning that
+      was trappable by using a user-defined error-handler. A different use of
+      pgsql_getrow removed the warning and thus the need for suppressing it.
+
+2003-02-19  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * (PHP_4_3)
+      win32/php5ts.dsw:
+      remove php5ts workspace from PHP_4_3 branch
+
+2003-02-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/README
+      sapi/thttpd/README
+      sapi/thttpd/README:
+      some improvements
+
+2003-02-19  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * scripts/ext_skel_ng/ext_skel_ng.php
+      scripts/ext_skel_ng/extension_parser.php
+      scripts/ext_skel_ng/php_function.php:
+      Microsoft Developer Studio project file (.dsp) generation added
+      
+      for now both config.m4 and .dsp files are generated for the simples
+      case only (one .c file, one .h file, no external dependencies)
+
+    * scripts/ext_skel_ng/README
+      scripts/ext_skel_ng/ext_skel_ng.php
+      scripts/ext_skel_ng/extension.dtd
+      scripts/ext_skel_ng/extension.xml
+      scripts/ext_skel_ng/extension_parser.php
+      scripts/ext_skel_ng/php_constant.php
+      scripts/ext_skel_ng/php_element.php
+      scripts/ext_skel_ng/php_function.php
+      scripts/ext_skel_ng/xml_stream_callback_parser.php
+      scripts/ext_skel_ng/xml_stream_parser.php:
+      next generation ext_skel script - initial checkin
+
+2003-02-19  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/ifx.ec:
+      - Revert latest commit
+
+2003-02-19  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_ini.c:
+      ws/style fixes
+
+2003-02-19  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/ifx.ec:
+      - Added Input Descriptor Binding to be used by blobs. This fixed a bug
+        where ESQL/C would cause a Segmentation fault if the first blob in a
+        result is NULL or '' as soon as it gets a result with blob != NULL
+      - Fixed leaks where blobs resources weren't always freed
+
+2003-02-19  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      main/php_ini.c
+      main/php_scandir.c
+      main/php_scandir.h:
+      MFH: prevent conflicts with other libraries (e.g. libc-client)
+
+    * ext/standard/dir.c:
+      scandir -> php_scandir, alphasort -> php_alphasort
+
+    * main/php_ini.c
+      main/php_scandir.c
+      main/php_scandir.h:
+      Fix the possible conflicts with other libs (like libc-client)
+
+    * main/SAPI.h
+      main/alloca.c
+      main/config.nw.h
+      main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/internal_functions.c.in
+      main/internal_functions_nw.c
+      main/internal_functions_registry.h
+      main/internal_functions_win32.c
+      main/logos.h
+      main/mergesort.c
+      main/network.c
+      main/php3_compat.h
+      main/php_compat.h
+      main/php_content_types.h
+      main/php_globals.h
+      main/php_ini.h
+      main/php_logos.c
+      main/php_logos.h
+      main/php_main.h
+      main/php_memory_streams.h
+      main/php_network.h
+      main/php_open_temporary_file.h
+      main/php_reentrancy.h
+      main/php_regex.h
+      main/php_syslog.h
+      main/php_variables.c
+      main/reentrancy.c
+      main/rfc1867.c
+      main/rfc1867.h
+      main/safe_mode.c
+      main/safe_mode.h
+      main/snprintf.c
+      main/snprintf.h
+      main/spprintf.c
+      main/spprintf.h
+      main/strlcat.c
+      main/strlcpy.c
+      main/win95nt.h
+      main/streams/cast.c
+      main/streams/filter.c
+      main/streams/memory.c
+      main/streams/php_stream_context.h
+      main/streams/php_stream_filter_api.h
+      main/streams/php_stream_plain_wrapper.h
+      main/streams/php_stream_userspace.h
+      main/streams/php_streams_int.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c
+      main/streams/userspace.c:
+      ws fixes + missing $Id$ tags, headers added
+
+2003-02-19  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/config.m4:
+      Updated IFX_VERSION entry to work with new Version output of ESQL/C
+
+2003-02-19  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      cleanup, documentation belongs elsewhere
+
+2003-02-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/standard/http_fopen_wrapper.c:
+      Fixed bug #22283 (possible crash when opening relative URLs).
+
+2003-02-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Added string.strip_tags filter.
+
 2003-02-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/filters.c:
