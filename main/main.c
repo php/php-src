@@ -84,6 +84,16 @@ php_core_globals core_globals;
 PHPAPI int core_globals_id;
 #endif
 
+#define ERROR_BUF_LEN	1024
+
+typedef struct {
+	char buf[ERROR_BUF_LEN];
+	char filename[ERROR_BUF_LEN];
+	uint lineno;
+} last_error_type;
+
+static last_error_type last_error;
+
 static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC);
 
 
@@ -225,6 +235,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"0",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("implicit_flush",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	implicit_flush,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("ignore_repeated_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_errors,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("ignore_repeated_source",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_source,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_gpc",		"1",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_gpc,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_runtime",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_runtime,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_sybase",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_sybase,	php_core_globals,	core_globals)
@@ -408,8 +420,8 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
  extended error handling function */
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
-	char buffer[1024];
-	int buffer_len;
+	char buffer[ERROR_BUF_LEN];
+	int buffer_len, display;
 	TSRMLS_FETCH();
 
 	buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
@@ -417,9 +429,24 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	if(buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
 		buffer_len = sizeof(buffer) - 1;
 	}
+	if (PG(ignore_repeated_errors)) {
+		if (strncmp(last_error.buf, buffer, sizeof(last_error.buf))
+			|| (!PG(ignore_repeated_source)
+				&& ((last_error.lineno != error_lineno)
+					|| strncmp(last_error.filename, error_filename, sizeof(last_error.filename))))) {
+			display = 1;
+		} else {
+			display = 0;
+		}
+	} else {
+		display = 1;
+	}
+	strlcpy(last_error.buf, buffer, sizeof(last_error.buf));
+	strlcpy(last_error.filename, error_filename, sizeof(last_error.filename));
+	last_error.lineno = error_lineno;
 
 	/* display/log the error if necessary */
-	if ((EG(error_reporting) & type || (type & E_CORE))
+	if (display && (EG(error_reporting) & type || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
 		char *error_type_str;
 
@@ -449,14 +476,14 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		}
 
 		if (!module_initialized || PG(log_errors)) {
-			char log_buffer[1024];
+			char log_buffer[ERROR_BUF_LEN];
 
 #ifdef PHP_WIN32
 			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
 				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
 			}
 #endif
-			snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+			snprintf(log_buffer, ERROR_BUF_LEN, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 			php_log_err(log_buffer TSRMLS_CC);
 		}
 		if (module_initialized && PG(display_errors)
@@ -469,8 +496,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				"<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n"
 				: "\n%s: %s in %s on line %d\n";
 			if (PG(xmlrpc_errors)) {
-				error_format = do_alloca(1024);
-				snprintf(error_format, 1023, "<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%ld</int></value></member><member><name>faultString</name><value><string>%%s:%%s in %%s on line %%d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number));
+				error_format = do_alloca(ERROR_BUF_LEN);
+				snprintf(error_format, ERROR_BUF_LEN-1, "<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%ld</int></value></member><member><name>faultString</name><value><string>%%s:%%s in %%s on line %%d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number));
 			}
 
 			if (prepend_string) {
@@ -526,6 +553,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	}
 
 	/* Log if necessary */
+	if (!display) return;
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		pval *tmp;
 
