@@ -1536,6 +1536,10 @@ PHP_FUNCTION(mb_output_handler)
  			mbfl_buffer_converter_delete(MBSTRG(outconv) TSRMLS_CC);
  			MBSTRG(outconv) = NULL;
   		}
+		if (encoding == mbfl_no_encoding_pass) {
+			RETVAL_STRING(arg_string, 1);
+			return;
+		}
  		/* if content-type is not yet set, set it and activate the converter */
  		if (SG(sapi_headers).send_default_content_type ) {
 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
