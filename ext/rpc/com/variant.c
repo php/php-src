@@ -260,7 +260,7 @@ static zval* variant_read(zval *object, zval *member, int type TSRMLS_DC)
 		ZVAL_LONG(result, V_VT(var->var));
 	} else {
 		ZVAL_FALSE(result);
-		php_error(E_WARNING, "Unknown member.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown member.");
 	}
 
 	return result;
@@ -280,7 +280,7 @@ static void variant_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	} else if (zend_hash_find(&types, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, (void **) &type) == SUCCESS) {
 		php_zval_to_variant_ex(value, var->var, *type, var->codepage);
 	} else {
-		php_error(E_WARNING, "Unknown member.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown member.");
 	}
 }
 

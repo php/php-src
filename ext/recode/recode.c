@@ -143,19 +143,19 @@ PHP_FUNCTION(recode_string)
 	request = recode_new_request(ReSG(outer));
 
 	if (request == NULL) {
-		php_error(E_WARNING, "Cannot allocate request structure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate request structure");
 		RETURN_FALSE;
 	}
 	
 	success = recode_scan_request(request, Z_STRVAL_PP(req));
 	if (!success) {
-		php_error(E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
 		goto error_exit;
 	}
 	
 	recode_buffer_to_buffer(request, Z_STRVAL_PP(str), Z_STRLEN_PP(str), &r, &r_len, &r_alen);
 	if (!r) {
-		php_error(E_WARNING, "Recoding failed.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
 		goto error_exit;
 	}
 	
@@ -204,19 +204,19 @@ PHP_FUNCTION(recode_file)
 
 	request = recode_new_request(ReSG(outer));
 	if (request == NULL) {
-		php_error(E_WARNING, "Cannot allocate request structure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate request structure");
 		RETURN_FALSE;
 	}
 
 	success = recode_scan_request(request, Z_STRVAL_PP(req));
 	if (!success) {
-		php_error(E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
 		goto error_exit;
 	}
 	
 	success = recode_file_to_file(request, in_fp, out_fp);
 	if (!success) {
-		php_error(E_WARNING, "Recoding failed.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
 		goto error_exit;
 	}
 

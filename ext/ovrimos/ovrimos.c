@@ -304,15 +304,12 @@ PHP_FUNCTION(ovrimos_execute)
 		int arr_elem;
 
 		if (Z_TYPE_P(arg2) != IS_ARRAY) {
-			php_error(E_WARNING,
-				  "Not an array in call to ovrimos_execute()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not an array in call to ovrimos_execute()");
 			RETURN_FALSE;
 		}
 		arr_elem = zend_hash_num_elements(Z_ARRVAL_P(arg2));
 		if (arr_elem < colnb) {
-			php_error(E_WARNING,
-				  "Not enough parameters in call to ovrimos_execute(): %d instead of %d",
-				  arr_elem, colnb);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not enough parameters in call to ovrimos_execute(): %d instead of %d", arr_elem, colnb);
 			RETURN_FALSE;
 		}
 
@@ -329,16 +326,12 @@ PHP_FUNCTION(ovrimos_execute)
 
 			if (zend_hash_get_current_data
 			    (Z_ARRVAL_P(arg2), (void **) &tmp) == FAILURE) {
-				php_error(E_WARNING,
-					  "Error getting parameter %d in call to ovrimos_execute()",
-					  icol);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error getting parameter %d in call to ovrimos_execute()", icol);
 				RETURN_FALSE;
 			}
 			convert_to_string(*tmp);
 			if (Z_TYPE_PP(tmp) != IS_STRING) {
-				php_error(E_WARNING,
-					  "Error converting parameter %d to string in call to ovrimos_execute()",
-					  icol);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error converting parameter %d to string in call to ovrimos_execute()", icol);
 				RETURN_FALSE;
 			}
 
@@ -376,17 +369,13 @@ PHP_FUNCTION(ovrimos_execute)
 				break;
 			}
 			if (!ret) {
-				php_error(E_WARNING,
-					  "Error converting parameter %d: %s in call to ovrimos_execute()",
-					  icol, msg);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error converting parameter %d: %s in call to ovrimos_execute()", icol, msg);
 				RETURN_FALSE;
 			}
 
 			len = sql_type_size(to_type) - 1;
 			if (!sqlPutParam(stmt, icol, buffer + 1, len)) {
-				php_error(E_WARNING,
-					  "Could send parameter %d (%d bytes) in call to ovrimos_execute()",
-					  icol, len);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,  "Could send parameter %d (%d bytes) in call to ovrimos_execute()", icol, len);
 				RETURN_FALSE;
 			}
 		}
@@ -655,8 +644,7 @@ PHP_FUNCTION(ovrimos_fetch_into)
 
 	if (arg_how != 0) {
 		if (Z_TYPE_P(arg_how) != IS_STRING) {
-			php_error(E_WARNING,
-				  "Third argument not string in ovrimos_fetch_into()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third argument not string in ovrimos_fetch_into()");
 			RETURN_FALSE;
 		}
 		s_how = Z_STRVAL_P(arg_how);
@@ -671,13 +659,11 @@ PHP_FUNCTION(ovrimos_fetch_into)
 		} else if (stricmp(s_how, "absolute") == 0) {
 			how = h_absolute;
 		} else {
-			php_error(E_WARNING,
-				  "Third argument not valid in ovrimos_fetch_into()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third argument not valid in ovrimos_fetch_into()");
 			RETURN_FALSE;
 		}
 		if (arg_row == 0 && how == h_absolute) {
-			php_error(E_WARNING,
-				  "Fourth argument is required for ABSOLUTE in ovrimos_fetch_into()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Fourth argument is required for ABSOLUTE in ovrimos_fetch_into()");
 			RETURN_FALSE;
 		}
 		if (arg_row != 0) {
@@ -781,8 +767,7 @@ PHP_FUNCTION(ovrimos_fetch_row)
 
 	if (arg_how != 0) {
 		if (Z_TYPE_P(arg_how) != IS_STRING) {
-			php_error(E_WARNING,
-				  "Second argument not string in ovrimos_fetch_row()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument not string in ovrimos_fetch_row()");
 			RETURN_FALSE;
 		}
 		s_how = Z_STRVAL_P(arg_how);
@@ -797,13 +782,11 @@ PHP_FUNCTION(ovrimos_fetch_row)
 		} else if (stricmp(s_how, "absolute") == 0) {
 			how = h_absolute;
 		} else {
-			php_error(E_WARNING,
-				  "Second argument not valid in ovrimos_fetch_row()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument not valid in ovrimos_fetch_row()");
 			RETURN_FALSE;
 		}
 		if (arg_row == 0 && how == 4) {
-			php_error(E_WARNING,
-				  "Third argument is required for ABSOLUTE in ovrimos_fetch_row()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third argument is required for ABSOLUTE in ovrimos_fetch_row()");
 			RETURN_FALSE;
 		}
 		if (arg_row != 0) {
@@ -878,12 +861,11 @@ PHP_FUNCTION(ovrimos_result)
 	} else if (Z_TYPE_P(arg_field) == IS_LONG) {
 		icol = Z_LVAL_P(arg_field) - 1;
 	} else {
-		php_error(E_WARNING,
-			  "Second argument neither number nor string in ovrimos_result()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument neither number nor string in ovrimos_result()");
 		RETURN_FALSE;
 	}
 	if (icol < 0 || icol > colnb) {
-		php_error(E_WARNING, "Unknown column in ovrimos_result()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown column in ovrimos_result()");
 		RETURN_FALSE;
 	}
 	column_to_string(stmt, icol, buffer, &len, pstmt);
@@ -1042,17 +1024,14 @@ PHP_FUNCTION(ovrimos_field_name)
 
 
 	if (Z_LVAL_P(arg2) < 1) {
-		php_error(E_WARNING,
-			  "Field numbering starts at 1! in call to ovrimos_field_name()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field numbering starts at 1! in call to ovrimos_field_name()");
 		RETURN_FALSE;
 	}
 
 	field = Z_LVAL_P(arg2) - 1;
 
 	if (field >= sqlGetOutputColNb(stmt)) {
-		php_error(E_WARNING,
-			  "No field at this index (%d) in call to ovrimos_field_name()",
-			  field);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No field at this index (%d) in call to ovrimos_field_name()", field);
 		RETURN_FALSE;
 	}
 
@@ -1081,17 +1060,14 @@ PHP_FUNCTION(ovrimos_field_type)
 	stmt = (SQLS) pstmt->statement;
 
 	if (Z_LVAL_P(arg2) < 1) {
-		php_error(E_WARNING,
-			  "Field numbering starts at 1! in call to ovrimos_field_type()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field numbering starts at 1! in call to ovrimos_field_type()");
 		RETURN_FALSE;
 	}
 
 	field = Z_LVAL_P(arg2) - 1;
 
 	if (field >= sqlGetOutputColNb(stmt)) {
-		php_error(E_WARNING,
-			  "No field at this index (%d) in call to ovrimos_field_type()",
-			  field);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No field at this index (%d) in call to ovrimos_field_type()", field);
 		RETURN_FALSE;
 	}
 
@@ -1123,17 +1099,14 @@ PHP_FUNCTION(ovrimos_field_len)
 	stmt = (SQLS) pstmt->statement;
 
 	if (Z_LVAL_P(arg2) < 1) {
-		php_error(E_WARNING,
-			  "Field numbering starts at 1! in call to ovrimos_field_len()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field numbering starts at 1! in call to ovrimos_field_len()");
 		RETURN_FALSE;
 	}
 
 	field = Z_LVAL_P(arg2) - 1;
 
 	if (field >= sqlGetOutputColNb(stmt)) {
-		php_error(E_WARNING,
-			  "No field at this index (%d) in call to ovrimos_field_len()",
-			  field);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No field at this index (%d) in call to ovrimos_field_len()", field);
 		RETURN_FALSE;
 	}
 

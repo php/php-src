@@ -534,7 +534,7 @@ static int php_w32api_load_function (char *definition, int definition_len, int f
 
 	if(zend_hash_exists(&WG(win32_ce)->function_table, (*fh)->function_name, strlen((*fh)->function_name) + 1))
 	{
-		php_error( E_WARNING, 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
 				   "A function by the name %s already has been registered, cannot redefine function", 
 				   (*fh)->function_name);
 
@@ -558,7 +558,7 @@ static int php_w32api_load_function (char *definition, int definition_len, int f
 					  NULL) != SUCCESS)
 	{
 
-		php_error( E_WARNING, 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
 				   "Loading of function %s failed: Could not insert function handle into hash", 
 				   (*fh)->function_name);
 
@@ -576,7 +576,7 @@ static int php_w32api_load_function (char *definition, int definition_len, int f
 	if(zend_hash_add(&WG(win32_ce)->function_table, (*fh)->function_name,
 					 strlen((*fh)->function_name) + 1, &function, sizeof(zend_function), NULL) == FAILURE)
 	{
-		php_error(E_ERROR, "Could not register funciton %s into function table", (*fh)->function_name);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not register funciton %s into function table", (*fh)->function_name);
 		zend_hash_del(WG(funcs), (*fh)->function_name, strlen((*fh)->function_name) +1);
 
 		return FAILURE;;
@@ -636,7 +636,7 @@ static int php_w32api_register_type(char *type_definition, int type_definition_l
 	if((zend_hash_exists(WG(callbacks), (*th)->type_name, strlen((*th)->type_name) +1)) || 
 	   (zend_hash_exists(WG(types), (*th)->type_name, strlen((*th)->type_name) + 1)))
 	{
-		php_error( E_WARNING, 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				   "A type or callback by the name %s already has been registered, cannot redefine type or callback", 
 				   (*th)->type_name);
 
@@ -658,7 +658,7 @@ static int php_w32api_register_type(char *type_definition, int type_definition_l
 					  NULL) != SUCCESS)
 	{
 
-		php_error( E_WARNING, 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
 				   "Loading of type %s failed: Could not insert type handle into hash", 
 				   (*th)->type_name);
 
@@ -711,7 +711,7 @@ static int php_w32api_register_callback(char *function_definition, int function_
 
 	if(zend_hash_exists(WG(callbacks), (*fh)->function_name, strlen((*fh)->function_name) + 1))
 	{
-		php_error( E_WARNING, 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
 				   "A callback by the name %s already has been registered, cannot redefine type", 
 				   (*fh)->function_name);
 
@@ -734,7 +734,7 @@ static int php_w32api_register_callback(char *function_definition, int function_
 					  NULL) != SUCCESS)
 	{
 
-		php_error( E_WARNING, 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				   "Loading of function %s failed: Could not insert function handle into hash", 
 				   (*fh)->function_name);
 
@@ -832,7 +832,7 @@ static int php_w32api_load_library (char *library_name, w32api_lib_handle **lh T
 		efree(*lh);
 		efree(lh);
 
-		php_error(E_WARNING, "Loading of library failed: %s", message_buffer);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Loading of library failed: %s", message_buffer);
 		LocalFree(message_buffer);
 
 		return FAILURE;
@@ -847,7 +847,7 @@ static int php_w32api_load_library (char *library_name, w32api_lib_handle **lh T
 					  NULL) != SUCCESS)
 	{
 
-		php_error( E_WARNING, 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
 				   "Loading of library %s failed: Could not insert library handle into hash", 
 				   (*lh)->library_name);
 
@@ -947,7 +947,7 @@ static int php_w32api_get_type_size(int type_id, char *type_name, int flags)
 				
 				if(zend_hash_find(WG(types), type_name, strlen(type_name) +1, (void **)&th) != SUCCESS)
 				{
-						php_error(E_ERROR, "Unknown type %s", type_name);
+						php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown type %s", type_name);
 						return -1;
 				}
 
@@ -957,7 +957,7 @@ static int php_w32api_get_type_size(int type_id, char *type_name, int flags)
 			break;		
 		case W32API_UNKNOWN:
 		default:
-			php_error(E_ERROR, "Unknown type %s", type_name);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown type %s", type_name);
 			return -1;
 	}
 }
@@ -1357,7 +1357,7 @@ void php_w32api_marshall_zval_to_c(argument *arg, w32api_dynamic_param *dp, zval
 		case W32API_COMPLEX:
 			if(Z_TYPE_P(pzval) != IS_OBJECT)
 			{
-				php_error(E_ERROR, "Variable passed as complex value is not an object");
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Variable passed as complex value is not an object");
 				break;
 			}
 
@@ -1379,7 +1379,7 @@ void php_w32api_marshall_zval_to_c(argument *arg, w32api_dynamic_param *dp, zval
 			break;
 
 		case W32API_UNKNOWN:
-			php_error(E_ERROR, "Unknown type when calling function, marshalling failed");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unknown type when calling function, marshalling failed");
 			break;
 	}
 
@@ -1490,7 +1490,7 @@ W32API_CLASS_FUNCTION(win32, registerfunction)
 
 	if(php_w32api_load_function(function_definition, function_definition_len, flags TSRMLS_CC) != SUCCESS)
 	{
-		php_error(E_ERROR, "Registering Function %s failed", function_definition);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Registering Function %s failed", function_definition);
 		RETURN_FALSE;
 	}
 
@@ -1570,7 +1570,7 @@ W32API_CLASS_FUNCTION(win32, definetype)
 
 	if(php_w32api_register_type(type_definition, type_definition_len TSRMLS_CC) != SUCCESS)
 	{
-		php_error(E_ERROR, "Registering Type %s failed", type_definition);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Registering Type %s failed", type_definition);
 		RETURN_FALSE;
 	}
 
@@ -1617,7 +1617,7 @@ W32API_CLASS_FUNCTION(win32, inittype)
 
 	if(zend_hash_find(WG(types), type_name, type_name_len +1, (void **)&th) == FAILURE)
 	{
-		php_error(E_ERROR, "Could not retrieve type handle for type %s from hash table", type_name);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not retrieve type handle for type %s from hash table", type_name);
 		RETURN_FALSE;
 	}
 
@@ -1658,7 +1658,7 @@ W32API_CLASS_FUNCTION(win32, invokefunction)
 
 	if(zend_hash_find(WG(funcs), function_name, strlen(function_name) +1, (void **)&fh) == FAILURE)
 	{
-		php_error(E_ERROR, "Could not retrieve function handle from hash table");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not retrieve function handle from hash table");
 		RETURN_FALSE;
 	}
 
@@ -1691,7 +1691,7 @@ W32API_CLASS_FUNCTION(win32, invokefunction)
 	if((*fh)->return_type_id == W32API_COMPLEX)
 	{
 		if(zend_hash_find(WG(types), (*fh)->return_type_name, strlen((*fh)->return_type_name) +1, (void **)&th) != SUCCESS)
-			php_error(E_ERROR, "Could not find type handle for type %s", (*fh)->return_type_name);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find type handle for type %s", (*fh)->return_type_name);
 
 		w32api_return_buffer = emalloc(th->size);
 		w32api_return_buffer_size = th->size;
@@ -1736,7 +1736,7 @@ W32API_CLASS_FUNCTION(win32, invokefunction)
 		case W32API_COMPLEX:
 			break;
 		default:
-			php_error(E_WARNING, "Unknown return type %s", (*fh)->return_type_name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown return type %s", (*fh)->return_type_name);
 	}
 
 }
@@ -2141,7 +2141,7 @@ w32api_func_handle *w32api_parser_load_function_ex(char *return_type, char *func
 			if(!return_value->handle)
 			{
 				/* TODO: php_error_docref and GetLastError etc */
-				php_error(E_WARNING, "Could not load function %s", function_name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load function %s", function_name);
 				efree(return_value);
 				return NULL;
 			}
@@ -2180,7 +2180,7 @@ arguments *w32api_parser_make_argument(char *arg_type, char *arg_name, int byref
 
 	if(argument_value->type_id == W32API_UNKNOWN)
 	{
-		php_error(E_NOTICE, "Unknown type %s used as arugment type", arg_type);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown type %s used as arugment type", arg_type);
 	}
 
 	return return_value;
@@ -2204,7 +2204,8 @@ arguments *w32api_parser_join_arguments(arguments *lval, arguments *rval)
  */
 int w32api_function_definition_error(char *s)
 {
-	php_error(E_ERROR, "Function Definition Parse Error: %s", s);
+	TSRMLS_FETCH();
+	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Function Definition Parse Error: %s", s);
 	return 0;
 }
 /* }}} */	
@@ -2278,7 +2279,8 @@ members *w32api_parser_type_join_values(members *lval, members *rval)
  */
 int w32api_type_definition_error(char *s)
 {
-	php_error(E_ERROR, "Type Definition Parse Error: %s", s);
+	TSRMLS_FETCH();
+	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Type Definition Parse Error: %s", s);
 	return 0;
 }
 /* }}} */	

@@ -128,24 +128,24 @@ PHP_FUNCTION(shm_attach)
 	}
 
 	if((shm_list_ptr = (sysvshm_shm *) emalloc(sizeof(sysvshm_shm)))==NULL) {
-		php_error(E_WARNING, "shm_attach() failed for key 0x%x: cannot allocate internal listelement", shm_key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: cannot allocate internal listelement", shm_key);
 		RETURN_FALSE;
 	}
 
 	/* get the id from a specified key or create new shared memory */
 	if((shm_id=shmget(shm_key,0,0))<0) {
 		if(shm_size<sizeof(sysvshm_chunk_head)) {
-			php_error(E_WARNING, "shm_attach() failed for key 0x%x: memorysize too small", shm_key);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: memorysize too small", shm_key);
 			RETURN_FALSE;
 		}
 		if((shm_id=shmget(shm_key,shm_size,shm_flag|IPC_CREAT|IPC_EXCL))<0) {
-			php_error(E_WARNING, "shmget() failed for key 0x%x: %s", shm_key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", shm_key, strerror(errno));
 			RETURN_FALSE;
 		}
 	}
 
 	if((shm_ptr = shmat(shm_id,NULL,0))==(void *)-1) {
-		php_error(E_WARNING, "shmget() failed for key 0x%x: %s", shm_key, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", shm_key, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -210,12 +210,12 @@ PHP_FUNCTION(shm_remove)
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 
 	if (!shm_list_ptr) {
-		php_error(E_WARNING, "The parameter is not a valid shm_indentifier");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The parameter is not a valid shm_indentifier");
 		RETURN_FALSE;
 	}
 
 	if(shmctl(shm_list_ptr->id,IPC_RMID,NULL)<0) {
-		php_error(E_WARNING, "shm_remove() failed for key 0x%x, id %i: %s", shm_list_ptr->key, id,strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x, id %i: %s", shm_list_ptr->key, id,strerror(errno));
 		RETURN_FALSE;
 	} 
 
@@ -246,7 +246,7 @@ PHP_FUNCTION(shm_put_var)
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {
-		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a SysV shared memory index", id);
 		RETURN_FALSE;
 	}
 
@@ -262,7 +262,7 @@ PHP_FUNCTION(shm_put_var)
 	smart_str_free(&shm_var);
 	
 	if(ret==-1) {
-		php_error(E_WARNING, "not enough shared memory left");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "not enough shared memory left");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -293,7 +293,7 @@ PHP_FUNCTION(shm_get_var)
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {
-		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a SysV shared memory index", id);
 		RETURN_FALSE;
 	}
 
@@ -302,7 +302,7 @@ PHP_FUNCTION(shm_get_var)
 	shm_varpos=php_check_shm_data((shm_list_ptr->ptr),key);
 
 	if(shm_varpos<0) {
-		php_error(E_WARNING, "variable key %d doesn't exist", key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %d doesn't exist", key);
 		RETURN_FALSE;
 	}
 	shm_var=(sysvshm_chunk*)((char*)shm_list_ptr->ptr+shm_varpos);
@@ -311,7 +311,7 @@ PHP_FUNCTION(shm_get_var)
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if(php_var_unserialize(&return_value, (const char **) &shm_data, shm_data+shm_var->length,&var_hash TSRMLS_CC)!=1) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		php_error(E_WARNING, "variable data in shared memory is corruped");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable data in shared memory is corruped");
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
@@ -339,14 +339,14 @@ PHP_FUNCTION(shm_remove_var)
 
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php_sysvshm.le_shm) {
-		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a SysV shared memory index", id);
 		RETURN_FALSE;
 	}
 
 	shm_varpos=php_check_shm_data((shm_list_ptr->ptr),key);
 
 	if(shm_varpos<0) {
-		php_error(E_WARNING, "variable key %d doesn't exist", key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %d doesn't exist", key);
 		RETURN_FALSE;
 	}
 	php_remove_shm_data((shm_list_ptr->ptr),shm_varpos);	

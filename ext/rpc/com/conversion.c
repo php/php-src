@@ -124,7 +124,7 @@ PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, i
 		safeArray = SafeArrayCreate(VT_VARIANT, 1, bounds);
 		
 		if (NULL == safeArray) {
-			php_error( E_WARNING,"Unable to convert php array to VARIANT array - %s", numberOfElements ? "" : "(Empty input array)");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to convert php array to VARIANT array - %s", numberOfElements ? "" : "(Empty input array)");
 			ZVAL_FALSE(zval_arg);
 		} else {
 			V_ARRAY(var_arg) = safeArray;
@@ -143,14 +143,14 @@ PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, i
 								php_zval_to_variant(*entry, v, codepage);                    /* Do the required conversion */
 							}
 						} else {
-							php_error( E_WARNING,"phpArrayToSafeArray() - Unable to retrieve pointer to output element number (%d)", i);
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "phpArrayToSafeArray() - Unable to retrieve pointer to output element number (%d)", i);
 						}
 					}
 					zend_hash_move_forward(ht);
 				}
 				SafeArrayUnlock( safeArray);
 			} else {
-				php_error( E_WARNING,"phpArrayToSafeArray() - Unable to lock safeArray");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "phpArrayToSafeArray() - Unable to lock safeArray");
 			}
 		}
 	} else {
@@ -365,7 +365,7 @@ PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, i
 				break;
 
 			case VT_VARIANT:
-				php_error(E_WARNING,"VT_VARIANT is invalid. Use VT_VARIANT|VT_BYREF instead.");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "VT_VARIANT is invalid. Use VT_VARIANT|VT_BYREF instead.");
 				/* break missing intentionally */
 			case VT_VARIANT|VT_BYREF: {
 					variantval *var;
@@ -430,7 +430,7 @@ PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, i
 				break;
 
 			default:
-				php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
 		}
 
 		if (unicode_str != NULL) {
@@ -463,7 +463,7 @@ PHPAPI int php_variant_to_zval(VARIANT *var_arg, zval *zval_arg, int codepage)
 		/* TODO: Add support for multi-dimensional SafeArrays */
 		/* For now just validate that the SafeArray has one dimension */
 		if (1 != (Dims = SafeArrayGetDim(array))) {
-			php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported: multi-dimensional (%d) SafeArrays", Dims);
 			ZVAL_NULL(zval_arg);
 			return FAILURE;
 		}
@@ -584,7 +584,7 @@ PHPAPI int php_variant_to_zval(VARIANT *var_arg, zval *zval_arg, int codepage)
 					default:
 						ZVAL_NULL(zval_arg);
 						ret = FAILURE;
-						php_error(E_WARNING, "Error converting DECIMAL value to PHP string");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error converting DECIMAL value to PHP string");
 						break;
 				}
 			}
@@ -687,7 +687,7 @@ PHPAPI int php_variant_to_zval(VARIANT *var_arg, zval *zval_arg, int codepage)
 					char *error_message;
 
 					error_message = php_COM_error_message(hr);
-					php_error(E_WARNING,"Unable to obtain IDispatch interface:  %s", error_message);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to obtain IDispatch interface:  %s", error_message);
 					LocalFree(error_message);
 
 					V_DISPATCH(var_arg) = NULL;
@@ -752,7 +752,7 @@ PHPAPI int php_variant_to_zval(VARIANT *var_arg, zval *zval_arg, int codepage)
 			break;
 
 		default:
-			php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
 			ZVAL_NULL(zval_arg);
 			ret = FAILURE;
 			break;
@@ -790,13 +790,13 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage, int 
 	if (error) {
 		switch (GetLastError()) {
 			case ERROR_NO_UNICODE_TRANSLATION:
-				php_error(E_WARNING, "No unicode translation available for the specified string");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "No unicode translation available for the specified string");
 				break;
 			case ERROR_INSUFFICIENT_BUFFER:
-				php_error(E_WARNING, "Internal Error: Insufficient Buffer");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal Error: Insufficient Buffer");
 				break;
 			default:
-				php_error(E_WARNING, "Unknown error in php_char_to_OLECHAR()");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error in php_char_to_OLECHAR()");
 		}
 	}
 
@@ -821,7 +821,7 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int cod
 		C_str = (char *) pemalloc(sizeof(char), persist);
 		*C_str = 0;
 
-		php_error(E_WARNING,"Error in php_OLECHAR_to_char()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in php_OLECHAR_to_char()");
 	}
 
 	if (out_length) {

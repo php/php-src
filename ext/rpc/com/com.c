@@ -503,7 +503,7 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 		char *error_message;
 	
 		error_message = php_COM_error_message(hr);
-		php_error(E_WARNING,"Unable to lookup %s: %s", method_name.str, error_message);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unable to lookup %s: %s", method_name.str, error_message);
 		LocalFree(error_message);
 		efree(funcname);
 
@@ -544,10 +544,10 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 		efree(result);
 		error_message = php_COM_error_message(hr);
 		if (ErrString) {
-			php_error(E_WARNING,"Invoke() failed: %s %s", error_message, ErrString);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invoke() failed: %s %s", error_message, ErrString);
 			efree(ErrString);
 		} else {
-			php_error(E_WARNING,"Invoke() failed: %s", error_message);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invoke() failed: %s", error_message);
 		}
 		LocalFree(error_message);
 		return FAILURE;
@@ -625,7 +625,7 @@ static int com_set(rpc_string property_name, zval *value, void **data)
 
 	if (FAILED(hr = php_COM_get_ids_of_names((comval *) *data, propname, &dispid))) {
 		error_message = php_COM_error_message(hr);
-		php_error(E_WARNING,"Unable to lookup %s: %s", property_name.str, error_message);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unable to lookup %s: %s", property_name.str, error_message);
 		LocalFree(error_message);
 		efree(propname);
 
@@ -646,10 +646,10 @@ static int com_set(rpc_string property_name, zval *value, void **data)
 	if (FAILED(hr = php_COM_invoke((comval *) *data, dispid, DISPATCH_PROPERTYPUT, &dispparams, NULL, &ErrString))) {
 		error_message = php_COM_error_message(hr);
 		if (ErrString) {
-			php_error(E_WARNING,"PropPut() failed: %s %s", error_message, ErrString);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"PropPut() failed: %s %s", error_message, ErrString);
 			efree(ErrString);
 		} else {
-			php_error(E_WARNING,"PropPut() failed: %s", error_message);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"PropPut() failed: %s", error_message);
 		}
 		LocalFree(error_message);
 		VariantClear(var);
@@ -794,7 +794,7 @@ PHP_FUNCTION(com_next)
 				
 				efree(result);
 				error_message = php_COM_error_message(hr);
-				php_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 				efree(error_message);
 
 				RETURN_NULL();
@@ -862,7 +862,7 @@ PHP_FUNCTION(com_reset)
 
 		if (FAILED(hr = C_ENUMVARIANT_VT(obj)->Reset(C_ENUMVARIANT(obj)))) {
 			char *error_message = php_COM_error_message(hr);
-			php_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 			efree(error_message);
 
 			RETURN_FALSE;
@@ -899,7 +899,7 @@ PHP_FUNCTION(com_skip)
 
 		if (FAILED(hr = C_ENUMVARIANT_VT(obj)->Skip(C_ENUMVARIANT(obj), count))) {
 			char *error_message = php_COM_error_message(hr);
-			php_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 			efree(error_message);
 			RETURN_FALSE;
 		}

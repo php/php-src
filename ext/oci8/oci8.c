@@ -101,7 +101,7 @@ static zend_class_entry *oci_coll_class_entry_ptr;
 #define CALL_OCI(call) \
 { \
 	if (OCI(in_call)) { \
-		php_error(E_WARNING, "OCI8 Recursive call!\n"); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI8 Recursive call!\n"); \
 		exit(-1); \
 	} else { \
 		OCI(in_call)=1; \
@@ -114,7 +114,7 @@ static zend_class_entry *oci_coll_class_entry_ptr;
 { \
 	if (OCI(in_call)) { \
 		retcode=-1; \
-		php_error(E_WARNING, "OCI8 Recursive call!\n"); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI8 Recursive call!\n"); \
 		exit(-1); \
 	} else { \
 		OCI(in_call)=1; \
@@ -968,21 +968,21 @@ oci_error(OCIError *err_p, char *what, sword status)
 {
 	text errbuf[512];
 	sb4 errcode = 0;
+	TSRMLS_FETCH();
 
 	switch (status) {
 	case OCI_SUCCESS:
 		break;
 	case OCI_SUCCESS_WITH_INFO:
-		php_error(E_WARNING, "%s: OCI_SUCCESS_WITH_INFO", what);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: OCI_SUCCESS_WITH_INFO", what);
 		break;
 	case OCI_NEED_DATA:
-		php_error(E_WARNING, "%s: OCI_NEED_DATA", what);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: OCI_NEED_DATA", what);
 		break;
 	case OCI_NO_DATA:
-		php_error(E_WARNING, "%s: OCI_NO_DATA", what);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: OCI_NO_DATA", what);
 		break;
 	case OCI_ERROR: {
-			TSRMLS_FETCH();
 			CALL_OCI(OCIErrorGet(
 					err_p, 
 					(ub4)1, 
@@ -992,17 +992,17 @@ oci_error(OCIError *err_p, char *what, sword status)
 					(ub4)sizeof(errbuf), 
 					(ub4)OCI_HTYPE_ERROR));
 		
-			php_error(E_WARNING, "%s: %s", what, errbuf);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: %s", what, errbuf);
 			break;
 		}
 	case OCI_INVALID_HANDLE:
-		php_error(E_WARNING, "%s: OCI_INVALID_HANDLE", what);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: OCI_INVALID_HANDLE", what);
 		break;
 	case OCI_STILL_EXECUTING:
-		php_error(E_WARNING, "%s: OCI_STILL_EXECUTING", what);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: OCI_STILL_EXECUTING", what);
 		break;
 	case OCI_CONTINUE:
-		php_error(E_WARNING, "%s: OCI_CONTINUE", what);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: OCI_CONTINUE", what);
 		break;
 	default:
 		break;
@@ -1135,7 +1135,7 @@ oci_get_col(oci_statement *statement, int col, zval **value)
 		}
 	} else if (col != -1) {
 		if (zend_hash_index_find(statement->columns, col, (void **)&outcol) == FAILURE) {
-			php_error(E_WARNING, "Invalid column %d", col);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column %d", col);
 			return NULL;
 		}
 		return outcol;
@@ -1164,7 +1164,7 @@ oci_new_desc(int type,oci_connection *connection)
 			break;
 
 		default:
-			php_error(E_WARNING, "Unknown descriptor type %d.",Z_TYPE_P(descr));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown descriptor type %d.",Z_TYPE_P(descr));
 			return 0;
 	}
 	
@@ -1201,11 +1201,11 @@ _oci_get_ocicoll(zval *id,oci_collection **collection TSRMLS_DC)
 	zval **coll;
 	
 	if (zend_hash_find(Z_OBJPROP_P(id), "collection", sizeof("collection"), (void **)&coll) == FAILURE) {
-		php_error(E_WARNING, "cannot find collection");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot find collection");
 		return 0;
 	}
 	if ((*collection = oci_get_coll(Z_LVAL_PP(coll) TSRMLS_CC)) == NULL) {
-		php_error(E_WARNING, "collection not found");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "collection not found");
 		return 0;
 	}
  
@@ -1225,12 +1225,12 @@ _oci_get_ocidesc(zval *id,oci_descriptor **descriptor TSRMLS_DC)
 	zval **desc;
 	
 	if (zend_hash_find(Z_OBJPROP_P(id), "descriptor", sizeof("descriptor"), (void **)&desc) == FAILURE) {
-		php_error(E_WARNING, "cannot find descriptor");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot find descriptor");
 		return 0;
 	}
 
 	if ((*descriptor = oci_get_desc(Z_LVAL_PP(desc) TSRMLS_CC)) == NULL) {
-		php_error(E_WARNING, "descriptor not found");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "descriptor not found");
 		return 0;
 	}
 	
@@ -1267,7 +1267,7 @@ _oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char
 
 			descr = oci_get_desc(column->descid TSRMLS_CC);
 			if (! descr) {
-				php_error(E_WARNING, "unable to find my descriptor %d",column->data);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to find my descriptor %d",column->data);
 				return -1;
 			}
 			
@@ -2050,9 +2050,10 @@ oci_bind_in_callback(dvoid *ictxp,     /* context pointer */
 {
 	oci_bind *phpbind;
 	zval *val;
+	TSRMLS_FETCH();
 
 	if (!(phpbind=(oci_bind *)ictxp) || !(val = phpbind->zval)) {
-		php_error(E_WARNING, "!phpbind || !phpbind->val");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "!phpbind || !phpbind->val");
 		return OCI_ERROR;
 	}
 
@@ -2103,9 +2104,10 @@ oci_bind_out_callback(dvoid *octxp,      /* context pointer */
 	oci_bind *phpbind;
 	zval *val;
 	sb4 retval = OCI_ERROR;
+	TSRMLS_FETCH();
 
 	if (!(phpbind=(oci_bind *)octxp) || !(val = phpbind->zval)) {
-		php_error(E_WARNING, "!phpbind || !phpbind->val");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "!phpbind || !phpbind->val");
 		return retval;
 	}
 
@@ -2870,15 +2872,15 @@ PHP_FUNCTION(ocibindbyname)
 #ifdef WITH_COLLECTIONS
 		case SQLT_NTY:
 			if(Z_TYPE_PP(var) != IS_OBJECT) {
-				php_error(E_WARNING,"Variable must be allocated using OCINewCollection()");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable must be allocated using OCINewCollection()");
 				RETURN_FALSE;
 			}
 			if ((inx = _oci_get_ocicoll(*var,&coll TSRMLS_CC)) == 0) {
-				php_error(E_WARNING,"Variable must be allocated using OCINewCollection()");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable must be allocated using OCINewCollection()");
 				RETURN_FALSE;
 			}
 			if (! (mycoll = (dvoid *) coll->coll)) {
-				php_error(E_WARNING,"Collection empty");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Collection empty");
 				RETURN_FALSE;
 			}
 			value_sz = sizeof(void*);
@@ -2891,17 +2893,17 @@ break;
 		case SQLT_BLOB:
 		case SQLT_RDD:
 			if (Z_TYPE_PP(var) != IS_OBJECT) {
-				php_error(E_WARNING,"Variable must be allocated using OCINewDescriptor()");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable must be allocated using OCINewDescriptor()");
 				RETURN_FALSE;
 			}
 
 			if ((inx = _oci_get_ocidesc(*var,&descr TSRMLS_CC)) == 0) {
-				php_error(E_WARNING,"Variable must be allocated using OCINewDescriptor()");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable must be allocated using OCINewDescriptor()");
 				RETURN_FALSE;
 			}
 		
 			if (! (mydescr = (dvoid *) descr->ocidescr)) {
-				php_error(E_WARNING,"Descriptor empty");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Descriptor empty");
 				RETURN_FALSE;
 			}
 			value_sz = sizeof(void*);
@@ -3022,7 +3024,7 @@ PHP_FUNCTION(ocifreedesc)
 		}
 	}
 
-	php_error(E_NOTICE, "OCIFreeDesc() should not be called like this. Use $somelob->free() to free a LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIFreeDesc() should not be called like this. Use $somelob->free() to free a LOB");
 
   	RETURN_FALSE;
 }
@@ -3071,7 +3073,7 @@ PHP_FUNCTION(ocisavelob)
 			if (offparam == -1) {
 				offset = curloblen;
 			} else if ((ub4) offparam >= curloblen) {
-				php_error(E_WARNING, "Offset smaller than current LOB-Size - appending");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset smaller than current LOB-Size - appending");
 				offset = curloblen;
 			} else {
 				offset = offparam;
@@ -3085,7 +3087,7 @@ PHP_FUNCTION(ocisavelob)
 		loblen = Z_STRLEN_PP(arg);
 	
 		if (loblen < 1) {
-			php_error(E_WARNING, "Cannot save a lob which size is less than 1 byte");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot save a lob which size is less than 1 byte");
 			RETURN_FALSE;
 		}
 
@@ -3160,7 +3162,7 @@ PHP_FUNCTION(ocisavelobfile)
 		filename = Z_STRVAL_PP(arg);
 
 		if ((fp = VCWD_OPEN(filename, O_RDONLY|O_BINARY)) == -1) {
-			php_error(E_WARNING, "Can't open file %s", filename);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't open file %s", filename);
 			RETURN_FALSE;
 		}
 
@@ -3278,7 +3280,7 @@ PHP_FUNCTION(ociwritelobtofile)
 			}
 
 			if ((fp = VCWD_OPEN_MODE(filename,O_CREAT | O_RDWR | O_BINARY | O_TRUNC, 0600)) == -1) {
-				php_error(E_WARNING, "Can't create file %s", filename);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create file %s", filename);
 				goto bail;
 			} 
 		}
@@ -3363,7 +3365,7 @@ PHP_FUNCTION(ociwritelobtofile)
 
 			if (fp != -1) {
 				if ((ub4) write(fp,buffer,toread) != toread) {
-					php_error(E_WARNING, "cannot write file!");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot write file!");
 					goto bail;
 				}
 			} else {
@@ -3479,7 +3481,7 @@ PHP_FUNCTION(ociwritetemporarylob)
 	loblen = Z_STRLEN_PP(var);
 	
 	if (loblen < 1) {
-		php_error(E_WARNING, "Cannot save a lob that is less than 1 byte");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot save a lob that is less than 1 byte");
 		RETURN_FALSE;
 	}
 
@@ -3568,7 +3570,7 @@ PHP_FUNCTION(ocicloselob)
 		}
 	}
 
-	php_error(E_NOTICE, "OCICloselob() should not be called like this. Use $somelob->close() to close a LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCICloselob() should not be called like this. Use $somelob->close() to close a LOB");
 
 	RETURN_FALSE;
 }
@@ -4359,7 +4361,7 @@ PHP_FUNCTION(ocierror)
 	}
 
 	if (! errh) {
-		php_error(E_WARNING, "OCIError: unable to find Error handle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCIError: unable to find Error handle");
 		RETURN_FALSE;
 	}
 
@@ -4468,7 +4470,7 @@ PHP_FUNCTION(ocipasswordchange)
 
 	/*  Disable in Safe Mode  */
 	if (PG(safe_mode)) {
-		php_error(E_WARNING, "%s is disabled in Safe Mode", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "is disabled in Safe Mode");
 		RETURN_FALSE;
 	}
 
@@ -4941,7 +4943,7 @@ PHP_FUNCTION(ocicollgetelem)
 		
 		/* Return false if value does not exist at that location */
 		if(exists == 0) {
-			php_error(E_WARNING, "OCICollGetElem - Invalid index %d", ndx);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCICollGetElem - Invalid index %d", ndx);
 			RETURN_FALSE;
 		}
 
@@ -5455,7 +5457,7 @@ PHP_FUNCTION(ocinewcollection)
 			}
 			break;
 		default:
-			php_error(E_WARNING, "OCINewCollection - Unknown Type %d", coll->coll_typecode);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCINewCollection - Unknown Type %d", coll->coll_typecode);
 			break;
 	}	
 

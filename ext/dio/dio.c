@@ -161,8 +161,7 @@ PHP_FUNCTION(dio_open)
 	}
 
 	if (fd == -1) {
-		php_error(E_WARNING, "%s(): cannot open file %s with flags %d and permissions %d: %s", 
-				  get_active_function_name(TSRMLS_C), file_name, flags, mode, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot open file %s with flags %d and permissions %d: %s", file_name, flags, mode, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -218,8 +217,7 @@ PHP_FUNCTION(dio_write)
 
 	res = write(f->fd, data, trunc_len ? trunc_len : data_len);
 	if (res == -1) {
-		php_error(E_WARNING, "%s(): cannot write data to file descriptor %d, %s",
-				  get_active_function_name(TSRMLS_C), f->fd, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot write data to file descriptor %d, %s", f->fd, strerror(errno));
 	}
 
 	RETURN_LONG(res);
@@ -240,8 +238,7 @@ PHP_FUNCTION(dio_truncate)
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	if (ftruncate(f->fd, offset) == -1) {
-		php_error(E_WARNING, "%s(): couldn't truncate %d to %d bytes: %s",
-				  get_active_function_name(TSRMLS_C), f->fd, offset, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "couldn't truncate %d to %d bytes: %s", f->fd, offset, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -265,8 +262,7 @@ PHP_FUNCTION(dio_stat)
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	if (fstat(f->fd, &s) == -1) {
-		php_error(E_WARNING, "%s(): cannot stat %d: %s",
-				  get_active_function_name(TSRMLS_C), f->fd, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot stat %d: %s", f->fd, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -327,8 +323,7 @@ PHP_FUNCTION(dio_fcntl)
 		HashTable      *fh;
 
 		if (!arg) {
-			php_error(E_WARNING, "%s() expects argument 3 to be array or int, none given",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be array or int, none given");
 			RETURN_FALSE;
 		}
 		if (Z_TYPE_P(arg) == IS_ARRAY) {
@@ -366,8 +361,7 @@ PHP_FUNCTION(dio_fcntl)
 			lk.l_whence = SEEK_SET;
 			lk.l_type   = Z_LVAL_P(arg);
 		} else {
-			php_error(E_WARNING, "%s() expects argument 3 to be array or int, %s given",
-					  get_active_function_name(TSRMLS_C), zend_zval_type_name(arg));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be array or int, %s given", zend_zval_type_name(arg));
 			RETURN_FALSE;
 		}
 
@@ -392,8 +386,7 @@ PHP_FUNCTION(dio_fcntl)
 		php_fd_t *new_f;
 
 		if (!arg || Z_TYPE_P(arg) != IS_LONG) {
-			php_error(E_WARNING, "%s() expects argument 3 to be int",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be int");
 			RETURN_FALSE;
 		}
 
@@ -403,8 +396,7 @@ PHP_FUNCTION(dio_fcntl)
 	}
 	default:
 		if (!arg || Z_TYPE_P(arg) != IS_LONG) {
-			php_error(E_WARNING, "%s() expects argument 3 to be int",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be int");
 			RETURN_FALSE;
 		}
 

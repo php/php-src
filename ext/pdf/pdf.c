@@ -253,6 +253,7 @@ static void _free_pdf_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 {
+	TSRMLS_FETCH();
 	switch (type){
 		case PDF_NonfatalError:
 			/*
@@ -262,7 +263,7 @@ static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 			 * pdf_set_parameter($p, "warning" 0) to switch off
 			 * the warnings inside PDFlib.
 			 */
-			php_error(E_WARNING,"Internal PDFlib warning: %s", shortmsg);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal PDFlib warning: %s", shortmsg);
 			return;
 		case PDF_MemoryError: /* give up in all other cases */
 		case PDF_IOError:
@@ -276,7 +277,7 @@ static void custom_errorhandler(PDF *p, int type, const char *shortmsg)
 		case PDF_SystemError:
 		case PDF_UnknownError:
 		default:
-			php_error(E_ERROR,"PDFlib error: %s", shortmsg);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR,"PDFlib error: %s", shortmsg);
 		}
 }
 /* }}} */
@@ -343,7 +344,7 @@ PHP_MINIT_FUNCTION(pdf)
 {
 	if ((PDF_get_majorversion() != PDFLIB_MAJORVERSION) ||
 			(PDF_get_minorversion() != PDFLIB_MINORVERSION)) {
-		php_error(E_ERROR,"PDFlib error: Version mismatch in wrapper code");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR,"PDFlib error: Version mismatch in wrapper code");
 	}
 	le_pdf = zend_register_list_destructors_ex(_free_pdf_doc, NULL, "pdf object", module_number);
 
@@ -659,7 +660,7 @@ PHP_FUNCTION(pdf_set_font)
 
 	font = PDF_findfont(pdf, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg4), embed);
 	if (font == -1) {
-		php_error(E_WARNING,"Font %s not found", Z_STRVAL_PP(arg2));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Font %s not found", Z_STRVAL_PP(arg2));
 		RETURN_FALSE;
 	}
 
@@ -1083,7 +1084,7 @@ PHP_FUNCTION(pdf_setflat)
 	convert_to_double_ex(arg2);
 	/* pdflib will do this for you, will throw some exception
 	if((Z_LVAL_PP(arg2) > 100) && (Z_LVAL_PP(arg2) < 0)) {
-		php_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter of pdf_setflat() has to between 0 and 100");
 		RETURN_FALSE;
 	}
 	*/
@@ -1109,7 +1110,7 @@ PHP_FUNCTION(pdf_setlinejoin)
 	convert_to_long_ex(arg2);
 	/* pdflib will do this for you, will throw some exception
 	if((Z_LVAL_PP(arg2) > 2) && (Z_LVAL_PP(arg2) < 0)) {
-		php_error(E_WARNING,"Parameter of pdf_setlinejoin() must be between 0 and 2");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter of pdf_setlinejoin() must be between 0 and 2");
 		RETURN_FALSE;
 	}
 	*/
@@ -1135,7 +1136,7 @@ PHP_FUNCTION(pdf_setlinecap)
 	convert_to_long_ex(arg2);
 	/* pdflib will do this for you, will throw some exception
 	if((Z_LVAL_PP(arg2) > 2) && (Z_LVAL_PP(arg2) < 0)) {
-		php_error(E_WARNING,"Parameter of pdf_setlinecap() must be > 0 and <= 2");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter of pdf_setlinecap() must be > 0 and <= 2");
 		RETURN_FALSE;
 	}
 	*/
@@ -1161,7 +1162,7 @@ PHP_FUNCTION(pdf_setmiterlimit)
 	convert_to_double_ex(arg2);
 	/* pdflib will do this for you, will throw some exception
 	if(Z_DVAL_PP(arg2) < 1) {
-		php_error(E_WARNING,"Parameter of pdf_setmiterlimit() must be >= 1");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter of pdf_setmiterlimit() must be >= 1");
 		RETURN_FALSE;
 	}
 	*/
@@ -1929,7 +1930,7 @@ PHP_FUNCTION(pdf_open_image_file)
 
 	if (pdf_image == -1) {
 	    /* pdflib will do this for you, will throw some exception
-	    php_error(E_WARNING, "Could not open image: %s", image);
+	    php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open image: %s", image);
 	    */
 	    RETURN_FALSE;
 	}
@@ -1958,7 +1959,7 @@ PHP_FUNCTION(pdf_open_memory_image)
 	ZEND_GET_RESOURCE_TYPE_ID(le_gd,"gd");
 	if(!le_gd)
 	{
-		php_error(E_ERROR, "Unable to find handle for GD image stream. Please check the GD extension is loaded.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to find handle for GD image stream. Please check the GD extension is loaded.");
 	}
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, arg2, -1, "Image", le_gd);
 
@@ -1995,7 +1996,7 @@ PHP_FUNCTION(pdf_open_memory_image)
 
 	if(pdf_image == -1) {
 		/* pdflib will do this for you, will throw some exception
-		php_error(E_WARNING, "Could not open image");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open image");
 		*/
 		efree(buffer);
 		RETURN_FALSE;
@@ -2401,7 +2402,7 @@ PHP_FUNCTION(pdf_findfont)
 	font = PDF_findfont(pdf, fontname, encoding, embed);
 	if (font == -1) {
 		/* pdflib will do this for you, will throw some exception
-		php_error(E_WARNING,"Font %s not found", fontname);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Font %s not found", fontname);
 		*/
 		RETURN_FALSE;
 	}
@@ -2471,7 +2472,7 @@ PHP_FUNCTION(pdf_setpolydash)
 	    } else if (Z_TYPE_P(keydata) == IS_LONG) {
 		darray[i] = (float) Z_LVAL_P(keydata);
 	    } else {
-		php_error(E_WARNING,"PDFlib set_polydash: illegal darray value");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PDFlib set_polydash: illegal darray value");
 	    }
 	    zend_hash_move_forward(array);
 	}
