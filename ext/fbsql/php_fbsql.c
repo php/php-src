@@ -7,7 +7,7 @@
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://www.php.net/license/2_02.txt.                                 |
+   | http:/*www.php.net/license/2_02.txt.                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -23,20 +23,20 @@
  * ? Safe mode implementation
  */
 
-// SB's list:
-//   - BLOBs
-//   - API for a more natural FB connect semantic
-//   - Connect & set session 
-//   - Autoreconnect when disconnected
-//   - Comments and cleanup
-//   - Documentation
-//
-//   - Format database error messages as HTML.
-//
-// BUGS
-//   - Select db with no arguments
-//   - Query with everything defaulted
-//
+/*	SB's list:
+	- BLOBs
+	- API for a more natural FB connect semantic
+	- Connect & set session 
+	- Autoreconnect when disconnected
+	- Comments and cleanup
+	- Documentation
+
+	- Format database error messages as HTML.
+
+	BUGS
+	- Select db with no arguments
+	 - Query with everything defaulted
+*/
 #include "php.h"
 #include "php_globals.h"
 #include "php_globals.h"
@@ -75,32 +75,32 @@ typedef struct PHPFBResult PHPFBResult;
 struct PHPFBLink;
 typedef struct PHPFBLink PHPFBLink;
 
-// The PHPFBLink structure represents a fbsql link. The lion is used for
-// a connection to a machine, it may be persistant and is reference counted.
-// The reason for refcounting is mostly to avoid to think, it work independent of 
-// any wierd and unforseen allocation deallocation order.
-//
-// The PHPFBDatabse structure implements to actual connection to a FrontBase server
-// ot may be persistant is the link it is connected to is persistant, and refcounted
-// for the same reasons as above.
-//
-// The PHPFBResult structure implements a result from the FrontBase server, and does all
-// required buffereing from of results.
-//
-// In the PHP code the 3 above a data structures are referenced by means of integers in the
-// range from 1 to som configurable maximum.  You can put a limit to the number of links, databases
-// and results.  The integer identifications is implemented by insertion in the list, which is passed
-// as an argument to all the functions, please note the list is polymorph.
-//
-// Database objects and link objects are all reused, base on the host name user name, host name database name 
-// user name.  So connecting twice to the same database as the same user will return the same database id.
-// We use the same coding for that as fbsql does, explioiting the underlying implementation of the lists.
-//
-// Persistant objects are put in the persistent list as well, but only by name, if you connect to a persistant object
-// and it is not in the list it is simply added and get a new index, and refcounted.  Tricky, tricky ...
-//
+/*	The PHPFBLink structure represents a fbsql link. The lion is used for
+	a connection to a machine, it may be persistant and is reference counted.
+	The reason for refcounting is mostly to avoid to think, it work independent of 
+	any wierd and unforseen allocation deallocation order.
 
-// Some functions which should be exported from FBCAccess
+	The PHPFBDatabse structure implements to actual connection to a FrontBase server
+	ot may be persistant is the link it is connected to is persistant, and refcounted
+	for the same reasons as above.
+
+	The PHPFBResult structure implements a result from the FrontBase server, and does all
+	required buffereing from of results.
+
+	In the PHP code the 3 above a data structures are referenced by means of integers in the
+	range from 1 to som configurable maximum.  You can put a limit to the number of links, databases
+	and results.  The integer identifications is implemented by insertion in the list, which is passed
+	as an argument to all the functions, please note the list is polymorph.
+
+	Database objects and link objects are all reused, base on the host name user name, host name database name 
+	user name.  So connecting twice to the same database as the same user will return the same database id.
+	We use the same coding for that as fbsql does, explioiting the underlying implementation of the lists.
+
+	Persistant objects are put in the persistent list as well, but only by name, if you connect to a persistant object
+	and it is not in the list it is simply added and get a new index, and refcounted.  Tricky, tricky ...
+*/
+
+/* Some functions which should be exported from FBCAccess */
 
 void*        fbaObjectAtIndex();
 void         fbcInitialize();
@@ -111,65 +111,65 @@ unsigned int fbaCount();
 
 struct PHPFBDatabase
 {
-	unsigned int			retainCount;		// The refcount 
-	unsigned int			index;				// The index in the list
-	PHPFBLink*				link;				// A pointer to the corresponding link object, may be NULL if no link were used
-	char*					databaseName;		// The name of the database
-	char*					databasePassword;	// The database password
-	FBCDatabaseConnection*	connection;			// The connection to the database
-	unsigned int			errorNo;			// The latest error on the connection, 0 is ok.
-	char*					errorText;			// The error text
-	unsigned int			resultCount;		// Number of active result for this database
-	unsigned int			rowIndex;			// The row index of the latest row inserted into the database
-	PHPFBResult**			results;			// Pointer to the active results
+	unsigned int			retainCount;		/* The refcount */
+	unsigned int			index;				/* The index in the list */
+	PHPFBLink*				link;				/* A pointer to the corresponding link object, may be NULL if no link were used */
+	char*					databaseName;		/* The name of the database */
+	char*					databasePassword;	/* The database password */
+	FBCDatabaseConnection*	connection;			/* The connection to the database */
+	unsigned int			errorNo;			/* The latest error on the connection, 0 is ok. */
+	char*					errorText;			/* The error text */
+	unsigned int			resultCount;		/* Number of active result for this database */
+	unsigned int			rowIndex;			/* The row index of the latest row inserted into the database */
+	PHPFBResult**			results;			/* Pointer to the active results */
 };
 
 struct PHPFBResult
 {
-	unsigned int			retainCount;		// The refcount
-	unsigned int			index;				// The index into the list
-	PHPFBLink*				link;				// The link for the result, may be NULL if no link 
-	PHPFBDatabase*			database;			// The database for the result, may be NULL of no database is related to the result
-	FBCDatabaseConnection*	connection;			// The database connection, just a convinience
-	char*					fetchHandle;			// The fetch handle, the id used by the server.  
-	FBCMetaData*			metaData;			// The metadata describing the result
-	FBCMetaData*			ResultmetaData;		// The metadata describing the result
-	FBCRowHandler*			rowHandler;			// The row handler, the Frontbase structure used for accessing rows in the result
-	unsigned int			batchSize;			// The number of row to fetch when expanding the number of rows in the row handler
-	int						rowCount;			// The number of rows in the results set.  The number of row is not in
-						// general known when the select is done, one typically needs to fetch all the row
-						// to figure out how many row you got. When the rowCount is unknown the value is
-						// 0x7ffffffff
-	int						columnCount;		// Number of columns in the row set.
-	int						rowIndex;			// The current row index.
-	int						columnIndex;		// The current column index
-	void**					row;				// The last row accessed
-	FBArray*				array;				// The link may return a result set, the database list, we implement that by the 
-						// FBArray, just a list of strings.
-	FBCPList*				list;				// The same special kind result just for property list from extract, schema info.
-	unsigned int			selectResults;		// number of results in select
-	unsigned int			currentResult;		// current result number
+	unsigned int			retainCount;		/* The refcount */
+	unsigned int			index;				/* The index into the list */
+	PHPFBLink*				link;				/* The link for the result, may be NULL if no link  */
+	PHPFBDatabase*			database;			/* The database for the result, may be NULL of no database is related to the result */
+	FBCDatabaseConnection*	connection;			/* The database connection, just a convinience */
+	char*					fetchHandle;		/* The fetch handle, the id used by the server.   */
+	FBCMetaData*			metaData;			/* The metadata describing the result */
+	FBCMetaData*			ResultmetaData;		/* The metadata describing the result */
+	FBCRowHandler*			rowHandler;			/* The row handler, the Frontbase structure used for accessing rows in the result */
+	unsigned int			batchSize;			/* The number of row to fetch when expanding the number of rows in the row handler */
+	int						rowCount;			/* The number of rows in the results set.  The number of row is not in */
+						/* general known when the select is done, one typically needs to fetch all the row
+						   to figure out how many row you got. When the rowCount is unknown the value is
+						   0x7ffffffff */
+	int						columnCount;		/* Number of columns in the row set. */
+	int						rowIndex;			/* The current row index. */
+	int						columnIndex;		/* The current column index */
+	void**					row;				/* The last row accessed */
+	FBArray*				array;				/* The link may return a result set, the database list, we implement that by the  */
+						/* FBArray, just a list of strings. */
+	FBCPList*				list;				/* The same special kind result just for property list from extract, schema info. */
+	unsigned int			selectResults;		/* number of results in select */
+	unsigned int			currentResult;		/* current result number */
 };
 
 struct PHPFBLink
 {
-	unsigned int			retainCount;		// The refcount
-	unsigned int			index;				// The index in the list
-	int						persistant;			// persistant ?
-	char*					hostName;			// Host name 
-	char*					userName;			// User name
-	char*					userPassword;		// User password
-	FBCExecHandler*			execHandler;		// The exechandler, can be used for database operations
+	unsigned int			retainCount;		/* The refcount */
+	unsigned int			index;				/* The index in the list */
+	int						persistant;			/* persistant ? */
+	char*					hostName;			/* Host name  */
+	char*					userName;			/* User name */
+	char*					userPassword;		/* User password */
+	FBCExecHandler*			execHandler;		/* The exechandler, can be used for database operations */
 	unsigned int			affectedRows;
-	long					autoCommit;			// Enable or disable autoCommit
+	long					autoCommit;			/* Enable or disable autoCommit */
 
-	PHPFBDatabase*			currentDatabase;	// The latest referenced database on this link
+	PHPFBDatabase*			currentDatabase;	/* The latest referenced database on this link */
 
-	unsigned int			databaseCount;			// The number of database connect to the link
-	PHPFBDatabase**			databases;			// and the pointers 
+	unsigned int			databaseCount;		/* The number of database connect to the link */
+	PHPFBDatabase**			databases;			/* and the pointers */
 
-	unsigned int			resultCount;		// The number of link results
-	PHPFBResult**			results;			// and the pointers.  Only used for list_dbs
+	unsigned int			resultCount;		/* The number of link results */
+	PHPFBResult**			results;			/* and the pointers.  Only used for list_dbs */
 };
 
 #define FBSQL_ASSOC		1<<0
@@ -213,7 +213,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_field_type,	NULL)
 	PHP_FE(fbsql_field_flags,	NULL) 
 
-//	Fontbase additions:
+/*	Fontbase additions:  */
 	PHP_FE(fbsql_autocommit,	NULL)
 	PHP_FE(fbsql_commit,		NULL)
 	PHP_FE(fbsql_rollback,		NULL)
@@ -225,7 +225,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_password,		NULL)
 	PHP_FE(fbsql_warnings,		NULL)
 
-//	Aliases:
+/*	Aliases:  */
 	PHP_FALIAS(fbsql, fbsql_db_query, NULL)
 
 	{NULL, NULL, NULL}
@@ -265,15 +265,15 @@ void phpfbReleaseResult ( PHPFBResult* result )
 	FBSQLLS_FETCH();
 	if (result)
     {
-      result->retainCount--;
-//printf("Release result   %x %d %d\n",result,result->index,result->retainCount);
+		result->retainCount--;
+/*	printf("Release result   %x %d %d\n",result,result->index,result->retainCount); */
 
       if (result->retainCount == 0)
        {
          if (result->fetchHandle) fbcdcCancelFetch(result->connection,result->fetchHandle);
          if (result->rowHandler)  fbcrhRelease(result->rowHandler);
          if (result->ResultmetaData)    fbcmdRelease(result->ResultmetaData);
-//         if (result->metaData)    fbcmdRelease(result->metaData);
+/*			if (result->metaData)    fbcmdRelease(result->metaData);  */
          if (result->list)        fbcplRelease(result->list);
          if (result->array)       fbaRelease(result->array);
          if ( result->database)
@@ -329,11 +329,11 @@ void phpfbReleaseDatabase ( PHPFBDatabase* database )
    if (database)
     {
       database->retainCount--;
-//printf("Release database %x %d %d\n", database, database->index, database->retainCount);
+/*printf("Release database %x %d %d\n", database, database->index, database->retainCount); */
       if (database->retainCount == 0)
        {
          unsigned int i;
-//         if (FB_SQL_G(databaseIndex == database->index) FB_SQL_G(databaseIndex = 0;
+/*         if (FB_SQL_G(databaseIndex == database->index) FB_SQL_G(databaseIndex = 0; */
          if (database->link)
           {
             for (i=0; i < database->link->databaseCount; i++)
@@ -364,14 +364,14 @@ PHPFBLink* phpfbRetainLink ( PHPFBLink* link)
 
 void phpfbReleaseLink ( PHPFBLink* link)
 {
-//  printf("Release %x %d %d\n",link,link->index,link->retainCount);
+/*  printf("Release %x %d %d\n",link,link->index,link->retainCount); */
   if (link)
    {
      link->retainCount--;
-//printf("Release link     %x %d %d\n", link, link->index, link->retainCount);
+/*printf("Release link     %x %d %d\n", link, link->index, link->retainCount); */
      if (link->retainCount == 0)
       {
-//        if (link->index == FB_SQL_G(linkIndex) FB_SQL_G(linkIndex = 0;
+/*        if (link->index == FB_SQL_G(linkIndex) FB_SQL_G(linkIndex = 0; */
         free(link->hostName);
         free(link->userName);
         free(link->userPassword);
@@ -413,10 +413,10 @@ static void php_fbsql_init_globals(zend_fbsql_globals *fbsql_globals)
 		name[sizeof(name)-1] = 0;
 		fbsql_globals->hostName = strdup(name);
 	}
-//	fbsql_globals->userName			= strdup(fbsql_globals->userName);
-//	fbsql_globals->userPassword		= strdup(fbsql_globals->userPassword);
-//	fbsql_globals->databaseName		= strdup(fbsql_globals->databaseName);
-//	fbsql_globals->databasePassword	= strdup(fbsql_globals->databasePassword);
+/*	fbsql_globals->userName			= strdup(fbsql_globals->userName); */
+/*	fbsql_globals->userPassword		= strdup(fbsql_globals->userPassword); */
+/*	fbsql_globals->databaseName		= strdup(fbsql_globals->databaseName); */
+/*	fbsql_globals->databasePassword	= strdup(fbsql_globals->databasePassword); */
 
 	fbsql_globals->persistantCount	= 0;
 	fbsql_globals->linkCount		= 0;
@@ -490,13 +490,13 @@ PHPFBLink* phpfbConnect
 	int          persistant 
  )
 {
-// Ref count databases and links!!
-// Search for the database/link in the hash plist and in the hashed list
-// If a link was non persistant then an is opened peristant just insert it 
-// in the persistant list
-//
-// Insert the persistant in the list and in the hash p list
-// Insert the non persistant in the 
+/*	Ref count databases and links!!
+	Search for the database/link in the hash plist and in the hashed list
+	If a link was non persistant then an is opened peristant just insert it 
+	in the persistant list
+
+	Insert the persistant in the list and in the hash p list
+	Insert the non persistant in the */
 	PHPFBLink* result;
 	list_entry *lep;
 	int        type;
@@ -507,21 +507,21 @@ PHPFBLink* phpfbConnect
 	if (userName     == NULL) userName     = FB_SQL_G(userName);
 	if (userPassword == NULL) userPassword = FB_SQL_G(userPassword);
 
-//printf("Connection %s %s\n",hostName,userName);
+/*	printf("Connection %s %s\n",hostName,userName); */
 	sprintf(name,"fbsql_%s_%s",hostName,userName);
-//printf("Hash find '%s'",name);
+/*	printf("Hash find '%s'",name); */
 	if(zend_hash_find(&EG(persistent_list), name, strlen(name), (void **) &lep) == SUCCESS)
 	{
 		PHPFBLink* lnk;
 		result = lep->ptr;
 		lnk = zend_list_find(result->index,&type);
 		if (lnk != result) result->index = zend_list_insert(result, le_link);
-//printf(" Persistant %x %d \n",result,result->index);
+/*	printf(" Persistant %x %d \n",result,result->index); */
 	}
 	else if(zend_hash_find (&EG(regular_list),name,strlen(name),(void **)&lep) == SUCCESS)
 	{
 		result = lep->ptr;
-//printf(" Non persistant %x %d \n",result,result->index);
+/*	printf(" Non persistant %x %d \n",result,result->index); */
 	}
 	else if ( FB_SQL_G(linkCount) == FB_SQL_G(maxLinks))
 	{
@@ -562,8 +562,8 @@ PHPFBLink* phpfbConnect
         }
 		result->index = zend_list_insert (phpfbRetainLink(result), le_link);
 		FB_SQL_G(linkCount)++;
-//printf(" new %x %d \n",result,result->index);
-//printf("Ny connection %x %x\n",result,result->execHandler);
+/* printf(" new %x %d \n",result,result->index); */
+/* printf("Ny connection %x %x\n",result,result->execHandler); */
 	}
 	return result;
 }
@@ -590,7 +590,7 @@ int phpfbFetchRow ( PHPFBResult* result, int row)
 	return 0;
 }
 
-// int fbsql_connect(string [hostname] , string [username] , string [password] );
+/* int fbsql_connect(string [hostname] , string [username] , string [password] ); */
 void phpfbDoConnect(INTERNAL_FUNCTION_PARAMETERS,int persistant)
 {
 	PHPFBLink* result; 
@@ -625,17 +625,22 @@ void phpfbDoConnect(INTERNAL_FUNCTION_PARAMETERS,int persistant)
 	return_value->type       = IS_LONG;
 }
 
-// int fbsql_connect(string [hostname] , string [username] , string [password] );
+/* {{{ proto int fbsql_connect(string [hostname] , string [username] , string [password] );
+	*/
 PHP_FUNCTION(fbsql_connect)
 {
 	phpfbDoConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
+/* }}} */
 
-// int fbsql_pconnect(string [hostname] , string [username] , string [password] );
+
+/* {{{ proto int fbsql_pconnect(string [hostname] , string [username] , string [password] );
+	*/
 PHP_FUNCTION(fbsql_pconnect)
 {
 	phpfbDoConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
+/* }}} */
 
 
 PHPFBLink* phpfbGetLink(int id)
@@ -673,7 +678,8 @@ PHPFBResult* phpfbGetResult(int id)
 }
 
 
-// int fbsql_close([int link_identifier])
+/* {{{ proto int fbsql_close([int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_close)
 {
 	int   argc = ARG_COUNT(ht);
@@ -717,9 +723,11 @@ PHP_FUNCTION(fbsql_close)
          
 	RETURN_TRUE;
 }
+/* }}} */
 
 
-// int fbsql_select_db(string database_name [, int link_identifier]
+/* {{{ proto int fbsql_select_db(string database_name [, int link_identifier]
+	*/
 PHPFBDatabase* phpfbSelectDB 
 (	INTERNAL_FUNCTION_PARAMETERS,
 	char*        databaseName,
@@ -798,7 +806,7 @@ PHPFBDatabase* phpfbSelectDB
 			fbcdcClose(c);
 			fbcdcRelease(c);
 			free(result);
-//printf("Returning Null\n");
+/*printf("Returning Null\n"); */
 			return NULL;
 		}
 		result->retainCount      = 2;
@@ -823,7 +831,7 @@ PHPFBDatabase* phpfbSelectDB
 		link->databases[i] = result;
 
 		FB_SQL_G(databaseCount)++;
-//   printf("Return database %x %x\n",result,c);
+/*   printf("Return database %x %x\n",result,c); */
 	}
 	link->currentDatabase     = result;
 	return_value->value.lval  = result->index;
@@ -832,6 +840,7 @@ PHPFBDatabase* phpfbSelectDB
 
 	return result;
 }
+/* }}} */
 
 void phpfbestrdup (const char * s, int* length, char** value )
 {
@@ -848,7 +857,8 @@ void phpfbestrdup (const char * s, int* length, char** value )
 	*length = l;
 }
 
-// bool fbsql_list_autocommit(int link_identifier [, bool OnOff])
+/* {{{ proto bool fbsql_list_autocommit(int link_identifier [, bool OnOff])
+	*/
 PHP_FUNCTION(fbsql_autocommit)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -879,8 +889,10 @@ PHP_FUNCTION(fbsql_autocommit)
 		RETURN_BOOL(phpLink->autoCommit);
 	}
 }
+/* }}} */
 
-// int fbsql_list_commit([int link_identifier])
+/* {{{ proto int fbsql_list_commit([int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_commit)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -913,8 +925,10 @@ PHP_FUNCTION(fbsql_commit)
 	else
 		RETURN_FALSE;
 }
+/* }}} */
 
-// int fbsql_list_rollback([int link_identifier])
+/* {{{ proto int fbsql_list_rollback([int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_rollback)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -947,9 +961,11 @@ PHP_FUNCTION(fbsql_rollback)
 	else
 		RETURN_FALSE;
 }
+/* }}} */
 
 
-// string fbsql_hostname([string host_name])
+/* {{{ proto string fbsql_hostname([string host_name])
+	*/
 PHP_FUNCTION(fbsql_hostname)
 {
 	int  argc = ARG_COUNT(ht);
@@ -968,8 +984,11 @@ PHP_FUNCTION(fbsql_hostname)
 		FB_SQL_G(hostName) = strdup(argv[0]->value.str.val);
 	}
 }
+/* }}} */
 
-// string fbsql_database([string database])
+
+/* {{{ proto string fbsql_database([string database])
+	*/
 PHP_FUNCTION(fbsql_database)
 {
 	int  argc = ARG_COUNT(ht);
@@ -988,8 +1007,11 @@ PHP_FUNCTION(fbsql_database)
 		FB_SQL_G(databaseName) = strdup(argv[0]->value.str.val);
 	}
 }
+/* }}} */
 
-// string fbsql_database_password([string database_password])
+
+/* {{{ proto string fbsql_database_password([string database_password])
+	*/
 PHP_FUNCTION(fbsql_database_password)
 {
 	int  argc = ARG_COUNT(ht);
@@ -1006,8 +1028,11 @@ PHP_FUNCTION(fbsql_database_password)
 		FB_SQL_G(databasePassword) = strdup(argv[0]->value.str.val); 
 	}
 }
+/* }}} */
 
-// string fbsql_username([string username])
+
+/* {{{ proto string fbsql_username([string username])
+	*/
 PHP_FUNCTION(fbsql_username)
 {
 	int  argc = ARG_COUNT(ht);
@@ -1026,8 +1051,11 @@ PHP_FUNCTION(fbsql_username)
 		FB_SQL_G(userName) = strdup(argv[0]->value.str.val); 
 	}
 }
+/* }}} */
 
-// string fbsql_username([string password])
+
+/* {{{ proto string fbsql_username([string password])
+	*/
 PHP_FUNCTION(fbsql_password)
 {   
 	int  argc = ARG_COUNT(ht);
@@ -1043,8 +1071,11 @@ PHP_FUNCTION(fbsql_password)
 		FB_SQL_G(userPassword) = strdup(argv[0]->value.str.val); 
 	}
 }
+/* }}} */
 
-// int fbsql_select_db([string database_name [, int link_identifier]])   
+
+/* {{{ proto int fbsql_select_db([string database_name [, int link_identifier]])   
+	*/
 PHP_FUNCTION(fbsql_select_db)
 {
 	int  argc = ARG_COUNT(ht);
@@ -1079,7 +1110,7 @@ PHP_FUNCTION(fbsql_select_db)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
 	if (phpLink == NULL) RETURN_FALSE;
-//printf("Select db at link %s@%s\n",phpLink->hostName,phpLink->userName);
+/*printf("Select db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 
 	database = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU,name,"",phpLink);
 	if (database == NULL) RETURN_FALSE;
@@ -1090,8 +1121,11 @@ PHP_FUNCTION(fbsql_select_db)
 	return_value->value.lval   = database->index;
 	return_value->type         = IS_LONG;
 }
+/* }}} */
 
-// int fbsql_change_user(string user, string password, string [database] , int [link_identifier] );
+
+/* {{{ proto int fbsql_change_user(string user, string password, string [database] , int [link_identifier] );
+	*/
 PHP_FUNCTION(fbsql_change_user)
 {
 	int             argc     = ARG_COUNT(ht);
@@ -1140,8 +1174,11 @@ PHP_FUNCTION(fbsql_change_user)
 		}
 	}
 }
+/* }}} */
 
-// int fbsql_create_db([string database_name [, int link_identifier]])
+
+/* {{{ proto int fbsql_create_db([string database_name [, int link_identifier]])
+	*/
 PHP_FUNCTION(fbsql_create_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1212,8 +1249,11 @@ PHP_FUNCTION(fbsql_create_db)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
-// int fbsql_drop_db(string database_name [, int link_identifier])
+
+/* {{{ proto int fbsql_drop_db(string database_name [, int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_drop_db)
 {
 	char* databaseName;
@@ -1282,8 +1322,11 @@ PHP_FUNCTION(fbsql_drop_db)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
-// int fbsql_stop_db(string database_name [, int link_identifier])
+
+/* {{{ proto int fbsql_stop_db(string database_name [, int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_stop_db)
 {
 	PHPFBDatabase*  phpDatabase;
@@ -1322,7 +1365,7 @@ PHP_FUNCTION(fbsql_stop_db)
 	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,"",phpLink);
 	if (phpDatabase == NULL) RETURN_FALSE;
 
-//printf("Stop db %x\n",phpDatabase->connection);
+/*	printf("Stop db %x\n",phpDatabase->connection); */
 	if (!fbcdcStopDatabase(phpDatabase->connection))
 	{
 		php_error(E_WARNING, "Cannot stop database %s@%s",databaseName,phpLink->hostName);
@@ -1347,18 +1390,21 @@ PHP_FUNCTION(fbsql_stop_db)
 		FB_SQL_G(resultCount)--;
 		zend_list_delete(phpDatabase->results[i]->index);
 	}
-//   printf("Database %X %d %d\n",phpDatabase,phpDatabase->index,phpDatabase->retainCount);
+/*	printf("Database %X %d %d\n",phpDatabase,phpDatabase->index,phpDatabase->retainCount); */
 	sprintf(name,"fbsql_%s@%s:%s",databaseName,phpLink->hostName, phpLink->userName);
 	zend_list_delete(phpDatabase->index);
 	FB_SQL_G(databaseCount)--;
 
 	zend_hash_del(&EG(regular_list),name,strlen(name));
 
-//   printf("After list delete\n");
+/*	printf("After list delete\n"); */
 	RETURN_TRUE;
 }
+/* }}} */
 
-// int fbsql_start_db(string database_name [, int link_identifier])
+
+/* {{{ proto int fbsql_start_db(string database_name [, int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_start_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1392,7 +1438,7 @@ PHP_FUNCTION(fbsql_start_db)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
     }
 	if (phpLink == NULL) RETURN_FALSE;
-//printf("Start db at link %s@%s\n",phpLink->hostName,phpLink->userName);
+/*printf("Start db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 	status = fbcehStatusForDatabaseNamed(phpLink->execHandler,databaseName);
 	if ((status != FBStopped) && (status != FBRunning) && ( status != FBStarting))
 	{
@@ -1433,6 +1479,8 @@ PHP_FUNCTION(fbsql_start_db)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
+
 
 int mdOk(PHPFBDatabase* database, FBCMetaData* md )
 {
@@ -1498,7 +1546,7 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 	return_value->value.lval = ok?-1:0;
 	return_value->type       = IS_LONG;
 
-//   printf("Result kind %s\n",tp);
+/*	printf("Result kind %s\n",tp); */
 	if (!ok || (tp[0] == 'C') || (tp[0] == 'R'))
 	{
 		unsigned i;
@@ -1507,7 +1555,7 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 			PHPFBResult* result = database->results[i];
 			if (result)
 			{
-//				printf("Delete from list %d %x",i,database->results[i],database->results[i]->index);
+/*				printf("Delete from list %d %x",i,database->results[i],database->results[i]->index); */
 				zend_list_delete(database->results[i]->index);
 				FB_SQL_G(databaseCount)--;
 				database->results[i] = NULL;
@@ -1580,7 +1628,8 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 	return result;
 }
 
-// int fbsql_query(string query [, int link_identifier])
+/* {{{ proto int fbsql_query(string query [, int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_query)
 {
 	PHPFBDatabase*  phpDatabase;
@@ -1611,7 +1660,7 @@ PHP_FUNCTION(fbsql_query)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
 	if (phpLink == NULL) RETURN_FALSE;
-//printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName);
+/*printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 
 	phpDatabase = phpLink->currentDatabase;
 	if (phpDatabase == NULL) RETURN_FALSE;
@@ -1623,8 +1672,11 @@ PHP_FUNCTION(fbsql_query)
 		if (phpResult) FB_SQL_G(resultIndex)  = phpResult->index;
 	}
 }
+/* }}} */
 
-// int fbsql_db_query(string database_name, string query [, int link_identifier])
+
+/* {{{ proto int fbsql_db_query(string database_name, string query [, int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_db_query)
 {
 	PHPFBDatabase*  phpDatabase;
@@ -1659,7 +1711,7 @@ PHP_FUNCTION(fbsql_db_query)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
 	if (phpLink == NULL) RETURN_FALSE;
-//printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName);
+/*	printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 	phpDatabase = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU, databaseName,"",phpLink);
 	if ( phpDatabase == NULL) RETURN_FALSE;
  
@@ -1670,8 +1722,11 @@ PHP_FUNCTION(fbsql_db_query)
 		if (phpResult) FB_SQL_G(resultIndex)  = phpResult->index;
 	}
 }
+/* }}} */
 
-// int fbsql_list_dbs([int link_identifier])
+
+/* {{{ proto int fbsql_list_dbs([int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_list_dbs)
 {
 	PHPFBLink*      phpLink = NULL;
@@ -1734,8 +1789,11 @@ PHP_FUNCTION(fbsql_list_dbs)
 	FB_SQL_G(resultIndex)      = phpResult->index;
 	FB_SQL_G(linkIndex)        = phpLink->index;
 }
+/* }}} */
 
-// int fbsql_list_tables(string database, int [link_identifier] );
+
+/* {{{ proto int fbsql_list_tables(string database, int [link_identifier] );
+	*/
 PHP_FUNCTION(fbsql_list_tables)
 {
 	PHPFBDatabase*  phpDatabase;
@@ -1790,8 +1848,11 @@ PHP_FUNCTION(fbsql_list_tables)
 		if (phpResult) FB_SQL_G(resultIndex)  = phpResult->index;
 	}
 }
+/* }}} */
 
-//int fbsql_list_fields(string database_name, string table_name [, int link_identifier])
+
+/* {{{ proto int fbsql_list_fields(string database_name, string table_name [, int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_list_fields)
 {
 	PHPFBDatabase*  phpDatabase;
@@ -1847,8 +1908,11 @@ PHP_FUNCTION(fbsql_list_fields)
 		if (phpResult) FB_SQL_G(resultIndex)  = phpResult->index;
 	}
 }
+/* }}} */
 
-// string fbsql_error([int link_identifier])
+
+/* {{{ proto string fbsql_error([int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_error)
 {
 	PHPFBLink*     phpLink = NULL;
@@ -1869,14 +1933,17 @@ PHP_FUNCTION(fbsql_error)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
 	if (phpLink == NULL) RETURN_FALSE;
-//printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName);
+/*	printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 	phpDatabase = phpLink->currentDatabase;
 	if ((phpDatabase == NULL) || (phpDatabase->errorText == NULL))  RETURN_FALSE;
 	phpfbestrdup(phpDatabase->errorText,&return_value->value.str.len,&return_value->value.str.val);
 	return_value->type          = IS_STRING;
 }
+/* }}} */
 
-// int fbsql_errno([int link_identifier])
+
+/* {{{ proto int fbsql_errno([int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_errno)
 {
 	PHPFBLink*     phpLink = NULL;
@@ -1897,14 +1964,17 @@ PHP_FUNCTION(fbsql_errno)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
 	if (phpLink == NULL) RETURN_FALSE;
-//printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName);
+/*	printf("Query db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
 	phpDatabase = phpLink->currentDatabase;
 	if (phpDatabase == NULL) RETURN_FALSE;
 	return_value->value.lval = phpDatabase->errorNo;
 	return_value->type       = IS_LONG;
 }
+/* }}} */
 
-// int fbsql_generate_warnings( [int flag]);
+
+/* {{{ proto int fbsql_generate_warnings( [int flag]);
+	*/
 PHP_FUNCTION(fbsql_warnings)
 {
 	int   argc     = ARG_COUNT(ht);
@@ -1921,8 +1991,11 @@ PHP_FUNCTION(fbsql_warnings)
 		FB_SQL_G(generateWarnings) = argv[0]->value.lval != 0;
 	}
 }
+/* }}} */
 
-//int fbsql_affected_rows([int link_identifier])
+
+/* {{{ proto int fbsql_affected_rows([int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_affected_rows)
 {
 	PHPFBLink*      phpLink;
@@ -1946,8 +2019,11 @@ PHP_FUNCTION(fbsql_affected_rows)
 	return_value->value.lval = phpLink->affectedRows;
 	return_value->type       = IS_LONG;
 }
+/* }}} */
 
-// int fbsql_insert_id([int link_identifier])
+
+/* {{{ proto int fbsql_insert_id([int link_identifier])
+	*/
 PHP_FUNCTION(fbsql_insert_id)
 {
 	PHPFBLink* phpLink;
@@ -1984,6 +2060,8 @@ PHP_FUNCTION(fbsql_insert_id)
 	return_value->type       = IS_LONG;
 	FB_SQL_G(linkIndex) = phpLink->index;
 }
+/* }}} */
+
 
 int phpSizeOfInt ( int i )
 {
@@ -2146,31 +2224,33 @@ void phpfbColumnAsString ( PHPFBResult* result, int column, void* data ,int* len
 
 		case FB_CLOB:
 		case FB_BLOB:
-//      {
-//         unsigned char* bytes = (unsigned char*)data;
-//         if (*bytes == '\1')
-//          {  // Direct
-//            unsigned int   l   = *((unsigned int*)(bytes+1));
-//            unsigned char* ptr = *((unsigned char**)(bytes+5));
-//            unsigned int   i;
-//           mf(file,"%4d:",l);
-//            for (i=0; i < l; i++)
-//             {
-//               if (i)
-//                {
-//                  if ((i % 32) == 0) mf(file,"\n     %*d:",lw+4,i);
-//                  else if ((i % 4) == 0) mf(file,"  ");
-//                }
-//               mf(file,"%02x",*ptr++);
-//             }
-//          }
-//         else
-//{
-//            mf(file,"%s",bytes+1);
-//          }
-//      }
-//     break;
-
+/*      {
+			unsigned char* bytes = (unsigned char*)data;
+			if (*bytes == '\1')
+			{  /* Direct
+				unsigned int   l   = *((unsigned int*)(bytes+1));
+				unsigned char* ptr = *((unsigned char**)(bytes+5));
+				unsigned int   i;
+				mf(file,"%4d:",l);
+				for (i=0; i < l; i++)
+				{
+					if (i)
+					{
+						if ((i % 32) == 0) 
+							mf(file,"\n     %*d:",lw+4,i);
+						else if ((i % 4) == 0) 
+							mf(file,"  ");
+					}
+					mf(file,"%02x",*ptr++);
+				}
+			}
+			else
+			{
+				mf(file,"%s",bytes+1);
+			}
+		}
+		break;
+*/
 		default:
 			php_error(E_WARNING,"Unimplemented type");
 		break;
@@ -2185,25 +2265,25 @@ void phpfbSqlResult ( INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int row
 		FBCPList* columns = (FBCPList*)fbcplValueForKey(result->list,"COLUMNS");
 		FBCPList* column  = (FBCPList*)fbcplValueAtIndex(columns,result->rowIndex);
 		if ( columnIndex == 0 )  
-		{ // Name
+		{ /* Name */
 			FBCPList* name = (FBCPList*)fbcplValueForKey(column,"NAME");
 			return_value->type = IS_STRING;
 			phpfbestrdup(fbcplString(( FBCPList*)name), &return_value->value.str.len, &return_value->value.str.val);
 		}
 		else if ( columnIndex == 2 )
-		{ // Length
+		{ /* Length */
 			FBCPList* name = (FBCPList*)fbcplValueForKey(column,"WIDTH");
 			return_value->type = IS_STRING;
 			phpfbestrdup((const char*)fbcplString(name), &return_value->value.str.len, &return_value->value.str.val);
 		}
 		else if ( columnIndex == 1 )
-		{ // Type
+		{ /* Type */
 			FBCPList* name = (FBCPList*)fbcplValueForKey(column,"DATATYPE");
 			return_value->type = IS_STRING;
 			phpfbestrdup((const char*)fbcplString(name), &return_value->value.str.len, &return_value->value.str.val);
 		}
 		else if ( columnIndex == 3 )
-		{ // Flags
+		{ /* Flags */
 			return_value->type = IS_STRING;
 			phpfbestrdup("", &return_value->value.str.len, &return_value->value.str.val);
 		}
@@ -2214,13 +2294,13 @@ void phpfbSqlResult ( INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int row
 		}
 	}
 	else if (result->array)
-	{ // Special case for get dbs
+	{ /* Special case for get dbs */
 		phpfbestrdup((char*)fbaObjectAtIndex(result->array,rowIndex), &return_value->value.str.len, &return_value->value.str.val);
 		return_value->type          = IS_STRING;
 	}
 	else if (!phpfbFetchRow(result,rowIndex))
 	{
-//     php_error(E_WARNING,"No such row %d in result set %d",resultIndex+1,rowIndex);
+/*     php_error(E_WARNING,"No such row %d in result set %d",resultIndex+1,rowIndex); */
 		RETURN_FALSE;
 	}
 	else if (columnIndex >= result->columnCount)
@@ -2247,7 +2327,8 @@ void phpfbSqlResult ( INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int row
 	}
 }
                        
-// int fbsql_result(int result, int row [, mixed field])
+/* {{{ proto int fbsql_result(int result, int row [, mixed field])
+	*/
 PHP_FUNCTION(fbsql_result)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2313,8 +2394,11 @@ PHP_FUNCTION(fbsql_result)
 		result->columnIndex = 0;
 	}
 }
+/* }}} */
 
-// int fbsql_next_result(int result)
+
+/* {{{ proto int fbsql_next_result(int result)
+	*/
 PHP_FUNCTION(fbsql_next_result)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2356,8 +2440,11 @@ PHP_FUNCTION(fbsql_next_result)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
-// int fbsql_num_rows(int result)
+
+/* {{{ proto int fbsql_num_rows(int result)
+	*/
 PHP_FUNCTION(fbsql_num_rows)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2389,8 +2476,11 @@ PHP_FUNCTION(fbsql_num_rows)
 	return_value->value.lval = rowCount;
 	return_value->type       = IS_LONG;
 }
+/* }}} */
 
-// int fbsql_num_fields(int result)
+
+/* {{{ proto int fbsql_num_fields(int result)
+	*/
 PHP_FUNCTION(fbsql_num_fields)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2417,8 +2507,11 @@ PHP_FUNCTION(fbsql_num_fields)
 
 	FB_SQL_G(resultIndex) = resultIndex;
 }
+/* }}} */
 
-// object fbsql_fetch_object(int result [, int result_typ])
+
+/* {{{ proto object fbsql_fetch_object(int result [, int result_typ])
+	*/
 PHP_FUNCTION(fbsql_fetch_object)
 {
 	PHP_FN(fbsql_fetch_array)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -2429,8 +2522,11 @@ PHP_FUNCTION(fbsql_fetch_object)
 		return_value->value.obj.ce = &zend_standard_class_def;
 	}
 }
+/* }}} */
 
-// array fbsql_fetch_row(int result)
+
+/* {{{ proto array fbsql_fetch_row(int result)
+	*/
 PHP_FUNCTION(fbsql_fetch_row)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2486,8 +2582,11 @@ PHP_FUNCTION(fbsql_fetch_row)
 	result->columnIndex = 0;
 	FB_SQL_G(resultIndex) = resultIndex;
 }
+/* }}} */
 
-// array fbsql_fetch_array(int result [, int result_typ])
+
+/* {{{ proto array fbsql_fetch_array(int result [, int result_typ])
+	*/
 PHP_FUNCTION(fbsql_fetch_array)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2576,8 +2675,11 @@ PHP_FUNCTION(fbsql_fetch_array)
 	result->rowIndex    = result->rowIndex+1;
 	result->columnIndex = 0;
 }
+/* }}} */
 
-// int fbsql_data_seek(int result, int row_number)
+
+/* {{{ proto int fbsql_data_seek(int result, int row_number)
+	*/
 PHP_FUNCTION(fbsql_data_seek)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2609,8 +2711,11 @@ PHP_FUNCTION(fbsql_data_seek)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
-// array fbsql_fetch_lengths(int result)
+
+/* {{{ proto array fbsql_fetch_lengths(int result)
+	*/
 PHP_FUNCTION(fbsql_fetch_lengths)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2644,8 +2749,11 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 	}
 	FB_SQL_G(resultIndex) = resultIndex;
 }
+/* }}} */
 
-// object fbsql_fetch_field(int result [, int field_offset])
+
+/* {{{ proto object fbsql_fetch_field(int result [, int field_offset])
+	*/
 PHP_FUNCTION(fbsql_fetch_field)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2692,19 +2800,22 @@ PHP_FUNCTION(fbsql_fetch_field)
 	add_property_string(return_value, "table",      (char*)fbccmdTableName(fbcmdColumnMetaDataAtIndex(result->metaData,column)),1);
 	add_property_long(return_value,   "max_length", fbcdmdLength(fbccmdDatatype(fbcmdColumnMetaDataAtIndex(result->metaData,column))));
 	add_property_string(return_value, "type",       (char*)fbcdmdDatatypeString (fbcmdDatatypeMetaDataAtIndex(result->metaData, column)),1);
-//	Remember to add the rest
-//	add_property_long(return_value, "not_null",IS_NOT_NULL(mysql_field->flags)?1:0);
-//	add_property_long(return_value, "primary_key",IS_PRI_KEY(mysql_field->flags)?1:0);
-//	add_property_long(return_value, "multiple_key",(mysql_field->flags&MULTIPLE_KEY_FLAG?1:0));
-//	add_property_long(return_value, "unique_key",(mysql_field->flags&UNIQUE_KEY_FLAG?1:0));
-//	add_property_long(return_value, "numeric",IS_NUM(mysql_field->type)?1:0);
-//	add_property_long(return_value, "blob",IS_BLOB(mysql_field->flags)?1:0);
-//	add_property_string(return_value, "type",php_mysql_get_field_name(mysql_field->type), 1);
-//	add_property_long(return_value, "unsigned",(mysql_field->flags&UNSIGNED_FLAG?1:0));
-//	add_property_long(return_value, "zerofill",(mysql_field->flags&ZEROFILL_FLAG?1:0));
+/*	Remember to add the rest */
+/*	add_property_long(return_value, "not_null",IS_NOT_NULL(mysql_field->flags)?1:0); */
+/*	add_property_long(return_value, "primary_key",IS_PRI_KEY(mysql_field->flags)?1:0); */
+/*	add_property_long(return_value, "multiple_key",(mysql_field->flags&MULTIPLE_KEY_FLAG?1:0)); */
+/*	add_property_long(return_value, "unique_key",(mysql_field->flags&UNIQUE_KEY_FLAG?1:0)); */
+/*	add_property_long(return_value, "numeric",IS_NUM(mysql_field->type)?1:0); */
+/*	add_property_long(return_value, "blob",IS_BLOB(mysql_field->flags)?1:0); */
+/*	add_property_string(return_value, "type",php_mysql_get_field_name(mysql_field->type), 1); */
+/*	add_property_long(return_value, "unsigned",(mysql_field->flags&UNSIGNED_FLAG?1:0)); */
+/*	add_property_long(return_value, "zerofill",(mysql_field->flags&ZEROFILL_FLAG?1:0)); */
 }
+/* }}} */
 
-// int fbsql_field_seek(int result, int field_offset)
+
+/* {{{ proto int fbsql_field_seek(int result, int field_offset)
+	*/
 PHP_FUNCTION(fbsql_field_seek)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2748,8 +2859,11 @@ PHP_FUNCTION(fbsql_field_seek)
 	result->columnIndex = column;
 	RETURN_TRUE;
 }
+/* }}} */
 
-// string mysql_field_name(int result, int field_index)
+
+/* {{{ proto string mysql_field_name(int result, int field_index)
+	*/
 PHP_FUNCTION(fbsql_field_name)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2802,8 +2916,11 @@ PHP_FUNCTION(fbsql_field_name)
 		result->columnIndex = column;
 	}
 }
+/* }}} */
 
-// string fbsql_field_table(int result, int field_index)
+
+/* {{{ proto string fbsql_field_table(int result, int field_index)
+	*/
 PHP_FUNCTION(fbsql_field_table)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2847,8 +2964,11 @@ PHP_FUNCTION(fbsql_field_table)
 					&return_value->value.str.val);
 	return_value->type = IS_STRING;
 }
+/* }}} */
 
-// string fbsql_field_lene(int result, int field_index)
+
+/* {{{ proto string fbsql_field_lene(int result, int field_index)
+	*/
 PHP_FUNCTION(fbsql_field_len)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2906,8 +3026,11 @@ PHP_FUNCTION(fbsql_field_len)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
-// string fbsql_field_type(int result, int field_index)
+
+/* {{{ proto string fbsql_field_type(int result, int field_index)
+	*/
 PHP_FUNCTION(fbsql_field_type)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -2962,8 +3085,11 @@ PHP_FUNCTION(fbsql_field_type)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
-// string fbsql_field_flags(int result, int field_index)
+
+/* {{{ proto string fbsql_field_flags(int result, int field_index)
+	*/
 PHP_FUNCTION(fbsql_field_flags)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -3006,11 +3132,14 @@ PHP_FUNCTION(fbsql_field_flags)
 	{
 		RETURN_FALSE;
 	}
-   // We should create the result -- currently empty
+   /* We should create the result -- currently empty */
 
 }
+/* }}} */
 
-// int fbsql_free_result(int result)
+
+/* {{{ proto int fbsql_free_result(int result)
+	*/
 PHP_FUNCTION(fbsql_free_result)
 {
 	int   argc    = ARG_COUNT(ht);
@@ -3035,5 +3164,6 @@ PHP_FUNCTION(fbsql_free_result)
 	FB_SQL_G(resultIndex) = 0;
 	RETURN_TRUE;
 }
+/* }}} */
 
 #endif
