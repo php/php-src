@@ -74,7 +74,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 			display_string_length = sizeof("<i>no value</i>")-1;
 		}
 		if(esc_html) {
-			php_html_puts(display_string, display_string_length TSRMLS_CC);
+			zend_html_puts(display_string, display_string_length);
 		} else {
 			PHPWRITE(display_string, display_string_length);
 		}
