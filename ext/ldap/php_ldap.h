@@ -78,6 +78,8 @@ PHP_FUNCTION(ldap_error);
 
 PHP_FUNCTION(ldap_compare);
 
+PHP_FUNCTION(ldap_sort);
+
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP
 PHP_FUNCTION(ldap_get_option);
 PHP_FUNCTION(ldap_set_option);
