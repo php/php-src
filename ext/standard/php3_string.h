@@ -79,6 +79,7 @@ extern void php3_setlocale(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_stristr(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_chunk_split(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_parsestr(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(bin2hex);
 
 extern PHPAPI char *_php3_strtoupper(char *s);
 extern PHPAPI char *_php3_strtolower(char *s);
