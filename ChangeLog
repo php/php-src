@@ -1,3 +1,106 @@
+2002-04-29  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/pear.m4: MFH: Add the shared extension check.
+
+    * ext/ming/config.m4:
+    Never add libraries without checking that they exist and can be linked.
+
+2002-04-29  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: MFH
+
+    * ext/com/COM.c: RETURN_NULL() is defined with braces while RETURN_TRUE
+    and RETURN_FALSE are defined without.
+    seems not very consistent ?
+
+2002-04-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c: MFH
+
+    * ext/standard/var.c: Add comments for the fix
+
+    * ext/standard/var.c: Fix here too
+
+2002-04-29  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: MFH
+
+    * ext/com/COM.c:
+    functions returned FALSE in case of error and the oo api returned NULL.
+    make them both behave equal (return NULL, as FALSE can be a valid value).
+
+2002-04-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c: MFH serializer fix
+
+    * ext/standard/var.c: Yet another serialization fix - for incomplete class
+
+2002-04-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/recode/config.m4
+      ext/recode/recode.c:
+    Make it possible to use recode 3.5 too. (happy now Wez? :)
+
+    * NEWS: Sync with PHP_4_2_0 branch.
+
+2002-04-29  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/sockets.c: - Fix WS and CS a bit
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+    - Store last errno in the module global 'last_error' implicitely
+    - Set the global 'last_error' explicitely for functions which can't return an
+      error withing a single socket context (socket_create and socket_select)
+    - Modified socket_last_error() to return global modules last
+      error if no socket resource is given
+    - Added a couple of more E_WARNING messages in case something
+      goes foobar so the user isn't left alone in the dark.
+
+2002-04-29  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/File/Find.php:
+    * fixed the maxrecursion in mapTreeMultiple()
+
+2002-04-29  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * NEWS: Added touch fix
+
+    * ext/standard/filestat.c: MFH touch bag fix
+
+    * NEWS: MFB
+
+    * NEWS: Added NEWS entry for PostgreSQL function rename.
+    Removed duplicate entry.
+
+2002-04-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-pear.xml: * version will be 0.10
+
+    * pear/PEAR/Packager.php: * slight cleanup
+
+    * pear/PEAR/Packager.php: * call the right parent constructor
+
+    * pear/PEAR/Command/Install.php:
+    * PEAR_Installer constructor now expects only the UI object
+
+    * pear/PEAR/Command/Remote.php:
+    * PEAR_Common::downloadHttp no longer wants a config object
+
+    * pear/PEAR/Common.php:
+    * always set $this->config (use PEAR_Config::singleton)
+    * rename setFrontend to setFrontendObject
+    * add validPackageName method
+    * added downloadHttp callback types setup, connfailed and writefailed
+    * no more passing config objects around
+
+    * pear/PEAR/Installer.php: * use the downloadHttp method w/callback
+
+2002-04-29  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/ming/config.m4:
+    shlib suffix was not defind and rint() was not found without -lm.
+
 2002-04-28  Jani Taskinen  <sniper@iki.fi>
 
     * build/rules.mk: Fixed bug: #16858
