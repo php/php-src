@@ -75,10 +75,6 @@
 #endif /* ZEND_MULTIBYTE */
 
 #if HAVE_MBSTRING
-
-#if HAVE_MBREGEX
-#include "mbregex.h"
-#endif
 /* }}} */
 
 /* {{{ prototypes */
@@ -170,21 +166,6 @@ static const struct mb_overload_def mb_ovld[] = {
 	{0, NULL, NULL, NULL}
 }; 
 /* }}} */
-
-#if HAVE_MBREGEX
-struct def_mbctype_tbl {
-	enum mbfl_no_encoding mbfl_encoding;
-	int regex_encoding;
-};
-
-const struct def_mbctype_tbl mbctype_tbl[] = {
-	{mbfl_no_encoding_ascii,MBCTYPE_ASCII},
-	{mbfl_no_encoding_euc_jp,MBCTYPE_EUC},
-	{mbfl_no_encoding_sjis,MBCTYPE_SJIS},
-	{mbfl_no_encoding_utf8,MBCTYPE_UTF8},
-	{mbfl_no_encoding_pass,-1}
-};
-#endif
 
 /* {{{ function_entry mbstring_functions[] */
 function_entry mbstring_functions[] = {
@@ -524,9 +505,6 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
 	enum mbfl_no_encoding no_encoding;
-#if HAVE_MBREGEX
-	const struct def_mbctype_tbl *p = NULL;
-#endif
 	if (new_value == NULL) {
 		return SUCCESS;
 	}
@@ -536,14 +514,13 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 		MBSTRG(internal_encoding) = no_encoding;
 		MBSTRG(current_internal_encoding) = no_encoding;
 #if HAVE_MBREGEX
-		p=&(mbctype_tbl[0]);
-		while (p->regex_encoding >= 0){
-			if (p->mbfl_encoding == MBSTRG(internal_encoding)){
-				MBSTRG(default_mbctype) = p->regex_encoding;
-				MBSTRG(current_mbctype) = p->regex_encoding;
-				break;
-			}
-			p++;
+ 		{
+ 			php_mb_reg_char_encoding mbctype;
+ 			mbctype = php_mb_regex_name2mbctype(new_value);
+ 			if (mbctype == REGCODE_UNDEF) {
+ 				mbctype = REGCODE_EUCJP;
+ 			}
+ 			MBSTRG(current_mbctype) = MBSTRG(default_mbctype) = mbctype;
 		}
 #endif
 #ifdef ZEND_MULTIBYTE
@@ -900,8 +877,11 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 /* {{{ PHP_MINFO_FUNCTION(mbstring) */
 PHP_MINFO_FUNCTION(mbstring)
 {
+	char buf[32];
+
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Multibyte Support", "enabled");
+	php_info_print_table_row(2, "Multibyte string engine", "libmbfl");
 #if defined(HAVE_MBSTR_JA)
 	php_info_print_table_row(2, "Japanese support", "enabled");	
 #endif
@@ -921,7 +901,10 @@ PHP_MINFO_FUNCTION(mbstring)
 		php_info_print_table_row(2, "HTTP input encoding translation", "enabled");	
 	}
 #if defined(HAVE_MBREGEX)
-	php_info_print_table_row(2, "Multibyte (japanese) regex support", "enabled");	
+	php_info_print_table_row(2, "Multibyte (japanese) regex support", "enabled");
+	sprintf(buf, "%d.%d.%d",
+			ONIGURUMA_VERSION_MAJOR,ONIGURUMA_VERSION_MINOR,ONIGURUMA_VERSION_TEENY);
+	php_info_print_table_row(2, "Multibyte regex (oniguruma) version", buf);	
 #endif
 	php_info_print_table_end();
 

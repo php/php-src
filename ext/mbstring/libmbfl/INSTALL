@@ -1,0 +1,12 @@
+
+For UNIX compatible system,
+
+./buildconf
+./configure 
+make
+make install
+
+For Windows,
+
+Visual C++ 6.0 and Borland C++ 5.0 is suppoted.
+
