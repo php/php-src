@@ -598,9 +598,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 	zend_hash_destroy(executor_globals->zend_constants);
 	*executor_globals->zend_constants = *GLOBAL_CONSTANTS_TABLE;
-
-	CG(global_namespace).name = NULL;
-	CG(global_namespace).name_length = 0;
 #else
 	zend_hash_init_ex(CG(auto_globals), 8, NULL, (dtor_func_t) zend_auto_global_dtor, 1, 0);
 	scanner_globals_ctor(&ini_scanner_globals TSRMLS_CC);
