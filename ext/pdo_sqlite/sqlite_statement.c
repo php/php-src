@@ -34,7 +34,6 @@
 static int pdo_sqlite_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
-	int i;
 
 	if (S->stmt) {
 		sqlite3_finalize(S->stmt);
@@ -46,18 +45,14 @@ static int pdo_sqlite_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 
 static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = stmt->dbh;
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
-	pdo_sqlite_db_handle *H = S->H;
-	int i;
 
 	if (stmt->executed && !S->done) {
 		sqlite3_reset(S->stmt);
 	}
 
 	S->done = 0;
-	i = sqlite3_step(S->stmt);
-	switch (i) {
+	switch (sqlite3_step(S->stmt)) {
 		case SQLITE_ROW:
 			S->pre_fetched = 1;
 			stmt->column_count = sqlite3_data_count(S->stmt);
@@ -81,10 +76,7 @@ static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 		enum pdo_param_event event_type TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = stmt->dbh;
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
-	pdo_sqlite_db_handle *H = S->H;
-	int i;
 
 	switch (event_type) {
 		case PDO_PARAM_EVT_EXEC_PRE:
@@ -105,25 +97,27 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						return 0;
 
 					case PDO_PARAM_NULL:
-						i = sqlite3_bind_null(S->stmt, param->paramno + 1);
-						if (i == SQLITE_OK)
+						if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
 							return 1;
+						}
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
 						
 					case PDO_PARAM_STR:
 					default:
 						if (Z_TYPE_P(param->parameter) == IS_NULL) {
-							i = sqlite3_bind_null(S->stmt, param->paramno + 1);
+							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
+								return 1;
+							}
 						} else {
 							convert_to_string(param->parameter);
-							i = sqlite3_bind_text(S->stmt, param->paramno + 1,
+							if(SQLITE_OK == sqlite3_bind_text(S->stmt, param->paramno + 1,
 								Z_STRVAL_P(param->parameter),
 								Z_STRLEN_P(param->parameter),
-								SQLITE_STATIC);
+								SQLITE_STATIC)) {
+								return 1;	
+							}
 						}
-						if (i == SQLITE_OK)
-							return 1;
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
 				}
