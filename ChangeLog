@@ -1,3 +1,8 @@
+2000-12-25  James L. Pine  <jlp@valinux.com>
+
+    * pear/DB/oci8.php:
+    added quoteString function to override the one in common.  replaces single quotes with double single quotes.
+
 2000-12-24  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/gmp/tests/002.phpt
