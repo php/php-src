@@ -442,12 +442,12 @@ class_statement:
 	|	is_static T_FUNCTION { $2.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$5, 1, $4.op_type, $1.u.constant.value.lval TSRMLS_CC); } '(' 
 			parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 	|	T_CLASS T_STRING extends_from '{' { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
-	|	T_ABSTRACT T_FUNCTION { $2.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$5, 1, $4.op_type, $1.u.constant.value.lval TSRMLS_CC); } '(' 
+	|	T_ABSTRACT T_FUNCTION { $2.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$5, 1, $4.op_type, FN_ABSTRACT TSRMLS_CC); } '(' 
 			parameter_list ')' { zend_do_abstract_method(TSRMLS_C); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 ;
 
 is_static:
-		T_STATIC	{ $$.u.constant.value.lval = 1; }
+		T_STATIC	{ $$.u.constant.value.lval = FN_IS_STATIC; }
 	|	/* empty */ { $$.u.constant.value.lval = 0; }
 ;
 	

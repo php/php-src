@@ -162,6 +162,11 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 #define IS_OVERLOADED_OBJECT 1
 #define IS_STRING_OFFSET 2
 
+/* The following tries to resolve the classname of a zval of type object.
+ * Since it is slow it should be only used in error messages.
+ */
+#define Z_OBJ_CLASS_NAME_P(zval) ((zval) && (zval)->type == IS_OBJECT && Z_OBJ_HT_P(zval)->get_class_entry != NULL && Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC) ? Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC)->name : "")
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */

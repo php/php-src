@@ -141,7 +141,7 @@ static zend_function_entry builtin_functions[] = {
 
 int zend_startup_builtin_functions(TSRMLS_D)
 {
-	return zend_register_functions(builtin_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
+	return zend_register_functions(NULL, builtin_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
 }
 
 

@@ -124,7 +124,7 @@ ZEND_API char *zend_zval_type_name(zval *arg);
 
 /* End of parameter parsing API -- andrei */
 
-int zend_register_functions(zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
+int zend_register_functions(zend_class_entry *scope, zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
 void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
 ZEND_API int zend_register_module(zend_module_entry *module_entry);
 
