@@ -53,6 +53,12 @@ void orbit_class_function_call(
 		/* TODO: handle error */
 	}
 
+	if (!object)
+	{
+		zend_error(E_WARNING, "Invalid Satellite class");\
+		return;
+	}
+
 	/* constructor or normal function? */
 	if (zend_llist_count(pPropertyReference->elements_list) == 1
 			&& !strcasecmp(function_name->element.value.str.val, pClass->name))
@@ -149,6 +155,9 @@ void * orbit_retrieve_data(const zval * php_object, int wanted_type)
 	pval ** orbit_data_handle = NULL;
 	int type = 0;
 
+	if (!php_object)
+		return NULL;
+	
 	/* get handle to corba data */
 	zend_hash_index_find(										
 			php_object->value.obj.properties,		/* hash table */	
