@@ -41,7 +41,10 @@
 
 DBA_OPEN_FUNC(flatfile)
 {
-	int fd, flags;
+	int fd;
+#ifdef F_SETFL
+	int flags;
+#endif
 
 	if (info->mode != DBA_READER) {
 		if (SUCCESS != php_stream_cast(info->fp, PHP_STREAM_AS_FD, (void*)&fd, 1)) {
