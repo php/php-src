@@ -509,6 +509,7 @@ PHP_FUNCTION(yaz_wait)
 	int event_mode = 0;
 	int no = 0;
 	ZOOM_connection conn_ar[MAX_ASSOC];
+	Yaz_Association conn_as[MAX_ASSOC];
 	int i, timeout = 15;
 
 	if (ZEND_NUM_ARGS() == 1) {
@@ -541,6 +542,7 @@ PHP_FUNCTION(yaz_wait)
 
 			sprintf(str, "%d", timeout);
 			ZOOM_connection_option_set(p->zoom_conn, "timeout", str);
+			conn_as[no] = p;
 			conn_ar[no++] = p->zoom_conn;
 		}
 	}
@@ -552,8 +554,10 @@ PHP_FUNCTION(yaz_wait)
 		if (ev <= 0) {
 			RETURN_FALSE;
 		} else {
-			Yaz_Association p = shared_associations[ev-1];
+			Yaz_Association p = conn_as[ev-1];
 			int event_code = ZOOM_connection_last_event(p->zoom_conn);
+
+			add_assoc_long(*pval_options, "connid", ev);
 
 			add_assoc_long(*pval_options, "eventcode", event_code);
 
