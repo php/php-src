@@ -2732,11 +2732,11 @@ PHP_FUNCTION(pg_unescape_bytea)
 		return;
 	}
 
-	to = (char *)php_pgsql_unescape_bytea((unsigned char*)from, from_len);
+	to = (char *)php_pgsql_unescape_bytea((unsigned char*)from, &to_len);
 	if (!to) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(to, to_len-1, 1); /* to_len includes addtional '\0' */
+	RETVAL_STRINGL(to, to_len, 1);
 	free(to);
 }
 /* }}} */
