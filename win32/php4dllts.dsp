@@ -1900,7 +1900,7 @@ SOURCE=..\ext\standard\sha1.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\sunfuncs.h
+SOURCE=..\ext\standard\php_sunfuncs.h
 # End Source File
 # Begin Source File
 
