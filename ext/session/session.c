@@ -832,6 +832,7 @@ static void php_session_start(PSLS_D)
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
+			send_cookie = 0;
 		}
 
 		if (!PS(id) &&
@@ -841,6 +842,7 @@ static void php_session_start(PSLS_D)
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
+			send_cookie = 0;
 		}
 	}
 
