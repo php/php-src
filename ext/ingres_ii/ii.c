@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_ini.h"
+#include "ext/standard/info.h"
 #include "php_ii.h"
 #include "ii.h"
 #include "ext/standard/php_string.h"
@@ -43,7 +44,7 @@ function_entry ii_functions[] = {
   PHP_FE(ingres_connect,	      NULL)
   PHP_FE(ingres_pconnect,	      NULL)
   PHP_FE(ingres_close,            NULL)
-  PHP_FE(ingres_query,	      NULL)
+  PHP_FE(ingres_query,			  NULL)
   PHP_FE(ingres_num_rows,         NULL)
   PHP_FE(ingres_num_fields,       NULL)
   PHP_FE(ingres_field_name,       NULL)
@@ -174,10 +175,10 @@ static void php_close_ii_link(zend_rsrc_list_entry *rsrc)
 static void _close_ii_plink(zend_rsrc_list_entry *rsrc)
 {
 	II_LINK *link = (II_LINK *)rsrc->ptr;
-  IILS_FETCH();
-
-  close_ii_link(link);
-  IIG(num_persistent)--;
+	IILS_FETCH();
+	
+	close_ii_link(link);
+	IIG(num_persistent)--;
 }
 
 /* cleans up the given persistent link.
@@ -257,7 +258,7 @@ PHP_MINIT_FUNCTION(ii)
   REGISTER_INI_ENTRIES();
   
   le_ii_link = zend_register_list_destructors_ex(php_close_ii_link, NULL, "ingres", module_number);
-  le_ii_plink = zend_register_list_destructors_ex(_clean_ii_plink, php_close_ii_plink, "ingres persistent", module_number);
+  le_ii_plink = zend_register_list_destructors_ex(_clean_ii_plink, _close_ii_plink, "ingres persistent", module_number);
 
   IIG(num_persistent) = 0;
 
