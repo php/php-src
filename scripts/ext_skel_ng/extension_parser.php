@@ -944,35 +944,77 @@ $code .= "
 	// {{{ config.m4 file
 	function write_config_m4() {
 
-		$upname = $this->name;
+		$upname = strtoupper($this->name);
 		
-		$fp = fopen("{$this->name}/config.m4", "w");
-		fputs($fp, 
-"dnl
-dnl \$ Id: \$
+		ob_start();
+
+		echo 
+'dnl
+dnl $ Id: $
 dnl
+';
+		
+		if(isset($this->with)) {
+			echo " 
+PHP_ARG_WITH({$this->name}, whether to enable {$this->name} functions,
+[  --with-{$this->name}[=DIR]      With {$this->name} support], yes)
+";
 
-PHP_ARG_ENABLE({$this->name} , whether to enable {$this->name} functions,
-[  --disable-{$this->name}         Disable {$this->name} functions], yes)
+		echo "
+if test \"\$PHP_$upname\" != \"no\"; then
+  if test -r \"\$PHP_$upname/{$this->with['testfile']}\"; then
+    PHP_{$upname}_DIR=\"\$PHP_$upname\"
+  else
+    AC_MSG_CHECKING(for {$this->name} in default path)
+    for i in ".str_replace(":"," ",$this->with['defaults'])."; do
+      if test -r \"\$i/{$this->with['testfile']}\"; then
+        PHP_{$upname}_DIR=\$i
+        AC_MSG_RESULT(found in \$i)
+      fi
+    done
+  fi
+fi
 
-");
+PHP_ADD_INCLUDE(\$PHP_{$upname}_DIR/include)
+";
 
-    if ($this->language === "cpp") {
-      fputs($fp, "PHP_REQUIRE_CXX\n");
+		if (count($this->libs)) {
+      echo "PHP_SUBST({$upname}_SHARED_LIBADD)\n";
+
+			foreach ($this->libs as $lib) {
+        echo "PHP_ADD_LIBRARY_WITH_PATH($lib[name], \$PHP_{$upname}_DIR/lib, {$upname}_SHARED_LIBADD)\n";
+			  if(isset($lib['function'])) {
+           echo "AC_CHECK_LIB($lib[name], $lib[function], [AC_DEFINE(HAVE_".strtoupper($lib['name']).",1,[ ])], [AC_MSG_ERROR($lib[name] library not found or wrong version)],)\n";
+        }
+			}
     }
 
-    fputs($fp, "
+		} else {
+		echo "
+PHP_ARG_ENABLE({$this->name} , whether to enable {$this->name} functions,
+[  --disable-{$this->name}         Disable {$this->name} support], yes)
+";
+		}
+
+		if ($this->language === "cpp") {
+			echo "PHP_REQUIRE_CXX\n";
+		}
+
+		echo "
 if test \"\$PHP_$upname\" != \"no\"; then
   AC_DEFINE(HAVE_$upname, 1, [ ])
   PHP_NEW_EXTENSION({$this->name}, ".join(" ", $this->files['c'])." , \$ext_shared)
 fi
-");
+";
 
-    if ($this->language === "cpp") {
-      echo "PHP_ADD_LIBRARY(stdc++)\n";
-    }
+		if ($this->language === "cpp") {
+			echo "  PHP_ADD_LIBRARY(stdc++)\n";
+		}
 
+		$fp = fopen("{$this->name}/config.m4", "w");
+		fputs($fp, ob_get_contents());
 		fclose($fp);
+    ob_end_clean();
 	}
 
 	// }}} 

@@ -38,7 +38,7 @@
   </changelog>
 	
 
-	<deps>
+	<deps language="c">
 	  <!-- these are not yet used in any way :( -->
     <with defaults='/usr:/usr/local' testfile='include/dummy.h'></with>
     <lib name='dummy' function='dummy' searchpath='/usr/lib:/lib'></lib>
