@@ -61,7 +61,7 @@ $GLOBALS['_PEAR_Common_dependency_relations'] = array('has','eq','lt','le','gt',
  * Valid file roles
  * @var array
  */
-$GLOBALS['_PEAR_Common_file_roles'] = array('php','ext','test','doc','data','extsrc','script');
+$GLOBALS['_PEAR_Common_file_roles'] = array('php','ext','test','doc','data','src','script');
 
 /**
  * Valid replacement types
@@ -444,6 +444,16 @@ class PEAR_Common extends PEAR
                 if (!$this->in_changelog) {
                     $this->d_i = (isset($this->d_i)) ? $this->d_i + 1 : 0;
                     $this->pkginfo['release_deps'][$this->d_i] = $attribs;
+                }
+                break;
+            case 'configureoptions':
+                if (!$this->in_changelog) {
+                    $this->pkginfo['configure_options'] = array();
+                }
+                break;
+            case 'configureoption':
+                if (!$this->in_changelog) {
+                    $this->pkginfo['configure_options'][] = $attribs;
                 }
                 break;
         }
@@ -868,6 +878,19 @@ class PEAR_Common extends PEAR
             }
             $ret .= "$indent    </deps>\n";
         }
+        if (isset($pkginfo['configure_options'])) {
+            $ret .= "$indent    <configureoptions>\n";
+            foreach ($pkginfo['configure_options'] as $c) {
+                $ret .= "$indent      <configureoption name=\"".
+                    htmlspecialchars($c['name']) . "\"";
+                if (isset($c['default'])) {
+                    $ret .= " default=\"" . htmlspecialchars($c['default']) . "\"";
+                }
+                $ret .= " prompt=\"" . htmlspecialchars($c['prompt']) . "\"";
+                $ret .= "/>\n";
+            }
+            $ret .= "$indent    </configureoptions>\n";
+        }
         if (isset($pkginfo['filelist'])) {
             $ret .= "$indent    <filelist>\n";
             foreach ($pkginfo['filelist'] as $file => $fa) {
@@ -1034,6 +1057,17 @@ class PEAR_Common extends PEAR
                     $errors[] = "dependency $i: missing name";
                 }
                 $i++;
+            }
+        }
+        if (!empty($info['configure_options'])) {
+            $i = 1;
+            foreach ($info['configure_options'] as $c) {
+                if (empty($c['name'])) {
+                    $errors[] = "configure option $i: missing name";
+                }
+                if (empty($c['prompt'])) {
+                    $errors[] = "configure option $i: missing prompt";
+                }
             }
         }
         if (empty($info['filelist'])) {

@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.24 2002-04-28 07:58:41 ssb Exp $
+     $Id: package.dtd,v 1.25 2002-05-27 01:20:07 ssb Exp $
 
      This is the PEAR package description, version 1.0b7.
      It should be used with the informal public identifier:
@@ -43,7 +43,7 @@
 
 <!ELEMENT changelog (release)+>
 
-<!ELEMENT release (version|license|state|date|notes|filelist|deps|provides|script)+>
+<!ELEMENT release (version|license|state|date|notes|filelist|deps|provides|script|configureoptions)+>
 
 <!ELEMENT version (#PCDATA)>
 
@@ -60,9 +60,11 @@
               baseinstalldir CDATA #IMPLIED>
 
 <!ELEMENT file (replace*)>
-<!ATTLIST file role           (php|ext|test|doc|data|script) 'php'
+<!ATTLIST file role           (php|ext|src|test|doc|data|script) 'php'
                debug          (na|on|off)        'na'
-               threaded       (na|on|off)        'na'
+               zts            (na|on|off)        'na'
+               phpapi         NUMBER             #IMPLIED
+               zendapi        NUMBER             #IMPLIED
                format         CDATA              #IMPLIED
                baseinstalldir CDATA              #IMPLIED
                platform       CDATA              #IMPLIED
@@ -103,3 +105,11 @@
                  pre-build    |post-build    |
                  pre-configure|post-configure|
                  pre-setup    |post-setup    )         #REQUIRED>
+
+<!ELEMENT configureoptions (configureoption*)>
+
+<!ELEMENT configureoption EMPTY>
+<!ATTLIST configureoption
+        name     CDATA      #REQUIRED
+        default  CDATA      #IMPLIED
+        prompt   CDATA      #REQUIRED>
