@@ -680,8 +680,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			}
 			
 			if ((retval = xml_call_handler(parser, parser->startElementHandler, parser->startElementPtr, 3, args))) {
-				zval_dtor(retval);
-				efree(retval);
+				zval_ptr_dtor(&retval);
 			}
 		} 
 
@@ -721,8 +720,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			if (atcnt) {
 				zend_hash_add(Z_ARRVAL_P(tag),"attributes",sizeof("attributes"),&atr,sizeof(zval*),NULL);
 			} else {
-				zval_dtor(atr);
-				FREE_ZVAL(atr);
+				zval_ptr_dtor(&atr);
 			}
 
 			zend_hash_next_index_insert(Z_ARRVAL_P(parser->data),&tag,sizeof(zval*),(void *) &parser->ctag);
@@ -749,8 +747,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 			args[1] = _xml_string_zval(tag_name);
 
 			if ((retval = xml_call_handler(parser, parser->endElementHandler, parser->endElementPtr, 2, args))) {
-				zval_dtor(retval);
-				efree(retval);
+				zval_ptr_dtor(&retval);
 			}
 		} 
 
@@ -799,8 +796,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			args[0] = _xml_resource_zval(parser->index);
 			args[1] = _xml_xmlchar_zval(s, len, parser->target_encoding);
 			if ((retval = xml_call_handler(parser, parser->characterDataHandler, parser->characterDataPtr, 2, args))) {
-				zval_dtor(retval);
-				efree(retval);
+				zval_ptr_dtor(&retval);
 			}
 		} 
 
@@ -877,8 +873,7 @@ void _xml_processingInstructionHandler(void *userData, const XML_Char *target, c
 		args[1] = _xml_xmlchar_zval(target, 0, parser->target_encoding);
 		args[2] = _xml_xmlchar_zval(data, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->processingInstructionHandler, parser->processingInstructionPtr, 3, args))) {
-			zval_dtor(retval);
-			efree(retval);
+			zval_ptr_dtor(&retval);
 		}
 	}
 }
@@ -895,8 +890,7 @@ void _xml_defaultHandler(void *userData, const XML_Char *s, int len)
 		args[0] = _xml_resource_zval(parser->index);
 		args[1] = _xml_xmlchar_zval(s, len, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->defaultHandler, parser->defaultPtr, 2, args))) {
-			zval_dtor(retval);
-			efree(retval);
+			zval_ptr_dtor(&retval);
 		}
 	}
 }
@@ -922,8 +916,7 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
 		args[5] = _xml_xmlchar_zval(notationName, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->unparsedEntityDeclHandler, parser->unparsedEntityDeclPtr, 6, args))) {
-			zval_dtor(retval);
-			efree(retval);
+			zval_ptr_dtor(&retval);
 		}
 	}
 }
@@ -947,8 +940,7 @@ void _xml_notationDeclHandler(void *userData,
 		args[3] = _xml_xmlchar_zval(systemId, 0, parser->target_encoding);
 		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->notationDeclHandler, parser->notationDeclPtr, 5, args))) {
-			zval_dtor(retval);
-			efree(retval);
+			zval_ptr_dtor(&retval);
 		}
 	}
 }
@@ -996,8 +988,7 @@ void _xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const
 		args[1] = _xml_xmlchar_zval(prefix, 0, parser->target_encoding);
 		args[2] = _xml_xmlchar_zval(uri, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->startNamespaceDeclHandler, parser->startNamespaceDeclPtr, 3, args))) {
-			zval_dtor(retval);
-			efree(retval);
+			zval_ptr_dtor(&retval);
 		}
 	}
 }
@@ -1014,8 +1005,7 @@ void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 		args[0] = _xml_resource_zval(parser->index);
 		args[1] = _xml_xmlchar_zval(prefix, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->endNamespaceDeclHandler, parser->endNamespaceDeclPtr, 2, args))) {
-			zval_dtor(retval);
-			efree(retval);
+			zval_ptr_dtor(&retval);
 		}
 	}
 }
