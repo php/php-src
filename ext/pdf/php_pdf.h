@@ -168,7 +168,6 @@ PHP_FUNCTION(pdf_setmatrix);
 #endif /* PDFlib >= V4 */
 
 #ifdef ZTS
-#define PDFG(v) (pdf_globals->v)
 #define PDFG(v) TSRMG(pdf_globals_id, php_pdf_globals *, v)
 #else
 #define PDFG(v) (pdf_globals.v)
