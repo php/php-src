@@ -1,11 +1,20 @@
 [IMPORTANT NOTICE]
 ------------------
- Please do not ask developers why some or all tests are failing in
-your environment! Let us know if you find why it fails. Thank you.
+ Failed tests usualy indicate a problem with your local system setup
+and not within PHP itself (at least for official PHP release versions).
+You may decide to automaticaly submit a test summary to our QA workflow
+at the end of a test run.
+ Please do *not* submit a failed test as a bug or ask for help on why
+it failed on your system without providing substantial backup information
+on *why* the test failed on your special setup. Thank you :-)
 
 
 [Testing Basics] 
 ----------------
+ The easiest way to test your PHP build is to run "make test" from the
+command line after successfully compiling. This will run the complete
+tests for all enabled functionalities and extensions using the PHP
+CLI binary (
  To execute test scripts, you must build PHP with some SAPI, then you
 type "make test" to execute all or some test scripts saved under
 "tests" directory under source root directory.
