@@ -553,7 +553,7 @@ php_formatted_print(int ht, int *len)
 	return result;
 }
 
-/* {{{ proto string sprintf(string format [, mixed arg1 [, ...]])
+/* {{{ proto string sprintf(string format [, mixed arg1 [, mixed ...]])
    Return a formatted string */
 PHP_FUNCTION(user_sprintf)
 {
@@ -568,7 +568,7 @@ PHP_FUNCTION(user_sprintf)
 }
 /* }}} */
 
-/* {{{ proto int printf(string format [, mixed arg1 [, ...]])
+/* {{{ proto int printf(string format [, mixed arg1 [, mixed ...]])
    Output a formatted string */
 PHP_FUNCTION(user_printf)
 {

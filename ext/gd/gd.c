@@ -516,7 +516,7 @@ PHP_FUNCTION(imagecreatefromxbm)
 }
 /* }}} */
 
-/* {{{ proto int imagecreatefromxpm(string filename)
+/* {{{ droto int imagecreatefromxpm(string filename)
    Create a new image from XPM file or URL */
 PHP_FUNCTION(imagecreatefromxpm)
 {
