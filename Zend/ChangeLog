@@ -1,3 +1,48 @@
+2003-05-20  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_operators.c:
+      bah humbug, use the pointer based version, which turns out to be an
+      instruction
+      faster
+
+    * zend_operators.c:
+      use pointer arithmetic for the normal zend_str_tolower()
+
+2003-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      No need to copy the zval unless __clone() is called
+
+2003-05-20  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_operators.c:
+      make this faster and sexier
+
+    * zend_execute.c:
+      use the new zend_str_tolower_copy() function
+
+    * zend_operators.c:
+      doesn't need to be register
+
+    * zend_execute_API.c
+      zend_operators.c
+      zend_operators.h:
+      optimize the lookups by avoiding a copy and then another pass
+      
+      Naked Dancing Girls should be given to: Myself, Zeev, Marcus,
+      and George Schlossnagle (in no particular order)
+
+    * zend_API.h
+      zend_execute_API.c:
+      add fast_call_user_function()
+
+2003-05-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * zend_API.h
+      zend_constants.h
+      zend_operators.h:
+      C++ compile fixes
+
 2003-04-07  Jani Taskinen  <sniper@iki.fi>
 
     * zend_language_scanner.l:
