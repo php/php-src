@@ -189,6 +189,12 @@ PHP_MINIT_FUNCTION(com_dotnet)
 PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 {
 	UNREGISTER_INI_ENTRIES();
+#if HAVE_MSCOREE_H
+	if (COMG(dotnet_runtime_stuff)) {
+		php_com_dotnet_mshutdown(TSRMLS_C);
+	}
+#endif
+
 	zend_ts_hash_destroy(&php_com_typelibraries);
 	return SUCCESS;
 }
