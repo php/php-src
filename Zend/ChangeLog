@@ -1,3 +1,29 @@
+2004-03-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_objects.c:
+      - Fix crash in destructors(). You can't throw an exception in destructors
+        as there is no guaranteed time when the destructor will be called.
+
+    * zend_reflection_api.c:
+      - Fix leak
+
+    * zend_reflection_api.c:
+      - Fix crash in reflection API (pierre)
+
+    * zend.c
+      zend_exceptions.c
+      zend_execute_API.c:
+      - Fix crash in exception handling (zend_exception_error(...) and
+        zend_eval_string_ex() were buggy (Dmitry, Andi)
+
+2004-03-01  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_compile.h:
+      - Typo fix (by Jan)
+
+    * zend_builtin_functions.c:
+      - Fixed bug #27443 (defined() returns wrong type).
+
 2004-02-29  Andi Gutmans  <andi@zend.com>
 
     * zend_reflection_api.c:

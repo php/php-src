@@ -1,3 +1,93 @@
+2004-03-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.w32:
+      - Fix win32 build.
+
+2004-03-01  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_objects.c:
+      - Fix crash in destructors(). You can't throw an exception in destructors
+        as there is no guaranteed time when the destructor will be called.
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix leak
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix crash in reflection API (pierre)
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute_API.c:
+      - Fix crash in exception handling (zend_exception_error(...) and
+        zend_eval_string_ex() were buggy (Dmitry, Andi)
+
+2004-03-01  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsltprocessor.c:
+      use php_libxml_import_node for transform functions
+
+2004-03-01  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_compile.h:
+      - Typo fix (by Jan)
+
+2004-03-01  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c
+      ext/simplexml/simplexml.c
+      ext/xsl/xsltprocessor.c:
+      Fix bug #27436 dom_import_simplexml innaccurate
+      extensions register callbacks to export nodes
+      prevents segfault passing invalid objects to import functions
+
+2004-03-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      - Use past tense
+
+    * NEWS:
+      - NFN
+
+    * ext/wddx/tests/001.phpt:
+      - Fix test.
+
+    * ext/standard/parsedate.y
+      ext/standard/tests/time/002.phpt:
+      - Add support for more ISO8601 style formats.
+       . Timezone specifier (ex. 20040301T00:00:00+1900)
+       . Week specifier "W"  (ex. 1997W021)
+      - Modified test case to test new features.
+
+2004-03-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_builtin_functions.c
+      tests/lang/bug27443.phpt:
+      - MFH: Fixed bug #27443 (defined() returns wrong type).
+
+    * tests/lang/bug27443.phpt:
+      
+      - Fixed bug #27443 (defined() returns wrong type).
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fixed bug #27443 (defined() returns wrong type).
+
+2004-03-01  Jon Parise  <jon@csh.rit.edu>
+
+    * main/streams/streams.c:
+      Cast the php_stream_dirent to a 'const char *' for estrndup() to avoid a
+      compiler warning.
+
+2004-03-01  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/dir.c:
+      context parameter for opendir() and dir()
+
+    * main/streams/php_stream_context.h:
+      Must addref the resource when we make a new zval reference to it that will
+      be exported to userspace.
+
 2004-02-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * NEWS:
