@@ -1,6 +1,6 @@
 diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
 --- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
-+++ thttpd-2.21b-cool/Makefile.in	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/Makefile.in	Sat Oct 26 19:54:48 2002
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -40,7 +40,7 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
 diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
 --- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
-+++ thttpd-2.21b-cool/config.h	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/config.h	Sat Oct 26 19:54:48 2002
 @@ -82,6 +82,11 @@
  */
  #define IDLE_READ_TIMELIMIT 60
@@ -64,7 +64,7 @@ diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  ** index pages for directories that don't have an explicit index file.
 diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
 --- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
-+++ thttpd-2.21b-cool/fdwatch.c	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/fdwatch.c	Sat Oct 26 19:54:48 2002
 @@ -460,7 +460,7 @@
  
      ridx = 0;
@@ -87,7 +87,7 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
      }
 diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 --- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/libhttpd.c	Sat Oct 26 19:54:48 2002
 @@ -85,6 +85,12 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -480,7 +480,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  
 diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
 --- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b-cool/libhttpd.h	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/libhttpd.h	Sat Oct 26 19:54:48 2002
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -509,7 +509,7 @@ diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
  ** mallocced strings.
 diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 --- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
-+++ thttpd-2.21b-cool/mime_encodings.txt	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/mime_encodings.txt	Sat Oct 26 19:54:48 2002
 @@ -3,6 +3,6 @@
  # A list of file extensions followed by the corresponding MIME encoding.
  # Extensions not found in the table proceed to the mime_types table.
@@ -521,7 +521,7 @@ diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
  uu	x-uuencode
 diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 --- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
-+++ thttpd-2.21b-cool/mime_types.txt	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/mime_types.txt	Sat Oct 26 19:54:48 2002
 @@ -1,135 +1,138 @@
 -# mime_types.txt
 -#
@@ -772,7 +772,7 @@ diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +ice	x-conference/x-cooltalk
 diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
 --- thttpd-2.21b/mmc.c	Fri Apr 13 23:02:15 2001
-+++ thttpd-2.21b-cool/mmc.c	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/mmc.c	Sat Oct 26 19:54:48 2002
 @@ -70,6 +70,7 @@
      unsigned int hash;
      int hash_idx;
@@ -844,7 +844,7 @@ diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
  	else
 diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
 --- thttpd-2.21b/mmc.h	Fri Apr 13 07:36:54 2001
-+++ thttpd-2.21b-cool/mmc.h	Sun Oct 13 13:52:58 2002
++++ thttpd-2.21b-cool/mmc.h	Sat Oct 26 19:54:48 2002
 @@ -31,8 +31,9 @@
  /* Returns an mmap()ed area for the given file, or (void*) 0 on errors.
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
@@ -858,16 +858,21 @@ diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
 diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 --- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b-cool/thttpd.c	Sun Oct 13 13:52:58 2002
-@@ -95,6 +95,7 @@
++++ thttpd-2.21b-cool/thttpd.c	Sat Oct 26 19:54:53 2002
+@@ -95,10 +95,10 @@
      httpd_conn* hc;
      int tnums[MAXTHROTTLENUMS];         /* throttle indexes */
      int numtnums;
 +    int keep_alive;
      long limit;
      time_t started_at;
-     Timer* idle_read_timer;
-@@ -111,12 +112,15 @@
+-    Timer* idle_read_timer;
+-    Timer* idle_send_timer;
++    time_t last_io;
+     Timer* wakeup_timer;
+     Timer* linger_timer;
+     long wouldblock_delay;
+@@ -111,12 +111,15 @@
  static int httpd_conn_count;
  
  /* The connection states. */
@@ -889,21 +894,25 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
  static httpd_server* hs = (httpd_server*) 0;
  int terminate = 0;
-@@ -140,11 +144,12 @@
+@@ -140,14 +143,14 @@
  static int handle_newconnect( struct timeval* tvP, int listen_fd );
  static void handle_read( connecttab* c, struct timeval* tvP );
  static void handle_send( connecttab* c, struct timeval* tvP );
 +static void handle_send_resp( connecttab* c, struct timeval* tvP );
  static void handle_linger( connecttab* c, struct timeval* tvP );
  static int check_throttles( connecttab* c );
++static void timeout_conns( ClientData client_data, struct timeval* nowP );
  static void clear_throttles( connecttab* c, struct timeval* tvP );
  static void update_throttles( ClientData client_data, struct timeval* nowP );
 -static void clear_connection( connecttab* c, struct timeval* tvP );
 +static void clear_connection( connecttab* c, struct timeval* tvP, int );
  static void really_clear_connection( connecttab* c, struct timeval* tvP );
- static void idle_read_connection( ClientData client_data, struct timeval* nowP );
- static void idle_send_connection( ClientData client_data, struct timeval* nowP );
-@@ -157,6 +162,12 @@
+-static void idle_read_connection( ClientData client_data, struct timeval* nowP );
+-static void idle_send_connection( ClientData client_data, struct timeval* nowP );
+ static void wakeup_connection( ClientData client_data, struct timeval* nowP );
+ static void linger_clear_connection( ClientData client_data, struct timeval* nowP );
+ static void occasional( ClientData client_data, struct timeval* nowP );
+@@ -157,6 +160,12 @@
  static void logstats( struct timeval* nowP );
  static void thttpd_logstats( long secs );
  
@@ -916,7 +925,29 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
  static void
  handle_term( int sig )
-@@ -454,12 +465,14 @@
+@@ -198,6 +207,8 @@
+     }
+ 
+ 
++static time_t httpd_time_now;
++
+ static void
+ handle_usr2( int sig )
+     {
+@@ -430,6 +441,12 @@
+ 	syslog( LOG_CRIT, "tmr_create(occasional) failed" );
+ 	exit( 1 );
+ 	}
++
++	if (tmr_create(0, timeout_conns, JunkClientData, 30 * 1000, 1) == 0) {
++		syslog(LOG_CRIT, "tmr_create(timeout_conns) failed");
++		exit(1);
++	}
++
+     if ( numthrottles > 0 )
+ 	{
+ 	/* Set up the throttles timer. */
+@@ -454,12 +471,14 @@
      /* If we're root, try to become someone else. */
      if ( getuid() == 0 )
  	{
@@ -931,7 +962,16 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	/* Set primary group. */
  	if ( setgid( gid ) < 0 )
  	    {
-@@ -566,15 +579,17 @@
+@@ -518,6 +537,8 @@
+ 
+     /* Main loop. */
+     (void) gettimeofday( &tv, (struct timezone*) 0 );
++    httpd_time_now = tv.tv_sec;
++
+     while ( ( ! terminate ) || numconnects > 0 )
+ 	{
+ 	/* Do the fd watch. */
+@@ -566,15 +587,17 @@
  	    if ( c == (connecttab*) 0 )
  		continue;
  	    hc = c->hc;
@@ -958,7 +998,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    }
  	tmr_run( &tv );
  
-@@ -1196,8 +1211,10 @@
+@@ -1196,8 +1219,10 @@
      logstats( &tv );
      for ( cnum = 0; cnum < maxconnects; ++cnum )
  	{
@@ -970,15 +1010,29 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	if ( connects[cnum].hc != (httpd_conn*) 0 )
  	    {
  	    httpd_destroy_conn( connects[cnum].hc );
-@@ -1285,6 +1302,7 @@
+@@ -1272,19 +1297,12 @@
+ 	c->conn_state = CNST_READING;
+ 	++numconnects;
+ 	client_data.p = c;
+-	c->idle_read_timer = tmr_create(
+-	    tvP, idle_read_connection, client_data, IDLE_READ_TIMELIMIT * 1000L,
+-	    0 );
+-	if ( c->idle_read_timer == (Timer*) 0 )
+-	    {
+-	    syslog( LOG_CRIT, "tmr_create(idle_read_connection) failed" );
+-	    exit( 1 );
+-	    }
+-	c->idle_send_timer = (Timer*) 0;
+ 	c->wakeup_timer = (Timer*) 0;
  	c->linger_timer = (Timer*) 0;
  	c->bytes_sent = 0;
  	c->numtnums = 0;
 +	c->keep_alive = 0;
++	c->last_io = httpd_time_now;
  
  	/* Set the connection file descriptor to no-delay mode. */
  	httpd_set_ndelay( c->hc->conn_fd );
-@@ -1297,12 +1315,40 @@
+@@ -1297,12 +1315,28 @@
  	}
      }
  
@@ -992,18 +1046,6 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +    c->started_at = tvP->tv_sec;
 +    c->wouldblock_delay = 0;
 +    client_data.p = c;
-+    if (c->idle_read_timer != 0) {
-+		tmr_cancel( c->idle_read_timer );
-+	    c->idle_read_timer = (Timer*) 0;
-+	}
-+    c->idle_send_timer = tmr_create(
-+	tvP, idle_send_connection, client_data, IDLE_SEND_TIMELIMIT * 1000L,
-+	0 );
-+    if ( c->idle_send_timer == (Timer*) 0 )
-+	{
-+	syslog( LOG_CRIT, "tmr_create(idle_send_connection) failed" );
-+	exit( 1 );
-+	}
 +
 +    fdwatch_del_fd( hc->conn_fd );
 +    fdwatch_add_fd( hc->conn_fd, c, FDW_WRITE );
@@ -1020,7 +1062,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      httpd_conn* hc = c->hc;
  
      /* Is there room in our buffer to read more bytes? */
-@@ -1311,7 +1357,7 @@
+@@ -1311,7 +1345,7 @@
  	if ( hc->read_size > 5000 )
  	    {
  	    httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
@@ -1029,7 +1071,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    return;
  	    }
  	httpd_realloc_str(
-@@ -1327,29 +1373,69 @@
+@@ -1327,29 +1361,57 @@
      ** EWOULDBLOCK; however, this apparently can happen if a packet gets
      ** garbled.
      */
@@ -1042,14 +1084,15 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +		httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
 +	}
 +	clear_connection( c, tvP, 0 );
- 	return;
++	return;
 +    } else if ( sz < 0 ) {
 +    	if (errno != EWOULDBLOCK) {
 +		httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
 +		clear_connection( c, tvP, 0 );
 +	} 
-+	return;
+ 	return;
 +    }
++    c->last_io = httpd_time_now;
 +    if (sz > 0) hc->read_idx += sz;
 +
 +    /* 
@@ -1059,21 +1102,8 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +    if ( hc->keep_alive ) {
 +		ClientData client_data;
 +
-+	    if ( c->idle_read_timer != (Timer*) 0 )
-+		{
-+		tmr_cancel( c->idle_read_timer );
-+		c->idle_read_timer = 0;
-+		}
 +
 +	client_data.p = c;
-+	c->idle_read_timer = tmr_create(
-+	    tvP, idle_read_connection, client_data, IDLE_READ_TIMELIMIT * 1000L,
-+	    0 );
-+	if ( c->idle_read_timer == (Timer*) 0 )
-+	    {
-+	    syslog( LOG_CRIT, "tmr_create(idle_read_connection) failed" );
-+	    exit( 1 );
-+	    }
 +    	
 +    	hc->keep_alive = 0;
 +    }
@@ -1107,7 +1137,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1358,7 +1444,7 @@
+@@ -1358,7 +1420,7 @@
  	{
  	httpd_send_err(
  	    hc, 503, httpd_err503title, "", httpd_err503form, hc->encodedurl );
@@ -1116,7 +1146,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1366,7 +1452,7 @@
+@@ -1366,7 +1428,7 @@
      if ( httpd_start_request( hc, tvP ) < 0 )
  	{
  	/* Something went wrong.  Close down the connection. */
@@ -1125,7 +1155,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1384,37 +1470,26 @@
+@@ -1384,37 +1446,24 @@
  	{
  	/* No file address means someone else is handling it. */
  	c->bytes_sent = hc->bytes_sent;
@@ -1134,8 +1164,6 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
 +	if (hc->file_address == (char *) 1) {
-+		tmr_cancel( c->idle_read_timer );
-+		c->idle_read_timer = (Timer*) 0;
 +		c->wouldblock_delay = 0;
 +		return;
 +	}
@@ -1172,7 +1200,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  static void
  handle_send( connecttab* c, struct timeval* tvP )
      {
-@@ -1443,6 +1518,9 @@
+@@ -1443,6 +1492,9 @@
  	iv[1].iov_base = &(hc->file_address[c->bytes_sent]);
  	iv[1].iov_len = MIN( c->bytes_to_send - c->bytes_sent, c->limit );
  	sz = writev( hc->conn_fd, iv, 2 );
@@ -1182,7 +1210,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	}
  
      if ( sz == 0 ||
-@@ -1486,7 +1564,7 @@
+@@ -1486,12 +1538,12 @@
  	*/
  	if ( errno != EPIPE && errno != EINVAL && errno != ECONNRESET )
  	    syslog( LOG_ERR, "write - %m sending %.80s", hc->encodedurl );
@@ -1191,7 +1219,13 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1500,7 +1578,7 @@
+     /* Ok, we wrote something. */
+-    tmr_reset( tvP, c->idle_send_timer );
++    c->last_io = httpd_time_now;
+     /* Was this a headers + file writev()? */
+     if ( hc->responselen > 0 )
+ 	{
+@@ -1500,7 +1552,7 @@
  	    {
  	    /* Yes; move the unwritten part to the front of the buffer. */
  	    int newlen = hc->responselen - sz;
@@ -1200,7 +1234,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    hc->responselen = newlen;
  	    sz = 0;
  	    }
-@@ -1519,7 +1597,7 @@
+@@ -1519,7 +1571,7 @@
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
  	/* This conection is finished! */
@@ -1209,7 +1243,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1560,6 +1638,9 @@
+@@ -1560,6 +1612,9 @@
      char buf[1024];
      int r;
  
@@ -1219,7 +1253,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      /* In lingering-close mode we just read and ignore bytes.  An error
      ** or EOF ends things, otherwise we go until a timeout.
      */
-@@ -1569,6 +1650,37 @@
+@@ -1569,6 +1624,37 @@
      }
  
  
@@ -1238,7 +1272,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +		goto clear;
 +	}
 +
-+	tmr_reset( tvP, c->idle_send_timer );
++	c->last_io = httpd_time_now;
 +
 +	if (n == hc->responselen) {
 +clear:
@@ -1257,7 +1291,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  static int
  check_throttles( connecttab* c )
      {
-@@ -1635,12 +1747,17 @@
+@@ -1635,23 +1721,18 @@
  
  
  static void
@@ -1271,13 +1305,23 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 -    httpd_write_response( c->hc );
 +    if (c->hc->responselen && c->conn_state != CNST_SENDING_RESP) {
 +		setup_sending(c, CNST_SENDING_RESP, tvP);
-+
-+		return;
-+	}
  
-     if ( c->idle_read_timer != (Timer*) 0 )
+-    if ( c->idle_read_timer != (Timer*) 0 )
+-	{
+-	tmr_cancel( c->idle_read_timer );
+-	c->idle_read_timer = 0;
+-	}
+-    if ( c->idle_send_timer != (Timer*) 0 )
+-	{
+-	tmr_cancel( c->idle_send_timer );
+-	c->idle_send_timer = 0;
++		return;
+ 	}
++
+     if ( c->wakeup_timer != (Timer*) 0 )
  	{
-@@ -1669,13 +1786,45 @@
+ 	tmr_cancel( c->wakeup_timer );
+@@ -1669,13 +1750,36 @@
      ** circumstances that make a lingering close necessary.  If the flag
      ** isn't set we do the real close now.
      */
@@ -1290,15 +1334,6 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +	c->conn_state = CNST_READING;
 +
 +	client_data.p = c;
-+	c->idle_read_timer = tmr_create(
-+	    tvP, idle_read_connection, client_data, IDLE_KEEPALIVE_TIMELIMIT * 1000L,
-+	    0 );
-+	if ( c->idle_read_timer == (Timer*) 0 )
-+	    {
-+	    syslog( LOG_CRIT, "tmr_create(idle_read_connection) failed" );
-+	    exit( 1 );
-+	    }
-+
 +	c->bytes_sent = 0;
 +	c->numtnums = 0;
 +	c->keep_alive = 1;
@@ -1325,7 +1360,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	client_data.p = c;
  	c->linger_timer = tmr_create(
  	    tvP, linger_clear_connection, client_data, LINGER_TIME * 1000L, 0 );
-@@ -1684,9 +1833,19 @@
+@@ -1684,9 +1788,19 @@
  	    syslog( LOG_CRIT, "tmr_create(linger_clear_connection) failed" );
  	    exit( 1 );
  	    }
@@ -1346,31 +1381,86 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      }
  
  
-@@ -1716,11 +1875,13 @@
-     c->idle_read_timer = (Timer*) 0;
-     if ( c->conn_state != CNST_FREE )
- 	{
+@@ -1707,40 +1821,6 @@
+     }
+ 
+ 
+-static void
+-idle_read_connection( ClientData client_data, struct timeval* nowP )
+-    {
+-    connecttab* c;
+-
+-    c = (connecttab*) client_data.p;
+-    c->idle_read_timer = (Timer*) 0;
+-    if ( c->conn_state != CNST_FREE )
+-	{
 -	syslog( LOG_INFO,
 -	    "%.80s connection timed out reading",
 -	    httpd_ntoa( &c->hc->client_addr ) );
 -	httpd_send_err( c->hc, 408, httpd_err408title, "", httpd_err408form, "" );
 -	clear_connection( c, nowP );
-+	if (! c->keep_alive) {
-+		syslog( LOG_INFO,
-+		    "%.80s connection timed out reading",
-+		    httpd_ntoa( &c->hc->client_addr ) );
-+		httpd_send_err( c->hc, 408, httpd_err408title, "", httpd_err408form, "" );
-+	}
-+	clear_connection( c, nowP, 0 );
- 	}
-     }
- 
-@@ -1737,7 +1898,7 @@
- 	syslog( LOG_INFO,
- 	    "%.80s connection timed out sending",
- 	    httpd_ntoa( &c->hc->client_addr ) );
+-	}
+-    }
+-
+-
+-static void
+-idle_send_connection( ClientData client_data, struct timeval* nowP )
+-    {
+-    connecttab* c;
+-
+-    c = (connecttab*) client_data.p;
+-    c->idle_send_timer = (Timer*) 0;
+-    if ( c->conn_state != CNST_FREE )
+-	{
+-	syslog( LOG_INFO,
+-	    "%.80s connection timed out sending",
+-	    httpd_ntoa( &c->hc->client_addr ) );
 -	clear_connection( c, nowP );
-+	clear_connection( c, nowP, 0 );
- 	}
-     }
+-	}
+-    }
+-
  
+ static void
+ wakeup_connection( ClientData client_data, struct timeval* nowP )
+@@ -1826,3 +1906,41 @@
+     stats_connections = stats_bytes = 0L;
+     stats_simultaneous = 0;
+     }
++
++static void
++timeout_conns(ClientData client_data, struct timeval *nowP)
++{
++    connecttab *c = connects, *ce = c + maxconnects;
++    time_t now = nowP->tv_sec;
++    int r = 0, w = 0;
++    int checked = 0;
++
++    while (c < ce) {
++        switch (c->conn_state) {
++        case CNST_SENDING:
++        case CNST_SENDING_RESP:
++            checked++;
++            if ((now - c->last_io) > IDLE_SEND_TIMELIMIT) {
++                clear_connection( c, nowP, 0 );
++                w++;
++            }
++            break;
++        case CNST_READING:
++            checked++;
++            if ((now - c->last_io) > IDLE_READ_TIMELIMIT) {
++                clear_connection( c, nowP, 0 );
++                r++;
++            }
++            break;
++        case CNST_FREE: break;
++        default: checked++; break;
++        }
++        c++;
++        if (checked >= numconnects) break;
++    }
++
++    if (r > 0 || w > 0) {
++        syslog(LOG_INFO, "Expired %d/%d connections in read/write state", r, w);
++    }
++}
++
