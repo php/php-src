@@ -6,7 +6,7 @@ void UpdateIniFromRegistry(char *path)
 {
 	char *p, *orig_path;
 	HKEY MainKey;
-
+	char *strtok_buf = NULL;
 
 	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\PHP\\Per Directory Values", 0, KEY_READ, &MainKey)!=ERROR_SUCCESS) {
 		return;
@@ -43,7 +43,7 @@ void UpdateIniFromRegistry(char *path)
 
 
 	path++;	/* step over the first / */
-	path = p = strtok(path, "\\/");
+	path = p = strtok_r(path, "\\/", &strtok_buf);
 
 	while (p) {
 		HKEY hKey;
@@ -67,7 +67,7 @@ void UpdateIniFromRegistry(char *path)
 		}
 
 		RegCloseKey(hKey);
-		p = strtok(NULL, "\\/");
+		p = strtok_r(NULL, "\\/", &strtok_buf);
 	}
 	RegCloseKey(MainKey);
 	efree(orig_path);

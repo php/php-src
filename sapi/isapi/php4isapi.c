@@ -390,6 +390,7 @@ static void hash_isapi_variables(ELS_D SLS_DC)
 	char *variable_buf;
 	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	char *variable;
+	char *strtok_buf = NULL;
 	LPEXTENSION_CONTROL_BLOCK lpECB;
 
 	lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
@@ -407,7 +408,7 @@ static void hash_isapi_variables(ELS_D SLS_DC)
 			return;
 		}
 	}
-	variable = strtok(variable_buf, "\r\n");
+	variable = strtok_r(variable_buf, "\r\n", &strtok_buf);
 	while (variable) {
 		char *colon = strchr(variable, ':');
 
@@ -426,7 +427,7 @@ static void hash_isapi_variables(ELS_D SLS_DC)
 			zend_hash_add(&EG(symbol_table), variable, strlen(variable)+1, &entry, sizeof(zval *), NULL);
 			*colon = ':';
 		}
-		variable = strtok(NULL, "\r\n");
+		variable = strtok_r(NULL, "\r\n", &strtok_buf);
 	}
 	if (variable_buf!=static_variable_buf) {
 		efree(variable_buf);
