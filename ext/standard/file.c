@@ -2083,7 +2083,7 @@ size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 	ptr = *buf = emalloc(step);
 	max_len = step;
 
-	while(ret = FP_FREAD(ptr, max_len - len, socket, fp, issock)) {
+	while((ret = FP_FREAD(ptr, max_len - len, socket, fp, issock))) {
 		len += ret;
 		if(len + min_room >= max_len) {
 			*buf = erealloc(*buf, max_len + step);
