@@ -1,64 +1,63 @@
-  -------------------------------------------------------------------- 
-   Copyright (c) 1998 The PHP Development Team.  All rights reserved.
-  -------------------------------------------------------------------- 
- 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
+-------------------------------------------------------------------- 
+                    The PHP License, version 2.0
+Copyright (c) 1999 The PHP Group. All rights reserved.
+-------------------------------------------------------------------- 
 
-  1. Commercial redistribution of larger works derived from, or 
-     works which bundle PHP, requires written permission from the
-     PHP Development Team.  You may charge a fee for the physical
-     act of transferring a copy, and must make it clear that the
-     fee being charged is for the distribution, and not for the
-     software itself.  You may, at your option, offer warranty
-     protection in exchange for a fee.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
 
-  2. Redistributions of source code must retain the above copyright
+  1. Redistributions of source code must retain the above copyright
      notice, this list of conditions and the following disclaimer. 
  
-  3. Redistributions in binary form must reproduce the above 
+  2. Redistributions in binary form must reproduce the above 
      copyright notice, this list of conditions and the following 
      disclaimer in the documentation and/or other materials provided
      with the distribution.
  
-  4. All advertising materials mentioning features or use of this
-     software must display the following acknowledgment:
-     "This product includes software written by the PHP Development
-      Team"
+  3. The name "PHP" must not be used to endorse or promote products 
+     derived from this software without prior permission from the 
+	 PHP Group.  This does not apply to add-on libraries or tools
+	 that work in conjunction with PHP.  In such a case the PHP
+	 name may be used to indicate that the product supports PHP.
  
-  5. The name "PHP" must not be used to endorse or promote products 
-     derived from this software without prior written permission
-     from the PHP Development Team.  This does not apply to add-on
-     libraries or tools that work in conjunction with PHP.  In such
-     a case the PHP name may be used to indicate that the product
-     supports PHP.
- 
-  6. Redistributions of any form whatsoever must retain the following
+  4. The PHP Group reserves the right to modify the PHP license at
+     any time and without prior notice, as long as the changes keep
+	 the free and open source nature of PHP.
+
+  5. Redistributions of any form whatsoever must retain the following
      acknowledgment:
-     "This product includes software written by the PHP Development
-      Team". 
- 
-  THIS SOFTWARE IS PROVIDED BY THE PHP DEVELOPMENT TEAM ``AS IS'' AND 
-  ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
-  PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE PHP
-  DEVELOPMENT TEAM OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-  OF THE POSSIBILITY OF SUCH DAMAGE.
+     "This product includes PHP, freely available from
+	 http://www.php.net/".
 
-  -------------------------------------------------------------------- 
+  6. Permission to freely distribute and use Zend as an integrated
+     part of PHP is granted, under the conditions of version 0.90
+	 of the Zend License.
+	 The license is bundled with the Zend engine, and is available
+	 at http://www.zend.com/license/0_90.txt, or by contacting
+	 license@zend.com.
 
-  This software consists of voluntary contributions made by many
-  individuals on behalf of the PHP Development Team.
 
-  The PHP Development Team can be contacted via Email at core@php.net.
-  
-  For more information on the PHP Development Team and the PHP 
-  project, please see <http://www.php.net>.
- 
+
+THIS SOFTWARE IS PROVIDED BY THE PHP DEVELOPMENT TEAM ``AS IS'' AND 
+ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
+PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE PHP
+DEVELOPMENT TEAM OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-------------------------------------------------------------------- 
+
+This software consists of voluntary contributions made by many
+individuals on behalf of the PHP Group.
+
+The PHP Group can be contacted via Email at php-group@php.net.
+
+For more information on the PHP Development Group and the PHP 
+project, please see <http://www.php.net>.

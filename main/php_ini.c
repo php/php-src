@@ -333,9 +333,9 @@ static int php_ini_displayer(php_ini_entry *ini_entry, int module_number)
 		return 0;
 	}
 
-	PUTS("<tr><td align=\"center\" bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">");
+	PUTS("<tr><td align=\"center\" bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
 	PHPWRITE(ini_entry->name, ini_entry->name_length-1);
-	PUTS("<td align=\"center\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+	PUTS("</b></td><td align=\"center\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 	php_ini_displayer_cb(ini_entry, PHP_INI_DISPLAY_ACTIVE);
 	PUTS("</td><td align=\"center\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 	php_ini_displayer_cb(ini_entry, PHP_INI_DISPLAY_ORIG);
