@@ -385,11 +385,6 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	char **env, *tmp1, *tmp2;
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
-	time_t the_time;
-	struct tm *ta, tmbuf;
-
-	the_time = time(NULL);
-	ta = php_localtime_r(&the_time, &tmbuf);
 
 	if (!sapi_module.phpinfo_as_text) {
 		php_print_info_htmlhead(TSRMLS_C);
@@ -412,11 +407,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
 			}
-			if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
-				PUTS("?="PHP_EGG_LOGO_GUID"\" alt=\"Dog!\" /></a>");
-			} else {
-				PUTS("?="PHP_LOGO_GUID"\" alt=\"PHP Logo\" /></a>");
-			}
+			PUTS("?=");
+			PUTS(php_logo_guid());
+			PUTS("\" alt=\"PHP Logo\" /></a>");
 		}
 
 		if (!sapi_module.phpinfo_as_text) {
@@ -902,10 +895,48 @@ PHP_FUNCTION(phpcredits)
 }
 /* }}} */
 
+
+/* {{{ php_logo_guid
+ */
+PHPAPI char *php_logo_guid()
+{
+	char *logo_guid;
+
+	time_t the_time;
+	struct tm *ta, tmbuf;
+
+	the_time = time(NULL);
+	ta = php_localtime_r(&the_time, &tmbuf);
+
+	if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
+		logo_guid = PHP_EGG_LOGO_GUID;
+	} else {
+		logo_guid = PHP_LOGO_GUID;
+	}
+
+	return estrdup(logo_guid);
+
+}
+/* }}} */
+
 /* {{{ proto string php_logo_guid(void)
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_logo_guid)
 {
+
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	RETURN_STRING(php_logo_guid(), 1);
+}
+/* }}} */
+
+/* {{{ proto string php_real_logo_guid(void)
+   Return the special ID used to request the PHP logo in phpinfo screens*/
+PHP_FUNCTION(php_real_logo_guid)
+{
+
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
