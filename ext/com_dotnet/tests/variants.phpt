@@ -19,14 +19,22 @@ $binary_ops = array('add', 'cat', 'sub', 'mul', 'and', 'div',
 foreach ($values as $t => $val) {
 	$v = new VARIANT($val);
 	if ($t != variant_get_type($v)) {
-		printf("Bork: [%d] %d: %s\n", $t, variant_get_type($v), (string)$v);
+		printf("Bork: [%d] %d: %s\n", $t, variant_get_type($v), $val);
+		print $v . "\n";
 	}
 	$results = array();
 
 	foreach ($values as $op2) {
 		echo "--\n";
 		foreach ($binary_ops as $op) {
-			echo "$op: " . call_user_func('variant_' . $op, $v, $op2) . "\n";
+			try {
+				echo "$op: " . call_user_func('variant_' . $op, $v, $op2) . "\n";
+			} catch (com_exception $e) {
+				echo "$op:\n";
+				echo "\tvariant_$op($v, $op2)\n";
+				echo "\texception " . $e->getMessage();
+				printf("\tcode %08x\n\n", $e->getCode());
+			}
 		}
 	}
 }
@@ -63,30 +71,90 @@ or: 46
 pow: 480145.116863642
 xor: 46
 --
-add: 
+add:
+	variant_add(42, hello)
+	exception Type mismatch.
+	code 80020005
+
 cat: 42hello
-sub: 
-mul: 
-and: 
-div: 
-eqv: 
-idiv: 
-imp: 
-mod: 
-or: 
-pow: 
-xor: 
+sub:
+	variant_sub(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+mul:
+	variant_mul(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+and:
+	variant_and(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+div:
+	variant_div(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+eqv:
+	variant_eqv(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+idiv:
+	variant_idiv(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+imp:
+	variant_imp(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+mod:
+	variant_mod(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+or:
+	variant_or(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+pow:
+	variant_pow(42, hello)
+	exception Type mismatch.
+	code 80020005
+
+xor:
+	variant_xor(42, hello)
+	exception Type mismatch.
+	code 80020005
+
 --
 add: 42
 cat: 42False
 sub: 42
 mul: 0
 and: 0
-div: 
+div:
+	variant_div(42, )
+	exception Division by zero.
+	code 80020012
+
 eqv: -43
-idiv: 
+idiv:
+	variant_idiv(42, )
+	exception Division by zero.
+	code 80020012
+
 imp: -43
-mod: 
+mod:
+	variant_mod(42, )
+	exception Division by zero.
+	code 80020012
+
 or: 42
 pow: 1
 xor: 42
@@ -119,89 +187,337 @@ or: 4
 pow: 80.2117802289664
 xor: 0
 --
-add: 
+add:
+	variant_add(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
 cat: 3.5hello
-sub: 
-mul: 
-and: 
-div: 
-eqv: 
-idiv: 
-imp: 
-mod: 
-or: 
-pow: 
-xor: 
+sub:
+	variant_sub(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+mul:
+	variant_mul(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+and:
+	variant_and(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+div:
+	variant_div(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+eqv:
+	variant_eqv(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+idiv:
+	variant_idiv(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+imp:
+	variant_imp(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+mod:
+	variant_mod(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+or:
+	variant_or(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+pow:
+	variant_pow(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
+xor:
+	variant_xor(3.5, hello)
+	exception Type mismatch.
+	code 80020005
+
 --
 add: 3.5
 cat: 3.5False
 sub: 3.5
 mul: 0
 and: 0
-div: 
+div:
+	variant_div(3.5, )
+	exception Division by zero.
+	code 80020012
+
 eqv: -5
-idiv: 
+idiv:
+	variant_idiv(3.5, )
+	exception Division by zero.
+	code 80020012
+
 imp: -5
-mod: 
+mod:
+	variant_mod(3.5, )
+	exception Division by zero.
+	code 80020012
+
 or: 4
 pow: 1
 xor: 4
 --
-add: 
+add:
+	variant_add(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
 cat: hello42
-sub: 
-mul: 
-and: 
-div: 
-eqv: 
-idiv: 
-imp: 
-mod: 
-or: 
-pow: 
-xor: 
+sub:
+	variant_sub(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+mul:
+	variant_mul(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+and:
+	variant_and(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+div:
+	variant_div(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+eqv:
+	variant_eqv(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+idiv:
+	variant_idiv(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+imp:
+	variant_imp(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+mod:
+	variant_mod(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+or:
+	variant_or(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+pow:
+	variant_pow(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
+xor:
+	variant_xor(hello, 42)
+	exception Type mismatch.
+	code 80020005
+
 --
-add: 
+add:
+	variant_add(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
 cat: hello3.5
-sub: 
-mul: 
-and: 
-div: 
-eqv: 
-idiv: 
-imp: 
-mod: 
-or: 
-pow: 
-xor: 
+sub:
+	variant_sub(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+mul:
+	variant_mul(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+and:
+	variant_and(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+div:
+	variant_div(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+eqv:
+	variant_eqv(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+idiv:
+	variant_idiv(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+imp:
+	variant_imp(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+mod:
+	variant_mod(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+or:
+	variant_or(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+pow:
+	variant_pow(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
+xor:
+	variant_xor(hello, 3.5)
+	exception Type mismatch.
+	code 80020005
+
 --
 add: hellohello
 cat: hellohello
-sub: 
-mul: 
-and: 
-div: 
-eqv: 
-idiv: 
-imp: 
-mod: 
-or: 
-pow: 
-xor: 
+sub:
+	variant_sub(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+mul:
+	variant_mul(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+and:
+	variant_and(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+div:
+	variant_div(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+eqv:
+	variant_eqv(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+idiv:
+	variant_idiv(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+imp:
+	variant_imp(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+mod:
+	variant_mod(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+or:
+	variant_or(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+pow:
+	variant_pow(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
+xor:
+	variant_xor(hello, hello)
+	exception Type mismatch.
+	code 80020005
+
 --
-add: 
+add:
+	variant_add(hello, )
+	exception Type mismatch.
+	code 80020005
+
 cat: helloFalse
-sub: 
-mul: 
-and: 
-div: 
-eqv: 
-idiv: 
-imp: 
-mod: 
-or: 
-pow: 
-xor: 
+sub:
+	variant_sub(hello, )
+	exception Type mismatch.
+	code 80020005
+
+mul:
+	variant_mul(hello, )
+	exception Type mismatch.
+	code 80020005
+
+and:
+	variant_and(hello, )
+	exception Type mismatch.
+	code 80020005
+
+div:
+	variant_div(hello, )
+	exception Type mismatch.
+	code 80020005
+
+eqv:
+	variant_eqv(hello, )
+	exception Type mismatch.
+	code 80020005
+
+idiv:
+	variant_idiv(hello, )
+	exception Type mismatch.
+	code 80020005
+
+imp:
+	variant_imp(hello, )
+	exception Type mismatch.
+	code 80020005
+
+mod:
+	variant_mod(hello, )
+	exception Type mismatch.
+	code 80020005
+
+or:
+	variant_or(hello, )
+	exception Type mismatch.
+	code 80020005
+
+pow:
+	variant_pow(hello, )
+	exception Type mismatch.
+	code 80020005
+
+xor:
+	variant_xor(hello, )
+	exception Type mismatch.
+	code 80020005
+
 --
 add: 42
 cat: False42
@@ -231,30 +547,90 @@ or: 4
 pow: 0
 xor: 4
 --
-add: 
+add:
+	variant_add(0, hello)
+	exception Type mismatch.
+	code 80020005
+
 cat: Falsehello
-sub: 
-mul: 
-and: 
-div: 
-eqv: 
-idiv: 
-imp: 
-mod: 
-or: 
-pow: 
-xor: 
+sub:
+	variant_sub(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+mul:
+	variant_mul(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+and:
+	variant_and(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+div:
+	variant_div(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+eqv:
+	variant_eqv(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+idiv:
+	variant_idiv(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+imp:
+	variant_imp(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+mod:
+	variant_mod(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+or:
+	variant_or(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+pow:
+	variant_pow(0, hello)
+	exception Type mismatch.
+	code 80020005
+
+xor:
+	variant_xor(0, hello)
+	exception Type mismatch.
+	code 80020005
+
 --
 add: 0
 cat: FalseFalse
 sub: 0
 mul: 0
 and: 0
-div: 
+div:
+	variant_div(0, )
+	exception Out of present range.
+	code 8002000a
+
 eqv: -1
-idiv: 
+idiv:
+	variant_idiv(0, )
+	exception Division by zero.
+	code 80020012
+
 imp: -1
-mod: 
+mod:
+	variant_mod(0, )
+	exception Division by zero.
+	code 80020012
+
 or: 0
 pow: 1
 xor: 0
