@@ -1,16 +1,23 @@
 dnl $Id$
 dnl config.m4 for extension pdo_odbc
 
-PHP_ARG_WITH(pdo-odbc,  PDBC driver for PDO,
-[[ --with-pdo-odbc=flavour,dir  Add support for "flavour" ODBC drivers,
-                               looking for include and lib dirs under "dir"
+AC_DEFUN(PDO_ODBC_HELP_TEXT, [[
+ --with-pdo-odbc=flavour,dir  Add support for "flavour" ODBC drivers,
+                              looking for include and lib dirs under "dir"
          
         flavour can be one of:
            ibm-db2, unixODBC
 
-        The extension will always be created as a shared extension
+        You may omit the ,dir part to use a reasonable default for
+        the flavour you have selected. e.g.:
+            --with-pdo-odbc=unixODBC
+        will check for unixODBC under /usr/local
+
+        This extension will always be created as a shared extension
         named pdo_odbc.so
 ]])
+
+PHP_ARG_WITH(pdo-odbc,  ODBC v3 driver for PDO, PDO_ODBC_HELP_TEXT)
 
 AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
   if test -f $PDO_ODBC_INCDIR/$1 ; then
@@ -18,6 +25,7 @@ AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
   fi
 ])
                                   
+AC_MSG_CHECKING(which ODBC flavour you want)
 if test "$PHP_PDO_ODBC" != "no" && test "$PHP_PDO_ODBC" != "yes" ; then
   pdo_odbc_flavour=`echo $withval | cut -d, -f1`
   pdo_odbc_dir=`echo $withval | cut -d, -f2`
@@ -25,9 +33,6 @@ if test "$PHP_PDO_ODBC" != "no" && test "$PHP_PDO_ODBC" != "yes" ; then
   if test "$pdo_odbc_dir" = "$withval" ; then
     pdo_odbc_dir=""
   fi
-
-
-  AC_MSG_CHECKING(which ODBC flavour you want)
 
   case $pdo_odbc_flavour in
     ibm-db2)
@@ -43,7 +48,9 @@ if test "$PHP_PDO_ODBC" != "no" && test "$PHP_PDO_ODBC" != "yes" ; then
         ;;
 
       *)
-        AC_MSG_ERROR(Unknown ODBC flavour $pdo_odbc_flavour)
+        AC_MSG_ERROR(Unknown ODBC flavour $pdo_odbc_flavour
+PDO_ODBC_HELP_TEXT      
+)
         ;;
   esac
 
@@ -95,5 +102,10 @@ if test "$PHP_PDO_ODBC" != "no" && test "$PHP_PDO_ODBC" != "yes" ; then
   PHP_SUBST(PDO_ODBC_SHARED_LIBADD)
 
   PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, yes,,-I\$prefix/include/php/ext $PDO_ODBC_INCLUDE)
+else
+  AC_MSG_ERROR(
+Unknown ODBC flavour $PHP_PDO_ODBC
+PDO_ODBC_HELP_TEXT
+)
 fi
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package version="1.0">
- <name>pdo_odbc</name>
+ <name>PDO_ODBC</name>
  <summary>ODBC v3 Interface driver for PDO</summary>
  <maintainers>
   <maintainer>
@@ -11,18 +11,25 @@
    <role>lead</role>
   </maintainer>
  </maintainers>
+ <configureoptions>
+	 <configureoption name="with-pdo-odbc" prompt="flavour,dir? (just leave blank for help)"/>
+</configureoptions>
  <description>
 	 This extension provides an ODBC v3 driver for PDO.  It supports unixODBC
-	 and IBM DB2 libraries, and will most likely support many more.
+	 and IBM DB2 libraries, and will support more in future releases.
  </description>
  <license>PHP</license>
  <release>
   <state>alpha</state>
-  <version>0.1dev</version>
-  <date>2004-05-18</date>
+  <version>0.1</version>
+  <date>2004-05-21</date>
 
   <notes>
-   Still much to be done.
+   You need to install the PDO core module before you can make use of this one.
+   You also require either IBM DB2 CLI libraries or unixODBC.
+
+   If you are running on windows, you can download the binary from here:
+   http://snaps.php.net/win32/PECL_5_0/php_pdo_odbc.dll
   </notes>
 
   <filelist>
@@ -37,8 +44,8 @@
    <file role="doc" name="CREDITS"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge" version="5.0.0"/>
-   <dep type="ext" rel="ge" version="0.1-dev"/>
+   <dep type="php" rel="ge" version="5.0.0RC3dev"/>
+   <dep type="ext" rel="ge" name="pdo" version="0.1"/>
   </deps>
  </release>
 </package>
