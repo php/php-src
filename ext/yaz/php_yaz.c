@@ -321,7 +321,8 @@ static void response_diag (Yaz_Association t, Z_DiagRec *p)
 
 static int send_present (Yaz_Association t);
 
-static void handle_records (Yaz_Association t, Z_Records *sr)
+static void handle_records (Yaz_Association t, Z_Records *sr,
+							int present_phase)
 {
 	if (sr && sr->which == Z_Records_NSD)
 	{
@@ -338,7 +339,7 @@ static void handle_records (Yaz_Association t, Z_Records *sr)
 	else if (sr && sr->which == Z_Records_multipleNSD)
 	{
 		if (sr->u.multipleNonSurDiagnostics->num_diagRecs >= 1)
-			response_diag(t,	sr->u.multipleNonSurDiagnostics->diagRecs[0]);
+			response_diag(t, sr->u.multipleNonSurDiagnostics->diagRecs[0]);
 		else
 			t->error = PHP_YAZ_ERROR_DECODE;
 	}
@@ -366,6 +367,7 @@ static void handle_records (Yaz_Association t, Z_Records *sr)
 		if (sr && sr->which == Z_Records_DBOSD)
 		{
 			int j, i;
+			NMEM nmem = odr_extract_mem (t->odr_in);
 			Z_NamePlusRecordList *p =
 				sr->u.databaseOrSurDiagnostics;
 			for (j = 0; j < t->resultSets->recordList->num_records; j++)
@@ -374,7 +376,20 @@ static void handle_records (Yaz_Association t, Z_Records *sr)
 			for (i = 0; i<p->num_records; i++)
 				t->resultSets->recordList->records[i+j] = p->records[i];
 			/* transfer our response to search_nmem .. we need it later */
-			nmem_transfer (t->resultSets->odr->mem, odr_extract_mem (t->odr_in));
+			nmem_transfer (t->resultSets->odr->mem, nmem);
+			nmem_destroy (nmem);
+			if (present_phase && p->num_records == 0)
+			{
+				/* present response and we didn't get any records! */
+				t->error = PHP_YAZ_ERROR_DECODE;
+				t->resultSets->recordList = 0;
+			}
+		}
+		else if (present_phase)
+		{
+			/* present response and we didn't get any records! */
+			t->error = PHP_YAZ_ERROR_DECODE;
+			t->resultSets->recordList = 0;
 		}
 	}
 }
@@ -382,12 +397,12 @@ static void handle_records (Yaz_Association t, Z_Records *sr)
 static void search_response (Yaz_Association t, Z_SearchResponse *sr)
 {
 	t->resultSets->resultCount = *sr->resultCount;
-	handle_records (t, sr->records);
+	handle_records (t, sr->records, 0);
 }
 
 static void present_response (Yaz_Association t, Z_PresentResponse *pr)
 {
-	handle_records (t, pr->records);
+	handle_records (t, pr->records, 1);
 }
 
 static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
