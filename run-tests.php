@@ -129,7 +129,6 @@ if (isset($argc) && $argc > 1) {
 		foreach($test_to_run AS $name=>$runnable) {
 			if(!preg_match("/\.phpt$/", $name))
 				continue;
-			echo "test: $name runnable: $runnable\n";
 			if ($runnable) {
 				$test_results[$name] = run_test($php,$name);
 			}
