@@ -209,8 +209,10 @@ static void _free_result(mssql_result *result, int free_fields)
 	}
 }
 
-static void _free_mssql_statement(mssql_statement *statement)
+static void _free_mssql_statement(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
+	mssql_statement *statement = (mssql_statement *)rsrc->ptr;
+
 	if (statement->binds) {
 		zend_hash_destroy(statement->binds);
 		efree(statement->binds);
@@ -289,7 +291,7 @@ PHP_MINIT_FUNCTION(mssql)
 
 	REGISTER_INI_ENTRIES();
 
-	le_statement = register_list_destructors(_free_mssql_statement, NULL);
+	le_statement = zend_register_list_destructors_ex(_free_mssql_statement, NULL, "mssql statement", module_number);
 	le_result = zend_register_list_destructors_ex(_free_mssql_result, NULL, "mssql result", module_number);
 	le_link = zend_register_list_destructors_ex(_close_mssql_link, NULL, "mssql link", module_number);
 	le_plink = zend_register_list_destructors_ex(NULL, _close_mssql_plink, "mssql link persistent", module_number);
@@ -1872,8 +1874,7 @@ PHP_FUNCTION(mssql_init)
 }
 /* }}} */
 
-/* {{{ proto bool mssql_bind(resource stmt, string param_name, mixed var, int type 
-		[, int is_output[, int is_null[, int maxlen]]])
+/* {{{ proto bool mssql_bind(resource stmt, string param_name, mixed var, int type [, int is_output [, int is_null [, int maxlen]]])
    Adds a parameter to a stored procedure or a remote stored procedure  */
 PHP_FUNCTION(mssql_bind)
 {
