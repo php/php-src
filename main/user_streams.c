@@ -218,6 +218,7 @@ PHP_FUNCTION(file_register_wrapper)
 	uwrap->classname = estrndup(classname, classname_len);
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
+	uwrap->wrapper.is_url = 1; /* allow safe_mode to disallow this wrapper if enabled */
 
 	zend_str_tolower(uwrap->classname, classname_len);
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, uwrap, le_protocols);
