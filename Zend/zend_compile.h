@@ -44,6 +44,7 @@
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
 #define FREE_OP(op, should_free) if (should_free) zval_dtor(&Ts[(op)->u.var].tmp_var);
 
+#define SET_UNUSED(op)  (op).op_type = IS_UNUSED
 
 #if SUPPORT_INTERACTIVE
 #define INC_BPC(op_array)	((op_array)->backpatch_count++)

@@ -34,9 +34,6 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-
-#define SET_UNUSED(op)  (op).op_type = IS_UNUSED
-
 static void free_filename(void *p)
 {
 	efree(*((char **) p));
