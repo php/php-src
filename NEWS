@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Added support for word match mnogosearch-3.2 command and for stopfile
+  command. StopTable will not be supported by mnogosearch-3.2.x
 - Added mmapfile(), read a file into a variabele with mmap (Ilia A, Derick)
 - Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
   not been called. (Sterling)
