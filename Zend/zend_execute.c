@@ -145,6 +145,7 @@ static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *sh
 			if (Ts[node->u.var].var.ptr_ptr) {
 				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
 				*should_free = 0;
+				SEPARATE_ZVAL_IF_NOT_REF(Ts[node->u.var].var.ptr_ptr);
 				return *Ts[node->u.var].var.ptr_ptr;
 			} else {
 				if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
