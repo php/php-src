@@ -32,6 +32,11 @@ if ( $file) {
 	die();
 }
 
+if ( !defined('IMAGETYPE_GIF'))     define('IMAGETYPE_GIF',1);
+if ( !defined('IMAGETYPE_JPEG'))    define('IMAGETYPE_JPEG',2);
+if ( !defined('IMAGETYPE_TIFF_II')) define('IMAGETYPE_TIFF_II',7);
+if ( !defined('IMAGETYPE_TIFF_MM')) define('IMAGETYPE_TIFF_MM',8);
+
 $possible = array();
 
 /****************************************************************************/
@@ -54,6 +59,8 @@ function error_msg() {
 // private to function search_file()
 function _search_file($root,&$possible,$path='') {
 	$sub = array();
+	$cnt = 0;
+	$type= false;
 
 	//error_log("search_file($root,$path)",0);
 	if ($dir = @opendir($root.$path.'/')) {
@@ -62,16 +69,26 @@ function _search_file($root,&$possible,$path='') {
 			//error_log("search_file($root$path):$type=$found",0);
 			switch( $type) {
 				case 'file':
-					$pos = strpos($found,'.');
-					if ( $pos !== false
-					   && (  strtolower(substr($found,$pos+1))=='jpg'
-					      || strtolower(substr($found,$pos+1))=='tif'
-					      || strtolower(substr($found,$pos+1))=='gif'
-					      )
-					   )
+					$pos  = strrpos($found,'.');
+					if ( function_exists('exif_imagetype')) {
+						$type = exif_imagetype($root.$path.'/'.$found);
+					} else {
+						if ( $pos!==false) {
+							$type = GetImageSize($root.$path.'/'.$found);
+							if ( is_array($type)) {
+								$type = $type[2];
+							} else {
+								$type = false;
+							}
+						} else $type = false;
+					}
+					if ( $type!==false)
 					{
-						$possible[] = $root.$path.'/'.$found;
+						$possible[] = array('file'=>$root.$path.'/'.$found, 'type'=>$type);
 						//error_log("search_file($root$path) add:$path/$found",0);
+						if ( ($cnt=count($possible)) % 100 == 0) {
+							error_log("exif test page - counting files: $cnt",0);
+						}
 					}
 					break;
 				case 'dir':
@@ -94,10 +111,12 @@ function _search_file($root,&$possible,$path='') {
 // Searches for $file in document tree. The path is ignored.
 //
 function search_file() {
-	global $argv;
+	global $argc, $argv;
 	$possible = array();
 
-	if ( array_key_exists('SCRIPT_FILENAME',$_SERVER)) {
+	if ( $argc > 1) {
+		$path = $argv[1];
+	} else if ( array_key_exists('SCRIPT_FILENAME',$_SERVER)) {
 		$path = $_SERVER['SCRIPT_FILENAME'];
 		//error_log("SCRIPT_FILENAME($path)",0);
 	} else {
@@ -105,8 +124,10 @@ function search_file() {
 		//error_log("argv($path)",0);
 	}
 	if ( ($p=strpos($path,'?')) !== false) $path = substr($path,0,$p);
-	if ( ($p=strrpos($path,'/')) < strlen($path)-1) $path = substr($path,0,$p);
+	if ( ($p=strrpos($path,'/')) /*< strlen($path)-1*/) $path = substr($path,0,$p);
+	error_log("exif test page - counting files in $path");
 	_search_file($path,$possible);
+	error_log("exif test page - counting files: ".count($possible)." done.",0);
 	return $possible;
 }
 
@@ -115,10 +136,15 @@ function search_file() {
 //
 // Searches for $file in document tree. The path is ignored.
 //
-function AddInfo($Name,$Value) {
+function AddInfo($Name,$Value,$highlight=0) {
 	if (is_array($Value)) $Value = 'Array: ('.join(',',$Value).')';
 	$Value = nl2br($Value);
-	return "<tr><td>$Name</td><td>$Value&nbsp;</td></tr>\n";
+	if ( $highlight) {
+		$Name = "<th>$Name</th>";
+	} else {
+		$Name = "<td>$Name</td>";
+	}
+	return "<tr>$Name<td>$Value&nbsp;</td></tr>\n";
 }
 
 $possible = search_file();
@@ -151,7 +177,7 @@ ul {
 </head>
 <body>
 <h1><?=$title ?></h1>
-<h2>(c) Marcus Boerger, 2002</h2>
+<h2>(c) Marcus B&ouml;rger, 2002</h2>
 </p>
 <p>
 Images taken from <a href="http://www.exif.org">www.exif.org</a>,
@@ -222,62 +248,115 @@ if (function_exists('exif_tagname')) {
 <h2>function exif_read_data for <?=count($possible)?> images</h2>
 
 <?php
+$check_getimagesize   = false;
+$check_exif_thumbnail = true;
+$check_exif_read_data = false;
+$fast_output = false;
 if (function_exists('exif_read_data')) {
 	$num  = 0;
-	$tab1 = "<table border='1' cellspacing='0' cellpadding='3' summary='function results'>\n";
+	echo "<table border='1' cellspacing='0' cellpadding='3' summary='function results'>\n";
 	$tab2 = "";//"<table border='1' cellspacing='0' cellpadding='3' summary='EXIF information'>\n";
+	$types = array('','GIF','JPEG','PNG','SWF','PSD','BMP','TIFF_II','TIFF_MM','JPC','JP2','JPX','JB2');
 	foreach($possible as $idx => $file) {
-		$num++;
+		$type = $file['type'];
+		$file = $file['file'];
+		if ( !((++$num)%100)) error_log("exif test page - checking files: $num",0);
 		$error = '';
-		$len   = 4;
-		$tab1 .= "<tr><td rowspan='3' valign='top'>$num</td><th colspan='2'>$file</th></tr>\n";
-		$size  = GetImageSize($file);
-		$error = error_msg();// clear message
-		if ( $size === false) {
-		    $getimagesize = '<b style="color:red">GetImageSize returned false</b><br>'.$error;
-		} else {
-			$getimagesize = "[ $size[0], $size[1], $size[2], $size[3] ]";
+		$len   = 2;
+		$rows  = 1
+		       + ($check_getimagesize ? 1 : 0)
+		       + ($check_exif_thumbnail ? 1 : 0)
+		       + ($check_exif_read_data ? 1 : 0);
+		if ( !$fast_output) echo "<tr><td rowspan='$rows' valign='top'>$num</td><th colspan='2'>$file</th></tr>\n";
+		if ($check_getimagesize) {
+			$len++;
+			$size  = GetImageSize($file);
+			$error = error_msg();// clear message
+			if ( $size === false) {
+				$error = '<b style="color:red">GetImageSize returned false</b><br>'.$error;
+			    $res_getimagesize = $error;
+			} else {
+				$res_getimagesize = '('.join($size,',').')';
+			}
+			if ( !$fast_output) echo AddInfo("GetImageSize",$error,1);
 		}
-		$tab1 .= AddInfo("GetImageSize",$error);
-		/**/
-		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12', true);",0);
-		$image = exif_read_data($file,'COMMENT,IFD0,EXIF,APP12',true);
-		$error = error_msg();// clear message
-		$tab1 .= AddInfo("exif_read_data",$error);
-		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12', true): $error",0);
-		//error_log("exif_read_data($file)",0);
-		$res   = '';
-		if ( $image === false) {
-		    $error = '<b style="color:red">exif_read_data returned false</b><br>'.$error;
-		} else {
-			// ah no!$error = error_msg(); // force o.k.
-			foreach($image as $Name => $Value) {
-				if ( $Name!='Thumbnail') {
-					if ( is_array($Value)) {
-						$len++;
-						$res .= AddInfo($Name,'Array('.count($Value).')');
-						foreach( $Value as $idx => $Entry) {
-							if ($idx==='Thumbnail') $Entry = '&lt;data&gt;';
-							$len++;
-							$res .= AddInfo($Name.':'.$idx,$Entry);
+		if ( $check_exif_thumbnail) {
+			$len++;
+			if ($type!=IMAGETYPE_JPEG) {// && $type!=IMAGETYPE_TIFF_II && $type!=IMAGETYPE_TIFF_MM) {
+				$error = "<b style='color: green'>filetype not supported: $types[$type]</b>";
+			    $res_exif_thumbnail = $error;
+			} else {
+				$t_width  = 0;
+				$t_height = 0;
+				$result = exif_thumbnail($file, $t_width, $t_height);
+				$error = error_msg();// clear message
+				if ( $result === false) {
+					$error = '<b style="color:red">exif_thumbnail returned false</b><br>'.$error;
+					if ( $t_width && $t_height) {
+						$error = "<b style='color:green'>$t_width x $t_height</b><br>$error";
+					}
+				    $res_exif_thumbnail = $error;
+				} else {
+					$res_exif_thumbnail = $t_width . " x " . $t_height;
+				}
+			}
+			if ( !$fast_output) echo AddInfo("exif_thumbnail",$error,1);
+		}
+		if ($check_exif_read_data) {
+			$len++;
+			if ($type!=IMAGETYPE_JPEG && $type!=IMAGETYPE_TIFF_II && $type!=IMAGETYPE_TIFF_MM) {
+				$res_exif_read_data = "<b style='color: green'>filetype not supported: $types[$type]</b>";
+				if ( !$fast_output) echo AddInfo("exif_read_data",$res_exif_read_data);
+				$res = '';
+			} else {
+				$image = exif_read_data($file,'COMMENT,IFD0,EXIF,APP12',true);
+				$error = error_msg();// clear message
+				if ( !$fast_output) echo AddInfo("exif_read_data",$error,1);
+				$res   = '';
+				if ( $image === false) {
+				    $res_exif_read_data = "<b style='color:red'>exif_read_data returned false</b><br>$error";
+				} else {
+					$res_exif_read_data = $error;
+					// ah no!$error = error_msg(); // force o.k.
+					foreach($image as $Name => $Value) {
+						if ( $Name!='Thumbnail') {
+							if ( is_array($Value)) {
+								$len++;
+								$res .= AddInfo($Name,'Array('.count($Value).')');
+								foreach( $Value as $idx => $Entry) {
+									if ($idx==='Thumbnail') $Entry = '&lt;data&gt;';
+									$len++;
+									$res .= AddInfo($Name.':'.$idx,$Entry);
+								}
+							} else {
+								$len++;
+								$res .= AddInfo($Name,$Value);
+							}
 						}
-					} else {
-						$len++;
-						$res .= AddInfo($Name,$Value);
 					}
 				}
 			}
 		}
 		$tab2 .= "<tr><td rowspan='$len' valign='top'>$num</td></tr>\n";
 		$tab2 .= "<tr><th colspan='2'>$file</th></tr>\n";
-		$tab2 .= "<tr><td><b>GetImageSize</b></td><td>$getimagesize</td></tr>\n";
-		$tab2 .= "<tr><td><b>exif_read_data</b></td><td>$error</td></tr>\n";
+		if ($check_getimagesize) {
+			$tab2 .= "<tr><th>GetImageSize</th><td>$res_getimagesize</td></tr>\n";
+		}
+		if ($check_exif_thumbnail) {
+			$tab2 .= "<tr><th>exif_thumbnail</th><td>$res_exif_thumbnail</td></tr>\n";
+		}
+		if ($check_exif_read_data) {
+		$tab2 .= "<tr><th>exif_read_data</th><td>$res_exif_read_data</td></tr>\n";
 		$tab2 .= $res;
+		}
+		if ( $fast_output) {
+			echo $tab2;
+			$tab2 = '';
+		}
 	}
-	//$tab1 .= "</table>\n";
-	$tab2 .= "</table>\n";
-	echo $tab1;
+	error_log("exif test page - checking files: ".count($possible)." done.",0);
 	echo $tab2;
+	echo "</table>\n";
 } else {
 	echo "<h1 style='color:red'>function exif_read_data is not supported</h1>\n";
 }
