@@ -680,7 +680,7 @@ TEST $file
 		putenv("CONTENT_TYPE=application/x-www-form-urlencoded");
 		putenv("CONTENT_LENGTH=$content_length");
 
-		$cmd = "$php$ini_settings -f $tmp_file 2>&1 < $tmp_post";
+		$cmd = "$php$ini_settings -f \"$tmp_file\" 2>&1 < $tmp_post";
 
 	} else {
 
@@ -688,7 +688,7 @@ TEST $file
 		putenv("CONTENT_TYPE=");
 		putenv("CONTENT_LENGTH=");
 
-		$cmd = "$php$ini_settings -f $tmp_file$args 2>&1";
+		$cmd = "$php$ini_settings -f \"$tmp_file\" $args 2>&1";
 	}
 
 	if (DETAILED) echo "
