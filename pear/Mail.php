@@ -15,6 +15,8 @@
 // +----------------------------------------------------------------------+
 // | Authors: Chuck Hagenbuch <chuck@horde.org>                           |
 // +----------------------------------------------------------------------+
+//
+// $Id$
 
 require_once 'PEAR.php';
 
@@ -22,6 +24,10 @@ require_once 'PEAR.php';
  * PEAR's Mail:: interface. Defines the interface for implementing
  * mailers under the PEAR hierarchy, and provides supporting functions
  * useful in multiple mailer backends.
+ * 
+ * @access public
+ * @version $Revision$
+ * @package Mail
  */
 class Mail extends PEAR {
     
@@ -29,8 +35,9 @@ class Mail extends PEAR {
      * Provides an interface for generating Mail:: objects of various
      * types
      *
-     * @param string The kind of Mail:: object to instantiate.
-     * @param array  The parameters to pass to the Mail:: object.
+     * @param string $driver The kind of Mail:: object to instantiate.
+     * @param array  $params The parameters to pass to the Mail:: object.     
+     @ @return object Mail a instance of the driver class or if fails a PEAR Error
      * @access public
      */
     function factory($driver, $params = array())
@@ -42,32 +49,34 @@ class Mail extends PEAR {
         } else {
             return new PEAR_Error('Unable to find class for driver ' . $driver);
         }
+
     }
     
 	/**
      * Implements Mail::send() function using php's built-in mail()
      * command.
-     * 
-     * @param mixed Either a comma-seperated list of recipients
+     *
+     * @param mixed $recipients Either a comma-seperated list of recipients
      *              (RFC822 compliant), or an array of recipients,
      *              each RFC822 valid. This may contain recipients not
      *              specified in the headers, for Bcc:, resending
      *              messages, etc.
      *
-     * @param array The array of headers to send with the mail, in an
+     * @param array $headers The array of headers to send with the mail, in an
      *              associative array, where the array key is the
      *              header name (ie, 'Subject'), and the array value
      *              is the header value (ie, 'test'). The header
      *              produced from those values would be 'Subject:
      *              test'.
      *
-     * @param string The full text of the message body, including any
+     * @param string $body The full text of the message body, including any
      *               Mime parts, etc.
      *
      * @return mixed Returns true on success, or a PEAR_Error
      *               containing a descriptive error message on
      *               failure.
      * @access public
+     * @deprecated use Mail_mail::send instead
      */	
     function send($recipients, $headers, $body)
     {
@@ -88,13 +97,14 @@ class Mail extends PEAR {
         list(,$text_headers) = Mail::prepareHeaders($headers);
         
         return mail($recipients, $subject, $body, $text_headers);
+
     }
     
     /**
      * Take an array of mail headers and return a string containing
      * text usable in sending a message.
      *
-     * @param array The array of headers to prepare, in an associative
+     * @param array $headers The array of headers to prepare, in an associative
      *              array, where the array key is the header name (ie,
      *              'Subject'), and the array value is the header
      *              value (ie, 'test'). The header produced from those
@@ -104,7 +114,7 @@ class Mail extends PEAR {
      *               otherwise returns an array containing two
      *               elements: Any From: address found in the headers,
      *               and the plain text version of the headers.
-     * @access protected
+     * @access private
      */
     function prepareHeaders($headers)
     {
@@ -146,7 +156,7 @@ class Mail extends PEAR {
      *              each RFC822 valid.
      *
      * @return array An array of forward paths (bare addresses).
-     * @access protected
+     * @access private
      */
     function parseRecipients($recipients)
     {
