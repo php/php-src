@@ -124,8 +124,6 @@ struct _php_core_globals {
 	zend_bool during_request_startup;
 
 	zend_bool allow_url_fopen;
-
-	zend_llist ini_extension_list;
 };
 
 
