@@ -1838,6 +1838,10 @@ PHP_FUNCTION(chunk_split)
 		RETURN_FALSE;
 	}
 
+	if (chunklen > Z_STRLEN_PP(p_str)) {
+		RETURN_STRINGL(Z_STRVAL_PP(p_str), Z_STRLEN_PP(p_str), 1);	
+	}
+
 	if (!Z_STRLEN_PP(p_str)) {
 		RETURN_EMPTY_STRING();
 	}
