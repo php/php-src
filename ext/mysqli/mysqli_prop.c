@@ -87,6 +87,19 @@ int link_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ property link_test_read */
+int link_test_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
+	long	i;
+	ALLOC_ZVAL(*retval);
+	array_init(*retval);
+
+	for (i=0; i < 10; i++)
+		add_index_long(*retval, i, i + 10);
+	return SUCCESS;
+}
+/*i }}} */
+
 /* {{{ property link_connect_errno_read */
 int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
@@ -171,7 +184,7 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_affected_rows_read, mysql_stmt_affected_rows,
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_insert_id_read, mysql_stmt_insert_id, MYSQLI_GET_STMT(), my_ulonglong);
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_num_rows_read, mysql_stmt_num_rows, MYSQLI_GET_STMT(), my_ulonglong);
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_param_count_read, mysql_stmt_param_count, MYSQLI_GET_STMT(), ulong);
-//MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_field_count_read, mysql_stmt_field_count, MYSQLI_GET_STMT(), ulong);
+MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_field_count_read, mysql_stmt_field_count, MYSQLI_GET_STMT(), ulong);
 MYSQLI_MAP_PROPERTY_FUNC_LONG(stmt_errno_read, mysql_stmt_errno, MYSQLI_GET_STMT(), ulong);
 MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_error_read, mysql_stmt_error, MYSQLI_GET_STMT());
 MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_sqlstate_read, mysql_stmt_sqlstate, MYSQLI_GET_STMT());
@@ -179,6 +192,7 @@ MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_sqlstate_read, mysql_stmt_sqlstate, MYSQLI_
 mysqli_property_entry mysqli_link_property_entries[] = {
 	{"affected_rows", link_affected_rows_read, NULL},
 	{"client_version", link_client_version_read, NULL},
+	{"test", link_test_read, NULL},
 	{"connect_errno", link_connect_errno_read, NULL},
 	{"connect_error", link_connect_error_read, NULL},
 	{"errno", link_errno_read, NULL},
@@ -212,9 +226,9 @@ mysqli_property_entry mysqli_stmt_property_entries[] = {
 	{"param_count", stmt_param_count_read, NULL},
 
 /*  TODO: stmt->field_count doesn't work currently, remove comments until mysqli_stmt_field_count
-    is implemented in client library 
-	{"field_count", stmt_field_count_read, NULL},
+    is implemented in client library
 */
+	{"field_count", stmt_field_count_read, NULL},
 
 	{"errno", stmt_errno_read, NULL},
 	{"error", stmt_error_read, NULL},
