@@ -15,7 +15,7 @@
   | Author: Georg Richter <georg@php.net>                                |
   +----------------------------------------------------------------------+
 
-  $Id:  
+  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
