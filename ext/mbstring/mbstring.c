@@ -373,11 +373,12 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 
 /* php.ini directive registration */
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
-	PHP_INI_ENTRY("mbstring.http_input", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_input)
-	PHP_INI_ENTRY("mbstring.http_output", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_output)
-	PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding)
-	PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
+	 PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
+	 PHP_INI_ENTRY("mbstring.http_input", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_input)
+	 PHP_INI_ENTRY("mbstring.http_output", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_output)
+	 PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding)
+	 PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
+	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
 PHP_INI_END()
 
 
@@ -406,6 +407,8 @@ php_mbstring_init_globals(zend_mbstring_globals *pglobals)
 	pglobals->filter_illegal_substchar = 0x3f;	/* '?' */
 	pglobals->current_filter_illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	pglobals->current_filter_illegal_substchar = 0x3f;	/* '?' */
+	pglobals->func_overload = 0;
+	pglobals->orig_mail = (zend_function *)NULL;
 	pglobals->outconv = NULL;
 }
 
@@ -466,6 +469,18 @@ PHP_RINIT_FUNCTION(mbstring)
 			n--;
 		}
 	}
+
+ 	/* override original mail() function with mb_send_mail(). */
+ 	if ((MBSTRG(func_overload) & MB_OVERLOAD_MAIL) == MB_OVERLOAD_MAIL &&
+		!MBSTRG(orig_mail)){ 
+		zend_hash_find(EG(function_table), "mb_send_mail", sizeof("mb_send_mail"), (void **)&func);
+		zend_hash_find(EG(function_table), "mail", sizeof("mail"), (void **)&MBSTRG(orig_mail));
+		if (zend_hash_del(EG(function_table), "mail",sizeof("mail")) != FAILURE) {
+			zend_hash_add(EG(function_table), "mail",sizeof("mail"),func, sizeof(zend_function), NULL);
+		} else {
+ 			zend_error(E_ERROR, "mbtring couldn't replace mail().");
+		}
+ 	}
 
 	return SUCCESS;
 }
