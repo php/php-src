@@ -299,7 +299,7 @@ ZEND_END_MODULE_GLOBALS(mysqli)
 #define MYSQLI_PROFILER_HEADER(query) php_mysqli_profiler_header(query)
 #define MYSQLI_PROFILER_REPORT_RESULT(res) php_mysqli_profiler_result_info(res)
 #define MYSQLI_PROFILER_EXPLAIN(mysql,query) \
-if (!strncasecmp("select", Z_STRVAL_PP(query), 6)){ \
+if (!strncasecmp("select", query, 6)){ \
 	php_mysqli_profiler_explain(mysql,query); \
 	if (mysql_errno(mysql)) { \
 		RETURN_FALSE; \
