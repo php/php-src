@@ -382,9 +382,6 @@ register_argc_argv = On
 ; Maximum size of POST data that PHP will accept.
 post_max_size = 8M
 
-; This directive is deprecated.  Use variables_order instead.
-gpc_order = "GPC"
-
 ; Magic quotes
 ;
 
@@ -531,7 +528,7 @@ default_socket_timeout = 60
 
 
 ;Windows Extensions
-;Note that ODBC support is now built in, so no dll is needed for it.
+;Note that ODBC support is built in, so no dll is needed for it.
 ;
 ;extension=php_bz2.dll
 ;extension=php_cpdf.dll

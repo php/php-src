@@ -549,11 +549,9 @@ int php_hash_environment(TSRMLS_D)
 {
 	char *p;
 	unsigned char _gpc_flags[5] = {0, 0, 0, 0, 0};
-	zend_bool have_variables_order;
 	zval *dummy_track_vars_array = NULL;
 	zend_bool initialized_dummy_track_vars_array=0;
 	zend_bool jit_initialization = (!PG(register_globals) && !PG(register_long_arrays));
-	char *variables_order;
 	struct auto_global_record {
 		char *name;
 		uint name_len;
@@ -576,22 +574,7 @@ int php_hash_environment(TSRMLS_D)
 		PG(http_globals)[i] = NULL;
 	}
 
-	if (PG(variables_order)) {
-		variables_order = PG(variables_order);
-		have_variables_order=1;
-	} else {
-		variables_order = PG(gpc_order);
-		have_variables_order=0;
-		ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
-		array_init(PG(http_globals)[TRACK_VARS_ENV]);
-		INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
-		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
-		if (PG(register_globals)) {
-			php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV]) TSRMLS_CC);
-		}
-	}
-
-	for (p=variables_order; p && *p; p++) {
+	for (p=PG(variables_order); p && *p; p++) {
 		switch(*p) {
 			case 'p':
 			case 'P':
@@ -626,15 +609,11 @@ int php_hash_environment(TSRMLS_D)
 			case 'e':
 			case 'E':
 				if (!jit_initialization && !_gpc_flags[3]) {
-					if (have_variables_order) {
-						php_auto_globals_create_env("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
-						if (PG(register_globals)) {
-							php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV]) TSRMLS_CC);
-						}
-					} else {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
-					}
+					php_auto_globals_create_env("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
 					_gpc_flags[3]=1;
+					if (PG(register_globals)) {
+						php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV]) TSRMLS_CC);
+					}
 				}
 				break;
 			case 's':
@@ -647,13 +626,6 @@ int php_hash_environment(TSRMLS_D)
 					}
 				}
 				break;
-		}
-	}
-
-	if (!jit_initialization && !have_variables_order && !_gpc_flags[4]) {
-		php_register_server_variables(TSRMLS_C);
-		if (PG(register_globals)) {
-			php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]) TSRMLS_CC);
 		}
 	}
 
@@ -734,21 +706,14 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRMLS_DC)
 {
 	zval *form_variables;
-	char *variables_order;
 	unsigned char _gpc_flags[3] = {0, 0, 0};
 	char *p;
-
-	if (PG(variables_order)) {
-		variables_order = PG(variables_order);
-	} else {
-		variables_order = PG(gpc_order);
-	}
 
 	ALLOC_ZVAL(form_variables);
 	array_init(form_variables);
 	INIT_PZVAL(form_variables);
 
-	for (p=variables_order; p && *p; p++) {
+	for (p=PG(variables_order); p && *p; p++) {
 		switch (*p) {
 			case 'g':
 			case 'G':

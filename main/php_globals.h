@@ -103,7 +103,6 @@ struct _php_core_globals {
 
 	arg_separators arg_separator;
 
-	char *gpc_order;
 	char *variables_order;
 
 	HashTable rfc1867_protected_variables;
