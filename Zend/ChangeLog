@@ -1,3 +1,78 @@
+2004-03-16  Derick Rethans  <php@derickrethans.nl>
+
+    * zend.c
+      zend.h
+      zend_API.h
+      zend_modules.h:
+      - Replaced the exec_finished hook by the zend_post_deactive hook for
+        extensions. The new hook will be run after the symbol table and
+      destructors
+        are run. (Derick)
+
+    * zend_modules.h:
+      - Bump API number so that it actually differs from PHP 4. This is needed
+        because we don't want PHP 4 and PHP 5 extensions to be in the same
+      directory
+        when doing "make install" for shared, or phpize'd extensions.
+
+2004-03-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      Fix SEGV in certain conditions while calling static methods
+
+2004-03-16  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_compile.h:
+      Add ability to disable JIT for a particular auto global
+
+2004-03-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      TSRM fix
+
+2004-03-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend.h:
+      Enable ptr format check for GCC 3.1 and higher
+
+2004-03-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend.h:
+      Do not allow 3.0.4 for __attribute__.
+
+    * zend.h:
+      Fixed bug #27600 (GCC 3.0.4 does not like __attribute__ directive)
+
+2004-03-16  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Fix problem when using old-style constructors it wasn't being inherited
+        correctly.
+
+2004-03-16  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_execute_API.c:
+      - Spaces to tabs
+
+2004-03-16  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute_API.c:
+      - If the called method is static then don't define $this
+
+    * zend_execute.c
+      zend_execute_API.c:
+      - Error out if get_method() isn't defined.
+      - Use calling scope of internal function callee when calling a method
+        using static syntax (array("A", "func"));
+
+2004-03-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c
+      zend_execute.h
+      zend_execute_API.c:
+      Improve error message
+
 2004-03-15  Andi Gutmans  <andi@zend.com>
 
     * zend_operators.c:
