@@ -71,10 +71,8 @@ static int clean_module_constant(zend_constant *c, int *module_number)
 }
 
 
-void clean_module_constants(int module_number)
+void clean_module_constants(int module_number TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	zend_hash_apply_with_argument(EG(zend_constants), (int (*)(void *,void *)) clean_module_constant, (void *) &module_number);
 }
 
@@ -156,10 +154,8 @@ int zend_shutdown_constants(TSRMLS_D)
 }
 
 
-void clean_non_persistent_constants(void)
+void clean_non_persistent_constants(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	zend_hash_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant);
 }
 
@@ -213,12 +209,11 @@ ZEND_API void zend_register_string_constant(char *name, uint name_len, char *str
 }
 
 
-ZEND_API int zend_get_constant(char *name, uint name_len, zval *result)
+ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
 {
 	zend_constant *c;
 	char *lookup_name = estrndup(name,name_len);
 	int retval;
-	TSRMLS_FETCH();
 
 	zend_str_tolower(lookup_name, name_len);
 

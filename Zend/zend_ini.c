@@ -298,19 +298,6 @@ ZEND_API char *zend_ini_string(char *name, uint name_length, int orig)
 }
 
 
-zend_ini_entry *get_ini_entry(char *name, uint name_length)
-{
-	zend_ini_entry *ini_entry;
-	TSRMLS_FETCH();
-
-	if (zend_hash_find(&EG(ini_directives), name, name_length, (void **) &ini_entry)==SUCCESS) {
-		return ini_entry;
-	} else {
-		return NULL;
-	}
-}
-
-
 static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 {
 	if (ini_entry->displayer) {

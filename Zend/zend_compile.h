@@ -212,8 +212,8 @@ int lex_scan(zval *zendlval TSRMLS_DC);
 void startup_scanner(TSRMLS_D);
 void shutdown_scanner(TSRMLS_D);
 
-ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename);
-ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename);
+ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename TSRMLS_DC);
+ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TSRMLS_DC);
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 
@@ -387,7 +387,7 @@ int print_class(zend_class_entry *class_entry);
 void print_op_array(zend_op_array *op_array, int optimizations);
 int pass_two(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
-ZEND_API zend_bool zend_is_compiling(void);
+ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC);
 
 int zendlex(znode *zendlval TSRMLS_DC);

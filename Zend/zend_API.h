@@ -132,7 +132,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 ZEND_API zend_module_entry *zend_get_module(int module_number);
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length);
 
-ZEND_API void wrong_param_count(void);
+ZEND_API void zend_wrong_param_count(TSRMLS_D);
 ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name);
 
 #define getThis() (this_ptr)
@@ -141,8 +141,8 @@ ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char 
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)
 #define ARG_COUNT(dummy)	(ht)
 #define ZEND_NUM_ARGS()		(ht)
-#define ZEND_WRONG_PARAM_COUNT()					{ wrong_param_count(); return; }
-#define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ wrong_param_count(); return ret; }
+#define ZEND_WRONG_PARAM_COUNT()					{ zend_wrong_param_count(TSRMLS_C); return; }
+#define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ zend_wrong_param_count(TSRMLS_C); return ret; }
 
 #ifndef ZEND_WIN32
 #define DLEXPORT
@@ -231,8 +231,8 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 #define add_property_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value)       
 
-ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[]);
-ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table);
+ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC);
+ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   int is_ref, int num_symbol_tables, ...);
