@@ -216,6 +216,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		case IS_OBJECT:
 			{
 				TSRMLS_FETCH();
+#if 0
 				/* Standard PHP objects */
 				if (expr->value.obj.handlers == &std_object_handlers) {
 					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
@@ -223,6 +224,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 					}
 					zend_error(E_NOTICE, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name);
 				}
+#endif
 				if (expr->value.obj.handlers->cast_object &&
 					expr->value.obj.handlers->cast_object(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
 					break;
