@@ -3,6 +3,8 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+- Fixed array_rand() to shuffle results when the number of requested
+  elements is the same as the number of elements in the array. (Andrei)
 - Added replace parameter to header() (Sascha)
 - Fixed handling of single quotes in transparent session-id mode (Sascha)
 - Fixed "php://*" fopen handler (Sascha)
