@@ -33,7 +33,7 @@ if (!@putenv("TZ=EST5") || getenv("TZ") != 'EST5') {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
 
-	putenv ("TZ=EST5");
+	putenv ("TZ=US/Eastern");
 	foreach ($dates as $date) {
 	    echo date ("Y-m-d H:i:s\n", strtotime ($date));
 	}
