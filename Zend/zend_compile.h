@@ -250,7 +250,7 @@ void do_post_incdec(znode *result, znode *op1, int op CLS_DC);
 void do_begin_variable_parse(CLS_D);
 void do_end_variable_parse(int type CLS_DC);
 
-void do_free(znode *op1 CLS_DC);
+void do_free(znode *op1, int is_used CLS_DC);
 
 void do_init_string(znode *result CLS_DC);
 void do_add_char(znode *result, znode *op1, znode *op2 CLS_DC);

@@ -161,11 +161,11 @@ statement:
 	|	T_FOR 
 			'('
 				for_expr
-			';' { do_free(&$3 CLS_CC); $4.u.opline_num = get_next_op_number(CG(active_op_array)); }
+			';' { do_free(&$3, 0 CLS_CC); $4.u.opline_num = get_next_op_number(CG(active_op_array)); }
 				for_expr
 			';' { do_for_cond(&$6, &$7 CLS_CC); }
 				for_expr
-			')' { do_free(&$9 CLS_CC); do_for_before_statement(&$4, &$7 CLS_CC); }
+			')' { do_free(&$9, 0 CLS_CC); do_for_before_statement(&$4, &$7 CLS_CC); }
 			for_statement { do_for_end(&$7 CLS_CC); }
 	|	T_SWITCH '(' expr ')' { do_switch_cond(&$3 CLS_CC); } switch_case_list { do_switch_end(&$6 CLS_CC); }
 	|	T_BREAK ';'		 	{ do_brk_cont(ZEND_BRK, NULL CLS_CC); }
@@ -178,7 +178,7 @@ statement:
 	|	T_STATIC static_var_list
 	|	T_ECHO echo_expr_list ';'
 	|	T_INLINE_HTML			{ do_echo(&$1 CLS_CC); }
-	|	expr ';'			{ do_free(&$1 CLS_CC); }
+	|	expr ';'			{ do_free(&$1, 0 CLS_CC); }
 	|	T_REQUIRE expr ';'			{ if ($2.op_type==IS_CONST && $2.u.constant.type==IS_STRING) { require_filename($2.u.constant.value.str.val CLS_CC); zval_dtor(&$2.u.constant); } else { do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); } }
 	|	T_UNSET '(' r_cvar ')' ';' { do_unset(&$3 CLS_CC); }
 	|	T_FOREACH '(' expr T_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
@@ -358,7 +358,7 @@ echo_expr_list:
 
 for_expr:
 		/* empty */			{ $$.op_type = IS_CONST;  $$.u.constant.type = IS_BOOL;  $$.u.constant.value.lval = 1; }
-	|	for_expr ',' { do_free(&$1 CLS_CC); } expr	{ $$ = $4; }
+	|	for_expr ',' { do_free(&$1, 0 CLS_CC); } expr	{ $$ = $4; }
 	|	expr				{ $$ = $1; }
 ;
 
