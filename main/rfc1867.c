@@ -72,7 +72,7 @@ void php_rfc1867_register_constants(TSRMLS_D)
 
 static void normalize_protected_variable(char *varname TSRMLS_DC)
 {
-	char *s=varname, *index=NULL, *indexend=NULL;
+	char *s=varname, *index=NULL, *indexend=NULL, *p;
 	
 	/* overjump leading space */
 	while (*s == ' ') {
@@ -82,6 +82,15 @@ static void normalize_protected_variable(char *varname TSRMLS_DC)
 	/* and remove it */
 	if (s != varname) {
 		memcpy(varname, s, strlen(s)+1);
+	}
+
+	for (p=varname; *p && *p != '['; p++) {
+		switch(*p) {
+			case ' ':
+			case '.':
+				*p='_';
+				break;
+		}
 	}
 
 	/* find index */
