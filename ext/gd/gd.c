@@ -154,7 +154,7 @@ function_entry gd_functions[] = {
 };
 
 zend_module_entry gd_module_entry = {
-	"gd", gd_functions, PHP_MINIT(gd), PHP_MSHUTDOWN(gd), NULL, NULL, PHP_MINFO(gd), STANDARD_MODULE_PROPERTIES
+	"gd", gd_functions, PHP_MINIT(gd), NULL, NULL, NULL, PHP_MINFO(gd), STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef ZTS
@@ -245,25 +245,6 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_PNG
 	php_printf(" PNG");
 #endif
-}
-
-PHP_MSHUTDOWN_FUNCTION(gd)
-{
-	GDLS_FETCH();
-
-#ifdef THREAD_SAFE
-	PHP3_TLS_THREAD_FREE(gdlib_globals);
-	PHP_MUTEX_LOCK(gdlib_mutex);
-	numthreads--;
-	if (numthreads<1) {
-		PHP3_TLS_PROC_SHUTDOWN(GDlibTls);
-		PHP_MUTEX_UNLOCK(gdlib_mutex);
-		PHP_MUTEX_FREE(gdlib_mutex);
-		return SUCCESS;
-	}
-	PHP_MUTEX_UNLOCK(gdlib_mutex);
-#endif
-	return SUCCESS;
 }
 
 /* Need this for cpdf. See also comment in file.c php3i_get_le_fp() */
