@@ -46,7 +46,7 @@ dnl
 dnl execute code, if variable is not set in namespace
 dnl
 AC_DEFUN(AC_PHP_ONCE,[
-  unique=`echo $ac_n "$2$ac_c" | tr -c -d a-zA-Z0-9`
+  unique=`echo $ac_n "$2$ac_c" | tr -cd a-zA-Z0-9`
   cmd="echo $ac_n \"\$$1$unique$ac_c\""
   if test -n "$unique" && test "`eval $cmd`" = "" ; then
     eval "$1$unique=set"
