@@ -862,6 +862,16 @@ yylex ()
 	  yyInput--;
 	  if (sign < 0)
 	    yylval.Number = -yylval.Number;
+	  /* Ignore ordinal suffixes on numbers */
+	  c = *yyInput;
+	  if (c == 's' || c == 'n' || c == 'r' || c == 't') {
+	    c = *++yyInput;
+	    if (c == 't' || c == 'd' || c == 'h') {
+	      yyInput++;
+	    } else {
+	      yyInput--;
+	    }
+	  }
 	  return sign ? tSNUMBER : tUNUMBER;
 	}
       if (ISALPHA (c))
