@@ -1020,6 +1020,11 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 
 	/* Relative path open */
 	if (*filename == '.') {
+
+		if (php_check_open_basedir(filename TSRMLS_CC)) {
+			return NULL;
+		}
+
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
@@ -1033,6 +1038,11 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 
 	/* Absolute path open */
 	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
+
+		if (php_check_open_basedir(filename TSRMLS_CC)) {
+			return NULL;
+		}
+
 		if ((php_check_safe_mode_include_dir(filename TSRMLS_CC)) == 0)
 			/* filename is in safe_mode_include_dir (or subdir) */
 			return php_stream_fopen_rel(filename, mode, opened_path);
@@ -1044,6 +1054,11 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	}
 
 	if (!path || (path && !*path)) {
+
+		if (php_check_open_basedir(path TSRMLS_CC)) {
+			return NULL;
+		}
+
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
@@ -1087,7 +1102,10 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 		if (PG(safe_mode)) {
 			if (VCWD_STAT(trypath, &sb) == 0) {
 				/* file exists ... check permission */
-				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
+
+				if (php_check_open_basedir(trypath TSRMLS_CC)) {
+					stream = NULL;
+				} else if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
 						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM)) {
 					/* UID ok, or trypath is in safe_mode_include_dir */
 					stream = php_stream_fopen_rel(trypath, mode, opened_path);
@@ -1404,6 +1422,10 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 {
 	if ((options & USE_PATH) && PG(include_path) != NULL) {
 		return php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path);
+	}
+
+	if (php_check_open_basedir(path TSRMLS_CC)) {
+		return NULL;
 	}
 
 	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
