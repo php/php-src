@@ -2,9 +2,9 @@ dnl
 dnl $Id$
 dnl
 
-AC_MSG_CHECKING(for Apache module support via DSO through APXS)
+AC_MSG_CHECKING(for Apache 1.x module support via DSO through APXS)
 AC_ARG_WITH(apxs,
-[  --with-apxs[=FILE]      Build shared Apache module. FILE is the optional
+[  --with-apxs[=FILE]      Build shared Apache 1.x module. FILE is the optional
                           pathname to the Apache apxs tool; defaults to "apxs".],[
   if test "$withval" = "yes"; then
     APXS=apxs
@@ -71,9 +71,9 @@ AC_ARG_WITH(apxs,
 APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php4.* sapi/apache/libphp4.module"
 
 if test "$PHP_SAPI" != "apache"; then
-AC_MSG_CHECKING(for Apache module support)
+AC_MSG_CHECKING(for Apache 1.x module support)
 AC_ARG_WITH(apache,
-[  --with-apache[=DIR]     Build Apache module. DIR is the top-level Apache
+[  --with-apache[=DIR]     Build Apache 1.x module. DIR is the top-level Apache
                           build directory, defaults to /usr/local/apache.],[
   if test "$withval" = "yes"; then
     # Apache's default directory
