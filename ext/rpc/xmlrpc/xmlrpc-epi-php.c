@@ -206,12 +206,18 @@ static void xmlrpc_server_destructor(zend_rsrc_list_entry *rsrc) {
    }
 }
 
+static void xmlrpc_init_globals(TSRMLS_D)
+{
+    return;
+}
+
 /* module init */
 PHP_MINIT_FUNCTION(xmlrpc)
 {
 /* Remove comments if you have entries in php.ini
         REGISTER_INI_ENTRIES();
 */
+   ZEND_INIT_MODULE_GLOBALS(xmlrpc, xmlrpc_init_globals, NULL);
    XMLRPCG(le_xmlrpc_server) = zend_register_list_destructors_ex(xmlrpc_server_destructor, NULL, "xmlrpc server", module_number);
 
    return SUCCESS;
@@ -842,7 +848,8 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
    xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
    pval* xmlrpc_params;
    pval* callback_params[3];
-
+   TSRMLS_FETCH();
+   
    /* convert xmlrpc to native php types */
    xmlrpc_params = XMLRPC_to_PHP(XMLRPC_RequestGetData(xRequest));
 
@@ -866,7 +873,8 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
    pval *retval_ptr, **php_function;
    pval* callback_params[1];
    xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
-
+   TSRMLS_FETCH();
+   
    MAKE_STD_ZVAL(retval_ptr);
    Z_TYPE_P(retval_ptr) = IS_NULL;
 
