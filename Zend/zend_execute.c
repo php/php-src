@@ -590,6 +590,7 @@ static void fetch_overloaded_element(znode *result, znode *op1, znode *op2, temp
 	zend_overloaded_element overloaded_element;
 
 	if (Ts[op1->u.var].EA.type == IS_STRING_OFFSET) {
+		get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
