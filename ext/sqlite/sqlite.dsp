@@ -128,6 +128,10 @@ SOURCE=.\libsqlite\src\copy.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\libsqlite\src\date.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\libsqlite\src\delete.c
 # End Source File
 # Begin Source File
@@ -303,6 +307,14 @@ SOURCE=.\libsqlite\src\vdbe.c
 # Begin Source File
 
 SOURCE=.\libsqlite\src\vdbe.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\vdbeaux.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libsqlite\src\vdbeInt.h
 # End Source File
 # Begin Source File
 
