@@ -128,7 +128,7 @@ SOURCE=..\ext\standard\cyr_convert.c
 # End Source File
 # Begin Source File
 
-SOURCE="..\main\fopen-wrappers.c"
+SOURCE="..\main\fopen_wrappers.c"
 # End Source File
 # Begin Source File
 
