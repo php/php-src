@@ -371,7 +371,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max, HashTable 
 	ELS_FETCH();
 	BLS_FETCH();
 
-	if(var_hash) {
+	if(var_hash && **p != 'R') {  /* references aren't counted by serializer! */
 		zend_hash_next_index_insert(var_hash, rval, sizeof(*rval), NULL);
 	}
 
