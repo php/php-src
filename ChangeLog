@@ -1,3 +1,80 @@
+2001-09-19  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Not using _free_ldap_result destructor for le_result_entry, leads to
+    crashes due to freeing same memory several times in some cases
+
+2001-09-19  Andy Sautins  <asautins@veripost.net>
+
+    * ext/oci8/oci8.c:
+    Collections core-dump fix.  ocicollgetelem was using OCIInd instead
+    of OCIInd * in call to OCICollGetElem
+
+2001-09-19  Stig Venaas  <venaas@uninett.no>
+
+    * ext/standard/dns.c: Added IPv6 support to gethostbyaddr()
+
+2001-09-19  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/dbase/dbase.dsp
+      ext/db/db.dsp: Fixing debug build on Win32
+
+2001-09-19  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/php_dbplus.c:
+    argument count fix plus beginning local query support
+
+2001-09-19  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/reqclient.h: The extension should not be GPL.
+
+2001-09-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/sockets/sockets.c: doh\!
+
+2001-09-19  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/CREDITS
+      ext/msession/Makefile
+      ext/msession/Makefile.in
+      ext/msession/README
+      ext/msession/config.m4
+      ext/msession/libs.mk
+      ext/msession/msession.c
+      ext/msession/msession.php
+      ext/msession/php_msession.h
+      ext/msession/reqclient.h: Added
+
+2001-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/math.c: quickly fix newly introdued off-by-one
+
+2001-09-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/sockets/sockets.c: Fix silly bugs
+
+2001-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/math.c:
+    Rewrite _php_match_basetozval to need only one multiplication
+    per iteration and avoid the U?LONG_MAX hassle.
+
+    * ext/mailparse/config.m4
+      ext/pcntl/config.m4: Fix indentation of ./configure --help
+
+    * build/build.mk: add missing dependency
+
+2001-09-19  Joey Smith  <joey@joeysmith.com>
+
+    * ext/domxml/php_domxml.c: MFH, Close bug #13322
+
+    * ext/domxml/php_domxml.c:
+    Don't manually register the resource, let php_domobject_new do it for us.
+    This fixes and elusive SIGSEGV.
+    Bug id'd and fixed by Ivo Hulinsky <huld@fido.cz>.
+
+    This fixes #13322.
+
 2001-09-18  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/mbstring/mbstring.dsp: Fixing win32 debug build
