@@ -391,8 +391,8 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 			return;
 		}
 
-		add_assoc_long_ex(t_map, "usage", sizeof("usage")+1, qlist->usage);
-		add_assoc_long_ex(t_map, "limit", sizeof("limit")+1, qlist->limit);
+		add_assoc_long_ex(t_map, "usage", sizeof("usage"), qlist->usage);
+		add_assoc_long_ex(t_map, "limit", sizeof("limit"), qlist->limit);
 		add_assoc_zval_ex(IMAPG(quota_return), qlist->name, strlen(qlist->name)+1, t_map);
 	}
 }
@@ -408,9 +408,9 @@ void mail_getquotaroot(MAILSTREAM *stream, char *mbx, STRINGLIST *qroot)
 {
 	TSRMLS_FETCH();
 
-	add_next_index_stringl(IMAPG(quota_return), mbx, strlen(mbx)+1, 1);
+	add_next_index_stringl(IMAPG(quota_return), mbx, strlen(mbx), 1);
 	for(; qroot; qroot = qroot->next) {
-		add_next_index_stringl(IMAPG(quota_return), qroot->text.data, qroot->text.size+1, 1);
+		add_next_index_stringl(IMAPG(quota_return), qroot->text.data, qroot->text.size, 1);
 	}
 
 }
@@ -442,7 +442,6 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 	imap_globals->folderlist_style = FLIST_ARRAY;
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	imap_globals->quota_return = NULL;
-	imap_globals->quotaroot_return = NULL;
 #endif
 }
 /* }}} */
@@ -1093,9 +1092,7 @@ PHP_FUNCTION(imap_get_quota)
 	}
 
 	*return_value = *IMAPG(quota_return);
-	//FREE_ZVAL(IMAPG(quota_return));
-	//IMAPG(quota_return) = NULL;
-
+	FREE_ZVAL(IMAPG(quota_return));
 }
 /* }}} */
 
@@ -1122,15 +1119,15 @@ PHP_FUNCTION(imap_get_quotaroot)
 	}
 
 	/* set the callback for the GET_QUOTAROOT function */
+	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	mail_parameters(NIL, SET_QUOTAROOT, (void *) mail_getquotaroot);
 	if(!imap_getquotaroot(imap_le_struct->imap_stream, Z_STRVAL_PP(mbox))) {
-		php_error(E_WARNING, "c-client imap_getquotaroot failed");
+		php_error(E_WARNING, "%s(): c-client imap_getquotaroot failed", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
 	*return_value = *IMAPG(quota_return);
-	//FREE_ZVAL(IMAPG(quota_return));
-	//IMAPG(quotaroot_return) = NULL;
+	FREE_ZVAL(IMAPG(quota_return));
 }
 /* }}} */
 
