@@ -132,9 +132,7 @@ PHP_FUNCTION(imap_mail_compose);
 PHP_FUNCTION(imap_alerts);
 PHP_FUNCTION(imap_errors);
 PHP_FUNCTION(imap_last_error);
-#ifndef PHP_WIN32
 PHP_FUNCTION(imap_mail);
-#endif
 PHP_FUNCTION(imap_search);
 PHP_FUNCTION(imap_utf8);
 PHP_FUNCTION(imap_utf7_decode);
