@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- snmp, pgsql, mysql and gd modules can be built as dynamically loaded 
+  modules (Greg)
 - OCI8 fix for fetching empty LOBs (Thies)
 - Added user-level callbacks for session module (Sascha)
 - Added support for unknown POST content types (Zeev)
