@@ -433,7 +433,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 	if (!silent) {
 		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
 		zend_debug_alloc_output("---------------------------------------\n");
-		zend_debug_alloc_output("Block 0x%0.8lX status at %s:%d:\n", (long) p, filename, lineno);
+		zend_debug_alloc_output("%s(%d) : Block 0x%0.8lX status:\n", filename, lineno, (long) p);
 		zend_debug_alloc_output("%10s\t","Beginning:  ");
 	}
 
