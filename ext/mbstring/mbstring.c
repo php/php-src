@@ -73,6 +73,7 @@ static int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_ident
 
 static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
 
+#if defined(MBSTR_ENC_TRANS)
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
 
 static sapi_post_entry mbstr_post_entries[] = {
@@ -80,6 +81,7 @@ static sapi_post_entry mbstr_post_entries[] = {
 	{ MULTIPART_CONTENT_TYPE,		sizeof(MULTIPART_CONTENT_TYPE)-1,		sapi_read_standard_form_data,	rfc1867_post_handler },
 	{ NULL, 0, NULL }
 };
+#endif
 
 function_entry mbstring_functions[] = {
 	PHP_FE(mb_internal_encoding,		NULL)
