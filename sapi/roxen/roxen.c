@@ -25,8 +25,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"
-/* Was using Pike's main.h */
-#include "../../main.h" 
+#include "php_main.h" 
 #include "ext/standard/info.h"
 
 #include "php_version.h"

@@ -26,6 +26,7 @@ AC_ARG_WITH(roxen,
 		AC_MSG_ERROR(Roxen/PHP requires Pike 0.7.79 or newer)
 	fi
    
+	AC_ADD_INCLUDE($PIKE_INCLUDE_DIR)
 	AC_DEFINE(HAVE_ROXEN,1,[Whether you use Roxen])
 	PHP_SAPI=roxen
 	PHP_BUILD_SHARED
@@ -35,7 +36,7 @@ AC_ARG_WITH(roxen,
 	Pike include dir:      $PIKE_INCLUDE_DIR
 	Pike module directory: $PIKE_MODULE_DIR"
 	PIKE_INCLUDE_DIR=" -I$PIKE_INCLUDE_DIR "
-    PHP_SUBST(PIKE_INCLUDE_DIR)
+#    PHP_SUBST(PIKE_INCLUDE_DIR)
 ])
 AC_MSG_RESULT($RESULT)
 
