@@ -2,10 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
-Fix OpenLink ODBC support (Stig)
-Fix min/max behaviour (Thies)
-Fix OpenLink ODBC support (Stig)
-Fix min/max behaviour (Thies)
+- Fix OpenLink ODBC support (Stig)
+- Fix min/max behaviour (Thies)
 - tempnam() now uses mkstemp() if available (Stig)
 - serialize() and var_dump() now honor the precision as set in php.ini
   for doubles. (Thies)
