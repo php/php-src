@@ -321,6 +321,8 @@ PHPAPI void php_print_info(int flag)
 		PUTS("</P>\n");
 		php_info_print_box_end();
 	}
+
+  PUTS("</BODY></HTML>");
 }
 
 
