@@ -2541,7 +2541,7 @@ void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double
 gdImagePtr gdImageRotate90 (gdImagePtr src)
 {
 	int uY, uX;
-	int c;
+	int c, r,g,b,a;
 	gdImagePtr dst;
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
@@ -2552,12 +2552,20 @@ gdImagePtr gdImageRotate90 (gdImagePtr src)
 		f = gdImageGetPixel;
 	}
 	dst = gdImageCreateTrueColor(src->sy, src->sx);
+
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
 		
 		for (uY = 0; uY<src->sy; uY++) {
 			for (uX = 0; uX<src->sx; uX++) {
 				c = f (src, uX, uY);
+				if (!src->trueColor) {
+					r = gdImageRed(src,c);
+					g = gdImageGreen(src,c);
+					b = gdImageBlue(src,c);
+					a = gdImageAlpha(src,c);
+					c = gdTrueColorAlpha(r, g, b, a);
+				}
 				gdImageSetPixel(dst, uY, (dst->sy - uX - 1), c);
 			}
 		}
@@ -2570,7 +2578,7 @@ gdImagePtr gdImageRotate90 (gdImagePtr src)
 gdImagePtr gdImageRotate180 (gdImagePtr src)
 {
 	int uY, uX;
-	int c;
+	int c,r,g,b,a;
 	gdImagePtr dst;
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
@@ -2581,12 +2589,20 @@ gdImagePtr gdImageRotate180 (gdImagePtr src)
 		f = gdImageGetPixel;
 	}
 	dst = gdImageCreateTrueColor(src->sx, src->sy);
+
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
 		
 		for (uY = 0; uY<src->sy; uY++) {
 			for (uX = 0; uX<src->sx; uX++) {
 				c = f (src, uX, uY);
+				if (!src->trueColor) {
+					r = gdImageRed(src,c);
+					g = gdImageGreen(src,c);
+					b = gdImageBlue(src,c);
+					a = gdImageAlpha(src,c);
+					c = gdTrueColorAlpha(r, g, b, a);
+				}
 				gdImageSetPixel(dst, (dst->sx - uX - 1), (dst->sy - uY - 1), c);
 			}
 		}
@@ -2599,7 +2615,7 @@ gdImagePtr gdImageRotate180 (gdImagePtr src)
 gdImagePtr gdImageRotate270 ( gdImagePtr src )
 {
 	int uY, uX;
-	int c;
+	int c,r,g,b,a;
 	gdImagePtr dst;
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	FuncPtr f;
@@ -2617,6 +2633,13 @@ gdImagePtr gdImageRotate270 ( gdImagePtr src )
 		for (uY = 0; uY<src->sy; uY++) {
 			for (uX = 0; uX<src->sx; uX++) {
 				c = f (src, uX, uY);
+				if (!src->trueColor) {
+					r = gdImageRed(src,c);
+					g = gdImageGreen(src,c);
+					b = gdImageBlue(src,c);
+					a = gdImageAlpha(src,c);
+					c = gdTrueColorAlpha(r, g, b, a);
+				}
 				gdImageSetPixel(dst, (dst->sx - uY - 1), uX, c);
 			}
 		}
