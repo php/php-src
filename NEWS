@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . ext/dio    (Jani, Derick)
   . ext/yp     (Jani, Derick)
   . ext/w32api (Jani, Derick)
+  . ext/cpdf   (Tony, Derick)
 - Changed stream_filter_(ap|pre)pend() to return resource. (Sara)
 - Changed mysqli_exception and sqlite_exception to use RuntimeException as base 
   if SPL extension is present. (Georg, Marcus)
