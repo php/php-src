@@ -33,6 +33,13 @@
 #define HAVE_CTIME 1
 
 
+#ifdef PHP_HPUX_TIME_R
+#undef HAVE_LOCALTIME_R
+#undef HAVE_ASCTIME_R
+#undef HAVE_CTIME_R
+#undef HAVE_GMTIME_R
+#endif
+
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 #define PHP_NEED_REENTRANCY 1
 #define localtime_r php_localtime_r
