@@ -31,6 +31,7 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_operators.h"
+#include "ext/standard/dns.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -434,15 +435,6 @@ function_entry basic_functions[] = {
 	PHP_FE(getprotobynumber,												NULL)
 #endif
 
-	PHP_FE(gethostbyaddr,													NULL)
-	PHP_FE(gethostbyname,													NULL)
-	PHP_FE(gethostbynamel,													NULL)
-
-#if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32) || defined(NETWARE))
-	PHP_FE(checkdnsrr,														NULL)
-	PHP_FE(getmxrr,second_and_third_args_force_ref)
-#endif
-
 	PHP_FE(getmyuid,														NULL)
 	PHP_FE(getmygid,														NULL)
 	PHP_FE(getmypid,														NULL)
@@ -575,6 +567,21 @@ function_entry basic_functions[] = {
 	PHP_FE(parse_ini_file,													NULL)
 	PHP_FE(is_uploaded_file,												NULL)
 	PHP_FE(move_uploaded_file,												NULL)
+
+	/* functions from dns.c */
+	PHP_FE(gethostbyaddr,													NULL)
+	PHP_FE(gethostbyname,													NULL)
+	PHP_FE(gethostbynamel,													NULL)
+
+#if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32) || defined(NETWARE))
+	PHP_FE(dns_check_record,												NULL)
+	PHP_FALIAS(checkdnsrr,			dns_check_record,						NULL)
+# if HAVE_DNS_FUNCS
+	PHP_FE(dns_get_record,			third_and_rest_force_ref)
+	PHP_FE(dns_get_mx,				second_and_third_args_force_ref)
+	PHP_FALIAS(getmxrr, 			dns_get_mx, 							NULL)
+# endif
+#endif
 
 	/* functions from type.c */
 	PHP_FE(intval,															NULL)
@@ -1058,6 +1065,12 @@ PHP_MINIT_FUNCTION(basic)
 # if HAVE_OPENSSL_EXT
 	php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC);
 	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper TSRMLS_CC);
+# endif
+#endif
+
+#if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE))
+# if HAVE_DNS_FUNCS
+	PHP_MINIT(dns) (INIT_FUNC_ARGS_PASSTHRU);
 # endif
 #endif
 
