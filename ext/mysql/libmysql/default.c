@@ -15,8 +15,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 ** The following arguments are handled automaticly;  If used, they must be
 ** first argument on the command line!
 ** --no-defaults	; no options are read.
-** --print-defaults	; Print the modified command line and exit
 ** --defaults-file=full-path-to-default-file	; Only this file will be read.
+** --defaults-extra-file=full-path-to-default-file ; Read this file before ~/
+** --print-defaults	; Print the modified command line and exit
 ****************************************************************************/
 
 #undef SAFEMALLOC		/* safe_malloc is not yet initailized */
@@ -24,6 +25,8 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include "mysys_priv.h"
 #include "m_string.h"
 #include "m_ctype.h"
+
+char *defaults_extra_file=0;
 
 /* Which directories are searched for options (and in which order) */
 
@@ -36,6 +39,7 @@ const char *default_directories[]= {
 #ifdef DATADIR
 DATADIR,
 #endif
+"",					/* Place for defaults_extra_dir */
 #ifndef __WIN__
 "~/",
 #endif
@@ -57,14 +61,15 @@ void load_defaults(const char *conf_file, const char **groups,
 		   int *argc, char ***argv)
 {
   DYNAMIC_ARRAY args;
-  const char **dirs, *extra_default_file;
+  const char **dirs, *forced_default_file;
   TYPELIB group;
   my_bool found_print_defaults=0;
+  uint args_used=0;
   MEM_ROOT alloc;
   char *ptr,**res;
   DBUG_ENTER("load_defaults");
 
-  init_alloc_root(&alloc,128);
+  init_alloc_root(&alloc,128,0);
   if (*argc >= 2 && !strcmp(argv[0][1],"--no-defaults"))
   {
     /* remove the --no-defaults argument and return only the other arguments */
@@ -83,9 +88,20 @@ void load_defaults(const char *conf_file, const char **groups,
   }
 
   /* Check if we want to force the use a specific default file */
-  extra_default_file=0;
-  if (*argc >= 2 && is_prefix(argv[0][1],"--defaults-file="))
-    extra_default_file=strchr(argv[0][1],'=')+1;
+  forced_default_file=0;
+  if (*argc >= 2)
+  {
+    if (is_prefix(argv[0][1],"--defaults-file="))
+    {
+      forced_default_file=strchr(argv[0][1],'=')+1;
+      args_used++;
+    }
+    else if (is_prefix(argv[0][1],"--defaults-extra-file="))
+    {
+      defaults_extra_file=strchr(argv[0][1],'=')+1;
+      args_used++;
+    }
+  }
 
   group.count=0;
   group.name= "defaults";
@@ -95,9 +111,9 @@ void load_defaults(const char *conf_file, const char **groups,
 
   if (init_dynamic_array(&args, sizeof(char*),*argc, 32))
     goto err;
-  if (extra_default_file)
+  if (forced_default_file)
   {
-    if (search_default_file(&args, &alloc, "", extra_default_file, "",
+    if (search_default_file(&args, &alloc, "", forced_default_file, "",
 			    &group))
       goto err;
   }
@@ -116,10 +132,22 @@ void load_defaults(const char *conf_file, const char **groups,
 			    &group))
       goto err;
 #endif
+#ifdef __EMX__
+    if (getenv("ETC") &&
+        search_default_file(&args, &alloc, getenv("ETC"), conf_file, 
+                            default_ext, &group))
+      goto err;
+#endif
     for (dirs=default_directories ; *dirs; dirs++)
     {
-      if (search_default_file(&args, &alloc, *dirs, conf_file, default_ext,
-			      &group))
+      int error=0;
+      if (**dirs)
+	error=search_default_file(&args, &alloc, *dirs, conf_file,
+				  default_ext, &group);
+      else if (defaults_extra_file)
+	error=search_default_file(&args, &alloc, NullS, defaults_extra_file,
+				  default_ext, &group);
+      if (error)
 	goto err;
     }
   }
@@ -131,11 +159,9 @@ void load_defaults(const char *conf_file, const char **groups,
   /* copy name + found arguments + command line arguments to new array */
   res[0]=argv[0][0];
   memcpy((gptr) (res+1), args.buffer, args.elements*sizeof(char*));
-  if (extra_default_file)
-  {
-    --*argc;					/* Skipp --defaults-file */
-    ++*argv;
-  }
+  /* Skipp --defaults-file and --defaults-extra-file */
+  (*argc)-= args_used;
+  (*argv)+= args_used;
 
   /* Check if we wan't to see the new argument list */
   if (*argc >= 2 && !strcmp(argv[0][1],"--print-defaults"))
@@ -174,7 +200,7 @@ void free_defaults(char **argv)
 {
   MEM_ROOT ptr;
   memcpy_fixed((char*) &ptr,(char *) argv - sizeof(ptr), sizeof(ptr));
-  free_root(&ptr);
+  free_root(&ptr,MYF(0));
 }
 
 
@@ -323,9 +349,18 @@ void print_defaults(const char *conf_file, const char **groups)
     GetWindowsDirectory(name,sizeof(name));
     printf("%s\\%s%s ",name,conf_file,have_ext ? "" : windows_ext);
 #endif
+#ifdef __EMX__
+    if (getenv("ETC"))
+      printf("%s\\%s%s ", getenv("ETC"), conf_file, default_ext);
+#endif
     for (dirs=default_directories ; *dirs; dirs++)
     {
-      strmov(name,*dirs);
+      if (**dirs)
+	strmov(name,*dirs);
+      else if (defaults_extra_file)
+	strmov(name,defaults_extra_file);
+      else
+	continue;
       convert_dirname(name);
       if (name[0] == FN_HOMELIB)	/* Add . to filenames in home */
 	strcat(name,".");
@@ -343,6 +378,7 @@ void print_defaults(const char *conf_file, const char **groups)
   puts("\nThe following options may be given as the first argument:\n\
 --print-defaults	Print the program argument list and exit\n\
 --no-defaults		Don't read default options from any options file\n\
---defaults-file=#	Only read default options from the given file #");
+--defaults-file=#	Only read default options from the given file #\n\
+--defaults-extra-file=# Read this file after the global files are read");
 }
 

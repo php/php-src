@@ -52,8 +52,9 @@ uint dirname_part(my_string to, const char *name)
 #define FN_DEVCHAR '\0'				/* For easier code */
 #endif
 
-void convert_dirname(my_string to)
+char *convert_dirname(my_string to)
 {
+  reg1 char *pos;
 #ifdef FN_UPPER_CASE
   caseup_str(to);
 #endif
@@ -62,7 +63,6 @@ void convert_dirname(my_string to)
 #endif
 #if FN_LIBCHAR != '/'
   {
-    reg1 my_string pos;
     pos=to-1;					/* Change from '/' */
     while ((pos=strchr(pos+1,'/')) != 0)
       *pos=FN_LIBCHAR;
@@ -70,7 +70,6 @@ void convert_dirname(my_string to)
 #endif
 #ifdef FN_C_BEFORE_DIR_2
   {
-    reg1 my_string pos;
     for (pos=to ; *pos ; pos++)
     {
       if (*pos == FN_C_BEFORE_DIR_2)
@@ -81,12 +80,13 @@ void convert_dirname(my_string to)
   }
 #else
   {					/* Append FN_LIBCHAR if not there */
-    char *end=strend(to);
-    if (end != to && (end[-1] != FN_LIBCHAR && end[-1] != FN_DEVCHAR))
+    pos=strend(to);
+    if (pos != to && (pos[-1] != FN_LIBCHAR && pos[-1] != FN_DEVCHAR))
     {
-      end[0]=FN_LIBCHAR;
-      end[1]=0;
+      *pos++=FN_LIBCHAR;
+      *pos=0;
     }
   }
 #endif
+  return pos;					/* Pointer to end of dir */
 } /* convert_dirname */

@@ -16,10 +16,9 @@ static my_string NEAR_F expand_tilde(my_string *path);
 
 	/* Pack a dirname ; Changes HOME to ~/ and current dev to ./ */
 	/* from is a dirname (from dirname() ?) ending with FN_LIBCHAR */
+	/* to may be == from */
 
 void pack_dirname(my_string to, const char *from)
-
-						/* to may be == from */
 {
   int cwd_err;
   uint d_length,length,buff_length;

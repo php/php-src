@@ -52,7 +52,7 @@ asm(".L5:				");
 #else
 
 void bmove(dst, src, len)
-register byte *dst;
+register char *dst;
 register const char *src;
 register uint len;
 {

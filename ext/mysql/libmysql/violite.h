@@ -56,8 +56,7 @@ my_bool		vio_is_blocking(	Vio*		vio);
 /*
  * setsockopt TCP_NODELAY at IPPROTO_TCP level, when possible.
  */
-int		vio_fastsend(		Vio*		vio,
-					my_bool		onoff);
+  int		vio_fastsend(		Vio*		vio);
 /*
  * setsockopt SO_KEEPALIVE at SOL_SOCKET level, when possible.
  */
@@ -93,6 +92,9 @@ my_bool vio_peer_addr(Vio * vio, char *buf);
 /* Remotes in_addr */
 
 void vio_in_addr(Vio *vio, struct in_addr *in);
+
+  /* Return 1 if there is data to be read */
+my_bool vio_poll_read(Vio *vio,uint timeout);
 
 #ifdef	__cplusplus
 }

@@ -34,6 +34,7 @@ my_bool init_dynamic_string(DYNAMIC_STRING *str, const char *init_str,
   DBUG_RETURN(FALSE);
 }
 
+
 my_bool dynstr_set(DYNAMIC_STRING *str, const char *init_str)
 {
   uint length;
@@ -58,6 +59,7 @@ my_bool dynstr_set(DYNAMIC_STRING *str, const char *init_str)
   DBUG_RETURN(FALSE);
 }
 
+
 my_bool dynstr_realloc(DYNAMIC_STRING *str, ulong additional_size)
 {
   DBUG_ENTER("dynstr_realloc");
@@ -76,11 +78,17 @@ my_bool dynstr_realloc(DYNAMIC_STRING *str, ulong additional_size)
 
 my_bool dynstr_append(DYNAMIC_STRING *str, const char *append)
 {
+  return dynstr_append_mem(str,append,strlen(append));
+}
+
+
+my_bool dynstr_append_mem(DYNAMIC_STRING *str, const char *append,
+			  uint length)
+{
   char *new_ptr;
-  uint length=(uint) strlen(append)+1;
-  if (str->length+length > str->max_length)
+  if (str->length+length >= str->max_length)
   {
-    uint new_length=(str->length+length+str->alloc_increment-1)/
+    uint new_length=(str->length+length+str->alloc_increment)/
       str->alloc_increment;
     new_length*=str->alloc_increment;
     if (!(new_ptr=(char*) my_realloc(str->str,new_length,MYF(MY_WME))))
@@ -89,9 +97,11 @@ my_bool dynstr_append(DYNAMIC_STRING *str, const char *append)
     str->max_length=new_length;
   }
   memcpy(str->str + str->length,append,length);
-  str->length+=length-1;
+  str->length+=length;
+  str->str[str->length]=0;			/* Safety for C programs */
   return FALSE;
 }
+
 
 void dynstr_free(DYNAMIC_STRING *str)
 {

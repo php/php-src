@@ -7,12 +7,25 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <my_sys.h>
 #include <m_string.h>
 
-void init_alloc_root(MEM_ROOT *mem_root,uint block_size)
+void init_alloc_root(MEM_ROOT *mem_root, uint block_size, uint pre_alloc_size)
 {
   mem_root->free=mem_root->used=0;
   mem_root->min_malloc=16;
   mem_root->block_size=block_size-MALLOC_OVERHEAD-sizeof(USED_MEM)-8;
   mem_root->error_handler=0;
+#if !(defined(HAVE_purify) && defined(EXTRA_DEBUG))
+  if (pre_alloc_size)
+  {
+    if ((mem_root->free = mem_root->pre_alloc=
+	 (USED_MEM*) my_malloc(pre_alloc_size+ ALIGN_SIZE(sizeof(USED_MEM)),
+			       MYF(0))))
+    {
+      mem_root->free->size=pre_alloc_size+ALIGN_SIZE(sizeof(USED_MEM));
+      mem_root->free->left=pre_alloc_size;
+      mem_root->free->next=0;
+    }
+  }
+#endif
 }
 
 gptr alloc_root(MEM_ROOT *mem_root,unsigned int Size)
@@ -75,26 +88,38 @@ gptr alloc_root(MEM_ROOT *mem_root,unsigned int Size)
 
 	/* deallocate everything used by alloc_root */
 
-void free_root(MEM_ROOT *root)
+void free_root(MEM_ROOT *root, myf MyFlags)
 {
   reg1 USED_MEM *next,*old;
   DBUG_ENTER("free_root");
 
   if (!root)
     DBUG_VOID_RETURN; /* purecov: inspected */
-  for (next= root->used ; next ; )
+  if (!(MyFlags & MY_KEEP_PREALLOC))
+    root->pre_alloc=0;
+
+  for ( next=root->used; next ;)
   {
     old=next; next= next->next ;
-    my_free((gptr) old,MYF(0));
+    if (old != root->pre_alloc)
+      my_free((gptr) old,MYF(0));
   }
   for (next= root->free ; next ; )
   {
     old=next; next= next->next ;
-    my_free((gptr) old,MYF(0));
+    if (old != root->pre_alloc)
+      my_free((gptr) old,MYF(0));
   }
   root->used=root->free=0;
+  if (root->pre_alloc)
+  {
+    root->free=root->pre_alloc;
+    root->free->left=root->pre_alloc->size-ALIGN_SIZE(sizeof(USED_MEM));
+    root->free->next=0;
+  }
   DBUG_VOID_RETURN;
 }
+
 
 char *strdup_root(MEM_ROOT *root,const char *str)
 {

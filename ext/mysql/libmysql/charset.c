@@ -7,9 +7,14 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <m_string.h>
 #include <my_dir.h>
 
+typedef struct cs_id_st {
+  char *name;
+  uint number;
+} CS_ID;
+
 const char *charsets_dir = NULL;
 static DYNAMIC_ARRAY cs_info_table;
-static TYPELIB available_charsets;
+static CS_ID **available_charsets;
 static int charset_initialized=0;
 
 #define MAX_LINE  1024
@@ -31,6 +36,25 @@ CHARSET_INFO *find_compiled_charset(uint cs_number);
 uint compiled_charset_number(const char *name);
 const char *compiled_charset_name(uint charset_number);
 
+
+static uint num_from_csname(CS_ID **cs, const char *name)
+{
+  CS_ID **c;
+  for (c = cs; *c; ++c)
+    if (!strcmp((*c)->name, name))
+      return (*c)->number;
+  return 0;   /* this mimics find_type() */
+}
+
+static char *name_from_csnum(CS_ID **cs, uint number)
+{
+  CS_ID **c;
+  if(cs)
+    for (c = cs; *c; ++c)
+      if ((*c)->number == number)
+	return (*c)->name;
+  return (char*) "?";   /* this mimics find_type() */
+}
 
 static my_bool get_word(struct simpleconfig_buf_st *fb, char *buf)
 {
@@ -56,13 +80,13 @@ static my_bool get_word(struct simpleconfig_buf_st *fb, char *buf)
 }
 
 
-static char *get_charsets_dir(char *buf)
+char *get_charsets_dir(char *buf)
 {
   const char *sharedir = SHAREDIR;
   DBUG_ENTER("get_charsets_dir");
 
   if (charsets_dir != NULL)
-    strnmov(buf, charsets_dir, FN_REFLEN);
+    strmake(buf, charsets_dir, FN_REFLEN-1);
   else
   {
     if (test_if_hard_path(sharedir) ||
@@ -78,12 +102,12 @@ static char *get_charsets_dir(char *buf)
 }
 
 
-static my_bool read_charset_index(TYPELIB *charsets, myf myflags)
+static my_bool read_charset_index(CS_ID ***charsets, myf myflags)
 {
   struct simpleconfig_buf_st fb;
-  char buf[MAX_LINE];
+  char buf[MAX_LINE], num_buf[MAX_LINE];
   DYNAMIC_ARRAY cs;
-  my_string s;
+  CS_ID *csid;
 
   strmov(get_charsets_dir(buf), "Index");
 
@@ -92,36 +116,42 @@ static my_bool read_charset_index(TYPELIB *charsets, myf myflags)
   fb.buf[0] = '\0';
   fb.p = fb.buf;
 
-  if (init_dynamic_array(&cs, sizeof(my_string), 32, 32))
+  if (init_dynamic_array(&cs, sizeof(CS_ID *), 32, 32))
     return TRUE;
 
-  while (!get_word(&fb, buf))
+  while (!get_word(&fb, buf) && !get_word(&fb, num_buf))
   {
+    uint csnum;
     uint length;
-    if (!(s= (char*) my_once_alloc(length= (uint) strlen(buf)+1, myflags)))
+
+    if (!(csnum = atoi(num_buf)))
+    {
+      /* corrupt Index file */
+      my_fclose(fb.f,myflags);
+      return TRUE;
+    }
+
+    if (!(csid = (CS_ID*) my_once_alloc(sizeof(CS_ID), myflags)) ||
+        !(csid->name=
+           (char*) my_once_alloc(length= (uint) strlen(buf)+1, myflags)))
     {
       my_fclose(fb.f,myflags);
       return TRUE;
     }
-    memcpy(s,buf,length);
-    insert_dynamic(&cs, (gptr) &s);
+    memcpy(csid->name,buf,length);
+    csid->number = csnum;
+
+    insert_dynamic(&cs, (gptr) &csid);
   }
   my_fclose(fb.f,myflags);
 
-  /* I seriously doubt this is the best way to initialize this
-   * TYPELIB from the Index file.  But it's the best way I could
-   * come up with right now. */
 
-  charsets->count = cs.elements;
-  charsets->name  = "";
-  if (!(charsets->type_names =
-	(const char **) my_once_alloc((cs.elements + 1) * sizeof(const char *),
-				      myflags)))
+  if (!(*charsets =
+      (CS_ID **) my_once_alloc((cs.elements + 1) * sizeof(CS_ID *), myflags)))
     return TRUE;
   /* unwarranted chumminess with dynamic_array implementation? */
-  memcpy((char*) charsets->type_names, cs.buffer,
-	 cs.elements * sizeof(my_string *));
-  charsets->type_names[cs.elements] = NullS;
+  memcpy((byte *) *charsets, cs.buffer, cs.elements * sizeof(CS_ID *));
+  (*charsets)[cs.elements] = NULL;
   delete_dynamic(&cs);  
 
   return FALSE;
@@ -150,7 +180,9 @@ static my_bool init_available_charsets(myf myflags)
     charset_initialized=1;
     pthread_mutex_unlock(&THR_LOCK_charset);
   }
-  return error || available_charsets.count == 0;
+  if(!available_charsets || !available_charsets[0])
+    error = TRUE;
+  return error;
 }
 
 
@@ -179,7 +211,7 @@ static my_bool fill_array(uchar *array, int sz, struct simpleconfig_buf_st *fb)
 static void get_charset_conf_name(uint cs_number, char *buf)
 {
   strxmov(get_charsets_dir(buf),
-          get_type(&available_charsets, cs_number - 1), ".conf", NullS);
+          name_from_csnum(available_charsets, cs_number), ".conf", NullS);
 }
 
 
@@ -223,7 +255,7 @@ uint get_charset_number(const char *charset_name)
   if (error)
     return compiled_charset_number(charset_name);
   else
-    return find_type((char*)charset_name, &available_charsets, 1);
+    return num_from_csname(available_charsets, charset_name);
 }
 
 const char *get_charset_name(uint charset_number)
@@ -233,7 +265,7 @@ const char *get_charset_name(uint charset_number)
   if (error)
     return compiled_charset_name(charset_number);
   else
-    return get_type(&available_charsets, charset_number - 1);
+    return name_from_csnum(available_charsets, charset_number);
 }
 
 
@@ -334,7 +366,7 @@ CHARSET_INFO *get_charset(uint cs_number, myf flags)
   (void) init_available_charsets(MYF(0));	/* If it isn't initialized */
   cs=get_internal_charset(cs_number);
 
-  if (!cs && flags & MY_WME)
+  if (!cs && (flags & MY_WME))
   {
     char index_file[FN_REFLEN], cs_string[23];
     strmov(get_charsets_dir(index_file), "Index");
@@ -424,6 +456,7 @@ char * list_charsets(myf want_flags)
   DYNAMIC_STRING s;
   char *p;
 
+  (void)init_available_charsets(MYF(0));
   init_dynamic_string(&s, NullS, 256, 1024);
 
   if (want_flags & MY_COMPILED_SETS)
@@ -438,29 +471,28 @@ char * list_charsets(myf want_flags)
 
   if (want_flags & MY_CONFIG_SETS)
   {
-    uint i;
-    const char *cs_name;
+    CS_ID **c;
     char buf[FN_REFLEN];
-    MY_STAT stat;
+    MY_STAT status;
 
-    for (i = 0; i < available_charsets.count; i++)
-    {
-      cs_name = get_type(&available_charsets, i);
-      if (charset_in_string(cs_name, &s))
-        continue;
-      get_charset_conf_name(i + 1, buf);
-      if (!my_stat(buf, &stat, MYF(0)))
-        continue;       /* conf file doesn't exist */
-      dynstr_append(&s, cs_name);
-      dynstr_append(&s, " ");
-    }
+    if((c=available_charsets))
+      for (; *c; ++c)
+	{
+	  if (charset_in_string((*c)->name, &s))
+	    continue;
+	  get_charset_conf_name((*c)->number, buf);
+	  if (!my_stat(buf, &status, MYF(0)))
+	    continue;       /* conf file doesn't exist */
+	  dynstr_append(&s, (*c)->name);
+	  dynstr_append(&s, " ");
+	}
   }
 
   if (want_flags & MY_INDEX_SETS)
   {
-    uint i;
-    for (i = 0; i < available_charsets.count; i++)
-      charset_append(&s, get_type(&available_charsets, i));
+    CS_ID **c;
+    for (c = available_charsets; *c; ++c)
+      charset_append(&s, (*c)->name);
   }
 
   if (want_flags & MY_LOADED_SETS)

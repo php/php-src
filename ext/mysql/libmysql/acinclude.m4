@@ -29,9 +29,16 @@ MYSQL_CHECK_GETHOSTNAME_R
 
 AC_DEFUN(MYSQL_CHECK_GETHOSTNAME_R,[
 # Check definition of gethostbyname_r (glibc2.0.100 is different from Solaris)
+ac_save_CXXFLAGS="$CXXFLAGS"
 AC_CACHE_CHECK([style of gethostname_r routines], mysql_cv_gethostname_style,
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+if test "$ac_cv_prog_gxx" = "yes"
+then
+  CXXFLAGS="$CXXFLAGS -Werror"
+fi
 AC_TRY_COMPILE(
-[#ifndef SCO
+[#if !defined(SCO) && !defined(__osf__)
 #define _REENTRANT
 #endif
 #include <pthread.h>
@@ -42,12 +49,44 @@ AC_TRY_COMPILE(
 #include <netdb.h>],
 [int skr;
 
- int res = gethostbyname_r((const char *) 0,
+ skr = gethostbyname_r((const char *) 0,
   (struct hostent*) 0, (char*) 0, 0, (struct hostent **) 0, &skr);],
 mysql_cv_gethostname_style=glibc2, mysql_cv_gethostname_style=other))
+AC_LANG_RESTORE
+CXXFLAGS="$ac_save_CXXFLAGS"
 if test "$mysql_cv_gethostname_style" = "glibc2"
 then
-  AC_DEFINE(HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R,,[ ])
+  AC_DEFINE(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE, , [ ])
+fi
+
+# Check 3rd argument of getthostbyname_r
+ac_save_CXXFLAGS="$CXXFLAGS"
+AC_CACHE_CHECK([3 argument to gethostname_r routines], mysql_cv_gethostname_arg,
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+if test "$ac_cv_prog_gxx" = "yes"
+then
+  CXXFLAGS="$CXXFLAGS -Werror"
+fi
+AC_TRY_COMPILE(
+[#if !defined(SCO) && !defined(__osf__)
+#define _REENTRANT
+#endif
+#include <pthread.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>],
+[int skr;
+
+ skr = gethostbyname_r((const char *) 0, (struct hostent*) 0, (hostent_data*) 0);],
+mysql_cv_gethostname_arg=hostent_data, mysql_cv_gethostname_arg=char))
+AC_LANG_RESTORE
+CXXFLAGS="$ac_save_CXXFLAGS"
+if test "$mysql_cv_gethostname_arg" = "hostent_data"
+then
+  AC_DEFINE(HAVE_GETHOSTBYNAME_R_RETURN_INT, , [ ])
 fi
 ])
 

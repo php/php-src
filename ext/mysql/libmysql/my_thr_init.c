@@ -21,9 +21,6 @@ pthread_mutex_t THR_LOCK_malloc,THR_LOCK_open,THR_LOCK_keycache,
 #ifndef HAVE_LOCALTIME_R
 pthread_mutex_t LOCK_localtime_r;
 #endif
-#ifdef __WIN__
-pthread_mutex_t THR_LOCK_thread;
-#endif
 
 /* FIXME  Note.  TlsAlloc does not set an auto destructor, so
 	the function my_thread_global_free must be called from
@@ -46,7 +43,7 @@ my_bool my_thread_global_init(void)
   pthread_mutex_init(&THR_LOCK_net,NULL);
   pthread_mutex_init(&THR_LOCK_charset,NULL);
 #ifdef __WIN__
-  pthread_mutex_init(&THR_LOCK_thread,NULL);
+  win_pthread_init();
 #endif
 #ifndef HAVE_LOCALTIME_R
   pthread_mutex_init(&LOCK_localtime_r,NULL);
@@ -63,10 +60,19 @@ void my_thread_global_end(void)
 
 static long thread_id=0;
 
+/*
+  We can't use mutex_locks here if we are using windows as
+  we may have compiled the program with SAFE_MUTEX, in which
+  case the checking of mutex_locks will not work until
+  the pthread_self thread specific variable is initialized.
+*/
+
 my_bool my_thread_init(void)
 {
   struct st_my_thread_var *tmp;
+#if !defined(__WIN__) || defined(USE_TLS) || ! defined(SAFE_MUTEX)
   pthread_mutex_lock(&THR_LOCK_lock);
+#endif
 #if !defined(__WIN__) || defined(USE_TLS)
   if (my_pthread_getspecific(struct st_my_thread_var *,THR_KEY_mysys))
   {
@@ -84,9 +90,11 @@ my_bool my_thread_init(void)
   pthread_setspecific(THR_KEY_mysys,tmp);
 
 #else
-  if (THR_KEY_mysys.id)   /* Allready initialized */
+  if (THR_KEY_mysys.id)   /* Already initialized */
   {
+#if !defined(__WIN__) || defined(USE_TLS) || ! defined(SAFE_MUTEX)
     pthread_mutex_unlock(&THR_LOCK_lock);
+#endif
     return 0;
   }
   tmp= &THR_KEY_mysys;
@@ -94,7 +102,9 @@ my_bool my_thread_init(void)
   tmp->id= ++thread_id;
   pthread_mutex_init(&tmp->mutex,NULL);
   pthread_cond_init(&tmp->suspend, NULL);
+#if !defined(__WIN__) || defined(USE_TLS) || ! defined(SAFE_MUTEX)
   pthread_mutex_unlock(&THR_LOCK_lock);
+#endif
   return 0;
 }
 

@@ -12,7 +12,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 ** If part, uniq field is found and full_name == 0 then x is expanded
 ** to full field.
 ** full_name has the following bit values:
-**   If & 1 accept only hole names
+**   If & 1 accept only whole names
 **   If & 2 don't expand if half field
 **   If & 4 allow #number# as type
 ****************************************************************************/

@@ -33,6 +33,19 @@ static my_bool win32_init_tcp_ip();
 #endif
 static my_bool my_init_done=0;
 
+
+static ulong atoi_octal(const char *str)
+{
+  long int tmp;
+  while (*str && isspace(*str))
+    str++;
+  str2int(str,
+	  (*str == '0' ? 8 : 10),		/* Octalt or decimalt */
+	  0, INT_MAX, &tmp);
+  return (ulong) tmp;
+}
+
+
 	/* Init my_sys functions and my_sys variabels */
 
 void my_init(void)
@@ -59,10 +72,12 @@ void my_init(void)
       if ((home_dir=getenv("HOME")) != 0)
 	home_dir=intern_filename(home_dir_buff,home_dir);
 #ifndef VMS
+      /* Default creation of new files */
       if ((str=getenv("UMASK")) != 0)
-	my_umask=atoi(str) | 0600;	/* Default creation of new files */
+	my_umask=(int) (atoi_octal(str) | 0600);
+	/* Default creation of new dir's */
       if ((str=getenv("UMASK_DIR")) != 0)
-	my_umask_dir=atoi(str) | 0700;	/* Default creation of new dir's */
+	my_umask_dir=(int) (atoi_octal(str) | 0700);
 #endif
 #ifdef VMS
       init_ctype();			/* Stupid linker don't link _ctype.c */
@@ -138,6 +153,7 @@ void my_end(int infoflag)
   if (have_tcpip);
     WSACleanup( );
 #endif /* __WIN__ */
+    my_init_done=0;
 } /* my_end */
 
 #ifdef __WIN__

@@ -27,6 +27,13 @@ extern int NEAR my_errno;		/* Last error in mysys */
 
 #include <stdarg.h>  
 
+#ifdef __EMX__
+/* record loging flags (F_GETLK, F_SETLK, F_SETLKW) */
+#define F_RDLCK     1           /* FreeBSD: shared or read lock */
+#define F_UNLCK     2           /* FreeBSD: unlock */
+#define F_WRLCK     3           /* FreeBSD: exclusive or write lock */
+#endif
+
 #define MYSYS_PROGRAM_USES_CURSES()  { error_handler_hook = my_message_curses;	mysys_uses_curses=1; }
 #define MYSYS_PROGRAM_DONT_USE_CURSES()  { error_handler_hook = my_message_no_curses; mysys_uses_curses=0;}
 #define MY_INIT(name);		{ my_progname= name; my_init(); }
@@ -45,9 +52,11 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MY_WME		16	/* Write message on error */
 #define MY_WAIT_IF_FULL 32	/* Wait and try again if disk full error */
 #define MY_RAID         64      /* Support for RAID (not the "Johnson&Johnson"-s one ;) */
+#define MY_DONT_CHECK_FILESIZE 128	/* Option to init_io_cache() */
 #define MY_LINK_WARNING 32	/* my_redel() gives warning if links */
 #define MY_COPYTIME	64	/* my_redel() copys time */
 #define MY_HOLD_ORIGINAL_MODES 128  /* my_copy() holds to file modes */
+#define MY_REDEL_MAKE_BACKUP 256
 #define MY_SEEK_NOT_DONE 32	/* my_lock may have to do a seek */
 #define MY_DONT_WAIT	64	/* my_lock() don't wait if can't lock */
 #define MY_ZEROFILL	32	/* my_malloc(), fill array with zero */
@@ -90,6 +99,9 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MIN_COMPRESS_LENGTH		50	/* Don't compress small bl. */
 #define KEYCACHE_BLOCK_SIZE		1024
 
+	/* root_alloc flags */
+#define MY_KEEP_PREALLOC	1
+
 	/* defines when allocating data */
 
 #ifdef SAFEMALLOC
@@ -102,6 +114,7 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define QUICK_SAFEMALLOC sf_malloc_quick=1
 #define NORMAL_SAFEMALLOC sf_malloc_quick=0
 extern uint sf_malloc_prehunc,sf_malloc_endhunc,sf_malloc_quick;
+extern ulonglong safemalloc_mem_limit;
 #else
 #define my_checkmalloc() (0)
 #define TERMINATE(A) {}
@@ -160,13 +173,15 @@ extern CHARSET_INFO *get_charset_by_name(const char *cs_name, myf flags);
 extern my_bool set_default_charset_by_name(const char *cs_name, myf flags);
 extern void free_charsets(void);
 extern char *list_charsets(myf want_flags); /* my_free() this string... */
+extern char *get_charsets_dir(char *buf);
 
 
-/* statisticts */
+/* statistics */
 extern ulong	_my_cache_w_requests,_my_cache_write,_my_cache_r_requests,
 		_my_cache_read;
 extern ulong	 _my_blocks_used,_my_blocks_changed;
-extern uint	my_file_opened,my_stream_opened;
+extern ulong	my_file_opened,my_stream_opened, my_tmp_file_created;
+extern my_bool	key_cache_inited;
 
 					/* Point to current my_message() */
 extern void (*my_sigtstp_cleanup)(void),
@@ -187,6 +202,7 @@ extern my_bool NEAR my_disable_locking,NEAR my_disable_async_io,
        NEAR my_disable_flush_key_blocks;
 extern char	wild_many,wild_one,wild_prefix;
 extern const char *charsets_dir;
+extern char *defaults_extra_file;
 
 typedef struct wild_file_pack	/* Struct to hold info when selecting files */
 {
@@ -201,7 +217,7 @@ typedef struct st_typelib {	/* Different types saved here */
   const char **type_names;
 } TYPELIB;
 
-enum cache_type {READ_CACHE,WRITE_CACHE,READ_NET,WRITE_NET};
+enum cache_type {READ_CACHE,WRITE_CACHE,READ_FIFO,READ_NET,WRITE_NET};
 enum flush_type { FLUSH_KEEP, FLUSH_RELEASE, FLUSH_IGNORE_CHANGED,
 		  FLUSH_FORCE_WRITE};
 
@@ -220,12 +236,15 @@ typedef struct st_record_cache	/* Used when cacheing records */
 } RECORD_CACHE;
 
 enum file_type { UNOPEN = 0, FILE_BY_OPEN, FILE_BY_CREATE,
-		   STREAM_BY_FOPEN, STREAM_BY_FDOPEN };
+		   STREAM_BY_FOPEN, STREAM_BY_FDOPEN, FILE_BY_MKSTEMP };
 
 extern struct my_file_info
 {
   my_string		name;
   enum file_type	type;
+#if defined(THREAD) && !defined(HAVE_PREAD)  
+  pthread_mutex_t	mutex;
+#endif
 } my_file_info[MY_NFILE];
 
 
@@ -244,20 +263,21 @@ typedef struct st_dynamic_string {
 
 typedef struct st_io_cache		/* Used when cacheing files */
 {
+  my_off_t pos_in_file,end_of_file;
   byte	*rc_pos,*rc_end,*buffer,*rc_request_pos;
+  int (*read_function)(struct st_io_cache *,byte *,uint);
+  char *file_name;			/* if used with 'open_cached_file' */
+  char *dir,*prefix;
   File file;
   int	seek_not_done,error;
   uint	buffer_length,read_length;
-  my_off_t pos_in_file,end_of_file;
   myf	myflags;			/* Flags used to my_read/my_write */
+  enum cache_type type;
 #ifdef HAVE_AIOWAIT
   uint inited;
   my_off_t aio_read_pos;
   my_aio_result aio_result;
 #endif
-  enum cache_type type;
-  int (*read_function)(struct st_io_cache *,byte *,uint);
-  char *file_name;			/* if used with 'open_cached_file' */
 } IO_CACHE;
 
 typedef int (*qsort2_cmp)(const void *, const void *, const void *);
@@ -298,10 +318,16 @@ typedef int (*qsort2_cmp)(const void *, const void *, const void *);
 #define my_b_tell(info) ((info)->pos_in_file + \
 			 ((info)->rc_pos - (info)->rc_request_pos))
 
+#define my_b_bytes_in_cache(info) ((uint) ((info)->rc_end - (info)->rc_pos))
+
 typedef struct st_changeable_var {
-  const char *name;
-  long *varptr;
-  long def_value,min_value,max_value,sub_size,block_size;
+  const char *name;			/* Name of variable */
+  long *varptr;				/* Pointer to variable */
+  long def_value,			/* Default value */
+       min_value,			/* Min allowed value */
+       max_value,			/* Max allowed value */
+       sub_size,			/* Subtract this from given value */
+       block_size;			/* Value should be a mult. of this */
 } CHANGEABLE_VAR;
 
 
@@ -311,15 +337,17 @@ typedef struct st_changeable_var {
 #define ST_USED_MEM_DEFINED
 typedef struct st_used_mem {			/* struct for once_alloc */
   struct st_used_mem *next;			/* Next block in use */
-  unsigned int	left;				/* memory left in block  */
-  unsigned int	size;				/* size of block */
+  unsigned int left;				/* memory left in block  */
+  unsigned int size;				/* Size of block */
 } USED_MEM;
 
 typedef struct st_mem_root {
   USED_MEM *free;
   USED_MEM *used;
+  USED_MEM *pre_alloc;
   unsigned int	min_malloc;
   unsigned int	block_size;
+
   void (*error_handler)(void);
 } MEM_ROOT;
 #endif
@@ -336,6 +364,9 @@ extern gptr my_once_alloc(uint Size,myf MyFlags);
 extern void my_once_free(void);
 extern my_string my_tempnam(const char *dir,const char *pfx,myf MyFlags);
 extern File my_open(const char *FileName,int Flags,myf MyFlags);
+extern File my_register_filename(File fd, const char *FileName,
+				 enum file_type type_of_file,
+				 uint error_message_number, myf MyFlags);
 extern File my_create(const char *FileName,int CreateFlags,
 		      int AccsesFlags, myf MyFlags);
 extern int my_close(File Filedes,myf MyFlags);
@@ -371,7 +402,7 @@ extern void TERMINATE(FILE *file);
 #endif
 extern void init_glob_errs(void);
 extern FILE *my_fopen(const char *FileName,int Flags,myf MyFlags);
-extern FILE *my_fdopen(File Filedes,int Flags,myf MyFlags);
+extern FILE *my_fdopen(File Filedes,const char *name, int Flags,myf MyFlags);
 extern int my_fclose(FILE *fd,myf MyFlags);
 extern int my_chsize(File fd,my_off_t newlength,myf MyFlags);
 extern int my_error _VARARGS((int nr,myf MyFlags, ...));
@@ -402,7 +433,7 @@ extern uint dirname_part(my_string to,const char *name);
 extern uint dirname_length(const char *name);
 #define base_name(A) (A+dirname_length(A))
 extern int test_if_hard_path(const char *dir_name);
-extern void convert_dirname(my_string name);
+extern char *convert_dirname(my_string name);
 extern void to_unix_path(my_string name);
 extern my_string fn_ext(const char *name);
 extern my_string fn_same(my_string toname,const char *name,int flag);
@@ -474,11 +505,18 @@ extern int my_block_write(IO_CACHE *info, const byte *Buffer,
 			  uint Count, my_off_t pos);
 extern int flush_io_cache(IO_CACHE *info);
 extern int end_io_cache(IO_CACHE *info);
+extern uint my_b_fill(IO_CACHE *info);
+extern void my_b_seek(IO_CACHE *info,my_off_t pos);
+extern uint my_b_gets(IO_CACHE *info, char *to, uint max_length);
+extern uint my_b_printf(IO_CACHE *info, const char* fmt, ...);
+extern uint my_b_vprintf(IO_CACHE *info, const char* fmt, va_list ap);
 extern my_bool open_cached_file(IO_CACHE *cache,const char *dir,
 				 const char *prefix, uint cache_size,
 				 myf cache_myflags);
 extern my_bool real_open_cached_file(IO_CACHE *cache);
 extern void close_cached_file(IO_CACHE *cache);
+File create_temp_file(char *to, const char *dir, const char *pfx,
+		      int mode, myf MyFlags);
 extern my_bool init_dynamic_array(DYNAMIC_ARRAY *array,uint element_size,
 				  uint init_alloc,uint alloc_increment);
 extern my_bool insert_dynamic(DYNAMIC_ARRAY *array,gptr element);
@@ -499,6 +537,8 @@ extern const char *get_type(TYPELIB *typelib,uint nr);
 extern my_bool init_dynamic_string(DYNAMIC_STRING *str, const char *init_str,
 				   uint init_alloc,uint alloc_increment);
 extern my_bool dynstr_append(DYNAMIC_STRING *str, const char *append);
+my_bool dynstr_append_mem(DYNAMIC_STRING *str, const char *append,
+			  uint length);
 extern my_bool dynstr_set(DYNAMIC_STRING *str, const char *init_str);
 extern my_bool dynstr_realloc(DYNAMIC_STRING *str, ulong additional_size);
 extern void dynstr_free(DYNAMIC_STRING *str);
@@ -513,9 +553,10 @@ extern void my_free_lock(byte *ptr,myf flags);
 #define my_malloc_lock(A,B) my_malloc((A),(B))
 #define my_free_lock(A,B) my_free((A),(B))
 #endif
-void init_alloc_root(MEM_ROOT *mem_root,uint block_size);
+#define alloc_root_inited(A) ((A)->min_malloc != 0)
+void init_alloc_root(MEM_ROOT *mem_root, uint block_size, uint pre_alloc_size);
 gptr alloc_root(MEM_ROOT *mem_root,unsigned int Size);
-void free_root(MEM_ROOT *root);
+void free_root(MEM_ROOT *root, myf MyFLAGS);
 char *strdup_root(MEM_ROOT *root,const char *str);
 char *memdup_root(MEM_ROOT *root,const char *str,uint len);
 void load_defaults(const char *conf_file, const char **groups,
@@ -537,7 +578,5 @@ extern my_bool have_tcpip;		/* Is set if tcpip is used */
 #ifdef	__cplusplus
 }
 #endif
-#ifdef USE_RAID
 #include "raid.h"
-#endif
 #endif /* _my_sys_h */

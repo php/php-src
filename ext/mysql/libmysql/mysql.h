@@ -35,8 +35,10 @@ typedef struct st_used_mem {			/* struct for once_alloc */
 typedef struct st_mem_root {
   USED_MEM *free;
   USED_MEM *used;
+  USED_MEM *pre_alloc;
   unsigned int	min_malloc;
   unsigned int	block_size;
+
   void (*error_handler)(void);
 } MEM_ROOT;
 #endif
@@ -59,6 +61,8 @@ extern char *mysql_unix_port;
 #define IS_NOT_NULL(n)	((n) & NOT_NULL_FLAG)
 #define IS_BLOB(n)	((n) & BLOB_FLAG)
 #define IS_NUM(t)	((t) <= FIELD_TYPE_INT24 || (t) == FIELD_TYPE_YEAR)
+#define IS_NUM_FIELD(f)	 ((f)->flags & NUM_FLAG)
+#define INTERNAL_NUM_FIELD(f) (((f)->type <= FIELD_TYPE_INT24 && ((f)->type != FIELD_TYPE_TIMESTAMP || (f)->length == 14 || (f)->length == 8)) || (f)->type == FIELD_TYPE_YEAR)
 
 typedef struct st_mysql_field {
   char *name;			/* Name of column */
@@ -211,8 +215,12 @@ MYSQL *		STDCALL mysql_real_connect(MYSQL *mysql, const char *host,
 void		STDCALL mysql_close(MYSQL *sock);
 int		STDCALL mysql_select_db(MYSQL *mysql, const char *db);
 int		STDCALL mysql_query(MYSQL *mysql, const char *q);
+int		STDCALL mysql_send_query(MYSQL *mysql, const char *q);
+int		STDCALL mysql_reap_query(MYSQL *mysql);
 int		STDCALL mysql_real_query(MYSQL *mysql, const char *q,
 					unsigned int length);
+int		STDCALL mysql_real_send_query(MYSQL *mysql, const char *q,
+					unsigned int len);
 int		STDCALL mysql_create_db(MYSQL *mysql, const char *DB);
 int		STDCALL mysql_drop_db(MYSQL *mysql, const char *DB);
 int		STDCALL mysql_shutdown(MYSQL *mysql);

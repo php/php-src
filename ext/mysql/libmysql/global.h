@@ -7,7 +7,14 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef _global_h
 #define _global_h
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined( __EMX__) && !defined( MYSQL_SERVER)
+/* moved here to use below VOID macro redefinition */
+#define INCL_BASE
+#define INCL_NOPMAPI
+#include <os2.h>
+#endif /* __EMX__ */
+
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(WIN32)
 #include <config-win.h>
 #else
 #include <my_config.h>
@@ -17,6 +24,12 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #undef inline				/* fix configure problem */
 #endif
 #endif /* _cplusplus */
+
+/* Fix problem with S_ISLNK() on Linux */
+#if defined(HAVE_LINUXTHREADS)
+#undef  _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
 
 /* The client defines this to avoid all thread code */
 #if defined(UNDEF_THREADS_HACK)
@@ -35,12 +48,11 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef __STDC_EXT__
 #define __STDC_EXT__ 1          /* To get large file support on hpux */
 #endif
-#if defined(THREAD) && defined(HAVE_LINUXTHREADS) && defined(HAVE_PTHREAD_RWLOCK_RDLOCK)
-#define _GNU_SOURCE 1
-#endif
 
 #if defined(THREAD) && !defined(__WIN__)
+#ifndef _POSIX_PTHREAD_SEMANTICS
 #define _POSIX_PTHREAD_SEMANTICS /* We want posix threads */
+#endif
 /* was #if defined(HAVE_LINUXTHREADS) || defined(HAVE_DEC_THREADS) || defined(HPUX) */
 #if !defined(SCO)
 #define _REENTRANT	1	/* Some thread libraries require this */
@@ -94,13 +106,13 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif
 
 /* In Linux-alpha we have atomic.h if we are using gcc */
-#if defined(HAVE_LINUXTHREADS) && defined(__GNUC__) && defined(__alpha__) && (__GNUC__ > 2 || ( __GNUC__ == 2 &&  __GNUC_MINOR__ >= 95))
+#if defined(HAVE_LINUXTHREADS) && defined(__GNUC__) && defined(__alpha__) && (__GNUC__ > 2 || ( __GNUC__ == 2 &&  __GNUC_MINOR__ >= 95)) && !defined(HAVE_ATOMIC_ADD)
 #define HAVE_ATOMIC_ADD
 #define HAVE_ATOMIC_SUB
 #endif
 
 /* In Linux-ia64 including atomic.h will give us an error */
-#if defined(HAVE_LINUXTHREADS) && defined(__GNUC__) && defined(__ia64__)
+#if (defined(HAVE_LINUXTHREADS) && defined(__GNUC__) && defined(__ia64__)) || !defined(THREAD)
 #undef HAVE_ATOMIC_ADD
 #undef HAVE_ATOMIC_SUB
 #endif
@@ -325,6 +337,10 @@ typedef int	(*qsort_cmp)(const void *,const void *);
 typedef SOCKET_SIZE_TYPE size_socket;
 #endif
 
+#ifndef SOCKOPT_OPTLEN_TYPE
+#define SOCKOPT_OPTLEN_TYPE size_socket
+#endif
+
 /* file create flags */
 
 #ifndef O_SHARE
@@ -365,9 +381,14 @@ typedef SOCKET_SIZE_TYPE size_socket;
 #define FN_DEVCHAR	':'
 
 #ifndef FN_LIBCHAR
+#ifdef __EMX__
+#define FN_LIBCHAR	'\\'
+#define FN_ROOTDIR	"\\"
+#else
 #define FN_LIBCHAR	'/'
 #define FN_ROOTDIR	"/"
-#define MY_NFILE	127	/* This is only used to save filenames */
+#endif
+#define MY_NFILE	1024	/* This is only used to save filenames */
 #endif
 
 /* #define EXT_IN_LIBNAME     */
@@ -450,6 +471,8 @@ extern double		my_atof(const char*);
 #undef HAVE_MLOCK
 #undef HAVE_TEMPNAM				/* Use ours */
 #undef HAVE_PTHREAD_SETPRIO
+#undef HAVE_FTRUNCATE
+#undef HAVE_READLINK
 #endif
 
 /* This is from the old m-machine.h file */
@@ -666,10 +689,14 @@ typedef char		bool;	/* Ordinary boolean values 0 1 */
 			  *((T)+4)=(uchar) (((A) >> 32)); }
 #define int8store(T,A)	*((ulonglong *) (T))= (ulonglong) (A)
 
-#define doubleget(V,M)	{ *((long *) &V) = *((long*) M); \
-			  *(((long *) &V)+1) = *(((long*) M)+1); }
-#define doublestore(T,V) { *((long *) T) = *((long*) &V); \
-			   *(((long *) T)+1) = *(((long*) &V)+1); }
+typedef union {
+  double v;
+  long m[2];
+} doubleget_union;
+#define doubleget(V,M)	{ ((doubleget_union *)&V)->m[0] = *((long*) M); \
+			  ((doubleget_union *)&V)->m[1] = *(((long*) M)+1); }
+#define doublestore(T,V) { *((long *) T) = ((doubleget_union *)&V)->m[0]; \
+			   *(((long *) T)+1) = ((doubleget_union *)&V)->m[1]; }
 #define float4get(V,M) { *((long *) &(V)) = *((long*) (M)); }
 #define float8get(V,M) doubleget((V),(M))
 #define float4store(V,M) memcpy((byte*) V,(byte*) (&M),sizeof(float))
@@ -839,5 +866,12 @@ typedef char		bool;	/* Ordinary boolean values 0 1 */
 #endif
 #endif
 
+#ifndef THREAD
+#define thread_safe_increment(V,L) (V)++
+#define thread_safe_add(V,C,L)     (V)+=(C)
+#define thread_safe_sub(V,C,L)     (V)-=(C)
+#define statistic_increment(V,L)   (V)++
+#define statistic_add(V,C,L)       (V)+=(C)
+#endif
 
 #endif /* _global_h */

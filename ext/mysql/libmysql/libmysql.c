@@ -52,6 +52,12 @@ my_string	mysql_unix_port=0;
 
 #define CLIENT_CAPABILITIES	(CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_LOCAL_FILES | CLIENT_TRANSACTIONS)
 
+#ifdef __WIN__
+#define CONNECT_TIMEOUT 20
+#else
+#define CONNECT_TIMEOUT 0
+#endif
+
 #if defined(MSDOS) || defined(__WIN__)
 #define ERRNO WSAGetLastError()
 #define perror(A)
@@ -100,13 +106,14 @@ static ulong mysql_sub_escape_string(CHARSET_INFO *charset_info, char *to,
 * Base version coded by Steve Bernacki, Jr. <steve@navinet.net>
 *****************************************************************************/
 
-static int connect2(File s, const struct sockaddr *name, uint namelen, uint to)
+static int connect2(my_socket s, const struct sockaddr *name, uint namelen,
+		    uint timeout)
 {
 #if defined(__WIN__)
   return connect(s, (struct sockaddr*) name, namelen);
 #else
   int flags, res, s_err;
-  size_socket s_err_size = sizeof(uint);
+  SOCKOPT_OPTLEN_TYPE s_err_size = sizeof(uint);
   fd_set sfds;
   struct timeval tv;
   time_t start_time, now_time;
@@ -115,7 +122,7 @@ static int connect2(File s, const struct sockaddr *name, uint namelen, uint to)
    * exactly like the normal connect() call does.
    */
 
-  if (to == 0)
+  if (timeout == 0)
     return connect(s, (struct sockaddr*) name, namelen);
 
   flags = fcntl(s, F_GETFL, 0);		  /* Set socket to not block */
@@ -162,13 +169,13 @@ static int connect2(File s, const struct sockaddr *name, uint namelen, uint to)
   start_time = time(NULL);
   for (;;)
   {
-    tv.tv_sec = (long) to;
+    tv.tv_sec = (long) timeout;
     tv.tv_usec = 0;
     if ((res = select(s+1, NULL, &sfds, NULL, &tv)) >= 0)
       break;
     now_time=time(NULL);
-    to-= (uint) (now_time - start_time);
-    if (errno != EINTR || (int) to <= 0)
+    timeout-= (uint) (now_time - start_time);
+    if (errno != EINTR || (int) timeout <= 0)
       return -1;
   }
 
@@ -182,7 +189,7 @@ static int connect2(File s, const struct sockaddr *name, uint namelen, uint to)
     return(-1);
 
   if (s_err)
-  {						/* getsockopt() could suceed */
+  {						/* getsockopt could succeed */
     errno = s_err;
     return(-1);					/* but return an error... */
   }
@@ -392,7 +399,7 @@ static void free_rows(MYSQL_DATA *cur)
 {
   if (cur)
   {
-    free_root(&cur->alloc);
+    free_root(&cur->alloc,MYF(0));
     my_free((gptr) cur,MYF(0));
   }
 }
@@ -459,8 +466,8 @@ static void free_old_query(MYSQL *mysql)
 {
   DBUG_ENTER("free_old_query");
   if (mysql->fields)
-    free_root(&mysql->field_alloc);
-  init_alloc_root(&mysql->field_alloc,8192);	/* Assume rowlength < 8192 */
+    free_root(&mysql->field_alloc,MYF(0));
+  init_alloc_root(&mysql->field_alloc,8192,0);	/* Assume rowlength < 8192 */
   mysql->fields=0;
   mysql->field_count=0;				/* For API */
   DBUG_VOID_RETURN;
@@ -512,8 +519,8 @@ static void read_user_name(char *name)
 
 static void read_user_name(char *name)
 {
-  char *str=getenv("USER");
-  strmov(name,str ? str : "ODBC");	 /* ODBC will send user variable */
+  char *str=getenv("USER");		/* ODBC will send user variable */
+  strmake(name,str ? str : "ODBC", USERNAME_LENGTH);
 }
 
 #endif
@@ -557,7 +564,7 @@ append_wild(char *to, char *end, const char *wild)
 **************************************************************************/
 
 void STDCALL
-mysql_debug(const char *debug)
+mysql_debug(const char *debug __attribute__((unused)))
 {
 #ifndef DBUG_OFF
   char	*env;
@@ -649,7 +656,7 @@ mysql_free_result(MYSQL_RES *result)
     }
     free_rows(result->data);
     if (result->fields)
-      free_root(&result->field_alloc);
+      free_root(&result->field_alloc,MYF(0));
     if (result->row)
       my_free((gptr) result->row,MYF(0));
     my_free((gptr) result,MYF(0));
@@ -665,8 +672,9 @@ mysql_free_result(MYSQL_RES *result)
 static const char *default_options[]=
 {"port","socket","compress","password","pipe", "timeout", "user",
  "init-command", "host", "database", "debug", "return-found-rows",
- "ssl_key" ,"ssl_cert" ,"ssl_ca" ,"ssl_capath",
- "character-set-dir", "default-character-set",
+ "ssl-key" ,"ssl-cert" ,"ssl-ca" ,"ssl-capath",
+ "character-set-dir", "default-character-set", "interactive-timeout",
+ "connect_timeout",
  NullS
 };
 
@@ -726,6 +734,7 @@ static void mysql_read_default_options(struct st_mysql_options *options,
 	case 5:				/* pipe */
 	  options->named_pipe=1;	/* Force named pipe */
 	  break;
+	case 20:			/* connect_timeout */
 	case 6:				/* timeout */
 	  if (opt_arg)
 	    options->connect_timeout=atoi(opt_arg);
@@ -796,6 +805,9 @@ static void mysql_read_default_options(struct st_mysql_options *options,
 	  my_free(options->charset_name,MYF(MY_ALLOW_ZERO_PTR));
           options->charset_name = my_strdup(opt_arg, MYF(MY_WME));
 	  break;
+	case 19:				/* Interactive-timeout */
+	  options->client_flag|=CLIENT_INTERACTIVE;
+	  break;
 	default:
 	  DBUG_PRINT("warning",("unknown option: %s",option[0]));
 	}
@@ -839,6 +851,8 @@ unpack_fields(MYSQL_DATA *data,MEM_ROOT *alloc,uint fields,
       field->flags=   (uint) (uchar) row->data[4][0];
       field->decimals=(uint) (uchar) row->data[4][1];
     }
+    if (INTERNAL_NUM_FIELD(field))
+      field->flags|= NUM_FLAG;
     if (default_value && row->data[5])
       field->def=strdup_root(alloc,(char*) row->data[5]);
     else
@@ -873,7 +887,7 @@ static MYSQL_DATA *read_rows(MYSQL *mysql,MYSQL_FIELD *mysql_fields,
     strmov(net->last_error,ER(net->last_errno));
     DBUG_RETURN(0);
   }
-  init_alloc_root(&result->alloc,8192);		/* Assume rowlength < 8192 */
+  init_alloc_root(&result->alloc,8192,0);	/* Assume rowlength < 8192 */
   result->alloc.min_malloc=sizeof(MYSQL_ROWS);
   prev_ptr= &result->data;
   result->rows=0;
@@ -986,9 +1000,7 @@ mysql_init(MYSQL *mysql)
   }
   else
     bzero((char*) (mysql),sizeof(*(mysql)));
-#ifdef __WIN__
-  mysql->options.connect_timeout=20;
-#endif
+  mysql->options.connect_timeout=CONNECT_TIMEOUT;
 #if defined(SIGPIPE) && defined(THREAD)
   if (!((mysql)->client_flag & CLIENT_IGNORE_SIGPIPE))
     (void) signal(SIGPIPE,pipe_sig_handler);
@@ -1125,8 +1137,9 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
 		   const char *passwd, const char *db,
 		   uint port, const char *unix_socket,uint client_flag)
 {
-  char		buff[100],charset_name_buff[16],*end,*host_info, *charset_name;
-  int		sock;
+  char		buff[NAME_LEN+USERNAME_LENGTH+100],charset_name_buff[16];
+  char		*end,*host_info,*charset_name;
+  my_socket	sock;
   uint32	ip_addr;
   struct	sockaddr_in sock_addr;
   uint		pkt_length;
@@ -1257,7 +1270,8 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
       host=LOCAL_HOST;
     sprintf(host_info=buff,ER(CR_TCP_CONNECTION),host);
     DBUG_PRINT("info",("Server name: '%s'.  TCP sock: %d", host,port));
-    if ((sock = socket(AF_INET,SOCK_STREAM,0)) == SOCKET_ERROR)
+    /* _WIN64 ;  Assume that the (int) range is enough for socket() */
+    if ((sock = (my_socket) socket(AF_INET,SOCK_STREAM,0)) == SOCKET_ERROR)
     {
       net->last_errno=CR_IPSOCK_ERROR;
       sprintf(net->last_error,ER(net->last_errno),ERRNO);
@@ -1317,6 +1331,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
   if (!net->vio || my_net_init(net, net->vio))
   {
     vio_delete(net->vio);
+    net->vio = 0;
     net->last_errno=CR_OUT_OF_MEMORY;
     strmov(net->last_error,ER(net->last_errno));
     goto error;
@@ -1325,6 +1340,13 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
 
   /* Get version info */
   mysql->protocol_version= PROTOCOL_VERSION;	/* Assume this */
+  if (mysql->options.connect_timeout &&
+      vio_poll_read(net->vio, mysql->options.connect_timeout))
+  {
+    net->last_errno= CR_SERVER_LOST;
+    strmov(net->last_error,ER(net->last_errno));    
+    goto error;
+  }
   if ((pkt_length=net_safe_read(mysql)) == packet_error)
     goto error;
 
@@ -1370,7 +1392,10 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
   {
     charset_name=charset_name_buff;
     sprintf(charset_name,"%d",mysql->server_language);	/* In case of errors */
-    mysql->charset=get_charset((uint8) mysql->server_language, MYF(MY_WME));
+    if (!(mysql->charset =
+	  get_charset((uint8) mysql->server_language, MYF(MY_WME))))
+      mysql->charset = default_charset_info; /* shouldn't be fatal */
+
   }
   else
     mysql->charset=default_charset_info;
@@ -1378,10 +1403,18 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
   if (!mysql->charset)
   {
     net->last_errno=CR_CANT_READ_CHARSET;
-    sprintf(net->last_error,ER(net->last_errno),
-	    charset_name ? charset_name : "unknown",
-	    mysql->options.charset_dir ? mysql->options.charset_dir :
-	    "default");
+    if (mysql->options.charset_dir)
+      sprintf(net->last_error,ER(net->last_errno),
+              charset_name ? charset_name : "unknown",
+              mysql->options.charset_dir);
+    else
+    {
+      char cs_dir_name[FN_REFLEN];
+      get_charsets_dir(cs_dir_name);
+      sprintf(net->last_error,ER(net->last_errno),
+              charset_name ? charset_name : "unknown",
+              cs_dir_name);
+    }
     goto error;
   }
 
@@ -1410,10 +1443,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
     mysql->unix_socket=0;
   strmov(mysql->server_version,(char*) net->read_pos+1);
   mysql->port=port;
-  mysql->client_flag=client_flag | mysql->options.client_flag;
-  DBUG_PRINT("info",("Server version = '%s'  capabilites: %ld  status: %d",
-		     mysql->server_version,mysql->server_capabilities,
-		     mysql->server_status));
+  client_flag|=mysql->options.client_flag;
 
   /* Send client information for access check */
   client_flag|=CLIENT_CAPABILITIES;
@@ -1426,8 +1456,8 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
   if (db)
     client_flag|=CLIENT_CONNECT_WITH_DB;
 #ifdef HAVE_COMPRESS
-  if (mysql->server_capabilities & CLIENT_COMPRESS &&
-      (mysql->options.compress || client_flag & CLIENT_COMPRESS))
+  if ((mysql->server_capabilities & CLIENT_COMPRESS) &&
+      (mysql->options.compress || (client_flag & CLIENT_COMPRESS)))
     client_flag|=CLIENT_COMPRESS;		/* We will use compression */
   else
 #endif
@@ -1470,9 +1500,13 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
   }
 #endif /* HAVE_OPENSSL */
 
+  DBUG_PRINT("info",("Server version = '%s'  capabilites: %ld  status: %d  client_flag: %d",
+		     mysql->server_version,mysql->server_capabilities,
+		     mysql->server_status, client_flag));
+
   int3store(buff+2,max_allowed_packet);
   if (user && user[0])
-    strmake(buff+5,user,32);
+    strmake(buff+5,user,32);			/* Max user name */
   else
     read_user_name((char*) buff+5);
 #ifdef _CUSTOMCONFIG_
@@ -1483,7 +1517,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
 	       (my_bool) (mysql->protocol_version == 9));
   if (db && (mysql->server_capabilities & CLIENT_CONNECT_WITH_DB))
   {
-    end=strmov(end+1,db);
+    end=strmake(end+1,db,NAME_LEN);
     mysql->db=my_strdup(db,MYF(MY_WME));
     db=0;
   }
@@ -1662,6 +1696,71 @@ mysql_query(MYSQL *mysql, const char *query)
   return mysql_real_query(mysql,query, (uint) strlen(query));
 }
 
+int STDCALL
+mysql_send_query(MYSQL* mysql, const char* query)
+{
+  return mysql_real_send_query(mysql, query, strlen(query));
+}
+
+/* send the query and return so we can do something else */
+/* needs to be followed by mysql_reap_query() when we want to
+   finish processing it
+*/  
+int STDCALL
+mysql_real_send_query(MYSQL* mysql, const char* query, uint len)
+{
+  return simple_command(mysql, COM_QUERY, query, len, 1);
+}
+
+int STDCALL
+mysql_reap_query(MYSQL* mysql)
+{
+  uchar *pos;
+  ulong field_count;
+  MYSQL_DATA *fields;
+  uint len;
+  DBUG_ENTER("mysql_reap_query");
+  DBUG_PRINT("enter",("handle: %lx",mysql));
+  if((len = net_safe_read(mysql)) == packet_error)
+    DBUG_RETURN(-1);
+  free_old_query(mysql);			/* Free old result */
+ get_info:
+  pos=(uchar*) mysql->net.read_pos;
+  if ((field_count= net_field_length(&pos)) == 0)
+    {
+      mysql->affected_rows= net_field_length_ll(&pos);
+      mysql->insert_id=	  net_field_length_ll(&pos);
+      if (mysql->server_capabilities & CLIENT_TRANSACTIONS)
+	{
+	  mysql->server_status=uint2korr(pos); pos+=2;
+	}
+      if (pos < mysql->net.read_pos+len && net_field_length(&pos))
+	mysql->info=(char*) pos;
+      DBUG_RETURN(0);
+    }
+  if (field_count == NULL_LENGTH)		/* LOAD DATA LOCAL INFILE */
+    {
+      int error=send_file_to_server(mysql,(char*) pos);
+      if ((len=net_safe_read(mysql)) == packet_error || error)
+	DBUG_RETURN(-1);
+      goto get_info;				/* Get info packet */
+    }
+  if (!(mysql->server_status & SERVER_STATUS_AUTOCOMMIT))
+    mysql->server_status|= SERVER_STATUS_IN_TRANS;
+
+  mysql->extra_info= net_field_length_ll(&pos); /* Maybe number of rec */
+  if (!(fields=read_rows(mysql,(MYSQL_FIELD*) 0,5)))
+    DBUG_RETURN(-1);
+  if (!(mysql->fields=unpack_fields(fields,&mysql->field_alloc,
+				    (uint) field_count,0,
+				    (my_bool) test(mysql->server_capabilities &
+						   CLIENT_LONG_FLAG))))
+    DBUG_RETURN(-1);
+  mysql->status=MYSQL_STATUS_GET_RESULT;
+  mysql->field_count=field_count;
+  DBUG_RETURN(0);
+
+}
 
 int STDCALL
 mysql_real_query(MYSQL *mysql, const char *query, uint length)

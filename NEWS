@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Updated ext/mysql/libmysql to version 3.23.32; bug fixes (tim@mysql.com)
 - Fixed possible crash in all (non-pcre) regex functions. (Thies)
 - Improved str_replace() to accept an array for any parameter - similar
   to preg_replace(). (Andrei)

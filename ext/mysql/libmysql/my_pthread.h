@@ -41,10 +41,12 @@ struct timespec {		/* For pthread_cond_timedwait() */
     long tv_nsec;
 };
 
+typedef int pthread_mutexattr_t;
 #define win_pthread_self my_thread_var->pthread_self
-#define pthread_handler_decl(A,B) unsigned __cdecl A(void *B)
-typedef unsigned (__cdecl *pthread_handler)(void *);
+#define pthread_handler_decl(A,B) void * __cdecl A(void *B)
+typedef void * (__cdecl *pthread_handler)(void *);
 
+void win_pthread_init(void);
 int win_pthread_setspecific(void *A,void *B,uint length);
 int pthread_create(pthread_t *,pthread_attr_t *,pthread_handler,void *);
 int pthread_cond_init(pthread_cond_t *cond, const pthread_condattr_t *attr);
@@ -60,7 +62,7 @@ int pthread_attr_setprio(pthread_attr_t *connect_att,int priority);
 int pthread_attr_destroy(pthread_attr_t *connect_att);
 struct tm *localtime_r(const time_t *timep,struct tm *tmp);
 
-void pthread_exit(unsigned A);	 /* was #define pthread_exit(A) ExitThread(A)*/
+void pthread_exit(void *a);	 /* was #define pthread_exit(A) ExitThread(A)*/
 
 #define ETIMEDOUT 145		    /* Win32 doesn't have this */
 #define getpid() GetCurrentThreadId()
@@ -70,13 +72,14 @@ void pthread_exit(unsigned A);	 /* was #define pthread_exit(A) ExitThread(A)*/
 #define HAVE_PTHREAD_ATTR_SETSTACKSIZE
 
 #ifdef USE_TLS					/* For LIBMYSQL.DLL */
+#undef SAFE_MUTEX				/* This will cause conflicts */
 #define pthread_key(T,V)  DWORD V
 #define pthread_key_create(A,B) ((*A=TlsAlloc())==0xFFFFFFFF)
 #define pthread_getspecific(A) (TlsGetValue(A))
 #define my_pthread_getspecific(T,A) ((T) TlsGetValue(A))
-#define my_pthread_getspecific_ptr(T,V) ((T) TlsGetValue(A))
-#define my_pthread_setspecific_ptr(T,V) TlsSetValue(T,V)
-#define pthread_setspecific(A,B) TlsSetValue(A,B)
+#define my_pthread_getspecific_ptr(T,V) ((T) TlsGetValue(V))
+#define my_pthread_setspecific_ptr(T,V) (!TlsSetValue((T),(V)))
+#define pthread_setspecific(A,B) (!TlsSetValue((A),(B)))
 #else
 #define pthread_key(T,V) __declspec(thread) T V
 #define pthread_key_create(A,B) pthread_dummy(0)
@@ -102,8 +105,8 @@ void pthread_exit(unsigned A);	 /* was #define pthread_exit(A) ExitThread(A)*/
 #define pthread_condattr_init(A)
 #define pthread_condattr_destroy(A)
 
-/*Irena: compiler does not like this:*/
-/*#define my_pthread_getprio(pthread_t thread_id) pthread_dummy(0)*/
+/*Irena: compiler does not like this: */
+/*#define my_pthread_getprio(pthread_t thread_id) pthread_dummy(0) */
 #define my_pthread_getprio(thread_id) pthread_dummy(0)
 
 #elif defined(HAVE_UNIXWARE7_THREADS)
@@ -201,42 +204,6 @@ extern int my_pthread_getprio(pthread_t thread_id);
 #define pthread_handler_decl(A,B) void *A(void *B)
 typedef void *(* pthread_handler)(void *);
 
-/* safe mutex for debugging */
-
-typedef struct st_safe_mutex_t
-{
-  pthread_mutex_t global,mutex;
-  char *file;
-  uint line,count;
-  pthread_t thread;
-} safe_mutex_t;
-
-int safe_mutex_init(safe_mutex_t *mp, const pthread_mutexattr_t *attr);
-int safe_mutex_lock(safe_mutex_t *mp,const char *file, uint line);
-int safe_mutex_unlock(safe_mutex_t *mp,const char *file, uint line);
-int safe_mutex_destroy(safe_mutex_t *mp,const char *file, uint line);
-int safe_cond_wait(pthread_cond_t *cond, safe_mutex_t *mp,const char *file,
-		   uint line);
-int safe_cond_timedwait(pthread_cond_t *cond, safe_mutex_t *mp,
-			struct timespec *abstime, const char *file, uint line);
-
-#ifdef SAFE_MUTEX
-#undef pthread_mutex_init
-#undef pthread_mutex_lock
-#undef pthread_mutex_unlock
-#undef pthread_mutex_destroy
-#undef pthread_mutex_wait
-#undef pthread_mutex_timedwait
-#undef pthread_mutex_t
-#define pthread_mutex_init(A,B) safe_mutex_init((A),(B))
-#define pthread_mutex_lock(A) safe_mutex_lock((A),__FILE__,__LINE__)
-#define pthread_mutex_unlock(A) safe_mutex_unlock((A),__FILE__,__LINE__)
-#define pthread_mutex_destroy(A) safe_mutex_destroy((A),__FILE__,__LINE__)
-#define pthread_cond_wait(A,B) safe_cond_wait((A),(B),__FILE__,__LINE__)
-#define pthread_cond_timedwait(A,B,C) safe_cond_timedwait((A),(B),(C),__FILE__,__LINE__)
-#define pthread_mutex_t safe_mutex_t
-#endif
-
 /* Test first for RTS or FSU threads */
 
 #if defined(PTHREAD_SCOPE_GLOBAL) && !defined(PTHREAD_SCOPE_SYSTEM)
@@ -253,7 +220,7 @@ extern int my_pthread_create_detached;
 #define HAVE_LOCALTIME_R
 #undef	HAVE_PTHREAD_ATTR_SETSCOPE
 #define HAVE_PTHREAD_ATTR_SETSCOPE
-#undef HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R	/* If we are running linux */
+#undef HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE	/* If we are running linux */
 #undef HAVE_RWLOCK_T
 #undef HAVE_RWLOCK_INIT
 #undef HAVE_PTHREAD_RWLOCK_RDLOCK
@@ -265,7 +232,7 @@ extern int my_pthread_create_detached;
 #endif /* defined(PTHREAD_SCOPE_GLOBAL) && !defined(PTHREAD_SCOPE_SYSTEM) */
 
 #if defined(_BSDI_VERSION) && _BSDI_VERSION < 199910
-int sigwait(const sigset_t *set, int *sig);
+int sigwait(sigset_t *set, int *sig);
 #endif
 
 #if defined(HAVE_UNIXWARE7_POSIX)
@@ -276,7 +243,7 @@ int sigwait(const sigset_t *set, int *sig);
 #ifndef HAVE_NONPOSIX_SIGWAIT
 #define my_sigwait(A,B) sigwait((A),(B))
 #else
-int my_sigwait(sigset_t *set,int *sig);
+int my_sigwait(const sigset_t *set,int *sig);
 #endif
 
 #ifdef HAVE_NONPOSIX_PTHREAD_MUTEX_INIT
@@ -295,7 +262,7 @@ extern int my_pthread_cond_init(pthread_cond_t *mp,
 #endif
 
 #if !defined(HAVE_SIGWAIT) && !defined(HAVE_mit_thread) && !defined(HAVE_rts_threads) && !defined(sigwait) && !defined(alpha_linux_port) && !defined(HAVE_NONPOSIX_SIGWAIT) && !defined(HAVE_DEC_3_2_THREADS) && !defined(_AIX)
-int sigwait(const sigset_t *setp, int *sigp);		/* Use our implemention */
+int sigwait(sigset_t *setp, int *sigp);		/* Use our implemention */
 #endif
 #if !defined(HAVE_SIGSET) && !defined(HAVE_mit_thread) && !defined(sigset)
 #define sigset(A,B) do { struct sigaction s; sigset_t set;              \
@@ -365,6 +332,18 @@ struct tm *localtime_r(const time_t *clock, struct tm *res);
 #define pthread_detach_this_thread() { pthread_t tmp=pthread_self() ; pthread_detach(&tmp); }
 #endif
 
+#ifdef HAVE_DARWIN_THREADS
+#define pthread_sigmask(A,B,C) sigprocmask((A),(B),(C))
+#define pthread_kill(A,B) pthread_dummy(0)
+#define pthread_condattr_init(A) pthread_dummy(0)
+#define pthread_condattr_destroy(A) pthread_dummy(0)
+#define pthread_signal(A,B) pthread_dummy(0)
+#undef	pthread_detach_this_thread
+#define pthread_detach_this_thread() { pthread_t tmp=pthread_self() ; pthread_detach(tmp); }
+#undef sigset
+#define sigset(A,B) pthread_signal((A),(void (*)(int)) (B))
+#endif
+
 #if ((defined(HAVE_PTHREAD_ATTR_CREATE) && !defined(HAVE_SIGWAIT)) || defined(HAVE_DEC_3_2_THREADS)) && !defined(HAVE_CTHREADS_WRAPPER)
 /* This is set on AIX_3_2 and Siemens unix (and DEC OSF/1 3.2 too) */
 #define pthread_key_create(A,B) \
@@ -385,32 +364,73 @@ struct tm *localtime_r(const time_t *clock, struct tm *res);
 #define HAVE_PTHREAD_KILL
 #endif
 
-#if defined(HAVE_PTHREAD_ATTR_CREATE) || defined(_AIX) || defined(HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R)
+#if defined(HAVE_PTHREAD_ATTR_CREATE) || defined(_AIX) || defined(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE)
 #if !defined(HPUX)
 struct hostent;
 #endif /* HPUX */
 struct hostent *my_gethostbyname_r(const char *name,
 				   struct hostent *result, char *buffer,
 				   int buflen, int *h_errnop);
-#if defined(HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R)
+#if defined(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE)
 #define GETHOSTBYNAME_BUFF_SIZE 2048
 #else
 #define GETHOSTBYNAME_BUFF_SIZE sizeof(struct hostent_data)
-#endif /* defined(HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R) */
+#endif /* defined(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE) */
 
 #else
-#ifdef HAVE_GETHOSTBYNAME_R_WITH_HOSTENT_DATA
-#define GETHOSTBYNAME_BUFF_SIZE sizeof(hostent_data)
-#define my_gethostbyname_r(A,B,C,D,E) gethostbyname_r((A),(B),(hostent_data*) (C))
+#ifdef HAVE_GETHOSTBYNAME_R_RETURN_INT
+#define GETHOSTBYNAME_BUFF_SIZE sizeof(struct hostent_data)
+struct hostent *my_gethostbyname_r(const char *name,
+				   struct hostent *result, char *buffer,
+				   int buflen, int *h_errnop);
 #else
 #define GETHOSTBYNAME_BUFF_SIZE 2048
 #define my_gethostbyname_r(A,B,C,D,E) gethostbyname_r((A),(B),(C),(D),(E))
-#endif /* HAVE_GETHOSTBYNAME_R_WITH_HOSTENT_DATA */
-#endif /* defined(HAVE_PTHREAD_ATTR_CREATE) || defined(_AIX) || defined(HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R) */
+#endif /* HAVE_GETHOSTBYNAME_R_RETURN_INT */
+#endif /* defined(HAVE_PTHREAD_ATTR_CREATE) || defined(_AIX) || defined(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE) */
 
 #endif /* defined(__WIN__) */
 
-/* READ-WRITE thread locking */
+	/* safe_mutex adds checking to mutex for easier debugging */
+
+typedef struct st_safe_mutex_t
+{
+  pthread_mutex_t global,mutex;
+  char *file;
+  uint line,count;
+  pthread_t thread;
+} safe_mutex_t;
+
+int safe_mutex_init(safe_mutex_t *mp, const pthread_mutexattr_t *attr);
+int safe_mutex_lock(safe_mutex_t *mp,const char *file, uint line);
+int safe_mutex_unlock(safe_mutex_t *mp,const char *file, uint line);
+int safe_mutex_destroy(safe_mutex_t *mp,const char *file, uint line);
+int safe_cond_wait(pthread_cond_t *cond, safe_mutex_t *mp,const char *file,
+		   uint line);
+int safe_cond_timedwait(pthread_cond_t *cond, safe_mutex_t *mp,
+			struct timespec *abstime, const char *file, uint line);
+
+	/* Wrappers if safe mutex is actually used */
+#ifdef SAFE_MUTEX
+#undef pthread_mutex_init
+#undef pthread_mutex_lock
+#undef pthread_mutex_unlock
+#undef pthread_mutex_destroy
+#undef pthread_mutex_wait
+#undef pthread_mutex_timedwait
+#undef pthread_mutex_t
+#undef pthread_cond_wait
+#undef pthread_cond_timedwait
+#define pthread_mutex_init(A,B) safe_mutex_init((A),(B))
+#define pthread_mutex_lock(A) safe_mutex_lock((A),__FILE__,__LINE__)
+#define pthread_mutex_unlock(A) safe_mutex_unlock((A),__FILE__,__LINE__)
+#define pthread_mutex_destroy(A) safe_mutex_destroy((A),__FILE__,__LINE__)
+#define pthread_cond_wait(A,B) safe_cond_wait((A),(B),__FILE__,__LINE__)
+#define pthread_cond_timedwait(A,B,C) safe_cond_timedwait((A),(B),(C),__FILE__,__LINE__)
+#define pthread_mutex_t safe_mutex_t
+#endif /* SAFE_MUTEX */
+
+	/* READ-WRITE thread locking */
 
 #if defined(USE_MUTEX_INSTEAD_OF_RW_LOCKS)
 /* use these defs for simple mutex locking */
@@ -476,19 +496,24 @@ extern int pthread_dummy(int);
 /* All thread specific variables are in the following struct */
 
 #define THREAD_NAME_SIZE 10
+#if defined(__ia64__)
+#define DEFAULT_THREAD_STACK	(128*1024)
+#else
+#define DEFAULT_THREAD_STACK	(64*1024)
+#endif
 
 struct st_my_thread_var
 {
   int thr_errno;
-  int cmp_length;
-  volatile int abort;
-  long id;
   pthread_cond_t suspend, *current_cond;
   pthread_mutex_t mutex,  *current_mutex;
   pthread_t pthread_self;
+  long id;
+  int cmp_length;
+  volatile int abort;
 #ifndef DBUG_OFF
-  char name[THREAD_NAME_SIZE+1];
   gptr dbug;
+  char name[THREAD_NAME_SIZE+1];
 #endif
 };
 

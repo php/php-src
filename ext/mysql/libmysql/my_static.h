@@ -19,16 +19,6 @@ struct st_remember {
   sig_handler (*func)(int number);
 };
 
-typedef struct sec_link {
-  struct sec_link *next_hash,**prev_hash;/* Blocks linked acc. to hash-value */
-  struct sec_link *next_used,*prev_used;
-  struct sec_link *next_changed,**prev_changed;
-  File file;
-  my_off_t diskpos;
-  byte *buffer;
-  my_bool changed;
-} SEC_LINK;
-
 struct irem {
     struct remember *_pNext;		/* Linked list of structures	   */
     struct remember *_pPrev;		/* Other link			   */
@@ -47,8 +37,6 @@ extern char	NEAR curr_dir[FN_REFLEN],NEAR home_dir_buff[FN_REFLEN];
 
 extern volatile int _my_signals;
 extern struct st_remember _my_sig_remember[MAX_SIGNALS];
-
-extern my_bool	key_cache_inited;
 
 extern const char *soundex_map;
 
