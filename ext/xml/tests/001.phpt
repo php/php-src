@@ -4,7 +4,7 @@ XML parser test, function callbacks
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-
+chdir(dirname(__FILE__));
 
 $xml_parser = xml_parser_create();
 xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, 1);

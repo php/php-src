@@ -4,7 +4,7 @@ Simple POST Method test
 a=Hello+World
 --GET--
 --FILE--
-<?php error_reporting(0);
+<?php
 echo $_POST['a']; ?>
 --EXPECT--
 Hello World
