@@ -68,18 +68,21 @@ if test "$PHP_SQLITE" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libsqlite/src)
     AC_CHECK_SIZEOF(char *,4)
     AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
-    dnl use latin 1 for now; the utf-8 handling in funcs.c uses assert(),
-    dnl which is a bit silly and something we want to avoid
-    SQLITE_ENCODING="ISO8859"
-    dnl SQLITE_ENCODING="UTF-8"
-    dnl AC_DEFINE(SQLITE_UTF8,1,[if SQLite should use utf-8 encoding])
+    dnl use latin 1 for SQLite older than 2.8.9; the utf-8 handling 
+    dnl in funcs.c uses assert(), which is a bit silly and something 
+    dnl we want to avoid. This assert() was removed in SQLite 2.8.9.
+    if test "$PHP_SQLITE_UTF8" = "yes"; then
+        SQLITE_ENCODING="UTF8"
+        AC_DEFINE(SQLITE_UTF8, 1, [ ])
+    else
+        SQLITE_ENCODING="ISO8859"
+    fi
     PHP_SUBST(SQLITE_ENCODING)
-
-    AC_PATH_PROG(LEMON,lemon,no)
-    PHP_SUBST(LEMON)
 
     SQLITE_VERSION=`cat $ext_srcdir/libsqlite/VERSION`
     PHP_SUBST(SQLITE_VERSION)
+    
+    sed -e s/--VERS--/$SQLITE_VERSION/ -e s/--ENCODING--/$SQLITE_ENCODING/ $ext_srcdir/libsqlite/src/sqlite.h.in >$ext_srcdir/libsqlite/src/sqlite.h
 
     if test "$ext_shared" = "no"; then
       echo '#include "php_config.h"' > $ext_srcdir/libsqlite/src/config.h
@@ -95,8 +98,6 @@ if test "$PHP_SQLITE" != "no"; then
 # define NDEBUG
 #endif
 EOF
-
-    PHP_ADD_MAKEFILE_FRAGMENT
 
   fi
 

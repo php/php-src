@@ -43,12 +43,9 @@
 <release>
 <state>stable</state>
 <version>1.0.2</version>
-<date>2004-01-17</date>
+<date>2004-07-10</date>
 <notes>
-Upgraded libsqlite to version 2.9.11
-Fixed crash bug in module shutdown
-Fixed crash with empty queries
-Fixed column name mangling bug
+Upgraded libsqlite to version 2.9.14
 </notes>
 
     <filelist>
@@ -57,7 +54,6 @@ Fixed column name mangling bug
       <file role="src" name="sqlite.dsp"/>
       <file role="src" name="php_sqlite.h"/>
       <file role="src" name="php_sqlite.def"/>
-	  <file role="src" name="Makefile.frag"/>
       <file role="doc" name="CREDITS"/>
       <file role="doc" name="README"/>
       <file role="doc" name="TODO"/>
@@ -136,6 +132,19 @@ Fixed column name mangling bug
   </release>
 
   <changelog>
+
+<release>
+<state>stable</state>
+<version>1.0.2</version>
+<date>2004-01-17</date>
+<notes>
+Upgraded libsqlite to version 2.9.11
+Fixed crash bug in module shutdown
+Fixed crash with empty queries
+Fixed column name mangling bug
+</notes>
+</release>
+
     <release>
       <state>stable</state>
       <version>1.0</version>

@@ -34,9 +34,6 @@
 # ifndef O_BINARY
 #  define O_BINARY 0
 # endif
-# ifndef EISDIR
-#  define EISDIR 21
-# endif
 #endif
 
 
@@ -467,9 +464,11 @@ int sqliteOsOpenReadWrite(
   id->dirfd = -1;
   id->fd = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY, 0644);
   if( id->fd<0 ){
-    if (errno == EISDIR) {
+#ifdef EISDIR
+    if( errno==EISDIR ){
       return SQLITE_CANTOPEN;
     }
+#endif
     id->fd = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
     if( id->fd<0 ){
       return SQLITE_CANTOPEN; 
@@ -780,25 +779,35 @@ int sqliteOsOpenDirectory(
 }
 
 /*
+** If the following global variable points to a string which is the
+** name of a directory, then that directory will be used to store
+** temporary files.
+*/
+const char *sqlite_temp_directory = 0;
+
+/*
 ** Create a temporary file name in zBuf.  zBuf must be big enough to
 ** hold at least SQLITE_TEMPNAME_SIZE characters.
 */
 int sqliteOsTempFileName(char *zBuf){
 #if OS_UNIX
   static const char *azDirs[] = {
+     0,
      "/var/tmp",
      "/usr/tmp",
      "/tmp",
      ".",
   };
-  static char zChars[] =
+  static unsigned char zChars[] =
     "abcdefghijklmnopqrstuvwxyz"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "0123456789";
   int i, j;
   struct stat buf;
   const char *zDir = ".";
+  azDirs[0] = sqlite_temp_directory;
   for(i=0; i<sizeof(azDirs)/sizeof(azDirs[0]); i++){
+    if( azDirs[i]==0 ) continue;
     if( stat(azDirs[i], &buf) ) continue;
     if( !S_ISDIR(buf.st_mode) ) continue;
     if( access(azDirs[i], 07) ) continue;
@@ -808,9 +817,9 @@ int sqliteOsTempFileName(char *zBuf){
   do{
     sprintf(zBuf, "%s/"TEMP_FILE_PREFIX, zDir);
     j = strlen(zBuf);
-    for(i=0; i<15; i++){
-      int n = sqliteRandomByte() % (sizeof(zChars)-1);
-      zBuf[j++] = zChars[n];
+    sqliteRandomness(15, &zBuf[j]);
+    for(i=0; i<15; i++, j++){
+      zBuf[j] = (char)zChars[ ((unsigned char)zBuf[j])%(sizeof(zChars)-1) ];
     }
     zBuf[j] = 0;
   }while( access(zBuf,0)==0 );
@@ -821,16 +830,22 @@ int sqliteOsTempFileName(char *zBuf){
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "0123456789";
   int i, j;
+  char *zDir;
   char zTempPath[SQLITE_TEMPNAME_SIZE];
-  GetTempPath(SQLITE_TEMPNAME_SIZE-30, zTempPath);
-  for(i=strlen(zTempPath); i>0 && zTempPath[i-1]=='\\'; i--){}
-  zTempPath[i] = 0;
+  if( sqlite_temp_directory==0 ){
+    GetTempPath(SQLITE_TEMPNAME_SIZE-30, zTempPath);
+    for(i=strlen(zTempPath); i>0 && zTempPath[i-1]=='\\'; i--){}
+    zTempPath[i] = 0;
+    zDir = zTempPath;
+  }else{
+    zDir = sqlite_temp_directory;
+  }
   for(;;){
-    sprintf(zBuf, "%s\\"TEMP_FILE_PREFIX, zTempPath);
+    sprintf(zBuf, "%s\\"TEMP_FILE_PREFIX, zDir);
     j = strlen(zBuf);
-    for(i=0; i<15; i++){
-      int n = sqliteRandomByte() % (sizeof(zChars) - 1);
-      zBuf[j++] = zChars[n];
+    sqliteRandomness(15, &zBuf[j]);
+    for(i=0; i<15; i++, j++){
+      zBuf[j] = (char)zChars[ ((unsigned char)zBuf[j])%(sizeof(zChars)-1) ];
     }
     zBuf[j] = 0;
     if( !sqliteOsFileExists(zBuf) ) break;
@@ -842,13 +857,16 @@ int sqliteOsTempFileName(char *zBuf){
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "0123456789";
   int i, j;
+  char *zDir;
   char zTempPath[SQLITE_TEMPNAME_SIZE];
   char zdirName[32];
   CInfoPBRec infoRec;
   Str31 dirName;
   memset(&infoRec, 0, sizeof(infoRec));
   memset(zTempPath, 0, SQLITE_TEMPNAME_SIZE);
-  if( FindFolder(kOnSystemDisk, kTemporaryFolderType,  kCreateFolder,
+  if( sqlite_temp_directory!=0 ){
+    zDir = sqlite_temp_directory;
+  }else if( FindFolder(kOnSystemDisk, kTemporaryFolderType,  kCreateFolder,
        &(infoRec.dirInfo.ioVRefNum), &(infoRec.dirInfo.ioDrParID)) == noErr ){
     infoRec.dirInfo.ioNamePtr = dirName;
     do{
@@ -865,15 +883,18 @@ int sqliteOsTempFileName(char *zBuf){
         break;
       }
     } while( infoRec.dirInfo.ioDrDirID != fsRtDirID );
+    zDir = zTempPath;
   }
-  if( *zTempPath == 0 )
+  if( zDir[0]==0 ){
     getcwd(zTempPath, SQLITE_TEMPNAME_SIZE-24);
+    zDir = zTempPath;
+  }
   for(;;){
-    sprintf(zBuf, "%s"TEMP_FILE_PREFIX, zTempPath);
+    sprintf(zBuf, "%s"TEMP_FILE_PREFIX, zDir);
     j = strlen(zBuf);
-    for(i=0; i<15; i++){
-      int n = sqliteRandomByte() % sizeof(zChars);
-      zBuf[j++] = zChars[n];
+    sqliteRandomness(15, &zBuf[j]);
+    for(i=0; i<15; i++, j++){
+      zBuf[j] = (char)zChars[ ((unsigned char)zBuf[j])%(sizeof(zChars)-1) ];
     }
     zBuf[j] = 0;
     if( !sqliteOsFileExists(zBuf) ) break;
@@ -1220,7 +1241,7 @@ int sqliteOsFileSize(OsFile *id, off_t *pSize){
 ** the LockFileEx() API.
 */
 int isNT(void){
-  static osType = 0;   /* 0=unknown 1=win95 2=winNT */
+  static int osType = 0;   /* 0=unknown 1=win95 2=winNT */
   if( osType==0 ){
     OSVERSIONINFO sInfo;
     sInfo.dwOSVersionInfoSize = sizeof(sInfo);
@@ -1331,9 +1352,11 @@ int sqliteOsReadLock(OsFile *id){
   if( id->locked>0 ){
     rc = SQLITE_OK;
   }else{
-    int lk = (sqliteRandomInteger() & 0x7ffffff)%N_LOCKBYTE+1;
+    int lk;
     int res;
     int cnt = 100;
+    sqliteRandomness(sizeof(lk), &lk);
+    lk = (lk & 0x7fffffff)%N_LOCKBYTE + 1;
     while( cnt-->0 && (res = LockFile(id->h, FIRST_LOCKBYTE, 0, 1, 0))==0 ){
       Sleep(1);
     }
@@ -1365,10 +1388,12 @@ int sqliteOsReadLock(OsFile *id){
   if( id->locked>0 || id->refNumRF == -1 ){
     rc = SQLITE_OK;
   }else{
-    int lk = (sqliteRandomInteger() & 0x7ffffff)%N_LOCKBYTE+1;
+    int lk;
     OSErr res;
     int cnt = 5;
     ParamBlockRec params;
+    sqliteRandomness(sizeof(lk), &lk);
+    lk = (lk & 0x7fffffff)%N_LOCKBYTE + 1;
     memset(&params, 0, sizeof(params));
     params.ioParam.ioRefNum = id->refNumRF;
     params.ioParam.ioPosMode = fsFromStart;
@@ -1783,7 +1808,7 @@ char *sqliteOsFullPathname(const char *zRelative){
 }
 
 /*
-** The following variable, if set to a now-zero value, become the result
+** The following variable, if set to a non-zero value, becomes the result
 ** returned from sqliteOsCurrentTime().  This is used for testing.
 */
 #ifdef SQLITE_TEST

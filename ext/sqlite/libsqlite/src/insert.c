@@ -330,14 +330,7 @@ void sqliteInsert(
   /* Open tables and indices if there are no row triggers */
   if( !row_triggers_exist ){
     base = pParse->nTab;
-    sqliteVdbeAddOp(v, OP_Integer, pTab->iDb, 0);
-    sqliteVdbeAddOp(v, OP_OpenWrite, base, pTab->tnum);
-    sqliteVdbeChangeP3(v, -1, pTab->zName, P3_STATIC);
-    for(idx=1, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, idx++){
-      sqliteVdbeAddOp(v, OP_Integer, pIdx->iDb, 0);
-      sqliteVdbeAddOp(v, OP_OpenWrite, idx+base, pIdx->tnum);
-      sqliteVdbeChangeP3(v, -1, pIdx->zName, P3_STATIC);
-    }
+    idx = sqliteOpenTableAndIndices(pParse, pTab, base);
     pParse->nTab += idx;
   }
 
@@ -391,8 +384,7 @@ void sqliteInsert(
         }
       }
       if( pColumn && j>=pColumn->nId ){
-        sqliteVdbeAddOp(v, OP_String, 0, 0);
-        sqliteVdbeChangeP3(v, -1, pTab->aCol[i].zDflt, P3_STATIC);
+        sqliteVdbeOp3(v, OP_String, 0, 0, pTab->aCol[i].zDflt, P3_STATIC);
       }else if( useTempTable ){
         sqliteVdbeAddOp(v, OP_Column, srcTab, j); 
       }else if( pSelect ){
@@ -416,14 +408,7 @@ void sqliteInsert(
   */
   if( row_triggers_exist && !isView ){
     base = pParse->nTab;
-    sqliteVdbeAddOp(v, OP_Integer, pTab->iDb, 0);
-    sqliteVdbeAddOp(v, OP_OpenWrite, base, pTab->tnum);
-    sqliteVdbeChangeP3(v, -1, pTab->zName, P3_STATIC);
-    for(idx=1, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, idx++){
-      sqliteVdbeAddOp(v, OP_Integer, pIdx->iDb, 0);
-      sqliteVdbeAddOp(v, OP_OpenWrite, idx+base, pIdx->tnum);
-      sqliteVdbeChangeP3(v, -1, pIdx->zName, P3_STATIC);
-    }
+    idx = sqliteOpenTableAndIndices(pParse, pTab, base);
     pParse->nTab += idx;
   }
 
@@ -472,8 +457,7 @@ void sqliteInsert(
         }
       }
       if( pColumn && j>=pColumn->nId ){
-        sqliteVdbeAddOp(v, OP_String, 0, 0);
-        sqliteVdbeChangeP3(v, -1, pTab->aCol[i].zDflt, P3_STATIC);
+        sqliteVdbeOp3(v, OP_String, 0, 0, pTab->aCol[i].zDflt, P3_STATIC);
       }else if( useTempTable ){
         sqliteVdbeAddOp(v, OP_Column, srcTab, j); 
       }else if( pSelect ){
@@ -535,14 +519,14 @@ void sqliteInsert(
     }
   }
 
+  sqliteVdbeAddOp(v, OP_SetCounts, 0, 0);
   sqliteEndWriteOperation(pParse);
 
   /*
   ** Return the number of rows inserted.
   */
   if( db->flags & SQLITE_CountRows ){
-    sqliteVdbeAddOp(v, OP_ColumnName, 0, 0);
-    sqliteVdbeChangeP3(v, -1, "rows inserted", P3_STATIC);
+    sqliteVdbeOp3(v, OP_ColumnName, 0, 1, "rows inserted", P3_STATIC);
     sqliteVdbeAddOp(v, OP_MemLoad, iCntMem, 0);
     sqliteVdbeAddOp(v, OP_Callback, 1, 0);
   }
@@ -698,8 +682,7 @@ void sqliteGenerateConstraintChecks(
         break;
       }
       case OE_Replace: {
-        sqliteVdbeAddOp(v, OP_String, 0, 0);
-        sqliteVdbeChangeP3(v, -1, pTab->aCol[i].zDflt, P3_STATIC);
+        sqliteVdbeOp3(v, OP_String, 0, 0, pTab->aCol[i].zDflt, P3_STATIC);
         sqliteVdbeAddOp(v, OP_Push, nCol-i, 0);
         break;
       }
@@ -741,8 +724,8 @@ void sqliteGenerateConstraintChecks(
       case OE_Rollback:
       case OE_Abort:
       case OE_Fail: {
-        sqliteVdbeAddOp(v, OP_Halt, SQLITE_CONSTRAINT, onError);
-        sqliteVdbeChangeP3(v, -1, "PRIMARY KEY must be unique", P3_STATIC);
+        sqliteVdbeOp3(v, OP_Halt, SQLITE_CONSTRAINT, onError,
+                         "PRIMARY KEY must be unique", P3_STATIC);
         break;
       }
       case OE_Replace: {
@@ -839,8 +822,7 @@ void sqliteGenerateConstraintChecks(
         }
         strcpy(&zErrMsg[n1], 
             pIdx->nColumn>1 ? " are not unique" : " is not unique");
-        sqliteVdbeAddOp(v, OP_Halt, SQLITE_CONSTRAINT, onError);
-        sqliteVdbeChangeP3(v, -1, sqliteStrDup(zErrMsg), P3_DYNAMIC);
+        sqliteVdbeOp3(v, OP_Halt, SQLITE_CONSTRAINT, onError, zErrMsg, 0);
         break;
       }
       case OE_Ignore: {
@@ -906,8 +888,32 @@ void sqliteCompleteInsertion(
     sqliteVdbeAddOp(v, OP_Dup, 1, 0);
     sqliteVdbeAddOp(v, OP_PutIntKey, newIdx, 0);
   }
-  sqliteVdbeAddOp(v, OP_PutIntKey, base, pParse->trigStack?0:1);
+  sqliteVdbeAddOp(v, OP_PutIntKey, base,
+    (pParse->trigStack?0:OPFLAG_NCHANGE) |
+    (isUpdate?0:OPFLAG_LASTROWID) | OPFLAG_CSCHANGE);
   if( isUpdate && recnoChng ){
     sqliteVdbeAddOp(v, OP_Pop, 1, 0);
   }
+}
+
+/*
+** Generate code that will open write cursors for a table and for all
+** indices of that table.  The "base" parameter is the cursor number used
+** for the table.  Indices are opened on subsequent cursors.
+**
+** Return the total number of cursors opened.  This is always at least
+** 1 (for the main table) plus more for each cursor.
+*/
+int sqliteOpenTableAndIndices(Parse *pParse, Table *pTab, int base){
+  int i;
+  Index *pIdx;
+  Vdbe *v = sqliteGetVdbe(pParse);
+  assert( v!=0 );
+  sqliteVdbeAddOp(v, OP_Integer, pTab->iDb, 0);
+  sqliteVdbeOp3(v, OP_OpenWrite, base, pTab->tnum, pTab->zName, P3_STATIC);
+  for(i=1, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, i++){
+    sqliteVdbeAddOp(v, OP_Integer, pIdx->iDb, 0);
+    sqliteVdbeOp3(v, OP_OpenWrite, i+base, pIdx->tnum, pIdx->zName, P3_STATIC);
+  }
+  return i;
 }

@@ -106,47 +106,36 @@ struct Sorter {
 #define NBFS 32
 
 /*
-** A single level of the stack is an instance of the following
-** structure.  Except, string values are stored on a separate
-** list of of pointers to character.  The reason for storing
-** strings separately is so that they can be easily passed
-** to the callback function.
-*/
-struct Stack {
-  int i;         /* Integer value */
-  int n;         /* Number of characters in string value, including '\0' */
-  int flags;     /* Some combination of STK_Null, STK_Str, STK_Dyn, etc. */
-  double r;      /* Real value */
-  char z[NBFS];  /* Space for short strings */
-};
-typedef struct Stack Stack;
-
-/*
-** Memory cells use the same structure as the stack except that space
-** for an arbitrary string is added.
+** A single level of the stack or a single memory cell
+** is an instance of the following structure. 
 */
 struct Mem {
-  Stack s;       /* All values of the memory cell besides string */
-  char *z;       /* String value for this memory cell */
+  int i;              /* Integer value */
+  int n;              /* Number of characters in string value, including '\0' */
+  int flags;          /* Some combination of MEM_Null, MEM_Str, MEM_Dyn, etc. */
+  double r;           /* Real value */
+  char *z;            /* String value */
+  char zShort[NBFS];  /* Space for short strings */
 };
 typedef struct Mem Mem;
 
 /*
-** Allowed values for Stack.flags
+** Allowed values for Mem.flags
 */
-#define STK_Null      0x0001   /* Value is NULL */
-#define STK_Str       0x0002   /* Value is a string */
-#define STK_Int       0x0004   /* Value is an integer */
-#define STK_Real      0x0008   /* Value is a real number */
-#define STK_Dyn       0x0010   /* Need to call sqliteFree() on zStack[] */
-#define STK_Static    0x0020   /* zStack[] points to a static string */
-#define STK_Ephem     0x0040   /* zStack[] points to an ephemeral string */
+#define MEM_Null      0x0001   /* Value is NULL */
+#define MEM_Str       0x0002   /* Value is a string */
+#define MEM_Int       0x0004   /* Value is an integer */
+#define MEM_Real      0x0008   /* Value is a real number */
+#define MEM_Dyn       0x0010   /* Need to call sqliteFree() on Mem.z */
+#define MEM_Static    0x0020   /* Mem.z points to a static string */
+#define MEM_Ephem     0x0040   /* Mem.z points to an ephemeral string */
+#define MEM_Short     0x0080   /* Mem.z points to Mem.zShort */
 
-/* The following STK_ value appears only in AggElem.aMem.s.flag fields.
+/* The following MEM_ value appears only in AggElem.aMem.s.flag fields.
 ** It indicates that the corresponding AggElem.aMem.z points to a
 ** aggregate function context that needs to be finalized.
 */
-#define STK_AggCtx    0x0040   /* zStack[] points to an agg function context */
+#define MEM_AggCtx    0x0100   /* Mem.z points to an agg function context */
 
 /*
 ** The "context" argument for a installable function.  A pointer to an
@@ -159,12 +148,11 @@ typedef struct Mem Mem;
 ** structure are known.
 **
 ** This structure is defined inside of vdbe.c because it uses substructures
-** (Stack) which are only defined there.
+** (Mem) which are only defined there.
 */
 struct sqlite_func {
   FuncDef *pFunc;   /* Pointer to function information.  MUST BE FIRST */
-  Stack s;          /* Small strings, ints, and double values go here */
-  char *z;          /* Space for holding dynamic string results */
+  Mem s;            /* The return value is stored here */
   void *pAgg;       /* Aggregate context */
   u8 isError;       /* Set to true for an error */
   u8 isStep;        /* Current in the step function */
@@ -220,6 +208,19 @@ struct Keylist {
 };
 
 /*
+** A Context stores the last insert rowid, the last statement change count,
+** and the current statement change count (i.e. changes since last statement).
+** Elements of Context structure type make up the ContextStack, which is
+** updated by the ContextPush and ContextPop opcodes (used by triggers)
+*/
+typedef struct Context Context;
+struct Context {
+  int lastRowid;    /* Last insert rowid (from db->lastRowid) */
+  int lsChange;     /* Last statement change count (from db->lsChange) */
+  int csChange;     /* Current statement change count (from db->csChange) */
+};
+
+/*
 ** An instance of the virtual machine.  This structure contains the complete
 ** state of the virtual machine.
 **
@@ -236,9 +237,9 @@ struct Vdbe {
   int nLabel;         /* Number of labels used */
   int nLabelAlloc;    /* Number of slots allocated in aLabel[] */
   int *aLabel;        /* Space to hold the labels */
-  int tos;            /* Index of top of stack */
-  Stack *aStack;      /* The operand stack, except string values */
-  char **zStack;      /* Text or binary values of the stack */
+  Mem *aStack;        /* The operand stack, except string values */
+  Mem *pTos;          /* Top entry in the operand stack */
+  char **zArgv;       /* Text values used by the callback */
   char **azColName;   /* Becomes the 4th parameter to callbacks */
   int nCursor;        /* Number of slots in aCsr[] */
   Cursor *aCsr;       /* One element of this array for each open cursor */
@@ -262,6 +263,8 @@ struct Vdbe {
   Keylist *pList;         /* A list of ROWIDs */
   int keylistStackDepth;  /* The size of the "keylist" stack */
   Keylist **keylistStack; /* The stack used by opcodes ListPush & ListPop */
+  int contextStackDepth;  /* The size of the "context" stack */
+  Context *contextStack;  /* Stack used by opcodes ContextPush & ContextPop*/
   int pc;                 /* The program counter */
   int rc;                 /* Value to return */
   unsigned uniqueCnt;     /* Used by OP_MakeRecord when P2!=0 */
@@ -271,9 +274,7 @@ struct Vdbe {
   int returnStack[100];   /* Return address stack for OP_Gosub & OP_Return */
   int returnDepth;        /* Next unused element in returnStack[] */
   int nResColumn;         /* Number of columns in one row of the result set */
-  char **azResColumn;                        /* Values for one row of result */ 
-  int (*xCallback)(void*,int,char**,char**); /* Callback for SELECT results */
-  void *pCbArg;                              /* First argument to xCallback() */
+  char **azResColumn;     /* Values for one row of result */ 
   int popStack;           /* Pop the stack this much on entry to VdbeExec() */
   char *zErrMsg;          /* Error message written here */
   u8 explain;             /* True if EXPLAIN present on SQL command */
@@ -286,16 +287,6 @@ struct Vdbe {
 #define VDBE_MAGIC_RUN      0xbdf20da3    /* VDBE is ready to execute */
 #define VDBE_MAGIC_HALT     0x519c2973    /* VDBE has completed execution */
 #define VDBE_MAGIC_DEAD     0xb606c3c8    /* The VDBE has been deallocated */
-
-/*
-** Here is a macro to handle the common case of popping the stack
-** once.  This macro only works from within the sqliteVdbeExec()
-** function.
-*/
-#define POPSTACK \
-  assert(p->tos>=0); \
-  if( aStack[p->tos].flags & STK_Dyn ) sqliteFree(zStack[p->tos]); \
-  p->tos--;
 
 /*
 ** Function prototypes

@@ -23,13 +23,11 @@
 %syntax_error {
   if( pParse->zErrMsg==0 ){
     if( TOKEN.z[0] ){
-      sqliteSetNString(&pParse->zErrMsg, 
-          "near \"", -1, TOKEN.z, TOKEN.n, "\": syntax error", -1, 0);
+      sqliteErrorMsg(pParse, "near \"%T\": syntax error", &TOKEN);
     }else{
-      sqliteSetString(&pParse->zErrMsg, "incomplete SQL statement", (char*)0);
+      sqliteErrorMsg(pParse, "incomplete SQL statement");
     }
   }
-  pParse->nErr++;
 }
 %name sqliteParser
 %include {
@@ -65,13 +63,10 @@ struct TrigEvent { int a; IdList * b; };
 %nonassoc END_OF_FILE ILLEGAL SPACE UNCLOSED_STRING COMMENT FUNCTION
           COLUMN AGG_FUNCTION.
 
-// Input is zero or more commands.
+// Input is a single SQL command
 input ::= cmdlist.
-
-// A list of commands is zero or more commands
-//
-cmdlist ::= ecmd.
 cmdlist ::= cmdlist ecmd.
+cmdlist ::= ecmd.
 ecmd ::= explain cmdx SEMI.
 ecmd ::= SEMI.
 cmdx ::= cmd.           { sqliteExec(pParse); }
@@ -131,6 +126,22 @@ id(A) ::= ID(X).         {A = X;}
   GLOB IGNORE IMMEDIATE INITIALLY INSTEAD LIKE MATCH KEY
   OF OFFSET PRAGMA RAISE REPLACE RESTRICT ROW STATEMENT
   TEMP TRIGGER VACUUM VIEW.
+
+// Define operator precedence early so that this is the first occurance
+// of the operator tokens in the grammer.  Keeping the operators together
+// causes them to be assigned integer values that are close together,
+// which keeps parser tables smaller.
+//
+%left OR.
+%left AND.
+%right NOT.
+%left EQ NE ISNULL NOTNULL IS LIKE GLOB BETWEEN IN.
+%left GT GE LT LE.
+%left BITAND BITOR LSHIFT RSHIFT.
+%left PLUS MINUS.
+%left STAR SLASH REM.
+%left CONCAT.
+%right UMINUS UPLUS BITNOT.
 
 // And "ids" is an identifer-or-string.
 //
@@ -366,7 +377,8 @@ seltablist(A) ::= stl_prefix(X) nm(Y) dbnm(D) as(Z) on_opt(N) using_opt(U). {
     else { sqliteIdListDelete(U); }
   }
 }
-seltablist(A) ::= stl_prefix(X) LP select(S) RP as(Z) on_opt(N) using_opt(U). {
+seltablist(A) ::= stl_prefix(X) LP seltablist_paren(S) RP
+                  as(Z) on_opt(N) using_opt(U). {
   A = sqliteSrcListAppend(X,0,0);
   A->a[A->nSrc-1].pSelect = S;
   if( Z.n ) sqliteSrcListAddAlias(A,&Z);
@@ -378,6 +390,17 @@ seltablist(A) ::= stl_prefix(X) LP select(S) RP as(Z) on_opt(N) using_opt(U). {
     if( A && A->nSrc>1 ){ A->a[A->nSrc-2].pUsing = U; }
     else { sqliteIdListDelete(U); }
   }
+}
+
+// A seltablist_paren nonterminal represents anything in a FROM that
+// is contained inside parentheses.  This can be either a subquery or
+// a grouping of table and subqueries.
+//
+%type seltablist_paren {Select*}
+%destructor seltablist_paren {sqliteSelectDelete($$);}
+seltablist_paren(A) ::= select(S).      {A = S;}
+seltablist_paren(A) ::= seltablist(F).  {
+   A = sqliteSelectNew(0,F,0,0,0,0,0,-1,0);
 }
 
 %type dbnm {Token}
@@ -505,16 +528,6 @@ inscollist(A) ::= nm(Y).                      {A = sqliteIdListAppend(0,&Y);}
 
 /////////////////////////// Expression Processing /////////////////////////////
 //
-%left OR.
-%left AND.
-%right NOT.
-%left EQ NE ISNULL NOTNULL IS LIKE GLOB BETWEEN IN.
-%left GT GE LT LE.
-%left BITAND BITOR LSHIFT RSHIFT.
-%left PLUS MINUS.
-%left STAR SLASH REM.
-%left CONCAT.
-%right UMINUS UPLUS BITNOT.
 
 %type expr {Expr*}
 %destructor expr {sqliteExprDelete($$);}
@@ -664,6 +677,20 @@ expr(A) ::= expr(X) NOT IN LP select(Y) RP(E).  {
   A = sqliteExpr(TK_NOT, A, 0, 0);
   sqliteExprSpan(A,&X->span,&E);
 }
+expr(A) ::= expr(X) IN nm(Y) dbnm(D). {
+  SrcList *pSrc = sqliteSrcListAppend(0, &Y, &D);
+  A = sqliteExpr(TK_IN, X, 0, 0);
+  if( A ) A->pSelect = sqliteSelectNew(0,pSrc,0,0,0,0,0,-1,0);
+  sqliteExprSpan(A,&X->span,D.z?&D:&Y);
+}
+expr(A) ::= expr(X) NOT IN nm(Y) dbnm(D). {
+  SrcList *pSrc = sqliteSrcListAppend(0, &Y, &D);
+  A = sqliteExpr(TK_IN, X, 0, 0);
+  if( A ) A->pSelect = sqliteSelectNew(0,pSrc,0,0,0,0,0,-1,0);
+  A = sqliteExpr(TK_NOT, A, 0, 0);
+  sqliteExprSpan(A,&X->span,D.z?&D:&Y);
+}
+
 
 /* CASE expressions */
 expr(A) ::= CASE(C) case_operand(X) case_exprlist(Y) case_else(Z) END(E). {
@@ -812,11 +839,11 @@ trigger_cmd(A) ::= UPDATE orconf(R) nm(X) SET setlist(Y) where_opt(Z).
                { A = sqliteTriggerUpdateStep(&X, Y, Z, R); }
 
 // INSERT
-trigger_cmd(A) ::= INSERT orconf(R) INTO nm(X) inscollist_opt(F) 
+trigger_cmd(A) ::= insert_cmd(R) INTO nm(X) inscollist_opt(F) 
   VALUES LP itemlist(Y) RP.  
 {A = sqliteTriggerInsertStep(&X, F, Y, 0, R);}
 
-trigger_cmd(A) ::= INSERT orconf(R) INTO nm(X) inscollist_opt(F) select(S).
+trigger_cmd(A) ::= insert_cmd(R) INTO nm(X) inscollist_opt(F) select(S).
                {A = sqliteTriggerInsertStep(&X, F, 0, S, R);}
 
 // DELETE
@@ -854,9 +881,12 @@ cmd ::= DROP TRIGGER nm(X) dbnm(D). {
 }
 
 //////////////////////// ATTACH DATABASE file AS name /////////////////////////
-cmd ::= ATTACH database_kw_opt ids(F) AS nm(D). {
-  sqliteAttach(pParse, &F, &D);
+cmd ::= ATTACH database_kw_opt ids(F) AS nm(D) key_opt(K). {
+  sqliteAttach(pParse, &F, &D, &K);
 }
+%type key_opt {Token}
+key_opt(A) ::= USING ids(X).  { A = X; }
+key_opt(A) ::= .              { A.z = 0; A.n = 0; }
 
 database_kw_opt ::= DATABASE.
 database_kw_opt ::= .

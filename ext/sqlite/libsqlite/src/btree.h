@@ -57,9 +57,9 @@ struct BtOps {
     char *(*IntegrityCheck)(Btree*, int*, int);
     const char *(*GetFilename)(Btree*);
     int (*Copyfile)(Btree*,Btree*);
+    struct Pager *(*Pager)(Btree*);
 #ifdef SQLITE_TEST
     int (*PageDump)(Btree*, int, int);
-    struct Pager *(*Pager)(Btree*);
 #endif
 };
 
@@ -142,13 +142,13 @@ int sqliteRbtreeOpen(const char *zFilename, int mode, int nPg, Btree **ppBtree);
                 (btOps(pBt)->IntegrityCheck(pBt, aRoot, nRoot))
 #define sqliteBtreeGetFilename(pBt)       (btOps(pBt)->GetFilename(pBt))
 #define sqliteBtreeCopyFile(pBt1, pBt2)   (btOps(pBt1)->Copyfile(pBt1, pBt2))
+#define sqliteBtreePager(pBt)             (btOps(pBt)->Pager(pBt))
 
 #ifdef SQLITE_TEST
 #define sqliteBtreePageDump(pBt, pgno, recursive)\
                 (btOps(pBt)->PageDump(pBt, pgno, recursive))
 #define sqliteBtreeCursorDump(pCur, aResult)\
                 (btCOps(pCur)->CursorDump(pCur, aResult))
-#define sqliteBtreePager(pBt)             (btOps(pBt)->Pager(pBt))
 int btree_native_byte_order;
 #endif /* SQLITE_TEST */
 
