@@ -1,3 +1,81 @@
+2004-01-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      NEWS:
+      BFN
+
+2004-01-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/gd/config.w32:
+      win32 build:
+      gd should build shared by default
+      don't use php.ini when running mkdist.php
+
+    * sapi/activescript/config.w32
+      sapi/activescript/php4activescript.def
+      sapi/activescript/scriptengine.cpp:
+      Make activescript SAPI build under php5.
+      Untested...!
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_iterator.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_olechar.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_wrapper.c
+      ext/com_dotnet/config.w32
+      ext/com_dotnet/php_com_dotnet.h
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Port other major parts of PHP 4 COM extension into PHP 5 com_dotnet
+      extension.
+      This enables:
+      - iteration of SafeArray types via foreach()
+      - proxying of multi-dimensional SafeArray types so that multi-dimension
+        array accesses work (untested!)
+      - Fix COM exceptions, and expose them as their own class of exception
+        "com_exception"
+      - auto typelib file import (com.typelib_file ini option)
+      - event sinking
+      - wrapper to map PHP objects to COM
+      - fix mapping of variant values to PHP values
+      
+
+    * ext/oci8/config.w32
+      ext/oracle/config.w32
+      ext/pspell/config.w32
+      ext/zlib/config.w32
+      sapi/nsapi/config.w32:
+      glob-ify lib checks; this simplifies writing of config.w32 files a little.
+
+2004-01-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/tests/dom_xinclude.phpt:
+      Fix bug #26815 (foreach (DOM) childnodes causes error using Xinclude)
+      update xinclude test
+
+2004-01-07  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      MFH: Let DB handle NULL params, fixes bug #26777
+
+    * ext/interbase/interbase.c:
+      Let DB handle NULL params, fixes bug #26777
+
+2004-01-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      Reimplement part of Bug #24608 that was reverted too
+
+    * ZendEngine2/zend_execute.c:
+      Revert patch that allowed to call sttaic methods via $method()
+
 2004-01-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/zend_mm.c:
