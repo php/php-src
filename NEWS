@@ -5,7 +5,7 @@ PHP 4.0                                                                    NEWS
 - Added is_uploaded_file() and move_uploaded_file() (Zeev)
 - Added several directives to php.ini - post_max_size, file_uploads,
   display_startup_errors - see php.ini-dist for further information (Zeev)
-- Fix readdir bug in libc5
+- Fix readdir bug in libc5. (Stas)
 - Fix some potential OpenBSD and NetBSD crash bugs when opening files. (Andi)
 - Add EscapeShellArg() function (Rasmus)
 - Add a php.ini option session.use_trans_sid to enable/disable trans-sid.
