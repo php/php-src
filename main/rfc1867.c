@@ -841,9 +841,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			}
 			if (skip_upload) {
 				efree(param);
-				if (filename) {
-					efree(filename);
-				}
+				efree(filename);
 				continue;
 			}	
 
