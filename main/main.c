@@ -813,7 +813,7 @@ static int php_hash_environment(TSRMLS_D);
 
 /* {{{ php_start_sapi()
  */
-static int php_start_sapi()
+static int php_start_sapi(TSRMLS_D)
 {
     int retval = SUCCESS;
 
@@ -940,7 +940,7 @@ int php_request_startup_for_hook(TSRMLS_D)
     signal(SIGCHLD, sigchld_handler);
 #endif
 
-    if (php_start_sapi() == FAILURE)
+    if (php_start_sapi(TSRMLS_C) == FAILURE)
         return FAILURE;
 
     php_output_activate(TSRMLS_C);
@@ -991,7 +991,7 @@ void php_request_shutdown_for_hook(void *dummy)
     } zend_end_try();
 
     zend_try {
-        shutdown_memory_manager(CG(unclean_shutdown), 0);
+        shutdown_memory_manager(CG(unclean_shutdown), 0 TSRMLS_CC);
     } zend_end_try();
 
     zend_try {
