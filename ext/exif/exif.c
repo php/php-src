@@ -1486,12 +1486,11 @@ static int exif_file_sections_realloc(image_info_type *ImageInfo, int section_in
 {
 	void *tmp;
 
+	/* This is not a malloc/realloc check. It is a plausibility check for the
+	 * function parameters (requirements engineering).
+	 */
 	if (section_index >= ImageInfo->file.count) {
 		EXIF_ERRLOG_FSREALLOC
-		return -1;
-	}
-	tmp = erealloc(ImageInfo->file.list[section_index].data, size);
-	if (size == 0 || section_index >= ImageInfo->file.count) {
 		return -1;
 	}
 	tmp = erealloc(ImageInfo->file.list[section_index].data, size);
