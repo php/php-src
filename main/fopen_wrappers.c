@@ -131,6 +131,7 @@ PHPAPI int _php3_check_open_basedir(char *path)
 				local_open_basedir[local_open_basedir_pos--] = 0;
 			}
 			
+#if 0
 			/* Strip double (back)slashes */
 			if (local_open_basedir_pos > 0) {
 				while ((
@@ -144,7 +145,8 @@ PHPAPI int _php3_check_open_basedir(char *path)
 					local_open_basedir[local_open_basedir_pos--] = 0;
 				}
 			}
-			
+#endif
+
 		} else {
 			/* Else use the unmodified path */
 			strcpy(local_open_basedir, PG(open_basedir));
