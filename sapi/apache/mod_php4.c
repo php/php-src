@@ -64,7 +64,7 @@
 # include "mod_dav.h"
 #endif
 
-int apache_php_module_main(request_rec *r, int fd, int display_source_mode CLS_DC ELS_DC PLS_DC SLS_DC);
+int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC ELS_DC PLS_DC SLS_DC);
 void php_save_umask(void);
 void php_restore_umask(void);
 int sapi_apache_read_post(char *buffer, uint count_bytes SLS_DC);
@@ -443,7 +443,7 @@ static char *php_apache_get_default_mimetype(request_rec *r SLS_DC)
 
 int send_php(request_rec *r, int display_source_mode, char *filename)
 {
-	int fd, retval;
+	int retval;
 	HashTable *per_dir_conf;
 	SLS_FETCH();
 	ELS_FETCH();
@@ -480,11 +480,6 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	if (filename == NULL) {
 		filename = r->filename;
 	}
-	/* Open the file */
-	if ((fd = popenf(r->pool, filename, O_RDONLY, 0)) == -1) {
-		log_reason("file permissions deny server access", filename, r);
-		return FORBIDDEN;
-	}
 
 	/* Apache 1.2 has a more complex mechanism for reading POST data */
 #if MODULE_MAGIC_NUMBER > 19961007
@@ -518,12 +513,11 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	add_cgi_vars(r);
 
 	init_request_info(SLS_C);
-	apache_php_module_main(r, fd, display_source_mode CLS_CC ELS_CC PLS_CC SLS_CC);
+	apache_php_module_main(r, display_source_mode CLS_CC ELS_CC PLS_CC SLS_CC);
 
 	/* Done, restore umask, turn off timeout, close file and return */
 	php_restore_umask();
 	kill_timeout(r);
-	pclosef(r->pool, fd);
 	return OK;
 }
 
