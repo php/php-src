@@ -104,7 +104,7 @@ const char *zend_mh_bundle_error(void);
 # define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL)
 # define DL_UNLOAD					dlclose
 # if defined(DLSYM_NEEDS_UNDERSCORE)
-#  define DL_FETCH_SYMBOL(h,s)		dlsym((h), "_" ## s)
+#  define DL_FETCH_SYMBOL(h,s)		dlsym((h), "_" s)
 # else
 #  define DL_FETCH_SYMBOL			dlsym
 # endif
