@@ -814,7 +814,7 @@ int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC)
 {
 	const char **rowdata, **colnames;
 	int ret, i, base;
-	char *errtext = NULL;
+	char *errtext = NULL, *colname;
 
 next_row:
 	ret = sqlite_step(rres->vm, &rres->ncolumns, &rowdata, &colnames);
@@ -822,7 +822,16 @@ next_row:
 		/* first row - lets copy the column names */
 		rres->col_names = safe_emalloc(rres->ncolumns, sizeof(char *), 0);
 		for (i = 0; i < rres->ncolumns; i++) {
-			rres->col_names[i] = estrdup(colnames[i]);
+			colname = strchr(colnames[i], '.');
+			if (!colname++) {
+				colname = (char*)colnames[i];
+			}
+			if (SQLITE_G(assoc_case) == 1) {
+				php_sqlite_strtoupper(colname);
+			} else if (SQLITE_G(assoc_case) == 2) {
+				php_sqlite_strtolower(colname);
+			}
+			rres->col_names[i] = estrdup(colname);
 		}
 		if (!rres->buffered) {
 			/* non buffered mode - also fetch memory for on single row */
@@ -1079,11 +1088,6 @@ PHP_FUNCTION(sqlite_fetch_array)
 		}
 		if (mode & PHPSQLITE_ASSOC) {
 			/* Lets see if we need to change case of the assoc key */
-			if (SQLITE_G(assoc_case) == 1) {
-				php_sqlite_strtoupper((char*)colnames[j]);
-			} else if (SQLITE_G(assoc_case) == 2) {
-				php_sqlite_strtolower((char*)colnames[j]);
-			}
 			if (decoded == NULL) {
 				add_assoc_null(return_value, (char*)colnames[j]);
 			} else {
