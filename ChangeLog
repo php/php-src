@@ -1,3 +1,89 @@
+2004-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFH: Fixed possible crash in imap_mail_compose().
+
+    * ext/imap/php_imap.c:
+      Fixed possible crash in imap_mail_compose().
+
+2004-12-21  Edin Kadribasic  <edink@emini.dk>
+
+    * acinclude.m4
+      acinclude.m4:
+      MFB: Avoid autoheader warning
+
+    * (PHP_4_3)
+      acinclude.m4:
+      Avoid autoheader warning
+
+2004-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Added missing bug fix news.
+
+2004-12-21  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      fix the overloading fix and #31106
+
+2004-12-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      ext/sybase/php_sybase_db.c:
+      MFH: - Fixed bug #28248 (Can not compile --with-sybase and freetds)
+
+    * ext/sybase/php_sybase_db.c:
+      - Fixed bug #28248 (Can not compile --with-sybase and freetds)
+
+    * (PHP_4_3)
+      scripts/Makefile.frag
+      scripts/Makefile.frag:
+      MFH: - Fixed bug #28385 (some files in $(prefix)/lib/php/build/* installed
+      with wrong permissions)
+
+    * scripts/Makefile.frag:
+      - Fixed bug #28385 (files in $(prefix)/lib/php/build/* installed with wrong
+        permissions). (Jani, ramsy at ramix dot jp)
+
+2004-12-21  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * (PHP_5_0)
+      ext/standard/tests/math/bug27646.phpt
+      ext/standard/tests/math/bug27646.phpt:
+      MFH: Fix test so it doesn't hang make test on HP-UX.
+
+    * ext/standard/tests/math/bug27646.phpt:
+      Fix test so it doesn't hang make test on HP-UX.
+
+2004-12-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/cpdf/config.m4:
+      MFH: - Fixed bug #31145 (configure is using -lcpdf instead of -lcpdfm)
+
+    * (PHP_5_0)
+      ext/cpdf/config.m4:
+      MFH: - Fixed bug #31145 (configure is using -lcpdf instead of -lcpdfm)
+
+    * ext/cpdf/config.m4:
+      - Fixed bug #31145 (configure is using -lcpdf instead of -lcpdfm)
+
+    * (PHP_4_3)
+      configure.in
+      configure.in
+      Zend/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      MFH: - Use correct header files (in c99 compliant way). uint32_t is
+      preferred.
+
+    * configure.in
+      ZendEngine2/zend_strtod.c:
+      - Use correct header files (in c99 compliant way). uint32_t is preferred.
+
 2004-12-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * acinclude.m4
