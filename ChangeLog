@@ -1,3 +1,25 @@
+2000-06-02  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - Update NEWS so that this is documented
+
+2000-06-02  Zeev Suraski  <zeev@php.net>
+
+    * main.c
+      php.h: Use the new error code
+
+    * ext/standard/math.c: Small optimization
+
+2000-06-02  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: -
+
+2000-06-02  Andi Gutmans  <andi@php.net>
+
+    * configure.in:
+    - Make TSRM always compile into PHP. We can now move virtual_cwd over here.
+    - We might not want to compile TSRM.c in case we are on a platform which
+    - doesn't support threads. Sascha? What do you think?
+
 2000-06-01  Charles Hagenbuch  <chagenbu@wso.williams.edu>
 
     * ext/imap/config.m4:
