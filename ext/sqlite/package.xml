@@ -42,7 +42,7 @@
 
 <release>
 <state>stable</state>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <date>2004-01-17</date>
 <notes>
 Upgraded libsqlite to version 2.9.11
