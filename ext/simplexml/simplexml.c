@@ -243,6 +243,9 @@ static zval * sxe_property_read(zval *object, zval *member, zend_bool silent TSR
  */
 static zval * sxe_dimension_read(zval *object, zval *offset TSRMLS_DC)
 {
+	if (Z_TYPE_P(offset) == IS_LONG && Z_LVAL_P(offset) == 0) {
+		return object;
+	}
 	return sxe_prop_dim_read(object, offset, 0, 1, 0 TSRMLS_CC);
 }
 /* }}} */
