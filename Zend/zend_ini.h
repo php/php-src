@@ -139,9 +139,6 @@ ZEND_API ZEND_INI_DISP(display_link_numbers);
 #define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), sizeof(name), displayer)
 #define REGISTER_INI_BOOLEAN(name) REGISTER_INI_DISPLAYER(name, zend_ini_boolean_displayer_cb)
 
-zval *cfg_get_entry(char *name, uint name_length);
-
-
 /* Standard message handlers */
 ZEND_API ZEND_INI_MH(OnUpdateBool);
 ZEND_API ZEND_INI_MH(OnUpdateInt);

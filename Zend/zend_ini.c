@@ -130,7 +130,7 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 {
 	zend_ini_entry *p = ini_entry;
 	zend_ini_entry *hashed_ini_entry;
-	zval *default_value;
+	zval default_value;
 
 	while (p->name) {
 		p->module_number = module_number;
@@ -138,11 +138,11 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 			zend_unregister_ini_entries(module_number);
 			return FAILURE;
 		}
-		if ((default_value=cfg_get_entry(p->name, p->name_length))) {
+		if ((zend_get_configuration_directive(p->name, p->name_length, &default_value))) {
 			if (!hashed_ini_entry->on_modify
-				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value->value.str.val, default_value->value.str.len, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, ZEND_INI_STAGE_STARTUP)==SUCCESS) {
-				hashed_ini_entry->value = default_value->value.str.val;
-				hashed_ini_entry->value_length = default_value->value.str.len;
+				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value.value.str.val, default_value.value.str.len, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, ZEND_INI_STAGE_STARTUP)==SUCCESS) {
+				hashed_ini_entry->value = default_value.value.str.val;
+				hashed_ini_entry->value_length = default_value.value.str.len;
 			}
 		} else {
 			if (hashed_ini_entry->on_modify) {
