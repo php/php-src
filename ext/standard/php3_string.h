@@ -40,11 +40,8 @@
 extern char *strtok_string;
 #endif
 
-PHP_FUNCTION(strlen);
-PHP_FUNCTION(strcmp);
 PHP_FUNCTION(strspn);
 PHP_FUNCTION(strcspn);
-PHP_FUNCTION(strcasecmp);
 PHP_FUNCTION(str_replace);
 PHP_FUNCTION(chop);
 PHP_FUNCTION(trim);
