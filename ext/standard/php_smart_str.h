@@ -84,7 +84,7 @@ static inline char *smart_str_print_unsigned(char *buf, unsigned long num)
 	
 	*p = '\0';
 	do {
-		*--p = (num % 10) + '0';
+		*--p = (char)(num % 10) + '0';
 		num /= 10;
 	} while (num > 0);
 
