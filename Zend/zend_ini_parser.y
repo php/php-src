@@ -261,11 +261,11 @@ var_string_list:
 	|	var_string_list TC_ENCAPSULATED_STRING { zend_ini_add_string(&$$, &$1, &$2); }
 	|	var_string_list constant_string { zend_ini_add_string(&$$, &$1, &$2); }
 	|	/* empty */ { zend_ini_init_string(&$$); }
-
+;
 
 cfg_var_ref:
 		TC_DOLLAR_CURLY TC_STRING '}' { zend_ini_get_var(&$$, &$2); }
-
+;
 
 expr:
 		constant_string			{ $$ = $1; }
