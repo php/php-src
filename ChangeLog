@@ -1,3 +1,69 @@
+2000-09-04  Zeev Suraski  <zeev@zend.com>
+
+    * main/rfc1867.c: Protect arrays as well.
+
+2000-09-04  Sterling Hughes  <stirling@bestweb.net>
+
+    * php.ini-dist
+      php.ini-optimized: Add the session.use_trans_sid option to php.ini file.
+
+    * ext/standard/basic_functions.h
+      ext/standard/output.c
+      ext/standard/basic_functions.c:
+    Add a php.ini option session.use_trans_sid to enable/disable trans-sid. 
+
+2000-09-04  Zeev Suraski  <zeev@zend.com>
+
+    * main/rfc1867.c: Prevent exploit in [tmp_name] as well
+
+    * main/rfc1867.c: Fix the logic.  Tested.
+
+2000-09-04  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    - remove a memory leak warning and fix a crash when tempnam()
+      failed for some reason (danny).
+
+2000-09-04  Zeev Suraski  <zeev@zend.com>
+
+    * main/rfc1867.c: 3rd time's a charm
+
+    * sapi/isapi/php4isapi.dsp: Fix ISAPI compilation
+
+    * main/rfc1867.c: Fix the fix
+
+    * NEWS: update NEWS
+
+    * main/php_globals.h
+      main/rfc1867.c:
+    Fix the file upload security problem with no side effects (untested)
+
+2000-09-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/network.c:
+    Include "php.h", otherwise we don't have access to the PHP and autoconf
+    macros.
+
+2000-09-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/rfc1867.c: Quick-fix for the file upload security alert
+
+2000-09-04  Andi Gutmans  <andi@zend.com>
+
+    * main/SAPI.c: - This shouldn't have been commited.
+      There are quite a few modules which are using VIRTUAL_DIR. I don't think
+      this should be happening.
+
+    * main/SAPI.c
+      main/php.h: - Found my bug and managed to move the V_* macros to TSRM
+
+2000-09-04  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c:
+    Convert 2 internal functions to follow naming conventions.
+    Revert small patch made earlier
+
 2000-09-03  Jani Taskinen  <sniper@iki.fi>
 
     * genfiles: oops.
