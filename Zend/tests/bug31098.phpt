@@ -46,7 +46,7 @@ ok
 ok
 ok
 
-Notice: Trying to get property of non-object in /home/dmitry/php/php5.0/Zend/tests/bug31098.php on line 24
+Notice: Trying to get property of non-object in %sbug31098.php on line %d
 ok
 ok
 ok
