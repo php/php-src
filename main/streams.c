@@ -1773,7 +1773,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 #ifdef PHP_WIN32
 			/* skip the sanity check; fstat doesn't appear to work on
 			 * UNC paths */
-			is_unc = (filename[0] == '\\' && filename[1] == '\\');
+			is_unc = IS_UNC_PATH(filename, strlen(filename));
 #endif
 			if (!is_unc) {
 				goto err;
