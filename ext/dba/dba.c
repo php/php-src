@@ -330,16 +330,16 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 /* }}} */
 /* }}} */
 
-/* {{{ proto int dba_popen(string path, string mode, string handlername[, ...])
-   opens path using the specified handler in mode persistently */
+/* {{{ proto int dba_popen(string path, string mode, string handlername [, ...])
+   Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
 	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto int dba_open(string path, string mode, string handlername[, ...])
-   opens path using the specified handler in mode*/
+/* {{{ proto int dba_open(string path, string mode, string handlername [, ...])
+   Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
 	php_dba_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -347,7 +347,7 @@ PHP_FUNCTION(dba_open)
 /* }}} */
 
 /* {{{ proto void dba_close(int handle)
-   closes database */
+   Closes database */
 PHP_FUNCTION(dba_close)
 {
 	DBA_ID_GET1;	
@@ -357,7 +357,7 @@ PHP_FUNCTION(dba_close)
 /* }}} */
 
 /* {{{ proto bool dba_exists(string key, int handle)
-   checks, if the specified key exists */
+   Checks, if the specified key exists */
 PHP_FUNCTION(dba_exists)
 {
 	DBA_ID_GET2;
@@ -370,7 +370,7 @@ PHP_FUNCTION(dba_exists)
 /* }}} */
 
 /* {{{ proto string dba_fetch(string key, int handle)
-   fetches the data associated with key */
+   Fetches the data associated with key */
 PHP_FUNCTION(dba_fetch)
 {
 	char *val;
@@ -385,7 +385,7 @@ PHP_FUNCTION(dba_fetch)
 /* }}} */
 
 /* {{{ proto string dba_firstkey(int handle)
-   resets the internal key pointer and returns the first key */
+   Resets the internal key pointer and returns the first key */
 PHP_FUNCTION(dba_firstkey)
 {
 	char *fkey;
@@ -400,7 +400,7 @@ PHP_FUNCTION(dba_firstkey)
 /* }}} */
 
 /* {{{ proto string dba_nextkey(int handle)
-   returns the next key */
+   Returns the next key */
 PHP_FUNCTION(dba_nextkey)
 {
 	char *nkey;
@@ -415,7 +415,7 @@ PHP_FUNCTION(dba_nextkey)
 /* }}} */
 
 /* {{{ proto bool dba_delete(string key, int handle)
-   deletes the entry associated with key */
+   Deletes the entry associated with key */
 PHP_FUNCTION(dba_delete)
 {
 	DBA_ID_GET2;
@@ -429,7 +429,7 @@ PHP_FUNCTION(dba_delete)
 /* }}} */
 
 /* {{{ proto bool dba_insert(string key, string value, int handle)
-   inserts value as key, returns false, if key exists already */
+   Inserts value as key, returns false, if key exists already */
 PHP_FUNCTION(dba_insert)
 {
 	php_dba_update(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -437,7 +437,7 @@ PHP_FUNCTION(dba_insert)
 /* }}} */
 
 /* {{{ proto bool dba_replace(string key, string value, int handle)
-   inserts value as key, replaces key, if key exists already */
+   Inserts value as key, replaces key, if key exists already */
 PHP_FUNCTION(dba_replace)
 {
 	php_dba_update(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -445,7 +445,7 @@ PHP_FUNCTION(dba_replace)
 /* }}} */
 
 /* {{{ proto bool dba_optimize(int handle)
-   optimizes (e.g. clean up, vacuum) database */
+   Optimizes (e.g. clean up, vacuum) database */
 PHP_FUNCTION(dba_optimize)
 {
 	DBA_ID_GET1;
@@ -459,7 +459,7 @@ PHP_FUNCTION(dba_optimize)
 /* }}} */
 
 /* {{{ proto bool dba_sync(int handle)
-   synchronizes database */
+   Synchronizes database */
 PHP_FUNCTION(dba_sync)
 {
 	DBA_ID_GET1;
