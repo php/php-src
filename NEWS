@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? Aug 2003, Version 4.3.3RC3
 - Fixed bug #22154 (Possible crash when memory_limit is reached and
   output buffering in addition to session.use_trans_sid is used). (Ilia)
+- Fixed bug #24883 (variables_order and gpc_order being ignored). (Ilia)
 
 30 Jul 2003, Version 4.3.3RC2
 - Improved the NSAPI SAPI module (Uwe Schindler)
