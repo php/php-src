@@ -1,7 +1,7 @@
 <?php # vim:ft=php
 
 require_once('pdo.inc');
-	
+
 set_sql('create', 'CREATE TABLE test(id int PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
 set_sql('insert1', 'INSERT INTO test VALUES(1, \'A\', \'Group1\')'); 
 set_sql('insert2', 'INSERT INTO test VALUES(2, \'B\', \'Group1\')'); 
@@ -24,7 +24,7 @@ class Test1
 		$this->id = $id;
 		$this->val = $val;
 	}
-	
+
 	static public function factory($id, $val)
 	{
 		echo __METHOD__ . "($id,$val)\n";
@@ -52,7 +52,7 @@ class DerivedStatement extends PDOStatement
 		$this->name = $name;
 		echo __METHOD__ . "($name)\n";
 	}
-	
+
 	function retrieve($id, $val) {
 		echo __METHOD__ . "($id,$val)\n";
 		return array($id=>$val);
