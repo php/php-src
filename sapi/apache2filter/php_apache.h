@@ -44,7 +44,6 @@ typedef struct php_struct {
 	int request_processed;
 } php_struct;
 
-int php_apache_register_module(void);
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf);
 void *create_php_config(apr_pool_t *p, char *dummy);
 void apply_config(void *);
