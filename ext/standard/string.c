@@ -4643,7 +4643,7 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
-/* {{{ proto mixed str_word_count(string str, [int format])
+/* {{{ proto mixed str_word_count(string str, [int format [, string charlist]])
    	Counts the number of words inside a string. If format of 1 is specified,
    	then the function will return an array containing all the words
    	found inside the string. If format of 2 is specified, then the function
@@ -4656,38 +4656,44 @@ PHP_FUNCTION(str_shuffle)
 */
 PHP_FUNCTION(str_word_count)
 {
-	zval **str, **o_format;
+	zval **str, **o_format, **also_alphas;
 	char *s, *e, *p, *buf;
+	char *p_also = NULL;
 	int word_count = 0;
 	int type = 0;
 	int n_args = ZEND_NUM_ARGS();
 
-	if (n_args > 2 || n_args < 1 || zend_get_parameters_ex(n_args, &str, &o_format) == FAILURE) {
+	if (n_args > 3 || n_args < 1 || zend_get_parameters_ex(n_args, &str, &o_format, &also_alphas) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	
-	if (n_args == 2) {
-		convert_to_long_ex(o_format);
-		type = Z_LVAL_PP(o_format);
+	switch (n_args) {
+		case 3:
+			convert_to_string_ex(also_alphas);
+			if (Z_STRLEN_PP(also_alphas)) {
+				p_also = Z_STRVAL_PP(also_alphas);
+			}
+		case 2:
+   			convert_to_long_ex(o_format);
+			type = Z_LVAL_PP(o_format);
 		
-		if (type != 1 && type != 2) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The specified format parameter, '%d' is invalid.", type);
-			RETURN_FALSE;
-		}
+			if (type != 1 && type !=2 && !(n_args >= 3 && type == 0)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The specified format parameter, '%d' is invalid.", type);
+				RETURN_FALSE;
+			} 
+			if (type) {
+				array_init(return_value);
+			}
 	}
 
 	convert_to_string_ex(str);
-	
 	e = Z_STRLEN_PP(str) + (p = s = Z_STRVAL_PP(str));
-		
-	if (type) {
-		array_init(return_value);
-	}
-	
 	while (p < e) {
 		if (isalpha(*p++)) {
-			s = p - 1;
-			while (isalpha(*p) || *p == '\'' || (*p == '-' && isalpha(*(p+1)))) {
+			s = p - 1; /* the word starts at s */
+			while (isalpha(*p) || *p == '\'' || (*p == '-' && isalpha(*(p+1)))
+					|| (p_also && php_memnstr(p_also, p, 1, p_also + Z_STRLEN_PP(also_alphas)))
+					)
+			{
 				p++;
 			}
 			
