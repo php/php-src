@@ -1,3 +1,29 @@
+2003-06-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.c
+      zend_execute.h:
+      Leftover.
+
+2003-06-02  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_object_handlers.c
+      zend_opcode.c:
+      MEGA-patch: namespaces are R.I.P.
+
 2003-06-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/zend2.php:

@@ -1,3 +1,61 @@
+2003-06-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.c:
+      Fix for 64 bit platforms (by Joe Orton)
+
+2003-06-02  Holger Zimmermann  <zimpel@t-online.de>
+
+    * (PHP_4_3)
+      sapi/pi3web/pi3web_sapi.c
+      sapi/pi3web/pi3web_sapi.h:
+      Merged with main trunk 1.53/1.5.
+
+2003-06-02  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.c:
+      Add "seekable" flag to stream_get_meta_data()
+
+2003-06-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/tokenizer/tokenizer.c:
+      Leftover.
+
+2003-06-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/ircg/ircg.c:
+      Add +l/+i error codes as trivial errors
+
+2003-06-02  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c
+      ext/interbase/tests/003.phpt:
+      MFH: Fixed numeric/decimal +/-(x,y) +/-(x,0)
+      for all platforms
+
+    * ext/interbase/interbase.c
+      ext/interbase/tests/003.phpt:
+      Fixed numeric/decimal +/-(x,y) +/-(x,0)
+      for all platforms
+
+2003-06-02  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/pi3web/pi3web_sapi.c:
+      No C++ comments in C code
+
+    * ext/mysqli/mysqli_api.c:
+      - No c++ comments in c code..
+
+2003-06-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/classes/bug23951.phpt:
+      
+      - Add test case for bug #23951
+
 2003-06-01  Uwe Schindler  <uwe@thetaphi.de>
 
     * sapi/nsapi/config.m4:
