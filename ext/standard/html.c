@@ -595,12 +595,12 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 
 /* {{{ php_unescape_html_entities
  */
-PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset)
+PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
 {
 	int retlen;
 	int j, k;
 	char *replaced, *ret;
-	enum entity_charset charset = determine_charset(hint_charset);
+	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
 	unsigned char replacement[15];
 	
 	ret = estrdup(old);
@@ -663,11 +663,11 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 
 /* {{{ php_escape_html_entities
  */
-PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset)
+PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
 {
 	int i, j, maxlen, len;
 	char *replaced;
-	enum entity_charset charset = determine_charset(hint_charset);
+	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
 	int matches_map;
 
 	maxlen = 2 * oldlen;
@@ -766,7 +766,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		return;
 	}
 
-	replaced = php_escape_html_entities(str, str_len, &len, all, quote_style, hint_charset);
+	replaced = php_escape_html_entities(str, str_len, &len, all, quote_style, hint_charset TSRMLS_CC);
 	RETVAL_STRINGL(replaced, len, 0);
 }
 /* }}} */
@@ -807,7 +807,7 @@ PHP_FUNCTION(html_entity_decode)
 		return;
 	}
 
-	replaced = php_unescape_html_entities(str, str_len, &len, 1, quote_style, hint_charset);
+	replaced = php_unescape_html_entities(str, str_len, &len, 1, quote_style, hint_charset TSRMLS_CC);
 	RETVAL_STRINGL(replaced, len, 0);
 }
 /* }}} */
@@ -828,7 +828,7 @@ PHP_FUNCTION(get_html_translation_table)
 	int which = HTML_SPECIALCHARS, quote_style = ENT_COMPAT;
 	int i, j;
 	char ind[2];
-	enum entity_charset charset = determine_charset(NULL);
+	enum entity_charset charset = determine_charset(NULL TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &which, &quote_style) == FAILURE) {
 		return;
