@@ -384,7 +384,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		zend_ptr_stack_push(&EG(argument_stack), param);
 	}
 
-	zend_ptr_stack_push(&EG(argument_stack), (void *) (long) param_count);
+	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) param_count, NULL);
 
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
@@ -564,10 +564,10 @@ void execute_new_code(CLS_D)
  */
 ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
 {
-	void **p = EG(argument_stack).top_element-1;
+	void **p = EG(argument_stack).top_element-2;
 	int delete_count = (ulong) *p;
 
-	EG(argument_stack).top -= (delete_count+1);
+	EG(argument_stack).top -= (delete_count+2);
 	while (--delete_count>=0) {
 		zval_ptr_dtor((zval **) --p);
 	}
@@ -578,7 +578,7 @@ ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
 
 ZEND_API int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC)
 {
-	void **p = EG(argument_stack).top_element-1;
+	void **p = EG(argument_stack).top_element-2;
 	int arg_count = (ulong) *p;
 
 	if (requested_arg>arg_count) {

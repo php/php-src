@@ -1574,7 +1574,7 @@ do_fcall_common:
 					zval **original_return_value;
 					int return_value_used = RETURN_VALUE_USED(opline);
 
-					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
+					zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) opline->extended_value, NULL);
 
 					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;
 
