@@ -24,7 +24,8 @@
 ;     you can use $_REQUEST["foo"] (includes any variable that arrives through the
 ;     request, namely, POST, GET and cookie variables), or use one of the specific
 ;     $_GET["foo"], $_POST["foo"], $_COOKIE["foo"] or $_FILES["foo"], depending
-;     on where the input originates.
+;     on where the input originates.  Also, you can look at the
+;     import_request_variables() function.
 ;     Note that register_globals is going to be depracated (i.e., turned off by
 ;     default) in the next version of PHP, because it often leads to security bugs.
 ;     Read http://php.net/manual/en/security.registerglobals.php for further
