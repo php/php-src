@@ -1,3 +1,15 @@
+2004-02-08  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      Fix write-mode of overloaded objects when using array dimensions
+
+2004-02-08  Andi Gutmans  <andi@zend.com>
+
+    * zend_objects_API.c:
+      - Check if free_storage exists
+
 2004-02-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES:

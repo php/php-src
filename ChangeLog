@@ -1,3 +1,27 @@
+2004-02-08  Andi Gutmans  <andi@zend.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES
+      README.Zeus
+      README.input_filter
+      makerpm:
+      - Change from PHP5 -> PHP 5
+
+2004-02-08  Zeev Suraski  <zeev@zend.com>
+
+    * ext/com_dotnet/com_handlers.c
+      ext/simplexml/simplexml.c:
+      Update to new API
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      Fix write-mode of overloaded objects when using array dimensions
+
+2004-02-08  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_objects_API.c:
+      - Check if free_storage exists
+
 2004-02-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ext/gmp/gmp.c:
