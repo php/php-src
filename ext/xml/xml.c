@@ -35,6 +35,8 @@
 
 #if HAVE_XML
 
+int xml_parser_inited = 0;
+
 #include "php_xml.h"
 # include "ext/standard/head.h"
 
@@ -250,7 +252,10 @@ PHP_MSHUTDOWN_FUNCTION(xml)
 PHP_RSHUTDOWN_FUNCTION(xml)
 {
 #ifdef LIBXML_EXPAT_COMPAT
-	xmlCleanupParser();
+	if (xml_parser_inited) {
+		xmlCleanupParser();
+		xml_parser_inited = 0;
+	}
 #endif	
 	return SUCCESS;
 }
