@@ -615,7 +615,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 
 PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
 {
-	char *cr, *lf, *eol;
+	char *cr, *lf, *eol = NULL;
 	size_t toread = 0, didread = 0, justread = 0, avail = 0;
 	char *readptr;
 	
