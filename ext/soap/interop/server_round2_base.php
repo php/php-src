@@ -19,7 +19,6 @@
 //
 // $Id$
 //
-require_once 'SOAP/Server.php';
 
 function generateFault($short, $long)
 {
@@ -42,7 +41,7 @@ function hex2bin($data)
 
 class SOAP_Interop_Base {
     var $method_namespace = 'http://soapinterop.org/';
-    
+
     function SOAP_Interop_Base() {
 	#if ($server) {
 	#    $server->addToMap("echoString",array("string"),array("string"));
@@ -64,121 +63,83 @@ class SOAP_Interop_Base {
 
     function echoString($inputString)
     {
-	return new SOAP_Value('outputString','string',$inputString);
+      return $inputString;
     }
 
     function echoStringArray($inputStringArray)
     {
-	$ra = array();
-	if ($inputStringArray) {
-	foreach($inputStringArray as $s) {
-	    $ra[] = new SOAP_Value('item','string',$s);
-	}
-	}
-	return new SOAP_Value('outputStringArray',NULL,$ra);
+      return $inputStringArray;
     }
 
 
     function echoInteger($inputInteger)
     {
-	return new SOAP_Value('outputInteger','int',(integer)$inputInteger);
+      return $inputInteger;
     }
 
     function echoIntegerArray($inputIntegerArray)
     {
-	$ra = array();
-	if ($inputIntegerArray) {
-	foreach ($inputIntegerArray as $i) {
-	    $ra[] = new SOAP_Value('item','int',$i);
-	}
-	}
-	return new SOAP_Value('outputIntArray',NULL,$ra);
+      return $inputIntegerArray;
     }
 
     function echoFloat($inputFloat)
     {
-	return new SOAP_Value('outputFloat','float',(FLOAT)$inputFloat);
+      return $inputFloat;
     }
 
     function echoFloatArray($inputFloatArray)
     {
-	$ra = array();
-	if ($inputFloatArray) {
-	foreach($inputFloatArray as $float) {
-	    $ra[] = new SOAP_Value('item','float',(FLOAT)$float);
-	}
-	}
-	return new SOAP_Value('outputFloatArray',NULL,$ra);
+      return $inputFloatArray;
     }
 
     function echoStruct($inputStruct)
     {
-	return new SOAP_Value('return','{http://soapinterop.org/xsd}SOAPStruct',
-			      array(
-				  new SOAP_Value('varInt','int',$inputStruct['varInt']),
-				  new SOAP_Value('varFloat','float',$inputStruct['varFloat']),
-				  new SOAP_Value('varString','string',$inputStruct['varString'])
-				   ));
+      return $inputStruct;
     }
 
     function echoStructArray($inputStructArray)
     {
-	$ra = array();
-	if ($inputStructArray) {
-	foreach($inputStructArray as $struct) {
-	    $ra[] = new SOAP_Value('item','{http://soapinterop.org/xsd}SOAPStruct',
-			      array(
-				  new SOAP_Value('varInt','int',$struct['varInt']),
-				  new SOAP_Value('varFloat','float',$struct['varFloat']),
-				  new SOAP_Value('varString','string',$struct['varString'])
-				   ));
-	}
-	}
-	return $ra;
+      return $inputStructArray;
     }
 
     function echoVoid()
     {
-	return NULL;
+      return NULL;
     }
 
     function echoBase64($b_encoded)
     {
-	return new SOAP_Value('return','base64Binary',base64_encode(base64_decode($b_encoded)));
+      return $b_encoded;
     }
 
     function echoDate($timeInstant)
     {
-	$dt = new SOAP_Type_dateTime($timeInstant);
-	if ($dt->toUnixtime() != -1) {
-	    $value = $dt->toSOAP();
-	    return new SOAP_Value('return','dateTime',$value);
-	} else {
-	    return new SOAP_Fault("Value $timeInstant is not a dateTime value");
-	}
+      return $timeInstant;
     }
 
     function echoHexBinary($hb)
     {
-	return new SOAP_Value('return','hexBinary',bin2hex(hex2bin($hb)));
+      return $hb;
     }
 
     function echoDecimal($dec)
     {
-	return new SOAP_Value('return','decimal',(FLOAT)$dec);
+      return $dec;
     }
 
     function echoBoolean($boolean)
     {
-	return new SOAP_Value('return','boolean',$boolean);
+      return $boolean;
     }
-    
+
     function echoMimeAttachment($stuff)
     {
         return new SOAP_Attachment('return','application/octet-stream',NULL,$stuff);
     }
 }
 
-$base = new SOAP_Interop_Base();
-$server->addObjectMap($base);
+$server = new SoapServer("http://test-uri");
+$server->bind("http://".$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF'])."/interop.wsdl.php");
+$server->setClass("SOAP_Interop_Base");
+$server->handle();
 ?>

@@ -21,6 +21,12 @@
       <email>shane@caraveo.com</email>
       <role>lead</role>
     </maintainer>
+    <maintainer>
+      <user>dmitry</user>
+      <name>Dmitry Stogov</name>
+      <email>dmitry@zend.com</email>
+      <role>lead</role>
+    </maintainer>
   </maintainers>
   <license>PHP</license>
   <release>
@@ -56,4 +62,3 @@
     </dir>
   </filelist>
 </package>
-

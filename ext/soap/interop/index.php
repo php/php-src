@@ -7,10 +7,9 @@
 <?php
 // get our endpoint
 $server = $_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
-$endpoint = 'http://'.$server."/soap_interop/server_round2.php";
-$base = 'http://'.$server."/soap_interop/interop.wsdl";
-$groupb = 'http://'.$server."/soap_interop/interopB.wsdl";
-$groupc = 'http://'.$server."/soap_interop/echoheadersvc.wsdl";
+$base = 'http://'.$server.dirname($_SERVER['PHP_SELF'])."/interop.wsdl.php";
+$groupb = 'http://'.$server.dirname($_SERVER['PHP_SELF'])."/interopB.wsdl.php";
+$groupc = 'http://'.$server.dirname($_SERVER['PHP_SELF'])."/echoheadersvc.wsdl.php";
 ?>
 <body>
 
@@ -21,7 +20,6 @@ at <a href="http://www.whitemesa.com/interop.htm">White Mesa</a>.</p>
 <p>Currently Round 2 base, Group B and Group C interop tests are enabled.</p>
 
 <h3>Round 2 Interop Server</h3>
-Endpoint: <?php echo $endpoint; ?><br>
 Base WSDL: <a href="<?php echo $base ?>"><?php echo $base ?></a><br>
 Group B WSDL: <a href="<?php echo $groupb ?>"><?php echo $groupb ?></a><br>
 Group C WSDL: <a href="<?php echo $groupc ?>"><?php echo $groupc ?></a><br>

@@ -7,6 +7,8 @@
 
 #define XSD_NAMESPACE "http://www.w3.org/2001/XMLSchema"
 #define XSD_NS_PREFIX "xsd"
+#define XSI_NAMESPACE "http://www.w3.org/2001/XMLSchema-instance"
+#define XSI_NS_PREFIX "xsi"
 #define XSD_STRING 101
 #define XSD_STRING_STRING "string"
 #define XSD_BOOLEAN 103
@@ -173,6 +175,7 @@ zval *to_zval_null(encodeType type, xmlNodePtr data);
 zval *guess_zval_convert(encodeType type, xmlNodePtr data);
 
 xmlNodePtr to_xml_long(encodeType type, zval *data, int style);
+xmlNodePtr to_xml_double(encodeType type, zval *data, int style);
 xmlNodePtr to_xml_bool(encodeType type, zval *data, int style);
 
 /* String encode */
@@ -214,8 +217,8 @@ smart_str *encode_new_ns();
 void set_ns_and_type(xmlNodePtr node, encodeType type);
 void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type);
 encodePtr get_conversion_ex(HashTable *encoding, int encode);
-encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, char *type);
-encodePtr get_conversion_from_href_type_ex(HashTable *encoding, char *type, int len);
+encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, const char *type);
+encodePtr get_conversion_from_href_type_ex(HashTable *encoding, const char *type, int len);
 
 int is_map(zval *array);
 void get_array_type(zval *array, smart_str *out_type TSRMLS_DC);
@@ -227,14 +230,14 @@ extern encode defaultEncoding[];
 #define FIND_XML_NULL(xml,zval) \
 	{ \
 		xmlAttrPtr null; \
-		if(!xml || !xml->children) \
+		if(!xml) \
 		{ \
 			ZVAL_NULL(zval); \
 			return zval; \
 		} \
 		if(xml->properties) \
 		{ \
-			null = get_attribute(xml->properties, "null"); \
+			null = get_attribute(xml->properties, "nil"); \
 			if(null) \
 			{ \
 				ZVAL_NULL(zval); \
@@ -243,11 +246,13 @@ extern encode defaultEncoding[];
 		} \
 	}
 
-#define FIND_ZVAL_NULL(zval, xml) \
+#define FIND_ZVAL_NULL(zval, xml, style) \
 { \
-	if(!zval) \
+	if(!zval || Z_TYPE_P(zval) == IS_NULL) \
 	{ \
-		xmlSetProp(xml, "xsi:null", "1"); \
+	  if (style == SOAP_ENCODED) {\
+			xmlSetProp(xml, "xsi:nil", "1"); \
+		}\
 		return xml; \
 	} \
 }

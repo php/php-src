@@ -100,7 +100,7 @@ struct _sdlType
 {
 	char *name;
 	char *namens;
-	int nullable;
+	int nillable;
 	int min_occurs;
 	int max_occurs;
 	HashTable *elements;				/* array of sdlTypePtr */
@@ -145,11 +145,11 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent);
 int load_sdl(char *struri, int force_load);
 int load_ms_sdl(char *struri, int force_load);
 
-encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, char *type);
-encodePtr get_encoder(sdlPtr sdl, char *ns, char *type);
-encodePtr get_encoder_ex(sdlPtr sdl, char *nscat);
-encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type);
-encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type);
+encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type);
+encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);
+encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat);
+encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type);
+encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type);
 
 sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type);
 sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
@@ -163,5 +163,3 @@ xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style);
 void delete_type(void *type);
 void delete_attribute(void *attribute);
 #endif
-
-

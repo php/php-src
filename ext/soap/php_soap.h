@@ -141,6 +141,8 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *services;
 	HashTable *overrides;
 	int cur_uniq_ns;
+	sdlPtr sdl;
+	zend_bool use_soap_error_handler;
 ZEND_END_MODULE_GLOBALS(soap)
 #ifdef PHP_WIN32
 #define PHP_SOAP_API __declspec(dllexport)
@@ -159,73 +161,6 @@ ZEND_EXTERN_MODULE_GLOBALS(soap);
 # define SOAP_GLOBAL(v) (soap_globals.v)
 #endif
 
-#define PHP_SOAP_SERVER_CLASSNAME "soapserver"
-#define PHP_SOAP_CLASSNAME "soapobject"
-#define PHP_SOAP_VAR_CLASSNAME "soapvar"
-#define PHP_SOAP_FAULT_CLASSNAME "soapfault"
-#define PHP_SOAP_PARAM_CLASSNAME "soapparam"
-
-
-extern zend_module_entry soap_module_entry;
-#define  soap_module_ptr & soap_module_entry
-
-PHP_MINIT_FUNCTION(soap);
-PHP_MSHUTDOWN_FUNCTION(soap);
-PHP_MINFO_FUNCTION(soap);
-
-/*
-  Registry Functions
-  TODO: this!
-*/
-PHP_FUNCTION(load_sdl);
-PHP_FUNCTION(unload_sdl);
-PHP_FUNCTION(unload_all_sdls);
-PHP_FUNCTION(get_available_sdls);
-PHP_FUNCTION(get_available_functions);
-PHP_FUNCTION(get_function_parameters);
-PHP_FUNCTION(soap_encode_to_xml);
-PHP_FUNCTION(soap_encode_to_zval);
-
-
-/* Server Functions */
-PHP_FUNCTION(soapserver);
-PHP_FUNCTION(setclass);
-PHP_FUNCTION(addfunction);
-PHP_FUNCTION(getfunctions);
-PHP_FUNCTION(handle);
-PHP_FUNCTION(setpersistence);
-PHP_FUNCTION(bind);
-#ifdef HAVE_PHP_DOMXML
-PHP_FUNCTION(map);
-#endif
-
-/* Client Functions */
-PHP_FUNCTION(soapobject);
-PHP_FUNCTION(__use);
-PHP_FUNCTION(__style);
-PHP_FUNCTION(__isfault);
-PHP_FUNCTION(__getfault);
-PHP_FUNCTION(__call);
-PHP_FUNCTION(__parse);
-PHP_FUNCTION(__generate);
-PHP_FUNCTION(__trace);
-PHP_FUNCTION(__getfunctions);
-PHP_FUNCTION(__gettypes);
-PHP_FUNCTION(__getlastresponse);
-PHP_FUNCTION(__getlastrequest);
-PHP_FUNCTION(__headerclass);
-PHP_FUNCTION(__headerfunction);
-
-/* SoapVar Functions */
-PHP_FUNCTION(soapvar);
-
-/* SoapFault Functions */
-PHP_FUNCTION(soapfault);
-
-/* SoapParam Functions */
-PHP_FUNCTION(soapparam);
-
-
 #define DECLARE_TRACE(file) \
 	FILE *trace_fp; \
 	char *trace_file = file;
@@ -235,13 +170,13 @@ PHP_FUNCTION(soapparam);
 	fwrite(place, strlen(place), 1, trace_fp); \
 	fclose(trace_fp);
 
-extern zend_class_entry soap_var_class_entry;
+extern zend_class_entry* soap_var_class_entry;
 
 PS_SERIALIZER_FUNCS(soap);
 
 void clear_soap_fault(zval *obj);
 void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
-void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
+zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 
 sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
 sdlFunctionPtr get_function(sdlBindingPtr sdl, char *function_name);
@@ -256,17 +191,18 @@ void delete_http_socket(void *handle);
 void delete_url(void *handle);
 void delete_mapping(void *data);
 
+#ifndef ZEND_ENGINE_2
 void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 zval soap_get_property_handler(zend_property_reference *property_reference);
 int soap_set_property_handler(zend_property_reference *property_reference, zval *value);
 void soap_destructor(void *jobject);
+#endif
 
 void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[] TSRMLS_DC);
 xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret TSRMLS_DC);
 xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count TSRMLS_DC);
 xmlNodePtr seralize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style TSRMLS_DC);
 xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style TSRMLS_DC);
-zval *desearlize_zval(sdlPtr sdl, xmlNodePtr data, sdlParamPtr param TSRMLS_DC);
 
 void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 #ifndef ZEND_ENGINE_2
@@ -278,10 +214,11 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 #define HTTP_RAW_POST_DATA "HTTP_RAW_POST_DATA"
 
 #define SOAP_SERVER_BEGIN_CODE() \
-	zend_error_cb = soap_error_handler
+	zend_bool old_handler = SOAP_GLOBAL(use_soap_error_handler);\
+	SOAP_GLOBAL(use_soap_error_handler) = 1;
 
 #define SOAP_SERVER_END_CODE() \
-	zend_error_cb = old_handler
+	SOAP_GLOBAL(use_soap_error_handler) = old_handler
 
 
 #define FOREACHATTRNODE(n,c,i) \

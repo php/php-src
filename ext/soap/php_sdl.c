@@ -1,6 +1,6 @@
 #include "php_soap.h"
 
-encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, char *type)
+encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type)
 {
 	encodePtr enc = NULL;
 	TSRMLS_FETCH();
@@ -14,7 +14,7 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, char *type)
 	return enc;
 }
 
-encodePtr get_encoder(sdlPtr sdl, char *ns, char *type)
+encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
@@ -29,7 +29,7 @@ encodePtr get_encoder(sdlPtr sdl, char *ns, char *type)
 	return enc;
 }
 
-encodePtr get_encoder_ex(sdlPtr sdl, char *nscat)
+encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat)
 {
 	encodePtr enc = NULL;
 	TSRMLS_FETCH();
@@ -42,7 +42,7 @@ encodePtr get_encoder_ex(sdlPtr sdl, char *nscat)
 	return enc;
 }
 
-encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type)
+encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	smart_str nscat = {0};
@@ -63,7 +63,7 @@ encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *ty
 	return enc;
 }
 
-encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type)
+encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
 {
 	smart_str nscat = {0};
 	encodePtr enc;
@@ -95,32 +95,26 @@ encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, char *ns, char *type)
 zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 {
 	sdlTypePtr type;
-	zval *ret;
 
 	type = enc.sdl_type;
-
-	if(type->encode)
-	{
+	if(type->encode) {
 		if(type->encode->details.type == IS_ARRAY ||
-			type->encode->details.type == SOAP_ENC_ARRAY)
-			ret = to_zval_array(enc, data);
-		else
-			ret = master_to_zval(type->encode, data);
-	} 
-	else if(zend_hash_num_elements(type->elements) == 1)
-	{
-		sdlTypePtr *t;
-		zend_hash_internal_pointer_reset(type->elements);
-		if(zend_hash_get_current_data(type->elements, (void **)&t) != FAILURE &&
-			(*t)->max_occurs != 1)
-			ret = to_zval_array(enc, data);
-	}
-	if(ret)
-		return ret;
-	else
+			type->encode->details.type == SOAP_ENC_ARRAY) {
+			return to_zval_array(enc, data);
+		} else {
+			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
+				return master_to_zval(type->encode, data);
+			} else {
+				return master_to_zval(get_conversion(UNKNOWN_TYPE), data);
+			}
+		}
+	} else if (type->elements) {
+		return to_zval_object(enc, data);
+	}	else {
 		return guess_zval_convert(enc, data);
+	}
 }
- 
+
 xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 {
 	sdlTypePtr type;
@@ -128,33 +122,63 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 
 	type = enc.sdl_type;
 
-	if(type->encode)
-	{
+	if(type->encode) {
 		if(type->encode->details.type == IS_ARRAY ||
-			type->encode->details.type == SOAP_ENC_ARRAY)
+			type->encode->details.type == SOAP_ENC_ARRAY) {
 			ret = sdl_to_xml_array(type, data, style);
-		else
-			ret = master_to_xml(type->encode, data, style);
-	}
-	else if(type->elements)
-	{
-		sdlTypePtr *t;
-		if(zend_hash_num_elements(type->elements) == 1)
-		{
-			zend_hash_internal_pointer_reset(type->elements);
-			if(zend_hash_get_current_data(type->elements, (void **)&t) != FAILURE &&
-				(*t)->max_occurs != 1)
-				ret = sdl_to_xml_array((*t), data, style);
+		} else {
+			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
+				ret = master_to_xml(type->encode, data, style);
+			} else {
+				ret = master_to_xml(get_conversion(UNKNOWN_TYPE), data, style);
+			}
 		}
-		if(!ret)
-			ret = sdl_to_xml_object(type, data, style);
 	}
-	else
+	else if(type->elements) {
+		ret = sdl_to_xml_object(type, data, style);
+	}	else {
 		ret = guess_xml_convert(enc, data, style);
-
-	/*
+	}
 	set_ns_and_type(ret, enc);
-	*/
+	return ret;
+}
+
+zval* sdl_to_zval_object(sdlTypePtr type, xmlNodePtr data)
+{
+	zval *ret;
+	xmlNodePtr trav;
+
+	TSRMLS_FETCH();
+
+	MAKE_STD_ZVAL(ret);
+	FIND_XML_NULL(data, ret);
+
+	if (data) {
+		object_init(ret);
+		trav = data->children;
+
+		while (trav != NULL) {
+			if(trav->type == XML_ELEMENT_NODE)
+			{
+				sdlTypePtr *element;
+				encodePtr enc = NULL;
+				zval *tmpVal;
+				if (trav->name != NULL &&
+				    zend_hash_find(type->elements, (char*)trav->name, strlen(trav->name)+1,(void **)&element) == SUCCESS) {
+				  enc = (*element)->encode;
+				}
+				if (enc == NULL) {
+					enc = get_conversion(UNKNOWN_TYPE);
+				}
+				tmpVal = master_to_zval(enc, trav);
+#ifdef ZEND_ENGINE_2
+				tmpVal->refcount--;
+#endif
+				add_property_zval(ret, (char *)trav->name, tmpVal);
+			}
+		  trav = trav->next;
+		}
+	}
 	return ret;
 }
 
@@ -164,6 +188,7 @@ xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style)
 	sdlTypePtr *t, tmp;
 
 	ret = xmlNewNode(NULL, "BOGUS");
+	FIND_ZVAL_NULL(data, ret, style);
 
 	zend_hash_internal_pointer_reset(type->elements);
 	while(zend_hash_get_current_data(type->elements, (void **)&t) != FAILURE)
@@ -172,14 +197,20 @@ xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style)
  		tmp = *t;
 		if(zend_hash_find(Z_OBJPROP_P(data), tmp->name, strlen(tmp->name) + 1, (void **)&prop) == FAILURE)
 		{
-			if(tmp->nullable == FALSE)
+			if(tmp->nillable == FALSE)
 				php_error(E_ERROR, "Error encoding object to xml missing property \"%s\"", tmp->name);
 		}
 		else
 		{
 			xmlNodePtr newNode;
-
-			newNode = master_to_xml(tmp->encode, (*prop), style);
+			encodePtr enc;
+			
+			if (tmp->encode) {
+				enc = tmp->encode;
+			} else {			  
+				enc = get_conversion((*prop)->type);
+			}
+			newNode = master_to_xml(enc, (*prop), style);
 			xmlNodeSetName(newNode, tmp->name);
 			xmlAddChild(ret, newNode);
 		}
@@ -189,16 +220,52 @@ xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style)
 	return ret;
 }
 
+static void add_xml_array_elements(xmlNodePtr xmlParam,
+                                   sdlTypePtr type,
+                                   encodePtr enc,
+                                   int dimension ,
+                                   int* dims,
+                                   zval* data,
+                                   int style) 
+{
+	int j;
+
+	if (Z_TYPE_P(data) == IS_ARRAY) {
+	 	zend_hash_internal_pointer_reset(data->value.ht);
+		for (j=0; j<dims[0]; j++) {
+ 			zval **zdata;
+ 			zend_hash_get_current_data(data->value.ht, (void **)&zdata);
+ 			if (dimension == 1) {
+	 			xmlNodePtr xparam;
+ 				if (enc == NULL) {
+ 					xparam = master_to_xml(get_conversion((*zdata)->type), (*zdata), style);
+ 				} else {
+ 					xparam = master_to_xml(enc, (*zdata), style);
+	 			}
+
+ 				xmlNodeSetName(xparam, type->name);
+ 				xmlAddChild(xmlParam, xparam);
+ 			} else {
+ 			  add_xml_array_elements(xmlParam, type, enc, dimension-1, dims+1, *zdata, style);
+ 			}
+ 			zend_hash_move_forward(data->value.ht);
+ 		}
+ 	}
+}
+
 xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 {
 	smart_str array_type_and_size = {0}, array_type = {0};
 	int i;
+	int dimension = 1;
+	int* dims;
 	xmlNodePtr xmlParam;
+	encodePtr enc = NULL;
 	TSRMLS_FETCH();
 
 	xmlParam = xmlNewNode(NULL,"BOGUS");
 
-	FIND_ZVAL_NULL(data, xmlParam);
+	FIND_ZVAL_NULL(data, xmlParam, style);
 
 	if(Z_TYPE_P(data) == IS_ARRAY)
 	{
@@ -207,96 +274,99 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 
 		if(style == SOAP_ENCODED)
 		{
+			xmlAttrPtr *wsdl;
 			if(type->attributes &&
-				zend_hash_find(type->attributes, SOAP_ENC_NAMESPACE":arrayType", 
-					sizeof(SOAP_ENC_NAMESPACE":arrayType"), 
-					(void **)&arrayType) == SUCCESS)
-			{
-				xmlAttrPtr *wsdl;
-				if(zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&wsdl) == SUCCESS)
-				{
-					char *ns = NULL, *value;
-					smart_str *prefix = encode_new_ns();
-					smart_str smart_ns = {0};
-					xmlNsPtr myNs;
+				zend_hash_find(type->attributes, SOAP_ENC_NAMESPACE":arrayType",
+					sizeof(SOAP_ENC_NAMESPACE":arrayType"),
+					(void **)&arrayType) == SUCCESS &&
+				zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&wsdl) == SUCCESS) {
+				
+				char *ns = NULL, *value, *end;
+				smart_str *prefix = encode_new_ns();
+				smart_str smart_ns = {0};
+				xmlNsPtr myNs;
+				zval** el;
 
-					parse_namespace((*wsdl)->children->content, &value, &ns);
-					myNs = xmlSearchNs((*wsdl)->doc, (*wsdl)->parent, ns);
+				parse_namespace((*wsdl)->children->content, &value, &ns);
+				myNs = xmlSearchNs((*wsdl)->doc, (*wsdl)->parent, ns);
 
-					smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
-					smart_str_appendl(&smart_ns, prefix->c, prefix->len);
-					smart_str_0(&smart_ns);
-
-					xmlSetProp(xmlParam, smart_ns.c, myNs->href);
-					smart_str_appends(&array_type_and_size, prefix->c);
-					smart_str_appendc(&array_type_and_size, ':');
-					smart_str_appends(&array_type_and_size, value);
-					smart_str_0(&array_type_and_size);
-
-					smart_str_free(prefix);
-					efree(prefix);
+				end = strrchr(value,'[');
+				if (end) {
+				  *end = '\0';
+				  end++;
+				  while (*end != ']' && *end != '\0') {
+				    if (*end == ',') {
+				      dimension++;
+				    }
+				    end++;
+				  }
 				}
-			}
-			else
-			{
+				if(myNs != NULL) {
+					enc = get_encoder(SOAP_GLOBAL(sdl), myNs->href, value);
+				}
+
+				dims = emalloc(sizeof(int)*dimension);
+				dims[0] = i;
+				el = &data;
+				for (i = 1; i < dimension; i++) {
+					if (el != NULL && Z_TYPE_PP(el) == IS_ARRAY && Z_ARRVAL_PP(el)->pListHead) {
+						el = (zval**)Z_ARRVAL_PP(el)->pListHead->pData;
+						if (Z_TYPE_PP(el) == IS_ARRAY) {
+							dims[i] = zend_hash_num_elements(Z_ARRVAL_PP(el));
+						} else {
+						  dims[i] = 0;
+						}
+					}
+				}
+
+				smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
+				smart_str_appendl(&smart_ns, prefix->c, prefix->len);
+				smart_str_0(&smart_ns);
+				xmlSetProp(xmlParam, smart_ns.c, myNs->href);
+				smart_str_free(&smart_ns);
+
+				smart_str_appends(&array_type_and_size, prefix->c);
+				smart_str_appendc(&array_type_and_size, ':');
+				smart_str_appends(&array_type_and_size, value);
+				smart_str_appendc(&array_type_and_size, '[');
+				smart_str_append_long(&array_type_and_size, dims[0]);
+				for (i=1; i<dimension; i++) {
+					smart_str_appendc(&array_type_and_size, ',');
+					smart_str_append_long(&array_type_and_size, dims[i]);
+				}
+				smart_str_appendc(&array_type_and_size, ']');
+				smart_str_0(&array_type_and_size);
+
+				smart_str_free(prefix);
+				efree(prefix);
+				efree(value);
+				if (ns) efree(ns);
+			} else {
 				smart_str_appends(&array_type_and_size, type->name);
 				smart_str_appendc(&array_type_and_size, '[');
 				smart_str_append_long(&array_type_and_size, i);
 				smart_str_appendc(&array_type_and_size, ']');
 				smart_str_0(&array_type_and_size);
+				dims = emalloc(sizeof(int)*dimension);
+				dims[0] = i;
 			}
 			xmlSetProp(xmlParam, SOAP_ENC_NS_PREFIX":arrayType", array_type_and_size.c);
 
 			smart_str_free(&array_type_and_size);
 			smart_str_free(&array_type);
-		}
+		} else {
+			dims = emalloc(sizeof(int)*dimension);
+			dims[0] = i;
+		}		  
 
-		zend_hash_internal_pointer_reset(data->value.ht);
-		for(;i > 0;i--)
-		{
-			xmlNodePtr xparam;
-			zval **zdata;
-			encodePtr enc;
-			zend_hash_get_current_data(data->value.ht, (void **)&zdata);
-
-			enc = get_conversion((*zdata)->type);
-			xparam = master_to_xml(enc, (*zdata), style);
-
-			xmlNodeSetName(xparam, type->name);
-			xmlAddChild(xmlParam, xparam);
-			zend_hash_move_forward(data->value.ht);
-		}
+		add_xml_array_elements(xmlParam, type, enc, dimension, dims, data, style);
+		efree(dims);
 	}
 
 	if(style == SOAP_ENCODED)
 		set_ns_and_type_ex(xmlParam, type->namens, type->name);
 	return xmlParam;
 }
-
-zval *sdl_convert_zval(encodeType enc, xmlNodePtr data)
-{
-	zval *ret;
-	MAKE_STD_ZVAL(ret);
-	ZVAL_STRING(ret, "blah", 1);
-
-	return ret;
-}
-
-/*
-zval *sdl_convert_zval(xmlNodePtr data, sdlTypePtr type)
-{
-	found = zend_hash_find(EG(class_table), class_name, class_name_len + 1, (void **)&ce);
-	if(found != FAILURE)
-	{
-		service->type = SOAP_CLASS;
-		service->soap_class.ce = ce;
-	}
-}
-// this function will take a zval and apply all attributes of sldTypePtr
-zval *sdl_convert_zval_to_zval(zval *data, sdlTypePtr type)
-{
-}
-*/
 
 sdlPtr get_sdl(char *uri)
 {
@@ -323,7 +393,7 @@ sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type)
 	if (sdl == NULL) {
 		return NULL;
 	}
-	
+
 	for(zend_hash_internal_pointer_reset(sdl->bindings);
 		zend_hash_get_current_data(sdl->bindings, (void **) &binding) == SUCCESS;
 		zend_hash_move_forward(sdl->bindings))
@@ -568,7 +638,7 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 		}
 		ENDFOREACH(trav);
 	}
-	
+
 	trav = definitions->children;
 	FOREACHNODE(trav, "import", import)
 	{
@@ -629,7 +699,7 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 
 			if(!binding)
 				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No binding element with name \"%s\"", ctype);
-			
+
 			if(ns) efree(ns); if(ctype) efree(ctype);
 
 			if(tmpbinding->bindingType == BINDING_SOAP)
@@ -637,7 +707,7 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 				sdlSoapBindingPtr soapBinding;
 				xmlNodePtr soapBindingNode;
 				xmlAttrPtr tmp;
-				
+
 				soapBinding = malloc(sizeof(sdlSoapBinding));
 				memset(soapBinding, 0, sizeof(sdlSoapBinding));
 
@@ -655,7 +725,7 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 					{
 						if(strcmp(tmp->children->content, WSDL_HTTP_TRANSPORT))
 							php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: PHP-SOAP doesn't support transport '%s'", tmp->children->content);
-							
+
 						soapBinding->transport = strdup(tmp->children->content);
 					}
 					tmpbinding->bindingAttributes = (void *)soapBinding;
@@ -824,7 +894,7 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 
 
 					function->responseName = malloc(strlen(function->functionName) + strlen("Response") + 1);
-					sprintf(function->responseName, "%sResponse\0", function->functionName);
+					sprintf(function->responseName, "%sResponse", function->functionName);
 					function->responseParameters = malloc(sizeof(HashTable));
 					zend_hash_init(function->responseParameters, 0, NULL, delete_paramater, 1);
 

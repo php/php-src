@@ -18,12 +18,10 @@
 //
 // $Id$
 //
-require_once 'SOAP/Server.php';
-require_once 'SOAP/Value.php';
 
 class SOAP_Interop_GroupC {
     var $method_namespace = 'http://soapinterop.org/echoheader/';
-    
+
     function echoMeStringRequest($string)
     {
 	return new SOAP_Value('{'.$this->method_namespace.'}echoMeStringResponse','string',$string);
@@ -35,7 +33,7 @@ class SOAP_Interop_GroupC {
     }
 }
 
-$groupc = new SOAP_Interop_GroupC();
-$server->addObjectMap($groupc);
-
+$server = new SoapServer("http://test-uri");
+$server->setClass("SOAP_Interop_GroupC");
+$server->handle();
 ?>

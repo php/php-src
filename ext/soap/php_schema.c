@@ -1,4 +1,27 @@
 #include "php_soap.h"
+
+static int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTypePtr cur_type);
+static int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlTypePtr cur_type);
+static int schema_sequence(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type);
+static int schema_list(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypePtr cur_type);
+static int schema_union(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr cur_type);
+static int schema_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, sdlTypePtr cur_type);
+static int schema_restriction_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type);
+static int schema_restriction_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type);
+static int schema_restriction_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type);
+static int schema_extension(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
+static int schema_all(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
+static int schema_group(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type);
+static int schema_choice(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type);
+static int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type);
+static int schema_attribute(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type);
+static int schema_any(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
+
+static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr);
+static void delete_restriction_var_int(void *rvi);
+
+static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr);
+static void delete_schema_restriction_var_char(void *srvc);
 /*
 2.6.1 xsi:type
 2.6.2 xsi:nil
@@ -70,7 +93,7 @@ int load_schema(sdlPtr *sdl,xmlNodePtr schema)
   Content: (annotation?, (restriction | list | union))
 </simpleType>
 */
-int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTypePtr cur_type)
+static int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTypePtr cur_type)
 {
 	xmlNodePtr content;
 	xmlAttrPtr name, ns;
@@ -147,7 +170,7 @@ int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTyp
   Content: (annotation?, (simpleType?))
 </list>
 */
-int schema_list(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypePtr cur_type)
+static int schema_list(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypePtr cur_type)
 {
 	return TRUE;
 }
@@ -160,7 +183,7 @@ int schema_list(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypePtr cur
   Content: (annotation?, (simpleType*))
 </union>
 */
-int schema_union(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr cur_type)
+static int schema_union(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr cur_type)
 {
 	return TRUE;
 }
@@ -172,7 +195,7 @@ int schema_union(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr c
   Content: (annotation?, (restriction | extension))
 </simpleContent>
 */
-int schema_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, sdlTypePtr cur_type)
+static int schema_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, sdlTypePtr cur_type)
 {
 	xmlNodePtr content;
 
@@ -203,7 +226,7 @@ int schema_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, s
   Content: (annotation?, (simpleType?, (minExclusive | minInclusive | maxExclusive | maxInclusive | totalDigits | fractionDigits | length | minLength | maxLength | enumeration | whiteSpace | pattern)*)?, ((attribute | attributeGroup)*, anyAttribute?))
 </restriction>
 */
-int schema_restriction_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type)
+static int schema_restriction_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type)
 {
 	xmlNodePtr content, trav;
 	xmlAttrPtr base;
@@ -230,8 +253,7 @@ int schema_restriction_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restTy
 	}
 
 	trav = restType->children;
-	do
-	{
+	while (trav != NULL) {
 		if(trav->type == XML_ELEMENT_NODE)
 		{
 			if(!strcmp(trav->name, "minExclusive"))
@@ -269,7 +291,8 @@ int schema_restriction_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restTy
 				zend_hash_next_index_insert(cur_type->restrictions->enumeration, &enumval, sizeof(sdlRestrictionCharPtr), NULL);
 			}
 		}
-	}while(trav = trav->next);
+	  trav = trav->next;
+	}
 
 	return TRUE;
 }
@@ -282,7 +305,7 @@ int schema_restriction_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restTy
   Content: (annotation?, (group | all | choice | sequence)?, ((attribute | attributeGroup)*, anyAttribute?))
 </restriction>
 */
-int schema_restriction_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type)
+static int schema_restriction_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type)
 {
 	xmlAttrPtr base;
 	xmlNodePtr trav;
@@ -304,8 +327,7 @@ int schema_restriction_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr re
 	}
 
 	trav = restType->children;
-	do
-	{
+	while (trav != NULL) {
 		if(trav->type == XML_ELEMENT_NODE)
 		{
 			if(!strcmp(trav->name, "group"))
@@ -333,7 +355,8 @@ int schema_restriction_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr re
 				schema_attribute(sdl, tsn, trav, cur_type);
 			}
 		}
-	}while(trav = trav->next);
+	  trav = trav->next;
+	}
 
 	return TRUE;
 }
@@ -346,7 +369,7 @@ int schema_restriction_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr re
   Content: (annotation?, (simpleType?, (minExclusive | minInclusive | maxExclusive | maxInclusive | totalDigits | fractionDigits | length | minLength | maxLength | enumeration | whiteSpace | pattern)*))
 </restriction>
 */
-int schema_restriction_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type)
+static int schema_restriction_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type)
 {
 	xmlNodePtr content, trav;
 	xmlAttrPtr base;
@@ -366,8 +389,7 @@ int schema_restriction_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr res
 		cur_type->restrictions = malloc(sizeof(sdlRestrictions));
 
 	trav = restType->children;
-	do
-	{
+	while (trav != NULL) {
 		if(trav->type == XML_ELEMENT_NODE)
 		{
 			if(!strcmp(trav->name, "minExclusive"))
@@ -405,12 +427,13 @@ int schema_restriction_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr res
 				zend_hash_next_index_insert(cur_type->restrictions->enumeration, &enumval, sizeof(sdlRestrictionCharPtr), NULL);
 			}
 		}
-	}while(trav = trav->next);
+	  trav = trav->next;
+	}
 
 	return TRUE;
 }
 
-int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr)
+static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr)
 {
 	xmlAttrPtr fixed, value, id;
 
@@ -439,7 +462,7 @@ int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr)
 	return TRUE;
 }
 
-void delete_restriction_var_int(void *rvi)
+static void delete_restriction_var_int(void *rvi)
 {
 	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
 	if(ptr->id);
@@ -447,7 +470,7 @@ void delete_restriction_var_int(void *rvi)
 	free(ptr);
 }
 
-int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr)
+static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr)
 {
 	xmlAttrPtr fixed, value, id;
 
@@ -475,7 +498,7 @@ int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr)
 	return TRUE;
 }
 
-void delete_schema_restriction_var_char(void *srvc)
+static void delete_schema_restriction_var_char(void *srvc)
 {
 	sdlRestrictionCharPtr ptr = *((sdlRestrictionCharPtr*)srvc);
 	if(ptr->id)
@@ -502,7 +525,7 @@ From complexContent:
   Content: (annotation?, ((group | all | choice | sequence)?, ((attribute | attributeGroup)*, anyAttribute?)))
 </extension>
 */
-int schema_extension(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type)
+static int schema_extension(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type)
 {
 	xmlNodePtr content;
 	xmlAttrPtr base;
@@ -548,7 +571,7 @@ int schema_extension(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr
   Content: (annotation?, element*)
 </all>
 */
-int schema_all(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur_type)
+static int schema_all(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur_type)
 {
 	xmlNodePtr element, trav;
 
@@ -567,7 +590,7 @@ int schema_all(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur_type)
   Content: (annotation?, (all | choice | sequence))
 </group>
 */
-int schema_group(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type)
+static int schema_group(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type)
 {
 	xmlNodePtr content;
 	xmlAttrPtr name;
@@ -609,7 +632,7 @@ int schema_group(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr c
   Content: (annotation?, (element | group | choice | sequence | any)*)
 </choice>
 */
-int schema_choice(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type)
+static int schema_choice(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav, data;
 
@@ -664,13 +687,12 @@ int schema_choice(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr
   Content: (annotation?, (element | group | choice | sequence | any)*)
 </sequence>
 */
-int schema_sequence(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type)
+static int schema_sequence(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 
 	trav = seqType->children;
-	do
-	{
+	while (trav != NULL) {
 		if(trav->type == XML_ELEMENT_NODE)
 		{
 			if(!strcmp(trav->name, "element"))
@@ -694,13 +716,13 @@ int schema_sequence(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr 
 				schema_any(sdl, tsn, trav, cur_type);
 			}
 		}
+		trav = trav->next;
 	}
-	while(trav = trav->next);
 
 	return TRUE;
 }
 
-int schema_any(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type)
+static int schema_any(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type)
 {
 	return TRUE;
 }
@@ -713,7 +735,7 @@ int schema_any(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_t
   Content: (annotation?, (restriction | extension))
 </complexContent>
 */
-int schema_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compCont, sdlTypePtr cur_type)
+static int schema_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compCont, sdlTypePtr cur_type)
 {
 	xmlNodePtr content;
 
@@ -739,7 +761,7 @@ int schema_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compCont, sdlT
   Content: (annotation?, (simpleContent | complexContent | ((group | all | choice | sequence)?, ((attribute | attributeGroup)*, anyAttribute?))))
 </complexType>
 */
-int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlTypePtr cur_type)
+static int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlTypePtr cur_type)
 {
 	xmlNodePtr content;
 	xmlAttrPtr attrs, name, ns;
@@ -848,7 +870,7 @@ int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlType
   Content: (annotation?, ((simpleType | complexType)?, (unique | key | keyref)*))
 </element>
 */
-int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type)
+static int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type)
 {
 	xmlNodePtr content;
 	xmlAttrPtr attrs, curattr, name, ns;
@@ -873,7 +895,7 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 		memset(newType, 0, sizeof(sdlType));
 		newType->name = strdup(name->children->content);
 		newType->namens = strdup(tsn->children->content);
-		newType->nullable = FALSE;
+		newType->nillable = FALSE;
 		newType->min_occurs = 1;
 		newType->max_occurs = 1;
 
@@ -898,7 +920,7 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 		smart_str_0(&key);
 		zend_hash_add(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 		cur_type = (*tmp);
-		create_encoder((*sdl), cur_type, ns->children->content, name->children->content);
+//		create_encoder((*sdl), cur_type, ns->children->content, name->children->content);
 		smart_str_free(&key);
 	}
 
@@ -922,12 +944,12 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 	{
 		if(!stricmp(curattr->children->content, "true") ||
 			!stricmp(curattr->children->content, "1"))
-			cur_type->nullable = TRUE;
+			cur_type->nillable = TRUE;
 		else
-			cur_type->nullable = FALSE;
+			cur_type->nillable = FALSE;
 	}
 	else
-		cur_type->nullable = FALSE;
+		cur_type->nillable = FALSE;
 
 	/* type = QName */
 	curattr = get_attribute(attrs, "type");
@@ -939,10 +961,10 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 		xmlNsPtr nsptr;
 
 		parse_namespace(curattr->children->content, &cptype, &str_ns);
-		if(str_ns)
+//		if(str_ns)
 			nsptr = xmlSearchNs(element->doc, element, str_ns);
-		else
-			nsptr = xmlSearchNsByHref(element->doc, element, ns->children->content);
+//		else
+//			nsptr = xmlSearchNsByHref(element->doc, element, ns->children->content);
 
 		cur_type->encode = get_create_encoder((*sdl), cur_type, (char *)nsptr->href, (char *)cptype);
 		if(str_ns) efree(str_ns);
@@ -977,7 +999,7 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
   Content: (annotation?, (simpleType?))
 </attribute>
 */
-int schema_attribute(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type)
+static int schema_attribute(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type)
 {
 	xmlAttrPtr attr;
 	sdlAttributePtr newAttr;
