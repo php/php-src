@@ -492,8 +492,15 @@ int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 {
 	php_core_globals *core_globals;
 	char *ini_path;
+	int threads=128; /* default for server */
 
-	tsrm_startup(1, 1, 0, NULL);
+	/* fetch max threads from NSAPI and initialize TSRM with it */
+#if defined(pool_maxthreads)
+	threads=pool_maxthreads;
+	if (threads<1) threads=128; /* default for server */
+#endif
+	tsrm_startup(threads, 1, 0, NULL);
+
 	core_globals = ts_resource(core_globals_id);
 
 	/* look if php_ini parameter is given to php4_init */
@@ -507,7 +514,7 @@ int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 
 	daemon_atrestart(&php4_close, NULL);
 
-	log_error(LOG_INFORM, "php4_init", sn, rq, "Initialized PHP Module");
+	log_error(LOG_INFORM, "php4_init", sn, rq, "Initialized PHP Module (%d threads exspected)", threads);
 	return REQ_PROCEED;
 }
 
