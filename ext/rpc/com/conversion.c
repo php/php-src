@@ -44,7 +44,6 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage);
 PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage);
 
 /* implementations */
-
 PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 {
 	OLECHAR *unicode_str;
@@ -242,6 +241,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 				struct tm *phptime;
 
 				phptime = gmtime(&(pval_arg->value.lval));
+				memset(&wintime, 0, sizeof(wintime));
 
 				wintime.wYear = phptime->tm_year + 1900;
 				wintime.wMonth = phptime->tm_mon + 1;
@@ -252,6 +252,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 
 				SystemTimeToVariantTime(&wintime, &V_DATE(var_arg));
 			}
+			break;
 
 		case VT_BSTR:
 			convert_to_string_ex(&pval_arg);
@@ -339,6 +340,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 				struct tm *phptime;
 
 				phptime = gmtime(&(pval_arg->value.lval));
+				memset(&wintime, 0, sizeof(wintime));
 
 				wintime.wYear   = phptime->tm_year + 1900;
 				wintime.wMonth  = phptime->tm_mon + 1;
@@ -349,6 +351,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 
 				SystemTimeToVariantTime(&wintime, var_arg->pdate);
 			}
+			break;
 
 		case VT_BSTR|VT_BYREF:
 			convert_to_string(pval_arg);
@@ -442,7 +445,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 			break;
 
 		default:
-			php_error(E_WARNING, "Type not supportet or not yet implemented.");
+			php_error(E_WARNING, "Type not supported or not yet implemented.");
 	}
 }
 
@@ -473,7 +476,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 		if (1 != (Dims = SafeArrayGetDim(array)))
 		{
 			php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
-			ZVAL_FALSE(pval_arg);
+			ZVAL_NULL(pval_arg);
 			return FAILURE;
 		}
         SafeArrayLock( array);
@@ -552,7 +555,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 	else switch(var_arg->vt & ~VT_BYREF)
 	{		
 		case VT_EMPTY:
-			pval_arg->type = IS_NULL;
+			ZVAL_NULL(pval_arg);
 			break;
 
 		case VT_UI1:
@@ -692,6 +695,8 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				{
 					VariantTimeToSystemTime(V_DATE(var_arg), &wintime);
 				}
+
+				memset(&phptime, 0, sizeof(phptime));
 
 				phptime.tm_year  = wintime.wYear - 1900;
 				phptime.tm_mon   = wintime.wMonth - 1;
