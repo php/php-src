@@ -239,7 +239,7 @@ inline double ulonglong2double(ulonglong value)
 #define HAVE_ALLOCA
 #define HAVE_STRPBRK
 #define HAVE_STRSTR
-#define HAVE_COMPRESS
+/* #define HAVE_COMPRESS     -- not with PHP, please */ 
 
 #ifdef NOT_USED
 #define HAVE_SNPRINTF		/* Gave link error */
@@ -273,6 +273,7 @@ inline double ulonglong2double(ulonglong value)
 #define FN_ROOTDIR	"\\"
 #define FN_NETWORK_DRIVES	/* Uses \\ to indicate network drives */
 #define FN_NO_CASE_SENCE	/* Files are not case-sensitive */
+#define FN_LOWER_CASE TRUE  /* Files are represented in lower case */
 #define MY_NFILE	1024
 
 #define DO_NOT_REMOVE_THREAD_WRAPPERS
