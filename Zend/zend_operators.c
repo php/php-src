@@ -1473,6 +1473,25 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 }
 
 
+ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length)
+{
+	int len;
+	int c1,c2;
+
+	len = MIN(length, MIN(len1, len2));
+
+	while (len--) {
+		c1 = tolower(*s1++);
+		c2 = tolower(*s2++);
+		if (c1 != c2) {
+			return c1 - c2;
+		}
+	}
+
+	return len1 - len2;
+}
+
+
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2)
 {
 	return zend_binary_strcmp(s1->value.str.val, s1->value.str.len, s2->value.str.val, s2->value.str.len);
@@ -1487,6 +1506,12 @@ ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3)
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2)
 {
 	return zend_binary_strcasecmp(s1->value.str.val, s1->value.str.len, s2->value.str.val, s2->value.str.len);
+}
+
+
+ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3)
+{
+	return zend_binary_strncasecmp(s1->value.str.val, s1->value.str.len, s2->value.str.val, s2->value.str.len, s3->value.lval);
 }
 
 
