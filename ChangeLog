@@ -1,3 +1,97 @@
+2002-08-15  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * sapi/apache/mod_php4.c:
+    Fix a NASTY multithreading bug with in the Apache module
+
+2002-08-15  edink  <edink@pb1.pair.com>
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/sapi_apache2.c:
+    MFH (make apache2filter work with Apache 2.0.40)
+
+2002-08-15  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * ext/session/php_session.h:
+    Make unset($_SESSION['foo']) actually remove the variable from the session,
+    if register_globals is off.
+
+    * ext/fribidi/fribidi.c
+      ext/fribidi/php_fribidi.h: Update email address
+
+2002-08-15  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/session/session.c: Correcting some english in the comment...
+
+    * NEWS: marking the fix for Bug #18401 in NEWS
+
+    * ext/standard/array.c:
+    Fix for bug #18401, makes shuffle() properly generate all possibilities.
+    Patch provided by Adam Trachtenberg <adam@trachtenberg.com>
+
+2002-08-15  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.h:
+    include libxml/xinclude.h to make some compilers happy
+
+2002-08-15  Martin Jansen  <mj@pb1.pair.com>
+
+    * pear/PEAR/Common.php: * Fix bug #18918.
+    * Add some PHPdoc comments.
+
+2002-08-15  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/java/Makefile.frag:
+    A fix suggested by chregu (who doesn't have karma) to re-enable older java
+    JDKs to work.
+
+2002-08-15  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c: proto fixes
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+     - Added DomNode->set_namespace(uri[,prefix]) (chregu)
+    - Added third optional parameter (prefix) to DomDocument->create_element_ns()
+    - generate prefix from random number, if not provided.
+
+2002-08-15  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: MFH
+
+    * NEWS: be more verbose
+
+2002-08-15  alan_k  <alan_k@pb1.pair.com>
+
+    * ext/dio/dio.c: changed default stop bits to a valid value
+
+    * ext/dio/dio.c: changed default stop bits
+
+    * ext/dio/dio.c
+      ext/dio/php_dio.h: adding dio_tcsetattr and ASYNC support
+
+2002-08-15  yohgaki  <yohgaki@pb1.pair.com>
+
+    * NEWS: Add 4.2.2 news just in case it's released.
+
+    * NEWS: news for disabling trans-sid by default.
+    but no entry for depreciation of --enable-trans-sid :(
+    (from 4.2.0)
+
+2002-08-15  kalowsky  <kalowsky@pb1.pair.com>
+
+    * main/win95nt.h: silencing some windows build warnings
+
+2002-08-15  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * ext/vpopmail/php_vpopmail.c:
+    coming to think of it, it shouldn't be necessary at all (thanks Jani :)
+
+    * ext/vpopmail/php_vpopmail.c: Fix build
+
+2002-08-15  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: hot, damn hot.
+
 2002-08-14  helly  <helly@pb1.pair.com>
 
     * ext/standard/info.c: do not include "php_have_iconv.h"
