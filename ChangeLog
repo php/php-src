@@ -1,3 +1,126 @@
+2003-12-13  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/userspace.c:
+      Export STREAM_MKDIR_RECURSIVE constant
+
+2003-12-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      Zend/zend_operators.c:
+      MFZE2(r-1.172): Fixes for POSIX compliancy.
+
+    * ZendEngine2/zend_operators.c:
+      Fixes for POSIX compliancy.
+
+2003-12-13  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ext/standard/exec.c
+      ext/standard/tests/file/bug26615.phpt:
+      - Fixed bug #26615 (patch by runekl at opoint dot com)
+
+2003-12-13  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * cvsclean.bat:
+      Add shortcut for 'nmake /I clean'.
+
+2003-12-13  Sara Golemon  <php@alphaweb.net>
+
+    * main/php_streams.h
+      main/streams/streams.c:
+      Fix Win32 Build.  mkdir/rmdir are macros
+
+2003-12-13  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      minor fixes for embedded
+
+2003-12-13  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/xml/tests/bug26614.phpt:
+      test case for BC bug 26614
+
+2003-12-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS
+      ext/dba/dba.c:
+      Revert: need a PHP4.3 solution.
+
+    * NEWS
+      ext/dba/dba.c:
+      - Fixed bug #26304 (Unexpected data loss when opening dba file).
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/php_mysqli.h:
+      ZTS fixes
+
+2003-12-13  Andrey Hristov  <php@hristov.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      add an example for illegal string offset. the example is stolen from Marcus
+      and Markus should be now satisfied :). Currently this code segfaults with
+      PHP_4_3.
+
+2003-12-13  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      fix for bug #26595 "`XSLT_NAMESPACE' undeclared"
+
+2003-12-13  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      removed old profiler stuff for embedded server
+
+2003-12-13  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/bz2/bz2.c
+      ext/curl/streams.c
+      ext/standard/file.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/php_streams.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c
+      main/streams/userspace.c:
+      Route mkdir()/rmdir() via wrapper ops.
+      Move current rmdir()/rmdir() code to plain_wrappers.c
+      Implement mkdir()/rmdir() in ftp:// wrapper
+
+2003-12-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      More fgetcsv() fixes.
+
+2003-12-13  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_profiler.c
+      ext/mysqli/mysqli_profiler.h
+      ext/mysqli/mysqli_profiler_com.c
+      ext/mysqli/mysqli_profiler_com.h:
+      removed profiler stuff
+
+    * ext/mysqli/config.m4
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/mysqli_report.h
+      ext/mysqli/php_mysqli.h:
+      removed profiler
+      added mysqli_report
+      	- better support for errors
+      	- support for no_index_used and bad_index_used
+      typos and prototype fixes
+
 2003-12-11  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/PEAR/Dependency.php
