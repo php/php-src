@@ -582,6 +582,9 @@ msql.max_links = -1
 ; Allow or prevent persistent links.
 pgsql.allow_persistent = On
 
+; Detect broken persistent links always with pg_pconnect(). Need a little overhead.
+pgsql.auto_reset_persistent = Off 
+
 ; Maximum number of persistent links.  -1 means no limit.
 pgsql.max_persistent = -1
 
