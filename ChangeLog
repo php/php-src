@@ -1,3 +1,34 @@
+2002-09-10  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/array.c
+      ext/standard/php_array.h: Fixed ZTS build.
+
+2002-09-10  Andrei Zmievski  <andrei@php.net>
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:
+    - Fixed array_merge_recursive() to avoid problems with merging cyclical
+      arrays (bug #16064). 
+
+    * NEWS: *** empty log message ***
+
+2002-09-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sysvmsg/sysvmsg.c
+      ext/sysvmsg/config.m4:
+    Patch for BSD-ish systems from Melvyn Sopacua <msopacua@idg.nl>,
+    slightly modified.
+
+2002-09-10  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/url.c:
+    php_url_parse() replaces controlchars with '_' now. This stops fopen wrapper
+    CR/LF injection issues.
+
+2002-09-10  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: Fix crash bug and memory leak in vectors
+
 2002-09-09  Jani Taskinen  <sniper@iki.fi>
 
     * NEWS: consistent..
