@@ -53,16 +53,10 @@ PHP_RINIT_FUNCTION(simplexml);
 PHP_MINFO_FUNCTION(simplexml);
 
 typedef struct {
-	xmlHashTablePtr nsmap;
-	int refcount;
-} simplexml_nsmap;
-
-typedef struct {
 	zend_object zo;
 	php_libxml_node_ptr *node;
 	php_libxml_ref_obj *document;
 	HashTable *properties;
-	simplexml_nsmap *nsmapptr;
 	xmlXPathContextPtr xpath;
 	struct {
 		php_libxml_node_ptr   *node;

@@ -66,8 +66,6 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, int
 	subnode = php_sxe_object_new(sxe->zo.ce TSRMLS_CC);
 	subnode->document = sxe->document;
 	subnode->document->refcount++;
-	subnode->nsmapptr = sxe->nsmapptr;
-	subnode->nsmapptr->refcount++;
 	subnode->iter.type = itertype;
 	if (name) {
 		subnode->iter.name = xmlStrdup(name);
@@ -126,28 +124,12 @@ static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node TS
 static inline int 
 match_ns(php_sxe_object *sxe, xmlNodePtr node, xmlChar *name)
 {
-	xmlChar *prefix = NULL;
-	
-	if (name == NULL && (node->ns == NULL || node->ns->prefix == NULL)) {
+	if (name == NULL && (node->ns == NULL || node->ns->href == NULL)) {
 		return 1;
 	}
-
-	if (node->ns) {
-		if (sxe->nsmapptr) {
-			prefix = xmlHashLookup(sxe->nsmapptr->nsmap, node->ns->href);
-		}
-		
-		if (prefix == NULL) {
-			prefix = (xmlChar*)node->ns->prefix;
-		}
-
-		if (prefix == NULL) {
-			return 0;
-		}
-
-		if (!xmlStrcmp(prefix, name)) {
-			return 1;
-		}
+	
+	if (!xmlStrcmp(node->ns->href, name)) {
+		return 1;
 	}	
 
 	return 0;
@@ -597,8 +579,6 @@ _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval **value TSRM
 		subnode = php_sxe_object_new(sxe_ref->zo.ce TSRMLS_CC);
 		subnode->document = sxe_ref->document;
 		subnode->document->refcount++;
-		subnode->nsmapptr = sxe_ref->nsmapptr;
-		subnode->nsmapptr->refcount++;
 		php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL TSRMLS_CC);
 
 		(*value)->type = IS_OBJECT;
@@ -712,16 +692,6 @@ sxe_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ simplexml_ce_xpath_register_ns()
- */
-static void 
-simplexml_ce_xpath_register_ns(char *prefix, xmlXPathContext *xpath, char *href)
-{
-  	xmlXPathRegisterNs(xpath, prefix, href);
-}
-/* }}} */
-
-
 /* {{{ xpath()
  */ 
 SXE_METHOD(xpath)
@@ -752,7 +722,6 @@ SXE_METHOD(xpath)
 	sxe->xpath->node = sxe->node->node;
 
  	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, (xmlNodePtr) sxe->node->node);
-
 	if (ns != NULL) {
 		while (ns[nsnbr] != NULL) {
 			nsnbr++;
@@ -762,14 +731,7 @@ SXE_METHOD(xpath)
 	sxe->xpath->namespaces = ns;
 	sxe->xpath->nsNr = nsnbr;
 
-	/* Register namespaces added in simplexml_cs_register_ns() */
-	xmlHashScan((xmlHashTablePtr) sxe->nsmapptr->nsmap, (xmlHashScanner) simplexml_ce_xpath_register_ns, sxe->xpath);
-
 	retval = xmlXPathEval(query, sxe->xpath);
-
-	/* Cleanup registered namespaces added in simplexml_cs_register_ns() */
-	xmlXPathRegisteredNsCleanup(sxe->xpath);
-
 	if (ns != NULL) {
 		xmlFree(ns);
 		sxe->xpath->namespaces = NULL;
@@ -808,26 +770,6 @@ SXE_METHOD(xpath)
 	}
 	
 	xmlXPathFreeObject(retval);
-}
-/* }}} */
-
-/* {{{ simplexml_ce_register_ns()
- */
-SXE_METHOD(register_ns)
-{
-	php_sxe_object *sxe;
-	char *nsname;
-	char *nsvalue;
-	int   nsname_len;
-	int   nsvalue_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &nsname, &nsname_len, &nsvalue, &nsvalue_len) == FAILURE) {
-		return;
-	}
-
-	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
-
-	xmlHashAddEntry(sxe->nsmapptr->nsmap, nsvalue, xmlStrdup(nsname));
 }
 /* }}} */
 
@@ -1030,22 +972,10 @@ sxe_object_clone(void *object, void **clone_ptr TSRMLS_DC)
 	if (sxe->node) {
 		nodep = xmlDocCopyNode(sxe->node->node, docp, 1);
 	}
-	clone->nsmapptr = emalloc(sizeof(simplexml_nsmap));
-	clone->nsmapptr->nsmap = xmlHashCreate(10);
-	clone->nsmapptr->refcount = 1;
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)clone, nodep, NULL TSRMLS_CC);
 
 	*clone_ptr = (void *) clone;
-}
-/* }}} */
-
-/* {{{ _free_ns_entry()
- */
-static void
-_free_ns_entry(void *p, xmlChar *data)
-{
-	xmlFree(p);
 }
 /* }}} */
 
@@ -1073,11 +1003,6 @@ static void sxe_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 	php_libxml_node_decrement_resource((php_libxml_node_object *)sxe TSRMLS_CC);
 
-	if (sxe->nsmapptr && --sxe->nsmapptr->refcount == 0) {
-		xmlHashFree(sxe->nsmapptr->nsmap, _free_ns_entry);
-		efree(sxe->nsmapptr);
-	}
-	
 	if (sxe->xpath) {
 		xmlXPathFreeContext(sxe->xpath);
 	}
@@ -1164,9 +1089,6 @@ PHP_FUNCTION(simplexml_load_file)
 
 	sxe = php_sxe_object_new(ce TSRMLS_CC);
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
-	sxe->nsmapptr = emalloc(sizeof(simplexml_nsmap));
-	sxe->nsmapptr->nsmap = xmlHashCreate(10);
-	sxe->nsmapptr->refcount = 1;
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 
 	return_value->type = IS_OBJECT;
@@ -1205,9 +1127,6 @@ PHP_FUNCTION(simplexml_load_string)
 
 	sxe = php_sxe_object_new(ce TSRMLS_CC);
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
-	sxe->nsmapptr = emalloc(sizeof(simplexml_nsmap));
-	sxe->nsmapptr->nsmap = xmlHashCreate(10);
-	sxe->nsmapptr->refcount = 1;
 	sxe->iter.type = SXE_ITER_NONE;
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 
@@ -1238,9 +1157,6 @@ SXE_METHOD(__construct)
 	}
 
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
-	sxe->nsmapptr = emalloc(sizeof(simplexml_nsmap));
-	sxe->nsmapptr->nsmap = xmlHashCreate(10);
-	sxe->nsmapptr->refcount = 1;
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 }
 
@@ -1498,9 +1414,6 @@ PHP_FUNCTION(simplexml_import_dom)
 		sxe = php_sxe_object_new(ce TSRMLS_CC);
 		sxe->document = object->document;
 		php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, nodep->doc TSRMLS_CC);
-		sxe->nsmapptr = emalloc(sizeof(simplexml_nsmap));
-		sxe->nsmapptr->nsmap = xmlHashCreate(10);
-		sxe->nsmapptr->refcount = 1;
 		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, nodep, NULL TSRMLS_CC);
 
 		return_value->type = IS_OBJECT;
@@ -1544,7 +1457,6 @@ ZEND_GET_MODULE(simplexml)
 /* each method can have its own parameters and visibility */
 static zend_function_entry sxe_functions[] = {
 	SXE_ME(__construct,            NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
-	SXE_ME(register_ns,            NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(asXML,                  NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(xpath,                  NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(attributes,             NULL, ZEND_ACC_PUBLIC)
