@@ -23,19 +23,19 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	trav = response->children;
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE) {
-	  	if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV)) {
-		  	env = trav;
-		  	envelope_ns = SOAP_1_1_ENV;
-		  } else if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV)) {
-		  	env = trav;
-		  	envelope_ns = SOAP_1_2_ENV;
-		  } else {
+			if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV)) {
+				env = trav;
+				envelope_ns = SOAP_1_1_ENV;
+			} else if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV)) {
+				env = trav;
+				envelope_ns = SOAP_1_2_ENV;
+			} else {
 				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got bad SOAP response\n", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
 				return FALSE;
-		  }
-	  }
-	  trav = trav->next;
+			}
+		}
+		trav = trav->next;
 	}
 	if (env == NULL) {
 		add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got XML without \"Envelope\" element\n", NULL, NULL TSRMLS_CC);
@@ -47,26 +47,26 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	head = NULL;
 	trav = env->children;
 	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
-	  trav = trav->next;
+		trav = trav->next;
 	}
 	if (trav != NULL && node_is_equal_ex(trav,"Header",envelope_ns)) {
-	  head = trav;
-	  trav = trav->next;
+		head = trav;
+		trav = trav->next;
 	}
 
 	/* Get <Body> element */
 	body = NULL;
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE) {
-  		if (body == NULL && node_is_equal_ex(trav,"Body",envelope_ns)) {
-		  	body = trav;
-		  } else {
+			if (body == NULL && node_is_equal_ex(trav,"Body",envelope_ns)) {
+				body = trav;
+			} else {
 				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got bad SOAP response\n", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
 				return FALSE;
-		  }
-	  }
-	  trav = trav->next;
+			}
+		}
+		trav = trav->next;
 	}
 	if (body == NULL) {
 		add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got \"Envelope\" without \"Body\" element\n", NULL, NULL TSRMLS_CC);
@@ -76,7 +76,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 	/* Check if <Body> contains <Fault> element */
 	fault = get_node_ex(body->children,"Fault",envelope_ns);
-	if(fault != NULL) {
+	if (fault != NULL) {
 		char *faultcode = NULL, *faultstring = NULL, *faultactor = NULL;
 		zval *details = NULL;
 		xmlNodePtr tmp;
@@ -182,14 +182,14 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	  /* Function hasn't WSDL description */
 		cur = resp;
 		array_init(return_value);
-		while(cur && cur->type != XML_ELEMENT_NODE) {
+		while (cur && cur->type != XML_ELEMENT_NODE) {
 			cur = cur->next;
 		}
 		if (cur != NULL) {
 			xmlNodePtr val;
 			val = cur->children;
 			while (val != NULL) {
-				while(val && val->type != XML_ELEMENT_NODE) {
+				while (val && val->type != XML_ELEMENT_NODE) {
 					val = val->next;
 				}
 				if (val != NULL) {
@@ -211,14 +211,14 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
 		if (param_count == 0) {
-		  zval_dtor(return_value);
-		  ZVAL_NULL(return_value);
+			zval_dtor(return_value);
+			ZVAL_NULL(return_value);
 		} else if (param_count == 1) {
-		  zval *tmp = *(zval**)Z_ARRVAL_P(return_value)->pListHead->pData;
-		  tmp->refcount++;
-		  zval_dtor(return_value);
-		  *return_value = *tmp;
-		  FREE_ZVAL(tmp);
+			zval *tmp = *(zval**)Z_ARRVAL_P(return_value)->pListHead->pData;
+			tmp->refcount++;
+			zval_dtor(return_value);
+			*return_value = *tmp;
+			FREE_ZVAL(tmp);
 		}
 	}
 

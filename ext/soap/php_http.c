@@ -23,12 +23,12 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 	FETCH_THIS_SDL(sdl);
 
 	xmlDocDumpMemory(doc, &buf, &buf_size);
-	if(!buf) {
+	if (!buf) {
 		add_soap_fault(this_ptr, "SOAP-ENV:Client", "Error build soap request", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
-	if(zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS
-		&& Z_LVAL_PP(trace) > 0) {
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
+	    Z_LVAL_PP(trace) > 0) {
 		add_property_stringl(this_ptr, "__last_request", buf, buf_size, 1);
 	}
 
@@ -38,24 +38,24 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		tv.tv_sec = 0;
 		tv.tv_usec = 1;
 		php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
-	  if (php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL) != PHP_STREAM_OPTION_RETURN_OK) {
-			php_stream_close(stream);
+		if (php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL) != PHP_STREAM_OPTION_RETURN_OK) {
+		    php_stream_close(stream);
 			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-  		stream = NULL;
-  	} else {
+			stream = NULL;
+		} else {
 			tv.tv_sec = FG(default_socket_timeout);;
 			tv.tv_usec = 0;
 			php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
 		}
 	}
 
-	if(!stream) {
+	if (!stream) {
 		char *url;
 		int use_ssl;
 
-		if(!sdl) {
+		if (!sdl) {
 			zval **location;
-			if(zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &location) == FAILURE) {
+			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &location) == FAILURE) {
 				xmlFree(buf);
 				add_soap_fault(this_ptr, "SOAP-ENV:Client", "Error could not find location", NULL, NULL TSRMLS_CC);
 				return FALSE;
@@ -95,11 +95,11 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 
 			reslen = spprintf(&res, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", phpurl->host, phpurl->port);
 
-			stream = php_stream_xport_create(res, reslen, 
+			stream = php_stream_xport_create(res, reslen,
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, 
-				NULL /*persistent_id*/, 
-				NULL /*timeout*/, 
+				STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
+				NULL /*persistent_id*/,
+				NULL /*timeout*/,
 				NULL, NULL, NULL);
 
 			efree(res);
@@ -116,7 +116,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
  		}
 #endif
 
-		if(stream) {
+		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", php_stream_get_resource_id(stream));
 			ret = zend_list_insert(phpurl, le_url);
@@ -140,9 +140,11 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		smart_str_appends(&soap_headers, phpurl->host);
 		smart_str_append_const(&soap_headers, "\r\n"
 			"Connection: Keep-Alive\r\n"
-//			"Connection: close\r\n"
-//			"Accept: text/html; text/xml; text/plain\r\n"
-//			"User-Agent: PHP SOAP 0.1\r\n"
+/*
+			"Connection: close\r\n"
+			"Accept: text/html; text/xml; text/plain\r\n"
+			"User-Agent: PHP SOAP 0.1\r\n"
+*/
 			"Content-Type: text/xml; charset=\"utf-8\"\r\n"
 			"Content-Length: ");
 		smart_str_append_long(&soap_headers, buf_size);
@@ -153,14 +155,14 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		smart_str_append_const(&soap_headers, "\"\r\n");
 
 		/* HTTP Authentication */
-		if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS) {
 			char* buf;
 			int len;
 
 			smart_str auth = {0};
 			smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
 			smart_str_appendc(&auth, ':');
-			if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS) {
+			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS) {
 				smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
 			}
 			smart_str_0(&auth);
@@ -173,14 +175,14 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		}
 
 		/* Send cookies along with request */
-		if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS) {
 			zval **data;
 			char *key;
 			int index, i;
 
 			smart_str_append_const(&soap_headers, "Cookie: ");
 			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(cookies));
-			for(i = 0;i < (int)Z_ARRVAL_PP(cookies)->nNumOfElements;i++) {
+			for (i = 0;i < (int)Z_ARRVAL_PP(cookies)->nNumOfElements;i++) {
 				zend_hash_get_current_data(Z_ARRVAL_PP(cookies), (void **)&data);
 				zend_hash_get_current_key(Z_ARRVAL_PP(cookies), &key, (long *)&index, FALSE);
 
@@ -198,7 +200,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		smart_str_0(&soap_headers);
 
 		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
-		if(err != soap_headers.len) {
+		if (err != soap_headers.len) {
 			xmlFree(buf);
 			smart_str_free(&soap_headers);
 			php_stream_close(stream);
@@ -223,11 +225,11 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	char* connection;
 	int http_1_1 = 0;
 
-	if(FIND_SOCKET_PROPERTY(this_ptr, socket_ref) != FAILURE) {
+	if (FIND_SOCKET_PROPERTY(this_ptr, socket_ref) != FAILURE) {
 		FETCH_SOCKET_RES(stream, socket_ref);
 	}
 
-	if(!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
+	if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 		add_soap_fault(this_ptr, "SOAP-ENV:Client", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
@@ -236,12 +238,12 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 
 	/* Check to see what HTTP status was sent */
 	http_version = get_http_header_value(http_headers,"HTTP/");
-	if(http_version) {
+	if (http_version) {
 		char *tmp;
 
 		tmp = strstr(http_version," ");
 
-		if(tmp != NULL) {
+		if (tmp != NULL) {
 			tmp++;
 			strncpy(http_status,tmp,4);
 			http_status[3] = '\0';
@@ -253,7 +255,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		Maybe try and test for some of the 300's 400's specfics but not
 		right now.
 
-		if(strcmp(http_status,"200"))
+		if (strcmp(http_status,"200"))
 		{
 			zval *err;
 			char *http_err;
@@ -268,30 +270,30 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		}*/
 
 		/* Try and get headers again */
-		if(!strcmp(http_status, "100")) {
-			if(!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
+		if (!strcmp(http_status, "100")) {
+			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
 				php_stream_close(stream);
 				zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 				add_soap_fault(this_ptr, "SOAP-ENV:Client", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
 				return FALSE;
 			}
 		}
-		
+
 		if (strncmp(http_version,"1.1", 3)) {
 			http_1_1 = 1;
 		}
 		efree(http_version);
 	}
 
-	if(!get_http_body(stream, http_headers, &http_body, &http_body_size TSRMLS_CC)) {
+	if (!get_http_body(stream, http_headers, &http_body, &http_body_size TSRMLS_CC)) {
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 		add_soap_fault(this_ptr, "SOAP-ENV:Client", "Error Fetching http body", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
 
-	if(zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS
-		&& Z_LVAL_PP(trace) > 0) {
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
+	    Z_LVAL_PP(trace) > 0) {
 		add_property_stringl(this_ptr, "__last_response", http_body, http_body_size, 1);
 	}
 
@@ -301,8 +303,8 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	/* See if the server requested a close */
 	http_close = TRUE;
 	connection = get_http_header_value(http_headers,"Connection: ");
-	if(connection) {
-		if(!strcmp(connection, "Keep-Alive")) {
+	if (connection) {
+		if (!strcmp(connection, "Keep-Alive")) {
 			http_close = FALSE;
 		}
 		efree(connection);
@@ -317,18 +319,18 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 
 	/* Check and see if the server even sent a xml document */
 	content_type = get_http_header_value(http_headers,"Content-Type: ");
-	if(content_type) {
+	if (content_type) {
 		char *pos = NULL;
 		int cmplen;
 		pos = strstr(content_type,";");
-		if(pos != NULL) {
+		if (pos != NULL) {
 			cmplen = pos - content_type;
 		} else {
 			cmplen = strlen(content_type);
 		}
 
-		if(strncmp(content_type, "text/xml", cmplen)) {
-			if(strncmp(http_body, "<?xml", 5)) {
+		if (strncmp(content_type, "text/xml", cmplen)) {
+			if (strncmp(http_body, "<?xml", 5)) {
 				zval *err;
 				MAKE_STD_ZVAL(err);
 				ZVAL_STRINGL(err, http_body, http_body_size, 1);
@@ -349,13 +351,13 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	   matter too much
 	*/
 	cookie_itt = strstr(http_headers,"Set-Cookie: ");
-	while(cookie_itt) {
+	while (cookie_itt) {
 		char *end_pos, *cookie;
 		char *eqpos, *sempos;
 		smart_str name = {0}, value = {0};
 		zval **cookies, *z_cookie;
 
-		if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == FAILURE) {
 			zval *tmp_cookies;
 			MAKE_STD_ZVAL(tmp_cookies);
 			array_init(tmp_cookies);
@@ -420,8 +422,9 @@ static char *get_http_header_value(char *headers, char *type)
 
 		/* find next line */
 		pos = strstr(pos, "\r\n");
-		if (pos)
+		if (pos) {
 			pos += 2;
+		}
 
 	} while (pos);
 
@@ -476,7 +479,7 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 		size = atoi(content_length);
 		http_buf = emalloc(size + 1);
 
-		while(http_buf_size < size) {
+		while (http_buf_size < size) {
 			http_buf_size += php_stream_read(stream, http_buf + http_buf_size, size - http_buf_size);
 		}
 		http_buf[size] = '\0';
@@ -497,7 +500,7 @@ static int get_http_headers(php_stream *stream, char **response, int *out_size T
 	smart_str tmp_response = {0};
 	char headerbuf[8192];
 
-	while(!done) {
+	while (!done) {
 		if (!php_stream_gets(stream, headerbuf, sizeof(headerbuf))) {
 			break;
 		}

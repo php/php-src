@@ -58,31 +58,26 @@ extern int le_url;
 extern int le_service;
 
 
-struct _soapHeaderHandler
-{
+struct _soapHeaderHandler {
 	char *ns;
 	int type;
 
-	struct _function_handler
-	{
+	struct _function_handler {
 		char *functionName;
 		char *type;
 	} function_handler;
 
-	struct _class_handler
-	{
+	struct _class_handler {
 		zend_class_entry *ce;
 	} class_handler;
 };
 
-struct _soapMapping
-{
+struct _soapMapping {
 	char *ns;
 	char *ctype;
 	int type;
 
-	struct _map_functions
-	{
+	struct _map_functions {
 		zval *to_xml_before;
 		zval *to_xml;
 		zval *to_xml_after;
@@ -91,25 +86,21 @@ struct _soapMapping
 		zval *to_zval_after;
 	} map_functions;
 
-	struct _map_class
-	{
+	struct _map_class {
 		int type;
 		zend_class_entry *ce;
 	} map_class;
 };
 
-struct _soapService
-{
+struct _soapService {
 	sdlPtr sdl;
 
-	struct _soap_functions
-	{
+	struct _soap_functions {
 		HashTable *ft;
 		int functions_all;
 	} soap_functions;
 
-	struct _soap_class
-	{
+	struct _soap_class {
 		zend_class_entry *ce;
 		zval **argv;
 		int argc;
@@ -228,29 +219,29 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 
 
 #define FOREACHATTRNODE(n,c,i) \
-	do \
-	{ \
-		if(n == NULL) \
+	do { \
+		if (n == NULL) { \
 			break; \
-		if(c) \
+		} \
+		if (c) { \
 			i = get_attribute(n,c); \
-		else \
+		} else { \
 			i = n; \
-		if(i != NULL) \
-		{ \
+		} \
+		if (i != NULL) { \
 			n = i;
 
 #define FOREACHNODE(n,c,i) \
-	do \
-	{ \
-		if(n == NULL) \
+	do { \
+		if (n == NULL) { \
 			break; \
-		if(c) \
+		} \
+		if (c) { \
 			i = get_node(n,c); \
-		else \
+		} else { \
 			i = n; \
-		if(i != NULL) \
-		{ \
+		} \
+		if(i != NULL) { \
 			n = i;
 
 #define ENDFOREACH(n) \
@@ -258,19 +249,19 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 	} while ((n = n->next));
 
 #define ZERO_PARAM() \
-	if(ZEND_NUM_ARGS() != 0) \
+	if (ZEND_NUM_ARGS() != 0) \
  		WRONG_PARAM_COUNT;
 
 #define ONE_PARAM(p) \
-	if(ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &p) == FAILURE) \
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &p) == FAILURE) \
 		WRONG_PARAM_COUNT;
 
 #define TWO_PARAM(p,p1) \
-	if(ZEND_NUM_ARGS() != 1 || getParameters(ht, 2, &p, &p1) == FAILURE) \
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 2, &p, &p1) == FAILURE) \
 		WRONG_PARAM_COUNT;
 
 #define THREE_PARAM(p,p1,p2) \
-	if(ZEND_NUM_ARGS() != 1 || getParameters(ht, 3, &p, &p1, &p2) == FAILURE) \
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 3, &p, &p1, &p2) == FAILURE) \
 		WRONG_PARAM_COUNT;
 
 #define FETCH_THIS_PORT(ss) \
@@ -291,12 +282,11 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 	{ \
 		zval *__thisObj,**__tmp; \
 		GET_THIS_OBJECT(__thisObj) \
-		if(FIND_SDL_PROPERTY(__thisObj,__tmp) != FAILURE) \
-		{ \
+		if(FIND_SDL_PROPERTY(__thisObj,__tmp) != FAILURE) { \
 			FETCH_SDL_RES(ss,__tmp); \
-		} \
-		else \
+		} else { \
 			ss = NULL; \
+		} \
 	}
 
 #define FIND_SDL_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "sdl", sizeof("sdl"), (void **)&tmp)
@@ -306,12 +296,11 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 	{ \
 		zval *__thisObj,**__tmp; \
 		GET_THIS_OBJECT(__thisObj) \
-		if(FIND_SERVICE_PROPERTY(__thisObj,__tmp) != FAILURE) \
-		{ \
+		if(FIND_SERVICE_PROPERTY(__thisObj,__tmp) != FAILURE) { \
 			FETCH_SERVICE_RES(ss,__tmp); \
-		} \
-		else \
+		} else { \
 			ss = NULL; \
+		} \
 	}
 
 #define FIND_SERVICE_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "service", sizeof("service"), (void **)&tmp)
@@ -321,12 +310,11 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 	{ \
 		zval *__thisObj,**__tmp; \
 		GET_THIS_OBJECT(__thisObj) \
-		if(FIND_URL_PROPERTY(__thisObj,__tmp) != FAILURE) \
-		{ \
+		if(FIND_URL_PROPERTY(__thisObj,__tmp) != FAILURE) { \
 			FETCH_URL_RES(ss,__tmp); \
-		} \
-		else \
+		} else { \
 			ss = NULL; \
+		} \
 	}
 
 #define FIND_URL_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "httpurl", sizeof("httpurl"), (void **)&tmp)
@@ -336,12 +324,11 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 	{ \
 		zval *__thisObj,**__tmp; \
 		GET_THIS_OBJECT(__thisObj) \
-		if(FIND_SOCKET_PROPERTY(__thisObj,__tmp) != FAILURE) \
-		{ \
+		if(FIND_SOCKET_PROPERTY(__thisObj,__tmp) != FAILURE) { \
 			FETCH_SOCKET_RES(ss,__tmp); \
-		} \
-		else \
+		} else { \
 			ss = NULL; \
+		} \
 	}
 
 #define FIND_SOCKET_PROPERTY(ss,tmp)	zend_hash_find(Z_OBJPROP_P(ss), "httpsocket", sizeof("httpsocket"), (void **)&tmp)
@@ -349,8 +336,7 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 
 #define GET_THIS_OBJECT(o) \
  	o = getThis(); \
-	if (!o) \
-	{ \
+	if (!o) { \
 		php_error(E_WARNING, "Cannot Get Class Info"); \
 		return; \
 	}
