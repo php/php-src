@@ -670,14 +670,6 @@ static void php_execute_pre_request_shutdown(PLS_D)
 	}
 }
 
-static void php_execute_post_request_startup(PLS_D)
-{
-	if (PG(post_request_startup_ok)) {
-		zend_llist_apply(&PG(ll_post_request_startup), php_start_request_hook);
-		zend_llist_destroy(&PG(ll_post_request_startup));
-		PG(post_request_startup_ok) = 0;
-	}
-}
 
 void php_register_pre_request_shutdown(void (*func)(void *), void *userdata)
 {
@@ -695,29 +687,12 @@ void php_register_pre_request_shutdown(void (*func)(void *), void *userdata)
 	zend_llist_add_element(&PG(ll_pre_request_shutdown), &ptr);
 }
 
-void php_register_post_request_startup(void (*func)(void *), void *userdata)
-{
-	php_request_hook ptr;
-	PLS_FETCH();
-
-	if (!PG(post_request_startup_ok)) {
-		zend_llist_init(&PG(ll_post_request_startup), sizeof(php_request_hook), NULL, 0);
-		PG(post_request_startup_ok) = 1;
-	}
-
-	ptr.func = func;
-	ptr.userdata = userdata;
-	
-	zend_llist_add_element(&PG(ll_post_request_startup), &ptr);
-}
 
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
 	global_lock();
 	
 	php_output_startup();
-
-	PG(post_request_startup_ok) = PG(pre_request_shutdown_ok) = 0;
 
 #if APACHE
 	/*
@@ -796,6 +771,7 @@ void php_request_shutdown(void *dummy)
 	CLS_FETCH();
 	ELS_FETCH();
 	SLS_FETCH();
+	PLS_FETCH();
 
 	php_execute_pre_request_shutdown(PLS_C);
 
@@ -1298,7 +1274,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (EG(main_op_array)) {
 		zend_hash_environment(PLS_C ELS_CC SLS_CC);
 		EG(active_op_array) = EG(main_op_array);
-		php_execute_post_request_startup(PLS_C);
+		zend_activate_modules();
 		zend_execute(EG(main_op_array) ELS_CC);
 	}
 }
