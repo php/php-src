@@ -27,11 +27,11 @@
 # endif
 # undef FD_SETSIZE
 # include "arpa/inet.h"
-# if HAVE_WS2TCPIP_H
-   /* IPv6 stuff, also defines socklen_t */
-#  include <ws2tcpip.h>
-# else
-typedef unsigned int socklen_t;
+/* defines socklen_t and some IPV6 stuff */
+# include <ws2tcpip.h>
+# if HAVE_WSPIAPI_H
+   /* getaddrinfo */
+#  include <wspiapi.h>
 # endif
 #else
 # undef closesocket

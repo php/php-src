@@ -186,7 +186,7 @@ ARG_ENABLE("ipv6", "Disable IPv6 support (default is turn it on if available)", 
 
 var main_network_has_ipv6 = 0;
 if (PHP_IPV6 == "yes") {
-	main_network_has_ipv6 = CHECK_HEADER_ADD_INCLUDE("ws2tcpip.h", "CFLAGS") ? 1 : 0;
+	main_network_has_ipv6 = CHECK_HEADER_ADD_INCLUDE("wspiapi.h", "CFLAGS") ? 1 : 0;
 }
 if (main_network_has_ipv6) {
 	STDOUT.WriteLine("Enabling IPv6 support");
