@@ -33,6 +33,7 @@ void register_html_constants(INIT_FUNC_ARGS);
 
 PHP_FUNCTION(htmlspecialchars);
 PHP_FUNCTION(htmlentities);
+PHP_FUNCTION(htmlspecialchars_decode);
 PHP_FUNCTION(html_entity_decode);
 PHP_FUNCTION(get_html_translation_table);
 
