@@ -35,7 +35,8 @@ typedef struct _zend_rsrc_list_entry {
 	zend_bool valid;
 } zend_rsrc_list_entry;
 
-typedef void (*rsrc_dtor_func_t)(zend_rsrc_list_entry *le);
+typedef void (*rsrc_dtor_func_t)(zend_rsrc_list_entry *rsrc);
+#define ZEND_RSRC_DTOR_FUNC(name)		void name(zend_rsrc_list_entry *rsrc)
 
 typedef struct _zend_rsrc_list_dtors_entry {
 	/* old style destructors */
@@ -46,6 +47,8 @@ typedef struct _zend_rsrc_list_dtors_entry {
 	rsrc_dtor_func_t list_dtor_ex;
 	rsrc_dtor_func_t plist_dtor_ex;
 
+	char *type_name;
+
 	int module_number;
 	int resource_id;
 	unsigned char type;
@@ -54,7 +57,7 @@ typedef struct _zend_rsrc_list_dtors_entry {
 
 #define register_list_destructors(ld, pld) zend_register_list_destructors((void (*)(void *))ld, (void (*)(void *))pld, module_number);
 ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number);
-ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, int module_number);
+ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, char *type_name, int module_number);
 
 enum list_entry_type {
 	LE_DB=1000
@@ -82,6 +85,8 @@ ZEND_API void *zend_plist_find(int id, int *type);
 
 ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type);
 ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
+
+ZEND_API char *zend_rsrc_list_get_rsrc_type(int resource);
 
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 

@@ -349,6 +349,7 @@ ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void
 	lde.module_number = module_number;
 	lde.resource_id = list_destructors.nNextFreeElement;
 	lde.type = ZEND_RESOURCE_LIST_TYPE_STD;
+	lde.type_name = NULL;
 	
 	if (zend_hash_next_index_insert(&list_destructors, (void *) &lde, sizeof(zend_rsrc_list_dtors_entry), NULL)==FAILURE) {
 		return FAILURE;
@@ -357,7 +358,7 @@ ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void
 }
 
 
-ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, int module_number)
+ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, char *type_name, int module_number)
 {
 	zend_rsrc_list_dtors_entry lde;
 	
@@ -372,6 +373,7 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 	lde.module_number = module_number;
 	lde.resource_id = list_destructors.nNextFreeElement;
 	lde.type = ZEND_RESOURCE_LIST_TYPE_EX;
+	lde.type_name = type_name;
 	
 	if (zend_hash_next_index_insert(&list_destructors,(void *) &lde, sizeof(zend_rsrc_list_dtors_entry),NULL)==FAILURE) {
 		return FAILURE;
@@ -389,6 +391,18 @@ int zend_init_rsrc_list_dtors()
 void zend_destroy_rsrc_list_dtors()
 {
 	zend_hash_destroy(&list_destructors);
+}
+
+
+char *zend_rsrc_list_get_rsrc_type(int resource)
+{
+	zend_rsrc_list_dtors_entry *lde;
+
+	if (zend_hash_index_find(&list_destructors, resource, (void **) &lde)==SUCCESS) {
+		return lde->type_name;
+	} else {
+		return NULL;
+	}
 }
 
 
