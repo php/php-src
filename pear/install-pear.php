@@ -20,7 +20,7 @@ for ($i = 0; $i < sizeof($argv); $i++) {
     $bn = basename($arg);
     if (ereg('package-(.*)\.xml$', $bn, $matches) ||
         ereg('([A-Za-z0-9_:]+)-.*\.(tar|tgz)$', $bn, $matches)) {
-        $install_files[$matches[1]] = $bn;
+        $install_files[$matches[1]] = $arg;
     } elseif ($arg == '--force') {
         $force = true;
     } elseif ($arg == '-d') {
