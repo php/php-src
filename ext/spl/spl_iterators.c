@@ -1282,6 +1282,7 @@ static INLINE void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 					zval_copy_ctor(intern->u.caching.zstr);
 					zval_dtor(&expr_copy);
 				} else {
+					INIT_PZVAL(intern->u.caching.zstr);
 					zval_copy_ctor(intern->u.caching.zstr);
 				}
 			}
