@@ -407,7 +407,9 @@ dnl
 dnl execute code, if variable is not set in namespace
 dnl
 AC_DEFUN(AC_PHP_ONCE,[
-  unique=`echo $ac_n "$2$ac_c" | tr -cd a-zA-Z0-9`
+  changequote({,})
+  unique=`echo $2|sed 's/[^a-zA-Z0-9]/_/g'`
+  changequote([,])
   cmd="echo $ac_n \"\$$1$unique$ac_c\""
   if test -n "$unique" && test "`eval $cmd`" = "" ; then
     eval "$1$unique=set"
@@ -564,7 +566,9 @@ dnl
 AC_DEFUN(AC_CHECK_CC_OPTION,[
   echo "main(){return 0;}" > conftest.$ac_ext
   opt="$1"
-  var=`echo $ac_n "$opt$ac_c"|tr -c a-zA-Z0-9 _`
+  changequote({,})
+  var=`echo $opt|sed 's/[^a-zA-Z0-9]/_/g'`
+  changequote([,])
   AC_MSG_CHECKING([if compiler supports -$1 really])
   ac_php_compile="${CC-cc} -$opt -o conftest $CFLAGS $CPPFLAGS conftest.$ac_ext 2>&1"
   if eval $ac_php_compile 2>&1 | egrep "$opt" > /dev/null 2>&1 ; then
