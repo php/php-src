@@ -13,6 +13,7 @@ PHP 4                                                                      NEWS
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+  . Reenabled dba_popen() with new persistent STDIO streams.
 - Added "disable_classes" php.ini option to allow administrators to disable
   certain classes for security reasons. (Harald)
 - Added man page for CLI version of PHP. (Marcus)
