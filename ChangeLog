@@ -1,3 +1,58 @@
+2003-01-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php:
+      - Windows fix (thanks to paj)
+
+2003-01-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/informix/ifx.ec:
+      Added sanity checks.
+
+2003-01-29  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/CREDITS
+      ext/oci8/oci8.c:
+      Added myself to the maintainers list.
+
+2003-01-29  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/embed/php_embed.c:
+      Be more consistent with the sapi internal name.
+
+    * ext/standard/dl.c:
+      Enable embedded code using sapi/embed to use dl().
+
+2003-01-29  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      ordered all bug fixes by the number :)
+
+    * NEWS:
+      NEWS police is back.
+
+    * (PHP_4_3)
+      NEWS:
+      news entries for new options in phpize and php-config
+
+2003-01-29  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/standard/basic_functions.c
+      main/main.c:
+      MFPHP_4_3
+
+    * (PHP_4_3)
+      main/main.c:
+      ilia pointet me to a thread on php-dev saying that
+      Co(Un)Initialize should be called per thread
+
+2003-01-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h:
+      Added part of strpos commit that never made it in for some reason.
+      
+
 2003-01-28  Harald Radi  <harald.radi+coding.php@nme.at>
 
     * (PHP_4_3)

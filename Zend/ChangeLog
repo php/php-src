@@ -1,3 +1,46 @@
+2003-01-29  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.h
+      zend_execute_API.c
+      zend_opcode.c:
+      Add additional stage to post-session cleanup.
+      We need separate cleanup stage because of the following problem:
+      Suppose we destroy class X, which destroys function table,
+      and in function table we have function foo() that has static $bar. Now if
+      object of class X was assigned to $bar, its destructor will be called and
+      will
+      fail since X's function table is in mid-destruction.
+      So we want first of all to clean up all data and then move to tables
+      destruction.
+      Note that only run-time accessed data need to be cleaned up, pre-defined
+      data can not contain objects and thus are not probelmatic.
+
+2003-01-29  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c
+      zend_object_handlers.c:
+      Code rearrangements
+
+2003-01-29  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute_API.c:
+      Fix object destructors:
+      zend_objects_store_call_destructors is not used anymore, we rely on
+      symbol tables cleaners to destroy all objects.
+
+    * zend_objects_API.c:
+      extra safety
+
+    * zend_compile.c:
+      fix memory leak
+
+2003-01-29  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c
+      zend_object_handlers.c:
+      Fix assignments to $this.
+      Fixes the 'make install' problem reported on php-dev
+
 2003-01-28  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
