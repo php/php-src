@@ -661,8 +661,6 @@ if test "$PHP_VERSIONING" = "yes"; then
   fi
 fi
 
-divert(6)
-
 enable_shared=yes
 enable_static=yes
 unset with_pic
@@ -884,8 +882,6 @@ PHP_SUBST(TSRM_DIR)
 PHP_SUBST(TSRM_LIB)
 PHP_SUBST(WARNING_LEVEL)
 PHP_SUBST_OLD(YACC)
-
-PHP_CONFIGURE_PART(Configuring libtool)
 
 old_CC=$CC
 
