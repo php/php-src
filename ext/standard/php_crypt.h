@@ -1,5 +1,5 @@
-#ifndef PHP3_CRYPT_H
-#define PHP3_CRYPT_H
+#ifndef PHP_CRYPT_H
+#define PHP_CRYPT_H
 
 #if HAVE_CRYPT
 extern php3_module_entry crypt_module_entry;

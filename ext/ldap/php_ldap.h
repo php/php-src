@@ -31,8 +31,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP3_LDAP_H
-#define _PHP3_LDAP_H
+#ifndef _PHP_LDAP_H
+#define _PHP_LDAP_H
 
 #if COMPILE_DL
 #undef HAVE_LDAP
@@ -124,4 +124,4 @@ extern ldap_module php3_ldap_module;
 
 #define phpext_ldap_ptr ldap_module_ptr
 
-#endif /* _PHP3_LDAP_H */
+#endif /* _PHP_LDAP_H */

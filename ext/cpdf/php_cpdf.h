@@ -28,8 +28,8 @@
  */
 /* $Id$ */
 
-#ifndef _PHP3_CPDF_H
-#define _PHP3_CPDF_H
+#ifndef _PHP_CPDF_H
+#define _PHP_CPDF_H
 
 #if HAVE_CPDFLIB
 

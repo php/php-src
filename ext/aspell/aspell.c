@@ -28,7 +28,7 @@
 
 #if HAVE_ASPELL
 
-#include "php3_aspell.h"
+#include "php_aspell.h"
 #if APACHE
 #  ifndef DEBUG
 #  undef palloc

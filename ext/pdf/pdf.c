@@ -57,7 +57,7 @@
 
 #if HAVE_PDFLIB
 
-#include "php3_pdf.h"
+#include "php_pdf.h"
 
 #ifdef THREAD_SAFE
 DWORD PDFlibTls;

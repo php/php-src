@@ -1,8 +1,8 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -23,75 +23,87 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Kristian Koehntopp (kris@koehntopp.de)                      |
+   | Authors: Nikolay P. Romanyuk <mag@redcom.ru>                         |
+   |                                                                      |
    +----------------------------------------------------------------------+
  */
 
-
 /* $Id$ */
 
-#ifndef _PHP3_POSIX_H
-#define _PHP3_POSIX_H
+#ifndef _PHP_VELOCIS_H
+#define _PHP_VELOCIS_H
 
 #if COMPILE_DL
-#define HAVE_POSIX 1
+#undef HAVE_VELOCIS
+#define HAVE_VELOCIS 1
 #endif
 
-#if HAVE_POSIX
-#ifndef DLEXPORT
-#define DLEXPORT
-#endif
+#if defined(HAVE_VELOCIS) && !HAVE_UODBC
+#define UNIX
+#include <sql.h>
+#include <sqlext.h>
 
-extern php3_module_entry posix_module_entry;
-#define posix_module_ptr &posix_module_entry
-
-PHP_FUNCTION(posix_kill);
-
-PHP_FUNCTION(posix_getpid);
-PHP_FUNCTION(posix_getppid);
-
-PHP_FUNCTION(posix_getuid);
-PHP_FUNCTION(posix_getgid);
-PHP_FUNCTION(posix_geteuid);
-PHP_FUNCTION(posix_getegid);
-PHP_FUNCTION(posix_setuid);
-PHP_FUNCTION(posix_setgid);
-PHP_FUNCTION(posix_getgroups);
-PHP_FUNCTION(posix_getlogin);
-
-PHP_FUNCTION(posix_getpgrp);
-PHP_FUNCTION(posix_setsid);
-PHP_FUNCTION(posix_setpgid);
-PHP_FUNCTION(posix_getpgid);
-PHP_FUNCTION(posix_getsid);
-
-PHP_FUNCTION(posix_uname);
-PHP_FUNCTION(posix_times);
-
-PHP_FUNCTION(posix_ctermid);
-PHP_FUNCTION(posix_ttyname);
-PHP_FUNCTION(posix_isatty);
-
-PHP_FUNCTION(posix_getcwd);
-
-PHP_FUNCTION(posix_mkfifo);
-PHP_FUNCTION(posix_getgrnam);
-PHP_FUNCTION(posix_getgrgid);
-PHP_FUNCTION(posix_getpwnam);
-PHP_FUNCTION(posix_getpwuid);
-
-PHP_FUNCTION(posix_getrlimit);
+typedef struct VConn {
+	HDBC    hdbc;
+	long    index;
+} VConn;
 
 typedef struct {
-	int dummy;
-} posix_module;
+	char name[32];
+	char *value;
+	long vallen;
+	SDWORD valtype;
+} VResVal;
+
+typedef struct Vresult {
+	HSTMT   hstmt;
+	VConn   *conn; 
+	long    index;
+	VResVal *values;
+	long    numcols;
+	int     fetched;
+} Vresult;
+
+typedef struct {
+	long num_links;
+	long max_links;
+	int le_link,le_result;
+} velocis_module;
+
+extern php3_module_entry velocis_module_entry;
+#define velocis_module_ptr &velocis_module_entry
+
+/* velocis.c functions */
+extern PHP_MINIT_FUNCTION(velocis);
+extern PHP_RINIT_FUNCTION(velocis);
+PHP_MINFO_FUNCTION(velocis);
+extern PHP_MSHUTDOWN_FUNCTION(velocis);
+
+PHP_FUNCTION(velocis_connect);
+PHP_FUNCTION(velocis_close);
+PHP_FUNCTION(velocis_exec);
+PHP_FUNCTION(velocis_fetch);
+PHP_FUNCTION(velocis_result);
+PHP_FUNCTION(velocis_freeresult);
+PHP_FUNCTION(velocis_autocommit);
+PHP_FUNCTION(velocis_off_autocommit);
+PHP_FUNCTION(velocis_commit);
+PHP_FUNCTION(velocis_rollback);
+PHP_FUNCTION(velocis_fieldnum);
+PHP_FUNCTION(velocis_fieldname);
+
+extern velocis_module php3_velocis_module;
 
 #else
 
-#define posix_module_ptr NULL
+#define velocis_module_ptr NULL
 
-#endif
+#endif /* HAVE_VELOCIS */
+#endif /* _PHP_VELOCIS_H */
 
-#define phpext_posix_ptr posix_module_ptr
-
-#endif /* _PHP3_POSIX_H */
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

@@ -28,8 +28,8 @@
  */
 /* $Id$ */
 
-#ifndef _PHP3_FDF_H
-#define _PHP3_FDF_H
+#ifndef _PHP_FDF_H
+#define _PHP_FDF_H
 
 #if HAVE_FDFLIB
 #if WIN32|WINNT
@@ -62,4 +62,4 @@ PHP_FUNCTION(fdf_add_template);
 #else
 #define phpext_fdf_ptr NULL
 #endif
-#endif /* _PHP3_FDF_H */
+#endif /* _PHP_FDF_H */

@@ -26,7 +26,7 @@
 #include "php.h"
 #include "reg.h"
 #include "post.h"
-#include "php3_string.h"
+#include "php_string.h"
 #ifdef HAVE_LOCALE_H
 # include <locale.h>
 #endif

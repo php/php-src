@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "php.h"
 #include <ctype.h>
-#include "php3_string.h"
+#include "php_string.h"
 #include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "exec.h"

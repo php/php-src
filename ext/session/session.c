@@ -31,7 +31,7 @@
 
 #include "php_session.h"
 #include "ext/standard/md5.h"
-#include "ext/standard/php3_var.h"
+#include "ext/standard/php_var.h"
 #include "ext/standard/datetime.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/url_scanner.h"

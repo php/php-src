@@ -32,7 +32,7 @@
 #include "php.h"
 
 #if DBA_CDB
-#include "php3_cdb.h"
+#include "php_cdb.h"
 
 #include <sys/types.h>
 #include <unistd.h>

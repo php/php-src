@@ -21,9 +21,9 @@
 #define IS_EXT_MODULE
 
 #include "php.h"
-#include "php3_xml.h"
+#include "php_xml.h"
 #include "zend_variables.h"
-#include "ext/standard/php3_string.h"
+#include "ext/standard/php_string.h"
 
 
 #if HAVE_LIBEXPAT

@@ -21,7 +21,7 @@
 
 #if HAVE_YP
 
-#include "php3_yp.h"
+#include "php_yp.h"
 
 #include <rpcsvc/ypclnt.h>
 

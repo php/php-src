@@ -54,7 +54,7 @@
 #endif
 
 #if HAVE_CPDFLIB
-#include "php3_cpdf.h"
+#include "php_cpdf.h"
 
 #ifdef THREAD_SAFE
 DWORD CPDFlibTls;

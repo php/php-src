@@ -29,7 +29,7 @@
 #include "ext/standard/head.h"
 #include <math.h>
 #include "SAPI.h"
-#include "php3_gd.h"
+#include "php_gd.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>

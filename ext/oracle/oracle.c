@@ -35,7 +35,7 @@
 
 #if HAVE_ORACLE
 
-#include "php3_oracle.h"
+#include "php_oracle.h"
 #define HASH_DTOR (int (*)(void *))
 
 #ifdef WIN32

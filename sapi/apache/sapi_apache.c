@@ -47,7 +47,7 @@
 #include "zend_execute.h"
 #include "zend_highlight.h"
 #include "zend_indent.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_standard.h"
 #include "util_script.h"
 #include "php_version.h"
 /*#include "mod_php4.h"*/

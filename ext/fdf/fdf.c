@@ -30,7 +30,7 @@
 #include "php.h"
 #include "ext/standard/head.h"
 #include <math.h>
-#include "php3_fdf.h"
+#include "php_fdf.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>

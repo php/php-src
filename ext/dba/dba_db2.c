@@ -32,7 +32,7 @@
 #include "php.h"
 
 #if DBA_DB2
-#include "php3_db2.h"
+#include "php_db2.h"
 #include <sys/stat.h>
 
 #include <string.h>

@@ -148,8 +148,8 @@ datum flatfile_nextkey(FILE *dbf);
 
 #endif
 
-#include "php3_db.h"
-#include "ext/standard/php3_string.h"
+#include "php_db.h"
+#include "ext/standard/php_string.h"
 
 #if THREAD_SAFE
 DWORD DbmTls;

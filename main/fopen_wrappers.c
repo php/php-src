@@ -41,9 +41,9 @@
 #endif
 
 #include "safe_mode.h"
-#include "php3_realpath.h"
+#include "php_realpath.h"
 #include "ext/standard/head.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_standard.h"
 #include "zend_compile.h"
 
 #if HAVE_PWD_H

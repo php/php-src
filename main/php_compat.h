@@ -1,5 +1,5 @@
-#ifndef _PHP3_COMPAT_H
-#define _PHP3_COMPAT_H
+#ifndef _PHP_COMPAT_H
+#define _PHP_COMPAT_H
 
 #define _php3_hash_init zend_hash_init
 #define _php3_hash_destroy zend_hash_destroy
@@ -90,4 +90,4 @@
 #define _php3_stripslashes	php_stripslashes
 #define php3_dl             php_dl
 
-#endif							/* _PHP3_COMPAT_H */
+#endif							/* _PHP_COMPAT_H */

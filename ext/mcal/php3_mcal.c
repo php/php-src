@@ -54,7 +54,7 @@
 #include "php3_list.h"
 #endif
 #include "mcal.h"
-#include "php3_mcal.h"
+#include "php_mcal.h"
 #include "modules.h"
 #if (WIN32|WINNT)
 #include "winsock.h"

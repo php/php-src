@@ -24,7 +24,7 @@
 #include "functions/dl.h"
 #endif
 #include "php_msql.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_standard.h"
 #include "php_globals.h"
 
 #if HAVE_MSQL

@@ -31,8 +31,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP3_GD_H
-#define _PHP3_GD_H
+#ifndef _PHP_GD_H
+#define _PHP_GD_H
 
 #define HAVE_GDIMAGECREATEFROMPNG 1
 
@@ -111,4 +111,4 @@ PHPAPI int phpi_get_le_gd(void);
 
 #endif
 
-#endif /* _PHP3_GD_H */
+#endif /* _PHP_GD_H */

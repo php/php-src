@@ -28,8 +28,8 @@
 
 #include <errno.h>
 
-#include "php3_sysvshm.h"
-#include "../standard/php3_var.h"
+#include "php_sysvshm.h"
+#include "../standard/php_var.h"
 
 function_entry sysvshm_functions[] = {
 	PHP_FE(shm_attach, NULL)

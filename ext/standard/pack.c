@@ -35,7 +35,7 @@
 #endif
 #include "ext/standard/head.h"
 #include "safe_mode.h"
-#include "php3_string.h"
+#include "php_string.h"
 #include "pack.h"
 #if HAVE_PWD_H
 #if MSVC5

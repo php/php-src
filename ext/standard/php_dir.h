@@ -19,8 +19,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP3_DIR_H
-#define _PHP3_DIR_H
+#ifndef _PHP_DIR_H
+#define _PHP_DIR_H
 extern php3_module_entry php3_dir_module_entry;
 #define php3_dir_module_ptr &php3_dir_module_entry
 
@@ -36,4 +36,4 @@ PHP_FUNCTION(getdir);
 
 #define phpext_dir_ptr php3_dir_module_ptr
 
-#endif /* _PHP3_DIR_H */
+#endif /* _PHP_DIR_H */

@@ -29,8 +29,8 @@
  
 /* $Id$ */
 
-#ifndef _PHP3_PGSQL_H
-#define _PHP3_PGSQL_H
+#ifndef _PHP_PGSQL_H
+#define _PHP_PGSQL_H
 
 #if COMPILE_DL
 #undef HAVE_PGSQL
@@ -147,4 +147,4 @@ extern PHP_PGSQL_API php_pgsql_globals pgsql_globals;
 
 #define phpext_pgsql_ptr pgsql_module_ptr
 
-#endif /* _PHP3_PGSQL_H */
+#endif /* _PHP_PGSQL_H */

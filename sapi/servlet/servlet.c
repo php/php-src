@@ -50,8 +50,8 @@
 #include "php_globals.h"
 #include "main.h"
 #include "fopen-wrappers.h"
-#include "ext/standard/php3_standard.h"
-#include "ext/standard/php3_dir.h"
+#include "ext/standard/php_standard.h"
+#include "ext/standard/php_dir.h"
 #include "snprintf.h"
 #if WIN32|WINNT
 #include <io.h>

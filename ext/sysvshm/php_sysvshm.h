@@ -23,42 +23,81 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
+   | Authors: Christian Cartus <chc@idgruppe.de>                          |
    +----------------------------------------------------------------------+
  */
 
 
 /* $Id$ */
 
-#ifndef _PHP3_BCMATH_H
-#define _PHP3_BCMATH_H
+#ifndef _PHP_SYSVSHM_H
+#define _PHP_SYSVSHM_H
 
 #if COMPILE_DL
-#undef WITH_BCMATH
-#define WITH_BCMATH 1
+#undef HAVE_SYSVSHM
+#define HAVE_SYSVSHM 1
 #endif
 
-#if WITH_BCMATH
 
-extern php3_module_entry bcmath_module_entry;
-#define phpext_bcmath_ptr &bcmath_module_entry
+#if HAVE_SYSVSHM
 
-extern PHP_RINIT_FUNCTION(bcmath);
-extern PHP_RSHUTDOWN_FUNCTION(bcmath);
-PHP_FUNCTION(bcadd);
-PHP_FUNCTION(bcsub);
-PHP_FUNCTION(bcmul);
-PHP_FUNCTION(bcdiv);
-PHP_FUNCTION(bcmod);
-PHP_FUNCTION(bcpow);
-PHP_FUNCTION(bcsqrt);
-PHP_FUNCTION(bccomp);
-PHP_FUNCTION(bcscale);
+extern php3_module_entry sysvshm_module_entry;
+#define sysvshm_module_ptr &sysvshm_module_entry
+
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+typedef struct {
+	int le_shm;
+	long init_mem;
+} sysvshm_module;
+
+
+typedef struct {
+	long key;
+	long length;
+	long next;
+	char mem;
+} sysvshm_chunk;
+
+
+typedef struct {
+	char magic[8];
+	long start;
+	long end;
+	long free;
+	long total;
+} sysvshm_chunk_head;
+
+
+typedef struct {
+	key_t key;					/* Key set by user */
+	long id;					/* Returned by shmget. */
+	sysvshm_chunk_head *ptr;			/* memoryaddress of shared memory */ 
+} sysvshm_shm;
+
+
+
+PHP_MINIT_FUNCTION(sysvshm);
+PHP_FUNCTION(shm_attach);
+PHP_FUNCTION(shm_detach);
+PHP_FUNCTION(shm_remove);
+PHP_FUNCTION(shm_put_var);
+PHP_FUNCTION(shm_get_var);
+PHP_FUNCTION(shm_remove_var);
+extern int php3int_put_shmdata(sysvshm_chunk_head *ptr,long key,char *data, long len);
+extern long php3int_check_shmdata(sysvshm_chunk_head *ptr, long key);
+extern int php3int_remove_shmdata(sysvshm_chunk_head *ptr, long shm_varpos);
+
+extern sysvshm_module php3_sysvshm_module;
 
 #else
 
-#define phpext_bcmath_ptr NULL
+#define sysvshm_module_ptr NULL
 
 #endif
 
-#endif /* _PHP3_BCMATH_H */
+#define phpext_sysvshm_ptr sysvshm_module_ptr
+
+#endif /* _PHP_SYSVSHM_H */

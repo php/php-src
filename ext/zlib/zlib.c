@@ -38,8 +38,8 @@
 #endif
 #include "ext/standard/head.h"
 #include "safe_mode.h"
-#include "ext/standard/php3_standard.h"
-#include "php3_zlib.h"
+#include "ext/standard/php_standard.h"
+#include "php_zlib.h"
 #include "fopen-wrappers.h"
 #if HAVE_PWD_H
 #if WIN32|WINNT

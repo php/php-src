@@ -32,7 +32,7 @@
 #include "php.h"
 
 #if DBA_NDBM
-#include "php3_ndbm.h"
+#include "php_ndbm.h"
 
 #include <fcntl.h>
 

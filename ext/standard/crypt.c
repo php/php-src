@@ -46,7 +46,7 @@
 extern char *crypt(char *__key,char *__salt);
 #endif
 
-#include "php3_crypt.h"
+#include "php_crypt.h"
 
 function_entry crypt_functions[] = {
 	PHP_FE(crypt,									NULL)

@@ -23,54 +23,23 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Tom May <tom@go2net.com>                                    |
+   | Authors: Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
 
 
-/* $Id$ */
+#ifndef _PHP_BROWSCAP_H
+#define _PHP_BROWSCAP_H
 
-#ifndef _PHP3_SYSVSEM_H
-#define _PHP3_SYSVSEM_H
+extern php3_module_entry browscap_module_entry;
+#define browscap_module_ptr &browscap_module_entry
 
-#if COMPILE_DL
-#undef HAVE_SYSVSEM
-#define HAVE_SYSVSEM 1
-#endif
+extern PHP_MINIT_FUNCTION(browscap);
+extern PHP_MSHUTDOWN_FUNCTION(browscap);
 
-#if HAVE_SYSVSEM
+PHP_FUNCTION(get_browser);
 
-extern php3_module_entry sysvsem_module_entry;
-#define sysvsem_module_ptr &sysvsem_module_entry
 
-extern int php3_minit_sysvsem(INIT_FUNC_ARGS);
-extern int php3_rinit_sysvsem(INIT_FUNC_ARGS);
-extern int php3_mshutdown_sysvsem(SHUTDOWN_FUNC_ARGS);
-extern int php3_rshutdown_sysvsem(SHUTDOWN_FUNC_ARGS);
-void php3_info_sysvsem(void);
-PHP_FUNCTION(sysvsem_get);
-PHP_FUNCTION(sysvsem_acquire);
-PHP_FUNCTION(sysvsem_release);
+#define phpext_browscap_ptr browscap_module_ptr
 
-typedef struct {
-	int le_sem;
-} sysvsem_module;
-
-typedef struct {
-	int id;						/* For error reporting. */
-	int key;					/* For error reporting. */
-	int semid;					/* Returned by semget(). */
-	int count;					/* Acquire count for auto-release. */
-} sysvsem_sem;
-
-extern sysvsem_module php3_sysvsem_module;
-
-#else
-
-#define sysvsem_module_ptr NULL
-
-#endif
-
-#define phpext_sysvsem_ptr sysvsem_module_ptr
-
-#endif /* _PHP3_SYSVSEM_H */
+#endif /* _PHP_BROWSCAP_H */

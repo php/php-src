@@ -7,7 +7,7 @@ Created from the snmputil sample in the Microsoft SDK for NT
 #include "../phpdl.h"
 #include "functions/dl.h"
 #endif
-#include "php3_snmp.h"
+#include "php_snmp.h"
 #include <sys/types.h>
 
 #include <windows.h>

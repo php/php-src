@@ -81,11 +81,13 @@ AC_ARG_WITH(adabas,
     withval=/usr/local
   fi
   if test "$withval" != "no"; then
-    ODBC_INCDIR=$withval/incl
-    ODBC_LIBDIR=$withval/lib
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_LIBS="${ODBC_LIBDIR}/odbclib.a -lsqlrte -lsqlptc"
+    AC_ADD_INCLUDE($withval/incl)
+    AC_ADD_LIBPATH($withval/lib)
+    ODBC_OBJS="${ODBC_LIBDIR}/odbclib.a"
+    AC_SUBST(ODBC_OBJS)
+    AC_ADD_LIBRARY_WITH_PATH(php_odbc, $abs_builddir/ext/odbc)
+    AC_ADD_LIBRARY(sqlrte)
+    AC_ADD_LIBRARY(sqlptc)
     ODBC_TYPE=adabas
     AC_DEFINE(HAVE_ADABAS)
     AC_MSG_RESULT(yes)
@@ -385,7 +387,7 @@ AC_ARG_WITH(dbmaker,
 ])
 fi
 
-if test -n "$ODBC_TYPE"; then
+if test -n "$ODBC_TYPE" && test -n "$ODBC_INCLUDE"; then
   INCLUDES="$INCLUDES $ODBC_INCLUDE"
   EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
   AC_DEFINE(HAVE_UODBC)
