@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed set_error_hanlder() to accept methods as callbacks and also
+  report invalid callbacks. (Andrei)
 - Fixed a memory corruption bug in overload extension. (Andrei)
 - Impelemented timeout functionality, and fixed error handling of fsockopen()
   on win32.
