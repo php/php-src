@@ -209,7 +209,7 @@ unticked_statement:
 			T_CATCH '(' T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
 	|	T_DELETE cvar	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
-	|	T_NAMESPACE T_STRING { do_namespace(&$2 TSRMLS_CC); }
+	|	T_NAMESPACE namespace_class_entry { do_namespace(&$2 TSRMLS_CC); }
 ;
 
 unset_variables:
@@ -524,6 +524,11 @@ parse_class_entry:
 parse_class_name_entry:
 		parse_class_name_entry T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class_name(&$$, &$1, &$2 TSRMLS_CC); }
 	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { $$ = $1; }
+;
+
+namespace_class_entry:
+		parse_class_entry T_STRING { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
+	|	T_STRING { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;
 
 new_class_entry:
