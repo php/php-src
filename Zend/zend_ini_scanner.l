@@ -93,6 +93,7 @@ void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
 NEWLINE ("\r"|"\n"|"\r\n")
 
 %option noyywrap
+%option never-interactive
 
 %%
 
