@@ -1158,11 +1158,20 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 
 	while (ptr->fname) {
 		internal_function->handler = ptr->handler;
-		internal_function->arg_types = ptr->func_arg_types;
 		internal_function->function_name = ptr->fname;
 		internal_function->scope = scope;
 		internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		internal_function->prototype = NULL;
+		if (ptr->arg_info) {
+			internal_function->arg_info = ptr->arg_info+1;
+			internal_function->num_args = ptr->num_args;
+			internal_function->pass_rest_by_reference = ptr->arg_info[0].pass_by_reference;
+		} else {
+			internal_function->arg_info = NULL;
+			internal_function->num_args = 0;
+			internal_function->pass_rest_by_reference = 0;
+		}
+		internal_function->fn_flags = ptr->flags;
 		if (!internal_function->handler) {
 			zend_error(error_type, "Null function defined as active function");
 			zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);

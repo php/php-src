@@ -262,15 +262,6 @@ struct _zval_struct {
 	zend_uchar is_ref;
 };
 
-struct _zend_op_array;
-
-typedef struct _zend_function_entry {
-	char *fname;
-	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
-	unsigned char *func_arg_types;
-} zend_function_entry;
-
-
 typedef struct _zend_property_reference {
 	int type;  /* read, write or r/w */
 	zval *object;
@@ -306,7 +297,7 @@ struct _zend_class_entry {
 	HashTable properties_info;
 	HashTable *static_members;
 	HashTable constants_table;
-	zend_function_entry *builtin_functions;
+	struct _zend_function_entry *builtin_functions;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;
@@ -396,12 +387,6 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define OE_IS_OBJECT	(1<<1)
 #define OE_IS_METHOD	(1<<2)
 
-
-/* Argument passing types */
-#define BYREF_NONE 0
-#define BYREF_FORCE 1
-#define BYREF_ALLOW 2
-#define BYREF_FORCE_REST 3
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
 void zend_shutdown(TSRMLS_D);

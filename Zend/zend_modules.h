@@ -31,9 +31,11 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
 
-ZEND_API extern unsigned char first_arg_force_ref[];
-ZEND_API extern unsigned char second_arg_force_ref[];
-ZEND_API extern unsigned char third_arg_force_ref[];
+ZEND_API extern struct _zend_arg_info first_arg_force_ref[2];
+ZEND_API extern struct _zend_arg_info second_arg_force_ref[3];
+ZEND_API extern struct _zend_arg_info third_arg_force_ref[4];
+ZEND_API extern struct _zend_arg_info fourth_arg_force_ref[5];
+ZEND_API extern struct _zend_arg_info all_args_by_ref[1];
 
 #define ZEND_MODULE_API_NO 20020429
 #ifdef ZTS
@@ -65,7 +67,7 @@ struct _zend_module_entry {
 	unsigned char zts;
 	struct _zend_ini_entry *ini_entry;
 	char *name;
-	zend_function_entry *functions;
+	struct _zend_function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
 	int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	int (*request_startup_func)(INIT_FUNC_ARGS);

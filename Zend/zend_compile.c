@@ -930,7 +930,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	init_op_array(&op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 
 	op_array.function_name = name;
-	op_array.arg_types = NULL;
 	op_array.return_reference = return_reference;
 	op_array.fn_flags = fn_flags;
 
@@ -1048,10 +1047,12 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 }
 
 
-void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, zend_uchar pass_type TSRMLS_DC)
+void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_uchar pass_by_reference TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_arg_info *cur_arg_info;
 
+	CG(active_op_array)->num_args++;
 	opline->opcode = op;
 	opline->result = *var;
 	opline->op1 = *offset;
@@ -1060,33 +1061,20 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	} else {
 		SET_UNUSED(opline->op2);
 	}
-	if (!CG(active_op_array)->arg_types) {
-		if (pass_type==BYREF_FORCE) {
-			int i;
-
-			CG(active_op_array)->arg_types = (unsigned char *) emalloc(sizeof(unsigned char)*(offset->u.constant.value.lval+1));
-			for (i=1; i<offset->u.constant.value.lval; i++) {
-				CG(active_op_array)->arg_types[i] = BYREF_NONE;
-			}
-			CG(active_op_array)->arg_types[0]=(unsigned char) offset->u.constant.value.lval;
-			CG(active_op_array)->arg_types[offset->u.constant.value.lval] = pass_type;
-		}
-	} else {
-		CG(active_op_array)->arg_types = (unsigned char *) erealloc(CG(active_op_array)->arg_types, sizeof(unsigned char)*(offset->u.constant.value.lval+1));
-		CG(active_op_array)->arg_types[0]=(unsigned char) offset->u.constant.value.lval;
-		CG(active_op_array)->arg_types[offset->u.constant.value.lval] = pass_type;
-	}
+	CG(active_op_array)->arg_info = erealloc(CG(active_op_array)->arg_info, sizeof(zend_arg_info)*(CG(active_op_array)->num_args));
+	cur_arg_info = &CG(active_op_array)->arg_info[CG(active_op_array)->num_args-1];
+	cur_arg_info->name = estrndup(varname->u.constant.value.str.val, varname->u.constant.value.str.len);
+	cur_arg_info->name_len = varname->u.constant.value.str.len;
+	cur_arg_info->allow_null = 1;
+	cur_arg_info->pass_by_reference = pass_by_reference;
 
 	if (class_type->op_type != IS_UNUSED) {
-		znode passed_var = opline->result;
-
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-		opline->opcode = ZEND_VERIFY_INSTANCEOF;
-		opline->op1 = *class_type;
-		opline->op2 = passed_var;
-		opline->extended_value = offset->u.constant.value.lval;
+		cur_arg_info->class_name = class_type->u.constant.value.str.val;
+		cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
+		zend_str_tolower(cur_arg_info->class_name, cur_arg_info->class_name_len);
 	} else {
+		cur_arg_info->class_name = NULL;
+		cur_arg_info->class_name_len = 0;
 		opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 	}
 }
@@ -1296,12 +1284,10 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 {
 	zend_op *opline;
-	unsigned char *arg_types;
 	int original_op=op;
 	zend_function **function_ptr_ptr, *function_ptr;
 	int send_by_reference;
-
-						
+			
 	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
 	function_ptr = *function_ptr_ptr;
 
@@ -1318,13 +1304,10 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 	}
 
 	if (function_ptr) {
-		arg_types = function_ptr->common.arg_types;
+		send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset) ? ZEND_ARG_SEND_BY_REF : 0;	
 	} else {
-		arg_types = NULL;
+		send_by_reference = 0;
 	}
-
-	send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(offset, 1, arg_types)?ZEND_ARG_SEND_BY_REF:0;
-
 
 	if (op == ZEND_SEND_VAR && zend_is_function_or_method_call(param)) {
 		/* Method call */
@@ -1333,7 +1316,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 		op = ZEND_SEND_VAR_NO_REF;
 	}
 
-	if (op!=ZEND_SEND_VAR_NO_REF && send_by_reference == ZEND_ARG_SEND_BY_REF) {
+	if (op!=ZEND_SEND_VAR_NO_REF && send_by_reference==ZEND_ARG_SEND_BY_REF) {
 		/* change to passing by reference */
 		switch (param->op_type) {
 			case IS_VAR:
@@ -1611,63 +1594,26 @@ static void do_inherit_method(zend_function *function)
 
 static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 {
-	zend_op *op, *proto_op;
+	zend_uint i;
 
 	if (!fe->common.prototype) {
 		return 1;
 	}
 
-	if ((fe->common.arg_types && !fe->common.prototype->common.arg_types)
-		|| (!fe->common.arg_types && fe->common.prototype->common.arg_types)) {
+	if (fe->common.num_args != fe->common.prototype->common.num_args
+		|| fe->common.pass_rest_by_reference != fe->common.prototype->common.pass_rest_by_reference) {
 		return 0;
 	}
 
-	if (fe->common.arg_types) {
-		if (fe->common.arg_types[0] != fe->common.prototype->common.arg_types[0]) {
+	for (i=0; i< fe->common.num_args; i++) {
+		if (strcmp(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)!=0) {
 			return 0;
 		}
-		if (memcmp(fe->common.arg_types+1, fe->common.prototype->common.arg_types+1, fe->common.arg_types[0]*sizeof(zend_uchar)) != 0) {
+		if (fe->common.arg_info[i].pass_by_reference != fe->common.prototype->common.arg_info[i].pass_by_reference) {
 			return 0;
 		}
 	}
-
-	if (fe->common.prototype->type == ZEND_INTERNAL_FUNCTION) {
-		return 1; /* nothing further we can do here */
-	}
-	
-	op = fe->op_array.opcodes;
-	proto_op = fe->common.prototype->op_array.opcodes;
-
-	/* Make sure that the implementation has all of the arguments of the interface */
-	while (proto_op->opcode != ZEND_RAISE_ABSTRACT_ERROR) {
-		if (proto_op->opcode != op->opcode) {
-			return 0;
-		}
-		switch (proto_op->opcode) {
-			case ZEND_FETCH_CLASS:
-				if (zend_binary_zval_strcasecmp(&op->op2.u.constant, &proto_op->op2.u.constant)!=0) {
-					return 0;
-				}
-				break;
-		}
-		proto_op++;
-		op++;
-	}
-
-	/* Make sure that the implementation doesn't receive more arguments than the interface */
-	while (1) {
-		switch (op->opcode) {
-			case ZEND_FETCH_CLASS:
-			case ZEND_FETCH_W:
-				op++;
-				break;
-			case ZEND_RECV:
-			case ZEND_RECV_INIT:
-				return 0;
-			default:
-				return 1;
-		}
-	}
+	return 1;
 }
 
 
