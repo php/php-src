@@ -168,6 +168,7 @@ HEADER_DIRS = \
 	Zend \
 	TSRM \
 	ext/standard \
+	ext/session \
 	ext/xml \
 	ext/xml/expat/xmlparse \
 	ext/xml/expat/xmltok \
