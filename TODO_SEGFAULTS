@@ -30,6 +30,7 @@ Open:
     php_imagepolygon            (4)
     imagesetstyle               (5)
     bundled gd                  (6)
+    exif extension		(7)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -92,6 +93,10 @@ Methodology
     gdImageCreateFromGd2PartCtx
     _gdImageGd2
     GetDataBlock (gd_gif_in.c)
+
+(7) few possible integer overflows, once safe_emalloc() or something similar
+    is implemented they can all be addressed.
+
 
 Ammendment 1.
 
