@@ -2608,7 +2608,7 @@ void zend_do_fold_constant(znode *result, znode *constant_name TSRMLS_DC)
 			zval_dtor(&constant_name->u.constant);
 			return;
 		} else {
-			zend_error(E_COMPILE_ERROR, "Cannot find %s constant in class %s\n", 
+			zend_error(E_COMPILE_ERROR, "Cannot find %s constant in class %s", 
 			           constant_name->u.constant.value.str.val, CG(active_class_entry)->name);
 		}
 	}
