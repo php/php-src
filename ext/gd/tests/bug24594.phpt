@@ -51,7 +51,7 @@ Bug #24594 (Filling an area using tiles).
 	$res .= imagecolorat($base,14,16)==$black?'1':'0';
 	$res .= imagecolorat($base,15,17)==$black?'1':'0';
 	echo "$res\n";
-	imagepng($base,"filled1.png");
+
 	imagefilledrectangle($base,0,0,149,149,$white);
 	imagerectangle($base, 9,9,139,139,$black);
 	imageline($base, 9,9,139,139,$black);
@@ -79,7 +79,6 @@ Bug #24594 (Filling an area using tiles).
 	$res .= imagecolorat($base,0,0)==$black?'1':'0';
 
 	echo "$res\n";
-	imagepng($base,"filled.png");
 ?>
 --EXPECT--
 000000111111101010
