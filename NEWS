@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Fixed a bug in WDDX deserialization that would sometimes corrupt the root
+  element if it was a scalar one. (Andrei)
+- Added support for parsing recordsets contained in WDDX packets. (Andrei)
 - Renamed key_exists tp array_key_exists. (Derick)
 - Fix ImageColorsForIndex() and ImageColorAt() to work for TrueColor
   images. (Rasmus)
