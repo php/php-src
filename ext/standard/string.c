@@ -1739,11 +1739,12 @@ PHP_FUNCTION(substr_replace)
 	}
 
 	result_len = Z_STRLEN_PP(str) - l + Z_STRLEN_PP(repl);
-	result = ecalloc(result_len + 1, sizeof(char *));
+	result = emalloc(result_len + 1);
 
 	memcpy(result, Z_STRVAL_PP(str), f);
-	memcpy(&result[f], Z_STRVAL_PP(repl), Z_STRLEN_PP(repl));
-	memcpy(&result[f + Z_STRLEN_PP(repl)], Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
+	memcpy((result + f), Z_STRVAL_PP(repl), Z_STRLEN_PP(repl));
+	memcpy((result + f + Z_STRLEN_PP(repl)), Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
+	result[result_len] = '\0';
 
 	RETURN_STRINGL(result, result_len, 0);
 }
