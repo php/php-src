@@ -110,7 +110,7 @@ PHP_FUNCTION(recode_string)
 	char *r = NULL;
 	pval **str;
 	pval **req;
-	bool  success;
+	int success;
 	
 	ReSLS_FETCH();
 	if (ZEND_NUM_ARGS() != 2
