@@ -1,3 +1,40 @@
+2003-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pcntl/pcntl.c
+      ext/simplexml/simplexml.c:
+      Kill unused variables.
+
+2003-11-05  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * main/rfc1867.c:
+      added buffer reallocation for filename.
+
+2003-11-05  Uwe Schindler  <uwe@thetaphi.de>
+
+    * win32/install.txt
+      win32/install.txt:
+      remove unix crap
+
+2003-11-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      NEWS:
+      Forgot to add that..
+
+2003-11-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      Fixed bug #26128 (mbstring prints out wrong information on phpinfo())
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      -** empty log message ***
+
 2003-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute.c
