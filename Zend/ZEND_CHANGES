@@ -121,19 +121,6 @@ Changes in the Zend Engine 2.0
         print $obj->address . "\n";
         ?>
 
-    * Forced deletion of objects.
-
-      The Zend Engine 1.0 had no means to force deletion of an object
-      if there are still references to it. The newly introduced delete
-      statement calls the object's destructor and frees it even if the
-      object is referenced by some other places in the engine. Other
-      references to the deleted object become stale and trying to
-      access them results in a fatal error.
-
-      Note that if you have a user-defined function delete() in an old
-      script, this script will yield a parser error with the Zend
-      Engine 2.0, since 'delete' is now a reserved word.
-
     * Nested classes (namespaces).
 
       The Zend Engine 1.0 provided only three scopes: the global
