@@ -8,6 +8,9 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	adds hooks to thttpd to call PHP, if a filename matches *.php. This
 	patch will be applied when you install PHP.
 
+	NOTE: This version supports *only* thttpd 2.21b, no prior or later
+	version.
+
 	This is a functional and stable module (it runs a large application
 	like IMP 2.2.0 without any problems). Its original intention was to
 	demonstrate the ability of PHP to work in every web server environment.
