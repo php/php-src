@@ -104,11 +104,22 @@ ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *))
 }
 
 
-ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *))
+ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements)
 {
 	zend_ptr_stack_apply(stack, func);
+	if (free_elements) {
+		int i = stack->top;
+
+		while (--i >= 0) {
+			efree(stack->elements[i]);
+		}
+	}
 	stack->top = 0;
 	stack->top_element = stack->elements;
 }
 
 
+ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack)
+{
+	return stack->top;
+}

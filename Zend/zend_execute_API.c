@@ -143,6 +143,8 @@ void init_executor(CLS_D ELS_DC)
 
 	EG(user_error_handler) = NULL;
 
+	zend_ptr_stack_init(&EG(user_error_handlers));
+
 #ifdef ZEND_WIN32
 	EG(timed_out) = 0;
 #endif
@@ -173,7 +175,6 @@ void shutdown_executor(ELS_D)
 		}
 	}
 
-
 	zend_ptr_stack_destroy(&EG(argument_stack));
 
 	/* Destroy all op arrays */
@@ -199,6 +200,9 @@ void shutdown_executor(ELS_D)
 		zval_dtor(EG(user_error_handler));
 		FREE_ZVAL(EG(user_error_handler));
 	}
+
+	zend_ptr_stack_clean(&EG(user_error_handlers), ZVAL_DESTRUCTOR, 1);
+	zend_ptr_stack_destroy(&EG(user_error_handlers));
 }
 
 
