@@ -1,3 +1,22 @@
+2004-10-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_vm_handlers.h:
+      - Revert automatic pass arg_info
+
+2004-10-08  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Fix BC break with default in switch() having to be at the end.
+
+2004-10-08  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * acconfig.h
+      zend_config.nw.h:
+      explicitly including sys/select.h as NetWare LibC sys/types.h does not
+      include sys/select.h implicitly as other LibC
+
 2004-10-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
