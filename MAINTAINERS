@@ -63,3 +63,7 @@ EXTENSION:           mssql
 PRIMARY MAINTAINER:  Frank M. Kromann <fmk@swwwing.com>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           java
+PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
