@@ -139,10 +139,12 @@ class PEAR_Remote extends PEAR
             $tmp = base64_encode("$username:$password");
             $req_headers .= "Authorization: Basic $tmp\r\n";
         }
-        print "XMLRPC REQUEST HEADERS:\n";
-        var_dump($req_headers);
-        print "XMLRPC REQUEST BODY:\n";
-        var_dump($request);
+        if ($this->config->get('verbose') > 3) {
+            print "XMLRPC REQUEST HEADERS:\n";
+            var_dump($req_headers);
+            print "XMLRPC REQUEST BODY:\n";
+            var_dump($request);
+        }
         fwrite($fp, ("POST /xmlrpc.php HTTP/1.0\r\n$req_headers\r\n$request"));
         $response = '';
         $line1 = fgets($fp, 2048);
