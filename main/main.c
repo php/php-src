@@ -702,13 +702,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	} else if (PG(implicit_flush)) {
 		php_start_implicit_flush();
 	}
-
-	if (SG(request_info).auth_user) {
-		php_register_variable(SG(request_info).auth_user, "PHP_AUTH_USER", NULL ELS_CC PLS_CC);
-	}
-	if (SG(request_info).auth_password) {
-		php_register_variable(SG(request_info).auth_password, "PHP_AUTH_PW", NULL ELS_CC PLS_CC);
-	}
 	
 	return SUCCESS;
 }
@@ -1007,10 +1000,23 @@ static inline void php_register_server_variables(ELS_D SLS_DC PLS_DC)
 		INIT_PZVAL(array_ptr);
 		zend_hash_add(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &array_ptr, sizeof(pval *),NULL);
 	}
-	sapi_module.register_server_variables(array_ptr ELS_CC SLS_CC PLS_CC);
 
+	/* Server variables */
+	if (sapi_module.register_server_variables) {
+		sapi_module.register_server_variables(array_ptr ELS_CC SLS_CC PLS_CC);
+	}
+
+	/* argv/argc support */
 	if (PG(register_argc_argv)) {
 		php_build_argv(SG(request_info).query_string, array_ptr ELS_CC PLS_CC);
+	}
+
+	/* PHP Authentication support */
+	if (SG(request_info).auth_user) {
+		php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, array_ptr ELS_CC PLS_CC);
+	}
+	if (SG(request_info).auth_password) {
+		php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, array_ptr ELS_CC PLS_CC);
 	}
 }
 

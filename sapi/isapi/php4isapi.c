@@ -328,7 +328,7 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 				value++;
 			}
 			*colon = 0;
-			php_register_variable(value, variable, track_vars_array ELS_CC PLS_CC);
+			php_register_variable(variable, value, track_vars_array ELS_CC PLS_CC);
 			*colon = ':';
 		}
 		variable = strtok_r(NULL, "\r\n", &strtok_buf);
