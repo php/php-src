@@ -20,12 +20,15 @@
 
 #include "zend.h"
 #include "zend_ptr_stack.h"
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#endif
 
 
 ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack)
 {
-	stack->top_element = stack->elements = (void **) emalloc(sizeof(void *)*STACK_BLOCK_SIZE);
-	stack->max = STACK_BLOCK_SIZE;
+	stack->top_element = stack->elements = (void **) emalloc(sizeof(void *)*PTR_STACK_BLOCK_SIZE);
+	stack->max = PTR_STACK_BLOCK_SIZE;
 	stack->top = 0;
 }
 
@@ -33,15 +36,49 @@ ZEND_API void zend_ptr_stack_init(zend_ptr_stack *stack)
 ZEND_API inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
 {
 	if (stack->top >= stack->max) {		/* we need to allocate more memory */
-		short diff = stack->top_element-stack->elements;
-		
 		stack->elements = (void **) erealloc(stack->elements, (sizeof(void *) * (stack->max *= 2 )));
-		stack->top_element = stack->elements+diff;
+		stack->top_element = stack->elements+stack->top;
 	}
 	stack->top++;
 	*(stack->top_element++) = ptr;
 }
 
+ZEND_API inline void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count,...)
+{
+	va_list ptr;
+	void *elem;
+	
+	if (stack->top+count > stack->max) {		/* we need to allocate more memory */
+		stack->max *= 2;
+		stack->max += count; 
+		stack->elements = (void **) erealloc(stack->elements, (sizeof(void *) * (stack->max)));
+		stack->top_element = stack->elements+stack->top;
+	}
+	va_start(ptr, count);
+	while (count>0) {
+		elem = va_arg(ptr, void *);
+		stack->top++;
+		*(stack->top_element++) = elem;
+		count--;
+	}
+	va_end(ptr);
+}
+
+
+ZEND_API inline void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count,...)
+{
+	va_list ptr;
+	void **elem;
+	
+	va_start(ptr, count);
+	while (count>0) {
+		elem = va_arg(ptr, void **);
+		*elem = *(stack->top_element--) = elem;
+		stack->top--;
+		count--;
+	}
+	va_end(ptr);
+}
 
 ZEND_API inline void *zend_ptr_stack_pop(zend_ptr_stack *stack)
 {
