@@ -43,7 +43,9 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #endif
-
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 
 /* True globals, no need for thread safety */
 static int le_result,le_link,le_plink;
