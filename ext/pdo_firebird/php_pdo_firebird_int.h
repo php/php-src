@@ -55,6 +55,10 @@ typedef void (__stdcall *info_func_t)(char*);
 typedef void (*info_func_t)(char*);
 #endif
 
+#ifndef min
+#define min(a,b) ((a)<(b)?(a):(b))
+#endif
+
 typedef struct {
 
 	/* the result of the last API call */

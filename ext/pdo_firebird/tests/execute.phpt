@@ -47,9 +47,9 @@ bool(true)
 int(1)
 array(6) {
   ["ID"]=>
-  int(1)
+  string(1) "1"
   [0]=>
-  int(1)
+  string(1) "1"
   ["TEXT"]=>
   string(3) "bla"
   [1]=>

@@ -19,11 +19,11 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
   [
     FIREBIRD_LIBNAME=gds
   ], [
-    PHP_CHECK_LIBRARY(fbclient, isc_detach_database,
+    PHP_CHECK_LIBRARY(ib_util, isc_detach_database,
     [
-      FIREBIRD_LIBNAME=fbclient
+      FIREBIRD_LIBNAME=ib_util
     ], [
-      AC_MSG_ERROR([libgds or libfbclient not found! Check config.log for more information.])
+      AC_MSG_ERROR([libgds or libib_util not found! Check config.log for more information.])
     ], [
       -L$FIREBIRD_LIBDIR
     ])

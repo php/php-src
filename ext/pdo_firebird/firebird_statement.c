@@ -56,7 +56,7 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	int result = 1, i;
 	
 	/* release the statement */
-	if (*S->name && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
+	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
 		RECORD_ERROR(stmt);
 		result = 0;
 	}
@@ -68,6 +68,9 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		}
 	}
 	efree(S->fetch_buf);
+	
+	zend_hash_destroy(S->named_params);
+	FREE_HASHTABLE(S->named_params);
 	
 	/* clean up the input descriptor */
 	if (S->in_sqlda) {
@@ -171,6 +174,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
+#if abies_0
 /* internal function to override return types of parameters */
 static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var) /* {{{ */
 {
@@ -194,18 +198,17 @@ static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var) 
 		case SQL_BLOB:
 			*param_type = PDO_PARAM_STR;
 			break;
-#if abies_0
 		case SQL_FLOAT:
 		case SQL_DOUBLE:
 			*param_type = PDO_PARAM_DBL;
 			break;
-#endif
 	}
 }
 /* }}} */
+#endif
 
-#define FETCH_BUF(buf,type,len) ((buf) = (buf) ? (buf) : \
-	emalloc((len) ? (len * sizeof(type)) : ((len) = sizeof(type))))
+#define FETCH_BUF(buf,type,len,lenvar) ((buf) = (buf) ? (buf) : \
+	emalloc((len) ? (len * sizeof(type)) : ((*(unsigned long*)lenvar) = sizeof(type))))
 
 /* fetch a blob into a fetch buffer */
 static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ */
@@ -214,7 +217,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
 	isc_blob_handle blobh = NULL;
-	static char const bl_items[] = { isc_info_blob_total_length };
+	char const bl_item = isc_info_blob_total_length;
 	char bl_info[20];
 	unsigned short i;
 	int result = *len = 0;
@@ -224,7 +227,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 		return 0;
 	}
 
-	if (isc_blob_info(H->isc_status, &blobh, sizeof(bl_items), const_cast(bl_items),
+	if (isc_blob_info(H->isc_status, &blobh, 1, const_cast(&bl_item),
 			sizeof(bl_info), bl_info)) {
 		RECORD_ERROR(stmt);
 		goto fetch_blob_end;
@@ -283,6 +286,7 @@ fetch_blob_end:
 	}
 	return result;
 }
+/* }}} */
 
 static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{{ */
 	unsigned long *len TSRMLS_DC)
@@ -296,7 +300,8 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 		*len = 0;
 	} else {
 		/* override the column param type */
-		set_param_type(&stmt->columns[colno].param_type,var);
+		/* set_param_type(&stmt->columns[colno].param_type,var); */
+		stmt->columns[colno].param_type = PDO_PARAM_STR;
 		
 		if (var->sqlscale < 0) {
 			static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000,
@@ -316,8 +321,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					n = *(ISC_INT64*)var->sqldata;
 			}
 				
-			*len = 24;
-			*ptr = FETCH_BUF(S->fetch_buf[colno], char, *len);
+			*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
 			
 			if (n >= 0) {
 				*len = sprintf(*ptr, "%" LL_MASK "d.%0*" LL_MASK "d", 
@@ -332,6 +336,11 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 			switch (var->sqltype & ~1) {
 				struct tm t;
 				char *fmt;				
+
+/**
+* For the time being, this code has been changed to convert every returned value to a string
+* before passing it back up to the PDO driver.
+*/
 				
 				case SQL_VARYING:
 					*ptr = &var->sqldata[2];
@@ -341,13 +350,36 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*ptr = var->sqldata;
 					*len = var->sqllen;
 					break;
+// --- cut here ---
 				case SQL_SHORT:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], long, *len);
+				    *ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
+					*len = sprintf(*ptr, "%d", *(short*)var->sqldata);
+					break;
+				case SQL_LONG:
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
+					*len = sprintf(*ptr, "%ld", *(ISC_LONG*)var->sqldata);
+					break;
+				case SQL_INT64:
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
+					*len = sprintf(*ptr, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
+					break;
+				case SQL_FLOAT:
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
+					*len = sprintf(*ptr, "%f", *(float*)var->sqldata);
+					break;
+				case SQL_DOUBLE:
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
+					*len = sprintf(*ptr, "%f" , *(double*)var->sqldata);
+					break;
+// --- cut here ---
+#if abies_0
+				case SQL_SHORT:
+					*ptr = FETCH_BUF(S->fetch_buf[colno], long, 0, *len);
 					*(long*)*ptr = *(short*)var->sqldata;
 					break;
 				case SQL_LONG:
 #if SIZEOF_LONG == 8
-					*ptr = FETCH_BUF(S->fetch_buf[colno], long, *len);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], long, 0, *len);
 					*(long*)*ptr = *(ISC_LONG*)var->sqldata;
 #else
 					*ptr = var->sqldata;
@@ -358,19 +390,19 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 #if SIZEOF_LONG == 8
 					*ptr = var->sqldata;
 #else
-					*len = 20;
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, *len);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 20, NULL);
 					*len = sprintf(*ptr, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata);
 #endif
 					break;
 				case SQL_FLOAT:
-					*ptr = FETCH_BUF(S->fetch_buf[colno], double, *len);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], double, 0, *len);
 					*(double*)*ptr = *(float*)var->sqldata;
 					break;
 				case SQL_DOUBLE:
 					*ptr = var->sqldata;
 					*len = sizeof(double);
 					break;
+#endif
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
 					fmt = INI_STR("ibase.dateformat");
@@ -385,8 +417,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					}
 
 					/* convert the timestamp into a string */
-					*len = 80;	/* TODO enough ? */
-					*ptr = FETCH_BUF(S->fetch_buf[colno], char, *len);
+					*ptr = FETCH_BUF(S->fetch_buf[colno], char, *len = 80, NULL);
 					*len = strftime(*ptr, *len, fmt, &t);
 					break;
 				case SQL_BLOB:
@@ -458,7 +489,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 		long *index;
 
 		/* try to determine the index by looking in the named_params hash */
-		if (SUCCESS == zend_hash_find(S->named_params, param->name, param->namelen+1, &index)) {
+		if (SUCCESS == zend_hash_find(S->named_params, param->name, param->namelen+1, (void*)&index)) {
 			param->paramno = *index;
 		} else {
 			/* ... or by looking in the input descriptor */
