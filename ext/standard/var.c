@@ -56,11 +56,7 @@ void php_var_dump(pval **struc, int level)
 			break;
 
 		case IS_LONG:
-			if ((*struc)->refcount == -1) {
-				i = sprintf(buf, "%*c[%ld]=>\n", level, ' ', (*struc)->value.lval);
-			} else {
-				i = sprintf(buf, "%*c%sint(%ld)\n", COMMON, (*struc)->value.lval);
-			}
+			i = sprintf(buf, "%*c%sint(%ld)\n", COMMON, (*struc)->value.lval);
 			PHPWRITE(&buf[1], i - 1);
 			break;
 
@@ -72,18 +68,10 @@ void php_var_dump(pval **struc, int level)
 			break;
 
 		case IS_STRING:
-			if ((*struc)->refcount == -1) {
-				i = sprintf(buf, "%*c[\"", level, ' ');
-			} else {
-				i = sprintf(buf, "%*c%sstring(%d) \"", COMMON, (*struc)->value.str.len);
-			}
+			i = sprintf(buf, "%*c%sstring(%d) \"", COMMON, (*struc)->value.str.len);
 			PHPWRITE(&buf[1], i - 1);
 			PHPWRITE((*struc)->value.str.val, (*struc)->value.str.len);
-			if ((*struc)->refcount == -1) {
-				strcpy(buf, "\"]=>\n");
-			} else {
-				strcpy(buf, "\"\n");
-			}
+			strcpy(buf, "\"\n");
 			PHPWRITE(buf, strlen(buf));
 			break;
 
@@ -114,25 +102,14 @@ void php_var_dump(pval **struc, int level)
 					continue;
 				}
 				switch (i) {
-					case HASH_KEY_IS_LONG:{
-							zval *d;
-							MAKE_STD_ZVAL(d);
-							ZVAL_LONG(d,index);
-							d->refcount = -1;
-							php_var_dump(&d, level + 2);
-							FREE_ZVAL(d);
-						}
+					case HASH_KEY_IS_LONG:
+						sprintf(buf, "%*c[%ld]=>\n", level + 1, ' ', index);
+						PHPWRITE(buf,strlen(buf));
 						break;
 
-					case HASH_KEY_IS_STRING:{
-							zval *d;
-							MAKE_STD_ZVAL(d);
-							ZVAL_STRING(d,key,0);
-							d->refcount = -1;
-							php_var_dump(&d, level + 2);
-							efree(key);
-							FREE_ZVAL(d);
-						}
+					case HASH_KEY_IS_STRING:
+						sprintf(buf, "%*c[\"%s\"]=>\n", level + 1, ' ', key);
+						PHPWRITE(buf, strlen(buf));
 						break;
 				}
 				php_var_dump(data, level + 2);
