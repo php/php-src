@@ -257,7 +257,7 @@ static gzFile php_gzopen_wrapper(char *path, char *mode, int options TSRMLS_DC)
 
 	stream = php_stream_open_wrapper(path, mode, options | REPORT_ERRORS, NULL TSRMLS_CC);
 	if (stream)	{
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_TRY_HARD, (void**)&fd, 1))
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD|PHP_STREAM_CAST_TRY_HARD, (void**)&fd, 1))
 		{
 			gzFile ret = gzdopen(fd, mode);
 			if (ret)	{
@@ -302,8 +302,8 @@ PHP_FUNCTION(gzfile)
 	convert_to_string_ex(filename);
 
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
-	stream = php_stream_gzopen(Z_STRVAL_PP(filename), "r", use_include_path|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
-	if (!stream) {
+	stream = php_stream_gzopen(Z_STRVAL_PP(filename), "rb", use_include_path|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL TSRMLS_CC);
+	if (stream == NULL) {
 		php_error(E_WARNING,"gzFile(\"%s\") - %s",Z_STRVAL_PP(filename),strerror(errno));
 		RETURN_FALSE;
 	}
