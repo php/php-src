@@ -19,6 +19,7 @@ Changes in the Zend Engine 2.0
       the box or after a very small amount of modifications would be
       high.
 
+      [Not sure if the following will be implemented after all]
       To simplify migration, the Zend Engine 2.0 supports an optional
       'auto-clone' feature, which performs a cloning of the object
       whenever it would have been copied in the Zend Engine 1.0.
@@ -36,10 +37,10 @@ Changes in the Zend Engine 2.0
 
       Creating a copy of an object with fully replicated properties is 
       not always the wanted behavior. A good example of the need for 
-      copy constructors, is if you have an object which represents a 
-      GTK window and the object holds the resource of this GTK window, 
-      when you create a duplicate you might want to create a new 
-      window with the same properties and have the new object hold the 
+      copy constructors, is if you have an object which represents a
+      GTK window and the object holds the resource of this GTK window,
+      when you create a duplicate you might want to create a new
+      window with the same properties and have the new object hold the
       resource of the new window. Another example is if your object 
       holds a reference to another object which it uses and when you 
       replicate the parent object you want to create a new instance of 
@@ -63,7 +64,7 @@ Changes in the Zend Engine 2.0
       will supply a function that imports all of the properties from 
       the source object, so that they can start with a by-value 
       replica of the source object, and only override properties that 
-      need to be changed.
+      need to be changed. [The function hasn't been implemented yet]
 
       Example:
 
@@ -133,7 +134,8 @@ Changes in the Zend Engine 2.0
       except that you can't instantiate a namespace with "new". This 
       essentially also makes a class a namespace, so the scoping rules 
       for namespaces apply for classes. Some of the consequences of 
-      this are:
+      this are: [Not finalized. Right now we basically have nested
+      classes so you can instantiate any nested class]
 
         * Classes may contain classes.
 
