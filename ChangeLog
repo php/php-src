@@ -1,3 +1,34 @@
+2000-05-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h: ANSIfy declarations/prototypes
+
+    * acinclude.m4: s/normal/SUSV2/
+
+    * php_virtual_cwd.h: Remove extra declarations of cwd_globals(_id)
+
+2000-05-16  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h:
+    - Reverse the patch until I have time to look at it. The global id should
+      be defined by ZEND_DECLARE_GLOBALS(cwd)
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h:
+    - Commit Sascha's patch to the virtual_cwd code. Will test it on Windows
+      soon.
+
+2000-05-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/cpdf/config.m4: Fix PHP_EXTENSION argument
+
+    PR: #4458
+
+2000-05-16  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/swf/swf.c: - fixed prototype
+
 2000-05-15  Sascha Schumann  <sascha@schumann.cx>
 
     * configure.in: Fix pointer to FAQ entry.
