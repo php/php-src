@@ -56,16 +56,21 @@
 }
 
 #if ZEND_DEBUG
+#define HT_IS_DESTROYING	1
+#define HT_DESTROYED		2
+#define HT_CLEANING		3
+#define HT_OK				0
+
 static void _zend_is_inconsistent(HashTable *ht,char *file, int line)
 {	
     switch (ht->inconsistent) {
-	case 1:
+	case HT_IS_DESTROYING:
         zend_error(E_CORE_ERROR, "ht=%08x is destroying in %s:%d",ht,file,line);
 		break;
-	case 2:
+	case HT_DESTROYED:
         zend_error(E_CORE_ERROR, "ht=%08x is already destroyed in %s:%d",ht,file,line);
 		break;
-	case 3:
+	case HT_CLEANING:
         zend_error(E_CORE_ERROR, "ht=%08x is cleaning %s:%d",ht,file,line);
 		break;
     }
@@ -105,7 +110,7 @@ ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction
 {
 	uint i;
 
-	SET_INCONSISTENT(0);
+	SET_INCONSISTENT(HT_OK);
 	
 	for (i = 0; i < nNumPrimeNumbers; i++) {
 		if (nSize <= PrimeNumbers[i]) {
@@ -572,7 +577,7 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 
 	IS_CONSISTENT(ht);
 
-	SET_INCONSISTENT(1);
+	SET_INCONSISTENT(HT_IS_DESTROYING);
 
 	p = ht->pListHead;
 	while (p != NULL) {
@@ -588,7 +593,7 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 	}
 	pefree(ht->arBuckets,ht->persistent);
 
-	SET_INCONSISTENT(2);
+	SET_INCONSISTENT(HT_DESTROYED);
 }
 
 
@@ -598,7 +603,7 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 
 	IS_CONSISTENT(ht);
 
-	SET_INCONSISTENT(3);
+	SET_INCONSISTENT(HT_CLEANING);
 
 	p = ht->pListHead;
 	while (p != NULL) {
@@ -619,7 +624,7 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 	ht->nNextFreeElement = 0;
 	ht->pInternalPointer = NULL;
 
-	SET_INCONSISTENT(0);
+	SET_INCONSISTENT(HT_OK);
 }
 
 
@@ -683,7 +688,7 @@ ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
 	}
 	pefree(ht->arBuckets,ht->persistent);
 
-	SET_INCONSISTENT(2);
+	SET_INCONSISTENT(HT_DESTROYED);
 }
 
 /* This is used to selectively delete certain entries from a hashtable.
