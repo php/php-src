@@ -1,3 +1,10 @@
+1999-11-11  Rasmus Lerdorf  <rasmus@php.net>
+
+    * MAINTAINERS:
+1999-11-11  Thies C. Arntzen  <thies@digicol.de>
+
+    * fopen-wrappers.c:    (PHP fopen) commands send to a FTP-server need to end in "\r\n" (RFC 854)
+
 1999-11-10  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/gd/config.m4:
