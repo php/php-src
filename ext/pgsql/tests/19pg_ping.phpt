@@ -4,7 +4,12 @@ PostgreSQL pg_ping() functions
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-include("pg_ping.inc");
+// optional functions
+
+include('config.inc');
+
+$db = pg_connect($conn_str);
+var_dump(pg_ping($db));
 ?>
 --EXPECT--
 bool(true)

@@ -4,7 +4,12 @@ PostgreSQL copy functions
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-include("copy.inc");
+
+include('config.inc');
+
+
+echo "OK";
+
 ?>
 --EXPECT--
 OK

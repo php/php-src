@@ -4,7 +4,26 @@ PostgreSQL pg_escape_bytea() functions
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-include("pg_escape_bytea.inc");
+// optional functions
+
+include('config.inc');
+
+$fp = fopen('php.gif', 'r');
+$image = fread($fp, filesize('php.gif'));
+$esc_image = pg_escape_bytea($image);
+
+$db = pg_connect($conn_str);
+pg_query($db, 'INSERT INTO '.$table_name.' (num, bin) VALUES (9876, \''.$esc_image.'\');');
+$result = pg_query($db, 'SELECT * FROM '.$table_name.' WHERE num = 9876');
+$rows = pg_fetch_all($result);
+$unesc_image = pg_unescape_bytea($rows[0]['bin']);
+
+if ($unesc_image !== $image) {
+	echo "NG";
+}
+else {
+	echo "OK";
+}
 ?>
 --EXPECT--
 OK
