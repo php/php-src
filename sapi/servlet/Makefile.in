@@ -8,7 +8,7 @@ LTLIBRARY_NAME    = libsapi.la
 LTLIBRARY_SOURCES = servlet.c java.c
 
 EXTRA_CFLAGS = $(JAVA_CFLAGS)
-EXTRA_INCLUDES = $(JAVE_INCLUDE)
+EXTRA_INCLUDES = $(JAVA_INCLUDE)
 
 include $(topsrcdir)/build/ltlib.mk
 
