@@ -13,7 +13,7 @@ CFG=mssql - Win32 Release_TS
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "mssql.mak" CFG="mssql - Win32 MSSQL 70 Debug_TS"
+!MESSAGE NMAKE /f "mssql.mak" CFG="mssql - Win32 Release_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D MSSQL70=1 /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL_MSSQL" /D "DBNTWIN32" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_MSSQL=1 /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D MSSQL70=1 /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL_MSSQL" /D "DBNTWIN32" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_MSSQL=1 /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D MSSQL70=1 /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MSSQL_EXPORTS" /D "COMPILE_DL_MSSQL" /D "DBNTWIN32" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_MSSQL=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts_debug.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"..\..\Debug_TS/php_mssql70.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\mssql-70\lib"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts_debug.lib ntwdblib.lib /nologo /dll /machine:I386 /out:"..\..\Debug_TS/php_mssql.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\mssql-70\lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts_debug.lib ntwdblib.lib /nologo /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php_mssql.dll" /pdbtype:sept /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\mssql-70\lib"
 
 !ENDIF 
 
