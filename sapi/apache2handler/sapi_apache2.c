@@ -48,7 +48,7 @@
 #include "http_log.h"
 #include "http_main.h"
 #include "util_script.h"
-#include "http_core.h"                         
+#include "http_core.h"
 #include "ap_mpm.h"
 
 #include "php_apache.h"
@@ -58,7 +58,7 @@
  * file does not use the system call shutdown, it is safe to #undef it.K
  */
 #undef shutdown
- 
+
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
 #define PHP_SCRIPT "php5-script"
@@ -69,31 +69,16 @@ char *apache2_php_ini_path_override = NULL;
 static int
 php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
-	apr_bucket *bucket;
-	apr_bucket_brigade *brigade;
 	request_rec *r;
 	php_struct *ctx;
-	char *copy_str;
-
-	if (str_length == 0) {
-		return 0;
-	}
 
 	ctx = SG(server_context);
 	r = ctx->r;
-	brigade = ctx->brigade;
-	
-	copy_str = apr_pmemdup(r->pool, str, str_length);
-	bucket = apr_bucket_pool_create(copy_str, str_length, r->pool, r->connection->bucket_alloc);
-						 
-	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
 
-	if (ap_pass_brigade(r->output_filters, brigade) != APR_SUCCESS || r->connection->aborted) {
+	if (ap_rwrite(str, str_length, r) < 0) {
 		php_handle_aborted_connection();
 	}
-	/* Ensure this brigade is empty for the next usage. */
-	apr_brigade_cleanup(brigade);
-	
+
 	return str_length; /* we always consume all the data passed to us. */
 }
 
@@ -241,8 +226,6 @@ static void
 php_apache_sapi_flush(void *server_context)
 {
 	php_struct *ctx;
-	apr_bucket_brigade *brigade;
-	apr_bucket *bucket;
 	request_rec *r;
 	TSRMLS_FETCH();
 
@@ -255,20 +238,15 @@ php_apache_sapi_flush(void *server_context)
 	}
 
 	r = ctx->r;
-	brigade = ctx->brigade;
 
 	sapi_send_headers(TSRMLS_C);
 
 	r->status = SG(sapi_headers).http_response_code;
 	SG(headers_sent) = 1;
 
-	/* Send a flush bucket down the filter chain. */
-	bucket = apr_bucket_flush_create(r->connection->bucket_alloc);
-	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
-	if (ap_pass_brigade(r->output_filters, brigade) != APR_SUCCESS || r->connection->aborted) {
+	if (ap_rflush(r) < 0 || r->connection->aborted) {
 		php_handle_aborted_connection();
 	}
-	apr_brigade_cleanup(brigade);
 }
 
 static void php_apache_sapi_log_message(char *msg)
@@ -277,7 +255,7 @@ static void php_apache_sapi_log_message(char *msg)
 	TSRMLS_FETCH();
 
 	ctx = SG(server_context);
-   
+
 	/* We use APLOG_STARTUP because it keeps us from printing the
 	 * data and time information at the beginning of the error log
 	 * line.  Not sure if this is correct, but it mirrors what happens
@@ -504,8 +482,8 @@ static int php_handler(request_rec *r)
 	}
 
 	/* Setup the CGI variables if this is the main request */
-	if (r->main == NULL || 
-		/* .. or if the sub-request envinronment differs from the main-request. */ 
+	if (r->main == NULL ||
+		/* .. or if the sub-request envinronment differs from the main-request. */
 		r->subprocess_env != r->main->subprocess_env
 	) {
 		/* setup standard CGI variables */
