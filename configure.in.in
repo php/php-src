@@ -158,6 +158,14 @@ else
 	fi
 fi
 
+AC_MSG_CHECKING([if compiler supports -Wl,--version-script])
+AC_CACHE_VAL(php_cv_cc_vscript,[
+		SLIBS=$LIBS
+		LIBS="-Wl,--version-script=$srcdir/php.map $LIBS"
+		AC_TRY_LINK([],[],php_cv_cc_vscript=yes,php_cv_cc_vscript=no)
+		LIBS=$SLIBS ])
+AC_MSG_RESULT($php_cv_cc_vscript)
+
 
 dnl Check compiler support for -rdynamic
 AC_MSG_CHECKING(if compiler supports -rdynamic)
@@ -387,11 +395,12 @@ AC_ARG_ENABLE(versioning,
     "SunOS 5"*)
         VERSION_SCRIPT="-Wl,'-M $abs_srcdir/php.map'"
     ;;
-    Linux*)
-        VERSION_SCRIPT="-Wl,--version-script=$abs_srcdir/php.map"
-    ;;
     *)
-        AC_MSG_ERROR(versioning is not supported on your OS)
+		if test "$php_cv_cc_vscript" = "yes" ; then
+          VERSION_SCRIPT="-Wl,--version-script=$abs_srcdir/php.map"
+		else 
+          AC_MSG_ERROR(versioning is not supported on your OS)
+	    fi
     ;;
     esac
     versioning="yes"
