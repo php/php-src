@@ -1,0 +1,12 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("libxml", "LibXML support", "yes");
+
+if (PHP_LIBXML == "yes") {
+	EXTENSION("libxml", "libxml.c", false /* never shared */);
+	AC_DEFINE("HAVE_LIBXML", 1, "LibXML support");
+	ADD_FLAG("LIBS_LIBXML", "libxml2.lib iconv.lib");
+}
+
+

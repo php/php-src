@@ -1,0 +1,26 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("sqlite", "SQLite support", "yes");
+
+if (PHP_SQLITE == "yes") {
+	FSO.CopyFile("ext\\sqlite\\libsqlite\\src\\sqlite.w32.h",
+	   	"ext\\sqlite\\libsqlite\\src\\sqlite.h");
+	
+	FSO.CopyFile("ext\\sqlite\\libsqlite\\src\\sqlite_config.w32.h",
+	   	"ext\\sqlite\\libsqlite\\src\\config.h");
+	
+	EXTENSION("sqlite", "sqlite.c sess_sqlite.c", null,
+		"/D PHP_SQLITE_EXPORTS /Iext/sqlite/libsqlite/src");
+	
+	ADD_SOURCES("ext/sqlite/libsqlite/src", "opcodes.c parse.c encode.c \
+		auth.c btree.c build.c delete.c expr.c func.c hash.c insert.c \
+		main.c os.c pager.c printf.c random.c select.c table.c tokenize.c \
+		update.c util.c vdbe.c attach.c btree_rb.c pragma.c vacuum.c \
+		copy.c where.c trigger.c", "sqlite");
+
+	AC_DEFINE("HAVE_SQLITE", 1, "SQLite support");
+	ADD_DEF_FILE("ext\\sqlite\\php_sqlite.def");
+}
+
+

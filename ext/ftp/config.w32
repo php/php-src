@@ -1,0 +1,9 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("ftp", "ftp support", "yes");
+
+if (PHP_FTP == "yes") {
+	EXTENSION("ftp", "php_ftp.c ftp.c");
+	AC_DEFINE('HAVE_FTP', 1, 'Have FTP support');
+}

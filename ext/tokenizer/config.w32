@@ -1,0 +1,11 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("tokenizer", "tokenizer support", "yes");
+
+if (PHP_TOKENIZER == "yes") {
+	EXTENSION("tokenizer", "tokenizer.c");
+	AC_DEFINE("HAVE_TOKENIZER", 1, "Tokenizer support");
+}
+
+
