@@ -1,98 +1,87 @@
-PHP 4.0                                                                    NEWS
+PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
-- Fix many bugs and memleaks in the domxml extension. (Markus)
-- Added var_export, which shows a representation of a variable, much like
-  var_dump, but in such a way you can use it as PHP code. (Derick)
-- Added -w option to the cgi-version. This will remove all comments and
-  whitespace from teh script. (Thies)
-- Added support for SO_RCVTIMEO and SO_SNDTIMEO to ext/sockets (Jason)
-- Added ob_get_level, which returns the nesting level of the output buffering
+- Fixed several bugs and memleaks in the domxml extension. (Markus)
+- Added var_export() which outputs a representation of a variable as reusable 
+  PHP code. (Derick)
+- Added -w option to the cgi-version which strips all comments and whitespace
+  from the script. (Thies)
+- Added support for SO_RCVTIMEO and SO_SNDTIMEO to ext/sockets. (Jason)
+- Added ob_get_level() which returns the nesting level of the output buffering
   mechanism. (Yasuo, Derick)
-- Added ob_flush and ob_clean functions, which flush and clean an
-  output buffer without destroying the buffer. (Derick)
-- Added a parameter to mysql_connect to force a new database link to be
+- Added ob_flush() and ob_clean() functions which flush and clean an output 
+  buffer without destroying the buffer. (Derick)
+- Added a parameter to mysql_connect() to force a new database link to be
   created. (Markus, Derick)
 - Added ldap_sort() function. (Stig Venaas)
 - Added md5_file(), which calculaties the MD5 sum of a file.
-  (patch by: Alessandro Astarita <aleast@capri.it>) (Derick)
+  Patch by Alessandro Astarita <aleast@capri.it> (Derick)
 - Added support for parsing recordsets contained in WDDX packets. (Andrei)
-- Renamed key_exists to array_key_exists. (Derick)
-- Fix ImageColorsForIndex() and ImageColorAt() to work for TrueColor
+- Renamed key_exists() to array_key_exists(). (Derick)
+- Fixed ImageColorsForIndex() and ImageColorAt() to work for TrueColor
   images. (Rasmus)
 - Added support for bind_textdomain_codeset(). (rudib@email.si)
-- Add generic Win 32 API extension. (jmoore)
-- Fix Bug 9878 (patch by bfoddy@mediaone.net). (jmoore)
-- Removed a warning message about a NONEXISTENT character set from
-  mysql_connect(), when the server's default character set != latin1.
-- Add Direct I/O extension for lowlevel access to the POSIX layer. (sterling)
-- Added Udm_Check_Charset function. (gluke)
+- Added generic Win 32 API extension. (jmoore)
+- Fixed Bug #9878. Patch by bfoddy@mediaone.net. (jmoore)
+- Removed warning message about NONEXISTENT character set from mysql_connect() 
+  when the server's default character set != latin1. (Mysql Team)
+- Added Direct I/O extension for lowlevel access to the POSIX layer. (sterling)
 - New SAPI module for the WebJames server on RISC OS. (Alex Waugh)
-- Made ldap_add (and modify) give warning with illegal value arrays.
-  Previously seg faulted or added wrong value. (Stig Venaas)
-- mnoGoSearch module example updates for 3.2.x compatibility
-- Some mnogosearch-3.2.x compilation bugs fixes.
-  Make crosswords and weight sections work with mnogosearch-3.2.x
-  UDM_PARAM_HLBEG, UDM_PARAM_HLEND mnoGoSearch Agent parameters
-  has been added. (gluke)
-- Fix bug 13885 (gmdate timezone handling on windows). (jmoore)
-- Fix behaviour of strtok. Bug 13866. (jmoore)
-- Made fbsql_num_rows() return the correct value on all select statements.
+- Made ldap_add (and modify) functions to throw a warning with illegal value 
+  arrays. Previously segfaulted or added wrong value. (Stig Venaas)
+- Added Udm_Check_Charset() function into mnoGoSearch extension. (gluke)
+- Fixed mnoGoSearch extension to support mnogosearch-3.2.x. (gluke)
+- Fixed bug #13885 (gmdate() timezone handling on windows). (jmoore)
+- Fixed behaviour of strtok(). Bug #13866. (jmoore)
+- Made fbsql_num_rows() to return the correct value on all select statements.
   (Frank)
 - Fixed HTTP file upload support to handle big files better. (Jani)
 - Added array_chunk() function that splits an array into chunks of specified
   size. (Andrei)
-- $HTTP_RAW_POST_DATA was not populated on a missing content-type even when
-  always_populate_raw_post_data was on - fixed. (Rasmus)
-- Added session_cache_expire() function. (patch from anuradha@gnu.org)
-- Add array_fill() function. (Rasmus)
-- Hide Authorization header from phpinfo() output in safe_mode. (Rasmus)
+- Fixed a bug which caused $HTTP_RAW_POST_DATA not to be populated on a missing
+  content-type even when always_populate_raw_post_data was On - fixed. (Rasmus)
+- Added session_cache_expire() function. Patch by anuradha@gnu.org (Andrei)
+- Added array_fill() function. (Rasmus)
+- Made Authorization header to be hidden from phpinfo() output in safe_mode. 
+  (Rasmus)
 - Re-instated safe-mode realm mangling. (Rasmus)
 - Fixed a bug in preg_replace() that would change the type of the replacement
   array entries to string. (Andrei)
 - Added user-space object overloading extension. (Andrei)
-- Make UDM_PARAM_ISPELL_PREFIXES work under mnogosearch-3.2.x. (gluke)
 - Added ldap_start_tls() function. (Stig Venaas, patch by kuenne@rentec.com)
-- Added support for word match mnogosearch-3.2 command and for stopfile
-  command. StopTable will not be supported by mnogosearch-3.2.x
 - Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
   not been called. (Sterling)
-- Don't throw a 'file does not exist' warning for the is_dir(), is_writeable(),
-  is_readable(), is_executable(), is_link() and is_file() functions. (Sterling)
+- Fixed is_dir(), is_writeable(), is_readable(), is_executable(), is_link() and
+  is_file() functions to not throw a 'file does not exist' warning. (Sterling)
 - Added array_change_key_case() function that returns array with
   with all string keys lowercased or uppercased. (EdinK)
 - Added parameter to ircg_pconnect to suppress treating non-fatal errors
   as fatal, and added conversion of Windows quotes to &quot;. (Sascha)
-- Added new function pcntl_exec, which behaves similar to the system
-  execve. (Jason)
-- initial support of mnogosearch-3.2.x has been added. Not all features
-  are implemented currently.
-- Fix segfault and check for truecolor image in ImageColorAt. (Rasmus)
-- nl2br now handles all styles of line-endings in one string. (Boian,
-  Derick)
-- Added mcrypt_generic_deinit to replace mcrypt_generic_end. (Derick)
+- Added pcntl_exec() function which behaves similar to the system execve.
+  (Jason)
+- Fixed segfault and check for truecolor image in ImageColorAt(). (Rasmus)
+- Fixed nl2br() to handle all styles of line-endings in one string. 
+  (Boian, Derick)
+- Added mcrypt_generic_deinit() to replace mcrypt_generic_end(). (Derick)
 - Added apache_setenv() function for injecting variables into Apache's
   subprocess_env table. (Rasmus)
-- Let settype also accept 'int', 'bool', 'float' and 'null'. (Jeroen)
-- Added IPv6 support to gethostbyaddr()
+- Added support for 'int', 'bool', 'float' and 'null' for settype(). (Jeroen)
+- Added IPv6 support to gethostbyaddr().
   (Patch by Matthias Wimmer <matthias@charente.de> and venaas)
-- Make the seed options to srand() and mt_srand() optional, if the seed is
-  not specified, the generate the most random seed possible. (Sterling)
-- A bug fixed when tryint to return NULL strings.
-  Added a new example of building search frontend based on mnoGoSearch
-  extension.
-- Fix for LONG_VARCHAR type crashing submitted by Walter Franzini.
-  (walter@sys-net.it)
-- Made in_array() and search_array() allow the needle to be an array in
-  itself. (Andrei)
+- Made the seed options to srand() and mt_srand() optional. If the seed is
+  not specified generate the most random seed possible. (Sterling)
+- Fixed LONG_VARCHAR type crashing in ODBC extension. Patch by Walter Franzini.
+  (kalowsky)
+- Made in_array() and search_array() allow the needle to be an array in itself.
+  (Andrei)
 - Added ini_get_all() function which returns all registered ini entries
   or entries for the specified extension. (Jani)
 - Added mailparse_uudecode_all() which extracts all uuencoded attachments
-- Add support for chinese encodings to htmlentities() and htmlspecialchars().
+- Added support for chinese encodings to htmlentities() and htmlspecialchars().
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
-?? ??? 200?, Version 4.1.0
+10 Dec 2001, Version 4.1.0
 - Fixed a bug which caused set_time_limit() to affect all requests to an
   Apache child. (Zeev)
 - Fixed a bug in WDDX deserialization that would sometimes corrupt the root
