@@ -37,8 +37,10 @@
 #include "../../../php_build/mssql-65/include/sqldb.h"
 #elif MSSQL70
 #define MSSQL_VERSION "7.0"
-#include "../../../php_build/mssql-70/include/sqlfront.h"
-#include "../../../php_build/mssql-70/include/sqldb.h"
+//#include "../../../php_build/mssql-70/include/sqlfront.h"
+//#include "../../../php_build/mssql-70/include/sqldb.h"
+#include "sqlfront.h"
+#include "sqldb.h"
 #else
 #define MSSQL_VERSION "Unknown"
 #endif
@@ -73,6 +75,8 @@ PHP_FUNCTION(mssql_pconnect);
 PHP_FUNCTION(mssql_close);
 PHP_FUNCTION(mssql_select_db);
 PHP_FUNCTION(mssql_query);
+PHP_FUNCTION(mssql_fetch_batch);
+PHP_FUNCTION(mssql_rows_affected);
 PHP_FUNCTION(mssql_free_result);
 PHP_FUNCTION(mssql_get_last_message);
 PHP_FUNCTION(mssql_num_rows);
@@ -107,7 +111,7 @@ typedef struct {
 	long cfg_min_error_severity, cfg_min_message_severity;
 	long compatability_mode, connect_timeout;
 	void (*get_column_content)(mssql_link *mssql_ptr,int offset,pval *result,int column_type);
-	long textsize, textlimit; 
+	long textsize, textlimit, batchsize;
 	HashTable *resource_list, *resource_plist;
 } php_mssql_globals;
 
@@ -124,6 +128,8 @@ typedef struct mssql_result {
 	pval **data;
 	mssql_field *fields;
 	mssql_link *mssql_ptr;
+	int batchsize;
+	int lastresult;
 	int cur_row,cur_field;
 	int num_rows,num_fields;
 } mssql_result;
