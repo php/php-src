@@ -20,6 +20,7 @@ PHP 4                                                                      NEWS
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added XBM and WBMP support for getimagesize(). (Marcus)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
+- Fixed bug #22234 (copy() fails if source file has 0 length). (Moriyoshi)
 - Fixed bug #22227 (printf() field limiters broke between 4.2.3 and 4.3.0).
   (Moriyoshi)
 - Fixed bug #22224 (implode() changes object references in array). (Moriyoshi)
