@@ -5,7 +5,7 @@ SUBDIRS = libzend ext sapi $(TSRM_DIR) regex
 
 CPPFLAGS := $(INCLUDES) -I$(ZEND_DIR) -I$(srcdir)/TSRM
 
-BUILDLDFLAGS = $(EXTRA_LDFLAGS) $(LDFLAGS) $(EXTRA_LIBS)
+BUILDLDFLAGS = $(EXTRA_LDFLAGS) $(LDFLAGS)
 
 noinst_LTLIBRARIES = libphp_util.la
 libphp_util_la_SOURCES = \
@@ -30,12 +30,12 @@ EXTRA_PROGRAMS = php
 
 phptemp_LTLIBRARIES = libphp4.la
 libphp4_la_SOURCES = stub.c
-libphp4_la_LIBADD = libphp_util.la
+libphp4_la_LIBADD = libphp_util.la $(EXTRA_LIBS)
 libphp4_la_LDFLAGS = -module -avoid-version $(BUILDLDFLAGS) $(NATIVE_RPATHS)
 
 noinst_PROGRAMS = $(PHP_PROGRAM)
 php_SOURCES = stub.c
-php_LDADD = libphp_util.la
+php_LDADD = libphp_util.la $(EXTRA_LIBS)
 php_LDFLAGS = -export-dynamic $(BUILDLDFLAGS) $(PHP_RPATHS)
 
 install-data-local:
