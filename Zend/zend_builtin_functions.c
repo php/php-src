@@ -39,6 +39,8 @@ static ZEND_FUNCTION(defined);
 static ZEND_FUNCTION(get_class);
 static ZEND_FUNCTION(get_parent_class);
 static ZEND_FUNCTION(method_exists);
+static ZEND_FUNCTION(class_exists);
+static ZEND_FUNCTION(function_exists);
 static ZEND_FUNCTION(leak);
 static ZEND_FUNCTION(get_used_files);
 static ZEND_FUNCTION(get_imported_files);
@@ -60,6 +62,8 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_class,			NULL)
 	ZEND_FE(get_parent_class,	NULL)
 	ZEND_FE(method_exists,		NULL)
+	ZEND_FE(class_exists,		NULL)
+	ZEND_FE(function_exists,	NULL)
 	ZEND_FE(leak,				NULL)
 	ZEND_FE(get_used_files,		NULL)
 	ZEND_FE(get_imported_files,	NULL)
@@ -394,19 +398,73 @@ ZEND_FUNCTION(get_parent_class)
 */
 ZEND_FUNCTION(method_exists)
 {
-	zval **arg1, **arg2;
+	zval **klass, **method_name;
+	char *lcname;
 	
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &arg1, &arg2)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &klass, &method_name)==FAILURE) {
 		RETURN_FALSE;
 	}
-	if ((*arg1)->type != IS_OBJECT) {
+	if ((*klass)->type != IS_OBJECT) {
 		RETURN_FALSE;
 	}
-	convert_to_string_ex(arg2);
-	if(zend_hash_exists(&(*arg1)->value.obj.ce->function_table, (*arg2)->value.str.val, (*arg2)->value.str.len+1)) {
+	convert_to_string_ex(method_name);
+	lcname = estrdup((*method_name)->value.str.val);
+	zend_str_tolower(lcname, (*method_name)->value.str.len);
+	if(zend_hash_exists(&(*klass)->value.obj.ce->function_table, lcname, (*method_name)->value.str.len+1)) {
+		efree(lcname);
 		RETURN_TRUE;
 	} else {
+		efree(lcname);
 		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool class_exists(string classname)
+     Checks if the class exists ...
+*/
+ZEND_FUNCTION(class_exists)
+{
+	zval **class_name;
+	char *lcname;
+	CLS_FETCH();
+
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &class_name)==FAILURE) {
+		RETURN_FALSE;
+	}
+	convert_to_string_ex(class_name);
+	lcname = estrdup((*class_name)->value.str.val);
+	zend_str_tolower(lcname, (*class_name)->value.str.len);
+	if (zend_hash_exists(CG(class_table), lcname, (*class_name)->value.str.len+1)) {
+		efree(lcname);
+		RETURN_TRUE;
+	} else {
+		efree(lcname);
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool function_exists(string function_name) 
+   Checks if the function exists */
+ZEND_FUNCTION(function_exists)
+{
+	zval **function_name;
+	char *lcname;
+	CLS_FETCH();
+	
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &function_name)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(function_name);
+	lcname = estrdup((*function_name)->value.str.val);
+	zend_str_tolower(lcname, (*function_name)->value.str.len);
+	if (zend_hash_exists(CG(function_table), lcname, (*function_name)->value.str.len+1) == FAILURE) {
+		efree(lcname);
+		RETURN_FALSE;
+	} else {
+		efree(lcname);
+		RETURN_TRUE;
 	}
 }
 /* }}} */
