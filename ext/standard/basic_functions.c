@@ -1845,7 +1845,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe)
 				   Z_TYPE_PP(obj) == IS_OBJECT &&
 				   Z_TYPE_PP(method) == IS_STRING) {
 			php_error(E_WARNING, "Unable to call %s::%s() - function does not exist",
-					  (*obj)->value.obj.ce->name, Z_STRVAL_PP(method));
+					  Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
 		} else
 			php_error(E_WARNING, "Unable to call tick function");
 	}
