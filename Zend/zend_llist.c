@@ -139,6 +139,24 @@ ZEND_API void zend_llist_copy(zend_llist *dst, zend_llist *src)
 }
 
 
+ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data))
+{
+	zend_llist_element *element, *next;
+
+	element=l->head;
+	while (element) {
+		next = element->next;
+		if (func(element->data)) {
+			if (l->dtor) {
+				l->dtor(element->data);
+				pefree(element, l->persistent);
+            }
+		}
+		element = next;
+	}
+}
+
+
 ZEND_API void zend_llist_apply(zend_llist *l, void (*func)(void *data))
 {
 	zend_llist_element *element;

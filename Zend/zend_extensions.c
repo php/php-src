@@ -138,20 +138,16 @@ static void zend_extension_shutdown(zend_extension *extension)
 #endif
 }
 
-static int zend_compare_extensions(zend_extension *extension1, zend_extension *extension2)
-{
-	return (extension1->handle == extension2->handle);
-}
-
-static void zend_extension_startup(zend_extension *extension)
+static int zend_extension_startup(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	if (extension->startup) {
 		if (extension->startup(extension)!=SUCCESS) {
-			zend_llist_del_element(&zend_extensions, extension, (int(*)(void *, void *)) zend_compare_extensions);
+			return 1;
 		}
 	}
 #endif
+	return 0;
 }
 
 
@@ -166,7 +162,7 @@ int zend_startup_extensions_mechanism()
 
 int zend_startup_extensions()
 {
-	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_startup);
+	zend_llist_apply_with_del(&zend_extensions, (int (*)(void *)) zend_extension_startup);
 	return SUCCESS;
 }
 
