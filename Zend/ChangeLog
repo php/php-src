@@ -1,3 +1,9 @@
+2004-10-13  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Don't allow access modifiers in interfaces. Explicitly stating public
+      - should also be disallowed but we don't have a way to detect it today.
+
 2004-10-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c:
