@@ -1,5 +1,5 @@
 
 LTLIBRARY_NAME    = libdomxml.la
-LTLIBRARY_SOURCES = domxml.c
+LTLIBRARY_SOURCES = php_domxml.c
 
 include $(top_srcdir)/build/dynlib.mk
