@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added FTP support (Andrew Skalski)
 - Added optional allowable_tags arguments to strip_tags() and fgetss() to
   allow you to specify a string of tags that are not to be stripped  (Rasmus)
 - Upgraded var_dump() to take multiple arguments (Andrey)
