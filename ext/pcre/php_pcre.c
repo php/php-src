@@ -108,6 +108,63 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 }
 /* }}} */
 
+#define PCRE_CACHE_SIZE 4096
+
+/* {{{ static pcre_clean_cache */
+static void pcre_clean_cache()
+{
+	HashTable *ht = &PCRE_G(pcre_cache);
+	Bucket *p = NULL;
+	int clean_size = PCRE_CACHE_SIZE / 8;
+
+	HANDLE_BLOCK_INTERRUPTIONS();
+
+	do {
+		p = ht->pListHead;
+
+		if (ht->pDestructor) {
+			ht->pDestructor(p->pData);
+		}
+		if (!p->pDataPtr) {
+			pefree(p->pData, ht->persistent);
+		}
+
+		if (p->pLast) {
+			p->pLast->pNext = p->pNext;
+		} else {
+			uint nIndex;
+
+			nIndex = p->h & ht->nTableMask;
+			ht->arBuckets[nIndex] = p->pNext;
+		}
+		if (p->pNext) {
+			p->pNext->pLast = p->pLast;
+		} else {
+			/* Nothing to do as this list doesn't have a tail */
+		}
+
+		if (p->pListLast != NULL) {
+			p->pListLast->pListNext = p->pListNext;
+		} else {
+			/* Deleting the head of the list */
+			ht->pListHead = p->pListNext;
+		}
+		if (p->pListNext != NULL) {
+			p->pListNext->pListLast = p->pListLast;
+		} else {
+			ht->pListTail = p->pListLast;
+		}
+		if (ht->pInternalPointer == p) {
+			ht->pInternalPointer = p->pListNext;
+		}
+		pefree(p, ht->persistent);
+		ht->nNumOfElements--;
+	} while (ht->nNumOfElements > PCRE_CACHE_SIZE - clean_size);
+
+	HANDLE_UNBLOCK_INTERRUPTIONS();
+}
+/* }}} */
+
 /* {{{ pcre_get_compiled_regex
  */
 PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC)
@@ -289,6 +346,15 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *pr
 	*compile_options = coptions;
 
 	efree(pattern);
+
+	/*
+	 * If we reached cache limit, clean out the items from the head of the list;
+	 * these are supposedly the oldest ones (but not necessarily the least used
+	 * ones).
+	 */
+	if (zend_hash_num_elements(&PCRE_G(pcre_cache)) == PCRE_CACHE_SIZE) {
+		pcre_clean_cache();
+	}
 
 	/* Store the compiled pattern and extra info in the cache. */
 	new_entry.re = re;
