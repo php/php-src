@@ -69,6 +69,51 @@
 #endif
 
 #include "dns.h"
+
+/* type compat */
+#ifndef DNS_T_A
+#define DNS_T_A		1
+#endif
+#ifndef DNS_T_NS
+#define DNS_T_NS	2
+#endif
+#ifndef DNS_T_CNAME
+#define DNS_T_CNAME	5
+#endif
+#ifndef DNS_T_SOA
+#define DNS_T_SOA	6
+#endif
+#ifndef DNS_T_PTR
+#define DNS_T_PTR	12
+#endif
+#ifndef DNS_T_HINFO
+#define DNS_T_HINFO	13
+#endif
+#ifndef DNS_T_MINFO
+#define DNS_T_MINFO	14
+#endif
+#ifndef DNS_T_MX
+#define DNS_T_MX	15
+#endif
+#ifndef DNS_T_TXT
+#define DNS_T_TXT	16
+#endif
+#ifndef DNS_T_AAAA
+#define DNS_T_AAAA	28
+#endif
+#ifndef DNS_T_SRV
+#define DNS_T_SRV	33
+#endif
+#ifndef DNS_T_NAPTR
+#define DNS_T_NAPTR	35
+#endif
+#ifndef DNS_T_A6
+#define DNS_T_A6	38
+#endif
+
+#ifndef DNS_T_ANY
+#define DNS_T_ANY	255
+#endif
 /* }}} */
 
 static char *php_gethostbyaddr(char *ip);
@@ -229,21 +274,16 @@ PHP_FUNCTION(dns_check_record)
 			convert_to_string_ex(arg2);
 
 			if (!strcasecmp("A", Z_STRVAL_PP(arg2))) type = T_A;
-			else if (!strcasecmp("NS",    Z_STRVAL_PP(arg2))) type = T_NS;
-			else if (!strcasecmp("MX",    Z_STRVAL_PP(arg2))) type = T_MX;
-			else if (!strcasecmp("PTR",   Z_STRVAL_PP(arg2))) type = T_PTR;
-			else if (!strcasecmp("ANY",   Z_STRVAL_PP(arg2))) type = T_ANY;
-			else if (!strcasecmp("SOA",   Z_STRVAL_PP(arg2))) type = T_SOA;
-			else if (!strcasecmp("CNAME", Z_STRVAL_PP(arg2))) type = T_CNAME;
-#ifdef T_AAAA
-			else if (!strcasecmp("AAAA",  Z_STRVAL_PP(arg2))) type = T_AAAA;
-#endif
-#ifdef T_SRV
-			else if (!strcasecmp("SRV",   Z_STRVAL_PP(arg2))) type = T_SRV;
-#endif
-#ifdef T_NAPTR
-			else if (!strcasecmp("NAPTR", Z_STRVAL_PP(arg2))) type = T_NAPTR;
-#endif
+			else if (!strcasecmp("NS",    Z_STRVAL_PP(arg2))) type = DNS_T_NS;
+			else if (!strcasecmp("MX",    Z_STRVAL_PP(arg2))) type = DNS_T_MX;
+			else if (!strcasecmp("PTR",   Z_STRVAL_PP(arg2))) type = DNS_T_PTR;
+			else if (!strcasecmp("ANY",   Z_STRVAL_PP(arg2))) type = DNS_T_ANY;
+			else if (!strcasecmp("SOA",   Z_STRVAL_PP(arg2))) type = DNS_T_SOA;
+			else if (!strcasecmp("CNAME", Z_STRVAL_PP(arg2))) type = DNS_T_CNAME;
+			else if (!strcasecmp("AAAA",  Z_STRVAL_PP(arg2))) type = DNS_T_AAAA;
+			else if (!strcasecmp("SRV",   Z_STRVAL_PP(arg2))) type = DNS_T_SRV;
+			else if (!strcasecmp("NAPTR", Z_STRVAL_PP(arg2))) type = DNS_T_NAPTR;
+			else if (!strcasecmp("A6", Z_STRVAL_PP(arg2)))    type = DNS_T_A6;
 			else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%s' not supported", Z_STRVAL_PP(arg2));
 				RETURN_FALSE;
@@ -266,7 +306,7 @@ PHP_FUNCTION(dns_check_record)
 
 #if HAVE_DNS_FUNCS
 
-#define PHP_DNS_NUM_TYPES	11	/* Number of DNS Types Supported by PHP currently */
+#define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
 
 #define PHP_DNS_A      0x00000001
 #define PHP_DNS_NS     0x00000002
@@ -276,11 +316,12 @@ PHP_FUNCTION(dns_check_record)
 #define PHP_DNS_HINFO  0x00001000
 #define PHP_DNS_MX     0x00004000
 #define PHP_DNS_TXT    0x00008000
+#define PHP_DNS_A6     0x01000000
 #define PHP_DNS_SRV    0x02000000
 #define PHP_DNS_NAPTR  0x04000000    
 #define PHP_DNS_AAAA   0x08000000
 #define PHP_DNS_ANY    0x10000000
-#define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
+#define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
 
 PHP_MINIT_FUNCTION(dns) {
 	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
@@ -294,6 +335,7 @@ PHP_MINIT_FUNCTION(dns) {
 	REGISTER_LONG_CONSTANT("DNS_SRV",   PHP_DNS_SRV,   CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_NAPTR", PHP_DNS_NAPTR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_AAAA",  PHP_DNS_AAAA,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_A6",	PHP_DNS_A6,    CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_ANY",   PHP_DNS_ANY,   CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_ALL",   PHP_DNS_ALL,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
@@ -327,8 +369,9 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 	u_long ttl;
 	long n, i;
 	u_short s;
-	u_char *tp;
+	u_char *tp, *p;
 	char name[MAXHOSTNAMELEN];
+	int have_v6_break = 0, in_v6_break = 0;
 
 	n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof(name)) - 2);
 	if (n < 0) {
@@ -357,27 +400,27 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 
 	add_assoc_string(*subarray, "host", name, 1);
 	switch (type) {
-		case T_A:
+		case DNS_T_A:
 			add_assoc_string(*subarray, "type", "A", 1);
 			sprintf(name, "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
 			add_assoc_string(*subarray, "ip", name, 1);
 			cp += dlen;
 			break;
-		case T_MX:
+		case DNS_T_MX:
 			add_assoc_string(*subarray, "type", "MX", 1);
 			GETSHORT(n, cp);
 			add_assoc_long(*subarray, "pri", n);
 			/* no break; */
-		case T_CNAME:
-			if (type == T_CNAME)
+		case DNS_T_CNAME:
+			if (type == DNS_T_CNAME)
 				add_assoc_string(*subarray, "type", "CNAME", 1);
 			/* no break; */
-		case T_NS:
-			if (type == T_NS)
+		case DNS_T_NS:
+			if (type == DNS_T_NS)
 				add_assoc_string(*subarray, "type", "NS", 1);
 			/* no break; */
-		case T_PTR:
-			if (type == T_PTR)
+		case DNS_T_PTR:
+			if (type == DNS_T_PTR)
 				add_assoc_string(*subarray, "type", "PTR", 1);
 			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
 			if (n < 0) {
@@ -386,7 +429,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			cp += n;
 			add_assoc_string(*subarray, "target", name, 1);
 			break;
-		case T_HINFO:
+		case DNS_T_HINFO:
 			/* See RFC 1010 for values */
 			add_assoc_string(*subarray, "type", "HINFO", 1);
 			n = *cp & 0xFF;
@@ -398,7 +441,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			add_assoc_stringl(*subarray, "os", cp, n, 1);
 			cp += n;
 			break;
-		case T_TXT:
+		case DNS_T_TXT:
 			add_assoc_string(*subarray, "type", "TXT", 1);
 			n = cp[0];
 			tp = emalloc(n + 1);
@@ -407,7 +450,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			cp += dlen;
 			add_assoc_stringl(*subarray, "txt", tp, n, 0);
 			break;
-		case T_SOA:
+		case DNS_T_SOA:
 			add_assoc_string(*subarray, "type", "SOA", 1);
 			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
 			if (n < 0) {
@@ -432,35 +475,115 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			GETLONG(n, cp);
 			add_assoc_long(*subarray, "minimum-ttl", n);
 			break;
-
-#ifdef T_AAAA
-		case T_AAAA:
+		case DNS_T_AAAA:
 			tp = name;
 			for(i=0; i < 8; i++) {
 				GETSHORT(s, cp);
-				if (s > 0) {
+				if (s != 0) {
 					if (tp > (u_char *)name) {
+						in_v6_break = 0;
 						tp[0] = ':';
 						tp++;
 					}
-					sprintf(tp,"%x",s);
-					tp += strlen(tp);
-				} else if (s == 0) {
-					if ((tp > (u_char *)name) && (tp[-1] != ':')) {
+					tp += sprintf(tp,"%x",s);
+				} else {
+					if (!have_v6_break) {
+						have_v6_break = 1;
+						in_v6_break = 1;
 						tp[0] = ':';
+						tp++;
+					} else if (!in_v6_break) {
+						tp[0] = ':';
+						tp++;
+						tp[0] = '0';
 						tp++;
 					}
 				}
 			}
-			if ((tp > (u_char *)name) && (tp[-1] == ':'))
-				tp[-1] = '\0';
+			if (have_v6_break && in_v6_break) {
+				tp[0] = ':';
+				tp++;
+			}
 			tp[0] = '\0';
 			add_assoc_string(*subarray, "type", "AAAA", 1);
 			add_assoc_string(*subarray, "ipv6", name, 1);
+			break; 
+		case DNS_T_A6:
+			p = cp;
+			add_assoc_string(*subarray, "type", "A6", 1);
+			n = ((int)cp[0]) & 0xFF;
+			cp++;
+			add_assoc_long(*subarray, "masklen", n);
+			tp = name;
+			if (n > 15) {
+				have_v6_break = 1;
+				in_v6_break = 1;
+				tp[0] = ':';
+				tp++;
+			}
+			if (n % 16 > 8) {
+				/* Partial short */
+				if (cp[0] != 0) {
+					if (tp > (u_char *)name) {
+						in_v6_break = 0;
+						tp[0] = ':';
+						tp++;
+					}
+					sprintf(tp, "%x", cp[0] & 0xFF);
+				} else {
+					if (!have_v6_break) {
+						have_v6_break = 1;
+						in_v6_break = 1;
+						tp[0] = ':';
+						tp++;
+					} else if (!in_v6_break) {
+						tp[0] = ':';
+						tp++;
+						tp[0] = '0';
+						tp++;
+					}
+				}
+				cp++;
+			}
+			for(i = (n+8)/16; i < 8; i++) {
+				GETSHORT(s, cp);
+				if (s != 0) {
+					if (tp > (u_char *)name) {
+						in_v6_break = 0;
+						tp[0] = ':';
+						tp++;
+					}
+					tp += sprintf(tp,"%x",s);
+				} else {
+					if (!have_v6_break) {
+						have_v6_break = 1;
+						in_v6_break = 1;
+						tp[0] = ':';
+						tp++;
+					} else if (!in_v6_break) {
+						tp[0] = ':';
+						tp++;
+						tp[0] = '0';
+						tp++;
+					}
+				}
+			}
+			if (have_v6_break && in_v6_break) {
+				tp[0] = ':';
+				tp++;
+			}
+			tp[0] = '\0';
+			add_assoc_string(*subarray, "ipv6", name, 1);
+			if (cp < p + dlen) {
+				n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
+				if (n < 0) {
+					return NULL;
+				}
+				cp += n;
+				add_assoc_string(*subarray, "chain", name, 1);
+			}
 			break;
-#endif
-#ifdef T_SRV
-		case T_SRV:
+		case DNS_T_SRV:
 			add_assoc_string(*subarray, "type", "SRV", 1);
 			GETSHORT(n, cp);
 			add_assoc_long(*subarray, "pri", n);
@@ -475,9 +598,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			cp += n;
 			add_assoc_string(*subarray, "target", name, 1);
 			break;
-#endif
-#ifdef T_NAPTR
-		case T_NAPTR:
+		case DNS_T_NAPTR:
 			add_assoc_string(*subarray, "type", "NAPTR", 1);
 			GETSHORT(n, cp);
 			add_assoc_long(*subarray, "order", n);
@@ -499,7 +620,6 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			cp += n;
 			add_assoc_string(*subarray, "replacement", name, 1);
 			break;
-#endif
 		default:
 			cp += dlen;
 	}
@@ -563,67 +683,57 @@ PHP_FUNCTION(dns_get_record)
 	array_init(return_value);
 
 	/* - We emulate an or'ed type mask by querying type by type. (Steps 0 - NUMTYPES-1 )
-	 *   If additional info is wanted we check again with T_ANY (step NUMTYPES / NUMTYPES+1 )
+	 *   If additional info is wanted we check again with DNS_T_ANY (step NUMTYPES / NUMTYPES+1 )
 	 *   store_results is used to skip storing the results retrieved in step
 	 *   NUMTYPES+1 when results were already fetched.
-	 * - In case of PHP_DNS_ANY we use the directly fetch T_ANY. (step NUMTYPES+1 )
+	 * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY. (step NUMTYPES+1 )
 	 */
 	for(type = (type_param==PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0); type < (addtl_recs ? (PHP_DNS_NUM_TYPES + 2) : PHP_DNS_NUM_TYPES) || first_query; type++)
 	{
 		first_query = 0;
 		switch (type) {
 			case 0: 
-				type_to_fetch = type_param&PHP_DNS_A     ? T_A     : 0;
+				type_to_fetch = type_param&PHP_DNS_A     ? DNS_T_A     : 0;
 				break;
 			case 1: 
-				type_to_fetch = type_param&PHP_DNS_NS    ? T_NS    : 0;
+				type_to_fetch = type_param&PHP_DNS_NS    ? DNS_T_NS    : 0;
 				break;
 			case 2: 
-				type_to_fetch = type_param&PHP_DNS_CNAME ? T_CNAME : 0;
+				type_to_fetch = type_param&PHP_DNS_CNAME ? DNS_T_CNAME : 0;
 				break;
 			case 3: 
-				type_to_fetch = type_param&PHP_DNS_SOA   ? T_SOA   : 0;
+				type_to_fetch = type_param&PHP_DNS_SOA   ? DNS_T_SOA   : 0;
 				break;
 			case 4: 
-				type_to_fetch = type_param&PHP_DNS_PTR   ? T_PTR   : 0;
+				type_to_fetch = type_param&PHP_DNS_PTR   ? DNS_T_PTR   : 0;
 				break;
 			case 5: 
-				type_to_fetch = type_param&PHP_DNS_HINFO ? T_HINFO : 0;
+				type_to_fetch = type_param&PHP_DNS_HINFO ? DNS_T_HINFO : 0;
 				break;
 			case 6: 
-				type_to_fetch = type_param&PHP_DNS_MX    ? T_MX    : 0;
+				type_to_fetch = type_param&PHP_DNS_MX    ? DNS_T_MX    : 0;
 				break;
 			case 7: 
-				type_to_fetch = type_param&PHP_DNS_TXT   ? T_TXT   : 0;
+				type_to_fetch = type_param&PHP_DNS_TXT   ? DNS_T_TXT   : 0;
 				break;
 			case 8:
-#ifdef T_AAAA
-				type_to_fetch = type_param&PHP_DNS_AAAA	 ? T_AAAA  : 0;
+				type_to_fetch = type_param&PHP_DNS_AAAA	 ? DNS_T_AAAA  : 0;
 				break;
-#else
-				continue;
-#endif
 			case 9:
-#ifdef T_SRV
-				type_to_fetch = type_param&PHP_DNS_SRV   ? T_SRV   : 0;
+				type_to_fetch = type_param&PHP_DNS_SRV   ? DNS_T_SRV   : 0;
 				break;
-#else
-				continue;
-#endif
 			case 10:
-#ifdef T_NAPTR
-				type_to_fetch = type_param&PHP_DNS_NAPTR ? T_NAPTR : 0;
+				type_to_fetch = type_param&PHP_DNS_NAPTR ? DNS_T_NAPTR : 0;
 				break;
-#else
-				continue;
-#endif
-
+			case 11:
+				type_to_fetch = type_param&PHP_DNS_A6	 ? DNS_T_A6 : 0;
+				break;
 			case PHP_DNS_NUM_TYPES:
 				store_results = 0;
 				continue;
 			default:
 			case (PHP_DNS_NUM_TYPES + 1):
-				type_to_fetch = T_ANY;
+				type_to_fetch = DNS_T_ANY;
 				break;
 		}
 		if (type_to_fetch) {
@@ -682,7 +792,7 @@ PHP_FUNCTION(dns_get_record)
 		while (ns-- > 0 && cp && cp < end) {
 			zval *retval;
 
-			cp = php_parserr(cp, &answer, T_ANY, 1, &retval);
+			cp = php_parserr(cp, &answer, DNS_T_ANY, 1, &retval);
 			if (retval != NULL) {
 				add_next_index_zval(authns, retval);
 			}
@@ -691,7 +801,7 @@ PHP_FUNCTION(dns_get_record)
 		while (ar-- > 0 && cp && cp < end) {
 			zval *retval;
 
-			cp = php_parserr(cp, &answer, T_ANY, 1, &retval);
+			cp = php_parserr(cp, &answer, DNS_T_ANY, 1, &retval);
 			if (retval != NULL) {
 				add_next_index_zval(addtl, retval);
 			}
@@ -741,7 +851,7 @@ PHP_FUNCTION(dns_get_mx)
 	array_init(mx_list);
 
 	/* Go! */
-	i = res_search(Z_STRVAL_P(host), C_IN, T_MX, (u_char *)&ans, sizeof(ans));
+	i = res_search(Z_STRVAL_P(host), C_IN, DNS_T_MX, (u_char *)&ans, sizeof(ans));
 	if (i < 0) {
 		RETURN_FALSE;
 	}
@@ -765,7 +875,7 @@ PHP_FUNCTION(dns_get_mx)
 		GETSHORT(type, cp);
 		cp += INT16SZ + INT32SZ;
 		GETSHORT(i, cp);
-		if (type != T_MX) {
+		if (type != DNS_T_MX) {
 			cp += i;
 			continue;
 		}
