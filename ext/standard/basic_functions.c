@@ -715,6 +715,7 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_socket_accept,				 		   third_arg_force_ref)
 	PHP_FE(stream_socket_get_name,											NULL)
 	PHP_FE(stream_copy_to_stream,											NULL)
+	PHP_FE(stream_get_contents,												NULL)
 	PHP_FE(fgetcsv,															NULL)
 	PHP_FE(flock,															NULL)
 	PHP_FE(get_meta_tags,													NULL)

@@ -266,6 +266,38 @@ PHP_FUNCTION(stream_socket_get_name)
 }
 /* }}} */
 
+/* {{{ proto long stream_get_contents(resource source [, long maxlen ])
+   Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
+PHP_FUNCTION(stream_get_contents)
+{
+	php_stream *stream;
+	zval *zsrc;
+	long maxlen = PHP_STREAM_COPY_ALL;
+	int len, newlen;
+	char *contents = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zsrc, &maxlen) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	php_stream_from_zval(stream, &zsrc);
+
+	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
+		
+		if (PG(magic_quotes_runtime)) {
+			contents = php_addslashes(contents, len, &newlen, 1 TSRMLS_CC); /* 1 = free source string */
+			len = newlen;
+		}
+
+		RETVAL_STRINGL(contents, len, 0);
+	} else if (len == 0) {
+		RETVAL_EMPTY_STRING();
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto long stream_copy_to_stream(resource source, resource dest [, long maxlen ])
    Reads up to maxlen bytes from source stream and writes them to dest stream. */
 PHP_FUNCTION(stream_copy_to_stream)
