@@ -620,6 +620,9 @@ static void php3_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pv
 				}
 
 				res_buf = (char *) emalloc(res_length+1);
+				memset(res_buf,' ',res_length+1);  /* XXX i'm sure there's a better way
+													  but i don't have sybase here to test
+													  991105 thies@digicol.de  */
 				dbconvert(NULL,coltype(offset),dbdata(sybase_ptr->link,offset), res_length,SYBCHAR,res_buf,-1);
 		
 				/* get rid of trailing spaces */
