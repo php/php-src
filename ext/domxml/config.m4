@@ -79,13 +79,13 @@ AC_DEFUN(PHP_DOM_XSLT_CHECK_VERSION,[
   AC_MSG_CHECKING(for libxslt version)
   AC_EGREP_CPP(yes,[
 #include <libxslt/xsltconfig.h>
-#if LIBXSLT_VERSION >= 10003
+#if LIBXSLT_VERSION >= 10018
   yes
 #endif
   ],[
-    AC_MSG_RESULT(>= 1.0.3)
+    AC_MSG_RESULT(>= 1.0.18)
   ],[
-    AC_MSG_ERROR(libxslt version 1.0.3 or greater required.)
+    AC_MSG_ERROR(libxslt version 1.0.18 or greater required.)
   ])
   CPPFLAGS=$old_CPPFLAGS
 ])
@@ -108,11 +108,11 @@ AC_DEFUN(PHP_DOM_EXSLT_CHECK_VERSION,[
 ])
 
 PHP_ARG_WITH(dom-xslt, for DOM XSLT support,
-[  --with-dom-xslt[=DIR]   Include DOM XSLT support (requires libxslt >= 1.0.3).
+[  --with-dom-xslt[=DIR]   Include DOM XSLT support (requires libxslt >= 1.0.18).
                           DIR is the libxslt install directory.])
 
 PHP_ARG_WITH(dom-exslt, for DOM EXSLT support,
-[  --with-dom-exslt[=DIR]  Include DOM EXSLT support (requires libxslt >= 1.0.3).
+[  --with-dom-exslt[=DIR]  Include DOM EXSLT support (requires libxslt >= 1.0.18).
                           DIR is the libexslt install directory.])
 
 if test "$PHP_DOM_XSLT" != "no"; then
