@@ -543,6 +543,9 @@ struct _pdo_stmt_t {
 		struct {
 			zend_class_entry *ce;	
 			zval *ctor_args;
+			zval *retval_ptr; 
+			zend_fcall_info fci;
+			zend_fcall_info_cache fcc;
 		} cls;
 		zval *into;
 	} fetch;
