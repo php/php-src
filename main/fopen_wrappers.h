@@ -82,7 +82,7 @@ PHPAPI char *php_strip_url_passwd(char *path);
 
 int php_init_fopen_wrappers(TSRMLS_D);
 int php_shutdown_fopen_wrappers(TSRMLS_D);
-PHPAPI int php_register_url_wrapper(char *protocol, php_fopen_url_wrapper_t wrapper TSRMLS_DC);
+PHPAPI int php_register_url_wrapper(const char *protocol, php_fopen_url_wrapper_t wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_wrapper(char *protocol TSRMLS_DC);
 
 #endif

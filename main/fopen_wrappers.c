@@ -90,7 +90,7 @@ static HashTable fopen_url_wrappers_hash;
 PHPAPI int php_register_url_wrapper(const char *protocol, php_fopen_url_wrapper_t wrapper TSRMLS_DC)
 {
 	if(PG(allow_url_fopen)) {
-		return zend_hash_add(&fopen_url_wrappers_hash, protocol, strlen(protocol), &wrapper, sizeof(wrapper), NULL);
+		return zend_hash_add(&fopen_url_wrappers_hash, (char *) protocol, strlen(protocol), &wrapper, sizeof(wrapper), NULL);
 	} else {
 		return FAILURE;
 	}
