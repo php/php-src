@@ -31,11 +31,11 @@ ini_set("session.use_trans_sid","1");
 <?php
 session_destroy();
 ?>
---EXPECT--
+--EXPECTF--
 <a href="/link?PHPSESSID=abtest">
 
-Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time. in /home/rei/PHP_CVS/php5/ext/session/tests/014.php on line 10
+Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time. in %s on line %d
 <a href="/link?PHPSESSID=abtest">
 
-Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time. in /home/rei/PHP_CVS/php5/ext/session/tests/014.php on line 14
+Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time. in %s on line %d
 <a href="/link?PHPSESSID=abtest">
