@@ -94,7 +94,7 @@ static unsigned long php_read4(FILE *fp)
 
 }
 
-static unsigned long int php_swf_get_bits (unsigned char* buffer, int pos, int count)
+static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int pos, unsigned int count)
 {
 	unsigned int loop;
 	unsigned long int result = 0;
