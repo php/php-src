@@ -310,9 +310,7 @@ PHP_MINIT_FUNCTION(mysqli)
  */
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
-	/* uncomment this line if you have INI entries
 	UNREGISTER_INI_ENTRIES();
-	*/
 	return SUCCESS;
 }
 /* }}} */
