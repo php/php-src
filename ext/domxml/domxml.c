@@ -530,7 +530,8 @@ PHP_FUNCTION(domxml_attributes)
 	}
 
 	while(attr) {
-		add_assoc_string(return_value, (char *) attr->name, attr->val->content, 1);
+		if(attr->val->content)
+			add_assoc_string(return_value, (char *) attr->name, attr->val->content, 1);
 		attr = attr->next;
 	}
 }
@@ -907,7 +908,8 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 		object_init_ex(pattr, domxmlattr_class_entry_ptr);
 		add_property_resource(pattr, "attribute", ret);
 		add_property_stringl(pattr, "name", (char *) attr->name, strlen(attr->name), 1);
-		add_property_stringl(pattr, "value", (char *) attr->val->content, strlen(attr->val->content), 1);
+		if(attr->val->content)
+			add_property_stringl(pattr, "value", (char *) attr->val->content, strlen(attr->val->content), 1);
 		zend_hash_next_index_insert((*attributes)->value.ht, &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
 	}
