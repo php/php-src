@@ -162,7 +162,6 @@ void init_executor(TSRMLS_D)
 	zend_ptr_stack_init(&EG(user_error_handlers));
 	zend_ptr_stack_init(&EG(user_exception_handlers));
 
-	EG(orig_error_reporting) = EG(error_reporting);
 	zend_objects_store_init(&EG(objects_store), 1024);
 
 	EG(full_tables_cleanup) = 0;
@@ -251,7 +250,6 @@ void shutdown_executor(TSRMLS_D)
 		zend_ptr_stack_clean(&EG(user_exception_handlers), ZVAL_DESTRUCTOR, 1);
 		zend_ptr_stack_destroy(&EG(user_exception_handlers));
 
-		EG(error_reporting) = EG(orig_error_reporting);
 		zend_objects_store_destroy(&EG(objects_store));
 	} zend_end_try();
 }

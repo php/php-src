@@ -58,6 +58,22 @@ static void (*zend_message_dispatcher_p)(long message, void *data);
 static int (*zend_get_configuration_directive_p)(char *name, uint name_length, zval *contents);
 
 
+static ZEND_INI_MH(OnUpdateErrorReporting)
+{
+	if (!new_value) {
+		EG(error_reporting) = E_ALL & ~E_NOTICE;
+	} else {
+		EG(error_reporting) = atoi(new_value);
+	}
+	return SUCCESS;
+}
+
+
+ZEND_INI_BEGIN()
+	ZEND_INI_ENTRY("error_reporting",			NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+ZEND_INI_END()
+
+
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
@@ -505,6 +521,14 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #endif
 
 	return SUCCESS;
+}
+
+
+void zend_register_standard_ini_entries(TSRMLS_D)
+{
+	int module_number = 0;
+
+	REGISTER_INI_ENTRIES();
 }
 
 

@@ -22,7 +22,7 @@
 #include "zend_API.h"
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
-
+#include "zend_ini.h"
 #undef ZEND_TEST_EXCEPTIONS
 
 static ZEND_FUNCTION(zend_version);
@@ -408,8 +408,8 @@ ZEND_FUNCTION(error_reporting)
 			if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long_ex(arg);
-			EG(error_reporting)=(*arg)->value.lval;
+			convert_to_string_ex(arg);
+			zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 			break;
 		default:
 			ZEND_WRONG_PARAM_COUNT();
