@@ -572,7 +572,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) {
+	if (php_check_open_basedir_ex(filename, IS_EXISTS_CHECK(type) ? 0 : 1 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
