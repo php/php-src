@@ -31,31 +31,37 @@ AC_ARG_WITH(imap,
 		fi
 		if test -n "$APXS"; then
 			if test -f $IMAP_DIR/lib/libimap.a; then
-				IMAP_LIBS="${apxs_runpath_switch}$IMAP_DIR/lib' -L$IMAP_DIR/lib -limap"
+				IMAP_LIBDIR="$IMAP_DIR/lib"
+				IMAP_LIB="imap"
 			elif test ! -f $IMAP_DIR/lib/libc-client.a; then
 				if test ! -f $IMAP_DIR/lib/libc-client4.so; then
 					AC_MSG_ERROR(You need to copy or link $IMAP_DIR/lib/c-client.a to $IMAP_DIR/lib/libc-client.a)
 				else
-					IMAP_LIBS="${apxs_runpath_switch}$IMAP_DIR/lib' -L$IMAP_DIR/lib -lc-client4"
+					IMAP_LIBDIR="$IMAP_DIR/lib"
+					IMAP_LIB="c-client4"
 				fi
 			else
-				IMAP_LIBS="${apxs_runpath_switch}$IMAP_DIR/lib' -L$IMAP_DIR/lib -lc-client"
+				IMAP_LIBDIR="$IMAP_DIR/lib"
+				IMAP_LIB="c-client"
 			fi
 		else
 			if test -f $IMAP_DIR/lib/libimap.a; then
-				IMAP_LIBS="-L$IMAP_DIR/lib -limap"
+				IMAP_LIBDIR="$IMAP_DIR/lib"
+				IMAP_LIB="imap"
 			elif test ! -f $IMAP_DIR/lib/c-client.a; then
 				if test ! -f $IMAP_DIR/lib/libc-client4.so; then
 					AC_MSG_ERROR(could not find c-client.a in $IMAP_DIR/lib !)
 				else
-					IMAP_LIBS="${ld_runpath_switch}$IMAP_DIR/lib -L$IMAP_DIR/lib -lc-client4"
+					IMAP_LIBDIR="$IMAP_DIR/lib"
+					IMAP_LIB="c-client4"
 				fi
 			else
-				IMAP_LIBS="-L$IMAP_DIR/lib $IMAP_DIR/lib/c-client.a"
+				IMAP_LIBS="$IMAP_DIR/lib"
+				IMAP_LIB="c-client"
 			fi
 		fi
-		INCLUDES="$INCLUDES -I$IMAP_INC_DIR"
-		EXTRA_LIBS="$EXTRA_LIBS $IMAP_LIBS"
+		AC_ADD_LIBRARY_WITH_PATH($IMAP_LIB, $IMAP_LIBDIR)
+		AC_ADD_INCLUDE($IMAP_INC_DIR)
 		AC_DEFINE(HAVE_IMAP)
 		AC_MSG_RESULT(yes)
 		PHP_EXTENSION(imap)
