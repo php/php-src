@@ -271,7 +271,7 @@ static PHP_INI_DISP(display_link_numbers)
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_mysql_globals,		mysql_globals)
 	STD_PHP_INI_ENTRY_EX("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_mysql_globals,		mysql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mysql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_mysql_globals,		mysql_globals,		display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mysql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_mysql_globals,		mysql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY("mysql.default_host",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_host,		php_mysql_globals,		mysql_globals)
 	STD_PHP_INI_ENTRY("mysql.default_user",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_user,		php_mysql_globals,		mysql_globals)
 	STD_PHP_INI_ENTRY("mysql.default_password",	NULL,	PHP_INI_ALL,			OnUpdateString,		default_password,	php_mysql_globals,		mysql_globals)
@@ -337,9 +337,9 @@ PHP_MINFO_FUNCTION(mysql)
 
 	php_printf("<table border=5 width=\"600\">");
 	php_info_print_table_header(2, "Key", "Value");
-	sprintf(buf, "%d", MySG(num_persistent));
+	sprintf(buf, "%ld", MySG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	sprintf(buf, "%d", MySG(num_links));
+	sprintf(buf, "%ld", MySG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
 #if !(WIN32|WINNT)

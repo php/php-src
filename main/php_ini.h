@@ -108,7 +108,7 @@ PHPAPI PHP_INI_DISP(php_ini_color_displayer_cb);
 #else
 #define STD_PHP_INI_ENTRY(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr) \
 	PHP_INI_ENTRY2(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr)
-#define STD_PHP_INI_ENTRY_EX(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr, display) \
+#define STD_PHP_INI_ENTRY_EX(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr, displayer) \
 	PHP_INI_ENTRY2_EX(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, displayer)
 #define STD_PHP_INI_BOOLEAN(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr) \
 	PHP_INI_ENTRY3_EX(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, php_ini_boolean_displayer_cb)
