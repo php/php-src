@@ -70,7 +70,7 @@ static zval *_php_sablot_resource_zval(long);
 /* Macro's */
 
 /* Free macros */
-#define S_FREE(__var) if (__var) efree(__var);
+#define S_FREE(__var) if (__var) { efree(__var); __var = NULL; }
 #define FUNCH_FREE(__var) if (__var) zval_ptr_dtor(&(__var));        
 
 /* ERROR Macros */
@@ -208,9 +208,10 @@ ZEND_GET_MODULE(sablot)
 
 static void php_sablot_init_globals(SABLOTLS_D)
 {
-	SABLOTG(processor)    = NULL;
-	SABLOTG(errors)       = NULL;
-	SABLOTG(errorHandler) = NULL;
+	SABLOTG(processor)             = NULL;
+	SABLOTG(errors)                = NULL;
+	SABLOTG(errorHandler)          = NULL;
+	SABLOTG(output_transform_file) = NULL;
 }
 
 
