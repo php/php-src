@@ -24,19 +24,19 @@
 #include "php.h"
 #include "php_spl.h"
 
-extern zend_class_entry *spl_ce_LogicException;
-extern zend_class_entry *spl_ce_BadFunctionCallException;
-extern zend_class_entry *spl_ce_BadMethodCallException;
-extern zend_class_entry *spl_ce_DomainException;
-extern zend_class_entry *spl_ce_InvalidArgumentException;
-extern zend_class_entry *spl_ce_LengthException;
-extern zend_class_entry *spl_ce_OutOfRangeException;
+extern PHPAPI zend_class_entry *spl_ce_LogicException;
+extern PHPAPI zend_class_entry *spl_ce_BadFunctionCallException;
+extern PHPAPI zend_class_entry *spl_ce_BadMethodCallException;
+extern PHPAPI zend_class_entry *spl_ce_DomainException;
+extern PHPAPI zend_class_entry *spl_ce_InvalidArgumentException;
+extern PHPAPI zend_class_entry *spl_ce_LengthException;
+extern PHPAPI zend_class_entry *spl_ce_OutOfRangeException;
 
-extern zend_class_entry *spl_ce_RuntimeException;
-extern zend_class_entry *spl_ce_OutOfBoundsException;
-extern zend_class_entry *spl_ce_OverflowException;
-extern zend_class_entry *spl_ce_RangeException;
-extern zend_class_entry *spl_ce_UnderflowException;
+extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
+extern PHPAPI zend_class_entry *spl_ce_OutOfBoundsException;
+extern PHPAPI zend_class_entry *spl_ce_OverflowException;
+extern PHPAPI zend_class_entry *spl_ce_RangeException;
+extern PHPAPI zend_class_entry *spl_ce_UnderflowException;
 
 PHP_MINIT_FUNCTION(spl_exceptions);
 

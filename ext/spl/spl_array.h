@@ -24,9 +24,9 @@
 #include "php.h"
 #include "php_spl.h"
 
-extern zend_class_entry *spl_ce_ArrayObject;
-extern zend_class_entry *spl_ce_ArrayIterator;
-extern zend_class_entry *spl_ce_Countable;
+extern PHPAPI zend_class_entry *spl_ce_ArrayObject;
+extern PHPAPI zend_class_entry *spl_ce_ArrayIterator;
+extern PHPAPI zend_class_entry *spl_ce_Countable;
 
 PHP_MINIT_FUNCTION(spl_array);
 

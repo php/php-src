@@ -24,8 +24,8 @@
 #include "php.h"
 #include "php_spl.h"
 
-extern zend_class_entry *spl_ce_DirectoryIterator;
-extern zend_class_entry *spl_ce_RecursiveDirectoryIterator;
+extern PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveDirectoryIterator;
 
 PHP_MINIT_FUNCTION(spl_directory);
 

@@ -46,8 +46,8 @@ static zend_object_handlers spl_ce_dir_handlers;
 
 
 /* decalre the class entry */
-zend_class_entry *spl_ce_DirectoryIterator;
-zend_class_entry *spl_ce_RecursiveDirectoryIterator;
+PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
+PHPAPI zend_class_entry *spl_ce_RecursiveDirectoryIterator;
 
 
 /* {{{ spl_ce_dir_object_free_storage */

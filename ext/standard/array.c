@@ -46,6 +46,9 @@
 #include "php_string.h"
 #include "php_rand.h"
 #include "php_smart_str.h"
+#if HAVE_SPL
+#include "ext/spl/spl_array.h"
+#endif
 
 #ifdef ZTS
 int array_globals_id;
@@ -98,7 +101,6 @@ php_array_globals array_globals;
 ZEND_BEGIN_MODULE_GLOBALS(array) 
 	int *multisort_flags[2];
 	int (*compare_func)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
-	zend_class_entry *php_ce_countable;
 ZEND_END_MODULE_GLOBALS(array) 
 
 ZEND_DECLARE_MODULE_GLOBALS(array)
@@ -325,14 +327,8 @@ PHP_FUNCTION(count)
 		case IS_OBJECT: {
 #if HAVE_SPL
 			zval *retval;
-			zend_class_entry **pce;
 
-			if (!ARRAYG(php_ce_countable)) {
-				if (zend_lookup_class("countable", sizeof("countable")-1, &pce TSRMLS_CC) == SUCCESS) {
-					ARRAYG(php_ce_countable) = *pce;
-				}
-			}
-			if (ARRAYG(php_ce_countable) && instanceof_function(Z_OBJCE_P(array), ARRAYG(php_ce_countable) TSRMLS_CC)) {
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
 				zend_call_method_with_0_params(&array, NULL, NULL, "count", &retval);
 				RETVAL_LONG(Z_LVAL_P(retval));
 				zval_ptr_dtor(&retval);

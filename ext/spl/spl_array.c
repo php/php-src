@@ -114,12 +114,12 @@ static zend_function_entry spl_funcs_Countable[] = {
 };
 
 zend_object_handlers spl_handler_ArrayObject;
-zend_class_entry *   spl_ce_ArrayObject;
+PHPAPI zend_class_entry  *spl_ce_ArrayObject;
 
 zend_object_handlers spl_handler_ArrayIterator;
-zend_class_entry *   spl_ce_ArrayIterator;
+PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
 
-zend_class_entry *spl_ce_Countable;
+PHPAPI zend_class_entry  *spl_ce_Countable;
 
 typedef struct _spl_array_object {
 	zend_object       std;
