@@ -722,6 +722,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 				FREE_OP(Ts, &opline->op1, free_op1);
 				break;
 			case ZEND_FETCH_STATIC:
+				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
 				break;
 		}
 	}
