@@ -1519,23 +1519,45 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 }
 
 
-inline int zend_binary_assign_op_helper(void *binary_op_arg, ZEND_OPCODE_HANDLER_ARGS)
+inline int zend_binary_assign_op_helper(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **var_ptr;
-	int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+	zval *value;
+	zend_bool increment_opline = 0;
 
 	switch (EX(opline)->extended_value) {
 		case ZEND_ASSIGN_OBJ:
-		case ZEND_ASSIGN_DIM:
-			return zend_binary_assign_op_obj_helper(binary_op_arg, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			return zend_binary_assign_op_obj_helper(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			break;
+		case ZEND_ASSIGN_DIM: {
+				zend_op *op_data = EX(opline)+1;
+				zval **object_ptr = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
+
+				if ((*object_ptr)->type == IS_OBJECT) {
+					zend_assign_to_object(&EX(opline)->result, object_ptr, &EX(opline)->op2, &op_data->op1, EX(Ts), ZEND_ASSIGN_DIM TSRMLS_CC);
+					EX(opline)++;
+					NEXT_OPCODE();
+				} else {
+					zend_op *data_opline = EX(opline)+1;
+
+					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
+					zend_fetch_dimension_address(&data_opline->op2, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_RW TSRMLS_CC);
+
+					value = get_zval_ptr(&data_opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					var_ptr = get_zval_ptr_ptr(&data_opline->op2, EX(Ts), BP_VAR_RW);
+					EG(free_op2) = 0;
+					increment_opline = 1;
+//	 				zend_assign_to_variable(&EX(opline)->result, &data_opline->op2, &data_opline->op1, value, (EG(free_op1)?IS_TMP_VAR:EX(opline)->op1.op_type), EX(Ts) TSRMLS_CC);
+				}
+			}
 			break;
 		default:
+			value = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+			var_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_RW);
+			EG(free_op1) = 0;
 			/* do nothing */
 			break;
 	}
-
-	var_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_RW);
-	binary_op = binary_op_arg;
 
 	if (!var_ptr) {
 		zend_error(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
@@ -1550,12 +1572,16 @@ inline int zend_binary_assign_op_helper(void *binary_op_arg, ZEND_OPCODE_HANDLER
 	
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
 
-	binary_op(*var_ptr, *var_ptr, get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R) TSRMLS_CC);
+	binary_op(*var_ptr, *var_ptr, value TSRMLS_CC);
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = var_ptr;
 	SELECTIVE_PZVAL_LOCK(*var_ptr, &EX(opline)->result);
+	FREE_OP(Ex(Ts), &EX(opline)->op1, EG(free_op1));
 	FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	AI_USE_PTR(EX_T(EX(opline)->result.u.var).var);
 
+	if (increment_opline) {
+		EX(opline)++;
+	}
 	NEXT_OPCODE();
 }
 

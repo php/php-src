@@ -247,13 +247,18 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 			*result = last_op->result;
 			break;
 		case ZEND_FETCH_DIM_RW:
+#if 1
 			last_op->opcode = op;
 			last_op->extended_value = ZEND_ASSIGN_DIM;
 
 			zend_do_op_data(opline, op2 TSRMLS_CC);
+			opline->op2.u.var = get_temporary_variable(CG(active_op_array));
+			opline->op2.u.EA.type = 0;
+			opline->op2.op_type = IS_VAR;
 			SET_UNUSED(opline->result);
 			*result = last_op->result;
 			break;
+#endif
 		default:
 			opline->opcode = op;
 			opline->op1 = *op1;
