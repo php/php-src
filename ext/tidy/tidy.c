@@ -1472,14 +1472,14 @@ PHP_FUNCTION(tidy_get_body)
 }
 /* }}} */
 
-/* {{{ proto void tidy_node::tidy_node()
+/* {{{ proto tidyNode::tidyNode()
    Constructor. */
 TIDY_NODE_METHOD(__construct)
 {	
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::hasChildren()
+/* {{{ proto boolean tidyNode::hasChildren()
    Returns true if this node has children */
 TIDY_NODE_METHOD(hasChildren)
 {
@@ -1493,7 +1493,7 @@ TIDY_NODE_METHOD(hasChildren)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::hasSiblings()
+/* {{{ proto boolean tidyNode::hasSiblings()
    Returns true if this node has siblings */
 TIDY_NODE_METHOD(hasSiblings)
 {
@@ -1507,7 +1507,7 @@ TIDY_NODE_METHOD(hasSiblings)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::isComment()
+/* {{{ proto boolean tidyNode::isComment()
    Returns true if this node represents a comment */
 TIDY_NODE_METHOD(isComment)
 {
@@ -1521,7 +1521,7 @@ TIDY_NODE_METHOD(isComment)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::isHtml()
+/* {{{ proto boolean tidyNode::isHtml()
    Returns true if this node is part of a HTML document */
 TIDY_NODE_METHOD(isHtml)
 {
@@ -1535,7 +1535,7 @@ TIDY_NODE_METHOD(isHtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::isXhtml()
+/* {{{ proto boolean tidyNode::isXhtml()
    Returns true if this node is part of a XHTML document */
 TIDY_NODE_METHOD(isXhtml)
 {
@@ -1549,7 +1549,7 @@ TIDY_NODE_METHOD(isXhtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::isXml()
+/* {{{ proto boolean tidyNode::isXml()
    Returns true if this node is part of a XML document */
 TIDY_NODE_METHOD(isXml)
 {
@@ -1563,7 +1563,7 @@ TIDY_NODE_METHOD(isXml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::isText()
+/* {{{ proto boolean tidyNode::isText()
    Returns true if this node represents text (no markup) */
 TIDY_NODE_METHOD(isText)
 {
@@ -1577,7 +1577,7 @@ TIDY_NODE_METHOD(isText)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::isJste()
+/* {{{ proto boolean tidyNode::isJste()
    Returns true if this node is JSTE */
 TIDY_NODE_METHOD(isJste)
 {
@@ -1591,7 +1591,7 @@ TIDY_NODE_METHOD(isJste)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::isAsp()
+/* {{{ proto boolean tidyNode::isAsp()
    Returns true if this node is ASP */
 TIDY_NODE_METHOD(isAsp)
 {
@@ -1605,7 +1605,7 @@ TIDY_NODE_METHOD(isAsp)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::isPhp()
+/* {{{ proto boolean tidyNode::isPhp()
    Returns true if this node is PHP */
 TIDY_NODE_METHOD(isPhp)
 {
