@@ -2454,7 +2454,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	
 
 	if (opline->op2.op_type == IS_UNUSED) {
-		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, 0, opline->extended_value TSRMLS_CC);
+		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, ZEND_FETCH_CLASS_AUTO, opline->extended_value TSRMLS_CC);
 		NEXT_OPCODE();
 	}
 
