@@ -1318,7 +1318,7 @@ void do_switch_end(znode *case_list CLS_DC)
 	
 	zend_stack_top(&CG(switch_cond_stack), (void **) &switch_entry_ptr);
 
-	if (case_list->u.opline_num != -1) { /* empty switch */
+	if (case_list->op_type != IS_UNUSED) { /* non-empty switch */
 		int next_op_number = get_next_op_number(CG(active_op_array));
 
 		CG(active_op_array)->opcodes[case_list->u.opline_num].op1.u.opline_num = next_op_number;
@@ -1444,7 +1444,7 @@ void do_default_before_statement(znode *case_list, znode *default_token CLS_DC)
 	switch_entry_ptr->default_case = next_op_number;
 
 	next_op_number = get_next_op_number(CG(active_op_array));
-	if (case_list->u.opline_num==-1) {
+	if (case_list->op_type==IS_UNUSED) {
 		return;
 	}
 	CG(active_op_array)->opcodes[case_list->u.opline_num].op1.u.opline_num = next_op_number;
