@@ -24,7 +24,7 @@ libs/libphp4.bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 install: $(all_targets) $(install_targets)
 
 install-sapi: $(OVERALL_TARGET)
-	@echo "Installing PHP SAPI module"
+	@echo "Installing PHP SAPI module:       $(PHP_SAPI)"
 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	-@if test ! -r $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME); then \
 		for i in 0.0.0 0.0 0; do \
