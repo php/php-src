@@ -70,7 +70,6 @@ static ZEND_FUNCTION(extension_loaded);
 static ZEND_FUNCTION(get_extension_funcs);
 static ZEND_FUNCTION(get_defined_constants);
 static ZEND_FUNCTION(debug_backtrace);
-static ZEND_FUNCTION(debug_print_backtrace);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
 #ifdef ZTS
@@ -130,7 +129,6 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_extension_funcs,		NULL)
 	ZEND_FE(get_defined_constants,		NULL)
 	ZEND_FE(debug_backtrace, NULL)
-	ZEND_FE(debug_print_backtrace, NULL)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
 #ifdef ZTS
@@ -1298,143 +1296,6 @@ static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) {
 	return arg_array;
 }
 
-void debug_print_backtrace_args(zval *arg_array)
-{
-	zval **tmp;
-	HashPosition iterator;
-	int i = 0;
-
-	zend_hash_internal_pointer_reset_ex(arg_array->value.ht, &iterator);
-	while (zend_hash_get_current_data_ex(arg_array->value.ht, (void **) &tmp, &iterator) == SUCCESS) {
-		if (i++) {
-			ZEND_PUTS(", ");
-		}
-		zend_print_flat_zval_r(*tmp);
-		zend_hash_move_forward_ex(arg_array->value.ht, &iterator);
-	}
-}
-
-/* {{{ proto void debug_print_backtrace(void)
-ZEND_FUNCTION(debug_print_backtrace)
-{
-	zend_execute_data *ptr;
-	int lineno;
-	char *function_name;
-	char *filename;
-	char *class_name;
-	char *call_type;
-	char *include_filename = NULL;
-	zval *arg_array;
-	void **cur_arg_pos = EG(argument_stack).top_element;
-	void **args = cur_arg_pos;
-	int arg_stack_consistent = 0;
-	int frames_on_stack = 0;
-	int indent;
-
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	while (--args >= EG(argument_stack).elements) {
-		if (*args--) {
-			break;
-		}
-		args -= *(ulong*)args;
-		frames_on_stack++;
-
-		if (args == EG(argument_stack).elements) {
-			arg_stack_consistent = 1;
-			break;
-		}
-	}
-
-	ptr = EG(current_execute_data);
-
-	/* skip debug_backtrace() */
-	ptr = ptr->prev_execute_data;
-	cur_arg_pos -= 2;
-	frames_on_stack--;
-
-	array_init(return_value);
-
-	while (ptr) {
-		if (ptr->op_array) {
-			filename = ptr->op_array->filename;
-			lineno = ptr->opline->lineno;
-		} else {
-			filename = NULL;
-		}
-
-		function_name = ptr->function_state.function->common.function_name;
-
-		if (function_name) {
-			if (ptr->object) {
-				class_name = Z_OBJCE(*ptr->object)->name;
-				call_type = "->";
-			} else if (ptr->function_state.function->common.scope) {
-				class_name = ptr->function_state.function->common.scope->name;
-				call_type = "::";
-			} else {
-				class_name = NULL;
-				call_type = NULL;
-			}
-			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
-				if (arg_stack_consistent && (frames_on_stack > 0)) {
-				    arg_array = debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC);
-					frames_on_stack--;
-				}
-			}	
-		} else {
-			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
-			zend_bool build_filename_arg = 1;
-
-			switch (ptr->opline->op2.u.constant.value.lval) {
-				case ZEND_EVAL:
-					function_name = "eval";
-					build_filename_arg = 0;
-					break;
-				case ZEND_INCLUDE:
-					function_name = "include";
-					break;
-				case ZEND_REQUIRE:
-					function_name = "require";
-					break;
-				case ZEND_INCLUDE_ONCE:
-					function_name = "include_once";
-					break;
-				case ZEND_REQUIRE_ONCE:
-					function_name = "require_once";
-					break;
-				default:
-					/* this can actually happen if you use debug_backtrace() in your error_handler and 
-					 * you're in the top-scope */
-					function_name = "unknown"; 
-					build_filename_arg = 0;
-					break;
-			}
-
-			if (build_filename_arg && include_filename) {
-				MAKE_STD_ZVAL(arg_array);
-				array_init(arg_array);
-				add_next_index_string(arg_array, include_filename, 1);
-			}
-		}
-		zend_printf("#%-2d ", indent);
-		if (class_name) {
-			ZEND_PUTS(class_name);
-			ZEND_PUTS(call_type);
-		}
-		zend_printf("%s(", function_name?function_name:"main");
-		debug_print_backtrace_args(arg_array);
-		ZVAL_DELREF(arg_array);
-		zend_printf(") called at [%s:%d]\n", filename, lineno);
-		include_filename = filename;
-		ptr = ptr->prev_execute_data;
-		++indent;
-	}
-}
-
-/* }}} */
 /* {{{ proto void debug_backtrace(void)
    Prints out a backtrace */
 ZEND_FUNCTION(debug_backtrace)
