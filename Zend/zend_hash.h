@@ -295,7 +295,7 @@ END_EXTERN_C()
 	}																					\
 	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
 		char *end=key+length-1;															\
-		ulong idx;																		\
+		long idx;																		\
 																						\
 		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
 			break;																		\
