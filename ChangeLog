@@ -1,3 +1,53 @@
+1999-11-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_regex.h: Avoid Apache's regex.h, if system regex was chosen
+
+1999-11-30  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/imap/imap.h
+      ext/imap/imap.c:
+    * ext/imap/imap.c: Kill some warnings
+
+1999-11-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Add '--enable-low-memory' option.
+
+    * php_reentrancy.h
+      reentrancy.c: Add PHPAPI for Windows.
+
+1999-11-30  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/file.c
+      ext/standard/basic_functions.c
+      ext/gd/gd.c
+      fopen-wrappers.c
+      fopen-wrappers.h
+      main.c
+      php4dllts.dsp:
+    - Added opened_path to php_fopen_wrapper() and the URL fopen wrapper (it's not
+      always properly set, it's a TODO for all of us).  This enables us to implement
+      true 'use' support.
+
+1999-11-30  Nick Gorham  <nick@easysoft.com>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h
+      NEWS
+      ltconfig
+      ltmain.sh
+      php.ini-dist:
+    Added check in the ODBC module that a connection is still valid before
+    reuse in a persistent connection.
+
+1999-11-30  Thies C. Arntzen  <thies@digicol.de>
+
+    * sapi/isapi/php.sym:
+    the Zeus-Guys were nice enoug to give us a call similar to DllMain()!
+
+1999-11-30  Shane Caraveo  <shane@php.net>
+
+    * win32/time.h: need to prevent multiple usage
+
 1999-11-29  Sander Steffann  <steffann@nederland.net>
 
     * ext/gd/gd.c: Show some extra info for GD with phpinfo()
