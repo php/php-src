@@ -19,8 +19,6 @@
 /* $Id$ */
 
 /*#define DEBUG_MAIN_NETWORK 1*/
-#define MAX_CHUNKS_PER_READ 10
-#define SOCKET_DEFAULT_TIMEOUT 60
 
 #include "php.h"
 
@@ -540,7 +538,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent 
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
 	sock->is_blocked = 1;
-	sock->timeout.tv_sec = SOCKET_DEFAULT_TIMEOUT;
+	sock->timeout.tv_sec = FG(default_socket_timeout);
 	sock->socket = socket;
 
 	stream = php_stream_alloc_rel(&php_stream_socket_ops, sock, persistent, "r+");
