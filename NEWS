@@ -17,6 +17,7 @@ PHP 4                                                                      NEWS
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
+- Fixed bug #20936 (openssl_pkey_get was broken). (jeroen@derks.it, Wez)
 - Removed extensions: (Jan, Jani, Sebastian)
   . ext/aspell
   . ext/ccvs
@@ -28,7 +29,7 @@ PHP 4                                                                      NEWS
   . ext/vpopmail
   . ext/cybermut
 - Fixed bug #20927 (wordwrap crash). (Ilia)
-- Fixed bug #20796 (when register_globals is on & arrays with same names are 
+- Fixed bug #20796 (when register_globals is on & arrays with same names are
   passed via get/post/cookie the data inside $_GET/$_POST/$_COOKIE can would be
   corrupted). (Ilia)
 - Fixed bug #20725 (if the upload directory cannot be written to, the POST data
@@ -106,7 +107,6 @@ PHP 4                                                                      NEWS
 - Added dbx_escape_string() function to dbx module. (Marc)
 - Added Oracle (oci8) support to dbx module. (Marc)
 - Updated FDF extension to work with Adode fdftk 5.0. (Hartmut)
-- Made raw POST data to be available also as "php://input" stream. (Hartmut)
 - Added mb_strtolower() and mb_strtoupper(). (Moriyoshi)
 - Fixed an infinite loop in setlocale() when only invalid locale names
   were passed in the array. (patch by Pal Loberg, pallo@initio.no)
@@ -170,28 +170,63 @@ PHP 4                                                                      NEWS
 - Fixed bug #19366 (gdImageFill crashes when x & y are outside of 
   the image's boundries). (Ilia)
 - Fixed bug #13936 (__FILE__ constant didn't contain full path). (Ilia)
-- Renamed:
-    socket_set_timeout()  -> stream_set_timeout()
-    socket_set_blocking() -> stream_set_blocking()
-    set_file_buffer()     -> stream_set_write_buffer()
-    socket_get_status()   -> stream_get_meta_data()
-  As these functions can (in theory) work on any type of stream. (Wez)
-- Added stream_context_create(), stream_context_set_params() and
-  stream_context_set_option and added an optional fourth parameter to
-  fopen() which accepts a stream context.  Contexts allow sharing of
-  information between streams (a kind of "session") and setting notification
-  callbacks. (Wez)
-- Added stream_filter_prepend() and stream_filter_append() which apply
-  a filter to either the top or the bottom of the filter stack for a stream.
-  Implemented "string.rot13" filter as an example; more filters are expected
-  to follow in later releases and other extensions. (Wez)
-- Added stream_select() which works like socket_select but works on streams
-  returned by fopen(), fsockopen() and pfsockopen() instead. (Wez)
+- PHP now has a new stream system that allows it to do some clever stuff with
+  fopen() and fsockopen().  As a result:
+  . URL wrappers natively supports https:// URLs if you have compiled
+    OpenSSL support into PHP (shared extension does not support this).
+  . Added support for fopen("ftps://...", ...) which allows to connect to FTP 
+    servers via SSL. (Stefan Esser)
+  . fsockopen() adds support for ssl:// and tls:// connections via TCP/IP
+  . copy($srcfilename, $destfilename) can now be used with URL wrappers
+  . zlib wrappers/streams can be used even on systems without fopencookie()
+  . Changed 'zlib:' fopen wrapper to 'compress.zlib://' and deprecate
+    'zlib:' to avoid ambiguities when filenames have ':' characters. (Wez)
+  . Added 'compress.bzip2://' stream and wrapper support.
+  . Added user-space streams - it is now possible to define a class in PHP
+    code and register it as a URL wrapper. (stream_register_wrapper)
+  . Most extensions now support streams when passing files, which means
+    that those extensions will now also support URL wrappers. (Wez)
+  . Added URL-wrapper support to exif. (Marcus)
+  . Added memory stream support. (Marcus)
+  . Renamed:
+      socket_set_timeout()  -> stream_set_timeout()
+      socket_set_blocking() -> stream_set_blocking()
+      set_file_buffer()     -> stream_set_write_buffer()
+      socket_get_status()   -> stream_get_meta_data()
+    As these functions can (in theory) work on any type of stream. (Wez)
+  . Raw POST data is now available as "php://input" stream. (Hartmut)
+  . fopen("php://output", "wb") returns a stream that writes to the output
+    buffer (like echo and print). (Wez)
+  . Added stream_context_create(), stream_context_set_params() and
+    stream_context_set_option and added an optional fourth parameter to
+    fopen() which accepts a stream context.  Contexts allow sharing of
+    information between streams (a kind of "session") and setting
+	notification callbacks. (Wez)
+  . Made the "User-Agent" header sent by http:// and https:// wrappers
+	configurable in php.ini or via a stream context. (Sterling)
+  . Added stream_filter_prepend() and stream_filter_append() which apply
+    a filter to either the top or the bottom of a stream filter stack.
+    Implemented "string.rot13" filter as an example; more filters are
+	expected to follow in later releases and other extensions. (Wez)
+  . Added stream_select() which works like socket_select but works on
+    streams returned by fopen(), fsockopen() and pfsockopen() instead. (Wez)
+  . Added STDIN, STDOUT and STDERR constants for CLI sapi reflecting opened
+    streams to their respective standard I/O counterparts. (Edin)
+  . Added php.ini option "auto_detect_line_endings" which enables PHP to
+    detect Macintosh, Unix and Dos end-of-line characters in fgets() and
+	file(). Fixes bugs #16521 and #16708. (Wez)
+  . Fixed include(), require() and GD functions to work with remote files
+    under win32.
+	Fixed bug #18609 (ImageCreateFromJPEG can't fetch from a URL). (Wez)
+- Fixed bug #18022 (fopen does not work with php://stdin anymore on Solaris).
+  (Wez)
+- Added php.ini option "default_socket_timeout" to set the timeout limit for 
+  PHP network streams. (kalowsky, ilia@prohost.org, Wez)
+- Added file_get_contents() which returns the contents of a file as a string. 
+  This function also supports the URL wrappers. (Wez)
 - Fixed bug #19595 (Missing functions for GD2 format handling). (Edin)
 - Fixed bug #19633 (Wrong directories in ext/ldap/config.m4). (Derick)
 - Fixed bugs #17274 and #19627 (segfault in sem_remove). (Wez)
-- Fixed bug #18022 (fopen does not work with php://stdin anymore on Solaris).
-  (Wez)
 - Added mb_convert_case() function to the mbstring extension which can convert
   strings between upper, lower and title case using Unicode mappings.
   Fixed bug #19257 (strtolower & strtoupper does not work for UTF-8 strings).
@@ -201,13 +236,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #18556 (Scripting Engine, problem with locales like tr_TR). (Ilia)
 - Changed y2k_compliance to default to 1 now. (Sascha)
 - Added platform independent socket error constants for better error handling. (Jason)
-- Fixed include(), require() and GD functions to work with remote files under
-  win32. Fixed bug #18609 (ImageCreateFromJPEG can't fetch from a URL. (Wez)
 - Update output of phpinfo() to use more CSS to reduce the file size, do
   proper HTML escaping, and make it XHTML compliant. (Colin)
-- Added php.ini option "auto_detect_line_endings" which enables PHP to detect
-  Macintosh, Unix and Dos end-of-line characters in fgets() and file().
-  Fixes bugs #16521 and #16708. (Wez)
 - Fixed compile errors in the FriBidi extension (Bug #16414). (Tal)
 - Fixed bugs #7472, #12120 and #12989 as well as other potential problems
   with strip_tags() function. (Ilia)
@@ -229,12 +259,6 @@ PHP 4                                                                      NEWS
   flag. (Andrei)
 - Fixed a build failure with the OCI8 extension on Tru64.
   (Patch by Michael Mauch, micahel.mauch@gmx.de)
-- Added support for fopen("ftps://...", ...) which allows to connect to FTP 
-  servers via SSL. (Stefan Esser)
-- Made the "User-Agent" header sent by the fopen wrappers to be configurable
-  in php.ini or via a stream context. (Sterling)
-- Added support for fopen("php://output", "wb") which returns a stream that
-  writes to the output buffer (like echo and print). (Wez)
 - Added --disable-all configure option. (Jani)
 - Backported debug_backtrace() from ZendEngine2. (Thies)
 - Added html-free phpinfo() output for CLI. (Jan)
@@ -286,8 +310,6 @@ PHP 4                                                                      NEWS
 - Fixed a bug in ODBC where closing the module caused a crash in the Windows 
   executable. (kalowsky)
 - Fixed memory leaks in pack() and unpack(). (Patch by ilia@prohost.org)
-- Added php.ini option "default_socket_timeout" to set the timeout limit for 
-  PHP streams. (kalowsky, ilia@prohost.org, Wez)
 - Added URLs to error messages which direct to a page describing the error or 
   function in question. (Derick, Wez, Marcus)
 - Added odbc_data_source() functionality to identify DB ServerName, and a 
@@ -381,8 +403,6 @@ PHP 4                                                                      NEWS
   the unix socket location. (e.g. NFS compiles, etc.) (James Cox)
 - Fixed is_a() to properly work on extension registered classes. (Andrei)
 - Added new constants: PHP_PREFIX and PHP_SHLIB_SUFFIX. (Stig)
-- Added STDIN, STDOUT and STDERR constants for CLI sapi reflecting opened
-  streams to their respective I/O counterparts. (Edin)
 - Added pctnl_alarm() function. (Edin)
 - If zlib.output_compression is enabled and a page is compressed 
   a "Vary: Accept-Encoding" header is now added. (Stefan)
@@ -444,23 +464,6 @@ PHP 4                                                                      NEWS
   available at http://www.jtatesoftware.com/cracklib/. (jtate)
 - Added mysql_info() function. (Jan)
 - Added mysql_list_processes() and mysql_stat() functions. (Georg)
-- Added file_get_contents() which returns the contents of a file as a string. 
-  This function also supports the URL wrappers. (Wez)
-- Changed 'zlib:' fopen wrapper to 'compress.zlib://' to avoid ambiguities
-  when filenames have ':' characters. (Wez)
-- Added URL-wrapper support to exif. (Marcus)
-- PHP now has a new stream system that allows it to do some clever stuff with
-  fopen() and fsockopen().  As a result:
-  . URL wrappers natively supports https:// URLs
-  . fsockopen() adds support for ssl:// and tls:// connections via TCP/IP
-  . copy($srcfilename, $destfilename) can now be used with URL wrappers
-  . zlib wrappers/streams can be used even on systems without fopencookie()
-  . Added 'compress.bzip2://' stream and wrapper support.
-  . Added user-space streams - it is now possible to define a class in PHP
-    code and register it as a URL wrapper. (stream_register_wrapper)
-  . Most extensions now support streams when passing files, which means
-    that those extensions will support URL wrappers. (Wez)
-  . Added memory stream support. (Marcus)
 - Fixed memory allocation problem on systems that have iconv() support in libc.
   (Yasuo)
 - Made var_dump() handle recursive structures better. (Yasuo, Derick)
