@@ -104,10 +104,6 @@ static int le_swfmorphp;
 static int le_swfspritep;
 static int le_swfinputp;
 
-static int le_fopen;
-static int le_socket;
-static int le_popen;
-
 zend_class_entry movie_class_entry;
 zend_class_entry shape_class_entry;
 zend_class_entry fill_class_entry;
@@ -189,7 +185,7 @@ SWFCharacter getCharacter(zval *id TSRMLS_DC)
 /* }}} */
 /* {{{ getInput - utility func for making an SWFInput from an fopened resource */
 
-static void destroy_SWFInput_resource(zend_rsrc_list_entry *resource)
+static void destroy_SWFInput_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
   destroySWFInput((SWFInput)resource->ptr);
 }
@@ -229,7 +225,7 @@ static SWFInput getInput(zval **zfile TSRMLS_DC)
 
   file = (FILE *) zend_fetch_resource(zfile TSRMLS_CC, -1, "File-Handle", &type, 3, php_file_le_fopen(), php_file_le_popen(), php_file_le_socket());
 
-  if(type == le_socket)
+  if(type == php_file_le_socket())
     input = newSWFInput_sock(*(int *)file);
   else
   {
@@ -3038,10 +3034,6 @@ PHP_RINIT_FUNCTION(ming)
 PHP_MINIT_FUNCTION(ming)
 {
   Ming_setErrorFunction(php_ming_error);
-
-  le_fopen = php_file_le_fopen();
-  le_popen = php_file_le_popen();
-  le_socket = php_file_le_socket();
 
 #define CONSTANT(s,c) REGISTER_LONG_CONSTANT((s), (c), CONST_CS | CONST_PERSISTENT)
 
