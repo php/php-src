@@ -1,3 +1,102 @@
+2002-06-14  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update Win32/mail changes, mention bundled gd library.
+
+2002-06-14  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+    - Fix issue with the DIRECTORY_SEPARATOR, did make the install of
+      XML_image2svg fail
+    - TODO++ and others minor stuff
+
+2002-06-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php:
+    * if verbosity config is > 3, display xmlrpc response
+    * another bugfix
+
+2002-06-14  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS: Fix.
+
+2002-06-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/gd/gd_bundled.dsp
+      win32/php_modules.dsw: Add gd_bundled to php_modules.dsw.
+
+2002-06-14  Alan Knowles  <alan@akbkhome.com>
+
+    * pear/PEAR/Command/Remote.php:
+    remote list and remote listall, can now list non-stable packages if you set prefered_state to something else
+
+    * pear/PEAR/Remote.php:
+    Fixed XML RPC sending of args - lets try and get the right tag :)
+
+    * pear/PEAR/Remote.php: Fixed XML RPC sending of args
+
+2002-06-14  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/gd/libgd/gd.h: Use some more sane paths for win32 version.
+
+2002-06-14  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/gd/gd_bundled.dsp:
+    - Remove freetype.lib and HAVE_LIBTTF; we're always linking against freetype2
+      anyway.
+
+2002-06-14  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - renamed domxml_parser_reference to domxml_parser_entitiy_reference
+    - renamed domxml_cdata_block to domxml_parser_cdata_section
+      (more consistent with the domxml_create_XXX methods)
+    - added domxml_parser_processing_instruction(target,data)
+    - added domxml_parser_namespace_decl(href,prefix)
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: - oops, that didn't even compile
+    - added domxml_parser_reference(reference)
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+     - Added preliminary SAX-Input support. It's now possible to build a DomDocument
+       with SAX-Events (added domxml_parser_start_document(), domxml_parser_end_document(),
+       domxml_parser_start_element(tagname[,attributes]), domxml_parser_end_element(tagname),
+       domxml_parser_characters(characters), domxml_parser_cdata_block(cdata),
+       domxml_parser_comment(comment), domxml_parser_get_document(). (chregu)
+
+2002-06-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/datetime.c
+      win32/sendmail.c: Remove unused local variables.
+
+2002-06-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/php_odbc_includes.h
+      ext/odbc/php_odbc.h
+      ext/odbc/config.m4
+      ext/odbc/php_odbc.c:
+    - Fixed bug #15803 (and propably others related too, part 2/2)
+      . Changed the configure/compile so that it doesn't "pollute" the INCLUDES
+        anymore and thus cause trouble with other extensions which
+        might use the same header files. (e.g. Informix)
+      . Separated the #include statements to own file so we don't get any
+        errors when compiling main/internal_functions.c
+
+    * ext/informix/php_informix_includes.h
+      ext/informix/stub.c
+      ext/informix/php_informix.h
+      ext/informix/config.m4
+      ext/informix/ifx.ec
+      ext/informix/Makefile.frag:
+    - Fixed bug #15803 (and propably others related too)
+      . Changed the compile so that it doesn't "pollute" the INCLUDES
+        anymore and thus cause trouble with other extensions which
+        might use the same header files. (e.g. ODBC)
+      . Some fixes for Informix compile problems (with the new build system)
+      . Removed unnecessary stub.c file.
+
 2002-06-13  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/gd/gd_bundled.dsp:
