@@ -34,6 +34,11 @@
 			$return_type = ($this->is_type($tokens[$n])) ? $tokens[$n++] : "void";
 			if(! $this->is_name($tokens[$n])) return("$tokens[$n] is not a valid function name");
 			$function_name = $tokens[$n++];
+
+			if($function_name != $this->name) {
+				return "proto function name is '$function_name' instead of '{$this->name}'";
+			}
+
 			if($tokens[$n]!='(') return("'(' expected instead of '$tokens[$n]'");
 			if($tokens[++$n]!=')') {			
 				for($param=0;$tokens[$n];$n++,$param++) {
