@@ -1,3 +1,15 @@
+2002-05-25  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Command/Package.php:
+    * Make rel_trans from doPackageInfo globally available.
+    * Add command "package-dependencies" (shortcut "pd") to list the
+      dependencies of a package.
+
+2002-05-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php:
+    * typo caught by PEAR_Common::detectDependencies :)
+
 2002-05-24  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * ext/mbstring/mbstring.c: reverted my patch.
