@@ -699,8 +699,8 @@ SPL_METHOD(dual_it, key)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (intern->current.data) {
-		if (intern->current.key_type == IS_STRING) {
-			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len, 1);
+		if (intern->current.key_type == HASH_KEY_IS_STRING) {
+			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len-1, 1);
 		} else {
 			RETURN_LONG(intern->current.int_key);
 		}

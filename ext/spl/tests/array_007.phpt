@@ -1,5 +1,5 @@
 --TEST--
-SPL: ArrayObject from object
+SPL: ArrayObject/Iterator from IteratorAggregate
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
@@ -9,7 +9,7 @@ SPL: ArrayObject from object
 // since they cannot be accessed from the external object which iterates 
 // them.
 
-class test
+class test implements IteratorAggregate
 {
 	public    $pub = "public";
 	protected $pro = "protected";
@@ -19,6 +19,12 @@ class test
 	{
 		$this->imp = "implicit";
 	}
+	
+	function getIterator()
+	{
+		$it = new ArrayObject($this);
+		return $it->getIterator();
+	}
 };
 
 $test = new test;
@@ -26,9 +32,7 @@ $test->dyn = "dynamic";
 
 print_r($test);
 
-$object = new ArrayObject($test);
-
-print_r($object);
+print_r($test->getIterator());
 
 foreach($test as $key => $val)
 {
@@ -47,7 +51,7 @@ test Object
     [imp] => implicit
     [dyn] => dynamic
 )
-ArrayObject Object
+ArrayIterator Object
 (
     [pub] => public
     [pro:protected] => protected
