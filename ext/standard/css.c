@@ -29,15 +29,15 @@ PHPAPI void php_info_print_css(void)
 	TSRMLS_FETCH();
 
 	PUTS("body {background-color: #ffffff; color: #000000;}\n");
-	PUTS("body, td, th, h1, h2 {font-family: arial, helvetica, sans-serif;}\n");
-	PUTS("pre {margin: 0px; font-family: \"andale mono\", \"monotype.com\", \"courier new\", courier, monospace;}\n");
+	PUTS("body, td, th, h1, h2 {font-family: sans-serif;}\n");
+	PUTS("pre {margin: 0px; font-family: monospace;}\n");
 	PUTS("a:link {color: #000099; text-decoration: none;}\n");
 	PUTS("a:hover {text-decoration: underline;}\n");
 	PUTS("table {border-collapse: collapse;}\n");
 	PUTS("td, th { border: 1px solid #000000; font-size: 75%; vertical-align: baseline;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
-	PUTS(".p {text-align: left;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
+	PUTS(".p {text-align: left;}\n");
 	PUTS(".e {background-color: #ccccff; font-weight: bold;}\n");
 	PUTS(".h {background-color: #9999cc; font-weight: bold;}\n");
 	PUTS(".v {background-color: #cccccc;}\n");
