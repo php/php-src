@@ -60,15 +60,16 @@ PHPAPI void php_url_free(php_url *theurl)
 
 /* {{{ php_replace_controlchars
  */
-PHPAPI char *php_replace_controlchars(char *str)
+PHPAPI char *php_replace_controlchars_ex(char *str, int len)
 {
 	unsigned char *s = (unsigned char *)str;
+	unsigned char *e = (unsigned char *)str + len;
 	
 	if (!str) {
 		return (NULL);
 	}
 	
-	while (*s) {
+	while (s < e) {
 	    
 		if (iscntrl(*s)) {
 			*s='_';
@@ -79,13 +80,21 @@ PHPAPI char *php_replace_controlchars(char *str)
 	return (str);
 } 
 /* }}} */
- 
+
+PHPAPI char *php_replace_controlchars(char *str)
+{
+	return php_replace_controlchars_ex(str, strlen(str));
+} 
+
+PHPAPI php_url *php_url_parse(char const *str)
+{
+	return php_url_parse_ex(str, strlen(str));
+}
 
 /* {{{ php_url_parse
  */
-PHPAPI php_url *php_url_parse(char const *str)
+PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 {
-	int length = strlen(str);
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char const *s, *e, *p, *pp, *ue;
@@ -94,7 +103,7 @@ PHPAPI php_url *php_url_parse(char const *str)
 	ue = s + length;
 
 	/* parse scheme */
-	if ((e = strchr(s, ':')) && (e-s)) {
+	if ((e = memchr(s, ':', length)) && (e - s)) {
 		/* 
 		 * certain schemas like mailto: and zlib: may not have any / after them
 		 * this check ensures we support those.
@@ -113,14 +122,14 @@ PHPAPI php_url *php_url_parse(char const *str)
 			}
 			
 			ret->scheme = estrndup(s, (e-s));
-			php_replace_controlchars(ret->scheme);
+			php_replace_controlchars_ex(ret->scheme, (e - s));
 			
 			length -= ++e - s;
 			s = e;
 			goto just_path;
 		} else {
 			ret->scheme = estrndup(s, (e-s));
-			php_replace_controlchars(ret->scheme);
+			php_replace_controlchars_ex(ret->scheme, (e - s));
 		
 			if (*(e+2) == '/') {
 				s = e + 3;
@@ -136,8 +145,8 @@ PHPAPI php_url *php_url_parse(char const *str)
 					}
 				}
 			} else {
-				s = e + 1;
 				if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
+					s = e + 1;
 					goto nohost;
 				} else {
 					length -= ++e - s;
@@ -170,8 +179,8 @@ PHPAPI php_url *php_url_parse(char const *str)
 	
 	e = ue;
 	
-	if (!(p = strchr(s, '/'))) {
-		if ((p = strchr(s, '?'))) {
+	if (!(p = memchr(s, '/', (ue - s)))) {
+		if ((p = memchr(s, '?', (ue - s)))) {
 			e = p;
 		}
 	} else {
@@ -183,17 +192,17 @@ PHPAPI php_url *php_url_parse(char const *str)
 		if ((pp = memchr(s, ':', (p-s)))) {
 			if ((pp-s) > 0) {
 				ret->user = estrndup(s, (pp-s));
-				php_replace_controlchars(ret->user);
+				php_replace_controlchars_ex(ret->user, (pp - s));
 			}	
 		
 			pp++;
 			if (p-pp > 0) {
 				ret->pass = estrndup(pp, (p-pp));
-				php_replace_controlchars(ret->pass);
+				php_replace_controlchars_ex(ret->pass, (p-pp));
 			}	
 		} else {
 			ret->user = estrndup(s, (p-s));
-			php_replace_controlchars(ret->user);
+			php_replace_controlchars_ex(ret->user, (p-s));
 		}
 		
 		s = p + 1;
@@ -241,7 +250,7 @@ PHPAPI php_url *php_url_parse(char const *str)
 	}
 
 	ret->host = estrndup(s, (p-s));
-	php_replace_controlchars(ret->host);
+	php_replace_controlchars_ex(ret->host, (p - s));
 	
 	if (e == ue) {
 		return ret;
@@ -251,7 +260,7 @@ PHPAPI php_url *php_url_parse(char const *str)
 	
 	nohost:
 	
-	if ((p = strchr(s, '?'))) {
+	if ((p = memchr(s, '?', (ue - s)))) {
 		pp = strchr(s, '#');
 		
 		if (pp && pp < p) {
@@ -261,24 +270,24 @@ PHPAPI php_url *php_url_parse(char const *str)
 	
 		if (p - s) {
 			ret->path = estrndup(s, (p-s));
-			php_replace_controlchars(ret->path);
+			php_replace_controlchars_ex(ret->path, (p - s));
 		}	
 	
 		if (pp) {
 			if (pp - ++p) { 
 				ret->query = estrndup(p, (pp-p));
-				php_replace_controlchars(ret->query);
+				php_replace_controlchars_ex(ret->query, (pp - p));
 			}
 			p = pp;
 			goto label_parse;
 		} else if (++p - ue) {
 			ret->query = estrndup(p, (ue-p));
-			php_replace_controlchars(ret->query);
+			php_replace_controlchars_ex(ret->query, (ue - p));
 		}
-	} else if ((p = strchr(s, '#'))) {
+	} else if ((p = memchr(s, '#', (ue - s)))) {
 		if (p - s) {
 			ret->path = estrndup(s, (p-s));
-			php_replace_controlchars(ret->path);
+			php_replace_controlchars_ex(ret->path, (p - s));
 		}	
 		
 		label_parse:
@@ -286,11 +295,11 @@ PHPAPI php_url *php_url_parse(char const *str)
 		
 		if (ue - p) {
 			ret->fragment = estrndup(p, (ue-p));
-			php_replace_controlchars(ret->fragment);
+			php_replace_controlchars_ex(ret->fragment, (ue - p));
 		}	
 	} else {
 		ret->path = estrndup(s, (ue-s));
-		php_replace_controlchars(ret->path);
+		php_replace_controlchars_ex(ret->path, (ue - s));
 	}
 
 	return ret;
@@ -309,7 +318,7 @@ PHP_FUNCTION(parse_url)
 		return;
 	}
 
-	resource = php_url_parse(str);
+	resource = php_url_parse_ex(str, str_len);
 	if (resource == NULL) {
 		php_error_docref1(NULL TSRMLS_CC, str, E_WARNING, "Unable to parse url");
 		RETURN_FALSE;
