@@ -573,7 +573,52 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			case PDO_FETCH_CLASS:
 				object_init_ex(return_value, stmt->fetch.cls.ce);
 
-				/* TODO: call ctor */
+				if (stmt->fetch.cls.ce->constructor) {
+					zend_fcall_info fci;
+					zend_fcall_info_cache fcc;
+					zval *retval_ptr; 
+
+					fci.size = sizeof(fci);
+					fci.function_table = &stmt->fetch.cls.ce->function_table;
+					fci.function_name = NULL;
+					fci.symbol_table = NULL;
+					fci.object_pp = &return_value;
+					fci.retval_ptr_ptr = &retval_ptr;
+					if (stmt->fetch.cls.ctor_args) {
+						HashTable *ht = Z_ARRVAL_P(stmt->fetch.cls.ctor_args);
+						Bucket *p;
+		
+						fci.param_count = 0;
+						fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
+						p = ht->pListHead;
+						while (p != NULL) {
+							fci.params[fci.param_count++] = (zval**)p->pData;
+							p = p->pListNext;
+						}
+					} else {
+						fci.param_count = 0;
+						fci.params = NULL;
+					}
+					fci.no_separation = 1;
+			
+					fcc.initialized = 1;
+					fcc.function_handler = stmt->fetch.cls.ce->constructor;
+					fcc.calling_scope = EG(scope);
+					fcc.object_pp = &return_value;
+			
+					if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+						zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not execute %s::%s()", stmt->fetch.cls.ce->name, stmt->fetch.cls.ce->constructor->common.function_name);
+					} else {
+						if (retval_ptr) {
+							zval_ptr_dtor(&retval_ptr);
+						}
+					}
+					if (fci.params) {
+						efree(fci.params);
+					}
+				} else if (stmt->fetch.cls.ctor_args) {
+					zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", stmt->fetch.cls.ce->name);
+				}
 				break;
 			
 			case PDO_FETCH_INTO:
@@ -643,6 +688,68 @@ static PHP_METHOD(PDOStatement, fetch)
 	PDO_STMT_CLEAR_ERR();
 	if (!do_fetch(stmt, TRUE, return_value, how, ori, off TSRMLS_CC)) {
 		PDO_HANDLE_STMT_ERR();
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed PDOStatement::fetchObject(string class_name [, NULL|array ctor_args]])
+   Fetches the next row and returns it as an object. */
+static PHP_METHOD(PDOStatement, fetchObject)
+{
+	long how = PDO_FETCH_CLASS;
+	long ori = PDO_FETCH_ORI_NEXT;
+	long off = 0;
+	char *class_name;
+	int class_name_len;
+	zend_class_entry *old_ce;
+	zval *old_ctor_args, *ctor_args;
+	int error = 0;
+
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	old_ce = stmt->fetch.cls.ce;
+	old_ctor_args = stmt->fetch.cls.ctor_args;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sz", 
+		&class_name, &class_name_len, &ctor_args)) {
+		RETURN_FALSE;
+	}
+
+	switch(ZEND_NUM_ARGS()) {
+	case 0:
+		stmt->fetch.cls.ce = zend_standard_class_def;
+		break;
+	case 2:
+		if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
+			zend_throw_exception(pdo_exception_ce, "Parameter ctor_args must either be NULL or an array ", 0 TSRMLS_CC);
+			error = 1;
+			break;
+		}
+		if (Z_TYPE_P(ctor_args) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
+			stmt->fetch.cls.ctor_args = ctor_args;
+		} else {
+			stmt->fetch.cls.ctor_args = NULL;
+		}
+		/* no break */
+	case 1:
+		stmt->fetch.cls.ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+
+		if (!stmt->fetch.cls.ce) {
+			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not find class '%s'", class_name);
+			error = 1;
+			break;
+		}
+	}
+
+	PDO_STMT_CLEAR_ERR();
+	if (!error && !do_fetch(stmt, TRUE, return_value, how, ori, off TSRMLS_CC)) {
+		error = 1;
+		PDO_HANDLE_STMT_ERR();
+	}
+	stmt->fetch.cls.ce = old_ce;
+	stmt->fetch.cls.ctor_args = old_ctor_args;
+	if (error) {
 		RETURN_FALSE;
 	}
 }
@@ -977,9 +1084,12 @@ fail_out:
 			}
 			
 			if (argc == 3) {
-				convert_to_array_ex(args[skip+2]);
-				stmt->fetch.cls.ctor_args = *args[skip+2];
-				zval_copy_ctor(stmt->fetch.cls.ctor_args);
+				if (Z_TYPE_PP(args[skip+2]) != IS_NULL && Z_TYPE_PP(args[skip+2]) != IS_ARRAY) {
+					zend_throw_exception(pdo_exception_ce, "Parameter ctor_args must either be NULL or an array ", 0 TSRMLS_CC);
+				} else if (Z_TYPE_PP(args[skip+2]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_PP(args[skip+2]))) {
+					stmt->fetch.cls.ctor_args = *args[skip+2];
+					zval_copy_ctor(stmt->fetch.cls.ctor_args);
+				}
 			}
 			break;
 
@@ -1070,6 +1180,7 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, rowCount,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchSingle,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchAll,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetchObject,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
