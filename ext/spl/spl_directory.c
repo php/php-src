@@ -50,9 +50,9 @@ zend_class_entry *spl_ce_DirectoryIterator;
 zend_class_entry *spl_ce_RecursiveDirectoryIterator;
 
 
-/* {{{ spl_ce_dir_object_dtor */
+/* {{{ spl_ce_dir_object_free_storage */
 /* close all resources and the memory allocated for the object */
-static void spl_ce_dir_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+static void spl_ce_dir_object_free_storage(void *object TSRMLS_DC)
 {
 	spl_ce_dir_object *intern = (spl_ce_dir_object *)object;
 
@@ -99,7 +99,7 @@ static zend_object_value spl_ce_dir_object_new_ex(zend_class_entry *class_type, 
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, spl_ce_dir_object_dtor, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) spl_ce_dir_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &spl_ce_dir_handlers;
 	return retval;
 }
