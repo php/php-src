@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Improved ob_gzhandler() to support chunked output buffering - it's recommended
+  to use it with 4KB chunks (Zeev)
+- Fixed chunked output buffering (Zeev)
 - Forced call_user_method() and call_user_method_array() to take the
   object argument by reference. (Andrei)
 - Fixed binding of ROWIDs in OCI8. (Thies)

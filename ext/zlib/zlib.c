@@ -111,7 +111,7 @@ zend_module_entry php_zlib_module_entry = {
 	php_zlib_functions,
 	PHP_MINIT(zlib),
 	PHP_MSHUTDOWN(zlib),
-	NULL,
+	PHP_RINIT(zlib),
 	NULL,
 	PHP_MINFO(zlib),
 	STANDARD_MODULE_PROPERTIES
@@ -157,6 +157,15 @@ PHP_MINIT_FUNCTION(zlib)
 
 	return SUCCESS;
 }
+
+PHP_RINIT_FUNCTION(zlib)
+{
+	ZLIBLS_FETCH();
+
+	ZLIBG(ob_gzhandler_status) = 0;
+	return SUCCESS;
+}
+
 
 PHP_MSHUTDOWN_FUNCTION(zlib)
 {
@@ -930,31 +939,35 @@ PHP_FUNCTION(gzinflate)
 
 
 
-static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buf_used ZLIBLS_DC)
+static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buf_used, zend_bool do_start, zend_bool do_end ZLIBLS_DC)
 {
 	Bytef *buffer;
 	uInt prev_outlen, outlen;
 	int err;
+	int start_offset = (do_start?10:0);
+	int end_offset = (do_end?8:0);
 
 	outlen = sizeof(char) * (str_length * 1.001 + 12);
-	buffer = (Bytef *) emalloc(outlen+10+8); /* 10+8 for the header and trailer */
+	buffer = (Bytef *) emalloc(outlen+start_offset+end_offset);
 	
-	ZLIBG(stream).next_out = buffer+10;
+	ZLIBG(stream).next_out = buffer+start_offset;
 	ZLIBG(stream).avail_out = outlen;
 
-	err = deflate(&ZLIBG(stream), Z_NO_FLUSH);
+	err = deflate(&ZLIBG(stream), Z_SYNC_FLUSH);
 	while (err == Z_OK && !ZLIBG(stream).avail_out) {
 		prev_outlen = outlen;
 		outlen *= 3;
-		buffer = realloc(buffer, outlen+10+8);
+		buffer = realloc(buffer, outlen+start_offset+end_offset);
 		
-		ZLIBG(stream).next_out = buffer+10 + prev_outlen;
+		ZLIBG(stream).next_out = buffer+start_offset + prev_outlen;
 		ZLIBG(stream).avail_out = prev_outlen * 2;
 
-		err = deflate(&ZLIBG(stream), Z_NO_FLUSH);
+		err = deflate(&ZLIBG(stream), Z_SYNC_FLUSH);
 	}
 
-	err = deflate(&ZLIBG(stream), Z_FINISH);
+	if (do_end) {
+		err = deflate(&ZLIBG(stream), Z_FINISH);
+	}
 
 	*p_buffer = buffer;
 	*p_buf_used = outlen - ZLIBG(stream).avail_out;
@@ -962,7 +975,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buf_used ZL
 }
 
 
-int php_deflate_string(const char *str, uint str_length, char **newstr, uint *new_length, int coding)
+int php_deflate_string(const char *str, uint str_length, char **newstr, uint *new_length, int coding, zend_bool do_start, zend_bool do_end)
 {
 	Bytef *buffer;
 	uInt buf_used;
@@ -973,66 +986,73 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 
 	ZLIBG(compression_coding) = coding;
 
-	ZLIBG(stream).zalloc = Z_NULL;
-	ZLIBG(stream).zfree = Z_NULL;
-	ZLIBG(stream).opaque = Z_NULL;
-
-	switch (coding) {
-		case CODING_GZIP:
-			/* windowBits is passed < 0 to suppress zlib header & trailer */
-			if (deflateInit2(&ZLIBG(stream), Z_DEFAULT_COMPRESSION, Z_DEFLATED,
-					-MAX_WBITS, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY)
-						!= Z_OK) {
-				/* TODO: print out error */
-				return FAILURE;
-			}
+	if (do_start) {
+		ZLIBG(stream).zalloc = Z_NULL;
+		ZLIBG(stream).zfree = Z_NULL;
+		ZLIBG(stream).opaque = Z_NULL;
+		switch (coding) {
+			case CODING_GZIP:
+				/* windowBits is passed < 0 to suppress zlib header & trailer */
+				if (deflateInit2(&ZLIBG(stream), Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+						-MAX_WBITS, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY)
+							!= Z_OK) {
+					/* TODO: print out error */
+					return FAILURE;
+				}
 		
-			/* Write a very simple .gz header: */
-			sprintf(header_buffer, "%c%c%c%c%c%c%c%c%c%c", gz_magic[0],
-						gz_magic[1], Z_DEFLATED, 0 /*flags*/,
-						0,0,0,0 /*time*/, 0 /*xflags*/, OS_CODE);
-			ZLIBG(crc) = crc32(0L, Z_NULL, 0);
-			break;
-		case CODING_DEFLATE:
-			if (deflateInit(&ZLIBG(stream), Z_DEFAULT_COMPRESSION) != Z_OK) {
-				/* TODO: print out error */
-				return FAILURE;
-			}
-			break;		
+				/* Write a very simple .gz header: */
+				sprintf(header_buffer, "%c%c%c%c%c%c%c%c%c%c", gz_magic[0],
+							gz_magic[1], Z_DEFLATED, 0 /*flags*/,
+							0,0,0,0 /*time*/, 0 /*xflags*/, OS_CODE);
+				ZLIBG(crc) = crc32(0L, Z_NULL, 0);
+				break;
+			case CODING_DEFLATE:
+				if (deflateInit(&ZLIBG(stream), Z_DEFAULT_COMPRESSION) != Z_OK) {
+					/* TODO: print out error */
+					return FAILURE;
+				}
+				break;		
+		}
 	}
 
 
 	ZLIBG(stream).next_in = (Bytef*) str;
 	ZLIBG(stream).avail_in = (uInt) str_length;
-	
+
 	if (ZLIBG(compression_coding) == 1) {
-		ZLIBG(crc) = crc32(ZLIBG(crc), (const Bytef *)str, str_length);
+		ZLIBG(crc) = crc32(ZLIBG(crc), (const Bytef *) str, str_length);
 	}
 
-	err = php_do_deflate(str_length, &buffer, &buf_used ZLIBLS_CC);
+	err = php_do_deflate(str_length, &buffer, &buf_used, do_start, do_end ZLIBLS_CC);
 	/* TODO: error handling (err may be Z_STREAM_ERROR, Z_BUF_ERROR, ?) */
 
-
-	if (ZLIBG(compression_coding) == 1) {
-		/* write crc & stream.total_in in LSB order */
-		sprintf(trailer_buffer, "%c%c%c%c%c%c%c%c",
-					(char) ZLIBG(crc) & 0xFF,
-					(char) (ZLIBG(crc) >> 8) & 0xFF,
-					(char) (ZLIBG(crc) >> 16) & 0xFF,
-					(char) (ZLIBG(crc) >> 24) & 0xFF,
-					(char) ZLIBG(stream).total_in & 0xFF,
-					(char) (ZLIBG(stream).total_in >> 8) & 0xFF,
-					(char) (ZLIBG(stream).total_in >> 16) & 0xFF,
-					(char) (ZLIBG(stream).total_in >> 24) & 0xFF);
+	if (do_end) {
+		if (ZLIBG(compression_coding) == 1) {
+			/* write crc & stream.total_in in LSB order */
+			sprintf(trailer_buffer, "%c%c%c%c%c%c%c%c",
+						(char) ZLIBG(crc) & 0xFF,
+						(char) (ZLIBG(crc) >> 8) & 0xFF,
+						(char) (ZLIBG(crc) >> 16) & 0xFF,
+						(char) (ZLIBG(crc) >> 24) & 0xFF,
+						(char) ZLIBG(stream).total_in & 0xFF,
+						(char) (ZLIBG(stream).total_in >> 8) & 0xFF,
+						(char) (ZLIBG(stream).total_in >> 16) & 0xFF,
+						(char) (ZLIBG(stream).total_in >> 24) & 0xFF);
+		}
 	}
 	
-
-	memcpy(buffer, header_buffer, 10);
-	memcpy(buffer+10+buf_used, trailer_buffer, 8);
-
-	*new_length = buf_used + 10 + 8;
 	*newstr = buffer;
-	deflateEnd(&ZLIBG(stream));
+	*new_length = buf_used;
+
+	if (do_start) {
+		memcpy(buffer, header_buffer, 10);
+		*new_length += 10;
+	}
+	if (do_end) {
+		memcpy(buffer+buf_used+(do_start?10:0), trailer_buffer, 8);
+		*new_length += 8;
+		deflateEnd(&ZLIBG(stream));
+	}
 
 	return SUCCESS;
 }
@@ -1044,14 +1064,14 @@ PHP_FUNCTION(gzencode)
 	int coding;
 
 	switch(ZEND_NUM_ARGS()) {
-		case CODING_GZIP:
+		case 1:
 			if (zend_get_parameters_ex(1, &zv_string)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(zv_string);
 			coding = 1;
 			break;
-		case CODING_DEFLATE:
+		case 2:
 			if (zend_get_parameters_ex(2, &zv_string, &zv_coding)==FAILURE) {
 				RETURN_FALSE;
 			}
@@ -1063,7 +1083,7 @@ PHP_FUNCTION(gzencode)
 			ZEND_WRONG_PARAM_COUNT();
 			break;
 	}
-	if (php_deflate_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string), &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), coding)==SUCCESS) {
+	if (php_deflate_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string), &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), coding, 1, 1)==SUCCESS) {
 		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
 		RETURN_FALSE;
@@ -1074,20 +1094,23 @@ PHP_FUNCTION(gzencode)
 PHP_FUNCTION(ob_gzhandler)
 {
 	int coding;
-	zval **zv_string;
+	zval **zv_string, **zv_mode;
 	zval **data, **a_encoding;
 	zend_bool return_original=0;
+	zend_bool do_start, do_end;
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &zv_string)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &zv_string, &zv_mode)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if (zend_hash_find(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), (void **) &data)==FAILURE
+	if (ZLIBG(ob_gzhandler_status)==-1
+		|| zend_hash_find(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), (void **) &data)==FAILURE
 		|| Z_TYPE_PP(data)!=IS_ARRAY
 		|| zend_hash_find(Z_ARRVAL_PP(data), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING"), (void **) &a_encoding)==FAILURE) {
 		/* return the original string */
 		*return_value = **zv_string;
 		zval_copy_ctor(return_value);
+		ZLIBG(ob_gzhandler_status)=-1;
 		return;
 	}
 	convert_to_string_ex(a_encoding);
@@ -1098,31 +1121,39 @@ PHP_FUNCTION(ob_gzhandler)
 	} else {
 		RETURN_FALSE;
 	}
-	if (php_deflate_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string), &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), coding)==SUCCESS) {
+	
+	convert_to_long_ex(zv_mode);
+	do_start = ((Z_LVAL_PP(zv_mode) & PHP_OUTPUT_HANDLER_START) ? 1 : 0);
+	do_end = ((Z_LVAL_PP(zv_mode) & PHP_OUTPUT_HANDLER_END) ? 1 : 0);
+	if (php_deflate_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string), &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), coding, do_start, do_end)==SUCCESS) {
 		Z_TYPE_P(return_value) = IS_STRING;
-		switch (coding) {
-			case CODING_GZIP:
-				if (sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1)==FAILURE) {
+		if (do_start) {
+			switch (coding) {
+				case CODING_GZIP:
+					if (sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1)==FAILURE) {
+						return_original = 1;
+					}
+					break;
+				case CODING_DEFLATE:
+					if (sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1)==FAILURE) {
+						return_original = 1;
+					}
+					break;
+				default:
 					return_original = 1;
-				}
-				break;
-			case CODING_DEFLATE:
-				if (sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1)==FAILURE) {
-					return_original = 1;
-				}
-				break;
-			default:
-				return_original = 1;
-				break;
+					break;
+			}
 		}
 
 		if (return_original) {
 			zval_dtor(return_value);
+#if 0
 		} else {
 			char lenbuf[64];
 			
 			sprintf(lenbuf,"Content-Length: %d",Z_STRLEN_P(return_value));
 			sapi_add_header(lenbuf,strlen(lenbuf), 1);
+#endif
 		}
 	} else {
 		return_original = 1;
@@ -1134,11 +1165,3 @@ PHP_FUNCTION(ob_gzhandler)
 		zval_copy_ctor(return_value);
 	}
 }
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
