@@ -22,7 +22,7 @@ $t = new pass();
 $t->show();
 $t->error();
 
-echo "Done\n"; // shouldn't be displayed of cause
+echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
 Call to function show()

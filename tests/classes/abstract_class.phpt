@@ -21,7 +21,7 @@ $t2->show();
 $t = new fail();
 $t->show();
 
-echo "Done\n"; // shouldn't be displayed of cause
+echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
 Call to function show()
