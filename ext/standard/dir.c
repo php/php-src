@@ -222,20 +222,18 @@ PHP_FUNCTION(closedir)
 /* }}} */
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
-/* {{{ proto int chroot(string directory)
+/* {{{ proto bool chroot(string directory)
    Change root directory */
 
 PHP_FUNCTION(chroot)
 {
-	pval **arg;
-	int ret;
+	char *str;
+	int ret, str_len;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		RETURN_FALSE;
 	}
-	convert_to_string_ex(arg);
-
-	ret = chroot(Z_STRVAL_PP(arg));
+    ret = chroot(str);
 	
 	if (ret != 0) {
 		php_error(E_WARNING, "chroot: %s (errno %d)", strerror(errno), errno);
