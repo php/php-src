@@ -25,6 +25,7 @@ Open:
     the dbase extension         (1)
     mb_strcut('', 2147483647);  (2)
     chunk_split                 (3)
+    socket_select               (4)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -53,6 +54,7 @@ X
 
 (3) integer overflow in php_chunk_split
 
+(4) heap corruption, dies in efree()/execute()
 
 Methodology
 
