@@ -33,6 +33,7 @@
 #include "ext/session/php_session.h"
 #include "zend_operators.h"
 #include "ext/standard/dns.h"
+#include "ext/standard/php_uuencode.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -488,6 +489,9 @@ function_entry basic_functions[] = {
 
 	PHP_FE(base64_decode,													NULL)
 	PHP_FE(base64_encode,													NULL)
+
+	PHP_FE(uuencode,														NULL)
+	PHP_FE(uudecode,														NULL)
 
 	PHP_FE(abs,																NULL)
 	PHP_FE(ceil,															NULL)
