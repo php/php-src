@@ -36,7 +36,7 @@
 #include "ext/standard/info.h"
 #include "php_pcntl.h"
 
-#if HAVE_GETPRIORITY || HAVE_SETPRIORITY
+#if HAVE_GETPRIORITY || HAVE_SETPRIORITY || HAVE_WAIT3
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
@@ -46,6 +46,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_fork,			NULL)
 	PHP_FE(pcntl_waitpid,		second_arg_force_ref)
+	PHP_FE(pcntl_wait,		first_arg_force_ref)
 	PHP_FE(pcntl_signal,		NULL)
 	PHP_FE(pcntl_wifexited,		NULL)
 	PHP_FE(pcntl_wifstopped,	NULL)
@@ -243,6 +244,37 @@ PHP_FUNCTION(pcntl_waitpid)
 
 	child_id = waitpid((pid_t) pid, &status, options);
 
+	Z_LVAL_P(z_status) = status;
+
+	RETURN_LONG((long) child_id);
+}
+/* }}} */
+
+/* {{{ proto int pcntl_wait(int &status)
+   Waits on or returns the status of a forked child as defined by the waitpid() system call */
+PHP_FUNCTION(pcntl_wait)
+{
+	long pid, options = 0;
+	zval *z_status = NULL;
+	int status;
+	pid_t child_id;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &z_status, &options) == FAILURE)
+		return;
+	
+	convert_to_long_ex(&z_status);
+
+	status = Z_LVAL_P(z_status);
+#ifdef HAVE_WAIT3
+	if(options) {
+		child_id = wait3(&status, options, NULL);
+	}
+	else {
+		child_id = wait(&status);
+	}
+#else
+	child_id = wait(&status);
+#endif
 	Z_LVAL_P(z_status) = status;
 
 	RETURN_LONG((long) child_id);
