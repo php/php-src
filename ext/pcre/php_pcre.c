@@ -136,6 +136,8 @@ int php_mshutdown_pcre(SHUTDOWN_FUNC_ARGS)
 {
 #ifndef ZTS
 	zend_hash_destroy(&PCRE_G(pcre_cache));
+#else
+	ts_free_id(pcre_globals_id);
 #endif
 	return SUCCESS;
 }
