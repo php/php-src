@@ -1,19 +1,21 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2003, Version 4.3.3
-- Prevent yaz from logging unless yaz.log_file is set (Adam Dickmeiss)
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
 - Added new command line parameters -B, -F, -R and -E which allow to process 
   stdin line by line (See 'php -h' or 'man php' for more). (Marcus)
 - Added DBA handler 'inifile' to support ini files. (Marcus)
-- Added a "DEBUG" qualifier to 'php -v's version output, and made the CGI
-  version statement look the same as the CLI version. (Derick)
+- Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
+- Fixed ext/yaz to not log unless yaz.log_file is set. (Adam Dickmeiss)
+- Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
 - Fixed bug #23898 (Proper handling of NULLs in odbc_result, odbc_fetch_into
   and odbc_result_all). (Ilia)
 - Fixed bug #23897 (Fixed a check for mbfilter_ru.h). (aleks@m2media.ru, Ilia)
 - Fixed bug #23894 (sprintf() decimal specifiers problem). (Moriyoshi)
 - Fixed bug #23888 (Missing input validation for flags parameter). (Ilia)
-
+- Fixed bug #23779 (mysql_connect(): disable local infile option if php.ini
+  option "open_basedir" is set). (Georg)
+ 
 29 May 2003, Version 4.3.2
 - Syncronized bundled GD library with GD 2.0.12. (Ilia)
 - Removed support for GDLIB version 1.x.x (php_gd.dll) on Windows. (Edin)
@@ -173,6 +175,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22017 (date() does not support negative timestamps on win32).
   (Ilia)
 - Fixed bug #22008 (strip_tags() eliminates too much). (Moriyoshi)
+- Fixed bug #21007 (html_errors off text-only output in phpinfo). (Marcus)
 - Fixed bug #22004 (Overload extension and _call() breaks classes). (Shane)
 - Fixed bug #21998 (array_pop() did not reset the current array position).
   (Jani)
