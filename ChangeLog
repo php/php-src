@@ -1,3 +1,102 @@
+2002-07-28  sniper  <sniper@pb1.pair.com>
+
+    * ext/mbstring/mbstring.c: MFH
+
+2002-07-28  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/xmlrpc/config.m4: FHM
+
+    * ext/xmlrpc/config.m4:
+    Allow xmlrpc-epi header files stored under include/xmlrpc-epi
+
+2002-07-28  derick  <derick@pb1.pair.com>
+
+    * ext/standard/md5.c
+      ext/standard/sha1.c: - Copy and paste error -> unify error messages
+
+2002-07-28  sesser  <sesser@pb1.pair.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/php_standard.h
+      ext/standard/sha1.c
+      ext/standard/sha1.h: Added sha1, sha1_file functions.
+
+    * ext/standard/filestat.c: MFH 2
+
+    * ext/standard/filestat.c: MFH
+
+2002-07-28  helly  <helly@pb1.pair.com>
+
+    * php.ini-dist
+      php.ini-recommended: -add & document ini settings for exif
+
+    * ext/exif/exif.c: -decode several MarkerNotes
+    -correct offset information in debug mode
+
+2002-07-28  tal  <tal@pb1.pair.com>
+
+    * pear/scripts/pear.in: * Fixed E_NOTICE on pear -V
+
+2002-07-28  sesser  <sesser@pb1.pair.com>
+
+    * NEWS: (re)added /ext/ftp news
+
+2002-07-28  sr  <sr@pb1.pair.com>
+
+    * main/SAPI.c
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c:
+    Commit patch as discussed on LinuxTag and posted to php-dev in June.
+    Disables zlib.output_compression for scripts with image/ content-type
+    header (fixes bug #16109) and makes it possible to switch
+    zlib.output_compression during script execution before the headers are
+    sent.
+
+2002-07-28  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: - Removed the 2 last entries.
+
+    * README.CVS-RULES: No exceptions.
+
+2002-07-28  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/pgsql/pgsql.c: Unify error messages
+
+2002-07-28  helly  <helly@pb1.pair.com>
+
+    * ext/gd/gd.c: forgot to move imeageellipse out of #ifdef HAVE_LIBGD20
+
+2002-07-28  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/mbstring/mbstring.c: MFH
+
+    * ext/mbstring/mbstring.c:
+    Fixed query string handling. Now some.php?a&b=1;c works.
+
+    * main/php_variables.c: MFH
+
+2002-07-28  tal  <tal@pb1.pair.com>
+
+    * pear/scripts/pear.in:
+    pear -V now shows pear version, php version and ZE version.
+
+2002-07-28  Stig Bakken  <ssb@pb1.pair.com>
+
+    * pear/package-PEAR.xml: * feature/fixed bug
+
+    * pear/PEAR/Command/Install.php: * added "upgrade-all" command
+
+    * pear/PEAR/Installer.php:
+    * don't abort install if errors are found in the package, display
+      a warning instead
+
+2002-07-28  yohgaki  <yohgaki@pb1.pair.com>
+
+    * main/php_variables.c:
+    Fixed some.php?a&b&c does not initilize $_GET['a'], $_GET['b'], $_GET['c']
+    when mbstr-enc-trans is disabled.
+
 2002-07-27  phanto  <phanto@pb1.pair.com>
 
     * win32/php4dllts.dsp: add dispatch.c

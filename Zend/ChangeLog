@@ -1,3 +1,7 @@
+2002-07-28  phanto  <phanto@pb1.pair.com>
+
+    * OBJECTS2_HOWTO: update the handlers struct
+
 2002-07-27  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_compile.c
