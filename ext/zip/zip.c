@@ -128,9 +128,18 @@ PHP_FUNCTION(zip_open)
 		return;
 	}
 
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	archive_p = zzip_opendir(filename);
 	if (archive_p == NULL) {
-		php_error(E_WARNING, "Cannot open zip archive %s", filename);
+		php_error(E_WARNING, "%s() Cannot open zip archive %s", 
+				  get_active_function_name(TSRMLS_C), filename);
 		RETURN_FALSE;
 	}
 
