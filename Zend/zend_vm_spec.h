@@ -117,19 +117,19 @@
 #define SPEC_IS_OP1_TMP_FREE_ANY()              IS_TMP_FREE(free_op1)
 #define SPEC_IS_OP1_TMP_FREE_CONST()            0
 #define SPEC_IS_OP1_TMP_FREE_TMP()              1
-#define SPEC_IS_OP1_TMP_FREE_VAR()              IS_TMP_FREE(free_op1)
+#define SPEC_IS_OP1_TMP_FREE_VAR()              0
 #define SPEC_IS_OP1_TMP_FREE_UNUSED()           0
 
 #define SPEC_FREE_OP1_ANY()                     FREE_OP(free_op1);
 #define SPEC_FREE_OP1_CONST()
 #define SPEC_FREE_OP1_TMP()                     zval_dtor(free_op1.var)
-#define SPEC_FREE_OP1_VAR()                     FREE_OP(free_op1);
+#define SPEC_FREE_OP1_VAR()                     FREE_OP_VAR_PTR(free_op1);
 #define SPEC_FREE_OP1_UNUSED()
 
 #define SPEC_FREE_OP1_IF_VAR_ANY()              FREE_OP_IF_VAR(free_op1);
 #define SPEC_FREE_OP1_IF_VAR_CONST()
 #define SPEC_FREE_OP1_IF_VAR_TMP()
-#define SPEC_FREE_OP1_IF_VAR_VAR()              FREE_OP_IF_VAR(free_op1);
+#define SPEC_FREE_OP1_IF_VAR_VAR()              FREE_OP_VAR_PTR(free_op1);
 #define SPEC_FREE_OP1_IF_VAR_UNUSED()
 
 #define SPEC_FREE_OP1_VAR_PTR_ANY()             FREE_OP_VAR_PTR(free_op1);
@@ -171,19 +171,19 @@
 #define SPEC_IS_OP2_TMP_FREE_ANY()              IS_TMP_FREE(free_op2)
 #define SPEC_IS_OP2_TMP_FREE_CONST()            0
 #define SPEC_IS_OP2_TMP_FREE_TMP()              1
-#define SPEC_IS_OP2_TMP_FREE_VAR()              IS_TMP_FREE(free_op2)
+#define SPEC_IS_OP2_TMP_FREE_VAR()              0
 #define SPEC_IS_OP2_TMP_FREE_UNUSED()           0
 
 #define SPEC_FREE_OP2_ANY()                     FREE_OP(free_op2);
 #define SPEC_FREE_OP2_CONST()
 #define SPEC_FREE_OP2_TMP()                     zval_dtor(free_op2.var)
-#define SPEC_FREE_OP2_VAR()                     FREE_OP(free_op2);
+#define SPEC_FREE_OP2_VAR()                     FREE_OP_VAR_PTR(free_op2);
 #define SPEC_FREE_OP2_UNUSED()
 
 #define SPEC_FREE_OP2_IF_VAR_ANY()              FREE_OP_IF_VAR(free_op2);
 #define SPEC_FREE_OP2_IF_VAR_CONST()
 #define SPEC_FREE_OP2_IF_VAR_TMP()
-#define SPEC_FREE_OP2_IF_VAR_VAR()              FREE_OP_IF_VAR(free_op2);
+#define SPEC_FREE_OP2_IF_VAR_VAR()              FREE_OP_VAR_PTR(free_op2);
 #define SPEC_FREE_OP2_IF_VAR_UNUSED()
 
 #define SPEC_FREE_OP2_VAR_PTR_ANY()             FREE_OP_VAR_PTR(free_op2);
