@@ -139,7 +139,7 @@ function_entry pgsql_functions[] = {
 	PHP_FALIAS(pg_locreate,	     pg_lo_create,      NULL)
 	PHP_FALIAS(pg_lounlink,	     pg_lo_unlink,      NULL)
 	PHP_FALIAS(pg_loopen,	     pg_lo_open,        NULL)
-	PHP_FALIAS(pg_loclse,	     pg_lo_close,        NULL)
+	PHP_FALIAS(pg_loclose,	     pg_lo_close,        NULL)
 	PHP_FALIAS(pg_loread,	     pg_lo_read,        NULL)
 	PHP_FALIAS(pg_lowrite,	     pg_lo_write,       NULL)
 	PHP_FALIAS(pg_loimport,	     pg_lo_import,      NULL)
