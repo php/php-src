@@ -60,5 +60,5 @@ void module_destructor(zend_module_entry *module);
 int module_registry_cleanup(zend_module_entry *module);
 int module_registry_request_startup(zend_module_entry *module);
 
-#define ZEND_MODULE_DTOR (int (*)(void *)) module_destructor
+#define ZEND_MODULE_DTOR (void (*)(void *)) module_destructor
 #endif

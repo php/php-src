@@ -206,7 +206,7 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 }
 
 
-ZEND_API int _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
+ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 {
 #if DEBUG_ZEND>=2
 	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
@@ -216,7 +216,6 @@ ZEND_API int _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 		zval_dtor(*zval_ptr);
 		safe_free_zval_ptr(*zval_ptr);
 	}
-	return 1;
 }
 
 

@@ -204,7 +204,7 @@ ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resou
 }
 
 
-int list_entry_destructor(void *ptr)
+void list_entry_destructor(void *ptr)
 {
 	list_entry *le = (list_entry *) ptr;
 	list_destructors_entry *ld;
@@ -216,11 +216,10 @@ int list_entry_destructor(void *ptr)
 	} else {
 		zend_error(E_WARNING,"Unknown list entry type in request shutdown (%d)",le->type);
 	}
-	return 1;
 }
 
 
-int plist_entry_destructor(void *ptr)
+void plist_entry_destructor(void *ptr)
 {
 	list_entry *le = (list_entry *) ptr;
 	list_destructors_entry *ld;
@@ -232,7 +231,6 @@ int plist_entry_destructor(void *ptr)
 	} else {
 		zend_error(E_WARNING,"Unknown persistent list entry type in module shutdown (%d)",le->type);
 	}
-	return 1;
 }
 
 

@@ -25,13 +25,12 @@
 #include "zend_globals.h"
 
 
-int free_zend_constant(zend_constant *c)
+void free_zend_constant(zend_constant *c)
 {
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_dtor(&c->value);
 	}
 	free(c->name);
-	return 1;
 }
 
 

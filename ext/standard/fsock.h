@@ -71,7 +71,7 @@ void php_sockset_timeout(int socket, struct timeval *timeout);
 int php_sockdestroy(int socket);
 int php_sock_close(int socket);
 size_t php_sock_set_def_chunk_size(size_t size);
-int php_msock_destroy(int *data);
+void php_msock_destroy(int *data);
 
 PHPAPI int connect_nonb(int sockfd, struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
 

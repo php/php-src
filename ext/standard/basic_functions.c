@@ -69,7 +69,7 @@ typedef struct _php_shutdown_function_entry {
 } php_shutdown_function_entry;
 
 /* some prototypes for local functions */
-static int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
+static void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
 pval test_class_get_property(zend_property_reference *property_reference);
 int test_class_set_property(zend_property_reference *property_reference, pval *value);
 void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
@@ -326,7 +326,7 @@ zend_module_entry basic_functions_module = {
 
 #if defined(HAVE_PUTENV)
 
-static int php_putenv_destructor(putenv_entry *pe)
+static void php_putenv_destructor(putenv_entry *pe)
 {
 	if (pe->previous_value) {
 		putenv(pe->previous_value);
@@ -346,7 +346,6 @@ static int php_putenv_destructor(putenv_entry *pe)
 	}
 	efree(pe->putenv_string);
 	efree(pe->key);
-	return 1;
 }
 #endif
 
@@ -405,7 +404,7 @@ PHP_RINIT_FUNCTION(basic)
 	BG(page_inode) = -1;
 	BG(page_mtime) = -1;
 #ifdef HAVE_PUTENV
-	if (zend_hash_init(&BG(putenv_ht), 1, NULL, (int (*)(void *)) php_putenv_destructor, 0) == FAILURE) {
+	if (zend_hash_init(&BG(putenv_ht), 1, NULL, (void (*)(void *)) php_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
 	}
 #endif
@@ -986,7 +985,7 @@ PHP_FUNCTION(call_user_method)
 }
 
 
-int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry)
+void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry)
 {
 	pval retval;
 	int i;
@@ -999,7 +998,6 @@ int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_e
 		zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
 	}
 	efree(shutdown_function_entry->arguments);
-	return 1;
 }
 
 
@@ -1034,7 +1032,7 @@ PHP_FUNCTION(register_shutdown_function)
 	convert_to_string(shutdown_function_entry.arguments[0]);
 	if (!BG(user_shutdown_function_names)) {
 		BG(user_shutdown_function_names) = (HashTable *) emalloc(sizeof(HashTable));
-		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (int (*)(void *))user_shutdown_function_dtor, 0);
+		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *))user_shutdown_function_dtor, 0);
 	}
 
 	for (i=0; i<shutdown_function_entry.arg_count; i++) {

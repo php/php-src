@@ -34,6 +34,11 @@
 #define HASH_DEL_KEY 0
 #define HASH_DEL_INDEX 1
 
+typedef int  (*compare_func_t)(const void *, const void *);
+typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t);
+typedef void (*dtor_func_t)(void *pDest);
+typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
+
 struct hashtable;
 
 typedef struct bucket {
@@ -53,25 +58,22 @@ typedef struct hashtable {
 	uint nHashSizeIndex;
 	uint nNumOfElements;
 	ulong nNextFreeElement;
-	ulong(*pHashFunction) (char *arKey, uint nKeyLength);
+	hash_func_t pHashFunction;
 	Bucket *pInternalPointer;	/* Used for element traversal */
 	Bucket *pListHead;
 	Bucket *pListTail;
 	Bucket **arBuckets;
-	int (*pDestructor) (void *pData);
+	dtor_func_t pDestructor;
 	unsigned char persistent;
 #if ZEND_DEBUG
 	int inconsistent;
 #endif
 } HashTable;
 
-typedef int  (*compare_func_t) (const void *, const void *);
-typedef void (*sort_func_t) (void *, size_t, register size_t, compare_func_t);
-
 BEGIN_EXTERN_C()
 
 /* startup/shutdown */
-ZEND_API int zend_hash_init(HashTable *ht, uint nSize, ulong(*pHashFunction) (char *arKey, uint nKeyLength), int (*pDestructor) (void *pData), int persistent);
+ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent);
 ZEND_API void zend_hash_destroy(HashTable *ht);
 
 ZEND_API void zend_hash_clean(HashTable *ht);
