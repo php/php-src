@@ -12,10 +12,10 @@ Fixed:
 	str_repeat (Ilia)
     setlocale (Rasmus)
     unregister_tick_function (Rasmus)
+	bcsub (Rasmus)
 
 Open:
 
-    bcsub (1)
     mb_ereg (2)
     mb_ereg_match (2)
     mb_eregi (2)
@@ -24,9 +24,6 @@ Open:
     xml_parser_create (Unable to reproduce - Rasmus)
 
     Notes:
-
-(1) appears, when bcadd, bcmod, bcmul, bcscale, bcsqrt have been tested
-    prior to it.  does not segfault when tested alone.
 
 (2) sometimes, mb_ereg passes the test, although a subsequent mbereg
     will cause a segfault. Probably something in-between screws up the engine.
