@@ -46,6 +46,8 @@ typedef struct _php_openssl_netstream_data_t {
 	int is_client;
 	int ssl_active;
 	php_stream_xport_crypt_method_t method;
+	unsigned state_set:1;
+	unsigned _spare:31;
 } php_openssl_netstream_data_t;
 
 php_stream_ops php_openssl_socket_ops;
@@ -92,6 +94,8 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 		case SSL_ERROR_WANT_WRITE:
 			/* re-negotiation, or perhaps the SSL layer needs more
 			 * packets: retry in next iteration */
+			errno = EAGAIN;
+			retry = sslsock->s.is_blocked;
 			break;
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
@@ -159,6 +163,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 			}
 				
 			retry = 0;
+			errno = 0;
 	}
 	return retry;
 }
@@ -210,7 +215,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 
 			if (nr_bytes <= 0) {
 				retry = handle_ssl_error(stream, nr_bytes TSRMLS_CC);
-				stream->eof = (retry == 0 && !SSL_pending(sslsock->ssl_handle));
+				stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
 				
 			} else {
 				/* we got the data */
@@ -377,10 +382,13 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 	int n, retry = 1;
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
-		if (sslsock->is_client) {
-			SSL_set_connect_state(sslsock->ssl_handle);
-		} else {
-			SSL_set_accept_state(sslsock->ssl_handle);
+		if (!sslsock->state_set) {
+			if (sslsock->is_client) {
+				SSL_set_connect_state(sslsock->ssl_handle);
+			} else {
+				SSL_set_accept_state(sslsock->ssl_handle);
+			}
+			sslsock->state_set = 1;
 		}
 	
 		do {
@@ -409,6 +417,8 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 			}
 
 			X509_free(peer_cert);
+		} else  {
+			n = errno == EAGAIN ? 0 : -1;
 		}
 
 		return n;

@@ -1290,7 +1290,7 @@ PHP_FUNCTION(stream_set_write_buffer)
 }
 /* }}} */
 
-/* {{{ proto bool stream_socket_enable_crypto(resource stream, bool enable [, int cryptokind, resource sessionstream])
+/* {{{ proto int stream_socket_enable_crypto(resource stream, bool enable [, int cryptokind, resource sessionstream])
    Enable or disable a specific kind of crypto on the stream */
 PHP_FUNCTION(stream_socket_enable_crypto)
 {
@@ -1298,6 +1298,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 	zval *zstream, *zsessstream = NULL;
 	php_stream *stream, *sessstream = NULL;
 	zend_bool enable;
+	int ret;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb|lr", &zstream, &enable, &cryptokind, &zsessstream) == FAILURE) {
 		RETURN_FALSE;
@@ -1315,7 +1316,17 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 		}
 	}
 
-	RETURN_BOOL(php_stream_xport_crypto_enable(stream, enable TSRMLS_CC) < 0 ? 0 : 1);
+	ret = php_stream_xport_crypto_enable(stream, enable TSRMLS_CC);
+	switch (ret) {
+		case -1:
+			RETURN_FALSE;
+
+		case 0:
+			RETURN_LONG(0);
+		
+		default:
+			RETURN_TRUE;
+	}
 }
 /* }}} */
 
