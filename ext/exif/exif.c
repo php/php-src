@@ -67,7 +67,7 @@
  * while extending the module as it shows if you are at the right position.
  * You are always considered to have a copy of TIFF6.0 and EXIF2.10 standard.
  */
-#define EXIF_DEBUG
+#undef EXIF_DEBUG
 
 #include "php_exif.h"
 #include <math.h>
@@ -2952,7 +2952,7 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 {
 	int ret;
 	struct stat st;
-	php_stream *mem_stream;
+	php_stream *mem_stream, *org_stream;
 
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
@@ -2981,16 +2981,18 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 	} else {
 		ImageInfo->FileDateTime = 0;
 		#ifdef HAVE_PHP_STREAM
-		if ( !ImageInfo->infile->ops->seek) {
-			php_error(E_NOTICE,"Using a memory stream");
+		if ( !php_stream_is(ImageInfo->infile, PHP_STREAM_IS_STDIO)) {
+	    	#ifdef EXIF_DEBUG
+	    	php_error(E_NOTICE,"stream is not stdio: using a memory stream");
+	    	#endif
 			mem_stream = php_memory_stream_create();
-			php_error(E_NOTICE,"Using a memory stream: created");
-			ImageInfo->FileSize = php_stream_copy_to_stream(ImageInfo->infile, mem_stream, PHP_STREAM_COPY_ALL);
-			php_error(E_NOTICE,"Using a memory stream: copy done %d", ImageInfo->FileSize);
-			php_error(E_NOTICE,"Using a memory stream: closed");
-//			auto_fclose(ImageInfo->infile);
-			php_error(E_NOTICE,"Using a memory stream: closed");
+			org_stream = ImageInfo->infile;
+			ImageInfo->FileSize = php_stream_copy_to_stream(org_stream, mem_stream, PHP_STREAM_COPY_ALL);
+			//auto_fclose(org_stream);
 			ImageInfo->infile = mem_stream;
+	    	#ifdef EXIF_DEBUG
+	    	php_error(E_NOTICE,"stream is not stdio: copy done");
+	    	#endif
 		}
 		#else
 		ImageInfo->FileSize = 0;
@@ -2998,9 +3000,7 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 	}
 
 	/* Scan the JPEG headers. */
-	php_error(E_NOTICE,"Using a memory stream: exif_scan_FILE_header");
 	ret = exif_scan_FILE_header(ImageInfo);
-	php_error(E_NOTICE,"Using a memory stream: exif_scan_FILE_header done");
 
 	auto_fclose(ImageInfo->infile);
 	return ret;
