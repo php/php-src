@@ -497,15 +497,16 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	zval *id, *rv = NULL;
 	xmlNodePtr elemp, nodep = NULL;
 	xmlNsPtr nsptr;
-	int ret, uri_len = 0, name_len = 0;
-	char *uri, *name;
+	xmlAttr *attr;
+	int ret, uri_len = 0, name_len = 0, value_len = 0;
+	char *uri, *name, *value;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
 	int errorcode = 0, stricterror;
 
 	DOM_GET_THIS_OBJ(elemp, id, xmlNodePtr, intern);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -537,6 +538,12 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 
 		if (errorcode == 0) {
 			nodep = (xmlNodePtr) xmlSetNsProp(elemp, nsptr, localname, NULL);
+		}
+
+		attr = xmlSetProp(nodep, localname, value);
+		if (!attr) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", localname);
+			RETURN_FALSE;
 		}
 	}
 
