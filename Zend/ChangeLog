@@ -1,3 +1,19 @@
+2003-09-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Simplify reflection_property::__constructor() and fix property factory
+
+    * zend_reflection_api.c:
+      - Don't use resorved words as variable names.
+      - Improve several exception messages.
+      - Fix Reflection_Property::_construct() / getDeclaringClass()
+
+    * zend_reflection_api.c:
+      Fix reflection_api::__construct() (noticed by Andrey)
+
+    * zend_default_classes.c:
+      Provide string casting for exceptions by calling toString()
+
 2003-09-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
