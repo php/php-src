@@ -1790,10 +1790,10 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 {
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error(E_CORE_ERROR, "Interface %s may not inherit from class (%s)", ce->name, parent_ce->name);
+		zend_error(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name, parent_ce->name);
 	}
 	if (parent_ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
-		zend_error(E_CORE_ERROR, "Class %s may not inherit from final class (%s)", ce->name, parent_ce->name);
+		zend_error(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name, parent_ce->name);
 	}
 
 	ce->parent = parent_ce;
@@ -1831,7 +1831,7 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTa
 
 	zend_hash_find(function_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void *) &function);
 	if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
-		int error_level = compile_time ? E_COMPILE_ERROR : E_CORE_ERROR;
+		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
 		zend_function *function;
 
 		if (zend_hash_find(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, (void *) &function)==SUCCESS
