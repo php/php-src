@@ -1,3 +1,95 @@
+2000-03-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c: - support for pdflib 3.0
+
+2000-03-07  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c: Changed typo (interpretor->interpreter)
+
+2000-03-07  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/DB/mssql.php:
+    Prepended an @ sign to the mssql_* function calls, that way they don't wine and moan
+    when something goes wrong, allowing for custom error messages.
+
+2000-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in:
+    Write configuration parameters into `config.nice', so you can redo the
+    same configuration with exactly one command.
+
+2000-03-07  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/DB/mssql.php: Couple thangs... mainly error checking.
+
+    * pear/DB/mssql.php:
+    Tested for basic capabilities, not extensive testing, but it still works.
+
+2000-03-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c: - quick hack to support pdflib 3.0 (not tested)
+
+2000-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/config.m4
+      ext/mysql/libmysql/mysql_com.h: Try to locate the mysql.sock
+
+2000-03-07  Andi Gutmans  <andi@php.net>
+
+    * ext/mysql/config.m4: - Enable MySQL by default
+
+2000-03-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/config.m4: Expanded checking for pcre.h and libpcre.a.
+
+2000-03-07  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/dl.c: - Thies, it is crucial :)
+
+2000-03-07  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/Makefile.in
+      sapi/servlet/config.m4: Sapi/servlet build on Unix broken
+
+2000-03-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c: - some cleanups and fixed memory leak
+
+2000-03-07  Sam Ruby  <rubys@us.ibm.com>
+
+    * php4dllts.dsp: Include metaphone on win32 builds
+
+    * ext/standard/flock_compat.h:
+    Unresolved external php_if_ftruncate on Win32
+
+2000-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Use threads.m4
+
+2000-03-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c: - switch to zend's double link list finished
+
+2000-03-07  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/basic_functions.c: Only define crypt if it is present
+
+2000-03-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/url.h: Can't believe it hasn't been done yet.
+
+    * configuration-parser.y: Kill warning.
+
+2000-03-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/dl.c: (php: dl) fixed MAXPATHLEN bug
+
+2000-03-07  Sam Ruby  <rubys@us.ibm.com>
+
+    * internal_functions_win32.c:
+    It looks like a number of "standard" extensions are now truly builtin...
+
 2000-03-06  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/mysql/libmysql/mysql_com.h:
