@@ -2,6 +2,8 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, Version 4.3.6
 - Fixed bug #27717 (Test Failures when compiled on 64-bit mode). (Ard, Derick)
+- Fixed bug #27687 (Bug Adding Default Charset to 'text/*' Content-Type 
+  Header). (Marcus)
 - Fixed bug #27664 (--disable-cli doesn't force --without-pear). (Ilia)
 - Fixed bug #27663 (compile failure with cURL 7.11.1). (Ilia)
 - Fixed bug #27646 (Cannot serialize/unserialize non-finite numeric values).
