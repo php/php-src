@@ -1373,7 +1373,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 		/* we only need to do the define step is this very statement is executed the first time! */
 		statement->executed++;
 		
-		statement->columns = emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(statement->columns);
 		zend_hash_init(statement->columns, 13, NULL, _oci_column_hash_dtor, 0);
 		
 		counter = 1;
@@ -2569,7 +2569,7 @@ PHP_FUNCTION(ocidefinebyname)
 	convert_to_string_ex(name);
 
 	if (statement->defines == NULL) {
-		statement->defines = emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(statement->defines);
 		zend_hash_init(statement->defines, 13, NULL, _oci_define_hash_dtor, 0);
 	}
 
@@ -2702,7 +2702,7 @@ PHP_FUNCTION(ocibindbyname)
 	convert_to_string_ex(name);
 
 	if (! statement->binds) {
-		statement->binds = emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(statement->binds);
 		zend_hash_init(statement->binds, 13, NULL, _oci_bind_hash_dtor, 0);
 	}
 

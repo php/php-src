@@ -1917,7 +1917,7 @@ PHP_FUNCTION(register_shutdown_function)
 		RETURN_FALSE;
 	}
 	if (!BG(user_shutdown_function_names)) {
-		BG(user_shutdown_function_names) = (HashTable *) emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
 		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *))user_shutdown_function_dtor, 0);
 	}
 
