@@ -52,15 +52,15 @@ static int  scheme_put(void *, SablotHandle, int, const char *, int *);
 static int  scheme_close(void *, SablotHandle, int);
 
 /* Sax handler functions */
-static SAX_RETURN sax_startdoc(void *);
-static SAX_RETURN sax_startelement(void *, const char *, const char **);
-static SAX_RETURN sax_endelement(void *, const char *);
-static SAX_RETURN sax_startnamespace(void *, const char *, const char *);
-static SAX_RETURN sax_endnamespace(void *, const char *);
-static SAX_RETURN sax_comment(void *, const char *);
-static SAX_RETURN sax_pi(void *, const char *, const char *);
-static SAX_RETURN sax_characters(void *, const char *, int);
-static SAX_RETURN sax_enddoc(void *);
+static SAX_RETURN sax_startdoc(void *, SablotHandle);
+static SAX_RETURN sax_startelement(void *, SablotHandle, const char *, const char **);
+static SAX_RETURN sax_endelement(void *, SablotHandle, const char *);
+static SAX_RETURN sax_startnamespace(void *, SablotHandle, const char *, const char *);
+static SAX_RETURN sax_endnamespace(void *, SablotHandle, const char *);
+static SAX_RETURN sax_comment(void *, SablotHandle, const char *);
+static SAX_RETURN sax_pi(void *, SablotHandle, const char *, const char *);
+static SAX_RETURN sax_characters(void *, SablotHandle, const char *, int);
+static SAX_RETURN sax_enddoc(void *, SablotHandle);
 
 /* Error handlers */
 static MH_ERROR error_makecode(void *, SablotHandle, int, unsigned short, unsigned short);
@@ -74,33 +74,20 @@ static int  le_xslt;
 /* {{{ xslt_functions[]
  */
 function_entry xslt_functions[] = {
-	PHP_FE(xslt_sax_create,              NULL)
-	PHP_FE(xslt_sax_set_sax_handlers,    NULL)
-	PHP_FE(xslt_sax_set_scheme_handlers, NULL)
-	PHP_FE(xslt_sax_process,             NULL)
-	PHP_FE(xslt_sax_set_base,            NULL)
-	PHP_FE(xslt_sax_set_log,             NULL)
-	PHP_FE(xslt_sax_set_error_handler,   NULL)
+	PHP_FE(xslt_create,              NULL)
+	PHP_FE(xslt_set_sax_handlers,    NULL)
+	PHP_FE(xslt_set_scheme_handlers, NULL)
+	PHP_FE(xslt_process,             NULL)
+	PHP_FE(xslt_set_base,            NULL)
+	PHP_FE(xslt_set_log,             NULL)
+	PHP_FE(xslt_set_error_handler,   NULL)
 #ifdef HAVE_SABLOT_SET_ENCODING
-	PHP_FE(xslt_sax_set_encoding,        NULL)
+	PHP_FE(xslt_set_encoding,        NULL)
 #endif
-	PHP_FE(xslt_sax_free,                NULL)
+	PHP_FE(xslt_free,                NULL)
 
 	PHP_FE(xslt_error,                   NULL)
 	PHP_FE(xslt_errno,                   NULL)
-
-	PHP_FALIAS(xslt_create,              xslt_sax_create,              NULL)
-	PHP_FALIAS(xslt_set_sax_handlers,    xslt_sax_set_sax_handlers,    NULL)
-	PHP_FALIAS(xslt_set_scheme_handlers, xslt_sax_set_scheme_handlers, NULL)
-	PHP_FALIAS(xslt_set_error_handler,   xslt_sax_set_error_handler,   NULL)
-	PHP_FALIAS(xslt_set_log,             xslt_sax_set_log,             NULL)
-	PHP_FALIAS(xslt_set_base,            xslt_sax_set_base,            NULL)
-	PHP_FALIAS(xslt_process,             xslt_sax_process,             NULL)
-	PHP_FALIAS(xslt_free,                xslt_sax_free,                NULL)
-#ifdef HAVE_SABLOT_SET_ENCODING
-	PHP_FALIAS(xslt_set_encoding,        xslt_sax_set_encoding,        NULL)
-#endif
-
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -178,13 +165,14 @@ PHP_MINFO_FUNCTION(xslt)
 }
 /* }}} */
 
-/* {{{ proto resource xslt_sax_create(void) 
+/* {{{ proto resource xslt_create(void) 
    Create a new XSLT processor */
-PHP_FUNCTION(xslt_sax_create)
+PHP_FUNCTION(xslt_create)
 {
-	php_xslt     *handle;      /* The php -> sablotron handle */
-	SablotHandle  processor;   /* The sablotron processor */
-	int           error;       /* The error container */
+	php_xslt        *handle;      /* The php -> sablotron handle */
+	SablotSituation  ctx;         /* Sablotron situation */
+	SablotHandle     processor;   /* The sablotron processor */
+	int              error;       /* The error container */
 
 	/* Allocate the php-sablotron handle */
 	handle                   = ecalloc(1, sizeof(php_xslt));
@@ -192,6 +180,18 @@ PHP_FUNCTION(xslt_sax_create)
 	handle->err              = ecalloc(1, sizeof(struct xslt_error));
 
 	XSLT_LOG(handle).path = NULL;
+
+	/* Unless SAX handlers are  */
+	handle->cacheable = 1;
+
+	/* Allocate the processor ctx */
+	error = SablotCreateSituation(&ctx);
+	if (error) {
+		XSLT_ERRNO(handle) = error;
+		RETURN_FALSE;
+	}
+
+	XSLT_CONTEXT(handle) = ctx;
 
 	/* Allocate the actual processor itself, via sablotron */
 	error = SablotCreateProcessor(&processor);
@@ -214,9 +214,9 @@ PHP_FUNCTION(xslt_sax_create)
 }
 /* }}} */
 
-/* {{{ proto void xslt_sax_set_sax_handlers(resource processor, array handlers)
+/* {{{ proto void xslt_set_sax_handlers(resource processor, array handlers)
    Set the SAX handlers to be called when the XML document gets processed */
-PHP_FUNCTION(xslt_sax_set_sax_handlers)
+PHP_FUNCTION(xslt_set_sax_handlers)
 {
 	zval       **processor_p,      /* Resource pointer to the php->sablotron handle */
 	           **sax_handlers_p,   /* Pointer to the sax handlers php array */
@@ -233,6 +233,8 @@ PHP_FUNCTION(xslt_sax_set_sax_handlers)
 	}
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
 	
+	handle->cacheable = 0;
+
 	/* Convert the sax_handlers_p zval ** to a hash table we can process */
 	sax_handlers = HASH_OF(*sax_handlers_p);
 	if (!sax_handlers) {
@@ -298,9 +300,9 @@ PHP_FUNCTION(xslt_sax_set_sax_handlers)
 }
 /* }}} */
 
-/* {{{ proto void xslt_sax_set_scheme_handlers(resource processor, array handlers)
+/* {{{ proto void xslt_set_scheme_handlers(resource processor, array handlers)
    Set the scheme handlers for the XSLT processor */
-PHP_FUNCTION(xslt_sax_set_scheme_handlers)
+PHP_FUNCTION(xslt_set_scheme_handlers)
 {
 	zval                   **processor_p,       /* Resource pointer to the php->sablotron handle */
 	                       **scheme_handlers_p, /* Pointer to the scheme handler array */
@@ -373,7 +375,7 @@ PHP_FUNCTION(xslt_sax_set_scheme_handlers)
 
 /* {{{ proto void xslt_set_error_handler(resource processor, mixed error_func)
    Set the error handler, to be called when an XSLT error happens */
-PHP_FUNCTION(xslt_sax_set_error_handler)
+PHP_FUNCTION(xslt_set_error_handler)
 {
 	zval      **processor_p,   /* Resource Pointer to a PHP-XSLT processor */
 	          **error_func;    /* Name of the user defined error function */
@@ -392,7 +394,7 @@ PHP_FUNCTION(xslt_sax_set_error_handler)
 
 /* {{{ proto void xslt_set_base(resource processor, string base)
    Sets the base URI for all XSLT transformations */
-PHP_FUNCTION(xslt_sax_set_base)
+PHP_FUNCTION(xslt_set_base)
 {
 	zval     **processor_p,  /* Resource Pointer to a PHP-XSLT processor */
 	         **base;         /* The base URI for the transformation */
@@ -410,9 +412,9 @@ PHP_FUNCTION(xslt_sax_set_base)
 }
 /* }}} */
 
-/* {{{ proto void xslt_sax_set_encoding(resource processor, string encoding)
+/* {{{ proto void xslt_set_encoding(resource processor, string encoding)
    Set the output encoding for the current stylesheet */
-PHP_FUNCTION(xslt_sax_set_encoding)
+PHP_FUNCTION(xslt_set_encoding)
 {
 /* The user has to explicitly compile sablotron with sablotron 
    encoding functions in order for SablotSetEncoding to be 
@@ -437,9 +439,9 @@ PHP_FUNCTION(xslt_sax_set_encoding)
 }
 /* }}} */
 
-/* {{{ proto void xslt_sax_set_log(resource processor, string logfile)
+/* {{{ proto void xslt_set_log(resource processor, string logfile)
    Set the log file to write the errors to (defaults to stderr) */
-PHP_FUNCTION(xslt_sax_set_log)
+PHP_FUNCTION(xslt_set_log)
 {
 	zval      **processor_p,             /* Resource pointer to a PHP-XSLT processor */
 	          **logfile;                 /* Path to the logfile */
@@ -473,86 +475,160 @@ PHP_FUNCTION(xslt_sax_set_log)
 }
 /* }}} */
 
-/* {{{ proto string xslt_sax_process(resource processor, string xml, string xslt[, mixed result[, array args[, array params]]])
-   Perform the xslt transformation */
-PHP_FUNCTION(xslt_sax_process)
+/* {{{ S_DOM *_php_sablot_dom_proc(php_xslt *, char *, size_t, zval **)
+ */
+static SDOM_Document 
+_php_sablot_dom_proc(php_xslt *h, char *datap, size_t data_len, zval **args)
 {
-	zval       **processor_p,    /* Resource Pointer to a PHP-XSLT processor */
-	           **xml_p,          /* A zval pointer to the XML data */
-	           **xslt_p,         /* A zval pointer to the XSLT data */
-	           **result_p,       /* A zval pointer to the transformation results */
-	           **params_p,       /* A zval pointer to the XSLT parameters array */
-	           **args_p;         /* A zval pointer to the XSLT arguments array */
-	php_xslt    *handle;         /* A PHP-XSLT processor */
-	char       **params = NULL;  /* A Sablotron parameter array */
-	char       **args   = NULL;  /* A Sablotron argument array */
-	char        *xslt;           /* The XSLT stylesheet or argument buffer (pointer to xslt_p) */
-	char        *xml;            /* The XML stylesheet or argument buffer (pointer to xml_p) */
-	char        *result;         /* The result file or argument buffer */
-	int          argc;           /* The number of arguments given */
-	int          error;          /* Our error container */
+	SDOM_Document domtree;
+
+	if (!strncmp(datap, "arg:", 4)) {
+		zval **data;
+
+		if (zend_hash_find(Z_ARRVAL_PP(args), 
+						   datap + 4, 
+						   data_len - 3,
+						   (void **) &data) == FAILURE && 
+			zend_hash_find(Z_ARRVAL_PP(args),
+						   datap + 5,
+						   data_len - 4,
+						   (void **) &data) == FAILURE) {
+			php_error(E_WARNING, "Cannot find argument: %s", datap);
+			return NULL;
+		}
+
+		SablotParseBuffer(XSLT_CONTEXT(h), Z_STRVAL_PP(data), &domtree);
+	}
+	else {
+		SablotParse(XSLT_CONTEXT(h), datap, &domtree);
+	}
+
+	return domtree;
+}
+/* }}} */
+
+/* {{{ proto string xslt_process(resource processor, string xml, string xslt[, mixed result[, array args[, array params]]])
+   Perform the xslt transformation */
+PHP_FUNCTION(xslt_process)
+{
+	zval          **processor_p;    /* Resource Pointer to a PHP-XSLT processor */
+	zval          **xml_p;          /* A zval pointer to the XML data */
+	zval          **xsl_p;          /* A zval pointer to the XSL data */
+	zval          **result_p;       /* A zval pointer to the transformation results */
+	zval          **params_p;       /* A zval pointer to the XSL parameters array */
+	zval          **args_p;         /* A zval pointer to the XSL arguments array */
+	zval          **data;           /* Parameter data */
+	php_xslt       *handle;         /* A PHP-XSLT processor */
+	SDOM_Document   xml_dom;        /* XML DOM tree to SablotRunProcessorGen */
+	SDOM_Document   xsl_dom;        /* XSL DOM tree to SablotRunProcessorGen */
+	char           *string_key;     /* String key from xslt_process() */
+	char           *result;         /* The result file or argument buffer */
+	int             argc;           /* The number of arguments given */
+	int             error;          /* Our error container */
+	ulong           num_key;        /* Numerical key */
 
 	argc = ZEND_NUM_ARGS();
 
 	if (argc < 3 || argc > 6 ||
-	    zend_get_parameters_ex(argc, &processor_p, &xml_p, &xslt_p, 
+	    zend_get_parameters_ex(argc, &processor_p, &xml_p, &xsl_p, 
 							   &result_p, &args_p, &params_p) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
-	convert_to_string_ex(xml_p);
-	convert_to_string_ex(xslt_p);
 
-	xml  = Z_STRVAL_PP(xml_p);
-	xslt = Z_STRVAL_PP(xslt_p);
+	/* Convert the XML and XSLT strings to S_DOM * handles */
+	convert_to_string_ex(xml_p);
+	convert_to_string_ex(xsl_p);
+
+	xml_dom = _php_sablot_dom_proc(handle, 
+								   Z_STRVAL_PP(xml_p), 
+								   Z_STRLEN_PP(xml_p), 
+								   args_p);
+	if (!xml_dom) {
+		RETURN_FALSE;
+	}
+
+	xsl_dom = _php_sablot_dom_proc(handle, 
+								   Z_STRVAL_PP(xsl_p),
+								   Z_STRLEN_PP(xsl_p), 
+								   args_p);
+	if (!xsl_dom) {
+		RETURN_FALSE;
+	}
+
+	SablotAddArgTree(handle->processor.ctx,
+					 XSLT_PROCESSOR(handle),
+					 "xml",
+					 xml_dom);
+	SablotAddArgTree(XSLT_CONTEXT(handle),
+					 XSLT_PROCESSOR(handle),
+					 "xsl",
+					 xsl_dom);
 
 	/* Well, no result file was given or result buffer, that means (guess what?)
-	   we're returning the result yipp di doo! */
+	 * we're returning the result yipp di doo! 
+	 */
 	if (argc < 4 || Z_TYPE_PP(result_p) == IS_NULL) {
-		result = "arg:/_result";
+		result = "arg:/result";
+		SablotAddArgBuffer(XSLT_CONTEXT(handle), 
+						   XSLT_PROCESSOR(handle), 
+						   result, 
+						   NULL);
 	}
-	/* The result buffer to place the data into, either a file or an argument buffer, etc. */
+	/* The result buffer to place the data into, either a file or 
+	 * an argument buffer, etc. 
+	 */
 	else {
 		convert_to_string_ex(result_p);
 		result = Z_STRVAL_PP(result_p);
 	}
 
-	/* Translate a PHP array into a Sablotron array */
-	if (argc > 4) {
-		xslt_make_array(args_p, &args);
-	}
-	
+	/* Add the XSLT parameters */
 	if (argc > 5) {
-		xslt_make_array(params_p, &params);
+		for (zend_hash_internal_pointer_reset(Z_ARRVAL_PP(params_p));
+			 zend_hash_get_current_data(Z_ARRVAL_PP(params_p), (void **) &data) == FAILURE;
+			 zend_hash_move_forward(Z_ARRVAL_PP(params_p))) {
+			if (zend_hash_get_current_key(Z_ARRVAL_PP(params_p), 
+										  &string_key, 
+										  &num_key, 
+										  0) == HASH_KEY_IS_LONG) {
+				php_error(E_WARNING, "Only string keys are allowed as XSLT parameters");
+				RETURN_FALSE;
+			}
+			
+			SablotAddParam(XSLT_CONTEXT(handle), 
+						   XSLT_PROCESSOR(handle), 
+						   string_key, 
+						   Z_STRVAL_PP(data));
+		}
 	}
-	
+
 	/* Perform transformation */
-	error = SablotRunProcessor(XSLT_PROCESSOR(handle), xslt, xml, result, params, args);
+	error = SablotRunProcessorGen(XSLT_CONTEXT(handle),
+								  XSLT_PROCESSOR(handle), 
+								  "arg:/xsl",
+								  "arg:/xml",
+								  result);
 	if (error) {
 		XSLT_ERRNO(handle) = error;
-
-		if (params) xslt_free_array(params);
-		if (args)   xslt_free_array(args);
-
 		RETURN_FALSE;
 	}
 
+	SablotDestroyDocument(XSLT_CONTEXT(handle), xml_dom);
+	SablotDestroyDocument(XSLT_CONTEXT(handle), xsl_dom);
+
 	/* If the result buffer is specified, then we return the results of the XSLT
 	   transformation */
-	if (!strcmp(result, "arg:/_result")) {
+	if (!strcmp(result, "arg:/result")) {
 		char *trans_result;
 
 		/* Fetch the result buffer into trans_result */
-		error = SablotGetResultArg(handle->processor.ptr, "arg:/_result", &trans_result);
+		error = SablotGetResultArg(XSLT_PROCESSOR(handle), 
+								   "arg:/result", 
+								   &trans_result);
 		if (error) {
 			/* Save the error number */
 			XSLT_ERRNO(handle) = error;
-			
-			/* Cleanup */
-			if (params) xslt_free_array(params);
-			if (args)   xslt_free_array(args);
-			
 			RETURN_FALSE;
 		}
 
@@ -560,20 +636,14 @@ PHP_FUNCTION(xslt_sax_process)
 		SablotFree(trans_result);
 	}
 	else {
-		RETVAL_TRUE;
+		RETURN_TRUE;
 	}
-	
-	/* Cleanup */
-	if (params)
-		xslt_free_array(params);
-	if (args)
-		xslt_free_array(args);
 }
 /* }}} */
 
-/* {{{ proto void xslt_sax_free(resource processor)
+/* {{{ proto void xslt_free(resource processor)
    Free the xslt processor up */
-PHP_FUNCTION(xslt_sax_free)
+PHP_FUNCTION(xslt_free)
 {
 	zval     **processor_p;   /* Resource pointer to a php-xslt processor */
 	php_xslt  *handle;        /* A PHP-XSLT processor */
@@ -639,6 +709,10 @@ static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		SablotUnregHandler(XSLT_PROCESSOR(handle), HLR_SAX,     NULL, NULL);
 		SablotUnregHandler(XSLT_PROCESSOR(handle), HLR_SCHEME,  NULL, NULL);
 		SablotDestroyProcessor(XSLT_PROCESSOR(handle));
+	}
+
+	if (XSLT_CONTEXT(handle)) {
+		SablotDestroySituation(XSLT_CONTEXT(handle));
 	}
 
 	/* Free Scheme handlers */
@@ -972,7 +1046,7 @@ static int  scheme_close(void *user_data, SablotHandle proc, int fd)
 
 /* {{{ sax_startdoc()
    Called when the document starts to be processed */
-static SAX_RETURN sax_startdoc(void *ctx)
+static SAX_RETURN sax_startdoc(void *ctx, SablotHandle proc)
 {
 	zval       *argv[1];                    /* Arguments to the sax start doc function */
 	zval       *retval;                     /* Return value from sax start doc function */
@@ -1003,6 +1077,7 @@ static SAX_RETURN sax_startdoc(void *ctx)
 /* {{{ sax_startelement()
    Called when an element is begun to be processed */
 static SAX_RETURN sax_startelement(void *ctx, 
+								   SablotHandle proc,
                                    const char  *name, 
                                    const char **attr)
 {
@@ -1048,9 +1123,9 @@ static SAX_RETURN sax_startelement(void *ctx,
 }
 /* }}} */
 
-/* {{{ xslt_sax_endelement()
+/* {{{ sax_endelement()
    Called when an ending XML element is encountered */
-static SAX_RETURN sax_endelement(void *ctx, const char *name)
+static SAX_RETURN sax_endelement(void *ctx, SablotHandle proc, const char *name)
 {
 	zval        *argv[2];                   /* Arguments to the sax end element function */
 	zval        *retval;                    /* Return value from the sax end element function */
@@ -1085,6 +1160,7 @@ static SAX_RETURN sax_endelement(void *ctx, const char *name)
 /* {{{ sax_startnamespace()
    Called at the beginning of the parsing of a new namespace */
 static SAX_RETURN sax_startnamespace(void *ctx, 
+									 SablotHandle proc,
                                      const char *prefix, 
                                      const char *uri)
 {
@@ -1123,7 +1199,7 @@ static SAX_RETURN sax_startnamespace(void *ctx,
 
 /* {{{ sax_endnamespace()
    Called when a new namespace is finished being parsed */
-static SAX_RETURN sax_endnamespace(void *ctx, const char *prefix)
+static SAX_RETURN sax_endnamespace(void *ctx, SablotHandle proc, const char *prefix)
 {
 	zval        *argv[2];                    /* Arguments to the sax end namespace function */
 	zval        *retval;                     /* Return value from the sax end namespace function */
@@ -1157,7 +1233,7 @@ static SAX_RETURN sax_endnamespace(void *ctx, const char *prefix)
 
 /* {{{ sax_comment()
    Called when a comment is found */
-static SAX_RETURN sax_comment(void *ctx, const char *contents)
+static SAX_RETURN sax_comment(void *ctx, SablotHandle proc, const char *contents)
 {
 	zval        *argv[2];                    /* Arguments to the sax comment function */
 	zval        *retval;                     /* Return value from the sax comment function */
@@ -1192,6 +1268,7 @@ static SAX_RETURN sax_comment(void *ctx, const char *contents)
 /* {{{ sax_pi()
    Called when processing instructions are found */
 static SAX_RETURN sax_pi(void *ctx, 
+						 SablotHandle proc,
                          const char *target, 
                          const char *contents)
 {
@@ -1233,6 +1310,7 @@ static SAX_RETURN sax_pi(void *ctx,
 /* {{{ sax_characters()
    Called when characters are come upon */
 static SAX_RETURN sax_characters(void *ctx,
+								 SablotHandle proc,
                                  const char *contents, 
                                  int length)
 {
@@ -1268,7 +1346,7 @@ static SAX_RETURN sax_characters(void *ctx,
 
 /* {{{ sax_enddoc()
    Called when the document is finished being parsed */
-static SAX_RETURN sax_enddoc(void *ctx)
+static SAX_RETURN sax_enddoc(void *ctx, SablotHandle proc)
 {
 	zval        *argv[1];                    /* Arguments to the end document function */
 	zval        *retval;                     /* Return value from the end document function */
