@@ -3,9 +3,11 @@ Copyright (c) 1998, 1999, 2000 Thai Open Source Software Center Ltd
 See the file COPYING for copying permission.
 */
 
+#if 0
 static char RCSId[]
   = "$Header$";
-
+#endif
+  
 #include "php_compat.h"
 
 #ifdef COMPILED_FROM_DSP
@@ -243,9 +245,11 @@ static enum XML_Error
 processXmlDecl(XML_Parser parser, int isGeneralTextEntity, const char *, const char *);
 static enum XML_Error
 initializeEncoding(XML_Parser parser);
+#if 0
 static enum XML_Error
 doProlog(XML_Parser parser, const ENCODING *enc, const char *s,
 	 const char *end, int tok, const char *next, const char **nextPtr);
+#endif
 static enum XML_Error
 processInternalParamEntity(XML_Parser parser, ENTITY *entity);
 static enum XML_Error
