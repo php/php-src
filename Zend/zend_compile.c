@@ -1852,6 +1852,22 @@ void do_include_or_eval(int type, znode *result, znode *op1 CLS_DC)
 	SET_UNUSED(opline->op2);
 	opline->op2.u.constant.value.lval = type;
 	*result = opline->result;
+	if (type==ZEND_REQUIRE) {
+		opline->result.u.EA.type |= EXT_TYPE_UNUSED;
+	}
+}
+
+
+void do_require(znode *filename CLS_DC)
+{
+	if (filename->op_type==IS_CONST
+		&& filename->u.constant.type==IS_STRING) {
+		require_filename(filename->u.constant.value.str.val CLS_CC);
+	} else {
+		znode result;
+
+		do_include_or_eval(ZEND_REQUIRE, &result, filename CLS_CC);
+	}
 }
 
 
