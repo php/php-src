@@ -137,8 +137,8 @@ class PEAR_Packager extends PEAR_Common
         $this->log(1, "Package $dest_package done");
         $cvsversion = preg_replace('/[^a-z0-9]/i', '_', $pkgversion);
         $cvstag = "RELEASE_$cvsversion";
-        $this->log(0, "Tag the released code with `pear cvstag $pkgfile'");
-        $this->log(0, "(or set the CVS tag $cvstag by hand)");
+        $this->log(1, "Tag the released code with `pear cvstag $pkgfile'");
+        $this->log(1, "(or set the CVS tag $cvstag by hand)");
         return $dest_package;
     }
 
