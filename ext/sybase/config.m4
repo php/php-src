@@ -13,18 +13,16 @@ AC_ARG_WITH(sybase,
       SYBASE_INCDIR=$withval/include
       SYBASE_LIBDIR=$withval/lib
     fi
-    SYBASE_INCLUDE=-I$SYBASE_INCDIR
-    SYBASE_LFLAGS="-L$SYBASE_LIBDIR -L$SYBASE_LIBDIR"
-    SYBASE_LIBS=-lsybdb
+	AC_ADD_INCLUDE($SYBASE_INCDIR)
+	AC_ADD_LIBPATH($SYBASE_LIBDIR)
+	AC_ADD_LIBRARY(sybdb)
     AC_MSG_RESULT(yes)
     PHP_EXTENSION(sybase)
     AC_CHECK_LIB(dnet_stub, dnet_addr,
-     [ SYBASE_LIBS="$SYBASE_LIBS -ldnet_stub"
+     [ AC_ADD_LIBRARY(dnet_stub)
         AC_DEFINE(HAVE_LIBDNET_STUB)
      ])
     AC_DEFINE(HAVE_SYBASE)
-    EXTRA_LIBS="$EXTRA_LIBS $SYBASE_LFLAGS $SYBASE_LIBS"
-    INCLUDES="$INCLUDES $SYBASE_INCLUDE"
   else
     AC_MSG_RESULT(no)
   fi
@@ -51,20 +49,22 @@ AC_ARG_WITH(sybase-ct,
       SYBASE_CT_INCDIR=$withval/include
       SYBASE_CT_LIBDIR=$withval/lib
     fi
-    SYBASE_CT_INCLUDE=-I$SYBASE_CT_INCDIR
-    SYBASE_CT_LFLAGS="-L$SYBASE_CT_LIBDIR"
-    SYBASE_CT_LIBS="-lcs -lct -lcomn -lintl"
+	AC_ADD_INCLUDE($SYBASE_CT_INCDIR)
+	AC_ADD_LIBPATH($SYBASE_CT_LIBDIR)
+	AC_ADD_LIBRARY(cs)
+	AC_ADD_LIBRARY(ct)
+	AC_ADD_LIBRARY(comn)
+	AC_ADD_LIBRARY(intl)
+	SYBASE_CT_LIBS="-lcs -lct -lcomn -lintl"
     old_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$SYBASE_CT_LIBDIR"
     AC_CHECK_LIB(tcl, netg_errstr,
-              [ SYBASE_CT_LIBS="$SYBASE_CT_LIBS -ltcl" ],
-              [ SYBASE_CT_LIBS="$SYBASE_CT_LIBS -lsybtcl" ],
+              [ AC_ADD_LIBRARY(tcl) ],
+              [ AC_ADD_LIBRARY(sybtcl) ],
               [ $SYBASE_CT_LIBS ])
     AC_CHECK_LIB(insck, insck__getVdate,
-              [ SYBASE_CT_LIBS="$SYBASE_CT_LIBS -linsck" ])
+              [ AC_ADD_LIBRARY(insck) ])
       LDFLAGS=$old_LDFLAGS
-    EXTRA_LIBS="$EXTRA_LIBS $SYBASE_CT_LFLAGS $SYBASE_CT_LIBS"
-    INCLUDES="$INCLUDES $SYBASE_CT_INCLUDE"
   else
     AC_MSG_RESULT(no)
   fi
