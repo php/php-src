@@ -130,6 +130,9 @@ struct _zend_compiler_globals {
 	znode implementing_class;
 
 	zend_uint access_type;
+
+	char *doc_comment;
+	zend_uint doc_comment_len;
 };
 
 

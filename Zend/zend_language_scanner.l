@@ -124,6 +124,7 @@ void startup_scanner(TSRMLS_D)
 {
 	CG(heredoc) = NULL;
 	CG(heredoc_len)=0;
+	RESET_DOC_COMMENT();
 	SCNG(yy_start_stack_ptr) = 0;
 	SCNG(yy_start_stack_depth) = 0;
 }
@@ -135,6 +136,7 @@ void shutdown_scanner(TSRMLS_D)
 		efree(CG(heredoc));
 		CG(heredoc_len)=0;
 	}
+	RESET_DOC_COMMENT();
 }
 END_EXTERN_C()
 
@@ -1201,6 +1203,8 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 }
 
 <ST_DOC_COMMENT>"*/" {
+	CG(doc_comment) = yytext;     /* no copying - intentional */
+	CG(doc_comment_len) = yyleng;
 	HANDLE_NEWLINES(yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_DOC_COMMENT;
