@@ -2240,7 +2240,7 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
 	int tox, toy;
 	int ncR, ncG, ncB;
 	toy = dstY;
-printf("srccpopy:%X", src->transparent);
+	
 	for (y = srcY; y < (srcY + h); y++) {
 		tox = dstX;
 		for (x = srcX; x < (srcX + w); x++) {
