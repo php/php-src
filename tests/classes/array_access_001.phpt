@@ -6,7 +6,7 @@ ZE2 ArrayAccess
 ?>
 --FILE--
 <?php
-class Object implements ArrayAccess {
+class object implements ArrayAccess {
 
 	public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 

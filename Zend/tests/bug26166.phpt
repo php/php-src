@@ -1,5 +1,5 @@
 --TEST--
-Bug #26166: __toString() crash when no values returned
+Bug #26166 (__toString() crash when no values returned)
 --FILE--
 <?php
 class Foo
@@ -64,4 +64,4 @@ Hello World!
 Got the exception
 ===NONE===
 
-Fatal error: Method none::__toString() must return a string value in %sbug26166.php on line %d
+Fatal error: Method None::__toString() must return a string value in %sbug26166.php on line %d

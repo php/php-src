@@ -4,7 +4,7 @@ ZE2 __set() and __get()
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
-class Setter {
+class setter {
 	public $n;
 	public $x = array('a' => 1, 'b' => 2, 'c' => 3);
 

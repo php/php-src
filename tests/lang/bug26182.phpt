@@ -20,6 +20,6 @@ print_r($t);
 
 ?>
 --EXPECT--
-a Object
+A Object
 (
 )
