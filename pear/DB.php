@@ -22,6 +22,9 @@
 // Database independent query interface.
 //
 
+if ($GLOBALS['USED_PACKAGES']['DB']) return;
+$GLOBALS['USED_PACKAGES']['DB'] = true;
+
 // {{{ Database independent error codes.
 
 /*
@@ -31,27 +34,34 @@
  * If you add an error code here, make sure you also add a textual
  * version of it in DB::errorMessage().
  */
-define("DB_OK",                     0);
-define("DB_ERROR",                 -1);
-define("DB_ERROR_SYNTAX",          -2);
-define("DB_ERROR_CONSTRAINT",      -3);
-define("DB_ERROR_NOT_FOUND",       -4);
-define("DB_ERROR_ALREADY_EXISTS",  -5);
-define("DB_ERROR_UNSUPPORTED",     -6);
-define("DB_ERROR_MISMATCH",        -7);
-define("DB_ERROR_INVALID",         -8);
-define("DB_ERROR_NOT_CAPABLE",     -9);
-define("DB_ERROR_TRUNCATED",      -10);
-define("DB_ERROR_INVALID_NUMBER", -11);
-define("DB_ERROR_INVALID_DATE",   -12);
-define("DB_ERROR_DIVZERO",        -13);
-define("DB_ERROR_NODBSELECTED",   -14);
-define("DB_ERROR_CANNOT_CREATE",  -15);
-define("DB_ERROR_CANNOT_DELETE",  -16);
-define("DB_ERROR_CANNOT_DROP",    -17);
-define("DB_ERROR_NOSUCHTABLE",    -18);
-define("DB_ERROR_NOSUCHFIELD",    -19);
-define("DB_ERROR_NEED_MORE_DATA", -20);
+define("DB_OK",                    	 0);
+define("DB_ERROR",                 	-1);
+define("DB_ERROR_SYNTAX",          	-2);
+define("DB_ERROR_CONSTRAINT",      	-3);
+define("DB_ERROR_NOT_FOUND",       	-4);
+define("DB_ERROR_ALREADY_EXISTS",  	-5);
+define("DB_ERROR_UNSUPPORTED",     	-6);
+define("DB_ERROR_MISMATCH",        	-7);
+define("DB_ERROR_INVALID",         	-8);
+define("DB_ERROR_NOT_CAPABLE",     	-9);
+define("DB_ERROR_TRUNCATED",       -10);
+define("DB_ERROR_INVALID_NUMBER",  -11);
+define("DB_ERROR_INVALID_DATE",    -12);
+define("DB_ERROR_DIVZERO",         -13);
+define("DB_ERROR_NODBSELECTED",    -14);
+define("DB_ERROR_CANNOT_CREATE",   -15);
+define("DB_ERROR_CANNOT_DELETE",   -16);
+define("DB_ERROR_CANNOT_DROP",     -17);
+define("DB_ERROR_NOSUCHTABLE",     -18);
+define("DB_ERROR_NOSUCHFIELD",     -19);
+define("DB_ERROR_NEED_MORE_DATA",  -20);
+
+/*
+ * Warnings are not detected as errors by DB::isError(), and are not
+ * fatal.  You can detect whether an error is in fact a warning with
+ * DB::isWarning().
+ */
+define("DB_WARNING_READ_ONLY",   -1000);
 
 // }}}
 // {{{ Prepare/execute parameter types
@@ -146,20 +156,19 @@ class DB {
     // {{{ factory()
 
 	/**
-	 * <purpose>Create a new DB object for the specified database
-	 * type</purpose>
+	 * Create a new DB object for the specified database type
 	 *
-	 * <param name="$type" type="string">database type</param>
+	 * @param $type string database type, for example "mysql"
 	 *
-	 * <return type="object">a newly created DB object, or a DB error
-	 * code on error</return>
+	 * @return object a newly created DB object, or a DB error code on
+	 * error
 	 */
     function &factory($type) {
 		global $USED_PACKAGES;
 		// "include" should be replaced with "import" once PHP gets it
 		$pkgname = 'DB/' . $type;
 		if (!is_array($USED_PACKAGES) || !$USED_PACKAGES[$pkgname]) {
-			if (!@include("DB/${type}.php")) {
+			if (!@include("${pkgname}.php")) {
 				return DB_ERROR_NOT_FOUND;
 			} else {
 				$USED_PACKAGES[$pkgname] = true;
@@ -174,19 +183,17 @@ class DB {
     // {{{ connect()
 
 	/**
-	 * <purpose>Create a new DB object and connect to the specified
-	 * database </purpose>
+	 * Create a new DB object and connect to the specified database
 	 *
-	 * <param name="$dsn" type="string">"data source name", see the
-	 * <ref method="DB::parseDSN"/> method for a description of the
-	 * dsn format.</param>
+	 * @param $dsn string "data source name", see the DB::parseDSN
+	 * method for a description of the dsn format.
 	 *
-	 * <param name="$persistent" type="bool">whether this connection
-	 * should be persistent.  Ignored if the backend extension does
-	 * not support persistent connections.</param>
+	 * @param $persistent bool whether this connection should be
+	 * persistent.  Ignored if the backend extension does not support
+	 * persistent connections.
 	 *
-	 * <return type="object">a newly created DB object, or a DB error
-	 * code on error</return>
+	 * @return object a newly created DB object, or a DB error code on
+	 * error
 	 */
 	function &connect($dsn, $persistent = false) {
 		global $USED_PACKAGES;
@@ -196,7 +203,7 @@ class DB {
 		// "include" should be replaced with "import" once PHP gets it
 		$pkgname = 'DB/' . $type;
 		if (!is_array($USED_PACKAGES) || !$USED_PACKAGES[$pkgname]) {
-			if (!@include($pkgname . '.php')) {
+			if (!@include("${pkgname}.php")) {
 				return DB_ERROR_NOT_FOUND;
 			} else {
 				$USED_PACKAGES[$pkgname] = true;
@@ -215,40 +222,54 @@ class DB {
     // {{{ apiVersion()
 
 	/**
-	 * <purpose>Return the DB API version</purpose>
+	 * Return the DB API version
 	 *
-	 * <return type="double">the DB API version number</return>
+	 * @return int the DB API version number
 	 */
     function apiVersion() {
-		return 1.00;
+		return 1;
     }
 
     // }}}
     // {{{ isError()
 
 	/**
-	 * <purpose>Tell whether a result code from a DB method is an
-	 * error</purpose>
+	 * Tell whether a result code from a DB method is an error
 	 *
-	 * <param name="$code" type="int">result code</param>
+	 * @param $code int result code
 	 *
-	 * <return type="bool">whether $code is an error</return>
+	 * @return bool whether $code is an error
 	 */
 	function isError($code) {
-		return is_int($code) && ($code < 0);
+		return is_int($code) && ($code < 0) && ($code > -1000);
+	}
+
+    // }}}
+    // {{{ isWarning()
+
+	/**
+	 * Tell whether a result code from a DB method is a warning.
+	 * Warnings differ from errors in that they are generated by DB,
+	 * and are not fatal.
+	 *
+	 * @param $code int result code
+	 *
+	 * @return bool whether $code is a warning
+	 */
+	function isWarning($code) {
+		return is_int($code) && ($code <= -1000);
 	}
 
     // }}}
     // {{{ errorMessage()
 
 	/**
-	 * <purpose>Return a textual error message for a DB error
-	 * code</purpose>
+	 * Return a textual error message for a DB error code
 	 *
-	 * <param name="$code" type="int">error code</param>
+	 * @param $code int error code
 	 *
-	 * <return type="string">error message, or false if the error code
-	 * was not recognized</return>
+	 * @return string error message, or false if the error code was
+	 * not recognized
 	 */
 	function errorMessage($code) {
 		if (!is_array($errorMessages)) {
@@ -271,7 +292,8 @@ class DB {
 				DB_ERROR_CANNOT_DELETE  => "can not delete",
 				DB_ERROR_CANNOT_DROP    => "can not drop",
 				DB_ERROR_NOSUCHTABLE    => "no such table",
-				DB_ERROR_NOSUCHFIELD    => "no such field"
+				DB_ERROR_NOSUCHFIELD    => "no such field",
+				DB_WARNING_READ_ONLY    => "warning: read only"
 			);
 		}
 		return $errorMessages[$code];
@@ -281,15 +303,11 @@ class DB {
     // {{{ parseDSN()
 
 	/**
-	 * <purpose>Parse a data source name</purpose>
+	 * Parse a data source name
 	 *
-	 * <param name="$dsn" type="string">Data Source Name to be
-	 * parsed</param>
+	 * @param $dsn string Data Source Name to be parsed
 	 *
-	 * <desc>
-	 * <para>
-	 * Parse a data source name and return an associative array with
-	 * the following keys:
+	 * @return array an associative array with the following keys:
 	 * <dl>
 	 *  <dt>phptype</dt>
 	 *  <dd>Database backend used in PHP (mysql, odbc etc.)</dd>
@@ -306,7 +324,9 @@ class DB {
 	 *  <dt>password</dt>
 	 *  <dd>Password for login</dd>
 	 * </dl>
-	 * </para><para>
+	 * </p>
+	 *
+	 * <p>
 	 * The format of the supplied DSN is in its fullest form:
 	 * <ul>
 	 *  <li>phptype(dbsyntax)://username:password@protocol+hostspec/database</li>
@@ -321,10 +341,9 @@ class DB {
 	 *  <li>phptype(dbsyntax)</li>
 	 *  <li>phptype</li>
 	 * </ul>
-	 * </para>
-	 * </desc>
+	 * </p>
 	 *
-	 * <return type="bool">FALSE is returned on error</return>
+	 * @return bool FALSE is returned on error
 	 */
 	function parseDSN($dsn) {
 		$parsed = array(
