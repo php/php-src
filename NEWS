@@ -5,7 +5,7 @@ PHP 4                                                                      NEWS
 
 05 Apr 2004, Version 4.3.6RC2
 - Fixed a bug that prevented building of the GD extension against external GD
-  lib 1.X. (Ilia, Nick Talbott).
+  lib 1.X. (Ilia, Edin, Nick Talbott).
 - Fixed bug #27849 (configure craps out on trivial syntax error). (Derick)
 
 01 Apr 2004, Version 4.3.6RC1
@@ -33,6 +33,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27646 (Cannot serialize/unserialize non-finite numeric values).
   (Marcus)
 - Fixed bug #26757 (session.save_path default is bogus for win32). (Wez)
+- Fixed bug #26589 (Crash inside mssql extension when selecting many columns 
+  of type money). (Frank)
 - Fixed bug #25547 (error_handler and array index with function call). 
   (cschneid at cschneid dot com)
 
