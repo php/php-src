@@ -1,32 +1,35 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- added fifth optional parameter to domxml_xslt_process. If set,
+- Added optional 5th parameter to domxml_xslt_process(). When set, profiling
+  information is saved to the specified file. (chregu)
 - Added MD5 support for crypt() on Windows. (Edin)
 - Fixed resource bug in LDAP extension. (Stig Venaas)
-- Fixed output buffer crash when buffer is over written in callback. (Yasuo)
+- Fixed crash in output buffering when buffer is overwritten in a callback. 
+  (Yasuo)
 - Added output_add_rewrite_var() and output_remove_rewrite_var() to inject
-  and remove variables from the URL-Rewriter. (thies)
+  and remove variables from the URL-Rewriter. (Thies)
 - The Windows build can now be configured more comfortably, for example 
   when dealing with built-in extensions. (Sebastian)
 - Added optional 3rd parameter to mysql_select_db() which makes it return
   the previously selected database name. (Jani)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
-- Made the mbstring extension enabled by default. (Yasuo)
+- Made the mbstring extension to be enabled by default. (Yasuo)
 - Fixed mixing OCIPlogon() and OCINLogon() to not leak Oracle-Sessions. (Thies)
 - Added php.ini options for EXIF extension to encode and decode Unicode/JIS
   user comments. (Marcus)
 - Changed the "-c" CLI/CGI option to allow both 'filename' and
   'path to php.ini'. (Yasuo)
-- Added version info to the dll and exe files created under Windows. (jtate)
-- Added "log_errors_max_len" php.ini option which controls maximum length for 
-  error messages. (Marcus)
+- Added version information to the .dll and .exe files created under Windows.
+  (jtate)
 - Added __FUNCTION__ and __CLASS__ constants. (Jani, Zend Engine)
 - Added pg_metadate(), pg_convert(), pg_insert(), pg_select(), pg_update()
   and pg_delete(). (Yasuo)
 - Added optional 2nd parameter for pg_result_status() to specify return type. 
   (Yasuo)
+- Added "log_errors_max_len" php.ini option which controls maximum length for 
+  error messages. (Marcus)
 - Added "ignore_repeated_errors" and "ignore_repeated_source" php.ini options
   which can be used to disable logging of repeated error messages. (Marcus)
 - Made pg_last_notice() work correctly. (Yasuo)
