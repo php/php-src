@@ -226,12 +226,41 @@ ZEND_API inline int object_init(zval *arg)
 }
 
 
+ZEND_API inline int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS))
+{
+	zend_error(E_WARNING, "add_assoc_function() is no longer supported");
+	return FAILURE;
+}
+
+
 ZEND_API inline int add_assoc_long(zval *arg, char *key, long n)
 {
 	zval *tmp = (zval *) emalloc(sizeof(zval));
 
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
+	INIT_PZVAL(tmp);
+	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API inline int add_assoc_bool(zval *arg, char *key, int b)
+{
+	zval *tmp = (zval *) emalloc(sizeof(zval));
+
+	tmp->type = IS_BOOL;
+	tmp->value.lval = b;
+	INIT_PZVAL(tmp);
+	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API inline int add_assoc_resource(zval *arg, char *key, int r)
+{
+	zval *tmp = (zval *) emalloc(sizeof(zval));
+
+	tmp->type = IS_RESOURCE;
+	tmp->value.lval = r;
 	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
@@ -280,19 +309,34 @@ ZEND_API inline int add_assoc_stringl(zval *arg, char *key, char *str, uint leng
 }
 
 
-ZEND_API inline int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS))
-{
-	zend_error(E_WARNING, "add_assoc_function() is no longer supported");
-	return FAILURE;
-}
-
-
 ZEND_API inline int add_index_long(zval *arg, uint index, long n)
 {
 	zval *tmp = (zval *) emalloc(sizeof(zval));
 
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
+	INIT_PZVAL(tmp);
+	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),NULL);
+}
+
+
+ZEND_API inline int add_index_bool(zval *arg, uint index, int b)
+{
+	zval *tmp = (zval *) emalloc(sizeof(zval));
+
+	tmp->type = IS_BOOL;
+	tmp->value.lval = b;
+	INIT_PZVAL(tmp);
+	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),NULL);
+}
+
+
+ZEND_API inline int add_index_resource(zval *arg, uint index, int r)
+{
+	zval *tmp = (zval *) emalloc(sizeof(zval));
+
+	tmp->type = IS_RESOURCE;
+	tmp->value.lval = r;
 	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),NULL);
 }
@@ -347,6 +391,28 @@ ZEND_API inline int add_next_index_long(zval *arg, long n)
 
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
+	INIT_PZVAL(tmp);
+	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API inline int add_next_index_bool(zval *arg, int b)
+{
+	zval *tmp = (zval *) emalloc(sizeof(zval));
+
+	tmp->type = IS_BOOL;
+	tmp->value.lval = b;
+	INIT_PZVAL(tmp);
+	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API inline int add_next_index_resource(zval *arg, int r)
+{
+	zval *tmp = (zval *) emalloc(sizeof(zval));
+
+	tmp->type = IS_RESOURCE;
+	tmp->value.lval = r;
 	INIT_PZVAL(tmp);
 	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *), NULL);
 }

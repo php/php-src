@@ -90,30 +90,40 @@ int zend_startup_module(zend_module_entry *module);
 ZEND_API int array_init(zval *arg);
 ZEND_API int object_init(zval *arg);
 ZEND_API int object_init_ex(zval *arg, zend_class_entry *ce);
+
+/* no longer supported */
+ZEND_API int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
+
 ZEND_API int add_assoc_long(zval *arg, char *key, long n);
+ZEND_API int add_assoc_bool(zval *arg, char *key, int b);
+ZEND_API int add_assoc_resource(zval *arg, char *key, int r);
 ZEND_API int add_assoc_double(zval *arg, char *key, double d);
 ZEND_API int add_assoc_string(zval *arg, char *key, char *str, int duplicate);
 ZEND_API int add_assoc_stringl(zval *arg, char *key, char *str, uint length, int duplicate);
-ZEND_API int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
+
 ZEND_API int add_index_long(zval *arg, uint idx, long n);
+ZEND_API int add_index_bool(zval *arg, uint idx, int b);
+ZEND_API int add_index_resource(zval *arg, uint idx, int r);
 ZEND_API int add_index_double(zval *arg, uint idx, double d);
 ZEND_API int add_index_string(zval *arg, uint idx, char *str, int duplicate);
 ZEND_API int add_index_stringl(zval *arg, uint idx, char *str, uint length, int duplicate);
+
 ZEND_API int add_next_index_long(zval *arg, long n);
+ZEND_API int add_next_index_bool(zval *arg, int b);
+ZEND_API int add_next_index_resource(zval *arg, int r);
 ZEND_API int add_next_index_double(zval *arg, double d);
 ZEND_API int add_next_index_string(zval *arg, char *str, int duplicate);
 ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate);
 
-ZEND_API int add_get_assoc_string(zval *arg, char *key, char *str, void **dest, int duplicate);
-ZEND_API int add_get_assoc_stringl(zval *arg, char *key, char *str, uint length, void **dest, int duplicate);
 ZEND_API int add_get_index_long(zval *arg, uint idx, long l, void **dest);
 ZEND_API int add_get_index_double(zval *arg, uint idx, double d, void **dest);
+ZEND_API int add_get_assoc_string(zval *arg, char *key, char *str, void **dest, int duplicate);
+ZEND_API int add_get_assoc_stringl(zval *arg, char *key, char *str, uint length, void **dest, int duplicate);
 ZEND_API int add_get_index_string(zval *arg, uint idx, char *str, void **dest, int duplicate);
 ZEND_API int add_get_index_stringl(zval *arg, uint idx, char *str, uint length, void **dest, int duplicate);
 
 ZEND_API int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval, int param_count, zval *params[]);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval, int param_count, zval **params[], int no_separation);
-
 
 ZEND_API int add_property_long(zval *arg, char *key, long l);
 ZEND_API int add_property_resource(zval *arg, char *key, long r);
