@@ -150,6 +150,8 @@ PHP                                                                        NEWS
 - Fixed bug #30106 (SOAP cannot not parse 'ref' element. Causes Uncaught
   SoapFault exception). (Dmitry)
 - Fixed bug #29989 (type re_registers redefined in oniguruma.h). (Moriyoshi)
+- Fixed bug #28803 (enabled debug causes bailout errors with CLI on AIX 
+  because of fflush() called on already closed filedescriptor). (Tony)
 - Fixed bug #29767 (Weird behaviour of __set($name, $value)). (Dmitry)
 - Fixed bug #29733 (printf() handles repeated placeholders wrong).
   (bugs dot php dot net at bluetwanger dot de, Ilia)
