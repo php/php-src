@@ -57,7 +57,7 @@ PHP_FUNCTION(yaz_get_option);
 
 ZEND_BEGIN_MODULE_GLOBALS(yaz)
 	int assoc_seq;
-	int max_links;
+	long max_links;
 	char *log_file;
 ZEND_END_MODULE_GLOBALS(yaz)
     

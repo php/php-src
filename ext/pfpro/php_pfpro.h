@@ -54,10 +54,10 @@ PHP_FUNCTION(pfpro_process);            /* Transaction processing     */
 ZEND_BEGIN_MODULE_GLOBALS(pfpro)
 	int initialized;
 	char *defaulthost;
-	int defaultport;
-	int defaulttimeout;
+	long defaultport;
+	long defaulttimeout;
 	char *proxyaddress;
-	int proxyport;
+	long proxyport;
 	char *proxylogon;
 	char *proxypassword;
 ZEND_END_MODULE_GLOBALS(pfpro)
