@@ -321,35 +321,29 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *in_charset, c
 {
 	switch (err) {
 		case PHP_ICONV_ERR_CONVERTER:
-			php_error(E_NOTICE, "%s(): Cannot open converter",
-			          get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot open converter");
 			break;
 		case PHP_ICONV_ERR_WRONG_CHARSET:
-			php_error(E_NOTICE, "%s(): Wrong charset, cannot convert from `%s' to `%s'",
-			          get_active_function_name(TSRMLS_C),
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Wrong charset, cannot convert from `%s' to `%s'",
 			          in_charset, out_charset);
 			break;
 
 		case PHP_ICONV_ERR_ILLEGAL_CHAR:
-			php_error(E_NOTICE, "%s(): Detected incomplete character in input string",
-			          get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Detected incomplete character in input string");
 			break;
 
 		case PHP_ICONV_ERR_ILLEGAL_SEQ:
-			php_error(E_NOTICE, "%s(): Detected illegal character in input string",
-			          get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Detected illegal character in input string");
 			break;
 
 		case PHP_ICONV_ERR_TOO_BIG:
 			/* should not happen */
-			php_error(E_WARNING, "%s(): Run out buffer",
-			          get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Run out buffer");
 			break;
 
 		default:
 			/* other error */
-			php_error(E_NOTICE, "%s(): Unknown error (%d)",
-			          get_active_function_name(TSRMLS_C), errno);
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown error (%d)", errno);
 			break;
 	}
 }
