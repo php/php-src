@@ -111,6 +111,8 @@ typedef struct {
 	char *strtok_pos1;
 	char *strtok_pos2;
 	char str_ebuf[40];
+	zval **array_walk_func_name;
+	zval **user_compare_func_name;
 } php_basic_globals;
 
 #ifdef ZTS
@@ -120,6 +122,7 @@ typedef struct {
 #define BLS_CC , BLS_C
 #define BG(v) (basic_globals->v)
 #define BLS_FETCH() php_basic_globals *basic_globals = ts_resource(basic_globals_id)
+extern int basic_globals_id;
 #else
 #define BLS_D
 #define BLS_DC
@@ -127,6 +130,7 @@ typedef struct {
 #define BLS_CC
 #define BG(v) (basic_globals.v)
 #define BLS_FETCH()
+extern php_basic_globals basic_globals;
 #endif
 
 #if HAVE_PUTENV

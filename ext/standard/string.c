@@ -33,12 +33,6 @@
 #include "zend_execute.h"
 #include "php_globals.h"
 
-#ifdef ZTS
-extern int basic_globals_id;
-#else
-extern php_basic_globals basic_globals;
-#endif
-
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
 

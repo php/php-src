@@ -149,9 +149,9 @@ int lookup_hostname(const char *addr, struct in_addr *in)
 int _php3_is_persistent_sock(int sock)
 {
 	char *key;
-	PLS_FETCH();
+	FLS_FETCH();
 
-	if (zend_hash_find(&PG(ht_fsock_socks), (char *) &sock, sizeof(sock),
+	if (zend_hash_find(&FG(ht_fsock_socks), (char *) &sock, sizeof(sock),
 				(void **) &key) == SUCCESS) {
 		return 1;
 	}
@@ -245,7 +245,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	unsigned short portno;
 	unsigned long conv;
 	char *key = NULL;
-	PLS_FETCH();
+	FLS_FETCH();
 	
 	if (arg_count > 5 || arg_count < 2 || getParametersArray(ht,arg_count,args)==FAILURE) {
 		FREE_SOCK;
@@ -282,7 +282,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	key = emalloc(args[0]->value.str.len + 10);
 	sprintf(key, "%s:%d", args[0]->value.str.val, portno);
 
-	if (persistent && zend_hash_find(&PG(ht_fsock_keys), key, strlen(key) + 1,
+	if (persistent && zend_hash_find(&FG(ht_fsock_keys), key, strlen(key) + 1,
 				(void *) &sockp) == SUCCESS) {
 		FREE_SOCK;
 		*sock = *sockp;
@@ -358,9 +358,9 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 	*sock=socketd;
 	if (persistent) {
-		zend_hash_update(&PG(ht_fsock_keys), key, strlen(key) + 1, 
+		zend_hash_update(&FG(ht_fsock_keys), key, strlen(key) + 1, 
 				sock, sizeof(*sock), NULL);
-		zend_hash_update(&PG(ht_fsock_socks), (char *) sock, sizeof(*sock),
+		zend_hash_update(&FG(ht_fsock_socks), (char *) sock, sizeof(*sock),
 				key, strlen(key) + 1, NULL);
 	}
 	if(key) efree(key);
