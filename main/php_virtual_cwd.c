@@ -48,7 +48,11 @@ typedef int mode_t;
 MUTEX_T cwd_mutex;
 #endif
 
-ZEND_DECLARE_MODULE_GLOBALS(cwd);
+#ifdef ZTS
+static ts_rsrc_id cwd_globals_id;
+#else
+static virtual_cwd_globals cwd_globals;
+#endif
 
 cwd_state main_cwd_state; /* True global */
 
@@ -145,12 +149,12 @@ static int php_is_file_ok(const cwd_state *state)
 	return (1);
 }
 
-static void cwd_globals_ctor(zend_cwd_globals *cwd_globals)
+static void cwd_globals_ctor(virtual_cwd_globals *cwd_globals)
 {
 	CWD_STATE_COPY(&cwd_globals->cwd, &main_cwd_state);
 }
 
-static void cwd_globals_dtor(zend_cwd_globals *cwd_globals)
+static void cwd_globals_dtor(virtual_cwd_globals *cwd_globals)
 {
 	CWD_STATE_FREE(&cwd_globals->cwd);
 }
@@ -167,7 +171,12 @@ CWD_API void virtual_cwd_startup(void)
 	main_cwd_state.cwd = strdup(cwd);
 	main_cwd_state.cwd_length = strlen(cwd);
 
-	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, cwd_globals_dtor);
+#ifdef ZTS
+	cwd_globals_id = ts_allocate_id(sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
+#else
+	cwd_globals_ctor(&cwd_globals);
+#endif
+
 #if defined(ZEND_WIN32) && defined(ZTS)
 	cwd_mutex = tsrm_mutex_alloc();
 #endif
