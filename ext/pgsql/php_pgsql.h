@@ -42,6 +42,8 @@ extern zend_module_entry pgsql_module_entry;
 #else
 #define PHPAPI __declspec(dllimport)
 #endif
+#elif defined NETWARE
+#include <libpq-fs.h>
 #else
 #include <libpq/libpq-fs.h>
 #endif
