@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Fixed readfile/passthru losing resources during connection abort (Sascha)
 - Fixed race in writing session files (Sascha)
 - Fixed a possible crash in the PHP CGI when no input file is
   specified (Zeev)
