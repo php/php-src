@@ -44,8 +44,17 @@ class PEAR_Uploader extends PEAR_Common
 
     // }}}
 
-    function Upload($pkgfile, $infofile)
+    function upload($pkgfile, $infofile = null)
     {
+        if ($infofile === null) {
+            $info = $this->infoFromTarBall($pkgfile);
+        } else {
+            $info = infoFromDescriptionFile($infofile);
+        }
+        if (PEAR::isError($info)) {
+            return $info;
+        }
+        
     }
 }
 
