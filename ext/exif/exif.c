@@ -70,6 +70,11 @@
 
 typedef unsigned char uchar;
 
+//#undef safe_emalloc
+#ifndef safe_emalloc
+# define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
+#endif
+
 #ifndef TRUE
 #	define TRUE 1
 #	define FALSE 0
@@ -1331,7 +1336,7 @@ static char *exif_get_sectionlist(int sectionlist TSRMLS_DC)
 	for(i=0; i<SECTION_COUNT; i++) {
 		len += strlen(exif_get_sectionname(i))+2;
 	}
-	sections = emalloc(len+1);
+	sections = safe_emalloc(len, 1, 1);
 	if (!sections) {
 		EXIF_ERRLOG_EALLOC
 		return NULL;
@@ -1616,7 +1621,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				break;
 			} else
 			if (length>1) {
-				info_data->value.list = emalloc(length*sizeof(image_info_value));
+				info_data->value.list = safe_emalloc(length, sizeof(image_info_value), 1);
 				if (!info_data->value.list) {
 					EXIF_ERRLOG_EALLOC
 					return;
@@ -1791,7 +1796,7 @@ static void exif_iif_add_buffer(image_info_type *image_info, int section_index, 
 			EXIF_ERRLOG_EALLOC
 			return;
 		}
-		info_data->value.s = emalloc(length+1);
+		info_data->value.s = safe_emalloc(length, 1, 1);
 		if (!info_data->value.s) {
 			EXIF_ERRLOG_EALLOC
 			return;
@@ -2525,7 +2530,7 @@ static int exif_process_string_raw(char **result, char *value, size_t byte_count
 	 * force end of string.
 	 */
 	if (byte_count) {
-		(*result) = emalloc(byte_count+1);
+		(*result) = safe_emalloc(byte_count, 1, 1);
 		memcpy(*result, value, byte_count);
 		(*result)[byte_count] = '\0';
 		return byte_count+1;
@@ -2871,7 +2876,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						/* When there are any characters after the first NUL */
 						ImageInfo->CopyrightPhotographer  = estrdup(value_ptr);
 						ImageInfo->CopyrightEditor        = estrdup(value_ptr+length+1);
-						ImageInfo->Copyright              = emalloc(strlen(value_ptr)+strlen(value_ptr+length+1)+3);
+						ImageInfo->Copyright              = safe_emalloc(strlen(value_ptr)+3, 1, strlen(value_ptr+length+1));
 						if (!ImageInfo->Copyright) {
 							EXIF_ERRLOG_EALLOC
 						} else {
@@ -3825,7 +3830,7 @@ PHP_FUNCTION(exif_read_data)
 
 	if(ac >= 2) {
 		convert_to_string_ex(p_sections_needed);
-		sections_str = emalloc(strlen(Z_STRVAL_PP(p_sections_needed))+3);
+		sections_str = safe_emalloc(strlen(Z_STRVAL_PP(p_sections_needed)), 1, 3);
 		if (!sections_str) {
 			EXIF_ERRLOG_EALLOC
 			RETURN_FALSE;
