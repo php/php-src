@@ -21,10 +21,10 @@ class testgemessage1 {}
  * @package PEAR_ErrorStack
  */
 
-class PEAR_ErrorStack_TestCase_getErrorMessage extends PHPUnit_TestCase
+class Error_Stack_TestCase_getErrorMessage extends PHPUnit_TestCase
 {
 
-    function PEAR_ErrorStack_TestCase_getErrorMessage($name)
+    function Error_Stack_TestCase_getErrorMessage($name)
     {
         $this->PHPUnit_TestCase($name);
     }

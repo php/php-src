@@ -13,10 +13,10 @@
  * @package PEAR_ErrorStack
  */
 
-class PEAR_ErrorStack_TestCase_getErrors extends PHPUnit_TestCase
+class Error_Stack_TestCase_getErrors extends PHPUnit_TestCase
 {
 
-    function PEAR_ErrorStack_TestCase_getErrors($name)
+    function Error_Stack_TestCase_getErrors($name)
     {
         $this->PHPUnit_TestCase($name);
     }

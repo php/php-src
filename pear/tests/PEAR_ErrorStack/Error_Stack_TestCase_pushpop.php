@@ -13,7 +13,7 @@
  * @package PEAR_ErrorStack
  */
 
-class PEAR_ErrorStack_TestCase_pushpop extends PHPUnit_TestCase
+class Error_Stack_TestCase_pushpop extends PHPUnit_TestCase
 {
     /**
      * A PEAR_PackageFileManager object
@@ -21,7 +21,7 @@ class PEAR_ErrorStack_TestCase_pushpop extends PHPUnit_TestCase
      */
     var $packagexml;
 
-    function PEAR_ErrorStack_TestCase_pushpop($name)
+    function Error_Stack_TestCase_pushpop($name)
     {
         $this->PHPUnit_TestCase($name);
     }
