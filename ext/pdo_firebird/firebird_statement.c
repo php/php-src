@@ -35,7 +35,7 @@
 #define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__ TSRMLS_CC)
 
 /* free the allocated space for passing field values to the db and back */
-static void free_sqlda(XSQLDA const *sqlda)
+static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
 {
 	int i;
 	
@@ -47,9 +47,10 @@ static void free_sqlda(XSQLDA const *sqlda)
 		}
 	}
 }
+/* }}} */
 	
 /* called by PDO to clean up a statement handle */
-static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
+static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int i;
@@ -73,9 +74,10 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	
 	return 1;
 }
+/* }}} */
 
 /* called by PDO to execute a prepared query */
-static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
+static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -111,9 +113,10 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	return 0;
 }
+/* }}} */
 
 /* called by PDO to fetch the next row from a statement */
-static int firebird_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
+static int firebird_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -140,9 +143,10 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 	return 0;
 }
+/* }}} */
 
 /* called by PDO to retrieve information about the fields being returned */
-static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
+static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
@@ -161,7 +165,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 }
 
 /* internal function to override return types of parameters */
-static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var)
+static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var) /* {{{ */
 {
 	/* set the param type after the field type */
 	switch (var->sqltype & ~1) {
@@ -189,11 +193,13 @@ static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var)
 			break;
 	}
 }
+/* }}} */
 
 #define FETCH_BUF(buf,type,len) ((buf) = (buf) ? (buf) : \
 	emalloc((len) ? (len * sizeof(type)) : ((len) = sizeof(type))))
 
-static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC)
+static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{{ */
+	unsigned long *len TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	XSQLVAR const *var = &S->out_sqlda.sqlvar[colno];
@@ -304,8 +310,9 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsign
 	}
 	return 1;
 }
+/* }}} */
 
-static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
+static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, /* {{{ */
 	enum pdo_param_event event_type TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
@@ -417,8 +424,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	}		
 	return 1;
 }
+/* }}} */
 
-static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
+static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	
@@ -438,6 +446,7 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, long attr, zval *val TS
 	}
 	return 1;
 }
+/* }}} */
 
 static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 {
@@ -456,6 +465,7 @@ static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, long attr, zval *val TS
 	}
 	return 1;
 }
+/* }}} */
 
 struct pdo_stmt_methods firebird_stmt_methods = {
 	firebird_stmt_dtor,
@@ -467,6 +477,7 @@ struct pdo_stmt_methods firebird_stmt_methods = {
 	firebird_stmt_set_attribute,
 	firebird_stmt_get_attribute
 };
+/* }}} */
 
 /*
  * Local variables:
