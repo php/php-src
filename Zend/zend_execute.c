@@ -2338,8 +2338,9 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_class_entry **pce;
 	zend_class_entry *ce = NULL;
 	zend_bool is_const;
-	char *class_name_strval = NULL;
-	zend_uint class_name_strlen = 0;
+	char *class_name_strval;
+	zend_uint class_name_strlen;
+	zend_bool free_class_name = 0;
 	zval *class_name;					
 	
 	if (EX(opline)->op2.op_type == IS_UNUSED) {
@@ -2374,6 +2375,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			class_name_strval = zend_str_tolower_dup(class_name->value.str.val, class_name->value.str.len);
 			class_name_strlen = class_name->value.str.len;
+			free_class_name = 1;
 		}
 	}
 	
@@ -2394,7 +2396,9 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 		EX_T(EX(opline)->result.u.var).EA.class_entry = ce;
 	}
 	if (!is_const) {
-		efree(class_name_strval);
+		if (free_class_name) {
+			efree(class_name_strval);
+		}
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	}
 	NEXT_OPCODE();
