@@ -129,7 +129,6 @@ PHP_FUNCTION(recode_string)
 {
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
-	bool success;
 	int r_len = 0, r_alen = 0;
 	int req_len, str_len;
 	char *req, *str;
@@ -144,9 +143,8 @@ PHP_FUNCTION(recode_string)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate request structure");
 		RETURN_FALSE;
 	}
-	
-	success = recode_scan_request(request, req);
-	if (!success) {
+
+	if (!recode_scan_request(request, req)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
@@ -154,19 +152,14 @@ PHP_FUNCTION(recode_string)
 	recode_buffer_to_buffer(request, str, str_len, &r, &r_len, &r_alen);
 	if (!r) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
-		goto error_exit;
-	}
-	
-	RETVAL_STRINGL(r, r_len, 1);
-	free(r);
-	/* FALLTHROUGH */
-
 error_exit:
-	if (request)
-		recode_delete_request(request);
+		RETVAL_FALSE;
+	} else {
+		RETVAL_STRINGL(r, r_len, 1);
+		free(r);
+	}
 
-	if (!r)	
-		RETURN_FALSE;
+	recode_delete_request(request);
 
 	return;
 }
@@ -177,7 +170,6 @@ error_exit:
 PHP_FUNCTION(recode_file)
 {
 	RECODE_REQUEST request = NULL;
-	int success;
 	zval **req;
 	zval **input, **output;
 	php_stream *instream, *outstream;
@@ -206,26 +198,21 @@ PHP_FUNCTION(recode_file)
 		RETURN_FALSE;
 	}
 
-	success = recode_scan_request(request, Z_STRVAL_PP(req));
-	if (!success) {
+	if (!recode_scan_request(request, Z_STRVAL_PP(req))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", Z_STRVAL_PP(req));
 		goto error_exit;
 	}
 	
-	success = recode_file_to_file(request, in_fp, out_fp);
-	if (!success) {
+	if (!recode_file_to_file(request, in_fp, out_fp)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
 		goto error_exit;
 	}
 
-	if (request)
-		recode_delete_request(request);
+	recode_delete_request(request);
 	RETURN_TRUE;
 
 error_exit:
-	if (request)
-		recode_delete_request(request);
-	
+	recode_delete_request(request);
 	RETURN_FALSE;
 }
 /* }}} */
