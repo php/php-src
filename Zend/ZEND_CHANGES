@@ -47,22 +47,37 @@ Changes in the Zend Engine 2.0
 
         Example
 
-        try {
-          code
+          <?php
+          class MyException {
+            function MyException($_error) {
+              $this->error = $_error;	
+            }
 
-          if (failure) {
-            throw new MyException(Failure);
+            function getException() {
+              return $this->error;	
+            }
           }
 
-          code
-        } catch ($exception) {
-          handle exception
+          function ThrowException() {
+            throw new MyException("'This is an exception!'");	
+          }
 
-          throw $exception; // Re-throw exception.
-        }
+          try {
+          } catch ($exception) {
+            print "There was an exception: " . $exception->getException();
+            print "\n";
+          }
 
-      Old code that does not use exceptions will run without
-      modifications.
+          try {
+            ThrowException();	
+          } catch ($exception) {
+            print "There was an exception: " . $exception->getException();
+            print "\n";
+          }
+          ?>
+
+      Old code that does not define user-space functions 'catch', 
+      'throw' and 'try' will run without modifications.
 
     * Namespaces.
 
