@@ -1577,10 +1577,17 @@ PHP_FUNCTION(imagecolorat)
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
+#if HAVE_LIBGD20
+	if(im->truecolor) {
+		php_error(E_WARNING, "ImageColorAt does not work on TrueColor images");
+		RETURN_FALSE;
+	}
+#endif
+
 	convert_to_long_ex(x);
 	convert_to_long_ex(y);
 
-	if (gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
+	if (im->pixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
 #if HAVE_LIBGD13
 		RETURN_LONG(im->pixels[Z_LVAL_PP(y)][Z_LVAL_PP(x)]);
 #else
