@@ -185,6 +185,7 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC)
 
 	if (intern->free_ptr && intern->ptr) {
 		efree(intern->ptr);
+		intern->ptr = NULL;
 	}
 	if (intern->obj) {
 		zval_ptr_dtor(&intern->obj);
@@ -221,6 +222,7 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 	intern->zo.in_set = 0;
 	intern->ptr = NULL;
 	intern->obj = NULL;
+	intern->free_ptr = 0;
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -848,7 +850,7 @@ static void reflection_function_factory(zend_function *function, zval *object TS
 	reflection_instanciate(reflection_function_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = function;
-	intern->free_ptr = function != NULL;
+	intern->free_ptr = 0;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
 /* }}} */
