@@ -393,7 +393,7 @@ static int sapi_find_matching_header(void *element1, void *element2)
 /* This function expects a *duplicated* string, that was previously emalloc()'d.
  * Pointers sent to this functions will be automatically freed by the framework.
  */
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace, int http_response_code TSRMLS_DC)
 {
 	int retval;
 	sapi_header_struct sapi_header;
@@ -462,11 +462,11 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
 			} else if (!STRCASECMP(header_line, "Location")) {
-			        if (SG(sapi_headers).http_response_code < 300 ||
-				    SG(sapi_headers).http_response_code > 307) {
-				   	/* Return a Found Redirect if one is not already specified */
+				if (SG(sapi_headers).http_response_code < 300 ||
+					SG(sapi_headers).http_response_code > 307) {
+					/* Return a Found Redirect if one is not already specified */
 					SG(sapi_headers).http_response_code = 302;
-				   }
+				}
 			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
 				int newlen;
 				char *result, *newheader;
@@ -547,6 +547,9 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 		}
 	}
 
+	if (http_response_code) {
+		SG(sapi_headers).http_response_code = http_response_code;
+	}
 	if (sapi_module.header_handler) {
 		retval = sapi_module.header_handler(&sapi_header, &SG(sapi_headers) TSRMLS_CC);
 	} else {

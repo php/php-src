@@ -133,9 +133,9 @@ SAPI_API void sapi_activate(TSRMLS_D);
 SAPI_API void sapi_deactivate(TSRMLS_D);
 SAPI_API void sapi_initialize_empty_request(TSRMLS_D);
 
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC);
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace, int http_response_code TSRMLS_DC);
 #define sapi_add_header(header_line, header_line_len, duplicate) \
-	sapi_add_header_ex((header_line), (header_line_len), (duplicate), 1 TSRMLS_CC)
+	sapi_add_header_ex((header_line), (header_line_len), (duplicate), 1, 0 TSRMLS_CC)
 SAPI_API int sapi_send_headers(TSRMLS_D);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC);
