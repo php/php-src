@@ -1039,12 +1039,12 @@ PHP_FUNCTION(mysql_unbuffered_query)
 /* }}} */
 
 
-/* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier] [, int result_mode])
+/* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier])
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_db_query)
 {
-	zval **db, **query, **mysql_link, **resmode;
-	int id, use_store=MYSQL_STORE_RESULT;
+	zval **db, **query, **mysql_link;
+	int id;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -1061,21 +1061,14 @@ PHP_FUNCTION(mysql_db_query)
 			}
 			id = -1;
 			break;
-		case 4:
-			if (zend_get_parameters_ex(4, &db, &query, &mysql_link, &resmode)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			convert_to_long_ex(resmode);
-			use_store = Z_LVAL_PP(resmode);
-			break;
-
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	php_mysql_do_query_general(query, mysql_link, id, db, use_store, return_value);
+	zend_error(E_NOTICE, "%s is deprecated; use mysql_select_db() and mysql_query() instead", get_active_function_name());
+	
+	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value);
 }
 /* }}} */
 
