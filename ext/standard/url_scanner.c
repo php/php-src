@@ -30,7 +30,9 @@
 #include "basic_functions.h"
 #include "url_scanner.h"
 
+#ifndef BUFSIZE
 #define BUFSIZE 256
+#endif
 
 PHP_RINIT_FUNCTION(url_scanner) {
 	url_adapt(NULL,0,NULL,NULL);
@@ -58,18 +60,18 @@ static char *url_attr_addon(const char *tag,const char *attr,const char *val,con
 	if(flag) {
 		if(!strstr(val,buf))
 			{
-				char *p = (char *)emalloc(strlen(buf)+strlen(PG(arg_separator))+1);
+				char *result = (char *)emalloc(strlen(buf)+strlen(PG(arg_separator))+1);
 				int n;
 
 				if(strchr(val,'?')) {
-					strcpy(p,PG(arg_separator));
+					strcpy(result,PG(arg_separator));
 					n=strlen(PG(arg_separator));
 				} else {
-					*p='?';
+					*result='?';
 					n=1;
 				}
-				strcpy(p+n,buf);
-				return p;
+				strcpy(result+n,buf);
+				return result;
 			}
 	} 
 	return NULL;
@@ -181,10 +183,43 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 			
 		case STATE_TAG_IS:
 		case STATE_TAG_IS2:
-			if(!isspace(*src)) {
+			if(*src=='>'){
+					US.state=STATE_NORMAL;
+					if(! (US.attr_done)) {
+						char *p;
+						p=url_attr_addon(US.tag,US.attr,"",data);
+						if(p) {
+							int l= strlen(p);
+							maxl+=l;
+							out=realloc(out,maxl);
+							outp=out+*newlen;
+							strcpy(outp,p);
+							outp+=l;
+							*newlen+=l;
+							efree(p);
+						}
+					}
+			} else if(*src=='#') {
+				if(! (US.attr_done)) {
+					char *p;
+					US.attr_done=1;
+					p=url_attr_addon(US.tag,US.attr,"#",data);
+					if(p) {
+						int l= strlen(p);
+						maxl+=l;
+						out=realloc(out,maxl);
+						outp=out+*newlen;
+						strcpy(outp,p);
+						outp+=l;
+						*newlen+=l;
+						efree(p);
+					}
+				}
+			} else if(!isspace(*src)&&(*src!='=')) {
 				US.ml=BUFSIZE;
 				US.p=US.val=erealloc(US.val,US.ml);
 				US.l=0;
+				US.attr_done=0;
 				if((*src=='"')||(*src=='\'')) {
 					US.state=STATE_TAG_QVAL2;
 					US.delim=*src;
@@ -198,20 +233,39 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 
 
 		case STATE_TAG_QVAL2:
-			if(*src==US.delim) {
-				char *p;
+			if(*src=='#') {
+				if(! (US.attr_done)) {
+					char *p;
+					US.attr_done=1;
+					*US.p='\0';
+					p=url_attr_addon(US.tag,US.attr,US.val,data);
+					if(p) {
+						int l= strlen(p);
+						maxl+=l;
+						out=realloc(out,maxl);
+						outp=out+*newlen;
+						strcpy(outp,p);
+						outp+=l;
+						*newlen+=l;
+						efree(p);
+					}
+				}
+			} else if(*src==US.delim) {
 				US.state=STATE_IN_TAG;
 				*US.p='\0';
-				p=url_attr_addon(US.tag,US.attr,US.val,data);
-				if(p) {
-					int l= strlen(p);
-					maxl+=l;
-					out=realloc(out,maxl);
-					outp=out+*newlen;
-					strcpy(outp,p);
-					outp+=l;
-					*newlen+=l;
-					efree(p);
+				if(! (US.attr_done)) {
+					char *p;
+					p=url_attr_addon(US.tag,US.attr,US.val,data);
+					if(p) {
+						int l= strlen(p);
+						maxl+=l;
+						out=realloc(out,maxl);
+						outp=out+*newlen;
+						strcpy(outp,p);
+						outp+=l;
+						*newlen+=l;
+						efree(p);
+					}
 				}
 				break;
 			} else if(*src=='\\') {
@@ -243,38 +297,40 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 			break;
 
 		case STATE_TAG_VAL:
-			if(!isspace(*src)) {
-				if((*src=='"')||(*src=='\'')) {
-					US.state=STATE_TAG_QVAL2;
-					US.delim=*src;
-				} else {
-					*US.p++=*src;
-					US.l++; 
-					if(US.l==US.ml) {
-						US.ml+=BUFSIZE;
-						US.val=erealloc(US.val,US.ml);
-						US.p = US.val+US.l;
-					}
-					US.state=STATE_TAG_VAL2;
-				}
-			}
-			break;
-
 		case STATE_TAG_VAL2:
-			if(isspace(*src)||(*src=='>')) {
-				char *p;
+			if(*src=='#') {
+				if(! (US.attr_done)) {
+					char *p;
+					US.attr_done=1;
+					*US.p='\0';
+					p=url_attr_addon(US.tag,US.attr,US.val,data);
+					if(p) {
+						int l= strlen(p);
+						maxl+=l;
+						out=realloc(out,maxl);
+						outp=out+*newlen;
+						strcpy(outp,p);
+						outp+=l;
+						*newlen+=l;
+						efree(p);
+					}
+					}
+			} else if(isspace(*src)||(*src=='>')) {
 				US.state=(*src=='>')?STATE_NORMAL:STATE_IN_TAG;
 				*US.p='\0';
-				p=url_attr_addon(US.tag,US.attr,US.val,data);
-				if(p) {
-					int l= strlen(p);
-					maxl+=l;
-					out=realloc(out,maxl);
-					outp=out+*newlen;
-					strcpy(outp,p);
-					outp+=l;
-					*newlen+=l;
-					efree(p);
+				if(! (US.attr_done)) {
+					char *p;
+					p=url_attr_addon(US.tag,US.attr,US.val,data);
+					if(p) {
+						int l= strlen(p);
+						maxl+=l;
+						out=realloc(out,maxl);
+						outp=out+*newlen;
+						strcpy(outp,p);
+						outp+=l;
+						*newlen+=l;
+						efree(p);
+					}
 				}
 			} else {
 				*US.p++=*src;
