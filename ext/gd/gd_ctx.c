@@ -1,3 +1,20 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2003 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.0 of the PHP license,       |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_0.txt.                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Stanislav Malyshev <stas@php.net>                           |
+   +----------------------------------------------------------------------+
+ */
 #include "php_gd.h"
 
 
@@ -5,8 +22,13 @@
 	
 static void _php_image_output_putc(struct gdIOCtx *ctx, int c)
 {
+	/* without the following downcast, the write will fail
+	 * (i.e., will write a zero byte) for all
+	 * big endian architectures:
+	 */
+	unsigned char ch = (unsigned char) c;
 	TSRMLS_FETCH();
-	php_write(&c, 1 TSRMLS_CC);
+	php_write(&ch, 1 TSRMLS_CC);
 }
 
 static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
