@@ -670,10 +670,11 @@ PHP_METHOD(soapfault,soapfault)
 	int fault_string_len, fault_code_len, fault_actor_len;
 	zval *details = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zs",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s!z!",
 		&fault_code, &fault_code_len,
 		&fault_string, &fault_string_len,
-		&details, &fault_actor, &fault_actor_len) == FAILURE) {
+		&fault_actor, &fault_actor_len,
+		&details) == FAILURE) {
 		php_error(E_ERROR, "Invalid arguments to SoapFault constructor");
 	}
 
