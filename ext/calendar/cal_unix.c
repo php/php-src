@@ -34,7 +34,7 @@ PHP_FUNCTION(unixtojd)
   struct tm *ta, tmbuf;
   int myargc=ZEND_NUM_ARGS();
 	
-  if ((myargc > 1) || (zend_get_parameters(ht,myargc, &timestamp) != SUCCESS)) {
+  if ((myargc > 1) || (zend_get_parameters(ht, myargc, &timestamp) != SUCCESS)) {
     WRONG_PARAM_COUNT;
   }
 
@@ -50,7 +50,7 @@ PHP_FUNCTION(unixtojd)
   }
 
   ta = php_localtime_r(&t, &tmbuf);
-  jdate = GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1,ta->tm_mday);
+  jdate = GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday);
   
   RETURN_LONG(jdate);
 }
@@ -63,7 +63,7 @@ PHP_FUNCTION(jdtounix)
   pval *jday;
   long uday;
 
-  if ((ZEND_NUM_ARGS()!= 1) || (zend_get_parameters(ht,1, &jday) != SUCCESS)) {
+  if ((ZEND_NUM_ARGS()!= 1) || (zend_get_parameters(ht, 1, &jday) != SUCCESS)) {
     WRONG_PARAM_COUNT;
   }
   

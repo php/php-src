@@ -208,13 +208,13 @@ PHP_FUNCTION(dbplus_open)
 	convert_to_long_ex(writing);
 	convert_to_long_ex(searchpath);
 
-	conn = cdb_open((*name)->value.str.val,(*writing)->value.lval,(*searchpath)->value.lval);
+	conn = cdb_open((*name)->value.str.val, (*writing)->value.lval, (*searchpath)->value.lval);
 	if(conn == NULL) {
 		/* TODO error handling */
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value,conn,le_dbplus);
+	ZEND_REGISTER_RESOURCE(return_value, conn, le_dbplus);
 }
 
 /* }}} */

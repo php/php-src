@@ -81,23 +81,23 @@ PHP_MINIT_FUNCTION(aspell)
    Load a dictionary */
 PHP_FUNCTION(aspell_new)
 {
-	pval **master,**personal;
+	pval **master, **personal;
 	int argc;
 	aspell *sc;
 	int ind;
 	
 	argc = ZEND_NUM_ARGS();
-	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc,&master,&personal) == FAILURE) {
+	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &master, &personal) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(master);
 	if(argc==2)
 	  {
 		convert_to_string_ex(personal) ;
-		sc=aspell_new((*master)->value.str.val,(*personal)->value.str.val);
+		sc=aspell_new((*master)->value.str.val, (*personal)->value.str.val);
 	  }
 	else
-	  sc=aspell_new((*master)->value.str.val,"");
+	  sc=aspell_new((*master)->value.str.val, "");
 
 	ind = zend_list_insert(sc, le_aspell);
 	RETURN_LONG(ind);
@@ -111,13 +111,13 @@ PHP_FUNCTION(aspell_suggest)
 	pval **scin, **word;
 	int argc;
 	aspell *sc;
-	int ind,type;
+	int ind, type;
 	aspellSuggestions *sug;
 	size_t i;
 
 	
 	argc = ZEND_NUM_ARGS();
-	if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
+	if (argc != 2 || zend_get_parameters_ex(argc, &scin, &word) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(scin);
@@ -125,7 +125,7 @@ PHP_FUNCTION(aspell_suggest)
 	sc = (aspell *)zend_list_find((*scin)->value.lval, &type);
 	if(!sc)
 	  {
-		php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);
+		php_error(E_WARNING, "%d is not an ASPELL result index", (*scin)->value.lval);
 		RETURN_FALSE;
 	  }
 
@@ -135,7 +135,7 @@ PHP_FUNCTION(aspell_suggest)
 
 	sug = aspell_suggest(sc, (*word)->value.str.val);
 	  for (i = 0; i != sug->size; ++i) {
-                add_next_index_string(return_value,(char *)sug->data[i],1);
+                add_next_index_string(return_value, (char *)sug->data[i], 1);
 	  }
 	  aspell_free_suggestions(sug);
 }
@@ -146,12 +146,12 @@ PHP_FUNCTION(aspell_suggest)
 PHP_FUNCTION(aspell_check)
 {
    int type;
-   pval **scin,**word;
+   pval **scin, **word;
    aspell *sc;
 
    int argc;
     argc = ZEND_NUM_ARGS();
-    if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
+    if (argc != 2 || zend_get_parameters_ex(argc, &scin, &word) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     convert_to_long_ex(scin);
@@ -159,7 +159,7 @@ PHP_FUNCTION(aspell_check)
     sc= (aspell *) zend_list_find((*scin)->value.lval, &type);
     if(!sc)
       {
-        php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);
+        php_error(E_WARNING, "%d is not an ASPELL result index", (*scin)->value.lval);
         RETURN_FALSE;
       }
     if (aspell_check(sc, (*word)->value.str.val)) 
@@ -177,13 +177,13 @@ PHP_FUNCTION(aspell_check)
    Return if word is valid, ignoring case or trying to trim it in any way */
 PHP_FUNCTION(aspell_check_raw)
 {
-  pval **scin,**word;
+  pval **scin, **word;
   int type;
   int argc;
   aspell *sc;
 
     argc = ZEND_NUM_ARGS();
-    if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
+    if (argc != 2 || zend_get_parameters_ex(argc, &scin, &word) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     convert_to_long_ex(scin);
@@ -191,7 +191,7 @@ PHP_FUNCTION(aspell_check_raw)
     sc = (aspell *)zend_list_find((*scin)->value.lval, &type);
     if(!sc)
       {
-        php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);
+        php_error(E_WARNING, "%d is not an ASPELL result index", (*scin)->value.lval);
         RETURN_FALSE;
       }
 	if (aspell_check_raw(sc, (*word)->value.str.val)) 

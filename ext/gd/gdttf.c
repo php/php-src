@@ -60,10 +60,10 @@ extern int gdImageColorResolve(gdImagePtr, int, int, int);
 #endif
 
 #ifndef MAX
-#define MAX(a,b) ((a)>(b)?(a):(b))
+#define MAX(a, b) ((a)>(b)?(a):(b))
 #endif
 #ifndef MIN
-#define MIN(a,b) ((a)<(b)?(a):(b))
+#define MIN(a, b) ((a)<(b)?(a):(b))
 #endif
 
 typedef struct {
@@ -343,7 +343,7 @@ fontFetch ( char **error, void *key )
 	}
 #else
 	a->fontname = (char *)malloc(strlen(b->fontname) + 1);
-	strcpy(a->fontname,b->fontname);
+	strcpy(a->fontname, b->fontname);
 #endif
 	a->ptsize = b->ptsize;
 	a->angle = b->angle;
@@ -508,10 +508,10 @@ glyphFetch ( char **error, void *key )
 	crect[5] = (int)(xmax * sin_a + ymax * cos_a);
 	crect[6] = (int)(xmin * cos_a - ymax * sin_a);
 	crect[7] = (int)(xmin * sin_a + ymax * cos_a);
-	a->xmin = MIN(MIN(crect[0],crect[2]),MIN(crect[4],crect[6]));
-	a->xmax = MAX(MAX(crect[0],crect[2]),MAX(crect[4],crect[6]));
-	a->ymin = MIN(MIN(crect[1],crect[3]),MIN(crect[5],crect[7]));
-	a->ymax = MAX(MAX(crect[1],crect[3]),MAX(crect[5],crect[7]));
+	a->xmin = MIN(MIN(crect[0], crect[2]), MIN(crect[4], crect[6]));
+	a->xmax = MAX(MAX(crect[0], crect[2]), MAX(crect[4], crect[6]));
+	a->ymin = MIN(MIN(crect[1], crect[3]), MIN(crect[5], crect[7]));
+	a->ymax = MAX(MAX(crect[1], crect[3]), MAX(crect[5], crect[7]));
 
 	/* allocate bitmap large enough for character */
 	a->Bit.rows = (a->ymax - a->ymin + 32 + 64) / 64;

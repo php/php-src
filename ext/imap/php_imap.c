@@ -336,7 +336,7 @@ void mail_free_errorlist(ERRORLIST **errlist)
  */
 MESSAGELIST *mail_newmessagelist(void)
 {
-	return (MESSAGELIST *) memset(fs_get(sizeof(MESSAGELIST)),0,
+	return (MESSAGELIST *) memset(fs_get(sizeof(MESSAGELIST)), 0,
 								  sizeof(MESSAGELIST));
 }
 /* }}} */
@@ -363,7 +363,7 @@ void mail_free_messagelist(MESSAGELIST **msglist)
  * Called via the mail_parameter function in c-client:src/c-client/mail.c
  * Author DRK
  */
-void mail_getquota(MAILSTREAM *stream, char *qroot,QUOTALIST *qlist)
+void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 {
 	TSRMLS_FETCH();
 
@@ -508,15 +508,15 @@ PHP_MINIT_FUNCTION(imap)
 
 	/* Status options */
 
-	REGISTER_MAIN_LONG_CONSTANT("SA_MESSAGES",SA_MESSAGES , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SA_MESSAGES", SA_MESSAGES , CONST_PERSISTENT | CONST_CS);
 	/* number of messages */
 	REGISTER_MAIN_LONG_CONSTANT("SA_RECENT", SA_RECENT, CONST_PERSISTENT | CONST_CS);
 	/* number of recent messages */
-	REGISTER_MAIN_LONG_CONSTANT("SA_UNSEEN",SA_UNSEEN , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SA_UNSEEN", SA_UNSEEN , CONST_PERSISTENT | CONST_CS);
 	/* number of unseen messages */
 	REGISTER_MAIN_LONG_CONSTANT("SA_UIDNEXT", SA_UIDNEXT, CONST_PERSISTENT | CONST_CS);
 	/* next UID to be assigned */
-	REGISTER_MAIN_LONG_CONSTANT("SA_UIDVALIDITY",SA_UIDVALIDITY , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SA_UIDVALIDITY", SA_UIDVALIDITY , CONST_PERSISTENT | CONST_CS);
 	/* UID validity value */
 	REGISTER_MAIN_LONG_CONSTANT("SA_ALL", sa_all, CONST_PERSISTENT | CONST_CS);
      /* get all status information */
@@ -524,37 +524,37 @@ PHP_MINIT_FUNCTION(imap)
 
 	/* Bits for mm_list() and mm_lsub() */
 
-	REGISTER_MAIN_LONG_CONSTANT("LATT_NOINFERIORS",LATT_NOINFERIORS , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LATT_NOINFERIORS", LATT_NOINFERIORS , CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LATT_NOSELECT", LATT_NOSELECT, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LATT_MARKED", LATT_MARKED, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("LATT_UNMARKED",LATT_UNMARKED , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LATT_UNMARKED", LATT_UNMARKED , CONST_PERSISTENT | CONST_CS);
 
 
 	/* Sort functions */
 
-	REGISTER_MAIN_LONG_CONSTANT("SORTDATE",SORTDATE , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SORTDATE", SORTDATE , CONST_PERSISTENT | CONST_CS);
 	/* date */
-	REGISTER_MAIN_LONG_CONSTANT("SORTARRIVAL",SORTARRIVAL , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SORTARRIVAL", SORTARRIVAL , CONST_PERSISTENT | CONST_CS);
 	/* arrival date */
-	REGISTER_MAIN_LONG_CONSTANT("SORTFROM",SORTFROM , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SORTFROM", SORTFROM , CONST_PERSISTENT | CONST_CS);
 	/* from */
-	REGISTER_MAIN_LONG_CONSTANT("SORTSUBJECT",SORTSUBJECT , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SORTSUBJECT", SORTSUBJECT , CONST_PERSISTENT | CONST_CS);
 	/* subject */
-	REGISTER_MAIN_LONG_CONSTANT("SORTTO",SORTTO , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SORTTO", SORTTO , CONST_PERSISTENT | CONST_CS);
 	/* to */
-	REGISTER_MAIN_LONG_CONSTANT("SORTCC",SORTCC , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SORTCC", SORTCC , CONST_PERSISTENT | CONST_CS);
 	/* cc */
-	REGISTER_MAIN_LONG_CONSTANT("SORTSIZE",SORTSIZE , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SORTSIZE", SORTSIZE , CONST_PERSISTENT | CONST_CS);
 	/* size */
 
-	REGISTER_MAIN_LONG_CONSTANT("TYPETEXT",TYPETEXT , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("TYPEMULTIPART",TYPEMULTIPART , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("TYPEMESSAGE",TYPEMESSAGE , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("TYPEAPPLICATION",TYPEAPPLICATION , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("TYPEAUDIO",TYPEAUDIO , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("TYPEIMAGE",TYPEIMAGE , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("TYPEVIDEO",TYPEVIDEO , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("TYPEOTHER",TYPEOTHER , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPETEXT", TYPETEXT , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEMULTIPART", TYPEMULTIPART , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEMESSAGE", TYPEMESSAGE , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEAPPLICATION", TYPEAPPLICATION , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEAUDIO", TYPEAUDIO , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEIMAGE", TYPEIMAGE , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEVIDEO", TYPEVIDEO , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEOTHER", TYPEOTHER , CONST_PERSISTENT | CONST_CS);
 	/*
 	TYPETEXT                unformatted text
 	TYPEMULTIPART           multiple part
@@ -566,12 +566,12 @@ PHP_MINIT_FUNCTION(imap)
 	TYPEOTHER               unknown
 	*/
 
-	REGISTER_MAIN_LONG_CONSTANT("ENC7BIT",ENC7BIT , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("ENC8BIT",ENC8BIT , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("ENCBINARY",ENCBINARY , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("ENCBASE64",ENCBASE64, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("ENCQUOTEDPRINTABLE",ENCQUOTEDPRINTABLE , CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("ENCOTHER",ENCOTHER , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENC7BIT", ENC7BIT , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENC8BIT", ENC8BIT , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENCBINARY", ENCBINARY , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENCBASE64", ENCBASE64, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENCQUOTEDPRINTABLE", ENCQUOTEDPRINTABLE , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENCOTHER", ENCOTHER , CONST_PERSISTENT | CONST_CS);
 	/*
 	ENC7BIT                 7 bit SMTP semantic data
 	ENC8BIT                 8 bit SMTP semantic data
@@ -1158,8 +1158,8 @@ PHP_FUNCTION(imap_headers)
 	}
 	
 	for (msgno = 1; msgno <= imap_le_struct->imap_stream->nmsgs; msgno++) {
-		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream,msgno);
-		mail_fetchstructure(imap_le_struct->imap_stream,msgno,NIL);
+		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream, msgno);
+		mail_fetchstructure(imap_le_struct->imap_stream, msgno, NIL);
 		tmp[0] = cache->recent ? (cache->seen ? 'R': 'N') : ' ';
 		tmp[1] = (cache->recent | cache->seen) ? ' ' : 'U';
 		tmp[2] = cache->flagged ? 'F' : ' ';
@@ -1847,7 +1847,7 @@ PHP_FUNCTION(imap_fetchstructure)
 		RETURN_FALSE;
 	}
     
-	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body ,myargc == 3 ? Z_LVAL_PP(flags) : NIL);
+	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body , myargc == 3 ? Z_LVAL_PP(flags) : NIL);
 	
 	if (!body) {
 		php_error(E_WARNING, "No body information available");
@@ -2016,8 +2016,8 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	msize = 0;
 
 	for (msgno = 1; msgno <= imap_le_struct->imap_stream->nmsgs; msgno++) {
-		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream,msgno);
-		mail_fetchstructure (imap_le_struct->imap_stream,msgno,NIL);
+		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream, msgno);
+		mail_fetchstructure (imap_le_struct->imap_stream, msgno, NIL);
 
 		if (!cache->seen || cache->recent) {
 			unreadmsg++;
@@ -3166,15 +3166,15 @@ PHP_FUNCTION(imap_mail_compose)
 
 			/* output cookie, mini-header, and contents */
 				tempstring=emalloc(strlen(mystring)+strlen(tmp)+1);
-				strcpy(tempstring,mystring);
+				strcpy(tempstring, mystring);
 				efree(mystring);
 				mystring=tempstring;
-				strcat(mystring,tmp);
+				strcat(mystring, tmp);
 
 				bod=&part->body;
 
 				tempstring=emalloc(strlen(bod->contents.text.data)+strlen(CRLF)+strlen(mystring)+1);
-				strcpy(tempstring,mystring);
+				strcpy(tempstring, mystring);
 				efree(mystring);
 				mystring=tempstring;
 				sprintf(mystring, "%s%s%s", mystring, bod->contents.text.data, CRLF);
@@ -3184,7 +3184,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 			sprintf(tmp, "--%s--", cookie);
 			tempstring=emalloc(strlen(tmp)+strlen(CRLF)+strlen(mystring)+1);
-			strcpy(tempstring,mystring);
+			strcpy(tempstring, mystring);
 			efree(mystring);
 			mystring=tempstring;
 			sprintf(mystring, "%s%s%s", mystring, tmp, CRLF);
@@ -3192,7 +3192,7 @@ PHP_FUNCTION(imap_mail_compose)
 	} else if (bod) {
 
 			tempstring=emalloc(strlen(bod->contents.text.data)+strlen(CRLF)+strlen(mystring)+1);
-			strcpy(tempstring,mystring);
+			strcpy(tempstring, mystring);
 			efree(mystring);
 			mystring=tempstring;
 			sprintf(mystring, "%s%s%s", mystring, bod->contents.text.data, CRLF);
@@ -3202,7 +3202,7 @@ PHP_FUNCTION(imap_mail_compose)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(mystring,strlen(mystring), 1);  
+	RETVAL_STRINGL(mystring, strlen(mystring), 1);  
 	efree(tempstring);
 }
 /* }}} */
@@ -3809,26 +3809,26 @@ static void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes
 	unsigned long thisNode = *numNodes;
 
 	/* define "#.num" */
-	snprintf(buf,25,"%ld.num", thisNode);
+	snprintf(buf, 25, "%ld.num", thisNode);
 
-	add_assoc_long(tree,buf,cur->num);
+	add_assoc_long(tree, buf, cur->num);
 
-	snprintf(buf,25,"%ld.next", thisNode);
+	snprintf(buf, 25, "%ld.next", thisNode);
 	if(cur->next) {
 	    (*numNodes)++;
-	    add_assoc_long(tree,buf,*numNodes);
+	    add_assoc_long(tree, buf, *numNodes);
 	    build_thread_tree_helper(cur->next, tree, numNodes, buf);
 	} else { /* "null pointer" */
-	    add_assoc_long(tree,buf,0);
+	    add_assoc_long(tree, buf, 0);
 	}
 
-	snprintf(buf,25,"%ld.branch", thisNode);
+	snprintf(buf, 25, "%ld.branch", thisNode);
 	if(cur->branch) {
 	    (*numNodes)++;
-	    add_assoc_long(tree,buf,*numNodes);
+	    add_assoc_long(tree, buf, *numNodes);
 	    build_thread_tree_helper(cur->branch, tree, numNodes, buf);	    
 	} else { /* "null pointer" */
-	    add_assoc_long(tree,buf,0);
+	    add_assoc_long(tree, buf, 0);
 	}
 }
 /* }}} */
@@ -3891,7 +3891,7 @@ PHP_FUNCTION (imap_thread)
 
 /* {{{ Interfaces to C-client 
  */
-void mm_searched(MAILSTREAM *stream,unsigned long number)
+void mm_searched(MAILSTREAM *stream, unsigned long number)
 {
 	MESSAGELIST *cur = NIL;
 	TSRMLS_FETCH();
@@ -3912,15 +3912,15 @@ void mm_searched(MAILSTREAM *stream,unsigned long number)
 	}
 }
 
-void mm_exists(MAILSTREAM *stream,unsigned long number)
+void mm_exists(MAILSTREAM *stream, unsigned long number)
 {
 }
 
-void mm_expunged(MAILSTREAM *stream,unsigned long number)
+void mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
 }
 
-void mm_flags(MAILSTREAM *stream,unsigned long number)
+void mm_flags(MAILSTREAM *stream, unsigned long number)
 {
 }
 
@@ -3948,7 +3948,7 @@ void mm_notify(MAILSTREAM *stream, char *str, long errflg)
 	}
 }
 
-void mm_list(MAILSTREAM *stream,DTYPE delimiter, char *mailbox, long attributes)
+void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes)
 {
 	STRINGLIST *cur=NIL;
 	FOBJECTLIST *ocur=NIL;
@@ -3997,7 +3997,7 @@ void mm_list(MAILSTREAM *stream,DTYPE delimiter, char *mailbox, long attributes)
 	}
 }
 
-void mm_lsub(MAILSTREAM *stream,DTYPE delimiter, char *mailbox, long attributes)
+void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes)
 {
 	STRINGLIST *cur=NIL;
 	FOBJECTLIST *ocur=NIL;
@@ -4043,7 +4043,7 @@ void mm_lsub(MAILSTREAM *stream,DTYPE delimiter, char *mailbox, long attributes)
 	}
 }
 
-void mm_status(MAILSTREAM *stream, char *mailbox,MAILSTATUS *status)
+void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
 	TSRMLS_FETCH();
 
@@ -4103,7 +4103,7 @@ void mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 	TSRMLS_FETCH();
 
 	if (*mb->user) {
-		strlcpy (user,mb->user, MAILTMPLEN);
+		strlcpy (user, mb->user, MAILTMPLEN);
 	} else {
 		strlcpy (user, IMAPG(imap_user), MAILTMPLEN);
 	}

@@ -1045,7 +1045,7 @@ ftp_getdata(ftpbuf_t *ftp)
 	struct sockaddr_in	addr;
 	int			size;
 	union ipbox		ipbox;
-	char			arg[sizeof("255,255,255,255,255,255")];
+	char			arg[sizeof("255, 255, 255, 255, 255, 255")];
 
 
 	/* ask for a passive connection if we need one */

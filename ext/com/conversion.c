@@ -141,7 +141,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 		
 		if(NULL == safeArray)
 		{
-			php_error( E_WARNING,"Unable to convert php array to VARIANT array - %s", numberOfElements ? "" : "(Empty input array)");
+			php_error( E_WARNING, "Unable to convert php array to VARIANT array - %s", numberOfElements ? "" : "(Empty input array)");
 			ZVAL_FALSE(pval_arg);
 		}
 		else
@@ -171,7 +171,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 						}
 						else
 						{
-							php_error( E_WARNING,"phpArrayToSafeArray() - Unable to retrieve pointer to output element number (%d)", i);
+							php_error( E_WARNING, "phpArrayToSafeArray() - Unable to retrieve pointer to output element number (%d)", i);
 						}
 					}
 					zend_hash_move_forward(ht);
@@ -180,7 +180,7 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 			}
 			else
 			{
-				php_error( E_WARNING,"phpArrayToSafeArray() - Unable to lock safeArray");
+				php_error( E_WARNING, "phpArrayToSafeArray() - Unable to lock safeArray");
 			}
 		}
 	}
@@ -488,7 +488,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 		/* For now just validate that the SafeArray has one dimension */
 		if (1 != (Dims = SafeArrayGetDim(array)))
 		{
-			php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
+			php_error(E_WARNING, "Unsupported: multi-dimensional (%d) SafeArrays", Dims);
 			ZVAL_NULL(pval_arg);
 			return FAILURE;
 		}
@@ -740,7 +740,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 					char *error_message;
 
 					error_message = php_COM_error_message(hr);
-					php_error(E_WARNING,"Unable to obtain IDispatch interface:  %s", error_message);
+					php_error(E_WARNING, "Unable to obtain IDispatch interface:  %s", error_message);
 					LocalFree(error_message);
 
 					V_DISPATCH(var_arg) = NULL;
@@ -822,7 +822,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			break;
 
 		default:
-			php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
+			php_error(E_WARNING, "Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
 			ZVAL_NULL(pval_arg);
 			ret = FAILURE;
 			break;
@@ -852,10 +852,10 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage)
 		switch(GetLastError())
 		{
 			case ERROR_NO_UNICODE_TRANSLATION:
-				php_error(E_WARNING,"No unicode translation available for the specified string");
+				php_error(E_WARNING, "No unicode translation available for the specified string");
 				break;
 			default:
-				php_error(E_WARNING,"Error in php_char_to_OLECHAR()");
+				php_error(E_WARNING, "Error in php_char_to_OLECHAR()");
 		}
 	}
 
@@ -882,7 +882,7 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int per
 		C_str = (char *) pemalloc(sizeof(char), persistent);
 		*C_str = 0;
 
-		php_error(E_WARNING,"Error in php_OLECHAR_to_char()");
+		php_error(E_WARNING, "Error in php_OLECHAR_to_char()");
 	}
 
 	if(out_length)

@@ -329,7 +329,7 @@ PHP_FUNCTION(ldap_connect)
 		case 2: {
 				pval **yyhost, **yyport;
 
-				if (zend_get_parameters_ex(2, &yyhost,&yyport) == FAILURE) {
+				if (zend_get_parameters_ex(2, &yyhost, &yyport) == FAILURE) {
 					RETURN_FALSE;
 				}
 
@@ -390,7 +390,7 @@ PHP_FUNCTION(ldap_connect)
 	} else
 #endif
 	{
-		ldap = ldap_open(host,port);
+		ldap = ldap_open(host, port);
 	}
 	
 	if ( ldap == NULL ) {
@@ -426,7 +426,7 @@ static int _get_lderrno(LDAP *ldap)
 	return ldap->ld_errno;
 #endif
 #else
-	return ldap_get_lderrno(ldap,NULL,NULL);
+	return ldap_get_lderrno(ldap, NULL, NULL);
 #endif
 }
 /* }}} */
@@ -451,7 +451,7 @@ PHP_FUNCTION(ldap_bind)
 			break;
 
 		case 3 :
-			if (zend_get_parameters_ex(3, &link, &bind_rdn,&bind_pw) == FAILURE) {
+			if (zend_get_parameters_ex(3, &link, &bind_rdn, &bind_pw) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 
@@ -471,7 +471,7 @@ PHP_FUNCTION(ldap_bind)
 	ZEND_FETCH_RESOURCE(ldap, LDAP *, link, -1, "ldap link", le_link);
 
 	if (ldap_bind_s(ldap, ldap_bind_rdn, ldap_bind_pw, LDAP_AUTH_SIMPLE) != LDAP_SUCCESS) {
-		php_error(E_WARNING,"LDAP:  Unable to bind to server: %s",ldap_err2string(_get_lderrno(ldap)));
+		php_error(E_WARNING, "LDAP:  Unable to bind to server: %s", ldap_err2string(_get_lderrno(ldap)));
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -751,15 +751,15 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	    && errno != LDAP_REFERRAL
 #endif
 	    ) {
-		php_error(E_WARNING,"LDAP: Unable to perform the search: %s",ldap_err2string(_get_lderrno(ldap)));
+		php_error(E_WARNING, "LDAP: Unable to perform the search: %s", ldap_err2string(_get_lderrno(ldap)));
 		RETVAL_FALSE; 
 	} else {
 		if (errno == LDAP_SIZELIMIT_EXCEEDED)  {
-			php_error(E_WARNING,"LDAP: Partial search results returned: Sizelimit exceeded.");
+			php_error(E_WARNING, "LDAP: Partial search results returned: Sizelimit exceeded.");
 		}
 #ifdef LDAP_ADMINLIMIT_EXCEEDED
 		else if (errno == LDAP_ADMINLIMIT_EXCEEDED) {
-			php_error(E_WARNING,"LDAP: Partial search results returned: Adminlimit exceeded.");
+			php_error(E_WARNING, "LDAP: Partial search results returned: Adminlimit exceeded.");
 		}
 #endif
 		
@@ -990,7 +990,7 @@ PHP_FUNCTION(ldap_first_attribute)
 	} else {
 		ZEND_REGISTER_RESOURCE(return_value, ber, le_ber_entry);
 
-		RETVAL_STRING(attribute,1);
+		RETVAL_STRING(attribute, 1);
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(attribute);
 #endif
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(ldap_next_attribute)
 	} else {
 		ZEND_REGISTER_RESOURCE(return_value, ber, le_ber_entry);
 
-		RETVAL_STRING(attribute,1);
+		RETVAL_STRING(attribute, 1);
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(attribute);
 #endif
@@ -1094,7 +1094,7 @@ PHP_FUNCTION(ldap_get_values)
 	char **ldap_value;
 	int i, num_values;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link,&result_entry, &attr) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link, &result_entry, &attr) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1171,7 +1171,7 @@ PHP_FUNCTION(ldap_get_values_len)
    Get the DN of a result entry */
 PHP_FUNCTION(ldap_get_dn) 
 {
-	pval **link,**result_entry;
+	pval **link, **result_entry;
 	LDAP *ldap;
 	LDAPMessage *ldap_result_entry;
 	char *text;
@@ -1185,7 +1185,7 @@ PHP_FUNCTION(ldap_get_dn)
 
 	text = ldap_get_dn(ldap, ldap_result_entry);
 	if ( text != NULL ) {
-		RETVAL_STRING(text,1);
+		RETVAL_STRING(text, 1);
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(text);
 #else
@@ -1205,14 +1205,14 @@ PHP_FUNCTION(ldap_explode_dn)
 	char **ldap_value;
 	int i, count;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &dn,&with_attrib) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &dn, &with_attrib) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string_ex(dn);
 	convert_to_long_ex(with_attrib);
 
-	ldap_value = ldap_explode_dn((*dn)->value.str.val,(*with_attrib)->value.lval);
+	ldap_value = ldap_explode_dn((*dn)->value.str.val, (*with_attrib)->value.lval);
 
 	i=0;
 	while(ldap_value[i] != NULL) i++;
@@ -1238,7 +1238,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 	pval **dn;
 	char *ufn;
 
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1,&dn)==FAILURE) {
+	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &dn)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1247,7 +1247,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 	ufn = ldap_dn2ufn((*dn)->value.str.val);
 	
 	if (ufn !=NULL) {
-		RETVAL_STRING(ufn,1);
+		RETVAL_STRING(ufn, 1);
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
 		ldap_memfree(ufn);
 #endif
@@ -1337,7 +1337,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			ldap_mods[i]->mod_bvalues[0]->bv_val = (*value)->value.str.val;
 		} else {	
 			for(j=0; j < num_values; j++) {
-				zend_hash_index_find((*value)->value.ht,j, (void **) &ivalue);
+				zend_hash_index_find((*value)->value.ht, j, (void **) &ivalue);
 				convert_to_string_ex(ivalue);
 				ldap_mods[i]->mod_bvalues[j] = (struct berval *) emalloc (sizeof(struct berval));
 				ldap_mods[i]->mod_bvalues[j]->bv_len = (*ivalue)->value.str.len;
@@ -1771,7 +1771,7 @@ PHP_FUNCTION(ldap_parse_result)
 				NULL /* &serverctrls */,
 				0 );
 	if (rc != LDAP_SUCCESS ) {
-		php_error(E_WARNING,"LDAP: Unable to parse result: %s", ldap_err2string(_get_lderrno(ldap)));
+		php_error(E_WARNING, "LDAP: Unable to parse result: %s", ldap_err2string(_get_lderrno(ldap)));
 		RETURN_FALSE;
 	}
 
@@ -1971,7 +1971,7 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 	}
 
 	if (result == LDAP_SUCCESS) {
-		RETVAL_STRINGL(ldap_buf,ldap_len,1);
+		RETVAL_STRINGL(ldap_buf, ldap_len, 1);
 		free(ldap_buf);
 	} else {
 		php_error(E_ERROR, "LDAP: Conversion from iso-8859-1 to t61 failed.");

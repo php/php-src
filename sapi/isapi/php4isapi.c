@@ -36,6 +36,7 @@
 #include "ext/standard/info.h"
 #include "php_variables.h"
 #include "php_ini.h"
+#include "ext/standard/head.h"
 
 #ifdef WITH_ZEUS
 # include "httpext.h"
@@ -61,7 +62,7 @@ exception trapping when running under a debugger
 #define ISAPI_POST_DATA_BUF 1024
 
 static zend_bool bFilterLoaded=0;
-static zend_bool bTerminateThreadsOnError=0;
+static zend_bool bIgnoreCrashes=0;
 
 static char *isapi_special_server_variable_names[] = {
 	"ALL_HTTP",
@@ -297,7 +298,7 @@ static int php_isapi_startup(sapi_module_struct *sapi_module)
 		|| zend_startup_module(&php_isapi_module)==FAILURE) {
 		return FAILURE;
 	} else {
-		bTerminateThreadsOnError = (zend_bool) INI_INT("isapi.terminate_threads_on_error");
+		bIgnoreCrashes = (zend_bool) INI_INT("isapi.ignore_crashes");
 		return SUCCESS;
 	}
 }
@@ -691,23 +692,28 @@ BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO *pVer)
 }
 
 
-static void my_endthread()
-{
 #ifdef PHP_WIN32
-	if (bTerminateThreadsOnError) {
-		_endthread();
+static int php_isapi_exception_handler(LPEXCEPTION_POINTERS ep TSRMLS_DC)
+{
+	if (ep->ExceptionRecord->ExceptionCode==EXCEPTION_STACK_OVERFLOW) {
+		return EXCEPTION_EXECUTE_HANDLER;
 	}
-#endif
-}
+	if (ep->ExceptionRecord->ExceptionCode==EXCEPTION_ACCESS_VIOLATION) {
+		char buf[1024];
 
-#ifdef PHP_WIN32
-/* ep is accessible only in the context of the __except expression,
- * so we have to call this function to obtain it.
- */
-BOOL exceptionhandler(LPEXCEPTION_POINTERS *e, LPEXCEPTION_POINTERS ep)
-{
-	*e=ep;
-	return TRUE;
+		_snprintf(buf, sizeof(buf)-1,"PHP has encountered an Access Violation at %p", ep->ExceptionRecord->ExceptionAddress);
+		php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
+	} else {
+		char buf[1024];
+
+		_snprintf(buf, sizeof(buf)-1,"PHP has encountered an Unhandled Exception Code %d at %p", ep->ExceptionRecord->ExceptionCode , ep->ExceptionRecord->ExceptionAddress);
+		php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
+	}
+	if (bIgnoreCrashes) {
+		return EXCEPTION_CONTINUE_SEARCH;
+	} else {
+		exit(-1);
+	}
 }
 #endif
 
@@ -715,9 +721,6 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
 	zend_file_handle file_handle;
 	zend_bool stack_overflown=0;
-#ifdef PHP_ENABLE_SEH
-	LPEXCEPTION_POINTERS e;
-#endif
 	TSRMLS_FETCH();
 
 	zend_first_try {
@@ -757,9 +760,9 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 				efree(SG(request_info).cookie_data);
 			}
 #ifdef PHP_ENABLE_SEH
-		} __except(exceptionhandler(&e, GetExceptionInformation())) {
-			char buf[1024];
-			if (_exception_code()==EXCEPTION_STACK_OVERFLOW) {
+		} __except(php_isapi_exception_handler(GetExceptionInformation() TSRMLS_CC)) {
+			/* we only trap stack overflow exceptions */
+			if (_exception_code() == EXCEPTION_STACK_OVERFLOW) {
 				LPBYTE lpPage;
 				static SYSTEM_INFO si;
 				static MEMORY_BASIC_INFORMATION mi;
@@ -787,24 +790,18 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 				}
 
 				CG(unclean_shutdown)=1;
-				_snprintf(buf, sizeof(buf)-1,"PHP has encountered a Stack overflow");
-				php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
-			} else if (_exception_code()==EXCEPTION_ACCESS_VIOLATION) {
-				_snprintf(buf, sizeof(buf)-1,"PHP has encountered an Access Violation at %p", e->ExceptionRecord->ExceptionAddress);
-				php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
-				my_endthread();
-			} else {
-				_snprintf(buf, sizeof(buf)-1,"PHP has encountered an Unhandled Exception Code %d at %p", e->ExceptionRecord->ExceptionCode , e->ExceptionRecord->ExceptionAddress);
-				php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
-				my_endthread();
+				php_header();
+				sapi_isapi_ub_write("Stack overflow", sizeof("Stack overflow")-1 TSRMLS_CC);
 			}
 #endif
 		}
 #ifdef PHP_ENABLE_SEH
 		__try {
 			php_request_shutdown(NULL);
-		} __except(EXCEPTION_EXECUTE_HANDLER) {
-			my_endthread();
+		} __except(php_isapi_exception_handler(GetExceptionInformation() TSRMLS_CC)) {
+			/* We should only get to this block in case of a stack overflow,
+			 * which is very unlikely
+			 */
 		}
 #else
 		php_request_shutdown(NULL);

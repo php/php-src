@@ -65,12 +65,12 @@ ZEND_GET_MODULE(fribidi)
  */
 PHP_MINIT_FUNCTION(fribidi)
 {
-	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_UTF8",FRIBIDI_CHARSET_UTF8, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_6",FRIBIDI_CHARSET_8859_6, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_8",FRIBIDI_CHARSET_8859_8, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CP1255",FRIBIDI_CHARSET_CP1255, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CP1256",FRIBIDI_CHARSET_CP1256, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_ISIRI_3342",FRIBIDI_CHARSET_ISIRI_3342, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_UTF8", FRIBIDI_CHARSET_UTF8, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_6", FRIBIDI_CHARSET_8859_6, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_8", FRIBIDI_CHARSET_8859_8, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CP1255", FRIBIDI_CHARSET_CP1255, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CP1256", FRIBIDI_CHARSET_CP1256, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_ISIRI_3342", FRIBIDI_CHARSET_ISIRI_3342, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -121,13 +121,13 @@ PHP_MINFO_FUNCTION(fribidi)
    Convert a logical string to a visual one */
 PHP_FUNCTION(fribidi_log2vis)
 {
-	zval **parameter1,**parameter2, **parameter3;
+	zval **parameter1, **parameter2, **parameter3;
 
 
-	FriBidiChar *u_logical_str,*u_visual_str;  /* unicode strings .... */
+	FriBidiChar *u_logical_str, *u_visual_str;  /* unicode strings .... */
 	char *inString;
 	guchar *outString;
-	int len,alloc_len,utf8_len;
+	int len, alloc_len, utf8_len;
 
 
 	FriBidiCharType base_dir;
@@ -172,25 +172,25 @@ PHP_FUNCTION(fribidi_log2vis)
 
 	switch(Z_LVAL_PP(parameter3)) {
 		case FRIBIDI_CHARSET_UTF8:
-			utf8_len=fribidi_utf8_to_unicode(inString,u_logical_str);
+			utf8_len=fribidi_utf8_to_unicode(inString, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_8859_6:
-			fribidi_iso8859_6_to_unicode(inString,u_logical_str);
+			fribidi_iso8859_6_to_unicode(inString, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_8859_8:
-			fribidi_iso8859_8_to_unicode(inString,u_logical_str);
+			fribidi_iso8859_8_to_unicode(inString, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_CP1255:
-			fribidi_cp1255_to_unicode(inString,u_logical_str);
+			fribidi_cp1255_to_unicode(inString, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_CP1256:
-			fribidi_cp1256_to_unicode(inString,u_logical_str);
+			fribidi_cp1256_to_unicode(inString, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_ISIRI_3342:
-			fribidi_isiri_3342_to_unicode(inString,u_logical_str);
+			fribidi_isiri_3342_to_unicode(inString, u_logical_str);
 			break;
 		default:
-			zend_error(E_ERROR,"unknown character set %d<BR>",Z_LVAL_PP(parameter3));
+			zend_error(E_ERROR,"unknown character set %d<BR>", Z_LVAL_PP(parameter3));
 	}
 	
 	
@@ -203,31 +203,31 @@ PHP_FUNCTION(fribidi_log2vis)
 	else
 		base_dir = FRIBIDI_TYPE_N;
 
-	fribidi_log2vis(u_logical_str,len,&base_dir,u_visual_str,position_L_to_V_list,position_V_to_L_list,embedding_level_list);
+	fribidi_log2vis(u_logical_str, len, &base_dir, u_visual_str, position_L_to_V_list, position_V_to_L_list, embedding_level_list);
 	
 	/* convert back to original char set */
 
 	switch(Z_LVAL_PP(parameter3)) {
 		case FRIBIDI_CHARSET_UTF8:
-			fribidi_unicode_to_utf8(u_visual_str,utf8_len , outString);
+			fribidi_unicode_to_utf8(u_visual_str, utf8_len , outString);
 			break;
 		case FRIBIDI_CHARSET_8859_6:
-			fribidi_unicode_to_iso8859_6(u_visual_str,len , outString);
+			fribidi_unicode_to_iso8859_6(u_visual_str, len , outString);
 			break;
 		case FRIBIDI_CHARSET_8859_8:
-			fribidi_unicode_to_iso8859_8(u_visual_str,len , outString);
+			fribidi_unicode_to_iso8859_8(u_visual_str, len , outString);
 			break;
 		case FRIBIDI_CHARSET_CP1255:
-			fribidi_unicode_to_cp1255(u_visual_str,len , outString);
+			fribidi_unicode_to_cp1255(u_visual_str, len , outString);
 			break;
 		case FRIBIDI_CHARSET_CP1256:
-			fribidi_unicode_to_cp1256(u_visual_str,len , outString);
+			fribidi_unicode_to_cp1256(u_visual_str, len , outString);
 			break;
 		case FRIBIDI_CHARSET_ISIRI_3342:
-			fribidi_unicode_to_isiri_3342(u_visual_str,len , outString);
+			fribidi_unicode_to_isiri_3342(u_visual_str, len , outString);
 			break;
 		default:
-			zend_error(E_ERROR,"unknown character set %d<BR>",Z_LVAL_PP(parameter3));
+			zend_error(E_ERROR,"unknown character set %d<BR>", Z_LVAL_PP(parameter3));
 	}
 	
 
@@ -238,7 +238,7 @@ PHP_FUNCTION(fribidi_log2vis)
 	efree(position_V_to_L_list);
 	efree(embedding_level_list);
 	
-	RETURN_STRING(outString,1);
+	RETURN_STRING(outString, 1);
 }
 /* }}} */
 

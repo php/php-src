@@ -66,7 +66,7 @@ static cal_list_t *g_cal_list=NULL;
 static cal_list_t *g_cal_list_end=NULL;
 /* 
  * this array should be set up as:
- * {"PHPScriptFunctionName",dllFunctionName,1} 
+ * {"PHPScriptFunctionName", dllFunctionName, 1} 
  */
 
 function_entry icap_functions[] = {
@@ -115,7 +115,7 @@ CALSTREAM *cal_close_it (zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	pils *icap_le_struct = (pils *)rsrc->ptr;
 	CALSTREAM *ret;
 
-	ret = cal_close (icap_le_struct->icap_stream,0);
+	ret = cal_close (icap_le_struct->icap_stream, 0);
 	efree(icap_le_struct);
 	return ret;
 }
@@ -163,22 +163,22 @@ void php_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
         int myargc=ZEND_NUM_ARGS();
 
 	
-	if (myargc <3 || myargc >4 || getParameters(ht, myargc, &calendar,&user,&passwd,&options) == FAILURE) {
+	if (myargc <3 || myargc >4 || getParameters(ht, myargc, &calendar, &user, &passwd, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string(calendar);
 	convert_to_string(user);
 	convert_to_string(passwd);
-	strcpy(icap_user,user->value.str.val);
-	strcpy(icap_password,passwd->value.str.val);
+	strcpy(icap_user, user->value.str.val);
+	strcpy(icap_password, passwd->value.str.val);
 	if(myargc ==4) {
 		convert_to_long(options);
 		flags=options->value.lval;
 	}
-		icap_stream = cal_open(NULL,calendar->value.str.val,0);
+		icap_stream = cal_open(NULL, calendar->value.str.val, 0);
 	if (!icap_stream) {
-		php_error(E_WARNING,"Couldn't open stream %s\n",calendar->value.str.val);
+		php_error(E_WARNING, "Couldn't open stream %s\n", calendar->value.str.val);
 		RETURN_FALSE;
 	}
 
@@ -244,7 +244,7 @@ PHP_FUNCTION(icap_reopen)
 	long cl_flags=0;
 	int myargc=ZEND_NUM_ARGS();
 
-	if (myargc<2 || myargc>3 || getParameters(ht,myargc,&streamind, &calendar, &options) == FAILURE) {
+	if (myargc<2 || myargc>3 || getParameters(ht, myargc, &streamind, &calendar, &options) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 
@@ -267,7 +267,7 @@ PHP_FUNCTION(icap_reopen)
 		cal_login(icap_stream, calendar->value.str.val);
 	*/
 	if (icap_stream == NULL) {
-		php_error(E_WARNING,"Couldn't re-open stream\n");
+		php_error(E_WARNING, "Couldn't re-open stream\n");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -281,7 +281,7 @@ PHP_FUNCTION(icap_expunge)
 {
 	pval *streamind;
 	int ind, ind_type;
-	pval *start,*end;
+	pval *start, *end;
 	pils *icap_le_struct; 
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &streamind) == FAILURE) {
@@ -309,13 +309,13 @@ PHP_FUNCTION(icap_expunge)
    Fetch an event */
 PHP_FUNCTION(icap_fetch_event)
 {
-	pval *streamind,*eventid,*start,*end,*options=NULL;
+	pval *streamind, *eventid, *start, *end, *options=NULL;
 	int ind, ind_type;
 	pils *icap_le_struct=NULL; 
 	CALEVENT *myevent;
 	int myargcount=ZEND_NUM_ARGS();
 	
-	if (myargcount < 1 || myargcount > 3 || getParameters(ht, myargcount, &streamind, &eventid,&options) == FAILURE) {
+	if (myargcount < 1 || myargcount > 3 || getParameters(ht, myargcount, &streamind, &eventid, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(streamind);
@@ -329,47 +329,47 @@ PHP_FUNCTION(icap_fetch_event)
 	if(myargcount==3) {
 		convert_to_long(options);
 	}
-	cal_fetch(icap_le_struct->icap_stream,eventid->value.lval,&myevent);
+	cal_fetch(icap_le_struct->icap_stream, eventid->value.lval, &myevent);
 
 	object_init(return_value);
-	add_property_long(return_value,"id",myevent->id);
-	add_property_long(return_value,"public",myevent->public);
+	add_property_long(return_value, "id", myevent->id);
+	add_property_long(return_value, "public", myevent->public);
 	MAKE_STD_ZVAL(start);
 	object_init(start);
 	if(myevent->start.has_date)
 	  {
-	    add_property_long(start,"year",myevent->start.year);
-	    add_property_long(start,"month",myevent->start.mon);
-	    add_property_long(start,"mday",myevent->start.mday);
+	    add_property_long(start, "year", myevent->start.year);
+	    add_property_long(start, "month", myevent->start.mon);
+	    add_property_long(start, "mday", myevent->start.mday);
 	  }
 	if(myevent->start.has_time)
 	  {
-	    add_property_long(start,"hour",myevent->start.hour);
-	    add_property_long(start,"min",myevent->start.min);
-	    add_property_long(start,"sec",myevent->start.sec);
+	    add_property_long(start, "hour", myevent->start.hour);
+	    add_property_long(start, "min", myevent->start.min);
+	    add_property_long(start, "sec", myevent->start.sec);
 	  }
-	add_assoc_object(return_value, "start",start);
+	add_assoc_object(return_value, "start", start);
 
 	MAKE_STD_ZVAL(end);
 	object_init(end);
 	if(myevent->end.has_date)
 	  {
-	    add_property_long(end,"year",myevent->end.year);
-	    add_property_long(end,"month",myevent->end.mon);
-	    add_property_long(end,"mday",myevent->end.mday);
+	    add_property_long(end, "year", myevent->end.year);
+	    add_property_long(end, "month", myevent->end.mon);
+	    add_property_long(end, "mday", myevent->end.mday);
 	  }
 	if(myevent->end.has_time)
 	  {
-	    add_property_long(end,"hour",myevent->end.hour);
-	    add_property_long(end,"min",myevent->end.min);
-	    add_property_long(end,"sec",myevent->end.sec);
+	    add_property_long(end, "hour", myevent->end.hour);
+	    add_property_long(end, "min", myevent->end.min);
+	    add_property_long(end, "sec", myevent->end.sec);
 	  }
-	add_assoc_object(return_value, "end",end);
+	add_assoc_object(return_value, "end", end);
 	
-	add_property_string(return_value,"category",myevent->category,1);
-	add_property_string(return_value,"title",myevent->title,1);
-	add_property_string(return_value,"description",myevent->description,1);
-	add_property_long(return_value,"alarm",myevent->alarm);
+	add_property_string(return_value, "category", myevent->category, 1);
+	add_property_string(return_value, "title", myevent->title, 1);
+	add_property_string(return_value, "description", myevent->description, 1);
+	add_property_long(return_value, "alarm", myevent->alarm);
 }
 /* }}} */
 
@@ -377,7 +377,7 @@ PHP_FUNCTION(icap_fetch_event)
    Returns list of UIDs for that day or range of days */
 PHP_FUNCTION(icap_list_events)
 {
-	pval *streamind,*begindate,*enddate;
+	pval *streamind, *begindate, *enddate;
         pval **pvalue;
 	int ind, ind_type;
 	unsigned long i;
@@ -386,10 +386,10 @@ PHP_FUNCTION(icap_list_events)
 	unsigned int msgno;
 	pils *icap_le_struct; 
 	cal_list_t *my_cal_list;
-	datetime_t begincal,endcal;
+	datetime_t begincal, endcal;
 	int myargc;
 	myargc=ZEND_NUM_ARGS();
-	if (myargc <2 || myargc > 3 || getParameters(ht,myargc,&streamind,&begindate,&enddate) == FAILURE) {
+	if (myargc <2 || myargc > 3 || getParameters(ht, myargc, &streamind, &begindate, &enddate) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -411,34 +411,34 @@ PHP_FUNCTION(icap_list_events)
 	}
 	begincal.has_time=0;
 	endcal.has_time=0;
-	if(zend_hash_find(begindate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(begindate->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
 	 SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           begincal.year=(*pvalue)->value.lval;
        }
-       if(zend_hash_find(begindate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(begindate->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           begincal.mon=(*pvalue)->value.lval;
        }
-       if(zend_hash_find(begindate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(begindate->value.ht, "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           begincal.mday=(*pvalue)->value.lval;
        }
 if(myargc == 3)
   {
-    if(zend_hash_find(enddate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(enddate->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
       endcal.year=(*pvalue)->value.lval;
     }
-    if(zend_hash_find(enddate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(enddate->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
       endcal.mon=(*pvalue)->value.lval;
     }
-    if(zend_hash_find(enddate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(enddate->value.ht, "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
       endcal.mday=(*pvalue)->value.lval;
@@ -447,11 +447,11 @@ if(myargc == 3)
  
 
 g_cal_list=NULL;
- cal_search_range(icap_le_struct->icap_stream,&begincal,&endcal);
+ cal_search_range(icap_le_struct->icap_stream, &begincal, &endcal);
  my_cal_list=g_cal_list;
  while(my_cal_list != NULL)
    {
-     add_next_index_long(return_value,my_cal_list->uid);
+     add_next_index_long(return_value, my_cal_list->uid);
      my_cal_list=my_cal_list->next;
      free(g_cal_list);
      g_cal_list=my_cal_list;
@@ -469,7 +469,7 @@ PHP_FUNCTION(icap_create_calendar)
 	int ind, ind_type;
 	pils *icap_le_struct; 
 	int myargc=ZEND_NUM_ARGS();
-	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&calendar) == FAILURE) {
+	if (myargc <1 || myargc > 2 || getParameters(ht, myargc, &streamind, &calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -483,7 +483,7 @@ PHP_FUNCTION(icap_create_calendar)
 		RETURN_FALSE;
 	}
 /*
-	if (icap_create(icap_le_struct->icap_stream,calendar->value.str.val)) 
+	if (icap_create(icap_le_struct->icap_stream, calendar->value.str.val)) 
 	  {
 	    RETURN_TRUE;
 	  }
@@ -500,11 +500,11 @@ PHP_FUNCTION(icap_create_calendar)
    Rename a calendar*/
 PHP_FUNCTION(icap_rename_calendar)
 {
-	pval *streamind, *src_calendar,*dest_calendar;
+	pval *streamind, *src_calendar, *dest_calendar;
 	int ind, ind_type;
 	pils *icap_le_struct; 
 	int myargc=ZEND_NUM_ARGS();
-	if (myargc <2 || myargc > 3 || getParameters(ht,myargc,&streamind,&src_calendar,&dest_calendar) == FAILURE) {
+	if (myargc <2 || myargc > 3 || getParameters(ht, myargc, &streamind, &src_calendar, &dest_calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -519,7 +519,7 @@ PHP_FUNCTION(icap_rename_calendar)
 		RETURN_FALSE;
 	}
 /*
-	if(icap_rename(icap_le_struct->icap_stream,src_calendar->value.str.val,dest_calendar->value.str.val)) {RETURN_TRUE;}
+	if(icap_rename(icap_le_struct->icap_stream, src_calendar->value.str.val, dest_calendar->value.str.val)) {RETURN_TRUE;}
 	else {RETURN_FALSE; }
 */
 }
@@ -532,7 +532,7 @@ PHP_FUNCTION(icap_rename_calendar)
    List alarms for a given time */
 PHP_FUNCTION(icap_list_alarms)
 {
-	pval *streamind, *date,*time;
+	pval *streamind, *date, *time;
         pval **pvalue;
 	datetime_t mydate;
 	int ind, ind_type;
@@ -542,7 +542,7 @@ PHP_FUNCTION(icap_list_alarms)
         cal_list_t *my_cal_list;
 
 	int myargc=ZEND_NUM_ARGS();
-	if (myargc != 3 || getParameters(ht,myargc,&streamind,&date,&time) == FAILURE) {
+	if (myargc != 3 || getParameters(ht, myargc, &streamind, &date, &time) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -562,39 +562,39 @@ PHP_FUNCTION(icap_list_alarms)
         }
 	mydate.has_date=1;
 	mydate.has_time=1;
-       if(zend_hash_find(date->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(date->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.year=(*pvalue)->value.lval;
        }
-       if(zend_hash_find(date->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(date->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.mon=(*pvalue)->value.lval;
        }
-       if(zend_hash_find(date->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(date->value.ht, "day", sizeof("day"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.mday=(*pvalue)->value.lval;
        }
 
-       if(zend_hash_find(time->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(time->value.ht, "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.hour=(*pvalue)->value.lval;
        }
-       if(zend_hash_find(time->value.ht,"minute",sizeof("minute"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(time->value.ht, "minute", sizeof("minute"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.min=(*pvalue)->value.lval;
        }
        mydate.sec=0;
        g_cal_list=NULL;
-       cal_search_alarm(icap_le_struct->icap_stream,&mydate);
+       cal_search_alarm(icap_le_struct->icap_stream, &mydate);
        my_cal_list=g_cal_list;
  while(my_cal_list != NULL)
    {
-     add_next_index_long(return_value,my_cal_list->uid);
+     add_next_index_long(return_value, my_cal_list->uid);
      my_cal_list=my_cal_list->next;
      free(g_cal_list);
      g_cal_list=my_cal_list;
@@ -613,7 +613,7 @@ PHP_FUNCTION(icap_delete_calendar)
 	int ind, ind_type;
 	pils *icap_le_struct; 
 	int myargc=ZEND_NUM_ARGS();
-	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&calendar) == FAILURE) {
+	if (myargc <1 || myargc > 2 || getParameters(ht, myargc, &streamind, &calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -627,7 +627,7 @@ PHP_FUNCTION(icap_delete_calendar)
 		RETURN_FALSE;
 	}
 	
-	if (icap_delete_calendar(icap_le_struct->icap_stream,calendar->value.str.val)) 
+	if (icap_delete_calendar(icap_le_struct->icap_stream, calendar->value.str.val)) 
 	  {
 	    RETURN_TRUE;
 	  }
@@ -648,7 +648,7 @@ PHP_FUNCTION(icap_delete_event)
 	int ind, ind_type;
 	pils *icap_le_struct; 
 	int myargc=ZEND_NUM_ARGS();
-	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&uid) == FAILURE) {
+	if (myargc <1 || myargc > 2 || getParameters(ht, myargc, &streamind, &uid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -661,7 +661,7 @@ PHP_FUNCTION(icap_delete_event)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if (cal_remove(icap_le_struct->icap_stream,uid->value.lval)) 
+	if (cal_remove(icap_le_struct->icap_stream, uid->value.lval)) 
 	  {
 	    RETURN_TRUE;
 	  }
@@ -687,20 +687,20 @@ PHP_FUNCTION(icap_popen)
    Store an event */
 PHP_FUNCTION(icap_store_event)
 {
-	pval *streamind,*storeobject;
+	pval *streamind, *storeobject;
 	int ind, ind_type;
 	unsigned long i;
 	char *t;
 	int icap_folders=0;
 	unsigned int msgno;
 	pils *icap_le_struct; 
-	pval **pvalue,**temppvalue;
+	pval **pvalue, **temppvalue;
 	cal_list_t *my_cal_list;
 	int myargc;
 	unsigned long uid;
 	CALEVENT *myevent;
 	myargc=ZEND_NUM_ARGS();
-	if (myargc !=2 || getParameters(ht,myargc,&streamind,&storeobject) == FAILURE) {
+	if (myargc !=2 || getParameters(ht, myargc, &streamind, &storeobject) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -721,69 +721,69 @@ PHP_FUNCTION(icap_store_event)
 		RETURN_FALSE;
 	}
 	myevent=calevent_new();
-	if(zend_hash_find(storeobject->value.ht,"uid",sizeof("uid"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht, "uid", sizeof("uid"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
 	  myevent->id=(*pvalue)->value.lval;
 	}
-	if(zend_hash_find(storeobject->value.ht,"public",sizeof("public"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht, "public", sizeof("public"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
 	  myevent->public=(*pvalue)->value.lval;
 	}
-	if(zend_hash_find(storeobject->value.ht,"category",sizeof("category"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht, "category", sizeof("category"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
 	  myevent->category=strdup((*pvalue)->value.str.val);
 	}
-	if(zend_hash_find(storeobject->value.ht,"title",sizeof("title"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht, "title", sizeof("title"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
 	  myevent->title=strdup((*pvalue)->value.str.val);
 	}
-	if(zend_hash_find(storeobject->value.ht,"description",sizeof("description"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht, "description", sizeof("description"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
 	  myevent->description=strdup((*pvalue)->value.str.val);
 	}
 
-	if(zend_hash_find(storeobject->value.ht,"alarm",sizeof("alarm"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht, "alarm", sizeof("alarm"), (void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
 	  myevent->alarm=(*pvalue)->value.lval;
 	}
 
 
-       	if(zend_hash_find(storeobject->value.ht,"start",sizeof("start"),(void **) &temppvalue)== SUCCESS){
+       	if(zend_hash_find(storeobject->value.ht, "start", sizeof("start"), (void **) &temppvalue)== SUCCESS){
           SEPARATE_ZVAL(temppvalue);
 	  convert_to_array(*temppvalue);
 	  
-	  if(zend_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.year=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.mon=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "mday", sizeof("mday"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.mday=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.hour=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "min", sizeof("min"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.min=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "sec", sizeof("sec"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.sec=(*pvalue)->value.lval;
@@ -791,36 +791,36 @@ PHP_FUNCTION(icap_store_event)
 	  myevent->start.has_date=true;
 	}
 
-       	if(zend_hash_find(storeobject->value.ht,"end",sizeof("end"),(void **) &temppvalue)== SUCCESS){
+       	if(zend_hash_find(storeobject->value.ht, "end", sizeof("end"), (void **) &temppvalue)== SUCCESS){
           SEPARATE_ZVAL(temppvalue);
 	  convert_to_array(*temppvalue);
 	  
-	  if(zend_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "year", sizeof("year"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.year=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "month", sizeof("month"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.mon=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "mday", sizeof("mday"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.mday=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "hour", sizeof("hour"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.hour=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "min", sizeof("min"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.min=(*pvalue)->value.lval;
 	  }
-	  if(zend_hash_find((*temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht, "sec", sizeof("sec"), (void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.sec=(*pvalue)->value.lval;
@@ -828,7 +828,7 @@ PHP_FUNCTION(icap_store_event)
 	  myevent->end.has_date=true;
 	}
 
-	cal_append(icap_le_struct->icap_stream,"INBOX",&uid,myevent);
+	cal_append(icap_le_struct->icap_stream, "INBOX", &uid, myevent);
 	calevent_free(myevent);
 	RETURN_LONG(uid);
 }
@@ -839,13 +839,13 @@ PHP_FUNCTION(icap_store_event)
    Snooze an alarm */
 PHP_FUNCTION(icap_snooze)
 {
-	pval *streamind,*uid;
+	pval *streamind, *uid;
 	int ind, ind_type;
 	pils *icap_le_struct; 
 	pval **pvalue;
 	int myargc;
 	myargc=ZEND_NUM_ARGS();
-	if (myargc !=2 || getParameters(ht,myargc,&streamind,&uid) == FAILURE) {
+	if (myargc !=2 || getParameters(ht, myargc, &streamind, &uid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -861,7 +861,7 @@ PHP_FUNCTION(icap_snooze)
 		RETURN_FALSE;
 	}
 
-	if(cal_snooze(icap_le_struct->icap_stream,uid->value.lval))
+	if(cal_snooze(icap_le_struct->icap_stream, uid->value.lval))
 	  {
 	    RETURN_TRUE;
 	  }
@@ -918,10 +918,10 @@ void cc_login(const char **user, const char **pwd)
 }
 
 
-void cc_vlog(const char *fmt,va_list ap)
+void cc_vlog(const char *fmt, va_list ap)
 {
 }
-void cc_vdlog(const char *fmt,va_list ap)
+void cc_vdlog(const char *fmt, va_list ap)
 {
 }
 

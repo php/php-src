@@ -111,8 +111,8 @@ PHP_FUNCTION(cybercash_encr)
 
 	if (!errcode) {
 		add_assoc_stringl(return_value, "outbuff", outbuff, outLth, 0);
-		add_assoc_long(return_value,"outLth",outLth);
-		add_assoc_stringl(return_value,"macbuff",macbuff,20,0);
+		add_assoc_long(return_value,"outLth", outLth);
+		add_assoc_stringl(return_value,"macbuff", macbuff, 20, 0);
 	} else {
 		efree(outbuff);
 		efree(macbuff);
@@ -124,7 +124,7 @@ PHP_FUNCTION(cybercash_encr)
    Cybercash decrypt */
 PHP_FUNCTION(cybercash_decr)
 {
-	zval **wmk,**sk,**inbuff;
+	zval **wmk, **sk, **inbuff;
 	unsigned char *outbuff, *macbuff;
 	unsigned int outAlloc, outLth;
 	long errcode;

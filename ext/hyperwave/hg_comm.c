@@ -35,7 +35,7 @@
 # define EWOULDBLOCK WSAEWOULDBLOCK
 # define ETIMEDOUT WSAETIMEDOUT
 # define bcopy memcpy
-# define bzero(a,b) memset(a,0,b)
+# define bzero(a, b) memset(a, 0, b)
 #else
 # include <sys/socket.h>
 # include <netinet/in.h>
@@ -1830,7 +1830,7 @@ int send_insertobject(int sockfd, char *objrec, char *parms, hw_objectID *object
 
 	tmp = build_msg_str(msg.buf, objrec);
 	tmp = build_msg_str(tmp, parms);
-/*fprintf(stderr,"objrec = %s, parms = %s\n", objrec, parms); */
+/*fprintf(stderr, "objrec = %s, parms = %s\n", objrec, parms); */
 
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
 		efree(msg.buf);
@@ -2622,7 +2622,7 @@ int send_mvcpdocscollscoll(int sockfd, hw_objectID *objectIDs, int count, int fr
 	tmp = build_msg_int(tmp, dest);
 	tmp = build_msg_int(tmp, count);
 	for(i=0; i<count;i++)
-		tmp = build_msg_int(tmp,objectIDs[i]);
+		tmp = build_msg_int(tmp, objectIDs[i]);
 
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
 		efree(msg.buf);
@@ -3536,12 +3536,12 @@ int send_getreldestforanchorsobj(int sockfd, char **anchorrec, char ***reldestre
 /*
 fprintf(stderr, "%d: ", thisID);
 for(k=0; k<countthis; k++)
-	fprintf(stderr,"%d, ", retthisIDs[k]);
-fprintf(stderr,"\n");
-fprintf(stderr,"%d: ", destdocid);
+	fprintf(stderr, "%d, ", retthisIDs[k]);
+fprintf(stderr, "\n");
+fprintf(stderr, "%d: ", destdocid);
 for(k=0; k<countdest; k++)
-	fprintf(stderr,"%d: %d, ", destdocid, retdestIDs[k]);
-fprintf(stderr,"\n");
+	fprintf(stderr, "%d: %d, ", destdocid, retdestIDs[k]);
+fprintf(stderr, "\n");
 */
 
 				mincount = (countthis < countdest) ? countthis : countdest;
@@ -3666,12 +3666,12 @@ int getrellink(int sockfd, int rootID, int thisID, int destID, char **reldeststr
 
 fprintf(stderr, "%d: ", thisID);
 for(k=0; k<countthis; k++)
-	fprintf(stderr,"%d, ", retthisIDs[k]);
-fprintf(stderr,"\n");
-fprintf(stderr,"%d: ", destID);
+	fprintf(stderr, "%d, ", retthisIDs[k]);
+fprintf(stderr, "\n");
+fprintf(stderr, "%d: ", destID);
 for(k=0; k<countdest; k++)
-	fprintf(stderr,"%d, ", retdestIDs[k]);
-fprintf(stderr,"\n");
+	fprintf(stderr, "%d, ", retdestIDs[k]);
+fprintf(stderr, "\n");
 
 	/*
 	** The message incollections returned a list of collections
@@ -3680,7 +3680,7 @@ fprintf(stderr,"\n");
 	** a sorted list of collection IDs. If for example you are
 	** looking for an ID 20 which has a path 1 -> 5 -> 4 -> 20
 	** (this means: 20 is child of 4, 4 is child of 5, 5 is child
-	** of 1) it will return 1,4,5 instead of 1,5,4
+	** of 1) it will return 1, 4, 5 instead of 1, 5, 4
 	** Consequently, we have to create the correct path, by checking
 	** for the parents and identifying it in the list.
 	** But there is another problem. If the id for which the list of
@@ -3712,7 +3712,7 @@ fprintf(stderr,"\n");
 	}
 
 	mincount = (countthis < countdest) ? countthis : countdest;
-fprintf(stderr,"mincount = %d\n", mincount);
+fprintf(stderr, "mincount = %d\n", mincount);
 	for(j=0; (j<mincount) && (retthisIDs[j]==retdestIDs[j]); j++)
 		;
 	equaltill = j;

@@ -257,7 +257,7 @@ PHP_FUNCTION(fdf_get_value)
 	buffer = emalloc(size);
 	err = FDFGetValue(fdf, Z_STRVAL_PP(fieldname), buffer, size-1, &nr);
 	if(err == FDFErcBufTooShort && nr > 0 ) {
-		buffer = erealloc(buffer,nr+1); 
+		buffer = erealloc(buffer, nr+1); 
 		err = FDFGetValue(fdf, Z_STRVAL_PP(fieldname), buffer, nr, &nr);
 	} 
 
@@ -325,8 +325,8 @@ PHP_FUNCTION(fdf_next_field_name)
 	err = FDFNextFieldName(fdf, fieldname, buffer, length-1, &nr);
 
 	if(err == FDFErcBufTooShort && nr > 0 ) {
-		buffer = erealloc(buffer,nr+1); 
-		err = FDFNextFieldName(fdf, fieldname, buffer, length-1,&nr);
+		buffer = erealloc(buffer, nr+1); 
+		err = FDFNextFieldName(fdf, fieldname, buffer, length-1, &nr);
 	} 
 
 	if(err != FDFErcOK) {
@@ -435,7 +435,7 @@ PHP_FUNCTION(fdf_get_status)
 	err = FDFGetStatus(fdf, buf, size-1,  &nr);
 
 	if(err == FDFErcBufTooShort && nr > 0 ) {
-		buf = erealloc(buf,nr+1); 
+		buf = erealloc(buf, nr+1); 
 		err = FDFGetStatus(fdf, buf, size-1,  &nr);
 	}
 	
@@ -496,7 +496,7 @@ PHP_FUNCTION(fdf_get_file)
 	err = FDFGetFile(fdf, buf, size-1,  &nr);
 
 	if(err == FDFErcBufTooShort && nr > 0 ) {
-		buf = erealloc(buf,nr+1); 
+		buf = erealloc(buf, nr+1); 
 		err = FDFGetFile(fdf, buf, size-1,  &nr);
 	}
 	
@@ -594,7 +594,7 @@ PHP_FUNCTION(fdf_set_flags)
 	convert_to_long_ex(flags);
 	convert_to_long_ex(newflags);	
 
-	err=FDFSetFlags(fdf,Z_STRVAL_PP(fieldname), Z_LVAL_PP(flags), Z_LVAL_PP(newflags));
+	err=FDFSetFlags(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(flags), Z_LVAL_PP(newflags));
 	if(err != FDFErcOK) {
 		php_error(E_WARNING,"Error setting flags for field: %s", Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
@@ -623,7 +623,7 @@ PHP_FUNCTION(fdf_set_opt)
 	convert_to_string_ex(value);
 	convert_to_string_ex(name);
 
-	err = FDFSetOpt(fdf,Z_STRVAL_PP(fieldname), Z_LVAL_PP(element), Z_STRVAL_PP(value), Z_STRVAL_PP(name));
+	err = FDFSetOpt(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(element), Z_STRVAL_PP(value), Z_STRVAL_PP(name));
 	if(err != FDFErcOK) {
 		php_error(E_WARNING,"Error setting FDF option for field: %s", Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
@@ -719,8 +719,8 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 {
 	FILE *fp;
 	FDFDoc theFDF;
-	char *name=NULL,*value=NULL,*p, *data;
-	int name_len=0,value_len=0;
+	char *name=NULL, *value=NULL, *p, *data;
+	int name_len=0, value_len=0;
 	char *lastfieldname =NULL;
 	char *filename = NULL;
 	FDFErc err;
@@ -732,23 +732,23 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 		if(filename) efree(filename);
 		return;
 	}
-	fwrite(SG(request_info).post_data,SG(request_info).post_data_length,1,fp);
+	fwrite(SG(request_info).post_data, SG(request_info).post_data_length, 1, fp);
 	fclose(fp);
 
 	/* Set HTTP_FDF_DATA variable */
-	data = estrndup(SG(request_info).post_data,SG(request_info).post_data_length);
+	data = estrndup(SG(request_info).post_data, SG(request_info).post_data_length);
 	SET_VAR_STRINGL("HTTP_FDF_DATA", data, SG(request_info).post_data_length);
 
- 	err = FDFOpen(filename,0,&theFDF);
+ 	err = FDFOpen(filename, 0, &theFDF);
 
 	if(err==FDFErcOK){	
 		name = emalloc(name_len=256);
 		value= emalloc(value_len=256);
 		while (1) {
-			err = FDFNextFieldName(theFDF,lastfieldname,name,name_len-1,&nBytes);
+			err = FDFNextFieldName(theFDF, lastfieldname, name, name_len-1, &nBytes);
 			if(err == FDFErcBufTooShort && nBytes >0 ) {
-				name = erealloc(name,name_len=(nBytes+1)); 
-				err = FDFNextFieldName(theFDF,lastfieldname,name,name_len-1,&nBytes);
+				name = erealloc(name, name_len=(nBytes+1)); 
+				err = FDFNextFieldName(theFDF, lastfieldname, name, name_len-1, &nBytes);
 			} 
 			
 			if(err != FDFErcOK || nBytes == 0) break; 
@@ -756,13 +756,13 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 			if(lastfieldname) efree(lastfieldname);
 			lastfieldname = estrdup(name);		
 
-			err = FDFGetValue(theFDF,name,NULL,0,&nBytes);			
+			err = FDFGetValue(theFDF, name, NULL, 0, &nBytes);			
 			if(err != FDFErcOK && err != FDFErcNoValue ) break; 
 
-			if(value_len<nBytes+1) value = erealloc(value,value_len=(nBytes+1));
+			if(value_len<nBytes+1) value = erealloc(value, value_len=(nBytes+1));
 			
 			if(nBytes>0) {
-				err = FDFGetValue(theFDF,name,value,value_len-1,&nBytes);
+				err = FDFGetValue(theFDF, name, value, value_len-1, &nBytes);
 				if(err == FDFErcOK && nBytes != 0) {
 					for(p=value;*p;p++) if(*p=='\r') *p='\n';
 					if(lastfieldname) efree(lastfieldname);

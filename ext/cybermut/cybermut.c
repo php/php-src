@@ -169,7 +169,7 @@ PHP_FUNCTION(cybermut_creerreponsecm)
 	
 	CreerReponseCM( Z_STRVAL_PP(phrase), buf);
 	
-	RETURN_STRING (buf,1);
+	RETURN_STRING (buf, 1);
 }
 /* }}} */
 

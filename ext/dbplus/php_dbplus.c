@@ -26,8 +26,8 @@
 #define _INT(x)    ((*x)->value.lval)
 #define _HASH(x)   ((*x)->value.ht)
 
-#define DBPLUS_FETCH_RESOURCE(r,z) 	ZEND_FETCH_RESOURCE(r, relf *, z, -1, "dbplus_relation", le_dbplus_relation); \
-                                	if(!r) RETURN_LONG(ERR_UNKNOWN);
+#define DBPLUS_FETCH_RESOURCE(r, z) 	ZEND_FETCH_RESOURCE(r, relf *, z, -1, "dbplus_relation", le_dbplus_relation); \
+	                                	if(!r) RETURN_LONG(ERR_UNKNOWN);
 
 
 static int
@@ -45,7 +45,7 @@ var2tuple(relf *r, zval **zv,	tuple *t)
 	ap = r->r_atts;
 	deg = r->r_rel.rel_deg;
 	do {
-		if(SUCCESS!=zend_hash_find((*zv)->value.ht,ap->att_name,strlen(ap->att_name)+1,(void **)&element))
+		if(SUCCESS!=zend_hash_find((*zv)->value.ht, ap->att_name, strlen(ap->att_name)+1, (void **)&element))
 			continue;
 
 		if (! *element) return 1;
@@ -116,27 +116,27 @@ tuple2var(relf * r, tuple * t, zval **zv)
 
 			switch(ap->att_type) {
 			case  FT_SHORT: 
-				ZVAL_LONG(element,AFFIX(ap, t)->f_short); 
+				ZVAL_LONG(element, AFFIX(ap, t)->f_short); 
 				break;
 
 			case  FT_UNSIGNED:
-				ZVAL_LONG(element,AFFIX(ap, t)->f_unsigned); 
+				ZVAL_LONG(element, AFFIX(ap, t)->f_unsigned); 
 				break;
 
 			case  FT_LONG:  
-				ZVAL_LONG(element,AFFIX(ap, t)->f_long); 
+				ZVAL_LONG(element, AFFIX(ap, t)->f_long); 
 				break;
 
 			case  FT_FLOAT:  
-				ZVAL_DOUBLE(element,AFFIX(ap, t)->f_float); 
+				ZVAL_DOUBLE(element, AFFIX(ap, t)->f_float); 
 				break;
 
 			case  FT_DOUBLE:  
-				ZVAL_DOUBLE(element,AFFIX(ap, t)->f_double); 
+				ZVAL_DOUBLE(element, AFFIX(ap, t)->f_double); 
 				break;
 
 	case FT_STRING: case FT_DEUTSCH: case FT_CHAR:
-				ZVAL_STRING(element,AFVAR(ap, t)->f_string,1);
+				ZVAL_STRING(element, AFVAR(ap, t)->f_string, 1);
 				break;
 
 				/*				
@@ -159,12 +159,12 @@ tuple2var(relf * r, tuple * t, zval **zv)
 			}
 
 			if(element->type!=IS_NULL)
-				zend_hash_update((*zv)->value.ht
-												 ,ap->att_name
-												 ,strlen(ap->att_name)+1
-												 ,(void *)&element
-												 ,sizeof(zval*)
-												 ,NULL);
+				zend_hash_update((*zv)->value.ht,
+								 ap->att_name,
+								 strlen(ap->att_name)+1,
+								 (void *)&element,
+								 sizeof(zval*),
+								 NULL);
 	
     } while (ap++, --deg);
     return 0;
@@ -190,20 +190,20 @@ ary2constr(relf * r, zval** constr)
 	db_coninit(r, &c);
 
 	if ((*constr)->type != IS_ARRAY) {
-		php_error(E_WARNING,"Constraint is not an array");
+		php_error(E_WARNING, "Constraint is not an array");
 		return NULL;
 	}
 
 	zend_hash_internal_pointer_reset(_HASH(constr));
-	if(zend_hash_get_current_data(_HASH(constr),(void **)&zdata)!=SUCCESS) {
-		php_error(E_WARNING,"Constraint array is empty");
+	if(zend_hash_get_current_data(_HASH(constr), (void **)&zdata)!=SUCCESS) {
+		php_error(E_WARNING, "Constraint array is empty");
 		return NULL;
 	}
 	
 	switch((*zdata)->type) {
 	case IS_STRING: /* constraints in plain string array */
 		if (_HASH(constr)->nNumOfElements%3) {
-			php_error(E_WARNING,"Constraint array has to have triples of strings");
+			php_error(E_WARNING, "Constraint array has to have triples of strings");
 			return NULL;
 		}
 
@@ -211,11 +211,11 @@ ary2constr(relf * r, zval** constr)
 			convert_to_string_ex(zdata);
 			dom = _STRING(zdata);
 			zend_hash_move_forward(_HASH(constr));
-			zend_hash_get_current_data(_HASH(constr),(void **)&zdata);
+			zend_hash_get_current_data(_HASH(constr), (void **)&zdata);
 			convert_to_string_ex(zdata);
 			op  = _STRING(zdata);
 			zend_hash_move_forward(_HASH(constr));
-			zend_hash_get_current_data(_HASH(constr),(void **)&zdata);
+			zend_hash_get_current_data(_HASH(constr), (void **)&zdata);
 			convert_to_string_ex(zdata);
 			val = _STRING(zdata);
 			zend_hash_move_forward(_HASH(constr));
@@ -232,36 +232,36 @@ ary2constr(relf * r, zval** constr)
 			f = string_to_field(val, ap, 0);
 			
 			(void) db_constrain(r, &c, dom, sop, f ? f : (field *) val);
-		} while(SUCCESS==zend_hash_get_current_data(_HASH(constr),(void **)&zdata));
+		} while(SUCCESS==zend_hash_get_current_data(_HASH(constr), (void **)&zdata));
 		
 		break;
 	case IS_ARRAY:
 		{
 			zval **entry;
 			for(zend_hash_internal_pointer_reset(_HASH(constr));
-					SUCCESS==zend_hash_get_current_data(_HASH(constr),(void **)&zdata);
+					SUCCESS==zend_hash_get_current_data(_HASH(constr), (void **)&zdata);
 					zend_hash_move_forward(_HASH(constr))) {
 				if(!((*zdata)->type==IS_ARRAY)) {
-					php_error(E_WARNING,"Constraint array element not an array");
+					php_error(E_WARNING, "Constraint array element not an array");
 					return NULL;
 				}
 				if(_HASH(zdata)->nNumOfElements!=3) {
-					php_error(E_WARNING,"Constraint array element not an array of size 3");
+					php_error(E_WARNING, "Constraint array element not an array of size 3");
 					return NULL;
 				}				
 
 				zend_hash_internal_pointer_reset(_HASH(zdata));
-				zend_hash_get_current_data(_HASH(zdata),(void **)&entry);
+				zend_hash_get_current_data(_HASH(zdata), (void **)&entry);
 				convert_to_string_ex(entry);
 				dom=_STRING(entry);
 
 				zend_hash_move_forward(_HASH(zdata));
-				zend_hash_get_current_data(_HASH(zdata),(void **)&entry);
+				zend_hash_get_current_data(_HASH(zdata), (void **)&entry);
 				convert_to_string_ex(entry);
 				op=_STRING(entry);
 
 				zend_hash_move_forward(_HASH(zdata));				
-				zend_hash_get_current_data(_HASH(zdata),(void **)&entry);
+				zend_hash_get_current_data(_HASH(zdata), (void **)&entry);
 				convert_to_string_ex(entry);
 				val=_STRING(entry);
 
@@ -304,13 +304,13 @@ PHP_FUNCTION(dbplus_add)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	convert_to_array_ex(data);
 	
-	if(var2tuple(r,data,&t))
+	if(var2tuple(r, data, &t))
 		RETURN_LONG(ERR_UNKNOWN);
 
-	stat=cdb_add(r,&t);
+	stat=cdb_add(r, &t);
 
 	RETURN_LONG(stat);
 }
@@ -332,27 +332,27 @@ PHP_FUNCTION(dbplus_aql)
 	switch (argc) {
 	case 3:
 		convert_to_string_ex(dbpath);
-		php_error(E_WARNING,"Arg dbpath: %s",_STRING(dbpath));
+		php_error(E_WARNING, "Arg dbpath: %s", _STRING(dbpath));
 		/* Fall-through. */
 	case 2:
 		convert_to_string_ex(server);
-		php_error(E_WARNING,"Arg server: %s",_STRING(server));
+		php_error(E_WARNING, "Arg server: %s", _STRING(server));
 		/* Fall-through. */
 	case 1:
 		convert_to_string_ex(query);
-		php_error(E_WARNING,"Arg query: %s",_STRING(query));
+		php_error(E_WARNING, "Arg query: %s", _STRING(query));
 		break;
 	}
 	
-	r = cdb_aql((argc>=2)?_STRING(server):"localhost"
-								 ,_STRING(query)
-								 ,(argc==3)?_STRING(dbpath):NULL);
+	r = cdb_aql((argc>=2)?_STRING(server):"localhost",
+								 _STRING(query),
+								 (argc==3)?_STRING(dbpath):NULL);
 	if(r == NULL) {
 		/* TODO error handling */
 		RETURN_FALSE;
 	}
 	
-	ZEND_REGISTER_RESOURCE(return_value,r,le_dbplus_relation);	
+	ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);	
 }
 /* }}} */
 
@@ -370,7 +370,7 @@ PHP_FUNCTION(dbplus_chdir)
 
 	convert_to_string_ex(newdir);
 
-	RETURN_STRING(cdb_chdir((argc==1)?_STRING(newdir):NULL),1);
+	RETURN_STRING(cdb_chdir((argc==1)?_STRING(newdir):NULL), 1);
 }
 /* }}} */
 
@@ -384,7 +384,7 @@ PHP_FUNCTION(dbplus_close)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	zend_list_delete((*relation)->value.lval);	
 
@@ -405,11 +405,11 @@ PHP_FUNCTION(dbplus_curr)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	
-	stat = cdb_current(r,&t);
+	stat = cdb_current(r, &t);
 	if(stat==ERR_NOERR) {
-		tuple2var(r,&t,tname);
+		tuple2var(r, &t, tname);
 	}
 
 	RETURN_LONG(stat);
@@ -437,7 +437,7 @@ PHP_FUNCTION(dbplus_errcode)
 	
 	if(errno==-1) errno = Acc_error;
 
-	RETURN_STRING(dbErrorMsg(errno,NULL),1); 
+	RETURN_STRING(dbErrorMsg(errno, NULL), 1); 
 }
 /* }}} */
 
@@ -463,16 +463,16 @@ PHP_FUNCTION(dbplus_find)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation); 
+	DBPLUS_FETCH_RESOURCE(r, relation); 
 
 	if ((*constr)->type != IS_ARRAY) {
-		php_error(E_WARNING,"Constraint is not an array");
+		php_error(E_WARNING, "Constraint is not an array");
 		RETURN_LONG(ERR_UNKNOWN);
 	}
 
 	convert_to_array_ex(data);
 
-	c = ary2constr(r,constr);
+	c = ary2constr(r, constr);
 	
 	if (!c){
 		RETURN_LONG(ERR_USER);
@@ -481,7 +481,7 @@ PHP_FUNCTION(dbplus_find)
 	stat = cdb_find(r, &t, c);
 	
 	if(stat==ERR_NOERR)
-		tuple2var(r,&t,data);	
+		tuple2var(r, &t, data);	
 
 	RETURN_LONG(stat);
 }
@@ -500,11 +500,11 @@ PHP_FUNCTION(dbplus_first)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	
-	stat = cdb_first(r,&t);
+	stat = cdb_first(r, &t);
 	if(stat==ERR_NOERR) {
-		tuple2var(r,&t,tname);
+		tuple2var(r, &t, tname);
 	}
 
 	RETURN_LONG(stat);
@@ -521,7 +521,7 @@ PHP_FUNCTION(dbplus_flush)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_flush(r));
 }
@@ -549,14 +549,14 @@ PHP_FUNCTION(dbplus_freelock)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_array_ex(data);
 	
-	if(var2tuple(r,data,&t))
+	if(var2tuple(r, data, &t))
 		RETURN_LONG(ERR_UNKNOWN);
 
-	stat=cdb_freelock(r,&t);
+	stat=cdb_freelock(r, &t);
 
 	RETURN_LONG(stat);
 }
@@ -572,7 +572,7 @@ PHP_FUNCTION(dbplus_freerlocks)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_freerlocks(r));
 }
@@ -591,14 +591,14 @@ PHP_FUNCTION(dbplus_getlock)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_array_ex(data);
 	
-	if(var2tuple(r,data,&t))
+	if(var2tuple(r, data, &t))
 		RETURN_LONG(ERR_UNKNOWN);
 
-	stat=cdb_getlock(r,&t);
+	stat=cdb_getlock(r, &t);
 
 	RETURN_LONG(stat);
 }
@@ -614,11 +614,11 @@ PHP_FUNCTION(dbplus_getunique)
 		WRONG_PARAM_COUNT;
 	}
 	
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	convert_to_long_ex(uniqueid);
 	convert_to_long_ex(flush);
 
-	RETURN_LONG(cdb_getunique(r,&(_INT(uniqueid)),_INT(flush)));
+	RETURN_LONG(cdb_getunique(r, &(_INT(uniqueid)), _INT(flush)));
 }
 /* }}} */
 
@@ -635,7 +635,7 @@ PHP_FUNCTION(dbplus_info)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	
 	ap = r->r_atts;
 	deg = r->r_rel.rel_deg;
@@ -646,19 +646,19 @@ PHP_FUNCTION(dbplus_info)
 	if (array_init(*result) == FAILURE)
 		RETURN_LONG(ERR_USER);	
 
-	if(!strcmp("atts",(*key)->value.str.val)) {
+	if(!strcmp("atts", (*key)->value.str.val)) {
 		do {
 			MAKE_STD_ZVAL(element); 
 
-			ZVAL_STRING(element,ap->att_name,1);
+			ZVAL_STRING(element, ap->att_name, 1);
 
-			zend_hash_update((*result)->value.ht
-											 ,ap->att_name
-											 ,strlen(ap->att_name)+1
-											 ,(void *)&element
-											 ,sizeof(zval*)
-											 ,NULL);
-		} while (ap++,deg--);
+			zend_hash_update((*result)->value.ht,
+											 ap->att_name,
+											 strlen(ap->att_name)+1,
+											 (void *)&element,
+											 sizeof(zval*),
+											 NULL);
+		} while (ap++, deg--);
 		RETURN_LONG(ERR_NOERR);
 	}
 
@@ -679,11 +679,11 @@ PHP_FUNCTION(dbplus_last)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	
-	stat = cdb_last(r,&t);
+	stat = cdb_last(r, &t);
 	if(stat==ERR_NOERR) {
-		tuple2var(r,&t,tname);
+		tuple2var(r, &t, tname);
 	}
 
 	RETURN_LONG(stat);
@@ -701,7 +701,7 @@ PHP_FUNCTION(dbplus_lockrel)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_lockrel(r));
 }
@@ -720,11 +720,11 @@ PHP_FUNCTION(dbplus_next)
 		WRONG_PARAM_COUNT;
 	}
 	
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	
-	stat = cdb_next(r,&t);
+	stat = cdb_next(r, &t);
 	if(stat==ERR_NOERR) {
-		tuple2var(r,&t,tname);
+		tuple2var(r, &t, tname);
 	}
 
 	RETURN_LONG(stat);
@@ -743,13 +743,13 @@ PHP_FUNCTION(dbplus_open)
 
 	convert_to_string_ex(tname);
 
-	r = cdb_open((*tname)->value.str.val,1,1);
+	r = cdb_open((*tname)->value.str.val, 1, 1);
 	if(r == NULL) {
 		/* TODO error handling */
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value,r,le_dbplus_relation);
+	ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);
 }
 /* }}} */
 
@@ -766,11 +766,11 @@ PHP_FUNCTION(dbplus_prev)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	
-	stat = cdb_previous(r,&t);
+	stat = cdb_previous(r, &t);
 	if(stat==ERR_NOERR) {
-		tuple2var(r,&t,tname);
+		tuple2var(r, &t, tname);
 	}
 
 	RETURN_LONG(stat);
@@ -787,13 +787,13 @@ PHP_FUNCTION(dbplus_rchperm)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_long_ex(mask);
 	convert_to_string_ex(user);
 	convert_to_string_ex(group);
 
-	RETURN_LONG(cdbRchperm(r,_INT(mask),_STRING(user),_STRING(group)));
+	RETURN_LONG(cdbRchperm(r, _INT(mask), _STRING(user), _STRING(group)));
 }
 /* }}} */
 
@@ -809,11 +809,11 @@ PHP_FUNCTION(dbplus_restorepos)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 	
-	stat = cdb_next(r,&t);
+	stat = cdb_next(r, &t);
 	if(stat==ERR_NOERR) {
-		tuple2var(r,&t,tname);
+		tuple2var(r, &t, tname);
 	}
 
 	RETURN_LONG(stat);
@@ -824,7 +824,7 @@ PHP_FUNCTION(dbplus_restorepos)
     */
 PHP_FUNCTION(dbplus_rkeys)
 {
-	relf *r,*rnew;
+	relf *r, *rnew;
 	zval **relation, **domlist, **zdata;
 	int nkeys=0;
 	char *p, *name=NULL, *keys[40]; /* TODO hardcoded magic number ??? */
@@ -833,17 +833,17 @@ PHP_FUNCTION(dbplus_rkeys)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	if((*domlist)->type == IS_ARRAY) {
 		convert_to_array_ex(domlist);
 		for(zend_hash_internal_pointer_reset(_HASH(domlist));
-				SUCCESS==zend_hash_get_current_data(_HASH(domlist),(void **)&zdata);
+				SUCCESS==zend_hash_get_current_data(_HASH(domlist), (void **)&zdata);
 				zend_hash_move_forward(_HASH(domlist))) {
 			if((*zdata)->type==IS_STRING)
 				keys[nkeys++] = _STRING(zdata);
 			else {
-				php_error(E_WARNING,"Domlist array contains non-string value(s)");
+				php_error(E_WARNING, "Domlist array contains non-string value(s)");
 				Acc_error = ERR_USER;
 				RETURN_FALSE;
 			}
@@ -862,7 +862,7 @@ PHP_FUNCTION(dbplus_rkeys)
 		/* TODO realy delete old relation resource ? */
 		zend_list_delete((*relation)->value.lval);	
 		
-		ZEND_REGISTER_RESOURCE(return_value,rnew,le_dbplus_relation);
+		ZEND_REGISTER_RESOURCE(return_value, rnew, le_dbplus_relation);
 	} else {
 		/* TODO error reporting */
 		RETURN_FALSE;
@@ -882,13 +882,13 @@ PHP_FUNCTION(dbplus_ropen)
 
 	convert_to_string_ex(tname);
 
-	r = ropen((*tname)->value.str.val,0,0);
+	r = ropen((*tname)->value.str.val, 0, 0);
 	if(r == NULL) {
 		/* TODO error handling */
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value,r,le_dbplus_relation);
+	ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);
 }
 /* }}} */
 
@@ -904,14 +904,14 @@ PHP_FUNCTION(dbplus_rquery)
 		WRONG_PARAM_COUNT;
 	}
 
-	r = aql_exec(_STRING(name),(argc==2)?_STRING(dbpath):NULL);
+	r = aql_exec(_STRING(name), (argc==2)?_STRING(dbpath):NULL);
 
 	if(!r) {
 		/* TODO error handling */
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value,r,le_dbplus_relation);
+	ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);
 }
 /* }}} */
 
@@ -925,12 +925,12 @@ PHP_FUNCTION(dbplus_rrename)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_string_ex(name);
 	convert_to_long_ex(flag);
 
-	RETURN_LONG(cdbRrename(r,_STRING(name),(*flag)->value.lval));
+	RETURN_LONG(cdbRrename(r, _STRING(name), (*flag)->value.lval));
 }
 /* }}} */
 
@@ -938,7 +938,7 @@ PHP_FUNCTION(dbplus_rrename)
     */
 PHP_FUNCTION(dbplus_rsecindex)
 {
-	relf *r,*rnew;
+	relf *r, *rnew;
 	zval **relation, **domlist, **compact, **zdata;
 	int nkeys=0;
 	char *p, *name=NULL, *keys[40]; /* TODO hardcoded magic number ??? */
@@ -947,17 +947,17 @@ PHP_FUNCTION(dbplus_rsecindex)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	if((*domlist)->type == IS_ARRAY) {
 		convert_to_array_ex(domlist);
 		for(zend_hash_internal_pointer_reset(_HASH(domlist));
-				SUCCESS==zend_hash_get_current_data(_HASH(domlist),(void **)&zdata);
+				SUCCESS==zend_hash_get_current_data(_HASH(domlist), (void **)&zdata);
 				zend_hash_move_forward(_HASH(domlist))) {
 			if((*zdata)->type==IS_STRING)
 				keys[nkeys++] = _STRING(zdata);
 			else {
-				php_error(E_WARNING,"Domlist array contains non-string value(s)");
+				php_error(E_WARNING, "Domlist array contains non-string value(s)");
 				Acc_error = ERR_USER;
 				RETURN_FALSE;
 			}
@@ -978,7 +978,7 @@ PHP_FUNCTION(dbplus_rsecindex)
 		/* TODO realy delete old relation resource ? */
 		zend_list_delete((*relation)->value.lval);	
 		
-		ZEND_REGISTER_RESOURCE(return_value,rnew,le_dbplus_relation);
+		ZEND_REGISTER_RESOURCE(return_value, rnew, le_dbplus_relation);
 	} else {
 		/* TODO error reporting */
 		RETURN_FALSE;
@@ -996,7 +996,7 @@ PHP_FUNCTION(dbplus_runlink)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdbRunlink(&r));
 }
@@ -1016,9 +1016,9 @@ PHP_FUNCTION(dbplus_rzap)
 
 	convert_to_long_ex(truncate);
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
-	RETURN_LONG(cdbRzap(r,(*truncate)->value.lval));
+	RETURN_LONG(cdbRzap(r, (*truncate)->value.lval));
 }
 /* }}} */
 
@@ -1032,7 +1032,7 @@ PHP_FUNCTION(dbplus_savepos)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
   RETURN_LONG(cdb_savepos(r));
 }
@@ -1048,11 +1048,11 @@ PHP_FUNCTION(dbplus_setindex)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_string_ex(idx_name);
 	
-	RETURN_LONG(cdb_setindex(r,_STRING(idx_name)));
+	RETURN_LONG(cdb_setindex(r, _STRING(idx_name)));
 }
 /* }}} */
 
@@ -1066,11 +1066,11 @@ PHP_FUNCTION(dbplus_setindexbynumber)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_long_ex(idx_number);
 	
-	RETURN_LONG(cdb_setindexbynumber(r,(*idx_number)->value.lval));
+	RETURN_LONG(cdb_setindexbynumber(r, (*idx_number)->value.lval));
 }
 /* }}} */
 
@@ -1090,27 +1090,27 @@ PHP_FUNCTION(dbplus_sql)
 	switch (argc) {
 	case 3:
 		convert_to_string_ex(dbpath);
-		php_error(E_WARNING,"Arg dbpath: %s",_STRING(dbpath));
+		php_error(E_WARNING, "Arg dbpath: %s", _STRING(dbpath));
 		/* Fall-through. */
 	case 2:
 		convert_to_string_ex(server);
-		php_error(E_WARNING,"Arg server: %s",_STRING(server));
+		php_error(E_WARNING, "Arg server: %s", _STRING(server));
 		/* Fall-through. */
 	case 1:
 		convert_to_string_ex(query);
-		php_error(E_WARNING,"Arg query: %s",_STRING(query));
+		php_error(E_WARNING, "Arg query: %s", _STRING(query));
 		break;
 	}
 	
-	r = cdb_sql((argc>=2)?_STRING(server):"localhost"
-								 ,_STRING(query)
-								 ,(argc==3)?_STRING(dbpath):NULL);
+	r = cdb_sql((argc>=2)?_STRING(server):"localhost",
+								 _STRING(query),
+								 (argc==3)?_STRING(dbpath):NULL);
 	if(r == NULL) {
 		/* TODO error handling */
 		RETURN_FALSE;
 	}
 	
-	ZEND_REGISTER_RESOURCE(return_value,r,le_dbplus_relation);	
+	ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);	
 }
 /* }}} */
 
@@ -1121,7 +1121,7 @@ PHP_FUNCTION(dbplus_tremove)
 	zval **relation, **old, **current;
 	enum errorcond stat = ERR_UNKNOWN;
 	relf *r;
-	tuple told,tcurr;
+	tuple told, tcurr;
 	int argc;
 	
 	argc = ZEND_NUM_ARGS(); 
@@ -1129,17 +1129,17 @@ PHP_FUNCTION(dbplus_tremove)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_array_ex(old);
 	
-	if(var2tuple(r,old,&told))
+	if(var2tuple(r, old, &told))
 		RETURN_LONG(ERR_UNKNOWN);
 
-	stat=cdbTremove(r,&told,&tcurr);
+	stat=cdbTremove(r, &told, &tcurr);
 	
 	if((stat==ERR_NOERR) && (argc==3))
-		tuple2var(r,&tcurr,current);
+		tuple2var(r, &tcurr, current);
 
 	RETURN_LONG(stat);
 }
@@ -1155,7 +1155,7 @@ PHP_FUNCTION(dbplus_undo)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_undo(r));
 }
@@ -1171,7 +1171,7 @@ PHP_FUNCTION(dbplus_undoprepare)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_undoprepare(r));
 }
@@ -1187,7 +1187,7 @@ PHP_FUNCTION(dbplus_unlockrel)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_unlockrel(r));
 }
@@ -1203,7 +1203,7 @@ PHP_FUNCTION(dbplus_unselect)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_unselect(r));
 }
@@ -1216,24 +1216,24 @@ PHP_FUNCTION(dbplus_update)
 	zval **relation, **old, **new;
 	enum errorcond stat = ERR_UNKNOWN;
 	relf *r;
-	tuple told,tnew;
+	tuple told, tnew;
 
  	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &relation, &old, &new) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_array_ex(old);
 	convert_to_array_ex(new);
 	
-	if(var2tuple(r,old,&told))
+	if(var2tuple(r, old, &told))
 		RETURN_LONG(ERR_UNKNOWN);
 
-	if(var2tuple(r,new,&tnew))
+	if(var2tuple(r, new, &tnew))
 		RETURN_LONG(ERR_UNKNOWN);
 
-	stat=cdb_update(r,&told,&tnew);
+	stat=cdb_update(r, &told, &tnew);
 	
 	RETURN_LONG(stat);
 }
@@ -1249,7 +1249,7 @@ PHP_FUNCTION(dbplus_xlockrel)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_xlockrel(r));
 }
@@ -1265,7 +1265,7 @@ PHP_FUNCTION(dbplus_xunlockrel)
 		WRONG_PARAM_COUNT;
 	}
 
-	DBPLUS_FETCH_RESOURCE(r,relation);
+	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	RETURN_LONG(cdb_xunlockrel(r));
 }
