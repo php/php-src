@@ -2272,12 +2272,38 @@ mbfl_wchar_device_output(int c, void *data)
 }
 
 
+/*
+ * string object
+ */
 void
 mbfl_string_init(mbfl_string *string)
 {
 	if (string) {
 		string->no_language = mbfl_no_language_uni;
 		string->no_encoding = mbfl_no_encoding_pass;
+		string->val = (unsigned char*)0;
+		string->len = 0;
+	}
+}
+
+void
+mbfl_string_init_set(mbfl_string *string, enum mbfl_no_language no_language, enum mbfl_no_encoding no_encoding)
+{
+	if (string) {
+		string->no_language = no_language;
+		string->no_encoding = no_encoding;
+		string->val = (unsigned char*)0;
+		string->len = 0;
+	}
+}
+
+void
+mbfl_string_clear(mbfl_string *string)
+{
+	if (string) {
+		if (string->val != (unsigned char*)0) {
+			mbfl_free(string->val);
+		}
 		string->val = (unsigned char*)0;
 		string->len = 0;
 	}
@@ -5685,28 +5711,53 @@ mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string)
 	return 0;
 }
 
-mbfl_string *
-mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result)
+int
+mbfl_buffer_converter_flush(mbfl_buffer_converter *convd)
 {
+	if (convd == NULL) {
+		return -1;
+	}
+
 	if (convd->filter1 != NULL) {
 		mbfl_convert_filter_flush(convd->filter1);
 	}
 	if (convd->filter2 != NULL) {
 		mbfl_convert_filter_flush(convd->filter2);
 	}
-	return mbfl_memory_device_result(&convd->device, result);
+
+	return 0;
 }
 
 mbfl_string *
-mbfl_buffer_converter_feed_getbuffer(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result)
+mbfl_buffer_converter_getbuffer(mbfl_buffer_converter *convd, mbfl_string *result)
 {
-	mbfl_buffer_converter_feed(convd, string);
+	if (convd != NULL && result != NULL && convd->device.buffer != NULL) {
+		result->no_encoding = convd->to->no_encoding;
+		result->val = convd->device.buffer;
+		result->len = convd->device.pos;
+	} else {
+		result = NULL;
+	}
+
+	return result;
+}
+
+mbfl_string *
+mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result)
+{
+	if (convd == NULL || result == NULL) {
+		return NULL;
+	}
+	result->no_encoding = convd->to->no_encoding;
 	return mbfl_memory_device_result(&convd->device, result);
 }
 
 mbfl_string *
 mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result)
 {
+	if (convd == NULL || string == NULL || result == NULL) {
+		return NULL;
+	}
 	mbfl_buffer_converter_feed(convd, string);
 	if (convd->filter1 != NULL) {
 		mbfl_convert_filter_flush(convd->filter1);
@@ -5714,6 +5765,7 @@ mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *str
 	if (convd->filter2 != NULL) {
 		mbfl_convert_filter_flush(convd->filter2);
 	}
+	result->no_encoding = convd->to->no_encoding;
 	return mbfl_memory_device_result(&convd->device, result);
 }
 

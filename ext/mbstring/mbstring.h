@@ -72,7 +72,7 @@ PHP_FUNCTION(mb_http_output);
 PHP_FUNCTION(mb_detect_order);
 PHP_FUNCTION(mb_substitute_character);
 PHP_FUNCTION(mb_preferred_mime_name);
-PHP_FUNCTION(mb_gpc_handler);
+PHP_FUNCTION(mb_parse_str);
 PHP_FUNCTION(mb_output_handler);
 PHP_FUNCTION(mb_strlen);
 PHP_FUNCTION(mb_strpos);
