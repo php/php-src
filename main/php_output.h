@@ -47,6 +47,8 @@ PHP_FUNCTION(ob_flush);
 PHP_FUNCTION(ob_clean);
 PHP_FUNCTION(ob_end_flush);
 PHP_FUNCTION(ob_end_clean);
+PHP_FUNCTION(ob_get_flush);
+PHP_FUNCTION(ob_get_clean);
 PHP_FUNCTION(ob_get_contents);
 PHP_FUNCTION(ob_get_length);
 PHP_FUNCTION(ob_get_level);
