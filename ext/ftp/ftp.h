@@ -37,7 +37,9 @@
 #include <netinet/in.h>
 
 
+/* XXX these should be configurable at runtime XXX */
 #define	FTP_BUFSIZE	4096
+#define	FTP_TIMEOUT	90
 
 typedef enum ftptype {
 	FTPTYPE_ASCII,
@@ -46,10 +48,13 @@ typedef enum ftptype {
 
 typedef struct ftpbuf
 {
-	FILE		*fp;			/* control connection */
+	int		fd;			/* control connection */
 	struct in_addr	localaddr;		/* local inet address */
 	int		resp;			/* last response code */
 	char		inbuf[FTP_BUFSIZE];	/* last response text */
+	char		*extra;			/* extra characters */
+	int		extralen;		/* number of extra chars */
+	char		outbuf[FTP_BUFSIZE];	/* command output buffer */
 	char		*pwd;			/* cached pwd */
 	char		*syst;			/* cached system type */
 	ftptype_t	type;			/* current transfer type */
@@ -60,8 +65,9 @@ typedef struct ftpbuf
 typedef struct databuf
 {
 	int		listener;		/* listener socket */
-	FILE		*fp;			/* data connection */
+	int		fd;			/* data connection */
 	ftptype_t	type;			/* transfer type */
+	char		buf[FTP_BUFSIZE];	/* data buffer */
 } databuf_t;
 
 
