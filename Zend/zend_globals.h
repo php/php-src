@@ -233,7 +233,7 @@ struct _zend_alloc_globals {
 	unsigned int allocated_memory_peak;
 	unsigned char memory_exhausted;
 #endif
-#if ZEND_MM
+#ifdef ZEND_MM
 	zend_mm_heap mm_heap;
 #endif
 };
