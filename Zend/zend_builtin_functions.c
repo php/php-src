@@ -1306,6 +1306,7 @@ ZEND_FUNCTION(debug_backtrace)
 	void **cur_arg_pos = EG(argument_stack).top_element;
 	void **args = cur_arg_pos;
 	int arg_stack_consistent = 0;
+	int frames_on_stack = 0;
 
 	if (ZEND_NUM_ARGS()) {
 		WRONG_PARAM_COUNT;
@@ -1316,6 +1317,7 @@ ZEND_FUNCTION(debug_backtrace)
 			break;
 		}
 		args -= *(ulong*)args;
+		frames_on_stack++;
 
 		if (args == EG(argument_stack).elements) {
 			arg_stack_consistent = 1;
@@ -1328,6 +1330,7 @@ ZEND_FUNCTION(debug_backtrace)
 	/* skip debug_backtrace() */
 	ptr = ptr->prev_execute_data;
 	cur_arg_pos -= 2;
+	frames_on_stack--;
 
 	array_init(return_value);
 
@@ -1370,8 +1373,9 @@ ZEND_FUNCTION(debug_backtrace)
 			}
 
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
-				if (arg_stack_consistent) {
+				if (arg_stack_consistent && (frames_on_stack > 0)) {
 					add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
+					frames_on_stack--;
 				}
 			}	
 		} else {
