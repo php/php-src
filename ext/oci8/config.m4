@@ -84,7 +84,7 @@ if test "$PHP_OCI8" != "no"; then
       PHP_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
       AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
       AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
-      AC_DEFINE(HAVE_OCI9,1,[])
+      AC_DEFINE(HAVE_OCI9,1,[ ])
       ;;
 
     *)
