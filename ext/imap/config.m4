@@ -63,19 +63,29 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
     PHP_KERBEROS=no
   ])
 
-  if test "$PHP_KERBEROS" = "yes"; then
-    test -d /usr/kerberos && PHP_KERBEROS=/usr/kerberos
-  fi
-
   if test "$PHP_KERBEROS" != "no"; then
-    if test ! -f $PHP_KERBEROS/lib/libkrb5.a && test ! -f $PHP_KERBEROS/lib/libkrb5.$SHLIB_SUFFIX_NAME; then
-      AC_MSG_ERROR([Kerberos libraries not found in $PHP_KERBEROS/lib. 
+
+    if test "$PHP_KERBEROS" = "yes"; then
+      SEARCH_PATHS="/usr/kerberos /usr/local /usr"
+    else
+      SEARCH_PATHS=$PHP_KERBEROS
+    fi
+
+    for i in $SEARCH_PATHS; do
+      if test -f $i/lib/libkrb5.a || test -f $i/lib/libkrb5.$SHLIB_SUFFIX_NAME; then
+        PHP_KERBEROS_DIR=$i
+        break
+      fi
+    done
+
+    if test -z "$PHP_KERBEROS_DIR"; then
+      AC_MSG_ERROR([Kerberos libraries not found. 
       
-      Check the path given to --with-kerberos (if no path is given, defaults to /usr/kerberos )
+      Check the path given to --with-kerberos (if no path is given, searches in /usr/kerberos, /usr/local and /usr )
       ])
     fi
     AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
-    PHP_ADD_LIBPATH($PHP_KERBEROS/lib, IMAP_SHARED_LIBADD)
+    PHP_ADD_LIBPATH($PHP_KERBEROS_DIR/lib, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY(gssapi_krb5, 1, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY(krb5, 1, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBRARY(k5crypto, 1, IMAP_SHARED_LIBADD)
