@@ -1,3 +1,50 @@
+1999-11-28  Stig Bakken  <ssb@fast.no>
+
+    * Makefile.am
+      build.mk
+      configure.in:    Renamed "PECL" to "PEAR" (PHP Extension and Add-on Repository).
+    New name courtesy of Peter Bowen <pzb@ARISTOTLE.ORG>.
+
+    * build.mk
+      buildconf:    Removed redundancy in buildconf/build.mk, buildconf now runs "make -f build.mk"
+
+1999-11-28  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/output.c:
+    - Add OLS_C so that we can call php_output_init_globals() with it.
+
+1999-11-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/informix/ifx.ec: Prevent mod_ssl's ap_hook.h from being included.
+
+1999-11-28  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/link.c:
+    * ext/standard/link.c: (symlink) Disable symlinks to urls
+
+1999-11-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * .cvsignore: Add buildmk.stamp
+
+    * build.mk
+      buildcheck.sh: Add version checks from buildconf
+
+1999-11-28  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    (ext/informix/ifx.ec) Reflect ESQL/C version used (Danny)
+
+1999-11-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ext_skel: Remove INCLUDES line from Makefile.am skeleton
+
+    * ext/standard/basic_functions.h
+      ext/standard/php3_string.h
+      ext/standard/string.c
+      ext/standard/basic_functions.c: Make basic/string functions thread-safe
+
+    * ext/session/session.c: ZTS fix
+
 1999-11-27  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/informix/Makefile.am
