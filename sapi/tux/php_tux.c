@@ -340,7 +340,7 @@ static void tux_request_ctor(TSRMLS_D)
 	SG(request_info).request_method = CGI_REQUEST_METHOD(TG(req));
 	SG(sapi_headers).http_response_code = 200;
 	SG(request_info).content_type = TG(req)->content_type;
-	SG(request_info).content_length = 0; // TG(req)->contentlength;
+	SG(request_info).content_length = 0; /* TG(req)->contentlength; */
 
 #if 0
 	php_handle_auth_data(TG(hc)->authorization TSRMLS_CC);

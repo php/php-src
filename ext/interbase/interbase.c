@@ -2960,14 +2960,14 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation)
 	switch (operation) {
 	case isc_action_svc_add_user:
 	case isc_action_svc_modify_user:
-		// 5 to 8 parameters for ADD or MODIFY operation
+		/* 5 to 8 parameters for ADD or MODIFY operation */
 		if(ZEND_NUM_ARGS() < 5 || ZEND_NUM_ARGS() > 8) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	
 	case isc_action_svc_delete_user:
-		// 4 parameters for DELETE operation
+		/* 4 parameters for DELETE operation */
 		if (ZEND_NUM_ARGS() != 4) {
 			WRONG_PARAM_COUNT;
 		}
@@ -2993,7 +2993,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation)
 	}
 
 	if (operation != isc_action_svc_delete_user) {
-		// Parameter not available for DELETE operation
+		/* Parameter not available for DELETE operation */
 		convert_to_string_ex(args[4]);
 		user_password = (*args[4])->value.str.val;
 	}
@@ -3021,7 +3021,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation)
 	zend_printf("lname    : %s<br>", last_name);
 */
 
-	// Build buffer for isc_service_attach()
+	/* Build buffer for isc_service_attach() */
 	*spb++ = isc_spb_version;
 	*spb++ = isc_spb_current_version;
 	*spb++ = isc_spb_user_name;
@@ -3034,7 +3034,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation)
 	spb += strlen(dba_password);
 	spb_length = spb - spb_buffer;
 
-	// Attach to the Service Manager
+	/* Attach to the Service Manager */
 	sprintf(service_name, "%s:service_mgr", ib_server);
 	if (isc_service_attach(IB_STATUS, 0, service_name,
 		&service_handle, spb_length, spb_buffer)) {
@@ -3045,43 +3045,43 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation)
 	else {
 		char request[128], *x, *p = request;
 
-		// Identify cluster (here, isc_action_svc_*_user)
+		/* Identify cluster (here, isc_action_svc_*_user) */
 		*p++ = operation;
 
-		// Argument for username
+		/* Argument for username */
 		*p++ = isc_spb_sec_username;
 		ADD_SPB_LENGTH(p, strlen(user_name));
 		for (x = user_name ; *x; ) *p++ = *x++;
 
-		// Argument for password
+		/* Argument for password */
 		if (user_password) {
 			*p++ = isc_spb_sec_password;
 			ADD_SPB_LENGTH(p, strlen(user_password));
 			for (x = user_password ; *x; ) *p++ = *x++;
 		}
 
-		// Argument for first name
+		/* Argument for first name */
 		if (first_name) {
 			*p++ = isc_spb_sec_firstname;
 			ADD_SPB_LENGTH(p, strlen(first_name));
 			for (x = first_name ; *x; ) *p++ = *x++;
 		}
 
-		// Argument for middle name
+		/* Argument for middle name */
 		if (middle_name) {
 			*p++ = isc_spb_sec_middlename;
 			ADD_SPB_LENGTH(p, strlen(middle_name));
 			for (x = middle_name ; *x; ) *p++ = *x++;
 		}
 
-		// Argument for last name
+		/* Argument for last name */
 		if (last_name) {
 			*p++ = isc_spb_sec_lastname;
 			ADD_SPB_LENGTH(p, strlen(last_name));
 			for (x = last_name ; *x; ) *p++ = *x++;
 		}
 
-		// Let's go update: start Service Manager
+		/* Let's go update: start Service Manager */
 		if (isc_service_start(IB_STATUS, &service_handle,
 			NULL, (unsigned short) (p - request), request)) {
 
@@ -3090,7 +3090,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation)
 			RETURN_FALSE;
 		}
 		else {
-			// Detach from Service Manager
+			/* Detach from Service Manager */
 			isc_service_detach(IB_STATUS, &service_handle);
 		}
 	}
