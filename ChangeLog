@@ -1,3 +1,104 @@
+2005-01-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.c:
+      Fix OSX DL_UNLOAD macro and actually use it to make shared extensions
+      work on OSX.
+
+2005-01-10  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/iconv/config.m4:
+      fix Konstantin's last name Chugeuv -> Chuguev
+
+2005-01-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      Zend/zend.h
+      Zend/zend_API.c:
+      Fixed shared extensions on OSX.  We were using zend_mh_bundle_load to
+      load a shared extension, but dlclose() to unload it because it was
+      hardcoded.  This caused problems for extensions loaded from php.ini
+      since the Apple linker does a symbol check on an unload and we hadn't
+      properly unloaded the shared extensions when Apache unloaded the parent
+      PHP shared library during its 2-pass load/unload/load startup routine.
+      By fixing the DL_UNLOAD macro and un-hardcoding the dlclose() call this
+      now works.
+
+2005-01-10  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/tests/math/bug30069.phpt:
+      MFH: update test to include negative floats as strings too
+
+    * ext/standard/tests/math/bug30069.phpt:
+      update test to include negative floats as strings too
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      MFH: - Fixed bug #28074 (FastCGI: stderr should be written in a FCGI stderr
+      stream).
+
+    * (PHP_5_0)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      - Fixed bug #28074 (FastCGI: stderr should be written in a FCGI stderr
+      stream).
+        (chris at ex-parrot dot com)
+
+    * sapi/cgi/cgi_main.c:
+      - Fixed bug #28074 (FastCGI: stderr should be written in a FCGI stderr
+      stream).
+
+    * ext/standard/php_parsedate.h
+      ext/standard/php_smart_str.h
+      ext/standard/php_smart_str_public.h
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re:
+      Missing $Id$ tag
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h:
+      - Update credits
+
+    * ChangeLog
+      ChangeLog.2004.gz:
+      - Compressed 2004 Changelog
+
+    * ZendEngine2/header
+      ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h:
+      - Added missing header sections.
+
+2005-01-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      - Fix proto
+
+    * ext/sqlite/sqlite.c:
+      - Bugfix #31342: SQLite OO interface with Exceptions (hugo dot pl at gmail
+      dot com)
+
+    * ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c:
+      - Implement iterator interface in sqlite
+
+2005-01-10  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/acinclude.m4
+      ZendEngine2/configure.in:
+      - Added AC_ZEND_C_BIGENDIAN macro (as requested by Andi)
+
+    * configure.in
+      configure.in
+      configure.in:
+      - The pic/no-pic patch by Joe Orton.
+
 2005-01-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)

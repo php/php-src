@@ -1,3 +1,25 @@
+2005-01-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * zend.h
+      zend_API.c:
+      Fix OSX DL_UNLOAD macro and actually use it to make shared extensions
+      work on OSX.
+
+2005-01-10  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * header
+      zend_arg_defs.c
+      zend_strtod.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      - Added missing header sections.
+
+    * acinclude.m4
+      configure.in:
+      - Added AC_ZEND_C_BIGENDIAN macro (as requested by Andi)
+
 2005-01-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_5_0)
