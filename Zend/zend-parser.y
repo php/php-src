@@ -605,7 +605,7 @@ encaps_list:
 
 encaps_var:
 		VARIABLE { do_fetch_globals(&$1); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
-	|	VARIABLE '[' encaps_var_offset ']'	{ do_fetch_globals(&$1); do_begin_variable_parse(CLS_C); fetch_array_begin(&$$, &$1, &$3 CLS_CC); }
+	|	VARIABLE '[' { do_begin_variable_parse(CLS_C); } encaps_var_offset ']'	{ do_fetch_globals(&$1);  fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
 	|	VARIABLE ZEND_OBJECT_OPERATOR STRING { do_begin_variable_parse(CLS_C); fetch_simple_variable(&$2, &$1, 1 CLS_CC); do_fetch_property(&$$, &$2, &$3 CLS_CC); }
 	|	DOLLAR_OPEN_CURLY_BRACES expr '}' { do_begin_variable_parse(CLS_C);  fetch_simple_variable(&$$, &$2, 1 CLS_CC); }
 	|	DOLLAR_OPEN_CURLY_BRACES STRING '[' expr ']' '}' { do_begin_variable_parse(CLS_C);  fetch_array_begin(&$$, &$2, &$4 CLS_CC); }
@@ -616,7 +616,7 @@ encaps_var:
 encaps_var_offset:
 		STRING	{ $$ = $1; }
 	|	NUM_STRING	{ $$ = $1; }
-	|	{ do_begin_variable_parse(CLS_C); } VARIABLE { fetch_simple_variable(&$$, &$2, 1 CLS_CC); }
+	|	VARIABLE { fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
 ;
 
 

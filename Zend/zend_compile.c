@@ -937,11 +937,16 @@ void do_brk_cont(int op, znode *expr CLS_DC)
 void do_switch_cond(znode *cond CLS_DC)
 {
 	zend_switch_entry switch_entry;
+	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
 	switch_entry.cond = *cond;
 	switch_entry.default_case = -1;
 	switch_entry.control_var = -1;
 	zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
+
+	if (opline->result.op_type == IS_VAR) {
+		opline->result.u.EA.type |= EXT_TYPE_UNUSED;
+	}
 
 	do_begin_loop(CLS_C);
 
