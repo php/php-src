@@ -3353,7 +3353,7 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *fore
 		value = tmp;
 
 		/* Mark extended_value in case both key and value are being used */
-		CG(active_op_array)->opcodes[foreach_token->u.opline_num].extended_value |= 2;
+		CG(active_op_array)->opcodes[foreach_token->u.opline_num].extended_value |= ZEND_FE_FETCH_WITH_KEY;
 	}
 
 	if ((key->op_type != IS_UNUSED) && (key->u.EA.type & ZEND_PARSED_REFERENCE_VARIABLE)) {
@@ -3366,7 +3366,7 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *fore
 			zend_error(E_COMPILE_ERROR, "Cannot create references to elements of a temporary array expression");
 		}
 		/* Mark extended_value for assign-by-reference */
-		CG(active_op_array)->opcodes[foreach_token->u.opline_num].extended_value |= 1;
+		CG(active_op_array)->opcodes[foreach_token->u.opline_num].extended_value |= ZEND_FE_FETCH_BYREF;
 	}
 
 	if (key->op_type != IS_UNUSED) {

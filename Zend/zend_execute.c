@@ -3779,8 +3779,7 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	int key_type;
-	/* extended_value & 2 means that the key is also needed */
-	zend_bool use_key = opline->extended_value & 2;
+	zend_bool use_key = opline->extended_value & ZEND_FE_FETCH_WITH_KEY;
 
 	PZVAL_LOCK(array);
 
@@ -3858,13 +3857,13 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 			break;
 	}
 
-	if (opline->extended_value & 1) {
+	if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 		SEPARATE_ZVAL_IF_NOT_REF(value);
 		(*value)->is_ref = 1;
 	}
 
 	if (!use_key) {
-		if (opline->extended_value & 1) {
+		if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 			EX_T(opline->result.u.var).var.ptr_ptr = value;
 			(*value)->refcount++;
 		} else {
