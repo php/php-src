@@ -91,43 +91,36 @@ PHP_MINFO_FUNCTION(ctype)
 
 /* {{{ ctype
  */
-static int ctype(int (*iswhat)(int), zval **c) 
-{
-	switch (Z_TYPE_PP(c)) {
-	case IS_LONG:
-		return iswhat(Z_LVAL_PP(c));
-	case IS_STRING:
-		{
-			char *p;
-			int n, len;
-			p=Z_STRVAL_PP(c);
-			len = Z_STRLEN_PP(c);
-			for(n=0;n<len;n++) {
-				if(!iswhat(*p++)) return 0;
-			}
-			return 1;
-		}
-	default:
-		break;
-	}
-	return 0;
-}
+#define CTYPE(iswhat) \
+	zval *c; \
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE) \
+		return; \
+ 	switch (Z_TYPE_P(c)) { \
+	case IS_LONG: \
+		RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
+	case IS_STRING: \
+		{ \
+			char *p; \
+			int n, len; \
+			p=Z_STRVAL_P(c); \
+			len = Z_STRLEN_P(c); \
+			for(n=0;n<len;n++) { \
+				if(!iswhat(*p++)) RETURN_FALSE; \
+			} \
+			RETURN_TRUE; \
+		} \
+	default: \
+		break; \
+	} \
+	RETURN_FALSE; 
+ 
 /* }}} */
 
 /* {{{ proto bool ctype_alnum(mixed c)
    Checks for alphanumeric character(s) */
 PHP_FUNCTION(ctype_alnum)
 {
-	zval *c;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(isalnum, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(isalnum);
 }
 /* }}} */
 
@@ -135,16 +128,7 @@ PHP_FUNCTION(ctype_alnum)
    Checks for alphabetic character(s) */
 PHP_FUNCTION(ctype_alpha)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(isalpha, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(isalpha);
 }
 /* }}} */
 
@@ -152,16 +136,7 @@ PHP_FUNCTION(ctype_alpha)
    Checks for control character(s) */
 PHP_FUNCTION(ctype_cntrl)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(iscntrl, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(iscntrl);
 }
 /* }}} */
 
@@ -169,16 +144,7 @@ PHP_FUNCTION(ctype_cntrl)
    Checks for numeric character(s) */
 PHP_FUNCTION(ctype_digit)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(isdigit, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(isdigit);
 }
 /* }}} */
 
@@ -186,16 +152,7 @@ PHP_FUNCTION(ctype_digit)
    Checks for lowercase character(s)  */
 PHP_FUNCTION(ctype_lower)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(islower, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(islower);
 }
 /* }}} */
 
@@ -203,16 +160,7 @@ PHP_FUNCTION(ctype_lower)
    Checks for any printable character(s) except space */
 PHP_FUNCTION(ctype_graph)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(isgraph, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(isgraph);
 }
 /* }}} */
 
@@ -220,16 +168,7 @@ PHP_FUNCTION(ctype_graph)
    Checks for printable character(s) */
 PHP_FUNCTION(ctype_print)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(isprint, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(isprint);
 }
 /* }}} */
 
@@ -237,16 +176,7 @@ PHP_FUNCTION(ctype_print)
    Checks for any printable character which is not whitespace or an alphanumeric character */
 PHP_FUNCTION(ctype_punct)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(ispunct, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(ispunct);
 }
 /* }}} */
 
@@ -254,16 +184,7 @@ PHP_FUNCTION(ctype_punct)
    Checks for whitespace character(s)*/
 PHP_FUNCTION(ctype_space)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(isspace, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(isspace);
 }
 /* }}} */
 
@@ -271,16 +192,7 @@ PHP_FUNCTION(ctype_space)
    Checks for uppercase character(s) */
 PHP_FUNCTION(ctype_upper)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(isupper, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(isupper);
 }
 /* }}} */
 
@@ -288,16 +200,7 @@ PHP_FUNCTION(ctype_upper)
    Checks for character(s) representing a hexadecimal digit */
 PHP_FUNCTION(ctype_xdigit)
 {
-	zval *c;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
-		return;
-	
-	if(ctype(isxdigit, &c)) {
-	   RETURN_TRUE;
-	}
-
-	RETURN_FALSE;		
+	CTYPE(isxdigit);
 }
 /* }}} */
 
