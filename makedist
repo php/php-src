@@ -29,6 +29,8 @@
 
 CVSROOT=:pserver:cvsread@cvs.php.net:/repository
 export CVSROOT
+ZENDROOT=:pserver:cvsread@cvs.zend.com:/repository
+export ZENDROOT
 
 if echo '\c' | grep -s c >/dev/null 2>&1
 then
@@ -61,8 +63,13 @@ CVSVER=`echo $VER | sed -e 's/\./_/g'`
 # CVS release tag
 CVSTAG=${PKG}_$CVSVER
 
-# should become "php3"
+# should become "php4"
 CVSMOD=`cat CVS/Repository | sed -e 's!^/[^/]*/!!'`
+# should become "libzend"
+ZENDMOD=`cat libzend/CVS/Repository | sed -e 's!^/[^/]*/!!'`
+# should become "TSRM"
+TSRMMOD=`cat TSRM/CVS/Repository | sed -e 's!^/[^/]*/!!'`
+
 
 if test ! -d $TMPDIR; then
     mkdir -p $TMPDIR || exit 2
@@ -75,6 +82,15 @@ cvs -Q export -r $CVSTAG $CVSMOD || exit 4
 echo ""
 
 cd $CVSMOD || exit 5
+
+# Check out Zend
+$ECHO_N "makedist: exporting tag '$CVSTAG' from '$ZENDMOD'...$ECHO_C"
+cvs -d $ZENDROOT -Q export -r $CVSTAG $ZENDMOD || exit 4
+
+# Check out TSRM
+$ECHO_N "makedist: exporting tag '$CVSTAG' from '$TSRMMOD'...$ECHO_C"
+cvs -d $ZENDROOT -Q export -r $CVSTAG $TSRMMOD || exit 4
+
 
 INC=""
 
@@ -91,24 +107,20 @@ done
 # generate some files so people don't need bison, flex and autoconf
 # to install
 set -x
-autoconf
-bison -p php -v -d language-parser.y
-flex -Pphp -olanguage-scanner.c -i language-scanner.lex
-bison -p cfg -v -d configuration-parser.y
-flex -Pcfg -oconfiguration-scanner.c -i configuration-scanner.lex
-cd convertor
-flex -i -Pphp -olanguage-scanner.c language-scanner.lex
-bison -p php -v -d language-parser.y
+./buildconf
+cd libzend
+bison -p zend -v -d zend-parser.y -o zend-parser.c
+flex -Pzend -ozend-scanner.c -i zend-scanner.l
 cd ..
+bison -p cfg -v -d configuration-parser.y -o configuration-parser.c
+flex -Pcfg -oconfiguration-scanner.c -i configuration-scanner.l
 
 #perl -i -p -e 's/\r\n/\n/' *.dsw *.dsp
 set +x
 
 INC="$INC \
 configuration-scanner.c \
-configuration-parser.tab.c configuration-parser.tab.h \
-language-scanner.c \
-language-parser.tab.c language-parser.tab.h \
+configuration-parser.c configuration-parser.h \
 configure"
 
 mkdir $PKG-$VER || exit 6
