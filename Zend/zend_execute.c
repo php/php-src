@@ -32,7 +32,6 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_fast_cache.h"
-#include "zend_execute_locks.h"
 #include "zend_ini.h"
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free TSRMLS_CC)
