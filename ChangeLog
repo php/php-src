@@ -1,3 +1,31 @@
+2000-06-28  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Would be a useful thing to have.
+
+    * ext/standard/array.c: Oops, didn't mean to commit that.
+
+    * ext/standard/array.c
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h:
+    - Added an optional parameter to preg_replace() that can be used to
+      specify how many replacements to make. 
+
+2000-06-28  Zeev Suraski  <zeev@php.net>
+
+    * sapi/apache/mod_php4.c:
+    I'm not sure whether this is necessary or not.  Is it guarenteed that get_module_conf()
+    will always return a value?  Even if there were no relevant directives at all?
+
+2000-06-28  Andi Gutmans  <andi@php.net>
+
+    * main/php_virtual_cwd.c:
+    - Fix problem with VIRTUAL_DIR and relative paths containing ..
+
+2000-06-28  Joey Smith  <joey@samaritan.com>
+
+    * ext/pdf/pdf.c: Added note about creating PDF documents in memory.
+    This is not quite complete, due to a bug in pdflib 3.0.
+
 2000-06-27  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/session.c: Cosmetic name change
