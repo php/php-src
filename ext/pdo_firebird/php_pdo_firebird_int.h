@@ -49,6 +49,12 @@
 /* Firebird API has a couple of missing const decls in its API */
 #define const_cast(s) ((char*)(s))
 
+#ifdef PHP_WIN32
+typedef void (__stdcall *info_func_t)(char*);
+#else
+typedef void (*info_func_t)(char*);
+#endif
+
 typedef struct {
 
 	/* the result of the last API call */
