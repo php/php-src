@@ -325,7 +325,7 @@ static void tokenize(zval *return_value)
 	array_init(return_value);
 
 	ZVAL_NULL(&token);
-	while ((token_type = lex_scan(&token CLS_CC))) {
+	while ((token_type = lex_scan(&token TSRMLS_CC))) {
 		destroy = 1;
 		switch (token_type) {
 			case T_OPEN_TAG:
@@ -480,7 +480,7 @@ PHP_FUNCTION(token_get_all)
 		return;
 
 	ZVAL_STRINGL(&source_z, source, source_len, 0);
-	zend_save_lexical_state(&original_lex_state CLS_CC);
+	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
 	if (zend_prepare_string_for_scanning(&source_z, "") == FAILURE) {
 		RETURN_EMPTY_STRING();
@@ -488,7 +488,7 @@ PHP_FUNCTION(token_get_all)
 
 	tokenize(return_value);
 	
-	zend_restore_lexical_state(&original_lex_state CLS_CC);
+	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 }
 /* }}} */
 
