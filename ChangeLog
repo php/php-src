@@ -1,3 +1,89 @@
+2001-04-26  Andi Gutmans  <andi@zend.com>
+
+    * tests/classes/class_example.phpt
+      tests/classes/inheritance.phpt
+      tests/lang/019.phpt
+      tests/lang/022.phpt: - Convert cfunction -> function.
+
+2001-04-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/rtfm/rtfm.c: typo/thinko bug in mail address fixed
+
+2001-04-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/fsock.c: MFH
+
+2001-04-26  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h: RC8
+
+2001-04-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/fsock.c:
+    fix for bug #8994, courtesy tom.anheyer@berlinonline.de
+
+
+2001-04-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/XML/RPC/Server.php: typo :-) (thanks to Carlo Marcelo Arenas Belon)
+
+2001-04-26  Matt McClanahan  <cardinal@dodds.net>
+
+    * ext/mysql/php_mysql.c:
+    Enforce the right number of params for mysql_fetch_*() functions, related to bug 9839.
+
+2001-04-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xslt/README.XSLT-BACKENDS:
+    Add a readme, this is a substitute to the e-mail I was going to send.  it
+    gives a basic overview of the new xslt extension and goes into the details
+    of the api, etc.
+
+2001-04-26  Andi Gutmans  <andi@zend.com>
+
+    * ext/session/session.c:
+    - use get_current_key_ex() in order to receive key length and not having
+    - to use strlen() everywhere.
+
+2001-04-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xslt/php_xslt.h
+      ext/xslt/xslt.c: Add a free function to free the returned structure.
+
+    * ext/xslt/php_xslt.h
+      ext/xslt/xslt.c:
+    Add the parse_xslt_arguments api function which parses sablotron type
+    arguments into an easy to use structure.
+
+2001-04-26  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: Take the blame for this one if it breaks something
+
+2001-04-26  Shane Caraveo  <shane@php.net>
+
+    * ext/session/session.c: compile was broken, new argument?
+
+2001-04-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xslt/EXPERIMENTAL
+      ext/xslt/Makefile.in
+      ext/xslt/config.m4
+      ext/xslt/php_sablot.h
+      ext/xslt/php_xslt.h
+      ext/xslt/sablot.c
+      ext/xslt/tests/001.phpt
+      ext/xslt/xslt.c:
+    Add an experimental version of the new XSLT extension.  This is by no means
+    to be used on anything production, if you want to test it, beware, it may or
+    may not work (feel free to complain to me if it doesn't work, or shower
+    praise if it does work)...
+
+    Mainly in PHP's CVS so that work on the other backends can take place.
+    The api (function_entry) is what I'm thinking of for all backends.  Every
+    backend simply needs to define these functions, I'll send an e-mail describing
+    all this in a bit....
+
 2001-04-25  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/rtfm/php_rtfm.h
