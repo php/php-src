@@ -1093,7 +1093,14 @@ PHP_FUNCTION(strerror)
 	}
 	if (Z_LVAL_PP(error) < -10000) {
 		Z_LVAL_PP(error) += 10000;
-		buf = hstrerror(-(Z_LVAL_PP(error)));
+#ifdef HAVE_HSTRERROR
+		buf = hstrerror(-(Z_LVAL_PP(error))); 
+#else
+		{
+		static char buf[100];
+		sprintf (buf, "Host lookup error %d", -(Z_LVAL_PP(error)));
+		}
+#endif
 	} else {
 		buf = strerror(-(Z_LVAL_PP(error)));
 	}

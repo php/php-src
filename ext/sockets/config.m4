@@ -7,7 +7,7 @@ PHP_ARG_ENABLE(sockets, whether to enable sockets support,
 if test "$PHP_SOCKETS" != "no"; then
 
   AC_CHECK_HEADERS(netdb.h netinet/tcp.h sys/un.h errno.h)
+  AC_CHECK_FUNCS(hstrerror)
   AC_DEFINE(HAVE_SOCKETS, 1, [ ])
-
   PHP_EXTENSION(sockets, $ext_shared)
 fi
