@@ -1,3 +1,76 @@
+2000-08-06  Zeev Suraski  <zeev@php.net>
+
+    * main/main.c:
+    Reverse this patch - it really shouldn't be in the error handler, but in the place
+    that generates the error...
+
+    * win32/sendmail.c: Fix warning
+
+    * win32/sendmail.c: Fix & optimize
+
+2000-08-06  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/pspell/pspell.c: Added a parameter type.
+
+    * ext/pspell/pspell.c: Fixed some protos.
+
+2000-08-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php_virtual_cwd.h: Including utime.h once is enough.
+
+2000-08-06  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/exec.c:
+    Description from the ChangeLog. Thies, is it correct?
+
+2000-08-06  Stanislav Malyshev  <stas@zend.com>
+
+    * main/php_virtual_cwd.h: Add utime include
+
+    * win32/sendmail.c: Add Joey Smith's sendmail_port patch
+
+2000-08-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in
+      main/php_virtual_cwd.h: Include <utime.h> in php_virtual_cwd.h.
+
+2000-08-06  Stanislav Malyshev  <stas@zend.com>
+
+    * main/php_virtual_cwd.c: Replace min() - not everyone has it
+
+    * main/php.h: fix stupid bug
+
+2000-08-06  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/file.c
+      ext/standard/filestat.c
+      main/fopen-wrappers.c
+      main/php.h
+      main/php_virtual_cwd.c
+      main/php_virtual_cwd.h: Virtualize realpath, chmod, chown and utime
+    This should fix #5935 and #5904
+
+2000-08-06  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/string.c: Changed some protos.
+
+2000-08-06  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/url_scanner.c:
+    removed a BAD IDEA (tm) that filtered out backslashes
+
+2000-08-06  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/rfc1867.c:
+    Support content-encoding headers in file upload mime parts
+
+    * main/php.h:
+    decouple this check just in case we hit a weird system that has one
+    and not the other.  And we specifically check for this, so we should
+    use the information.
+
+    * php.ini-dist: Remove mysql dll
+
 2000-08-05  Danny Heijl  <Danny.Heijl@cevi.be>
 
     * ext/informix/ifx.ec:
