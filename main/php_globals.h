@@ -58,6 +58,7 @@ struct _php_core_globals {
 	zend_bool implicit_flush;
 
 	int output_buffering;
+	int double_buffering;
 
 	char *safe_mode_include_dir;
 	zend_bool safe_mode_gid;
