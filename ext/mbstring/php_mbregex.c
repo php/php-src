@@ -557,7 +557,12 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 			}
 		} else { /* nomatch */
 			/* stick that last bit of string on our output */
-			_php_mb_regex_strbuf_ncat(&outdev, (const unsigned char *)&string[pos], string_len - pos);
+			int l = string_len - pos;
+			if (l > 0) {
+				_php_mb_regex_strbuf_ncat(&outdev, (const unsigned char *)&string[pos], l);
+			} else {
+				outdev.pos += l;
+			}
 		}
 	}
 
@@ -1083,3 +1088,12 @@ PHP_FUNCTION(mb_regex_set_options)
 /* }}} */
 
 #endif	/* HAVE_MBREGEX */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: fdm=marker
+ * vim: noet sw=4 ts=4
+ */
