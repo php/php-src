@@ -1,3 +1,118 @@
+2001-03-03  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/RFC822.php: documentation/whitespace
+
+    * pear/Mail/RFC822.php:
+    Add a validate parameter that allows you to turn off validation of atoms.
+    This lets you pass in an address list containing non-mime-encoded addresses,
+    for example, and get back a correctly split-up list that you can then encode.
+
+2001-03-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg_scanner.re
+      ext/ircg/ircg.c:
+    Finally fix the handler API to always pass smart_str's to the handlers.
+
+    format_msg now takes smart_str's only as parameters.
+
+    This easily saves a couple of million strlen's for one million
+    messages.
+
+2001-03-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache.php: The main file with new features.
+      - added support for cache dataset groups
+      - added extSave() - see my next PEAR list posting
+      - added getUserdata()
+
+    * pear/Cache/Output.php: Made Output use the new features.
+
+    * pear/Cache/Graphics.php: Renamed the class to follow PEAR's guides.
+
+    * pear/Cache/Function.php:
+    Changed the order of the inline module comment and the copyright stuff.
+
+     Ok, I know this will lead to some discussion. But please let me change
+     it so that PHPDoc works with it. Future version of PHPDoc will be able to
+     handle the other order but this version... I'll redo my changed as well as
+     soon as there is a new PHPDoc version.
+
+    * pear/Cache/Container.php: PR:
+      What does PR mean - Public Relations? Anyway: new cache structure/features
+        - allowed to group cache datasets in a group
+        - allowed to add userdata [CHAR(255)] to a dataset in the cache
+
+      More explanations will follow on the PEAR list.
+
+    Submitted by:
+      Ulf Wendel <uw@php.net>
+
+    Reviewed by:
+      myself ;-)
+      works on my development system and my homepage
+
+    * pear/Cache/Container/shm.php: Updates for the new structure/featues
+
+    * pear/Cache/Container/phplib.php:
+    Changes for the new structure / features
+
+    * pear/Cache/Container/file.php:
+    Changes for the new cache structure / features.
+     - added delDirectory() as a helper function for flush
+     - new file format
+
+    * pear/Cache/Container/db.php: Changes for the new cache structure
+     - extended inline docs
+     - extended calls to the still not existant call CacheError
+     - several changed for the new cache structure
+
+    WARNING: the code is untested, I don't have PEAR installed - Windows user.
+
+2001-03-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re:
+    4-fold increase of ircg_mirc_color() with a single new rule.
+
+    * ext/ircg/ircg.c: Improve the speed of format_msg() (5 fold increase).
+
+    We are still spending too much time in ircg_mirc_color().  According
+    to gprof on FreeBSD, it is something like 20% for encoding short
+    plain text messages.
+
+2001-03-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * php.ini-dist:
+    Jan says: 'Do not load php_gtk.dll through php.ini, only use dl(), otherwise it crashes (atleast on Win32).' Me thinks: 'There should be no crash, but a warning. Anyways, remove it from php.ini-dist, so others do not run into this... :-)
+
+2001-03-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container/phplib.php:
+    bugfix: idExists(), inline Doc changes: class doc
+
+2001-03-03  Sylvain PAGES  <spages@free.fr>
+
+    * ext/cybermut/cybermut.xml: - modified line 161 to be xml compliant
+
+2001-03-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * php.ini-dist: Whitespace only.
+
+    * php.ini-dist:
+    Whitespace Fixes. Added another Win32 extension DLL. Removed configuration for non-existent debugger.
+
+    * php.ini-dist: Added some more Win32 extension DLLs.
+
+    * pear/Benchmark/Iterate.php:
+    Use call_user_func_array() in order to profile functions that take arguments.
+
+    * pear/Benchmark/Timer.php: Whitespace only.
+
+2001-03-03  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: add a warn not available for curl_getinfo().
+    remove unneccessary error checking.
+
 2001-03-02  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c: Make use of the "zero-copy" write queue feature.
