@@ -32,6 +32,7 @@
 #include "php_globals.h"
 #include "php_variables.h"
 #include "rfc1867.h"
+#include "ext/standard/php_string.h"
 
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
@@ -1082,18 +1083,19 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					s = tmp;
 				}
 				num_vars--;
-			} else {
-				s = strrchr(filename, '\\');
-				if ((tmp = strrchr(filename, '/')) > s) {
-					s = tmp;
-				}
-			}
-#else
-			s = strrchr(filename, '\\');
-			if ((tmp = strrchr(filename, '/')) > s) {
-				s = tmp;
+				goto filedone;
 			}
 #endif
+
+			/* ensure that the uploaded file name only contains the path */
+			php_basename(filename, strlen(filename), NULL, 0, &s, NULL TSRMLS_CC);
+			efree(filename);
+			filename = s;
+
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
+filedone:
+#endif
+
 			
 			if (!is_anonymous) {
 				if (s && s > filename) {
