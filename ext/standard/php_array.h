@@ -70,6 +70,7 @@ PHP_FUNCTION(array_reverse);
 PHP_FUNCTION(array_reduce);
 PHP_FUNCTION(array_pad);
 PHP_FUNCTION(array_flip);
+PHP_FUNCTION(array_change_key_case);
 PHP_FUNCTION(array_rand);
 PHP_FUNCTION(array_unique);
 PHP_FUNCTION(array_intersect);

@@ -65,6 +65,10 @@ php_array_globals array_globals;
 #define SORT_DESC		   	3
 #define SORT_ASC		    4
 
+#define CASE_LOWER          0
+#define CASE_UPPER          1
+
+
 PHP_MINIT_FUNCTION(array)
 {
 #ifdef ZTS
@@ -83,6 +87,8 @@ PHP_MINIT_FUNCTION(array)
 	REGISTER_LONG_CONSTANT("SORT_REGULAR", SORT_REGULAR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NUMERIC", SORT_NUMERIC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_STRING", SORT_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CASE_LOWER", CASE_LOWER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CASE_UPPER", CASE_UPPER, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -2234,6 +2240,60 @@ PHP_FUNCTION(array_flip)
 		}
 	
 		zend_hash_move_forward_ex(target_hash, &pos);
+	}
+}
+/* }}} */
+
+/* {{{ proto array array_change_key_case(array input [, int case=CASE_LOWER])
+   Retuns an array with all string keys lowercased [or uppercased] */
+PHP_FUNCTION(array_change_key_case)
+{
+	zval **array, **entry, **to_upper;
+	char *string_key;
+	char *new_key;
+	uint str_key_len;
+	ulong num_key;
+	ulong change_to_upper=0;
+
+	HashPosition pos;
+					
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 || 
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &array, &to_upper) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (ZEND_NUM_ARGS() > 1) {
+		convert_to_long_ex(to_upper);
+		change_to_upper = Z_LVAL_PP(to_upper);
+	}
+
+	if (Z_TYPE_PP(array) != IS_ARRAY) {
+		php_error(E_WARNING, "Wrong datatype in array_change_key_case() call");
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(array), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(array), (void **)&entry, &pos) == SUCCESS) {
+		(*entry)->refcount++; 
+
+		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(array), &string_key, &str_key_len, &num_key, 0, &pos)) {
+		    case HASH_KEY_IS_LONG:
+				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry, sizeof(entry), NULL);
+				break;
+		    case HASH_KEY_IS_STRING:
+				new_key=estrndup(string_key,str_key_len);
+				if (change_to_upper)
+					php_strtoupper(new_key, str_key_len - 1);
+				else
+					php_strtolower(new_key, str_key_len - 1);
+				zend_hash_update(Z_ARRVAL_P(return_value), new_key, str_key_len, entry, sizeof(entry), NULL);
+				efree(new_key);
+				break;
+		}
+
+		zend_hash_move_forward_ex(Z_ARRVAL_PP(array), &pos);
 	}
 }
 /* }}} */
