@@ -364,7 +364,8 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1+1);
 #ifdef TSRM_WIN32
 			/* Windows 9x will consider C:\\Foo as a network path. Avoid it. */
-			if (state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') {
+			if ((state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') || 
+				IsDBCSLeadByte(state->cwd[state->cwd_length-2])) {
 				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 			}
 #else

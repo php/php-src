@@ -1051,7 +1051,7 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 	/* strip trailing slashes */
 	while (*c == '/'
 #ifdef PHP_WIN32
-		   || *c == '\\'
+		   || (*c == '\\' && !IsDBCSLeadByte(*(c-1)))
 #endif
 		)
 		c--;
@@ -1063,7 +1063,7 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 
 	if ((c = strrchr(s, '/'))
 #ifdef PHP_WIN32
-		|| (c = strrchr(s, '\\'))
+		|| ((c = strrchr(s, '\\')) && !IsDBCSLeadByte(*(c-1)))
 #endif
 		) {
 		ret = estrdup(c + 1);
@@ -1108,7 +1108,7 @@ PHPAPI void php_dirname(char *path, int len)
 	}
 
 	/* Strip trailing slashes */
-	while (end >= path && IS_SLASH(*end)) {
+	while (end >= path && IS_SLASH_P(end)) {
 		end--;
 	}
 	if (end < path) {
@@ -1119,7 +1119,7 @@ PHPAPI void php_dirname(char *path, int len)
 	}
 
 	/* Strip filename */
-	while (end >= path && !IS_SLASH(*end)) {
+	while (end >= path && !IS_SLASH_P(end)) {
 		end--;
 	}
 	if (end < path) {
@@ -1130,7 +1130,7 @@ PHPAPI void php_dirname(char *path, int len)
 	}
 
 	/* Strip slashes which came before the file name */
-	while (end >= path && IS_SLASH(*end)) {
+	while (end >= path && IS_SLASH_P(end)) {
 		end--;
 	}
 	if (end < path) {
