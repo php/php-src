@@ -116,6 +116,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_field_is_null,NULL)
 	/* async message function */
 	PHP_FE(pg_get_notify,   NULL)
+	PHP_FE(pg_get_pid,      NULL)
 	/* error message functions */
 	PHP_FE(pg_result_error, NULL)
 	PHP_FE(pg_last_error,   NULL)
@@ -3015,9 +3016,7 @@ PHP_FUNCTION(pg_get_notify)
 	zval *pgsql_link;
 	int id = -1, result_type = PGSQL_ASSOC;
 	PGconn *pgsql;
-	PGresult *pgsql_result;
 	PGnotify *pgsql_notify;
-	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r|l",
 								 &pgsql_link) == FAILURE) {
@@ -3044,6 +3043,24 @@ PHP_FUNCTION(pg_get_notify)
 }
 /* }}} */
 
+/* {{{ proto resource pg_get_pid([resource connection)
+   Get backend(server) pid */
+PHP_FUNCTION(pg_get_pid)
+{
+	zval *pgsql_link;
+	int id = -1, pid;
+	PGconn *pgsql;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r",
+								 &pgsql_link) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	RETURN_LONG(PQbackendPID(pgsql));
+}
+/* }}} */
 
 /* {{{ php_pgsql_meta_data
  * TODO: Add meta_data cache for better performance

@@ -43,14 +43,13 @@ module with specific version. You need to install PostgreSQL
 somewhere in your system to build PHP with PostgreSQL support.
 
 ==== Note For PostgreSQL 7.2 ====
-I've tested upto 7.2.1.
+I've tested upto 7.2.2.
 
 ==== TODO List ===
 Make pg_convert() smater. 
  - Better regex
  - User defiend type support
 Support async connection.
-Support async notification.
 
 ==== Experimental Functions =====
 
@@ -217,6 +216,19 @@ array pg_select(resource db, string table, array ids[, bool convert])
    Select records that has ids (id=>value) 
 
 --------------------------------------------------------------------
+array pg_get_notify([resource db[, notify]])
+   Get notify message on the connection 
+
+--------------------------------------------------------------------
+string pg_unescape_bytea(string bytea_data)
+   Unescape bytea field data 
+
+--------------------------------------------------------------------
+bool pg_ping(resource db)
+   ping database connection and try to reset connection if it's
+   broken 
+
+-------------------------------------------------------------------
 
 Again, experimental functions are subject to be changed without 
 notice.
