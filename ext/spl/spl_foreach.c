@@ -151,6 +151,10 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 			if (proxy->is_a & SPL_IS_A_SEQUENCE) {
 				spl_begin_method_call_no_retval(obj, proxy->obj_ce, &proxy->funcs.rewind, "rewind", sizeof("rewind")-1 TSRMLS_CC);
 			}
+			// now this is an optimization trick:
+			// ZEND_SWITCH_FREE receives the array copy or the spl object in op1 and has an unused op2
+			// We have to check for op1 being an object that implements spl_forwar... Or we simply set 
+			// op2 and know we can safely free the object as needed, which is waht we do.
 			op_array->opcodes[EX(opline)->op2.u.opline_num].op2 = *op1;
 		}
 
@@ -238,6 +242,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 /* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE) */
 ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE)
 {
+	// See not in ZEND_FE_FETCH on setting op2
 	znode *op2 = &EX(opline)->op2;
 	zval *tmp, **obj = spl_get_zval_ptr_ptr(op2, EX(Ts) TSRMLS_CC);
 	spl_foreach_proxy *proxy;
