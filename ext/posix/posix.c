@@ -25,7 +25,7 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
-#include "ext/standard/file.h"
+#include "ext/standard/file.h" /* Provides php_file_le_stream() */
 #include "php_posix.h"
 
 #if HAVE_POSIX
@@ -581,21 +581,27 @@ PHP_FUNCTION(posix_ctermid)
 #endif
 /* }}} */
 
-#define STREAM_GET_FD() \
-			stream = zend_list_find(Z_LVAL_P(z_fd), &rsrc_type); \
-			if (!stream || rsrc_type != php_file_le_stream()) { \
-				php_error(E_WARNING, "%s() expects argument 1 to be a valid stream resource", \
-						  get_active_function_name(TSRMLS_C)); \
-				return; \
-			} \
-			if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) { \
-				php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 0); \
-			} else { \
-				php_error(E_WARNING, "%s() could not use stream of type '%s'", \
-						  get_active_function_name(TSRMLS_C), stream->ops->label); \
-				return; \
-			}
+/* Checks if the provides resource is a stream and if it provides a file descriptor */
+static int php_posix_stream_get_fd(long rsrc_id, int *fd TSRMLS_DC)
+{
+	php_stream *stream;
+	int rsrc_type;
 
+	stream = zend_list_find(rsrc_id, &rsrc_type);
+	if (!stream || rsrc_type != php_file_le_stream()) {
+		php_error(E_WARNING, "%s() expects argument 1 to be a valid stream resource",
+				  get_active_function_name(TSRMLS_C));
+		return 0;
+	}
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)fd, 0);
+	} else {
+		php_error(E_WARNING, "%s() could not use stream of type '%s'",
+				  get_active_function_name(TSRMLS_C), stream->ops->label);
+		return 0;
+	}
+	return 1;
+}
 
 /* {{{ proto string posix_ttyname(int fd)
    Determine terminal device name (POSIX.1, 4.7.2) */
@@ -603,15 +609,16 @@ PHP_FUNCTION(posix_ttyname)
 {
 	zval *z_fd;
 	char *p;
-	php_stream *stream;
-	int rsrc_type, fd;
+	int fd;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE)
 		return;
 
 	switch (Z_TYPE_P(z_fd)) {
 		case IS_RESOURCE:
-			STREAM_GET_FD();
+			if (!php_posix_stream_get_fd(Z_RESVAL_P(z_fd), &fd)) {
+				RETURN_FALSE;
+			}
 			break;
 		default:
 			convert_to_long(z_fd);
@@ -632,15 +639,16 @@ PHP_FUNCTION(posix_ttyname)
 PHP_FUNCTION(posix_isatty)
 {
 	zval *z_fd;
-	php_stream *stream;
-	int rsrc_type, fd;
+	int fd;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE)
 		return;
 
 	switch (Z_TYPE_P(z_fd)) {
 		case IS_RESOURCE:
-			STREAM_GET_FD();
+			if (!php_posix_stream_get_fd(Z_RESVAL_P(z_fd), &fd)) {
+				RETURN_FALSE;
+			}
 			break;
 		default:
 			convert_to_long(z_fd);
