@@ -15,7 +15,9 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 # define THANKS_GUYS ""
 #endif
 
+#ifdef WANT_LOGO
 0 ICON win32\build\php.ico
+#endif
 
 #define XSTRVER4(maj, min, rel, build) #maj "." #min "." #rel "." #build
 #define XSTRVER3(maj, min, rel) #maj "." #min "." #rel

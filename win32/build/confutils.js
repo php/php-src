@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.14 2003-12-04 12:34:29 rrichards Exp $
+// $Id: confutils.js,v 1.15 2003-12-04 13:38:47 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -31,8 +31,12 @@ if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files\\";
 }
 
-STDOUT.WriteLine("program files " + PROGRAM_FILES);
+if (!FSO.FileExists("README.CVS-RULES")) {
+	STDERR.WriteLine("Must be run from the root of the php source");
+	WScript.Quit(10);
+}
 
+// TODO: pick this up from configure.in
 var PHP_VERSION = 5;
 
 configure_args = new Array();
@@ -43,6 +47,20 @@ build_dirs = new Array();
 
 extension_include_code = "";
 extension_module_ptrs = "";
+
+function condense_path(path)
+{
+	var cd = WshShell.CurrentDirectory;
+
+	path = FSO.GetAbsolutePathName(path);
+
+	if (path.substr(0, cd.length).toLowerCase()
+			== cd.toLowerCase() &&
+			(path.charCodeAt(cd.length) == 92 || path.charCodeAt(cd.length) == 47)) {
+		return path.substr(cd.length + 1);
+	}
+	return path;
+}
 
 function ConfigureArg(type, optname, helptext, defval)
 {
@@ -425,6 +443,7 @@ function generate_version_info_resource(makefiletarget, creditspath)
 	var res_prod_name = res_desc;
 	var credits;
 	var thanks = "";
+	var logo = "";
 
 	if (FSO.FileExists(creditspath + '/CREDITS')) {
 		credits = FSO.OpenTextFile(creditspath + '/CREDITS', 1);
@@ -437,9 +456,13 @@ function generate_version_info_resource(makefiletarget, creditspath)
 		}
 		credits.Close();
 	}
+
+	if (makefiletarget.match(new RegExp("\\.exe$"))) {
+		logo = " /D WANT_LOGO ";
+	}
 	
 	MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": win32\\build\\template.rc");
-	MFO.WriteLine("\t$(RC) /fo $(BUILD_DIR)\\" + resname +
+	MFO.WriteLine("\t$(RC) /fo $(BUILD_DIR)\\" + resname + logo +
 	   	' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"' + makefiletarget +
 	   	'\\"" /d PRODUCT_NAME="\\"' + res_prod_name + '\\"" /d THANKS_GUYS="\\"' +
 		thanks + '\\"" win32\\build\\template.rc');
@@ -454,7 +477,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	var ldflags;
 	var resname;
 
-	STDOUT.WriteLine("Enabling sapi/" + sapiname);
+	STDOUT.WriteLine("Enabling SAPI " + configure_module_dirname);
 
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# objects for SAPI " + sapiname);
@@ -464,16 +487,16 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 		ADD_FLAG('CFLAGS_' + SAPI, cflags);
 	}
 
-	ADD_SOURCES("sapi/" + sapiname, file_list, sapiname);
+	ADD_SOURCES(configure_module_dirname, file_list, sapiname);
 	MFO.WriteBlankLines(1);
 	MFO.WriteLine("# SAPI " + sapiname);
 	MFO.WriteBlankLines(1);
 
 	/* generate a .res file containing version information */
-	resname = generate_version_info_resource(makefiletarget, "sapi/" + sapiname);
+	resname = generate_version_info_resource(makefiletarget, configure_module_dirname);
 	
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
-	MFO.WriteLine("\t@echo SAPI " + sapiname + " build complete");
+	MFO.WriteLine("\t@echo SAPI " + configure_module_dirname + "/" + sapiname + " build complete");
 	MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
@@ -512,11 +535,11 @@ function EXTENSION(extname, file_list, shared, cflags)
 	}
 
 	if (shared) {
-		STDOUT.WriteLine("Enabling ext/" + extname + " [shared]");
+		STDOUT.WriteLine("Enabling extension " + configure_module_dirname + " [shared]");
 		cflags = "/D COMPILE_DL_" + EXT + " /D " + EXT + "_EXPORTS=1 " + cflags;
 		ADD_FLAG("CFLAGS_PHP", "/D COMPILE_DL_" + EXT);
 	} else {
-		STDOUT.WriteLine("Enabling ext/" + extname);
+		STDOUT.WriteLine("Enabling extension " + configure_module_dirname);
 	}
 
 	MFO.WriteBlankLines(1);
@@ -524,13 +547,13 @@ function EXTENSION(extname, file_list, shared, cflags)
 	MFO.WriteBlankLines(1);
 
 
-	ADD_SOURCES("ext/" + extname, file_list, extname);
+	ADD_SOURCES(configure_module_dirname, file_list, extname);
 	
 	MFO.WriteBlankLines(1);
 
 	if (shared) {
 		dllname = "php_" + extname + ".dll";
-		var resname = generate_version_info_resource(dllname, "ext/" + extname);
+		var resname = generate_version_info_resource(dllname, configure_module_dirname);
 	
 		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 		MFO.WriteLine("\t$(LD) /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname);
@@ -559,7 +582,7 @@ function EXTENSION(extname, file_list, shared, cflags)
 			if (s.match(re)) {
 				c = file_get_contents(s);
 				if (c.match("phpext_")) {
-					extension_include_code += '#include "ext/' + extname + '/' + FSO.GetFileName(s) + '"\r\n';
+					extension_include_code += '#include "' + configure_module_dirname + '/' + FSO.GetFileName(s) + '"\r\n';
 				}
 			}
 		}
