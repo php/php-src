@@ -989,7 +989,7 @@ PHPAPI char *expand_filepath(char *filepath)
 	char cwd[MAXPATHLEN+1];
 	char *result;
 
-	result = getcwd(cwd, MAXPATHLEN);	
+	result = V_GETCWD(cwd, MAXPATHLEN);	
 	if (!result) {
 		cwd[0] = '\0';
 	}
