@@ -4,6 +4,8 @@
 - Add user-space callback for the authorizer function (this is potentially
   very slow, so it needs to be implemented carefully).
 
+- Add user-space callback to handle busy databases.
+
 - Add an unbuffered query mode to stream data through PHP, rather than
   fetching it all at the start.
 
