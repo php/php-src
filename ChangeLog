@@ -1,3 +1,486 @@
+2000-05-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/nsapi/Makefile.in
+      sapi/phttpd/Makefile.in
+      sapi/roxen/Makefile.in
+      sapi/servlet/Makefile.in
+      sapi/thttpd/Makefile.in
+      pear/Makefile.in
+      regex/Makefile.in
+      sapi/Makefile.in
+      sapi/aolserver/Makefile.in
+      sapi/apache/Makefile.in
+      sapi/cgi/Makefile.in
+      sapi/isapi/Makefile.in
+      ext/swf/Makefile.in
+      ext/xml/Makefile.in
+      ext/xml/expat/xmlparse/Makefile.in
+      ext/xml/expat/xmltok/Makefile.in
+      ext/yp/Makefile.in
+      ext/zlib/Makefile.in
+      ext/sybase_ct/Makefile.in
+      ext/sysvsem/Makefile.in
+      ext/sysvshm/Makefile.in
+      ext/wddx/Makefile.in
+      ext/xml/expat/Makefile.in
+      ext/standard/Makefile.in
+      ext/sybase/Makefile.in
+      ext/recode/Makefile.in
+      ext/session/Makefile.in
+      ext/snmp/Makefile.in
+      ext/pcre/Makefile.in
+      ext/pcre/pcrelib/Makefile.in
+      ext/pdf/Makefile.in
+      ext/pgsql/Makefile.in
+      ext/posix/Makefile.in
+      ext/readline/Makefile.in
+      ext/msql/Makefile.in
+      ext/mysql/Makefile.in
+      ext/mysql/libmysql/Makefile.in
+      ext/oci8/Makefile.in
+      ext/odbc/Makefile.in
+      ext/oracle/Makefile.in
+      ext/informix/Makefile.in
+      ext/interbase/Makefile.in
+      ext/java/Makefile.in
+      ext/ldap/Makefile.in
+      ext/mcal/Makefile.in
+      ext/mcrypt/Makefile.in
+      ext/mhash/Makefile.in
+      ext/ftp/Makefile.in
+      ext/gd/Makefile.in
+      ext/gettext/Makefile.in
+      ext/hyperwave/Makefile.in
+      ext/icap/Makefile.in
+      ext/imap/Makefile.in
+      ext/db/Makefile.in
+      ext/dba/Makefile.in
+      ext/dbase/Makefile.in
+      ext/domxml/Makefile.in
+      ext/fdf/Makefile.in
+      ext/filepro/Makefile.in
+      ext/bcmath/Makefile.in
+      ext/calendar/Makefile.in
+      ext/cpdf/Makefile.in
+      ext/cybercash/Makefile.in
+      ext/dav/Makefile.in
+      Makefile.in
+      ext/Makefile.in
+      ext/aspell/Makefile.in: Remove trailing empty lines
+
+2000-05-01  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c: Never mind on the error check
+
+2000-05-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/servlet/Makefile.in
+      sapi/thttpd/Makefile.in
+      sapi/apache/Makefile.in
+      sapi/cgi/Makefile.in
+      sapi/isapi/Makefile.in
+      sapi/nsapi/Makefile.in
+      sapi/phttpd/Makefile.in
+      sapi/roxen/Makefile.in
+      ext/swf/Makefile.in
+      ext/yp/Makefile.in
+      ext/zlib/Makefile.in
+      pear/Makefile.in
+      regex/Makefile.in
+      sapi/Makefile.in
+      sapi/aolserver/Makefile.in
+      ext/sysvshm/Makefile.in
+      ext/wddx/Makefile.in
+      ext/xml/Makefile.in
+      ext/xml/expat/Makefile.in
+      ext/xml/expat/xmlparse/Makefile.in
+      ext/xml/expat/xmltok/Makefile.in
+      ext/session/Makefile.in
+      ext/snmp/Makefile.in
+      ext/standard/Makefile.in
+      ext/sybase/Makefile.in
+      ext/sybase_ct/Makefile.in
+      ext/sysvsem/Makefile.in
+      ext/pgsql/Makefile.in
+      ext/posix/Makefile.in
+      ext/readline/Makefile.in
+      ext/recode/Makefile.in
+      ext/pcre/Makefile.in
+      ext/pdf/Makefile.in
+      ext/oci8/Makefile.in
+      ext/odbc/Makefile.in
+      ext/oracle/Makefile.in
+      ext/pcre/pcrelib/Makefile.in
+      ext/mhash/Makefile.in
+      ext/msql/Makefile.in
+      ext/mysql/Makefile.in
+      ext/mysql/libmysql/Makefile.in
+      ext/imap/Makefile.in
+      ext/informix/Makefile.in
+      ext/interbase/Makefile.in
+      ext/java/Makefile.in
+      ext/ldap/Makefile.in
+      ext/mcal/Makefile.in
+      ext/mcrypt/Makefile.in
+      ext/filepro/Makefile.in
+      ext/ftp/Makefile.in
+      ext/gd/Makefile.in
+      ext/gettext/Makefile.in
+      ext/hyperwave/Makefile.in
+      ext/icap/Makefile.in
+      ext/dav/Makefile.in
+      ext/db/Makefile.in
+      ext/dba/Makefile.in
+      ext/dbase/Makefile.in
+      ext/domxml/Makefile.in
+      ext/fdf/Makefile.in
+      Makefile.in
+      ext/Makefile.in
+      ext/aspell/Makefile.in
+      ext/bcmath/Makefile.in
+      ext/calendar/Makefile.in
+      ext/cpdf/Makefile.in
+      ext/cybercash/Makefile.in: Large test commit IV
+
+    * sapi/phttpd/Makefile.in
+      sapi/roxen/Makefile.in
+      sapi/servlet/Makefile.in
+      sapi/thttpd/Makefile.in
+      sapi/isapi/Makefile.in
+      sapi/nsapi/Makefile.in
+      pear/Makefile.in
+      regex/Makefile.in
+      sapi/Makefile.in
+      sapi/aolserver/Makefile.in
+      sapi/apache/Makefile.in
+      sapi/cgi/Makefile.in
+      ext/swf/Makefile.in
+      ext/xml/Makefile.in
+      ext/xml/expat/xmlparse/Makefile.in
+      ext/xml/expat/xmltok/Makefile.in
+      ext/yp/Makefile.in
+      ext/zlib/Makefile.in
+      ext/sysvsem/Makefile.in
+      ext/sysvshm/Makefile.in
+      ext/wddx/Makefile.in
+      ext/xml/expat/Makefile.in
+      ext/snmp/Makefile.in
+      ext/standard/Makefile.in
+      ext/sybase/Makefile.in
+      ext/sybase_ct/Makefile.in
+      ext/readline/Makefile.in
+      ext/recode/Makefile.in
+      ext/session/Makefile.in
+      ext/pgsql/Makefile.in
+      ext/posix/Makefile.in
+      ext/pcre/Makefile.in
+      ext/pcre/pcrelib/Makefile.in
+      ext/pdf/Makefile.in
+      ext/msql/Makefile.in
+      ext/mysql/Makefile.in
+      ext/mysql/libmysql/Makefile.in
+      ext/oci8/Makefile.in
+      ext/odbc/Makefile.in
+      ext/oracle/Makefile.in
+      ext/interbase/Makefile.in
+      ext/java/Makefile.in
+      ext/ldap/Makefile.in
+      ext/mcal/Makefile.in
+      ext/mcrypt/Makefile.in
+      ext/mhash/Makefile.in
+      ext/gd/Makefile.in
+      ext/gettext/Makefile.in
+      ext/hyperwave/Makefile.in
+      ext/icap/Makefile.in
+      ext/imap/Makefile.in
+      ext/informix/Makefile.in
+      ext/domxml/Makefile.in
+      ext/fdf/Makefile.in
+      ext/filepro/Makefile.in
+      ext/ftp/Makefile.in
+      ext/dav/Makefile.in
+      ext/db/Makefile.in
+      ext/dba/Makefile.in
+      ext/dbase/Makefile.in
+      ext/aspell/Makefile.in
+      ext/bcmath/Makefile.in
+      ext/calendar/Makefile.in
+      ext/cpdf/Makefile.in
+      ext/cybercash/Makefile.in
+      Makefile.in
+      ext/Makefile.in: Large commit test III
+
+    * ext/imap/Makefile.in
+      ext/filepro/Makefile.in
+      ext/ftp/Makefile.in
+      ext/gd/Makefile.in
+      ext/gettext/Makefile.in
+      ext/hyperwave/Makefile.in
+      ext/icap/Makefile.in
+      ext/dba/Makefile.in
+      ext/dbase/Makefile.in
+      ext/domxml/Makefile.in
+      ext/fdf/Makefile.in
+      ext/dav/Makefile.in
+      ext/db/Makefile.in
+      ext/cpdf/Makefile.in
+      ext/cybercash/Makefile.in
+      Makefile.in
+      ext/Makefile.in
+      ext/aspell/Makefile.in
+      ext/bcmath/Makefile.in
+      ext/calendar/Makefile.in: Large test commit II
+
+    * ext/db/Makefile.in
+      ext/cpdf/Makefile.in
+      ext/cybercash/Makefile.in
+      ext/dav/Makefile.in
+      ext/aspell/Makefile.in
+      ext/bcmath/Makefile.in
+      ext/calendar/Makefile.in
+      Makefile.in
+      ext/Makefile.in: Large test commit I
+
+    * ext/posix/Makefile.in
+      ext/posix/config.m4
+      ext/posix/posix.c: Make posix module buildable as shared module
+
+    * ext/pgsql/Makefile.in
+      ext/pgsql/config.m4: Revamp config stuff
+
+    * NEWS: .
+
+2000-05-01  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c: Dynamically allocate points for ImagePolygon (Marc Pohl)
+
+2000-05-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Use GCC's --print-libgcc-file-name flag to find libgcc's path.
+
+    Obtained from: mod_ssl
+
+2000-05-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: It's nice to keep them alphabetized.
+
+    * TODO: Nother entry.
+
+    * NEWS: New function.
+
+    * NEWS: Fix attribution.
+
+2000-05-01  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/calendar/calendar.dsp: oops wrong settings commited in project.
+
+    * php_modules.dsw
+      ext/calendar/calendar.dsp: adding calendar project
+
+2000-05-01  Joey Smith  <joey@samaritan.com>
+
+    * makerpm: Small fix: Description still referred to package as PHP3.
+
+2000-05-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/xml/expat/Makefile.in: Remove white-space, breaks UnixWare make
+
+2000-05-01  Joey Smith  <joey@samaritan.com>
+
+    * ext/bcmath/config.m4:
+    Forgot to mention: Added configure time checking for bcmath package. (Thanks, Sascha!)
+
+    * README.bcmath
+      ext/bcmath/config.m4:
+    There was already a perfectly good README-BCMATH, I just found the different naming confusing.
+
+    * ext/recode/.cvsignore: Shut up CVS
+
+2000-05-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_virtual_cwd.c: php_reentrancy.h is needed for strtok_r
+
+    * sapi/nsapi/.cvsignore: Ignore standard files
+
+    * ext/xml/Makefile.in
+      ext/xml/expat/Makefile.in: Rebuild xml, if libexpat changed.
+
+    * ext/xml/Makefile.in: Link expat into static and shared module.
+
+    * pear/Makefile.in: Copy dynlib.mk to the build directory.
+
+    * build/library.mk: Get rid of old cruft. Broke build on Irix.
+
+    * ext/zlib/.cvsignore
+      ext/zlib/Makefile.in
+      ext/yp/.cvsignore
+      ext/yp/Makefile.in
+      ext/xml/expat/.cvsignore
+      ext/xml/expat/Makefile.in
+      ext/xml/expat/xmlparse/.cvsignore
+      ext/xml/expat/xmlparse/Makefile.in
+      ext/xml/expat/xmltok/.cvsignore
+      ext/xml/expat/xmltok/Makefile.in
+      ext/sysvsem/.cvsignore
+      ext/sysvsem/Makefile.in
+      ext/sysvshm/.cvsignore
+      ext/sysvshm/Makefile.in
+      ext/wddx/.cvsignore
+      ext/wddx/Makefile.in
+      ext/xml/.cvsignore
+      ext/xml/Makefile.in
+      ext/xml/config.m4
+      ext/standard/.cvsignore
+      ext/standard/Makefile.in
+      ext/swf/.cvsignore
+      ext/swf/Makefile.in
+      ext/swf/config.m4
+      ext/swf/php_swf.h
+      ext/swf/swf.c
+      ext/sybase/.cvsignore
+      ext/sybase/Makefile.in
+      ext/sybase_ct/.cvsignore
+      ext/sybase_ct/Makefile.in
+      ext/snmp/Makefile.in
+      ext/recode/.cvsignore
+      ext/recode/Makefile.in
+      ext/session/.cvsignore
+      ext/session/Makefile.in
+      ext/session/config.m4
+      ext/session/session.c
+      ext/snmp/.cvsignore
+      ext/pcre/pcrelib/testdata/.cvsignore
+      ext/pdf/.cvsignore
+      ext/pdf/Makefile.in
+      ext/pgsql/.cvsignore
+      ext/pgsql/Makefile.in
+      ext/posix/.cvsignore
+      ext/posix/Makefile.in
+      ext/readline/.cvsignore
+      ext/readline/Makefile.in
+      ext/oracle/.cvsignore
+      ext/oracle/Makefile.in
+      ext/pcre/.cvsignore
+      ext/pcre/Makefile.in
+      ext/pcre/config.m4
+      ext/pcre/pcrelib/.cvsignore
+      ext/pcre/pcrelib/Makefile.in
+      ext/pcre/pcrelib/doc/.cvsignore
+      ext/pcre/php_pcre.c
+      ext/mssql/.cvsignore
+      ext/mysql/.cvsignore
+      ext/mysql/Makefile.in
+      ext/mysql/config.m4
+      ext/mysql/libmysql/.cvsignore
+      ext/mysql/libmysql/Makefile.in
+      ext/oci8/.cvsignore
+      ext/oci8/Makefile.in
+      ext/odbc/.cvsignore
+      ext/odbc/Makefile.in
+      ext/mcal/.cvsignore
+      ext/mcal/Makefile.in
+      ext/mcrypt/.cvsignore
+      ext/mcrypt/Makefile.in
+      ext/mhash/.cvsignore
+      ext/mhash/Makefile.in
+      ext/msql/.cvsignore
+      ext/msql/Makefile.in
+      ext/imap/Makefile.in
+      ext/informix/.cvsignore
+      ext/informix/Makefile.in
+      ext/interbase/.cvsignore
+      ext/interbase/Makefile.in
+      ext/java/.cvsignore
+      ext/java/Makefile.in
+      ext/ldap/.cvsignore
+      ext/ldap/Makefile.in
+      ext/icap/Makefile.in
+      ext/imap/.cvsignore
+      ext/gettext/.cvsignore
+      ext/gettext/Makefile.in
+      ext/hyperwave/.cvsignore
+      ext/hyperwave/Makefile.in
+      ext/icap/.cvsignore
+      ext/fdf/.cvsignore
+      ext/fdf/Makefile.in
+      ext/filepro/.cvsignore
+      ext/filepro/Makefile.in
+      ext/ftp/.cvsignore
+      ext/ftp/Makefile.in
+      ext/gd/.cvsignore
+      ext/gd/Makefile.in
+      ext/dbase/.cvsignore
+      ext/dbase/Makefile.in
+      ext/domxml/.cvsignore
+      ext/domxml/Makefile.in
+      ext/dav/.cvsignore
+      ext/dav/Makefile.in
+      ext/db/.cvsignore
+      ext/db/Makefile.in
+      ext/dba/.cvsignore
+      ext/dba/Makefile.in
+      ext/cybercash/.cvsignore
+      ext/cybercash/Makefile.in
+      ext/calendar/.cvsignore
+      ext/calendar/Makefile.in
+      ext/com/.cvsignore
+      ext/cpdf/.cvsignore
+      ext/cpdf/Makefile.in
+      build/build2.mk
+      build/dynlib.mk
+      build/rules.mk
+      ext/Makefile.in
+      ext/aspell/.cvsignore
+      ext/aspell/Makefile.in
+      ext/bcmath/.cvsignore
+      ext/bcmath/Makefile.in
+      ext/ext_skel
+      acinclude.m4
+      configure.in
+      dynlib.m4: Improved in-tree shared libraries build system
+
+    The following new/revived shared modules are available now:
+
+      ... MySQL (*)
+      ... PCRE (*)
+      ... Session
+      ... SWF
+
+      (*) capable of using bundled library or external library
+
+    All changes:
+
+      The m4 macro PHP_EXTENSION was revamped. Uses LIB_BUILD now.
+      This effectively means that all extensions have to use dynlib.
+
+      ext/mysql/config.m4 was revamped.
+      Uses LIB_BUILD for building bundled library.
+
+      ext/pcre/config.m4 was revamped.
+      Uses LIB_BUILD for building bundled library.
+
+      ext/ext_skel was changed to reflect that more modules should be
+      compileable as shared module.
+
+      ext/Makefile.in has been simplified enormously.
+
+      Dependencies are now stored in the build tree.
+
+      Empty dependencies are not generated by buildconf anymore. They
+      are now dynamically created during the build process.
+
+      Implicit rules for .S were removed.
+
+      The NO_RECURSION feature was removed.
+
+      "libs.mk" has been added to all cvsignore files in ext.
+
+2000-05-01  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: Added info about the swf module
+
+
 2000-04-30  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/swf/php_swf.h: Allow the SWF module to compile as a dl.
