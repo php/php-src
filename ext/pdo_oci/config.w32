@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("pdo-oci", "Oracle OCI support for PDO", "yes,shared");
+ARG_WITH("pdo-oci", "Oracle OCI support for PDO", "no");
 
 if (PHP_PDO_OCI != "no") {
 
@@ -28,11 +28,6 @@ if (PHP_PDO_OCI != "no") {
 
 		EXTENSION('pdo_oci', 'pdo_oci.c oci_driver.c oci_statement.c');
 		ADD_FLAG('CFLAGS_PDO_OCI', "/I ..\\pecl");
-
-		AC_DEFINE('HAVE_OCI_TEMP_LOB', 1);
-		AC_DEFINE('HAVE_OCI', 1);
-		AC_DEFINE('HAVE_OCI_ATTR_STATEMENT', 1);
-		AC_DEFINE('PHP_OCI_HAVE_COLLECTIONS', 1);
 
 		/* LOCAL HACKS: assume you have OCI 9.2 */
 		AC_DEFINE('HAVE_OCIENVCREATE', 1);

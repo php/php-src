@@ -301,7 +301,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	zend_bool dyn = FALSE;
 
 	/* describe the column */
-	STMT_CALL(OCIParamGet, (S->stmt, OCI_HTYPE_STMT, S->err, &param, colno+1));
+	STMT_CALL(OCIParamGet, (S->stmt, OCI_HTYPE_STMT, S->err, (dvoid*)&param, colno+1));
 
 	/* what type ? */
 	STMT_CALL_MSG(OCIAttrGet, "OCI_ATTR_DATA_TYPE",
@@ -359,7 +359,7 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	if (!dyn) {
 		STMT_CALL(OCIDefineByPos, (S->stmt, &S->cols[colno].def, S->err, colno+1,
 					S->cols[colno].data, S->cols[colno].datalen, dtype, &S->cols[colno].indicator,
-					&S->cols[colno].fetched_len, &S->cols[colno].retcode));
+					&S->cols[colno].fetched_len, &S->cols[colno].retcode, OCI_DEFAULT));
 	}
 	
 	return 1;
