@@ -87,11 +87,6 @@ extern int le_fp;
 #include "build-defs.h"
 #endif
 
-#ifndef ZTS
-static HashTable ht_keys;
-static HashTable ht_socks;
-#endif
-
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 
 function_entry fsock_functions[] = {
@@ -130,8 +125,8 @@ php3_module_entry fsock_module_entry = {
 };
  
 #ifndef ZTS
-static HashTable ht_keys;
-static HashTable ht_socks;
+static HashTable PG(ht_fsock_keys);
+static HashTable PG(ht_fsock_socks);
 #endif
 
 
@@ -160,8 +155,9 @@ int lookup_hostname(const char *addr, struct in_addr *in)
 int _php3_is_persistent_sock(int sock)
 {
 	char *key;
+	PLS_FETCH();
 
-	if (_php3_hash_find(&ht_socks, (char *) &sock, sizeof(sock),
+	if (_php3_hash_find(&PG(ht_fsock_socks), (char *) &sock, sizeof(sock),
 				(void **) &key) == SUCCESS) {
 		return 1;
 	}
@@ -289,7 +285,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	key = emalloc(args[0]->value.str.len + 10);
 	sprintf(key, "%s:%d", args[0]->value.str.val, portno);
 
-	if (persistent && _php3_hash_find(&ht_keys, key, strlen(key) + 1,
+	if (persistent && _php3_hash_find(&PG(ht_fsock_keys), key, strlen(key) + 1,
 				(void *) &sockp) == SUCCESS) {
 		efree(key);
 		*sock = *sockp;
@@ -364,9 +360,9 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 	*sock=socketd;
 	if (persistent) {
-		_php3_hash_update(&ht_keys, key, strlen(key) + 1, 
+		_php3_hash_update(&PG(ht_fsock_keys), key, strlen(key) + 1, 
 				sock, sizeof(*sock), NULL);
-		_php3_hash_update(&ht_socks, (char *) sock, sizeof(*sock),
+		_php3_hash_update(&PG(ht_fsock_socks), (char *) sock, sizeof(*sock),
 				key, strlen(key) + 1, NULL);
 	}
 	if(key) efree(key);
@@ -735,8 +731,8 @@ static void _php3_msock_destroy(int *data)
 int php3_minit_fsock(INIT_FUNC_ARGS)
 {
 #ifndef ZTS
-	_php3_hash_init(&ht_keys, 0, NULL, NULL, 1);
-	_php3_hash_init(&ht_socks, 0, NULL, (void (*)(void *))_php3_msock_destroy, 1);
+	_php3_hash_init(&PG(ht_fsock_keys), 0, NULL, NULL, 1);
+	_php3_hash_init(&PG(ht_fsock_socks), 0, NULL, (void (*)(void *))_php3_msock_destroy, 1);
 #endif
 	return SUCCESS;
 }
@@ -746,8 +742,8 @@ int php3_minit_fsock(INIT_FUNC_ARGS)
 int php3_mshutdown_fsock(SHUTDOWN_FUNC_ARGS)
 {
 #ifndef ZTS
-	_php3_hash_destroy(&ht_socks);
-	_php3_hash_destroy(&ht_keys);
+	_php3_hash_destroy(&PG(ht_fsock_socks));
+	_php3_hash_destroy(&PG(ht_fsock_keys));
 #endif
 	php_cleanup_sockbuf(1);
 	return SUCCESS;

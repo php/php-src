@@ -100,13 +100,13 @@ int _php3_getftpresult(int socketd);
 	
 	When open_basedir is NULL, always return 0
 */
-PHPAPI int _php3_check_specific_open_basedir(char *basedir, char *path)
+PHPAPI int _php3_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 {
 	char resolved_name[MAXPATHLEN];
 	char resolved_basedir[MAXPATHLEN];
 	char local_open_basedir[MAXPATHLEN];
 	int local_open_basedir_pos;
-	PLS_FETCH();
+	SLS_FETCH();
 	
 	/* Special case basedir==".": Use script-directory */
 	if ((strcmp(PG(open_basedir), ".") == 0) && 
@@ -153,6 +153,8 @@ PHPAPI int _php3_check_specific_open_basedir(char *basedir, char *path)
 
 PHPAPI int _php3_check_open_basedir(char *path)
 {
+	PLS_FETCH();
+
 	/* Only check when open_basedir is available */
 	if (PG(open_basedir) && *PG(open_basedir)) {
 		char *pathbuf;
@@ -174,7 +176,7 @@ PHPAPI int _php3_check_open_basedir(char *path)
 				end++;
 			}
 
-			if (_php3_check_specific_open_basedir(ptr, path) == 0) {
+			if (_php3_check_specific_open_basedir(ptr, path PLS_CC) == 0) {
 				efree(pathbuf);
 				return 0;
 			}
