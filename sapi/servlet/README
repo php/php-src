@@ -28,7 +28,7 @@ Build and execution instructions:
     Build:
       ./configure --with-servlet --with-java
     Execute:
-      add phpsrvlt.jar to CLASSPATH
+      Put phpsrvlt.jar into your $CATALINA_HOME/lib directory
       add directory containing libphp4.so to LD_LIBRARY_PATH
       merge/overwrite build/tomcat/examples/WEB-INF/web.xml from sapi/servlet
 
@@ -37,6 +37,6 @@ Build and execution instructions:
       add jdsk (or d:\build\tomcat\classes) to CLASSPATH
       build sapi\servlet\servlet.dsp
     Execute:
-      add phpsrvlt.jar to CLASSPATH
+      Put phpsrvlt.jar into your $CATALINA_HOME/lib directory
       add directory containing php4ts.dll and phpsrvlt.dll to PATH
       merge/overwrite build\tomcat\examples\WEB-INF\web.xml from sapi\servlet
