@@ -516,8 +516,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 	if (stream->writepos - stream->readpos < (off_t)size) {
 		size_t justread = 0;
 	
-		if (stream->eof)
-			return;
+		/* ignore eof here; the underlying state might have changed */
 		
 		/* no; so lets fetch more data */
 		
@@ -576,7 +575,8 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			didread += toread;
 		}
 
-		if (size == 0 || stream->eof) {
+		/* ignore eof here; the underlying state might have changed */
+		if (size == 0) {
 			break;
 		}
 
@@ -674,7 +674,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 		return -1;
 	}
 
-	return stream->ops->stat(stream, ssb TSRMLS_CC);
+	return (stream->ops->stat)(stream, ssb TSRMLS_CC);
 }
 
 PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len TSRMLS_DC)
