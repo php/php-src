@@ -926,7 +926,7 @@ static char *rsl_strdup(int start_frag, int start_pos, int len)
     req_dat =  MIME_MAGIC_G(req_dat);
 
     /* allocate the result string */
-    result = (char *) emalloc(len + 1);
+    result = (char *) emalloc(len + 2);
 
     /* loop through and collect the string */
     res_pos = 0;
