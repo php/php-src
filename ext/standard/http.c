@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Sara Golemon <pollia@php.net>                               |
+   | Authors: Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -170,8 +170,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 /* }}} */
 
 /* {{{ proto string http_build_query(mixed formdata [, string prefix])
-   Generate a form-encoded query string from an associative array or object.
-   */
+   Generates a form-encoded query string from an associative array or object. */
 PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;
