@@ -2082,7 +2082,7 @@ PHP_FUNCTION(rmdir)
 }
 /* }}} */
 
-/* {{{ proto int readfile(string filename [, int use_include_path])
+/* {{{ proto int readfile(string filename [, bool use_include_path])
    Output a file or a URL */
 PHP_FUNCTION(readfile)
 {
