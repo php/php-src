@@ -833,7 +833,7 @@ static void reflection_extension_factory(zval *object, char *name_str TSRMLS_DC)
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, zval *object TSRMLS_DC)
+static void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, int required, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -850,6 +850,7 @@ static void reflection_parameter_factory(struct _zend_arg_info *arg_info, int of
 	reference = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	reference->arg_info = arg_info;
 	reference->offset = offset;
+	reference->required = required;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
@@ -1413,7 +1414,7 @@ ZEND_METHOD(reflection_function, getParameters)
 		 zval *parameter;   
 
 		 ALLOC_ZVAL(parameter);
-		 reflection_parameter_factory(arg_info, i, parameter TSRMLS_CC);
+		 reflection_parameter_factory(arg_info, i, fptr->common.required_num_args, parameter TSRMLS_CC);
 		 add_next_index_zval(return_value, parameter);
 		 
 		 arg_info++;
