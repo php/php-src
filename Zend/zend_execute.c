@@ -3994,7 +3994,7 @@ int zend_add_interface_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-int zend_verify_ce_handler(ZEND_OPCODE_HANDLER_ARGS)
+int zend_verify_instanceof_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *arg = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
@@ -4192,7 +4192,7 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_START_NAMESPACE] = zend_start_namespace_handler;
 
 	zend_opcode_handlers[ZEND_ADD_INTERFACE] = zend_add_interface_handler;
-	zend_opcode_handlers[ZEND_VERIFY_CE] = zend_verify_ce_handler;
+	zend_opcode_handlers[ZEND_VERIFY_INSTANCEOF] = zend_verify_instanceof_handler;
 }
 
 /*
