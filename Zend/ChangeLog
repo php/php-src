@@ -1,3 +1,23 @@
+2004-01-11  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_compile.c
+      zend_language_scanner.h
+      zend_language_scanner.l:
+      TSRMLS fix
+
+2004-01-11  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y:
+      - Re-allow conditional class declerations. Needless to say that I also
+      - think it's not great coding.. Use polymorphism instead :)
+
+    * zend_compile.c
+      zend_language_scanner.h
+      zend_language_scanner.l:
+      - This should fix the problem of conditional function decleration on the
+      - same line of code not to work. You should re-evaluate your coding style
+      - if you really code this way :)
+
 2004-01-10  Zeev Suraski  <zeev@zend.com>
 
     * zend_operators.c:
