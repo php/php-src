@@ -454,9 +454,7 @@ non_empty_parameter_list:
 
 optional_class_type:
 		/* empty */		{ $$.op_type = IS_UNUSED; }
-	|	namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$$, &$1, &$3, 0 TSRMLS_CC); }
-	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$$, NULL, &$2, 1 TSRMLS_CC); }
-	|	T_STRING { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
+	|	fully_qualified_class_name		{ $$ = $1; }
 ;
 
 function_call_parameter_list:
@@ -571,8 +569,8 @@ expr_without_variable:
 		T_LIST '(' { zend_do_list_init(TSRMLS_C); } assignment_list ')' '=' expr { zend_do_list_end(&$$, &$7 TSRMLS_CC); }
 	|	variable '=' expr		{ zend_check_writable_variable(&$1); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign(&$$, &$1, &$3 TSRMLS_CC); }
 	|	variable '=' '&' variable { zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$4 TSRMLS_CC); }
-	|	variable '=' '&' T_NEW new_class_entry { zend_check_writable_variable(&$1); zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
-	|	T_NEW new_class_entry { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+	|	variable '=' '&' T_NEW dynamic_class_name { zend_check_writable_variable(&$1); zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
+	|	T_NEW dynamic_class_name { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	variable T_PLUS_EQUAL expr 	{ zend_check_writable_variable(&$1); zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 TSRMLS_CC); }
 	|	variable T_MINUS_EQUAL expr	{ zend_check_writable_variable(&$1); zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_SUB, &$$, &$1, &$3 TSRMLS_CC); }
 	|	variable T_MUL_EQUAL expr		{ zend_check_writable_variable(&$1); zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_MUL, &$$, &$1, &$3 TSRMLS_CC); }
@@ -616,7 +614,7 @@ expr_without_variable:
 	|	expr T_IS_SMALLER_OR_EQUAL expr { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$1, &$3 TSRMLS_CC); }
 	|	expr '>' expr 					{ zend_do_binary_op(ZEND_IS_SMALLER, &$$, &$3, &$1 TSRMLS_CC); }
 	|	expr T_IS_GREATER_OR_EQUAL expr { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$3, &$1 TSRMLS_CC); }
-	|	expr T_INSTANCEOF instanceof_expr { zend_do_instanceof(&$$, &$1, &$3, 0 TSRMLS_CC); }
+	|	expr T_INSTANCEOF dynamic_class_name { zend_do_instanceof(&$$, &$1, &$3, 0 TSRMLS_CC); }
 	|	'(' expr ')' 	{ $$ = $2; }
 	|	expr '?' { zend_do_begin_qm_op(&$1, &$2 TSRMLS_CC); }
 		expr ':' { zend_do_qm_true(&$4, &$2, &$5 TSRMLS_CC); }
@@ -660,7 +658,7 @@ import_namespace:
 	|	T_STRING { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
 ;
 
-new_class_entry:
+dynamic_class_name:
 		namespace_name T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string { zend_do_fetch_class(&$$, &$1, &$3, 0 TSRMLS_CC); }
 	|	T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string { zend_do_fetch_class(&$$, NULL, &$2, 1 TSRMLS_CC); }
 	|	static_or_variable_string { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
@@ -676,11 +674,6 @@ static_or_variable_string:
 	|	r_variable_without_static_member	{ $$ = $1; }
 ;
 
-instanceof_expr:
-		namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$$, &$1, &$3, 0 TSRMLS_CC); }
-	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$$, NULL, &$2, 1 TSRMLS_CC); }
-	|	T_STRING { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
-;
 
 exit_expr:
 		/* empty */	{ memset(&$$, 0, sizeof(znode)); $$.op_type = IS_UNUSED; }	
