@@ -24,6 +24,9 @@
 #endif
 #include <string.h>
 #include <errno.h>
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
 
 #include "php.h"
 #include "microtime.h"
