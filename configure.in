@@ -713,11 +713,13 @@ fi
 
 ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
 
-EXTENSION_DIR="$prefix/lib/php/extensions/$PART1-$PART2-$ZEND_MODULE_API_NO"
+if test -z "$PEAR_INSTALLDIR"; then
+  PEAR_INSTALLDIR="$prefix/lib/php"
+fi
 
-PEAR_INSTALLDIR="$prefix/lib/php"
+EXTENSION_DIR="\${PEAR_INSTALLDIR}/extensions/$PART1-$PART2-$ZEND_MODULE_API_NO"
 
-INCLUDE_PATH=".:$PEAR_INSTALLDIR"
+INCLUDE_PATH=".:\${PEAR_INSTALLDIR}"
 
 PHP_BUILD_RPATH
 

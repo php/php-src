@@ -28,7 +28,7 @@ if test "$PHP_NSAPI" != "no"; then
   AC_DEFINE(HAVE_NSAPI,1,[Whether you have a Netscape Server])
   PHP_SAPI=nsapi
   PHP_BUILD_SHARED
-  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PHP_NSAPI/bin/"
+  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)$PHP_NSAPI/bin/"
 fi
 
 
