@@ -54,7 +54,7 @@ function usage()
  * This makes it easier to convert to HTML output later.
  */
 
-function write($str)
+function dowrite($str)
 {
     global $term_bold, $term_norm;
     $str = str_replace("%b", $term_bold, $str);
@@ -62,9 +62,9 @@ function write($str)
     print $str;
 }
 
-function writeln($str)
+function dowriteln($str)
 {
-    write("$str\n");
+    dowrite("$str\n");
 }
 
 function initialize()
@@ -99,8 +99,8 @@ function initialize()
     }
 
     if (!is_executable($php)) {
-        writeln("PHP CGI binary ($php) not executable.");
-        writeln("Please compile PHP as a CGI executable and try again.");
+        dowriteln("PHP CGI binary ($php) not executable.");
+        dowriteln("Please compile PHP as a CGI executable and try again.");
         exit;
     }
 
@@ -175,7 +175,7 @@ function do_testing($argc, &$argv)
     $counting = $total - $skipped;
 
     if ($counting <= 0) {
-        writeln("No tests were run.");
+        dowriteln("No tests were run.");
         return;
     }
 
@@ -188,12 +188,12 @@ function do_testing($argc, &$argv)
     $failed_pstr = sprintf($failed_p < 10.0 ? "%1.1f" : "%3.0f", $failed_p);
     $skipped_pstr = sprintf($skipped_p < 10.0 ? "%1.1f" : "%3.0f", $skipped_p);
 
-    writeln("TEST RESULT SUMMARY");
-    writeln("=============================");
-    writeln(sprintf("Number of tests:  %4d", $total));
-    writeln(sprintf("Tests skipped:    %4d (%s%%)", $skipped, $skipped_pstr));
-    writeln(sprintf("Tests failed:     %4d (%s%%)", $failed, $failed_pstr));
-    writeln(sprintf("Tests passed:     %4d (%s%%)", $passed, $passed_pstr));
+    dowriteln("TEST RESULT SUMMARY");
+    dowriteln("=============================");
+    dowriteln(sprintf("Number of tests:  %4d", $total));
+    dowriteln(sprintf("Tests skipped:    %4d (%s%%)", $skipped, $skipped_pstr));
+    dowriteln(sprintf("Tests failed:     %4d (%s%%)", $failed, $failed_pstr));
+    dowriteln(sprintf("Tests passed:     %4d (%s%%)", $passed, $passed_pstr));
 }
 
 function find_testdirs($dir = '.', $first_pass = true)
@@ -245,8 +245,8 @@ function run_tests_in_dir($dir = '.')
     if (sizeof($testfiles) == 0) {
         return;
     }
-    writeln("%bRunning tests in $dir%B");
-    writeln("=================".str_repeat("=", strlen($dir)));
+    dowriteln("%bRunning tests in $dir%B");
+    dowriteln("=================".str_repeat("=", strlen($dir)));
     sort($testfiles);
     for ($i = 0; $i < sizeof($testfiles); $i++) {
         switch (run_test($testfiles[$i])) {
@@ -264,9 +264,9 @@ function run_tests_in_dir($dir = '.')
         $total++;
     }
     if ($oskipped + (isset($tests_in_dir[$dir])?$tests_in_dir[$dir]:0)  == $skipped) {
-        writeln("[all $skipped test(s) skipped]");
+        dowriteln("[all $skipped test(s) skipped]");
     }
-    writeln("");
+    dowriteln("");
     return true;
 }
 
@@ -376,6 +376,7 @@ function run_test($file)
     putenv("REDIRECT_STATUS=1");
     putenv("CONTENT_LENGTH=");
     putenv("QUERY_STRING=".(isset($GET)?$GET:""));
+    $include_path = ini_get("include_path");
     if (isset($fps["SKIPIF"])) {
         $tmpfile["SKIPIF_OUTPUT"] = tempnam($tmpdir, $tmpfix);
         putenv("REQUEST_METHOD=GET");
@@ -411,9 +412,9 @@ function run_test($file)
     putenv("c=");
     putenv("d=");
     if (isset($fps["POST"])) {
-        $cmd = "$php -f $tmpfile[FILE] < $tmpfile[POST]";
+        $cmd = "$php -q $tmpfile[FILE] < $tmpfile[POST]";
     } else {
-        $cmd = "$php -f $tmpfile[FILE]";
+        $cmd = "$php -q $tmpfile[FILE]";
     }
     $ofp = @fopen($tmpfile["OUTPUT"], "w");
     if (!$ofp) {
@@ -464,7 +465,7 @@ function run_test($file)
         copy($tmpfile["EXPECT"], $expectfile);
         copy($tmpfile["FILE"], $phpfile);
     }
-    writeln(sprintf("%s%-68s ... %s%s", $pre, substr($desc, 0, 68),
+    dowriteln(sprintf("%s%-68s ... %s%s", $pre, substr($desc, 0, 68),
                     $text, $post));
 //    if ($status == TEST_FAILED) {
 //        for ($i = 0; $i < sizeof($variables); $i++) {
