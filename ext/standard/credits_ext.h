@@ -90,7 +90,7 @@ CREDIT_LINE("Verisign Payflow Pro", "John Donagher, David Croft");
 CREDIT_LINE("Vpopmail", "David Croft, Boian Bonev");
 CREDIT_LINE("W32API", "James Moore");
 CREDIT_LINE("WDDX", "Andrei Zmievski");
-CREDIT_LINE("Win32 COM", "Zeev Suraski, Harald Radi, Alan Brown");
+CREDIT_LINE("Win32 COM", "Alan Brown, Wez Furlong, Harald Radi, Zeev Suraski");
 CREDIT_LINE("XML", "Stig Bakken, Thies C. Arntzen");
 CREDIT_LINE("xmlrpc", "Dan Libby");
 CREDIT_LINE("YAZ", "Adam Dickmeiss");
