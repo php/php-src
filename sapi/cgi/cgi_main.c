@@ -148,8 +148,6 @@ static char *sapi_cgi_read_cookies(SLS_D)
 
 static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
 {
-	char *pi;
-
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
 	 */
