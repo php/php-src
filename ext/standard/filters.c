@@ -1265,6 +1265,9 @@ out_failure:
 		php_conv_dtor(read_cd);
 		pefree(read_cd, persistent);
 	}
+	if (inst->filtername != NULL) {
+		pefree(inst->filtername, persistent);
+	}
 	return FAILURE;
 }
 
