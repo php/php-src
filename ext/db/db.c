@@ -439,7 +439,6 @@ PHP_FUNCTION(dbmclose)
  */
 void php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	int ret = 0;
 	dbm_info *info = (dbm_info *)rsrc->ptr;
 	DBM_TYPE dbf;
 	int lockfd;
@@ -491,45 +490,11 @@ PHP_FUNCTION(dbminsert)
 		RETURN_FALSE;
 	}
 	
-	ret = php_dbm_insert(info, Z_STRVAL_P(key), Z_STRVAL_P(value) TSRMLS_CC);
+	ret = php_dbm_insert_replace(info, Z_STRVAL_P(key), Z_STRVAL_P(value), 0 TSRMLS_CC);
 	RETURN_LONG(ret);
 }
 /* }}} */
 
-
-/* {{{ php_dbm_insert
- */
-int php_dbm_insert(dbm_info *info, char *key, char *value TSRMLS_DC) {
-	datum key_datum, value_datum;
-	int ret;
-	DBM_TYPE dbf;
-
-	php_stripslashes(key, NULL TSRMLS_CC);
-	php_stripslashes(value, NULL TSRMLS_CC);
-
-	value_datum.dptr = estrdup(value);
-	value_datum.dsize = strlen(value);
-
-	key_datum.dptr = estrdup(key);
-	key_datum.dsize = strlen(key);
-#if GDBM_FIX
-	key_datum.dsize++;
-#endif
-
-	dbf = info->dbf;
-	if (!dbf) {
-		php_error(E_WARNING, "Unable to locate dbm file");
-		return 1;
-	}
-
-	ret = DBM_STORE(dbf, key_datum, value_datum, DBM_INSERT);
-
-	/* free the memory */
-	efree(key_datum.dptr); efree(value_datum.dptr);
-
-	return(ret);	
-}
-/* }}} */
 
 /* {{{ proto int dbmreplace(int dbm_identifier, string key, string value)
    Replaces the value for a key in a dbm database */
@@ -551,28 +516,31 @@ PHP_FUNCTION(dbmreplace)
 		RETURN_FALSE;
 	}
 	
-	ret = php_dbm_replace(info, Z_STRVAL_P(key), Z_STRVAL_P(value) TSRMLS_CC);
+	ret = php_dbm_insert_replace(info, Z_STRVAL_P(key), Z_STRVAL_P(value), 1 TSRMLS_CC);
 	RETURN_LONG(ret);
 }
 /* }}} */
 
 /* {{{ php_dbm_replace
  */
-int php_dbm_replace(dbm_info *info, char *key, char *value TSRMLS_DC)
+int php_dbm_insert_replace(dbm_info *info, char *key, char *value, int replace_mode TSRMLS_DC)
 {
 	DBM_TYPE dbf;
 	int ret;
 	datum key_datum, value_datum;
+
+	key = estrdup(key);
+	value = estrdup(value);
 
 	if (PG(magic_quotes_runtime)) {
 		php_stripslashes(key, NULL TSRMLS_CC);
 		php_stripslashes(value, NULL TSRMLS_CC);
 	}
 
-	value_datum.dptr = estrdup(value);
+	value_datum.dptr = value;
 	value_datum.dsize = strlen(value);
 
-	key_datum.dptr = estrdup(key);
+	key_datum.dptr = key;
 	key_datum.dsize = strlen(key);
 #if GDBM_FIX
 	key_datum.dsize++;
@@ -580,11 +548,15 @@ int php_dbm_replace(dbm_info *info, char *key, char *value TSRMLS_DC)
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php_error(E_WARNING, "Unable to locate dbm file");
-		return 1;
+		php_error(E_WARNING, "%s(): Unable to locate dbm file", get_active_function_name(TSRMLS_C));
+		ret = 1;
+	} else {
+		if (!replace_mode) {
+			ret = DBM_STORE(dbf, key_datum, value_datum, DBM_INSERT);
+		} else {
+			ret = DBM_STORE(dbf, key_datum, value_datum, DBM_REPLACE);
+		}
 	}
-
-	ret = DBM_STORE(dbf, key_datum, value_datum, DBM_REPLACE);
 
 	/* free the memory */
 	efree(key_datum.dptr); efree(value_datum.dptr);
