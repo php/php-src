@@ -773,3 +773,10 @@ sockets.use_system_read = On
 ;com.typelib_file = 
 ; allow Distributed-COM calls
 ;com.allow_dcom = true
+
+[Printer]
+;printer.default_printer = ""
+
+; Local Variables:
+; tab-width: 4
+; End:

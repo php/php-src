@@ -504,6 +504,9 @@ sockets.use_system_read		=	Off	; Use the system read() function instead of
 ;com.typelib_file = 				; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
 ;com.allow_dcom			=	true	; allow Distributed-COM calls
 
+[Printer]
+;printer.default_printer = ""
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
