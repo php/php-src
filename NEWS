@@ -1,14 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.2
-- Fixed bug #29657 (xml_* functions throw non descriptive error). 
-  (Christian, Rob)
-- Fixed bug #29711 (Changed ext/xml to default to UTF-8 output). (Rob)
-- Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
 - Added PHP_EOL constant that contains the OS way of representing newlines.
   (Paul Hudson, Derick)
+- Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
+- Fixed bug #29711 (Changed ext/xml to default to UTF-8 output). (Rob)
 - Fixed bug #29678 (opendir() with ftp:// wrapper segfaults if path does not
   have trailing slash). (Ilia)
+- Fixed bug #29657 (xml_* functions throw non descriptive error). 
+  (Christian, Rob)
 - Fixed bug #29656 (segfault on result and statement properties). (Georg)
 - Fixed bug #29447 (Reflection API issues). (Marcus)
 
