@@ -538,23 +538,31 @@ ftp_rmdir(ftpbuf_t *ftp, const char *dir)
 /* {{{ ftp_chmod
  */
 int
-ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename)
+ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filename_len)
 {
-	char buffer[1024];
+	char *buffer;
 
-	if (ftp == NULL) {
+	if (ftp == NULL || filename_len <= 0) {
+		return 0;
+	}
+
+	if (!(buffer = emalloc(32 + filename_len + 1))) {
 		return 0;
 	}
 
 	sprintf(buffer, "CHMOD %o %s", mode, filename);
 
 	if (!ftp_putcmd(ftp, "SITE", buffer)) {
+		efree(buffer);
 		return 0;
 	}
+
+	efree(buffer);
 
 	if (!ftp_getresp(ftp) || ftp->resp != 200) {
 		return 0;
 	}
+	
 	return 1;
 }
 /* }}} */
