@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- PHP 4 scripts will now obey the max_execution_time setting and actually
+  time out (Rasmus)
 - Add configure command to phpinfo() output (Stig)
 - Add optional socket path to the mysql_?connect() functions (Rasmus)
 - Fix some warnings when compiling in maintainer-mode (Stig)
