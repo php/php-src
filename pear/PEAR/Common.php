@@ -79,7 +79,7 @@ class PEAR_Common extends PEAR
                $file = array_shift($this->_tempfiles))
         {
             if (@is_dir($file)) {
-                System::rm("-rf $file"); // XXX FIXME Windows
+                System::rm("-rf $file");
             } elseif (file_exists($file)) {
                 unlink($file);
             }
@@ -105,7 +105,7 @@ class PEAR_Common extends PEAR
             $dir = dirname($dir);
         }
         while ($newdir = array_shift($dirstack)) {
-            if (mkdir($newdir, 0777)) {
+            if (mkdir($newdir, 0755)) {
                 $this->log(2, "+ created dir $newdir");
             } else {
                 return false;
@@ -125,6 +125,18 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+
+    function mkTempDir()
+    {
+        $dir = (OS_WINDOWS) ? 'c:\\windows\\temp' : '/tmp';
+        $tmpdir = tempnam($tmpdir, 'pear');
+        unlink($tmpdir);
+        if (!mkdir($tmpdir, 0700)) {
+            return $this->raiseError("Unable to create temporary directory $tmpdir");
+        }
+        $this->addTempFile($tmpdir);
+        return $tmpdir;
+    }
 
     // {{{ _element_start()
 
