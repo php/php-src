@@ -245,7 +245,7 @@ PHPAPI char *php_url_encode(char *s, int len, int *new_length)
 	register int x, y;
 	unsigned char *str;
 
-	str = (unsigned char *) emalloc(3 * strlen(s) + 1);
+	str = (unsigned char *) emalloc(3 * len + 1);
 	for (x = 0, y = 0; len--; x++, y++) {
 		str[y] = (unsigned char) s[x];
 		if (str[y] == ' ') {
