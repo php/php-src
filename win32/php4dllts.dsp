@@ -354,27 +354,27 @@ SOURCE=..\main\win95nt.h
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\chartables.c
-# ADD CPP /D "STATIC"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\get.c
-# ADD CPP /D "STATIC"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\maketables.c
-# ADD CPP /D "STATIC"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\pcre.c
-# ADD CPP /D "STATIC"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\study.c
-# ADD CPP /D "STATIC"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 3"
@@ -1326,15 +1326,10 @@ SOURCE=..\ext\com\COM.c
 # Begin Source File
 
 SOURCE=..\ext\com\conversion.c
-
 # End Source File
-
 # Begin Source File
 
-
-
 SOURCE=..\ext\com\dispatch.c
-
 # End Source File
 # Begin Source File
 
