@@ -2,7 +2,7 @@
 .SH NAME
 pgrep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
-.B pgrep [-chilnsvx] pattern [file] ...
+.B pgrep [-Vchilnsvx] pattern [file] ...
 
 
 .SH DESCRIPTION
@@ -23,6 +23,10 @@ against the pattern.
 
 .SH OPTIONS
 .TP 10
+\fB-V\fR
+Write the version number of the PCRE library being used to the standard error
+stream.
+.TP
 \fB-c\fR
 Do not print individual lines; instead just print a count of the number of
 lines that would otherwise have been printed. If several files are given, a

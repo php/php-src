@@ -2,7 +2,7 @@
 *      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/* This file is automatically written by the makechartables auxiliary 
+/* This file is automatically written by the dftables auxiliary 
 program. If you edit it by hand, you might like to edit the Makefile to 
 prevent its ever being regenerated.
 

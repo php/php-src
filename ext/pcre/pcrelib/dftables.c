@@ -59,7 +59,7 @@ printf(
   "/*************************************************\n"
   "*      Perl-Compatible Regular Expressions       *\n"
   "*************************************************/\n\n"
-  "/* This file is automatically written by the makechartables auxiliary \n"
+  "/* This file is automatically written by the dftables auxiliary \n"
   "program. If you edit it by hand, you might like to edit the Makefile to \n"
   "prevent its ever being regenerated.\n\n"
   "This file is #included in the compilation of pcre.c to build the default\n"

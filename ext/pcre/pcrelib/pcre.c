@@ -111,7 +111,7 @@ static const short int escapes[] = {
 
 static BOOL
   compile_regex(int, int, int *, uschar **, const uschar **, const char **,
-    BOOL, int, compile_data *);
+    BOOL, int, int *, int *, compile_data *);
 
 
 
@@ -148,10 +148,13 @@ tables. */
 *          Return version string                 *
 *************************************************/
 
+#define STRING(a)  # a
+#define XSTRING(s) STRING(s)
+
 const char *
 pcre_version(void)
 {
-return PCRE_VERSION;
+return XSTRING(PCRE_MAJOR) "." XSTRING(PCRE_MINOR) " " XSTRING(PCRE_DATE);
 }
 
 
@@ -162,7 +165,10 @@ return PCRE_VERSION;
 *************************************************/
 
 /* This function picks potentially useful data out of the private
-structure.
+structure. The public options are passed back in an int - though the
+re->options field has been expanded to a long int, all the public options
+at the low end of it, and so even on 16-bit systems this will still be OK.
+Therefore, I haven't changed the API for pcre_info().
 
 Arguments:
   external_re   points to compiled code
@@ -181,7 +187,7 @@ pcre_info(const pcre *external_re, int *optptr, int *first_char)
 const real_pcre *re = (const real_pcre *)external_re;
 if (re == NULL) return PCRE_ERROR_NULL;
 if (re->magic_number != MAGIC_NUMBER) return PCRE_ERROR_BADMAGIC;
-if (optptr != NULL) *optptr = (re->options & PUBLIC_OPTIONS);
+if (optptr != NULL) *optptr = (int)(re->options & PUBLIC_OPTIONS);
 if (first_char != NULL)
   *first_char = ((re->options & PCRE_FIRSTSET) != 0)? re->first_char :
      ((re->options & PCRE_STARTLINE) != 0)? -1 : -2;
@@ -532,6 +538,7 @@ for (;;)
 
     case OP_REVERSE:
     cc++;
+    /* Fall through */
 
     case OP_CREF:
     case OP_OPT:
@@ -627,6 +634,8 @@ Arguments:
   ptrptr       points to the current pattern pointer
   errorptr     points to pointer to error message
   optchanged   set to the value of the last OP_OPT item compiled
+  reqchar      set to the last literal character required, else -1
+  countlits    set to count of mandatory literal characters
   cd           contains pointers to tables
 
 Returns:       TRUE on success
@@ -636,12 +645,15 @@ Returns:       TRUE on success
 static BOOL
 compile_branch(int options, int *brackets, uschar **codeptr,
   const uschar **ptrptr, const char **errorptr, int *optchanged,
-  compile_data *cd)
+  int *reqchar, int *countlits, compile_data *cd)
 {
 int repeat_type, op_type;
 int repeat_min, repeat_max;
 int bravalue, length;
 int greedy_default, greedy_non_default;
+int prevreqchar;
+int condcount = 0;
+int subcountlits = 0;
 register int c;
 register uschar *code = *codeptr;
 uschar *tempcode;
@@ -655,6 +667,11 @@ uschar class[32];
 greedy_default = ((options & PCRE_UNGREEDY) != 0);
 greedy_non_default = greedy_default ^ 1;
 
+/* Initialize no required char, and count of literals */
+
+*reqchar = prevreqchar = -1;
+*countlits = 0;
+
 /* Switch on next character until the end of the branch */
 
 for (;; ptr++)
@@ -664,6 +681,7 @@ for (;; ptr++)
   int class_lastchar;
   int newoptions;
   int condref;
+  int subreqchar;
 
   c = *ptr;
   if ((options & PCRE_EXTENDED) != 0)
@@ -937,18 +955,19 @@ for (;; ptr++)
       { repeat_type = greedy_non_default; ptr++; }
     else repeat_type = greedy_default;
 
-    /* If the maximum is zero then the minimum must also be zero; Perl allows
-    this case, so we do too - by simply omitting the item altogether. */
-
-    if (repeat_max == 0) code = previous;
-
     /* If previous was a string of characters, chop off the last one and use it
     as the subject of the repeat. If there was only one character, we can
-    abolish the previous item altogether. */
+    abolish the previous item altogether. A repeat with a zero minimum wipes
+    out any reqchar setting, backing up to the previous value. We must also
+    adjust the countlits value. */
 
-    else if (*previous == OP_CHARS)
+    if (*previous == OP_CHARS)
       {
       int len = previous[1];
+
+      if (repeat_min == 0) *reqchar = prevreqchar;
+      *countlits += repeat_min - 1;
+
       if (len == 1)
         {
         c = previous[2];
@@ -987,7 +1006,15 @@ for (;; ptr++)
       code = previous;
 
       OUTPUT_SINGLE_REPEAT:
-      repeat_type += op_type;      /* Combine both values for many cases */
+
+      /* If the maximum is zero then the minimum must also be zero; Perl allows
+      this case, so we do too - by simply omitting the item altogether. */
+
+      if (repeat_max == 0) goto END_REPEAT;
+
+      /* Combine the op_type with the repeat_type */
+
+      repeat_type += op_type;
 
       /* A minimum of zero is handled either as the special case * or ?, or as
       an UPTO, with the maximum given. */
@@ -1064,10 +1091,15 @@ for (;; ptr++)
       }
 
     /* If previous was a character class or a back reference, we put the repeat
-    stuff after it. */
+    stuff after it, but just skip the item if the repeat was {0,0}. */
 
     else if (*previous == OP_CLASS || *previous == OP_REF)
       {
+      if (repeat_max == 0)
+        {
+        code = previous;
+        goto END_REPEAT;
+        }
       if (repeat_min == 0 && repeat_max == -1)
         *code++ = OP_CRSTAR + repeat_type;
       else if (repeat_min == 1 && repeat_max == -1)
@@ -1118,14 +1150,22 @@ for (;; ptr++)
 
       if (repeat_min == 0)
         {
+        /* If we set up a required char from the bracket, we must back off
+        to the previous value and reset the countlits value too. */
+
+        if (subcountlits > 0)
+          {
+          *reqchar = prevreqchar;
+          *countlits -= subcountlits;
+          }
+
         /* If the maximum is also zero, we just omit the group from the output
         altogether. */
 
         if (repeat_max == 0)
           {
           code = previous;
-          previous = NULL;
-          break;
+          goto END_REPEAT;
           }
 
         /* If the maximum is 1 or unlimited, we just have to stick in the
@@ -1230,59 +1270,6 @@ for (;; ptr++)
       correct offset was computed above. */
 
       else code[-ketoffset] = OP_KETRMAX + repeat_type;
-
-
-#ifdef NEVER
-      /* If the minimum is greater than zero, and the maximum is unlimited or
-      equal to the minimum, the first copy remains where it is, and is
-      replicated up to the minimum number of times. This case includes the +
-      repeat, but of course no replication is needed in that case. */
-
-      if (repeat_min > 0 && (repeat_max == -1 || repeat_max == repeat_min))
-        {
-        for (i = 1; i < repeat_min; i++)
-          {
-          memcpy(code, previous, len);
-          code += len;
-          }
-        }
-
-      /* If the minimum is zero, stick BRAZERO in front of the first copy.
-      Then, if there is a fixed upper limit, replicated up to that many times,
-      sticking BRAZERO in front of all the optional ones. */
-
-      else
-        {
-        if (repeat_min == 0)
-          {
-          memmove(previous+1, previous, len);
-          code++;
-          *previous++ = OP_BRAZERO + repeat_type;
-          }
-
-        for (i = 1; i < repeat_min; i++)
-          {
-          memcpy(code, previous, len);
-          code += len;
-          }
-
-        for (i = (repeat_min > 0)? repeat_min : 1; i < repeat_max; i++)
-          {
-          *code++ = OP_BRAZERO + repeat_type;
-          memcpy(code, previous, len);
-          code += len;
-          }
-        }
-
-      /* If the maximum is unlimited, set a repeater in the final copy. We
-      can't just offset backwards from the current code point, because we
-      don't know if there's been an options resetting after the ket. The
-      correct offset was computed above. */
-
-      if (repeat_max == -1) code[-ketoffset] = OP_KETRMAX + repeat_type;
-#endif
-
-
       }
 
     /* Else there's some kind of shambles */
@@ -1295,6 +1282,7 @@ for (;; ptr++)
 
     /* In all case we no longer have a previous item. */
 
+    END_REPEAT:
     previous = NULL;
     break;
 
@@ -1463,6 +1451,8 @@ for (;; ptr++)
          (bravalue == OP_ASSERTBACK ||
           bravalue == OP_ASSERTBACK_NOT), /* TRUE if back assert */
          condref,                      /* Condition reference number */
+         &subreqchar,                  /* For possible last char */
+         &subcountlits,                /* For literal count */
          cd))                          /* Tables block */
       goto FAILED;
 
@@ -1476,20 +1466,37 @@ for (;; ptr++)
 
     if (bravalue == OP_COND)
       {
-      int branchcount = 0;
       uschar *tc = code;
+      condcount = 0;
 
       do {
-         branchcount++;
+         condcount++;
          tc += (tc[1] << 8) | tc[2];
          }
       while (*tc != OP_KET);
 
-      if (branchcount > 2)
+      if (condcount > 2)
         {
         *errorptr = ERR27;
         goto FAILED;
         }
+      }
+
+    /* Handle updating of the required character. If the subpattern didn't
+    set one, leave it as it was. Otherwise, update it for normal brackets of
+    all kinds, forward assertions, and conditions with two branches. Don't
+    update the literal count for forward assertions, however. If the bracket
+    is followed by a quantifier with zero repeat, we have to back off. Hence
+    the definition of prevreqchar and subcountlits outside the main loop so
+    that they can be accessed for the back off. */
+
+    if (subreqchar > 0 &&
+         (bravalue >= OP_BRA || bravalue == OP_ONCE || bravalue == OP_ASSERT ||
+         (bravalue == OP_COND && condcount == 2)))
+      {
+      prevreqchar = *reqchar;
+      *reqchar = subreqchar;
+      if (bravalue != OP_ASSERT) *countlits += subcountlits;
       }
 
     /* Now update the main code pointer to the end of the group. */
@@ -1586,6 +1593,12 @@ for (;; ptr++)
 
     while (length < 255 && (cd->ctypes[c = *(++ptr)] & ctype_meta) == 0);
 
+    /* Update the last character and the count of literals */
+
+    prevreqchar = (length > 1)? code[-2] : *reqchar;
+    *reqchar = code[-1];
+    *countlits += length;
+
     /* Compute the length and set it in the data vector, and advance to
     the next state. */
 
@@ -1629,6 +1642,8 @@ Argument:
   errorptr    -> pointer to error message
   lookbehind  TRUE if this is a lookbehind assertion
   condref     > 0 for OPT_CREF setting at start of conditional group
+  reqchar     -> place to put the last required character, or a negative number
+  countlits   -> place to put the shortest literal count of any branch
   cd          points to the data block with tables pointers
 
 Returns:      TRUE on success
@@ -1637,7 +1652,7 @@ Returns:      TRUE on success
 static BOOL
 compile_regex(int options, int optchanged, int *brackets, uschar **codeptr,
   const uschar **ptrptr, const char **errorptr, BOOL lookbehind, int condref,
-  compile_data *cd)
+  int *reqchar, int *countlits, compile_data *cd)
 {
 const uschar *ptr = *ptrptr;
 uschar *code = *codeptr;
@@ -1645,7 +1660,10 @@ uschar *last_branch = code;
 uschar *start_bracket = code;
 uschar *reverse_count = NULL;
 int oldoptions = options & PCRE_IMS;
+int branchreqchar, branchcountlits;
 
+*reqchar = -1;
+*countlits = INT_MAX;
 code += 3;
 
 /* At the start of a reference-based conditional group, insert the reference
@@ -1684,7 +1702,8 @@ for (;;)
 
   /* Now compile the branch */
 
-  if (!compile_branch(options,brackets,&code,&ptr,errorptr,&optchanged,cd))
+  if (!compile_branch(options, brackets, &code, &ptr, errorptr, &optchanged,
+      &branchreqchar, &branchcountlits, cd))
     {
     *ptrptr = ptr;
     return FALSE;
@@ -1695,6 +1714,25 @@ for (;;)
   length = code - last_branch;
   last_branch[1] = length >> 8;
   last_branch[2] = length & 255;
+
+  /* Save the last required character if all branches have the same; a current
+  value of -1 means unset, while -2 means "previous branch had no last required
+  char".  */
+
+  if (*reqchar != -2)
+    {
+    if (branchreqchar >= 0)
+      {
+      if (*reqchar == -1) *reqchar = branchreqchar;
+      else if (*reqchar != branchreqchar) *reqchar = -2;
+      }
+    else *reqchar = -2;
+    }
+
+  /* Keep the shortest literal count */
+
+  if (branchcountlits < *countlits) *countlits = branchcountlits;
+  DPRINTF(("literal count = %d min=%d\n", branchcountlits, *countlits));
 
   /* If lookbehind, check that this branch matches a fixed-length string,
   and put the length into the OP_REVERSE item. Temporarily mark the end of
@@ -1788,6 +1826,11 @@ for (;;)
 
     case OP_CREF:
     code += 2;
+    break;
+
+    case OP_WORD_BOUNDARY:
+    case OP_NOT_WORD_BOUNDARY:
+    code++;
     break;
 
     case OP_ASSERT_NOT:
@@ -1972,7 +2015,7 @@ pcre_compile(const char *pattern, int options, const char **errorptr,
 real_pcre *re;
 int length = 3;      /* For initial BRA plus length */
 int runlength;
-int c, size;
+int c, size, reqchar, countlits;
 int bracount = 0;
 int top_backref = 0;
 int branch_extra = 0;
@@ -2312,13 +2355,16 @@ while ((c = *(++ptr)) != 0)
             will lead to an over-estimate on the length, but this shouldn't
             matter very much. We also have to allow for resetting options at
             the start of any alternations, which we do by setting
-            branch_newextra to 2. */
+            branch_newextra to 2. Finally, we record whether the case-dependent
+            flag ever changes within the regex. This is used by the "required
+            character" code. */
 
             case ':':
             if (((set|unset) & PCRE_IMS) != 0)
               {
               length += 4;
               branch_newextra = 2;
+              if (((set|unset) & PCRE_CASELESS) != 0) options |= PCRE_ICHANGED;
               }
             goto END_OPTIONS;
 
@@ -2519,7 +2565,7 @@ code = re->code;
 *code = OP_BRA;
 bracount = 0;
 (void)compile_regex(options, -1, &bracount, &code, &ptr, errorptr, FALSE, -1,
-  &compile_block);
+  &reqchar, &countlits, &compile_block);
 re->top_bracket = bracount;
 re->top_backref = top_backref;
 
@@ -2579,6 +2625,15 @@ if ((options & PCRE_ANCHORED) == 0)
     }
   }
 
+/* Save the last required character if there are at least two literal
+characters on all paths, or if there is no first character setting. */
+
+if (reqchar >= 0 && (countlits > 1 || (re->options & PCRE_FIRSTSET) == 0))
+  {
+  re->req_char = reqchar;
+  re->options |= PCRE_REQCHSET;
+  }
+
 /* Print out the compiled data for debugging */
 
 #ifdef DEBUG
@@ -2588,9 +2643,10 @@ printf("Length = %d top_bracket = %d top_backref = %d\n",
 
 if (re->options != 0)
   {
-  printf("%s%s%s%s%s%s%s%s\n",
+  printf("%s%s%s%s%s%s%s%s%s\n",
     ((re->options & PCRE_ANCHORED) != 0)? "anchored " : "",
     ((re->options & PCRE_CASELESS) != 0)? "caseless " : "",
+    ((re->options & PCRE_ICHANGED) != 0)? "case state changed " : "",
     ((re->options & PCRE_EXTENDED) != 0)? "extended " : "",
     ((re->options & PCRE_MULTILINE) != 0)? "multiline " : "",
     ((re->options & PCRE_DOTALL) != 0)? "dotall " : "",
@@ -2603,6 +2659,12 @@ if ((re->options & PCRE_FIRSTSET) != 0)
   {
   if (isprint(re->first_char)) printf("First char = %c\n", re->first_char);
     else printf("First char = \\x%02x\n", re->first_char);
+  }
+
+if ((re->options & PCRE_REQCHSET) != 0)
+  {
+  if (isprint(re->req_char)) printf("Req char = %c\n", re->req_char);
+    else printf("Req char = \\x%02x\n", re->req_char);
   }
 
 code_end = code;
@@ -2838,7 +2900,7 @@ Returns:      TRUE if matched
 
 static BOOL
 match_ref(int offset, register const uschar *eptr, int length, match_data *md,
-  int ims)
+  unsigned long int ims)
 {
 const uschar *p = md->start_subject + md->offset_vector[offset];
 
@@ -2897,9 +2959,10 @@ Returns:       TRUE if matched
 
 static BOOL
 match(register const uschar *eptr, register const uschar *ecode,
-  int offset_top, match_data *md, int ims, BOOL condassert, const uschar *eptrb)
+  int offset_top, match_data *md, unsigned long int ims, BOOL condassert,
+  const uschar *eptrb)
 {
-int original_ims = ims;   /* Save for resetting on ')' */
+unsigned long int original_ims = ims;   /* Save for resetting on ')' */
 
 for (;;)
   {
@@ -3014,9 +3077,11 @@ for (;;)
     ecode += 2;
     break;
 
-    /* End of the pattern */
+    /* End of the pattern. If PCRE_NOTEMPTY is set, fail if we have matched
+    an empty string - recursion will then try other alternatives, if any. */
 
     case OP_END:
+    if (md->notempty && eptr == md->start_match) return FALSE;
     md->end_match_ptr = eptr;          /* Record where we ended */
     md->end_offset_top = offset_top;   /* and how many extracts were taken */
     return TRUE;
@@ -3026,7 +3091,7 @@ for (;;)
     case OP_OPT:
     ims = ecode[1];
     ecode += 2;
-    DPRINTF(("ims set to %02x\n", ims));
+    DPRINTF(("ims set to %02lx\n", ims));
     break;
 
     /* Assertion brackets. Check the alternative branches in turn - the
@@ -3133,7 +3198,7 @@ for (;;)
       if (ecode[3] == OP_OPT)
         {
         ims = (ims & ~PCRE_IMS) | ecode[4];
-        DPRINTF(("ims set to %02x at group repeat\n", ims));
+        DPRINTF(("ims set to %02lx at group repeat\n", ims));
         }
 
       if (*ecode == OP_KETRMIN)
@@ -3227,7 +3292,7 @@ for (;;)
       the group. */
 
       ims = original_ims;
-      DPRINTF(("ims reset to %02x\n", ims));
+      DPRINTF(("ims reset to %02lx\n", ims));
 
       /* For a non-repeating ket, just continue at this level. This also
       happens for a repeating ket if no characters were matched in the group.
@@ -3321,12 +3386,8 @@ for (;;)
     case OP_NOT_WORD_BOUNDARY:
     case OP_WORD_BOUNDARY:
       {
-      /* Modified the next line to check previous character
-	 in case we're not at the beginning of the whole string
-	 (Andrey Zmievski) */
-      BOOL prev_is_word = (eptr != md->start_subject) ?
-        ((md->ctypes[eptr[-1]] & ctype_word) != 0) :
-		((md->ctypes[md->regprev] & ctype_word) != 0);
+      BOOL prev_is_word = (eptr != md->start_subject) &&
+        ((md->ctypes[eptr[-1]] & ctype_word) != 0);
       BOOL cur_is_word = (eptr < md->end_subject) &&
         ((md->ctypes[*eptr] & ctype_word) != 0);
       if ((*ecode++ == OP_WORD_BOUNDARY)?
@@ -4117,6 +4178,7 @@ Arguments:
   external_extra  points to "hints" from pcre_study() or is NULL
   subject         points to the subject string
   length          length of subject string (may contain binary zeros)
+  start_offset    where to start in the subject string
   options         option bits
   offsets         points to a vector of ints to be filled in with offsets
   offsetcount     the number of elements in the vector
@@ -4129,16 +4191,19 @@ Returns:          > 0 => success; value is the number of elements filled in
 
 int
 pcre_exec(const pcre *external_re, const pcre_extra *external_extra,
-  const char *subject, int length, const char *strbeg, int options,
-  int *offsets, int offsetcount, int minlen)
+  const char *subject, int length, int start_offset, int options, int *offsets,
+  int offsetcount)
 {
 int resetcount, ocount;
 int first_char = -1;
-int ims = 0;
+int req_char = -1;
+int req_char2 = -1;
+unsigned long int ims = 0;
 match_data match_block;
 const uschar *start_bits = NULL;
-const uschar *start_match = (const uschar *)subject;
+const uschar *start_match = (const uschar *)subject + start_offset;
 const uschar *end_subject;
+const uschar *req_char_ptr = start_match - 1;
 const real_pcre *re = (const real_pcre *)external_re;
 const real_pcre_extra *extra = (const real_pcre_extra *)external_extra;
 BOOL using_temporary_offsets = FALSE;
@@ -4159,20 +4224,12 @@ match_block.endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
 
 match_block.notbol = (options & PCRE_NOTBOL) != 0;
 match_block.noteol = (options & PCRE_NOTEOL) != 0;
+match_block.notempty = (options & PCRE_NOTEMPTY) != 0;
 
 match_block.errorcode = PCRE_ERROR_NOMATCH;     /* Default error */
 
 match_block.lcc = re->tables + lcc_offset;
 match_block.ctypes = re->tables + ctypes_offset;
-
-/* Setup previous character (Andrey Zmievski) */
-if (subject == strbeg)
-	match_block.regprev = '\n';
-else {
-	match_block.regprev = subject[-1];
-	if (!(re->options & PCRE_MULTILINE) && match_block.regprev == '\n')
-		match_block.regprev = '\0';
-}
 
 /* The ims options can vary during the matching as a result of the presence
 of (?ims) items in the pattern. They are kept in a local variable so that
@@ -4238,7 +4295,23 @@ if (!anchored)
         start_bits = extra->start_bits;
   }
 
-/* Loop for unanchored matches; for anchored regexps the loop runs just once. */
+/* For anchored or unanchored matches, there may be a "last known required
+character" set. If the PCRE_CASELESS is set, implying that the match starts
+caselessly, or if there are any changes of this flag within the regex, set up
+both cases of the character. Otherwise set the two values the same, which will
+avoid duplicate testing (which takes significant time). This covers the vast
+majority of cases. It will be suboptimal when the case flag changes in a regex
+and the required character in fact is caseful. */
+
+if ((re->options & PCRE_REQCHSET) != 0)
+  {
+  req_char = re->req_char;
+  req_char2 = ((re->options & (PCRE_CASELESS | PCRE_ICHANGED)) != 0)?
+    (re->tables + fcc_offset)[req_char] : req_char;
+  }
+
+/* Loop for handling unanchored repeated matching attempts; for anchored regexs
+the loop runs just once. */
 
 do
   {
@@ -4267,14 +4340,14 @@ do
 
   else if (startline)
     {
-    if (start_match > match_block.start_subject)
+    if (start_match > match_block.start_subject + start_offset)
       {
       while (start_match < end_subject && start_match[-1] != '\n')
         start_match++;
       }
     }
 
-  /* Or to a non-unique first char */
+  /* Or to a non-unique first char after study */
 
   else if (start_bits != NULL)
     {
@@ -4291,6 +4364,59 @@ do
   printf("\n");
 #endif
 
+  /* If req_char is set, we know that that character must appear in the subject
+  for the match to succeed. If the first character is set, req_char must be
+  later in the subject; otherwise the test starts at the match point. This
+  optimization can save a huge amount of backtracking in patterns with nested
+  unlimited repeats that aren't going to match. We don't know what the state of
+  case matching may be when this character is hit, so test for it in both its
+  cases if necessary. However, the different cased versions will not be set up
+  unless PCRE_CASELESS was given or the casing state changes within the regex.
+  Writing separate code makes it go faster, as does using an autoincrement and
+  backing off on a match. */
+
+  if (req_char >= 0)
+    {
+    register const uschar *p = start_match + ((first_char >= 0)? 1 : 0);
+
+    /* We don't need to repeat the search if we haven't yet reached the
+    place we found it at last time. */
+
+    if (p > req_char_ptr)
+      {
+      /* Do a single test if no case difference is set up */
+
+      if (req_char == req_char2)
+        {
+        while (p < end_subject)
+          {
+          if (*p++ == req_char) { p--; break; }
+          }
+        }
+
+      /* Otherwise test for either case */
+
+      else
+        {
+        while (p < end_subject)
+          {
+          register int pp = *p++;
+          if (pp == req_char || pp == req_char2) { p--; break; }
+          }
+        }
+
+      /* If we can't find the required character, break the matching loop */
+
+      if (p >= end_subject) break;
+
+      /* If we have found the required character, save the point where we
+      found it, so that we don't search again next time round the loop if
+      the start hasn't passed this character yet. */
+
+      req_char_ptr = p;
+      }
+    }
+
   /* When a match occurs, substrings will be set for all internal extractions;
   we just need to set up the whole thing as substring 0 before returning. If
   there were too many extractions, set the return code to zero. In the case
@@ -4298,11 +4424,8 @@ do
   those back references that we can. In this case there need not be overflow
   if certain parts of the pattern were not used. */
 
+  match_block.start_match = start_match;
   if (!match(start_match, re->code, 2, &match_block, ims, FALSE, start_match))
-    continue;
-
-  /* Check that the match is not closer than minlen (Andrey Zmievski) */
-  if (start_match - match_block.start_subject < minlen)
     continue;
 
   /* Copy the offset information from temporary store if necessary */

@@ -26,9 +26,15 @@ pcreposix - POSIX API for Perl-compatible regular expressions.
 
 .SH DESCRIPTION
 This set of functions provides a POSIX-style API to the PCRE regular expression
-package. See \fBpcre (3)\fR for a description of the native API, which contains
-additional functionality. The functions described here are just wrapper
-functions that ultimately call the native API.
+package. See the \fBpcre\fR documentation for a description of the native API,
+which contains additional functionality.
+
+The functions described here are just wrapper functions that ultimately call
+the native API. Their prototypes are defined in the \fBpcreposix.h\fR header
+file, and on Unix systems the library itself is called \fBpcreposix.a\fR, so
+can be accessed by adding \fB-lpcreposix\fR to the command for linking an
+application which uses them. Because the POSIX functions call the native ones,
+it is also necessary to add \fR-lpcre\fR.
 
 As I am pretty ignorant about POSIX, these functions must be considered as
 experimental. I have implemented only those option bits that can be reasonably

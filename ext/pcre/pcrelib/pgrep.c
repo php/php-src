@@ -74,7 +74,7 @@ while (fgets(buffer, sizeof(buffer), in) != NULL)
   if (length > 0 && buffer[length-1] == '\n') buffer[--length] = 0;
   linenumber++;
 
-  match = pcre_exec(pattern, hints, buffer, length, 0, offsets, 99) >= 0;
+  match = pcre_exec(pattern, hints, buffer, length, 0, 0, offsets, 99) >= 0;
   if (match && whole_lines && offsets[1] != length) match = FALSE;
 
   if (match != invert)
@@ -119,7 +119,7 @@ return rc;
 static int
 usage(int rc)
 {
-fprintf(stderr, "Usage: pgrep [-chilnsvx] pattern [file] ...\n");
+fprintf(stderr, "Usage: pgrep [-Vchilnsvx] pattern [file] ...\n");
 return rc;
 }
 
@@ -159,6 +159,11 @@ for (i = 1; i < argc; i++)
       case 's': silent = TRUE; break;
       case 'v': invert = TRUE; break;
       case 'x': whole_lines = TRUE; options |= PCRE_ANCHORED; break;
+
+      case 'V':
+      fprintf(stderr, "PCRE version %s\n", pcre_version());
+      break;
+
       default:
       fprintf(stderr, "pgrep: unknown option %c\n", s[-1]);
       return usage(2);

@@ -32,9 +32,14 @@
 #ifndef _PHP_PCRE_H
 #define _PHP_PCRE_H
 
-#if HAVE_PCRE
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 
+#if HAVE_BUNDLED_PCRE
 #include "pcrelib/pcre.h"
+#else
+#include "pcre.h"
+#endif
+
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif
@@ -84,7 +89,7 @@ extern ZEND_API php_pcre_globals pcre_globals;
 
 #define pcre_module_ptr NULL
 
-#endif /* HAVE_PCRE */
+#endif /* HAVE_PCRE || HAVE_BUNDLED_PCRE */
 
 #define phpext_pcre_ptr pcre_module_ptr
 

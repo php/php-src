@@ -1,0 +1,182 @@
+<HTML>
+<HEAD>
+<TITLE>pcreposix specification</TITLE>
+</HEAD>
+<body bgcolor="#FFFFFF" text="#00005A">
+<H1>pcreposix specification</H1>
+This HTML document has been generated automatically from the original man page.
+If there is any nonsense in it, please consult the man page in case the
+conversion went wrong.
+<UL>
+<LI><A NAME="TOC1" HREF="#SEC1">NAME</A>
+<LI><A NAME="TOC2" HREF="#SEC2">SYNOPSIS</A>
+<LI><A NAME="TOC3" HREF="#SEC3">DESCRIPTION</A>
+<LI><A NAME="TOC4" HREF="#SEC4">COMPILING A PATTERN</A>
+<LI><A NAME="TOC5" HREF="#SEC5">MATCHING A PATTERN</A>
+<LI><A NAME="TOC6" HREF="#SEC6">ERROR MESSAGES</A>
+<LI><A NAME="TOC7" HREF="#SEC7">STORAGE</A>
+<LI><A NAME="TOC8" HREF="#SEC8">AUTHOR</A>
+</UL>
+<LI><A NAME="SEC1" HREF="#TOC1">NAME</A>
+<P>
+pcreposix - POSIX API for Perl-compatible regular expressions.
+</P>
+<LI><A NAME="SEC2" HREF="#TOC1">SYNOPSIS</A>
+<P>
+<B>#include &#60;pcreposix.h&#62;</B>
+</P>
+<P>
+<B>int regcomp(regex_t *<I>preg</I>, const char *<I>pattern</I>,</B>
+<B>int <I>cflags</I>);</B>
+</P>
+<P>
+<B>int regexec(regex_t *<I>preg</I>, const char *<I>string</I>,</B>
+<B>size_t <I>nmatch</I>, regmatch_t <I>pmatch</I>[], int <I>eflags</I>);</B>
+</P>
+<P>
+<B>size_t regerror(int <I>errcode</I>, const regex_t *<I>preg</I>,</B>
+<B>char *<I>errbuf</I>, size_t <I>errbuf_size</I>);</B>
+</P>
+<P>
+<B>void regfree(regex_t *<I>preg</I>);</B>
+</P>
+<LI><A NAME="SEC3" HREF="#TOC1">DESCRIPTION</A>
+<P>
+This set of functions provides a POSIX-style API to the PCRE regular expression
+package. See the <B>pcre</B> documentation for a description of the native API,
+which contains additional functionality.
+</P>
+<P>
+The functions described here are just wrapper functions that ultimately call
+the native API. Their prototypes are defined in the <B>pcreposix.h</B> header
+file, and on Unix systems the library itself is called <B>pcreposix.a</B>, so
+can be accessed by adding <B>-lpcreposix</B> to the command for linking an
+application which uses them. Because the POSIX functions call the native ones,
+it is also necessary to add \fR-lpcre\fR.
+</P>
+<P>
+As I am pretty ignorant about POSIX, these functions must be considered as
+experimental. I have implemented only those option bits that can be reasonably
+mapped to PCRE native options. Other POSIX options are not even defined. It may
+be that it is useful to define, but ignore, other options. Feedback from more
+knowledgeable folk may cause this kind of detail to change.
+</P>
+<P>
+When PCRE is called via these functions, it is only the API that is POSIX-like
+in style. The syntax and semantics of the regular expressions themselves are
+still those of Perl, subject to the setting of various PCRE options, as
+described below.
+</P>
+<P>
+The header for these functions is supplied as <B>pcreposix.h</B> to avoid any
+potential clash with other POSIX libraries. It can, of course, be renamed or
+aliased as <B>regex.h</B>, which is the "correct" name. It provides two
+structure types, <I>regex_t</I> for compiled internal forms, and
+<I>regmatch_t</I> for returning captured substrings. It also defines some
+constants whose names start with "REG_"; these are used for setting options and
+identifying error codes.
+</P>
+<LI><A NAME="SEC4" HREF="#TOC1">COMPILING A PATTERN</A>
+<P>
+The function <B>regcomp()</B> is called to compile a pattern into an
+internal form. The pattern is a C string terminated by a binary zero, and
+is passed in the argument <I>pattern</I>. The <I>preg</I> argument is a pointer
+to a regex_t structure which is used as a base for storing information about
+the compiled expression.
+</P>
+<P>
+The argument <I>cflags</I> is either zero, or contains one or more of the bits
+defined by the following macros:
+</P>
+<P>
+<PRE>
+  REG_ICASE
+</PRE>
+</P>
+<P>
+The PCRE_CASELESS option is set when the expression is passed for compilation
+to the native function.
+</P>
+<P>
+<PRE>
+  REG_NEWLINE
+</PRE>
+</P>
+<P>
+The PCRE_MULTILINE option is set when the expression is passed for compilation
+to the native function.
+</P>
+<P>
+The yield of <B>regcomp()</B> is zero on success, and non-zero otherwise. The
+<I>preg</I> structure is filled in on success, and one member of the structure
+is publicized: <I>re_nsub</I> contains the number of capturing subpatterns in
+the regular expression. Various error codes are defined in the header file.
+</P>
+<LI><A NAME="SEC5" HREF="#TOC1">MATCHING A PATTERN</A>
+<P>
+The function <B>regexec()</B> is called to match a pre-compiled pattern
+<I>preg</I> against a given <I>string</I>, which is terminated by a zero byte,
+subject to the options in <I>eflags</I>. These can be:
+</P>
+<P>
+<PRE>
+  REG_NOTBOL
+</PRE>
+</P>
+<P>
+The PCRE_NOTBOL option is set when calling the underlying PCRE matching
+function.
+</P>
+<P>
+<PRE>
+  REG_NOTEOL
+</PRE>
+</P>
+<P>
+The PCRE_NOTEOL option is set when calling the underlying PCRE matching
+function.
+</P>
+<P>
+The portion of the string that was matched, and also any captured substrings,
+are returned via the <I>pmatch</I> argument, which points to an array of
+<I>nmatch</I> structures of type <I>regmatch_t</I>, containing the members
+<I>rm_so</I> and <I>rm_eo</I>. These contain the offset to the first character of
+each substring and the offset to the first character after the end of each
+substring, respectively. The 0th element of the vector relates to the entire
+portion of <I>string</I> that was matched; subsequent elements relate to the
+capturing subpatterns of the regular expression. Unused entries in the array
+have both structure members set to -1.
+</P>
+<P>
+A successful match yields a zero return; various error codes are defined in the
+header file, of which REG_NOMATCH is the "expected" failure code.
+</P>
+<LI><A NAME="SEC6" HREF="#TOC1">ERROR MESSAGES</A>
+<P>
+The <B>regerror()</B> function maps a non-zero errorcode from either
+<B>regcomp</B> or <B>regexec</B> to a printable message. If <I>preg</I> is not
+NULL, the error should have arisen from the use of that structure. A message
+terminated by a binary zero is placed in <I>errbuf</I>. The length of the
+message, including the zero, is limited to <I>errbuf_size</I>. The yield of the
+function is the size of buffer needed to hold the whole message.
+</P>
+<LI><A NAME="SEC7" HREF="#TOC1">STORAGE</A>
+<P>
+Compiling a regular expression causes memory to be allocated and associated
+with the <I>preg</I> structure. The function <B>regfree()</B> frees all such
+memory, after which <I>preg</I> may no longer be used as a compiled expression.
+</P>
+<LI><A NAME="SEC8" HREF="#TOC1">AUTHOR</A>
+<P>
+Philip Hazel &#60;ph10@cam.ac.uk&#62;
+<BR>
+University Computing Service,
+<BR>
+New Museums Site,
+<BR>
+Cambridge CB2 3QG, England.
+<BR>
+Phone: +44 1223 334714
+</P>
+<P>
+Copyright (c) 1997-1999 University of Cambridge.

@@ -1814,4 +1814,77 @@
     *** Failers 
     abcde\nBar  
 
+/^.*B/
+    **** Failers
+    abc\nB
+     
+/(?s)^.*B/
+    abc\nB
+
+/(?m)^.*B/
+    abc\nB
+     
+/(?ms)^.*B/
+    abc\nB
+
+/(?ms)^B/
+    abc\nB
+
+/(?s)B$/
+    B\n
+
+/^[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/
+    123456654321
+  
+/^\d\d\d\d\d\d\d\d\d\d\d\d/
+    123456654321 
+
+/^[\d][\d][\d][\d][\d][\d][\d][\d][\d][\d][\d][\d]/
+    123456654321
+  
+/^[abc]{12}/
+    abcabcabcabc
+    
+/^[a-c]{12}/
+    abcabcabcabc
+    
+/^(a|b|c){12}/
+    abcabcabcabc 
+
+/^[abcdefghijklmnopqrstuvwxy0123456789]/
+    n
+    *** Failers 
+    z 
+
+/abcde{0,0}/
+    abcd
+    *** Failers
+    abce  
+
+/ab[cd]{0,0}e/
+    abe
+    *** Failers
+    abcde 
+    
+/ab(c){0,0}d/
+    abd
+    *** Failers
+    abcd   
+
+/a(b*)/
+    a
+    ab
+    abbbb
+    *** Failers
+    bbbbb    
+    
+/ab\d{0}e/
+    abe
+    *** Failers
+    ab1e   
+    
+/"([^\\"]+|\\.)*"/
+    the \"quick\" brown fox
+    \"the \\\"quick\\\" brown fox\" 
+
 / End of test input /

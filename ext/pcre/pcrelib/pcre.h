@@ -7,6 +7,22 @@
 #ifndef _PCRE_H
 #define _PCRE_H
 
+#define PCRE_MAJOR 2
+#define PCRE_MINOR 08
+#define PCRE_DATE  31-Aug-1999
+
+/* Win32 uses DLL by default */
+
+#ifdef _WIN32
+# ifdef STATIC
+#  define PCRE_DL_IMPORT
+# else
+#  define PCRE_DL_IMPORT __declspec(dllimport)
+# endif
+#else
+# define PCRE_DL_IMPORT
+#endif
+
 /* Have to include stdlib.h in order to ensure that size_t is defined;
 it is needed here for malloc. */
 
@@ -31,6 +47,7 @@ extern "C" {
 #define PCRE_NOTBOL          0x0080
 #define PCRE_NOTEOL          0x0100
 #define PCRE_UNGREEDY        0x0200
+#define PCRE_NOTEMPTY        0x0400
 
 /* Exec-time and get-time error codes */
 
@@ -48,10 +65,13 @@ typedef void pcre;
 typedef void pcre_extra;
 
 /* Store get and free functions. These can be set to alternative malloc/free
-functions if required. */
+functions if required. Some magic is required for Win32 DLL; it is null on
+other OS. */
 
-extern void *(*pcre_malloc)(size_t);
-extern void  (*pcre_free)(void *);
+PCRE_DL_IMPORT extern void *(*pcre_malloc)(size_t);
+PCRE_DL_IMPORT extern void  (*pcre_free)(void *);
+
+#undef PCRE_DL_IMPORT
 
 /* Functions */
 
@@ -59,7 +79,7 @@ extern pcre *pcre_compile(const char *, int, const char **, int *,
   const unsigned char *);
 extern int pcre_copy_substring(const char *, int *, int, int, char *, int);
 extern int pcre_exec(const pcre *, const pcre_extra *, const char *,
-  int, const char *, int, int *, int, int);
+  int, int, int, int *, int);
 extern int pcre_get_substring(const char *, int *, int, int, const char **);
 extern int pcre_get_substring_list(const char *, int *, int, const char ***);
 extern int pcre_info(const pcre *, int *, int *);

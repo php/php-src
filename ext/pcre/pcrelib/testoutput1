@@ -1,4 +1,4 @@
-PCRE version 2.05 21-Apr-1999
+PCRE version 2.08 31-Aug-1999
 
 /the quick brown fox/
     the quick brown fox
@@ -2767,6 +2767,121 @@ No match
 No match
     abcde\nBar  
 No match
+
+/^.*B/
+    **** Failers
+No match
+    abc\nB
+No match
+     
+/(?s)^.*B/
+    abc\nB
+ 0: abc\x0aB
+
+/(?m)^.*B/
+    abc\nB
+ 0: B
+     
+/(?ms)^.*B/
+    abc\nB
+ 0: abc\x0aB
+
+/(?ms)^B/
+    abc\nB
+ 0: B
+
+/(?s)B$/
+    B\n
+ 0: B
+
+/^[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/
+    123456654321
+ 0: 123456654321
+  
+/^\d\d\d\d\d\d\d\d\d\d\d\d/
+    123456654321 
+ 0: 123456654321
+
+/^[\d][\d][\d][\d][\d][\d][\d][\d][\d][\d][\d][\d]/
+    123456654321
+ 0: 123456654321
+  
+/^[abc]{12}/
+    abcabcabcabc
+ 0: abcabcabcabc
+    
+/^[a-c]{12}/
+    abcabcabcabc
+ 0: abcabcabcabc
+    
+/^(a|b|c){12}/
+    abcabcabcabc 
+ 0: abcabcabcabc
+ 1: c
+
+/^[abcdefghijklmnopqrstuvwxy0123456789]/
+    n
+ 0: n
+    *** Failers 
+No match
+    z 
+No match
+
+/abcde{0,0}/
+    abcd
+ 0: abcd
+    *** Failers
+No match
+    abce  
+No match
+
+/ab[cd]{0,0}e/
+    abe
+ 0: abe
+    *** Failers
+No match
+    abcde 
+No match
+    
+/ab(c){0,0}d/
+    abd
+ 0: abd
+    *** Failers
+No match
+    abcd   
+No match
+
+/a(b*)/
+    a
+ 0: a
+ 1: 
+    ab
+ 0: ab
+ 1: b
+    abbbb
+ 0: abbbb
+ 1: bbbb
+    *** Failers
+ 0: a
+ 1: 
+    bbbbb    
+No match
+    
+/ab\d{0}e/
+    abe
+ 0: abe
+    *** Failers
+No match
+    ab1e   
+No match
+    
+/"([^\\"]+|\\.)*"/
+    the \"quick\" brown fox
+ 0: "quick"
+ 1: quick
+    \"the \\\"quick\\\" brown fox\" 
+ 0: "the \"quick\" brown fox"
+ 1:  brown fox
 
 / End of test input /
 
