@@ -296,10 +296,10 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 /* {{{ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) */
 static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 {
-	zval			*regex,				/* Regular expression */
-					*subject,			/* String to match against */
-					*subpats = NULL,	/* Array for subpatterns */
-					*subpats_order,		/* Order of the results in the subpatterns
+	zval			**regex,			/* Regular expression */
+					**subject,			/* String to match against */
+					**subpats = NULL,	/* Array for subpatterns */
+					**subpats_order,	/* Order of the results in the subpatterns
 										   array for global match */
 					*result_set,		/* Holds a set of subpatterns after
 										   a global match */
@@ -325,13 +325,13 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	/* Get function parameters and do error-checking. */
 	switch(ARG_COUNT(ht)) {
 		case 2:
-			if (getParameters(ht, 2, &regex, &subject) == FAILURE) {
+			if (getParametersEx(2, &regex, &subject) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			break;
 			
 		case 3:
-			if (getParameters(ht, 3, &regex, &subject, &subpats) == FAILURE) {
+			if (getParametersEx(3, &regex, &subject, &subpats) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			if (global)
@@ -343,7 +343,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			break;
 
 		case 4:
-			if (getParameters(ht, 4, &regex, &subject, &subpats, &subpats_order) == FAILURE) {
+			if (getParametersEx(4, &regex, &subject, &subpats, &subpats_order) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			if (!ParameterPassedByReference(ht, 3)) {
@@ -352,8 +352,8 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			}
 	
 			/* Make sure subpats_order is a number */
-			convert_to_long(subpats_order);
-			subpats_order_val = subpats_order->value.lval;
+			convert_to_long_ex(subpats_order);
+			subpats_order_val = (*subpats_order)->value.lval;
 			if (subpats_order_val < PREG_PATTERN_ORDER ||
 				subpats_order_val > PREG_SET_ORDER) {
 				zend_error(E_WARNING, "Wrong value for parameter 4 in call to preg_match_all()");
@@ -365,17 +365,17 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Make sure we're dealing with strings. */
-	convert_to_string(regex);
-	convert_to_string(subject);
+	convert_to_string_ex(regex);
+	convert_to_string_ex(subject);
 
 	/* Make sure to clean up the passed array and initialize it. */
 	if (subpats != NULL) {
-		zval_dtor(subpats);
-		array_init(subpats);
+		zval_dtor(*subpats);
+		array_init(*subpats);
 	}
 
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra, &preg_options)) == NULL) {
+	if ((re = _pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -401,8 +401,8 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	
 	do {
 		/* Execute the regular expression. */
-		count = pcre_exec(re, extra, subject->value.str.val,
-						  subject->value.str.len, start_offset,
+		count = pcre_exec(re, extra, (*subject)->value.str.val,
+						  (*subject)->value.str.len, start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */	
@@ -414,12 +414,12 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		/* If something has matched */
 		if (count >= 0) {
 			matched++;
-			match = subject->value.str.val + offsets[0];
+			match = (*subject)->value.str.val + offsets[0];
 
 			/* If subpatters array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if (pcre_get_substring_list(subject->value.str.val,
+				if (pcre_get_substring_list((*subject)->value.str.val,
 											offsets, count, &stringlist) < 0) {
 					efree(offsets);
 					efree(re);
@@ -445,14 +445,14 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 							add_next_index_string(result_set, (char *)stringlist[i], 1);
 						}
 						/* And add it to the output array */
-						zend_hash_next_index_insert(subpats->value.ht, &result_set,
+						zend_hash_next_index_insert((*subpats)->value.ht, &result_set,
 								sizeof(zval *), NULL);
 					}
 				}
 				else {			/* single pattern matching */
 					/* For each subpattern, insert it into the subpatterns array. */
 					for (i=0; i<count; i++) {
-						add_next_index_string(subpats, (char *)stringlist[i], 1);
+						add_next_index_string((*subpats), (char *)stringlist[i], 1);
 					}
 				}
 
@@ -464,7 +464,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < subject->value.str.len) {
+			if (g_notempty != 0 && start_offset < (*subject)->value.str.len) {
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + 1;
 			} else
@@ -484,7 +484,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	/* Add the match sets to the output array and clean up */
 	if (global && subpats_order_val == PREG_PATTERN_ORDER) {
 		for (i=0; i<num_subpats; i++) {
-			zend_hash_next_index_insert(subpats->value.ht, &match_sets[i], sizeof(zval *), NULL);
+			zend_hash_next_index_insert((*subpats)->value.ht, &match_sets[i], sizeof(zval *), NULL);
 		}
 		efree(match_sets);
 	}
@@ -848,36 +848,36 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
     Perform Perl-style regular expression replacement */
 PHP_FUNCTION(preg_replace)
 {
-	zval			*regex,
-					*replace,
-					*subject,
+	zval		   **regex,
+				   **replace,
+				   **subject,
 				   **subject_entry_ptr,
 					*subject_entry;
 	char			*result;
 	
 	/* Get function parameters and do error-checking. */
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &regex, &replace, &subject) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &regex, &replace, &subject) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	/* if subject is an array */
-	if (subject->type == IS_ARRAY) {
+	if ((*subject)->type == IS_ARRAY) {
 		array_init(return_value);
-		zend_hash_internal_pointer_reset(subject->value.ht);
+		zend_hash_internal_pointer_reset((*subject)->value.ht);
 		
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		while (zend_hash_get_current_data(subject->value.ht, (void **)&subject_entry_ptr) == SUCCESS) {
+		while (zend_hash_get_current_data((*subject)->value.ht, (void **)&subject_entry_ptr) == SUCCESS) {
 			subject_entry = *subject_entry_ptr;
 			
-			if ((result = _php_replace_in_subject(regex, replace, subject_entry)) != NULL)
+			if ((result = _php_replace_in_subject(*regex, *replace, subject_entry)) != NULL)
 				add_next_index_string(return_value, result, 0);
 		
-			zend_hash_move_forward(subject->value.ht);
+			zend_hash_move_forward((*subject)->value.ht);
 		}
 	}
 	else {	/* if subject is not an array */
-		if ((result = _php_replace_in_subject(regex, replace, subject)) != NULL) {
+		if ((result = _php_replace_in_subject(*regex, *replace, *subject)) != NULL) {
 			RETVAL_STRING(result, 1);
 			efree(result);
 		}
@@ -890,9 +890,9 @@ PHP_FUNCTION(preg_replace)
     split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
 {
-	zval			*regex,				/* Regular expression to split by */
-					*subject,			/* Subject string to split */
-					*limit;				/* Number of pieces to return */
+	zval		   **regex,				/* Regular expression to split by */
+				   **subject,			/* Subject string to split */
+				   **limit;				/* Number of pieces to return */
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	int			 	*offsets;			/* Array of subpattern offsets */
@@ -909,23 +909,23 @@ PHP_FUNCTION(preg_split)
 
 	/* Get function parameters and do error checking */	
 	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 3 || getParameters(ht, argc, &regex, &subject, &limit) == FAILURE) {
+	if (argc < 1 || argc > 3 || getParametersEx(argc, &regex, &subject, &limit) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	if (argc == 3) {
-		convert_to_long(limit);
-		limit_val = limit->value.lval;
+		convert_to_long_ex(limit);
+		limit_val = (*limit)->value.lval;
 	}
 	else
 		limit_val = -1;
 	
 	/* Make sure we're dealing with strings */
-	convert_to_string(regex);
-	convert_to_string(subject);
+	convert_to_string_ex(regex);
+	convert_to_string_ex(subject);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra, &preg_options)) == NULL) {
+	if ((re = _pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 	
@@ -938,13 +938,13 @@ PHP_FUNCTION(preg_split)
 	
 	/* Start at the beginning of the string */
 	start_offset = 0;
-	last_match = subject->value.str.val;
+	last_match = (*subject)->value.str.val;
 	match = NULL;
 	
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
-		count = pcre_exec(re, extra, subject->value.str.val,
-						  subject->value.str.len, start_offset,
+		count = pcre_exec(re, extra, (*subject)->value.str.val,
+						  (*subject)->value.str.len, start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */
@@ -955,13 +955,13 @@ PHP_FUNCTION(preg_split)
 				
 		/* If something matched */
 		if (count > 0) {
-			match = subject->value.str.val + offsets[0];
+			match = (*subject)->value.str.val + offsets[0];
 		
 			/* Add the piece to the return value */
 			add_next_index_stringl(return_value, last_match,
-								   &subject->value.str.val[offsets[0]]-last_match, 1);
+								   &(*subject)->value.str.val[offsets[0]]-last_match, 1);
 			
-			last_match = &subject->value.str.val[offsets[1]];
+			last_match = &(*subject)->value.str.val[offsets[1]];
 			
 			/* One less left to do */
 			if (limit_val != -1)
@@ -971,7 +971,7 @@ PHP_FUNCTION(preg_split)
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < subject->value.str.len) {
+			if (g_notempty != 0 && start_offset < (*subject)->value.str.len) {
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + 1;
 			} else
@@ -990,7 +990,7 @@ PHP_FUNCTION(preg_split)
 	
 	/* Add the last piece to the return value */
 	add_next_index_string(return_value,
-						  &subject->value.str.val[start_offset], 1);
+						  &(*subject)->value.str.val[start_offset], 1);
 	
 	/* Clean up */
 	efree(offsets);
@@ -1002,7 +1002,7 @@ PHP_FUNCTION(preg_split)
    Quote regular expression characters */
 PHP_FUNCTION(preg_quote)
 {
-	zval 	*in_str_arg;	/* Input string argument */
+	zval    **in_str_arg;	/* Input string argument */
 	char 	*in_str,		/* Input string */
 			*out_str,		/* Output string with quoted characters */
 		 	*p,				/* Iterator for input string */
@@ -1010,13 +1010,13 @@ PHP_FUNCTION(preg_quote)
 		 	 c;				/* Current character */
 	
 	/* Get the arguments and check for errors */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &in_str_arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &in_str_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	/* Make sure we're working with strings */
-	convert_to_string(in_str_arg);
-	in_str = in_str_arg->value.str.val;
+	convert_to_string_ex(in_str_arg);
+	in_str = (*in_str_arg)->value.str.val;
 
 	/* Nothing to do if we got an empty string */
 	if (!*in_str) {
@@ -1025,7 +1025,7 @@ PHP_FUNCTION(preg_quote)
 	
 	/* Allocate enough memory so that even if each character
 	   is quoted, we won't run out of room */
-	out_str = emalloc(2 * in_str_arg->value.str.len + 1);
+	out_str = emalloc(2 * (*in_str_arg)->value.str.len + 1);
 	
 	/* Go through the string and quote necessary characters */
 	for(p = in_str, q = out_str; (c = *p); p++) {
@@ -1067,8 +1067,8 @@ PHP_FUNCTION(preg_quote)
    Searches array and returns entries which match regex */
 PHP_FUNCTION(preg_grep)
 {
-	zval			*regex,				/* Regular expression */
-					*input,				/* Input array */
+	zval		   **regex,				/* Regular expression */
+				   **input,				/* Input array */
 					*entry,				/* A copy of the entry in the input array */
 			   	   **entry_ptr;			/* An entry in the input array */
 	pcre			*re = NULL;			/* Compiled regular expression */
@@ -1082,20 +1082,20 @@ PHP_FUNCTION(preg_grep)
 	
 	/* Get arguments and do error checking */
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, ARG_COUNT(ht), &regex, &input) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(ARG_COUNT(ht), &regex, &input) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (input->type != IS_ARRAY) {
+	if ((*input)->type != IS_ARRAY) {
 		zend_error(E_WARNING, "Secong argument to preg_grep() should be an array");
 		return;
 	}
 	
 	/* Make sure regex is a string */
-	convert_to_string(regex);
+	convert_to_string_ex(regex);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra, &preg_options)) == NULL) {
+	if ((re = _pcre_get_compiled_regex((*regex)->value.str.val, extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1110,8 +1110,8 @@ PHP_FUNCTION(preg_grep)
 	entry = (zval *)emalloc(sizeof(zval));
 		
 	/* Go through the input array */
-	zend_hash_internal_pointer_reset(input->value.ht);
-	while(zend_hash_get_current_data(input->value.ht, (void **)&entry_ptr) == SUCCESS) {
+	zend_hash_internal_pointer_reset((*input)->value.ht);
+	while(zend_hash_get_current_data((*input)->value.ht, (void **)&entry_ptr) == SUCCESS) {
 
 		/* Copy entry and convert to string */
 		*entry = **entry_ptr;
@@ -1134,7 +1134,7 @@ PHP_FUNCTION(preg_grep)
 			(*entry_ptr)->refcount++;
 
 			/* Add to return array */
-			switch(zend_hash_get_current_key(input->value.ht, &string_key, &num_key))
+			switch(zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key))
 			{
 				case HASH_KEY_IS_STRING:
 					zend_hash_update(return_value->value.ht, string_key,
@@ -1150,7 +1150,7 @@ PHP_FUNCTION(preg_grep)
 		}
 		
 		zval_dtor(entry);
-		zend_hash_move_forward(input->value.ht);
+		zend_hash_move_forward((*input)->value.ht);
 	}
 	
 	/* Clean up */
