@@ -2270,8 +2270,12 @@ send_by_ref:
 			case ZEND_EXT_NOP:
 			case ZEND_NOP:
 				break;
+#if (WINNT|WIN32) /* This makes the switch() statement twice as quick. Moving to enum
+					 might make this a general speed up for other platforms too */
 			default:
+				__assume(0);
 				break;
+#endif
 		}
 		opline++;
 	}
