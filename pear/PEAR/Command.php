@@ -18,6 +18,15 @@
 //
 // $Id$
 
+
+require_once "PEAR.php";
+
+/**
+ * List of commands and what classes they are implemented in.
+ * @var array command => implementing class
+ */
+$GLOBALS['_PEAR_Command_commandlist'] = array();
+
 /**
  * PEAR command class, a simple factory class for administrative
  * commands.
@@ -61,34 +70,59 @@
  *   classes do PEAR::raiseError(), from other classes do
  *   $this->raiseError().
  */
-
-require_once "PEAR.php";
-
-$GLOBALS['_PEAR_Command_commandlist'] = array();
-
 class PEAR_Command
 {
-    function factory($command)
+    /**
+     * Get the right object for executing a command.
+     *
+     * @param object Instance of PEAR_Config object
+     * @param string The name of the command
+     *
+     * @return object the command object or a PEAR error
+     *
+     * @access public
+     */
+    function factory(&$config, $command)
     {
-        static $command_classes = array(
-            'install'   => 'PEAR_Command_Install':
-            'uninstall' => 'PEAR_Command_Install':
-            'upgrade'   => 'PEAR_Command_Install':
-            );
-        if (isset($command_classes[$command])) {
-            $class = $command_classes[$command];
-            $obj =& new $class();
+        if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
+            PEAR_Command::registerCommands();
+        }
+        if (isset($GLOBALS['_PEAR_Command_commandlist'][$command])) {
+            $class = $GLOBALS['_PEAR_Command_commandlist'][$command];
+            $obj =& new $class($config);
             return $obj;
         }
         return PEAR::raiseError("unknown command: $command");
     }
 
-    function registerAllCommands()
+    /**
+     * Scan through the Command directory looking for classes
+     * and see what commands they implement.
+     *
+     * @param bool   (optional) if FALSE (default), the new list of
+     *               commands should replace the current one.  If TRUE,
+     *               new entries will be merged with old.
+     *
+     * @param string (optional) where (what directory) to look for
+     *               classes, defaults to the Command subdirectory of
+     *               the directory from where this file (__FILE__) is
+     *               included.
+     *
+     * @return bool TRUE on success, a PEAR error on failure
+     *
+     * @access public
+     */
+    function registerCommands($merge = false, $dir = null)
     {
-        $dir = dirname(__FILE__) . '/Command';
+        if ($dir === null) {
+            $dir = dirname(__FILE__) . '/Command';
+        }
         $dp = @opendir($dir);
         if (empty($dp)) {
-            return PEAR::raiseError("PEAR_Command::registerAllCommands: opendir($dir) failed");
+            return PEAR::raiseError("PEAR_Command::registerCommands: opendir($dir) failed");
+        }
+        if (!$merge) {
+            $GLOBALS['_PEAR_Command_commandlist'] = array();
         }
         while ($entry = readdir($dp)) {
             if ($entry{0} == '.' || substr($entry, -4) != '.php' || $entry == 'Common.php') {
@@ -98,7 +132,24 @@ class PEAR_Command
             $file = "$dir/$entry";
             include_once $file;
             $implements = call_user_func(array($class, "getCommands"));
+            foreach ($implements as $command) {
+                $GLOBALS['_PEAR_Command_commandlist'][$command] = $class;
+            }
         }
+        return true;
+    }
+
+    /**
+     * Get the list of currently supported commands, and what
+     * classes implement them.
+     *
+     * @return array command => implementing class
+     *
+     * @access public
+     */
+    function getCommands()
+    {
+        return $GLOBALS['_PEAR_Command_commandlist'];
     }
 }
 
