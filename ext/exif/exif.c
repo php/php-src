@@ -4043,7 +4043,7 @@ PHP_FUNCTION(exif_thumbnail)
 }
 /* }}} */
 
-/* {{{ proto long exif_imagetype(string imagefile)
+/* {{{ proto int exif_imagetype(string imagefile)
    Get the type of an image */
 PHP_FUNCTION(exif_imagetype)
 {
