@@ -177,8 +177,8 @@ AC_DEFUN([PHP_REMOVE_USR_LIB],[
   unset ac_new_flags
   for i in [$]$1; do
     case [$]i in
-    -L/usr/lib|-L/usr/lib/) ;;
-    *) ac_new_flags="[$]ac_new_flags [$]i" ;;
+    -L/usr/lib|-L/usr/lib/[)] ;;
+    *[)] ac_new_flags="[$]ac_new_flags [$]i" ;;
     esac
   done
   $1=[$]ac_new_flags
@@ -253,11 +253,11 @@ dnl
 AC_DEFUN([PHP_EVAL_LIBLINE],[
   for ac_i in $1; do
     case $ac_i in
-    -l*)
+    -l*[)]
       ac_ii=`echo $ac_i|cut -c 3-`
       PHP_ADD_LIBRARY($ac_ii,1,$2)
     ;;
-    -L*)
+    -L*[)]
       ac_ii=`echo $ac_i|cut -c 3-`
       PHP_ADD_LIBPATH($ac_ii,$2)
     ;;
@@ -273,7 +273,7 @@ dnl
 AC_DEFUN([PHP_EVAL_INCLINE],[
   for ac_i in $1; do
     case $ac_i in
-    -I*)
+    -I*[)]
       ac_ii=`echo $ac_i|cut -c 3-`
       PHP_ADD_INCLUDE($ac_ii)
     ;;
@@ -337,10 +337,10 @@ AC_DEFUN([PHP_SHLIB_SUFFIX_NAME],[
   PHP_SUBST(SHLIB_SUFFIX_NAME)
   SHLIB_SUFFIX_NAME=so
   case $host_alias in
-  *hpux*)
+  *hpux*[)]
 	SHLIB_SUFFIX_NAME=sl
 	;;
-  *darwin*)
+  *darwin*[)]
 	SHLIB_SUFFIX_NAME=dylib
 	;;
   esac
@@ -511,17 +511,17 @@ AC_DEFUN([PHP_ARG_ANALYZE_EX],[
 ext_output="yes, shared"
 ext_shared=yes
 case [$]$1 in
-shared,*)
+shared,*[)]
   $1=`echo "[$]$1"|sed 's/^shared,//'`
   ;;
-shared)
+shared[)]
   $1=yes
   ;;
-no)
+no[)]
   ext_output=no
   ext_shared=no
   ;;
-*)
+*[)]
   ext_output=yes
   ext_shared=no
   ;;
@@ -654,8 +654,8 @@ main() {
 ])
 ])
   case $ac_cv_time_r_type in
-  hpux) AC_DEFINE(PHP_HPUX_TIME_R,1,[Whether you have HP-UX 10.x]) ;;
-  irix) AC_DEFINE(PHP_IRIX_TIME_R,1,[Whether you have IRIX-style functions]) ;;
+  hpux[)] AC_DEFINE(PHP_HPUX_TIME_R,1,[Whether you have HP-UX 10.x]) ;;
+  irix[)] AC_DEFINE(PHP_IRIX_TIME_R,1,[Whether you have IRIX-style functions]) ;;
   esac
 ])
 
@@ -1238,10 +1238,10 @@ AC_DEFUN([PHP_SELECT_SAPI],[
   PHP_SAPI=$1
   
   case "$2" in
-  static) PHP_BUILD_STATIC;;
-  shared) PHP_BUILD_SHARED;;
-  bundle) PHP_BUILD_BUNDLE;;
-  program) PHP_BUILD_PROGRAM($5);;
+  static[)] PHP_BUILD_STATIC;;
+  shared[)] PHP_BUILD_SHARED;;
+  bundle[)] PHP_BUILD_BUNDLE;;
+  program[)] PHP_BUILD_PROGRAM($5);;
   esac
     
   ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])
@@ -1327,13 +1327,13 @@ AC_DEFUN([PHP_SOLARIS_PIC_WEIRDNESS],[
   if test -n "$EXT_SHARED"; then
     os=`uname -sr 2>/dev/null`
     case $os in
-        "SunOS 5.6"|"SunOS 5.7")
+        "SunOS 5.6"|"SunOS 5.7"[)]
           case $CC in
 	    gcc*|egcs*) CFLAGS="$CFLAGS -fPIC";;
-	    *) CFLAGS="$CFLAGS -fpic";;
+	    *[)] CFLAGS="$CFLAGS -fpic";;
 	  esac
 	  AC_MSG_RESULT([yes]);;
-	*)
+	*[)]
 	  AC_MSG_RESULT([no]);;
     esac
   else
@@ -1371,8 +1371,8 @@ AC_DEFUN([PHP_SYS_LFS],
   ac_shellvars='CPPFLAGS LDFLAGS LIBS'
   for ac_shellvar in $ac_shellvars; do
     case $ac_shellvar in
-      CPPFLAGS) ac_lfsvar=LFS_CFLAGS ;;
-      *) ac_lfsvar=LFS_$ac_shellvar ;;
+      CPPFLAGS[)] ac_lfsvar=LFS_CFLAGS ;;
+      *[)] ac_lfsvar=LFS_$ac_shellvar ;;
     esac
     eval test '"${'$ac_shellvar'+set}"' = set && ac_set=$ac_shellvar
     (getconf $ac_lfsvar) >/dev/null 2>&1 || { ac_result=no; break; }
@@ -1381,14 +1381,14 @@ AC_DEFUN([PHP_SYS_LFS],
     eval ac_test_$ac_shellvar=\$ac_getconf
   done
   case "$ac_result$ac_getconfs" in
-    yes) ac_result=no ;;
+    yes[)] ac_result=no ;;
   esac
   case "$ac_result$ac_set" in
-    yes?*) ac_result="yes, but $ac_set is already set, so use its settings"
+    yes?*[)] ac_result="yes, but $ac_set is already set, so use its settings"
   esac
   AC_MSG_RESULT([$ac_result])
   case $ac_result in
-    yes)
+    yes[)]
       for ac_shellvar in $ac_shellvars; do
         eval $ac_shellvar=\$ac_test_$ac_shellvar
       done ;;
@@ -1458,10 +1458,10 @@ AC_DEFUN([PHP_BROKEN_GETCWD],[
   AC_MSG_CHECKING([for broken getcwd])
   os=`uname -sr 2>/dev/null`
   case $os in
-    SunOS*)
+    SunOS*[)]
 	  AC_DEFINE(HAVE_BROKEN_GETCWD,1, [Define if system has broken getcwd])
 	  AC_MSG_RESULT([yes]);;
-	*)
+	*[)]
 	  AC_MSG_RESULT([no]);;
   esac
 ])
@@ -1773,12 +1773,12 @@ AC_DEFUN([PHP_CHECK_FUNC],[
   AC_CHECK_FUNC($1, [found=yes],[ AC_CHECK_FUNC(__$1,[found=yes],[found=no]) ])
 
   case $found in
-  yes) 
+  yes[)] 
     PHP_DEF_HAVE($1)
     ac_cv_func_$1=yes
   ;;
   ifelse($#,1,,[
-    *) PHP_CHECK_FUNC_LIB($@) ;;
+    *[)] PHP_CHECK_FUNC_LIB($@) ;;
   ])
   esac
 ])
