@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed CR/LF processing for Windows/OS2 in quoted_printable_decode (kir)
+- Fixed CR/LF processing for Windows/OS2 in quoted_printable_decode (kir)
 - Made crack extension available to Win32. Cracklib libraries for Win32 are 
   available from http://www.jtatesoftware.com/cracklib/. (jtate)
 - Added mysql_info() function. (Jan)
