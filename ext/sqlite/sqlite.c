@@ -121,15 +121,15 @@ struct php_sqlite_result {
 	int curr_row;
 	char **col_names;
 	int alloc_rows;
-	char **table;
 	int mode;
+	char **table;
 };
 
 struct php_sqlite_db {
 	sqlite *db;
 	int last_err_code;
 	zend_bool is_persistent;
-	int rsrc_id;
+	long rsrc_id;
 
 	HashTable callbacks;
 };
@@ -1138,7 +1138,7 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
    Opens a persistent handle to a SQLite database. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_popen)
 {
-	int mode = 0666;
+	long mode = 0666;
 	char *filename, *fullpath, *hashkey;
 	long filename_len, hashkeylen;
 	zval *errmsg = NULL;
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(sqlite_popen)
 		fullpath = estrndup(filename, filename_len);
 	}
 
-	hashkeylen = spprintf(&hashkey, 0, "sqlite_pdb_%s:%d", fullpath, mode);
+	hashkeylen = spprintf(&hashkey, 0, "sqlite_pdb_%s:%ld", fullpath, mode);
 	
 	/* do we have an existing persistent connection ? */
 	if (SUCCESS == zend_hash_find(&EG(persistent_list), hashkey, hashkeylen+1, (void*)&le)) {
@@ -1213,7 +1213,7 @@ PHP_FUNCTION(sqlite_popen)
    Opens a SQLite database. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_open)
 {
-	int mode = 0666;
+	long mode = 0666;
 	char *filename, *fullpath = NULL;
 	long filename_len;
 	zval *errmsg = NULL;
@@ -1267,7 +1267,7 @@ PHP_FUNCTION(sqlite_open)
    Opens a SQLite database and creates an object for it. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_factory)
 {
-	int mode = 0666;
+	long mode = 0666;
 	char *filename;
 	long filename_len;
 	zval *errmsg = NULL;
@@ -1434,7 +1434,7 @@ next_row:
 /* }}} */
 
 /* {{{ sqlite_query */
-void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_len, int mode, int buffered, zval *return_value, struct php_sqlite_result **prres TSRMLS_DC)
+void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_len, long mode, int buffered, zval *return_value, struct php_sqlite_result **prres TSRMLS_DC)
 {
 	struct php_sqlite_result res, *rres;
 	int ret;
@@ -1510,7 +1510,7 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 	struct php_sqlite_db *db;
 	char *sql;
 	long sql_len;
-	int mode = PHPSQLITE_BOTH;
+	long mode = PHPSQLITE_BOTH;
 	char *errtext = NULL;
 	zval *object = getThis();
 
@@ -1617,7 +1617,7 @@ PHP_FUNCTION(sqlite_query)
 	struct php_sqlite_db *db;
 	char *sql;
 	long sql_len;
-	int mode = PHPSQLITE_BOTH;
+	long mode = PHPSQLITE_BOTH;
 	char *errtext = NULL;
 	zval *object = getThis();
 
@@ -1777,7 +1777,7 @@ static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, 
 PHP_FUNCTION(sqlite_fetch_all)
 {
 	zval *zres, *ent;
-	int mode = PHPSQLITE_BOTH;
+	long mode = PHPSQLITE_BOTH;
 	zend_bool decode_binary = 1;
 	struct php_sqlite_result *res;
 	zval *object = getThis();
@@ -1975,7 +1975,7 @@ PHP_FUNCTION(sqlite_array_query)
 	struct php_sqlite_result *rres;
 	char *sql;
 	long sql_len;
-	int mode = PHPSQLITE_BOTH;
+	long mode = PHPSQLITE_BOTH;
 	char *errtext = NULL;
 	zend_bool decode_binary = 1;
 	zval *object = getThis();
@@ -2187,7 +2187,7 @@ PHP_FUNCTION(sqlite_fetch_single)
 PHP_FUNCTION(sqlite_current)
 {
 	zval *zres;
-	int mode = PHPSQLITE_BOTH;
+	long mode = PHPSQLITE_BOTH;
 	zend_bool decode_binary = 1;
 	struct php_sqlite_result *res;
 	zval *object = getThis();
@@ -2422,7 +2422,7 @@ PHP_FUNCTION(sqlite_field_name)
 {
 	zval *zres;
 	struct php_sqlite_result *res;
-	int field;
+	long field;
 	zval *object = getThis();
 
 	if (object) {
@@ -2438,7 +2438,7 @@ PHP_FUNCTION(sqlite_field_name)
 	}
 
 	if (field < 0 || field >= res->ncolumns) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "field %d out of range", field);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "field %ld out of range", field);
 		RETURN_FALSE;
 	}
 
@@ -2452,7 +2452,7 @@ PHP_FUNCTION(sqlite_seek)
 {
 	zval *zres;
 	struct php_sqlite_result *res;
-	int row;
+	long row;
 	zval *object = getThis();
 
 	if (object) {
@@ -2473,7 +2473,7 @@ PHP_FUNCTION(sqlite_seek)
 	}
 	
 	if (row < 0 || row >= res->nrows) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "row %d out of range", row);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "row %ld out of range", row);
 		RETURN_FALSE;
 	}
 
