@@ -45,22 +45,24 @@
 
 /* checking in the same order as in configure.in */
 
-#if HAVE_SOLID /* Solid Server */
+#ifdef HAVE_SOLID /* Solid Server */
 
 #define ODBC_TYPE "Solid"
 #include <cli0core.h>
 #include <cli0ext1.h>
-#define HAVE_SQL_EXTENDED_FETCH 0
+#undef HAVE_SQL_EXTENDED_FETCH
 PHP_FUNCTION(solid_fetch_prev);
+#define SQLSMALLINT SWORD
+#define SQLUSMALLINT UWORD
 
-#elif HAVE_EMPRESS /* Empress */
+#elif defined(HAVE_EMPRESS) /* Empress */
 
 #define ODBC_TYPE "Empress"
 #include <sql.h>
 #include <sqlext.h>
-#define HAVE_SQL_EXTENDED_FETCH 0
+#undef HAVE_SQL_EXTENDED_FETCH
 
-#elif HAVE_ADABAS /* Adabas D */
+#elif defined(HAVE_ADABAS) /* Adabas D */
 
 #define ODBC_TYPE "Adabas D"
 #include <WINDOWS.H>
@@ -68,7 +70,7 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
 
-#elif HAVE_IODBC /* iODBC library */
+#elif defined(HAVE_IODBC) /* iODBC library */
 
 #define ODBC_TYPE "iODBC"
 #include <isql.h>
@@ -81,21 +83,21 @@ PHP_FUNCTION(solid_fetch_prev);
 #define SQL_LEN_DATA_AT_EXEC_OFFSET  (-100)
 #define SQL_LEN_DATA_AT_EXEC(length) (-(length)+SQL_LEN_DATA_AT_EXEC_OFFSET)
 
-#elif HAVE_UNIXODBC /* unixODBC library */
+#elif defined(HAVE_UNIXODBC) /* unixODBC library */
 
 #define ODBC_TYPE "unixODBC"
 #include <sql.h>
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
 
-#elif HAVE_ESOOB /* Easysoft ODBC-ODBC Bridge library */
+#elif defined(HAVE_ESOOB) /* Easysoft ODBC-ODBC Bridge library */
 
 #define ODBC_TYPE "ESOOB"
 #include <sql.h>
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
 
-#elif HAVE_OPENLINK /* OpenLink ODBC drivers */
+#elif defined(HAVE_OPENLINK) /* OpenLink ODBC drivers */
 
 #define ODBC_TYPE "Openlink"
 #include <iodbc.h>
@@ -103,8 +105,10 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <isqlext.h>
 #include <udbcext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
+#define SQLSMALLINT SWORD
+#define SQLUSMALLINT UWORD
 
-#elif HAVE_VELOCIS /* Raima Velocis */
+#elif defined(HAVE_VELOCIS) /* Raima Velocis */
 
 #define ODBC_TYPE "Velocis"
 #define UNIX
@@ -112,13 +116,13 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sql.h>
 #include <sqlext.h>
 
-#elif HAVE_CODBC /* Custom ODBC */
+#elif defined(HAVE_CODBC) /* Custom ODBC */
 
 #define ODBC_TYPE "Custom ODBC"
 #define HAVE_SQL_EXTENDED_FETCH 1
 #include <odbc.h>
 
-#elif HAVE_IBMDB2 /* DB2 CLI */
+#elif defined(HAVE_IBMDB2) /* DB2 CLI */
 
 #define ODBC_TYPE "IBM DB2 CLI"
 #define HAVE_SQL_EXTENDED_FETCH 1

@@ -40,7 +40,7 @@
 # define THREAD_LS
 #endif
 
-#if HAVE_VELOCIS
+#ifdef HAVE_VELOCIS
 #include "php3_velocis.h"
 
 function_entry velocis_functions[] = {

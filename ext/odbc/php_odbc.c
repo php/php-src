@@ -147,7 +147,7 @@ static void _free_odbc_result(odbc_result *res)
 			res->values = NULL;
 		}
 		if (res->stmt) {
-#if HAVE_SOLID
+#ifdef HAVE_SOLID
 			SQLTransact(res->conn_ptr->henv, res->conn_ptr->hdbc,
 						(UWORD)SQL_COMMIT);
 #endif
@@ -536,7 +536,7 @@ int odbc_bindcols(odbc_result *result)
 				result->values[i].value = NULL;
 				break;
 				
-#if HAVE_ADABAS
+#ifdef HAVE_ADABAS
 			case SQL_TIMESTAMP:
 				result->values[i].value = (char *)emalloc(27);
 				SQLBindCol(result->stmt, (UWORD)(i+1), SQL_C_CHAR, result->values[i].value,
@@ -913,7 +913,7 @@ PHP_FUNCTION(odbc_exec)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	RETCODE rc;
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	UDWORD      scrollopts;
 #endif
 
@@ -951,7 +951,7 @@ PHP_FUNCTION(odbc_exec)
 		RETURN_FALSE;
 	}
 	
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	/* Solid doesn't have ExtendedFetch, if DriverManager is used, get Info,
 	   whether Driver supports ExtendedFetch */
 	rc = SQLGetInfo(conn->hdbc, SQL_FETCH_DIRECTION, (void *) &scrollopts, sizeof(scrollopts), NULL);
@@ -1010,7 +1010,7 @@ PHP_FUNCTION(odbc_fetch_into)
 	RETCODE rc;
     SWORD sql_c_type;
 	char *buf = NULL;
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	UDWORD crow;
 	UWORD  RowStatus[1];
 	SDWORD rownum = -1;
@@ -1066,7 +1066,7 @@ PHP_FUNCTION(odbc_fetch_into)
 		}
 	}
 
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	if (result->fetch_abs) {
 		if (rownum > 0)
 			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,rownum,&crow,RowStatus);
@@ -1079,7 +1079,7 @@ PHP_FUNCTION(odbc_fetch_into)
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
 		RETURN_FALSE;
 
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	if (rownum > 0 && result->fetch_abs)
 		result->fetched = rownum;
 	else
@@ -1145,7 +1145,7 @@ PHP_FUNCTION(odbc_fetch_into)
 }
 /* }}} */
 
-#if HAVE_SOLID
+#ifdef HAVE_SOLID
 PHP_FUNCTION(solid_fetch_prev)
 {
 	odbc_result *result;
@@ -1181,7 +1181,7 @@ PHP_FUNCTION(odbc_fetch_row)
 	odbc_result *result;
 	RETCODE rc;
 	pval **pv_res, **pv_row;
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	UDWORD crow;
 	UWORD RowStatus[1];
 #endif
@@ -1204,7 +1204,7 @@ PHP_FUNCTION(odbc_fetch_row)
 		RETURN_FALSE;
 	}
 
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
     if (result->fetch_abs) {
 		if (numArgs > 1)
 			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,rownum,&crow,RowStatus);
@@ -1240,7 +1240,7 @@ PHP_FUNCTION(odbc_result)
 	RETCODE rc;
 	SDWORD	fieldsize;
 	pval **pv_res, **pv_field;
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	UDWORD crow;
 	UWORD RowStatus[1];
 #endif
@@ -1289,7 +1289,7 @@ PHP_FUNCTION(odbc_result)
 
 	if (result->fetched == 0) {
 		/* User forgot to call odbc_fetchrow(), let's do it here */
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 		if (result->fetch_abs)
 			rc = SQLExtendedFetch(result->stmt, SQL_FETCH_NEXT, 1, &crow,RowStatus);
 		else
@@ -1409,7 +1409,7 @@ PHP_FUNCTION(odbc_result_all)
 	RETCODE rc;
 	pval **pv_res, **pv_format;
 	SWORD sql_c_type;
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	UDWORD crow;
 	UWORD RowStatus[1];
 #endif
@@ -1429,7 +1429,7 @@ PHP_FUNCTION(odbc_result_all)
 		php_error(E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
 	}
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 	if (result->fetch_abs)
 		rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
 	else
@@ -1509,7 +1509,7 @@ PHP_FUNCTION(odbc_result_all)
 		}
    		php_printf("</tr>\n");
 
-#if HAVE_SQL_EXTENDED_FETCH
+#ifdef HAVE_SQL_EXTENDED_FETCH
 		if (result->fetch_abs)
 			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
 		else
@@ -1565,11 +1565,11 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	SQLAllocEnv(&((*conn)->henv));
 	SQLAllocConnect((*conn)->henv, &((*conn)->hdbc));
 	
-#if HAVE_SOLID
+#ifdef HAVE_SOLID
 	SQLSetConnectOption((*conn)->hdbc, SQL_TRANSLATE_OPTION,
 			SQL_SOLID_XLATOPT_NOCNV);
 #endif
-#if HAVE_OPENLINK
+#ifdef HAVE_OPENLINK
 	{
 		char dsnbuf[300];
 		short dsnbuflen;
@@ -1588,7 +1588,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 			return FALSE;
 		}
 	}
-#if HAVE_EMPRESS
+#ifdef HAVE_EMPRESS
 	{
 		int     direct = 0;
 		char    dsnbuf[300];

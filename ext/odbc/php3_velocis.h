@@ -38,7 +38,7 @@
 #define HAVE_VELOCIS 1
 #endif
 
-#if HAVE_VELOCIS && !HAVE_UODBC
+#if defined(HAVE_VELOCIS) && !HAVE_UODBC
 #define UNIX
 #include <sql.h>
 #include <sqlext.h>
