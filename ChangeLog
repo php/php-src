@@ -2,6 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fix for include_path for Win32 (Andi, Zend library)
+- Fixed bug in ISAPI header sending function (Charles)
+- Fixed memory leak when using undefined values (Andi & Zeev, Zend library)
 - Added output_buffering directive to php.ini, to enable output buffering
   for all PHP scripts (default is off).
 - Fix some more class inheritance issues (Zeev, Zend library)
