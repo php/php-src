@@ -49,8 +49,8 @@ ZEND_GET_MODULE(extname)
  */
 /* Remove comments and fill if you need to have entries in php.ini
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("extname.value",      "42", PHP_INI_ALL, OnUpdateInt, global_value, zend_extname_globals, extname_globals)
-    STD_PHP_INI_ENTRY("extname.string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_extname_globals, extname_globals)
+    STD_PHP_INI_ENTRY("extname.global_value",      "42", PHP_INI_ALL, OnUpdateInt, global_value, zend_extname_globals, extname_globals)
+    STD_PHP_INI_ENTRY("extname.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_extname_globals, extname_globals)
 PHP_INI_END()
 */
 /* }}} */
