@@ -28,10 +28,10 @@
 
 #define MAXMIMESTRING        256
 
-#define OK 0
-#define DECLINED -1
-#define DONE -2
-#define ERROR -3
+#define MIME_MAGIC_OK 0
+#define MIME_MAGIC_DECLINED -1
+#define MIME_MAGIC_DONE -2
+#define MIME_MAGIC_ERROR -3
 
 #define DIR_MAGIC_TYPE "httpd/unix-directory"
 
@@ -140,7 +140,6 @@ static int ascmagic(unsigned char *, int);
 static int is_tar(unsigned char *, int);
 static int softmagic(unsigned char *, int);
 static void tryit(unsigned char *, int, int);
-static int zmagic(unsigned char *, int);
 
 static int getvalue(struct magic *, char **);
 static int hextoint(int);
@@ -156,10 +155,15 @@ static int mconvert(union VALUETYPE *, struct magic *);
 static int magic_rsl_get(char **, char **);
 static int magic_process(char *);
 
-static int uncompress(int, 
-		      unsigned char **, int);
 static long from_oct(int, char *);
 static int fsmagic(const char *fn);
+
+
+#if 0 /* TODO */
+static int zmagic(unsigned char *, int);
+static int uncompress(int, unsigned char **, int);
+static int uncompress_child(void *, child_info *);
+#endif
 
 /*
  * includes for ASCII substring recognition formerly "names.h" in file
