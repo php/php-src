@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev 
+- Add fdf_set_encoding() function (Masaki YATSU, Rasmus)
+- Fix return value for a failed snmpset() - now returns false  (Rasmus)
+- Add hostname:port support to snmp functions (nbougues@axialys.net, Rasmus)
 - Reversed the destruction-order of resources. This fixes the reported OCI8 
   "failed to rollback outstanding transactions!" message. (Thies Zend Engine)
 - Added option for returning XMLRPC fault packets. (Matt Allen, Sascha

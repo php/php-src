@@ -53,6 +53,7 @@ PHP_FUNCTION(fdf_set_flags);
 PHP_FUNCTION(fdf_set_opt);
 PHP_FUNCTION(fdf_set_submit_form_action);
 PHP_FUNCTION(fdf_set_javascript_action);
+PHP_FUNCTION(fdf_set_encoding);
 
 #else
 #define fdf_module_ptr NULL
