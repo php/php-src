@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- IMPORTANT: removed /F modifier handling from preg_replace(). Instead
+  one should use new preg_replace_callback() function. (Andrei)
 - Added new php.ini directive: arg_separator.input which is used to tell
   PHP which characters are considered as argument separators in URLs. 
   Renamed php.ini directive: arg_separator -> arg_separator.output (Jani)
