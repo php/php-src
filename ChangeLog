@@ -1,3 +1,136 @@
+2000-12-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gettext/gettext.c: wb clean.
+
+2000-12-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/rfc1867.c: MFH off-by-one fix
+
+    * main/php_logos.c: MFH memory leak fix
+
+2000-12-08  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+     Added the call_user_method_array function which allows you to call a method with an
+     arbitrary number of parameters. 
+
+2000-12-08  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/rfc1867.c: Fix off by one error in file upload code
+
+2000-12-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/config.m4: Merge changes from HEAD.
+
+    * ext/domxml/config.m4:
+    Version checking for domxml. Requires >= 2.2.7 at the moment.
+
+2000-12-08  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: Correct merge.
+
+2000-12-08  Stig Bakken  <ssb@fast.no>
+
+    * run-tests.php: * output fix for skipped tests
+
+2000-12-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sablot/CREDITS
+      ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: MFH on Sterling's request.
+
+    * main/php_logos.c: Fix a memory leak
+
+    * ext/standard/datetime.c
+      ext/standard/parsedate.y
+      ext/standard/php_parsedate.h: MFH namespace protecting changes
+
+2000-12-08  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt:
+    * updated tests after DB_Error("string") set $code to DB_ERROR
+
+2000-12-08  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/CREDITS
+      ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: Fix sablotron.
+
+    Add a little beautifying of the extensions name for phpcredits() (Sablotron XSLT not Sablot).
+
+
+2000-12-08  Zak Greant  <zak@nucleus.com>
+
+    * ext/gettext/gettext.c
+      ext/gettext/php_gettext.h:
+    Added constants to represent the various categories of
+    locale (LC_ALL, LC_MESSAGES, etc...)
+
+2000-12-08  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/STATUS
+      pear/DB/mysql.php
+      pear/DB/pgsql.php
+      pear/DB/tests/fetchmodes.inc
+      pear/DB/tests/mysql/002.phpt
+      pear/DB/tests/pgsql/001.phpt
+      pear/DB/tests/pgsql/002.phpt
+      pear/DB/tests/pgsql/003.phpt
+      pear/DB/tests/pgsql/004.phpt
+      pear/DB/tests/pgsql/005.phpt
+      pear/DB/tests/pgsql/006.phpt
+      pear/DB/tests/pgsql/007.phpt
+      pear/DB/tests/pgsql/008.phpt
+      pear/DB/tests/pgsql/mktable.inc
+      pear/DB/tests/pgsql/skipif.inc:
+    * ported the mysql tests to pgsql (the nextId test is skipped for now)
+    * giving pgsql auto-commit a shot
+    * fixed error reporting some places in pgsql
+    * added horrible hack to avoid getting notices on stderr if
+      DB_pgsql::commit is called at the wrong time
+
+    * pear/DB/pgsql.php:
+    * fetchRow with DB_FETCHMODE_ASSOC returned an array with both string and
+      numerical indexes - fixed (supposed to be string only)
+
+    * pear/DB/STATUS: * updated status file
+
+    * pear/DB.php
+      pear/DB/STATUS
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php:
+    * applied fetch modes patch for odbc by Richard M. Yumul
+    * added DB::isManip so we have _one_ place for testing whether something
+      is a data manipulation query
+    * when passed a string as its first constructor arg, DB_Error now uses
+      the error code DB_ERROR rather than just 0
+    * implemented auto-commit for ibase (not yet fully tested)
+    * fixed persistent connections in odbc
+
+    * pear/DB/mysql.php
+      pear/DB/tests/mysql/008.phpt:
+    * change affectedRows semantics for MySQL: only return non-0 for
+      INSERT/UPDATE/DELETE queries
+
+    * run-tests.php: added TODO comment
+
+2000-12-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/datetime.c
+      ext/standard/parsedate.y
+      ext/standard/php_parsedate.h:
+    Namespace protect parse_date interface and implementation
+
 2000-12-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * pear/DB/STATUS: Updated STATUS.
