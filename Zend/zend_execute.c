@@ -123,6 +123,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 			}
 			break;
 		case IS_UNUSED:
+			*should_free = 0;
 			return NULL;
 			break;
 #if DEBUG_ZEND
