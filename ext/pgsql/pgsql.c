@@ -464,7 +464,7 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
 #if HAVE_PG_CONFIG_H
 	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
-#ifdef MULTIBYTE
+#ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 	php_info_print_table_row(2, "Multibyte charater support", "enabled");
 #else
 	php_info_print_table_row(2, "Multibyte charater support", "disabled");
