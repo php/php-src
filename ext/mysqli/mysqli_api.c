@@ -899,7 +899,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
    Get a result row as an enumerated array */
 PHP_FUNCTION(mysqli_fetch_row) 
 {
-	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_NUM);
+	php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQLI_NUM, 0);
 }
 /* }}} */
 

@@ -90,7 +90,7 @@ extern function_entry mysqli_functions[];
 extern function_entry mysqli_link_methods[];
 extern function_entry mysqli_stmt_methods[];
 extern function_entry mysqli_result_methods[];
-extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int flag);
+extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(STMT *stmt);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 
