@@ -592,7 +592,7 @@ static inline void node_wrapper_dtor(xmlNodePtr node)
 
 /*	This function should only be used when freeing nodes 
 	as dependant objects are destroyed */
-static inline void node_wrapper_free(xmlNodePtr node)
+static inline void node_wrapper_free(xmlNodePtr node  TSRMLS_DC)
 {
 	zval *wrapper, **handle;
 	int type, refcount = 0;
@@ -605,7 +605,6 @@ static inline void node_wrapper_free(xmlNodePtr node)
 	if (wrapper != NULL ) {
 		/* All references need to be destroyed */
 		if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	SUCCESS) {
-			TSRMLS_FETCH();
 			if (zend_list_find(Z_LVAL_PP(handle), &type)) {
 				zend_list_delete(Z_LVAL_PP(handle));
 			}
@@ -633,10 +632,10 @@ static inline void attr_list_wrapper_dtor(xmlAttrPtr attr)
 
 /*	destroyref is a bool indicating if all registered objects for nodes 
 	within the tree should be destroyed */
-static inline void node_list_wrapper_dtor(xmlNodePtr node, int destroyref)
+static inline void node_list_wrapper_dtor(xmlNodePtr node, int destroyref TSRMLS_DC)
 {
 	while (node != NULL) {
-		node_list_wrapper_dtor(node->children, destroyref);
+		node_list_wrapper_dtor(node->children, destroyref TSRMLS_CC);
 		switch (node->type) {
 			/* Skip property freeing for the following types */
 			case XML_ATTRIBUTE_DECL:
@@ -648,11 +647,11 @@ static inline void node_list_wrapper_dtor(xmlNodePtr node, int destroyref)
 				/*	Attribute Nodes contain accessible children
 					Call this function with the propert list
 				attr_list_wrapper_dtor(node->properties);  */
-				node_list_wrapper_dtor((xmlNodePtr) node->properties, destroyref);
+				node_list_wrapper_dtor((xmlNodePtr) node->properties, destroyref TSRMLS_CC);
 		}
 
 		if (destroyref == 1) {
-			node_wrapper_free(node);
+			node_wrapper_free(node TSRMLS_CC);
 		} else {
 			node_wrapper_dtor(node);
 		}
@@ -721,7 +720,7 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	xmlDoc *doc = (xmlDoc *) rsrc->ptr;
 
 	if (doc) {
-		node_list_wrapper_dtor(doc->children, 0);
+		node_list_wrapper_dtor(doc->children, 0 TSRMLS_CC);
 		node_wrapper_dtor((xmlNodePtr) doc);
 		xmlFreeDoc(doc);
 	}
@@ -736,8 +735,8 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (node->parent == NULL) {
 		/* Attribute Nodes ccontain accessible children 
 		attr_list_wrapper_dtor(node->properties); */
-		node_list_wrapper_dtor((xmlNodePtr) node->properties, 0);
-		node_list_wrapper_dtor(node->children, 0);
+		node_list_wrapper_dtor((xmlNodePtr) node->properties, 0 TSRMLS_CC);
+		node_list_wrapper_dtor(node->children, 0 TSRMLS_CC);
 		node_wrapper_dtor(node);
 		xmlFreeNode(node);
 	} else {
@@ -750,7 +749,7 @@ static void php_free_xml_attr(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
 	if (node->parent == NULL) {
 		/* Attribute Nodes contain accessible children */
-		node_list_wrapper_dtor(node->children, 0);
+		node_list_wrapper_dtor(node->children, 0 TSRMLS_CC);
 		node_wrapper_dtor(node);
 		xmlFreeProp((xmlAttrPtr) node);
 	} else {
@@ -1545,7 +1544,7 @@ PHP_MSHUTDOWN_FUNCTION(domxml)
 /*	If you want do find memleaks in this module, compile libxml2 with --with-mem-debug and
 	uncomment the following line, this will tell you the amount of not freed memory
 	and the total used memory into apaches error_log  */
-/*	xmlMemoryDump(); */
+	xmlMemoryDump(); 
 
 	return SUCCESS;
 }
@@ -3726,11 +3725,14 @@ PHP_FUNCTION(domxml_doc_imported_node)
 
 	DOMXML_GET_OBJ(srcnode, arg1, le_domxmlnodep);
 
-	node = xmlCopyNode(srcnode, recursive);
+	/* node = xmlCopyNode(srcnode, recursive); */
+	node = xmlDocCopyNode(srcnode, docp, recursive);
 	if (!node) {
 		RETURN_FALSE;
 	}
-	node->doc = docp;			/* Not enough because other nodes in the tree are not set */
+	/* No longer need handled by xmlDocCopyNode
+	node->doc = docp;
+	*/
 
 	DOMXML_RET_OBJ(rv, node, &ret);
 }
@@ -4211,7 +4213,7 @@ PHP_FUNCTION(domxml_doc_add_root)
 {
 	zval *id, *rv = NULL;
 	xmlDoc *docp;
-	xmlNode *nodep;
+	xmlNode *nodep, *root;
 	int ret, name_len;
 	char *name;
 
@@ -4222,7 +4224,14 @@ PHP_FUNCTION(domxml_doc_add_root)
 		RETURN_FALSE;
 	}
 
-	xmlDocSetRootElement(docp, nodep);
+	if ((root = xmlDocSetRootElement(docp, nodep)) != NULL) {
+		/* Root node already unlinked from xmlDocSetRootElement */
+		if (dom_object_get_data(root) == NULL) {
+			node_list_unlink(root->children);
+			node_list_unlink((xmlNodePtr) root->properties);
+			xmlFreeNode(root);
+		}
+	}
 
 	DOMXML_RET_OBJ(rv, nodep, &ret);
 }
@@ -4326,11 +4335,11 @@ PHP_FUNCTION(domxml_doc_free_doc)
 		RETURN_FALSE;
 	}
 
-	node_list_wrapper_dtor(docp->children, 1);
-	node_list_wrapper_dtor((xmlNodePtr) docp->properties, 1);
+	node_list_wrapper_dtor(docp->children, 1 TSRMLS_CC);
+	node_list_wrapper_dtor((xmlNodePtr) docp->properties, 1 TSRMLS_CC);
 	/* Attribute Nodes ccontain accessible children 
 	attr_list_wrapper_dtor(docp->properties); */
-	node_wrapper_free(docp);
+	node_wrapper_free(docp TSRMLS_CC);
 
 	RETURN_TRUE;
 }
@@ -5160,8 +5169,10 @@ PHP_FUNCTION(domxml_xslt_stylesheet)
 
 	sheetp = xsltParseStylesheetDoc(docp);
 
-	if (!sheetp)
+	if (!sheetp) {
+		xmlFreeDoc(docp);
 		RETURN_FALSE;
+	}
 
 	rv = php_xsltstylesheet_new(sheetp, &ret TSRMLS_CC);
 	DOMXML_RET_ZVAL(rv);
@@ -5191,9 +5202,10 @@ PHP_FUNCTION(domxml_xslt_stylesheet_doc)
 
 	sheetp = xsltParseStylesheetDoc(newdocp);
 
-	if (!sheetp)
+	if (!sheetp) {
+		xmlFreeDoc(newdocp);
 		RETURN_FALSE;
-
+	}
 	rv = php_xsltstylesheet_new(sheetp, &ret TSRMLS_CC);
 	DOMXML_RET_ZVAL(rv);
 }
