@@ -37,9 +37,9 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.2b3</version>
+    <version>1.2b4</version>
     <state>beta</state>
-    <date>2003-08-03</date>
+    <date>2003-08-05</date>
     <notes>
 * Changed license from PHP 2.02 to 3.0
 * Added support for optional dependencies
@@ -51,6 +51,7 @@
 * Added the command "download-all" (Alex Merz)
 * Made package dependency checking back to work
 * Added support for spaces in path names (Greg)
+* Various bugfixes
 * Added new pear "bundle" command, which downloads and uncompress a PECL package.
 The main purpouse of this command is for easily adding extensions to the PHP sources
 before compiling it.
