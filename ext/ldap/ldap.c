@@ -1371,7 +1371,7 @@ PHP_FUNCTION(ldap_error) {
 
 
 /* {{{ proto int ldap_compare(int link, string dn, string attr, string value)
-	Determine if an entry has a specific value for one of its attributes. */
+   Determine if an entry has a specific value for one of its attributes */
 PHP_FUNCTION(ldap_compare) {
 	pval **link, **dn, **attr, **value;
 	char *ldap_dn, *ldap_attr, *ldap_value;
