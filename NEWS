@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Make increment of empty string ("") behave like in PHP 3 and result in "1"
+  (Andi, Zend Engine)
 - POST handler for Adobe FDF format (Hartmut)
 - read and write .gz-files transparently on glibc based systems
   using the 'zlib:' fopen wrapper (Hartmut)
