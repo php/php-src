@@ -49,14 +49,14 @@
 #endif
 
 
-/* {{{ iconv_functions[] 
+/* {{{ iconv_functions[]
  */
 function_entry iconv_functions[] = {
 	PHP_NAMED_FE(iconv,php_if_iconv,				NULL)
 	PHP_FE(ob_iconv_handler,						NULL)
 	PHP_FE(iconv_get_encoding,						NULL)
 	PHP_FE(iconv_set_encoding,						NULL)
-	{NULL, NULL, NULL}	
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
@@ -71,7 +71,7 @@ zend_module_entry iconv_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(miconv),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -122,12 +122,12 @@ PHP_MINFO_FUNCTION(miconv)
 	DISPLAY_INI_ENTRIES();
 }
 #
-#define PHP_ICONV_CONVERTER          1
-#define PHP_ICONV_WRONG_CHARSET      2
-#define PHP_ICONV_TOO_BIG            3
-#define PHP_ICONV_ILLEGAL_SEQ        4
-#define PHP_ICONV_ILLEGAL_CHAR       5
-#define PHP_ICONV_UNKNOWN             6
+#define PHP_ICONV_CONVERTER			1
+#define PHP_ICONV_WRONG_CHARSET		2
+#define PHP_ICONV_TOO_BIG			3
+#define PHP_ICONV_ILLEGAL_SEQ		4
+#define PHP_ICONV_ILLEGAL_CHAR		5
+#define PHP_ICONV_UNKNOWN			6
 
 /* {{{ php_iconv_string
  */
@@ -137,14 +137,14 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 {
 #if HAVE_LIBICONV
 	/* No errno for libiconv(?) */
-    unsigned int in_size, out_size, out_left;
-    char *out_buffer, *out_p;
-    iconv_t cd;
-    size_t result;
-    typedef unsigned int ucs4_t;
+	unsigned int in_size, out_size, out_left;
+	char *out_buffer, *out_p;
+	iconv_t cd;
+	size_t result;
+	typedef unsigned int ucs4_t;
 
 	*err = 0;
-    in_size  = in_len;
+	in_size = in_len;
 
     /*
 	  This is not the right way to get output size...
@@ -153,53 +153,53 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	  a single char can be more than 4 bytes.
 	  I added 15 extra bytes for safety. <yohgaki@php.net>
 	*/
-    out_size = in_len * sizeof(ucs4_t) + 16;
-    out_buffer = (char *) emalloc(out_size);
-
+	out_size = in_len * sizeof(ucs4_t) + 16;
+	out_buffer = (char *) emalloc(out_size);
+	
 	*out = out_buffer;
-    out_p = out_buffer;
+	out_p = out_buffer;
 	out_left = out_size;
-  
-    cd = icv_open(out_charset, in_charset);
-  
+	
+	cd = icv_open(out_charset, in_charset);
+	
 	if (cd == (iconv_t)(-1)) {
 		*err = PHP_ICONV_UNKNOWN;
-		php_error(E_WARNING, "iconv: cannot convert from `%s' to `%s'",
-				  in_charset, out_charset);
+		php_error(E_WARNING, "%s(): unknown error, unable to convert from `%s' to `%s'",
+				  get_active_function_name(TSRMLS_C), in_charset, out_charset);
 		efree(out_buffer);
 		return FAILURE;
 	}
 	
 	result = icv(cd, (char **) &in_p, &in_size, (char **)
-				   &out_p, &out_left);
-
-    if (result == (size_t)(-1)) {
+				&out_p, &out_left);
+	
+	if (result == (size_t)(-1)) {
 		*err = PHP_ICONV_UNKNOWN;
 		efree(out_buffer);
 		return FAILURE;
-    }
-
+	}
+	
 	*out_len = out_size - out_left;
 	out_buffer[*out_len] = '\0';
-    icv_close(cd);
-
-    return SUCCESS;
+	icv_close(cd);
+	
+	return SUCCESS;
 
 #else
 	/*
 	  libc iconv should support errno. Handle it better way.
 	*/
-    iconv_t cd;
-    size_t in_left, out_size, out_left;
-    char *out_p, *out_buf, *tmp_buf;
-    size_t i, bsz, result;
+	iconv_t cd;
+	size_t in_left, out_size, out_left;
+	char *out_p, *out_buf, *tmp_buf;
+	size_t i, bsz, result;
 
 	*err = 0;
-    cd = iconv_open(out_charset, in_charset);
+	cd = iconv_open(out_charset, in_charset);
 	if (cd == (iconv_t)(-1)) {
 		if (errno == EINVAL) {
 			*err = PHP_ICONV_WRONG_CHARSET;
-			php_error(E_NOTICE, "%s() cannot convert from `%s' to `%s'",
+			php_error(E_NOTICE, "%s() wrong charset, cannot convert from `%s' to `%s'",
 					  get_active_function_name(TSRMLS_C), in_charset, out_charset);
 		}
 		else {
@@ -207,14 +207,14 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 			php_error(E_NOTICE, "%s() cannot open converter",
 					  get_active_function_name(TSRMLS_C));
 		}
-		return FAILURE;		
+		return FAILURE;
 	}
 	
 	in_left= in_len;
 	out_left = in_len + 32; /* Avoid realloc() most cases */ 
 	bsz = out_left;
-    out_buf = (char *) emalloc(bsz+1); 
-    out_p = out_buf;
+	out_buf = (char *) emalloc(bsz+1); 
+	out_p = out_buf;
 	result = iconv(cd, (char **) &in_p, &in_left, (char **) &out_p, &out_left);
 	out_size = bsz - out_left;
 	for (i = 2;in_left > 0 && errno == E2BIG; i++) {
@@ -230,39 +230,39 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 		result = iconv(cd, (char **)&in_p, &in_left, &out_p, &out_left);
 		out_size += bsz - out_left;
 	}
-    iconv_close(cd);
-    if (result == (size_t)(-1)) {
+	iconv_close(cd);
+	if (result == (size_t)(-1)) {
 		switch (errno) {
 			case EINVAL:
-				php_error(E_NOTICE, "%s() detected incomplete character in input string.",
+				php_error(E_NOTICE, "%s() detected incomplete character in input string",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_ILLEGAL_CHAR;
 				break;
 			case EILSEQ:
-				php_error(E_NOTICE, "%s() detected illegal character in input string.",
+				php_error(E_NOTICE, "%s() detected illegal character in input string",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_ILLEGAL_SEQ;
 				break;
 			case E2BIG:
 				/* should not happen */
-				php_error(E_WARNING, "%s() run out buffer.",
+				php_error(E_WARNING, "%s() run out buffer",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_TOO_BIG;
 				break;
 			default:
 				/* other error */
-				php_error(E_NOTICE, "%s() error",
-						  get_active_function_name(TSRMLS_C));
+				php_error(E_NOTICE, "%s() unknown error (%d)",
+						  get_active_function_name(TSRMLS_C), errno);
 				*err = PHP_ICONV_UNKNOWN;
 				efree(out_buf);
 				return FAILURE;
 				break;
 		}
-    }
+	}
 	*out_p = '\0';
 	*out = out_buf;
 	*out_len = out_size;
-    return SUCCESS;
+	return SUCCESS;
 #endif
 }
 /* }}} */
@@ -271,22 +271,17 @@ static int php_iconv_string(const char *in_p, size_t in_len,
    Returns str converted to the out_charset character set */
 PHP_NAMED_FUNCTION(php_if_iconv)
 {
-	zval **in_charset, **out_charset, **in_buffer;
-	char *out_buffer;
+	char *in_charset, *out_charset, *in_buffer, *out_buffer;
 	unsigned int out_len;
-	int err;
+	int in_charset_len, out_charset_len, in_buffer_len, err;
 	
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &in_charset, &out_charset, &in_buffer) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss",
+		&in_charset, &in_charset_len, &out_charset, &out_charset_len, &in_buffer, &in_buffer_len) == FAILURE)
+		return;
 
-	convert_to_string_ex(in_charset);
-	convert_to_string_ex(out_charset);
-	convert_to_string_ex(in_buffer);
-
-	if (php_iconv_string(Z_STRVAL_PP(in_buffer), Z_STRLEN_PP(in_buffer),
+	if (php_iconv_string(in_buffer, in_buffer_len,
 						 &out_buffer,  &out_len,
-						 Z_STRVAL_PP(in_charset), Z_STRVAL_PP(out_charset), &err TSRMLS_CC) == SUCCESS) {
+						 in_charset, out_charset, &err TSRMLS_CC) == SUCCESS) {
 		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
 		RETURN_FALSE;
@@ -299,28 +294,26 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 PHP_FUNCTION(ob_iconv_handler)
 {
 	char *out_buffer;
-	zval **zv_string, **zv_status;
+	zval *zv_string;
 	unsigned int out_len;
-	int err;
+	int err, status;;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &zv_string, &zv_status)==FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &zv_string, &status) == FAILURE)
+		return;
 
-	convert_to_string_ex(zv_string);
-	convert_to_long_ex(zv_status);
+	convert_to_string_ex(&zv_string);
 
 	if (SG(sapi_headers).send_default_content_type &&
-		php_iconv_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string),
+		php_iconv_string(Z_STRVAL_P(zv_string), Z_STRLEN_P(zv_string),
 						 &out_buffer, &out_len,
-						 ICONVG(internal_encoding), 
+						 ICONVG(internal_encoding),
 						 ICONVG(output_encoding),
-						 &err TSRMLS_CC)==SUCCESS) {
+						 &err TSRMLS_CC) == SUCCESS) {
 		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
 		zval_dtor(return_value);
-		*return_value = **zv_string;
-		zval_copy_ctor(return_value);		
+		*return_value = *zv_string;
+		zval_copy_ctor(return_value);
 	}
 	
 }
@@ -330,22 +323,18 @@ PHP_FUNCTION(ob_iconv_handler)
    Sets internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_set_encoding)
 {
-	zval **type, **charset;
-	int argc = ZEND_NUM_ARGS(), retval;
+	char *type, *charset;
+	int type_len, charset_len, retval;
 
-	if (argc != 2 || zend_get_parameters_ex(2, &type, &charset) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &type, &type_len, &charset, &charset_len) == FAILURE)
+		return;
 
-	convert_to_string_ex(type);
-	convert_to_string_ex(charset);
-
-	if(!strcasecmp("input_encoding", Z_STRVAL_PP(type))) {
-		retval = zend_alter_ini_entry("iconv.input_encoding", sizeof("iconv.input_encoding"), Z_STRVAL_PP(charset), Z_STRLEN_PP(charset), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-	} else if(!strcasecmp("output_encoding", Z_STRVAL_PP(type))) {
-		retval = zend_alter_ini_entry("iconv.output_encoding", sizeof("iconv.output_encoding"), Z_STRVAL_PP(charset), Z_STRLEN_PP(charset), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-	} else if(!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
-		retval = zend_alter_ini_entry("iconv.internal_encoding", sizeof("iconv.internal_encoding"), Z_STRVAL_PP(charset), Z_STRLEN_PP(charset), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	if(!strcasecmp("input_encoding", type)) {
+		retval = zend_alter_ini_entry("iconv.input_encoding", sizeof("iconv.input_encoding"), charset, charset_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	} else if(!strcasecmp("output_encoding", type)) {
+		retval = zend_alter_ini_entry("iconv.output_encoding", sizeof("iconv.output_encoding"), charset, charset_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	} else if(!strcasecmp("internal_encoding", type)) {
+		retval = zend_alter_ini_entry("iconv.internal_encoding", sizeof("iconv.internal_encoding"), charset, charset_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	} else {
 		RETURN_FALSE;
 	}
@@ -362,30 +351,27 @@ PHP_FUNCTION(iconv_set_encoding)
    Get internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_get_encoding)
 {
-	zval **type;
-	int argc = ZEND_NUM_ARGS();
+	char *type = "all";
+	int type_len;
 
-	if (argc < 0 || argc > 1 || zend_get_parameters_ex(1, &type) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &type, &type_len) == FAILURE)
+		return;
 
-	convert_to_string_ex(type);
-
-	if (argc == 0 || !strcasecmp("all", Z_STRVAL_PP(type))) {
+	if (!strcasecmp("all", type)) {
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-		add_assoc_string(return_value, "input_encoding", 
+		add_assoc_string(return_value, "input_encoding",
 						 ICONVG(input_encoding), 1);
-		add_assoc_string(return_value, "output_encoding", 
+		add_assoc_string(return_value, "output_encoding",
 						 ICONVG(output_encoding), 1);
-		add_assoc_string(return_value, "internal_encoding", 
+		add_assoc_string(return_value, "internal_encoding",
 						 ICONVG(internal_encoding), 1);
-	} else if (!strcasecmp("input_encoding", Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("input_encoding", type)) {
 		RETVAL_STRING(ICONVG(input_encoding), 1);
-	} else if (!strcasecmp("output_encoding", Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("output_encoding", type)) {
 		RETVAL_STRING(ICONVG(output_encoding), 1);
-	} else if (!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("internal_encoding", type)) {
 		RETVAL_STRING(ICONVG(internal_encoding), 1);
 	} else {
 		RETURN_FALSE;
