@@ -80,7 +80,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			PUTS("[\"");
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
-					php_html_puts(string_key, strlen(string_key) TSRMLS_CC);
+					php_html_puts(string_key, string_len TSRMLS_CC);
 					break;
 				case HASH_KEY_IS_LONG:
 					php_printf("%ld", num_key);
