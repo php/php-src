@@ -123,6 +123,7 @@ typedef struct {
 	int le_lofp,le_string;
 	int ignore_notices;
 	char *last_notice;
+	uint last_notice_len;
 } php_pgsql_globals;
 
 
