@@ -1403,7 +1403,7 @@ PHP_FUNCTION(pg_fetch_result)
 /* {{{ void php_pgsql_fetch_hash */
 static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type, int into_object)
 {
-	zval                *result;
+	zval                *result, *zrow;
 	PGresult            *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int             i, num_fields, pgsql_row, use_row;
@@ -1432,10 +1432,14 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 		result_type = PGSQL_ASSOC;
 		use_row = 0;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &result, &row, &result_type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zl", &result, &zrow, &result_type) == FAILURE) {
 			return;
 		}
-		use_row = ZEND_NUM_ARGS() > 1;
+		use_row = ZEND_NUM_ARGS() > 1 && Z_TYPE_P(zrow) != IS_NULL;
+		if (use_row) {
+			convert_to_long_ex(&zrow);
+			row = Z_LVAL_P(zrow);
+		}
 	}
 
 	if (!(result_type & PGSQL_BOTH)) {
