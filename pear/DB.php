@@ -600,7 +600,11 @@ class DB_result
      */
     function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT, $rownum=null)
     {
-        $res = $this->fetchInto($arr, $fetchmode, $rownum);
+        if ($fetchmode === DB_FETCHMODE_DEFAULT) {
+            $fetchmode = $this->dbh->fetchmode;
+        }
+
+        $res = $this->dbh->fetchInto($arr, $fetchmode, $rownum);
         if ($res !== DB_OK) {
             return $res;
         }
