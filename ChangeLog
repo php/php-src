@@ -1,3 +1,92 @@
+2003-03-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/openssl/openssl.c:
+      - Typo and some whitespace
+
+    * ext/openssl/openssl.c:
+      - Added optional parameter to openssl_sign() to specify the hashing
+        algorithm to use. (Patch by Scott <scott@planetscott.ca>)
+
+2003-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/gd/libgd/gd.c:
+      Fixed bug #22965 (Crash in gd lib's ImageFillToBorder()).
+
+2003-03-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4:
+      Merge proper -I parameter for APXS builds
+
+2003-03-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/gd/gd.c:
+      No point calling the RSHUTDOWN hook here unless we are actually going
+      to do something in it.
+
+2003-03-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * .gdbinit:
+      Added various gdb macros to examine zval, znode, and HashTable
+
+2003-03-30  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_profiler.c:
+      changed constant name
+
+2003-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      if TEST_PHP_EXECUTABLE=auto then use ./sapi/cli/php
+
+    * NEWS:
+      update
+
+    * sapi/cli/php_cli.c:
+      more ini defaults for error message handling
+
+    * main/main.c:
+      cleanup
+
+2003-03-30  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_profiler.h:
+      changed macro
+
+2003-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/interface_doubled.phpt:
+      bugfix #22961 by cynic@php.net
+
+    * sapi/cli/php_cli.c:
+      simplify and fix
+
+    * sapi/cli/TODO:
+      done
+
+2003-03-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mysqli/config.m4:
+      --+_
+
+2003-03-30  Shane Caraveo  <shane@caraveo.com>
+
+    * run-tests2.php:
+      uncomment removal of temp file
+      update changes from run-tests
+
+    * sapi/isapi/php4isapi.c:
+      clean up url handling with path_info
+      handle sending a 404 if the requested file does not exist
+
+    * main/php_variables.c:
+      _SERVER also should not be quoted by magic_quotes_GPC
+      also remove an empty if statement
+
 2003-03-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/var.c:

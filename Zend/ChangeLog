@@ -1,3 +1,22 @@
+2003-03-30  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_language_parser.y:
+      Since zend_do_begin_class_member_function_call assumes the previous
+      opcode is FETCH_CONSTANT, swap the calls around.
+
+2003-03-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_execute.c:
+      ZTS fix.
+
+2003-03-30  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c:
+      Try to report class name of the exception
+
+    * zend_execute.c:
+      Fix namespace switch
+
 2003-03-29  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
