@@ -36,13 +36,24 @@
 
 int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS);
 
-int spl_call_method(zval **object_pp, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr, HashTable *symbol_table TSRMLS_DC, int param_count, ...);
+int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr, HashTable *symbol_table TSRMLS_DC, int param_count, ...);
+
+/* {{{ zend_class_entry */
+static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
+{
+	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_class_entry) {
+		return Z_OBJ_HT_P(obj)->get_class_entry(obj TSRMLS_CC);
+	} else {
+		return NULL;
+	}
+}
+/* }}} */
 
 /* {{{ spl_begin_method_call_arg */
-static inline int spl_begin_method_call_arg(zval **ce, zend_function **fn_proxy, char *function_name, int fname_len, zval *retval, zval *arg1 TSRMLS_DC)
+static inline int spl_begin_method_call_arg(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval *retval, zval *arg1 TSRMLS_DC)
 {
 	zval *local_retval;
-	int ret = spl_call_method(ce, fn_proxy, function_name, fname_len, &local_retval, NULL TSRMLS_CC, 1, arg1);
+	int ret = spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, &local_retval, NULL TSRMLS_CC, 1, arg1);
 	if (local_retval) {
 		COPY_PZVAL_TO_ZVAL(*retval, local_retval);
 	} else {
@@ -53,10 +64,10 @@ static inline int spl_begin_method_call_arg(zval **ce, zend_function **fn_proxy,
 /* }}} */
 
 /* {{{ spl_begin_method_call_this */
-static inline int spl_begin_method_call_this(zval **ce, zend_function **fn_proxy, char *function_name, int fname_len, zval *retval TSRMLS_DC)
+static inline int spl_begin_method_call_this(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval *retval TSRMLS_DC)
 {
 	zval *local_retval;
-	int ret = spl_call_method(ce, fn_proxy, function_name, fname_len, &local_retval, NULL TSRMLS_CC, 0);
+	int ret = spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, &local_retval, NULL TSRMLS_CC, 0);
 	if (local_retval) {
 		COPY_PZVAL_TO_ZVAL(*retval, local_retval);
 	} else {
@@ -67,23 +78,23 @@ static inline int spl_begin_method_call_this(zval **ce, zend_function **fn_proxy
 /* }}} */
 
 /* {{{ spl_begin_method_call_ex */
-static inline int spl_begin_method_call_ex(zval **ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval TSRMLS_DC)
+static inline int spl_begin_method_call_ex(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval TSRMLS_DC)
 {
-	return spl_call_method(ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 0);
+	return spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 0);
 }
 /* }}} */
 
 /* {{{ spl_begin_method_call_arg_ex1 */
-static inline int spl_begin_method_call_arg_ex1(zval **ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, zval *arg1 TSRMLS_DC)
+static inline int spl_begin_method_call_arg_ex1(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, zval *arg1 TSRMLS_DC)
 {
-	return spl_call_method(ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 1, arg1);
+	return spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 1, arg1);
 }
 /* }}} */
 
 /* {{{ spl_begin_method_call_arg_ex2 */
-static inline int spl_begin_method_call_arg_ex2(zval **ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, zval *arg1, zval *arg2 TSRMLS_DC)
+static inline int spl_begin_method_call_arg_ex2(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, zval *arg1, zval *arg2 TSRMLS_DC)
 {
-	return spl_call_method(ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 2, arg1, arg2);
+	return spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 2, arg1, arg2);
 }
 /* }}} */
 

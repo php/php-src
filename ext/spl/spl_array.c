@@ -122,7 +122,7 @@ void spl_array_writer_default_set(zval *object, zval *newval, zval **retval TSRM
 	spl_array_writer_object *writer;
 
 	writer = (spl_array_writer_object *) zend_object_store_get_object(object TSRMLS_CC);
-	spl_begin_method_call_arg_ex2(&writer->obj, NULL, "set", sizeof("set")-1, retval, writer->idx, newval TSRMLS_CC);
+	spl_begin_method_call_arg_ex2(&writer->obj, NULL, NULL, "set", sizeof("set")-1, retval, writer->idx, newval TSRMLS_CC);
 }
 /* }}} */
 
@@ -169,7 +169,7 @@ int spl_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_vari
 		zval *exists;
 
 		/*ALLOC_ZVAL(exists); not needed */
-		spl_begin_method_call_arg_ex1(container_ptr, NULL, "exists", sizeof("exists")-1, &exists, dim TSRMLS_CC);
+		spl_begin_method_call_arg_ex1(container_ptr, NULL, NULL, "exists", sizeof("exists")-1, &exists, dim TSRMLS_CC);
 		if (!i_zend_is_true(exists)) {
 			if (type == BP_VAR_R || type == BP_VAR_RW) {
 				SEPARATE_ZVAL(&dim);
@@ -188,13 +188,13 @@ int spl_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_vari
 		}
 		DELETE_RET_ZVAL(exists);
 		if (type == BP_VAR_R || type == BP_VAR_IS) {
-			spl_begin_method_call_arg_ex1(container_ptr, NULL, "get", sizeof("get")-1, retval, dim TSRMLS_CC);
+			spl_begin_method_call_arg_ex1(container_ptr, NULL, NULL, "get", sizeof("get")-1, retval, dim TSRMLS_CC);
 			(*retval)->refcount--;
 		} else 
 #ifdef SPL_ARRAY_WRITE
 		if (spl_is_instance_of(container_ptr, spl_ce_array_access_ex TSRMLS_CC)) {
 			/* array_access_ex instaces have their own way of creating an access_writer */
-			spl_begin_method_call_arg_ex1(container_ptr, NULL, "new_writer", sizeof("new_writer")-1, retval, dim TSRMLS_CC);
+			spl_begin_method_call_arg_ex1(container_ptr, NULL, NULL, "new_writer", sizeof("new_writer")-1, retval, dim TSRMLS_CC);
 			T(result->u.var).var.ptr = *retval;
 			AI_PTR_2_PTR_PTR(T(result->u.var).var);
 			SELECTIVE_PZVAL_LOCK(*retval, result);
@@ -291,7 +291,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN)
 			spl_array_writer_default_set(*writer, newval, &retval TSRMLS_CC);
 		} else if (spl_is_instance_of(writer, spl_ce_array_writer TSRMLS_CC)) {
 			newval = spl_get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2) TSRMLS_CC);
-			spl_begin_method_call_arg_ex1(writer, NULL, "set", sizeof("set")-1, &retval, newval TSRMLS_CC);
+			spl_begin_method_call_arg_ex1(writer, NULL, NULL, "set", sizeof("set")-1, &retval, newval TSRMLS_CC);
 		} else {
 			ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_ASSIGN);
 		}

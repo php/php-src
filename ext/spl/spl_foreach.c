@@ -35,12 +35,14 @@
 	memset(emalloc(size), 0, size)
 
 typedef struct {
-	zend_uint     index;
-	zend_function *f_next;
-	zend_function *f_rewind;
-	zend_function *f_more;
-	zend_function *f_current;
-	zend_function *f_key;
+	zend_uint        index;
+	zend_class_entry *obj_ce;
+	zend_uint        is_ce_assoc;
+	zend_function    *f_next;
+	zend_function    *f_rewind;
+	zend_function    *f_more;
+	zend_function    *f_current;
+	zend_function    *f_key;
 } spl_foreach_proxy;
 
 /* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET) */
@@ -52,8 +54,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 		obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 		if (spl_implements(obj, spl_ce_iterator TSRMLS_CC)) {
 			spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-			MAKE_STD_ZVAL(retval);
-			spl_begin_method_call_this(obj, NULL, "new_iterator", sizeof("new_iterator")-1, retval TSRMLS_CC);
+			spl_begin_method_call_ex(obj, NULL, NULL, "new_iterator", sizeof("new_iterator")-1, &retval TSRMLS_CC);
 			EX_T(EX(opline)->result.u.var).var.ptr = retval;
 			EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
 			/* EX(opline)->result.u.EA.type = 0; */
@@ -78,60 +79,96 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 }
 /* }}} */
 
+#define CONNECT_TO_BUCKET_DLLIST(element, list_head)		\
+	(element)->pNext = (list_head);							\
+	(element)->pLast = NULL;								\
+	if ((element)->pNext) {									\
+		(element)->pNext->pLast = (element);				\
+	}
+
+#define CONNECT_TO_GLOBAL_DLLIST(element, ht)				\
+	(element)->pListLast = (ht)->pListTail;					\
+	(ht)->pListTail = (element);							\
+	(element)->pListNext = NULL;							\
+	if ((element)->pListLast != NULL) {						\
+		(element)->pListLast->pListNext = (element);		\
+	}														\
+	if (!(ht)->pListHead) {									\
+		(ht)->pListHead = (element);						\
+	}														\
+	if ((ht)->pInternalPointer == NULL) {					\
+		(ht)->pInternalPointer = (element);					\
+	}
+
 /* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH) */
 ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 {
-	zval **obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
+	znode *op1 = &EX(opline)->op1;
+	zval **obj = spl_get_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
 	zval more, tmp, *value, *key, *result;
-	spl_foreach_proxy *proxy;
+	spl_foreach_proxy *proxy = (spl_foreach_proxy*)op1->u.EA.type;
 
-	if (spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
-		proxy = (spl_foreach_proxy*)EX(opline)->op1.u.EA.type;
-		
+	if (proxy || spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
 		if (!proxy) {
-			(spl_foreach_proxy*)EX(opline)->op1.u.EA.type = proxy = ezalloc(sizeof(spl_foreach_proxy));
+			(spl_foreach_proxy*)op1->u.EA.type = proxy = ezalloc(sizeof(spl_foreach_proxy));
+			proxy->obj_ce = spl_get_class_entry(*obj TSRMLS_CC);
 		}
 		
-		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
+		spl_unlock_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
 		PZVAL_LOCK(*obj);
 
 		if (proxy->index++) {
-			spl_begin_method_call_this(obj, &proxy->f_next, "next", sizeof("next")-1, &tmp TSRMLS_CC);
-		} else if (spl_implements(obj, spl_ce_sequence TSRMLS_CC)) {
-			spl_begin_method_call_this(obj, &proxy->f_rewind, "rewind", sizeof("rewind")-1, &tmp TSRMLS_CC);
+			spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_next, "next", sizeof("next")-1, &tmp TSRMLS_CC);
+		} else {
+			proxy->is_ce_assoc = spl_implements(obj, spl_ce_assoc TSRMLS_CC);
+			if (spl_implements(obj, spl_ce_sequence TSRMLS_CC)) {
+				spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_rewind, "rewind", sizeof("rewind")-1, &tmp TSRMLS_CC);
+			}
 		}
 
-		spl_begin_method_call_this(obj, &proxy->f_more, "has_more", sizeof("has_more")-1, &more TSRMLS_CC);
+		spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_more, "has_more", sizeof("has_more")-1, &more TSRMLS_CC);
 		if (zend_is_true(&more)) {
 			result = &EX_T(EX(opline)->result.u.var).tmp_var;
 			array_init(result);
-			ALLOC_ZVAL(value);
 
-			spl_begin_method_call_this(obj, &proxy->f_current, "current", sizeof("current")-1, value TSRMLS_CC);
+			spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->f_current, "current", sizeof("current")-1, &value TSRMLS_CC);
 
-			zend_hash_index_update(result->value.ht, 0, &value, sizeof(zval *), NULL);
-		
-			if (spl_implements(obj, spl_ce_assoc TSRMLS_CC)) {
-				ALLOC_ZVAL(key);
-				spl_begin_method_call_this(obj, &proxy->f_key, "key", sizeof("key")-1, key TSRMLS_CC);
+			if (proxy->is_ce_assoc) {
+				spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->f_key, "key", sizeof("key")-1, &key TSRMLS_CC);
 			} else {
-				/* If someone makes a reference to this value then there is
-				 * a real problem. And the only way to avoid it is to alloc
-				 * dealloc this temporary zval then.
-				 */
-				tmp.value.lval = proxy->index;
-				tmp.type = IS_LONG;
-				tmp.refcount = 0;
-				tmp.is_ref = 0;
-				key = &tmp;
+				MAKE_STD_ZVAL(key);
+				key->value.lval = proxy->index;
+				key->type = IS_LONG;
 			}
+			zend_hash_index_update(result->value.ht, 0, &value, sizeof(zval *), NULL);
 			zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
-
+/*
+			{
+				Bucket *p;
+				
+				p = (Bucket*)emalloc(sizeof(Bucket)-1);
+				p->pDataPtr = value;
+				p->pData = &p->pDataPtr;
+				p->nKeyLength = 0;
+				p->h = 0;
+				CONNECT_TO_BUCKET_DLLIST(p, result->value.ht->arBuckets[0]);
+				result->value.ht->arBuckets[0] = p;
+				CONNECT_TO_GLOBAL_DLLIST(p, result->value.ht);
+				p = (Bucket*)emalloc(sizeof(Bucket)-1);
+				p->pDataPtr = key;
+				p->pData = &p->pDataPtr;
+				p->nKeyLength = 0;
+				p->h = 1;
+				CONNECT_TO_BUCKET_DLLIST(p, result->value.ht->arBuckets[1]);
+				result->value.ht->arBuckets[1] = p;
+				CONNECT_TO_GLOBAL_DLLIST(p, result->value.ht);
+				result->value.ht->nNumOfElements = 2;
+			}
+*/
 			NEXT_OPCODE();
-		} else {
-			efree(proxy);
-			EX(opline)->op1.u.EA.type = 0;
 		}
+		efree(proxy);
+		op1->u.EA.type = 0;
 		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 		return 0;
 	}
