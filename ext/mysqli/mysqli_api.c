@@ -439,7 +439,7 @@ PHP_FUNCTION(mysqli_data_seek)
 		RETURN_FALSE;
 	}
 
-	if (!offset || offset >= result->row_count) {
+	if (offset < 0 || offset >= result->row_count) {
 	   RETURN_FALSE;
 	}
 
@@ -914,7 +914,7 @@ PHP_FUNCTION(mysqli_field_tell)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_free_result(object result)
+/* {{{ proto void mysqli_free_result(object result)
    Free query result memory for the given result handle */
 PHP_FUNCTION(mysqli_free_result) 
 {
@@ -929,7 +929,7 @@ PHP_FUNCTION(mysqli_free_result)
 	mysql_free_result(result);
 	MYSQLI_CLEAR_RESOURCE(&mysql_result);	
 
-	RETURN_TRUE;
+	return;
 }
 /* }}} */
 
@@ -938,6 +938,14 @@ PHP_FUNCTION(mysqli_free_result)
 PHP_FUNCTION(mysqli_get_client_info)
 {
 	RETURN_STRING((char *)mysql_get_client_info(), 1);
+}
+/* }}} */
+
+/* {{{ proto int mysqli_get_client_version(void) 
+   Get MySQL client info */
+PHP_FUNCTION(mysqli_get_client_version)
+{
+	RETURN_LONG((long)mysql_get_client_version());
 }
 /* }}} */
 

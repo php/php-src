@@ -33,18 +33,11 @@ PHP_FUNCTION(mysqli_report)
 {
 	int		flags;
 
-	if (MyG(report_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Report level already set.");
-		RETURN_FALSE;
-	}
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
 		return;
 	}
 
-	if (!flags) {
-		RETURN_FALSE;
-	}
 	MyG(report_mode) = flags;
 
 	RETURN_TRUE;
