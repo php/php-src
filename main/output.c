@@ -186,7 +186,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		zval *z_status;
 
 		ALLOC_INIT_ZVAL(orig_buffer);
-		ZVAL_STRINGL(orig_buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 0);
+		ZVAL_STRINGL(orig_buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
 		orig_buffer->refcount=2;	/* don't let call_user_function() destroy our buffer */
 		orig_buffer->is_ref=1;
 
@@ -203,10 +203,10 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		}
 		OG(ob_lock) = 0;
 		zval_ptr_dtor(&OG(active_ob_buffer).output_handler);
-		if (orig_buffer->refcount==2) { /* free the zval */
+		orig_buffer->refcount -=2;
+		if (orig_buffer->refcount <= 0) { /* free the zval */
+			zval_dtor(orig_buffer);
 			FREE_ZVAL(orig_buffer);
-		} else {
-			orig_buffer->refcount-=2;
 		}
 		zval_ptr_dtor(&z_status);
 		zval_ptr_dtor(&OG(active_ob_buffer).output_handler);
@@ -250,7 +250,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 
 	if (send_buffer) {
 		/* FIXME: chunked output behavior is needed to be checked. (Yasuo) */
-		if (OG(ob_nesting_level) == 0 && !OG(active_ob_buffer).erase && status == (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_END))
+		if (OG(php_body_write) == php_ub_body_write && OG(ob_nesting_level) == 0 && !OG(active_ob_buffer).erase && status == (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_END))
 			ADD_CL_HEADER(final_buffer_length);
 		OG(php_body_write)(final_buffer, final_buffer_length TSRMLS_CC);
 	}
