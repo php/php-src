@@ -146,7 +146,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_set_client_encoding,	NULL)
 #endif
 	/* misc function */
-	PHP_FE(pg_metadata,     NULL)
+	PHP_FE(pg_meta_data,     NULL)
 	PHP_FE(pg_convert,      NULL)
 	PHP_FE(pg_insert,       NULL)
 	PHP_FE(pg_update,       NULL)
@@ -2809,10 +2809,10 @@ PHP_FUNCTION(pg_result_status)
 }
 /* }}} */
 
-/* {{{ php_pgsql_metadata
- * TODO: Add metadata cache for better performance
+/* {{{ php_pgsql_meta_data
+ * TODO: Add meta_data cache for better performance
  */
-PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC) 
+PHPAPI int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC) 
 {
 	PGresult *pg_result;
 	char *tmp_name;
@@ -2835,7 +2835,7 @@ PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *met
 	
 	pg_result = PQexec(pg_link, querystr.c);
 	if (PQresultStatus(pg_result) != PGRES_TUPLES_OK || (num_rows = PQntuples(pg_result)) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to query metadata for '%s' table %s", table_name, querystr.c);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to query meta_data for '%s' table %s", table_name, querystr.c);
 		smart_str_free(&querystr);
 		PQclear(pg_result);
 		return FAILURE;
@@ -2871,9 +2871,9 @@ PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *met
 /* }}} */
 
 
-/* {{{ proto array pg_metadata(resource db, string table)
-   Get metadata */
-PHP_FUNCTION(pg_metadata)
+/* {{{ proto array pg_meta_data(resource db, string table)
+   Get meta_data */
+PHP_FUNCTION(pg_meta_data)
 {
 	zval *pgsql_link;
 	char *table_name;
@@ -2889,7 +2889,7 @@ PHP_FUNCTION(pg_metadata)
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
 	array_init(return_value);
-	if (php_pgsql_metadata(pgsql, table_name, return_value TSRMLS_CC) == FAILURE) {
+	if (php_pgsql_meta_data(pgsql, table_name, return_value TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value); /* destroy array */
 		RETURN_FALSE;
 	}
@@ -3094,7 +3094,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 		FREE_ZVAL(meta);
 		return FAILURE;
 	}
-	if (php_pgsql_metadata(pg_link, table_name, meta TSRMLS_CC) == FAILURE) {
+	if (php_pgsql_meta_data(pg_link, table_name, meta TSRMLS_CC) == FAILURE) {
 		zval_dtor(meta);
 		FREE_ZVAL(meta);
 		return FAILURE;

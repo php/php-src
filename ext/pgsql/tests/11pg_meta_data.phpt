@@ -4,7 +4,7 @@ PostgreSQL pg_metadata()
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-include("pg_metadata.inc");
+include("pg_meta_data.inc");
 ?>
 --EXPECT--
 array(3) {

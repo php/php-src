@@ -130,7 +130,7 @@ PHP_FUNCTION(pg_escape_bytea);
 #endif
 
 /* misc functions */
-PHP_FUNCTION(pg_metadata);
+PHP_FUNCTION(pg_meta_data);
 PHP_FUNCTION(pg_convert);
 PHP_FUNCTION(pg_insert);
 PHP_FUNCTION(pg_update);
@@ -149,7 +149,7 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_DML_STRING            (1<<11)    /* Return query string */
 
 /* exported functions */
-PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
+PHPAPI int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
 PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, ulong opt TSRMLS_DC);
 PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, ulong opt, char **sql TSRMLS_DC);
 PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, ulong opt , char **sql TSRMLS_DC);
