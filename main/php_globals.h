@@ -53,6 +53,7 @@ struct _php_core_globals {
 	zend_bool allow_call_time_pass_reference;
 	zend_bool zend_set_utility_values;
 	zend_bool output_buffering;
+	zend_bool implicit_flush;
 
 	zend_bool safe_mode;
 	zend_bool sql_safe_mode;
