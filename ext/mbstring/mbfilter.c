@@ -7650,7 +7650,7 @@ mbfl_oddlen(mbfl_string *string)
 	int len, n, m, k;
 	unsigned char *p;
 	const unsigned char *mbtab;
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	encoding = mbfl_no2encoding(string->no_encoding);
 	if (encoding == NULL || string == NULL) {
