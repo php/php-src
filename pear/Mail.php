@@ -33,16 +33,20 @@ class Mail extends PEAR {
      * @param array  The parameters to pass to the Mail:: object.
      * @access public
      */
-    function factory($mailer_type, $params = array())
+    function factory($driver, $params = array())
     {
-        $mailer_type = strtolower($mailer_type);
-        $classfile = PEAR_INSTALL_DIR . '/Mail/' . $mailer_type . '.php';
-        if (@is_readable($classfile)) {
-            include_once $classfile;
-            $class = 'Mail_' . $mailer_type;
+        if (@include_once 'Mail/' . $driver . '.php') {
+            $class = 'Mail_' . $driver;
+        } elseif (@include_once 'Mail/' . strtoupper($driver) . '.php') {
+            $class = 'Mail_' . strtoupper($driver);
+        } elseif (@include_once 'Mail/' . ucfirst($driver) . '.php') {
+            $class = 'Mail_' . ucfirst($driver);
+        }
+        
+        if (isset($class)) {
             return new $class($params);
         } else {
-            return new PEAR_Error('unable to find classfile: ' . $classfile);
+            return new PEAR_Error('Unable to find class for driver ' . $driver);
         }
     }
     
@@ -116,9 +120,9 @@ class Mail extends PEAR {
         
         foreach ($headers as $key => $val) {
             if ($key == 'From') {
-                include_once 'Mail/rfc822.php';
+                include_once 'Mail/RFC822.php';
                 
-                $from_arr = Mail_rfc822::parseAddressList($val, 'localhost', false);
+                $from_arr = Mail_RFC822::parseAddressList($val, 'localhost', false);
                 $from = $from_arr[0]->mailbox . '@' . $from_arr[0]->host;
                 if (strstr($from, ' ')) {
                     // Reject outright envelope From addresses with spaces.
@@ -152,7 +156,7 @@ class Mail extends PEAR {
      */
     function parseRecipients($recipients)
     {
-        include_once 'Mail/rfc822.php';
+        include_once 'Mail/RFC822.php';
         
         // if we're passed an array, assume addresses are valid and
         // implode them before parsing.
@@ -163,7 +167,7 @@ class Mail extends PEAR {
         // Parse recipients, leaving out all personal info. This is
         // for smtp recipients, etc. All relevant personal information
         // should already be in the headers.
-        $addresses = Mail_rfc822::parseAddressList($recipients, 'localhost', false);
+        $addresses = Mail_RFC822::parseAddressList($recipients, 'localhost', false);
         $recipients = array();
         if (is_array($addresses)) {
             foreach ($addresses as $ob) {
