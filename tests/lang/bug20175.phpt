@@ -1,7 +1,7 @@
 --TEST--
 Bug #20175 (Static vars can't store ref to new instance)
 --SKIPIF--
-<?php if (version_compare(zend_version(),'2.0.0-dev','<')) die('skip ZE1 does not have static class members');
+<?php if (version_compare(zend_version(),'2.0.0-dev','<')) die('skip ZE1 does not have static class members'); ?>
 --FILE--
 <?php
 print zend_version()."\n";
