@@ -32,7 +32,7 @@
 #include <fribidi/fribidi.h>
 
 /* The fribidi guys dont believe in BC */
-#ifdef FRIBIDI_CHAR_SET_UTF8
+#ifndef FRIBIDI_MICRO_VERSION_STR
 #define FRIBIDI_CHARSET_UTF8                FRIBIDI_CHAR_SET_UTF8
 #define FRIBIDI_CHARSET_ISO8859_6           FRIBIDI_CHAR_SET_ISO8859_6
 #define FRIBIDI_CHARSET_ISO8859_8           FRIBIDI_CHAR_SET_ISO8859_8
@@ -212,7 +212,11 @@ PHP_FUNCTION(fribidi_log2vis)
 	
 	out_string = (char *) emalloc(sizeof(char)*alloc_len);
 
+#if FRIBIDI_MAJOR_VERSION == 0 && FRIBIDI_MINOR_VERSION <= 10
 	fribidi_log2vis(u_logical_str, len, &base_dir, u_visual_str, position_L_to_V_list, position_V_to_L_list, embedding_level_list);
+#else
+	fribidi_log2vis(NULL, u_logical_str, len, &base_dir, u_visual_str, position_L_to_V_list, position_V_to_L_list, embedding_level_list);
+#endif
 	
 	/* convert back to original char set */
 	switch(Z_LVAL_PP(charset)) {
