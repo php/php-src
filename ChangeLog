@@ -1,3 +1,122 @@
+2000-08-21  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/apache/php4apache.dsp:
+    updated project to work with readdir.h rev.1.5 from apache cvs
+
+    * win32/php4ts.dsw:
+    updated the projectfile to build the aolserver and nsapi modules
+
+    * sapi/aolserver/php4aolserver.dsp:
+    added the vs6 projectfile for the aolserver
+
+2000-08-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/README:
+    thttpd/PHP verified to run IMP 2.2.0 without any hitches.
+
+2000-08-21  Torben Wilson  <torben@netmill.com>
+
+    * NEWS:
+
+    NEWS update for file-function segfault fix.
+
+    * ext/standard/file.c:
+
+    Fixed segfault with fgets(), fgetcsv(), fgetss(), and fread() when
+    called with negative length argument.
+
+2000-08-21  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.c: Keep servlet working...
+
+2000-08-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/snmp/Makefile.in: Remove extra tab
+
+2000-08-21  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php:
+    make the definition of connect() consistent - always take the $dsn as a
+    reference.
+
+    * pear/DB.php
+      pear/DB/common.php:
+    Make the DB classes work with call-time pass-by-reference disabled.
+
+2000-08-21  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gd/gd.c: Fix crash in one-argument imagecolortransparent
+
+    * ext/standard/parsedate.y: Fix win32 build
+
+2000-08-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mcal/php_mcal.c
+      ext/standard/md5.c
+      ext/standard/md5.h
+      ext/standard/php_global.h
+      ext/icap/php_icap.c:
+    Get rid of php_global.h and the associated data types UINT4/_POINTER.
+
+    We use php_uint32 now globally.
+
+    Also removed K&R support from md5.[ch].
+
+    * main/win95nt.h: The macro CONVERT_TO_WIN_FS is not used anywhere.
+
+    * main/main.c
+      main/php.h
+      main/php_ini.c
+      main/php_ini.h
+      main/php_ticks.c
+      main/php_variables.c
+      ext/standard/basic_functions.h
+      ext/standard/crc32.c
+      ext/standard/datetime.c
+      ext/standard/info.c
+      ext/standard/info.h
+      ext/standard/levenshtein.c
+      ext/standard/parsedate.y
+      ext/standard/php_parsedate.h
+      main/fopen-wrappers.c: Cleaning up some mess
+
+2000-08-21  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/fdf.c
+      ext/fdf/php_fdf.h: - added function fdf_set_javascript_action()
+
+2000-08-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/config.m4: - Reversed last 'fix'
+
+2000-08-21  Andi Gutmans  <andi@php.net>
+
+    * main/fopen-wrappers.c:
+    - Remove old/deprecated version of expand_filepath
+
+2000-08-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * php.ini-optimized:
+    Delete this suggestion as it was leading newbie users to use this file
+    without understanding what they were doing.  Experienced users will find
+    and use this file on their own.
+
+2000-08-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+    Move thttpd_php_init() call to httpd_initialize().
+
+    Otherwise, some init stuff was done twice (like resetting the
+    known_post_content_types hash table which caused post requests
+    to fail).
+
 2000-08-20  Zeev Suraski  <zeev@php.net>
 
     * win32/php4dllts.dsp: Fix Win32 build
