@@ -62,7 +62,9 @@ in the ChangeLog.  If the line begins with @, it will be redirected to the
 NEWS file. Everything else goes into the ChangeLog.
 
 It is important to note that if your comment or news logline spans multiple
-lines, you have to put # or @ at the beginning of _every_ such line.
+lines, you have to put # or @ at the beginning of _every_ such line. Every 
+entry in NEWS has to have a name after it, so if you did it with someone's 
+help, put both your names there.
 
 Example. Say you modified two files, datetime.c and string.c. In datetime.c
 you added a new format option for date() function, and in string.c you fixed
