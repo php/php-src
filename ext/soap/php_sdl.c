@@ -28,6 +28,47 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type)
 	return enc;
 }
 
+encodePtr get_encoder_from_element(sdlPtr sdl, xmlNodePtr node, const char *type)
+{
+	encodePtr enc = NULL;
+	TSRMLS_FETCH();
+
+	if (sdl && sdl->types) {
+		xmlNsPtr nsptr;
+		char *ns, *cptype;
+		sdlTypePtr *sdl_type;
+
+		parse_namespace(type, &cptype, &ns);
+		nsptr = xmlSearchNs(node->doc, node, ns);
+		if (nsptr != NULL) {
+			smart_str nscat = {0};
+
+			smart_str_appends(&nscat, nsptr->href);
+			smart_str_appendc(&nscat, ':');
+			smart_str_appends(&nscat, cptype);
+			smart_str_0(&nscat);
+
+			if (zend_hash_find(sdl->types, nscat.c, nscat.len + 1, (void **)&sdl_type) == SUCCESS) {
+				enc = (*sdl_type)->encode;
+			} else if (zend_hash_find(sdl->types, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
+				enc = (*sdl_type)->encode;
+			}
+			smart_str_free(&nscat);
+		} else {
+			if (zend_hash_find(sdl->types, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
+				enc = (*sdl_type)->encode;
+			}
+		}
+
+		if (cptype) {efree(cptype);}
+		if (ns) {efree(ns);}
+	}
+	if (enc == NULL) {
+		enc = get_conversion(UNKNOWN_TYPE);
+	}
+	return enc;
+}
+
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
@@ -569,20 +610,28 @@ static sdlPtr load_wsdl(char *struri)
 					}
 
 					input = get_node(operation->children, "input");
+					portTypeInput = get_node(portTypeOperation->children, "input");
+
+					output = get_node(operation->children, "output");
+					portTypeOutput = get_node(portTypeOperation->children, "output");
+
 					if (input != NULL) {
-						xmlAttrPtr message;
+						xmlAttrPtr message, name;
 						xmlNodePtr part, trav3;
 						char *ns, *ctype;
 
-						portTypeInput = get_node(portTypeOperation->children, "input");
 						if (portTypeInput) {
 							message = get_attribute(portTypeInput->properties, "message");
 							if (message == NULL) {
 								php_error(E_ERROR, "Error parsing wsdl (Missing name for \"input\" of \"%s\")", op_name->children->content);
 							}
 
-							/* FIXME: may be input message name */
-							function->requestName = strdup(function->functionName);
+							name = get_attribute(portTypeInput->properties, "name");
+							if (name != NULL) {
+								function->requestName = strdup(name->children->content);
+							} else {
+								function->requestName = strdup(function->functionName);
+							}
 							function->requestParameters = malloc(sizeof(HashTable));
 							zend_hash_init(function->requestParameters, 0, NULL, delete_paramater, 1);
 
@@ -642,14 +691,14 @@ static sdlPtr load_wsdl(char *struri)
 
 								param->paramName = strdup(name->children->content);
 
-								element = get_attribute(part->properties, "element");
-								if (element != NULL) {
-									param->encode = get_encoder_from_prefix(ctx.root, part, element->children->content);
-								}
-
 								type = get_attribute(part->properties, "type");
 								if (type != NULL) {
 									param->encode = get_encoder_from_prefix(ctx.root, part, type->children->content);
+								} else {
+									element = get_attribute(part->properties, "element");
+									if (element != NULL) {
+										param->encode = get_encoder_from_element(ctx.root, part, element->children->content);
+									} 
 								}
 
 								zend_hash_next_index_insert(function->requestParameters, &param, sizeof(sdlParamPtr), NULL);
@@ -657,23 +706,23 @@ static sdlPtr load_wsdl(char *struri)
 							ENDFOREACH(trav3);
 						}
 
-						paramOrder = get_attribute(portTypeOperation->properties, "parameterOrder");
-						if (paramOrder) {
-							/* FIXME: */
-						}
 					}
 
-					output = get_node(operation->children, "output");
 					if (output != NULL) {
-						xmlAttrPtr message;
+						xmlAttrPtr message, name;
 						xmlNodePtr part, trav3;
 						char *ns, *ctype;
 
-						portTypeOutput = get_node(portTypeOperation->children, "output");
 						if (portTypeOutput) {
-							/* FIXME: may be output message name */
-							function->responseName = malloc(strlen(function->functionName) + strlen("Response") + 1);
-							sprintf(function->responseName, "%sResponse", function->functionName);
+							name = get_attribute(portTypeOutput->properties, "name");
+							if (name != NULL) {
+								function->responseName = strdup(name->children->content);
+							} else if (input == NULL) {
+								function->responseName = strdup(function->functionName);
+							} else {
+								function->responseName = malloc(strlen(function->functionName) + strlen("Response") + 1);
+								sprintf(function->responseName, "%sResponse", function->functionName);
+							}
 							function->responseParameters = malloc(sizeof(HashTable));
 							zend_hash_init(function->responseParameters, 0, NULL, delete_paramater, 1);
 
@@ -737,14 +786,15 @@ static sdlPtr load_wsdl(char *struri)
 
 								param->paramName = strdup(name->children->content);
 
-								element = get_attribute(part->properties, "element");
-								if (element) {
-									param->encode = get_encoder_from_prefix(ctx.root, part, element->children->content);
-								}
 
 								type = get_attribute(part->properties, "type");
 								if (type) {
 									param->encode = get_encoder_from_prefix(ctx.root, part, type->children->content);
+								} else {
+									element = get_attribute(part->properties, "element");
+									if (element) {
+										param->encode = get_encoder_from_element(ctx.root, part, element->children->content);
+									}
 								}
 
 								zend_hash_next_index_insert(function->responseParameters, &param, sizeof(sdlParamPtr), NULL);
@@ -753,12 +803,34 @@ static sdlPtr load_wsdl(char *struri)
 						}
 					}
 
+					paramOrder = get_attribute(portTypeOperation->properties, "parameterOrder");
+					if (paramOrder) {
+						/* FIXME: */
+					}
+
 					fault = get_node(operation->children, "fault");
 					if (!fault) {
 					}
 
 					function->binding = tmpbinding;
-					zend_hash_add(&ctx.root->functions, php_strtolower(function->functionName, strlen(function->functionName)), strlen(function->functionName), &function, sizeof(sdlFunctionPtr), NULL);
+
+					{
+						char *tmp = estrdup(function->functionName);
+						int  len = strlen(tmp);
+
+						zend_hash_add(&ctx.root->functions, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL);
+						efree(tmp);
+						if (function->requestName != NULL && strcmp(function->requestName,function->functionName) != 0) {
+							if (ctx.root->requests == NULL) {
+								ctx.root->requests = malloc(sizeof(HashTable));
+								zend_hash_init(ctx.root->requests, 0, NULL, NULL, 1);
+							}
+							tmp = estrdup(function->requestName);
+							len = strlen(tmp);
+							zend_hash_add(ctx.root->requests, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL);
+							efree(tmp);
+						}
+					}
 				}
 				ENDFOREACH(trav2);
 
@@ -826,6 +898,10 @@ void delete_sdl(void *handle)
 	if (tmp->bindings) {
 		zend_hash_destroy(tmp->bindings);
 		free(tmp->bindings);
+	}
+	if (tmp->encoders) {
+		zend_hash_destroy(tmp->requests);
+		free(tmp->requests);
 	}
 	free(tmp);
 }
