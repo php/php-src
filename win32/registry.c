@@ -1,13 +1,15 @@
 #include "php.h"
 #include "php_ini.h"
 
+#define PHP_REGISTRY_KEY "SOFTWARE\\PHP"
+
 void UpdateIniFromRegistry(char *path TSRMLS_DC)
 {
 	char *p, *orig_path;
 	HKEY MainKey;
 	char *strtok_buf = NULL;
 
-	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\PHP\\Per Directory Values", 0, KEY_READ, &MainKey)!=ERROR_SUCCESS) {
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, PHP_REGISTRY_KEY "\\Per Directory Values", 0, KEY_READ, &MainKey)!=ERROR_SUCCESS) {
 		return;
 	}
 
@@ -70,7 +72,8 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 				RegEnumValue(hKey, i, namebuf, &namebuf_len, NULL, &lType, valuebuf, &valuebuf_len);
 
 				if ((lType == REG_SZ) || (lType == REG_EXPAND_SZ)) {
-					zend_alter_ini_entry(namebuf, namebuf_len + 1, valuebuf, valuebuf_len, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+					/* valuebuf_len includes terminating 0 */
+					zend_alter_ini_entry(namebuf, namebuf_len + 1, valuebuf, valuebuf_len?valuebuf_len-1:0, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 				}
 
 				i++;
@@ -85,4 +88,24 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 	}
 	RegCloseKey(MainKey);
 	efree(orig_path);
+}
+
+#define PHPRC_REGISTRY_NAME "IniFilePath"
+
+char *GetIniPathFromRegistry()
+{
+	char *reg_location = NULL;
+	HKEY hKey;
+	
+	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, PHP_REGISTRY_KEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+		DWORD buflen = MAXPATHLEN;
+		reg_location = emalloc(MAXPATHLEN+1);
+		if(RegQueryValueEx(hKey, PHPRC_REGISTRY_NAME, 0, NULL, reg_location, &buflen) != ERROR_SUCCESS) {
+			efree(reg_location);
+			reg_location = NULL;
+			return reg_location;
+		}
+		RegCloseKey(hKey);
+	}
+	return reg_location;
 }
