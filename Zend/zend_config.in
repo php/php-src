@@ -1,0 +1,43 @@
+#! /bin/sh
+#
+# $Id$
+#
+# Written by Sascha Schumann <sascha@schumann.cx>
+
+
+# taken from autoconf
+
+if (echo "testing\c"; echo 1,2,3) | grep c >/dev/null; then
+  # Stardent Vistra SVR4 grep lacks -e, says ghazi@caip.rutgers.edu.
+  if (echo -n testing; echo 1,2,3) | sed s/-n/xn/ | grep xn >/dev/null; then
+    ac_n= ac_c='
+' ac_t='    '
+  else
+    ac_n=-n ac_c= ac_t=
+  fi
+else
+  ac_n= ac_c='\c' ac_t=
+fi
+
+
+flags_libs="@LIBS@"
+flags_ldflags="@LDFLAGS@"
+flags_cflags="@CPPFLAGS@ @CFLAGS@"
+
+case "$1" in
+--ldflags)
+	echo $ac_n "$flags_ldflags$ac_c"
+;;
+--cflags)
+	echo $ac_n "$flags_cflags$ac_c"
+;;
+--libs)
+	echo $ac_n "$flags_libs$ac_c"
+;;
+*)
+	echo "$0 [--libs|--cflags|--ldflags]"
+	exit 1
+;;
+esac
+
+exit 0

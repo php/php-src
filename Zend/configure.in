@@ -155,11 +155,17 @@ AC_SUBST(TSRM_LIB)
 AC_SUBST(ZEND_SCANNER_SRC)
 AC_SUBST(ZEND_SCANNER_COMPILE)
 
+if test "$enable_thread_safety" = "yes" ; then
+AC_CHECK_LIB(C, cin)
+AC_CHECK_LIB(g++, cin)
+AC_CHECK_LIB(stdc++, cin)
+fi
+
 AC_SUBST(CFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB_EXPORT)
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile zend_config)
 
 
 # Local Variables:
