@@ -1936,7 +1936,7 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
 {
 	/* expects interface to be contained in ce's interface list already */
-	int i, ce_num, if_num = iface->num_interfaces;
+	zend_uint i, ce_num, if_num = iface->num_interfaces;
 	zend_class_entry *entry;
 
 	if (if_num==0) {
