@@ -35,6 +35,7 @@
 #include <sys/time.h>
 #endif
 
+#include "../lcg/php_lcg.h"
 #include "uniqid.h"
 
 /* {{{ proto string uniqid(string prefix)
@@ -43,7 +44,7 @@ PHP_FUNCTION(uniqid)
 {
 #ifdef HAVE_GETTIMEOFDAY
 	pval *prefix;
-	char uniqid[128];
+	char uniqid[138];
 	int sec, usec;
 	struct timeval tv;
 	
@@ -57,10 +58,6 @@ PHP_FUNCTION(uniqid)
 		php_error(E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
 		return;
 	}
-	/* dont need this on windows so lets not do it*/
-#if HAVE_USLEEP && !(WIN32|WINNT)
-	usleep(1);
-#endif
 	gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
 	sec = (int) tv.tv_sec;
 	usec = (int) (tv.tv_usec % 1000000);
@@ -68,7 +65,7 @@ PHP_FUNCTION(uniqid)
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs:
 	 */
-	sprintf(uniqid, "%s%08x%05x", prefix->value.str.val, sec, usec);
+	sprintf(uniqid, "%s%08x%05x%.8f", prefix->value.str.val, sec, usec, php_combined_lcg() * 10);
 
 	RETURN_STRING(uniqid,1);
 #endif
