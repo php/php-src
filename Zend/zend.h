@@ -28,7 +28,7 @@
 #if WINNT||WIN32
 #include "config.w32.h"
 #else
-#include "config.h"
+#include "zend_config.h"
 #include "config.unix.h"
 #endif
 

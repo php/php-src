@@ -1,145 +1,378 @@
+# Makefile.in generated automatically by automake 1.3 from Makefile.am
+
+# Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DISTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = .
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
 CC = @CC@
-AR = ar rc
-LIBNAME = libzend.a
-PROF_CFLAGS =
 CFLAGS_SHLIB = @CFLAGS_SHLIB@
+DEBUG_CFLAGS = @DEBUG_CFLAGS@
 LDFLAGS_SHLIB = @LDFLAGS_SHLIB@
 LDFLAGS_SHLIB_EXPORT = @LDFLAGS_SHLIB_EXPORT@
-CPPFLAGS = @CPPFLAGS@
-CFLAGS = @CFLAGS@ $(CFLAGS_SHLIB) $(CPPFLAGS) $(INCLUDE) @DEBUG_CFLAGS@ $(PROF_CFLAGS)
-LDFLAGS = @LDFLAGS@ $(LDFLAGS_SHLIB) $(LDFLAGS_SHLIB_EXPORT)
+LEX = @LEX@
+MAKEINFO = @MAKEINFO@
+PACKAGE = @PACKAGE@
 RANLIB = @RANLIB@
+VERSION = @VERSION@
 YACC = @YACC@
 
-SOURCE = zend_alloc.c zend_compile.c zend_constants.c zend_execute.c zend_execute_API.c \
-       zend_highlight.c zend_llist.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
-       zend_stack.c zend_variables.c zend-parser.c zend-scanner.c zend.c zend_API.c zend_extensions.c \
-       zend_hash.c zend_list.c zend_indent.c
-       
-OBJS = zend_alloc.o zend_compile.o zend_constants.o zend_execute.o zend_execute_API.o \
-       zend_highlight.o zend_llist.o zend_opcode.o zend_operators.o zend_ptr_stack.o \
-       zend_stack.o zend_variables.o zend-parser.o zend-scanner.o zend.o zend_API.o zend_extensions.o \
-       zend_hash.o zend_list.o zend_indent.o
+AUTOMAKE_OPTIONS=foreign
+noinst_LIBRARIES=libzend.a
+libzend_a_SOURCES=zend_alloc.c zend_compile.c zend_constants.c \
+	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
+	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
+	zend_variables.c zend-parser.c zend-scanner.c zend.c zend_API.c \
+	zend_extensions.c zend_hash.c zend_list.c zend_indent.c \
+	zend-parser.y zend-scanner.l
+ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = zend_config.h
+CONFIG_CLEAN_FILES = 
+LIBRARIES =  $(noinst_LIBRARIES)
 
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I.
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
+libzend_a_LIBADD = 
+libzend_a_OBJECTS =  zend_alloc.o zend_compile.o zend_constants.o \
+zend_execute.o zend_execute_API.o zend_highlight.o zend_llist.o \
+zend_opcode.o zend_operators.o zend_ptr_stack.o zend_stack.o \
+zend_variables.o zend-parser.o zend-scanner.o zend.o zend_API.o \
+zend_extensions.o zend_hash.o zend_list.o zend_indent.o zend-parser.o \
+zend-scanner.o
+AR = ar
+LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
+LEXLIB = @LEXLIB@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  COPYING INSTALL Makefile.am Makefile.in acconfig.h \
+acinclude.m4 aclocal.m4 configure configure.in install-sh missing \
+mkinstalldirs stamp-h.in zend-parser.c zend-scanner.c zend_config.h.in
 
-all:	$(LIBNAME)
 
-libzend.a: $(OBJS)
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = tar
+GZIP = --best
+DEP_FILES =  .deps/zend-parser.P .deps/zend-scanner.P .deps/zend.P \
+.deps/zend_API.P .deps/zend_alloc.P .deps/zend_compile.P \
+.deps/zend_constants.P .deps/zend_execute.P .deps/zend_execute_API.P \
+.deps/zend_extensions.P .deps/zend_hash.P .deps/zend_highlight.P \
+.deps/zend_indent.P .deps/zend_list.P .deps/zend_llist.P \
+.deps/zend_opcode.P .deps/zend_operators.P .deps/zend_ptr_stack.P \
+.deps/zend_stack.P .deps/zend_variables.P
+SOURCES = $(libzend_a_SOURCES)
+OBJECTS = $(libzend_a_OBJECTS)
+
+all: Makefile $(LIBRARIES) zend_config.h
+
+.SUFFIXES:
+.SUFFIXES: .S .c .l .o .s .y
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+	cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+$(ACLOCAL_M4):  configure.in  acinclude.m4
+	cd $(srcdir) && $(ACLOCAL)
+
+config.status: $(srcdir)/configure
+	$(SHELL) ./config.status --recheck
+$(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+	cd $(srcdir) && $(AUTOCONF)
+
+zend_config.h: stamp-h
+	@:
+stamp-h: $(srcdir)/zend_config.h.in $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES= CONFIG_HEADERS=zend_config.h \
+	     $(SHELL) ./config.status
+	@echo timestamp > stamp-h
+$(srcdir)/zend_config.h.in: $(srcdir)/stamp-h.in
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
+	cd $(top_srcdir) && $(AUTOHEADER)
+	@echo timestamp > $(srcdir)/stamp-h.in
+
+mostlyclean-hdr:
+
+clean-hdr:
+
+distclean-hdr:
+	-rm -f zend_config.h
+
+maintainer-clean-hdr:
+
+mostlyclean-noinstLIBRARIES:
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+
+distclean-noinstLIBRARIES:
+
+maintainer-clean-noinstLIBRARIES:
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+libzend.a: $(libzend_a_OBJECTS) $(libzend_a_DEPENDENCIES)
 	-rm -f libzend.a
-	$(AR) libzend.a $(OBJS)
+	$(AR) cru libzend.a $(libzend_a_OBJECTS) $(libzend_a_LIBADD)
 	$(RANLIB) libzend.a
-	
-zend-parser.h zend-parser.c: zend-parser.y
-	bison -p zend -v -d zend-parser.y -o zend-parser.c
+.y.c:
+	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
+	if test -f y.tab.h; then \
+	if cmp -s y.tab.h $*.h; then rm -f y.tab.h; else mv y.tab.h $*.h; fi; \
+	else :; fi
+zend-parser.h: zend-parser.c
 
-zend-scanner.o:
-	$(CC) $(CFLAGS) -w -c zend-scanner.c
+.l.c:
+	$(LEX) $(LFLAGS) $< && mv $(LEX_OUTPUT_ROOT).c $@
 
-zend-scanner.c:  zend-scanner.l
-	flex -Pzend -ozend-scanner.c -i zend-scanner.l
+tags: TAGS
 
-clean:  
-	-rm -f libzend.a *.o
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $(SOURCES) $(HEADERS) $(LISP)
 
-distclean: clean
-	-rm -f *-scanner.c *-parser.[ch] *.output
-	-rm -f config.status config.cache config.log
-	-rm -f Makefile Makefile.depend config.h
+TAGS:  $(HEADERS) $(SOURCES) zend_config.h.in $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)zend_config.h.in$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags zend_config.h.in $$unique $(LISP) -o $$here/TAGS)
 
-.c.o:
-	@rm -f $@
-	$(CC) $(CFLAGS) -c $< -o $@
-	@bn=`echo $@ | sed -e 's#functions/##'`; test -f $@ || \
-	  (test "$@" != "$$bn" && test -f "$$bn" && mv $$bn $@)
+mostlyclean-tags:
 
-parser-scanner: zend-parser.c zend-parser.h zend-scanner.c
+clean-tags:
 
-depend:	parser-scanner
-	$(CC) $(CFLAGS) -MM $(SOURCE) | perl -pe 's|regex/regex.h||;' > Makefile.depend
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(PACKAGE)-$(VERSION)
+top_distdir = $(distdir)
+
+# This target untars the dist file and tries a VPATH configuration.  Then
+# it guarantees that the distribution is self-contained by making another
+# tarfile.
+distcheck: dist
+	-rm -rf $(distdir)
+	GZIP=$(GZIP) $(TAR) zxf $(distdir).tar.gz
+	mkdir $(distdir)/=build
+	mkdir $(distdir)/=inst
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \
+	cd $(distdir)/=build \
+	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
+	  && $(MAKE) \
+	  && $(MAKE) dvi \
+	  && $(MAKE) check \
+	  && $(MAKE) install \
+	  && $(MAKE) installcheck \
+	  && $(MAKE) dist
+	-rm -rf $(distdir)
+	@echo "========================"; \
+	echo "$(distdir).tar.gz is ready for distribution"; \
+	echo "========================"
+dist: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+dist-all: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+distdir: $(DISTFILES)
+	-rm -rf $(distdir)
+	mkdir $(distdir)
+	-chmod 777 $(distdir)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --foreign Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  test -f $(distdir)/$$file \
+	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	  || cp -p $$d/$$file $(distdir)/$$file; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+
+maintainer-clean-depend:
+	-rm -rf .deps
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).P -c $<
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).p -c $<
+	@-sed -e 's/^\([^:]*\)\.o:/\1.lo \1.o:/' \
+	  < .deps/$(*F).p > .deps/$(*F).P
+	@-rm -f .deps/$(*F).p
+info:
+dvi:
+check: all
+	$(MAKE)
+installcheck:
+install-exec: 
+	@$(NORMAL_INSTALL)
+
+install-data: 
+	@$(NORMAL_INSTALL)
+
+install: install-exec install-data all
+	@:
+
+uninstall: 
+
+install-strip:
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+installdirs:
 
 
-zend_alloc.o: zend_alloc.c zend.h config.h config.unix.h zend_errors.h \
- zend_alloc.h zend_hash.h zend_llist.h zend_globals.h zend_stack.h \
- zend_ptr_stack.h zend_compile.h zend-parser.h zend_execute.h
-zend_compile.o: zend_compile.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
- zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_execute.h zend_API.h modules.h zend_list.h zend_variables.h \
- zend_operators.h
-zend_constants.o: zend_constants.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_constants.h \
- zend_variables.h zend_operators.h zend_globals.h zend_stack.h \
- zend_ptr_stack.h zend_compile.h zend-parser.h zend_execute.h
-zend_execute.o: zend_execute.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
- zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_execute.h zend_API.h modules.h zend_list.h zend_variables.h \
- zend_operators.h zend_constants.h zend_extensions.h
-zend_execute_API.o: zend_execute_API.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
- zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_execute.h zend_API.h modules.h zend_list.h zend_variables.h \
- zend_operators.h zend_constants.h zend_extensions.h
-zend_highlight.o: zend_highlight.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
- zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_execute.h zend_highlight.h
-zend_llist.o: zend_llist.c zend.h config.h config.unix.h zend_errors.h \
- zend_alloc.h zend_hash.h zend_llist.h
-zend_opcode.o: zend_opcode.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
- zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_execute.h zend_variables.h zend_operators.h zend_extensions.h \
- zend_API.h modules.h zend_list.h
-zend_operators.o: zend_operators.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_operators.h \
- zend_variables.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_compile.h zend-parser.h zend_execute.h
-zend_ptr_stack.o: zend_ptr_stack.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_ptr_stack.h
-zend_stack.o: zend_stack.c zend.h config.h config.unix.h zend_errors.h \
- zend_alloc.h zend_hash.h zend_llist.h zend_stack.h
-zend_variables.o: zend_variables.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_API.h \
- modules.h zend_list.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_compile.h zend-parser.h zend_execute.h zend_constants.h \
- zend_variables.h
-zend-parser.o: zend-parser.c zend_compile.h zend.h config.h \
- config.unix.h zend_errors.h zend_alloc.h zend_hash.h zend_llist.h \
- zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_execute.h zend_list.h zend_API.h modules.h zend_variables.h \
- zend_operators.h
-zend-scanner.o: zend-scanner.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
- zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_execute.h zend-scanner.h zend_highlight.h zend_constants.h \
- zend_variables.h zend_operators.h
-zend.o: zend.c zend.h config.h config.unix.h zend_errors.h \
- zend_alloc.h zend_hash.h zend_llist.h zend_operators.h \
- zend_variables.h zend_extensions.h zend_compile.h zend-parser.h \
- zend_globals.h zend_stack.h zend_ptr_stack.h zend_execute.h modules.h \
- zend_constants.h zend_list.h
-zend_API.o: zend_API.c zend.h config.h config.unix.h zend_errors.h \
- zend_alloc.h zend_hash.h zend_llist.h zend_variables.h zend_execute.h \
- zend_compile.h zend-parser.h zend_globals.h zend_stack.h \
- zend_ptr_stack.h zend_API.h modules.h zend_list.h zend_constants.h \
- zend_operators.h
-zend_extensions.o: zend_extensions.c zend_extensions.h zend_compile.h \
- zend.h config.h config.unix.h zend_errors.h zend_alloc.h zend_hash.h \
- zend_llist.h zend-parser.h zend_globals.h zend_stack.h \
- zend_ptr_stack.h zend_execute.h
-zend_hash.o: zend_hash.c zend.h config.h config.unix.h zend_errors.h \
- zend_alloc.h zend_hash.h zend_llist.h
-zend_list.o: zend_list.c zend.h config.h config.unix.h zend_errors.h \
- zend_alloc.h zend_hash.h zend_llist.h zend_list.h zend_API.h \
- modules.h zend_globals.h zend_stack.h zend_ptr_stack.h zend_compile.h \
- zend-parser.h zend_execute.h
-zend_indent.o: zend_indent.c zend.h config.h config.unix.h \
- zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
- zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
- zend_execute.h zend_indent.h
+mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
-# Local Variables:
-# tab-width: 4
-# End:
+clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+
+distclean-generic:
+	-rm -f Makefile $(DISTCLEANFILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+
+maintainer-clean-generic:
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+mostlyclean:  mostlyclean-hdr mostlyclean-noinstLIBRARIES \
+		mostlyclean-compile mostlyclean-tags mostlyclean-depend \
+		mostlyclean-generic
+
+clean:  clean-hdr clean-noinstLIBRARIES clean-compile clean-tags \
+		clean-depend clean-generic mostlyclean
+
+distclean:  distclean-hdr distclean-noinstLIBRARIES distclean-compile \
+		distclean-tags distclean-depend distclean-generic clean
+	-rm -f config.status
+
+maintainer-clean:  maintainer-clean-hdr maintainer-clean-noinstLIBRARIES \
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+	-rm -f config.status
+
+.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
+mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir mostlyclean-depend \
+distclean-depend clean-depend maintainer-clean-depend info dvi \
+installcheck install-exec install-data install uninstall all \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+# automake isn't too clever about "non-standard" use of lex and yacc
+
+zend-scanner.c: zend-scanner.l
+	$(LEX) -Pzend -ozend-scanner.c -i zend-scanner.l
+
+zend-parser.h: zend-parser.c
+zend-parser.c: zend-parser.y
+	$(YACC) -p zend -v -d zend-parser.y -o zend-parser.c
+
+clean:
+	-rm -f zend-parser.c zend-parser.h zend-scanner.c
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:
