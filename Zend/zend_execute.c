@@ -3248,6 +3248,7 @@ int zend_fetch_constant_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value;
 
 	if (opline->op1.op_type == IS_UNUSED) {
+/* This seems to be a reminant of namespaces
 		if (EG(scope)) {
 			ce = EG(scope);
 			if (zend_hash_find(&ce->constants_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
@@ -3257,7 +3258,7 @@ int zend_fetch_constant_handler(ZEND_OPCODE_HANDLER_ARGS)
 				NEXT_OPCODE();
 			}
 		}
-
+*/
 		if (!zend_get_constant(opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len, &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 						opline->op2.u.constant.value.str.val,

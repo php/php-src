@@ -211,42 +211,6 @@ static zend_uint get_temporary_variable(zend_op_array *op_array)
 }
 
 
-void zend_do_fold_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
-{
-	int (*do_op)(zval *, zval *, zval * TSRMLS_DC);
-
-#define FOLD_CASE(val, func)  \
-	case val: \
-		do_op = func; \
-		break;
-
-	switch (op) {
-		FOLD_CASE(ZEND_SL, shift_left_function)
-		FOLD_CASE(ZEND_SR, shift_right_function)
-		FOLD_CASE(ZEND_BW_OR, bitwise_or_function)
-		FOLD_CASE(ZEND_BW_AND, bitwise_and_function)
-		FOLD_CASE(ZEND_BW_XOR, bitwise_xor_function)
-		FOLD_CASE(ZEND_CONCAT, concat_function)
-		FOLD_CASE(ZEND_ADD, add_function)
-		FOLD_CASE(ZEND_SUB, sub_function)
-		FOLD_CASE(ZEND_MUL, mul_function)
-		FOLD_CASE(ZEND_DIV, div_function)
-		FOLD_CASE(ZEND_MOD, mod_function)
-		FOLD_CASE(ZEND_BOOL_XOR, boolean_xor_function)
-		case ZEND_BW_NOT:
-			bitwise_not_function(&result->u.constant, &op1->u.constant TSRMLS_CC);
-			return;
-		default:
-			zend_error(E_COMPILE_ERROR, "Unknown binary op opcode %d", op);
-			return;
-	}
-
-	do_op(&result->u.constant, &op1->u.constant, &op2->u.constant TSRMLS_CC);
-	/* clean up constants after folding - we won't need them anymore */
-	zval_dtor(&op1->u.constant);
-	zval_dtor(&op2->u.constant);
-}
-
 void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2831,26 +2795,6 @@ void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_lis
 
 	CG(active_op_array)->opcodes[new_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
 	*result = CG(active_op_array)->opcodes[new_token->u.opline_num].op1;
-}
-
-void zend_do_fold_constant(znode *result, znode *constant_name TSRMLS_DC)
-{
-	zval **zresult;
-	
-	if (zend_hash_find(&CG(active_class_entry)->constants_table, constant_name->u.constant.value.str.val,
-	                   constant_name->u.constant.value.str.len+1, (void **) &zresult) != SUCCESS) {
-		if (zend_get_constant(constant_name->u.constant.value.str.val, constant_name->u.constant.value.str.len, &result->u.constant TSRMLS_CC)) {
-			zval_dtor(&constant_name->u.constant);
-			return;
-		} else {
-			zend_error(E_COMPILE_ERROR, "Cannot find %s constant in class %s", 
-			           constant_name->u.constant.value.str.val, CG(active_class_entry)->name);
-		}
-	}
-
-	result->u.constant = **zresult;
-	zval_copy_ctor(&result->u.constant);
-	zval_dtor(&constant_name->u.constant);
 }
 
 void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC)
