@@ -113,6 +113,16 @@ zend_module_entry session_module_entry = {
 #define STD_FMT "%s|"
 #define NOTFOUND_FMT "!%s|"
 
+#define PS_ADD_VARL(name,namelen) \
+	zend_hash_update(&PS(vars), name, namelen + 1, 0, 0, NULL)
+
+#define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
+
+#define PS_DEL_VARL(name,namelen) \
+	zend_hash_del(&PS(vars), name, namelen + 1);
+
+#define PS_DEL_VAR(name) PS_DEL_VARL(name, strlen(name))
+
 PS_SERIALIZER_ENCODE_FUNC(php)
 {
 	pval *buf;
@@ -146,16 +156,6 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 
 	return SUCCESS;
 }
-
-#define PS_ADD_VARL(name,namelen) \
-	zend_hash_update(&PS(vars), name, namelen + 1, 0, 0, NULL)
-
-#define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
-
-#define PS_DEL_VARL(name,namelen) \
-	zend_hash_del(&PS(vars), name, namelen + 1);
-
-#define PS_DEL_VAR(name) PS_DEL_VARL(name, strlen(name))
 
 PS_SERIALIZER_DECODE_FUNC(php)	
 {
@@ -194,6 +194,77 @@ PS_SERIALIZER_DECODE_FUNC(php)
 
 	return SUCCESS;
 }
+
+#if 0
+
+PS_SERIALIZER_ENCODE_FUNC(wddx)
+{
+	wddx_packet *packet;
+	char *key;
+	ELS_FETCH();
+	zval **struc;
+	char *buf;
+
+	packet = _php_wddx_constructor();
+
+	_php_wddx_packet_start(packet, NULL);
+	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
+	
+	for(zend_hash_internal_pointer_reset(&PS(vars));
+			zend_hash_get_current_key(&PS(vars), &key, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_move_forward(&PS(vars))) {
+		if(zend_hash_find(&EG(symbol_table), key, strlen(key) + 1, (void **) &struc) == SUCCESS) {
+			_php_wddx_serialize_var(packet, *struc, key);
+		}
+	}
+	
+	_php_wddx_add_chunk(packet, WDDX_STRUCT_E);
+	_php_wddx_packet_end(packet);
+	*newstr = _php_wddx_gather(packet);
+	_php_wddx_destructor(packet);
+	
+	if(newlen) *newlen = strlen(*newstr);
+
+	return SUCCESS;
+}
+
+PS_SERIALIZER_DECODE_FUNC(wddx) 
+{
+	zval *retval;
+	zval **ent;
+	zval *current;
+	char *key;
+	char tmp[128];
+	ulong idx;
+	int hash_type;
+	ELS_FETCH();
+
+	retval = (zval *) ecalloc(sizeof(zval), 1);
+
+	_php_wddx_deserialize(val, retval);
+
+	for(zend_hash_internal_pointer_reset(retval->value.ht);
+			zend_hash_get_current_data(retval->value.ht, (void **) &ent) == SUCCESS;
+			zend_hash_move_forward(retval->value.ht)) {
+		hash_type = zend_hash_get_current_key(retval->value.ht, &key, &idx);
+
+		switch(hash_type) {
+			case HASH_KEY_IS_LONG:
+				sprintf(tmp, "%ld", idx);
+				key = tmp;
+			case HASH_KEY_IS_STRING:
+				zval_add_ref(ent);
+				zend_hash_update(&EG(symbol_table), key, strlen(key) + 1,
+						ent, sizeof(ent), NULL);
+		}
+	}
+
+	zval_dtor(retval);
+	efree(retval);
+
+	return SUCCESS;
+}
+#endif
 
 static char *_php_session_encode(int *newlen PSLS_DC)
 {
