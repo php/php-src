@@ -1619,6 +1619,8 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 	if (zend_hash_quick_find(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child_info)==SUCCESS) {
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+		} else if (child_info->flags & ZEND_ACC_IMPLICIT_PUBLIC) {
+			return 1; /* Inherit from the parent */
 		}
 		return 0;	/* Don't copy from parent */
 	} else {
@@ -2209,12 +2211,18 @@ void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_le
 }
 
 
-void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
+void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC)
 {
 	zval *property;
 	zend_property_info property_info;
+	zend_property_info *existing_property_info;
 	HashTable *target_symbol_table;
 
+	if (zend_hash_find(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, (void **) &existing_property_info)==SUCCESS) {
+		if (!(existing_property_info->flags & ZEND_ACC_IMPLICIT_PUBLIC)) {
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::$%s", CG(active_class_entry)->name, var_name->u.constant.value.str.val);
+		}
+	}
 	ALLOC_ZVAL(property);
 
 	if (value) {
@@ -2224,13 +2232,13 @@ void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
 		property->type = IS_NULL;
 	}
 
-	if (CG(access_type) & ZEND_ACC_STATIC) {
+	if (access_type & ZEND_ACC_STATIC) {
 		target_symbol_table = CG(active_class_entry)->static_members;
 	} else {
 		target_symbol_table = &CG(active_class_entry)->default_properties;
 	}
 
-	switch (CG(access_type) & ZEND_ACC_PPP_MASK) {
+	switch (access_type & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PRIVATE: {
 				char *priv_name;
 				int priv_name_length;
@@ -2257,7 +2265,7 @@ void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC)
 			property_info.name_length = var_name->u.constant.value.str.len;
 			break;
 	}
-	property_info.flags = CG(access_type);
+	property_info.flags = access_type;
 	property_info.h = zend_get_hash_value(property_info.name, property_info.name_length+1);
 
 	zend_hash_update(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property_info, sizeof(zend_property_info), NULL);
@@ -2326,6 +2334,10 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 					break;
 			}
 			*result = opline_ptr->result;
+			if (CG(active_class_entry)
+				&& !zend_hash_exists(&CG(active_class_entry)->properties_info, property->u.constant.value.str.val, property->u.constant.value.str.len+1)) {
+				zend_do_declare_property(property, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_IMPLICIT_PUBLIC TSRMLS_CC);
+			}
 			return;
 		}
 	}

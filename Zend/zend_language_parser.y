@@ -474,10 +474,10 @@ access_modifier:
 ;
 
 class_variable_declaration:
-		class_variable_declaration ',' T_VARIABLE					{ zend_do_declare_property(&$3, NULL TSRMLS_CC); }
-	|	class_variable_declaration ',' T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$3, &$5 TSRMLS_CC); }
-	|	T_VARIABLE						{ zend_do_declare_property(&$1, NULL TSRMLS_CC); }
-	|	T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$1, &$3 TSRMLS_CC); }
+		class_variable_declaration ',' T_VARIABLE					{ zend_do_declare_property(&$3, NULL, CG(access_type) TSRMLS_CC); }
+	|	class_variable_declaration ',' T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$3, &$5, CG(access_type) TSRMLS_CC); }
+	|	T_VARIABLE						{ zend_do_declare_property(&$1, NULL, CG(access_type) TSRMLS_CC); }
+	|	T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$1, &$3, CG(access_type) TSRMLS_CC); }
 ;
 
 class_constant_declaration:
