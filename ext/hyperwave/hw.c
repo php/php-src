@@ -154,8 +154,8 @@ ZEND_GET_MODULE(hw)
 #define HW_FETCH_ID(hw_zval) \
 	convert_to_long_ex(hw_zval); \
 	id = Z_LVAL_PP(hw_zval); \
-	ptr = zend_list_find(id, &type); \
-	if(!ptr || (type != le_socketp && type != le_psocketp)) { \
+	ptr = (hw_document *) zend_list_find(id, &type); \
+	if(!ptr || (type != le_document)) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find file identifier %d", id); \
 		RETURN_FALSE; \
 	}
@@ -983,14 +983,14 @@ PHP_FUNCTION(hw_pconnect)
 PHP_FUNCTION(hw_close)
 {
 	zval **arg1;
-	int id, type;
+	int link, type;
 	hw_connection *ptr;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	HW_FETCH_ID(arg1);
-	zend_list_delete(id);
+	HW_FETCH_LINK(arg1);
+	zend_list_delete(link);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1000,14 +1000,14 @@ PHP_FUNCTION(hw_close)
 PHP_FUNCTION(hw_info)
 {
 	pval **arg1;
-	int id, type;
+	int link, type;
 	hw_connection *ptr;
 	char *str;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	HW_FETCH_ID(arg1);
+	HW_FETCH_LINK(arg1);
 	if(NULL != (str = get_hw_info(ptr))) {
 		/*
 		php_printf("%s\n", str);
@@ -1027,13 +1027,13 @@ PHP_FUNCTION(hw_info)
 PHP_FUNCTION(hw_error)
 {
 	pval **arg1;
-	int id, type;
+	int link, type;
 	hw_connection *ptr;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	HW_FETCH_ID(arg1);
+	HW_FETCH_LINK(arg1);
 	RETURN_LONG(ptr->lasterror);
 }
 /* }}} */
@@ -1043,14 +1043,14 @@ PHP_FUNCTION(hw_error)
 PHP_FUNCTION(hw_errormsg)
 {
 	pval **arg1;
-	int id, type;
+	int link, type;
 	hw_connection *ptr;
 	char errstr[100];
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	HW_FETCH_ID(arg1);
+	HW_FETCH_LINK(arg1);
 
 	switch (ptr->lasterror) {
 		case 0:
