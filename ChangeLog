@@ -1,3 +1,31 @@
+2004-12-28  Derick Rethans  <php@derickrethans.nl>
+
+    * scripts/Makefile.frag:
+      - MFB: Add dom/xml_common.h header as installed header in order to be able
+      to build pecl/xml_reader
+
+    * (PHP_5_0)
+      scripts/Makefile.frag:
+      - Add dom/xml_common.h header as installed header in order to be able to
+      build pecl/xml_reader
+
+2004-12-28  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      Update desc
+
+2004-12-28  Andi Gutmans  <andi@zend.com>
+
+    * php.ini-recommended:
+      - Revert expose_php change
+
+2004-12-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * php.ini-recommended:
+      Turn off sending of PHP identifying header. This is complete useless for
+      any practical application and is a total wasting bandwidth/cpu.
+
 2004-12-27  Zeev Suraski  <zeev@zend.com>
 
     * (PHP_4_3)
