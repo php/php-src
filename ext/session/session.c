@@ -1285,32 +1285,28 @@ PHP_FUNCTION(session_module_name)
 {
 	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
-	char *old;
 
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
-	
-	old = safe_estrdup(PS(mod)->s_name);
 
 	if (ac == 1) {
-		ps_module *tempmod;
-
 		convert_to_string_ex(p_name);
-		tempmod = _php_find_ps_module(Z_STRVAL_PP(p_name) TSRMLS_CC);
-		if (tempmod) {
-			if (PS(mod_data))
-				PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
-			PS(mod) = tempmod;
-			PS(mod_data) = NULL;
-		} else {
-			efree(old);
+		if (!_php_find_ps_module(Z_STRVAL_PP(p_name) TSRMLS_CC)) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find named PHP session module (%s)",
 					Z_STRVAL_PP(p_name));
 			RETURN_FALSE;
 		}
-	}
+		if (PS(mod_data)) {
+			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
+		}
+		PS(mod_data) = NULL;
 
-	RETVAL_STRING(old, 0);
+		RETVAL_STRING(safe_estrdup(PS(mod)->s_name), 0);
+
+		zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	} else {
+		RETURN_STRING(safe_estrdup(PS(mod)->s_name), 0);
+	}
 }
 /* }}} */
 
