@@ -3,13 +3,12 @@ dnl config.m4 for extension recode
 dnl don't forget to call PHP_EXTENSION(recode)
 
 
-AC_MSG_CHECKING(for recode support)
-AC_ARG_WITH(recode,
+PHP_ARG_WITH(recode,for recode support,
 [  --with-recode[=DIR]     Include recode support. DIR is the recode install
-                          directory.],
-[
-	if test "$withval" != "no"; then
-		RECODE_LIST="$withval /usr /usr/local /opt"
+                          directory.])
+
+	if test "$PHP_RECODE" != "no"; then
+		RECODE_LIST="$PHP_RECODE /usr /usr/local /opt"
 
 		for i in $RECODE_LIST; do
 			if test -f $i/include/recode.h; then
@@ -51,15 +50,13 @@ recode_format_table();
 		fi
 
 		AC_ADD_INCLUDE($RECODE_DIR/$RECODE_INC)
-		AC_ADD_LIBRARY_DEFER_WITH_PATH(recode, $RECODE_DIR/$RECODE_LIB)
-
-		AC_MSG_RESULT(yes)
+		if test "$ext_shared" = "yes"; then
+			AC_ADD_LIBRARY_WITH_PATH(recode, $RECODE_DIR/$RECODE_LIB, RECODE_SHARED_LIBADD)
+			PHP_SUBST(RECODE_SHARED_LIBADD)
+		else
+			AC_ADD_LIBRARY_DEFER_WITH_PATH(recode, $RECODE_DIR/$RECODE_LIB)
+		fi
 
 		AC_DEFINE(HAVE_LIBRECODE, 1, [Whether we have librecode 3.5 or higher])
-		PHP_EXTENSION(recode)
-	else
-		AC_MSG_RESULT(no)
+		PHP_EXTENSION(recode,$ext_shared)
 	fi
-],[
-	AC_MSG_RESULT(no)
-])
