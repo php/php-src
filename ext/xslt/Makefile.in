@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libxslt.la
-LTLIBRARY_SOURCES     = xslt.c sablot.c
-LTLIBRARY_SHARED_NAME = xslt.la
-LTLIBRARY_SHARED_LIBADD  = $(XSLT_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,7 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-zlib 'zlib (>= 1.0.9) support? ' yesnodir \
-    'no /usr zlib install' \
-'    Whether to use the zlib support to read/write .gz-files.\n
-    Requires zlib version >= 1.0.9!'
