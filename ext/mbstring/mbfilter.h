@@ -123,6 +123,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_byte4be,
 	mbfl_no_encoding_byte4le,
 	mbfl_no_encoding_base64,
+	mbfl_no_encoding_uuencode,
 	mbfl_no_encoding_qprint,
 	mbfl_no_encoding_7bit,
 	mbfl_no_encoding_8bit,

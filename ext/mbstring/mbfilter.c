@@ -296,6 +296,15 @@ static mbfl_encoding mbfl_encoding_base64 = {
 	MBFL_ENCTYPE_SBCS
 };
 
+static mbfl_encoding mbfl_encoding_uuencode = {
+	mbfl_no_encoding_uuencode,
+	"UUENCODE",
+	"x-uuencode",
+	NULL,
+	NULL,
+	MBFL_ENCTYPE_SBCS
+};
+
 static const char *mbfl_encoding_qprint_aliases[] = {"qprint", NULL};
 
 static mbfl_encoding mbfl_encoding_qprint = {
@@ -695,6 +704,7 @@ static mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_byte4be,
 	&mbfl_encoding_byte4le,
 	&mbfl_encoding_base64,
+	&mbfl_encoding_uuencode,
 	&mbfl_encoding_qprint,
 	&mbfl_encoding_7bit,
 	&mbfl_encoding_8bit,
@@ -756,6 +766,8 @@ static int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter);
 static int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter);
 static int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter);
+static int mbfl_filt_conv_uudec(int c, mbfl_convert_filter *filter);
+
 static int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter);
 static int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter);
@@ -910,6 +922,16 @@ static struct mbfl_convert_vtbl vtbl_b64_8bit = {
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_base64dec,
 	mbfl_filt_conv_base64dec_flush };
+
+static struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
+	mbfl_no_encoding_uuencode,
+	mbfl_no_encoding_8bit,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_uudec,
+	mbfl_filt_conv_common_flush
+};
+
 
 static struct mbfl_convert_vtbl vtbl_8bit_qprint = {
 	mbfl_no_encoding_8bit,
@@ -1549,6 +1571,7 @@ static struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_8859_15,
 	&vtbl_8bit_b64,
 	&vtbl_b64_8bit,
+	&vtbl_uuencode_8bit,
 	&vtbl_8bit_qprint,
 	&vtbl_qprint_8bit,
 	&vtbl_8bit_7bit,
@@ -2477,6 +2500,100 @@ mbfl_filt_conv_wchar_byte4le(int c, mbfl_convert_filter *filter)
 }
 
 
+/* uuencode => any */
+#define UUDEC(c)	(char)(((c)-' ')&077)
+static const char * uuenc_begin_text = "begin 0";
+enum { uudec_state_ground=0, uudec_state_inbegin,
+	uudec_state_until_newline,
+	uudec_state_size, uudec_state_a, uudec_state_b, uudec_state_c, uudec_state_d,
+	uudec_state_skip_newline};
+static int
+mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
+{
+	int n;
+	
+	switch(filter->status)	{
+		case uudec_state_ground:
+			/* looking for "begin 0666 filename\n" line */
+			if (filter->cache == 0 && c == 'b')
+			{
+				filter->status = uudec_state_inbegin;
+				filter->cache = 1; /* move to 'e' */
+			}
+			else if (c == '\n')
+				filter->cache = 0;
+			else
+				filter->cache++;
+			break;
+		case uudec_state_inbegin:
+			if (uuenc_begin_text[filter->cache++] != c)	{
+				/* doesn't match pattern */
+				filter->status = uudec_state_ground;
+				break;
+			}
+			if (filter->cache == 5)
+			{
+				/* thats good enough - wait for a newline */
+				filter->status = uudec_state_until_newline;
+				filter->cache = 0;
+			}
+			break;
+		case uudec_state_until_newline:
+			if (c == '\n')
+				filter->status = uudec_state_size;
+			break;
+		case uudec_state_size:
+			/* get "size" byte */
+			n = UUDEC(c);
+			filter->cache = n << 24;
+			filter->status = uudec_state_a;
+			break;
+		case uudec_state_a:
+			/* get "a" byte */
+			n = UUDEC(c);
+			filter->cache |= (n << 16);
+			filter->status = uudec_state_b;
+			break;
+		case uudec_state_b:
+			/* get "b" byte */
+			n = UUDEC(c);
+			filter->cache |= (n << 8);
+			filter->status = uudec_state_c;
+			break;
+		case uudec_state_c:
+			/* get "c" byte */
+			n = UUDEC(c);
+			filter->cache |= n;
+			filter->status = uudec_state_d;
+			break;
+		case uudec_state_d:
+			/* get "d" byte */
+			{
+				int A, B, C, D = UUDEC(c);
+				A = (filter->cache >> 16) & 0xff;
+				B = (filter->cache >> 8) & 0xff;
+				C = (filter->cache) & 0xff;
+				n = (filter->cache >> 24) & 0xff;
+				if (n-- > 0)
+					CK((*filter->output_function)( (A << 2) | (B >> 4), filter->data));
+				if (n-- > 0)
+					CK((*filter->output_function)( (B << 4) | (C >> 2), filter->data));
+				if (n-- > 0)
+					CK((*filter->output_function)( (C << 6) | D, filter->data));
+				filter->cache = n << 24;
+
+				if (n == 0)
+					filter->status = uudec_state_skip_newline;	/* skip next byte (newline) */
+				else
+					filter->status = uudec_state_a; /* go back to fetch "A" byte */
+			}
+			break;
+		case uudec_state_skip_newline:
+			/* skip newline */
+			filter->status = 0;
+	}
+	return c;
+}
 
 /*
  * any => BASE64
@@ -5195,10 +5312,12 @@ mbfl_convert_filter_get_vtbl(enum mbfl_no_encoding from, enum mbfl_no_encoding t
 
 	if (to == mbfl_no_encoding_base64 ||
 	    to == mbfl_no_encoding_qprint ||
+	    to == mbfl_no_encoding_uuencode ||
 	    to == mbfl_no_encoding_7bit) {
 		from = mbfl_no_encoding_8bit;
 	} else if (from == mbfl_no_encoding_base64 ||
-	           from == mbfl_no_encoding_qprint) {
+	           from == mbfl_no_encoding_qprint ||
+				  from == mbfl_no_encoding_uuencode) {
 		to = mbfl_no_encoding_8bit;
 	}
 
