@@ -368,6 +368,9 @@ ZEND_FUNCTION(each)
 		return;
 	}
 	if (zend_hash_get_current_data(target_hash, (void **) &entry_ptr)==FAILURE) {
+		if (!target_hash->pInternalPointer) {
+			zend_hash_internal_pointer_end(target_hash);
+		}
 		RETURN_FALSE;
 	}
 	array_init(return_value);
