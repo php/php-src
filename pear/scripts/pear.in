@@ -20,6 +20,7 @@
 //
 require_once 'PEAR.php';
 require_once 'PEAR/Config.php';
+require_once 'PEAR/Remote.php';
 require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -147,7 +148,6 @@ switch ($command) {
     // {{{ list-packages
 
     case 'list-packages': {
-        include_once 'PEAR/Remote.php';
         $remote = new PEAR_Remote($config);
         $result = $remote->call('package.listAll');
         $i = $j = 0;
