@@ -159,6 +159,10 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 {
 	register int npad;
 
+	if (max_width && min_width) {
+		expprec = max_width = 0;	
+	}
+
 	npad = min_width - MIN(len, (expprec ? max_width : len));
 
 	if (npad < 0) {
@@ -605,10 +609,10 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					convert_to_string_ex(args[argnum]);
 					php_sprintf_appendstring(&result, &outpos, &size,
 											 Z_STRVAL_PP(args[argnum]),
-											 width, 0, padding,
+											 width, precision, padding,
 											 alignment,
 											 Z_STRLEN_PP(args[argnum]),
-											 0, 0);
+											 0, expprec);
 					break;
 
 				case 'd':
