@@ -60,8 +60,8 @@
 #endif
 #endif
 
+static unsigned char all_args_force_ref[] = { 1, BYREF_FORCE_REST };
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
-static unsigned char first_and_second_args_force_ref[] = { 2, BYREF_FORCE, BYREF_FORCE };
 /* uncomment this if/when we actually need it - tired of seeing the warning
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 */
@@ -325,7 +325,7 @@ function_entry basic_functions[] = {
 	PHP_FE(extract,						NULL)
 	PHP_FE(compact,						NULL)
 	PHP_FE(range,						NULL)
-	PHP_FE(multisort,					first_and_second_args_force_ref)
+	PHP_FE(multisort,					all_args_force_ref)
 	PHP_FE(array_push,					first_arg_force_ref)
 	PHP_FE(array_pop,					first_arg_force_ref)
 	PHP_FE(array_shift,					first_arg_force_ref)
@@ -3276,20 +3276,38 @@ PHP_FUNCTION(array_pad)
 }
 /* }}} */
 
+int multisort_compare(const void *a, const void *b)
+{
+	Bucket**	  ab = *(Bucket ***)a;
+	Bucket**	  bb = *(Bucket ***)b;
+	int			  r;
+	int			  result = 0;
+	zval		  temp;
+
+	r = 0;
+	do {
+		compare_function(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData));
+		result = temp.value.lval;
+		if (result != 0)
+			return result;
+		r++;
+	} while (ab[r] != NULL);
+	return result;
+}
 
 PHP_FUNCTION(multisort)
 {
-	zval	   ***args;
-	zval		 *entry;
-	Bucket	   ***indirect;
-	Bucket		 *p;
-	int			  argc;
-	int			  array_size;
-	int			  i, k;
+	zval***			args;
+	Bucket***		indirect;
+	Bucket*			p;
+	HashTable*		hash;
+	int				argc;
+	int				array_size;
+	int				i, k;
 	
 	/* Get the argument count and check it */
 	argc = ARG_COUNT(ht);
-	if (argc < 2) {
+	if (argc < 1) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -3298,6 +3316,15 @@ PHP_FUNCTION(multisort)
 	if (getParametersArrayEx(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
+	}
+
+	for (i = 0; i < argc; i++) {
+		if ((*args[i])->type != IS_ARRAY) {
+			php_error(E_WARNING, "Argument %i to %s() is not an array", i+1,
+					  get_active_function_name());
+			efree(args);
+			return;
+		}
 	}
 	
 	array_size = zend_hash_num_elements((*args[0])->value.ht);
@@ -3311,18 +3338,48 @@ PHP_FUNCTION(multisort)
 
 	indirect = (Bucket ***)emalloc(array_size * sizeof(Bucket **));
 	for (i = 0; i < array_size; i++)
-		indirect[i] = (Bucket **)emalloc(argc * sizeof(Bucket *));
+		indirect[i] = (Bucket **)emalloc((argc+1) * sizeof(Bucket *));
 	
 	for (i = 0; i < argc; i++) {
 		k = 0;
 		for (p = (*args[i])->value.ht->pListHead; p; p = p->pListNext, k++) {
 			indirect[k][i] = p;
 		}
-		
-		for (; k < array_size; k++)
-			indirect[k][i] = NULL;
 	}
+	for (k = 0; k < array_size; k++)
+		indirect[k][argc] = NULL;
+
+	qsort(indirect, array_size, sizeof(Bucket **), multisort_compare);
 	
+	HANDLE_BLOCK_INTERRUPTIONS();
+	for (i = 0; i < argc; i++) {
+		hash = (*args[i])->value.ht;
+		hash->pListHead = indirect[0][i];;
+		hash->pListTail = NULL;
+		hash->pInternalPointer = hash->pListHead;
+
+		for (k = 0; k < array_size; k++) {
+			if (hash->pListTail) {
+				hash->pListTail->pListNext = indirect[k][i];
+			}
+			indirect[k][i]->pListLast = hash->pListTail;
+			indirect[k][i]->pListNext = NULL;
+			hash->pListTail = indirect[k][i];
+		}
+		
+		p = hash->pListHead;
+		k = 0;
+		while (p != NULL) {
+			if (p->nKeyLength == 0)
+				p->h = k++;
+			p = p->pListNext;
+		}
+		hash->nNextFreeElement = array_size;
+		zend_hash_rehash(hash);
+	}
+	HANDLE_UNBLOCK_INTERRUPTIONS();
+		
+	/* Clean up */	
 	for (i = 0; i < array_size; i++)
 		efree(indirect[i]);
 	efree(indirect);
