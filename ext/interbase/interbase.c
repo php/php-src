@@ -69,6 +69,9 @@ typedef unsigned long long ISC_UINT64;
 #ifdef PHP_WIN32
 #define LL_MASK "I64"
 #define LL_LIT(lit) lit ## I64
+#ifdef FB_SQLDA
+#pragma comment(lib, "fbclient_ms.lib")
+#endif
 #else
 #define LL_MASK "ll"
 #define LL_LIT(lit) lit ## ll
@@ -717,22 +720,20 @@ PHP_RSHUTDOWN_FUNCTION(ibase)
  
 PHP_MINFO_FUNCTION(ibase)
 {
-	char tmp[32];
+	char tmp[64];
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Interbase Support", "enabled");
 
-	php_info_print_table_row(2, "Client Library",
-#if (SQLDA_CURRENT_VERSION == 1 && SQL_DIALECT_CURRENT == 1)
-		"Interbase 5.6 or earlier");
-#elif (SQLDA_CURRENT_VERSION == 2 && SQL_DIALECT_CURRENT == 3)
-		"Interbase 7 or later");
+#if (SQLDA_CURRENT_VERSION > 1) || defined(FB_SQLDA)
+	isc_get_client_version(tmp);
+	php_info_print_table_row(2, "Client Library", tmp);
+#elif (SQL_DIALECT_CURRENT == 1)
+	php_info_print_table_row(2, "Client Library", "Interbase 5.6 or earlier");
 #elif !defined(DSC_null)
-		"Interbase 6");
-#elif !defined(FB_SQLDA)
-		"Firebird 1.0");
+	php_info_print_table_row(2, "Client Library", "Interbase 6");
 #else
-		"Firebird 1.5 or later");
+	php_info_print_table_row(2, "Client Library", "Firebird 1.0");
 #endif
 
 	php_info_print_table_row(2, "Revision", FILE_REVISION);
