@@ -6,6 +6,7 @@ rewriter correctly handles attribute names which contain dashes
 session.use_cookies=0
 session.cache_limiter=
 session.use_trans_sid=1
+session.name=PHPSESSID
 --FILE--
 <?php
 
