@@ -396,7 +396,7 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 {
 	char *c;
 	int ch;
-	int i;
+	size_t i;
 
 	c = s;
 	for (i=0; i<len; i++) {
@@ -428,7 +428,7 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 {
 	register int ch;
 	char *c;
-	int i;
+	size_t i;
 
 	c = s;
 	for (i=0; i<len; i++) {
