@@ -77,17 +77,24 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	int n = 0;
 	zend_llist_position pos;
 	sapi_header_struct *h;
+	size_t len;
 	
 	if (!SG(sapi_headers).http_status_line) {
-		size_t len;
-
 		snprintf(buf, 1023, "HTTP/1.0 %d Something\r\n", SG(sapi_headers).http_response_code);
 		len = strlen(buf);
 		vec[n].iov_base = buf;
-		vec[n++].iov_len = len;
-		TG(hc)->status = SG(sapi_headers).http_response_code;
-		TG(hc)->bytes_sent += len;
+		vec[n].iov_len = len;
+	} else {
+		vec[n].iov_base = SG(sapi_headers).http_status_line;
+		len = strlen(vec[n].iov_base);
+		vec[n].iov_len = len;
+		vec[++n].iov_base = "\r\n";
+		vec[n].iov_len = 2;
+		len += 2;
 	}
+	TG(hc)->status = SG(sapi_headers).http_response_code;
+	TG(hc)->bytes_sent += len;
+	n++;
 
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
