@@ -17,7 +17,12 @@ if test "$PHP_SYBASE_CT" != "no"; then
     SYBASE_CT_LIBDIR=$PHP_SYBASE_CT/lib
   fi
 
-  PHP_ADD_INCLUDE($SYBASE_CT_INCDIR)
+  if test -f $SYBASE_CT_INCDIR/ctpublic.h; then
+    PHP_ADD_INCLUDE($SYBASE_CT_INCDIR)
+  else
+    AC_MSG_ERROR([ctpublic.h missing!])
+  fi
+  
   PHP_ADD_LIBPATH($SYBASE_CT_LIBDIR, SYBASE_CT_SHARED_LIBADD)
   PHP_ADD_LIBRARY(cs,, SYBASE_CT_SHARED_LIBADD)
   PHP_ADD_LIBRARY(ct,, SYBASE_CT_SHARED_LIBADD)
@@ -26,7 +31,7 @@ if test "$PHP_SYBASE_CT" != "no"; then
 
   SYBASE_CT_LIBS="-L$SYBASE_CT_LIBDIR -lcs -lct -lcomn -lintl"
 
-  AC_CHECK_LIB(tcl, netg_errstr, [
+  PHP_CHECK_LIBRARY(tcl, netg_errstr, [
     PHP_ADD_LIBRARY(tcl,,SYBASE_CT_SHARED_LIBADD)
   ],[ 
     PHP_ADD_LIBRARY(sybtcl,,SYBASE_CT_SHARED_LIBADD)
