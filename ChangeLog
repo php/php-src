@@ -1,3 +1,28 @@
+2001-12-19  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/HTML/Menu.php: PHP_SELF & friends went to $_SERVER since 4.1.0
+
+2001-12-19  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/odbc.php:
+    free the result when is a resource or free the statement if not
+    in freeResult()
+
+2001-12-19  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container/msession.php:
+    flag if to establish a msession connectio or reuse one
+
+    * pear/Cache/Container/msession.php:
+    Experimental, untested msession container - should be fast
+
+2001-12-19  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/README:
+    Updated README. Module will not cancel queued query sent.
+
+    * ext/pgsql/pgsql.c: Do not cancel queued query automatically.
+
 2001-12-18  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
 
     * ext/pgsql/pgsql.c: More proper error message.
