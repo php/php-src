@@ -779,9 +779,9 @@ PHP_FUNCTION(strtotime)
 	if (argc == 2) {
 		convert_to_long_ex(z_now);
 		now = Z_LVAL_PP(z_now);
-		RETURN_LONG(parse_date(Z_STRVAL_PP(z_time), &now));
+		RETURN_LONG(php_parse_date(Z_STRVAL_PP(z_time), &now));
 	} else {
-		RETURN_LONG(parse_date(Z_STRVAL_PP(z_time), NULL));
+		RETURN_LONG(php_parse_date(Z_STRVAL_PP(z_time), NULL));
 	}
 }
 /* }}} */
