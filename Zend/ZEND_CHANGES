@@ -205,6 +205,25 @@ Changes in the Zend Engine 2.0
 
       This syntax only applies to objects/classes, not built-in types.
 
+    * final.
+
+      The Zend Engine 2.0 introduces the "final" keyword to declare
+      final members and methods. Those cannot be overridden by
+      sub-classes.
+
+      Example:
+
+        <?php
+        class Foo {
+          final function bar() {
+            // ...
+          }
+        }
+        ?>
+
+      Old code that has no user-defined classes or functions named 
+      'final' should run without modifications.
+
     * Object Cloning.
 
       The Zend Engine 1.0 offered no way a user could decide what copy
