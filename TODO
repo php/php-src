@@ -93,7 +93,6 @@ ext/wddx
         (Andrei)
 
     * implement wddx_packet_as_javascript(). (Andrei)
-    * aways escape '&' and '<' in serialized data. (Thies)
 
 other cool stuff
 ----------------
