@@ -111,10 +111,10 @@ class oop_test {
 	
 	function oop_static() {
 		echo "oop_static()\n";
-		if (!isset($this->oop_value)) {
-			$this->oop_value = & new oop_class;
+		if (!isset(self::oop_value)) {
+			self::oop_value = & new oop_class;
 		}
-		echo $this->oop_value->oop_name;
+		echo self::oop_value->oop_name;
 	}
 }
 
