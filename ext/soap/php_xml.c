@@ -1,5 +1,33 @@
 #include "php_soap.h"
 
+/* Channel libxml file io layer through the PHP streams subsystem.
+ * This allows use of ftps:// and https:// urls */
+
+int php_stream_xmlIO_match_wrapper(const char *filename)
+{
+	TSRMLS_FETCH();
+	return php_stream_locate_url_wrapper(filename, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ? 1 : 0;
+
+}
+
+void *php_stream_xmlIO_open_wrapper(const char *filename)
+{
+	TSRMLS_FETCH();
+	return php_stream_open_wrapper(filename, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+}
+
+int php_stream_xmlIO_read(void *context, char *buffer, int len)
+{
+	TSRMLS_FETCH();
+	return php_stream_read((php_stream*)context, buffer, len);
+}
+
+int php_stream_xmlIO_close(void *context)
+{
+	TSRMLS_FETCH();
+	return php_stream_close((php_stream*)context);
+}
+
 xmlNsPtr attr_find_ns(xmlAttrPtr node)
 {
 	if(node->ns)

@@ -16,19 +16,11 @@
 # include "ext/domxml/php_domxml.h"
 #endif
 
-#ifdef PHP_WIN32
-# ifdef PHP_HAVE_STREAMS
-#  define SOAP_STREAM php_stream *
-# else
-#  define SOAP_STREAM SOCKET
-# endif
-#else
-# ifdef PHP_HAVE_STREAMS
-#  define SOAP_STREAM php_stream *
-# else
-#  define SOCKET unsigned int
-#  define SOAP_STREAM SOCKET
-# endif
+#ifndef PHP_HAVE_STREAMS
+# error You lose - must be compiled against PHP 4.3.0 or later
+#endif
+
+#ifndef PHP_WIN32
 # define TRUE 1
 # define FALSE 0
 # define stricmp strcasecmp
@@ -401,8 +393,8 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 			ss = NULL; \
 	}
 
-#define FIND_SOCKET_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "httpsocket", sizeof("httpsocket"), (void **)&tmp)
-#define FETCH_SOCKET_RES(ss,tmp) ss = (SOAP_STREAM)zend_fetch_resource(tmp TSRMLS_CC, -1, "httpsocket", NULL, 1, le_http_socket)
+#define FIND_SOCKET_PROPERTY(ss,tmp)	zend_hash_find(Z_OBJPROP_P(ss), "httpsocket", sizeof("httpsocket"), (void **)&tmp)
+#define FETCH_SOCKET_RES(ss,tmp)		php_stream_from_zval_no_verify(ss,tmp)
 
 #define GET_THIS_OBJECT(o) \
  	o = getThis(); \
