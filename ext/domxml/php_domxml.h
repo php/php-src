@@ -36,6 +36,7 @@
 #include <libxml/xpointer.h>
 #endif
 #if HAVE_DOMXSLT
+#include <libxslt/xsltconfig.h>
 #include <libxslt/xsltInternals.h>
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
