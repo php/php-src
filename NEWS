@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 12 Feb 2004, PHP 5 Beta 4
+- Fixed interfaces to check for function return-by-reference equality when
+  inheriting and implementing interfaces. (Andi, Zeev)
 - Changed exceptions so that they must now inherit from the built-in Exception
   class. This allows for a general catch(Exception $e) statement to catch all
   exceptions. (Andi, Zeev)
