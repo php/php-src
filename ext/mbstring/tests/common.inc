@@ -40,8 +40,8 @@ $t_ary = array(
 
 class tc
 {
-	var $s1 = '日本語EUC-JPの文字列';
-	var $s2 = 'English Text';
+	public $s1 = '日本語EUC-JPの文字列';
+	public $s2 = 'English Text';
 
 	function tc() 
 	{
