@@ -882,6 +882,10 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	char dummy = 1;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
+
+	if (name == NULL) {
+		return FAILURE;
+	}
 	
 	lc_name = do_alloca(name_length + 1);
 	zend_str_tolower_copy(lc_name, name, name_length);
