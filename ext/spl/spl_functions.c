@@ -134,12 +134,13 @@ char * spl_make_fully_qualyfied_name(zend_class_entry * pce TSRMLS_DC)
 void spl_add_class_name(zval * list, zend_class_entry * pce TSRMLS_DC)
 {
 	char * str = spl_make_fully_qualyfied_name(pce TSRMLS_CC); 
+	size_t len = strlen(str);
 	zval *tmp;
 
-	if (zend_hash_find(Z_ARRVAL_P(list), str, strlen(str)+1, (void*)&tmp) == FAILURE) {
+	if (zend_hash_find(Z_ARRVAL_P(list), str, len+1, (void*)&tmp) == FAILURE) {
 		MAKE_STD_ZVAL(tmp);
 		ZVAL_STRING(tmp, str, 0);
-		zend_hash_add(Z_ARRVAL_P(list), str, strlen(str)+1, &tmp, sizeof(zval *), NULL);
+		zend_hash_add(Z_ARRVAL_P(list), str, len+1, &tmp, sizeof(zval *), NULL);
 	} else {
 		efree(str);
 	}
@@ -153,23 +154,20 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce TSRMLS_DC)
 
 	for (num_interfaces = 0; num_interfaces < pce->num_interfaces; num_interfaces++) {
 		spl_add_class_name(list, pce->interfaces[num_interfaces] TSRMLS_CC);
-		spl_add_interfaces(list, pce->interfaces[num_interfaces] TSRMLS_CC);
-	}
-	if (pce->parent) {
-		spl_add_class_name(list, pce->parent TSRMLS_CC);
-		spl_add_interfaces(list, pce->parent TSRMLS_CC);
 	}
 }
 /* }}} */
 
-/* {{{ spl_add_interfaces */
+/* {{{ spl_add_classes */
 int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC)
 {
-	spl_add_class_name(list, *ppce TSRMLS_CC);
-	if ((*ppce)->parent) {
-		spl_add_classes(&(*ppce)->parent, list TSRMLS_CC);
+	zend_class_entry *pce = *ppce;
+	spl_add_class_name(list, pce TSRMLS_CC);
+	spl_add_interfaces(list, pce TSRMLS_CC);
+	while (pce->parent) {
+		pce = pce->parent;
+		spl_add_classes(&pce->parent, list TSRMLS_CC);
 	}
-	spl_add_interfaces(list, *ppce TSRMLS_CC);
 	return 0;
 }
 /* }}} */
