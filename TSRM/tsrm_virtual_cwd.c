@@ -352,9 +352,6 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			path_length = new_path_length;
 		} else {
 			free(new_path);
-			if (GetLastError() != ERROR_FILE_NOT_FOUND) {
-				return 1;
-			}
 		}
 	}
 #endif
