@@ -3330,7 +3330,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0;
-	int state;
+	int state = 0;
 
 	if (stateptr)
 		state = *stateptr;
