@@ -269,7 +269,6 @@ PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC)
  */
 PHPAPI void php_start_implicit_flush(TSRMLS_D)
 {
-	php_end_ob_buffer(1, 0 TSRMLS_CC);		/* Switch out of output buffering if we're in it */
 	OG(implicit_flush)=1;
 }
 /* }}} */
