@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fix symbol clash which caused a DSO problem on OpenBSD (Rob Black and
+  anil@recoil.org)
+- Added new function: ldap_compare(). (Jani)
 - Fixed a bug in ldap_get_entries() and ldap_get_attributes(). (Jani)
 - Ported DB to new error reporting scheme in PEAR. (Stig)
 - Added sybase and ibase DB backends in PEAR. (Sterling)
