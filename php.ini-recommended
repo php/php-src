@@ -813,6 +813,9 @@ mssql.compatability_mode = Off
 ; Limits the number of records in each batch.  0 = all records in one batch.
 ;mssql.batchsize = 0
 
+; Use NT authentication when connecting to the server
+mssql.secure_connection = Off
+
 [Assertion]
 ; Assert(expr); active by default.
 ;assert.active = On
