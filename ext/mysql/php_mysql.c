@@ -98,7 +98,7 @@ static int le_result, le_link, le_plink;
 #define MYSQL_USE_RESULT	0
 #define MYSQL_STORE_RESULT	1
 
-#if MYSQL_VERSION_ID < 32223
+#if MYSQL_VERSION_ID < 32224
 #define PHP_MYSQL_VALID_RESULT(mysql)		\
 	(mysql_num_fields(mysql)>0)
 #else
