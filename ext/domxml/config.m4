@@ -48,7 +48,7 @@ if test "$PHP_DOM" != "no"; then
     ])
     withval=$old_withval
   else
-    echo "checking for libz needed by pdflib 3.0... already zlib support"
+    echo "checking for libz needed by libxml ... already zlib support"
     LIBS="$LIBS -L$withval/lib -lz"
   fi
 
