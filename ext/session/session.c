@@ -434,6 +434,7 @@ static void php_session_track_init(TSRMLS_D)
 	  MAKE_STD_ZVAL(PS(http_session_vars));
 	  array_init(PS(http_session_vars));
 	  ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 1, 0);
+	  ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 1, 0);
 	}
 }
 
@@ -792,8 +793,8 @@ static void php_session_start(TSRMLS_D)
 	 */
 
 	if (!PS(id)) {
-		if (zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS",
-					sizeof("HTTP_COOKIE_VARS"), (void **) &data) == SUCCESS &&
+		if (zend_hash_find(&EG(symbol_table), "_COOKIE",
+					sizeof("_COOKIE"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
@@ -803,8 +804,8 @@ static void php_session_start(TSRMLS_D)
 		}
 
 		if (!PS(id) &&
-				zend_hash_find(&EG(symbol_table), "HTTP_GET_VARS",
-					sizeof("HTTP_GET_VARS"), (void **) &data) == SUCCESS &&
+				zend_hash_find(&EG(symbol_table), "_GET",
+					sizeof("_GET"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
@@ -813,8 +814,8 @@ static void php_session_start(TSRMLS_D)
 		}
 
 		if (!PS(id) &&
-				zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS",
-					sizeof("HTTP_POST_VARS"), (void **) &data) == SUCCESS &&
+				zend_hash_find(&EG(symbol_table), "_POST",
+					sizeof("_POST"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
@@ -1141,8 +1142,10 @@ static void php_register_var(zval** entry TSRMLS_DC)
 	} else {
 		convert_to_string_ex(entry);
 
-		if (strcmp(Z_STRVAL_PP(entry), "HTTP_SESSION_VARS") != 0)
+		if ((strcmp(Z_STRVAL_PP(entry), "HTTP_SESSION_VARS") != 0) ||
+		   (strcmp(Z_STRVAL_PP(entry), "_SESSION") != 0)) {
 			PS_ADD_VARL(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry));
+		}
 	}
 }
 /* }}} */
@@ -1390,6 +1393,8 @@ PHP_MINIT_FUNCTION(session)
 	ts_allocate_id(&ps_globals_id, sizeof(php_ps_globals), NULL, NULL);
 	ps_globals = ts_resource(ps_globals_id);
 #endif
+
+	zend_register_auto_global("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
 
 	PS(module_number) = module_number;
 	REGISTER_INI_ENTRIES();
