@@ -273,6 +273,149 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 /*
 ** creates an array return value from object record
 */
+#define ARR_SPEC_TYPE_NR    1
+#define ARR_SPEC_TYPE_LANG  2
+#define FILL_SPEC(spec, t) {attr_spec *__spec = emalloc(sizeof(attr_spec));\
+                            __spec->hasAttr = 0; \
+                            MAKE_STD_ZVAL(__spec->arr); \
+                            __spec->type = t; \
+                            spec = __spec; }
+typedef struct _attr_spec {
+	int hasAttr;       /* If that attribute has been encountered in current object record */
+	zval *arr;         /* The array containing all values of the attribute */
+	enum {ATTR_NONE,   /* The type of the attribute */
+	      ATTR_NR,
+	      ATTR_LANG
+	} type;
+} attr_spec;
+
+int make2_return_array_from_objrec(pval **return_value, char *objrec) {
+	char *attrname, *str, *temp, language[3];
+	int i, count;
+	zval *spec_arr;
+	attr_spec *spec;
+	
+	/* Create an array with an entry containing specs for each attribute
+	   and fill in the specs for Title, Description, Keyword, Group
+	 */
+	MAKE_STD_ZVAL(spec_arr);
+	array_init(spec_arr);
+	FILL_SPEC(spec, ATTR_LANG);
+	add_assoc_long(spec_arr, "Title", (long) spec);
+	FILL_SPEC(spec, ATTR_LANG);
+	add_assoc_long(spec_arr, "Description", (long) spec);
+	FILL_SPEC(spec, ATTR_LANG);
+	add_assoc_long(spec_arr, "Keyword", (long) spec);
+	FILL_SPEC(spec, ATTR_NONE);
+	add_assoc_long(spec_arr, "Group", (long) spec);
+
+/*
+	count = zend_hash_num_elements(spec_arr->value.ht);
+	zend_hash_internal_pointer_reset(spec_arr->value.ht);
+	for(i=0; i<count; i++) {
+		zval *keydata, **keydataptr;
+		attr_spec *spec;
+		int keytype;
+		ulong length;
+		char *key;
+		keytype = zend_hash_get_current_key(spec_arr->value.ht, &key, &length);
+		zend_hash_get_current_data(spec_arr->value.ht, (void **) &keydataptr);
+		keydata = *keydataptr;
+		spec = (attr_spec *) keydata->value.lval;
+fprintf(stderr,"spec=0x%X, hasAttr=%d, arr=0x%X, type=%d\n", spec, spec->hasAttr, spec->arr, spec->type);
+		zend_hash_move_forward(spec_arr->value.ht);
+	}
+*/
+
+	if (array_init(*return_value) == FAILURE) {
+		(*return_value)->type = IS_STRING;
+		(*return_value)->value.str.val = empty_string;
+		(*return_value)->value.str.len = 0;
+		return -1;
+	}
+
+	/* Loop through the attributes of object record and check
+	   if the attribute has a specification. If it has the value
+	   is added to array in spec record. If not it is added straight
+	   to the return_value array.
+	*/
+	temp = estrdup(objrec);
+	attrname = strtok(temp, "\n");
+	while(attrname != NULL) {
+		zval *data, **dataptr;
+		attr_spec *spec;
+		str = attrname;
+
+		/* Check if a specification is available.
+		   If it isn't available then insert the attribute as
+		   a string into the return array
+		*/
+		while((*str != '=') && (*str != '\0'))
+			str++;
+		*str = '\0';
+		str++;
+		if(zend_hash_find(spec_arr->value.ht, attrname, strlen(attrname)+1, (void **) &dataptr) == FAILURE) {
+			add_assoc_string(*return_value, attrname, str, 1);
+		} else {
+			data = *dataptr;
+			spec = (attr_spec *) data->value.lval;
+			if ((spec->hasAttr == 0) && (array_init(spec->arr) == FAILURE)) {
+				return -1;
+			}
+			spec->hasAttr = 1;
+
+			switch(spec->type) {
+				case ATTR_LANG:
+					if(str[2] == ':') {
+						str[2] = '\0';
+						strcpy(language, str);
+						str += 3;
+					} else
+						strcpy(language, "xx");
+
+					add_assoc_string(spec->arr, language, str, 1);
+					break;
+				case ATTR_NONE:
+					add_next_index_string(spec->arr, str, 1);
+					break;
+			}
+		}
+
+		attrname = strtok(NULL, "\n");
+	}
+	efree(temp);
+
+	/* At this point the attributes listed in the specs haven't been
+	   added to the return value array. Loop throught the spec and
+	   add each attribute array if it exists
+	 */
+	count = zend_hash_num_elements(spec_arr->value.ht);
+	zend_hash_internal_pointer_reset(spec_arr->value.ht);
+	for(i=0; i<count; i++) {
+		zval *keydata, **keydataptr, *val;
+		attr_spec *spec;
+		int keytype;
+		ulong length;
+		char *key;
+		keytype = zend_hash_get_current_key(spec_arr->value.ht, &key, &length);
+		zend_hash_get_current_data(spec_arr->value.ht, (void **) &keydataptr);
+		keydata = *keydataptr;
+		spec = (attr_spec *) keydata->value.lval;
+		val = spec->arr;
+		if(spec->hasAttr) {
+			zend_hash_add((*return_value)->value.ht, key, strlen(key)+1, &val, sizeof(zval *), NULL);
+
+		} else {
+			efree(val);
+		}
+		efree(spec);
+		zend_hash_move_forward(spec_arr->value.ht);
+	}
+
+
+	return(0);
+}
+
 int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	char *attrname, *str, *temp, language[3], *title;
 	int iTitle, iDesc, iKeyword, iGroup;
@@ -3266,7 +3409,7 @@ PHP_FUNCTION(hw_objrec2array) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg1);
-	make_return_array_from_objrec(&return_value, arg1->value.str.val);
+	make2_return_array_from_objrec(&return_value, arg1->value.str.val);
 }
 /* }}} */
 
