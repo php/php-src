@@ -98,6 +98,7 @@ void init_op_array(zend_op_array *op_array, int type, int initial_ops_size)
 	op_array->uses_globals = 0;
 
 	op_array->return_reference = 0;
+	op_array->done_pass_two = 0;
 
 	zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_ctor_handler, op_array);
 }
@@ -185,7 +186,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
 	}
-	zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_dtor_handler, op_array);
+	if (op_array->done_pass_two) {
+		zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_dtor_handler, op_array);
+	}
 }
 
 
@@ -300,6 +303,7 @@ int pass_two(zend_op_array *op_array)
 	if (CG(handle_op_arrays)) {
 		zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_handler, op_array);
 	}
+	op_array->done_pass_two = 1;
 	return 0;
 }
 
