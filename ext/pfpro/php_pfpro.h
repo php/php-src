@@ -51,8 +51,7 @@ PHP_FUNCTION(pfpro_cleanup);            /* Shut down cleanly          */
 PHP_FUNCTION(pfpro_process_raw);        /* Raw transaction processing */
 PHP_FUNCTION(pfpro_process);            /* Transaction processing     */
 
-typedef struct {
-	int le_pfpro;
+ZEND_BEGIN_MODULE_GLOBALS(pfpro)
 	int initialized;
 	char *defaulthost;
 	int defaultport;
@@ -61,10 +60,10 @@ typedef struct {
 	int proxyport;
 	char *proxylogon;
 	char *proxypassword;
-} php_pfpro_globals;
+ZEND_END_MODULE_GLOBALS(pfpro)
 
 #ifdef ZTS
-#define PFPROG(v) TSRMG(pfpro_globals_id, php_pfpro_globals *, v)
+#define PFPROG(v) TSRMG(pfpro_globals_id, zend_pfpro_globals *, v)
 #else
 #define PFPROG(v) (pfpro_globals.v)
 #endif
