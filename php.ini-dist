@@ -139,7 +139,7 @@ implicit_flush = Off
 
 ; The unserialize callback function will be called (with the undefined class'
 ; name as parameter), if the unserializer finds an undefined class
-; which should be instanciated.
+; which should be instantiated.
 ; A warning appears if the specified function is not defined, or if the
 ; function doesn't include/implement the missing class.
 ; So only set this entry, if you really want to implement such a
@@ -771,7 +771,7 @@ sybase.min_message_severity = 10
 ; Compatability mode with old versions of PHP 3.0.
 ; If on, this will cause PHP to automatically assign types to results according
 ; to their Sybase type, instead of treating them all as strings.  This
-; compatability mode will probably not stay around forever, so try applying
+; compatibility mode will probably not stay around forever, so try applying
 ; whatever necessary changes to your code, and turn it off.
 sybase.compatability_mode = Off
 
@@ -1120,7 +1120,7 @@ sockets.use_system_read = On
 ; registered as output buffer to function
 ;mbstring.http_output = SJIS
 
-; enable automatic encoding translation accoding to
+; enable automatic encoding translation according to
 ; mbstring.internal_encoding setting. Input chars are
 ; converted to internal encoding by setting this to On.
 ; Note: Do _not_ use automatic encoding translation for
