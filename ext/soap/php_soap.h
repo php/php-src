@@ -277,7 +277,9 @@ xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int styl
 zval *desearlize_zval(sdlPtr sdl, xmlNodePtr data, sdlParamPtr param);
 
 void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+#ifndef ZEND_ENGINE_2
 int my_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC);
+#endif
 
 #define phpext_soap_ptr soap_module_ptr
 
@@ -348,7 +350,7 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 		ss = *__tmp; \
 	}
 
-#define FIND_PORT_PROPERTY(ss,tmp) zend_hash_find(ss->value.obj.properties, "port", sizeof("port"), (void **)&tmp)
+#define FIND_PORT_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "port", sizeof("port"), (void **)&tmp)
 
 #define FETCH_THIS_SDL(ss) \
 	{ \
@@ -362,7 +364,7 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 			ss = NULL; \
 	}
 
-#define FIND_SDL_PROPERTY(ss,tmp) zend_hash_find(ss->value.obj.properties, "sdl", sizeof("sdl"), (void **)&tmp)
+#define FIND_SDL_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "sdl", sizeof("sdl"), (void **)&tmp)
 #define FETCH_SDL_RES(ss,tmp) ss = (sdlPtr) zend_fetch_resource(tmp TSRMLS_CC, -1, "sdl", NULL, 1, le_sdl)
 
 #define FETCH_THIS_SERVICE(ss) \
@@ -377,7 +379,7 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 			ss = NULL; \
 	}
 
-#define FIND_SERVICE_PROPERTY(ss,tmp) zend_hash_find(ss->value.obj.properties, "service", sizeof("service"), (void **)&tmp)
+#define FIND_SERVICE_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "service", sizeof("service"), (void **)&tmp)
 #define FETCH_SERVICE_RES(ss,tmp) ss = (soapServicePtr) zend_fetch_resource(tmp TSRMLS_CC, -1, "service", NULL, 1, le_service)
 
 #define FETCH_THIS_URL(ss) \
@@ -392,7 +394,7 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 			ss = NULL; \
 	}
 
-#define FIND_URL_PROPERTY(ss,tmp) zend_hash_find(ss->value.obj.properties, "httpurl", sizeof("httpurl"), (void **)&tmp)
+#define FIND_URL_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "httpurl", sizeof("httpurl"), (void **)&tmp)
 #define FETCH_URL_RES(ss,tmp) ss = (php_url *) zend_fetch_resource(tmp TSRMLS_CC, -1, "httpurl", NULL, 1, le_url)
 
 #define FETCH_THIS_SOCKET(ss) \
@@ -407,7 +409,7 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 			ss = NULL; \
 	}
 
-#define FIND_SOCKET_PROPERTY(ss,tmp) zend_hash_find(ss->value.obj.properties, "httpsocket", sizeof("httpsocket"), (void **)&tmp)
+#define FIND_SOCKET_PROPERTY(ss,tmp) zend_hash_find(Z_OBJPROP_P(ss), "httpsocket", sizeof("httpsocket"), (void **)&tmp)
 #define FETCH_SOCKET_RES(ss,tmp) ss = (SOAP_STREAM)zend_fetch_resource(tmp TSRMLS_CC, -1, "httpsocket", NULL, 1, le_http_socket)
 
 #define GET_THIS_OBJECT(o) \

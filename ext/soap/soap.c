@@ -995,7 +995,8 @@ PHP_FUNCTION(handle)
 				else
 					soap_obj = tmp_soap;
 			}
- 			function_table = &(soap_obj->value.obj.ce->function_table);
+/* 			function_table = &(soap_obj->value.obj.ce->function_table);*/
+ 			function_table = &((Z_OBJCE_P(soap_obj))->function_table);
 		}
 		else
 		{
@@ -1615,8 +1616,10 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 
 void clear_soap_fault(zval *obj)
 {
-	if(obj != NULL && obj->type == IS_OBJECT)
-		zend_hash_del(obj->value.obj.properties, "__soap_fault", sizeof("__soap_fault"));
+	if(obj != NULL && obj->type == IS_OBJECT) {
+/*		zend_hash_del(obj->value.obj.properties, "__soap_fault", sizeof("__soap_fault"));*/
+		zend_hash_del(Z_OBJPROP_P(obj), "__soap_fault", sizeof("__soap_fault"));
+	}
 }
 
 void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC)
@@ -2242,6 +2245,7 @@ void delete_mapping(void *data)
 }
 
 /* Should not need */
+#ifndef ZEND_ENGINE_2
 int my_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC)
 {
 	if(call_user_function(function_table, object_pp, function_name, retval_ptr, param_count, params TSRMLS_CC) == FAILURE)
@@ -2288,3 +2292,6 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 	}
 	return FAILURE;
 }
+#endif
+
+
