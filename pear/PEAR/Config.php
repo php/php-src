@@ -26,8 +26,17 @@ require_once 'PEAR.php';
  */
 $GLOBALS['_PEAR_Config_instance'] = null;
 
+define('PEAR_CONFIG_DEFAULT_BINDIR',
+       PHP_BINDIR);
 define('PEAR_CONFIG_DEFAULT_DOCDIR',
-       PHP_DATADIR.DIRECTORY_SEPARATOR.'doc'.DIRECTORY_SEPARATOR.'pear');
+       PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'docs');
+define('PEAR_CONFIG_DEFAULT_PHPDIR',
+//       PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib');
+       PEAR_INSTALL_DIR);
+define('PEAR_CONFIG_DEFAULT_DATADIR',
+       PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
+define('PEAR_CONFIG_DEFAULT_TESTDIR',
+       PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
 define('PEAR_DEFAULT_UMASK', umask());
 
 // in case a --without-pear PHP installation is used
@@ -91,7 +100,7 @@ class PEAR_Config extends PEAR
             ),
         'php_dir' => array(
             'type' => 'directory',
-            'default' => PEAR_INSTALL_DIR,
+            'default' => PEAR_CONFIG_DEFAULT_PHPDIR,
             'doc' => 'directory where .php files are installed',
             ),
         'ext_dir' => array(
@@ -106,7 +115,7 @@ class PEAR_Config extends PEAR
             ),
         'bin_dir' => array(
             'type' => 'directory',
-            'default' => PHP_BINDIR,
+            'default' => PEAR_CONFIG_DEFAULT_BINDIR,
             'doc' => 'directory where executables are installed',
             ),
         'username' => array(
