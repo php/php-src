@@ -86,31 +86,35 @@ typedef struct dba_handler {
 
 /* {{{ macromania */
 
-#define DBA_ID_PARS pval *id; dba_info *info = NULL; int type, ac = ARG_COUNT(ht)
+#define DBA_ID_PARS 											\
+	pval **id; 													\
+	dba_info *info = NULL; 										\
+	int type, ac = ARG_COUNT(ht)
 
 /* these are used to get the standard arguments */
 
-#define DBA_GET1 \
-	if(ac != 1 || getParameters(ht, ac, &id) != SUCCESS) { \
-		WRONG_PARAM_COUNT; \
+#define DBA_GET1 												\
+	if(ac != 1 || getParametersEx(ac, &id) != SUCCESS) { 		\
+		WRONG_PARAM_COUNT; 										\
 	}
 
-#define DBA_GET2 \
-	pval *key; \
-	if(ac != 2 || getParameters(ht, ac, &key, &id) != SUCCESS) { \
-		WRONG_PARAM_COUNT; \
-	} \
-	convert_to_string(key)
+#define DBA_GET2 												\
+	pval **key; 												\
+	if(ac != 2 || getParametersEx(ac, &key, &id) != SUCCESS) { 	\
+		WRONG_PARAM_COUNT; 										\
+	} 															\
+	convert_to_string_ex(key)
 
-#define DBA_IF_NOT_CORRECT_TYPE(link_id) \
-	info = php3_list_find(link_id, &type); \
+#define DBA_IF_NOT_CORRECT_TYPE(link_id) 						\
+	info = php3_list_find(link_id, &type); 						\
 	if(!info || (type != GLOBAL(le_db) && type != GLOBAL(le_pdb)))
 	
-#define DBA_ID_GET \
-	convert_to_long(id); \
-	DBA_IF_NOT_CORRECT_TYPE(id->value.lval) { \
-		php_error(E_WARNING, "Unable to find DBA identifier %d", id->value.lval); \
-		RETURN_FALSE; \
+#define DBA_ID_GET 												\
+	convert_to_long_ex(id); 									\
+	DBA_IF_NOT_CORRECT_TYPE((*id)->value.lval) { 				\
+		php_error(E_WARNING, "Unable to find DBA identifier %d", \
+				(*id)->value.lval); 							\
+		RETURN_FALSE; 											\
 	}
 	
 #define DBA_ID_GET1 DBA_ID_PARS; DBA_GET1; DBA_ID_GET
@@ -208,13 +212,13 @@ static PHP_MINFO_FUNCTION(dba)
 static void _php3_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	DBA_ID_PARS;
-	pval *val, *key;
+	pval **val, **key;
 
-	if(ac != 3 || getParameters(ht, ac, &key, &val, &id) != SUCCESS) {
+	if(ac != 3 || getParametersEx(ac, &key, &val, &id) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(key);
-	convert_to_string(val);
+	convert_to_string_ex(key);
+	convert_to_string_ex(val);
 	DBA_ID_GET;
 
 	DBA_WRITE_CHECK;
@@ -230,7 +234,7 @@ static void _php3_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	pval **args = (pval **) NULL;
+	pval ***args = (pval ***) NULL;
 	int ac = ARG_COUNT(ht);
 	dba_mode_t modenr;
 	dba_info *info;
@@ -246,15 +250,15 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	
 	/* we pass additional args to the respective handler */
 	args = emalloc(ac * sizeof(pval *));
-	if(getParametersArray(ht, ac, args) != SUCCESS) {
+	if(getParametersArrayEx(ac, args) != SUCCESS) {
 		FREENOW;
 		WRONG_PARAM_COUNT;
 	}
 		
 	/* we only take string arguments */
 	for(i = 0; i < ac; i++) {
-		convert_to_string(args[i]);
-		keylen += args[i]->value.str.len;
+		convert_to_string_ex(args[i]);
+		keylen += (*args[i])->value.str.len;
 	}
 
 	if(persistent) {
@@ -263,8 +267,8 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		keylen = 0;
 		
 		for(i = 0; i < ac; i++) {
-			memcpy(key+keylen,args[i]->value.str.val,args[i]->value.str.len);
-			keylen += args[i]->value.str.len;
+			memcpy(key+keylen,(*args[i])->value.str.val,(*args[i])->value.str.len);
+			keylen += (*args[i])->value.str.len;
 		}
 		
 		if(zend_hash_find(&ht_keys, key, keylen, (void **) &info) == SUCCESS) {
@@ -273,17 +277,16 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 	
-	/* this is O(n) and could be improved */
 	for(hptr = handler; hptr->name &&
-			strcasecmp(hptr->name, args[2]->value.str.val); hptr++);
+			strcasecmp(hptr->name, (*args[2])->value.str.val); hptr++);
 
 	if(!hptr->name) {
-		php_error(E_WARNING, "no such handler: %s", args[2]->value.str.val);
+		php_error(E_WARNING, "no such handler: %s", (*args[2])->value.str.val);
 		FREENOW;
 		RETURN_FALSE;
 	}
 
-	switch(args[1]->value.str.val[0]) {
+	switch((*args[1])->value.str.val[0]) {
 		case 'c': 
 			modenr = DBA_CREAT; 
 			break;
@@ -297,14 +300,14 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			modenr = DBA_TRUNC;
 			break;
 		default:
-			php_error(E_WARNING,"illegal DBA mode: %s",args[1]->value.str.val);
+			php_error(E_WARNING,"illegal DBA mode: %s",(*args[1])->value.str.val);
 			FREENOW;
 			RETURN_FALSE;
 	}
 			
 	info = malloc(sizeof(*info));
 	memset(info, 0, sizeof(info));
-	info->path = strdup(args[0]->value.str.val);
+	info->path = strdup((*args[0])->value.str.val);
 	info->mode = modenr;
 	info->argc = ac - 3;
 	info->argv = args + 3;
@@ -354,7 +357,7 @@ PHP_FUNCTION(dba_close)
 {
 	DBA_ID_GET1;	
 	
-	php3_list_delete(id->value.lval);
+	php3_list_delete((*id)->value.lval);
 }
 /* }}} */
 
