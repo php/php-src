@@ -13,10 +13,10 @@ session.bug_compat_warn=1
 track_errors=1
 log_errors=0
 html_errors=0
+display_errors=1
+error_reporting=2039;
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_NOTICE);
-
 session_id("abtest");
 
 ### Phase 1 cleanup
@@ -29,7 +29,8 @@ session_register("c");
 var_dump($c);
 unset($c);
 $c = 3.14;
-session_write_close();
+@session_write_close(); // this generates an E_WARNING which will be printed 
+// by $php_errormsg so we can use "@" here. ANY further message IS an error.
 echo $php_errormsg."\n";
 unset($HTTP_SESSION_VARS);
 unset($c);
