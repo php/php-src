@@ -58,6 +58,29 @@ PHPAPI void php_url_free(php_url *theurl)
 }
 /* }}} */
 
+/* {{{ php_replace_controlchars
+ */
+PHPAPI char *php_replace_controlchars(char *str)
+{
+	unsigned char *s = (unsigned char *)str;
+	
+	if (!str) {
+		return (NULL);
+	}
+	
+	while (*s) {
+	    
+		if (iscntrl(*s)) {
+			*s='_';
+		}	
+		s++;
+	}
+	
+	return (str);
+} 
+/* }}} */
+ 
+
 /* {{{ php_url_parse
  */
 PHPAPI php_url *php_url_parse(char *str)
@@ -87,21 +110,25 @@ PHPAPI php_url *php_url_parse(char *str)
 	/* no processing necessary on the scheme */
 	if (subs[2].rm_so != -1 && subs[2].rm_so <= length) {
 		ret->scheme = estrndup(str + subs[2].rm_so, subs[2].rm_eo - subs[2].rm_so);
+		php_replace_controlchars(ret->scheme);
 	}
 
 	/* the path to the resource */
 	if (subs[5].rm_so != -1 && subs[5].rm_so <= length) {
 		ret->path = estrndup(str + subs[5].rm_so, subs[5].rm_eo - subs[5].rm_so);
+		php_replace_controlchars(ret->path);
 	}
 
 	/* the query part */
 	if (subs[7].rm_so != -1 && subs[7].rm_so <= length) {
 		ret->query = estrndup(str + subs[7].rm_so, subs[7].rm_eo - subs[7].rm_so);
+		php_replace_controlchars(ret->query);
 	}
 
 	/* the fragment */
 	if (subs[9].rm_so != -1 && subs[9].rm_so <= length) {
 		ret->fragment = estrndup(str + subs[9].rm_so, subs[9].rm_eo - subs[9].rm_so);
+		php_replace_controlchars(ret->fragment);
 	}
 
 	/* extract the username, pass, and port from the hostname */
@@ -130,14 +157,18 @@ PHPAPI php_url *php_url_parse(char *str)
 			/* now deal with all of the results */
 			if (subs[2].rm_so != -1 && subs[2].rm_so < length) {
 				ret->user = estrndup(result + subs[2].rm_so, subs[2].rm_eo - subs[2].rm_so);
+				php_replace_controlchars(ret->user);
 			}
 			if (subs[4].rm_so != -1 && subs[4].rm_so < length) {
 				ret->pass = estrndup(result + subs[4].rm_so, subs[4].rm_eo - subs[4].rm_so);
+				php_replace_controlchars(ret->pass);
 			}
 			if (subs[7].rm_so != -1 && subs[7].rm_so < length) {
 				ret->host = estrndup(result + subs[7].rm_so, subs[7].rm_eo - subs[7].rm_so);
+				php_replace_controlchars(ret->host);
 			} else if (subs[8].rm_so != -1 && subs[8].rm_so < length) {
 				ret->host = estrndup(result + subs[8].rm_so, subs[8].rm_eo - subs[8].rm_so);
+				php_replace_controlchars(ret->host);
 			}
 			if (subs[10].rm_so != -1 && subs[10].rm_so < length) {
 				ret->port = (unsigned short) strtol(result + subs[10].rm_so, NULL, 10);
