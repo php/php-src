@@ -631,7 +631,6 @@ static void Win32FreeDescriptor(int fd)
 	        fdTable[fd].path = NULL;
 	        break;
 		case FD_PIPE_ASYNC:
-			CloseHandle((HANDLE)fdTable[fd].fid.value);
 			break;
 	    default:
 	        break;
@@ -854,11 +853,17 @@ int OS_FcgiConnect(char *bindPath)
         if (*bindPath != ':')
         {
             char * p = strchr(bindPath, ':');
-            int len = p - bindPath + 1;
+            if (p) {
+                int len = p - bindPath + 1;
 
-            host = malloc(len);
-            strncpy(host, bindPath, len);
-            host[len] = '\0';
+                host = malloc(len);
+                if (!host) {
+                    fprintf(stderr, "Unable to allocate memory\n");
+                    return -1;
+                }
+                strncpy(host, bindPath, len);
+                host[len-1] = '\0';
+            }
         }
         
         hp = gethostbyname(host ? host : LOCALHOST);
@@ -885,7 +890,7 @@ int OS_FcgiConnect(char *bindPath)
             return -1;
         }
 
-	    if (! connect(sock, (struct sockaddr *) &sockAddr, sockLen)) 
+        if (connect(sock, (struct sockaddr *) &sockAddr, sockLen) == SOCKET_ERROR) 
         {
 	        closesocket(sock);
 	        return -1;
@@ -988,6 +993,7 @@ int OS_Read(int fd, char * buf, size_t len)
         else
         {
 		    fdTable[fd].Errno = GetLastError();
+			ret = -1;
 	    }
 
         break;
@@ -1403,21 +1409,38 @@ int OS_Close(int fd)
 	case FD_PIPE_ASYNC:
 	case FD_FILE_SYNC:
 	case FD_FILE_ASYNC:
-	    break;
-
-        case FD_SOCKET_SYNC:
+        /*
+         * CloseHandle returns: TRUE success, 0 failure
+         */
+		if (CloseHandle(fdTable[fd].fid.fileHandle) == FALSE)
+			ret = -1;
+        break;
+    case FD_SOCKET_SYNC:
 	case FD_SOCKET_ASYNC:
 	    /*
 	     * Closing a socket that has an async read outstanding causes a
 	     * tcp reset and possible data loss.  The shutdown call seems to
 	     * prevent this.
 	     */
-	    shutdown(fdTable[fd].fid.sock, 2);
-	    /*
+
+        /* shutdown(fdTable[fd].fid.sock, SD_BOTH); */
+
+        {
+        char buf[16];
+        int r;
+
+        shutdown(fdTable[fd].fid.sock,SD_SEND);
+
+        do
+        { 
+            r = recv(fdTable[fd].fid.sock,buf,16,0);
+        } while (r > 0);
+        }
+        /*
 	     * closesocket returns: 0 success, SOCKET_ERROR failure
 	     */
 	    if (closesocket(fdTable[fd].fid.sock) == SOCKET_ERROR)
-		ret = -1;
+			ret = -1;
 	    break;
 	default:
 	    return -1;		/* fake failure */
@@ -1452,7 +1475,7 @@ int OS_CloseRead(int fd)
     ASSERT(fdTable[fd].type == FD_SOCKET_ASYNC
 	|| fdTable[fd].type == FD_SOCKET_SYNC);
 
-    if (shutdown(fdTable[fd].fid.sock,0) == SOCKET_ERROR)
+    if (shutdown(fdTable[fd].fid.sock,SD_RECEIVE) == SOCKET_ERROR)
 	ret = -1;
     return ret;
 }
@@ -1894,7 +1917,7 @@ void OS_SetFlags(int fd, int flags)
 
     if (fdTable[fd].type == FD_SOCKET_SYNC && flags == O_NONBLOCK) {
         if (ioctlsocket(fdTable[fd].fid.sock, FIONBIO, &pLong) ==
-	    SOCKET_ERROR) {
+	        SOCKET_ERROR) {
 	    //exit(WSAGetLastError());
 			SetLastError(WSAGetLastError());
 			return;
