@@ -2985,7 +2985,7 @@ PHP_FUNCTION(ibase_timefmt)
 /* }}} */
 #endif
 
-/* {{{ proto int ibase_num_fields(resource {query|result})
+/* {{{ proto int ibase_num_fields(resource query|result)
    Get the number of fields in result */
 PHP_FUNCTION(ibase_num_fields)
 {
@@ -3021,14 +3021,78 @@ PHP_FUNCTION(ibase_num_fields)
 }
 /* }}} */
 
-/* {{{ proto array ibase_field_info(resource result, int field_number)
+/* {{{ static char * _php_ibase_field_type() */
+static char * _php_ibase_field_type(XSQLVAR *var)
+{
+	char buf[32], *s;
+	int precision;
+	
+	switch (var->sqltype & ~1) {
+		case SQL_TEXT:	    s = "CHAR"; break;
+		case SQL_VARYING:   s = "VARCHAR"; break;
+		case SQL_SHORT:
+			if (var->sqlscale < 0) {
+				precision = 4;
+			} else {
+				s = "SMALLINT"; 
+			}
+			break;
+		case SQL_LONG:
+			if (var->sqlscale < 0) {
+				precision = 9;
+			} else {
+				s = "INTEGER"; 
+			}
+			break;
+		case SQL_FLOAT:	    s = "FLOAT"; break;
+		case SQL_DOUBLE:    
+		case SQL_D_FLOAT:   s = "DOUBLE PRECISION"; break;
+#ifdef SQL_INT64
+		case SQL_INT64:     
+			if (var->sqlscale < 0) {
+				precision = 18;
+			} else {
+				s = "BIGINT"; 
+			}
+			break;
+#endif
+#ifdef SQL_TIMESTAMP
+		case SQL_TIMESTAMP:	s = "TIMESTAMP"; break;
+		case SQL_TYPE_DATE:	s = "DATE"; break;
+		case SQL_TYPE_TIME:	s = "TIME"; break;
+#else
+		case SQL_DATE:	    s = "DATE"; break;
+#endif
+		case SQL_BLOB:	    s = "BLOB"; break;
+		case SQL_ARRAY:	    s = "ARRAY"; break;
+
+				/* TODO provide more detailed information about the field type, field size
+				   and array dimensions */
+			
+		case SQL_QUAD:	    s = "QUAD"; break;
+
+		default:
+			sprintf(buf, "unknown (%d)", var->sqltype & ~1);
+			s = buf;
+			break;
+	}
+	if (var->sqlscale < 0) {
+		sprintf(buf, "NUMERIC(%d,%d)", precision, -var->sqlscale);
+		s = buf;
+	}
+	
+	return estrdup(s);
+}
+/* }}} */
+
+/* {{{ proto array ibase_field_info(resource query|result, int field_number)
    Get information about a field */
 PHP_FUNCTION(ibase_field_info)
 {
 	zval **result_arg, **field_arg;
-	ibase_result *ib_result;
-	char buf[30], *s;
-	int len;
+	char buf[8], *s;
+	int len, type;
+	XSQLDA *sqlda;
 	XSQLVAR *var;
 
 	RESET_ERRMSG;
@@ -3037,22 +3101,34 @@ PHP_FUNCTION(ibase_field_info)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, "InterBase result", le_result);
+	zend_list_find(Z_LVAL_PP(result_arg), &type);
+	
+	if (type == le_query) {
+		ibase_query *ib_query;
 
-	if (ib_result->out_sqlda == NULL) {
+		ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result_arg, -1, "InterBase query", le_query);
+		sqlda = ib_query->out_sqlda;
+	} else {
+		ibase_result *ib_result;
+		
+		ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, "InterBase result", le_result);
+		sqlda = ib_result->out_sqlda;
+	}					
+
+	if (sqlda == NULL) {
 		_php_ibase_module_error("Trying to get field info from a non-select query" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	convert_to_long_ex(field_arg);
 
-	if (Z_LVAL_PP(field_arg) < 0 || Z_LVAL_PP(field_arg) >= ib_result->out_sqlda->sqld) {
+	if (Z_LVAL_PP(field_arg) < 0 || Z_LVAL_PP(field_arg) >= sqlda->sqld) {
 		RETURN_FALSE;
 	}
 	
 	array_init(return_value);
 
-	var = ib_result->out_sqlda->sqlvar + Z_LVAL_PP(field_arg);
+	var = sqlda->sqlvar + Z_LVAL_PP(field_arg);
 
 	add_index_stringl(return_value, 0, var->sqlname, var->sqlname_length, 1);
 	add_assoc_stringl(return_value, "name", var->sqlname, var->sqlname_length, 1);
@@ -3067,42 +3143,10 @@ PHP_FUNCTION(ibase_field_info)
 	add_index_stringl(return_value, 3, buf, len, 1);
 	add_assoc_stringl(return_value, "length", buf, len, 1);
 
-	switch (var->sqltype & ~1) {
-		case SQL_TEXT:	    s = "TEXT"; break;
-		case SQL_VARYING:   s = "VARYING"; break;
-		case SQL_SHORT:	    s = "SHORT"; break;
-		case SQL_LONG:	    s = "LONG"; break;
-		case SQL_FLOAT:	    s = "FLOAT"; break;
-		case SQL_DOUBLE:    s = "DOUBLE"; break;
-		case SQL_D_FLOAT:   s = "D_FLOAT"; break;
-#ifdef SQL_INT64
-		case SQL_INT64:     s = "INT64"; break;
-#endif
-#ifdef SQL_TIMESTAMP
-		case SQL_TIMESTAMP:	s = "TIMESTAMP"; break;
-		case SQL_TYPE_DATE:	s = "DATE"; break;
-		case SQL_TYPE_TIME:	s = "TIME"; break;
-#else
-		case SQL_DATE:	    s = "DATE"; break;
-#endif
-		case SQL_BLOB:	    s = "BLOB"; break;
-		case SQL_ARRAY:	{
-				
-				/* TODO provide more detailed information about the field type, field size
-				   and array dimensions */
-			
-				s = "ARRAY"; 
-				break;
-			}			
-
-		case SQL_QUAD:	    s = "QUAD"; break;
-	default:
-		sprintf(buf, "unknown (%d)", var->sqltype & ~1);
-		s = buf;
-		break;
-	}
-	add_index_stringl(return_value, 4, s, strlen(s), 1);
-	add_assoc_stringl(return_value, "type", s, strlen(s), 1);
+	s = _php_ibase_field_type(var);
+	add_index_string(return_value, 4, s, 1);
+	add_assoc_string(return_value, "type", s, 1);
+	efree(s);
 }
 /* }}} */
 
@@ -3135,7 +3179,7 @@ PHP_FUNCTION(ibase_param_info)
 {
 	zval **result_arg, **field_arg;
 	ibase_query *ib_query;
-	char buf[30], *s;
+	char buf[8], *s;
 	int len;
 	XSQLVAR *var;
 
@@ -3165,38 +3209,10 @@ PHP_FUNCTION(ibase_param_info)
 	add_index_stringl(return_value, 0, buf, len, 1);
 	add_assoc_stringl(return_value, "length", buf, len, 1);
 
-	switch (var->sqltype & ~1) {
-		case SQL_TEXT:	    s = "TEXT"; break;
-		case SQL_VARYING:   s = "VARYING"; break;
-		case SQL_SHORT:	    s = "SHORT"; break;
-		case SQL_LONG:	    s = "LONG"; break;
-		case SQL_FLOAT:	    s = "FLOAT"; break;
-		case SQL_DOUBLE:    s = "DOUBLE"; break;
-		case SQL_D_FLOAT:   s = "D_FLOAT"; break;
-#ifdef SQL_INT64
-		case SQL_INT64:     s = "INT64"; break;
-#endif
-#ifdef SQL_TIMESTAMP
-		case SQL_TIMESTAMP:	s = "TIMESTAMP"; break;
-		case SQL_TYPE_DATE:	s = "DATE"; break;
-		case SQL_TYPE_TIME:	s = "TIME"; break;
-#else
-		case SQL_DATE:	    s = "DATE"; break;
-#endif
-		case SQL_BLOB:	    s = "BLOB"; break;
-		case SQL_ARRAY:	    s = "ARRAY"; break;
-
-				/* TODO provide more detailed information about the field type, field size
-				   and array dimensions */
-			
-		case SQL_QUAD:	    s = "QUAD"; break;
-	default:
-		sprintf(buf, "unknown (%d)", var->sqltype & ~1);
-		s = buf;
-		break;
-	}
-	add_index_stringl(return_value, 1, s, strlen(s), 1);
-	add_assoc_stringl(return_value, "type", s, strlen(s), 1);
+	s = _php_ibase_field_type(var);
+	add_index_string(return_value, 1, s, 1);
+	add_assoc_string(return_value, "type", s, 1);
+	efree(s);
 }
 /* }}} */
 
