@@ -51,6 +51,12 @@
 #define UDM_PARAM_STOPTABLE	7
 #define UDM_PARAM_STOPFILE	8
 
+/* udm_add_search_limit constants */
+#define UDM_LIMIT_URL		1
+#define UDM_LIMIT_TAG		2
+#define UDM_LIMIT_LANG		3
+#define UDM_LIMIT_CAT		4
+
 #define UDM_TRACK_ENABLED	1
 #define UDM_TRACK_DISABLED	0
 
@@ -66,6 +72,7 @@ static int le_link,le_res;
 function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_alloc_agent,		NULL)
 	PHP_FE(udm_set_agent_param,	NULL)
+	PHP_FE(udm_add_search_limit,	NULL)
 	PHP_FE(udm_free_agent,		NULL)
 
 	PHP_FE(udm_errno,		NULL)
@@ -132,6 +139,12 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_CHARSET",UDM_PARAM_CHARSET,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOPTABLE",UDM_PARAM_STOPTABLE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOPFILE",UDM_PARAM_STOPFILE,CONST_CS | CONST_PERSISTENT);	
+	
+	/* udm_add_search_limit constants */
+	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_LIMIT_URL",UDM_LIMIT_URL,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_LIMIT_TAG",UDM_LIMIT_TAG,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_LIMIT_LANG",UDM_LIMIT_LANG,CONST_CS | CONST_PERSISTENT);	
 	
 	/* udm_get_res_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_FOUND",UDM_PARAM_FOUND,CONST_CS | CONST_PERSISTENT);
@@ -354,7 +367,66 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 			
 		default:
-			php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown agent parameter");
+			php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown agent session parameter");
+			RETURN_FALSE;
+			break;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto int udm_add_search_limit(int agent, int var, string val)
+   Add mnoGoSearch search restrictions */
+DLEXPORT PHP_FUNCTION(udm_add_search_limit)
+{
+	pval **yyagent, **yyvar, **yyval;
+	char *val;
+	int var;
+	UDM_AGENT * Agent;
+
+	switch(ZEND_NUM_ARGS()){
+	
+		case 3: 		
+			if(zend_get_parameters_ex(3,&yyagent,&yyvar,&yyval)==FAILURE){
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(yyvar);
+			convert_to_string_ex(yyval);
+			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
+			var = (*yyvar)->value.lval;
+			val = (*yyval)->value.str.val;
+			
+			break;
+			
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	switch(var){
+		case UDM_LIMIT_URL: 
+			UdmAddURLLimit(Agent->Conf,val);
+		
+			break;
+			
+		case UDM_LIMIT_TAG: 
+			UdmAddTagLimit(Agent->Conf,val);
+		
+			break;
+
+		case UDM_LIMIT_LANG: 
+			UdmAddLangLimit(Agent->Conf,val);
+			
+			break;
+
+		case UDM_LIMIT_CAT: 
+			UdmAddCatLimit(Agent->Conf,val);
+			
+			break;
+			
+		default:
+			php_error(E_WARNING,"Udm_Add_Search_Limit: Unknown search limit parameter");
 			RETURN_FALSE;
 			break;
 	}

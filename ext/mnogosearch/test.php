@@ -35,14 +35,20 @@
 	Udm_Set_Agent_Param($udm,UDM_PARAM_CACHE_MODE,UDM_CACHE_DISABLED);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_TRACK_MODE,UDM_TRACK_DISABLED);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_CHARSET,"koi8-r");
-	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPTABLE,"stopwords");
+//	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPTABLE,"stopword");
 //	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPFILE,"stop.txt");
+
+// Stage 3: add search limits
+//	Udm_Add_Search_Limit($udm,UDM_LIMIT_URL,"http://www.mydomain.com/%");
+//	Udm_Add_Search_Limit($udm,UDM_LIMIT_TAG,"01");
+//	Udm_Add_Search_Limit($udm,UDM_LIMIT_CAT,"01");
+//	Udm_Add_Search_Limit($udm,UDM_LIMIT_LANG,"en");
 	
-// Stage 3: perform search 
+// Stage 4: perform search 
 
 	$res=Udm_Find($udm,$q);	
 
-// Stage 4: display results
+// Stage 5: display results
 
 	// Check error code
 	if(($errno=Udm_Errno($udm))>0){
@@ -77,7 +83,7 @@
 		Udm_Free_Res($res);
 	}
 
-//Stage 5: free UdmSearch agent
+//Stage 6: free UdmSearch agent
 
 	Udm_Free_Agent($udm);
 ?>
