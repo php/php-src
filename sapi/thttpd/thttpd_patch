@@ -1,6 +1,6 @@
-diff -Nur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
+diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
 --- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
-+++ thttpd-2.21b-cool/Makefile.in	Sat Sep  7 15:43:49 2002
++++ thttpd-2.21b-cool/Makefile.in	Mon Sep 23 17:37:36 2002
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -38,9 +38,9 @@ diff -Nur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
-diff -Nur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
+diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
 --- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
-+++ thttpd-2.21b-cool/config.h	Sat Sep  7 15:43:49 2002
++++ thttpd-2.21b-cool/config.h	Sun Sep 22 22:44:56 2002
 @@ -82,6 +82,11 @@
  */
  #define IDLE_READ_TIMELIMIT 60
@@ -62,9 +62,9 @@ diff -Nur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  
  /* CONFIGURE: If this is defined then thttpd will automatically generate
  ** index pages for directories that don't have an explicit index file.
-diff -Nur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
+diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
 --- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
-+++ thttpd-2.21b-cool/fdwatch.c	Sat Sep 21 19:15:38 2002
++++ thttpd-2.21b-cool/fdwatch.c	Mon Sep 23 17:38:03 2002
 @@ -460,7 +460,7 @@
  
      ridx = 0;
@@ -85,9 +85,9 @@ diff -Nur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
  	default: return 0;
  	}
      }
-diff -Nur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
+diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 --- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Sat Sep 21 18:17:49 2002
++++ thttpd-2.21b-cool/libhttpd.c	Mon Sep 23 17:29:24 2002
 @@ -85,6 +85,8 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -408,7 +408,15 @@ diff -Nur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      if ( hc->method == METHOD_GET || hc->method == METHOD_POST )
  	{
  	httpd_clear_ndelay( hc->conn_fd );
-@@ -3561,6 +3616,11 @@
+@@ -3369,6 +3424,7 @@
+     int expnlen, indxlen;
+     char* cp;
+     char* pi;
++    int nocache = 0;
+ 
+     expnlen = strlen( hc->expnfilename );
+ 
+@@ -3561,6 +3617,11 @@
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
  	return cgi( hc );
  
@@ -420,22 +428,38 @@ diff -Nur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
      ** is prohibited.
-@@ -3611,14 +3671,27 @@
+@@ -3594,6 +3655,8 @@
+ 	hc->end_byte_loc = hc->sb.st_size - 1;
+ 
+     figure_mime( hc );
++    if ( strncmp(hc->decodedurl, "/nocache/", sizeof("/nocache/") - 1 ) == 0 )
++	nocache = 1;
+ 
+     if ( hc->method == METHOD_HEAD )
+ 	{
+@@ -3601,7 +3664,7 @@
+ 	    hc, 200, ok200title, hc->encodings, "", hc->type, hc->sb.st_size,
+ 	    hc->sb.st_mtime );
+ 	}
+-    else if ( hc->if_modified_since != (time_t) -1 &&
++    else if ( !nocache && hc->if_modified_since != (time_t) -1 &&
+ 	 hc->if_modified_since >= hc->sb.st_mtime )
+ 	{
+ 	hc->method = METHOD_HEAD;
+@@ -3611,14 +3674,25 @@
  	}
      else
  	{
 -	hc->file_address = mmc_map( hc->expnfilename, &(hc->sb), nowP );
-+		char *extraheads = "";
-+		int nocache = 0;
++	char *extraheads = "";
 +
-+		if (strncmp(hc->decodedurl, "/nocache/", sizeof("/nocache/")-1) == 0) {
-+			extraheads = "Expires: Thu, 19 Nov 1981 08:52:00 GMT\r\n"
-+				"Cache-Control: no-store, no-cache, must-revalidate, "
-+				"post-check=0, pre-check=0\r\n"
-+				"Pragma: no-cache\r\n";
-+
-+			nocache = 1;
-+		}
++	if ( nocache ) 
++	    {
++	    extraheads = "Expires: Thu, 19 Nov 1981 08:52:00 GMT\r\n"
++		"Cache-Control: no-store, no-cache, must-revalidate, "
++		"post-check=0, pre-check=0\r\n"
++		"Pragma: no-cache\r\n";
++	    }
 +		
 +	hc->file_address = mmc_map( hc->expnfilename, &(hc->sb), nowP, nocache );
  	if ( hc->file_address == (char*) 0 )
@@ -450,9 +474,9 @@ diff -Nur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	    hc->sb.st_mtime );
  	}
  
-diff -Nur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
+diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
 --- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b-cool/libhttpd.h	Sat Sep  7 15:43:49 2002
++++ thttpd-2.21b-cool/libhttpd.h	Sun Sep 22 22:44:56 2002
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -479,9 +503,9 @@ diff -Nur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
  
  /* Call this to de-initialize a connection struct and *really* free the
  ** mallocced strings.
-diff -Nur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
+diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 --- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
-+++ thttpd-2.21b-cool/mime_encodings.txt	Sat Sep  7 15:43:49 2002
++++ thttpd-2.21b-cool/mime_encodings.txt	Sun Sep 22 22:44:56 2002
 @@ -3,6 +3,6 @@
  # A list of file extensions followed by the corresponding MIME encoding.
  # Extensions not found in the table proceed to the mime_types table.
@@ -491,9 +515,9 @@ diff -Nur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 +Z	compress
 +gz	gzip
  uu	x-uuencode
-diff -Nur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
+diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 --- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
-+++ thttpd-2.21b-cool/mime_types.txt	Sat Sep  7 15:43:49 2002
++++ thttpd-2.21b-cool/mime_types.txt	Sun Sep 22 22:44:56 2002
 @@ -1,135 +1,138 @@
 -# mime_types.txt
 -#
@@ -742,9 +766,9 @@ diff -Nur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +avi	video/x-msvideo
 +movie	video/x-sgi-movie
 +ice	x-conference/x-cooltalk
-diff -Nur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
+diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
 --- thttpd-2.21b/mmc.c	Fri Apr 13 23:02:15 2001
-+++ thttpd-2.21b-cool/mmc.c	Sat Sep 21 19:19:15 2002
++++ thttpd-2.21b-cool/mmc.c	Sun Sep 22 22:44:56 2002
 @@ -70,6 +70,7 @@
      unsigned int hash;
      int hash_idx;
@@ -814,9 +838,9 @@ diff -Nur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
  	if ( nowP != (struct timeval*) 0 )
  	    m->reftime = nowP->tv_sec;
  	else
-diff -Nur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
+diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
 --- thttpd-2.21b/mmc.h	Fri Apr 13 07:36:54 2001
-+++ thttpd-2.21b-cool/mmc.h	Sat Sep 21 18:18:17 2002
++++ thttpd-2.21b-cool/mmc.h	Sun Sep 22 22:44:56 2002
 @@ -31,8 +31,9 @@
  /* Returns an mmap()ed area for the given file, or (void*) 0 on errors.
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
@@ -828,9 +852,9 @@ diff -Nur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
  
  /* Done with an mmap()ed area that was returned by mmc_map().
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
-diff -Nur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
+diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 --- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b-cool/thttpd.c	Sat Sep 21 19:15:38 2002
++++ thttpd-2.21b-cool/thttpd.c	Mon Sep 23 17:38:03 2002
 @@ -95,6 +95,7 @@
      httpd_conn* hc;
      int tnums[MAXTHROTTLENUMS];         /* throttle indexes */
@@ -999,13 +1023,13 @@ diff -Nur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +		httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
 +	}
 +	clear_connection( c, tvP, 0 );
-+	return;
+ 	return;
 +    } else if ( sz < 0 ) {
 +    	if (errno != EWOULDBLOCK) {
 +		httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
 +		clear_connection( c, tvP, 0 );
 +	} 
- 	return;
++	return;
 +    }
 +    if (sz > 0) hc->read_idx += sz;
 +
