@@ -207,6 +207,15 @@ ZEND_API void zend_object_store_set_object(zval *zobject, void *object TSRMLS_DC
 }
 
 
+/* Called when the ctor was terminated by an exception */
+ZEND_API void zend_object_store_ctor_failed(zval *zobject TSRMLS_DC)
+{
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
+
+	EG(objects_store).object_buckets[handle].destructor_called = 1;
+}
+
+
 /* Proxy objects workings */
 typedef struct _zend_proxy_object {
 	zval *object;
