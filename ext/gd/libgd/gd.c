@@ -3607,8 +3607,9 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 			new_a = gdImageAlpha(srcback, pxl);
 
 			for (j=0; j<3; j++) {
+				int yv = MIN(MAX(y - 1 + j, 0), src->sy - 1);
 				for (i=0; i<3; i++) {
-				        pxl = f(srcback, x-(3>>1)+i, y-(3>>1)+j);
+				        pxl = f(srcback, MIN(MAX(x - 1 + i, 0), src->sx - 1), yv);
 					new_r += (float)gdImageRed(srcback, pxl) * filter[j][i];
 					new_g += (float)gdImageGreen(srcback, pxl) * filter[j][i];
 					new_b += (float)gdImageBlue(srcback, pxl) * filter[j][i];
