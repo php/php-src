@@ -2,7 +2,11 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
+
+#ifndef PHP_WIN32
 #include <unistd.h>
+#endif
+
 #include <limits.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -10,7 +14,7 @@
 
 typedef unsigned int uint;
 
-#if WINDOWS
+#ifdef PHP_WIN32
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define DEFAULT_SLASH '\\'
 #define TOKENIZER_STRING "/\\"
@@ -31,6 +35,7 @@ static int php_check_dots(const char *element, uint n)
 #define IS_DIRECTORY_CURRENT(element, len) \
 	(len == 1 && ptr[0] == '.')
 
+#define strtok_r(a, b, c) strtok((a), (b)) /* Temporary fix for Windows */
 
 #else
 #define IS_SLASH(c)	((c) == '/')
@@ -68,6 +73,7 @@ typedef struct _cwd_state {
 	uint cwd_length;
 } cwd_state;
 
+#ifndef PHP_WIN32
 static int php_is_dir_ok(const cwd_state *state) 
 {
 	struct stat buf;
@@ -77,6 +83,7 @@ static int php_is_dir_ok(const cwd_state *state)
 
 	return (1);
 }
+#endif
 
 
 char *virtual_getcwd(cwd_state *state, uint *length)
@@ -91,7 +98,7 @@ char *virtual_getcwd(cwd_state *state, uint *length)
 		return retval;
 	}
 
-#if WINDOWS
+#ifdef PHP_WIN32
 	/* If we have something like C: */
 	if (state->cwd_length == 2 && state->cwd[state->cwd_length-1] == ':') {
 		char *retval;
@@ -128,7 +135,7 @@ int virtual_chdir(cwd_state *state, char *path)
 		state->cwd = (char *) malloc(1);
 		state->cwd[0] = '\0';
 		state->cwd_length = 0;
-#if WINDOWS
+#ifdef PHP_WIN32
 	} else if(IS_SLASH(path[0])) {
 		state->cwd = (char *) malloc(3);
 		memcpy(state->cwd, old_state->cwd, 2);
@@ -192,7 +199,7 @@ void main(void)
 	cwd_state state;
 	uint length;
 
-#if !WINDOWS
+#ifndef PHP_WIN32
 	state.cwd = malloc(PATH_MAX + 1);
 	state.cwd_length = PATH_MAX;
 
