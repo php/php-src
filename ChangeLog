@@ -1,3 +1,127 @@
+2002-04-30  Harald Radi  <h.radi@nme.at>
+
+    * ext/overload/overload.c: ZE2 compatibility fixes
+
+2002-04-30  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/sockets.c: - Forgot to update proto
+
+    * ext/sockets/sockets.c:
+    - Allow resetting the module global last_error too.
+
+2002-04-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mbstring/mbfilter_cn.c
+      ext/mbstring/mbfilter_tw.c: More unused variables.
+
+2002-04-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/aggregation.c: Fix ZE1 build
+
+2002-04-30  Harald Radi  <h.radi@nme.at>
+
+    * NEWS: MFH
+
+2002-04-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mbstring/mbfilter_kr.c: Fix ZTS build. Remove unused variables.
+
+    * main/config.w32.h: Add missing #define's.
+
+2002-04-30  Harald Radi  <h.radi@nme.at>
+
+    * NEWS:
+2002-04-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: Add new ext/mbstring/mbfilter_*.c files.
+
+2002-04-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var_unserializer.c: Touch file
+
+2002-04-30  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    reverting the cursor change as it seems to break many ODBC drivers.
+
+    * ext/odbc/php_odbc.c:
+    re-setting the CURSOR back to DYNAMIC rather than FORWARD_ONLY.  This change
+    broke many other ODBC drivers (obviously testing wasn't extensive).
+
+2002-04-30  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbregex.c: fixed compile warning with Visual C++.
+
+    * ext/mbstring/mbfilter_cn.c
+      ext/mbstring/mbfilter_cn.h
+      ext/mbstring/mbfilter_ja.c
+      ext/mbstring/mbfilter_kr.c
+      ext/mbstring/mbfilter_kr.h
+      ext/mbstring/mbfilter_tw.c
+      ext/mbstring/mbfilter_tw.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/unicode_table_cn.h
+      ext/mbstring/unicode_table_kr.h
+      ext/mbstring/unicode_table_tw.h
+      ext/mbstring/config.m4
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h:
+    added simplified chinese, traditional chinese, korean support to mbstring. Note that this feature is experimental.
+
+2002-04-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/browscap.c: ZE2 compatibility fix
+
+    * ext/standard/aggregation.c: ZE2 compatibility fixes
+
+2002-04-30  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/file/003.phpt:
+    revert last bogus change. There is bug in is_file()
+
+2002-04-30  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - added function domxml_parser_set_keep_blanks()
+
+2002-04-30  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mbstring/mbstring.dsp: Adding missing files to project
+
+2002-04-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/file.c: Fix ZTS build.
+
+2002-04-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+    Make use of new flag so that we can buffer http headers when we know that
+    the stream is not intended to be used in require/include.
+
+    * ext/standard/file.h
+      ext/standard/file.c
+      ext/standard/basic_functions.c:
+    Implement user-space funtions to operate on stream contexts.
+
+    * ext/standard/tests/file/003.phpt: Fix is_file test.
+
+    * main/streams.c: Remove debug code that should not have been committed.
+
+    * main/network.c: Remove this; it should not have been commited
+
+    * main/main.c: revert...
+
+    * main/main.c
+      main/network.c
+      main/php_streams.h
+      main/streams.c: Implement context option setting API.
+    Add/amend debugging code for sockets.
+    Add a flag that will help the http wrapper optimize itself when
+    it is not being used for include/require.
+
 2002-04-29  Jani Taskinen  <sniper@iki.fi>
 
     * pear/pear.m4: MFH: Add the shared extension check.
