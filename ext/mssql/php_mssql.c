@@ -136,6 +136,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mssql.textlimit",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textlimit,					zend_mssql_globals,		mssql_globals,	display_text_size)
 	STD_PHP_INI_ENTRY_EX("mssql.batchsize",   			"0",	PHP_INI_ALL,	OnUpdateInt,	batchsize,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
 	STD_PHP_INI_BOOLEAN("mssql.datetimeconvert",  		"1",	PHP_INI_ALL,	OnUpdateBool,	datetimeconvert,			zend_mssql_globals,		mssql_globals)
+	STD_PHP_INI_BOOLEAN("mssql.secure_connection",		"0",	PHP_INI_SYSTEM, OnUpdateBool,	secure_connection,			zend_mssql_globals,		mssql_globals)
 PHP_INI_END()
 
 /* error handler */
@@ -441,11 +442,16 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	dbprocerrhandle(mssql.login, (DBERRHANDLE_PROC) php_mssql_error_handler);
 	dbprocmsghandle(mssql.login, (DBMSGHANDLE_PROC) php_mssql_message_handler);
 
-	if (user) {
-		DBSETLUSER(mssql.login,user);
+	if (MS_SQL_G(secure_connection)){
+		DBSETLSECURE(mssql.login);
 	}
-	if (passwd) {
-		DBSETLPWD(mssql.login,passwd);
+	else {
+		if (user) {
+			DBSETLUSER(mssql.login,user);
+		}
+		if (passwd) {
+			DBSETLPWD(mssql.login,passwd);
+		}
 	}
 	DBSETLAPP(mssql.login,MS_SQL_G(appname));
 	mssql.valid = 1;
