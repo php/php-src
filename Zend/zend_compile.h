@@ -100,6 +100,7 @@ typedef struct _zend_brk_cont_element {
 #define ZEND_ACC_INTERFACE		0x08
 #define ZEND_ACC_ABSTRACT_CLASS	0x10
 #define ZEND_ACC_FINAL_CLASS	0x20
+#define ZEND_ACC_IMPLEMENTED_ABSTRACT	0x40
 
 #define ZEND_ACC_ALLOW_STATIC	0x80
 
