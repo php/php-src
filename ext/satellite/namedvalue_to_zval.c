@@ -83,7 +83,7 @@ static zend_bool satellite_any_to_zval_sequence(
 		const CORBA_any * pSource, zval * pDestination)
 {
 	int i;
-	int length = 0;
+	int length = 0, step;
 	void ** pp_members = NULL;
 	zend_bool success = FALSE;
 	CORBA_NamedValue source_item;
@@ -121,13 +121,17 @@ static zend_bool satellite_any_to_zval_sequence(
 	array_init(pDestination);
 #endif
 
+	step = content_type->length ? content_type->length : 1;
+
 	for (i = 0; i < length; i++)
 	{
 		p_destination_item = NULL;
 		memset(&source_item, 0, sizeof(CORBA_NamedValue));
 
 		source_item.argument._type = content_type;
-		source_item.argument._value = &pp_members[i];
+		source_item.argument._value = pp_members;
+
+		pp_members += step;
 
 		ALLOC_ZVAL(p_destination_item);
 		
@@ -236,6 +240,7 @@ static zend_bool satellite_any_to_zval_struct(
 		}
 	}
 
+	return TRUE;
 
 error:	
 	return FALSE;
@@ -292,7 +297,7 @@ zend_bool satellite_any_to_zval(
 
 		default:
 /*			printf("unsupported corba TCKind %i\n", kind);*/
-/*			php_error(E_WARNING, "unsupported corba TCKind %i", kind);*/
+			zend_error(E_WARNING, "(satellite) unsupported corba TCKind %i", kind);
 	}
 
 	return success;
