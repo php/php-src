@@ -1,3 +1,138 @@
+2002-03-13  Ludovico Magnocavallo  <ludo@sumatrasolutions.com>
+
+    * pear/DB/ibase.php: fixed typo in modifyLimitQuery()
+    beginning of error code interpretation for tests compliance
+
+2002-03-13  Stefan Roehrich  <sr@linux.de>
+
+    * NEWS: Fixed NEWS entry.
+
+    * ext/zlib/tests/003.phpt
+      ext/zlib/zlib.c: Fix for #15930 in release branch.
+
+    * ext/zlib/tests/001.phpt
+      ext/zlib/zlib.c: Fix for #14939 in release branch.
+
+2002-03-13  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c: -release merge
+
+2002-03-13  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/credits_ext.h: Regenerate Credits for Release
+
+    * scripts/credits
+      ext/overload/CREDITS
+      ext/w32api/CREDITS: Merge credits fixes
+
+    * ext/overload/CREDITS
+      ext/w32api/CREDITS: Fix CREDIT files, remove email address
+
+    * scripts/credits: Ignore extensions/sapis named skeleton
+
+2002-03-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: > might not sufficiently update a timestamp.
+
+    echo > should be good enough and should be implemented by the shell.
+
+2002-03-13  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/credits_ext.h: Fix credits.
+
+2002-03-13  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/credits_sapi.h: Update credits in release branch
+
+    * ext/standard/credits_sapi.h: Update Credits
+
+    * ext/standard/credits_ext.h: Update Credits in release branch
+
+    * ext/standard/credits_ext.h: Update Credits
+
+2002-03-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Because of the feature "don't try to send a cookie, if the sid
+    was contained in get/post variables" (which I still am not convinced
+    of completely), we need a separate variable which determines whether
+    to define SID in the event that a cookie was not sent.
+
+    Noticed by: Matt Allen
+
+    * acinclude.m4: Some simplifications in PHP_ADD_SOURCES*
+
+    * pear/pear.m4
+      acinclude.m4
+      configure.in:
+    a bit of refactoring and making always_shared a nop in every day life
+
+2002-03-13  Stig Bakken  <ssb@fast.no>
+
+    * ext/xmlrpc/config.m4
+      ext/xslt/config.m4: * MFH: another libconv->libiconv typo
+
+    * ext/xmlrpc/config.m4
+      ext/xslt/config.m4: * another libconv->libiconv typo
+
+2002-03-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/pear.m4
+      acinclude.m4
+      configure.in:
+    Provide context-specific functions which yield the directories
+    of extensions (PHP 4 configure vs. self-contained module)
+
+    * ext/cpdf/config.m4
+      ext/cybercash/config.m4:
+    Fix leftovers from yesterday (s/PHP_EXTENSION/PHP_NEW_EXTENSION/).
+
+2002-03-13  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    Return attribute name  in node_name(), if it's a XML_ATTRIBUTE_NODE
+
+    * ext/domxml/php_domxml.c:
+    Return #document in node_name(), if it's a XML_DOCUMENT_NODE
+
+2002-03-13  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/sapi_apache2.c: Sync with Apache2 Filter API change.
+
+2002-03-13  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/php_vpopmail.c: fix all comments in protos
+
+2002-03-13  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/aggregation.c:
+    I've altered my diagnosis of segfault/leak problem
+
+    * ext/standard/aggregation.c:
+    Fix some issues with ZE2, but now have some leaks.
+
+2002-03-13  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/tests/pear_error.phpt: No more lines on this test
+
+    * pear/PEAR.php: phpdoc update
+
+    * pear/PEAR.php
+      pear/tests/pear_error3.phpt:
+    Fix error handling selection when both class and global are set
+
+2002-03-13  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbfilter.c: Fixed a compiler warning
+
+2002-03-13  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/001.phpt: -remove filetime from test
+
+    * ext/exif/exif.c: -handling
+
+    * ext/exif/tests/001.phpt: -remove filetime from test
+
 2002-03-12  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB/pgsql.php:
