@@ -222,6 +222,26 @@ void timeout(int sig);
 
 #define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
 
+#define PHPMY_UNBUFFERED_QUERY_CHECK()			\
+{							\
+	if (mysql->active_result_id) {			\
+		do {					\
+			int type;			\
+			MYSQL_RES *mysql_result;	\
+							\
+			mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);	\
+			if (mysql_result && type==le_result) {						\
+				if (!mysql_eof(mysql_result)) {						\
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Function called without first fetching all rows from a previous unbuffered query");	\
+					while (mysql_fetch_row(mysql_result));	\
+				}						\
+				zend_list_delete(mysql->active_result_id);	\
+				mysql->active_result_id = 0;			\
+			}							\
+		} while(0);							\
+	}									\
+}										\
+
 /* {{{ _free_mysql_result
  * This wrapper is required since mysql_free_result() returns an integer, and
  * thus, cannot be used directly
@@ -239,11 +259,27 @@ static void _free_mysql_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 static void php_mysql_set_default_link(int id TSRMLS_DC)
 {
-	if (MySG(default_link)!=-1) {
-		zend_list_delete(MySG(default_link));
-	}
 	MySG(default_link) = id;
 	zend_list_addref(id);
+}
+/* }}} */
+
+/* {{{ php_mysql_select_db
+*/
+static int php_mysql_select_db(php_mysql_conn *mysql, char *db TSRMLS_DC)
+{
+	/* a small optimization to avoid selecting the database if it is already selected */
+	if (mysql->conn.db && !strcmp(mysql->conn.db, db)) {
+		return 1;
+	} else {
+		PHPMY_UNBUFFERED_QUERY_CHECK();
+
+		if (mysql_select_db(&mysql->conn, db) != 0) {
+			return 0;
+		} else {
+			return 1;
+		}
+	}
 }
 /* }}} */
 
@@ -833,11 +869,13 @@ PHP_FUNCTION(mysql_close)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	if (id==-1) { /* explicit resource number */
+		PHPMY_UNBUFFERED_QUERY_CHECK();
 		zend_list_delete(Z_RESVAL_PP(mysql_link));
 	}
 
 	if (id!=-1 
 		|| (mysql_link && Z_RESVAL_PP(mysql_link)==MySG(default_link))) {
+		PHPMY_UNBUFFERED_QUERY_CHECK();
 		zend_list_delete(MySG(default_link));
 		MySG(default_link) = -1;
 	}
@@ -877,10 +915,10 @@ PHP_FUNCTION(mysql_select_db)
 	
 	convert_to_string_ex(db);
 
-	if (mysql_select_db(&mysql->conn, Z_STRVAL_PP(db))!=0) {
-		RETVAL_FALSE;
+	if (php_mysql_select_db(mysql, Z_STRVAL_PP(db) TSRMLS_CC)) {
+		RETURN_TRUE;
 	} else {
-		RETVAL_TRUE;
+		RETURN_FALSE;	
 	}
 }
 /* }}} */
@@ -1057,6 +1095,8 @@ PHP_FUNCTION(mysql_stat)
 	}
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
+	PHPMY_UNBUFFERED_QUERY_CHECK();
+
 	RETURN_STRING((char *)mysql_stat(&mysql->conn), 1);
 }
 /* }}} */
@@ -1115,10 +1155,11 @@ PHP_FUNCTION(mysql_create_db)
 	}
 
 	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, please use mysql_query() to issue a SQL CREATE DATABASE statement instead.");
-
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
-	
+
+	PHPMY_UNBUFFERED_QUERY_CHECK();
+
 	convert_to_string_ex(db);
 
 	if (mysql_create_db(&mysql->conn, Z_STRVAL_PP(db))==0) {
@@ -1184,26 +1225,12 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 	
 	if (db) {
 		convert_to_string_ex(db);
-		if (mysql_select_db(&mysql->conn, Z_STRVAL_PP(db))!=0) {
+		if (!php_mysql_select_db(mysql, Z_STRVAL_PP(db) TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
 	}
-	
 
-	if (mysql->active_result_id) do {
-		int type;
-		MYSQL_RES *mysql_result;
-
-		mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);
-		if (mysql_result && type==le_result) {
-			if (!mysql_eof(mysql_result)) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Function called without first fetching all rows from a previous unbuffered query");
-				while (mysql_fetch_row(mysql_result));
-			}
-			zend_list_delete(mysql->active_result_id);
-			mysql->active_result_id = 0;
-		}
-	} while(0);
+	PHPMY_UNBUFFERED_QUERY_CHECK();
 
 	convert_to_string_ex(query);
 
@@ -1386,6 +1413,8 @@ PHP_FUNCTION(mysql_list_dbs)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
+	PHPMY_UNBUFFERED_QUERY_CHECK();
+
 	if ((mysql_result=mysql_list_dbs(&mysql->conn, NULL))==NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
@@ -1426,9 +1455,12 @@ PHP_FUNCTION(mysql_list_tables)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	convert_to_string_ex(db);
-	if (mysql_select_db(&mysql->conn, Z_STRVAL_PP(db))!=0) {
+	if (!php_mysql_select_db(mysql, Z_STRVAL_PP(db) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+
+	PHPMY_UNBUFFERED_QUERY_CHECK();
+
 	if ((mysql_result=mysql_list_tables(&mysql->conn, NULL))==NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
@@ -1469,9 +1501,12 @@ PHP_FUNCTION(mysql_list_fields)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	convert_to_string_ex(db);
-	if (mysql_select_db(&mysql->conn, Z_STRVAL_PP(db))!=0) {
+	if (!php_mysql_select_db(mysql, Z_STRVAL_PP(db) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+
+	PHPMY_UNBUFFERED_QUERY_CHECK();
+
 	convert_to_string_ex(table);
 	if ((mysql_result=mysql_list_fields(&mysql->conn, Z_STRVAL_PP(table), NULL))==NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
@@ -1500,6 +1535,8 @@ PHP_FUNCTION(mysql_list_processes)
 	}
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	PHPMY_UNBUFFERED_QUERY_CHECK();
 
 	mysql_result = mysql_list_processes(&mysql->conn);
 	if (mysql_result == NULL) {
@@ -2385,6 +2422,9 @@ PHP_FUNCTION(mysql_ping)
 	}
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	PHPMY_UNBUFFERED_QUERY_CHECK();
+
 	RETURN_BOOL(! mysql_ping(&mysql->conn));
 }
 /* }}} */
