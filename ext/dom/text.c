@@ -103,6 +103,7 @@ Since:
 */
 PHP_FUNCTION(dom_text_split_text)
 {
+	zval       *id;
 	xmlChar    *cur;
 	xmlChar    *first;
 	xmlChar    *second;
@@ -113,11 +114,10 @@ PHP_FUNCTION(dom_text_split_text)
 	int         length;
 	dom_object	*intern;
 
-	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr, intern);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &offset) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, dom_text_class_entry, &offset) == FAILURE) {
 		return;
 	}
+	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
 	if (node->type != XML_TEXT_NODE) {
 		RETURN_FALSE;
@@ -162,12 +162,14 @@ Since: DOM Level 3
 */
 PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 {
+	zval       *id;
 	xmlNodePtr  node;
 	dom_object	*intern;
 
-	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr, intern);
-
-	DOM_NO_ARGS();
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_text_class_entry) == FAILURE) {
+		return;
+	}
+	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
 	if (xmlIsBlankNode(node)) {
 		RETURN_TRUE;
