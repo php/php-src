@@ -22,6 +22,8 @@
  *   (make use of mersenne twister, other data such as IP, browser etc.)
  * - add complete support for objects (partially implemented)
  * - userland callback functions for ps_module
+ * - write documentation
+ * - write ps_module utilizing shared memory (mm)
  */
 #if !(WIN32|WINNT)
 #include <sys/time.h>
