@@ -1924,7 +1924,7 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(resource fp, int length [, string delimiter[, string enclosure]])
+/* {{{ proto array fgetcsv(resource fp, int length [, string delimiter [, string enclosure]])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
@@ -1978,7 +1978,7 @@ PHP_FUNCTION(fgetcsv)
 		convert_to_string_ex(p_enclosure);
 		/* Make sure that there is at least one character in string */
 		if (Z_STRLEN_PP(p_enclosure) < 1) {
-			php_error(E_WARNING, "%s() 3rd paramater must be a character",
+			php_error(E_WARNING, "%s() 4th paramater must be a character",
 					  get_active_function_name(TSRMLS_C));
 			return;
 		}
@@ -2004,10 +2004,10 @@ PHP_FUNCTION(fgetcsv)
 	}
 
 	buf = emalloc(len + 1);
-	/*needed because recv/read/gzread doesnt set null char at end*/
+	/* needed because recv/read/gzread doesnt set null char at end */
 	memset(buf, 0, len + 1);
 
-	if (php_stream_gets(stream, buf, len) == NULL)	{
+	if (php_stream_gets(stream, buf, len) == NULL) {
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -2029,7 +2029,7 @@ PHP_FUNCTION(fgetcsv)
 
 	/* reserve workspace for building each individual field */
 
-	temp = emalloc(len);	/*	unlikely but possible! */
+	temp = emalloc(len);	/* unlikely but possible! */
 	tptr = temp;
 
 	/* Initialize return array */
@@ -2038,7 +2038,7 @@ PHP_FUNCTION(fgetcsv)
 	/* Main loop to read CSV fields */
 	/* NB this routine will return a single null entry for a blank line */
 
-	do	{
+	do {
 		/* 1. Strip any leading space */
 		while(isspace((int) *bptr) && (*bptr!=delimiter)) bptr++;
 		/* 2. Read field, leaving bptr pointing at start of next field */
@@ -2069,7 +2069,7 @@ PHP_FUNCTION(fgetcsv)
 						/* read a new line from input, as at start of routine */
 						memset(buf, 0, len+1);
 
-						if (php_stream_gets(stream, buf, len) == NULL)	{
+						if (php_stream_gets(stream, buf, len) == NULL) {
 							efree(lineEnd); 
 							efree(temp); 
 							efree(buf);
