@@ -23,15 +23,9 @@ require_once 'PEAR/Common.php';
 require_once 'PEAR/Registry.php';
 require_once 'PEAR/Dependency.php';
 
-// TODO: remove empty dirs after uninstall
-
 /**
  * Administration class used to install PEAR packages and maintain the
  * installed package database.
- *
- * TODO:
- *  - Install the "role=doc" files in a central pear doc dir
- *  - kill FIXME's
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
@@ -81,25 +75,38 @@ class PEAR_Installer extends PEAR_Common
      */
     var $registry;
 
-    /** PEAR_Config object used by the installer
-     * @var object
-     */
-    var $config;
-
     // }}}
 
     // {{{ constructor
 
-    function PEAR_Installer(&$config)
+    /**
+     * PEAR_Installer constructor.
+     *
+     * @param object $ui user interface object (instance of PEAR_Frontend_*)
+     *
+     * @access public
+     */
+    function PEAR_Installer(&$ui)
     {
-        $this->PEAR();
-        $this->config = &$config;
+        $this->PEAR_Common();
+        $this->setFrontendObject($ui);
+        $this->debug = $this->config->get('verbose');
+        $this->registry = &new PEAR_Registry($this->config->get('php_dir'));
     }
 
     // }}}
 
     // {{{ _deletePackageFiles()
 
+    /**
+     * Delete a package's installed files, remove empty directories.
+     *
+     * @param string $package package name
+     *
+     * @return bool TRUE on success, or a PEAR error on failure
+     *
+     * @access private
+     */
     function _deletePackageFiles($package)
     {
         if (!strlen($package)) {
@@ -110,16 +117,21 @@ class PEAR_Installer extends PEAR_Common
             return $this->raiseError("$package not installed");
         }
         foreach ($filelist as $file => $props) {
+            if (empty($props['installed_as'])) {
+                continue;
+            }
             $path = $props['installed_as'];
             if (!@unlink($path)) {
-                $this->log(2, "unable to delete: $path");
+                $this->log(1, "unable to delete: $path");
             } else {
+                $this->log(1, "deleted file $path");
                 // Delete package directory if it's empty
                 if (@rmdir(dirname($path))) {
                     $this->log(2, "+ rmdir $path");
                 }
             }
         }
+        return true;
     }
 
     // }}}
@@ -235,6 +247,23 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+    // {{{ getPackageDownloadUrl()
+
+    function getPackageDownloadUrl($package)
+    {
+        if ($this === null || $this->config === null) {
+            $package = "http://pear.php.net/get/$package";
+        } else {
+            $package = "http://" . $this->config->get('master_server') .
+                "/get/$package";
+        }
+        if (!extension_loaded("zlib")) {
+            $package .= '?uncompress=yes';
+        }
+        return $package;
+    }
+
+    // }}}
     // {{{ install()
 
     /**
@@ -245,37 +274,24 @@ class PEAR_Installer extends PEAR_Common
      * @return bool true if successful, false if not
      */
 
-    function install($pkgfile, $options = array(), $config = null)
+    function install($pkgfile, $options = array())
     {
         // recognized options:
         // - register_only : update registry but don't install files
         // - upgrade       : upgrade existing install
         // - soft          : fail silently
         //
-        if (empty($this->registry)) {
-            $this->registry = &new PEAR_Registry($this->config->get('php_dir'));
-        }
-        $oldcwd = getcwd();
         $need_download = false;
         //  ==> XXX should be removed later on
         $flag_old_format = false;
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
             $need_download = true;
         } elseif (!@is_file($pkgfile)) {
-            if (preg_match('/^[A-Z][A-Za-z0-9_]+$/', $pkgfile)) {
-                // valid package name
-                if ($this->registry->packageExists($pkgfile)) {
+            if ($this->validPackageName($pkgfile)) {
+                if ($this->registry->packageExists($pkgfile) && empty($options['upgrade'])) {
                     return $this->raiseError("$pkgfile already installed");
                 }
-                if ($config === null) {
-                    $pkgfile = "http://pear.php.net/get/$pkgfile";
-                } else {
-                    $pkgfile = "http://" . $config->get('master_server') .
-                         "/get/$pkgfile";
-                }
-                if (!extension_loaded("zlib")) {
-                    $pkgfile .= '?uncompress=yes';
-                }
+                $pkgfile = $this->getPackageDownloadUrl($pkgfile);
                 $need_download = true;
             } else {
                 if (strlen($pkgfile)) {
@@ -288,33 +304,19 @@ class PEAR_Installer extends PEAR_Common
 
         // Download package -----------------------------------------------
         if ($need_download) {
-            $file = basename($pkgfile);
-            if (PEAR::isError($downloaddir = $this->mkTempDir())) {
-                return $downloaddir;
-            }
-            $this->log(2, '+ tmp dir created at ' . $downloaddir);
-            $downloadfile = $downloaddir . DIRECTORY_SEPARATOR . $file;
-            $this->log(1, "downloading $pkgfile ...");
-            if (!$fp = @fopen($pkgfile, 'r')) {
-                return $this->raiseError("$pkgfile: failed to download ($php_errormsg)");
-            }
-            // XXX FIXME should check content-disposition header
-            // for now we set the "force" option to avoid an error
-            // because of a temp. package file called "Package"
-            if (!$wp = @fopen($downloadfile, 'w')) {
-                return $this->raiseError("$downloadfile: write failed ($php_errormsg)");
-            }
-            $bytes = 0;
-            while ($data = @fread($fp, 16384)) {
-                $bytes += strlen($data);
-                if (!@fwrite($wp, $data)) {
-                    return $this->raiseError("$downloadfile: write failed ($php_errormsg)");
+            $downloaddir = $this->config->get('download_dir');
+            if (empty($downloaddir)) {
+                if (PEAR::isError($downloaddir = $this->mkTempDir())) {
+                    return $downloaddir;
                 }
+                $this->log(2, '+ tmp dir created at ' . $downloaddir);
             }
-            $pkgfile = $downloadfile;
-            fclose($fp);
-            fclose($wp);
-            $this->log(1, '...done: ' . number_format($bytes, 0, '', ',') . ' bytes');
+            $callback = $this->ui ? array(&$this, '_downloadCallback') : null;
+            $file = $this->downloadHttp($pkgfile, $this->ui, $downloaddir, $callback);
+            if (PEAR::isError($file)) {
+                return $this->raiseError($file);
+            }
+            $pkgfile = $file;
         }
 
         if (substr($pkgfile, -4) == '.xml') {
@@ -322,21 +324,20 @@ class PEAR_Installer extends PEAR_Common
         } else {
             // Decompress pack in tmp dir -------------------------------------
 
-            // To allow relative package file calls
-            if (!chdir(dirname($pkgfile))) {
-                return $this->raiseError('unable to chdir to package directory');
+            // To allow relative package file names
+            $oldcwd = getcwd();
+            if (@chdir(dirname($pkgfile))) {
+                $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
+                chdir($oldcwd);
             }
-            $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
 
             if (PEAR::isError($tmpdir = $this->mkTempDir())) {
-                chdir($oldcwd);
                 return $tmpdir;
             }
             $this->log(2, '+ tmp dir created at ' . $tmpdir);
 
             $tar = new Archive_Tar($pkgfile, true);
             if (!@$tar->extract($tmpdir)) {
-                chdir($oldcwd);
                 return $this->raiseError("unable to unpack $pkgfile");
             }
 
@@ -360,14 +361,12 @@ class PEAR_Installer extends PEAR_Common
         }
 
         if (!is_file($descfile)) {
-            chdir($oldcwd);
             return $this->raiseError("no package.xml file after extracting the archive");
         }
 
         // Parse xml file -----------------------------------------------
         $pkginfo = $this->infoFromDescriptionFile($descfile);
         if (PEAR::isError($pkginfo)) {
-            chdir($oldcwd);
             return $pkginfo;
         }
 
@@ -402,7 +401,9 @@ class PEAR_Installer extends PEAR_Common
             }
             if (empty($options['register_only'])) {
                 // when upgrading, remove old release's files first:
-                $this->_deletePackageFiles($pkgname);
+                if (PEAR::isError($err = $this->_deletePackageFiles($pkgname))) {
+                    return $this->raiseError($err);
+                }
             }
         }
 
@@ -412,7 +413,6 @@ class PEAR_Installer extends PEAR_Common
         $this->pkginfo = $pkginfo;
         if (empty($options['register_only'])) {
             if (!is_dir($this->config->get('php_dir'))) {
-                chdir($oldcwd);
                 return $this->raiseError("no script destination directory\n",
                                          null, PEAR_ERROR_DIE);
             }
@@ -446,7 +446,6 @@ class PEAR_Installer extends PEAR_Common
         } else {
             $ret = $this->registry->updatePackage($pkgname, $this->pkginfo, false);
         }
-        chdir($oldcwd);
         return $ret;
     }
 
@@ -460,7 +459,9 @@ class PEAR_Installer extends PEAR_Common
         }
 
         // Delete the files
-        $this->_deletePackageFiles($package);
+        if (PEAR::isError($err = $this->_deletePackageFiles($package))) {
+            return $this->raiseError($err);
+        }
 
         // Register that the package is no longer installed
         return $this->registry->deletePackage($package);
@@ -484,6 +485,21 @@ class PEAR_Installer extends PEAR_Common
             }
         }
         return false;
+    }
+
+    // }}}
+    // {{{ _downloadCallback()
+
+    function _downloadCallback($msg, $params = null)
+    {
+        switch ($msg) {
+            case 'saveas':
+                $this->log(1, "downloading $params ...");
+                break;
+            case 'done':
+                $this->log(1, '...done: ' . number_format($params, 0, '', ',') . ' bytes');
+                break;
+        }
     }
 
     // }}}
