@@ -1,3 +1,15 @@
+2004-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      String offset starts with 0, fix isset($str[$len])
+
+    * (PHP_5_0)
+      zend_compile.c:
+      MFH: Bugfix #29882 isset crashes on arrays
+
+    * zend_compile.c:
+      Bugfix #29882 isset crashes on arrays
+
 2004-08-27  Andi Gutmans  <andi@zend.com>
 
     * zend_alloc.c:
