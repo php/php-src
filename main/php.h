@@ -82,7 +82,7 @@ extern unsigned char second_arg_allow_ref[];
 #define DEBUG ZEND_DEBUG
 
 
-#if DEBUG || !(defined(__GNUC__)||PHP_WIN32
+#if DEBUG || !(defined(__GNUC__)||PHP_WIN32)
 #ifdef inline
 #undef inline
 #endif
