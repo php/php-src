@@ -36,7 +36,7 @@ function cleanall()
 {
 	$dp = opendir(".");
 	while ($ent = readdir($dp)) {
-		if (substr($ent, -4) == ".inf") {
+		if (substr($ent, -4) == ".reg") {
 			unlink($ent);
 		}
 	}
