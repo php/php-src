@@ -661,13 +661,13 @@ PHP_FUNCTION(curl_getinfo)
 	ZEND_FETCH_RESOURCE(curl_handle, php_curl *, curl_id, -1, "CURL Handle", le_curl);
 
 	if (argc < 2) {
-		char url[250];
+		char *url;
 		long l_code;
 		double d_code;
 
 		array_init(return_value);
 
-		curl_easy_getinfo(curl_handle->cp, CURLINFO_EFFECTIVE_URL, url);
+		curl_easy_getinfo(curl_handle->cp, CURLINFO_EFFECTIVE_URL, &url);
 		add_assoc_string(return_value, "url", url, 1);
 		
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_HTTP_CODE, &l_code);
