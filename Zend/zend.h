@@ -250,11 +250,6 @@ typedef union _zvalue_value {
 		int len;
 	} str;
 	HashTable *ht;				/* hash table value */
-/*	struct {
-		zend_class_entry *ce;
-		HashTable *properties;
-	} obj;
-*/
 	zend_object_value obj;
 } zvalue_value;
 

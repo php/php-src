@@ -231,19 +231,18 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 	}
 
 
-#define Z_LVAL(zval)		(zval).value.lval
-#define Z_BVAL(zval)		((zend_bool)(zval).value.lval)
-#define Z_DVAL(zval)		(zval).value.dval
-#define Z_STRVAL(zval)		(zval).value.str.val
-#define Z_STRLEN(zval)		(zval).value.str.len
-#define Z_ARRVAL(zval)		(zval).value.ht
-#define Z_OBJ_HANDLE(zval)  (zval).value.obj.handle
-#define Z_OBJ_HT(zval)      (zval).value.obj.handlers
-#define Z_OBJCE(zval)		zend_get_class_entry(&(zval))
-#define Z_OBJPROP(zval)		Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
-#define Z_OBJ_HANDLER(zval, hf) \
-							Z_OBJ_HT((zval))->hf
-#define Z_RESVAL(zval)		(zval).value.lval
+#define Z_LVAL(zval)			(zval).value.lval
+#define Z_BVAL(zval)			((zend_bool)(zval).value.lval)
+#define Z_DVAL(zval)			(zval).value.dval
+#define Z_STRVAL(zval)			(zval).value.str.val
+#define Z_STRLEN(zval)			(zval).value.str.len
+#define Z_ARRVAL(zval)			(zval).value.ht
+#define Z_OBJ_HANDLE(zval)		(zval).value.obj.handle
+#define Z_OBJ_HT(zval)			(zval).value.obj.handlers
+#define Z_OBJCE(zval)			zend_get_class_entry(&(zval))
+#define Z_OBJPROP(zval)			Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
+#define Z_OBJ_HANDLER(zval, hf) Z_OBJ_HT((zval))->hf
+#define Z_RESVAL(zval)			(zval).value.lval
 
 #define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
 #define Z_BVAL_P(zval_p)		Z_BVAL(*zval_p)
