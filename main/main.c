@@ -795,6 +795,7 @@ int php_module_startup(sapi_module_struct *sf)
 	global_lock_init();
 	SG(server_context) = NULL;
 	SG(request_info).request_method = NULL;
+	SG(request_info).auth_user = SG(request_info).auth_password = NULL;
 	sapi_activate(SLS_C);
 
 	if (module_initialized) {
