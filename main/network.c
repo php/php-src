@@ -55,25 +55,94 @@
 # define SOCK_CONN_ERR -1
 #endif
 
-/* Copied lookup_hostname, will be replaced */
-
-/*
- * Converts a host name to an IP address.
- */
-static int php_network_lookup_hostname(const char *addr, struct in_addr *in)
+static void php_network_freeaddresses(struct sockaddr **sal)
 {
-        struct hostent *host_info;
+	struct sockaddr **sap;
 
-        if (!inet_aton(addr, in)) {
-                /* XXX NOT THREAD SAFE */
-                host_info = gethostbyname(addr);
-                if (host_info == 0) {
-                        /* Error: unknown host */
+	if (sal == NULL)
+		return;
+	for (sap = sal; *sap != NULL; sap++)
+		free(*sap);
+	free(sal);
+}
+
+static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
+{
+	struct sockaddr **sap;
+	
+        if (host != NULL) {
+#ifdef HAVE_GETADDRINFO
+                struct addrinfo hints, *res, *sai;
+		int n;
+
+                memset( &hints, '\0', sizeof(hints) );
+                hints.ai_family = AF_UNSPEC;
+                if (getaddrinfo(host, NULL, &hints, &res))
                         return -1;
-                }
-                *in = *((struct in_addr *) host_info->h_addr);
+                sai = res;
+		for (n=2; (sai = sai->ai_next) != NULL; n++);
+		*sal = malloc(n * sizeof(*sal));
+		if (*sal == NULL)
+			return -1;
+
+                sai = res;
+		sap = *sal;
+                do {
+                        switch (sai->ai_family) {
+#  ifdef AF_INET6
+                        case AF_INET6: {
+				*sap = malloc(sizeof(struct sockaddr_in6));
+				if (*sap == NULL) {
+					freeaddrinfo(res);
+					goto errexit;
+				}
+				*(struct sockaddr_in6 *)*sap =
+					*((struct sockaddr_in6 *)sai->ai_addr);
+                        } break;
+#  endif
+                        case AF_INET: {
+				*sap = malloc(sizeof(struct sockaddr_in));
+				if (*sap == NULL) {
+					freeaddrinfo(res);
+					goto errexit;
+				}
+				*(struct sockaddr_in *)*sap =
+					*((struct sockaddr_in *)sai->ai_addr);
+                        } break;
+                        }
+			sap++;
+                } while ((sai = sai->ai_next) != NULL);
+                freeaddrinfo(res);
+#else
+		struct hostent *host_info;
+		struct in_addr in;
+
+		if (!inet_aton(host, &in)) {
+			/* XXX NOT THREAD SAFE */
+			host_info = gethostbyname(host);
+			if (host_info == NULL)
+				return -1;
+			in = *((struct in_addr *) host_info->h_addr);
+		}
+
+		*sal = malloc(2 * sizeof(*sal));
+		if (*sal == NULL)
+			return -1;
+		sap = *sal;
+		*sap = malloc(sizeof(struct sockaddr_in));
+		if (*sap == NULL)
+			goto errexit;
+
+		(*sap)->sa_family = AF_INET;
+		((struct sockaddr_in *)*sap)->sin_addr = in;
+		sap++;
+#endif
+		*sap = NULL;
+		return 0;
+	errexit:
+		php_network_freeaddresses(*sal);
         }
-        return 0;
+	return -1;
 }
 
 /*
@@ -84,19 +153,49 @@ static int php_network_lookup_hostname(const char *addr, struct in_addr *in)
 int hostconnect(char *host, int port, int socktype, int timeout)
 {	
 	int s;
-	struct sockaddr_in sa;
+	struct sockaddr **sal, **psal;
 
-	if (php_network_lookup_hostname(host, &sa.sin_addr))
+	if (php_network_getaddresses(host, &sal))
 		return -1;
-	s = socket(PF_INET, socktype, 0);
-	if (s == SOCK_ERR)
-		return -1;
-	sa.sin_family = AF_INET;
-	sa.sin_port = htons(port);
-	if (connect(s, (struct sockaddr *) &sa, sizeof(sa)) == SOCK_CONN_ERR) {
-		close (s);
-		return -1;
+	
+	psal = sal;
+	while (*sal != NULL) {
+		s = socket((*sal)->sa_family, socktype, 0);
+		if (s != SOCK_ERR) {
+			switch ((*sal)->sa_family) {
+#if defined( HAVE_GETADDRINFO ) && defined( AF_INET6 )
+			case AF_INET6: {
+				struct sockaddr_in6 *sa =
+					(struct sockaddr_in6 *)*sal;
+				
+				sa->sin6_family = (*sal)->sa_family;
+				sa->sin6_port = htons(port);
+				if (connect(s, (struct sockaddr *) sa,
+					    sizeof(*sa)) != SOCK_CONN_ERR)
+					goto ok;
+			} break;
+#endif
+			case AF_INET: {
+				struct sockaddr_in *sa =
+					(struct sockaddr_in *)*sal;
+
+				sa->sin_family = (*sal)->sa_family;
+				sa->sin_port = htons(port);
+				if (connect(s, (struct sockaddr *) sa,
+					    sizeof(*sa)) != SOCK_CONN_ERR)
+					goto ok;
+
+			} break;
+			}
+			close (s);
+		}
+		sal++;
 	}
+	php_network_freeaddresses(psal);
+	return -1;
+
+ ok:
+	php_network_freeaddresses(psal);
 	return s;
 }
 
