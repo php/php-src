@@ -568,7 +568,21 @@ int zendlex(znode *zendlval CLS_DC);
 #define PZVAL_IS_REF(z)		((z)->is_ref)
 
 #define PZVAL_LOCK(z)	((z)->refcount++)
-#define PZVAL_UNLOCK(z)	((z)->refcount--)
+#define PZVAL_UNLOCK(z)	{ ((z)->refcount--);							\
+							if (!(z)->refcount) {						\
+								EG(garbage)[EG(garbage_ptr)++] = (z);	\
+								if (EG(garbage_ptr) == 4) {				\
+									zval_dtor(EG(garbage)[0]);			\
+									efree(EG(garbage)[0]);				\
+									zval_dtor(EG(garbage)[1]);			\
+									efree(EG(garbage)[1]);				\
+									EG(garbage)[0] = EG(garbage)[2];	\
+									EG(garbage)[1] = EG(garbage)[3];	\
+									EG(garbage_ptr) -= 2;				\
+								}										\
+							}											\
+						}
+
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
 
 #endif /* _COMPILE_H */

@@ -138,7 +138,6 @@ struct _zend_executor_globals {
 	HashTable *zend_constants;	/* constants table */
 
 	long precision;
-	zend_bool destroying_function_symbol_table;
 
 	/* for extended information support */
 	zend_bool no_extensions;
@@ -150,6 +149,9 @@ struct _zend_executor_globals {
 	int free_op1, free_op2;
 	int (*unary_op)(zval *result, zval *op1);
 	int (*binary_op)(zval *result, zval *op1, zval *op2);
+
+	zval *garbage[4];
+	int garbage_ptr;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 #if SUPPORT_INTERACTIVE
