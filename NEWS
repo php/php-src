@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Add Olympus-specific tags to read_exif_data() (Rasmus)
+- Fixed bug in imap_fetchheader() where using FT_PREFETCHTEXT didn't return
+  the body. Bug #4447. (Jani)
+- Fixed exec() returning "\0" when output is empty
 - Added XML_Parser class in PEAR (Stig)
 - Added "make test" target in pear/ and added some regression tests (Stig)
 - Fix bug in strip_tags function as per bug #5857 (Rasmus)
