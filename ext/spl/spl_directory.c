@@ -341,47 +341,47 @@ SPL_METHOD(DirectoryIterator, func_name) \
 }
 /* }}} */
 
-/* {{{ proto int DirectoryIterator::filePerms()
+/* {{{ proto int DirectoryIterator::getPerms()
    Get file permissions */
 FileFunction(getPerms, FS_PERMS)
 /* }}} */
 
-/* {{{ proto int DirectoryIterator::fileInode()
+/* {{{ proto int DirectoryIterator::getInode()
    Get file inode */
 FileFunction(getInode, FS_INODE)
 /* }}} */
 
-/* {{{ proto int DirectoryIterator::fileSize()
+/* {{{ proto int DirectoryIterator::getSize()
    Get file size */
 FileFunction(getSize, FS_SIZE)
 /* }}} */
 
-/* {{{ proto int DirectoryIterator::fileOwner()
+/* {{{ proto int DirectoryIterator::getOwner()
    Get file owner */
 FileFunction(getOwner, FS_OWNER)
 /* }}} */
 
-/* {{{ proto int DirectoryIterator::fileGroup()
+/* {{{ proto int DirectoryIterator::getGroup()
    Get file group */
 FileFunction(getGroup, FS_GROUP)
 /* }}} */
 
-/* {{{ proto int DirectoryIterator::fileATime()
+/* {{{ proto int DirectoryIterator::getATime()
    Get last access time of file */
 FileFunction(getATime, FS_ATIME)
 /* }}} */
 
-/* {{{ proto int DirectoryIterator::fileMTime()
+/* {{{ proto int DirectoryIterator::getMTime()
    Get last modification time of file */
 FileFunction(getMTime, FS_MTIME)
 /* }}} */
 
-/* {{{ proto int DirectoryIterator::fileCTime()
+/* {{{ proto int DirectoryIterator::getCTime()
    Get inode modification time of file */
 FileFunction(getCTime, FS_CTIME)
 /* }}} */
 
-/* {{{ proto string DirectoryIterator::fileType()
+/* {{{ proto string DirectoryIterator::getType()
    Get file type */
 FileFunction(getType, FS_TYPE)
 /* }}} */
