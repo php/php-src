@@ -2,13 +2,13 @@
 DBA DB3 handler test
 --SKIPIF--
 <?php 
+	$handler = 'db3';
 	require_once('skipif.inc');
-	if (!in_array('db3', dba_handlers())) die('skip DB3 handler not available');
 ?>
 --FILE--
 <?php
-	require_once('test.inc');
 	$handler = 'db3';
+	require_once('test.inc');
 	require_once('dba_handler.inc');
 ?>
 --EXPECT--

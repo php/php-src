@@ -2,13 +2,13 @@
 DBA INIFILE handler test
 --SKIPIF--
 <?php 
+	$handler = 'inifile';
 	require_once('skipif.inc');
-	if (!in_array('inifile', dba_handlers())) die('skip INIFILE handler not available');
 ?>
 --FILE--
 <?php
-	require_once('test.inc');
 	$handler = 'inifile';
+	require_once('test.inc');
 	require_once('dba_handler.inc');
 ?>
 --EXPECT--
