@@ -74,6 +74,7 @@ function_entry basic_functions[] = {
 	{"strval",		string_value,				NULL},
 	PHP_FE(define,		NULL)
 	PHP_FE(defined,		NULL)
+	PHP_FE(bin2hex, NULL)
 	{"short_tags",	php3_toggle_short_open_tag, NULL},
 	{"sleep",		php3_sleep,					NULL},
 	{"usleep",		php3_usleep,				NULL},
@@ -406,7 +407,7 @@ int php3_rshutdown_basic(SHUTDOWN_FUNC_ARGS)
  * System Functions *
  ********************/
 
-void php3_getenv(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getenv)
 {
 #if FHTTPD
 	int i;
@@ -459,7 +460,7 @@ void php3_getenv(INTERNAL_FUNCTION_PARAMETERS)
 
 
 #if HAVE_PUTENV
-void php3_putenv(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(putenv)
 {
 
 	pval *str;
@@ -506,7 +507,7 @@ void php3_putenv(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 
 
-void php3_error_reporting(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(error_reporting)
 {
 	pval *arg;
 	int old_error_reporting;
@@ -531,7 +532,7 @@ void php3_error_reporting(INTERNAL_FUNCTION_PARAMETERS)
 	RETVAL_LONG(old_error_reporting);
 }
 
-void php3_toggle_short_open_tag(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(toggle_short_open_tag)
 {
 	/* has to be implemented within Zend */
 #if 0
@@ -630,7 +631,7 @@ static int array_key_compare(const void *a, const void *b)
 }
 
 
-void php3_key_sort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(key_sort)
 {
 	pval *array;
 	HashTable *target_hash;
@@ -654,7 +655,7 @@ void php3_key_sort(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_count(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(count)
 {
 	pval *array;
 	HashTable *target_hash;
@@ -731,7 +732,7 @@ static int array_reverse_data_compare(const void *a, const void *b)
 	return array_data_compare(a,b)*-1;
 }
 
-void php3_asort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(asort)
 {
 	pval *array;
 	HashTable *target_hash;
@@ -754,7 +755,7 @@ void php3_asort(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_arsort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(arsort)
 {
 	pval *array;
 	HashTable *target_hash;
@@ -777,7 +778,7 @@ void php3_arsort(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_sort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sort)
 {
 	pval *array;
 	HashTable *target_hash;
@@ -800,7 +801,7 @@ void php3_sort(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_rsort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(rsort)
 {
 	pval *array;
 	HashTable *target_hash;
@@ -847,7 +848,7 @@ static int array_user_compare(const void *a, const void *b)
 }
 
 
-void php3_user_sort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(user_sort)
 {
 	pval *array;
 	pval *old_compare_func;
@@ -873,7 +874,7 @@ void php3_user_sort(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_auser_sort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(auser_sort)
 {
 	pval *array;
 	pval *old_compare_func;
@@ -947,7 +948,7 @@ static int array_user_key_compare(const void *a, const void *b)
 }
 
 
-void php3_user_key_sort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(user_key_sort)
 {
 	pval *array;
 	pval *old_compare_func;
@@ -1177,7 +1178,7 @@ void array_current_key(INTERNAL_FUNCTION_PARAMETERS)
 #ifdef __cplusplus
 void php3_flush(HashTable *)
 #else
-void php3_flush(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(flush)
 #endif
 {
 	SLS_FETCH();
@@ -1201,7 +1202,7 @@ void php3_flush(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sleep(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sleep)
 {
 	pval *num;
 
@@ -1212,7 +1213,7 @@ void php3_sleep(INTERNAL_FUNCTION_PARAMETERS)
 	sleep(num->value.lval);
 }
 
-void php3_usleep(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(usleep)
 {
 #if HAVE_USLEEP
 	pval *num;
@@ -1225,7 +1226,7 @@ void php3_usleep(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 }
 
-void php3_gettype(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gettype)
 {
 	pval *arg;
 
@@ -1266,7 +1267,7 @@ void php3_gettype(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_settype(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(settype)
 {
 	pval *var, *type;
 	char *new_type;
@@ -1296,7 +1297,7 @@ void php3_settype(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_min(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(min)
 {
 	int argc=ARG_COUNT(ht);
 	pval **result;
@@ -1347,7 +1348,7 @@ void php3_min(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_max(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(max)
 {
 	int argc=ARG_COUNT(ht);
 	pval **result;
@@ -1411,7 +1412,7 @@ static int _php3_array_walk(const void *a)
 	return 0;
 }
 
-void php3_array_walk(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(array_walk) {
 	pval *array, *old_walk_func_name;
 	HashTable *target_hash;
 
@@ -1433,7 +1434,7 @@ void php3_array_walk(INTERNAL_FUNCTION_PARAMETERS) {
 }
 
 #if 0
-void php3_max(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(max)
 {
 	pval **argv;
 	int argc, i;
@@ -1500,13 +1501,13 @@ void php3_max(INTERNAL_FUNCTION_PARAMETERS)
 }
 #endif
 
-void php3_get_current_user(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(get_current_user)
 {
 	RETURN_STRING(_php3_get_current_user(),1);
 }
 
 
-void php3_get_cfg_var(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(get_cfg_var)
 {
 	pval *varname;
 	char *value;
@@ -1523,7 +1524,7 @@ void php3_get_cfg_var(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_STRING(value,1);
 }
 
-void php3_set_magic_quotes_runtime(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(set_magic_quotes_runtime)
 {
 	pval *new_setting;
 	PLS_FETCH();
@@ -1537,14 +1538,14 @@ void php3_set_magic_quotes_runtime(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 	
-void php3_get_magic_quotes_runtime(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(get_magic_quotes_runtime)
 {
 	PLS_FETCH();
 
 	RETURN_LONG(PG(magic_quotes_runtime));
 }
 
-void php3_get_magic_quotes_gpc(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(get_magic_quotes_gpc)
 {
 	PLS_FETCH();
 
@@ -1567,14 +1568,14 @@ void php3_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 }
 
 
-void php3_is_long(INTERNAL_FUNCTION_PARAMETERS) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG); }
-void php3_is_double(INTERNAL_FUNCTION_PARAMETERS) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE); }
-void php3_is_string(INTERNAL_FUNCTION_PARAMETERS) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING); }
-void php3_is_array(INTERNAL_FUNCTION_PARAMETERS) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY); }
-void php3_is_object(INTERNAL_FUNCTION_PARAMETERS) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT); }
+PHP_FUNCTION(is_long) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG); }
+PHP_FUNCTION(is_double) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE); }
+PHP_FUNCTION(is_string) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING); }
+PHP_FUNCTION(is_array) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY); }
+PHP_FUNCTION(is_object) { php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT); }
 
 
-void php3_leak(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(leak)
 {
 	int leakbytes=3;
 	pval *leak;
@@ -1602,7 +1603,7 @@ void php3_leak(INTERNAL_FUNCTION_PARAMETERS)
 	3 = save to file in 3rd parameter
 */
 
-void php3_error_log(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(error_log)
 {
 	pval *string, *erropt = NULL, *option = NULL, *emailhead = NULL;
 	int opt_err = 0;
@@ -1703,7 +1704,7 @@ PHPAPI int _php3_error_log(int opt_err,char *message,char *opt,char *headers){
 }
 
 
-void php3_call_user_func(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(call_user_func)
 {
 	pval **params;
 	pval retval;
@@ -1729,7 +1730,7 @@ void php3_call_user_func(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_call_user_method(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(call_user_method)
 {
 	pval **params;
 	pval retval;

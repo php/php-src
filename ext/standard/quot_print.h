@@ -32,6 +32,6 @@
 #ifndef _QUOT_PRINT_H
 #define _QUOT_PRINT_H
 
-extern void php3_quoted_printable_decode(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(quoted_printable_decode);
 
 #endif /* _QUOT_PRINT_H */

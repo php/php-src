@@ -32,7 +32,7 @@
 #ifndef _HTML_H
 #define _HTML_H
 
-extern void php3_htmlspecialchars(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_htmlentities(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(htmlspecialchars);
+PHP_FUNCTION(htmlentities);
 
 #endif /* _HTML_H */

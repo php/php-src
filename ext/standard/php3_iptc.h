@@ -33,6 +33,6 @@
 #ifndef _PHPIPTC_H
 #define _PHPIPTC_H
 
-extern void php3_iptcparse(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(iptcparse);
 
 #endif /* _PHPIPTC_H */

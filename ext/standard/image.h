@@ -31,6 +31,6 @@
 #ifndef _IMAGE_H
 #define _IMAGE_H
 
-extern void php3_getimagesize(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(getimagesize);
 
 #endif /* _IMAGE_H */

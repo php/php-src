@@ -80,31 +80,35 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 	reg_cache *rc = NULL;
 	REGLS_FETCH();
 	
-	if(_php3_hash_find(&REG(ht_rc), (char *) pattern, patlen, (void **) &rc) == FAILURE ||
+	printf("called for pattern %s\n", pattern);
+	if(_php3_hash_find(&REG(ht_rc), (char *) pattern, patlen+1, (void **) &rc) == FAILURE ||
 			rc->cflags != cflags) {
+		printf("compiling it\n");
 		r = regcomp(preg, pattern, cflags);
+		printf("regcomp returned %d\n", r);
 		if(!r) {
 			reg_cache rcp;
 
 			rcp.cflags = cflags;
 			memcpy(&rcp.preg, preg, sizeof(*preg));
-			_php3_hash_update(&REG(ht_rc), (char *) pattern, patlen,
-					(void *) &rcp, sizeof(*rc), NULL);
+			_php3_hash_update(&REG(ht_rc), (char *) pattern, patlen+1,
+					(void *) &rcp, sizeof(rcp), NULL);
 		}
 	} else {
+		printf("found it at %x\n", rc);
 		memcpy(preg, &rc->preg, sizeof(*preg));
 	}
 	
 	return r;
 }
 
-#define regfree(a);
-#define regcomp _php_regcomp
-
 static void _free_reg_cache(reg_cache *rc) 
 {
 	regfree(&rc->preg);
 }
+
+#define regfree(a);
+#define regcomp(a,b,c) _php_regcomp(a,b,c)
 	
 static void php_reg_init_globals(php_reg_globals *reg_globals) 
 {
@@ -289,7 +293,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 /* {{{ proto int ereg(string pattern, string string [, array registers])
    Regular expression match */
-void php3_ereg(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ereg)
 {
 	_php3_ereg(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -297,7 +301,7 @@ void php3_ereg(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int eregi(string pattern, string string [, array registers])
    Case-insensitive regular expression match */
-void php3_eregi(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(eregi)
 {
 	_php3_ereg(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -503,7 +507,7 @@ static void _php3_eregreplace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 /* {{{ proto string ereg_replace(string pattern, string string [, array registers])
    Replace regular expression */
-void php3_eregreplace(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(eregreplace)
 {
 	_php3_eregreplace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -511,7 +515,7 @@ void php3_eregreplace(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string eregi_replace(string pattern, string string [, array registers])
    Case insensitive replace regular expression */
-void php3_eregireplace(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(eregireplace)
 {
 	_php3_eregreplace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -521,7 +525,7 @@ void php3_eregireplace(INTERNAL_FUNCTION_PARAMETERS)
    = split(":", $passwd_file, 5); */
 /* {{{ proto array split(string pattern, string string [, int limit])
    split string into array by regular expression */
-void php3_split(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(split)
 {
 	pval *spliton, *str, *arg_count = NULL;
 	regex_t re;
@@ -616,7 +620,7 @@ void php3_split(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string sql_regcase(string string)
    Make regular expression for case insensitive match */
-PHPAPI void php3_sql_regcase(INTERNAL_FUNCTION_PARAMETERS)
+PHPAPI PHP_FUNCTION(sql_regcase)
 {
 	pval *string;
 	char *tmp;

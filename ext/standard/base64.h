@@ -31,8 +31,8 @@
 #ifndef _BASE64_h
 #define _BASE64_h
 
-extern void php3_base64_decode(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_base64_encode(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(base64_decode);
+PHP_FUNCTION(base64_encode);
 
 extern unsigned char *_php3_base64_encode(const unsigned char *, int, int *);
 extern unsigned char *_php3_base64_decode(const unsigned char *, int, int *);

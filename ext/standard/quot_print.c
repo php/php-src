@@ -68,7 +68,7 @@ static char _php3_hex2int(int c)
 */
 /* {{{ proto string quoted_printable_decode(string str)
    Convert a quoted-printable string to an 8 bit string */
-void php3_quoted_printable_decode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(quoted_printable_decode)
 {
 	pval *arg1;
 	char *str;

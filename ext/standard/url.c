@@ -157,7 +157,7 @@ url *url_parse(char *string)
 
 /* {{{ proto array parse_url(string url)
    Parse a URL and return its components */
-void php3_parse_url(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(parse_url)
 {
 	pval *string;
 	url *resource;
@@ -265,7 +265,7 @@ char *_php3_urlencode(char *s, int len)
 
 /* {{{ proto string urlencode(string str)
    URL-encodes string */
-void php3_urlencode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(urlencode)
 {
 	pval *arg;
 	char *str;
@@ -286,7 +286,7 @@ void php3_urlencode(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string urldecode(string str)
    Decodes URL-encoded string */
-void php3_urldecode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(urldecode)
 {
 	pval *arg;
 	int len;
@@ -360,7 +360,7 @@ char *_php3_rawurlencode(char *s, int len)
 
 /* {{{ proto string rawurlencode(string str)
    URL-encodes string */
-void php3_rawurlencode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(rawurlencode)
 {
 	pval *arg;
 	char *str;
@@ -381,7 +381,7 @@ void php3_rawurlencode(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string rawurldecode(string str)
    Decodes URL-encodes string */
-void php3_rawurldecode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(rawurldecode)
 {
 	pval *arg;
 	int len;

@@ -32,10 +32,10 @@
 #ifndef _PHP3_LINK_H
 #define _PHP3_LINK_H
 
-extern void php3_link(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_unlink(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_readlink(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_linkinfo(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_symlink(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(link);
+PHP_FUNCTION(unlink);
+PHP_FUNCTION(readlink);
+PHP_FUNCTION(linkinfo);
+PHP_FUNCTION(symlink);
 
 #endif /* _PHP3_LINK_H */

@@ -65,7 +65,7 @@ char *_php3_gethostbyname(char *name);
 
 /* {{{ proto string gethostbyaddr(string ip_address)
    Get the Internet host name corresponding to a given IP address */
-void php3_gethostbyaddr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gethostbyaddr)
 {
 	pval *arg;
 	
@@ -104,7 +104,7 @@ char *_php3_gethostbyaddr(char *ip)
 
 /* {{{ proto string gethostbyname(string hostname)
    Get the IP address corresponding to a given Internet host name */
-void php3_gethostbyname(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gethostbyname)
 {
 	pval *arg;
 	
@@ -121,7 +121,7 @@ void php3_gethostbyname(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array gethostbynamel(string hostname)
    Return a list of IP addresses that a given hostname resolves to. */
-void php3_gethostbynamel(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gethostbynamel)
 {
 	pval *arg;
 	struct hostent *hp;
@@ -174,7 +174,7 @@ char *_php3_gethostbyname(char *name)
 
 /* {{{ proto int checkdnsrr(string host [, string type])
    Check DNS records corresponding to a given Internet host name or IP address */
-void php3_checkdnsrr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(checkdnsrr)
 {
 	pval *arg1,*arg2;
 	int type,i;
@@ -234,7 +234,7 @@ void php3_checkdnsrr(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int getmxrr(string hostname, array mxhosts [, array weight])
    Get MX records corresponding to a given Internet host name */
-void php3_getmxrr(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getmxrr)
 {
 	pval *host, *mx_list, *weight_list;
 	pval tmp1,tmp2;

@@ -50,7 +50,7 @@
 
 /* {{{ proto string uniqid(string prefix)
    Generate a unique id */
-void php3_uniqid(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(uniqid)
 {
 #ifdef HAVE_GETTIMEOFDAY
 	pval *prefix;

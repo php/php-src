@@ -57,7 +57,7 @@
 #ifdef __cplusplus
 void php3_microtime(HashTable *)
 #else
-void php3_microtime(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(microtime)
 #endif
 {
 #if HAVE_GETTIMEOFDAY

@@ -42,7 +42,7 @@ char *_php3_number_format(double, int, char ,char);
 
 /* {{{ proto int abs(int number)
    Return the absolute value of the number */
-void php3_abs(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(abs) {
 	pval *value;
 	
 	if (ARG_COUNT(ht)!=1||getParameters(ht,1,&value)==FAILURE) {
@@ -66,7 +66,7 @@ void php3_abs(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int ceil(double number)
    Returns the next highest integer value of the number */
-void php3_ceil(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(ceil) {
 	pval *value;
 	
 	if (ARG_COUNT(ht)!=1||getParameters(ht,1,&value)==FAILURE) {
@@ -90,7 +90,7 @@ void php3_ceil(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int floor(double number)
    Returns the next lowest integer value from the number */
-void php3_floor(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(floor) {
 	pval *value;
 	
 	if (ARG_COUNT(ht)!=1||getParameters(ht,1,&value)==FAILURE) {
@@ -128,7 +128,7 @@ inline double rint(double n)
 
 /* {{{ proto int round(double number)
    Returns the rounded value of the number */
-void php3_round(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(round)
 {
 	pval *value;
 
@@ -150,7 +150,7 @@ void php3_round(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double sin(double number)
    Returns the sine of the number in radians */
-void php3_sin(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sin)
 {
 	pval *num;
 
@@ -165,7 +165,7 @@ void php3_sin(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double cos(double number)
    Returns the cosine of the number in radians */
-void php3_cos(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(cos)
 {
 	pval *num;
 
@@ -180,7 +180,7 @@ void php3_cos(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double tan(double number)
    Returns the tangent of the number in radians */
-void php3_tan(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(tan)
 {
 	pval *num;
 
@@ -195,7 +195,7 @@ void php3_tan(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double asin(double number)
    Returns the arc sine of the number in radians */
-void php3_asin(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(asin)
 {
 	pval *num;
 
@@ -210,7 +210,7 @@ void php3_asin(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double acos(double number)
    Return the arc cosine of the number in radians */
-void php3_acos(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(acos)
 {
 	pval *num;
 
@@ -225,7 +225,7 @@ void php3_acos(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double atan(double number)
    Returns the arc tangent of the number in radians */
-void php3_atan(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(atan)
 {
 	pval *num;
 
@@ -240,7 +240,7 @@ void php3_atan(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double atan2(double y, double x)
    Returns the arc tangent of y/x, with the resulting quadrant determined by the signs of y and x */
-void php3_atan2(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(atan2)
 {
 	pval *num1, *num2;
 
@@ -256,7 +256,7 @@ void php3_atan2(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double pi(void)
    Returns an approximation of pi */
-void php3_pi(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pi)
 {
 	return_value->value.dval = M_PI;
 	return_value->type = IS_DOUBLE;
@@ -265,7 +265,7 @@ void php3_pi(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double pow(double base, double exponent)
    Returns base raised to the power of expopent */
-void php3_pow(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pow)
 {
 	pval *num1, *num2;
 	
@@ -280,7 +280,7 @@ void php3_pow(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double exp(double number)
    Returns e raised to the power of the number */
-void php3_exp(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(exp)
 {
 	pval *num;
 
@@ -295,7 +295,7 @@ void php3_exp(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double log(double number)
    Returns the natural logarithm of the number */
-void php3_log(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(log)
 {
 	pval *num;
 
@@ -310,7 +310,7 @@ void php3_log(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double log10(double number)
    Returns the base-10 logarithm of the number */
-void php3_log10(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(log10)
 {
 	pval *num;
 
@@ -325,7 +325,7 @@ void php3_log10(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double sqrt(double number)
    Returns the square root of the number */
-void php3_sqrt(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sqrt)
 {
 	pval *num;
 
@@ -340,7 +340,7 @@ void php3_sqrt(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double deg2rad(double number)
    Converts the number in degrees to the radian equivalent  */
-void php3_deg2rad(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(deg2rad)
 {
 	pval *deg;
 
@@ -354,7 +354,7 @@ void php3_deg2rad(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto double rad2deg(double number)
    Converts the radian number to the equivalent number in degrees */
-void php3_rad2deg(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(rad2deg)
 {
 	pval *rad;
 
@@ -441,7 +441,7 @@ _php3_longtobase(pval *arg, int base)
 
 /* {{{ proto int bindec(string binary_number)
    Returns the decimal equivalent of the binary number */
-void php3_bindec(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bindec)
 {
 	pval *arg;
 	long ret;
@@ -459,7 +459,7 @@ void php3_bindec(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int hexdec(string hexadimal_number)
    Returns the decimal equivalent of the hexadecimal number */
-void php3_hexdec(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hexdec)
 {
 	pval *arg;
 	long ret;
@@ -477,7 +477,7 @@ void php3_hexdec(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int octdec(string octal_number)
    Returns the decimal equivalent of an octal string */
-void php3_octdec(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(octdec)
 {
 	pval *arg;
 	long ret;
@@ -495,7 +495,7 @@ void php3_octdec(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string decbin(int decimal_number)
    Returns a string containing a binary representation of the number */
-void php3_decbin(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(decbin)
 {
 	pval *arg;
 	char *result;
@@ -515,7 +515,7 @@ void php3_decbin(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string decoct(int decimal_number)
    Returns a string containing an octal representation of the given number */
-void php3_decoct(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(decoct)
 {
 	pval *arg;
 	char *result;
@@ -535,7 +535,7 @@ void php3_decoct(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string dechex(int decimal_number)
    Returns a string containing a hexadecimal representation of the given number */
-void php3_dechex(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dechex)
 {
 	pval *arg;
 	char *result;
@@ -557,7 +557,7 @@ void php3_dechex(INTERNAL_FUNCTION_PARAMETERS)
 /* {{{ proto string base_convert(string number, int frombase, int tobase)
    Converts a number in a string from any base <= 36 to any base <= 36.
 */
-void php3_base_convert(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(base_convert)
 {
 	pval *number, *frombase, *tobase, temp;
 	char *result;
@@ -644,7 +644,7 @@ char *_php3_number_format(double d,int dec,char dec_point,char thousand_sep)
 
 /* {{{ proto string number_format(double number, [,int num_decimal_places [, string  dec_seperator, string thousands_seperator)]])
    Formats a number with grouped thousands */
-void php3_number_format(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(number_format)
 {
 	pval *num,*dec,*t_s,*d_p;
 	char thousand_sep=',', dec_point='.';

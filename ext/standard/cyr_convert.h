@@ -32,7 +32,7 @@
 #ifndef _CYR_CONVERT_H
 #define _CYR_CONVERT_H
 
-extern void php3_convert_cyr_string(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(convert_cyr_string);
 
 #endif /* _CYR_CONVERT_H */
 

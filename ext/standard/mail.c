@@ -67,7 +67,7 @@ DLEXPORT php3_module_entry *get_module(void) { return &odbc_module_entry; }
 
 /* {{{ proto int mail(string to, string subject, string message [, string additional_headers])
    Send an email message */
-void php3_mail(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mail)
 {
 	pval *argv[4];
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL;
@@ -171,7 +171,7 @@ void php3_info_mail(ZEND_MODULE_INFO_FUNC_ARGS)
 
 #else
 
-void php3_mail(INTERNAL_FUNCTION_PARAMETERS) {}
+PHP_FUNCTION(mail) {}
 void php3_info_mail(ZEND_MODULE_INFO_FUNC_ARGS) {}
 
 #endif

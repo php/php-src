@@ -47,8 +47,8 @@
 extern php3_module_entry fsock_module_entry;
 #define fsock_module_ptr &fsock_module_entry
 
-extern PHP_FUNCTION(fsockopen);
-extern PHP_FUNCTION(pfsockopen);
+PHP_FUNCTION(fsockopen);
+PHP_FUNCTION(pfsockopen);
 extern int lookup_hostname(const char *addr, struct in_addr *in);
 extern int _php3_sock_fgets(char *buf, int maxlen, int socket);
 extern int _php3_sock_fread(char *buf, int maxlen, int socket);

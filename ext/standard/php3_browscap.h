@@ -37,7 +37,7 @@ extern php3_module_entry browscap_module_entry;
 extern int php3_minit_browscap(INIT_FUNC_ARGS);
 extern int php3_mshutdown_browscap(SHUTDOWN_FUNC_ARGS);
 
-extern void php3_get_browser(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(get_browser);
 
 
 #define phpext_browscap_ptr browscap_module_ptr
