@@ -540,9 +540,10 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	va_list args;
 	zval ***params;
 	zval *retval;
-	zval *error_type, *error_message;
+	zval *error_type, *error_message, *z_error_filename, *z_error_lineno;
 	char *error_filename;
 	uint error_lineno;
+	zval *orig_user_error_handler;
 	ELS_FETCH();
 	CLS_FETCH();
 
@@ -602,6 +603,8 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			/* Handle the error in user space */
 			ALLOC_INIT_ZVAL(error_message);
 			ALLOC_INIT_ZVAL(error_type);
+			ALLOC_INIT_ZVAL(z_error_filename);
+			ALLOC_INIT_ZVAL(z_error_lineno);
 			error_message->value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
 
 #ifdef HAVE_VSNPRINTF
@@ -615,19 +618,36 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			error_type->value.lval = type;
 			error_type->type = IS_LONG;
 
-			params = (zval ***) emalloc(sizeof(zval **)*2);
+			if (error_filename) {
+				z_error_filename->value.str.len = strlen(error_filename);
+				z_error_filename->value.str.val = estrndup(error_filename, z_error_filename->value.str.len);
+				z_error_filename->type = IS_STRING;
+			}
+				
+			z_error_lineno->value.lval = error_lineno;
+			z_error_lineno->type = IS_LONG;
+
+			params = (zval ***) emalloc(sizeof(zval **)*4);
 			params[0] = &error_type;
 			params[1] = &error_message;
+			params[2] = &z_error_filename;
+			params[3] = &z_error_lineno;
 
-			if (call_user_function_ex(CG(function_table), NULL, EG(user_error_handler), &retval, 2, params, 1, NULL)==SUCCESS) {
+			orig_user_error_handler = EG(user_error_handler);
+			EG(user_error_handler) = NULL;
+			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 4, params, 1, NULL)==SUCCESS) {
 				zval_ptr_dtor(&retval);
 			} else {
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(type, error_filename, error_lineno, format, args);
 			}
+			EG(user_error_handler) = orig_user_error_handler;
+
 			efree(params);
 			zval_ptr_dtor(&error_message);
 			zval_ptr_dtor(&error_type);
+			zval_ptr_dtor(&z_error_filename);
+			zval_ptr_dtor(&z_error_lineno);
 			break;
 	}
 
