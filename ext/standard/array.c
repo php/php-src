@@ -574,10 +574,12 @@ PHP_FUNCTION(reset)
 	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		return;
 	}
-		
-	*return_value = **entry;
-	pval_copy_constructor(return_value);
-	INIT_PZVAL(return_value); /* XXX is this needed? */
+
+	if (used_return_value) {	
+		*return_value = **entry;
+		pval_copy_constructor(return_value);
+	/*	INIT_PZVAL(return_value);  XXX is this needed? - No! :) */
+	}
 }
 
 PHP_FUNCTION(current)
