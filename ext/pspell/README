@@ -12,7 +12,7 @@ should work as well.
 General notes
 -------------
 
-Plese, note that somewhere around version .27.x (I believe) aspell stopped
+Please, note that somewhere around version .27.x (I believe) aspell stopped
 working with the aspell module for php. This is due to the fact that the
 author changed things around a bit, and suggested that people link to pspell
 in the future rather than to aspell. That's exactly what this module is for.
