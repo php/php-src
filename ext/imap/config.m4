@@ -23,7 +23,7 @@ AC_DEFUN(IMAP_LIB_CHK,[
 
 AC_DEFUN(PHP_IMAP_KRB_CHK, [
   PHP_ARG_WITH(kerberos,for Kerberos support in IMAP,
-  [  --with-kerberos[=DIR]     IMAP: Include Kerberos support.])
+  [  --with-kerberos[=DIR]     IMAP: Include Kerberos support. DIR is the Kerberos install dir.])
 
   if test "$PHP_KERBEROS" = "yes"; then
     test -d /usr/kerberos && PHP_KERBEROS=/usr/kerberos
@@ -41,7 +41,7 @@ AC_DEFUN(PHP_IMAP_KRB_CHK, [
 
 AC_DEFUN(PHP_IMAP_SSL_CHK, [
   PHP_ARG_WITH(imap-ssl,for SSL support in IMAP,
-  [  --with-imap-ssl[=DIR]     IMAP: Include SSL support.])
+  [  --with-imap-ssl[=DIR]     IMAP: Include SSL support. DIR is the OpenSSL install dir.])
 
   if test "$PHP_IMAP_SSL" = "yes"; then
     PHP_IMAP_SSL=/usr
