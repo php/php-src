@@ -12,6 +12,10 @@ PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
 PHP_ARG_WITH(png-dir, for the location of libpng, 
 [  --with-png-dir[=DIR]      PDFLIB: define libpng install directory.
                                      (OPTIONAL for PDFlib v4)], no, no)
+
+PHP_ARG_WITH(zlib-dir, for the location of libz, 
+[  --with-zlib-dir[=DIR]     PDFLIB: define libz install directory.
+                                     (OPTIONAL for PDFlib v4)], no, no)
  
 PHP_ARG_WITH(tiff-dir, for the location of libtiff,
 [  --with-tiff-dir[=DIR]     PDFLIB: define libtiff install directory.
