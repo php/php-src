@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20041027
+#define PDO_DRIVER_API	20050105
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -86,22 +86,45 @@ enum pdo_cursor_type {
 	PDO_CURSOR_SCROLL,		/* scrollable cursor */
 };
 
+/* SQL-92 SQLSTATE error codes.
+
+The character string value returned for an SQLSTATE consists of a two-character
+class value followed by a three-character subclass value. A class value of 01
+indicates a warning and is accompanied by a return code of
+SQL_SUCCESS_WITH_INFO.
+
+Class values other than '01', except for the class 'IM',
+indicate an error and are accompanied by a return code of SQL_ERROR. The class
+'IM' is specific to warnings and errors that derive from the implementation of
+ODBC itself.
+
+The subclass value '000' in any class indicates that there is no
+subclass for that SQLSTATE. The assignment of class and subclass values is
+defined by SQL-92.
+*/
+
+typedef char pdo_error_type[6]; /* SQLSTATE */
+
+
+#define PDO_ERR_NONE				"00000"
+#if 0
 /* generic error code values.
  * Don't want to go overboard with these.
  * */
-enum pdo_error_type {
-	PDO_ERR_NONE,			/* no error condition */
-	PDO_ERR_CANT_MAP,		/* no way to map native error to the generic codes; consult the native error for more info */
-	PDO_ERR_SYNTAX,
-	PDO_ERR_CONSTRAINT,
-	PDO_ERR_NOT_FOUND,
-	PDO_ERR_ALREADY_EXISTS,
-	PDO_ERR_NOT_IMPLEMENTED,
-	PDO_ERR_MISMATCH,
-	PDO_ERR_TRUNCATED,
-	PDO_ERR_DISCONNECTED,
-	PDO_ERR_NO_PERM,
+#define	PDO_ERR_SYNTAX				"42000"		
+#define	PDO_ERR_CONSTRAINT			"23000"
+#define	PDO_ERR_NOT_FOUND			""
+#define	PDO_ERR_ALREADY_EXISTS,
+#define	PDO_ERR_NOT_IMPLEMENTED,
+#define	PDO_ERR_MISMATCH,
+#define	PDO_ERR_TRUNCATED,
+#define	PDO_ERR_DISCONNECTED,
+#define	PDO_ERR_NO_PERM,
+
+	PDO_ERR_CANT_MAP,		/* no way to map native error to the generic
+							 * codes; consult the native error for more info */
 };
+#endif
 
 enum pdo_error_mode {
 	PDO_ERRMODE_SILENT,		/* just set error codes */
@@ -189,6 +212,20 @@ typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS
  * You may set this handler to NULL, which is equivalent to returning SUCCESS. */
 typedef int (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
+/* for adding methods to the dbh or stmt objects 
+pointer to a list of driver specific functions. The convention is
+to prefix the function names using the PDO driver name; this will
+reduce the chance of collisions with future functionality in the
+PDO class or in user code (they can extend the PDO object).
+*/
+enum {
+	PDO_DBH_DRIVER_METHOD_KIND_DBH = 0,
+	PDO_DBH_DRIVER_METHOD_KIND_STMT,
+	PDO_DBH_DRIVER_METHOD_KIND__MAX
+};
+
+typedef function_entry *(*pdo_dbh_get_driver_methods_func)(pdo_dbh_t *dbh, int kind TSRMLS_DC);
+
 struct pdo_dbh_methods {
 	pdo_dbh_close_func		closer;
 	pdo_dbh_prepare_func	preparer;
@@ -202,6 +239,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_fetch_error_func	fetch_err;
 	pdo_dbh_get_attr_func   	get_attribute;
 	pdo_dbh_check_liveness_func	check_liveness;
+	pdo_dbh_get_driver_methods_func get_driver_methods;
 };
 
 /* }}} */
@@ -352,7 +390,7 @@ struct _pdo_dbh_t {
 	unsigned long data_source_len;
 
 	/* the global error code. */
-	enum pdo_error_type error_code;
+	pdo_error_type error_code;
 
 	enum pdo_error_mode error_mode;
 
@@ -363,6 +401,8 @@ struct _pdo_dbh_t {
 	int persistent_id_len;
 	unsigned int refcount;
 
+	/* driver specific "class" methods for the dbh and stmt */
+	HashTable *cls_methods[PDO_DBH_DRIVER_METHOD_KIND__MAX-1];
 };
 
 /* describes a column */
@@ -433,7 +473,7 @@ struct _pdo_stmt_t {
 	int active_query_stringlen;
 
 	/* the cursor specific error code. */
-	enum pdo_error_type error_code;
+	pdo_error_type error_code;
 
 	/* for lazy fetches, we always return the same lazy object handle.
 	 * Let's keep it here. */

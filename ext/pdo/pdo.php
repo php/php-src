@@ -1,20 +1,12 @@
 <?php
+dl('pdo.so');
+dl('pdo_sqlite.so');
 
 //$x = new PDO("oci:dbname=hostname", 'php', 'php');
-$x = new PDO("odbc:ram", 'php', 'php', array(PDO_ATTR_AUTOCOMMIT => 0));
-$stmt = $x->prepare("select NAME, VALUE from test where value like ?");
+$x = new PDO("sqlite::memory:");
 
-$the_name = 'bar%';
-$stmt->execute(array($the_name)) or die("failed to execute!");
-$stmt->bindColumn('VALUE', $value);
-
-while ($row = $stmt->fetch()) {
-	echo "name=$row[NAME] value=$row[VALUE]\n";
-	echo "value is $value\n";
-	echo "\n";
-}
-
-echo "Let's try an update\n";
+$x->query("create table test(name string, value string)");
+debug_zval_dump($x);
 
 $stmt = $x->prepare("INSERT INTO test (NAME, VALUE) VALUES (:name, :value)");
 
@@ -29,6 +21,41 @@ for ($i = 0; $i < 4; $i++) {
 		break;
 	}
 }
+
+$stmt = null;
+
+echo "DEFAULT:\n";
+foreach ($x->queryAndIterate("select NAME, VALUE from test") as $row) {
+	print_r($row);
+}
+
+echo "OBJ:\n";
+
+class Foo {
+	public $NAME = "Don't change me";
+}
+
+$foo = new foo;
+
+foreach ($x->queryAndIterate("select NAME, VALUE from test", PDO_FETCH_COLUMN, 1) as $row) {
+	debug_zval_dump($row);
+}
+
+echo "Done\n";
+exit;
+
+$stmt = $x->prepare("select NAME, VALUE from test where value like ?");
+$the_name = 'bar%';
+$stmt->execute(array($the_name)) or die("failed to execute!");
+$stmt->bindColumn('VALUE', $value);
+
+while ($row = $stmt->fetch()) {
+	echo "name=$row[NAME] value=$row[VALUE]\n";
+	echo "value is $value\n";
+	echo "\n";
+}
+
+echo "Let's try an update\n";
 
 echo "All done\n";
 

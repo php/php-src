@@ -669,7 +669,7 @@ static PHP_METHOD(PDOStatement, errorCode)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(stmt->error_code);
+	RETURN_STRING(stmt->error_code, 1);
 }
 /* }}} */
 
@@ -684,7 +684,7 @@ static PHP_METHOD(PDOStatement, errorInfo)
 	}
 
 	array_init(return_value);
-	add_next_index_long(return_value, stmt->error_code);
+	add_next_index_string(return_value, stmt->error_code, 1);
 
 	if (stmt->dbh->methods->fetch_err) {
 		stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value TSRMLS_CC);
@@ -1024,7 +1024,7 @@ static union _zend_function *dbstmt_method_get(
 #endif
    	char *method_name, int method_len TSRMLS_DC)
 {
-	zend_function *fbc;
+	zend_function *fbc = NULL;
 	char *lc_method_name;
 #if PHP_API_VERSION >= 20041225
 	zval *object = *object_pp;
@@ -1033,11 +1033,26 @@ static union _zend_function *dbstmt_method_get(
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
-	if (zend_hash_find(&pdo_dbstmt_ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-		efree(lc_method_name);
-		return NULL;
+	if (zend_hash_find(&pdo_dbstmt_ce->function_table, lc_method_name, 
+			method_len+1, (void**)&fbc) == FAILURE) {
+		pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
+		/* not a pre-defined method, nor a user-defined method; check
+		 * the driver specific methods */
+		if (!stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT]) {
+			if (!pdo_hash_methods(stmt->dbh, PDO_DBH_DRIVER_METHOD_KIND_STMT TSRMLS_CC)) {
+				goto out;
+			}
+		}
+
+		if (zend_hash_find(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH],
+				lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
+			fbc = NULL;
+			goto out;
+		}
+		/* got it */
 	}
 	
+out:
 	efree(lc_method_name);
 	return fbc;
 }
