@@ -3441,14 +3441,14 @@ PHP_FUNCTION(imap_mail_compose)
 #if !(WIN32|WINNT)
 int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath)
 {
-#if MSVC5
+#if PHP_WIN32
 	int tsm_err;
 #else
 	FILE *sendmail;
 	int ret;
 #endif
 
-#if MSVC5
+#if PHP_WIN32
 	if (imap_TSendMail(INI_STR("smtp"),&tsm_err,headers,subject,to,message,cc,bcc,rpath) != SUCCESS){
 		php_error(E_WARNING, GetSMErrorText(tsm_err));
 		return 0;
