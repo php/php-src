@@ -655,6 +655,44 @@ ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC)
 }
 
 
+static int zend_merge_property(zval **value, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	/* which name should a numeric property have ? */
+	if (hash_key->nKeyLength) {
+		zval *obj = va_arg(args, zval *);
+		zend_object_handlers *obj_ht = va_arg(args, zend_object_handlers *);
+		zval member;
+		TSRMLS_FETCH();
+
+		ZVAL_STRINGL(&member, hash_key->arKey, hash_key->nKeyLength-1, 0);
+		obj_ht->write_property(obj, &member, *value TSRMLS_CC);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+
+/* This function should be called after the constructor has been called 
+ * because it may call __set from the uninitialized object otherwise. */
+ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC)
+{
+	zend_object_handlers *obj_ht = Z_OBJ_HT_P(obj);
+	zend_class_entry *old_scope = EG(scope);
+
+	EG(scope) = Z_OBJCE_P(obj);
+	zend_hash_apply_with_arguments(properties, (apply_func_args_t)zend_merge_property, 2, obj, obj_ht);
+	EG(scope) = old_scope;
+
+	if (destroy_ht) {
+		zend_hash_destroy(properties);
+		FREE_HASHTABLE(properties);
+	}
+}
+
+
+/* This function requires 'properties' to contain all props declared in the
+ * class and all props being public. If only a subset is given or the class 
+ * has protected members then you need to merge the properties seperately by
+ * calling zend_merge_properties(). */
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC)
 {
 	zval *tmp;
