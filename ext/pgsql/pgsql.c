@@ -923,7 +923,7 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			int should_copy;
 
 			if (PG(magic_quotes_runtime)) {
-				data = _php3_addslashes(element,element_len,&data_len,0);
+				data = php_addslashes(element,element_len,&data_len,0);
 				should_copy = 0;
 			} else {
 				data = element;

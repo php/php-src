@@ -837,7 +837,7 @@ DLEXPORT PHP_FUNCTION(msql_result)
 	
 	if (sql_row[field_offset]) {
 		if (PG(magic_quotes_runtime)) {
-			return_value->value.str.val = _php3_addslashes(sql_row[field_offset],0,&return_value->value.str.len,0);
+			return_value->value.str.val = php_addslashes(sql_row[field_offset],0,&return_value->value.str.len,0);
 		} else {	
 			return_value->value.str.len = (sql_row[field_offset]?strlen(sql_row[field_offset]):0);
 			return_value->value.str.val = (char *) safe_estrndup(sql_row[field_offset],return_value->value.str.len);
@@ -938,7 +938,7 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			int should_copy;
 
 			if (PG(magic_quotes_runtime)) {
-				data = _php3_addslashes(msql_row[i], 0, &data_len, 0);
+				data = php_addslashes(msql_row[i], 0, &data_len, 0);
 				should_copy = 0;
 			} else {
 				data = msql_row[i];

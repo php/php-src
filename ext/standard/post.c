@@ -168,7 +168,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 	if (var_type == GPC_INDEXED_ARRAY) {
 		ind = php3_get_ident_index(var);
 		if (PG(magic_quotes_gpc)) {
-			ret = _php3_addslashes(ind, 0, NULL, 1);
+			ret = php_addslashes(ind, 0, NULL, 1);
 		} else {
 			ret = ind;
 		}
@@ -200,7 +200,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 
 	val_len = strlen(val);
 	if (PG(magic_quotes_gpc)) {
-		val = _php3_addslashes(val, val_len, &val_len, 0);
+		val = php_addslashes(val, val_len, &val_len, 0);
 	} else {
 		val = estrndup(val, val_len);
 	}
@@ -438,7 +438,7 @@ PHPAPI void php3_TreatHeaders(void)
 
 	if (user) {
 		if (PG(magic_quotes_gpc)) {
-			escaped_str = _php3_addslashes(user, 0, &len, 0);
+			escaped_str = php_addslashes(user, 0, &len, 0);
 			SET_VAR_STRINGL("PHP_AUTH_USER", escaped_str, len);
 		} else {
 			SET_VAR_STRING("PHP_AUTH_USER", estrdup(user));
@@ -446,7 +446,7 @@ PHPAPI void php3_TreatHeaders(void)
 	}
 	if (t) {
 		if (PG(magic_quotes_gpc)) {
-			escaped_str = _php3_addslashes(t, 0, &len, 0);
+			escaped_str = php_addslashes(t, 0, &len, 0);
 			SET_VAR_STRINGL("PHP_AUTH_PW", escaped_str, len);
 		} else {
 			SET_VAR_STRING("PHP_AUTH_PW", estrdup(t));
@@ -454,7 +454,7 @@ PHPAPI void php3_TreatHeaders(void)
 	}
 	if (type) {
 		if (PG(magic_quotes_gpc)) {
-			escaped_str = _php3_addslashes(type, 0, &len, 0);
+			escaped_str = php_addslashes(type, 0, &len, 0);
 			SET_VAR_STRINGL("PHP_AUTH_TYPE", escaped_str, len);
 		} else {
 			SET_VAR_STRING("PHP_AUTH_TYPE", estrdup(type));
@@ -473,11 +473,11 @@ PHPAPI void php3_TreatHeaders(void)
 			if((l->paramc > 1)&&!strcasecmp(l->params[0], "REMOTE_PW")){
 				type = "Basic";
 				if (PG(magic_quotes_gpc)) {
-					escaped_str = _php3_addslashes(type, 0, &len, 0);
+					escaped_str = php_addslashes(type, 0, &len, 0);
 					SET_VAR_STRINGL("PHP_AUTH_TYPE", escaped_str, len);
-					escaped_str = _php3_addslashes(l->params[1], 0, &len, 0);
+					escaped_str = php_addslashes(l->params[1], 0, &len, 0);
 					SET_VAR_STRINGL("PHP_AUTH_PW", escaped_str, len);
-					escaped_str = _php3_addslashes(req->remote_user, 0, &len, 0);
+					escaped_str = php_addslashes(req->remote_user, 0, &len, 0);
 					SET_VAR_STRINGL("PHP_AUTH_USER", escaped_str, len);
 
 				} else {

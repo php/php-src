@@ -88,8 +88,8 @@ PHP_FUNCTION(strip_tags);
 extern PHPAPI char *_php3_strtoupper(char *s);
 extern PHPAPI char *_php3_strtolower(char *s);
 extern PHPAPI char *_php3_strtr(char *string, int len, char *str_from, char *str_to, int trlen);
-extern PHPAPI char *_php3_addslashes(char *string, int length, int *new_length, int freeit);
-extern PHPAPI void _php3_stripslashes(char *string, int *len);
+extern PHPAPI char *php_addslashes(char *string, int length, int *new_length, int freeit);
+extern PHPAPI void php_stripslashes(char *string, int *len);
 extern PHPAPI void _php3_dirname(char *str, int len);
 extern PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t);
 extern PHPAPI char *_php3_str_to_str(char *haystack, int length, char *needle,
