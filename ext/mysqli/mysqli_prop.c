@@ -82,6 +82,15 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC)\
 int link_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
+	ZVAL_LONG(*retval, MYSQL_VERSION_ID);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ property link_client_info_read */
+int link_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
+	ALLOC_ZVAL(*retval);
 	ZVAL_STRING(*retval, MYSQL_SERVER_VERSION, 1);
 	return SUCCESS;
 }
@@ -191,6 +200,7 @@ MYSQLI_MAP_PROPERTY_FUNC_STRING(stmt_sqlstate_read, mysql_stmt_sqlstate, MYSQLI_
 
 mysqli_property_entry mysqli_link_property_entries[] = {
 	{"affected_rows", link_affected_rows_read, NULL},
+	{"client_info", link_client_info_read, NULL},
 	{"client_version", link_client_version_read, NULL},
 	{"test", link_test_read, NULL},
 	{"connect_errno", link_connect_errno_read, NULL},

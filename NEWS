@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   raise an ReflectionException instead of returning NULL on failure.
   (Sebastian)
 - Fixed convert.* filters to consume remaining buckets_in on flush. (Sara)
+- Fixed bug in mysqli->client_version (Georg)
 
 13 Jul 2004, PHP 5.0.0
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
