@@ -274,6 +274,15 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	char *cvt;
 	register int i = 0, j = 0;
 	int sign, decpt;
+#ifdef HAVE_LOCALECONV
+	char decimal_point;
+	TSRMLS_FETCH();
+
+	decimal_point = CG(decimal_point);
+#else
+#define decimal_point '.'
+#endif
+
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
 				  *buffer, pos, size, number, width, padding, alignment, fmt));
@@ -308,7 +317,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			numbuf[i++] = '0';
 			if (precision > 0) {
 				int k = precision;
-				numbuf[i++] = '.';
+				numbuf[i++] = decimal_point;
 				while ((decpt++ < 0) && k--) {
 					numbuf[i++] = '0';
 				}
@@ -317,12 +326,12 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			while (decpt-- > 0)
 				numbuf[i++] = cvt[j++];
 			if (precision > 0)
-				numbuf[i++] = '.';
+				numbuf[i++] = decimal_point;
 		}
 	} else {
 		numbuf[i++] = cvt[j++];
 		if (precision > 0)
-			numbuf[i++] = '.';
+			numbuf[i++] = decimal_point;
 	}
 
 	while (cvt[j]) {
@@ -336,6 +345,9 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	}
 	php_sprintf_appendstring(buffer, pos, size, numbuf, width, 0, padding,
 							 alignment, i, sign, 0);
+#ifndef HAVE_LOCALECONV
+#undef decimal_point
+#endif
 }
 
 
@@ -583,7 +595,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 
 				case 'e':
 				case 'f':
-					/* XXX not done */
+					/* XXX not done */ /* ??? WTF? 'g' missing or what? (hartmut) */
 					convert_to_double_ex(args[argnum]);
 					php_sprintf_appenddouble(&result, &outpos, &size,
 											 Z_DVAL_PP(args[argnum]),
