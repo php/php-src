@@ -644,7 +644,7 @@ PHP_FUNCTION(socket_create_listen)
 		RETURN_FALSE;
 	}
 
-	sock->error = 0;
+	php_sock->error = 0;
 
 	ZEND_REGISTER_RESOURCE(return_value, php_sock, le_socket);
 }
