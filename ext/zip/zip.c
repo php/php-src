@@ -122,8 +122,9 @@ PHP_FUNCTION(zip_open)
     ZZIP_DIR *archive_p = NULL;
     int       filename_len;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE)
-    return;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	    return;
+	}
 
     archive_p = zzip_opendir(filename);
     if (archive_p == NULL) {
@@ -144,8 +145,9 @@ PHP_FUNCTION(zip_read)
     php_zzip_dirent  *entry = NULL;
     int               ret;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zzip_dp) == FAILURE)
-    return;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zzip_dp) == FAILURE) {
+	    return;
+	}
 
     ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *, zzip_dp, -1, le_zip_dir_name, le_zip_dir);
 
@@ -168,8 +170,9 @@ PHP_FUNCTION(zip_close)
     zval     **zzip_dp;
     ZZIP_DIR  *archive_p = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zzip_dp) == FAILURE)
-    return;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zzip_dp) == FAILURE) {
+	    return;
+	}
 
     ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *, zzip_dp, -1, le_zip_dir_name, le_zip_dir);
 
@@ -184,8 +187,9 @@ static void php_zzip_get_entry(INTERNAL_FUNCTION_PARAMETERS, int opt)
     zval            **zzip_ent;
     php_zzip_dirent  *entry = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zzip_ent) == FAILURE)
-    return;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zzip_ent) == FAILURE) {
+	    return;
+	}
 
     ZEND_FETCH_RESOURCE(entry, php_zzip_dirent *, zzip_ent, -1, le_zip_entry_name, le_zip_entry);
 
@@ -248,8 +252,9 @@ PHP_FUNCTION(zip_entry_open)
     php_zzip_dirent  *entry = NULL;
     int               mode;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|i", &zzip_dp, &zzip_ent, &mode) == FAILURE)
-    return;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|i", &zzip_dp, &zzip_ent, &mode) == FAILURE) {
+		return;
+	}
 
     ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *,        zzip_dp,  -1, le_zip_dir_name,   le_zip_dir);
     ZEND_FETCH_RESOURCE(entry,     php_zzip_dirent *, zzip_ent, -1, le_zip_entry_name, le_zip_entry);
@@ -273,8 +278,9 @@ PHP_FUNCTION(zip_entry_read)
     int               len   = 1024;
     int               ret   = 0;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|i", &zzip_ent, &len) == FAILURE)
-    return;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &zzip_ent, &len) == FAILURE) {
+	    return;
+	}
     
     ZEND_FETCH_RESOURCE(entry, php_zzip_dirent *, zzip_ent, -1, le_zip_entry_name, le_zip_entry);
 
@@ -294,8 +300,9 @@ PHP_FUNCTION(zip_entry_close)
     zval            **zzip_ent;
     php_zzip_dirent  *entry = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zzip_ent) == FAILURE)
-    return;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zzip_ent) == FAILURE) {
+		return;
+	}
 
     ZEND_FETCH_RESOURCE(entry, php_zzip_dirent *, zzip_ent, -1, le_zip_entry_name, le_zip_entry);
 

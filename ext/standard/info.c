@@ -458,8 +458,9 @@ PHP_FUNCTION(phpinfo)
 	int argc = ZEND_NUM_ARGS();
 	long flag;
 
-	if (zend_parse_parameters(argc, "|l", &flag) == FAILURE)
+	if (zend_parse_parameters(argc TSRMLS_CC, "|l", &flag) == FAILURE) {
 		return;
+	}
 
 	if(!argc) {
 		flag = 0xFFFFFFFF;
@@ -491,8 +492,9 @@ PHP_FUNCTION(phpcredits)
 	int argc = ZEND_NUM_ARGS();
 	long flag;
 
-	if (zend_parse_parameters(argc, "|l", &flag) == FAILURE)
+	if (zend_parse_parameters(argc TSRMLS_CC, "|l", &flag) == FAILURE) {
 		return;
+	}
 
 	if(!argc) {
 		flag = 0xFFFFFFFF;

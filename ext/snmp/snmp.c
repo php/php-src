@@ -417,8 +417,9 @@ PHP_FUNCTION(snmp_set_quick_print)
 	int argc = ZEND_NUM_ARGS();
 	long a1;
 
-	if (zend_parse_parameters(argc, "l", &a1) == FAILURE)
+	if (zend_parse_parameters(argc TSRMLS_CC, "l", &a1) == FAILURE) {
 		return;
+	}
 
 	snmp_set_quick_print((int)a1);
 }
