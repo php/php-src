@@ -27,8 +27,8 @@
 #endif
 
 typedef struct {
-    long engine;
-    long last_modified;
+	long engine;
+	long last_modified;
 	long xbithack;
 	long terminate_child;
 	zend_bool in_request;
@@ -38,15 +38,10 @@ extern zend_module_entry apache_module_entry;
 
 #ifdef ZTS
 extern int php_apache_info_id;
-#define AP(v) TSRMG(alloc_globals_id, php_apache_info_struct *, v)
+#define AP(v) TSRMG(php_apache_info_id, php_apache_info_struct *, v)
 #else
 extern php_apache_info_struct php_apache_info;
 #define AP(v) (php_apache_info.v)
-#endif
-
-
-#ifdef WIN32
-#define S_IXUSR _S_IEXEC
 #endif
 
 #endif							/* MOD_PHP4_H */
