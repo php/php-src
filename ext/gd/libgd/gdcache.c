@@ -66,7 +66,7 @@ gdCacheCreate (
 {
   gdCache_head_t *head;
 
-  head = (gdCache_head_t *) gdMalloc (sizeof (gdCache_head_t));
+  head = (gdCache_head_t *) gdPMalloc(sizeof (gdCache_head_t));
   head->mru = NULL;
   head->size = size;
   head->gdCacheTest = gdCacheTest;
@@ -125,7 +125,7 @@ gdCacheGet (gdCache_head_t * head, void *keydata)
     }
   if (i < head->size)
     {				/* cache still growing - add new elem */
-      elem = (gdCache_element_t *) gdMalloc (sizeof (gdCache_element_t));
+      elem = (gdCache_element_t *) gdPMalloc(sizeof (gdCache_element_t));
     }
   else
     {				/* cache full - replace least-recently-used */
