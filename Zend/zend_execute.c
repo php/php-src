@@ -359,7 +359,6 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 static void print_refcount(zval *p, char *str)
 {
-	//printf("*** refcount for %x - '%s':  %d\n", p, str, p->refcount);
 	print_refcount(NULL, NULL);
 }
 
@@ -413,7 +412,6 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 					zval *new_zval = &EG(uninitialized_zval);
 
 					new_zval->refcount++;
-					//zend_hash_update(target_symbol_table, varname->value.str.val, varname->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
 					zend_hash_update_ptr(target_symbol_table, varname->value.str.val, varname->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
 				}
 				break;
@@ -802,7 +800,6 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 
 	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
 	(*(property_reference->object))->value.obj.ce->handle_function_call(arg_count, return_value, list, plist, *property_reference->object, property_reference);
-	//(*(property_reference->object))->value.obj.ce->handle_function_call(NULL, NULL, NULL, NULL, NULL);
 	zend_llist_destroy(&property_reference->elements_list);
 
 	zend_stack_del_top(&EG(overloaded_objects_stack));
@@ -1347,12 +1344,12 @@ do_fcall_common:
 						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), (object_ptr?*object_ptr:NULL));
 					} else if (function_state.function->type==ZEND_USER_FUNCTION) {
 						if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
-							//printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);
+							/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 							function_state.function_symbol_table = *(EG(symtable_cache_ptr)--);
 						} else {
 							function_state.function_symbol_table = (HashTable *) emalloc(sizeof(HashTable));
 							zend_hash_init(function_state.function_symbol_table, 0, NULL, PVAL_PTR_DTOR, 0);
-							//printf("Cache miss!  Initialized %x\n", function_state.function_symbol_table);
+							/*printf("Cache miss!  Initialized %x\n", function_state.function_symbol_table);*/
 						}
 						calling_symbol_table = EG(active_symbol_table);
 						EG(active_symbol_table) = function_state.function_symbol_table;
@@ -1404,8 +1401,6 @@ do_fcall_common:
 					if (!free_op1) {
 						zendi_zval_copy_ctor(*EG(return_value));
 					}
-					//return_value->refcount=1;
-					//return_value->is_ref=0;
 #if SUPPORT_INTERACTIVE
 					op_array->last_executed_op_number = opline-op_array->opcodes;
 #endif
@@ -1427,7 +1422,6 @@ do_fcall_common:
 					*valptr = Ts[opline->op1.u.var].tmp_var;
 					valptr->refcount=1;
 					valptr->is_ref=0;
-					//zend_hash_next_index_insert_ptr(function_state.function_symbol_table, valptr, sizeof(zval *), NULL);
 					zend_ptr_stack_push(&EG(argument_stack), valptr);
 				}
 				break;
@@ -1457,7 +1451,6 @@ do_fcall_common:
 						zval_copy_ctor(varptr);
 					}
 					varptr->refcount++;
-					//zend_hash_next_index_insert_ptr(function_state.function_symbol_table, varptr, sizeof(zval *), NULL);
 					zend_ptr_stack_push(&EG(argument_stack), varptr);
 					FREE_OP(&opline->op1, free_op1);  /* for string offsets */
 				}
@@ -1481,14 +1474,12 @@ send_by_ref:
 						/* at the end of this code refcount is always 1 */
 					}
 					varptr->refcount++;
-					//zend_hash_next_index_insert_ptr(function_state.function_symbol_table, varptr, sizeof(zval *), NULL);
 					zend_ptr_stack_push(&EG(argument_stack), varptr);
 				}
 				break;
 			case ZEND_RECV: {
 					zval **param;
 
-					//if (zend_hash_index_find(EG(active_symbol_table), opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
 						zend_error(E_NOTICE, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name());
 						DEC_AI_COUNT();
@@ -1502,7 +1493,6 @@ send_by_ref:
 			case ZEND_RECV_INIT: {
 					zval **param, *assignment_value;
 
-					//if (zend_hash_index_find(EG(active_symbol_table), opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
 						if (opline->op2.op_type == IS_UNUSED) {
 							DEC_AI_COUNT();
@@ -1571,10 +1561,8 @@ send_by_ref:
 
 					if (opline->opcode == ZEND_BRK) {
 						opline = op_array->opcodes+jmp_to->brk;
-					//	printf("Jumping to %d\n", jmp_to->brk);
 					} else {
 						opline = op_array->opcodes+jmp_to->cont;
-					//	printf("Jumping to %d\n", jmp_to->cont);
 					}
 					FREE_OP(&opline->op2, free_op2);
 					continue;
@@ -1804,7 +1792,11 @@ send_by_ref:
 					char *str_key;
 					ulong int_key;
 
-					if (zend_hash_get_current_data(array->value.ht, (void **) &value)==FAILURE) {
+					if (array->type != IS_ARRAY) {
+						zend_error(E_WARNING, "Non array argument supplied for foreach()");
+						opline = op_array->opcodes+opline->op2.u.opline_num;
+						continue;
+					} else if (zend_hash_get_current_data(array->value.ht, (void **) &value)==FAILURE) {
 						opline = op_array->opcodes+opline->op2.u.opline_num;
 						continue;
 					}
