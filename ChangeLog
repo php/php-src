@@ -1,3 +1,57 @@
+1999-12-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/php_mysql.c: Kill compiler warning
+
+    * configure.in:
+    Clear LIBS as well, otherwise later linking checks (TSRM) might fail
+
+    * configure.in: Add TSRM's LDFLAGS to EXTRA_LDFLAGS
+
+    * ext/oci8/config.m4:
+    Enable --with-oci8 to use relative paths as input parameters
+
+    * configure.in:
+    Limit _POSIX_PTHREAD_SEMANTICS to Solaris, and stop appending -O2. This
+    is automatically done by autoconf's AC_PROG_CC.
+
+    * .cvsignore: Ignore these directory entries
+
+    * config.guess
+      config.sub
+      ltconfig
+      ltmain.sh: Fix ltconfig, ltmain.sh
+    Update config.sub, config.guess from libtool-1.3.4
+
+1999-12-22  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c: unlock the serializing lock a tad bit later
+
+1999-12-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Little fix.
+
+1999-12-22  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/iptc.c:
+1999-12-22  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/config.m4:
+    Catch errors in the pike version-check script to avoid potential problems
+
+    * sapi/roxen/roxen.c: Removed C++ style comment
+
+    * sapi/roxen/roxen.c:
+    Some fixes in thread safe (ie ZTS) mode - now it actually seems to
+    work perfectly. Also fixed a couple of typos.
+
+1999-12-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Logic fix, improved comments, better SID checking
+
+    * ext/session/session.c:
+    Warn users, if they have disabled gpc_globals and track_vars. Also work
+    correctly, if users have enabled track_vars/disabled gpc_globals.
+
 1999-12-21  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/roxen/Makefile.am
