@@ -422,20 +422,41 @@ COMMAND $cmd
     // Does the output match what is expected?
     
     $output = trim($out);
-    $wanted = trim($section_text['EXPECT']);
-    
     $output = preg_replace('/\r\n/',"\n",$output);
-    $wanted = preg_replace('/\r\n/',"\n",$wanted);
-
+    if(isset($section_text['EXPECTF'])) {
+        $wanted = trim($section_text['EXPECTF']);
+        $wanted = preg_replace('/\r\n/',"\n",$wanted);
+        $wanted = preg_quote($wanted, '/');
+        // Stick to basics
+        $wanted = str_replace("%s", ".*?", $wanted); //not greedy
+        $wanted = str_replace("%i", "[0-9]+", $wanted);
+        $wanted = str_replace("%f", "[0-9\.+\-]+", $wanted);
+/* DEBUG YOUR REGEX HERE
+        var_dump($wanted);
+        print(str_repeat('=', 80) . "\n");
+        var_dump($output);
+*/
+        if(preg_match("/$wanted/s", $output)) {
+            echo "PASS $tested\n";
+            return 'PASSED';
+        }
+    }
+    else {
+        $wanted = trim($section_text['EXPECT']);
+        $wanted = preg_replace('/\r\n/',"\n",$wanted);
 	// compare and leave on success
-    $ok = (0 == strcmp($output,$wanted));
-    if ($ok) {
-        echo "PASS $tested\n";
-        return 'PASSED';
+        $ok = (0 == strcmp($output,$wanted));
+        if ($ok) {
+            echo "PASS $tested\n";
+            return 'PASSED';
+        }
     }
     
     // Test failed so we need to report details.
     echo "FAIL $tested\n";
+
+    
+
 
 	// write .exp
 	if (strpos($log_format,'E')!==false) {
