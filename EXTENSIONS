@@ -233,7 +233,8 @@ MAINTENANCE:         Unknown
 STATUS:              Obsolete
 -------------------------------------------------------------------------------
 EXTENSION:           imap
-MAINTENANCE:         Unknown
+PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org>
+MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           java
@@ -247,7 +248,8 @@ MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mcal
-MAINTENANCE:         Unknown
+PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org>
+MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mcrypt
