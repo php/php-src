@@ -34,10 +34,6 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
-#ifdef ZTS
-MUTEX_T mbregex_locale_mutex = NULL;
-#endif
-
 /* {{{ static void php_mb_regex_free_cache() */
 static void php_mb_regex_free_cache(php_mb_regex_t **pre) 
 {
@@ -70,9 +66,6 @@ void _php_mb_regex_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC)
 /* {{{ PHP_MINIT_FUNCTION(mb_regex) */
 PHP_MINIT_FUNCTION(mb_regex)
 {
-# ifdef ZTS
-	mbregex_locale_mutex = tsrm_mutex_alloc();
-# endif
 	return SUCCESS;
 }
 /* }}} */
@@ -80,11 +73,6 @@ PHP_MINIT_FUNCTION(mb_regex)
 /* {{{ PHP_MSHUTDOWN_FUNCTION(mb_regex) */
 PHP_MSHUTDOWN_FUNCTION(mb_regex)
 {
-#ifdef ZTS
-	if (mbregex_locale_mutex != NULL) {
-		tsrm_mutex_free(mbregex_locale_mutex);
-	}
-#endif
 	return SUCCESS;
 }
 /* }}} */
