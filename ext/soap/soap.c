@@ -287,11 +287,14 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	zend_hash_add(soap_globals->defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
 	zend_hash_add(soap_globals->defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
 	zend_hash_add(soap_globals->defEncNs, APACHE_NAMESPACE, sizeof(APACHE_NAMESPACE), APACHE_NS_PREFIX, sizeof(APACHE_NS_PREFIX), NULL);
-	zend_hash_add(soap_globals->defEncNs, SOAP_ENC_NAMESPACE, sizeof(SOAP_ENC_NAMESPACE), SOAP_ENC_NS_PREFIX, sizeof(SOAP_ENC_NS_PREFIX), NULL);
+	zend_hash_add(soap_globals->defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE), SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX), NULL);
+	zend_hash_add(soap_globals->defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE), SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX), NULL);
+
 	/* and by prefix */
 	zend_hash_add(soap_globals->defEncPrefix, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), XSD_NAMESPACE, sizeof(XSD_NAMESPACE), NULL);
 	zend_hash_add(soap_globals->defEncPrefix, APACHE_NS_PREFIX, sizeof(APACHE_NS_PREFIX), APACHE_NAMESPACE, sizeof(APACHE_NAMESPACE), NULL);
-	zend_hash_add(soap_globals->defEncPrefix, SOAP_ENC_NS_PREFIX, sizeof(SOAP_ENC_NS_PREFIX), SOAP_ENC_NAMESPACE, sizeof(SOAP_ENC_NAMESPACE), NULL);
+	zend_hash_add(soap_globals->defEncPrefix, SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX), SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE), NULL);
+	zend_hash_add(soap_globals->defEncPrefix, SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX), SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE), NULL);
 
 	soap_globals->use_soap_error_handler = 0;
 	soap_globals->sdl = NULL;
@@ -1245,7 +1248,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		}
 		php_end_ob_buffer(0, 0 TSRMLS_CC);
 
-		set_soap_fault(&ret, "SOAP-ENV:Server", buffer, NULL, &outbuf TSRMLS_CC);
+		set_soap_fault(&ret, "Server", buffer, NULL, &outbuf TSRMLS_CC);
 		doc_return = seralize_response_call(NULL, NULL, NULL, &ret, soap_version TSRMLS_CC);
 
 		/* Build and send our headers + http 500 status */
@@ -1437,7 +1440,7 @@ zend_try {
  			smart_str_appends(&error,function);
  			smart_str_appends(&error,"\") is not a valid method for this service");
  			smart_str_0(&error);
-			add_soap_fault(thisObj, "SOAP-ENV:Client", error.c, NULL, NULL TSRMLS_CC);
+			add_soap_fault(thisObj, "Client", error.c, NULL, NULL TSRMLS_CC);
 			smart_str_free(&error);
 		}
 	} else {
@@ -1445,9 +1448,9 @@ zend_try {
 		smart_str *action;
 
 		if (zend_hash_find(Z_OBJPROP_P(thisObj), "uri", sizeof("uri"), (void *)&uri) == FAILURE) {
-			add_soap_fault(thisObj, "SOAP-ENV:Client", "Error finding \"uri\" property", NULL, NULL TSRMLS_CC);
+			add_soap_fault(thisObj, "Client", "Error finding \"uri\" property", NULL, NULL TSRMLS_CC);
 		} else if (zend_hash_find(Z_OBJPROP_P(thisObj), "location", sizeof("location"),(void **) &location) == FAILURE) {
-			add_soap_fault(thisObj, "SOAP-ENV:Client", "Error could not find \"location\" property", NULL, NULL TSRMLS_CC);
+			add_soap_fault(thisObj, "Client", "Error could not find \"location\" property", NULL, NULL TSRMLS_CC);
 		} else {
 	 		request = seralize_function_call(thisObj, NULL, function, Z_STRVAL_PP(uri), real_args, arg_count, soap_version TSRMLS_CC);
 			action = build_soap_action(thisObj, function);
@@ -1475,7 +1478,7 @@ zend_try {
 			*return_value = **fault;
 			zval_copy_ctor(return_value);
 		} else {
-			*return_value = *add_soap_fault(thisObj, "SOAP-ENV:Client", "Unknown Error", NULL, NULL TSRMLS_CC);
+			*return_value = *add_soap_fault(thisObj, "Client", "Unknown Error", NULL, NULL TSRMLS_CC);
 			zval_copy_ctor(return_value);
 		}
 	} else {
@@ -1732,15 +1735,15 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 	trav = request->children;
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE) {
-			if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV)) {
+			if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV_NAMESPACE)) {
 				env = trav;
 				*version = SOAP_1_1;
-				envelope_ns = SOAP_1_1_ENV;
+				envelope_ns = SOAP_1_1_ENV_NAMESPACE;
 				SOAP_GLOBAL(soap_version) = SOAP_1_1;
-			} else if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV)) {
+			} else if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV_NAMESPACE)) {
 				env = trav;
 				*version = SOAP_1_2;
-				envelope_ns = SOAP_1_2_ENV;
+				envelope_ns = SOAP_1_2_ENV_NAMESPACE;
 				SOAP_GLOBAL(soap_version) = SOAP_1_2;
 			} else {
 				php_error(E_ERROR,"looks like we got bad SOAP request\n");
@@ -1855,23 +1858,28 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 	doc = xmlNewDoc("1.0");
 	doc->charset = XML_CHAR_ENCODING_UTF8;
 	doc->encoding = xmlStrdup((xmlChar*)"UTF-8");
-	doc->children = xmlNewDocNode(doc, NULL, "SOAP-ENV:Envelope", NULL);
-	envelope = doc->children;
 
 	if (version == SOAP_1_1) {
-		ns = xmlNewNs(envelope, SOAP_1_1_ENV,"SOAP-ENV");
+		envelope = xmlNewDocNode(doc, NULL, SOAP_1_1_ENV_NS_PREFIX":Envelope", NULL);
+		ns = xmlNewNs(envelope, SOAP_1_1_ENV_NAMESPACE, SOAP_1_1_ENV_NS_PREFIX);
 	} else if (version == SOAP_1_2) {
-		ns = xmlNewNs(envelope, SOAP_1_2_ENV,"SOAP-ENV");
+		envelope = xmlNewDocNode(doc, NULL, SOAP_1_2_ENV_NS_PREFIX":Envelope", NULL);
+		ns = xmlNewNs(envelope, SOAP_1_2_ENV_NAMESPACE, SOAP_1_2_ENV_NS_PREFIX);
 	} else {
 	  php_error(E_ERROR, "Unknown SOAP version");
 	}
+	doc->children = envelope;
 
 	body = xmlNewChild(envelope, ns, "Body", NULL);
 
 	if (Z_TYPE_P(ret) == IS_OBJECT &&
 		Z_OBJCE_P(ret) == soap_fault_class_entry) {
 		use = SOAP_ENCODED;
-		param = seralize_zval(ret, NULL, "SOAP-ENV:Fault", use TSRMLS_CC);
+		if (version == SOAP_1_1) {
+			param = seralize_zval(ret, NULL, SOAP_1_1_ENV_NS_PREFIX":Fault", use TSRMLS_CC);
+		} else {
+			param = seralize_zval(ret, NULL, SOAP_1_2_ENV_NS_PREFIX":Fault", use TSRMLS_CC);
+		}
 		xmlAddChild(body, param);
 	} else {
 		gen_ns = encode_new_ns();
@@ -1964,11 +1972,11 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 		xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
 		xmlSetProp(envelope, "xmlns:" APACHE_NS_PREFIX , APACHE_NAMESPACE);
 		if (version == SOAP_1_1) {
-			xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_1_ENC);
-			xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_1_ENC);
+			xmlSetProp(envelope, "xmlns:"SOAP_1_1_ENC_NS_PREFIX, SOAP_1_1_ENC_NAMESPACE);
+			xmlSetProp(envelope, SOAP_1_1_ENV_NS_PREFIX":encodingStyle", SOAP_1_1_ENC_NAMESPACE);
 		} else if (version == SOAP_1_2) {
-			xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_2_ENC);
-			/*xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_2_ENC);*/
+			xmlSetProp(envelope, "xmlns:"SOAP_1_2_ENC_NS_PREFIX, SOAP_1_2_ENC_NAMESPACE);
+			/*xmlSetProp(envelope, SOAP_1_2_ENV_NS_PREFIX"encodingStyle", SOAP_1_2_ENC_NAMESPACE);*/
 		}
 	}
 
@@ -1994,15 +2002,16 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 	doc = xmlNewDoc("1.0");
 	doc->encoding = xmlStrdup((xmlChar*)"UTF-8");
 	doc->charset = XML_CHAR_ENCODING_UTF8;
-	envelope = xmlNewDocNode(doc, NULL, "SOAP-ENV:Envelope", NULL);
-	xmlDocSetRootElement(doc, envelope);
 	if (version == SOAP_1_1) {
-		ns = xmlNewNs(envelope, SOAP_1_1_ENV, "SOAP-ENV");
+		envelope = xmlNewDocNode(doc, NULL, SOAP_1_1_ENV_NS_PREFIX":Envelope", NULL);
+		ns = xmlNewNs(envelope, SOAP_1_1_ENV_NAMESPACE, SOAP_1_1_ENV_NS_PREFIX);
 	} else if (version == SOAP_1_2) {
-		ns = xmlNewNs(envelope, SOAP_1_2_ENV, "SOAP-ENV");
+		envelope = xmlNewDocNode(doc, NULL, SOAP_1_2_ENV_NS_PREFIX":Envelope", NULL);
+		ns = xmlNewNs(envelope, SOAP_1_2_ENV_NAMESPACE, SOAP_1_2_ENV_NS_PREFIX);
 	} else {
 		php_error(E_ERROR, "Unknown SOAP version");
 	}
+	xmlDocSetRootElement(doc, envelope);
 
 	body = xmlNewChild(envelope, ns, "Body", NULL);
 
@@ -2052,11 +2061,11 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 		xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		xmlSetProp(envelope, "xmlns:" APACHE_NS_PREFIX , APACHE_NAMESPACE);
 		if (version == SOAP_1_1) {
-			xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_1_ENC);
-			xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_1_ENC);
+			xmlSetProp(envelope, "xmlns:"SOAP_1_1_ENC_NS_PREFIX, SOAP_1_1_ENC_NAMESPACE);
+			xmlSetProp(envelope, SOAP_1_1_ENV_NS_PREFIX":encodingStyle", SOAP_1_1_ENC_NAMESPACE);
 		} else if (version == SOAP_1_2) {
-			xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_2_ENC);
-			/*xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_2_ENC);*/
+			xmlSetProp(envelope, "xmlns:"SOAP_1_2_ENC_NS_PREFIX, SOAP_1_2_ENC_NAMESPACE);
+			/*xmlSetProp(envelope, SOAP_1_2_ENV_NS_PREFIX":encodingStyle", SOAP_1_2_ENC_NAMESPACE);*/
 		}
 	}
 
