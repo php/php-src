@@ -83,6 +83,10 @@ EXTENSION:           pdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           pgsql
+PRIMARY MAINTAINER:  Jouni Ahto <jah@mork.net>
+STATUS:              Odd fixes
+--------------------------------------------------------------------------------
 EXTENSION:           session
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 STATUS:              Maintained
