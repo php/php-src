@@ -192,6 +192,41 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	return 1;
 }
 
+static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+
+	switch (attr) {
+		case PDO_ATTR_CLIENT_VERSION:
+			ZVAL_STRING(return_value, (char *)mysql_get_client_info(), 1);
+			break;
+
+		case PDO_ATTR_SERVER_VERSION:
+			ZVAL_STRING(return_value, (char *)mysql_get_server_info(H->server), 1);
+			break;
+
+		case PDO_ATTR_CONNECTION_STATUS:
+			ZVAL_STRING(return_value, (char *)mysql_get_host_info(H->server), 1);
+			break;
+
+		case PDO_ATTR_SERVER_INFO: {
+			char *tmp;
+
+			if ((tmp = (char *)mysql_stat(H->server))) {
+				ZVAL_STRING(return_value, tmp, 1);
+			} else {
+				pdo_mysql_error(dbh);
+				return -1;
+			}
+		}
+			break;
+
+		default:
+			return 0;	
+	}
+
+	return 1;
+}
 
 static struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
@@ -203,7 +238,8 @@ static struct pdo_dbh_methods mysql_methods = {
 	NULL,
 	NULL,
 	pdo_mysql_last_insert_id,
-	pdo_mysql_fetch_error_func
+	pdo_mysql_fetch_error_func,
+	pdo_mysql_get_attribute
 };
 
 static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
