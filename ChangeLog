@@ -1,3 +1,75 @@
+2004-12-17  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_object_handlers.c:
+      - Fixed Bug #30562  	Segmentation fault with __call()
+
+2004-12-17  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      php.ini-dist:
+      fix typo
+
+2004-12-17  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/var.c
+      ext/standard/var.c
+      ext/standard/tests/array/var_export2.phpt
+      ext/standard/tests/array/var_export2.phpt:
+      - MF43: Fixed bug #31072 (var_export() does not output an array element
+      with an
+        empty string key). (Derick)
+
+    * ext/standard/tests/array/var_export2.phpt
+      ext/standard/tests/array/var_export2.phpt:
+        1.1.4;
+      file var_export2.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/var.c:
+      - Fixed bug #31072 (var_export() does not output an array element with an
+      empty
+        string key). (Derick)
+
+    * ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - MF43: Fixed strtod for Irix and some other strange platform
+
+    * (PHP_4_3)
+      Zend/zend_strtod.c:
+      - Fixed strtod for Irix and some other strange platform
+
+    * main/php_sprintf.c
+      main/php_sprintf.c:
+      - MF43: Fixed weird types, this also makes it compile on IRIX again.
+
+    * (PHP_4_3)
+      main/php_sprintf.c:
+      - Fixed weird types, this also makes it compile on IRIX again.
+
+2004-12-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/xml/compat.c:
+      MFH: Fixed bug #31139 (XML Parser Functions seem to drop &amp; when
+      parsing)
+
+    * ext/xml/compat.c:
+      Fixed bug #31139 (XML Parser Functions seem to drop &amp; when parsing)
+
+2004-12-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      typo
+
 2004-12-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)

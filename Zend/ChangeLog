@@ -1,3 +1,14 @@
+2004-12-17  Andi Gutmans  <andi@zend.com>
+
+    * zend_object_handlers.c:
+      - Fixed Bug #30562  	Segmentation fault with __call()
+
+2004-12-17  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_strtod.c
+      zend_strtod.c:
+      - MF43: Fixed strtod for Irix and some other strange platform
+
 2004-12-16  Derick Rethans  <php@derickrethans.nl>
 
     * zend_strtod.c
