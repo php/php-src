@@ -52,7 +52,7 @@ function out_result($result, $table_name = "")
 function out_result_trap_error($result, $table_name = "")
 {
    echo "--- $table_name ---\n";
-   while ($r = ibase_fetch_row($result)) {
+   while ($r = @ibase_fetch_row($result)) {
 		echo join("\t",$r)."\t\n";
    }
    echo "errmsg [" . ibase_errmsg() . "]\t\n";
