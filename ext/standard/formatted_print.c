@@ -65,6 +65,7 @@ static char HEXCHARS[] = "0123456789ABCDEF";
 static char *php_convert_to_decimal(double arg, int ndigits, int *decpt, int *sign, int eflag)
 {
 	register int r2;
+	int mvl;
 	double fi, fj;
 	register char *p, *p1;
 	/*THREADX*/
@@ -90,13 +91,21 @@ static char *php_convert_to_decimal(double arg, int ndigits, int *decpt, int *si
 		p1 = &cvt_buf[NDIG];
 		while (fi != 0) {
 			fj = modf(fi / 10, &fi);
+			if (p1 <= &cvt_buf[0]) {
+				mvl = NDIG - ndigits;
+				memmove(&cvt_buf[mvl], &cvt_buf[0], NDIG-mvl-1);
+				p1 += mvl;
+			}
 			*--p1 = (int) ((fj + .03) * 10) + '0';
 			r2++;
 		}
 		while (p1 < &cvt_buf[NDIG])
 			*p++ = *p1++;
 	} else if (arg > 0) {
-		while ((fj = arg * 10.0) < 0.9999999) {
+		while ((fj = arg * 10) < 1) {
+			if (!eflag && (r2 * -1) < ndigits) {
+				break;
+			}
 			arg = fj;
 			r2--;
 		}
@@ -109,10 +118,17 @@ static char *php_convert_to_decimal(double arg, int ndigits, int *decpt, int *si
 		cvt_buf[0] = '\0';
 		return (cvt_buf);
 	}
+	if (p <= p1 && p < &cvt_buf[NDIG]) {
+		arg = modf(arg * 10, &fj);
+		if ((int)fj==10) {
+			*p++ = '1';
+			fj = 0;
+			*decpt = ++r2;
+		}
 	while (p <= p1 && p < &cvt_buf[NDIG]) {
-		arg *= 10;
-		arg = modf(arg, &fj);
 		*p++ = (int) fj + '0';
+			arg = modf(arg * 10, &fj);
+		}
 	}
 	if (p1 >= &cvt_buf[NDIG]) {
 		cvt_buf[NDIG - 1] = '\0';
@@ -286,7 +302,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	char numbuf[NUM_BUF_SIZE];
 	char *cvt;
 	register int i = 0, j = 0;
-	int sign, decpt;
+	int sign, decpt, cvt_len;
 	char decimal_point = EG(float_separator)[0];
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
@@ -312,6 +328,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	}
 
 	cvt = php_convert_to_decimal(number, precision, &decpt, &sign, (fmt == 'e'));
+	cvt_len = strlen(cvt);
 
 	if (sign) {
 		numbuf[i++] = '-';
@@ -330,10 +347,15 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 				}
 			}
 		} else {
-			while (decpt-- > 0)
-				numbuf[i++] = cvt[j++];
-			if (precision > 0)
+			while (decpt-- > 0) {
+				numbuf[i++] = j < cvt_len ? cvt[j++] : '0';
+			}
+			if (precision > 0) {
 				numbuf[i++] = decimal_point;
+				while (precision-- > 0) {
+					numbuf[i++] = j < cvt_len ? cvt[j++] : '0';
+				}
+			}
 		}
 	} else if (fmt == 'e' || fmt == 'E') {
 		char *exp_p;
