@@ -37,7 +37,6 @@ extern "C" {
 // passed to the procedure on a new request
 //
 typedef struct _CONTROL_BLOCK {
-	void	 *pPIHTTP;
     DWORD     cbSize;                 // size of this struct.
     HCONN     ConnID;                 // Context number not to be modified!
     DWORD     dwHttpStatusCode;       // HTTP Status code
