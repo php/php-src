@@ -18,7 +18,7 @@ class foo {
 		return 666;
 	}
 	var $foo;
-	var $bar="this is a test...";
+	var $bar="this is a test....";
 };
 
 class bar {
