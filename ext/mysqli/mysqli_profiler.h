@@ -25,7 +25,7 @@
 #include "sys/time.h"
 #endif
 
-#define MYSQLI_PROFILER_VERSION 0.9
+#define MYSQLI_PROFILER_PROTOCOL_VERSION	1.0
 
 /* common profiler header struct */
 typedef struct {
@@ -153,14 +153,14 @@ if (MyG(profiler))\
 	char tmp[30];\
 	sprintf ((char *)&tmp, "%ld", value);\
 	MYSQLI_PROFILER_ELAPSEDTIME(cmd);\
-	cmd##->returnvalue = my_estrdup(tmp);\
+	cmd->returnvalue = my_estrdup(tmp);\
 }
 
 #define MYSQLI_PROFILER_COMMAND_RETURNSTRING(cmd, value)\
 if (MyG(profiler))\
 {\
 	MYSQLI_PROFILER_ELAPSEDTIME(cmd);\
-	cmd##->returnvalue = my_estrdup(value);\
+	cmd->returnvalue = my_estrdup(value);\
 }
 #define MYSQLI_PROFILER_EXPLAIN(explain,header,mysql,query) php_mysqli_profiler_explain(explain,header, mysql, query)
 
