@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Release Candidate 3
+- Added support for dumping private/protected properties to var_dump().
+  (Andrey)
 - Added count() support for COM arrays. (Wez)
 - Changed tidy_node to tidyNode and removed tidy_exception. (John)
 - Fixed bug #28311 (Transparency detection code is off by 1).
