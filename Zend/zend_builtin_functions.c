@@ -1731,6 +1731,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			zend_bool build_filename_arg = 1;
 
+			if (!ptr->opline) {
+				/* can happen when calling eval from a custom sapi */
+				function_name = "unknown";
+				build_filename_arg = 0;
+			} else
 			switch (ptr->opline->op2.u.constant.value.lval) {
 				case ZEND_EVAL:
 					function_name = "eval";
