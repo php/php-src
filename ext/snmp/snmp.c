@@ -264,9 +264,17 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	if (st >= 2) {
 		memmove((char *)name, (char *)root, rootlen * sizeof(oid));
 		name_length = rootlen;
-		if (array_init(return_value) == FAILURE) {
-			php_error(E_WARNING, "Cannot prepare result array");
-			RETURN_FALSE;
+		switch(st) {
+			case 2:
+			case 3:
+				if (array_init(return_value) == FAILURE) {
+					php_error(E_WARNING, "Cannot prepare result array");
+					RETURN_FALSE;
+				}
+				break;
+			default:
+				RETVAL_TRUE;
+				break;
 		}
 	}
 
