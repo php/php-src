@@ -144,6 +144,11 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 #define CV_OF(i)     (EG(current_execute_data)->CVs[i])
 #define CV_DEF_OF(i) (EG(active_op_array)->vars[i])
 
+ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data_ptr, zend_uint var)
+{
+	return execute_data_ptr->CVs[var];
+}
+
 static inline void zend_get_cv_address(zend_compiled_variable *cv, zval ***ptr, temp_variable *Ts TSRMLS_DC)
 {
    zval *new_zval = &EG(uninitialized_zval);

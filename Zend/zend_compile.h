@@ -319,6 +319,8 @@ ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TS
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 
+ZEND_API char* zend_get_compiled_variable_name(zend_op_array *op_array, zend_uint var, int* name_len);
+
 #ifdef ZTS
 const char *zend_get_zendtext(TSRMLS_D);
 int zend_get_zendleng(TSRMLS_D);
