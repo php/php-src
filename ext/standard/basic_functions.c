@@ -3255,7 +3255,6 @@ PHP_FUNCTION(array_pad)
 	
 	/* Populate the pads array */
 	num_pads = pad_size_abs - input_size;
-	/*(*pad_value)->refcount += num_pads;*/
 	pads = (zval **)emalloc(num_pads * sizeof(zval **));
 	for (i = 0; i < num_pads; i++)
 		pads[i] = pad_value;
@@ -3285,7 +3284,7 @@ PHP_FUNCTION(multisort)
 	Bucket	   ***indirect;
 	Bucket		 *p;
 	int			  argc;
-	int			  max_size = 0;
+	int			  array_size;
 	int			  i, k;
 	
 	/* Get the argument count and check it */
@@ -3301,13 +3300,17 @@ PHP_FUNCTION(multisort)
 		WRONG_PARAM_COUNT;
 	}
 	
+	array_size = zend_hash_num_elements((*args[0])->value.ht);
 	for (i = 0; i < argc; i++) {
-		if (zend_hash_num_elements((*args[i])->value.ht) > max_size)
-			max_size = zend_hash_num_elements((*args[i])->value.ht);
+		if (zend_hash_num_elements((*args[i])->value.ht) != array_size) {
+			php_error(E_WARNING, "Array sizes are inconsistent");
+			efree(args);
+			return;
+		}
 	}
 
-	indirect = (Bucket ***)emalloc(max_size * sizeof(Bucket **));
-	for (i = 0; i < max_size; i++)
+	indirect = (Bucket ***)emalloc(array_size * sizeof(Bucket **));
+	for (i = 0; i < array_size; i++)
 		indirect[i] = (Bucket **)emalloc(argc * sizeof(Bucket *));
 	
 	for (i = 0; i < argc; i++) {
@@ -3316,11 +3319,11 @@ PHP_FUNCTION(multisort)
 			indirect[k][i] = p;
 		}
 		
-		for (; k < max_size; k++)
+		for (; k < array_size; k++)
 			indirect[k][i] = NULL;
 	}
 	
-	for (i = 0; i < max_size; i++)
+	for (i = 0; i < array_size; i++)
 		efree(indirect[i]);
 	efree(indirect);
 	efree(args);
