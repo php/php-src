@@ -165,77 +165,66 @@ static PHP_INI_MH(OnUpdateErrorReporting)
 #	define DEFAULT_SENDMAIL_PATH NULL
 #endif
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("short_open_tag",	"1",		PHP_INI_ALL,		OnUpdateBool,		short_tags,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("asp_tags",			"0",		PHP_INI_ALL,		OnUpdateBool,		asp_tags,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference",	"1",	PHP_INI_ALL,	OnUpdateBool,	allow_call_time_pass_reference, php_core_globals, core_globals)
-	PHP_INI_ENTRY("precision",			"14",		PHP_INI_ALL,		OnSetPrecision)
-	STD_PHP_INI_BOOLEAN("output_buffering",	"0",	PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	output_buffering,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("implicit_flush",	"0",	PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	implicit_flush,		php_core_globals,	core_globals)
+	PHP_INI_ENTRY_EX("define_syslog_variables",	"0",				PHP_INI_ALL,	NULL,			php_ini_boolean_displayer_cb)			
+	PHP_INI_ENTRY_EX("highlight.bg",			HL_BG_COLOR,		PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
+	PHP_INI_ENTRY_EX("highlight.comment",		HL_COMMENT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
+	PHP_INI_ENTRY_EX("highlight.default",		HL_DEFAULT_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
+	PHP_INI_ENTRY_EX("highlight.html",			HL_HTML_COLOR,		PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
+	PHP_INI_ENTRY_EX("highlight.keyword",		HL_KEYWORD_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
+	PHP_INI_ENTRY_EX("highlight.string",		HL_STRING_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 
-	PHP_INI_ENTRY_EX("highlight.comment",	HL_COMMENT_COLOR,	PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
-	PHP_INI_ENTRY_EX("highlight.default",	HL_DEFAULT_COLOR,	PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
-	PHP_INI_ENTRY_EX("highlight.html",		HL_HTML_COLOR,		PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
-	PHP_INI_ENTRY_EX("highlight.string",	HL_STRING_COLOR,	PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
-	PHP_INI_ENTRY_EX("highlight.bg",		HL_BG_COLOR,		PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
-	PHP_INI_ENTRY_EX("highlight.keyword",	HL_KEYWORD_COLOR,	PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
+	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference","1",PHP_INI_ALL,		OnUpdateBool,	allow_call_time_pass_reference,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("asp_tags",				"0",		PHP_INI_ALL,		OnUpdateBool,			asp_tags,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("display_errors",		"1",		PHP_INI_ALL,		OnUpdateBool,			display_errors,			php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"1",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("implicit_flush",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	implicit_flush,			php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("magic_quotes_gpc",		"1",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_gpc,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("magic_quotes_runtime",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_runtime,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("magic_quotes_sybase",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_sybase,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	output_buffering,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_ALL,		OnUpdateBool,			register_argc_argv,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("register_globals",		"1",		PHP_INI_ALL,		OnUpdateBool,			register_globals,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("safe_mode",			"0",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("short_open_tag",		"1",		PHP_INI_ALL,		OnUpdateBool,			short_tags,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("sql.safe_mode",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			sql_safe_mode,			php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
+#if PHP_TRACK_VARS /* "cc -32" on IRIX 6.4 does not like (PHP_TRACK_VARS?"1":"0") - thies 991004 */								
+	STD_PHP_INI_BOOLEAN("track_vars",			"1",		PHP_INI_ALL,		OnUpdateBool,			track_vars,				php_core_globals,	core_globals)
+#else																															
+	STD_PHP_INI_BOOLEAN("track_vars",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_vars,				php_core_globals,	core_globals)
+#endif																															
+	STD_PHP_INI_BOOLEAN("y2k_compliance",		"0",		PHP_INI_ALL,		OnUpdateBool,			y2k_compliance,			php_core_globals,	core_globals)
 
-	STD_PHP_INI_BOOLEAN("magic_quotes_gpc",		"1",	PHP_INI_ALL,		OnUpdateBool,		magic_quotes_gpc,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("magic_quotes_runtime",	"0",	PHP_INI_ALL,		OnUpdateBool,		magic_quotes_runtime,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("magic_quotes_sybase",	"0",	PHP_INI_ALL,		OnUpdateBool,		magic_quotes_sybase,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("arg_separator",			"&",		PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_ALL,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_ALL,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("default_charset", SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateStringUnempty,	default_charset,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("default_mimetype",SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateStringUnempty,	default_mimetype,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateString,			error_log,				php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("extension_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("gpc_order",				"GPC",		PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,				php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("include_path",			NULL,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("max_execution_time",		"30",		PHP_INI_ALL,		OnUpdateInt, 			max_execution_time,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("open_basedir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	open_basedir,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("safe_mode_exec_dir",		"1",		PHP_INI_SYSTEM,		OnUpdateString,			safe_mode_exec_dir,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("upload_max_filesize",	"2097152",	PHP_INI_ALL,		OnUpdateInt,			upload_max_filesize,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("upload_tmp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("user_dir",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	user_dir,				php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("variables_order",		NULL,		PHP_INI_ALL,		OnUpdateStringUnempty,	variables_order,		php_core_globals,	core_globals)
 
-	STD_PHP_INI_BOOLEAN("safe_mode",		"0",	PHP_INI_SYSTEM,			OnUpdateBool,	safe_mode,				php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("sql.safe_mode",	"0",	PHP_INI_SYSTEM,			OnUpdateBool,	sql_safe_mode,			php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("safe_mode_exec_dir",	"1",	PHP_INI_SYSTEM,			OnUpdateString,	safe_mode_exec_dir,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("enable_dl",		"1",	PHP_INI_SYSTEM,			OnUpdateBool,	enable_dl,				php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("expose_php",		"1",	PHP_INI_SYSTEM,			OnUpdateBool,	expose_php,				php_core_globals,	core_globals)
-
-
-	PHP_INI_ENTRY("SMTP",			"localhost",			PHP_INI_ALL,		NULL)
-	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
-	PHP_INI_ENTRY("sendmail_from",	NULL,					PHP_INI_ALL,		NULL)
-
-	PHP_INI_ENTRY("error_reporting",	NULL,				PHP_INI_ALL,		OnUpdateErrorReporting)
-	STD_PHP_INI_BOOLEAN("display_errors",		"1",			PHP_INI_ALL,		OnUpdateBool,		display_errors,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("track_errors",		"0",			PHP_INI_ALL,		OnUpdateBool,		track_errors,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("log_errors",			"0",			PHP_INI_ALL,		OnUpdateBool,		log_errors,			php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("error_log",			NULL,			PHP_INI_ALL,		OnUpdateString,	error_log,			php_core_globals,	core_globals)
-
-
-	STD_PHP_INI_ENTRY("auto_prepend_file",	NULL,			PHP_INI_ALL,		OnUpdateString,	auto_prepend_file,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("auto_append_file",	NULL,			PHP_INI_ALL,		OnUpdateString,	auto_append_file,	php_core_globals,	core_globals)
-
-	STD_PHP_INI_BOOLEAN("y2k_compliance",		"0",			PHP_INI_ALL,		OnUpdateBool,		y2k_compliance,		php_core_globals,	core_globals)
-
-	STD_PHP_INI_ENTRY("doc_root",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,		php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("user_dir",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	user_dir,		php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("include_path",		NULL,			PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("open_basedir",		NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	open_basedir,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("extension_dir",		NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,	php_core_globals,	core_globals)
-
-	STD_PHP_INI_ENTRY("upload_tmp_dir",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("upload_max_filesize",	"2097152",		PHP_INI_ALL,		OnUpdateInt,				upload_max_filesize,	php_core_globals,	core_globals)
-
-	PHP_INI_ENTRY("browscap",			NULL,				PHP_INI_SYSTEM,		NULL)
-
-	PHP_INI_ENTRY_EX("define_syslog_variables",	"0",		PHP_INI_ALL,		NULL,	php_ini_boolean_displayer_cb)
-
-	STD_PHP_INI_ENTRY("max_execution_time",		"30",			PHP_INI_ALL,		OnUpdateInt, 				max_execution_time,	php_core_globals,	core_globals)
+	PHP_INI_ENTRY("SMTP",						"localhost",PHP_INI_ALL,		NULL)
+	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		NULL)
+	PHP_INI_ENTRY("error_reporting",			NULL,		PHP_INI_ALL,		OnUpdateErrorReporting)
 #if MEMORY_LIMIT
-	PHP_INI_ENTRY("memory_limit",			"8388608",		PHP_INI_ALL,		OnChangeMemoryLimit)
+	PHP_INI_ENTRY("memory_limit",				"8388608",	PHP_INI_ALL,		OnChangeMemoryLimit)
 #endif
-
-#if PHP_TRACK_VARS /* "cc -32" on IRIX 6.4 does not like (PHP_TRACK_VARS?"1":"0") - thies 991004 */
-	STD_PHP_INI_BOOLEAN("track_vars",			"1",			PHP_INI_ALL,		OnUpdateBool,				track_vars,		php_core_globals,	core_globals)
-#else
-	STD_PHP_INI_BOOLEAN("track_vars",			"0",			PHP_INI_ALL,		OnUpdateBool,				track_vars,		php_core_globals,	core_globals)
-#endif
-
-	STD_PHP_INI_BOOLEAN("register_globals",		"1",			PHP_INI_ALL,		OnUpdateBool,			register_globals,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",			PHP_INI_ALL,		OnUpdateBool,			register_argc_argv,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,			php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("variables_order",		NULL,			PHP_INI_ALL,		OnUpdateStringUnempty,	variables_order,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,		php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"1",			PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
+	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
+	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
+	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
 PHP_INI_END()
 
 
@@ -627,7 +616,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	PG(header_is_being_sent) = 0;
 	
 	zend_activate(CLS_C ELS_CC);
-	sapi_activate(SLS_C);	
+	sapi_activate(SLS_C PLS_CC);	
 
 	php_set_timeout(PG(max_execution_time));
 	

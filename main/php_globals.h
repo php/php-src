@@ -83,6 +83,9 @@ struct _php_core_globals {
 	char *gpc_order;
 	char *variables_order;
 
+	char *default_mimetype;
+	char *default_charset;
+
 	zend_bool expose_php;
 
 	zend_bool track_vars;
