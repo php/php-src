@@ -1052,7 +1052,7 @@ exit_failed:
 PHPAPI PHP_FUNCTION(fgetc)
 {
 	zval **arg1;
-	char *buf;
+	char buf[2];
 	int result;
 	php_stream *stream;
 
@@ -1062,18 +1062,15 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
-	buf = safe_emalloc(2, sizeof(char), 0);
-
 	result = php_stream_getc(stream);
 
 	if (result == EOF) {
-		efree(buf);
 		RETVAL_FALSE;
 	} else {
 		buf[0] = result;
 		buf[1] = '\0';
 
-		RETURN_STRINGL(buf, 1, 0);
+		RETURN_STRINGL(buf, 1, 1);
 	}
 }
 /* }}} */
