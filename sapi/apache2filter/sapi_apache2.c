@@ -116,12 +116,15 @@ static void
 php_apache_sapi_flush(void *server_context)
 {
 	php_struct *ctx = server_context;
+	ap_bucket_brigade *bb;
+	ap_bucket *b;
+
+	bb = ap_brigade_create(ctx->f->r->pool);
+	b = ap_bucket_create_flush();
+	AP_BRIGADE_INSERT_TAIL(bb, b);
+	ap_pass_brigade(ctx->f->next, bb);
+	
 	return;
-
-	/* This does not work yet. Apparently, the default handler
-	   interpretes bucket flush as EOS */
-
-	ap_rflush(ctx->f->r);
 }
 
 static sapi_module_struct sapi_module = {
@@ -192,6 +195,8 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 
 		PG(during_request_startup) = 0;
 		SG(sapi_headers).http_response_code = 200;
+		SG(request_info).query_string = f->r->args;
+		f->r->no_cache = f->r->no_local_copy = 1;
 		content_type = sapi_get_default_content_type(SLS_C);
 		f->r->content_type = apr_pstrdup(f->r->pool, 
 				content_type);
@@ -213,15 +218,18 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		PLS_FETCH();
 
 		ctx->state = 2;
+
+		if (php_handle_special_queries(SLS_C PLS_CC)) 
+			goto skip_execution;
 		
 		AP_BRIGADE_FOREACH(b, ctx->bb) {
 			rv = ap_bucket_read(b, &str, &n, 1);
 			if (rv == APR_SUCCESS && n > 0)
 				smart_str_appendl(&content, str, n);
 		}
-		if (!content.c) goto fucked;
+		if (!content.c) goto skip_execution;
 		smart_str_0(&content);
-		
+
 #if 1
 #define FFFF "/tmp/really_silly"
 		fd = open(FFFF, O_WRONLY|O_TRUNC|O_CREAT, 0600);
@@ -242,7 +250,7 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 #endif
 
 		smart_str_free(&content);
-fucked:
+skip_execution:
 		php_request_shutdown(NULL);
 
 		eos = ap_bucket_create_eos();
