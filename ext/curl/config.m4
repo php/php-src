@@ -43,7 +43,7 @@ if test "$PHP_CURL" != "no"; then
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)
   PHP_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/lib, CURL_SHARED_LIBADD)
 
-  AC_CHECK_LIB(curl,curl_easy_perform, 
+  PHP_CHECK_LIBRARY(curl,curl_easy_perform, 
   [ 
     AC_DEFINE(HAVE_CURL,1,[ ])
   ],[

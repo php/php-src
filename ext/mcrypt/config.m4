@@ -17,12 +17,12 @@ if test "$PHP_MCRYPT" != "no"; then
     AC_MSG_ERROR(mcrypt.h not found. Please reinstall libmcrypt.)
   fi
 
-  AC_CHECK_LIB(mcrypt, mcrypt_module_open, 
+  PHP_CHECK_LIBRARY(mcrypt, mcrypt_module_open, 
   [
     PHP_ADD_LIBRARY(ltdl,, MCRYPT_SHARED_LIBADD)
     AC_DEFINE(HAVE_LIBMCRYPT24,1,[ ])
   ],[
-    AC_CHECK_LIB(mcrypt, init_mcrypt, 
+    PHP_CHECK_LIBRARY(mcrypt, init_mcrypt, 
     [
       AC_DEFINE(HAVE_LIBMCRYPT22,1,[ ])
     ],[

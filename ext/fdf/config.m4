@@ -19,7 +19,7 @@ if test "$PHP_FDFTK" != "no"; then
   
   FDFLIBRARY=""
   for i in fdftk FdfTk; do
-    AC_CHECK_LIB($i, FDFOpen, [FDFLIBRARY=$i], [], [-L$FDFTK_DIR/lib -lm])
+    PHP_CHECK_LIBRARY($i, FDFOpen, [FDFLIBRARY=$i], [], [-L$FDFTK_DIR/lib -lm])
   done
   
   if test -z "$FDFLIBRARY"; then
