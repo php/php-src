@@ -2257,6 +2257,8 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
  */
 inline int zend_check_private(zend_execute_data *execute_data, zend_class_entry *ce, int fn_flags, char *function_name_strval, int function_name_strlen TSRMLS_DC)
 {
+	zend_function *orig_fbc;
+
 	if (!ce) {
 		return 0;
 	}
@@ -2271,6 +2273,8 @@ inline int zend_check_private(zend_execute_data *execute_data, zend_class_entry 
 		return 1;
 	}
 
+	orig_fbc = EX(fbc);
+
 	/* Check rule #2 */
 	while (ce) {
 		if (ce == EG(scope)) {
@@ -2283,6 +2287,8 @@ inline int zend_check_private(zend_execute_data *execute_data, zend_class_entry 
 		}
 		ce = ce->parent;
 	}
+
+	EX(fbc) = orig_fbc;
 	return 0;
 }
 
