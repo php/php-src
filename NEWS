@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Made the User-Agent that php's fopen wrappers send, configurable via
+  php.ini or via a stream context. (Sterling)
 - Added support for fopen("php://output", "wb") which returns a stream that
   writes to the output buffer (like echo and print). (Wez)
 - Added --disable-all configure option. (Jani)
