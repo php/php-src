@@ -111,7 +111,7 @@ extern zend_module_entry tidy_module_entry;
 #define FALSE 0
 #endif
 
-#define ADD_PROPERITY_STRING(_table, _key, _string) \
+#define ADD_PROPERTY_STRING(_table, _key, _string) \
 	{ \
 		zval *tmp; \
 		MAKE_STD_ZVAL(tmp); \
@@ -123,7 +123,7 @@ extern zend_module_entry tidy_module_entry;
 		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
 	}
 
-#define ADD_PROPERITY_LONG(_table, _key, _long) \
+#define ADD_PROPERTY_LONG(_table, _key, _long) \
 	{ \
 		zval *tmp; \
 		MAKE_STD_ZVAL(tmp); \
@@ -131,7 +131,7 @@ extern zend_module_entry tidy_module_entry;
 		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
 	}
 
-#define ADD_PROPERITY_NULL(_table, _key) \
+#define ADD_PROPERTY_NULL(_table, _key) \
 	{ \
 		zval *tmp; \
 		MAKE_STD_ZVAL(tmp); \
@@ -211,7 +211,7 @@ static zval * tidy_instanciate(zend_class_entry *, zval * TSRMLS_DC);
 static int tidy_doc_cast_handler(zval *, zval *, int, int TSRMLS_DC);
 static int tidy_node_cast_handler(zval *, zval *, int, int TSRMLS_DC);
 static void tidy_doc_update_properties(PHPTidyObj * TSRMLS_DC);
-static void tidy_add_default_properities(PHPTidyObj *, tidy_obj_type TSRMLS_DC);
+static void tidy_add_default_properties(PHPTidyObj *, tidy_obj_type TSRMLS_DC);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType * TSRMLS_DC);
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes);
 
