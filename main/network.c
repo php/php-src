@@ -678,6 +678,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	size_t ret = 0;
 
 	if (sock->is_blocked)	{
+		sock->timeout_event = 0;
 		while(!sock->eof && TOREAD(sock) < count && !sock->timeout_event)
 			php_sock_stream_read_internal(stream, sock TSRMLS_CC);
 	}
@@ -791,6 +792,8 @@ static char *php_sockop_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS
 
 	if(!p) {
 		if(sock->is_blocked) {
+			sock->timeout_event = 0;
+			
 			while(!p && !sock->eof && !sock->timeout_event && TOREAD(sock) < maxlen) {
 				php_sock_stream_read_internal(stream, sock TSRMLS_CC);
 				SEARCHCR();
