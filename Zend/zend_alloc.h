@@ -85,6 +85,10 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 
+#define USE_ZEND_ALLOC 1
+
+#if USE_ZEND_ALLOC
+
 /* Standard wrapper macros */
 #define emalloc(size)					_emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define safe_emalloc(nmemb, size, offset)       _safe_emalloc((nmemb), (size), (offset) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
@@ -123,6 +127,45 @@ ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZE
 
 #define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):STR_EMPTY_ALLOC())
 #define safe_estrndup(ptr, len) ((ptr)?(estrndup((ptr), (len))):STR_EMPTY_ALLOC())
+
+#else
+
+#define _GNU_SOURCE
+#include <string.h>
+#undef _GNU_SOURCE
+
+/* Standard wrapper macros */
+#define emalloc(size)					malloc(size)
+#define safe_emalloc(nmemb, size, offset)		malloc((nmemb) * (size) + (offset))
+#define efree(ptr)						free(ptr)
+#define ecalloc(nmemb, size)			calloc((nmemb), (size))
+#define erealloc(ptr, size)				realloc((ptr), (size))
+#define erealloc_recoverable(ptr, size)	realloc((ptr), (size))
+#define estrdup(s)						strdup(s)
+#define estrndup(s, length)				strndup((s), (length))
+
+/* Relay wrapper macros */
+#define emalloc_rel(size)					malloc(size)
+#define safe_emalloc_rel(nmemb, size, offset)		malloc((nmemb) * (size) + (offset))
+#define efree_rel(ptr)						free(ptr)
+#define ecalloc_rel(nmemb, size)			calloc((nmemb), (size))
+#define erealloc_rel(ptr, size)				realloc((ptr), (size))
+#define erealloc_recoverable_rel(ptr, size)	realloc((ptr), (size))
+#define estrdup_rel(s)						strdup(s)
+#define estrndup_rel(s, length)				strndup((s), (length))
+
+/* Selective persistent/non persistent allocation macros */
+#define pemalloc(size, persistent)		malloc(size)
+#define pefree(ptr, persistent)			free(ptr)
+#define pecalloc(nmemb, size, persistent)		calloc((nmemb), (size))
+#define perealloc(ptr, size, persistent)		realloc((ptr), (size))
+#define perealloc_recoverable(ptr, size, persistent)	realloc((ptr), (size))
+#define pestrdup(s, persistent)			strdup(s)
+
+#define safe_estrdup(ptr)  ((ptr)?(strdup(ptr)):(empty_string))
+#define safe_estrndup(ptr, len) ((ptr)?(strndup((ptr), (len))):(empty_string))
+
+#endif
 
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit);
 
