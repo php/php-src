@@ -57,8 +57,8 @@ static char *url_attr_addon(const char *tag,const char *attr,const char *val,con
 	} else if(!strcasecmp(tag,"img"  ) && !strcasecmp(attr,"action" )) {
 		flag = 1;
 	}
-	if(flag) {
-		if(!strstr(val,buf))
+	if(flag) {		
+		if(!strstr(val,buf)&&!strchr(val,':'))
 			{
 				char *result = (char *)emalloc(strlen(buf)+strlen(PG(arg_separator))+1);
 				int n;
