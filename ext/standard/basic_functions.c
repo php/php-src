@@ -305,7 +305,9 @@ function_entry basic_functions[] = {
 	PHP_FE(get_loaded_extensions,		NULL)
 	PHP_FE(extension_loaded,			NULL)
 	PHP_FE(get_extension_funcs,			NULL)
-	
+
+	PHP_FE(parse_ini_file,				NULL)
+
 	{NULL, NULL, NULL}
 };
 

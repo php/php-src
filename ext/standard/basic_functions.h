@@ -107,6 +107,9 @@ PHP_FUNCTION(get_loaded_extensions);
 PHP_FUNCTION(extension_loaded);
 PHP_FUNCTION(get_extension_funcs);
 
+/* From the INI parser */
+PHP_FUNCTION(parse_ini_file);
+
 #ifdef PHP_WIN32
 typedef unsigned int php_stat_len;
 #else
