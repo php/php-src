@@ -123,6 +123,11 @@ PHP_FUNCTION(print_r);
 PHP_FUNCTION(define);
 PHP_FUNCTION(defined);
 
+PHP_FUNCTION(connection_aborted);
+PHP_FUNCTION(connection_timeout);
+PHP_FUNCTION(connection_status);
+PHP_FUNCTION(ignore_user_abort);
+
 PHP_FUNCTION(function_exists);
 PHP_FUNCTION(in_array);
 PHP_FUNCTION(extract);
