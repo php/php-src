@@ -13,23 +13,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
+   | Authors: Preston L. Bannister <pbannister@php.net>                   |
+   |          Sander Roobol <sander@php.net>                              |
    | (based on version by: Stig Bakken <ssb@fast.no>)                     |
    | (based on the PHP 3 test framework by Rasmus Lerdorf)                |
    +----------------------------------------------------------------------+
  */
 
 /*
-    History
-    -------
-
-    2002-05-07  Preston L. Bannister <preston.bannister@cox.net>
-
-    Rewrote and updated to run on Win32.  
 
     Require exact specification of PHP executable to test (no guessing!).
-
-    Require a specific tests/php.ini (rather than whatever is lying around),
-    and test that this is indeed what we are using.
 
     Die if any internal errors encountered in test script.
 
@@ -38,9 +31,6 @@
     Optionally output error lines indicating the failing test source and log
     for direct jump with MSVC or Emacs.
 
-    Run basic (non-extension) tests first.  Treat PEAR as extension.
-
-    Tested on Windows 2000 with the Cygnus Win32 toolkit installed.
 */
 
 /*
@@ -50,6 +40,7 @@
 
 set_time_limit(0);
 ob_implicit_flush();
+error_reporting(E_ALL);
 
 if (ini_get('safe_mode')) {
     echo <<<SAFE_MODE_WARNING
@@ -70,47 +61,40 @@ SAFE_MODE_WARNING;
 // Require the explicit specification.
 // Otherwise we could end up testing the wrong file!
 
-$php = $_ENV['TEST_PHP_EXECUTABLE'];
+if(isset($_ENV['TEST_PHP_EXECUTABLE'])) {
+	$php = $_ENV['TEST_PHP_EXECUTABLE'];
+} else {
+	error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
+}
 
-isset($php)
-    or die("FAIL environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!\n");
-
-@is_executable($php)
-    or die("FAIL invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php . "\n");
+if(!@is_executable($php)) {
+	error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php);
+}
 
 // Check whether a detailed log is wanted.
 
 define('DETAILED',0 + $_ENV['TEST_PHP_DETAILED']);
 
-// Write INI file to be used in tests.
-
-$include_path = getcwd();
-
-$test_ini = realpath(dirname($php) . "/php.ini");
-save_text($test_ini,"[PHP]\ninclude_path = \"$include_path\"\n");
-
 // Write test context information.
 
 echo "
 =====================================================================
-TIME " . date('Y-m-d H:i:s') . " - start of test run
 CWD         : " . getcwd() . "
 PHP         : $php
 PHP_SAPI    : " . PHP_SAPI . "
 PHP_VERSION : " . PHP_VERSION . "
 PHP_OS      : " . PHP_OS . "
 INI actual  : " . get_cfg_var('cfg_file_path') . "
-INI wanted  : " . realpath('tests/php.ini') . "
-INI tests   : $test_ini
+INI wanted  : " . realpath('php.ini-dist') . "
 =====================================================================
-
 ";
 
 // Make sure we are using the proper php.ini.
 
-$php_ini = realpath("tests/php.ini");
+// FIXME: this doesn't work on linux
+/*$php_ini = realpath("php.ini-dist");
 realpath(get_cfg_var('cfg_file_path')) == $php_ini
-    or die("FAIL test/php.ini was not used!\n");
+    or error("php.ini-dist was not used!");*/
 
 // Determine the tests to be run.
 
@@ -118,143 +102,86 @@ $test_to_run = array();
 $test_files = array();
 $test_results = array();
 
-if (isset($_SERVER['argc'])) {
-
-    // If parameters given assume they represent selected tests to run.
-
-    $argc = $_SERVER['argc'];
-    $argv = $_SERVER['argv'];
-    for ($i = 1; $i < $argc; $i++) {
-        $testfile = realpath($argv[$i]);
-        $test_to_run[$testfile] = 1;
-    }
-    
+// If parameters given assume they represent selected tests to run.
+if ($argc>1) {
+	for ($i=1; $i<$argc; $i++) {
+		$testfile = realpath($argv[$i]);
+		$test_to_run[$testfile] = 1;
+	}
 }
 
 // Compile a list of all test files (*.phpt).
+$module_of_test = $test_files = array();
+find_files(getcwd());
 
-{
-    $directories = array();
-    $directories[] = getcwd();
-    for ($n = 0; $n < count($directories); $n++) {
-        $path = $directories[$n];
-        $module = '';
-        if (ereg('/ext/([^/]+)/',"$path/",$r)) {
-            $module = $r[1];
-        } else if (ereg('/pear/',"$path/")) {
-            $module = 'PEAR';
-        }
-        $o = opendir($path) or die("Cannot open directory - $path\n");
-        while ($name = readdir($o)) {
-            if (is_dir("$path/$name")) {
-                if ('.' == $name) continue;
-                if ('..' == $name) continue;
-                if ('CVS' == $name) continue;
-                $directories[] = "$path/$name";
-                continue;
-            }
-            
-            // Cleanup any left-over tmp files from last run.
-            if (ereg('[.]tmp$',$name)) {
-                @unlink("$path/$name");
-                continue;
-            }
-            
-            // Otherwise we're only interested in *.phpt files.
-            if (!ereg('[.]phpt$',$name)) continue;
-            //echo "Runnable '" . $name . "' in '" . $path . "'\n";
-            $testfile = realpath("$path/$name");
-            $test_files[] = $testfile;
-            $module_of_test[$testfile] = $module;
-        }
-        closedir($o);    
-    }
+function find_files($dir) {
+	global $test_files, $module_of_test;
+
+	/* FIXME: this messes up if you unpack PHP in /ext/pear :) */
+	if (ereg('/ext/([^/]+)/',"$dir/",$r)) {
+		$module = $r[1];
+	} else if (ereg('/pear/',"$dir/")) {
+		$module = 'pear';
+	} else {
+		$module = '';
+	}
+
+	$o = opendir($dir) or error("cannot open directory: $dir");
+	while (($name = readdir($o))!==false) {
+		if (is_dir("{$dir}/{$name}") && !in_array($name, array('.', '..', 'CVS'))) {
+			find_files("{$dir}/{$name}");
+	    }
+	
+		// Cleanup any left-over tmp files from last run.
+		if (substr($name, -4)=='.tmp') {
+			@unlink("$dir/$name");
+			continue;
+		}
+
+		// Otherwise we're only interested in *.phpt files.
+		if (substr($name, -5)=='.phpt') {
+			$testfile = realpath("{$dir}/{$name}");
+			$test_files[] = $testfile;
+//			$module_of_test[$testfile] = $module;
+		}
+	}
+
+	closedir($o);
 }
 
 // Run only selected tests, if specified.
-
 if (count($test_to_run)) {
-    echo "Running selected tests.\n";
-    while (list($name,$runnable) = each($test_to_run)) {
-        echo "test: $name runnable: $runnable\n";
-        if (!$runnable) continue;
-        $test_results[$name] = run_test($php,$name);
-    }
-    exit;
+	echo "Running selected tests.\n";
+	foreach($test_to_run AS $name=>$runnable) {
+		echo "test: $name runnable: $runnable\n";
+		if ($runnable) {
+			$test_results[$name] = run_test($php,$name);
+		}
+	}
+	exit(0);
 }
-
-// We need to know the compiled in modules so we know what to test.
-
-$modules_compiled = @get_loaded_extensions();
-$modules_to_test = array(
-    ''      => 1,
-    'PEAR'  => 1,
-);
-foreach ($modules_compiled as $module) {
-    echo "Will test compiled extension: $module\n";
-    $modules_to_test[$module] = 1;
-}
-
-echo '
-=====================================================================
-';
 
 sort($test_files);
-$modules_skipped = array();
 
-// Run non-module tests.
+$start_time = time();
 
-$module_current = '';
-$path_current = '';
-foreach ($test_files as $name) {
-
-    // Only non-module tests wanted for this pass.
-    if ($module_of_test[$name]) continue;   
-    
-    $path = dirname($name);
-    if ($path_current != $path) {
-        $path_current = $path;
-        echo ".... directory $path\n";
-    }
-
-    $test_results[$name] = run_test($php,$name);
-}
-
-// Run module tests (or at least those applicable to this PHP build).
-
-$module_current = '';
-$path_current = '';
-foreach ($test_files as $name) {
-    $module = $module_of_test[$name];
-    
-    // Already ran non-module tests.
-    if (!$module) continue;     
-
-    if ($module_current != $module) {
-        $module_current = $module;
-        echo "
----------------------------------------------------------------------
-.... " . ($modules_to_test[$module] ? "testing " : "skipped ") . ($module ? "extension: $module" : "generic PHP") . "
+echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "
+=====================================================================
 ";
-    }
-    
-    // Can we run the test for the given module?
-    if (!$modules_to_test[$module]) {
-        $modules_skipped[$module] += 1;
-        $test_results[$name] = 'SKIPPED';
-        continue;
-    }
+
+$path_current = '';
+foreach ($test_files as $name) {
     
     $path = dirname($name);
     if ($path_current != $path) {
         $path_current = $path;
-        echo ".... directory $path\n";
+        echo "       entering directory $path\n";
     }
 
-    // We've gotten this far - run the test!
-    
     $test_results[$name] = run_test($php,$name);
 }
+
+$end_time = time();
 
 // Summarize results
 
@@ -264,7 +191,7 @@ if (0 == count($test_results)) {
 }
 
 $n_total = count($test_results);
-$sum_results = array();
+$sum_results = array('PASSED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
 foreach ($test_results as $v) {
     $sum_results[$v]++;
 }
@@ -275,26 +202,25 @@ while (list($v,$n) = each($sum_results)) {
 
 echo "
 =====================================================================
-TIME " . date('Y-m-d H:i:s') . " - end of test run
-
-TEST RESULT SUMMARY
+TIME END " . date('Y-m-d H:i:s', $end_time) . "
 =====================================================================
+TEST RESULT SUMMARY
+---------------------------------------------------------------------
 Number of tests : " . sprintf("%4d",$n_total) . "
 Tests skipped   : " . sprintf("%4d (%2.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . "
 Tests failed    : " . sprintf("%4d (%2.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . "
 Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . "
+Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 =====================================================================
-Skipped " . count($modules_skipped) . " extensions
 ";
 
 //
 //  Write the given text to a temporary file, and return the filename.
 //
 
-function save_text($filename,$text)
-{
+function save_text($filename,$text) {
     $fp = @fopen($filename,'w')
-        or die("Cannot open file '" . $filename . "'!\n");
+        or error("Cannot open file '" . $filename . "' (save_text)");
     fwrite($fp,$text);
     fclose($fp);
     if (1 < DETAILED) echo "
@@ -344,7 +270,7 @@ TEST $file
     );
 
     $fp = @fopen($file, "r")
-        or die("Cannot open test file: $file\n");
+        or error("Cannot open test file: $file");
 
     $section = '';
     while (!feof($fp)) {
@@ -362,14 +288,16 @@ TEST $file
     }
     fclose($fp);
 
-    $tmp = dirname($file);
-    $tmp_skipif = realpath("$tmp/_SKIPIF");  
-    $tmp_file   = realpath("$tmp/_FILE");  
-    $tmp_post   = realpath("$tmp/_POST");  
+    $tested = trim($section_text['TEST']).' ('.basename($file).')';
+
+    $tmp = realpath(dirname($file));
+	$tmp_skipif = "$tmp/_SKIPIF";
+	$tmp_file   = "$tmp/_FILE";
+	$tmp_post   = "$tmp/_POST";
     
-    @unlink($tmp_skipif);
-    @unlink($tmp_file);
-    @unlink($tmp_post);
+	@unlink($tmp_skipif);
+	@unlink($tmp_file);
+	@unlink($tmp_post);
     
     // Reset environment from any previous test.
 
@@ -382,16 +310,16 @@ TEST $file
     putenv("CONTENT_LENGTH=");
     
     // Check if test should be skipped.
-    
+	
     if (trim($section_text['SKIPIF'])) {
-        save_text($tmp_skipif,$section_text['SKIPIF']);
-        $output = `$php -f $tmp_skipif`;
-        @unlink($tmp_skipif);
-        $output = trim($output);
-        if (0 == strcmp('skip',$output)) {
-            return 'SKIPPED';
-        }
-    }
+		save_text($tmp_skipif, $section_text['SKIPIF']);
+		$output = `$php $tmp_skipif`;
+		@unlink($tmp_skipif);
+		if(trim($output)=='skip') {
+			echo "SKIP $tested\n";
+			return 'SKIPPED';
+		}
+	}
     
     // We've satisfied the preconditions - run the test!
     
@@ -413,7 +341,7 @@ TEST $file
         putenv("CONTENT_TYPE=application/x-www-form-urlencoded");
         putenv("CONTENT_LENGTH=$content_length");
         
-        $cmd = "$php 2>&1 < $tmp_post";
+        $cmd = "$php -f $tmp_file 2>&1 < $tmp_post";
         
     } else {
     
@@ -421,7 +349,7 @@ TEST $file
         putenv("CONTENT_TYPE=");
         putenv("CONTENT_LENGTH=");
 
-        $cmd = "$php 2>&1";
+        $cmd = "$php -f $tmp_file 2>&1";
         
     }
 
@@ -442,8 +370,6 @@ COMMAND $cmd
     @unlink($tmp_file);
     
     // Does the output match what is expected?
-
-    $tested = trim($section_text['TEST']);
     
     $output = trim(preg_replace('/^(..+\n)+\n/','',$out));
     $wanted = trim($section_text['EXPECT']);
@@ -459,11 +385,11 @@ COMMAND $cmd
     
     // Test failed so we need to report details.
 
-    echo "FAIL $tested (" . basename($file) . ").\n";
+    echo "FAIL $tested\n";
 
     $logname = ereg_replace('\.phpt$','.log',$file);
     $log = fopen($logname,'w')
-        or die("Cannot create test log - $logname\n");
+        or error("Cannot create test log - $logname");
     
     fwrite($log,"
 ---- EXPECTED OUTPUT
@@ -477,6 +403,11 @@ $output
     error_report($file,$logname,$tested);
     
     return 'FAILED';
+}
+
+function error($message) {
+	echo "ERROR: {$message}\n";
+	exit(1);
 }
 
 /*
