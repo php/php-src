@@ -273,14 +273,9 @@ PHP_FUNCTION(get_meta_tags)
 		return;
 	}
 
-	php_stream_open_wrapper(filename, "rb", 0, NULL);
-
-	
 	md.stream = php_stream_open_wrapper(filename, "rb",
 			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
-	
-
 
 	if (!md.stream)	{
 		RETURN_FALSE;
