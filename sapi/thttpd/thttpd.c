@@ -349,7 +349,6 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static PHP_MINIT_FUNCTION(thttpd)
 {
-	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
@@ -406,20 +405,28 @@ static sapi_module_struct thttpd_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void thttpd_module_main(TSRMLS_D)
+static void thttpd_module_main(int show_source TSRMLS_DC)
 {
 	zend_file_handle file_handle;
-
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = SG(request_info).path_translated;
-	file_handle.free_filename = 0;
-	file_handle.opened_path = NULL;
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return;
 	}
 	
-	php_execute_script(&file_handle TSRMLS_CC);
+	if (show_source) {
+		zend_syntax_highlighter_ini syntax_highlighter_ini;
+
+		php_get_highlight_struct(&syntax_highlighter_ini);
+		highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC);
+	} else {
+		file_handle.type = ZEND_HANDLE_FILENAME;
+		file_handle.filename = SG(request_info).path_translated;
+		file_handle.free_filename = 0;
+		file_handle.opened_path = NULL;
+
+		php_execute_script(&file_handle TSRMLS_CC);
+	}
+	
 	php_request_shutdown(NULL);
 }
 
@@ -648,14 +655,7 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 	
 	thttpd_request_ctor(TSRMLS_C);
 
-	if (show_source) {
-		zend_syntax_highlighter_ini syntax_highlighter_ini;
-
-		php_get_highlight_struct(&syntax_highlighter_ini);
-		highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC);
-	} else {
-		thttpd_module_main(TSRMLS_C);
-	}
+	thttpd_module_main(show_source TSRMLS_CC);
 
 	/* disable kl, if no content-length was seen or Connection: was set */
 	if (TG(seen_cl) == 0 || TG(seen_cn) == 1) {
