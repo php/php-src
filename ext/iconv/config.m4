@@ -28,8 +28,8 @@ if test "$PHP_ICONV" != "no"; then
   PHP_SUBST(ICONV_SHARED_LIBADD)
 
   if test -f $ICONV_DIR/lib/libconv.a -o -f $ICONV_DIR/lib/libiconv.so ; then
-    AC_CHECK_LIB(iconv, iconv_open, AC_DEFINE(HAVE_ICONV, 1, [ ]))
     PHP_ADD_LIBRARY_WITH_PATH(iconv, $ICONV_DIR/lib, ICONV_SHARED_LIBADD)
+    AC_CHECK_LIB(iconv, iconv_open, AC_DEFINE(HAVE_ICONV, 1, [ ]))
   else
     AC_CHECK_LIB(c, iconv_open, AC_DEFINE(HAVE_ICONV, 1, [ ]))
   fi
