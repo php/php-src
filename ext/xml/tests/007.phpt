@@ -1,7 +1,13 @@
 --TEST--
 xml_parse_into_struct/umlauts in tags
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php // vim600: syn=php
+include("skipif.inc");
+if(strtoupper("הצü") == "הצü")
+{
+	die("skip strtoupper on non-ascii not supported on this platform");
+}
+?>
 --FILE--
 <?php
 function startHandler($parser,$tag,$attr) { var_dump($tag,$attr); }
