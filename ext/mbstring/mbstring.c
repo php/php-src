@@ -662,31 +662,6 @@ php_mbstring_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 	MBSTRG(current_language) = mbfl_no_language_english;
 	MBSTRG(internal_encoding) = mbfl_no_encoding_8859_1;
 	MBSTRG(current_internal_encoding) = mbfl_no_encoding_8859_1;
-
-#if defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
-	MBSTRG(language) = mbfl_no_language_simplified_chinese;
-	MBSTRG(current_language) = mbfl_no_language_simplified_chinese;
-	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_cn;
-	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_cn;
-#endif
-#if defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_JA)
-	MBSTRG(language) = mbfl_no_language_traditional_chinese;
-	MBSTRG(current_language) = mbfl_no_language_traditional_chinese;
-	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_tw;
-	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_tw;
-#endif
-#if defined(HAVE_MBSTR_KR) & !defined(HAVE_MBSTR_JA)
-	MBSTRG(language) = mbfl_no_language_korean;
-	MBSTRG(current_language) = mbfl_no_language_korean;
-	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_kr;
-	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_kr;
-#endif
-#if defined(HAVE_MBSTR_JA)
-	MBSTRG(language) = mbfl_no_language_japanese;
-	MBSTRG(current_language) = mbfl_no_language_japanese;
-	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_jp;
-	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_jp;
-#endif
 #ifdef ZEND_MULTIBYTE
 	MBSTRG(script_encoding_list) = NULL;
 	MBSTRG(script_encoding_list_size) = 0;
