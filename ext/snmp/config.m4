@@ -35,10 +35,10 @@ PHP_ARG_WITH(snmp,for SNMP support,
     if test "$ac_cv_header_default_store_h" = "yes"; then
       AC_MSG_CHECKING(for OpenSSL support in SNMP libraries)
       AC_EGREP_CPP(yes,[
-        #include <ucd-snmp-config.h>
-        #if USE_OPENSSL
+#include <ucd-snmp-config.h>
+#if USE_OPENSSL
         yes
-        #endif
+#endif
       ],[
         SNMP_SSL=yes
       ],[

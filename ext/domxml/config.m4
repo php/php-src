@@ -7,10 +7,10 @@ AC_DEFUN(PHP_DOM_CHECK_VERSION,[
   CPPFLAGS=-I$DOMXML_DIR/include$DOMXML_DIR_ADD
   AC_MSG_CHECKING(for libxml version)
   AC_EGREP_CPP(yes,[
-  #include <libxml/xmlversion.h>
-  #if LIBXML_VERSION >= 20414
+#include <libxml/xmlversion.h>
+#if LIBXML_VERSION >= 20414
   yes
-  #endif
+#endif
   ],[
     AC_MSG_RESULT(>= 2.4.14)
   ],[
@@ -78,10 +78,10 @@ AC_DEFUN(PHP_DOM_XSLT_CHECK_VERSION,[
   CPPFLAGS=-I$DOMXSLT_DIR/include
   AC_MSG_CHECKING(for libxslt version)
   AC_EGREP_CPP(yes,[
-  #include <libxslt/xsltconfig.h>
-  #if LIBXSLT_VERSION >= 10003
+#include <libxslt/xsltconfig.h>
+#if LIBXSLT_VERSION >= 10003
   yes
-  #endif
+#endif
   ],[
     AC_MSG_RESULT(>= 1.0.3)
   ],[
@@ -95,10 +95,10 @@ AC_DEFUN(PHP_DOM_EXSLT_CHECK_VERSION,[
   CPPFLAGS=-I$DOMEXSLT_DIR/include
   AC_MSG_CHECKING(for libexslt version)
   AC_EGREP_CPP(yes,[
-  #include <libexslt/exsltconfig.h>
-  #if LIBEXSLT_VERSION >= 600
+#include <libexslt/exsltconfig.h>
+#if LIBEXSLT_VERSION >= 600
   yes
-  #endif
+#endif
   ],[
     AC_MSG_RESULT(>= 1.0.3)
   ],[
