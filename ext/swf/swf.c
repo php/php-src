@@ -106,10 +106,6 @@ zend_module_entry swf_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL
-DLEXPORT zend_module_entry *get_module() { return &swf_module_entry; };
-#endif
-
 PHP_MINFO_FUNCTION(swf)
 {
 	php_info_print_table_start();
@@ -141,6 +137,9 @@ PHP_MINIT_FUNCTION(swf)
 	return SUCCESS;
 }
 
+         
+/* {{{ proto void swf_openfile(string name, double xsize, double ysize, double framerate, double r, double g, double b)
+   Create a Shockwave Flash file given by name, with width xsize and height ysize at a frame rate of framerate and a background color specified by a red value of r, green value of g and a blue value of b */
 PHP_FUNCTION(swf_openfile)
 {
 	zval **name, **sizeX, **sizeY, **frameRate, **r, **g, **b;
@@ -160,12 +159,18 @@ PHP_FUNCTION(swf_openfile)
 	swf_openfile((*name)->value.str.val, (float)(*sizeX)->value.dval, (float)(*sizeY)->value.dval,
 	       		 (float)(*frameRate)->value.dval, (float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_closefile(void)
+   Close a Shockwave flash file that was opened with swf_openfile */
 PHP_FUNCTION(swf_closefile)
 {
 	swf_closefile();
 }
+/* }}} */
 
+/* {{{ proto void swf_labelframe(string name)
+   Adds string name to the current frame */
 PHP_FUNCTION(swf_labelframe)
 {
 	zval **name;
@@ -176,12 +181,18 @@ PHP_FUNCTION(swf_labelframe)
 	convert_to_string_ex(name);
 	swf_labelframe((*name)->value.str.val);
 }
+/* }}} */
 
+/* {{{ proto void swf_showframe(void)
+   Finish the current frame */
 PHP_FUNCTION(swf_showframe)
 {
 	swf_showframe();
 }
+/* }}} */
 
+/* {{{ proto void swf_setframe(int frame_number)
+   Set the current frame number to the number given by frame_number */
 PHP_FUNCTION(swf_setframe)
 {
 	zval **frameno;
@@ -193,11 +204,15 @@ PHP_FUNCTION(swf_setframe)
 	
 	swf_setframe((*frameno)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto int swf_getframe(void)
+   Returns the current frame */
 PHP_FUNCTION(swf_getframe)
 {
 	RETURN_LONG(swf_getframe());
 }
+/* }}} */
 
 void col_swf(INTERNAL_FUNCTION_PARAMETERS, int opt) {
 	zval **r, **g, **b, **a;
@@ -216,16 +231,24 @@ void col_swf(INTERNAL_FUNCTION_PARAMETERS, int opt) {
 	}
 }
 
+/* {{{ proto void swf_mulcolor(double r, double g, double b, double a)
+   Sets the global multiply color to the rgba value specified */
 PHP_FUNCTION(swf_mulcolor)
 {
 	col_swf(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-
+/* }}} */ 
+         
+/* {{{ proto void swf_addcolor(double r, double g, double b, double a)
+   Set the global add color to the rgba value specified */
 PHP_FUNCTION(swf_addcolor)
 {
 	col_swf(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
-
+/* }}} */ 
+         
+/* {{{ proto void swf_placeobject(int objid, int depth)
+   Places the object, objid, in the current frame at depth, depth */
 PHP_FUNCTION(swf_placeobject)
 {
 	zval **objid, **depth;
@@ -237,7 +260,10 @@ PHP_FUNCTION(swf_placeobject)
 	convert_to_long_ex(depth);
 	swf_placeobject((*objid)->value.lval, (*depth)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void swf_modifyobject(int depth, int how)
+   Updates the position and/or color of the object */
 PHP_FUNCTION(swf_modifyobject)
 {
 	zval **depth, **how;
@@ -250,7 +276,10 @@ PHP_FUNCTION(swf_modifyobject)
 	
 	swf_modifyobject((*depth)->value.lval, (*how)->value.lval);
 }
+/* }}} */
 
+/* {{{ swf_removeobject(int depth)
+   Removes the object at the specified depth */
 PHP_FUNCTION(swf_removeobject)
 {
 	zval **depth;
@@ -263,21 +292,32 @@ PHP_FUNCTION(swf_removeobject)
 	swf_removeobject((*depth)->value.lval);
 }
 
+/* {{{ proto int swf_nextid(void)
+   Returns a free objid */
 PHP_FUNCTION(swf_nextid)
 {
 	swf_nextid();
 }
+/* }}} */
 
+/* {{{ proto void swf_startdoaction(void)
+   Starts the description of an action list for the current frame */
 PHP_FUNCTION(swf_startdoaction)
 {
 	swf_startdoaction();
 }
+/* }}} */
 
+/* {{{ proto void swf_enddoaction(void)
+   Ends the list of actions to perform for the current frame */
 PHP_FUNCTION(swf_enddoaction)
 {
 	swf_enddoaction();
 }
-
+/* }}} */
+ 
+/* {{{ proto void swf_actiongotoframe(int frame_number)
+   Causes the Flash movie to display the specified frame, frame_number, and then stop. */
 PHP_FUNCTION(swf_actiongotoframe)
 {
 	zval **frameno;
@@ -289,7 +329,10 @@ PHP_FUNCTION(swf_actiongotoframe)
 
 	swf_actionGotoFrame((*frameno)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void swf_actiongeturl(string url, string target)
+   Gets the specified url */
 PHP_FUNCTION(swf_actiongeturl)
 {
 	zval **url, **target;
@@ -302,32 +345,50 @@ PHP_FUNCTION(swf_actiongeturl)
 	
 	swf_actionGetURL((*url)->value.str.val, (*target)->value.str.val);
 }
+/* }}} */
 
+/* {{{ proto void swf_actionnextframe(void)
+   Goes foward one frame */
 PHP_FUNCTION(swf_actionnextframe)
 {
 	swf_actionNextFrame();
 }
+/* }}} */
 
+/* {{{ proto void swf_actionprevframe(void)
+   Goes backward one frame */
 PHP_FUNCTION(swf_actionprevframe)
 {
 	swf_actionPrevFrame();
 }
+/* }}} */
 
+/* {{{ proto void swf_actionplay(void)
+   Starts playing the Flash movie from the current frame */
 PHP_FUNCTION(swf_actionplay)
 {
 	swf_actionPlay();
 }
+/* }}} */
 
+/* {{{ proto void swf_actionstop(void)
+   Stops playing the Flash movie at the current frame */
 PHP_FUNCTION(swf_actionstop)
 {
 	swf_actionStop();
 }
+/* }}} */
 
+/* {{{ proto void swf_actiontogglequality(void)
+   Toggles between high and low quality */
 PHP_FUNCTION(swf_actiontogglequality)
 {
 	swf_actionToggleQuality();
 }
+/* }}} */
 
+/* {{{ proto void swf_actionwaitforframe(int frame, int skipcount)
+   If the specified frame has not been loaded, skip the specified number of actions in the action list */
 PHP_FUNCTION(swf_actionwaitforframe)
 {
 	zval **frame, **skipcount;
@@ -340,7 +401,10 @@ PHP_FUNCTION(swf_actionwaitforframe)
 	convert_to_long_ex(skipcount);
 	swf_actionWaitForFrame((*frame)->value.lval, (*skipcount)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void swf_actionsettarget(string target)
+   Sets the context for actions */
 PHP_FUNCTION(swf_actionsettarget)
 {
 	zval **target;
@@ -352,7 +416,10 @@ PHP_FUNCTION(swf_actionsettarget)
 	convert_to_string_ex(target);
 	swf_actionSetTarget((*target)->value.str.val);
 }
+/* }}} */
 
+/* {{{ proto void swf_actiongotolabel(string label)
+   Causes the flash movie to display the frame with the given label and then stop */
 PHP_FUNCTION(swf_actiongotolabel)
 {
 	zval **label;
@@ -364,6 +431,7 @@ PHP_FUNCTION(swf_actiongotolabel)
 	convert_to_string_ex(label);
 	swf_actionGoToLabel((*label)->value.str.val);
 }
+/* }}} */
 
 void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
@@ -389,17 +457,24 @@ void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	}
 }
 
+/* {{{ proto void swf_defineline(int objid, double x1, double y1, double x2, double y2, double width)
+   Create a line with object id, objid, starting from x1, y1 and going to x2, y2 with width, width */
 PHP_FUNCTION(swf_defineline)
 {
 	php_swf_define(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 
+/* {{{ proto void swf_defineline(int objid, double x1, double y1, double x2, double y2, double width)
+   Create a rectangle with object id, objid, the upper lefthand coordinate is given by x1, y1 the bottom right coordinate is x2, y2 and with is the width of the line */
 PHP_FUNCTION(swf_definerect)
 {
 	php_swf_define(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
-
+/* {{{ proto void swf_startshape(int objid)
+   Initialize a new shape with object id, objid */
 PHP_FUNCTION(swf_startshape)
 {
 	zval **objid;
@@ -410,7 +485,10 @@ PHP_FUNCTION(swf_startshape)
 	convert_to_long_ex(objid);
 	swf_startshape((*objid)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void swf_shapelinesolid(double r, double g, double b, double a, double width)
+   Create a line with color defined by rgba, and a width of width */
 PHP_FUNCTION(swf_shapelinesolid)
 {
 	zval **r, **g, **b, **a, **width;
@@ -426,12 +504,18 @@ PHP_FUNCTION(swf_shapelinesolid)
 	swf_shapelinesolid((float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval, (float)(*a)->value.dval,
 				   (float)(*width)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_shapefilloff(void)
+   Turns off filling */
 PHP_FUNCTION(swf_shapefilloff)
 {
 	swf_shapefilloff();
 }
+/* }}} */
 
+/* {{{ proto void swf_shapefillsolid(double r, double g, double b, double a)
+   Sets the current fill style to a solid fill with the specified rgba color */
 PHP_FUNCTION(swf_shapefillsolid)
 {
 	zval **r, **g, **b, **a;
@@ -447,6 +531,7 @@ PHP_FUNCTION(swf_shapefillsolid)
 	
 	swf_shapefillsolid((float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval, (float)(*a)->value.dval);
 }
+/* }}} */
 
 void php_swf_fill_bitmap(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
@@ -464,16 +549,21 @@ void php_swf_fill_bitmap(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	}
 }
 
-
+/* {{{ proto void swf_shapefillbitmapclip(int bitmapid)
+   Sets the current fill mode to clipped bitmap fill. Pixels from the previously defined bitmapid will be used to fill areas */
 PHP_FUNCTION(swf_shapefillbitmapclip)
 {
 	php_swf_fill_bitmap(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 
+/* {{{ proto void swf_shapefillbitmaptile(int bitmapid)
+   Sets the current fill mode to tiled bitmap fill. Pixels from the previously defined bitmapid will be used to fill areas */
 PHP_FUNCTION(swf_shapefillbitmaptile)
 {
 	php_swf_fill_bitmap(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
 void php_swf_shape(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
@@ -492,16 +582,24 @@ void php_swf_shape(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	}
 }
 
+/* {{{ proto void swf_shapemoveto(double x, double y)
+   swf_shapemoveto moves the current position to the given x,y. */
 PHP_FUNCTION(swf_shapemoveto)
 {
 	php_swf_shape(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 
+/* {{{ proto void swf_shapelineto(double x, double y)
+   Draws a line from the current position to x,y, the current position is then set to x,y */
 PHP_FUNCTION(swf_shapelineto)
 {
 	php_swf_shape(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
-
+/* }}} */
+ 
+/* {{{ proto void swf_shapecurveto(double x1, double y1, double x2, double y2)
+   Draws a quadratic bezier curve starting at the current position using x1, y1 as an off curve control point and using x2, y2 as the end point. The current position is then set to x2, y2. */
 PHP_FUNCTION(swf_shapecurveto)
 {
 	zval **x1, **y1, **x2, **y2;
@@ -516,8 +614,10 @@ PHP_FUNCTION(swf_shapecurveto)
 	
 	swf_shapecurveto((float)(*x1)->value.dval, (float)(*y1)->value.dval, (float)(*x2)->value.dval, (float)(*y2)->value.dval);
 }
+/* }}} */
 
-
+/* {{{ proto void swf_shapecurveto3(double x1, double y1, double x2, double y2, double x3, double y3)
+   Draws a cubic bezier curve starting at the current position using x1, y1 and x2, y2 as off curve control points and using x3,y3 as the end point.  The current position is then sent to x3, y3 */
 PHP_FUNCTION(swf_shapecurveto3)
 {
 	zval **x1, **y1, **x2, **y2, **x3, **y3;
@@ -535,7 +635,10 @@ PHP_FUNCTION(swf_shapecurveto3)
 	swf_shapecurveto3((float)(*x1)->value.dval, (float)(*y1)->value.dval, (float)(*x2)->value.dval, (float)(*y2)->value.dval,
 				  (float)(*x3)->value.dval, (float)(*y3)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_shapearc(double x, double y, double r, double ang1, double ang2)
+   Draws a circular arc from ang1 to ang2. The center of the circle is given by x, and y. r specifies the radius of the arc */
 PHP_FUNCTION(swf_shapearc)
 {
 	zval **x, **y, **r, **ang1, **ang2;
@@ -552,12 +655,18 @@ PHP_FUNCTION(swf_shapearc)
 	swf_shapearc((float)(*x)->value.dval, (float)(*y)->value.dval, (float)(*r)->value.dval, (float)(*ang1)->value.dval,
 	             (float)(*ang2)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_endshape(void)
+   Completes the definition of the current shape */
 PHP_FUNCTION(swf_endshape)
 {
 	swf_endshape();
 }
+/* }}} */
 
+/* {{{ proto void swf_definefont(int fontid, string name)
+   Defines a font. name specifies the PostScript name of the font to use. This font also becomes the current font.  */
 PHP_FUNCTION(swf_definefont)
 {
 	zval **fontid, **name;
@@ -570,7 +679,10 @@ PHP_FUNCTION(swf_definefont)
 	
 	swf_definefont((*fontid)->value.lval, (*name)->value.str.val);
 }
+/* }}} */
 
+/* {{{ proto void swf_setfont(int fontid)
+   Sets fontid to the current font */
 PHP_FUNCTION(swf_setfont)
 {
 	zval **fontid;
@@ -581,7 +693,10 @@ PHP_FUNCTION(swf_setfont)
 	convert_to_long_ex(fontid);
 	swf_setfont((*fontid)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void swf_fontsize(double height)
+   Sets the current font's height to the value specified by height */
 PHP_FUNCTION(swf_fontsize)
 {
 	zval **height;
@@ -593,7 +708,10 @@ PHP_FUNCTION(swf_fontsize)
 	
 	swf_fontsize((float)(*height)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_fontslant(double slant)
+   Set the current font slant to the angle indicated by slant */
 PHP_FUNCTION(swf_fontslant)
 {
 	zval **slant;
@@ -605,7 +723,10 @@ PHP_FUNCTION(swf_fontslant)
 	
 	swf_fontslant((float)(*slant)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_fonttracking(track)
+   Sets the current font tracking to the specified value, track */
 PHP_FUNCTION(swf_fonttracking)
 {
 	zval **track;
@@ -616,7 +737,10 @@ PHP_FUNCTION(swf_fonttracking)
 	convert_to_double_ex(track);
 	swf_fonttracking((float)(*track)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto array swf_getfontinfo(void)
+   Get information about the current font */
 PHP_FUNCTION(swf_getfontinfo)
 {
 	float A_height, x_height;
@@ -628,7 +752,10 @@ PHP_FUNCTION(swf_getfontinfo)
 	add_assoc_double(return_value, "Aheight", A_height);
 	add_assoc_double(return_value, "xheight", x_height);
 }
+/* }}} */
 
+/* {{{ proto void swf_definetext(int objid, string str, int docCenter)
+   defines a text string using the current font, current fontsize and current font slant. If docCenter is 1, the word is centered in x */
 PHP_FUNCTION(swf_definetext)
 {
 	zval **objid, **str, **docCenter;
@@ -642,7 +769,10 @@ PHP_FUNCTION(swf_definetext)
 	
 	swf_definetext((*objid)->value.lval, (*str)->value.str.val, (*docCenter)->value.lval);
 }
-	
+/* }}} */
+
+/* {{{ proto void swf_textwidth(string str)
+   Calculates the width of a string, str, using the current fontsize & current font */
 PHP_FUNCTION(swf_textwidth)
 {
 	zval **str;
@@ -653,7 +783,10 @@ PHP_FUNCTION(swf_textwidth)
 	convert_to_string_ex(str);
 	RETURN_DOUBLE((double)swf_textwidth((*str)->value.str.val));
 }
+/* }}} */
 
+/* {{{ proto void swf_definebitmap(int objid, string imgname)
+   Defines a bitmap given the name of a .gif .rgb .jpeg or .fi image. The image will be converted into Flash jpeg or Flash color map format */
 PHP_FUNCTION(swf_definebitmap)
 {
 	zval **objid, **imgname;
@@ -666,7 +799,10 @@ PHP_FUNCTION(swf_definebitmap)
 	
 	swf_definebitmap((*objid)->value.lval, (*imgname)->value.str.val);
 }
+/* }}} */
 
+/* {{{ proto array swf_getbitmapinfo(int bitmapid)
+   Returns an array of information about a bitmap specified by bitmapid */
 PHP_FUNCTION(swf_getbitmapinfo)
 {
 	zval **bitmapid;
@@ -688,7 +824,10 @@ PHP_FUNCTION(swf_getbitmapinfo)
 	add_assoc_long(return_value, "width", width);
 	add_assoc_long(return_value, "height", height);
 }
+/* }}} */
 
+/* {{{ proto void swf_startsymbol(int objid)
+   Create a new symbol with object id, objid */
 PHP_FUNCTION(swf_startsymbol)
 {
 	zval **objid;
@@ -700,12 +839,18 @@ PHP_FUNCTION(swf_startsymbol)
 	
 	swf_startsymbol((*objid)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void swf_endsymbol(void)
+   End the current symbol */
 PHP_FUNCTION(swf_endsymbol)
 {
 	swf_endsymbol();
 }
+/* }}} */
 
+/* {{{ proto void swf_startbutton(int objid, int type)
+   Start a button with an object id, objid and a type of either TYPE_MENUBUTTON or TYPE_PUSHBUTTON */
 PHP_FUNCTION(swf_startbutton)
 {
 	zval **objid, **type;
@@ -718,7 +863,10 @@ PHP_FUNCTION(swf_startbutton)
 	
 	swf_startbutton((*objid)->value.lval, (*type)->value.lval); /* TYPE_MENUBUTTON, TYPE_PUSHBUTTON */
 }
+/* }}} */
 
+/* {{{ proto void swf_addbuttonrecord(int state, int objid, int depth)
+   Controls the location, appearance and active area of the current button */
 PHP_FUNCTION(swf_addbuttonrecord)
 {
 	zval **state, **objid, **depth;
@@ -732,7 +880,10 @@ PHP_FUNCTION(swf_addbuttonrecord)
 	
 	swf_addbuttonrecord((*state)->value.lval, (*objid)->value.lval, (*depth)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void swf_oncondition(int transitions)
+   Describes a transition used to trigger an action list */
 PHP_FUNCTION(swf_oncondition)
 {
 	zval **transitions;
@@ -744,11 +895,15 @@ PHP_FUNCTION(swf_oncondition)
 	
 	swf_oncondition((*transitions)->value.lval);
 }
+/* }}} */
 
+/* {{{ proto void swf_endbutton(void)
+   Complete the definition of the current button */
 PHP_FUNCTION(swf_endbutton)
 {
 	swf_endbutton();
 }
+/* }}} */
 
 void php_swf_geo_same(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
@@ -775,28 +930,42 @@ void php_swf_geo_same(INTERNAL_FUNCTION_PARAMETERS, int opt)
 		swf_perspective((*arg1)->value.dval, (*arg2)->value.dval, (*arg3)->value.dval,
 		                (*arg4)->value.dval);
 	}
-}
+} 
 
+/* {{{ proto void swf_viewport(double xmin, double xmax, double ymin, double ymax)
+   Selects an area on the drawing surface for future drawing */
 PHP_FUNCTION(swf_viewport)
 {
 	php_swf_geo_same(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
+/* {{{ void swf_ortho2(double xmin, double xmax, double ymin, double ymax)
+   Defines a 2-D orthographic mapping of user coordinates onto the current viewport */ 
 PHP_FUNCTION(swf_ortho2)
 {
 	php_swf_geo_same(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 
+/* {{{ proto void swf_polarview(double dist, double azimuth, double incidence, double twist)
+   Defines he viewer's position in polar coordinates */
 PHP_FUNCTION(swf_polarview)
 {
 	php_swf_geo_same(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
+/* }}} */
 
+/* {{{ proto void swf_perspective(double fovy, double aspect, double near, double far)
+   Define a perspective projection transformation. */
 PHP_FUNCTION(swf_perspective)
 {
 	php_swf_geo_same(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
+/* }}} */
 
+/* {{{ proto void swf_lookat(double vx, double vy, double vz, double px, double py, double pz, double twist)
+   Defines a viewing transformation by giving the view position vx, vy, vz, and the coordinates of a reference point in the scene at px, py, pz. Twist controls a rotation along the viewer's z axis */
 PHP_FUNCTION(swf_lookat)
 {
 	zval **vx, **vy, **vz, **px, **py, **pz, **twist;
@@ -815,17 +984,26 @@ PHP_FUNCTION(swf_lookat)
 	swf_lookat((*vx)->value.dval, (*vy)->value.dval, (*vz)->value.dval,
 	           (*px)->value.dval, (*py)->value.dval, (*pz)->value.dval, (*twist)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_pushmatrix(void)
+   Push the current transformation matrix onto the stack */
 PHP_FUNCTION(swf_pushmatrix)
 {
 	swf_pushmatrix();
 }
+/* }}} */
 
+/* {{{ proto void swf_popmatrix(void)
+   Restore a previous transformation matrix */
 PHP_FUNCTION(swf_popmatrix)
 {
 	swf_popmatrix();
 }
+/* }}} */
 
+/* {{{ proto void swf_scale(double x, double y, double z)
+   Scale the current transformation */
 PHP_FUNCTION(swf_scale)
 {
 	zval **x, **y, **z;
@@ -839,7 +1017,10 @@ PHP_FUNCTION(swf_scale)
 	
 	swf_scale((*x)->value.dval, (*y)->value.dval, (*z)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_translate(double x, double y, double z)
+   Translate the current transformation */
 PHP_FUNCTION(swf_translate)
 {
 	zval **x, **y, **z;
@@ -853,7 +1034,10 @@ PHP_FUNCTION(swf_translate)
 	
 	swf_translate((*x)->value.dval, (*y)->value.dval, (*z)->value.dval);
 }
+/* }}} */
 
+/* {{{ proto void swf_rotate(double angle, string axis)
+   Rotate the current transformation by the given angle about x, y, or z axis. The axis may be 'x', 'y', or 'z' */
 PHP_FUNCTION(swf_rotate)
 {
 	zval **angle, **axis;
@@ -866,7 +1050,10 @@ PHP_FUNCTION(swf_rotate)
 	
 	swf_rotate((*angle)->value.dval, (*axis)->value.str.val);
 }
+/* }}} */
 
+/* {{{ proto void swf_posround(int doit)
+   This enables or disables rounding of the translation when objects are places or moved */
 PHP_FUNCTION(swf_posround)
 {
 	zval **doit;
@@ -878,5 +1065,6 @@ PHP_FUNCTION(swf_posround)
 	
 	swf_posround((*doit)->value.lval);
 }
+/* }}} */
 
 #endif
