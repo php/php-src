@@ -33,6 +33,14 @@ switch ($connection) {
         $password="dbx_testpassword";
         $module_name="pgsql";
         break;
+    case DBX_FBSQL:
+        $module=DBX_FBSQL;
+        $host="";
+        $database="dbx_test";
+        $username="dbx_testuser";
+        $password="dbx_testpassword";
+        $module_name="fbsql";
+        break;
     }
 
 ?>
