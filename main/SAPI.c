@@ -538,49 +538,6 @@ SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry)
 	zend_hash_del(&known_post_content_types, post_entry->content_type, post_entry->content_type_len+1);
 }
 
-SAPI_API int sapi_add_post_entry(char *content_type
-								 , void (*post_reader)(SLS_D)
-								 , void (*post_handler)(char *content_type_dup
-								 , void *arg SLS_DC)) {
-
-	sapi_post_entry *post_entry = (sapi_post_entry *)malloc(sizeof(sapi_post_entry));
-	if(!post_entry) return 0;
-
-	post_entry->content_type     = strdup(content_type);
-	if(post_entry->content_type == NULL) return 0;
-	post_entry->content_type_len = strlen(content_type);
-	post_entry->post_reader      = post_reader;
-	post_entry->post_handler     = post_handler;
-
-	return zend_hash_add(&known_post_content_types
-						 , post_entry->content_type
-						 , post_entry->content_type_len+1
-						 , (void *) post_entry
-						 , sizeof(sapi_post_entry)
-						 , NULL
-						 );
-}
-
-SAPI_API void sapi_remove_post_entry(char *content_type) {
-	sapi_post_entry *post_entry;
-
-	zend_hash_find(&known_post_content_types
-				   ,content_type
-				   ,strlen(content_type)+1
-				   ,(void **)&post_entry
-				   );
-	
-	if(post_entry != NULL) {
-		zend_hash_del(&known_post_content_types
-					  ,content_type
-					  ,strlen(content_type)+1
-					  );
-		free(post_entry->content_type);
-		free(post_entry);
-	} else {
-		php_error(E_WARNING,"unregister post handler failed in fdf");
-	}
-}
 
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(SLS_D))
 {
