@@ -20,6 +20,8 @@
 
 /* #define HW_DEBUG */
 
+//#define newlist
+
 #include <stdlib.h>
 #include "php.h"
 #include "php_globals.h"
@@ -131,13 +133,21 @@ char *fnInsStr(char *str, int pos, char *insstr)
 *            int end: end position                                     *
 * Return: Pointer to new anchor, NULL if error                         *
 ***********************************************************************/
+#ifdef newlist
+ANCHOR *fnAddAnchor(zend_llist *pAnchorList, 
+                    int objectID,
+                    int start, int end)
+#else
 ANCHOR *fnAddAnchor(DLIST *pAnchorList, 
                     int objectID,
                     int start, int end)
+#endif
 {
 	ANCHOR *cur_ptr;
 
 #ifdef newlist
+	if(NULL == (cur_ptr = (ANCHOR *) emalloc(sizeof(ANCHOR))))
+		return NULL;
 #else
 	if((cur_ptr = (ANCHOR *) dlst_newnode(sizeof(ANCHOR))) == NULL) {
 		return NULL;
@@ -160,7 +170,6 @@ ANCHOR *fnAddAnchor(DLIST *pAnchorList,
 
 #ifdef newlist
 	zend_llist_prepend_element(pAnchorList, cur_ptr);
-	free(cur_ptr);
 #else
 	dlst_insertafter(pAnchorList, cur_ptr, PHP_DLST_HEAD(pAnchorList));
 #endif
@@ -175,8 +184,16 @@ ANCHOR *fnAddAnchor(DLIST *pAnchorList,
 * Parameter: ptr: pointer to node                                      *
 * Return: void                                                         *
 ***********************************************************************/
+#ifdef newlist
+void fnDeleteAnchor(void *ptr1)
+#else
 void fnDeleteAnchor(ANCHOR *ptr)
+#endif
 {
+#ifdef newlist
+	ANCHOR *ptr;
+	ptr = (ANCHOR *) ptr1;
+#endif
 
 	if(ptr->destdocname) efree(ptr->destdocname);
 	if(ptr->nameanchor) efree(ptr->nameanchor);
@@ -189,10 +206,51 @@ void fnDeleteAnchor(ANCHOR *ptr)
 	if(ptr->fragment) efree(ptr->fragment);
 
 #ifdef newlist
-	free(ptr);
+	efree(ptr);
 #else
 	dlst_freenode(ptr);
 #endif
+}
+
+/***********************************************************************
+* Function fnListAnchor()                                              *
+*                                                                      *
+* Lists all anchors in  anchor list.                                   *
+* Parameter: ptr: pointer to list                                      *
+* Return: void                                                         *
+***********************************************************************/
+#ifdef newlist
+void fnListAnchor(zend_llist *pAnchorList)
+#else
+void fnListAnchor(DLIST *pAnchorList)
+#endif
+{
+	ANCHOR *cur_ptr;
+#ifdef newlist
+	cur_ptr = (ANCHOR *) zend_llist_get_last(pAnchorList);
+#else
+	cur_ptr = (ANCHOR *) dlst_last(pAnchorList);
+#endif
+	while(cur_ptr) {
+
+		fprintf(stderr, "%d, %d, %s, %s, %s %s\n", cur_ptr->start,
+		                                           cur_ptr->end,
+		                                           cur_ptr->destdocname,
+		                                           cur_ptr->nameanchor,
+		                                           cur_ptr->link,
+		                                           cur_ptr->tagattr);
+//	if(ptr->htmlattr) efree(ptr->htmlattr);
+//	if(ptr->codebase) efree(ptr->codebase);
+//	if(ptr->code) efree(ptr->code);
+//	if(ptr->keyword) efree(ptr->keyword);
+//	if(ptr->fragment) efree(ptr->fragment);
+
+#ifdef newlist
+		cur_ptr = (ANCHOR *) zend_llist_get_prev(pAnchorList);
+#else
+		cur_ptr = (ANCHOR *) dlst_prev(cur_ptr);
+#endif
+	}
 }
 
 /***********************************************************************
@@ -238,12 +296,17 @@ int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2)
 *            int ancount: number of anchors                            *
 * Return: List of Anchors, NULL if error                               *
 ***********************************************************************/
+#ifdef newlist
+zend_llist *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode)
+#else
 DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode)
+#endif
 {
 	int start, end, i, destid, anchordestid, objectID;
 	ANCHOR *cur_ptr = NULL;
 #ifdef newlist
 	zend_llist *pAnchorList;
+	pAnchorList = (zend_llist *) emalloc(sizeof(zend_llist));
 	zend_llist_init(pAnchorList, sizeof(char *), fnDeleteAnchor, 0);
 #else
 	DLIST *pAnchorList = dlst_init();
@@ -474,7 +537,11 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 * Return: Text with anchors                                            *
 ***********************************************************************/
 #define BUFFERLEN 200
+#ifdef newlist
+char *fnInsAnchorsIntoText(char *text, zend_llist *pAnchorList, char **bodytag, char *urlprefix) {
+#else
 char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char *urlprefix) {
+#endif
 	ANCHOR *cur_ptr;
 	char bgstr[BUFFERLEN], istr[BUFFERLEN];
 	char *scriptname;
@@ -605,7 +672,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 			offset += strlen(istr) + 4;
 			laststart = cur_ptr->start;
 		}
-#if newlist
+#ifdef newlist
 		cur_ptr = (ANCHOR *) dlst_prev(cur_ptr);
 #else
 		cur_ptr = (ANCHOR *) zend_llist_get_prev(pAnchorList);
@@ -1919,11 +1986,16 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 	if((documenttype != NULL) && (strcmp(documenttype, "Image") != 0)) {
 		if(send_getanchorsobj(sockfd, objectID, &anchors, &ancount) == 0) {
 			char **destrec, **reldestrec;
+#ifdef newlist
+			zend_llist *pAnchorList;
+#else
 			DLIST *pAnchorList;
+#endif
 
 			send_getdestforanchorsobj(sockfd, anchors, &destrec, ancount);
 			send_getreldestforanchorsobj(sockfd, anchors, &reldestrec, ancount, rootid, objectID);
 			pAnchorList = fnCreateAnchorList(objectID, anchors, destrec, reldestrec, ancount, mode);
+//fnListAnchor(pAnchorList);
 			/* Free only the array, the objrecs has been freed in fnCreateAnchorList() */
 			if(anchors) efree(anchors);
 			if(destrec) efree(destrec);
@@ -1935,7 +2007,8 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 
 				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
 #ifdef newlist
-				zend_llist_destroy(pAnchorList)
+				zend_llist_destroy(pAnchorList);
+				efree(pAnchorList);
 #else
 				dlst_kill(pAnchorList, fnDeleteAnchor);
 #endif
@@ -4261,7 +4334,11 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	if((documenttype != NULL) && (!strcmp(documenttype, "text") != 0)) {
 		if(send_getanchorsobj(sockfd, objectID, &anchors, &ancount) == 0) {
 			char **destrec, **reldestrec;
+#ifdef newlist
+			zend_llist *pAnchorList = NULL;
+#else
 			DLIST *pAnchorList = NULL;
+#endif
 
 			send_getdestforanchorsobj(sockfd, anchors, &destrec, ancount);
 			send_getreldestforanchorsobj(sockfd, anchors, &reldestrec, ancount, rootid, objectID);
@@ -4277,7 +4354,8 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 
 				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
 #ifdef newlist
-				zend_llist_destroy(pAnchorList)
+				zend_llist_destroy(pAnchorList);
+				efree(pAnchorList);
 #else
 				dlst_kill(pAnchorList, fnDeleteAnchor);
 #endif

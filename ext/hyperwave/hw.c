@@ -1287,7 +1287,7 @@ php_printf("%s", object);
 }
 /* }}} */
 
-/* {{{ proto string hw_getobject(int link, int objid)
+/* {{{ proto string hw_getobject(int link, int objid¸ [string linkroot])
    Returns object record  */
 PHP_FUNCTION(hw_getobject) {
 	pval **argv[3];
