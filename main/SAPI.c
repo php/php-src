@@ -21,6 +21,8 @@
 #include "TSRM.h"
 #endif
 
+#include "rfc1867.h"
+
 #if WIN32||WINNT
 #define STRCASECMP stricmp
 #else
@@ -33,7 +35,8 @@ static SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
 static sapi_post_content_type_reader supported_post_content_types[] = {
-	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data },
+	{ DEFAULT_POST_CONTENT_TYPE,	sizeof(DEFAULT_POST_CONTENT_TYPE)-1,	sapi_read_standard_form_data },
+	{ MULTIPART_CONTENT_TYPE,		sizeof(MULTIPART_CONTENT_TYPE)-1,		rfc1867_post_reader	},
 	{ NULL, 0, NULL }
 };
 
@@ -80,19 +83,43 @@ static void sapi_free_header(sapi_header_struct *sapi_header)
 #undef SAPI_POST_BLOCK_SIZE
 #define SAPI_POST_BLOCK_SIZE 2
 
+
 static void sapi_read_post_data(SLS_D)
 {
 	sapi_post_content_type_reader *post_content_type_reader;
 	uint content_type_length = strlen(SG(request_info).content_type);
 	char *content_type = estrndup(SG(request_info).content_type, content_type_length);
+	char *p;
+	char oldchar=0;
 
-	zend_str_tolower(content_type, content_type_length);
+	/* dedicated implementation for increased performance:
+	 * - Make the content type lowercase
+	 * - Trim descriptive data, stay with the content-type only
+	 */
+	for (p=content_type; p<content_type+content_type_length; p++) {
+		switch (*p) {
+			case ';':
+			case ',':
+			case ' ':
+				content_type_length = p-content_type;
+				oldchar = *p;
+				*p = 0;
+				break;
+			default:
+				*p = tolower(*p);
+				break;
+		}
+	}
 
 	if (zend_hash_find(&known_post_content_types, content_type, content_type_length+1, (void **) &post_content_type_reader)==FAILURE) {
-		sapi_module.sapi_error(E_CORE_ERROR, "Unsupported content type:  '%s'", content_type);
+		sapi_module.sapi_error(E_COMPILE_ERROR, "Unsupported content type:  '%s'", content_type);
 		return;
 	}
-	post_content_type_reader->post_reader(SLS_C);
+	if (oldchar) {
+		*(p-1) = oldchar;
+	}
+	post_content_type_reader->post_reader(content_type SLS_CC);
+	efree(content_type);
 }
 
 
