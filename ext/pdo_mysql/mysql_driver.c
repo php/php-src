@@ -143,6 +143,17 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	/* handle for the server */
 	H->server = mysql_init(NULL);
 	dbh->driver_data = H;
+
+	/* handle MySQL options */
+	if (driver_options) {
+		long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+
+		if (mysql_options(H->server, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout)) {
+			pdo_mysql_error(H);
+			goto cleanup;
+		}
+	}
+
 	if(vars[2].optval && strcmp("localhost", vars[2].optval)) {
 		host = vars[2].optval;
 		port = atoi(vars[3].optval); 
