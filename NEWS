@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, PHP 5 Beta 3
+- Fixed bug #24394 (Serializing cross-referenced objects causes segfault).
+  (Moriyoshi)
 
 30 Oct 2003, PHP 5 Beta 2
 - Lots and lots of changes in the Zend Engine 2 since beta 1:
