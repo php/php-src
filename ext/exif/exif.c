@@ -777,7 +777,7 @@ void exif_add_image_info( image_info_type *image_info, int section_index, char *
 			if ( !info_value->value.s) {
 				info_value->length = 0;
 				php_error(E_WARNING, "Could not allocate memory for thumbnail");
-				return;
+				break; /* better return with "" instead of possible casing problems */
 			}
 			break;
 
@@ -1732,7 +1732,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 		ImageInfo->sections[ImageInfo->sections_count].Size = itemlen;
 
 		Data = (uchar *)emalloc(itemlen+1); /* Add 1 to allow sticking a 0 at the end. */
-		ImageInfo->sections[ImageInfo->sections_count].Data = Data;
+		ImageInfo->sections[ImageInfo->sections_count++].Data = Data;
 
 		/* Store first two pre-read bytes. */
 		Data[0] = (uchar)lh;
@@ -1743,7 +1743,6 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 			php_error(E_WARNING, "error reading from file: got=x%04X(=%d) != itemlen-2=x%04X(=%d)",got, got, itemlen-2, itemlen-2);
 			return FALSE;
 		}
-		ImageInfo->sections_count += 1;
 
 		#ifdef EXIF_DEBUG
 		php_error(E_NOTICE,"process section(x%02X=%s) @ x%04X + x%04X(=%d)", marker, exif_get_markername(marker), fpos, itemlen, itemlen);
@@ -2074,7 +2073,7 @@ int php_exif_discard_sections(image_info_type *ImageInfo)
 	int a;
 
 	if ( ImageInfo->sections_count) {
-		for (a=0;a<ImageInfo->sections_count-1;a++) {
+		for (a=0;a<ImageInfo->sections_count;a++) {
 			efree(ImageInfo->sections[a].Data);
 		}
 	}
@@ -2092,6 +2091,7 @@ int php_exif_discard_imageinfo(image_info_type *ImageInfo)
 
 	if (ImageInfo->FileName) 		efree(ImageInfo->FileName);
 	if (ImageInfo->Thumbnail) 		efree(ImageInfo->Thumbnail);
+	if (ImageInfo->UserComment)		efree(ImageInfo->UserComment);
 	for (i=0; i<SECTION_COUNT; i++) {
 		exif_free_image_info( ImageInfo, i);
 	}
@@ -2217,8 +2217,10 @@ PHP_FUNCTION(exif_read_data)
 
 	ImageInfo.sections_found |= FOUND_COMPUTED;/* do not inform about in debug*/
 
-	if (ret==FALSE || array_init(return_value) == FAILURE || (sections_needed && !(sections_needed&ImageInfo.sections_found))) {
+	if (ret==FALSE || (sections_needed && !(sections_needed&ImageInfo.sections_found)) || array_init(return_value) == FAILURE) {
+		/* array_init must be checked at last! otherwise the array must be freed if a later test fails. */
 		php_exif_discard_imageinfo(&ImageInfo);
+		if ( sections_str) efree( sections_str);
 		RETURN_FALSE;
 	}
 
