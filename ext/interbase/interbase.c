@@ -974,7 +974,7 @@ PHP_FUNCTION(ibase_pconnect)
    Close an InterBase connection */
 PHP_FUNCTION(ibase_close)
 {
-	zval **link_arg;
+	zval **link_arg = NULL;
 	ibase_db_link *ib_link;
 	int link_id;
 	
@@ -1006,7 +1006,7 @@ PHP_FUNCTION(ibase_close)
    Drop an InterBase database */
 PHP_FUNCTION(ibase_drop_db)
 {
-	zval **link_arg;
+	zval **link_arg = NULL;
 	ibase_db_link *ib_link;
 	int link_id;
 	
@@ -1576,98 +1576,120 @@ _php_ibase_exec_error:		 /* I'm a bad boy... */
 }
 /* }}} */
 
-/* {{{ proto resource ibase_trans([int trans_args [, resource link_identifier]])
-   Start transaction */
+/* {{{ proto resource ibase_trans([int trans_args [, resource link_identifier [, ... ], int trans_args [, resource link_identifier [, ... ]] [, ...]]])
+   Start a transaction over one or several databases */
+
+#define TPB_MAX_SIZE (8*sizeof(char))
+
 PHP_FUNCTION(ibase_trans)
 {
-	zval ***args;
-	char tpb[20];
-	long trans_argl = 0;
-	int tpb_len = 0, argn, link_cnt, link_id[19], i;
-	ibase_db_link *ib_link[19];
+	unsigned i, argn, link_cnt = 0, tpb_len = 0;
+	char last_tpb[TPB_MAX_SIZE];
+	ibase_db_link **ib_link = NULL;
 	ibase_trans *ib_trans;
-
-	ISC_TEB *teb;
 	isc_tr_handle tr_handle = NULL;
+	ISC_STATUS result;
 	
 	RESET_ERRMSG;
 
 	argn = ZEND_NUM_ARGS();
-	if (argn < 0) {
-		WRONG_PARAM_COUNT;
-	}
 
-	if (argn) {
-		/* the number of databases this transaction connects to */
-		link_cnt = argn-1;
+	/* (1+argn) is an upper bound for the number of links this trans connects to */
+	ib_link = (ibase_db_link**)do_alloca(sizeof(ibase_db_link*) * (1+argn));
+	
+	if (argn > 0) {
+		long trans_argl = 0;
+		char *tpb;
+		ISC_TEB *teb;
+		zval ***args = (zval ***)do_alloca(sizeof(zval **) * argn);
 
-		args = (zval ***) emalloc(sizeof(zval **) * argn);
 		if (zend_get_parameters_array_ex(argn, args) == FAILURE) {
-			efree(args);
+			free_alloca(args);
+			free_alloca(ib_link);
 			RETURN_FALSE;
 		}
 
-		/* Handle all database links. */
-		for (i = argn-1; i > 0 && Z_TYPE_PP(args[i]) == IS_RESOURCE; --i) {
-			ZEND_FETCH_RESOURCE2(ib_link[i-1], ibase_db_link *, args[i], -1, "InterBase link", le_link, le_plink);
-			link_id[i-1] = Z_LVAL_PP(args[i]);
+		teb = (ISC_TEB*)do_alloca(sizeof(ISC_TEB) * argn);
+		tpb = (char*)do_alloca(TPB_MAX_SIZE * argn);
+
+		/* enumerate all the arguments: assume every non-resource argument 
+		   specifies modifiers for the link ids that follow it */
+		for (i = 0; i < argn; ++i) {
+			
+			if (Z_TYPE_PP(args[i]) == IS_RESOURCE) {
+				
+				ZEND_FETCH_RESOURCE2(ib_link[link_cnt], ibase_db_link *, args[i], -1, "InterBase link", le_link, le_plink);
+	
+				/* copy the most recent modifier string into tbp[] */
+				memcpy(&tpb[TPB_MAX_SIZE * link_cnt], last_tpb, TPB_MAX_SIZE);
+
+				/* add a database handle to the TEB with the most recently specified set of modifiers */
+				teb[link_cnt].db_ptr = &ib_link[link_cnt]->link;
+				teb[link_cnt].tpb_len = tpb_len;
+				teb[link_cnt].tpb_ptr = &tpb[TPB_MAX_SIZE * link_cnt];
+				
+				++link_cnt;
+				
+			} else {
+				
+				tpb_len = 0;
+
+				convert_to_long_ex(args[i]);
+				trans_argl = Z_LVAL_PP(args[i]);
+
+				if (trans_argl) {
+					last_tpb[tpb_len++] = isc_tpb_version3;
+
+					/* access mode */
+					if (trans_argl & PHP_IBASE_READ) { /* READ ONLY TRANSACTION */
+						last_tpb[tpb_len++] = isc_tpb_read;
+					} else {
+						last_tpb[tpb_len++] = isc_tpb_write;  /* default access mode */
+					}
+
+					/* isolation level */
+					if (trans_argl & PHP_IBASE_COMMITTED) {
+						last_tpb[tpb_len++] = isc_tpb_read_committed;
+						if (trans_argl & PHP_IBASE_REC_VERSION) {
+							last_tpb[tpb_len++] = isc_tpb_rec_version;
+						} else {
+							last_tpb[tpb_len++] = isc_tpb_no_rec_version; /* default in read_committed  */ 
+						}	
+					} else if (trans_argl & PHP_IBASE_CONSISTENCY) {
+						last_tpb[tpb_len++] = isc_tpb_consistency;
+					} else {
+						last_tpb[tpb_len++] = isc_tpb_concurrency;   /* default isolation level */ 
+					}
+					
+					/* lock resolution */
+					if (trans_argl & PHP_IBASE_NOWAIT) {
+						last_tpb[tpb_len++] = isc_tpb_nowait;
+					} else {
+						last_tpb[tpb_len++] = isc_tpb_wait;  /* default lock resolution */
+					}
+				}
+			}
+		}	
+					
+		if (link_cnt > 0) {
+			result = isc_start_multiple(IB_STATUS, &tr_handle, link_cnt, teb);
 		}
 
-		/* First argument is transaction parameters */
-		convert_to_long_ex(args[0]);
-		trans_argl = Z_LVAL_PP(args[0]);
-
-		efree(args);
+		free_alloca(args);
+		free_alloca(tpb);
+		free_alloca(teb);
 	}
 
-	if (argn < 2) {
+	if (link_cnt == 0) {
 		link_cnt = 1;
 		ZEND_FETCH_RESOURCE2(ib_link[0], ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
-	}
-
-	if (trans_argl) {
-		tpb[tpb_len++] = isc_tpb_version3;
-		/* tpbp = tpb; */
-		/* access mode */
-		if (trans_argl & PHP_IBASE_READ) { /* READ ONLY TRANSACTION */
-			tpb[tpb_len++] = isc_tpb_read;
-		} else {
-			tpb[tpb_len++] = isc_tpb_write;  /* default  access mode */
-		}
-		/* isolation level */
-		if (trans_argl & PHP_IBASE_COMMITTED) {
-			tpb[tpb_len++] = isc_tpb_read_committed;
-			if (trans_argl & PHP_IBASE_REC_VERSION) {
-				tpb[tpb_len++] = isc_tpb_rec_version;
-			} else {
-				tpb[tpb_len++] = isc_tpb_no_rec_version; /* default in read_committed  */ 
-			}	
-		} else if (trans_argl & PHP_IBASE_CONSISTENCY) {
-			tpb[tpb_len++] = isc_tpb_consistency;
-		} else {
-			tpb[tpb_len++] = isc_tpb_concurrency;   /* default isolation level */ 
-		}
-		
-		/* lock resolution */
-		if (trans_argl & PHP_IBASE_NOWAIT) {
-			tpb[tpb_len++] = isc_tpb_nowait;
-		} else {
-			tpb[tpb_len++] = isc_tpb_wait;  /* default lock resolution */
-		}
-	}
-
-	/* allocate a TEB array */
-	teb = (ISC_TEB*) emalloc(sizeof(ISC_TEB) * link_cnt);
-	for (i = 0; i < link_cnt; ++i) {
-		teb[i].db_ptr = &ib_link[i]->link;
-		teb[i].tpb_len = tpb_len;
-		teb[i].tpb_ptr = tpb;
+		result = isc_start_transaction(IB_STATUS, &tr_handle, 1, &ib_link[0]->link, tpb_len, last_tpb);
 	}
 	
 	/* start the transaction */
-	if (isc_start_multiple(IB_STATUS, &tr_handle, link_cnt, teb)) {
+	if (result) {
 		_php_ibase_error(TSRMLS_C);
-		efree(teb);
+		free_alloca(ib_link);
 		RETURN_FALSE;
 	}
 
@@ -1692,7 +1714,7 @@ PHP_FUNCTION(ibase_trans)
 		(*l)->trans = ib_trans;
 		(*l)->next = NULL;
 	}
-	efree(teb);
+	free_alloca(ib_link);
 	ZEND_REGISTER_RESOURCE(return_value, ib_trans, le_trans);
 }
 /* }}} */
@@ -1824,6 +1846,7 @@ PHP_FUNCTION(ibase_query)
 	/* use stack to avoid leaks */
 	args = (zval ***) do_alloca(sizeof(zval **) * ZEND_NUM_ARGS());
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+		free_alloca(args);
 		RETURN_FALSE;
 	}
 	
@@ -2459,6 +2482,7 @@ PHP_FUNCTION(ibase_execute)
 	/* use stack to avoid leaks */
 	args = (zval ***) do_alloca(ZEND_NUM_ARGS() * sizeof(zval **));
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+		free_alloca(args);
 		RETURN_FALSE;
 	}
 
