@@ -141,8 +141,8 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter TSRMLS_DC)
 	c1 = (s >> 8) & 0xff;
 	c2 = s & 0xff;
 	/* exclude UHC extension area */
-	if (c1 < 0xa1 || c1 > 0xfe || c2 < 0xa1 && c2 > 0xfe){ 
-		s = 0;
+	if (c1 < 0xa1 || c2 < 0xa1){ 
+		s = c;
 	}
 
 	if (s <= 0) {
