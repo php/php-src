@@ -1018,10 +1018,6 @@ pfpro.defaulttimeout = 30
 ; Default proxy password.
 ;pfpro.proxypassword =
 
-[Sockets]
-; Use the system read() function instead of the php_read() wrapper.
-sockets.use_system_read = On
-
 [com]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
 ;com.typelib_file = 
