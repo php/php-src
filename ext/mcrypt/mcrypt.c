@@ -439,7 +439,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	zval **mcryptind;
 	unsigned char *key_s, *iv_s;
 	char dummy[256];
-	int max_key_size, iv_size;
+	int max_key_size, key_size, iv_size;
 	MCRYPT td;
 	int argc;
     MCLS_FETCH();
@@ -464,7 +464,10 @@ PHP_FUNCTION(mcrypt_generic_init)
 	if (Z_STRLEN_PP(key) > max_key_size) {
 		sprintf (dummy, "key size too large; supplied length: %d, max: %d", 
 			Z_STRLEN_PP(key), max_key_size);
-		php_error (E_NOTICE, dummy);
+		php_error (E_WARNING, dummy);
+		key_size = max_key_size;
+	} else {
+		key_size = Z_STRLEN_PP(key);
 	}
 	memcpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
 
@@ -475,7 +478,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	}
 	memcpy (iv_s, Z_STRVAL_PP(iv), iv_size);
 
-	RETVAL_LONG (mcrypt_generic_init (td, key_s, Z_STRLEN_PP(key), iv_s));
+	RETVAL_LONG (mcrypt_generic_init (td, key_s, key_size, iv_s));
 	efree (iv_s);
 	efree (key_s);
 }
