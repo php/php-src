@@ -126,6 +126,7 @@ static void ps_files_close(ps_files *data)
 static void ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
+	TSRMLS_FETCH();
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if (data->lastkey) {
@@ -142,12 +143,12 @@ static void ps_files_open(ps_files *data, const char *key)
 		data->lastkey = estrdup(key);
 		
 #ifdef O_EXCL
-		data->fd = VCWD_OPEN((buf, O_RDWR | O_BINARY));
+		data->fd = VCWD_OPEN(buf, O_RDWR | O_BINARY);
 		
 		if (data->fd == -1 && errno == ENOENT) 
-			data->fd = VCWD_OPEN((buf, O_EXCL | O_RDWR | O_CREAT | O_BINARY, 0600));
+			data->fd = VCWD_OPEN_MODE(buf, O_EXCL | O_RDWR | O_CREAT | O_BINARY, 0600);
 #else
-		data->fd = VCWD_OPEN((buf, O_CREAT | O_RDWR | O_BINARY, 0600));
+		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, 0600);
 #endif
 		if (data->fd != -1) 
 			flock(data->fd, LOCK_EX);
@@ -168,6 +169,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 	time_t now;
 	int nrdels = 0;
 	size_t dirname_len;
+	TSRMLS_FETCH();
 
 	dir = opendir(dirname);
 	if (!dir) {
@@ -312,6 +314,7 @@ PS_DESTROY_FUNC(files)
 {
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
+	TSRMLS_FETCH();
 
 	if (!ps_files_path_create(buf, sizeof(buf), data, key))
 		return FAILURE;

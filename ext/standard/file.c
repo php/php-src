@@ -581,7 +581,7 @@ PHP_FUNCTION(tempnam)
 	d = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
 	strlcpy(p, Z_STRVAL_PP(arg2), sizeof(p));
 
-	if ((fp = php_open_temporary_file(d, p, &opened_path))) {
+	if ((fp = php_open_temporary_file(d, p, &opened_path TSRMLS_CC))) {
 		fclose(fp);
 		RETVAL_STRING(opened_path, 0);
 	} else {
@@ -1059,7 +1059,8 @@ exit_failed:
 /* {{{ proto string fgetc(int fp)
    Get a character from file pointer */
 
-PHP_FUNCTION(fgetc) {
+PHP_FUNCTION(fgetc)
+{
 	pval **arg1;
 	int type;
 	char *buf;
@@ -1921,7 +1922,7 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 
-	if (php_copy_file(Z_STRVAL_PP(source), Z_STRVAL_PP(target))==SUCCESS) {
+	if (php_copy_file(Z_STRVAL_PP(source), Z_STRVAL_PP(target) TSRMLS_CC)==SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1932,24 +1933,24 @@ PHP_FUNCTION(copy)
 
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file(char *src, char *dest)
+PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 {
 	char buffer[8192];
 	int fd_s,fd_t,read_bytes;
 	int ret = FAILURE;
 
 #ifdef PHP_WIN32
-	if ((fd_s=VCWD_OPEN((src,O_RDONLY|_O_BINARY)))==-1) {
+	if ((fd_s=VCWD_OPEN(src, O_RDONLY|_O_BINARY))==-1) {
 #else
-	if ((fd_s=VCWD_OPEN((src,O_RDONLY)))==-1) {
+	if ((fd_s=VCWD_OPEN(src, O_RDONLY))==-1) {
 #endif
 		php_error(E_WARNING,"Unable to open '%s' for reading:  %s", src, strerror(errno));
 		return FAILURE;
 	}
 #ifdef PHP_WIN32
-	if ((fd_t=VCWD_OPEN((dest,_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE)))==-1) {
+	if ((fd_t=VCWD_OPEN_MODE(dest, _O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY, _S_IREAD|_S_IWRITE))==-1) {
 #else
-	if ((fd_t=VCWD_CREAT(dest,0777))==-1) {
+	if ((fd_t=VCWD_CREAT(dest, 0777))==-1) {
 #endif
 		php_error(E_WARNING,"Unable to create '%s':  %s", dest, strerror(errno));
 		close(fd_s);
@@ -2045,7 +2046,8 @@ PHP_FUNCTION(fread)
 /* {{{ proto array fgetcsv(int fp, int length [, string delimiter])
    Get line from file pointer and parse for CSV fields */
 
-PHP_FUNCTION(fgetcsv) {
+PHP_FUNCTION(fgetcsv)
+{
 	char *temp, *tptr, *bptr, *lineEnd;
 	char delimiter = ',';	/* allow this to be set as parameter */
 

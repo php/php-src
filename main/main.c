@@ -189,7 +189,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("highlight.keyword",		HL_KEYWORD_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.string",		HL_STRING_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 
-	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference","1",PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,	allow_call_time_pass_reference,	zend_compiler_globals,	compiler_globals)
+	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference",	"1",	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,	allow_call_time_pass_reference,	zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("asp_tags",				"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			asp_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("display_errors",		"1",		PHP_INI_ALL,		OnUpdateBool,			display_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
@@ -602,7 +602,7 @@ static void sigchld_handler(int apar)
 {
     while (waitpid(-1, NULL, WNOHANG) > 0)
 		;
-    signal(SIGCHLD,sigchld_handler);   
+    signal(SIGCHLD, sigchld_handler);   
 }
 /* }}} */
 #endif
@@ -616,7 +616,7 @@ int php_request_startup(TSRMLS_D)
 	int retval = SUCCESS;
 
 #if PHP_SIGCHILD
-	signal(SIGCHLD,sigchld_handler);
+	signal(SIGCHLD, sigchld_handler);
 #endif
 
 	zend_try {
@@ -728,7 +728,7 @@ static int php_body_write_wrapper(const char *str, uint str_length)
  */
 static void core_globals_ctor(php_core_globals *core_globals TSRMLS_DC)
 {
-	memset(core_globals,0,sizeof(*core_globals));
+	memset(core_globals, 0, sizeof(*core_globals));
 }
 /* }}} */
 #endif
@@ -959,10 +959,12 @@ void php_module_shutdown()
 	php_shutdown_fopen_wrappers(TSRMLS_C);
 	php_shutdown_info_logos();
 	UNREGISTER_INI_ENTRIES();
-#ifndef ZTS
+#ifdef ZTS
+	ts_free_thread();
+#else
 	zend_ini_shutdown(TSRMLS_C);
-#endif
 	shutdown_memory_manager(0, 1);
+#endif
 	module_initialized = 0;
 }
 /* }}} */
@@ -1003,7 +1005,7 @@ static inline void php_register_server_variables(TSRMLS_D)
 static int php_hash_environment(TSRMLS_D)
 {
 	char *p;
-	unsigned char _gpc_flags[3] = {0,0,0};
+	unsigned char _gpc_flags[3] = {0, 0, 0};
 	zend_bool have_variables_order;
 	zval *dummy_track_vars_array;
 	zend_bool initialized_dummy_track_vars_array=0;
@@ -1200,7 +1202,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 	zend_try {
 #ifdef PHP_WIN32
-		UpdateIniFromRegistry(primary_file->filename);
+		UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
 #endif
 
 		PG(during_request_startup) = 0;

@@ -2453,14 +2453,16 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 /* {{{ proto string xpath_new_context([int doc_handle])
    Create new XPath context */
-PHP_FUNCTION(xpath_new_context) {
+PHP_FUNCTION(xpath_new_context)
+{
 	php_xpathptr_new_context(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPATH);
 }
 /* }}} */
 
 /* {{{ proto string xptr_new_context([int doc_handle])
    Create new XPath context */
-PHP_FUNCTION(xptr_new_context) {
+PHP_FUNCTION(xptr_new_context)
+{
 	php_xpathptr_new_context(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPTR);
 }
 /* }}} */
@@ -2557,14 +2559,16 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 
 /* {{{ proto int xpath_eval([int xpathctx_handle,] string str)
    Evaluate the XPath Location Path in the given string */
-PHP_FUNCTION(xpath_eval) {
+PHP_FUNCTION(xpath_eval)
+{
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPATH, 0);
 }
 /* }}} */
 
 /* {{{ proto int xpath_eval_expression([int xpathctx_handle,] string str)
    Evaluate the XPath Location Path in the given string */
-PHP_FUNCTION(xpath_eval_expression) {
+PHP_FUNCTION(xpath_eval_expression)
+{
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPATH, 1);
 }
 /* }}} */
@@ -2573,7 +2577,8 @@ PHP_FUNCTION(xpath_eval_expression) {
 #if defined(LIBXML_XPTR_ENABLED)
 /* {{{ proto int xptr_eval([int xpathctx_handle,] string str)
    Evaluate the XPtr Location Path in the given string */
-PHP_FUNCTION(xptr_eval) {
+PHP_FUNCTION(xptr_eval)
+{
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPTR, 0);
 }
 /* }}} */

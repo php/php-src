@@ -399,7 +399,7 @@ static void _php_pdf_set_info(INTERNAL_FUNCTION_PARAMETERS, char *field)
 
 /* {{{ proto bool pdf_set_info(int pdfdoc, string fieldname, string value)
    Fills an info field of the document */
-PHP_FUNCTION(pdf_set_info) 
+PHP_FUNCTION(pdf_set_info)
 {
 	zval **arg1, **arg2, **arg3;
 	PDF *pdf;
@@ -452,14 +452,15 @@ PHP_FUNCTION(pdf_set_info_author)
 
 /* {{{ proto bool pdf_set_info_keywords(int pdfdoc, string keywords)
    Fills the keywords field of the document */
-PHP_FUNCTION(pdf_set_info_keywords) {
+PHP_FUNCTION(pdf_set_info_keywords)
+{
 	_php_pdf_set_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, "Keywords");
 }
 /* }}} */
 
 /* {{{ proto int pdf_open([int filedesc])
    Opens a new pdf document. If filedesc is NULL, document is created in memory. This is the old interface, only for compatibility use pdf_new + pdf_open_file instead */
-PHP_FUNCTION(pdf_open) 
+PHP_FUNCTION(pdf_open)
 {
 	zval **file;
 	FILE *fp;
@@ -494,7 +495,7 @@ PHP_FUNCTION(pdf_open)
 
 /* {{{ proto void pdf_close(int pdfdoc)
    Closes the pdf document */
-PHP_FUNCTION(pdf_close) 
+PHP_FUNCTION(pdf_close)
 {
 	zval **arg1;
 	PDF *pdf;
@@ -514,7 +515,7 @@ PHP_FUNCTION(pdf_close)
 
 /* {{{ proto void pdf_begin_page(int pdfdoc, double width, double height)
    Starts page */
-PHP_FUNCTION(pdf_begin_page) 
+PHP_FUNCTION(pdf_begin_page)
 {
 	zval **arg1, **arg2, **arg3;
 	PDF *pdf;
@@ -534,7 +535,7 @@ PHP_FUNCTION(pdf_begin_page)
 
 /* {{{ proto void pdf_end_page(int pdfdoc)
    Ends page */
-PHP_FUNCTION(pdf_end_page) 
+PHP_FUNCTION(pdf_end_page)
 {
 	zval **arg1;
 	PDF *pdf;
@@ -552,7 +553,7 @@ PHP_FUNCTION(pdf_end_page)
 
 /* {{{ proto void pdf_show(int pdfdoc, string text)
    Output text at current position */
-PHP_FUNCTION(pdf_show) 
+PHP_FUNCTION(pdf_show)
 {
 	zval **arg1, **arg2;
 	PDF *pdf;
@@ -571,7 +572,7 @@ PHP_FUNCTION(pdf_show)
 
 /* {{{ proto void pdf_show_xy(int pdfdoc, string text, double x-koor, double y-koor)
    Output text at position */
-PHP_FUNCTION(pdf_show_xy) 
+PHP_FUNCTION(pdf_show_xy)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
 	PDF *pdf;
@@ -592,7 +593,7 @@ PHP_FUNCTION(pdf_show_xy)
 
 /* {{{ proto int pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode [, string feature])
    Output text formated in a boxed */
-PHP_FUNCTION(pdf_show_boxed) 
+PHP_FUNCTION(pdf_show_boxed)
 {
 	zval **argv[8];
 	int argc = ZEND_NUM_ARGS();
@@ -634,7 +635,7 @@ PHP_FUNCTION(pdf_show_boxed)
 
 /* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, string encoding [, int embed])
    Select the current font face, size and encoding */
-PHP_FUNCTION(pdf_set_font) 
+PHP_FUNCTION(pdf_set_font)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int font, embed;
@@ -1831,7 +1832,7 @@ static void _php_pdf_open_image(INTERNAL_FUNCTION_PARAMETERS, char *type)
 	convert_to_string_ex(arg2);
 
 #ifdef VIRTUAL_DIR
-	virtual_filepath(Z_STRVAL_PP(arg2), &image);
+	virtual_filepath(Z_STRVAL_PP(arg2), &image TSRMLS_CC);
 #else
 	image = Z_STRVAL_PP(arg2);
 #endif  
@@ -1904,7 +1905,7 @@ PHP_FUNCTION(pdf_open_image_file)
 	convert_to_string_ex(arg3);
 
 #ifdef VIRTUAL_DIR
-	virtual_filepath(Z_STRVAL_PP(arg3), &image);
+	virtual_filepath(Z_STRVAL_PP(arg3), &image TSRMLS_CC);
 #else
 	image = Z_STRVAL_PP(arg3);
 #endif  
@@ -2228,7 +2229,8 @@ PHP_FUNCTION(pdf_add_annotation)
 
 /* {{{ proto int pdf_new()
    Creates a new PDF object */
-PHP_FUNCTION(pdf_new) {
+PHP_FUNCTION(pdf_new)
+{
 	PDF *pdf;
 
 	pdf = PDF_new2(custom_errorhandler, pdf_emalloc, pdf_realloc, pdf_efree, NULL);
@@ -2244,7 +2246,8 @@ PHP_FUNCTION(pdf_new) {
 
 /* {{{ proto void pdf_delete(int pdfdoc)
    Deletes the PDF object */
-PHP_FUNCTION(pdf_delete) {
+PHP_FUNCTION(pdf_delete)
+{
 	zval **arg1;
 	PDF *pdf;
 
@@ -2265,7 +2268,8 @@ PHP_FUNCTION(pdf_delete) {
 /* {{{ proto int pdf_open_file(int pdfdoc [, char filename])
    Opens a new PDF document. If filename is NULL, document is created in memory. This is not yet fully supported */
 
-PHP_FUNCTION(pdf_open_file) {
+PHP_FUNCTION(pdf_open_file)
+{
 	zval **arg1, **arg2;
 	int pdf_file;
 	char *filename;
@@ -2304,7 +2308,8 @@ PHP_FUNCTION(pdf_open_file) {
 
 /* {{{ proto int pdf_get_buffer(int pdfdoc)
    Fetches the full buffer containig the generated PDF data */
-PHP_FUNCTION(pdf_get_buffer) {
+PHP_FUNCTION(pdf_get_buffer)
+{
 	zval **arg1;
 	long size;
 	PDF *pdf;
@@ -2325,7 +2330,8 @@ PHP_FUNCTION(pdf_get_buffer) {
 
 /* {{{ proto int pdf_findfont(int pdfdoc, string fontname, string encoding [, int embed])
    Prepares the font fontname for later use with pdf_setfont() */
-PHP_FUNCTION(pdf_findfont) {
+PHP_FUNCTION(pdf_findfont)
+{
 	zval **arg1, **arg2, **arg3, **arg4;
 	int embed, font;
 	const char *fontname, *encoding;
@@ -2371,7 +2377,8 @@ PHP_FUNCTION(pdf_findfont) {
 
 /* {{{ proto void pdf_setfont(int pdfdoc, int font, float fontsize)
    Sets the current font in the fiven fontsize */
-PHP_FUNCTION(pdf_setfont) {
+PHP_FUNCTION(pdf_setfont)
+{
 	zval **arg1, **arg2, **arg3;
 	int font;
 	float fontsize;
@@ -2399,7 +2406,8 @@ PHP_FUNCTION(pdf_setfont) {
 /* {{{ proto void pdf_setpolydash(int pdfdoc, double darray)
    Sets more complicated dash pattern */ 
 
-PHP_FUNCTION(pdf_setpolydash) {
+PHP_FUNCTION(pdf_setpolydash)
+{
 	zval **arg1, **arg2;
 	HashTable *array;
 	int len, i;
@@ -2444,7 +2452,8 @@ PHP_FUNCTION(pdf_setpolydash) {
 
 /* {{{ proto void pdf_concat(int pdf, double a, double b, double c, double d, double e, double f)
    Concatenates a matrix to the current transformation matrix for text and graphics */
-PHP_FUNCTION(pdf_concat) {
+PHP_FUNCTION(pdf_concat)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
 
@@ -2475,7 +2484,8 @@ PHP_FUNCTION(pdf_concat) {
 
 /* {{{ proto int pdf_open_ccitt(int pdf, string filename, int width, int height, int bitreverse, int k, int blackls1)
    Opens an image file with raw CCITT G3 or G4 compresed bitmap data */
-PHP_FUNCTION(pdf_open_ccitt) {
+PHP_FUNCTION(pdf_open_ccitt)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
 	int pdf_image;
@@ -2489,7 +2499,7 @@ PHP_FUNCTION(pdf_open_ccitt) {
 
 	convert_to_string_ex(arg2);
 #ifdef VIRTUAL_DIR
-	virtual_filepath(Z_STRVAL_PP(arg2), &image);
+	virtual_filepath(Z_STRVAL_PP(arg2), &image TSRMLS_CC);
 #else
 	image = Z_STRVAL_PP(arg2);
 #endif  
@@ -2514,7 +2524,8 @@ PHP_FUNCTION(pdf_open_ccitt) {
 
 /* {{{ proto int pdf_open_image(int pdf, string type, string source, string data, long length, int width, int height, int components, int bpc, string params)
    Opens an image of the given type and returns an image for placement in a PDF document */
-PHP_FUNCTION(pdf_open_image) {
+PHP_FUNCTION(pdf_open_image)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10;
 	PDF *pdf;
 	int pdf_image;
@@ -2537,7 +2548,7 @@ PHP_FUNCTION(pdf_open_image) {
 	convert_to_string_ex(arg10);
 
 #ifdef VIRTUAL_DIR
-	virtual_filepath(Z_STRVAL_PP(arg4), &image);
+	virtual_filepath(Z_STRVAL_PP(arg4), &image TSRMLS_CC);
 #else
 	image = Z_STRVAL_PP(arg4);
 #endif  
@@ -2559,7 +2570,8 @@ PHP_FUNCTION(pdf_open_image) {
 
 /* {{{ proto void pdf_attach_file(int pdf, double lly, double lly, double urx, double ury, string filename, string description, string author, string mimetype, string icon)
    Adds a file attachment annotation at the rectangle specified by his lower left and upper right corners */
-PHP_FUNCTION(pdf_attach_file) {
+PHP_FUNCTION(pdf_attach_file)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10;
 	PDF *pdf;
 
@@ -2596,7 +2608,8 @@ PHP_FUNCTION(pdf_attach_file) {
 
 /* {{{ proto void pdf_add_note(int pdfdoc, double llx, double lly, double urx, double ury, string contents, string title, string icon, int open)
    Sets annotation */
-PHP_FUNCTION(pdf_add_note) {
+PHP_FUNCTION(pdf_add_note)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9;
 	PDF *pdf;
 
@@ -2631,7 +2644,8 @@ PHP_FUNCTION(pdf_add_note) {
 
 /* {{{ proto void pdf_add_locallink(int pdfdoc, double llx, double lly, double urx, double ury, int page, string dest)
    Adds link to web resource */
-PHP_FUNCTION(pdf_add_locallink) {
+PHP_FUNCTION(pdf_add_locallink)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
 
@@ -2662,7 +2676,8 @@ PHP_FUNCTION(pdf_add_locallink) {
 
 /* {{{ proto void pdf_add_launchlink(int pdfdoc, double llx, double lly, double urx, double ury, string filename)
    Adds link to web resource */
-PHP_FUNCTION(pdf_add_launchlink) {
+PHP_FUNCTION(pdf_add_launchlink)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
 	PDF *pdf;
 
@@ -2693,7 +2708,8 @@ PHP_FUNCTION(pdf_add_launchlink) {
 
 /* {{{ proto int pdf_open_pdi(int pdf, string filename, string stringparam, int intparam);
  * Open an existing PDF document and prepare it for later use. */
-PHP_FUNCTION(pdf_open_pdi) {
+PHP_FUNCTION(pdf_open_pdi)
+{
 	zval **arg1, **arg2, **arg3, **arg4;
 	PDF *pdf;
 	int pdi_handle;
@@ -2710,7 +2726,7 @@ PHP_FUNCTION(pdf_open_pdi) {
 	convert_to_long_ex(arg4);
 
 #ifdef VIRTUAL_DIR
-	virtual_filepath(Z_STRVAL_PP(arg2), &file);
+	virtual_filepath(Z_STRVAL_PP(arg2), &file) TSRMLS_CC;
 #else
 	file = Z_STRVAL_PP(arg2);
 #endif  
@@ -2726,7 +2742,8 @@ PHP_FUNCTION(pdf_open_pdi) {
 
 /* {{{ proto void pdf_close_pdi(int pdf, int doc);
  * Close all open page handles, and close the input PDF document. */
-PHP_FUNCTION(pdf_close_pdi) {
+PHP_FUNCTION(pdf_close_pdi)
+{
 	zval **arg1, **arg2;
 	PDF *pdf;
 
@@ -2747,7 +2764,8 @@ PHP_FUNCTION(pdf_close_pdi) {
 
 /* {{{ proto int pdf_open_pdi_page(int pdf, int doc, int page, string label);
  * Prepare a page for later use with PDF_place_image(). */
-PHP_FUNCTION(pdf_open_pdi_page) {
+PHP_FUNCTION(pdf_open_pdi_page)
+{
 	zval **arg1, **arg2, **arg3, **arg4;
 	PDF *pdf;
 	int pdi_image;
@@ -2773,7 +2791,8 @@ PHP_FUNCTION(pdf_open_pdi_page) {
 
 /* {{{ proto void pdf_place_pdi_page(int pdf, int page, double x, double y, double sx, double sy)
  * Place a PDF page with the lower left corner at (x, y), and scale it. */
-PHP_FUNCTION(pdf_place_pdi_page) {
+PHP_FUNCTION(pdf_place_pdi_page)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
 	PDF *pdf;
 
@@ -2802,7 +2821,8 @@ PHP_FUNCTION(pdf_place_pdi_page) {
 
 /* {{{ proto void pdf_close_pdi_page(int pdf, int page);
  * Close the page handle, and free all page-related resources. */
-PHP_FUNCTION(pdf_close_pdi_page) {
+PHP_FUNCTION(pdf_close_pdi_page)
+{
 	zval **arg1, **arg2;
 	PDF *pdf;
 
@@ -2823,7 +2843,8 @@ PHP_FUNCTION(pdf_close_pdi_page) {
 
 /* {{{ proto string pdf_get_pdi_parameter(int pdf, string key, int doc, int page, int index);
  * Get the contents of some PDI document parameter with string type. */
-PHP_FUNCTION(pdf_get_pdi_parameter) {
+PHP_FUNCTION(pdf_get_pdi_parameter)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	PDF *pdf;
 	const char *buffer;
@@ -2853,7 +2874,8 @@ PHP_FUNCTION(pdf_get_pdi_parameter) {
 
 /* {{{ proto double pdf_get_pdi_value(int pdf, string key, int doc, int page, int index);
  * Get the contents of some PDI document parameter with numerical type. */
-PHP_FUNCTION(pdf_get_pdi_value) {
+PHP_FUNCTION(pdf_get_pdi_value)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
 	PDF *pdf;
 	double value;
@@ -2881,7 +2903,8 @@ PHP_FUNCTION(pdf_get_pdi_value) {
 
 /* {{{ proto int pdf_begin_pattern(int pdf, double width, double height, double xstep, double ystep, int painttype);
  * Start a new pattern definition. */
-PHP_FUNCTION(pdf_begin_pattern) {
+PHP_FUNCTION(pdf_begin_pattern)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
 	PDF *pdf;
 	int pattern_image;
@@ -2911,7 +2934,8 @@ PHP_FUNCTION(pdf_begin_pattern) {
 
 /* {{{ proto void pdf_end_pattern(int pdf);
  * Finish the pattern definition. */
-PHP_FUNCTION(pdf_end_pattern) {
+PHP_FUNCTION(pdf_end_pattern)
+{
 	zval **arg1;
 	PDF *pdf;
 
@@ -2929,7 +2953,8 @@ PHP_FUNCTION(pdf_end_pattern) {
 
 /* {{{ proto int pdf_begin_template(int pdf, double width, double height);
  * Start a new template definition. */
-PHP_FUNCTION(pdf_begin_template) {
+PHP_FUNCTION(pdf_begin_template)
+{
 	zval **arg1, **arg2, **arg3;
 	PDF *pdf;
 	int tmpl_image;
@@ -2953,7 +2978,8 @@ PHP_FUNCTION(pdf_begin_template) {
 
 /* {{{ proto void pdf_end_template(int pdf);
  * Finish the template definition. */
-PHP_FUNCTION(pdf_end_template) {
+PHP_FUNCTION(pdf_end_template)
+{
 	zval **arg1;
 	PDF *pdf;
 
@@ -2972,7 +2998,8 @@ PHP_FUNCTION(pdf_end_template) {
 
 /* {{{ proto void pdf_setcolor(int pdf, string type, string colorspace, double c1 [, double c2 [, double c3 [, double c4]]]);
  * Set the current color space and color. */
-PHP_FUNCTION(pdf_setcolor) {
+PHP_FUNCTION(pdf_setcolor)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
 	double c1;
@@ -3035,7 +3062,8 @@ PHP_FUNCTION(pdf_setcolor) {
 
 /* {{{ proto int pdf_makespotcolor(int pdf, string spotname);
  * Make a named spot color from the current color. */
-PHP_FUNCTION(pdf_makespotcolor) {
+PHP_FUNCTION(pdf_makespotcolor)
+{
 	zval **arg1, **arg2;
 	PDF *pdf;
 	int spotcolor;
@@ -3058,7 +3086,8 @@ PHP_FUNCTION(pdf_makespotcolor) {
 
 /* {{{ proto void pdf_arcn(int pdf, double x, double y, double r, double alpha, double beta);
  * Draw a clockwise circular arc from alpha to beta degrees. */
-PHP_FUNCTION(pdf_arcn) {
+PHP_FUNCTION(pdf_arcn)
+{
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
 	PDF *pdf;
 
@@ -3087,7 +3116,8 @@ PHP_FUNCTION(pdf_arcn) {
 
 /* {{{ proto void pdf_initgraphics(int pdf);
  * Reset all implicit color and graphics state parameters to their defaults. */
-PHP_FUNCTION(pdf_initgraphics) {
+PHP_FUNCTION(pdf_initgraphics)
+{
 	zval **arg1;
 	PDF *pdf;
 
@@ -3105,7 +3135,8 @@ PHP_FUNCTION(pdf_initgraphics) {
 
 /* {{{ proto void pdf_add_thumbnail(int pdf, int image);
  * Add an existing image as thumbnail for the current page. */
-PHP_FUNCTION(pdf_add_thumbnail) {
+PHP_FUNCTION(pdf_add_thumbnail)
+{
 	zval **arg1, **arg2;
 	PDF *pdf;
 
@@ -3126,7 +3157,8 @@ PHP_FUNCTION(pdf_add_thumbnail) {
 
 /* {{{ proto void pdf_setmatrix(int pdf, double a, double b, double c, double d, double e, double f)
    Explicitly set the current transformation matrix. */
-PHP_FUNCTION(pdf_setmatrix) {
+PHP_FUNCTION(pdf_setmatrix)
+{ 
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
 

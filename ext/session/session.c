@@ -478,7 +478,7 @@ static char *_php_create_id(int *newlen TSRMLS_DC)
 	if (PS(entropy_length) > 0) {
 		int fd;
 
-		fd = VCWD_OPEN((PS(entropy_file), O_RDONLY));
+		fd = VCWD_OPEN(PS(entropy_file), O_RDONLY);
 		if (fd >= 0) {
 			char buf[2048];
 			int n;

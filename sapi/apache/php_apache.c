@@ -139,26 +139,26 @@ PHP_FUNCTION(apache_child_terminate)
    Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
-	pval **arg_name,**arg_val;
+	pval **arg_name, **arg_val;
 	char *note_val;
 	int arg_count = ARG_COUNT(ht);
 	TSRMLS_FETCH();
 
 	if (arg_count<1 || arg_count>2 ||
-		zend_get_parameters_ex(arg_count,&arg_name,&arg_val) ==FAILURE ) {
+		zend_get_parameters_ex(arg_count, &arg_name, &arg_val) ==FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	convert_to_string_ex(arg_name);
-	note_val = (char *) table_get(((request_rec *)SG(server_context))->notes,(*arg_name)->value.str.val);
+	note_val = (char *) table_get(((request_rec *)SG(server_context))->notes, (*arg_name)->value.str.val);
 	
 	if (arg_count == 2) {
 		convert_to_string_ex(arg_val);
-		table_set(((request_rec *)SG(server_context))->notes,(*arg_name)->value.str.val,(*arg_val)->value.str.val);
+		table_set(((request_rec *)SG(server_context))->notes, (*arg_name)->value.str.val, (*arg_val)->value.str.val);
 	}
 
 	if (note_val) {
-		RETURN_STRING(note_val,1);
+		RETURN_STRING(note_val, 1);
 	} else {
 		RETURN_FALSE;
 	}
@@ -205,15 +205,15 @@ PHP_MINFO_FUNCTION(apache)
 #endif
 	sprintf(output_buf, "%d", MODULE_MAGIC_NUMBER);
 	php_info_print_table_row(2, "Apache API Version", output_buf);
-	sprintf(output_buf, "%s:%u", serv->server_hostname,serv->port);
+	sprintf(output_buf, "%s:%u", serv->server_hostname, serv->port);
 	php_info_print_table_row(2, "Hostname:Port", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
-	sprintf(output_buf, "%s(%d)/%d", user_name,(int)user_id,(int)group_id);
+	sprintf(output_buf, "%s(%d)/%d", user_name, (int)user_id, (int)group_id);
 	php_info_print_table_row(2, "User/Group", output_buf);
-	sprintf(output_buf, "Per Child: %d<br>Keep Alive: %s<br>Max Per Connection: %d",max_requests_per_child,serv->keep_alive ? "on":"off", serv->keep_alive_max);
+	sprintf(output_buf, "Per Child: %d<br>Keep Alive: %s<br>Max Per Connection: %d", max_requests_per_child, serv->keep_alive ? "on":"off", serv->keep_alive_max);
 	php_info_print_table_row(2, "Max Requests", output_buf);
 #endif
-	sprintf(output_buf, "Connection: %d<br>Keep-Alive: %d",serv->timeout,serv->keep_alive_timeout);
+	sprintf(output_buf, "Connection: %d<br>Keep-Alive: %d", serv->timeout, serv->keep_alive_timeout);
 	php_info_print_table_row(2, "Timeouts", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
 	php_info_print_table_row(2, "Server Root", server_root);
@@ -304,12 +304,12 @@ PHP_FUNCTION(virtual)
 	request_rec *rr = NULL;
 	TSRMLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
 	
-	if (!(rr = sub_req_lookup_uri ((*filename)->value.str.val,((request_rec *) SG(server_context))))) {
+	if (!(rr = sub_req_lookup_uri ((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
 		php_error(E_WARNING, "Unable to include '%s' - URI lookup failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
@@ -355,7 +355,7 @@ PHP_FUNCTION(getallheaders)
 			 !strncasecmp(tenv[i].key, "authorization", 13))) {
 			continue;
 		}
-		if (add_assoc_string(return_value, tenv[i].key,(tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
+		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
 			RETURN_FALSE;
 		}
     }
@@ -370,65 +370,65 @@ PHP_FUNCTION(apache_lookup_uri)
 	request_rec *rr=NULL;
 	TSRMLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
 
-	if(!(rr = sub_req_lookup_uri((*filename)->value.str.val,((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "URI lookup failed",(*filename)->value.str.val);
+	if(!(rr = sub_req_lookup_uri((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
+		php_error(E_WARNING, "URI lookup failed", (*filename)->value.str.val);
 		RETURN_FALSE;
 	}
 	object_init(return_value);
-	add_property_long(return_value,"status",rr->status);
+	add_property_long(return_value,"status", rr->status);
 	if (rr->the_request) {
-		add_property_string(return_value,"the_request",rr->the_request,1);
+		add_property_string(return_value,"the_request", rr->the_request, 1);
 	}
 	if (rr->status_line) {
-		add_property_string(return_value,"status_line",(char *)rr->status_line,1);		
+		add_property_string(return_value,"status_line", (char *)rr->status_line, 1);		
 	}
 	if (rr->method) {
-		add_property_string(return_value,"method",(char *)rr->method,1);		
+		add_property_string(return_value,"method", (char *)rr->method, 1);		
 	}
 	if (rr->content_type) {
-		add_property_string(return_value,"content_type",(char *)rr->content_type,1);
+		add_property_string(return_value,"content_type", (char *)rr->content_type, 1);
 	}
 	if (rr->handler) {
-		add_property_string(return_value,"handler",(char *)rr->handler,1);		
+		add_property_string(return_value,"handler", (char *)rr->handler, 1);		
 	}
 	if (rr->uri) {
-		add_property_string(return_value,"uri",rr->uri,1);
+		add_property_string(return_value,"uri", rr->uri, 1);
 	}
 	if (rr->filename) {
-		add_property_string(return_value,"filename",rr->filename,1);
+		add_property_string(return_value,"filename", rr->filename, 1);
 	}
 	if (rr->path_info) {
-		add_property_string(return_value,"path_info",rr->path_info,1);
+		add_property_string(return_value,"path_info", rr->path_info, 1);
 	}
 	if (rr->args) {
-		add_property_string(return_value,"args",rr->args,1);
+		add_property_string(return_value,"args", rr->args, 1);
 	}
 	if (rr->boundary) {
-		add_property_string(return_value,"boundary",rr->boundary,1);
+		add_property_string(return_value,"boundary", rr->boundary, 1);
 	}
-	add_property_long(return_value,"no_cache",rr->no_cache);
-	add_property_long(return_value,"no_local_copy",rr->no_local_copy);
-	add_property_long(return_value,"allowed",rr->allowed);
-	add_property_long(return_value,"sent_bodyct",rr->sent_bodyct);
-	add_property_long(return_value,"bytes_sent",rr->bytes_sent);
-	add_property_long(return_value,"byterange",rr->byterange);
-	add_property_long(return_value,"clength",rr->clength);
+	add_property_long(return_value,"no_cache", rr->no_cache);
+	add_property_long(return_value,"no_local_copy", rr->no_local_copy);
+	add_property_long(return_value,"allowed", rr->allowed);
+	add_property_long(return_value,"sent_bodyct", rr->sent_bodyct);
+	add_property_long(return_value,"bytes_sent", rr->bytes_sent);
+	add_property_long(return_value,"byterange", rr->byterange);
+	add_property_long(return_value,"clength", rr->clength);
 
 #if MODULE_MAGIC_NUMBER >= 19980324
 	if (rr->unparsed_uri) {
-		add_property_string(return_value,"unparsed_uri",rr->unparsed_uri,1);
+		add_property_string(return_value,"unparsed_uri", rr->unparsed_uri, 1);
 	}
 	if(rr->mtime) {
-		add_property_long(return_value,"mtime",rr->mtime);
+		add_property_long(return_value,"mtime", rr->mtime);
 	}
 #endif
 	if(rr->request_time) {
-		add_property_long(return_value,"request_time",rr->request_time);
+		add_property_long(return_value,"request_time", rr->request_time);
 	}
 
 	destroy_sub_req(rr);
@@ -445,13 +445,13 @@ PHP_FUNCTION(apache_exec_uri)
 	request_rec *rr=NULL;
 	TSRMLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
 
-	if(!(rr = ap_sub_req_lookup_uri((*filename)->value.str.val,((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "URI lookup failed",(*filename)->value.str.val);
+	if(!(rr = ap_sub_req_lookup_uri((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
+		php_error(E_WARNING, "URI lookup failed", (*filename)->value.str.val);
 		RETURN_FALSE;
 	}
 	RETVAL_LONG(ap_run_sub_req(rr));

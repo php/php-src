@@ -87,7 +87,7 @@
  * SUCH DAMAGE.
  */
 
-static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **opened_path_p)
+static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **opened_path_p TSRMLS_DC)
 {
 	char *trailing_slash;
 	FILE *fp;
@@ -148,7 +148,7 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
  * This function should do its best to return a file pointer to a newly created
  * unique file, on every platform.
  */
-PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p)
+PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC)
 {
 	static char path_tmp[] = "/tmp";
 	FILE *fp;
@@ -162,11 +162,11 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **op
 		*opened_path_p = NULL;
 	}
 
-	if ((fp=php_do_open_temporary_file((char *) dir, pfx, opened_path_p))) {
+	if ((fp=php_do_open_temporary_file((char *) dir, pfx, opened_path_p TSRMLS_CC))) {
 		return fp;
 	}
 
-	if ((fp=php_do_open_temporary_file(getenv("TMPDIR"), pfx, opened_path_p))) {
+	if ((fp=php_do_open_temporary_file(getenv("TMPDIR"), pfx, opened_path_p TSRMLS_CC))) {
 		return fp;
 	}
 #if PHP_WIN32
@@ -175,17 +175,17 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **op
 
 		TempPath = (char *) emalloc(MAXPATHLEN);
 		if (GetTempPath(MAXPATHLEN, TempPath)) {
-			fp = php_do_open_temporary_file(TempPath, pfx, opened_path_p);
+			fp = php_do_open_temporary_file(TempPath, pfx, opened_path_p TSRMLS_CC);
 		}
 		efree(TempPath);
 		return fp;
 	}
 #else
-	if ((fp=php_do_open_temporary_file(P_tmpdir, pfx, opened_path_p))) {
+	if ((fp=php_do_open_temporary_file(P_tmpdir, pfx, opened_path_p TSRMLS_CC))) {
 		return fp;
 	}
 
-	if ((fp=php_do_open_temporary_file(path_tmp, pfx, opened_path_p))) {
+	if ((fp=php_do_open_temporary_file(path_tmp, pfx, opened_path_p TSRMLS_CC))) {
 		return fp;
 	}
 #endif

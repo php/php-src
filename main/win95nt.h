@@ -19,7 +19,7 @@ typedef char * caddr_t;
 #define S_IFBLK		_IFBLK
 #define	S_IFLNK		_IFLNK
 #define chdir(path) SetCurrentDirectory(path)
-#define mkdir(a,b)	_mkdir(a)
+#define mkdir(a, b)	_mkdir(a)
 #define rmdir(a)	_rmdir(a)
 #define getpid		_getpid
 #define php_sleep(t)	Sleep(t*1000)

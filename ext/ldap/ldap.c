@@ -1984,14 +1984,16 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 
 /* {{{ proto string ldap_t61_to_8859(string value)
    Translate t61 characters to 8859 characters */
-PHP_FUNCTION(ldap_t61_to_8859) {
+PHP_FUNCTION(ldap_t61_to_8859)
+{
 	php_ldap_do_translate(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
 /* {{{ proto string ldap_8859_to_t61(string value)
    Translate 8859 characters to t61 characters */
-PHP_FUNCTION(ldap_8859_to_t61) {
+PHP_FUNCTION(ldap_8859_to_t61)
+{
 	php_ldap_do_translate(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */

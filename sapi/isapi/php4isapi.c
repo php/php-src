@@ -788,14 +788,14 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 				}
 
 				CG(unclean_shutdown)=1;
-				_snprintf(buf,sizeof(buf)-1,"PHP has encountered a Stack overflow");
+				_snprintf(buf, sizeof(buf)-1,"PHP has encountered a Stack overflow");
 				php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
 			} else if (_exception_code()==EXCEPTION_ACCESS_VIOLATION) {
-				_snprintf(buf,sizeof(buf)-1,"PHP has encountered an Access Violation at %p",e->ExceptionRecord->ExceptionAddress);
+				_snprintf(buf, sizeof(buf)-1,"PHP has encountered an Access Violation at %p", e->ExceptionRecord->ExceptionAddress);
 				php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
 				my_endthread();
 			} else {
-				_snprintf(buf,sizeof(buf)-1,"PHP has encountered an Unhandled Exception Code %d at %p",e->ExceptionRecord->ExceptionCode , e->ExceptionRecord->ExceptionAddress);
+				_snprintf(buf, sizeof(buf)-1,"PHP has encountered an Unhandled Exception Code %d at %p", e->ExceptionRecord->ExceptionCode , e->ExceptionRecord->ExceptionAddress);
 				php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
 				my_endthread();
 			}

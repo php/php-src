@@ -299,7 +299,7 @@ php_ns_startup(sapi_module_struct *sapi_module)
  * the HTTP header data, so that a script can access these.
  */
 
-#define ADD_STRINGX(name,buf)										\
+#define ADD_STRINGX(name, buf)										\
 	php_register_variable(name, buf, track_vars_array TSRMLS_CC)
 
 #define ADD_STRING(name)										\

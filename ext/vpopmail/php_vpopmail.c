@@ -427,7 +427,8 @@ PHP_FUNCTION(vpopmail_add_domain_ex)
 
 /* {{{ proto bool vpopmail_del_domain_ex(string domain)
    Delete a virtual domain */
-PHP_FUNCTION(vpopmail_del_domain_ex) {
+PHP_FUNCTION(vpopmail_del_domain_ex)
+{
 	zval **domain;
 	int retval=-1;
 	char *cmd,*escdomain;
@@ -469,7 +470,8 @@ PHP_FUNCTION(vpopmail_del_domain_ex) {
 
 /* {{{ proto bool vpopmail_add_alias_domain_ex(string olddomain, string newdomain)
    Add alias to an existing virtual domain */
-PHP_FUNCTION(vpopmail_add_alias_domain_ex) {
+PHP_FUNCTION(vpopmail_add_alias_domain_ex)
+{
 	zval **olddomain, **newdomain;
 	int retval;
 	char *cmd,*escolddomain,*escnewdomain;

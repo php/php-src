@@ -75,7 +75,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 
 		php_get_highlight_struct(&syntax_highlighter_ini);
-		if (highlight_file(SG(request_info).path_translated,&syntax_highlighter_ini TSRMLS_CC)){
+		if (highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC)){
 			return OK;
 		} else {
 			return NOT_FOUND;

@@ -36,7 +36,7 @@
 #define TRUNC_IT(extension, mode) \
 	snprintf(buf, MAXPATHLEN, "%s" extension, info->path); \
 	buf[MAXPATHLEN-1] = '\0'; \
-	if((fd = VCWD_OPEN((buf, O_CREAT | mode | O_WRONLY, filemode))) == -1) \
+	if((fd = VCWD_OPEN_MODE(buf, O_CREAT | mode | O_WRONLY, filemode)) == -1) \
 		return FAILURE; \
 	close(fd);
 

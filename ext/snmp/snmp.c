@@ -376,35 +376,40 @@ retry:
 
 /* {{{ proto string snmpget(string host, string community, string object_id [, int timeout [, int retries]]) 
    Fetch a SNMP object */
-PHP_FUNCTION(snmpget) {
+PHP_FUNCTION(snmpget)
+{
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
 
 /* {{{ proto array snmpwalk(string host, string community, string object_id [, int timeout [, int retries]]) 
    Return all objects under the specified object id */
-PHP_FUNCTION(snmpwalk) {
+PHP_FUNCTION(snmpwalk)
+{
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
 }
 /* }}} */
 
 /* {{{ proto array snmprealwalk(string host, string community, string object_id [, int timeout [, int retries]])
    Return all objects including their respective object id withing the specified one */
-PHP_FUNCTION(snmprealwalk) {
+PHP_FUNCTION(snmprealwalk)
+{
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
 }
 /* }}} */
 
 /* {{{ proto bool snmp_get_quick_print(void)
    Return the current status of quick_print */
-PHP_FUNCTION(snmp_get_quick_print) {
+PHP_FUNCTION(snmp_get_quick_print)
+{
 	RETURN_LONG(snmp_get_quick_print() ? 1 : 0);
 }
 /* }}} */
 
 /* {{{ proto void snmp_set_quick_print(int quick_print)
    Return all objects including their respective object id withing the specified one */
-PHP_FUNCTION(snmp_set_quick_print) {
+PHP_FUNCTION(snmp_set_quick_print)
+{
 	zval **a1;
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &a1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -416,7 +421,8 @@ PHP_FUNCTION(snmp_set_quick_print) {
 
 /* {{{ proto int snmpset(string host, string community, string object_id, string type, mixed value [, int timeout [, int retries]]) 
    Set the value of a SNMP object */
-PHP_FUNCTION(snmpset) {
+PHP_FUNCTION(snmpset)
+{
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11);
 }
 /* }}} */

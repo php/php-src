@@ -309,7 +309,8 @@ static int php_foreach_cat (int instatus, char *inkey, int inkeylen, char *inval
 
 /* {{{ proto array yp_cat(string domain, string map)
    Return an array containing the entire map */
-PHP_FUNCTION(yp_cat) {
+PHP_FUNCTION(yp_cat)
+{
 	pval **domain, **map;
 	struct ypall_callback callback;
 
@@ -343,7 +344,8 @@ PHP_FUNCTION(yp_errno)
 
 /* {{{ proto string yp_err_string(int errorcode)
    Returns the corresponding error string for the given error code */
-PHP_FUNCTION(yp_err_string) {
+PHP_FUNCTION(yp_err_string)
+{
 	pval **error;
 	char *string;
 

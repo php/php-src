@@ -23,8 +23,8 @@
 //
 // Simple wrappers for the heap APIS
 //
-#define xmalloc(s) HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,(s))
-#define xfree(s)   HeapFree(GetProcessHeap(),0,(s))
+#define xmalloc(s) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (s))
+#define xfree(s)   HeapFree(GetProcessHeap(), 0, (s))
 
 //
 // The mandatory exports from the ISAPI DLL
@@ -64,9 +64,9 @@ typedef BOOL (WINAPI *VersionProc)(HSE_VERSION_INFO *) ;
 typedef DWORD (WINAPI *HttpExtProc)(EXTENSION_CONTROL_BLOCK *);
 BOOL WINAPI FillExtensionControlBlock(EXTENSION_CONTROL_BLOCK *, TIsapiContext *) ;
 BOOL WINAPI GetServerVariable(HCONN, LPSTR, LPVOID, LPDWORD );
-BOOL WINAPI ReadClient(HCONN,LPVOID,LPDWORD);
-BOOL WINAPI WriteClient(HCONN,LPVOID,LPDWORD,DWORD);
-BOOL WINAPI ServerSupportFunction(HCONN,DWORD,LPVOID,LPDWORD,LPDWORD);
+BOOL WINAPI ReadClient(HCONN, LPVOID, LPDWORD);
+BOOL WINAPI WriteClient(HCONN, LPVOID, LPDWORD, DWORD);
+BOOL WINAPI ServerSupportFunction(HCONN, DWORD, LPVOID, LPDWORD, LPDWORD);
 VersionProc IsapiGetExtensionVersion;
 HttpExtProc IsapiHttpExtensionProc;
 HSE_VERSION_INFO version_info;
@@ -186,7 +186,7 @@ BOOL ReadGlobalEnvironment(const char *environment)
 	DWORD i=0;
 	if (fp) {
 		char line[2048];
-		while (fgets(line,sizeof(line)-1,fp)) {
+		while (fgets(line, sizeof(line)-1, fp)) {
 			// file.php arg1 arg2 etc.
 			char *p = strchr(line, '=');
 			if (p) {
@@ -209,7 +209,7 @@ BOOL ReadFileList(const char *filelist)
 	}
 	char line[2048];
 	int i=0;
-	while (fgets(line,sizeof(line)-1,fp)) {
+	while (fgets(line, sizeof(line)-1, fp)) {
 		// file.php arg1 arg2 etc.
 		stripcrlf(line);
 		if (strlen(line)>3) {
@@ -298,7 +298,7 @@ BOOL ParseTestFile(const char *path, const char *fn)
 	FILE *ft = fopen(tn, "w+");
 	FILE *fe = fopen(en, "w+");
 	if (fp && ft && fe) {
-		while (fgets(line,sizeof(line)-1,fp)) {
+		while (fgets(line, sizeof(line)-1, fp)) {
 			if (line[0]=='-') {
 				if (_strnicmp(line, "--TEST--", 8)==0) {
 					parsestate = test;
@@ -371,7 +371,7 @@ BOOL GetTestFiles(const char *path)
 	WIN32_FIND_DATA fd;
 	memset(&fd, 0, sizeof(WIN32_FIND_DATA));
 
-	_snprintf(FindPath, sizeof(FindPath)-1, "%s\\*.*",path);
+	_snprintf(FindPath, sizeof(FindPath)-1, "%s\\*.*", path);
 	HANDLE fh = FindFirstFile(FindPath, &fd);
 	if (fh != INVALID_HANDLE_VALUE) {
 		do {
@@ -379,7 +379,7 @@ BOOL GetTestFiles(const char *path)
 				!strchr(fd.cFileName, '.')) {
 				// subdirectory, recurse into it
 				char NewFindPath[MAX_PATH];
-				_snprintf(NewFindPath, sizeof(NewFindPath)-1, "%s\\%s",path, fd.cFileName);
+				_snprintf(NewFindPath, sizeof(NewFindPath)-1, "%s\\%s", path, fd.cFileName);
 				GetTestFiles(NewFindPath);
 			} else if (strstr(fd.cFileName, ".phpt")) {
 				// got test file, parse it now
@@ -400,12 +400,12 @@ void DeleteTempFiles(const char *mask)
 	WIN32_FIND_DATA fd;
 	memset(&fd, 0, sizeof(WIN32_FIND_DATA));
 
-	_snprintf(FindPath, sizeof(FindPath)-1, "%s\\%s",temppath, mask);
+	_snprintf(FindPath, sizeof(FindPath)-1, "%s\\%s", temppath, mask);
 	HANDLE fh = FindFirstFile(FindPath, &fd);
 	if (fh != INVALID_HANDLE_VALUE) {
 		do {
 			char NewFindPath[MAX_PATH];
-			_snprintf(NewFindPath, sizeof(NewFindPath)-1, "%s\\%s",temppath, fd.cFileName);
+			_snprintf(NewFindPath, sizeof(NewFindPath)-1, "%s\\%s", temppath, fd.cFileName);
 			DeleteFile(NewFindPath);
 			memset(&fd, 0, sizeof(WIN32_FIND_DATA));
 		} while (FindNextFile(fh, &fd) != 0);
@@ -469,7 +469,7 @@ int main(int argc, char* argv[])
 		    0,
 		    NULL 
 		);
-		fprintf(stderr,"Error: Dll 'php4isapi.dll' not found -%d\n%s\n", GetLastError(),lpMsgBuf);
+		fprintf(stderr,"Error: Dll 'php4isapi.dll' not found -%d\n%s\n", GetLastError(), lpMsgBuf);
 		LocalFree( lpMsgBuf );
 		return -1;
 	}
@@ -479,12 +479,12 @@ int main(int argc, char* argv[])
 
 	IsapiGetExtensionVersion = (VersionProc)GetProcAddress(hDll,"GetExtensionVersion");
 	if (!IsapiGetExtensionVersion) {
-		fprintf(stderr,"Can't Get Extension Version %d\n",GetLastError());
+		fprintf(stderr,"Can't Get Extension Version %d\n", GetLastError());
 		return -1;
 	}
 	IsapiHttpExtensionProc = (HttpExtProc)GetProcAddress(hDll,"HttpExtensionProc");
 	if (!IsapiHttpExtensionProc) {
-		fprintf(stderr,"Can't Get Extension proc %d\n",GetLastError());
+		fprintf(stderr,"Can't Get Extension proc %d\n", GetLastError());
 		return -1;
 	}
 
@@ -658,7 +658,7 @@ BOOL WINAPI GetServerVariable(HCONN hConn, LPSTR lpszVariableName,
 		rc = value.GetLength();
 		strncpy((char *)lpBuffer, value, *lpdwSize-1);
 	} else
-		rc = GetEnvironmentVariable(lpszVariableName,(char *)lpBuffer,*lpdwSize) ;
+		rc = GetEnvironmentVariable(lpszVariableName, (char *)lpBuffer, *lpdwSize) ;
 
 	if (!rc) { // return of 0 indicates the variable was not found
 		SetLastError(ERROR_NO_DATA);
@@ -684,7 +684,7 @@ BOOL WINAPI ReadClient(HCONN hConn, LPVOID lpBuffer, LPDWORD lpdwSize) {
 	if (!c) return FALSE;
 
 	if (c->in != INVALID_HANDLE_VALUE) 
-		return ReadFile(c->in,lpBuffer,(*lpdwSize), lpdwSize,NULL);
+		return ReadFile(c->in, lpBuffer, (*lpdwSize), lpdwSize, NULL);
 
 	return FALSE;
 }
@@ -697,7 +697,7 @@ BOOL WINAPI WriteClient(HCONN hConn, LPVOID lpBuffer, LPDWORD lpdwSize,
 	if (!c) return FALSE;
 
 	if (c->out != INVALID_HANDLE_VALUE) 
-		return WriteFile(c->out,lpBuffer,*lpdwSize, lpdwSize,NULL);
+		return WriteFile(c->out, lpBuffer, *lpdwSize, lpdwSize, NULL);
 
 	return FALSE;
 }
@@ -737,7 +737,7 @@ BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 			if (temp) xfree(temp);
 
 			dwBytes = strlen(lpszRespBuf);
-			bRet = WriteClient(0,lpszRespBuf,&dwBytes,0);
+			bRet = WriteClient(0, lpszRespBuf, &dwBytes, 0);
 			xfree(lpszRespBuf);
 
 			break;
@@ -761,7 +761,7 @@ BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 					(lpdwSize > 0)?lpvBuffer:0);
 			xfree(temp);
 			dwBytes = strlen(lpszRespBuf);
-			bRet = WriteClient(0,lpszRespBuf,&dwBytes,0);
+			bRet = WriteClient(0, lpszRespBuf, &dwBytes, 0);
 			xfree(lpszRespBuf);
 			break;
 		default:
@@ -785,11 +785,11 @@ char * MakeDateStr(void){
 
 	GetSystemTime(&systime);
 
-	wsprintf(szDate,"%s, %d %s %d %d:%d.%d",DaysofWeek[systime.wDayOfWeek],
+	wsprintf(szDate,"%s, %d %s %d %d:%d.%d", DaysofWeek[systime.wDayOfWeek],
 									  systime.wDay,
 									  Months[systime.wMonth],
 									  systime.wYear,
-									  systime.wHour,systime.wMinute,
+									  systime.wHour, systime.wMinute,
 									  systime.wSecond );
 
 	return szDate;
@@ -801,7 +801,7 @@ BOOL WINAPI FillExtensionControlBlock(EXTENSION_CONTROL_BLOCK *ECB, TIsapiContex
 
 	char * temp;
 	ECB->cbSize = sizeof(EXTENSION_CONTROL_BLOCK);
-	ECB->dwVersion = MAKELONG(HSE_VERSION_MINOR,HSE_VERSION_MAJOR);
+	ECB->dwVersion = MAKELONG(HSE_VERSION_MINOR, HSE_VERSION_MAJOR);
 	ECB->ConnID = (void *)context;
 	//
 	// Pointers to the functions the DLL will call.
@@ -831,15 +831,16 @@ BOOL WINAPI FillExtensionControlBlock(EXTENSION_CONTROL_BLOCK *ECB, TIsapiContex
 //
 // Works like _getenv(), but uses win32 functions instead.
 //
-char * GetEnv(LPSTR lpszEnvVar) {
+char *GetEnv(LPSTR lpszEnvVar)
+{
 	
-	char *var,dummy;
+	char *var, dummy;
 	DWORD dwLen;
 
 	if (!lpszEnvVar)
 		return "";
 	
-	dwLen =GetEnvironmentVariable(lpszEnvVar,&dummy,1);
+	dwLen =GetEnvironmentVariable(lpszEnvVar, &dummy, 1);
 
 	if (dwLen == 0)
 		return "";
@@ -847,7 +848,7 @@ char * GetEnv(LPSTR lpszEnvVar) {
 	var = (char *)xmalloc(dwLen);
 	if (!var)
 		return "";
-	(void)GetEnvironmentVariable(lpszEnvVar,var,dwLen);
+	(void)GetEnvironmentVariable(lpszEnvVar, var, dwLen);
 
 	return var;
 }

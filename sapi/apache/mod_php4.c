@@ -440,7 +440,7 @@ static void init_request_info(TSRMLS_D)
 		tmp = uudecode(r->pool, authorization);
 		SG(request_info).auth_user = getword_nulls_nc(r->pool, &tmp, ':');
 		if (SG(request_info).auth_user) {
-			r->connection->user = pstrdup(r->connection->pool,SG(request_info).auth_user);
+			r->connection->user = pstrdup(r->connection->pool, SG(request_info).auth_user);
 			r->connection->ap_auth_type = "Basic";
 			SG(request_info).auth_user = estrdup(SG(request_info).auth_user);
 		}
@@ -596,7 +596,7 @@ static int send_parsed_php(request_rec * r)
         TSRMLS_FETCH();
  
         sprintf(mem_usage,"%u", (int) AG(allocated_memory_peak));
-        ap_table_setn(r->notes, "mod_php_memory_usage", ap_pstrdup(r->pool,mem_usage));
+        ap_table_setn(r->notes, "mod_php_memory_usage", ap_pstrdup(r->pool, mem_usage));
     }
 #endif
 
@@ -889,16 +889,16 @@ module MODULE_VAR_EXPORT php4_module =
 	NULL,						/* fixups */
 	NULL						/* logger */
 #if MODULE_MAGIC_NUMBER >= 19970103
-	,NULL						/* header parser */
+	, NULL						/* header parser */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970719
-	,NULL             			/* child_init */
+	, NULL             			/* child_init */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970728
-	,php_child_exit_handler		/* child_exit */
+	, php_child_exit_handler		/* child_exit */
 #endif
 #if MODULE_MAGIC_NUMBER >= 19970902
-	,NULL						/* post read-request */
+	, NULL						/* post read-request */
 #endif
 };
 /* }}} */

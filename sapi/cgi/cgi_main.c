@@ -390,7 +390,7 @@ int main(int argc, char *argv[])
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
-	signal(SIGPIPE,SIG_IGN); /* ignore SIGPIPE in standalone mode so
+	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 								that sockets created via fsockopen()
 								don't kill PHP if the remote site
 								closes it.  in apache|apxs mode apache
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
 
 
 #ifdef ZTS
-	tsrm_startup(1,1,0, NULL);
+	tsrm_startup(1, 1, 0, NULL);
 #endif
 
 	sapi_startup(&cgi_sapi_module);
@@ -718,7 +718,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				return FAILURE;
 			}
 			file_handle.filename = argv0;
-			file_handle.opened_path = expand_filepath(argv0, NULL);
+			file_handle.opened_path = expand_filepath(argv0, NULL TSRMLS_CC);
 		} else if (retval == SUCCESS) {
 			/* #!php support */
 			c = fgetc(file_handle.handle.fp);

@@ -2936,7 +2936,7 @@ PHP_FUNCTION(ocisavelobfile)
 
 		filename = (*arg)->value.str.val;
 
-		if ((fp = VCWD_OPEN((filename, O_RDONLY|O_BINARY))) == -1) {
+		if ((fp = VCWD_OPEN(filename, O_RDONLY|O_BINARY)) == -1) {
 			php_error(E_WARNING, "Can't open file %s", filename);
 			RETURN_FALSE;
         } 
@@ -3054,7 +3054,7 @@ PHP_FUNCTION(ociwritelobtofile)
 				goto bail;
 			}
 
-			if ((fp = VCWD_OPEN((filename,O_CREAT | O_RDWR | O_BINARY | O_TRUNC, 0600))) == -1) {
+			if ((fp = VCWD_OPEN_MODE(filename,O_CREAT | O_RDWR | O_BINARY | O_TRUNC, 0600)) == -1) {
 				php_error(E_WARNING, "Can't create file %s", filename);
 				goto bail;
 			} 

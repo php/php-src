@@ -42,21 +42,21 @@
 # define SOCK_CONN_ERR -1
 # define SOCK_RECV_ERR -1
 #endif
-#define SOCK_WRITE(d,s) send(s,d,strlen(d),0)
-#define SOCK_WRITEL(d,l,s) send(s,d,l,0)
+#define SOCK_WRITE(d, s) send(s, d, strlen(d), 0)
+#define SOCK_WRITEL(d, l, s) send(s, d, l, 0)
 #define SOCK_FGETC(s) php_sock_fgetc((s))
-#define SOCK_FGETS(b,l,s) php_sock_fgets((b),(l),(s))
+#define SOCK_FGETS(b, l, s) php_sock_fgets((b), (l), (s))
 #define SOCK_FEOF(sock) php_sock_feof((sock))
-#define SOCK_FREAD(ptr,size,sock) php_sock_fread((ptr),(size),(sock))
+#define SOCK_FREAD(ptr, size, sock) php_sock_fread((ptr), (size), (sock))
 #define SOCK_FCLOSE(s) php_sock_close(s)
 
-#define FP_FGETS(buf,len,sock,fp,issock) \
-	((issock)?SOCK_FGETS(buf,len,sock):fgets(buf,len,fp))
-#define FP_FREAD(buf,len,sock,fp,issock) \
-	((issock)?SOCK_FREAD(buf,len,sock):fread(buf,1,len,fp))
-#define FP_FEOF(sock,fp,issock) \
+#define FP_FGETS(buf, len, sock, fp, issock) \
+	((issock)?SOCK_FGETS(buf, len, sock):fgets(buf, len, fp))
+#define FP_FREAD(buf, len, sock, fp, issock) \
+	((issock)?SOCK_FREAD(buf, len, sock):fread(buf, 1, len, fp))
+#define FP_FEOF(sock, fp, issock) \
 	((issock)?SOCK_FEOF(sock):feof(fp))
-#define FP_FGETC(sock,fp,issock) \
+#define FP_FGETC(sock, fp, issock) \
 	((issock)?SOCK_FGETC(sock):fgetc(fp))
 
 /* values for issock */
@@ -69,7 +69,7 @@ typedef FILE *(*php_fopen_url_wrapper_t)(const char *, char *, int, int *, int *
 PHPAPI FILE *php_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC);
 
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC);
-PHPAPI char *expand_filepath(const char *filepath, char *real_path);
+PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC);
 
 PHPAPI int php_check_open_basedir(char *path TSRMLS_DC);
 PHPAPI int php_check_specific_open_basedir(char *basedir, char *path TSRMLS_DC);

@@ -823,7 +823,7 @@ void pike_module_init( void )
   }
   start_new_program(); /* Text */
   pike_add_function("run", f_php_caudium_request_handler,
-		    "function(string,mapping,object,function:void)", 0);
+		    "function(string, mapping, object, function:void)", 0);
   end_class("Interpreter", 0);
 }
 
