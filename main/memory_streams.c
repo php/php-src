@@ -153,14 +153,14 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 	switch(whence) {
 		case SEEK_CUR:
 			if (offset < 0) {
-				if (ms->fpos < -offset) {
+				if (ms->fpos < (size_t)(-offset)) {
 					ms->fpos = 0;
 					/*return EINVAL;*/
 				} else {
 					ms->fpos = ms->fpos + offset;
 				}
 			} else {
-				if (ms->fpos < offset) {
+				if (ms->fpos < (size_t)(offset)) {
 					ms->fpos = ms->fsize;
 					/*return EINVAL;*/
 				} else {
@@ -169,7 +169,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 			}
 			return 0;
 		case SEEK_SET:
-			if (offset > ms->fsize) {
+			if (ms->fsize < (size_t)(offset)) {
 				ms->fpos = ms->fsize;
 				/*return EINVAL;*/
 			} else {
@@ -180,7 +180,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 			if (offset > 0) {
 				ms->fpos = ms->fsize;
 				/*return EINVAL;*/
-			} else if (ms->fpos < -offset) {
+			} else if (ms->fpos < (size_t)(-offset)) {
 				ms->fpos = 0;
 				/*return EINVAL;*/
 			} else {
