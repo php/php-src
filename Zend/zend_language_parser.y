@@ -457,6 +457,7 @@ optional_class_type:
 	|	fully_qualified_class_name		{ $$ = $1; }
 ;
 
+
 function_call_parameter_list:
 		non_empty_function_call_parameter_list	{ $$ = $1; }
 	|	/* empty */				{ $$.u.constant.value.lval = 0; }
@@ -718,7 +719,7 @@ const_scalar_expr_list:
 	|   const_scalar_expr '*'  const_scalar_expr { zend_do_fold_binary_op(ZEND_MUL, &$$, &$1, &$3 TSRMLS_CC); } 
 	|   const_scalar_expr '/'  const_scalar_expr { zend_do_fold_binary_op(ZEND_DIV, &$$, &$1, &$3 TSRMLS_CC); } 
 	|   const_scalar_expr '%'  const_scalar_expr { zend_do_fold_binary_op(ZEND_MOD, &$$, &$1, &$3 TSRMLS_CC); } 
-	|   const_scalar_expr '~'  const_scalar_expr { zend_do_fold_binary_op(ZEND_BW_NOT, &$$, &$1, &$3 TSRMLS_CC); }
+	|                     '~'  const_scalar_expr { zend_do_fold_binary_op(ZEND_BW_NOT, &$$, &$2, NULL TSRMLS_CC); }
 	|   '(' const_scalar_expr ')' { $$ = $2; }
 ;
 
