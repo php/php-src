@@ -118,7 +118,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	ce.create_object = php_com_object_new;
 	zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
 
-	zend_ts_hash_init(&php_com_typelibraries, 0, NULL, php_com_typelibrary_dtor, 0);
+	zend_ts_hash_init(&php_com_typelibraries, 0, NULL, php_com_typelibrary_dtor, 1);
 
 #if HAVE_MSCOREE_H
 	INIT_CLASS_ENTRY(ce, "dotnet", NULL);
