@@ -1,3 +1,50 @@
+2004-01-03  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      NEWS:
+      More proper news format.
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cli/php_cli.c:
+      MFH: cli overrides php.ini and switches output buffering off.
+
+2004-01-03  Jan Lehnardt  <jan@dasmoped.net>
+
+    * scripts/phpize.in:
+       - remove unneeded subroutine call
+
+2004-01-03  Derick Rethans  <php@derickrethans.nl>
+
+    * .cvsignore:
+      - Added test results to .cvsignore file
+
+    * NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_reflection_api.c
+      ext/standard/basic_functions.c
+      ext/standard/var.c:
+      - Fixed var_export() to show public, protected and private modifiers
+      properly.
+      - Exported (un)mangle_property_name.
+
+    * scripts/phpize.in:
+      - Show the API numbers again while phpizing.
+
+2004-01-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      s/then/than/ Thanks Jani & Andi
+
 2004-01-02  Edin Kadribasic  <edink@emini.dk>
 
     * sapi/cli/php_cli.c:
