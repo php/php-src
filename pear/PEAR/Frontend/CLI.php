@@ -91,6 +91,9 @@ class PEAR_Frontend_CLI extends PEAR
     // }}}
     // {{{ displayError(eobj)
 
+    /**
+     * @param object PEAR_Error object
+     */
     function displayError($eobj)
     {
         return $this->_displayLine($eobj->getMessage());
@@ -99,6 +102,9 @@ class PEAR_Frontend_CLI extends PEAR
     // }}}
     // {{{ displayFatalError(eobj)
 
+    /**
+     * @param object PEAR_Error object
+     */
     function displayFatalError($eobj)
     {
         $this->displayError($eobj);
