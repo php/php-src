@@ -590,13 +590,26 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 	int laststart=0;
 
 /* The following is very tricky and depends on how rewriting is setup on your webserver.
-   If you skip the scriptname in the url you will have to map each hyperwave name to http://<hwname>.
-   This may not always be a good idea. The best solution is probably to provide a prefix for such
-   a case which is an optional parameter to hw_gettext hw_pipedocument.
+   If you skip the scriptname in the url you will have to map each hyperwave name
+   to http://<hwname>. This may not always be a good idea. The best solution is
+   probably to provide a prefix for such
+   a case which is an optional parameter to hw_gettext() or hw_pipedocument().
+   FIXME: Currently, the variable SCRIPT_NAME is empty thouht SCRIPT_URL is
+   not. In our case this is OK, since as mentioned above it is better to have no
+   SCRIPT_NAME than to have if rewriting is on.
 */
 	if(urlprefix) {
 		scriptname = urlprefix;
 	} else {
+		zval **script_name;
+		if (zend_hash_find(&EG(symbol_table), "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void **) &script_name)==FAILURE)
+			scriptname = NULL;
+		else {
+			convert_to_string_ex(script_name);
+			scriptname = (*script_name)->value.str.val;
+		}
+
+#if 0
 #if APACHE
 		{
 		int j;
@@ -604,13 +617,15 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 		table_entry *elts = (table_entry *)arr->elts;
 
 		for (j=0; j < arr->nelts; j++) {
-			if(0 == strcmp(elts[j].key, "SCRIPT_NAME"))
+			if((0 == strcmp(elts[j].key, "SCRIPT_NAME")) ||
+			   (0 == strcmp(elts[j].key, "SCRIPT_URL")))
 			break;
 		}
 		scriptname = elts[j].val;
 		}
 #else
 		scriptname = getenv("SCRIPT_FILENAME");
+#endif
 #endif
 	}
 
