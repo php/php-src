@@ -550,7 +550,7 @@ PHP_FUNCTION(ftp_get)
 		RETURN_FALSE;
 	}
 
-	if ((outfp = fopen(arg2->value.str.val, "w")) == NULL) {
+	if ((outfp = PHP_FOPEN(arg2->value.str.val, "w")) == NULL) {
 		fclose(tmpfp);
 		php_error(E_WARNING, "error opening %s", arg2->value.str.val);
 		RETURN_FALSE;
@@ -634,7 +634,7 @@ PHP_FUNCTION(ftp_put)
 	convert_to_string(arg3);
 	XTYPE(xtype, arg4);
 
-	if ((infp = fopen(arg3->value.str.val, "r")) == NULL) {
+	if ((infp = PHP_FOPEN(arg3->value.str.val, "r")) == NULL) {
 		php_error(E_WARNING, "error opening %s", arg3->value.str.val);
 		RETURN_FALSE;
 	}

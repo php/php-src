@@ -161,7 +161,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 #endif
 
 
-	if (!new_value || (typelib_file=fopen(new_value, "r"))==NULL) {
+	if (!new_value || (typelib_file=PHP_FOPEN(new_value, "r"))==NULL) {
 		return FAILURE;
 	}
 
