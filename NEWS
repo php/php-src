@@ -2,11 +2,14 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added register_argc_argv INI directive, to allow to selectively disable
+  the declaration of the $argv and $argc variables for increased
+  performance (Zeev)
 - Added $HTTP_ENV_VARS[] and $HTTP_SERVER_VARS[] support, which similarly
   to $HTTP_GET_VARS[], contain environment and server variables.  Setting
   register_globals to Off will now also prevent registration of the
   environment and server variables into the global scope (Zeev)
-- Renamed gpc_globals to register_globals (Zeev)
+- Renamed gpc_globals INI directive to register_globals (Zeev)
 - Introduced variables_order that deprecates gpc_order, and allows control
   over the server and environment variables, in addition to GET/POST/Cookies
   (Zeev)
