@@ -77,7 +77,7 @@ asp_tags = Off
 precision    =  12
 
 ; Enforce year 2000 compliance (will cause problems with non-compliant browsers)
-y2k_compliance = Off
+y2k_compliance = on
 
 ; Output buffering allows you to send header lines (including cookies) even
 ; after you send body content, at the price of slowing PHP's output layer a
@@ -819,7 +819,8 @@ session.entropy_file =
 
 ;session.entropy_file = /dev/urandom
 
-; Set to {nocache,private,public} to determine HTTP caching aspects.
+; Set to {nocache,private,public,} to determine HTTP caching aspects
+; or leave this empty to avoid sending anti-caching headers.
 session.cache_limiter = nocache
 
 ; Document expires after n minutes.
