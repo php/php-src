@@ -48,10 +48,6 @@ dnl ## All of these are normally in the extension directories.
 
 dnl ## Diversion 5 is the last one.  Here we generate files and clean up.
 
-divert(2)
-
-PHP_CONFIGURE_PART(Running system checks)
-	
 dnl ## This is where the version number is changed from now on!
 AM_INIT_AUTOMAKE(php, 4.0RC2-dev)
 
@@ -74,12 +70,6 @@ AC_CANONICAL_HOST
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
-dnl ## If we're using cc on HP-UX, add -Ae -D_HPUX_SOURCE [obsolete]
-dnl ## if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"
-dnl ## then
-dnl ##	 test -n "$GCC" || CFLAGS="-Ae $CFLAGS -D_HPUX_SOURCE"
-dnl ## fi
-
 dnl Checks for programs.
 AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
@@ -95,11 +85,8 @@ else
     AC_MSG_RESULT($1.$2 (ok))
 fi
 
-dnl ## there has to be a better way...
-dnl ## OLDLIBS=$LIBS; LIBS=""
 AC_PROG_CC
 AC_AIX
-dnl ## LIBS=$OLDLIBS
 
 AM_PROG_CC_STDC
 
@@ -120,6 +107,35 @@ fi
 sinclude(Zend/acinclude.m4)
 sinclude(Zend/Zend.m4)
 sinclude(TSRM/tsrm.m4)
+
+divert(2)
+
+PTHREADS_CHECK
+
+PHP_SAPI=cgi
+PHP_BUILD_PROGRAM
+dnl paths to the targets relative to the build directory
+SAPI_PROGRAM=php
+dnl on HP-UX, the extension is .sl. Need to improve this
+SAPI_SHARED=libs/libphp4.so
+SAPI_STATIC=libs/libphp4.a
+
+PHP_CONFIGURE_PART(Configuring SAPI modules)
+
+esyscmd(./scripts/config-stubs sapi)
+
+AC_MSG_CHECKING(for chosen SAPI module)
+AC_MSG_RESULT($PHP_SAPI)
+
+if test "$enable_experimental_zts" = "yes"; then
+  PTHREADS_ASSIGN_VARS
+  PTHREADS_FLAGS
+fi
+
+divert(3)
+
+PHP_CONFIGURE_PART(Running system checks)
+
 
 dnl check for -R, etc. switch
 AC_MSG_CHECKING(whether compiler supports -R)
@@ -365,7 +381,7 @@ if test $ac_cv_type_in_addr_t = no; then
   AC_DEFINE(in_addr_t, u_int)
 fi
 
-divert(3)
+divert(4)
 
 
 	
@@ -539,23 +555,8 @@ if test "$PHP_PEAR" = "yes"; then
   PEAR_DIR=pear
 fi
 
-
-PHP_SAPI=cgi
-PHP_BUILD_PROGRAM
-dnl paths to the targets relative to the build directory
-SAPI_PROGRAM=php
-dnl on HP-UX, the extension is .sl. Need to improve this
-SAPI_SHARED=libs/libphp4.so
-SAPI_STATIC=libs/libphp4.a
-
-PHP_CONFIGURE_PART(Configuring SAPI modules)
-
-esyscmd(./scripts/config-stubs sapi)
-
-AC_MSG_CHECKING(for chosen SAPI module)
-AC_MSG_RESULT($PHP_SAPI)
 	
-divert(4)
+divert(5)
 
 PHP_CONFIGURE_PART(Configuring extensions)
 	
@@ -581,7 +582,7 @@ if test "$PHP_VERSIONING" = "yes"; then
   fi
 fi
 
-divert(5)
+divert(6)
 
 enable_shared=yes
 enable_static=yes
@@ -604,8 +605,6 @@ if test "$PHP_SAPI" = "cgi"; then
 fi
 
 PHP_REGEX
-
-PTHREADS_FLAGS
 
 PHP_CONFIGURE_PART(Configuring Zend)
 LIBZEND_BASIC_CHECKS
