@@ -80,7 +80,7 @@ documentation
 
 ext/bz2
 -------
-    * Add an ini setting to specify the size of decompression buffer.
+    * Add an ini directive to specify the size of decompression buffer.
       The default 4k is too small for large files and also requires much time
       for decompression. 40k is suitable for such files, however it may be too
       much under certain environments. There should be appropriate default
