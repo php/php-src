@@ -32,7 +32,7 @@
 
 #ifdef PHP_WIN32
 #include <winsock.h>
-#define signal(a,b) NULL
+#define signal(a, b) NULL
 #else
 #include "build-defs.h"
 #if HAVE_SIGNAL_H
@@ -47,7 +47,7 @@
 #endif
 
 /* True globals, no need for thread safety */
-static int le_result,le_link,le_plink;
+static int le_result, le_link, le_plink;
 
 #include "php_ini.h"
 
@@ -161,7 +161,7 @@ ZEND_GET_MODULE(mysql)
 
 void timeout(int sig);
 
-#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"MySQL:  A link to the server could not be established"); RETURN_FALSE; } }
+#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING, "MySQL:  A link to the server could not be established"); RETURN_FALSE; } }
 
 /*
  * This wrapper is required since mysql_free_result() returns an integer, and
@@ -194,7 +194,7 @@ static void _close_mysql_link(zend_rsrc_list_entry *rsrc)
 
 	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(link);
-	signal(SIGPIPE,handler);
+	signal(SIGPIPE, handler);
 	efree(link);
 	MySG(num_links)--;
 }
@@ -207,7 +207,7 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc)
 
 	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(link);
-	signal(SIGPIPE,handler);
+	signal(SIGPIPE, handler);
 
 	free(link);
 	MySG(num_persistent)--;
@@ -320,13 +320,24 @@ PHP_MINFO_FUNCTION(mysql)
 }
 
 
-static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
+#define MYSQL_DO_CONNECT_CLEANUP()	\
+	if (free_host) {				\
+		efree(host);				\
+	}
+
+#define MYSQL_DO_CONNECT_RETURN_FALSE()		\
+	MYSQL_DO_CONNECT_CLEANUP();				\
+	RETURN_FALSE;
+
+static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char *user,*passwd,*host,*socket,*tmp;
+	char *user, *passwd, *host_and_port, *socket, *tmp, *host=NULL;
 	char *hashed_details;
-	int hashed_details_length,port = MYSQL_PORT;
+	int hashed_details_length, port = MYSQL_PORT;
 	MYSQL *mysql;
 	void (*handler) (int);
+	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL;
+	zend_bool free_host=0;
 	MySLS_FETCH();
 	PLS_FETCH();
 
@@ -334,76 +345,78 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 
 	if (PG(sql_safe_mode)) {
 		if (ZEND_NUM_ARGS()>0) {
-			php_error(E_NOTICE,"SQL safe mode in effect - ignoring host/user/password information");
+			php_error(E_NOTICE, "SQL safe mode in effect - ignoring host/user/password information");
 		}
-		host=passwd=NULL;
+		host_and_port=passwd=NULL;
 		user=php_get_current_user();
 		hashed_details_length = strlen(user)+5+3;
 		hashed_details = (char *) emalloc(hashed_details_length+1);
-		sprintf(hashed_details,"mysql__%s_",user);
+		sprintf(hashed_details, "mysql__%s_", user);
 	} else {
-		host = MySG(default_host);
+		host_and_port = MySG(default_host);
 		user = MySG(default_user);
 		passwd = MySG(default_password);
 		
 		switch(ZEND_NUM_ARGS()) {
 			case 0: /* defaults */
 				break;
-			case 1: {
-					pval **yyhost;
-					
-					if (zend_get_parameters_ex(1, &yyhost)==FAILURE) {
-						RETURN_FALSE;
+			case 1: {					
+					if (zend_get_parameters_ex(1, &z_host)==FAILURE) {
+						MYSQL_DO_CONNECT_RETURN_FALSE();
 					}
-					convert_to_string_ex(yyhost);
-					host = (*yyhost)->value.str.val;
 				}
 				break;
 			case 2: {
-					pval **yyhost, **yyuser;
-					
-					if (zend_get_parameters_ex(2, &yyhost, &yyuser)==FAILURE) {
-						RETURN_FALSE;
+					if (zend_get_parameters_ex(2, &z_host, &z_user)==FAILURE) {
+						MYSQL_DO_CONNECT_RETURN_FALSE();
 					}
-					convert_to_string_ex(yyhost);
-					convert_to_string_ex(yyuser);
-					host = (*yyhost)->value.str.val;
-					user = (*yyuser)->value.str.val;
+					convert_to_string_ex(z_user);
+					user = (*z_user)->value.str.val;
 				}
 				break;
 			case 3: {
-					pval **yyhost,**yyuser,**yypasswd;
-				
-					if (zend_get_parameters_ex(3, &yyhost, &yyuser, &yypasswd) == FAILURE) {
-						RETURN_FALSE;
+					if (zend_get_parameters_ex(3, &z_host, &z_user, &z_passwd) == FAILURE) {
+						MYSQL_DO_CONNECT_RETURN_FALSE();
 					}
-					convert_to_string_ex(yyhost);
-					convert_to_string_ex(yyuser);
-					convert_to_string_ex(yypasswd);
-					host = (*yyhost)->value.str.val;
-					user = (*yyuser)->value.str.val;
-					passwd = (*yypasswd)->value.str.val;
+					convert_to_string_ex(z_user);
+					convert_to_string_ex(z_passwd);
+					user = (*z_user)->value.str.val;
+					passwd = (*z_passwd)->value.str.val;
 				}
 				break;
 			default:
 				WRONG_PARAM_COUNT;
 				break;
 		}
-		hashed_details_length = sizeof("mysql___")-1 + strlen(SAFE_STRING(host))+strlen(SAFE_STRING(user))+strlen(SAFE_STRING(passwd));
+		if (z_host) {
+			SEPARATE_ZVAL(z_host); /* We may modify z_host if it contains a port, separate */
+			convert_to_string_ex(z_host);
+			host_and_port = Z_STRVAL_PP(z_host);
+			if (z_user) {
+				convert_to_string_ex(z_user);
+				user = Z_STRVAL_PP(z_user);
+				if (z_passwd) {
+					convert_to_string_ex(z_passwd);
+					passwd = Z_STRVAL_PP(z_passwd);
+				}
+			}
+		}
+
+		hashed_details_length = sizeof("mysql___")-1 + strlen(SAFE_STRING(host_and_port))+strlen(SAFE_STRING(user))+strlen(SAFE_STRING(passwd));
 		hashed_details = (char *) emalloc(hashed_details_length+1);
-		sprintf(hashed_details,"mysql_%s_%s_%s",SAFE_STRING(host), SAFE_STRING(user), SAFE_STRING(passwd));
+		sprintf(hashed_details, "mysql_%s_%s_%s", SAFE_STRING(host_and_port), SAFE_STRING(user), SAFE_STRING(passwd));
 	}
 
 	/* We cannot use mysql_port anymore in windows, need to use
 	 * mysql_real_connect() to set the port.
 	 */
-	if (host && (tmp=strchr(host,':'))) {
-		*tmp=0;
+	if (host_and_port && (tmp=strchr(host_and_port, ':'))) {
+		host = estrndup(host_and_port, tmp-host_and_port);
+		free_host = 1;
 		tmp++;
 		if (tmp[0] != '/') {
 			port = atoi(tmp);
 			if ((tmp=strchr(tmp, ':'))) {
-				*tmp=0;
 				tmp++;
 				socket=tmp;
 			} 
@@ -411,6 +424,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			socket = tmp;
 		}
 	} else {
+		host = host_and_port;
 		port = MySG(default_port);
 	}
 
@@ -429,27 +443,27 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			list_entry new_le;
 
 			if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
-				php_error(E_WARNING,"MySQL:  Too many open links (%d)",MySG(num_links));
+				php_error(E_WARNING, "MySQL:  Too many open links (%d)", MySG(num_links));
 				efree(hashed_details);
-				RETURN_FALSE;
+				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			if (MySG(max_persistent)!=-1 && MySG(num_persistent)>=MySG(max_persistent)) {
-				php_error(E_WARNING,"MySQL:  Too many open persistent links (%d)",MySG(num_persistent));
+				php_error(E_WARNING, "MySQL:  Too many open persistent links (%d)", MySG(num_persistent));
 				efree(hashed_details);
-				RETURN_FALSE;
+				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			/* create the link */
 		mysql = (MYSQL *) malloc(sizeof(MYSQL));
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(mysql);
-		if (mysql_real_connect(mysql,host,user,passwd,NULL,port,socket,0)==NULL) {
+		if (mysql_real_connect(mysql, host, user, passwd, NULL, port, socket, 0)==NULL) {
 #else
-		if (mysql_connect(mysql,host,user,passwd)==NULL) {
+		if (mysql_connect(mysql, host, user, passwd)==NULL) {
 #endif
 				php_error(E_WARNING, "%s", mysql_error(mysql));
 				free(mysql);
 				efree(hashed_details);
-				RETURN_FALSE;
+				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			
 			/* hash it up */
@@ -458,52 +472,52 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				free(mysql);
 				efree(hashed_details);
-				RETURN_FALSE;
+				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			MySG(num_persistent)++;
 			MySG(num_links)++;
 		} else {  /* we do */
 			if (le->type != le_plink) {
-				RETURN_FALSE;
+				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			/* ensure that the link did not die */
-			handler=signal(SIGPIPE,SIG_IGN);
+			handler=signal(SIGPIPE, SIG_IGN);
 #if defined(HAVE_MYSQL_ERRNO) && defined(CR_SERVER_GONE_ERROR)
 			mysql_stat(le->ptr);
 			if (mysql_errno((MYSQL *)le->ptr) == CR_SERVER_GONE_ERROR) {
 #else
-			if (!strcasecmp(mysql_stat(le->ptr),"mysql server has gone away")) { /* the link died */
+			if (!strcasecmp(mysql_stat(le->ptr), "mysql server has gone away")) { /* the link died */
 #endif
-				signal(SIGPIPE,handler);
+				signal(SIGPIPE, handler);
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
-				if (mysql_real_connect(le->ptr,host,user,passwd,NULL,port,socket,0)==NULL) {
+				if (mysql_real_connect(le->ptr, host, user, passwd, NULL, port, socket, 0)==NULL) {
 #else
-				if (mysql_connect(le->ptr,host,user,passwd)==NULL) {
+				if (mysql_connect(le->ptr, host, user, passwd)==NULL) {
 #endif
-					php_error(E_WARNING,"MySQL:  Link to server lost, unable to reconnect");
+					php_error(E_WARNING, "MySQL:  Link to server lost, unable to reconnect");
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
-					RETURN_FALSE;
+					MYSQL_DO_CONNECT_RETURN_FALSE();
 				}
 			}
-			signal(SIGPIPE,handler);
+			signal(SIGPIPE, handler);
 			mysql = (MYSQL *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);
 	} else { /* non persistent */
-		list_entry *index_ptr,new_index_ptr;
+		list_entry *index_ptr, new_index_ptr;
 		
 		/* first we check the hash for the hashed_details key.  if it exists,
 		 * it should point us to the right offset where the actual mysql link sits.
 		 * if it doesn't, open a new mysql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
-			int type,link;
+		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+			int type, link;
 			void *ptr;
 
 			if (index_ptr->type != le_index_ptr) {
-				RETURN_FALSE;
+				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			link = (int) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
@@ -513,28 +527,29 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				php_mysql_set_default_link(link);
 				return_value->type = IS_RESOURCE;
 				efree(hashed_details);
+				MYSQL_DO_CONNECT_CLEANUP();
 				return;
 			} else {
-				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list), hashed_details, hashed_details_length+1);
 			}
 		}
 		if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
-			php_error(E_WARNING,"MySQL:  Too many open links (%d)",MySG(num_links));
+			php_error(E_WARNING, "MySQL:  Too many open links (%d)", MySG(num_links));
 			efree(hashed_details);
-			RETURN_FALSE;
+			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
 
 		mysql = (MYSQL *) emalloc(sizeof(MYSQL));
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(mysql);
-		if (mysql_real_connect(mysql,host,user,passwd,NULL,port,socket,0)==NULL) {
+		if (mysql_real_connect(mysql, host, user, passwd, NULL, port, socket, 0)==NULL) {
 #else
-		if (mysql_connect(mysql,host,user,passwd)==NULL) {
+		if (mysql_connect(mysql, host, user, passwd)==NULL) {
 #endif
-			php_error(E_WARNING,"MySQL Connection Failed: %s\n",mysql_error(mysql));
+			php_error(E_WARNING, "MySQL Connection Failed: %s\n", mysql_error(mysql));
 			efree(hashed_details);
 			efree(mysql);
-			RETURN_FALSE;
+			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
 
 		/* add it to the list */
@@ -543,15 +558,16 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
-			RETURN_FALSE;
+			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
 		MySG(num_links)++;
 	}
 
 	efree(hashed_details);
 	php_mysql_set_default_link(return_value->value.lval);
+	MYSQL_DO_CONNECT_CLEANUP();
 }
 
 
@@ -587,7 +603,7 @@ PHP_FUNCTION(mysql_pconnect)
    Close a MySQL connection */
 PHP_FUNCTION(mysql_close)
 {
-	pval **mysql_link=NULL;
+	zval **mysql_link=NULL;
 	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
@@ -628,7 +644,7 @@ PHP_FUNCTION(mysql_close)
    Select a MySQL database */
 PHP_FUNCTION(mysql_select_db)
 {
-	pval **db, **mysql_link;
+	zval **db, **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
@@ -670,7 +686,7 @@ PHP_FUNCTION(mysql_select_db)
    Create a MySQL database */
 PHP_FUNCTION(mysql_create_db)
 {
-	pval **db,**mysql_link;
+	zval **db, **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
@@ -710,7 +726,7 @@ PHP_FUNCTION(mysql_create_db)
    Drop (delete) a MySQL database */
 PHP_FUNCTION(mysql_drop_db)
 {
-	pval **db, **mysql_link;
+	zval **db, **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
@@ -751,8 +767,11 @@ PHP_FUNCTION(mysql_drop_db)
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_query)
 {
-	pval **query, **mysql_link, **store_result;
-	int id,use_store=MYSQL_STORE_RESULT;
+	zval **query, **mysql_link;
+#if 0
+	zval **store_result;
+#endif
+	int id, use_store=MYSQL_STORE_RESULT;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -823,8 +842,11 @@ PHP_FUNCTION(mysql_query)
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_db_query)
 {
-	pval **db, **query, **mysql_link, **store_result;
-	int id,use_store=MYSQL_STORE_RESULT;
+	zval **db, **query, **mysql_link;
+#if 0
+	zval **store_result;
+#endif
+	int id, use_store=MYSQL_STORE_RESULT;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -900,7 +922,7 @@ PHP_FUNCTION(mysql_db_query)
    List databases available on a MySQL server */
 PHP_FUNCTION(mysql_list_dbs)
 {
-	pval **mysql_link;
+	zval **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
@@ -925,7 +947,7 @@ PHP_FUNCTION(mysql_list_dbs)
 	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	if ((mysql_result=mysql_list_dbs(mysql, NULL))==NULL) {
-		php_error(E_WARNING,"Unable to save MySQL query result");
+		php_error(E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
@@ -937,7 +959,7 @@ PHP_FUNCTION(mysql_list_dbs)
    List tables in a MySQL database */
 PHP_FUNCTION(mysql_list_tables)
 {
-	pval **db, **mysql_link;
+	zval **db, **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
@@ -969,7 +991,7 @@ PHP_FUNCTION(mysql_list_tables)
 		RETURN_FALSE;
 	}
 	if ((mysql_result=mysql_list_tables(mysql, NULL))==NULL) {
-		php_error(E_WARNING,"Unable to save MySQL query result");
+		php_error(E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
@@ -981,7 +1003,7 @@ PHP_FUNCTION(mysql_list_tables)
    List MySQL result fields */
 PHP_FUNCTION(mysql_list_fields)
 {
-	pval **db, **table, **mysql_link;
+	zval **db, **table, **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
@@ -1013,8 +1035,8 @@ PHP_FUNCTION(mysql_list_fields)
 		RETURN_FALSE;
 	}
 	convert_to_string_ex(table);
-	if ((mysql_result=mysql_list_fields(mysql, (*table)->value.str.val,NULL))==NULL) {
-		php_error(E_WARNING,"Unable to save MySQL query result");
+	if ((mysql_result=mysql_list_fields(mysql, (*table)->value.str.val, NULL))==NULL) {
+		php_error(E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
@@ -1026,7 +1048,7 @@ PHP_FUNCTION(mysql_list_fields)
    Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysql_error)
 {
-	pval **mysql_link;
+	zval **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
@@ -1051,7 +1073,7 @@ PHP_FUNCTION(mysql_error)
 	
 	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
-	RETURN_STRING(mysql_error(mysql),1);
+	RETURN_STRING(mysql_error(mysql), 1);
 }
 /* }}} */
 
@@ -1061,7 +1083,7 @@ PHP_FUNCTION(mysql_error)
 #ifdef HAVE_MYSQL_ERRNO
 PHP_FUNCTION(mysql_errno)
 {
-	pval **mysql_link;
+	zval **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
@@ -1096,7 +1118,7 @@ PHP_FUNCTION(mysql_errno)
    Get number of affected rows in previous MySQL operation */
 PHP_FUNCTION(mysql_affected_rows)
 {
-	pval **mysql_link;
+	zval **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
@@ -1151,7 +1173,7 @@ PHP_FUNCTION(mysql_escape_string)
    Get the id generated from the previous INSERT operation */
 PHP_FUNCTION(mysql_insert_id)
 {
-	pval **mysql_link;
+	zval **mysql_link;
 	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
@@ -1185,7 +1207,7 @@ PHP_FUNCTION(mysql_insert_id)
    Get result data */
 PHP_FUNCTION(mysql_result)
 {
-	pval **result, **row, **field=NULL;
+	zval **result, **row, **field=NULL;
 	MYSQL_RES *mysql_result;
 	MYSQL_ROW sql_row;
 	mysql_row_length_type *sql_row_lengths;
@@ -1212,7 +1234,7 @@ PHP_FUNCTION(mysql_result)
 		
 	convert_to_long_ex(row);
 	if ((*row)->value.lval<0 || (*row)->value.lval>=(int)mysql_num_rows(mysql_result)) {
-		php_error(E_WARNING,"Unable to jump to row %d on MySQL result index %d", (*row)->value.lval, (*result)->value.lval);
+		php_error(E_WARNING, "Unable to jump to row %d on MySQL result index %d", (*row)->value.lval, (*result)->value.lval);
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, (*row)->value.lval);
@@ -1228,23 +1250,23 @@ PHP_FUNCTION(mysql_result)
 					MYSQL_FIELD *tmp_field;
 					char *table_name, *field_name, *tmp;
 
-					if ((tmp=strchr((*field)->value.str.val,'.'))) {
+					if ((tmp=strchr((*field)->value.str.val, '.'))) {
 						table_name = estrndup((*field)->value.str.val, tmp-(*field)->value.str.val);
 						field_name = estrdup(tmp+1);
 					} else {
 						table_name = NULL;
 						field_name = estrndup((*field)->value.str.val,(*field)->value.str.len);
 					}
-					mysql_field_seek(mysql_result,0);
+					mysql_field_seek(mysql_result, 0);
 					while ((tmp_field=mysql_fetch_field(mysql_result))) {
-						if ((!table_name || !strcasecmp(tmp_field->table,table_name)) && !strcasecmp(tmp_field->name,field_name)) {
+						if ((!table_name || !strcasecmp(tmp_field->table, table_name)) && !strcasecmp(tmp_field->name, field_name)) {
 							field_offset = i;
 							break;
 						}
 						i++;
 					}
 					if (!tmp_field) { /* no match found */
-						php_error(E_WARNING,"%s%s%s not found in MySQL result index %d",
+						php_error(E_WARNING, "%s%s%s not found in MySQL result index %d",
 									(table_name?table_name:""), (table_name?".":""), field_name, (*result)->value.lval);
 						efree(field_name);
 						if (table_name) {
@@ -1262,7 +1284,7 @@ PHP_FUNCTION(mysql_result)
 				convert_to_long_ex(field);
 				field_offset = (*field)->value.lval;
 				if (field_offset<0 || field_offset>=(int)mysql_num_fields(mysql_result)) {
-					php_error(E_WARNING,"Bad column offset specified");
+					php_error(E_WARNING, "Bad column offset specified");
 					RETURN_FALSE;
 				}
 				break;
@@ -1273,10 +1295,10 @@ PHP_FUNCTION(mysql_result)
 		return_value->type = IS_STRING;
 
 		if (PG(magic_quotes_runtime)) {
-			return_value->value.str.val = php_addslashes(sql_row[field_offset],sql_row_lengths[field_offset],&return_value->value.str.len,0);
+			return_value->value.str.val = php_addslashes(sql_row[field_offset], sql_row_lengths[field_offset],&return_value->value.str.len, 0);
 		} else {	
 			return_value->value.str.len = sql_row_lengths[field_offset];
-			return_value->value.str.val = (char *) safe_estrndup(sql_row[field_offset],return_value->value.str.len);
+			return_value->value.str.val = (char *) safe_estrndup(sql_row[field_offset], return_value->value.str.len);
 		}
 	} else {
 		return_value->type = IS_NULL;
@@ -1289,7 +1311,7 @@ PHP_FUNCTION(mysql_result)
    Get number of rows in a result */
 PHP_FUNCTION(mysql_num_rows)
 {
-	pval **result;
+	zval **result;
 	MYSQL_RES *mysql_result;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
@@ -1308,7 +1330,7 @@ PHP_FUNCTION(mysql_num_rows)
    Get number of fields in a result */
 PHP_FUNCTION(mysql_num_fields)
 {
-	pval **result;
+	zval **result;
 	MYSQL_RES *mysql_result;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
@@ -1325,7 +1347,7 @@ PHP_FUNCTION(mysql_num_fields)
 
 static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
-	pval **result, **arg2;
+	zval **result, **arg2;
 	MYSQL_RES *mysql_result;
 	MYSQL_ROW mysql_row;
 	MYSQL_FIELD *mysql_field;
@@ -1368,15 +1390,15 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		RETURN_FALSE;
 	}
 	
-	mysql_field_seek(mysql_result,0);
-	for (mysql_field=mysql_fetch_field(mysql_result),i=0; mysql_field; mysql_field=mysql_fetch_field(mysql_result),i++) {
+	mysql_field_seek(mysql_result, 0);
+	for (mysql_field=mysql_fetch_field(mysql_result), i=0; mysql_field; mysql_field=mysql_fetch_field(mysql_result), i++) {
 		if (mysql_row[i]) {
 			char *data;
 			int data_len;
 			int should_copy;
 
 			if (PG(magic_quotes_runtime)) {
-				data = php_addslashes(mysql_row[i],mysql_row_lengths[i],&data_len,0);
+				data = php_addslashes(mysql_row[i], mysql_row_lengths[i],&data_len, 0);
 				should_copy = 0;
 			} else {
 				data = mysql_row[i];
@@ -1447,7 +1469,7 @@ PHP_FUNCTION(mysql_fetch_assoc)
    Move internal result pointer */
 PHP_FUNCTION(mysql_data_seek)
 {
-	pval **result, **offset;
+	zval **result, **offset;
 	MYSQL_RES *mysql_result;
 	
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &result, &offset)==FAILURE) {
@@ -1458,7 +1480,7 @@ PHP_FUNCTION(mysql_data_seek)
 
 	convert_to_long_ex(offset);
 	if ((*offset)->value.lval<0 || (*offset)->value.lval>=(int)mysql_num_rows(mysql_result)) {
-		php_error(E_WARNING,"Offset %d is invalid for MySQL result index %d", (*offset)->value.lval, (*result)->value.lval);
+		php_error(E_WARNING, "Offset %d is invalid for MySQL result index %d", (*offset)->value.lval, (*result)->value.lval);
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, (*offset)->value.lval);
@@ -1471,7 +1493,7 @@ PHP_FUNCTION(mysql_data_seek)
    Get max data size of each column in a result */
 PHP_FUNCTION(mysql_fetch_lengths)
 {
-	pval **result;
+	zval **result;
 	MYSQL_RES *mysql_result;
 	mysql_row_length_type *lengths;
 	int num_fields;
@@ -1552,7 +1574,7 @@ static char *php_mysql_get_field_name(int field_type)
    Get column information from a result and return as an object */
 PHP_FUNCTION(mysql_fetch_field)
 {
-	pval **result, **field=NULL;
+	zval **result, **field=NULL;
 	MYSQL_RES *mysql_result;
 	MYSQL_FIELD *mysql_field;
 	
@@ -1576,7 +1598,7 @@ PHP_FUNCTION(mysql_fetch_field)
 
 	if (field) {
 		if ((*field)->value.lval<0 || (*field)->value.lval>=(int)mysql_num_fields(mysql_result)) {
-			php_error(E_WARNING,"MySQL:  Bad field offset");
+			php_error(E_WARNING, "MySQL:  Bad field offset");
 			RETURN_FALSE;
 		}
 		mysql_field_seek(mysql_result, (*field)->value.lval);
@@ -1591,14 +1613,14 @@ PHP_FUNCTION(mysql_fetch_field)
 	add_property_string(return_value, "name",(mysql_field->name?mysql_field->name:empty_string), 1);
 	add_property_string(return_value, "table",(mysql_field->table?mysql_field->table:empty_string), 1);
 	add_property_string(return_value, "def",(mysql_field->def?mysql_field->def:empty_string), 1);
-	add_property_long(return_value, "max_length",mysql_field->max_length);
-	add_property_long(return_value, "not_null",IS_NOT_NULL(mysql_field->flags)?1:0);
-	add_property_long(return_value, "primary_key",IS_PRI_KEY(mysql_field->flags)?1:0);
+	add_property_long(return_value, "max_length", mysql_field->max_length);
+	add_property_long(return_value, "not_null", IS_NOT_NULL(mysql_field->flags)?1:0);
+	add_property_long(return_value, "primary_key", IS_PRI_KEY(mysql_field->flags)?1:0);
 	add_property_long(return_value, "multiple_key",(mysql_field->flags&MULTIPLE_KEY_FLAG?1:0));
 	add_property_long(return_value, "unique_key",(mysql_field->flags&UNIQUE_KEY_FLAG?1:0));
-	add_property_long(return_value, "numeric",IS_NUM(mysql_field->type)?1:0);
-	add_property_long(return_value, "blob",IS_BLOB(mysql_field->flags)?1:0);
-	add_property_string(return_value, "type",php_mysql_get_field_name(mysql_field->type), 1);
+	add_property_long(return_value, "numeric", IS_NUM(mysql_field->type)?1:0);
+	add_property_long(return_value, "blob", IS_BLOB(mysql_field->flags)?1:0);
+	add_property_string(return_value, "type", php_mysql_get_field_name(mysql_field->type), 1);
 	add_property_long(return_value, "unsigned",(mysql_field->flags&UNSIGNED_FLAG?1:0));
 	add_property_long(return_value, "zerofill",(mysql_field->flags&ZEROFILL_FLAG?1:0));
 }
@@ -1609,7 +1631,7 @@ PHP_FUNCTION(mysql_fetch_field)
    Set result pointer to a specific field offset */
 PHP_FUNCTION(mysql_field_seek)
 {
-	pval **result, **offset;
+	zval **result, **offset;
 	MYSQL_RES *mysql_result;
 	
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &result, &offset)==FAILURE) {
@@ -1620,7 +1642,7 @@ PHP_FUNCTION(mysql_field_seek)
 
 	convert_to_long_ex(offset);
 	if ((*offset)->value.lval<0 || (*offset)->value.lval>=(int)mysql_num_fields(mysql_result)) {
-		php_error(E_WARNING,"Field %d is invalid for MySQL result index %d", (*offset)->value.lval, (*result)->value.lval);
+		php_error(E_WARNING, "Field %d is invalid for MySQL result index %d", (*offset)->value.lval, (*result)->value.lval);
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, (*offset)->value.lval);
@@ -1638,7 +1660,7 @@ PHP_FUNCTION(mysql_field_seek)
 
 static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
-	pval **result, **field;
+	zval **result, **field;
 	MYSQL_RES *mysql_result;
 	MYSQL_FIELD *mysql_field;
 	char buf[512];
@@ -1652,7 +1674,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	
 	convert_to_long_ex(field);
 	if ((*field)->value.lval<0 || (*field)->value.lval>=(int)mysql_num_fields(mysql_result)) {
-		php_error(E_WARNING,"Field %d is invalid for MySQL result index %d", (*field)->value.lval, (*result)->value.lval);
+		php_error(E_WARNING, "Field %d is invalid for MySQL result index %d", (*field)->value.lval, (*result)->value.lval);
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, (*field)->value.lval);
@@ -1663,12 +1685,12 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	switch (entry_type) {
 		case PHP_MYSQL_FIELD_NAME:
 			return_value->value.str.len = strlen(mysql_field->name);
-			return_value->value.str.val = estrndup(mysql_field->name,return_value->value.str.len);
+			return_value->value.str.val = estrndup(mysql_field->name, return_value->value.str.len);
 			return_value->type = IS_STRING;
 			break;
 		case PHP_MYSQL_FIELD_TABLE:
 			return_value->value.str.len = strlen(mysql_field->table);
-			return_value->value.str.val = estrndup(mysql_field->table,return_value->value.str.len);
+			return_value->value.str.val = estrndup(mysql_field->table, return_value->value.str.len);
 			return_value->type = IS_STRING;
 			break;
 		case PHP_MYSQL_FIELD_LEN:
@@ -1760,7 +1782,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
    Get the name of the specified field in a result */
 PHP_FUNCTION(mysql_field_name)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_NAME);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_NAME);
 }
 /* }}} */
 
@@ -1769,7 +1791,7 @@ PHP_FUNCTION(mysql_field_name)
    Get name of the table the specified field is in */
 PHP_FUNCTION(mysql_field_table)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_TABLE);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_TABLE);
 }
 /* }}} */
 
@@ -1778,7 +1800,7 @@ PHP_FUNCTION(mysql_field_table)
    Returns the length of the specified field */
 PHP_FUNCTION(mysql_field_len)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_LEN);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_LEN);
 }
 /* }}} */
 
@@ -1787,7 +1809,7 @@ PHP_FUNCTION(mysql_field_len)
    Get the type of the specified field in a result */
 PHP_FUNCTION(mysql_field_type)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_TYPE);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_TYPE);
 }
 /* }}} */
 
@@ -1796,7 +1818,7 @@ PHP_FUNCTION(mysql_field_type)
    Get the flags associated with the specified field in a result */
 PHP_FUNCTION(mysql_field_flags)
 {
-	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MYSQL_FIELD_FLAGS);
+	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_FLAGS);
 }
 /* }}} */
 
@@ -1805,7 +1827,7 @@ PHP_FUNCTION(mysql_field_flags)
    Free result memory */
 PHP_FUNCTION(mysql_free_result)
 {
-	pval **result;
+	zval **result;
 	MYSQL_RES *mysql_result;
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
