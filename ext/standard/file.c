@@ -2257,11 +2257,11 @@ PHP_FUNCTION(fgetcsv)
 	re = e = buf + buf_len;
 
 	/* strip leading spaces */
-	while (isspace((int)*(unsigned char *)s) && *s != delimiter) {
+	while (isspace((int)*(unsigned char *)s) && *s != delimiter && s < re) {
 		s++;
 	}
 	/* strip trailing spaces */
-	while (isspace((int)*(unsigned char *)(--e)) && *e != delimiter);
+	while (e >= s && isspace((int)*(unsigned char *)(--e)) && *e != delimiter);
 	e++;
 
 	array_init(return_value);
