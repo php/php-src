@@ -1,3 +1,105 @@
+2000-09-01  David Eriksson  <david@2good.com>
+
+    * ext/satellite/Makefile.in
+      ext/satellite/README
+      ext/satellite/class.c
+      ext/satellite/class.h
+      ext/satellite/common.c
+      ext/satellite/common.h
+      ext/satellite/corba.c
+      ext/satellite/corba.h
+      ext/satellite/enum.c
+      ext/satellite/enum.h
+      ext/satellite/findtype.c
+      ext/satellite/findtype.h
+      ext/satellite/hashtable.c
+      ext/satellite/hashtable.h
+      ext/satellite/namedvalue_to_zval.c
+      ext/satellite/namedvalue_to_zval.h
+      ext/satellite/object.c
+      ext/satellite/object.h
+      ext/satellite/php_orbit.c
+      ext/satellite/php_orbit.h
+      ext/satellite/struct.c
+      ext/satellite/struct.h
+      ext/satellite/typecode.c
+      ext/satellite/typecode.h
+      ext/satellite/typemanager.c
+      ext/satellite/typemanager.h
+      ext/satellite/zval_to_namedvalue.c
+      ext/satellite/zval_to_namedvalue.h:
+    * ext/satellite/Makefile.in
+      ext/satellite/README
+      ext/satellite/class.c
+      ext/satellite/class.h
+      ext/satellite/common.c
+      ext/satellite/common.h
+      ext/satellite/config.m4
+      ext/satellite/corba.c
+      ext/satellite/corba.h
+      ext/satellite/enum.c
+      ext/satellite/enum.h
+      ext/satellite/findtype.c
+      ext/satellite/findtype.h
+      ext/satellite/hashtable.c
+      ext/satellite/hashtable.h
+      ext/satellite/namedvalue_to_zval.c
+      ext/satellite/namedvalue_to_zval.h
+      ext/satellite/object.c
+      ext/satellite/object.h
+      ext/satellite/php_orbit.c
+      ext/satellite/php_orbit.h
+      ext/satellite/struct.c
+      ext/satellite/struct.h
+      ext/satellite/typecode.c
+      ext/satellite/typecode.h
+      ext/satellite/typemanager.c
+      ext/satellite/typemanager.h
+      ext/satellite/zval_to_namedvalue.c
+      ext/satellite/zval_to_namedvalue.h:
+    - Initial submission of CORBA extension for PHP: Satellite
+
+2000-09-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.h
+      ext/standard/basic_functions.c:
+    - Added support for user defined 'tick' callback functions. This helps
+      emulate background processing. 
+
+2000-09-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    Extend HTTP headers for private-caching and add a new PHP function
+    session_cache_limiter.
+
+    Submitted by: Jon Parise <jon@csh.rit.edu>
+
+    * ext/session/mod_files.c: s/PATH_MAX/MAXPATHLEN/
+
+    * ext/session/session.c:
+    Speed up standard php encoding function and add new php_binary serializer.
+
+2000-09-01  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/dir.c
+      main/main.c: - Fix dir.c
+    - Begin cleanup of php_error_cb()
+
+2000-09-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/main.c: Hopefully last round of fixing varargs use.
+
+    We don't need to create the log message twice, and by doing it only
+    once we also avoid the orig_args trap.
+
+    * ext/standard/dir.c
+      ext/session/mod_files.c:
+    Solaris/x86 insists of having a large buffer for storing the result of
+    readdir_r(), otherwise it will segfault.
+
+    PR: #6479
+
 2000-08-31  Andi Gutmans  <andi@php.net>
 
     * configure.in:
