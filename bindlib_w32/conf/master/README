@@ -1,0 +1,45 @@
+
+How to add new hosts to the name server data base:
+
+1) Edit 'named.hosts' file:
+
+	For each machine you need to enter the following information:
+	machine name, all its network addresses, host information, and common
+	aliases for it.
+
+	This is the entry for calder.
+
+CALDER		IN	A	128.32.130.1
+		IN	A	128.32.129.3
+		IN	HINFO	VAX-11/750 UNIX
+UCBCALDER	IN	CNAME	CALDER
+
+ For the machine you are adding:
+	1) replace 'CALDER' with the new machine name
+	2) replace '128.32.130.1' with the new machines address
+		if there is more then one address for the machine
+		then add lines like the one with '128.32.129.3'
+	3) replace 'VAX-11/750' with the machine type
+	4) If it doesn't run 'UNIX' then replace UNIX with its
+	   operating system.
+
+2) Edit 'named.rev' file:
+
+	For each address of a machine you need to enter the reverse
+	address notation for the machine:
+
+	For calder the lines look as follows:
+
+12.0	IN	PTR	CALDER.BERKELEY.EDU.
+3.129	IN	PTR	CALDER.BERKELEY.EDU.
+
+	Calder has two address '128.32.0.12' and '128.32.129.3'
+
+	You take the two numbers after 128.32 and reverse them.
+	Then replace CALDER with the new machine name.
+
+    *** Note the trailing "." on "EDU." it needs to be there.  Otherwise
+	BIND will add the current $ORIGIN to this name, which won't work.
+	***
+
+3) Increment the serial number on both files.  

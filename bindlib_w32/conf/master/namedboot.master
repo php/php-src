@@ -1,0 +1,16 @@
+;
+;  boot file for authoritive master name server for Berkeley.EDU
+; Note that there should be one primary entry for each SOA record.
+;
+;
+sortlist 10.0.0.0 
+
+directory	/usr/local/adm/named
+
+; type    domain		source host/file		backup file
+
+cache     .			root.cache
+primary   Berkeley.EDU		berkeley.zone
+primary   32.128.IN-ADDR.ARPA	berkeley.rev
+primary   0.0.127.IN-ADDR.ARPA	localhost.rev
+

@@ -1,0 +1,22 @@
+; Authoritative data for Berkeley.EDU (ORIGIN assumed Berkeley.EDU)
+;
+@		IN	SOA	ucbvax.berkeley.edu kjd.ucbvax.berkeley.edu (
+				1986020501	; Serial
+				10800	; Refresh 3 hours
+				3600	; Retry   1 hour
+				3600000 ; Expire  1000 hours
+				86400 )	; Minimum 24 hours
+		IN	MX	    10 ucb-vax
+		IN	NS	    monet
+localhost	IN	A	    127.1
+ucb-arpa        IN	A	    10.0.0.78
+		IN	A	    128.32.0.4
+		IN	HINFO	    VAX-11/780 UNIX
+arpa         	IN	CNAME	    ucbarpa
+ucb-vax   9999  IN	A	    10.2.0.78
+		IN	A	    128.32.0.10
+		IN	HINFO	    VAX-11/750 UNIX
+ucbvax          IN	CNAME	    ucb-vax
+monet	        IN	A	    128.32.0.7
+		IN	HINFO	    VAX-11/750 UNIX
+ucbmonet	IN	CNAME	    monet
