@@ -148,8 +148,8 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *str, size_t str_nbytes, const char *enc, const char **next_pos, int mode);
 
-static php_iconv_err_t php_iconv_stream_filter_register_factory();
-static php_iconv_err_t php_iconv_stream_filter_unregister_factory();
+static php_iconv_err_t php_iconv_stream_filter_register_factory(TSRMLS_D);
+static php_iconv_err_t php_iconv_stream_filter_unregister_factory(TSRMLS_D);
 /* }}} */
 
 /* {{{ static globals */
@@ -207,7 +207,7 @@ PHP_MINIT_FUNCTION(miconv)
 	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_STRICT", PHP_ICONV_MIME_DECODE_STRICT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_CONTINUE_ON_ERROR", PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
-	if (php_iconv_stream_filter_register_factory() != PHP_ICONV_ERR_SUCCESS) {
+	if (php_iconv_stream_filter_register_factory(TSRMLS_C) != PHP_ICONV_ERR_SUCCESS) {
 		return FAILURE;
 	}
 
@@ -218,7 +218,7 @@ PHP_MINIT_FUNCTION(miconv)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(miconv)
 {
-	php_iconv_stream_filter_unregister_factory();
+	php_iconv_stream_filter_unregister_factory(TSRMLS_C);
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -2523,7 +2523,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 /* }}} */
 
 /* {{{ php_iconv_stream_register_factory */
-static php_iconv_err_t php_iconv_stream_filter_register_factory()
+static php_iconv_err_t php_iconv_stream_filter_register_factory(TSRMLS_D)
 {
 	static php_stream_filter_factory filter_factory = {
 		php_iconv_stream_filter_factory_create
@@ -2539,7 +2539,7 @@ static php_iconv_err_t php_iconv_stream_filter_register_factory()
 /* }}} */
 
 /* {{{ php_iconv_stream_unregister_factory */
-static php_iconv_err_t php_iconv_stream_filter_unregister_factory()
+static php_iconv_err_t php_iconv_stream_filter_unregister_factory(TSRMLS_D)
 {
 	if (FAILURE == php_stream_filter_unregister_factory(
 				php_iconv_stream_filter_ops.label TSRMLS_CC)) {
