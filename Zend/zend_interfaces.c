@@ -125,7 +125,7 @@ static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
 
-	zend_user_it_invalidate_current(iter TSRMLS_CC);
+	zend_user_it_invalidate_current(_iter TSRMLS_CC);
 	zval_ptr_dtor(&object);
 	efree(iter);
 }
@@ -224,7 +224,7 @@ static void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
 
-	zend_user_it_invalidate_current(iter TSRMLS_CC);
+	zend_user_it_invalidate_current(_iter TSRMLS_CC);
 	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_next, "next", NULL);
 }
 /* }}} */
@@ -235,7 +235,7 @@ static void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
 
-	zend_user_it_invalidate_current(iter TSRMLS_CC);
+	zend_user_it_invalidate_current(_iter TSRMLS_CC);
 	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_rewind, "rewind", NULL);
 }
 /* }}} */
