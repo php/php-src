@@ -1844,6 +1844,11 @@ PHP_FUNCTION(pdf_set_parameter) {
 		RETURN_FALSE;
 	}
 
+    if (arg2->value.str.val == "compatibility") {
+		php_error(E_ERROR,"Compatibility modes not supported at this time");
+		RETURN_FALSE;
+	}
+	
 	PDF_set_parameter(pdf, arg2->value.str.val, arg3->value.str.val);
 
 	RETURN_TRUE;
