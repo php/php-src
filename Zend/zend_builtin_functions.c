@@ -506,9 +506,9 @@ ZEND_FUNCTION(defined)
 	convert_to_string_ex(var);
 	if (zend_get_constant((*var)->value.str.val, (*var)->value.str.len, &c TSRMLS_CC)) {
 		zval_dtor(&c);
-		RETURN_LONG(1);
+		RETURN_TRUE;
 	} else {
-		RETURN_LONG(0);
+		RETURN_FALSE;
 	}
 }
 /* }}} */
