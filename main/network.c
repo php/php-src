@@ -599,6 +599,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *per
 
 	sock->is_blocked = 1;
 	sock->timeout.tv_sec = FG(default_socket_timeout);
+	sock->timeout.tv_usec = 0;
 	sock->socket = socket;
 
 	stream = php_stream_alloc_rel(&php_stream_socket_ops, sock, persistent_id, "r+");
@@ -974,6 +975,7 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	fd_set wrfds, efds;
 	int n;
+	struct timeval timeout;
 
 	if (close_handle) {
 #if HAVE_OPENSSL_EXT
@@ -990,13 +992,21 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		/* prevent more data from coming in */
 		shutdown(sock->socket, SHUT_RD);
 
-		/* make sure that the OS sends all data before we close the connection */
+		/* try to make sure that the OS sends all data before we close the connection.
+		 * Essentially, we are waiting for the socket to become writeable, which means
+		 * that all pending data has been sent.
+		 * We use a small timeout which should encourage the OS to send the data,
+		 * but at the same time avoid hanging indefintely.
+		 * */
 		do {
 			FD_ZERO(&wrfds);
 			FD_SET(sock->socket, &wrfds);
 			efds = wrfds;
+
+			timeout.tv_sec = 0;
+			timeout.tv_usec = 5000; /* arbitrary */
 		
-			n = select(sock->socket + 1, NULL, &wrfds, &efds, NULL);
+			n = select(sock->socket + 1, NULL, &wrfds, &efds, &timeout);
 		} while (n == -1 && php_socket_errno() == EINTR);
 		
 		closesocket(sock->socket);
