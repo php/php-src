@@ -587,7 +587,7 @@ static int netsnmp_session_set_sec_name(struct snmp_session *s, char *name)
 
 /* {{{ proto int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
    Set the security level in the snmpv3 session */
-static int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
+static int netsnmp_session_set_sec_level(struct snmp_session *s, char *level TSRMLS_DC)
 {
 	if ((s) && (level)) {
 		if (!strcasecmp(level, "noAuthNoPriv") || !strcasecmp(level, "nanp")) {
@@ -608,7 +608,7 @@ static int netsnmp_session_set_sec_level(struct snmp_session *s, char *level)
 
 /* {{{ proto int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
    Set the authentication protocol in the snmpv3 session */
-static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
+static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot TSRMLS_DC)
 {
 	if ((s) && (prot)) {
 		if (!strcasecmp(prot, "MD5")) {
@@ -629,7 +629,7 @@ static int netsnmp_session_set_auth_protocol(struct snmp_session *s, char *prot)
 
 /* {{{ proto int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
    Set the security protocol in the snmpv3 session */
-static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
+static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot TSRMLS_DC)
 {
 	if ((s) && (prot)) {
 		if (!strcasecmp(prot, "DES")) {
@@ -660,7 +660,7 @@ static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot)
 
 /* {{{ proto int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass)
    Make key from pass phrase in the snmpv3 session */
-static int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass)
+static int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass TSRMLS_DC)
 {
 	/*
 	 * make master key from pass phrases 
@@ -692,7 +692,7 @@ static int netsnmp_session_gen_auth_key(struct snmp_session *s, char *pass)
 
 /* {{{ proto int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass)
    Make key from pass phrase in the snmpv3 session */
-static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass)
+static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRMLS_DC)
 {
 	if ((s) && (pass) && strlen(pass)) {
 		s->securityPrivKeyLen = USM_PRIV_KU_LEN;
@@ -773,34 +773,34 @@ void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st) {
 
 	/* Setting the security level. */
 	convert_to_string_ex(a3);
-	if (netsnmp_session_set_sec_level(&session, Z_STRVAL_PP(a3))) {
+	if (netsnmp_session_set_sec_level(&session, Z_STRVAL_PP(a3) TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid security level: %s", a3);
 		RETURN_FALSE;
 	}
 
 	/* Setting the authentication protocol. */
 	convert_to_string_ex(a4);
-	if (netsnmp_session_set_auth_protocol(&session, Z_STRVAL_PP(a4))) {
+	if (netsnmp_session_set_auth_protocol(&session, Z_STRVAL_PP(a4) TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid authentication protocol: %s", Z_STRVAL_PP(a4));
 		RETURN_FALSE;
 	}
 	/* Setting the authentication passphrase. */
 	convert_to_string_ex(a5);
-	if (netsnmp_session_gen_auth_key(&session, Z_STRVAL_PP(a5))) {
+	if (netsnmp_session_gen_auth_key(&session, Z_STRVAL_PP(a5) TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not generate key for authentication pass phrase: %s", Z_STRVAL_PP(a4));
 		RETURN_FALSE;
 	}
 
 	/* Setting the security protocol. */
 	convert_to_string_ex(a6);
-	if (netsnmp_session_set_sec_protocol(&session, Z_STRVAL_PP(a6)) &&
+	if (netsnmp_session_set_sec_protocol(&session, Z_STRVAL_PP(a6) TSRMLS_CC) &&
 			(0 != strlen(Z_STRVAL_PP(a6)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid security protocol: %s", Z_STRVAL_PP(a6));
 		RETURN_FALSE;
 	}
 	/* Setting the security protocol passphrase. */
 	convert_to_string_ex(a7);
-	if (netsnmp_session_gen_sec_key(&session, Z_STRVAL_PP(a7)) &&
+	if (netsnmp_session_gen_sec_key(&session, Z_STRVAL_PP(a7) TSRMLS_CC) &&
 							(0 != strlen(Z_STRVAL_PP(a7)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not generate key for security pass phrase: %s", Z_STRVAL_PP(a7));
 		RETURN_FALSE;
