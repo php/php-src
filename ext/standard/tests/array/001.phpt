@@ -2,6 +2,8 @@
 Test array_merge and array_walk
 --POST--
 --GET--
+--INI--
+precision=14
 --FILE--
 <?php
 require('ext/standard/tests/array/data.inc');
