@@ -213,6 +213,10 @@ SOURCE=.\typeinfo.c
 
 SOURCE=.\userdatahandler.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\xpath.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

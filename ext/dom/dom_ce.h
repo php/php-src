@@ -50,5 +50,8 @@ zend_class_entry *dom_entity_class_entry;
 zend_class_entry *dom_entityreference_class_entry;
 zend_class_entry *dom_processinginstruction_class_entry;
 zend_class_entry *dom_string_extend_class_entry;
+#if defined(LIBXML_XPATH_ENABLED)
+zend_class_entry *dom_xpath_class_entry;
+#endif
 
 #endif /* DOM_CE_H */
