@@ -949,7 +949,7 @@ int zend_std_cast_object(zval *readobj, zval *writeobj, int type, int should_fre
 	return FAILURE;
 }
 
-zend_object_handlers std_object_handlers = {
+ZEND_API zend_object_handlers std_object_handlers = {
 	zend_objects_store_add_ref,				/* add_ref */
 	zend_objects_store_del_ref,				/* del_ref */
 	zend_objects_store_delete_obj,			/* delete_obj */
