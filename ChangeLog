@@ -1,3 +1,70 @@
+2001-04-04  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php:
+    as the row counter starts with 0, last row is before numrows
+
+2001-04-04  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: MFH - make postgresql compiel against 6.5.x
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: make it compile with 6.5.x
+    postgresql notices are now send to the standard error-log
+
+2001-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_version.h
+      configure.in: This branch is 4.0.6-dev..
+
+    * ext/standard/url_scanner.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c
+      NEWS
+      php.ini-dist
+      php.ini-optimized: Added new configuration directives:
+    arg_separator.input and arg_separator.output
+
+2001-04-04  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h: Adding empty RSHUTDOWN function.
+
+2001-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/crack/crack.c: Killed 2 compile warnings.
+
+2001-04-04  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/sql2xml.php:
+    - new function addArray() for adding Arrays to the xml
+    - new function addSql() for providing sql-strings as input
+    - constructor takes a dsn or a pear::db object as param (API-Change..)
+    - a lot of inline-documentation (not finished...)
+
+2001-04-04  Jason Greene  <jason@inetgurus.net>
+
+    * build/buildcheck.sh:
+    This is a temporary fix to the previous patch that breaks the build.
+    This keeps the functionality of searching for glibtool or libtool,
+    but have you checked the rest of the build process to see if this is
+    compatible? Regardless, 'which' returns a value on some os's when nothing is
+    found which breaks the previous patches test. Also the unary negation after
+    an if is not compatible with true bourne.
+
+    -Jason
+
+2001-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_variables.c: Cookies use ; as argument separator.
+
+    * ext/sockets/config.m4:
+    Cleaned up a bit. Removed some checks for header files that are
+    already checked in configure.in
+
 2001-04-03  Wilfredo Sanchez  <wsanchez@mit.edu>
 
     * sapi/apache/apMakefile.tmpl
