@@ -21,7 +21,7 @@
 #include "zend_extensions.h"
 
 ZEND_API zend_llist zend_extensions;
-static int last_resource_number=0;
+static int last_resource_number;
 
 int zend_load_extensions(char **extension_paths)
 {
@@ -140,6 +140,14 @@ static void zend_extension_shutdown(zend_extension *extension)
 		extension->shutdown(extension);
 	}
 #endif
+}
+
+
+int zend_startup_extensions()
+{
+	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
+	last_resource_number = 0;
+	return SUCCESS;
 }
 
 
