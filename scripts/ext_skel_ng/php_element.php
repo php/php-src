@@ -14,7 +14,8 @@ class php_element {
 									 "array"    => "array",
 									 "object"   => "object",
 									 "resource" => "resource",
-									 "mixed"    => "mixes",
+									 "mixed"    => "mixed",
+									 "callback" => "callback",
 									 );
 		
 		if(isset($types[$name])) {
