@@ -787,7 +787,7 @@ PHP_FUNCTION(htmlspecialchars)
 /* }}} */
 
 /* {{{ proto string html_entity_decode(string string [, int quote_style][, string charset])
-   Convert all applicable characters to HTML entities */
+   Convert all HTML entities to their applicable characters */
 PHP_FUNCTION(html_entity_decode)
 {
 	char *str, *hint_charset = NULL;
