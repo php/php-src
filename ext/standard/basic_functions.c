@@ -628,7 +628,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(socket_get_status,												NULL)
 
-#if (!defined(PHP_WIN32) && !defined(__BEOS__)) || defined(ZTS)
+#if (!defined(PHP_WIN32) && !defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 	PHP_FE(realpath,														NULL)
 #else
 	PHP_FALIAS(realpath,			warn_not_available,						NULL)
