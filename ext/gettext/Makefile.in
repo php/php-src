@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libgettext.la
-LTLIBRARY_SOURCES = gettext.c
-LTLIBRARY_SHARED_NAME = gettext.la
-LTLIBRARY_SHARED_LIBADD = $(GETTEXT_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

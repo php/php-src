@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libncurses.la
-LTLIBRARY_SOURCES     = ncurses.c ncurses_fe.c ncurses_functions.c
-LTLIBRARY_SHARED_NAME = ncurses.la
-LTLIBRARY_SHARED_LIBADD  = $(NCURSES_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
