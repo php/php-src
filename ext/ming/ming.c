@@ -1610,6 +1610,8 @@ PHP_FUNCTION(swfmovie_save)
   retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC),
 			      &phpStreamOutputMethod, (void *)stream);
 
+  php_stream_close(stream);
+  
   RETURN_LONG(retval);
 }
 
