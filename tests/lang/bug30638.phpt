@@ -1,19 +1,20 @@
 --TEST--
-Bug #12647 (Locale settings affecting float parsing)
+Bug #30638 (localeconv returns wrong LC_NUMERIC settings)
 --SKIPIF--
 <?php  # try to activate a german locale
 if (setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge") === FALSE) {
 	print "skip";
 }
 ?>
---POST--
---GET--
 --FILE--
 <?php 
 # activate the german locale
 setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge");
 
-echo (float)"3.14", "\n";
+$lc = localeconv();
+printf("decimal_point: %s\n", $lc['decimal_point']);
+printf("thousands_sep: %s\n", $lc['thousands_sep']);
 ?>
 --EXPECT--
-3,14
+decimal_point: ,
+thousands_sep: .
