@@ -1895,6 +1895,7 @@ DLEXPORT PHP_FUNCTION(udm_find)
 				if (zend_get_parameters_ex(2, &yyagent,&yyquery)==FAILURE) {
 					RETURN_FALSE;
 				}
+				convert_to_string_ex(yyquery);
 			}
 			break;
 		default:
@@ -1902,7 +1903,6 @@ DLEXPORT PHP_FUNCTION(udm_find)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
-	convert_to_string_ex(yyquery);
 	
 #if UDM_VERSION_ID < 30200
 	if ((Res=UdmFind(Agent,UdmTolower(Z_STRVAL_PP(yyquery),Agent->charset)))) {
