@@ -35,7 +35,7 @@
 #define _PHP3_GD_H
 
 
-#if defined(HAVE_LIBTTF) && defined(HAVE_FREETYPE_H)
+#if defined(HAVE_LIBTTF)
 #define ENABLE_GD_TTF
 #endif
 
