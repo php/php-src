@@ -52,16 +52,12 @@
 
 #if WIN32||WINNT
 #	include <time.h>
-#	include "php.h"
-#	undef YYSTYPE
 #	include "php_reentrancy.h"
 #else
 #	if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE)
 extern time_t timezone;
 #	endif
 #endif
-
-
 
 
 #define yylhs		date_yylhs
@@ -157,10 +153,6 @@ static time_t	yyRelMonth;
 static time_t	yyRelSeconds;
 
 
-extern struct tm	*localtime(const time_t *timep);
-
-/* YYSTYPE is not yet defined at this point */
-static int date_lex(void *yylval);
 
 static void		date_error(char *s);
 
@@ -173,6 +165,10 @@ static void		date_error(char *s);
     time_t			Number;
     enum _MERIDIAN	Meridian;
 }
+
+%{
+static int date_lex(YYSTYPE *yylval);
+%}
 
 %token	tDAY tDAYZONE tMERIDIAN tMONTH tMONTH_UNIT tSEC_UNIT tSNUMBER
 %token	tUNUMBER tZONE
@@ -642,6 +638,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes, tim
     time_t	        Julian;
     int	                i;
     time_t		tod;
+    struct tm		tmbuf;
 
     /* Year should not be passed as a relative value, but absolute one.
        so this should not happen, but just ensure it */
@@ -674,7 +671,7 @@ Convert(time_t Month, time_t Day, time_t Year, time_t Hours, time_t Minutes, tim
 	return -1;
     Julian += tod;
     tod = Julian;
-    if (dst == DSTon || (dst == DSTmaybe && localtime(&tod)->tm_isdst))
+    if (dst == DSTon || (dst == DSTmaybe && localtime_r(&tod,&tmbuf)->tm_isdst))
 	Julian -= DST_OFFSET * 60 * 60;
     return Julian;
 }
@@ -685,9 +682,10 @@ DSTcorrect(time_t Start, time_t Future)
 {
     time_t	StartDay;
     time_t	FutureDay;
+    struct tm	tmbuf;
 
-    StartDay = (localtime(&Start)->tm_hour + 1) % 24;
-    FutureDay = (localtime(&Future)->tm_hour + 1) % 24;
+    StartDay = (localtime_r(&Start,&tmbuf)->tm_hour + 1) % 24;
+    FutureDay = (localtime_r(&Future,&tmbuf)->tm_hour + 1) % 24;
     return (Future - Start) + (StartDay - FutureDay) * DST_OFFSET * 60 * 60;
 }
 
@@ -864,7 +862,6 @@ static int date_lex(YYSTYPE *yylval)
 
 time_t parsedate(char *p, TIMEINFO *now)
 {
-	extern int date_parse(void);
     struct tm		*tm, tmbuf;
     TIMEINFO		ti;
     time_t		Start;
@@ -895,7 +892,7 @@ time_t parsedate(char *p, TIMEINFO *now)
     yyHaveRel = 0;
     yyHaveTime = 0;
 
-    if (date_parse() || yyHaveTime > 1 || yyHaveDate > 1)
+    if (date_parse(YYPARSE_PARAM_ARG) || yyHaveTime > 1 || yyHaveDate > 1)
 	return -1;
 
     if (yyHaveDate || yyHaveTime) {
