@@ -72,7 +72,7 @@ static void build_runtime_defined_function_key(zval *result, zval *name, zend_op
 
 	/* NULL, name length, filename length, line number length */
 	result->value.str.len = 1+name->value.str.len+strlen(filename)+lineno_len+1;
-	result->value.str.val = (char *) emalloc(result->value.str.len); /* Extra null byte is allocated a line before */
+	result->value.str.val = (char *) emalloc(result->value.str.len); /* Extra null byte is calculated a line before */
 	sprintf(result->value.str.val, "%c%s%s%s", '\0', name->value.str.val, filename, lineno_buf);
 	result->type = IS_STRING;
 	result->refcount = 1;
