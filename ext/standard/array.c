@@ -2246,12 +2246,12 @@ PHP_FUNCTION(array_unique)
 		arTmp[i] = p;
 	arTmp[i] = NULL;
     set_compare_func(SORT_REGULAR);
-	qsort((void *) arTmp, i, sizeof(Bucket *), array_data_compare);
+	qsort((void *) arTmp, i, sizeof(Bucket *), array_type_data_compare);
 
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; *cmpdata; cmpdata++) {
-		if (array_data_compare(lastkept, cmpdata)) {
+		if (array_type_data_compare(lastkept, cmpdata)) {
 		        lastkept = cmpdata;
 		} else {
 			p = *cmpdata;
