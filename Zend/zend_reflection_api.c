@@ -2383,7 +2383,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 	METHOD_NOTSTATIC;
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", reflection_class_ptr, &object) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &object, reflection_class_ptr) == FAILURE) {
 		return;
 	}
 
