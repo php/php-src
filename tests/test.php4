@@ -1,7 +1,6 @@
 <?
 function blah($a)
 {
-
 	return $a;
 }
 
