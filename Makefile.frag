@@ -1,3 +1,8 @@
+
+#
+# Zend
+#
+
 $(builddir)/zend_language_scanner.lo: $(builddir)/zend_language_parser.h
 $(builddir)/zend_ini_scanner.lo: $(builddir)/zend_ini_parser.h
 

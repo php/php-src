@@ -4,6 +4,7 @@ prefix="@prefix@"
 version="@PHP_VERSION@"
 includedir="@includedir@/php"
 includes="-I$includedir -I$includedir/main -I$includedir/Zend"
+ldflags="@PHP_LDFLAGS@"
 libs="@EXTRA_LIBS@"
 if test '@TSRM_DIR@' != ''; then
     includes="$includes -I$includedir/TSRM"
@@ -15,6 +16,8 @@ case "$1" in
 	echo $prefix;;
 --includes)
 	echo $includes;;
+--ldflags)
+	echo $ldflags;;
 --libs)
 	echo $libs;;
 --extension-dir)
@@ -22,7 +25,7 @@ case "$1" in
 --version)
 	echo $version;;
 *)
-	echo "Usage: $0 [--prefix|--includes|--libs|--extension-dir|--version]"
+	echo "Usage: $0 [--prefix|--includes|--ldflags|--libs|--extension-dir|--version]"
 	exit 1;;
 esac
 
