@@ -1,3 +1,63 @@
+2004-12-03  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      ext/standard/array.c
+      ext/standard/tests/array/array_walk_recursive.phpt:
+      MFH: fix array_walk_recursive() so it doesn't reuse cached fci between
+      calls
+      and add test for it
+
+    * ext/standard/array.c
+      ext/standard/tests/array/array_walk_recursive.phpt:
+      fix array_walk_recursive() so it doesn't reuse cached fci between calls
+      and add test for it
+
+2004-12-03  Stefan Esser  <sesser@suspekt.org>
+
+    * (PHP_4_3)
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re:
+      fix compile
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Handle already existing elements correctly
+
+2004-12-03  Christian Stocker  <chregu@bitflux.ch>
+
+    * (PHP_4_3)
+      ext/domxml/EXPERIMENTAL:
+      - remove EXPERIMENTAL tag
+
+2004-12-03  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/tests/bug30967.phpt:
+      MFH: Fix for bug #30967 (properties in extended mysqli classes don't work)
+
+    * ext/mysqli/tests/bug30967.phpt:
+      
+      Fixed bug #30967 (properties in extended mysqli classes don't work)
+
+    * ext/mysqli/mysqli.c:
+      Fixed bug #30967 (properties in extended mysqli classes don't work)
+
+2004-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      MFH: Fixed bug #30962 (mssql returns space for NULL columns).
+
+    * ext/mssql/php_mssql.c:
+      Fixed bug #30962 (mssql returns space for NULL columns).
+
 2004-12-02  Antony Dovgal  <tony2001@phpclub.net>
 
     * ext/standard/array.c:
