@@ -45,13 +45,10 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 	zend_uint i = 1;
 
 	for (i = 1; i < objects->top ; i++) {
-		if (objects->object_buckets[i].valid) {
-			struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
-			if (obj->dtor && !objects->object_buckets[i].destructor_called) {
-				objects->object_buckets[i].destructor_called = 1;
-				obj->dtor(obj->object, i TSRMLS_CC);
-			}
-			objects->object_buckets[i].valid = 0;
+		struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
+		if (obj->dtor && !objects->object_buckets[i].destructor_called) {
+			objects->object_buckets[i].destructor_called = 1;
+			obj->dtor(obj->object, i TSRMLS_CC);
 		}
 	}
 }
@@ -80,7 +77,6 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 		handle = EG(objects_store).top++;
 	}
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-	EG(objects_store).object_buckets[handle].valid = 1;
 	EG(objects_store).object_buckets[handle].destructor_called = 0;
 
 	obj->refcount = 1;
@@ -98,10 +94,6 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
 
-	if (!EG(objects_store).object_buckets[handle].valid) {
-		zend_error(E_ERROR, "Trying to add reference to invalid object");
-	}
-
 	EG(objects_store).object_buckets[handle].bucket.obj.refcount++;
 #if ZEND_DEBUG_OBJECTS
 	fprintf(stderr, "Increased refcount of object id #%d\n", handle);
@@ -111,7 +103,6 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 #define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST()																\
 			EG(objects_store).object_buckets[handle].bucket.free_list.next = EG(objects_store).free_list_head;	\
 			EG(objects_store).free_list_head = handle;													\
-			EG(objects_store).object_buckets[handle].valid = 0;
 
 ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 {
@@ -119,16 +110,13 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 	struct _store_object *obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 	
 	if (--obj->refcount == 0) {
-		if (EG(objects_store).object_buckets[handle].valid) {
-			if (!EG(objects_store).object_buckets[handle].destructor_called) {
-				EG(objects_store).object_buckets[handle].destructor_called = 1;
-				if (obj->dtor) {
-					obj->dtor(obj->object, handle TSRMLS_CC);
-				}
-				EG(objects_store).object_buckets[handle].valid = 0;
-				if (obj->refcount == 0) {
-					ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
-				}
+		if (!EG(objects_store).object_buckets[handle].destructor_called) {
+			EG(objects_store).object_buckets[handle].destructor_called = 1;
+			if (obj->dtor) {
+				obj->dtor(obj->object, handle TSRMLS_CC);
+			}
+			if (obj->refcount == 0) {
+				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
 			}
 		}
 #if ZEND_DEBUG_OBJECTS
@@ -149,9 +137,6 @@ ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	struct _store_object *obj;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
-	if (!EG(objects_store).object_buckets[handle].valid) {
-		zend_error(E_CORE_ERROR, "Trying to clone invalid object of class %s", Z_OBJCE_P(zobject)->name);
-	}
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 	
 	if (obj->clone == NULL) {
@@ -169,11 +154,6 @@ ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 ZEND_API void *zend_object_store_get_object(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-
-	if (!EG(objects_store).object_buckets[handle].valid) {
-		zend_error(E_ERROR, "Trying to access invalid object");
-		return NULL;
-	}
 
 	return EG(objects_store).object_buckets[handle].bucket.obj.object;
 }
