@@ -1555,6 +1555,7 @@ static void php_rshutdown_session_globals(TSRMLS_D)
 	if (PS(id)) {
 		efree(PS(id));
 	}
+	PS(session_status)=php_session_none;
 }
 
 
@@ -1588,7 +1589,6 @@ static void php_session_flush(TSRMLS_D)
 {
 	if(PS(session_status)==php_session_active) {
 		php_session_save_current_state(TSRMLS_C);
-		PS(session_status)=php_session_none;
 	}
 }
 
