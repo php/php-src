@@ -23,7 +23,7 @@
 
 #include "zend_compile.h"
 
-#define ZEND_EXTENSION_API_NO		20000531
+#define ZEND_EXTENSION_API_NO		20000622
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
@@ -85,7 +85,7 @@ ZEND_API void zend_extension_dispatch_message(int message, void *arg);
 
 
 #define ZEND_EXTENSION()	\
-	ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, "0.90", ZTS_V, ZEND_DEBUG }
+	ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, ZEND_VERSION, ZTS_V, ZEND_DEBUG }
 
 #define STANDARD_ZEND_EXTENSION_PROPERTIES NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1
 
