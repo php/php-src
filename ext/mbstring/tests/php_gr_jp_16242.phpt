@@ -21,7 +21,7 @@ $cmd = 'echo "<?php ';
 $cmd .= "var_dump(ini_get('mbstring.language'));";
 $cmd .= "var_dump(ini_get('mbstring.internal_encoding'));";
 $cmd .= 'var_dump(mb_internal_encoding());';
-$cmd .= ' ?>" |'.$_ENV["TEST_PHP_EXECUTABLE"].' -c '.$tmpfile;
+$cmd .= ' ?>" |'.getenv("TEST_PHP_EXECUTABLE").' -c '.$tmpfile;
 
 system($cmd);
 
