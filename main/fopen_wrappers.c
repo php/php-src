@@ -443,8 +443,39 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		}
 		ptr = end;
 	}
+
 	efree(pathbuf);
-	return NULL;
+
+	{
+		char *exec_fname;
+		int exec_fname_len;
+		char *filename_dir;
+		ELS_FETCH();
+
+		exec_fname = zend_get_executed_filename(ELS_C);
+		exec_fname_len = strlen(exec_fname);
+
+		pathbuf = (char *) emalloc(exec_fname_len+filename_length+1+1); /* Over allocate to save time */
+		memcpy(pathbuf, exec_fname, exec_fname_len+1);
+
+		while ((--exec_fname_len >= 0) && !IS_SLASH(pathbuf[exec_fname_len])) {
+		}
+		pathbuf[exec_fname_len] = DEFAULT_SLASH;
+		memcpy(&pathbuf[exec_fname_len+1], filename, filename_length+1);
+
+		fprintf(stderr,"Trying to open %s\n", pathbuf);
+
+		if (PG(safe_mode)) {
+			if (VCWD_STAT(pathbuf, &sb) == 0 && (!php_checkuid(pathbuf, mode, CHECKUID_CHECK_MODE_PARAM))) {
+				efree(pathbuf);
+				return NULL;
+			}
+		}
+		fp = php_fopen_and_set_opened_path(pathbuf, mode, opened_path);
+		efree(pathbuf);
+		return fp;
+	}
+	return NULL; /* Not really needed anymore */
 }
 /* }}} */
  
