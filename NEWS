@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fix Informix compile (Evan)
+- added XML_Set_Object() function, now you can use the XML-Parser from
+  within an object. (Thies)
+- Fix warnings compiling in maintainer mode. (Stig)
 - Session vars are now decoded into $HTTP_STATE_VARS[] array and the
   globals, depending on track_vars and gpc_globals settings (Andrei)
 - Added get_used_files() function - returns a hash mapping the use()'d files
