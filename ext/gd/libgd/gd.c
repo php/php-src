@@ -1823,7 +1823,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 	if (y < ((im->sy) - 1)) {
 		lastBorder = 1;
 		for (i = leftLimit; i <= rightLimit; i++) {
-			int c = gdImageGetTrueColorPixel(im, i, y + 1);
+			int c = gdImageGetPixel(im, i, y + 1);
 
 			if (lastBorder) {
 				if ((c != border) && (c != color)) {
