@@ -83,7 +83,7 @@ void inifile_line_free(line_type *ln)
 inifile * inifile_alloc(php_stream *fp, int readonly, int persistent TSRMLS_DC)
 {
 	inifile *dba;
-	int fd = 0;
+	int fd;
 
 	if (!readonly) {
 		if (!php_stream_truncate_supported(fp)) {
@@ -98,7 +98,6 @@ inifile * inifile_alloc(php_stream *fp, int readonly, int persistent TSRMLS_DC)
 	dba = pemalloc(sizeof(inifile), persistent);
 	memset(dba, 0, sizeof(inifile));
 	dba->fp = fp;
-	dba->fd = fd;
 	dba->readonly = readonly;
 	return dba;
 }
