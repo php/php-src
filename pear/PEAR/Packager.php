@@ -144,4 +144,13 @@ class PEAR_Packager extends PEAR_Common
     // }}}
 }
 
+if (!function_exists('md5_file')) {
+    function &md5_file($file) {
+        if (!$fd = @fopen($file, 'r')) {
+            return false;
+        }
+        return md5(fread($fd, filesize($file)));
+    }
+}
+
 ?>
