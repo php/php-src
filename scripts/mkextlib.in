@@ -13,5 +13,4 @@ for dir in $extensions; do
     ext_libs="$ext_libs $archive"
 done
 
-dir=`dirname $0`
-(set -x; $dir/armerge $outfile $ext_libs)
+(set -x; $top_srcdir/scripts/armerge $outfile $ext_libs)

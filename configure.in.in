@@ -1,7 +1,10 @@
 dnl $Id$ -*- sh -*-
 dnl Process this file with autoconf to produce a configure script.
 
+
+
 divert(0)
+AC_INIT(main.c)
 recurse=yes
 for arg in $@; do
 	case $arg in
@@ -13,7 +16,7 @@ for arg in $@; do
 done
 
 if test "$recurse" = "yes"; then
-	(cwd=`pwd`;set -x;cd libzend;./configure --cache-file=$cwd/config.cache $@)
+	(cwd=`pwd`; set -x; cd $srcdir/libzend; ./configure --cache-file=$cwd/config.cache $@)
 fi
 
 dnl ## Diversion 1 is the initial checking of OS features, programs,
@@ -33,9 +36,10 @@ dnl ## Diversion 4 is the last one.  Here we generate files and clean up.
 
 divert(1)
 
-AC_INIT(main.c)
 dnl ## This is where the version number is changed from now on!
 AM_INIT_AUTOMAKE(php, 4.0pa1)
+
+
 
 PHP_VERSION=$VERSION
 echo "#define PHP_VERSION \"$PHP_VERSION\"" > php_version.h.new

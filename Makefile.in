@@ -34,7 +34,7 @@ VPATH = @srcdir@
 bindir = @bindir@
 
 ZEND_DIR = $(srcdir)/libzend
-SUBDIRS=libzend ext
+SUBDIRS=$(srcdir)/libzend ext
 
 CC = @CC@
 AR = ar rc
@@ -83,7 +83,7 @@ FUNCTIONS_SOURCE = functions/adabasd.c functions/apache.c functions/fhttpd.c \
        functions/sysvsem.c functions/sysvshm.c functions/dav.c
 
 FUNCTIONS = $(FUNCTIONS_SOURCE:.c=.o)
-PHPLIBS = -L@top_srcdir@/libzend -lzend -L@top_srcdir@/ext -lphpext
+PHPLIBS = -L@top_srcdir@/libzend -lzend -Lext -lphpext
 LIBS = $(PHPLIBS) $(EXTRA_LIBS) @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@ @DBASE_LIB@ @REGEX_LIB@ @DBM_LIB@ @ORACLE_LFLAGS@ @ORACLE_LIBS@ @IODBC_LFLAGS@ @IODBC_LIBS@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @MYSQL_LFLAGS@ @MYSQL_LIBS@ @MSQL_LFLAGS@ @MSQL_LIBS@ @ADA_LFLAGS@ @ADA_LIBS@ @SOLID_LIBS@ @EMPRESS_LIBS@ @OPENLINK_LFLAGS@ @OPENLINK_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @VELOCIS_LIBS@ @CODBC_LFLAGS@ @CODBC_LIBS@ @IMAP_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFLIB_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @SNMP_LFLAGS@ @SNMP_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@ @XML_LIBS@ @LIBS@
 
 all: $(BINNAME)
@@ -103,7 +103,7 @@ php: all-recursive $(OBJS) $(FUNCTIONS) @REGEX_LIB@ @FHTTPD_LIB@ @DBASE_LIB@
 # Apache modules
 libphp3.a libmodphp3.a libmodphp3-so.a: all-recursive $(OBJS) $(FUNCTIONS)
 	$(AR) $@.tmp $(OBJS) $(FUNCTIONS) @DBASE_LIB@
-	scripts/armerge $@ $@.tmp ext/libphpext.a libzend/libzend.a
+	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a $(srcdir)/libzend/libzend.a
 	@rm -f $@.tmp
 	$(RANLIB) $(BINNAME)
 
@@ -123,7 +123,7 @@ functions/ifx.c: functions/ifx.ec
 configuration-parser.h configuration-parser.c:	$(srcdir)/configuration-parser.y
 	bison -p cfg -v -d $(srcdir)/configuration-parser.y -o configuration-parser.c
 
-configuration-scanner.o:
+configuration-scanner.o:	configuration-scanner.c
 	$(CC) $(CFLAGS) -w$(WARNING_LEVEL) -c configuration-scanner.c
 
 configuration-scanner.c:	$(srcdir)/configuration-scanner.l
