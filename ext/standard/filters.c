@@ -97,9 +97,11 @@ static const struct {
 	php_stream_filter_factory *factory;
 } standard_filters[] = {
 	{ &strfilter_rot13_ops, &strfilter_rot13_factory },
+	/* additional filters to go here */
 	{ NULL, NULL }
 };
 
+/* {{{ filter MINIT and MSHUTDOWN */
 PHP_MINIT_FUNCTION(standard_filters)
 {
 	int i;
@@ -112,7 +114,6 @@ PHP_MINIT_FUNCTION(standard_filters)
 			return FAILURE;
 		}
 	}
-
 	return SUCCESS;
 }
 
@@ -125,6 +126,7 @@ PHP_MSHUTDOWN_FUNCTION(standard_filters)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
 /*
  * Local variables:
