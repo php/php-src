@@ -154,7 +154,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 }
 
 
-inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce TSRMLS_DC)
+static inline int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce TSRMLS_DC)
 {
 	switch (property_info->flags & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PUBLIC:
