@@ -187,6 +187,8 @@ static int wddx_stack_destroy(wddx_stack *stack)
 				zval_dtor(((st_entry *)stack->elements[i])->data);
 				efree(((st_entry *)stack->elements[i])->data);
 			}
+			if (((st_entry *)stack->elements[i])->varname)
+				efree(((st_entry *)stack->elements[i])->varname);
 			efree(stack->elements[i]);
 		}		
 		efree(stack->elements);
@@ -727,7 +729,7 @@ void php_wddx_deserialize_ex(char *value, int vallen, zval *return_value)
 	
 	XML_ParserFree(parser);
 
-	if (!wddx_stack_is_empty(&stack)) {
+	if (stack.top == 1) {
 		wddx_stack_top(&stack, (void**)&ent);
 		*return_value = *(ent->data);
 		zval_copy_ctor(return_value);
