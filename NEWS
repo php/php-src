@@ -76,6 +76,7 @@ PHP                                                                        NEWS
 - Fixed bug #31710 (Wrong return values for mysqli_autocommit/commit/rollback).
   (Georg)
 - Fixed bug #31705 (parse_url() does not recognize http://foo.com#bar). (Ilia)
+- Fixed bug #31695 (Cannot redefine endpoint when using WSDL). (Dmitry)
 - Fixed bug #31684 (dio_tcsetattr(): misconfigured termios settings).
   (elod at itfais dot com)
 - Fixed bug #31683 (changes to $name in __get($name) override future 
