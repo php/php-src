@@ -35,12 +35,10 @@ PHP_FUNCTION(mysqli_connect)
 {
 	MYSQL 				*mysql;
 	MYSQLI_RESOURCE 	*mysqli_resource;
-	PR_MYSQL			*prmysql = NULL;
 	zval  				*object = getThis();
 	char 				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
 	unsigned int 		hostname_len, username_len, passwd_len, dbname_len, socket_len;
 	unsigned int 		port=0;
-	struct timeval		starttime;
 
 	if (getThis() && !ZEND_NUM_ARGS()) {
 		RETURN_NULL();
@@ -63,38 +61,29 @@ PHP_FUNCTION(mysqli_connect)
 				}
 			}
 		}
-	}	
-	mysql = mysql_init(NULL);
-
-	if (MyG(profiler)){
-		gettimeofday(&starttime, NULL);
 	}
+
+	mysql = mysql_init(NULL);
 
 	if (mysql_real_connect(mysql,hostname,username,passwd,dbname,port,socket,0) == NULL) {
 		/* Save error messages */
 
+		MYSQLI_REPORT_MYSQL_ERROR(mysql);
 		php_mysqli_set_error(mysql_errno(mysql), (char *) mysql_error(mysql) TSRMLS_CC);
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysql_error(mysql));
+		if (!(MyG(report_mode) & MYSQLI_REPORT_ERROR)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysql_error(mysql));
+		}
 		/* free mysql structure */
 		mysql_close(mysql);
 		RETURN_FALSE;
 	}
-	php_mysqli_set_error(mysql_errno(mysql), (char *) mysql_error(mysql) TSRMLS_CC);
 
-	if (MyG(profiler)) {
-		prmysql = (PR_MYSQL *)MYSQLI_PROFILER_NEW(prmain, MYSQLI_PR_MYSQL, 0);
-		php_mysqli_profiler_timediff(starttime, &prmysql->header.elapsedtime);
-		MYSQLI_PROFILER_STARTTIME(prmysql);
-		prmysql->hostname = estrdup(hostname);
-		prmysql->username = estrdup(username);
-		prmysql->thread_id = mysql->thread_id;
-	}
+	/* clear error */
+	php_mysqli_set_error(mysql_errno(mysql), (char *) mysql_error(mysql) TSRMLS_CC);
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
-	mysqli_resource->prinfo = prmysql;
-
 
 	if (!object) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
@@ -111,7 +100,6 @@ PHP_FUNCTION(mysqli_embedded_connect)
 {
 	MYSQL 				*mysql;
 	MYSQLI_RESOURCE 	*mysqli_resource;
-	PR_MYSQL			*prmysql = NULL;
 	zval  				*object = getThis();
 	char				*dbname = NULL;
 	int					dblen = 0;
@@ -126,10 +114,6 @@ PHP_FUNCTION(mysqli_embedded_connect)
 		return;
 	}
 
-	if (MyG(profiler)){
-		gettimeofday(&starttime, NULL);
-	}
-
 	mysql = mysql_init(NULL);
 
 	if (mysql_real_connect(mysql, NULL, NULL, NULL, dbname, 0, NULL, 0) == NULL) {
@@ -141,14 +125,6 @@ PHP_FUNCTION(mysqli_embedded_connect)
 	}
 
 	php_mysqli_set_error(mysql_errno(mysql), (char *) mysql_error(mysql) TSRMLS_CC);
-
-	if (MyG(profiler)) {
-		prmysql = (PR_MYSQL *)MYSQLI_PROFILER_NEW(prmain, MYSQLI_PR_MYSQL, 0);
-		php_mysqli_profiler_timediff(starttime, &prmysql->header.elapsedtime);
-		MYSQLI_PROFILER_STARTTIME(prmysql);
-		prmysql->hostname = prmysql->username = NULL;
-		prmysql->thread_id = mysql->thread_id;
-	}
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
@@ -215,12 +191,11 @@ PHP_FUNCTION(mysqli_multi_query)
 	zval			*mysql_link;
 	char			*query = NULL;
 	unsigned int 	query_len;
-	PR_MYSQL		*prmysql;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
 
 	MYSQLI_ENABLE_MQ;	
 	if (mysql_real_query(mysql, query, query_len)) {
@@ -238,69 +213,42 @@ PHP_FUNCTION(mysqli_query)
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
 	MYSQL_RES 			*result;
-	PR_MYSQL			*prmysql;
-	PR_QUERY			*prquery;
-	PR_RESULT			*prresult;
 	char				*query = NULL;
 	unsigned int 		query_len;
 	unsigned int 		resultmode = 0;
-	struct timeval		starttime;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|l", &mysql_link, mysqli_link_class_entry, &query, &query_len, &resultmode) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL*, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
-
-	/* profiling information */
-	if (MyG(profiler)) {
-		prquery = (PR_QUERY *)MYSQLI_PROFILER_NEW(prmysql, MYSQLI_PR_QUERY, 1);
-		prquery->explain.query = my_estrdup(query);
-		if (!strncasecmp("select", query, 6)){
-			if (!(MYSQLI_PROFILER_EXPLAIN(&prquery->explain, &prquery->header, mysql, query))) {
-				RETURN_FALSE;
-			}
-		}
-	}
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL*, &mysql_link, "mysqli_link");
 
 	MYSQLI_DISABLE_MQ;
 
 	if (mysql_real_query(mysql, query, query_len)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql);
 		RETURN_FALSE;
 	}
 
-	if (MyG(profiler)) {
-		MYSQLI_PROFILER_ELAPSEDTIME(prquery);
-		prquery->insertid = mysql_insert_id(mysql);
-		prquery->affectedrows = mysql_affected_rows(mysql);
-	}
 
 	if (!mysql_field_count(mysql)) {
+		if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
+			php_mysqli_report_index(query, mysql->server_status);
+		}
 		RETURN_TRUE;
-	}
-
-	/* profiler result information */
-	if (MyG(profiler)) {
-		gettimeofday(&starttime, NULL);
-		prresult = (PR_RESULT *)MYSQLI_PROFILER_NEW(prquery, MYSQLI_PR_RESULT, 1);
-	} else {
-		prresult = NULL;
 	}
 
 	result = (resultmode == MYSQLI_USE_RESULT) ? mysql_use_result(mysql) : mysql_store_result(mysql);
 
-	if (result && MyG(profiler)) {
-		MYSQLI_PROFILER_ELAPSEDTIME(prresult);
-		prresult->rows = result->row_count;
-		prresult->columns = result->field_count;
-	}
-		
 	if (!result) {
 		RETURN_FALSE;
 	}
 
+	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
+		php_mysqli_report_index(query, mysql->server_status);
+	}
+
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)result;
-	mysqli_resource->prinfo = (void *)prresult;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);
 }
 /* }}} */

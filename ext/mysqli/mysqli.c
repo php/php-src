@@ -40,7 +40,6 @@ static HashTable classes;
 static HashTable mysqli_link_properties;
 static HashTable mysqli_result_properties;
 static HashTable mysqli_stmt_properties;
-PR_MAIN *prmain;
 extern void php_mysqli_connect(INTERNAL_FUNCTION_PARAMETERS);
 
 typedef int (*mysqli_read_t)(mysqli_object *obj, zval **retval TSRMLS_DC);
@@ -238,7 +237,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 }
 /* }}} */
 
-
+/* {{{ void mysqli_add_property(HashTable *h, char *pname, mysqli_read_t r_func, mysqli_write_t w_func TSRMLS_DC) */
 void mysqli_add_property(HashTable *h, char *pname, mysqli_read_t r_func, mysqli_write_t w_func TSRMLS_DC) {
 	mysqli_prop_handler		p;
 
@@ -247,6 +246,7 @@ void mysqli_add_property(HashTable *h, char *pname, mysqli_read_t r_func, mysqli
 
 	zend_hash_add(h, pname, strlen(pname) + 1, &p, sizeof(mysqli_prop_handler), NULL);
 }
+/* }}} */
 
 /* {{{ mysqli_objects_new
  */
@@ -267,7 +267,8 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
+					(void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(intern, mysqli_objects_dtor, mysqli_objects_clone TSRMLS_CC);
 	retval.handlers = &mysqli_object_handlers;
@@ -324,7 +325,8 @@ static void php_mysqli_init_globals(zend_mysqli_globals *mysqli_globals)
 	mysqli_globals->default_user = NULL;
 	mysqli_globals->default_pw = NULL;
 	mysqli_globals->default_socket = NULL;
-	mysqli_globals->profiler = 0;
+	mysqli_globals->report_mode = 0;
+	mysqli_globals->report_ht = 0;
 	mysqli_globals->multi_query = 0;
 }
 /* }}} */
@@ -447,10 +449,11 @@ PHP_MINIT_FUNCTION(mysqli)
 	/* bind blob support */
 	REGISTER_LONG_CONSTANT("MYSQLI_NO_DATA", MYSQL_NO_DATA, CONST_CS | CONST_PERSISTENT);
 
-	/* profiler support */
-	REGISTER_LONG_CONSTANT("MYSQLI_PR_REPORT_STDERR", 1, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQLI_PR_REPORT_PORT", 2, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQLI_PR_REPORT_FILE", 3, CONST_CS | CONST_PERSISTENT);
+	/* reporting */
+	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_INDEX", MYSQLI_REPORT_INDEX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_ERROR", MYSQLI_REPORT_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_CLOSE", MYSQLI_REPORT_CLOSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_ALL", MYSQLI_REPORT_ALL, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -470,7 +473,6 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 }
 /* }}} */
 
-/* Remove if there's nothing to do at request start */
 /* {{{ PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION(mysqli)
@@ -482,7 +484,6 @@ PHP_RINIT_FUNCTION(mysqli)
 }
 /* }}} */
 
-/* Remove if there's nothing to do at request end */
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
@@ -490,19 +491,6 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 	if (MyG(error_msg)) {
 		efree(MyG(error_msg));
 	}
-
-	if (MyG(profiler)) {
-		if (prmain->header.child) {
-			php_mysqli_profiler_report((PR_COMMON *)prmain, 0);
-		}
-		switch (prmain->mode) {
-			case MYSQLI_PR_REPORT_FILE:
-				fclose(prmain->fp);
-				efree(prmain->name);
-			break;
-		}
-	}
-
 	return SUCCESS;
 }
 /* }}} */
@@ -534,8 +522,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	MYSQL_FIELD		*fields;
 	MYSQL_ROW		row;
 	unsigned long	*field_len;
-	PR_RESULT		*prresult;
-	PR_COMMAND		*prcommand;
 	zval            *ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 
@@ -570,13 +556,14 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		}
 	}
 
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, prresult, PR_RESULT *, &mysql_result, "mysqli_result"); 
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result"); 
 
-	MYSQLI_PROFILER_COMMAND_START(prcommand, prresult);
-
-	fields = mysql_fetch_fields(result);
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_NULL();
+	}
+
+	if (fetchtype & MYSQLI_ASSOC) {
+		fields = mysql_fetch_fields(result);
 	}
 
 	array_init(return_value);
@@ -677,13 +664,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		} else if (ctor_params) {
 			zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
 		}
-	}
-
-	if (MyG(profiler)) {
-		char tmp[10];
-		sprintf ((char *)&tmp,"row[%d]", mysql_num_fields(result));
-		MYSQLI_PROFILER_COMMAND_RETURNSTRING(prcommand, tmp);
-		prresult->fetched_rows++;
 	}
 }
 /* }}} */

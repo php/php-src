@@ -26,7 +26,6 @@
 #endif
 
 #include <mysql.h>
-#include "mysqli_profiler.h"
 
 #ifndef PHP_MYSQLI_H
 #define PHP_MYSQLI_H
@@ -52,7 +51,12 @@ typedef struct {
 } STMT;
 
 typedef struct {
-	void		*prinfo;	/* profiler info */
+	int			mode;
+	int			socket;
+	FILE		*fp;
+} PROFILER;
+
+typedef struct {
 	void		*ptr;		/* resource: (mysql, result, stmt) */
 } MYSQLI_RESOURCE;
 
@@ -68,14 +72,12 @@ typedef struct _mysqli_property_entry {
 	int (*w_func)(mysqli_object *obj, zval **retval TSRMLS_DC);
 } mysqli_property_entry;
 
-#define MYSQLI_PR_MAIN		0
-#define MYSQLI_PR_MYSQL		1
-#define MYSQLI_PR_QUERY		2
+#define MYSQLI_PR_CONNECT		1
+#define MYSQLI_PR_QUERY			2
 #define MYSQLI_PR_QUERY_RESULT	3
-#define MYSQLI_PR_STMT		4
+#define MYSQLI_PR_STMT			4
 #define MYSQLI_PR_STMT_RESULT	5
-#define MYSQLI_PR_RESULT	6
-#define MYSQLI_PR_COMMAND	7
+#define MYSQLI_PR_COMMAND		6
 
 
 #define phpext_mysqli_ptr &mysqli_module_entry
@@ -104,6 +106,8 @@ extern mysqli_property_entry mysqli_stmt_property_entries[];
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(STMT *stmt);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
+extern void php_mysqli_report_error(char *sqlstate, int errorno, char *error);
+extern void php_mysqli_report_index(char *query, unsigned int status);
 
 zend_class_entry *mysqli_link_class_entry;
 zend_class_entry *mysqli_stmt_class_entry;
@@ -150,7 +154,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object, __ce)\
 }
 
-#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __prptr, __prtype, __id, __name) \
+#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name) \
 { \
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
@@ -159,7 +163,6 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
   		RETURN_NULL();\
   	}\
 	__ptr = (__type)my_res->ptr; \
-	__prptr = (__prtype)my_res->prinfo; \
 	if (!strcmp((char *)__name, "mysqli_stmt")) {\
 		if (!((STMT *)__ptr)->stmt->mysql) {\
   			php_error(E_WARNING, "Statement isn't valid anymore");\
@@ -195,6 +198,12 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	}\
 }
 
+#if WIN32|WINNT
+#define SCLOSE(a) closesocket(a)
+#else
+#define SCLOSE(a) close(a)
+#endif
+
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 	1
 
@@ -212,6 +221,22 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 /* fetch types */
 #define FETCH_SIMPLE		1
 #define FETCH_RESULT		2
+
+/*** REPORT MODES ***/
+#define MYSQLI_REPORT_INDEX			1
+#define MYSQLI_REPORT_ERROR			2
+#define MYSQLI_REPORT_CLOSE			4
+#define MYSQLI_REPORT_ALL		  255
+
+#define MYSQLI_REPORT_MYSQL_ERROR(mysql) \
+if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql->net.last_errno) { \
+	php_mysqli_report_error(mysql->net.sqlstate, mysql->net.last_errno, mysql->net.last_error); \
+}
+
+#define MYSQLI_REPORT_STMT_ERROR(stmt) \
+if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && stmt->last_errno) { \
+	php_mysqli_report_error(stmt->sqlstate, stmt->last_errno, stmt->last_error); \
+}
 
 PHP_MYSQLI_API void mysqli_register_link(zval *return_value, void *link TSRMLS_DC);
 PHP_MYSQLI_API void mysqli_register_stmt(zval *return_value, void *stmt TSRMLS_DC);
@@ -283,12 +308,11 @@ PHP_FUNCTION(mysqli_ping);
 PHP_FUNCTION(mysqli_prepare);
 PHP_FUNCTION(mysqli_query);
 PHP_FUNCTION(mysqli_get_metadata);
-PHP_FUNCTION(mysqli_profiler);
+PHP_FUNCTION(mysqli_report);
 PHP_FUNCTION(mysqli_read_query_result);
 PHP_FUNCTION(mysqli_real_connect);
 PHP_FUNCTION(mysqli_real_query);
 PHP_FUNCTION(mysqli_real_escape_string);
-PHP_FUNCTION(mysqli_reload);
 PHP_FUNCTION(mysqli_rollback);
 PHP_FUNCTION(mysqli_row_seek);
 PHP_FUNCTION(mysqli_rpl_parse_enabled);
@@ -334,7 +358,8 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	char			*default_socket;
 	long			error_no;
 	char			*error_msg;
-	unsigned int	profiler;
+	int				report_mode;
+	HashTable		*report_ht;
 	unsigned int	multi_query;
 #ifdef HAVE_EMBEDDED_MYSQLI
 	unsigned int	embedded;
