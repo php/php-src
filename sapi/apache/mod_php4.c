@@ -255,7 +255,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 		} else {
 			val = empty_string;
 		}
-		php_register_variable(elts[i].key, val, NULL ELS_CC PLS_CC);
+		php_register_variable(elts[i].key, val, track_vars_array  ELS_CC PLS_CC);
 	}
 
 	/* insert special variables */
