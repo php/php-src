@@ -41,6 +41,7 @@ VERSION="4.3.0-dev"
 
 dnl Define where extension directories are located in the configure context
 AC_DEFUN(PHP_EXT_BUILDDIR,[ext/$1])dnl
+AC_DEFUN(PHP_EXT_DIR,[ext/$1])dnl
 AC_DEFUN(PHP_EXT_SRCDIR,[$abs_srcdir/ext/$1])dnl
 AC_DEFUN(PHP_ALWAYS_SHARED,[])dnl
 
