@@ -740,6 +740,7 @@ static void xsltstylesheet_set_data(void *obj, zval *wrapper)
 }
 
 
+#ifdef HELLY_0
 static zval *xsltstylesheet_get_data(void *obj)
 {
 /*
@@ -753,6 +754,7 @@ static zval *xsltstylesheet_get_data(void *obj)
 */
 	return ((zval *) (((xsltStylesheetPtr) obj)->_private));
 }
+#endif
 
 void *php_xsltstylesheet_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
@@ -3764,7 +3766,7 @@ PHP_FUNCTION(domxml_doc_ids)
 PHP_FUNCTION(xmldoc)
 {
 	zval *rv = NULL;
-	xmlDoc *docp;
+	xmlDoc *docp = NULL;
 	int ret; 
 	char *buffer;
 	int buffer_len;
@@ -3851,7 +3853,7 @@ PHP_FUNCTION(xmldoc)
 PHP_FUNCTION(xmldocfile)
 {
 	zval *rv = NULL;
-	xmlDoc *docp;
+	xmlDoc *docp = NULL;
 	int ret, file_len;
 	char *file;
 	int mode = 0, prevSubstValue;
