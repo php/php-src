@@ -4092,11 +4092,13 @@ int zend_end_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval restored_error_reporting;
 	
-	restored_error_reporting.type = IS_LONG;
-	restored_error_reporting.value.lval = EX_T(opline->op1.u.var).tmp_var.value.lval;
-	convert_to_string(&restored_error_reporting);
-	zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-	zendi_zval_dtor(restored_error_reporting);
+	if (EG(error_reporting)) {
+		restored_error_reporting.type = IS_LONG;
+		restored_error_reporting.value.lval = EX_T(opline->op1.u.var).tmp_var.value.lval;
+		convert_to_string(&restored_error_reporting);
+		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		zendi_zval_dtor(restored_error_reporting);
+	}
 	NEXT_OPCODE();
 }
 
