@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.15 2003-12-04 13:38:47 wez Exp $
+// $Id: confutils.js,v 1.16 2003-12-04 17:03:20 fmk Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -573,7 +573,7 @@ function EXTENSION(extname, file_list, shared, cflags)
 
 		/* find the header that declars the module pointer,
 		 * so we can include it in internal_functions.c */
-		var ext_dir = FSO.GetFolder("ext/" + extname);
+		var ext_dir = FSO.GetFolder(configure_module_dirname);
 		var fc = new Enumerator(ext_dir.Files);
 		var re = /\.h$/;
 		var s, c;
