@@ -850,6 +850,7 @@ PHP_SUBST(EXT_STATIC)
 PHP_SUBST(EXT_SHARED)
 PHP_SUBST(EXT_LIBS)
 PHP_SUBST(EXT_LTLIBS)
+PHP_SUBST(EXT_CLI_LTLIBS)
 
 PHP_SUBST_OLD(abs_builddir)
 PHP_SUBST_OLD(abs_srcdir)
@@ -995,6 +996,11 @@ if test -n "\$REDO_ALL"; then
   extensions="$EXT_STATIC"
 dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$extensions > main/internal_functions.c
+
+  echo "creating main/internal_functions_cli.c"
+  cli_extensions="$EXT_STATIC $EXT_CLI_STATIC"
+  sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
+
 dnl  if cmp main/internal_functions.c.old main/internal_functions.c > /dev/null 2>&1; then
 dnl      echo "main/internal_functions.c is unchanged"
 dnl      mv main/internal_functions.c.old main/internal_functions.c

@@ -906,13 +906,14 @@ AC_DEFUN(PHP_AC_BROKEN_SPRINTF,[
 ])
 
 dnl
-dnl PHP_EXTENSION(extname [, shared])
+dnl PHP_EXTENSION(extname [, shared [,sapi_class]])
 dnl
 dnl Includes an extension in the build.
 dnl
 dnl "extname" is the name of the ext/ subdir where the extension resides
 dnl "shared" can be set to "shared" or "yes" to build the extension as
-dnl a dynamically loadable library.
+dnl a dynamically loadable library. Optional parameter "sapi_class" can
+dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
 dnl
 AC_DEFUN(PHP_EXTENSION,[
   EXT_SUBDIRS="$EXT_SUBDIRS $1"
@@ -927,15 +928,29 @@ dnl ---------------------------------------------- External Module
     ext_srcdir=$abs_srcdir
   fi
 
-  if test "$2" != "shared" && test "$2" != "yes"; then
+  if test "$2" != "shared" && test "$2" != "yes" && test "$3" != "cli"; then
 dnl ---------------------------------------------- Static module
     LIB_BUILD($ext_builddir)
     EXT_LTLIBS="$EXT_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
     EXT_STATIC="$EXT_STATIC $1"
-  else 
+  else
+    if test "$2" = "shared" || test "$2" = "yes"; then
 dnl ---------------------------------------------- Shared module
-    LIB_BUILD($ext_builddir,yes)
-    AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z-,A-Z_), 1, Whether to build $1 as dynamic module)
+      LIB_BUILD($ext_builddir,yes)
+      AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z-,A-Z_), 1, Whether to build $1 as dynamic module)
+    fi
+  fi
+
+  if test "$2" != "shared" && test "$2" != "yes" && test "$3" = "cli"; then
+dnl ---------------------------------------------- CLI static module
+    LIB_BUILD($ext_builddir)
+    if test "$PHP_SAPI" = "cgi"; then
+      EXT_LTLIBS="$EXT_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
+      EXT_STATIC="$EXT_STATIC $1"
+    else
+      EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
+      EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
+    fi
   fi
 
   PHP_FAST_OUTPUT($ext_builddir/Makefile)

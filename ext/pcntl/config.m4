@@ -6,14 +6,13 @@ dnl Process Control (pcntl) extentsion --EXPERIMENTAL--
 dnl TODO - Add platform checks 
 
 PHP_ARG_ENABLE(pcntl, whether to enable pcntl support,
-[  --enable-pcntl          Enable experimental pcntl support (CGI ONLY!)])
+[  --enable-pcntl          Enable experimental pcntl support (CLI/CGI only)])
 
 if test "$PHP_PCNTL" != "no"; then
-	PHP_CHECK_STANDALONE(pcntl)
  
   AC_CHECK_FUNCS(fork, [ AC_DEFINE(HAVE_FORK,1,[ ]) ], [ AC_MSG_ERROR(pcntl: fork() not supported by this platform) ])
   AC_CHECK_FUNCS(waitpid, [ AC_DEFINE(HAVE_WAITPID,1,[ ]) ], [ AC_MSG_ERROR(pcntl: fork() not supported by this platform) ])
   AC_CHECK_FUNCS(sigaction, [ AC_DEFINE(HAVE_SIGACTION,1,[ ]) ], [ AC_MSG_ERROR(pcntl: sigaction() not supported by this platform) ])
   
-  PHP_EXTENSION(pcntl, $ext_shared)
+  PHP_EXTENSION(pcntl, $ext_shared, cli)
 fi

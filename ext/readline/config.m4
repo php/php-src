@@ -3,14 +3,10 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(libedit,for libedit readline replacement, 
-[  --with-libedit[=DIR]    Include libedit readline replacement.])
+[  --with-libedit[=DIR]    Include libedit readline replacement (CLI/CGI only).])
 
 PHP_ARG_WITH(readline,for readline support,
-[  --with-readline[=DIR]   Include readline support.])
-
-if test "$PHP_READLINE" != "no" -o "$PHP_LIBEDIT" != "no"; then
-  PHP_CHECK_INTERACTIVE(readline)
-fi
+[  --with-readline[=DIR]   Include readline support (CLI/CGI only).])
 
 if test "$PHP_READLINE" != "no"; then
   for i in /usr/local /usr $PHP_READLINE; do
@@ -55,7 +51,7 @@ if test "$PHP_READLINE" != "no"; then
   PHP_SUBST(READLINE_SHARED_LIBADD)
 
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
-  PHP_EXTENSION(readline, $ext_shared)
+  PHP_EXTENSION(readline, $ext_shared, cli)
 fi
 
 if test "$PHP_LIBEDIT" != "no"; then
@@ -92,5 +88,5 @@ if test "$PHP_LIBEDIT" != "no"; then
   PHP_SUBST(READLINE_SHARED_LIBADD)
 
   AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
-  PHP_EXTENSION(readline, $ext_shared)
+  PHP_EXTENSION(readline, $ext_shared, cli)
 fi
