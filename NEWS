@@ -1,6 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed a bug in socket_select() that could cause unexpected behavior when using a statement
+  like $w=$e=array($sock);
+  This change unfortunately prevents the use of constant values(NULL) for the socket array paramaters.
+  Instead use a temporary variable or an expression with the leftmost member being a temporary variable.
+  ex. socket_select($w, $r, $e=NULL, 10);
 - Added optional 3rd parameter to mysql_select_db() which makes it return
   the previously selected database name. (Jani)
 - If possible set Content-Length header in zlib.output_compression mode. (thies)
