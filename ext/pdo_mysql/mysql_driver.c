@@ -196,7 +196,11 @@ static int mysql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 
 static int mysql_handle_autocommit(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	return 0 <= mysql_handle_doer(dbh, ZEND_STRL("SET SESSION AUTOCOMMIT=0") TSRMLS_CC);
+	if (dbh->auto_commit) {
+		return 0 <= mysql_handle_doer(dbh, ZEND_STRL("SET SESSION AUTOCOMMIT=1") TSRMLS_CC);
+	} else {
+		return 0 <= mysql_handle_doer(dbh, ZEND_STRL("SET SESSION AUTOCOMMIT=0") TSRMLS_CC);
+	}
 }
 
 static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
