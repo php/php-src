@@ -78,7 +78,6 @@ void shutdown_compiler(CLS_D)
 	zend_llist_destroy(&CG(filenames_list));
 	zend_hash_apply(CG(function_table), (int (*)(void *)) is_not_internal_function);
 	zend_hash_apply(CG(class_table), (int (*)(void *)) is_not_internal_class);
-	destroy_resource_list();
 	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
 }
 
