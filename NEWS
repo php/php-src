@@ -19,8 +19,8 @@ PHP 4                                                                      NEWS
   the specified number of bytes or until the ending string is found. (Ilia)
 - Added optional parameter to mkdir() which makes directory creation recursive.
   (Ilia)
-- Added optional parameters to file() which make the result array not contain
-  the line endings and to skip empty lines. (Ilia)
+- Added optional parameter to file() which can be used to make the result array
+  not contain the line endings and to skip empty lines. (Ilia)
 - Added get_headers() function, it can be used to retrieve headers sent
   by the browser for the specified URL. (Ilia)
 - Added str_split() function, this function can break down a string into an
