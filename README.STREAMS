@@ -51,7 +51,16 @@ Where:
         IGNORE_URL      - do not use plugin wrappers
         REPORT_ERRORS   - show errors in a standard format if something
                           goes wrong.
-    opened_path is used to return the path of the actual file opened.
+        STREAM_MUST_SEEK - If you really need to be able to seek the stream
+                           and don't need to be able to write to the original
+                           file/URL, use this option to arrange for the stream
+                           to be copied (if needed) into a stream that can
+                           be seek()ed.
+                           
+    opened_path is used to return the path of the actual file opened,
+    but if you used STREAM_MUST_SEEK, may not be valid.  You are
+    responsible for efree()ing opened_path.  opened_path may be (and usually
+    is) NULL.
 
 If you need to open a specific stream, or convert standard resources into
 streams there are a range of functions to do this defined in php_streams.h.
@@ -108,6 +117,39 @@ data remaining on the stream if you set maxlen to PHP_STREAM_COPY_ALL.
 The buffer is allocated using pemalloc(); you need to call pefree() to
 release the memory when you are done.
 As with copy_to_stream, this function will try use mmap where it can.
+
+If you have an existing stream and need to be able to seek() it, you
+can use this function to copy the contents into a new stream that can
+be seek()ed:
+
+PHPAPI int php_stream_make_seekable(php_stream *origstream, php_stream **newstream);
+
+It returns one of the following values:
+#define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
+#define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
+#define PHP_STREAM_FAILED		2 /* an error occurred while attempting conversion */
+#define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
+
+make_seekable will always set newstream to be the stream that is valid
+if the function succeeds.
+When you have finished, remember to close the stream.
+
+NOTE: If you only need to seek forwards, there is no need to call this
+function, as the php_stream_seek can emulate forward seeking when the
+whence parameter is SEEK_CUR.
+
+NOTE: Writing to the stream may not affect the original source, so it
+only makes sense to use this for read-only use.
+
+NOTE: If the origstream is network based, this function will block
+until the whole contents have been downloaded.
+
+NOTE: Never call this function with an origstream that is referenced
+as a resource! It will close the origstream on success, and this
+can lead to a crash when the resource is later used/released.
+
+NOTE: If you are opening a stream and need it to be seekable, use the
+STREAM_MUST_SEEK option to php_stream_open_wrapper();
 
 Casting Streams
 ===============

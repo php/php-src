@@ -22,19 +22,6 @@
 
 #include "php_globals.h"
 
-#define IGNORE_PATH		0
-#define USE_PATH		1
-#define IGNORE_URL		2
-/* There's no USE_URL. */
-#define ENFORCE_SAFE_MODE 4
-#define REPORT_ERRORS	8
-
-#ifdef PHP_WIN32
-# define IGNORE_URL_WIN IGNORE_URL
-#else
-# define IGNORE_URL_WIN 0
-#endif
-
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC);
 PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC);
 

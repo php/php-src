@@ -146,12 +146,35 @@ PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_
 #define php_stream_is_persistent(stream)	(stream)->is_persistent
 
 /* Wrappers support */
+
+#define IGNORE_PATH			0
+#define USE_PATH			1
+#define IGNORE_URL			2
+/* There's no USE_URL. */
+#define ENFORCE_SAFE_MODE 	4
+#define REPORT_ERRORS		8
+/* If you don't need to write to the stream, but really need to
+ * be able to seek, use this flag in your options. */
+#define STREAM_MUST_SEEK	16
+
+#ifdef PHP_WIN32
+# define IGNORE_URL_WIN IGNORE_URL
+#else
+# define IGNORE_URL_WIN 0
+#endif
+
 int php_init_stream_wrappers(TSRMLS_D);
 int php_shutdown_stream_wrappers(TSRMLS_D);
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
-
 PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path TSRMLS_DC);
+
+#define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
+#define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
+#define PHP_STREAM_FAILED		2 /* an error occurred while attempting conversion */
+#define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
+/* DO NOT call this on streams that are referenced by resources! */
+PHPAPI int php_stream_make_seekable(php_stream *origstream, php_stream **newstream);
 
 #endif
 

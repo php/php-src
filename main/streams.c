@@ -166,7 +166,7 @@ PHPAPI char *php_stream_gets(php_stream *stream, char *buf, size_t maxlen)
 		return stream->ops->gets(stream, buf, maxlen);
 	} else {
 		/* unbuffered fgets - poor performance ! */
-		size_t n = 0;
+		size_t n = 1;
 		char *c = buf;
 
 		/* TODO: look at error returns? */
@@ -944,7 +944,7 @@ PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, 
 		goto out;
 	}
 
-	if ((options & USE_PATH) && PG(include_path) != NULL)	{
+	if ((options & USE_PATH) && PG(include_path) != NULL) {
 		stream = php_stream_fopen_with_path(path, mode, PG(include_path), opened_path TSRMLS_CC);
 		goto out;
 	}
@@ -954,7 +954,29 @@ PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, 
 
 	stream = php_stream_fopen(path, mode, opened_path TSRMLS_CC);
 out:
-	if (stream == NULL && (options & REPORT_ERRORS))	{
+	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
+		php_stream *newstream;
+
+		switch(php_stream_make_seekable(stream, &newstream)) {
+			case PHP_STREAM_UNCHANGED:
+				return stream;
+			case PHP_STREAM_RELEASED:
+				return newstream;
+			default:
+				php_stream_close(stream);
+				stream = NULL;
+				if (options & REPORT_ERRORS) {
+					char *tmp = estrdup(path);
+					php_strip_url_passwd(tmp);
+					zend_error(E_WARNING, "%s(\"%s\") - could not make seekable - %s",
+							get_active_function_name(TSRMLS_C), tmp, strerror(errno));
+					efree(tmp);
+
+					options ^= REPORT_ERRORS;
+				}
+		}
+	}
+	if (stream == NULL && (options & REPORT_ERRORS)) {
 		char *tmp = estrdup(path);
 		php_strip_url_passwd(tmp);
 		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_C), tmp, strerror(errno));
@@ -963,6 +985,34 @@ out:
 	return stream;
 }
 
+PHPAPI int php_stream_make_seekable(php_stream *origstream, php_stream **newstream)
+{
+	assert(newstream != NULL);
+
+	*newstream = NULL;
+	
+	if (origstream->ops->seek != NULL) {
+		*newstream = origstream;
+		return PHP_STREAM_UNCHANGED;
+	}
+	
+	/* Use a tmpfile and copy the old streams contents into it */
+
+	*newstream = php_stream_fopen_tmpfile();
+
+	if (*newstream == NULL)
+		return PHP_STREAM_FAILED;
+
+	if (php_stream_copy_to_stream(origstream, *newstream, PHP_STREAM_COPY_ALL) == 0) {
+		php_stream_close(*newstream);
+		*newstream = NULL;
+		return PHP_STREAM_CRITICAL;
+	}
+
+	php_stream_close(origstream);
+
+	return PHP_STREAM_RELEASED;
+}
 
 /*
  * Local variables:
