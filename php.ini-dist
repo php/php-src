@@ -380,7 +380,6 @@ allow_url_fopen = On
 ;extension=php_filepro.dll
 ;extension=php_gd.dll
 ;extension=php_gettext.dll
-;extension=php_gtk.dll
 ;extension=php_hyperwave.dll
 ;extension=php_iconv.dll
 ;extension=php_ifx.dll
