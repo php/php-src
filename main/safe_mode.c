@@ -121,6 +121,14 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	if (duid == (uid=php_getuid())) {
 		return 1;
 	} else {
+		SLS_FETCH();
+
+		if (SG(rfc1867_uploaded_files)) {
+			if (zend_hash_exists(SG(rfc1867_uploaded_files),filename,strlen(filename)+1)) {
+				return 1;
+			}
+		}
+
 		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", uid, filename, duid);
 		return 0;
 	}
