@@ -8,7 +8,7 @@ libphpext_standard_a_SOURCES=\
 	pack.c pageinfo.c rand.c reg.c soundex.c string.c \
 	syslog.c type.c uniqid.c url.c iptc.c var.c quot_print.c \
 	cyr_convert.c flock_compat.c crypt.c dl.c head.c post.c \
-	parsedate.y lcg.c url_scanner.c
+	parsedate.y lcg.c url_scanner.c metaphone.c
 
 $(srcdir)/url_scanner.c: $(srcdir)/url_scanner.re
 	re2c -b $< > $@
