@@ -47,10 +47,16 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	int didwrite;
+	struct timeval *ptimeout;
 
 	if (sock->socket == -1) {
 		return 0;
 	}
+
+	if (sock->timeout.tv_sec == -1)
+		ptimeout = NULL;
+	else
+		ptimeout = &sock->timeout;
 
 retry:
 	didwrite = send(sock->socket, buf, count, 0);
@@ -60,24 +66,12 @@ retry:
 		char *estr;
 
 		if (sock->is_blocked && err == EWOULDBLOCK) {
-			fd_set fdw, tfdw;
 			int retval;
-			struct timeval timeout, *ptimeout;
 
-			FD_ZERO(&fdw);
-			FD_SET(sock->socket, &fdw);
 			sock->timeout_event = 0;
 
-			if (sock->timeout.tv_sec == -1)
-				ptimeout = NULL;
-			else
-				ptimeout = &timeout;
-
 			do {
-				tfdw = fdw;
-				timeout = sock->timeout;
-
-				retval = select(sock->socket + 1, NULL, &tfdw, NULL, ptimeout);
+				retval = php_pollfd_for(sock->socket, POLLOUT, ptimeout);
 
 				if (retval == 0) {
 					sock->timeout_event = 1;
@@ -111,29 +105,22 @@ retry:
 
 static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
 {
-	fd_set fdr, tfdr;
 	int retval;
-	struct timeval timeout, *ptimeout;
+	struct timeval *ptimeout;
 
 	if (sock->socket == -1) {
 		return;
 	}
 	
-	FD_ZERO(&fdr);
-	FD_SET(sock->socket, &fdr);
 	sock->timeout_event = 0;
 
 	if (sock->timeout.tv_sec == -1)
 		ptimeout = NULL;
 	else
-		ptimeout = &timeout;
-
+		ptimeout = &sock->timeout;
 
 	while(1) {
-		tfdr = fdr;
-		timeout = sock->timeout;
-
-		retval = select(sock->socket + 1, &tfdr, NULL, NULL, ptimeout);
+		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
 
 		if (retval == 0)
 			sock->timeout_event = 1;
@@ -178,14 +165,12 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 #ifdef PHP_WIN32
-	fd_set wrfds, efds;
 	int n;
-	struct timeval timeout;
 #endif
 
 	if (close_handle) {
 
-		if (sock->socket != -1) {
+		if (sock->socket != SOCK_ERR) {
 #ifdef PHP_WIN32
 			/* prevent more data from coming in */
 			shutdown(sock->socket, SHUT_RD);
@@ -197,19 +182,11 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			 * but at the same time avoid hanging indefintely.
 			 * */
 			do {
-				FD_ZERO(&wrfds);
-				FD_SET(sock->socket, &wrfds);
-				efds = wrfds;
-
-				timeout.tv_sec = 0;
-				timeout.tv_usec = 5000; /* arbitrary */
-
-				n = select(sock->socket + 1, NULL, &wrfds, &efds, &timeout);
+				n = php_pollfd_for_ms(sock->socket, POLLOUT, 500);
 			} while (n == -1 && php_socket_errno() == EINTR);
 #endif
-
 			closesocket(sock->socket);
-			sock->socket = -1;
+			sock->socket = SOCK_ERR;
 		}
 
 	}
@@ -274,7 +251,6 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 	switch(option) {
 		case PHP_STREAM_OPTION_CHECK_LIVENESS:
 			{
-				fd_set rfds;
 				struct timeval tv;
 				char buf;
 				int alive = 1;
@@ -293,14 +269,9 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 				if (sock->socket == -1) {
 					alive = 0;
-				} else {
-					FD_ZERO(&rfds);
-					FD_SET(sock->socket, &rfds);
-
-					if (select(sock->socket + 1, &rfds, NULL, NULL, &tv) > 0 && FD_ISSET(sock->socket, &rfds)) {
-						if (0 == recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
-							alive = 0;
-						}
+				} else if (php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
+					if (0 == recv(sock->socket, &buf, sizeof(buf), MSG_PEEK) && php_socket_errno() != EAGAIN) {
+						alive = 0;
 					}
 				}
 				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;

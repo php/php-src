@@ -1236,19 +1236,11 @@ ftp_getresp(ftpbuf_t *ftp)
 int
 my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
-	fd_set		write_set;
-	struct timeval	tv;
 	int		n, size, sent;
 
 	size = len;
 	while (size) {
-		tv.tv_sec = ftp->timeout_sec;
-		tv.tv_usec = 0;
-
-		FD_ZERO(&write_set);
-		FD_SET(s, &write_set);
-
-		n = select(s + 1, NULL, &write_set, NULL, &tv);
+		n = php_pollfd_for_ms(s, POLLOUT, ftp->timeout_sec * 1000);
 
 		if (n < 1) {
 
@@ -1288,17 +1280,9 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 int
 my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
-	fd_set		read_set;
-	struct timeval	tv;
 	int		n, nr_bytes;
 
-	tv.tv_sec = ftp->timeout_sec;
-	tv.tv_usec = 0;
-
-	FD_ZERO(&read_set);
-	FD_SET(s, &read_set);
-
-	n = select(s + 1, &read_set, NULL, NULL, &tv);
+	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
 #if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
@@ -1328,16 +1312,9 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 int
 data_available(ftpbuf_t *ftp, php_socket_t s)
 {
-	fd_set		read_set;
-	struct timeval	tv;
 	int		n;
 
-	tv.tv_sec = 0;
-	tv.tv_usec = 1;
-
-	FD_ZERO(&read_set);
-	FD_SET(s, &read_set);
-	n = select(s + 1, &read_set, NULL, NULL, &tv);
+	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
 	if (n < 1) {
 #if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {
@@ -1355,16 +1332,9 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 int
 data_writeable(ftpbuf_t *ftp, php_socket_t s)
 {
-	fd_set		write_set;
-	struct timeval	tv;
 	int		n;
 
-	tv.tv_sec = 0;
-	tv.tv_usec = 1;
-
-	FD_ZERO(&write_set);
-	FD_SET(s, &write_set);
-	n = select(s + 1, NULL, &write_set, NULL, &tv);
+	n = php_pollfd_for_ms(s, POLLOUT, 1000);
 	if (n < 1) {
 #ifndef PHP_WIN32
 		if (n == 0) {
@@ -1383,16 +1353,9 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 int
 my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrlen)
 {
-	fd_set		accept_set;
-	struct timeval	tv;
 	int		n;
 
-	tv.tv_sec = ftp->timeout_sec;
-	tv.tv_usec = 0;
-	FD_ZERO(&accept_set);
-	FD_SET(s, &accept_set);
-
-	n = select(s + 1, &accept_set, NULL, NULL, &tv);
+	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
 #if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0) {

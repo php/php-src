@@ -217,7 +217,7 @@ PHP_FUNCTION(stream_socket_accept)
 
 	if (peername) {
 		zval_dtor(peername);
-		ZVAL_STRING(peername, "", 1);
+		ZVAL_STRING(peername, NULL, 0);
 	}
 
 	if (0 == php_stream_xport_accept(stream, &clistream,
@@ -236,6 +236,10 @@ PHP_FUNCTION(stream_socket_accept)
 
 	if (errstr) {
 		efree(errstr);
+	}
+
+	if (peername && Z_STRVAL_P(peername) == NULL) {
+		ZVAL_STRING(peername, "", 1);
 	}
 }
 /* }}} */
@@ -543,7 +547,9 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 		 * is not displayed.
 		 * */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd >= 0) {
-			FD_SET(this_fd, fds);
+			
+			PHP_SAFE_FD_SET(this_fd, fds);
+
 			if (this_fd > *max_fd) {
 				*max_fd = this_fd;
 			}
@@ -579,7 +585,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		 * is not displayed.
 		 */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd >= 0) {
-			if (FD_ISSET(this_fd, fds)) {
+			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				zend_hash_next_index_insert(new_hash, (void *)elem, sizeof(zval *), (void **)&dest_elem);
 				if (dest_elem) {
 					zval_add_ref(dest_elem);
@@ -664,6 +670,7 @@ PHP_FUNCTION(stream_select)
 	int				max_fd = 0;
 	int				retval, sets = 0;
 	long			usec = 0;
+	int				set_count, max_set_count = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
 		return;
@@ -672,14 +679,33 @@ PHP_FUNCTION(stream_select)
 	FD_ZERO(&wfds);
 	FD_ZERO(&efds);
 
-	if (r_array != NULL) sets += stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
-	if (w_array != NULL) sets += stream_array_to_fd_set(w_array, &wfds, &max_fd TSRMLS_CC);
-	if (e_array != NULL) sets += stream_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
+	if (r_array != NULL) {
+		set_count = stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
+		if (set_count > max_set_count)
+			max_set_count = set_count;
+		sets += set_count;
+	}
+	
+	if (w_array != NULL) {
+		set_count = stream_array_to_fd_set(w_array, &wfds, &max_fd TSRMLS_CC);
+		if (set_count > max_set_count)
+			max_set_count = set_count;
+		sets += set_count;
+	}
+
+	if (e_array != NULL) {
+		set_count = stream_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
+		if (set_count > max_set_count)
+			max_set_count = set_count;
+		sets += set_count;
+	}
 
 	if (!sets) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stream arrays were passed");
 		RETURN_FALSE;
 	}
+
+	PHP_SAFE_MAX_FD(max_fd, max_set_count);
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (sec != NULL) {

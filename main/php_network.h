@@ -106,6 +106,104 @@ typedef int php_socket_t;
 # define SOCK_RECV_ERR -1
 #endif
 
+/* uncomment this to debug poll(2) emulation on systems that have poll(2) */
+/* #define PHP_USE_POLL_2_EMULATION 1 */
+
+#if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
+# include <sys/poll.h>
+typedef struct pollfd php_pollfd;
+#else
+typedef struct _php_pollfd {
+	php_socket_t fd;
+	short events;
+	short revents;
+} php_pollfd;
+
+PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout);
+
+# define POLLIN      0x0001    /* There is data to read */
+# define POLLPRI     0x0002    /* There is urgent data to read */
+# define POLLOUT     0x0004    /* Writing now will not block */
+# define POLLERR     0x0008    /* Error condition */
+# define POLLHUP     0x0010    /* Hung up */
+# define POLLNVAL    0x0020    /* Invalid request: fd not open */
+
+# ifndef PHP_USE_POLL_2_EMULATION
+#  define PHP_USE_POLL_2_EMULATION 1
+# endif
+#endif
+
+#define PHP_POLLREADABLE	(POLLIN|POLLERR|POLLHUP)
+
+#ifndef PHP_USE_POLL_2_EMULATION
+# define php_poll2(ufds, nfds, timeout)		poll(ufds, nfds, timeout)
+#endif
+
+/* timeval-to-timeout (for poll(2)) */
+static inline int php_tvtoto(struct timeval *timeouttv)
+{
+	if (timeouttv) {
+		return (timeouttv->tv_sec * 1000) + (timeouttv->tv_usec / 1000);
+	}
+	return -1;
+}
+
+/* hybrid select(2)/poll(2) for a single descriptor.
+ * timeouttv follows same rules as select(2), but is reduced to millisecond accuracy.
+ * Returns 0 on timeout, -1 on error, or the event mask (ala poll(2)).
+ */
+static inline int php_pollfd_for(php_socket_t fd, int events, struct timeval *timeouttv)
+{
+	php_pollfd p;
+	int n;
+
+	p.fd = fd;
+	p.events = events;
+	p.revents = 0;
+
+	n = php_poll2(&p, 1, php_tvtoto(timeouttv));
+
+	if (n > 0) {
+		return p.revents;
+	}
+
+	return n;
+}
+
+static inline int php_pollfd_for_ms(php_socket_t fd, int events, int timeout)
+{
+	php_pollfd p;
+	int n;
+
+	p.fd = fd;
+	p.events = events;
+	p.revents = 0;
+
+	n = php_poll2(&p, 1, timeout);
+
+	if (n > 0) {
+		return p.revents;
+	}
+
+	return n;
+}
+
+/* emit warning and suggestion for unsafe select(2) usage */
+PHPAPI void _php_emit_fd_setsize_warning(int max_fd);
+
+#ifdef PHP_WIN32
+/* it is safe to FD_SET too many fd's under win32; the macro will simply ignore
+ * descriptors that go beyond the default FD_SETSIZE */
+# define PHP_SAFE_FD_SET(fd, set)	FD_SET(fd, set)
+# define PHP_SAFE_FD_ISSET(fd, set)	FD_ISSET(fd, set)
+# define PHP_SAFE_MAX_FD(m, n)		do { if (n + 1 >= FD_SETSIZE) { _php_emit_fd_setsize_warning(n); }} while(0)
+#else
+# define PHP_SAFE_FD_SET(fd, set)	do { if (fd < FD_SETSIZE) FD_SET(fd, set); } while(0)
+# define PHP_SAFE_FD_ISSET(fd, set)	((fd < FD_SETSIZE) && FD_ISSET(fd, set))
+# define PHP_SAFE_MAX_FD(m, n)		do { if (m >= FD_SETSIZE) { _php_emit_fd_setsize_warning(m); m = FD_SETSIZE - 1; }} while(0)
+#endif
+
+
 #define PHP_SOCK_CHUNK_SIZE	8192
 
 #ifdef HAVE_SOCKADDR_STORAGE
