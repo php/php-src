@@ -1,3 +1,27 @@
+2004-10-26  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c:
+      - Patch from Andrey Hristov:
+      I have cooked a small patch which allows is_subclass_of() the accept
+      not only an object as first parameter but a string as well. When string
+      is passed the function checks whether the class specified is subclass of
+      the second parameter
+      class a{}
+      class b{} extends a{}
+      is_subclass_of("a", "a") //false
+      is_subclass_of("b", "a") //true
+      currently only objects are allowed as first parameter
+
+2004-10-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      zend_operators.c:
+      MFH: Fixed bug #30572 (crash when comparing SimpleXML attribute to a
+      boolean).
+
+    * zend_operators.c:
+      Fixed bug #30228 (crash when comparing SimpleXML attribute to a boolean).
+
 2004-10-23  Andi Gutmans  <andi@zend.com>
 
     * zend_vm_execute.h:
