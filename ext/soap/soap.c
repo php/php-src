@@ -1271,7 +1271,8 @@ PHP_METHOD(soapserver, handle)
 				response_name = estrdup(function->responseName);
 			} else {
 				response_name = emalloc(Z_STRLEN(function_name) + sizeof("Response"));
-				sprintf(response_name,"%sResponse",Z_STRVAL(function_name));
+				memcpy(response_name,Z_STRVAL(function_name),Z_STRLEN(function_name));
+				memcpy(response_name+Z_STRLEN(function_name),"Response",sizeof("Response"));
 			}
 			SOAP_GLOBAL(overrides) = service->mapping;
 			doc_return = seralize_response_call(function, response_name, service->uri, &retval, soap_headers, soap_version TSRMLS_CC);
@@ -1494,7 +1495,7 @@ PHP_METHOD(soapclient, soapclient)
 				php_error(E_ERROR, "Can't create SoapClient. 'location' option is requred in nonWSDL mode.");
 				return;
 			}
-			
+
 			if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_STRING) {
 				add_property_stringl(this_ptr, "uri", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
@@ -1502,15 +1503,15 @@ PHP_METHOD(soapclient, soapclient)
 				php_error(E_ERROR, "Can't create SoapClient. 'uri' option is requred in nonWSDL mode.");
 				return;
 			}
-			
+
 			if (zend_hash_find(ht, "style", sizeof("style"), (void**)&tmp) == SUCCESS &&
-					Z_TYPE_PP(tmp) == IS_LONG && 
+					Z_TYPE_PP(tmp) == IS_LONG &&
 					(Z_LVAL_PP(tmp) == SOAP_RPC || Z_LVAL_PP(tmp) == SOAP_DOCUMENT)) {
 				add_property_long(this_ptr, "style", Z_LVAL_PP(tmp));
 			}
 
 			if (zend_hash_find(ht, "use", sizeof("use"), (void**)&tmp) == SUCCESS &&
-					Z_TYPE_PP(tmp) == IS_LONG && 
+					Z_TYPE_PP(tmp) == IS_LONG &&
 					(Z_LVAL_PP(tmp) == SOAP_LITERAL || Z_LVAL_PP(tmp) == SOAP_ENCODED)) {
 				add_property_long(this_ptr, "use", Z_LVAL_PP(tmp));
 			}
@@ -1547,7 +1548,7 @@ PHP_METHOD(soapclient, soapclient)
 			}
 		}
 		if (zend_hash_find(ht, "trace", sizeof("trace"), (void**)&tmp) == SUCCESS &&
-		    (Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG) && 
+		    (Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG) &&
 				Z_LVAL_PP(tmp) == 1) {
 			add_property_long(this_ptr, "trace", 1);
 		}
@@ -1739,7 +1740,7 @@ PHP_METHOD(soapclient, __call)
 	}
 
 	if (options) {
-		if (Z_TYPE_P(options) == IS_ARRAY) {		
+		if (Z_TYPE_P(options) == IS_ARRAY) {
 			HashTable *ht = Z_ARRVAL_P(options);
 			zval **tmp;
 
@@ -1752,7 +1753,7 @@ PHP_METHOD(soapclient, __call)
 			    Z_TYPE_PP(tmp) == IS_STRING) {
 				soap_action = Z_STRVAL_PP(tmp);
 			}
-		} else if (Z_TYPE_P(options) != IS_NULL) {		
+		} else if (Z_TYPE_P(options) != IS_NULL) {
 			php_error(E_ERROR, "Invalid arguments to SoapClient->__call");
 		}
 	}
