@@ -1,3 +1,92 @@
+2001-01-07  Shane Caraveo  <shane@php.net>
+
+    * sapi/isapi/stresstest/stresstest.cpp
+      sapi/isapi/stresstest/stresstest.dsp:
+    stresstest is based on cgiwrap.  it can be used to debug php4isapi.dll without
+    the use of an actual web server.
+
+    * sapi/isapi/php4isapi.c: define flag to turn off exception handling
+
+2001-01-07  Stig Venaas  <venaas@uninett.no>
+
+    * ext/standard/credits_ext.h: Added OpenSSL
+
+    * configure.in: Changed OpenSSL requirements from 0.9.6 to 0.9.5
+
+    * ext/ldap/ldap.c:
+    Minor changes to LDAP_OPT constants, and added support for controls to
+    ldap_set_option.
+
+2001-01-07  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/browscap.c: Fix possible startup crash
+
+    * main/php_ini.h: Fix CGI build
+
+    * main/main.c: Change get_ini_entry to get_configuration_directive
+
+2001-01-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/crypt.c:
+    - Fix for bug 7035, regarding PHP_MAX_SALT_LENGTH for OpenBsd
+
+2001-01-07  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    Added LDAPv3 stuff. ldap_search() now treats LDAP_ADMINLIMIT_EXCEEDED like
+    LDAP_SIZELIMIT_EXCEEDED and returns referral results.
+    Added new functions ldap_parse_result(), ldap_first_reference(),
+    ldap_next_reference() and ldap_parse_reference() that among other things
+    make referrals and search references accessible.
+
+2001-01-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/imap/php_imap.c: Fix ZTS build which was broken by the last commit
+
+2001-01-07  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: Merged from rev 1.105
+
+    * ext/oci8/oci8.c: fix small leak in ociexecute()
+    fixes: #8573
+    submitted by: tcarroll@chc-chimes.com
+
+2001-01-07  Stig Venaas  <venaas@uninett.no>
+
+    * acinclude.m4
+      ext/openssl/openssl.c:
+    Made OpenSSL extension work with 0.9.5 and changed version check to 0.9.5
+
+2001-01-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Use MAKE_STD_ZVAL/FREE_ZVAL to handle zval memory allocation.
+
+    * ext/session/tests/004.phpt
+      ext/session/tests/005.phpt: Add a new test and refine the fourth test
+
+    * ext/session/mod_user.c
+      ext/session/session.c:
+    Use zval_ptr_dtor instead of zval_dtor/FREE_ZVAL pair.
+
+    Submitted by: Andi Gutmans
+
+2001-01-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gdcache.h: Fixed bug: 8478
+
+    * ext/imap/php_imap.c: imap_user and imap_password were freed too early.
+    PR: 8424
+
+2001-01-07  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/CODING_STANDARDS: Fix typo.  This one was my fault, anyway.
+
+2001-01-07  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/CODING_STANDARDS: list the correct modeline for vi.
+
 2001-01-06  Mika Tuupola  <tuupola@appelsiini.net>
 
     * pear/Image/Remote.php:
