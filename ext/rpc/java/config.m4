@@ -88,9 +88,9 @@ AC_ARG_WITH(java,
       if test "$PHP_SAPI" = "cgi"; then
         AC_ADD_LIBRARY($JAVA_LIB)
       fi
-    fi
 
-    INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 \$(srcdir)/ext/java/php_java.jar \$(libdir)"
+      INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 \$(srcdir)/ext/java/php_java.jar \$(libdir)"
+    fi
 
     AC_MSG_RESULT(yes)
   else
