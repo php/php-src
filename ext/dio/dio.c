@@ -88,8 +88,10 @@ ZEND_GET_MODULE(dio)
 static void _dio_close_fd(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_fd_t *f = (php_fd_t *) rsrc->ptr;
-	close(f->fd);
-	free(f);
+	if (f) {
+		close(f->fd);
+		free(f);
+	}
 }
 
 #define RDIOC(c) REGISTER_LONG_CONSTANT(#c, c, CONST_CS | CONST_PERSISTENT)
@@ -158,10 +160,13 @@ PHP_MINFO_FUNCTION(dio)
 	php_info_print_table_end();
 }
 
-static void new_php_fd(php_fd_t **f, int fd)
+static int new_php_fd(php_fd_t **f, int fd)
 {
-	*f = malloc(sizeof(php_fd_t));
+	if (!(*f = malloc(sizeof(php_fd_t)))) {
+		return 0;
+	}
 	(*f)->fd = fd;
+	return 1;
 }
 
 /* {{{ proto resource dio_open(string filename, int flags[, int mode])
@@ -194,7 +199,10 @@ PHP_FUNCTION(dio_open)
 		RETURN_FALSE;
 	}
 
-	new_php_fd(&f, fd);
+	
+	if (!new_php_fd(&f, fd)) {
+		RETURN_FALSE;
+	}
 	ZEND_REGISTER_RESOURCE(return_value, f, le_fd);
 }
 /* }}} */
@@ -436,7 +444,9 @@ PHP_FUNCTION(dio_fcntl)
 				RETURN_FALSE;
 			}
 
-			new_php_fd(&new_f, fcntl(f->fd, cmd, Z_LVAL_P(arg)));
+			if (!new_php_fd(&new_f, fcntl(f->fd, cmd, Z_LVAL_P(arg)))) {
+				RETURN_FALSE;
+			}
 			ZEND_REGISTER_RESOURCE(return_value, new_f, le_fd);
 			break;
 		}
