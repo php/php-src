@@ -59,7 +59,8 @@ static void php_output_init_globals(OLS_D)
 }
 
 
-PHP_MINIT_FUNCTION(output)
+/* Start output layer */
+PHPAPI void php_output_startup()
 {
 #ifdef ZTS
 	output_globals_id = ts_allocate_id(sizeof(php_output_globals), (ts_allocate_ctor) php_output_init_globals, NULL);
@@ -67,18 +68,14 @@ PHP_MINIT_FUNCTION(output)
 	php_output_init_globals(OLS_C);
 #endif
 
-	return SUCCESS;
-}
+	{
+		OLS_FETCH();
 
-/* Start output layer */
-PHPAPI void php_output_startup()
-{
-	OLS_FETCH();
-
-	OG(php_body_write) = php_ub_body_write;
-	OG(php_header_write) = sapi_module.ub_write;
-	OG(nesting_level) = 0;
-	OG(lock) = 0;
+		OG(php_body_write) = php_ub_body_write;
+		OG(php_header_write) = sapi_module.ub_write;
+		OG(nesting_level) = 0;
+		OG(lock) = 0;
+	}
 }
 
 
