@@ -19,11 +19,12 @@
 /* $Id$ */
 
 #include "php.h"
-#include "php_wddx.h"
 
 #if HAVE_WDDX
 
+#include "php_wddx.h"
 #include "php_wddx_api.h"
+
 #define PHP_XML_INTERNAL
 #include "ext/xml/php_xml.h"
 #include "ext/standard/php_incomplete_class.h"
@@ -1261,20 +1262,40 @@ PHP_FUNCTION(wddx_add_vars)
 }
 /* }}} */
 
-/* {{{ proto mixed wddx_deserialize(string packet) 
+/* {{{ proto mixed wddx_deserialize(mixed packet) 
    Deserializes given packet and returns a PHP value */
 PHP_FUNCTION(wddx_deserialize)
 {
-	char *packet;
-	int packet_len;
+	zval *packet;
+	char *payload;
+	int payload_len;
+	php_stream *stream = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &packet, &packet_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &packet) == FAILURE)
 		return;
 
-	if (packet_len == 0)
+	if (Z_TYPE_P(packet) == IS_STRING) {
+		payload 	= Z_STRVAL_P(packet);
+		payload_len = Z_STRLEN_P(packet);
+	}
+	else if (Z_TYPE_P(packet) == IS_RESOURCE) {
+		stream = php_stream_from_zval(stream, &packet);
+		if (stream) {
+			payload_len = php_stream_copy_to_mem(stream, &payload, PHP_STREAM_COPY_ALL, 0 TSRMLS_CC);
+		}
+	} else {
+		php_error(E_WARNING, "%s() expects parameter 1 to be a string or a stream",
+				  get_active_function_name());
 		return;
+	}
+
+	if (payload_len == 0)
+		return;
+
+	php_wddx_deserialize_ex(payload, payload_len, return_value);
 		
-	php_wddx_deserialize_ex(packet, packet_len, return_value);
+	if (stream)
+		pefree(payload, 0);
 }
 /* }}} */
 
