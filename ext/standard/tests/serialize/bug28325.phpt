@@ -3,13 +3,13 @@ Bug #28325 (Problem in serialisation of circular references)
 --FILE--
 <?php
 class a {
-	public $b;
+	var $b;
 }
 class b {
-	public $c;
+	var $c;
 }
 class c {
-	public $d;
+	var $d;
 }
 $a = new a();
 $a->b = new b();
@@ -17,20 +17,20 @@ $a->b->c = new c();
 $a->b->c->d = $a;
 var_dump(unserialize(serialize($a)));
 ?>
---EXPECTF--
-object(a)#%d (1) {
+--EXPECT--
+object(a)(1) {
   ["b"]=>
-  object(b)#%d (1) {
+  object(b)(1) {
     ["c"]=>
-    object(c)#%d (1) {
+    object(c)(1) {
       ["d"]=>
-      object(a)#%d (1) {
+      object(a)(1) {
         ["b"]=>
-        object(b)#%d (1) {
+        object(b)(1) {
           ["c"]=>
-          object(c)#%d (1) {
+          object(c)(1) {
             ["d"]=>
-            *RECURSION*
+            NULL
           }
         }
       }

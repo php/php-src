@@ -1,7 +1,5 @@
 --TEST--
 serialize()/unserialize()/var_dump()
---POST--
---GET--
 --FILE--
 <?php 
 class t
@@ -14,11 +12,16 @@ class t
 
 class s
 {
+	var $a;
+	var $b;
+	var $c;
+
 	function s()
 	{
 		$this->a = "hallo";
 		$this->b = "php";
 		$this->c = "world";
+		$this->d = "!";
 	}
 
 	function __sleep()
@@ -94,9 +97,11 @@ object(t)(1) {
 __sleep called
 O:1:"s":2:{s:1:"a";s:5:"hallo";s:1:"c";s:5:"world";}
 __wakeup called
-object(s)(2) {
+object(s)(3) {
   ["a"]=>
   string(5) "hallo"
+  ["b"]=>
+  NULL
   ["c"]=>
   string(5) "world"
 }

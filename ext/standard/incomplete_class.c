@@ -115,9 +115,6 @@ char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del TSRMLS_DC)
 
 		if (nlen)
 			*nlen = Z_STRLEN_PP(val);
-
-		if (del)
-			zend_hash_del(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER));
 	}
 
 	return (retval);
