@@ -1262,34 +1262,6 @@ PHP_FUNCTION(imap_body)
 }
 /* }}} */
 
-/* {{{ proto string imap_fetchtext_full(int stream_id, int msg_no [, int options])
-   Read the full text of a message */
-PHP_FUNCTION(imap_fetchtext_full)
-{
-	zval **streamind, **msgno, **flags;
-	int ind, ind_type;
-	pils *imap_le_struct; 
-	int myargcount = ZEND_NUM_ARGS();
-	if (myargcount >3 || myargcount <2 || zend_get_parameters_ex(myargcount, &streamind, &msgno, &flags) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	convert_to_long_ex(streamind);
-	convert_to_long_ex(msgno);
-	if (myargcount == 3) {
-		convert_to_long_ex(flags);
-	}
-	ind = Z_LVAL_PP(streamind);
-
-	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
-	if (!imap_le_struct || !IS_STREAM(ind_type)) {
-		php_error(E_WARNING, "Unable to find stream pointer");
-		RETURN_FALSE;
-	}
-	RETVAL_STRING(mail_fetchtext_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, myargcount==3 ? Z_LVAL_PP(flags) : NIL), 1);
-}
-/* }}} */
-
 /* {{{ proto int imap_mail_copy(int stream_id, int msg_no, string mailbox [, int options])
    Copy specified message to a mailbox */
 PHP_FUNCTION(imap_mail_copy)
