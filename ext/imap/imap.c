@@ -1396,16 +1396,15 @@ PHP_FUNCTION(imap_list)
 /* Author: CJH */
 PHP_FUNCTION(imap_list_full)
 {
-	pval *streamind, *ref, *pat, mboxob;
+	pval *streamind, *ref, *pat, *mboxob;
 	int ind, ind_type;
 	pils *imap_le_struct; 
 	FOBJECTLIST *cur=NIL;
 	char *delim=NIL;
 	
-	
 	/* set flag for new, improved array of objects mailbox list */
 	folderlist_style = FLIST_OBJECT;
-
+	
 	if (ARG_COUNT(ht)!=3 
 		|| getParameters(ht,3,&streamind,&ref,&pat) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1414,9 +1413,8 @@ PHP_FUNCTION(imap_list_full)
 	convert_to_long(streamind);
 	convert_to_string(ref);
 	convert_to_string(pat);
-
+	
 	ind = streamind->value.lval;
-
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -1428,21 +1426,23 @@ PHP_FUNCTION(imap_list_full)
 	if (imap_folder_objects == NIL) {
 		RETURN_FALSE;
 	}
+	
 	array_init(return_value);
 	delim = emalloc(2 * sizeof(char));
 	cur=imap_folder_objects;
-	while (cur != NIL ) {
-		object_init(&mboxob);
-		add_property_string(&mboxob, "name", cur->LTEXT,1);
-		add_property_long(&mboxob, "attributes", cur->attributes);
+	while (cur != NIL) {
+		MAKE_STD_ZVAL(mboxob);
+		object_init(mboxob);
+		add_property_string(mboxob, "name", cur->LTEXT,1);
+		add_property_long(mboxob, "attributes", cur->attributes);
 #ifdef IMAP41
 		delim[0] = (char)cur->delimiter;
 		delim[1] = 0;
-		add_property_string(&mboxob, "delimiter", delim, 1);
+		add_property_string(mboxob, "delimiter", delim, 1);
 #else
-		add_property_string(&mboxob, "delimiter", cur->delimiter, 1);
+		add_property_string(mboxob, "delimiter", cur->delimiter, 1);
 #endif
-		add_next_index_object(return_value, &mboxob);
+		add_next_index_object(return_value, mboxob);
 		cur=cur->next;
 	}
 	mail_free_foblist(&imap_folder_objects);
@@ -1980,7 +1980,7 @@ PHP_FUNCTION(imap_lsub)
 /* Author: CJH */
 PHP_FUNCTION(imap_lsub_full)
 {
-	pval *streamind, *ref, *pat, mboxob;
+	pval *streamind, *ref, *pat, *mboxob;
 	int ind, ind_type;
 	pils *imap_le_struct;
 	FOBJECTLIST *cur=NIL;
@@ -1998,9 +1998,8 @@ PHP_FUNCTION(imap_lsub_full)
 	convert_to_long(streamind);
 	convert_to_string(ref);
 	convert_to_string(pat);
-
-	ind = streamind->value.lval;
 	
+	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -2012,20 +2011,22 @@ PHP_FUNCTION(imap_lsub_full)
 	if (imap_sfolder_objects == NIL) {
 		RETURN_FALSE;
 	}
+	
 	array_init(return_value);
 	cur=imap_sfolder_objects;
 	while (cur != NIL ) {
-		object_init(&mboxob);
-		add_property_string(&mboxob, "name", cur->LTEXT, 1);
-		add_property_long(&mboxob, "attributes", cur->attributes);
+		MAKE_STD_ZVAL(mboxob);
+		object_init(mboxob);
+		add_property_string(mboxob, "name", cur->LTEXT, 1);
+		add_property_long(mboxob, "attributes", cur->attributes);
 #ifdef IMAP41
 		delim[0] = (char)cur->delimiter;
 		delim[1] = 0;
-		add_property_string(&mboxob, "delimiter", delim, 1);
+		add_property_string(mboxob, "delimiter", delim, 1);
 #else
-		add_property_string(&mboxob, "delimiter", cur->delimiter, 1);
+		add_property_string(mboxob, "delimiter", cur->delimiter, 1);
 #endif
-		add_next_index_object(return_value, &mboxob);
+		add_next_index_object(return_value, mboxob);
 		cur=cur->next;
 	}
 	mail_free_foblist (&imap_sfolder_objects);
