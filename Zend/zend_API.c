@@ -1708,11 +1708,12 @@ ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int 
 	
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		property = malloc(sizeof(zval));
+		ZVAL_STRINGL(property, zend_strndup(value, len), len, 0);
 	} else {
 		ALLOC_ZVAL(property);
+		ZVAL_STRINGL(property, value, len, 1);
 	}
 	INIT_PZVAL(property);
-	ZVAL_STRINGL(property, zend_strndup(value, len), len, 0);
 	return zend_declare_property(ce, name, name_length, property, access_type);
 }
 
