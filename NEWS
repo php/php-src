@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Mar 2004, Version 4.3.5
+?? ??? 2004, Version 4.3.6
+- Fixed bug #27663 (compile failure with cURL 7.11.1). (Ilia)
+
+26 Mar 2004, Version 4.3.5
 - Fixed possible crash using an invalid color index with a palette image in
   imagecolortransparent (Pierre)
 - Fixed php-cgi to not ignore command-line switches when run in a web context.
