@@ -633,7 +633,7 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 }
 
 
-int spprintf(char **pbuf, size_t max_len, const char *format, ...)
+PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...)
 {
 	int cc;
 	va_list ap;
