@@ -240,7 +240,9 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("define_syslog_variables",	"0",		PHP_INI_ALL,		NULL,	php_ini_boolean_displayer_cb)
 
 	PHP_INI_ENTRY("max_execution_time",		"30",			PHP_INI_ALL,		OnChangeMaxExecutionTime)
+#if MEMORY_LIMIT
 	PHP_INI_ENTRY("memory_limit",			"8388608",		PHP_INI_ALL,		OnChangeMemoryLimit)
+#endif
 
 #if PHP_TRACK_VARS /* "cc -32" on IRIX 6.4 does not like (PHP_TRACK_VARS?"1":"0") - thies 991004 */
 	STD_PHP_INI_BOOLEAN("track_vars",			"1",			PHP_INI_ALL,		OnUpdateBool,				track_vars,		php_core_globals,	core_globals)
