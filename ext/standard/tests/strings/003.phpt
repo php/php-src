@@ -1,7 +1,5 @@
 --TEST--
 Testing str_shuffle.
---POST--
---GET--
 --FILE--
 <?php
 $s = '123';
