@@ -40,7 +40,7 @@ mbfl_filt_conv_cp1251_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		s |= MBFL_WCSGROUP_THROUGH;
 	}
 
-	CK((*filter->output_function)(s, filter->data));
+	CK((*filter->output_function)(s, filter->data TSRMLS_CC));
 
 	return c;
 }
@@ -71,10 +71,10 @@ mbfl_filt_conv_wchar_cp1251(int c, mbfl_convert_filter *filter TSRMLS_DC)
 	}
 
 	if (s >= 0) {
-		CK((*filter->output_function)(s, filter->data));
+		CK((*filter->output_function)(s, filter->data TSRMLS_CC));
 	} else {
 		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			CK(mbfl_filt_conv_illegal_output(c, filter TSRMLS_CC));
 		}
 	}
 
@@ -104,7 +104,7 @@ mbfl_filt_conv_cp866_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		s |= MBFL_WCSGROUP_THROUGH;
 	}
 
-	CK((*filter->output_function)(s, filter->data));
+	CK((*filter->output_function)(s, filter->data TSRMLS_CC));
 
 	return c;
 }
@@ -135,10 +135,10 @@ mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter TSRMLS_DC)
 	}
 
 	if (s >= 0) {
-		CK((*filter->output_function)(s, filter->data));
+		CK((*filter->output_function)(s, filter->data TSRMLS_CC));
 	} else {
 		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			CK(mbfl_filt_conv_illegal_output(c, filter TSRMLS_CC));
 		}
 	}
 
@@ -168,7 +168,7 @@ mbfl_filt_conv_koi8r_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		s |= MBFL_WCSGROUP_THROUGH;
 	}
 
-	CK((*filter->output_function)(s, filter->data));
+	CK((*filter->output_function)(s, filter->data TSRMLS_CC));
 
 	return c;
 }
@@ -199,10 +199,10 @@ mbfl_filt_conv_wchar_koi8r(int c, mbfl_convert_filter *filter TSRMLS_DC)
 	}
 
 	if (s >= 0) {
-		CK((*filter->output_function)(s, filter->data));
+		CK((*filter->output_function)(s, filter->data TSRMLS_CC));
 	} else {
 		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			CK(mbfl_filt_conv_illegal_output(c, filter TSRMLS_CC));
 		}
 	}
 
