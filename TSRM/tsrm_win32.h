@@ -92,6 +92,7 @@ typedef struct {
 TSRM_API void tsrm_win32_startup(void);
 TSRM_API void tsrm_win32_shutdown(void);
 
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env);
 TSRM_API FILE *popen(const char *command, const char *type);
 TSRM_API int pclose(FILE *stream);
 

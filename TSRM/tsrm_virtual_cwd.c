@@ -799,33 +799,9 @@ CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC)
 
 #ifdef TSRM_WIN32
 
-/* On Windows the trick of prepending "cd cwd; " doesn't work so we need to perform
-   a real chdir() and mutex it
- */
 CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC)
 {
-	char prev_cwd[MAXPATHLEN];
-	char *getcwd_result;
-	FILE *retval;
-
-	getcwd_result = getcwd(prev_cwd, MAXPATHLEN);
-	if (!getcwd_result) {
-		return NULL;
-	}
-
-#ifdef ZTS
-	tsrm_mutex_lock(cwd_mutex);
-#endif
-
-	chdir(CWDG(cwd).cwd);
-	retval = popen(command, type);
-	chdir(prev_cwd);
-
-#ifdef ZTS
-	tsrm_mutex_unlock(cwd_mutex);
-#endif
-
-	return retval;
+	return popen_ex(command, type, CWDG(cwd).cwd, NULL);
 }
 
 #elif defined(NETWARE)
