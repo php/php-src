@@ -1767,7 +1767,7 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func TSRMLS_DC)
 
 	if ((statement->error == OCI_NO_DATA) || (nrows == 0)) {
 		if (statement->last_query == 0) {
-			/* reset define-list for refcursosrs */
+			/* reset define-list for refcursors */
 			if (statement->columns) {
 				zend_hash_destroy(statement->columns);
 				efree(statement->columns);
