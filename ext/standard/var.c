@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Jani Lehtimäki <jkl@njet.net>                               |
    |          Thies C. Arntzen <thies@digicol.de>                         |
+   |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
  */
 
@@ -29,6 +30,7 @@
 #include "php.h"
 #include "php_string.h"
 #include "php_var.h"
+#include "basic_functions.h"
 
 #define COMMON ((*struc)->is_ref?"&":"")
 
@@ -50,6 +52,101 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 	return 0;
 }
 
+static char *php_lookup_class_name(zval **object, size_t *nlen, zend_bool del);
+
+#define INCOMPLETE_CLASS_MSG \
+		"The script tried to execute a method or "  \
+		"access a property of an incomplete object. " \
+		"Please ensure that the class definition <b>%s</b> of the object " \
+		"you are trying to operate on was loaded _before_ " \
+		"the session was started"
+
+static void incomplete_class_message(zend_property_reference *ref)
+{
+	char buf[1024];
+	char *class_name;
+
+	class_name = php_lookup_class_name(&ref->object, NULL, 0);
+	
+	if (!class_name)
+		class_name = estrdup("unknown");
+	
+	snprintf(buf, 1023, INCOMPLETE_CLASS_MSG, class_name);
+	
+	efree(class_name);
+
+	php_error(E_ERROR, buf);
+}
+
+static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
+{
+	incomplete_class_message(property_reference);
+}
+
+static int incomplete_class_set_property(zend_property_reference *property_reference, zval *value)
+{
+	incomplete_class_message(property_reference);
+	
+	/* does not reach this point */
+	return (0);
+}
+
+static zval incomplete_class_get_property(zend_property_reference *property_reference)
+{
+	zval foo;
+	
+	incomplete_class_message(property_reference);
+
+	/* does not reach this point */
+	return (foo);
+}
+
+#define INCOMPLETE_CLASS "__PHP_Incomplete_Class"
+
+static void php_create_incomplete_class(BLS_D)
+{
+	zend_class_entry incomplete_class;
+
+	INIT_OVERLOADED_CLASS_ENTRY(incomplete_class, INCOMPLETE_CLASS, NULL,
+			incomplete_class_call_func,
+			incomplete_class_get_property,
+			incomplete_class_set_property);
+
+	BG(incomplete_class) = zend_register_internal_class(&incomplete_class);
+}
+
+#define MAGIC_MEMBER "__PHP_Incomplete_Class_Name"
+
+static char *php_lookup_class_name(zval **object, size_t *nlen, zend_bool del)
+{
+	zval **val;
+	char *retval = NULL;
+
+	if (zend_hash_find((*object)->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
+		retval = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
+
+		if (nlen)
+			*nlen = Z_STRLEN_PP(val);
+
+		if (del)
+			zend_hash_del((*object)->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER));
+	}
+
+	return (retval);
+}
+
+static void php_store_class_name(zval **object, const char *name, size_t len)
+{
+	zval *val;
+
+	MAKE_STD_ZVAL(val);
+
+	Z_TYPE_P(val)   = IS_STRING;
+	Z_STRVAL_P(val) = estrndup(name, len);
+	Z_STRLEN_P(val) = len;
+
+	zend_hash_update((*object)->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
+}
 
 void php_var_dump(pval **struc, int level)
 {
@@ -149,6 +246,24 @@ PHP_FUNCTION(var_dump)
 	strcat(__p->value.str.val + __i, (S));\
 }
 
+#define PHP_SET_CLASS_ATTRIBUTES() 				\
+	if ((*struc)->value.obj.ce == BG(incomplete_class)) {				\
+		class_name = php_lookup_class_name(struc, &name_len, 1);		\
+		free_class_name = 1;											\
+	} else {															\
+		class_name = (*struc)->value.obj.ce->name;						\
+		name_len   = (*struc)->value.obj.ce->name_length;				\
+	}
+
+#define PHP_CLEANUP_CLASS_ATTRIBUTES()									\
+	if (free_class_name) efree(class_name)
+
+#define PHP_CLASS_ATTRIBUTES											\
+	char *class_name;													\
+	size_t name_len;													\
+	zend_bool free_class_name = 0										\
+
+
 /* }}} */
 /* {{{ php_var_serialize */
 
@@ -158,6 +273,7 @@ void php_var_serialize(pval *buf, pval **struc)
 	ulong slen;
 	int i;
 	HashTable *myht;
+	BLS_FETCH();
 
 	switch ((*struc)->type) {
 		case IS_BOOL:
@@ -202,6 +318,7 @@ void php_var_serialize(pval *buf, pval **struc)
 				zval *retval_ptr = NULL;
 				zval *fname;
 				int res;
+				PHP_CLASS_ATTRIBUTES;
 				CLS_FETCH();
 
 				MAKE_STD_ZVAL(fname);
@@ -212,7 +329,11 @@ void php_var_serialize(pval *buf, pval **struc)
 				if (res == SUCCESS) {
 					if (retval_ptr && HASH_OF(retval_ptr)) {
 						int count = zend_hash_num_elements(HASH_OF(retval_ptr));
-						slen = sprintf(s, "O:%d:\"%s\":%d:{",(*struc)->value.obj.ce->name_length,(*struc)->value.obj.ce->name, count);
+						
+						PHP_SET_CLASS_ATTRIBUTES();
+						slen = sprintf(s, "O:%d:\"%s\":%d:{",name_len,class_name, count);
+						PHP_CLEANUP_CLASS_ATTRIBUTES();
+						
 						STR_CAT(buf, s, slen);
 						if (count > 0) {
 							char *key;
@@ -268,7 +389,11 @@ void php_var_serialize(pval *buf, pval **struc)
 			if ((*struc)->type == IS_ARRAY) {
 				slen = sprintf(s, "a:%d:{", i);
 			} else {
-				slen = sprintf(s, "O:%d:\"%s\":%d:{",(*struc)->value.obj.ce->name_length,(*struc)->value.obj.ce->name, i);
+				PHP_CLASS_ATTRIBUTES;
+
+				PHP_SET_CLASS_ATTRIBUTES();
+				slen = sprintf(s, "O:%d:\"%s\":%d:{",name_len,class_name,i);
+				PHP_CLEANUP_CLASS_ATTRIBUTES();
 			}
 			STR_CAT(buf, s, slen);
 			if (i > 0) {
@@ -329,6 +454,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 	char cur;
 	HashTable *myht;
 	ELS_FETCH();
+	BLS_FETCH();
 
 	switch (cur = **p) {
 		case 'N':
@@ -413,7 +539,11 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 
 		case 'a':
 		case 'o':
-		case 'O': 
+		case 'O': {
+			zend_bool incomplete_class = 0;
+			char *class_name = NULL;
+			size_t name_len = 0;
+			
 			INIT_PZVAL(*rval);
 
 			if (cur == 'a') {
@@ -424,8 +554,6 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				zend_class_entry *ce;
 
 				if (cur == 'O') { /* php4 serialized - we get the class-name */
-					char *class_name;
-
 					if (*((*p) + 1) != ':') {
 						return 0;
 					}
@@ -437,7 +565,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 					if (**p != ':') {
 						return 0;
 					}
-					i = atoi(q);
+					name_len = i = atoi(q);
 					if (i < 0 || (*p + 3 + i) > max || *((*p) + 1) != '\"' ||
 						*((*p) + 2 + i) != '\"' || *((*p) + 3 + i) != ':') {
 						return 0;
@@ -451,17 +579,23 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 					(*p) += i;
 					
 					if (zend_hash_find(EG(class_table), class_name, i+1, (void **) &ce)==FAILURE) {
-						php_error(E_NOTICE, "Unserializing non-existant class: %s! No methods will be available!", class_name);
-						ce = &zend_standard_class_def;
+						incomplete_class = 1;
+						if (BG(incomplete_class) == NULL)
+							php_create_incomplete_class(BLS_C);
+						ce = BG(incomplete_class);
 					}
-
-					efree(class_name);
 				} else { /* old php 3.0 data 'o' */
 					ce = &zend_standard_class_def;
 				}
 
 				object_init_ex(*rval,ce);
 				myht = (*rval)->value.obj.properties;
+
+				if (incomplete_class)
+					php_store_class_name(rval, class_name, name_len);
+
+				if (class_name)
+					efree(class_name);
 			}
 
 			(*p) += 2;
@@ -526,6 +660,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 			}
 
 			return *((*p)++) == '}';
+		  }
 	}
 
 	return 0;
