@@ -385,7 +385,7 @@ AC_ARG_ENABLE(versioning,
   if test "$enableval" = "yes" ; then
     case "`uname -sr`" in
     "SunOS 5"*)
-        VERSION_SCRIPT="-M $abs_srcdir/php.map"
+        VERSION_SCRIPT="-Wl,'-M $abs_srcdir/php.map'"
     ;;
     Linux*)
         VERSION_SCRIPT="-Wl,--version-script=$abs_srcdir/php.map"
