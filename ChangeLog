@@ -1,3 +1,46 @@
+2002-07-23  Jim Winstead  <jimw@pb1.pair.com>
+
+    * ext/standard/credits.c:
+    restore shane to list of members of php group (got lost somewhere along the way)
+
+2002-07-23  holger  <holger@pb1.pair.com>
+
+    * sapi/pi3web/pi3web_sapi.c:
+    Removed some outdated lines from init_request_info().
+
+2002-07-23  Sascha Schumann  <sas@pb1.pair.com>
+
+    * configure.in
+      main/php_version.h: Working on 4.2.3 now
+
+    * .cvsignore: Add autom4te.cache
+
+    * ext/dbx/dbx.c: MFH remove \r
+
+    * ext/dbx/dbx.c: Remove \r
+
+2002-07-23  edink  <edink@pb1.pair.com>
+
+    * ext/pcre/config.m4: MFB (patch by Troels Arvin <troels@arvin.dk>).
+    Added pcre include path to global list of includes in order to allow
+    use of external pcre libs.
+
+    * ext/pcre/config.m4:
+    Allow pcre.h to be in $PREFIX/include/pcre since this is the case
+    with some Linux distributions (patch by Troels Arvin <troels@arvin.dk>).
+
+2002-07-23  sniper  <sniper@pb1.pair.com>
+
+    * configure.in: Fix bug: #18308. (uname -a sometimes has extra linefeeds)
+
+    * configure.in:
+    This should fix those solaris+gcc bugs when --enable-libgcc is not used
+
+    * ext/gd/config.m4:
+    Fix bug: #18479. Better error message what was not found.
+
+    * NEWS: <insert funny comment here>
+
 2002-07-22  jan  <jan@pb1.pair.com>
 
     * ext/standard/datetime.c:
