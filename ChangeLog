@@ -1,3 +1,119 @@
+2001-01-15  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/isapi/stresstest/stresstest.dsp: Fix output dir
+
+    * sapi/isapi/stresstest/stresstest.cpp:
+    - Implement CompareStringWithFile()
+    - Remove a stupid NULL assignment that slipped in the last commit
+
+    * sapi/isapi/stresstest/notes.txt
+      sapi/isapi/stresstest/stresstest.cpp:
+    - Implement quick file comparing routine
+    - Fix crash - wait on the threads themselves, not on Event objects.
+      It takes time between the time a thread signals the event, and the
+      time it actually terminates (shutdown code) - so FreeLibrary() and
+      the main() termination could occur before all of the threads
+      terminated...
+
+2001-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c: Try harder to push data through the wire.
+
+    I just learned that the AOLserver module will be used for a 100k users
+    webmail service.  Wheee!
+
+2001-01-15  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mhash/mhash.c: Some protos fixed.
+
+2001-01-15  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_globals.h
+      main/php_ini.c: - Remove the ini_extension_list global
+    - Switch to delayed loading of Zend extensions
+
+    * main/rfc1867.c: Use free_estring()
+
+    * ext/standard/php_string.h: Nuke a couple of warnings
+
+    * ext/odbc/php_odbc.c: Fix Win32 build
+
+2001-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php_globals.h
+      main/php_ini.c:
+    Defer loading of extensions until all configuration entries have been
+    added to the configuration hash.
+
+2001-01-15  David Croft  <david@infotrek.co.uk>
+
+    * ext/vpopmail/php_vpopmail.c
+      ext/vpopmail/php_vpopmail.h:
+    restored vadddomain/vdeldomain to use library functions rather than invoking
+     vpopmail executables
+    implemented vaddaliasdomain natively
+    global variable to store whether vpopmail was used and only vclose() if
+     necessary
+    return the functions to returning true/false for success/failure rather than
+     some arbitrary vpopmail return value
+    return the functions to not doing everything at once as you then lose
+     fine-grain control over its operation
+    change C++ comments to C
+
+2001-01-15  Shane Caraveo  <shane@php.net>
+
+    * sapi/isapi/stresstest/notes.txt
+      sapi/isapi/stresstest/stresstest.cpp: test now produce valid OK or FAIL.
+
+2001-01-15  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/STATUS: * status update: odbc now supports errorNative
+
+2001-01-15  Shane Caraveo  <shane@php.net>
+
+    * sapi/isapi/stresstest/stresstest.cpp:
+    dont do results if not using test files
+
+2001-01-15  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/odbc.php: * DB_odbc: added native error support
+
+2001-01-15  Shane Caraveo  <shane@php.net>
+
+    * sapi/isapi/stresstest/stresstest.cpp: clean up temp files
+
+2001-01-15  Stig Bakken  <ssb@fast.no>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    - Added odbc_error() and odbc_errormsg() functions 
+
+    * pear/DB/tests/odbc/.cvsignore
+      pear/DB/tests/odbc/001.phpt
+      pear/DB/tests/odbc/002.phpt
+      pear/DB/tests/odbc/003.phpt
+      pear/DB/tests/odbc/004.phpt
+      pear/DB/tests/odbc/006.phpt
+      pear/DB/tests/odbc/007.phpt
+      pear/DB/tests/odbc/010.phpt
+      pear/DB/tests/odbc/connect.inc
+      pear/DB/tests/odbc/dsn.inc
+      pear/DB/tests/odbc/mktable.inc
+      pear/DB/tests/odbc/skipif.inc: * defined a bunch of ODBC tests
+
+2001-01-15  Shane Caraveo  <shane@php.net>
+
+    * sapi/isapi/stresstest/stresstest.cpp: check files open
+
+    * sapi/isapi/stresstest/stresstest.cpp: fix file reading, add results
+
+    * sapi/isapi/stresstest/notes.txt
+      sapi/isapi/stresstest/stresstest.cpp
+      sapi/isapi/stresstest/stresstest.dsp:
+    Multithreaded stress test program for isapi module now supports phpt files
+    still stuff to do before it's realy done, but does run the tests, just need
+    to get it to compare results right now.
+
 2001-01-14  David Croft  <david@infotrek.co.uk>
 
     * ext/vpopmail/config.m4:
