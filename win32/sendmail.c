@@ -323,9 +323,10 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 /*********************************************************************
 // Name:  PostHeader
 // Input:       1) return path
-//                  2) Subject
-//                  3) destination address
-//                  4) DoMime flag
+//              2) Subject
+//              3) destination address
+//              4) headers
+//				5) cc destination address
 // Output:      Error code or Success
 // Description:
 // Author/Date:  jcar 20/9/96
@@ -365,11 +366,10 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		p += sprintf(p, "From: %s\r\n", RPath);
 	}
 	p += sprintf(p, "Subject: %s\r\n", Subject);
-	if(!xheaders || !strstr(xheaders, "To:")){
-		p += sprintf(p, "To: %s\r\n", mailTo);
-	}
-	if (mailCc && *mailCc) 
+	p += sprintf(p, "To: %s\r\n", mailTo);
+	if (mailCc && *mailCc) {
 		p += sprintf(p, "Cc: %s\r\n", mailCc);
+	}
 	if(xheaders){
 		p += sprintf(p, "%s\r\n", xheaders);
 	}
