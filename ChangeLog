@@ -1,3 +1,90 @@
+2002-12-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/exec.c
+      main/streams.c:
+      MFH fix for bug #21077.
+      (proc_open problems with BSD)
+
+    * ext/standard/exec.c
+      main/streams.c:
+      Correct mistake introduced by my last commit on these files;
+      *_from_pipe() is for process-pipes created by fopen, not generic pipes
+      created from proc_open().
+      Correctly implemented the fifo/pipe check for *_from_file() and it seems
+      to be working correctly now.
+
+2002-12-19  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/install.txt
+      win32/php4.dsp
+      win32/php4ts.dsp
+      win32/php4ts.rc2
+      win32/pws-php4cgi.reg:
+      MFB:
+      Making windows build system changes according to proposal:
+      http://news.php.net/article.php?group=php.dev&article=92682
+
+    * win32/install.txt
+      win32/php4.dsp
+      win32/php4ts.dsp
+      win32/php4ts.rc2
+      win32/pws-php4cgi.reg:
+      Making windows build system changes according to proposal:
+      http://news.php.net/article.php?group=php.dev&article=92682
+
+2002-12-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/datetime.c:
+      MFH
+
+    * ext/standard/datetime.c:
+      Fixed bug #21098.
+
+2002-12-19  Edin Kadribasic  <edink@proventum.net>
+
+    * configure.in
+      sapi/cgi/config9.m4:
+      MFB:
+      Making build system changes according to proposal:
+      http://news.php.net/article.php?group=php.dev&article=92682
+
+    * configure.in
+      sapi/cgi/config9.m4:
+      Making build system changes according to proposal:
+      http://news.php.net/article.php?group=php.dev&article=92682
+
+2002-12-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/basic/bug20539.phpt:
+      MFH
+
+    * tests/basic/bug20539.phpt:
+      Appended "\n" as suggested by Derick.
+
+2002-12-19  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/ZendEngine2.mak:
+      NetWare related files added and changes/modifications done for the existing
+      ones.
+
+    * netware/sys/stat.h:
+      NetWare related changes/modifications.
+
+2002-12-19  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mcrypt/mcrypt.dsp:
+      MFB: Remove dependancy on libtool library which is no longer needed.
+
+    * ext/mcrypt/mcrypt.dsp:
+      Removed libtool library from link which is no longer needed. This fixes
+      windows build.
+
+    * sapi/cli/php_cli.c:
+      MFB: Reverted previous patches as suggested by Andi.
+
+    * sapi/cli/php_cli.c:
+      Reverted previous patch as suggested by Andi. (reopening #20539).
+
 2002-12-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/tests/file/bug12556.phpt:
