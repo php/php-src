@@ -2375,7 +2375,12 @@ PHP_FUNCTION(domxml_node_append_child)
 		php_error(E_WARNING, "%s(): can't append attribute node", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
-
+	
+	if (!(child->doc == NULL || child->doc == parent->doc)) {
+		php_error(E_WARNING, "%s(): Can't append node, which is in a different document than the parent node", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+	
 	/* first unlink node, if child is already a child of parent */
 	if (child->parent == parent){
 		xmlUnlinkNode(child);
