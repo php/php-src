@@ -6,8 +6,8 @@ Bug #29795 (SegFault with Soap and Amazon's Web Services)
 <?php
 class LocalSoapClient extends SoapClient {
 
-  function LocalSoapClient($wsdl, $options) {
-    $this->SoapClient($wsdl, $options);
+  function __construct($wsdl, $options) {
+    parent::__construct($wsdl, $options);
   }
 
   function __doRequest($request, $location, $action, $version) {

@@ -94,7 +94,7 @@ class Interop_Client
         $this->_getEndpoints($test, 1);
 
         // retreive endpoints from the endpoint server
-        $endpointArray = $soapclient->__soap_call("GetEndpointInfo",array("groupName"=>$test),array('soapaction'=>"http://soapinterop.org/",'uri'=>"http://soapinterop.org/"));
+        $endpointArray = $soapclient->__soapCall("GetEndpointInfo",array("groupName"=>$test),array('soapaction'=>"http://soapinterop.org/",'uri'=>"http://soapinterop.org/"));
         if (is_soap_fault($endpointArray) || PEAR::isError($endpointArray)) {
             if ($this->html) print "<pre>";
             print $soapclient->wire."\n";
@@ -428,9 +428,9 @@ try {
             $return = eval('return $soap->'.$soap_test->method_name.'('.$args.');');
         } else {
           if ($soap_test->headers || $soap_test->headers_expect) {
-            $return = $soap->__soap_call($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace), $soap_test->headers, $result_headers);
+            $return = $soap->__soapCall($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace), $soap_test->headers, $result_headers);
           } else {
-            $return = $soap->__soap_call($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace));
+            $return = $soap->__soapCall($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace));
           }
         }
 } catch (SoapFault $ex) {

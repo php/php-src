@@ -251,6 +251,12 @@ PHP_METHOD(SoapParam, SoapParam);
 /* SoapHeader Functions */
 PHP_METHOD(SoapHeader, SoapHeader);
 
+#ifdef ZEND_ENGINE_2
+#define SOAP_CTOR(class_name, func_name, arginfo, flags) ZEND_FENTRY(__construct, ZEND_FN(class_name##_##func_name), arginfo, flags)
+#else
+#define SOAP_CTOR(class_name, func_name, arginfo, flags) PHP_ME(class_name, func_name, arginfo, flags)
+#endif
+
 static zend_function_entry soap_functions[] = {
 #ifdef HAVE_PHP_DOMXML
 	PHP_FE(soap_encode_to_xml, NULL)
@@ -262,7 +268,7 @@ static zend_function_entry soap_functions[] = {
 };
 
 static zend_function_entry soap_fault_functions[] = {
-	PHP_ME(SoapFault, SoapFault, NULL, 0)
+	SOAP_CTOR(SoapFault, SoapFault, NULL, 0)
 #ifdef ZEND_ENGINE_2
 	PHP_ME(SoapFault, __toString, NULL, 0)
 #endif
@@ -270,7 +276,7 @@ static zend_function_entry soap_fault_functions[] = {
 };
 
 static zend_function_entry soap_server_functions[] = {
-	PHP_ME(SoapServer, SoapServer, NULL, 0)
+	SOAP_CTOR(SoapServer, SoapServer, NULL, 0)
 	PHP_ME(SoapServer, setPersistence, NULL, 0)
 	PHP_ME(SoapServer, setClass, NULL, 0)
 	PHP_ME(SoapServer, addFunction, NULL, 0)
@@ -301,12 +307,12 @@ unsigned char __soap_call_args[] = { 5, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYRE
 #endif
 
 static zend_function_entry soap_client_functions[] = {
-	PHP_ME(SoapClient, SoapClient, NULL, 0)
+	SOAP_CTOR(SoapClient, SoapClient, NULL, 0)
 	PHP_ME(SoapClient, __call, __call_args, 0)
 #ifdef ZEND_ENGINE_2
-	ZEND_FENTRY(__soap_call, ZEND_FN(SoapClient___call), __soap_call_args, 0)
+	ZEND_FENTRY(__soapCall, ZEND_FN(SoapClient___call), __soap_call_args, 0)
 #else
-	ZEND_NAMED_FE(__soap_call, ZEND_FN(SoapClient___call), __soap_call_args)
+	ZEND_NAMED_FE(__soapCall, ZEND_FN(SoapClient___call), __soap_call_args)
 #endif
 	PHP_ME(SoapClient, __getLastRequest, NULL, 0)
 	PHP_ME(SoapClient, __getLastResponse, NULL, 0)
@@ -319,17 +325,17 @@ static zend_function_entry soap_client_functions[] = {
 };
 
 static zend_function_entry soap_var_functions[] = {
-	PHP_ME(SoapVar, SoapVar, NULL, 0)
+	SOAP_CTOR(SoapVar, SoapVar, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry soap_param_functions[] = {
-	PHP_ME(SoapParam, SoapParam, NULL, 0)
+	SOAP_CTOR(SoapParam, SoapParam, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry soap_header_functions[] = {
-	PHP_ME(SoapHeader, SoapHeader, NULL, 0)
+	SOAP_CTOR(SoapHeader, SoapHeader, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
