@@ -1,3 +1,38 @@
+2005-04-05  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/ldap/ldap.c:
+      remove proto, it's internal func
+
+2005-04-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #32589 (Possible crash inside imap_mail_compose, with
+      charsets).
+
+    * ext/imap/php_imap.c:
+      Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
+
+2005-04-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/serialize/005.phpt:
+      - Add new test
+
+    * ZendEngine2/zend_interfaces.c:
+      - Just return FAILURE & allow NULL without emmidiate error
+
+2005-04-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      main/streams/streams.c:
+      MFH: Fixed bug #30362 (stream_get_line() not reading data correctly).
+
+    * main/streams/streams.c:
+      Fixed bug #30362 (stream_get_line() not reading data correctly).
+
 2005-04-04  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_4_3)
