@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <windows.h>
+#include <float.h>
 
 typedef unsigned long ulong;
 typedef unsigned int uint;
@@ -57,6 +58,7 @@ typedef unsigned int uint;
 # define inline
 #endif
 
+#define finite(A) _finite(A)
 
 #ifdef LIBZEND_EXPORTS
 #	define ZEND_API __declspec(dllexport)
