@@ -17,7 +17,7 @@ echo $withval
 		  old_LIBS=$LIBS
 		  LIBS="$LIBS -ltiff -ljpeg -lpng -lz"
       AC_CHECK_LIB(pdf, PDF_show_boxed, [AC_DEFINE(HAVE_PDFLIB,1,[ ])],
-        [AC_MSG_ERROR(pdflib extension requires at least pdflib 3.x. You may as well need libtiff and libjpeg. In such a case use the options --with-tiff-dir=<DIR> and --with-jpeg-dir=<DIR>)])
+        [AC_MSG_ERROR(pdflib extension requires at least pdflib 3.x. You may also need libtiff and libjpeg. If so, use the options --with-tiff-dir=<DIR> and --with-jpeg-dir=<DIR>)])
       LIBS=$old_LIBS
       LDFLAGS=$old_LDFLAGS
       AC_ADD_LIBRARY(pdf)

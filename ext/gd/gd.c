@@ -116,6 +116,10 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreatefromgif,						NULL)
 	PHP_FE(imagegif,								NULL)
 #endif
+#ifdef HAVE_GD_JPG
+	PHP_FE(imagecreatefromjpeg,						NULL)
+	PHP_FE(imagejpeg,								NULL)
+#endif
 	PHP_FE(imagedestroy,							NULL)
 	PHP_FE(imagefill,								NULL)
 	PHP_FE(imagefilledpolygon,						NULL)
@@ -634,6 +638,116 @@ PHP_FUNCTION(imagegif)
 /* }}} */
 
 #endif /* HAVE_GD_GIF */
+
+#ifdef HAVE_GD_JPG
+
+/* {{{ proto int imagecreatefromjpeg(string filename)
+   Create a new image from JPEG file or URL */
+PHP_FUNCTION(imagecreatefromjpeg)
+{
+	zval **file;
+	gdImagePtr im;
+	char *fn=NULL;
+	FILE *fp;
+	int issock=0, socketd=0;
+	GDLS_FETCH();
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(file);
+	fn = (*file)->value.str.val;
+#if WIN32|WINNT
+	fp = fopen((*file)->value.str.val, "rb");
+#else
+	fp = php_fopen_wrapper((*file)->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+#endif
+	if (!fp) {
+		php_strip_url_passwd(fn);
+		php_error(E_WARNING,
+				  "ImageCreateFromJpeg: Unable to open %s for reading", fn);
+		RETURN_FALSE;
+	}
+	im = gdImageCreateFromJpeg(fp);
+	fflush(fp);
+	fclose(fp);
+
+	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
+}
+/* }}} */
+
+/* {{{ proto int imagejpeg(int im [, string filename [, int quality]])
+   Output image to browser or file */
+PHP_FUNCTION(imagejpeg)
+{
+	zval **imgind, **file, **qual;
+	gdImagePtr im;
+	char *fn=NULL;
+	FILE *fp;
+	int argc;
+	int output=1, q=-1;
+	GDLS_FETCH();
+
+	argc = ARG_COUNT(ht);
+	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &qual) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+
+	if (argc == 3) {
+		convert_to_long_ex(qual);
+		q = (*qual)->value.lval;
+	}
+
+	if (argc > 1) {
+		convert_to_string_ex(file);
+		fn = (*file)->value.str.val;
+		if (fn && strlen(fn) && php_check_open_basedir(fn)) {
+			php_error(E_WARNING, "ImageJpeg: Invalid filename");
+			RETURN_FALSE;
+		}
+	}
+
+	if (argc > 1 && strlen(fn)) {
+		fp = fopen(fn, "wb");
+		if (!fp) {
+			php_error(E_WARNING, "ImageJpeg: unable to open %s for writing", fn);
+			RETURN_FALSE;
+		}
+		gdImageJpeg(im,fp,q);
+		fflush(fp);
+		fclose(fp);
+	}
+	else {
+		int   b;
+		FILE *tmp;
+		char  buf[4096];
+		tmp = tmpfile();
+		if (tmp == NULL) {
+			php_error(E_WARNING, "Unable to open temporary file");
+			RETURN_FALSE;
+		}
+		output = php_header();
+		if (output) {
+			gdImageJpeg(im, tmp, q);
+            fseek(tmp, 0, SEEK_SET);
+#if APACHE && defined(CHARSET_EBCDIC)
+			SLS_FETCH();
+            /* This is a binary file already: avoid EBCDIC->ASCII conversion */
+            ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
+#endif
+            while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
+                php_write(buf, b);
+            }
+        }
+        fclose(tmp);
+        /* the temporary file is automatically deleted */
+    }
+    RETURN_TRUE;
+}
+/* }}} */
+
+#endif
 
 /* {{{ proto int imagedestroy(int im)
    Destroy an image */
