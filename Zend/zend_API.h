@@ -277,6 +277,9 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 #define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount)		\
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount)
 
+#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH_EX(name, name_length, var, _refcount, _is_ref)		\
+	ZEND_SET_SYMBOL_WITH_LENGTH_EX(&EG(symbol_table), name, name_length, var, _refcount, _is_ref)
+
 #define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
 
 #endif							/* _ZEND_API_H */
