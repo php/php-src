@@ -13,8 +13,8 @@
  *  Very simple SMTP Send-mail program for sending command-line level
  *  emails and CGI-BIN form response for the Windows platform.
  *
- *  The complete wSendmail package with source code can be from
- *  http://www.jgaa.com
+ *  The complete wSendmail package with source code can be located
+ *  from http://www.jgaa.com
  *
  */
 
