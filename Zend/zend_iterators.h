@@ -74,6 +74,7 @@ enum zend_object_iterator_kind {
 	ZEND_ITER_OBJECT
 };
 
+BEGIN_EXTERN_C()
 /* given a zval, returns stuff that can be used to iterate it. */
 ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(zval *array_ptr, zend_object_iterator **iter TSRMLS_DC);
 
@@ -81,6 +82,7 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(zval *array_ptr, ze
 ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC);
 
 ZEND_API void zend_register_iterator_wrapper(TSRMLS_D);
+END_EXTERN_C()
 
 /*
  * Local variables:

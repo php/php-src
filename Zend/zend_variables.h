@@ -23,9 +23,9 @@
 #define ZEND_VARIABLES_H
 
 
-ZEND_API int zend_print_variable(zval *var);
 
 BEGIN_EXTERN_C()
+ZEND_API int zend_print_variable(zval *var);
 ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC);
@@ -56,10 +56,9 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zvalue);
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor
 #endif
 
-END_EXTERN_C()
-
-
 ZEND_API void zval_add_ref(zval **p);
+
+END_EXTERN_C()
 
 #define ZVAL_DESTRUCTOR (void (*)(void *)) zval_dtor_wrapper
 #define ZVAL_PTR_DTOR (void (*)(void *)) zval_ptr_dtor_wrapper
