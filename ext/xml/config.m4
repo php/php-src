@@ -20,7 +20,9 @@ if test "$PHP_XML" != "no"; then
   PHP_SETUP_LIBXML(XML_SHARED_LIBADD, [
     xml_sources="xml.c compat.c"
   ], [
-    AC_MSG_ERROR(xml2-config not found. Use --with-libxml-dir=<DIR>)
+    if test "$PHP_EXPAT_DIR" = "no"; then
+      AC_MSG_ERROR(xml2-config not found. Use --with-libxml-dir=<DIR>)
+    fi
   ])
 
   if test "$PHP_EXPAT_DIR" != "no"; then
