@@ -77,6 +77,8 @@ PHP_FUNCTION(array_reverse);
 PHP_FUNCTION(array_pad);
 PHP_FUNCTION(array_flip);
 
+HashTable* _phpi_splice(HashTable *, int, int, zval ***, int, HashTable **);
+int multisort_compare(const void *a, const void *b);
 
 #define phpext_array_ptr array_module_ptr
 #endif /* _PHP_ARRAY_H */

@@ -367,7 +367,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 #endif
 	char *user,*passwd,*host,*socket=NULL,*tmp;
 	char *hashed_details;
-	int hashed_details_length,port;
+	int hashed_details_length,port = MYSQL_PORT;
 	MYSQL *mysql;
 	MySLS_FETCH();
 	PLS_FETCH();
