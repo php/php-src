@@ -1396,7 +1396,6 @@ PHP_FUNCTION(call_user_func)
 		RETURN_FALSE;
 	}
 	SEPARATE_ZVAL(params[0]);
-	convert_to_string(*params[0]);
 	if (call_user_function_ex(CG(function_table), NULL, *params[0], &retval_ptr, arg_count-1, params+1, 1)==SUCCESS
 		&& retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
@@ -1508,8 +1507,7 @@ PHP_FUNCTION(register_shutdown_function)
 
 	if (zend_get_parameters_array(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments)==FAILURE) {
 		RETURN_FALSE;
-	}	
-	convert_to_string(shutdown_function_entry.arguments[0]);
+	}
 	if (!BG(user_shutdown_function_names)) {
 		BG(user_shutdown_function_names) = (HashTable *) emalloc(sizeof(HashTable));
 		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *))user_shutdown_function_dtor, 0);

@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Allow all functions that receive user-defined function callbacks to accept
+  an array that contains an object and a method name, in place of a function
+  name, e.g. usort($array, array($obj, "ObjSort")) (Zeev, Zend Engine)
 - Added set_error_handler() to allow custom error handling functions,
   instead of the built-in error handling code (Zeev, Zend Engine)
 - Renamed user_error() to trigger_error();  user_error() remains
