@@ -910,9 +910,7 @@ PHP_FUNCTION(getimagesize)
 		}
 		zval_dtor(*info);
 
-		if (array_init(*info) == FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(*info);
 
 		convert_to_string_ex(arg1);
 		break;
@@ -976,11 +974,7 @@ PHP_FUNCTION(getimagesize)
 	php_stream_close(stream);
 
 	if (result) {
-		if (array_init(return_value) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
-			efree(result);
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		add_index_long(return_value, 0, result->width);
 		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
