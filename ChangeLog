@@ -1,3 +1,43 @@
+2002-01-19  Edin Kadribasic  <edink@proventum.net>
+
+    * TODO: Removed two issues resolved by the introduction of sapi/cli.
+
+    * sapi/cli/php_cli.c: Merged patch from sapi/cgi.
+
+2002-01-19  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
+
+    * ext/domxml/php_domxml.c:
+    - Fixed passing parameters to domxml_xslt_process(). Now they can be either strings or XPath expressions.
+    - Several minor fixes in domxml_xslt_process().
+
+2002-01-19  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Crypt/HCEMD5.php: * Fix bug #13189.
+
+2002-01-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/mailparse/rfc2045cdecode.c:
+    Make the decoder less strict to allow for brain-dead mailers that mark
+    messages as 7bit but then include 8bit chars in the body.
+    Thanks to Dan Fitzpatrick for bringing this to my attention.
+
+2002-01-19  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php
+      pear/DB.php:
+    Stores limit_from and limit_count as DB_result proporties instead
+    of DB_common. Fixs bug when doing queries inside limitQuery results.
+
+    * pear/DB/common.php: ws
+
+    * pear/DB/oci8.php:
+    Removed unecesary check and only change the case of the keys
+    when data is returned (fetchInto())
+
+2002-01-19  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/main.c: Make --enable-safe-mode useful
+
 2002-01-18  Shane Caraveo  <shane@caraveo.com>
 
     * sapi/cgi/cgi_main.c: reimplement extension listing
