@@ -150,6 +150,9 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 		if ((n = getaddrinfo(host, NULL, &hints, &res))) {
 			php_error(E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
 			return 0;
+		} else if (res == NULL) {
+			php_error(E_WARNING, "php_network_getaddresses: getaddrinfo failed (null result pointer)");
+			return 0;
 		}
 
 		sai = res;
