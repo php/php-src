@@ -51,7 +51,9 @@
  */
 function_entry dba_functions[] = {
 	PHP_FE(dba_open, NULL)
-	PHP_FE(dba_popen, NULL)
+	PHP_FALIAS(dba_popen, dba_open, NULL)
+	/* Disabled until 4.3.1, when persistent STDIO streams are implemented.   */
+	/* PHP_FE(dba_popen, NULL) */
 	PHP_FE(dba_close, NULL)
 	PHP_FE(dba_delete, NULL)
 	PHP_FE(dba_exists, NULL)
