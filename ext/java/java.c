@@ -552,17 +552,20 @@ static pval _java_getset_property
 }
 
 
-pval java_get_property_handler(zend_property_reference *property_reference TSRMLS_DC)
+pval java_get_property_handler(zend_property_reference *property_reference)
 {
+  TSRMLS_FETCH();
+
   pval presult = _java_getset_property(property_reference, 0 TSRMLS_CC);
   checkError(&presult);
   return presult;
 }
 
 
-int java_set_property_handler(zend_property_reference *property_reference, pval *value TSRMLS_DC)
+int java_set_property_handler(zend_property_reference *property_reference, pval *value)
 {
   pval presult;
+  TSRMLS_FETCH();
 
   presult = _java_getset_property(property_reference, _java_makeArray(1, &value TSRMLS_CC) TSRMLS_CC);
   return checkError(&presult) ? FAILURE : SUCCESS;
