@@ -13,6 +13,8 @@ these rules.
 Code Implementation
 -------------------
 
+[0] Document your code in source files and the manual. [tm]
+
 [1] Functions that are given pointers to resources should not free them
 
 For instance, function int mail(char *to, char *from) should NOT free
@@ -46,20 +48,47 @@ Exceptions:
     doing so, should return that new length, so it doesn't have to be
     recalculated with strlen() (e.g. php_addslashes())
 
-[5] Use php_error() to report any errors/warnings during code execution.
-    Use descriptive error messages, and try to avoid using identical
-    error strings for different stages of an error.  For example,
-    if in order to obtain a URL you have to parse the URL, connect,
-    and retreive the text, assuming something can go wrong at each
-    of these stages, don't report an error "Unable to get URL"
-    on all of them, but instead, write something like "Unable
-    to parse URL", "Unable to connect to URL server" and "Unable
-    to fetch URL text", respectively.
+[5] Use php_error_docref() group of functions to report any errors/warnings 
+    during code execution. Use descriptive error messages, and try to avoid 
+    using identical error strings for different stages of an error. For 
+    example, if in order to obtain a URL you have to parse the URL, connect,
+    and retreive the text, assuming something can go wrong at each of these 
+    stages, don't report an error "Unable to get URL" on all of them, but 
+    instead, write something like "Unable to parse URL", "Unable to connect 
+    to URL server" and "Unable to fetch URL text", respectively.
 
     It has been silently agreed to prefix every php_error() message with the
     name of the current function if applicable:
 
     php_error(E_WHATEVER, "%s(): Desc.", get_active_function_name(TSRMLS_C));
+
+    This can be done automatically using php_error_docref(). The first
+    parameter, docref, is either NULL or the URL of a page describing the 
+    error in detail. If you pass NULL, the reference is generated from 
+    the name of the function being executed:
+
+    php_error_docref(NULL TSRMLS_CC, E_WHATEVER, "Desc.");
+
+    If you pass a URL, it can either be a full URL beginning with "http://":
+
+    php_error_docref("http://www.php.net/manual/en/function.fopen#error" 
+                     TSRMLS_CC, E_WHATEVER, "Desc.");
+
+    Or the name of a manual page without file extension, but with an optional 
+    target anchor. Or simply the anchor within the manual page of the current
+    function. When using function names you must replace '_' by '-':
+
+    php_error_docref("function.ext_func#error" TSRMLS_CC, E_WHATEVER, "Desc.");
+
+    To display one or two important parameters after the function name, use 
+    php_error_docref1() or php_error_docref2(). For example, file functions 
+    should display the name of the file opened:
+
+    php_error_docref1("function.fopen", filename
+                      TSRMLS_CC, E_WHATEVER, "Desc.");
+
+    php_error_docref2("function.fopen", filename, openmode
+                      TSRMLS_CC, E_WHATEVER, "Desc.");
 
     Fixing ("unifying") existing php_error() message is a good thing [tm].
 
