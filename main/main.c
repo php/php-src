@@ -227,7 +227,12 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("max_execution_time",		"30",			PHP_INI_ALL,		OnChangeMaxExecutionTime)
 	PHP_INI_ENTRY("memory_limit",			"8388608",		PHP_INI_ALL,		OnChangeMemoryLimit)
 
-	STD_PHP_INI_BOOLEAN("track_vars",			(PHP_TRACK_VARS?"1":"0"),			PHP_INI_ALL,		OnUpdateBool,				track_vars,		php_core_globals,	core_globals)
+#if PHP_TRACK_VARS /* "cc -32" on IRIX 6.4 does not like (PHP_TRACK_VARS?"1":"0") - thies 991004 */
+	STD_PHP_INI_BOOLEAN("track_vars",			"1",			PHP_INI_ALL,		OnUpdateBool,				track_vars,		php_core_globals,	core_globals)
+#ese
+	STD_PHP_INI_BOOLEAN("track_vars",			"0",			PHP_INI_ALL,		OnUpdateBool,				track_vars,		php_core_globals,	core_globals)
+#endif
+
 	STD_PHP_INI_BOOLEAN("gpc_globals",			"1",								PHP_INI_ALL,		OnUpdateBool,				gpc_globals,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,	php_core_globals,	core_globals)
