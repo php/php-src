@@ -1280,20 +1280,34 @@ ZEND_FUNCTION(debug_backtrace)
 	char *include_filename = NULL;
 	zval *stack_frame;
 	void **cur_arg_pos = EG(argument_stack).top_element;
+	void **args = cur_arg_pos;
+	int arg_stack_consitent = 0;
 
 	if (ZEND_NUM_ARGS()) {
 		WRONG_PARAM_COUNT;
 	}
 
+	while (--args >= EG(argument_stack).elements) {
+		if (*args--) {
+			break;
+		}
+		args -= *(ulong*)args;
+
+		if (args == EG(argument_stack).elements) {
+			arg_stack_consitent = 1;
+			break;
+		}
+	}
+
+	if (! arg_stack_consitent) {
+		zend_error(E_ERROR, "debug_backtrace(): Can't be called by function parameter");
+	}
+	
 	ptr = EG(current_execute_data);
 
 	/* skip debug_backtrace() */
 	ptr = ptr->prev_execute_data;
 	cur_arg_pos -= 2;
-
-    if (ptr && cur_arg_pos[-1]) { 
-		zend_error(E_ERROR, "debug_backtrace(): Can't be used as a function parameter");
-	}
 
 	array_init(return_value);
 
