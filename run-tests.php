@@ -943,26 +943,114 @@ $output
 	return $warn ? 'WARNED' : 'FAILED';
 }
 
+function comp_line($l1,$l2,$is_reg) {
+	if ($is_reg) {
+		return preg_match('/^'.$l1.'$/s', $l2);
+	} else {
+		return !strcmp($l1, $l2);
+	}
+}
+
+function count_array_diff($ar1,$ar2,$is_reg,$w,$idx1,$idx2,$cnt1,$cnt2,$steps) {
+	$equal = 0;
+	while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
+		$idx1++;
+		$idx2++;
+		$equal++;
+		$steps--;
+	}
+	if (--$steps > 0) {
+		$eq1 = 0;
+		$st = $steps / 2;
+		for ($ofs1 = $idx1+1; $ofs1 < $cnt1 && $st-- > 0; $ofs1++) {
+			$eq = count_array_diff($ar1,$ar2,$is_reg,$w,$ofs1,$idx2,$cnt1,$cnt2,$st);
+			if ($eq > $eq1) {
+				$eq1 = $eq;
+			}
+		}
+		$eq2 = 0;
+		$st = $steps;
+		for ($ofs2 = $idx2+1; $ofs2 < $cnt2 && $st-- > 0; $ofs2++) {
+			$eq = count_array_diff($ar1,$ar2,$is_reg,$w,$idx1,$ofs2,$cnt1,$cnt2,$st);
+			if ($eq > $eq2) {
+				$eq2 = $eq;
+			}
+		}
+		if ($eq1 > $eq2) {
+			$equal += $eq1;
+		} else if ($eq2 > 0) {
+			$equal += $eq2;
+		}
+	}
+	return $equal;
+}
+
+function generate_array_diff($ar1,$ar2,$is_reg,$w) {
+	$idx1 = 0; $ofs1 = 0; $cnt1 = count($ar1);
+	$idx2 = 0; $ofs2 = 0; $cnt2 = count($ar2);
+	$diff = array();
+	$old1 = array();
+	$old2 = array();
+	
+	while ($idx1 < $cnt1 && $idx2 < $cnt2) {
+		if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
+			$idx1++;
+			$idx2++;
+			continue;
+		} else {
+			$c1 = count_array_diff($ar1,$ar2,$is_reg,$w,$idx1+1,$idx2,$cnt1,$cnt2,10);
+			$c2 = count_array_diff($ar1,$ar2,$is_reg,$w,$idx1,$idx2+1,$cnt1,$cnt2,10);
+			if ($c1 > $c2) {
+				$old1[$idx1] = sprintf("%03d- ", $idx1+1).$w[$idx1++];
+				$last = 1;
+			} else if ($c2 > 0) {
+				$old2[$idx2] = sprintf("%03d+ ", $idx2+1).$ar2[$idx2++];
+				$last = 2;
+			} else {
+				$old1[$idx1] = sprintf("%03d- ", $idx1+1).$w[$idx1++];
+				$old2[$idx2] = sprintf("%03d+ ", $idx2+1).$ar2[$idx2++];
+			}
+		}
+	}
+	
+	reset($old1); $k1 = key($old1); $l1 = -2;
+	reset($old2); $k2 = key($old2); $l2 = -2;  
+	while ($k1 !== NULL || $k2 !== NULL) {
+		if ($k1 == $l1+1 || $k2 === NULL) {
+			$l1 = $k1;
+			$diff[] = current($old1);
+			next($old1);
+			$k1 = key($old1);
+		} else if ($k2 == $l2+1 || $k1 === NULL) {
+			$l2 = $k2;
+			$diff[] = current($old2);
+			next($old2);
+			$k2 = key($old2);
+		} else if ($k1 < $k2) {
+			$l1 = $k1;
+			$diff[] = current($old1);
+			next($old1);
+			$k1 = key($old1);
+		} else {
+			$l2 = $k2;
+			$diff[] = current($old2);
+			next($old2);
+			$k2 = key($old2);
+		}
+	}
+	while ($idx1 < $cnt1) {
+		$diff[] = sprintf("%03d- ", $idx1+1).$w[$idx1++];
+	}
+	while ($idx2 < $cnt2) {
+		$diff[] = sprintf("%03d+ ", $idx2+1).$ar2[$idx2++];
+	}
+	return $diff;
+}
+
 function generate_diff($wanted,$wanted_re,$output)
 {
 	$w = explode("\n", $wanted);
 	$o = explode("\n", $output);
-	if (!is_null($wanted_re)) {
-		$r = explode("\n", $wanted_re);
-		for($idx = 0; $idx < min(count($o),count($r)); $idx++) {
-			if (preg_match('/^'.$r[$idx].'$/s', $o[$idx])) {
-				$w[$idx] = $o[$idx];
-			}
-		}
-	}
-	$w1 = array_diff_assoc($w,$o);
-	$o1 = array_diff_assoc($o,$w);
-	$w2 = array();
-	$o2 = array();
-	foreach($w1 as $idx => $val) $w2[sprintf("%03d<",$idx)] = sprintf("%03d- ", $idx+1).$val;
-	foreach($o1 as $idx => $val) $o2[sprintf("%03d>",$idx)] = sprintf("%03d+ ", $idx+1).$val;
-	$diff = array_merge($w2, $o2);
-	ksort($diff);
 	$r = is_null($wanted_re) ? $w : explode("\n", $wanted_re);
 	$diff = generate_array_diff($r,$o,!is_null($wanted_re),$w);
 	return implode("\r\n", $diff);
