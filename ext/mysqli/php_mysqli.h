@@ -25,10 +25,20 @@
 #undef LIST
 #endif
 
+#ifdef PHP_WIN32
+#include "win32/time.h"
+#else
+#include "sys/time.h"
+#endif
+
 #include <mysql.h>
 
 #ifndef PHP_MYSQLI_H
 #define PHP_MYSQLI_H
+
+#define MYSQLI_PR_TYPE_QUERY	 0
+#define MYSQLI_PR_TYPE_PREPARE	 1
+
 
 typedef struct {
 	ulong		buflen;
@@ -44,6 +54,18 @@ typedef struct {
 	char		*is_null;
 	char		type;
 } STMT;
+
+typedef struct {
+	char		active;
+	struct timeval	start;
+	unsigned int	count[2];
+	ulong		min_row_val[2];
+	ulong		max_row_val[2];
+	ulong		row_val[2];
+	double		min_elapsed[2];
+	double		max_elapsed[2];
+	double		elapsed[2];
+} PROFILER;
 
 typedef struct _mysqli_object {
 	zend_object zo;
@@ -71,6 +93,13 @@ extern function_entry mysqli_stmt_methods[];
 extern function_entry mysqli_result_methods[];
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int flag);
 extern void php_clear_stmt_bind(STMT *stmt);
+
+/* Profiler functions */
+extern void php_mysqli_profiler_result_info(MYSQL_RES *res);
+void php_mysqli_profiler_explain(MYSQL *mysql, char *query);
+void php_mysqli_profiler_header(char *query);
+void php_mysqli_profiler_elapsed_time();
+
 zend_class_entry *mysqli_link_class_entry;
 zend_class_entry *mysqli_stmt_class_entry;
 zend_class_entry *mysqli_result_class_entry;
@@ -153,8 +182,8 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_BIND_SEND_DATA	4
 
 /* fetch types */
-#define FETCH_SIMPLE		0
-#define FETCH_RESULT		1
+#define FETCH_SIMPLE		1
+#define FETCH_RESULT		2
 
 PHP_MYSQLI_API void mysqli_register_link(zval *return_value, void *link TSRMLS_DC);
 PHP_MYSQLI_API void mysqli_register_stmt(zval *return_value, void *stmt TSRMLS_DC);
@@ -230,6 +259,7 @@ PHP_FUNCTION(mysqli_rpl_query_type);
 PHP_FUNCTION(mysqli_select_db);
 PHP_FUNCTION(mysqli_send_long_data);
 PHP_FUNCTION(mysqli_send_query);
+PHP_FUNCTION(mysqli_set_profiler_opt);
 PHP_FUNCTION(mysqli_slave_query);
 PHP_FUNCTION(mysqli_ssl_set);
 PHP_FUNCTION(mysqli_stat);
@@ -245,16 +275,17 @@ PHP_FUNCTION(mysqli_use_result);
 PHP_FUNCTION(mysqli_warning_count);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
-	long default_link;
-	long num_links;
-	long max_links;
-	unsigned int default_port;
-	char *default_host;
-	char *default_user;
-	char *default_pw;
-	char *default_socket;
-	long error_no;
-	char *error_msg;
+	long		default_link;
+	long		num_links;
+	long		max_links;
+	unsigned int	default_port;
+	char		*default_host;
+	char		*default_user;
+	char		*default_pw;
+	char		*default_socket;
+	long		error_no;
+	char		*error_msg;
+	PROFILER	profiler;
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 #ifdef ZTS
@@ -262,6 +293,18 @@ ZEND_END_MODULE_GLOBALS(mysqli)
 #else
 #define MyG(v) (mysqli_globals.v)
 #endif
+
+#define MYSQLI_PROFILER_GETTIME gettimeofday(&MyG(profiler.start), NULL)
+#define MYSQLI_PROFILER_REPORTTIME php_mysqli_profiler_elapsed_time()
+#define MYSQLI_PROFILER_HEADER(query) php_mysqli_profiler_header(query)
+#define MYSQLI_PROFILER_REPORT_RESULT(res) php_mysqli_profiler_result_info(res)
+#define MYSQLI_PROFILER_EXPLAIN(mysql,query) \
+if (!strncasecmp("select", Z_STRVAL_PP(query), 6)){ \
+	php_mysqli_profiler_explain(mysql,query); \
+	if (mysql_errno(mysql)) { \
+		RETURN_FALSE; \
+	} \
+}
 
 ZEND_EXTERN_MODULE_GLOBALS(mysqli);
 
