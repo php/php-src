@@ -18,9 +18,7 @@ class test {
 $test1 = new test();
 ?>
 --EXPECT--
-
-Notice: Undefined property:  test::$test in /home/derick/bug24436.php on line 11test1
-
-Notice: Undefined property:  test::$test in /home/derick/bug24436.php on line 12test2
+test1
+test2
 test1
 test2
