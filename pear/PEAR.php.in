@@ -30,6 +30,16 @@ define('PHP_BINDIR', '@prefix@/bin');
 define('PEAR_INSTALL_DIR', '@PEAR_INSTALLDIR@');
 define('PEAR_EXTENSION_DIR', '@EXTENSION_DIR@');
 
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    define('OS_WINDOWS', true);
+    define('OS_UNIX', false);
+    define('PEAR_OS', 'Windows');
+} else {
+    define('OS_WINDOWS', false);
+    define('OS_UNIX', true);
+    define('PEAR_OS', 'Unix'); // blatant assumption
+}
+
 $_PEAR_default_error_mode = PEAR_ERROR_RETURN;
 $_PEAR_default_error_options = E_USER_NOTICE;
 $_PEAR_default_error_callback = '';
@@ -76,14 +86,21 @@ class PEAR
      * $_PEAR_destructor_object_list for destructor emulation if a
      * destructor object exists.
      */
-    function PEAR() {
-        if (method_exists($this, "_".get_class($this))) {
-            global $_PEAR_destructor_object_list;
-            $_PEAR_destructor_object_list[] = &$this;
-        }
+    function PEAR()
+    {
+        $classname = get_class($this);
         if ($this->_debug) {
-            printf("PEAR constructor called, class=%s\n",
-                   get_class($this));
+            print "PEAR constructor called, class=$classname\n";
+        }
+        while ($classname) {
+            $destructor = "_$classname";
+            if (method_exists($this, $destructor)) {
+                global $_PEAR_destructor_object_list;
+                $_PEAR_destructor_object_list[] = &$this;
+                break;
+            } else {
+                $classname = get_parent_class($classname);
+            }
         }
     }
 
@@ -276,19 +293,28 @@ class PEAR
 
 // {{{ _PEAR_call_destructors()
 
-function _PEAR_call_destructors() {
+function _PEAR_call_destructors()
+{
     global $_PEAR_destructor_object_list;
-    if (is_array($_PEAR_destructor_object_list) && sizeof($_PEAR_destructor_object_list)) {
-    reset($_PEAR_destructor_object_list);
-    while (list($k, $objref) = each($_PEAR_destructor_object_list)) {
-        $destructor = "_".get_class($objref);
-        if (method_exists($objref, $destructor)) {
-        $objref->$destructor();
+    if (is_array($_PEAR_destructor_object_list) &&
+        sizeof($_PEAR_destructor_object_list))
+    {
+        reset($_PEAR_destructor_object_list);
+        while (list($k, $objref) = each($_PEAR_destructor_object_list)) {
+            $classname = get_class($objref);
+            while ($classname) {
+                $destructor = "_$classname";
+                if (method_exists($objref, $destructor)) {
+                    $objref->$destructor();
+                    break;
+                } else {
+                    $classname = get_parent_class($classname);
+                }
+            }
         }
-    }
-    // Empty the object list to ensure that destructors are
-    // not called more than once.
-    $_PEAR_destructor_object_list = array();
+        // Empty the object list to ensure that destructors are
+        // not called more than once.
+        $_PEAR_destructor_object_list = array();
     }
 }
 
