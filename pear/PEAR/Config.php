@@ -113,6 +113,16 @@ class PEAR_Config extends PEAR
             'default' => PEAR_CONFIG_DEFAULT_DOCDIR,
             'doc' => 'directory where documentation is installed',
             ),
+        'data_dir' => array(
+            'type' => 'directory',
+            'default' => PEAR_CONFIG_DEFAULT_DATADIR,
+            'doc' => 'directory where data files are installed',
+            ),
+        'test_dir' => array(
+            'type' => 'directory',
+            'default' => PEAR_CONFIG_DEFAULT_TESTDIR,
+            'doc' => 'directory where regression tests are installed',
+            ),
         'bin_dir' => array(
             'type' => 'directory',
             'default' => PEAR_CONFIG_DEFAULT_BINDIR,
