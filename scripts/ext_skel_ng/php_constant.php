@@ -25,7 +25,7 @@
 			return trim("
 <row>
  <entry>
-  <constant id='constant".strtolower(str_replace("_","-",$this->name))."'>$name</constant>
+  <constant id='constant".strtolower(str_replace("_","-",$this->name))."'>{$this->name}</constant>
   (<link linkend='language.types.integer'>integer</link>)
  </entry>
  <entry>{$this->value}</entry>
