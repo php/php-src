@@ -21,7 +21,7 @@ $(srcdir)/libsqlite/src/opcodes.h: $(srcdir)/libsqlite/src/vdbe.c
 $(srcdir)/libsqlite/src/sqlite.h: $(srcdir)/libsqlite/src/sqlite.h.in
 	sed -e s/--VERS--/$(SQLITE_VERSION)/ -e s/--ENCODING--/$(SQLITE_ENCODING)/ $(srcdir)/libsqlite/src/sqlite.h.in >$(srcdir)/libsqlite/src/sqlite.h
 
-$(srcdir)/libsqlite/src/sqlite.c: $(srcdir)/libsqlite/src/sqlite.h
+$(srcdir)/sqlite.c: $(srcdir)/libsqlite/src/sqlite.h
 
 $(srcdir)/libsqlite/src/parse.c:	$(srcdir)/libsqlite/src/parse.y
 	$(LEMON) $(srcdir)/libsqlite/src/parse.y
