@@ -40,6 +40,7 @@
 
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
+#define EINPROGRESS	WSAEWOULDBLOCK
 #	define fsync _commit
 #	define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */
@@ -109,6 +110,18 @@ typedef struct {
 } php_sockaddr_storage;
 #endif
 
+PHPAPI int php_network_connect_socket_to_host(const char *host, unsigned short port,
+		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
+		int *error_code
+		TSRMLS_DC);
+
+PHPAPI int php_network_connect_socket(int sockfd,
+		const struct sockaddr *addr,
+		socklen_t addrlen,
+		int asynchronous,
+		struct timeval *timeout,
+		char **error_string,
+		int *error_code);
 
 int php_hostconnect(const char *host, unsigned short port, int socktype, struct timeval *timeout TSRMLS_DC);
 PHPAPI int php_connect_nonb(int sockfd, const struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
@@ -125,29 +138,19 @@ struct _php_netstream_data_t	{
 	char is_blocked;
 	struct timeval timeout;
 	char timeout_event;
-#if HAVE_OPENSSL_EXT
-	/* openssl specific bits here */
-	SSL *ssl_handle;
-	int ssl_active;
-#endif
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;
-
-#define PHP_NETSTREAM_DATA_FROM_STREAM(stream)		(php_netstream_data_t*)(stream)->abstract
-
 extern php_stream_ops php_stream_socket_ops;
+extern php_stream_ops php_stream_generic_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
 PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *persistent_id STREAMS_DC TSRMLS_DC );
 /* open a connection to a host using php_hostconnect and return a stream */
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
 		int socktype, struct timeval *timeout, const char *persistent_id STREAMS_DC TSRMLS_DC);
-PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, const char *persistent_id,
-		struct timeval *timeout STREAMS_DC TSRMLS_DC);
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC TSRMLS_CC)
 #define php_stream_sock_open_host(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_CC TSRMLS_CC)
-#define php_stream_sock_open_unix(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_CC TSRMLS_CC)
 
 /* {{{ memory debug */
 #define php_stream_sock_open_from_socket_rel(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_REL_CC TSRMLS_CC)
@@ -155,12 +158,6 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, con
 #define php_stream_sock_open_unix_rel(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_REL_CC TSRMLS_CC)
 
 /* }}} */
-
-#if HAVE_OPENSSL_EXT
-PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method, php_stream *session_stream TSRMLS_DC);
-#define php_stream_sock_ssl_activate(stream, activate)	php_stream_sock_ssl_activate_with_method((stream), (activate), SSLv23_client_method(), NULL TSRMLS_CC)
-
-#endif
 
 #endif /* _PHP_NETWORK_H */
 

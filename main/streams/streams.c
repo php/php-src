@@ -29,9 +29,6 @@
 #include "ext/standard/file.h"
 #include "ext/standard/basic_functions.h" /* for BG(mmap_file) (not strictly required) */
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
-#ifdef HAVE_SYS_MMAN_H
-#include <sys/mman.h>
-#endif
 #include <stddef.h>
 #include <fcntl.h>
 #include "php_streams_int.h"
@@ -103,7 +100,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 /* }}} */
 
 /* {{{ wrapper error reporting */
-static void display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption TSRMLS_DC)
+void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption TSRMLS_DC)
 {
 	char *tmp = estrdup(path);
 	char *msg;
@@ -152,7 +149,7 @@ static void display_wrapper_errors(php_stream_wrapper *wrapper, const char *path
 		efree(msg);
 }
 
-static void tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC)
+void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC)
 {
 	if (wrapper) {
 		/* tidy up the error stack */
@@ -1061,52 +1058,37 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 	return ret;
 }
 
+PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize TSRMLS_DC)
+{
+	return php_stream_set_option(stream, PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SET_SIZE, &newsize);
+}
+
 PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 {
 	size_t bcount = 0;
-	int ready = 0;
 	char buf[8192];
-#ifdef HAVE_MMAP
-	int fd;
-#endif
+	int b;
 
-#ifdef HAVE_MMAP
-	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)
-			&& !php_stream_is_filtered(stream)
-			&& php_stream_tell(stream) == 0
-			&& SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 0))
-	{
-		struct stat sbuf;
-		off_t off;
-		void *p;
-		size_t len;
+	if (php_stream_mmap_possible(stream)) {
+		char *p;
+		size_t mapped;
 
-		fstat(fd, &sbuf);
+		p = php_stream_mmap_range(stream, php_stream_tell(stream), 0, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
-		if (sbuf.st_size > sizeof(buf)) {
-			off = php_stream_tell(stream);
-			len = sbuf.st_size - off;
-			p = mmap(0, len, PROT_READ, MAP_SHARED, fd, off);
-			if (p != (void *) MAP_FAILED) {
-				BG(mmap_file) = p;
-				BG(mmap_len) = len;
-				PHPWRITE(p, len);
-				BG(mmap_file) = NULL;
-				munmap(p, len);
-				bcount += len;
-				ready = 1;
-			}
+		if (p) {
+			PHPWRITE(p, mapped);
+
+			php_stream_mmap_unmap(stream);
+
+			return mapped;
 		}
 	}
-#endif
-	if(!ready) {
-		int b;
 
-		while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
-			PHPWRITE(buf, b);
-			bcount += b;
-		}
+	while ((b = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+		PHPWRITE(buf, b);
+		bcount += b;
 	}
+
 	return bcount;
 }
 
@@ -1118,9 +1100,6 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	size_t len = 0, max_len;
 	int step = CHUNK_SIZE;
 	int min_room = CHUNK_SIZE / 4;
-#if HAVE_MMAP
-	int srcfd;
-#endif
 
 	if (buf)
 		*buf = NULL;
@@ -1131,50 +1110,25 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	if (maxlen == PHP_STREAM_COPY_ALL)
 		maxlen = 0;
 
-#if HAVE_MMAP
-	/* try and optimize the case where we are copying from the start of a plain file.
-	 * We could probably make this work in more situations, but I don't trust the stdio
-	 * buffering layer.
-	 * */
-	if ( php_stream_is(src, PHP_STREAM_IS_STDIO) &&
-			!php_stream_is_filtered(src) &&
-			php_stream_tell(src) == 0 &&
-			SUCCESS == php_stream_cast(src, PHP_STREAM_AS_FD, (void**)&srcfd, 0))
-	{
-		struct stat sbuf;
+	if (php_stream_mmap_possible(src)) {
+		char *p;
+		size_t mapped;
 
-		if (fstat(srcfd, &sbuf) == 0) {
-			void *srcfile;
+		p = php_stream_mmap_range(src, php_stream_tell(src), maxlen, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
-#if STREAM_DEBUG
-			fprintf(stderr, "mmap attempt: maxlen=%d filesize=%ld\n", maxlen, sbuf.st_size);
-#endif
-	
-			if (maxlen > sbuf.st_size || maxlen == 0)
-				maxlen = sbuf.st_size;
-#if STREAM_DEBUG
-			fprintf(stderr, "mmap attempt: will map maxlen=%d\n", maxlen);
-#endif
-		
-			srcfile = mmap(NULL, maxlen, PROT_READ, MAP_SHARED, srcfd, 0);
-			if (srcfile != (void*)MAP_FAILED) {
+		if (p) {
+			*buf = pemalloc_rel_orig(mapped + 1, persistent);
 
-				*buf = pemalloc_rel_orig(maxlen + 1, persistent);
-
-				if (*buf)	{
-					memcpy(*buf, srcfile, maxlen);
-					(*buf)[maxlen] = '\0';
-					ret = maxlen;
-				}
-
-				munmap(srcfile, maxlen);
-
-				return ret;
+			if (*buf)	{
+				memcpy(*buf, p, mapped);
+				(*buf)[mapped] = '\0';
 			}
+
+			php_stream_mmap_unmap(src);
+
+			return mapped;
 		}
-		/* fall through - we might be able to copy in smaller chunks */
 	}
-#endif
 
 	ptr = *buf = pemalloc_rel_orig(step, persistent);
 	max_len = step;
@@ -1204,9 +1158,6 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	size_t haveread = 0;
 	size_t didread;
 	php_stream_statbuf ssbuf;
-#if HAVE_MMAP
-	int srcfd;
-#endif
 
 	if (maxlen == 0)
 		return 0;
@@ -1214,46 +1165,26 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	if (maxlen == PHP_STREAM_COPY_ALL)
 		maxlen = 0;
 
-#if HAVE_MMAP
-	/* try and optimize the case where we are copying from the start of a plain file.
-	 * We could probably make this work in more situations, but I don't trust the stdio
-	 * buffering layer.
-	 * */
-	if ( php_stream_is(src, PHP_STREAM_IS_STDIO) &&
-			!php_stream_is_filtered(src) &&
-			php_stream_tell(src) == 0 &&
-			SUCCESS == php_stream_cast(src, PHP_STREAM_AS_FD, (void**)&srcfd, 0))
-	{
-		struct stat sbuf;
-
-		if (fstat(srcfd, &sbuf) == 0) {
-			void *srcfile;
-
-			/* in the event that the source file is 0 bytes, return 1 to indicate success
-			 * because opening the file to write had already created a copy */
-
-			if(sbuf.st_size ==0)
-				return 1;
-
-			if (maxlen > sbuf.st_size || maxlen == 0)
-				maxlen = sbuf.st_size;
-
-			srcfile = mmap(NULL, maxlen, PROT_READ, MAP_SHARED, srcfd, 0);
-			if (srcfile != (void*)MAP_FAILED) {
-				haveread = php_stream_write(dest, srcfile, maxlen);
-				munmap(srcfile, maxlen);
-				return haveread;
-			}
-		}
-		/* fall through - we might be able to copy in smaller chunks */
-	}
-#endif
-
 	if (php_stream_stat(src, &ssbuf) == 0) {
 		/* in the event that the source file is 0 bytes, return 1 to indicate success
 		 * because opening the file to write had already created a copy */
 		if (ssbuf.sb.st_size == 0) {
 			return 1;
+		}
+	}
+
+	if (php_stream_mmap_possible(src)) {
+		char *p;
+		size_t mapped;
+
+		p = php_stream_mmap_range(src, php_stream_tell(src), maxlen, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
+
+		if (p) {
+			haveread = php_stream_write(dest, p, mapped);
+
+			php_stream_mmap_unmap(src);
+
+			return mapped;
 		}
 	}
 
@@ -1323,6 +1254,18 @@ int php_init_stream_wrappers(int module_number TSRMLS_DC)
 			zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1) == SUCCESS
 			&& 
 			zend_hash_init(php_get_stream_filters_hash(), 0, NULL, NULL, 1) == SUCCESS
+			&&
+			zend_hash_init(php_stream_xport_get_hash(), 0, NULL, NULL, 1) == SUCCESS
+			&&
+			php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
+			&&
+			php_stream_xport_register("udp", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
+#ifdef AF_UNIX
+			&&
+			php_stream_xport_register("unix", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
+			&&
+			php_stream_xport_register("udg", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
+#endif
 		) ? SUCCESS : FAILURE;
 }
 
@@ -1330,6 +1273,7 @@ int php_shutdown_stream_wrappers(int module_number TSRMLS_DC)
 {
 	zend_hash_destroy(&url_stream_wrappers_hash);
 	zend_hash_destroy(php_get_stream_filters_hash());
+	zend_hash_destroy(php_stream_xport_get_hash());
 	return SUCCESS;
 }
 
@@ -1451,9 +1395,9 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options,
 		php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC, "not implemented");
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		display_wrapper_errors(wrapper, path, "failed to open dir" TSRMLS_CC);
+		php_stream_display_wrapper_errors(wrapper, path, "failed to open dir" TSRMLS_CC);
 	}
-	tidy_wrapper_error_log(wrapper TSRMLS_CC);
+	php_stream_tidy_wrapper_error_log(wrapper TSRMLS_CC);
 
 	return stream;
 }
@@ -1498,15 +1442,13 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 
 	if (wrapper)	{
 
-		/* prepare error stack */
-		wrapper->err_count = 0;
-		wrapper->err_stack = NULL;
-		
 		stream = wrapper->wops->stream_opener(wrapper,
 				path_to_open, mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
-		if (stream)
+		
+		if (stream) {
 			stream->wrapper = wrapper;
+		}
 	}
 
 #if ZEND_DEBUG
@@ -1554,9 +1496,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 	
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		display_wrapper_errors(wrapper, path, "failed to open stream" TSRMLS_CC);
+		php_stream_display_wrapper_errors(wrapper, path, "failed to open stream" TSRMLS_CC);
 	}
-	tidy_wrapper_error_log(wrapper TSRMLS_CC);
+	php_stream_tidy_wrapper_error_log(wrapper TSRMLS_CC);
 #if ZEND_DEBUG
 	if (stream == NULL && copy_of_path != NULL) {
 		efree(copy_of_path);

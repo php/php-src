@@ -608,6 +608,13 @@ PHP_MINIT_FUNCTION(openssl)
 	} else {
 		strlcpy(default_ssl_conf_filename, config_filename, sizeof(default_ssl_conf_filename));
 	}
+
+	php_stream_xport_register("ssl", php_openssl_ssl_socket_factory TSRMLS_CC);
+	php_stream_xport_register("tls", php_openssl_ssl_socket_factory TSRMLS_CC);
+
+	/* override the default tcp socket provider */
+	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory TSRMLS_CC);
+	
 	return SUCCESS;
 }
 /* }}} */
@@ -628,6 +635,13 @@ PHP_MINFO_FUNCTION(openssl)
 PHP_MSHUTDOWN_FUNCTION(openssl)
 {
 	EVP_cleanup();
+
+	php_stream_xport_unregister("ssl" TSRMLS_CC);
+	php_stream_xport_unregister("tls" TSRMLS_CC);
+
+	/* reinstate the default tcp handler */
+	php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC);
+
 	return SUCCESS;
 }
 /* }}} */

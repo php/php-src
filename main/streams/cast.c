@@ -296,28 +296,6 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 
 	if (stream == NULL)
 		return NULL;
-
-#ifdef PHP_WIN32
-	/* Avoid possible strange problems when working with socket based streams */
-	if ((options & STREAM_OPEN_FOR_INCLUDE) && php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
-		char buf[CHUNK_SIZE];
-
-		fp = php_open_temporary_file(NULL, "php", NULL TSRMLS_CC);
-		if (fp) {
-			while (!php_stream_eof(stream)) {
-				size_t didread = php_stream_read(stream, buf, sizeof(buf));
-				if (didread > 0) {
-					fwrite(buf, 1, didread, fp);
-				} else {
-					break;
-				}
-			}
-			php_stream_close(stream);
-			rewind(fp);
-			return fp;
-		}
-	}
-#endif
 	
 	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE,
 				(void**)&fp, REPORT_ERRORS) == FAILURE)

@@ -56,4 +56,6 @@ extern php_stream_wrapper php_plain_files_wrapper;
 #define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
 #endif
 
+void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC);
+void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption TSRMLS_DC);
 

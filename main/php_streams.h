@@ -332,8 +332,22 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 /* whether or not locking is supported */
 #define PHP_STREAM_LOCK_SUPPORTED		1	
 
-#define php_stream_supports_lock(stream)	php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED TSRMLS_CC) == 0 ? 1 : 0
-#define php_stream_lock(stream, mode)		php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL TSRMLS_CC)
+#define php_stream_supports_lock(stream)	_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, 0, (void *) PHP_STREAM_LOCK_SUPPORTED TSRMLS_CC) == 0 ? 1 : 0
+#define php_stream_lock(stream, mode)		_php_stream_set_option((stream), PHP_STREAM_OPTION_LOCKING, (mode), (void *) NULL TSRMLS_CC)
+
+/* option code used by the php_stream_xport_XXX api */
+#define PHP_STREAM_OPTION_XPORT_API			7 /* see php_stream_transport.h */
+#define PHP_STREAM_OPTION_CRYPTO_API		8 /* see php_stream_transport.h */
+#define PHP_STREAM_OPTION_MMAP_API			9 /* see php_stream_mmap.h */
+#define PHP_STREAM_OPTION_TRUNCATE_API		10
+
+#define PHP_STREAM_TRUNCATE_SUPPORTED	0
+#define PHP_STREAM_TRUNCATE_SET_SIZE	1	/* ptrparam is a pointer to a size_t */
+
+#define php_stream_truncate_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SUPPORTED, NULL TSRMLS_CC) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+
+PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize TSRMLS_DC);
+#define php_stream_truncate_set_size(stream, size)	_php_stream_truncate_set_size((stream), (size) TSRMLS_CC)
 
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
 #define PHP_STREAM_OPTION_RETURN_ERR 		-1 /* problem setting option */
@@ -356,8 +370,10 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC TSRMLS_CC)
 
+#include "streams/php_stream_transport.h"
 #include "streams/php_stream_plain_wrapper.h"
 #include "streams/php_stream_userspace.h"
+#include "streams/php_stream_mmap.h"
 
 /* coerce the stream into some other form */
 /* cast as a stdio FILE * */

@@ -99,6 +99,8 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	char tmp_line[128];
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect;
+	char *transport_string, *errstr = NULL;
+	int transport_len;
 
 	if (strpbrk(mode, "awx+")) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP wrapper does not support writeable connections.");
@@ -110,14 +112,26 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 		return NULL;
 	
 	use_ssl = resource->scheme && (strlen(resource->scheme) > 4) && resource->scheme[4] == 's';
-
 	/* choose default ports */
 	if (use_ssl && resource->port == 0)
 		resource->port = 443;
 	else if (resource->port == 0)
 		resource->port = 80;
 
-	stream = php_stream_sock_open_host(resource->host, resource->port, SOCK_STREAM, NULL, 0);
+	transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->host, resource->port);
+
+	stream = php_stream_xport_create(transport_string, transport_len, options,
+			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
+			NULL, NULL, context, &errstr, NULL);
+			
+	if (errstr) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", errstr);
+		efree(errstr);
+		errstr = NULL;
+	}
+
+	efree(transport_string);
+
 	if (stream == NULL)	
 		goto out;
 
@@ -133,17 +147,6 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	php_stream_context_set(stream, context);
 
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
-	
-#if HAVE_OPENSSL_EXT
-	if (use_ssl)	{
-		if (php_stream_sock_ssl_activate(stream, 1) == FAILURE)	{
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to activate SSL mode");
-			php_stream_close(stream);
-			stream = NULL;
-			goto out;
-		}
-	}
-#endif
 
 	scratch_len = strlen(path) + 32;
 	scratch = emalloc(scratch_len);

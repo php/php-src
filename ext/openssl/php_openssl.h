@@ -26,6 +26,8 @@
 extern zend_module_entry openssl_module_entry;
 #define phpext_openssl_ptr &openssl_module_entry
 
+php_stream_transport_factory_func php_openssl_ssl_socket_factory;
+
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
