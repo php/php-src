@@ -2122,7 +2122,7 @@ $ifdef HAVE_IFX_IUS;
 
         		fieldleng=ifx_var_getlen(&lvar_tmp);
  
-                if (fieldleng > 2) fieldleng -= 2; /* fix by Alan Sheperd */
+                if (fieldleng > 2) fieldleng -= 2; /* fix by Alex Shepherd */
 
                 if ((char_data = (char *)emalloc(fieldleng + 1)) == NULL) {
                     php_error(E_WARNING, "Out of memory");
@@ -2472,7 +2472,7 @@ $ifdef HAVE_IFX_IUS;
 
 			        fieldleng=ifx_var_getlen(&lvar_tmp);
  
-                    if (fieldleng > 2) fieldleng -= 2; /* fix by Alan Sheperd */
+                    if (fieldleng > 2) fieldleng -= 2; /* fix by Alex Shepherd */
 
         	        if ((char_data = (char *)emalloc(fieldleng + 1)) == NULL) {
                 	    php_error(E_WARNING, "Out of memory");
