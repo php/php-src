@@ -217,7 +217,7 @@ SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 
 void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 {
-	char *res = NULL, *var, *val, *separator = ";&";
+	char *res = NULL, *var, *val, *separator=NULL;
 	const char *c_var;
 	pval *array_ptr;
 	int free_buffer=0;
@@ -238,7 +238,6 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 					PG(http_globals)[TRACK_VARS_GET] = array_ptr;
 					break;
 				case PARSE_COOKIE:
-					separator=";";
 					PG(http_globals)[TRACK_VARS_COOKIE] = array_ptr;
 					break;
 			}
@@ -278,6 +277,16 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 		return;
 	}
 
+	switch (arg) {
+		case PARSE_GET:
+		case PARSE_STRING:
+			separator = (char *) estrdup(PG(arg_separator).input);
+			break;
+		case PARSE_COOKIE:
+			separator = ";\0";
+			break;
+	}
+	
 	var = php_strtok_r(res, separator, &strtok_buf);
 	
 	while (var) {
@@ -292,6 +301,11 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 		}
 		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
+
+	if(arg != PARSE_COOKIE) {
+		efree(separator);
+	}
+
 	if (free_buffer) {
 		efree(res);
 	}

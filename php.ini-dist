@@ -243,7 +243,12 @@ warn_plus_overloading = Off
 
 ; The separator used in PHP generated URLs to separate arguments.
 ; Default is "&". 
-;arg_separator = "&amp;"
+;arg_separator.output = "&amp;"
+
+; List of separator(s) used by PHP to parse input URLs into variables.
+; Default is "&". 
+; NOTE: Every character in this directive is considered as separator!
+;arg_separator.input = ";&"
 
 ; This directive describes the order in which PHP registers GET, POST, Cookie,
 ; Environment and Built-in variables (G, P, C, E & S respectively, often

@@ -52,6 +52,11 @@ extern ZEND_API struct _php_core_globals core_globals;
 
 struct _php_tick_function_entry;
 
+typedef struct _arg_separators {
+	char *output;
+	char *input;
+} arg_separators;
+
 struct _php_core_globals {
 	zend_bool magic_quotes_gpc;
 	zend_bool magic_quotes_runtime;
@@ -93,7 +98,8 @@ struct _php_core_globals {
 	char *auto_prepend_file;
 	char *auto_append_file;
 
-	char *arg_separator;
+	arg_separators arg_separator;
+
 	char *gpc_order;
 	char *variables_order;
 
