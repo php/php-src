@@ -50,7 +50,7 @@ extern void xslt_free_arguments(xslt_args *);
 
 extern void xslt_assign_handler(struct xslt_function **, zval **);
 extern void xslt_free_handler(struct xslt_function *);
-extern void xslt_call_function(char *, struct xslt_function *, int, zval **, zval **);
+extern void xslt_call_function(char *, zval *, int, zval **, zval **);
 
 extern void xslt_debug(char *, char *, ...);
 

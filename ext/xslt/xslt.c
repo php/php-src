@@ -225,7 +225,7 @@ extern void xslt_call_function(char *name,
 	/* Call the function */
 	error = call_user_function_ex(EG(function_table),
 	                              NULL, function,
-							      retval, argc, argv, O, NULL);
+							      retval, argc, argv, 0, NULL);
 	if (error == FAILURE) {
 		php_error(E_WARNING, "Cannot call the %s handler: %s", 
 		          name, Z_STRVAL_P(function));
