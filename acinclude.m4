@@ -69,9 +69,9 @@ dnl which array to append to?
 AC_DEFUN(PHP_ADD_SOURCES,[
   PHP_ADD_SOURCES_X($1, $2, $3, ifelse($4,cli,PHP_CLI_OBJS,ifelse($4,sapi,PHP_SAPI_OBJS,PHP_GLOBAL_OBJS)))
 ])
-
+dnl
 dnl PHP_ASSIGN_BUILD_VARS(type)
-dnl Internal macro
+dnl internal, don't use
 AC_DEFUN(PHP_ASSIGN_BUILD_VARS,[
 ifelse($1,shared,[
   b_c_pre=$shared_c_pre
@@ -838,7 +838,17 @@ AC_DEFUN(PHP_EXPAND_PATH,[
     $2="$ep_realdir/`basename \"$1\"`"
   fi
 ])
-
+dnl
+dnl internal, don't use
+AC_DEFUN(PHP_ADD_LIBPATH_GLOBAL,[
+  AC_PHP_ONCE(LIBPATH, $1, [
+    test -n "$ld_runpath_switch" && LDFLAGS="$LDFLAGS $ld_runpath_switch$1"
+    LDFLAGS="$LDFLAGS -L$1"
+    PHP_RPATHS="$PHP_RPATHS $1"
+  ])
+])dnl
+dnl
+dnl
 dnl
 dnl PHP_ADD_LIBPATH(path[, shared-libadd])
 dnl
@@ -847,15 +857,15 @@ dnl
 AC_DEFUN(PHP_ADD_LIBPATH,[
   if test "$1" != "/usr/lib"; then
     PHP_EXPAND_PATH($1, ai_p)
-    if test "$ext_shared" = "yes" && test -n "$2"; then
-      $2="-R$1 -L$1 [$]$2"
-    else
-      AC_PHP_ONCE(LIBPATH, $ai_p, [
-        test -n "$ld_runpath_switch" && LDFLAGS="$LDFLAGS $ld_runpath_switch$ai_p"
-        LDFLAGS="$LDFLAGS -L$ai_p"
-        PHP_RPATHS="$PHP_RPATHS $ai_p"
-      ])
-    fi
+    ifelse([$2],,[
+      PHP_ADD_LIBPATH_GLOBAL([$ai_p])
+    ],[
+      if test "$ext_shared" = "yes"; then
+        $2="-R$ai_p -L$ai_p [$]$2"
+      else
+        PHP_ADD_LIBPATH_GLOBAL([$ai_p])
+      fi
+    ])
   fi
 ])
 
@@ -894,31 +904,36 @@ AC_DEFUN(PHP_ADD_INCLUDE,[
     ])
   fi
 ])
-
-AC_DEFUN(PHP_X_ADD_LIBRARY,[
-  ifelse([$2],,$3="-l$1 [$]$3", $3="[$]$3 -l$1")
-])
-
+dnl
+dnl internal, don't use
+AC_DEFUN(PHP_X_ADD_LIBRARY,[dnl
+  ifelse([$2],,$3="-l$1 [$]$3", $3="[$]$3 -l$1") dnl
+])dnl
+dnl
+dnl internal, don't use
+AC_DEFUN(PHP_ADD_LIBRARY_SKELETON,[
+  case $1 in
+  c|c_r|pthread*) ;;
+  *) ifelse($3,,[
+    PHP_X_ADD_LIBRARY($1,$2,LIBS)
+  ],[
+    if test "$ext_shared" = "yes"; then
+      PHP_X_ADD_LIBRARY($1,$2,$3)
+    else
+      $4($1,$2)
+    fi
+  ]) ;;
+  esac
+])dnl
+dnl
+dnl
 dnl
 dnl PHP_ADD_LIBRARY(library[, append[, shared-libadd]])
 dnl
 dnl add a library to the link line
 dnl
 AC_DEFUN(PHP_ADD_LIBRARY,[
- case $1 in
- c|c_r|pthread*) ;;
- *)
-ifelse($3,,[
-   PHP_X_ADD_LIBRARY($1,$2,LIBS)
-],[
-   if test "$ext_shared" = "yes"; then
-     PHP_X_ADD_LIBRARY($1,$2,$3)
-   else
-     PHP_ADD_LIBRARY($1,$2)
-   fi
-])
-  ;;
-  esac
+  PHP_ADD_LIBRARY_SKELETON([$1],[$2],[$3],[PHP_ADD_LIBRARY])
 ])
 
 dnl
@@ -927,20 +942,7 @@ dnl
 dnl add a library to the link line (deferred)
 dnl
 AC_DEFUN(PHP_ADD_LIBRARY_DEFER,[
- case $1 in
- c|c_r|pthread*) ;;
- *)
-ifelse($3,,[
-   PHP_X_ADD_LIBRARY($1,$2,DLIBS)
-],[
-   if test "$ext_shared" = "yes"; then
-     PHP_X_ADD_LIBRARY($1,$2,$3)
-   else
-     PHP_ADD_LIBRARY_DEFER($1,$2)
-   fi
-])
-  ;;
-  esac
+  PHP_ADD_LIBRARY_SKELETON([$1],[$2],[$3],[PHP_ADD_LIBRARY_DEFER])
 ])
   
 dnl
