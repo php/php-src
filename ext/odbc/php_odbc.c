@@ -49,8 +49,6 @@
 #define ODBC_TYPE "Win32"
 #define PHP_ODBC_TYPE ODBC_TYPE
 
-#else
-#include "build-defs.h"
 #endif
 
 /*

@@ -45,8 +45,6 @@
 
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
-#else
-#include "build-defs.h"
 #endif
 
 #define STREAM_DEBUG 0

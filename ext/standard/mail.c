@@ -23,15 +23,14 @@
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/info.h"
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-#include "build-defs.h"
+
 #if HAVE_SYSEXITS_H
 #include <sysexits.h>
 #endif
 #if HAVE_SYS_SYSEXITS_H
 #include <sys/sysexits.h>
 #endif
-#endif
+
 #include "php_mail.h"
 #include "php_ini.h"
 #include "safe_mode.h"

@@ -24,8 +24,6 @@
 #if defined(PHP_WIN32) || defined(NETWARE)
 #include "zend.h"
 #include "ap_compat.h"
-#else
-#include "build-defs.h"
 #endif
 
 #ifdef ZTS

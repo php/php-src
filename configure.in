@@ -325,6 +325,7 @@ limits.h \
 locale.h \
 monetary.h \
 mach-o/dyld.h \
+netdb.h \
 pwd.h \
 resolv.h \
 signal.h \
@@ -1107,6 +1108,8 @@ PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.frag,$abs_srcdir/Zend,Zend)
 
 PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE
+
+AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
 $php_shtool mkdir -p pear/scripts
 ALL_OUTPUT_FILES="php4.spec main/build-defs.h \

@@ -25,17 +25,17 @@ extern "C"
 {
 #include "php.h"
 #include "php_globals.h"
-//#include "ext/standard/php_standard.h"
 #include "ext/standard/head.h"
 #include "ext/standard/info.h"
-//#include "fopen-wrappers.h"
+#if 0
+#include "ext/standard/php_standard.h"
+#include "fopen-wrappers.h"
+#endif
 #include "SAPI.h"
 }
 
 #ifdef PHP_WIN32
 #include <winsock.h>
-#else
-#include "build-defs.h"
 #endif
 #ifdef HAVE_MMAP 
 #include <sys/mman.h>

@@ -37,7 +37,7 @@
  */
 
 /* This just seems unessacary */
-#if (WIN32|WINNT)
+#if PHP_WIN32
 #define ENABLE_GD_TTF
 #else
 #include "php_config.h"

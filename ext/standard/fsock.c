@@ -105,8 +105,6 @@ static int fsock_globals_id;
 #ifdef USE_WINSOCK
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #endif
-#else
-#include "build-defs.h"
 #endif
 
 /* {{{ php_lookup_hostname */

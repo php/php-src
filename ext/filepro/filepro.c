@@ -151,7 +151,7 @@ zend_module_entry filepro_module_entry = {
 
 #ifdef COMPILE_DL_FILEPRO
 ZEND_GET_MODULE(filepro)
-#if (WIN32|WINNT) && defined(THREAD_SAFE)
+#if defined(PHP_WIN32) && defined(THREAD_SAFE)
 
 /*NOTE: You should have an odbc.def file where you
 export DllMain*/

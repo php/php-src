@@ -26,10 +26,6 @@
 #include "ext/standard/info.h"
 #include "SAPI.h"
 
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-#include "build-defs.h"
-#endif
-
 #if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
 #include <stdlib.h>
 #include <stdio.h>

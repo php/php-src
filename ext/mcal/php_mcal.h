@@ -5,10 +5,6 @@
 
 #if HAVE_MCAL
 
-#ifndef PHP_WIN32
-#include "build-defs.h"
-#endif
-
 /* Functions accessable to PHP */
 extern zend_module_entry php_mcal_module_entry;
 #define php_mcal_module_ptr &php_mcal_module_entry

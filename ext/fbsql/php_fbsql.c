@@ -42,11 +42,10 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include <winsock.h>
 #else
 #include <php_config.h>
-#include <build-defs.h>
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
