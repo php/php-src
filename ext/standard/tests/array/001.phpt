@@ -57,28 +57,17 @@ array(11) {
   int(27)
   [3]=>
   string(4) "test"
-  ["-1000"]=>
+  [4]=>
   array(2) {
     [0]=>
     string(6) "banana"
     [1]=>
     string(6) "orange"
   }
-  [4]=>
-  string(6) "monkey"
   [5]=>
-  float(-0.33333333333333)
+  string(6) "monkey"
   [6]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
-      array(1) {
-        [0]=>
-        int(0)
-      }
-    }
-  }
+  float(-0.33333333333333)
   [7]=>
   array(1) {
     [0]=>
@@ -101,6 +90,17 @@ array(11) {
       }
     }
   }
+  [9]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        int(0)
+      }
+    }
+  }
 }
  -- Testing array_walk() -- 
 int(0)
@@ -113,28 +113,17 @@ string(4) "test"
 int(27)
 int(3)
 string(4) "test"
-string(5) "-1000"
+int(4)
 array(2) {
   [0]=>
   string(6) "banana"
   [1]=>
   string(6) "orange"
 }
-int(4)
-string(6) "monkey"
 int(5)
-float(-0.33333333333333)
+string(6) "monkey"
 int(6)
-array(1) {
-  [0]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
-      int(0)
-    }
-  }
-}
+float(-0.33333333333333)
 int(7)
 array(1) {
   [0]=>
@@ -147,6 +136,17 @@ array(1) {
   }
 }
 int(8)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      int(0)
+    }
+  }
+}
+int(9)
 array(1) {
   [0]=>
   array(1) {
