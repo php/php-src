@@ -131,7 +131,13 @@ if test "$PHP_PDO_OCI" != "no"; then
     -L$PDO_OCI_DIR/lib $PDO_OCI_SHARED_LIBADD
   ])
 
-
+  dnl Scrollable cursors?
+  PHP_CHECK_LIBRARY(clntsh, OCIStmtFetch2,
+  [
+  	 AC_DEFINE(HAVE_OCISTMTFETCH2,1,[ ])
+  ], [], [
+    -L$PDO_OCI_DIR/lib $PDO_OCI_SHARED_LIBADD
+  ])
 
   PHP_NEW_EXTENSION(pdo_oci, pdo_oci.c oci_driver.c oci_statement.c, $ext_shared,,-I\$prefix/include/php/ext)
 
