@@ -61,7 +61,7 @@ PHP_FUNCTION(xmldocfile);
 PHP_FUNCTION(html_doc);
 PHP_FUNCTION(html_doc_file);
 #endif
-PHP_FUNCTION(xmltree);
+PHP_FUNCTION(domxml_xmltree);
 PHP_FUNCTION(domxml_new_xmldoc);
 PHP_FUNCTION(domxml_substitute_entities_default);
 
