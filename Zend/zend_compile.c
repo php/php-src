@@ -1134,7 +1134,9 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 	CG(class_entry).handle_property_set = NULL;
 	CG(class_entry).handle_property_get = NULL;
 
-	zend_hash_add(CG(class_table), CG(class_entry).name, CG(class_entry).name_length+1, &CG(class_entry), sizeof(zend_class_entry), (void **) &CG(active_class_entry));
+	if (zend_hash_add(CG(class_table), CG(class_entry).name, CG(class_entry).name_length+1, &CG(class_entry), sizeof(zend_class_entry), (void **) &CG(active_class_entry))==FAILURE) {
+		zend_error(E_COMPILE_ERROR, "Class %s cannot be redeclared", CG(class_entry).name);
+	}
 }
 
 
