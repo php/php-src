@@ -288,7 +288,23 @@ ZEND_API void zval_update_constant(zval *p)
 	}
 }
 
+
 int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval, int param_count, zval *params[])
+{
+	zval ***params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
+	int i;
+	int ex_retval;
+
+	for (i=0; i<param_count; i++) {
+		params_array[i] = &params[i];
+	}
+	ex_retval = call_user_function_ex(function_table, object, function_name, retval, param_count, params_array, 1);
+	efree(params_array);
+	return ex_retval;
+}
+
+
+int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval, int param_count, zval **params[], int no_separation)
 {
 	int i;
 	zval *original_return_value;
@@ -312,14 +328,37 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		return FAILURE;
 	}
 
-
 	for (i=0; i<param_count; i++) {
 		zval *param;
 
-		param = (zval *) emalloc(sizeof(zval));
-		*param = *(params[i]);
-		INIT_PZVAL(param);
-		zval_copy_ctor(param);
+		if (function_state.function->common.arg_types
+			&& i<function_state.function->common.arg_types[0]
+			&& function_state.function->common.arg_types[i+1]==BYREF_FORCE
+			&& !PZVAL_IS_REF(*params[i])) {
+			if ((*params[i])->refcount>1) {
+				zval *new_zval;
+
+				if (no_separation) {
+					return FAILURE;
+				}
+				new_zval = (zval *) emalloc(sizeof(zval));
+				*new_zval = **params[i];
+				new_zval->refcount = 1;
+				new_zval->EA.locks = 0;
+				(*params[i])->refcount--;
+				*params[i] = new_zval;
+			}
+			(*params[i])->refcount++;
+			(*params[i])->EA.is_ref = 1;
+			param = *params[i];
+		} else if (*params[i] != &EG(uninitialized_zval)) {
+			(*params[i])->refcount++;
+			param = *params[i];
+		} else {
+			param = (zval *) emalloc(sizeof(zval));
+			*param = **(params[i]);
+			INIT_PZVAL(param);
+		}
 		zend_ptr_stack_push(&EG(argument_stack), param);
 	}
 
