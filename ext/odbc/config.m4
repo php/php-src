@@ -80,7 +80,7 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Solid support)
 AC_ARG_WITH(solid,
 [  --with-solid[=DIR]      Include Solid support.  DIR is the Solid base
-			  install directory, defaults to /usr/local/solid],
+              install directory, defaults to /usr/local/solid],
 [
   if test "$withval" = "yes"; then
     withval=/usr/local/solid
@@ -88,13 +88,13 @@ AC_ARG_WITH(solid,
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
     ODBC_LIBDIR=$withval/lib
-	  ODBC_INCLUDE=-I$ODBC_INCDIR
-	  ODBC_TYPE=solid
-	  AC_DEFINE(HAVE_SOLID)
-	  AC_MSG_RESULT(yes)
-	  AC_FIND_SOLID_LIBS($ODBC_LIBDIR)
+    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_TYPE=solid
+    AC_DEFINE(HAVE_SOLID)
+    AC_MSG_RESULT(yes)
+    AC_FIND_SOLID_LIBS($ODBC_LIBDIR)
   else
-	  AC_MSG_RESULT(no)
+    AC_MSG_RESULT(no)
   fi
 ],[
   AC_MSG_RESULT(no)
@@ -116,8 +116,8 @@ AC_ARG_WITH(ibm-db2,
         ODBC_LIBDIR=$withval/lib
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
-	ODBC_TYPE=db2
-	ODBC_LIBS="-ldb2"
+    ODBC_TYPE=db2
+    ODBC_LIBS="-ldb2"
     AC_DEFINE(HAVE_IBMDB2)
 
     AC_MSG_RESULT(yes)
@@ -334,7 +334,7 @@ fi
 if test -n "$ODBC_TYPE"; then
   INCLUDES="$INCLUDES $ODBC_INCLUDE"
   EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
-  AC_DEFINE(HAVE_UODBC, 1)
+  AC_DEFINE(HAVE_UODBC)
   AC_SUBST(ODBC_INCDIR)
   AC_SUBST(ODBC_INCLUDE)
   AC_SUBST(ODBC_LIBDIR)

@@ -1,11 +1,11 @@
-#define HAVE_SOLID 0
-#define HAVE_IBMDB2 0
-#define HAVE_IODBC 0
-#define HAVE_ESOOB 0
-#define HAVE_UNIXODBC 0
-#define HAVE_OPENLINK 0
-#define HAVE_ADABAS 0
-#define HAVE_CODBC 0
-#define HAVE_UODBC 0
-#define HAVE_EMPRESS 0
-#define HAVE_VELOCIS 0
+#undef HAVE_SOLID
+#undef HAVE_IBMDB2
+#undef HAVE_IODBC
+#undef HAVE_ESOOB
+#undef HAVE_UNIXODBC
+#undef HAVE_OPENLINK
+#undef HAVE_ADABAS
+#undef HAVE_CODBC
+#undef HAVE_UODBC
+#undef HAVE_EMPRESS
+#undef HAVE_VELOCIS
