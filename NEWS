@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fix problem with CGI crashing on certain servers especially Windows Apache
+  & O'Reilly website (Andi)
 - Added Pi3Web SAPI module; run ./configure --with-pi3web to enable this.
   (Holger; zimpel@t-online.de)
 - Enhanced WDDX functions to call __sleep() and __wakeup() when working on
