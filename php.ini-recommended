@@ -433,6 +433,8 @@ session.cache_expire      = 180     ; document expires after n minutes
 session.use_trans_sid     = 1       ; use transient sid support if enabled
                                     ; by compiling with --enable-trans-sid
 
+url_rewriter.tags         = "a=href,area=href,frame=src,input=src,form=fakeentry"
+
 
 [MSSQL]
 ;extension=php_mssql.dll
