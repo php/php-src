@@ -110,7 +110,7 @@ typedef struct _php_per_dir_entry {
 # endif
 # define pclosef(p,f) close(f)
 #else
-# define php3i_popenf(p,n,f,m) popenf((p),(n),(f),(m))
+# define php_popenf(p,n,f,m) popenf((p),(n),(f),(m))
 #endif
 
 php_apache_info_struct php_apache_info;		/* active config */
