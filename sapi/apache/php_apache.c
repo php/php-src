@@ -74,13 +74,12 @@ function_entry apache_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-
+#ifndef PHP_WIN32
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xbithack",			"0",				PHP_INI_ALL,		OnUpdateInt,		xbithack, php_apache_info_struct, php_apache_info)
 	STD_PHP_INI_ENTRY("engine",				"1",				PHP_INI_ALL,		OnUpdateInt,		engine, php_apache_info_struct, php_apache_info)
 	STD_PHP_INI_ENTRY("last_modified",		"0",				PHP_INI_ALL,		OnUpdateInt,		last_modified, php_apache_info_struct, php_apache_info)
 PHP_INI_END()
-
 
 static PHP_MINIT_FUNCTION(apache)
 {
@@ -88,17 +87,21 @@ static PHP_MINIT_FUNCTION(apache)
 	return SUCCESS;
 }
 
-
 static PHP_MSHUTDOWN_FUNCTION(apache)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
-
 zend_module_entry apache_module_entry = {
 	"apache", apache_functions, PHP_MINIT(apache), PHP_MSHUTDOWN(apache), NULL, NULL, PHP_MINFO(apache), STANDARD_MODULE_PROPERTIES
 };
+#else
+zend_module_entry apache_module_entry = {
+	"apache", apache_functions, NULL, NULL, NULL, NULL, PHP_MINFO(apache), STANDARD_MODULE_PROPERTIES
+};
+#endif
+
 
 /* {{{ proto string apache_note(string note_name [, string note_value])
    Get and set Apache request notes */
