@@ -1,3 +1,35 @@
+2004-06-03  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/php_ibase_udf.c:
+      Let DB handle type coercion instead of PHP
+
+    * ext/interbase/php_ibase_udf.c:
+      Added support for other return types besides VARCHAR
+
+2004-06-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+2004-06-03  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_blobs.c:
+      Fixed blob ID format
+
+    * NEWS:
+      news
+
+2004-06-03  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC3RC2)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Prepare for RC3RC2
+
 2004-06-01  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/interbase/ibase_query.c:

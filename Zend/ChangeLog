@@ -1,3 +1,9 @@
+2004-06-03  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0RC3RC2)
+      zend.h:
+      - Prepare for RC3RC2
+
 2004-06-02  Andi Gutmans  <andi@zend.com>
 
     * zend_mm.h:
