@@ -499,21 +499,21 @@ void php_rinit_globals(PSLS_D)
 	PS(mod) = _php_find_ps_module(INI_STR("session_module_name"));
 		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
-	ps_globals->save_path = estrdup(INI_STR("session_save_path"));
-	ps_globals->session_name = estrdup(INI_STR("session_name"));
-	ps_globals->id = NULL;
-	ps_globals->nr_open_sessions = 0;
-	ps_globals->mod_data = NULL;
+	PS(save_path) = estrdup(INI_STR("session_save_path"));
+	PS(session_name) = estrdup(INI_STR("session_name"));
+	PS(id) = NULL;
+	PS(nr_open_sessions) = 0;
+	PS(mod_data) = NULL;
 }
 
 void php_rshutdown_globals(PSLS_D)
 {
-	if(ps_globals->mod_data)
-		ps_globals->mod->close(&ps_globals->mod_data);
-	efree(ps_globals->save_path);
-	efree(ps_globals->session_name);
-	if(ps_globals->id) efree(ps_globals->id);
-	zend_hash_destroy(&ps_globals->vars);
+	if(PS(mod_data))
+		PS(mod)->close(&PS(mod_data));
+	efree(PS(save_path));
+	efree(PS(session_name));
+	if(PS(id)) efree(PS(id));
+	zend_hash_destroy(&PS(vars));
 }
 
 int php_rinit_session(INIT_FUNC_ARGS)
