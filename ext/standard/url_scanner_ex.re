@@ -45,7 +45,6 @@ static PHP_INI_MH(OnUpdateTags)
 	char *key;
 	char *lasts;
 	char *tmp;
-	TSRMLS_FETCH();
 	
 	ctx = &BG(url_adapt_state_ex);
 	
@@ -232,13 +231,12 @@ static inline void handle_val(STD_PARA, char quotes, char type)
 #define scdebug(x)
 #endif
 
-static inline void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen)
+static inline void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen TSRMLS_DC)
 {
 	char *end, *q;
 	char *xp;
 	char *start;
 	int rest;
-	TSRMLS_FETCH();
 
 	smart_str_appendl(&ctx->buf, newdata, newlen);
 	
@@ -318,11 +316,10 @@ stop:
 	ctx->buf.len = rest;
 }
 
-char *url_adapt_flush(size_t *newlen)
+char *url_adapt_flush(size_t *newlen TSRMLS_DC)
 {
 	char *ret = NULL;
 	url_adapt_state_ex_t *ctx;
-	TSRMLS_FETCH();
 	
 	ctx = &BG(url_adapt_state_ex);
 	
@@ -336,13 +333,12 @@ char *url_adapt_flush(size_t *newlen)
 	return ret;
 }
 
-char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen)
+char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC)
 {
 	smart_str surl = {0};
 	smart_str buf = {0};
 	smart_str sname = {0};
 	smart_str sval = {0};
-	TSRMLS_FETCH();
 
 	smart_str_setl(&surl, url, urllen);
 	smart_str_sets(&sname, name);
@@ -356,17 +352,16 @@ char *url_adapt_single_url(const char *url, size_t urllen, const char *name, con
 	return buf.c;
 }
 
-char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen)
+char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen TSRMLS_DC)
 {
 	char *ret;
 	url_adapt_state_ex_t *ctx;
-	TSRMLS_FETCH();
 
 	ctx = &BG(url_adapt_state_ex);
 
 	smart_str_sets(&ctx->q_name, name);
 	smart_str_sets(&ctx->q_value, value);
-	mainloop(ctx, src, srclen);
+	mainloop(ctx, src, srclen TSRMLS_CC);
 
 	*newlen = ctx->result.len;
 	if (!ctx->result.c) 
@@ -379,7 +374,6 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 PHP_RINIT_FUNCTION(url_scanner)
 {
 	url_adapt_state_ex_t *ctx;
-	TSRMLS_FETCH();
 	
 	ctx = &BG(url_adapt_state_ex);
 
@@ -391,7 +385,6 @@ PHP_RINIT_FUNCTION(url_scanner)
 PHP_RSHUTDOWN_FUNCTION(url_scanner)
 {
 	url_adapt_state_ex_t *ctx;
-	TSRMLS_FETCH();
 	
 	ctx = &BG(url_adapt_state_ex);
 
@@ -406,7 +399,6 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 PHP_MINIT_FUNCTION(url_scanner)
 {
 	url_adapt_state_ex_t *ctx;
-	TSRMLS_FETCH();
 	
 	ctx = &BG(url_adapt_state_ex);
 
@@ -418,8 +410,6 @@ PHP_MINIT_FUNCTION(url_scanner)
 
 PHP_MSHUTDOWN_FUNCTION(url_scanner)
 {
-	TSRMLS_FETCH();
-
 	UNREGISTER_INI_ENTRIES();
 	zend_hash_destroy(BG(url_adapt_state_ex).tags);
 	free(BG(url_adapt_state_ex).tags);

@@ -182,7 +182,6 @@ PHP_MINFO_FUNCTION(apache)
 	extern char *user_name;
 	extern gid_t group_id;
 	extern int max_requests_per_child;
-	TSRMLS_FETCH();
 
 	serv = ((request_rec *) SG(server_context))->server;
 

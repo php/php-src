@@ -1271,13 +1271,13 @@ PHP_FUNCTION(session_destroy)
 void session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen TSRMLS_DC)
 {
 	if (PS(define_sid) && (PS(session_status) == php_session_active))
-		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen);
+		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen TSRMLS_CC);
 }
 
 void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC)
 {
 	if (PS(define_sid) && (PS(session_status) == php_session_active))
-		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen);
+		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen TSRMLS_CC);
 }
 
 void session_adapt_flush(int (*write)(const char *, uint TSRMLS_DC) TSRMLS_DC)
@@ -1285,7 +1285,7 @@ void session_adapt_flush(int (*write)(const char *, uint TSRMLS_DC) TSRMLS_DC)
 	char *str;
 	size_t len;
 	
-	str = url_adapt_flush(&len);
+	str = url_adapt_flush(&len TSRMLS_CC);
 	if (str) write(str, len TSRMLS_CC);
 }
 
