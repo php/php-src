@@ -405,8 +405,8 @@ AC_ARG_WITH(dbmaker,
     # check DBMaker version (from 5.0 to 2.0)
     DBMAKER_VERSION=5.0
 
-    while [ test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a \
-                 "$DBMAKER_VERSION" != "2.9" ]; do
+    while [[ test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a \
+                 "$DBMAKER_VERSION" != "2.9" ]]; do
         DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | awk '{ print $1-1;}'`
         MAJOR_V=`echo $DM_VER | awk '{ print $1/10; }' \
                  | awk  -F. '{ print $1; }'`
@@ -414,7 +414,7 @@ AC_ARG_WITH(dbmaker,
         DBMAKER_VERSION=$MAJOR_V.$MINOR_V
     done
 
-    if [ "$DBMAKER_VERSION" = "2.9" ]; then
+    if [[ "$DBMAKER_VERSION" = "2.9" ]]; then
         withval=$DBMAKER_HOME
     else
         DBMAKER_PATH=$DBMAKER_HOME/$DBMAKER_VERSION
@@ -436,8 +436,7 @@ AC_ARG_WITH(dbmaker,
 
     if test "$shared" = "yes"; then
         AC_MSG_RESULT(yes (shared))
-        ODBC_LFLAGS="-L$withval/driver/JDBC"
-        ODBC_LIBS="-ldmjdbc -lc -lm"
+        ODBC_LIBS="-ldmapic -lc -lm"
         ODBC_SHARED="odbc.la"
     else
         AC_MSG_RESULT(yes (static))
