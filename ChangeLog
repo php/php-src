@@ -1,3 +1,106 @@
+2000-09-19  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4: This fix prevents adding an empty -l to LIBS
+
+2000-09-19  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php4dllts.dsp: fix unresolved externals
+
+2000-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re:
+    Reduce the amount of copying in the mainloop. We copy tag/arg only, if we
+    need to preserve them for a new loop iteration (after we leave mainloop).
+    Otherwise, we can just let them point to the work area.
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Revert part of last commit. I'll refine it later.
+
+2000-09-19  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/array.c: - Change to Z_BVAL macro
+
+2000-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Another speedup by avoiding string copies.
+
+    15% speed gain in test case (rewriting 1M URLs).
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Remove nextiter label
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    s/DEBUG/SCANNER_DEBUG/. "Convert" one macro to inline function to be more
+    consistent. Also use continue.
+
+2000-09-19  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Fix a few build bugs, still no go
+
+2000-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Kill warning
+
+    * ext/standard/url_scanner.c:
+    The rewrite was completely authored by Hartmut
+
+2000-09-19  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c:
+    (Zeus-specific) Don't GetServerVariable() for vars which Zeus doesn't use
+
+2000-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c: Remove unnecessary include directive
+
+2000-09-19  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/url_scanner.c
+      ext/wddx/wddx.c
+      ext/standard/basic_functions.c
+      ext/standard/array.c: - Fix warnings
+    - Fix URL scanner startup crash
+
+2000-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Don't restore timestamp on internal_functions.c, otherwise rerunning
+    configure will cause config.status to be run again during make
+    (due to the rule in main/Makefile.in).
+
+2000-09-19  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c: Fixed bug which could truncate PHP_SELF
+
+2000-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/Makefile.in
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re:
+    Add new URL scanner. This version is up to 20% faster. It will be
+    enabled by default once I'm sure that it works in every case.
+
+    To enable it, apply s/url_adapt_ext/url_adapt_ext_ex/ to session.c
+
+    * ext/session/session.c: *** empty log message ***
+
+    * ext/standard/url_scanner.c
+      ext/standard/url_scanner.h:
+    Fix RINIT/RSHUTDOWN functions and add url_adapt_ext()
+
+2000-09-19  Stig Bakken  <ssb@fast.no>
+
+    * NEWS:
 2000-09-18  Stig Bakken  <ssb@fast.no>
 
     * pear/HTML/Form.php:
