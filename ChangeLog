@@ -1,3 +1,48 @@
+2003-10-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/ldap/ldap.c:
+      MFH: - Fixed bug #25764 (ldap_get_option() crashes with unbinded ldap link)
+
+    * ext/ldap/ldap.c:
+      - Fixed bug #25764 (ldap_get_option() crashes when called with unbinded
+      ldap link)
+
+2003-10-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/element.c
+      ext/dom/php_dom.c:
+      some namespace fixes
+      fix compiler warning
+
+2003-10-06  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Installer.php:
+      better version checks (contributed by Roman)
+
+2003-10-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_com.c:
+      potential fix for #25759, although it will need further review.
+
+2003-10-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      BFN
+
+    * ext/simplexml/simplexml.c:
+      Forgot about this one
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/bug25756.phpt
+      ext/simplexml/tests/bug25756.xsd
+      ext/simplexml/tests/bug25756_1.xml
+      ext/simplexml/tests/bug25756_2.xml:
+      Fixed bug #25756 (SimpleXML's validate_schema_file() broken)
+
 2003-10-05  Shane Caraveo  <shane@caraveo.com>
 
     * ext/dom/node.c:
