@@ -109,7 +109,7 @@ PHP_FUNCTION(strcspn)
 }
 /* }}} */
 
-PHPAPI void _php3_trim(pval *str, pval * return_value, int mode)
+PHPAPI void php_trim(pval *str, pval * return_value, int mode)
 /* mode 1 : trim left
    mode 2 : trim right
    mode 3 : trim left and right
@@ -161,7 +161,7 @@ PHP_FUNCTION(chop)
 	convert_to_string_ex(str);
 
 	if ((*str)->type == IS_STRING) {
-		_php3_trim(*str, return_value, 2);
+		php_trim(*str, return_value, 2);
 		return;
 	}
 	RETURN_FALSE;
@@ -180,7 +180,7 @@ PHP_FUNCTION(trim)
 	convert_to_string_ex(str);
 
 	if ((*str)->type == IS_STRING) {
-		_php3_trim(*str, return_value, 3);
+		php_trim(*str, return_value, 3);
 		return;
 	}
 	RETURN_FALSE;
@@ -198,14 +198,14 @@ PHP_FUNCTION(ltrim)
 	}
 	convert_to_string_ex(str);
 	if ((*str)->type == IS_STRING) {
-		_php3_trim(*str, return_value, 1);
+		php_trim(*str, return_value, 1);
 		return;
 	}
 	RETURN_FALSE;
 }
 /* }}} */
 
-void _php3_explode(pval *delim, pval *str, pval *return_value) 
+PHPAPI void php_explode(pval *delim, pval *str, pval *return_value) 
 {
 	char *work_str, *p1, *p2;
 	int i = 0;
@@ -245,7 +245,7 @@ PHP_FUNCTION(explode)
 	if (array_init(return_value) == FAILURE) {
 		return;
 	}
-	_php3_explode(*delim, *str, return_value);
+	php_explode(*delim, *str, return_value);
 }
 /* }}} */
 
@@ -253,7 +253,7 @@ PHP_FUNCTION(explode)
 /* {{{ proto string join(array src, string glue)
    An alias for implode */
 /* }}} */
-void _php3_implode(pval *delim, pval *arr, pval *return_value) 
+PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value) 
 {
 	pval **tmp;
 	int len = 0, count = 0;
@@ -316,7 +316,7 @@ PHP_FUNCTION(implode)
 				   get_active_function_name());
 		return;
 	}
-	_php3_implode(delim, arr, return_value);
+	php_implode(delim, arr, return_value);
 }
 /* }}} */
 
@@ -386,7 +386,7 @@ PHP_FUNCTION(strtok)
 }
 /* }}} */
 
-PHPAPI char *_php3_strtoupper(char *s)
+PHPAPI char *php_strtoupper(char *s)
 {
 	char *c;
 	int ch;
@@ -412,12 +412,12 @@ PHP_FUNCTION(strtoupper)
 
 	*return_value = **arg;
 	zval_copy_ctor(return_value);
-	_php3_strtoupper(return_value->value.str.val);
+	php_strtoupper(return_value->value.str.val);
 }
 /* }}} */
 
 
-PHPAPI char *_php3_strtolower(char *s)
+PHPAPI char *php_strtolower(char *s)
 {
 	register int ch;
 	char *c;
@@ -444,7 +444,7 @@ PHP_FUNCTION(strtolower)
 
 	*return_value = **str;
 	zval_copy_ctor(return_value);
-	ret = _php3_strtolower(return_value->value.str.val);
+	ret = php_strtolower(return_value->value.str.val);
 }
 /* }}} */
 
@@ -481,7 +481,7 @@ PHP_FUNCTION(basename)
 }
 /* }}} */
 
-PHPAPI void _php3_dirname(char *str, int len) {
+PHPAPI void php_dirname(char *str, int len) {
 	register char *c;
 
 	c = str + len - 1;
@@ -512,7 +512,7 @@ PHP_FUNCTION(dirname)
 	}
 	convert_to_string_ex(str);
 	ret = estrdup((*str)->value.str.val);
-	_php3_dirname(ret,(*str)->value.str.len);
+	php_dirname(ret,(*str)->value.str.len);
 	RETVAL_STRING(ret,1);
 	efree(ret);
 }
@@ -520,7 +520,7 @@ PHP_FUNCTION(dirname)
 
 
 /* case insensitve strstr */
-PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t)
+PHPAPI char *php_stristr(unsigned char *s, unsigned char *t)
 {
 	int i, j, k, l;
 	
@@ -552,7 +552,7 @@ PHP_FUNCTION(stristr)
 		php_error(E_WARNING,"Empty delimiter");
 		RETURN_FALSE;
 	}
-	found = php3i_stristr((*haystack)->value.str.val, (*needle)->value.str.val);
+	found = php_stristr((*haystack)->value.str.val, (*needle)->value.str.val);
 
 	if (found) {
 		RETVAL_STRING(found,1);
@@ -705,9 +705,8 @@ PHP_FUNCTION(strrchr)
 }
 /* }}} */
 
-static char *
-_php3_chunk_split(char *src, int srclen, char *end, int endlen,
-				  int chunklen, int *destlen)
+static char *php_chunk_split(char *src, int srclen, char *end, int endlen,
+							 int chunklen, int *destlen)
 {
 	char *dest;
 	char *p, *q;
@@ -778,8 +777,8 @@ PHP_FUNCTION(chunk_split)
 		RETURN_FALSE;
 	}
 	
-	result = _php3_chunk_split((*p_str)->value.str.val, (*p_str)->value.str.len,
-							   end, endlen, chunklen, &result_len);
+	result = php_chunk_split((*p_str)->value.str.val, (*p_str)->value.str.len,
+						     end, endlen, chunklen, &result_len);
 	
 	if(result) {
 		RETVAL_STRINGL(result, result_len, 0);
@@ -972,8 +971,8 @@ PHP_FUNCTION(ucwords)
 }
 /* }}} */
 
-PHPAPI char *_php3_strtr(char *string, int len, char *str_from,
-						 char *str_to, int trlen)
+PHPAPI char *php_strtr(char *string, int len, char *str_from,
+					   char *str_to, int trlen)
 {
 	int i;
 	unsigned char xlat[256];
@@ -1009,11 +1008,11 @@ PHP_FUNCTION(strtr)
 	convert_to_string_ex(from);
 	convert_to_string_ex(to);
 
-	RETVAL_STRING(_php3_strtr((*str)->value.str.val,
-							  (*str)->value.str.len,
-							  (*from)->value.str.val,
-							  (*to)->value.str.val,
-							  MIN((*from)->value.str.len,(*to)->value.str.len)),
+	RETVAL_STRING(php_strtr((*str)->value.str.val,
+							(*str)->value.str.len,
+							(*from)->value.str.val,
+							(*to)->value.str.val,
+							MIN((*from)->value.str.len,(*to)->value.str.len)),
 				  1);
 }
 /* }}} */
@@ -1046,8 +1045,8 @@ PHP_FUNCTION(strrev)
 }
 /* }}} */
 
-static void _php3_similar_str(const char *txt1, int len1, const char *txt2, 
-							  int len2, int *pos1, int *pos2, int *max)
+static void php_similar_str(const char *txt1, int len1, const char *txt2, 
+							int len2, int *pos1, int *pos2, int *max)
 {
 	char *p, *q;
 	char *end1 = (char *) txt1 + len1;
@@ -1068,19 +1067,19 @@ static void _php3_similar_str(const char *txt1, int len1, const char *txt2,
 	}
 }
 
-static int _php3_similar_char(const char *txt1, int len1, 
-							  const char *txt2, int len2)
+static int php_similar_char(const char *txt1, int len1, 
+							const char *txt2, int len2)
 {
 	int sum;
 	int pos1, pos2, max;
 
-	_php3_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
+	php_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
 	if ((sum = max)) {
 		if (pos1 && pos2)
-			sum += _php3_similar_char(txt1, pos1, txt2, pos2);
+			sum += php_similar_char(txt1, pos1, txt2, pos2);
 		if ((pos1 + max < len1) && (pos2 + max < len2))
-			sum += _php3_similar_char(txt1 + pos1 + max, len1 - pos1 - max, 
-									  txt2 + pos2 + max, len2 - pos2 -max);
+			sum += php_similar_char(txt1 + pos1 + max, len1 - pos1 - max, 
+									txt2 + pos2 + max, len2 - pos2 - max);
 	}
 	return sum;
 }
@@ -1111,7 +1110,7 @@ PHP_FUNCTION(similar_text)
 		RETURN_LONG(0);
 	}
 	
-	sim = _php3_similar_char((*t1)->value.str.val, (*t1)->value.str.len, 
+	sim = php_similar_char((*t1)->value.str.val, (*t1)->value.str.len, 
 							 (*t2)->value.str.val, (*t2)->value.str.len);
 	
 	if (ac > 2) {
@@ -1460,7 +1459,7 @@ PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,pva
 
 
 static inline char *
-_php3_memnstr(char *haystack, char *needle, int needle_len, char *end)
+php_memnstr(char *haystack, char *needle, int needle_len, char *end)
 {
 	char *p = haystack;
 	char *s = NULL;
@@ -1485,7 +1484,7 @@ PHPAPI char *php_str_to_str(char *haystack, int length,
 	new = emalloc(length);
 	/* we jump through haystack searching for the needle. hurray! */
 	for(p = haystack, q = new;
-			(r = _php3_memnstr(p, needle, needle_len, end));) {
+			(r = php_memnstr(p, needle, needle_len, end));) {
 	/* this ain't optimal. you could call it `efficient memory usage' */
 		off = erealloc(new, (q - new) + (r - p) + (str_len) + 1);
 		if(off != new) {
@@ -1570,7 +1569,7 @@ PHP_FUNCTION(str_replace)
 /* Converts Logical Hebrew text (Hebrew Windows style) to Visual text
  * Cheers/complaints/flames - Zeev Suraski <zeev@php.net>
  */
-static void _php3_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
+static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
 {
 	pval **str,**max_chars_per_line;
 	char *heb_str,*tmp,*target,*opposite_target,*broken_str;
@@ -1738,7 +1737,7 @@ static void _php3_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
    Convert logical Hebrew text to visual text */
 PHP_FUNCTION(hebrev)
 {
-	_php3_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	php_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 /* }}} */
 
@@ -1746,7 +1745,7 @@ PHP_FUNCTION(hebrev)
    Convert logical Hebrew text to visual text with newline conversion */
 PHP_FUNCTION(hebrevc)
 {
-	_php3_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
 
@@ -1791,7 +1790,7 @@ PHP_FUNCTION(strip_tags)
 	}
 	convert_to_string_ex(str);
 	buf = estrdup((*str)->value.str.val);
-	_php3_strip_tags(buf, (*str)->value.str.len, 0, allow?(*allow)->value.str.val:NULL);
+	php_strip_tags(buf, (*str)->value.str.len, 0, allow?(*allow)->value.str.val:NULL);
 	RETURN_STRING(buf, 0);
 }
 /* }}} */
@@ -1941,7 +1940,7 @@ int php_tag_find(char *tag, int len, char *set) {
 	in state 1 and when the tag is closed check it against the
 	allow string to see if we should allow it.
 */
-void _php3_strip_tags(char *rbuf, int len, int state, char *allow) {
+PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow) {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0;
 
@@ -1952,7 +1951,7 @@ void _php3_strip_tags(char *rbuf, int len, int state, char *allow) {
 	rp = rbuf;
 	br = 0;
 	if(allow) {
-		_php3_strtolower(allow);
+		php_strtolower(allow);
 		tbuf = emalloc(PHP_TAG_BUF_SIZE+1);
 		tp = tbuf;
 	} else {
