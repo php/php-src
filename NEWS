@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2002, Version 4.3.0
+-- bogus entry --
+
 ?? ??? 2002, Version 4.2.0
 - read_exif_data is now an alias for exif_read_data
   important to differenciate old/new version for tests)
@@ -17,8 +20,8 @@ PHP 4                                                                      NEWS
   . Removed all code pertaining to fd_sets (socket_fd_*)
   . Modfied/Improved socket_select() to take resource arrays instead of fd_sets
      ex. <?php $wfds=$rfds=array($sock1, $sock2, $sock3, $sock7);
-	       $r=socket_select($rfds, $wfds, NULL, 1);
-	       print "Ready to read:\n"; var_dump($rfds); ?>
+               $r=socket_select($rfds, $wfds, NULL, 1);
+               print "Ready to read:\n"; var_dump($rfds); ?>
 - Returned iconv support to FreeBSD (kalowsky)
 - Added CLI (command line intrerface) sapi based on a cut-down version
   of the CGI sapi which is more suited for writing shell scripts. Some of
