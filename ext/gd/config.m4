@@ -36,7 +36,7 @@ dnl A whole whack of possible places where this might be
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
 	ac_cv_lib_gd_gdImageLine=yes
       else
-        AC_MSG_RESULT(no)
+        AC_MSG_ERROR(Unable to find libgd.a anywhere under $withval)
       fi ;;
   esac
 ],[
