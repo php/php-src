@@ -38,7 +38,11 @@ ZEND_API zend_alloc_globals alloc_globals;
 #endif
 
 
+#ifdef ZEND_MM
+#define ZEND_DISABLE_MEMORY_CACHE 1
+#else
 #define ZEND_DISABLE_MEMORY_CACHE 0
+#endif
 
 #ifdef ZEND_MM
 #define ZEND_DO_MALLOC(size)		zend_mm_alloc(&AG(mm_heap), size)
@@ -416,8 +420,12 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 	AG(allocated_memory_peak) = 0;
 #endif
 
+#if ZEND_ENABLE_FAST_CACHE
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
+#endif
+#if !ZEND_DISABLE_MEMORY_CACHE
 	memset(AG(cache_count), 0, sizeof(AG(cache_count)));
+#endif
 
 #ifdef ZEND_MM
 	zend_mm_startup(&AG(mm_heap), 256*1024);
