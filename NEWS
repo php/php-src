@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.3
+- Fixed bug #30282 (segfault when using unknown/unsupported session.save_handler 
+  and/or session.serialize_handler). (Tony)
 - Fixed bug #30276 (Possible crash in ctype_digit on large numbers). (Ilia)
 - Fixed bug #30224 (Sybase date strings are sometimes not null terminated).
   (Ilia)
