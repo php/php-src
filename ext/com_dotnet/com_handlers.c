@@ -231,12 +231,21 @@ static HashTable *com_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
+static void function_dtor(void *pDest)
+{
+	zend_internal_function *f = (zend_internal_function*)pDest;
+
+	efree(f->function_name);
+	if (f->arg_info) {
+		efree(f->arg_info);
+	}
+}
+
 static union _zend_function *com_method_get(zval *object, char *name, int len TSRMLS_DC)
 {
-	zend_internal_function *f;
+	zend_internal_function f, *fptr = NULL;
 	php_com_dotnet_object *obj;
-
-	/* TODO: cache this */
+	union _zend_function *func;
 
 	obj = CDNO_FETCH(object);
 
@@ -244,64 +253,79 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 		return NULL;
 	}
 
-	f = emalloc(sizeof(zend_internal_function));
-	f->type = ZEND_OVERLOADED_FUNCTION_TEMPORARY;
-	f->num_args = 0;
-	f->arg_info = NULL;
-	f->scope = obj->ce;
-	f->fn_flags = 0;
-	f->function_name = estrndup(name, len);
+	/* check cache */
+	if (obj->method_cache == NULL || FAILURE == zend_hash_find(obj->method_cache, name, len, (void**)&fptr)) {
+		f.type = ZEND_OVERLOADED_FUNCTION;
+		f.num_args = 0;
+		f.arg_info = NULL;
+		f.scope = obj->ce;
+		f.fn_flags = 0;
+		f.function_name = estrndup(name, len);
 
-	if (obj->typeinfo) {
-		/* look for byref params */
-		ITypeComp *comp;
-		ITypeInfo *TI = NULL;
-		DESCKIND kind;
-		BINDPTR bindptr;
-		OLECHAR *olename;
-		ULONG lhash;
-		int i;
+		if (obj->typeinfo) {
+			/* look for byref params */
+			ITypeComp *comp;
+			ITypeInfo *TI = NULL;
+			DESCKIND kind;
+			BINDPTR bindptr;
+			OLECHAR *olename;
+			ULONG lhash;
+			int i;
 
-		if (SUCCEEDED(ITypeInfo_GetTypeComp(obj->typeinfo, &comp))) {
-			olename = php_com_string_to_olestring(name, len, obj->code_page TSRMLS_CC);
-			lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_SYSTEM_DEFAULT, olename);
+			if (SUCCEEDED(ITypeInfo_GetTypeComp(obj->typeinfo, &comp))) {
+				olename = php_com_string_to_olestring(name, len, obj->code_page TSRMLS_CC);
+				lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_SYSTEM_DEFAULT, olename);
 
-			if (SUCCEEDED(ITypeComp_Bind(comp, olename, lhash, INVOKE_FUNC, &TI, &kind, &bindptr))) {
-				switch (kind) {
-					case DESCKIND_FUNCDESC:
-						f->arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
+				if (SUCCEEDED(ITypeComp_Bind(comp, olename, lhash, INVOKE_FUNC, &TI, &kind, &bindptr))) {
+					switch (kind) {
+						case DESCKIND_FUNCDESC:
+							f.arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
 
-						for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
-							f->arg_info[i].allow_null = 1;
-							if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
-								f->arg_info[i].pass_by_reference = 1;
+							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
+								f.arg_info[i].allow_null = 1;
+								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
+									f.arg_info[i].pass_by_reference = 1;
+								}
 							}
-						}
 
-						f->num_args = bindptr.lpfuncdesc->cParams;
+							f.num_args = bindptr.lpfuncdesc->cParams;
 
-						ITypeInfo_ReleaseFuncDesc(TI, bindptr.lpfuncdesc);
-						break;
+							ITypeInfo_ReleaseFuncDesc(TI, bindptr.lpfuncdesc);
+							break;
 
-					/* these should not happen, but *might* happen if the user
-					 * screws up; lets avoid a leak in that case */
-					case DESCKIND_VARDESC:
-						ITypeInfo_ReleaseVarDesc(TI, bindptr.lpvardesc);
-						break;
-					case DESCKIND_TYPECOMP:
-						ITypeComp_Release(bindptr.lptcomp);
-						break;
+							/* these should not happen, but *might* happen if the user
+							 * screws up; lets avoid a leak in that case */
+						case DESCKIND_VARDESC:
+							ITypeInfo_ReleaseVarDesc(TI, bindptr.lpvardesc);
+							break;
+						case DESCKIND_TYPECOMP:
+							ITypeComp_Release(bindptr.lptcomp);
+							break;
+					}
+					if (TI) {
+						ITypeInfo_Release(TI);
+					}
 				}
-				if (TI) {
-					ITypeInfo_Release(TI);
-				}
+				ITypeComp_Release(comp);
+				efree(olename);
 			}
-			ITypeComp_Release(comp);
-			efree(olename);
 		}
+
+		/* save this method in the cache */
+		if (!obj->method_cache) {
+			ALLOC_HASHTABLE(obj->method_cache);
+			zend_hash_init(obj->method_cache, 2, NULL, function_dtor, 0);
+		}
+
+		zend_hash_update(obj->method_cache, name, len, &f, sizeof(f), (void**)&fptr);
 	}
 
-	return (union _zend_function*)f;
+	/* duplicate this into a new chunk of emalloc'd memory,
+	 * since the engine will efree it */
+	func = emalloc(sizeof(*fptr));
+	memcpy(func, fptr, sizeof(*fptr));
+
+	return func;
 }
 
 static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
@@ -311,7 +335,7 @@ static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	int nargs;
 	VARIANT v;
 	int ret = FAILURE;
-
+	
 	obj = CDNO_FETCH(getThis());
 
 	if (V_VT(&obj->v) != VT_DISPATCH) {
@@ -343,31 +367,33 @@ static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 static union _zend_function *com_constructor_get(zval *object TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
-	zend_internal_function *f;
+	static zend_internal_function c, d, v;
 
 	obj = CDNO_FETCH(object);
 
-	/* TODO: this leaks */
-	f = emalloc(sizeof(zend_internal_function));
-	f->type = ZEND_INTERNAL_FUNCTION;
-
-	f->function_name = obj->ce->name;
-	f->scope = obj->ce;
-	f->arg_info = NULL;
-	f->num_args = 0;
-	f->fn_flags = 0;
-#if HAVE_MSCOREE_H
-	if (f->function_name[0] == 'd') { /* 'd'otnet */
-		f->handler = ZEND_FN(com_dotnet_create_instance);
-	} else 
-#endif
-	if (f->function_name[0] == 'c') { /* 'c'om */
-		f->handler = ZEND_FN(com_create_instance);
-	} else { /* 'v'ariant */
-		f->handler = ZEND_FN(com_variant_create_instance);
+#define POPULATE_CTOR(f, fn)	\
+	f.type = ZEND_INTERNAL_FUNCTION; \
+	f.function_name = obj->ce->name; \
+	f.scope = obj->ce; \
+	f.arg_info = NULL; \
+	f.num_args = 0; \
+	f.fn_flags = 0; \
+	f.handler = ZEND_FN(fn); \
+	return (union _zend_function*)&f;
+	
+	switch (obj->ce->name[0]) {
+		case 'd':
+			POPULATE_CTOR(d, com_dotnet_create_instance);
+		
+		case 'c':
+			POPULATE_CTOR(d, com_create_instance);
+		
+		case 'v':
+			POPULATE_CTOR(d, com_variant_create_instance);
+			
+		default:
+			return NULL;
 	}
-
-	return (union _zend_function*)f;
 }
 
 static zend_class_entry *com_class_entry_get(zval *object TSRMLS_DC)
@@ -538,6 +564,13 @@ void php_com_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 	}
 
 	VariantClear(&obj->v);
+
+	if (obj->method_cache) {
+		FREE_HASHTABLE(obj->method_cache);
+	}
+	if (obj->id_of_name_cache) {
+		FREE_HASHTABLE(obj->id_of_name_cache);
+	}
 	efree(obj);
 }
 

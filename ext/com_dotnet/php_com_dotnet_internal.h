@@ -46,6 +46,11 @@ typedef struct _php_com_dotnet_object {
 	IDispatch *sink_dispatch;
 	GUID sink_id;
 	DWORD sink_cookie;
+
+	/* cache for method signatures */
+	HashTable *method_cache;
+	/* cache for name -> DISPID */
+	HashTable *id_of_name_cache;
 } php_com_dotnet_object;
 
 static inline int php_com_is_valid_object(zval *zv TSRMLS_DC)

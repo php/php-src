@@ -31,6 +31,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(com_dotnet)
 TsHashTable php_com_typelibraries;
+
 zend_class_entry
 	*php_com_variant_class_entry,
    	*php_com_exception_class_entry,
