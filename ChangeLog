@@ -1,3 +1,12 @@
+2004-08-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      main/streams/xp_socket.c:
+      MFH: Using int when long should be used.
+
+    * main/streams/xp_socket.c:
+      Using int when long should be used.
+
 2004-08-21  Timm Friebe  <thekid@thekid.de>
 
     * ext/sybase_ct/php_sybase_ct.c:
