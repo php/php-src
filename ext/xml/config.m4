@@ -40,10 +40,15 @@ AC_ARG_WITH(xml,
       fi
     fi
     AC_DEFINE(HAVE_LIBEXPAT, 1)
-    AC_ADD_INCLUDE($XML_INCLUDE)
     PHP_EXTENSION(xml, $shared)
     if test "$shared" != "yes"; then
       EXTRA_LIBS="$EXTRA_LIBS $XML_LIBS"
+      AC_ADD_INCLUDE($XML_INCLUDE)
+      XML_INCLUDE=""
+      XML_STATIC="libphpext_xml.a"
+    else
+      XML_INCLUDE="-I$XML_INCLUDE"
+      XML_SHARED="xml.la"
     fi
   else
     AC_MSG_RESULT(no)
@@ -52,3 +57,6 @@ AC_ARG_WITH(xml,
   AC_MSG_RESULT(no)
 ]) 
 AC_SUBST(XML_LIBS)
+AC_SUBST(XML_INCLUDE)
+AC_SUBST(XML_STATIC)
+AC_SUBST(XML_SHARED)
