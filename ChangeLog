@@ -1,3 +1,22 @@
+2004-02-06  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/config.w32
+      ext/interbase/interbase.c:
+      Fix build with Win32 Interbase 5.x
+
+2004-02-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      sapi/cli/php_cli.c:
+      MFH: Fixed possible memory leak with INI values.
+
+    * sapi/cli/php_cli.c:
+      Fixed possible memory leak with INI values.
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFH: Fixed bug #24773 (unseting of strings as arrays causes a crash).
+
 2004-02-05  Andrey Hristov  <andrey@webgate.bg>
 
     * NEWS:
