@@ -1,7 +1,5 @@
 --TEST--
 Test array_diff and array_diff_assoc behaviour
---POST--
---GET--
 --FILE--
 <?php
 $a = array(1,"big"=>2,3,6,3,5,3,3,3,3,3,3,3,3,3,3);
