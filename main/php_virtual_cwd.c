@@ -22,7 +22,6 @@
 #endif
 
 #ifdef PHP_WIN32
-typedef unsigned int int;
 #define strtok_r(a,b,c) strtok((a),(b))
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define DEFAULT_SLASH '\\'
