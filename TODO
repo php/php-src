@@ -66,7 +66,7 @@ ext/session
 -----------
     * implement a call to set a session read-only to overcome 
       the need to serialize frame-loads.
-	* maybe implement finer-grained session variables that could be 
+    * maybe implement finer-grained session variables that could be 
       locked individually.
 
 ext/standard
