@@ -197,14 +197,17 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					val = val->next;
 				}
 				if (val != NULL) {
-					zval *tmp;
-					tmp = master_to_zval(NULL, val);
-					if (val->name) {
-						add_assoc_zval(return_value, (char*)val->name, tmp);
-					} else {
-						add_next_index_zval(return_value, tmp);
+					if (!node_is_equal_ex(val,"result",RPC_SOAP12_NAMESPACE)) {
+						zval *tmp;
+
+						tmp = master_to_zval(NULL, val);
+						if (val->name) {
+							add_assoc_zval(return_value, (char*)val->name, tmp);
+						} else {
+							add_next_index_zval(return_value, tmp);
+						}
+						++param_count;
 					}
-					++param_count;
 					val = val->next;
 				}
 			}

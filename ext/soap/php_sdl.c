@@ -312,11 +312,11 @@ static sdlPtr load_wsdl(char *struri)
 				if (address->ns && !strcmp(address->ns->href, WSDL_SOAP11_NAMESPACE)) {
 					wsdl_soap_namespace = WSDL_SOAP11_NAMESPACE;
 					tmpbinding->bindingType = BINDING_SOAP;
-				} else if (address->ns && !strcmp(address->ns->href, WSDL_SOAP12OLD_NAMESPACE)) {
-					wsdl_soap_namespace = WSDL_SOAP12OLD_NAMESPACE;
-					tmpbinding->bindingType = BINDING_SOAP;
 				} else if (address->ns && !strcmp(address->ns->href, WSDL_SOAP12_NAMESPACE)) {
 					wsdl_soap_namespace = WSDL_SOAP12_NAMESPACE;
+					tmpbinding->bindingType = BINDING_SOAP;
+				} else if (address->ns && !strcmp(address->ns->href, RPC_SOAP12_NAMESPACE)) {
+					wsdl_soap_namespace = RPC_SOAP12_NAMESPACE;
 					tmpbinding->bindingType = BINDING_SOAP;
 				} else if (address->ns && !strcmp(address->ns->href, WSDL_HTTP11_NAMESPACE)) {
 					tmpbinding->bindingType = BINDING_HTTP;
