@@ -1,9 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Added domxml_node_namespace_uri() (Rui Lopes).
-- Fix win32 memory leak in /ext/sockets that would occur on any error condition
-  Fix host resolution error messages on win32
+- Added domxml_node_namespace_uri(). (Rui Lopes)
+- Fixed win32 memory leak in /ext/sockets that would occur on any error 
+  condition. Also fixed host resolution error messages on win32. (Jason)
 - Added optional 3rd parameter 'recursive' to ftp_rawlist() which will
   do 'LIST -R' instead of 'LIST'. (Jani)
 - Disabled the fifth parameter in mail() when safe-mode is turned on. (Derick)
