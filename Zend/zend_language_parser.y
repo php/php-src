@@ -445,32 +445,37 @@ class_statement:
 		variable_modifiers { CG(access_type) = $1.u.constant.value.lval; } class_variable_declaration ';'
 	|	class_constant_declaration ';'
 	|	method_modifiers T_FUNCTION { $2.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$5, 1, $4.op_type, $1.u.constant.value.lval TSRMLS_CC); } '(' 
-			parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); }
-	|	T_ABSTRACT method_modifiers T_FUNCTION { $3.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$3, &$6, 1, $5.op_type, $2.u.constant.value.lval | ZEND_ACC_ABSTRACT TSRMLS_CC); } '(' 
-			parameter_list ')' { zend_do_abstract_method(TSRMLS_C); zend_do_end_function_declaration(&$3 TSRMLS_CC); } ';'
+			parameter_list ')' method_body { zend_do_abstract_method(&$5, &$1, &$10 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 	|	T_CLASS T_STRING extends_from '{' { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 ;
 
+
+method_body:
+		';' /* abstract method */		{ $$.u.constant.value.lval = ZEND_ACC_ABSTRACT; }
+	|	'{' inner_statement_list '}'	{ $$.u.constant.value.lval = 0;	}
+;
+
 variable_modifiers:
-		non_empty_access_modifiers		{ $$ = $1; }
+		non_empty_member_modifiers		{ $$ = $1; }
 	|	T_VAR							{ $$.u.constant.value.lval = ZEND_ACC_PUBLIC; }
 ;
 
 method_modifiers:
 		/* empty */							{ $$.u.constant.value.lval = ZEND_ACC_PUBLIC; }
-	|	non_empty_access_modifiers			{ $$ = $1;  if (!($$.u.constant.value.lval & ZEND_ACC_PPP_MASK)) { $$.u.constant.value.lval |= ZEND_ACC_PUBLIC; } }
+	|	non_empty_member_modifiers			{ $$ = $1;  if (!($$.u.constant.value.lval & ZEND_ACC_PPP_MASK)) { $$.u.constant.value.lval |= ZEND_ACC_PUBLIC; } }
 ;
 
-non_empty_access_modifiers:
-		access_modifier						{ $$ = $1; }
-	|	non_empty_access_modifiers access_modifier	{ $$.u.constant.value.lval = zend_do_verify_access_types(&$1, &$2); }
+non_empty_member_modifiers:
+		member_modifier						{ $$ = $1; }
+	|	non_empty_member_modifiers member_modifier	{ $$.u.constant.value.lval = zend_do_verify_access_types(&$1, &$2); }
 ;
 
-access_modifier:
+member_modifier:
 		T_PUBLIC				{ $$.u.constant.value.lval = ZEND_ACC_PUBLIC; }
 	|	T_PROTECTED				{ $$.u.constant.value.lval = ZEND_ACC_PROTECTED; }
 	|	T_PRIVATE				{ $$.u.constant.value.lval = ZEND_ACC_PRIVATE; }
 	|	T_STATIC				{ $$.u.constant.value.lval = ZEND_ACC_STATIC; }
+	|	T_ABSTRACT				{ $$.u.constant.value.lval = ZEND_ACC_ABSTRACT; }
 ;
 
 class_variable_declaration:
