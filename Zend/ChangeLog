@@ -1,3 +1,8 @@
+2003-01-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend_API.c:
+      Replace snprintf() call using zend_error's capabilities
+
 2003-01-23  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute.c:
