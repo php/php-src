@@ -314,11 +314,19 @@ class PEAR_Dependency
      */
     function checkPHP(&$errmsg, $req, $relation = 'ge')
     {
+        // this would be a bit stupid, but oh well :)
+        if ($relation == 'has') {
+            return false;
+        }
+        if ($relation == 'not') {
+            $errmsg = "Invalid dependency - 'not' is allowed when specifying PHP, you must run PHP in PHP";
+            return PEAR_DEPENDENCY_BAD_DEPENDENCY;
+        }
         if (substr($req, 0, 2) == 'v.') {
             $req = substr($req,2, strlen($req) - 2);
         }
         $php_ver = phpversion();
-        $operator = substr($relation,0,2);
+        $operator = $relation;
         if (!version_compare("$php_ver", "$req", $operator)) {
             $errmsg = "PHP version " . $this->signOperator($operator) .
                 " $req is required";
@@ -341,9 +349,8 @@ class PEAR_Dependency
     function checkProgram(&$errmsg, $program)
     {
         // XXX FIXME honor safe mode
-        $path_delim = OS_WINDOWS ? ';' : ':';
         $exe_suffix = OS_WINDOWS ? '.exe' : '';
-        $path_elements = explode($path_delim, getenv('PATH'));
+        $path_elements = explode(PATH_SEPARATOR, getenv('PATH'));
         foreach ($path_elements as $dir) {
             $file = $dir . DIRECTORY_SEPARATOR . $program . $exe_suffix;
             if (@file_exists($file) && @is_executable($file)) {
