@@ -158,6 +158,7 @@ PHP_MYSQL_API php_mysql_globals mysql_globals;
 DLEXPORT zend_module_entry *get_module(void) { return &mysql_module_entry; }
 #endif
 
+void timeout(int sig);
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"MySQL:  A link to the server could not be established"); RETURN_FALSE; } }
 
@@ -184,18 +185,24 @@ static void php_mysql_set_default_link(int id)
 
 static void _close_mysql_link(MYSQL *link)
 {
+	void (*handler) (int);   
 	MySLS_FETCH();
 
+	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(link);
+	signal(SIGPIPE,handler);
 	efree(link);
 	MySG(num_links)--;
 }
 
 static void _close_mysql_plink(MYSQL *link)
 {
+	void (*handler) (int);
 	MySLS_FETCH();
 
+	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(link);
+	signal(SIGPIPE,handler);
 
 	free(link);
 	MySG(num_persistent)--;
@@ -316,6 +323,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	char *hashed_details;
 	int hashed_details_length,port = MYSQL_PORT;
 	MYSQL *mysql;
+	void (*handler) (int);
 	MySLS_FETCH();
 	PLS_FETCH();
 
@@ -449,12 +457,14 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				RETURN_FALSE;
 			}
 			/* ensure that the link did not die */
+			handler=signal(SIGPIPE,SIG_IGN);
 #if defined(HAVE_MYSQL_ERRNO) && defined(CR_SERVER_GONE_ERROR)
 			mysql_stat(le->ptr);
 			if (mysql_errno((MYSQL *)le->ptr) == CR_SERVER_GONE_ERROR) {
 #else
 			if (!strcasecmp(mysql_stat(le->ptr),"mysql server has gone away")) { /* the link died */
 #endif
+				signal(SIGPIPE,handler);
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 				if (mysql_real_connect(le->ptr,host,user,passwd,NULL,port,socket,0)==NULL) {
 #else
@@ -466,6 +476,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 					RETURN_FALSE;
 				}
 			}
+			signal(SIGPIPE,handler);
 			mysql = (MYSQL *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);
