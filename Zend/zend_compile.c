@@ -2154,17 +2154,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", class_name->u.constant.value.str.val);
 	}
 
-	if (CG(active_class_entry)) {
-		new_class_entry->name_length = sizeof("::")-1 + class_name->u.constant.value.str.len + CG(active_class_entry)->name_length;
-		new_class_entry->name = emalloc(new_class_entry->name_length+1);
-		strcpy(new_class_entry->name, CG(active_class_entry)->name);
-		strcat(new_class_entry->name, "::");
-		strcat(new_class_entry->name, class_name->u.constant.value.str.val);
-		STR_FREE(class_name->u.constant.value.str.val);
-	} else {
-		new_class_entry->name = class_name->u.constant.value.str.val;
-		new_class_entry->name_length = class_name->u.constant.value.str.len;
-	}
+	new_class_entry->name = class_name->u.constant.value.str.val;
+	new_class_entry->name_length = class_name->u.constant.value.str.len;
 
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->parent = NULL;
