@@ -53,5 +53,7 @@ object(simplexml_element)#%d (1) {
   [0]=>
   string(2) "30"
 }
-
-Fatal error: Unsupported operand types in %s014.php on line %d
+object(simplexml_element)#%d (1) {
+  [0]=>
+  string(2) "35"
+}

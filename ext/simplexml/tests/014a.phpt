@@ -48,9 +48,9 @@ object(simplexml_element)#%d (1) {
 NULL
 bool(false)
 ---Unsupported---
+NULL
 object(simplexml_element)#%d (1) {
   [0]=>
-  string(2) "30"
+  string(1) "5"
 }
-
-Fatal error: Unsupported operand types in %s014.php on line %d
+===DONE===

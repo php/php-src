@@ -21,6 +21,7 @@ foreach ($sxe as $element_name => $element) {
 foreach ($sxe->children('http://www.example.com/hot') as $element_name => $element) {
     print "$element_name is $element->name\n";
 }
+
 ?>
 ===DONE===
 --EXPECT--
