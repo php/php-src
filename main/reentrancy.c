@@ -127,11 +127,10 @@ PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
 	if (!ptr && errno != 0)
 		ret = errno;
 
-	if (entry && ptr)
+	if (ptr)
 		memcpy(entry, ptr, sizeof(*ptr));
 
-	if (result) 
-		*result = ptr;
+	*result = ptr;
 
 	local_unlock(READDIR_R);
 
