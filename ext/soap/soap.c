@@ -30,13 +30,14 @@ static int le_url = 0;
 static int le_service = 0;
 
 typedef struct _soapHeader {
-	sdlFunctionPtr       function;
-	zval                 function_name;
-	int                  mustUnderstand;
-	int                  num_params;
-	zval               **parameters;
-	zval                 retval;
-	struct _soapHeader  *next;
+	sdlFunctionPtr                    function;
+	zval                              function_name;
+	int                               mustUnderstand;
+	int                               num_params;
+	zval                            **parameters;
+	zval                              retval;
+	sdlSoapBindingFunctionHeaderPtr   hdr;
+	struct _soapHeader               *next;
 } soapHeader;
 
 /* Local functions */
@@ -443,7 +444,7 @@ PHP_MINIT_FUNCTION(soap)
 	REGISTER_LONG_CONSTANT("SOAP_ENC_ARRAY", SOAP_ENC_ARRAY, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_STRING_CONSTANT("XSD_NAMESPACE", XSD_NAMESPACE, CONST_CS | CONST_PERSISTENT);
-	
+
 	REGISTER_LONG_CONSTANT("XSD_ANYTYPE", XSD_ANYTYPE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_STRING", XSD_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_BOOLEAN", XSD_BOOLEAN, CONST_CS | CONST_PERSISTENT);
@@ -1136,7 +1137,7 @@ PHP_METHOD(soapserver, handle)
 					SOAP_GLOBAL(soap_version) = SOAP_1_1;
 				} else if (strcmp(env->ns->href,SOAP_1_2_ENV_NAMESPACE) == 0) {
 					SOAP_GLOBAL(soap_version) = SOAP_1_2;
-				} 
+				}
 			}
 			php_error(E_ERROR,"DTD are not supported by SOAP");
 		}
@@ -1226,7 +1227,7 @@ PHP_METHOD(soapserver, handle)
 				soapHeader *h = header;
 
 				header = header->next;
-				if (service->sdl && !h->function && h->mustUnderstand) {
+				if (h->mustUnderstand && service->sdl && !h->function && !h->hdr) {
 					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
 				}
 
@@ -1302,7 +1303,6 @@ PHP_METHOD(soapserver, handle)
 		php_end_ob_buffer(0, 0 TSRMLS_CC);
 
 		/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
-		xmlSetDocCompressMode(doc_return, 1);
 		xmlDocDumpMemory(doc_return, &buf, &size);
 
 		if (size == 0) {
@@ -2201,16 +2201,16 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 		trav = head->children;
 		while (trav != NULL) {
 			if (trav->type == XML_ELEMENT_NODE) {
-				xmlNodePtr func = trav;
+				xmlNodePtr hdr_func = trav;
 				xmlAttrPtr attr;
 				int mustUnderstand = 0;
 
 				if (*version == SOAP_1_1) {
-					attr = get_attribute_ex(func->properties,"encodingStyle",SOAP_1_1_ENV_NAMESPACE);
+					attr = get_attribute_ex(hdr_func->properties,"encodingStyle",SOAP_1_1_ENV_NAMESPACE);
 					if (attr && strcmp(attr->children->content,SOAP_1_1_ENC_NAMESPACE) != 0) {
 						soap_server_fault("Client","Unknown Data Encoding Style", NULL, NULL TSRMLS_CC);
 					}
-					attr = get_attribute_ex(func->properties,"actor",envelope_ns);
+					attr = get_attribute_ex(hdr_func->properties,"actor",envelope_ns);
 					if (attr != NULL) {
 						if (strcmp(attr->children->content,"http://schemas.xmlsoap.org/soap/actor/next") != 0 &&
 						    (actor == NULL || strcmp(attr->children->content,actor) != 0)) {
@@ -2218,11 +2218,11 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 						}
 					}
 				} else if (*version == SOAP_1_2) {
-					attr = get_attribute_ex(func->properties,"encodingStyle",SOAP_1_2_ENV_NAMESPACE);
+					attr = get_attribute_ex(hdr_func->properties,"encodingStyle",SOAP_1_2_ENV_NAMESPACE);
 					if (attr && strcmp(attr->children->content,SOAP_1_2_ENC_NAMESPACE) != 0) {
 						soap_server_fault("DataEncodingUnknown","Unknown Data Encoding Style", NULL, NULL TSRMLS_CC);
 					}
-					attr = get_attribute_ex(func->properties,"role",envelope_ns);
+					attr = get_attribute_ex(hdr_func->properties,"role",envelope_ns);
 					if (attr != NULL) {
 						if (strcmp(attr->children->content,"http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver") != 0 &&
 						    strcmp(attr->children->content,"http://www.w3.org/2003/05/soap-envelope/role/next") != 0 &&
@@ -2231,7 +2231,7 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 						}
 					}
 				}
-				attr = get_attribute_ex(func->properties,"mustUnderstand",envelope_ns);
+				attr = get_attribute_ex(hdr_func->properties,"mustUnderstand",envelope_ns);
 				if (attr) {
 					if (strcmp(attr->children->content,"1") == 0 ||
 					    strcmp(attr->children->content,"true") == 0) {
@@ -2245,15 +2245,39 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 				}
 				h = emalloc(sizeof(soapHeader));
 				memset(h, 0, sizeof(soapHeader));
-				h->function = find_function(sdl, func, &h->function_name);
 				h->mustUnderstand = mustUnderstand;
-				if (h->function && h->function->binding && h->function->binding->bindingType == BINDING_SOAP) {
-					sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)h->function->bindingAttributes;
-					if (fnb->style == SOAP_RPC) {
-						func = func->children;
-					}
+				h->function = find_function(sdl, hdr_func, &h->function_name);
+				if (!h->function && sdl && function && function->binding && function->binding->bindingType == BINDING_SOAP) {
+					sdlSoapBindingFunctionHeaderPtr *hdr;
+					sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
+				  if (fnb->input.headers) {
+				  	smart_str key = {0};
+
+				  	if (hdr_func->ns) {
+				  		smart_str_appends(&key, hdr_func->ns->href);
+				  		smart_str_appendc(&key, ':');
+				  	}
+			  		smart_str_appendl(&key, Z_STRVAL(h->function_name), Z_STRLEN(h->function_name));
+			  		smart_str_0(&key);
+				    if (zend_hash_find(fnb->input.headers, key.c, key.len+1, (void**)&hdr) == SUCCESS) {
+					    h->hdr = *hdr;
+					  }
+			  		smart_str_free(&key);
+				  }
 				}
-				deseralize_parameters(func, h->function, &h->num_params, &h->parameters);
+				if (h->hdr) {
+					h->num_params = 1;
+					h->parameters = emalloc(sizeof(zval*));
+					h->parameters[0] = master_to_zval(h->hdr->encode, hdr_func);
+				} else {
+					if (h->function && h->function->binding && h->function->binding->bindingType == BINDING_SOAP) {
+						sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)h->function->bindingAttributes;
+						if (fnb->style == SOAP_RPC) {
+							hdr_func = hdr_func->children;
+						}
+					}
+					deseralize_parameters(hdr_func, h->function, &h->num_params, &h->parameters);
+				}
 				INIT_ZVAL(h->retval);
 				if (last == NULL) {
 					*headers = h;
@@ -2413,7 +2437,6 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 	}
 	xmlDocSetRootElement(doc, envelope);
 
-
 	if (Z_TYPE_P(ret) == IS_OBJECT &&
 		Z_OBJCE_P(ret) == soap_fault_class_entry) {
 		body = xmlNewChild(envelope, ns, "Body", NULL);
@@ -2489,8 +2512,64 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 			h = headers;
 			while (h != NULL) {
 				if (Z_TYPE(h->retval) != IS_NULL) {
-					if (seralize_response_call2(head, h->function, Z_STRVAL(h->function_name), uri, &h->retval, version, 0 TSRMLS_CC) == SOAP_ENCODED) {
-						use = SOAP_ENCODED;
+					encodePtr hdr_enc = NULL;
+					int hdr_use = SOAP_LITERAL;
+					zval *hdr_ret = &h->retval;
+					char *hdr_ns   = h->hdr?h->hdr->ns:NULL;
+					char *hdr_name = Z_STRVAL(h->function_name);
+
+
+					if (Z_TYPE(h->retval) == IS_OBJECT &&
+					    Z_OBJCE(h->retval) == soap_header_class_entry) {
+						HashTable* ht = Z_OBJPROP(h->retval);
+						zval **tmp;
+
+						if (function && function->binding && function->binding->bindingType == BINDING_SOAP) {
+							sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
+
+							if (fnb->output.headers) {
+								sdlSoapBindingFunctionHeaderPtr *hdr;
+								smart_str key = {0};
+
+								if (zend_hash_find(ht, "namespace", sizeof("namespace"), (void**)&tmp) == SUCCESS &&
+							      Z_TYPE_PP(tmp) == IS_STRING) {
+									smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+									smart_str_appendc(&key, ':');
+									hdr_ns = Z_STRVAL_PP(tmp);
+								}
+								if (zend_hash_find(ht, "name", sizeof("name"), (void**)&tmp) == SUCCESS &&
+								    Z_TYPE_PP(tmp) == IS_STRING) {
+									smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+									hdr_name = Z_STRVAL_PP(tmp);
+								}
+								smart_str_0(&key);
+								if (zend_hash_find(fnb->output.headers, key.c, key.len+1, (void**)&hdr) == SUCCESS) {
+									hdr_enc = (*hdr)->encode;
+									hdr_use = (*hdr)->use;
+								}
+								smart_str_free(&key);
+							}
+						}
+						if (zend_hash_find(ht, "data", sizeof("data"), (void**)&tmp) == SUCCESS) {
+							hdr_ret = *tmp;
+						} else {
+							hdr_ret = NULL;
+						}
+					}
+
+					if (h->function) {
+						if (seralize_response_call2(head, h->function, Z_STRVAL(h->function_name), uri, hdr_ret, version, 0 TSRMLS_CC) == SOAP_ENCODED) {
+							use = SOAP_ENCODED;
+						}
+					} else {
+						xmlNodePtr xmlHdr = master_to_xml(hdr_enc, hdr_ret, hdr_use, head);
+						if (hdr_name) {
+							xmlNodeSetName(xmlHdr,hdr_name);
+						}
+						if (hdr_ns) {
+							xmlNsPtr nsptr = encode_add_ns(xmlHdr,hdr_ns);
+							xmlSetNs(xmlHdr, nsptr);
+						}
 					}
 				}
 				h = h->next;
@@ -2500,7 +2579,6 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 				xmlUnlinkNode(head);
 				xmlFreeNode(head);
 			}
-
 		}
 
 		body = xmlNewChild(envelope, ns, "Body", NULL);
@@ -2528,10 +2606,11 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, int version, HashTable *soap_headers TSRMLS_DC)
 {
 	xmlDoc *doc;
-	xmlNode *envelope = NULL, *body, *method = NULL;
-	xmlNs *ns = NULL;
+	xmlNodePtr envelope = NULL, body, method = NULL, head = NULL;
+	xmlNsPtr ns = NULL;
 	zval **zstyle, **zuse;
 	int i, style, use;
+	HashTable *hdrs = NULL;
 
 	encode_reset_ns();
 
@@ -2552,7 +2631,69 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 	xmlDocSetRootElement(doc, envelope);
 
 	if (soap_headers) {
-		xmlNodePtr head = xmlNewChild(envelope, ns, "Header", NULL);
+		head = xmlNewChild(envelope, ns, "Header", NULL);
+	}
+
+	body = xmlNewChild(envelope, ns, "Body", NULL);
+
+	if (function && function->binding->bindingType == BINDING_SOAP) {
+		sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
+
+		hdrs = fnb->input.headers;
+		style = fnb->style;
+		/*FIXME: how to pass method name if style is SOAP_DOCUMENT */
+		/*style = SOAP_RPC;*/
+		use = fnb->input.use;
+		if (style == SOAP_RPC) {
+			ns = encode_add_ns(body, fnb->input.ns);
+			if (function->requestName) {
+				method = xmlNewChild(body, ns, function->requestName, NULL);
+			} else {
+				method = xmlNewChild(body, ns, function->functionName, NULL);
+			}
+		}
+	} else {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "style", sizeof("style"), (void **)&zstyle) == SUCCESS) {
+			style = Z_LVAL_PP(zstyle);
+		} else {
+			style = SOAP_RPC;
+		}
+		/*FIXME: how to pass method name if style is SOAP_DOCUMENT */
+		/*style = SOAP_RPC;*/
+		if (style == SOAP_RPC) {
+			ns = encode_add_ns(body, uri);
+			method = xmlNewChild(body, ns, function_name, NULL);
+		}
+
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "use", sizeof("use"), (void **)&zuse) == SUCCESS &&
+			  Z_LVAL_PP(zuse) == SOAP_LITERAL) {
+			use = SOAP_LITERAL;
+		} else {
+			use = SOAP_ENCODED;
+		}
+	}
+
+	for (i = 0;i < arg_count;i++) {
+		xmlNodePtr param;
+		sdlParamPtr parameter = get_param(function, NULL, i, FALSE);
+
+		if (style == SOAP_RPC) {
+			param = seralize_parameter(parameter, arguments[i], i, NULL, use, method TSRMLS_CC);
+		} else if (style == SOAP_DOCUMENT) {
+			param = seralize_parameter(parameter, arguments[i], i, NULL, use, body TSRMLS_CC);
+			if (function && function->binding->bindingType == BINDING_SOAP) {
+				sdlParamPtr *sparam;
+
+				if (zend_hash_index_find(function->requestParameters, i, (void **)&sparam) == SUCCESS && (*sparam)->element) {
+					ns = encode_add_ns(param, (*sparam)->element->namens);
+					xmlNodeSetName(param, (*sparam)->element->name);
+					xmlSetNs(param, ns);
+				}
+			}
+		}
+	}
+
+	if (head) {
 		zval** header;
 
 		zend_hash_internal_pointer_reset(soap_headers);
@@ -2566,9 +2707,29 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 		      Z_TYPE_PP(ns) == IS_STRING) {
 		  	xmlNodePtr h;
 		  	xmlNsPtr nsptr;
-		  	
+		    int hdr_use = SOAP_LITERAL;
+		    encodePtr enc = NULL;
+
+		    if (hdrs) {
+		    	smart_str key = {0};
+		    	sdlSoapBindingFunctionHeaderPtr *hdr;
+
+		    	smart_str_appendl(&key, Z_STRVAL_PP(ns), Z_STRLEN_PP(ns));
+		    	smart_str_appendc(&key, ':');
+		    	smart_str_appendl(&key, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
+		    	smart_str_0(&key);
+		    	if (zend_hash_find(hdrs, key.c, key.len+1,(void**)&hdr) == SUCCESS) {
+		    		hdr_use = (*hdr)->use;
+		    		enc = (*hdr)->encode;
+		    		if (hdr_use == SOAP_ENCODED) {
+		    			use = SOAP_ENCODED;
+		    		}
+		    	}
+		    	smart_str_free(&key);
+		    }
+
 			  if (zend_hash_find(ht, "data", sizeof("data"), (void**)&tmp) == SUCCESS) {
-			  	h = master_to_xml(NULL,*tmp,SOAP_DOCUMENT,head);
+			  	h = master_to_xml(enc, *tmp, hdr_use, head);
 			  	xmlNodeSetName(h, Z_STRVAL_PP(name));
 			  } else {
 			  	h = xmlNewNode(NULL, Z_STRVAL_PP(name));
@@ -2606,48 +2767,10 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 					  		xmlSetProp(h, SOAP_1_2_ENV_NS_PREFIX":role",SOAP_1_2_ACTOR_UNLIMATERECEIVER);
 					  	}
 			  		}
-			  	}	
+			  	}
 			  }
 		  }
 			zend_hash_move_forward(soap_headers);
-		}
-	}
-
-	body = xmlNewChild(envelope, ns, "Body", NULL);
-
-	if (function && function->binding->bindingType == BINDING_SOAP) {
-		sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
-
-		style = fnb->style;
-		/*FIXME: how to pass method name if style is SOAP_DOCUMENT */
-		/*style = SOAP_RPC;*/
-		use = fnb->input.use;
-		if (style == SOAP_RPC) {
-			ns = encode_add_ns(body, fnb->input.ns);
-			if (function->requestName) {
-				method = xmlNewChild(body, ns, function->requestName, NULL);
-			} else {
-				method = xmlNewChild(body, ns, function->functionName, NULL);
-			}
-		}
-	} else {
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "style", sizeof("style"), (void **)&zstyle) == SUCCESS) {
-			style = Z_LVAL_PP(zstyle);
-		} else {
-			style = SOAP_RPC;
-		}
-		/*FIXME: how to pass method name if style is SOAP_DOCUMENT */
-		/*style = SOAP_RPC;*/
-		if (style == SOAP_RPC) {
-			ns = encode_add_ns(body, uri);
-			method = xmlNewChild(body, ns, function_name, NULL);
-		}
-
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "use", sizeof("use"), (void **)&zuse) == SUCCESS &&
-			  Z_LVAL_PP(zuse) == SOAP_LITERAL) {
-			use = SOAP_LITERAL;
-		} else {
-			use = SOAP_ENCODED;
 		}
 	}
 
@@ -2661,26 +2784,6 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 			xmlNewNs(envelope, SOAP_1_2_ENC_NAMESPACE, SOAP_1_2_ENC_NS_PREFIX);
 			if (method) {
 				xmlSetNsProp(method, envelope->ns, "encodingStyle", SOAP_1_2_ENC_NAMESPACE);
-			}
-		}
-	}
-
-	for (i = 0;i < arg_count;i++) {
-		xmlNodePtr param;
-		sdlParamPtr parameter = get_param(function, NULL, i, FALSE);
-
-		if (style == SOAP_RPC) {
-			param = seralize_parameter(parameter, arguments[i], i, NULL, use, method TSRMLS_CC);
-		} else if (style == SOAP_DOCUMENT) {
-			param = seralize_parameter(parameter, arguments[i], i, NULL, use, body TSRMLS_CC);
-			if (function && function->binding->bindingType == BINDING_SOAP) {
-				sdlParamPtr *sparam;
-
-				if (zend_hash_index_find(function->requestParameters, i, (void **)&sparam) == SUCCESS && (*sparam)->element) {
-					ns = encode_add_ns(param, (*sparam)->element->namens);
-					xmlNodeSetName(param, (*sparam)->element->name);
-					xmlSetNs(param, ns);
-				}
 			}
 		}
 	}
@@ -2731,7 +2834,7 @@ static xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, i
 	if (param != NULL) {
 		enc = param->encode;
 	} else {
-		enc = get_conversion(val->type);
+		enc = NULL;
 	}
 	xmlParam = master_to_xml(enc, val, style, parent);
 	if (!strcmp(xmlParam->name, "BOGUS")) {

@@ -9,9 +9,10 @@ General
 
 SOAP
 ----
-? support for SOAP headers
++ support for SOAP headers
   ? actor attribute
-  ? mustUnderstend attribute
+  + mustUnderstend attribute
+- SOAP routing
 - root attribute
 - make sure soap 1.1 and 1.2 are supported fully
 
@@ -62,7 +63,7 @@ WSDL
 ? SOAP binding
   - <soap:body> parts attribute
   - <soap:fault>
-  - <soap:header> and <soap:headerfault>
+  - <soap:headerfault>
 - HTTP GET/POST binding
 - MIME binding
 - SOAP 1.2 bindings???

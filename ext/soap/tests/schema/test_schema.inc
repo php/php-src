@@ -37,7 +37,7 @@ $wsdl  = <<<EOF
 		<operation name="test">
 			<soap:operation soapAction="#test" style="$style"/>
 			<input>
-				<soap:body parts="body" use="$use" namespace="http://test-uri/"/>
+				<soap:body parts="body" use="$use" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
 			</input>
 		</operation>
 	</binding>

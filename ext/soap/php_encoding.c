@@ -249,22 +249,23 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 	    Z_OBJCE_P(data) == soap_var_class_entry) {
 		zval **ztype, **zdata, **zns, **zstype, **zname, **znamens;
 		encodePtr enc;
+		HashTable *ht = Z_OBJPROP_P(data);
 
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
+		if (zend_hash_find(ht, "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
 			php_error(E_ERROR, "SOAP-ERROR: Encoding: SoapVar hasn't 'enc_type' propery");
 		}
 
 		enc = get_conversion(Z_LVAL_P(*ztype));
 
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_value", sizeof("enc_value"), (void **)&zdata) == FAILURE) {
+		if (zend_hash_find(ht, "enc_value", sizeof("enc_value"), (void **)&zdata) == FAILURE) {
 			node = master_to_xml(enc, NULL, style, parent);
 		} else {
 			node = master_to_xml(enc, *zdata, style, parent);
 		}
 
 		if (style == SOAP_ENCODED) {
-			if (zend_hash_find(Z_OBJPROP_P(data), "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
-				if (zend_hash_find(Z_OBJPROP_P(data), "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
+			if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
+				if (zend_hash_find(ht, "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
 					set_ns_and_type_ex(node, Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
 				} else {
 					set_ns_and_type_ex(node, NULL, Z_STRVAL_PP(zstype));
@@ -272,10 +273,10 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			}
 		}
 
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_name", sizeof("enc_name"), (void **)&zname) == SUCCESS) {
+		if (zend_hash_find(ht, "enc_name", sizeof("enc_name"), (void **)&zname) == SUCCESS) {
 			xmlNodeSetName(node, Z_STRVAL_PP(zname));
 		}
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_namens", sizeof("enc_namens"), (void **)&znamens) == SUCCESS) {
+		if (zend_hash_find(ht, "enc_namens", sizeof("enc_namens"), (void **)&znamens) == SUCCESS) {
 			xmlNsPtr nsp = encode_add_ns(node, Z_STRVAL_PP(znamens));
 			xmlSetNs(node, nsp);
 		}
@@ -2307,7 +2308,7 @@ static xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 {
 	if (data && data->properties) {
 		xmlAttrPtr href;
-		
+
 		href = data->properties;
 		while (1) {
 			href = get_attribute(href, "href");

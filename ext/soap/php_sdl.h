@@ -63,11 +63,21 @@ struct _sdlSoapBinding {
 	int   style;
 };
 
+typedef struct _sdlSoapBindingFunctionHeader {
+	char       *name;
+	char       *ns;
+	int         use;
+	sdlTypePtr  element;
+	encodePtr   encode;
+	char       *encodingStyle; /* not implemented yet */
+} sdlSoapBindingFunctionHeader, *sdlSoapBindingFunctionHeaderPtr;
+
 struct _sdlSoapBindingFunctionBody {
-	char *ns;
-	int   use;
-	char *parts;         /* not implemented yet */
-	char *encodingStyle; /* not implemented yet */
+	char      *ns;
+	int        use;
+	char      *parts;          /* not implemented yet */
+	char      *encodingStyle;  /* not implemented yet */
+	HashTable *headers;        /* array of sdlSoapBindingFunctionHeaderPtr */
 };
 
 struct _sdlSoapBindingFunction {
