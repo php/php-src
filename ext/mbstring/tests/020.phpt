@@ -6,6 +6,8 @@ HTML input/output
 	include('skipif.inc'); 
 ?>
 --INI--
+output_handler = mb_output_handler
+zlib.output_compression = Off
 arg_separator.input="x"
 error_reporting=0
 mbstring.http_input=HTML-ENTITIES
