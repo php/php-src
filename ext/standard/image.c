@@ -276,7 +276,15 @@ static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
 static struct gfxinfo *php_handle_png (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	unsigned char dim[8];
+	unsigned char dim[9];
+/* Width:              4 bytes
+ * Height:             4 bytes
+ * Bit depth:          1 byte
+ * Color type:         1 byte
+ * Compression method: 1 byte
+ * Filter method:      1 byte
+ * Interlace method:   1 byte
+ */
 
 	if (php_stream_seek(stream, 8, SEEK_CUR))
 		return NULL;
@@ -287,6 +295,7 @@ static struct gfxinfo *php_handle_png (php_stream * stream TSRMLS_DC)
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 	result->width  = (((unsigned int)dim[0]) << 24) + (((unsigned int)dim[1]) << 16) + (((unsigned int)dim[2]) << 8) + ((unsigned int)dim[3]);
 	result->height = (((unsigned int)dim[4]) << 24) + (((unsigned int)dim[5]) << 16) + (((unsigned int)dim[6]) << 8) + ((unsigned int)dim[7]);
+	result->bits   = (unsigned int)dim[8];
 	return result;
 }
 /* }}} */
