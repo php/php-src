@@ -48,6 +48,7 @@ static HashTable* rpc_get_properties(zval * TSRMLS_DC);
 static union _zend_function* rpc_get_method(zval *, char *, int TSRMLS_DC);
 static union _zend_function* rpc_get_constructor(zval * TSRMLS_DC);
 static zend_class_entry* rpc_get_class_entry(zval * TSRMLS_DC);
+static int rpc_get_class_name(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC);
 static int rpc_compare(zval *, zval * TSRMLS_DC);
 /**/
 
@@ -74,7 +75,7 @@ static zend_object_handlers rpc_handlers = {
 	NULL,
 	rpc_get_constructor,
 	rpc_get_class_entry,
-	NULL,
+	rpc_get_class_name,
 	rpc_compare
 };
 
@@ -409,6 +410,19 @@ static zend_class_entry* rpc_get_class_entry(zval *object TSRMLS_DC)
 	return intern->ce;
 }
 
+static int rpc_get_class_name(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+{
+	GET_INTERNAL(intern);
+
+	if (parent) {
+		return FAILURE;
+	} else {
+		*class_name = intern->ce->name;
+		*class_name_len = intern->ce->name_length;
+		return SUCCESS;
+	}
+}
+
 static int rpc_compare(zval *object1, zval *object2 TSRMLS_DC)
 {
 	/* FIXME */
@@ -581,7 +595,7 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 			retval = SUCCESS;
 		} else {
 			/* call the rpc ctor */
-			retval = RPC_HT(intern)->rpc_ctor(*(rpc_string *)(class_hash), &(intern->data), num_args, args);
+			retval = RPC_HT(intern)->rpc_ctor(class_hash->name, &(intern->data), num_args, args);
 		}
 	} else {
 		/* disable caching from now on */
@@ -788,7 +802,7 @@ ZEND_API zend_object_value rpc_objects_new(zend_class_entry *class_type TSRMLS_D
 	zov->handlers = &rpc_handlers;
 
 	/* set up the internal representation of our rpc instance */
-	intern = (rpc_internal *) pemalloc(sizeof(rpc_internal), TRUE);
+	intern = (rpc_internal *) pecalloc(1, sizeof(rpc_internal), TRUE);
 
 	intern->ce = class_type;
 	intern->data = NULL;
@@ -867,6 +881,45 @@ static void rpc_internal_set(rpc_internal *intern, char *property, zend_uint pro
 	if (retval != SUCCESS) {
 		/* TODO: exception here */
 	}
+}
+
+ZEND_API zval* _rpc_object_from_data(zval *z, zend_class_entry *ce, void *data, rpc_class_hash *class_hash TSRMLS_DC)
+{
+	rpc_internal *intern;
+
+	if (z == NULL) {
+		ALLOC_ZVAL(z);
+	}
+
+	Z_TYPE_P(z) = IS_OBJECT;
+	z->value.obj = rpc_objects_new(ce TSRMLS_CC);
+	
+	if (GET_INTERNAL_EX(intern, z) != SUCCESS) {
+		/* TODO: exception */
+		return NULL;
+	}
+
+	intern->data = data;
+
+	if (class_hash == NULL) {
+		class_hash = pemalloc(sizeof(rpc_class_hash), TRUE);
+		if (class_hash == NULL) {
+			/* TODO: exception */
+
+			return NULL;
+		}
+		/* set up the cache */
+		zend_ts_hash_init(&(class_hash->methods), 0, NULL, rpc_string_dtor, TRUE);
+		zend_ts_hash_init(&(class_hash->properties), 0, NULL, rpc_string_dtor, TRUE);
+		class_hash->handlers = intern->handlers;
+		class_hash->singleton = FALSE;
+		class_hash->poolable = FALSE;
+		class_hash->data = NULL;
+	}
+
+	RPC_CLASS(intern) = class_hash;
+
+	return z;
 }
 
 

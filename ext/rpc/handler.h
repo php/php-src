@@ -128,5 +128,7 @@ typedef struct _rpc_proxy {
 } rpc_proxy;
 
 ZEND_API rpc_register_layer(rpc_handler_entry *entry TSRMLS_DC);
+ZEND_API zval* _rpc_object_from_data(zval *z, zend_class_entry *ce, void *data, rpc_class_hash *class_hash TSRMLS_DC);
+#define rpc_object_from_data(z, layer, data, class_hash)  _rpc_object_from_data((z), layer##_class_entry, (data), (class_hash) TSRMLS_CC)
 
 #endif /* HANDLER_H */
