@@ -248,27 +248,14 @@ PHP_INI_END()
 /* True global (no need for thread safety */
 static int module_initialized = 0;
 
-#ifndef ZTS
-
-/*
- * Globals yet to be protected
- */
-
-#if APACHE
-request_rec *php3_rqst = NULL;	/* request record pointer for apache module version */
-#endif
-
-/*
- * End of globals to be protected
- */
-
-#endif
 
 #if APACHE
 void php3_apache_puts(const char *s)
 {
-	if (php3_rqst) {
-		rputs(s, php3_rqst);
+	SLS_FETCH();
+	
+	if (SG(server_context)) {
+		rputs(s, (request_rec *) SG(server_context));
 	} else {
 		fputs(s, stdout);
 	}
@@ -276,8 +263,10 @@ void php3_apache_puts(const char *s)
 
 void php3_apache_putc(char c)
 {
-	if (php3_rqst) {
-		rputc(c, php3_rqst);
+	SLS_FETCH();
+	
+	if (SG(server_context)) {
+		rputc(c, (request_rec *) SG(server_context));
 	} else {
 		fputc(c, stdout);
 	}
@@ -288,6 +277,7 @@ void php3_log_err(char *log_message)
 {
 	FILE *log_file;
 	PLS_FETCH();
+	SLS_FETCH();
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
@@ -310,11 +300,11 @@ void php3_log_err(char *log_message)
 	}
 	/* Otherwise fall back to the default logging location. */
 #if APACHE
-	if (php3_rqst) {
+	if (SG(server_context)) {
 #if MODULE_MAGIC_NUMBER >= 19970831
-		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, php3_rqst->server, log_message);
+		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, log_message);
 #else
-		log_error(log_message, php3_rqst->server);
+		log_error(log_message, ((requset_rec *) SG(server_context))->server);
 #endif
 	} else {
 		fprintf(stderr, log_message);
@@ -581,6 +571,7 @@ static void php_message_handler_for_zend(long message, void *data)
 			break;
 		case ZMSG_MEMORY_LEAK_DETECTED: {
 				ELS_FETCH();
+				SLS_FETCH();
 
 				if (EG(error_reporting)&E_WARNING) {
 #if ZEND_DEBUG
@@ -590,9 +581,9 @@ static void php_message_handler_for_zend(long message, void *data)
 
 					snprintf(memory_leak_buf,512,"Possible PHP4 memory leak detected (harmless):  0x%0.8lX, %d bytes from %s:%d", (long) t, t->size, t->filename, t->lineno);
 #		if MODULE_MAGIC_NUMBER >= 19970831
-					aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, php3_rqst->server, memory_leak_buf);
+					aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, memory_leak_buf);
 #		else
-					log_error(memory_leak_buf,php3_rqst->server);
+					log_error(memory_leak_buf, ((request_rec *) SG(server_context))->server);
 #		endif
 #	else
 					php3_printf("Freeing 0x%0.8X (%d bytes), allocated in %s on line %d<br>\n",(void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING),t->size,t->filename,t->lineno);
@@ -606,7 +597,7 @@ static void php_message_handler_for_zend(long message, void *data)
 
 
 
-int php_request_startup(CLS_D ELS_DC PLS_DC)
+int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
 	zend_output_startup();
 
@@ -622,7 +613,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC)
 	 * memory.  
 	 */
 	block_alarms();
-	register_cleanup(php3_rqst->pool, NULL, php_request_shutdown, php_request_shutdown_for_exec);
+	register_cleanup(((request_rec *) SG(server_context))->pool, NULL, php_request_shutdown, php_request_shutdown_for_exec);
 	unblock_alarms();
 #endif
 
@@ -935,7 +926,7 @@ int _php3_hash_environment(PLS_D)
 	{
 		pval **tmp_ptr;
 		register int i;
-		array_header *arr = table_elts(php3_rqst->subprocess_env);
+		array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 		table_entry *elts = (table_entry *) arr->elts;
 		int len;
 
@@ -961,8 +952,8 @@ int _php3_hash_environment(PLS_D)
 			_php3_hash_update(&EG(symbol_table), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), tmp_ptr, sizeof(pval *), NULL);
 		}
 		tmp = (pval *) emalloc(sizeof(pval));
-		tmp->value.str.len = strlen(php3_rqst->uri);
-		tmp->value.str.val = estrndup(php3_rqst->uri, tmp->value.str.len);
+		tmp->value.str.len = strlen(((request_rec *) SG(server_context))->uri);
+		tmp->value.str.val = estrndup(((request_rec *) SG(server_context))->uri, tmp->value.str.len);
 		tmp->refcount=1;
 		tmp->is_ref=0;
 		tmp->type = IS_STRING;
@@ -1171,7 +1162,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 /* some systems are missing these from their header files */
 
 #if APACHE
-PHPAPI int apache_php3_module_main(request_rec * r, int fd, int display_source_mode)
+PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mode)
 {
 	zend_file_handle file_handle;
 #ifdef ZTS
@@ -1182,8 +1173,9 @@ PHPAPI int apache_php3_module_main(request_rec * r, int fd, int display_source_m
 	zend_executor_globals *executor_globals=&eg;
 	php_core_globals *core_globals=&pcg;
 #endif
+	SLS_FETCH();
 
-	php3_rqst = r;
+	SG(server_context) = r;
 
 	if (php_request_startup(CLS_C ELS_CC PLS_CC) == FAILURE) {
 		return FAILURE;

@@ -394,9 +394,6 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			php3_sybase_module.num_links++;
 		} else {  /* we do */
 			if (le->type != php3_sybase_module.le_plink) {
-#if BROKEN_SYBASE_PCONNECTS
-				log_error("PHP/Sybase:  Hashed persistent link is not a Sybase link!",php3_rqst->server);
-#endif
 				php3_error(E_WARNING,"Sybase:  Hashed persistent link is not a Sybase link!");
 				RETURN_FALSE;
 			}
@@ -404,25 +401,13 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			sybase_ptr = (sybase_link *) le->ptr;
 			/* test that the link hasn't died */
 			if (DBDEAD(sybase_ptr->link)==TRUE) {
-#if BROKEN_SYBASE_PCONNECTS
-				log_error("PHP/Sybase:  Persistent link died, trying to reconnect...",php3_rqst->server);
-#endif
 				if ((sybase_ptr->link=dbopen(sybase_ptr->login,host))==FAIL) {
-#if BROKEN_SYBASE_PCONNECTS
-					log_error("PHP/Sybase:  Unable to reconnect!",php3_rqst->server);
-#endif
 					/*php3_error(E_WARNING,"Sybase:  Link to server lost, unable to reconnect");*/
 					_php3_hash_del(plist, hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
-#if BROKEN_SYBASE_PCONNECTS
-				log_error("PHP/Sybase:  Reconnect successful!",php3_rqst->server);
-#endif
 				if (dbsetopt(sybase_ptr->link,DBBUFFER,"2",-1)==FAIL) {
-#if BROKEN_SYBASE_PCONNECTS
-					log_error("PHP/Sybase:  Unable to set required options",php3_rqst->server);
-#endif
 					_php3_hash_del(plist, hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;

@@ -6,6 +6,8 @@
 
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
+#else
+sapi_globals_struct sapi_globals;
 #endif
 
 /* A true global (no need for thread safety) */

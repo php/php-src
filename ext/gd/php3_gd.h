@@ -49,7 +49,7 @@ extern php3_module_entry gd_module_entry;
 /* gd.c functions */
 extern void php3_info_gd(void);
 extern int php3_minit_gd(INIT_FUNC_ARGS);
-extern int php3_mend_gd(void);
+extern int php3_mend_gd(SHUTDOWN_FUNC_ARGS);
 extern int gdImageColorResolve(gdImagePtr, int, int, int);
 extern void php3_imagearc(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_imagechar(INTERNAL_FUNCTION_PARAMETERS);

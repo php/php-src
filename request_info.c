@@ -28,6 +28,7 @@
  */
 
 #include "php.h"
+#include "SAPI.h"
 
 #ifndef THREAD_SAFE
 PHPAPI php3_request_info request_info;
@@ -194,19 +195,22 @@ int php3_init_request_info(void *conf)
 int php3_init_request_info(void *conf)
 {
 	const char *buf;
+	request_rec *r;
+	SLS_FETCH();
 
+	r = ((request_rec *) SG(server_context));
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
 
-	request_info.filename = php3_rqst->filename;
-	request_info.request_method = php3_rqst->method;
-	request_info.query_string = php3_rqst->args;
-	request_info.content_type = table_get(php3_rqst->subprocess_env, "CONTENT_TYPE");
+	request_info.filename = r->filename;
+	request_info.request_method = r->method;
+	request_info.query_string = r->args;
+	request_info.content_type = table_get(r->subprocess_env, "CONTENT_TYPE");
 
-	buf = table_get(php3_rqst->subprocess_env, "CONTENT_LENGTH");
+	buf = table_get(r->subprocess_env, "CONTENT_LENGTH");
 	request_info.content_length = (buf ? atoi(buf) : 0);
 
-	request_info.cookies = table_get(php3_rqst->subprocess_env, "HTTP_COOKIE");
+	request_info.cookies = table_get(r->subprocess_env, "HTTP_COOKIE");
 
 	return SUCCESS;
 }

@@ -461,7 +461,9 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag) {
 #if APACHE
 	{
 	int j;
-	array_header *arr = table_elts(php3_rqst->subprocess_env);
+	SLS_FETCH();
+	
+	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 	table_entry *elts = (table_entry *)arr->elts;
 
 	for (j=0; j < arr->nelts; j++) {

@@ -343,7 +343,7 @@ AC_ARG_WITH(apxs,
 ])
 
 
-APACHE_INSTALL_FILES="$srcdir/mod_php3.* $srcdir/php_version.h libphp3.module"
+APACHE_INSTALL_FILES="$srcdir/mod_php3.* $srcdir/php_version.h libphp3.module $srcdir/SAPI.h"
 
 
 AC_MSG_CHECKING(for Apache module support via DSO through APACI)

@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/php3_standard.h"
+#include "SAPI.h"
 #include "main.h"
 #include "head.h"
 #include "post.h"
@@ -84,6 +85,10 @@ void php4i_add_header_information(char *header_information)
 	char *temp = NULL;
 	long myuid = 0L;
 	char temp2[32];
+	request_rec *req;
+	SLS_FETCH();
+	
+	req = ((request_rec *) SG(server_context));
 #endif
 
 	if (php3_HeaderPrinted == 1) {
@@ -104,10 +109,10 @@ void php4i_add_header_information(char *header_information)
 		*r = '\0';
 		if (!strcasecmp(header_information, "Content-type")) {
 			if (*(r + 1) == ' ')
-				php3_rqst->content_type = pstrdup(php3_rqst->pool,r + 2);
+				req->content_type = pstrdup(req->pool,r + 2);
 			else
-				php3_rqst->content_type = pstrdup(php3_rqst->pool,r + 1);
-			cont_type = (char *)php3_rqst->content_type;
+				req->content_type = pstrdup(req->pool,r + 1);
+			cont_type = (char *) req->content_type;
 		} else {
 			if (*(r + 1) == ' ') {
 				rr = r + 2;
@@ -126,26 +131,26 @@ void php4i_add_header_information(char *header_information)
 						temp = _php3_regreplace("$", temp2, rr, 0, 0);
 					}
 				}
-				table_set(php3_rqst->headers_out, header_information, temp);
+				table_set(req->headers_out, header_information, temp);
 			} else
-				table_set(php3_rqst->headers_out, header_information, rr);
+				table_set(req->headers_out, header_information, rr);
 		}
 		if (!strcasecmp(header_information, "location")) {
-			php3_rqst->status = REDIRECT;
+			req->status = REDIRECT;
 		}
 		*r = ':';
 		php3_HeaderPrinted = 2;
 	}
 	if (!strncasecmp(header_information, "http/", 5)) {
 		if (strlen(header_information) > 9) {
-			php3_rqst->status = atoi(&((header_information)[9]));
+			req->status = atoi(&((header_information)[9]));
 		}
 		/* Use a pstrdup here to get the memory straight from Apache's per-request pool to
 		 * avoid having our own memory manager complain about this memory not being freed
 		 * because it really shouldn't be freed until the end of the request and it isn't
 		 * easy for us to figure out when we allocated it vs. when something else might have.
 		 */
-		php3_rqst->status_line = pstrdup(php3_rqst->pool,&((header_information)[9]));
+		req->status_line = pstrdup(req->pool,&((header_information)[9]));
 	}
 #else
 	r = strchr(header_information, ':');
@@ -230,12 +235,13 @@ PHPAPI int php3_header(void)
 	CookieList *cookie;
 	int len = 0;
 	time_t t;
-      char *dt, *cookievalue = NULL;
+	char *dt, *cookievalue = NULL;
 #endif
 #if APACHE || defined(USE_SAPI) || FHTTPD
 	char *tempstr;
 #endif
 	PLS_FETCH();
+	SLS_FETCH();
 
 	if (PG(header_is_being_sent)) {
 		return 0;
@@ -244,7 +250,7 @@ PHPAPI int php3_header(void)
 	}
 
 #if APACHE
-	if (!php3_rqst) {  /* we're not in a request, allow output */
+	if (!((request_rec *) SG(server_context))) {  /* we're not in a request, allow output */
 		PG(header_is_being_sent) = 0;
 		return 1;
 	}
@@ -305,7 +311,7 @@ PHPAPI int php3_header(void)
 			if (cookie->secure) {
 				strcat(tempstr, "; secure");
 			}
-			table_add(php3_rqst->headers_out, "Set-Cookie", tempstr);
+			table_add(((request_rec *) SG(server_context))->headers_out, "Set-Cookie", tempstr);
 			if (cookie->domain) efree(cookie->domain);
 			if (cookie->path) efree(cookie->path);
 			if (cookie->name) efree(cookie->name);
@@ -317,8 +323,8 @@ PHPAPI int php3_header(void)
 		}
 		php3_HeaderPrinted = 1;
 		header_called = 1;
-		send_http_header(php3_rqst);
-		if (php3_rqst->header_only) {
+		send_http_header(((request_rec *) SG(server_context)));
+		if (((request_rec *) SG(server_context))->header_only) {
 			set_header_request(1);
 			PG(header_is_being_sent) = 0;
 			return(0);

@@ -56,6 +56,7 @@
 #include "zend_globals.h"
 
 #include "php_globals.h"
+#include "SAPI.h"
 
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
@@ -396,6 +397,7 @@ void php3_getenv(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 	pval *str;
 	char *ptr;
+	SLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -423,7 +425,7 @@ void php3_getenv(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (str->type == IS_STRING &&
 #if APACHE
-		((ptr = (char *)table_get(php3_rqst->subprocess_env, str->value.str.val)) || (ptr = getenv(str->value.str.val)))
+		((ptr = (char *)table_get(((request_rec *) SG(server_context))->subprocess_env, str->value.str.val)) || (ptr = getenv(str->value.str.val)))
 #endif
 #if CGI_BINARY
 		(ptr = getenv(str->value.str.val))
@@ -1166,11 +1168,13 @@ void php3_flush(HashTable *)
 void php3_flush(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 {
+	SLS_FETCH();
+	
 #if APACHE
 #  if MODULE_MAGIC_NUMBER > 19970110
-	rflush(php3_rqst);
+	rflush(((request_rec *) SG(server_context)));
 #  else
-	bflush(php3_rqst->connection->client);
+	bflush(((request_rec *) SG(server_context))->connection->client);
 #  endif
 #endif
 #if FHTTPD

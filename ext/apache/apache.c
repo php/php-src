@@ -34,6 +34,7 @@
 #include "ext/standard/head.h"
 #include "php_globals.h"
 #include "php_ini.h"
+#include "SAPI.h"
 #include "mod_php3.h"
 
 #include <stdlib.h>
@@ -130,6 +131,7 @@ void php3_apache_note(INTERNAL_FUNCTION_PARAMETERS)
 	pval *arg_name,*arg_val;
 	char *note_val;
 	int arg_count = ARG_COUNT(ht);
+	SLS_FETCH();
 
 	if (arg_count<1 || arg_count>2 ||
 		getParameters(ht,arg_count,&arg_name,&arg_val) == FAILURE ) {
@@ -137,11 +139,11 @@ void php3_apache_note(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	convert_to_string(arg_name);
-	note_val = (char *) table_get(php3_rqst->notes,arg_name->value.str.val);
+	note_val = (char *) table_get(((request_rec *) SG(server_context))->notes,arg_name->value.str.val);
 	
 	if (arg_count == 2) {
 		convert_to_string(arg_val);
-		table_set(php3_rqst->notes,arg_name->value.str.val,arg_val->value.str.val);
+		table_set(((request_rec *) SG(server_context))->notes,arg_name->value.str.val,arg_val->value.str.val);
 	}
 
 	if (note_val) {
@@ -158,13 +160,16 @@ void php3_info_apache(void) {
 	char name[64];
 	char *p;
 #endif
-	server_rec *serv = php3_rqst->server;
+	server_rec *serv;
 	extern char server_root[MAX_STRING_LEN];
 	extern uid_t user_id;
 	extern char *user_name;
 	extern gid_t group_id;
 	extern int max_requests_per_child;
+	SLS_FETCH();
 
+	serv = ((request_rec *) SG(server_context))->server;
+	
 #if WIN32|WINNT
 	PUTS("Apache for Windows 95/NT<br>");
 #else
@@ -214,13 +219,14 @@ void php3_virtual(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *filename;
 	request_rec *rr = NULL;
+	SLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(filename);
 	
-	if (!(rr = sub_req_lookup_uri (filename->value.str.val, php3_rqst))) {
+	if (!(rr = sub_req_lookup_uri (filename->value.str.val, ((request_rec *) SG(server_context))))) {
 		php3_error(E_WARNING, "Unable to include '%s' - URI lookup failed", filename->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
@@ -259,11 +265,12 @@ void php3_getallheaders(INTERNAL_FUNCTION_PARAMETERS)
     array_header *env_arr;
     table_entry *tenv;
     int i;
+    SLS_FETCH();
 	
     if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
     }
-    env_arr = table_elts(php3_rqst->headers_in);
+    env_arr = table_elts(((request_rec *) SG(server_context))->headers_in);
     tenv = (table_entry *)env_arr->elts;
     for (i = 0; i < env_arr->nelts; ++i) {
 		if (!tenv[i].key ||
@@ -284,13 +291,14 @@ void php3_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *filename;
 	request_rec *rr=NULL;
+	SLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(filename);
 
-	if(!(rr = sub_req_lookup_uri(filename->value.str.val, php3_rqst))) {
+	if(!(rr = sub_req_lookup_uri(filename->value.str.val, ((request_rec *) SG(server_context))))) {
 		php3_error(E_WARNING, "URI lookup failed", filename->value.str.val);
 		RETURN_FALSE;
 	}
@@ -353,16 +361,18 @@ void php3_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
 #if 0
 This function is most likely a bad idea.  Just playing with it for now.
 
-void php3_apache_exec_uri(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_apache_exec_uri(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *filename;
 	request_rec *rr=NULL;
+	SLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(filename);
 
-	if(!(rr = ap_sub_req_lookup_uri(filename->value.str.val, php3_rqst))) {
+	if(!(rr = ap_sub_req_lookup_uri(filename->value.str.val, ((request_rec *) SG(server_context))))) {
 		php3_error(E_WARNING, "URI lookup failed", filename->value.str.val);
 		RETURN_FALSE;
 	}
