@@ -517,10 +517,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		regfree(&re);
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	/* churn through str, generating array entries as we go */
 	while ((count == -1 || count > 1) && !(err = regexec(&re, strp, 1, subs, 0))) {

@@ -1374,9 +1374,7 @@ PHP_FUNCTION(array_fill)
 	}
 
 	/* allocate an array for return */
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	switch (Z_TYPE_PP(start_key)) {
 		case IS_STRING:
@@ -1428,9 +1426,7 @@ PHP_FUNCTION(range)
 	}
 
 	/* allocate an array for return */
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	if (Z_TYPE_PP(zlow)==IS_STRING && Z_TYPE_PP(zhigh)==IS_STRING) {
 		char *low, *high;
