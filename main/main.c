@@ -122,7 +122,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	int new_limit;
 
 	if (new_value) {
-		new_limit = php_atoi(new_value);
+		new_limit = php_atoi(new_value, new_value_length);
 	} else {
 		new_limit = 1<<30;		/* effectively, no limit */
 	}
