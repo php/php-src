@@ -1087,7 +1087,7 @@ SPL_METHOD(File, next)
 	spl_file_object_free_line(intern TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void setFlags()
+/* {{{ proto void setFlags(int flags)
    Set file handling flags */
 SPL_METHOD(File, setFlags)
 {
@@ -1096,7 +1096,7 @@ SPL_METHOD(File, setFlags)
 	zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags);
 } /* }}} */
 
-/* {{{ proto void getFlags()
+/* {{{ proto int getFlags()
    Get file handling flags */
 SPL_METHOD(File, getFlags)
 {
@@ -1105,7 +1105,7 @@ SPL_METHOD(File, getFlags)
 	RETURN_LONG(intern->flags);
 } /* }}} */
 
-/* {{{ proto void setMaxLineLen()
+/* {{{ proto void setMaxLineLen(int max_len)
    Set maximum line length */
 SPL_METHOD(File, setMaxLineLen)
 {
@@ -1125,7 +1125,7 @@ SPL_METHOD(File, setMaxLineLen)
 	intern->max_line_len = max_len;
 } /* }}} */
 
-/* {{{ proto void getMaxLineLen()
+/* {{{ proto int getMaxLineLen()
    Get maximum line length */
 SPL_METHOD(File, getMaxLineLen)
 {
@@ -1134,14 +1134,14 @@ SPL_METHOD(File, getMaxLineLen)
 	RETURN_LONG((long)intern->max_line_len);
 } /* }}} */
 
-/* {{{ proto void hasChildren()
+/* {{{ proto bool hasChildren()
    Rturn false */
 SPL_METHOD(File, hasChildren)
 {
 	RETURN_FALSE;
 } /* }}} */
 
-/* {{{ proto void getChildren()
+/* {{{ proto bool getChildren()
    Read NULL */
 SPL_METHOD(File, getChildren)
 {
@@ -1315,7 +1315,7 @@ SPL_METHOD(File, fpassthru)
 FileFunction(fscanf)
 /* }}} */
 
-/* {{{ proto int fwrite(string str [, int length])
+/* {{{ proto mixed File::fwrite(string str [, int length])
    Binary-safe file write */
 SPL_METHOD(File, fwrite)
 {
@@ -1395,25 +1395,58 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetcsv, 0, 0, 0)
 	ZEND_ARG_INFO(0, enclosure)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1) 
+	ZEND_ARG_INFO(0, operation)
+	ZEND_ARG_INFO(1, wouldblock])
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fseek, 0, 0, 1) 
+	ZEND_ARG_INFO(0, pos)
+	ZEND_ARG_INFO(0, whence)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetss, 0, 0, 0) 
+	ZEND_ARG_INFO(0, allowable_tags)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fscanf, 0, 0, 1) 
+	ZEND_ARG_INFO(0, format)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fwrite, 0, 0, 1) 
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_ftruncate, 0, 0, 1) 
+	ZEND_ARG_INFO(0, size)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_file_object_class_functions[] = {
 	SPL_ME(File, __construct,    arginfo_file_object___construct,   ZEND_ACC_PUBLIC)
 	SPL_ME(File, getFilename,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(File, rewind,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(File, eof,            NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(File, valid,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fgets,          arginfo_file_object_fgetcsv, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fgetcsv,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, flock,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(File, fgets,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(File, fgetcsv,        arginfo_file_object_fgetcsv,       ZEND_ACC_PUBLIC)
+	SPL_ME(File, flock,          arginfo_file_object_flock,         ZEND_ACC_PUBLIC)
 	SPL_ME(File, fflush,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(File, ftell,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fseek,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(File, fseek,          arginfo_file_object_fseek,         ZEND_ACC_PUBLIC)
 	SPL_ME(File, fgetc,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(File, fpassthru,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fgetss,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fscanf,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fwrite,         NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(File, fgetss,         arginfo_file_object_fgetss,        ZEND_ACC_PUBLIC)
+	SPL_ME(File, fscanf,         arginfo_file_object_fscanf,        ZEND_ACC_PUBLIC)
+	SPL_ME(File, fwrite,         arginfo_file_object_fwrite,        ZEND_ACC_PUBLIC)
 	SPL_ME(File, fstat,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, ftruncate,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(File, ftruncate,      arginfo_file_object_ftruncate,     ZEND_ACC_PUBLIC)
 	SPL_ME(File, current,        NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(File, key,            NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(File, next,           NULL, ZEND_ACC_PUBLIC)
