@@ -1917,10 +1917,20 @@ static inline int zend_incdec_op_helper(incdec_t incdec_op_arg, ZEND_OPCODE_HAND
 		zend_error(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 	if (*var_ptr == EG(error_zval_ptr)) {
-		EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
-		SELECTIVE_PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr, &opline->result);
-		AI_USE_PTR(EX_T(opline->result.u.var).var);
-		NEXT_OPCODE();
+		switch (opline->opcode) {
+			case ZEND_PRE_INC:
+			case ZEND_PRE_DEC:
+				EX_T(opline->result.u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr);
+				SELECTIVE_PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr, &opline->result);
+				AI_USE_PTR(EX_T(opline->result.u.var).var);
+				NEXT_OPCODE();
+				break;
+			case ZEND_POST_INC:
+			case ZEND_POST_DEC:
+				EX_T(opline->result.u.var).tmp_var = *EG(uninitialized_zval_ptr);
+				NEXT_OPCODE();
+				break;
+		}
 	}
 
 	switch (opline->opcode) {
