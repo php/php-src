@@ -282,7 +282,7 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 
 /* {{{ curl_write
  */
-static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
+static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx TSRMLS_DC)
 {
 	php_curl       *ch     = (php_curl *) ctx;
 	php_curl_write *t      = ch->handlers->write;
@@ -392,7 +392,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 
 /* {{{ curl_write_header
  */
-static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
+static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx TSRMLS_DC)
 {
 	php_curl       *ch  = (php_curl *) ctx;
 	php_curl_write *t   = ch->handlers->write_header;
@@ -460,7 +460,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	php_curl    *ch   = (php_curl *) ctx;
 	zval        *func = ch->handlers->passwd;
 	zval        *argv[3];
-	zval        *retval;
+	zval        *retval = NULL;
 	int          error;
 	int          ret = 0;
 	TSRMLS_FETCH();
