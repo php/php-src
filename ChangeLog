@@ -1,3 +1,55 @@
+2004-03-13  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      NEWS:
+      - entry for fix #27582
+
+    * ext/gd/tests/bug27582_1.phpt
+      ext/gd/tests/bug27582_1.phpt
+      ext/gd/tests/bug27582_2.phpt:
+      
+      file bug27582_1.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.c:
+      - MFH bug #27582 (imagefilltoborder crashes)
+
+    * ext/gd/tests/bug27582_2.phpt:
+      
+      - add tests for the bug #27582 (imagefilltoborder crashes)
+
+    * ext/gd/libgd/gd.c:
+      - restore too the alphablending if we do not reach the end of the function
+        Notice: This function still crashes (stack overflow), to reproduce it
+        see bug27582_2.phpt
+
+2004-03-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      Bugfix #27586 ArrayObject::getIterator crashes with [] assignment
+
+2004-03-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_3)
+      pear/scripts/pear.bat:
+      oops
+
+2004-03-13  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/libgd/gd.c:
+      - fix #27582 (http://bugs.php.net/bug.php?id=27582)
+        The problem was that the colors were changed endlessly, blending over
+        and over. An endless loop and recursive calls filled the stack=>segfault
+
+2004-03-13  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/scripts/pear.bat
+      pear/scripts/pear.bat
+      pear/scripts/pearcmd.php
+      pear/scripts/pearcmd.php:
+      fix #1008: safe mode raises warning
+      fix register_argc_argv in pear.bat
+
 2004-03-12  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_4_3)
