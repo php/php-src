@@ -166,12 +166,7 @@ static SchemeHandler sh = {
   _php_sablot_sh_close
 };
 
-#ifdef ZTS
-int sablot_globals_id;
-#else
-php_sablot_globals sablot_globals;
-#endif
-
+PHP_DECLARE_MODULE_GLOBALS(sablot)
 
 static unsigned char sixth_arg_force_ref[] = { 6, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_arg_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
@@ -214,12 +209,12 @@ zend_module_entry sablot_module_entry = {
 ZEND_GET_MODULE(sablot)
 #endif
 
-static void php_sablot_init_globals(php_sablot_init_globals *sablot_init_globals_p TSRMLS_DC)
+static void php_sablot_init_globals(php_sablot_globals *sablot_globals)
 {
-	SABLOTG(processor)             = NULL;
-	SABLOTG(errors)                = NULL;
-	SABLOTG(errorHandler)          = NULL;
-	SABLOTG(output_transform_file) = NULL;
+	sablot_globals->processor             = NULL;
+	sablot_globals->errors                = NULL;
+	sablot_globals->errorHandler          = NULL;
+	sablot_globals->output_transform_file = NULL;
 }
 
 
@@ -248,7 +243,9 @@ PHP_MSHUTDOWN_FUNCTION(sablot)
 
 PHP_RSHUTDOWN_FUNCTION(sablot)
 {
+	/*
 	SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
+	*/
 	return SUCCESS;
 }
 
@@ -1349,7 +1346,9 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
     TSRMLS_FETCH();
    
     if (userData == NULL) {
+		/* **FIXME** SABLOTG_HANDLE is not defined anywhere  -RL
         SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
+		*/
         
         SABLOTG(errors_start).next = NULL;
         SABLOTG(errors)            = &SABLOTG(errors_start);

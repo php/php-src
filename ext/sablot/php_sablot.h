@@ -108,7 +108,7 @@ typedef struct {
 
 
 /* Sablotron Globals */
-typedef struct {
+typedef struct _php_sablot_globals {
     zval *errorHandler;
     php_sablot_error *errors;
     php_sablot_error errors_start;
