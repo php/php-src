@@ -736,6 +736,7 @@ zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, i
 		}
 	}
 	
+	zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	return retval;
 }
 
