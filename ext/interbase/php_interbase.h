@@ -49,6 +49,7 @@ PHP_MINFO_FUNCTION(ibase);
 PHP_FUNCTION(ibase_connect);
 PHP_FUNCTION(ibase_pconnect);
 PHP_FUNCTION(ibase_close);
+PHP_FUNCTION(ibase_drop_db);
 PHP_FUNCTION(ibase_query);
 PHP_FUNCTION(ibase_fetch_row);
 PHP_FUNCTION(ibase_fetch_assoc);
@@ -86,7 +87,6 @@ PHP_FUNCTION(ibase_errmsg);
 
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
-#define IBASE_TRANS_ON_LINK 10
 #define IBASE_BLOB_SEG 4096
 
 ZEND_BEGIN_MODULE_GLOBALS(ibase)
@@ -106,15 +106,21 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 ZEND_END_MODULE_GLOBALS(ibase)
 
 typedef struct {
-	isc_tr_handle trans[IBASE_TRANS_ON_LINK];
 	isc_db_handle link;
+	struct tr_list *trans;
 	unsigned short dialect;
 } ibase_db_link;
 
 typedef struct {
-	int trans_num;
-	int link_rsrc;
-} ibase_tr_link;
+	isc_tr_handle handle;
+	int link_cnt;
+	ibase_db_link *link[1];
+} ibase_trans;
+
+typedef struct tr_list {
+	ibase_trans *trans;
+	struct tr_list *next;
+} ibase_tr_list;
 
 typedef struct {
 	ISC_ARRAY_DESC ar_desc;
