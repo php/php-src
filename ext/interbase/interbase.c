@@ -1136,32 +1136,16 @@ PHP_FUNCTION(ibase_rollback_ret)
 #endif
 /* }}} */
 
-#if HAVE_STRFTIME
 /* {{{ proto bool ibase_timefmt(string format [, int type ])
    Sets the format of timestamp, date and time columns returned from queries */
 PHP_FUNCTION(ibase_timefmt)
 {
-	zval ***args;
-	char *fmt = NULL;
-	int type = PHP_IBASE_TIMESTAMP;
+	char *fmt;
+	int fmt_len;
+	long type = PHP_IBASE_TIMESTAMP;
 	
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		efree(args);
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &fmt, &fmt_len, &type)) {
 		RETURN_FALSE;
-	}
-
-	switch (ZEND_NUM_ARGS()) {
-		case 2:
-			convert_to_long_ex(args[1]);
-			type = Z_LVAL_PP(args[1]);
-		case 1:
-			convert_to_string_ex(args[0]);
-			fmt = Z_STRVAL_PP(args[0]);
 	}
 
 	switch (type) {
@@ -1183,13 +1167,13 @@ PHP_FUNCTION(ibase_timefmt)
 			}
 			IBG(timeformat) = DL_STRDUP(fmt);
 			break;
+		default:
+			RETURN_FALSE;
 	}
 
-	efree(args);
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto int ibase_gen_id(string generator [, int increment [, resource link_identifier ]])
    Increments the named generator and returns its new value */
