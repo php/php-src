@@ -72,6 +72,7 @@ PEAR Installer:
 * Fix #25322 - bad md5sum should be fatal error
 * Package uninstall now also removes empty directories
 * Fixed locking problems for reading commands (pear list, pear info)
+* Fixed #45 preferred_state works incorrectly 
 
 OS_Guess Class:
 
