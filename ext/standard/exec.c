@@ -220,22 +220,22 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
    Execute an external program */
 PHP_FUNCTION(exec)
 {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int arg_count = ARG_COUNT(ht);
 	int ret;
 
-	if (arg_count > 3 || getParameters(ht, arg_count, &arg1, &arg2, &arg3) == FAILURE) {
+	if (arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1,&arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(0, arg1->value.str.val, NULL, return_value);
+			ret = _Exec(0, (*arg1)->value.str.val, NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"Array argument to exec() not passed by reference");
 			}
-			ret = _Exec(2, arg1->value.str.val, arg2, return_value);
+			ret = _Exec(2, (*arg1)->value.str.val,*arg2,return_value);
 			break;
 		case 3:
 			if (!ParameterPassedByReference(ht,2)) {
@@ -244,9 +244,9 @@ PHP_FUNCTION(exec)
 			if (!ParameterPassedByReference(ht,3)) {
 				php_error(E_WARNING,"return_status argument to exec() not passed by reference");
 			}
-			ret = _Exec(2, arg1->value.str.val, arg2, return_value);
-			arg3->type = IS_LONG;
-			arg3->value.lval=ret;
+			ret = _Exec(2,(*arg1)->value.str.val,*arg2,return_value);
+			(*arg3)->type = IS_LONG;
+			(*arg3)->value.lval=ret;
 			break;
 	}
 }
@@ -256,24 +256,24 @@ PHP_FUNCTION(exec)
    Execute an external program and display output */
 PHP_FUNCTION(system)
 {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int arg_count = ARG_COUNT(ht);
 	int ret;
 
-	if (arg_count > 2 || getParameters(ht, arg_count, &arg1, &arg2) == FAILURE) {
+	if (arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1,&arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(1, arg1->value.str.val, NULL, return_value);
+			ret = _Exec(1, (*arg1)->value.str.val, NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"return_status argument to system() not passed by reference");
 			}
-			ret = _Exec(1, arg1->value.str.val, NULL, return_value);
-			arg2->type = IS_LONG;
-			arg2->value.lval=ret;
+			ret = _Exec(1, (*arg1)->value.str.val, NULL,return_value);
+			(*arg2)->type = IS_LONG;
+			(*arg2)->value.lval=ret;
 			break;
 	}
 }
@@ -283,24 +283,24 @@ PHP_FUNCTION(system)
    Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int arg_count = ARG_COUNT(ht);
 	int ret;
 
-	if (arg_count > 2 || getParameters(ht, arg_count, &arg1, &arg2) == FAILURE) {
+	if (arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1,&arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(3, arg1->value.str.val, NULL, return_value);
+			ret = _Exec(3, (*arg1)->value.str.val, NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"return_status argument to system() not passed by reference");
 			}
-			ret = _Exec(3, arg1->value.str.val, NULL, return_value);
-			arg2->type = IS_LONG;
-			arg2->value.lval=ret;
+			ret = _Exec(3, (*arg1)->value.str.val, NULL,return_value);
+			(*arg2)->type = IS_LONG;
+			(*arg2)->value.lval=ret;
 			break;
 	}
 }
@@ -348,16 +348,16 @@ char * php_escape_shell_cmd(char *str) {
    escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
-	pval *arg1;
+	pval **arg1;
 	char *cmd = NULL;
 
-	if (getParameters(ht, 1, &arg1) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string(arg1);
-	if (arg1->value.str.len) {
-		cmd = php_escape_shell_cmd(arg1->value.str.val);
+	convert_to_string_ex(arg1);
+	if ((*arg1)->value.str.len) {
+		cmd = php_escape_shell_cmd((*arg1)->value.str.val);
 		RETVAL_STRING(cmd, 1);
 		efree(cmd);
 	}
@@ -369,10 +369,10 @@ PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
 	int readbytes,total_readbytes=0,allocated_space;
-	pval *cmd;
+	pval **cmd;
 	PLS_FETCH();
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &cmd)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&cmd)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -381,13 +381,13 @@ PHP_FUNCTION(shell_exec)
 		RETURN_FALSE;
 	}
 
-	convert_to_string(cmd);
+	convert_to_string_ex(cmd);
 #if WIN32|WINNT
-	if ((in=popen(cmd->value.str.val,"rt"))==NULL) {
+	if ((in=popen((*cmd)->value.str.val,"rt"))==NULL) {
 #else
-	if ((in=popen(cmd->value.str.val,"r"))==NULL) {
+	if ((in=popen((*cmd)->value.str.val,"r"))==NULL) {
 #endif
-		php_error(E_WARNING,"Unable to execute '%s'",cmd->value.str.val);
+		php_error(E_WARNING,"Unable to execute '%s'",(*cmd)->value.str.val);
 	}
 	allocated_space = EXEC_INPUT_BUF;
 	return_value->value.str.val = (char *) emalloc(allocated_space);

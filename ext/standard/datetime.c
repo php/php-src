@@ -76,17 +76,17 @@ PHP_FUNCTION(time)
 
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
-	pval *arguments[7];
+	pval **arguments[7];
 	struct tm *ta, tmbuf;
 	time_t t;
 	int i, gmadjust, seconds, arg_count = ARG_COUNT(ht);
 
-	if (arg_count > 7 || getParametersArray(ht, arg_count, arguments) == FAILURE) {
+	if (arg_count > 7 || zend_get_parameters_array_ex(arg_count,arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* convert supplied arguments to longs */
 	for (i = 0; i < arg_count; i++) {
-		convert_to_long(arguments[i]);
+		convert_to_long_ex(arguments[i]);
 	}
 	t = time(NULL);
 #ifdef HAVE_TZSET
@@ -115,7 +115,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	*/
 	switch(arg_count) {
 	case 7:
-		ta->tm_isdst = arguments[6]->value.lval;
+		ta->tm_isdst = (*arguments[6])->value.lval;
 		/* fall-through */
 	case 6:
 		/*
@@ -127,23 +127,23 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		** dates including the whole gregorian calendar.
 		** But it cannot represent ancestral dates prior to year 1001.
 		*/
-		ta->tm_year = arguments[5]->value.lval
-		  - ((arguments[5]->value.lval > 1000) ? 1900 : 0);
+		ta->tm_year = (*arguments[5])->value.lval
+		  - (((*arguments[5])->value.lval > 1000) ? 1900 : 0);
 		/* fall-through */
 	case 5:
-		ta->tm_mday = arguments[4]->value.lval;
+		ta->tm_mday = (*arguments[4])->value.lval;
 		/* fall-through */
 	case 4:
-		ta->tm_mon = arguments[3]->value.lval - 1;
+		ta->tm_mon = (*arguments[3])->value.lval - 1;
 		/* fall-through */
 	case 3:
-		ta->tm_sec = arguments[2]->value.lval;
+		ta->tm_sec = (*arguments[2])->value.lval;
 		/* fall-through */
 	case 2:
-		ta->tm_min = arguments[1]->value.lval;
+		ta->tm_min = (*arguments[1])->value.lval;
 		/* fall-through */
 	case 1:
-		ta->tm_hour = arguments[0]->value.lval;
+		ta->tm_hour = (*arguments[0])->value.lval;
 		/* fall-through */
 	case 0:
 		break;
@@ -185,7 +185,7 @@ PHP_FUNCTION(gmmktime)
 static void
 php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
-	pval *format, *timestamp;
+	pval **format, **timestamp;
 	time_t the_time;
 	struct tm *ta, tmbuf;
 	int i, size = 0, length, h, beat;
@@ -193,22 +193,22 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	switch(ARG_COUNT(ht)) {
 	case 1:
-		if (getParameters(ht, 1, &format) == FAILURE) {
+		if (zend_get_parameters_ex(1, &format) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		the_time = time(NULL);
 		break;
 	case 2:
-		if (getParameters(ht, 2, &format, &timestamp) == FAILURE) {
+		if (zend_get_parameters_ex(2, &format, &timestamp) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(timestamp);
-		the_time = timestamp->value.lval;
+		convert_to_long_ex(timestamp);
+		the_time = (*timestamp)->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(format);
+	convert_to_string_ex(format);
 
 	if (gm) {
 		ta = gmtime_r(&the_time, &tmbuf);
@@ -220,8 +220,8 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		php_error(E_WARNING, "unexpected error in date()");
 		RETURN_FALSE;
 	}
-	for (i = 0; i < format->value.str.len; i++) {
-		switch (format->value.str.val[i]) {
+	for (i = 0; i < (*format)->value.str.len; i++) {
+		switch ((*format)->value.str.val[i]) {
 			case 'U':		/* seconds since the epoch */
 				size += 10;
 				break;
@@ -259,7 +259,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				size += 2;
 				break;
 			case '\\':
-				if(i < format->value.str.len-1) {
+				if(i < (*format)->value.str.len-1) {
 					i++;
 				}
 			case 'L':		/* boolean for leap year */
@@ -276,12 +276,12 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	return_value->value.str.val = (char *) emalloc(size + 1);
 	return_value->value.str.val[0] = '\0';
 
-	for (i = 0; i < format->value.str.len; i++) {
-		switch (format->value.str.val[i]) {
+	for (i = 0; i < (*format)->value.str.len; i++) {
+		switch ((*format)->value.str.val[i]) {
 			case '\\':
-				if(i < format->value.str.len-1) {
+				if(i < (*format)->value.str.len-1) {
 					char ch[2];
-					ch[0]=format->value.str.val[i+1];
+					ch[0]=(*format)->value.str.val[i+1];
 					ch[1]='\0';
 					strcat(return_value->value.str.val, ch);
 					i++;
@@ -419,7 +419,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			default:
 				length = strlen(return_value->value.str.val);
-				return_value->value.str.val[length] = format->value.str.val[i];
+				return_value->value.str.val[length] = (*format)->value.str.val[i];
 				return_value->value.str.val[length + 1] = '\0';
 				break;
 		}
@@ -440,17 +440,17 @@ PHP_FUNCTION(gmdate)
 
 PHP_FUNCTION(getdate)
 {
-	pval *timestamp_arg;
+	pval **timestamp_arg;
 	struct tm *ta, tmbuf;
 	time_t timestamp;
 
 	if (ARG_COUNT(ht) == 0) {
 		timestamp = time(NULL);
-	} else if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &timestamp_arg) == FAILURE) {
+	} else if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&timestamp_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(timestamp_arg);
-		timestamp = timestamp_arg->value.lval;
+		convert_to_long_ex(timestamp_arg);
+		timestamp = (*timestamp_arg)->value.lval;
 	}
 
 	ta = localtime_r(&timestamp, &tmbuf);
@@ -512,19 +512,19 @@ char *php_std_date(time_t t)
 #define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
 PHP_FUNCTION(checkdate)
 {
-	pval *month, *day, *year;
+	pval **month, **day, **year;
 	int m, d, y;
 	
 	if (ARG_COUNT(ht) != 3 ||
-		getParameters(ht, 3, &month, &day, &year) == FAILURE) {
+		zend_get_parameters_ex(3, &month, &day, &year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(day);
-	convert_to_long(month);
-	convert_to_long(year);
-	y = year->value.lval;
-	m = month->value.lval;
-	d = day->value.lval;
+	convert_to_long_ex(day);
+	convert_to_long_ex(month);
+	convert_to_long_ex(year);
+	y = (*year)->value.lval;
+	m = (*month)->value.lval;
+	d = (*day)->value.lval;
 
 	if (y < 100)
 		y += 1900;
@@ -546,7 +546,7 @@ PHP_FUNCTION(checkdate)
 
 PHP_FUNCTION(strftime)
 {
-	pval *format_arg, *timestamp_arg;
+	pval **format_arg, **timestamp_arg;
 	char *format,*buf;
 	time_t timestamp;
 	struct tm *ta, tmbuf;
@@ -555,28 +555,28 @@ PHP_FUNCTION(strftime)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &format_arg)==FAILURE) {
+			if (zend_get_parameters_ex(1,&format_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
 			time(&timestamp);
 			break;
 		case 2:
-			if (getParameters(ht, 2, &format_arg, &timestamp_arg)==FAILURE) {
+			if (zend_get_parameters_ex(2, &format_arg,&timestamp_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(timestamp_arg);
-			timestamp = timestamp_arg->value.lval;
+			convert_to_long_ex(timestamp_arg);
+			timestamp = (*timestamp_arg)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 
-	convert_to_string(format_arg);
-	if (format_arg->value.str.len==0) {
+	convert_to_string_ex(format_arg);
+	if ((*format_arg)->value.str.len==0) {
 		RETURN_FALSE;
 	}
-	format = format_arg->value.str.val;
+	format = (*format_arg)->value.str.val;
 	ta = localtime_r(&timestamp, &tmbuf);
 
 	buf = (char *) emalloc(buf_len);
@@ -599,24 +599,24 @@ PHP_FUNCTION(strftime)
    Convert string representation of date and time to a timestamp */
 PHP_FUNCTION(strtotime)
 {
-	pval	*timep, *nowp;
+	pval	**timep, **nowp;
 	int 	 ac;
 	struct timeval tv;
 
 	ac = ARG_COUNT(ht);
 
-	if (ac < 1 || ac > 2 || getParameters(ht, ac, &timep, &nowp)==FAILURE) {
+	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &timep,&nowp)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(timep);
+	convert_to_string_ex(timep);
 	if (ac == 2) {
-		convert_to_long(nowp);
-		tv.tv_sec = nowp->value.lval;
+		convert_to_long_ex(nowp);
+		tv.tv_sec = (*nowp)->value.lval;
 		tv.tv_usec = 0;
-		RETURN_LONG(parsedate(timep->value.str.val, &tv));
+		RETURN_LONG(parsedate((*timep)->value.str.val, &tv));
 	} else {
-		RETURN_LONG(parsedate(timep->value.str.val, NULL));
+		RETURN_LONG(parsedate((*timep)->value.str.val, NULL));
 	}
 }
 
