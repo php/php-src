@@ -589,15 +589,19 @@ AC_DEFUN(PHP_BUILD_RPATH,[
 ])
 
 dnl
-dnl PHP_ADD_INCLUDE(path)
+dnl PHP_ADD_INCLUDE(path [,before])
 dnl
-dnl add a include path
+dnl add a include pat, if before is 1, add in front.
 dnl
 AC_DEFUN(PHP_ADD_INCLUDE,[
   if test "$1" != "/usr/include"; then
     PHP_EXPAND_PATH($1, ai_p)
     AC_PHP_ONCE(INCLUDEPATH, $ai_p, [
-      INCLUDES="$INCLUDES -I$ai_p"
+      if test "$2"; then
+        INCLUDES="-I$ai_p $INCLUDES"
+      else
+        INCLUDES="$INCLUDES -I$ai_p"
+      fi
     ])
   fi
 ])
