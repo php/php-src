@@ -335,6 +335,11 @@ function_entry basic_functions[] = {
 	PHP_FE(array_keys,					NULL)
 	PHP_FE(array_values,				NULL)
 
+	PHP_FE(connection_aborted,			NULL)
+	PHP_FE(connection_timeout,			NULL)
+	PHP_FE(connection_status,			NULL)
+	PHP_FE(ignore_user_abort,			NULL)
+
 	{NULL, NULL, NULL}
 };
 
@@ -2336,6 +2341,58 @@ PHP_FUNCTION(defined)
 		RETURN_LONG(0);
 	}
 }
+
+/* {{{ proto int connection_aborted(void)
+   Returns true if client disconnected */
+PHP_FUNCTION(connection_aborted)
+{
+    RETURN_LONG(PG(connection_status)&PHP_CONNECTION_ABORTED);
+}
+/* }}} */
+
+/* {{{ proto int connection_timeout(void)
+   Returns true if script timed out */
+PHP_FUNCTION(connection_timeout)
+{
+
+    RETURN_LONG(PG(connection_status)&PHP_CONNECTION_TIMEOUT);
+}
+/* }}} */
+
+/* {{{ proto int connection_status(void)
+   Returns the connection status bitfield */
+PHP_FUNCTION(connection_status)
+{
+
+    RETURN_LONG(PG(connection_status));
+}
+/* }}} */
+
+/* {{{ proto int ignore_user_abort(boolean value)
+   Set whether we want to ignore a user abort event or not */
+PHP_FUNCTION(ignore_user_abort)
+{
+    pval *arg;
+    int old_setting;
+
+    old_setting = PG(ignore_user_abort);
+    switch (ARG_COUNT(ht)) {
+        case 0:
+            break;
+        case 1:
+            if (getParameters(ht,1,&arg) == FAILURE) {
+                RETURN_FALSE;
+            }
+            convert_to_long(arg);
+            PG(ignore_user_abort)=arg->value.lval;
+            break;
+        default:
+            WRONG_PARAM_COUNT;
+            break;
+    }
+    RETURN_LONG(old_setting);
+}
+/* }}} */
 
 /* {{{ proto bool function_exists(string function_name) 
    Checks if a given function has been defined */

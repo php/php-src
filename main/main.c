@@ -474,6 +474,7 @@ static void php3_timeout(int dummy)
 
 	php_error(E_ERROR, "Maximum execution time of %d second%s exceeded",
 			  php_timeout_seconds, php_timeout_seconds == 1 ? "" : "s");
+	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
 }
 #endif
 
