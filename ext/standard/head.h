@@ -21,31 +21,11 @@
 #ifndef HEAD_H
 #define HEAD_H
 
-/* 
-   We are still using a PHP2-style Push/Pop list here as opposed
-   to the PHP built-in list functionality because of the nature
-   of this particular list.  It is just used as a structured
-   buffer.  Doing this with the built-in list code would require
-   some changes to allow a search for the first item with a
-   certain type.  This type of search would not be optimal.
-   Private list management makes more sense here
-*/
-typedef struct CookieList {
-	char *name;
-	char *value;
-	time_t expires;
-	char *path;
-	char *domain;
-	int secure;
-	struct CookieList *next;
-} CookieList;
-
 extern PHP_RINIT_FUNCTION(head);
-PHP_FUNCTION(Header);
+PHP_FUNCTION(header);
 PHP_FUNCTION(setcookie);
 PHP_FUNCTION(headers_sent);
 
 PHPAPI int php_header(void);
-int php_headers_unsent(void);
 
 #endif

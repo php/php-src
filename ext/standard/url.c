@@ -38,7 +38,7 @@
 
 /* {{{ free_url
  */
-PHPAPI void php_url_free(php_url * theurl)
+PHPAPI void php_url_free(php_url *theurl)
 {
 	if (theurl->scheme)
 		efree(theurl->scheme);
@@ -245,7 +245,7 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
 
 /* {{{ php_url_encode
  */
-PHPAPI char *php_url_encode(char *s, int len)
+PHPAPI char *php_url_encode(char *s, int len, int *new_length)
 {
 	register int x, y;
 	unsigned char *str;
@@ -274,6 +274,9 @@ PHPAPI char *php_url_encode(char *s, int len)
 #endif /*CHARSET_EBCDIC*/
 	}
 	str[y] = '\0';
+	if (new_length) {
+		*new_length = y;
+	}
 	return ((char *) str);
 }
 /* }}} */
@@ -284,6 +287,7 @@ PHP_FUNCTION(urlencode)
 {
 	pval **arg;
 	char *str;
+	int str_len;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -294,8 +298,8 @@ PHP_FUNCTION(urlencode)
 		var_reset(return_value);
 		return;
 	}
-	str = php_url_encode((*arg)->value.str.val, (*arg)->value.str.len);
-	RETVAL_STRING(str, 1);
+	str = php_url_encode((*arg)->value.str.val, (*arg)->value.str.len, &str_len);
+	RETVAL_STRINGL(str, str_len, 0);
 	efree(str);
 }
 /* }}} */
@@ -355,7 +359,7 @@ PHPAPI int php_url_decode(char *str, int len)
 
 /* {{{ php_raw_url_encode
  */
-PHPAPI char *php_raw_url_encode(char *s, int len)
+PHPAPI char *php_raw_url_encode(char *s, int len, int *new_length)
 {
 	register int x, y;
 	unsigned char *str;
@@ -380,6 +384,9 @@ PHPAPI char *php_raw_url_encode(char *s, int len)
 		}
 	}
 	str[y] = '\0';
+	if (new_length) {
+		*new_length = y;
+	}
 	return ((char *) str);
 }
 /* }}} */
@@ -390,6 +397,7 @@ PHP_FUNCTION(rawurlencode)
 {
 	pval **arg;
 	char *str;
+	int new_len;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -399,9 +407,8 @@ PHP_FUNCTION(rawurlencode)
 	if (!(*arg)->value.str.len) {
 		RETURN_FALSE;
 	}
-	str = php_raw_url_encode((*arg)->value.str.val, (*arg)->value.str.len);
-	RETVAL_STRING(str, 1);
-	efree(str);
+	str = php_raw_url_encode((*arg)->value.str.val, (*arg)->value.str.len, &new_len);
+	RETVAL_STRINGL(str, new_len, 0);
 }
 /* }}} */
 
