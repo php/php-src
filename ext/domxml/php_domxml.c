@@ -2258,19 +2258,18 @@ PHP_FUNCTION(domxml_node_children)
 		last = ((xmlDoc *) nodep)->children;
 	else
 		last = nodep->children;
-	if (!last) {
-		RETURN_FALSE;
-	}
 
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-
-	while (last) {
-		zval *child;
-		child = php_domobject_new(last, &ret, NULL TSRMLS_CC);
-		add_next_index_zval(return_value, child);
-		last = last->next;
+	
+	if (last) {
+		while (last) {
+			zval *child;
+			child = php_domobject_new(last, &ret, NULL TSRMLS_CC);
+			add_next_index_zval(return_value, child);
+			last = last->next;
+		}
 	}
 }
 /* }}} */
