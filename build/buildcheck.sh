@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.9 2001-05-23 19:10:06 sas Exp $ 
+# $Id: buildcheck.sh,v 1.10 2001-05-23 19:13:24 sas Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -40,7 +40,7 @@ echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
 # automake 1.4 or newer
-am_version=`automake --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+am_version=`automake --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//' -e 's/-p[0-9]*$//'`
 if test "$am_version" = ""; then
 echo "buildconf: automake not found."
 echo "           You need automake version 1.4 or newer installed"
