@@ -13,6 +13,6 @@ requests will be run in parallell. The maximum number of parallell
 PHP4-execution is limited to the number of handle threads Roxen is
 started with.
 
-- The Author, David Hedbor <neotron@php.net>
-
-
+Support for this module is lacking. Please contact Roxen Internet
+Software for support and help. See http://www.roxen.com/company/contact/
+for contact information.
