@@ -891,9 +891,20 @@ sockets.use_system_read = On
 ;printer.default_printer = ""
 
 [mbstring]
+; internal/script encoding.
+; Some encoding cannot work as internal encoding.
+; (e.g. SJIS, BIG5, ISO-2022-*)
 ;mbstring.internal_encoding = EUC-JP
+
+; http input encoding.
 ;mbstring.http_input = auto
+
+; http output encoding. mb_output_handler must be
+; registered as output buffer to function
 ;mbstring.http_output = SJIS
+
+; automatic encoding detection order.
+; auto means 
 ;mbstring.detect_order = auto
 ;mbstring.substitute_character = none;
 
