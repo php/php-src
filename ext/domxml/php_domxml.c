@@ -2360,7 +2360,7 @@ PHP_FUNCTION(domxml_node_replace_node)
 PHP_FUNCTION(domxml_node_append_child)
 {
 	zval *id, *rv = NULL, *node;
-	xmlNodePtr child, parent, new_child;
+	xmlNodePtr child, parent, new_child = NULL;
 	int ret;
 
 	DOMXML_PARAM_ONE(parent, id, le_domxmlnodep, "o", &node);
@@ -2381,7 +2381,34 @@ PHP_FUNCTION(domxml_node_append_child)
 	if (child->parent == parent){
 		xmlUnlinkNode(child);
 	}
-	new_child = xmlAddChild(parent, child);
+	
+	/*
+	 * The following code is from libxml2/tree.c and a fix for bug #20209
+	 * libxml does free textnodes, if there are adjacent TEXT nodes
+	 * This is bad behaviour for domxml, since then we have have reference
+	 * to undefined nodes. The idea here is, that we do this text comparison
+	 * by ourself and not free the nodes. and only if libxml2 won't do any harm
+	 * call the function from libxml2.
+	 * The code is exactly the same as in libxml2, only xmlFreeNode was taken away.
+	 */
+
+	if (child->type == XML_TEXT_NODE) {
+		if ((parent->type == XML_TEXT_NODE) &&
+			(parent->content != NULL)) {
+			xmlNodeAddContent(parent, child->content);
+			new_child = parent;
+		}
+		if ((parent->last != NULL) && (parent->last->type == XML_TEXT_NODE) &&
+			(parent->last->name == child->name)) {
+			xmlNodeAddContent(parent->last, child->content);
+			new_child = parent->last;
+		}
+	}
+	/* end libxml2 code */
+	
+	if (NULL == new_child) {
+		new_child = xmlAddChild(parent, child);
+	}
 
 	if (NULL == new_child) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't append node");
