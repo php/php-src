@@ -35,8 +35,8 @@
 #endif
 #endif
 
-#ifdef HAVE_OPENSSL_EXT
-#include <openssl/ssl.h>
+#if HAVE_OPENSSL_EXT
+# include <openssl/ssl.h>
 #endif
 
 #if HAVE_FTP
@@ -59,7 +59,7 @@ static
 
 function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			NULL)
-#ifdef HAVE_OPENSSL_EXT
+#if HAVE_OPENSSL_EXT
 	PHP_FE(ftp_ssl_connect,		NULL)
 #endif	
 	PHP_FE(ftp_login,			NULL)
@@ -110,7 +110,7 @@ zend_module_entry php_ftp_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef COMPILE_DL_FTP
+#if COMPILE_DL_FTP
 ZEND_GET_MODULE(php_ftp)
 #endif
 
@@ -179,7 +179,7 @@ PHP_FUNCTION(ftp_connect)
 
 	/* autoseek for resuming */
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
-#ifdef HAVE_OPENSSL_EXT
+#if HAVE_OPENSSL_EXT
 	/* disable ssl */
 	ftp->use_ssl = 0;
 #endif
@@ -188,7 +188,7 @@ PHP_FUNCTION(ftp_connect)
 }
 /* }}} */
 
-#ifdef HAVE_OPENSSL_EXT
+#if HAVE_OPENSSL_EXT
 /* {{{ proto resource ftp_ssl_connect(string host [, int port [, int timeout]])
    Opens a FTP-SSL stream */
 PHP_FUNCTION(ftp_ssl_connect)
