@@ -29,6 +29,19 @@
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
+#elif defined(NETWARE)
+#ifdef USE_WINSOCK
+/*#include <ws2nlm.h>*/
+#include <novsock2.h>
+#else
+#include <sys/socket.h>
+#endif
+#ifdef NEW_LIBC
+#include <sys/param.h>
+#else
+#include "netware/param.h"
+#endif
+#include "netware/mktemp.h"
 #else
 #include <sys/param.h>
 #include <sys/socket.h>
@@ -95,6 +108,9 @@ static FILE *php_do_open_temporary_file(const char *path, const char *pfx, char 
 #ifndef PHP_WIN32
 	int fd;
 #endif
+#ifdef NETWARE
+    char *file_path = NULL;
+#endif
 
 	if (!path) {
 		return NULL;
@@ -115,6 +131,14 @@ static FILE *php_do_open_temporary_file(const char *path, const char *pfx, char 
 #ifdef PHP_WIN32
 	if (GetTempFileName(path, pfx, 0, opened_path)) {
 		fp = VCWD_FOPEN(opened_path, "wb");
+	} else {
+		fp = NULL;
+	}
+#elif defined(NETWARE)
+	/* Using standard mktemp() implementation for NetWare */
+	file_path = mktemp(opened_path);
+	if (file_path) {
+		fp = VCWD_FOPEN(file_path, "wb");
 	} else {
 		fp = NULL;
 	}
