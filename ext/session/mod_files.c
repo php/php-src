@@ -28,6 +28,8 @@
  */
 
 
+#include "php.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -37,7 +39,6 @@
 
 #include <fcntl.h>
 
-#include "php.h"
 #include "php_session.h"
 #include "mod_files.h"
 #include "ext/standard/flock_compat.h"
