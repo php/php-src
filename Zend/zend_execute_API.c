@@ -88,19 +88,12 @@ void init_executor(CLS_D ELS_DC)
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
 /* destroys stack frame, therefore makes core dumps worthless */
-#if 0
-#if ZEND_DEBUG
+#if 0&&ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
 #endif
-#endif
-	/*
-	EG(return_value) = &EG(global_return_value);
-	var_reset(EG(return_value));
-	*/
-	EG(return_value_ptr_ptr) = &EG(global_return_value);
-	EG(global_return_value) = emalloc(sizeof(zval));
-	INIT_PZVAL(EG(global_return_value));
-	var_reset(EG(global_return_value));
+	EG(return_value_ptr_ptr) = &EG(global_return_value_ptr);
+	EG(global_return_value_ptr) = &EG(global_return_value);
+	INIT_ZVAL(EG(global_return_value));
 
 	EG(symtable_cache_ptr) = EG(symtable_cache)-1;
 	EG(symtable_cache_limit)=EG(symtable_cache)+SYMTABLE_CACHE_SIZE-1;
@@ -126,8 +119,7 @@ void init_executor(CLS_D ELS_DC)
 
 void shutdown_executor(ELS_D)
 {
-	zval_ptr_dtor(&EG(global_return_value));
-	/*zval_dtor(&EG(global_return_value));*/
+	zval_dtor(&EG(global_return_value));
 	zend_ptr_stack_destroy(&EG(arg_types_stack));
 	zend_stack_destroy(&EG(overloaded_objects_stack));
 			
@@ -295,25 +287,31 @@ ZEND_API int zval_update_constant(zval **pp)
 }
 
 
-int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval, int param_count, zval *params[])
+int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, int param_count, zval *params[])
 {
 	zval ***params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
 	int i;
 	int ex_retval;
+	zval *local_retval_ptr;
 
 	for (i=0; i<param_count; i++) {
 		params_array[i] = &params[i];
 	}
-	ex_retval = call_user_function_ex(function_table, object, function_name, retval, param_count, params_array, 1);
+	ex_retval = call_user_function_ex(function_table, object, function_name, &local_retval_ptr, param_count, params_array, 1);
+	if (local_retval_ptr) {
+		COPY_PZVAL_TO_ZVAL(*retval_ptr, local_retval_ptr);
+	} else {
+		INIT_ZVAL(*retval_ptr);
+	}
 	efree(params_array);
 	return ex_retval;
 }
 
 
-int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval, int param_count, zval **params[], int no_separation)
+int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation)
 {
 	int i;
-	zval *original_return_value;
+	zval **original_return_value;
 	HashTable *calling_symbol_table;
 	zend_function_state function_state;
 	zend_function_state *original_function_state_ptr;
@@ -369,7 +367,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 
 	zend_ptr_stack_push(&EG(argument_stack), (void *) (long) param_count);
 
-	var_uninit(retval);
+	*retval_ptr_ptr = NULL;
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
 		EG(active_symbol_table) = (HashTable *) emalloc(sizeof(HashTable));
@@ -382,20 +380,22 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 			zend_hash_update_ptr(EG(active_symbol_table), "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
 			zend_assign_to_variable_reference(NULL, this_ptr, &object, NULL ELS_CC);
 		}
-		original_return_value = EG(return_value);
+		original_return_value = EG(return_value_ptr_ptr);
 		original_op_array = EG(active_op_array);
-		EG(return_value) = retval;
+		EG(return_value_ptr_ptr) = retval_ptr_ptr;
 		EG(active_op_array) = (zend_op_array *) function_state.function;
-		original_opline_ptr = EG(opline_ptr);	
+		original_opline_ptr = EG(opline_ptr);
 		zend_execute(EG(active_op_array) ELS_CC);
 		zend_hash_destroy(EG(active_symbol_table));		
 		efree(EG(active_symbol_table));
 		EG(active_symbol_table) = calling_symbol_table;
 		EG(active_op_array) = original_op_array;
-		EG(return_value)=original_return_value;
+		EG(return_value_ptr_ptr)=original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
 	} else {
-		((zend_internal_function *) function_state.function)->handler(param_count, retval, &EG(regular_list), &EG(persistent_list), object, 1);
+		ALLOC_INIT_ZVAL(*retval_ptr_ptr);
+		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, &EG(regular_list), &EG(persistent_list), object, 1);
+		INIT_PZVAL(*retval_ptr_ptr);
 	}
 	zend_ptr_stack_clear_multiple(ELS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
@@ -404,7 +404,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 }
 
 
-ZEND_API void zend_eval_string(char *str, zval *retval CLS_DC ELS_DC)
+ZEND_API void zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC)
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -412,7 +412,7 @@ ZEND_API void zend_eval_string(char *str, zval *retval CLS_DC ELS_DC)
 	zend_function_state *original_function_state_ptr = EG(function_state_ptr);
 	int original_handle_op_arrays;
 
-	if (retval) {
+	if (retval_ptr) {
 		pv.value.str.len = strlen(str)+sizeof("return  ;")-1;
 		pv.value.str.val = emalloc(pv.value.str.len+1);
 		strcpy(pv.value.str.val, "return ");
@@ -432,25 +432,35 @@ ZEND_API void zend_eval_string(char *str, zval *retval CLS_DC ELS_DC)
 	CG(handle_op_arrays) = original_handle_op_arrays;
 
 	if (new_op_array) {
-		zval dummy_retval;
-		zval *original_return_value = EG(return_value);
+		zval *local_retval_ptr=NULL;
+		zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
 		zend_op **original_opline_ptr = EG(opline_ptr);
 		
-		EG(return_value) = (retval?retval:&dummy_retval);
-		var_reset(EG(return_value));
+		EG(return_value_ptr_ptr) = &local_retval_ptr;
 		EG(active_op_array) = new_op_array;
 		EG(no_extensions)=1;
+
 		zend_execute(new_op_array ELS_CC);
+
+		if (local_retval_ptr) {
+			if (retval_ptr) {
+				COPY_PZVAL_TO_ZVAL(*retval_ptr, local_retval_ptr);
+			} else {
+				zval_ptr_dtor(&local_retval_ptr);
+			}
+		} else {
+			if (retval_ptr) {
+				INIT_ZVAL(*retval_ptr);
+			}
+		}
+
 		EG(no_extensions)=0;
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
 		EG(function_state_ptr) = original_function_state_ptr;
 		destroy_op_array(new_op_array);
 		efree(new_op_array);
-		EG(return_value) = original_return_value;
-		if (!retval) {
-			zval_dtor(&dummy_retval);
-		}
+		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
 	} else {
 		printf("Failed executing:\n%s\n", str);
 	}

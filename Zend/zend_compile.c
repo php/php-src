@@ -1854,7 +1854,7 @@ void do_include_or_eval(int type, znode *result, znode *op1 CLS_DC)
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_INCLUDE_OR_EVAL;
-	opline->result.op_type = IS_TMP_VAR;
+	opline->result.op_type = IS_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *op1;
 	SET_UNUSED(opline->op2);

@@ -1473,26 +1473,28 @@ overloaded_function_call_cont:
 do_fcall_common:
 				{
 					zval **original_return_value;
-					int return_value_not_used = (opline->result.u.EA.type & EXT_TYPE_UNUSED);
-
+					int return_value_used = !(opline->result.u.EA.type & EXT_TYPE_UNUSED);
 
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
+
 					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;
-					/* The emalloc() could be optimized out for call user function but it
-					   creates a problem with include() */
-					Ts[opline->result.u.var].var.ptr = (zval *)emalloc(sizeof(zval));
-					INIT_ZVAL(*(Ts[opline->result.u.var].var.ptr));
 
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {	
-						((zend_internal_function *) function_state.function)->handler(opline->extended_value, Ts[opline->result.u.var].var.ptr, &EG(regular_list), &EG(persistent_list), object.ptr, !return_value_not_used);
+						Ts[opline->result.u.var].var.ptr = (zval *)emalloc(sizeof(zval));
+						INIT_ZVAL(*(Ts[opline->result.u.var].var.ptr));
+						((zend_internal_function *) function_state.function)->handler(opline->extended_value, Ts[opline->result.u.var].var.ptr, &EG(regular_list), &EG(persistent_list), object.ptr, return_value_used);
 						if (object.ptr) {
 							object.ptr->refcount--;
 						}
 						Ts[opline->result.u.var].var.ptr->is_ref = 0;
 						Ts[opline->result.u.var].var.ptr->refcount = 1;
+						if (!return_value_used) {
+							zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
+						}
 					} else if (function_state.function->type==ZEND_USER_FUNCTION) {
 						HashTable *calling_symbol_table;
 
+						Ts[opline->result.u.var].var.ptr = NULL;
 						if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 							/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 							function_state.function_symbol_table = *(EG(symtable_cache_ptr)--);
@@ -1518,7 +1520,15 @@ do_fcall_common:
 						original_return_value = EG(return_value_ptr_ptr);
 						EG(return_value_ptr_ptr) = Ts[opline->result.u.var].var.ptr_ptr;
 						EG(active_op_array) = (zend_op_array *) function_state.function;
+
 						zend_execute(EG(active_op_array) ELS_CC);
+
+						if (return_value_used && !Ts[opline->result.u.var].var.ptr) {
+							Ts[opline->result.u.var].var.ptr = (zval *) emalloc(sizeof(zval));
+							INIT_ZVAL(*Ts[opline->result.u.var].var.ptr);
+						} else if (!return_value_used && Ts[opline->result.u.var].var.ptr) {
+							zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
+						}
 						EG(opline_ptr) = &opline;
 						EG(active_op_array) = op_array;
 						EG(return_value_ptr_ptr)=original_return_value;
@@ -1531,11 +1541,13 @@ do_fcall_common:
 						}
 						EG(active_symbol_table) = calling_symbol_table;
 					} else { /* ZEND_OVERLOADED_FUNCTION */
+						Ts[opline->result.u.var].var.ptr = (zval *)emalloc(sizeof(zval));
+						INIT_ZVAL(*(Ts[opline->result.u.var].var.ptr));
 						call_overloaded_function(opline->extended_value, Ts[opline->result.u.var].var.ptr, &EG(regular_list), &EG(persistent_list) ELS_CC);
 						efree(fbc);
-					}
-					if (return_value_not_used) {
-						zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
+						if (!return_value_used) {
+							zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
+						}
 					}
 					object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
@@ -1561,25 +1573,23 @@ do_fcall_common:
 							(*retval_ptr_ptr)->is_ref = 1;
 						}
 						(*retval_ptr_ptr)->refcount++;
-						efree(*EG(return_value_ptr_ptr));
 						(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
 					} else {
 						retval_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					
 						if (!EG(free_op1)) { /* Not a temp var */
 							if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
-								/**(EG(return_value_ptr_ptr)) = (zval *)emalloc(sizeof(zval));*/
+								*(EG(return_value_ptr_ptr)) = (zval *)emalloc(sizeof(zval));
 								**EG(return_value_ptr_ptr) = *retval_ptr;
 								(*EG(return_value_ptr_ptr))->is_ref = 0;
 								(*EG(return_value_ptr_ptr))->refcount = 1;
 								zval_copy_ctor(*EG(return_value_ptr_ptr));
 							} else {
-								efree(*EG(return_value_ptr_ptr));
 								*EG(return_value_ptr_ptr) = retval_ptr;
 								retval_ptr->refcount++;
 							}
 						} else {
-							/**(EG(return_value_ptr_ptr))= (zval *)emalloc(sizeof(zval));*/
+							*(EG(return_value_ptr_ptr))= (zval *)emalloc(sizeof(zval));
 							**EG(return_value_ptr_ptr) = *retval_ptr;
 							(*EG(return_value_ptr_ptr))->refcount = 1;
 							(*EG(return_value_ptr_ptr))->is_ref = 0;
@@ -1940,26 +1950,20 @@ send_by_ref:
 							break;
 					}
 					FREE_OP(&opline->op1, EG(free_op1));
-
+					Ts[opline->result.u.var].var.ptr = NULL;
+					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;
 					if (new_op_array) {
-						zval *return_value_ptr;
-						/*Ts[opline->result.u.var].tmp_var.value.lval = 1;
-						Ts[opline->result.u.var].tmp_var.type = IS_LONG;
-						EG(return_value) = &Ts[opline->result.u.var].tmp_var;
-						*/
-						return_value_ptr = emalloc(sizeof(zval));
-						
-						INIT_PZVAL(return_value_ptr);
-						return_value_ptr->value.lval = 1;
-						return_value_ptr->type = IS_LONG;
-						EG(return_value_ptr_ptr) = &return_value_ptr;
+						EG(return_value_ptr_ptr) = Ts[opline->result.u.var].var.ptr_ptr;
 						EG(active_op_array) = new_op_array;
 
 						zend_execute(new_op_array ELS_CC);
 
-						Ts[opline->result.u.var].tmp_var = *return_value_ptr;
-						zval_copy_ctor(&Ts[opline->result.u.var].tmp_var);
-						zval_ptr_dtor(&return_value_ptr);
+						if (!Ts[opline->result.u.var].var.ptr) { /* there was no return statement */
+							Ts[opline->result.u.var].var.ptr = (zval *) emalloc(sizeof(zval));
+							INIT_PZVAL(Ts[opline->result.u.var].var.ptr);
+							Ts[opline->result.u.var].var.ptr->value.lval = 1;
+							Ts[opline->result.u.var].var.ptr->type = IS_LONG;
+						}
 
 						EG(opline_ptr) = &opline;
 						EG(active_op_array) = op_array;
@@ -1967,7 +1971,8 @@ send_by_ref:
 						destroy_op_array(new_op_array);
 						efree(new_op_array);
 					} else {
-						INIT_ZVAL(Ts[opline->result.u.var].tmp_var);
+						Ts[opline->result.u.var].var.ptr = (zval *) emalloc(sizeof(zval));
+						INIT_ZVAL(*Ts[opline->result.u.var].var.ptr);
 					}
 					EG(return_value_ptr_ptr) = original_return_value;
 				}

@@ -110,7 +110,6 @@ struct _zend_compiler_globals {
 
 
 struct _zend_executor_globals {
-	zval *return_value;
 	zval **return_value_ptr_ptr;
 
 	zval uninitialized_zval;
@@ -122,7 +121,10 @@ struct _zend_executor_globals {
 	zend_function_state *function_state_ptr;
 	zend_ptr_stack arg_types_stack;
 	zend_stack overloaded_objects_stack;
-	zval *global_return_value;
+
+	/* for global return() support */
+	zval *global_return_value_ptr;
+	zval global_return_value;
 
 	/* symbol table cache */
 	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];
