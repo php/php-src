@@ -17,6 +17,9 @@
  */
 /* $Id$ */
 
+#include "php.h"
+#include "snprintf.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
