@@ -21,7 +21,6 @@ CREDIT_LINE("CGI / FastCGI", "Rasmus Lerdorf, Stig Bakken, Shane Caraveo");
 CREDIT_LINE("CLI", "Edin Kadribasic, Marcus Boerger");
 CREDIT_LINE("Embed", "Edin Kadribasic");
 CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
-CREDIT_LINE("Java Servlet", "Sam Ruby");
 CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy, Uwe Schindler");
 CREDIT_LINE("phttpd", "Thies C. Arntzen");
 CREDIT_LINE("pi3web", "Holger Zimmermann");
