@@ -1,0 +1,13 @@
+- review/code inspection of the bind stuff
+- test
+- documentation
+- benchmarks /ext/mysql vs. ext/mysqli
+- testing/compiling under windows
+- migration guide:
+	diffrences between ext/mysql and mysqli
+	not supported functions from ext/mysql (mysql_db_query)
+- ini-settings
+- phpinfo output (Status: mostly done, maybe some more information could be interesting)
+- blob support for mysql_prepare
+- multi query support (still open until there is a decision (MySQL AB))
+- bundled libmysql 4.1
