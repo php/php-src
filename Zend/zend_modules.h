@@ -37,7 +37,7 @@ extern unsigned char second_arg_allow_ref[];
 
 #include "zend.h"
 
-#define ZEND_MODULE_API_NO 20000310
+#define ZEND_MODULE_API_NO 20000313
 
 #ifdef ZTS
 #define USING_ZTS 1

@@ -165,7 +165,7 @@ typedef struct _list_llist_element {
 
 
 typedef struct _zend_file_handle {
-	int type;
+	zend_uchar type;
 	char *filename;
 	char *opened_path;
 	union {
