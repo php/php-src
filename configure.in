@@ -868,7 +868,9 @@ fi
 dnl Configuring Zend and TSRM.
 dnl -------------------------------------------------------------------------
 
+PHP_HELP_SEPARATOR([Zend:])
 PHP_CONFIGURE_PART(Configuring Zend)
+
 LIBZEND_BASIC_CHECKS
 LIBZEND_DLSYM_CHECK
 LIBZEND_OTHER_CHECKS
@@ -892,6 +894,7 @@ fi
 ZEND_EXTRA_LIBS="$LIBS"
 unset LIBS LDFLAGS
 
+PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)
 TSRM_BASIC_CHECKS
 if test "$PHP_THREAD_SAFETY" = "yes"; then
@@ -1111,6 +1114,7 @@ dnl
 dnl Libtool creation
 dnl
 
+PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART(Configuring libtool)
 
 LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"

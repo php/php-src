@@ -4,7 +4,7 @@ dnl
 
 AC_MSG_CHECKING(for Servlet support)
 AC_ARG_WITH(servlet,
-[  --with-servlet[=DIR]      Include servlet support. DIR is the base install
+[  --with-servlet[=DIR]    Include servlet support. DIR is the base install
                           directory for the JSDK.  This SAPI prereqs the
                           java extension must be built as a shared dl.],
 [

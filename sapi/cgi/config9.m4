@@ -12,9 +12,9 @@ AC_ARG_ENABLE(cgi,
 
 AC_ARG_ENABLE(force-cgi-redirect,
 [  --enable-force-cgi-redirect
-                           Enable the security check for internal server
-                           redirects.  You should use this if you are
-                           running the CGI version with Apache.],
+                          Enable the security check for internal server
+                          redirects.  You should use this if you are
+                          running the CGI version with Apache.],
 [
   PHP_FORCE_CGI_REDIRECT=$enableval
 ],[
@@ -42,7 +42,8 @@ AC_ARG_ENABLE(fastcgi,
 ])
 
 AC_ARG_ENABLE(path-info-check,
-[  --disable-path-info-check  If this is disabled, paths such as
+[  --disable-path-info-check  
+                          If this is disabled, paths such as
                           /info.php/test?a=b will fail to work.],
 [
   PHP_ENABLE_PATHINFO_CHECK=$enableval
