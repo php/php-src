@@ -116,10 +116,12 @@ ZEND_API void wrong_param_count(void);
 
 #define getThis() (this_ptr)
 
-#define WRONG_PARAM_COUNT { wrong_param_count(); return; }
-#define WRONG_PARAM_COUNT_WITH_RETVAL(ret) { wrong_param_count(); return ret; }
+#define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
+#define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)
 #define ARG_COUNT(dummy)	(ht)
 #define ZEND_NUM_ARGS()		(ht)
+#define ZEND_WRONG_PARAM_COUNT()					{ wrong_param_count(); return; }
+#define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ wrong_param_count(); return ret; }
 
 #ifndef ZEND_WIN32
 #define DLEXPORT
