@@ -1184,7 +1184,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 						return_value.type = IS_OBJECT;
 						return_value.value.obj.ce = &com_class_entry;
-						return_value.value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+						ALLOC_HASHTABLE(return_value.value.obj.properties);
 						zend_hash_init(return_value.value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 						ALLOC_ZVAL(handle);
@@ -1225,7 +1225,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 			return_value.type = IS_OBJECT;
 			return_value.value.obj.ce = &com_class_entry;
-			return_value.value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+			ALLOC_HASHTABLE(return_value.value.obj.properties);
 			zend_hash_init(return_value.value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 			ALLOC_ZVAL(handle);

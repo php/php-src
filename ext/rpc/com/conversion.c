@@ -746,7 +746,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 
 					Z_TYPE_P(pval_arg) = IS_OBJECT;
 					pval_arg->value.obj.ce = &com_class_entry;
-					pval_arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+					ALLOC_HASHTABLE(pval_arg->value.obj.properties);
 					zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 					ALLOC_ZVAL(handle);

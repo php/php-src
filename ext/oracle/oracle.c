@@ -840,7 +840,7 @@ PHP_FUNCTION(ora_bind)
 	convert_to_long_ex(plen);
 
 	if (cursor->params == NULL) {
-		cursor->params = (HashTable *)emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(cursor->params);
 		if (!cursor->params ||
 			zend_hash_init(cursor->params, 19, NULL,
 						   HASH_DTOR pval_ora_param_destructor, 0) == FAILURE) {

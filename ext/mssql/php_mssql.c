@@ -1917,7 +1917,7 @@ PHP_FUNCTION(mssql_bind)
 	
 	/* hashtable of binds */
 	if (! statement->binds) {
-		statement->binds = emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(statement->binds);
 		zend_hash_init(statement->binds, 13, NULL, _mssql_bind_hash_dtor, 0);
 	}
 

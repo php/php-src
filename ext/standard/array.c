@@ -1419,7 +1419,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		length = num_in-offset;
 
 	/* Create and initialize output hash */
-	out_hash = (HashTable *)emalloc(sizeof(HashTable));
+	ALLOC_HASHTABLE(out_hash);
 	zend_hash_init(out_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
 	/* Start at the beginning of the input hash and copy
