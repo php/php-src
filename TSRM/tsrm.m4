@@ -12,14 +12,22 @@ AC_CHECK_HEADERS(stdarg.h)
 
 AC_DEFUN(TSRM_PTHREAD,[
 
-AC_CHECK_LIB(c_r, pthread_kill)
-AC_CHECK_LIB(pthread, pthread_kill)
+dnl Check for FreeBSD/Linux -pthread option
 
+old_LDFLAGS="$LDFLAGS"
+LDFLAGS="$LDFLAGS -pthread"
 AC_CHECK_FUNCS(pthread_kill)
 
 if test "$ac_cv_func_pthread_kill" != "yes"; then
-  AC_MSG_ERROR(You need pthreads to build TSRM.)
+  LDFLAGS="$old_LDFLAGS"
+dnl Fall back to the standard -lpthread
+  AC_CHECK_LIB(pthread, pthread_kill)
+  unset ac_cv_func_pthread_kill
+  AC_CHECK_FUNCS(pthread_kill)
+  if test "$ac_cv_func_pthread_kill" != "yes"; then
+    AC_MSG_ERROR(You need Pthreads to build TSRM on UNIX.)
+  fi
 fi
-
+		
 AC_DEFINE(PTHREADS, [], Whether to use Pthreads)
 ])
