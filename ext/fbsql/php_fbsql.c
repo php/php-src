@@ -3059,10 +3059,8 @@ PHP_FUNCTION(fbsql_fetch_field)
 			RETURN_FALSE;
 		}
 	}
-	if (object_init(return_value)==FAILURE)
-	{
-		RETURN_FALSE;
-	}
+	object_init(return_value);
+
 	add_property_string(return_value, "name",       (char*)fbccmdLabelName(fbcmdColumnMetaDataAtIndex(result->metaData, column)), 1);
 	add_property_string(return_value, "table",      (char*)fbccmdTableName(fbcmdColumnMetaDataAtIndex(result->metaData, column)), 1);
 	add_property_long(return_value,   "max_length", fbcdmdLength(fbccmdDatatype(fbcmdColumnMetaDataAtIndex(result->metaData, column))));

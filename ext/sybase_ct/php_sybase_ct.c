@@ -1824,9 +1824,8 @@ PHP_FUNCTION(sybase_fetch_field)
 		RETURN_FALSE;
 	}
 
-	if (object_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
+	object_init(return_value);
+
 	add_property_string(return_value, "name", result->fields[field_offset].name, 1);
 	add_property_long(return_value, "max_length", result->fields[field_offset].max_length);
 	add_property_string(return_value, "column_source", result->fields[field_offset].column_source, 1);

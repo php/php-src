@@ -1866,9 +1866,7 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
 	/* Initialize return object */
-	if (object_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	object_init(return_value);
 
 	unreadmsg = 0;
 	deletedmsg = 0;
@@ -2497,9 +2495,7 @@ PHP_FUNCTION(imap_status)
  	convert_to_string_ex(mbx);
 	convert_to_long_ex(flags);
 
-	if (object_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	object_init(return_value);
 
  	if (mail_status(imap_le_struct->imap_stream, Z_STRVAL_PP(mbx), Z_LVAL_PP(flags))) {
 		add_property_long(return_value, "flags", IMAPG(status_flags));
@@ -2548,9 +2544,7 @@ PHP_FUNCTION(imap_bodystruct)
 		RETURN_FALSE;
 	}
 
-	if (object_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	object_init(return_value);
 	
 	body=mail_body(imap_le_struct->imap_stream, Z_LVAL_PP(msg), Z_STRVAL_PP(section));
 	if (body->type <= TYPEMAX) {

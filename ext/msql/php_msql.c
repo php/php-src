@@ -1095,9 +1095,7 @@ PHP_FUNCTION(msql_fetch_field)
 	if (!msql_result || (msql_field=msqlFetchField(msql_result))==NULL) {
 		RETURN_FALSE;
 	}
-	if (object_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
+	object_init(return_value);
 
 	add_property_string(return_value, "name",(msql_field->name?msql_field->name:empty_string), 1);
 	add_property_string(return_value, "table",(msql_field->table?msql_field->table:empty_string), 1);
