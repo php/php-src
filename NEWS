@@ -2,19 +2,23 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
-- Fixed float-compare in min(),max(),a[r]sort(),[r]sort(). (Thies)
-- Implemented get_html_translation_table() function. (Thies)
+- Fixed inconsistencies in the implementation of here-docs (Andi & Zeev, Zend 
+  library)
+- Fixed a problem with constant class-member initializations (Andi & Zeev,
+  Zend library)
+- Fixed float-compare in min(),max(),a[r]sort(),[r]sort() (Thies)
+- Implemented get_html_translation_table() function (Thies)
 - Implemented array_flip() function. Returns input-array with key, value
-  flipped. (Thies)
+  flipped (Thies)
 - Added Berkeley DB3 support in DBA (Sascha)
 - Implemented 2-Arg version of strtr($str,$translation_array). This can be used
-  to revert what htmlspecialchars() did. (Thies)
-- Fixed mem-overwrite in XML_Parse_Into_Struct. (Thies)
-- Added substr_replace() function. (Andrei)
+  to revert what htmlspecialchars() did (Thies)
+- Fixed mem-overwrite in XML_Parse_Into_Struct (Thies)
+- Added substr_replace() function (Andrei)
 
 November 16 1999, Version 4.0 Beta 3
-- ucfirst()/ucwords() no longer modify arg1. (Thies)
-- Fixed strtr() not to modify arg1. (Thies)
+- ucfirst()/ucwords() no longer modify arg1 (Thies)
+- Fixed strtr() not to modify arg1 (Thies)
 - Added Win32 build files for Informix driver and make it
   compile with ZTS (danny)
 - Added tmpfile() function (Stig)
