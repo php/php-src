@@ -27,8 +27,6 @@
 
 #if HAVE_MNOGOSEARCH
 
-#undef HAVE_PGSQL
-#undef HAVE_MYSQL
 #include <udm_config.h>
 #include <udmsearch.h>
 
@@ -70,6 +68,12 @@ DLEXPORT PHP_FUNCTION(udm_crc32);
 #if UDM_VERSION_ID >= 30204
 DLEXPORT PHP_FUNCTION(udm_parse_query_string);
 DLEXPORT PHP_FUNCTION(udm_make_excerpt);
+DLEXPORT PHP_FUNCTION(udm_set_agent_param_ex);
+DLEXPORT PHP_FUNCTION(udm_get_res_field_ex);
+#endif
+#if UDM_VERSION_ID >= 30211
+DLEXPORT PHP_FUNCTION(udm_hash32);
+DLEXPORT PHP_FUNCTION(udm_alloc_agent_array);
 #endif
 #endif
 
