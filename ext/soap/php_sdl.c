@@ -39,15 +39,35 @@ static void delete_parameter(void *paramater);
 static void delete_header(void *header);
 static void delete_document(void *doc_ptr);
 
-encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type)
+encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const char *type)
 {
 	encodePtr enc = NULL;
-	TSRMLS_FETCH();
+	xmlNsPtr nsptr;
+	char *ns, *cptype;
 
-	enc = get_conversion_from_type(data, type);
-	if (enc == NULL && sdl) {
-		enc = get_conversion_from_type_ex(sdl->encoders, data, type);
+	parse_namespace(type, &cptype, &ns);
+	nsptr = xmlSearchNs(node->doc, node, ns);
+	if (nsptr != NULL) {
+		int ns_len = strlen(nsptr->href);
+		int type_len = strlen(cptype);
+		int len = ns_len + type_len + 1;
+		char *nscat = do_alloca(len + 1);
+
+		memcpy(nscat, nsptr->href, ns_len);
+		nscat[ns_len] = ':';
+		memcpy(nscat+ns_len+1, cptype, type_len);
+		nscat[len] = '\0';
+
+		enc = get_encoder_ex(sdl, nscat, len);
+		if (enc == NULL) {
+			enc = get_encoder_ex(sdl, type, type_len);
+		}
+		free_alloca(nscat);
+	} else {
+		enc = get_encoder_ex(sdl, type, strlen(type));
 	}
+	efree(cptype);
+	if (ns) {efree(ns);}
 	return enc;
 }
 
@@ -64,19 +84,22 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const char *type)
 		parse_namespace(type, &cptype, &ns);
 		nsptr = xmlSearchNs(node->doc, node, ns);
 		if (nsptr != NULL) {
-			smart_str nscat = {0};
+			int ns_len = strlen(nsptr->href);
+			int type_len = strlen(cptype);
+			int len = ns_len + type_len + 1;
+			char *nscat = do_alloca(len + 1);
 
-			smart_str_appends(&nscat, nsptr->href);
-			smart_str_appendc(&nscat, ':');
-			smart_str_appends(&nscat, cptype);
-			smart_str_0(&nscat);
+			memcpy(nscat, nsptr->href, ns_len);
+			nscat[ns_len] = ':';
+			memcpy(nscat+ns_len+1, cptype, type_len);
+			nscat[len] = '\0';
 
-			if (zend_hash_find(sdl->elements, nscat.c, nscat.len + 1, (void **)&sdl_type) == SUCCESS) {
+			if (zend_hash_find(sdl->elements, nscat, len + 1, (void **)&sdl_type) == SUCCESS) {
 				ret = *sdl_type;
-			} else if (zend_hash_find(sdl->elements, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
+			} else if (zend_hash_find(sdl->elements, (char*)type, type_len + 1, (void **)&sdl_type) == SUCCESS) {
 				ret = *sdl_type;
 			}
-			smart_str_free(&nscat);
+			free_alloca(nscat);
 		} else {
 			if (zend_hash_find(sdl->elements, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
 				ret = *sdl_type;
@@ -93,26 +116,33 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
+	int ns_len = strlen(ns);
+	int type_len = strlen(type);
+	int len = ns_len + type_len + 1;
 
-	nscat = emalloc(strlen(ns) + strlen(type) + 2);
-	sprintf(nscat, "%s:%s", ns, type);
+	nscat = do_alloca(len + 1);
+	memcpy(nscat, ns, ns_len);
+	nscat[ns_len] = ':';
+	memcpy(nscat+ns_len+1, type, type_len);
+	nscat[len] = '\0';
 
-	enc = get_encoder_ex(sdl, nscat);
+	enc = get_encoder_ex(sdl, nscat, len);
 
-	efree(nscat);
+	free_alloca(nscat);
 	return enc;
 }
 
-encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat)
+encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, int len)
 {
-	encodePtr enc = NULL;
+	encodePtr *enc;
 	TSRMLS_FETCH();
 
-	enc = get_conversion_from_href_type(nscat);
-	if (enc == NULL && sdl) {
-		enc = get_conversion_from_href_type_ex(sdl->encoders, nscat, strlen(nscat));
+	if (zend_hash_find(&SOAP_GLOBAL(defEnc), (char*)nscat, len + 1, (void **)&enc) == SUCCESS) {
+		return (*enc);
+	} else if (sdl && sdl->encoders && zend_hash_find(sdl->encoders, (char*)nscat, len + 1, (void **)&enc) == SUCCESS) {
+		return (*enc);
 	}
-	return enc;
+	return NULL;
 }
 
 sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type)
@@ -172,7 +202,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 	xmlAttrPtr targetNamespace;
 
 	if (zend_hash_exists(&ctx->docs, struri, strlen(struri)+1)) {
-	  return;
+		return;
 	}
 
 	wsdl = soap_xmlParseFile(struri);
@@ -225,17 +255,17 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 			/* TODO: namespace ??? */
 			xmlAttrPtr tmp = get_attribute(trav->properties, "location");
 			if (tmp) {
-			  xmlChar *uri;
+				xmlChar *uri;
 				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
 
 				if (base == NULL) {
-			    uri = xmlBuildURI(tmp->children->content, trav->doc->URL);
+					uri = xmlBuildURI(tmp->children->content, trav->doc->URL);
 				} else {
-    			uri = xmlBuildURI(tmp->children->content, base);
-			    xmlFree(base);
+					uri = xmlBuildURI(tmp->children->content, base);
+					xmlFree(base);
 				}
 				load_wsdl_ex(uri, ctx, 1);
-		    xmlFree(uri);
+				xmlFree(uri);
 			}
 
 		} else if (node_is_equal(trav,"message")) {
@@ -341,7 +371,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			if (ctype == NULL) {
 				ctype = tmp->children->content;
 			} else {
-			  ++ctype;
+				++ctype;
 			}
 			if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&message) != SUCCESS) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
@@ -430,7 +460,7 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 	if (ctype == NULL) {
 		ctype = message_name;
 	} else {
-	  ++ctype;
+		++ctype;
 	}
 	if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&tmp) != SUCCESS) {
 		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", message->children->content);
@@ -589,7 +619,7 @@ static sdlPtr load_wsdl(char *struri)
 				if (ctype == NULL) {
 					ctype = bindingAttr->children->content;
 				} else {
-				  ++ctype;
+					++ctype;
 				}
 				if (zend_hash_find(&ctx.bindings, ctype, strlen(ctype)+1, (void*)&tmp) != SUCCESS) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No <binding> element with name '%s'", ctype);
@@ -638,7 +668,7 @@ static sdlPtr load_wsdl(char *struri)
 				if (ctype == NULL) {
 					ctype = type->children->content;
 				} else {
-				  ++ctype;
+					++ctype;
 				}
 				if (zend_hash_find(&ctx.portTypes, ctype, strlen(ctype)+1, (void**)&tmp) != SUCCESS) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <portType> with name '%s'", name->children->content);
@@ -1907,28 +1937,28 @@ sdlPtr get_sdl(char *uri TSRMLS_DC)
 	if (SOAP_GLOBAL(cache_enabled)) {
 		char  fn[MAXPATHLEN];
 
-	  if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri,strlen(uri))) {
-		  strcpy(fn, uri);
+		if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri,strlen(uri))) {
+			strcpy(fn, uri);
 		} else if (VCWD_REALPATH(uri, fn) == NULL) {
 			sdl = load_wsdl(uri);
 		}
 		if (sdl == NULL) {
 			char* key;
 			time_t t = time(0);
-		  char md5str[33];
-	  	PHP_MD5_CTX context;
-		  unsigned char digest[16];
-		  int len = strlen(SOAP_GLOBAL(cache_dir));
+			char md5str[33];
+			PHP_MD5_CTX context;
+			unsigned char digest[16];
+			int len = strlen(SOAP_GLOBAL(cache_dir));
 
-		  md5str[0] = '\0';
-		  PHP_MD5Init(&context);
-		  PHP_MD5Update(&context, fn, strlen(fn));
-		  PHP_MD5Final(digest, &context);
-		  make_digest(md5str, digest);
-		  key = do_alloca(len+sizeof("/wsdl-")-1+sizeof(md5str));
-		  memcpy(key,SOAP_GLOBAL(cache_dir),len);
-		  memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
-		  memcpy(key+len+sizeof("/wsdl-")-1,md5str,sizeof(md5str));
+			md5str[0] = '\0';
+			PHP_MD5Init(&context);
+			PHP_MD5Update(&context, fn, strlen(fn));
+			PHP_MD5Final(digest, &context);
+			make_digest(md5str, digest);
+			key = do_alloca(len+sizeof("/wsdl-")-1+sizeof(md5str));
+			memcpy(key,SOAP_GLOBAL(cache_dir),len);
+			memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
+			memcpy(key+len+sizeof("/wsdl-")-1,md5str,sizeof(md5str));
 
 			if ((sdl = get_sdl_from_cache(key, fn, t-SOAP_GLOBAL(cache_ttl))) == NULL) {
 				sdl = load_wsdl(fn);
@@ -1982,11 +2012,6 @@ void delete_sdl(void *handle)
 		efree(tmp->requests);
 	}
 	efree(tmp);
-}
-
-void delete_sdl_ptr(void *handle)
-{
-	delete_sdl((sdlPtr*)handle);
 }
 
 static void delete_binding(void *data)
