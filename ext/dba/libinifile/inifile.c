@@ -25,7 +25,6 @@
 #include "php.h"
 #include "php_globals.h"
 #include "safe_mode.h"
-#include "php_network.h"
 
 #include <stdlib.h>
 #include <string.h>
