@@ -30,8 +30,7 @@ END_EXTERN_C()
 			ALLOC_HASHTABLE(properties);											\
 			zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);					\
 																					\
-			ALLOC_ZVAL(handle);														\
-			INIT_PZVAL(handle);														\
+			MAKE_STD_ZVAL(handle);													\
 			ZVAL_LONG(handle, zend_list_insert((o), IS_COM));						\
 																					\
 			zval_copy_ctor(handle);													\
@@ -46,7 +45,7 @@ END_EXTERN_C()
 #define ALLOC_COM(z)	(z) = (comval *) emalloc(sizeof(comval));					\
 						C_REFCOUNT(z) = 0;
 
-#define FREE_COM(z)		efree(z);
+#define FREE_COM(z)		php_COM_destruct(z TSRMLS_CC);
 
 #define IS_COM			php_COM_get_le_comval()
 
