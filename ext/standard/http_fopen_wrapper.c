@@ -263,26 +263,40 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 			}
 		}
 	}
-	{
-		ELS_FETCH();
 
-		zend_hash_update(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &response_header, sizeof(zval *), NULL);
-	}
 	if (!reqok) {
 		SOCK_FCLOSE(*socketd);
 		*socketd = 0;
 		free_url(resource);
-#if 0
 		if (location[0] != '\0') {
-			return php_fopen_url_wrapper(location, mode, options, issock, socketd, opened_path);
+			zval **response_header_new, *entry, **entryp;
+
+			fp = php_fopen_url_wrap_http(location, mode, options, issock, socketd, opened_path);
+			ELS_FETCH();
+			if (zend_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &response_header_new) == SUCCESS) {
+				entryp = &entry;
+				MAKE_STD_ZVAL(entry);
+				ZVAL_EMPTY_STRING(entry);
+				zend_hash_next_index_insert(Z_ARRVAL_P(response_header), entryp, sizeof(zval *), NULL);
+				zend_hash_internal_pointer_reset(Z_ARRVAL_PP(response_header_new));
+				while (zend_hash_get_current_data(Z_ARRVAL_PP(response_header_new), (void **)&entryp) == SUCCESS) {
+					zval_add_ref(entryp);
+					zend_hash_next_index_insert(Z_ARRVAL_P(response_header), entryp, sizeof(zval *), NULL);
+					zend_hash_move_forward(Z_ARRVAL_PP(response_header_new));
+				}
+			}
+			goto out;
 		} else {
-			return NULL;
+			fp = NULL;
+			goto out;
 		}
-#else
-		return NULL;
-#endif
 	}
 	free_url(resource);
 	*issock = 1;
+ out:
+	{
+		ELS_FETCH();
+		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", response_header);
+	}	
 	return (fp);
 }
