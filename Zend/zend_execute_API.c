@@ -670,6 +670,11 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 		return FAILURE;
 	}
 
+	if (EG(exception)) {
+		zend_error(E_ERROR, "__autoload threw an exception");
+	}
+
+	/* If an exception is thrown retval_ptr will be NULL but we bailout before we reach this point */
 	zval_ptr_dtor(&retval_ptr);
 
 	return zend_hash_find(EG(class_table), name, name_length + 1, (void **) ce);		
