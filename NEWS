@@ -3,6 +3,8 @@ PHP 4.0                                                                    NEWS
 ?? ??? 200?, Version 4.0.8-dev
 
 ?? ??? 200?, Version 4.0.7
+- Add support for chinese encodings to htmlentities() and htmlspecialchars()
+  (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
 - Fixed a crash in dbase_replace_record (Patch by robin.marlow@dps-int.com)
 - Fixed a crash in msql_result() (Zeev)
 - Added support for single dimensional SafeArrays and Enumerations.
