@@ -81,6 +81,7 @@
 
 /* $Id$ */
 
+#include "php.h"
 
 #include <stdlib.h>
 #include "mbfilter.h"
