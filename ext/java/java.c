@@ -730,6 +730,19 @@ JNIEXPORT jlong JNICALL Java_net_php_reflect_nextElement
   return (jlong)(long)result;
 }
 
+JNIEXPORT jlong JNICALL Java_net_php_reflect_hashUpdate
+  (JNIEnv *jenv, jclass self, jlong array, jbyteArray key)
+{
+  pval *result;
+  pval pkey;
+  pval *handle = (pval*)(long)array;
+  ALLOC_ZVAL(result);
+  Java_net_php_reflect_setResultFromString(jenv, self, (jlong)(long)&pkey, key);
+  zend_hash_update(handle->value.ht, pkey.value.str.val, pkey.value.str.len+1,
+    &result, sizeof(zval *), NULL);
+  return (jlong)(long)result;
+}
+
 JNIEXPORT void JNICALL Java_net_php_reflect_setException
   (JNIEnv *jenv, jclass self, jlong result, jbyteArray value)
 {
