@@ -1917,7 +1917,7 @@ send_by_ref:
 					if (offset) {
 						switch(offset->type) {
 							case IS_DOUBLE:
-								zend_hash_index_update(array_ptr->value.ht, (long) offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
+								zend_hash_index_update(array_ptr->value.ht, (long) offset->value.dval, &expr_ptr, sizeof(zval *), NULL);
 								break;
 							case IS_LONG:
 								zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
