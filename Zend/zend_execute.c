@@ -2280,7 +2280,13 @@ send_by_ref:
 				NEXT_OPCODE();
 			case ZEND_EXIT:
 				if (opline->op1.op_type != IS_UNUSED) {
-					zend_print_variable(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R));
+					zval *ptr;
+
+					ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					if (Z_TYPE_P(ptr) == IS_LONG) {
+						EG(exit_status) = Z_LVAL_P(ptr);
+					}
+					zend_print_variable(ptr);
 					FREE_OP(&opline->op1, EG(free_op1));
 				}
 				zend_bailout();

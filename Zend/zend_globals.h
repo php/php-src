@@ -151,6 +151,7 @@ struct _zend_executor_globals {
 
 	int error_reporting;
 	int orig_error_reporting;
+	int exit_status;
 
 	zend_op_array *active_op_array;
 
