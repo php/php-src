@@ -29,7 +29,6 @@
 typedef struct {
     long engine;
     long last_modified;
-	char *dav_script;
 	long xbithack;
 } php_apache_info_struct;
 

@@ -59,9 +59,6 @@
 #include "util_script.h"
 
 #include "mod_php4.h"
-#if HAVE_MOD_DAV
-# include "mod_dav.h"
-#endif
 
 #undef shutdown
 
@@ -724,46 +721,6 @@ void php_init_handler(server_rec *s, pool *p)
 }
 
 
-#if HAVE_MOD_DAV
-
-extern int phpdav_mkcol_test_handler(request_rec *r);
-extern int phpdav_mkcol_create_handler(request_rec *r);
-
-/* conf is being read twice (both here and in send_php()) */
-int send_parsed_php_dav_script(request_rec *r)
-{
-	php_apache_info_struct *conf;
-
-	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config,
-													&php4_module);
-	return send_php(r, 0, 0, conf->dav_script);
-}
-
-static int php_type_checker(request_rec *r)
-{
-	php_apache_info_struct *conf;
-
-	conf = (php_apache_info_struct *)get_module_config(r->per_dir_config,
-												   &php4_module);
-
-    /* If DAV support is enabled, use mod_dav's type checker. */
-    if (conf->dav_script) {
-		dav_api_set_request_handler(r, send_parsed_php_dav_script);
-		dav_api_set_mkcol_handlers(r, phpdav_mkcol_test_handler,
-								   phpdav_mkcol_create_handler);
-		/* leave the rest of the request to mod_dav */
-		return dav_api_type_checker(r);
-	}
-
-    return DECLINED;
-}
-
-#else /* HAVE_MOD_DAV */
-
-# define php_type_checker NULL
-
-#endif /* HAVE_MOD_DAV */
-
 
 handler_rec php_handlers[] =
 {
@@ -799,7 +756,7 @@ module MODULE_VAR_EXPORT php4_module =
 	NULL,						/* check_user_id */
 	NULL,						/* check auth */
 	NULL,						/* check access */
-	php_type_checker,			/* type_checker */
+	NULL,						/* type_checker */
 	NULL,						/* fixups */
 	NULL						/* logger */
 #if MODULE_MAGIC_NUMBER >= 19970103
