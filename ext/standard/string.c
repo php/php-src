@@ -33,6 +33,13 @@
 #include "zend_execute.h"
 #include "php_globals.h"
 
+#ifdef ZTS
+extern int basic_globals_id;
+#else
+extern php_basic_globals basic_globals;
+#endif
+
+/* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
 
 static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *newlen)
@@ -321,22 +328,15 @@ PHP_FUNCTION(implode)
 /* }}} */
 
 
-#ifndef THREAD_SAFE
-char *strtok_string;
-#endif
-
 /* {{{ proto string strtok([string str,] string token)
    Tokenize a string */
 PHP_FUNCTION(strtok)
 {
 	pval **str, **tok;
-#ifndef THREAD_SAFE
-	static char *strtok_pos1 = NULL;
-	static char *strtok_pos2 = NULL;
-#endif
 	char *token = NULL, *tokp=NULL;
 	char *first = NULL;
 	int argc;
+	BLS_FETCH();
 	
 	argc = ARG_COUNT(ht);
 
@@ -351,35 +351,35 @@ PHP_FUNCTION(strtok)
 	if (argc == 2) {
 		convert_to_string_ex(str);
 
-		STR_FREE(strtok_string);
-		strtok_string = estrndup((*str)->value.str.val,(*str)->value.str.len);
-		strtok_pos1 = strtok_string;
-		strtok_pos2 = NULL;
+		STR_FREE(BG(strtok_string));
+		BG(strtok_string) = estrndup((*str)->value.str.val,(*str)->value.str.len);
+		BG(strtok_pos1) = BG(strtok_string);
+		BG(strtok_pos2) = NULL;
 	}
-	if (strtok_pos1 && *strtok_pos1) {
+	if (BG(strtok_pos1) && *BG(strtok_pos1)) {
 		for ( /* NOP */ ; token && *token; token++) {
-			strtok_pos2 = strchr(strtok_pos1, (int) *token);
-			if (!first || (strtok_pos2 && strtok_pos2 < first)) {
-				first = strtok_pos2;
+			BG(strtok_pos2) = strchr(BG(strtok_pos1), (int) *token);
+			if (!first || (BG(strtok_pos2) && BG(strtok_pos2) < first)) {
+				first = BG(strtok_pos2);
 			}
 		}						/* NB: token is unusable now */
 
-		strtok_pos2 = first;
-		if (strtok_pos2) {
-			*strtok_pos2 = '\0';
+		BG(strtok_pos2) = first;
+		if (BG(strtok_pos2)) {
+			*BG(strtok_pos2) = '\0';
 		}
-		RETVAL_STRING(strtok_pos1,1);
+		RETVAL_STRING(BG(strtok_pos1),1);
 #if 0
 		/* skip 'token' white space for next call to strtok */
-		while (strtok_pos2 && 
-			strchr(tokp, *(strtok_pos2+1))) {
-			strtok_pos2++;
+		while (BG(strtok_pos2) && 
+			strchr(tokp, *(BG(strtok_pos2)+1))) {
+			BG(strtok_pos2)++;
 		}
 #endif
-		if (strtok_pos2)
-			strtok_pos1 = strtok_pos2 + 1;
+		if (BG(strtok_pos2))
+			BG(strtok_pos1) = BG(strtok_pos2) + 1;
 		else
-			strtok_pos1 = NULL;
+			BG(strtok_pos1) = NULL;
 	} else {
 		RETVAL_FALSE;
 	}
@@ -1436,13 +1436,11 @@ char *strerror(int errnum)
 {
 	extern int sys_nerr;
 	extern char *sys_errlist[];
-#ifndef THREAD_SAFE
-	static char str_ebuf[40];
-#endif
+	BLS_FETCH();
 
 	if ((unsigned int)errnum < sys_nerr) return(sys_errlist[errnum]);
-	(void)sprintf(str_ebuf, "Unknown error: %d", errnum);
-	return(str_ebuf);
+	(void)sprintf(BG(str_ebuf), "Unknown error: %d", errnum);
+	return(BG(str_ebuf));
 }
 #endif
 #endif
@@ -1987,10 +1985,6 @@ PHP_FUNCTION(strip_tags)
 }
 /* }}} */
 
-#ifndef THREAD_SAFE
-char *locale_string;
-#endif
-
 /* {{{ proto string setlocale(string category, string locale)
    Set locale information */
 PHP_FUNCTION(setlocale)
@@ -1999,6 +1993,7 @@ PHP_FUNCTION(setlocale)
 	pval *category, *locale;
 	int cat;
 	char *loc, *retval;
+	BLS_FETCH();
 
 	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &pcategory, &plocale)==FAILURE)
 		WRONG_PARAM_COUNT;
@@ -2031,8 +2026,8 @@ PHP_FUNCTION(setlocale)
 	if (retval) {
 		/* Remember if locale was changed */
 		if (loc) {
-			STR_FREE(locale_string);
-			strtok_string = estrdup(retval);
+			STR_FREE(BG(locale_string));
+			BG(strtok_string) = estrdup(retval);
 		}
 
 		RETVAL_STRING(retval,1);

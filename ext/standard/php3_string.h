@@ -36,10 +36,7 @@
 #ifndef _PHPSTRING_H
 #define _PHPSTRING_H
 
-#ifndef THREAD_SAFE
-extern char *strtok_string;
-extern char *locale_string;
-#endif
+#include "basic_functions.h"
 
 PHP_FUNCTION(strspn);
 PHP_FUNCTION(strcspn);

@@ -55,29 +55,28 @@
   	#define md5 ap_md5
   	which "kills" out md5 function.
 */
-#ifdef md5
 #undef md5
 #endif
+
+#ifdef ZTS
+int basic_globals_id;
+#else
+php_basic_globals basic_globals;
 #endif
 
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 /* uncomment this if/when we actually need it - tired of seeing the warning
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 */
-static HashTable *user_shutdown_function_names;
+;
 
 typedef struct _php_shutdown_function_entry {
 	zval **arguments;
 	int arg_count;
 } php_shutdown_function_entry;
 
-#ifdef ZTS
-#undef HAVE_PUTENV
-#endif
-
 /* some prototypes for local functions */
-int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
-void php3_call_shutdown_functions(void);
+static int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
 
 function_entry basic_functions[] = {
 	PHP_FE(intval,									NULL)
@@ -329,7 +328,6 @@ php3_module_entry basic_functions_module = {
 };
 
 #if defined(HAVE_PUTENV)
-static HashTable putenv_ht;
 
 static int _php3_putenv_destructor(putenv_entry *pe)
 {
@@ -364,7 +362,10 @@ void test_class_startup();
 PHP_MINIT_FUNCTION(basic)
 {
 	ELS_FETCH();
-
+#ifdef ZTS
+	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), NULL, NULL);
+#endif
+	
 	REGISTER_DOUBLE_CONSTANT("M_PI", M_PI, CONST_CS | CONST_PERSISTENT);
 	
 	test_class_startup();
@@ -378,6 +379,10 @@ PHP_MINIT_FUNCTION(basic)
 
 PHP_MSHUTDOWN_FUNCTION(basic)
 {
+#ifdef ZTS
+	ts_free_id(basic_globals_id);
+#endif
+	
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;	
 }
@@ -385,30 +390,34 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 
 PHP_RINIT_FUNCTION(basic)
 {
-	strtok_string = NULL;
-	locale_string = NULL;
+	BLS_FETCH();
+
+	BG(strtok_string) = NULL;
+	BG(locale_string) = NULL;
 #ifdef HAVE_PUTENV
-	if (zend_hash_init(&putenv_ht, 1, NULL, (int (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
+	if (zend_hash_init(&BG(putenv_ht), 1, NULL, (int (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
 	}
 #endif
-	user_shutdown_function_names=NULL;
+	BG(user_shutdown_function_names)=NULL;
 	return SUCCESS;
 }
 
 
 PHP_RSHUTDOWN_FUNCTION(basic)
 {
-	STR_FREE(strtok_string);
+	BLS_FETCH();
+
+	STR_FREE(BG(strtok_string));
 #ifdef HAVE_PUTENV
-	zend_hash_destroy(&putenv_ht);
+	zend_hash_destroy(&BG(putenv_ht));
 #endif
 	/* Check if locale was changed and change it back
 	   to the value in startup environment */
-	if (locale_string != NULL) {
+	if (BG(locale_string) != NULL) {
 		setlocale(LC_ALL, "");
 	}
-	STR_FREE(locale_string);
+	STR_FREE(BG(locale_string));
 
 	return SUCCESS;
 }
@@ -475,6 +484,7 @@ PHP_FUNCTION(getenv)
 PHP_FUNCTION(putenv)
 {
 	pval **str;
+	BLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -494,7 +504,7 @@ PHP_FUNCTION(putenv)
 		pe.key_len = strlen(pe.key);
 		pe.key = estrndup(pe.key,pe.key_len);
 		
-		zend_hash_del(&putenv_ht,pe.key,pe.key_len+1);
+		zend_hash_del(&BG(putenv_ht),pe.key,pe.key_len+1);
 		
 		/* find previous value */
 		pe.previous_value = NULL;
@@ -506,7 +516,7 @@ PHP_FUNCTION(putenv)
 		}
 
 		if ((ret=putenv(pe.putenv_string))==0) { /* success */
-			zend_hash_add(&putenv_ht,pe.key,pe.key_len+1,(void **) &pe,sizeof(putenv_entry),NULL);
+			zend_hash_add(&BG(putenv_ht),pe.key,pe.key_len+1,(void **) &pe,sizeof(putenv_entry),NULL);
 			RETURN_TRUE;
 		} else {
 			efree(pe.putenv_string);
@@ -1024,9 +1034,11 @@ int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_e
 
 void php3_call_shutdown_functions(void)
 {
-	if (user_shutdown_function_names) {
-		zend_hash_destroy(user_shutdown_function_names);
-		efree(user_shutdown_function_names);
+	BLS_FETCH();
+	
+	if (BG(user_shutdown_function_names)) {
+		zend_hash_destroy(BG(user_shutdown_function_names));
+		efree(BG(user_shutdown_function_names));
 	}
 }
 
@@ -1036,6 +1048,7 @@ PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry shutdown_function_entry;
 	int i;
+	BLS_FETCH();
 
 	shutdown_function_entry.arg_count = ARG_COUNT(ht);
 
@@ -1048,15 +1061,15 @@ PHP_FUNCTION(register_shutdown_function)
 		RETURN_FALSE;
 	}	
 	convert_to_string(shutdown_function_entry.arguments[0]);
-	if (!user_shutdown_function_names) {
-		user_shutdown_function_names = (HashTable *) emalloc(sizeof(HashTable));
-		zend_hash_init(user_shutdown_function_names, 0, NULL, (int (*)(void *))user_shutdown_function_dtor, 0);
+	if (!BG(user_shutdown_function_names)) {
+		BG(user_shutdown_function_names) = (HashTable *) emalloc(sizeof(HashTable));
+		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (int (*)(void *))user_shutdown_function_dtor, 0);
 	}
 
 	for (i=0; i<shutdown_function_entry.arg_count; i++) {
 		shutdown_function_entry.arguments[i]->refcount++;
 	}
-	zend_hash_next_index_insert(user_shutdown_function_names, &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
+	zend_hash_next_index_insert(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
 }
 /* }}} */
 
