@@ -55,7 +55,7 @@ PHPAPI int php_remove_tick_function(void (*func)(int))
 	return SUCCESS;
 }
 
-void php_tick_iterator(void *data, void *arg)
+static void php_tick_iterator(void *data, void *arg)
 {
 	void (*func)(int);
 	func = (void(*)(int))data;

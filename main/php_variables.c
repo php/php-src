@@ -23,6 +23,7 @@
 #include "ext/standard/php_standard.h"
 #include "php_variables.h"
 #include "php_globals.h"
+#include "php_content_types.h"
 #include "SAPI.h"
 
 #include "zend_globals.h"

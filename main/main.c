@@ -304,7 +304,7 @@ void php_log_err(char *log_message)
 #define PRINTF_BUFFER_SIZE 1024*4
 
 /* wrapper for modules to use PHPWRITE */
-PHPAPI int php_write(void *buf, int size)
+PHPAPI int php_write(void *buf, uint size)
 {
 	return PHPWRITE(buf, size);
 }

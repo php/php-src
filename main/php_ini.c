@@ -103,7 +103,7 @@ static int ini_key_compare(const void *a, const void *b)
 }
 
 
-void php_ini_sort_entries()
+void php_ini_sort_entries(void)
 {
 	zend_hash_sort(&known_directives, qsort, ini_key_compare, 0);
 }

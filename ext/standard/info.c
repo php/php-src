@@ -108,7 +108,7 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 	}
 }
 
-void php_info_print_style()
+void php_info_print_style(void)
 {
 	php_printf("<STYLE TYPE=\"text/css\"><!--\n");
 	php_printf("A { text-decoration: none; }\n");
