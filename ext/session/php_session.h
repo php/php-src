@@ -21,12 +21,14 @@
 
 #include "ext/standard/php_var.h"
 
-#define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name
-#define PS_CLOSE_ARGS void **mod_data
-#define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen
-#define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const int vallen
-#define PS_DESTROY_ARGS void **mod_data, const char *key
-#define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels
+#define PHP_SESSION_API 20020306
+
+#define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
+#define PS_CLOSE_ARGS void **mod_data TSRMLS_DC
+#define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen TSRMLS_DC
+#define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const int vallen TSRMLS_DC
+#define PS_DESTROY_ARGS void **mod_data, const char *key TSRMLS_DC
+#define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
 
 typedef struct ps_module_struct {
 	const char *name;
