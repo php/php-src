@@ -132,7 +132,7 @@ PHP_FUNCTION(mail)
 
 /* {{{ php_mail
  */
-int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
+PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
 #ifdef PHP_WIN32
 	int tsm_err;
