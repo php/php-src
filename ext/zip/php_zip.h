@@ -47,8 +47,8 @@ PHP_FUNCTION(zip_entry_read);
 PHP_FUNCTION(zip_entry_close);
 
 typedef struct {
-	ZZIP_FILE   *fp;
-	ZZIP_DIRENT  dirent;
+    ZZIP_FILE   *fp;
+    ZZIP_DIRENT  dirent;
 } php_zzip_dirent;
 
 #else
