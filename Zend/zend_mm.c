@@ -387,10 +387,12 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 
 			new_next_block = ZEND_MM_BLOCK_AT(mm_block, mm_block->size);
 			if (new_next_block != next_block) { /* A new free block was created */
+				zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) new_next_block);
 				zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) next_block);
 				new_next_block->size += next_block->size;
 				/* update the next block's prev_size */
 				ZEND_MM_BLOCK_AT(mm_block, new_next_block->size)->prev_size = new_next_block->size;
+				zend_mm_add_to_free_list(heap, (zend_mm_free_block *) new_next_block);
 			}
 		}
 		return p;
