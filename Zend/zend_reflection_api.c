@@ -178,7 +178,7 @@ static void reflection_register_implement(zend_class_entry *class_entry, zend_cl
 	class_entry->interfaces[num_interfaces - 1] = interface_entry;
 }
 
-static void reflection_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+static void reflection_free_objects_storage(zend_object *object TSRMLS_DC)
 {
 	reflection_object *intern = (reflection_object *) object;
 
@@ -188,7 +188,7 @@ static void reflection_objects_dtor(void *object, zend_object_handle handle TSRM
 	if (intern->obj) {
 		zval_ptr_dtor(&intern->obj);
 	}
-	zend_objects_destroy_object(object, handle TSRMLS_CC);
+	zend_objects_free_object_storage(object TSRMLS_CC);
 }
 
 static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC)
@@ -223,7 +223,7 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	retval.handle = zend_objects_store_put(intern, reflection_objects_dtor, NULL, reflection_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, reflection_free_objects_storage, reflection_objects_clone TSRMLS_CC);
 	retval.handlers = &reflection_object_handlers;
 	return retval;
 }
