@@ -2727,7 +2727,7 @@ PHP_FUNCTION(pdf_open_pdi)
 	convert_to_long_ex(arg4);
 
 #ifdef VIRTUAL_DIR
-	virtual_filepath(Z_STRVAL_PP(arg2), &file) TSRMLS_CC;
+	virtual_filepath(Z_STRVAL_PP(arg2), &file TSRMLS_CC);
 #else
 	file = Z_STRVAL_PP(arg2);
 #endif  
