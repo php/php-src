@@ -7,15 +7,6 @@
     touch silently failed when HAVE_UTIME is not defined.
     (This needs more consideration. Which platform does not support it?)
 
-2002-04-26  Jani Taskinen  <sniper@iki.fi>
-
-    * NEWS: - News entry about the change in php.ini-*
-
-
-    * php.ini-dist
-      php.ini-recommended:
-    Default setting for short_open_tag is better be Off.
-
 2002-04-26  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/session.c: three less strlen invocations
