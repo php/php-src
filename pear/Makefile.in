@@ -15,6 +15,7 @@ PEAR_SUBDIRS = \
 	DB \
 	File \
 	HTML \
+	Mail \
 	Net \
 	Payment \
 	PEAR \
@@ -39,6 +40,10 @@ PEAR_FILES = \
 	File/SearchReplace.php \
 	HTML/Form.php \
 	HTTP.php \
+	Mail.php \
+	Mail/sendmail.php \
+	Mail/smtp.php \
+	Net/SMTP.php \
 	Net/Socket.php \
 	PEAR/Installer.php \
 	Payment/Verisign.php \
