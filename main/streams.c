@@ -227,9 +227,9 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, const
 	if (filter == NULL) {
 		/* TODO: these need correct docrefs */
 		if (factory == NULL)
-			php_error_docref(NULL, E_WARNING TSRMLS_CC, "unable to locate filter \"%s\"", filtername);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to locate filter \"%s\"", filtername);
 		else
-			php_error_docref(NULL, E_WARNING TSRMLS_CC, "unable to create or locate filter \"%s\"", filtername);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
 	}
 	
 	return filter;
@@ -1221,7 +1221,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	}
 
 	if (stream->filterhead) {
-		php_error_docref(NULL, E_WARNING TSRMLS_CC, "cannot cast a filtered stream on this system");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot cast a filtered stream on this system");
 		return FAILURE;
 	}
 	
