@@ -87,6 +87,10 @@ EXTENSION:           pdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           pfpro
+PRIMARY MAINTAINER:  David Croft <david@infotrek.co.uk>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           pgsql
 PRIMARY MAINTAINER:  Jouni Ahto <jah@mork.net>
 STATUS:              Odd fixes
