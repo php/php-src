@@ -1243,7 +1243,7 @@ PHP_FUNCTION(domxml_is_blank_node)
 /* }}} */
 
 /* {{{ proto int domxml_node_type(void)
-   unknown ??? */
+   Returns the type of the node */
 PHP_FUNCTION(domxml_node_type)
 {
 	zval *id;
