@@ -16,6 +16,12 @@ fi
 cwd=`pwd`
 passthru="$@"
 
+CONFIGURE_COMMAND=$0
+for arg in "$@"; do
+    CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'"
+done
+AC_SUBST(CONFIGURE_COMMAND)
+
 dnl ## Diversion 1 is the initial checking of OS features, programs,
 dnl ## libraries and so on.
 
