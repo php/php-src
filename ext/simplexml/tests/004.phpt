@@ -9,6 +9,10 @@ $sxe = simplexml_load_file(dirname(__FILE__).'/004.xml');
 
 print_r($sxe);
 
+$elem1 = $sxe->elem1;
+$elem2 = $elem1->elem2;
+echo($elem2->CDATA);
+
 echo "---Done---\n";
 
 ?>
