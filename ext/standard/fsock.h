@@ -26,11 +26,7 @@
 #define FSOCK_H
 
 #ifdef NETWARE
-#ifdef NEW_LIBC
 #include "sys/timeval.h"
-#else
-#include "netware/time_nw.h"    /* For 'timeval' */
-#endif
 #endif
 
 #include "file.h"
