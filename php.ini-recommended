@@ -1,57 +1,12 @@
 [PHP]
 
 ;;;;;;;;;;;;;;;;;;;
-; About php.ini   ;
-;;;;;;;;;;;;;;;;;;;
-; This file controls many aspects of PHP's behavior.  In order for PHP to
-; read it, it must be named 'php.ini'.  PHP looks for it in the current
-; working directory, in the path designated by the environment variable
-; PHPRC, and in the path that was defined in compile time (in that order).
-; Under Windows, the compile-time path is the Windows directory.  The
-; path in which the php.ini file is looked for can be overridden using
-; the -c argument in command line mode.
-;
-; The syntax of the file is extremely simple.  Whitespace and Lines
-; beginning with a semicolon are silently ignored (as you probably guessed).
-; Section headers (e.g. [Foo]) are also silently ignored, even though
-; they might mean something in the future.
-;
-; Directives are specified using the following syntax:
-; directive = value
-; Directive names are *case sensitive* - foo=bar is different from FOO=bar.
-;
-; The value can be a string, a number, a PHP constant (e.g. E_ALL or M_PI), one
-; of the INI constants (On, Off, True, False, Yes, No and None) or an expression
-; (e.g. E_ALL & ~E_NOTICE), or a quoted string ("foo").
-;
-; Expressions in the INI file are limited to bitwise operators and parentheses:
-; |        bitwise OR
-; &        bitwise AND
-; ~        bitwise NOT
-; !        boolean NOT
-;
-; Boolean flags can be turned on using the values 1, On, True or Yes.
-; They can be turned off using the values 0, Off, False or No.
-;
-; An empty string can be denoted by simply not writing anything after the equal
-; sign, or by using the None keyword:
-;
-;  foo =         ; sets foo to an empty string
-;  foo = none    ; sets foo to an empty string
-;  foo = "none"  ; sets foo to the string 'none'
-;
-; If you use constants in your value, and these constants belong to a
-; dynamically loaded extension (either a PHP extension or a Zend extension),
-; you may only use these constants *after* the line that loads the extension.
-; 
-;
-;;;;;;;;;;;;;;;;;;;
 ; About this file ;
 ;;;;;;;;;;;;;;;;;;;
-; This is the recommended, PHP 5-style version of the php.ini-dist file.  It
+;
+; This is the recommended, PHP 4-style version of the php.ini-dist file.  It
 ; sets some non standard settings, that make PHP more efficient, more secure,
 ; and encourage cleaner coding.
-;
 ; The price is that with these settings, PHP may be incompatible with some
 ; applications, and sometimes, more difficult to develop with.  Using this
 ; file is warmly recommended for production sites.  As all of the changes from
@@ -64,7 +19,7 @@
 ; This file is different from the php.ini-dist file in the fact that it features
 ; different values for several directives, in order to improve performance, while
 ; possibly breaking compatibility with the standard out-of-the-box behavior of
-; PHP.  Please make sure you read what's different, and modify your scripts
+; PHP 3.  Please make sure you read what's different, and modify your scripts
 ; accordingly, if you decide to use this file instead.
 ;
 ; - register_globals = Off         [Security, Performance]
@@ -79,10 +34,6 @@
 ;     default) in the next version of PHP, because it often leads to security bugs.
 ;     Read http://php.net/manual/en/security.registerglobals.php for further
 ;     information.
-; - register_long_arrays = Off     [Performance]
-;     Disables registration of the older (and deprecated) long predefined array
-;     variables ($HTTP_*_VARS).  Instead, use the superglobals that were
-;     introduced in PHP 4.1.0
 ; - display_errors = Off           [Security]
 ;     With this directive set to off, errors that occur during the execution of
 ;     scripts will no longer be displayed as a part of the script output, and thus,
@@ -109,7 +60,7 @@
 ;     SQL databases without further manipulation.  Instead, you should use the
 ;     function addslashes() on each input element you wish to send to a database.
 ; - variables_order = "GPCS"       [Performance]
-;     The environment variables are not hashed into the $_ENV.  To access
+;     The environment variables are not hashed into the $HTTP_ENV_VARS[].  To access
 ;     environment variables, you can use getenv() instead.
 ; - error_reporting = E_ALL        [Code Cleanliness, Security(?)]
 ;     By default, PHP surpresses errors of type E_NOTICE.  These error messages
@@ -168,19 +119,17 @@ output_buffering = 4096
 ;       is doing.
 ; Note: You cannot use both "mb_output_handler" with "ob_iconv_handler"
 ;       and you cannot use both "ob_gzhandler" and "zlib.output_compression".
-; Note: output_handler must be empty if this is set 'On' !!!!
-;       Instead you must use zlib.output_handler.
 ;output_handler =
 
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)
 ; Note: Resulting chunk size may vary due to nature of compression. PHP
-;       outputs chunks that are few hundreds bytes each as a result of
-;       compression. If you prefer a larger chunk size for better
-;       performance, enable output_buffering in addition.
-; Note: You need to use zlib.output_handler instead of the standard
-;       output_handler, or otherwise the output will be corrupted.
+;       outputs chunks that are few handreds bytes each as a result of compression.
+;       If you want larger chunk size for better performence, enable output_buffering
+;       also.
+; Note: output_handler must be empty if this is set 'On' !!!!
+;       Instead you must use zlib.output_handler.
 zlib.output_compression = Off
 
 ; You cannot specify additional output handlers if zlib.output_compression
@@ -500,7 +449,7 @@ default_mimetype = "text/html"
 ; cgi.force_redirect configuration below
 doc_root =
 
-; The directory under which PHP opens the script using /~username used only
+; The directory under which PHP opens the script using /~usernamem used only
 ; if nonempty.
 user_dir =
 
@@ -568,8 +517,8 @@ allow_url_fopen = On
 ; Define the anonymous ftp password (your email address)
 ;from="john@doe.com"
 
-; Define the User-Agent string
-; user_agent="PHP"
+; Define the user agent for php to send
+;user_agent="PHP"
 
 ; Default timeout for socket based streams (seconds)
 default_socket_timeout = 60
@@ -974,14 +923,6 @@ session.gc_divisor     = 1000
 ; cleaned up by the garbage collection process.
 session.gc_maxlifetime = 1440
 
-; NOTE: If you are using the subdirectory option for storing session files
-;       (see session.save_path above), then garbage collection does *not*
-;       happen automatically.  You will need to do your own garbage
-;       collection through a shell script, cron entry, or some other method.
-;       For example, the following script would is the equivalent of
-;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
-;          cd /path/to/sessions; find -cmin +24 | xargs rm
-
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
 ; to initialize a session variable in the global scope, albeit register_globals
 ; is disabled.  PHP 4.3 and later will warn you, if this feature is used.
@@ -1006,7 +947,7 @@ session.entropy_file =
 
 ;session.entropy_file = /dev/urandom
 
-; Set to {nocache,private,public,} to determine HTTP caching aspects
+; Set to {nocache,private,public,} to determine HTTP caching aspects.
 ; or leave this empty to avoid sending anti-caching headers.
 session.cache_limiter = nocache
 

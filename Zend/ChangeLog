@@ -1,28 +1,3 @@
-2004-07-14  Stanislav Malyshev  <stas@zend.com>
-
-    * zend_object_handlers.c:
-      be consistent with write_dimension
-
-    * zend_object_handlers.c:
-      fix #28957
-
-2004-07-13  Andi Gutmans  <andi@zend.com>
-
-    * zend.h:
-      - 5.0.1-dev
-
-2004-07-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
-
-    * zend_constants.c:
-      Bugfix #29116 Zend constant warning uses memory after free (jdolecek at
-      NetBSD dot org)
-
-2004-07-13  Andi Gutmans  <andi@zend.com>
-
-    * (php_5_0_0)
-      zend.h:
-      - Roll PHP 5.0.0
-
 2004-07-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (php_5_0_0RC4)

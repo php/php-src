@@ -2673,13 +2673,13 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	smart_str_0(&hashed_details);
 
 	if (!exclusive) {
-		mutex_lock(mx_lock);
 		if (zend_ts_hash_find(persistent_sessions, hashed_details.c, hashed_details.len+1, (void **) &session_list) != SUCCESS) {
 			zend_llist tmp;
 			/* first session, set up a session list */
 			zend_llist_init(&tmp, sizeof(oci_session), (llist_dtor_func_t) _session_pcleanup, 1);
 			zend_ts_hash_update(persistent_sessions, hashed_details.c, hashed_details.len+1, &tmp, sizeof(zend_llist), (void **) &session_list);
 		} else {
+			mutex_lock(mx_lock);
 
 			/* session list found, search for an idle session or an already opened session by the current thread */
 			session = zend_llist_get_first(session_list);
@@ -2692,6 +2692,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 				session->thread = thread_id();
 			}
 
+			mutex_unlock(mx_lock);
 		}
 
 		if (session) {
@@ -2706,7 +2707,6 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 				/* breakthru to open */
 			}
 		}
-		mutex_unlock(mx_lock);
 	}
 
 	session = ecalloc(1,sizeof(oci_session));

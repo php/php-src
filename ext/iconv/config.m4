@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(iconv, for iconv support,
-[  --without-iconv[=DIR]   Exclude iconv support], yes)
+[  --without-iconv[=DIR]   Include iconv support], yes)
 
 if test "$PHP_ICONV" != "no"; then
 

@@ -12,7 +12,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;
-; About php.ini   ;
+; About this file ;
 ;;;;;;;;;;;;;;;;;;;
 ; This file controls many aspects of PHP's behavior.  In order for PHP to
 ; read it, it must be named 'php.ini'.  PHP looks for it in the current
@@ -55,10 +55,6 @@
 ; dynamically loaded extension (either a PHP extension or a Zend extension),
 ; you may only use these constants *after* the line that loads the extension.
 ;
-;
-;;;;;;;;;;;;;;;;;;;
-; About this file ;
-;;;;;;;;;;;;;;;;;;;
 ; All the values in the php.ini-dist file correspond to the builtin
 ; defaults (that is, if no php.ini is used, or if you delete these lines,
 ; the builtin defaults will be identical).
@@ -110,8 +106,6 @@ output_buffering = Off
 ;       is doing.
 ; Note: You cannot use both "mb_output_handler" with "ob_iconv_handler"
 ;       and you cannot use both "ob_gzhandler" and "zlib.output_compression".
-; Note: output_handler must be empty if this is set 'On' !!!!
-;       Instead you must use zlib.output_handler.
 ;output_handler =
 
 ; Transparent output compression using the zlib library
@@ -162,7 +156,6 @@ serialize_precision = 100
 ; reference).
 allow_call_time_pass_reference = On
 
-;
 ; Safe Mode
 ;
 safe_mode = Off
@@ -241,7 +234,6 @@ max_execution_time = 30     ; Maximum execution time of each script, in seconds
 max_input_time = 60	; Maximum amount of time each script may spend parsing request data
 memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -270,10 +262,6 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ; E_USER_NOTICE     - user-generated notice message
 ;
 ; Examples:
-;
-;   - Show all errors, except for notices and coding standards warnings
-;
-;error_reporting = E_ALL & ~E_NOTICE & ~E_STRICT
 ;
 ;   - Show all errors, except for notices
 ;
@@ -566,7 +554,6 @@ default_socket_timeout = 60
 ;extension=php_iisfunc.dll
 ;extension=php_imap.dll
 ;extension=php_interbase.dll
-;extension=php_java.dll
 ;extension=php_ldap.dll
 ;extension=php_mbstring.dll
 ;extension=php_mcrypt.dll
@@ -733,8 +720,7 @@ msql.max_links = -1
 ; Allow or prevent persistent links.
 pgsql.allow_persistent = On
 
-; Detect broken persistent links always with pg_pconnect().
-; Auto reset feature requires a little overheads.
+; Detect broken persistent links always with pg_pconnect(). Need a little overhead.
 pgsql.auto_reset_persistent = Off
 
 ; Maximum number of persistent links.  -1 means no limit.
@@ -744,7 +730,6 @@ pgsql.max_persistent = -1
 pgsql.max_links = -1
 
 ; Ignore PostgreSQL backends Notice message or not.
-; Notice message logging require a little overheads.
 pgsql.ignore_notice = 0
 
 ; Log PostgreSQL backends Noitce message or not.

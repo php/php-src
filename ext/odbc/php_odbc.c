@@ -3038,7 +3038,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 		fschema = Z_STRVAL_PP(pv_fschema);
 		convert_to_string_ex(pv_ftable);
 		ftable = Z_STRVAL_PP(pv_ftable);
-#if defined(HAVE_DBMAKER) || defined (HAVE_IBMDB2)
+#ifdef HAVE_DBMAKER
 #define EMPTY_TO_NULL(xstr) \
 	if ((int)strlen((xstr)) == 0) (xstr) = NULL
 
