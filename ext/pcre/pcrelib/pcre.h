@@ -10,6 +10,7 @@
 /* The file pcre.h is build by "configure". Do not edit it; instead
 make changes to pcre.in. */
 
+#include "php_compat.h"
 #define PCRE_MAJOR 3
 #define PCRE_MINOR 4
 #define PCRE_DATE  22-Aug-2000
