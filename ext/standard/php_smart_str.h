@@ -24,120 +24,147 @@
 #include <stdlib.h>
 #include <zend.h>
 
-#define smart_str_0(x) do { if ((x)->c) { (x)->c[(x)->len] = '\0'; } } while (0)
+#define smart_str_0(x) do {											\
+	if ((x)->c) {													\
+		(x)->c[(x)->len] = '\0';									\
+	}																\
+} while (0)
 
 #ifndef SMART_STR_PREALLOC
 #define SMART_STR_PREALLOC 128
 #endif
 
-#define smart_str_alloc(d, n, what) {\
-	if (!d->c) d->len = d->a = 0; \
-	newlen = d->len + n; \
-	if (newlen >= d->a) {\
-		d->c = perealloc(d->c, newlen + SMART_STR_PREALLOC + 1, what); \
-		d->a = newlen + SMART_STR_PREALLOC; \
-	}\
-}
+#define smart_str_alloc4(d, n, what, newlen) do {					\
+	if (!(d)->c) (d)->len = (d)->a = 0;								\
+	newlen = (d)->len + (n);										\
+	if (newlen >= (d)->a) {											\
+		(d)->a = newlen + SMART_STR_PREALLOC;						\
+		(d)->c = perealloc((d)->c, (d)->a + 1, (what));				\
+	}																\
+} while (0)
 
-#define smart_str_appends_ex(dest, src, what) smart_str_appendl_ex(dest, src, strlen(src), what)
-#define smart_str_appends(dest, src) smart_str_appendl(dest, src, strlen(src))
+#define smart_str_alloc(d, n, what) \
+	smart_str_alloc4((d), (n), (what), newlen)
 
-#define smart_str_appendc(dest, c) smart_str_appendc_ex(dest, c, 0)
-#define smart_str_free(s) smart_str_free_ex(s, 0)
-#define smart_str_appendl(dest, src, len) smart_str_appendl_ex(dest, src, len, 0)
-#define smart_str_append(dest, src) smart_str_append_ex(dest, src, 0)
-#define smart_str_append_long(dest, val) smart_str_append_long_ex(dest, val, 0)
-#define smart_str_append_unsigned(dest, val) smart_str_append_unsigned_ex(dest, val, 0)
+/* wrapper */
 
-static inline void smart_str_appendc_ex(smart_str *dest, unsigned char c, int what)
-{
-	size_t newlen;
+#define smart_str_appends_ex(dest, src, what) \
+	smart_str_appendl_ex((dest), (src), strlen(src), (what))
+#define smart_str_appends(dest, src) \
+	smart_str_appendl((dest), (src), strlen(src))
 
-	smart_str_alloc(dest, 1, what);
-	dest->len = newlen;
-	((unsigned char *) dest->c)[dest->len - 1] = c;
-}
+#define smart_str_appendc(dest, c) \
+	smart_str_appendc_ex((dest), (c), 0)
+#define smart_str_free(s) \
+	smart_str_free_ex((s), 0)
+#define smart_str_appendl(dest, src, len) \
+	smart_str_appendl_ex((dest), (src), (len), 0)
+#define smart_str_append(dest, src) \
+	smart_str_append_ex((dest), (src), 0)
+#define smart_str_append_long(dest, val) \
+	smart_str_append_long_ex((dest), (val), 0)
+#define smart_str_append_off_t(dest, val) \
+	smart_str_append_off_t_ex((dest), (val), 0)
+#define smart_str_append_unsigned(dest, val) \
+	smart_str_append_unsigned_ex((dest), (val), 0)
 
+#define smart_str_appendc_ex(dest, ch, what) do {					\
+	register size_t __nl;											\
+	smart_str_alloc4((dest), 1, (what), __nl);						\
+	(dest)->len = __nl;												\
+	((unsigned char *) (dest)->c)[(dest)->len - 1] = (ch);			\
+} while (0)
 
-static inline void smart_str_free_ex(smart_str *s, int what)
-{
-	if (s->c) {
-		pefree(s->c, what);
-		s->c = NULL;
-	}
-	s->a = s->len = 0;
-}
+#define smart_str_free_ex(s, what) do {								\
+	smart_str *__s = (smart_str *) (s);								\
+	if (__s->c) {													\
+		pefree(__s->c, what);										\
+		__s->c = NULL;												\
+	}																\
+	__s->a = __s->len = 0;											\
+} while (0)
 
-static inline void smart_str_appendl_ex(smart_str *dest, const char *src, size_t len, int what)
-{
-	size_t newlen;
+#define smart_str_appendl_ex(dest, src, nlen, what) do {			\
+	register size_t __nl;											\
+	smart_str *__dest = (smart_str *) (dest);						\
+																	\
+	smart_str_alloc4(__dest, (nlen), (what), __nl);					\
+	memcpy(__dest->c + __dest->len, (src), (nlen));					\
+	__dest->len = __nl;												\
+} while (0)
 
-	smart_str_alloc(dest, len, what);
-	memcpy(dest->c + dest->len, src, len);
-	dest->len = newlen;
-}
+/* input: buf points to the END of the buffer */
+#define smart_str_print_unsigned4(buf, num, vartype, result) do {	\
+	char *__p = (buf);												\
+	vartype __num = (num);											\
+	*__p = '\0';													\
+	do {															\
+		*--__p = (char) (__num % 10) + '0';							\
+		__num /= 10;												\
+	} while (__num > 0);											\
+	result = __p;													\
+} while (0)
 
 /* buf points to the END of the buffer */
-static inline char *smart_str_print_unsigned(char *buf, unsigned long num)
-{
-	char *p = buf;
+#define smart_str_print_long4(buf, num, vartype, result) do {	\
+	if (num < 0) {													\
+		/* this might cause problems when dealing with LONG_MIN		\
+		   and machines which don't support long long.  Works		\
+		   flawlessly on 32bit x86 */								\
+		smart_str_print_unsigned4((buf), -(num), vartype, (result));	\
+		*--(result) = '-';											\
+	} else {														\
+		smart_str_print_unsigned4((buf), (num), vartype, (result));	\
+	}																\
+} while (0)
+
+/*
+ * these could be replaced using a braced-group inside an expression
+ * for GCC compatible compilers, e.g.
+ *
+ * #define f(..) ({char *r;..;__r;})
+ */  
+ 
+static inline char *smart_str_print_long(char *buf, long num) {
+	char *r; 
+	smart_str_print_long4(buf, num, unsigned long, r); 
+	return r;
+}
+
+static inline char *smart_str_print_unsigned(char *buf, long num) {
+	char *r; 
+	smart_str_print_unsigned4(buf, num, unsigned long, r); 
+	return r;
+}
+
+#define smart_str_append_generic_ex(dest, num, type, vartype, func) do {	\
+	char __b[32];															\
+	char *__t;																\
+   	smart_str_print##func##4 (__b + sizeof(__b) - 1, (num), vartype, __t);	\
+	smart_str_appendl_ex((dest), __t, __b + sizeof(__b) - 1 - __t, (type));	\
+} while (0)
 	
-	*p = '\0';
-	do {
-		*--p = (char)(num % 10) + '0';
-		num /= 10;
-	} while (num > 0);
+#define smart_str_append_unsigned_ex(dest, num, type) \
+	smart_str_append_generic_ex((dest), (num), (type), unsigned long, _unsigned)
 
-	return p;
-}
+#define smart_str_append_long_ex(dest, num, type) \
+	smart_str_append_generic_ex((dest), (num), (type), unsigned long, _long)
 
-/* buf points to the END of the buffer */
-static inline char *smart_str_print_long(char *buf, long num)
-{
-	char *p;
-	
-	if (num < 0) {
-		/* this might cause problems when dealing with LONG_MIN
-		   and machines which don't support long long.  Works
-		   flawlessly on 32bit x86 */
-		p = smart_str_print_unsigned(buf, -num);
-		*--p = '-';
-	} else {
-		p = smart_str_print_unsigned(buf, num);
-	}
+#define smart_str_append_off_t_ex(dest, num, type) \
+	smart_str_append_generic_ex((dest), (num), (type), off_t, _long)
 
-	return p;
-}
+#define smart_str_append_ex(dest, src, what) \
+	smart_str_appendl_ex((dest), ((smart_str *)(src))->c, \
+		((smart_str *)(src))->len, (what));
 
-static inline void smart_str_append_long_ex(smart_str *dest, long num, int type)
-{
-	char buf[32];
-	char *p = smart_str_print_long(buf + sizeof(buf) - 1, num);
-	smart_str_appendl_ex(dest, p, (buf + sizeof(buf) - 1) - p, type);
-}
 
-static inline void smart_str_append_unsigned_ex(smart_str *dest, long num, int type)
-{
-	char buf[32];
-	char *p = smart_str_print_unsigned(buf + sizeof(buf) - 1, num);
-	smart_str_appendl_ex(dest, p, (buf + sizeof(buf) - 1) - p, type);
-}
+#define smart_str_setl(dest, src, nlen) do {						\
+	(dest)->len = (nlen);											\
+	(dest)->a = (nlen) + 1;											\
+	(dest)->c = (char *) (src);										\
+} while (0)
 
-static inline void smart_str_append_ex(smart_str *dest, smart_str *src, int what)
-{
-	smart_str_appendl_ex(dest, src->c, src->len, what);
-}
-
-static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
-{
-	dest->len = len;
-	dest->a = len + 1;
-	dest->c = (char *) src;
-}
-
-static inline void smart_str_sets(smart_str *dest, const char *src)
-{
-	smart_str_setl(dest, src, strlen(src));
-}
+#define smart_str_sets(dest, src) \
+	smart_str_setl((dest), (src), strlen(src));
 
 #endif
