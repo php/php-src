@@ -1018,6 +1018,9 @@ PHP_MINFO_FUNCTION(mbstring)
 #if defined(HAVE_MBSTR_KR)
 	php_info_print_table_row(2, "Korean support", "enabled");	
 #endif
+#if defined(HAVE_MBSTR_RU)
+	php_info_print_table_row(2, "Russian support", "enabled");	
+#endif
 	if (MBSTRG(encoding_translation)) {
 		php_info_print_table_row(2, "HTTP input encoding translation", "enabled");	
 	}
