@@ -32,7 +32,7 @@ Having said that, here are the organizational rules:
 
 The next few rules are more of a technical nature.
 
-   1. DO NOT TOUCH ChangeLog! It is automatically updated from the commit
+   1. DO NOT TOUCH ChangeLog! It is automagically updated from the commit
       messages every day. Woe be to those who attempt to mess with it.
 
    2. All news updates intended for public viewing, such as new features,
@@ -85,7 +85,7 @@ For string.c:
 # Man, that thing was leaking all over the place!
 @- Memory leak in trim() function has finally been fixed. (Bob)
 
-The lines above marked with @ will go into NEWS file automatically, and the
+The lines above marked with @ will go into NEWS file automagically, and the
 # lines will be omitted from the ChangeLog. Alternatively, you might want
 to modify NEWS file directly and not use the @ lines.
 
