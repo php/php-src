@@ -1297,7 +1297,7 @@ X
     fi
   fi
 
-cat<<X
+cat <<X
 +--------------------------------------------------------------------+
 | License:                                                           |
 | This software is subject to the PHP License, available in this     |
@@ -1316,13 +1316,11 @@ cat<<X
 | about the implications of having register_globals set to on, and   |
 | avoid using it if possible.                                        |
 +--------------------------------------------------------------------+
-
 X
-PHP_CONFIGURE_PART(Thank you for using PHP.)
-cat<<X
 
-
-X
+PHP_CONFIGURE_PART(
+Thank you for using PHP.
+)
 
 fi
 ])
