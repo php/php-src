@@ -2966,9 +2966,9 @@ int zend_recv_handler(ZEND_OPCODE_HANDLER_ARGS)
 			PZVAL_UNLOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr);
 		}
 	} else if (PZVAL_IS_REF(*param)) {
-		zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
+		zend_assign_to_variable_reference(&EX(opline)->result, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
 	} else {
-		zend_assign_to_variable(NULL, &EX(opline)->result, NULL, *param, IS_VAR, EX(Ts) TSRMLS_CC);
+		zend_assign_to_variable(&EX(opline)->result, &EX(opline)->result, NULL, *param, IS_VAR, EX(Ts) TSRMLS_CC);
 	}
 
 	NEXT_OPCODE();
@@ -2998,13 +2998,13 @@ int zend_recv_init_handler(ZEND_OPCODE_HANDLER_ARGS)
 			param = NULL;
 			assignment_value = &EX(opline)->op2.u.constant;
 		}
-		zend_assign_to_variable(NULL, &EX(opline)->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
+		zend_assign_to_variable(&EX(opline)->result, &EX(opline)->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
 	} else {
 		assignment_value = *param;
 		if (PZVAL_IS_REF(assignment_value)) {
-			zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
+			zend_assign_to_variable_reference(&EX(opline)->result, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
 		} else {
-			zend_assign_to_variable(NULL, &EX(opline)->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
+			zend_assign_to_variable(&EX(opline)->result, &EX(opline)->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
 		}
 	}
 
@@ -3993,6 +3993,28 @@ int zend_add_interface_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
+
+int zend_verify_ce_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zval *arg = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+
+	if ((Z_TYPE_P(arg) != IS_OBJECT)
+		|| !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
+		char *error_msg;
+
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			error_msg = "implement interface";
+		} else {
+			error_msg = "be an instance of";
+		}
+		zend_error(E_ERROR, "Argument %d must %s %s", EX(opline)->extended_value, error_msg, ce->name);
+	}
+
+	NEXT_OPCODE();
+}
+
+
 void zend_init_opcodes_handlers()
 {
 	zend_opcode_handlers[ZEND_NOP] = zend_nop_handler;
@@ -4170,6 +4192,7 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_START_NAMESPACE] = zend_start_namespace_handler;
 
 	zend_opcode_handlers[ZEND_ADD_INTERFACE] = zend_add_interface_handler;
+	zend_opcode_handlers[ZEND_VERIFY_CE] = zend_verify_ce_handler;
 }
 
 /*
