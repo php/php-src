@@ -2262,15 +2262,19 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 	}
 
-	if (!PZVAL_IS_REF(EX(object))) {
-		EX(object)->refcount++; /* For $this pointer */
+	if (EX(fbc)->common.is_static) {
+		EX(object) = NULL;
 	} else {
-		zval *this_ptr;
-		ALLOC_ZVAL(this_ptr);
-		*this_ptr = *EX(object);
-		INIT_PZVAL(this_ptr);
-		zval_copy_ctor(this_ptr);
-		EX(object) = this_ptr;
+		if (!PZVAL_IS_REF(EX(object))) {
+			EX(object)->refcount++; /* For $this pointer */
+		} else {
+			zval *this_ptr;
+			ALLOC_ZVAL(this_ptr);
+			*this_ptr = *EX(object);
+			INIT_PZVAL(this_ptr);
+			zval_copy_ctor(this_ptr);
+			EX(object) = this_ptr;
+		}
 	}
 
 	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
@@ -2312,10 +2316,6 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		function_name_strval = tmp.value.str.val;
 		function_name_strlen = tmp.value.str.len;
 	}
-	
-	if ((EX(object) = EG(This))) {
-		EX(object)->refcount++;
-	}
 
 	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
 
@@ -2331,6 +2331,14 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	EX(fbc) = function;
+
+	if (function->common.is_static) {
+		EX(object) = NULL;
+	} else {
+		if ((EX(object) = EG(This))) {
+			EX(object)->refcount++;
+		}
+	}
 
 	NEXT_OPCODE();
 }
@@ -2408,7 +2416,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 
-	if (EX(function_state).function->type==ZEND_INTERNAL_FUNCTION) {	
+	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
 		((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX_T(EX(opline)->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
@@ -2418,7 +2426,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		if (!return_value_used) {
 			zval_ptr_dtor(&EX_T(EX(opline)->result.u.var).var.ptr);
 		}
-	} else if (EX(function_state).function->type==ZEND_USER_FUNCTION) {
+	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		HashTable *calling_symbol_table;
 
 		EX_T(EX(opline)->result.u.var).var.ptr = NULL;
@@ -2462,6 +2470,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
 
+		/* Not sure what should be done here if it's a static method */
 		if (EX(object)) {
 			Z_OBJ_HT_P(EX(object))->call_method(EX(fbc)->common.function_name, EX(opline)->extended_value, EX_T(EX(opline)->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
 		} else {
@@ -2512,6 +2521,7 @@ int zend_do_fcall_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
 	do {
+		/*
 		if (EG(scope)) {
 			if (zend_hash_find(&EG(scope)->function_table, fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function) == SUCCESS) {
 				if ((EX(object) = EG(This))) {
@@ -2521,6 +2531,7 @@ int zend_do_fcall_handler(ZEND_OPCODE_HANDLER_ARGS)
 				break;
 			}
 		}
+		*/
 		if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 			zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
 		}
