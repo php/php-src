@@ -118,7 +118,7 @@ PHP_MINFO_FUNCTION(fribidi)
 +------------------------------------------------------------+
 */           
 
-/* {{{ proto string fribidi_log2vis(string str, long direction, int charset)
+/* {{{ proto string fribidi_log2vis(string v_str, long direction, long charset)
    Convert a logical string to a visual one */
 PHP_FUNCTION(fribidi_log2vis)
 {
