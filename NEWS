@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Allow the PostgreSQL driver to do internal row counting when iterating
+  through result sets. (gvz@2scale.net)
 - Updated ext/mysql/libmysql to version 3.23.39; Portability fixes, minor
   bug fixes. (tim@mysql.com)
 - Added the CONNECTION_ABORTED, CONNECTION_TIMEOUT and CONNECTION_NORMAL
