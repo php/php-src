@@ -315,6 +315,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	 jstring authUser, jboolean display_source_mode)
 {
 	zend_file_handle file_handle;
+	int retval;
 #ifndef VIRTUAL_DIR
 	char cwd[MAXPATHLEN];
 #endif
@@ -352,7 +353,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		 */
 		SETSTRING( SG(request_info).path_translated, pathTranslated );
 #ifdef VIRTUAL_DIR
-		file_handle.handle.fp = php_fopen_primary_script();
+		retval = php_fopen_primary_script(&file_handle);
 #else
 		/*
 		 * The java runtime doesn't like the working directory to be
@@ -360,15 +361,11 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		 * in the hopes that Java doesn't notice.
 		 */
 		getcwd(cwd,MAXPATHLEN);
-		file_handle.handle.fp = php_fopen_primary_script();
+		retval = php_fopen_primary_script(&file_handle);
 		chdir(cwd);
 #endif
-		file_handle.filename = SG(request_info).path_translated;
-		file_handle.opened_path = NULL;
-		file_handle.free_filename = 0;
-		file_handle.type = ZEND_HANDLE_FP;
-
-		if (!file_handle.handle.fp) {
+		
+		if (retval == FAILURE) {
 			php_request_shutdown((void *) 0);
 			php_module_shutdown();
 			ThrowIOException(jenv,file_handle.filename);
@@ -385,7 +382,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 
 			if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
 				php_get_highlight_struct(&syntax_highlighter_ini);
-			sapi_send_headers();
+				sapi_send_headers();
 				zend_highlight(&syntax_highlighter_ini);
 			}
 		} else {
