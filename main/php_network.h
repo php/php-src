@@ -106,7 +106,7 @@ PHPAPI php_stream *php_stream_sock_open_from_socket(int socket, int persistent);
 /* open a connection to a host using php_hostconnect and return a stream */
 PHPAPI php_stream *php_stream_sock_open_host(const char *host, unsigned short port,
 		int socktype, int timeout, int persistent);
-PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int persistent, struct timeval *timeout);
+PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int pathlen, int persistent, struct timeval *timeout);
 
 PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout);
 PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode);
