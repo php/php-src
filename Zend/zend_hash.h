@@ -159,6 +159,7 @@ ZEND_API int zend_hash_index_find(HashTable *ht, ulong h, void **pData);
 
 /* Misc */
 ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength);
+ZEND_API int zend_hash_quick_exists(HashTable *ht, char *arKey, uint nKeyLength, ulong h);
 ZEND_API int zend_hash_index_exists(HashTable *ht, ulong h);
 ZEND_API ulong zend_hash_next_free_element(HashTable *ht);
 

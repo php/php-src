@@ -938,6 +938,35 @@ ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
 }
 
 
+ZEND_API int zend_hash_quick_exists(HashTable *ht, char *arKey, uint nKeyLength, ulong h)
+{
+	uint nIndex;
+	Bucket *p;
+
+	if (nKeyLength==0) {
+		return zend_hash_index_exists(ht, h);
+	}
+
+	IS_CONSISTENT(ht);
+
+	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
+
+	nIndex = h & ht->nTableMask;
+
+	p = ht->arBuckets[nIndex];
+	while (p != NULL) {
+		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
+			if (!memcmp(p->arKey, arKey, nKeyLength)) {
+				return 1;
+			}
+		}
+		p = p->pNext;
+	}
+	return 0;
+
+}
+
+
 ZEND_API int zend_hash_index_find(HashTable *ht, ulong h, void **pData)
 {
 	uint nIndex;
