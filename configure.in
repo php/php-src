@@ -232,6 +232,21 @@ case $host_alias in
     ;;
 esac
 
+# Disable PIC mode by default where it is known to be safe to do so,
+# to avoid the performance hit from the lost register
+AC_MSG_CHECKING([whether to force non-PIC code in shared modules])
+case $host_alias in
+i?86-*-linux*|i?86-*-freebsd*)
+    if test "${with_pic+set}" != "set"; then
+      with_pic=no
+      AC_MSG_RESULT(yes)
+    else
+      AC_MSG_RESULT(no)
+    fi
+    ;;
+*) AC_MSG_RESULT(no) ;;
+esac
+
 
 dnl Include Zend and TSRM configurations.
 dnl -------------------------------------------------------------------------
@@ -881,7 +896,6 @@ fi
 
 enable_shared=yes
 enable_static=yes
-unset with_pic
 
 case $php_build_target in
 program|static)
@@ -892,7 +906,9 @@ program|static)
 ;;
 shared)
     enable_static=no
-    standard_libtool_flag=-prefer-pic
+    if test "${with_pic+set}" != "set"; then
+      standard_libtool_flag='-prefer-pic'
+    fi
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
 ;;
 esac
