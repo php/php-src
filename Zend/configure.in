@@ -117,6 +117,23 @@ AC_ARG_ENABLE(debug,
 AC_SUBST(DEBUG_CFLAGS)
 CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
+RESULT=yes
+AC_MSG_CHECKING(whether to enable inline)
+AC_ARG_ENABLE(inline,
+[  --disable-inline        Disable the inline specifier],
+[
+  if test "$enableval" = "no"; then
+    RESULT=no
+  fi
+])
+AC_MSG_RESULT($RESULT)
+
+if test "$RESULT" = "yes"; then
+  AC_C_INLINE
+else
+  AC_DEFINE(inline, [])
+fi
+
 AC_MSG_CHECKING(whether to enable a memory limit)
 AC_ARG_ENABLE(memory-limit,
 [  --enable-memory-limit   Compile with memory limit support. ],
