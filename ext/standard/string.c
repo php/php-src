@@ -1826,7 +1826,7 @@ PHP_FUNCTION(ucfirst)
 	convert_to_string_ex(str);
 
 	if (!Z_STRLEN_PP(str)) {
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	}
 
 	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
@@ -1847,7 +1847,7 @@ PHP_FUNCTION(ucwords)
 	convert_to_string_ex(str);
 
 	if (!Z_STRLEN_PP(str)) {
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	}
 
 	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
