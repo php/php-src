@@ -1075,13 +1075,21 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		/* Push a seperator to the switch and foreach stacks */
 		zend_switch_entry switch_entry;
 	
-		switch_entry.cond.op_type = IS_UNUSED;
+		/* switch_entry.cond.op_type = IS_UNUSED;  Doesn't seem to be needed now */
 		switch_entry.default_case = 0;
 		switch_entry.control_var = 0;
 
 		zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
 
-		zend_stack_push(&CG(foreach_copy_stack), (void *) &switch_entry.cond, sizeof(znode));
+		{
+			/* Foreach stack separator */
+			zend_op dummy_opline;
+
+			dummy_opline.result.op_type = IS_UNUSED;
+			dummy_opline.op1.op_type = IS_UNUSED;
+
+			zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
+		}
 	}
 
 	if (CG(doc_comment)) {
@@ -1476,20 +1484,31 @@ static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC)
 	return 0;
 }
 
-static int generate_free_foreach_copy(znode *foreach_copy TSRMLS_DC)
+static int generate_free_foreach_copy(zend_op *foreach_copy TSRMLS_DC)
 {
 	zend_op *opline;
-	
-	if (foreach_copy->op_type != IS_VAR && foreach_copy->op_type != IS_TMP_VAR) {
-		return 0;
-	}
+
+	/* If we reach the seperator then stop applying the stack */
+	if (foreach_copy->op1.op_type == IS_UNUSED && foreach_copy->op2.op_type == IS_UNUSED) {
+		return 1;
+	}	
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_SWITCH_FREE;
-	opline->op1 = *foreach_copy;
+	opline->op1 = foreach_copy->result;
 	SET_UNUSED(opline->op2);
 	opline->extended_value = 1;
+
+	if (foreach_copy->op1.op_type != IS_UNUSED) {
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+		opline->opcode = ZEND_SWITCH_FREE;
+		opline->op1 = foreach_copy->op1;
+		SET_UNUSED(opline->op2);
+		opline->extended_value = 0;
+	}
+	
 	return 0;
 }
 
@@ -3295,14 +3314,19 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 	opline->extended_value = is_variable;
 	*open_brackets_token = opline->result;
 
-	zend_stack_push(&CG(foreach_copy_stack), (void *) &opline->result, sizeof(znode));
-	if (push_container) {
-		zend_stack_push(&CG(foreach_copy_stack), (void *) &CG(active_op_array)->opcodes[CG(active_op_array)->last-2].op1, sizeof(znode));
-	} else {
-		znode tmp;
+	{
+		zend_op dummy_opline;
 
-		tmp.op_type = IS_UNUSED;
-		zend_stack_push(&CG(foreach_copy_stack), (void *) &tmp, sizeof(znode));
+		dummy_opline.result = opline->result;
+		if (push_container) {
+			dummy_opline.op1 = CG(active_op_array)->opcodes[CG(active_op_array)->last-2].op1;
+		} else {
+			znode tmp;
+
+			tmp.op_type = IS_UNUSED;
+			dummy_opline.op1 = tmp;
+		}
+		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
 	}
 	
 	/* save the location of the beginning of the loop (array fetching) */
@@ -3390,7 +3414,7 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *fore
 
 void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token TSRMLS_DC)
 {
-	znode *container_ptr;
+	zend_op *container_ptr;
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_JMP;
@@ -3404,9 +3428,6 @@ void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token TSRMLS
 
 	zend_stack_top(&CG(foreach_copy_stack), (void **) &container_ptr);
 	generate_free_foreach_copy(container_ptr TSRMLS_CC);
-	zend_stack_del_top(&CG(foreach_copy_stack));
-
-	generate_free_foreach_copy(open_brackets_token TSRMLS_CC);
 	zend_stack_del_top(&CG(foreach_copy_stack));
 
 	DEC_BPC(CG(active_op_array));
