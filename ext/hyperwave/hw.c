@@ -3057,7 +3057,7 @@ PHP_FUNCTION(hw_document_bodytag)
 		strcpy(temp+strlen(ptr->bodytag)-1+Z_STRLEN_P(argv[1]), ">\n");
 		RETURN_STRING(temp, 0);
 	} else {
-//fprintf(stderr, "hw_document_bodytag: %s (%s)\n", ptr->bodytag, ptr->attributes);
+/* fprintf(stderr, "hw_document_bodytag: %s (%s)\n", ptr->bodytag, ptr->attributes); */
 		if(ptr->bodytag) {
 			RETURN_STRING(ptr->bodytag, 1);
 		} else {

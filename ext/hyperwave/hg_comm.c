@@ -803,7 +803,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 	}
 	snprintf(istr, BUFFERLEN, "<BODY %s>", bgstr);
 	*bodytag = estrdup(istr);
-//	if(scriptname != urlprefix) efree(scriptname);
+/*	if(scriptname != urlprefix) efree(scriptname); */
 	if(scriptname != NULL) efree(scriptname);
 	return(newtext);
 }
