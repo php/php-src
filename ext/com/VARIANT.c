@@ -230,7 +230,7 @@ static int php_VARIANT_set_property_handler(zend_property_reference *property_re
 
 static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value TSRMLS_DC)
 {
-	int type;
+	VARTYPE type;
 
 	if (!strcmp(Z_STRVAL_P(arg_property), "value")) {
 		php_pval_to_variant(value, var_arg, codepage TSRMLS_CC);

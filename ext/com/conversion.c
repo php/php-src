@@ -42,7 +42,7 @@ static void comval_to_variant(pval *pval_arg, VARIANT *var_arg TSRMLS_DC);
 /* implementations */
 PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage TSRMLS_DC)
 {
-	int type = VT_EMPTY;	/* default variant type */
+	VARTYPE type = VT_EMPTY;	/* default variant type */
 
 	switch (Z_TYPE_P(pval_arg)) {
 		case IS_NULL:
@@ -90,11 +90,11 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage T
 
 PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage TSRMLS_DC)
 {
-	php_pval_to_variant_ex2(pval_arg, var_arg, Z_LVAL_P(pval_type), codepage TSRMLS_CC);
+	php_pval_to_variant_ex2(pval_arg, var_arg, (unsigned short) Z_LVAL_P(pval_type), codepage TSRMLS_CC);
 }
 
 
-PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC)
+PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, VARTYPE type, int codepage TSRMLS_DC)
 {
 	OLECHAR *unicode_str;
 
@@ -108,7 +108,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 		int numberOfElements = zend_hash_num_elements(ht);
 		SAFEARRAY *safeArray;
 		SAFEARRAYBOUND bounds[1];
-		VARIANT *v;
+		VARIANT *v, var;
 		zval **entry;        /* An entry in the input array */
 		
 		type &= ~VT_ARRAY;
@@ -118,29 +118,35 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 			ALLOC_VARIANT(V_VARIANTREF(var_arg));
 			var_arg = V_VARIANTREF(var_arg);		/* put the array in that VARIANT */
 		}
+		if (!type) {
+			// if no type is given we take the variant type
+			type = VT_VARIANT;
+		}
 
 		bounds[0].lLbound = 0;
 		bounds[0].cElements = numberOfElements;
-		safeArray = SafeArrayCreate(VT_VARIANT, 1, bounds);
+		safeArray = SafeArrayCreate(type, 1, bounds);
 		
 		if (NULL == safeArray) {
 			php_error( E_WARNING,"Unable to convert php array to VARIANT array - %s", numberOfElements ? "" : "(Empty input array)");
 			ZVAL_FALSE(pval_arg);
 		} else {
 			V_ARRAY(var_arg) = safeArray;
-			V_VT(var_arg) = VT_ARRAY|VT_VARIANT;                /* Now have a valid safe array allocated */
+			V_VT(var_arg) = VT_ARRAY|type;                /* Now have a valid safe array allocated */
 			if (SUCCEEDED(SafeArrayLock(safeArray))) {
 				ulong i;
+				UINT size = SafeArrayGetElemsize(safeArray);
 
 				zend_hash_internal_pointer_reset(ht);
 				for (i = 0; i < (ulong)numberOfElements; ++i) {
 					if ((zend_hash_get_current_data(ht, (void **)&entry) == SUCCESS) && (entry != NULL)) { /* Get a pointer to the php array element */
 						/* Add another value to the safe array */
-						if (SUCCEEDED(SafeArrayPtrOfIndex( safeArray, &i, &v))) {		/* Pointer to output element entry retrieved successfully */
-							if (type) {	/* explicit type */
-							   php_pval_to_variant_ex2(*entry, v, type, codepage TSRMLS_CC);		/* Do the required conversion */
+						if (SUCCEEDED(SafeArrayPtrOfIndex(safeArray, &i, &v))) {			/* Pointer to output element entry retrieved successfully */
+							if (type == VT_VARIANT) {
+								php_pval_to_variant(*entry, v, codepage TSRMLS_CC);				/* Do the required conversion */
 							} else {
-								php_pval_to_variant(*entry, v, codepage TSRMLS_CC);                    /* Do the required conversion */
+								php_pval_to_variant_ex2(*entry, &var, type, codepage TSRMLS_CC);	/* Do the required conversion */
+								memcpy(v, &(var.byref), size);
 							}
 						} else {
 							php_error( E_WARNING,"phpArrayToSafeArray() - Unable to retrieve pointer to output element number (%d)", i);
