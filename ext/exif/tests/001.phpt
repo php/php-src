@@ -23,4 +23,4 @@ foreach($image as $idx=>$section) {
 echo $accept;
 ?>
 --EXPECT--
-ArrayFitest2.jpgFi1015448798Fi1240SeCOMPUTED, ANY_TAG, IFD0, THUMBNAIL, COMMENT, EXIFArrayCoPhoto (c) M.BoergerCoEdited by M.Boerger.htwidth="1" height="1"He1Wi1Is1UsExif test image.UsASCIIArrayCoPhoto (c) M.BoergerUsASCIIArrayJP523Array0Comment #1.1Comment #2.2Comment #3end
+ArrayFitest2.jpgFi1015448798Fi1240SeCOMPUTED, ANY_TAG, IFD0, THUMBNAIL, COMMENTArrayCoPhoto (c) M.BoergerCoEdited by M.Boerger.htwidth="1" height="1"He1Wi1Is16777216UsExif test image.UsASCIIArrayCoPhoto (c) M.BoergerUsASCIIArrayJP523Array0Comment #1.1Comment #2.2Comment #3end
