@@ -1,3 +1,7 @@
+dnl
+dnl $Id$
+dnl
+
 AC_ARG_WITH(webjames,
 [  --with-webjames=SRCDIR  Build PHP as a WebJames module (RISC OS only)],[
   PHP_EXPAND_PATH($withval, WEBJAMES)

@@ -1,3 +1,7 @@
+dnl
+dnl $Id$
+dnl
+
 PHP_TUX=no
 
 AC_ARG_WITH(tux,

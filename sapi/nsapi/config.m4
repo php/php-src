@@ -1,8 +1,10 @@
-dnl ## $Id$ -*- sh -*-
+dnl
+dnl $Id$
+dnl
 
 AC_MSG_CHECKING(for NSAPI support)
 AC_ARG_WITH(nsapi,
-[  --with-nsapi=DIR        Specify path to the installed Netscape],[
+[  --with-nsapi=DIR        Build PHP as NSAPI module for use with iPlanet.],[
   PHP_NSAPI=$withval
 ],[
   PHP_NSAPI=no

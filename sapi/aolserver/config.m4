@@ -1,4 +1,6 @@
-dnl ## $Id$ -*- sh -*-
+dnl
+dnl $Id$
+dnl
 
 AC_MSG_CHECKING(for AOLserver support)
 AC_ARG_WITH(aolserver,

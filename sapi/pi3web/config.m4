@@ -1,3 +1,7 @@
+dnl
+dnl $Id$
+dnl
+
 PHP_ARG_WITH(pi3web,for Pi3Web Support,
 [  --with-pi3web=DIR       Build PHP as a module for use with Pi3Web.])
 

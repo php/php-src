@@ -1,5 +1,6 @@
-dnl ## -*- sh -*-
-
+dnl
+dnl $Id$
+dnl
 
 AC_MSG_CHECKING(for Apache module support via DSO through APXS)
 AC_ARG_WITH(apxs,

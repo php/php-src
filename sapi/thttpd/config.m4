@@ -1,3 +1,7 @@
+dnl
+dnl $Id$
+dnl
+
 AC_ARG_WITH(thttpd,
 [  --with-thttpd=SRCDIR    Build PHP as thttpd module],[
   test -d $withval || AC_MSG_RESULT(thttpd directory does not exist ($withval))
