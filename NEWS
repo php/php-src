@@ -2,7 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
-- Added auto-registration of everything in $HTTP_SESSION_VARS[] is
+- Added auto-registration of everything in $HTTP_SESSION_VARS[] if
   register_globals is turned off. (Andrei)
 - Cleaned up extension namespace (Stig)
 - OCINLogon() sessions are now closed again. (Thies)
