@@ -189,6 +189,7 @@ static sapi_module_struct sapi_module = {
 	sapi_cgibin_ub_write,			/* unbuffered write */
 	sapi_cgibin_flush,				/* flush */
 	NULL,							/* get uid */
+	NULL,							/* getenv */
 
 	php_error,						/* error handler */
 

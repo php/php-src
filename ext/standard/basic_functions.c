@@ -482,53 +482,26 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 
 PHP_FUNCTION(getenv)
 {
-#if FHTTPD
-	int i;
-#endif
 	pval **str;
 	char *ptr;
-#if APACHE
-	SLS_FETCH();
-#endif
+
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
 
-#if FHTTPD
-	ptr=NULL;
-	if ((*str)->type == IS_STRING && req){
-		for(i=0;i<req->nlines;i++){
-			if (req->lines[i].paramc>1){
-				if (req->lines[i].params[0]){
-					if (!strcmp(req->lines[i].params[0],
-								(*str)->value.str.val)){
-						ptr=req->lines[i].params[1];
-						i=req->nlines;
-					}
-				}
-			}
-		}
+	if ((*str)->type != IS_STRING) {
+		RETURN_FALSE;
 	}
-	if (!ptr) ptr = getenv((*str)->value.str.val);
-	if (ptr
-#else
-
-	if ((*str)->type == IS_STRING &&
-#if APACHE
-		((ptr = (char *)table_get(((request_rec *) SG(server_context))->subprocess_env, (*str)->value.str.val)) || (ptr = getenv((*str)->value.str.val)))
-#endif
-#if CGI_BINARY
-		(ptr = getenv((*str)->value.str.val))
-#endif
-
-#if USE_SAPI
-		(ptr = sapi_rqst->getenv(sapi_rqst->scid,(*str)->value.str.val))
-#endif
-#endif
-		) {
-		RETURN_STRING(ptr,1);
+	
+	
+	ptr = sapi_getenv((*str)->value.str.val, (*str)->value.str.len);
+	if (!ptr) {
+		ptr = getenv((*str)->value.str.val);
+	}
+	if (ptr) {
+		RETURN_STRING(ptr, 1);
 	}
 	RETURN_FALSE;
 }

@@ -527,6 +527,7 @@ static sapi_module_struct sapi_module = {
   php_roxen_sapi_ub_write,					/* unbuffered write */
   NULL,										/* flush */
   NULL,										/* get uid */
+  NULL,										/* getenv */
 
   php_error,								/* error handler */
 
