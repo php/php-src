@@ -317,6 +317,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 	int i, maxlen, len;
 	char *new;
 	enum entity_charset charset = determine_charset(hint_charset);
+	int matches_map;
 
 	maxlen = 2 * oldlen;
 	if (maxlen < 128)
@@ -329,7 +330,8 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 		int mbseqlen;
 		unsigned char mbsequence[16];	/* allow up to 15 characters in a multibyte sequence */
 		unsigned short this_char = get_next_char(charset, old, &i, mbsequence, &mbseqlen);
-		int matches_map;
+			
+		matches_map = 0;
 		
 		if (len + 9 > maxlen)
 			new = erealloc (new, maxlen += 128);
@@ -339,7 +341,6 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 			int j;
 			unsigned char * rep;
 	
-			matches_map = 0;
 
 			for (j=0; entity_map[j].charset != cs_terminator; j++)	{
 				if (entity_map[j].charset == charset
