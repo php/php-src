@@ -112,17 +112,7 @@ SOURCE=.\php_interbase.h
 
 SOURCE=.\interbase.rc
 
-!IF  "$(CFG)" == "interbase - Win32 Debug_TS"
-
-# ADD BASE RSC /l 0x413
-# ADD RSC /l 0x413 /i "..\..\main" /i "..\..\win32"
-
-!ELSEIF  "$(CFG)" == "interbase - Win32 Release_TS"
-
-# ADD BASE RSC /l 0x413
-# ADD RSC /l 0x413 /i "..\.." /i "..\..\main" /i "..\..\win32" /i "..\..\Zend" /i "..\..\TSRM" /d "ZEND_WIN32" /d "WIN32" /d "PHP_WIN32"
-
-!ENDIF 
+# ADD RSC /i "..\..\main" /i "..\..\win32"
 
 # End Source File
 # End Group
