@@ -41,6 +41,38 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 
 /* Streams based network functions */
 
+#if HAVE_SOCKETPAIR
+/* {{{ proto array stream_socket_pair(int domain, int type, int protocol)
+   Creates a pair of indistinguishable socket streams */
+PHP_FUNCTION(stream_socket_pair)
+{
+	long domain, type, protocol;
+	php_stream *s1, *s2;
+	zval *zs1, *sz2;
+	int pair[2];
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll",
+			&domain, &type, &protocol)) {
+		RETURN_FALSE;
+	}
+
+	if (0 != socketpair(domain, type, protocol, pair)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create sockets: [%d]: %s",
+			php_socket_errno(), php_socket_strerror(php_socket_errno()));
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	s1 = php_stream_sock_open_from_socket(pair[0], 0);
+	s2 = php_stream_sock_open_from_socket(pair[1], 0);
+
+	add_next_index_zval(return_value, php_stream_get_resource_id(s1));
+	add_next_index_zval(return_value, php_stream_get_resource_id(s2));
+}
+/* }}} */
+#endif
+
 /* {{{ proto resource stream_socket_client(string remoteaddress [, long &errcode, string &errstring, double timeout, long flags, resource context])
    Open a client connection to a remote address */
 PHP_FUNCTION(stream_socket_client)
