@@ -5,18 +5,24 @@ dnl
 PHP_ARG_WITH(pdflib,for PDFlib support,
 [  --with-pdflib[=DIR]     Include PDFlib support.])
 
-PHP_ARG_WITH(jpeg-dir, for the location of libjpeg, 
-[  --with-jpeg-dir[=DIR]     PDFLIB: define libjpeg install directory.
+if test -z "$PHP_JPEG_DIR"; then
+  PHP_ARG_WITH(jpeg-dir, for the location of libjpeg, 
+  [  --with-jpeg-dir[=DIR]     PDFLIB: define libjpeg install directory.
                                      (OPTIONAL for PDFlib v4)], no, no)
+fi
 
-PHP_ARG_WITH(png-dir, for the location of libpng, 
-[  --with-png-dir[=DIR]      PDFLIB: define libpng install directory.
+if test -z "$PHP_PNG_DIR"; then
+  PHP_ARG_WITH(png-dir, for the location of libpng, 
+  [  --with-png-dir[=DIR]      PDFLIB: define libpng install directory.
                                      (OPTIONAL for PDFlib v4)], no, no)
+fi
 
-PHP_ARG_WITH(zlib-dir, for the location of libz, 
-[  --with-zlib-dir[=DIR]     PDFLIB: define libz install directory.
+if test -z "$PHP_ZLIB_DIR"; then
+  PHP_ARG_WITH(zlib-dir, for the location of libz, 
+  [  --with-zlib-dir[=DIR]     PDFLIB: define libz install directory.
                                      (OPTIONAL for PDFlib v4)], no, no)
- 
+fi
+
 PHP_ARG_WITH(tiff-dir, for the location of libtiff,
 [  --with-tiff-dir[=DIR]     PDFLIB: define libtiff install directory.
                                      (OPTIONAL for PDFlib v4)], no, no)
@@ -121,4 +127,3 @@ See config.log for more information.
     ;;
   esac
 fi
-
