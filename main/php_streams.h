@@ -30,6 +30,7 @@
 BEGIN_EXTERN_C()
 PHPAPI int php_file_le_stream(void);
 PHPAPI int php_file_le_pstream(void);
+PHPAPI int php_file_le_stream_filter(void);
 END_EXTERN_C()
 
 /* {{{ Streams memory debugging stuff */

@@ -405,6 +405,88 @@ PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream
 
 }
 
+PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS_DC)
+{
+	php_stream_bucket_brigade brig_a = { NULL, NULL }, brig_b = { NULL, NULL }, *inp = &brig_a, *outp = &brig_b, *brig_temp;
+	php_stream_bucket *bucket;
+	php_stream_filter_chain *chain;
+	php_stream_filter *current;
+	php_stream *stream;
+	size_t flushed_size = 0;
+	long flags = (finish ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC);
+
+	if (!filter->chain || !filter->chain->stream) {
+		/* Filter is not attached to a chain, or chain is somehow not part of a stream */
+		return FAILURE;
+	}
+
+	chain = filter->chain;
+	stream = chain->stream;
+
+	for(current = filter; current; current = current->next) {
+		php_stream_filter_status_t status;
+
+		status = filter->fops->filter(stream, filter, inp, outp, NULL, flags TSRMLS_CC);
+		if (status == PSFS_FEED_ME) {
+			/* We've flushed the data far enough */
+			return SUCCESS;
+		}
+		if (status == PSFS_ERR_FATAL) {
+			return FAILURE;
+		}
+		/* Otherwise we have data available to PASS_ON
+			Swap the brigades and continue */
+		brig_temp = inp;
+		inp = outp;
+		outp = brig_temp;
+		outp->head = NULL;
+		outp->tail = NULL;
+
+		flags = PSFS_FLAG_NORMAL;
+	}
+
+	/* Last filter returned data via PSFS_PASS_ON
+		Do something with it */
+
+	for(bucket = inp->head; bucket; bucket = bucket->next) {
+		flushed_size += bucket->buflen;
+	}
+
+	if (flushed_size == 0) {
+		/* Unlikely, but possible */
+		return SUCCESS;
+	}
+
+	if (chain == &(stream->readfilters)) {
+		/* Dump any newly flushed data to the read buffer */
+		if (stream->readpos > 0) {
+			/* Back the buffer up */
+			memcpy(stream->readbuf, stream->readbuf + stream->readpos, stream->writepos - stream->readpos);
+			stream->readpos = 0;
+			stream->writepos -= stream->readpos;
+		}
+		if (flushed_size > (stream->readbuflen - stream->writepos)) {
+			/* Grow the buffer */
+			stream->readbuf = perealloc(stream->readbuf, stream->writepos + flushed_size + stream->chunk_size, stream->is_persistent);
+		}
+		while ((bucket = inp->head)) {
+			memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
+			stream->writepos += bucket->buflen;
+			php_stream_bucket_unlink(bucket TSRMLS_CC);
+			php_stream_bucket_delref(bucket TSRMLS_CC);
+		}
+	} else if (chain == &(stream->writefilters)) {
+		/* Send flushed data to the stream */
+		while ((bucket = inp->head)) {
+			stream->ops->write(stream, bucket->buf, bucket->buflen TSRMLS_CC);
+			php_stream_bucket_unlink(bucket TSRMLS_CC);
+			php_stream_bucket_delref(bucket TSRMLS_CC);
+		}
+	}
+
+	return SUCCESS;
+}
+
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC)
 {
 	if (filter->prev) {
