@@ -315,6 +315,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "mbstring"=..\ext\mbstring\mbstring.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "mcrypt"=..\ext\mcrypt\mcrypt.dsp - Package Owner=<4>
 
 Package=<5>
