@@ -494,6 +494,28 @@ Changes in the Zend Engine 2.0
         }
         ?>
 
+    * Built-In Backtracing.
+
+      Example:
+
+        <?php
+        $backtrace = debug_backtrace();
+
+        foreach ($backtrace as $step) {
+            if (isset($step['class'])) {
+                print $step['class'];
+                print '::';
+            }
+
+            print $step['function'];
+            print '   [';
+            print $step['file'];
+            print ':';
+            print $step['line'];
+            print "]\n";
+        }
+        ?>
+
 
 Changes in the Zend Engine 1.0
 
