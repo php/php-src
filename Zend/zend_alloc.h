@@ -64,10 +64,12 @@ typedef union _align_test {
 #define MAX_CACHED_ENTRIES	256
 #define PRE_INIT_CACHE_ENTRIES	32
 
-#if (defined (__GNUC__) && __GNUC__ >= 2)
-#define PLATFORM_ALIGNMENT (__alignof__ (align_test))
+#if __GNUC__ -0 >= 2
+# define PLATFORM_ALIGNMENT (__alignof__ (align_test))
+# define ZEND_ATTRIBUTE_MALLOC __attribute__ ((malloc))
 #else
-#define PLATFORM_ALIGNMENT (sizeof(align_test))
+# define PLATFORM_ALIGNMENT (sizeof(align_test))
+# define ZEND_ATTRIBUTE_MALLOC
 #endif
 
 #define MEM_HEADER_PADDING (((PLATFORM_ALIGNMENT-sizeof(zend_mem_header))%PLATFORM_ALIGNMENT+PLATFORM_ALIGNMENT)%PLATFORM_ALIGNMENT)
@@ -75,15 +77,15 @@ typedef union _align_test {
 
 BEGIN_EXTERN_C()
 
-ZEND_API char *zend_strndup(const char *s, unsigned int length);
+ZEND_API char *zend_strndup(const char *s, unsigned int length) ZEND_ATTRIBUTE_MALLOC;
 
-ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 
 /* Standard wrapper macros */
 #define emalloc(size)					_emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
