@@ -32,7 +32,12 @@ function test_exit_signal(){
 		$options=0;
 		posix_kill($pid, SIGTERM);
 		pcntl_waitpid($pid, &$status, $options);
-		if ( pcntl_wifsignaled($status) ) print "\nProcess was terminated by signal : ". pcntl_wtermsig($status);
+		if ( pcntl_wifsignaled($status) ) {
+			$signal_print=pcntl_wtermsig($status);
+			if ($signal_print==SIGTERM) $signal_print="SIGTERM";
+			print "\nProcess was terminated by signal : ". $signal_print;
+		}
+
 	}
 }
 
@@ -49,7 +54,11 @@ function test_stop_signal(){
 		$options=WUNTRACED;
 		posix_kill($pid, SIGSTOP);
 		pcntl_waitpid($pid, &$status, $options);
-		if ( pcntl_wifstopped($status) ) print "\nProcess was stoped by signal : ". pcntl_wstopsig($status);
+		if ( pcntl_wifstopped($status) ) {
+			$signal_print=pcntl_wstopsig($status);
+			if ($signal_print==SIGSTOP) $signal_print="SIGSTOP";
+			print "\nProcess was stoped by signal : ". $signal_print;
+		}
 		posix_kill($pid, SIGCONT);
 	}
 }
@@ -66,7 +75,7 @@ Testing pcntl_wifexited and wexitstatus....-1
 Exited With: -1
 
 Testing pcntl_wifsignaled....
-Process was terminated by signal : 15
+Process was terminated by signal : SIGTERM
 
 Testing pcntl_wifstopped and pcntl_wstopsig....
-Process was stoped by signal : 19
+Process was stoped by signal : SIGSTOP
