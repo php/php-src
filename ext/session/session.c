@@ -17,10 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/*
- * TODO:
- * - userland callback functions for ps_module
- */
 #if !(WIN32|WINNT)
 #include <sys/time.h>
 #else
@@ -61,6 +57,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_start, NULL)
 	PHP_FE(session_destroy, NULL)
 	PHP_FE(session_unset, NULL)
+	PHP_FE(session_set_save_handler, NULL)
 	{0}
 };
 
@@ -83,6 +80,7 @@ PS_SERIALIZER_FUNCS(php);
 PS_SERIALIZER_FUNCS(wddx);
 #endif
 
+
 const static ps_serializer ps_serializers[] = {
 #ifdef WDDX_SERIALIZER
 	PS_SERIALIZER_ENTRY(wddx),
@@ -91,20 +89,21 @@ const static ps_serializer ps_serializers[] = {
 	{0}
 };
 
-static int php_minit_session(INIT_FUNC_ARGS);
-static int php_rinit_session(INIT_FUNC_ARGS);
-static int php_mshutdown_session(SHUTDOWN_FUNC_ARGS);
-static int php_rshutdown_session(SHUTDOWN_FUNC_ARGS);
-static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_MINIT_FUNCTION(session);
+PHP_RINIT_FUNCTION(session);
+PHP_MSHUTDOWN_FUNCTION(session);
+PHP_RSHUTDOWN_FUNCTION(session);
+PHP_MINFO_FUNCTION(session);
+
 static void php_rinit_session_globals(PSLS_D);
 static void php_rshutdown_session_globals(PSLS_D);
 
 zend_module_entry session_module_entry = {
 	"session",
 	session_functions,
-	php_minit_session, php_mshutdown_session,
-	php_rinit_session, php_rshutdown_session,
-	php_info_isapi,
+	PHP_MINIT(session), PHP_MSHUTDOWN(session),
+	PHP_RINIT(session), PHP_RSHUTDOWN(session),
+	PHP_MINFO(session),
 	STANDARD_MODULE_PROPERTIES,
 };
 
@@ -611,6 +610,38 @@ PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
+/* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc)
+   sets user-level functions */
+PHP_FUNCTION(session_set_save_handler)
+{
+	zval **args[6];
+	int i;
+	ps_user *mdata;
+	PSLS_FETCH();
+
+	if(ARG_COUNT(ht) != 6 || getParametersArrayEx(6, args) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if(PS(nr_open_sessions) > 0) {
+		RETURN_FALSE;
+	}
+	
+	PS(mod) = _php_find_ps_module("user" PSLS_CC);
+
+	mdata = emalloc(sizeof *mdata);
+	
+	for(i = 0; i < 6; i++) {
+		convert_to_string_ex(args[i]);
+		mdata->names[i] = estrdup((*args[i])->value.str.val);
+	}
+	
+	PS(mod_data) = (void *) mdata;
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto string session_save_path([string newname])
    return the current save path passed to module_name. if newname is given, the save path is replaced with newname */
 PHP_FUNCTION(session_save_path)
@@ -846,7 +877,7 @@ static void php_rshutdown_session_globals(PSLS_D)
 	zend_hash_destroy(&PS(vars));
 }
 
-int php_rinit_session(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(session)
 {
 	PSLS_FETCH();
 
@@ -865,7 +896,7 @@ int php_rinit_session(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php_rshutdown_session(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(session)
 {
 	PSLS_FETCH();
 
@@ -877,7 +908,7 @@ int php_rshutdown_session(SHUTDOWN_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php_minit_session(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(session)
 {
 #ifdef ZTS
 	php_ps_globals *ps_globals;
@@ -891,14 +922,14 @@ int php_minit_session(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php_mshutdown_session(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(session)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
 
-static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(session)
 {
 	DISPLAY_INI_ENTRIES();
 }
