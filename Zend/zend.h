@@ -247,7 +247,7 @@ typedef union _zvalue_value {
 	double dval;				/* double value */
 	struct {
 		char *val;
-		zend_uint len;
+		int len;
 	} str;
 	HashTable *ht;				/* hash table value */
 /*	struct {
