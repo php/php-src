@@ -53,6 +53,12 @@ static zend_object_value zend_default_exception_new(zend_class_entry *class_type
 	return obj.value.obj;
 }
 
+ZEND_METHOD(reflection, __clone)
+{
+	/* Should never be executable */
+	_DO_THROW("Cannot clone object using __clone()");
+}
+
 ZEND_METHOD(exception, __construct)
 {
 	char  *message = NULL;
@@ -348,6 +354,7 @@ ZEND_METHOD(exception, __toString)
  * that gives the user anything to accomplish this.
  */
 static zend_function_entry default_exception_functions[] = {
+	ZEND_ME(exception, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(exception, __construct, NULL, 0)
 	ZEND_ME(exception, getMessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getCode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
