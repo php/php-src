@@ -79,7 +79,7 @@ ZEND_GET_MODULE(dba)
 
 typedef struct dba_handler {
 	char *name;
-	int (*open)(dba_info * TSRMLS_DC);
+	int (*open)(dba_info *, char **error TSRMLS_DC);
 	void (*close)(dba_info * TSRMLS_DC);
 	char* (*fetch)(dba_info *, char *, int, int, int * TSRMLS_DC);
 	int (*update)(dba_info *, char *, int, char *, int, int TSRMLS_DC);
@@ -290,7 +290,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	dba_mode_t modenr;
 	dba_info *info;
 	dba_handler *hptr;
-	char *key = NULL;
+	char *key = NULL, *error = NULL;
 	int keylen = 0;
 	int i;
 	
@@ -341,7 +341,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	for (hptr = handler; hptr->name && strcasecmp(hptr->name, Z_STRVAL_PP(args[2])); hptr++);
 
 	if (!hptr->name) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", Z_STRVAL_PP(args[2]));
+		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "No such handler: %s", Z_STRVAL_PP(args[2]));
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -360,7 +360,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			modenr = DBA_TRUNC;
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal DBA mode: %s", Z_STRVAL_PP(args[1]));
+			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
 			FREENOW;
 			RETURN_FALSE;
 	}
@@ -373,9 +373,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argv = args + 3;
 	info->hnd = NULL;
 
-	if (hptr->open(info TSRMLS_CC) != SUCCESS) {
+	if (hptr->open(info, &error TSRMLS_CC) != SUCCESS) {
 		dba_close(info TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Driver initialization failed for handler: %s", Z_STRVAL_PP(args[2]));
+		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", Z_STRVAL_PP(args[2]), error?": ":"", error?error:"");
 		FREENOW;
 		RETURN_FALSE;
 	}

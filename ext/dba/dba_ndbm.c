@@ -55,7 +55,7 @@ DBA_OPEN_FUNC(ndbm)
 			gmode = O_RDWR | O_CREAT | O_TRUNC;
 			break;
 		default:
-			return FAILURE;
+			return FAILURE; /* not possible */
 	}
 
 	if(info->argc > 0) {
@@ -69,6 +69,7 @@ DBA_OPEN_FUNC(ndbm)
 		pinfo->dbf = dbf;
 		return SUCCESS;
 	}
+	*error = "Out of memory";
 	return FAILURE;
 }
 
