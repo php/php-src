@@ -89,7 +89,7 @@ PHP_FUNCTION(mysql_get_server_info);
 PHP_FUNCTION(mysql_info);
 PHP_FUNCTION(mysql_stat);
 PHP_FUNCTION(mysql_thread_id);
-PHP_FUNCTION(mysql_character_set_name);
+PHP_FUNCTION(mysql_client_encoding);
 PHP_FUNCTION(mysql_ping);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)

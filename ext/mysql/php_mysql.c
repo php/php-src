@@ -158,7 +158,7 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_real_escape_string,					NULL)
 	PHP_FE(mysql_stat,									NULL)
 	PHP_FE(mysql_thread_id,								NULL)
-	PHP_FE(mysql_character_set_name,					NULL)
+	PHP_FE(mysql_client_encoding,					NULL)
 	PHP_FE(mysql_ping,									NULL)
 #ifdef HAVE_GETINFO_FUNCS
 	PHP_FE(mysql_get_client_info,						NULL)
@@ -1054,9 +1054,9 @@ PHP_FUNCTION(mysql_stat)
 }
 /* }}} */
 
-/* {{{ proto string mysql_character_set_name([int link_identifier])
+/* {{{ proto string mysql_client_encoding([int link_identifier])
 	Returns the default character set for the current connection */
-PHP_FUNCTION(mysql_character_set_name)
+PHP_FUNCTION(mysql_client_encoding)
 {
 	zval *mysql_link = NULL;
 	int id = -1;
