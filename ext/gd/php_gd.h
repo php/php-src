@@ -55,10 +55,10 @@
 
 #define PHP_GDIMG_TYPE_GIF 1
 #define PHP_GDIMG_TYPE_PNG 2
-#define PHP_GDIMG_TYPE_JPG 4
-#define PHP_GDIMG_TYPE_WBM 8
-#define PHP_GDIMG_TYPE_XBM 16
-#define PHP_GDIMG_TYPE_XPM 32
+#define PHP_GDIMG_TYPE_JPG 3
+#define PHP_GDIMG_TYPE_WBM 4
+#define PHP_GDIMG_TYPE_XBM 5
+#define PHP_GDIMG_TYPE_XPM 6
 
 
 extern zend_module_entry gd_module_entry;
@@ -140,8 +140,8 @@ PHP_FUNCTION(imagepstext);
 PHP_FUNCTION(imagepsbbox);
 PHPAPI int phpi_get_le_gd(void);
 
-static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type);
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type);
+static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)());
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static void _php_image_output_wbmp(gdImagePtr im, FILE *fp);
 
 #ifdef ZTS

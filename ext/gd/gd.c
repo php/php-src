@@ -424,10 +424,10 @@ PHP_FUNCTION(imagecreate)
 /* }}} */
 
 
-static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type) {
+static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)()) {
 	zval **file;
 	gdImagePtr im;
-	char *fn=NULL, *tn=NULL;
+	char *fn=NULL;
 	FILE *fp;
 	int issock=0, socketd=0;
 	GDLS_FETCH();
@@ -444,53 +444,17 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type)
 #endif
 	if (!fp) {
 		php_strip_url_passwd(fn);
-		php_error(E_WARNING,
-				  "ImageCreateFromPng: Unable to open %s for reading", fn);
+		php_error(E_WARNING, "%s: Unable to open '%s' for reading", get_active_function_name(), fn);
 		RETURN_FALSE;
 	}
-	switch (image_type) {
-#ifdef HAVE_GD_GIF
-		case PHP_GDIMG_TYPE_GIF:
-			im = gdImageCreateFromGif(fp);
-			tn = "Gif";
-			break;
-#endif
-#ifdef HAVE_GD_PNG
-		case PHP_GDIMG_TYPE_PNG:
-			im = gdImageCreateFromPng(fp);
-			tn = "Png";
-			break;
-#endif
-#ifdef HAVE_GD_JPG
-		case PHP_GDIMG_TYPE_JPG:
-			im = gdImageCreateFromJpeg(fp);
-			tn = "Jpeg";
-			break;
-#endif
-#ifdef HAVE_GD_XBM
-		case PHP_GDIMG_TYPE_XBM:
-			im = gdImageCreateFromXbm(fp);
-			tn = "Xbm";
-			break;
-#endif
-#if 0	/* Heck, gd.h misses prototype... fix later.
-		   Anyway, it wants a filename, not a file pointer,
-		   so need a tmp file if it's not local. Or easier,
-		   just document it not accepting URLs...
-		*/
-#ifdef HAVE_GD_XPM
-		case PHP_GDIMG_TYPE_XPM:
-			im = gdImageCreateFromXpm(fn);
-			tn = "Xpm";
-			break;
-#endif
-#endif
-	}
+
+	im = (*func_p)(fp);
+
 	fflush(fp);
 	fclose(fp);
 
 	if (!im) {
-		php_error(E_WARNING,"ImageCreateFrom%s: %s is not a valid %s file", tn, fn, tn);
+		php_error(E_WARNING,"%s: '%s' is not a valid %s file", get_active_function_name, fn, tn);
 		RETURN_FALSE;
 	}
 
@@ -502,9 +466,9 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type)
 PHP_FUNCTION(imagecreatefromgif)
 {
 #ifdef HAVE_GD_GIF
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageCreateFromGif);
 #else /* HAVE_GD_GIF */
-	php_error(E_WARNING, "ImageCreateFromGIF: No GIF support in this PHP build");
+	php_error(E_WARNING, "ImageCreateFromGif: No GIF support in this PHP build");
 	RETURN_FALSE;
 #endif /* HAVE_GD_GIF */
 }
@@ -515,7 +479,7 @@ PHP_FUNCTION(imagecreatefromgif)
 PHP_FUNCTION(imagecreatefromjpeg)
 {
 #ifdef HAVE_GD_JPG
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageCreateFromJpeg);
 #else /* HAVE_GD_JPG */
 	php_error(E_WARNING, "ImageCreateFromJpeg: No JPEG support in this PHP build");
 	RETURN_FALSE;
@@ -528,7 +492,7 @@ PHP_FUNCTION(imagecreatefromjpeg)
 PHP_FUNCTION(imagecreatefrompng)
 {
 #ifdef HAVE_GD_PNG
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImageCreateFromPng);
 #else /* HAVE_GD_PNG */
 	php_error(E_WARNING, "ImageCreateFromPng: No PNG support in this PHP build");
 	RETURN_FALSE;
@@ -541,7 +505,7 @@ PHP_FUNCTION(imagecreatefrompng)
 PHP_FUNCTION(imagecreatefromxbm)
 {
 #ifdef HAVE_GD_XBM
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageCreateFromXbm);
 #else /* HAVE_GD_XBM */
 	php_error(E_WARNING, "ImageCreateFromXbm: No XBM support in this PHP build");
 	RETURN_FALSE;
@@ -555,7 +519,7 @@ PHP_FUNCTION(imagecreatefromxpm)
 {
 	/*
 #ifdef HAVE_GD_XPM
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XPM);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XPM, "XPM", gdImageCreateFromXpm);
 #else
 	*/
 	php_error(E_WARNING, "ImageCreateFromXpm: No XPM support in this PHP build");
@@ -566,14 +530,13 @@ PHP_FUNCTION(imagecreatefromxpm)
 }
 /* }}} */
 
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type) {
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)()) {
 	zval **imgind, **file, **quality;
 	gdImagePtr im;
-	char *fn = NULL, *tn = NULL;
+	char *fn = NULL;
 	FILE *fp;
 	int argc;
 	int output = 1, q = -1;
-	void (*func_p)();
 	GDLS_FETCH();
 
 	argc = ZEND_NUM_ARGS();
@@ -582,48 +545,24 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type) {
 	}
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
 
-	switch (image_type) {
-#ifdef HAVE_GD_GIF
-		case PHP_GDIMG_TYPE_GIF:
-			func_p = gdImageGif;
-			tn = "Gif";
-			break;
-#endif
-#ifdef HAVE_GD_PNG
-		case PHP_GDIMG_TYPE_PNG:
-			func_p = gdImagePng;
-			tn = "Png";
-			break;
-#endif
-#ifdef HAVE_GD_JPG
-		case PHP_GDIMG_TYPE_JPG:
-			func_p = gdImageJpeg;
-			tn = "Jpeg";
-			break;
-#endif
-		case PHP_GDIMG_TYPE_WBM:
-			func_p = _php_image_output_wbmp;
-			tn = "Wbmp";
-			break;
-	}
-
-	if (argc == 3) {
-		convert_to_long_ex(quality);
-		q = Z_LVAL_PP(quality);
-		argc--;
-	}
-
-	if (argc == 2) {
+	if (argc > 1) {
 		convert_to_string_ex(file);
-		fn = (*file)->value.str.val;
+		fn = Z_STRVAL_PP(file);
+		if (argc == 3) {
+			convert_to_long_ex(quality);
+			q = Z_LVAL_PP(quality);
+		}
+	}
+
+	if ((argc == 2) || (argc == 3 && Z_STRLEN_PP(file))) {
 		if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
-			php_error(E_WARNING, "Image%s: Invalid filename", fn);
+			php_error(E_WARNING, "%s: invalid filename '%s'", get_active_function_name(), fn);
 			RETURN_FALSE;
 		}
 
 		fp = V_FOPEN(fn, "wb");
 		if (!fp) {
-			php_error(E_WARNING, "Image%s: unable to open %s for writing", tn, fn);
+			php_error(E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(), fn);
 			RETURN_FALSE;
 		}
 		if (image_type == PHP_GDIMG_TYPE_JPG) {
@@ -637,17 +576,18 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type) {
 		int   b;
 		FILE *tmp;
 		char  buf[4096];
+
 		tmp = tmpfile();
 		if (tmp == NULL) {
-			php_error(E_WARNING, "Unable to open temporary file");
+			php_error(E_WARNING, "%s: unable to open temporary file", get_active_function_name());
 			RETURN_FALSE;
 		}
 		output = php_header();
 		if (output) {
 			if (image_type == PHP_GDIMG_TYPE_JPG) {
-				(*func_p)(im, fp, q);
+				(*func_p)(im, tmp, q);
 			} else {
-				(*func_p)(im, fp);
+				(*func_p)(im, tmp);
 			}
             fseek(tmp, 0, SEEK_SET);
 #if APACHE && defined(CHARSET_EBCDIC)
@@ -665,12 +605,25 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type) {
     RETURN_TRUE;
 }
 
+/* {{{ proto int imagegif(int im [, string filename])
+   Output GIF image to browser or file */
+PHP_FUNCTION(imagegif)
+{
+#ifdef HAVE_GD_GIF
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGif);
+#else /* HAVE_GD_GIF */
+	php_error(E_WARNING, "ImageGif: No GIF support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_GIF */
+}
+/* }}} */
+
 /* {{{ proto int imagepng(int im [, string filename])
    Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
 #ifdef HAVE_GD_PNG
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG);
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePng);
 #else /* HAVE_GD_PNG */
 	php_error(E_WARNING, "ImagePng: No PNG support in this PHP build");
 	RETURN_FALSE;
@@ -679,25 +632,12 @@ PHP_FUNCTION(imagepng)
 /* }}} */
 
 
-/* {{{ proto int imagegif(int im [, string filename])
-   Output GIF image to browser or file */
-PHP_FUNCTION(imagegif)
-{
-#ifdef HAVE_GD_GIF
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG);
-#else /* HAVE_GD_GIF */
-	php_error(E_WARNING, "ImageGif: No GIF support in this PHP build");
-	RETURN_FALSE;
-#endif /* HAVE_GD_GIF */
-}
-/* }}} */
-
 /* {{{ proto int imagejpeg(int im [, string filename [, int quality]])
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
 #ifdef HAVE_GD_JPG
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG);
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpeg);
 #else /* HAVE_GD_JPG */
 	php_error(E_WARNING, "ImageJpeg: No JPG support in this PHP build");
 	RETURN_FALSE;
@@ -709,7 +649,7 @@ PHP_FUNCTION(imagejpeg)
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM);
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", _php_image_output_wbmp);
 }
 /* }}} */
 
