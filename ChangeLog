@@ -1,3 +1,88 @@
+2005-03-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - If an exception is pending we don't bail out but show the unhandled
+      exception
+
+2005-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/str_word_count.phpt:
+      A more performance friendly version of Andrey's patch.
+
+2005-03-12  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      FRN
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/str_word_count.phpt:
+      added an optional third parameter to str_word_count(), which is used as
+      a list of characters which are considerd "is_alpha()". Thus V14GR4 can
+      be extracted as one word if the user supplies "14" as charlist.
+      FR #31560
+
+2005-03-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/cli/php_cli.c:
+      it's 2005 already
+
+2005-03-12  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/string.c:
+      - type is either 1 or 2 if second parameter is set. if not set then type
+      is 0.
+      - use the lvalue for the second rvalue
+
+    * ext/standard/tests/strings/str_word_count.phpt:
+      add a test file
+
+    * ext/pcre/tests/pcre_count.phpt:
+      add test
+
+    * NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      main/SAPI.c
+      win32/sendmail.c:
+      FR 32275 - fifth parameter to preg_replace() to count number of replaces
+      made.
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      Fixed #30871
+
+2005-03-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/wddx/tests/wddx.xml:
+      - Fix test
+
+    * ext/wddx/wddx.c:
+      - Fix another memleak
+
+    * ext/wddx/wddx.c:
+      - Fix memleak
+
+2005-03-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/config.w32:
+      build sqlite2 pdo driver on win32
+
+2005-03-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/pdo_sqlite2.c:
+      - Errcode might be empty
+
+2005-03-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/pdo_sqlite2.c:
+      Fix crappy whitespace
+
 2005-03-11  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/sqlite/config.m4
