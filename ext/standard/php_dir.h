@@ -30,7 +30,7 @@ PHP_FUNCTION(closedir);
 PHP_FUNCTION(chdir);
 PHP_FUNCTION(getcwd);
 PHP_FUNCTION(rewinddir);
-PHP_FUNCTION(readdir);
+PHP_NAMED_FUNCTION(php_if_readdir);
 PHP_FUNCTION(getdir);
 
 #endif /* PHP_DIR_H */
