@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2005, PHP 5.0.4
+13 Mar 2005, PHP 5.0.4RC1
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Added length and charsetnr for field array and object in mysqli. (Georg)
 - Added checks for negative values to gmp_sqrt(), gmp_powm(), gmp_sqrtrem()
