@@ -81,6 +81,7 @@ PHP_FUNCTION(com_propget);
 PHP_FUNCTION(com_propput);
 
 static int le_idispatch;
+static int codepage;
 
 function_entry COM_functions[] = {
 	PHP_FE(COM_load,								NULL)
@@ -125,7 +126,7 @@ static char *php_string_from_clsid(const CLSID clsid)
 	char *clsid_str;
 
 	StringFromCLSID(clsid, &ole_clsid);
-	clsid_str = php_OLECHAR_to_char(ole_clsid, NULL, 0);
+	clsid_str = php_OLECHAR_to_char(ole_clsid, NULL, 0, codepage);
 	LocalFree(ole_clsid);
 
 	return clsid_str;
@@ -210,7 +211,7 @@ PHP_INI_END()
    Loads a COM module */
 PHP_FUNCTION(COM_load)
 {
-	pval *module_name, *server_name=NULL;
+	pval *module_name, *server_name=NULL, *code_page;
 	CLSID clsid;
 	HRESULT hr;
 	OLECHAR *ProgID;
@@ -221,6 +222,7 @@ PHP_FUNCTION(COM_load)
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			getParameters(ht, 1, &module_name);
+			codepage = CP_ACP;
 			break;
 		case 2:
 			if (!INI_INT("allow_dcom")) {
@@ -229,6 +231,24 @@ PHP_FUNCTION(COM_load)
 			}
 			getParameters(ht, 2, &module_name, &server_name);
 			convert_to_string(server_name);
+			codepage = CP_ACP;
+			break;
+		case 3:
+			if (!INI_INT("allow_dcom")) {
+				php_error(E_WARNING, "DCOM is disabled");
+				RETURN_FALSE;
+			}
+			getParameters(ht, 3, &module_name, &server_name, &code_page);
+
+			if (server_name->type == IS_NULL) {
+				efree(server_name);
+				server_name = NULL;
+			}
+			else
+				convert_to_string(server_name);
+
+			convert_to_long(code_page);
+			codepage = code_page->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -236,7 +256,7 @@ PHP_FUNCTION(COM_load)
 	}
 
 	convert_to_string(module_name);
-	ProgID = php_char_to_OLECHAR(module_name->value.str.val, module_name->value.str.len);
+	ProgID = php_char_to_OLECHAR(module_name->value.str.val, module_name->value.str.len, codepage);
 	hr = CLSIDFromProgID(ProgID, &clsid);
 	efree(ProgID);
 
@@ -257,7 +277,7 @@ PHP_FUNCTION(COM_load)
 
 		server_info.dwReserved1=0;
 		server_info.dwReserved2=0;
-		server_info.pwszName = php_char_to_OLECHAR(server_name->value.str.val, server_name->value.str.len);
+		server_info.pwszName = php_char_to_OLECHAR(server_name->value.str.val, server_name->value.str.len, codepage);
 		server_info.pAuthInfo=NULL;
 
 		pResults.pIID = &IID_IDispatch;
@@ -296,7 +316,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 	int current_arg, current_variant;
 	DISPPARAMS dispparams;
 
-	funcname = php_char_to_OLECHAR(function_name->value.str.val, function_name->value.str.len);
+	funcname = php_char_to_OLECHAR(function_name->value.str.val, function_name->value.str.len, codepage);
 
 	hr = i_dispatch->GetIDsOfNames(IID_NULL, &funcname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
@@ -312,7 +332,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 
 	for (current_arg=0; current_arg<arg_count; current_arg++) {
 		current_variant = arg_count - current_arg - 1;
-		php_pval_to_variant(arguments[current_arg], &variant_args[current_variant]);
+		php_pval_to_variant(arguments[current_arg], &variant_args[current_variant], codepage);
 	}
 
 	dispparams.rgvarg = variant_args;
@@ -377,7 +397,7 @@ PHP_FUNCTION(COM_invoke)
 	}
 	efree(arguments);
 
-	php_variant_to_pval(&var_result, return_value, 0);
+	php_variant_to_pval(&var_result, return_value, 0, codepage);
 }
 /* }}} */
 
@@ -413,7 +433,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 
 
 	/* obtain property handler */
-	propname = php_char_to_OLECHAR(arg_property->value.str.val, arg_property->value.str.len);
+	propname = php_char_to_OLECHAR(arg_property->value.str.val, arg_property->value.str.len, codepage);
 
 	hr = i_dispatch->GetIDsOfNames(IID_NULL, &propname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
@@ -465,7 +485,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 
 
 	/* obtain property handler */
-	propname = php_char_to_OLECHAR(arg_property->value.str.val, arg_property->value.str.len);
+	propname = php_char_to_OLECHAR(arg_property->value.str.val, arg_property->value.str.len, codepage);
 
 	hr = i_dispatch->GetIDsOfNames(IID_NULL, &propname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
@@ -478,7 +498,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 	}
 
 
-	php_pval_to_variant(value, &new_value);
+	php_pval_to_variant(value, &new_value, codepage);
 	dispparams.rgvarg = &new_value;
 	dispparams.rgdispidNamedArgs = &mydispid;
 	dispparams.cArgs = 1;
@@ -504,7 +524,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 
 
 	if (SUCCEEDED(hr)) {
-		php_variant_to_pval(&var_result, return_value, 0);
+		php_variant_to_pval(&var_result, return_value, 0, codepage);
 	} else {
 		*return_value = *value;
 		zval_copy_ctor(return_value);
@@ -539,7 +559,7 @@ PHP_FUNCTION(com_propget)
 	if (do_COM_propget(&var_result, i_dispatch, arg_property, 0)==FAILURE) {
 		RETURN_FALSE;
 	}
-	php_variant_to_pval(&var_result, return_value, 0);
+	php_variant_to_pval(&var_result, return_value, 0, codepage);
 }
 /* }}} */
 
@@ -638,7 +658,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 	pval result;
 	VARIANTARG var_result = _php_COM_get_property_handler(property_reference);
 
-	php_variant_to_pval(&var_result, &result, 0);
+	php_variant_to_pval(&var_result, &result, 0, codepage);
 	return result;
 }
 
@@ -747,7 +767,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		}
 		pval_destructor(&function_name->element);
 		efree(arguments);
-		php_variant_to_pval(&var_result, return_value, 0);
+		php_variant_to_pval(&var_result, return_value, 0, codepage);
 	}
 
 	for (overloaded_property = (zend_overloaded_element *) zend_llist_get_first(property_reference->elements_list);
@@ -775,7 +795,7 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 	int interfaces;
 	ELS_FETCH();
 
-	p = php_char_to_OLECHAR(typelib_name, strlen(typelib_name));
+	p = php_char_to_OLECHAR(typelib_name, strlen(typelib_name), codepage);
 
 	if (FAILED(LoadTypeLib(p, &TypeLib))) {
 		efree(p);
@@ -799,7 +819,7 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 			char *EnumId;
 
 			TypeLib->lpVtbl->GetDocumentation(TypeLib, i, &bstr_EnumId, NULL, NULL, NULL);
-			EnumId = php_OLECHAR_to_char(bstr_EnumId, NULL, 0);
+			EnumId = php_OLECHAR_to_char(bstr_EnumId, NULL, 0, codepage);
 			printf("Enumeration %d - %s:\n", i, EnumId);
 			efree(EnumId);
 #endif
@@ -818,10 +838,10 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 					continue;
 				}
 				LocalFree(bstr_ids);
-				ids = php_OLECHAR_to_char(bstr_ids, NULL, 1);
+				ids = php_OLECHAR_to_char(bstr_ids, NULL, 1, codepage);
 				c.name_len = strlen(ids)+1;
 				c.name = ids;
-				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, 1);
+				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, 1, codepage);
 				c.flags = mode;
 
 				zend_register_constant(&c ELS_CC);
