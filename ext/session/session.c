@@ -825,7 +825,7 @@ static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC)
 		convert_to_string((*ppid)); \
 		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid))
 
-static void php_session_start(TSRMLS_D)
+PHPAPI void php_session_start(TSRMLS_D)
 {
 	pval **ppid;
 	pval **data;
