@@ -911,15 +911,24 @@ PHP_FUNCTION(dba_fetch)
 }
 /* }}} */
 
-/* {{{ proto array dba_key_split(string key)
-   Splits an inifile key into an array of the form array(0=>group,1=>value_name) */
+/* {{{ proto array|false dba_key_split(string key)
+   Splits an inifile key into an array of the form array(0=>group,1=>value_name) but returns false if input is false or null */
 PHP_FUNCTION(dba_key_split)
 {
+	zval *zkey;
 	char *key, *name;
 	int key_len;
-	
+
+	if (ZEND_NUM_ARGS() != 1) {
+		WRONG_PARAM_COUNT;
+	}
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &zkey) == SUCCESS) {
+		if (Z_TYPE_P(zkey) == IS_NULL || (Z_TYPE_P(zkey) == IS_BOOL && !Z_LVAL_P(zkey))) {
+			RETURN_BOOL(0);
+		}
+	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
-		return;
+		RETURN_BOOL(0);
 	}
 	array_init(return_value);
 	if (key[0] == '[' && (name = strchr(key, ']')) != NULL) {
