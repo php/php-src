@@ -63,6 +63,13 @@
 #include <netinet/in.h>
 #endif
 
+#define INC_OUTPUTPOS(a,b) \
+	if ((a) < 0 || ((INT_MAX - outputpos)/(b)) < (a)) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow in format string", code); \
+		RETURN_FALSE; \
+	} \
+	outputpos += (a)*(b);
+
 /* Whether machine is little endian */
 char machine_little_endian;
 
@@ -246,7 +253,7 @@ PHP_FUNCTION(pack)
 		switch ((int) code) {
 			case 'h': 
 			case 'H': 
-				outputpos += (arg + 1) / 2;		/* 4 bit per arg */
+				INC_OUTPUTPOS((arg + 1) / 2,1)	/* 4 bit per arg */
 				break;
 
 			case 'a': 
@@ -254,34 +261,34 @@ PHP_FUNCTION(pack)
 			case 'c': 
 			case 'C':
 			case 'x':
-				outputpos += arg;		/* 8 bit per arg */
+				INC_OUTPUTPOS(arg,1)		/* 8 bit per arg */
 				break;
 
 			case 's': 
 			case 'S': 
 			case 'n': 
 			case 'v':
-				outputpos += arg * 2;	/* 16 bit per arg */
+				INC_OUTPUTPOS(arg,2)		/* 16 bit per arg */
 				break;
 
 			case 'i': 
 			case 'I':
-				outputpos += arg * sizeof(int);
+				INC_OUTPUTPOS(arg,sizeof(int))
 				break;
 
 			case 'l': 
 			case 'L': 
 			case 'N': 
 			case 'V':
-				outputpos += arg * 4;	/* 32 bit per arg */
+				INC_OUTPUTPOS(arg,4)		/* 32 bit per arg */
 				break;
 
 			case 'f':
-				outputpos += arg * sizeof(float);
+				INC_OUTPUTPOS(arg,sizeof(float))
 				break;
 
 			case 'd':
-				outputpos += arg * sizeof(double);
+				INC_OUTPUTPOS(arg,sizeof(double))
 				break;
 
 			case 'X':
@@ -650,6 +657,11 @@ PHP_FUNCTION(unpack)
 				sprintf(n, "%.*s", namelen, name);
 			}
 
+			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow", type);
+				inputpos = 0;
+			}
+
 			if ((inputpos + size) <= inputlen) {
 				switch ((int) type) {
 					case 'a': 
@@ -820,6 +832,10 @@ PHP_FUNCTION(unpack)
 				}
 
 				inputpos += size;
+				if (inputpos < 0) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", type);
+					inputpos = 0;
+				}
 			} else if (arg < 0) {
 				/* Reached end of input for '*' repeater */
 				break;
