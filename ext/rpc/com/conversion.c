@@ -529,11 +529,11 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				hr = SafeArrayGetElement(array, indices, (VOID *) &(vv.lVal));
 			}
 			if (FAILED(hr))
-            {
+			{
 				/* Failure to retieve an element probably means the array is sparse */
 				/* So leave the php array sparse too */
 				continue;
-            }
+			}
 			/* Create an element to be added to the array */
 			ALLOC_ZVAL(element);
 			/* Call ourself again to handle the base type conversion */
@@ -560,10 +560,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				add_index_zval(pval_arg, ii, element);
 			}
 		}
-        SafeArrayUnlock(array);
-		/* Clean up the SafeArray since that is our responsibility */
-		SafeArrayDestroyData(array);
-		SafeArrayDestroyDescriptor(array);
+		SafeArrayUnlock(array);
 	}
 	else switch(var_arg->vt & ~VT_BYREF)
 	{		
@@ -683,13 +680,11 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			if(V_ISBYREF(var_arg))
 			{
 				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage);
-				SysFreeString(*V_BSTRREF(var_arg));
 				efree(V_BSTRREF(var_arg));
 			}
 			else
 			{
 				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), persistent, codepage);
-				SysFreeString(V_BSTR(var_arg));
 			}
 
 			Z_TYPE_P(pval_arg) = IS_STRING;

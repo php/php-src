@@ -1452,7 +1452,8 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 			php_variant_to_pval(var_result, return_value, 0, codepage);
 		}
 
-		FREE_VARIANT(var_result);
+//		FREE_VARIANT(var_result);
+		efree(var_result);
 		efree(arguments);
 	}
 
