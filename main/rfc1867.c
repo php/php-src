@@ -642,21 +642,20 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	boundary++;
 	boundary_len = strlen(boundary);
 
-	if (boundary[0] == '"' && boundary[boundary_len-1] == '"') {
-		if (boundary_len < 2) { /* otherwise a single " passes */
+	if (boundary[0] == '"') {
+		boundary++;
+		boundary_end = strchr(boundary, '"');
+		if (!boundary_end) { 
 			sapi_module.sapi_error(E_WARNING, "Invalid boundary in multipart/form-data POST data");
 			return;
 		}
-		boundary++;
-		boundary_len -= 2;
-		boundary[boundary_len] = '\0';
 	} else {
 		/* search for the end of the boundary */
 		boundary_end = strchr(boundary, ',');
-		if (boundary_end) {
-			boundary_end[0] = '\0';
-			boundary_len = boundary_end-boundary;
-		}
+	}
+	if (boundary_end) {
+		boundary_end[0] = '\0';
+		boundary_len = boundary_end-boundary;
 	}
 
 	/* Initialize the buffer */
