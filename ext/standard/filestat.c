@@ -446,6 +446,7 @@ PHP_FUNCTION(clearstatcache)
 }
 /* }}} */
 
+#define IS_LINK_OPERATION() (type == 8 /* filetype */ || type == 14 /* is_link */ || type == 16 /* lstat */)
 
 static void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value)
 {
@@ -469,29 +470,23 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
 #endif
 		if (V_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
-			if ((type != 14) && (type != 15 || errno != ENOENT)) { /* fileexists() test must print no error */
+			if (!IS_LINK_OPERATION() && (type != 15 || errno != ENOENT)) { /* fileexists() test must print no error */
 				php_error(E_NOTICE,"stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			efree(BG(CurrentStatFile));
 			BG(CurrentStatFile) = NULL;
-			if (type != 14) { /* Don't require success for is link */
+			if (!IS_LINK_OPERATION()) { /* Don't require success for link operation */
 				RETURN_FALSE;
 			}
 		}
 	}
 
 #if HAVE_SYMLINK
-	if (8 == type /* filetype */
-		|| 14 == type /* is link */
-		|| 16 == type) { /* lstat */
-
+	if (IS_LINK_OPERATION() && !BG(lsb).st_mode) {
 		/* do lstat if the buffer is empty */
-
-		if (!BG(lsb).st_mode) {
-			if (V_LSTAT(filename, &BG(lsb)) == -1) {
-				php_error(E_NOTICE, "lstat failed for %s (errno=%d - %s)", filename, errno, strerror(errno));
-				RETURN_FALSE;
-			}
+		if (V_LSTAT(filename, &BG(lsb)) == -1) {
+			php_error(E_NOTICE, "lstat failed for %s (errno=%d - %s)", filename, errno, strerror(errno));
+			RETURN_FALSE;
 		}
 	}
 #endif
