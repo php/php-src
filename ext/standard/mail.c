@@ -208,8 +208,10 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #else
 #if defined(EX_TEMPFAIL)
 		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL))
-#else
+#elif defined(EX_OK)
 		if (ret != EX_OK)
+#else
+		if (ret != 0)
 #endif
 #endif
 		{
