@@ -67,6 +67,8 @@ static int le_result, le_conn, le_pconn;
 
 #define SAFE_SQL_NTS(n) ((SWORD) ((n)?(SQL_NTS):0))
 
+static unsigned char a3_arg2_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
+
 function_entry odbc_functions[] = {
 	PHP_FE(odbc_setoption, NULL)
 	PHP_FE(odbc_autocommit, NULL)
@@ -80,8 +82,9 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_prepare, NULL)
 	PHP_FE(odbc_execute, NULL)
 	PHP_FE(odbc_fetch_row, NULL)
-	PHP_FE(odbc_fetch_into, NULL)
+	PHP_FE(odbc_fetch_into, a3_arg2_force_ref)
 	PHP_FE(odbc_field_len, NULL)
+	PHP_FE(odbc_field_scale, NULL)
 	PHP_FE(odbc_field_name, NULL)
 	PHP_FE(odbc_field_type, NULL)
 	PHP_FE(odbc_field_num, NULL)
@@ -93,8 +96,6 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_rollback, NULL)
 	PHP_FE(odbc_binmode, NULL)
 	PHP_FE(odbc_longreadlen, NULL)
-/*	PHP_FE(odbc_bind_param, NULL)
-	PHP_FE(odbc_define, NULL)*/
 	PHP_FE(odbc_tables, NULL)
 	PHP_FE(odbc_columns, NULL)
 	PHP_FE(odbc_gettypeinfo, NULL)
@@ -111,6 +112,7 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_specialcolumns, NULL)
 	PHP_FE(odbc_statistics, NULL)
 	PHP_FALIAS(odbc_do, odbc_exec, NULL)
+	PHP_FALIAS(odbc_field_precision, odbc_field_len, NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -461,26 +463,25 @@ void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
 {
 	char	state[6];
 	SDWORD	error;        /* Not used */
-	char	errormsg[255];
+	char	errormsg[SQL_MAX_MESSAGE_LENGTH];
 	SWORD	errormsgsize; /* Not used */
-	RETCODE ret;
+	RETCODE rc;
 	ODBCLS_FETCH();
 
-#if !defined (HAVE_ADABAS)
-	do {
-#endif
-		ret = SQLError(henv, conn, stmt, state,
+	while(henv != SQL_NULL_HENV){
+		do {
+			rc = SQLError(henv, conn, stmt, state,
 			    &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
-	    if (func) {
-		    php_error(E_WARNING, "SQL error: %s, SQL state %s in %s",
+	    	if (func) {
+		    	php_error(E_WARNING, "SQL error: %s, SQL state %s in %s",
 				   errormsg, state, func);
-	    } else {
-		    php_error(E_WARNING, "SQL error: %s, SQL state %s",
-				    errormsg, state);
-	    }
-#if !defined (HAVE_ADABAS)
-	} while (SQL_SUCCEEDED(ret));
-#endif
+			} else {
+		    	php_error(E_WARNING, "SQL error: %s, SQL state %s",
+						    errormsg, state);
+			}
+			
+		} while (SQL_SUCCEEDED(rc));
+	}
 }
 
 void php_odgbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
@@ -602,6 +603,42 @@ static int _close_pconn_with_id(list_entry *le, int *id)
 		return 0;
 	}
 }
+
+void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
+{
+	odbc_result *result;
+	SDWORD len;
+	pval **pv_res, **pv_num;
+
+	if (zend_get_parameters_ex(2, &pv_res, &pv_num) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(pv_num);
+
+	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
+
+	if (result->numcols == 0) {
+		php_error(E_WARNING, "No tuples available at this result index");
+		RETURN_FALSE;
+	}
+
+	if ((*pv_num)->value.lval > result->numcols) {
+		php_error(E_WARNING, "Field index larger than number of fields");
+		RETURN_FALSE;
+	}
+
+	if ((*pv_num)->value.lval < 1) {
+		php_error(E_WARNING, "Field numbering starts at 1");
+		RETURN_FALSE;
+	}
+
+	SQLColAttributes(result->stmt, (UWORD)(*pv_num)->value.lval, 
+					(type?SQL_COLUMN_SCALE:SQL_COLUMN_PRECISION), NULL, 0, NULL, &len);
+
+	RETURN_LONG(len);
+}
+
 /* Main User Functions */
 
 /* {{{ proto void odbc_close_all(void)
@@ -1053,7 +1090,7 @@ PHP_FUNCTION(odbc_exec)
 }
 /* }}} */
 
-/* {{{ proto int odbc_fetch_into(int result_id [, int rownumber], array result_array)
+/* {{{ proto int odbc_fetch_into(int result_id, array result_array [, int rownumber])
    Fetch one result row into an array */ 
 PHP_FUNCTION(odbc_fetch_into)
 {
@@ -1076,7 +1113,7 @@ PHP_FUNCTION(odbc_fetch_into)
 				WRONG_PARAM_COUNT;
 			break;
 		case 3:
-			if (zend_get_parameters_ex(3, &pv_res, &pv_row, &pv_res_arr) == FAILURE)
+			if (zend_get_parameters_ex(3, &pv_res, &pv_res_arr, &pv_row) == FAILURE)
 				WRONG_PARAM_COUNT;
 			convert_to_long_ex(pv_row);
 			rownum = (*pv_row)->value.lval;
@@ -1085,7 +1122,7 @@ PHP_FUNCTION(odbc_fetch_into)
 			WRONG_PARAM_COUNT;
 	}
 
-	if (!ParameterPassedByReference(ht, numArgs)) {
+	if (!ParameterPassedByReference(ht, 2)) {
 		php_error(E_WARNING, "Array not passed by reference in call to odbc_fetch_into()");
 		RETURN_FALSE;
 	}
@@ -2029,40 +2066,18 @@ PHP_FUNCTION(odbc_field_type)
 /* }}} */
 
 /* {{{ proto int odbc_field_len(int result_id, int field_number)
-   Get the length of a column */   
+   Get the length (precision) of a column */
 PHP_FUNCTION(odbc_field_len)
 {
-	odbc_result *result;
-	SDWORD len;
-	pval **pv_res, **pv_num;
+	odbc_column_lengths(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
 
-	if (zend_get_parameters_ex(2, &pv_res, &pv_num) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_long_ex(pv_num);
-
-	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
-
-	if (result->numcols == 0) {
-		php_error(E_WARNING, "No tuples available at this result index");
-		RETURN_FALSE;
-	}
-
-	if ((*pv_num)->value.lval > result->numcols) {
-		php_error(E_WARNING, "Field index larger than number of fields");
-		RETURN_FALSE;
-	}
-
-	if ((*pv_num)->value.lval < 1) {
-		php_error(E_WARNING, "Field numbering starts at 1");
-		RETURN_FALSE;
-	}
-
-	SQLColAttributes(result->stmt, (UWORD)(*pv_num)->value.lval, 
-					 SQL_COLUMN_PRECISION, NULL, 0, NULL, &len);
-	
-	RETURN_LONG(len);
+/* {{{ proto int odbc_field_scale(int result_id, int field_number)
+   Get the scale of a column */
+PHP_FUNCTION(odbc_field_scale)
+{
+	odbc_column_lengths(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);	
 }
 /* }}} */
 
@@ -2314,7 +2329,7 @@ PHP_FUNCTION(odbc_tables)
 /* }}} */
 
 /* {{{ proto int odbc_columns(int connection_id, string catalog, string schema, string table, string column)
-   Call the SQLColumns function */
+   Returns a result identifier that can be used to fetch a list of column names in specified tables */
 PHP_FUNCTION(odbc_columns)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_table, **pv_column;
@@ -2397,7 +2412,7 @@ PHP_FUNCTION(odbc_columns)
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
 /* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column)
-   Call the SQLColumnPrivileges function */
+    Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
 PHP_FUNCTION(odbc_columnprivileges)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_table, **pv_column;
@@ -2477,7 +2492,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 
 #if !defined(HAVE_SOLID)
 /* {{{ proto int odbc_foreignkeys(int connection_id, string pk_catalog, string pk_schema, string pk_table, string fk_catalog, string fk_schema, string fk_table)
-   Call the SQLForeignKeys function */
+   Returns a result identifier to either a list of foreign keys in the specified table or a list of foreign keys in other tables that refer to the primary key in the specified table */
 PHP_FUNCTION(odbc_foreignkeys)
 {
 	pval **pv_conn, **pv_pcat, **pv_pschema, **pv_ptable;
@@ -2576,7 +2591,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 #endif /* HAVE_SOLID */
 
 /* {{{ proto int odbc_gettypeinfo(int connection_id [, int data_type ])
-   Call the SQLGetTypeInfo function */
+   Returns a result identifier containing information about data types supported by the data source */
 PHP_FUNCTION(odbc_gettypeinfo)
 {
 	pval **pv_conn, **pv_data_type;
@@ -2648,7 +2663,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 /* }}} */
 
 /* {{{ proto int odbc_primarykeys(int connection_id, string database, string schema, string table)
-   Call the SQLPrimaryKeys function */
+   Returns a result identifier listing the column names that comprise the primary key for a table */
 PHP_FUNCTION(odbc_primarykeys)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_table;
@@ -2724,7 +2739,7 @@ PHP_FUNCTION(odbc_primarykeys)
 
 #if !defined(HAVE_SOLID)
 /* {{{ proto int odbc_procedurecolumns(int connection_id [, string database, string schema, string proc, string column])
-   Call the SQLProcedureColumns function */
+   Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
 PHP_FUNCTION(odbc_procedurecolumns)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_proc, **pv_col;
@@ -2808,7 +2823,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 
 #if !defined(HAVE_SOLID)
 /* {{{ proto int odbc_procedures(int connection_id [, string database, string schema, string proc])
-   Call the SQLProcedures function */
+   Returns a result identifier containg the list of procedure names in a datasource */
 PHP_FUNCTION(odbc_procedures)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_proc;
@@ -2888,7 +2903,7 @@ PHP_FUNCTION(odbc_procedures)
 #endif /* HAVE_SOLID */
 
 /* {{{ proto int odbc_specialcolumns(int connection_id, int type, string catalog, string schema, string name, int scope, int nullable)
-   Call the SQLSpecialColumns function */
+   Returns a result identifier containing either The optimal set of columns that uniquely identifies a row in the table or Columns that are automatically updated when any value in the row is updated by a transaction */
 PHP_FUNCTION(odbc_specialcolumns)
 {
 	pval **pv_conn, **pv_type, **pv_cat, **pv_schema, **pv_name;
@@ -2976,7 +2991,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 /* }}} */
 
 /* {{{ proto int odbc_statistics(int connection_id, string catalog, string schema, string name, int unique, int reserved)
-   Call the SQLStatistics function */
+   Returns a result identifier that contains statistics about a single table and the indexes associated with the table */
 PHP_FUNCTION(odbc_statistics)
 {
     pval **pv_conn, **pv_cat, **pv_schema, **pv_name;
@@ -3061,7 +3076,7 @@ PHP_FUNCTION(odbc_statistics)
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
 /* {{{ proto int odbc_tableprivilegess(int connection_id, string catalog, string schema, string table)
-   Call the SQLTablePrivilegess function */
+   Returns a result identifier containing a list of tables and the privileges associated with each table */
 PHP_FUNCTION(odbc_tableprivileges)
 {
     pval **pv_conn, **pv_cat, **pv_schema, **pv_table;
