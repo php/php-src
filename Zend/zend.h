@@ -405,7 +405,7 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 	}										\
 	INIT_PZVAL(&(zv));
 
-#define ZEND_MAX_RESERVED_RESOURCES	1
+#define ZEND_MAX_RESERVED_RESOURCES	2
 
 #ifdef ZEND_WIN32
 /* Only use this macro if you know for sure that all of the switches values
