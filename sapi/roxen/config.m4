@@ -36,7 +36,6 @@ AC_ARG_WITH(roxen,
 	Pike include dir:      $PIKE_INCLUDE_DIR
 	Pike module directory: $PIKE_MODULE_DIR"
 	PIKE_INCLUDE_DIR=" -I$PIKE_INCLUDE_DIR "
-#    PHP_SUBST(PIKE_INCLUDE_DIR)
 ])
 AC_MSG_RESULT($RESULT)
 
