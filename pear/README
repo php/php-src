@@ -13,25 +13,6 @@ developers, and to give the PHP community a single source for such
 code.
 
 
-ADMINISTRATION
-
-This section will describe the rules for how files are structured and
-how functions and classes should be named.
-
-
-TOOLS
-
-This section will describe the tools provided to PEAR users.
-
-
-CODING RULES AND GUIDELINES
-
-* Before adding a new top-level directory ("DB" is one), discuss your
-  intentions on pear-dev@lists.php.net.
-
-* Please see http://pear.php.net/manual/standards.php for full rules and guidelines.
-
-
 DOCUMENTATION
 
 Documentation for PEAR can be found at http://pear.php.net/manual/.
