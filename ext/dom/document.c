@@ -941,7 +941,7 @@ PHP_FUNCTION(dom_document_document)
 	xmlDoc *docp = NULL, *olddoc;
 	dom_object *intern;
 	char *encoding, *version = NULL;
-	int encoding_len, version_len;
+	int encoding_len = 0, version_len;
 
 	id = getThis();
 	
