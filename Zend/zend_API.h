@@ -241,36 +241,50 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define add_method(arg,key,method)	add_assoc_function((arg),(key),(method))
 
+#if ZEND_DEBUG
+#define CHECK_ZVAL_STRING(z) \
+if ((z)->value.str.val[ (z)->value.str.len ] != '\0') zend_error(E_WARNING, "String is not zero-terminated (%s)",(z)->value.str.val);
+#else
+#define CHECK_ZVAL_STRING(z)
+#endif
+
 #define ZVAL_RESOURCE(z,l) {			\
 		(z)->type = IS_RESOURCE;        \
 		(z)->value.lval = l;	        \
 	}
+
 #define ZVAL_BOOL(z,b) {				\
 		(z)->type = IS_BOOL;	        \
 		(z)->value.lval = b;	        \
 	}
+
 #define ZVAL_NULL(z) {					\
 		(z)->type = IS_NULL;	        \
 	}
+
 #define ZVAL_LONG(z,l) {				\
 		(z)->type = IS_LONG;	        \
 		(z)->value.lval = l;	        \
 	}
+
 #define ZVAL_DOUBLE(z,d) {				\
 		(z)->type = IS_DOUBLE;	        \
 		(z)->value.dval = d;	        \
 	}
+
 #define ZVAL_STRING(z,s,duplicate) {	\
 		char *__s=(s);					\
 		(z)->value.str.len = strlen(__s);	\
 		(z)->value.str.val = (duplicate?estrndup(__s,(z)->value.str.len):__s);	\
 		(z)->type = IS_STRING;	        \
 	}
+
 #define ZVAL_STRINGL(z,s,l,duplicate) {	\
 		char *__s=(s); int __l=l;		\
 		(z)->value.str.len = __l;	    \
 		(z)->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
 		(z)->type = IS_STRING;		    \
+		CHECK_ZVAL_STRING(z); 			\
 	}
 
 #define ZVAL_EMPTY_STRING(z) {	        \
@@ -282,108 +296,33 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define ZVAL_FALSE  { (z)->value.lval = 0;  (z)->type = IS_BOOL; }
 #define ZVAL_TRUE   { (z)->value.lval = 1;  (z)->type = IS_BOOL; }
 
-#define RETVAL_RESOURCE(l) {			\
-		return_value->type = IS_RESOURCE;\
-		return_value->value.lval = l;	\
-	}
-#define RETVAL_BOOL(b) {				\
-		return_value->type = IS_BOOL;	\
-		return_value->value.lval = b;	\
-	}
-#define RETVAL_NULL() {					\
-		return_value->type = IS_NULL;	\
-	}
-#define RETVAL_LONG(l) {				\
-		return_value->type = IS_LONG;	\
-		return_value->value.lval = l;	\
-	}
-#define RETVAL_DOUBLE(d) {				\
-		return_value->type = IS_DOUBLE;	\
-		return_value->value.dval = d;	\
-	}
-#define RETVAL_STRING(s,duplicate) {	\
-		char *__s=(s);					\
-		return_value->value.str.len = strlen(__s);	\
-		return_value->value.str.val = (duplicate?estrndup(__s,return_value->value.str.len):__s);	\
-		return_value->type = IS_STRING;	\
-	}
-#define RETVAL_STRINGL(s,l,duplicate) {		\
-		char *__s=(s); int __l=l;			\
-		return_value->value.str.len = __l;	\
-		return_value->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
-		return_value->type = IS_STRING;		\
-	}
+#define RETVAL_RESOURCE(l)				ZVAL_RESOURCE(return_value,l)
+#define RETVAL_BOOL(b)					ZVAL_BOOL(return_value,b)
+#define RETVAL_NULL() 					ZVAL_NULL(return_value)
+#define RETVAL_LONG(l) 					ZVAL_LONG(return_value,l)
+#define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value,d)
+#define RETVAL_STRING(s,duplicate) 		ZVAL_STRING(return_value,s,duplicate)
+#define RETVAL_STRINGL(s,l,duplicate) 	ZVAL_STRINGL(return_value,s,l,duplicate)
+#define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
+#define RETVAL_FALSE  					ZVAL_BOOL(return_value,0)
+#define RETVAL_TRUE   					ZVAL_BOOL(return_value,1)
 
-#define RETVAL_EMPTY_STRING() {	            \
-		return_value->value.str.len = 0;  	\
-		return_value->value.str.val = empty_string; \
-		return_value->type = IS_STRING;		\
-	}
-
-#define RETVAL_FALSE  { return_value->value.lval = 0;  return_value->type = IS_BOOL; }
-#define RETVAL_TRUE   { return_value->value.lval = 1;  return_value->type = IS_BOOL; }
-
-#define RETURN_RESOURCE(l) {			\
-		return_value->type = IS_RESOURCE;\
-		return_value->value.lval = l;	\
-		return;							\
-	}
-
-#define RETURN_BOOL(b) {				\
-		return_value->type = IS_BOOL;	\
-		return_value->value.lval = b;	\
-		return;							\
-	}
-
-#define RETURN_NULL() {				\
-		return_value->type = IS_NULL;	\
-		return;							\
-	}
-
-#define RETURN_LONG(l) {				\
-		return_value->type = IS_LONG;	\
-		return_value->value.lval = l;	\
-		return;							\
-	}
-#define RETURN_DOUBLE(d) {				\
-		return_value->type = IS_DOUBLE;	\
-		return_value->value.dval = d;	\
-		return;							\
-	}
-#define RETURN_STRING(s,duplicate) {	\
-		char *__s=(s);					\
-		return_value->value.str.len = strlen(__s);	\
-		return_value->value.str.val = (duplicate?estrndup(__s,return_value->value.str.len):__s);	\
-		return_value->type = IS_STRING;	\
-		return;							\
-	}
-#define RETURN_STRINGL(s,l,duplicate) {		\
-		char *__s=(s); int __l=l;			\
-		return_value->value.str.len = __l;	\
-		return_value->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
-      	return_value->type = IS_STRING;		\
-		return;								\
-	}
-
-#define RETURN_EMPTY_STRING() {	            \
-		return_value->value.str.len = 0;  	\
-		return_value->value.str.val = empty_string; \
-		return_value->type = IS_STRING;		\
-        return;                             \
-	}
-
-#define RETURN_FALSE  { RETVAL_FALSE; return; }
-#define RETURN_TRUE   { RETVAL_TRUE; return; }
+#define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
+#define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
+#define RETURN_NULL() 					{ RETVAL_NULL(); return;}
+#define RETURN_LONG(l) 					{ RETVAL_LONG(l); return; }
+#define RETURN_DOUBLE(d) 				{ RETVAL_DOUBLE(d); return; }
+#define RETURN_STRING(s,duplicate) 		{ RETVAL_STRING(s,duplicate); return; }
+#define RETURN_STRINGL(s,l,duplicate) 	{ RETVAL_STRINGL(s,l,duplicate); return; }
+#define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }
+#define RETURN_FALSE  					{ RETVAL_FALSE; return; }
+#define RETURN_TRUE   					{ RETVAL_TRUE; return; }
 
 #define SET_VAR_STRING(n,v)	{																				\
 								{																			\
 									zval *var;																\
-									char *str=(v); /* prevent 'v' from being evaluated more than once */	\
-																											\
 									ALLOC_ZVAL(var);														\
-									var->value.str.val = (str);												\
-									var->value.str.len = strlen((str));										\
-									var->type = IS_STRING;													\
+									ZVAL_STRING(var,v,0);													\
 									ZEND_SET_GLOBAL_VAR(n, var);											\
 								}																			\
 							}
@@ -391,11 +330,8 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define SET_VAR_STRINGL(n,v,l)	{														\
 									{													\
 										zval *var;										\
-																						\
 										ALLOC_ZVAL(var);								\
-										var->value.str.val = (v);						\
-										var->value.str.len = (l);						\
-										var->type = IS_STRING;							\
+										ZVAL_STRINGL(var,v,l,0);						\
 										ZEND_SET_GLOBAL_VAR(n, var);					\
 									}													\
 								}
@@ -403,10 +339,8 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define SET_VAR_LONG(n,v)	{															\
 								{														\
 									zval *var;											\
-																						\
 									ALLOC_ZVAL(var);									\
-									var->value.lval = (v);								\
-									var->type = IS_LONG;								\
+									ZVAL_LONG(var,v);									\
 									ZEND_SET_GLOBAL_VAR(n, var);						\
 								}														\
 							}
@@ -414,10 +348,8 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define SET_VAR_DOUBLE(n,v)	{															\
 								{														\
 									zval *var;											\
-																						\
 									ALLOC_ZVAL(var);									\
-									var->value.dval = (v);								\
-									var->type = IS_DOUBLE;								\
+									ZVAL_DOUBLE(var,v);									\
 									ZEND_SET_GLOBAL_VAR(n, var);						\
 								}														\
 							}
