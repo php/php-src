@@ -1657,10 +1657,10 @@ ora_describe_define(oraCursor * cursor)
 			php_error(E_WARNING, "Out of memory");
 			return -1;
 		}
+		memset(cursor->columns,0,sizeof(oraColumn) * cursor->ncols);
 	}
 
 	for(col = 0; col < cursor->ncols; col++){
-		memset(&cursor->columns[col], 0, sizeof(oraColumn));
 		cursor->columns[col].cbufl = ORANAMELEN;
 		
 		if (odescr(&cursor->cda, (sword)col + 1, &cursor->columns[col].dbsize,
