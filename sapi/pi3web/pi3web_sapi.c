@@ -278,9 +278,6 @@ static char *sapi_pi3web_read_cookies(TSRMLS_D)
 
 static void init_request_info(LPCONTROL_BLOCK lpCB TSRMLS_DC)
 {
-	char *path_end = strrchr(lpCB->lpszFileName, PHP_DIR_SEPARATOR);
-	if ( path_end ) *path_end = PHP_DIR_SEPARATOR;
-
 	SG(server_context) = lpCB;
 	SG(request_info).request_method  = lpCB->lpszMethod;
 	SG(request_info).query_string    = lpCB->lpszQueryString;
