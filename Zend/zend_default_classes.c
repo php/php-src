@@ -333,7 +333,7 @@ ZEND_METHOD(exception, tostring)
  */
 static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __construct, NULL, 0)
-	ZEND_ME(exception, getmessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getmessage, NULL, 0) /* non final for now */
 	ZEND_ME(exception, getcode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getfile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getline, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
