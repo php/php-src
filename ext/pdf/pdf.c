@@ -583,11 +583,12 @@ PHP_FUNCTION(pdf_show_xy) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode)
+/* {{{ proto int pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode)
    Output text formated in a boxed */
 PHP_FUNCTION(pdf_show_boxed) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7;
 	int id, type;
+	int nr;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
@@ -608,9 +609,9 @@ PHP_FUNCTION(pdf_show_boxed) {
 		RETURN_FALSE;
 	}
 
-	PDF_show_boxed(pdf, arg2->value.str.val, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, (float) arg6->value.dval, arg7->value.str.val, NULL);
+	nr = PDF_show_boxed(pdf, arg2->value.str.val, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, (float) arg6->value.dval, arg7->value.str.val, NULL);
 
-	RETURN_TRUE;
+	RETURN_LONG(nr);
 }
 /* }}} */
 
