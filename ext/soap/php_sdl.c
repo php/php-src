@@ -993,7 +993,7 @@ static sdlPtr load_wsdl(char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x09
+#define WSDL_CACHE_VERSION 0x0a
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
@@ -1042,6 +1042,7 @@ static void sdl_deserialize_attribute(sdlAttributePtr attr, encodePtr *encoders,
 	int i;
 
 	attr->name = sdl_deserialize_string(in);
+	attr->namens = sdl_deserialize_string(in);
 	attr->ref = sdl_deserialize_string(in);
 	attr->def = sdl_deserialize_string(in);
 	attr->fixed = sdl_deserialize_string(in);
@@ -1317,7 +1318,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 	sdlPtr sdl;
 	time_t old_t;
 	int  i, num_groups, num_types, num_elements, num_encoders, num_bindings, num_func;
-	sdlFunctionPtr *functions;
+	sdlFunctionPtr *functions = NULL;
 	sdlBindingPtr *bindings;
 	sdlTypePtr *types;
 	encodePtr *encoders;
@@ -1472,6 +1473,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 
 	/* deserialize functions */
 	WSDL_CACHE_GET_INT(num_func, &in);
+<<<<<<< php_sdl.c
 	zend_hash_init(&sdl->functions, num_func, NULL, delete_function, 0);
 	functions = emalloc(num_func*sizeof(sdlFunctionPtr));
 	for (i = 0; i < num_func; i++) {
@@ -1499,42 +1501,73 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 			WSDL_CACHE_SKIP(1, &in);
 			func->bindingAttributes = NULL;
 		}
+=======
+	if (num_func > 0) {
+		zend_hash_init(&sdl->functions, num_func, NULL, delete_function, 0);
+		functions = emalloc(num_func*sizeof(sdlFunctionPtr));
+		for (i = 0; i < num_func; i++) {
+			int binding_num, num_faults;
+			sdlFunctionPtr func = emalloc(sizeof(sdlFunction));
+			sdl_deserialize_key(&sdl->functions, func, &in);
+			func->functionName = sdl_deserialize_string(&in);
+			func->requestName = sdl_deserialize_string(&in);
+			func->responseName = sdl_deserialize_string(&in);
 
-		func->requestParameters = sdl_deserialize_parameters(encoders, types, &in);
-		func->responseParameters = sdl_deserialize_parameters(encoders, types, &in);
-
-		WSDL_CACHE_GET_INT(num_faults, &in);
-		if (num_faults > 0) {
-		  int j;
-
-			func->faults = emalloc(sizeof(HashTable));
-			zend_hash_init(func->faults, num_faults, NULL, delete_fault, 0);
-
-			for (j = 0; j < num_faults; j++) {
-				sdlFaultPtr fault = emalloc(sizeof(sdlFault));
-
-				sdl_deserialize_key(func->faults, fault, &in);
-				fault->name =sdl_deserialize_string(&in);
-				fault->details =sdl_deserialize_parameters(encoders, types, &in);
-				if (*in != 0) {
-					sdlSoapBindingFunctionFaultPtr binding = fault->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunctionFault));
-					memset(binding, 0, sizeof(sdlSoapBindingFunctionFault));
-					WSDL_CACHE_GET_1(binding->use,sdlEncodingUse,&in);
-					if (binding->use == SOAP_ENCODED) {
-						WSDL_CACHE_GET_1(binding->encodingStyle, sdlRpcEncodingStyle, &in);
-					} else {
-						binding->encodingStyle = SOAP_ENCODING_DEFAULT;
-					}
-					binding->ns = sdl_deserialize_string(&in);
-				} else {
-					WSDL_CACHE_SKIP(1, &in);
-					fault->bindingAttributes = NULL;
-				}
+			WSDL_CACHE_GET_INT(binding_num, &in);
+			if (binding_num == 0) {
+				func->binding = NULL;
+			} else {
+				func->binding = bindings[binding_num-1];
 			}
-		} else {
-			func->faults = NULL;
+			if (func->binding && func->binding->bindingType == BINDING_SOAP && *in != 0) {
+				sdlSoapBindingFunctionPtr binding = func->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunction));
+				memset(binding, 0, sizeof(sdlSoapBindingFunction));
+				WSDL_CACHE_GET_1(binding->style,sdlEncodingStyle,&in);
+				binding->soapAction = sdl_deserialize_string(&in);
+				sdl_deserialize_soap_body(&binding->input, encoders, types, &in);
+				sdl_deserialize_soap_body(&binding->output, encoders, types, &in);
+			} else {
+				WSDL_CACHE_SKIP(1, &in);
+				func->bindingAttributes = NULL;
+			}
+>>>>>>> 1.70.2.3
+
+			func->requestParameters = sdl_deserialize_parameters(encoders, types, &in);
+			func->responseParameters = sdl_deserialize_parameters(encoders, types, &in);
+
+			WSDL_CACHE_GET_INT(num_faults, &in);
+			if (num_faults > 0) {
+			  int j;
+
+				func->faults = emalloc(sizeof(HashTable));
+				zend_hash_init(func->faults, num_faults, NULL, delete_fault, 0);
+
+				for (j = 0; j < num_faults; j++) {
+					sdlFaultPtr fault = emalloc(sizeof(sdlFault));
+
+					sdl_deserialize_key(func->faults, fault, &in);
+					fault->name =sdl_deserialize_string(&in);
+					fault->details =sdl_deserialize_parameters(encoders, types, &in);
+					if (*in != 0) {
+						sdlSoapBindingFunctionFaultPtr binding = fault->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunctionFault));
+						memset(binding, 0, sizeof(sdlSoapBindingFunctionFault));
+						WSDL_CACHE_GET_1(binding->use,sdlEncodingUse,&in);
+						if (binding->use == SOAP_ENCODED) {
+							WSDL_CACHE_GET_1(binding->encodingStyle, sdlRpcEncodingStyle, &in);
+						} else {
+							binding->encodingStyle = SOAP_ENCODING_DEFAULT;
+						}
+						binding->ns = sdl_deserialize_string(&in);
+					} else {
+						WSDL_CACHE_SKIP(1, &in);
+						fault->bindingAttributes = NULL;
+					}
+				}
+			} else {
+				func->faults = NULL;
+			}
+			functions[i] = func;
 		}
-		functions[i] = func;
 	}
 
 	/* deserialize requests */
@@ -1551,7 +1584,9 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 		}
 	}
 
-	efree(functions);
+	if (functions) {
+		efree(functions);
+	}
 	efree(bindings);
 	efree(encoders);
 	efree(types);
@@ -1619,6 +1654,7 @@ static void sdl_serialize_attribute(sdlAttributePtr attr, HashTable *tmp_encoder
 	int i;
 
 	sdl_serialize_string(attr->name, out);
+	sdl_serialize_string(attr->namens, out);
 	sdl_serialize_string(attr->ref, out);
 	sdl_serialize_string(attr->def, out);
 	sdl_serialize_string(attr->fixed, out);

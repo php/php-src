@@ -43,6 +43,8 @@
 #define XSD_NS_PREFIX "xsd"
 #define XSI_NAMESPACE "http://www.w3.org/2001/XMLSchema-instance"
 #define XSI_NS_PREFIX "xsi"
+#define XML_NAMESPACE "http://www.w3.org/XML/1998/namespace"
+#define XML_NS_PREFIX "xml"
 
 #define XSD_STRING 101
 #define XSD_STRING_STRING "string"
