@@ -68,7 +68,7 @@ ZEND_GET_MODULE(calendar)
 #endif
 
 /* this order must match the conversion table below */
-enum {
+enum cal_name_type_t {
 	CAL_GREGORIAN = 0,
 	CAL_JULIAN,
 	CAL_JEWISH,
