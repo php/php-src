@@ -311,6 +311,10 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 				}
 				break;
 			}
+		default:
+			{
+				break;
+			}
 	}
 	*newpos = pos;
 	mbseq[mbpos] = '\0';
