@@ -948,6 +948,52 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2)
 }
 
 
+ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2)
+{
+	zval op1_copy, op2_copy;
+	int use_copy1, use_copy2;
+
+	zend_make_printable_zval(op1, &op1_copy, &use_copy1);
+	zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+
+	if (use_copy1) {
+		op1 = &op1_copy;
+	}
+	if (use_copy2) {
+		op2 = &op2_copy;
+	}
+
+	result->value.lval = zend_binary_zval_strcmp(op1, op2);
+	result->type = IS_LONG;
+
+	if (use_copy1) {
+		zval_dtor(op1);
+	}
+	if (use_copy2) {
+		zval_dtor(op2);
+	}
+	return SUCCESS;
+}
+
+ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2)
+{
+	zval op1_copy, op2_copy;
+
+	op1_copy = *op1;
+	zval_copy_ctor(&op1_copy);
+
+	op2_copy = *op2;
+	zval_copy_ctor(&op2_copy);
+
+	convert_to_double(&op1_copy);
+	convert_to_double(&op2_copy);
+
+	result->value.lval = NORMALIZE_BOOL(op2_copy.value.dval-op1_copy.value.dval);
+	result->type = IS_LONG;
+
+	return SUCCESS;
+}
+
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
