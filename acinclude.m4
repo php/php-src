@@ -1186,7 +1186,9 @@ main() {
 	int res = 0;
 	res = res || (snprintf(buf, 2, "marcus") != 6); 
 	res = res || (buf[1] != '\0');
-	res = res || (snprintf(buf, 0, "boerger") != 7);
+	/* Implementations may consider this as an encoding error */
+	snprintf(buf, 0, "boerger");
+	/* However, they MUST ignore the pointer */
 	res = res || (buf[0] != 'm');
 	res = res || (snprintf(NULL, 0, "boerger") != 7);
 	res = res || (snprintf(buf, sizeof(buf), "%f", 0.12345678) != 8);
