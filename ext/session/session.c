@@ -19,11 +19,8 @@
 
 /*
  * TODO:
- * - improve session id creation to avoid collisions
- *   (make use of mersenne twister, other data such as IP, browser etc.)
  * - add complete support for objects (partially implemented)
  * - userland callback functions for ps_module
- * - write documentation
  * - write ps_module utilizing shared memory (mm)
  */
 #if !(WIN32|WINNT)
@@ -40,7 +37,7 @@
 #include "ext/standard/md5.h"
 #include "ext/standard/php3_var.h"
 #include "ext/standard/datetime.h"
-
+#include "ext/lcg/php_lcg.h"
 
 #ifdef ZTS
 int ps_globals_id;
@@ -74,6 +71,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.lifetime", "0", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.serialize_handler", "php", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.extern_referer_chk", "", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 PS_SERIALIZER_FUNCS(php);
@@ -223,7 +221,7 @@ static char *_php_create_id(int *newlen)
 	gettimeofday(&tv, NULL);
 	PHP3_MD5Init(&context);
 	
-	sprintf(buf, "%ld%ld", tv.tv_sec, tv.tv_usec);
+	sprintf(buf, "%ld%ld%0.8f", tv.tv_sec, tv.tv_usec, php_combined_lcg() * 10);
 	PHP3_MD5Update(&context, buf, strlen(buf));
 
 	PHP3_MD5Final(digest, &context);
@@ -339,6 +337,9 @@ static void _php_session_start(PSLS_D)
 
 	lensess = strlen(PS(session_name));
 	
+	/* check whether a symbol with the name of the session exists
+	   in the global symbol table */
+	
 	if(!PS(id) &&
 			zend_hash_find(&EG(symbol_table), PS(session_name),
 				lensess + 1, (void **) &ppid) == SUCCESS) {
@@ -346,6 +347,10 @@ static void _php_session_start(PSLS_D)
 		PS(id) = estrndup((*ppid)->value.str.val, (*ppid)->value.str.len);
 		send_cookie = 0;
 	}
+
+	/* if the previous section was successful, we check whether
+	   a symbol with the name of the session exists in the global
+	   HTTP_COOKIE_VARS array */
 
 	if(!send_cookie &&
 			zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS",
@@ -355,6 +360,10 @@ static void _php_session_start(PSLS_D)
 				lensess + 1, (void **) &ppid) == SUCCESS) {
 		define_sid = 0;
 	}
+
+	/* check the REQUEST_URI symbol for a string of the form
+	   '<session-name>=<session-id>' to allow URLs of the form
+       http://yoursite/<session-name>=<session-id>/script.php */
 
 	if(!PS(id) &&
 			zend_hash_find(&EG(symbol_table), "REQUEST_URI", 
@@ -367,6 +376,22 @@ static void _php_session_start(PSLS_D)
 		p += lensess + 1;
 		if((q = strpbrk(p, "/?\\")))
 			PS(id) = estrndup(p, q - p);
+	}
+
+	/* check whether the current request was referred to by
+	   an external site which invalidates the previously found id */
+	
+	if(PS(id) && 
+			PS(extern_referer_chk)[0] != '\0' &&
+			zend_hash_find(&EG(symbol_table), "HTTP_REFERER",
+				sizeof("HTTP_REFERER"), (void **) &data) == SUCCESS &&
+			(*data)->type == IS_STRING &&
+			(*data)->value.str.len != 0 &&
+			strstr((*data)->value.str.val, PS(extern_referer_chk)) == NULL) {
+		efree(PS(id));
+		PS(id) = NULL;
+		send_cookie = 1;
+		define_sid = 1;
 	}
 	
 	if(!PS(id)) {
@@ -643,6 +668,7 @@ static void php_rinit_session_globals(PSLS_D)
 	PS(session_name) = estrdup(INI_STR("session.name"));
 	PS(gc_probability) = INI_INT("session.gc_probability");
 	PS(gc_maxlifetime) = INI_INT("session.gc_maxlifetime");
+	PS(extern_referer_chk) = estrdup(INI_STR("extern_referer_chk"));
 	PS(id) = NULL;
 	PS(lifetime) = INI_INT("session.lifetime");
 	PS(nr_open_sessions) = 0;
@@ -653,6 +679,7 @@ static void php_rshutdown_session_globals(PSLS_D)
 {
 	if(PS(mod_data))
 		PS(mod)->close(&PS(mod_data));
+	efree(PS(extern_referer_chk));
 	efree(PS(save_path));
 	efree(PS(session_name));
 	if(PS(id)) efree(PS(id));

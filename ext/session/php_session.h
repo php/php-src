@@ -82,6 +82,7 @@ typedef struct {
 	char *save_path;
 	char *session_name;
 	char *id;
+	char *extern_referer_chk;
 	int lifetime;
 	ps_module *mod;
 	void *mod_data;
