@@ -765,6 +765,40 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	return zend_hash_find(EG(class_table), name, name_length + 1, (void **) ce);		
 }
 
+ZEND_API int zend_lookup_ns_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
+{
+	char *ns_name;
+	char *class_name;
+	char *name_end = name + name_length;
+	int   ns_name_length;
+	zend_namespace **ns;
+	
+	/* handle simple class name case */
+	if ((class_name = zend_memnstr(name, "::", sizeof("::")-1, name_end)) == NULL) {
+		return zend_lookup_class(name, name_length, ce TSRMLS_CC);
+	}
+	/* handle ::C case */
+	if (class_name == name) {
+		return zend_lookup_class(name + sizeof("::")-1, name_length - sizeof("::")+1, ce TSRMLS_CC);
+	}
+
+	ns_name_length = class_name - name;
+	class_name += sizeof("::")-1;
+	if (class_name == name_end) {
+		return FAILURE;
+	}
+	ns_name = zend_strndup(name, ns_name_length);
+
+	if (zend_hash_find(&EG(global_namespace_ptr)->class_table, ns_name, ns_name_length+1, (void **)&ns) == SUCCESS &&
+		zend_hash_find(&(*ns)->class_table, class_name, name_end - class_name + 1, (void **)ce) == SUCCESS) {
+		free(ns_name);
+		return SUCCESS;
+	}
+
+	free(ns_name);
+	return FAILURE;
+}
+
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC)
 {
 	zval pv;

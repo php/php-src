@@ -68,6 +68,7 @@ static inline void safe_free_zval_ptr(zval *p)
 	}
 }
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
+ZEND_API int zend_lookup_ns_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 void zend_switch_namespace(zend_namespace *ns TSRMLS_DC);
 
