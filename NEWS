@@ -2,23 +2,24 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
 - Fixed array_rand() on thread-safe platforms such as Windows. (Edin)
-- If zlib.output_compression is enabled and a page is compressed
+- If zlib.output_compression is enabled and a page is compressed 
   a "Vary: Accept-Encoding" header is added. (Stefan)
-- Renamed getallheaders() to apache_request_headers() and kept
-  getallheaders() as an alias to it.  Also added apache_response_headers()
-  which returns the current response headers from Apache.
-- Added missing AddRef() calls in the COM extension. This should
-  fix weird behaviour (in particular with ADODB). (Harald)
+- Renamed getallheaders() to apache_request_headers() and kept getallheaders() 
+  as an alias to it. Also added apache_response_headers() which returns the 
+  current response headers from Apache. (Rasmus)
+- Added missing AddRef() calls in the COM extension. This should fix weird 
+  behaviour (in particular with ADODB). (Harald)
 - Fixed some dummy errors. (dets)
-- Fix segfault in version_compare() (Stig)
-- Added support to getimagesize() for compressed Flash MX files. (Derick)
-- Added ability to capture string offsets in preg_split() results. (David Brown, Andrei)
+- Fix segfault in version_compare(). (Stig)
+- Added compressed Flash MX files support to getimagesize(). (Derick)
+- Added ability to capture string offsets in preg_split() results.
+  (David Brown, Andrei)
 - Fixed a crash bug in token_get_all(). (Andrei)
 - Implemented glob() for Unix/Win32. (Hartmut, Edin, Markus)
 - Added domxml_doc_set_root() to change the root node. (Lukas Schroeder)
-- Fixed a crash bug in stripslashes() when working in sybase mode (Rasmus)
+- Fixed a crash bug in stripslashes() when working in sybase mode. (Rasmus)
 - Added experimental support for Simplified Chinese, Traditional Chinese and
-  Korean encoding in mbstring. (Rui)
+  Korean encodings into mbstring. (Rui)
 - Misc. Win32 mail() enhancements: support 'From:' header (msisolak@yahoo.com),
   Bcc headers and be case-insensitive, enhanced error reporting. (Markus)
 - Improved IMAP extension performance. (adam.kauffman@mindspring.com,
