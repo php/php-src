@@ -126,7 +126,7 @@ PHP_FUNCTION(aspell_suggest)
 	sc = (aspell *)zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!sc)
 	  {
-		php_error(E_WARNING, "%d is not an ASPELL result index", Z_LVAL_PP(scin));
+		php_error(E_WARNING, "%s(): %d is not an ASPELL result index", get_active_function_name(TSRMLS_C), Z_LVAL_PP(scin));
 		RETURN_FALSE;
 	  }
 
@@ -160,7 +160,7 @@ PHP_FUNCTION(aspell_check)
     sc= (aspell *) zend_list_find(Z_LVAL_PP(scin), &type);
     if(!sc)
       {
-        php_error(E_WARNING, "%d is not an ASPELL result index", Z_LVAL_PP(scin));
+        php_error(E_WARNING, "%s(): %d is not an ASPELL result index", get_active_function_name(TSRMLS_C), Z_LVAL_PP(scin));
         RETURN_FALSE;
       }
     if (aspell_check(sc, Z_STRVAL_PP(word))) 
@@ -192,7 +192,7 @@ PHP_FUNCTION(aspell_check_raw)
     sc = (aspell *)zend_list_find(Z_LVAL_PP(scin), &type);
     if(!sc)
       {
-        php_error(E_WARNING, "%d is not an ASPELL result index", Z_LVAL_PP(scin));
+        php_error(E_WARNING, "%s(): %d is not an ASPELL result index", get_active_function_name(TSRMLS_C), Z_LVAL_PP(scin));
         RETURN_FALSE;
       }
 	if (aspell_check_raw(sc, Z_STRVAL_PP(word))) 

@@ -199,7 +199,7 @@ PHP_FUNCTION(ccvs_new) /* cv_new() */
 
   convert_to_string_ex(psess);
   if (!Z_STRVAL_PP(psess)) {
-    php_error(E_WARNING, "Invalid session to ccvs_new()");
+    php_error(E_WARNING, "%s(): Invalid session", get_active_function_name(TSRMLS_C));
     RETURN_FALSE;
   }
 
