@@ -304,11 +304,16 @@ PHP_FUNCTION(ncurses_erase)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_erasechar()
+/* {{{ proto string ncurses_erasechar()
    Return current erase character */
 PHP_FUNCTION(ncurses_erasechar)
 {
-	RETURN_LONG(erasechar());
+	char temp[2];
+
+	temp[0] = erasechar();
+	temp[1] = '\0';
+
+	RETURN_STRINGL (temp, 1, 1);
 }
 /* }}} */
 
@@ -345,15 +350,19 @@ PHP_FUNCTION(ncurses_has_il)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_inch()
+/* {{{ proto string ncurses_inch()
    Get character and attribute at current position */
 PHP_FUNCTION(ncurses_inch)
 {
-	RETURN_LONG(inch());
-}
-/* }}} */
+	char temp[2];
 
-/* {{{ proto bool ncurses_insertln()
+	temp[0] = inch();
+	temp[1] = '\0';
+
+	RETURN_STRINGL (temp, 1, 1);
+}
+
+	/* {{{ proto bool ncurses_insertln()
    Insert a line, move rest of screen down */
 PHP_FUNCTION(ncurses_insertln)
 {
@@ -369,11 +378,16 @@ PHP_FUNCTION(ncurses_isendwin)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_killchar()
+/* {{{ proto string ncurses_killchar()
    Return current line kill character */
 PHP_FUNCTION(ncurses_killchar)
 {
-	RETURN_LONG(killchar());
+	char temp[2];
+
+	temp[0] = killchar();
+	temp[1] = '\0';
+
+	RETURN_STRINGL (temp, 1, 1);
 }
 /* }}} */
 
