@@ -63,6 +63,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API void zend_str_tolower(char *str, unsigned int length);
 ZEND_API int zend_binary_strcmp(zval *s1, zval *s2);
+ZEND_API int zend_binary_strcasecmp(zval *s1, zval *s2);
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
 #endif
