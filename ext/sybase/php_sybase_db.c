@@ -734,7 +734,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 													  but i don't have sybase here to test
 													  991105 thies@thieso.net  */
 				dbconvert(NULL,coltype(offset),dbdata(sybase_ptr->link,offset), src_length,SYBCHAR,res_buf,res_length);
-		
+#if ilia_0		
 				/* get rid of trailing spaces */
 				p = res_buf + res_length;
 				while (p >= res_buf && (*p == ' ' || *p == '\0')) {
@@ -742,8 +742,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 				}
 				*(++p) = 0; /* put a trailing NULL */
 				res_length = p - res_buf;
-				
-		
+#endif		
 				Z_STRLEN_P(result) = res_length;
 				Z_STRVAL_P(result) = res_buf;
 				Z_TYPE_P(result) = IS_STRING;
