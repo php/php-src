@@ -97,12 +97,13 @@ void stripcrlf(char *line)
 	if (line[l]==10 || line[l]==13) line[l]=0;
 }
 
+#define COMPARE_BUF_SIZE	1024
 
 BOOL CompareFiles(const char*f1, const char*f2)
 {
 	FILE *fp1, *fp2;
 	bool retval;
-	char buf1[1024], buf2[1024];
+	char buf1[COMPARE_BUF_SIZE], buf2[COMPARE_BUF_SIZE];
 	int length1, length2;
 
 	if ((fp1=fopen(f1, "r"))==NULL) {
@@ -119,7 +120,6 @@ BOOL CompareFiles(const char*f1, const char*f2)
 		length1 = fread(buf1, 1, sizeof(buf1), fp1);
 		length2 = fread(buf2, 1, sizeof(buf2), fp2);
 
-		buf2[0] = 0;
 		// check for end of file
 		if (feof(fp1)) {
 			if (!feof(fp2)) {
@@ -145,6 +145,39 @@ BOOL CompareFiles(const char*f1, const char*f2)
 
 	return retval;
 }
+
+
+BOOL CompareStringWithFile(const char *filename, const char *str, unsigned int str_length)
+{
+	FILE *fp;
+	bool retval;
+	char buf[COMPARE_BUF_SIZE];
+	unsigned int offset=0, readbytes;
+
+	if ((fp=fopen(filename, "r"))==NULL) {
+		return FALSE;
+	}
+
+	retval = TRUE; // success oriented
+	while (true) {
+		readbytes = fread(buf, 1, sizeof(buf), fp);
+
+		// check for end of file
+		if (feof(fp)) {
+			break;
+		}
+
+		if (offset+readbytes > str_length
+			|| memcmp(buf, str+offset, readbytes)!=NULL) {
+			retval = FALSE;
+			break;
+		}
+	}
+	fclose(fp);
+
+	return retval;
+}
+
 
 BOOL ReadGlobalEnvironment(const char *environment)
 {
@@ -596,7 +629,7 @@ BOOL stress_main(const char *filename,
 
 	// compare the output with the EXPECT section
 	if (matchdata && *matchdata != 0) {
-		ok = CompareFiles(matchdata, fname);
+		ok = CompareStringWithFile(fname, matchdata, strlen(matchdata));
 	}
 
 	DeleteFile(fname);
