@@ -301,7 +301,7 @@ PHP_FUNCTION(curl_init)
 	}
 	memset(curl_handle, 0, sizeof(php_curl));
 
-	zend_llist_init(&curl_handle->to_free, sizeof(char *), curl_free_string, 0);
+	zend_llist_init(&curl_handle->to_free, sizeof(char *), (void(*)(void *))curl_free_string, 0);
 
 	curl_handle->cp = curl_easy_init();
 	if (!curl_handle->cp) {
