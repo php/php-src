@@ -109,8 +109,6 @@ function_entry exif_functions[] = {
 
 #define EXIF_VERSION "1.3 $Id$"
 
-ZEND_DECLARE_MODULE_GLOBALS(exif)
-
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(exif)
@@ -132,6 +130,8 @@ ZEND_BEGIN_MODULE_GLOBALS(exif)
 	char * decode_jis_be;
 	char * decode_jis_le;
 ZEND_END_MODULE_GLOBALS(exif) 
+
+ZEND_DECLARE_MODULE_GLOBALS(exif)
 
 #ifdef ZTS
 #define EXIF_G(v) TSRMG(exif_globals_id, zend_exif_globals *, v)
