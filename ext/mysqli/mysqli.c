@@ -42,7 +42,7 @@ void php_clear_stmt_bind(STMT *stmt) {
 	int i;
 
 
-	if (stmt->stmt)
+	if (stmt->stmt && stmt->stmt->mysql->host)
 		mysql_stmt_close(stmt->stmt);
 
 	if (stmt->var_cnt) {
