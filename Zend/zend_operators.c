@@ -880,7 +880,7 @@ ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2)
 {
 	result->value.str.len = op1->value.str.len + 1;
 	result->value.str.val = (char *) erealloc(op1->value.str.val, result->value.str.len+1);
-    result->value.str.val[result->value.str.len - 1] = op2->value.chval;
+    result->value.str.val[result->value.str.len - 1] = (char) op2->value.lval;
 	result->value.str.val[result->value.str.len] = 0;
 	result->type = IS_STRING;
 	return SUCCESS;

@@ -681,11 +681,11 @@ encaps_list:
 	|	encaps_list T_ENCAPSED_AND_WHITESPACE		{ do_add_string(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list T_CHARACTER 					{ do_add_char(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list T_BAD_CHARACTER				{ do_add_string(&$$, &$1, &$2 CLS_CC); }
-	|	encaps_list '['		{ $2.u.constant.value.chval = '['; do_add_char(&$$, &$1, &$2 CLS_CC); }
-	|	encaps_list ']'		{ $2.u.constant.value.chval = ']'; do_add_char(&$$, &$1, &$2 CLS_CC); }
-	|	encaps_list '{'		{ $2.u.constant.value.chval = '{'; do_add_char(&$$, &$1, &$2 CLS_CC); }
-	|	encaps_list '}'		{ $2.u.constant.value.chval = '}'; do_add_char(&$$, &$1, &$2 CLS_CC); }
-	|	encaps_list T_OBJECT_OPERATOR  { znode tmp;  $2.u.constant.value.chval = '-';  do_add_char(&tmp, &$1, &$2 CLS_CC);  $2.u.constant.value.chval = '>'; do_add_char(&$$, &tmp, &$2 CLS_CC); }
+	|	encaps_list '['		{ $2.u.constant.value.lval = (long) '['; do_add_char(&$$, &$1, &$2 CLS_CC); }
+	|	encaps_list ']'		{ $2.u.constant.value.lval = (long) ']'; do_add_char(&$$, &$1, &$2 CLS_CC); }
+	|	encaps_list '{'		{ $2.u.constant.value.lval = (long) '{'; do_add_char(&$$, &$1, &$2 CLS_CC); }
+	|	encaps_list '}'		{ $2.u.constant.value.lval = (long) '}'; do_add_char(&$$, &$1, &$2 CLS_CC); }
+	|	encaps_list T_OBJECT_OPERATOR  { znode tmp;  $2.u.constant.value.lval = (long) '-';  do_add_char(&tmp, &$1, &$2 CLS_CC);  $2.u.constant.value.lval = (long) '>'; do_add_char(&$$, &tmp, &$2 CLS_CC); }
 	|	/* empty */			{ do_init_string(&$$ CLS_CC); }
 
 ;

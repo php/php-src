@@ -1556,7 +1556,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"$"[^a-zA-Z_\x7f-\xff{] {
-	zendlval->value.chval = yytext[0];
+	zendlval->value.lval = (long) yytext[0];
 	if (yyleng == 2) {
 		yyless(1);
 		/*unput(yytext[1]);
@@ -1568,12 +1568,12 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ENCAPSED_TOKENS} {
-	zendlval->value.chval = yytext[0];
+	zendlval->value.lval = (long) yytext[0];
 	return yytext[0];
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	zendlval->value.chval = yytext[0];
+	zendlval->value.lval = (long) yytext[0];
 	yy_push_state(ST_IN_SCRIPTING);
 	/*unput('$');*/
 	yyless(1);
@@ -1582,54 +1582,54 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <ST_SINGLE_QUOTE>"\\'" {
-	zendlval->value.chval='\'';
+	zendlval->value.lval = (long) '\'';
 	return T_CHARACTER;
 }
 
 <ST_SINGLE_QUOTE>"\\\\" {
-	zendlval->value.chval='\\';
+	zendlval->value.lval = (long)'\\';
 	return T_CHARACTER;
 }
 
 <ST_DOUBLE_QUOTES>"\\\"" {
-	zendlval->value.chval='"';
+	zendlval->value.lval = (long) '"';
 	return T_CHARACTER;
 }
 
 <ST_BACKQUOTE>"\\`" {
-	zendlval->value.chval='`';
+	zendlval->value.lval = (long) '`';
 	return T_CHARACTER;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\"[0-7]{1,3} {
-	zendlval->value.chval = (char) strtol (yytext+1, NULL, 8);
+	zendlval->value.lval = strtol(yytext+1, NULL, 8);
 	return T_CHARACTER;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\x"[0-9A-Fa-f]{1,2} {
-	zendlval->value.chval = (char) strtol (yytext+2, NULL, 16);
+	zendlval->value.lval = strtol (yytext+2, NULL, 16);
 	return T_CHARACTER;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\". {
 	switch (yytext[1]) {
 		case 'n':
-			zendlval->value.chval='\n';
+			zendlval->value.lval = (long) '\n';
 			break;
 		case 't':
-			zendlval->value.chval='\t';
+			zendlval->value.lval = (long) '\t';
 			break;
 		case 'r':
-			zendlval->value.chval='\r';
+			zendlval->value.lval = (long) '\r';
 			break;
 		case '\\':
-			zendlval->value.chval='\\';
+			zendlval->value.lval = (long) '\\';
 			break;
 		case '$':
-			zendlval->value.chval=yytext[1];
+			zendlval->value.lval = (long) yytext[1];
 			break;
 		case '{':
-			zendlval->value.chval=yytext[1];
+			zendlval->value.lval = (long) yytext[1];
 			break;
 		default:
 			zendlval->value.str.val = estrndup(yytext,yyleng);

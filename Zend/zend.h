@@ -159,7 +159,6 @@ typedef union _zvalue_value {
 		char *val;
 		int len;
 	} str;
-	char chval;					/* char value */
 	HashTable *ht;				/* hash table value */
 	struct {
 		zend_class_entry *ce;
