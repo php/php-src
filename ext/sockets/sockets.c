@@ -111,6 +111,9 @@ static unsigned char second_fifth_and_sixth_args_force_ref[] =
 static unsigned char third_through_seventh_args_force_ref[] =
 {7, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
 
+/* Global buffer for php_strerror() */
+static char php_strerror_buf[10000];
+
 /* {{{ sockets_functions[]
  */
 function_entry sockets_functions[] = {
@@ -343,16 +346,25 @@ static char *php_strerror(int error) {
 		buf = hstrerror(error);
 #else
 		{
-			static char buf[100];
-			sprintf(buf, "Host lookup error %d", error);
+			sprintf(php_strerror_buf, "Host lookup error %d", error);
+			buf = php_strerror_buf;
 		}
 #endif
 	} else {
 		buf = strerror(error);
 	}
-#else
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
-				  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	(LPTSTR)&buf, 0, NULL);
+#else 
+	{
+		LPTSTR tmp = NULL;
+
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
+				  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &tmp, 0, NULL);
+
+		strlcpy(php_strerror_buf, (char *) tmp, 10000);
+		LocalFree(tmp);
+		
+		buf = php_strerror_buf;
+	}
 #endif
 	
 	return (buf ? (char *) buf : "");
@@ -368,7 +380,11 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 	} else {
 		if (! (host_entry = gethostbyname(string))) {
 			/* Note: < -10000 indicates a host lookup error */
+#ifdef PHP_WIN32
+			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());
+#else
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
+#endif
 			return 0;
 		}
 		if (host_entry->h_addrtype != AF_INET) {
@@ -754,8 +770,6 @@ PHP_FUNCTION(socket_read)
 	retval = (*read_function)(php_sock->bsd_socket, tmpbuf, length);
 #else
 	retval = recv(php_sock->bsd_socket, tmpbuf, length, 0);
-	/* i don't know why, but it _does_ fix a memleak */
-	SleepEx(1, TRUE);
 #endif
 
 	if (retval == -1) {
