@@ -1,3 +1,14 @@
+2005-01-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug31098.phpt
+      tests/bug31098.phpt:
+      Fixed bug #31098 (isset false positive)
+
 2005-01-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_5_0)
