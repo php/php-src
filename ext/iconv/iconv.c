@@ -115,7 +115,8 @@ typedef enum _php_iconv_err_t {
 	PHP_ICONV_ERR_ILLEGAL_SEQ       = 4,
 	PHP_ICONV_ERR_ILLEGAL_CHAR      = 5,
 	PHP_ICONV_ERR_UNKNOWN           = 6,
-	PHP_ICONV_ERR_MALFORMED         = 7
+	PHP_ICONV_ERR_MALFORMED         = 7,
+	PHP_ICONV_ERR_ALLOC             = 8
 } php_iconv_err_t;
 /* }}} */
 
@@ -146,6 +147,9 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval, const char *hays
 static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fname, size_t fname_nbytes, const char *fval, size_t fval_nbytes, unsigned int max_line_len, const char *lfchars, php_iconv_enc_scheme_t enc_scheme, const char *out_charset, const char *enc);
 
 static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *str, size_t str_nbytes, const char *enc, const char **next_pos, int mode);
+
+static php_iconv_err_t php_iconv_stream_filter_register_factory();
+static php_iconv_err_t php_iconv_stream_filter_unregister_factory();
 /* }}} */
 
 /* {{{ static globals */
@@ -203,6 +207,10 @@ PHP_MINIT_FUNCTION(miconv)
 	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_STRICT", PHP_ICONV_MIME_DECODE_STRICT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_CONTINUE_ON_ERROR", PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
+	if (php_iconv_stream_filter_register_factory() != PHP_ICONV_ERR_SUCCESS) {
+		return FAILURE;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -210,6 +218,7 @@ PHP_MINIT_FUNCTION(miconv)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(miconv)
 {
+	php_iconv_stream_filter_unregister_factory();
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -2212,6 +2221,328 @@ PHP_FUNCTION(iconv_get_encoding)
 }
 /* }}} */
 
+/* {{{ iconv stream filter */
+typedef struct _php_iconv_stream_filter {
+	iconv_t cd;
+	int persistent;
+	char *to_charset;
+	size_t to_charset_len;
+	char *from_charset;
+	size_t from_charset_len;
+} php_iconv_stream_filter;
+
+/* {{{ php_iconv_stream_filter_dtor */
+static void php_iconv_stream_filter_dtor(php_iconv_stream_filter *self)
+{
+	pefree(self->to_charset, self->persistent);
+	pefree(self->from_charset, self->persistent);
+}
+/* }}} */
+
+/* {{{ php_iconv_stream_filter_ctor() */
+static php_iconv_err_t php_iconv_stream_filter_ctor(php_iconv_stream_filter *self,
+		const char *to_charset, size_t to_charset_len,
+		const char *from_charset, size_t from_charset_len, int persistent)
+{
+	if (NULL == (self->to_charset = pemalloc(to_charset_len + 1, persistent))) {
+		return PHP_ICONV_ERR_ALLOC;
+	}
+	self->to_charset_len = to_charset_len;
+	if (NULL == (self->from_charset = pemalloc(from_charset_len + 1, persistent))) {
+		pefree(self->to_charset, persistent);
+		return PHP_ICONV_ERR_ALLOC;
+	}
+	self->from_charset_len = from_charset_len;
+
+	memcpy(self->to_charset, to_charset, to_charset_len);
+	self->to_charset[to_charset_len] = '\0';
+	memcpy(self->from_charset, from_charset, from_charset_len);
+	self->from_charset[from_charset_len] = '\0';
+
+	if ((iconv_t)-1 == (self->cd = iconv_open(self->to_charset, self->from_charset))) {
+		pefree(self->from_charset, persistent);
+		pefree(self->to_charset, persistent);
+		return PHP_ICONV_ERR_UNKNOWN;
+	}
+	self->persistent = persistent;
+
+	return PHP_ICONV_ERR_SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_iconv_stream_filter_do_filter */
+static php_stream_filter_status_t php_iconv_stream_filter_do_filter(
+		php_stream *stream, php_stream_filter *filter,
+		php_stream_bucket_brigade *buckets_in,
+		php_stream_bucket_brigade *buckets_out,
+		size_t *bytes_consumed, int flags TSRMLS_DC)
+{
+	php_stream_bucket *bucket = NULL, *new_bucket;
+	size_t consumed = 0;
+	php_iconv_stream_filter *self = (php_iconv_stream_filter *)filter->abstract;
+	char *out_buf = NULL;
+	size_t out_buf_size;
+	char *pd;
+	size_t ocnt, prev_ocnt;
+
+	if (flags != PSFS_FLAG_NORMAL) {
+		/* flush operation */
+
+		out_buf_size = 64;
+		out_buf = pemalloc(out_buf_size, self->persistent);
+		ocnt = prev_ocnt = out_buf_size;
+		pd = out_buf;
+
+		/* trying hard to reduce the number of buckets to hand to the
+		 * next filter */ 
+
+		for (;;) {
+			if (iconv(self->cd, NULL, NULL, &pd, &ocnt) == (size_t)-1) {
+#if ICONV_SUPPORTS_ERRNO
+				switch (errno) {
+					case EILSEQ:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): invalid multibyte sequence", self->from_charset, self->to_charset);
+						goto out_failure;
+
+					case EINVAL:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unexpected octet values", self->from_charset, self->to_charset);
+						goto out_failure;
+
+					case E2BIG:
+						break;
+
+					default:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unknown error", self->from_charset, self->to_charset);
+						goto out_failure;
+				}
+#else
+				if (ocnt == prev_ocnt) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unknown error", self->from_charset, self->to_charset);
+					goto out_failure;
+				}
+#endif
+				{
+					char *new_out_buf;
+					size_t new_out_buf_size;
+
+					new_out_buf_size = out_buf_size << 1;
+
+					if (new_out_buf_size < out_buf_size) {
+						/* whoa! no bigger buckets are sold anywhere... */
+						new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, self->persistent TSRMLS_CC);
+
+						php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+
+						out_buf_size = bucket->buflen;
+						out_buf = pemalloc(out_buf_size, self->persistent);
+						ocnt = out_buf_size;
+						pd = out_buf;
+					} else {
+						new_out_buf = perealloc(out_buf, new_out_buf_size, self->persistent);
+						pd = new_out_buf + (pd - out_buf);
+						ocnt += (new_out_buf_size - out_buf_size);
+						out_buf = new_out_buf;
+						out_buf_size = new_out_buf_size;
+					}
+				}
+			} else {
+				break;
+			}
+
+			prev_ocnt = ocnt;
+		}
+		/* give output bucket to next in chain */
+		if (out_buf_size - ocnt > 0) {
+			new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, self->persistent TSRMLS_CC);
+			php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+		} else {
+			pefree(out_buf, self->persistent);
+		}
+	} else {
+		while (buckets_in->head != NULL) {
+			const char *ps;
+			size_t icnt, prev_icnt;
+
+			bucket = buckets_in->head;
+
+			php_stream_bucket_unlink(bucket TSRMLS_CC);
+			icnt = prev_icnt = bucket->buflen;
+			ps = bucket->buf;
+
+			out_buf_size = bucket->buflen;
+			out_buf = pemalloc(out_buf_size, self->persistent);
+			ocnt = out_buf_size;
+			pd = out_buf;
+
+			/* trying hard to reduce the number of buckets to hand to the
+			 * next filter */ 
+
+			while (icnt > 0) {
+				if (iconv(self->cd, &ps, &icnt, &pd, &ocnt) == (size_t)-1) {
+#if ICONV_SUPPORTS_ERRNO
+					switch (errno) {
+						case EILSEQ:
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): invalid multibyte sequence", self->from_charset, self->to_charset);
+							goto out_failure;
+
+						case EINVAL:
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unexpected octet values", self->from_charset, self->to_charset);
+							goto out_failure;
+
+						case E2BIG:
+							break;
+
+						default:
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unknown error", self->from_charset, self->to_charset);
+							goto out_failure;
+					}
+#else
+					if (prev_icnt == icnt) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unknown error", self->from_charset, self->to_charset);
+						goto out_failure;
+					}
+#endif
+					{
+						char *new_out_buf;
+						size_t new_out_buf_size;
+
+						new_out_buf_size = out_buf_size << 1;
+
+						if (new_out_buf_size < out_buf_size) {
+							/* whoa! no bigger buckets are sold anywhere... */
+							new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, self->persistent TSRMLS_CC);
+
+							php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+
+							out_buf_size = bucket->buflen;
+							out_buf = pemalloc(out_buf_size, self->persistent);
+							ocnt = out_buf_size;
+							pd = out_buf;
+						} else {
+							new_out_buf = perealloc(out_buf, new_out_buf_size, self->persistent);
+							pd = new_out_buf + (pd - out_buf);
+							ocnt += (new_out_buf_size - out_buf_size);
+							out_buf = new_out_buf;
+							out_buf_size = new_out_buf_size;
+						}
+					}
+				}
+				prev_icnt = icnt;
+			}
+
+			/* update consumed by the number of bytes just used */
+			consumed = bucket->buflen - icnt;
+
+			/* give output bucket to next in chain */
+			if (out_buf_size - ocnt > 0) {
+				new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, self->persistent TSRMLS_CC);
+				php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+			} else {
+				pefree(out_buf, self->persistent);
+			}
+
+			php_stream_bucket_delref(bucket TSRMLS_CC);
+		}
+	}
+
+	if (bytes_consumed) {
+		*bytes_consumed = consumed;
+	}
+	
+	return PSFS_PASS_ON;
+
+out_failure:
+	if (out_buf != NULL) {
+		pefree(out_buf, self->persistent);
+	}
+	if (bucket != NULL) {
+		php_stream_bucket_delref(bucket TSRMLS_CC);
+	}
+	return PSFS_ERR_FATAL;
+}
+/* }}} */
+
+/* {{{ php_iconv_stream_filter_cleanup */
+static void php_iconv_stream_filter_cleanup(php_stream_filter *filter TSRMLS_DC)
+{
+	php_iconv_stream_filter_dtor((php_iconv_stream_filter *)filter->abstract);
+	pefree(filter->abstract, ((php_iconv_stream_filter *)filter->abstract)->persistent);
+}
+/* }}} */
+
+static php_stream_filter_ops php_iconv_stream_filter_ops = {
+	php_iconv_stream_filter_do_filter,
+	php_iconv_stream_filter_cleanup,
+	"convert.iconv.*"
+};
+
+/* {{{ php_iconv_stream_filter_create */
+static php_stream_filter *php_iconv_stream_filter_factory_create(const char *name, zval *params, int persistent TSRMLS_DC)
+{
+	php_stream_filter *retval = NULL;
+	php_iconv_stream_filter *inst;
+	char *from_charset = NULL, *to_charset = NULL;
+	size_t from_charset_len, to_charset_len;
+
+	if ((from_charset = strchr(name, '.')) == NULL) {
+		return NULL;
+	}
+	++from_charset;
+	if ((from_charset = strchr(from_charset, '.')) == NULL) {
+		return NULL;
+	}
+	++from_charset;
+	if ((to_charset = strchr(from_charset, '/')) == NULL) {
+		return NULL;
+	}
+	from_charset_len = to_charset - from_charset;
+	++to_charset;
+	to_charset_len = strlen(to_charset);
+
+	if (NULL == (inst = pemalloc(sizeof(php_iconv_stream_filter), persistent))) {
+		return NULL;
+	}
+
+	if (php_iconv_stream_filter_ctor(inst, to_charset, to_charset_len, from_charset, from_charset_len, persistent) != PHP_ICONV_ERR_SUCCESS) {
+		pefree(inst, persistent);
+		return NULL;
+	}
+
+	if (NULL == (retval = php_stream_filter_alloc(&php_iconv_stream_filter_ops, inst, persistent))) {
+		php_iconv_stream_filter_dtor(inst);
+		pefree(inst, persistent);
+	}
+
+	return retval;	
+}
+/* }}} */
+
+/* {{{ php_iconv_stream_register_factory */
+static php_iconv_err_t php_iconv_stream_filter_register_factory()
+{
+	static php_stream_filter_factory filter_factory = {
+		php_iconv_stream_filter_factory_create
+	};
+
+	if (FAILURE == php_stream_filter_register_factory(
+				php_iconv_stream_filter_ops.label,
+				&filter_factory TSRMLS_CC)) {
+		return PHP_ICONV_ERR_UNKNOWN;
+	}
+	return PHP_ICONV_ERR_SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_iconv_stream_unregister_factory */
+static php_iconv_err_t php_iconv_stream_filter_unregister_factory()
+{
+	if (FAILURE == php_stream_filter_unregister_factory(
+				php_iconv_stream_filter_ops.label TSRMLS_CC)) {
+		return PHP_ICONV_ERR_UNKNOWN;
+	}
+	return PHP_ICONV_ERR_SUCCESS;
+}
+/* }}} */
 #endif
 
 /*
