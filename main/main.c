@@ -1505,11 +1505,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			VCWD_CHDIR_FILE(primary_file->filename);
 		}
 
-		if(primary_file->filename) {			
+		if (primary_file->filename) {			
 			char realfile[MAXPATHLEN];
 			int realfile_len;
 			int dummy = 1;
-			if(VCWD_REALPATH(primary_file->filename, realfile)) {
+			if (VCWD_REALPATH(primary_file->filename, realfile)) {
 				realfile_len =  strlen(realfile);
 				zend_hash_add(&EG(included_files), realfile, realfile_len+1, (void *)&dummy, sizeof(int), NULL);
 				primary_file->opened_path = emalloc(realfile_len+1);
@@ -1527,6 +1527,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		} else {
 			prepend_file_p = NULL;
 		}
+
 		if (PG(auto_append_file) && PG(auto_append_file)[0]) {
 			append_file.filename = PG(auto_append_file);
 			append_file.opened_path = NULL;
