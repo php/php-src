@@ -289,23 +289,27 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_SH", LOCK_SH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_EX", LOCK_EX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_UN", LOCK_UN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCK_NB", LOCK_NB, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
 
 /* }}} */
-/* {{{ proto bool flock(int fp, int operation)
+/* {{{ proto bool flock(int fp, int operation [, int wouldblock])
    Portable file locking */
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
 PHP_FUNCTION(flock)
 {
-    pval **arg1, **arg2;
-    int type, fd, act;
+    pval **arg1, **arg2, **arg3;
+    int type, fd, act, ret, arg_count = ARG_COUNT(ht);
 	void *what;
 	
-    if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+    if (arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 	
@@ -320,19 +324,22 @@ PHP_FUNCTION(flock)
 	
     convert_to_long_ex(arg2);
 
-    act = (*arg2)->value.lval & 3;
-    if (act < 1 || act > 3) {
-		php_error(E_WARNING, "illegal value for second argument");
+    act = (*arg2)->value.lval & (LOCK_SH | LOCK_EX | LOCK_NB | LOCK_UN);
+    if (act < 1) {
+		php_error(E_WARNING, "Illegal operation argument");
 		RETURN_FALSE;
     }
 
     /* flock_values contains all possible actions
        if (arg2 & 4) we won't block on the lock */
-    act = flock_values[act - 1] | ((*arg2)->value.lval & 4 ? LOCK_NB : 0);
-    if (flock(fd, act) == -1) {
+    act = flock_values[act - 1] | ((*arg2)->value.lval & LOCK_NB ? LOCK_NB : 0);
+    if ((ret=flock(fd, act)) == -1) {
         RETURN_FALSE;
     }
-
+	if(ret==-1 && errno==EWOULDBLOCK && arg_count==3) {
+		(*arg3)->type = IS_LONG;
+		(*arg3)->value.lval=1;
+	}
     RETURN_TRUE;
 }
 
