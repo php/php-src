@@ -27,6 +27,9 @@
 #include "php_xsl.h"
 #include "ext/libxml/php_libxml.h"
 
+static void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
+static void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
+
 /*
 * class xsl_xsltprocessor 
 *
@@ -43,6 +46,7 @@ zend_function_entry php_xsl_xsltprocessor_class_functions[] = {
 	PHP_FALIAS(getParameter, xsl_xsltprocessor_get_parameter, NULL)
 	PHP_FALIAS(removeParameter, xsl_xsltprocessor_remove_parameter, NULL)
 	PHP_FALIAS(hasExsltSupport, xsl_xsltprocessor_has_exslt_support, NULL)
+	PHP_FALIAS(registerPhpFunctions, xsl_xsltprocessor_register_php_functions, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -71,6 +75,14 @@ static char *php_xsl_xslt_string_to_xpathexpr(const char *str TSRMLS_DC)
 	}
 	return (char *) value;
 }
+
+static void php_xsl_unregister_php_functions() {
+	xsltUnregisterExtModuleFunction ((const xmlChar *) "functionString",
+				   (const xmlChar *) "http://php.net/xsl");
+	xsltUnregisterExtModuleFunction ((const xmlChar *) "function",
+				   (const xmlChar *) "http://php.net/xsl");
+}
+
 
 /* {{{ php_xsl_xslt_make_params()
    Translates a PHP array to a libxslt parameters array */
@@ -118,6 +130,162 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 	return params;
 }
 /* }}} */
+
+
+static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type)
+{
+	xsltTransformContextPtr tctxt;
+	zval **args;
+	zval *retval;
+	int result, i, ret;
+	zend_fcall_info fci;
+	zval handler;
+	xmlXPathObjectPtr obj;
+	char *str;
+
+	TSRMLS_FETCH();
+
+	tctxt = xsltXPathGetTransformContext(ctxt);
+	if (tctxt == NULL) {
+		xsltGenericError(xsltGenericErrorContext,
+		"xsltExtFunctionTest: failed to get the transformation context\n");
+		return;
+	}
+
+	fci.param_count = nargs - 1;
+	fci.params = safe_emalloc(fci.param_count, sizeof(zval**), 0);
+
+	args = safe_emalloc(nargs - 1, sizeof(zval *), 0);
+	/* Reverse order to pop values off ctxt stack */
+	for (i = nargs - 2; i >= 0; i--) {
+		obj = valuePop(ctxt);
+		MAKE_STD_ZVAL(args[i]);
+		switch (obj->type) {
+			case XPATH_STRING:
+				ZVAL_STRING(args[i],  obj->stringval, 1);
+				break;
+			case XPATH_BOOLEAN:
+				ZVAL_BOOL(args[i],  obj->boolval);
+				break;
+			case XPATH_NUMBER:
+				ZVAL_DOUBLE(args[i], obj->floatval);
+				break;
+			case XPATH_NODESET:
+				if (type == 1) {
+					str = xmlXPathCastToString(obj);
+					ZVAL_STRING(args[i], str, 1);
+					xmlFree(str);
+				} else if (type == 2) {
+					int j;
+					dom_object *intern;
+					array_init(args[i]);
+					if (obj->nodesetval->nodeNr > 0) {
+						intern = (dom_object *) php_dom_object_get_data((void *) obj->nodesetval->nodeTab[0]->doc);
+						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
+							xmlNodePtr node = obj->nodesetval->nodeTab[j];
+							zval *child;
+							
+							MAKE_STD_ZVAL(child);
+							/* not sure, if we need this... it's copied from xpath.c */
+							if (node->type == XML_NAMESPACE_DECL) {
+								xmlNsPtr curns;
+								xmlNodePtr nsparent;
+								
+								nsparent = node->_private;
+								curns = xmlNewNs(NULL, node->name, NULL);
+								if (node->children) {
+									curns->prefix = xmlStrdup((char *) node->children);
+								}
+								if (node->children) {
+									node = xmlNewDocNode(node->doc, NULL, (char *) node->children, node->name);
+								} else {
+									node = xmlNewDocNode(node->doc, NULL, "xmlns", node->name);
+								}
+								node->type = XML_NAMESPACE_DECL;
+								node->parent = nsparent;
+								node->ns = curns;
+							}
+							child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
+							add_next_index_zval(args[i], child);
+						}
+					}
+				}
+				break;
+			default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php:function object type %d is not supported yet", obj->type);
+			ZVAL_STRING(args[i], "", 0);
+		}
+		xmlXPathFreeObject(obj);
+		fci.params[i] = &args[i];
+	}
+	
+	fci.size = sizeof(fci);
+	fci.function_table = EG(function_table);
+	
+	obj = valuePop(ctxt);
+	if (obj->stringval == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Handler name must be a string");
+		xmlXPathFreeObject(obj);
+		for (i = 0; i < nargs - 1; i++) {
+			zval_ptr_dtor(&args[i]);
+		}
+		efree(args);
+		efree(fci.params);
+		return; 
+	}
+	INIT_PZVAL(&handler);
+	ZVAL_STRING(&handler, obj->stringval, 1);
+	xmlXPathFreeObject(obj);
+	
+	fci.function_name = &handler;
+	fci.symbol_table = NULL;
+	fci.object_pp = NULL;
+	fci.retval_ptr_ptr = &retval;
+	fci.no_separation = 0;
+	/*fci.function_handler_cache = &function_ptr;*/
+	
+	result = zend_call_function(&fci, NULL TSRMLS_CC);
+	if (result == FAILURE) {
+		if (Z_TYPE(handler) == IS_STRING) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
+		} 
+	} else {
+		if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry TSRMLS_CC)) {
+			xmlNode *nodep;
+			dom_object *obj;
+			obj = (dom_object *)zend_object_store_get_object(retval TSRMLS_CC);
+			nodep = dom_object_get_node(obj);
+			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
+		} else if (retval->type == IS_BOOL) {
+			valuePush(ctxt, xmlXPathNewBoolean(retval->value.lval));
+		} else if (retval->type == IS_OBJECT) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "A PHP Object can not be converted to a XPath-string");
+			valuePush(ctxt, xmlXPathNewString(""));
+		} else {
+			convert_to_string_ex(&retval);
+			valuePush(ctxt, xmlXPathNewString( Z_STRVAL_P(retval)));
+		}
+		zval_ptr_dtor(&retval);
+	}
+	zval_dtor(&handler);
+	for (i = 0; i < nargs - 1; i++) {
+		zval_ptr_dtor(&args[i]);
+	}
+	efree(args);
+	efree(fci.params);
+}
+
+static void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
+{
+	xsl_ext_function_php(ctxt, nargs, 1);
+}
+
+static void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
+{
+	xsl_ext_function_php(ctxt, nargs, 2);
+}
+
+
 /* {{{ proto xsl_xsltdocucument xsl_xsltprocessor_import_stylesheet(node index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since: 
@@ -228,6 +396,11 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 		doc = xmlCopyDoc(doc, 1);
 	}
 	newdocp = xsltApplyStylesheet(sheetp, doc, (const char**) params);
+	
+	if (intern->registerPhpFunctions == 1) {
+		php_xsl_unregister_php_functions();
+	}
+	
 	if (intern->hasKeys == 1) {
 		xmlFreeDoc(doc);
 	}
@@ -282,7 +455,11 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	}
 
 	newdocp = xsltApplyStylesheet(sheetp, doc, (const char**)params);
-
+	
+	if (intern->registerPhpFunctions == 1) {
+		php_xsl_unregister_php_functions();
+	}
+	
 	if (intern->hasKeys == 1) {
 		xmlFreeDoc(doc);
 	}
@@ -339,7 +516,11 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	}
 
 	newdocp = xsltApplyStylesheet(sheetp, doc, (const char**)params);
-
+	
+	if (intern->registerPhpFunctions == 1) {
+		php_xsl_unregister_php_functions();
+	}
+	
 	if (intern->hasKeys == 1) {
 		xmlFreeDoc(doc);
 	}
@@ -441,6 +622,28 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 	}
 }
 /* }}} end xsl_xsltprocessor_remove_parameter */
+
+/* {{{ proto xsl_xsltprocessor_register_php_functions();
+*/
+PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
+{
+	zval *id;
+	xsl_object *intern;
+
+	DOM_GET_THIS(id);
+	
+	
+	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+	intern->registerPhpFunctions = 1;
+	
+	xsltRegisterExtModuleFunction ((const xmlChar *) "functionString",
+				   (const xmlChar *) "http://php.net/xsl",
+				   xsl_ext_function_string_php);
+	xsltRegisterExtModuleFunction ((const xmlChar *) "function",
+				   (const xmlChar *) "http://php.net/xsl",
+				   xsl_ext_function_object_php);
+}
+/* }}} end xsl_xsltprocessor_register_php_functions(); */
 
 /* {{{ proto xsl_xsltprocessor_has_exslt_support();
 */
