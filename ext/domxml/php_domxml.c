@@ -1636,13 +1636,14 @@ PHP_MINIT_FUNCTION(domxml)
    Unity function for testing */
 PHP_FUNCTION(domxml_test)
 {
-	zval *id;
+	zval **id;
 
-	if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE)
+	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &id) == FAILURE)) {
 		WRONG_PARAM_COUNT;
+	}
 
-	convert_to_long(id);
-	RETURN_LONG(Z_LVAL_P(id));
+	convert_to_long_ex(id);
+	RETURN_LONG(Z_LVAL_PP(id));
 }
 /* }}} */
 
@@ -2854,18 +2855,18 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
 /* since this function is not implemented, outcomment it for the time beeing
 PHP_FUNCTION(domxml_elem_set_attribute_node)
 {
-	zval *id, *arg1, *rv = NULL;
+	zval *id, **arg1, *rv = NULL;
 	xmlNode *nodep;
 	xmlAttr *attrp, *newattrp;
 	int ret;
 
-	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
-		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
-		attrp = php_dom_get_object(arg1, le_domxmlattrp, 0 TSRMLS_CC);
-	} else {
+	if ((ZEND_NUM_ARGS() == 1) && (zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
+	id = getThis();
+	nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
+	attrp = php_dom_get_object(*arg1, le_domxmlattrp, 0 TSRMLS_CC);
 
 	FIXME: The following line doesn't work 
 	newattrp = xmlCopyProp(nodep, attrp);
