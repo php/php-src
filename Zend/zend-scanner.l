@@ -325,7 +325,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 END_EXTERN_C()
 
 
-ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle CLS_DC)
+ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type CLS_DC)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
@@ -347,7 +347,12 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle CLS_DC)
 	retval = op_array; /* success oriented */
 
 	if (open_file_for_scanning(file_handle CLS_CC)==FAILURE) {
-		zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		if (type==ZEND_REQUIRE) {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+			zend_bailout();		
+		} else {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		}
 		compilation_successful=0;
 	} else {
 		init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE CLS_CC);
@@ -382,7 +387,6 @@ zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC)
 	zend_file_handle file_handle;
 	zval tmp;
 	zend_op_array *retval;
-	int error_reporting=0;
 
 	if (filename->type != IS_STRING) {
 		tmp = *filename;
@@ -396,23 +400,8 @@ zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC)
 	file_handle.opened_path = NULL;
 
 
-	if (type==ZEND_REQUIRE) {
-		/* We don't want to hear about inclusion failures;  If we fail,
-		 * we'll generate a require failure
-		 */
-		error_reporting = EG(error_reporting);
-		EG(error_reporting) = 0;
-	}
-	retval = zend_compile_file(&file_handle CLS_CC);
+	retval = zend_compile_file(&file_handle, type CLS_CC);
 	zend_destroy_file_handle(&file_handle CLS_CC);
-
-	if (type==ZEND_REQUIRE) {
-		EG(error_reporting) = error_reporting;
-		if (!retval) {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, filename->value.str.val);
-			zend_bailout();		
-		}
-	}
 
 	if (filename==&tmp) {
 		zval_dtor(&tmp);
