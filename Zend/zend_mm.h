@@ -28,16 +28,22 @@
 
 /* mm block type */
 typedef struct _zend_mm_block {
-	size_t size;
-	unsigned int type;
+	unsigned int size : 31;
+	unsigned int type : 1;
 	size_t prev_size;
-	struct _zend_mm_block *prev_free_block;
-	struct _zend_mm_block *next_free_block;
 } zend_mm_block;
+
+typedef struct _zend_mm_free_block {
+	unsigned int size : 31;
+	unsigned int type : 1;
+	size_t prev_size;
+	struct _zend_mm_free_block *prev_free_block;
+	struct _zend_mm_free_block *next_free_block;
+} zend_mm_free_block;
 
 typedef struct _zend_mm_heap {
 	/* Head of free list */
-	zend_mm_block *free_list;
+	zend_mm_free_block *free_list;
 	size_t block_size;
 } zend_mm_heap;
 
