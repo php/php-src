@@ -101,8 +101,10 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_createmailbox,	NULL)
 	PHP_FE(imap_renamemailbox,	NULL)
 	PHP_FE(imap_deletemailbox,	NULL)
+#ifdef HAVE_IMAP2000
 	PHP_FE(imap_get_quota,		NULL)
 	PHP_FE(imap_set_quota,		NULL)
+#endif
 	PHP_FALIAS(imap_listmailbox, imap_list,	NULL)
 	PHP_FALIAS(imap_getmailboxes, imap_list_full,	NULL)
 	PHP_FALIAS(imap_scanmailbox, imap_listscan,	NULL)
@@ -357,6 +359,7 @@ MESSAGELIST *mail_newmessagelist(void)
 								  sizeof(MESSAGELIST));
 }
 
+#ifdef HAVE_IMAP2000
 /* Mail GET_QUOTA callback
  * Called via the mail_parameter function in c-client:src/c-client/mail.c
  * Author DRK
@@ -370,6 +373,7 @@ void mail_getquota(MAILSTREAM *stream, char *qroot,QUOTALIST *qlist)
 		IMAPG(quota_limit) = qlist->limit;
 	}
 }
+#endif
 
 /* Mail garbage collect MESSAGELIST
  * Accepts: pointer to MESSAGELIST pointer
@@ -547,12 +551,13 @@ PHP_MINIT_FUNCTION(imap)
 	/* next UID to be assigned */
 	REGISTER_MAIN_LONG_CONSTANT("SA_UIDVALIDITY",SA_UIDVALIDITY , CONST_PERSISTENT | CONST_CS);
 	/* UID validity value */
-
+#ifdef HAVE_IMAP2000
 	sa_all |= GET_QUOTA;
         REGISTER_MAIN_LONG_CONSTANT("GET_QUOTA",GET_QUOTA , CONST_PERSISTENT | CONST_CS);
      /* Disk space taken up by mailbox. */
 	sa_all |= GET_QUOTAROOT;
         REGISTER_MAIN_LONG_CONSTANT("GET_QUOTAROOT",GET_QUOTAROOT , CONST_PERSISTENT | CONST_CS);
+#endif
      /* Disk space taken up by all mailboxes owned by user. */
 	REGISTER_MAIN_LONG_CONSTANT("SA_ALL", sa_all, CONST_PERSISTENT | CONST_CS);
      /* get all status information */
@@ -1011,7 +1016,7 @@ PHP_FUNCTION(imap_num_recent)
 }
 /* }}} */
 
-
+#ifdef HAVE_IMAP2000
 /* {{{ proto array imap_get_quota(int stream_id, string qroot)
 	Returns the quota set to the mailbox account qroot */
 PHP_FUNCTION(imap_get_quota)
@@ -1053,7 +1058,6 @@ PHP_FUNCTION(imap_get_quota)
 }
 /* }}} */
 
-
 /* {{{ proto int imap_set_quota(int stream_id, string qroot, int mailbox_size)
    Will set the quota for qroot mailbox */
 PHP_FUNCTION(imap_set_quota)
@@ -1084,6 +1088,7 @@ PHP_FUNCTION(imap_set_quota)
 	RETURN_LONG(imap_setquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot), &limits));
 }
 /* }}} */
+#endif
 
 
 /* {{{ proto int imap_expunge(int stream_id)

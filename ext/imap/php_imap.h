@@ -6,12 +6,15 @@
 #include "build-defs.h"
 #endif
 
-/*
+#ifdef HAVE_IMAP2000
+ /* these are used for quota support */
+ #include "c-client.h"	/* includes mail.h and rfc822.h */
+ #include "imap4r1.h"	/* location of c-client quota functions */
+#else
  #include "mail.h"
  #include "rfc822.h" 
-*/
-#include "c-client.h"
-#include "imap4r1.h"	/* used for the imap_setquota function */
+#endif
+
 #include "modules.h"
 
 extern zend_module_entry imap_module_entry;
@@ -104,8 +107,10 @@ PHP_FUNCTION(imap_renamemailbox);
 PHP_FUNCTION(imap_deletemailbox);
 PHP_FUNCTION(imap_listmailbox);
 PHP_FUNCTION(imap_scanmailbox);
+#ifdef HAVE_IMAP2000
 PHP_FUNCTION(imap_get_quota);
 PHP_FUNCTION(imap_set_quota);
+#endif
 PHP_FUNCTION(imap_subscribe);
 PHP_FUNCTION(imap_unsubscribe);
 PHP_FUNCTION(imap_append);
@@ -162,8 +167,10 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 	unsigned long status_unseen;
 	unsigned long status_uidnext;
 	unsigned long status_uidvalidity;
+#ifdef HAVE_IMAP2000
 	unsigned long quota_usage;
 	unsigned long quota_limit;
+#endif
 ZEND_END_MODULE_GLOBALS(imap)
 
 
