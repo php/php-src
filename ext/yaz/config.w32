@@ -6,31 +6,29 @@ ARG_WITH("yaz", "YAZ support (ANSI/NISO Z39.50)", "no");
 // this is a temporary hack
 function yaz_check_version()
 {
-	var yaz_h = PHP_PHP_BUILD + "\\include\\yaz\\yaz-version.h";
 	var c = null;
 	var v;
-	if (FSO.FileExists(yaz_h)) {
-		c = file_get_contents(yaz_h);
-		if (c.match(/YAZ_VERSIONL\s+0x([a-zA-Z0-9]{2})/)) {
-			v = RegExp.$1;
-			if (parseInt(v) >= 2) {
-				return true;
-			}
+	var yaz_h = CHECK_HEADER_ADD_INCLUDE("yaz/yaz-version.h", "CFLAGS_YAZ", PHP_YAZ);
+
+	if (!yaz_h) {
+		return false;
+	}
+
+	c = file_get_contents(yaz_h + "\\yaz\\yaz-version.h");
+	if (c.match(/YAZ_VERSIONL\s+(0x[a-zA-Z0-9]+)/)) {
+		v = RegExp.$1;
+		if (parseInt(v) >= 0x20000) {
+			return true;
 		}
+		WARNING("yaz not enabled; version 2.0 or higher required; you have version " + v);
 	}
 	return false;
 }
 
 if (PHP_YAZ != "no") {
-
-	if (CHECK_HEADER_ADD_INCLUDE("yaz/yaz-version.h", "CFLAGS_YAZ", PHP_YAZ) &&
-			CHECK_LIB("yaz.lib", "yaz", PHP_YAZ)) {
-		if (yaz_check_version()) {
-			EXTENSION('yaz', 'php_yaz.c');
-			AC_DEFINE('HAVE_YAZ', 1);
-		} else {
-			WARNING("yaz not enabled; version 2.0 or higher required");
-		}
+	if (yaz_check_version() && CHECK_LIB("yaz.lib", "yaz", PHP_YAZ)) {
+		EXTENSION('yaz', 'php_yaz.c');
+		AC_DEFINE('HAVE_YAZ', 1);
 	} else {
 		WARNING("yaz not enabled; libraries and headers not found");
 	}
