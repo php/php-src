@@ -72,7 +72,7 @@ PHP_MINFO_FUNCTION(cybercash)
 }
 /* }}} */
 
-/* {{{ proto cybercash_encr(string wmk, string sk, string data)
+/* {{{ proto array cybercash_encr(string wmk, string sk, string data)
    Cybercash encrypt */
 PHP_FUNCTION(cybercash_encr)
 {
