@@ -21,6 +21,10 @@
 #include "zend.h"
 #include "zend_API.h"
 
+ZEND_API zend_class_entry *zend_ce_traversable;
+ZEND_API zend_class_entry *zend_ce_aggregate;
+ZEND_API zend_class_entry *zend_ce_iterator;
+
 ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
 
 #define zend_call_method_with_0_params(obj, obj_ce, fn_proxy, function_name, retval) \
