@@ -1,3 +1,17 @@
+2000-01-02  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: nice to have.
+
+2000-01-02  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h: Statements get closed before connection shutdown.
+    Disabled fetching all errors for Adabas.
+
+2000-01-02  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c: (var_dump, serialize, unserialize) support NULL
+
 2000-01-01  Sascha Schumann  <sascha@schumann.cx>
 
     * TODO: Add some points
