@@ -46,11 +46,11 @@ exit;
 
 function usage()
 {
-    writeln("Usage: run-tests.php [-d] [-h] [dir|file...]");
+    dowriteln("Usage: run-tests.php [-d] [-h] [dir|file...]");
 }
 
 /*
- * Please use write() and writeln() for all screen output.
+ * Please use dowrite() and dowriteln() for all screen output.
  * This makes it easier to convert to HTML output later.
  */
 
@@ -264,7 +264,8 @@ function run_tests_in_dir($dir = '.')
         $total++;
     }
     if ($oskipped + (isset($tests_in_dir[$dir])?$tests_in_dir[$dir]:0)  == $skipped) {
-        dowriteln("[all $skipped test(s) skipped]");
+        $skippednow = $skipped - $oskipped;
+        dowriteln("[all $skippednow test(s) skipped]");
     }
     dowriteln("");
     return true;
@@ -407,10 +408,6 @@ function run_test($file)
         putenv("CONTENT_TYPE=");
         putenv("CONTENT_LENGTH=");
     }
-    putenv("a=");
-    putenv("b=");
-    putenv("c=");
-    putenv("d=");
     if (isset($fps["POST"])) {
         $cmd = "$php -q $tmpfile[FILE] < $tmpfile[POST]";
     } else {
@@ -418,13 +415,13 @@ function run_test($file)
     }
     $ofp = @fopen($tmpfile["OUTPUT"], "w");
     if (!$ofp) {
-        writeln("Error: could not write to output file");
+        dowriteln("Error: could not write to output file");
         delete_tmpfiles();
         return TEST_INTERNAL_ERROR;
     }
     $cp = popen($cmd, "r");
     if (!$cp) {
-        writeln("Error: could not execute: $cmd");
+        dowriteln("Error: could not execute: $cmd");
         delete_tmpfiles();
         return TEST_INTERNAL_ERROR;
     }
