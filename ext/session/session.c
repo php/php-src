@@ -1449,6 +1449,8 @@ static void php_session_flush(TSRMLS_D)
 	}
 }
 
+/* {{{ proto void session_write_close(void)
+   Write session data and end session */
 PHP_FUNCTION(session_write_close)
 {
 	php_session_flush(TSRMLS_C);
@@ -1463,7 +1465,7 @@ PHP_RSHUTDOWN_FUNCTION(session)
 	php_rshutdown_session_globals(TSRMLS_C);
 	return SUCCESS;
 }
-
+/* }}} */
 
 
 PHP_MINIT_FUNCTION(session)
