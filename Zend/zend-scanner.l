@@ -24,6 +24,7 @@
 %x BACKQUOTE
 %x HEREDOC
 %x LOOKING_FOR_PROPERTY
+%x LOOKING_FOR_VARNAME
 %option stack
 
 %{
@@ -825,7 +826,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <DOUBLE_QUOTES,BACKQUOTE,HEREDOC>"${" {
-	yy_push_state(IN_SCRIPTING);
+	yy_push_state(LOOKING_FOR_VARNAME);
 	return T_DOLLAR_OPEN_CURLY_BRACES;
 }
 
@@ -835,6 +836,23 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return '}';
 }
 
+
+<LOOKING_FOR_VARNAME>{LABEL} {
+	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
+	yy_pop_state();
+	yy_push_state(IN_SCRIPTING);
+	return T_STRING_VARNAME;
+}
+
+
+<LOOKING_FOR_VARNAME>. {
+	/*yyless(1);*/
+	unput(yytext[0]);
+	yy_pop_state();
+	yy_push_state(IN_SCRIPTING);
+}
 
 
 <IN_SCRIPTING>{LNUM}|{HNUM} {
@@ -1236,6 +1254,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	yyless(1);
 	return T_CURLY_OPEN;
 }
+
 
 <SINGLE_QUOTE>"\\'" {
 	zendlval->value.chval='\'';
