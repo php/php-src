@@ -139,6 +139,10 @@ SOURCE=.\zend_constants.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_dynamic_array.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_execute.c
 # End Source File
 # Begin Source File
@@ -240,6 +244,10 @@ SOURCE=.\zend_config.w32.h
 # Begin Source File
 
 SOURCE=.\zend_constants.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_dynamic_array.h
 # End Source File
 # Begin Source File
 
