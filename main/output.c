@@ -869,14 +869,17 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 		return FAILURE;
 	}
 
+	add_assoc_long(elem, "chunk_size", ob_buffer->chunk_size);
+	if (!ob_buffer->chunk_size) {
+		add_assoc_long(elem, "size", ob_buffer->size);
+		add_assoc_long(elem, "block_size", ob_buffer->block_size);
+	}
 	if (ob_buffer->internal_output_handler) {
 		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_INTERNAL);
 		add_assoc_long(elem, "buffer_size", ob_buffer->internal_output_handler_buffer_size);
 	}
 	else {
 		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
-		add_assoc_long(elem, "initial_size", ob_buffer->size);
-		add_assoc_long(elem, "chunk_size", ob_buffer->chunk_size);
 	}
 	add_assoc_long(elem, "status", ob_buffer->status);
 	add_assoc_string(elem, "name", ob_buffer->handler_name, 1);
