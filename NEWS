@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ??? 2000, Version 4.0.3-dev
 - Added an optional parameter to wordwrap that cuts a string if the length
+  (Derick)
 - Added functions pg_put_line and pg_end_copy (Dirk Elmendorf)
 - Added second parameter for parse_str to save result (John Bafford)
 - Fix bug with curl places extra data in the output. (medvitz@medvitz.net)
