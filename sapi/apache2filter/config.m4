@@ -50,12 +50,14 @@ AC_ARG_WITH(apxs2,
     AC_MSG_ERROR([Please note that Apache version >= 2.0.35 is required.])
   fi
 
+  INSTALL_IT="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i `[ -d \`$APXS -q SYSCONFDIR\` ] || echo -a` -n php4"
+
   case $host_alias in
   *aix*)
     APXS_SBINDIR=`$APXS -q SBINDIR`
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_SBINDIR/httpd.exp"
     PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c)
-    INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL" 
+    INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL" 
     ;;
   *darwin*)
     dnl When using bundles on Darwin, we must resolve all symbols.  However,
@@ -73,11 +75,11 @@ AC_ARG_WITH(apxs2,
     PHP_SUBST(MH_BUNDLE_FLAGS)
     PHP_SELECT_SAPI(apache2filter, bundle, sapi_apache2.c apache_config.c php_functions.c)
     SAPI_SHARED=libs/libphp4.so
-    INSTALL_IT="$APXS -i -a -n php4 $SAPI_SHARED"
+    INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ;;
   *)
     PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c) 
-    INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL"
+    INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   esac
 
