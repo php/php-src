@@ -53,6 +53,7 @@ function_entry swf_functions[] = {
 	PHP_FE(swf_actiongotolabel,		NULL)
 	PHP_FE(swf_defineline,		NULL)
 	PHP_FE(swf_definerect,		NULL)
+	PHP_FE(swf_definepoly,		NULL)
 	PHP_FE(swf_startshape,		NULL)
 	PHP_FE(swf_shapelinesolid,		NULL)
 	PHP_FE(swf_shapefilloff,		NULL)
@@ -161,8 +162,9 @@ PHP_FUNCTION(swf_openfile)
 	convert_to_double_ex(g);
 	convert_to_double_ex(b);
 	
-	swf_openfile((*name)->value.str.val, (float)(*sizeX)->value.dval, (float)(*sizeY)->value.dval,
-	       		 (float)(*frameRate)->value.dval, (float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval);
+	swf_openfile((*name)->value.str.val,
+			 (float)(*sizeX)->value.dval, (float)(*sizeY)->value.dval,
+      		 	 (float)(*frameRate)->value.dval, (float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval);
 }
 /* }}} */
 
@@ -475,6 +477,44 @@ PHP_FUNCTION(swf_defineline)
 PHP_FUNCTION(swf_definerect)
 {
 	php_swf_define(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto void swf_definepoly(int obj_id, array coords, int npoints, double width)
+   Define a Polygon from an array of x,y coordinates, coords. */
+PHP_FUNCTION(swf_definepoly)
+{
+	zval **obj_id, **coordinates, **NumPoints, **width, **var;
+	int npoints, i;
+	float coords[256][2];
+	
+	if (ARG_COUNT(ht) != 4 ||
+	    zend_get_parameters_ex(4, &obj_id, &coordinates, &NumPoints, &width) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(obj_id);
+	convert_to_long_ex(NumPoints);
+	convert_to_double_ex(width);
+	
+	if ((*coordinates)->type != IS_ARRAY) {
+		return;
+		php_error(E_WARNING, "Wrong datatype of second argument to swf_definepoly");
+	}
+	
+	npoints = (*NumPoints)->value.lval;
+	for (i = 0; i < npoints; i++) {
+		if (zend_hash_index_find((*coordinates)->value.ht, (i * 2), (void **)&var) == SUCCESS) {
+			SEPARATE_ZVAL(var);
+			convert_to_double_ex(var);
+			coords[i][0] = (float)(*var)->value.dval;
+		}
+		if (zend_hash_index_find((*coordinates)->value.ht, (i * 2) + 1, (void **)&var) == SUCCESS) {
+			SEPARATE_ZVAL(var);
+			convert_to_double_ex(var);
+			coords[i][1] = (float)(*var)->value.dval;
+		}
+	}
+	swf_definepoly((*obj_id)->value.lval, coords, npoints, (float)(*width)->value.dval);
 }
 /* }}} */
 
