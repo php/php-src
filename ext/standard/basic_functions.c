@@ -1519,6 +1519,9 @@ PHP_FUNCTION(getopt)
 		if(o == 0) {
 #ifdef HARTMUT_0
 			optname = (char *)longopts[longindex].name;
+#else                      
+			/* o == 0 shall never happen so this only fixes a compiler warning */
+			optname = NULL;
 #endif
 		} else {		
 			if(o == 1) o = '-';
