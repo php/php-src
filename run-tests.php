@@ -474,8 +474,8 @@ function generate_diff($wanted,$output)
     $o1 = array_diff($o,$w);
     $w2 = array();
     $o2 = array();
-    foreach($w1 as $idx => $val) $w2[sprintf("%03d<",$idx)] = sprintf("%03d- $val", $idx+1);
-    foreach($o1 as $idx => $val) $o2[sprintf("%03d>",$idx)] = sprintf("%03d+ $val", $idx+1);
+    foreach($w1 as $idx => $val) $w2[sprintf("%03d<",$idx)] = sprintf("%03d- ", $idx+1).$val;
+    foreach($o1 as $idx => $val) $o2[sprintf("%03d>",$idx)] = sprintf("%03d+ ", $idx+1).$val;
     $diff = array_merge($w2, $o2);
     ksort($diff);
     return implode("\r\n", $diff);
