@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   . ext/ccvs
   . ext/cybercash
   . ext/icap
+- Moved ext/vpopmail to PECL. (James)
 - Added ICONV_IMPL and ICONV_VERSION constants to iconv extension to
   indicate which iconv implementation is used. (Moriyoshi)
 - Added experimental patch to address problem with floats on various locales.
