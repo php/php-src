@@ -38,14 +38,10 @@
 #include <unistd.h>
 #endif
 
-#ifdef PHP_31
-#include "os/nt/flock.h"
-#else
 #ifdef PHP_WIN32
 #include "win32/flock.h"
 #else
 #include <sys/file.h>
-#endif
 #endif
 
 #if HAVE_FCNTL_H
@@ -630,7 +626,12 @@ char *php_dbm_fetch(dbm_info *info, char *key TSRMLS_DC)
 	DBM_TYPE dbf;
 
 	key_datum.dptr = key;
+#ifdef PHP_WIN32
+	key_datum.dsize = strlen(key+1);
+#else
 	key_datum.dsize = strlen(key);
+#endif
+
 #if GDBM_FIX
 	key_datum.dsize++;
 #endif
