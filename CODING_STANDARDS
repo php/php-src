@@ -111,8 +111,8 @@ Exceptions:
        Function calls in assert conditions may also cause this problem, if 
        they modify one of their arguments or global variables.
 
-[9] When commenting out code using a #if statement, do NOT use 0 only.  Append 
-    to any 0 an _<cvs username here>.  For example, #if 0_FOO, where FOO is
+[9] When commenting out code using a #if statement, do NOT use 0 only. Instead
+    use "<cvs username here>_0". For example, #if FOO_0, where FOO is your
     cvs user foo.  This allows easier tracking of why code was commented out, 
     especially in bundled libraries.  
 
