@@ -410,7 +410,7 @@ static void php_fbsql_init_globals(zend_fbsql_globals *fbsql_globals)
 		char name[256];
 		gethostname(name,sizeof(name));
 		name[sizeof(name)-1] = 0;
-		fbsql_globals->hostName = strdup(name);
+		fbsql_globals->hostName = estrdup(name);
 	}
 
 	fbsql_globals->persistantCount	= 0;
@@ -524,9 +524,9 @@ PHPFBLink* phpfbConnect(INTERNAL_FUNCTION_PARAMETERS, char *hostName, char *user
 		result = malloc(sizeof(PHPFBLink));
 		result->retainCount     = 1;
 		result->persistant      = persistant;
-		result->hostName        = strdup(hostName);
-		result->userName        = strdup(userName);
-		result->userPassword    = strdup(userPassword);
+		result->hostName        = estrdup(hostName);
+		result->userName        = estrdup(userName);
+		result->userPassword    = estrdup(userPassword);
 		result->execHandler     = execHandler;
 		result->affectedRows    = 0;
 		result->autoCommit		= FB_SQL_G(autoCommit);
@@ -795,8 +795,8 @@ PHPFBDatabase* phpfbSelectDB
 		result->retainCount      = 2;
 		result->index            = zend_list_insert((PHPFBDatabase*)(le.ptr), le_dba);
 		result->link             = phpfbRetainLink(link);
-		result->databaseName     = strdup(databaseName);
-		result->databasePassword = strdup(FB_SQL_G(databasePassword));
+		result->databaseName     = estrdup(databaseName);
+		result->databasePassword = estrdup(FB_SQL_G(databasePassword));
 		result->connection       = c;
 		result->errorNo          = 0;
 		result->errorText        = NULL;
@@ -966,7 +966,7 @@ PHP_FUNCTION(fbsql_hostname)
 	{
 		convert_to_string_ex(argv[1]);
 		if (phpLink->hostName) free(phpLink->hostName);
-		phpLink->hostName = strdup((*argv[1])->value.str.val);
+		phpLink->hostName = estrdup((*argv[1])->value.str.val);
 	}
 }
 /* }}} */
@@ -1016,14 +1016,14 @@ PHP_FUNCTION(fbsql_database_password)
 	phpLink = phpfbGetLink((*argv[0])->value.lval);    
 	if (phpLink == NULL) RETURN_FALSE;
 
-	phpfbestrdup(phpLink->currentDatabase->databasePassword, &return_value->value.str.len, &return_value->value.str.val);
-	return_value->type = IS_STRING;
 	if (argc == 2)
 	{
 		convert_to_string_ex(argv[1]);
-		if (phpLink->currentDatabase->databasePassword) free(phpLink->currentDatabase->databasePassword);
-		phpLink->currentDatabase->databasePassword = strdup((*argv[1])->value.str.val); 
+		if (FB_SQL_G(databasePassword)) free(FB_SQL_G(databasePassword));
+		FB_SQL_G(databasePassword) = estrdup((*argv[1])->value.str.val); 
 	}
+	phpfbestrdup(phpLink->currentDatabase->databasePassword, &return_value->value.str.len, &return_value->value.str.val);
+	return_value->type = IS_STRING;
 }
 /* }}} */
 
@@ -1044,14 +1044,14 @@ PHP_FUNCTION(fbsql_username)
 	if (argc >= 1)
 	{
 		convert_to_string_ex(argv[0]);
-		free(FB_SQL_G(userName));
+		if (FB_SQL_G(userName)) free(FB_SQL_G(userName));
 		FB_SQL_G(userName) = strdup((*argv[0])->value.str.val); 
 	}
 }
 /* }}} */
 
 
-/* {{{ proto string fbsql_username([string password])
+/* {{{ proto string fbsql_password([string password])
 	*/
 PHP_FUNCTION(fbsql_password)
 {   
@@ -1064,7 +1064,7 @@ PHP_FUNCTION(fbsql_password)
 	if (argc >= 1)
 	{
 		convert_to_string_ex(argv[0]);
-		free(FB_SQL_G(userPassword));
+		if (FB_SQL_G(userPassword)) free(FB_SQL_G(userPassword));
 		FB_SQL_G(userPassword) = strdup((*argv[0])->value.str.val); 
 	}
 }
@@ -1077,7 +1077,7 @@ PHP_FUNCTION(fbsql_select_db)
 {
 	int  argc = ARG_COUNT(ht);
 	zval	**argv[2];
-	char* name;
+	char*          name = NULL;
 	PHPFBLink*     phpLink = NULL;
 	PHPFBDatabase* database = NULL;
 	FBSQLLS_FETCH();
@@ -1175,7 +1175,7 @@ PHP_FUNCTION(fbsql_change_user)
 		if (return_value->value.lval)
 		{
 			free(phpLink->userName);
-			phpLink->userName = strdup(userName);
+			phpLink->userName = estrdup(userName);
 		}
 	}
 }
@@ -1502,7 +1502,7 @@ int mdOk(PHPFBDatabase* database, FBCMetaData* md)
 	if (md == NULL)
 	{
 		database->errorNo  = 1;
-		database->errorText  = strdup("Connection was database server was lost");
+		database->errorText  = estrdup("Connection was database server was lost");
 		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, database->errorText);
 		result = 0;
 	}
