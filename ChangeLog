@@ -1,3 +1,194 @@
+2002-10-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php:
+    * make *_dir config parameters available for substitution in the
+      rpm spec file template
+
+    * pear/PEAR/Installer.php:
+    * add transactions member array (for queueing file transactions)
+
+    * pear/template.spec: * some minor fixes to the rpm spec file template
+
+    * pear/PEAR/Config.php: * add some signature handling config options
+
+2002-10-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/casefold.phpt:
+    Do the same test as ext/standard/test/strings/strtoupper.phpt does
+
+    * ext/standard/html.c:
+    Improved determine_charset() to use mbstring.internal_encoding when the last
+    param is a null string. (If the param is omitted, it takes iso-8859-1 as
+    the default charset in favour of backwards compatibility.)
+
+2002-10-22  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/tests/strings/strtoupper.phpt:
+    test for locale support in strtoupper
+
+2002-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/curl.c: Fixed ZTS build.
+
+2002-10-22  Stefan Esser  <s.esser@e-matters.de>
+
+    * Makefile.global
+      run-tests.php: fix make test for an external build dir setup
+
+2002-10-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/db/db.c: ups - the other way round of course
+
+    * ext/db/tests/001.phpt
+      ext/db/tests/002.phpt
+      ext/db/tests/003.phpt
+      ext/db/tests/004.phpt
+      ext/db/tests/005.phpt
+      ext/db/tests/006.phpt
+      ext/db/tests/test.inc: Updated tests
+
+    * ext/db/tests/.cvsignore: Add lock file
+
+    * ext/db/db.c: Fix this extension.
+
+    * ext/standard/string.c: Fix for cases when new_length is NULL
+
+2002-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+    Fixed a possible segmentation fault in file() function.
+
+2002-10-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/README: No longer needed. See README.TESTING
+
+2002-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/xslt/tests/009.phpt: Small corrections to the expected output.
+
+    * pear/tests/pear_autoloader.phpt: One more PEAR test to be skipped.
+
+    * ext/standard/tests/strings/implode.phpt: Fixed implode test
+
+    * main/streams.c:
+    When doing automatic line end detection, pick the line end that is found
+    first.
+
+    * pear/tests/pear_error.phpt
+      pear/tests/pear_error2.phpt
+      pear/tests/pear_error3.phpt
+      pear/tests/pear_error4.phpt
+      pear/tests/pear_registry.phpt
+      pear/tests/pear_system.phpt
+      pear/Console/tests/001-getopt.phpt
+      pear/tests/pear1.phpt
+      pear/tests/pear_config.phpt:
+    Disable PEAR tests. These tests have too many dependcies such as
+    pre-installed PEAR, needing to run as root user, most tests
+    will fail if PEAR install directory is not inside include_path and so on.
+
+    * sapi/apache2filter/apache_config.c:
+    Fixed a bug that caused the values of options/flags set via
+    httpd.conf/.htaccess and other apache methods to contain a \0 as part of the
+    value.
+
+2002-10-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/pear.m4:
+    - Add optional targets to allow the usage of Makefile.frag for shared
+      extensions.
+
+2002-10-22  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/skeleton/tests/001.phpt: Correct case for README.TESTING.
+
+2002-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    Added support for 'engine Off' directive
+    Added support for 'none' option for *_value options.
+
+2002-10-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/scripts/phpize.in:
+    - Explicitly return "0" at the end of the script. For some weird reason it
+      was returning error code 256 for me. This fixes pear install <pecl>.tar.gz
+      for me.
+
+2002-10-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/func/006.phpt: Test result depends on these ini settings
+
+    * ext/skeleton/tests/001.phpt
+      README.TESTING: Update documentation
+
+    * tests/.cvsignore
+      tests/classes/.cvsignore
+      tests/func/.cvsignore
+      tests/lang/.cvsignore
+      tests/strings/.cvsignore
+      ext/zlib/tests/.cvsignore
+      tests/basic/.cvsignore
+      ext/standard/tests/.cvsignore
+      ext/sysvmsg/tests/.cvsignore
+      ext/xml/tests/.cvsignore
+      ext/xslt/tests/.cvsignore
+      ext/zip/tests/.cvsignore
+      ext/standard/tests/reg/.cvsignore
+      ext/standard/tests/serialize/.cvsignore
+      ext/standard/tests/strings/.cvsignore
+      ext/standard/tests/time/.cvsignore
+      ext/standard/tests/versioning/.cvsignore
+      ext/standard/tests/assert/.cvsignore
+      ext/standard/tests/file/.cvsignore
+      ext/standard/tests/general_functions/.cvsignore
+      ext/standard/tests/math/.cvsignore
+      ext/skeleton/tests/.cvsignore
+      ext/standard/tests/aggregation/.cvsignore
+      ext/standard/tests/array/.cvsignore
+      ext/pcntl/tests/.cvsignore
+      ext/pgsql/tests/.cvsignore
+      ext/pspell/tests/.cvsignore
+      ext/session/tests/.cvsignore
+      ext/mbstring/tests/.cvsignore
+      ext/mcrypt/tests/.cvsignore
+      ext/mcve/tests/.cvsignore
+      ext/ncurses/tests/.cvsignore
+      ext/openssl/tests/.cvsignore
+      ext/gd/tests/.cvsignore
+      ext/gmp/tests/.cvsignore
+      ext/iconv/tests/.cvsignore
+      ext/interbase/tests/.cvsignore
+      ext/dio/tests/.cvsignore
+      ext/domxml/tests/.cvsignore
+      ext/exif/tests/.cvsignore
+      ext/fribidi/tests/.cvsignore
+      ext/db/tests/.cvsignore
+      ext/dbx/tests/.cvsignore
+      ext/bz2/tests/.cvsignore
+      ext/crack/tests/.cvsignore
+      ext/ctype/tests/.cvsignore
+      ext/cybermut/tests/.cvsignore: Missing and updated. Now including *.php
+
+    * run-tests.php: Give back the php file and leave it in case test fails.
+
+2002-10-22  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/standard/dl.c: Fixing check to enable dl() for both cgi and cgi-fcgi
+
+2002-10-22  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Style polizei
+
+    * Makefile.global: - Revert the undiscussed change.
+
+2002-10-22  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * Makefile.global: Hmm. -c options was there, but removed.
+    It is _needed_ for php.ini users uses buffer by default.
+
 2002-10-21  Jani Taskinen  <sniper@iki.fi>
 
     * ext/gd/config.m4: Nuke tabs.
