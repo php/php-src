@@ -27,6 +27,7 @@
 #include "ext/standard/php_smart_str.h"
 
 #include <sys/uio.h>
+#include <stdlib.h>
 
 typedef struct {
 	httpd_conn *hc;
@@ -199,9 +200,12 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 		php_register_variable(#name, TG(hc)->field, track_vars_array TSRMLS_CC); \
 	}
 
+	CONDADD(QUERY_STRING, query);
+	CONDADD(HTTP_HOST, hdrhost);
 	CONDADD(HTTP_REFERER, referer);
 	CONDADD(HTTP_USER_AGENT, useragent);
 	CONDADD(HTTP_ACCEPT, accept);
+	CONDADD(HTTP_ACCEPT_LANGUAGE, acceptl);
 	CONDADD(HTTP_ACCEPT_ENCODING, accepte);
 	CONDADD(HTTP_COOKIE, cookie);
 	CONDADD(CONTENT_TYPE, contenttype);
@@ -537,14 +541,22 @@ void thttpd_set_dont_close(void)
 
 void thttpd_php_init(void)
 {
+	char *ini;
+
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 	ts_allocate_id(&thttpd_globals_id, sizeof(php_thttpd_globals), NULL, NULL);
 	qr_lock = tsrm_mutex_alloc();
 	thttpd_register_on_close(remove_dead_conn);
 #endif
+
+	if ((ini = getenv("PHP_INI_PATH"))) {
+		thttpd_sapi_module.php_ini_path_override = ini;
+	}
+
 	sapi_startup(&thttpd_sapi_module);
 	thttpd_sapi_module.startup(&thttpd_sapi_module);
+	
 	{
 		TSRMLS_FETCH();
 
