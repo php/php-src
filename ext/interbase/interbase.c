@@ -28,8 +28,6 @@
 
 #include "php.h"
 
-#define FILE_REVISION "$Revision$"
-
 #if HAVE_IBASE
 
 #include "php_ini.h"
@@ -424,6 +422,8 @@ static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ *
 /* TODO this function should be part of either Zend or PHP API */
 static PHP_INI_DISP(php_ibase_password_displayer_cb)
 {
+	TSRMLS_FETCH();
+
 	if ((type == PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) 
 			|| (type == PHP_INI_DISPLAY_ACTIVE && ini_entry->value)) {
 		PUTS("********");
