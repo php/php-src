@@ -2,33 +2,36 @@ dnl
 dnl $Id$
 dnl
 
-AC_MSG_CHECKING(whether to include QDOM support)
-AC_ARG_WITH(qtdom,
-[  --with-qtdom            Include QtDOM support (requires Qt >= 2.2.0).],
-[
-case $withval in
-    no)
-      AC_MSG_RESULT(no) ;;
+PHP_ARG_WITH(qtdom, for QtDOM support,
+[  --with-qtdom            Include QtDOM support (requires Qt >= 2.2.0).])
+
+if test "$PHP_QTDOM" != "no"; then
+  case $PHP_QTDOM in
     yes)
       if test -f $QTDIR/include/qdom.h; then
-        AC_MSG_RESULT(yes)
-        PHP_ADD_LIBRARY_WITH_PATH(qt, $QTDIR/lib)
-        PHP_ADD_INCLUDE($QTDIR/include)
-        AC_DEFINE(HAVE_QTDOM, 1, [Wheter you have qtdom])
-        PHP_NEW_EXTENSION(qtdom, qtdom.c qtdom_qt.cpp, $ext_shared)
-        PHP_REQUIRE_CXX
+        QTDOM_LIBDIR=$QTDIR/lib
+        QTDOM_INCDIR=$QTDIR/include
       elif test -f /usr/lib/qt2/include/qdom.h; then
-        AC_MSG_RESULT(yes)
-        PHP_ADD_LIBRARY(qt)
-        PHP_ADD_INCLUDE(/usr/lib/qt2/include)
-        AC_DEFINE(HAVE_QTDOM, 1, [Wheter you have qtdom])
-        PHP_NEW_EXTENSION(qtdom, qtdom.c qtdom_qt.cpp, $ext_shared)
-        PHP_REQUIRE_CXX
-      else
-        AC_MSG_RESULT(no)
+        QTDOM_LIBDIR=/usr/lib
+        QTDOM_INCDIR=/usr/lib/qt2/include
+      fi
+      ;;
+    *)
+      if test -f $PHP_QTDOM/include/qdom.h; then
+        QTDOM_LIBDIR=$PHP_QTDOM/lib
+        QTDOM_INCDIR=$PHP_QTDOM/include
       fi
       ;;
   esac
-],[
-  AC_MSG_RESULT(no)
-])
+
+  if test -z "$QTDOM_INCDIR"; then
+    AC_MSG_ERROR([qdom.h not found.])
+  fi
+
+  PHP_ADD_LIBRARY_WITH_PATH(qt, $QTDOM_LIBDIR, QTDOM_SHARED_LIBADD)
+  PHP_ADD_INCLUDE($QTDOM_INCDIR)
+  PHP_NEW_EXTENSION(qtdom, qtdom.c qtdom_qt.cpp, $ext_shared)
+  PHP_SUBST(QTDOM_SHARED_LIBADD)
+  AC_DEFINE(HAVE_QTDOM, 1, [Whether you have qtdom])
+  PHP_REQUIRE_CXX
+fi
