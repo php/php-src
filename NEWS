@@ -5,8 +5,8 @@ PHP                                                                        NEWS
 ?? ??? 2003, PHP 5 Beta 2
 - Improved the Interbase extension: (Ard Biesheuvel)
   . Added support for multiple databases into ibase_trans()
-  . Added support for CREATE DATABASE and SET TRANSACTION statements 
-    into ibase_query()
+  . Added support for CREATE DATABASE, SET TRANSACTION and EXECUTE PROCEDURE
+    statements into ibase_query()
   . Added ibase_commit_ret()
   . Added ibase_rollback_ret()
   . Added ibase_drop_db() 
