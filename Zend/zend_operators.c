@@ -1534,8 +1534,8 @@ ZEND_API int decrement_function(zval *op1)
 					double d = (double)lval;
 					ZVAL_DOUBLE(op1, d-1);
 				} else {
-				op1->value.lval = lval-1;
-				op1->type = IS_LONG;
+					op1->value.lval = lval-1;
+					op1->type = IS_LONG;
 				}
 				break;
 			}
