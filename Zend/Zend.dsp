@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=Zend - Win32 Debug
+CFG=Zend - Win32 Release_inline
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,12 +13,13 @@ CFG=Zend - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "Zend.mak" CFG="Zend - Win32 Debug"
+!MESSAGE NMAKE /f "Zend.mak" CFG="Zend - Win32 Release_inline"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
 !MESSAGE "Zend - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "Zend - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "Zend - Win32 Release_inline" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -71,12 +72,36 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+!ELSEIF  "$(CFG)" == "Zend - Win32 Release_inline"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Output_Dir "Zend___Win32_Release_inline"
+# PROP BASE Intermediate_Dir "Zend___Win32_Release_inline"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Output_Dir "Zend___Win32_Release_inline"
+# PROP Intermediate_Dir "Zend___Win32_Release_inline"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D ZEND_DEBUG=0 /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /FR /FD /c
+# SUBTRACT BASE CPP /YX
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D ZEND_DEBUG=0 /D "WIN32" /D "_MBCS" /D "ZEND_WIN32_FORCE_INLINE" /FR /FD /c
+# SUBTRACT CPP /YX
+# ADD BASE RSC /l 0x40d /d "NDebug"
+# ADD RSC /l 0x40d /d "NDebug"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo
+
 !ENDIF 
 
 # Begin Target
 
 # Name "Zend - Win32 Release"
 # Name "Zend - Win32 Debug"
+# Name "Zend - Win32 Release_inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -230,6 +255,10 @@ SOURCE=.\zend_extensions.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_fast_cache.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_globals.h
 # End Source File
 # Begin Source File
@@ -267,10 +296,6 @@ SOURCE=.\zend_stack.h
 # Begin Source File
 
 SOURCE=.\zend_variables.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zend_fast_cache.h
 # End Source File
 # End Group
 # Begin Group "Parsers"
@@ -316,6 +341,24 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "Zend - Win32 Release_inline"
+
+# Begin Custom Build
+InputDir=.
+InputPath=".\zend-parser.y"
+
+BuildCmds= \
+	if not "X%CYGWIN%"=="X" bison --output=zend-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend zend-parser.y \
+	if "X%CYGWIN%"=="X" bison --output=zend-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend zend-parser.y \
+	
+
+"$(InputDir)\zend-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)\zend-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
@@ -338,6 +381,16 @@ InputPath=".\zend-scanner.l"
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "Zend - Win32 Debug"
+
+# Begin Custom Build
+InputPath=".\zend-scanner.l"
+
+"zend-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -i -Pzend -ozend-scanner.c zend-scanner.l
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Zend - Win32 Release_inline"
 
 # Begin Custom Build
 InputPath=".\zend-scanner.l"
