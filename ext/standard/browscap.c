@@ -58,7 +58,7 @@ static void convert_browscap_pattern(zval *pattern)
 		return;
 	}
 
-	t = (char *) malloc(Z_STRLEN_P(pattern)*2);
+	t = (char *) malloc(Z_STRLEN_P(pattern)*2 + 1);
 	
 	for (i=0, j=0; i<Z_STRLEN_P(pattern); i++, j++) {
 		switch (Z_STRVAL_P(pattern)[i]) {
@@ -78,6 +78,11 @@ static void convert_browscap_pattern(zval *pattern)
 				break;
 		}
 	}
+	
+	if (j && (t[j-1] == '.')) {
+		t[j++] = '*';
+	}
+	
 	t[j]=0;
 	Z_STRVAL_P(pattern) = t;
 	Z_STRLEN_P(pattern) = j;
