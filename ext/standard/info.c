@@ -300,7 +300,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"></head>", charset);
 		PUTS("<body text=\"#000000\" bgcolor=\"#f0f0ff\" link=\"#0000ff\" vlink=\"#ff00ff\" alink=\"#0000ff\">");
 	} else {
-		PUTS("phpinfo()\n");
+        PUTS("       _           _        __        ____  \n");
+        PUTS(" _ __ | |__  _ __ (_)_ __  / _| ___  / /\\ \\ \n");
+        PUTS("| '_ \\| '_ \\| '_ \\| | '_ \\| |_ / _ \\| |  | |\n");
+        PUTS("| |_) | | | | |_) | | | | |  _| (_) | |  | |\n");
+        PUTS("| .__/|_| |_| .__/|_|_| |_|_|  \\___/| |  | |\n");
+        PUTS("|_|         |_|                      \\_\\/_/ \n\n");
 	}	
 
 	if (flag & PHP_INFO_GENERAL) {
