@@ -107,7 +107,7 @@
 #if defined(HAVE_MBSTR_KR)
 #include "mbfilter_kr.h"
 #endif
-#if defined(HAVE_MBSTR_KR)
+#if defined(HAVE_MBSTR_RU)
 #include "mbfilter_ru.h"
 #endif
 
