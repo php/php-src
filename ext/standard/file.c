@@ -109,9 +109,15 @@ php_file_globals file_globals;
 
 /* sharing globals is *evil* */
 static int le_stream = FAILURE;
+static int le_stream_context = FAILURE;
 
 /* }}} */
 /* {{{ Module-Stuff */
+
+static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
+{
+	php_stream_context_free((php_stream_context*)rsrc->ptr);
+}
 
 static void _file_stream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -142,6 +148,7 @@ static void file_globals_dtor(php_file_globals *file_globals_p TSRMLS_DC)
 PHP_MINIT_FUNCTION(file)
 {
 	le_stream = zend_register_list_destructors_ex(_file_stream_dtor, NULL, "stream", module_number);
+	le_stream_context = zend_register_list_destructors_ex(file_context_dtor, NULL, "stream-context", module_number);
 
 #ifdef ZTS
 	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
@@ -157,6 +164,19 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("LOCK_UN", 3, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LOCK_NB", 4, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_CONNECT", 		PHP_STREAM_NOTIFY_CONNECT,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_AUTH_REQUIRED",	PHP_STREAM_NOTIFY_AUTH_REQUIRED,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_AUTH_RESULT",		PHP_STREAM_NOTIFY_AUTH_RESULT,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_MIME_TYPE_IS",	PHP_STREAM_NOTIFY_MIME_TYPE_IS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_FILE_SIZE_IS",	PHP_STREAM_NOTIFY_FILE_SIZE_IS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_REDIRECTED",		PHP_STREAM_NOTIFY_REDIRECTED,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_PROGRESS",		PHP_STREAM_NOTIFY_PROGRESS,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_FAILURE",			PHP_STREAM_NOTIFY_FAILURE,			CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,  CONST_CS | CONST_PERSISTENT);
+	
 	return SUCCESS;
 }
 
@@ -562,36 +582,126 @@ PHP_FUNCTION(file_get_wrapper_data)
 }
 /* }}} */
 
-/* {{{ proto resource fopen(string filename, string mode [, bool use_include_path])
+/* {{{ file_context related functions */
+static void user_space_stream_notifier(php_stream_context *context, int notifycode, int severity,
+		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC)
+{
+	zval *callback = (zval*)context->notifier->ptr;
+	zval *retval = NULL;
+	zval zcode, zseverity, zmsg, zxcode, zsofar, zmax;
+	zval *ptrs[6] = {&zcode, &zseverity, &zmsg, &zxcode, &zsofar, &zmax};
+	zval **args[6] = {&ptrs[0], &ptrs[1], &ptrs[2], &ptrs[3], &ptrs[4], &ptrs[5]};
+	
+	INIT_ZVAL(zcode);
+	INIT_ZVAL(zseverity);
+	INIT_ZVAL(zmsg);
+	INIT_ZVAL(zxcode);
+	INIT_ZVAL(zsofar);
+	INIT_ZVAL(zmax);
+
+	ZVAL_LONG(&zcode, notifycode);
+	ZVAL_LONG(&zseverity, severity);
+	ZVAL_LONG(&zxcode, xcode);
+	ZVAL_LONG(&zsofar, bytes_sofar);
+	ZVAL_LONG(&zmax, bytes_max);
+
+	if (xmsg) {
+		ZVAL_STRING(&zmsg, xmsg, 0);
+	} else {
+		ZVAL_NULL(&zmsg);
+	}
+
+	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, args, 0, NULL TSRMLS_CC)) {
+		zend_error(E_WARNING, "failed to call user notifier");
+	}
+	if (retval)
+		zval_ptr_dtor(&retval);
+}
+
+static int parse_context_options(php_stream_context *context, zval *params)
+{
+	int ret = SUCCESS;
+	zval **tmp;
+
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) {
+		
+		if (context->notifier) {
+			php_stream_notification_free(context->notifier);
+			context->notifier = NULL;
+		}
+
+		context->notifier = php_stream_notification_alloc();
+		context->notifier->func = user_space_stream_notifier;
+		context->notifier->ptr = *tmp;
+		ZVAL_ADDREF(*tmp);
+	}
+	
+	return ret;
+}
+/* }}} */
+
+/* {{{ proto bool file_context_set_params(resource context, array options)
+   Set parameters for a file context */
+PHP_FUNCTION(file_context_set_params)
+{
+	zval *params, *zcontext;
+	php_stream_context *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &zcontext, &params) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	context = (php_stream_context*)zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, le_stream_context);
+	ZEND_VERIFY_RESOURCE(context);
+
+	RETVAL_BOOL(parse_context_options(context, params) == SUCCESS);
+}
+/* }}} */
+
+/* {{{ proto resource file_context_create([array options])
+   Create a file context and optionally set parameters */
+PHP_FUNCTION(file_context_create)
+{
+	zval *params = NULL;
+	php_stream_context *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &params) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	context = php_stream_context_alloc();
+	
+	if (params)
+		parse_context_options(context, params);
+	
+	ZEND_REGISTER_RESOURCE(return_value, context, le_stream_context);
+}
+/* }}} */
+
+/* {{{ proto resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
    Open a file or a URL and return a file pointer */
 PHP_NAMED_FUNCTION(php_if_fopen)
 {
-	zval **arg1, **arg2, **arg3;
-	int use_include_path = 0;
+	char *filename, *mode;
+	int filename_len, mode_len;
+	zend_bool use_include_path = 0;
+	zval *zcontext = NULL;
 	php_stream *stream;
-	
-	switch(ZEND_NUM_ARGS()) {
-	case 2:
-		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 3:
-		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long_ex(arg3);
-		use_include_path = Z_LVAL_PP(arg3);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(arg1);
-	convert_to_string_ex(arg2);
+	php_stream_context *context = NULL;
 
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), Z_STRVAL_PP(arg2),
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|br", &filename, &filename_len,
+				&mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (zcontext) {
+		context = (php_stream_context*)zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, le_stream_context);
+		ZEND_VERIFY_RESOURCE(context);
+	}
+	
+	stream = php_stream_open_wrapper_ex(filename, mode,
 				use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				NULL);
+				NULL, context);
+
 	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
@@ -622,6 +732,7 @@ PHPAPI PHP_FUNCTION(fclose)
 }
 
 /* }}} */
+
 /* {{{ proto resource popen(string command, string mode)
    Execute a command and open either a read or a write pipe to it */
 

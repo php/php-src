@@ -69,7 +69,8 @@
 
 #define php_stream_fopen_temporary_file_rel(dir, pfx, opened_path)	_php_stream_fopen_temporary_file((dir), (pfx), (opened_path) STREAMS_REL_CC TSRMLS_CC)
 	
-#define php_stream_open_wrapper_rel(path, mode, options, opened) _php_stream_open_wrapper((path), (mode), (options), (opened) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_open_wrapper_rel(path, mode, options, opened) _php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_open_wrapper_ex_rel(path, mode, options, opened, context) _php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_make_seekable_rel(origstream, newstream, flags) _php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_REL_CC TSRMLS_CC)
 
@@ -85,15 +86,47 @@
  * the php_stream->abstract pointer to hold their context, and streams
  * opened via stream_open_wrappers can use the zval ptr in
  * php_stream->wrapperdata to hold meta data for php scripts to
- * retrieve using fgetwrapperdata(). */
+ * retrieve using file_get_wrapper_data(). */
 
 typedef struct _php_stream php_stream;
 typedef struct _php_stream_wrapper php_stream_wrapper;
+typedef struct _php_stream_context php_stream_context;
+
+/* callback for status notifications */
+typedef void (*php_stream_notification_func)(php_stream_context *context,
+		int notifycode, int severity,
+		char *xmsg, int xcode,
+		size_t bytes_sofar, size_t bytes_max,
+		void * ptr TSRMLS_DC);
 
 typedef struct _php_stream_statbuf {
 	struct stat sb; /* regular info */
 	/* extended info to go here some day */
 } php_stream_statbuf;
+
+#define PHP_STREAM_NOTIFIER_PROGRESS	1
+
+typedef struct _php_stream_notifier {
+	php_stream_notification_func func;
+	void *ptr;
+	int mask;
+	size_t progress, progress_max; /* position for progress notification */
+} php_stream_notifier;
+
+struct _php_stream_context {
+	php_stream_notifier *notifier;
+
+};
+
+typedef struct _php_stream_wrapper_options {
+	int valid_options; /* PHP_STREAM_WRAPPER_OPT_XXX */
+	
+	php_stream_notification_func notifier;
+	void *notifier_ptr;
+
+	/* other info like user-agent, SSL cert and cookie information
+	 * to go here some day */
+} php_stream_wrapper_options;
 
 typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
@@ -114,7 +147,7 @@ typedef struct _php_stream_ops  {
 typedef struct _php_stream_wrapper_ops {
 	/* open/create a wrapped stream */
 	php_stream *(*opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
-			int options, char **opened_path STREAMS_DC TSRMLS_DC);
+			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 	/* close/destroy a wrapped stream */
 	int (*closer)(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC);
 	/* stat a wrapped stream */
@@ -127,6 +160,7 @@ struct _php_stream_wrapper	{
 	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
 };
+
 
 struct _php_stream  {
 	php_stream_ops *ops;
@@ -148,6 +182,9 @@ struct _php_stream  {
 #if ZEND_DEBUG
 	int __exposed;	/* non-zero if exposed as a zval somewhere */
 #endif
+
+	php_stream_context *context;
+
 }; /* php_stream */
 /* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0
@@ -305,8 +342,10 @@ int php_init_stream_wrappers(TSRMLS_D);
 int php_shutdown_stream_wrappers(TSRMLS_D);
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
-PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC);
-#define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper((path), (mode), (options), (opened) STREAMS_CC TSRMLS_CC)
+PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+
+#define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
+#define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
@@ -328,6 +367,58 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int opt
 extern php_stream_ops php_stream_userspace_ops;
 #define PHP_STREAM_IS_USERSPACE	&php_stream_userspace_ops
 
+PHPAPI void php_stream_context_free(php_stream_context *context);
+PHPAPI php_stream_context *php_stream_context_alloc(void);
+
+PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
+PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);
+
+#define PHP_STREAM_NOTIFY_RESOLVE		1
+#define PHP_STREAM_NOTIFY_CONNECT		2
+#define PHP_STREAM_NOTIFY_AUTH_REQUIRED		3
+#define PHP_STREAM_NOTIFY_MIME_TYPE_IS	4
+#define PHP_STREAM_NOTIFY_FILE_SIZE_IS	5
+#define PHP_STREAM_NOTIFY_REDIRECTED	6
+#define PHP_STREAM_NOTIFY_PROGRESS		7
+#define PHP_STREAM_NOTIFY_COMPLETED		8
+#define PHP_STREAM_NOTIFY_FAILURE		9
+#define PHP_STREAM_NOTIFY_AUTH_RESULT	10
+
+#define PHP_STREAM_NOTIFY_SEVERITY_INFO	0
+#define PHP_STREAM_NOTIFY_SEVERITY_WARN	1
+#define PHP_STREAM_NOTIFY_SEVERITY_ERR	2
+
+PHPAPI void php_stream_notification_notify(php_stream_context *context, int notifycode, int severity,
+		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC);
+PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context);
+
+#define php_stream_notify_info(context, code, xmsg, xcode)	do { if ((context) && (context)->notifier) { \
+	php_stream_notification_notify((context), (code), PHP_STREAM_NOTIFY_SEVERITY_INFO, \
+				(xmsg), (xcode), 0, 0, NULL TSRMLS_CC); } } while (0)
+			
+#define php_stream_notify_progress(context, bsofar, bmax) do { if ((context) && (context)->notifier) { \
+	php_stream_notification_notify((context), PHP_STREAM_NOTIFY_PROGRESS, PHP_STREAM_NOTIFY_SEVERITY_INFO, \
+			NULL, 0, (bsofar), (bmax), NULL TSRMLS_CC); } } while(0)
+
+#define php_stream_notify_progress_init(context, sofar, bmax) do { if ((context)->notifier) { \
+	(context)->notifier->progress = (sofar); \
+	(context)->notifier->progress_max = (bmax); \
+	(context)->notifier->mask |= PHP_STREAM_NOTIFIER_PROGRESS; \
+	php_stream_notify_progress((context), (sofar), (bmax)); } } while (0)
+
+#define php_stream_notify_progress_increment(context, dsofar, dmax) do { if ((context) && (context)->notifier && (context)->notifier->mask & PHP_STREAM_NOTIFIER_PROGRESS) { \
+	(context)->notifier->progress += (dsofar); \
+	(context)->notifier->progress_max += (dmax); \
+	php_stream_notify_progress((context), (context)->notifier->progress, (context)->notifier->progress_max); } } while (0)
+
+#define php_stream_notify_file_size(context, file_size, xmsg, xcode) do { if ((context) && (context)->notifier) { \
+	php_stream_notification_notify((context), PHP_STREAM_NOTIFY_FILE_SIZE_IS, PHP_STREAM_NOTIFY_SEVERITY_INFO, \
+			(xmsg), (xcode), 0, (file_size), NULL TSRMLS_CC); } } while(0)
+	
+#define php_stream_notify_error(context, code, xmsg, xcode) do { if ((context) && (context)->notifier) {\
+	php_stream_notification_notify((context), (code), PHP_STREAM_NOTIFY_SEVERITY_ERR, \
+			(xmsg), (xcode), 0, 0, NULL TSRMLS_CC); } } while(0)
+	
 #endif
 
 /*

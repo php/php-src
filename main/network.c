@@ -574,11 +574,18 @@ PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size TSR
 static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+	size_t didwrite;
+	
 #if HAVE_OPENSSL_EXT
 	if (sock->ssl_active)
-		return SSL_write(sock->ssl_handle, buf, count);
+		didwrite = SSL_write(sock->ssl_handle, buf, count);
+	else
 #endif
-	return send(sock->socket, buf, count, 0);
+	didwrite = send(sock->socket, buf, count, 0);
+	
+	php_stream_notify_progress_increment(stream->context, didwrite, 0);
+
+	return didwrite;
 }
 static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
 {
@@ -638,6 +645,8 @@ static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_da
 	nr_bytes = recv(sock->socket, buf, sock->chunk_size, 0);
 	if(nr_bytes > 0) {
 
+		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
+		
 		/* try to avoid ever expanding buffer */
 		if (sock->readpos > 0) {
 			memmove(sock->readbuf, READPTR(sock), sock->readbuflen - sock->readpos);
@@ -669,7 +678,10 @@ static size_t php_sock_stream_read(php_stream *stream, php_netstream_data_t *soc
 
 	for(i = 0; !sock->eof && i < MAX_CHUNKS_PER_READ; i++) {
 		nr_bytes = php_sock_stream_read_internal(stream, sock TSRMLS_CC);
-		if(nr_bytes == 0) break;
+		if(nr_bytes == 0)
+			break;
+		
+		
 		nr_read += nr_bytes;
 	}
 
