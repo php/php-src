@@ -9,6 +9,8 @@ PHP 4                                                                      NEWS
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Fixed bug #17098 (make Apache2 aware that PHP scripts represent dynamic data
+  and should not be cached). (Ilia)
 - Fixed bug #21445 (gd unable to open fonts). (Ilia)
 - Fixed bug #20503 (imagesetbrush() not available on Windows). (Edin)
 - Fixed bug #21169 (Compile Failure, and lots of warnings on UnixWare).
