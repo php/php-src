@@ -726,7 +726,10 @@ PHP_FUNCTION(pg_close)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	if (id==-1) { /* explicit resource number */
@@ -773,7 +776,10 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	switch(entry_type) {
@@ -912,7 +918,10 @@ PHP_FUNCTION(pg_query)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	convert_to_string_ex(query);
@@ -1593,7 +1602,7 @@ PHP_FUNCTION(pg_last_oid)
    Enable tracing a PostgreSQL connection */
 PHP_FUNCTION(pg_trace)
 {
-	zval **z_filename, **z_mode, **z_pgsql_link = NULL;
+	zval **z_filename, **z_mode, **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
 	char *mode = "w";
@@ -1617,7 +1626,7 @@ PHP_FUNCTION(pg_trace)
 			mode = Z_STRVAL_PP(z_mode);
 			break;
 		case 3:
-			if (zend_get_parameters_ex(3, &z_filename, &z_mode, &z_pgsql_link)==FAILURE) {
+			if (zend_get_parameters_ex(3, &z_filename, &z_mode, &pgsql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(z_mode);
@@ -1627,8 +1636,11 @@ PHP_FUNCTION(pg_trace)
 			ZEND_WRONG_PARAM_COUNT();
 			break;
 	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
 
-	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, z_pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	convert_to_string_ex(z_filename);
 
 	stream = php_stream_open_wrapper(Z_STRVAL_PP(z_filename), mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
@@ -1669,6 +1681,9 @@ PHP_FUNCTION(pg_untrace)
 			ZEND_WRONG_PARAM_COUNT();
 			break;
 	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	PQuntrace(pgsql);
@@ -1699,7 +1714,10 @@ PHP_FUNCTION(pg_lo_create)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
 	/* NOTE: Archive modes not supported until I get some more data. Don't think anybody's
@@ -1774,7 +1792,10 @@ PHP_FUNCTION(pg_lo_unlink)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires 1 or 2 arguments.");
 		RETURN_FALSE;
 	}
-	
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	if (lo_unlink(pgsql, oid) == -1) {
@@ -1843,6 +1864,9 @@ PHP_FUNCTION(pg_lo_open)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires 1 or 2 arguments.");
 		RETURN_FALSE;
 	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
@@ -2080,6 +2104,10 @@ PHP_FUNCTION(pg_lo_import)
 		RETURN_FALSE;
 	}
 
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	oid = lo_import(pgsql, file_in);
@@ -2174,6 +2202,10 @@ PHP_FUNCTION(pg_lo_export)
 		RETURN_FALSE;
 	}
 
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	if (lo_export(pgsql, oid, file_out)) {
@@ -2256,7 +2288,10 @@ PHP_FUNCTION(pg_set_client_encoding)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	convert_to_string_ex(encoding);
@@ -2288,6 +2323,9 @@ PHP_FUNCTION(pg_client_encoding)
 			WRONG_PARAM_COUNT;
 			break;
 	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
@@ -2332,6 +2370,9 @@ PHP_FUNCTION(pg_end_copy)
 			WRONG_PARAM_COUNT;
 			break;
 	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
@@ -2372,6 +2413,9 @@ PHP_FUNCTION(pg_put_line)
 			WRONG_PARAM_COUNT;
 			break;
 	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
