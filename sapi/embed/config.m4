@@ -5,7 +5,7 @@ dnl
 AC_MSG_CHECKING(for embedded SAPI library support)
 
 AC_ARG_ENABLE(embed,
-[  --enable-embed[=TYPE]   Enable building of embedded SAPI library
+[  --enable-embed[=TYPE]   EXPERIMENTAL: Enable building of embedded SAPI library
                           TYPE is either 'shared' or 'static'. [TYPE=shared]],
 [ 
   case $enableval in
