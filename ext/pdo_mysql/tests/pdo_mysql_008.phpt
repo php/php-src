@@ -1,5 +1,5 @@
 --TEST--
-PDO-SQLite: PDO_FETCH_UNIQUE conflict
+PDO-MySQL: PDO_FETCH_UNIQUE conflict
 --SKIPIF--
 <?php # vim:ft=php
 require_once('skipif.inc'); ?>
