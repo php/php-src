@@ -1,14 +1,14 @@
 #include <sys/types.h>
 
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-#endif
-
 #ifdef PHP_WIN32
 #include "config.w32.h"
 #include "win32/readdir.h"
 #else
 #include "php_config.h"
+#endif
+
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
 #endif
 
 #ifndef HAVE_ALPHASORT 
