@@ -102,7 +102,6 @@ void init_executor(CLS_D ELS_DC)
 
 	zend_ptr_stack_init(&EG(argument_stack));
 
-	EG(AiCount) = 0;
 	zend_ptr_stack_init(&EG(garbage));
 
 	EG(main_op_array) = NULL;

@@ -61,35 +61,14 @@ ZEND_API int zval_dtor(zval *zvalue)
 				ELS_FETCH();
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
-#ifdef USE_AI_COUNT
-					if (EG(AiCount)==0) {
-						zend_hash_destroy(zvalue->value.ht);
-						efree(zvalue->value.ht);
-					} else {
-						zend_ptr_stack_push(&EG(garbage), zvalue->value.ht);
-					}
-#else
 					zend_hash_destroy(zvalue->value.ht);
 					efree(zvalue->value.ht);
-#endif
 				}
 			}
 			break;
-		case IS_OBJECT: {
-#ifdef USE_AI_COUNT
-			ELS_FETCH();
-
-				if (EG(AiCount)==0) {
-					zend_hash_destroy(zvalue->value.obj.properties);
-					efree(zvalue->value.obj.properties);
-				} else {
-					zend_ptr_stack_push(&EG(garbage), zvalue->value.obj.properties);
-				}
-#else
-				zend_hash_destroy(zvalue->value.obj.properties);
-				efree(zvalue->value.obj.properties);
-#endif
-			}
+		case IS_OBJECT:
+			zend_hash_destroy(zvalue->value.obj.properties);
+			efree(zvalue->value.obj.properties);
 			break;
 		case IS_RESOURCE:
 			/* destroy resource */
