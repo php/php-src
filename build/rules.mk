@@ -53,11 +53,11 @@ distclean: distclean-recursive clean-x
 	rm -f config.cache config.log config.status config_vars.mk libtool \
 	php_config.h stamp-h Makefile build-defs.h php4.spec libphp4.module
 
-test: $(top_builddir)/php
+test: $(top_builddir)/sapi/cli/php
 	@if test "$(TESTS)" = ""; then \
-		TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/php -C -q $(top_srcdir)/run-tests.php $(srcdir); \
+		TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/sapi/cli/php $(top_srcdir)/run-tests.php $(srcdir); \
 	else \
-		TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/php -C -q $(top_srcdir)/run-tests.php $(TESTS); \
+		TOP_BUILDDIR=$(top_builddir) TOP_SRCDIR=$(top_srcdir) $(top_builddir)/sapi/cli/php $(top_srcdir)/run-tests.php $(TESTS); \
 	fi
 
 include $(builddir)/.deps
