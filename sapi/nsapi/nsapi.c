@@ -176,11 +176,6 @@ ZEND_DECLARE_MODULE_GLOBALS(nsapi)
 
 #define NSAPI_G(v) TSRMG(nsapi_globals_id, zend_nsapi_globals *, v)
 
-/* compatibility with PHP4_3 */
-#if !defined(OnUpdateLong)
-#define OnUpdateLong OnUpdateInt
-#endif
-
 /* {{{ nsapi_functions[]
  *
  * Every user visible function must have an entry in nsapi_functions[].
@@ -216,7 +211,7 @@ zend_module_entry nsapi_module_entry = {
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("nsapi.read_timeout", "60", PHP_INI_ALL, OnUpdateLong, read_timeout, zend_nsapi_globals, nsapi_globals)
+    STD_PHP_INI_ENTRY("nsapi.read_timeout", "60", PHP_INI_ALL, OnUpdateInt, read_timeout, zend_nsapi_globals, nsapi_globals)
 PHP_INI_END()
 /* }}} */
 
