@@ -5,8 +5,8 @@ dnl don't forget to call PHP_EXTENSION(recode)
 
 AC_MSG_CHECKING(for recode support)
 AC_ARG_WITH(recode,
-[	 --with-recode[=DIR]	Include recode support.	 DIR is the recode
-													install directory.],
+[  --with-recode[=DIR]     Include recode support. DIR is the recode install
+                          directory.],
 [
 	if test "$withval" != "no"; then
 		RECODE_LIST="$withval /usr /usr/local /opt"

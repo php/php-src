@@ -74,7 +74,7 @@ echo $withval
         ]) 
 
         AC_ARG_WITH(png-dir,
-        [  --with-png-dir[=DIR]   png dir for pdflib 3.x],[
+        [  --with-png-dir[=DIR]    png dir for pdflib 3.x],[
           if test -z $withval; then
             withval="/usr/local"
           fi
