@@ -2,7 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 5.0.0
 
-?? ??? 2003, PHP 5 Beta 2
+30 Oct 2003, PHP 5 Beta 2
+- Lots and lots of changes in the Zend Engine 2 since beta 1:
+  . Added Iterators
+  . Improved memory manager
+  . Added Reflection API
+  . Removed the not so working namespaces support
+  . Removed support for expressions within constant declerations.
+  . You can read about most changes in ZEND_CHANGES under the Zend directory.
 - Improved the DBX extension: (Marc)
   . Added DBX_RESULT_UNBUFFERED flag for dbx_query().
   . Added dbx_fetch_row()
