@@ -1,3 +1,29 @@
+1999-11-16  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php3_string.h
+      ext/standard/string.c: (PHP substr_replace) New function.
+
+    * ext/standard/array.c: Just some rearranging.
+
+1999-11-16  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/array.c: - Change used_return_value to return_value_used
+
+    * ext/standard/array.c:
+    - Initial support for Thies' idea of passing functions a flag telling them
+      they don't need to return a value. Adjusted reset() to work with this.
+      It is a bit problematic because if internal functions don't look at the
+      flag and still return a value orginally this leaked. So I free the value
+      in any case, which kind of makes the speed gain a bit smaller
+
+1999-11-16  Stig Bakken  <ssb@fast.no>
+
+    * NEWS: final news update before 4.0b3
+
+    * php_version.h
+      configure.in: 4.0b3 coming up
+
 1999-11-16  Stig Bakken  <ssb@fast.no>
 
     * php_version.h
