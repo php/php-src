@@ -127,8 +127,7 @@ dnl AC_PROG_CXXCPP
 dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
 
-AC_CHECK_PROG(RE2C, re2c, re2c, [exit 0;])
-
+PHP_PROG_RE2C
 AC_PROG_RANLIB
 AC_PROG_LN_S
 AC_PROG_AWK

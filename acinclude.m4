@@ -16,6 +16,9 @@ AC_DEFUN([PHP_ADD_MAKEFILE_FRAGMENT],[
   sed -e "s#\$(srcdir)#$ac_srcdir#g" -e "s#\$(builddir)#$ac_builddir#g" $src  >> Makefile.fragments
 ])
 
+AC_DEFUN(PHP_PROG_RE2C,[
+  AC_CHECK_PROG(RE2C, re2c, re2c, [exit 0;])
+])
 
 dnl PHP_DEFINE(WHAT[, value])
 dnl
