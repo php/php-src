@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.2 2001-01-10 01:01:52 ssb Exp $
+     $Id: package.dtd,v 1.3 2001-03-29 21:54:27 uw Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
@@ -20,68 +20,81 @@
          Stig S. Bakken <ssb@fast.no>
 
   -->
+<!ENTITY nbsp "test">
 
 <!--============== attributes present in all elements ======================-->
-<!ENTITY % global.atts		"id		ID	#IMPLIED">
-
+<!ENTITY % global.atts "id		ID	#IMPLIED">
 <!--============== attributes common to several elements ===================-->
-<!ENTITY % role.atts		"Role		(php|ext|test|doc) 'php'">
-<!ENTITY % extension.atts	"Debug		(on|off) 'off'
+<!ENTITY % role.atts "Role		(php|ext|test|doc) 'php'">
+<!ENTITY % extension.atts "Debug		(on|off) 'off'
 				 ThreadSafe	(on|off) 'off'">
-<!ENTITY % format.atts		"Format		CDATA	#IMPLIED">
-
+<!ENTITY % format.atts "Format		CDATA	#IMPLIED">
 <!--=============== ELEMENT: Package =======================================-->
-<!ELEMENT Package		(Name,Summary,Maintainer,Release,FileList)>
-<!ATTLIST Package		%global.atts;
-				Type		(Source|Binary) 'Binary'>
-
+<!ELEMENT Package (Name, Summary, Maintainer, Release, FileList)>
+<!ATTLIST Package
+	%global.atts; 
+	Type (Source | Binary) "Binary"
+>
 <!--=============== ELEMENT: Name ==========================================-->
-<!ELEMENT Name			(#PCDATA)>
-<!ATTLIST Name			%global.atts;>
-
+<!ELEMENT Name (#PCDATA)>
+<!ATTLIST Name
+	%global.atts; 
+>
 <!--=============== ELEMENT: Summary =======================================-->
-<!ELEMENT Summary		(#PCDATA)>
-<!ATTLIST Summary		%global.atts;>
-
+<!ELEMENT Summary (#PCDATA)>
+<!ATTLIST Summary
+	%global.atts; 
+>
 <!--=============== ELEMENT: Maintainer ====================================-->
-<!ELEMENT Maintainer		(Initials,Name,Email)>
-<!ATTLIST Maintainer		%global.atts;>
-
+<!ELEMENT Maintainer (Initials, Name, Email)>
+<!ATTLIST Maintainer
+	%global.atts; 
+>
 <!--=============== ELEMENT: Initials ======================================-->
-<!ELEMENT Initials		(#PCDATA)>
-<!ATTLIST Initials		%global.atts;>
-
+<!ELEMENT Initials (#PCDATA)>
+<!ATTLIST Initials
+	%global.atts; 
+>
 <!--=============== ELEMENT: Email =========================================-->
-<!ELEMENT Email			(#PCDATA)>
-<!ATTLIST Email			%global.atts;>
-
+<!ELEMENT Email (#PCDATA)>
+<!ATTLIST Email
+	%global.atts; 
+>
 <!--=============== ELEMENT: Release =======================================-->
-<!ELEMENT Release		(Version,Date,Notes?)>
-<!ATTLIST Release		%global.atts;>
-
+<!ELEMENT Release (Version, Date, Notes?)>
+<!ATTLIST Release
+	%global.atts; 
+>
 <!--=============== ELEMENT: Version =======================================-->
-<!ELEMENT Version		(#PCDATA)>
-<!ATTLIST Version		%global.atts;>
-
+<!ELEMENT Version (#PCDATA)>
+<!ATTLIST Version
+	%global.atts; 
+>
 <!--=============== ELEMENT: Date =========================================-->
-<!ELEMENT Date			(#PCDATA)>
-<!ATTLIST Date			%global.atts;>
-
+<!ELEMENT Date (#PCDATA)>
+<!ATTLIST Date
+	%global.atts; 
+>
 <!--=============== ELEMENT: Notes =========================================-->
-<!ELEMENT Notes			(#PCDATA)>
-<!ATTLIST Notes			%global.atts;>
-
+<!ELEMENT Notes (#PCDATA)>
+<!ATTLIST Notes
+	%global.atts; 
+>
 <!--=============== ELEMENT: FileList ======================================-->
-<!ELEMENT FileList		(Dir | File)*>
-<!ATTLIST FileList		%global.atts;>
-
+<!ELEMENT FileList (Dir | File)*>
+<!ATTLIST FileList
+	%global.atts; 
+>
 <!--=============== ELEMENT: Dir ===========================================-->
-<!ELEMENT Dir			(#PCDATA)>
-<!ATTLIST Dir			%global.atts;>
-
+<!ELEMENT Dir (#PCDATA)>
+<!ATTLIST Dir
+	%global.atts; 
+>
 <!--=============== ELEMENT: File ==========================================-->
-<!ELEMENT File			(#PCDATA)>
-<!ATTLIST File			%global.atts;
-                                %role.atts;
-                                %extension.atts;
-                                %format.atts;>
+<!ELEMENT File (#PCDATA)>
+<!ATTLIST File
+	%global.atts; 
+	%role.atts; 
+	%extension.atts; 
+	%format.atts; 
+>
