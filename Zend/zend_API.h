@@ -51,6 +51,30 @@
 #define ZEND_GINIT_FUNCTION(module)      int ZEND_GINIT(module)(GINIT_FUNC_ARGS)
 #define ZEND_GSHUTDOWN_FUNCTION(module)  int ZEND_GSHUTDOWN(module)(void)
 
+
+#define ZEND_BEGIN_MODULE_GLOBALS(module_name)		\
+	typedef struct _zend_##module_name##_globals {
+#define ZEND_END_MODULE_GLOBALS(module_name)		\
+	} zend_##module_name##_globals;
+
+#ifdef ZTS
+
+#define ZEND_DECLARE_MODULE_GLOBALS(module_name)							\
+	static ts_rsrc_id module_name##_globals_id;
+#define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
+	module_name##_globals_id = ts_allocate_id(sizeof(zend_##module_name##_globals), (ts_allocate_ctor) globals_ctor, (ts_allocate_dtor) globals_dtor);
+
+#else
+
+#define ZEND_DECLARE_MODULE_GLOBALS(module_name)							\
+	static zend_##module_name##_globals module_name##_globals;
+#define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
+	globals_ctor(&module_name##_globals);
+
+#endif
+
+
+
 #define INIT_CLASS_ENTRY(class_container, class_name, functions)	\
 	{																\
 		class_container.name = strdup(class_name);					\
