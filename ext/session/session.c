@@ -21,7 +21,6 @@
  * TODO:
  * - add complete support for objects (partially implemented)
  * - userland callback functions for ps_module
- * - write ps_module utilizing shared memory (mm)
  */
 #if !(WIN32|WINNT)
 #include <sys/time.h>
@@ -279,9 +278,10 @@ static void _php_session_send_cookie(PSLS_D)
 		date_fmt = php3_std_date(time(NULL) + PS(lifetime));
 		len += sizeof(COOKIE_EXPIRES) + strlen(date_fmt);
 	}
-	cookie = emalloc(len + 1);
+	cookie = ecalloc(len + 1, 1);
 	
 	snprintf(cookie, len, COOKIE_FMT, PS(session_name), PS(id));
+	cookie[len] = '\0';
 	if (PS(lifetime) > 0) {
 		strcat(cookie, COOKIE_EXPIRES);
 		strcat(cookie, date_fmt);
@@ -295,8 +295,9 @@ static ps_module *_php_find_ps_module(char *name PSLS_DC)
 {
 	ps_module *ret = NULL;
 	ps_module **mod;
+	ps_module **end = ps_modules + (sizeof(ps_modules)/sizeof(ps_module*));
 
-	for(mod = ps_modules; ((*mod && (*mod)->name) || !*mod); mod++) {
+	for(mod = ps_modules; mod < end; mod++) {
 		if(*mod && !strcasecmp(name, (*mod)->name)) {
 			ret = *mod;
 			break;
@@ -333,7 +334,7 @@ static void _php_session_start(PSLS_D)
 	int lensess;
 	ELS_FETCH();
 
-	if (PS(nr_open_sessions) > 0) return;
+	if (PS(nr_open_sessions) != 0) return;
 
 	lensess = strlen(PS(session_name));
 	
@@ -419,7 +420,7 @@ static void _php_session_start(PSLS_D)
 	if(PS(mod_data) && PS(gc_probability) > 0) {
 		srand(time(NULL));
 		nrand = (int) (100.0*rand()/RAND_MAX);
-		if(nrand >= PS(gc_probability)) 
+		if(nrand < PS(gc_probability)) 
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime));
 	}
 }
@@ -694,11 +695,15 @@ int php_rinit_session(INIT_FUNC_ARGS)
 
 	php_rinit_session_globals(PSLS_C);
 
+	if(PS(mod) == NULL) {
+		/* current status is unusable */
+		PS(nr_open_sessions) = -1;
+		return FAILURE;
+	}
+
 	if(INI_INT("session_auto_start")) {
 		_php_session_start(PSLS_C);
 	}
-	if(PS(mod) == NULL)
-		return FAILURE;
 
 	return SUCCESS;
 }

@@ -4,9 +4,10 @@
  */
 
 #include "mod_files.h"
+#include "mod_mm.h"
 
 static ps_module *ps_modules[] = {
 	ps_files_ptr,
-	0,
+	ps_mm_ptr,
 };
 

@@ -1,2 +1,3 @@
 /* define if you want to use the session extension */
-/* #undef HAVE_LIBSESSION */
+
+#undef HAVE_LIBMM

@@ -43,7 +43,7 @@ ps_module ps_mod_files = {
 	PS_MOD(files)
 };
 
-#define PS_FILES_DATA ps_files *data = *mod_data
+#define PS_FILES_DATA ps_files *data = PS_GET_MOD_DATA()
 
 PS_OPEN_FUNC(files)
 {
@@ -51,7 +51,7 @@ PS_OPEN_FUNC(files)
 	char *p;
 
 	data = ecalloc(sizeof(*data), 1);
-	*mod_data = data;
+	PS_SET_MOD_DATA(data);
 
 	data->fd = -1;
 	if((p = strchr(save_path, ':'))) {
