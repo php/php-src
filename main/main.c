@@ -259,7 +259,6 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
-
 	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
 
 	STD_PHP_INI_ENTRY("allow_url_fopen",		"1",		PHP_INI_ALL,		OnUpdateBool,			allow_url_fopen,			php_core_globals,	core_globals)
@@ -875,6 +874,11 @@ int php_module_startup(sapi_module_struct *sf)
 		return FAILURE;
 	}
 
+	if (php_init_info_logos() == FAILURE) {
+		php_printf("PHP:  Unable to initialize info phpinfo logos.\n");
+		return FAILURE;
+	}
+
 	zuv.import_use_extension = ".php";
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
@@ -936,6 +940,7 @@ void php_module_shutdown()
 	global_lock_destroy();
 	zend_shutdown();
 	php_shutdown_fopen_wrappers();
+	php_shutdown_info_logos();
 	UNREGISTER_INI_ENTRIES();
 	zend_ini_mshutdown();
 	shutdown_memory_manager(0, 1);
@@ -1133,23 +1138,81 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 
 #include "logos.h"
 
+typedef struct _php_info_logo { 
+	char *mimetype;
+	int mimelen;
+	unsigned char *data; 
+	int size; 
+} php_info_logo;
+
+HashTable phpinfo_logo_hash;
+
+PHPAPI int php_register_info_logo(char *logo_string, char *mimetype, unsigned char *data, int size)
+{
+	php_info_logo *info_logo = (php_info_logo *)malloc(sizeof(php_info_logo));
+
+	if(!info_logo) return FAILURE;
+	info_logo->mimetype = mimetype;
+	info_logo->mimelen  = strlen(mimetype);
+	info_logo->data     = data;
+	info_logo->size     = size;
+
+	return zend_hash_add(&phpinfo_logo_hash, logo_string, strlen(logo_string), info_logo, sizeof(php_info_logo), NULL);
+}
+
+PHPAPI int php_unregister_info_logos(char *logo_string)
+{
+	return zend_hash_del(&phpinfo_logo_hash, logo_string, strlen(logo_string));
+}
+
+int php_init_info_logos(void)
+{
+	if(zend_hash_init(&phpinfo_logo_hash, 0, NULL, NULL, 1)==FAILURE) 
+		return FAILURE;
+
+	php_register_info_logo(PHP_LOGO_GUID    , "image/gif", php_logo    , sizeof(php_logo));
+	php_register_info_logo(PHP_EGG_LOGO_GUID, "image/gif", php_egg_logo, sizeof(php_egg_logo));
+	php_register_info_logo(ZEND_LOGO_GUID   , "image/gif", zend_logo   , sizeof(zend_logo));
+
+	return SUCCESS;
+}
+
+int php_shutdown_info_logos(void)
+{
+	zend_hash_destroy(&phpinfo_logo_hash);
+	return SUCCESS;
+}
+
+#define CONTENT_TYPE_HEADER "Content-Type: "
+static int php_info_logos(char *logo_string)
+{
+	php_info_logo *logo_image;
+	char *content_header;
+	int len;
+
+	if(FAILURE==zend_hash_find(&phpinfo_logo_hash,logo_string,strlen(logo_string),(void **)&logo_image))
+		return 0;
+
+	len=strlen(CONTENT_TYPE_HEADER)+logo_image->mimelen;
+	content_header=malloc(len+1);
+	if(!content_header) return 0;
+	strcpy(content_header,CONTENT_TYPE_HEADER);
+	strcat(content_header,logo_image->mimetype);
+	sapi_add_header(content_header, len, 1);
+	free(content_header);
+
+	PHPWRITE(logo_image->data, logo_image->size);
+	return 1;
+}
+
 PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
 {
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
 		&& PG(expose_php)) {
-		if (!strcmp(SG(request_info).query_string+1, PHP_LOGO_GUID)) {
-			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
-			PHPWRITE(php_logo, sizeof(php_logo));
-			return 1;
-		} else if (!strcmp(SG(request_info).query_string+1, PHP_EGG_LOGO_GUID)) {
-			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
-			PHPWRITE(php_egg_logo, sizeof(php_egg_logo));
-			return 1;
-		} else if (!strcmp(SG(request_info).query_string+1, ZEND_LOGO_GUID)) {
-			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
-			PHPWRITE(zend_logo, sizeof(zend_logo));
-			return 1;
-		} else if (!strcmp(SG(request_info).query_string+1, "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000")) {
+		if(php_info_logos(SG(request_info).query_string+1))
+			{	
+				return 1;
+		} else if (!strcmp(SG(request_info).query_string+1, PHP_CREDITS_GUID)) {
 			php_print_credits(PHP_CREDITS_ALL);
 			return 1;
 		}
@@ -1287,6 +1350,7 @@ PHPAPI void dummy_indent()
 	zend_indent();
 }
 #endif
+
 
 /*
  * Local variables:
