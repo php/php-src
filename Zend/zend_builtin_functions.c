@@ -53,6 +53,7 @@ static ZEND_FUNCTION(get_class_vars);
 static ZEND_FUNCTION(get_object_vars);
 static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(user_error);
+static ZEND_FUNCTION(set_user_error_handler);
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
@@ -88,6 +89,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_object_vars,	NULL)
 	ZEND_FE(get_class_methods,	NULL)
 	ZEND_FE(user_error,			NULL)
+	ZEND_FE(set_user_error_handler,		NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -732,3 +734,25 @@ ZEND_FUNCTION(user_error)
 	RETURN_TRUE;
 }
 /* }}} */
+
+
+ZEND_FUNCTION(set_user_error_handler)
+{
+	zval **error_handler;
+
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &error_handler)==FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	convert_to_string_ex(error_handler);
+	if (EG(user_error_handler)) {
+		zval_dtor(EG(user_error_handler));
+	} else {
+		ALLOC_ZVAL(EG(user_error_handler));
+	}
+
+	*EG(user_error_handler) = **error_handler;
+	zval_copy_ctor(EG(user_error_handler));
+
+	RETURN_TRUE;
+}

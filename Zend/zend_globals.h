@@ -179,6 +179,8 @@ struct _zend_executor_globals {
 	zval *garbage[4];
 	int garbage_ptr;
 
+	zval *user_error_handler;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 #if SUPPORT_INTERACTIVE
 	int interactive;

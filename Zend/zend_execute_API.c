@@ -115,6 +115,8 @@ void init_executor(CLS_D ELS_DC)
 	zend_hash_init(&EG(included_files), 5, NULL, NULL, 0);
 
 	EG(ticks_count) = 0;
+
+	EG(user_error_handler) = NULL;
 }
 
 
@@ -154,8 +156,12 @@ void shutdown_executor(ELS_D)
 	signal(SIGSEGV, original_sigsegv_handler);
 #endif
 
-
 	zend_hash_destroy(&EG(included_files));
+
+	if (EG(user_error_handler)) {
+		zval_dtor(EG(user_error_handler));
+		FREE_ZVAL(EG(user_error_handler));
+	}
 }
 
 
