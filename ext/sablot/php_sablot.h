@@ -35,9 +35,7 @@ extern zend_module_entry sablot_module_entry;
 /* Module functions */
 PHP_MINIT_FUNCTION(sablot);
 PHP_MINFO_FUNCTION(sablot);
-
-/* Request functions */
-PHP_RSHUTDOWN_FUNCTION(sablot);
+PHP_MSHUTDOWN_FUNCTION(sablot);
 
 /* Output transformation functions */
 PHP_FUNCTION(xslt_output_begintransform);
@@ -100,7 +98,6 @@ typedef struct {
 /* Sablotron Globals */
 typedef struct {
     zval *errorHandler;
-    SablotHandle processor;
     php_sablot_error *errors;
     php_sablot_error errors_start;
 	char *output_transform_file; /* For output transformations */
