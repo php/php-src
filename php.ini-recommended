@@ -1182,6 +1182,15 @@ sockets.use_system_read = On
 ; such as dynamic images
 tidy.clean_output = Off
 
+[soap]
+; Enables or disables WSDL caching feature.
+soap.wsdl_cache_enabled=1
+; Sets the directory name where SOAP extension will put cache files.
+soap.wsdl_cache_dir="/tmp"
+; (time to live) Sets the number of second while cached file will be used 
+; instead of original one.
+soap.wsdl_cache_ttl=86400
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
