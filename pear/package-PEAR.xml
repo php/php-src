@@ -35,6 +35,11 @@
     <state>beta</state>
     <date>YYYY-MM-DD</date>
     <notes>
+* fixed broken "help" command
+* new command: "info"
+* new command: "config-help"
+* un-indent multi-line data from xml description files
+* new command: "build"
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -45,6 +50,7 @@
         <file role="php" name="Command.php"/>
         <dir name="Command">
           <file role="php" name="Auth.php"/>
+          <file role="php" name="Build.php"/>
           <file role="php" name="Common.php"/>
           <file role="php" name="Config.php"/>
           <file role="php" name="Install.php"/>
