@@ -1,3 +1,65 @@
+2001-05-05  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/php_network.h: Added missing sys/time.h include
+
+    * main/php_network.h: Fixed Andi's build problem.
+
+2001-05-05  Andi Gutmans  <andi@zend.com>
+
+    * configure.in
+      main/php_version.h: - RC1
+
+2001-05-05  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/fsock.c
+      ext/standard/fsock.h
+      main/network.c
+      main/php_network.h
+      main/php_streams.h
+      main/streams.c:
+    Nuke buffering from php_streams, move connect_nonb() from fsock.c to network.c
+    and rename to php_connect_nonb().
+    Use php_connect_nonb() instead of connect() in php_hostconnect() -> timeouts
+    should now work in php_hostconnect().
+    sock streams abstraction now uses php_sockbuf as the "abstract" pointer.
+
+2001-05-05  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/dbx.php
+      pear/Cache/Container/file.php: fixed some typos in the code.
+
+    * pear/Cache/Container/phplib.php:
+    low/highwater mark detection of cache size done.
+
+2001-05-05  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: - Fix format to be consistent
+
+2001-05-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/buildcheck.sh: Fix libtool check
+
+    Submitted by: brisse@ping.dk
+
+2001-05-05  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/CREDITS: Added Sascha Kettler to credits
+
+2001-05-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/php_mysql.c: Fix broken ZTS build.
+
+2001-05-05  Thies C. Arntzen  <thies@thieso.net>
+
+    * TODO-4.1.txt: not to forget this one!
+
+2001-05-05  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+    emalloc()'d strings must be freed before the request shutdown;
+    Rule of the thumb:  initialize in RINIT, clean in RSHUTDOWN
+
 2001-05-04  Wez Furlong  <wez.php@thebrainroom.com>
 
     * ext/openssl/openssl.c
