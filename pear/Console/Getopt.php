@@ -77,9 +77,6 @@ class Console_Getopt {
         if ($long_options)
             sort($long_options);
 
-        if ($args[0]{0} != '-') {
-            array_shift($args);
-        }
         reset($args);
         while (list($i, $arg) = each($args)) {
 

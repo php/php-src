@@ -17,17 +17,15 @@ short and long options.</description>
     </maintainer>
     <maintainer>
       <user>ssb</user>
-      <role>developer</role>
+      <role>helper</role>
       <name>Stig Bakken</name>
       <email>stig@php.net</email>
     </maintainer>
   </maintainers>
   <release>
-    <version>0.11</version>
-    <date>2002-05-26</date>
-    <notes>POSIX getopt compatibility fix: treat first element of args
-array as command name
-</notes>
+    <version>0.10</version>
+    <date>2002-05-12</date>
+    <notes>Packaging fix</notes>
     <state>beta</state>
     <filelist>
      <dir name="Console">
@@ -36,12 +34,6 @@ array as command name
     </filelist>
   </release>
   <changelog>
-    <release>
-      <version>0.10</version>
-      <date>2002-05-12</date>
-      <notes>Packaging fix</notes>
-      <state>beta</state>
-    </release>
     <release>
       <version>0.9</version>
       <date>2002-05-12</date>
