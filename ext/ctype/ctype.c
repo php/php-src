@@ -59,7 +59,7 @@ function_entry ctype_functions[] = {
 };
 /* }}} */
 
-/* {{{ ctype_mpodule_entry
+/* {{{ ctype_module_entry
  */
 zend_module_entry ctype_module_entry = {
 	STANDARD_MODULE_HEADER,
