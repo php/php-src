@@ -2423,6 +2423,7 @@ PHP_FUNCTION(parse_str)
 	zval *sarg;
 	char *res = NULL;
 	int argCount;
+	int old_rg;
 	
 	PLS_FETCH();
 	SLS_FETCH();
@@ -2438,19 +2439,19 @@ PHP_FUNCTION(parse_str)
 		res = estrndup(sarg->value.str.val, sarg->value.str.len);
 	}
 
-	if(argCount == 1)
+	old_rg = PG(register_globals);
+	if(argCount == 1) {
+		PG(register_globals) = 1;
 		php_treat_data(PARSE_STRING, res, NULL ELS_CC PLS_CC SLS_CC);
-	else
-	{
-		int old_rg = PG(register_globals);
+	} else 	{
 		PG(register_globals) = 0;
 		/* Clear out the array that was passed in. */
 		zval_dtor(*arrayArg);
 		array_init(*arrayArg);
 		
 		php_treat_data(PARSE_STRING, res, *arrayArg ELS_CC PLS_CC SLS_CC);
-		PG(register_globals) = old_rg;
 	}
+	PG(register_globals) = old_rg;
 }
 /* }}} */
 
