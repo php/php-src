@@ -40,11 +40,15 @@
 
 /* {{{ proto string uniqid(string prefix [, bool more_entropy])
    Generates a unique ID */
+#ifdef HAVE_GETTIMEOFDAY
 PHP_FUNCTION(uniqid)
 {
-#ifdef HAVE_GETTIMEOFDAY
 	char *prefix;
+#if defined(__CYGWIN__)
+	zend_bool more_entropy = 1;
+#else
 	zend_bool more_entropy = 0;
+#endif
 	char uniqid[138];
 	int sec, usec, argc, prefix_len;
 	struct timeval tv;
@@ -57,17 +61,21 @@ PHP_FUNCTION(uniqid)
 
 	/* Do some bounds checking since we are using a char array. */
 	if (prefix_len > 114) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The prefix to uniqid should not be more than 114 characters.");
 		return;
 	}
 #if HAVE_USLEEP && !defined(PHP_WIN32)
 	if (!more_entropy) {
+#if defined(__CYGWIN__)
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "You must use 'more entropy' under CYGWIN.");
+		return;
+#endif
 		usleep(1);
 	}
 #endif
 	gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
 	sec = (int) tv.tv_sec;
-	usec = (int) (tv.tv_usec % 1000000);
+	usec = (int) (tv.tv_usec % 0x100000);
 
 	/* The max value usec can have is 0xF423F, so we use only five hex
 	 * digits for usecs.
@@ -79,15 +87,9 @@ PHP_FUNCTION(uniqid)
 	}
 
 	RETURN_STRING(uniqid, 1);
-#endif
 }
+#endif
 /* }}} */
-
-function_entry uniqid_functions[] = {
-	PHP_FE(uniqid, NULL)
-	{NULL, NULL, NULL}
-};
-
 
 /*
  * Local variables:
