@@ -1515,6 +1515,10 @@ SOURCE=..\ext\com\COM.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\com\conversion.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\win32\pwd.c
 # End Source File
 # Begin Source File
@@ -1532,6 +1536,10 @@ SOURCE=..\win32\sendmail.c
 # Begin Source File
 
 SOURCE=..\win32\time.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\typedef_VARIANT.c
 # End Source File
 # Begin Source File
 
@@ -1555,6 +1563,14 @@ SOURCE=..\win32\wsyslog.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\ext\com\com.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\conversion.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\win32\grp.h
 # End Source File
 # Begin Source File
@@ -1563,11 +1579,15 @@ SOURCE=..\win32\param.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\com\php3_COM.h
+SOURCE=..\ext\com\php_COM.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\win32\php_registry.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\php_typedef_VARIANT.h
 # End Source File
 # Begin Source File
 
