@@ -59,7 +59,7 @@ funcdef:			tIDENTIFIER tIDENTIFIER tALIAS tIDENTIFIER'(' argument_list ')' tFROM
 
 argument_list:		argument ',' argument_list { $$ = w32api_parser_join_arguments($1, $3);}
 					| argument {$$ = $1;}
-					| {$$ = NULL}
+					| {$$ = NULL;}
 ;
 
 argument:			tIDENTIFIER tIDENTIFIER { $$ = w32api_parser_make_argument_byval($1, $2); }
