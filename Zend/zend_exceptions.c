@@ -528,7 +528,7 @@ ZEND_END_ARG_INFO();
 
 static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(exception, __construct, arginfo_exception___construct, 0)
+	ZEND_ME(exception, __construct, arginfo_exception___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(exception, getMessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getCode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getFile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
@@ -549,7 +549,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_error_exception___construct, 0, 0, 3)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry error_exception_functions[] = {
-	ZEND_ME(error_exception, __construct, arginfo_error_exception___construct, 0)
+	ZEND_ME(error_exception, __construct, arginfo_error_exception___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(error_exception, getSeverity, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
