@@ -1,7 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
-- Introduced a new $_FORM variable, which includes any GET, POST or COOKIE
+- Introduced a new $_REQUEST array, which includes any GET, POST or COOKIE
   variables.  Like the other new variables, this variable is also available
   regardless of the context.  (Andi & Zeev)
 - Introduced $_GET, $_POST, $_COOKIE, $_SERVER and $_ENV variables, which
