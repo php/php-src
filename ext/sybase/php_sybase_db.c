@@ -720,11 +720,14 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 			if (dbwillconvert(coltype(offset),SYBCHAR)) {
 				char *res_buf;
 				int res_length = dbdatlen(sybase_ptr->link,offset);
+				int src_length = res_length;
 				register char *p;
 			
 				switch (coltype(offset)) {
 					case SYBBINARY:
 					case SYBVARBINARY:
+						res_length *= 2;
+						break;
 					case SYBCHAR:
 					case SYBVARCHAR:
 					case SYBTEXT:
@@ -740,15 +743,16 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 				memset(res_buf,' ',res_length+1);  /* XXX i'm sure there's a better way
 													  but i don't have sybase here to test
 													  991105 thies@thieso.net  */
-				dbconvert(NULL,coltype(offset),dbdata(sybase_ptr->link,offset), res_length,SYBCHAR,res_buf,-1);
+				dbconvert(NULL,coltype(offset),dbdata(sybase_ptr->link,offset), res_length,SYBCHAR,res_buf,res_length);
 		
 				/* get rid of trailing spaces */
 				p = res_buf + res_length;
-				while (*p == ' ') {
+				while (p >= res_buf && *p == ' ') {
 					p--;
-					res_length--;
 				}
 				*(++p) = 0; /* put a trailing NULL */
+				res_length = p - res_buf;
+				
 		
 				Z_STRLEN_P(result) = res_length;
 				Z_STRVAL_P(result) = res_buf;
