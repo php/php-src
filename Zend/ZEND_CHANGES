@@ -120,7 +120,7 @@ Changes in the Zend Engine 2.0
             }
 
             function __clone() {
-                $this->name = $clone->name;
+                $this->name = $that->name;
                 $this->address = 'New York';
                 $this->id = self::$id++;
             }
@@ -488,6 +488,8 @@ Changes in the Zend Engine 2.0
 
         print foo::$my_static;
         ?>
+
+    * Static methods (TBD)
 
     * Parameters that are passed by reference to a function
       may now have default values.
