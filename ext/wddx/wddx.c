@@ -606,6 +606,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		
 		for (i=0; atts[i]; i++) {
 			if (!strcmp(atts[i], EL_VERSION)) {
+				/* nothing for now */
 			}
 		}
 	} else if (!strcmp(name, EL_STRING)) {
@@ -702,21 +703,39 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 	zval				*obj;
 	zval				*tmp;
 	ELS_FETCH();
+
+	if (stack->top == 0)
+		return;
 	
 	if (!strcmp(name, EL_STRING) || !strcmp(name, EL_NUMBER) ||
 		!strcmp(name, EL_BOOLEAN) || !strcmp(name, EL_NULL) ||
 	  	!strcmp(name, EL_ARRAY) || !strcmp(name, EL_STRUCT)) {
+		wddx_stack_top(stack, (void**)&ent1);
+
+		/* Call __wakeup() method on the object. */
+		if (ent1->data->type == IS_OBJECT) {
+			zval *fname, *retval = NULL;
+
+			MAKE_STD_ZVAL(fname);
+			ZVAL_STRING(fname, "__wakeup", 1);
+
+			call_user_function_ex(NULL, ent1->data, fname, &retval, 0, 0, 0, NULL);
+
+			zval_dtor(fname);
+			FREE_ZVAL(fname);
+			if (retval)
+				zval_ptr_dtor(&retval);
+		}
+
 		if (stack->top > 1) {
-			wddx_stack_top(stack, (void**)&ent1);
 			stack->top--;
 			wddx_stack_top(stack, (void**)&ent2);
 			if (ent2->data->type == IS_ARRAY || ent2->data->type == IS_OBJECT) {
 				target_hash = HASH_OF(ent2->data);
-				
+
 				if (ent1->varname) {
 					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
 						ent1->data->type == IS_STRING && ent1->data->value.str.len) {
-						zval *fname, *retval = NULL;
 
 						if (zend_hash_find(EG(class_table), ent1->data->value.str.val,
 										   ent1->data->value.str.len+1, (void **) &ce)==FAILURE) {
@@ -745,17 +764,6 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 						/* Clean up class name var entry */
 						zval_dtor(ent1->data);
 						efree(ent1->data);
-
-						/* Call __wakeup() method on the object. */
-						MAKE_STD_ZVAL(fname);
-						ZVAL_STRING(fname, "__wakeup", 1);
-
-						call_user_function_ex(NULL, obj, fname, &retval, 0, 0, 0, NULL);
-
-						zval_dtor(fname);
-						FREE_ZVAL(fname);
-						if (retval)
-							zval_ptr_dtor(&retval);
 					}
 					else
 						zend_hash_update(target_hash,
