@@ -24,7 +24,12 @@
 
 PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t length, php_stream_mmap_operation_t mode, size_t *mapped_len TSRMLS_DC)
 {
-	php_stream_mmap_range range = { offset, length, mode, NULL };
+	php_stream_mmap_range range;
+	
+	range.offset = offset;
+	range.length = length;
+	range.mode = mode;
+	range.mapped = NULL;
 
 	/* TODO: Enforce system policy and limits for mmap sizes ? */
 	
