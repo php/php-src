@@ -1,5 +1,5 @@
 --TEST--
-PEAR_Error in die mode
+PEAR_Error: die mode
 --SKIPIF--
 --FILE--
 <?php // -*- C++ -*-
@@ -9,9 +9,9 @@ PEAR_Error in die mode
 //               - PEAR::isError static method
 // testing PEAR_Error
 
-require_once "PEAR.php";
+require "../PEAR.php";
 
-error_reporting(4095);
+error_reporting(E_ALL);
 
 print "mode=die: ";
 $err = new PEAR_Error("test error!!\n", -42, PEAR_ERROR_DIE);

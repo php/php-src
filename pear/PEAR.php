@@ -286,7 +286,7 @@ class PEAR
      *
      * @return int     the new depth of the "expected errors" stack
      */
-    function expectError($code)
+    function expectError($code = "*")
     {
         if (is_array($code)) {
             array_push($this->_expected_errors, $code);
@@ -366,8 +366,12 @@ class PEAR
             $message     = $message->getMessage();
         }
 
-        if (isset($this) && isset($this->_expected_errors) && sizeof($this->_expected_errors) > 0 && in_array($code, end($this->_expected_errors))) {
-            $mode = PEAR_ERROR_RETURN;
+        if (isset($this) && isset($this->_expected_errors) && sizeof($this->_expected_errors) > 0 && sizeof($exp = end($this->_expected_errors))) {
+            if ($exp[0] == "*" ||
+                (is_int(reset($exp)) && in_array($code, $exp)) ||
+                (is_string(reset($exp)) && in_array($message, $exp))) {
+                $mode = PEAR_ERROR_RETURN;
+            }
         }
 
         if ($mode === null) {
@@ -491,63 +495,6 @@ class PEAR
     }
 
     // }}}
-
-    /**
-    * Converts a php version string to an array
-    * (supported formats are: X.X.X, X.X.X-dev, X.X.XplX)
-    *
-    * @param string $version A valid php version (ie. 4.0.7)
-    * @return array
-    * @see PEAR::phpVersionIs()
-    */
-    function _explodePHPVersion($version)
-    {
-        @list($version, ) = explode('-', $version);  // 4.0.7-dev
-        @list($version, ) = explode('RC', $version); // 4.0.7RC1
-        list($mayor, $minor, $sub) = explode('.', $version);
-        @list($sub, $patch) = explode('pl', $sub);   // 4.0.14pl1
-        if ($patch === null) {
-            $patch = 0;
-        }
-        return array($mayor, $minor, $sub, $patch);
-    }
-
-    /**
-    * Find if a version is minor or greater than a given PHP version
-    * (it should be red as "if my php version is minor|greater|between this one)
-    *
-    * Usage:
-    * PEAR::phpVersionIs('4.0.7')           => if the current version
-    *                                          is minor than version 4.0.7
-    * PEAR::phpVersionIs(null, '4.0.12pl3') => if current is greater that 4.0.12pl3
-    * PEAR::phpVersionIs('4.0.9', '4.0.4')  => if current is between 4.0.9 and 4.0.4
-    *
-    * @param string $minorthan   Version should be minor than this param
-    * @param string $greaterthan Version should be greater than this param
-    * @param string $version     Version to compare with (defaults to current)
-    *
-    * @return bool If the comparation was successful or not
-    */
-    function phpVersionIs($minorthan = null, $greaterthan = null, $version = PHP_VERSION)
-    {
-        $version = PEAR::_explodePHPVersion($version);
-        $ret = false;
-        if ($minorthan) {
-            $minor = PEAR::_explodePHPVersion($minorthan);
-            for ($i=0; $i < count($version)-1 && $minor[$i] == $version[$i]; $i++);
-            if ($version[$i] >= $minor[$i]) {
-                return false;
-            }
-            $ret = true;
-        }
-        if ($greaterthan) {
-            $greater = PEAR::_explodePHPVersion($greaterthan);
-            for ($i=0; $i < count($version)-1 && $greater[$i] == $version[$i]; $i++);
-            $ret = ($version[$i] > $greater[$i]) ? true : false;
-        }
-        return $ret;
-    }
-
 }
 
 // {{{ _PEAR_call_destructors()
@@ -584,13 +531,11 @@ class PEAR_Error
     // {{{ properties
 
     var $error_message_prefix = '';
-    var $error_prepend        = '';
-    var $error_append         = '';
     var $mode                 = PEAR_ERROR_RETURN;
     var $level                = E_USER_NOTICE;
     var $code                 = -1;
     var $message              = '';
-    var $debuginfo            = '';
+    var $userinfo             = '';
 
     // Wait until we have a stack-groping function in PHP.
     //var $file    = '';
@@ -713,8 +658,7 @@ class PEAR_Error
      */
     function getMessage ()
     {
-        return ($this->error_prepend . $this->error_message_prefix .
-                $this->message       . $this->error_append);
+        return ($this->error_message_prefix . $this->message);
     }
 
 
@@ -808,11 +752,9 @@ class PEAR_Error
                 $callback = $this->callback;
             }
             return sprintf('[%s: message="%s" code=%d mode=callback '.
-                           'callback=%s prefix="%s" prepend="%s" append="%s" '.
-                           'info="%s"]',
+                           'callback=%s prefix="%s" info="%s"]',
                            get_class($this), $this->message, $this->code,
                            $callback, $this->error_message_prefix,
-                           $this->error_prepend, $this->error_append,
                            $this->userinfo);
         }
         if ($this->mode & PEAR_ERROR_CALLBACK) {
@@ -830,12 +772,11 @@ class PEAR_Error
         if ($this->mode & PEAR_ERROR_RETURN) {
             $modes[] = 'return';
         }
-        return sprintf('[%s: message="%s" code=%d mode=%s level=%s prefix="%s" '.
-                       'prepend="%s" append="%s" info="%s"]',
+        return sprintf('[%s: message="%s" code=%d mode=%s level=%s '.
+                       'prefix="%s" info="%s"]',
                        get_class($this), $this->message, $this->code,
                        implode("|", $modes), $levels[$this->level],
                        $this->error_message_prefix,
-                       $this->error_prepend, $this->error_append,
                        $this->userinfo);
     }
 

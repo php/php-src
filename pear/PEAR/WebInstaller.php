@@ -25,11 +25,14 @@
  *
  *  <?php
  *      require("PEAR/WebInstaller.php");
- *      $installer = new PEAR_WebInstaller("/path/to/your/install/dir","http://pear.php.net/download/");
+ *      $installer = new PEAR_WebInstaller("/path/to/your/install/dir","http://php.chregu.tv/pear/");
  *      $installer->start();
  *  ?>
  *
  *  and put PEAR/WebInstaller.php (this script) anywhere in your include_path.
+ *
+ *  (http://php.chregu.tv/pear/ is just for testing purposes until this
+ *    system runs on pear.php.net, but feel free to use it till then)
  *
  *  Both parameters are optional. If the install dir is ommitted, the
  *  installer takes either the system wide pear-directory (mostly
@@ -39,7 +42,7 @@
  *
  *  The second parameter points to the server/directory where all the
  *  packages and especially Packages.xml is located. If not given, the
- *  standard PEAR-Repository is taken (http://pear.php.net/download/)
+ *  standard PEAR-Repository is taken (http://pear.php.net/whatever..)
  *
  *  After installation, just add the install-dir to your include_path and
  *  the packages should work.
@@ -85,7 +88,7 @@ class PEAR_WebInstaller extends PEAR
     var $AllPackages;
 
     /** URL to the server containing all packages in tgz-Format and the Package.xml */
-    var $remotedir = "http://pear.php.net/download/";
+    var $remotedir = "http://php.chregu.tv/pear/";
 
     /*  Directory where the to be installed files should be put
         per default PEAR_INSTALL_DIR (/usr/local/lib/php) if it's writeable for the webserver,
@@ -244,6 +247,10 @@ class PEAR_WebInstaller extends PEAR
         print "<TABLE CELLSPACING=0 BORDER=0 CELLPADDING=1>";
         print "<TR><TD BGCOLOR=\"#000000\">\n";
         print "<TABLE CELLSPACING=1 BORDER=0 CELLPADDING=3 width=\"100%\">\n";
+        print "<tr bgcolor=\"f0f0f0\">";
+        print "<td COLSPAN=\"6\" ><input type=\"submit\" value=\"Install\"></td>";
+        print "</tr>";
+
         print " <TR BGCOLOR=\"#e0e0e0\" >\n";
         print "  <TH>Inst.</TH>\n";
         print "  <TH>Package</TH>\n";
@@ -274,7 +281,7 @@ class PEAR_WebInstaller extends PEAR
             print "</TD>\n";
 
             print "  <TD BGCOLOR=\"$bg1\">";
-            print $this->printCell ($package[name],"http://pear.php.net/pkginfo.php?package=$package[name]");
+            print $this->printCell ($package["name"],"http://pear.php.net/pkginfo.php?package=$package[name]");
             print "</TD>\n";
 
             print "<TD BGCOLOR=\"$bg2\">";
@@ -290,7 +297,7 @@ class PEAR_WebInstaller extends PEAR
             print "</TD>\n";
 
             print "<TD BGCOLOR=\"$bg2\">";
-            $this->printCell ($package["release_notes"]);
+            $this->printCell (nl2br($package["release_notes"]));
             print "</TD>\n";
             print " </TR>\n";
 
@@ -601,7 +608,6 @@ class PEAR_WebInstaller extends PEAR
         $this->loggerEnd();
         print "From the WebInstaller.php introduction: <p>";
 
-        //        $file = implode("",file(__FILE__));
         $file = file(__FILE__);
         foreach($file as $line)
         {
@@ -610,12 +616,13 @@ class PEAR_WebInstaller extends PEAR
             }
             $help .= $line;
         }
+
         highlight_string($help);
         print "<p>";
         if ($Full != 2) {
             print "<a href=\"$PHP_SELF?help=2\">See the full source</a><p>\n";
         }
-        
+
         print "<a href=\"$PHP_SELF\">Back to the packages overview</A>\n";
     }
 

@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.6.2.2 2001-10-09 22:53:59 ssb Exp $
+     $Id: package.dtd,v 1.6.2.3 2001-11-13 01:26:39 ssb Exp $
 
      This is the PEAR package description, version 1.1b1.
      It should be used with the informal public identifier:
@@ -28,7 +28,7 @@
 			   threadsafe	(on|off) 'off'">
 <!ENTITY % format.atts "format		CDATA	#IMPLIED">
 <!--=============== ELEMENT: package =======================================-->
-<!ELEMENT package (name, summary, maintainer, release, filelist)>
+<!ELEMENT package (name, summary, maintainer, release)>
 <!ATTLIST package
 	%global.atts; 
 	type (source | binary | empty) "empty"
@@ -59,13 +59,18 @@
 	%global.atts; 
 >
 <!--=============== ELEMENT: release =======================================-->
-<!ELEMENT release (version, date, notes?)>
+<!ELEMENT release (version?, state?, date, notes?, filelist)>
 <!ATTLIST release
 	%global.atts; 
 >
 <!--=============== ELEMENT: version =======================================-->
 <!ELEMENT version (#PCDATA)>
 <!ATTLIST version
+	%global.atts; 
+>
+<!--=============== ELEMENT: state =========================================-->
+<!ELEMENT state (#PCDATA)>
+<!ATTLIST state
 	%global.atts; 
 >
 <!--=============== ELEMENT: date =========================================-->
@@ -78,7 +83,7 @@
 <!ATTLIST notes
 	%global.atts; 
 >
-<!--=============== ELEMENT: fileList ======================================-->
+<!--=============== ELEMENT: filelist ======================================-->
 <!ELEMENT filelist (dir | file | libfile)*>
 <!ATTLIST filelist
 	%global.atts; 

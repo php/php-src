@@ -57,6 +57,7 @@ define("DB_ERROR_NOT_LOCKED",         -21);
 define("DB_ERROR_VALUE_COUNT_ON_ROW", -22);
 define("DB_ERROR_INVALID_DSN",        -23);
 define("DB_ERROR_CONNECT_FAILED",     -24);
+define("DB_ERROR_EXTENSION_NOT_FOUND",-25);
 
 /*
  * Warnings are not detected as errors by DB::isError(), and are not
@@ -375,7 +376,8 @@ class DB
                 DB_OK                       => 'no error',
                 DB_WARNING                  => 'unknown warning',
                 DB_WARNING_READ_ONLY        => 'read only',
-                DB_ERROR_NEED_MORE_DATA     => 'insufficient data supplied'
+                DB_ERROR_NEED_MORE_DATA     => 'insufficient data supplied',
+                DB_ERROR_EXTENSION_NOT_FOUND=> 'extension not found'
             );
         }
 
@@ -512,16 +514,10 @@ class DB
     function assertExtension($name)
     {
         if (!extension_loaded($name)) {
-            $dlext = (substr(PHP_OS, 0, 3) == 'WIN') ? '.dll' : '.so';
+            $dlext = OS_WINDOWS ? '.dll' : '.so';
             @dl($name . $dlext);
         }
-        if (!extension_loaded($name)) {
-            trigger_error("The extension '$name' couldn't be loaded. ".
-                            'Probably you don\'t have support in your PHP '.
-                            'to this Database backend', E_USER_ERROR);
-            return false;
-        }
-        return true;
+        return extension_loaded($name);
     }
 }
 
@@ -604,6 +600,7 @@ class DB_result
 {
     var $dbh;
     var $result;
+    var $row_counter = null;
 
     /**
      * DB_result constructor.
@@ -618,11 +615,11 @@ class DB_result
     }
 
     /**
-     * Fetch and return a row of data (it uses backend->fetchInto for that)
-     * @param   $fetchmode  format of fetched row
-     * @param   $rownum     the row number to fetch
+     * Fetch and return a row of data (it uses driver->fetchInto for that)
+     * @param int $fetchmode  format of fetched row
+     * @param int $rownum     the row number to fetch
      *
-     * @return  array   a row of data, NULL on no more rows or PEAR_Error on error
+     * @return  array a row of data, NULL on no more rows or PEAR_Error on error
      */
     function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT, $rownum=null)
     {
@@ -631,15 +628,41 @@ class DB_result
         }
         if ($fetchmode === DB_FETCHMODE_OBJECT) {
             $fetchmode = DB_FETCHMODE_ASSOC;
-            $return_object = true;
+            $object_class = $this->dbh->fetchmode_object_class;
+        }
+        if ($this->dbh->limit_from !== null) {
+            if ($this->row_counter === null) {
+                $this->row_counter = $this->dbh->limit_from;
+                // For Interbase
+                if ($this->dbh->features['limit'] == false) {
+                    $i = 0;
+                    while ($i++ < $this->dbh->limit_from) {
+                        $this->dbh->fetchInto($this->result, $arr, $fetchmode);
+                    }
+                }
+            }
+            if ($this->row_counter >= (
+                    $this->dbh->limit_from + $this->dbh->limit_count))
+            {
+                return null;
+            }
+            if ($this->dbh->features['limit'] == 'emulate') {
+                $rownum = $this->row_counter;
+            }
+
+            $this->row_counter++;
         }
         $res = $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
         if ($res !== DB_OK) {
             return $res;
         }
-        if (isset($return_object)) {
-            $class = $this->dbh->fetchmode_object_class;
-            $ret =& new $class($arr);
+        if (isset($object_class)) {
+            // default mode specified in DB_common::fetchmode_object_class property
+            if ($object_class == 'stdClass') {
+                $ret = (object) $arr;
+            } else {
+                $ret =& new $object_class($arr);
+            }
             return $ret;
         }
         return $arr;
@@ -648,12 +671,12 @@ class DB_result
     /**
      * Fetch a row of data into an existing variable.
      *
-     * @param   $arr        reference to data containing the row
-     * @param   $fetchmode  format of fetched row
-     * @param   $rownum     the row number to fetch
+     * @param  mixed $arr        reference to data containing the row
+     * @param  int   $fetchmode  format of fetched row
+     * @param  int   $rownum     the row number to fetch
      *
      * @return  mixed  DB_OK on success, NULL on no more rows or
-     *                 a DB_Error object on errors
+     *                 a DB_Error object on error
      */
     function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT, $rownum=null)
     {
@@ -662,12 +685,38 @@ class DB_result
         }
         if ($fetchmode === DB_FETCHMODE_OBJECT) {
             $fetchmode = DB_FETCHMODE_ASSOC;
-            $return_object = true;
+            $object_class = $this->dbh->fetchmode_object_class;
+        }
+        if ($this->dbh->limit_from !== null) {
+            if ($this->row_counter === null) {
+                $this->row_counter = $this->dbh->limit_from;
+                // For Interbase
+                if ($this->dbh->features['limit'] == false) {
+                    $i = 0;
+                    while ($i++ < $this->dbh->limit_from) {
+                        $this->dbh->fetchInto($this->result, $arr, $fetchmode);
+                    }
+                }
+            }
+            if ($this->row_counter >= (
+                    $this->dbh->limit_from + $this->dbh->limit_count))
+            {
+                return null;
+            }
+            if ($this->dbh->features['limit'] == 'emulate') {
+                $rownum = $this->row_counter;
+            }
+
+            $this->row_counter++;
         }
         $res = $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
-        if (($res === DB_OK) && isset($return_object)) {
-            $class = $this->dbh->fetchmode_object_class;
-            $arr = new $class($arr);
+        if (($res === DB_OK) && isset($object_class)) {
+            // default mode specified in DB_common::fetchmode_object_class property
+            if ($object_class == 'stdClass') {
+                $arr = (object) $arr;
+            } else {
+                $arr = new $object_class($arr);
+            }
         }
         return $res;
     }
@@ -693,6 +742,16 @@ class DB_result
     }
 
     /**
+     * Get the next result if a batch of queries was executed.
+     *
+     * @return bool true if a new result is available or false if not.
+     */
+    function nextResult()
+    {
+        return $this->dbh->nextResult($this->result);
+    }
+
+    /**
      * Frees the resources allocated for this result set.
      * @return  int     error code
      */
@@ -710,8 +769,17 @@ class DB_result
     {
         return $this->dbh->tableInfo($this->result, $mode);
     }
+
+    function getRowCounter()
+    {
+        return $this->row_counter;
+    }
 }
 
+/**
+* Pear DB Row Object
+* @see DB_common::setFetchMode()
+*/
 class DB_row
 {
     function DB_row(&$arr)

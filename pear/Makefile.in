@@ -10,7 +10,6 @@ include $(top_srcdir)/build/rules.mk
 peardir=$(PEAR_INSTALLDIR)
 
 PEAR_SUBDIRS = \
-	Archive \
 	Benchmark \
 	Cache \
 	Cache/Container \
@@ -30,11 +29,9 @@ PEAR_SUBDIRS = \
 	Payment \
 	PEAR \
 	Schedule \
-	XML \
-	XML/RPC
+	XML 
 
 PEAR_FILES = \
-	Archive/Tar.php \
 	Benchmark/Iterate.php \
 	Benchmark/Timer.php \
 	Cache.php \
@@ -57,6 +54,7 @@ PEAR_FILES = \
 	Date/Human.php \
 	DB.php \
 	DB/common.php \
+	DB/fbsql.php \
 	DB/ibase.php \
 	DB/ifx.php \
 	DB/msql.php \
@@ -103,14 +101,15 @@ PEAR_FILES = \
 	Numbers/Roman.php \
 	PEAR.php \
 	PEAR/Common.php \
+	PEAR/Config.php \
 	PEAR/Installer.php \
 	PEAR/Packager.php \
+	PEAR/Remote.php \
 	PEAR/Uploader.php \
 	Payment/Verisign.php \
 	Schedule/At.php \
-	XML/Parser.php \
-	XML/RPC.php \
-	XML/RPC/Server.php
+	System.php \
+	XML/Parser.php 
 
 install-data-local:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
