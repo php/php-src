@@ -122,7 +122,7 @@ PHP_FUNCTION(htmlentities)
 /* }}} */
 
 /* {{{ proto array get_html_translation_table([int whichone])
-	returns the internal translation-table used by htmlspecialchars and htmlentities */
+   Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
 	zval **whichone;
