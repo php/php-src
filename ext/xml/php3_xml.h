@@ -37,14 +37,20 @@
 #include <xmltok.h>
 #include <xmlparse.h>
 
+#if WIN32||WINNT
+#define PHP_XML_API __declspec(dllexport)
+#else
+#define PHP_XML_API
+#endif
+
+
 #ifdef XML_UNICODE
 # error "UTF-16 Unicode support not implemented!"
 #endif
 
 typedef struct {
-	int le_xml_parser;
 	XML_Char *default_encoding;
-} xml_module;
+} php_xml_globals;
 
 typedef struct {
 	int index;
@@ -128,6 +134,22 @@ PHP_FUNCTION(xml_parse_into_struct);
 #endif /* HAVE_LIBEXPAT */
 
 #define phpext_xml_ptr xml_module_ptr
+
+#ifdef ZTS
+#define XMLLS_D php_xml_globals *xml_globals
+#define XMLLS_DC , PSLS_D
+#define XMLLS_C xml_globals
+#define XMLLS_CC , XMLLS_C
+#define XML(v) (xml_globals->v)
+#define XMLLS_FETCH() php_xml_globals *xml_globals = ts_resource(xml_globals_id)
+#else
+#define XMLLS_D
+#define XMLLS_DC
+#define XMLLS_C
+#define XMLLS_CC
+#define XML(v) (xml_globals.v)
+#define XMLLS_FETCH()
+#endif
 
 # endif /* _PHP_XML_H */
 
