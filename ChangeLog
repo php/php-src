@@ -1,3 +1,66 @@
+1999-12-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Define COMPILE_DL_MODNAME, if module is built as dynamic module
+
+1999-12-01  Stig Bakken  <ssb@fast.no>
+
+    * ext/mysql/php_mysql.c
+      ext/gd/gd.c: Back out PIC/COMPILE_DL hack from gd/mysql.
+
+    * ext/standard/php_output.h
+      pear/README
+      ext/gd/gd.c
+      ext/gd/gdttf.c
+      ext/gd/php3_gd.h
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      dl/phpdl.h
+      SAPI.h
+      configure.in
+      php_ini.h:    - Fixed some warnings in maintainer-mode.
+    - Made mysql and gd work as shared extensions again by defining
+      COMPILE_DL if PIC is defined.
+
+1999-12-01  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/post.c: Test commit, ignore
+
+    * ext/standard/post.c:
+    * ext/standard/post.c:
+1999-12-01  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php: remove some debug output
+
+1999-12-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/fsock.c
+      ext/standard/string.c: Make array.c thread-safe
+
+    * php_globals.h: Remove fsock-specific members
+
+    * ext/standard/fsock.c
+      ext/standard/fsock.h
+      main.c: Make fsock module thread-safe
+
+1999-12-01  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/config.m4: use new PHP_BUILD_THREAD_SAFE macro
+
+    * ext/standard/parsedate.y:
+    libzend/zend_compile.h's #define YYSTYPE causes parsedate to barf on Windows
+
+1999-12-01  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: just a remark
+
+1999-12-01  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ltconfig
+      ltmain.sh:
 1999-11-30  Sascha Schumann  <sascha@schumann.cx>
 
     * php_regex.h: Avoid Apache's regex.h, if system regex was chosen
