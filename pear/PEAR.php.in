@@ -60,14 +60,14 @@ $_PEAR_destructor_object_list = array();
  */
 class PEAR
 {
-	// {{{ properties
+    // {{{ properties
 
-	var $_debug = false;
+    var $_debug = false;
     var $_default_error_mode = null;
     var $_default_error_options = null;
     var $_default_error_handler = '';
 
-	// }}}
+    // }}}
 
     // {{{ constructor
 
@@ -75,33 +75,33 @@ class PEAR
      * Constructor.  Registers this object in
      * $_PEAR_destructor_object_list for destructor emulation.
      */
-	function PEAR() {
-		global $_PEAR_destructor_object_list;
-		$_PEAR_destructor_object_list[] = &$this;
-		if ($this->_debug) {
-			printf("PEAR constructor called, class=%s\n",
-				   get_class($this));
-		}
-	}
+    function PEAR() {
+        global $_PEAR_destructor_object_list;
+        $_PEAR_destructor_object_list[] = &$this;
+        if ($this->_debug) {
+            printf("PEAR constructor called, class=%s\n",
+                   get_class($this));
+        }
+    }
 
     // }}}
     // {{{ destructor
 
     /**
      * Destructor (the emulated type of...).  Does nothing right now,
-	 * but is included for forward compatibility, so subclass
-	 * destructors should always call it.
+     * but is included for forward compatibility, so subclass
+     * destructors should always call it.
      * 
      * See the note in the class desciption about output from
      * destructors.
-	 *
-	 * @access public
+     *
+     * @access public
      */
     function _PEAR() {
-		if ($this->_debug) {
-			printf("PEAR destructor called, class=%s\n",
-				   get_class($this));
-		}
+        if ($this->_debug) {
+            printf("PEAR destructor called, class=%s\n",
+                   get_class($this));
+        }
     }
 
     // }}}
@@ -110,15 +110,15 @@ class PEAR
     /**
      * Tell whether a value is a PEAR error.
      *
-     * @param	$data	the value to test
-     * @access	public
-     * @return	bool	true if $data is an error
+     * @param   $data   the value to test
+     * @access  public
+     * @return  bool    true if $data is an error
      */
-	function isError($data) {
-		return (bool)(is_object($data) &&
-					  (get_class($data) == "pear_error" ||
-					   is_subclass_of($data, "pear_error")));
-	}
+    function isError($data) {
+        return (bool)(is_object($data) &&
+                      (get_class($data) == "pear_error" ||
+                       is_subclass_of($data, "pear_error")));
+    }
 
     // }}}
     // {{{ setErrorHandling()
@@ -246,16 +246,16 @@ class PEAR
 function _PEAR_call_destructors() {
     global $_PEAR_destructor_object_list;
     if (is_array($_PEAR_destructor_object_list) && sizeof($_PEAR_destructor_object_list)) {
-	reset($_PEAR_destructor_object_list);
-	while (list($k, $objref) = each($_PEAR_destructor_object_list)) {
-	    $destructor = "_".get_class($objref);
-	    if (method_exists($objref, $destructor)) {
-		$objref->$destructor();
-	    }
-	}
-	// Empty the object list to ensure that destructors are
-	// not called more than once.
-	$_PEAR_destructor_object_list = array();
+    reset($_PEAR_destructor_object_list);
+    while (list($k, $objref) = each($_PEAR_destructor_object_list)) {
+        $destructor = "_".get_class($objref);
+        if (method_exists($objref, $destructor)) {
+        $objref->$destructor();
+        }
+    }
+    // Empty the object list to ensure that destructors are
+    // not called more than once.
+    $_PEAR_destructor_object_list = array();
     }
 }
 
@@ -265,235 +265,235 @@ class PEAR_Error
 {
     // {{{ properties
 
-	var $error_message_prefix = '';
-	var $error_prepend        = '';
-	var $error_append         = '';
-	var $mode                 = PEAR_ERROR_RETURN;
-	var $level                = E_USER_NOTICE;
-	var $code                 = -1;
-	var $message              = '';
-	var $debuginfo            = '';
+    var $error_message_prefix = '';
+    var $error_prepend        = '';
+    var $error_append         = '';
+    var $mode                 = PEAR_ERROR_RETURN;
+    var $level                = E_USER_NOTICE;
+    var $code                 = -1;
+    var $message              = '';
+    var $debuginfo            = '';
 
-	// Wait until we have a stack-groping function in PHP.
-	//var $file    = '';
-	//var $line    = 0;
-	
+    // Wait until we have a stack-groping function in PHP.
+    //var $file    = '';
+    //var $line    = 0;
+    
 
     // }}}
     // {{{ constructor
 
-	/**
-	 * PEAR_Error constructor
-	 *
-	 * @param $message error message
-	 *
-	 * @param $code (optional) error code
-	 *
-	 * @param $mode (optional) error mode, one of: PEAR_ERROR_RETURN,
-	 * PEAR_ERROR_PRINT, PEAR_ERROR_DIE, PEAR_ERROR_TRIGGER or
-	 * PEAR_ERROR_CALLBACK
-	 *
-	 * @param $level (optional) error level, _OR_ in the case of
-	 * PEAR_ERROR_CALLBACK, the callback function or object/method
-	 * tuple.
-	 *
-	 * @access public
-	 *
-	 */
-	function PEAR_Error($message = "unknown error", $code = null,
+    /**
+     * PEAR_Error constructor
+     *
+     * @param $message error message
+     *
+     * @param $code (optional) error code
+     *
+     * @param $mode (optional) error mode, one of: PEAR_ERROR_RETURN,
+     * PEAR_ERROR_PRINT, PEAR_ERROR_DIE, PEAR_ERROR_TRIGGER or
+     * PEAR_ERROR_CALLBACK
+     *
+     * @param $level (optional) error level, _OR_ in the case of
+     * PEAR_ERROR_CALLBACK, the callback function or object/method
+     * tuple.
+     *
+     * @access public
+     *
+     */
+    function PEAR_Error($message = "unknown error", $code = null,
                         $mode = null, $options = null, $userinfo = null)
-	{
-		if ($mode === null) {
-			$mode = PEAR_ERROR_RETURN;
-		}
-		$this->message   = $message;
-		$this->code      = $code;
-		$this->mode      = $mode;
-		$this->userinfo = $userinfo;
-		if ($mode & PEAR_ERROR_CALLBACK) {
-			$this->level = E_USER_NOTICE;
-			$this->callback = $options;
-		} else {
-			if ($options === null) {
-				$options = E_USER_NOTICE;
-			}
-			$this->level = $options;
-			$this->callback = null;
-		}
-		if ($this->mode & PEAR_ERROR_PRINT) {
-			print $this->getMessage();
-		}
-		if ($this->mode & PEAR_ERROR_TRIGGER) {
-			trigger_error($this->getMessage(), $this->level);
-		}
-		if ($this->mode & PEAR_ERROR_DIE) {
-			die($this->getMessage());
-		}
-		if ($this->mode & PEAR_ERROR_CALLBACK) {
-			if (is_string($this->callback) && strlen($this->callback)) {
-				call_user_func($this->callback, $this);
-			} elseif (is_array($this->callback) &&
-					  sizeof($this->callback) == 2 &&
-					  is_object($this->callback[0]) &&
-					  is_string($this->callback[1]) &&
-					  strlen($this->callback[1])) {
-				call_user_method($this->callback[1], $this->callback[0],
-								 $this);
-			}
-		}
-	}
+    {
+        if ($mode === null) {
+            $mode = PEAR_ERROR_RETURN;
+        }
+        $this->message   = $message;
+        $this->code      = $code;
+        $this->mode      = $mode;
+        $this->userinfo = $userinfo;
+        if ($mode & PEAR_ERROR_CALLBACK) {
+            $this->level = E_USER_NOTICE;
+            $this->callback = $options;
+        } else {
+            if ($options === null) {
+                $options = E_USER_NOTICE;
+            }
+            $this->level = $options;
+            $this->callback = null;
+        }
+        if ($this->mode & PEAR_ERROR_PRINT) {
+            print $this->getMessage();
+        }
+        if ($this->mode & PEAR_ERROR_TRIGGER) {
+            trigger_error($this->getMessage(), $this->level);
+        }
+        if ($this->mode & PEAR_ERROR_DIE) {
+            die($this->getMessage());
+        }
+        if ($this->mode & PEAR_ERROR_CALLBACK) {
+            if (is_string($this->callback) && strlen($this->callback)) {
+                call_user_func($this->callback, $this);
+            } elseif (is_array($this->callback) &&
+                      sizeof($this->callback) == 2 &&
+                      is_object($this->callback[0]) &&
+                      is_string($this->callback[1]) &&
+                      strlen($this->callback[1])) {
+                call_user_method($this->callback[1], $this->callback[0],
+                                 $this);
+            }
+        }
+    }
 
     // }}}
     // {{{ getMode()
 
-	/**
-	 * Get the error mode from an error object.
-	 *
-	 * @return int error mode
-	 * @access public
-	 */
-	function getMode() {
-		return $this->mode;
-	}
+    /**
+     * Get the error mode from an error object.
+     *
+     * @return int error mode
+     * @access public
+     */
+    function getMode() {
+        return $this->mode;
+    }
 
     // }}}
     // {{{ getCallback()
 
-	/**
-	 * Get the callback function/method from an error object.
-	 *
-	 * @return mixed callback function or object/method array
-	 * @access public
-	 */
-	function getCallback() {
-		return $this->callback;
-	}
+    /**
+     * Get the callback function/method from an error object.
+     *
+     * @return mixed callback function or object/method array
+     * @access public
+     */
+    function getCallback() {
+        return $this->callback;
+    }
 
     // }}}
     // {{{ getMessage()
 
-	
-	/**
-	 * Get the error message from an error object.
-	 *
-	 * @return	string	full error message
-	 * @access public
-	 */
-	function getMessage ()
-	{
-		return ($this->error_prepend . $this->error_message_prefix .
-		        $this->message       . $this->error_append);
-	}
-	
+    
+    /**
+     * Get the error message from an error object.
+     *
+     * @return  string  full error message
+     * @access public
+     */
+    function getMessage ()
+    {
+        return ($this->error_prepend . $this->error_message_prefix .
+                $this->message       . $this->error_append);
+    }
+    
 
     // }}}
     // {{{ getCode()
     
-	/**
-	 * Get error code from an error object
-	 *
-	 * @return int error code
-	 * @access public
-	 */
-	 function getCode()
-	 {
-	 	return $this->code;
-	 }
+    /**
+     * Get error code from an error object
+     *
+     * @return int error code
+     * @access public
+     */
+     function getCode()
+     {
+        return $this->code;
+     }
 
     // }}}
     // {{{ getType()
 
-	/**
-	 * Get the name of this error/exception.
-	 *
-	 * @return string error/exception name (type)
-	 * @access public
-	 */
-	function getType ()
-	{
-		return get_class($this);
-	}
+    /**
+     * Get the name of this error/exception.
+     *
+     * @return string error/exception name (type)
+     * @access public
+     */
+    function getType ()
+    {
+        return get_class($this);
+    }
 
     // }}}
     // {{{ getUserInfo()
 
-	/**
-	 * Get additional user-supplied information.
-	 *
-	 * @return string user-supplied information
-	 * @access public
-	 */
-	function getUserInfo ()
-	{
-		return $this->userinfo;
-	}
+    /**
+     * Get additional user-supplied information.
+     *
+     * @return string user-supplied information
+     * @access public
+     */
+    function getUserInfo ()
+    {
+        return $this->userinfo;
+    }
 
     // }}}
     // {{{ getDebugInfo()
 
-	/**
-	 * Get additional debug information supplied by the application.
-	 *
-	 * @return string debug information
-	 * @access public
-	 */
-	function getDebugInfo ()
-	{
-		return $this->getUserInfo();
-	}
+    /**
+     * Get additional debug information supplied by the application.
+     *
+     * @return string debug information
+     * @access public
+     */
+    function getDebugInfo ()
+    {
+        return $this->getUserInfo();
+    }
 
     // }}}
     // {{{ toString()
 
-	/**
-	 * Make a string representation of this object.
-	 *
-	 * @return string a string with an object summary
-	 * @access public
-	 */
-	function toString() {
-		$modes = array();
-		$levels = array(E_USER_NOTICE => "notice",
-						E_USER_WARNING => "warning",
-						E_USER_ERROR => "error");
-		if ($this->mode & PEAR_ERROR_CALLBACK) {
-			if (is_array($this->callback)) {
-				$callback = get_class($this->callback[0]) . "::" .
-					$this->callback[1];
-			} else {
-				$callback = $this->callback;
-			}
-			return sprintf('[%s: message="%s" code=%d mode=callback '.
-						   'callback=%s prefix="%s" prepend="%s" append="%s" '.
-						   'debug="%s"]',
-						   get_class($this), $this->message, $this->code,
-						   $callback, $this->error_message_prefix,
-						   $this->error_prepend, $this->error_append,
-						   $this->debuginfo);
-		}
-		if ($this->mode & PEAR_ERROR_CALLBACK) {
-			$modes[] = "callback";
-		}
-		if ($this->mode & PEAR_ERROR_PRINT) {
-			$modes[] = "print";
-		}
-		if ($this->mode & PEAR_ERROR_TRIGGER) {
-			$modes[] = "trigger";
-		}
-		if ($this->mode & PEAR_ERROR_DIE) {
-			$modes[] = "die";
-		}
-		if ($this->mode & PEAR_ERROR_RETURN) {
-			$modes[] = "return";
-		}
-		return sprintf('[%s: message="%s" code=%d mode=%s level=%s prefix="%s" '.
-					   'prepend="%s" append="%s" debug="%s"]',
-					   get_class($this), $this->message, $this->code,
-					   implode("|", $modes), $levels[$this->level],
-					   $this->error_message_prefix,
-					   $this->error_prepend, $this->error_append,
-					   $this->debuginfo);
-	}
+    /**
+     * Make a string representation of this object.
+     *
+     * @return string a string with an object summary
+     * @access public
+     */
+    function toString() {
+        $modes = array();
+        $levels = array(E_USER_NOTICE => "notice",
+                        E_USER_WARNING => "warning",
+                        E_USER_ERROR => "error");
+        if ($this->mode & PEAR_ERROR_CALLBACK) {
+            if (is_array($this->callback)) {
+                $callback = get_class($this->callback[0]) . "::" .
+                    $this->callback[1];
+            } else {
+                $callback = $this->callback;
+            }
+            return sprintf('[%s: message="%s" code=%d mode=callback '.
+                           'callback=%s prefix="%s" prepend="%s" append="%s" '.
+                           'debug="%s"]',
+                           get_class($this), $this->message, $this->code,
+                           $callback, $this->error_message_prefix,
+                           $this->error_prepend, $this->error_append,
+                           $this->debuginfo);
+        }
+        if ($this->mode & PEAR_ERROR_CALLBACK) {
+            $modes[] = "callback";
+        }
+        if ($this->mode & PEAR_ERROR_PRINT) {
+            $modes[] = "print";
+        }
+        if ($this->mode & PEAR_ERROR_TRIGGER) {
+            $modes[] = "trigger";
+        }
+        if ($this->mode & PEAR_ERROR_DIE) {
+            $modes[] = "die";
+        }
+        if ($this->mode & PEAR_ERROR_RETURN) {
+            $modes[] = "return";
+        }
+        return sprintf('[%s: message="%s" code=%d mode=%s level=%s prefix="%s" '.
+                       'prepend="%s" append="%s" debug="%s"]',
+                       get_class($this), $this->message, $this->code,
+                       implode("|", $modes), $levels[$this->level],
+                       $this->error_message_prefix,
+                       $this->error_prepend, $this->error_append,
+                       $this->debuginfo);
+    }
 
     // }}}
 }
