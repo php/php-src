@@ -94,15 +94,16 @@ int dbx_mysql_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS
     return 1;
     }
 
-int dbx_mysql_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS) {
+int dbx_mysql_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS) {
     /*/ returns 1 as long or a result identifier as resource on success  or 0 as long on failure /*/
-    int number_of_arguments=2;
-    zval ** arguments[2];
+    int number_of_arguments=3;
+    zval ** arguments[3];
     zval * returned_zval=NULL;
 
-    arguments[0]=sql_statement;
-    arguments[1]=dbx_handle;
-    dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_query", &returned_zval, number_of_arguments, arguments);
+    arguments[0]=db_name;
+    arguments[1]=sql_statement;
+    arguments[2]=dbx_handle;
+    dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_db_query", &returned_zval, number_of_arguments, arguments);
     /*/ mysql_query returns a bool for success or failure, or a result_identifier for select statements /*/
     if (!returned_zval || (returned_zval->type!=IS_BOOL && returned_zval->type!=IS_RESOURCE)) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);

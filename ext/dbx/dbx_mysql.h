@@ -35,7 +35,7 @@ int dbx_mysql_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, z
     /*/ returns persistent connection handle as resource on success or 0 as long on failure /*/
 int dbx_mysql_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS);
     /*/ returns 1 as long on success or 0 as long on failure /*/
-int dbx_mysql_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS);
+int dbx_mysql_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS);
     /*/ returns 1 as long or a result identifier as resource on success  or 0 as long on failure /*/
 int dbx_mysql_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS);
     /*/ returns column-count as long on success or 0 as long on failure /*/
