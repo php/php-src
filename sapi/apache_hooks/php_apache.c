@@ -132,10 +132,12 @@ static request_rec *get_apache_request(pval *z TSRMLS_DC)
 /* {{{ php_apache_request_new(request_rec *r)
  * create a new zval-instance for ApacheRequest that wraps request_rec
  */
-zval *php_apache_request_new(request_rec *r TSRMLS_DC)
+zval *php_apache_request_new(request_rec *r)
 {
 	zval *req;
 	zval *addr;
+	
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(addr);
 	Z_TYPE_P(addr) = IS_LONG;

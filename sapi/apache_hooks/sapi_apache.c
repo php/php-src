@@ -105,8 +105,8 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
                 ZVAL_STRING(method, tmp +2, 1);
                 *tmp = ':';
                 call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL TSRMLS_CC);
-                zval_dtor(&class);
-                zval_dtor(&method);
+                zval_dtor(class);
+                zval_dtor(method);
             }
             else {
                 php_error(E_ERROR, "Unable to call %s - not a Class::Method\n", handler->name);
@@ -118,7 +118,7 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
             assert(0);
             break;
     }
-	zval_dtor(&req);
+	zval_dtor(req);
 	AP(in_request) = 0;
 
 	return OK;
