@@ -372,7 +372,8 @@ if (!getenv('NO_INTERACTION')) {
 		if (substr(PHP_OS, 0, 3) != "WIN") {
 			$automake = shell_exec('automake --version');
 			$autoconf = shell_exec('autoconf --version');
-			$libtool = shell_exec('libtool --version');
+			/* Always use the generated libtool - Mac OSX uses 'glibtool' */
+			$libtool = shell_exec('./libtool --version');
 			/* Try the most common flags for 'version' */
 			$flags = array('-v', '-V', '--version');
 			$cc_status=0;
