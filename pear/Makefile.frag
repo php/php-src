@@ -158,8 +158,7 @@ HEADER_DIRS = \
 	ext/standard \
 	ext/session \
 	ext/xml \
-	ext/xml/expat/xmlparse \
-	ext/xml/expat/xmltok \
+	ext/xml/expat \
 	main \
 	ext/mbstring \
 	ext/pgsql \
