@@ -217,7 +217,6 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 	  if (phpurl != NULL) {
 	  	php_url_free(phpurl);
 	  }
-		xmlFree(buf);
 		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
@@ -226,14 +225,12 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 	if (phpurl->scheme != NULL && strcmp(phpurl->scheme, "https") == 0) {
 		use_ssl = 1;
 	} else if (phpurl->scheme == NULL || strcmp(phpurl->scheme, "http") != 0) {
-		xmlFree(buf);
 		php_url_free(phpurl);
 		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
 #ifdef ZEND_ENGINE_2
 	if (use_ssl && php_stream_locate_url_wrapper("https://", NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) == NULL) {
-		xmlFree(buf);
 		php_url_free(phpurl);
 		add_soap_fault(this_ptr, "HTTP", "SSL support not available in this build", NULL, NULL TSRMLS_CC);
 		return FALSE;
@@ -241,7 +238,6 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 #else
 #ifndef HAVE_OPENSSL_EXT
 	if (use_ssl) {
-		xmlFree(buf);
 		php_url_free(phpurl);
 		add_soap_fault(this_ptr, "HTTP", "SSL support not available in this build", NULL, NULL TSRMLS_CC);
 		return FALSE;
@@ -291,7 +287,6 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 			add_property_resource(this_ptr, "httpsocket", php_stream_get_resource_id(stream));
 			add_property_long(this_ptr, "_use_proxy", use_proxy);
 		} else {
-			xmlFree(buf);
 			php_url_free(phpurl);
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL TSRMLS_CC);
 			return FALSE;
@@ -382,7 +377,6 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 					request_size = Z_STRLEN(retval);
 				} else {
 					if (request != buf) {efree(request);}
-					xmlFree(buf);
 					smart_str_free(&soap_headers);
 					php_stream_close(stream);
 					zend_hash_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"));
@@ -471,7 +465,6 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
 		if (err != soap_headers.len) {
 			if (request != buf) {efree(request);}
-			xmlFree(buf);
 			smart_str_free(&soap_headers);
 			php_stream_close(stream);
 			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl"));
