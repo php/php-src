@@ -1833,13 +1833,14 @@ PHP_FUNCTION(substr)
 }
 /* }}} */
 
-/* {{{ proto string substr_replace(string str, string repl, int start [, int length])
+
+/* {{{ proto mixed substr_replace(mixed str, mixed repl, mixed start [, mixed length])
    Replaces part of a string with another string */
 PHP_FUNCTION(substr_replace)
 {
 	zval **str;
 	zval **from;
-	zval **len;
+	zval **len = NULL;
 	zval **repl;
 	char *result;
 	int result_len;
@@ -1847,60 +1848,229 @@ PHP_FUNCTION(substr_replace)
 	int f;
 	int argc = ZEND_NUM_ARGS();
 
+	HashPosition pos_str, pos_from, pos_repl, pos_len;
+	zval **tmp_str = NULL, **tmp_from = NULL, **tmp_repl = NULL, **tmp_len= NULL;
+
+
 	if (argc < 3 || argc > 4 || zend_get_parameters_ex(argc, &str, &repl, &from, &len) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_string_ex(str);
-	convert_to_string_ex(repl);
-	convert_to_long_ex(from);
 	
+	if (Z_TYPE_PP(str) != IS_ARRAY) {
+		convert_to_string_ex(str);
+	}
+	if (Z_TYPE_PP(repl) != IS_ARRAY) {
+		convert_to_string_ex(repl);
+	}
+	if (Z_TYPE_PP(from) != IS_ARRAY) {
+		convert_to_long_ex(from);
+	}
+
 	if (argc > 3) {
-		convert_to_long_ex(len);
-		l = Z_LVAL_PP(len);
+		if (Z_TYPE_PP(len) != IS_ARRAY) {
+			convert_to_long_ex(len);
+			l = Z_LVAL_PP(len);
+		}
 	} else {
-		l = Z_STRLEN_PP(str);
+		if (Z_TYPE_PP(str) != IS_ARRAY) {
+			l = Z_STRLEN_PP(str);
+		}
 	}
+
+	if (Z_TYPE_PP(str) == IS_STRING) {
+		if (
+			(argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) 
+			|| 
+			(argc == 4 && Z_TYPE_PP(from) != Z_TYPE_PP(len))
+		) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
+			RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);		
+		}
+		if (argc == 4 && Z_TYPE_PP(from) == IS_ARRAY) {
+			if (zend_hash_num_elements(Z_ARRVAL_PP(from)) != zend_hash_num_elements(Z_ARRVAL_PP(len))) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should have the same number of elements");
+				RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);		
+			}
+		}
+	}
+
 	
-	f = Z_LVAL_PP(from);
+	if (Z_TYPE_PP(str) != IS_ARRAY) {
+		if (Z_TYPE_PP(from) != IS_ARRAY) {
+			int repl_len = 0;
 
-	/* if "from" position is negative, count start position from the end
-	 * of the string
-	 */
-	if (f < 0) {
-		f = Z_STRLEN_PP(str) + f;
-		if (f < 0) {
-			f = 0;
+			f = Z_LVAL_PP(from);
+
+			/* if "from" position is negative, count start position from the end
+			 * of the string
+			 */
+			if (f < 0) {
+				f = Z_STRLEN_PP(str) + f;
+				if (f < 0) {
+					f = 0;
+				}
+			} else if (f > Z_STRLEN_PP(str)) {
+				f = Z_STRLEN_PP(str);
+			}
+			/* if "length" position is negative, set it to the length
+			 * needed to stop that many chars from the end of the string
+			 */
+			if (l < 0) {
+				l = (Z_STRLEN_PP(str) - f) + l;
+				if (l < 0) {
+					l = 0;
+				}
+			}
+
+			if ((f + l) > Z_STRLEN_PP(str)) {
+				l = Z_STRLEN_PP(str) - f;
+			}
+			if (Z_TYPE_PP(repl) == IS_ARRAY) {
+				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(repl), &pos_repl);
+				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(repl), (void **) &tmp_repl, &pos_repl)) {
+					convert_to_string_ex(tmp_repl);
+					repl_len = Z_STRLEN_PP(tmp_repl);
+				}			
+				result_len = Z_STRLEN_PP(str) - l + repl_len;
+				result = ecalloc(result_len + 1, sizeof(char *));
+
+				memcpy(result, Z_STRVAL_PP(str), f);
+				if (repl_len) {
+					memcpy(&result[f], Z_STRVAL_PP(tmp_repl), repl_len);
+				}
+			} else {
+				repl_len = Z_STRLEN_PP(repl);
+				result_len = Z_STRLEN_PP(str) - l + repl_len;
+				result = ecalloc(result_len + 1, sizeof(char *));
+
+				memcpy(result, Z_STRVAL_PP(str), f);
+				memcpy(&result[f], Z_STRVAL_PP(repl), repl_len);
+			}
+			memcpy(&result[f + repl_len], Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
+			RETURN_STRINGL(result, result_len, 0);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented.");
+			RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);	
 		}
-	} else if (f > Z_STRLEN_PP(str)) {
-		f = Z_STRLEN_PP(str);
-	}
+	} else { /* str is array of strings */
+		
+		array_init(return_value);
 
-
-	/* if "length" position is negative, set it to the length
-	 * needed to stop that many chars from the end of the string
-	 */
-	if (l < 0) {
-		l = (Z_STRLEN_PP(str) - f) + l;
-		if (l < 0) {
-			l = 0;
+		if (Z_TYPE_PP(from) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(from), &pos_from);
 		}
-	}
 
-	if ((f + l) > Z_STRLEN_PP(str)) {
-		l = Z_STRLEN_PP(str) - f;
-	}
+		if (argc > 3 && Z_TYPE_PP(len) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(len), &pos_len);
+		}
+		
+		if (Z_TYPE_PP(repl) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(repl), &pos_repl);
+		}
+		
+		
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(str), &pos_str);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(str), (void **) &tmp_str, &pos_str) == SUCCESS) {
+			convert_to_string_ex(tmp_str);
+			
+			if (Z_TYPE_PP(from) == IS_ARRAY) {
+				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(from), (void **) &tmp_from, &pos_from)) {
+					convert_to_long_ex(tmp_from);
+					
+					f = Z_LVAL_PP(tmp_from);
+					if (f < 0) {
+						f = Z_STRLEN_PP(tmp_str) + f;
+						if (f < 0) {
+							f = 0;
+						}
+					} else if (f > Z_STRLEN_PP(tmp_str)) {
+						f = Z_STRLEN_PP(tmp_str);
+					}
+					zend_hash_move_forward_ex(Z_ARRVAL_PP(from), &pos_from);
+				} else {
+					f = 0;
+				}				
+			} else {
+				f = Z_LVAL_PP(from);
+				if (f < 0) {
+					f = Z_STRLEN_PP(tmp_str) + f;
+					if (f < 0) {
+						f = 0;
+					}
+				} else if (f > Z_STRLEN_PP(tmp_str)) {
+					f = Z_STRLEN_PP(tmp_str);
+				}		
+			}
 
-	result_len = Z_STRLEN_PP(str) - l + Z_STRLEN_PP(repl);
-	result = ecalloc(result_len + 1, sizeof(char *));
+			
+			if (argc > 3 && Z_TYPE_PP(len) == IS_ARRAY) {
+				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(len), (void **) &tmp_len, &pos_len)) {
+					convert_to_long_ex(tmp_len);
+					
+					l = Z_LVAL_PP(tmp_len);
+					zend_hash_move_forward_ex(Z_ARRVAL_PP(len), &pos_len);
+				} else {
+					l = Z_STRLEN_PP(tmp_str);
+				}
+			} else if (argc > 3) { 
+				l = Z_LVAL_PP(len);
+			} else {
+				l = Z_STRLEN_PP(tmp_str);
+			}
+			
+			if (l < 0) {
+				l = (Z_STRLEN_PP(tmp_str) - f) + l;
+				if (l < 0) {
+					l = 0;
+				}
+			}	
 
-	memcpy(result, Z_STRVAL_PP(str), f);
-	memcpy(&result[f], Z_STRVAL_PP(repl), Z_STRLEN_PP(repl));
-	memcpy(&result[f + Z_STRLEN_PP(repl)], Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
 
-	RETURN_STRINGL(result, result_len, 0);
+			if ((f + l) > Z_STRLEN_PP(tmp_str)) {
+				l = Z_STRLEN_PP(tmp_str) - f;
+			}
+		
+			result_len = Z_STRLEN_PP(tmp_str) - l;
+			
+			if (Z_TYPE_PP(repl) == IS_ARRAY) {
+				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(repl), (void **) &tmp_repl, &pos_repl)) {
+					convert_to_string_ex(tmp_repl);
+					result_len += Z_STRLEN_PP(tmp_repl);
+					zend_hash_move_forward_ex(Z_ARRVAL_PP(repl), &pos_repl);	
+					result = ecalloc(result_len + 1, sizeof(char *));
+
+					memcpy(result, Z_STRVAL_PP(tmp_str), f);
+					memcpy(&result[f], Z_STRVAL_PP(tmp_repl), Z_STRLEN_PP(tmp_repl));
+					memcpy(&result[f + Z_STRLEN_PP(tmp_repl)], Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
+				} else {
+					result = ecalloc(result_len + 1, sizeof(char *));
+	
+					memcpy(result, Z_STRVAL_PP(tmp_str), f);
+					memcpy(&result[f], Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
+				}
+
+			} else {
+				result_len += Z_STRLEN_PP(repl);
+
+				result = ecalloc(result_len + 1, sizeof(char *));
+
+
+				memcpy(result, Z_STRVAL_PP(tmp_str), f);
+				memcpy(&result[f], Z_STRVAL_PP(repl), Z_STRLEN_PP(repl));
+				memcpy(&result[f + Z_STRLEN_PP(repl)], Z_STRVAL_PP(tmp_str) + f + l, Z_STRLEN_PP(tmp_str) - f - l);
+			}
+			
+
+			add_next_index_stringl(return_value, result, result_len, 0);
+			
+			zend_hash_move_forward_ex(Z_ARRVAL_PP(str), &pos_str);
+		} /*while*/
+	} /* if */
 }
 /* }}} */
+
+
+
 
 /* {{{ proto string quotemeta(string str)
    Quotes meta characters */
