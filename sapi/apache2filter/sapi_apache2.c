@@ -161,6 +161,17 @@ php_apache_sapi_read_cookies(TSRMLS_D)
 	return (char *) http_cookie;
 }
 
+static char *
+php_apache_sapi_getenv(char *name, size_t name_len TSRMLS_DC)
+{
+	php_struct *ctx = SG(server_context);
+	const char *env_var;
+	
+	env_var = apr_table_get(ctx->r->subprocess_env, name);
+
+	return (char *) env_var;
+}
+
 static void
 php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
@@ -254,7 +265,7 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_ub_write,				/* unbuffered write */
 	php_apache_sapi_flush,					/* flush */
 	NULL,									/* get uid */
-	NULL,									/* getenv */
+	php_apache_sapi_getenv,					/* getenv */
 
 	php_error,								/* error handler */
 
