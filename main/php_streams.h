@@ -153,6 +153,7 @@ typedef struct _php_stream_ops  {
 	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
 	int (*stat)(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
+	int dont_block;
 } php_stream_ops;
 
 typedef struct _php_stream_wrapper_ops {

@@ -923,7 +923,8 @@ php_stream_ops php_stream_socket_ops = {
 	NULL, /* seek */
 	php_sockop_cast,
 	php_sockop_stat,
-	php_sockop_set_option
+	php_sockop_set_option,
+	1
 };
 
 

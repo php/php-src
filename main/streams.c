@@ -494,7 +494,11 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 		
 		if (justread <= 0)
 			break;
+		
 		stream->writepos += justread;
+		
+		if (stream->ops->dont_block)
+			break;
 	}
 }
 
@@ -615,74 +619,105 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	return stream->ops->stat(stream, ssb TSRMLS_CC);
 }
 
+static char *php_stream_locate_eol(php_stream *stream TSRMLS_DC)
+{
+	size_t avail;
+	char *cr, *lf, *eol = NULL;
+	char *readptr;
+	
+	readptr = stream->readbuf + stream->readpos;
+	avail = stream->writepos - stream->readpos;
+
+	/* Look for EOL */
+	if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
+		cr = memchr(readptr, '\r', avail);
+		lf = memchr(readptr, '\n', avail);
+
+		if (cr && lf != cr + 1) {
+			/* mac */
+			stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
+			stream->flags |= PHP_STREAM_FLAG_EOL_MAC;
+			eol = cr;
+		} else if ((cr && lf && cr == lf - 1) || (lf)) {
+			/* dos or unix endings */
+			stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
+			eol = lf;
+		}
+	} else if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
+		eol = memchr(readptr, '\r', avail);
+	} else {
+		/* unix (and dos) line endings */
+		eol = memchr(readptr, '\n', avail);
+	}
+
+	return eol;
+}
+
 PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
 {
-	char *cr, *lf, *eol = NULL;
-	size_t toread = 0, didread = 0, justread = 0, avail = 0;
-	char *readptr;
+	size_t avail = 0;
 	
 	if (maxlen == 0)
 		return NULL;
-	
-	while (didread < maxlen - 1) {
-		toread = maxlen - 1;
-		if (toread > stream->chunk_size)
-			toread = stream->chunk_size;
 
-		php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
+	/*
+	 * If the underlying stream operations block when no new data is readable,
+	 * we need to take extra precautions.
+	 *
+	 * If there is buffered data available, we check for a EOL. If it exists,
+	 * we pass the data immediately back to the caller. This saves a call
+	 * to the read implementation and will not block where blocking
+	 * is not necessary at all.
+	 *
+	 * If the stream buffer contains more data than the caller requested,
+	 * we can also avoid that costly step and simply return that data.
+	 */
 
-		readptr = stream->readbuf + stream->readpos;
+	for (;;) {
 		avail = stream->writepos - stream->readpos;
 
-		if (avail == 0)
-			break;
-		
-		/* Look for EOL */
-		if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
-			cr = memchr(readptr, '\r', avail);
-			lf = memchr(readptr, '\n', avail);
+		if (avail > 0) {
+			size_t cpysz = 0;
+			char *readptr;
+			char *eol;
+			int done = 0;
 
-			if (cr && lf != cr + 1) {
-				/* mac */
-				stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
-				stream->flags |= PHP_STREAM_FLAG_EOL_MAC;
-				eol = cr;
-			} else if ((cr && lf && cr == lf - 1) || (lf)) {
-				/* dos or unix endings */
-				stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
-				eol = lf;
+			readptr = stream->readbuf + stream->readpos;
+			eol = php_stream_locate_eol(stream TSRMLS_CC);
+
+			if (eol) {
+				cpysz = eol - readptr + 1;
+				done = 1;
+			} else {
+				cpysz = avail;
 			}
-		} else if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
-			eol = memchr(readptr, '\r', avail);
+
+			if (cpysz >= maxlen - 1) {
+				cpysz = maxlen - 1;
+				done = 1;
+			}
+
+			memcpy(buf, readptr, cpysz);
+
+			stream->position += cpysz;
+			stream->readpos += cpysz;
+			buf += cpysz;
+			maxlen -= cpysz;
+
+			if (done) {
+				break;
+			}
 		} else {
-			/* unix (and dos) line endings */
-			eol = memchr(readptr, '\n', avail);
+			size_t toread = maxlen - 1;
+			if (toread > stream->chunk_size)
+				toread = stream->chunk_size;
+
+			/* XXX: Should not the loop end, if the stream op fails? */
+			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
 		}
-
-		if (eol && (size_t)((ptrdiff_t)eol + 1 - (ptrdiff_t)readptr) <= maxlen - 1) {
-			justread = eol + 1 - readptr;
-		} else {
-			eol = NULL;
-			justread = toread;
-			if (justread > avail)
-				justread = avail;
-		}
-
-		memcpy(buf, readptr, justread);
-		didread += justread;
-		buf += justread;
-		stream->readpos += justread;
-
-		if (eol)
-			break;
 	}
-
-	if (didread == 0)
-		return NULL;
 	
-	/* terminate the buffer */
-	*buf = '\0';
-	stream->position += didread;
+	buf[0] = '\0';
 
 	return buf;
 }
