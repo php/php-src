@@ -502,7 +502,7 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 		unsigned int i, j;
 		zend_mem_header *ptr;
 
-		for (i=1; i<MAX_CACHED_MEMORY; i++) {
+		for (i=0; i<MAX_CACHED_MEMORY; i++) {
 			for (j=0; j<AG(cache_count)[i]; j++) {
 				ptr = (zend_mem_header *) AG(cache)[i][j];
 #  if MEMORY_LIMIT
