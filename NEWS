@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, PHP 5 Beta 3
+- Added dba_key_split() to split inifile keys in an array. (Marcus)
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
 - Fixed bug #24394 (Serializing cross-referenced objects causes segfault).
   (Moriyoshi)
