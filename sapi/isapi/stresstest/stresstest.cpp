@@ -31,7 +31,6 @@
 //
 #define NUM_THREADS 10
 #define ITERATIONS 1
-HANDLE terminate[NUM_THREADS];
 HANDLE StartNow;
 // quick and dirty environment
 typedef CMapStringToString TEnvironment;
@@ -101,32 +100,50 @@ void stripcrlf(char *line)
 
 BOOL CompareFiles(const char*f1, const char*f2)
 {
-	FILE *fp1 = fopen(f1,"r");
-	if (!fp1) return FALSE;
-	FILE *fp2 = fopen(f2,"r");
-	if (!fp2) {
+	FILE *fp1, *fp2;
+	bool retval;
+	char buf1[1024], buf2[1024];
+	int length1, length2;
+
+	if ((fp1=fopen(f1, "r"))==NULL) {
+		return FALSE;
+	}
+
+	if ((fp2=fopen(f2, "r"))==NULL) {
 		fclose(fp1);
 		return FALSE;
 	}
 
-	CString file1, file2, line;
-	char buf[1024];
-	while (fgets(buf, sizeof(buf), fp1)) {
-		line = buf;
-		line.TrimLeft();
-		line.TrimRight();
-		file1+=line;
+	retval = TRUE; // success oriented
+	while (true) {
+		length1 = fread(buf1, 1, sizeof(buf1), fp1);
+		length2 = fread(buf2, 1, sizeof(buf2), fp2);
+
+		buf2[0] = 0;
+		// check for end of file
+		if (feof(fp1)) {
+			if (!feof(fp2)) {
+				retval = FALSE;
+			}
+			break;
+		} else if (feof(fp2)) {
+			if (!feof(fp1)) {
+				retval = FALSE;
+			}
+			break;
+		}
+
+		// compare data
+		if (length1!=length2
+			|| memcmp(buf1, buf2, length1)!=0) {
+			retval = FALSE;
+			break;
+		}
 	}
 	fclose(fp1);
-	while (fgets(buf, sizeof(buf), fp2)) {
-		line = buf;
-		line.TrimLeft();
-		line.TrimRight();
-		file2+=line;
-	}
 	fclose(fp2);
 
-	return file1==file2;
+	return retval;
 }
 
 BOOL ReadGlobalEnvironment(const char *environment)
@@ -202,16 +219,13 @@ void DoThreads() {
 	DWORD tid;
 	HANDLE threads[NUM_THREADS];
 	for (DWORD i=0; i< NUM_THREADS; i++) {
-		terminate[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
-		if ((threads[i]=CreateThread(NULL, 0, IsapiThread, &terminate[i], CREATE_SUSPENDED, &tid))==NULL){
-			SetEvent(terminate[i]);
-		}
+		threads[i]=CreateThread(NULL, 0, IsapiThread, NULL, CREATE_SUSPENDED, &tid);
 	}
 	for (i=0; i< NUM_THREADS; i++) {
 		if (threads[i]) ResumeThread(threads[i]);
 	}
 	// wait for threads to finish
-	WaitForMultipleObjects(NUM_THREADS, terminate, TRUE, INFINITE);
+	WaitForMultipleObjects(NUM_THREADS, threads, TRUE, INFINITE);
 }
 
 void DoFileList(const char *filelist, const char *environment)
@@ -394,7 +408,8 @@ void DoTestFiles(const char *filelist, const char *environment)
 	printf("Done\r\n");
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 	LPVOID lpMsgBuf;
 	char *filelist=NULL, *environment=NULL;
 
@@ -454,8 +469,9 @@ int main(int argc, char* argv[]) {
 			_snprintf(TestPath, sizeof(TestPath)-1, "%s\\tests", filelist);
 		else strcpy(TestPath, "tests");
 		DoTestFiles(TestPath, environment);
-	} else
+	} else {
 		DoFileList(filelist, environment);
+	}
 
 	// cleanup
 
@@ -470,8 +486,8 @@ int main(int argc, char* argv[]) {
 
 DWORD CALLBACK IsapiThread(void *p)
 {
-	HANDLE *terminate = (HANDLE *)p;
 	DWORD filecount = IsapiFileList.GetSize();
+
 	for (DWORD j=0; j<ITERATIONS; j++) {
 		for (DWORD i=0; i<filecount; i++) {
 			// execute each file
@@ -496,7 +512,6 @@ DWORD CALLBACK IsapiThread(void *p)
 			Sleep(10);
 		}
 	}
-	SetEvent(*terminate);
 	printf("Thread ending...\n");
 	return 0;
 }
