@@ -1,3 +1,33 @@
+2000-03-18  Sander Steffann  <steffann@nederland.net>
+
+    * ext/gd/config.m4: A small fix when checking for libjpeg
+
+2000-03-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * .cvsignore
+      configure.in:       on platforms which support it (i.e. Linux) (Sascha)
+
+    Additionally, we enforce passing pthread_cflags to the compiler, if
+    libtool chooses it as linker.
+
+    * sapi/aolserver/aolserver.c: Make it compile
+
+2000-03-18  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/dl.c: - Fix compile problem on FreeBSD.
+
+2000-03-18  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: *** empty log message ***
+
+    * ext/standard/var.c
+      NEWS:
+    (serialize/unserialize) _sleep_() -> __sleep(), _wakeup_() -> __wakeup() rename.
+
+2000-03-18  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: *** empty log message ***
+
 2000-03-17  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
 
     * ext/standard/filestat.c: is_executable() for root fixed
