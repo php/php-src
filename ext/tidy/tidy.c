@@ -93,8 +93,6 @@
         } \
     }
 
-#define TIDY_THROW _php_tidy_throw_exception
-
 #define REGISTER_TIDY_CLASS(classname, name, parent) \
 	{ \
 		zend_class_entry ce; \
@@ -330,27 +328,6 @@ void php_tidy_panic(ctmbstr msg)
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
 }
 
-static void _php_tidy_throw_exception(char *message, ...)
-{
-	char *msg;
-	va_list ap;
-	
-	TSRMLS_FETCH();
-    
-	va_start(ap, message);
-	vspprintf(&msg, 0, message, ap);
-	
-    if(TG(inst)) {
-        zend_throw_exception(tidy_ce_exception, msg, 0 TSRMLS_CC);
-    } else {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", msg);
-    }
-	    
-    va_end(ap);
-	efree(msg);
-	
-}
-
 static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS_DC)
 {
 	TidyOption opt;
@@ -486,7 +463,7 @@ static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path TSR
 	int len;
 	char *data = NULL;
 
-	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL))) {
+	if (!(stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE, NULL))) {
 		return NULL;
 	}
 	if ((len = php_stream_copy_to_mem(stream, &data, PHP_STREAM_COPY_ALL, 0)) == 0) {
@@ -693,7 +670,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj TSRMLS_DC)
 	if (obj->ptdoc->errbuf->size) {
 		MAKE_STD_ZVAL(temp);
 		ZVAL_STRINGL(temp, obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size, TRUE);
-		zend_hash_update(obj->std.properties, "error_buf", sizeof("error_buf"), (void *)&temp, sizeof(zval *), NULL);
+		zend_hash_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer"), (void *)&temp, sizeof(zval *), NULL);
 	}
 }
 
@@ -777,7 +754,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRM
 			break;
 
 		case is_doc:
-			ADD_PROPERTY_NULL(obj->std.properties, error_buf);
+			ADD_PROPERTY_NULL(obj->std.properties, errorBuffer);
 			ADD_PROPERTY_NULL(obj->std.properties, value);
 			break;
 
