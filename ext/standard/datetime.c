@@ -94,18 +94,16 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		convert_to_long(arguments[i]);
 	}
 	t=time(NULL);
-	if (gm) {
-		tn = gmtime(&t);
 #if HAVE_TZSET
-		tzset();
-#if HAVE_TM_ZONE
+	tzset();
+#endif
+	tn = localtime(&t);
+	if (gm) {
+#if HAVE_TM_GMTOFF
 		gmadjust=(tn->tm_gmtoff)/3600;
 #else
 		gmadjust=timezone/3600;
 #endif
-#endif
-	} else {
-		tn = localtime(&t);
 	}
 	memcpy(&ta,tn,sizeof(struct tm));
 	ta.tm_isdst = -1;
