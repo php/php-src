@@ -1,3 +1,9 @@
+2002-08-21  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_execute.c:
+    zend_execute: make sure that current_execute_data points to the right thing
+    after coming back from recursion.
+
 2002-08-19  Zeev Suraski  <zeev@pb1.pair.com>
 
     * zend_operators.c: MFZE1

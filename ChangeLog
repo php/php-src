@@ -1,3 +1,101 @@
+2002-08-21  sniper  <sniper@pb1.pair.com>
+
+    * sapi/apache/mod_php4.c: Fix ZTS build
+
+2002-08-21  helly  <helly@pb1.pair.com>
+
+    * ext/exif/tests/003.phpt
+      ext/exif/tests/004.phpt: These require exif and mbstring
+
+    * tests/basic/012.phpt: Test argument passing for CLI
+
+    * tests/basic/011.phpt: This does not work for CLI
+
+    * run-tests.php:
+    Added ARGS section to allow passing arguments to CLI tests
+
+2002-08-21  sniper  <sniper@pb1.pair.com>
+
+    * ext/standard/array.c: MFH
+
+2002-08-21  iliaa  <iliaa@pb1.pair.com>
+
+    * ext/standard/string.c: Added monetary.h to prevent compile warning.
+    Fixed a memory leak inside money_format function, which occures if the
+    parameters to the function are not valid.
+    Fixed a segmentation fault inside money_format in the event the value
+    to be formated is >1024 bytes.
+    Made the return value of money_format be null terminated.
+
+    * configure.in:
+    Added a check for monetary.h needed for strfmon inside string.c
+
+2002-08-21  helly  <helly@pb1.pair.com>
+
+    * ext/exif/tests/003.phpt
+      ext/exif/tests/004.phpt: Reflect recent changes to exif.c
+
+    * ext/standard/array.c: Fixes array test 004.phpt. Nice copy paste error.
+
+    * ext/standard/tests/array/003.phpt:
+    Patch from Melvyn Sopacua <msopacua@idg.nl> finally fixes it (bug 19006).
+
+2002-08-21  sebastian  <sebastian@pb1.pair.com>
+
+    * ext/standard/string.c: Fix ZTS build.
+
+2002-08-21  derick  <derick@pb1.pair.com>
+
+    * ext/domxml/CREDITS
+      ext/mysql/CREDITS: - Proper format for CREDITS files
+
+2002-08-21  steinm  <steinm@pb1.pair.com>
+
+    * ext/domxml/CREDITS: - gave overdue credits to christian
+
+2002-08-21  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/java/java.c:
+    This final change enables the ext/java to compile on OSX.
+
+2002-08-21  iliaa  <iliaa@pb1.pair.com>
+
+    * ext/ftp/ftp.c: Fixed compile warning.
+
+2002-08-21  helly  <helly@pb1.pair.com>
+
+    * ext/standard/tests/array/003.phpt
+      ext/standard/tests/array/004.phpt:
+    add ini setting precision - this does not fix the real problem here
+
+    * ext/mbstring/tests/020.phpt: more ini settings
+
+    * main/output.c
+      main/php_output.h:
+    full decopling of size parameters of ob_start() and internal buffer handlers
+
+2002-08-21  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/java/config.m4
+      ext/java/java.c: One more patch up towards OSX compatibility...
+
+2002-08-21  helly  <helly@pb1.pair.com>
+
+    * ext/standard/tests/general_functions/008.phpt:
+    Add var_dump float format test
+
+    * ext/standard/tests/general_functions/007.phpt:
+    Add combined base64 and md5 test
+
+    * ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/001.phpt: fix array tests
+    someone must have changed precision in php.ini-dist from 14 to 12
+
+    * main/snprintf.c:
+    make snprintf and f,g,G converions of snprintf/spprintf C99 complient
+
+    * main/output.c: Ignore double_buffering for ob_start().
+
 2002-08-20  helly  <helly@pb1.pair.com>
 
     * php.ini-dist
