@@ -84,7 +84,8 @@ static void print_hash(HashTable *ht, int indent)
 	zval **tmp;
 	char *string_key;
 	HashPosition iterator;
-	unsigned long num_key, str_len;
+	ulong num_key;
+	uint str_len;
 	int i;
 
 	for (i=0; i<indent; i++) {
