@@ -1306,7 +1306,14 @@ void zend_do_begin_class_member_function_call(TSRMLS_D)
 
 	/* a tmp var is leaked here */
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
-	zend_lowercase_znode_if_const(&opline->op2);
+	if(opline->op2.op_type == IS_CONST &&
+	   (sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(opline->op2.u.constant) &&
+	   memcmp(Z_STRVAL(opline->op2.u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
+		zval_dtor(&opline->op2.u.constant);
+		SET_UNUSED(opline->op2);
+	} else {
+		zend_lowercase_znode_if_const(&opline->op2);
+	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 }
@@ -2600,7 +2607,7 @@ void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC)
 	opline->opcode = ZEND_INIT_CTOR_CALL;
 	opline->op1 = (opline-2)->result;
 	SET_UNUSED(opline->op2);
-
+	
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
 }
 
