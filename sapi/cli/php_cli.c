@@ -549,6 +549,7 @@ int main(int argc, char *argv[])
 #endif
 
 	cli_sapi_module.ini_defaults = sapi_cli_ini_defaults;
+	cli_sapi_module.phpinfo_as_text = 1;
 	sapi_startup(&cli_sapi_module);
 
 #ifdef PHP_WIN32
