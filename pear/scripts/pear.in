@@ -25,7 +25,7 @@ require_once 'PEAR/Remote.php';
 require_once 'PEAR/Registry.php';
 require_once 'Console/Getopt.php';
 
-error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ALL);
 
 PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
@@ -124,7 +124,7 @@ $script_dir = $config->get("php_dir");
 $ext_dir    = $config->get("ext_dir");
 $doc_dir    = $config->get("doc_dir");
 
-$command = $options[1][1];
+$command = (isset($options[1][1])) ? $options[1][1] : null;
 $rest = array_slice($options[1], 2);
 
 $command_options = array(
@@ -167,7 +167,7 @@ switch ($command) {
 
     case 'package': {
         include_once 'PEAR/Packager.php';
-        $pkginfofile = $options[1][2];
+        $pkginfofile = isset($options[1][2]) ? $options[1][2] : null;
         $packager =& new PEAR_Packager($script_dir, $ext_dir, $doc_dir);
         $packager->setErrorHandling(PEAR_ERROR_DIE, "pear page: %s\n");
         $packager->debug = $verbose;
@@ -274,9 +274,9 @@ switch ($command) {
 function usage($error = null)
 {
     $stderr = fopen('php://stderr', 'w');
-    if (PEAR::isError($obj)) {
+    if (PEAR::isError($error)) {
         fputs($stderr, $error->getMessage());
-    } elseif ($obj !== null) {
+    } elseif ($error !== null) {
         fputs($stderr, $error);
     }
     fputs($stderr,
