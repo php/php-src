@@ -1,3 +1,43 @@
+2002-06-24  Andi Gutmans  <andi@zend.com>
+
+    * zend_fast_cache.h:
+    - MFZE1 (Turn off fast cache until we make sure it performs well.)
+
+    * zend_alloc.c: - More fixes (warnings, bug fixes etc.)
+
+    * zend_execute.c:
+    - Revert patch which checks at run-time if you're allowed to assign
+    - certain values by reference.
+    - We still need to find a solution for cases when this shouldn't be allowed
+    - as it might cause leaks.
+
+    * zend_alloc.c: - Fix crash bug and clean up a bit.
+
+2002-06-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * Zend.m4: IMHO, ZTS should no longer be labeled experimental.
+
+2002-06-24  Andi Gutmans  <andi@zend.com>
+
+    * zend_alloc.c: - MFZE1
+
+    * zend_alloc.c: - Don't use cache if we're using ZEND_MM
+
+    * zend_mm.c:
+    - Hardcode alignment to 8. We might need a configure check for this.
+
+    * zend_mm.c
+      zend_mm.h: - Improve memory manager to allocate small blocks quickly.
+
+    * zend_alloc.h
+      zend_mm.h
+      zend_alloc.c:
+    - Don't keep allocated blocks in a linked list if we're in non-debug mode
+    - as now the memory manager takes care to nuke all leaking blocks.
+
+    * zend.h
+      zend_types.h: - MFZE1
+
 2002-06-23  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c
