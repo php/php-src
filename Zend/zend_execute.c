@@ -1341,9 +1341,18 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
 		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr TSRMLS_CC);
 		if(NULL == ptr_ptr) {
-			zend_error_noreturn(E_ERROR, "Cannot access undefined property %s::$%s for object with overloaded property access", Z_OBJCE_P(container)->name, Z_STRVAL_P(prop_ptr));
-		}
-		if (result) {
+			zval *ptr;
+
+			if (Z_OBJ_HT_P(container)->read_property &&
+			    (ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, BP_VAR_W TSRMLS_CC)) != NULL) {
+				if (result) {
+					result->var.ptr = ptr;
+					result->var.ptr_ptr = &result->var.ptr;
+				}
+			} else {
+				zend_error(E_ERROR, "Cannot access undefined property for object with overloaded property access");
+			}
+		} else if (result) {
 			result->var.ptr_ptr = ptr_ptr;
 		}
 	} else if (Z_OBJ_HT_P(container)->read_property) {
