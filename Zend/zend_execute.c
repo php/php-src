@@ -1513,7 +1513,7 @@ binary_assign_op_addr: {
 							}
 							active_function_table = &ce->function_table;
 						} else { /* used for member function calls */
-							object.ptr = _get_object_zval_ptr(&opline->op1, Ts, &EG(free_op1) TSRMLS_CC);
+							object.ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 							
 							if ((!object.ptr && Ts[opline->op1.u.var].EA.type==IS_OVERLOADED_OBJECT)								
 								|| ((object.ptr && object.ptr->type==IS_OBJECT) && Z_OBJCE_P(object.ptr)->handle_function_call)) { /* overloaded function call */
