@@ -1,12 +1,45 @@
 #!/bin/sh
 
+mv configure.in configure.in.old 2>/dev/null
 ./scripts/preconfig
+if cmp configure.in.old configure.in > /dev/null 2>&1; then
+    echo keeping configure.in
+    mv configure.in.old configure.in
+else
+    echo created or modified configure.in
+fi
+
 if test -f mkinstalldirs; then
     automake
 else
     automake --add-missing
 fi
+
+mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
+if cmp aclocal.m4.old aclocal.m4 > /dev/null 2>&1; then
+    echo keeping aclocal.m4
+    mv aclocal.m4.old aclocal.m4
+else
+    echo created or modified aclocal.m4
+fi
+
+mv configure configure.old 2>/dev/null
 autoconf
-(cd libzend;autoconf)
+if cmp configure.old configure > /dev/null 2>&1; then
+    echo keeping configure
+    mv configure.old configure
+else
+    echo created or modified configure
+fi
+
+cd libzend
+mv configure configure.old 2>/dev/null
+autoconf
+if cmp configure.old configure > /dev/null 2>&1; then
+    echo keeping libzend/configure
+    mv configure.old configure
+else
+    echo created or modified libzend/configure
+fi
 
