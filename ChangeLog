@@ -1,3 +1,113 @@
+2002-04-01  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c: MFH
+
+    * configure.in: Fix for bug: #5499 (no need to MFH this one)
+
+    * main/rfc1867.c: Prevent crashing with some bogus POSTs.
+
+2002-04-01  Richard Heyes  <richard@phpguru.org>
+
+    * pear/Mail/RFC822.php: * Fixed bug with new limit option
+
+    * pear/Mail/RFC822.php: * Added optional limit to prevent runaway parsing
+    * Changed recursive nature of _splitAddresses as it was barfing on
+      large amounts of addresses (1000+)
+    * Added approximateCount() function which will give an approximate count
+      of how many addresses are in a string
+
+2002-04-01  Kirill Maximov  <kir@actimind.com>
+
+    * ext/standard/quot_print.c
+      ext/standard/tests/general_functions/002.phpt:
+    (PHP quoted_printable_decode) Fixed CR/LF processing for Windows/OS2
+
+2002-04-01  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Install.php
+      pear/PEAR/Packager.php: typo
+
+    * pear/PEAR/Command/Config.php:
+    Added layer checks and reorganize a little the code
+
+    * pear/PEAR/Config.php:
+    - Define the PEAR constants when they are not set (be nice
+      with the "--wihout-pear" people who finally regrets)
+    - Added method getLayers()
+
+    * pear/PEAR/Command/Config.php:
+    - Make "config-set" actually store the values
+    - Help and error messages enhance
+
+    * pear/PEAR/Command/Install.php:
+    - Added "nodeps" option to install/upgrade/uninstall
+      (pear install -n package.tgz)
+    - Finish to document the install commands
+
+2002-04-01  Kirill Maximov  <kir@actimind.com>
+
+    * ext/standard/quot_print.c
+      ext/standard/tests/general_functions/002.phpt
+      ext/standard/tests/general_functions/006.phpt:
+    (PHP quoted_printable_decode) Fixed CR/LF processing for Windows/OS2
+
+2002-04-01  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in:
+    - Set some php.ini values needed by the installer
+    - Removed unused present_array() and heading() functions
+
+2002-04-01  Stig Bakken  <ssb@fast.no>
+
+    * pear/Net/Socket.php: * moved to /pear
+
+2002-04-01  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Registry.php:
+    People reported problems with flock(LOCK_SH) and fopen('w')
+
+    * pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Registry.php: added help
+
+    * pear/scripts/pear.in: Adaptation for the new help system
+
+    * pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command.php: Go with the help system
+
+2002-04-01  Stig Bakken  <ssb@fast.no>
+
+    * pear/package.dtd: * typo
+
+2002-04-01  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/001.phpt
+      ext/exif/tests/002.phpt: MFH finding test files
+
+2002-04-01  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/config.m4: MFH.
+    Forgot to commit this when I commit fix build with PostgreSQL 6.5.x
+
+2002-04-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/math.c: - MFH for fix for bug #14966
+
+    * ext/standard/math.c: - Fix for bug #14966
+
+2002-04-01  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/exif/exif.c: - Nuke *FETCH macros.
+
+2002-04-01  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+2002-04-01  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c: PHP_SESSION_API not always defined.
+
 2002-03-31  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/exif/exif.c: - Fix compilation.
