@@ -23,6 +23,10 @@ require_once 'PEAR/Common.php';
 require_once 'PEAR/Registry.php';
 require_once 'PEAR/Dependency.php';
 
+define('PEAR_INSTALLER_OK',       1);
+define('PEAR_INSTALLER_FAILED',   0);
+define('PEAR_INSTALLER_SKIPPED', -1);
+
 /**
  * Administration class used to install PEAR packages and maintain the
  * installed package database.
@@ -151,7 +155,7 @@ class PEAR_Installer extends PEAR_Common
             // return if this file is meant for another platform
             if (!$os->matchSignature($atts['platform'])) {
                 $this->log(2, "skipped $file (meant for $atts[platform], we are ".$os->getSignature().")");
-                return;
+                return PEAR_INSTALLER_SKIPPED;
             }
         }
 
@@ -159,7 +163,7 @@ class PEAR_Installer extends PEAR_Common
             case 'test': case 'data': case 'ext':
                 // don't install test files for now
                 $this->log(2, "$file: $atts[role] file not installed yet");
-                return true;
+                return PEAR_INSTALLER_OK;
             case 'doc':
                 $dest_dir = $this->config->get('doc_dir') .
                      DIRECTORY_SEPARATOR . $this->pkginfo['package'];
@@ -167,7 +171,7 @@ class PEAR_Installer extends PEAR_Common
             case 'extsrc':
                 // don't install test files for now
                 $this->log(2, "$file: no support for building extensions yet");
-                return true;
+                return PEAR_INSTALLER_OK;
             case 'php':
                 $dest_dir = $this->config->get('php_dir');
                 break;
@@ -197,16 +201,16 @@ class PEAR_Installer extends PEAR_Common
         $dest_file = preg_replace('!//+!', '/', $dest_file);
         if (!@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
-                $this->log(0, "failed to mkdir $dest_dir");
-                return false;
+                return $this->raiseError(PEAR_INSTALLER_FAILED,
+                                         "failed to mkdir $dest_dir");
             }
             $this->log(3, "+ mkdir $dest_dir");
         }
         $orig_file = $tmp_path . DIRECTORY_SEPARATOR . $file;
         if (empty($atts['replacements'])) {
             if (!@copy($orig_file, $dest_file)) {
-                $this->log(0, "failed to copy $orig_file to $dest_file");
-                return false;
+                return $this->raiseError(PEAR_INSTALLER_FAILED,
+                                         "failed to copy $orig_file to $dest_file");
             }
             $this->log(3, "+ cp $orig_file $dest_file");
         } else {
@@ -237,8 +241,8 @@ class PEAR_Installer extends PEAR_Common
             }
             $wp = @fopen($dest_file, "w");
             if (!is_resource($wp)) {
-                $this->log(0, "failed to create $dest_file");
-                return false;
+                return $this->raiseError(PEAR_INSTALLER_FAILED,
+                                         "failed to create $dest_file");
             }
             fwrite($wp, $contents);
             fclose($wp);
@@ -259,7 +263,7 @@ class PEAR_Installer extends PEAR_Common
         $this->pkginfo['filelist'][$file]['installed_as'] = $dest_file;
 
         $this->log(2, "installed file $dest_file");
-        return true;
+        return PEAR_INSTALLER_OK;
     }
 
     // }}}
@@ -448,13 +452,14 @@ class PEAR_Installer extends PEAR_Common
             // <== XXX This part should be removed later on
 
             foreach ($pkginfo['filelist'] as $file => $atts) {
+                $this->expectError(PEAR_INSTALLER_FAILED);
                 $res = $this->_installFile($file, $atts, $tmp_path);
-                if (!$res) {
-                    // If file can't be installed and 'force' is not set, abort
-                    if (empty($options['force'])) {
-                        return null;
-                    }
-                    // Do not register not installed files
+                $this->popExpect();
+                if (PEAR::isError($res) && empty($options['force'])) {
+                    return $this->raiseError($res);
+                }
+                if ($res != PEAR_INSTALLER_OK) {
+                    // Do not register files that were not installed
                     unset($pkginfo['filelist'][$file]);
                 }
             }
