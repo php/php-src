@@ -559,9 +559,18 @@ static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg
 }
 /* }}} */
 
+static int init_sqlite_globals(zend_sqlite_globals *g)
+{
+	g->assoc_case = 0;
+	return SUCCESS;
+}
+
 PHP_MINIT_FUNCTION(sqlite)
 {
+	ZEND_INIT_MODULE_GLOBALS(sqlite, init_sqlite_globals, NULL);
+	
 	REGISTER_INI_ENTRIES();
+
 	le_sqlite_db = zend_register_list_destructors_ex(php_sqlite_db_dtor, NULL, "sqlite database", module_number);
 	le_sqlite_pdb = zend_register_list_destructors_ex(NULL, php_sqlite_db_dtor, "sqlite database (persistent)", module_number);
 	le_sqlite_result = zend_register_list_destructors_ex(php_sqlite_result_dtor, NULL, "sqlite result", module_number);
