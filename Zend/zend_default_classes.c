@@ -358,7 +358,7 @@ static zend_function_entry default_exception_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-void zend_cast_exception(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+int zend_cast_exception(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
 	if (type == IS_STRING) {
 		zval fname, *retval;
@@ -367,10 +367,10 @@ void zend_cast_exception(zval *readobj, zval *writeobj, int type, int should_fre
 		if (call_user_function_ex(NULL, &readobj, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC) == SUCCESS) {
 			ZVAL_STRING(writeobj, Z_STRVAL_P(retval), 1);
 			zval_ptr_dtor(&retval);
-			return;
+			return SUCCESS;
 		}
 	}
-	Z_TYPE_P(writeobj) = IS_NULL;
+	return FAILURE;
 }
 
 static void zend_register_default_exception(TSRMLS_D)
