@@ -287,7 +287,7 @@ PHP_FUNCTION(wordwrap)
 				}
 				l++;
 			}
-			if (l > linelength) {
+			if (l >= linelength) {
 				pgr = l;
 				l = linelength;
 				/* needs breaking; work backwards to find previous word */
