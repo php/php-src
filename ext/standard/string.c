@@ -2126,8 +2126,10 @@ PHP_FUNCTION(setlocale)
 		cat = LC_COLLATE;
 	else if (!strcasecmp ("LC_CTYPE", category->value.str.val))
 		cat = LC_CTYPE;
+#ifndef PHP_WIN32
 	else if (!strcasecmp ("LC_MESSAGES", category->value.str.val))
-		cat = LC_MESSAGES;	
+		cat = LC_MESSAGES;
+#endif
 	else if (!strcasecmp ("LC_MONETARY", category->value.str.val))
 		cat = LC_MONETARY;
 	else if (!strcasecmp ("LC_NUMERIC", category->value.str.val))
