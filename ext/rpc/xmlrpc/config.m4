@@ -10,12 +10,18 @@ sinclude(libxmlrpc/xmlrpc.m4)
 PHP_ARG_WITH(xmlrpc, for XMLRPC-EPI support,
 [  --with-xmlrpc[=DIR]     Include XMLRPC-EPI support.])
 
+xmlrpc_ext_shared=$ext_shared
+
 PHP_ARG_WITH(expat-dir, libexpat dir for XMLRPC-EPI,
 [  --with-expat-dir=DIR      XMLRPC-EPI: libexpat dir for XMLRPC-EPI.])
 
+PHP_ARG_WITH(iconv-dir, iconv dir for XMLRPC-EPI,
+[  --with-iconv-dir=DIR      XMLRPC-EPI: iconv dir for XMLRPC-EPI.])
+
+
 if test "$PHP_XMLRPC" != "no"; then
 
-  PHP_EXTENSION(xmlrpc, $ext_shared)
+  PHP_EXTENSION(xmlrpc, $xmlrpc_ext_shared)
   PHP_SUBST(XMLRPC_SHARED_LIBADD)
   AC_DEFINE(HAVE_XMLRPC,1,[ ])
 
@@ -31,6 +37,10 @@ if test "$PHP_XMLRPC" != "no"; then
 
   if test "$testval" = "no"; then
     AC_MSG_ERROR(XML-RPC support requires libexpat. Use --with-expat-dir=<DIR>)
+  fi
+
+  if test "$PHP_ICONV_DIR" != "no"; then
+    PHP_ICONV=$PHP_ICONV_DIR
   fi
 
   if test "$PHP_ICONV" = "no"; then
@@ -49,7 +59,7 @@ if test "$PHP_XMLRPC" = "yes"; then
   XMLRPC_SUBDIRS=libxmlrpc
   PHP_SUBST(XMLRPC_LIBADD)
   PHP_SUBST(XMLRPC_SUBDIRS)
-  LIB_BUILD($ext_builddir/libxmlrpc,$ext_shared,yes)
+  LIB_BUILD($ext_builddir/libxmlrpc,$xmlrpc_ext_shared,yes)
   PHP_ADD_INCLUDE($ext_srcdir/libxmlrpc)
   XMLRPC_MODULE_TYPE=builtin
 
