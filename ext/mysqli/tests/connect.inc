@@ -9,8 +9,6 @@
 		$host = "localhost";
 		$user = "root";
 		$passwd = "";
-
-		$driver->embedded_server_start(FALSE, NULL, NULL);
 	} else {
 		$path =  realpath('./ext/mysqli/tests');
 		$host = $user = $passwd = NULL;
