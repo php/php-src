@@ -42,6 +42,8 @@ CWD_API int virtual_chdir(char *path);
 CWD_API int virtual_chdir_file(char *path);
 CWD_API int virtual_filepath(char *path, char **filepath);
 CWD_API FILE *virtual_fopen(const char *path, const char *mode);
+CWD_API int virtual_open(const char *path, int flags);
+CWD_API int virtual_creat(const char *path, mode_t mode);
 CWD_API int virtual_stat(const char *path, struct stat *buf);
 #ifndef ZEND_WIN32
 CWD_API int virtual_lstat(const char *path, struct stat *buf);

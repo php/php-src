@@ -298,6 +298,9 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #ifdef VIRTUAL_DIR
 #define V_GETCWD(buff, size) virtual_getcwd(buff,size)
 #define V_FOPEN(path, mode) virtual_fopen(path, mode)
+#define V_OPEN(path, flags) virtual_open(path, flags)
+#define V_OPEN_CREAT(path, flags, mode) virtual_open(path, flags, mode)
+#define V_CREAT(path, mode) virtual_creat(path, mode)
 #define V_CHDIR(path) virtual_chdir(path)
 #define V_CHDIR_FILE(path) virtual_chdir_file(path)
 #define V_GETWD(buf)
@@ -310,6 +313,9 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #else
 #define V_GETCWD(buff, size) getcwd(buff,size)
 #define V_FOPEN(path, mode)  fopen(path, mode)
+#define V_OPEN(path, flags) open(path, flags)
+#define V_OPEN_CREAT(path, flags, mode) open(path, flags, mode)
+#define V_CREAT(path, mode) creat(path, mode)
 #define V_CHDIR(path) chdir(path)
 #define V_CHDIR_FILE(path) chdir_file(path)
 #define V_GETWD(buf) getwd(buf)
