@@ -1,0 +1,8 @@
+# $Id$
+
+LTLIBRARY_NAME        = liboverload.la
+LTLIBRARY_SOURCES     = overload.c
+LTLIBRARY_SHARED_NAME = overload.la
+LTLIBRARY_SHARED_LIBADD  = $(OVERLOAD_SHARED_LIBADD)
+
+include $(top_srcdir)/build/dynlib.mk
