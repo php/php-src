@@ -67,10 +67,10 @@ static char *find_xslt_argument(const char **argv, const char *key)
 
 /* {{{ parse_xslt_arguments()
    Parse an XSLT argument buffer */
-extern xslt_args *parse_xslt_arguments(char *xml, 
-                                       char *xsl, 
-									   char *result, 
-									   char **argv)
+extern xslt_args *parse_xslt_arguments(char  *xml, 
+                                       char  *xsl, 
+                                       char  *result, 
+                                       char **argv)
 {
 	xslt_args *return_value;
 
@@ -116,6 +116,26 @@ extern xslt_args *parse_xslt_arguments(char *xml,
 	}
 
 	return return_value;
+}
+/* }}} */
+
+/* {{{ free_xslt_arguments()
+   Free's an XSLT argument list returned from parse_xslt_arguments() */
+extern void free_xslt_arguments(xslt_args *to_free)
+{
+	if (to_free->xml.ptr) {
+		efree(to_free->xml.ptr);
+	}
+	
+	if (to_free->xsl.ptr) {
+		efree(to_free->xsl.ptr);
+	}
+	
+	if (to_free->result.ptr) {
+		efree(to_free->result.ptr);
+	}
+	
+	efree(to_free);
 }
 /* }}} */
 

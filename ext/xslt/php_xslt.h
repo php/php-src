@@ -46,6 +46,7 @@ typedef struct {
 } xslt_args;
 
 extern xslt_args *parse_xslt_arguments(char *, char *, char *, char **);
+extern void free_xslt_arguments(xslt_args *to_free);
 
 extern void assign_xslt_handler(struct xslt_function **, zval **);
 extern void free_xslt_handler(struct xslt_function *);
