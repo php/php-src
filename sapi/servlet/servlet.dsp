@@ -184,9 +184,9 @@ InputPath=.\servlet.java
 	copy ..\..\ext\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
-	$(JAVA_HOME)\bin\javac net\php\servlet.java 
-	$(JAVA_HOME)\bin\javac net\php\reflect.java 
-	$(JAVA_HOME)\bin\javac net\php\formatter.java 
+  cd net\php
+	$(JAVA_HOME)\bin\javac -O *.java 
+	cd ..\..
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
 	erase net\php\formatter.* 
@@ -210,9 +210,9 @@ InputPath=.\servlet.java
 	copy ..\..\ext\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
-	$(JAVA_HOME)\bin\javac -g net\php\servlet.java 
-	$(JAVA_HOME)\bin\javac -g net\php\reflect.java 
-	$(JAVA_HOME)\bin\javac -g net\php\formatter.java 
+  cd net\php
+	$(JAVA_HOME)\bin\javac -g *.java 
+	cd ..\..
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
 	erase net\php\formatter.* 
@@ -236,9 +236,9 @@ InputPath=.\servlet.java
 	copy ..\..\ext\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
-	$(JAVA_HOME)\bin\javac -g net\php\servlet.java 
-	$(JAVA_HOME)\bin\javac -g net\php\reflect.java 
-	$(JAVA_HOME)\bin\javac -g net\php\formatter.java 
+  cd net\php
+	$(JAVA_HOME)\bin\javac -g *.java 
+	cd ..\..
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
 	erase net\php\formatter.* 
@@ -262,9 +262,9 @@ InputPath=.\servlet.java
 	copy ..\..\ext\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
-	$(JAVA_HOME)\bin\javac net\php\servlet.java 
-	$(JAVA_HOME)\bin\javac net\php\reflect.java 
-	$(JAVA_HOME)\bin\javac net\php\formatter.java 
+  cd net\php
+	$(JAVA_HOME)\bin\javac -O *.java 
+	cd ..\..
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
 	erase net\php\formatter.* 
