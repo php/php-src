@@ -1,6 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-ovrimos 'ovrimos support?' yesnodir no \
-'    Whether to build the ovrimos extension.'
-	

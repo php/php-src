@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME        = libmuscat.la
-LTLIBRARY_SOURCES     = muscat.c muscat_net.c
-LTLIBRARY_SHARED_NAME = muscat.la
-LTLIBRARY_SHARED_LIBADD  = $(MUSCAT_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

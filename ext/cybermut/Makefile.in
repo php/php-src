@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libcybermut.la
-LTLIBRARY_SOURCES     = cybermut.c
-LTLIBRARY_SHARED_NAME = cybermut.la
-LTLIBRARY_SHARED_LIBADD  = $(CYBERMUT_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
