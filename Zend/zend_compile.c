@@ -1185,19 +1185,20 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC)
 	opline->extended_value = ZEND_FETCH_CLASS_GLOBAL;
 	CG(catch_begin) = fetch_class_op_number;
 	if (class_name->op_type == IS_CONST) {
+		int fetch_type;
+
 		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
-		if ((class_name->u.constant.value.str.len == (sizeof("self") - 1)) &&
-			!memcmp(class_name->u.constant.value.str.val, "self", sizeof("self"))) {
-			SET_UNUSED(opline->op2);
-			opline->extended_value = ZEND_FETCH_CLASS_SELF;
-			zval_dtor(&class_name->u.constant);
-		} else if ((class_name->u.constant.value.str.len == (sizeof("parent") - 1)) &&
-			!memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent"))) {
-			SET_UNUSED(opline->op2);
-			opline->extended_value = ZEND_FETCH_CLASS_PARENT;
-			zval_dtor(&class_name->u.constant);
-		} else {
-			opline->op2 = *class_name;
+		fetch_type = zend_get_class_fetch_type(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
+		switch (fetch_type) {
+			case ZEND_FETCH_CLASS_SELF:
+			case ZEND_FETCH_CLASS_PARENT:
+				SET_UNUSED(opline->op2);
+				opline->extended_value = fetch_type;
+				zval_dtor(&class_name->u.constant);
+				break;
+			default:
+				opline->op2 = *class_name;
+				break;
 		}
 	} else {
 		opline->op2 = *class_name;
@@ -3412,6 +3413,20 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 	ce->parent = NULL;
 	ce->num_interfaces = 0;
 	ce->interfaces = NULL;
+}
+
+
+int zend_get_class_fetch_type(char *class_name, uint class_name_len)
+{
+	if ((class_name_len == sizeof("self")-1) &&
+		!memcmp(class_name, "self", sizeof("self"))) {
+		return ZEND_FETCH_CLASS_SELF;		
+	} else if ((class_name_len == sizeof("parent")-1) &&
+		!memcmp(class_name, "parent", sizeof("parent"))) {
+		return ZEND_FETCH_CLASS_PARENT;
+	} else {
+		return ZEND_FETCH_CLASS_DEFAULT;
+	}
 }
 
 /*
