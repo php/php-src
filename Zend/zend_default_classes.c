@@ -481,9 +481,9 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 		EG(exception) = NULL;
 		
 		MAKE_STD_ZVAL(str);
-		handler->cast_object(exception, str, IS_STRING, 0 TSRMLS_CC);
-
-		zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, EG(exception) ? Z_OBJCE_P(exception)->name : Z_STRVAL_P(str) TSRMLS_CC);
+		if (handler->cast_object(exception, str, IS_STRING, 0 TSRMLS_CC) != FAILURE) {
+			zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, EG(exception) ? Z_OBJCE_P(exception)->name : Z_STRVAL_P(str) TSRMLS_CC);
+		}
 		zval_ptr_dtor(&str);
 	
 		if (EG(exception)) {
