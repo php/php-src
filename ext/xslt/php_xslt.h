@@ -55,6 +55,9 @@ extern void xslt_call_function(char *, zval *, int, zval **, zval **);
 
 extern void xslt_debug(char *, char *, ...);
 
+extern void xslt_make_array(zval **zarr, char ***carr);
+extern void xslt_free_array(char **arr);
+
 #endif
 
 #endif
