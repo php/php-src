@@ -644,10 +644,9 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 		php3_printf("Unable to initialize request info.\n");
 		return FAILURE;
 	}
+	
+	zend_activate(CLS_C ELS_CC);
 	sapi_activate(SLS_C);	
-	init_compiler(CLS_C ELS_CC);
-	init_executor(CLS_C ELS_CC);
-	startup_scanner(CLS_C);
 
 	if (SG(request_info).auth_user) {
 		zval *auth_user;
@@ -705,11 +704,7 @@ void php_request_shutdown(void *dummy)
 	
 	php_ini_rshutdown();
 
-
-	shutdown_scanner(CLS_C);
-	shutdown_executor(ELS_C);
-	shutdown_compiler(CLS_C);
-
+	zend_deactivate(CLS_C ELS_CC);
 	sapi_deactivate(SLS_C);
 
 	php3_destroy_request_info(NULL);
