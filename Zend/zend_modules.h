@@ -36,7 +36,6 @@ extern unsigned char second_arg_force_ref[];
 extern unsigned char second_arg_allow_ref[];
 
 #include "zend.h"
-#include "../TSRM/TSRM.h"
 
 #define ZEND_MODULE_API_NO 20000401
 
@@ -66,7 +65,7 @@ struct _zend_module_entry {
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	int (*global_startup_func)(void);
 	int (*global_shutdown_func)(void);
-	ts_rsrc_id globals_id;
+	int globals_id;
 	int module_started;
 	unsigned char type;
 	void *handle;
