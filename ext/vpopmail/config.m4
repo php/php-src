@@ -36,6 +36,11 @@ if test "$PHP_VPOPMAIL" != "no"; then
 		fi
 	done
 
+	dnl newer versions of vpopmail have include/vauth.h defining valias functions
+	if test -r $VPOPMAIL_INC_DIR/vauth.h; then
+		AC_DEFINE(HAVE_VPOPMAIL_VAUTH,1,[Whether vpopmail has vauth.h])
+	fi
+
 	AC_MSG_RESULT($VPOPMAIL_DIR)
 
 	PHP_ADD_INCLUDE($VPOPMAIL_INC_DIR)
