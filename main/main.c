@@ -1105,10 +1105,9 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
-	char old_cwd[4096];
+	char *old_cwd;
 	SLS_FETCH();
 
-	old_cwd[0] = '\0';
 	php_hash_environment(ELS_C SLS_CC PLS_CC);
 
 	zend_activate_modules();
@@ -1134,10 +1133,13 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		}
 	}
 
+	old_cwd = do_alloca(4096);
+	old_cwd[0] = '\0';
 
 	if (setjmp(EG(bailout))!=0) {
 		if (old_cwd[0] != '\0')
 			V_CHDIR(old_cwd);
+		free_alloca(old_cwd);
 		return;
 	}
 
@@ -1173,6 +1175,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 
 	if (old_cwd[0] != '\0')
 		V_CHDIR(old_cwd);
+	free_alloca(old_cwd);
 }
 
 PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
