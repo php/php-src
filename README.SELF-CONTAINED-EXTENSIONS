@@ -14,6 +14,19 @@ HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
   We will describe now how to create these and how to put things
   together.
 
+PREPARING YOUR SYSTEM
+
+  While the result will run on any system, a developer's setup needs these
+  tools:
+
+    GNU autoconf
+    GNU automake
+    GNU libtool
+    GNU m4
+
+  All of these are available from 
+
+    ftp://ftp.gnu.org/pub/gnu/
 
 CONVERTING AN EXISTING EXTENSION
 
