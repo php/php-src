@@ -55,7 +55,7 @@ fi
 if test "$PHP_XMLRPC" = "yes"; then
   XMLRPC_CHECKS
   XMLRPC_LIBADD=libxmlrpc/libxmlrpc.la
-  XMLRPC_SHARED_LIBADD=libxmlrpc/libxmlrpc.la
+  XMLRPC_SHARED_LIBADD="$XMLRPC_SHARED_LIBADD libxmlrpc/libxmlrpc.la"
   XMLRPC_SUBDIRS=libxmlrpc
   PHP_SUBST(XMLRPC_LIBADD)
   PHP_SUBST(XMLRPC_SUBDIRS)
