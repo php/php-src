@@ -27,7 +27,9 @@
 #if DBA_GDBM
 #include "php_gdbm.h"
 
-#include <gdbm.h>
+#ifdef GDBM_INCLUDE_FILE
+#include GDBM_INCLUDE_FILE
+#endif
 
 #define GDBM_DATA dba_gdbm_data *dba = info->dbf
 #define GDBM_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen

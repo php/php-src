@@ -27,7 +27,12 @@
 #if DBA_DBM
 #include "php_dbm.h"
 
-#include <dbm.h>
+#ifdef DBM_INCLUDE_FILE
+#include DBM_INCLUDE_FILE
+#endif
+#if DBA_GDBM
+#include "php_gdbm.h"
+#endif
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -108,6 +113,14 @@ DBA_UPDATE_FUNC(dbm)
 	datum gval;
 
 	DBM_GKEY;
+
+	if (mode == 1) { /* insert */
+		gval = fetch(gkey);
+		if(gval.dptr) {
+			return FAILURE;
+		}
+	}
+
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
 	
@@ -179,7 +192,13 @@ DBA_SYNC_FUNC(dbm)
 
 DBA_INFO_FUNC(dbm)
 {
-	return estrdup("DBM");
+#if DBA_GDBM
+	if (!strcmp(DBM_VERSION, "GDBM"))
+	{
+		return dba_info_gdbm(hnd, info TSRMLS_CC);
+	}
+#endif
+	return estrdup(DBM_VERSION);
 }
 
 #endif
