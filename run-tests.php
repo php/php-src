@@ -686,8 +686,8 @@ function generate_diff($wanted,$output)
 {
 	$w = explode("\n", $wanted);
 	$o = explode("\n", $output);
-	$w1 = array_diff($w,$o);
-	$o1 = array_diff($o,$w);
+	$w1 = array_diff_assoc($w,$o);
+	$o1 = array_diff_assoc($o,$w);
 	$w2 = array();
 	$o2 = array();
 	foreach($w1 as $idx => $val) $w2[sprintf("%03d<",$idx)] = sprintf("%03d- ", $idx+1).$val;
