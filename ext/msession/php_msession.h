@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | msession 1.0                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2003 The PHP Group                                |
+   | Copyright (c) 1997-2002 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,6 +48,7 @@ PHP_FUNCTION(msession_ctl);
 PHP_FUNCTION(msession_count);
 PHP_FUNCTION(msession_create);
 PHP_FUNCTION(msession_destroy);
+PHP_FUNCTION(msession_exec);
 PHP_FUNCTION(msession_set);
 PHP_FUNCTION(msession_get);
 PHP_FUNCTION(msession_find);
@@ -63,6 +64,7 @@ PHP_FUNCTION(msession_uniq);
 PHP_FUNCTION(msession_randstr);
 PHP_FUNCTION(msession_plugin);
 PHP_FUNCTION(msession_call);
+PHP_FUNCTION(msession_ping);
 
 /* 
   	Declare any global variables you may need between the BEGIN

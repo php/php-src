@@ -30,6 +30,12 @@
 	WITH PHOENIX OR IT WILL NOT WORK.
 --------------------------------------------------------------------------
 */
+/* Required to use the new version of Phoenix 1.2 */
+
+#ifndef REQCLIENT_VER	
+#define REQCLIENT_VER 030113
+#endif
+
 enum REQ_TYPES
 {
 	REQ_ERR,
@@ -56,6 +62,8 @@ enum REQ_TYPES
 	REQ_PLUGIN,
 	REQ_CALL,
 	REQ_SERIALIZE,
+	REQ_RESTORE,
+	REQ_EXEC,
 	REQ_LAST,
 	REQ_INTERNAL_BEGIN=1023,
 	REQ_INTERNALLAST,
@@ -80,6 +88,7 @@ enum REQ_ERRORS
 	REQE_UNKNOWN
 };
 
+
 #define REQ_POPEN               1024
 #define REQ_PCLOSE              1025
 #define REQ_PING                1026
@@ -98,8 +107,14 @@ typedef struct _requestPacket
 
 typedef struct _requestBuf
 {
-	unsigned int type;
-	unsigned int size;
+	unsigned int type;	// Type of packet, dynamic/static
+	unsigned int size;	// size of memory block
+#if (REQCLIENT_VER >= 030113)
+	unsigned int fmt;	// format, binary/ascii
+	unsigned int reserved;	// Just in case
+#else
+#warning You are using an old Phoenix definition, this will have problems with a newer version
+#endif
 	REQ	req;
 }REQB;
 
