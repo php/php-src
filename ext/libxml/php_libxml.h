@@ -42,7 +42,7 @@ extern zend_module_entry libxml_module_entry;
 
 typedef struct {
 	zval *stream_context;
-	smart_str *error_buffer;
+	smart_str error_buffer;
 } php_libxml_globals;
 
 typedef struct _php_libxml_ref_obj {

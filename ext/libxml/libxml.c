@@ -225,7 +225,7 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_DC)
 {
 	LIBXML(stream_context) = NULL;
-	LIBXML(error_buffer) = NULL;
+	LIBXML(error_buffer).c = NULL;
 }
 #endif
 
@@ -336,16 +336,15 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 	if (output == 1) {
 		switch (error_type) {
 			case PHP_LIBXML_CTX_ERROR:
-				php_libxml_ctx_error_level(E_WARNING, ctx, (char *) LIBXML(error_buffer) TSRMLS_CC);
+				php_libxml_ctx_error_level(E_WARNING, ctx, LIBXML(error_buffer).c TSRMLS_CC);
 				break;
 			case PHP_LIBXML_CTX_WARNING:
-				php_libxml_ctx_error_level(E_NOTICE, ctx, (char *) LIBXML(error_buffer) TSRMLS_CC);
+				php_libxml_ctx_error_level(E_NOTICE, ctx, LIBXML(error_buffer).c TSRMLS_CC);
 				break;
 			default:
-				php_error(E_WARNING, "%s", (char *) LIBXML(error_buffer));
+				php_error(E_WARNING, "%s", LIBXML(error_buffer).c);
 		}
 		smart_str_free(&LIBXML(error_buffer));
-		LIBXML(error_buffer) = NULL;
 	}
 }
 
@@ -419,7 +418,7 @@ PHP_MINIT_FUNCTION(libxml)
 	ts_allocate_id(&libxml_globals_id, sizeof(php_libxml_globals), (ts_allocate_ctor) php_libxml_init_globals, NULL);
 #else
 	LIBXML(stream_context) = NULL;
-	LIBXML(error_buffer) = NULL;
+	LIBXML(error_buffer).c = NULL;
 #endif
 
 	return SUCCESS;
@@ -441,10 +440,7 @@ PHP_MSHUTDOWN_FUNCTION(libxml)
 
 PHP_RSHUTDOWN_FUNCTION(libxml)
 {
-	if (LIBXML(error_buffer)) {
-		smart_str_free(&LIBXML(error_buffer));
-		LIBXML(error_buffer) = NULL;
-	}
+	smart_str_free(&LIBXML(error_buffer));
 	return SUCCESS;
 }
 
