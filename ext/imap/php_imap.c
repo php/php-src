@@ -71,7 +71,7 @@ void *fs_get(size_t size);
 int imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char *rpath);
 
 
-void mail_close_it(zend_rsrc_list_entry *rsrc);
+void mail_close_it (zend_rsrc_list_entry *rsrc);
 #ifdef OP_RELOGIN
 /* AJS: close persistent connection */
 void mail_userlogout_it(zend_rsrc_list_entry *rsrc);
@@ -184,6 +184,9 @@ void mail_close_it(zend_rsrc_list_entry *rsrc)
 {
 	pils *imap_le_struct = (pils *)rsrc->ptr;
 	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags);
+
+	efree(IMAPG(imap_user));
+	efree(IMAPG(imap_password));
 	efree(imap_le_struct);
 }
 
@@ -766,8 +769,6 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	} else {
 #endif
 		imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
-		efree(IMAPG(imap_user));
-		efree(IMAPG(imap_password));
 
 		if (imap_stream == NIL) {
 			php_error(E_WARNING, "Couldn't open stream %s\n", (*mailbox)->value.str.val);
