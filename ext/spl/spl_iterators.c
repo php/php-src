@@ -62,7 +62,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator);
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it___construct, 0) 
-	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO();
 
@@ -849,7 +849,7 @@ static zend_object_value spl_dual_it_new(zend_class_entry *class_type TSRMLS_DC)
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_filter_it___construct, 0) 
-	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_FilterIterator[] = {
@@ -866,7 +866,7 @@ static zend_function_entry spl_funcs_FilterIterator[] = {
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_parent_it___construct, 0) 
-	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_ParentIterator[] = {
@@ -996,7 +996,7 @@ static zend_function_entry spl_funcs_SeekableIterator[] = {
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_limit_it___construct, 0) 
-	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, count)
 ZEND_END_ARG_INFO();
@@ -1166,7 +1166,7 @@ SPL_METHOD(CachingIterator, __toString)
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_caching_it___construct, 0) 
-	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, getStrVal)
 ZEND_END_ARG_INFO();
 
@@ -1212,7 +1212,7 @@ SPL_METHOD(CachingRecursiveIterator, getChildren)
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_REFERENCE_AGNOSTIC, 2) 
-	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, getStrVal)
 	ZEND_ARG_INFO(0, catch_getChildren)
 ZEND_END_ARG_INFO();
