@@ -82,12 +82,16 @@ Since: DOM Level 3
 int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNodePtr node;
-	
+	xmlChar *wholetext;
+
 	node = obj->ptr;
 
 	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, xmlNodeListGetString(node->doc, node, 1), 1);
-	
+	wholetext = xmlNodeListGetString(node->doc, node, 1);
+	ZVAL_STRING(*retval, wholetext, 1);
+
+	xmlFree(wholetext);
+
 	return SUCCESS;
 }
 
@@ -129,6 +133,7 @@ PHP_FUNCTION(dom_text_split_text)
 	length = xmlStrlen(cur);
 
 	if (offset > length || offset < 0) {
+		xmlFree(cur);
 		RETURN_FALSE;
 	}
 
@@ -139,6 +144,9 @@ PHP_FUNCTION(dom_text_split_text)
 
 	xmlNodeSetContentLen(node, first, offset);
 	nnode = xmlNewText(second);
+	
+	xmlFree(first);
+	xmlFree(second);
 
 	nnode->type = XML_ELEMENT_NODE;
 	xmlAddNextSibling(node, nnode);
