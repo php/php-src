@@ -712,12 +712,12 @@ FileFunction(PHP_FN(file_exists),15)
 
 /* {{{ proto array lstat(string filename)
    Give information about a file or symbolic link */
-FileFunction(PHP_FN(lstat),16)
+FileFunction(php_if_lstat,16)
 /* }}} */
 
 /* {{{ proto array stat(string filename)
    Give information about a file */
-FileFunction(PHP_FN(stat),17)
+FileFunction(php_if_stat,17)
 /* }}} */
 
 /*

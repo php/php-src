@@ -26,8 +26,8 @@
 extern PHP_MINIT_FUNCTION(file);
 
 PHP_FUNCTION(tempnam);
-PHP_FUNCTION(tmpfile);
-PHP_FUNCTION(fopen);
+PHP_NAMED_FUNCTION(php_if_tmpfile);
+PHP_NAMED_FUNCTION(php_if_fopen);
 PHP_FUNCTION(fclose);
 PHP_FUNCTION(popen);
 PHP_FUNCTION(pclose);
@@ -63,8 +63,8 @@ PHP_FUNCTION(fd_set);
 PHP_FUNCTION(fd_isset);
 PHP_FUNCTION(select);
 PHP_FUNCTION(realpath);
-PHP_FUNCTION(ftruncate);
-PHP_FUNCTION(fstat);
+PHP_NAMED_FUNCTION(php_if_ftruncate);
+PHP_NAMED_FUNCTION(php_if_fstat);
 
 PHPAPI int php_set_sock_blocking(int socketd, int block);
 PHPAPI int php_file_le_fopen(void);
