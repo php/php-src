@@ -511,7 +511,23 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 				}
 				node = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node);
 			}
-
+			else {
+				if (Z_TYPE_P(member) != IS_STRING) {
+					zval tmp_zv = *member;
+					zval_copy_ctor(&tmp_zv);
+					member = &tmp_zv;
+					convert_to_string(member);
+				}
+				node = node->children;
+				while (node) {
+					xmlNodePtr nnext;
+					nnext = node->next;
+					if (!xmlStrcmp(node->name, Z_STRVAL_P(member))) {
+						break;
+					}
+					node = nnext;
+				}
+            }
 			if (node) {
 				exists = 1;
 			}
