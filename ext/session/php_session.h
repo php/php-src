@@ -59,6 +59,12 @@ typedef struct ps_module_struct {
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
 	 ps_delete_##x, ps_gc_##x 
 
+typedef enum {
+	php_session_disabled,
+	php_session_none,
+	php_session_active,
+} php_session_status;
+
 typedef struct {
 	char *save_path;
 	char *session_name;
@@ -70,11 +76,11 @@ typedef struct {
 	long cookie_lifetime;
 	char *cookie_path;
 	char *cookie_domain;
-    zend_bool  cookie_secure;
+	zend_bool  cookie_secure;
 	ps_module *mod;
 	void *mod_data;
 	HashTable vars;
-	int nr_open_sessions;
+	php_session_status session_status;
 	long gc_probability;
 	long gc_maxlifetime;
 	int module_number;
