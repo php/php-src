@@ -31,6 +31,8 @@
 
 #if HAVE_LIBMCRYPT
 
+#include "fcntl.h"
+
 #include "php_mcrypt.h"
 
 #include "lcrypt.h"
@@ -41,6 +43,7 @@ function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_cfb, NULL)
 	PHP_FE(mcrypt_get_block_size, NULL)
 	PHP_FE(mcrypt_get_key_size, NULL)
+	PHP_FE(mcrypt_create_iv, NULL)
 	{0},
 };
 
@@ -74,6 +77,16 @@ static mcrypt_global_struct mcryptg;
 
 static int php3_minit_mcrypt(INIT_FUNC_ARGS)
 {
+	/* modes for mcrypt_??? routines */
+	REGISTER_LONG_CONSTANT("MCRYPT_ENCODE", 0, 0);
+	REGISTER_LONG_CONSTANT("MCRYPT_DECODE", 1, 0);
+	
+	/* sources for mcrypt_create_iv */
+	REGISTER_LONG_CONSTANT("MCRYPT_DEV_RANDOM", 0, 0);
+	REGISTER_LONG_CONSTANT("MCRYPT_DEV_URANDOM", 1, 0);
+	REGISTER_LONG_CONSTANT("MCRYPT_RAND", 2, 0);
+	
+	/* ciphers */
 	MCRYPT_ENTRY(BLOWFISH);
 	MCRYPT_ENTRY(DES);
 	MCRYPT_ENTRY(TripleDES);
@@ -89,6 +102,52 @@ static int php3_minit_mcrypt(INIT_FUNC_ARGS)
 	MCRYPT_ENTRY(CRYPT);
 #endif
 	return SUCCESS;
+}
+
+typedef enum {
+	RANDOM = 0,
+	URANDOM,
+	RAND
+} iv_source;
+
+/* proto mcrypt_create_iv(int size, int source)
+   create an initializing vector (IV) */
+PHP_FUNCTION(mcrypt_create_iv)
+{
+	pval *size, *psource;
+	char *iv;
+	iv_source source;
+	int i;
+
+	if(ARG_COUNT(ht) != 2 || getParameters(ht, 2, &size, &psource) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(size);
+	convert_to_long(psource);
+	source = psource->value.lval;
+
+	i = size->value.lval;
+	iv = ecalloc(i, 1);
+	
+	if(source == RANDOM || source == URANDOM) {
+		int fd;
+
+		fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom",
+				O_RDONLY);
+		if(fd < 0) {
+			efree(iv);
+			php3_error(E_WARNING, "cannot open source device");
+			RETURN_FALSE;
+		}
+		read(fd, iv, i);
+		close(fd);
+	} else {
+		while(i--) {
+			iv[i] = rand();
+		}
+	}
+	RETURN_STRINGL(iv, size->value.lval, 0);
 }
 
 /* proto mcrypt_get_key_size(int cipher)
