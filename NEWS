@@ -61,6 +61,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21855 (Threading issue on HP-UX). (Roshan Naik, Andi, Moriyoshi)
 - Fixed bug #21074 (Apache2: "ErrorDocument xxx /error.php" broken). (Jani)
 - Fixed bug #19613 (putenv("VAR=") does not empty VAR on win32). (Zeev)
+- Fixed bug #13142 (strtotime not handling "M d H:i:s Y" format). (Ilia)
 - Fixed bug #11924 (ibase_query(), ibase_execute() mangled passed parameters).
   (Jani)
   

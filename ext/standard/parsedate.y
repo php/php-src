@@ -260,6 +260,17 @@ date	: tUNUMBER '/' tUNUMBER {
 	    ((struct date_yy *)parm)->yyMonth = $1;
 	    ((struct date_yy *)parm)->yyDay = $3;
 	}
+	| tMONTH tUNUMBER tUNUMBER ':' tUNUMBER ':' tUNUMBER tUNUMBER {
+		((struct date_yy *)parm)->yyYear = $8;
+		((struct date_yy *)parm)->yyMonth = $1;
+		((struct date_yy *)parm)->yyDay = $2;
+
+		((struct date_yy *)parm)->yyHour = $3;
+		((struct date_yy *)parm)->yyMinutes = $5;
+		((struct date_yy *)parm)->yySeconds = $7;
+
+		((struct date_yy *)parm)->yyHaveTime = 1;
+	}
 	| tUNUMBER '/' tUNUMBER '/' tUNUMBER {
 	  /* Interpret as YYYY/MM/DD if $1 >= 1000, otherwise as MM/DD/YY.
 	     The goal in recognizing YYYY/MM/DD is solely to support legacy
