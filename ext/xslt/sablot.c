@@ -52,15 +52,15 @@ static int  scheme_put(void *, SablotHandle, int, const char *, int *);
 static int  scheme_close(void *, SablotHandle, int);
 
 /* Sax handler functions */
-static SAX_RETURN sax_startdoc(void *);
-static SAX_RETURN sax_startelement(void *, const char *, const char **);
-static SAX_RETURN sax_endelement(void *, const char *);
-static SAX_RETURN sax_startnamespace(void *, const char *, const char *);
-static SAX_RETURN sax_endnamespace(void *, const char *);
-static SAX_RETURN sax_comment(void *, const char *);
-static SAX_RETURN sax_pi(void *, const char *, const char *);
-static SAX_RETURN sax_characters(void *, const char *, int);
-static SAX_RETURN sax_enddoc(void *);
+static SAX_RETURN sax_startdoc(void *, SablotHandle);
+static SAX_RETURN sax_startelement(void *, SablotHandle, const char *, const char **);
+static SAX_RETURN sax_endelement(void *, SablotHandle, const char *);
+static SAX_RETURN sax_startnamespace(void *, SablotHandle, const char *, const char *);
+static SAX_RETURN sax_endnamespace(void *, SablotHandle, const char *);
+static SAX_RETURN sax_comment(void *, SablotHandle, const char *);
+static SAX_RETURN sax_pi(void *, SablotHandle, const char *, const char *);
+static SAX_RETURN sax_characters(void *, SablotHandle, const char *, int);
+static SAX_RETURN sax_enddoc(void *, SablotHandle);
 
 /* Error handlers */
 static MH_ERROR error_makecode(void *, SablotHandle, int, unsigned short, unsigned short);
@@ -507,7 +507,7 @@ PHP_FUNCTION(xslt_process)
 	}
 	
 	/* Perform transformation */
-	error = SablotRunProcessor(XSLT_PROCESSOR(handle), xslt, xml, result, params, args);
+	error = SablotRunProcessor(XSLT_PROCESSOR(handle), xslt, xml, result, (const char**)params, (const char**)args);
 	if (error) {
 		XSLT_ERRNO(handle) = error;
 
@@ -586,6 +586,9 @@ PHP_FUNCTION(xslt_error)
 }
 /* }}} */
 
+<<<<<<< sablot.c
+
+=======
 /* {{{ proto void xslt_free(resource processor)
    Free the xslt processor up */
 PHP_FUNCTION(xslt_free)
@@ -604,6 +607,7 @@ PHP_FUNCTION(xslt_free)
 }
 /* }}} */
 
+>>>>>>> 1.48
 /* {{{ free_processor()
    Free an XSLT processor */
 static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -936,7 +940,7 @@ static int  scheme_close(void *user_data, SablotHandle proc, int fd)
 
 /* {{{ sax_startdoc()
    Called when the document starts to be processed */
-static SAX_RETURN sax_startdoc(void *ctx)
+static SAX_RETURN sax_startdoc(void *ctx, SablotHandle processor)
 {
 	zval       *argv[1];                    /* Arguments to the sax start doc function */
 	zval       *retval;                     /* Return value from sax start doc function */
@@ -966,7 +970,7 @@ static SAX_RETURN sax_startdoc(void *ctx)
 
 /* {{{ sax_startelement()
    Called when an element is begun to be processed */
-static SAX_RETURN sax_startelement(void *ctx, 
+static SAX_RETURN sax_startelement(void *ctx, SablotHandle processor,
                                    const char  *name, 
                                    const char **attr)
 {
@@ -1014,7 +1018,7 @@ static SAX_RETURN sax_startelement(void *ctx,
 
 /* {{{ xslt_sax_endelement()
    Called when an ending XML element is encountered */
-static SAX_RETURN sax_endelement(void *ctx, const char *name)
+static SAX_RETURN sax_endelement(void *ctx, SablotHandle processor, const char *name)
 {
 	zval        *argv[2];                   /* Arguments to the sax end element function */
 	zval        *retval;                    /* Return value from the sax end element function */
@@ -1048,7 +1052,7 @@ static SAX_RETURN sax_endelement(void *ctx, const char *name)
 
 /* {{{ sax_startnamespace()
    Called at the beginning of the parsing of a new namespace */
-static SAX_RETURN sax_startnamespace(void *ctx, 
+static SAX_RETURN sax_startnamespace(void *ctx, SablotHandle processor, 
                                      const char *prefix, 
                                      const char *uri)
 {
@@ -1087,7 +1091,7 @@ static SAX_RETURN sax_startnamespace(void *ctx,
 
 /* {{{ sax_endnamespace()
    Called when a new namespace is finished being parsed */
-static SAX_RETURN sax_endnamespace(void *ctx, const char *prefix)
+static SAX_RETURN sax_endnamespace(void *ctx, SablotHandle processor, const char *prefix)
 {
 	zval        *argv[2];                    /* Arguments to the sax end namespace function */
 	zval        *retval;                     /* Return value from the sax end namespace function */
@@ -1121,7 +1125,7 @@ static SAX_RETURN sax_endnamespace(void *ctx, const char *prefix)
 
 /* {{{ sax_comment()
    Called when a comment is found */
-static SAX_RETURN sax_comment(void *ctx, const char *contents)
+static SAX_RETURN sax_comment(void *ctx, SablotHandle processor, const char *contents)
 {
 	zval        *argv[2];                    /* Arguments to the sax comment function */
 	zval        *retval;                     /* Return value from the sax comment function */
@@ -1155,7 +1159,7 @@ static SAX_RETURN sax_comment(void *ctx, const char *contents)
 
 /* {{{ sax_pi()
    Called when processing instructions are found */
-static SAX_RETURN sax_pi(void *ctx, 
+static SAX_RETURN sax_pi(void *ctx, SablotHandle processor,
                          const char *target, 
                          const char *contents)
 {
@@ -1194,7 +1198,7 @@ static SAX_RETURN sax_pi(void *ctx,
 
 /* {{{ sax_characters()
    Called when characters are come upon */
-static SAX_RETURN sax_characters(void *ctx,
+static SAX_RETURN sax_characters(void *ctx, SablotHandle processor,
                                  const char *contents, 
                                  int length)
 {
@@ -1230,7 +1234,7 @@ static SAX_RETURN sax_characters(void *ctx,
 
 /* {{{ sax_enddoc()
    Called when the document is finished being parsed */
-static SAX_RETURN sax_enddoc(void *ctx)
+static SAX_RETURN sax_enddoc(void *ctx, SablotHandle processor)
 {
 	zval        *argv[1];                    /* Arguments to the end document function */
 	zval        *retval;                     /* Return value from the end document function */
