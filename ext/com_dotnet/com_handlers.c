@@ -445,7 +445,7 @@ static int com_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return ret;
 }
 
-static void com_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -463,12 +463,12 @@ static void com_object_cast(zval *readobj, zval *writeobj, int type, int should_
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 
 		if (!obj->have_default_bind && !com_get_default_binding(obj TSRMLS_CC)) {
-			return;
+			return FAILURE;
 		}
 
 		if (FAILURE == php_com_do_invoke_by_id(obj, obj->default_bind,
 				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL TSRMLS_CC)) {
-			return;
+			return FAILURE;
 		}
 	} else {
 		VariantCopy(&v, &obj->v);
@@ -495,6 +495,7 @@ static void com_object_cast(zval *readobj, zval *writeobj, int type, int should_
 
 	php_com_zval_from_variant(writeobj, &v, obj->code_page TSRMLS_CC);
 	VariantClear(&v);
+	return SUCCESS;
 }
 
 zend_object_handlers php_com_object_handlers = {
