@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed bug #30147 (OO sqlite_fetch_object did not reset error handler). (Wez)
 - Fixed bug #30133 (get_current_user() crashes on Windows). (Edin)
 - Fixed bug #30057 (did not detect IPV6 on FreeBSD 4.1). (Wez)
+- Fixed bug #27798 (private / protected variables not exposed by 
+  get_object_vars() inside class). (Marcus)
 
 23 Sep 2004, PHP 5.0.2
 - Added new boolean (fourth) parameter to array_slice() that turns on the
