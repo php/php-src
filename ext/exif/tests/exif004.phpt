@@ -6,8 +6,8 @@ Check for exif_read_data, Unicode WinXP tags
 	if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 ?>
 --INI--
-output_handler = 
-zlib.output_compression = Off
+output_handler=
+zlib.output_compression=0
 exif.decode_unicode_intel=UCS-2LE
 exif.decode_unicode_motorola=UCS-2BE
 exif.encode_unicode=ISO-8859-1

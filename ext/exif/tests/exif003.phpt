@@ -1,10 +1,13 @@
 --TEST--
 Check for exif_read_data, Unicode user comment
 --SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+<?php 
+	if (!extension_loaded('exif')) die('skip exif extension not available');
+	if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+?>
 --INI--
-output_handler = 
-zlib.output_compression = Off
+output_handler=
+zlib.output_compression=0
 exif.decode_unicode_motorola=UCS-2BE
 exif.encode_unicode=ISO-8859-15
 --FILE--
