@@ -151,10 +151,6 @@ SOURCE=.\zend_extensions.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_gcc_inline.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend_hash.c
 # End Source File
 # Begin Source File
@@ -164,6 +160,10 @@ SOURCE=.\zend_highlight.c
 # Begin Source File
 
 SOURCE=.\zend_indent.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ini.c
 # End Source File
 # Begin Source File
 
@@ -276,6 +276,10 @@ SOURCE=.\zend_highlight.h
 # Begin Source File
 
 SOURCE=.\zend_indent.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ini.h
 # End Source File
 # Begin Source File
 
