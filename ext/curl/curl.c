@@ -18,11 +18,10 @@
 
 /* $Id$ */
 
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
- 
+
 #include "php.h"
 
 #if HAVE_CURL
@@ -43,47 +42,11 @@
 #include "php_curl.h"
 
 static int  le_curl;
-static char le_curl_name[] = "cURL handle";
+#define le_curl_name "cURL handle"
 
 static void _php_curl_close(zend_rsrc_list_entry *rsrc);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
-
-#ifdef PHP_WIN32
-/* {{{ win32_cleanup()
-   Clean-up allocated socket data on win32 systems */
-static void win32_cleanup()
-{
-	WSACleanup();
-}
-/* }}} */
-
-/* {{{ win32_init()
-   Initialize WSA stuff on Win32 systems */
-static CURLcode win32_init()
-{
-	WSADATA wsa_data;
-	WORD    requested_version = MAKEWORD(1, 1);
-	int     error;
-	
-	error = WSAStartup(requested_version, &wsa_data);
-	if (error != 0) {
-		return CURLE_FAILED_INIT;
-	}
-	
-	if (LOBYTE(wsa_data.wVersion) != 1 || HIBYTE(wsa_data.wVersion) != 1) {
-		WSACleanup();
-		return CURLE_FAILED_INIT;
-	}
-	
-	return CURLE_OK;
-}
-/* }}} */
-#else
-static CURLcode win32_init(void) { return CURLE_OK; }
-#define win32_cleanup()
-#endif
-
 
 function_entry curl_functions[] = {
 	PHP_FE(curl_init,     NULL)
@@ -101,7 +64,7 @@ zend_module_entry curl_module_entry = {
 	"curl",
 	curl_functions,
 	PHP_MINIT(curl),
-	PHP_MSHUTDOWN(curl),
+	NULL,
 	NULL,
 	NULL,
 	PHP_MINFO(curl),
@@ -191,7 +154,8 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT("CURLOPT_CONNECTTIMEOUT",  CURLOPT_CONNECTTIMEOUT);
 	REGISTER_CURL_CONSTANT("CURLOPT_SSL_VERIFYPEER",  CURLOPT_SSL_VERIFYPEER);
 	REGISTER_CURL_CONSTANT("CURLOPT_CAINFO",          CURLOPT_CAINFO);
-
+	REGISTER_CURL_CONSTANT("CURLOPT_BINARYTRANSER",   CURLOPT_BINARYTRANSFER);
+	
 	/* Constants effecting the way CURLOPT_CLOSEPOLICY works */
 	REGISTER_CURL_CONSTANT("CURLCLOSEPOLICY_LEAST_RECENTLY_USED", CURLCLOSEPOLICY_LEAST_RECENTLY_USED);
 	REGISTER_CURL_CONSTANT("CURLCLOSEPOLICY_OLDEST",              CURLCLOSEPOLICY_OLDEST);
@@ -264,16 +228,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT("CURLE_TELNET_OPTION_SYNTAX",        CURLE_TELNET_OPTION_SYNTAX);
 	REGISTER_CURL_CONSTANT("CURLE_ALREADY_COMPLETE",            CURLE_ALREADY_COMPLETE);
 
-	if (win32_init() != CURLE_OK) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(curl)
-{
-	win32_cleanup();
 	return SUCCESS;
 }
 
@@ -282,6 +236,8 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 #define PHP_CURL_USER   2
 #define PHP_CURL_DIRECT 3
 #define PHP_CURL_RETURN 4
+#define PHP_CURL_ASCII  5
+#define PHP_CURL_BINARY 6
 
 static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 {
@@ -291,10 +247,12 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	ELS_FETCH();
 
 	switch (t->method) {
+	case PHP_CURL_STDOUT:
+		PUTS(data);
+		break;
 	case PHP_CURL_FILE:
 		return fwrite(data, size, nmemb, t->fp);
 	case PHP_CURL_RETURN:
-	case PHP_CURL_STDOUT:
 		smart_str_appendl(&t->buf, data, (int) length);
 		break;
 	case PHP_CURL_USER: {
@@ -487,7 +445,7 @@ PHP_FUNCTION(curl_version)
 }
 /* }}} */
 
-static void init_curl_handle(php_curl **ch)
+static void alloc_curl_handle(php_curl **ch)
 {
 	*ch                    = emalloc(sizeof(php_curl));
 	(*ch)->handlers        = ecalloc(1, sizeof(php_curl_handlers));
@@ -515,7 +473,7 @@ PHP_FUNCTION(curl_init)
 		WRONG_PARAM_COUNT;
 	}
 
-	init_curl_handle(&ch);
+	alloc_curl_handle(&ch);
 
 	ch->cp = curl_easy_init();
 	if (! ch->cp) {
@@ -524,6 +482,7 @@ PHP_FUNCTION(curl_init)
 	}
 
 	ch->handlers->write->method = PHP_CURL_STDOUT;
+	ch->handlers->write->type   = PHP_CURL_ASCII;
 	ch->handlers->read->method  = PHP_CURL_DIRECT;
 
 	curl_easy_setopt(ch->cp, CURLOPT_NOPROGRESS,        1);
@@ -658,6 +617,10 @@ PHP_FUNCTION(curl_setopt)
 			ch->handlers->write->method = PHP_CURL_RETURN;
 		}
 		break;
+	case CURLOPT_BINARYTRANSFER:
+		convert_to_long_ex(zvalue);
+		
+		ch->handlers->write->type = PHP_CURL_BINARY;
 	case CURLOPT_WRITEFUNCTION:
 		zval_add_ref(zvalue);
 		ch->handlers->write->func = *zvalue;
@@ -800,13 +763,9 @@ PHP_FUNCTION(curl_exec)
 	}
 
 	if (ch->handlers->write->method == PHP_CURL_RETURN) {
-		smart_str_0(&ch->handlers->write->buf);
+		if (ch->handlers->write->type != PHP_CURL_BINARY) 
+			smart_str_0(&ch->handlers->write->buf);
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
-		smart_str_free(&ch->handlers->write->buf);
-	}
-	else if (ch->handlers->write->method == PHP_CURL_STDOUT) {
-		smart_str_0(&ch->handlers->write->buf);
-		PUTS(ch->handlers->write->buf.c);
 		smart_str_free(&ch->handlers->write->buf);
 	}
 
