@@ -8,7 +8,7 @@ PHP 4.0                                                                    NEWS
 - Added support to getimagesize to return dimensions of BMP and PSD
   files (Derick)
 - Added Japanese multibyte string functions support. (Rui)
-- Added Mac OS X "\r" line ending support to the Zend Engine (Andi)
+- Added Mac OS X "\r" line ending support. (Andi, Zend Engine)
 - Fixed a bug regarding the $PHP_SELF being incorrectly registered when
   force-cgi-redirect was not enabled. (Sterling)
 - pfpro extension now supports version 3 of the Verisign SDK (John Donagher)
