@@ -18,9 +18,9 @@ AC_ARG_WITH(readline,
       AC_MSG_ERROR(Please reinstall readline - I cannot find readline.h)
     fi
     AC_ADD_INCLUDE($READLINE_DIR/include)
-    AC_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/lib)
-    AC_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/lib)
     AC_ADD_LIBRARY(termcap)
+    AC_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/lib)
+    AC_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/lib)
 
     AC_MSG_RESULT(yes)
 
