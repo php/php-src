@@ -97,7 +97,7 @@ struct _zend_op_array {
 	zend_uint *refcount;
 
 	zend_op *opcodes;
-	zend_uint last, size;
+	int last, size;
 
 	zend_uint T;
 
