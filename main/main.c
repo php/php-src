@@ -1125,14 +1125,12 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 	INIT_PZVAL(argc);
 
 	if (PG(register_globals)) {
+		arr->refcount++;
+		argc->refcount++;
 		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
 		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	}
 
-	if (PG(register_globals)) {
-		arr->refcount++;
-		argc->refcount++;
-	}
 	zend_hash_update(track_vars_array->value.ht, "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
 	zend_hash_update(track_vars_array->value.ht, "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
 }
