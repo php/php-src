@@ -50,3 +50,4 @@ internal_functions.c: internal_functions.c.in config.status
 	CONFIG_FILES= CONFIG_HEADERS= ./config.status
 
 .NOEXPORT:
+
