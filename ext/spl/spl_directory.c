@@ -119,6 +119,7 @@ static zend_object_value spl_dir_object_new(zend_class_entry *class_type TSRMLS_
 /* {{{ spl_dir_open */
 static void spl_dir_open(spl_dir_object* intern, char *path TSRMLS_DC)
 {
+	/* we are using EH_THORW so REPORT_ERRORS results in exceptions */
 	intern->dirp = php_stream_opendir(path, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
 
 	intern->path = estrdup(path);
@@ -184,10 +185,10 @@ SPL_CLASS_FUNCTION(dir, __construct)
 	char *path;
 	long len;
 
-/* exceptions do not work yet
-	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);*/
+	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len) == FAILURE) {
+		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
 
