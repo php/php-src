@@ -40,7 +40,7 @@ if test "$PHP_LDAP" != "no"; then
 
 	PHP_SUBST(LDAP_SHARED_LIBADD)
 
-	if test -f $LDAP_LIBDIR/liblber.a; then
+	if test -f $LDAP_LIBDIR/liblber.a -o -f $LDAP_LIBDIR/liblber.so ; then
 		AC_ADD_LIBRARY_WITH_PATH(lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
 		AC_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
 	elif test -f $LDAP_LIBDIR/libldapssl41.so; then
