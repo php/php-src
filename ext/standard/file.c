@@ -776,7 +776,7 @@ PHP_FUNCTION(feof)
 /* }}} */
 
 
-/* {{{ proto int socket_set_blocking(int socket descriptor, int mode)
+/* {{{ proto int set_socket_blocking(int socket descriptor, int mode)
    Set blocking/non-blocking mode on a socket */
 PHPAPI int php_set_sock_blocking(int socketd, int block)
 {

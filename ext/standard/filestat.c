@@ -122,8 +122,10 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 		efree (BG(CurrentStatFile));
 	}
 	return SUCCESS;
-}
+} 
 
+/* {{{ proto double diskfreespace(string path)
+   Get free diskspace for filesystem that path is on */
 PHP_FUNCTION(diskfreespace)
 {
 	pval **path;
@@ -220,6 +222,7 @@ PHP_FUNCTION(diskfreespace)
 
 	RETURN_DOUBLE(bytesfree);
 }
+/* }}} */
 
 /* {{{ proto bool chown(string filename, mixed user)
    Change file owner */

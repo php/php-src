@@ -294,7 +294,7 @@ function_entry basic_functions[] = {
 	PHP_FE(register_shutdown_function,	NULL)
 
 	PHP_FE(highlight_file,				NULL)	
-	PHP_NAMED_FE(show_source, PHP_FN(highlight_file), NULL)
+	PHP_FALIAS(show_source, highlight_file , NULL)
 	PHP_FE(highlight_string,			NULL)
 	
 	PHP_FE(ini_get,						NULL)
@@ -1967,7 +1967,7 @@ PHP_FUNCTION(extension_loaded)
 /* }}} */
 
 
-/* proto array get_extension_funcs(string extension_name)
+/* {{{ proto array get_extension_funcs(string extension_name)
    Returns an array with the names of functions belonging to the named extension */
 PHP_FUNCTION(get_extension_funcs)
 {
