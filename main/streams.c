@@ -1286,7 +1286,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	if (data->fd >= 0) {
 		ret = read(data->fd, buf, count);
 		
-		if (ret == 0 || (ret < count && errno != EWOULDBLOCK))
+		if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK))
 			stream->eof = 1;
 				
 	} else {
