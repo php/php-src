@@ -3651,6 +3651,48 @@ PHP_FUNCTION(array_chunk)
 }
 /* }}} */
 
+/* {{{ proto array array_combine(array keys, array values)
+   Creates an array by using the elements of the first parameter as keys and the elements of the second as correspoding keys */
+PHP_FUNCTION(array_combine)
+{
+	zval *values, *keys;
+	HashPosition pos_values, pos_keys;
+	zval **entry_keys, **entry_values;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa", &keys, &values) == FAILURE) {
+		return;
+	}
+
+	if (zend_hash_num_elements(Z_ARRVAL_P(keys)) == 0 || zend_hash_num_elements(Z_ARRVAL_P(values)) == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have number of elements at least 0");
+		RETURN_FALSE;
+	}
+
+		
+	if (zend_hash_num_elements(Z_ARRVAL_P(keys)) != zend_hash_num_elements(Z_ARRVAL_P(values))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have equal number of elements");
+		RETURN_FALSE;
+	}
+	
+	array_init(return_value);
+	
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(keys), &pos_keys);
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(keys), (void **)&entry_keys, &pos_keys) == SUCCESS &&
+		 zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&entry_values, &pos_values) == SUCCESS) {
+		if (Z_TYPE_PP(entry_keys) == IS_STRING) {
+			zval_add_ref(entry_values);
+			add_assoc_zval(return_value, Z_STRVAL_PP(entry_keys), *entry_values);
+		} else if (Z_TYPE_PP(entry_keys) == IS_LONG) {
+			zval_add_ref(entry_values);
+			add_index_zval(return_value, Z_LVAL_PP(entry_keys), *entry_values);
+		}
+		zend_hash_move_forward_ex(Z_ARRVAL_PP(entry_keys), &pos_keys);
+		zend_hash_move_forward_ex(Z_ARRVAL_PP(entry_values), &pos_values);
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
