@@ -35,25 +35,27 @@
 #include <winbase.h>
 #endif
 
-
-typedef struct _zend_ini_parser_param {
-	zend_ini_parser_cb_t ini_parser_cb;
-	void *arg;
-} zend_ini_parser_param;
-
 #define YYSTYPE zval
-#define YYPARSE_PARAM ini_parser_param
 
-#define ZEND_INI_PARSER_CB	((zend_ini_parser_param *) ini_parser_param)->ini_parser_cb
-#define ZEND_INI_PARSER_ARG	((zend_ini_parser_param *) ini_parser_param)->arg
+#ifdef ZTS
+#define YYPARSE_PARAM tsrm_ls
+#define YYLEX_PARAM tsrm_ls
+#endif
 
-int ini_lex(zval *ini_lval);
-int ini_parse(void *ini_parser_param);
+#define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
+#define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
+
+int ini_lex(zval *ini_lval TSRMLS_DC);
+#ifdef ZTS
+int ini_parse(void *arg);
+#else
+int ini_parse(void);
+#endif
 
 zval yylval;
 
 #ifndef ZTS
-extern int ini_lex(zval *ini_lval);
+extern int ini_lex(zval *ini_lval TSRMLS_DC);
 extern FILE *ini_in;
 extern int ini_lineno;
 extern void init_cfg_scanner(void);
@@ -147,19 +149,20 @@ static void ini_error(char *str)
 
 int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
-	zend_ini_parser_param ini_parser_param;
 	int retval;
+	zend_ini_parser_param ini_parser_param;
 	TSRMLS_FETCH();
 
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;
 
+	CG(ini_parser_param) = &ini_parser_param;
 	if (zend_ini_open_file_for_scanning(fh TSRMLS_CC)==FAILURE) {
 		return FAILURE;
 	}
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
-	retval = ini_parse(&ini_parser_param);
+	retval = ini_parse(TSRMLS_C);
 
 	zend_ini_close_file(fh TSRMLS_CC);
 

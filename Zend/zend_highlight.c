@@ -29,8 +29,8 @@
 extern char *zendtext;
 extern int zendleng;
 #else
-#define zendtext ((char *) zend_get_zendtext(TSRMLS_C))
-#define zendleng zend_get_zendleng(TSRMLS_C)
+#define zendtext LANG_SCNG(yy_text)
+#define zendleng LANG_SCNG(yy_leng)
 #endif
 
 ZEND_API void zend_html_putc(char c)

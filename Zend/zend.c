@@ -320,6 +320,12 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS
 }
 
 
+static void zend_new_thread_end_handler(THREAD_T thread_id TSRMLS_DC)
+{
+	zend_copy_ini_directives(TSRMLS_C);
+	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
+}
+
 #endif
 
 
@@ -340,13 +346,14 @@ static void alloc_globals_dtor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 #include <floatingpoint.h>
 #endif
 
-#ifdef ZTS
-static void zend_new_thread_end_handler(THREAD_T thread_id TSRMLS_DC)
+
+static void scanner_globals_ctor(zend_scanner_globals *scanner_globals_p TSRMLS_DC)
 {
-	zend_copy_ini_directives(TSRMLS_C);
-	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
+	scanner_globals_p->c_buf_p = (char *) 0;
+	scanner_globals_p->init = 1;
+	scanner_globals_p->start = 0;
+	scanner_globals_p->current_buffer = NULL;
 }
-#endif
 
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions)
@@ -355,6 +362,13 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
 	void ***tsrm_ls;
+#ifdef ZTS
+	extern ZEND_API ts_rsrc_id ini_scanner_globals_id;
+	extern ZEND_API ts_rsrc_id language_scanner_globals_id;
+#else
+	extern zend_scanner_globals ini_scanner_globals;
+	extern zend_scanner_globals language_scanner_globals;
+#endif
 
 	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
 #else
@@ -406,6 +420,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	global_constants_table = NULL;
 	ts_allocate_id(&compiler_globals_id, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
 	ts_allocate_id(&executor_globals_id, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
+	ts_allocate_id(&language_scanner_globals_id, sizeof(zend_scanner_globals), (ts_allocate_ctor) scanner_globals_ctor, NULL);
+	ts_allocate_id(&ini_scanner_globals_id, sizeof(zend_scanner_globals), (ts_allocate_ctor) scanner_globals_ctor, NULL);
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
 	tsrm_ls = ts_resource_ex(0, NULL);
@@ -415,6 +431,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_startup_constants(tsrm_ls);
 	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
 #else
+	scanner_globals_ctor(&ini_scanner_globals TSRMLS_CC);
+	scanner_globals_ctor(&language_scanner_globals TSRMLS_CC);
 	zend_startup_constants();
 	zend_set_default_compile_time_values(TSRMLS_C);
 	EG(user_error_handler) = NULL;
