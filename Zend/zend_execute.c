@@ -2077,6 +2077,7 @@ do_fcall_common:
 						ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
 						INIT_ZVAL(*(EX(Ts)[EX(opline)->result.u.var].var.ptr));
 						((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(object), return_value_used TSRMLS_CC);
+						EG(current_execute_data) = &execute_data;
 						EX(Ts)[EX(opline)->result.u.var].var.ptr->is_ref = 0;
 						EX(Ts)[EX(opline)->result.u.var].var.ptr->refcount = 1;
 						if (!return_value_used) {
@@ -2101,6 +2102,7 @@ do_fcall_common:
 						EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 
 						zend_execute(EG(active_op_array) TSRMLS_CC);
+						EG(current_execute_data) = &execute_data;
 
 						if (return_value_used && !EX(Ts)[EX(opline)->result.u.var].var.ptr) {
 							if (!EG(exception)) {
@@ -2732,6 +2734,7 @@ send_by_ref:
 						EX(object) = NULL;
 						
 						zend_execute(new_op_array TSRMLS_CC);
+						EG(current_execute_data) = &execute_data;
 						
 						EX(function_state).function = saved_function;
 						EX(object) = saved_object;
