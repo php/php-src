@@ -31,89 +31,95 @@
 /* $Id$ */
 
 #ifndef _PHP_ODBC_H
-# define _PHP_ODBC_H
+#define _PHP_ODBC_H
 
-# if HAVE_UODBC
+#if HAVE_UODBC
 
-# ifndef MSVC5
-#  define FAR
-# endif
+#ifndef MSVC5
+#define FAR
+#endif
 
 /* checking in the same order as in configure.in */
 
-# if HAVE_SOLID /* Solid Server */
+#if HAVE_SOLID /* Solid Server */
 
-#  include <cli0core.h>
-#  include <cli0ext1.h>
-#  define HAVE_SQL_EXTENDED_FETCH 0
+#define ODBC_TYPE "Solid"
+#include <cli0core.h>
+#include <cli0ext1.h>
+#define HAVE_SQL_EXTENDED_FETCH 0
 PHP_FUNCTION(solid_fetch_prev);
 
-# elif HAVE_EMPRESS /* Empress */
+#elif HAVE_EMPRESS /* Empress */
 
-#  include <sql.h>
-#  include <sqlext.h>
-#  define HAVE_SQL_EXTENDED_FETCH 0
+#define ODBC_TYPE "Empress"
+#include <sql.h>
+#include <sqlext.h>
+#define HAVE_SQL_EXTENDED_FETCH 0
 
-# elif HAVE_ADABAS /* Adabas D */
+#elif HAVE_ADABAS /* Adabas D */
 
-#  include <WINDOWS.H>
-#  include <sql.h>
-#  include <sqlext.h>
-#  define HAVE_SQL_EXTENDED_FETCH 1
+#define ODBC_TYPE "Adabas D"
+#include <WINDOWS.H>
+#include <sql.h>
+#include <sqlext.h>
+#define HAVE_SQL_EXTENDED_FETCH 1
 
-# elif HAVE_IODBC /* iODBC library */
+#elif HAVE_IODBC /* iODBC library */
 
-#  include <isql.h>
-#  include <isqlext.h>
-#  include <odbc_types.h>
-#  include <odbc_funcs.h>
-#  define HAVE_SQL_EXTENDED_FETCH 1
-#  define SQL_FD_FETCH_ABSOLUTE   0x00000010L
-#  define SQL_CURSOR_DYNAMIC      2UL
-#  define SQL_NO_TOTAL            (-4)
-#  define SQL_SO_DYNAMIC          0x00000004L
-#  define SQL_LEN_DATA_AT_EXEC_OFFSET  (-100)
-#  define SQL_LEN_DATA_AT_EXEC(length) (-(length)+SQL_LEN_DATA_AT_EXEC_OFFSET)
+#define ODBC_TYPE "iODBC"
+#include <isql.h>
+#include <isqlext.h>
+#define HAVE_SQL_EXTENDED_FETCH 1
+#define SQL_FD_FETCH_ABSOLUTE   0x00000010L
+#define SQL_CURSOR_DYNAMIC      2UL
+#define SQL_NO_TOTAL            (-4)
+#define SQL_SO_DYNAMIC          0x00000004L
+#define SQL_LEN_DATA_AT_EXEC_OFFSET  (-100)
+#define SQL_LEN_DATA_AT_EXEC(length) (-(length)+SQL_LEN_DATA_AT_EXEC_OFFSET)
 
-# elif HAVE_OPENLINK /* OpenLink ODBC drivers */
+#elif HAVE_OPENLINK /* OpenLink ODBC drivers */
 
-#  include <iodbc.h>
-#  include <isql.h>
-#  include <isqlext.h>
-#  include <udbcext.h>
-#  define HAVE_SQL_EXTENDED_FETCH 1
+#define ODBC_TYPE "Openlink"
+#include <iodbc.h>
+#include <isql.h>
+#include <isqlext.h>
+#include <udbcext.h>
+#define HAVE_SQL_EXTENDED_FETCH 1
 
-# elif HAVE_VELOCIS /* Raima Velocis */
+#elif HAVE_VELOCIS /* Raima Velocis */
 
-#  define UNIX
-#  define HAVE_SQL_EXTENDED_FETCH 1
-#  include <sql.h>
-#  include <sqlext.h>
+#define ODBC_TYPE "Velocis"
+#define UNIX
+#define HAVE_SQL_EXTENDED_FETCH 1
+#include <sql.h>
+#include <sqlext.h>
 
-# elif HAVE_CODBC /* Custom ODBC */
+#elif HAVE_CODBC /* Custom ODBC */
 
-#  define HAVE_SQL_EXTENDED_FETCH 1
-#  include <odbc.h>
+#define ODBC_TYPE "Custom ODBC"
+#define HAVE_SQL_EXTENDED_FETCH 1
+#include <odbc.h>
 
-# elif HAVE_DB2 /* DB2 CLI */
+#elif HAVE_DB2 /* DB2 CLI */
 
-#  define HAVE_SQL_EXTENDED_FETCH 1
-#  include <sqlcli1.h>
-#  ifdef DB268K
+#define ODBC_TYPE "DB2 CLI"
+#define HAVE_SQL_EXTENDED_FETCH 1
+#include <sqlcli1.h>
+#ifdef DB268K
 /* Need to include ASLM for 68K applications */
-#   include <LibraryManager.h>
-#  endif
+#include <LibraryManager.h>
+#endif
 
-# else /* MS ODBC */
+#else /* MS ODBC */
 
-#  define HAVE_SQL_EXTENDED_FETCH 1
-#  include <WINDOWS.H>
-#  include <sql.h>
-#  include <sqlext.h>
-# endif
+#define HAVE_SQL_EXTENDED_FETCH 1
+#include <WINDOWS.H>
+#include <sql.h>
+#include <sqlext.h>
+#endif
 
 extern php3_module_entry odbc_module_entry;
-# define odbc_module_ptr &odbc_module_entry
+#define odbc_module_ptr &odbc_module_entry
 
 
 /* user functions */
@@ -129,7 +135,6 @@ PHP_FUNCTION(odbc_close_all);
 PHP_FUNCTION(odbc_commit);
 PHP_FUNCTION(odbc_connect);
 PHP_FUNCTION(odbc_pconnect);
-void php3_odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int);
 PHP_FUNCTION(odbc_cursor);
 PHP_FUNCTION(odbc_exec);
 PHP_FUNCTION(odbc_do);
@@ -147,9 +152,12 @@ PHP_FUNCTION(odbc_prepare);
 PHP_FUNCTION(odbc_result);
 PHP_FUNCTION(odbc_result_all);
 PHP_FUNCTION(odbc_rollback);
-void php3_odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int);
 PHP_FUNCTION(odbc_binmode);
 PHP_FUNCTION(odbc_longreadlen);
+/* 
+ * PHP_FUNCTION(odbc_bind_param);
+ * PHP_FUNCTION(odbc_define);
+*/
 
 typedef struct odbc_connection {
 #if HAVE_DB2
@@ -158,6 +166,7 @@ typedef struct odbc_connection {
 	HDBC hdbc;
 #endif
 	int open;
+	int persistent;
 } odbc_connection;
 
 typedef struct odbc_result_value {
@@ -207,9 +216,6 @@ typedef struct {
 	HashTable *resource_plist;
 } php_odbc_globals;
 
-# ifndef ZTS
-extern php_odbc_globals odbc_globals;
-# endif
 
 int odbc_add_result(HashTable *list, odbc_result *result);
 odbc_result *odbc_get_result(HashTable *list, int count);

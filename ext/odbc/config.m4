@@ -62,9 +62,9 @@ AC_ARG_WITH(adabas,
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/incl
     ODBC_LIBDIR=$withval/lib
-    ODBC_LFLAGS=-L$ADA_LIBDIR
-    ODBC_INCLUDE=-I$ADA_INCDIR
-    ODBC_LIBS="${ADA_LIBDIR}/odbclib.a -lsqlrte -lsqlptc"
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_LIBS="${ODBC_LIBDIR}/odbclib.a -lsqlrte -lsqlptc"
     ODBC_TYPE=adabas
     AC_DEFINE(HAVE_ADABAS)
     AC_MSG_RESULT(yes)
@@ -182,8 +182,8 @@ AC_ARG_WITH(custom-odbc,
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
     ODBC_LIBDIR=$withval/lib
-    ODBC_LFLAGS=-L$CODBC_LIBDIR
-    ODBC_INCLUDE=-I$CODBC_INCDIR
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=$CUSTOM_ODBC_LIBS
     ODBC_TYPE=custom
     AC_DEFINE(HAVE_CODBC)
@@ -208,8 +208,8 @@ AC_ARG_WITH(iodbc,
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
     ODBC_LIBDIR=$withval/lib
-    ODBC_LFLAGS=-L$IODBC_LIBDIR
-    ODBC_INCLUDE=-I$IODBC_INCDIR
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-liodbc
     ODBC_TYPE=iodbc
     AC_DEFINE(HAVE_IODBC)
