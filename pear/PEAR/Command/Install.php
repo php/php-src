@@ -28,9 +28,6 @@ require_once "PEAR/Installer.php";
  */
 class PEAR_Command_Install extends PEAR_Command_Common
 {
-    // {{{ properties
-    // }}}
-
     // {{{ constructor
 
     /**
