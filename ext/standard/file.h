@@ -73,6 +73,8 @@ PHP_NAMED_FUNCTION(php_if_fstat);
 
 PHP_FUNCTION(file_get_wrapper_data);
 PHP_FUNCTION(file_register_wrapper);
+PHP_FUNCTION(file_context_create);
+PHP_FUNCTION(file_context_set_params);
 PHP_MINIT_FUNCTION(user_streams);
 
 PHPAPI int php_set_sock_blocking(int socketd, int block);

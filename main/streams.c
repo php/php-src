@@ -1069,7 +1069,8 @@ PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
 /* }}} */
 
 /* {{{ php_stream_open_url */
-static php_stream *php_stream_open_url(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
+static php_stream *php_stream_open_url(char *path, char *mode, int options,
+	char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper;
 	const char *p, *protocol = NULL;
@@ -1085,7 +1086,7 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 		/* BC with older php scripts and zlib wrapper */
 		protocol = path;
 		n = 4;
-		zend_error(E_NOTICE, "Use of \"zlib:\" wrapper is deprecated; please use \"zlib://\" instead.");
+		zend_error(E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"zlib://\" instead.");
 	}
 
 	if (protocol)	{
@@ -1103,7 +1104,7 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 			protocol = NULL;
 		}
 		if (wrapper)	{
-			php_stream *stream = wrapper->wops->opener(wrapper, path, mode, options, opened_path STREAMS_REL_CC TSRMLS_CC);
+			php_stream *stream = wrapper->wops->opener(wrapper, path, mode, options, opened_path, context STREAMS_REL_CC TSRMLS_CC);
 			if (stream)
 				stream->wrapper = wrapper;
 			return stream;
@@ -1126,8 +1127,9 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 }
 /* }}} */
 
-/* {{{ php_stream_open_wrapper */
-PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
+/* {{{ php_stream_open_wrapper_ex */
+PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options,
+		char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
 
@@ -1138,7 +1140,7 @@ PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options,
 		return NULL;
 
 	if (PG(allow_url_fopen) && !(options & IGNORE_URL))	{
-		stream = php_stream_open_url(path, mode, options, opened_path STREAMS_REL_CC TSRMLS_CC);
+		stream = php_stream_open_url(path, mode, options, opened_path, context STREAMS_REL_CC TSRMLS_CC);
 		goto out;
 	}
 
@@ -1242,6 +1244,41 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	return PHP_STREAM_RELEASED;
 }
 /* }}} */
+
+PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context)
+{
+	php_stream_context *oldcontext = stream->context;
+	stream->context = context;
+	return oldcontext;
+}
+
+PHPAPI void php_stream_notification_notify(php_stream_context *context, int notifycode, int severity,
+		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC)
+{
+	if (context && context->notifier)
+		context->notifier->func(context, notifycode, severity, xmsg, xcode, bytes_sofar, bytes_max, ptr TSRMLS_CC);
+}
+
+PHPAPI void php_stream_context_free(php_stream_context *context)
+{
+	efree(context);
+}
+
+PHPAPI php_stream_context *php_stream_context_alloc(void)
+{
+	return ecalloc(1, sizeof(php_stream_context));
+}
+
+PHPAPI php_stream_notifier *php_stream_notification_alloc(void)
+{
+	return ecalloc(1, sizeof(php_stream_notifier));
+}
+
+PHPAPI void php_stream_notification_free(php_stream_notifier *notifier)
+{
+	efree(notifier);
+}
+
 
 /*
  * Local variables:

@@ -54,7 +54,7 @@ PHP_FUNCTION(ob_gzhandler);
 
 int php_enable_output_compression(int buffer_size TSRMLS_DC);
 
-php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC);
+php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 extern php_stream_ops php_stream_gzio_ops;
 extern php_stream_wrapper php_stream_gzip_wrapper;
 

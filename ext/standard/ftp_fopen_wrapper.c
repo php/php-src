@@ -66,16 +66,16 @@
 
 #include "php_fopen_wrappers.h"
 
-static int php_get_ftp_result(php_stream *stream TSRMLS_DC)
+
+static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size TSRMLS_DC)
 {
-	char tmp_line[513];
+	while (php_stream_gets(stream, buffer, buffer_size-1) &&
+		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
+			 isdigit((int) buffer[2]) && buffer[3] == ' '));
 
-	while (php_stream_gets(stream, tmp_line, sizeof(tmp_line)-1) &&
-		   !(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
-			 isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
-
-	return strtol(tmp_line, NULL, 10);
+	return strtol(buffer, NULL, 10);
 }
+#define GET_FTP_RESULT(stream)	get_ftp_result((stream), tmp_line, sizeof(tmp_line) TSRMLS_CC)
 
 static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper,
 		php_stream *stream,
@@ -103,7 +103,7 @@ php_stream_wrapper php_stream_ftp_wrapper =	{
 
 /* {{{ php_fopen_url_wrap_ftp
  */
-php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
+php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream=NULL;
 	php_url *resource=NULL;
@@ -113,6 +113,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	int result;
 	int i;
 	char *tpath, *ttpath;
+	size_t file_size = 0;
 	
 	resource = php_url_parse((char *) path);
 	if (resource == NULL || resource->path == NULL)
@@ -126,10 +127,15 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	if (stream == NULL)
 		goto errexit;
 
+	php_stream_context_set(stream, context);
+	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
+
 	/* Start talking to ftp server */
-	result = php_get_ftp_result(stream TSRMLS_CC);
-	if (result > 299 || result < 200)
+	result = GET_FTP_RESULT(stream);
+	if (result > 299 || result < 200) {
+		php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE, tmp_line, result);
 		goto errexit;
+	}
 
 	/* send the user name */
 	php_stream_write_string(stream, "USER ");
@@ -142,10 +148,12 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	php_stream_write_string(stream, "\r\n");
 	
 	/* get the response */
-	result = php_get_ftp_result(stream TSRMLS_CC);
+	result = GET_FTP_RESULT(stream);
 	
 	/* if a password is required, send it */
 	if (result >= 300 && result <= 399) {
+		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, tmp_line, 0);
+
 		php_stream_write_string(stream, "PASS ");
 		if (resource->pass != NULL) {
 			php_raw_url_decode(resource->pass, strlen(resource->pass));
@@ -162,14 +170,20 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		php_stream_write_string(stream, "\r\n");
 		
 		/* read the response */
-		result = php_get_ftp_result(stream TSRMLS_CC);
+		result = GET_FTP_RESULT(stream);
+
+		if (result > 299 || result < 200) {
+			php_stream_notify_error(context, PHP_STREAM_NOTIFY_AUTH_RESULT, tmp_line, result);
+		} else {
+			php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_RESULT, tmp_line, result);
+		}
 	}
 	if (result > 299 || result < 200)
 		goto errexit;
 	
 	/* set the connection to be binary */
 	php_stream_write_string(stream, "TYPE I\r\n");
-	result = php_get_ftp_result(stream TSRMLS_CC);
+	result = GET_FTP_RESULT(stream);
 	if (result > 299 || result < 200)
 		goto errexit;
 	
@@ -179,13 +193,22 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	php_stream_write_string(stream, "\r\n");
 	
 	/* read the response */
-	result = php_get_ftp_result(stream TSRMLS_CC);
+	result = GET_FTP_RESULT(stream);
 	if (mode[0] == 'r') {
+		char *sizestr;
+		
 		/* when reading file, it must exist */
 		if (result > 299 || result < 200) {
 			errno = ENOENT;
 			goto errexit;
 		}
+		
+		sizestr = strchr(tmp_line, ' ');
+		if (sizestr) {
+			sizestr++;
+			file_size = atoi(sizestr);
+			php_stream_notify_file_size(context, file_size, tmp_line, result);
+		}	
 	} else {
 		/* when writing file, it must NOT exist */
 		if (result <= 299 && result >= 200) {
@@ -193,25 +216,23 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 			goto errexit;
 		}
 	}
-	
+
 	/* set up the passive connection */
 
     /* We try EPSV first, needed for IPv6 and works on some IPv4 servers */
 	php_stream_write_string(stream, "EPSV\r\n");
-	while (php_stream_gets(stream, tmp_line, sizeof(tmp_line)-1) &&
-		   !(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
-			 isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
+	result = GET_FTP_RESULT(stream);
 
 	/* check if we got a 229 response */
-	if (strncmp(tmp_line, "229", 3)) {
+	if (result != 229) {
 		/* EPSV failed, let's try PASV */
 		php_stream_write_string(stream, "PASV\r\n");
-		while (php_stream_gets(stream, tmp_line, sizeof(tmp_line)-1) &&
-			   !(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
-				 isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
+		result = GET_FTP_RESULT(stream);
+		
 		/* make sure we got a 227 response */
-		if (strncmp(tmp_line, "227", 3))
+		if (result != 227)
 			goto errexit;
+
 		/* parse pasv command (129, 80, 95, 25, 13, 221) */
 		tpath = tmp_line;
 		/* skip over the "227 Some message " part */
@@ -279,13 +300,20 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	if (stream == NULL)
 		goto errexit;
 
+	php_stream_context_set(stream, context);
+	php_stream_notify_progress_init(context, 0, file_size);
+
 	php_url_free(resource);
 	return stream;
 
  errexit:
 	php_url_free(resource);
-	if (stream)
+	if (stream) {
+		php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE, tmp_line, result);
 		php_stream_close(stream);
+	}
+	if (tmp_line[0] != '\0')
+		zend_error(E_WARNING, "FTP server reports %s", tmp_line);
 	return NULL;
 }
 /* }}} */
