@@ -37,6 +37,8 @@
 /* Define to compile Zend thread safe */
 #undef ZTS
 
+#undef HAVE_LIBDL
+
 @BOTTOM@
 
 #ifdef HAVE_STDLIB_H
