@@ -171,8 +171,6 @@ static int mysqli_write_na(mysqli_object *obj, zval *newval TSRMLS_DC)
 }
 /* }}} */
 
-MYSQL *p;
-
 /* {{{ mysqli_read_property */
 zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 {
