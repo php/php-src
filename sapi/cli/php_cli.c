@@ -447,7 +447,7 @@ int main(int argc, char *argv[])
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL;
 	zend_llist global_vars;
-	int interactive=0;
+	int interactive=0, is_hashbang=0;
 	int module_started = 0;
 	char *exec_direct=NULL;
 	char *param_error=NULL;
@@ -748,7 +748,7 @@ int main(int argc, char *argv[])
 						fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
 					}
 				}
-				CG(zend_lineno) = -2;
+				is_hashbang = 1;
 			} else {
 				lseek(file_handle.handle.fd, 0, SEEK_SET);
 			}
@@ -779,6 +779,12 @@ int main(int argc, char *argv[])
 			PUTS("Could not startup.\n");
 			goto err;
 		}
+
+		/* Correct line numbers when #!php is used. This is reset in php_request_startup(). */
+		if (is_hashbang) {
+			CG(zend_lineno) = -2;
+		}
+
 		*arg_excp = arg_free; /* reconstuct argv */
 		if (no_headers) {
 			SG(headers_sent) = 1;
