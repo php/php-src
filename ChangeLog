@@ -1,3 +1,103 @@
+2000-06-30  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/dbase/dbase.c: Fix bug 4813.  Fixed by greg@darkphoton.com
+
+    * ext/dbase/dbase.c:    Fixed the dbase_create function.
+
+2000-06-30  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: Typo.
+
+2000-06-30  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * pear/DB/oci8.php:
+    OCI8 implementation for PEAR. From James L. Pine <jpine@valinux.com>. There
+    are apparently problems with ocierror(), but it mostly works.
+
+2000-06-30  Dan Kalowsky  <dkalowsky@wgate.com>
+
+    * ext/odbc/config.m4
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    updates for the SolidEE to work for 3.5 with PHP4.0.1.  Still causes warning of "integer from pointer used without typecast" but does not seem to effect the final build any.  have not found a correction yet.  has not shown the SQLParamData bug either, but unknown if it is closed as i was unable to reproduce it.
+
+    basically fixed the config.m4 file, and added a #define of HAVE_SOLID_35, due to the solidee 3.5 vs all other solidee systems being drastically different.  and solidtech providing no means for testing what version you are using.
+
+    does not include fixes for the linux users of glibc2 (automatically assumes libc5).  temporary work around, link your /usr/local/solid/lib files from a scll2x23 or scll2x30 to a scllux30 or scllux23 name...  suggestions to automate this are welcome.
+
+2000-06-30  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * pear/DB.php:
+    DB::parseDSN() now checks the value it is passed, and if it is already an
+    array, returns it. This lets you pass arrays to the connect functions and
+    they'll work transparently.
+
+2000-06-30  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c:
+    Some user-agents send 'basic' instead of 'Basic' in their Authorization
+    header.  ApacheBench is an example.  PHP's HTTP Auth would not work with
+    these.
+    Some user-agents send 'basic' instead of 'Basic' in their Authorization
+    header.  ApacheBench is an example.  PHP's HTTP Auth would not work with
+    these. (Rasmus)
+
+2000-06-30  Zeev Suraski  <zeev@php.net>
+
+    * ext/sybase/php_sybase_db.h
+      ext/sybase/sybase.c
+      ext/sybase/Makefile.in
+      ext/sybase/php_sybase.h
+      ext/sybase/php_sybase_db.c: First Sybase-DB fix patch
+
+2000-06-30  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.dsp: remove unnecessary dependency
+
+2000-06-30  Zeev Suraski  <zeev@php.net>
+
+    * win32/time.h
+      NEWS
+      main/configuration-parser.y
+      main/main.c: - Revert bogus time.h commit
+    - Fixed a problem under some versions of Windows that could cause PHP to hang
+      on startup if errors occured, e.g. in the php.ini file
+
+2000-06-30  Thies C. Arntzen  <thies@digicol.de>
+
+    * main/php_version.h: hmm, this file is not really auto-generated.
+
+2000-06-30  Zeev Suraski  <zeev@php.net>
+
+    * sapi/servlet/servlet.dsp
+      win32/php4dllts.dsp
+      win32/php4ts.dsp
+      win32/time.h
+      main/configuration-parser.y
+      main/main.c
+      sapi/apache/php4apache.dsp
+      sapi/isapi/php4isapi.dsp
+      sapi/nsapi/php4nsapi.dsp: Set version number on DLLs
+
+    * win32/php4ts.dsw:
+    PHP modules should only be in the php_modules.dsw workspace...
+
+2000-06-30  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c
+      ext/hyperwave/php_hyperwave.h: - using more of the zend API
+
+2000-06-30  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/java.c
+      ext/java/reflect.java:
+    Fix garbage in warning strings, and IllegalArgumentException on
+    assignments which require data type conversions.
+
+2000-06-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO: .
+
 2000-06-29  Zeev Suraski  <zeev@php.net>
 
     * ext/standard/php_dir.h
