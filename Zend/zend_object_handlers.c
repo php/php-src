@@ -178,12 +178,24 @@ inline int zend_verify_property_access(zend_property_info *property_info, zend_c
 	return 0;
 }
 
+static inline zend_bool is_derived_class(zend_class_entry *child_class, zend_class_entry *parent_class)
+{
+	child_class = child_class->parent;
+	while (child_class) {
+		if (child_class == parent_class) {
+			return 1;
+		}
+		child_class = child_class->parent;
+	}
+
+	return 0;
+}
+
 static inline zend_property_info *zend_get_property_info(zend_object *zobj, zval *member TSRMLS_DC)
 {
 	zend_property_info *property_info = NULL;
 	zend_property_info *scope_property_info;
 	zend_bool denied_access = 0;
-
 
 	ulong h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member)+1);
 	if (zend_hash_quick_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS) {
@@ -203,6 +215,7 @@ static inline zend_property_info *zend_get_property_info(zend_object *zobj, zval
 		}
 	}
 	if (EG(scope) != zobj->ce
+		&& is_derived_class(zobj->ce, EG(scope))
 		&& EG(scope)
 		&& zend_hash_quick_find(&EG(scope)->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &scope_property_info)==SUCCESS
 		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
