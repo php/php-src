@@ -2782,8 +2782,6 @@ PHP_FUNCTION(imap_fetchheader)
 	zval **streamind, **msgno, **flags;
 	int ind, ind_type, msgindex;
 	pils *imap_le_struct;
-	char *body, *header, *tempstring;
-	unsigned long blen, hlen;
 	int myargc = ZEND_NUM_ARGS();
 	
 	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &flags) == FAILURE) {
