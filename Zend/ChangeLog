@@ -1,3 +1,35 @@
+2004-03-25  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_language_scanner.l:
+      - Remove old and deprecated <?php_track_vars?> scanner token.
+
+2004-03-25  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - If __construct() is defined then it will always take precedence over
+      - old style constructors.
+
+2004-03-25  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      no need to use result for RECV's - as in PHP4
+
+    * zend_execute.c:
+      Use get/set handlers for increment.decrement ops on objects
+
+2004-03-25  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute_API.c:
+          /* The compiler is not-reentrant. Make sure we __autoload() only during
+      run-time
+           * (doesn't impact fuctionality of __autoload()
+           */
+
+2004-03-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c:
+      Using ALLOC_HASHTABLE/FREE_HASHTABLE instead of emalloc/free.
+
 2004-03-24  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c
