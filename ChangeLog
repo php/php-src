@@ -1,3 +1,104 @@
+2001-12-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/overload.c:
+    - Fix memory leak when accessing undefined index or property.
+    - Only invoke call_get_handler() on an object in the chain if it's overloaded.
+
+2001-12-07  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/xslt/sablot.c:
+    - Fix crash with invalid option to xslt_set_scheme_handlers().
+
+2001-12-07  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/xslt/sablot.c: Let's not crash when no error str has been set
+
+2001-12-07  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c: Fix for bug #13628.
+
+2001-12-07  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/imap/php_imap.c: fix #13801 (imap_rfc822_parse_adrlist changes arg1)
+
+2001-12-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/overload.c: Make sure refcount is 1 on stack zval.
+
+2001-12-07  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/dbplus.c: old stuff removed
+
+2001-12-07  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/basic_functions.c:
+    Fix long2ip's handling of unsigned longs, by accepting a string argument and
+    then manually converting the string to an unsigned long using strtoul()
+
+2001-12-07  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/odbc/velocis.c: proto fixes
+
+    * ext/cybercash/cybercash.c: proto fix
+
+    * ext/msession/msession.c: - proto descriptions
+    - changed to new parameter parser api
+    - changed to K&R style
+    - various cleanups
+
+2001-12-07  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/crack/crack.c: Fixed one proto.
+
+    * ext/standard/basic_functions.c: Fixed some protos.
+
+2001-12-07  Stig Bakken  <ssb@fast.no>
+
+    * ext/xmlrpc/config.m4: * configure help indent fix
+
+2001-12-07  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/file.c
+      ext/openssl/openssl.c: proto fix
+
+    * ext/odbc/velocis.c: protos prepared
+
+    * ext/icap/php_icap.c: proto fix
+
+2001-12-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/README
+      ext/overload/php_overload.h: All right, let people RTFM.
+
+    * ext/overload/overload.c:
+    Add fold markers in strategic places and improve MINIT function a bit.
+
+    * ext/overload/overload.c:
+    If the method exists in object's function table, call it directly without
+    using __call() handler.
+
+    * ext/overload/overload.c: Support overloaded method calls via __call().
+
+2001-12-07  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/php_functions.c: apr_table_elts are now const
+
+    * sapi/apache2filter/php_functions.c:
+    rename functions to match those supported in the apache 1.3 module:
+     apache_sub_request -> virtual
+     get_all_headers    -> getallheaders
+
+2001-12-07  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mssql.php
+      pear/DB/sybase.php:
+    Throw the error only if all of the extensions are missing
+
+2001-12-07  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Common.php:
+    changed getAttribute to return null if attribute doesn't exist
+
 2001-12-06  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/msession/msession.c: added protos (but without description yet)
