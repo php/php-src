@@ -2277,9 +2277,15 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
+		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
+			zend_error(E_COMPILE_ERROR, "Constructor %s::%s cannot be static", ce->name, ce->constructor->common.function_name);
+		}
 	}
 	if (ce->destructor) {
 		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
+		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
+			zend_error(E_COMPILE_ERROR, "Destructor %s::%s cannot be static", ce->name, ce->destructor->common.function_name);
+		}
 	}
 
 	ce->line_end = zend_get_compiled_lineno(TSRMLS_C);
