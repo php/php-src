@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.1 1999-05-06 20:52:19 sas Exp $
+# $Id: genif.sh,v 1.2 1999-05-08 18:16:29 andrey Exp $
 # replacement for genif.pl
 
 infile="$1"
@@ -16,8 +16,7 @@ fi
 cmd1='echo $data | grep @EXT_INCLUDE_CODE@ > /dev/null 2>&1'
 cmd2='echo $data | grep @EXT_MODULE_PTRS@ > /dev/null 2>&1'
 
-while read ; do
-	data="$REPLY"
+while read data; do
 	if eval $cmd1 ; then
 		for ext in $* ; do
 			for pre in php3 php php4 zend; do
