@@ -15,7 +15,7 @@ struct _php_ini_entry {
 	int modifyable;
 	char *name;
 	uint name_length;
-	int (*on_modify)(php_ini_entry *entry, pval *new_value);
+	int (*on_modify)(php_ini_entry *entry, char *new_value, uint new_value_length);
 
 	char *value;
 	uint value_length;
