@@ -427,6 +427,15 @@ if test "$ac_cv_sockaddr_storage" = yes; then
   AC_DEFINE(HAVE_SOCKADDR_STORAGE,1,[Whether you have struct sockaddr_storage])
 fi
 
+dnl Check for struct sockaddr_storage
+AC_CACHE_CHECK([for struct cmsghdr], ac_cv_cmsghdr,
+[AC_TRY_COMPILE([ #include <sys/types.h>
+#include <sys/socket.h>], [struct cmsghdr s; s],
+  ac_cv_cmsghdr=yes, ac_cv_cmsghdr=no)])
+if test "$ac_cv_cmsghdr" = yes; then
+  AC_DEFINE(HAVE_CMSGHDR,1,[Whether you have struct cmsghdr])
+fi
+
 dnl Check if sockaddr data structure includes an "sa_len" member
 
 AC_TRY_COMPILE([
