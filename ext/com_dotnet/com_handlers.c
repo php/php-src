@@ -275,7 +275,7 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 	}
 
 	f = emalloc(sizeof(zend_internal_function));
-	f->type = ZEND_OVERLOADED_FUNCTION;
+	f->type = ZEND_OVERLOADED_FUNCTION_TEMPORARY;
 	f->num_args = 0;
 	f->arg_info = NULL;
 	f->scope = obj->ce;
