@@ -4,6 +4,11 @@ PHP                                                                        NEWS
 
 ?? ??? 2003, PHP 5 Beta 2
 - Added new COM extension with integrated .Net support. (Wez)
+- Added new array functions : 
+  . array_udiff()        (Andrey)
+  . array_udiff_assoc()  (Andrey)
+  . array_udiff_uassoc() (Andrey)
+  . array_diff_uassoc()  (Andrey)
 - Improved the DBX extension: (Marc)
   . Added DBX_RESULT_UNBUFFERED flag for dbx_query().
   . Added dbx_fetch_row()
