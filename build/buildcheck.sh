@@ -12,11 +12,11 @@
 #  | obtain it through the world-wide-web, please send a note to          |
 #  | license@php.net so we can mail you a copy immediately.               |
 #  +----------------------------------------------------------------------+
-#  | Authors: Stig Bakken <ssb@fast.no>                                   |
+#  | Authors: Stig Bakken <ssb@php.net>                                   |
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.23 2003-02-11 21:11:42 sniper Exp $ 
+# $Id: buildcheck.sh,v 1.24 2003-03-18 12:05:59 ssb Exp $ 
 #
 
 echo "buildconf: checking installation..."

@@ -14,7 +14,7 @@
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
 // | Authors: Sterling Hughes <sterling@php.net>                          |
-// |          Stig Bakken <ssb@fast.no>                                   |
+// |          Stig Bakken <ssb@php.net>                                   |
 // |          Tomas V.V.Cox <cox@idecnet.com>                             |
 // +----------------------------------------------------------------------+
 //
@@ -66,7 +66,7 @@ ini_set('track_errors', true);
  * objects by reference, ej: $obj =& new PEAR_child;
  *
  * @since PHP 4.0.2
- * @author Stig Bakken <ssb@fast.no>
+ * @author Stig Bakken <ssb@php.net>
  * @see http://pear.php.net/manual/
  */
 class PEAR

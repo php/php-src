@@ -415,7 +415,7 @@ class System
     *
     * @param string $program The command to search for
     * @return mixed A string with the full path or false if not found
-    * @author Stig Bakken <ssb@fast.no>
+    * @author Stig Bakken <ssb@php.net>
     */
     function which($program, $fallback = false)
     {
