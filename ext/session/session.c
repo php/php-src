@@ -245,9 +245,9 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val PSLS_DC)
 			REPLACE_ZVAL_VALUE(old_symbol,state_val_copy,0);
 			FREE_ZVAL(state_val_copy);
 
-			zend_set_hash_symbol(*old_symbol, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
+			zend_set_hash_symbol(*old_symbol, name, namelen, 1, 1, Z_ARRVAL_P(PS(http_session_vars)));
 		} else {
-			zend_set_hash_symbol(state_val_copy, name, namelen, 0, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
+			zend_set_hash_symbol(state_val_copy, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
 		}
 	} else {
 		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
