@@ -152,7 +152,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 
 	tmp_line[0] = '\0';
 
-	if (strchr(mode, 'a') || strchr(mode, '+')) {
+	if (strpbrk(mode, "a+")) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "FTP does not support simultaneous read/write connections.");
 		return NULL;
 	}
