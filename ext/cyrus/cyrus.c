@@ -53,7 +53,7 @@ zend_module_entry cyrus_module_entry = {
 	cyrus_functions,
 	PHP_MINIT(cyrus),
 	NULL,
-	NULL,	
+	NULL,
 	NULL,
 	PHP_MINFO(cyrus),
 	NO_VERSION_YET,
@@ -71,7 +71,7 @@ static void cyrus_free(zend_rsrc_list_entry *rsrc)
 	if (conn->client)
 		imclient_close(conn->client);
 
-	if (conn->host) 
+	if (conn->host)
 		efree(conn->host);
 
 	if (conn->port)
@@ -79,16 +79,16 @@ static void cyrus_free(zend_rsrc_list_entry *rsrc)
 
 	efree(conn);
 }
-	
+
 PHP_MINIT_FUNCTION(cyrus)
 {
-	le_cyrus = zend_register_list_destructors_ex(cyrus_free, NULL, 
+	le_cyrus = zend_register_list_destructors_ex(cyrus_free, NULL,
 	                                             le_cyrus_name, module_number);
 
-	REGISTER_LONG_CONSTANT("CYRUS_CONN_NONSYNCLITERAL", 
+	REGISTER_LONG_CONSTANT("CYRUS_CONN_NONSYNCLITERAL",
 	                       IMCLIENT_CONN_NONSYNCLITERAL,
 	                       CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CYRUS_CONN_INITIALRESPONSE", 
+	REGISTER_LONG_CONSTANT("CYRUS_CONN_INITIALRESPONSE",
 	                       IMCLIENT_CONN_INITIALRESPONSE,
 	                       CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CYRUS_CALLBACK_NUMBERED", CALLBACK_NUMBERED,
@@ -125,7 +125,7 @@ PHP_FUNCTION(cyrus_connect)
 	int               flags = 0;
 	int               error;
 	int               argc = ZEND_NUM_ARGS();
-	
+
 	if (argc < 0 || argc > 3 ||
 	    zend_get_parameters_ex(argc, &z_host, &z_port, &z_flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -169,7 +169,7 @@ PHP_FUNCTION(cyrus_connect)
 	case -1:
 		php_error(E_WARNING, "%s(): Invalid hostname: %s", get_active_function_name(TSRMLS_C), host);
 		RETURN_FALSE;
-	
+
 	case -2:
 		php_error(E_WARNING, "%s(): Invalid port: %d", get_active_function_name(TSRMLS_C), port);
 		RETURN_FALSE;
@@ -181,14 +181,14 @@ PHP_FUNCTION(cyrus_connect)
 /* }}} */
 
 
-static void cyrus_capable_callback(struct imclient *client, void *rock, 
+static void cyrus_capable_callback(struct imclient *client, void *rock,
                                    struct imclient_reply *reply)
 {
 	char *token = NULL;
 	char *token_buf;
 	char *mechanism = rock;
 
-	
+
 	/* We need to split the reply up by the whitespace */
 	token = php_strtok_r(reply->text, " ", &token_buf);
 	while (token != NULL) {
@@ -202,7 +202,7 @@ static void cyrus_capable_callback(struct imclient *client, void *rock,
 }
 
 
-/* {{{ proto bool cyrus_authenticate( resource connection [, string mechlist [, string service [, string user [, int minssf [, int maxssf]]]]])
+/* {{{ proto void cyrus_authenticate( resource connection [, string mechlist [, string service [, string user [, int minssf [, int maxssf]]]]])
    Authenticate agaings a Cyrus IMAP server */
 PHP_FUNCTION(cyrus_authenticate)
 {
@@ -235,26 +235,26 @@ PHP_FUNCTION(cyrus_authenticate)
 	else {
 		char tmp_mechlist[100];
 		int  pos = 0;
-		
+
 		/* NULL out the buffer, ensures it has a safe ending and allows us to
 		 * test properly for the end of the buffer
 		 */
 		memset(tmp_mechlist, 0, sizeof tmp_mechlist);
 
 		/* We'll be calling the "CAPABILITY" command, which will give us a list
-		 * of the types of authorization the server is capable of 
+		 * of the types of authorization the server is capable of
 		 */
-		imclient_addcallback(conn->client, "CAPABILITY", 0, 
+		imclient_addcallback(conn->client, "CAPABILITY", 0,
 		                     cyrus_capable_callback, (void *) tmp_mechlist, 0);
 		imclient_send(conn->client, NULL, NULL, "CAPABILITY");
 
 		/* Grab the end of string position into pos */
-		while (tmp_mechlist[pos++] != 0) 
+		while (tmp_mechlist[pos++] != 0)
 			;
 
 		/* Tack on PLAIN to whatever the auth string is */
 		memcpy(tmp_mechlist + pos, " PLAIN", 6);
-		
+
 		/* Copy it onto the main buffer */
 		mechlist = estrndup(tmp_mechlist, pos + 6);
 	}
@@ -277,22 +277,22 @@ PHP_FUNCTION(cyrus_authenticate)
 		/* XXX: UGLY, but works, determines the username to use */
 		user = (char *) sapi_getenv("USER", 4);
 		if (! user) {
-		user = (char *) getenv("USER");
-		if (! user) {
-			user = (char *) sapi_getenv("LOGNAME", 7);
+			user = (char *) getenv("USER");
 			if (! user) {
-			user = (char *) getenv("LOGNAME");
-			if (! user) {
-				struct passwd *pwd = getpwuid(getuid());
-				if (! pwd) {
-				php_error(E_WARNING, "%s(): Couldn't determine user id", get_active_function_name(TSRMLS_C));
-				RETURN_FALSE;
+				user = (char *) sapi_getenv("LOGNAME", 7);
+				if (! user) {
+				user = (char *) getenv("LOGNAME");
+					if (! user) {
+						struct passwd *pwd = getpwuid(getuid());
+						if (! pwd) {
+							php_error(E_WARNING, "%s(): Couldn't determine user id", get_active_function_name(TSRMLS_C));
+							RETURN_FALSE;
+						}
+		
+						user = estrdup(pwd->pw_name);
+					}
 				}
-			
-				user = estrdup(pwd->pw_name);
 			}
-			}
-		}
 		}
 	}
 
@@ -314,7 +314,7 @@ PHP_FUNCTION(cyrus_authenticate)
 		maxssf = 1000;
 	}
 
-	imclient_authenticate(conn->client, mechlist, service, 
+	imclient_authenticate(conn->client, mechlist, service,
 	                      user, minssf, maxssf);
 
 	efree(mechlist);
@@ -324,8 +324,8 @@ PHP_FUNCTION(cyrus_authenticate)
 /* }}} */
 
 
-static void cyrus_generic_callback(struct imclient *client, 
-                                   void *rock, 
+static void cyrus_generic_callback(struct imclient *client,
+                                   void *rock,
                                    struct imclient_reply *reply)
 {
 	php_cyrus_callback *callback = rock;
@@ -356,7 +356,7 @@ static void cyrus_generic_callback(struct imclient *client,
 		argv[2] = &text;
 		argv[3] = &msgno;
 
-		if (call_user_function_ex(EG(function_table), NULL, callback->function, 
+		if (call_user_function_ex(EG(function_table), NULL, callback->function,
                                   &retval, 4, argv, 0, NULL TSRMLS_CC) == FAILURE) {
 			php_error(E_WARNING, "%s(): Couldn't call the %s handler",
 			          get_active_function_name(TSRMLS_C), callback->trigger);
@@ -374,8 +374,8 @@ static void cyrus_generic_callback(struct imclient *client,
 	}
 }
 
-	
-/* {{{ proto bool cyrus_bind( resource connection, array callbacks) 
+
+/* {{{ proto bool cyrus_bind( resource connection, array callbacks)
  Bind callbacks to a Cyrus IMAP connection */
 PHP_FUNCTION(cyrus_bind)
 {
@@ -397,7 +397,7 @@ PHP_FUNCTION(cyrus_bind)
 
 	hash = HASH_OF(*z_callback);
 	if (! hash) {
-		php_error(E_WARNING, 
+		php_error(E_WARNING,
 		          "%s(): Second argument must be an array or object", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
@@ -407,9 +407,9 @@ PHP_FUNCTION(cyrus_bind)
 		 zend_hash_move_forward(hash)) {
 		SEPARATE_ZVAL(tmp);
 		zend_hash_get_current_key(hash, &string_key, &num_key, 0);
-		if (! string_key) 
+		if (! string_key)
 			continue;
-		
+
 		if (! strcasecmp(string_key, "trigger")) {
 			convert_to_string_ex(tmp);
 			callback.trigger = estrndup(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
@@ -436,7 +436,7 @@ PHP_FUNCTION(cyrus_bind)
 
 	callback.le = conn->id;
 
-	imclient_addcallback(conn->client, callback.trigger, callback.flags, 
+	imclient_addcallback(conn->client, callback.trigger, callback.flags,
 	                     cyrus_generic_callback, (void **) &callback, 0);
 
 	RETURN_TRUE;
@@ -458,14 +458,14 @@ PHP_FUNCTION(cyrus_unbind)
 	ZEND_FETCH_RESOURCE(conn, php_cyrus *, z_conn, -1, le_cyrus_name, le_cyrus);
 	convert_to_string_ex(trigger_name);
 
-	imclient_addcallback(conn->client, Z_STRVAL_PP(trigger_name), 0, 
+	imclient_addcallback(conn->client, Z_STRVAL_PP(trigger_name), 0,
 	                     NULL, NULL, 0);
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool cyrus_query( resource connection, string query) 
+/* {{{ proto bool cyrus_query( resource connection, string query)
    Send a query to a Cyrus IMAP server */
 PHP_FUNCTION(cyrus_query)
 {
@@ -480,7 +480,7 @@ PHP_FUNCTION(cyrus_query)
 	ZEND_FETCH_RESOURCE(conn, php_cyrus *, z_conn, -1, le_cyrus_name, le_cyrus);
 	convert_to_string_ex(query);
 
-	imclient_send(conn->client, NULL, NULL, Z_STRVAL_PP(query)); 
+	imclient_send(conn->client, NULL, NULL, Z_STRVAL_PP(query));
 
 	RETURN_TRUE;
 }
