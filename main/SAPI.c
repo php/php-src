@@ -236,7 +236,7 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
 SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len SLS_DC)
 {
 	char *charset, *newtype;
-	int newlen;
+	size_t newlen;
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
 	if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
