@@ -128,10 +128,10 @@ mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 			s = (c1 & 0xff)*94 + c - 0xa1;
 			w = 0;
 			if (s >= 0) {
-				if (plane == 1 & s < cns11643_2_ucs_table_size) {
+				if (plane == 1 && s < cns11643_2_ucs_table_size) {
 					w = cns11643_2_ucs_table[s];
 				}
-				if (plane == 13 & s < cns11643_14_ucs_table_size) {
+				if (plane == 13 && s < cns11643_14_ucs_table_size) {
 					w = cns11643_14_ucs_table[s];
 				}
 			}
