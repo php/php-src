@@ -829,20 +829,21 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, void (*pCopyC
 }
 
 
-ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size)
+ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size, int overwrite)
 {
 	Bucket *p;
 	void *t;
+	int mode = (overwrite?HASH_UPDATE:HASH_ADD);
 
     p = source->pListHead;
 	while (p) {
 		memcpy(tmp, p->pData, size);
 		if (p->nKeyLength>0) {
-			if (zend_hash_add(target, p->arKey, p->nKeyLength, tmp, size, &t)==SUCCESS && pCopyConstructor) {
+			if (zend_hash_add_or_update(target, p->arKey, p->nKeyLength, tmp, size, &t, mode)==SUCCESS && pCopyConstructor) {
 				pCopyConstructor(t);
 			}
 		} else {
-			if (!zend_hash_index_exists(target, p->h) && zend_hash_index_update(target, p->h, tmp, size, &t)==SUCCESS && pCopyConstructor) {
+			if ((mode==HASH_UPDATE || !zend_hash_index_exists(target, p->h)) && zend_hash_index_update(target, p->h, tmp, size, &t)==SUCCESS && pCopyConstructor) {
 				pCopyConstructor(t);
 			}
 		}
