@@ -475,7 +475,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	self->mode = mode;
 	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, "rwb");
 	self->innerstream = php_stream_memory_create(mode);
-//	php_stream_temp_write(stream, NULL, 0 TSRMLS_CC);
+/*	php_stream_temp_write(stream, NULL, 0 TSRMLS_CC); */
 	return stream;
 }
 /* }}} */

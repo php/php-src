@@ -724,7 +724,7 @@ static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 
-	// loop chunks to find BMHD chunk
+	/* loop chunks to find BMHD chunk */
 	do {
 		if (php_stream_read(stream, a, 8) != 8) {
 			efree(result);
@@ -735,7 +735,7 @@ static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
 		if ((size & 1) == 1) {
 			size++;
 		}
-		if (chunkId == 0x424d4844) { // BMHD chunk
+		if (chunkId == 0x424d4844) { /* BMHD chunk */
 			if (php_stream_read(stream, a, 9) != 9) {
 				efree(result);
 				return NULL;
