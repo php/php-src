@@ -111,7 +111,15 @@ allow_call_time_pass_reference = On
 ;
 safe_mode = Off
 
+; When safe_mode is on, only executables located in the safe_mode_exec_dir
+; will be allowed to be executed via the exec family of functions.
 safe_mode_exec_dir =
+
+; open_basedir if set limits all file operations to the defined directory
+; and below.  This directive makes most sense if used in a per-directory
+; or per-virtualhost web server configuration file.
+;
+;open_basedir =
 
 ; Setting certain environment variables may be a potential security breach.
 ; This directive contains a comma-delimited list of prefixes.  In Safe Mode,
