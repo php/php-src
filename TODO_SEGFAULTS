@@ -6,7 +6,7 @@ Fixed:
 
     mb_convert_encoding (Moriyoshi)
     socket_iovec_alloc (Rasmus)
-    exif_thumbnail (Rasmus)
+    exif_imagetype,exif_thumbnail (Rasmus)
     dbase_open (Rasmus)
     array_pad (Rasmus)
     str_repeat (Ilia)
