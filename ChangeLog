@@ -1,3 +1,28 @@
+2002-02-17  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/scripts/pearcmd-info.php: * Fix for bug #15500
+
+2002-02-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/package.dtd: * allow <license> in both <package> and <release>
+    * added <changelog> element
+    * added "data" role for files
+    * allow nested <dir> elements
+
+2002-02-17  Alex Waugh  <alex@alexwaugh.com>
+
+    * sapi/webjames/webjames.c: Updated to new TSRM macros
+
+2002-02-17  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/File/Find.php:
+    * added mapTreeMultiple() method.
+
+2002-02-17  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/Makefile.in:
+    Image/Remote.php and Mail/mime.php have moved to the pear/ repository.
+
 2002-02-15  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: Fix.
