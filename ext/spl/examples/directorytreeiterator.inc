@@ -11,7 +11,7 @@ class DirectoryTreeIterator extends RecursiveIteratorIterator
 	{
 		$tree = '';
 		for ($l=0; $l < $this->getLevel(); $l++) {
-			$tree .= $this->getSubIterator($l)->hasMore() ? '| ' : '  ';
+			$tree .= $this->getSubIterator($l)->hasNext() ? '| ' : '  ';
 		}
 		return $tree . ($this->getSubIterator($l)->hasNext() ? '|-' : '\-') 
 		       . $this->getSubIterator($l);
