@@ -32,19 +32,25 @@
 #ifdef PHP_WIN32
 
 #include "php.h"
-#include "php_COM.h"
-#include "php_VARIANT.h"
+
+#include "../rpc.h"
+#include "../handler.h"
+
+#include "com.h"
+#include "com_wrapper.h"
+#include "conversion.h"
+#include "variant.h"
 
 /* prototypes */
 
-static void comval_to_variant(pval *pval_arg, VARIANT *var_arg TSRMLS_DC);
+static int comval_to_variant(zval *zval_arg, VARIANT *var_arg);
 
 /* implementations */
-PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage TSRMLS_DC)
+PHPAPI void php_zval_to_variant(zval *zval_arg, VARIANT *var_arg, int codepage)
 {
 	int type = VT_EMPTY;	/* default variant type */
 
-	switch (Z_TYPE_P(pval_arg)) {
+	switch (Z_TYPE_P(zval_arg)) {
 		case IS_NULL:
 			type = VT_NULL;
 			break;
@@ -54,7 +60,7 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage T
 			break;
 
 		case IS_OBJECT:
-			if (!strcmp(Z_OBJCE_P(pval_arg)->name, "VARIANT")) {
+			if (!strcmp(Z_OBJCE_P(zval_arg)->name, "VARIANT")) {
 				type = VT_VARIANT|VT_BYREF;
 			} else {
 				type = VT_DISPATCH;
@@ -84,19 +90,13 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage T
 			break;
 	}
 
-	php_pval_to_variant_ex2(pval_arg, var_arg, type, codepage TSRMLS_CC);
+	php_zval_to_variant_ex(zval_arg, var_arg, type, codepage);
 }
 
 
-PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage TSRMLS_DC)
+PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, int codepage)
 {
-	php_pval_to_variant_ex2(pval_arg, var_arg, Z_LVAL_P(pval_type), codepage TSRMLS_CC);
-}
-
-
-PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC)
-{
-	OLECHAR *unicode_str;
+	OLECHAR *unicode_str = NULL;
 
 	VariantInit(var_arg);
 	V_VT(var_arg) = type;
@@ -104,7 +104,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 	if (V_VT(var_arg) & VT_ARRAY) {
 		/* For now we'll just handle single dimension arrays, we'll use the data type of the first element for the
 		   output data type */
-		HashTable *ht = Z_ARRVAL(*pval_arg);
+		HashTable *ht = Z_ARRVAL(*zval_arg);
 		int numberOfElements = zend_hash_num_elements(ht);
 		SAFEARRAY *safeArray;
 		SAFEARRAYBOUND bounds[1];
@@ -115,7 +115,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 
 		if (V_VT(var_arg) == (VT_ARRAY|VT_BYREF)) {		/* == is intended, because VT_*|VT_BYREF|VT_ARRAY means something diffrent */
 			type &= ~VT_BYREF;
-			ALLOC_VARIANT(V_VARIANTREF(var_arg));
+			V_VARIANTREF(var_arg) = (VARIANT *) emalloc(sizeof(VARIANT));
 			var_arg = V_VARIANTREF(var_arg);		/* put the array in that VARIANT */
 		}
 
@@ -125,7 +125,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 		
 		if (NULL == safeArray) {
 			php_error( E_WARNING,"Unable to convert php array to VARIANT array - %s", numberOfElements ? "" : "(Empty input array)");
-			ZVAL_FALSE(pval_arg);
+			ZVAL_FALSE(zval_arg);
 		} else {
 			V_ARRAY(var_arg) = safeArray;
 			V_VT(var_arg) = VT_ARRAY|VT_VARIANT;                /* Now have a valid safe array allocated */
@@ -138,9 +138,9 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 						/* Add another value to the safe array */
 						if (SUCCEEDED(SafeArrayPtrOfIndex( safeArray, &i, &v))) {		/* Pointer to output element entry retrieved successfully */
 							if (type) {	/* explicit type */
-							   php_pval_to_variant_ex2(*entry, v, type, codepage TSRMLS_CC);		/* Do the required conversion */
+							   php_zval_to_variant_ex(*entry, v, type, codepage);		/* Do the required conversion */
 							} else {
-								php_pval_to_variant(*entry, v, codepage TSRMLS_CC);                    /* Do the required conversion */
+								php_zval_to_variant(*entry, v, codepage);                    /* Do the required conversion */
 							}
 						} else {
 							php_error( E_WARNING,"phpArrayToSafeArray() - Unable to retrieve pointer to output element number (%d)", i);
@@ -158,37 +158,37 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 
 			case VT_NULL:
 			case VT_VOID:
-				ZVAL_NULL(pval_arg);
+				ZVAL_NULL(zval_arg);
 				break; 
 			
 			case VT_UI1:
-				convert_to_long_ex(&pval_arg);
-				V_UI1(var_arg) = (unsigned char) Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_UI1(var_arg) = (unsigned char) Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_I2:
-				convert_to_long_ex(&pval_arg);
-				V_I2(var_arg) = (short) Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_I2(var_arg) = (short) Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_I4:
-				convert_to_long_ex(&pval_arg);
-				V_I4(var_arg) = Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_I4(var_arg) = Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_R4:
-				convert_to_double_ex(&pval_arg);
-				V_R4(var_arg) = (float) Z_DVAL_P(pval_arg);
+				convert_to_double_ex(&zval_arg);
+				V_R4(var_arg) = (float) Z_DVAL_P(zval_arg);
 				break;
 
 			case VT_R8:
-				convert_to_double_ex(&pval_arg);
-				V_R8(var_arg) = Z_DVAL_P(pval_arg);
+				convert_to_double_ex(&zval_arg);
+				V_R8(var_arg) = Z_DVAL_P(zval_arg);
 				break;
 
 			case VT_BOOL:
-				convert_to_boolean_ex(&pval_arg);
-				if (Z_LVAL_P(pval_arg)) {
+				convert_to_boolean_ex(&zval_arg);
+				if (Z_LVAL_P(zval_arg)) {
 					V_BOOL(var_arg) = VT_TRUE;
 				} else {
 					V_BOOL(var_arg) = VT_FALSE;
@@ -196,23 +196,23 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 				break;
 
 			case VT_ERROR:
-				convert_to_long_ex(&pval_arg);
-				V_ERROR(var_arg) = Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_ERROR(var_arg) = Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_CY:
-				convert_to_double_ex(&pval_arg);
-				VarCyFromR8(Z_DVAL_P(pval_arg), &V_CY(var_arg));
+				convert_to_double_ex(&zval_arg);
+				VarCyFromR8(Z_DVAL_P(zval_arg), &V_CY(var_arg));
 				break;
 
 			case VT_DATE: {
 					SYSTEMTIME wintime;
 					struct tm *phptime;
 
-					switch (Z_TYPE_P(pval_arg)) {
+					switch (Z_TYPE_P(zval_arg)) {
 						case IS_DOUBLE:
 							/* already a VariantTime value */
-							V_DATE(var_arg) = Z_DVAL_P(pval_arg);
+							V_DATE(var_arg) = Z_DVAL_P(zval_arg);
 							break;
 
 						/** @todo
@@ -222,8 +222,8 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 
 						default:
 							/* a PHP time value ? */
-							convert_to_long_ex(&pval_arg);
-							phptime = gmtime(&(Z_LVAL_P(pval_arg)));
+							convert_to_long_ex(&zval_arg);
+							phptime = gmtime(&(Z_LVAL_P(zval_arg)));
 							memset(&wintime, 0, sizeof(wintime));
 
 							wintime.wYear = phptime->tm_year + 1900;
@@ -240,39 +240,36 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 				break;
 
 			case VT_BSTR:
-				convert_to_string_ex(&pval_arg);
-				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
-				V_BSTR(var_arg) = SysAllocStringByteLen((char *) unicode_str, Z_STRLEN_P(pval_arg) * sizeof(OLECHAR));
-				efree(unicode_str);
+				convert_to_string_ex(&zval_arg);
+				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(zval_arg), Z_STRLEN_P(zval_arg), codepage, FALSE);
+				V_BSTR(var_arg) = SysAllocStringByteLen((char *) unicode_str, Z_STRLEN_P(zval_arg) * sizeof(OLECHAR));
 				break;
 
 			case VT_DECIMAL:
-				convert_to_string_ex(&pval_arg);
-				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+				convert_to_string_ex(&zval_arg);
+				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(zval_arg), Z_STRLEN_P(zval_arg), codepage, FALSE);
 				VarDecFromStr(unicode_str, LOCALE_SYSTEM_DEFAULT, 0, &V_DECIMAL(var_arg));
 				break;
 
 			case VT_DECIMAL|VT_BYREF:
-				convert_to_string_ex(&pval_arg);
-				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+				convert_to_string_ex(&zval_arg);
+				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(zval_arg), Z_STRLEN_P(zval_arg), codepage, FALSE);
 				VarDecFromStr(unicode_str, LOCALE_SYSTEM_DEFAULT, 0, V_DECIMALREF(var_arg));
 				break;
 
 			case VT_UNKNOWN:
-				comval_to_variant(pval_arg, var_arg TSRMLS_CC);
-				if (V_VT(var_arg) != VT_DISPATCH) {
-					VariantInit(var_arg);
-				} else {
+				if (comval_to_variant(zval_arg, var_arg) == SUCCESS) {
 					V_VT(var_arg) = VT_UNKNOWN;
 					V_UNKNOWN(var_arg) = (IUnknown *) V_DISPATCH(var_arg);
 				}
 				break;
 
 			case VT_DISPATCH:
-				if (!strcmp(Z_OBJCE_P(pval_arg)->name, "COM")) {
-					comval_to_variant(pval_arg, var_arg TSRMLS_CC);
+				if (Z_OBJCE_P(zval_arg) == com_class_entry) {
+					comval_to_variant(zval_arg, var_arg);
 				} else {
-					V_DISPATCH(var_arg) = php_COM_export_object(pval_arg TSRMLS_CC);
+					V_DISPATCH(var_arg) = php_COM_export_object(zval_arg);
+
 					if (V_DISPATCH(var_arg)) {
 						V_VT(var_arg) = VT_DISPATCH;
 					}
@@ -283,35 +280,35 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 				break;
 
 			case VT_UI1|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_UI1REF(var_arg) = (unsigned char FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_UI1REF(var_arg) = (unsigned char FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_I2|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_I2REF(var_arg) = (short FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_I2REF(var_arg) = (short FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_I4|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_I4REF(var_arg) = (long FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_I4REF(var_arg) = (long FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_R4|VT_BYREF:
-				convert_to_double(pval_arg);
-				V_R4REF(var_arg) = (float FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_double(zval_arg);
+				V_R4REF(var_arg) = (float FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_R8|VT_BYREF:
-				convert_to_double(pval_arg);
-				V_R8REF(var_arg) = (double FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_double(zval_arg);
+				V_R8REF(var_arg) = (double FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_BOOL|VT_BYREF:
-				convert_to_boolean(pval_arg);
+				convert_to_boolean(zval_arg);
 				/* emalloc or malloc ? */
 				V_BOOLREF(var_arg) = (short FAR*) pemalloc(sizeof(short), 1);
-				if (Z_LVAL_P(pval_arg)) {
+				if (Z_LVAL_P(zval_arg)) {
 					*V_BOOLREF(var_arg) = VT_TRUE;
 				} else {
 					*V_BOOLREF(var_arg) = VT_TRUE;
@@ -319,20 +316,20 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 				break;
 
 			case VT_ERROR|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_ERRORREF(var_arg) = (long FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_ERRORREF(var_arg) = (long FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_CY|VT_BYREF:
-				convert_to_double_ex(&pval_arg);
-				VarCyFromR8(Z_DVAL_P(pval_arg), var_arg->pcyVal);
+				convert_to_double_ex(&zval_arg);
+				VarCyFromR8(Z_DVAL_P(zval_arg), var_arg->pcyVal);
 				break;
 
 			case VT_DATE|VT_BYREF: {
 					SYSTEMTIME wintime;
 					struct tm *phptime;
 
-					phptime = gmtime(&(Z_LVAL_P(pval_arg)));
+					phptime = gmtime(&(Z_LVAL_P(zval_arg)));
 					memset(&wintime, 0, sizeof(wintime));
 
 					wintime.wYear   = phptime->tm_year + 1900;
@@ -347,28 +344,21 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 				break;
 
 			case VT_BSTR|VT_BYREF:
-				convert_to_string(pval_arg);
+				convert_to_string(zval_arg);
 				V_BSTRREF(var_arg) = (BSTR FAR*) emalloc(sizeof(BSTR FAR*));
-				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(zval_arg), Z_STRLEN_P(zval_arg), codepage, FALSE);
 				*V_BSTRREF(var_arg) = SysAllocString(unicode_str);
-				efree(unicode_str);
 				break;
 
 			case VT_UNKNOWN|VT_BYREF:
-				comval_to_variant(pval_arg, var_arg TSRMLS_CC);
-				if (V_VT(var_arg) != VT_DISPATCH) {
-					VariantInit(var_arg);
-				} else {
+				if (comval_to_variant(zval_arg, var_arg) == SUCCESS) {
 					V_VT(var_arg) = VT_UNKNOWN|VT_BYREF;
 					V_UNKNOWNREF(var_arg) = (IUnknown **) &V_DISPATCH(var_arg);
 				}
 				break;
 
 			case VT_DISPATCH|VT_BYREF:
-				comval_to_variant(pval_arg, var_arg TSRMLS_CC);
-				if (V_VT(var_arg) != VT_DISPATCH) {
-					VariantInit(var_arg);
-				} else {
+				if (comval_to_variant(zval_arg, var_arg) == SUCCESS) {
 					V_VT(var_arg) = VT_DISPATCH|VT_BYREF;
 					V_DISPATCHREF(var_arg) = &V_DISPATCH(var_arg);
 				}
@@ -378,93 +368,85 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 				php_error(E_WARNING,"VT_VARIANT is invalid. Use VT_VARIANT|VT_BYREF instead.");
 				/* break missing intentionally */
 			case VT_VARIANT|VT_BYREF: {
-					int tp;
-					pval **var_handle;
+					variantval *var;
+					TSRMLS_FETCH();
 
-					/* fetch the VARIANT structure */
-					zend_hash_index_find(Z_OBJPROP_P(pval_arg), 0, (void **) &var_handle);
-
-					V_VT(var_arg) = VT_VARIANT|VT_BYREF;
-					V_VARIANTREF(var_arg) = (VARIANT FAR*) zend_list_find(Z_LVAL_P(*var_handle), &tp);
-
-					if (!V_VARIANTREF(var_arg) && (tp != IS_VARIANT)) {
-						VariantInit(var_arg);
+					if ((var = zend_object_store_get_object(zval_arg TSRMLS_CC)) == NULL) {
+						/* TODO exception */
 					}
-				}
-			/*
-				should be, but isn't :)
 
-				if (V_VT(var_arg) != (VT_VARIANT|VT_BYREF)) {
-					VariantInit(var_arg);
+					V_VARIANTREF(var_arg) = var->var;
 				}
-			*/
 				break;
 
 			case VT_I1:
-				convert_to_long_ex(&pval_arg);
-				V_I1(var_arg) = (char)Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_I1(var_arg) = (char)Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_UI2:
-				convert_to_long_ex(&pval_arg);
-				V_UI2(var_arg) = (unsigned short)Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_UI2(var_arg) = (unsigned short)Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_UI4:
-				convert_to_long_ex(&pval_arg);
-				V_UI4(var_arg) = (unsigned long)Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_UI4(var_arg) = (unsigned long)Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_INT:
-				convert_to_long_ex(&pval_arg);
-				V_INT(var_arg) = (int)Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_INT(var_arg) = (int)Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_UINT:
-				convert_to_long_ex(&pval_arg);
-				V_UINT(var_arg) = (unsigned int)Z_LVAL_P(pval_arg);
+				convert_to_long_ex(&zval_arg);
+				V_UINT(var_arg) = (unsigned int)Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_I1|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_I1REF(var_arg) = (char FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_I1REF(var_arg) = (char FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_UI2|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_UI2REF(var_arg) = (unsigned short FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_UI2REF(var_arg) = (unsigned short FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_UI4|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_UI4REF(var_arg) = (unsigned long FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_UI4REF(var_arg) = (unsigned long FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_INT|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_INTREF(var_arg) = (int FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_INTREF(var_arg) = (int FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			case VT_UINT|VT_BYREF:
-				convert_to_long(pval_arg);
-				V_UINTREF(var_arg) = (unsigned int FAR*) &Z_LVAL_P(pval_arg);
+				convert_to_long(zval_arg);
+				V_UINTREF(var_arg) = (unsigned int FAR*) &Z_LVAL_P(zval_arg);
 				break;
 
 			default:
 				php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
 		}
+
+		if (unicode_str != NULL) {
+			efree(unicode_str);
+		}
 	}
 }
 
-
-PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TSRMLS_DC)
+PHPAPI int php_variant_to_zval(VARIANT *var_arg, zval *zval_arg, int codepage)
 {
 	/* Changed the function to return a value for recursive error testing */
 	/* Existing calls will be unaffected by the change - so it */
 	/* seemed like the smallest impact on unfamiliar code */
 	int ret = SUCCESS; 
 
-	INIT_PZVAL(pval_arg);
+	INIT_PZVAL(zval_arg);
 
 	/* Add SafeArray support */
 	if (V_ISARRAY(var_arg)) {
@@ -475,14 +457,14 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 		register int ii;
 		UINT Dims;
 		VARIANT vv;
-		pval *element;
+		zval *element;
 		HRESULT hr;
 
 		/* TODO: Add support for multi-dimensional SafeArrays */
 		/* For now just validate that the SafeArray has one dimension */
 		if (1 != (Dims = SafeArrayGetDim(array))) {
 			php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
-			ZVAL_NULL(pval_arg);
+			ZVAL_NULL(zval_arg);
 			return FAILURE;
 		}
         SafeArrayLock(array);
@@ -501,7 +483,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 
 		/* Since COM returned an array we set up the php */
 		/* return value to be an array */
-		array_init(pval_arg);
+		array_init(zval_arg);
 
 		/* Walk the safe array */
 		for (ii=lbound;ii<=ubound;ii++) {
@@ -527,7 +509,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 			/* If SafeArrayGetElement proclaims to allocate */
 			/* memory for a BSTR, so the recursive call frees */
 			/* the string correctly */
-			if (FAILURE == php_variant_to_pval(&vv, element, codepage TSRMLS_CC)) {
+			if (FAILURE == php_variant_to_zval(&vv, element, codepage)) {
 				/* Error occurred setting up array element */
 				/* Error was displayed by the recursive call */
 				FREE_ZVAL(element);
@@ -541,52 +523,52 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 				/* break; */
 			} else {
 				/* Just insert the element into our return array */
-				add_index_zval(pval_arg, ii, element);
+				add_index_zval(zval_arg, ii, element);
 			}
 		}
 		SafeArrayUnlock(array);
 	} else switch (var_arg->vt & ~VT_BYREF) {
 		case VT_EMPTY:
-			ZVAL_NULL(pval_arg);
+			ZVAL_NULL(zval_arg);
 			break;
 
 		case VT_UI1:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, (long)*V_UI1REF(var_arg));
+				ZVAL_LONG(zval_arg, (long)*V_UI1REF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, (long)V_UI1(var_arg));
+				ZVAL_LONG(zval_arg, (long)V_UI1(var_arg));
 			}
 			break;
 
 		case VT_I2:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, (long )*V_I2REF(var_arg));
+				ZVAL_LONG(zval_arg, (long )*V_I2REF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, (long)V_I2(var_arg));
+				ZVAL_LONG(zval_arg, (long)V_I2(var_arg));
 			}
 			break;
 
 		case VT_I4:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, *V_I4REF(var_arg));
+				ZVAL_LONG(zval_arg, *V_I4REF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, V_I4(var_arg));
+				ZVAL_LONG(zval_arg, V_I4(var_arg));
 			}
 			break;
 
 		case VT_R4:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_DOUBLE(pval_arg, (double)*V_R4REF(var_arg));
+				ZVAL_DOUBLE(zval_arg, (double)*V_R4REF(var_arg));
 			} else {
-				ZVAL_DOUBLE(pval_arg, (double)V_R4(var_arg));
+				ZVAL_DOUBLE(zval_arg, (double)V_R4(var_arg));
 			}
 			break;
 
 		case VT_R8:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_DOUBLE(pval_arg, *V_R8REF(var_arg));
+				ZVAL_DOUBLE(zval_arg, *V_R8REF(var_arg));
 			} else {
-				ZVAL_DOUBLE(pval_arg, V_R8(var_arg));
+				ZVAL_DOUBLE(zval_arg, V_R8(var_arg));
 			}
 			break;
 
@@ -595,12 +577,12 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 				OLECHAR *unicode_str;
 				switch (VarBstrFromDec(&V_DECIMAL(var_arg), LOCALE_SYSTEM_DEFAULT, 0, &unicode_str)) {
 					case S_OK:
-						Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(unicode_str, &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
-						Z_TYPE_P(pval_arg) = IS_STRING;
+						Z_STRVAL_P(zval_arg) = php_OLECHAR_to_char(unicode_str, &Z_STRLEN_P(zval_arg), codepage, FALSE);
+						Z_TYPE_P(zval_arg) = IS_STRING;
 						break;
 
 					default:
-						ZVAL_NULL(pval_arg);
+						ZVAL_NULL(zval_arg);
 						ret = FAILURE;
 						php_error(E_WARNING, "Error converting DECIMAL value to PHP string");
 						break;
@@ -611,53 +593,53 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 		/* Currency */
 		case VT_CY:
 			if (V_ISBYREF(var_arg)) {
-				VarR8FromCy(*V_CYREF(var_arg), &Z_DVAL_P(pval_arg));
+				VarR8FromCy(*V_CYREF(var_arg), &Z_DVAL_P(zval_arg));
 			} else {
-				VarR8FromCy(V_CY(var_arg), &Z_DVAL_P(pval_arg));
+				VarR8FromCy(V_CY(var_arg), &Z_DVAL_P(zval_arg));
 			}
-			Z_TYPE_P(pval_arg) = IS_DOUBLE;
+			Z_TYPE_P(zval_arg) = IS_DOUBLE;
 			break;
 
 		case VT_BOOL:
 			if (V_ISBYREF(var_arg)) {
 				if (*V_BOOLREF(var_arg)) {
-					ZVAL_BOOL(pval_arg, Z_TRUE);
+					ZVAL_BOOL(zval_arg, Z_TRUE);
 				} else {
-					ZVAL_BOOL(pval_arg, Z_FALSE);
+					ZVAL_BOOL(zval_arg, Z_FALSE);
 				}
 			} else {
 				if (V_BOOL(var_arg)) {
-					ZVAL_BOOL(pval_arg, Z_TRUE);
+					ZVAL_BOOL(zval_arg, Z_TRUE);
 				} else {
-					ZVAL_BOOL(pval_arg, Z_FALSE);
+					ZVAL_BOOL(zval_arg, Z_FALSE);
 				}
 			}
 			break;
 
 		case VT_NULL:
 		case VT_VOID:
-			ZVAL_NULL(pval_arg);
+			ZVAL_NULL(zval_arg);
 			break;
 
 		case VT_VARIANT:
-			php_variant_to_pval(V_VARIANTREF(var_arg), pval_arg, codepage TSRMLS_CC);
+			php_variant_to_zval(V_VARIANTREF(var_arg), zval_arg, codepage);
 			break;
 
 		case VT_BSTR:
-			Z_TYPE_P(pval_arg) = IS_STRING;
+			Z_TYPE_P(zval_arg) = IS_STRING;
 
 			if (V_ISBYREF(var_arg)) {
 				if (*V_BSTR(var_arg)) {
-					Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+					Z_STRVAL_P(zval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(zval_arg), codepage, FALSE);
 				} else {
-					ZVAL_NULL(pval_arg);
+					ZVAL_NULL(zval_arg);
 				}
 				efree(V_BSTRREF(var_arg));
 			} else {
 				if (V_BSTR(var_arg)) {
-					Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+					Z_STRVAL_P(zval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(zval_arg), codepage, FALSE);
 				} else {
-					ZVAL_NULL(pval_arg);
+					ZVAL_NULL(zval_arg);
 				}
 			}
 
@@ -686,7 +668,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 					phptime.tm_isdst = -1;
 
 					tzset();
-					ZVAL_LONG(pval_arg, mktime(&phptime));
+					ZVAL_LONG(zval_arg, mktime(&phptime));
 				} else {
 					ret = FAILURE;
 				}
@@ -704,7 +686,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 				if (FAILED(hr)) {
 					char *error_message;
 
-					error_message = php_COM_error_message(hr TSRMLS_CC);
+					error_message = php_COM_error_message(hr);
 					php_error(E_WARNING,"Unable to obtain IDispatch interface:  %s", error_message);
 					LocalFree(error_message);
 
@@ -714,63 +696,64 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 			/* break missing intentionaly */
 		case VT_DISPATCH: {
 				comval *obj;
+				TSRMLS_FETCH();
 
 				if (V_DISPATCH(var_arg) == NULL) {
 					ret = FAILURE;
-					ZVAL_NULL(pval_arg);
+					ZVAL_NULL(zval_arg);
 				} else {
 					ALLOC_COM(obj);
-					php_COM_set(obj, &V_DISPATCH(var_arg), FALSE TSRMLS_CC);
+					php_COM_set(obj, &V_DISPATCH(var_arg), FALSE);
 					
-					ZVAL_COM(pval_arg, obj);
-					VariantInit(var_arg);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
+					ZVAL_COM(zval_arg, obj);
+					VariantInit(var_arg);	/* to protect C_DISPATCH(obj) from being freed when var_result is destructed */
 				}
 			}
 			break;
 
 		case VT_I1:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, (long)*V_I1REF(var_arg));
+				ZVAL_LONG(zval_arg, (long)*V_I1REF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, (long)V_I1(var_arg));
+				ZVAL_LONG(zval_arg, (long)V_I1(var_arg));
 			}
 			break;
 
 		case VT_UI2:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, (long)*V_UI2REF(var_arg));
+				ZVAL_LONG(zval_arg, (long)*V_UI2REF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, (long)V_UI2(var_arg));
+				ZVAL_LONG(zval_arg, (long)V_UI2(var_arg));
 			}
 			break;
 
 		case VT_UI4:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, (long)*V_UI4REF(var_arg));
+				ZVAL_LONG(zval_arg, (long)*V_UI4REF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, (long)V_UI4(var_arg));
+				ZVAL_LONG(zval_arg, (long)V_UI4(var_arg));
 			}
 			break;
 
 		case VT_INT:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, (long)*V_INTREF(var_arg));
+				ZVAL_LONG(zval_arg, (long)*V_INTREF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, (long)V_INT(var_arg));
+				ZVAL_LONG(zval_arg, (long)V_INT(var_arg));
 			}
 			break;
 
 		case VT_UINT:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, (long)*V_UINTREF(var_arg));
+				ZVAL_LONG(zval_arg, (long)*V_UINTREF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, (long)V_UINT(var_arg));
+				ZVAL_LONG(zval_arg, (long)V_UINT(var_arg));
 			}
 			break;
 
 		default:
 			php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", V_VT(var_arg), V_VT(var_arg));
-			ZVAL_NULL(pval_arg);
+			ZVAL_NULL(zval_arg);
 			ret = FAILURE;
 			break;
 	}
@@ -778,7 +761,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 }
 
 
-PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRMLS_DC)
+PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage, int persist)
 {
 	BOOL error = FALSE;
 	OLECHAR *unicode_str;
@@ -792,13 +775,13 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRML
 	}
 
 	if (strlen >= 0) {
-		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR) * strlen);
+		unicode_str = (OLECHAR *) pemalloc(sizeof(OLECHAR) * strlen, persist);
 
 		/* convert string */
 		error = !MultiByteToWideChar(codepage, (codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED | MB_ERR_INVALID_CHARS), C_str, strlen, unicode_str, strlen);
 	} else {
 		/* return a zero-length string */
-		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR));
+		unicode_str = (OLECHAR *) pemalloc(sizeof(OLECHAR), persist);
 		*unicode_str = 0;
 
 		error = TRUE;
@@ -821,7 +804,7 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRML
 }
 
 
-PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int codepage TSRMLS_DC)
+PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int codepage, int persist)
 {
 	char *C_str;
 	uint length = 0;
@@ -830,12 +813,12 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int cod
 	uint reqSize = WideCharToMultiByte(codepage, codepage == CP_UTF8 ? 0 : WC_COMPOSITECHECK, unicode_str, -1, NULL, 0, NULL, NULL);
 
 	if (reqSize) {
-		C_str = (char *) emalloc(sizeof(char) * reqSize);
+		C_str = (char *) pemalloc(sizeof(char) * reqSize, persist);
 
 		/* convert string */
 		length = WideCharToMultiByte(codepage, codepage == CP_UTF8 ? 0 : WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
 	} else {
-		C_str = (char *) emalloc(sizeof(char));
+		C_str = (char *) pemalloc(sizeof(char), persist);
 		*C_str = 0;
 
 		php_error(E_WARNING,"Error in php_OLECHAR_to_char()");
@@ -848,21 +831,21 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int cod
 	return C_str;
 }
 
-
-static void comval_to_variant(pval *pval_arg, VARIANT *var_arg TSRMLS_DC)
+static int comval_to_variant(zval *object, VARIANT *var_arg)
 {
-	pval **comval_handle;
-	comval *obj;
-	int type;
+	rpc_internal *intern;
+	TSRMLS_FETCH();
 
-	/* fetch the comval structure */
-	zend_hash_index_find(Z_OBJPROP_P(pval_arg), 0, (void **) &comval_handle);
-	obj = (comval *)zend_list_find(Z_LVAL_P(*comval_handle), &type);
-	if (!obj || (type != IS_COM) || !C_ISREFD(obj)) {
+	if (GET_INTERNAL_EX(intern, object) != SUCCESS) {
+		/* TODO exception */
 		VariantInit(var_arg);
+
+		return FAILURE;
 	} else {
 		V_VT(var_arg) = VT_DISPATCH;
-		V_DISPATCH(var_arg) = C_DISPATCH(obj);
+		V_DISPATCH(var_arg) = C_DISPATCH((comval *) intern->data);
+
+		return SUCCESS;
 	}
 }
 

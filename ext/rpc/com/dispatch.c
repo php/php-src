@@ -23,9 +23,11 @@
  * them as objects implementing IDispatch.
  * */
 
+#include "../rpc.h"
+
 #include "php.h"
-#include "php_COM.h"
-#include "php_VARIANT.h"
+#include "com.h"
+#include "com_wrapper.h"
 #include "conversion.h"
 #include "variant.h"
 
@@ -177,7 +179,7 @@ static HRESULT STDMETHODCALLTYPE disp_getidsofnames(
 		unsigned int namelen;
 		zval **tmp;
 		
-		name = php_OLECHAR_to_char(rgszNames[i], &namelen, CP_ACP TSRMLS_CC);
+		name = php_OLECHAR_to_char(rgszNames[i], &namelen, CP_ACP, FALSE);
 		
 		/* Lookup the name in the hash */
 		if (zend_hash_find(disp->name_to_dispid, name, namelen+1, (void**)&tmp) == FAILURE) {
@@ -223,7 +225,7 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 	TSRMLS_FETCH();
 	FETCH_DISP("GetDispID");
 
-	name = php_OLECHAR_to_char(bstrName, &namelen, CP_ACP TSRMLS_CC);
+	name = php_OLECHAR_to_char(bstrName, &namelen, CP_ACP, FALSE);
 
 	/* Lookup the name in the hash */
 	if (zend_hash_find(disp->name_to_dispid, name, namelen+1, (void**)&tmp) == SUCCESS) {
@@ -275,13 +277,13 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 			
 			if (V_VT(arg) == VT_DISPATCH) {
 				trace("arg %d is dispatchable\n", i);
-				if (NULL == php_COM_object_from_dispatch(V_DISPATCH(arg), zarg TSRMLS_CC)) {
+				if ((zarg = php_COM_object_from_dispatch(V_DISPATCH(arg))) == NULL) {
 					trace("failed to convert arg %d to zval\n", i);
 					ZVAL_NULL(zarg);
 				}
 			} else {
-				// arg can't be an idispatch, so we don't care for the implicit AddRef() call here
-				if (FAILURE == php_variant_to_pval(arg, zarg, codepage TSRMLS_CC)) {
+				/* arg can't be an idispatch, so we don't care for the implicit AddRef() call here */
+				if (FAILURE == php_variant_to_zval(arg, zarg, codepage)) {
 					trace("failed to convert arg %d to zval\n", i);
 					ZVAL_NULL(zarg);
 				}
@@ -322,9 +324,9 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 					/* export the object using a dispatch like ourselves */
 					VariantInit(pvarRes);
 					V_VT(pvarRes) = VT_DISPATCH;
-					V_DISPATCH(pvarRes) = php_COM_export_object(retval TSRMLS_CC);
+					V_DISPATCH(pvarRes) = php_COM_export_object(retval);
 				} else {
-					php_pval_to_variant(retval, pvarRes, codepage TSRMLS_CC);
+					php_zval_to_variant(retval, pvarRes, codepage);
 				}
 			}
 			zval_ptr_dtor(&retval);
@@ -379,7 +381,7 @@ static HRESULT STDMETHODCALLTYPE disp_getmembername(
 	FETCH_DISP("GetMemberName");
 
 	if (SUCCESS == zend_hash_index_find(disp->dispid_to_name, id, (void**)&name)) {
-		OLECHAR *olestr = php_char_to_OLECHAR(Z_STRVAL_P(name), Z_STRLEN_P(name), CP_ACP TSRMLS_CC);
+		OLECHAR *olestr = php_char_to_OLECHAR(Z_STRVAL_P(name), Z_STRLEN_P(name), CP_ACP, FALSE);
 		*pbstrName = SysAllocString(olestr);
 		efree(olestr);
 		return S_OK;
@@ -511,7 +513,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 	}
 }
 
-static php_dispatchex *disp_constructor(zval *object TSRMLS_DC)
+static php_dispatchex *disp_constructor(zval *object)
 {
 	php_dispatchex *disp = (php_dispatchex*)CoTaskMemAlloc(sizeof(php_dispatchex));
 
@@ -559,9 +561,9 @@ static void disp_destructor(php_dispatchex *disp)
 	CoTaskMemFree(disp);
 }
 
-PHPAPI IDispatch *php_COM_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name TSRMLS_DC)
+PHPAPI IDispatch *php_COM_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name)
 {
-	php_dispatchex *disp = disp_constructor(val TSRMLS_CC);
+	php_dispatchex *disp = disp_constructor(val);
 	HashPosition pos;
 	char *name = NULL;
 	zval *tmp, **ntmp;
@@ -596,31 +598,32 @@ PHPAPI IDispatch *php_COM_export_as_sink(zval *val, GUID *sinkid, HashTable *id_
 	return (IDispatch*)disp;
 }
 
-PHPAPI IDispatch *php_COM_export_object(zval *val TSRMLS_DC)
+PHPAPI IDispatch *php_COM_export_object(zval *val)
 {
 	php_dispatchex *disp = NULL;
+	TSRMLS_FETCH();
 
 	if (Z_TYPE_P(val) != IS_OBJECT)
 		return NULL;
 
-	if (Z_OBJCE_P(val) == &COM_class_entry || !strcmp(Z_OBJCE_P(val)->name, "COM")) {
+	if (Z_OBJCE_P(val) == com_class_entry) {
 		/* pass back it's IDispatch directly */
-		zval **tmp;
 		comval *obj;
-		int type;
-		
-		zend_hash_index_find(Z_OBJPROP_P(val), 0, (void**)&tmp);
-		obj = (comval *)zend_list_find(Z_LVAL_PP(tmp), &type);
-		if (type != IS_COM)
-			return NULL;
+		rpc_internal *intern;
+
+		if (GET_INTERNAL_EX(intern, val) != SUCCESS) {
+			/* TODO: exception */
+		}
+
+		obj = (comval *) intern->data;
 
 		C_DISPATCH(obj)->lpVtbl->AddRef(C_DISPATCH(obj));
 		return C_DISPATCH(obj);
 	}
 
-	disp = disp_constructor(val TSRMLS_CC);
+	disp = disp_constructor(val);
 	generate_dispids(disp TSRMLS_CC);
-
+ 
 	return (IDispatch*)disp;
 }
 

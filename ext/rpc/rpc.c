@@ -1,3 +1,21 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2002 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Harald Radi <h.radi@nme.at>                                  |
+   +----------------------------------------------------------------------+
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -9,15 +27,13 @@
 #include "php_rpc.h"
 #include "rpc.h"
 #include "layer.h"
+#include "hash.h"
 
 static void rpc_instance_dtor(void *);
 static void rpc_class_dtor(void *);
 static void rpc_string_dtor(void *);
 
-static zend_object_value rpc_objects_new(zend_class_entry * TSRMLS_DC);
-static void rpc_objects_delete(void *object, zend_object_handle handle TSRMLS_DC);
-
-static int zend_ts_hash_remove_key_or_index(TsHashTable *ht, char *arKey, uint nKeyLength, void **pData);
+static void rpc_objects_delete(void *, zend_object_handle TSRMLS_DC);
 
 /* object handler */
 static zval* rpc_read(zval *, zval *, int  TSRMLS_DC);
@@ -30,7 +46,7 @@ static void rpc_unset_property(zval *, zval * TSRMLS_DC);
 static HashTable* rpc_get_properties(zval * TSRMLS_DC);
 static union _zend_function* rpc_get_method(zval *, char *, int TSRMLS_DC);
 static union _zend_function* rpc_get_constructor(zval * TSRMLS_DC);
-static zend_class_entry* rpc_get_class_entry(zval *object TSRMLS_DC);
+static zend_class_entry* rpc_get_class_entry(zval * TSRMLS_DC);
 static int rpc_compare(zval *, zval * TSRMLS_DC);
 /**/
 
@@ -88,6 +104,7 @@ zend_module_entry rpc_module_entry = {
 
 zend_class_entry rpc_class_entry;
 
+static zend_function *rpc_ctor;
 static HashTable *handlers;
 static TsHashTable *pool;
 static TsHashTable *classes;
@@ -104,6 +121,7 @@ ZEND_INI_END()
  */
 ZEND_MINIT_FUNCTION(rpc)
 {
+	zend_internal_function *zif;
 	zend_class_entry *rpc_entry;
 
 	/* rpc base class entry */
@@ -121,23 +139,38 @@ ZEND_MINIT_FUNCTION(rpc)
 	zend_llist_init(classes_list, sizeof(rpc_class_hash **), rpc_class_dtor, TRUE);
 
 	FOREACH_HANDLER {
-		HANDLER.rpc_handler_init();
+		zend_class_entry ce;
+
+		HANDLER.rpc_handler_init(module_number TSRMLS_CC);
 		
 		/* create a class entry for every rpc handler */
-		INIT_CLASS_ENTRY((*(HANDLER.ce)),
-							HANDLER.name,
-							HANDLER.methods);
+		INIT_CLASS_ENTRY(ce,
+						 HANDLER.name,
+						 HANDLER.methods);
 
-		HANDLER.ce->create_object = rpc_objects_new;
+		ce.create_object = rpc_objects_new;
 
 		/* load all available rpc handler into a hash */
 		zend_hash_add(handlers, HANDLER.name, strlen(HANDLER.name) + 1, &(HANDLER.handlers), sizeof(rpc_object_handlers *), NULL);
 
 		/* register classes and functions */
-		zend_register_internal_class_ex(HANDLER.ce, rpc_entry, NULL TSRMLS_CC);
+		*HANDLER.ce = zend_register_internal_class_ex(&ce, rpc_entry, NULL TSRMLS_CC);
 		zend_register_functions(HANDLER.functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
 		zend_register_ini_entries(HANDLER.ini, module_number TSRMLS_CC);
 	}
+
+
+	zif = (zend_internal_function *) emalloc(sizeof(zend_internal_function));
+
+	zif->type = ZEND_INTERNAL_FUNCTION;
+	zif->function_name = rpc_entry->name;
+	zif->scope = rpc_entry;
+	zif->arg_types = NULL;
+	zif->handler = ZEND_FN(rpc_load);
+
+	/* add new constructor to the method table */
+	zend_hash_add(&(rpc_entry->function_table), rpc_entry->name, rpc_entry->name_length + 1, zif, sizeof(zend_function), &rpc_ctor);
+	efree(zif);
 
 	REGISTER_INI_ENTRIES();
 
@@ -149,6 +182,10 @@ ZEND_MINIT_FUNCTION(rpc)
  */
 ZEND_MSHUTDOWN_FUNCTION(rpc)
 {
+	FOREACH_HANDLER {
+		HANDLER.rpc_handler_shutdown(TSRMLS_C);
+	}
+
 	/* destroy instances first */
 	zend_ts_hash_destroy(pool);
 
@@ -214,35 +251,6 @@ static void rpc_instance_dtor(void *pDest)
 	pefree(*intern, TRUE);
 }
 
-static zend_object_value rpc_objects_new(zend_class_entry *class_type TSRMLS_DC)
-{
-	zend_object_value *zov;
-	rpc_internal *intern;
-	
-	/* set up the object value struct */
-	zov = (zend_object_value*) pemalloc(sizeof(zend_object_value), TRUE);
-	zov->handlers = &rpc_handlers;
-
-	/* set up the internal representation of our rpc instance */
-	intern = (rpc_internal *) pemalloc(sizeof(rpc_internal), TRUE);
-
-	intern->ce = class_type;
-	intern->data = NULL;
-	intern->function_table.hash = intern->ce->function_table;
-	intern->function_table.reader = 0;
-	intern->function_table.mx_reader = tsrm_mutex_alloc();
-	intern->function_table.mx_writer = tsrm_mutex_alloc();
-	intern->mx_handler = tsrm_mutex_alloc();
-
-	if (zend_hash_find(handlers, class_type->name, class_type->name_length + 1, (void **) &(intern->handlers)) != SUCCESS) {
-		/* TODO: exception */
-	}
-
-	zov->handle = zend_objects_store_put(intern, rpc_objects_delete, NULL TSRMLS_CC);
-
-	return *zov;
-}
-
 static zend_object_value rpc_create_proxy(TSRMLS_D)
 {
 	zend_object_value *zov;
@@ -283,7 +291,9 @@ static void rpc_objects_delete(void *object, zend_object_handle handle TSRMLS_DC
 			zend_ts_hash_index_update(pool, RPC_CLASS(intern)->name.len + 1, &intern, sizeof(rpc_internal *), NULL);
 		}
 	} else {
-		RPC_HT(intern)->rpc_dtor(intern->data);
+		if (intern->data != NULL) {
+			RPC_HT(intern)->rpc_dtor(intern->data);
+		}
 		pefree(intern, TRUE);
 	}
 }
@@ -351,7 +361,6 @@ static void rpc_set(zval **property, zval *value TSRMLS_DC)
 static int rpc_has_property(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
 //	GET_INTERNAL(intern);
-	
 	/* FIXME */
 	return FAILURE;
 }
@@ -365,7 +374,6 @@ static void rpc_unset_property(zval *object, zval *member TSRMLS_DC)
 static HashTable* rpc_get_properties(zval *object TSRMLS_DC)
 {
 //	GET_INTERNAL(intern);
-
 	/* FIXME */
 	return NULL;
 }
@@ -378,11 +386,22 @@ static union _zend_function* rpc_get_method(zval *object, char *method, int meth
 	if (zend_ts_hash_find(&(intern->function_table), method, method_len + 1, &function) != SUCCESS) {
 		zend_internal_function *zif;
 
+		/* get reftypes */
+		if (RPC_HT(intern)->rpc_describe) {
+			char *arg_types;
+			rpc_string method_name;
+
+			method_name.str = method;
+			method_name.len = method_len;
+
+			RPC_HT(intern)->rpc_describe(method_name, intern->data, &arg_types);
+		}
+
 		zif = (zend_internal_function *) emalloc(sizeof(zend_internal_function));
 		zif->arg_types = NULL;
 		zif->function_name = method;
 		zif->handler = ZEND_FN(rpc_call);
-		zif->scope = NULL;
+		zif->scope = intern->ce;
 		zif->type = ZEND_INTERNAL_FUNCTION;
 
 		/* add new method to the method table */
@@ -395,25 +414,6 @@ static union _zend_function* rpc_get_method(zval *object, char *method, int meth
 
 static union _zend_function* rpc_get_constructor(zval *object TSRMLS_DC)
 {
-	zend_function *rpc_ctor;
-	GET_INTERNAL(intern);
-
-	if (zend_ts_hash_find(&(intern->function_table), intern->ce->name, intern->ce->name_length + 1, &rpc_ctor) != SUCCESS) {
-		zend_internal_function *zif;
-
-		zif = (zend_internal_function *) emalloc(sizeof(zend_internal_function));
-
-		zif->type = ZEND_INTERNAL_FUNCTION;
-		zif->function_name = intern->ce->name;
-		zif->scope = intern->ce;
-		zif->arg_types = NULL;
-		zif->handler = ZEND_FN(rpc_load);
-
-		/* add new constructor to the method table */
-		zend_ts_hash_add(&(intern->function_table), intern->ce->name, intern->ce->name_length + 1, zif, sizeof(zend_function), &rpc_ctor);
-		efree(zif);
-	}
-
 	return rpc_ctor;
 }
 
@@ -484,7 +484,9 @@ ZEND_FUNCTION(rpc_load)
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 1 TSRMLS_CC, "s", &class_val.str, &class_val.len) != SUCCESS) {
 			/* none of the two possibilities */
 			/* TODO: exception */
-			php_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
+			rpc_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
+			ZVAL_NULL(object);
+			return;
 		} else {
 			/* hash classname if hashing function exists */
 			if (RPC_HT(intern)->rpc_hash) {
@@ -492,7 +494,7 @@ ZEND_FUNCTION(rpc_load)
 				GET_SIGNATURE(intern, class_val.str, class_val.len, hash_val, num_args, arg_types);
 
 				/* check if already hashed */	
-				if (zend_ts_hash_find(classes, hash_val.str, hash_val.len + 1, (void **) &class_hash_find) != SUCCESS) {
+ 				if (zend_ts_hash_find(classes, hash_val.str, hash_val.len + 1, (void **) &class_hash_find) != SUCCESS) {
 					class_hash = pemalloc(sizeof(rpc_class_hash), TRUE);
 
 					/* set up the cache */
@@ -504,12 +506,14 @@ ZEND_FUNCTION(rpc_load)
 					class_hash->data = NULL;
 
 					/* do hashing */
-					if (RPC_HT(intern)->rpc_hash(class_val, (rpc_string *)(class_hash), num_args, arg_types, CLASS) != SUCCESS) {
+					if (RPC_HT(intern)->rpc_hash(class_val, (rpc_string *)(class_hash), NULL, num_args, arg_types, CLASS) != SUCCESS) {
 						/* TODO: exception */
+						ZVAL_NULL(object);
+						return;
 					}
 
 					/* overload class entry */
-					RPC_HT(intern)->rpc_name(class_val, &class_val, CLASS);
+					RPC_HT(intern)->rpc_name(class_val, &class_val, NULL, CLASS);
 					INIT_CLASS_ENTRY(overloaded_class_entry, NULL, NULL);
 					overloaded_class_entry.name = class_val.str;
 					overloaded_class_entry.name_length = class_val.len;
@@ -561,7 +565,7 @@ ZEND_FUNCTION(rpc_load)
 			zend_ts_hash_init(&(class_hash->properties), 0, NULL, rpc_string_dtor, TRUE);
 
 			/* overload class entry */
-			RPC_HT(intern)->rpc_name(class_val, &class_val, CLASS);
+			RPC_HT(intern)->rpc_name(class_val, &class_val, NULL, CLASS);
 			INIT_CLASS_ENTRY(overloaded_class_entry, class_val.str, NULL);
 			class_hash->ce = zend_register_internal_class_ex(&overloaded_class_entry, intern->ce, NULL TSRMLS_CC);
 			intern->ce = class_hash->ce;
@@ -606,6 +610,7 @@ ZEND_FUNCTION(rpc_load)
 
 	if (retval != SUCCESS) {
 		/* TODO: exception */
+		RETURN_NULL();
 	}
 }
 
@@ -628,7 +633,7 @@ ZEND_FUNCTION(rpc_call)
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 2 TSRMLS_CC, "Os", &object, *ce, &hash, &hash_len) != SUCCESS) {
 				/* none of the two possibilities */
 				/* TODO: exception */
-				php_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
+				rpc_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
 			}
 		}
 
@@ -660,8 +665,9 @@ ZEND_FUNCTION(rpc_call)
 
 				/* check if already hashed */	
 				if (zend_ts_hash_find(&(intern->hash->methods), hash_val.str, hash_val.len + 1, (void **) &method_hash_find) != SUCCESS) {
-					if (RPC_HT(intern)->rpc_hash(*method_hash, method_hash, num_args, arg_types, METHOD) != SUCCESS) {
+					if (RPC_HT(intern)->rpc_hash(*method_hash, method_hash, intern->data, num_args, arg_types, METHOD) != SUCCESS) {
 						/* TODO: exception */
+						RETURN_NULL();
 					}
 
 					/* register with non-hashed key */
@@ -680,7 +686,7 @@ ZEND_FUNCTION(rpc_call)
 		 * and srm it is better to do concurrency checks
 		 */
 		tsrm_mutex_lock(intern->mx_handler);
-		retval = RPC_HT(intern)->rpc_call(*method_hash, &(intern->data), &return_value, num_args, args);
+		retval = RPC_HT(intern)->rpc_call(*method_hash, &(intern->data), return_value, num_args, args);
 		tsrm_mutex_unlock(intern->mx_handler);
 	}
 
@@ -704,7 +710,7 @@ ZEND_FUNCTION(rpc_set)
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 3 TSRMLS_CC, "Osz", &object, *ce, &property, &property_len, &value) != SUCCESS) {
 			/* none of the two possibilities */
 			/* TODO: exception */
-			php_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
+			rpc_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
 		}
 	}
 
@@ -729,7 +735,7 @@ ZEND_FUNCTION(rpc_get)
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 2 TSRMLS_CC, "Os", &object, *ce, &property, &property_len) != SUCCESS) {
 			/* none of the two possibilities */
 			/* TODO: exception */
-			php_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
+			rpc_error(E_WARNING, "wrong arguments for %s()", get_active_function_name(TSRMLS_C));
 		}
 	}
 
@@ -778,6 +784,44 @@ ZEND_FUNCTION(rpc_poolable)
 	}
 }
 
+ZEND_API void rpc_error(int type, const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	zend_error(type, format, args);
+	va_end(args);
+}
+
+ZEND_API zend_object_value rpc_objects_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	zend_object_value *zov;
+	rpc_internal *intern;
+	
+	/* set up the object value struct */
+	zov = (zend_object_value*) pemalloc(sizeof(zend_object_value), TRUE);
+	zov->handlers = &rpc_handlers;
+
+	/* set up the internal representation of our rpc instance */
+	intern = (rpc_internal *) pemalloc(sizeof(rpc_internal), TRUE);
+
+	intern->ce = class_type;
+	intern->data = NULL;
+	intern->function_table.hash = intern->ce->function_table;
+	intern->function_table.reader = 0;
+	intern->function_table.mx_reader = tsrm_mutex_alloc();
+	intern->function_table.mx_writer = tsrm_mutex_alloc();
+	intern->mx_handler = tsrm_mutex_alloc();
+
+	if (zend_hash_find(handlers, class_type->name, class_type->name_length + 1, (void **) &(intern->handlers)) != SUCCESS) {
+		/* TODO: exception */
+	}
+
+	zov->handle = zend_objects_store_put(intern, rpc_objects_delete, NULL TSRMLS_CC);
+
+	return *zov;
+}
+
 /*******************/
 
 static void rpc_internal_get(rpc_internal *intern, char *property, zend_uint property_len, zval *return_value)
@@ -799,8 +843,9 @@ static void rpc_internal_get(rpc_internal *intern, char *property, zend_uint pro
 		} else if(property) {
 			/* check if already hashed */	
 			if (zend_ts_hash_find(&(intern->hash->properties), property, property_len + 1, (void **) &property_hash_find) != SUCCESS) {
-				if (RPC_HT(intern)->rpc_hash(*property_hash, property_hash, 0, NULL, PROPERTY) != SUCCESS) {
+				if (RPC_HT(intern)->rpc_hash(*property_hash, property_hash, intern->data, 0, NULL, PROPERTY) != SUCCESS) {
 					/* TODO: exception */
+					RETURN_NULL();
 				}
 
 				/* register with non-hashed key */
@@ -838,78 +883,6 @@ static void rpc_internal_set(rpc_internal *intern, char *property, zend_uint pro
 		/* TODO: exception here */
 	}
 }
-
-/***********************************/
-
-static int zend_ts_hash_remove_key_or_index(TsHashTable *ht, char *arKey, uint nKeyLength, void **pData)
-{
-	uint nIndex;
-	uint h = nKeyLength;
-	uint result;
-	void **ppData;
-	Bucket *p;
-
-	tsrm_mutex_lock(ht->mx_writer);
-
-	if (arKey) {
-		result = zend_hash_find(TS_HASH(ht), arKey, nKeyLength, (void **) &ppData);
-	} else {
-		result = zend_hash_index_find(TS_HASH(ht), h, (void **) &ppData);
-	}
-
-	if (result == SUCCESS) {
-		*pData = *ppData;
-
-		if (arKey) {
-			h = zend_inline_hash_func(arKey, nKeyLength);
-		}
-
-		nIndex = h & TS_HASH(ht)->nTableMask;
-
-		p = TS_HASH(ht)->arBuckets[nIndex];
-		while (p != NULL) {
-			if ((p->h == h) && ((p->nKeyLength == 0) || /* Numeric index */
-				((p->nKeyLength == nKeyLength) && (!memcmp(p->arKey, arKey, nKeyLength))))) {
-				HANDLE_BLOCK_INTERRUPTIONS();
-				if (p == TS_HASH(ht)->arBuckets[nIndex]) {
-					TS_HASH(ht)->arBuckets[nIndex] = p->pNext;
-				} else {
-					p->pLast->pNext = p->pNext;
-				}
-				if (p->pNext) {
-					p->pNext->pLast = p->pLast;
-				}
-				if (p->pListLast != NULL) {
-					p->pListLast->pListNext = p->pListNext;
-				} else { 
-					/* Deleting the head of the list */
-					TS_HASH(ht)->pListHead = p->pListNext;
-				}
-				if (p->pListNext != NULL) {
-					p->pListNext->pListLast = p->pListLast;
-				} else {
-					TS_HASH(ht)->pListTail = p->pListLast;
-				}
-				if (TS_HASH(ht)->pInternalPointer == p) {
-					TS_HASH(ht)->pInternalPointer = p->pListNext;
-				}
-				if (!p->pDataPtr) {
-					pefree(p->pData, TS_HASH(ht)->persistent);
-				}
-				pefree(p, TS_HASH(ht)->persistent);
-				HANDLE_UNBLOCK_INTERRUPTIONS();
-				TS_HASH(ht)->nNumOfElements--;
-				return SUCCESS;
-			}
-			p = p->pNext;
-		}
-	}
-	tsrm_mutex_unlock(ht->mx_writer);
-
-	return FAILURE;
-}
-
-
 
 
 /*
