@@ -1650,7 +1650,7 @@ PHP_FUNCTION(ifx_errormsg)
 		break;
 	}
 
-	maxmsglen = 10;
+	maxmsglen = 255;
 	msglen = maxmsglen;     /* Some bug fix, rgetlmsg doesnt always set the value */
 	ifx_errmsg = (char *)emalloc(maxmsglen + 1);
 	if (ifx_errorcode != 0) {
