@@ -30,12 +30,10 @@
 		"you are trying to operate on was loaded _before_ " \
 		"the session was started"
 
-#define INCOMPLETE_CLASS "__PHP_Incomplete_Class"
-#define MAGIC_MEMBER "__PHP_Incomplete_Class_Name"
 
 /* {{{ incomplete_class_message
  */
-static void incomplete_class_message(zend_property_reference *ref)
+static void incomplete_class_message(zend_property_reference *ref, int error_type)
 {
 	char buf[1024];
 	char *class_name;
@@ -49,7 +47,7 @@ static void incomplete_class_message(zend_property_reference *ref)
 	
 	efree(class_name);
 
-	php_error(E_ERROR, "%s", buf);
+	php_error(error_type, "%s", buf);
 }
 /* }}} */
 
@@ -57,7 +55,7 @@ static void incomplete_class_message(zend_property_reference *ref)
  */
 static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
-	incomplete_class_message(property_reference);
+	incomplete_class_message(property_reference, E_ERROR);
 }
 /* }}} */
 
@@ -65,7 +63,7 @@ static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS, zend_proper
  */
 static int incomplete_class_set_property(zend_property_reference *property_reference, zval *value)
 {
-	incomplete_class_message(property_reference);
+	incomplete_class_message(property_reference, E_NOTICE);
 	
 	/* does not reach this point */
 	return (0);
@@ -78,7 +76,7 @@ static zval incomplete_class_get_property(zend_property_reference *property_refe
 {
 	zval foo;
 	
-	incomplete_class_message(property_reference);
+	incomplete_class_message(property_reference, E_NOTICE);
 
 	/* does not reach this point */
 	memset(&foo, 0, sizeof(zval)); /* shut warnings up */
