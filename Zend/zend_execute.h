@@ -55,7 +55,7 @@ void shutdown_executor(ELS_D);
 void execute(zend_op_array *op_array ELS_DC);
 ZEND_API int zend_is_true(zval *op);
 ZEND_API inline void safe_free_zval_ptr(zval *p)
-#if defined(C0X_INLINE_SEMANTICS)
+#if defined(C9X_INLINE_SEMANTICS)
 {
 	ELS_FETCH();
 
@@ -69,7 +69,7 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC);
 ZEND_API inline int i_zend_is_true(zval *op)
-#if defined(C0X_INLINE_SEMANTICS)
+#if defined(C9X_INLINE_SEMANTICS)
 {
 	int result;
 
@@ -113,7 +113,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg);
 
 /* dedicated Zend executor functions - do not use! */
 ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
-#if defined(C0X_INLINE_SEMANTICS)
+#if defined(C9X_INLINE_SEMANTICS)
 {
 	void **p = EG(argument_stack).top_element-2;
 	int delete_count = (ulong) *p;
@@ -129,7 +129,7 @@ ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
 #endif
 
 ZEND_API inline int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC)
-#if defined(C0X_INLINE_SEMANTICS)
+#if defined(C9X_INLINE_SEMANTICS)
 {
 	void **p = EG(argument_stack).top_element-2;
 	int arg_count = (ulong) *p;
@@ -161,7 +161,7 @@ ZEND_API zend_bool zend_is_executing(void);
 #define active_opline (*EG(opline_ptr))
 
 ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC)
-#if defined(C0X_INLINE_SEMANTICS)
+#if defined(C9X_INLINE_SEMANTICS)
 {
 	zval *variable_ptr = *variable_ptr_ptr;
 	zval *value_ptr;

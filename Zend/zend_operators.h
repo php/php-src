@@ -50,7 +50,7 @@ ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2);
 ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API inline int is_numeric_string(char *str, int length, long *lval, double *dval)
-#if defined(C0X_INLINE_SEMANTICS)
+#if defined(C9X_INLINE_SEMANTICS)
 {
 	long local_lval;
 	double local_dval;
