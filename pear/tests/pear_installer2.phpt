@@ -125,6 +125,17 @@ echo 'file bin/.tmpinstaller2.phpt.testfile.php exists? => ';
 echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
     '.tmpinstaller2.phpt.testfile.php') ? "yes\n" : "no\n");
 
+echo "install non-existent file:\n";
+$err = $installer->_installFile('....php', array('role' => 'php'),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array());
+echo 'returned PEAR_Error: ' . (get_class($err) == 'pear_error' ? "yes\n" : "no\n");
+if (is_object($err)) {
+    echo 'message: ' . $err->getMessage() . "\n";
+}
+echo 'file bin/.tmp....php exists? => ';
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    '.tmp....php') ? "yes\n" : "no\n");
+
 define('PEARINSTALLERTEST2_FAKE_FOO_CONST', 'good');
 echo "\ntest replacements:\n";
 $fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php', 'w');
@@ -216,10 +227,16 @@ file test/.tmpinstaller2.phpt.testfile.php exists? => yes
 install as role="script":
 int(1)
 file bin/.tmpinstaller2.phpt.testfile.php exists? => yes
+file bin/.tmpinstaller2.phpt.testfile.php exists? => yes
 install as invalid role="klingon":
 returned PEAR_Error: yes
 message: Invalid role `klingon' for file installer2.phpt.testfile.php
+
 file bin/.tmpinstaller2.phpt.testfile.php exists? => no
+install non-existent file:
+returned PEAR_Error: yes
+message: file does not exist
+file bin/.tmp....php exists? => no
 
 test replacements:
 int(1)
