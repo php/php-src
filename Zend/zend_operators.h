@@ -22,6 +22,21 @@
 #define _OPERATORS_H
 
 #include <errno.h>
+#include <math.h>
+
+#ifndef HAVE_FINITE
+#ifndef finite  				/* in case it's already a macro */
+#define finite(a) isfinite(a)	/* HPUX 11 only has isfinite() */
+#endif
+#else
+#if HAVE_IEEEFP_H
+#include <ieeefp.h>
+#endif
+#endif
+
+#if WITH_BCMATH
+#include "ext/bcmath/number.h"
+#endif
 
 #define MAX_LENGTH_OF_LONG 18
 #define MAX_LENGTH_OF_DOUBLE 32
