@@ -598,7 +598,7 @@ PHP_FUNCTION(mcal_create_calendar)
 }
 /* }}} */
 
-/* {{{ proto string mcal_rename(int stream_id, string src_calendar, string dest_calendar)
+/* {{{ proto string mcal_rename_calendar(int stream_id, string src_calendar, string dest_calendar)
    Rename a calendar */
 PHP_FUNCTION(mcal_rename_calendar)
 {
@@ -629,7 +629,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 }
 /* }}} */
 
-/* {{{ proto int mcal_reopen(int stream_id, array date, array time)
+/* {{{ proto mcal_list_alarms(int stream_id, int year, int month, int day, int hour, int min, int sec)
    List alarms for a given time */
 PHP_FUNCTION(mcal_list_alarms)
 {
@@ -1282,7 +1282,7 @@ PHP_FUNCTION(mcal_week_of_year)
 }
 /* }}} */
 
-/* {{{ proto int mcal_day_of_week(int ayear, int amonth, int aday, int byear, int bmonth, int bday)
+/* {{{ proto int mcal_date_compare(int ayear, int amonth, int aday, int byear, int bmonth, int bday)
    Returns <0, 0, >0 if a<b, a==b, a>b respectively */
 PHP_FUNCTION(mcal_date_compare)
 {
