@@ -135,7 +135,7 @@ fi
 autoheader
 
 # find all Makefile.ams
-files="Makefile `find ext sapi regex -name Makefile.am | sed 's#\.am##' | tr '\n' ' '`"
+files="Makefile `find ext sapi regex pecl -name Makefile.am | sed 's#\.am##' | tr '\n' ' '`"
 
 # suppress stupid automake warning
 automake --add-missing --include-deps $automake_flags $files  2>&1 | grep -v \$PHP_OUTPUT_FILES >&2
