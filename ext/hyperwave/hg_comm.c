@@ -776,9 +776,9 @@ static int set_noblock(int fd)
 
 int write_to(int fd, void *buffer, int n, int timeout)
 {
-	int nrem, nw;
+	int nrem, nw=0;
 	char *bptr;
-	int  error;
+	int  error=0;
 #if defined(SYSV) || (WIN32|WINNT)
 	int    width = 20;
 #else
@@ -812,7 +812,7 @@ int write_to(int fd, void *buffer, int n, int timeout)
                                     (fd_set *) 0, 
                            &select_timeout)) <= 0 && errno != EINTR) break;
     
-		if(errno != EINTR && ( nw =  write(fd, bptr, nrem)) <= 0) {
+		if(errno != EINTR && ( nw = write(fd, bptr, nrem)) <= 0) {
 			/*
 			 *  check for error number - and keep trying to
 			 *  write
@@ -846,9 +846,9 @@ int write_to(int fd, void *buffer, int n, int timeout)
 
 int read_to(int fd, char *buffer, int n, int timeout)
   {
-  int nrem, nread, nr;
+  int nrem, nread, nr=0;
   char *bptr;
-  int  error;
+  int  error=0;
 
 #if defined(SYSV) || (WIN32|WINNT)
   int    width = 20;
@@ -1608,7 +1608,7 @@ int send_insertobject(int sockfd, char *objrec, char *parms, hw_objectID *object
 int send_unlock(int sockfd, hw_objectID objectID)
 {
 	hg_msg msg;
-	int  length, error;
+	int  length;
 	char *tmp;
 
 	length = HEADER_LENGTH + sizeof(hw_objectID);
@@ -4691,9 +4691,9 @@ int send_getsrcbydest(int sockfd, hw_objectID objectID, char ***childrec, int *c
 int send_mapid(int sockfd, int servid, hw_objectID id, int *virtid)
 {
 	hg_msg msg, *retmsg;
-	int length, i, error;
+	int length, error;
 	char *tmp;
-	int *ptr, *ptr1;
+	int *ptr;
 
 	length = HEADER_LENGTH + 2 * sizeof(hw_objectID);
 
