@@ -395,7 +395,7 @@ static void init_request_info(SLS_D)
 	}
 	if (authorization
 /* 		&& !auth_type(r) */
-		&& !strcmp(getword(r->pool, &authorization, ' '), "Basic")) {
+		&& !strcasecmp(getword(r->pool, &authorization, ' '), "Basic")) {
 		tmp = uudecode(r->pool, authorization);
 		SG(request_info).auth_user = getword_nulls_nc(r->pool, &tmp, ':');
 		if (SG(request_info).auth_user) {
