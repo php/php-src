@@ -32,6 +32,7 @@ typedef struct {
     int compression_coding;
     z_stream stream;
     uLong crc;
+	int ob_gzhandler_status;
 } php_zlib_globals;
 
 extern zend_module_entry php_zlib_module_entry;
@@ -39,6 +40,7 @@ extern zend_module_entry php_zlib_module_entry;
 
 PHP_MINIT_FUNCTION(zlib);
 PHP_MSHUTDOWN_FUNCTION(zlib);
+PHP_RINIT_FUNCTION(zlib);
 PHP_MINFO_FUNCTION(zlib);
 PHP_FUNCTION(gzopen);
 PHP_FUNCTION(gzclose);
