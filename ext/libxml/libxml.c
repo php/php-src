@@ -31,6 +31,7 @@
 #include "zend_variables.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 
 #if HAVE_LIBXML
 
@@ -110,7 +111,6 @@ int php_libxml_streams_IO_match_wrapper(const char *filename)
 void *php_libxml_streams_IO_open_wrapper(const char *filename)
 {
 	char resolved_path[MAXPATHLEN + 1];
-	int file_exist;
 	php_stream_statbuf ssbuf;
 	php_stream_context *context = NULL;
 	php_stream_wrapper *wrapper = NULL;
