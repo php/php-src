@@ -304,7 +304,7 @@ PHP_FUNCTION(iptcembed)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
-	unsigned int length, inx, len, inheader, tagsfound;
+	unsigned int length, inx, len, tagsfound;
 	unsigned char *buffer;
 	unsigned char recnum, dataset;
 	unsigned char key[ 16 ];
@@ -319,7 +319,6 @@ PHP_FUNCTION(iptcparse)
 	length = Z_STRLEN_PP(str);
 	buffer = Z_STRVAL_PP(str);
 
-	inheader = 0; /* have we already found the IPTC-Header??? */
 	tagsfound = 0; /* number of tags already found */
 
 	while (inx < length) { /* find 1st tag */
