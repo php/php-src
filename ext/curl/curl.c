@@ -55,7 +55,7 @@ php_curl_globals curl_globals;
 
 static int le_curl;
 
-static void _php_curl_close(php_curl *);
+static void _php_curl_close(zend_rsrc_list_entry *rsrc);
 #define SAVE_CURL_ERROR(__handle, __err) \
 	__handle->cerrno = (int)__err;
 
@@ -266,6 +266,7 @@ PHP_MINIT_FUNCTION(curl)
 PHP_MSHUTDOWN_FUNCTION(curl)
 {
 	win32_cleanup();
+	return SUCCESS;
 }
 
 
@@ -309,6 +310,7 @@ PHP_FUNCTION(curl_init)
 
 		urlstr = estrndup(Z_STRVAL_PP(url), Z_STRLEN_PP(url));
 		curl_easy_setopt(curl_handle->cp, CURLOPT_URL, urlstr);
+		efree(urlstr);
 	}
 
 	curl_easy_setopt(curl_handle->cp, CURLOPT_NOPROGRESS, 1);
@@ -509,7 +511,8 @@ PHP_FUNCTION(curl_setopt)
 			}
 			break;
 		
-		case CURLOPT_QUOTE: CURLOPT_POSTQUOTE:
+		case CURLOPT_QUOTE: 
+		case CURLOPT_POSTQUOTE:
 		
 			{
 				zval **current;
