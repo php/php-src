@@ -1,3 +1,38 @@
+2004-03-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h:
+      Fix zend_parse_method_parameters_ex() and make it consistant with
+      zend_parse_method_parameters().
+
+2004-03-02  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Fix leaks (although there might be still a problem here).
+
+    * zend_execute.c:
+      - Fix leak (Dmitry)
+
+    * zend_compile.c:
+      - Fix crash in:
+      <?php
+        class Foo {
+          public $attributes=  array();
+      
+          function export() {
+            foreach ($this->attributes as $name => $attr) {
+            }
+          }
+        }
+      
+        $f= new Foo();
+        $f->export();
+      ?>
+
+    * zend_objects.c:
+      - Improve fix for protecting destructor's from exceptions.
+      - I was killing the current exception completely which was wrong.
+
 2004-03-01  Andi Gutmans  <andi@zend.com>
 
     * zend_objects.c:
