@@ -33,11 +33,10 @@
 
 /* {{{ incomplete_class_message
  */
-static void incomplete_class_message(int error_type)
+static void incomplete_class_message(int error_type TSRMLS_DC)
 {
 	char buf[1024];
 	char *class_name = NULL;
-	TSRMLS_FETCH();
 
 	if(EG(This)) {
 		class_name = php_lookup_class_name(EG(This), NULL, 0);
@@ -58,7 +57,7 @@ static void incomplete_class_message(int error_type)
  */
 static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS)
 {
-	incomplete_class_message(E_ERROR);
+	incomplete_class_message(E_ERROR TSRMLS_CC);
 }
 /* }}} */
 
@@ -66,7 +65,7 @@ static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS)
  */
 static void incomplete_class_set_property(INTERNAL_FUNCTION_PARAMETERS)
 {
-	incomplete_class_message(E_NOTICE);
+	incomplete_class_message(E_NOTICE TSRMLS_CC);
 }
 /* }}} */
 
@@ -74,7 +73,7 @@ static void incomplete_class_set_property(INTERNAL_FUNCTION_PARAMETERS)
  */
 static void incomplete_class_get_property(INTERNAL_FUNCTION_PARAMETERS)
 {
-	incomplete_class_message(E_NOTICE);
+	incomplete_class_message(E_NOTICE TSRMLS_CC);
 }
 /* }}} */
 
