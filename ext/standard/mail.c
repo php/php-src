@@ -33,16 +33,6 @@
 #include "win32/sendmail.h"
 #endif
 
-function_entry mail_functions[] = {
-	PHP_FE(mail,									NULL)
-	{NULL, NULL, NULL}
-};
-
-zend_module_entry mail_module_entry = {
-	"Sendmail", mail_functions, NULL, NULL, NULL, NULL, PHP_MINFO(mail), STANDARD_MODULE_PROPERTIES
-};
-
-
 #if COMPILE_DL
 DLEXPORT zend_module_entry *get_module(void) { return &odbc_module_entry; }
 #endif

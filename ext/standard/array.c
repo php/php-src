@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Rasmus Lerdorf <rasmus@php.net>                             |
+   |          Andrei Zmievski <andrei@ispi.net>                           |
    +----------------------------------------------------------------------+
  */
 
@@ -51,64 +53,6 @@ php_array_globals array_globals;
 
 #define SORT_DESC		   -1
 #define SORT_ASC		    1
-
-function_entry array_functions[] = {
-	PHP_FE(ksort,									first_arg_force_ref)
-	PHP_FE(krsort,									first_arg_force_ref)
-	PHP_FE(asort,									first_arg_force_ref)
-	PHP_FE(arsort,									first_arg_force_ref)
-	PHP_FE(sort,									first_arg_force_ref)
-	PHP_FE(rsort,									first_arg_force_ref)
-	PHP_FE(usort,									first_arg_force_ref)
-	PHP_FE(uasort,									first_arg_force_ref)
-	PHP_FE(uksort,									first_arg_force_ref)
-	PHP_FE(shuffle,									first_arg_force_ref)
-	PHP_FE(array_walk,								first_arg_force_ref)
-	PHP_FE(count,									first_arg_allow_ref)
-	PHP_FE(end, 									first_arg_force_ref)
-	PHP_FE(prev, 									first_arg_force_ref)
-	PHP_FE(next, 									first_arg_force_ref)
-	PHP_FE(reset, 									first_arg_force_ref)
-	PHP_FE(current, 								first_arg_force_ref)
-	PHP_FE(key, 									first_arg_force_ref)
-	PHP_FE(min,										NULL)
-	PHP_FE(max,										NULL)
-	PHP_FE(in_array,								NULL)
-	PHP_FE(extract,									NULL)
-	PHP_FE(compact,									NULL)
-	PHP_FE(range,									NULL)
-	PHP_FE(array_multisort,							NULL)
-	PHP_FE(array_push,								first_arg_force_ref)
-	PHP_FE(array_pop,								first_arg_force_ref)
-	PHP_FE(array_shift,								first_arg_force_ref)
-	PHP_FE(array_unshift,							first_arg_force_ref)
-	PHP_FE(array_splice,							first_arg_force_ref)
-	PHP_FE(array_slice,								NULL)
-	PHP_FE(array_merge,								NULL)
-	PHP_FE(array_keys,								NULL)
-	PHP_FE(array_values,							NULL)
-	PHP_FE(array_count_values,		 			  	NULL)
-	PHP_FE(array_reverse,							NULL)
-	PHP_FE(array_pad,								NULL)
-	PHP_FE(array_flip,								NULL)
-
-	/* Aliases */
-	PHP_FALIAS(pos,				current,			first_arg_force_ref)
-	PHP_FALIAS(sizeof,			count,				first_arg_allow_ref)
-	
-	{NULL, NULL, NULL}
-};
-
-zend_module_entry array_module_entry = {
-	"Array Functions",			/* extension name */
-	array_functions,			/* function list */
-	PHP_MINIT(array),			/* process startup */
-	PHP_MSHUTDOWN(array),		/* process shutdown */
-	NULL,						/* request startup */
-	NULL,						/* request shutdown */
-	NULL,						/* extension info */
-	STANDARD_MODULE_PROPERTIES
-};
 
 PHP_MINIT_FUNCTION(array)
 {

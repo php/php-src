@@ -51,4 +51,7 @@ configuration-parser.h configuration-parser.c: configuration-parser.y
 configuration-scanner.c: configuration-scanner.l
 	$(LEX) -Pcfg -o$@ -i $<
 
+internal_functions.c: internal_functions.c.in config.status
+	CONFIG_FILES= CONFIG_HEADERS= ./config.status
+
 .NOEXPORT:

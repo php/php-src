@@ -59,9 +59,8 @@ php_basic_globals basic_globals;
 #endif
 
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
-/* uncomment this if/when we actually need it - tired of seeing the warning
+static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
-*/
 ;
 
 typedef struct _php_shutdown_function_entry {
@@ -311,6 +310,177 @@ function_entry basic_functions[] = {
 
 	PHP_FE(parse_ini_file,				NULL)
 
+	/* functions from reg.c */
+	PHP_FE(ereg,									third_argument_force_ref)
+	PHP_FE(ereg_replace,							NULL)
+	PHP_FE(eregi,									third_argument_force_ref)
+	PHP_FE(eregi_replace,							NULL)
+	PHP_FE(split,									NULL)
+	PHP_FALIAS(join,			implode,			NULL)
+	PHP_FE(sql_regcase,								NULL)
+
+	/* functions from dl.c */
+	PHP_FE(dl,							NULL)
+
+	/* functions from file.c */
+	PHP_FE(pclose,				NULL)
+	PHP_FE(popen,				NULL)
+	PHP_FE(readfile,			NULL)
+	PHP_FE(rewind,				NULL)
+	PHP_FE(rmdir,				NULL)
+	PHP_FE(umask,				NULL)
+	PHP_FE(fclose,				NULL)
+	PHP_FE(feof,				NULL)
+	PHP_FE(fgetc,				NULL)
+	PHP_FE(fgets,				NULL)
+	PHP_FE(fgetss,				NULL)
+	PHP_FE(fread,				NULL)
+	PHP_FE(fopen,				NULL)
+	PHP_FE(fpassthru,			NULL)
+	PHP_FE(ftruncate,    		NULL)
+	PHP_FE(fstat,    			NULL)
+	PHP_FE(fseek,				NULL)
+	PHP_FE(ftell,				NULL)
+	PHP_FE(fwrite,				NULL)
+	PHP_FALIAS(fputs,	fwrite,	NULL)
+	PHP_FE(mkdir,				NULL)
+	PHP_FE(rename,				NULL)
+	PHP_FE(copy,				NULL)
+	PHP_FE(tempnam,				NULL)
+	PHP_FE(tmpfile,				NULL)
+	PHP_FE(file,				NULL)
+	PHP_FE(fgetcsv,				NULL)
+    PHP_FE(flock,				NULL)
+	PHP_FE(get_meta_tags,		NULL)
+	/* set_socket_blocking() is deprecated,
+	   use socket_set_blocking() instead */
+	PHP_FE(set_socket_blocking,	NULL)
+	PHP_FE(socket_set_blocking,	NULL)
+#if HAVE_SYS_TIME_H
+	PHP_FE(socket_set_timeout,	NULL)
+#endif
+	PHP_FE(socket_get_status,	NULL)
+	PHP_FE(realpath,			NULL)
+
+	/* functions from fsock.c */
+	PHP_FE(fsockopen, 			third_and_fourth_args_force_ref)
+	PHP_FE(pfsockopen, 			third_and_fourth_args_force_ref)
+
+	/* functions from pack.c */
+	PHP_FE(pack,				NULL)
+	PHP_FE(unpack,				NULL)
+
+	/* functions from browscap.c */
+	PHP_FE(get_browser,			NULL)
+
+	/* functions from crypt.c */
+	PHP_FE(crypt,				NULL)
+
+	/* functions from dir.c */
+	PHP_FE(opendir,				NULL)
+	PHP_FE(closedir,			NULL)
+	PHP_FE(chdir,				NULL)
+	PHP_FE(getcwd,				NULL)
+	PHP_FE(rewinddir,			NULL)
+	PHP_FE(readdir,				NULL)
+	PHP_FALIAS(dir,		getdir,	NULL)
+
+	/* functions from filestat.c */
+	PHP_FE(fileatime,			NULL)
+	PHP_FE(filectime,			NULL)
+	PHP_FE(filegroup,			NULL)
+	PHP_FE(fileinode,			NULL)
+	PHP_FE(filemtime,			NULL)
+	PHP_FE(fileowner,			NULL)
+	PHP_FE(fileperms,			NULL)
+	PHP_FE(filesize,			NULL)
+	PHP_FE(filetype,			NULL)
+	PHP_FE(file_exists,			NULL)
+	PHP_FE(is_writable,			NULL)
+	PHP_FALIAS(is_writeable,	is_writable,		NULL)
+	PHP_FE(is_readable,				NULL)
+	PHP_FE(is_executable,			NULL)
+	PHP_FE(is_file,					NULL)
+	PHP_FE(is_dir,					NULL)
+	PHP_FE(is_link,					NULL)
+	PHP_FE(stat,					NULL)
+	PHP_FE(lstat,					NULL)
+	PHP_FE(chown,					NULL)
+	PHP_FE(chgrp,					NULL)
+	PHP_FE(chmod,					NULL)
+	PHP_FE(touch,					NULL)
+	PHP_FE(clearstatcache,			NULL)
+	PHP_FE(diskfreespace,			NULL)
+
+	/* functions from mail.c */
+	PHP_FE(mail,					NULL)
+
+	/* functions from syslog.c */
+	PHP_FE(openlog,					NULL)
+	PHP_FE(syslog,					NULL)
+	PHP_FE(closelog,				NULL)
+	PHP_FE(define_syslog_variables,	NULL)
+
+	/* functions from lcg.c */
+	PHP_FE(lcg_value, NULL)
+
+	/* functions from metaphone.c */
+	PHP_FE(metaphone, NULL)
+
+	/* functions from output.c */
+	PHP_FE(ob_start,					NULL)
+	PHP_FE(ob_end_flush,				NULL)
+	PHP_FE(ob_end_clean,				NULL)
+	PHP_FE(ob_get_contents,				NULL)
+	PHP_FE(ob_implicit_flush,			NULL)
+
+	/* functions from array.c */
+	PHP_FE(ksort,									first_arg_force_ref)
+	PHP_FE(krsort,									first_arg_force_ref)
+	PHP_FE(asort,									first_arg_force_ref)
+	PHP_FE(arsort,									first_arg_force_ref)
+	PHP_FE(sort,									first_arg_force_ref)
+	PHP_FE(rsort,									first_arg_force_ref)
+	PHP_FE(usort,									first_arg_force_ref)
+	PHP_FE(uasort,									first_arg_force_ref)
+	PHP_FE(uksort,									first_arg_force_ref)
+	PHP_FE(shuffle,									first_arg_force_ref)
+	PHP_FE(array_walk,								first_arg_force_ref)
+	PHP_FE(count,									first_arg_allow_ref)
+	PHP_FE(end, 									first_arg_force_ref)
+	PHP_FE(prev, 									first_arg_force_ref)
+	PHP_FE(next, 									first_arg_force_ref)
+	PHP_FE(reset, 									first_arg_force_ref)
+	PHP_FE(current, 								first_arg_force_ref)
+	PHP_FE(key, 									first_arg_force_ref)
+	PHP_FE(min,										NULL)
+	PHP_FE(max,										NULL)
+	PHP_FE(in_array,								NULL)
+	PHP_FE(extract,									NULL)
+	PHP_FE(compact,									NULL)
+	PHP_FE(range,									NULL)
+	PHP_FE(array_multisort,							NULL)
+	PHP_FE(array_push,								first_arg_force_ref)
+	PHP_FE(array_pop,								first_arg_force_ref)
+	PHP_FE(array_shift,								first_arg_force_ref)
+	PHP_FE(array_unshift,							first_arg_force_ref)
+	PHP_FE(array_splice,							first_arg_force_ref)
+	PHP_FE(array_slice,								NULL)
+	PHP_FE(array_merge,								NULL)
+	PHP_FE(array_keys,								NULL)
+	PHP_FE(array_values,							NULL)
+	PHP_FE(array_count_values,		 			  	NULL)
+	PHP_FE(array_reverse,							NULL)
+	PHP_FE(array_pad,								NULL)
+	PHP_FE(array_flip,								NULL)
+	/* aliases from array.c */
+	PHP_FALIAS(pos,				current,			first_arg_force_ref)
+	PHP_FALIAS(sizeof,			count,				first_arg_allow_ref)
+	
+	/* functions from assert.c */
+	PHP_FE(assert,          NULL)
+	PHP_FE(assert_options,	NULL)
+
 	{NULL, NULL, NULL}
 };
 
@@ -359,8 +529,10 @@ zend_module_entry basic_functions_module = {
 	PHP_MSHUTDOWN(basic),		/* process shutdown */
 	PHP_RINIT(basic),			/* request startup */
 	PHP_RSHUTDOWN(basic),		/* request shutdown */
-	NULL,						/* extension info */
-	STANDARD_MODULE_PROPERTIES
+	PHP_MINFO(basic),			/* extension info */
+	PHP_GINIT(basic),			/* global startup function */
+	NULL,						/* global shutdown function */
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #if defined(HAVE_PUTENV)
@@ -426,6 +598,18 @@ PHP_MINIT_FUNCTION(basic)
 
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
+
+	PHP_MINIT(regex)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(file)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(fsock)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(pack)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(browscap)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(crypt)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(dir)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(syslog)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(array)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(assert)(INIT_FUNC_ARGS_PASSTHRU);
+
 	return SUCCESS;
 }
 
@@ -441,6 +625,13 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 #endif
 
 	UNREGISTER_INI_ENTRIES();
+
+	PHP_MSHUTDOWN(regex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_MSHUTDOWN(fsock)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_MSHUTDOWN(browscap)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_MSHUTDOWN(array)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_MSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+
 	return SUCCESS;	
 }
 
@@ -462,6 +653,12 @@ PHP_RINIT_FUNCTION(basic)
 	}
 #endif
 	BG(user_shutdown_function_names)=NULL;
+
+	PHP_RINIT(head)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_RINIT(filestat)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_RINIT(syslog)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_RINIT(assert)(INIT_FUNC_ARGS_PASSTHRU);
+
 	return SUCCESS;
 }
 
@@ -481,9 +678,30 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	}
 	STR_FREE(BG(locale_string));
 
+	PHP_RSHUTDOWN(fsock)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_RSHUTDOWN(filestat)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_RSHUTDOWN(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_RSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+
 	return SUCCESS;
 }
 
+
+PHP_GINIT_FUNCTION(basic)
+{
+	PHP_GINIT(output)(GINIT_FUNC_ARGS_PASSTHRU);
+
+	return SUCCESS;
+}
+
+
+PHP_MINFO_FUNCTION(basic)
+{
+	PHP_MINFO(regex)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
+	PHP_MINFO(dl)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
+	PHP_MINFO(mail)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
+	PHP_MINFO(assert)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
+}
 
 PHP_FUNCTION(ip2long)
 {

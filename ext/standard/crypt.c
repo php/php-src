@@ -48,16 +48,6 @@ extern char *crypt(char *__key,char *__salt);
 
 #include "php_crypt.h"
 
-function_entry crypt_functions[] = {
-	PHP_FE(crypt,									NULL)
-	{NULL, NULL, NULL}
-};
-
-zend_module_entry crypt_module_entry = {
-	"Crypt", crypt_functions, PHP_MINIT(crypt), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
-};
-
-
 /* 
    The capabilities of the crypt() function is determined by the test programs
    run by configure from aclocal.m4.  They will set PHP_STD_DES_CRYPT,

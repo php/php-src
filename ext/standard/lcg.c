@@ -69,7 +69,7 @@ static void lcg_init_globals(LCGLS_D)
 #endif
 }
 
-static int php_minit_lcg(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(lcg)
 {
 #ifdef ZTS
 	lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
@@ -86,17 +86,3 @@ PHP_FUNCTION(lcg_value)
 	RETURN_DOUBLE(php_combined_lcg());
 }
 /* }}} */
-
-static function_entry lcg_functions[] = {
-	PHP_FE(lcg_value, NULL)
-	{0}
-};
-
-zend_module_entry lcg_module_entry = {
-	"LCG",
-	lcg_functions,
-	php_minit_lcg, NULL,
-	NULL, NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES
-};

@@ -34,9 +34,6 @@
 #ifndef _FILE_H
 #define _FILE_H
 
-extern zend_module_entry file_module_entry;
-#define file_module_ptr &file_module_entry
-
 extern PHP_MINIT_FUNCTION(file);
 
 PHP_FUNCTION(tempnam);
@@ -82,5 +79,4 @@ PHPAPI int php_file_le_fopen(void);
 PHPAPI int php_file_le_socket(void);
 PHPAPI int php_file_le_uploads(void);
 
-#define phpext_file_ptr file_module_ptr
 #endif /* _FILE_H */

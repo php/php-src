@@ -37,25 +37,14 @@
 
 void php_dl(pval *file,int type,pval *return_value);
 
-
 #ifdef HAVE_LIBDL
 
-extern zend_module_entry dl_module_entry;
-#define dl_module_ptr &dl_module_entry
-
 /* dynamic loading functions */
-void dl(INTERNAL_FUNCTION_PARAMETERS);
-extern PHP_MINIT_FUNCTION(dl);
-extern PHP_MSHUTDOWN_FUNCTION(dl);
-extern PHP_RSHUTDOWN_FUNCTION(dl);
+PHP_FUNCTION(dl);
 PHP_MINFO_FUNCTION(dl);
 
 #else
 
-#define dl_module_ptr NULL
-
 #endif
-
-#define phpext_dl_ptr dl_module_ptr
 
 #endif /* _DL_H */

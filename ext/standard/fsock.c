@@ -95,27 +95,6 @@ extern int le_fp;
 #include "build-defs.h"
 #endif
 
-static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
-
-function_entry fsock_functions[] = {
-      PHP_FE(fsockopen, 							third_and_fourth_args_force_ref)
-      PHP_FE(pfsockopen, 							third_and_fourth_args_force_ref)
-      {NULL, NULL, NULL}
-};
-
-
-zend_module_entry fsock_module_entry = {
-	"Socket functions",
-	fsock_functions,
-	PHP_MINIT(fsock),
-	PHP_MSHUTDOWN(fsock),
-	NULL,
-	PHP_RSHUTDOWN(fsock),
-	NULL,
-	STANDARD_MODULE_PROPERTIES
-};
- 
-
 /* {{{ lookup_hostname */
 
 /*

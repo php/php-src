@@ -40,21 +40,11 @@
 #include <sys/param.h>
 #endif
 
-function_entry dl_functions[] = {
-	{"dl",		dl,		NULL},
-	{NULL, NULL, NULL}
-};
-
-
-zend_module_entry dl_module_entry = {
-	"PHP_DL", dl_functions, NULL, NULL, NULL, NULL, PHP_MINFO(dl), STANDARD_MODULE_PROPERTIES
-};
-
 #endif
 
 /* {{{ proto int dl(string extension_filename)
    Load a PHP extension at runtime */
-void dl(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dl)
 {
 	pval **file;
 	PLS_FETCH();
@@ -161,7 +151,7 @@ void php_dl(pval *file,int type,pval *return_value)
 
 PHP_MINFO_FUNCTION(dl)
 {
-	PUTS("Dynamic Library support enabled.\n");
+	PUTS("Dynamic Library support enabled<br>.\n");
 }
 
 #else
@@ -170,6 +160,11 @@ void php_dl(pval *file,int type,pval *return_value)
 {
 	php_error(E_WARNING,"Cannot dynamically load %s - dynamic modules are not supported",file->value.str.val);
 	RETURN_FALSE;
+}
+
+PHP_MINFO_FUNCTION(dl)
+{
+	PUTS("Dynamic Library support not available<br>.\n");
 }
 
 #endif

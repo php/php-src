@@ -29,17 +29,6 @@ static char *lookup_browser_name;
 static pval *found_browser_entry;
 #endif
 
-function_entry browscap_functions[] = {
-	PHP_FE(get_browser,								NULL)
-	{NULL, NULL, NULL}
-};
-
-zend_module_entry browscap_module_entry = {
-	"browscap", browscap_functions, PHP_MINIT(browscap), PHP_MSHUTDOWN(browscap),
-	NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
-};
-
-
 static int browser_reg_compare(zval **browser)
 {
 	pval *browser_name;

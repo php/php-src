@@ -33,7 +33,12 @@ PHPAPI void php_end_implicit_flush();
 PHPAPI char *php_get_output_start_filename();
 PHPAPI int php_get_output_start_lineno();
 
-extern zend_module_entry output_module_entry;
-#define phpext_output_ptr &output_module_entry
+PHP_FUNCTION(ob_start);
+PHP_FUNCTION(ob_end_flush);
+PHP_FUNCTION(ob_end_clean);
+PHP_FUNCTION(ob_get_contents);
+PHP_FUNCTION(ob_implicit_flush);
+
+PHP_GINIT_FUNCTION(output);
 
 #endif /* _OUTPUT_BUFFER */

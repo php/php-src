@@ -24,24 +24,7 @@
 #include "php_string.h"
 #include "reg.h"
 
-unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
-
-function_entry reg_functions[] = {
-	PHP_FE(ereg,									third_argument_force_ref)
-	PHP_FE(ereg_replace,							NULL)
-	PHP_FE(eregi,									third_argument_force_ref)
-	PHP_FE(eregi_replace,							NULL)
-	PHP_FE(split,									NULL)
-	PHP_FALIAS(join,			implode,			NULL)
-	PHP_FE(sql_regcase,								NULL)
-	{NULL, NULL, NULL}
-};
-
-
-static PHP_MINIT_FUNCTION(regex);
-static PHP_MSHUTDOWN_FUNCTION(regex);
-static PHP_MINFO_FUNCTION(regex);
-
+#if 0
 zend_module_entry regexp_module_entry = {
 	"Regular Expressions", 
 	reg_functions, 
@@ -49,6 +32,7 @@ zend_module_entry regexp_module_entry = {
 	NULL, NULL, PHP_MINFO(regex), 
 	STANDARD_MODULE_PROPERTIES
 };
+#endif
 
 #ifdef ZTS
 int reg_globals_id;
@@ -101,7 +85,7 @@ static void php_reg_init_globals(php_reg_globals *reg_globals)
 	zend_hash_init(&reg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_reg_cache, 1);
 }
 
-static PHP_MINIT_FUNCTION(regex)
+PHP_MINIT_FUNCTION(regex)
 {
 #ifdef ZTS
 	reg_globals_id = ts_allocate_id(sizeof(php_reg_globals), (ts_allocate_ctor) php_reg_init_globals, NULL);
@@ -112,7 +96,7 @@ static PHP_MINIT_FUNCTION(regex)
 	return SUCCESS;
 }
 
-static PHP_MSHUTDOWN_FUNCTION(regex)
+PHP_MSHUTDOWN_FUNCTION(regex)
 {
 	REGLS_FETCH();
 
@@ -120,12 +104,12 @@ static PHP_MSHUTDOWN_FUNCTION(regex)
 	return SUCCESS;
 }
 
-static PHP_MINFO_FUNCTION(regex)
+PHP_MINFO_FUNCTION(regex)
 {
 #if HSREGEX
-	PUTS("Bundled regex library enabled\n");
+	PUTS("Bundled regex library enabled<br>\n");
 #else
-	PUTS("System regex library enabled\n");
+	PUTS("System regex library enabled<br>\n");
 #endif
 }
 

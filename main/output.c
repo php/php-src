@@ -64,14 +64,6 @@ int output_globals_id;
 php_output_globals output_globals;
 #endif
 
-
-PHP_FUNCTION(ob_start);
-PHP_FUNCTION(ob_end_flush);
-PHP_FUNCTION(ob_end_clean);
-PHP_FUNCTION(ob_get_contents);
-PHP_FUNCTION(ob_implicit_flush);
-
-
 static void php_output_init_globals(OLS_D)
 {
  	OG(php_body_write) = NULL;
@@ -96,32 +88,6 @@ PHP_GINIT_FUNCTION(output)
 
 	return SUCCESS;
 }
-
-static zend_function_entry php_output_functions[] = {
-	PHP_FE(ob_start,					NULL)
-	PHP_FE(ob_end_flush,				NULL)
-	PHP_FE(ob_end_clean,				NULL)
-	PHP_FE(ob_get_contents,				NULL)
-	PHP_FE(ob_implicit_flush,			NULL)
-	{NULL, NULL, NULL}
-};
-
-PHP_RINIT_FUNCTION(output);
-PHP_RSHUTDOWN_FUNCTION(output);
-
-zend_module_entry output_module_entry = {
-	"PHP_output", 
-	php_output_functions, 
-	NULL,					/* extension-wide startup function */
-	NULL,					/* extension-wide shutdown function */
-	NULL,					/* per-request startup function */
-	NULL,					/* per-request shutdown function */
-	NULL,					/* information function */
-	PHP_GINIT(output),		/* global startup function */
-	NULL,					/* global shutdown function */
-	STANDARD_MODULE_PROPERTIES_EX
-};
-
 
 /* Start output layer */
 PHPAPI void php_output_startup()

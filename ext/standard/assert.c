@@ -53,33 +53,6 @@ php_assert_globals assert_globals;
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
-PHP_MINIT_FUNCTION(assert);
-PHP_MSHUTDOWN_FUNCTION(assert);
-PHP_RINIT_FUNCTION(assert);
-PHP_RSHUTDOWN_FUNCTION(assert);
-PHP_MINFO_FUNCTION(assert);
-
-PHP_FUNCTION(assert);
-PHP_FUNCTION(assert_options);
-
-static zend_function_entry php_assert_functions[] = {
-	PHP_FE(assert,          NULL)
-	PHP_FE(assert_options,	NULL)
-	{NULL, NULL, NULL}
-};
-
-
-zend_module_entry assert_module_entry = {
-	"Assertion", 
-	php_assert_functions, 
-	PHP_MINIT(assert),
-	PHP_MSHUTDOWN(assert),
-	PHP_RINIT(assert),
-	PHP_RSHUTDOWN(assert),
-	PHP_MINFO(assert),
-    STANDARD_MODULE_PROPERTIES
-};
-
 #define ASSERT_ACTIVE       1
 #define ASSERT_CALLBACK     2
 #define ASSERT_BAIL         3
