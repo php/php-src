@@ -2,11 +2,12 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
-- Updated PCRE to use the new high-performance Zend function API (Andrey)
+- Updated preg_split() to allow returning only non-empty pieces (Andrei)
+- Updated PCRE to use the new high-performance Zend function API (Andrei)
 - Updated session, dba, mhash, mcrypt, sysvshm, sysvsem, gettext modules to use
   the new high-performance Zend function API (Sascha)
-- Extended var_dump to handle resource type somewhat (Andrey)
-- Updated WDDX to use the new high-performance Zend function API (Andrey)
+- Extended var_dump to handle resource type somewhat (Andrei)
+- Updated WDDX to use the new high-performance Zend function API (Andrei)
 - Updated XML to use the new high-performance Zend function API. (Thies)
 - Updated Oracle to use the new high-performance Zend function API. (Thies)
 - Improved the performance of the MySQL module significantly by using the new
@@ -20,7 +21,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
   typo in mcal_list_alarms() (Andrew Skalski)
 - Fixed Ora_PLogon (Thies)
 - Resourcified Oracle (Thies)
-- Implemented object serialization/deserialization in WDDX (Andrey)
+- Implemented object serialization/deserialization in WDDX (Andrei)
 - Added krsort() function (Thies)
 - Added func_num_args(), func_get_arg() and func_get_args() for standard
   access to variable number of arguments functions (Zeev)
@@ -28,7 +29,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Added optional allowable_tags arguments to strip_tags(), gzgetss() and
   fgetss() to allow you to specify a string of tags that are not to be
   stripped  (Rasmus)
-- Upgraded var_dump() to take multiple arguments (Andrey)
+- Upgraded var_dump() to take multiple arguments (Andrei)
 - Resourcified XML (Thies)
 - Fixed a memory leak in the Apache per-directory directives handler (Zeev)
 - Added array_count_values() function. (Thies)
@@ -45,9 +46,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Made serialize/unserialize work on classes. If the class is known at 
   unserialize() time, you'll get back a fully working object! (Thies)
 - Reworked preg_* functions according to the new PCRE API, which also made
-  them behave much more like Perl ones (Andrey)
-- Made it possible to specify external location of PCRE library (Andrey)
-- Updated bundled PCRE library to version 2.08 (Andrey)
+  them behave much more like Perl ones (Andrei)
+- Made it possible to specify external location of PCRE library (Andrei)
+- Updated bundled PCRE library to version 2.08 (Andrei)
 - count()/is_array/is_object... speedups. (Thies)
 - OCI8 supports appending and positioning when saving LOBs (Thies)
 - Added metaphone support (Thies)
@@ -60,12 +61,12 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
   tells PHP whether it may expose its existence to the outside world, e.g.
   by adding itself to the Web server header (Zeev)
 - Added support for transparent session id propagation (Sascha)
-- Made WDDX serialize object properties properly (Andrey)
+- Made WDDX serialize object properties properly (Andrei)
 - Fixed WDDX mem leak when undefined variable is passed in
-  for serialization (Andrey)
-- Added session_unset() function (Andrey)
-- Fixed double session globals shutdown crash (Andrey)
-- Fixed crash related to ignore_user_abort ini entry (Andrey)
+  for serialization (Andrei)
+- Added session_unset() function (Andrei)
+- Fixed double session globals shutdown crash (Andrei)
+- Fixed crash related to ignore_user_abort ini entry (Andrei)
 - Added support for external entropy sources for session id creation 
   (on Unices /dev/random and /dev/urandom) (Sascha)
 - Added gpc_globals variable directive to php.ini.  By default it is On, but
@@ -75,7 +76,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
   This allows concurrent use of PHP 3.0 and PHP 4.0 as Apache modules. See
   the end of the INSTALL file for more information.
 - Added second parameter to array_keys which specifies search value
-  for which the key should be returned (Andrey)
+  for which the key should be returned (Andrei)
 - Resourcified Informix driver (Danny)
 - New resource handling for odbc, renamed to php_odbc.[ch]
 - Make set_time_limit() work on Unix (Rasmus)
@@ -97,7 +98,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Added -d switch to the CGI binary that allows overriding php.ini values
   from the command line (Zeev)
 - Fixed a crash that would occur if wddx_deserialize did not receive
-  a valid packet (Andrey)
+  a valid packet (Andrei)
 - Fixed a bugglet when redefining a class at run-time (Andi, Zend library)
 - Fixed sem_get() on AIX (Sascha)
 - Fixed fopen() to work with URL's in Win32 (Andi & Zeev)
@@ -114,7 +115,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Improved speed of uniqid() by using the combined LCG and removing
   the extra usleep() (Sascha)
 - Introduced general combined linear congruential generator (Sascha)
-- Made ldap_close back into an alias for ldap_unbind (Andrey)
+- Made ldap_close back into an alias for ldap_unbind (Andrei)
 - OciFetchInto now resets the returned array in all cases (Thies)
 - Fixed mysql_errno() to work with recent versions of MySQL (Zeev)
 - Fixed a problem with define() and boolean values (Zeev)
@@ -123,7 +124,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Oracle is now ZTS-Safe (Thies)
 - Fixed flushing of cached information to disk in DBA's DB2 module (Sascha)
 - OCI8 is now ZTS-Safe (Thies)
-- Fixed is_writeable/is_writable problem; they are both defined now (Andrey)
+- Fixed is_writeable/is_writable problem; they are both defined now (Andrei)
 - Imported PHP 3.0 diskfreespace() function (Thies)
 - Fixed thread-safety issues in the MySQL module (Zeev)
 - Fixed thread-safe support for dynamic modules (Zeev)
@@ -140,7 +141,7 @@ August 9 1999, Version 4.0 Beta 2
   on using the allow_builtin_links INI directive (Zeev)
 - Changed phpinfo() to list modules that have no info function (Zeev)
 - Modified array_walk() function so that the userland callback is passed
-  a key and possible user data in addition to the value (Andrey)
+  a key and possible user data in addition to the value (Andrei)
 - Fixed ldap_search(), ldap_read() and ldap_list() (Zeev)
 - Fixed Apache information in phpinfo() (sam@breakfree.com)
 - Improved register_shutdown_function() - you may now supply arguments that
@@ -165,7 +166,7 @@ August 9 1999, Version 4.0 Beta 2
 - Fixed runtime inheritance of classes (parent methods/properties were
   overriding their children) (Zeev, Zend library)
 - Fixed backwards incompatibility with the "new" operator (Andi, Zend library)
-- Fixed bugs in uksort() and ksort() sort ordering (Andrey)
+- Fixed bugs in uksort() and ksort() sort ordering (Andrei)
 - Fixed a memory leak when using assignment-op operators with lvalue of type
   string (Zeev, Zend library)
 - Fixed a problem in inheritance from classes that are defined in include()d
@@ -179,18 +180,18 @@ August 9 1999, Version 4.0 Beta 2
 - Fixed a crash problem in switch statements that had a string offset
   as a conditional (Andi & Zeev, Zend library)
 - Imported PHP 3.0 fixes for rand() and mt_rand() (Rasmus)
-- Added function entries for strip_tags() and similar_text() (Andrey)
+- Added function entries for strip_tags() and similar_text() (Andrei)
 - Fixed a bug in WDDX that would cause a crash if a number was passed in
-  instead of a variable name (Andrey)
-- Ported strtotime() function from PHP 3.0 (Andrey)
+  instead of a variable name (Andrei)
+- Ported strtotime() function from PHP 3.0 (Andrei)
 - Merged in gdttf stuff from PHP 3.0 (Sascha)
 - buildconf now checks your installation (Stig)
 - XML module now built dynamically with --with-xml=shared (Stig)
 - Added a check for freetype.h - fixed build on RedHat 6.0 (Zeev)
-- Fixed array_walk() to work in PHP 4.0 (Andrey)
-- Ported all remaining date() format options from PHP 3.0 (Andrey)
-- $php_errormsg now works (Andrey)
-- Added locale support for Perl Compatible Regexp functions (Andrey)
+- Fixed array_walk() to work in PHP 4.0 (Andrei)
+- Ported all remaining date() format options from PHP 3.0 (Andrei)
+- $php_errormsg now works (Andrei)
+- Added locale support for Perl Compatible Regexp functions (Andrei)
 - Informix module ported (Danny)
 - Removed --with-shared-apache (Sascha)
 - Added patch for reverse lookup table in base64_decode (Sascha)
