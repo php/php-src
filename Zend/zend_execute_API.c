@@ -344,6 +344,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	int orig_free_op1, orig_free_op2;
 	int (*orig_unary_op)(zval *result, zval *op1);
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2);
+	zval function_name_copy;
 	ELS_FETCH();
 
 	*retval_ptr_ptr = NULL;
@@ -391,11 +392,16 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		return FAILURE;
 	}
 
+	function_name_copy = *function_name;
+	zval_copy_ctor(&function_name_copy);
+	zend_str_tolower(function_name_copy.value.str.val, function_name_copy.value.str.len);
+
 	original_function_state_ptr = EG(function_state_ptr);
-	zend_str_tolower(function_name->value.str.val, function_name->value.str.len);
-	if (zend_hash_find(function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function_state.function)==FAILURE) {
+	if (zend_hash_find(function_table, function_name_copy.value.str.val, function_name_copy.value.str.len+1, (void **) &function_state.function)==FAILURE) {
+		zval_dtor(&function_name_copy);
 		return FAILURE;
 	}
+	zval_dtor(&function_name_copy);
 
 	for (i=0; i<param_count; i++) {
 		zval *param;
