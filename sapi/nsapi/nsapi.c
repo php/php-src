@@ -708,6 +708,11 @@ static void nsapi_log_message(char *message)
 	log_error(LOG_INFORM, pblock_findval("fn", rc->pb), rc->sn, rc->rq, "%s", message);
 }
 
+static time_t sapi_nsapi_get_request_time(TSRMLS_D)
+{
+	return REQ_TIME( ((nsapi_request_context *)SG(server_context))->rq );
+}
+
 static int php_nsapi_startup(sapi_module_struct *sapi_module)
 {
 	if (php_module_startup(sapi_module, &nsapi_module_entry, 1)==FAILURE) {
@@ -743,7 +748,7 @@ static sapi_module_struct nsapi_sapi_module = {
 
 	sapi_nsapi_register_server_variables,   /* register server variables */
 	nsapi_log_message,                      /* Log message */
-	NULL,									/* Get request time */
+	sapi_nsapi_get_request_time,			/* Get request time */
 
 	NULL,                                   /* Block interruptions */
 	NULL,                                   /* Unblock interruptions */
