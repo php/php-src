@@ -1,6 +1,3 @@
-- Implement an aggregating php function handler for use in SQL statements and
-  triggers etc.
-
 - Add user-space callback for the authorizer function (this is potentially
   very slow, so it needs to be implemented carefully).
 
