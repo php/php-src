@@ -58,7 +58,9 @@
 #include "ext/ftp/php_ftp.h"
 #endif
 #include "ext/standard/reg.h"
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
+#endif
 #if HAVE_UODBC
 #include "ext/odbc/php_odbc.h"
 #endif
@@ -88,43 +90,45 @@
 /* {{{ php_builtin_extensions[]
  */
 zend_module_entry *php_builtin_extensions[] = {
-	phpext_standard_ptr,
-	phpext_pcre_ptr,
+	phpext_standard_ptr
 #if WITH_BCMATH
-	phpext_bcmath_ptr,
+	,phpext_bcmath_ptr
 #endif
 #if HAVE_CALENDAR
-	phpext_calendar_ptr,
+	,phpext_calendar_ptr
 #endif
 #if HAVE_COM
-	phpext_com_ptr,
+	,phpext_com_ptr
 #endif
 #if HAVE_FTP
-	phpext_ftp_ptr,
+	,phpext_ftp_ptr
 #endif
 #if defined(MBSTR_ENC_TRANS)
-	phpext_mbstring_ptr,
+	,phpext_mbstring_ptr
 #endif
 #if HAVE_MYSQL
-	phpext_mysql_ptr,
+	,phpext_mysql_ptr
 #endif
 #if HAVE_UODBC
-	phpext_odbc_ptr,
+	,phpext_odbc_ptr
 #endif
 #if HAVE_OVERLOAD
-  phpext_overload_ptr,
+  ,phpext_overload_ptr
 #endif
-#if HAVE_TOKENIZER
-	phpext_tokenizer_ptr,
-#endif
-#if HAVE_LIBEXPAT
-	phpext_xml_ptr,
-#endif
-#if HAVE_LIBEXPAT && HAVE_WDDX
-	phpext_wddx_ptr,
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+	,phpext_pcre_ptr
 #endif
 #if HAVE_SESSION
-	phpext_session_ptr
+	,phpext_session_ptr
+#endif
+#if HAVE_TOKENIZER
+	,phpext_tokenizer_ptr
+#endif
+#if HAVE_LIBEXPAT
+	,phpext_xml_ptr
+#endif
+#if HAVE_LIBEXPAT && HAVE_WDDX
+	,phpext_wddx_ptr
 #endif
 };
 /* }}} */
