@@ -26,6 +26,7 @@
 #include "pi3web_sapi.h"
 #include "php.h"
 #include "php_main.h"
+#include "php_variables.h"
 #include "SAPI.h"
 #include "php_globals.h"
 #include "ext/standard/info.h"
