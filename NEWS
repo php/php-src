@@ -1,27 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-<<<<<<< NEWS
-<<<<<<< NEWS
-<<<<<<< NEWS
 - If possible set Content-Length header in zlib.output_compression mode. (thies)
-- added session_set_userdata() which enables you to specify one variable
-  that will be kept in the browser in addition to the session-id. This
-  only works when using trans-sid sessions (no cookie). (thies)
-- Major update of domxml, new functions, better DOM compliance (Uwe)
-=======
+- Added session_set_userdata() which enables you to specify one variable that
+  will be kept in the browser in addition to the session-id.
+  Note: This only works with trans-sid sessions (no cookie). (thies)
 - Major update of domxml. New functions and better DOM compliance. (Uwe)
->>>>>>> 1.954
-=======
-- Changed the short_open_tag default to 'Off' in php.ini-dist and 
-  php.ini-recommended. (Jani)
-
-- Major update of domxml. New functions and better DOM compliance. (Uwe)
->>>>>>> 1.955
-=======
-
-- Major update of domxml. New functions and better DOM compliance. (Uwe)
->>>>>>> 1.956
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
 - Made the mbstring extension enabled by default. (Yasuo)
