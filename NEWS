@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   . Added ibase_num_rows()
   . Added ibase_num_params()
   . Added ibase_param_info()
+  . Added ibase_wait_event()
+  . Added ibase_set_event_handler()
 - Added misc. new functions:
   . pg_version(). (Marcus)
   . dbase_get_header_info(). (Zak)
