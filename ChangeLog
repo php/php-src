@@ -1,3 +1,100 @@
+2004-01-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/libsqlite/src/sqlite.w32.h:
+      update file for win32 build
+
+2004-01-16  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/simplexml/tests/profile04.phpt
+      ext/simplexml/tests/profile05.phpt
+      ext/simplexml/tests/profile06.phpt
+      ext/simplexml/tests/profile07.phpt
+      ext/simplexml/tests/profile10.phpt
+      ext/simplexml/tests/profile11.phpt:
+      update the profile of how namespaces should work after discussions with
+      shane and rob richards.  there were a lot of race conditions with regards
+      to the way namespaces have been handled in XML documents so far, this new
+      method removes the race conditions, and gives me a real reason to add the
+      children() and attributes() methods.
+
+2004-01-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      ZendEngine2/zend_reflection_api.c:
+      - Fixed bug #26640 (__autoload() not invoked by Reflection classes)
+      
+
+2004-01-16  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/simplexml/tests/profile01.phpt
+      ext/simplexml/tests/profile02.phpt
+      ext/simplexml/tests/profile03.phpt
+      ext/simplexml/tests/profile04.phpt
+      ext/simplexml/tests/profile05.phpt
+      ext/simplexml/tests/profile06.phpt
+      ext/simplexml/tests/profile07.phpt
+      ext/simplexml/tests/profile08.phpt
+      ext/simplexml/tests/profile09.phpt
+      ext/simplexml/tests/profile10.phpt
+      ext/simplexml/tests/profile11.phpt:
+      Add a "profile" of simplexml's expected behaviour in the form of tests.
+      This will be expanded as issues arise and will be a formal definition
+      (in code) of simplexml's behaviour.
+
+2004-01-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/xml/xml.c:
+      MFH: - Fixed bug #26937 (Warning in xml.c)
+
+    * ext/xml/xml.c:
+      Kill warning (bug #26937)
+
+    * tests/lang/bug26640.phpt:
+      Added test case for bug #26640
+
+2004-01-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/TODO:
+      Update TODO
+
+    * EXTENSIONS
+      EXTENSIONS:
+      Added Antony Dovgal as OCI8 maintainer.
+
+    * run-tests.php:
+      Fixed division by zero warning.
+
+2004-01-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * ext/mime_magic/mime_magic.c:
+      Fix the mime_magic.debug option init
+
+2004-01-16  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/CREDITS:
+      Add myself at last =)
+
+2004-01-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/tests/bug26927.phpt:
+      MFH: Fixed Bug #26927 (preg_quote() does not escape \0).
+
+    * ext/pcre/tests/bug26927.phpt:
+      
+      Fixed Bug #26927 (preg_quote() does not escape \0).
+
+    * ext/pcre/php_pcre.c:
+      Fixed Bug #26927 (preg_quote() does not escape \0).
+
 2004-01-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sqlite/sqlite.c

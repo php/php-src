@@ -1,3 +1,9 @@
+2004-01-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_reflection_api.c:
+      - Fixed bug #26640 (__autoload() not invoked by Reflection classes)
+      
+
 2004-01-15  Zeev Suraski  <zeev@zend.com>
 
     * zend.c:
