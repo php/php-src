@@ -461,7 +461,7 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 					char *htmlattr, *str2;
 					int offset;
 					str1 = object;
-					htmlattr = emalloc(strlen(object));
+					htmlattr = emalloc(strlen(object)); /* alloc mem big enough for htmlattr */
 					htmlattr[0] = '\0';
 					offset = 0;
 					while(NULL != (str = strstr(str1, "HtmlAttr="))) {
@@ -469,7 +469,9 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 						str1 = str;
 						while((*str1 != '\n') && (*str1 != '\0'))
 							str1++;
-						if(NULL != (str2 = strchr(str, '='))) {
+						/* Find the '=' in the HTML attr and make sure it is part of the
+						   attr and not somewhere in the objrec. */
+						if((NULL != (str2 = strchr(str, '='))) && (str2 < str1)) {
 							str2++;
 							strncpy(&htmlattr[offset], str, str2 - str);
 							offset = offset + (str2 - str);
