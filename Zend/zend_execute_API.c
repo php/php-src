@@ -680,12 +680,16 @@ void zend_set_timeout(long seconds)
 #	ifdef HAVE_SETITIMER
 	{
 		struct itimerval t_r;		/* timeout requested */
+		sigset_t sigset;
 
 		t_r.it_value.tv_sec = seconds;
 		t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
 		setitimer(ITIMER_PROF, &t_r, NULL);
 		signal(SIGPROF, zend_timeout);
+		sigemptyset(&sigset);
+		sigaddset(&sigset, SIGPROF);
+		sigprocmask(SIG_UNBLOCK,&sigset,NULL);
 	}
 #	endif
 #endif
