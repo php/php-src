@@ -534,7 +534,7 @@ static zval *dbstmt_prop_read(zval *object, zval *member, int type TSRMLS_DC)
 
 	convert_to_string(member);
 
-	if(strcmp(Z_STRVAL_P(member), "queryString")) == 0) {
+	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		MAKE_STD_ZVAL(return_value);
 		ZVAL_STRINGL(return_value, stmt->query_string, stmt->query_stringlen, 1);
 	}
