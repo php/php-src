@@ -55,14 +55,14 @@ char *_php3_gethostbyname(char *name);
    Get the Internet host name corresponding to a given IP address */
 PHP_FUNCTION(gethostbyaddr)
 {
-	pval *arg;
+	pval **arg;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
-	return_value->value.str.val = _php3_gethostbyaddr(arg->value.str.val);
+	return_value->value.str.val = _php3_gethostbyaddr((*arg)->value.str.val);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
 }
@@ -94,14 +94,14 @@ char *_php3_gethostbyaddr(char *ip)
    Get the IP address corresponding to a given Internet host name */
 PHP_FUNCTION(gethostbyname)
 {
-	pval *arg;
+	pval **arg;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
-	return_value->value.str.val = _php3_gethostbyname(arg->value.str.val);
+	return_value->value.str.val = _php3_gethostbyname((*arg)->value.str.val);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
 }
@@ -111,30 +111,30 @@ PHP_FUNCTION(gethostbyname)
    Return a list of IP addresses that a given hostname resolves to. */
 PHP_FUNCTION(gethostbynamel)
 {
-	pval *arg;
+	pval **arg;
 	struct hostent *hp;
 	struct in_addr in;
 	int i;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	hp = gethostbyname(arg->value.str.val);
+	hp = gethostbyname((*arg)->value.str.val);
 	if (hp == NULL || hp->h_addr_list == NULL) {
 #if DEBUG
-		php_error(E_WARNING, "Unable to resolve %s\n", arg->value.str.val);
+		php_error(E_WARNING, "Unable to resolve %s\n", (*arg)->value.str.val);
 #endif
 		return;
 	}
 
 	for (i = 0 ; hp->h_addr_list[i] != 0 ; i++) {
-		memcpy(&in.s_addr, hp->h_addr_list[i], sizeof(in.s_addr));
+		in = *(struct in_addr *) hp->h_addr_list[i];
 		add_next_index_string(return_value, inet_ntoa(in), 1);
 	}
 
@@ -164,7 +164,7 @@ char *_php3_gethostbyname(char *name)
    Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(checkdnsrr)
 {
-	pval *arg1,*arg2;
+	pval **arg1,**arg2;
 	int type,i;
 #ifndef MAXPACKET
 #define MAXPACKET  8192 /* max packet size used internally by BIND */
@@ -173,34 +173,34 @@ PHP_FUNCTION(checkdnsrr)
 	
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParameters(ht, 1, &arg1) == FAILURE) {
+		if (getParametersEx(1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		type = T_MX;
-		convert_to_string(arg1);
+		convert_to_string_ex(arg1);
 		break;
 	case 2:
-		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		if (getParametersEx(2, &arg1, &arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_string(arg1);
-		convert_to_string(arg2);
-		if ( !strcasecmp("A",arg2->value.str.val) ) type = T_A;
-		else if ( !strcasecmp("NS",arg2->value.str.val) ) type = T_NS;
-		else if ( !strcasecmp("MX",arg2->value.str.val) ) type = T_MX;
-		else if ( !strcasecmp("PTR",arg2->value.str.val) ) type = T_PTR;
-		else if ( !strcasecmp("ANY",arg2->value.str.val) ) type = T_ANY;
-		else if ( !strcasecmp("SOA",arg2->value.str.val) ) type = T_SOA;
-		else if ( !strcasecmp("CNAME",arg2->value.str.val) ) type = T_CNAME;
+		convert_to_string_ex(arg1);
+		convert_to_string_ex(arg2);
+		if ( !strcasecmp("A",(*arg2)->value.str.val) ) type = T_A;
+		else if ( !strcasecmp("NS",(*arg2)->value.str.val) ) type = T_NS;
+		else if ( !strcasecmp("MX",(*arg2)->value.str.val) ) type = T_MX;
+		else if ( !strcasecmp("PTR",(*arg2)->value.str.val) ) type = T_PTR;
+		else if ( !strcasecmp("ANY",(*arg2)->value.str.val) ) type = T_ANY;
+		else if ( !strcasecmp("SOA",(*arg2)->value.str.val) ) type = T_SOA;
+		else if ( !strcasecmp("CNAME",(*arg2)->value.str.val) ) type = T_CNAME;
 		else {
-			php_error(E_WARNING,"Type '%s' not supported",arg2->value.str.val);
+			php_error(E_WARNING,"Type '%s' not supported",(*arg2)->value.str.val);
 			RETURN_FALSE;
 		}
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	i = res_search(arg1->value.str.val,C_IN,type,ans,sizeof(ans));
+	i = res_search((*arg1)->value.str.val,C_IN,type,ans,sizeof(ans));
 	if ( i < 0 ) {
 		RETURN_FALSE;
 	}
