@@ -215,9 +215,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		char *hd;
 
 		hd = sapi_get_default_content_type(TSRMLS_C);
-		PHPWRITE("Content-type: ", sizeof("Content-type: ")-1);
-		PHPWRITE(hd, strlen(hd));
-		PHPWRITE("\r\n", 2);
+		PHPWRITE_H("Content-type: ", sizeof("Content-type: ")-1);
+		PHPWRITE_H(hd, strlen(hd));
+		PHPWRITE_H("\r\n", 2);
 		efree(hd);
 	}
 	
