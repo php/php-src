@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = libzlib.la
 LTLIBRARY_SOURCES = zlib.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+

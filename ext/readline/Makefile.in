@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = libreadline.la
 LTLIBRARY_SOURCES = readline.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+

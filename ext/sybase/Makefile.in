@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = libsybase.la
 LTLIBRARY_SOURCES = sybase.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+

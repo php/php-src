@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = libldap.la
 LTLIBRARY_SOURCES = ldap.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+

@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = libmsql.la
 LTLIBRARY_SOURCES = php_msql.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+

@@ -6,3 +6,4 @@ LTLIBRARY_SOURCES = dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c \
 include $(top_srcdir)/build/dynlib.mk
 
 
+
