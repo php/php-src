@@ -33,6 +33,7 @@
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
+#include "zend_object_handlers.h"
 
 void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 {
@@ -575,11 +576,12 @@ static union _zend_function *dbh_method_get(zval *object, char *method_name, int
 {
 	zend_function *fbc;
 	char *lc_method_name;
+	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
 
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
-	if (zend_hash_find(&pdo_dbh_ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
+	if (zend_hash_find(&dbh->ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
 		efree(lc_method_name);
 		return NULL;
 	}
@@ -596,29 +598,25 @@ static int dbh_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 static union _zend_function *dbh_get_ctor(zval *object TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
+ 	static zend_internal_function ctor = {0};
+	ctor.type = ZEND_INTERNAL_FUNCTION;
+	ctor.function_name = "__construct";
+	ctor.scope = pdo_dbh_ce;
+	ctor.handler = ZEND_FN(dbh_constructor);
 
-	if(dbh->ce != pdo_dbh_ce) {
-		return dbh->ce->constructor;
-	} else {
-	 	static zend_internal_function ctor = {0};
-
-		ctor.type = ZEND_INTERNAL_FUNCTION;
-		ctor.function_name = "__construct";
-		ctor.scope = pdo_dbh_ce;
-		ctor.handler = ZEND_FN(dbh_constructor);
-
-		return (union _zend_function*)&ctor;
-	}
+	return (union _zend_function*)&ctor;
 }
 
 static zend_class_entry *dbh_get_ce(zval *object TSRMLS_DC)
 {
-	return pdo_dbh_ce;
+	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
+	return dbh->ce;
 }
 
 static int dbh_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
+	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
+
 	*class_name = estrndup("PDO", sizeof("PDO")-1);
 	*class_name_len = sizeof("PDO")-1;
 	return 0;
@@ -653,6 +651,7 @@ static zend_object_handlers pdo_dbh_object_handlers = {
 	NULL
 };
 
+
 static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 {
 	pdo_dbh_t *dbh = (pdo_dbh_t*)object;
@@ -665,7 +664,9 @@ static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 		/* XXX: don't really free it, just delete the rsrc id */
 		return;
 	}
-
+	if(dbh->properties) {
+		zend_hash_destroy(dbh->properties);
+	}
 	dbh->methods->closer(dbh TSRMLS_CC);
 
 	if (dbh->data_source) {
@@ -689,10 +690,16 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 	dbh = emalloc(sizeof(*dbh));
 	memset(dbh, 0, sizeof(*dbh));
 	dbh->ce = ce;
+	ALLOC_HASHTABLE(dbh->properties);
+	zend_hash_init(dbh->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
 	retval.handle = zend_objects_store_put(dbh, NULL, pdo_dbh_free_storage, NULL TSRMLS_CC);
-	retval.handlers = &pdo_dbh_object_handlers;
-
+	if(ce == pdo_dbh_ce) {
+		retval.handlers = &pdo_dbh_object_handlers;
+	}
+	else {
+		retval.handlers = &std_object_handlers;
+	}
 	return retval;
 }
 
