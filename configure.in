@@ -1113,7 +1113,7 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        output.c )
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
-       plain_wrapper.c userspace.c)
+       plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c)
 
 PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
 PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)

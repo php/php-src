@@ -48,10 +48,6 @@
 #include <fcntl.h>
 #endif
 
-#ifdef HAVE_OPENSSL_EXT
-#include <openssl/err.h>
-#endif
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
@@ -167,84 +163,217 @@ static void php_network_freeaddresses(struct sockaddr **sal)
 /* {{{ php_network_getaddresses
  * Returns number of addresses, 0 for none/error
  */
-static int php_network_getaddresses(const char *host, struct sockaddr ***sal TSRMLS_DC)
+static int php_network_getaddresses(const char *host, struct sockaddr ***sal, char **error_string TSRMLS_DC)
 {
 	struct sockaddr **sap;
 	int n;
+#ifdef HAVE_GETADDRINFO
+	struct addrinfo hints, *res, *sai;
+#else
+	struct hostent *host_info;
+	struct in_addr in;
+#endif
 
 	if (host == NULL) {
 		return 0;
 	}
 
-	{
 #ifdef HAVE_GETADDRINFO
-		struct addrinfo hints, *res, *sai;
+	memset(&hints, '\0', sizeof(hints));
 
-		memset(&hints, '\0', sizeof(hints));
-#  ifdef HAVE_IPV6
-		hints.ai_family = AF_UNSPEC;
-#  else
-		hints.ai_family = AF_INET;
-#  endif
-		if ((n = getaddrinfo(host, NULL, &hints, &res))) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", PHP_GAI_STRERROR(n));
-			return 0;
-		} else if (res == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed (null result pointer)");
-			return 0;
+# ifdef HAVE_IPV6
+	hints.ai_family = AF_UNSPEC;
+# else
+	hints.ai_family = AF_INET;
+# endif
+	
+	if ((n = getaddrinfo(host, NULL, &hints, &res)) || res == NULL) {
+		char *str = res == NULL ? "null result pointer" : PHP_GAI_STRERROR(n);
+
+		if (error_string) {
+			spprintf(error_string, 0, "getaddrinfo: %s", str);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", str);
 		}
+		return 0;
+	}
 
-		sai = res;
-		for (n = 1; (sai = sai->ai_next) != NULL; n++);
-		*sal = emalloc((n + 1) * sizeof(*sal));
-		sai = res;
-		sap = *sal;
-		do {
-			switch (sai->ai_family) {
-#  ifdef HAVE_IPV6
+	sai = res;
+
+	for (n = 1; (sai = sai->ai_next) != NULL; n++) {
+		;
+	}
+		
+	*sal = emalloc((n + 1) * sizeof(*sal));
+	sai = res;
+	sap = *sal;
+	do {
+		switch (sai->ai_family) {
+# if HAVE_IPV6
 			case AF_INET6:
 				*sap = emalloc(sizeof(struct sockaddr_in6));
 				*(struct sockaddr_in6 *)*sap =
 					*((struct sockaddr_in6 *)sai->ai_addr);
 				sap++;
 				break;
-#  endif
+# endif
 			case AF_INET:
 				*sap = emalloc(sizeof(struct sockaddr_in));
 				*(struct sockaddr_in *)*sap =
 					*((struct sockaddr_in *)sai->ai_addr);
 				sap++;
 				break;
-			}
-		} while ((sai = sai->ai_next) != NULL);
-		freeaddrinfo(res);
-#else
-		struct hostent *host_info;
-		struct in_addr in;
-
-		if (!inet_aton(host, &in)) {
-			/* XXX NOT THREAD SAFE
-			 * (but it *is* thread safe under win32)
-			 */
-			host_info = gethostbyname(host);
-			if (host_info == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: gethostbyname failed");
-				return 0;
-			}
-			in = *((struct in_addr *) host_info->h_addr);
 		}
+	} while ((sai = sai->ai_next) != NULL);
+	freeaddrinfo(res);
+#else
 
-		*sal = emalloc(2 * sizeof(*sal));
-		sap = *sal;
-		*sap = emalloc(sizeof(struct sockaddr_in));
-		(*sap)->sa_family = AF_INET;
-		((struct sockaddr_in *)*sap)->sin_addr = in;
-		sap++;
-		n = 1;
-#endif
+	if (!inet_aton(host, &in)) {
+		/* XXX NOT THREAD SAFE
+		 * (but it *is* thread safe under win32)
+		 */
+		host_info = gethostbyname(host);
+		if (host_info == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: gethostbyname failed");
+			return 0;
+		}
+		in = *((struct in_addr *) host_info->h_addr);
 	}
+
+	*sal = emalloc(2 * sizeof(*sal));
+	sap = *sal;
+	*sap = emalloc(sizeof(struct sockaddr_in));
+	(*sap)->sa_family = AF_INET;
+	((struct sockaddr_in *)*sap)->sin_addr = in;
+	sap++;
+	n = 1;
+#endif
+	
 	*sap = NULL;
 	return n;
+}
+/* }}} */
+
+#ifndef O_NONBLOCK
+#define O_NONBLOCK O_NDELAY
+#endif
+
+#if !defined(__BEOS__)
+# define HAVE_NON_BLOCKING_CONNECT 1
+# ifdef PHP_WIN32
+typedef u_long php_non_blocking_flags_t;
+#  define SET_SOCKET_BLOCKING_MODE(sock, save) \
+     save = TRUE; ioctlsocket(sock, FIONBIO, &save)
+#  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
+	 ioctlsocket(sock, FIONBIO, &save)
+# else
+typedef int php_non_blocking_flags_t;
+#  define SET_SOCKET_BLOCKING_MODE(sock, save) \
+	 save = fcntl(sock, F_GETFL, 0); \
+	 fcntl(sock, F_SETFL, save | O_NONBLOCK)
+#  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
+	 fcntl(sock, F_SETFL, save)
+# endif
+#endif
+
+
+
+
+/* Connect to a socket using an interruptible connect with optional timeout.
+ * Optionally, the connect can be made asynchronously, which will implicitly
+ * enable non-blocking mode on the socket.
+ * */
+/* {{{ php_network_connect_socket */
+PHPAPI int php_network_connect_socket(int sockfd,
+		const struct sockaddr *addr,
+		socklen_t addrlen,
+		int asynchronous,
+		struct timeval *timeout,
+		char **error_string,
+		int *error_code)
+{
+#if HAVE_NON_BLOCKING_CONNECT
+	php_non_blocking_flags_t orig_flags;
+	int n;
+	int error = 0;
+	socklen_t len;
+	int ret = 0;
+	fd_set rset;
+	fd_set wset;
+	fd_set eset;
+
+	SET_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
+	
+	if ((n = connect(sockfd, addr, addrlen)) < 0) {
+		error = php_socket_errno();
+
+		if (error_code) {
+			*error_code = error;
+		}
+
+		if (error != EINPROGRESS) {
+			if (error_string) {
+				*error_string = php_socket_strerror(error, NULL, 0);
+			}
+
+			return -1;
+		}
+		if (asynchronous && error == EINPROGRESS) {
+			/* this is fine by us */
+			return 0;
+		}
+	}
+
+	if (n == 0) {
+		goto ok;
+	}
+
+	FD_ZERO(&rset);
+	FD_ZERO(&eset);
+	FD_SET(sockfd, &rset);
+	FD_SET(sockfd, &eset);
+
+	wset = rset;
+
+	if ((n = select(sockfd + 1, &rset, &wset, &eset, timeout)) == 0) {
+		error = ETIMEDOUT;
+	}
+
+	if(FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
+		len = sizeof(error);
+		/*
+		   BSD-derived systems set errno correctly
+		   Solaris returns -1 from getsockopt in case of error
+		   */
+		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
+			ret = -1;
+		}
+	} else {
+		/* whoops: sockfd has disappeared */
+		ret = -1;
+	}
+
+ok:
+	if (!asynchronous) {
+		/* back to blocking mode */
+		RESTORE_SOCKET_BLOCKING_MODE(sockfd, orig_flags);
+	}
+
+	if (error_code) {
+		*error_code = error;
+	}
+
+	if (error && error_string) {
+		*error_string = php_socket_strerror(error, NULL, 0);
+		ret = -1;
+	}
+	return ret;
+#else
+	if (asynchronous) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Asynchronous connect() not supported on this platform");
+	}
+	return connect(sockfd, addr, addrlen);
+#endif
 }
 /* }}} */
 
@@ -254,13 +383,8 @@ PHPAPI int php_connect_nonb(int sockfd,
 						socklen_t addrlen,
 						struct timeval *timeout)
 {
-	/* probably won't work on Win32, someone else might try it (read: fix it ;) */
-
 #if (!defined(__BEOS__) && !defined(PHP_WIN32)) && (defined(O_NONBLOCK) || defined(O_NDELAY))
 
-#ifndef O_NONBLOCK
-#define O_NONBLOCK O_NDELAY
-#endif
 
 	int flags;
 	int n;
@@ -395,6 +519,144 @@ PHPAPI int php_connect_nonb_win32(SOCKET sockfd,
 /* }}} */
 #endif
 
+/* {{{ sub_times */
+static inline void sub_times(struct timeval a, struct timeval b, struct timeval *result)
+{
+	result->tv_usec = a.tv_usec - b.tv_usec;
+	if (result->tv_usec < 0L) {
+		a.tv_sec--;
+		result->tv_usec += 1000000L;
+	}
+	result->tv_sec = a.tv_sec - b.tv_sec;
+	if (result->tv_sec < 0L) {
+		result->tv_sec++;
+		result->tv_usec -= 1000000L;
+	}
+}
+/* }}} */
+
+/* Connect to a remote host using an interruptible connect with optional timeout.
+ * Optionally, the connect can be made asynchronously, which will implicitly
+ * enable non-blocking mode on the socket.
+ * Returns the connected (or connecting) socket, or -1 on failure.
+ * */
+
+/* {{{ php_network_connect_socket_to_host */
+int php_network_connect_socket_to_host(const char *host, unsigned short port,
+		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
+		int *error_code
+		TSRMLS_DC)
+{
+	int num_addrs, sock, n, fatal = 0;
+	struct sockaddr **sal, **psal, *sa;
+	struct timeval working_timeout;
+	socklen_t socklen;
+#if HAVE_GETTIMEOFDAY
+	struct timeval limit_time, time_now;
+#endif
+
+	num_addrs = php_network_getaddresses(host, &psal, error_string TSRMLS_CC);
+
+	if (num_addrs == 0) {
+		/* could not resolve address(es) */
+		return -1;
+	}
+
+	if (timeout) {
+		memcpy(&working_timeout, timeout, sizeof(working_timeout));
+#if HAVE_GETTIMEOFDAY
+		gettimeofday(&limit_time, NULL);
+		limit_time.tv_sec += working_timeout.tv_sec;
+		limit_time.tv_usec += working_timeout.tv_usec;
+		if (limit_time.tv_usec >= 1000000) {
+			limit_time.tv_usec -= 1000000;
+			limit_time.tv_sec++;
+		}
+#endif
+	}
+
+	for (sal = psal; !fatal && *sal != NULL; sal++) {
+		sa = *sal;
+
+		/* create a socket for this address */
+		sock = socket(sa->sa_family, socktype, 0);
+
+		if (sock == SOCK_ERR) {
+			continue;
+		}
+
+		switch (sa->sa_family) {
+#if HAVE_GETADDRINFO && HAVE_IPV6
+			case AF_INET6:
+				((struct sockaddr_in6 *)sa)->sin6_family = sa->sa_family;
+				((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
+				socklen = sizeof(struct sockaddr_in6);
+				break;
+#endif
+			case AF_INET:
+				((struct sockaddr_in *)sa)->sin_family = sa->sa_family;
+				((struct sockaddr_in *)sa)->sin_port = htons(port);
+				socklen = sizeof(struct sockaddr_in);
+				break;
+			default:
+				/* Unknown family */
+				sa = NULL;
+		}
+
+		if (sa) {
+			/* make a connection attempt */
+			
+			n = php_network_connect_socket(sock, sa, socklen, asynchronous,
+					timeout ? &working_timeout : NULL,
+					error_string, error_code);
+
+			if (n != SOCK_CONN_ERR) {
+				goto connected;
+			}
+
+			/* adjust timeout for next attempt */
+#if HAVE_GETTIMEOFDAY
+			if (timeout) {
+				gettimeofday(&time_now, NULL);
+
+				if (timercmp(&time_now, &limit_time, >=)) {
+					/* time limit expired; don't attempt any further connections */
+					fatal = 1;
+				} else {
+					/* work out remaining time */
+					sub_times(limit_time, time_now, &working_timeout);
+				}
+			}
+#else
+			if (err == PHP_TIMEOUT_ERROR_VALUE) {
+				/* Don't even bother trying to connect to the next alternative;
+				 * we have no way to determine how long we have already taken
+				 * and it is quite likely that the next attempt will fail too. */
+				fatal = 1;
+			} else {
+				/* re-use the same initial timeout.
+				 * Not the best thing, but in practice it should be good-enough */
+				if (timeout) {
+					memcpy(&working_timeout, timeout, sizeof(working_timeout));
+				}
+			}
+#endif
+		}
+
+		close(sock);
+	}
+	sock = -1;
+
+connected:
+
+	php_network_freeaddresses(psal);
+	
+	return sock;
+}
+/* }}} */
+
+
+
 /* {{{ php_hostconnect
  * Creates a socket of type socktype and connects to the given host and
  * port, returns the created socket on success, else returns -1.
@@ -408,7 +670,7 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, struct 
 	int set_timeout = 0;
 	int err;
 	
-	n = php_network_getaddresses(host, &sal TSRMLS_CC);
+	n = php_network_getaddresses(host, &sal, NULL TSRMLS_CC);
 
 	if (n == 0)
 		return -1;
@@ -546,6 +808,12 @@ int php_sockaddr_size(php_sockaddr_storage *addr)
 }
 /* }}} */
 
+/* Given a socket error code, if buf == NULL:
+ *   emallocs storage for the error message and returns
+ * else
+ *   sprintf message into provided buffer and returns buf
+ */
+/* {{{ php_socket_strerror */
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 {
 #ifndef PHP_WIN32
@@ -589,7 +857,9 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 	return buf;
 #endif
 }
+/* }}} */
 
+/* deprecated */
 PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
@@ -603,7 +873,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *per
 	sock->timeout.tv_usec = 0;
 	sock->socket = socket;
 
-	stream = php_stream_alloc_rel(&php_stream_socket_ops, sock, persistent_id, "r+");
+	stream = php_stream_alloc_rel(&php_stream_generic_socket_ops, sock, persistent_id, "r+");
 	stream->flags |= PHP_STREAM_FLAG_AVOID_BLOCKING;
 
 	if (stream == NULL)	
@@ -615,124 +885,19 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *per
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
 		int socktype, struct timeval *timeout, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
-	int socket;
+	char *res;
+	long reslen;
 	php_stream *stream;
 
-	socket = php_hostconnect(host, port, socktype, timeout TSRMLS_CC);
+	reslen = spprintf(&res, 0, "tcp://%s:%d", host, port);
 
-	if (socket == -1)
-		return NULL;
+	stream = php_stream_xport_create(res, reslen, ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, persistent_id, timeout, NULL, NULL, NULL);
 
-	stream = php_stream_sock_open_from_socket_rel(socket, persistent_id);
-
-	if (stream == NULL)
-		closesocket(socket);
+	efree(res);
 
 	return stream;
 }
-
-PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, const char *persistent_id,
-		struct timeval *timeout STREAMS_DC TSRMLS_DC)
-{
-#if defined(AF_UNIX)
-	int socketd;
-	struct  sockaddr_un unix_addr;
-	php_stream *stream;
-
-	socketd = socket(PF_UNIX, SOCK_STREAM, 0);
-	if (socketd == SOCK_ERR)
-		return NULL;
-
-	memset(&unix_addr, 0, sizeof(unix_addr));
-	unix_addr.sun_family = AF_UNIX;
-
-	/* we need to be binary safe on systems that support an abstract
-	 * namespace */
-	if (pathlen >= sizeof(unix_addr.sun_path)) {
-		/* On linux, when the path begins with a NUL byte we are
-		 * referring to an abstract namespace.  In theory we should
-		 * allow an extra byte below, since we don't need the NULL.
-		 * BUT, to get into this branch of code, the name is too long,
-		 * so we don't care. */
-		pathlen = sizeof(unix_addr.sun_path) - 1;
-	}
-	
-	memcpy(unix_addr.sun_path, path, pathlen);
-
-	if (php_connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), timeout) == SOCK_CONN_ERR) 
-		return NULL;
-
-	stream = php_stream_sock_open_from_socket_rel(socketd, persistent_id);
-	if (stream == NULL)
-		closesocket(socketd);
-	return stream;
-#else
-	return NULL;
-#endif
-}
-
-#if HAVE_OPENSSL_EXT
-PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method, php_stream *session_stream TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	php_netstream_data_t *psock = NULL;
-	SSL_CTX *ctx = NULL;
-
-
-	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: stream is not a network stream");
-		return FAILURE;
-	}
-
-	if (session_stream) {
-		if (!php_stream_is(session_stream, PHP_STREAM_IS_SOCKET)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: session_stream is not a network stream");
-			return FAILURE;
-		}
-		psock = (php_netstream_data_t*)session_stream->abstract;
-	}
-	
-	if (activate == sock->ssl_active)
-		return SUCCESS;	/* already in desired mode */
-	
-	if (activate && sock->ssl_handle == NULL)	{
-		ctx = SSL_CTX_new(method);
-		if (ctx == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: failed to create an SSL context");
-			return FAILURE;
-		}
-
-		sock->ssl_handle = SSL_new(ctx);
-		if (sock->ssl_handle == NULL)	{
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: failed to create an SSL handle");
-			SSL_CTX_free(ctx);
-			return FAILURE;
-		}
-		
-		SSL_set_fd(sock->ssl_handle, sock->socket);
-		
-		if (psock) {
-			SSL_copy_session_id(sock->ssl_handle, psock->ssl_handle);
-		}
-	}
-
-	if (activate)	{
-		if (SSL_connect(sock->ssl_handle) <= 0)	{
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: SSL handshake/connection failed");
-			SSL_shutdown(sock->ssl_handle);
-			return FAILURE;
-		}
-		sock->ssl_active = activate;
-	}
-	else	{
-		SSL_shutdown(sock->ssl_handle);
-		sock->ssl_active = 0;
-	}
-	return SUCCESS;
-}
-
-#endif
-
 
 PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 {
@@ -763,347 +928,6 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 #endif
       return ret;
 }
-
-#if HAVE_OPENSSL_EXT
-static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	int err = SSL_get_error(sock->ssl_handle, nr_bytes);
-	char esbuf[512];
-	char *ebuf = NULL, *wptr = NULL;
-	size_t ebuf_size = 0;
-	unsigned long code;
-	int retry = 1;
-
-	switch(err) {
-		case SSL_ERROR_ZERO_RETURN:
-			/* SSL terminated (but socket may still be active) */
-			retry = 0;
-			break;
-		case SSL_ERROR_WANT_READ:
-		case SSL_ERROR_WANT_WRITE:
-			/* re-negotiation, or perhaps the SSL layer needs more
-			 * packets: retry in next iteration */
-			break;
-		case SSL_ERROR_SYSCALL:
-			if (ERR_peek_error() == 0) {
-				if (nr_bytes == 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING,
-							"SSL: fatal protocol error");
-					stream->eof = 1;
-					retry = 0;
-				} else {
-					char *estr = php_socket_strerror(php_socket_errno(), NULL, 0);
-
-					php_error_docref(NULL TSRMLS_CC, E_WARNING,
-							"SSL: %s", estr);
-
-					efree(estr);
-					retry = 0;
-				}
-				break;
-			}
-			/* fall through */
-		default:
-			/* some other error */
-			while ((code = ERR_get_error()) != 0) {
-				/* allow room for a NUL and an optional \n */
-				if (ebuf) {
-					esbuf[0] = '\n';
-					esbuf[1] = '\0';
-					ERR_error_string_n(code, esbuf + 1, sizeof(esbuf) - 2);
-				} else {
-					esbuf[0] = '\0';
-					ERR_error_string_n(code, esbuf, sizeof(esbuf) - 1);
-				}
-				code = strlen(esbuf);
-				esbuf[code] = '\0';
-
-				ebuf = erealloc(ebuf, ebuf_size + code + 1);
-				if (wptr == NULL) {
-					wptr = ebuf;
-				}	
-
-				/* also copies the NUL */
-				memcpy(wptr, esbuf, code + 1);
-				wptr += code;
-			}
-
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-					"SSL operation failed with code %d.%s%s",
-					err,
-					ebuf ? "OpenSSL Error messages:\n" : "",
-					ebuf ? ebuf : "");
-				
-			retry = 0;
-	}
-	return retry;
-}
-#endif
-
-
-
-static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	size_t didwrite;
-	
-#if HAVE_OPENSSL_EXT
-	if (sock->ssl_active) {
-		int retry = 1;
-
-		do {
-			didwrite = SSL_write(sock->ssl_handle, buf, count);
-
-			if (didwrite <= 0) {
-				retry = handle_ssl_error(stream, didwrite TSRMLS_CC);
-			} else {
-				break;
-			}
-		} while(retry);
-		
-	} else
-#endif
-	{
-		didwrite = send(sock->socket, buf, count, 0);
-	
-		if (didwrite <= 0) {
-			char *estr = php_socket_strerror(php_socket_errno(), NULL, 0);
-			
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %d bytes failed with errno=%d %s",
-					count, php_socket_errno(), estr);
-			efree(estr);
-		}
-	}
-	
-	if (didwrite > 0)
-		php_stream_notify_progress_increment(stream->context, didwrite, 0);
-
-	return didwrite;
-}
-
-#if ZEND_DEBUG && DEBUG_MAIN_NETWORK
-static inline void dump_sock_state(char *msg, php_netstream_data_t *sock TSRMLS_DC)
-{
-	printf("%s: blocked=%d timeout_event=%d eof=%d inbuf=%d timeout=%d\n", msg, sock->is_blocked, sock->timeout_event, sock->eof, TOREAD(sock), sock->timeout);
-}
-# define DUMP_SOCK_STATE(msg, sock)	dump_sock_state(msg, sock TSRMLS_CC)
-#else
-# define DUMP_SOCK_STATE(msg, sock)	/* nothing */
-#endif
-
-static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
-{
-	fd_set fdr, tfdr;
-	int retval;
-	struct timeval timeout, *ptimeout;
-
-	FD_ZERO(&fdr);
-	FD_SET(sock->socket, &fdr);
-	sock->timeout_event = 0;
-
-	if (sock->timeout.tv_sec == -1)
-		ptimeout = NULL;
-	else
-		ptimeout = &timeout;
-
-	
-	while(1) {
-		tfdr = fdr;
-		timeout = sock->timeout;
-
-DUMP_SOCK_STATE("wait_for_data", sock);
-
-		retval = select(sock->socket + 1, &tfdr, NULL, NULL, ptimeout);
-
-		if (retval == 0)
-			sock->timeout_event = 1;
-
-		if (retval >= 0)
-			break;
-	}
-DUMP_SOCK_STATE("wait_for_data: done", sock);
-}
-
-static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	size_t nr_bytes = 0;
-
-#if HAVE_OPENSSL_EXT
-	if (sock->ssl_active) {
-		int retry = 1;
-
-		do {
-			nr_bytes = SSL_read(sock->ssl_handle, buf, count);
-
-			if (nr_bytes <= 0) {
-				retry = handle_ssl_error(stream, nr_bytes TSRMLS_CC);
-				if (retry == 0 && !SSL_pending(sock->ssl_handle)) {
-					stream->eof = 1;
-				}
-			} else {
-				/* we got the data */
-				break;
-			}
-		} while (retry);
-	}
-	else
-#endif
-	{
-		if (sock->is_blocked) {
-			php_sock_stream_wait_for_data(stream, sock TSRMLS_CC);
-			if (sock->timeout_event)
-				return 0;
-		}
-
-		nr_bytes = recv(sock->socket, buf, count, 0);
-
-		if (nr_bytes == 0 || (nr_bytes == -1 && php_socket_errno() != EWOULDBLOCK)) {
-			stream->eof = 1;
-		}
-	}
-
-	if (nr_bytes > 0)
-		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
-
-	return nr_bytes;
-}
-
-
-static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	fd_set wrfds, efds;
-	int n;
-	struct timeval timeout;
-
-	if (close_handle) {
-#if HAVE_OPENSSL_EXT
-		if (sock->ssl_active) {
-			SSL_shutdown(sock->ssl_handle);
-			sock->ssl_active = 0;
-		}
-		if (sock->ssl_handle) {
-			SSL_free(sock->ssl_handle);
-			sock->ssl_handle = NULL;
-		}
-#endif
-
-		/* prevent more data from coming in */
-		shutdown(sock->socket, SHUT_RD);
-
-		/* try to make sure that the OS sends all data before we close the connection.
-		 * Essentially, we are waiting for the socket to become writeable, which means
-		 * that all pending data has been sent.
-		 * We use a small timeout which should encourage the OS to send the data,
-		 * but at the same time avoid hanging indefintely.
-		 * */
-		do {
-			FD_ZERO(&wrfds);
-			FD_SET(sock->socket, &wrfds);
-			efds = wrfds;
-
-			timeout.tv_sec = 0;
-			timeout.tv_usec = 5000; /* arbitrary */
-		
-			n = select(sock->socket + 1, NULL, &wrfds, &efds, &timeout);
-		} while (n == -1 && php_socket_errno() == EINTR);
-		
-		closesocket(sock->socket);
-
-	}
-
-	pefree(sock, php_stream_is_persistent(stream));
-	
-	return 0;
-}
-
-static int php_sockop_flush(php_stream *stream TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	return fsync(sock->socket);
-}
-
-static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	return fstat(sock->socket, &ssb->sb);
-}
-
-static int php_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
-{
-	int oldmode;
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-
-	switch(option) {
-		case PHP_STREAM_OPTION_BLOCKING:
-	
-			oldmode = sock->is_blocked;
-	
-			/* no need to change anything */
-			if (value == oldmode)
-				return oldmode;
-	
-			if (SUCCESS == php_set_sock_blocking(sock->socket, value TSRMLS_CC)) {
-				sock->is_blocked = value;
-				return oldmode;
-			}
-
-			return PHP_STREAM_OPTION_RETURN_ERR;
-
-		case PHP_STREAM_OPTION_READ_TIMEOUT:
-			sock->timeout = *(struct timeval*)ptrparam;
-			sock->timeout_event = 0;
-			return PHP_STREAM_OPTION_RETURN_OK;
-
-		default:
-			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
-	}
-}
-
-static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-
-	switch(castas)	{
-		case PHP_STREAM_AS_STDIO:
-#if HAVE_OPENSSL_EXT
-			if (sock->ssl_active)
-				return FAILURE;
-#endif
-			if (ret)	{
-				*ret = fdopen(sock->socket, stream->mode);
-				if (*ret)
-					return SUCCESS;
-				return FAILURE;
-			}
-			return SUCCESS;
-		case PHP_STREAM_AS_FD:
-		case PHP_STREAM_AS_SOCKETD:
-#if HAVE_OPENSSL_EXT
-			if (sock->ssl_active)
-				return FAILURE;
-#endif
-			if (ret)
-				*ret = (void*)sock->socket;
-			return SUCCESS;
-		default:
-			return FAILURE;
-	}
-}
-
-php_stream_ops php_stream_socket_ops = {
-	php_sockop_write, php_sockop_read,
-	php_sockop_close, php_sockop_flush,
-	"socket",
-	NULL, /* seek */
-	php_sockop_cast,
-	php_sockop_stat,
-	php_sockop_set_option,
-};
-
-
 
 
 /*

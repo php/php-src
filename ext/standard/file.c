@@ -647,6 +647,7 @@ PHP_FUNCTION(stream_get_meta_data)
 	
 	add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
 	
+#if 0
 	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
 		php_netstream_data_t *sock = PHP_NETSTREAM_DATA_FROM_STREAM(stream);
 
@@ -654,10 +655,13 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_bool(return_value, "blocked", sock->is_blocked);
 		add_assoc_bool(return_value, "eof", stream->eof);
 	} else {
+#endif
 		add_assoc_bool(return_value, "timed_out", 0);
 		add_assoc_bool(return_value, "blocked", 1);
 		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
+#if 0
 	}
+#endif
 
 }
 /* }}} */
@@ -2237,7 +2241,7 @@ PHP_FUNCTION(unlink)
 }
 /* }}} */
 
-/* {{{ proto int ftruncate(resource fp, int size)
+/* {{{ proto bool ftruncate(resource fp, int size)
    Truncate file to 'size' length */
 PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
@@ -2254,15 +2258,12 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 
 	convert_to_long_ex(size);
 
-	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate sockets!");
+	if (!php_stream_truncate_supported(stream)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate this stream!");
 		RETURN_FALSE;
 	}
-	if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
-		ret = ftruncate(fd, Z_LVAL_PP(size));
-		RETURN_LONG(ret + 1);
-	}
-	RETURN_FALSE;
+	
+	RETURN_BOOL(0 == php_stream_truncate_set_size(stream, Z_LVAL_PP(size)));
 }
 /* }}} */
 

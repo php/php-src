@@ -32,6 +32,9 @@
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
 
 #include "php_streams_int.h"
 
@@ -135,11 +138,16 @@ typedef struct {
 	int fd;					/* underlying file descriptor */
 	int is_process_pipe;	/* use pclose instead of fclose */
 	int is_pipe;			/* don't try and seek */
-	int lock_flag;		/* stores the lock state */
+	int lock_flag;			/* stores the lock state */
 	char *temp_file_name;	/* if non-null, this is the path to a temporary file that
 							 * is to be deleted when the stream is closed */
 #if HAVE_FLUSHIO
 	char last_op;
+#endif
+
+#if HAVE_MMAP
+	char *last_mapped_addr;
+	size_t last_mapped_len;
 #endif
 } php_stdio_stream_data;
 
@@ -348,6 +356,13 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	assert(data != NULL);
+
+#if HAVE_MMAP
+	if (data->last_mapped_addr) {
+		munmap(data->last_mapped_addr, data->last_mapped_len);
+		data->last_mapped_addr = NULL;
+	}
+#endif
 	
 	if (close_handle) {
 		if (data->lock_flag != LOCK_UN) {
@@ -572,8 +587,76 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 			}
 			break;
 
+		case PHP_STREAM_OPTION_MMAP_API:
+#if HAVE_MMAP
+			{
+				php_stream_mmap_range *range = (php_stream_mmap_range*)ptrparam;
+				struct stat sbuf;
+				int prot, flags;
+				
+				switch (value) {
+					case PHP_STREAM_MMAP_SUPPORTED:
+						return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
+
+					case PHP_STREAM_MMAP_MAP_RANGE:
+						fstat(fd, &sbuf);
+						if (range->length == 0 || range->length > sbuf.st_size) {
+							range->length = sbuf.st_size;
+						}
+						switch (range->mode) {
+							case PHP_STREAM_MAP_MODE_READONLY:
+								prot = PROT_READ;
+								flags = MAP_PRIVATE;
+								break;
+							case PHP_STREAM_MAP_MODE_READWRITE:
+								prot = PROT_READ | PROT_WRITE;
+								flags = MAP_PRIVATE;
+								break;
+							case PHP_STREAM_MAP_MODE_SHARED_READONLY:
+								prot = PROT_READ;
+								flags = MAP_SHARED;
+								break;
+							case PHP_STREAM_MAP_MODE_SHARED_READWRITE:
+								prot = PROT_READ | PROT_WRITE;
+								flags = MAP_SHARED;
+								break;
+							default:
+								return PHP_STREAM_OPTION_RETURN_ERR;
+						}
+						range->mapped = (char*)mmap(NULL, range->length, prot, flags, fd, range->offset);
+						if (range->mapped == (char*)MAP_FAILED) {
+							range->mapped = NULL;
+							return PHP_STREAM_OPTION_RETURN_ERR;
+						}
+						/* remember the mapping */
+						data->last_mapped_addr = range->mapped;
+						data->last_mapped_len = range->length;
+						return PHP_STREAM_OPTION_RETURN_OK;
+
+					case PHP_STREAM_MMAP_UNMAP:
+						if (data->last_mapped_addr) {
+							munmap(data->last_mapped_addr, data->last_mapped_len);
+							data->last_mapped_addr = NULL;
+
+							return PHP_STREAM_OPTION_RETURN_OK;
+						}
+						return PHP_STREAM_OPTION_RETURN_ERR;
+				}
+			}
+#endif
+			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
+
+		case PHP_STREAM_OPTION_TRUNCATE_API:
+			switch (value) {
+				case PHP_STREAM_TRUNCATE_SUPPORTED:
+					return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
+
+				case PHP_STREAM_TRUNCATE_SET_SIZE:
+					return ftruncate(fd, *(size_t*)ptrparam) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+			}
+			
 		default:
-			return -1;
+			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
 }
 
@@ -588,6 +671,7 @@ PHPAPI php_stream_ops	php_stream_stdio_ops = {
 };
 /* }}} */
 
+/* {{{ plain files opendir/readdir implementation */
 static size_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	DIR *dir = (DIR*)stream->abstract;
@@ -658,7 +742,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, char 
 		
 	return stream;
 }
-
+/* }}} */
 
 
 static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, char *path, char *mode,

@@ -40,10 +40,6 @@
 PHP_FUNCTION(fsockopen);
 PHP_FUNCTION(pfsockopen);
 
-PHPAPI int php_lookup_hostname(const char *addr, struct in_addr *in);
-
-PHP_RSHUTDOWN_FUNCTION(fsock);
-
 /*
  * Local variables:
  * tab-width: 4
