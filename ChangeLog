@@ -1,3 +1,111 @@
+2000-09-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/main.c: - Fixed missing parameter in php_atoi
+
+2000-09-09  Stig Venaas  <venaas@uninett.no>
+
+    * main/fopen-wrappers.c:
+    Added IPv6 support to php_fopen_url_wrap_ftp (EPSV and php_hostconnect())
+
+2000-09-09  David Croft  <david@infotrek.co.uk>
+
+    * NEWS: fix typo
+
+2000-09-09  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS
+
+2000-09-09  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c: check the range of message numbers in imap_uid.
+
+2000-09-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix attribution.
+
+2000-09-09  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS
+
+    * main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/php_globals.h
+      main/php_ini.c
+      main/php_ini.h
+      main/rfc1867.c
+      php.ini-optimized
+      php.ini-dist: More security-related (control) patches:
+    - Avoid displaying errors during startup, unless display_startup_errors is enabled.
+    - Implemented post_size_max limit.  Defaults to 8MB.
+    - Implemented file_uploads on/off directive (defaults to on).
+
+2000-09-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/config.m4: - Fix for bug #6586
+
+2000-09-09  Stig Venaas  <venaas@uninett.no>
+
+    * configure.in:
+    More restrictive getaddrinfo check, better not find it than breaking builds
+
+2000-09-09  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/file.c: Fix UNIX build
+
+    * configure.in: Check for mkstemp()
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/swf/swf.c
+      main/SAPI.c
+      main/rfc1867.c
+      main/rfc1867.h: Security related updates:
+    - Introduce php_open_temporary_file(), in place of tempnam().  Still
+      needs testing under UNIX (mkstemp()), works reliably under Windows now.
+    - Reimplement the mechanism for unlinking uploaded files at the end of the request
+      (was it ever tested?).  Files moved with move_uploaded_file() will not be unlink()'d
+      again, to avoid (albeit very unlikely) race conditions.
+
+2000-09-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    Fixed #6627. Wrong logic...
+
+2000-09-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/.cvsignore
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php
+      pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/DB/tests/db_factory.phpt
+      pear/DB/tests/db_parsedsn.phpt
+      pear/PEAR.php.in
+      pear/tests/DB_Error.phpt
+      pear/tests/DB_factory.phpt
+      pear/tests/DB_parseDSN.phpt
+      pear/tests/pear1.phpt
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error2.phpt
+      pear/tests/pear_error_callback.phpt:    Added a more configurable error reporting interface to DB.
+    Also added some more tests, and moved the DB tests to pear/DB/tests.
+
+    * ext/standard/file.c: * compile fix
+
+    * run-tests.php:
+    * don't require "POST" section to be present (TEST, FILE and EXPECT
+      are enough)
+
 2000-09-08  Zeev Suraski  <zeev@zend.com>
 
     * ext/standard/basic_functions.c
