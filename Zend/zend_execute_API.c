@@ -1057,8 +1057,6 @@ void zend_unset_timeout(TSRMLS_D)
 zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
 {
 	zend_class_entry **pce;
-	zend_class_entry *ce = NULL;
-	zend_bool free_class_name = 0;
 
 check_fetch_type:
 	switch (fetch_type) {
