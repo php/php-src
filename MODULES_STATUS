@@ -8,4 +8,6 @@ DBA					Not yet ported
 mcrypt				Working
 mhash				Working
 dbase				Working
-aspell              Working
+aspell				Working
+imap				Working
+ldap				Untested
