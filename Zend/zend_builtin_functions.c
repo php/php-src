@@ -804,7 +804,7 @@ ZEND_FUNCTION(get_declared_classes)
 
 #define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
 
-/* {{ proto string lambda(string args, string code)
+/* {{{ proto string lambda(string args, string code)
    Creates an anonymous function, and returns its name (funny, eh?) */
 ZEND_FUNCTION(lambda)
 {
