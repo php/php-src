@@ -974,6 +974,9 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC)==SUCCESS) {
 				if (retval) {
+					if (Z_TYPE_P(retval) != IS_NULL && !zend_is_true(retval)) {
+						zend_error_cb(type, error_filename, error_lineno, format, args);
+					}
 					zval_ptr_dtor(&retval);
 				}
 			} else {
