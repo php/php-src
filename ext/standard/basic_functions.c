@@ -1569,6 +1569,8 @@ PHP_FUNCTION(call_user_func_array)
     convert_to_string_ex(func_name);
     
     params_ar = HASH_OF(*params);
+    if (!params_ar)
+      php_error(E_ERROR, "Second argument is empty or not an array.");
     num_elems = zend_hash_num_elements(params_ar);
     
     func_args = (zval ***)emalloc(sizeof(zval **) * num_elems);
