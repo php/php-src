@@ -20,22 +20,16 @@
 /* $Id$ */
 #define IS_EXT_MODULE
 #if COMPILE_DL
-#ifdef PHP_31
-# include "../phpdl.h"
-#else
-# ifdef THREAD_SAFE
-# undef THREAD_SAFE
-# endif
 # include "dl/phpdl.h"
 #endif
-#endif
 
-#if 0
+#if 1
 
 #include "php.h"
 #include "php_globals.h"
 #include "safe_mode.h"
 #include "fopen-wrappers.h"
+#include "ext/standard/flock_compat.h" 
 
 #include <stdlib.h>
 #include <string.h>
