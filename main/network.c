@@ -515,7 +515,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent 
 
 	sock->is_blocked = 1;
 	sock->chunk_size = FG(def_chunk_size);
-	sock->timeout.tv_sec = -1;
+	sock->timeout.tv_sec = 60;
 	sock->socket = socket;
 
 	stream = php_stream_alloc_rel(&php_stream_socket_ops, sock, persistent, "r+");
