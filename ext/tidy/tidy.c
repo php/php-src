@@ -28,15 +28,20 @@
 #include "php_tidy.h"
 #include "Zend/zend_API.h"
 #include "Zend/zend_hash.h"
+#include "safe_mode.h"
+
+#ifdef ZEND_ENGINE_2
 #include "zend_objects_API.h"
 #include "zend_objects.h"
 #include "zend_operators.h"
-#include "safe_mode.h"
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(tidy);
 
 static int le_tidydoc;
 #define le_tidydoc_name "Tidy Document"
+
+#ifdef ZEND_ENGINE_2
 
 zend_class_entry *php_tidy_ce;
 
@@ -63,17 +68,18 @@ static zend_object_handlers php_tidy_object_handlers = {
 	tidy_object_cast
 };
 
+#endif
 
 function_entry tidy_functions[] = {
 	PHP_FE(tidy_create,	        	NULL)
-	PHP_FE(tidy_setopt,             	NULL)
-	PHP_FE(tidy_getopt,             	NULL)
-	PHP_FE(tidy_parse_string,       	NULL)
-	PHP_FE(tidy_parse_file,         	NULL)
-	PHP_FE(tidy_get_output,         	NULL)
-	PHP_FE(tidy_get_error_buffer,   	NULL)
-	PHP_FE(tidy_clean_repair,       	NULL)
-	PHP_FE(tidy_diagnose,           	NULL)
+	PHP_FE(tidy_setopt,             NULL)
+	PHP_FE(tidy_getopt,             NULL)
+	PHP_FE(tidy_parse_string,       NULL)
+	PHP_FE(tidy_parse_file,         NULL)
+	PHP_FE(tidy_get_output,         NULL)
+	PHP_FE(tidy_get_error_buffer,   NULL)
+	PHP_FE(tidy_clean_repair,       NULL)
+	PHP_FE(tidy_diagnose,           NULL)
 	PHP_FE(tidy_get_release,		NULL)
 	PHP_FE(tidy_get_status,		  	NULL)
 	PHP_FE(tidy_get_html_ver,	  	NULL)
@@ -84,13 +90,17 @@ function_entry tidy_functions[] = {
 	PHP_FE(tidy_access_count,	  	NULL)
 	PHP_FE(tidy_config_count,	  	NULL)
 	PHP_FE(tidy_load_config,		NULL)
-	PHP_FE(tidy_load_config_enc,		NULL)
+	PHP_FE(tidy_load_config_enc,	NULL)
 	PHP_FE(tidy_set_encoding,	  	NULL)
 	PHP_FE(tidy_save_config,		NULL)
+
+#ifdef ZEND_ENGINE_2
 	PHP_FE(tidy_get_root,		  	NULL)
 	PHP_FE(tidy_get_head,		  	NULL)
 	PHP_FE(tidy_get_html,		  	NULL)
 	PHP_FE(tidy_get_body,		  	NULL)
+#endif
+
 	{NULL, NULL, NULL}
 };
 
@@ -107,7 +117,7 @@ zend_module_entry tidy_module_entry = {
 	NULL,
 	PHP_MINFO(tidy),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.5b",
+	"0.6b",
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -117,34 +127,13 @@ zend_module_entry tidy_module_entry = {
 ZEND_GET_MODULE(tidy)
 #endif
 
+#ifdef ZEND_ENGINE_2
+
 static inline PHPTidyObj *php_tidy_fetch_object(zval *object TSRMLS_DC)
 {
 	
 	return (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
 }
-
-void * _php_tidy_mem_alloc(size_t size)
-{
-	return emalloc(size);
-}
-
-void * _php_tidy_mem_realloc(void *mem, size_t newsize)
-{
-	return erealloc(mem, newsize);
-}
-
-void _php_tidy_mem_free(void *mem)
-{
-	efree(mem);
-}
-
-void _php_tidy_mem_panic(ctmbstr errmsg)
-{
-	
-	TSRMLS_FETCH();
-	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for Tidy: %s", (char *)errmsg);
-}
-
 
 PHPTidyObj *php_tidy_new()
 {
@@ -233,24 +222,6 @@ zend_object_value php_tidy_register_object(PHPTidyObj *intern TSRMLS_DC)
 
 	return retval;
 }
- 
-void dtor_TidyDoc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-    
-	PHPTidyDoc *tdoc = (PHPTidyDoc *)rsrc->ptr;
-	    
-	if(tdoc->doc) {
-		    tidyRelease(tdoc->doc);
-	}
-	if(tdoc->errbuf) {
-		    tidyBufFree(tdoc->errbuf);
-		    efree(tdoc->errbuf);
-	
-	}
-	
-	efree(tdoc);
-    
-}
 
  void php_tidy_obj_dtor(void *object, zend_object_handle handle TSRMLS_DC)
  {
@@ -306,6 +277,49 @@ void dtor_TidyDoc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	
 }
 
+#endif
+
+void * _php_tidy_mem_alloc(size_t size)
+{
+	return emalloc(size);
+}
+
+void * _php_tidy_mem_realloc(void *mem, size_t newsize)
+{
+	return erealloc(mem, newsize);
+}
+
+void _php_tidy_mem_free(void *mem)
+{
+	efree(mem);
+}
+
+void _php_tidy_mem_panic(ctmbstr errmsg)
+{
+	
+	TSRMLS_FETCH();
+	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for Tidy: %s", (char *)errmsg);
+}
+
+ 
+void dtor_TidyDoc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+    
+	PHPTidyDoc *tdoc = (PHPTidyDoc *)rsrc->ptr;
+	    
+	if(tdoc->doc) {
+		    tidyRelease(tdoc->doc);
+	}
+	if(tdoc->errbuf) {
+		    tidyBufFree(tdoc->errbuf);
+		    efree(tdoc->errbuf);
+	
+	}
+	
+	efree(tdoc);
+    
+}
+
 void php_tidy_init_globals(zend_tidy_globals *tidy_globals)
 {
 	
@@ -315,11 +329,15 @@ void php_tidy_init_globals(zend_tidy_globals *tidy_globals)
 PHP_MINIT_FUNCTION(tidy)
 {
 
+#ifdef ZEND_ENGINE_2
+
 	zend_class_entry _tidy_entry;
     
 	INIT_CLASS_ENTRY(_tidy_entry, "TidyObject", NULL);
 	php_tidy_ce = zend_register_internal_class(&_tidy_entry TSRMLS_CC);
-    
+
+#endif
+
 	ZEND_INIT_MODULE_GLOBALS(tidy, php_tidy_init_globals, NULL);
 	le_tidydoc = zend_register_list_destructors_ex(dtor_TidyDoc, NULL, le_tidydoc_name, module_number);
     
@@ -1050,6 +1068,8 @@ PHP_FUNCTION(tidy_getopt)
 }
 /* }}} */
 
+#ifdef ZEND_ENGINE_2
+
 /* {{{ proto TidyNode tidy_get_root(resource tidy)
     Returns a TidyNode Object representing the root of the tidy parse tree */
 PHP_FUNCTION(tidy_get_root)
@@ -1687,6 +1707,7 @@ int tidy_objects_compare(zval *obj_one, zval *obj_two TSRMLS_DC)
 	
 }
 
+#endif
 
 void _php_tidy_register_nodetypes(INIT_FUNC_ARGS)
 {
