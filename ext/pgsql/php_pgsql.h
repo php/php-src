@@ -29,7 +29,9 @@ extern zend_module_entry pgsql_module_entry;
 
 #ifdef PHP_PGSQL_PRIVATE
 #undef SOCKET_SIZE_TYPE
+#ifdef PHP_PGSQL_NEEDS_POSTGRES_H
 #include <postgres.h>
+#endif
 #include <libpq-fe.h>
 
 #ifdef PHP_WIN32
