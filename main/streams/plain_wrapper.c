@@ -149,6 +149,10 @@ typedef struct {
 	char *last_mapped_addr;
 	size_t last_mapped_len;
 #endif
+#ifdef PHP_WIN32
+	char *last_mapped_addr;
+	HANDLE file_mapping;
+#endif
 } php_stdio_stream_data;
 
 PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path STREAMS_DC TSRMLS_DC)
@@ -361,6 +365,15 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	if (data->last_mapped_addr) {
 		munmap(data->last_mapped_addr, data->last_mapped_len);
 		data->last_mapped_addr = NULL;
+	}
+#elif defined(PHP_WIN32)
+	if (data->last_mapped_addr) {
+		UnmapViewOfFile(data->last_mapped_addr);
+		data->last_mapped_addr = NULL;
+	}
+	if (data->file_mapping) {
+		CloseHandle(data->file_mapping);
+		data->file_mapping = NULL;
 	}
 #endif
 	
@@ -643,6 +656,88 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						return PHP_STREAM_OPTION_RETURN_ERR;
 				}
 			}
+#elif defined(PHP_WIN32)
+			{
+				php_stream_mmap_range *range = (php_stream_mmap_range*)ptrparam;
+				HANDLE hfile = (HANDLE)_get_osfhandle(fd);
+				DWORD prot, acc, loffs = 0, delta = 0;
+
+				switch (value) {
+					case PHP_STREAM_MMAP_SUPPORTED:
+						return hfile == INVALID_HANDLE_VALUE ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
+
+					case PHP_STREAM_MMAP_MAP_RANGE:
+						switch (range->mode) {
+							case PHP_STREAM_MAP_MODE_READONLY:
+								prot = PAGE_READONLY;
+								acc = FILE_MAP_READ;
+								break;
+							case PHP_STREAM_MAP_MODE_READWRITE:
+								prot = PAGE_READWRITE;
+								acc = FILE_MAP_READ | FILE_MAP_WRITE;
+								break;
+							case PHP_STREAM_MAP_MODE_SHARED_READONLY:
+								prot = PAGE_READONLY;
+								acc = FILE_MAP_READ;
+								/* TODO: we should assign a name for the mapping */
+								break;
+							case PHP_STREAM_MAP_MODE_SHARED_READWRITE:
+								prot = PAGE_READWRITE;
+								acc = FILE_MAP_READ | FILE_MAP_WRITE;
+								/* TODO: we should assign a name for the mapping */
+								break;
+						}
+
+						/* create a mapping capable of viewing the whole file (this costs no real resources) */
+						data->file_mapping = CreateFileMapping(hfile, NULL, prot, 0, 0, NULL);
+
+						if (data->file_mapping == NULL) {
+							return PHP_STREAM_OPTION_RETURN_ERR;
+						}
+
+						if (range->length == 0) {
+							range->length = GetFileSize(hfile, NULL) - range->offset;
+						}
+
+						/* figure out how big a chunk to map to be able to view the part that we need */
+						if (range->offset != 0) {
+							SYSTEM_INFO info;
+							DWORD gran;
+
+							GetSystemInfo(&info);
+							gran = info.dwAllocationGranularity;
+							loffs = (range->offset / gran) * gran;
+							delta = range->offset - loffs;
+						}
+
+						data->last_mapped_addr = MapViewOfFile(data->file_mapping, acc, 0, loffs, range->length);
+
+						if (data->last_mapped_addr) {
+							/* give them back the address of the start offset they requested */
+							range->mapped = data->last_mapped_addr + delta;
+							return PHP_STREAM_OPTION_RETURN_OK;
+						}
+
+						CloseHandle(data->file_mapping);
+						data->file_mapping = NULL;
+
+						return PHP_STREAM_OPTION_RETURN_ERR;
+
+					case PHP_STREAM_MMAP_UNMAP:
+						if (data->last_mapped_addr) {
+							UnmapViewOfFile(data->last_mapped_addr);
+							data->last_mapped_addr = NULL;
+							CloseHandle(data->file_mapping);
+							data->file_mapping = NULL;
+							return PHP_STREAM_OPTION_RETURN_OK;
+						}
+						return PHP_STREAM_OPTION_RETURN_ERR;
+
+					default:
+						return PHP_STREAM_OPTION_RETURN_ERR;
+				}
+			}
+
 #endif
 			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 
