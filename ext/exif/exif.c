@@ -67,7 +67,7 @@
  * while extending the module as it shows if you are at the right position.
  * You are always considered to have a copy of TIFF6.0 and EXIF2.10 standard.
  */
-#define EXIF_DEBUG
+#undef EXIF_DEBUG
 
 #undef EXIF_JPEG2000
 
