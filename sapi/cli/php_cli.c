@@ -87,7 +87,7 @@
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
-#define OPTSTRING "aB:Cc:d:E:eF:f:g:hilmnqR:r:sw?vz:"
+#define OPTSTRING "aB:Cc:d:E:eF:f:g:hilmnqRH:r:sw?vz"
 
 static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
@@ -317,6 +317,7 @@ static void php_cli_usage(char *argv0)
 				"  -R <code>        Run PHP <code> for every input line\n"
 				"  -F <file>        Parse and execute <file> for every input line\n"
 				"  -E <end_code>    Run PHP <end_code> after processing all input lines\n"
+				"  -H               Hide any passed arguments\n"
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
@@ -471,6 +472,7 @@ int main(int argc, char *argv[])
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	const char *param_error=NULL;
 	int scan_input = 0;
+	int hide_argv = 0;
 /* end of temporary locals */
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -780,6 +782,9 @@ int main(int argc, char *argv[])
 			case 'z': /* load extension file */
 				zend_load_extension(ap_php_optarg);
 				break;
+			case 'H':
+				hide_argv = 1;
+				break;
 
 			default:
 				break;
@@ -844,6 +849,14 @@ int main(int argc, char *argv[])
 		}
 		CG(start_lineno) = lineno;
 		*arg_excp = arg_free; /* reconstuct argv */
+
+		if (hide_argv) {
+			int i;
+			for (i = 1; i < argc; i++) {
+				memset(argv[i], 0, strlen(argv[i]));
+			}
+		}
+
 		if (no_headers) {
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
