@@ -32,6 +32,7 @@
 
 #include "ext/standard/info.h"
 #include "php_sockets.h"
+#include "php_ini.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -192,11 +193,17 @@ static void destroy_iovec(zend_rsrc_list_entry *rsrc)
 	}
 }
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_BOOLEAN("sockets.use_system_read", "0", PHP_INI_ALL, OnUpdateInt, use_system_read, php_sockets_globals, sockets_globals)
+PHP_INI_END()
+
 PHP_MINIT_FUNCTION(sockets)
 {
 	SOCKETSLS_FETCH();
 	SOCKETSG(le_destroy) = register_list_destructors(destroy_fd_sets, NULL, "sockets file descriptor set");
 	SOCKETSG(le_iov)     = register_list_destructors(destroy_iovec,   NULL, "sockets i/o vector");
+
+	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("AF_UNIX", AF_UNIX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET", AF_INET, CONST_CS | CONST_PERSISTENT);
@@ -619,12 +626,6 @@ int php_read(int fd, void *buf, int maxlen, int binary)
      if (m & O_NONBLOCK)
           nonblock = 1;
 
-     {
-	char buf[255];
-	snprintf(buf, 255, "nonblock = %i\n", nonblock);
-	PUTS(buf);
-     }
-
      t = (char *) buf;
      while (keep_going) { /* (*t != '\n' && *t != '\r' && *t != '\0' && n < maxlen) { */
           m = read(fd, (void *) t, 1);
@@ -660,6 +661,8 @@ PHP_FUNCTION(read)
 	zval **fd, **buf, **length, **binary;
 	char *tmpbuf;
 	int ret;
+	int (*read_function)(int, void *, int, int);
+	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4 ||
 	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &buf, &length, &binary) == FAILURE) {
@@ -669,13 +672,19 @@ PHP_FUNCTION(read)
 	v_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, length, binary);
 	convert_to_string_ex(buf);
 
+	if (SOCKETSG(use_system_read) == 1) {
+		read_function = (int (*)(int, void *, int, int)) read;
+	} else {
+		read_function = (int (*)(int, void *, int, int)) php_read;
+	}
+
 	tmpbuf = emalloc(Z_LVAL_PP(length)*sizeof(char));
 	if (tmpbuf == NULL) {
 		php_error(E_WARNING, "Couldn't allocate memory from %s()", get_active_function_name());
 		RETURN_FALSE;
 	}
 	
-	ret = php_read(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length), ZEND_NUM_ARGS() == 4 ? Z_LVAL_PP(binary) : 0);
+	ret = (*read_function)(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length), ZEND_NUM_ARGS() == 4 ? Z_LVAL_PP(binary) : 0);
 	
 	if (ret >= 0) {
 		Z_STRVAL_PP(buf) = estrndup(tmpbuf,ret);
