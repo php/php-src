@@ -1072,6 +1072,10 @@ SOURCE=".\php.ini-dist"
 
 SOURCE=".\README.CVS-RULES"
 # End Source File
+# Begin Source File
+
+SOURCE=.\TODO
+# End Source File
 # End Group
 # End Target
 # End Project
