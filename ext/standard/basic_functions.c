@@ -426,7 +426,7 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(socket_set_timeout, warn_not_available,      NULL)
 #endif
 	PHP_FE(socket_get_status,	NULL)
-#if !PHP_WIN32 || defined(ZTS)
+#if !defined(PHP_WIN32) || defined(ZTS)
 	PHP_FE(realpath,			NULL)
 #else
 	PHP_FALIAS(realpath,		warn_not_available,		NULL)

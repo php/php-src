@@ -77,6 +77,7 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number)
 PHPAPI void display_ini_entries(zend_module_entry *module)
 {
 	int module_number;
+	ELS_FETCH();
 
 	if (module) {
 		module_number = module->module_number;
@@ -85,7 +86,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 	}
 	php_info_print_table_start();
 	php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
-	zend_ini_apply_with_argument((apply_func_arg_t) php_ini_displayer, (void *) (long) module_number);
+	zend_hash_apply_with_argument(&EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (long) module_number);
 	php_info_print_table_end();
 }
 
