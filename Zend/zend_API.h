@@ -246,8 +246,10 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var, 0);	\
 	}
 
+#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount) \
+			ZEND_SET_SYMBOL_WITH_LENGTH_EX(symtable, name, name_length, var, _refcount, 0)
 
-#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount)									\
+#define ZEND_SET_SYMBOL_WITH_LENGTH_EX(symtable, name, name_length, var, _refcount, _is_ref)			\
 	{																									\
 		zval **orig_var;																				\
 																										\
@@ -263,7 +265,7 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 			**orig_var = *(var);																		\
 			efree(var);																					\
 		} else {																						\
-			INIT_PZVAL((var));																			\
+			(var)->is_ref = _is_ref;																	\
 			if (_refcount) {																			\
 				(var)->refcount = _refcount;															\
 			}																							\
