@@ -142,8 +142,8 @@
 %token T_CURLY_OPEN
 %token T_PAAMAYIM_NEKUDOTAYIM
 %token T_IMPORT T_FROM
-%token T_NAMESPACE
 %token T_NAMESPACE_NAME
+%token T_NAMESPACE
 
 %% /* Rules */
 
@@ -654,7 +654,8 @@ fully_qualified_class_name:
 ;
 
 import_namespace:
-		T_STRING { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
+		T_NAMESPACE_NAME { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
+	|	T_STRING { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
 ;
 
 dynamic_class_name:
