@@ -45,7 +45,7 @@ extern void xslt_debug(char *function_name, char *format, ...)
 
 	buffer[sizeof(buffer) - 1] = '\0';
 
-	php_printf("<b>XSLT Debug</b>: %s: %s<br>\n", 
+	php_printf("<b>XSLT Debug</b>: %s: %s<br />\n", 
 	           function_name, buffer);
 #endif
 }

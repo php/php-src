@@ -1418,7 +1418,7 @@ hg_msg *recv_hg_msg_head(int sockfd)
 	}
 
 #ifdef HW_DEBUG
-	php_printf("<B>   Recv msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
+	php_printf("<b>   Recv msg: </b>type = %d -- id = %d<br />\n", msg->msg_type, msg->version_msgid);
 #endif
 	return(msg);
 }
@@ -1470,7 +1470,7 @@ hg_msg *recv_hg_msg(int sockfd)
 		msg->buf = NULL;  
 
 #ifdef HW_DEBUG
-	php_printf("<B>   Recv msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
+	php_printf("<b>   Recv msg: </b>type = %d -- id = %d<br />\n", msg->msg_type, msg->version_msgid);
 #endif
 	return(msg);
 }
@@ -5681,7 +5681,7 @@ static int send_hg_msg(int sockfd, hg_msg *msg, int length)
      char *buf, *tmp;
 
 #ifdef HW_DEBUG
-	php_printf("<B>Sending msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
+	php_printf("<b>Sending msg: </b>type = %d -- id = %d<br />\n", msg->msg_type, msg->version_msgid);
 #endif
      if ( length < HEADER_LENGTH )  {
 /*          fprintf(stderr, "send_hg_msg: bad msg\n"); */
@@ -5793,7 +5793,7 @@ static char *build_msg_int(char *buf, int val) {
 	int tmp;
 
 #ifdef HW_DEBUG
-	php_printf("   Added int to header: <B>%d</B><BR>\n", val);
+	php_printf("   Added int to header: <b>%d</b><br />\n", val);
 #endif
 	tmp = swap_on ? swap(val) : val;
 	memcpy(buf, (char *)&tmp, 4);
@@ -5807,7 +5807,7 @@ static char *build_msg_str(char *buf, char *str)
      int len = strlen(str)+1;
 
 #ifdef HW_DEBUG
-	php_printf("   Added str to header: <B>%s</B> (%d)<BR>\n", str, strlen(str));
+	php_printf("   Added str to header: <b>%s</b> (%d)<br />\n", str, strlen(str));
 #endif
 
      memcpy(buf, str, len);

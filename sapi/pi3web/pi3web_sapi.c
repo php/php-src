@@ -91,7 +91,7 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 	php_info_print_table_row(2, "Server PID", variable_buf);
 	php_info_print_table_row(2, "Server Platform", PIPlatform_getDescription());
 
-	PUTS("</table><BR>");	
+	PUTS("</table><br />");	
 
 	PUTS("<table border=0 cellpadding=3 cellspacing=1 width=600 align=center>\n");
 	PUTS("<tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Request Information</th></tr>\n");
