@@ -1,3 +1,10 @@
+--TEST--
+OpenSSL private key functions
+--SKIPIF--
+<?php include('skipif.inc'); ?>
+--POST--
+--GET--
+--FILE--
 <?php
 echo "Creating private key\n";
 
