@@ -10,7 +10,6 @@
 #define OPTERRARG (3)
 
 
-char buff[81]; /* too hold option value when needed */
 char *ap_php_optarg;
 int ap_php_optind = 1;
 static int ap_php_opterr = 1;
@@ -110,12 +109,7 @@ int ap_php_getopt(int argc, char* const *argv, const char *optstr)
         }
         else
         {
-            int offset = 2;
-            int len = 0;
-            while(argv[ap_php_optind][offset]) {
-                buff[len++] = argv[ap_php_optind][offset++];
-            }
-            ap_php_optarg = buff;
+            ap_php_optarg = &argv[ap_php_optind][2];
             ap_php_optind++;
         }
         return(*cp);
