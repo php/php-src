@@ -53,11 +53,6 @@ ps_module ps_mod_msession = {
 
 // #define ERR_DEBUG
 
-/* If you declare any globals in php_msession.h uncomment this: 
-
-ZEND_DECLARE_MODULE_GLOBALS(msession)
-*/
-
 /* True global resources - no need for thread safety here */
 static char	g_defhost[]="localhost";
 static char *	g_host=g_defhost;
@@ -70,10 +65,7 @@ static REQB *	g_reqb=NULL;
 #define GET_REQB	\
 	if(!g_reqb) { RETURN_NULL(); }
 
-/* Every user visible function must have an entry in msession_functions[].
- */
 function_entry msession_functions[] = {
-	PHP_FE(confirm_msession_compiled,	NULL)		/* For testing, remove later. */
 	PHP_FE(msession_connect,NULL)
 	PHP_FE(msession_disconnect,NULL)
 	PHP_FE(msession_lock,NULL)
@@ -103,9 +95,9 @@ zend_module_entry msession_module_entry = {
 	"msession",
 	msession_functions,
 	PHP_MINIT(msession),
-	PHP_MSHUTDOWN(msession),
-	PHP_RINIT(msession),	/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(msession),/* Replace with NULL if there's nothing to do at request end */
+	NULL,	
+	NULL,	
+	PHP_RSHUTDOWN(msession),
 	PHP_MINFO(msession),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -115,16 +107,8 @@ zend_module_entry msession_module_entry = {
 ZEND_GET_MODULE(msession)
 #endif
 
-		 /* Remove comments and fill if you need to have entries in php.ini
-				PHP_INI_BEGIN()
-				PHP_INI_END()
-		 */
-
-		 PHP_MINIT_FUNCTION(msession)
+PHP_MINIT_FUNCTION(msession)
 {
-	/* Remove comments if you have entries in php.ini
-		 REGISTER_INI_ENTRIES();
-	*/
 	g_conn = NULL;
 	g_host = g_defhost;
 	
@@ -135,21 +119,6 @@ ZEND_GET_MODULE(msession)
 	return SUCCESS;
 }
 
-PHP_MSHUTDOWN_FUNCTION(msession)
-{
-	/* Remove comments if you have entries in php.ini
-		 UNREGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
-}
-
-/* Remove if there's nothing to do at request start */
-PHP_RINIT_FUNCTION(msession)
-{
-	return SUCCESS;
-}
-
-/* Remove if there's nothing to do at request end */
 PHP_RSHUTDOWN_FUNCTION(msession)
 {
 	if(g_conn)
@@ -171,29 +140,6 @@ PHP_MINFO_FUNCTION(msession)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "msession support", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-		 DISPLAY_INI_ENTRIES();
-	*/
-}
-
-PHP_FUNCTION(confirm_msession_compiled)
-{
-	zval **arg;
-	int len;
-	char string[256];
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(arg);
-
-	len = sprintf(string, "(%s) Module %s is compiled into PHP, g_host:%s, g_port:%d", 
-								__TIME__,
-								Z_STRVAL_PP(arg),
-								g_host,
-								g_port);
-	RETURN_STRINGL(string, len, 1);
 }
 
 int PHPMsessionConnect(const char *szhost, int nport)
@@ -268,6 +214,7 @@ char *PHPMsessionGetData(const char *session)
 		ret = safe_estrdup(g_reqb->req.datum);
 	return ret;
 }
+
 int PHPMsessionSetData(const char *session, const char *data)
 {
 	int ret=0;
@@ -398,6 +345,7 @@ PHP_FUNCTION(msession_destroy)
 
 	RETURN_TRUE;
 }
+
 PHP_FUNCTION(msession_lock)
 {
 	long key;
@@ -421,6 +369,7 @@ PHP_FUNCTION(msession_lock)
 
 	RETURN_LONG( key);
 }
+
 PHP_FUNCTION(msession_unlock)
 {
 	long lkey;
@@ -477,8 +426,8 @@ PHP_FUNCTION(msession_set)
 		{
 			RETURN_FALSE;
 		}
-
 }
+
 PHP_FUNCTION(msession_get)
 {
 	char *val;
@@ -508,8 +457,9 @@ PHP_FUNCTION(msession_get)
 	if(g_reqb->req.stat==REQ_OK)
 		val = safe_estrdup(g_reqb->req.datum);
 
-	RETURN_STRING(val, 0)
-		}
+	RETURN_STRING(val, 0);
+}
+
 PHP_FUNCTION(msession_uniq)
 {
 	long val;
@@ -541,6 +491,7 @@ PHP_FUNCTION(msession_uniq)
 			RETURN_NULL();
 		}
 }
+
 PHP_FUNCTION(msession_randstr)
 {
 	long val;
@@ -572,6 +523,7 @@ PHP_FUNCTION(msession_randstr)
 			RETURN_NULL();
 		}
 }
+
 PHP_FUNCTION(msession_find)
 {
 	zval **name;
@@ -612,6 +564,7 @@ PHP_FUNCTION(msession_find)
 			RETURN_NULL();
 		}
 }
+
 PHP_FUNCTION(msession_list)
 {
 	GET_REQB
@@ -689,6 +642,7 @@ PHP_FUNCTION(msession_get_array)
 				}
 		}
 }
+
 PHP_FUNCTION(msession_set_array)
 {
 	zval **session;
@@ -854,6 +808,7 @@ PHP_FUNCTION(msession_timeout)
 			RETURN_NULL();
 		}
 }
+
 PHP_FUNCTION(msession_inc)
 {
 	char *val;
@@ -886,6 +841,7 @@ PHP_FUNCTION(msession_inc)
 			RETURN_FALSE;
 		}
 }
+
 PHP_FUNCTION(msession_getdata)
 {
 	char *val;
@@ -940,6 +896,7 @@ PHP_FUNCTION(msession_setdata)
 			RETURN_FALSE;
 		}
 }
+
 PHP_FUNCTION(msession_plugin)
 {
 	int ret;
