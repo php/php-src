@@ -39,7 +39,9 @@
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#else
+#endif
+
+#ifndef HAVE_INET_ATON
 int		 inet_aton(const char *, struct in_addr *);
 #endif
 
