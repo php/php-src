@@ -293,7 +293,7 @@ static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 	MAKE_STD_ZVAL(tmp);
 
 	INI_DEFAULT("register_argc_argv", 19, "1");
-	INI_DEFAULT("html_errors", 12, "1");
+	INI_DEFAULT("html_errors", 12, "0");
 	INI_DEFAULT("implicit_flush", 15, "1");
 	INI_DEFAULT("max_execution_time", 19, "0");
 
