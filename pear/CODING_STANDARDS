@@ -170,7 +170,7 @@ to include PHP code on differing operating systems and setups.
 All source code files in the core PEAR distribution should contain the
 following comment block as the header:
 
-/* vim: set expandtab tabstop=4 swiftwidth=4: */
+/* vim: set expandtab tabstop=4 shiftwidth=4: */
 // +----------------------------------------------------------------------+
 // | PHP version 4.0                                                      |
 // +----------------------------------------------------------------------+
