@@ -162,6 +162,8 @@ void zend_ini_close_file(zend_file_handle *fh)
 
 %}
 
+NEWLINE ("\r"|"\n"|"\r\n")
+
 %option noyywrap
 %option yylineno
 
@@ -183,7 +185,7 @@ void zend_ini_close_file(zend_file_handle *fh)
 	return CFG_FALSE;
 }
 
-<INITIAL>[[][^[]+[\]]([\n]?|"\r\n"?) {
+<INITIAL>[[][^[]+[\]]{NEWLINE}? {
 	/* SECTION */
 
 	/* eat trailng ] */
@@ -261,11 +263,11 @@ void zend_ini_close_file(zend_file_handle *fh)
 	return yytext[0];
 }
 
-<INITIAL>"\r\n" {
+<INITIAL>{NEWLINE} {
 	return '\n';
 }
 
-<INITIAL>[;][^\r\n]*[\r\n]? {
+<INITIAL>[;][^\r\n]*{NEWLINE}? {
 	/* comment */
 	return '\n';
 }
