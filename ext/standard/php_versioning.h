@@ -1,4 +1,4 @@
-/*
+/* 
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
@@ -12,57 +12,20 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
+   | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
+   |                                                                      |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#include "basic_functions.h"
-#include "php_math.h"
-#include "php_string.h"
-#include "base64.h"
-#include "php_dir.h"
-#include "dns.h"
-#include "reg.h"
-#include "php_mail.h"
-#include "md5.h"
-#include "html.h"
-#include "exec.h"
-#include "file.h"
-#include "php_ext_syslog.h"
-#include "php_filestat.h"
-#include "php_browscap.h"
-#include "pack.h"
-#include "datetime.h"
-#include "microtime.h"
-#include "url.h"
-#include "pageinfo.h"
-#include "cyr_convert.h"
-#include "php_link.h"
-#include "fsock.h"
-#include "php_image.h"
-#include "php_iptc.h"
-#include "info.h"
-#include "uniqid.h"
-#include "php_var.h"
-#include "quot_print.h"
-#include "type.h"
-#include "dl.h"
-#include "php_crypt.h"
-#include "head.h"
-#include "php_lcg.h"
-#include "php_metaphone.h"
-#include "php_output.h"
-#include "php_array.h"
-#include "php_assert.h"
-#include "php_versioning.h"
+#ifndef PHP_VERSIONING_H
+#define PHP_VERSIONING_H
 
-#define phpext_standard_ptr basic_functions_module_ptr
+#include "ext/standard/basic_functions.h"
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
+PHPAPI char *php_canonicalize_version(const char *);
+PHPAPI int php_version_compare(const char *, const char *);
+PHP_FUNCTION(version_compare);
+
+#endif
