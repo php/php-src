@@ -335,8 +335,34 @@ class PEAR_Installer extends PEAR_Common
     // }}}
     // {{{ addFileOperation()
 
+    /**
+     * Add a file operation to the current file transaction.
+     *
+     * @see startFileTransaction()
+     * @var string $type This can be one of:
+     *    - rename:  rename a file ($data has 2 values)
+     *    - chmod:   change permissions on a file ($data has 1 value)
+     *    - delete:  delete a file ($data has 1 value)
+     *    - rmdir:   delete a directory if empty ($data has 1 value)
+     *    - installed_as: mark a file as installed ($data has 4 values).
+     * @var array $data For all file operations, this array must contain the
+     *    full path to the file or directory that is being operated on.  For
+     *    the rename command, the first parameter must be the file to rename,
+     *    the second its new name.
+     *
+     *    The installed_as operation contains 4 elements in this order:
+     *    1. Filename as listed in the filelist element from package.xml
+     *    2. Full path to the installed file
+     *    3. Full path from the php_dir configuration variable used in this
+     *       installation
+     *    4. Relative path from the php_dir that this file is installed in
+     */
     function addFileOperation($type, $data)
     {
+        if (!is_array($data)) {
+            return $this->raiseError('Internal Error: $data in addFileOperation'
+                . ' must be an array, was ' . gettype($data));
+        }
         if ($type == 'chmod') {
             $octmode = decoct($data[0]);
             $this->log(3, "adding to transaction: $type $octmode $data[1]");
