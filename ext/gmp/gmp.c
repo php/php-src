@@ -99,6 +99,21 @@ static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc);
 #define GMP_ROUND_PLUSINF   1
 #define GMP_ROUND_MINUSINF  2
 
+static void *gmp_emalloc(size_t size)
+{
+	return emalloc(size);
+}
+
+static void *gmp_erealloc(void *ptr, size_t old_size, size_t new_size)
+{
+	return erealloc(ptr, new_size);
+}
+
+static void gmp_efree(void *ptr, size_t size)
+{
+	efree(ptr);
+}
+
 ZEND_MINIT_FUNCTION(gmp)
 {
 /* Remove comments if you have entries in php.ini
@@ -110,6 +125,9 @@ ZEND_MINIT_FUNCTION(gmp)
 	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_MINUSINF", GMP_ROUND_MINUSINF, CONST_CS | CONST_PERSISTENT);
+
+	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
+
 	return SUCCESS;
 }
 
