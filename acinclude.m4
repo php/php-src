@@ -33,7 +33,6 @@ AC_DEFUN(PHP_TARGET_RDYNAMIC,[
   fi
 ])
 
-dnl {{{ PHP_REMOVE_USR_LIB
 AC_DEFUN(PHP_REMOVE_USR_LIB,[
   unset ac_new_flags
   for i in [$]$1; do
@@ -43,10 +42,7 @@ AC_DEFUN(PHP_REMOVE_USR_LIB,[
     esac
   done
   $1=[$]ac_new_flags
-
 ])
-
-dnl }}}    
 
 AC_DEFUN(PHP_SETUP_OPENSSL,[
   if test "$PHP_OPENSSL" = "no"; then
@@ -1175,16 +1171,3 @@ AC_DEFUN(PHP_CHECK_LIBRARY, [
 
 
 
-dnl
-AC_DEFUN(PHP_CHECK_INTERACTIVE, [
-  if test "$PHP_SAPI" != "cgi"; then
-    AC_MSG_ERROR([$1 extension can only be used with CGI build!])
-  fi
-])
-
-dnl
-AC_DEFUN(PHP_CHECK_STANDALONE, [
-  if test "$PHP_SAPI" != "cgi"; then
-      AC_MSG_ERROR([$1 extension may affect webserver operation internals, so it can only be used with CGI build!])
-  fi
-])
