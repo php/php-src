@@ -190,6 +190,9 @@ void init_executor(TSRMLS_D)
 void shutdown_destructors(TSRMLS_D) {
 	zend_try {
 		zend_objects_store_call_destructors(&EG(objects_store) TSRMLS_CC);
+	} zend_catch {
+		/* if we couldn't destruct cleanly, mark all objects as destructed anyway */
+		zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
 	} zend_end_try();
 }
 
