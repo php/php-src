@@ -26,7 +26,7 @@ session_id("abtest");
 session_start();
 session_register('o1', 'o2' );
 
-$o1 =& new TFoo(42);
+$o1 = new TFoo(42);
 $o2 =& $o1;
 
 session_write_close();
