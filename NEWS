@@ -1,14 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
-- Added new parameter to sha1() and md5() which return the digest as
-  binary data. (Michael Bretterklieber <mbretter@jawa.at>, Derick)
-- Added proc_nice() function, which allows changing priority of the current
-  process. (Ilia)
-- Added pcntl_getpriority() and pcntl_setpriority() functions, which can be 
-  used to fetch and change priority of any process. (Ilia)
-- Added idate(), date_sunrise() and date_sunset() functions. (Moshe Doron)
-- Added support for long options in CLI & CGI (e.g. --version). (Marcus)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
@@ -21,22 +13,25 @@ PHP 4                                                                      NEWS
 - Changed is_executable() to be available also on Windows. (Shane)
 - Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
-- Changed uniqid() parameters to be optional and allow any prefix length.
-  (Marcus)
+- Changed uniqid() parameters to be optional and allow any prefix length. (Marcus)
+- Added optional parameter to sha1() and md5() which makes them return 
+  the digest as binary data. (Michael Bretterklieber <mbretter@jawa.at>, Derick)
+- Added proc_nice() function. Changes priority of the current process. (Ilia)
+- Added pcntl_getpriority() and pcntl_setpriority() functions. (Ilia)
+- Added idate(), date_sunrise() and date_sunset() functions. (Moshe Doron)
+- Added long options into CLI & CGI (e.g. --version). (Marcus)
 - Added strpbrk() function. Searches a string for a list of characters. (Ilia)
 - Added stream_get_line() function. Reads either the specified number of bytes
   or until the ending string is found. (Ilia)
-- Added optional parameter to mkdir() which makes directory creation recursive.
-  (Ilia)
-- Added optional parameter to file() which can be used to make the result array
-  not contain the line endings and to skip empty lines. (Ilia)
-- Added get_headers() function. Used to retrieve headers sent by the browser
-  for the specified URL. (Ilia)
+- Added optional parameter to mkdir() to make directory creation recursive. (Ilia)
+- Added optional parameter to file() which makes the result array not contain
+  the line endings and to skip empty lines. (Ilia)
+- Added get_headers() function. Returns headers sent by the server of 
+  the specified URL. (Ilia)
 - Added str_split() function. Breaks down a string into an array of elements 
   based on length. (Ilia)
-- Added array_walk_recursive() function. Applies user function recursively 
-  to an array. (Ilia)
-- Added command line parameters -B, -F, -R and -E which allow to process stdin
+- Added array_walk_recursive() function. (Ilia)
+- Added new command line parameters -B, -F, -R and -E which allow to process stdin
   line by line (See php -h for more). (Marcus)
 - Added string.base64 stream filter. (Moriyoshi)
 - Added domxml_node_get_path(). (Lukas Schröder)
