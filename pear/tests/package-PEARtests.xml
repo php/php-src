@@ -67,9 +67,12 @@
         <file role="test" name="TestUnit.php"/>
        </dir> <!-- PEAR_ErrorStack -->
        <dir name="test-pkg6">
+        <file role="test" name="conflictpackage2.xml"/>
         <file role="test" name="conflictpackage.xml"/>
         <file role="test" name="invalidtgz.tgz"/>
         <file role="test" name="nopackagexml.tgz"/>
+        <file role="test" name="package2.xml"/>
+        <file role="test" name="package2_invalid.xml"/>
         <file role="test" name="package.xml"/>
         <file role="test" name="pkg6-1.1.tgz"/>
         <file role="test" name="pkg6-2.0b1.tgz"/>
@@ -122,6 +125,7 @@
        <file role="test" name="pear_installer_installFile_channels.phpt"/>
        <file role="test" name="pear_installer_install_channels.phpt"/>
        <file role="test" name="pear_packager.phpt"/>
+       <file role="test" name="pear_registry_inc.php.inc"/>
        <file role="test" name="pear_registry.phpt"/>
        <file role="test" name="pear_registry_1.1.phpt"/>
        <file role="test" name="pear_system.phpt"/>

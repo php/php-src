@@ -19,7 +19,7 @@ if (!is_dir($temp_path)) {
 touch($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
 // no UI is needed for these tests
 $ui = false;
-$config = new PEAR_Config;
+$config = new PEAR_Config($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
 $config->set('php_dir', dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp');
 $reg = &new PEAR_Registry($config->get('php_dir'));
 $chan = new PEAR_ChannelFile;

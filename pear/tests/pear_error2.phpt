@@ -14,7 +14,7 @@ if (!getenv('PHP_PEAR_RUNTESTS')) {
 //               - PEAR::isError static method
 // testing PEAR_Error
 
-include dirname(__FILE__)."/../PEAR.php";
+include_once "PEAR.php";
 
 error_reporting(E_ALL);
 
