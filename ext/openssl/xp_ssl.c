@@ -437,9 +437,15 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 		case PHP_STREAM_OPTION_CHECK_LIVENESS:
 			{
 				fd_set rfds;
-				struct timeval tv = {0,0};
+				struct timeval tv;
 				char buf;
 				int alive = 1;
+
+				if (sslsock->s.timeout.tv_sec == -1) {
+					tv.tv_sec = FG(default_socket_timeout);
+				} else {
+					tv = sslsock->s.timeout;
+				}
 
 				if (sslsock->s.socket == -1) {
 					alive = 0;
