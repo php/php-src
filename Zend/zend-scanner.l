@@ -348,7 +348,7 @@ ZEND_API zend_op_array *v_compile_files(int type CLS_DC, int file_count, va_list
 	retval_znode.u.constant.is_ref = 0;
 	retval_znode.u.constant.refcount = 1;
 
-	init_op_array(op_array, INITIAL_OP_ARRAY_SIZE);
+	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
 
 	retval = op_array; /* success oriented */
@@ -486,8 +486,7 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	convert_to_string(&tmp);
 	source_string = &tmp;
 
-	init_op_array(op_array, INITIAL_OP_ARRAY_SIZE);
-	op_array->type = ZEND_EVAL_CODE;
+	init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
 	if (prepare_string_for_scanning(source_string CLS_CC)==FAILURE) {
 		destroy_op_array(op_array);
