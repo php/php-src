@@ -225,11 +225,6 @@ PHPAPI php_url *php_url_parse(char *str)
 		p = e;
 	}
 
-	if (*s == '[' && *(p-1) == ']') {
-		s++;
-		p--;
-	}
-	
 	/* check if we have a valid host, if we don't reject the string as url */
 	if ((p-s) < 1) {
 		STR_FREE(ret->scheme);
