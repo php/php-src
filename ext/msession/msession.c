@@ -46,24 +46,24 @@
 /* Uncomment to get debugging messages */
 /* #define ERR_DEBUG */
 
-/* Zend version number is out of whack in 4.0.6 */
-/* Numerical <> do not seem to work, older released version is greater than current */
 /* This sets the PHP API version used in the file. */
 /* If this module does not compile on the version of PHP you are using, look for */
 /* this value in Zend/zend_modules.h, and set appropriately */
 
-#if (ZEND_MODULE_API_NO ==  20001222)
+#if (ZEND_MODULE_API_NO <=  20001222)
 #define PHP_4_0
 #define TSRMLS_CC
 #define TSRMLS_FETCH()
+/* Comment out this line if you wish to have msession without php sessions */
 #define HAVE_PHP_SESSION
+#warning Backward compatible msession extension requires PHP sessions. If PHP compiles and links, you can ignore this warning.
 #elif (ZEND_MODULE_API_NO >= 20010901)
 #define PHP_4_1
 #endif
 
 /*
  * Please do not remove backward compatibility from this module.
- * this same source must also work with 4.0 versions of PHP.
+ * this same source must also work with the 4.0.6 version of PHP.
  *
  * Module Variable naming hints:
  * All global scope variables begin with "g_" for global.
