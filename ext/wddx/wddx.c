@@ -990,30 +990,22 @@ int php_wddx_deserialize_ex(char *value, int vallen, zval *return_value)
    Creates a new packet and serializes the given value */
 PHP_FUNCTION(wddx_serialize_value)
 {
-	int argc;
-	zval **var,
-		 **comment;
+	zval *var;
+	char *comment = NULL;
+	int comment_len = 0;
 	wddx_packet *packet;
 	
-	argc = ZEND_NUM_ARGS();
-	if(argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &var, &comment) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s",
+							  &var, &comment, &comment_len) == FAILURE)
+		return;
 	
 	packet = php_wddx_constructor();
 	if (!packet) {
 		RETURN_FALSE;
 	}
 
-	if (argc == 2)
-	{
-		convert_to_string_ex(comment);
-		php_wddx_packet_start(packet, Z_STRVAL_PP(comment), Z_STRLEN_PP(comment));
-	}
-	else
-		php_wddx_packet_start(packet, NULL, 0);
-
-	php_wddx_serialize_var(packet, (*var), NULL, 0);
+	php_wddx_packet_start(packet, comment, comment_len);
+	php_wddx_serialize_var(packet, var, NULL, 0);
 	php_wddx_packet_end(packet);
 					
 	ZVAL_STRINGL(return_value, packet->c, packet->len, 1);
@@ -1031,6 +1023,12 @@ PHP_FUNCTION(wddx_serialize_vars)
 	zval ***args;
 		
 	argc = ZEND_NUM_ARGS();
+	if (argc < 1) {
+		php_error(E_WARNING, "%s() requires at least 1 argument, 0 given",
+				  get_active_function_name());
+		return;
+	}
+
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)emalloc(argc * sizeof(zval **));
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
@@ -1089,28 +1087,21 @@ void php_wddx_destructor(wddx_packet *packet)
    Starts a WDDX packet with optional comment and returns the packet id */
 PHP_FUNCTION(wddx_packet_start)
 {
-	int argc;
-	zval **comment;
+	char *comment = NULL;
+	int comment_len = 0;
 	wddx_packet *packet;
 
 	comment = NULL;
-	argc = ZEND_NUM_ARGS();
 
-	if (argc > 1 || (argc == 1 && zend_get_parameters_ex(1, &comment)==FAILURE)) {
-		WRONG_PARAM_COUNT;
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &comment, &comment_len) == FAILURE)
+		return;
 
 	packet = php_wddx_constructor();
 	if (!packet) {
 		RETURN_FALSE;
 	}
 	
-	if (argc == 1) {
-		convert_to_string_ex(comment);
-		php_wddx_packet_start(packet, Z_STRVAL_PP(comment), Z_STRLEN_PP(comment));
-	} else
-		php_wddx_packet_start(packet, NULL, 0);
-	
+	php_wddx_packet_start(packet, comment, comment_len);
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 
 	ZEND_REGISTER_RESOURCE(return_value, packet, le_wddx);
@@ -1121,14 +1112,13 @@ PHP_FUNCTION(wddx_packet_start)
    Ends specified WDDX packet and returns the string containing the packet */
 PHP_FUNCTION(wddx_packet_end)
 {
-	zval **packet_id;
+	zval *packet_id;
 	wddx_packet *packet = NULL;
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &packet_id)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &packet_id) == FAILURE)
+		return;
 
-	ZEND_FETCH_RESOURCE(packet, wddx_packet *, packet_id, -1, "WDDX packet ID", le_wddx);
+	ZEND_FETCH_RESOURCE(packet, wddx_packet *, &packet_id, -1, "WDDX packet ID", le_wddx);
 			
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);	
 	
@@ -1136,11 +1126,11 @@ PHP_FUNCTION(wddx_packet_end)
 
 	ZVAL_STRINGL(return_value, packet->c, packet->len, 1);
 
-	zend_list_delete(Z_LVAL_PP(packet_id));
+	zend_list_delete(Z_LVAL_P(packet_id));
 }
 /* }}} */
 
-/* {{{ proto int wddx_add_vars(int packet_id [, mixed var_names [, mixed ...]])
+/* {{{ proto int wddx_add_vars(int packet_id,  mixed var_names [, mixed ...])
    Serializes given variables and adds them to packet given by packet_id */
 PHP_FUNCTION(wddx_add_vars)
 {
@@ -1151,7 +1141,9 @@ PHP_FUNCTION(wddx_add_vars)
 	
 	argc = ZEND_NUM_ARGS();
 	if (argc < 2) {
-		WRONG_PARAM_COUNT;
+		php_error(E_WARNING, "%s() requires at least 2 arguments, %d given",
+				  get_active_function_name(), ZEND_NUM_ARGS());
+		return;	
 	}
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
@@ -1185,17 +1177,16 @@ PHP_FUNCTION(wddx_add_vars)
    Deserializes given packet and returns a PHP value */
 PHP_FUNCTION(wddx_deserialize)
 {
-	zval **packet;
+	char *packet;
+	int packet_len;
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &packet) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &packet, &packet_len) == FAILURE)
+		return;
 
-	convert_to_string_ex(packet);
-	if (Z_STRLEN_PP(packet) == 0)
+	if (packet_len == 0)
 		return;
 		
-	php_wddx_deserialize(*packet, return_value);
+	php_wddx_deserialize_ex(packet, packet_len, return_value);
 }
 /* }}} */
 
