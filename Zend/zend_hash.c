@@ -537,9 +537,6 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 		if ((p->h == h) && ((p->nKeyLength == 0) || /* Numeric index */
 			((p->nKeyLength == nKeyLength) && (!memcmp(p->arKey, arKey, nKeyLength))))) {
 			HANDLE_BLOCK_INTERRUPTIONS();
-			if (ht->pDestructor) {
-				ht->pDestructor(p->pData);
-			}
 			if (p == ht->arBuckets[nIndex]) {
 				ht->arBuckets[nIndex] = p->pNext;
 			} else {
@@ -561,6 +558,9 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 			}
 			if (ht->pInternalPointer == p) {
 				ht->pInternalPointer = p->pListNext;
+			}
+			if (ht->pDestructor) {
+				ht->pDestructor(p->pData);
 			}
 			pefree(p,ht->persistent);
 			HANDLE_UNBLOCK_INTERRUPTIONS();
