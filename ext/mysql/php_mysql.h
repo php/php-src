@@ -83,7 +83,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long default_port;
 	char *default_host, *default_user, *default_password;
 	char *default_socket;
-ZEND_END_MODULE_GLOBALS(mysql);
+ZEND_END_MODULE_GLOBALS(mysql)
 
 #ifdef ZTS
 # define MySLS_D	zend_mysql_globals *mysql_globals
