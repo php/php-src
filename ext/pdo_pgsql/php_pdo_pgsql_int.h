@@ -46,6 +46,8 @@ typedef struct {
 	Oid          pgsql_type;
 	long         intval;
 	zend_bool    boolval;
+	char         *lobval;
+	size_t       loblen;
 } pdo_pgsql_column;
 
 typedef struct {
