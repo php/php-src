@@ -1345,7 +1345,7 @@ PHP_FUNCTION(inet_pton)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(buffer, 1);
+	RETURN_STRINGL(buffer, af == AF_INET ? 4 : 16, 1);
 }
 /* }}} */
 #endif /* HAVE_INET_PTON */
