@@ -131,8 +131,27 @@ ZEND_DECLARE_MODULE_GLOBALS(zlib)
 ZEND_GET_MODULE(php_zlib)
 #endif
 
+/* {{{ OnUpdate_zlib_output_compression */
+static PHP_INI_MH(OnUpdate_zlib_output_compression)
+{
+	char *ini_value;
+
+	ini_value = php_ini_string("output_handler", sizeof("output_handler"), 0); 
+
+	if (new_value != NULL && strlen(ini_value) != 0) {
+		php_error(E_CORE_ERROR,"Cannot use both zlib.output_compression and output_handler!!");
+		return FAILURE;
+	}
+
+	OnUpdateInt(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+
+	return SUCCESS;
+}
+/* }}} */
+
+
 PHP_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("zlib.output_compression",   "0",    PHP_INI_ALL,     OnUpdateInt,        output_compression,   zend_zlib_globals,     zlib_globals)
+    STD_PHP_INI_BOOLEAN("zlib.output_compression", "0", PHP_INI_ALL, OnUpdate_zlib_output_compression, output_compression, zend_zlib_globals, zlib_globals)
 PHP_INI_END()
 
 /* {{{ phpi_destructor_gzclose

@@ -97,6 +97,9 @@ output_handler =
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)
+;
+; Note: output_handler must be empty if this is set 'On' !!!!
+;
 zlib.output_compression = Off
 
 ; Implicit flush tells PHP to tell the output layer to flush itself
