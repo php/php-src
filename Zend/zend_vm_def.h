@@ -3254,6 +3254,9 @@ ZEND_VM_HANDLER(79, ZEND_EXIT, CONST|TMP|VAR|UNUSED|CV, ANY)
 {
 	zend_op *opline = EX(opline);
 
+	if (EG(exception)) {
+		ZEND_VM_RETURN();
+	}
 	if (OP1_TYPE != IS_UNUSED) {
 		zval *ptr;
 		zend_free_op free_op1;

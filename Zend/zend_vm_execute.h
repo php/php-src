@@ -2081,6 +2081,9 @@ static int ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 
+	if (EG(exception)) {
+		ZEND_VM_RETURN();
+	}
 	if (IS_CONST != IS_UNUSED) {
 		zval *ptr;
 		zend_free_op free_op1;
@@ -4540,6 +4543,9 @@ static int ZEND_EXIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 
+	if (EG(exception)) {
+		ZEND_VM_RETURN();
+	}
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zval *ptr;
 		zend_free_op free_op1;
@@ -7752,6 +7758,9 @@ static int ZEND_EXIT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 
+	if (EG(exception)) {
+		ZEND_VM_RETURN();
+	}
 	if (IS_VAR != IS_UNUSED) {
 		zval *ptr;
 		zend_free_op free_op1;
@@ -13291,6 +13300,9 @@ static int ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 
+	if (EG(exception)) {
+		ZEND_VM_RETURN();
+	}
 	if (IS_UNUSED != IS_UNUSED) {
 		zval *ptr;
 		zend_free_op free_op1;
@@ -18404,6 +18416,9 @@ static int ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 
+	if (EG(exception)) {
+		ZEND_VM_RETURN();
+	}
 	if (IS_CV != IS_UNUSED) {
 		zval *ptr;
 		zend_free_op free_op1;
@@ -30960,6 +30975,9 @@ static int ZEND_EXIT_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 
+	if (EG(exception)) {
+		ZEND_VM_RETURN();
+	}
 	if (opline->op1.op_type != IS_UNUSED) {
 		zval *ptr;
 		zend_free_op free_op1;
