@@ -179,6 +179,7 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 		/* update the buffer length */
 		if (actual_read > 0) {
 			self->bytes_in_buffer += actual_read;
+			SG(read_post_bytes) += actual_read;
 		}
 	}
 
