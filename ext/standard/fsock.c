@@ -232,20 +232,12 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			timeout.tv_usec = conv % 1000000;
 			/* fall-through */
 		case 4:
-			if(!ParameterPassedByReference(ht,4)) {
-				php_error(E_WARNING,"error string argument to fsockopen not passed by reference");
-			}
-			pval_copy_constructor(*args[3]);
-			(*args[3])->value.str.val = empty_string;
-			(*args[3])->value.str.len = 0;
-			(*args[3])->type = IS_STRING;
+			zval_dtor(*args[3]);
+			ZVAL_STRING(*args[3],"",1);
 			/* fall-through */
 		case 3:
-			if(!ParameterPassedByReference(ht,3)) {
-				php_error(E_WARNING,"error argument to fsockopen not passed by reference");
-			}
-			(*args[2])->type = IS_LONG;
-			(*args[2])->value.lval = 0;
+			zval_dtor(*args[2]);
+			ZVAL_LONG(*args[2],0);
 			break;
 	}
 	convert_to_string_ex(args[0]);
@@ -294,10 +286,14 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
   
 		if (connect_nonb(socketd, (struct sockaddr *)&server, sizeof(server), &timeout) == SOCK_CONN_ERR) {
 			CLOSE_SOCK(1);
-			if(arg_count>2) (*args[2])->value.lval = errno;
-			if(arg_count>3) {
-				(*args[3])->value.str.val = estrdup(strerror(errno));
-				(*args[3])->value.str.len = strlen((*args[3])->value.str.val);
+
+			if (arg_count>2) {
+				zval_dtor(*args[2]);
+				ZVAL_LONG(*args[2],errno);
+			}
+			if (arg_count>3) {
+				zval_dtor(*args[3]);
+				ZVAL_STRING(*args[3],strerror(errno),1);
 			}
 			RETURN_FALSE;
 		}
