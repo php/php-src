@@ -20,7 +20,7 @@ if test "$PHP_XMLRPC" != "no"; then
   AC_DEFINE(HAVE_XMLRPC,1,[ ])
 
   testval=no
-  for i in $PHP_EXPAT_DIR $XMLRPC_DIR; do
+  for i in /usr /usr/local $PHP_EXPAT_DIR $XMLRPC_DIR; do
     if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.$SHLIB_SUFFIX_NAME; then
       AC_DEFINE(HAVE_LIBEXPAT2,1,[ ])
       PHP_ADD_LIBRARY_WITH_PATH(expat, $i/lib, XMLRPC_SHARED_LIBADD)
@@ -28,6 +28,10 @@ if test "$PHP_XMLRPC" != "no"; then
       testval=yes
     fi
   done
+
+  if test "$testval" = "no"; then
+    AC_MSG_ERROR(XML-RPC support requires libexpat. Use --with-expat-dir=<DIR>)
+  fi
 
 
 dnl  found_iconv=no
