@@ -113,7 +113,7 @@ int zend_load_extension(char *path)
 	return SUCCESS;
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
-	return FAILURE
+	return FAILURE;
 #endif
 }
 
