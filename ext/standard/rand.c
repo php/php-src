@@ -31,6 +31,10 @@
 # include <windows.h>
 #endif
 
+#if defined(NETWARE) && !defined(NEW_LIBC)  /* For getpid() used below */
+#include "netware/pwd.h"
+#endif
+
 #include "php.h"
 #include "php_math.h"
 #include "php_rand.h"
