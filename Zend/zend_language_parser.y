@@ -318,7 +318,6 @@ namespace_statement:
 	|	namespace_const_declaration ';'
 	|	function_declaration_statement
 	|	class_declaration_statement
-	|	namespace_declaration_statement
 ;
 
 namespace_var_declaration_list:
