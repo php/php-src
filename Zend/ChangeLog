@@ -1,3 +1,11 @@
+2002-10-19  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.h: - Fix compile warning.
+
+    * zend_opcode.c
+      zend_compile.h
+      zend_execute.c: - Improve opcode dispatching
+
 2002-10-18  Andi Gutmans  <andi@zend.com>
 
     * zend.c

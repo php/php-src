@@ -1,3 +1,74 @@
+2002-10-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/strings/implode.phpt:
+    - Hopefully fix test file problems
+
+2002-10-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dio/dio.c: Silence compile warning.
+
+    * main/network.c: Silence compile warning, when compiling --with-openssl.
+
+    * main/network.c: Fixed a typo.
+
+2002-10-19  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c: a silly comment typo
+
+    * ext/oci8/oci8.c:
+    - fixed proto for OciBindByName to represent the forth parameter optional
+
+2002-10-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4:
+    --with-zlib-dir has to be defined here to enable phpize build
+
+2002-10-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams.c: made fgets() binary safe.
+    php_stream_gets is now a macro which calls php_stream_get_line. The latter
+    has an option argument to return the number of bytes in the line.
+    Functions like fgetcsv(), fgetss() can be made binary safe by calling
+    php_stream_get_line directly.
+
+
+2002-10-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pgsql/pgsql.c: - Style polizei =)
+
+2002-10-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Probable fix for #19944
+
+2002-10-19  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c
+      ext/exif/tests/005.phpt
+      ext/exif/tests/test5.jpg:
+    MFH: Allow ifd start at offset other than 00000008h and provide testcase.
+
+    * ext/exif/exif.c
+      ext/exif/tests/005.phpt
+      ext/exif/tests/test5.jpg:
+    Allow ifd start at offset other than 00000007h and provide testcase.
+
+2002-10-19  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+    Revert invalid patch. It seems the real problem is in php error
+    function(s). It exits with return code -1 when php_error_docref()
+    is called.
+
+    There is custom error handler and without custom error handler,
+    it is working.
+
+    * ext/pgsql/pgsql.c: Skip field when there is obvious error.
+    Fixed freeing of wrong zval.
+
+    * ext/pgsql/pgsql.c: Fixed typo.
+
 2002-10-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/url.c:
