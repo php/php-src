@@ -38,10 +38,10 @@ typedef union _zend_function *(*zend_object_get_constructor_t)(zval *object TSRM
 /* Get method parameter mask - by value/by reference, etc. */
 
 /* Object maintenance/destruction */
-typedef void (*zend_object_add_ref_t)(zval *object);
-typedef void (*zend_object_del_ref_t)(zval *object);
-typedef void (*zend_object_delete_obj_t)(zval *object);
-typedef zend_object_value (*zend_object_clone_obj_t)(zval *object);
+typedef void (*zend_object_add_ref_t)(zval *object TSRMLS_DC);
+typedef void (*zend_object_del_ref_t)(zval *object TSRMLS_DC);
+typedef void (*zend_object_delete_obj_t)(zval *object TSRMLS_DC);
+typedef zend_object_value (*zend_object_clone_obj_t)(zval *object TSRMLS_DC);
 
 typedef int (*zend_object_get_class_name_t)(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC);
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2 TSRMLS_DC);
