@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
+   | Authors: Onn Ben-Zvi <onn@zend.com>                                  |
    +----------------------------------------------------------------------+
  */
 
@@ -66,8 +66,8 @@ ZEND_GET_MODULE(fribidi)
 PHP_MINIT_FUNCTION(fribidi)
 {
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_UTF8", FRIBIDI_CHARSET_UTF8, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_6", FRIBIDI_CHARSET_8859_6, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_8", FRIBIDI_CHARSET_8859_8, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_6", FRIBIDI_CHARSET_ISO8859_6, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_8", FRIBIDI_CHARSET_ISO8859_8, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CP1255", FRIBIDI_CHARSET_CP1255, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_CP1256", FRIBIDI_CHARSET_CP1256, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_ISIRI_3342", FRIBIDI_CHARSET_ISIRI_3342, CONST_CS | CONST_PERSISTENT);
@@ -108,13 +108,13 @@ PHP_MINFO_FUNCTION(fribidi)
 /*             Possible values (i.e., char sets supported)      */
 /*              FRIBIDI_CHARSET_UTF8                            */
 /*              FRIBIDI_CHARSET_8859_6                          */  
-/*				FRIBIDI_CHARSET_8859_8          */
-/*				FRIBIDI_CHARSET_CP1255          */
-/*				FRIBIDI_CHARSET_CP1256          */
-/*				FRIBIDI_CHARSET_ISIRI_3342      */
+/*				FRIBIDI_CHARSET_8859_8                          */
+/*				FRIBIDI_CHARSET_CP1255                          */
+/*				FRIBIDI_CHARSET_CP1256                          */
+/*				FRIBIDI_CHARSET_ISIRI_3342                      */
 /*                                                              */
 /* Output: on success: The visual string.                       */
-/*         on failure:						*/ 
+/*         on failure:                                          */ 
 /*--------------------------------------------------------------*/           
 
 /* {{{ proto string fribidi_log2vis(string str, string direction, int charset)
@@ -174,10 +174,10 @@ PHP_FUNCTION(fribidi_log2vis)
 		case FRIBIDI_CHARSET_UTF8:
 			utf8_len=fribidi_utf8_to_unicode(inString, u_logical_str);
 			break;
-		case FRIBIDI_CHARSET_8859_6:
+		case FRIBIDI_CHARSET_ISO8859_6:
 			fribidi_iso8859_6_to_unicode(inString, u_logical_str);
 			break;
-		case FRIBIDI_CHARSET_8859_8:
+		case FRIBIDI_CHARSET_ISO8859_8:
 			fribidi_iso8859_8_to_unicode(inString, u_logical_str);
 			break;
 		case FRIBIDI_CHARSET_CP1255:
@@ -211,10 +211,10 @@ PHP_FUNCTION(fribidi_log2vis)
 		case FRIBIDI_CHARSET_UTF8:
 			fribidi_unicode_to_utf8(u_visual_str, utf8_len , outString);
 			break;
-		case FRIBIDI_CHARSET_8859_6:
+		case FRIBIDI_CHARSET_ISO8859_6:
 			fribidi_unicode_to_iso8859_6(u_visual_str, len , outString);
 			break;
-		case FRIBIDI_CHARSET_8859_8:
+		case FRIBIDI_CHARSET_ISO8859_8:
 			fribidi_unicode_to_iso8859_8(u_visual_str, len , outString);
 			break;
 		case FRIBIDI_CHARSET_CP1255:
