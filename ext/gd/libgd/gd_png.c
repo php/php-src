@@ -667,20 +667,10 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
       /* Our little 7-bit alpha channel trick costs us a bit here. */
       png_bytep *row_pointers;
       row_pointers = gdMalloc (sizeof (png_bytep) * height);
-      if (row_pointers == NULL)
-	{
-	  php_gd_error("gd-png error: unable to allocate row_pointers\n");
-	}
       for (j = 0; j < height; ++j)
 	{
 	  int bo = 0;
-	  if ((row_pointers[j] = (png_bytep) gdMalloc (width * channels)) == NULL)
-	    {
-	      php_gd_error("gd-png error: unable to allocate rows\n");
-	      for (i = 0; i < j; ++i)
-		gdFree (row_pointers[i]);
-	      return;
-	    }
+	  row_pointers[j] = (png_bytep) gdMalloc (width * channels);
 	  for (i = 0; i < width; ++i)
 	    {
 	      unsigned char a;
@@ -714,20 +704,10 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 	{
 	  png_bytep *row_pointers;
 	  row_pointers = gdMalloc (sizeof (png_bytep) * height);
-	  if (row_pointers == NULL)
-	    {
-	      php_gd_error("gd-png error: unable to allocate row_pointers\n");
-	    }
 	  for (j = 0; j < height; ++j)
 	    {
-	      if ((row_pointers[j] = (png_bytep) gdMalloc (width)) == NULL)
-		{
-		  php_gd_error("gd-png error: unable to allocate rows\n");
-		  for (i = 0; i < j; ++i)
-		    gdFree (row_pointers[i]);
-		  return;
-		}
-	      for (i = 0; i < width; ++i)
+	      row_pointers[j] = (png_bytep) gdMalloc (width);
+	      for (i = 0; i < width; ++i) 
 		row_pointers[j][i] = mapping[im->pixels[j][i]];
 	    }
 

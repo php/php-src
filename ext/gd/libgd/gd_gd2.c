@@ -25,8 +25,8 @@
 
 /* Use this for commenting out debug-print statements. */
 /* Just use the first '#define' to allow all the prints... */
-#define GD2_DBG(s) (s) 
-//#define GD2_DBG(s)
+/* #define GD2_DBG(s) (s) */
+#define GD2_DBG(s)
 
 typedef struct
   {
@@ -184,7 +184,7 @@ _gd2CreateFromFile (gdIOCtxPtr in, int *sx, int *sy,
       goto fail1;
     }
 
-  im = gdImageCreate (*sx, *sy);
+  im = gdImageCreateTrueColor(*sx, *sy);
   if (im == NULL)
     {
       GD2_DBG(php_gd_error("Could not create gdImage\n"));
@@ -393,7 +393,7 @@ gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 			  int r = chunkBuf[chunkPos++] << 16;
 			  int g = chunkBuf[chunkPos++] << 8;
 			  int b = chunkBuf[chunkPos++];
-			  im->pixels[y][x] = a + r + g + b;
+			  im->tpixels[y][x] = a + r + g + b;
 			}
 		      else
 			{
@@ -818,10 +818,10 @@ _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 		{
 		  for (x = xlo; x < xhi; x++)
 		    {
-		      int p = im->pixels[y][x];
 		      GD2_DBG(php_gd_error("%d...",x));
 		      if (im->trueColor)
 			{
+			  int p = im->tpixels[y][x];
 			  chunkData[chunkLen++] = gdTrueColorGetAlpha (p);
 			  chunkData[chunkLen++] = gdTrueColorGetRed (p);
 			  chunkData[chunkLen++] = gdTrueColorGetGreen (p);
@@ -829,7 +829,7 @@ _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 			}
 		      else
 			{
-			  chunkData[chunkLen++] = p;
+			  chunkData[chunkLen++] = im->pixels[y][x];
 			}
 		    };
 		}
