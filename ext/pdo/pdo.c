@@ -99,7 +99,7 @@ static void php_pdo_init_globals(zend_pdo_globals *pdo_globals)
 PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 {
 	if (driver->api_version != PDO_DRIVER_API) {
-		zend_error(E_ERROR, "PDO: driver %s requires PDO API version %d; this is PDO version %d",
+		zend_error(E_ERROR, "PDO: driver %s requires PDO API version %ld; this is PDO version %d",
 			driver->driver_name, driver->api_version, PDO_DRIVER_API);
 		return FAILURE;
 	}
