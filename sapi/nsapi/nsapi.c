@@ -210,12 +210,19 @@ PHP_INI_END()
 
 /* newer servers hide this functions from the programmer so redefine the functions dynamically
    thanks to Chris Elving from Sun for the function declarations */
-
 typedef int (*nsapi_servact_prototype)(Session *sn, Request *rq);
 nsapi_servact_prototype nsapi_servact_uri2path = NULL;
 nsapi_servact_prototype nsapi_servact_pathchecks = NULL;
 nsapi_servact_prototype nsapi_servact_fileinfo = NULL;
 nsapi_servact_prototype nsapi_servact_service = NULL;
+
+#ifdef PHP_WIN32
+/* The following dll-names for nsapi are in use at this time. The undocumented
+ * servact_* functions are always in the newest one, older ones are supported by
+ * the server only by wrapping the function table nothing else. So choose
+ * the newest one found in process space for dynamic linking */
+char *nsapi_dlls[] = { "ns-httpd40.dll", "ns-httpd36.dll", "ns-httpd35.dll", "ns-httpd30.dll", NULL };
+#endif
 
 /* {{{ php_nsapi_init_dynamic_symbols
  */
@@ -231,13 +238,10 @@ static void php_nsapi_init_dynamic_symbols(void)
 	/* find address of internal NSAPI functions */
 #ifdef PHP_WIN32
 	register int i;
-	char module_name[11];
 	DL_HANDLE module = NULL;
-	/* find a LOADED dll module named "ns-httpdX0", where X is version
-	 * currently there are server-dlls in version 2, 3 and 4 in use */
-	for (i=4; i>=2; i--) {
-		sprintf(module_name, "ns-httpd%d0", i);
-		if (module = GetModuleHandle(module_name)) {
+	/* find a LOADED dll module from nsapi_dlls */
+	for (i=0; nsapi_dlls[i]; i++) {
+		if (module = GetModuleHandle(nsapi_dlls[i])) {
 			break;
 		}
 	}
@@ -295,7 +299,8 @@ PHP_MINFO_FUNCTION(nsapi)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "NSAPI support", "enabled");
 	php_info_print_table_row(2, "Server Software", system_version());
-	php_info_print_table_row(2, "Sub-requests with virtual()", (nsapi_servact_service)?"enabled":"not supported on this platform" );
+	php_info_print_table_row(2, "Sub-requests with virtual()",
+	 (nsapi_servact_service)?((zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0))?"not supported with zlib.output_compression":"enabled"):"not supported on this platform" );
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -324,6 +329,9 @@ PHP_FUNCTION(virtual)
 
 	if (!nsapi_servact_service) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Sub-requests not supported on this platform", (*uri)->value.str.val);
+		RETURN_FALSE;
+	} else if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include uri '%s' - Sub-requests do not work with zlib.output_compression", (*uri)->value.str.val);
 		RETURN_FALSE;
 	} else {
 		php_end_ob_buffers(1 TSRMLS_CC);
