@@ -38,6 +38,7 @@ ZEND_API void zend_llist_init(zend_llist *l, size_t size, void (*dtor)(void *dat
 ZEND_API void zend_llist_add_element(zend_llist *l, void *element);
 ZEND_API void zend_llist_del_element(zend_llist *l, void *element);
 ZEND_API void zend_llist_destroy(zend_llist *l);
+ZEND_API void zend_llist_clean(zend_llist *l);
 ZEND_API void zend_llist_remove_tail(zend_llist *l);
 ZEND_API void zend_llist_copy(zend_llist *dst, zend_llist *src);
 ZEND_API void zend_llist_apply(zend_llist *l, void (*func)(void *data));
