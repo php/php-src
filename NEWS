@@ -82,6 +82,8 @@ PHP 4.0                                                                    NEWS
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
 ?? ??? 200?, Version 4.1.0
+- Fixed a bug which caused set_time_limit() to affect all requests to an
+  Apache child. (Zeev)
 - Removed the sablotron extension in favor of the new XSLT extension.
   (Sterling)
 - Fixed a bug preg_match_all() that would return results under improper indices
