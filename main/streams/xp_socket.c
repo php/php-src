@@ -267,7 +267,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 	switch(castas)	{
 		case PHP_STREAM_AS_STDIO:
 			if (ret)	{
-				*ret = fdopen(sock->socket, stream->mode);
+				*(FILE**)ret = fdopen(sock->socket, stream->mode);
 				if (*ret)
 					return SUCCESS;
 				return FAILURE;
@@ -276,7 +276,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD:
 			if (ret)
-				*ret = (void*)sock->socket;
+				*(int*)ret = sock->socket;
 			return SUCCESS;
 		default:
 			return FAILURE;
