@@ -5,7 +5,8 @@ supplied_flag=$1
 # do some version checking for the tools we use
 if test "$1" = "--force"; then
     shift
-elif test -r buildconf.stamp ; then 
+# this is a posix correct "test -nt"
+elif test "`ls -t buildconf buildconf.stamp|head -1`" != "buildconf"; then
     :
 else
     echo "buildconf: checking installation..."
