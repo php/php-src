@@ -762,9 +762,9 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
             case 'n':
                 if (!(flags & SCAN_SUPPRESS)) {
                     if (numVars) {
-                        current = args[objIndex++];
-                        convert_to_long( *current );
-                        ZVAL_STRINGL( *current, string, end-string, 1);
+						current = args[objIndex++];
+                        zval_dtor( *current );
+                        ZVAL_LONG( *current, (long)(string - baseString) );
                     } else {
                         add_index_long(*return_value, objIndex++, string - baseString);
                     }
@@ -883,8 +883,8 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
             if (!(flags & SCAN_SUPPRESS)) {
                 if (numVars) {
                     current = args[objIndex++];
-                    convert_to_string( *current );
-                    ZVAL_STRINGL( *current, string, end-string, 1);
+					zval_dtor( *current );
+					ZVAL_STRINGL( *current, string, end-string, 1);
                 } else {
                     add_index_stringl( *return_value, objIndex++, string, end-string, 1);
                 }
