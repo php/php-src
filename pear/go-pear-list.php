@@ -7,7 +7,7 @@
  */
 $packages  = array(
 "PEAR"                  =>    "1.3.1",
-"Mail"                  =>    "1.1.2",
+"Mail"                  =>    "1.1.3",
 "Net_SMTP"              =>    "1.2.5",
 "Net_Socket"            =>    "1.0.1",
 "PHPUnit"               =>    "2.0.0beta1",
