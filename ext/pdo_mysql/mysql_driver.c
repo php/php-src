@@ -249,7 +249,8 @@ static struct pdo_dbh_methods mysql_methods = {
 	NULL,
 	pdo_mysql_last_insert_id,
 	pdo_mysql_fetch_error_func,
-	pdo_mysql_get_attribute
+	pdo_mysql_get_attribute,
+	NULL /* check_liveness: TODO: ping */
 };
 
 #ifndef PDO_MYSQL_UNIX_ADDR
