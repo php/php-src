@@ -22,7 +22,7 @@
 	TODO:
 	- Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time
 	- Make new modifier, similar to /e, that passes matches to
-      a user-defined function
+	  a user-defined function
 */
 
 #include "php.h"
