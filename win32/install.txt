@@ -10,7 +10,6 @@ Installtion instructions
 Apache:
 1. Stop the Apache Webserver.
 Edit the httpd.conf and put in these lines, modified to your environment:
-2. Unzip the Package to c:\php, now move php4ts.dll to the windows/system(32) directory, overwritte any older file!
 
 # for the apache module
 LoadModule php4_module c:/php/sapi/php4apache.dll
@@ -21,8 +20,11 @@ ScriptAlias /php4/ "C:/php/"
 Action application/x-httpd-php4 "/php4/php.exe"
 AddType application/x-httpd-php4 .php
 
+2. Unzip the Package to c:\php, now move php4ts.dll to the windows/system(32) directory, overwritte any older file!
+
 3. Copy the php.ini-dist to your sysroot (directory where you installed windows), rename it to php.ini, and
 edit the php.ini to fit your needs.
+
 4. Restart the Apache server.
 
 
