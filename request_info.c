@@ -92,7 +92,7 @@ int php3_init_request_info(void *conf)
 	r = ((request_rec *) SG(server_context));
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
-	request_info.filename = r->filename;
+	request_info.script_filename = r->filename;
 
 	return SUCCESS;
 }
