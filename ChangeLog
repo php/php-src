@@ -1,3 +1,129 @@
+2003-02-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/php_mysqli.h:
+      Allow mysqli to be built when imap (c-client) is used.
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c
+      ext/mysqli/mysqli_api.c:
+      CS fixes.
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      Fixed compile warnings.
+
+2003-02-14  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/045.phpt:
+      test for bind_result with show
+
+2003-02-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      Slight fix for consistency
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-02-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      a little bit slower but somewhat tricky and more flexible and it does not
+      allocate static buffers anymore
+
+2003-02-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      Fixed wrong commit: s/&/*/
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      MFH(r1.358): Fixed a str_replace() bug similar to bug #22224
+
+    * ext/standard/string.c:
+      Fixed a str_replace() bug similar to bug #22224
+
+    * (PHP_4_3)
+      ext/standard/string.c
+      ext/standard/tests/strings/bug22224.phpt:
+      MFH(r1.357): Fixed bug #22224
+      MFH: Added test case for the bug
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug22224.phpt:
+      Fixed bug #22224 (implode changes object references in array)
+      Added test case for the bug
+
+2003-02-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      Fixed a typo.
+
+2003-02-14  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      fixed compiler warning
+
+    * ext/mysqli/mysqli_api.c:
+      fixed a bug in mysqli_fetch
+      removed c++ comment (thx to Jani :)
+      fixed compiler warning
+
+2003-02-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      Missing portion of the previous patch.
+
+    * ext/mysqli/php_mysqli.h:
+      Buncha Fixes.
+       * Fixed a number of memory leaks.
+       * Fixed some php_error_docref() calls that tried to print non-existent
+         arguments.
+       * Fixed some signed/unsigned problems.
+       * Fixed the MYSQLI_FETCH_RESOURCE macro so that compilers do not complain
+         about un-initialized variables.
+       * CS fixes.
+
+2003-02-14  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_api.c:
+      bind_result fix
+
+    * ext/mysqli/mysqli.c:
+      fixed a bug in prepare/bind
+
+2003-02-14  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cgi/cgi_main.c:
+      MFB
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      Added missing $Id$ tag
+
+2003-02-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * .gdbinit:
+      add really nice dump_bt function for debugging in gdb
+
+2003-02-14  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      configure.in
+      ext/standard/config.m4:
+      - MFH, do not add libcrypt if crypt() is provided by libc.
+
+    * configure.in
+      ext/standard/config.m4:
+      - Don't add libcrypt if the crypt() function is provided already.
+        (by libc, like in HP-UX)
+
 2003-02-13  Sara Golemon  <php@alphaweb.net>
 
     * ext/ftp/ftp.c:
