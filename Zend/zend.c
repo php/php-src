@@ -27,9 +27,11 @@
 #ifdef ZTS
 #	define GLOBAL_FUNCTION_TABLE	global_function_table
 #	define GLOBAL_CLASS_TABLE		global_class_table
+#	define GLOBAL_CONSTANTS_TABLE	global_constants_table
 #else
 #	define GLOBAL_FUNCTION_TABLE	CG(function_table)
 #	define GLOBAL_CLASS_TABLE		CG(class_table)
+#	define GLOBAL_CONSTANTS_TABLE	CG(zend_constants)
 #endif
 
 /* true multithread-shared globals */
@@ -49,6 +51,7 @@ ZEND_API int executor_globals_id;
 int alloc_globals_id;
 HashTable *global_function_table;
 HashTable *global_class_table;
+HashTable *global_constants_table;
 #endif
 
 zend_utility_values zend_uv;
@@ -245,7 +248,10 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals)
 
 static void executor_globals_ctor(zend_executor_globals *executor_globals)
 {
-	zend_startup_constants(ELS_C);
+	if (global_constants_table) {
+		zend_startup_constants(executor_globals->zend_constants ELS_CC);
+		zend_copy_constants(executor_globals->zend_constants, global_constants_table);
+	}
 	init_resource_plist(ELS_C);
 }
 
@@ -298,10 +304,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
 	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO)-1;
 
-	/* Prepare data structures */
-#ifndef ZTS
-	zend_startup_constants(ELS_C);
-#endif
 	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1);
@@ -311,6 +313,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
 
 #ifdef ZTS
+	global_constants_table = NULL;
 	compiler_globals_id = ts_allocate_id(sizeof(zend_compiler_globals), (void (*)(void *)) compiler_globals_ctor, (void (*)(void *)) compiler_globals_dtor);
 	executor_globals_id = ts_allocate_id(sizeof(zend_executor_globals), (void (*)(void *)) executor_globals_ctor, (void (*)(void *)) executor_globals_dtor);
 	compiler_globals = ts_resource(compiler_globals_id);
@@ -318,6 +321,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	compiler_globals_dtor(compiler_globals);
 	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
+	zend_startup_constants(executor_globals->zend_constants, executor_globals);
+	GLOBAL_CONSTANTS_TABLE = executor_globals->zend_constants;
+	zend_register_standard_constants(ELS_C);
 #endif
 
 #ifndef ZTS
