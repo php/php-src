@@ -661,7 +661,7 @@ int php_xbithack_handler(request_rec * r)
 static void apache_php_module_shutdown_wrapper(void)
 {
 	apache_php_initialized = 0;
-	sapi_module.shutdown(&sapi_module_conf);
+	sapi_module_conf.shutdown(&sapi_module_conf);
 
 #if MODULE_MAGIC_NUMBER >= 19970728
 	/* This function is only called on server exit if the apache API
@@ -679,7 +679,7 @@ static void apache_php_module_shutdown_wrapper(void)
 static void php_child_exit_handler(server_rec *s, pool *p)
 {
 /*	apache_php_initialized = 0; */
-	sapi_module.shutdown(&sapi_module_conf);
+	sapi_module_conf.shutdown(&sapi_module_conf);
 
 #ifdef ZTS
 	tsrm_shutdown();
