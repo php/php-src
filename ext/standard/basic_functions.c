@@ -1765,7 +1765,7 @@ PHP_FUNCTION(ini_get)
 /* }}} */
 
 /* {{{ proto string ini_set(string varname, string newvalue)
-   Set a configuration option, returns false on error and the old value of the configuration option on failure */
+   Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
 {
 	pval **varname, **new_value;
