@@ -1956,7 +1956,7 @@ int main(void)
 }
   ], [ac_cv_c_bigendian_php=yes], [ac_cv_c_bigendian_php=no], [ac_cv_c_bigendian_php=unknown])
   if test $ac_cv_c_bigendian_php = yes; then
-    AC_DEFINE(WORDS_BIGENDIAN)
+    AC_DEFINE(WORDS_BIGENDIAN, [], [Define if processor uses big-endian word])
   fi
  ])
 ])
