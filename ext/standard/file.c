@@ -1447,32 +1447,28 @@ PHP_FUNCTION(fseek)
 }
 
 /* }}} */
-/* {{{ proto bool mkdir(string pathname, int mode)
+/* {{{ proto bool mkdir(string pathname[, int mode])
    Create a directory */
 
 PHP_FUNCTION(mkdir)
 {
-	zval **arg1, **arg2;
-	int ret;
-	mode_t mode;
+	int dir_len, ret;
+	mode_t mode = 0777;
+	char *dir;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &dir, &dir_len, &mode) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(arg1);
-	convert_to_long_ex(arg2);
 
-	mode = (mode_t) Z_LVAL_PP(arg2);
-
-	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg1), NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+	if (PG(safe_mode) &&(!php_checkuid(dir, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(Z_STRVAL_PP(arg1) TSRMLS_CC)) {
+	if (php_check_open_basedir(dir TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	ret = VCWD_MKDIR(Z_STRVAL_PP(arg1), mode);
+	ret = VCWD_MKDIR(dir, mode);
 	if (ret < 0) {
 		php_error(E_WARNING, "mkdir() failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -2354,6 +2350,6 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
  */
