@@ -1,3 +1,132 @@
+2000-11-02  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen-wrappers.c
+      main/safe_mode.h: - When mode is specified the flag is a don't care
+
+    * main/fopen-wrappers.c: - Missed one of the php_checkuid() places
+
+2000-11-02  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS
+
+2000-11-02  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/link.c
+      main/fopen-wrappers.c
+      ext/filepro/filepro.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/db/db.c
+      ext/dbase/dbase.c:
+    - Use CHECKUID_* #define's instead of cryptic numbers in php_checkuid()
+    - I did not test for validity of the actual php_checkuid() calls and there
+    - might be mistakes in the previous code.
+
+2000-11-02  Zeev Suraski  <zeev@zend.com>
+
+    * genfiles: Update to reflect the changes in the parsers/scanners
+
+2000-11-02  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail.php: spelling. bad chuck.
+
+    * pear/Mail.php
+      pear/Mail/sendmail.php:
+    always prepend Receieved: headers to avoid generating mail that looks like
+    spam, and remove a silly comment from the sendmail backend.
+
+2000-11-02  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/caudium.c:
+    Now correctly detects Pike 7.0 and use the alternative code. It also sends the
+    number of written bytes to the done callback function.
+
+    * ext/standard/info.c: Added Caudium to credit line.
+
+    * sapi/roxen/README: Changed contact information.
+
+    * sapi/caudium/README: Added notice about Caudium websites.
+
+    * sapi/caudium/.cvsignore
+      sapi/caudium/Makefile.in
+      sapi/caudium/README
+      sapi/caudium/TODO
+      sapi/caudium/caudium.c
+      sapi/caudium/config.m4: Initial caudium support.
+
+2000-11-02  Stanislav Malyshev  <stas@zend.com>
+
+    * acinclude.m4: Revert the patch - people don't like it
+
+2000-11-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO: Add note
+
+    * TODO: .
+
+2000-11-02  Stanislav Malyshev  <stas@zend.com>
+
+    * acinclude.m4: Fix issue with Sun CC not detecting readdir_r
+
+2000-11-02  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      ext/standard/output.c:
+    - Fixed a bug that caused PHP not to properly flush its output buffer, if more
+      than one output buffer was used
+
+2000-11-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/README: Update. Someone should really write better docs. =)
+
+    * ext/session/session.c
+      main/SAPI.h
+      main/main.c
+      main/php_logos.c
+      main/php_logos.h
+      main/php_variables.c
+      sapi/apache2filter/sapi_apache2.c: Const'ify part of sapi_request_info.
+
+    query_string, post_data, path_translated, request_uri, auth_user,
+    auth_password and argv0 are modified, so they cannot become const.
+
+    * ext/standard/array.c
+      main/mergesort.c
+      main/php.h: Namespace protect mergesort (caused conflict on Darwin).
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    Namespace protect dir_cmds and kill some warnings
+
+    * sapi/apache2filter/apache_config.c:
+    Restrict php_admin_value to *.conf files.
+
+2000-11-02  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/php4apache.dsp
+      win32/php4dll.dsp
+      win32/php4dllts.dsp: - Fix Windows build
+    - Changed the Apache .dsp to expect the Apache source code files under php_build
+
+2000-11-02  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/sablot.c: Das war nicht gut.
+
+2000-11-02  Zeev Suraski  <zeev@zend.com>
+
+    * main/Makefile.in
+      main/main.c
+      main/php_logos.c
+      main/php_logos.h: Fix a few warnings
+
+    * NEWS: update NEWS
+
+    * sapi/apache/sapi_apache.c:
+    Fix a nasty bug in the shutdown sequence of PHP under Apache.
+
 2000-11-01  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/url_scanner_ex.c
