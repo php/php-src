@@ -75,16 +75,16 @@ PHP_FUNCTION(ezmlm_hash)
 	RETURN_LONG((int) h);
 }
 
-/* {{{ proto int mail(string to, string subject, string message [, string additional_headers])
+/* {{{ proto int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
    Send an email message */
 PHP_FUNCTION(mail)
 {
-	pval **argv[4];
-	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL;
+	pval **argv[5];
+	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
 	int argc;
 	
 	argc = ZEND_NUM_ARGS();
-	if (argc < 3 || argc > 4 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
+	if (argc < 3 || argc > 5 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* To: */
@@ -115,12 +115,17 @@ PHP_FUNCTION(mail)
 		message = NULL;
 	}
 
-	if (argc == 4) {			/* other headers */
+	if (argc >= 4) {			/* other headers */
 		convert_to_string_ex(argv[3]);
 		headers = (*argv[3])->value.str.val;
 	}
 	
-	if (php_mail(to, subject, message, headers)){
+	if (argc == 5) {			/* extra options that get passed to the mailer */
+		convert_to_string_ex(argv[4]);
+		extra_cmd = (*argv[4])->value.str.val;
+	}
+	
+	if (php_mail(to, subject, message, headers, extra_cmd)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -128,7 +133,7 @@ PHP_FUNCTION(mail)
 }
 /* }}} */
 
-int php_mail(char *to, char *subject, char *message, char *headers)
+int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
 #ifdef PHP_WIN32
 	int tsm_err;
@@ -136,6 +141,7 @@ int php_mail(char *to, char *subject, char *message, char *headers)
 	FILE *sendmail;
 	int ret;
 	char *sendmail_path = INI_STR("sendmail_path");
+	char *sendmail_cmd = NULL;
 #endif
 
 #ifdef PHP_WIN32
@@ -147,7 +153,18 @@ int php_mail(char *to, char *subject, char *message, char *headers)
 	if (!sendmail_path) {
 		return 0;
 	}
-	sendmail = popen(sendmail_path, "w");
+	if (extra_cmd != NULL) {
+		sendmail_cmd = emalloc (strlen (sendmail_path) + strlen (extra_cmd) + 2);
+		strcpy (sendmail_cmd, sendmail_path);
+		strcat (sendmail_cmd, " ");
+		strcat (sendmail_cmd, extra_cmd);
+	} else {
+		sendmail_cmd = sendmail_path;
+	}
+
+	sendmail = popen(sendmail_cmd, "w");
+	if (extra_cmd != NULL)
+		efree (sendmail_cmd);
 
 	if (sendmail) {
 		fprintf(sendmail, "To: %s\n", to);
