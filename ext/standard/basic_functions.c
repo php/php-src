@@ -960,7 +960,6 @@ PHP_FUNCTION(constant)
 PHP_FUNCTION(ip2long)
 {
 	zval **str;
-	char tmp_buff[16];
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -968,9 +967,7 @@ PHP_FUNCTION(ip2long)
 
 	convert_to_string_ex(str);
 
-	sprintf(tmp_buff, "%u", ntohl(inet_addr(Z_STRVAL_PP(str))));
-
-	RETURN_STRING(tmp_buff,1);
+	RETURN_LONG(ntohl(inet_addr(Z_STRVAL_PP(str))));
 }
 /* }}} */
 
