@@ -25,11 +25,11 @@ Fixed:
 Open:
 
     the dbase extension         (1)
-    chunk_split                 (3)
-    socket_select               (4)
-    php_imagepolygon		(5)
-    imagesetstyle		(6)
-    bundled gd			(7)
+    chunk_split                 (2)
+    socket_select               (3)
+    php_imagepolygon            (4)
+    imagesetstyle               (5)
+    bundled gd                  (6)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -49,9 +49,9 @@ dbase_numrecords
 dbase_open
 X 
 
-(3) integer overflow in php_chunk_split
+(2) integer overflow in php_chunk_split
 
-(4) heap corruption, dies in efree()/execute()
+(3) heap corruption, dies in efree()/execute()
 
 Methodology
 
