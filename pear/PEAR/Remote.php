@@ -61,7 +61,7 @@ class PEAR_Remote extends PEAR
         };
 
         $fp = fopen($filename, 'rb');
-        if ($fp === null) {
+        if (!$fp) {
             return null;
         }
         $content  = fread($fp, filesize($filename));
