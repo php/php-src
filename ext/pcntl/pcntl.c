@@ -534,13 +534,13 @@ PHP_FUNCTION(pcntl_getpriority)
 	if (errno) {
 		switch (errno) {
 			case ESRCH:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: No process was located using the given parameters.", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: No process was located using the given parameters.", errno);
 				break;
 			case EINVAL:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: Invalid identifier flag.", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: Invalid identifier flag.", errno);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %l has occured.", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %d has occured.", errno);
 				break;
 		}
 		RETURN_FALSE;
@@ -567,19 +567,19 @@ PHP_FUNCTION(pcntl_setpriority)
 	if (setpriority(who, pid, pri)) {
 		switch (errno) {
 			case ESRCH:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: No process was located using the given parameters.", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: No process was located using the given parameters.", errno);
 				break;
 			case EINVAL:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: Invalid identifier flag.", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: Invalid identifier flag.", errno);
 				break;
 			case EPERM:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller.", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: A process was located, but neither its effective nor real user ID matched the effective user ID of the caller.", errno);
 				break;
 			case EACCES:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%l: Only a super user may attempt to increase the process priority.", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d: Only a super user may attempt to increase the process priority.", errno);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %l has occured.", errno);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error %d has occured.", errno);
 				break;
 		}
 		RETURN_FALSE;
