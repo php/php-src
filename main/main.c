@@ -1009,11 +1009,14 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	php_core_globals *core_globals;
 #endif
+
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 #endif
 #ifdef PHP_WIN32
+	CoInitialize(NULL);
+
 	{
 		DWORD dwVersion = GetVersion();
 
@@ -1233,6 +1236,10 @@ void php_module_shutdown(TSRMLS_D)
 #endif
 
 	module_initialized = 0;
+	
+#ifdef PHP_WIN32
+	CoUninitialize();
+#endif
 }
 /* }}} */
 
