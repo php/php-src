@@ -123,6 +123,9 @@ function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_get_res_param,	NULL)
 	PHP_FE(udm_get_res_field,	NULL)
 	
+	PHP_FE(udm_cat_list,		NULL)
+	PHP_FE(udm_cat_path,		NULL)
+	
 	PHP_FE(udm_free_res,		NULL)
 	PHP_FE(udm_free_agent,		NULL)
 
@@ -1111,6 +1114,104 @@ DLEXPORT PHP_FUNCTION(udm_error)
 DLEXPORT PHP_FUNCTION(udm_api_version)
 {
 	RETURN_LONG(UDM_VERSION_ID);
+}
+/* }}} */
+
+
+/* {{{ proto array udm_cat_list(int agent, string category)
+   Get mnoGoSearch categories list with the same root */
+DLEXPORT PHP_FUNCTION(udm_cat_list)
+{
+	pval ** yycat, ** yyagent;
+	UDM_AGENT * Agent;
+	char *cat;
+	UDM_CATEGORY *c=NULL;
+	char *buf=NULL;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 2: {
+				if (zend_get_parameters_ex(2, &yyagent,&yycat)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	convert_to_string_ex(yycat);
+	cat = (*yycat)->value.str.val;
+
+	if((c=UdmCatList(Agent,cat))){
+		if (array_init(return_value)==FAILURE) {
+			RETURN_FALSE;
+		}
+		
+		if (!(buf=calloc(1,UDMSTRSIZ+1))) {
+			RETURN_FALSE;
+		}
+		
+		while(c->rec_id){			
+			snprintf(buf, UDMSTRSIZ, "%s%s",c->link[0]?"@ ":"", c->name);				 
+			add_assoc_string(return_value, c->link[0]?c->link:c->path, buf, 1);
+			c++;
+		}
+		
+		free(buf);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto array udm_cat_path(int agent, string category)
+   Get mnoGoSearch categories path from the root to the given catgory */
+DLEXPORT PHP_FUNCTION(udm_cat_path)
+{
+	pval ** yycat, ** yyagent;
+	UDM_AGENT * Agent;
+	char *cat;
+	UDM_CATEGORY *c=NULL;
+	char *buf=NULL;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 2: {
+				if (zend_get_parameters_ex(2, &yyagent,&yycat)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	convert_to_string_ex(yycat);
+	cat = (*yycat)->value.str.val;
+
+	if((c=UdmCatPath(Agent,cat))){
+		if (array_init(return_value)==FAILURE) {
+			RETURN_FALSE;
+		}
+		
+		if (!(buf=calloc(1,UDMSTRSIZ+1))) {
+			RETURN_FALSE;
+		}
+		
+		while(c->rec_id){			
+			snprintf(buf, UDMSTRSIZ, "%s%s",c->link[0]?"@ ":"", c->name);				 
+			add_assoc_string(return_value, c->link[0]?c->link:c->path, buf, 1);
+			c++;
+		}
+		
+		free(buf);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
