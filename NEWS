@@ -13,43 +13,41 @@ PHP 4                                                                      NEWS
 - Changed uniqid() parameters to be optional and allow any prefix length.
   (Marcus)
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
-- Added strpbrk() function, which can search a string for a list of 
-  characters. (Ilia)
-- Added stream_get_line() function. This function will read either 
-  the specified number of bytes or until the ending string is found. (Ilia)
+- Added strpbrk() function. Searches a string for a list of characters. (Ilia)
+- Added stream_get_line() function. Reads either the specified number of bytes
+  or until the ending string is found. (Ilia)
 - Added optional parameter to mkdir() which makes directory creation recursive.
   (Ilia)
 - Added optional parameter to file() which can be used to make the result array
   not contain the line endings and to skip empty lines. (Ilia)
-- Added get_headers() function, it can be used to retrieve headers sent
-  by the browser for the specified URL. (Ilia)
-- Added str_split() function, this function can break down a string into an
-  array of elements based on length. (Ilia)
+- Added get_headers() function. Used to retrieve headers sent by the browser
+  for the specified URL. (Ilia)
+- Added str_split() function. Breaks down a string into an array of elements 
+  based on length. (Ilia)
 - Added man page for CLI version of PHP. (marcus)
-- Added array_walk_recursive() function that can apply user function 
-  recursively to an array. (Ilia)
-- Added command line parameters -B, -F, -R and -E which allow to process
-  stdin line by line (See php -h for more). (Marcus)
+- Added array_walk_recursive() function. Applies user function recursively 
+  to an array. (Ilia)
+- Added command line parameters -B, -F, -R and -E which allow to process stdin
+  line by line (See php -h for more). (Marcus)
 - Added string.base64 stream filter. (Moriyoshi)
-- Added domxml_node_get_path() (Lukas Schröder)
-- Added iconv related functions (Moriyoshi)
+- Added domxml_node_get_path(). (Lukas Schröder)
+- Added iconv related functions. (Moriyoshi)
   . iconv_strlen()
   . iconv_substr()
   . iconv_strpos()
   . iconv_strrpos()
   . iconv_mime_decode()
   . iconv_mime_encode()
-- Added new range() functionality (Ilia)
+- Added new range() functionality. (Ilia)
   . Support for float modifier.
   . Detection of numeric values inside strings passed as high & low.
   . Proper handle the situations where high == low.
 - Added XBM support for GetImageSize(). (Marcus)
 - Added XBM support for bundled GD library. (Marcus)
-- Added imagefilter() function which allows application of various filters.
-  This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)
-- Added imageistruecolor(), only available with GD2. (Pierre-Alain Joye)
-- Added antialiased drawing support (Pierre-Alain Joye, Ilia), available only
-  with bundled GD:
+- Added imagefilter() function. Allows application of various filters.
+  Only available with bundled GD. (Pierre-Alain Joye, Ilia)
+- Added imageistruecolor(). Only available with GD2. (Pierre-Alain Joye)
+- Added antialiased drawing support to bundled GD. (Pierre-Alain Joye, Ilia)
    . imageantialias($im, $flag) to (de)active antialias
    . imageline antialias support
    . imagepolygon antialias support
