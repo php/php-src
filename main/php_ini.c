@@ -67,9 +67,9 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 			if (ini_entry->orig_value && ini_entry->orig_value[0]) {
 				display_string = ini_entry->orig_value;
 				display_string_length = ini_entry->orig_value_length;
-				esc_html = 1;
+				esc_html = !sapi_module.phpinfo_as_text;
 			} else {
-				if (PG(html_errors)) {
+				if (!sapi_module.phpinfo_as_text) {
 					display_string = "<i>no value</i>";
 					display_string_length = sizeof("<i>no value</i>") - 1;
 				} else {
@@ -80,9 +80,9 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		} else if (ini_entry->value && ini_entry->value[0]) {
 			display_string = ini_entry->value;
 			display_string_length = ini_entry->value_length;
-			esc_html=1;
+			esc_html = !sapi_module.phpinfo_as_text;
 		} else {
-			if (PG(html_errors)) {
+			if (!sapi_module.phpinfo_as_text) {
 				display_string = "<i>no value</i>";
 				display_string_length = sizeof("<i>no value</i>") - 1;
 			} else {
@@ -107,7 +107,7 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS
 	if (ini_entry->module_number != module_number) {
 		return 0;
 	}
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		PUTS("<tr>");
 		PUTS("<td class=\"e\">");
 		PHPWRITE(ini_entry->name, ini_entry->name_length - 1);
