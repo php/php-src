@@ -51,7 +51,7 @@
 #define TRUNC_IT(extension, mode) \
 	snprintf(buf, PATH_MAX, "%s" extension, info->path); \
 	buf[PATH_MAX] = '\0'; \
-	if((fd = open(buf, O_CREAT | mode | O_WRONLY, filemode)) == -1) \
+	if((fd = V_OPEN((buf, O_CREAT | mode | O_WRONLY, filemode))) == -1) \
 		return FAILURE; \
 	close(fd);
 
