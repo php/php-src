@@ -29,9 +29,9 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type)
 	return enc;
 }
 
-static encodePtr get_encoder_from_element(sdlPtr sdl, xmlNodePtr node, const char *type)
+static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const char *type)
 {
-	encodePtr enc = NULL;
+	sdlTypePtr ret = NULL;
 	TSRMLS_FETCH();
 
 	if (sdl && sdl->elements) {
@@ -50,24 +50,21 @@ static encodePtr get_encoder_from_element(sdlPtr sdl, xmlNodePtr node, const cha
 			smart_str_0(&nscat);
 
 			if (zend_hash_find(sdl->elements, nscat.c, nscat.len + 1, (void **)&sdl_type) == SUCCESS) {
-				enc = (*sdl_type)->encode;
+				ret = *sdl_type;
 			} else if (zend_hash_find(sdl->elements, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
-				enc = (*sdl_type)->encode;
+				ret = *sdl_type;
 			}
 			smart_str_free(&nscat);
 		} else {
 			if (zend_hash_find(sdl->elements, (char*)type, strlen(type) + 1, (void **)&sdl_type) == SUCCESS) {
-				enc = (*sdl_type)->encode;
+				ret = *sdl_type;
 			}
 		}
 
 		if (cptype) {efree(cptype);}
 		if (ns) {efree(ns);}
 	}
-	if (enc == NULL) {
-		enc = get_conversion(UNKNOWN_TYPE);
-	}
-	return enc;
+	return ret;
 }
 
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
@@ -543,7 +540,10 @@ static sdlPtr load_wsdl(char *struri)
 								} else {
 									element = get_attribute(part->properties, "element");
 									if (element != NULL) {
-										param->encode = get_encoder_from_element(ctx.root, part, element->children->content);
+										param->element = get_element(ctx.root, part, element->children->content);
+										if (param->element) {
+											param->encode = param->element->encode;
+										}
 									}
 								}
 
@@ -640,7 +640,10 @@ static sdlPtr load_wsdl(char *struri)
 								} else {
 									element = get_attribute(part->properties, "element");
 									if (element) {
-										param->encode = get_encoder_from_element(ctx.root, part, element->children->content);
+										param->element = get_element(ctx.root, part, element->children->content);
+										if (param->element) {
+											param->encode = param->element->encode;
+										}
 									}
 								}
 
