@@ -339,17 +339,22 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 
-	if (!php_stream_eof(stream))	{
+	if (!php_stream_eof(stream)) {
+		size_t tmp_line_len;
 		/* get response header */
 
-		if (php_stream_gets(stream, tmp_line, sizeof(tmp_line)-1) != NULL)	{
+		if (_php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval *http_response;
 			int response_code;
 
 			MAKE_STD_ZVAL(http_response);
 			ZVAL_NULL(http_response);
 
-			response_code = atoi(tmp_line + 9);
+			if (tmp_line_len > 9) {
+				response_code = atoi(tmp_line + 9);
+			} else {
+				response_code = 0;
+			}
 			switch(response_code) {
 				case 200:
 				case 302:
@@ -361,11 +366,15 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 							tmp_line, response_code);
 					break;
 				default:
+					/* safety net in the event tmp_line == NULL */
+					if (!tmp_line_len) {
+						tmp_line[0] = '\0';
+					}
 					php_stream_notify_error(context, PHP_STREAM_NOTIFY_FAILURE,
 							tmp_line, response_code);
 			}
 			
-			Z_STRLEN_P(http_response) = strlen(tmp_line);
+			Z_STRLEN_P(http_response) = tmp_line_len;
 			Z_STRVAL_P(http_response) = estrndup(tmp_line, Z_STRLEN_P(http_response));
 			if (Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=='\n') {
 				Z_STRVAL_P(http_response)[Z_STRLEN_P(http_response)-1]=0;
