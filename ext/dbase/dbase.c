@@ -674,7 +674,7 @@ PHP_FUNCTION(dbase_create)
 
 		/* field type */
 		if (zend_hash_index_find(Z_ARRVAL_PP (field), 1, (void **)&value) == FAILURE) {
-			php_error(E_WARNING, "expected field type as sececond element of list in field %d", i);
+			php_error(E_WARNING, "expected field type as second element of list in field %d", i);
 			RETURN_FALSE;
 		}
 		convert_to_string_ex(value);
