@@ -237,7 +237,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	pval *args[5];
 	int *sock=emalloc(sizeof(int));
 	int *sockp;
-	int id, arg_count=ARG_COUNT(ht);
+	int arg_count=ARG_COUNT(ht);
 	int socketd = -1;
 	struct timeval timeout = { 60, 0 };
 	unsigned short portno;
