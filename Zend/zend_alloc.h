@@ -46,7 +46,7 @@ typedef struct _zend_mem_header {
 	THREAD_T thread_id;
 # endif
 #endif
-#if ZEND_DEBUG
+#if ZEND_DEBUG || !defined(ZEND_MM)
     struct _zend_mem_header *pNext;
     struct _zend_mem_header *pLast;
 #endif
