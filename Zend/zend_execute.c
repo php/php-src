@@ -2031,7 +2031,16 @@ send_by_ref:
 					zend_op_array *new_op_array=NULL;
 					zval **original_return_value = EG(return_value_ptr_ptr);
 					int return_value_used;
+					zval *inc_filename = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					zval tmp_inc_filename;
 					CLS_FETCH();
+
+					if (inc_filename->type!=IS_STRING) {
+						tmp_inc_filename = *inc_filename;
+						zval_copy_ctor(&tmp_inc_filename);
+						convert_to_string(&tmp_inc_filename);
+						inc_filename = &tmp_inc_filename;
+					}
 					
 					return_value_used = RETURN_VALUE_USED(opline);
 
@@ -2039,16 +2048,7 @@ send_by_ref:
 						case ZEND_INCLUDE_ONCE: {
 								char *opened_path;
 								int dummy = 1;
-								zval *inc_filename = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-								zval tmp_inc_filename;
 								zend_file_handle file_handle;
-
-								if (inc_filename->type!=IS_STRING) {
-									tmp_inc_filename = *inc_filename;
-									zval_copy_ctor(&tmp_inc_filename);
-									convert_to_string(&tmp_inc_filename);
-									inc_filename = &tmp_inc_filename;
-								}
 
 								file_handle.handle.fp = zend_fopen(inc_filename->value.str.val, &opened_path);
 								file_handle.type = ZEND_HANDLE_FP;
@@ -2071,22 +2071,24 @@ send_by_ref:
 									}
 								}
 								break;
-								if (inc_filename==&tmp_inc_filename) {
-									zval_dtor(&tmp_inc_filename);
-								}
 							}
 							break;
 						case ZEND_INCLUDE:
 						case ZEND_REQUIRE:
-							new_op_array = compile_filename(opline->op2.u.constant.value.lval, get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC ELS_CC);
+						{
+							new_op_array = compile_filename(opline->op2.u.constant.value.lval, inc_filename CLS_CC ELS_CC);
 							if (new_op_array) {
 								pass_include_eval(new_op_array);
 							}
 							break;
+						}
 						case ZEND_EVAL:
-							new_op_array = compile_string(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC);
+							new_op_array = compile_string(inc_filename CLS_CC);
 							break;
 						EMPTY_SWITCH_DEFAULT_CASE()
+					}
+					if (inc_filename==&tmp_inc_filename) {
+						zval_dtor(&tmp_inc_filename);
 					}
 					FREE_OP(&opline->op1, EG(free_op1));
 					Ts[opline->result.u.var].var.ptr = NULL;
