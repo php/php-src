@@ -27,13 +27,13 @@ foreach ($data as $str) {
 	$db->query("INSERT INTO strings VALUES('$str')");
 }
 
-echo "====stdclass====\n";
+echo "====class24====\n";
 $res = $db->query("SELECT a FROM strings", SQLITE_ASSOC);
 while ($res->has_more()) {
 	var_dump($res->fetch_object('class24'));
 }
 
-echo "====class24!====\n";
+echo "====stdclass====\n";
 $res = $db->query("SELECT a FROM strings", SQLITE_ASSOC);
 while ($res->has_more()) {
 	var_dump($res->fetch_object());
@@ -42,7 +42,7 @@ while ($res->has_more()) {
 echo "====DONE!====\n";
 ?>
 --EXPECTF--
-====stdclass====
+====class24====
 class24::__construct
 object(class24)#%d (1) {
   ["a"]=>
@@ -58,7 +58,7 @@ object(class24)#%d (1) {
   ["a"]=>
   string(5) "three"
 }
-====class24!====
+====stdclass====
 object(stdClass)#%d (1) {
   ["a"]=>
   string(3) "one"
