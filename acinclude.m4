@@ -783,6 +783,15 @@ AC_DEFUN(PHP_BUILD_STATIC,[
 ])
 
 dnl
+dnl PHP_BUILD_BUNDLE
+dnl
+AC_DEFUN(PHP_BUILD_BUNDLE,[
+  PHP_BUILD_PROGRAM
+  OVERALL_TARGET=libs/libphp4.bundle
+  php_build_target=static
+])
+
+dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN(PHP_BUILD_PROGRAM,[
@@ -1092,6 +1101,7 @@ AC_DEFUN(PHP_SELECT_SAPI,[
   case "$2" in
   static) PHP_BUILD_STATIC;;
   shared) PHP_BUILD_SHARED;;
+  bundle) PHP_BUILD_BUNDLE;;
   program) PHP_BUILD_PROGRAM;;
   esac
   
