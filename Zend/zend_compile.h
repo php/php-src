@@ -259,6 +259,8 @@ void zend_do_post_incdec(znode *result, znode *op1, int op TSRMLS_DC);
 void zend_do_begin_variable_parse(TSRMLS_D);
 void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC);
 
+void zend_check_writable_variable(znode *variable);
+
 void zend_do_free(znode *op1 TSRMLS_DC);
 
 void zend_do_init_string(znode *result TSRMLS_DC);

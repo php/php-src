@@ -528,6 +528,28 @@ void zend_do_if_end(TSRMLS_D)
 	DEC_BPC(CG(active_op_array));
 }
 
+#if 0
+/* variable parsing type (compile-time) */
+#define ZEND_PARSED_MEMBER			(1<<0)
+#define ZEND_PARSED_METHOD_CALL		(1<<1)
+#define ZEND_PARSED_STATIC_MEMBER	(1<<2)
+#define ZEND_PARSED_FUNCTION_CALL	(1<<3)
+#define ZEND_PARSED_VARIABLE		(1<<4)
+
+#endif
+
+void zend_check_writable_variable(znode *variable)
+{
+	zend_uint type = variable->u.EA.type;
+	
+	if (type & ZEND_PARSED_METHOD_CALL) {
+		zend_error(E_ERROR, "Can't use method return value in write context");
+	}
+	if ((type & ZEND_PARSED_FUNCTION_CALL) &&
+		!(type & (ZEND_PARSED_METHOD_CALL|ZEND_PARSED_MEMBER))) {
+		zend_error(E_ERROR, "Can't use function return value in write context");
+	}
+}
 
 zend_bool zend_variable_buffer_empty(TSRMLS_D)
 {

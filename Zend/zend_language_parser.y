@@ -613,12 +613,13 @@ r_cvar:
 
 
 w_cvar:
-	cvar { zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); $$ = $1; }
+	cvar	{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); $$ = $1; }
+			{ zend_check_writable_variable(&$$); }
 ;
 
-
 rw_cvar:
-	cvar { zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); $$ = $1; }
+	cvar	{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); $$ = $1; }
+			{ zend_check_writable_variable(&$$); }
 ;
 
 r_cvar_without_static_member:
