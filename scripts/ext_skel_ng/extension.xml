@@ -106,6 +106,16 @@
       </code>
     </function>
 
+		<function role='private' name='myfunc'>
+      <code>
+<![CDATA[
+  static int myfunc(void) { 
+    return 23;
+  }
+]]>
+      </code>
+    </function>
+
 
 		<function role='public' name='dummy_int'>
 			<summary>dummy integer conversion</summary>
