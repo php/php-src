@@ -6,14 +6,14 @@
 2002-03-03  James E. Flemer  <jflemer@acm.jhu.edu>
 
     * main/safe_mode.c:
-    (php_checkuid) Added case for root directory when mode is
-                   not CHECKUID_ALLOW_ONLY_DIR.
+    Added case for root directory when mode is not
+    CHECKUID_ALLOW_ONLY_DIR.
 
     * main/safe_mode.c:
-    (php_checkuid) Added case for root directory when mode is
-                   CHECKUID_ALLOW_ONLY_DIR.
+    Added case for root directory when mode is
+    CHECKUID_ALLOW_ONLY_DIR.
 
-    * ext/standard/dir.c: (PHP opendir) Added safe_mode checks on path.
+    * ext/standard/dir.c: Added safe_mode checks on path.
 
 2002-03-03  Thomas V.V.Cox  <cox@idecnet.com>
 
