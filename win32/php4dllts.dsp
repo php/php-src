@@ -450,22 +450,22 @@ SOURCE=..\ext\pcre\pcrelib\chartables.c
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\get.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "LINK_SIZE=2"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\maketables.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "LINK_SIZE=2"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\pcre.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "LINK_SIZE=2"
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\study.c
-# ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "LINK_SIZE=2"
 # End Source File
 # End Group
 # Begin Group "Header Files No. 3"
