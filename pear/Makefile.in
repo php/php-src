@@ -45,6 +45,7 @@ PEAR_FILES = \
 	DB/storage.php \
 	DB/sybase.php \
 	File/Find.php \
+	File/Passwd.php \
 	File/SearchReplace.php \
 	HTML/Form.php \
 	HTTP.php \
