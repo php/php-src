@@ -1096,7 +1096,13 @@ EXEC SQL END DECLARE SECTION;
       }
 
       if(ARG_COUNT(ht)==3) {
-          getParameters(ht, ARG_COUNT(ht), &dummy,&dummy,&pblobidarr);
+          if (getParameters(ht, 3, &dummy, &dummy, &pblobidarr) == FAILURE) {
+              php3_error(E_WARNING,"Can't get blob array param");
+              EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+              EXEC SQL free :statemid;
+              efree(Ifx_Result);
+              RETURN_FALSE;
+          } 
           if (pblobidarr->type != IS_ARRAY) {
               php3_error(E_WARNING,"blob-parameter not an array");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
@@ -1493,7 +1499,13 @@ EXEC SQL END DECLARE SECTION;
       }
       if(ARG_COUNT(ht)==3) {
           Ifx_Result->paramquery=1;
-          getParameters(ht, ARG_COUNT(ht), &dummy,&dummy,&pblobidarr);
+          if (getParameters(ht, 3, &dummy, &dummy,&pblobidarr) == FAILURE) {
+              php3_error(E_WARNING,"Can't get blob array param");
+              EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+              EXEC SQL free :statemid;
+              efree(Ifx_Result);
+              RETURN_FALSE;
+          } 
           if(pblobidarr->type != IS_ARRAY) {
               php3_error(E_WARNING,"blob-parameter not an array");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
