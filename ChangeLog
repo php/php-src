@@ -1,3 +1,52 @@
+2003-03-08  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_profiler.c
+      ext/mysqli/php_mysqli.h:
+      various changes for profiler
+
+2003-03-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gdttf.c:
+      - MFH: Fixed a bug in GD's truecolor TTF handling.
+
+    * ext/gd/gdttf.c:
+      - Fixed a bug in GD's truecolor TTF handling
+
+2003-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/network.c:
+      fix warnings - one left
+
+    * run-tests.php:
+      summary for selective tests if more than one
+      
+
+2003-03-08  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/main.c:
+      fix possible XSS in error messages
+
+    * ext/standard/html.c:
+      wrong place.
+
+2003-03-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4)
+      ext/standard/php_smart_str.h:
+      macro-ize smart string implementation to improve optimization
+      across single calls
+
+2003-03-08  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/html.c:
+      fixing memory leak
+
 2003-03-07  Jani Taskinen  <sniper@iki.fi>
 
     * sapi/isapi/php4isapi.c:
