@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2004, PHP 5.0.0
-- Fixed bug #28751 (SoapServer does not call _autoload()). (Dmitry)
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
 - Changed doc comments to require a single white space after '/**'. (Marcus)
 - Fixed bug #29019 (Database not closing). (Marcus)
@@ -16,6 +15,9 @@ PHP                                                                        NEWS
 - Fixed bug #28789 (ReflectionProperty getValue() fails on public static 
   members). (Marcus)
 - Fixed bug #28771 (Segfault when using xslt and clone). (Rob)
+- Fixed bug #28751 (SoapServer does not call _autoload()). (Dmitry)
+- Fixed bug #28739 (array_*diff() and array_*intersect() not clearing the fci
+  cache before work). (Andrey)
 - Fixed bug #28721 (appendChild() and insertBefore() unset DOMText).(Rob)
 - Fixed bug #28702 (SOAP does not parse WSDL service address correctly). (Dmitry)
 - Fixed bug #28699 (Reflection api bugs). (Marcus)
