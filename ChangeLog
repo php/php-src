@@ -1,3 +1,122 @@
+2002-12-21  Frank M. Kromann  <frank@kromann.info>
+
+    * win32/php4ts_cli.dsp:
+      MFH
+
+    * win32/php4ts_cli.dsp:
+      Create php.exe in cli directory to avoid conflict with the cgi version
+
+2002-12-21  Edin Kadribasic  <edink@proventum.net>
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB:
+      Updated list of bundled windows extensions compiled by
+      Christoph Grottolo <cg@gordimer.net>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Updated list of bundled windows extensions compiled by
+      Christoph Grottolo <cg@gordimer.net>
+
+    * NEWS:
+      MFB: Reflect recent changes to the build process.
+
+    * NEWS:
+      Reflect recent changes to the build process.
+
+2002-12-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/apache2filter/sapi_apache2.c:
+      MFH: Made auth information inaccessible under safe mode
+
+    * sapi/apache2filter/sapi_apache2.c:
+      Made auth information inaccessible under safe mode as discussed in the list
+
+2002-12-21  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * tests/lang/bug20993.phpt:
+      MFB: There won't be a warning/fix on this, so remove the test
+
+    * tests/lang/bug20993.phpt:
+      There won't be a warning/fix on this, so remove the test
+
+2002-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Moved the bug fix news entry to 4.3.0 section, to indicate that it has been
+      MFHed.
+
+    * NEWS:
+      Bug fixing news
+
+    * ext/curl/curl.c:
+      MFH
+
+2002-12-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * NEWS
+      sapi/apache/mod_php4.c:
+      MFB.
+
+    * sapi/apache/mod_php4.c:
+      Make PHP_AUTH_* variables not available in safe mode under Apache. Patch by
+      Philip Olson.
+
+2002-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Bug fixing news & range() changes.
+
+    * ext/curl/interface.c:
+      Fixed bug #20987 (no handling for client certificates).
+
+2002-12-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pgsql/pgsql.c:
+      MFB: Fix typo
+
+    * ext/pgsql/pgsql.c:
+      - Fix typo
+
+2002-12-21  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * tests/lang/bug20993.phpt:
+      MFB: Skip the test, until a proper descision is made
+
+    * tests/lang/bug20993.phpt:
+      Skip the test, until a proper descision is made
+
+2002-12-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/apache2filter/sapi_apache2.c:
+      WS
+
+    * sapi/apache2filter/sapi_apache2.c:
+      Added some notes about the brigade bug detection
+
+2002-12-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * configure.in
+      main/php_version.h:
+      Back to -dev.
+
+    * configure.in
+      main/php_version.h:
+      Go with RC4.
+
+    * NEWS
+      ext/dba/dba.c:
+      MFH
+
+    * NEWS
+      NEWS:
+      -** empty log message ***
+
+    * ext/dba/dba.c:
+      Alias dba_popen() to dba_open() until persistent STDIO streams are
+      implemented.
+
 2002-12-20  Sascha Schumann  <sascha@schumann.cx>
 
     * netware/ZendEngine2.mak:
