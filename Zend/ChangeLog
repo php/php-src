@@ -1,3 +1,19 @@
+2002-09-02  Thies C. Arntzen  <thies@thieso.net>
+
+    * zend_builtin_functions.c:
+    refine last patch. if the argument-stack is not consistent don't try to show
+    arguments. no call to zend_error is made as we might end up in an infinite
+    recursion if called from an error_handler.
+    so: if the arguments to functions aren't shown in debug_backtrace this is 'cause
+    the arument stack was not consistent when debug_backtrace was called.
+
+    * zend_builtin_functions.c:
+    debug_backtrace() now checks the complete argument-stack for consistency.
+
+2002-09-02  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c: MFZE1
+
 2002-09-01  Andi Gutmans  <andi@zend.com>
 
     * zend_llist.c: - Fix leak reported by "l0t3k" <cshmoove@hotmail.com>
