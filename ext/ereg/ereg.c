@@ -236,10 +236,10 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 				add_index_bool(*array, i, 0);
 			}
 		}
-		efree(subs);
 		efree(buf);
 	}
 
+	efree(subs);
 	efree(string);
 	if (err == REG_NOMATCH) {
 		RETVAL_FALSE;
