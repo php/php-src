@@ -49,4 +49,17 @@ if ($fp) {
 	}
 }
 
+$fp = fopen("$extname/$extname.php", "rb");
+if ($fp) {
+	$php_file = fread($fp, filesize("$extname/$extname.php"));
+	fclose($fp);
+	
+	$php_file = str_replace("dl('", "dl('php_", $php_file);
+	$fp = fopen("$extname/$extname.php", "wb");
+	if ($fp) {
+		fwrite($fp, $php_file);
+		fclose($fp);
+	}
+}
+
 ?>
