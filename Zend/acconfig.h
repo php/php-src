@@ -25,9 +25,6 @@
 
 #undef ZEND_DEBUG
 
-/* Define if you want to enable bc style precision math support */
-#define WITH_BCMATH 0
-
 /* Define if you want to enable memory limit support */
 #define MEMORY_LIMIT 0
 
@@ -54,21 +51,6 @@
 
 /* Define if you have stdiostream.h */
 #undef HAVE_STDIOSTREAM_H
-
-#ifdef HAVE_DLFCN_H
-# include <dlfcn.h>
-#endif
-
-#if defined(HAVE_LIBDL) && defined(RTLD_NOW)
-# define DL_LOAD(libname)	dlopen(libname, RTLD_NOW)
-# define DL_UNLOAD		dlclose
-# define DL_FETCH_SYMBOL	dlsym
-# define DL_HANDLE		void *
-# define ZEND_EXTENSIONS_SUPPORT 1
-#else
-# define DL_HANDLE		void *
-# define ZEND_EXTENSIONS_SUPPORT 0
-#endif
 
 #if ZEND_BROKEN_SPRINTF
 int zend_sprintf(char *buffer, const char *format, ...);

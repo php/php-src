@@ -53,6 +53,21 @@
 # include <stdarg.h>
 #endif
 
+#ifdef HAVE_DLFCN_H
+# include <dlfcn.h>
+#endif
+
+#if defined(HAVE_LIBDL) && defined(RTLD_NOW)
+# define DL_LOAD(libname)	dlopen(libname, RTLD_NOW)
+# define DL_UNLOAD		dlclose
+# define DL_FETCH_SYMBOL	dlsym
+# define DL_HANDLE		void *
+# define ZEND_EXTENSIONS_SUPPORT 1
+#else
+# define DL_HANDLE		void *
+# define ZEND_EXTENSIONS_SUPPORT 0
+#endif
+
 #if ZEND_DEBUG
 #define ZEND_FILE_LINE_D				char *__zend_filename, uint __zend_lineno
 #define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
