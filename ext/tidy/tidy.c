@@ -897,6 +897,7 @@ PHP_FUNCTION(tidy_parse_file)
 
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
 		TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+		return;
 	}
 
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
