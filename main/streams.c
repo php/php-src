@@ -656,6 +656,7 @@ static char *php_stream_locate_eol(php_stream *stream TSRMLS_DC)
 PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
 {
 	size_t avail = 0;
+	int did_copy = 0;
 	
 	if (maxlen == 0)
 		return NULL;
@@ -704,6 +705,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			buf += cpysz;
 			maxlen -= cpysz;
 
+			did_copy = 1;
 			if (done) {
 				break;
 			}
@@ -720,6 +722,9 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			}
 		}
 	}
+	
+	if (!did_copy)
+		return NULL;
 	
 	buf[0] = '\0';
 
