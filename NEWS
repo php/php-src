@@ -135,6 +135,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #20857 (snmpset() failed always, patch by: rs@epost.de). (Jani)
 - Fixed bug #20802 (PHP would die silently when memory limit reached). (Ilia)
 - Fixed bug #20715 (odbc could not be compiled as shared extension). (Jani)
+- Fixed bug #20641 (Numeric/decimal datatype overflow on Win32). (Daniela)
 - Fixed bug #20503 (imagesetbrush() not available on Windows). (Edin)
 - Fixed bug #20282 (COM memory leak). (Harald)
 - Fixed bug #20256 (snprintf() not defined on some systems). (Jani)
