@@ -161,12 +161,14 @@ function initialize()
         }
     }
 
-    if (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}")) {
-        $php = $_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}";
-    } elseif (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/php{$ext}")) {
+    if (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/php{$ext}")) {
         $php = $_ENV["TOP_BUILDDIR"]."/php{$ext}";
+    } elseif (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}")) {
+        $php = $_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}";
     } elseif (@is_executable("./php{$ext}")) {
         $php = getcwd() . "/php{$ext}";
+    } elseif (@is_executable("./sapi/cli/php{$ext}")) {
+        $php = getcwd() . "/sapi/cli/php{$ext}";
     }
     if (empty($php)) {
         $php = in_path("php", $windows_p);
