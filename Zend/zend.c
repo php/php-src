@@ -301,6 +301,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals)
 	}
 	zend_init_rsrc_plist(ELS_C);
 	EG(lambda_count)=0;
+	EG(user_error_handler) = NULL;
 }
 
 
@@ -401,6 +402,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #else
 	zend_startup_constants();
 	zend_set_default_compile_time_values(CLS_C);
+	EG(user_error_handler) = NULL;
 #endif
 	zend_register_standard_constants(ELS_C);
 
