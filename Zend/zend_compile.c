@@ -34,11 +34,6 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-static void free_filename(void *p)
-{
-	efree(*((char **) p));
-}
-
 
 static void build_runtime_defined_function_key(zval *result, zval *name, zend_op *opline CLS_DC)
 {
@@ -80,7 +75,7 @@ void init_compiler(CLS_D ELS_DC)
 	CG(active_class_entry) = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
-	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_filename, 0);
+	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);
 	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
 	zend_init_rsrc_list(ELS_C);

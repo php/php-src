@@ -782,3 +782,8 @@ ZEND_API char *zend_make_compiled_string_description(char *name)
 	return compiled_string_description;
 }
 
+
+void free_estring(char **str_p)
+{
+	efree(*str_p);
+}
