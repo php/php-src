@@ -28,6 +28,7 @@
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 #include "php_simplexml.h"
 
 #if HAVE_SPL
@@ -279,13 +280,32 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	xmlAttrPtr      attr = NULL;
 	int             counter = 0;
 	int             is_attr = 0;
-	zval            tmp_zv;
+	zval            tmp_zv, trim_zv;
+
+	if (!member) {
+		/* this happens when the user did: $sxe[] = $value
+		 * and could also be E_PARSE, but use this only during parsing
+		 * but this is during runtime.
+		 */
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot create unnamed attribute");
+		return;
+	}
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		tmp_zv = *member;
-		zval_copy_ctor(&tmp_zv);
+		trim_zv = *member;
+		zval_copy_ctor(&trim_zv);
+		convert_to_string(&trim_zv);
+		php_trim(Z_STRVAL(trim_zv), Z_STRLEN(trim_zv), NULL, 0, &tmp_zv, 3 TSRMLS_CC);
+		zval_dtor(&trim_zv);
 		member = &tmp_zv;
-		convert_to_string(member);
+	}
+
+	if (!Z_STRLEN_P(member)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write or create unnamed %s", attribs ? "attribute" : "element");
+		if (member == &tmp_zv) {
+			zval_dtor(&tmp_zv);
+		}
+		return;
 	}
 
 	name = Z_STRVAL_P(member);
