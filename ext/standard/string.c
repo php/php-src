@@ -972,7 +972,7 @@ void php3_ucwords(INTERNAL_FUNCTION_PARAMETERS)
 		if(*(r+1)){
 			r++;
 			*r=toupper((unsigned char)*r);
-		}
+		} else break;
 	}
 	RETVAL_STRING(arg->value.str.val,1);
 }

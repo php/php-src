@@ -463,6 +463,7 @@ void php3_strftime(INTERNAL_FUNCTION_PARAMETERS)
 	char *format,*buf;
 	time_t timestamp;
 	struct tm *ta;
+	int max_reallocs = 5;
 	size_t buf_len=64, real_len;
 
 	switch (ARG_COUNT(ht)) {
@@ -495,11 +496,15 @@ void php3_strftime(INTERNAL_FUNCTION_PARAMETERS)
 	while ((real_len=strftime(buf,buf_len,format,ta))==buf_len || real_len==0) {
 		buf_len *= 2;
 		buf = (char *) erealloc(buf, buf_len);
+		if(!--max_reallocs) break;
 	}
 	
-	return_value->value.str.val = (char *) erealloc(buf,real_len+1);
-	return_value->value.str.len = real_len;
-	return_value->type = IS_STRING;
+	if(real_len && real_len != buf_len) {
+		buf = (char *) erealloc(buf,real_len+1);
+		RETURN_STRINGL(buf, real_len, 0);
+	}
+	efree(buf);
+	RETURN_FALSE;
 }
 #endif
 /*

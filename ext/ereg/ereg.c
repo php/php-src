@@ -537,7 +537,8 @@ PHPAPI void php3_sql_regcase(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *string;
 	char *tmp;
-	register int i;
+	unsigned char c;
+	register int i, j;
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &string)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -547,17 +548,22 @@ PHPAPI void php3_sql_regcase(INTERNAL_FUNCTION_PARAMETERS)
 	
 	tmp = (char *) emalloc(string->value.str.len*4+1);
 	
-	for (i=0; i<string->value.str.len; i++) {
-		tmp[i*4] = '[';
-		tmp[i*4+1]=toupper((unsigned char)string->value.str.val[i]);
-		tmp[i*4+2]=tolower((unsigned char)string->value.str.val[i]);
-		tmp[i*4+3]=']';
+	for (i=j=0; i<string->value.str.len; i++) {
+		c = (unsigned char) string->value.str.val[i];
+		if(isalpha(c)) {
+			tmp[j++] = '[';
+			tmp[j++] = toupper(c);
+			tmp[j++] = tolower(c);
+			tmp[j++] = ']';
+		} else {
+			tmp[j++] = c;
+		}
 	}
-	tmp[string->value.str.len*4]=0;
+	tmp[j]=0;
 	
-	return_value->value.str.val = tmp;
-	return_value->value.str.len = string->value.str.len*4;
-	return_value->type = IS_STRING;
+	tmp = erealloc(tmp, j + 1);
+	
+	RETVAL_STRINGL(tmp, j, 0);
 }
 /* }}} */
 
