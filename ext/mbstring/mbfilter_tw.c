@@ -89,6 +89,7 @@ mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		break;
 
 	case 2:	/* got 0x8e,  first char */
+		c1 = filter->cache;
 		if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
 			CK((*filter->output_function)(c, filter->data TSRMLS_CC));
 			filter->status = 0;
