@@ -28,7 +28,7 @@ A plugin system allows to add custom spell support.
 see www.abisource.com/enchant/</description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
+  <state>stable</state>
   <version>1.0</version>
   <date>2004-08-11</date>
   <notes>- Fixed leak inside MINFO function.
