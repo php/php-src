@@ -67,11 +67,13 @@ PHP_FUNCTION(sha1)
 
 /* }}} */
 
-/* {{{ proto string sha1_file(string filename)
+/* {{{ proto string sha1_file(string filename [, bool raw_output])
    Calculate the sha1 hash of given filename */
 PHP_FUNCTION(sha1_file)
 {
-	zval          **arg;
+	char          *arg;
+	int           arg_len;
+	zend_bool raw_output = 0;
 	char          sha1str[41];
 	unsigned char buf[1024];
 	unsigned char digest[20];
@@ -79,21 +81,19 @@ PHP_FUNCTION(sha1_file)
 	int           n;
 	FILE          *fp;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(arg);
-
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(arg), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (PG(safe_mode) && (!php_checkuid(arg, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(Z_STRVAL_PP(arg) TSRMLS_CC)) {
+	if (php_check_open_basedir(arg TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	if ((fp = VCWD_FOPEN(Z_STRVAL_PP(arg), "rb")) == NULL) {
+	if ((fp = VCWD_FOPEN(arg, "rb")) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open file");
 		RETURN_FALSE;
 	}
@@ -113,9 +113,12 @@ PHP_FUNCTION(sha1_file)
 
 	fclose(fp);
 
-	make_sha1_digest(sha1str, digest);
-
-	RETVAL_STRING(sha1str, 1);
+	if (raw_output) {
+		RETURN_STRINGL(digest, 20, 1);
+	} else {
+		make_sha1_digest(sha1str, digest);
+		RETVAL_STRING(sha1str, 1);
+	}
 }
 /* }}} */
 

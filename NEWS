@@ -20,8 +20,9 @@ PHP 4                                                                      NEWS
 - Added lightweight streaming input abstraction to the Zend Engine scanners
   that provides uniform support for include()'ing data from PHP streams across
   all platforms (Wez, Zend Engine).
-- Added optional parameter to sha1() and md5() which makes them return 
-  the digest as binary data. (Michael Bretterklieber <mbretter@jawa.at>, Derick)
+- Added optional parameter to sha1(), sha1_file(), md5() and md5_file() which
+  makes them return the digest as binary data. (Michael Bretterklieber
+  <mbretter@jawa.at>, Derick)
 - Added proc_nice() function. Changes priority of the current process. (Ilia)
 - Added pcntl_getpriority() and pcntl_setpriority() functions. (Ilia)
 - Added idate(), date_sunrise() and date_sunset() functions. (Moshe Doron)

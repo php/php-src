@@ -69,11 +69,13 @@ PHP_NAMED_FUNCTION(php_if_md5)
 }
 /* }}} */
 
-/* {{{ proto string md5_file(string filename)
+/* {{{ proto string md5_file(string filename [, bool raw_output])
    Calculate the md5 hash of given filename */
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
-	zval          **arg;
+	char          *arg;
+	int           arg_len;
+	zend_bool raw_output = 0;
 	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
@@ -81,21 +83,19 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	int           n;
 	FILE          *fp;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(arg);
-
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(arg), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (PG(safe_mode) && (!php_checkuid(arg, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(Z_STRVAL_PP(arg) TSRMLS_CC)) {
+	if (php_check_open_basedir(arg TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
-	if ((fp = VCWD_FOPEN(Z_STRVAL_PP(arg), "rb")) == NULL) {
+	if ((fp = VCWD_FOPEN(arg, "rb")) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open file");
 		RETURN_FALSE;
 	}
@@ -115,9 +115,12 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 
 	fclose(fp);
 
-	make_digest(md5str, digest);
-
-	RETVAL_STRING(md5str, 1);
+	if (raw_output) {
+		RETURN_STRINGL(digest, 20, 1);
+	} else {
+		make_digest(md5str, digest);
+		RETVAL_STRING(md5str, 1);
+	}
 }
 /* }}} */
 
