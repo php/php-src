@@ -814,7 +814,19 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			}
 			if (doprint || (! parser->skipwhite)) {
 				if (parser->lastwasopen) {
-					add_assoc_string(*(parser->ctag),"value",decoded_value,0);
+					zval **myval;
+					
+					/* check if the current tag already has a value - if yes append to that! */
+					if (zend_hash_find((*parser->ctag)->value.ht,"value",sizeof("value"),(void **) &myval) == SUCCESS) {
+						int newlen = (*myval)->value.str.len + decoded_len;
+						(*myval)->value.str.val = erealloc((*myval)->value.str.val,newlen);
+						strcpy((*myval)->value.str.val + (*myval)->value.str.len,decoded_value);
+						(*myval)->value.str.len += decoded_len;
+						efree(decoded_value);
+					} else {
+						add_assoc_string(*(parser->ctag),"value",decoded_value,0);
+					}
+					
 				} else {
 					zval *tag;
 
@@ -828,7 +840,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					add_assoc_string(tag,"value",decoded_value,0);
 					add_assoc_string(tag,"type","cdata",1);
 					add_assoc_long(tag,"level",parser->level);
-					
+
 					zend_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(zval*),NULL);
 				}
 			} else {
