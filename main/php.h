@@ -163,7 +163,7 @@ extern char *strerror(int);
 
 #include "fopen-wrappers.h"
 
-#if REGEX == 1 || REGEX == 0
+#if (REGEX == 1 || REGEX == 0) && !defined(NO_REGEX_EXTRA_H)
 #include "regex/regex_extra.h"
 #endif
 
