@@ -50,6 +50,7 @@
 #define IFCONNECT_ENDVAL(V) 	} else { php_error(E_WARNING, s_szNoInit); return V; }
 #define IFCONNECT_END		} else { php_error(E_WARNING, s_szNoInit); RETURN_FALSE; }
 
+/* Test if session module contains custom sesson ID patch */
 #ifdef PHP_SESSION_API
 #if (PHP_SESSION_API >= 20020330)
 #define HAVE_PHP_SESSION_CREATESID
@@ -84,7 +85,6 @@
  * Also, please to not reformat braces ;-)
  * -MLW
  */
-
 #if HAVE_MSESSION
 #ifdef HAVE_PHP_SESSION
 #ifdef HAVE_PHP_SESSION_CREATESID
@@ -135,6 +135,7 @@ function_entry msession_functions[] = {
 	PHP_FE(msession_randstr,NULL)
 	PHP_FE(msession_plugin,NULL)
 	PHP_FE(msession_call,NULL)
+	PHP_FE(msession_ctl,NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -441,6 +442,78 @@ PHP_FUNCTION(msession_lock)
 
 }
 /* }}} */
+
+/* {{{ proto int msession_stat(string name)
+   Lock a session */
+PHP_FUNCTION(msession_ctl)
+{
+	static char *parray[] =
+	{	"EXIST",
+		"TTL",
+		"AGE",
+		"TLA",
+		"CTIME",
+		"TOUCH",
+		"NOW",
+		NULL
+	};
+	IFCONNECT_BEGIN
+	char *szsession;
+	zval **session;
+	zval **which;
+	int fn = REQ_STAT_EXIST;
+	
+			
+	int n = ZEND_NUM_ARGS();
+
+	if(n != 1 && n != 2)
+ 	{
+		WRONG_PARAM_COUNT;
+	}
+
+	if(zend_get_parameters_ex(n,&session,&which) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(session);
+	szsession = Z_STRVAL_PP(session);
+
+	if(n > 1)
+	{
+		char *szwhich;
+		int i;
+		convert_to_string_ex(which);
+		szwhich = Z_STRVAL_PP(which);
+		for(i=0; parray[i]; i++)
+		{
+			if(strcasecmp(parray[i], szwhich) == 0)
+			{
+				
+				fn = i;
+				break;
+			}
+		}
+	}
+	FormatRequest(&s_reqb, REQ_CTL, szsession, "","",fn);
+	DoRequest(s_conn,&s_reqb);
+
+	if(s_reqb->req.stat==REQ_OK)
+	{
+#ifdef ERR_DEBUG
+		char buffer[128];
+		sprintf(buffer, "ret:%d", s_reqb->req.param);
+		ELOG(buffer);
+#endif
+		RETURN_LONG(s_reqb->req.param);
+	}
+	else
+	{
+		ELOG("msession_ctl failed");
+		RETURN_FALSE;
+	}
+	IFCONNECT_END
+}
 
 /* {{{ proto int msession_unlock(string session, int key)
    Unlock a session */
