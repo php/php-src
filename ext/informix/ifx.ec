@@ -71,7 +71,7 @@ static loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC);
 static char* php_intifx_create_tmpfile(long bid TSRMLS_DC);
 static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC);
 static char* php_intifx_null(TSRMLS_D);
-static long php_intifx_create_char(char* param, long len, HashTable *list TSMRLS_DC);
+static long php_intifx_create_char(char* param, long len, HashTable *list TSRMLS_DC);
 static long php_intifx_free_char(long id, HashTable *list TSRMLS_DC);
 static long php_intifx_update_char(long bid, char* param, long len, HashTable *list TSRMLS_DC);
 static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS_DC);
