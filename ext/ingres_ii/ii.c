@@ -75,7 +75,7 @@ zend_module_entry ingres_ii_module_entry = {
 	PHP_RINIT(ii),
 	PHP_RSHUTDOWN(ii),
 	PHP_MINFO(ii),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -189,17 +189,25 @@ static void _close_ii_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
    used when the request ends to 'refresh' the link for use
    by the next request
 */
-static void _clean_ii_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void _ai_clean_ii_plink(II_LINK *link TSRMLS_DC)
 {
-	II_LINK *link = (II_LINK *) rsrc->ptr;
+	int ai_error = 0;
+	IIAPI_DISCONNPARM disconnParm;
 	IIAPI_AUTOPARM autoParm;
 
+	/* if link as always been marked as broken do nothing */
+	/* This because we call this function directly from close function */
+	/* And it's called in the end of request */
+	if (link->connHandle == NULL) {
+		return;
+	}
+	
+	if (link->stmtHandle && _close_statement(link)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Ingres II:  Unable to close statement !!");
+		ai_error = 1;
+	}
+	
 	if (link->autocommit) {
-
-		if (link->stmtHandle && _close_statement(link)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Ingres II:  Unable to close statement !!");
-		}
-
 		autoParm.ac_genParm.gp_callback = NULL;
 		autoParm.ac_genParm.gp_closure = NULL;
 		autoParm.ac_connHandle = link->connHandle;
@@ -219,6 +227,22 @@ static void _clean_ii_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (link->tranHandle && _rollback_transaction(link TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Ingres II:  Unable to rollback transaction !!");
 	}
+
+	/* Assume link is broken, close it, and mark it as broken with conn Handle NULL */
+	if (ai_error) {
+		disconnParm.dc_genParm.gp_callback = NULL;
+		disconnParm.dc_genParm.gp_closure = NULL;
+		disconnParm.dc_connHandle = link->connHandle;
+		
+		IIapi_disconnect(&disconnParm);
+		link->connHandle = NULL;
+	}
+}
+
+static void _clean_ii_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	II_LINK *link = (II_LINK *)rsrc->ptr;
+	_ai_clean_ii_plink(link TSRMLS_CC);
 }
 
 /* sets the default link
@@ -373,6 +397,7 @@ static int ii_success(IIAPI_GENPARM *genParm)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Ingres II:  Server or API error - no error message available");
 			} else {
 				IIAPI_GETEINFOPARM getEInfoParm;
+				TSRMLS_FETCH();
 
 				getEInfoParm.ge_errorHandle = genParm->gp_errorHandle;
 				IIapi_getErrorInfo(&getEInfoParm);
@@ -522,7 +547,40 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* unable to figure out the right way to do this   */
 			/* maybe does the api handle the reconnection transparently ? */
 			link = (II_LINK *) le->ptr;
+			
+			/* Unfortunetaly NO !!!*/
+			/* Ingres api doesn't reconnect */
+			/* Have to reconnect if cleaning function has flagged link as broken */
+			if (link->connHandle == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Ingres II:  Broken link (%s),reconnect", db);
+				
+				/* Recreate the link */
+				connParm.co_genParm.gp_callback = NULL;
+				connParm.co_genParm.gp_closure = NULL;
+				connParm.co_target = db;
+				connParm.co_username = user;
+				connParm.co_password = pass;
+				connParm.co_timeout = -1; /* no timeout */
+				connParm.co_connHandle = NULL;
+				connParm.co_tranHandle = NULL;
+
+				IIapi_connect(&connParm);
+
+				if (!ii_sync(&(connParm.co_genParm)) || ii_success(&(connParm.co_genParm)) == II_FAIL) {
+					efree(hashed_details);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Ingres II:  Unable to connect to database (%s)", db);
+					RETURN_FALSE;
+				}
+
+				link->connHandle = connParm.co_connHandle;
+				link->tranHandle = NULL;
+				link->stmtHandle = NULL;
+				link->fieldCount = 0;
+				link->descriptor = NULL;
+				link->autocommit = 0;
+			}
 		}
+		
 		ZEND_REGISTER_RESOURCE(return_value, link, le_ii_plink);
 
 	} else { /* non persistent */
@@ -626,23 +684,43 @@ PHP_FUNCTION(ingres_pconnect)
    Close an Ingres II database connection */
 PHP_FUNCTION(ingres_close)
 {
-	zval **link;
-	int argc;
+	zval **link = NULL;
 	int link_id = -1;
 	II_LINK *ii_link;
 
-	argc = ZEND_NUM_ARGS();
-	if (argc > 1 || (argc && zend_get_parameters_ex(argc, &link) == FAILURE)) {
-		WRONG_PARAM_COUNT;
-	}
+	switch (ZEND_NUM_ARGS()) {
+		case 0: 
+			link_id = IIG(default_link);
+			break;
 
-	if (argc == 0) {
-		link_id = IIG(default_link);
+		case 1: 
+			if (zend_get_parameters_ex(1, &link) == FAILURE) {
+				RETURN_FALSE;
+			}
+			link_id = -1;
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 
 	ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
 
-	zend_list_delete(link_id);
+	/* Call the clean function synchronously here */
+	/* Otherwise we have to wait for request shutdown */
+	/* This way we can reuse the link in the same script */
+	_ai_clean_ii_plink(ii_link TSRMLS_CC);
+  
+	if (link_id == -1) { /* explicit resource number */
+		zend_list_delete(Z_RESVAL_PP(link));
+	}
+	
+	if (link_id != -1 || (link && Z_RESVAL_PP(link) == IIG(default_link))) {
+		zend_list_delete(IIG(default_link));
+		IIG(default_link) = -1;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1464,4 +1542,3 @@ PHP_FUNCTION(ingres_autocommit)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-     
