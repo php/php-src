@@ -1725,6 +1725,24 @@ PHP_FUNCTION(mysqli_select_db)
 }
 /* }}} */
 
+/* {{{ proto string mysqli_sqlstate(resource link)
+   Returns the SQLSTATE error from previous MySQL operation */
+#if MYSQL_VERSION_ID >= 40101
+PHP_FUNCTION(mysqli_sqlstate) 
+{
+	MYSQL 		*mysql;
+	zval  		*mysql_link;
+	PR_MYSQL	*prmysql;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
+	RETURN_STRING((char *)mysql_sqlstate(mysql),1);
+}
+#endif
+/* }}} */
+
 /* {{{ proto string mysqli_ssl_set(resource link [,string key [,string cert [,string ca [,string capath [,string cipher]]]]])
 */
 PHP_FUNCTION(mysqli_ssl_set)
@@ -1817,6 +1835,25 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
+
+/* {{{ proto string mysqli_stmt_error(resource stmt)
+*/
+#if MYSQL_VERSION_ID >= 40101
+PHP_FUNCTION(mysqli_stmt_sqlstate) 
+{
+	STMT 	*stmt;
+	zval 	*mysql_stmt;
+	PR_STMT	*prstmt;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt"); 
+	
+	RETURN_STRING((char *)mysql_stmt_sqlstate(stmt->stmt),1);
+}
+#endif
 /* }}} */
 
 /* {{{ proto resource mysqli_store_result(resource link)

@@ -254,12 +254,18 @@ PHP_FUNCTION(mysqli_select_db);
 PHP_FUNCTION(mysqli_send_long_data);
 PHP_FUNCTION(mysqli_send_query);
 PHP_FUNCTION(mysqli_slave_query);
+#if MYSQL_VERSION_ID >= 40101
+PHP_FUNCTION(mysqli_sqlstate);
+#endif
 PHP_FUNCTION(mysqli_ssl_set);
 PHP_FUNCTION(mysqli_stat);
 PHP_FUNCTION(mysqli_stmt_affected_rows);
 PHP_FUNCTION(mysqli_stmt_close);
 PHP_FUNCTION(mysqli_stmt_errno);
 PHP_FUNCTION(mysqli_stmt_error);
+#if MYSQL_VERSION_ID >= 40101
+PHP_FUNCTION(mysqli_stmt_sqlstate);
+#endif
 PHP_FUNCTION(mysqli_stmt_store_result);
 PHP_FUNCTION(mysqli_store_result);
 PHP_FUNCTION(mysqli_thread_id);
