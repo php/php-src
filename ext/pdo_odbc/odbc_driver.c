@@ -146,9 +146,9 @@ static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 	
 	if (H->dbc != SQL_NULL_HANDLE) {
 		SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_ROLLBACK);
+		SQLDisconnect(H->dbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, H->dbc);
 	}
-
-	SQLFreeHandle(SQL_HANDLE_DBC, H->dbc);
 	SQLFreeHandle(SQL_HANDLE_ENV, H->env);
 	pefree(H, dbh->is_persistent);
 
