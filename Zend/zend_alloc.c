@@ -516,6 +516,16 @@ ZEND_API void _persist_alloc(void *ptr)
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
+
+#ifdef ZTS
+
+void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
+{
+	start_memory_manager();
+}
+
+
+#endif
 /*
  * Local variables:
  * tab-width: 4

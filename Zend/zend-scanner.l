@@ -169,16 +169,16 @@ inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	/* Reset the scanner for scanning the new file */
 	yyin = tmp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
-	CG(zend_lineno) = 1;
 	BEGIN(INITIAL);
 	
-	zend_set_compiled_filename(file_handle->filename);
 #else
 	ifstream *input_file = new ifstream(file_handle->filename);
 	CG(ZFL) = new ZendFlexLexer;
 
 	CG(ZFL)->switch_streams(input_file, &cout);
 #endif
+	zend_set_compiled_filename(file_handle->filename);
+	CG(zend_lineno) = 1;
 	return SUCCESS;
 }
 END_EXTERN_C()

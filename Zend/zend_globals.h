@@ -101,6 +101,7 @@ extern ZEND_API zend_executor_globals executor_globals;
 # define ALS_CC , ALS_C
 # define AG(v) (((zend_alloc_globals *) alloc_globals)->v)
 # define ALS_FETCH()	zend_alloc_globals *alloc_globals = (zend_alloc_globals *) ts_resource(alloc_globals_id)
+void alloc_globals_ctor(zend_alloc_globals *alloc_globals);
 #else
 # define ALS_D
 # define ALS_DC
@@ -109,7 +110,6 @@ extern ZEND_API zend_executor_globals executor_globals;
 # define AG(v) (alloc_globals.v)
 # define ALS_FETCH()
 #endif
-
 
 #include "zend_compile.h"
 #include "zend_execute.h"
