@@ -831,7 +831,8 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 	char *replaced, *ret, *p, *q, *lim, *next;
 	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
 	unsigned char replacement[15];
-	
+	int replacement_len;
+
 	ret = estrdup(old);
 	retlen = oldlen;
 	if (!retlen) {
@@ -860,6 +861,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 				entity_length += 2;
 
 				/* When we have MBCS entities in the tables above, this will need to handle it */
+				replacement_len = 0;
 				switch (charset) {
 					case cs_8859_1:
 					case cs_cp1252:
@@ -869,19 +871,19 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 					case cs_cp866:
 						replacement[0] = k;
 						replacement[1] = '\0';
+						replacement_len = 1;
 
 					case cs_big5:
 					case cs_gb2312:
 					case cs_big5hkscs:
 					case cs_sjis:
 					case cs_eucjp:
-						replacement[0] = (char)((unsigned int)k >> 8);
-						replacement[1] = (k & 0xff);
-						replacement[2] = '\0';
-						break;
+						/* we cannot properly handle those multibyte encodings
+						 * with php_str_to_str. skip it. */ 
+						continue;
 
 					case cs_utf_8:
-						php_utf32_utf8(replacement, k);
+						replacement_len = php_utf32_utf8(replacement, k);
 						break;
 
 					default:
@@ -889,7 +891,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 						return 0;
 				}
 
-				replaced = php_str_to_str(ret, retlen, entity, entity_length, replacement, 1, &retlen);
+				replaced = php_str_to_str(ret, retlen, entity, entity_length, replacement, replacement_len, &retlen);
 				efree(ret);
 				ret = replaced;
 			}
