@@ -176,15 +176,16 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	stmt->columns[colno].namelen = strlen(stmt->columns[colno].name);
 	stmt->columns[colno].maxlen = 0xffffffff;
 	stmt->columns[colno].precision = 0;
-
+	
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_INTEGER:
 		case SQLITE_FLOAT:
-		case SQLITE_TEXT:
+		case SQLITE3_TEXT:
 		case SQLITE_BLOB:
 			stmt->columns[colno].param_type = PDO_PARAM_STR;
 			break;
 		case SQLITE_NULL:
+		default:
 			stmt->columns[colno].param_type = PDO_PARAM_NULL;
 			break;
 	}
@@ -214,10 +215,20 @@ static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsi
 			*ptr = (char*)sqlite3_column_blob(S->stmt, colno);
 			*len = sqlite3_column_bytes(S->stmt, colno);
 			return 1;
+
+		case SQLITE3_TEXT:
+			*ptr = (char*)sqlite3_column_text(S->stmt, colno);
+			*len = sqlite3_column_bytes(S->stmt, colno);
+			if (*len) {
+				/* sqlite3.h says "the NUL terminator is included in the byte count
+				 * for TEXT values" */
+				*len--;
+			}
+			return 1;
 		
 		default:
 			*ptr = (char*)sqlite3_column_text(S->stmt, colno);
-			*len = strlen(*ptr);
+			*len = sqlite3_column_bytes(S->stmt, colno);
 			return 1;
 	}
 }

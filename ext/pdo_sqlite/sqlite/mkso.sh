@@ -13,9 +13,11 @@ TCLDIR=/home/drh/tcltk/846/linux/846linux
 TCLSTUBLIB=$TCLDIR/libtclstub8.4g.a
 OPTS='-DUSE_TCL_STUBS=1 -DNDEBUG=1'
 for i in *.c; do
-  CMD="cc -fPIC $OPTS -O2 -I. -I$TCLDIR -c $i"
-  echo $CMD
-  $CMD
+  if test $i != 'keywordhash.c'; then
+    CMD="cc -fPIC $OPTS -O2 -I. -I$TCLDIR -c $i"
+    echo $CMD
+    $CMD
+  fi
 done
 echo gcc -shared *.o $TCLSTUBLIB -o tclsqlite3.so
 gcc -shared *.o $TCLSTUBLIB -o tclsqlite3.so

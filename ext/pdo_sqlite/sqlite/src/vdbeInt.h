@@ -220,7 +220,6 @@ struct sqlite3_context {
   Mem s;            /* The return value is stored here */
   void *pAgg;       /* Aggregate context */
   u8 isError;       /* Set to true for an error */
-  u8 isStep;        /* Current in the step function */
   int cnt;          /* Number of times that the step function has been called */
   CollSeq *pColl;
 };
@@ -322,7 +321,9 @@ struct Vdbe {
   int magic;              /* Magic number for sanity checking */
   int nMem;               /* Number of memory locations currently allocated */
   Mem *aMem;              /* The memory locations */
-  Agg agg;                /* Aggregate information */
+  int nAgg;               /* Number of elements in apAgg */
+  Agg *apAgg;             /* Array of aggregate contexts */
+  Agg *pAgg;              /* Current aggregate context */
   int nCallback;          /* Number of callbacks invoked so far */
   Keylist *pList;         /* A list of ROWIDs */
   int contextStackTop;    /* Index of top element in the context stack */
@@ -343,6 +344,7 @@ struct Vdbe {
   u8 explain;             /* True if EXPLAIN present on SQL command */
   u8 changeCntOn;         /* True to update the change-counter */
   u8 aborted;             /* True if ROLLBACK in another VM causes an abort */
+  u8 expired;             /* True if the VM needs to be recompiled */
   int nChange;            /* Number of db changes made since last reset */
 };
 
@@ -363,10 +365,12 @@ int sqlite3VdbeAggReset(sqlite3*, Agg *, KeyInfo *);
 void sqlite3VdbeKeylistFree(Keylist*);
 void sqliteVdbePopStack(Vdbe*,int);
 int sqlite3VdbeCursorMoveto(Cursor*);
-#if !defined(NDEBUG) || defined(VDBE_PROFILE)
+#if defined(SQLITE_DEBUG) || defined(VDBE_PROFILE)
 void sqlite3VdbePrintOp(FILE*, int, Op*);
 #endif
+#ifdef SQLITE_DEBUG
 void sqlite3VdbePrintSql(Vdbe*);
+#endif
 int sqlite3VdbeSerialTypeLen(u32);
 u32 sqlite3VdbeSerialType(Mem*);
 int sqlite3VdbeSerialPut(unsigned char*, Mem*);

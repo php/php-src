@@ -26,29 +26,21 @@ BCC = @BUILD_CC@ @BUILD_CFLAGS@
 # will run on the target platform.  (BCC and TCC are usually the
 # same unless your are cross-compiling.)
 #
-TCC = @TARGET_CC@ @TARGET_CFLAGS@ -I. -I${TOP}/src -DNDEBUG
+TCC = @TARGET_CC@ @TARGET_CFLAGS@ -I. -I${TOP}/src
 
-# Some standard variables and programs
+# Define -DNDEBUG to compile without debugging (i.e., for production usage)
+# Omitting the define will cause extra debugging code to be inserted and
+# includes extra comments when "EXPLAIN stmt" is used.
 #
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-libdir = @libdir@
-INSTALL = @INSTALL@
-LIBTOOL = ./libtool
-RELEASE = @ALLOWRELEASE@
-
-# libtool compile/link/install
-LTCOMPILE = $(LIBTOOL) --mode=compile $(TCC)
-LTLINK = $(LIBTOOL) --mode=link $(TCC)
-LTINSTALL = $(LIBTOOL) --mode=install $(INSTALL)
+TCC += @TARGET_DEBUG@
 
 # Compiler options needed for programs that use the TCL library.
 #
-TCL_FLAGS = @TARGET_TCL_INC@
+TCC += @TCL_INCLUDE_SPEC@
 
 # The library that programs using TCL must link against.
 #
-LIBTCL = @TARGET_TCL_LIBS@
+LIBTCL = @TCL_LIB_SPEC@ @TCL_LIBS@
 
 # Compiler options needed for programs that use the readline() library.
 #
@@ -74,22 +66,64 @@ LIBPTHREAD=@TARGET_THREAD_LIB@
 #
 TEMP_STORE = -DTEMP_STORE=@TEMP_STORE@
 
+# Version numbers and release number for the SQLite being compiled.
+#
+VERSION = @VERSION@
+VERSION_NUMBER = @VERSION_NUMBER@
+RELEASE = @RELEASE@
+
+# Filename extensions
+#
+BEXE = @BUILD_EXEEXT@
+TEXE = @TARGET_EXEEXT@
+
+# The following variable is "1" if the configure script was able to locate
+# the tclConfig.sh file.  It is an empty string otherwise.  When this
+# variable is "1", the TCL extension library (libtclsqlite3.so) is built
+# and installed.
+#
+HAVE_TCL = @HAVE_TCL@
+
+# The suffix used on shared libraries.  Ex:  ".dll", ".so", ".dylib"
+#
+SHLIB_SUFFIX = @TCL_SHLIB_SUFFIX@
+
+# The directory into which to store package information for
+
+# Some standard variables and programs
+#
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+libdir = @libdir@
+INSTALL = @INSTALL@
+LIBTOOL = ./libtool
+ALLOWRELEASE = @ALLOWRELEASE@
+
+# libtool compile/link/install
+LTCOMPILE = $(LIBTOOL) --mode=compile $(TCC)
+LTLINK = $(LIBTOOL) --mode=link $(TCC)
+LTINSTALL = $(LIBTOOL) --mode=install $(INSTALL)
+
 # You should not have to change anything below this line
 ###############################################################################
 
+OPTS += -DSQLITE_OMIT_CURSOR          # Cursors do not work at this time
+TCC += -DSQLITE_OMIT_CURSOR
+
 # Object files for the SQLite library.
 #
-LIBOBJ = attach.lo auth.lo btree.lo build.lo date.lo delete.lo \
-         expr.lo func.lo hash.lo insert.lo \
-         main.lo opcodes.lo os_mac.lo os_unix.lo os_win.lo \
+LIBOBJ = alter.lo attach.lo auth.lo btree.lo build.lo date.lo \
+         delete.lo expr.lo func.lo hash.lo insert.lo \
+         main.lo opcodes.lo os_unix.lo os_win.lo \
          pager.lo parse.lo pragma.lo printf.lo random.lo \
-         select.lo table.lo tokenize.lo trigger.lo update.lo util.lo vacuum.lo \
-         vdbe.lo vdbeapi.lo vdbeaux.lo vdbemem.lo \
+         select.lo table.lo tokenize.lo trigger.lo update.lo \
+         util.lo vacuum.lo vdbe.lo vdbeapi.lo vdbeaux.lo vdbemem.lo \
          where.lo utf.lo legacy.lo
 
 # All of the source code files.
 #
 SRC = \
+  $(TOP)/src/alter.c \
   $(TOP)/src/attach.c \
   $(TOP)/src/auth.c \
   $(TOP)/src/btree.c \
@@ -104,7 +138,6 @@ SRC = \
   $(TOP)/src/insert.c \
   $(TOP)/src/legacy.c \
   $(TOP)/src/main.c \
-  $(TOP)/src/os_mac.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
   $(TOP)/src/pager.c \
@@ -137,8 +170,8 @@ SRC = \
 #
 TESTSRC = \
   $(TOP)/src/btree.c \
+  $(TOP)/src/date.c \
   $(TOP)/src/func.c \
-  $(TOP)/src/os_mac.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
   $(TOP)/src/pager.c \
@@ -164,7 +197,6 @@ HDR = \
    opcodes.h \
    $(TOP)/src/os.h \
    $(TOP)/src/os_common.h \
-   $(TOP)/src/os_mac.h \
    $(TOP)/src/os_unix.h \
    $(TOP)/src/os_win.h \
    $(TOP)/src/sqliteInt.h  \
@@ -180,7 +212,7 @@ VDBEHDR = \
 # This is the default Makefile target.  The objects listed here
 # are what get build when you type just "make" with no arguments.
 #
-all:	sqlite3.h libsqlite3.la sqlite3@TARGET_EXEEXT@
+all:	sqlite3.h libsqlite3.la sqlite3$(TEXE) $(HAVE_TCL:1=libtclsqlite3.la)
 
 Makefile: $(TOP)/Makefile.in
 	./config.status
@@ -194,14 +226,15 @@ last_change:	$(SRC)
 
 libsqlite3.la:	$(LIBOBJ)
 	$(LTLINK) -o libsqlite3.la $(LIBOBJ) $(LIBPTHREAD) \
-		${RELEASE} -rpath $(libdir) -version-info "8:6:8"
+		${ALLOWRELEASE} -rpath $(libdir) -version-info "8:6:8"
 
 libtclsqlite3.la:	tclsqlite.lo libsqlite3.la
 	$(LTLINK) -o libtclsqlite3.la tclsqlite.lo \
-		libsqlite3.la $(LIBTCL) $(LIBPTHREAD) -rpath $(libdir)/sqlite \
+		$(LIBOBJ) @TCL_STUB_LIB_SPEC@ $(LIBPTHREAD) \
+                -rpath $(libdir)/sqlite \
 		-version-info "8:6:8"
 
-sqlite3@TARGET_EXEEXT@:	$(TOP)/src/shell.c libsqlite3.la sqlite3.h
+sqlite3$(TEXE):	$(TOP)/src/shell.c libsqlite3.la sqlite3.h
 	$(LTLINK) $(READLINE_FLAGS) $(LIBPTHREAD) \
 		-o sqlite3 $(TOP)/src/shell.c libsqlite3.la $(LIBREADLINE)
 
@@ -211,23 +244,26 @@ sqlite3@TARGET_EXEEXT@:	$(TOP)/src/shell.c libsqlite3.la sqlite3.h
 # files are automatically generated.  This target takes care of
 # all that automatic generation.
 #
-target_source:	$(SRC) $(VDBEHDR) 
+target_source:	$(SRC) parse.c opcodes.c keywordhash.h $(VDBEHDR) 
 	rm -rf tsrc
 	mkdir -p tsrc
 	cp $(SRC) $(VDBEHDR) tsrc
 	rm tsrc/sqlite.h.in tsrc/parse.y
-	cp parse.c opcodes.c tsrc
+	cp parse.c opcodes.c keywordhash.h tsrc
 	cp $(TOP)/sqlite3.def tsrc
 
 # Rules to build the LEMON compiler generator
 #
-lemon@BUILD_EXEEXT@:	$(TOP)/tool/lemon.c $(TOP)/tool/lempar.c
+lemon$(BEXE):	$(TOP)/tool/lemon.c $(TOP)/tool/lempar.c
 	$(BCC) -o lemon $(TOP)/tool/lemon.c
 	cp $(TOP)/tool/lempar.c .
 
 
 # Rules to build individual files
 #
+alter.lo:	$(TOP)/src/alter.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/alter.c
+
 attach.lo:	$(TOP)/src/attach.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/attach.c
 
@@ -287,13 +323,10 @@ opcodes.lo:	opcodes.c
 	$(LTCOMPILE) -c opcodes.c
 
 opcodes.c:	opcodes.h $(TOP)/mkopcodec.awk
-	sort -n +2 opcodes.h | awk -f $(TOP)/mkopcodec.awk >opcodes.c
+	sort -n -b +2 opcodes.h | awk -f $(TOP)/mkopcodec.awk >opcodes.c
 
 opcodes.h:	parse.h $(TOP)/src/vdbe.c $(TOP)/mkopcodeh.awk
 	cat parse.h $(TOP)/src/vdbe.c | awk -f $(TOP)/mkopcodeh.awk >opcodes.h
-
-os_mac.lo:	$(TOP)/src/os_mac.c $(HDR)
-	$(LTCOMPILE) $(THREADSAFE) -c $(TOP)/src/os_mac.c
 
 os_unix.lo:	$(TOP)/src/os_unix.c $(HDR)
 	$(LTCOMPILE) $(THREADSAFE) -c $(TOP)/src/os_unix.c
@@ -306,15 +339,15 @@ parse.lo:	parse.c $(HDR)
 
 parse.h:	parse.c
 
-parse.c:	$(TOP)/src/parse.y lemon@BUILD_EXEEXT@
+parse.c:	$(TOP)/src/parse.y lemon$(BEXE)
 	cp $(TOP)/src/parse.y .
-	./lemon parse.y
+	./lemon $(OPTS) parse.y
 
 pragma.lo:	$(TOP)/src/pragma.c $(HDR)
-	$(LTCOMPILE) $(TCL_FLAGS) -c $(TOP)/src/pragma.c
+	$(LTCOMPILE) -c $(TOP)/src/pragma.c
 
 printf.lo:	$(TOP)/src/printf.c $(HDR)
-	$(LTCOMPILE) $(TCL_FLAGS) -c $(TOP)/src/printf.c
+	$(LTCOMPILE) -c $(TOP)/src/printf.c
 
 random.lo:	$(TOP)/src/random.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/random.c
@@ -323,17 +356,21 @@ select.lo:	$(TOP)/src/select.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/select.c
 
 sqlite3.h:	$(TOP)/src/sqlite.h.in 
-	sed -e s/--VERS--/`cat ${TOP}/VERSION`/ \
-                 $(TOP)/src/sqlite.h.in >sqlite3.h
+	sed -e s/--VERS--/$(RELEASE)/ $(TOP)/src/sqlite.h.in | \
+	sed -e s/--VERSION-NUMBER--/$(VERSION_NUMBER)/ >sqlite3.h
 
 table.lo:	$(TOP)/src/table.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/table.c
 
 tclsqlite.lo:	$(TOP)/src/tclsqlite.c $(HDR)
-	$(LTCOMPILE) $(TCL_FLAGS) -c $(TOP)/src/tclsqlite.c
+	$(LTCOMPILE) -c $(TOP)/src/tclsqlite.c
 
-tokenize.lo:	$(TOP)/src/tokenize.c $(HDR)
+tokenize.lo:	$(TOP)/src/tokenize.c keywordhash.h $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/tokenize.c
+
+keywordhash.h:	$(TOP)/tool/mkkeywordhash.c
+	$(BCC) -o mkkeywordhash$(BEXE) $(OPTS) $(TOP)/tool/mkkeywordhash.c
+	./mkkeywordhash$(BEXE) >keywordhash.h
 
 trigger.lo:	$(TOP)/src/trigger.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/trigger.c
@@ -365,33 +402,49 @@ vdbemem.lo:	$(TOP)/src/vdbemem.c $(VDBEHDR)
 where.lo:	$(TOP)/src/where.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/where.c
 
-tclsqlite-sh.lo:	$(TOP)/src/tclsqlite.c $(HDR)
-	$(LTCOMPILE) $(TCL_FLAGS) -DTCLSH=1 -o $@ -c $(TOP)/src/tclsqlite.c
+tclsqlite-shell.lo:	$(TOP)/src/tclsqlite.c $(HDR)
+	$(LTCOMPILE) -DTCLSH=1 -o $@ -c $(TOP)/src/tclsqlite.c
 
-tclsqlite3:	tclsqlite-sh.lo libsqlite3.la
-	$(LTLINK) $(TCL_FLAGS) -o tclsqlite3 tclsqlite-sh.lo \
+tclsqlite-stubs.lo:	$(TOP)/src/tclsqlite.c $(HDR)
+	$(LTCOMPILE) -DTCL_USE_STUBS=1 -o $@ -c $(TOP)/src/tclsqlite.c
+
+tclsqlite3:	tclsqlite-shell.lo libsqlite3.la
+	$(LTLINK) -o tclsqlite3 tclsqlite-shell.lo \
 		 libsqlite3.la $(LIBTCL)
 
-testfixture@TARGET_EXEEXT@:	$(TOP)/src/tclsqlite.c libtclsqlite3.la libsqlite3.la $(TESTSRC)
-	$(LTLINK) $(TCL_FLAGS) -DTCLSH=1 -DSQLITE_TEST=1\
+testfixture$(TEXE):	$(TOP)/src/tclsqlite.c libtclsqlite3.la libsqlite3.la $(TESTSRC)
+	$(LTLINK) -DTCLSH=1 -DSQLITE_TEST=1\
                 $(THREADSAFE) $(TEMP_STORE)\
                 -o testfixture $(TESTSRC) $(TOP)/src/tclsqlite.c \
-		libtclsqlite3.la libsqlite3.la $(LIBTCL)
+		libtclsqlite3.la $(LIBTCL)
 
-crashtest@TARGET_EXEEXT@:	$(TOP)/src/tclsqlite.c libsqlite3.la $(TESTSRC) $(TOP)/src/os_test.c
-	$(LTLINK) $(TCL_FLAGS) -DOS_TEST=1 -DTCLSH=1 -DSQLITE_TEST=1 \
+crashtest$(TEXE):	$(TOP)/src/tclsqlite.c libsqlite3.la $(TESTSRC) $(TOP)/src/os_test.c
+	$(LTLINK) -DOS_TEST=1 -DTCLSH=1 -DSQLITE_TEST=1 \
 		-o crashtest \
 		$(TESTSRC) $(TOP)/src/os_test.c $(TOP)/src/tclsqlite.c \
 		libsqlite3.la $(LIBTCL) $(THREADLIB)
 
 
 
-fulltest:	testfixture@TARGET_EXEEXT@ sqlite3@TARGET_EXEEXT@ crashtest@TARGET_EXEEXT@
+fulltest:	testfixture$(TEXE) sqlite3$(TEXE) crashtest$(TEXE)
 	./testfixture $(TOP)/test/all.test
 
-test:	testfixture@TARGET_EXEEXT@ sqlite3@TARGET_EXEEXT@
+test:	testfixture$(TEXE) sqlite3$(TEXE)
 	./testfixture $(TOP)/test/quick.test
 
+sqlite3_analyzer$(TEXE):	$(TOP)/src/tclsqlite.c libtclsqlite3.la \
+				$(TESTSRC) $(TOP)/tool/spaceanal.tcl
+	sed \
+	  -e '/^#/d' \
+	  -e 's,\\,\\\\,g' \
+	  -e 's,",\\",g' \
+	  -e 's,^,",' \
+	  -e 's,$$,\\n",' \
+	  $(TOP)/tool/spaceanal.tcl >spaceanal_tcl.h
+	$(LTLINK) -DTCLSH=2 -DSQLITE_TEST=1\
+                $(THREADSAFE) $(TEMP_STORE)\
+                -o sqlite3_analyzer$(EXE) $(TESTSRC) $(TOP)/src/tclsqlite.c \
+		libtclsqlite3.la $(LIBTCL)
 
 # Rules used to build documentation
 #
@@ -400,6 +453,9 @@ arch.html:	$(TOP)/www/arch.tcl
 
 arch2.gif:	$(TOP)/www/arch2.gif
 	cp $(TOP)/www/arch2.gif .
+
+autoinc.html:	$(TOP)/www/autoinc.tcl
+	tclsh $(TOP)/www/autoinc.tcl >autoinc.html
 
 c_interface.html:	$(TOP)/www/c_interface.tcl
 	tclsh $(TOP)/www/c_interface.tcl >c_interface.html
@@ -412,6 +468,9 @@ capi3ref.html:	$(TOP)/www/capi3ref.tcl
 
 changes.html:	$(TOP)/www/changes.tcl
 	tclsh $(TOP)/www/changes.tcl >changes.html
+
+compile.html:	$(TOP)/www/compile.tcl
+	tclsh $(TOP)/www/compile.tcl >compile.html
 
 copyright.html:	$(TOP)/www/copyright.tcl
 	tclsh $(TOP)/www/copyright.tcl >copyright.html
@@ -455,6 +514,9 @@ index.html:	$(TOP)/www/index.tcl last_change
 
 lang.html:	$(TOP)/www/lang.tcl
 	tclsh $(TOP)/www/lang.tcl >lang.html
+
+pragma.html:	$(TOP)/www/pragma.tcl
+	tclsh $(TOP)/www/pragma.tcl >pragma.html
 
 lockingv3.html:	$(TOP)/www/lockingv3.tcl
 	tclsh $(TOP)/www/lockingv3.tcl >lockingv3.html
@@ -503,11 +565,13 @@ version3.html:	$(TOP)/www/version3.tcl
 #
 DOC = \
   arch.html \
-  arch2.gif \
+  arch.png \
+  autoinc.html \
   c_interface.html \
   capi3.html \
   capi3ref.html \
   changes.html \
+  compile.html \
   copyright.html \
   copyright-release.html \
   copyright-release.pdf \
@@ -527,6 +591,7 @@ DOC = \
   oldnews.html \
   omitted.html \
   opcode.html \
+  pragma.html \
   quickstart.html \
   speed.html \
   sqlite.gif \
@@ -534,13 +599,13 @@ DOC = \
   support.html \
   tclsqlite.html \
   vdbe.html \
-  version3.html
+  version3.html 
 
 doc:	common.tcl $(DOC)
 	mkdir -p doc
 	mv $(DOC) doc
 
-install:	sqlite3 libsqlite3.la sqlite3.h
+install:	sqlite3 libsqlite3.la sqlite3.h ${HAVE_TCL:1=tcl_install}
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(LTINSTALL) libsqlite3.la $(DESTDIR)$(libdir)
 	$(INSTALL) -d $(DESTDIR)$(exec_prefix)/bin
@@ -550,14 +615,18 @@ install:	sqlite3 libsqlite3.la sqlite3.h
 	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig; 
 	$(INSTALL) -m 0644 sqlite3.pc $(DESTDIR)$(libdir)/pkgconfig; 
 
+tcl_install:	libtclsqlite3.la
+	tclsh $(TOP)/tclinstaller.tcl $(VERSION)
+
 clean:	
-	rm -f *.lo *.la *.o sqlite3@TARGET_EXEEXT@ libsqlite3.la
+	rm -f *.lo *.la *.o sqlite3$(TEXE) libsqlite3.la
 	rm -f sqlite3.h opcodes.*
 	rm -rf .libs .deps 
-	rm -f lemon@BUILD_EXEEXT@ lempar.c parse.* sqlite*.tar.gz
+	rm -f lemon$(BEXE) lempar.c parse.* sqlite*.tar.gz
+	rm -f mkkeywordhash$(BEXE) keywordhash.h
 	rm -f $(PUBLISH)
 	rm -f *.da *.bb *.bbg gmon.out
-	rm -f testfixture@TARGET_EXEEXT@ test.db
+	rm -f testfixture$(TEXE) test.db
 	rm -rf doc
 	rm -f common.tcl
 	rm -f sqlite3.dll sqlite3.lib

@@ -50,13 +50,21 @@ typedef unsigned int Pgno;
 */
 typedef struct Pager Pager;
 
+/*
+** Allowed values for the flags parameter to sqlite3pager_open().
+**
+** NOTE: This values must match the corresponding BTREE_ values in btree.h.
+*/
+#define PAGER_OMIT_JOURNAL  0x0001    /* Do not use a rollback journal */
+#define PAGER_NO_READLOCK   0x0002    /* Omit readlocks on readonly files */
+
 
 /*
 ** See source code comments for a detailed description of the following
 ** routines:
 */
 int sqlite3pager_open(Pager **ppPager, const char *zFilename,
-                     int nExtra, int useJournal);
+                     int nExtra, int flags);
 void sqlite3pager_set_busyhandler(Pager*, BusyHandler *pBusyHandler);
 void sqlite3pager_set_destructor(Pager*, void(*)(void*,int));
 void sqlite3pager_set_reiniter(Pager*, void(*)(void*,int));
@@ -76,7 +84,7 @@ int sqlite3pager_pagecount(Pager*);
 int sqlite3pager_truncate(Pager*,Pgno);
 int sqlite3pager_begin(void*, int exFlag);
 int sqlite3pager_commit(Pager*);
-int sqlite3pager_sync(Pager*,const char *zMaster);
+int sqlite3pager_sync(Pager*,const char *zMaster, Pgno);
 int sqlite3pager_rollback(Pager*);
 int sqlite3pager_isreadonly(Pager*);
 int sqlite3pager_stmt_begin(Pager*);
@@ -91,6 +99,7 @@ const char *sqlite3pager_dirname(Pager*);
 const char *sqlite3pager_journalname(Pager*);
 int sqlite3pager_rename(Pager*, const char *zNewName);
 void sqlite3pager_set_codec(Pager*,void(*)(void*,void*,Pgno,int),void*);
+int sqlite3pager_movepage(Pager*,void*,Pgno);
 
 #if defined(SQLITE_DEBUG) || defined(SQLITE_TEST)
 int sqlite3pager_lockstate(Pager*);

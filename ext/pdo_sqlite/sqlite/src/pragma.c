@@ -14,28 +14,17 @@
 ** $Id$
 */
 #include "sqliteInt.h"
+#include "os.h"
 #include <ctype.h>
+
+/* Ignore this whole file if pragmas are disabled
+*/
+#ifndef SQLITE_OMIT_PRAGMA
 
 #if defined(SQLITE_DEBUG) || defined(SQLITE_TEST)
 # include "pager.h"
 # include "btree.h"
 #endif
-
-/*
-** Interpret the given string as a boolean value.
-*/
-static int getBoolean(const u8 *z){
-  static const u8 *azTrue[] = { "yes", "on", "true" };
-  int i;
-  if( z[0]==0 ) return 0;
-  if( sqlite3IsNumber(z, 0, SQLITE_UTF8) ){
-    return atoi(z);
-  }
-  for(i=0; i<sizeof(azTrue)/sizeof(azTrue[0]); i++){
-    if( sqlite3StrICmp(z,azTrue[i])==0 ) return 1;
-  }
-  return 0;
-}
 
 /*
 ** Interpret the given string as a safety level.  Return 0 for OFF,
@@ -47,30 +36,33 @@ static int getBoolean(const u8 *z){
 ** to support legacy SQL code.  The safety level used to be boolean
 ** and older scripts may have used numbers 0 for OFF and 1 for ON.
 */
-static int getSafetyLevel(u8 *z){
-  static const struct {
-    const u8 *zWord;
-    int val;
-  } aKey[] = {
-    { "no",    0 },
-    { "off",   0 },
-    { "false", 0 },
-    { "yes",   1 },
-    { "on",    1 },
-    { "true",  1 },
-    { "full",  2 },
-  };
-  int i;
-  if( z[0]==0 ) return 1;
-  if( sqlite3IsNumber(z, 0, SQLITE_UTF8) ){
+static int getSafetyLevel(const u8 *z){
+                             /* 123456789 123456789 */
+  static const char zText[] = "onoffalseyestruefull";
+  static const u8 iOffset[] = {0, 1, 2, 4, 9, 12, 16};
+  static const u8 iLength[] = {2, 2, 3, 5, 3, 4, 4};
+  static const u8 iValue[] =  {1, 0, 0, 0, 1, 1, 2};
+  int i, n;
+  if( isdigit(*z) ){
     return atoi(z);
   }
-  for(i=0; i<sizeof(aKey)/sizeof(aKey[0]); i++){
-    if( sqlite3StrICmp(z,aKey[i].zWord)==0 ) return aKey[i].val;
+  n = strlen(z);
+  for(i=0; i<sizeof(iLength); i++){
+    if( iLength[i]==n && sqlite3StrNICmp(&zText[iOffset[i]],z,n)==0 ){
+      return iValue[i];
+    }
   }
   return 1;
 }
 
+/*
+** Interpret the given string as a boolean value.
+*/
+static int getBoolean(const u8 *z){
+  return getSafetyLevel(z)&1;
+}
+
+#ifndef SQLITE_OMIT_PAGER_PRAGMAS
 /*
 ** Interpret the given string as a temp db location. Return 1 for file
 ** backed temporary databases, 2 for the Red-Black tree in memory database
@@ -89,14 +81,11 @@ static int getTempStore(const char *z){
 }
 
 /*
-** If the TEMP database is open, close it and mark the database schema
-** as needing reloading.  This must be done when using the TEMP_STORE
-** or DEFAULT_TEMP_STORE pragmas.
+** Invalidate temp storage, either when the temp storage is changed
+** from default, or when 'file' and the temp_store_directory has changed
 */
-static int changeTempStorage(Parse *pParse, const char *zStorageType){
-  int ts = getTempStore(zStorageType);
+static int invalidateTempStorage(Parse *pParse){
   sqlite3 *db = pParse->db;
-  if( db->temp_store==ts ) return SQLITE_OK;
   if( db->aDb[1].pBt!=0 ){
     if( db->flags & SQLITE_InTrans ){
       sqlite3ErrorMsg(pParse, "temporary storage cannot be changed "
@@ -107,9 +96,25 @@ static int changeTempStorage(Parse *pParse, const char *zStorageType){
     db->aDb[1].pBt = 0;
     sqlite3ResetInternalSchema(db, 0);
   }
+  return SQLITE_OK;
+}
+
+/*
+** If the TEMP database is open, close it and mark the database schema
+** as needing reloading.  This must be done when using the TEMP_STORE
+** or DEFAULT_TEMP_STORE pragmas.
+*/
+static int changeTempStorage(Parse *pParse, const char *zStorageType){
+  int ts = getTempStore(zStorageType);
+  sqlite3 *db = pParse->db;
+  if( db->temp_store==ts ) return SQLITE_OK;
+  if( invalidateTempStorage( pParse ) != SQLITE_OK ){
+    return SQLITE_ERROR;
+  }
   db->temp_store = ts;
   return SQLITE_OK;
 }
+#endif
 
 /*
 ** Generate code to return a single integer value.
@@ -130,35 +135,42 @@ static void returnSingleInt(Parse *pParse, const char *zLabel, int value){
 ** Also, implement the pragma.
 */
 static int flagPragma(Parse *pParse, const char *zLeft, const char *zRight){
-  static const struct {
+  static const struct sPragmaType {
     const char *zName;  /* Name of the pragma */
     int mask;           /* Mask for the db->flags value */
   } aPragma[] = {
     { "vdbe_trace",               SQLITE_VdbeTrace     },
     { "sql_trace",                SQLITE_SqlTrace      },
     { "vdbe_listing",             SQLITE_VdbeListing   },
-#if 1  /* FIX ME:  Remove the following pragmas */
     { "full_column_names",        SQLITE_FullColNames  },
     { "short_column_names",       SQLITE_ShortColNames },
     { "count_changes",            SQLITE_CountRows     },
     { "empty_result_callbacks",   SQLITE_NullCallback  },
-#endif
+    /* The following is VERY experimental */
+    { "writable_schema",          SQLITE_WriteSchema   },
+    { "omit_readlock",            SQLITE_NoReadlock    },
   };
   int i;
-  for(i=0; i<sizeof(aPragma)/sizeof(aPragma[0]); i++){
-    if( sqlite3StrICmp(zLeft, aPragma[i].zName)==0 ){
+  const struct sPragmaType *p;
+  for(i=0, p=aPragma; i<sizeof(aPragma)/sizeof(aPragma[0]); i++, p++){
+    if( sqlite3StrICmp(zLeft, p->zName)==0 ){
       sqlite3 *db = pParse->db;
       Vdbe *v;
-      if( zRight==0 ){
-        v = sqlite3GetVdbe(pParse);
-        if( v ){
-          returnSingleInt(pParse,
-               aPragma[i].zName, (db->flags&aPragma[i].mask)!=0);
+      v = sqlite3GetVdbe(pParse);
+      if( v ){
+        if( zRight==0 ){
+          returnSingleInt(pParse, p->zName, (db->flags & p->mask)!=0 );
+        }else{
+          if( getBoolean(zRight) ){
+            db->flags |= p->mask;
+          }else{
+            db->flags &= ~p->mask;
+          }
         }
-      }else if( getBoolean(zRight) ){
-        db->flags |= aPragma[i].mask;
-      }else{
-        db->flags &= ~aPragma[i].mask;
+        /* If one of these pragmas is executed, any prepared statements
+        ** need to be recompiled.
+        */
+        sqlite3VdbeAddOp(v, OP_Expire, 0, 0);
       }
       return 1;
     }
@@ -217,6 +229,7 @@ void sqlite3Pragma(
     goto pragma_out;
   }
  
+#ifndef SQLITE_OMIT_PAGER_PRAGMAS
   /*
   **  PRAGMA [database.]default_cache_size
   **  PRAGMA [database.]default_cache_size=N
@@ -281,10 +294,31 @@ void sqlite3Pragma(
       int size = pBt ? sqlite3BtreeGetPageSize(pBt) : 0;
       returnSingleInt(pParse, "page_size", size);
     }else{
-      sqlite3BtreeSetPageSize(pBt, atoi(zRight), sqlite3BtreeGetReserve(pBt));
+      sqlite3BtreeSetPageSize(pBt, atoi(zRight), -1);
     }
   }else
+#endif /* SQLITE_OMIT_PAGER_PRAGMAS */
 
+  /*
+  **  PRAGMA [database.]auto_vacuum
+  **  PRAGMA [database.]auto_vacuum=N
+  **
+  ** Get or set the (boolean) value of the database 'auto-vacuum' parameter.
+  */
+#ifndef SQLITE_OMIT_AUTOVACUUM
+  if( sqlite3StrICmp(zLeft,"auto_vacuum")==0 ){
+    Btree *pBt = pDb->pBt;
+    if( !zRight ){
+      int auto_vacuum = 
+          pBt ? sqlite3BtreeGetAutoVacuum(pBt) : SQLITE_DEFAULT_AUTOVACUUM;
+      returnSingleInt(pParse, "auto_vacuum", auto_vacuum);
+    }else{
+      sqlite3BtreeSetAutoVacuum(pBt, getBoolean(zRight));
+    }
+  }else
+#endif
+
+#ifndef SQLITE_OMIT_PAGER_PRAGMAS
   /*
   **  PRAGMA [database.]cache_size
   **  PRAGMA [database.]cache_size=N
@@ -331,6 +365,45 @@ void sqlite3Pragma(
   }else
 
   /*
+  **   PRAGMA temp_store_directory
+  **   PRAGMA temp_store_directory = ""|"directory_name"
+  **
+  ** Return or set the local value of the temp_store_directory flag.  Changing
+  ** the value sets a specific directory to be used for temporary files.
+  ** Setting to a null string reverts to the default temporary directory search.
+  ** If temporary directory is changed, then invalidateTempStorage.
+  **
+  */
+  if( sqlite3StrICmp(zLeft, "temp_store_directory")==0 ){
+    if( !zRight ){
+      if( sqlite3_temp_directory ){
+        sqlite3VdbeSetNumCols(v, 1);
+        sqlite3VdbeSetColName(v, 0, "temp_store_directory", P3_STATIC);
+        sqlite3VdbeOp3(v, OP_String8, 0, 0, sqlite3_temp_directory, 0);
+        sqlite3VdbeAddOp(v, OP_Callback, 1, 0);
+      }
+    }else{
+      if( zRight[0] && !sqlite3OsIsDirWritable(zRight) ){
+        sqlite3ErrorMsg(pParse, "not a writable directory");
+        goto pragma_out;
+      }
+      if( TEMP_STORE==0
+       || (TEMP_STORE==1 && db->temp_store<=1)
+       || (TEMP_STORE==2 && db->temp_store==1)
+      ){
+        invalidateTempStorage(pParse);
+      }
+      sqliteFree(sqlite3_temp_directory);
+      if( zRight[0] ){
+        sqlite3_temp_directory = zRight;
+        zRight = 0;
+      }else{
+        sqlite3_temp_directory = 0;
+      }
+    }
+  }else
+
+  /*
   **   PRAGMA [database.]synchronous
   **   PRAGMA [database.]synchronous=OFF|ON|NORMAL|FULL
   **
@@ -353,22 +426,14 @@ void sqlite3Pragma(
       }
     }
   }else
-
-#if 0  /* Used once during development.  No longer needed */
-  if( sqlite3StrICmp(zLeft, "trigger_overhead_test")==0 ){
-    if( getBoolean(zRight) ){
-      sqlite3_always_code_trigger_setup = 1;
-    }else{
-      sqlite3_always_code_trigger_setup = 0;
-    }
-  }else
-#endif
+#endif /* SQLITE_OMIT_PAGER_PRAGMAS */
 
   if( flagPragma(pParse, zLeft, zRight) ){
     /* The flagPragma() subroutine also generates any necessary code
     ** there is nothing more to do here */
   }else
 
+#ifndef SQLITE_OMIT_SCHEMA_PRAGMAS
   /*
   **   PRAGMA table_info(<table>)
   **
@@ -401,8 +466,7 @@ void sqlite3Pragma(
         sqlite3VdbeOp3(v, OP_String8, 0, 0,
            pTab->aCol[i].zType ? pTab->aCol[i].zType : "numeric", 0);
         sqlite3VdbeAddOp(v, OP_Integer, pTab->aCol[i].notNull, 0);
-        sqlite3VdbeOp3(v, OP_String8, 0, 0,
-           pTab->aCol[i].zDflt, P3_STATIC);
+        sqlite3ExprCode(pParse, pTab->aCol[i].pDflt);
         sqlite3VdbeAddOp(v, OP_Integer, pTab->aCol[i].isPrimKey, 0);
         sqlite3VdbeAddOp(v, OP_Callback, 6, 0);
       }
@@ -458,6 +522,40 @@ void sqlite3Pragma(
     }
   }else
 
+  if( sqlite3StrICmp(zLeft, "database_list")==0 ){
+    int i;
+    if( sqlite3ReadSchema(pParse) ) goto pragma_out;
+    sqlite3VdbeSetNumCols(v, 3);
+    sqlite3VdbeSetColName(v, 0, "seq", P3_STATIC);
+    sqlite3VdbeSetColName(v, 1, "name", P3_STATIC);
+    sqlite3VdbeSetColName(v, 2, "file", P3_STATIC);
+    for(i=0; i<db->nDb; i++){
+      if( db->aDb[i].pBt==0 ) continue;
+      assert( db->aDb[i].zName!=0 );
+      sqlite3VdbeAddOp(v, OP_Integer, i, 0);
+      sqlite3VdbeOp3(v, OP_String8, 0, 0, db->aDb[i].zName, 0);
+      sqlite3VdbeOp3(v, OP_String8, 0, 0,
+           sqlite3BtreeGetFilename(db->aDb[i].pBt), 0);
+      sqlite3VdbeAddOp(v, OP_Callback, 3, 0);
+    }
+  }else
+
+  if( sqlite3StrICmp(zLeft, "collation_list")==0 ){
+    int i = 0;
+    HashElem *p;
+    sqlite3VdbeSetNumCols(v, 2);
+    sqlite3VdbeSetColName(v, 0, "seq", P3_STATIC);
+    sqlite3VdbeSetColName(v, 1, "name", P3_STATIC);
+    for(p=sqliteHashFirst(&db->aCollSeq); p; p=sqliteHashNext(p)){
+      CollSeq *pColl = (CollSeq *)sqliteHashData(p);
+      sqlite3VdbeAddOp(v, OP_Integer, i++, 0);
+      sqlite3VdbeOp3(v, OP_String8, 0, 0, pColl->zName, 0);
+      sqlite3VdbeAddOp(v, OP_Callback, 2, 0);
+    }
+  }else
+#endif /* SQLITE_OMIT_SCHEMA_PRAGMAS */
+
+#ifndef SQLITE_OMIT_FOREIGN_KEY
   if( sqlite3StrICmp(zLeft, "foreign_key_list")==0 && zRight ){
     FKey *pFK;
     Table *pTab;
@@ -491,24 +589,7 @@ void sqlite3Pragma(
       }
     }
   }else
-
-  if( sqlite3StrICmp(zLeft, "database_list")==0 ){
-    int i;
-    if( sqlite3ReadSchema(pParse) ) goto pragma_out;
-    sqlite3VdbeSetNumCols(v, 3);
-    sqlite3VdbeSetColName(v, 0, "seq", P3_STATIC);
-    sqlite3VdbeSetColName(v, 1, "name", P3_STATIC);
-    sqlite3VdbeSetColName(v, 2, "file", P3_STATIC);
-    for(i=0; i<db->nDb; i++){
-      if( db->aDb[i].pBt==0 ) continue;
-      assert( db->aDb[i].zName!=0 );
-      sqlite3VdbeAddOp(v, OP_Integer, i, 0);
-      sqlite3VdbeOp3(v, OP_String8, 0, 0, db->aDb[i].zName, 0);
-      sqlite3VdbeOp3(v, OP_String8, 0, 0,
-           sqlite3BtreeGetFilename(db->aDb[i].pBt), 0);
-      sqlite3VdbeAddOp(v, OP_Callback, 3, 0);
-    }
-  }else
+#endif /* !defined(SQLITE_OMIT_FOREIGN_KEY) */
 
 #ifndef NDEBUG
   if( sqlite3StrICmp(zLeft, "parser_trace")==0 ){
@@ -521,6 +602,7 @@ void sqlite3Pragma(
   }else
 #endif
 
+#ifndef SQLITE_OMIT_INTEGRITY_CHECK
   if( sqlite3StrICmp(zLeft, "integrity_check")==0 ){
     int i, j, addr;
 
@@ -645,6 +727,9 @@ void sqlite3Pragma(
     addr = sqlite3VdbeAddOpList(v, ArraySize(endCode), endCode);
     sqlite3VdbeChangeP2(v, addr+2, addr+ArraySize(endCode));
   }else
+#endif /* SQLITE_OMIT_INTEGRITY_CHECK */
+
+#ifndef SQLITE_OMIT_UTF16
   /*
   **   PRAGMA encoding
   **   PRAGMA encoding = "utf-8"|"utf-16"|"utf-16le"|"utf-16be"
@@ -715,6 +800,69 @@ void sqlite3Pragma(
       }
     }
   }else
+#endif /* SQLITE_OMIT_UTF16 */
+
+#ifndef SQLITE_OMIT_SCHEMA_VERSION_PRAGMAS
+  /*
+  **   PRAGMA [database.]schema_version
+  **   PRAGMA [database.]schema_version = <integer>
+  **
+  **   PRAGMA [database.]user_version
+  **   PRAGMA [database.]user_version = <integer>
+  **
+  ** The pragma's schema_version and user_version are used to set or get
+  ** the value of the schema-version and user-version, respectively. Both
+  ** the schema-version and the user-version are 32-bit signed integers
+  ** stored in the database header.
+  **
+  ** The schema-cookie is usually only manipulated internally by SQLite. It
+  ** is incremented by SQLite whenever the database schema is modified (by
+  ** creating or dropping a table or index). The schema version is used by
+  ** SQLite each time a query is executed to ensure that the internal cache
+  ** of the schema used when compiling the SQL query matches the schema of
+  ** the database against which the compiled query is actually executed.
+  ** Subverting this mechanism by using "PRAGMA schema_version" to modify
+  ** the schema-version is potentially dangerous and may lead to program
+  ** crashes or database corruption. Use with caution!
+  **
+  ** The user-version is not used internally by SQLite. It may be used by
+  ** applications for any purpose.
+  */
+  if( sqlite3StrICmp(zLeft, "schema_version")==0 ||
+      sqlite3StrICmp(zLeft, "user_version")==0 ){
+
+    int iCookie;   /* Cookie index. 0 for schema-cookie, 6 for user-cookie. */
+    if( zLeft[0]=='s' || zLeft[0]=='S' ){
+      iCookie = 0;
+    }else{
+      iCookie = 5;
+    }
+
+    if( zRight ){
+      /* Write the specified cookie value */
+      static const VdbeOpList setCookie[] = {
+        { OP_Transaction,    0,  1,  0},    /* 0 */
+        { OP_Integer,        0,  0,  0},    /* 1 */
+        { OP_SetCookie,      0,  0,  0},    /* 2 */
+      };
+      int addr = sqlite3VdbeAddOpList(v, ArraySize(setCookie), setCookie);
+      sqlite3VdbeChangeP1(v, addr, iDb);
+      sqlite3VdbeChangeP1(v, addr+1, atoi(zRight));
+      sqlite3VdbeChangeP1(v, addr+2, iDb);
+      sqlite3VdbeChangeP2(v, addr+2, iCookie);
+    }else{
+      /* Read the specified cookie value */
+      static const VdbeOpList readCookie[] = {
+        { OP_ReadCookie,      0,  0,  0},    /* 0 */
+        { OP_Callback,        1,  0,  0}
+      };
+      int addr = sqlite3VdbeAddOpList(v, ArraySize(readCookie), readCookie);
+      sqlite3VdbeChangeP1(v, addr, iDb);
+      sqlite3VdbeChangeP2(v, addr, iCookie);
+      sqlite3VdbeSetNumCols(v, 1);
+    }
+  }
+#endif /* SQLITE_OMIT_SCHEMA_VERSION_PRAGMAS */
 
 #if defined(SQLITE_DEBUG) || defined(SQLITE_TEST)
   /*
@@ -748,7 +896,17 @@ void sqlite3Pragma(
 #endif
 
   {}
+
+  if( v ){
+    /* Code an OP_Expire at the end of each PRAGMA program to cause
+    ** the VDBE implementing the pragma to expire. Most (all?) pragmas
+    ** are only valid for a single execution.
+    */
+    sqlite3VdbeAddOp(v, OP_Expire, 1, 0);
+  }
 pragma_out:
   sqliteFree(zLeft);
   sqliteFree(zRight);
 }
+
+#endif /* SQLITE_OMIT_PRAGMA */

@@ -196,7 +196,9 @@ static char *one_input_line(const char *zPrior, FILE *in){
     zPrompt = mainPrompt;
   }
   zResult = readline(zPrompt);
+#if defined(HAVE_READLINE) && HAVE_READLINE==1
   if( zResult ) add_history(zResult);
+#endif
   return zResult;
 }
 
@@ -360,6 +362,7 @@ static void output_csv(struct callback_data *p, const char *z, int bSep){
   }
 }
 
+#ifdef SIGINT
 /*
 ** This routine runs when the user presses Ctrl-C
 */
@@ -367,6 +370,7 @@ static void interrupt_handler(int NotUsed){
   seenInterrupt = 1;
   if( db ) sqlite3_interrupt(db);
 }
+#endif
 
 /*
 ** This is the callback routine that the SQLite library
@@ -652,7 +656,11 @@ static int dump_callback(void *pArg, int nArg, char **azArg, char **azCol){
   zType = azArg[1];
   zSql = azArg[2];
   
-  fprintf(p->out, "%s;\n", zSql);
+  if( strcasecmp(zTable,"sqlite_sequence")!=0 ){
+    fprintf(p->out, "%s;\n", zSql);
+  }else{
+    fprintf(p->out, "DELETE FROM sqlite_sequence;\n");
+  }
 
   if( strcmp(zType, "table")==0 ){
     sqlite3_stmt *pTableInfo = 0;
@@ -746,7 +754,7 @@ static char zHelp[] =
   ".help                  Show this message\n"
   ".import FILE TABLE     Import data from FILE into TABLE\n"
   ".indices TABLE         Show names of all indices on TABLE\n"
-  ".mode MODE ?TABLE?     Set output mode where MODE is on of:\n"
+  ".mode MODE ?TABLE?     Set output mode where MODE is one of:\n"
   "                         csv      Comma-separated values\n"
   "                         column   Left-aligned columns.  (See .width)\n"
   "                         html     HTML <table> code\n"
@@ -882,6 +890,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
     data.colWidth[0] = 3;
     data.colWidth[1] = 15;
     data.colWidth[2] = 58;
+    data.cnt = 0;
     sqlite3_exec(p->db, "PRAGMA database_list; ", callback, &data, &zErrMsg);
     if( zErrMsg ){
       fprintf(stderr,"Error: %s\n", zErrMsg);
@@ -1677,7 +1686,11 @@ int main(int argc, char **argv){
   if( i<argc ){
     data.zDbFilename = argv[i++];
   }else{
+#ifndef SQLITE_OMIT_MEMORYDB
     data.zDbFilename = ":memory:";
+#else
+    data.zDbFilename = 0;
+#endif
   }
   if( i<argc ){
     zFirstCmd = argv[i++];
@@ -1770,7 +1783,9 @@ int main(int argc, char **argv){
       if( zHome && (zHistory = malloc(strlen(zHome)+20))!=0 ){
         sprintf(zHistory,"%s/.sqlite_history", zHome);
       }
+#if defined(HAVE_READLINE) && HAVE_READLINE==1
       if( zHistory ) read_history(zHistory);
+#endif
       process_input(&data, 0);
       if( zHistory ){
         stifle_history(100);

@@ -18,11 +18,11 @@
 **
 ** $Id$
 */
+#include "sqliteInt.h"
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "sqliteInt.h"
 #include "vdbeInt.h"
 #include "os.h"
 
@@ -347,10 +347,11 @@ static const struct compareInfo likeInfo = { '%', '_',   0, 1 };
 **
 **         abc[*]xyz        Matches "abc*xyz" only
 */
-int patternCompare(
+static int patternCompare(
   const u8 *zPattern,              /* The glob pattern */
   const u8 *zString,               /* The string to compare against the glob */
-  const struct compareInfo *pInfo  /* Information about how to do the compare */
+  const struct compareInfo *pInfo, /* Information about how to do the compare */
+  const int esc                    /* The escape character */
 ){
   register int c;
   int invert;
@@ -360,9 +361,10 @@ int patternCompare(
   u8 matchAll = pInfo->matchAll;
   u8 matchSet = pInfo->matchSet;
   u8 noCase = pInfo->noCase; 
+  int prevEscape = 0;     /* True if the previous character was 'escape' */
 
   while( (c = *zPattern)!=0 ){
-    if( c==matchAll ){
+    if( !prevEscape && c==matchAll ){
       while( (c=zPattern[1]) == matchAll || c == matchOne ){
         if( c==matchOne ){
           if( *zString==0 ) return 0;
@@ -370,9 +372,15 @@ int patternCompare(
         }
         zPattern++;
       }
+      if( c && esc && sqlite3ReadUtf8(&zPattern[1])==esc ){
+        u8 const *zTemp = &zPattern[1];
+        sqliteNextChar(zTemp);
+        c = *zTemp;
+      }
       if( c==0 ) return 1;
       if( c==matchSet ){
-        while( *zString && patternCompare(&zPattern[1],zString,pInfo)==0 ){
+        assert( esc==0 );   /* This is GLOB, not LIKE */
+        while( *zString && patternCompare(&zPattern[1],zString,pInfo,esc)==0 ){
           sqliteNextChar(zString);
         }
         return *zString!=0;
@@ -386,17 +394,18 @@ int patternCompare(
             while( c2 != 0 && c2 != c ){ c2 = *++zString; }
           }
           if( c2==0 ) return 0;
-          if( patternCompare(&zPattern[1],zString,pInfo) ) return 1;
+          if( patternCompare(&zPattern[1],zString,pInfo,esc) ) return 1;
           sqliteNextChar(zString);
         }
         return 0;
       }
-    }else if( c==matchOne ){
+    }else if( !prevEscape && c==matchOne ){
       if( *zString==0 ) return 0;
       sqliteNextChar(zString);
       zPattern++;
     }else if( c==matchSet ){
       int prior_c = 0;
+      assert( esc==0 );    /* This only occurs for GLOB, not LIKE */
       seen = 0;
       invert = 0;
       c = sqliteCharVal(zString);
@@ -424,6 +433,9 @@ int patternCompare(
       if( c2==0 || (seen ^ invert)==0 ) return 0;
       sqliteNextChar(zString);
       zPattern++;
+    }else if( esc && !prevEscape && sqlite3ReadUtf8(zPattern)==esc){
+      prevEscape = 1;
+      sqliteNextChar(zPattern);
     }else{
       if( noCase ){
         if( sqlite3UpperToLower[c] != sqlite3UpperToLower[*zString] ) return 0;
@@ -432,6 +444,7 @@ int patternCompare(
       }
       zPattern++;
       zString++;
+      prevEscape = 0;
     }
   }
   return *zString==0;
@@ -457,8 +470,21 @@ static void likeFunc(
 ){
   const unsigned char *zA = sqlite3_value_text(argv[0]);
   const unsigned char *zB = sqlite3_value_text(argv[1]);
+  int escape = 0;
+  if( argc==3 ){
+    /* The escape character string must consist of a single UTF-8 character.
+    ** Otherwise, return an error.
+    */
+    const unsigned char *zEsc = sqlite3_value_text(argv[2]);
+    if( sqlite3utf8CharLen(zEsc, -1)!=1 ){
+      sqlite3_result_error(context, 
+          "ESCAPE expression must be a single character", -1);
+      return;
+    }
+    escape = sqlite3ReadUtf8(zEsc);
+  }
   if( zA && zB ){
-    sqlite3_result_int(context, patternCompare(zA, zB, &likeInfo));
+    sqlite3_result_int(context, patternCompare(zA, zB, &likeInfo, escape));
   }
 }
 
@@ -469,13 +495,13 @@ static void likeFunc(
 **
 **       A GLOB B
 **
-** is implemented as glob(A,B).
+** is implemented as glob(B,A).
 */
 static void globFunc(sqlite3_context *context, int arg, sqlite3_value **argv){
   const unsigned char *zA = sqlite3_value_text(argv[0]);
   const unsigned char *zB = sqlite3_value_text(argv[1]);
   if( zA && zB ){
-    sqlite3_result_int(context, patternCompare(zA, zB, &globInfo));
+    sqlite3_result_int(context, patternCompare(zA, zB, &globInfo, 0));
   }
 }
 
@@ -506,6 +532,7 @@ static void versionFunc(
 ){
   sqlite3_result_text(context, sqlite3_version, -1, SQLITE_STATIC);
 }
+
 
 /*
 ** EXPERIMENTAL - This is not an official function.  The interface may
@@ -704,10 +731,12 @@ static void test_destructor(
   memcpy(zVal, sqlite3ValueText(argv[0], db->enc), len);
   if( db->enc==SQLITE_UTF8 ){
     sqlite3_result_text(pCtx, zVal, -1, destructor);
+#ifndef SQLITE_OMIT_UTF16
   }else if( db->enc==SQLITE_UTF16LE ){
     sqlite3_result_text16le(pCtx, zVal, -1, destructor);
   }else{
     sqlite3_result_text16be(pCtx, zVal, -1, destructor);
+#endif /* SQLITE_OMIT_UTF16 */
   }
 }
 static void test_destructor_count(
@@ -762,6 +791,20 @@ static void test_auxdata(
 }
 #endif /* SQLITE_TEST */
 
+#ifdef SQLITE_TEST
+/*
+** A function to test error reporting from user functions. This function
+** returns a copy of it's first argument as an error.
+*/
+static void test_error(
+  sqlite3_context *pCtx, 
+  int nArg,
+  sqlite3_value **argv
+){
+  sqlite3_result_error(pCtx, sqlite3_value_text(argv[0]), 0);
+}
+#endif /* SQLITE_TEST */
+
 /*
 ** An instance of the following structure holds the context of a
 ** sum() or avg() aggregate computation.
@@ -807,33 +850,6 @@ struct StdDevCtx {
   double sum2;    /* Sum of the squares of terms */
   int cnt;        /* Number of terms counted */
 };
-
-#if 0   /* Omit because math library is required */
-/*
-** Routines used to compute the standard deviation as an aggregate.
-*/
-static void stdDevStep(sqlite3_context *context, int argc, const char **argv){
-  StdDevCtx *p;
-  double x;
-  if( argc<1 ) return;
-  p = sqlite3_aggregate_context(context, sizeof(*p));
-  if( p && argv[0] ){
-    x = sqlite3AtoF(argv[0], 0);
-    p->sum += x;
-    p->sum2 += x*x;
-    p->cnt++;
-  }
-}
-static void stdDevFinalize(sqlite3_context *context){
-  double rN = sqlite3_aggregate_count(context);
-  StdDevCtx *p = sqlite3_aggregate_context(context, sizeof(*p));
-  if( p && p->cnt>1 ){
-    double rCnt = cnt;
-    sqlite3_set_result_double(context, 
-       sqrt((p->sum2 - p->sum*p->sum/rCnt)/(rCnt-1.0)));
-  }
-}
-#endif
 
 /*
 ** The following structure keeps track of state information for the
@@ -933,7 +949,9 @@ void sqlite3RegisterBuiltinFunctions(sqlite3 *db){
     { "typeof",             1, 0, SQLITE_UTF8,    0, typeofFunc },
     { "length",             1, 0, SQLITE_UTF8,    0, lengthFunc },
     { "substr",             3, 0, SQLITE_UTF8,    0, substrFunc },
+#ifndef SQLITE_OMIT_UTF16
     { "substr",             3, 0, SQLITE_UTF16LE, 0, sqlite3utf16Substr },
+#endif
     { "abs",                1, 0, SQLITE_UTF8,    0, absFunc    },
     { "round",              1, 0, SQLITE_UTF8,    0, roundFunc  },
     { "round",              2, 0, SQLITE_UTF8,    0, roundFunc  },
@@ -945,6 +963,7 @@ void sqlite3RegisterBuiltinFunctions(sqlite3 *db){
     { "ifnull",             2, 0, SQLITE_UTF8,    1, ifnullFunc },
     { "random",            -1, 0, SQLITE_UTF8,    0, randomFunc },
     { "like",               2, 0, SQLITE_UTF8,    0, likeFunc   },
+    { "like",               3, 0, SQLITE_UTF8,    0, likeFunc   },
     { "glob",               2, 0, SQLITE_UTF8,    0, globFunc   },
     { "nullif",             2, 0, SQLITE_UTF8,    1, nullifFunc },
     { "sqlite_version",     0, 0, SQLITE_UTF8,    0, versionFunc},
@@ -960,6 +979,7 @@ void sqlite3RegisterBuiltinFunctions(sqlite3 *db){
     { "test_destructor",       1, 1, SQLITE_UTF8, 0, test_destructor},
     { "test_destructor_count", 0, 0, SQLITE_UTF8, 0, test_destructor_count},
     { "test_auxdata",         -1, 0, SQLITE_UTF8, 0, test_auxdata},
+    { "test_error",            1, 0, SQLITE_UTF8, 0, test_error},
 #endif
   };
   static const struct {
@@ -976,9 +996,6 @@ void sqlite3RegisterBuiltinFunctions(sqlite3 *db){
     { "avg",    1, 0, 0, sumStep,      avgFinalize    },
     { "count",  0, 0, 0, countStep,    countFinalize  },
     { "count",  1, 0, 0, countStep,    countFinalize  },
-#if 0
-    { "stddev", 1, 0, stdDevStep,   stdDevFinalize },
-#endif
   };
   int i;
 
@@ -998,6 +1015,9 @@ void sqlite3RegisterBuiltinFunctions(sqlite3 *db){
       }
     }
   }
+#ifndef SQLITE_OMIT_ALTERTABLE
+  sqlite3AlterFunctions(db);
+#endif
   for(i=0; i<sizeof(aAggs)/sizeof(aAggs[0]); i++){
     void *pArg = 0;
     switch( aAggs[i].argType ){

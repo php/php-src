@@ -39,8 +39,8 @@
 ** LIMIT clause of a SELECT statement.
 */
 struct LimitVal {
-  int limit;    /* The LIMIT value.  -1 if there is no limit */
-  int offset;   /* The OFFSET.  0 if there is none */
+  Expr *pLimit;    /* The LIMIT expression.  NULL if there is no limit */
+  Expr *pOffset;   /* The OFFSET expression.  NULL if there is none */
 };
 
 /*
@@ -81,11 +81,13 @@ struct AttachKey { int type;  Token key; };
 input ::= cmdlist.
 cmdlist ::= cmdlist ecmd.
 cmdlist ::= ecmd.
-ecmd ::= explain cmdx SEMI.
-ecmd ::= SEMI.
 cmdx ::= cmd.           { sqlite3FinishCoding(pParse); }
-explain ::= EXPLAIN.    { sqlite3BeginParse(pParse, 1); }
+ecmd ::= SEMI.
+ecmd ::= explain cmdx SEMI.
 explain ::= .           { sqlite3BeginParse(pParse, 0); }
+%ifndef SQLITE_OMIT_EXPLAIN
+explain ::= EXPLAIN.    { sqlite3BeginParse(pParse, 1); }
+%endif
 
 ///////////////////// Begin and end transactions. ////////////////////////////
 //
@@ -144,7 +146,12 @@ id(A) ::= ID(X).         {A = X;}
   DATABASE DEFERRED DESC DETACH EACH END EXCLUSIVE EXPLAIN FAIL FOR
   GLOB IGNORE IMMEDIATE INITIALLY INSTEAD LIKE MATCH KEY
   OF OFFSET PRAGMA RAISE REPLACE RESTRICT ROW STATEMENT
-  TEMP TRIGGER VACUUM VIEW.
+  TEMP TRIGGER VACUUM VIEW
+%ifdef SQLITE_OMIT_COMPOUND_SELECT
+  EXCEPT INTERSECT UNION
+%endif
+  REINDEX RENAME CDATE CTIME CTIMESTAMP ALTER
+  .
 
 // Define operator precedence early so that this is the first occurance
 // of the operator tokens in the grammer.  Keeping the operators together
@@ -162,6 +169,7 @@ id(A) ::= ID(X).         {A = X;}
 %right NOT.
 %left IS LIKE GLOB BETWEEN IN ISNULL NOTNULL NE EQ.
 %left GT LE LT GE.
+%right ESCAPE.
 %left BITAND BITOR LSHIFT RSHIFT.
 %left PLUS MINUS.
 %left STAR SLASH REM.
@@ -196,23 +204,35 @@ carglist ::= carglist carg.
 carglist ::= .
 carg ::= CONSTRAINT nm ccons.
 carg ::= ccons.
-carg ::= DEFAULT ids(X).             {sqlite3AddDefaultValue(pParse,&X,0);}
-carg ::= DEFAULT plus_num(X).        {sqlite3AddDefaultValue(pParse,&X,0);}
-carg ::= DEFAULT minus_num(X).       {sqlite3AddDefaultValue(pParse,&X,1);}
-carg ::= DEFAULT NULL. 
+carg ::= DEFAULT term(X).            {sqlite3AddDefaultValue(pParse,X);}
+carg ::= DEFAULT PLUS term(X).       {sqlite3AddDefaultValue(pParse,X);}
+carg ::= DEFAULT MINUS term(X).      {
+  Expr *p = sqlite3Expr(TK_UMINUS, X, 0, 0);
+  sqlite3AddDefaultValue(pParse,p);
+}
+carg ::= DEFAULT id(X).              {
+  Expr *p = sqlite3Expr(TK_STRING, 0, 0, &X);
+  sqlite3AddDefaultValue(pParse,p);
+}
 
 // In addition to the type name, we also care about the primary key and
 // UNIQUE constraints.
 //
 ccons ::= NULL onconf.
 ccons ::= NOT NULL onconf(R).               {sqlite3AddNotNull(pParse, R);}
-ccons ::= PRIMARY KEY sortorder onconf(R).  {sqlite3AddPrimaryKey(pParse,0,R);}
+ccons ::= PRIMARY KEY sortorder onconf(R) autoinc(I).
+                                     {sqlite3AddPrimaryKey(pParse,0,R,I);}
 ccons ::= UNIQUE onconf(R).          {sqlite3CreateIndex(pParse,0,0,0,0,R,0,0);}
 ccons ::= CHECK LP expr RP onconf.
 ccons ::= REFERENCES nm(T) idxlist_opt(TA) refargs(R).
                                 {sqlite3CreateForeignKey(pParse,0,&T,TA,R);}
 ccons ::= defer_subclause(D).   {sqlite3DeferForeignKey(pParse,D);}
 ccons ::= COLLATE id(C).  {sqlite3AddCollateType(pParse, C.z, C.n);}
+
+// The optional AUTOINCREMENT keyword
+%type autoinc {int}
+autoinc(X) ::= .          {X = 0;}
+autoinc(X) ::= AUTOINCR.  {X = 1;}
 
 // The next group of rules parses the arguments to a REFERENCES clause
 // that determine if the referential integrity checking is deferred or
@@ -249,8 +269,8 @@ conslist ::= conslist COMMA tcons.
 conslist ::= conslist tcons.
 conslist ::= tcons.
 tcons ::= CONSTRAINT nm.
-tcons ::= PRIMARY KEY LP idxlist(X) RP onconf(R).
-                                             {sqlite3AddPrimaryKey(pParse,X,R);}
+tcons ::= PRIMARY KEY LP idxlist(X) autoinc(I) RP onconf(R).
+                                         {sqlite3AddPrimaryKey(pParse,X,R,I);}
 tcons ::= UNIQUE LP idxlist(X) RP onconf(R).
                                        {sqlite3CreateIndex(pParse,0,0,0,X,R,0,0);}
 tcons ::= CHECK expr onconf.
@@ -285,12 +305,14 @@ cmd ::= DROP TABLE fullname(X). {
 
 ///////////////////// The CREATE VIEW statement /////////////////////////////
 //
+%ifndef SQLITE_OMIT_VIEW
 cmd ::= CREATE(X) temp(T) VIEW nm(Y) dbnm(Z) AS select(S). {
   sqlite3CreateView(pParse, &X, &Y, &Z, S, T);
 }
 cmd ::= DROP VIEW fullname(X). {
   sqlite3DropTable(pParse, X, 1);
 }
+%endif // SQLITE_OMIT_VIEW
 
 //////////////////////// The SELECT statement /////////////////////////////////
 //
@@ -305,6 +327,7 @@ cmd ::= select(X).  {
 %destructor oneselect {sqlite3SelectDelete($$);}
 
 select(A) ::= oneselect(X).                      {A = X;}
+%ifndef SQLITE_OMIT_COMPOUND_SELECT
 select(A) ::= select(X) multiselect_op(Y) oneselect(Z).  {
   if( Z ){
     Z->op = Y;
@@ -317,9 +340,10 @@ multiselect_op(A) ::= UNION(OP).      {A = @OP;}
 multiselect_op(A) ::= UNION ALL.      {A = TK_ALL;}
 multiselect_op(A) ::= INTERSECT(OP).  {A = @OP;}
 multiselect_op(A) ::= EXCEPT(OP).     {A = @OP;}
+%endif // SQLITE_OMIT_COMPOUND_SELECT
 oneselect(A) ::= SELECT distinct(D) selcollist(W) from(X) where_opt(Y)
                  groupby_opt(P) having_opt(Q) orderby_opt(Z) limit_opt(L). {
-  A = sqlite3SelectNew(W,X,Y,P,Q,Z,D,L.limit,L.offset);
+  A = sqlite3SelectNew(W,X,Y,P,Q,Z,D,L.pLimit,L.pOffset);
 }
 
 // The "distinct" nonterminal is true (1) if the DISTINCT keyword is
@@ -394,31 +418,33 @@ seltablist(A) ::= stl_prefix(X) nm(Y) dbnm(D) as(Z) on_opt(N) using_opt(U). {
     else { sqlite3IdListDelete(U); }
   }
 }
-seltablist(A) ::= stl_prefix(X) LP seltablist_paren(S) RP
-                  as(Z) on_opt(N) using_opt(U). {
-  A = sqlite3SrcListAppend(X,0,0);
-  A->a[A->nSrc-1].pSelect = S;
-  if( Z.n ) sqlite3SrcListAddAlias(A,&Z);
-  if( N ){
-    if( A && A->nSrc>1 ){ A->a[A->nSrc-2].pOn = N; }
-    else { sqlite3ExprDelete(N); }
+%ifndef SQLITE_OMIT_SUBQUERY
+  seltablist(A) ::= stl_prefix(X) LP seltablist_paren(S) RP
+                    as(Z) on_opt(N) using_opt(U). {
+    A = sqlite3SrcListAppend(X,0,0);
+    A->a[A->nSrc-1].pSelect = S;
+    if( Z.n ) sqlite3SrcListAddAlias(A,&Z);
+    if( N ){
+      if( A && A->nSrc>1 ){ A->a[A->nSrc-2].pOn = N; }
+      else { sqlite3ExprDelete(N); }
+    }
+    if( U ){
+      if( A && A->nSrc>1 ){ A->a[A->nSrc-2].pUsing = U; }
+      else { sqlite3IdListDelete(U); }
+    }
   }
-  if( U ){
-    if( A && A->nSrc>1 ){ A->a[A->nSrc-2].pUsing = U; }
-    else { sqlite3IdListDelete(U); }
+  
+ // A seltablist_paren nonterminal represents anything in a FROM that
+  // is contained inside parentheses.  This can be either a subquery or
+  // a grouping of table and subqueries.
+  //
+  %type seltablist_paren {Select*}
+  %destructor seltablist_paren {sqlite3SelectDelete($$);}
+  seltablist_paren(A) ::= select(S).      {A = S;}
+  seltablist_paren(A) ::= seltablist(F).  {
+     A = sqlite3SelectNew(0,F,0,0,0,0,0,0,0);
   }
-}
-
-// A seltablist_paren nonterminal represents anything in a FROM that
-// is contained inside parentheses.  This can be either a subquery or
-// a grouping of table and subqueries.
-//
-%type seltablist_paren {Select*}
-%destructor seltablist_paren {sqlite3SelectDelete($$);}
-seltablist_paren(A) ::= select(S).      {A = S;}
-seltablist_paren(A) ::= seltablist(F).  {
-   A = sqlite3SelectNew(0,F,0,0,0,0,0,-1,0);
-}
+%endif // SQLITE_OMIT_SUBQUERY
 
 %type dbnm {Token}
 dbnm(A) ::= .          {A.z=0; A.n=0;}
@@ -487,12 +513,16 @@ having_opt(A) ::= .                {A = 0;}
 having_opt(A) ::= HAVING expr(X).  {A = X;}
 
 %type limit_opt {struct LimitVal}
-limit_opt(A) ::= .                     {A.limit = -1; A.offset = 0;}
-limit_opt(A) ::= LIMIT signed(X).      {A.limit = X; A.offset = 0;}
-limit_opt(A) ::= LIMIT signed(X) OFFSET signed(Y). 
-                                       {A.limit = X; A.offset = Y;}
-limit_opt(A) ::= LIMIT signed(X) COMMA signed(Y). 
-                                       {A.limit = Y; A.offset = X;}
+%destructor limit_opt {
+  sqlite3ExprDelete($$.pLimit);
+  sqlite3ExprDelete($$.pOffset);
+}
+limit_opt(A) ::= .                     {A.pLimit = 0; A.pOffset = 0;}
+limit_opt(A) ::= LIMIT expr(X).        {A.pLimit = X; A.pOffset = 0;}
+limit_opt(A) ::= LIMIT expr(X) OFFSET expr(Y). 
+                                       {A.pLimit = X; A.pOffset = Y;}
+limit_opt(A) ::= LIMIT expr(X) COMMA expr(Y). 
+                                       {A.pOffset = X; A.pLimit = Y;}
 
 /////////////////////////// The DELETE statement /////////////////////////////
 //
@@ -550,9 +580,12 @@ inscollist(A) ::= nm(Y).                      {A = sqlite3IdListAppend(0,&Y);}
 
 %type expr {Expr*}
 %destructor expr {sqlite3ExprDelete($$);}
+%type term {Expr*}
+%destructor term {sqlite3ExprDelete($$);}
 
+expr(A) ::= term(X).             {A = X;}
 expr(A) ::= LP(B) expr(X) RP(E). {A = X; sqlite3ExprSpan(A,&B,&E); }
-expr(A) ::= NULL(X).             {A = sqlite3Expr(@X, 0, 0, &X);}
+term(A) ::= NULL(X).             {A = sqlite3Expr(@X, 0, 0, &X);}
 expr(A) ::= ID(X).               {A = sqlite3Expr(TK_ID, 0, 0, &X);}
 expr(A) ::= JOIN_KW(X).          {A = sqlite3Expr(TK_ID, 0, 0, &X);}
 expr(A) ::= nm(X) DOT nm(Y). {
@@ -567,10 +600,11 @@ expr(A) ::= nm(X) DOT nm(Y) DOT nm(Z). {
   Expr *temp4 = sqlite3Expr(TK_DOT, temp2, temp3, 0);
   A = sqlite3Expr(TK_DOT, temp1, temp4, 0);
 }
-expr(A) ::= INTEGER(X).      {A = sqlite3Expr(@X, 0, 0, &X);}
-expr(A) ::= FLOAT(X).        {A = sqlite3Expr(@X, 0, 0, &X);}
-expr(A) ::= STRING(X).       {A = sqlite3Expr(@X, 0, 0, &X);}
+term(A) ::= INTEGER(X).      {A = sqlite3Expr(@X, 0, 0, &X);}
+term(A) ::= FLOAT(X).        {A = sqlite3Expr(@X, 0, 0, &X);}
+term(A) ::= STRING(X).       {A = sqlite3Expr(@X, 0, 0, &X);}
 expr(A) ::= BLOB(X).         {A = sqlite3Expr(@X, 0, 0, &X);}
+expr(A) ::= REGISTER(X).     {A = sqlite3RegisterExpr(pParse, &X);}
 expr(A) ::= VARIABLE(X).     {
   Token *pToken = &X;
   Expr *pExpr = A = sqlite3Expr(TK_VARIABLE, 0, 0, pToken);
@@ -584,6 +618,9 @@ expr(A) ::= ID(X) LP STAR RP(E). {
   A = sqlite3ExprFunction(0, &X);
   sqlite3ExprSpan(A,&X,&E);
 }
+term(A) ::= CTIME(OP).                  {A = sqlite3Expr(@OP,0,0,0);}
+term(A) ::= CDATE(OP).                  {A = sqlite3Expr(@OP,0,0,0);}
+term(A) ::= CTIMESTAMP(OP).             {A = sqlite3Expr(@OP,0,0,0);}
 expr(A) ::= expr(X) AND(OP) expr(Y).    {A = sqlite3Expr(@OP, X, Y, 0);}
 expr(A) ::= expr(X) OR(OP) expr(Y).     {A = sqlite3Expr(@OP, X, Y, 0);}
 expr(A) ::= expr(X) LT(OP) expr(Y).     {A = sqlite3Expr(@OP, X, Y, 0);}
@@ -607,14 +644,21 @@ likeop(A) ::= LIKE.     {A.opcode = TK_LIKE; A.not = 0;}
 likeop(A) ::= GLOB.     {A.opcode = TK_GLOB; A.not = 0;}
 likeop(A) ::= NOT LIKE. {A.opcode = TK_LIKE; A.not = 1;}
 likeop(A) ::= NOT GLOB. {A.opcode = TK_GLOB; A.not = 1;}
-expr(A) ::= expr(X) likeop(OP) expr(Y).  [LIKE]  {
+%type escape {Expr*}
+escape(X) ::= ESCAPE expr(A). [ESCAPE] {X = A;}
+escape(X) ::= .               [ESCAPE] {X = 0;}
+expr(A) ::= expr(X) likeop(OP) expr(Y) escape(E).  [LIKE]  {
   ExprList *pList = sqlite3ExprListAppend(0, Y, 0);
   pList = sqlite3ExprListAppend(pList, X, 0);
+  if( E ){
+    pList = sqlite3ExprListAppend(pList, E, 0);
+  }
   A = sqlite3ExprFunction(pList, 0);
   if( A ) A->op = OP.opcode;
   if( OP.not ) A = sqlite3Expr(TK_NOT, A, 0, 0);
   sqlite3ExprSpan(A, &X->span, &Y->span);
 }
+
 expr(A) ::= expr(X) ISNULL(E). {
   A = sqlite3Expr(TK_ISNULL, X, 0, 0);
   sqlite3ExprSpan(A,&X->span,&E);
@@ -651,11 +695,6 @@ expr(A) ::= PLUS(B) expr(X). [UPLUS] {
   A = sqlite3Expr(TK_UPLUS, X, 0, 0);
   sqlite3ExprSpan(A,&B,&X->span);
 }
-expr(A) ::= LP(B) select(X) RP(E). {
-  A = sqlite3Expr(TK_SELECT, 0, 0, 0);
-  if( A ) A->pSelect = X;
-  sqlite3ExprSpan(A,&B,&E);
-}
 %type between_op {int}
 between_op(A) ::= BETWEEN.     {A = 0;}
 between_op(A) ::= NOT BETWEEN. {A = 1;}
@@ -667,29 +706,42 @@ expr(A) ::= expr(W) between_op(N) expr(X) AND expr(Y). [BETWEEN] {
   if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
   sqlite3ExprSpan(A,&W->span,&Y->span);
 }
-%type in_op {int}
-in_op(A) ::= IN.      {A = 0;}
-in_op(A) ::= NOT IN.  {A = 1;}
-expr(A) ::= expr(X) in_op(N) LP exprlist(Y) RP(E). [IN] {
-  A = sqlite3Expr(TK_IN, X, 0, 0);
-  if( A ) A->pList = Y;
-  if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
-  sqlite3ExprSpan(A,&X->span,&E);
-}
-expr(A) ::= expr(X) in_op(N) LP select(Y) RP(E).  [IN] {
-  A = sqlite3Expr(TK_IN, X, 0, 0);
-  if( A ) A->pSelect = Y;
-  if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
-  sqlite3ExprSpan(A,&X->span,&E);
-}
-expr(A) ::= expr(X) in_op(N) nm(Y) dbnm(Z). [IN] {
-  SrcList *pSrc = sqlite3SrcListAppend(0,&Y,&Z);
-  A = sqlite3Expr(TK_IN, X, 0, 0);
-  if( A ) A->pSelect = sqlite3SelectNew(0,pSrc,0,0,0,0,0,-1,0);
-  if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
-  sqlite3ExprSpan(A,&X->span,Z.z?&Z:&Y);
-}
-
+%ifndef SQLITE_OMIT_SUBQUERY
+  %type in_op {int}
+  in_op(A) ::= IN.      {A = 0;}
+  in_op(A) ::= NOT IN.  {A = 1;}
+  expr(A) ::= expr(X) in_op(N) LP exprlist(Y) RP(E). [IN] {
+    A = sqlite3Expr(TK_IN, X, 0, 0);
+    if( A ) A->pList = Y;
+    if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
+    sqlite3ExprSpan(A,&X->span,&E);
+  }
+  expr(A) ::= LP(B) select(X) RP(E). {
+    A = sqlite3Expr(TK_SELECT, 0, 0, 0);
+    if( A ) A->pSelect = X;
+    sqlite3ExprSpan(A,&B,&E);
+  }
+  expr(A) ::= expr(X) in_op(N) LP select(Y) RP(E).  [IN] {
+    A = sqlite3Expr(TK_IN, X, 0, 0);
+    if( A ) A->pSelect = Y;
+    if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
+    sqlite3ExprSpan(A,&X->span,&E);
+  }
+  expr(A) ::= expr(X) in_op(N) nm(Y) dbnm(Z). [IN] {
+    SrcList *pSrc = sqlite3SrcListAppend(0,&Y,&Z);
+    A = sqlite3Expr(TK_IN, X, 0, 0);
+    if( A ) A->pSelect = sqlite3SelectNew(0,pSrc,0,0,0,0,0,0,0);
+    if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
+    sqlite3ExprSpan(A,&X->span,Z.z?&Z:&Y);
+  }
+  expr(A) ::= EXISTS(B) LP select(Y) RP(E). {
+    Expr *p = A = sqlite3Expr(TK_EXISTS, 0, 0, 0);
+    if( p ){
+      p->pSelect = Y;
+      sqlite3ExprSpan(p,&B,&E);
+    }
+  }
+%endif // SQLITE_OMIT_SUBQUERY
 
 /* CASE expressions */
 expr(A) ::= CASE(C) case_operand(X) case_exprlist(Y) case_else(Z) END(E). {
@@ -728,10 +780,10 @@ expritem(A) ::= .                       {A = 0;}
 ///////////////////////////// The CREATE INDEX command ///////////////////////
 //
 cmd ::= CREATE(S) uniqueflag(U) INDEX nm(X) dbnm(D)
-        ON fullname(Y) LP idxlist(Z) RP(E) onconf(R). {
+        ON nm(Y) LP idxlist(Z) RP(E) onconf(R). {
   if( U!=OE_None ) U = R;
   if( U==OE_Default) U = OE_Abort;
-  sqlite3CreateIndex(pParse, &X, &D, Y, Z, U, &S, &E);
+  sqlite3CreateIndex(pParse, &X, &D, sqlite3SrcListAppend(0,&Y,0),Z,U, &S, &E);
 }
 
 %type uniqueflag {int}
@@ -776,6 +828,7 @@ cmd ::= VACUUM nm.             {sqlite3Vacuum(pParse,0);}
 
 ///////////////////////////// The PRAGMA command /////////////////////////////
 //
+%ifndef SQLITE_OMIT_PRAGMA
 cmd ::= PRAGMA nm(X) dbnm(Z) EQ nm(Y).  {sqlite3Pragma(pParse,&X,&Z,&Y,0);}
 cmd ::= PRAGMA nm(X) dbnm(Z) EQ ON(Y).  {sqlite3Pragma(pParse,&X,&Z,&Y,0);}
 cmd ::= PRAGMA nm(X) dbnm(Z) EQ plus_num(Y). {sqlite3Pragma(pParse,&X,&Z,&Y,0);}
@@ -784,6 +837,7 @@ cmd ::= PRAGMA nm(X) dbnm(Z) EQ minus_num(Y). {
 }
 cmd ::= PRAGMA nm(X) dbnm(Z) LP nm(Y) RP. {sqlite3Pragma(pParse,&X,&Z,&Y,0);}
 cmd ::= PRAGMA nm(X) dbnm(Z).             {sqlite3Pragma(pParse,&X,&Z,0,0);}
+%endif // SQLITE_OMIT_PRAGMA
 plus_num(A) ::= plus_opt number(X).   {A = X;}
 minus_num(A) ::= MINUS number(X).     {A = X;}
 number(A) ::= INTEGER(X).             {A = X;}
@@ -792,6 +846,8 @@ plus_opt ::= PLUS.
 plus_opt ::= .
 
 //////////////////////////// The CREATE TRIGGER command /////////////////////
+
+%ifndef SQLITE_OMIT_TRIGGER
 
 cmd ::= CREATE trigger_decl(A) BEGIN trigger_cmd_list(S) END(Z). {
   Token all;
@@ -869,6 +925,8 @@ expr(A) ::= RAISE(X) LP raisetype(T) COMMA nm(Z) RP(Y).  {
   A->iColumn = T;
   sqlite3ExprSpan(A, &X, &Y);
 }
+%endif // !SQLITE_OMIT_TRIGGER
+
 %type raisetype {int}
 raisetype(A) ::= ROLLBACK.  {A = OE_Rollback;}
 raisetype(A) ::= ABORT.     {A = OE_Abort;}
@@ -876,9 +934,11 @@ raisetype(A) ::= FAIL.      {A = OE_Fail;}
 
 
 ////////////////////////  DROP TRIGGER statement //////////////////////////////
+%ifndef SQLITE_OMIT_TRIGGER
 cmd ::= DROP TRIGGER fullname(X). {
   sqlite3DropTrigger(pParse,X);
 }
+%endif // !SQLITE_OMIT_TRIGGER
 
 //////////////////////// ATTACH DATABASE file AS name /////////////////////////
 cmd ::= ATTACH database_kw_opt ids(F) AS nm(D) key_opt(K). {
@@ -896,3 +956,16 @@ database_kw_opt ::= .
 cmd ::= DETACH database_kw_opt nm(D). {
   sqlite3Detach(pParse, &D);
 }
+
+////////////////////////// REINDEX collation //////////////////////////////////
+%ifndef SQLITE_OMIT_REINDEX
+cmd ::= REINDEX.                {sqlite3Reindex(pParse, 0, 0);}
+cmd ::= REINDEX nm(X) dbnm(Y).  {sqlite3Reindex(pParse, &X, &Y);}
+%endif
+
+//////////////////////// ALTER TABLE table ... ////////////////////////////////
+%ifndef SQLITE_OMIT_ALTERTABLE
+cmd ::= ALTER TABLE fullname(X) RENAME TO nm(Z). {
+  sqlite3AlterRenameTable(pParse,X,&Z);
+}
+%endif

@@ -15,118 +15,204 @@ typedef struct Keyword Keyword;
 struct Keyword {
   char *zName;         /* The keyword name */
   char *zTokenType;    /* Token value for this keyword */
+  int mask;            /* Code this keyword if non-zero */
+  int id;              /* Unique ID for this record */
   int hash;            /* Hash on the keyword */
   int offset;          /* Offset to start of name string */
   int len;             /* Length of this keyword, not counting final \000 */
+  int prefix;          /* Number of characters in prefix */
   int iNext;           /* Index in aKeywordTable[] of next with same hash */
+  int substrId;        /* Id to another keyword this keyword is embedded in */
+  int substrOffset;    /* Offset into substrId for start of this keyword */
 };
+
+/*
+** Define masks used to determine which keywords are allowed
+*/
+#ifdef SQLITE_OMIT_ALTERTABLE
+#  define ALTER      0
+#else
+#  define ALTER      1
+#endif
+#define ALWAYS     2
+#ifdef SQLITE_OMIT_ATTACH
+#  define ATTACH     0
+#else
+#  define ATTACH     4
+#endif
+#ifdef SQLITE_OMIT_AUTOINCREMENT
+#  define AUTOINCR   0
+#else
+#  define AUTOINCR   8
+#endif
+#ifdef SQLITE_OMIT_COMPOUND_SELECT
+#  define COMPOUND   0
+#else
+#  define COMPOUND   16
+#endif
+#ifdef SQLITE_OMIT_CONFLICT_CLAUSE
+#  define CONFLICT   0
+#else
+#  define CONFLICT   32
+#endif
+#ifdef SQLITE_OMIT_EXPLAIN
+#  define EXPLAIN    0
+#else
+#  define EXPLAIN    128
+#endif
+#ifdef SQLITE_OMIT_FOREIGN_KEY
+#  define FKEY       0
+#else
+#  define FKEY       256
+#endif
+#ifdef SQLITE_OMIT_PRAGMA
+#  define PRAGMA     0
+#else
+#  define PRAGMA     512
+#endif
+#ifdef SQLITE_OMIT_REINDEX
+#  define REINDEX    0
+#else
+#  define REINDEX    1024
+#endif
+#ifdef SQLITE_OMIT_SUBQUERY
+#  define SUBQUERY   0
+#else
+#  define SUBQUERY   2048
+#endif
+#ifdef SQLITE_OMIT_TRIGGER
+#  define TRIGGER    0
+#else
+#  define TRIGGER    4096
+#endif
+#ifdef SQLITE_OMIT_VACUUM
+#  define VACUUM     0
+#else
+#  define VACUUM     8192
+#endif
+#ifdef SQLITE_OMIT_VIEW
+#  define VIEW       0
+#else
+#  define VIEW       16384
+#endif
+
 
 /*
 ** These are the keywords
 */
 static Keyword aKeywordTable[] = {
-  { "ABORT",            "TK_ABORT",        },
-  { "AFTER",            "TK_AFTER",        },
-  { "ALL",              "TK_ALL",          },
-  { "AND",              "TK_AND",          },
-  { "AS",               "TK_AS",           },
-  { "ASC",              "TK_ASC",          },
-  { "ATTACH",           "TK_ATTACH",       },
-  { "BEFORE",           "TK_BEFORE",       },
-  { "BEGIN",            "TK_BEGIN",        },
-  { "BETWEEN",          "TK_BETWEEN",      },
-  { "BY",               "TK_BY",           },
-  { "CASCADE",          "TK_CASCADE",      },
-  { "CASE",             "TK_CASE",         },
-  { "CHECK",            "TK_CHECK",        },
-  { "COLLATE",          "TK_COLLATE",      },
-  { "COMMIT",           "TK_COMMIT",       },
-  { "CONFLICT",         "TK_CONFLICT",     },
-  { "CONSTRAINT",       "TK_CONSTRAINT",   },
-  { "CREATE",           "TK_CREATE",       },
-  { "CROSS",            "TK_JOIN_KW",      },
-  { "DATABASE",         "TK_DATABASE",     },
-  { "DEFAULT",          "TK_DEFAULT",      },
-  { "DEFERRED",         "TK_DEFERRED",     },
-  { "DEFERRABLE",       "TK_DEFERRABLE",   },
-  { "DELETE",           "TK_DELETE",       },
-  { "DESC",             "TK_DESC",         },
-  { "DETACH",           "TK_DETACH",       },
-  { "DISTINCT",         "TK_DISTINCT",     },
-  { "DROP",             "TK_DROP",         },
-  { "END",              "TK_END",          },
-  { "EACH",             "TK_EACH",         },
-  { "ELSE",             "TK_ELSE",         },
-  { "EXCEPT",           "TK_EXCEPT",       },
-  { "EXCLUSIVE",        "TK_EXCLUSIVE",    },
-  { "EXPLAIN",          "TK_EXPLAIN",      },
-  { "FAIL",             "TK_FAIL",         },
-  { "FOR",              "TK_FOR",          },
-  { "FOREIGN",          "TK_FOREIGN",      },
-  { "FROM",             "TK_FROM",         },
-  { "FULL",             "TK_JOIN_KW",      },
-  { "GLOB",             "TK_GLOB",         },
-  { "GROUP",            "TK_GROUP",        },
-  { "HAVING",           "TK_HAVING",       },
-  { "IGNORE",           "TK_IGNORE",       },
-  { "IMMEDIATE",        "TK_IMMEDIATE",    },
-  { "IN",               "TK_IN",           },
-  { "INDEX",            "TK_INDEX",        },
-  { "INITIALLY",        "TK_INITIALLY",    },
-  { "INNER",            "TK_JOIN_KW",      },
-  { "INSERT",           "TK_INSERT",       },
-  { "INSTEAD",          "TK_INSTEAD",      },
-  { "INTERSECT",        "TK_INTERSECT",    },
-  { "INTO",             "TK_INTO",         },
-  { "IS",               "TK_IS",           },
-  { "ISNULL",           "TK_ISNULL",       },
-  { "JOIN",             "TK_JOIN",         },
-  { "KEY",              "TK_KEY",          },
-  { "LEFT",             "TK_JOIN_KW",      },
-  { "LIKE",             "TK_LIKE",         },
-  { "LIMIT",            "TK_LIMIT",        },
-  { "MATCH",            "TK_MATCH",        },
-  { "NATURAL",          "TK_JOIN_KW",      },
-  { "NOT",              "TK_NOT",          },
-  { "NOTNULL",          "TK_NOTNULL",      },
-  { "NULL",             "TK_NULL",         },
-  { "OF",               "TK_OF",           },
-  { "OFFSET",           "TK_OFFSET",       },
-  { "ON",               "TK_ON",           },
-  { "OR",               "TK_OR",           },
-  { "ORDER",            "TK_ORDER",        },
-  { "OUTER",            "TK_JOIN_KW",      },
-  { "PRAGMA",           "TK_PRAGMA",       },
-  { "PRIMARY",          "TK_PRIMARY",      },
-  { "RAISE",            "TK_RAISE",        },
-  { "REFERENCES",       "TK_REFERENCES",   },
-  { "REPLACE",          "TK_REPLACE",      },
-  { "RESTRICT",         "TK_RESTRICT",     },
-  { "RIGHT",            "TK_JOIN_KW",      },
-  { "ROLLBACK",         "TK_ROLLBACK",     },
-  { "ROW",              "TK_ROW",          },
-  { "SELECT",           "TK_SELECT",       },
-  { "SET",              "TK_SET",          },
-  { "STATEMENT",        "TK_STATEMENT",    },
-  { "TABLE",            "TK_TABLE",        },
-  { "TEMP",             "TK_TEMP",         },
-  { "TEMPORARY",        "TK_TEMP",         },
-  { "THEN",             "TK_THEN",         },
-  { "TRANSACTION",      "TK_TRANSACTION",  },
-  { "TRIGGER",          "TK_TRIGGER",      },
-  { "UNION",            "TK_UNION",        },
-  { "UNIQUE",           "TK_UNIQUE",       },
-  { "UPDATE",           "TK_UPDATE",       },
-  { "USING",            "TK_USING",        },
-  { "VACUUM",           "TK_VACUUM",       },
-  { "VALUES",           "TK_VALUES",       },
-  { "VIEW",             "TK_VIEW",         },
-  { "WHEN",             "TK_WHEN",         },
-  { "WHERE",            "TK_WHERE",        },
+  { "ABORT",            "TK_ABORT",        CONFLICT|TRIGGER       },
+  { "AFTER",            "TK_AFTER",        TRIGGER                },
+  { "ALL",              "TK_ALL",          ALWAYS                 },
+  { "ALTER",            "TK_ALTER",        ALTER                  },
+  { "AND",              "TK_AND",          ALWAYS                 },
+  { "AS",               "TK_AS",           ALWAYS                 },
+  { "ASC",              "TK_ASC",          ALWAYS                 },
+  { "ATTACH",           "TK_ATTACH",       ATTACH                 },
+  { "AUTOINCREMENT",    "TK_AUTOINCR",     AUTOINCR               },
+  { "BEFORE",           "TK_BEFORE",       TRIGGER                },
+  { "BEGIN",            "TK_BEGIN",        ALWAYS                 },
+  { "BETWEEN",          "TK_BETWEEN",      ALWAYS                 },
+  { "BY",               "TK_BY",           ALWAYS                 },
+  { "CASCADE",          "TK_CASCADE",      FKEY                   },
+  { "CASE",             "TK_CASE",         ALWAYS                 },
+  { "CHECK",            "TK_CHECK",        ALWAYS                 },
+  { "COLLATE",          "TK_COLLATE",      ALWAYS                 },
+  { "COMMIT",           "TK_COMMIT",       ALWAYS                 },
+  { "CONFLICT",         "TK_CONFLICT",     CONFLICT               },
+  { "CONSTRAINT",       "TK_CONSTRAINT",   ALWAYS                 },
+  { "CREATE",           "TK_CREATE",       ALWAYS                 },
+  { "CROSS",            "TK_JOIN_KW",      ALWAYS                 },
+  { "CURRENT_DATE",     "TK_CDATE",        ALWAYS                 },
+  { "CURRENT_TIME",     "TK_CTIME",        ALWAYS                 },
+  { "CURRENT_TIMESTAMP","TK_CTIMESTAMP",   ALWAYS                 },
+  { "DATABASE",         "TK_DATABASE",     ATTACH                 },
+  { "DEFAULT",          "TK_DEFAULT",      ALWAYS                 },
+  { "DEFERRED",         "TK_DEFERRED",     ALWAYS                 },
+  { "DEFERRABLE",       "TK_DEFERRABLE",   FKEY                   },
+  { "DELETE",           "TK_DELETE",       ALWAYS                 },
+  { "DESC",             "TK_DESC",         ALWAYS                 },
+  { "DETACH",           "TK_DETACH",       ATTACH                 },
+  { "DISTINCT",         "TK_DISTINCT",     ALWAYS                 },
+  { "DROP",             "TK_DROP",         ALWAYS                 },
+  { "END",              "TK_END",          ALWAYS                 },
+  { "EACH",             "TK_EACH",         TRIGGER                },
+  { "ELSE",             "TK_ELSE",         ALWAYS                 },
+  { "ESCAPE",           "TK_ESCAPE",       ALWAYS                 },
+  { "EXCEPT",           "TK_EXCEPT",       COMPOUND               },
+  { "EXCLUSIVE",        "TK_EXCLUSIVE",    ALWAYS                 },
+  { "EXISTS",           "TK_EXISTS",       SUBQUERY               },
+  { "EXPLAIN",          "TK_EXPLAIN",      EXPLAIN                },
+  { "FAIL",             "TK_FAIL",         CONFLICT|TRIGGER       },
+  { "FOR",              "TK_FOR",          TRIGGER                },
+  { "FOREIGN",          "TK_FOREIGN",      FKEY                   },
+  { "FROM",             "TK_FROM",         ALWAYS                 },
+  { "FULL",             "TK_JOIN_KW",      ALWAYS                 },
+  { "GLOB",             "TK_GLOB",         ALWAYS                 },
+  { "GROUP",            "TK_GROUP",        ALWAYS                 },
+  { "HAVING",           "TK_HAVING",       ALWAYS                 },
+  { "IGNORE",           "TK_IGNORE",       CONFLICT|TRIGGER       },
+  { "IMMEDIATE",        "TK_IMMEDIATE",    ALWAYS                 },
+  { "IN",               "TK_IN",           ALWAYS                 },
+  { "INDEX",            "TK_INDEX",        ALWAYS                 },
+  { "INITIALLY",        "TK_INITIALLY",    FKEY                   },
+  { "INNER",            "TK_JOIN_KW",      ALWAYS                 },
+  { "INSERT",           "TK_INSERT",       ALWAYS                 },
+  { "INSTEAD",          "TK_INSTEAD",      TRIGGER                },
+  { "INTERSECT",        "TK_INTERSECT",    COMPOUND               },
+  { "INTO",             "TK_INTO",         ALWAYS                 },
+  { "IS",               "TK_IS",           ALWAYS                 },
+  { "ISNULL",           "TK_ISNULL",       ALWAYS                 },
+  { "JOIN",             "TK_JOIN",         ALWAYS                 },
+  { "KEY",              "TK_KEY",          ALWAYS                 },
+  { "LEFT",             "TK_JOIN_KW",      ALWAYS                 },
+  { "LIKE",             "TK_LIKE",         ALWAYS                 },
+  { "LIMIT",            "TK_LIMIT",        ALWAYS                 },
+  { "MATCH",            "TK_MATCH",        ALWAYS                 },
+  { "NATURAL",          "TK_JOIN_KW",      ALWAYS                 },
+  { "NOT",              "TK_NOT",          ALWAYS                 },
+  { "NOTNULL",          "TK_NOTNULL",      ALWAYS                 },
+  { "NULL",             "TK_NULL",         ALWAYS                 },
+  { "OF",               "TK_OF",           ALWAYS                 },
+  { "OFFSET",           "TK_OFFSET",       ALWAYS                 },
+  { "ON",               "TK_ON",           ALWAYS                 },
+  { "OR",               "TK_OR",           ALWAYS                 },
+  { "ORDER",            "TK_ORDER",        ALWAYS                 },
+  { "OUTER",            "TK_JOIN_KW",      ALWAYS                 },
+  { "PRAGMA",           "TK_PRAGMA",       PRAGMA                 },
+  { "PRIMARY",          "TK_PRIMARY",      ALWAYS                 },
+  { "RAISE",            "TK_RAISE",        TRIGGER                },
+  { "REFERENCES",       "TK_REFERENCES",   FKEY                   },
+  { "REINDEX",          "TK_REINDEX",      REINDEX                },
+  { "RENAME",           "TK_RENAME",       ALTER                  },
+  { "REPLACE",          "TK_REPLACE",      CONFLICT               },
+  { "RESTRICT",         "TK_RESTRICT",     FKEY                   },
+  { "RIGHT",            "TK_JOIN_KW",      ALWAYS                 },
+  { "ROLLBACK",         "TK_ROLLBACK",     ALWAYS                 },
+  { "ROW",              "TK_ROW",          TRIGGER                },
+  { "SELECT",           "TK_SELECT",       ALWAYS                 },
+  { "SET",              "TK_SET",          ALWAYS                 },
+  { "STATEMENT",        "TK_STATEMENT",    TRIGGER                },
+  { "TABLE",            "TK_TABLE",        ALWAYS                 },
+  { "TEMP",             "TK_TEMP",         ALWAYS                 },
+  { "TEMPORARY",        "TK_TEMP",         ALWAYS                 },
+  { "THEN",             "TK_THEN",         ALWAYS                 },
+  { "TO",               "TK_TO",           ALTER                  },
+  { "TRANSACTION",      "TK_TRANSACTION",  ALWAYS                 },
+  { "TRIGGER",          "TK_TRIGGER",      TRIGGER                },
+  { "UNION",            "TK_UNION",        COMPOUND               },
+  { "UNIQUE",           "TK_UNIQUE",       ALWAYS                 },
+  { "UPDATE",           "TK_UPDATE",       ALWAYS                 },
+  { "USING",            "TK_USING",        ALWAYS                 },
+  { "VACUUM",           "TK_VACUUM",       VACUUM                 },
+  { "VALUES",           "TK_VALUES",       ALWAYS                 },
+  { "VIEW",             "TK_VIEW",         VIEW                   },
+  { "WHEN",             "TK_WHEN",         ALWAYS                 },
+  { "WHERE",            "TK_WHERE",        ALWAYS                 },
 };
 
 /* Number of keywords */
-#define NKEYWORD (sizeof(aKeywordTable)/sizeof(aKeywordTable[0]))
+static int NKEYWORD = (sizeof(aKeywordTable)/sizeof(aKeywordTable[0]));
 
 /* An array to map all upper-case characters into their corresponding
 ** lower-case character. 
@@ -153,10 +239,37 @@ const unsigned char sqlite3UpperToLower[] = {
 /*
 ** Comparision function for two Keyword records
 */
-static int keywordCompare(const void *a, const void *b){
+static int keywordCompare1(const void *a, const void *b){
   const Keyword *pA = (Keyword*)a;
   const Keyword *pB = (Keyword*)b;
-  return strcmp(pA->zName, pB->zName);
+  int n = pA->len - pB->len;
+  if( n==0 ){
+    n = strcmp(pA->zName, pB->zName);
+  }
+  return n;
+}
+static int keywordCompare2(const void *a, const void *b){
+  const Keyword *pA = (Keyword*)a;
+  const Keyword *pB = (Keyword*)b;
+  int n = strcmp(pA->zName, pB->zName);
+  return n;
+}
+static int keywordCompare3(const void *a, const void *b){
+  const Keyword *pA = (Keyword*)a;
+  const Keyword *pB = (Keyword*)b;
+  int n = pA->offset - pB->offset;
+  return n;
+}
+
+/*
+** Return a KeywordTable entry with the given id
+*/
+static Keyword *findById(int id){
+  int i;
+  for(i=0; i<NKEYWORD; i++){
+    if( aKeywordTable[i].id==id ) break;
+  }
+  return &aKeywordTable[i];
 }
 
 /*
@@ -164,31 +277,88 @@ static int keywordCompare(const void *a, const void *b){
 ** output.
 */
 int main(int argc, char **argv){
-  int i, j, h;
+  int i, j, k, h;
   int bestSize, bestCount;
   int count;
   int nChar;
   int aHash[1000];  /* 1000 is much bigger than NKEYWORD */
 
-  /* Make sure the table is sorted */
-  qsort(aKeywordTable, NKEYWORD, sizeof(aKeywordTable[0]), keywordCompare);
+  /* Remove entries from the list of keywords that have mask==0 */
+  for(i=j=0; i<NKEYWORD; i++){
+    if( aKeywordTable[i].mask==0 ) continue;
+    if( j<i ){
+      aKeywordTable[j] = aKeywordTable[i];
+    }
+    j++;
+  }
+  NKEYWORD = j;
 
-  /* Fill in the hash value, length, and offset for all entries */
-  nChar = 0;
+  /* Fill in the lengths of strings and hashes for all entries. */
   for(i=0; i<NKEYWORD; i++){
     Keyword *p = &aKeywordTable[i];
     p->len = strlen(p->zName);
-    /* p->hash = sqlite3HashNoCase(p->zName, p->len); */
-    p->hash = UpperToLower[p->zName[0]]*5 +
-              UpperToLower[p->zName[p->len-1]]*3 + p->len;
-    p->offset = nChar;
-    if( i<NKEYWORD-1 && strncmp(p->zName, aKeywordTable[i+1].zName,p->len)==0 ){
-      /* This entry is a prefix of the one that follows.  Do not advance
-      ** the offset */
-    }else{
-      nChar += p->len;
+    p->hash = (UpperToLower[p->zName[0]]*4) ^
+              (UpperToLower[p->zName[p->len-1]]*3) ^ p->len;
+    p->id = i+1;
+  }
+
+  /* Sort the table from shortest to longest keyword */
+  qsort(aKeywordTable, NKEYWORD, sizeof(aKeywordTable[0]), keywordCompare1);
+
+  /* Look for short keywords embedded in longer keywords */
+  for(i=NKEYWORD-2; i>=0; i--){
+    Keyword *p = &aKeywordTable[i];
+    for(j=NKEYWORD-1; j>i && p->substrId==0; j--){
+      Keyword *pOther = &aKeywordTable[j];
+      if( pOther->substrId ) continue;
+      if( pOther->len<=p->len ) continue;
+      for(k=0; k<=pOther->len-p->len; k++){
+        if( memcmp(p->zName, &pOther->zName[k], p->len)==0 ){
+          p->substrId = pOther->id;
+          p->substrOffset = k;
+          break;
+        }
+      }
     }
   }
+
+  /* Sort the table into alphabetical order */
+  qsort(aKeywordTable, NKEYWORD, sizeof(aKeywordTable[0]), keywordCompare2);
+
+  /* Fill in the offset for all entries */
+  nChar = 0;
+  for(i=0; i<NKEYWORD; i++){
+    Keyword *p = &aKeywordTable[i];
+    if( p->offset>0 || p->substrId ) continue;
+    p->offset = nChar;
+    nChar += p->len;
+    for(k=p->len-1; k>=1; k--){
+      for(j=i+1; j<NKEYWORD; j++){
+        Keyword *pOther = &aKeywordTable[j];
+        if( pOther->offset>0 || pOther->substrId ) continue;
+        if( pOther->len<=k ) continue;
+        if( memcmp(&p->zName[p->len-k], pOther->zName, k)==0 ){
+          p = pOther;
+          p->offset = nChar - k;
+          nChar = p->offset + p->len;
+          p->zName += k;
+          p->len -= k;
+          p->prefix = k;
+          j = i;
+          k = p->len;
+        }
+      }
+    }
+  }
+  for(i=0; i<NKEYWORD; i++){
+    Keyword *p = &aKeywordTable[i];
+    if( p->substrId ){
+      p->offset = findById(p->substrId)->offset + p->substrOffset;
+    }
+  }
+
+  /* Sort the table by offset */
+  qsort(aKeywordTable, NKEYWORD, sizeof(aKeywordTable[0]), keywordCompare3);
 
   /* Figure out how big to make the hash table in order to minimize the
   ** number of collisions */
@@ -217,12 +387,13 @@ int main(int argc, char **argv){
   }
 
   /* Begin generating code */
-  printf("int sqlite3KeywordCode(const char *z, int n){\n");
+  printf("/* Hash score: %d */\n", bestCount);
+  printf("static int keywordCode(const char *z, int n){\n");
 
   printf("  static const char zText[%d] =\n", nChar+1);
   for(i=j=0; i<NKEYWORD; i++){
     Keyword *p = &aKeywordTable[i];
-    if( i<NKEYWORD-1 && p->offset==aKeywordTable[i+1].offset ) continue;
+    if( p->substrId ) continue;
     if( j==0 ) printf("    \"");
     printf("%s", p->zName);
     j += p->len;
@@ -260,7 +431,7 @@ int main(int argc, char **argv){
   printf("  static const unsigned char aLen[%d] = {\n", NKEYWORD);
   for(i=j=0; i<NKEYWORD; i++){
     if( j==0 ) printf("    ");
-    printf(" %3d,", aKeywordTable[i].len);
+    printf(" %3d,", aKeywordTable[i].len+aKeywordTable[i].prefix);
     j++;
     if( j>12 ){
       printf("\n");
@@ -296,8 +467,8 @@ int main(int argc, char **argv){
 
   printf("  int h, i;\n");
   printf("  if( n<2 ) return TK_ID;\n");
-  printf("  h = (sqlite3UpperToLower[((unsigned char*)z)[0]]*5 + \n"
-         "      sqlite3UpperToLower[((unsigned char*)z)[n-1]]*3 +\n"
+  printf("  h = ((sqlite3UpperToLower[((unsigned char*)z)[0]]*4) ^\n"
+         "      (sqlite3UpperToLower[((unsigned char*)z)[n-1]]*3) ^\n"
          "      n) %% %d;\n", bestSize);
   printf("  for(i=((int)aHash[h])-1; i>=0; i=((int)aNext[i])-1){\n");
   printf("    if( aLen[i]==n &&"
@@ -306,6 +477,9 @@ int main(int argc, char **argv){
   printf("    }\n");
   printf("  }\n");
   printf("  return TK_ID;\n");
+  printf("}\n");
+  printf("int sqlite3KeywordCode(const char *z, int n){\n");
+  printf("  return keywordCode(z, n);\n");
   printf("}\n");
 
   return 0;

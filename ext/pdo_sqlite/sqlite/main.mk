@@ -54,9 +54,9 @@ TCCX = $(TCC) $(OPTS) $(THREADSAFE) $(USLEEP) -I. -I$(TOP)/src
 
 # Object files for the SQLite library.
 #
-LIBOBJ+= attach.o auth.o btree.o build.o date.o delete.o \
+LIBOBJ+= alter.o attach.o auth.o btree.o build.o date.o delete.o \
          expr.o func.o hash.o insert.o \
-         main.o opcodes.o os_mac.o os_unix.o os_win.o \
+         main.o opcodes.o os_unix.o os_win.o \
          pager.o parse.o pragma.o printf.o random.o \
          select.o table.o tclsqlite.o tokenize.o trigger.o \
          update.o util.o vacuum.o \
@@ -66,6 +66,7 @@ LIBOBJ+= attach.o auth.o btree.o build.o date.o delete.o \
 # All of the source code files.
 #
 SRC = \
+  $(TOP)/src/alter.c \
   $(TOP)/src/attach.c \
   $(TOP)/src/auth.c \
   $(TOP)/src/btree.c \
@@ -80,7 +81,6 @@ SRC = \
   $(TOP)/src/insert.c \
   $(TOP)/src/legacy.c \
   $(TOP)/src/main.c \
-  $(TOP)/src/os_mac.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
   $(TOP)/src/pager.c \
@@ -113,8 +113,8 @@ SRC = \
 #
 TESTSRC = \
   $(TOP)/src/btree.c \
+  $(TOP)/src/date.c \
   $(TOP)/src/func.c \
-  $(TOP)/src/os_mac.c \
   $(TOP)/src/os_unix.c \
   $(TOP)/src/os_win.c \
   $(TOP)/src/pager.c \
@@ -140,7 +140,6 @@ HDR = \
    opcodes.h \
    $(TOP)/src/os.h \
    $(TOP)/src/os_common.h \
-   $(TOP)/src/os_mac.h \
    $(TOP)/src/os_unix.h \
    $(TOP)/src/os_win.h \
    $(TOP)/src/sqliteInt.h  \
@@ -181,12 +180,12 @@ objects: $(LIBOBJ_ORIG)
 # files are automatically generated.  This target takes care of
 # all that automatic generation.
 #
-target_source:	$(SRC) $(VDBEHDR) opcodes.c
+target_source:	$(SRC) $(VDBEHDR) opcodes.c keywordhash.h
 	rm -rf tsrc
 	mkdir tsrc
 	cp $(SRC) $(VDBEHDR) tsrc
 	rm tsrc/sqlite.h.in tsrc/parse.y
-	cp parse.c opcodes.c tsrc
+	cp parse.c opcodes.c keywordhash.h tsrc
 	cp $(TOP)/sqlite3.def tsrc
 
 # Rules to build the LEMON compiler generator
@@ -197,6 +196,9 @@ lemon:	$(TOP)/tool/lemon.c $(TOP)/tool/lempar.c
 
 # Rules to build individual files
 #
+alter.o:	$(TOP)/src/alter.c $(HDR)
+	$(TCCX) -c $(TOP)/src/alter.c
+
 attach.o:	$(TOP)/src/attach.c $(HDR)
 	$(TCCX) -c $(TOP)/src/attach.c
 
@@ -256,13 +258,10 @@ opcodes.o:	opcodes.c
 	$(TCCX) -c opcodes.c
 
 opcodes.c:	opcodes.h $(TOP)/mkopcodec.awk
-	sort -n +2 opcodes.h | awk -f $(TOP)/mkopcodec.awk >opcodes.c
+	sort -n -b +2 opcodes.h | awk -f $(TOP)/mkopcodec.awk >opcodes.c
 
 opcodes.h:	parse.h $(TOP)/src/vdbe.c $(TOP)/mkopcodeh.awk
 	cat parse.h $(TOP)/src/vdbe.c | awk -f $(TOP)/mkopcodeh.awk >opcodes.h
-
-os_mac.o:	$(TOP)/src/os_mac.c $(HDR)
-	$(TCCX) -c $(TOP)/src/os_mac.c
 
 os_unix.o:	$(TOP)/src/os_unix.c $(HDR)
 	$(TCCX) -c $(TOP)/src/os_unix.c
@@ -277,7 +276,7 @@ parse.h:	parse.c
 
 parse.c:	$(TOP)/src/parse.y lemon
 	cp $(TOP)/src/parse.y .
-	./lemon parse.y
+	./lemon $(OPTS) parse.y
 
 pragma.o:	$(TOP)/src/pragma.c $(HDR)
 	$(TCCX) $(TCL_FLAGS) -c $(TOP)/src/pragma.c
@@ -293,7 +292,7 @@ select.o:	$(TOP)/src/select.c $(HDR)
 
 sqlite3.h:	$(TOP)/src/sqlite.h.in 
 	sed -e s/--VERS--/`cat ${TOP}/VERSION`/ \
-            -e s/--ENCODING--/$(ENCODING)/ \
+	    -e s/--VERSION-NUMBER--/`cat ${TOP}/VERSION | sed 's/[^0-9]/ /g' | awk '{printf "%d%03d%03d",$$1,$$2,$$3}'`/ \
                  $(TOP)/src/sqlite.h.in >sqlite3.h
 
 table.o:	$(TOP)/src/table.c $(HDR)
@@ -302,8 +301,12 @@ table.o:	$(TOP)/src/table.c $(HDR)
 tclsqlite.o:	$(TOP)/src/tclsqlite.c $(HDR)
 	$(TCCX) $(TCL_FLAGS) -c $(TOP)/src/tclsqlite.c
 
-tokenize.o:	$(TOP)/src/tokenize.c $(HDR)
+tokenize.o:	$(TOP)/src/tokenize.c keywordhash.h $(HDR)
 	$(TCCX) -c $(TOP)/src/tokenize.c
+
+keywordhash.h:	$(TOP)/tool/mkkeywordhash.c
+	$(BCC) -o mkkeywordhash $(OPTS) $(TOP)/tool/mkkeywordhash.c
+	./mkkeywordhash >keywordhash.h
 
 trigger.o:	$(TOP)/src/trigger.c $(HDR)
 	$(TCCX) -c $(TOP)/src/trigger.c
@@ -367,7 +370,7 @@ sqlite3_analyzer$(EXE):	$(TOP)/src/tclsqlite.c libsqlite3.a $(TESTSRC) \
 	  -e 's,^,",' \
 	  -e 's,$$,\\n",' \
 	  $(TOP)/tool/spaceanal.tcl >spaceanal_tcl.h
-	$(TCCX) $(TCL_FLAGS) -DTCLSH=2 -DSQLITE_TEST=1 -static -o \
+	$(TCCX) $(TCL_FLAGS) -DTCLSH=2 -DSQLITE_TEST=1 -o \
  		sqlite3_analyzer$(EXE) $(TESTSRC) $(TOP)/src/tclsqlite.c \
 		libsqlite3.a $(LIBTCL) $(THREADLIB)
 
@@ -378,6 +381,9 @@ arch.html:	$(TOP)/www/arch.tcl
 
 arch.png:	$(TOP)/www/arch.png
 	cp $(TOP)/www/arch.png .
+
+autoinc.html:	$(TOP)/www/autoinc.tcl
+	tclsh $(TOP)/www/autoinc.tcl >autoinc.html
 
 c_interface.html:	$(TOP)/www/c_interface.tcl
 	tclsh $(TOP)/www/c_interface.tcl >c_interface.html
@@ -390,6 +396,9 @@ capi3ref.html:	$(TOP)/www/capi3ref.tcl
 
 changes.html:	$(TOP)/www/changes.tcl
 	tclsh $(TOP)/www/changes.tcl >changes.html
+
+compile.html:	$(TOP)/www/compile.tcl
+	tclsh $(TOP)/www/compile.tcl >compile.html
 
 copyright.html:	$(TOP)/www/copyright.tcl
 	tclsh $(TOP)/www/copyright.tcl >copyright.html
@@ -432,7 +441,10 @@ index.html:	$(TOP)/www/index.tcl last_change
 	tclsh $(TOP)/www/index.tcl >index.html
 
 lang.html:	$(TOP)/www/lang.tcl
-	tclsh $(TOP)/www/lang.tcl >lang.html
+	tclsh $(TOP)/www/lang.tcl doc >lang.html
+
+pragma.html:	$(TOP)/www/pragma.tcl
+	tclsh $(TOP)/www/pragma.tcl >pragma.html
 
 lockingv3.html:	$(TOP)/www/lockingv3.tcl
 	tclsh $(TOP)/www/lockingv3.tcl >lockingv3.html
@@ -476,16 +488,21 @@ vdbe.html:	$(TOP)/www/vdbe.tcl
 version3.html:	$(TOP)/www/version3.tcl
 	tclsh $(TOP)/www/version3.tcl >version3.html
 
+whentouse.html:	$(TOP)/www/whentouse.tcl
+	tclsh $(TOP)/www/whentouse.tcl >whentouse.html
+
 
 # Files to be published on the website.
 #
 DOC = \
   arch.html \
   arch.png \
+  autoinc.html \
   c_interface.html \
   capi3.html \
   capi3ref.html \
   changes.html \
+  compile.html \
   copyright.html \
   copyright-release.html \
   copyright-release.pdf \
@@ -505,6 +522,7 @@ DOC = \
   oldnews.html \
   omitted.html \
   opcode.html \
+  pragma.html \
   quickstart.html \
   speed.html \
   sqlite.gif \
@@ -512,7 +530,8 @@ DOC = \
   support.html \
   tclsqlite.html \
   vdbe.html \
-  version3.html
+  version3.html \
+  whentouse.html
 
 doc:	common.tcl $(DOC)
 	mkdir -p doc
@@ -527,7 +546,7 @@ install:	sqlite3 libsqlite3.a sqlite3.h
 
 clean:	
 	rm -f *.o sqlite3 libsqlite3.a sqlite3.h opcodes.*
-	rm -f lemon lempar.c parse.* sqlite*.tar.gz
+	rm -f lemon lempar.c parse.* sqlite*.tar.gz mkkeywordhash keywordhash.h
 	rm -f $(PUBLISH)
 	rm -f *.da *.bb *.bbg gmon.out
 	rm -rf tsrc

@@ -38,6 +38,7 @@ void sqlite3Attach(
 
   v = sqlite3GetVdbe(pParse);
   if( !v ) return;
+  sqlite3VdbeAddOp(v, OP_Expire, 1, 0);
   sqlite3VdbeAddOp(v, OP_Halt, 0, 0);
   if( pParse->explain ) return;
   db = pParse->db;
@@ -160,6 +161,7 @@ void sqlite3Detach(Parse *pParse, Token *pDbname){
 
   v = sqlite3GetVdbe(pParse);
   if( !v ) return;
+  sqlite3VdbeAddOp(v, OP_Expire, 0, 0);
   sqlite3VdbeAddOp(v, OP_Halt, 0, 0);
   if( pParse->explain ) return;
   db = pParse->db;
@@ -251,11 +253,14 @@ int sqlite3FixSrcList(
          pFix->zType, pFix->pName, pItem->zDatabase);
       return 1;
     }
+#if !defined(SQLITE_OMIT_VIEW) || !defined(SQLITE_OMIT_TRIGGER)
     if( sqlite3FixSelect(pFix, pItem->pSelect) ) return 1;
     if( sqlite3FixExpr(pFix, pItem->pOn) ) return 1;
+#endif
   }
   return 0;
 }
+#if !defined(SQLITE_OMIT_VIEW) || !defined(SQLITE_OMIT_TRIGGER)
 int sqlite3FixSelect(
   DbFixer *pFix,       /* Context of the fixation */
   Select *pSelect      /* The SELECT statement to be fixed to one database */
@@ -309,6 +314,9 @@ int sqlite3FixExprList(
   }
   return 0;
 }
+#endif
+
+#ifndef SQLITE_OMIT_TRIGGER
 int sqlite3FixTriggerStep(
   DbFixer *pFix,     /* Context of the fixation */
   TriggerStep *pStep /* The trigger step be fixed to one database */
@@ -327,3 +335,4 @@ int sqlite3FixTriggerStep(
   }
   return 0;
 }
+#endif

@@ -574,7 +574,7 @@ int sqlite3OsOpenDirectory(
 ** name of a directory, then that directory will be used to store
 ** temporary files.
 */
-const char *sqlite3_temp_directory = 0;
+char *sqlite3_temp_directory = 0;
 
 /*
 ** Create a temporary file name in zBuf.  zBuf must be big enough to
@@ -616,6 +616,22 @@ int sqlite3OsTempFileName(char *zBuf){
   return SQLITE_OK; 
 }
 
+#ifndef SQLITE_OMIT_PAGER_PRAGMAS
+/*
+** Check that a given pathname is a directory and is writable 
+**
+*/
+int sqlite3OsIsDirWritable(char *zBuf){
+  struct stat buf;
+  if( zBuf==0 ) return 0;
+  if( zBuf[0]==0 ) return 0;
+  if( stat(zBuf, &buf) ) return 0;
+  if( !S_ISDIR(buf.st_mode) ) return 0;
+  if( access(zBuf, 07) ) return 0;
+  return 1;
+}
+#endif /* SQLITE_OMIT_PAGER_PRAGMAS */
+
 /*
 ** Read data from a file into a buffer.  Return SQLITE_OK if all
 ** bytes were read successfully and SQLITE_IOERR if anything goes
@@ -645,6 +661,7 @@ int sqlite3OsRead(OsFile *id, void *pBuf, int amt){
 int sqlite3OsWrite(OsFile *id, const void *pBuf, int amt){
   int wrote = 0;
   assert( id->isOpen );
+  assert( amt>0 );
   SimulateIOError(SQLITE_IOERR);
   SimulateDiskfullError;
   TIMER_START;
@@ -675,8 +692,17 @@ int sqlite3OsSeek(OsFile *id, i64 offset){
 ** The fsync() system call does not work as advertised on many
 ** unix systems.  The following procedure is an attempt to make
 ** it work better.
+**
+** The SQLITE_NO_SYNC macro disables all fsync()s.  This is useful
+** for testing when we want to run through the test suite quickly.
+** You are strongly advised *not* to deploy with SQLITE_NO_SYNC
+** enabled, however, since with SQLITE_NO_SYNC enabled, an OS crash
+** or power failure will likely corrupt the database file.
 */
 static int full_fsync(int fd){
+#ifdef SQLITE_NO_SYNC
+  return SQLITE_OK;
+#else
   int rc;
 #ifdef F_FULLFSYNC
   rc = fcntl(fd, F_FULLFSYNC, 0);
@@ -685,6 +711,7 @@ static int full_fsync(int fd){
   rc = fsync(fd);
 #endif
   return rc;
+#endif
 }
 
 /*
@@ -1157,10 +1184,16 @@ int sqlite3OsRandomSeed(char *zBuf){
   memset(zBuf, 0, 256);
 #if !defined(SQLITE_TEST)
   {
-    int pid;
-    time((time_t*)zBuf);
-    pid = getpid();
-    memcpy(&zBuf[sizeof(time_t)], &pid, sizeof(pid));
+    int pid, fd;
+    fd = open("/dev/urandom", O_RDONLY);
+    if( fd<0 ){
+      time((time_t*)zBuf);
+      pid = getpid();
+      memcpy(&zBuf[sizeof(time_t)], &pid, sizeof(pid));
+    }else{
+      read(fd, zBuf, 256);
+      close(fd);
+    }
   }
 #endif
   return SQLITE_OK;
