@@ -3108,7 +3108,7 @@ send_by_ref:
 				do_bind_function_or_class(EX(opline), EG(function_table), EG(class_table), 0);
 				NEXT_OPCODE();
 			case ZEND_TICKS:
-				if (++EG(ticks_count)==EX(opline)->op1.u.constant.value.lval) {
+				if (++EG(ticks_count)>=EX(opline)->op1.u.constant.value.lval) {
 					EG(ticks_count)=0;
 					if (zend_ticks_function) {
 						zend_ticks_function(EX(opline)->op1.u.constant.value.lval);
