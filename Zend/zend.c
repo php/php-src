@@ -992,7 +992,8 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			if (EG(exception)) {
 				char ex_class_name[128];
 				if(Z_TYPE_P(EG(exception)) == IS_OBJECT) {
-					snprintf(ex_class_name, 127, "%s", Z_OBJ_CLASS_NAME_P(EG(exception)));
+					strncpy(ex_class_name, Z_OBJ_CLASS_NAME_P(EG(exception)), 127);
+					ex_class_name[127] = '\0';
 				} else {
 					strcpy(ex_class_name, "Unknown Exception");
 				}
