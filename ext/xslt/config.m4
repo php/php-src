@@ -66,8 +66,7 @@ if test "$PHP_XSLT" != "no"; then
     done
 
     if test "$found_expat" = "no"; then
-      PHP_ADD_LIBRARY(xmlparse)
-      PHP_ADD_LIBRARY(xmltok)
+      AC_MSG_ERROR([expat not found. To build sablotron you need the expat library.])
     fi
 
     if test "$PHP_ICONV" = "no"; then
