@@ -431,7 +431,11 @@ ZEND_API ZEND_INI_MH(OnUpdateBool)
 
 	p = (zend_bool *) (base+(size_t) mh_arg1);
 
-	*p = (zend_bool) atoi(new_value);
+	if (strncasecmp("on", new_value, sizeof("on"))) {
+		*p = (zend_bool) atoi(new_value);
+	} else {
+		*p = (zend_bool) 1;
+	}
 	return SUCCESS;
 }
 
