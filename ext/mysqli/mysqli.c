@@ -594,7 +594,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			}
 			fetchtype = override_flags;
 		} else {
-			fetchtype = MYSQLI_NUM;
+			fetchtype = MYSQLI_ASSOC;
 			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
 				return;
 			}

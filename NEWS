@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   (Marcus, kameshj at fastmail dot fm)
 - Fixed bug #29368 (The destructor is called when an exception is thrown from 
   the constructor). (Marcus)
+- Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default) (Georg)
 - Fixed bug #29291 (get_class_vars() return names with NULLs). (Marcus)
 - Fixed bug #29119 (html_entity_decode() misbehaves with UTF-8). (Moriyoshi)
 - Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
