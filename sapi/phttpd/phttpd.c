@@ -293,7 +293,6 @@ int pm_request(struct connectioninfo *cip)
 	struct httpinfo *hip = cip->hip;
 	int status;
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	if (strcasecmp(hip->method, "GET") == 0 || 
 	    strcasecmp(hip->method, "HEAD") == 0 ||
