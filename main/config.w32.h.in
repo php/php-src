@@ -8,6 +8,7 @@
 /* Default PHP / PEAR directories */
 #define CONFIGURATION_FILE_PATH "php.ini"
 #define PHP_BINDIR "c:\\php4"
+#define PHP_PREFIX "c:\\php4"
 #define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
 #define PHP_DATADIR "c:\\php4"
 #define PHP_EXTENSION_DIR "c:\\php4"
