@@ -81,6 +81,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	int in_string=0;
 	CLS_FETCH();
 
+	zend_printf("<code>");
 	zend_printf("<font color=\"%s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
 	token.type = 0;
@@ -158,6 +159,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		zend_printf("</font>\n");
 	}
 	zend_printf("</font>\n");
+	zend_printf("</code>");
 }
 
 /*
