@@ -49,10 +49,10 @@ echo "---Done---\n";
 ?>
 --EXPECT--
 string(3) "Joe"
-string(3) "JoeFoo"
-string(3) "JoeFooBar"
+string(6) "JoeFoo"
+string(9) "JoeFooBar"
 ---ArrayOverloading---
 string(3) "Joe"
-string(3) "JoeFoo"
-string(3) "JoeFooBar"
+string(6) "JoeFoo"
+string(9) "JoeFooBar"
 ---Done---
