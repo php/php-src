@@ -100,18 +100,6 @@ void init_executor(CLS_D ELS_DC)
 	EG(active_symbol_table) = &EG(symbol_table);
 
 	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_activator);
-
-	/* $GLOBALS array */
-	{
-		zval *globals = (zval *) emalloc(sizeof(zval));
-		
-		globals->value.ht = &EG(symbol_table);
-		globals->type = IS_ARRAY;
-		globals->refcount = 1;
-		globals->is_ref = 0;
-		zend_hash_update(&EG(symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL);
-	}
-
 	EG(opline_ptr) = NULL;
 }
 
