@@ -207,7 +207,7 @@ unticked_statement:
 	|	T_UNSET '(' unset_variables ')' ';'
 	|	T_FOREACH '(' variable T_AS { zend_do_foreach_begin(&$1, &$3, &$2, &$4, 1 TSRMLS_CC); } w_variable foreach_optional_arg ')' { zend_do_foreach_cont(&$6, &$7, &$4 TSRMLS_CC); } foreach_statement { zend_do_foreach_end(&$1, &$2 TSRMLS_CC); }
 	|	T_FOREACH '(' expr_without_variable T_AS { zend_do_foreach_begin(&$1, &$3, &$2, &$4, 0 TSRMLS_CC); } w_variable foreach_optional_arg ')' { zend_do_foreach_cont(&$6, &$7, &$4 TSRMLS_CC); } foreach_statement { zend_do_foreach_end(&$1, &$2 TSRMLS_CC); }
-	|	T_DECLARE { zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(TSRMLS_C); }
+	|	T_DECLARE { $1.u.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
 	|	';'		/* empty statement */
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
 		T_CATCH '(' catch_or_import_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8, &$9, 1 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
