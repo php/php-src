@@ -1509,6 +1509,7 @@ ZEND_API int increment_function(zval *op1)
 ZEND_API int decrement_function(zval *op1)
 {
 	long lval;
+	double dval;
 	
 	switch (op1->type) {
 		case IS_LONG:
@@ -1528,16 +1529,23 @@ ZEND_API int decrement_function(zval *op1)
 				op1->value.lval = -1;
 				op1->type = IS_LONG;
 				break;
-			} else if (is_numeric_string(op1->value.str.val, op1->value.str.len, &lval, NULL, 0)==IS_LONG) { /* long */
-				STR_FREE(op1->value.str.val);
-				if(lval == LONG_MIN) {
-					double d = (double)lval;
-					ZVAL_DOUBLE(op1, d-1);
-				} else {
-					op1->value.lval = lval-1;
-					op1->type = IS_LONG;
-				}
-				break;
+			}
+			switch(is_numeric_string(op1->value.str.val, op1->value.str.len, &lval, &dval, 0)) {
+				case IS_LONG:
+					STR_FREE(op1->value.str.val);
+					if(lval == LONG_MIN) {
+						double d = (double)lval;
+						ZVAL_DOUBLE(op1, d-1);
+					} else {
+						op1->value.lval = lval-1;
+						op1->type = IS_LONG;
+					}
+					break;
+				case IS_DOUBLE:
+					STR_FREE(op1->value.str.val);
+					op1->value.dval = dval - 1;
+					op1->type = IS_DOUBLE;
+					break;
 			}
 			break;
 		default:
