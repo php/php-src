@@ -1,0 +1,2 @@
+/* Define if you want the LDAP directory interface */
+#define HAVE_LDAP 0
