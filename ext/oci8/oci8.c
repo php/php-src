@@ -3461,7 +3461,7 @@ PHP_FUNCTION(ocifetchstatement)
 	int i;
 	int mode = OCI_NUM;
 	int rows = 0;
-	char namebuf[ 128 ];
+	char *namebuf;
 	int ac = ZEND_NUM_ARGS();
 
 	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &stmt, &array, &fmode) == FAILURE) {
@@ -3489,10 +3489,10 @@ PHP_FUNCTION(ocifetchstatement)
 		MAKE_STD_ZVAL(tmp);
 		array_init(tmp);
 
-		memcpy(namebuf,columns[ i ]->name, columns[ i ]->name_len);
-		namebuf[ columns[ i ]->name_len ] = 0;
+		namebuf = estrndup(columns[ i ]->name,columns[ i ]->name_len);
 				
 		zend_hash_update((*array)->value.ht, namebuf, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
+		efree(namebuf);
 	}
 
 	while (oci_fetch(statement, nrows, "OCIFetchStatement")) {
