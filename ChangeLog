@@ -1,3 +1,70 @@
+2000-10-30  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      main/Makefile.in
+      main/configuration-parser.y
+      main/configuration-scanner.l
+      main/php_ini.c
+      main/php_ini.h
+      main/php_main.h
+      win32/php4.dsp
+      win32/php4.dsw
+      win32/php4dll.dsp
+      win32/php4dllts.dsp:
+    - Complete the move to the new INI parser.  (Side effect:  at last, people
+      can finally have spaces and tabs in their extension statements...)
+
+2000-10-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/pear.m4:
+    PATH is not optional (we print that message, because php-config isn't in the
+    PATH).
+
+2000-10-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/odbc/php_odbc.h: - Added the two constants mentioned in bug #6097
+
+2000-10-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/sysvshm/sysvshm.c: Update to use reference-serializer too
+
+    * ext/sysvshm/sysvshm.c
+      ext/session/session.c
+      ext/standard/php_var.h
+      ext/standard/var.c: Add support for serializing references.
+
+    * ext/standard/scanf.c: Fix crash in sscanf in error handler (#7533)
+
+    * ext/calendar/cal_unix.c: Don't try to work with negative timestamps
+
+    * main/rfc1867.c: Remove empty temp file on failed upload
+
+2000-10-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * dynlib.m4:
+    LTLIBRARY_DEPENDENCIES might depend on variables defined in config_vars.mk,
+    so we force inclusion of that file before we use LTLIBRARY_DEPENDENCIES
+    in a rule.
+
+2000-10-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/pack.c: Make "H*" work
+
+2000-10-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/config.m4: Remove --with-aolserver-src directive.
+
+    AOLserver 3.1 and up install the include directory as per suggestion.
+
+2000-10-30  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/sockets.c:
+    Removed INI entry for read() function, made changes to read() so it will
+    take 4th parameter specifying whether to use the read() wrapper or the
+    system read() function, and modified the wrapper() so that it worked (mostly)
+    properly once again.
+
 2000-10-29  Zeev Suraski  <zeev@zend.com>
 
     * NEWS
