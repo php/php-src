@@ -65,6 +65,7 @@ PHP_FUNCTION(sqlite_seek);
 PHP_FUNCTION(sqlite_rewind);
 PHP_FUNCTION(sqlite_next);
 PHP_FUNCTION(sqlite_prev);
+PHP_FUNCTION(sqlite_key);
 
 PHP_FUNCTION(sqlite_valid);
 PHP_FUNCTION(sqlite_has_prev);

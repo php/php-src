@@ -42,6 +42,7 @@
 #include <sqlite.h>
 
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 
 #ifndef safe_emalloc
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
@@ -223,11 +224,11 @@ function_entry sqlite_funcs_query[] = {
 	PHP_ME_MAPPING(column, sqlite_column, NULL)
 	PHP_ME_MAPPING(numFields, sqlite_num_fields, NULL)
 	PHP_ME_MAPPING(fieldName, sqlite_field_name, NULL)
-	/* spl_forward */
+	/* iterator */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
+	PHP_ME_MAPPING(key, sqlite_key, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
 	PHP_ME_MAPPING(valid, sqlite_valid, NULL)
-	/* spl_sequence */
 	PHP_ME_MAPPING(rewind, sqlite_rewind, NULL)
 	/* additional */
 	PHP_ME_MAPPING(prev, sqlite_prev, NULL)
@@ -245,7 +246,7 @@ function_entry sqlite_funcs_ub_query[] = {
 	PHP_ME_MAPPING(column, sqlite_column, NULL)
 	PHP_ME_MAPPING(numFields, sqlite_num_fields, NULL)
 	PHP_ME_MAPPING(fieldName, sqlite_field_name, NULL)
-	/* spl_forward */
+	/* iterator */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
 	PHP_ME_MAPPING(valid, sqlite_valid, NULL)
@@ -1000,10 +1001,11 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_SQLITE_CLASS(Exception,  exception, zend_exception_get_default());
 	sqlite_object_handlers_query.get_class_entry = sqlite_get_ce_query;
 	sqlite_object_handlers_ub_query.get_class_entry = sqlite_get_ce_ub_query;
-	
+
 	sqlite_ce_ub_query->get_iterator = sqlite_get_iterator;
 	sqlite_ce_ub_query->iterator_funcs.funcs = &sqlite_ub_query_iterator_funcs;
 
+	zend_class_implements(sqlite_ce_query TSRMLS_CC, 1, zend_ce_iterator);	
 	sqlite_ce_query->get_iterator = sqlite_get_iterator;
 	sqlite_ce_query->iterator_funcs.funcs = &sqlite_query_iterator_funcs;
 
@@ -2627,6 +2629,30 @@ PHP_FUNCTION(sqlite_next)
 	res->curr_row++;
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool sqlite_key(resource result)
+   Return the current row index of a buffered result. */
+PHP_FUNCTION(sqlite_key)
+{
+	zval *zres;
+	struct php_sqlite_result *res;
+	zval *object = getThis();
+
+	if (object) {
+		if (ZEND_NUM_ARGS() != 0) {
+			WRONG_PARAM_COUNT
+		}
+		RES_FROM_OBJECT(res, object);
+	} else {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zres)) {
+			return;
+		}
+		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+	}
+
+	RETURN_LONG(res->curr_row);
 }
 /* }}} */
 
