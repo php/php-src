@@ -54,21 +54,25 @@ int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode T
 		php_stream_seek(dba->fp, 0L, SEEK_END);
 		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", key_datum.dsize);
 		php_stream_flush(dba->fp);
-		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize)
+		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize) {
 			return -1;
+		}
 		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", value_datum.dsize);
 		php_stream_flush(dba->fp);
-		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize)
+		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize) {
 			return -1;
-	} else { /* DBM_REPLACE */
+		}
+	} else { /* FLATFILE_REPLACE */
 		flatfile_delete(dba, key_datum TSRMLS_CC);
 		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", key_datum.dsize);
 		php_stream_flush(dba->fp);
-		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize)
+		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize) {
 			return -1;
+		}
 		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", value_datum.dsize);
-		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize)
+		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize) {
 			return -1;
+		}
 	}
 
 	php_stream_flush(dba->fp);
@@ -121,8 +125,9 @@ int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 	buf = emalloc((buf_size + 1)*sizeof(char));
 	while(!php_stream_eof(dba->fp)) {
 		/* read in the length of the key name */
-		if (!php_stream_gets(dba->fp, buf, 15))
+		if (!php_stream_gets(dba->fp, buf, 15)) {
 			break;
+		}
 		num = atoi(buf);
 		if (num > buf_size) {
 			buf_size += num;
@@ -132,8 +137,9 @@ int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 
 		/* read in the key name */
 		num = php_stream_read(dba->fp, buf, sizeof(char)*num);
-		if (num<0) 
+		if (num < 0)  {
 			break;
+		}
 		*(buf+num) = '\0';
 
 		if (size == num && !memcmp(buf, key, size)) {
@@ -141,8 +147,9 @@ int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 			php_stream_putc(dba->fp, 0);
 			php_stream_flush(dba->fp);
 			php_stream_seek(dba->fp, 0L, SEEK_END);
-			if (buf) 
+			if (buf)  {
 				efree(buf);
+			}
 			return SUCCESS;
 		}	
 
@@ -156,11 +163,13 @@ int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 		}
 		/* read in the value */
 		num = php_stream_read(dba->fp, buf, sizeof(char)*num);
-		if (num<0)
+		if (num < 0) {
 			break;
+		}
 	}
-	if (buf) 
+	if (buf) {
 		efree(buf);
+	}
 	return FAILURE;
 }	
 /* }}} */
@@ -178,8 +187,9 @@ int flatfile_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
 	php_stream_rewind(dba->fp);
 	buf = emalloc((buf_size+1)*sizeof(char));
 	while (!php_stream_eof(dba->fp)) {
-		if (!php_stream_gets(dba->fp, buf, 15)) 
+		if (!php_stream_gets(dba->fp, buf, 15))  {
 			break;
+		}
 		num = atoi(buf);
 		if (num > buf_size) {
 			buf_size+=num;
@@ -194,20 +204,23 @@ int flatfile_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
 				break;
 			}
 		}	
-		if (!php_stream_gets(dba->fp, buf, 15))
+		if (!php_stream_gets(dba->fp, buf, 15)) {
 			break;
+		}
 		num = atoi(buf);
 		if (num > buf_size) {
 			buf_size+=num;
 			buf = erealloc(buf, (buf_size+1)*sizeof(char));
 		}
 		num = php_stream_read(dba->fp, buf, sizeof(char)*num);
-		if (num<0) 
+		if (num < 0) {
 			break;
+		}
 		*(buf+num) = '\0';
 	}
-	if (buf) 
+	if (buf) {
 		efree(buf);
+	}
 	return(ret);
 }
 /* }}} */
@@ -222,15 +235,18 @@ datum flatfile_firstkey(flatfile *dba TSRMLS_DC) {
 	php_stream_rewind(dba->fp);
 	buf.dptr = emalloc((buf_size+1)*sizeof(char));
 	while(!php_stream_eof(dba->fp)) {
-		if (!php_stream_gets(dba->fp, buf.dptr, 15)) break;
+		if (!php_stream_gets(dba->fp, buf.dptr, 15)) {
+			break;
+		}
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			buf.dptr = erealloc(buf.dptr, (buf_size+1)*sizeof(char));
 		}
 		num = php_stream_read(dba->fp, buf.dptr, num);
-		if (num<0) 
+		if (num < 0) {
 			break;
+		}
 		buf.dsize = num;
 		if (*(buf.dptr)!=0) {
 			dba->CurrentFlatFilePos = php_stream_tell(dba->fp);
@@ -243,11 +259,13 @@ datum flatfile_firstkey(flatfile *dba TSRMLS_DC) {
 			buf.dptr = erealloc(buf.dptr, (buf_size+1)*sizeof(char));
 		}
 		num = php_stream_read(dba->fp, buf.dptr, num);
-		if (num<0) 
+		if (num < 0) {
 			break;
+		}
 	}
-	if (buf.dptr) 
+	if (buf.dptr)  {
 		efree(buf.dptr);
+	}
 	buf.dptr = NULL;
 	return(buf);
 }
@@ -263,33 +281,39 @@ datum flatfile_nextkey(flatfile *dba TSRMLS_DC) {
 	php_stream_seek(dba->fp, dba->CurrentFlatFilePos, SEEK_SET);
 	buf.dptr = emalloc((buf_size+1)*sizeof(char));
 	while(!php_stream_eof(dba->fp)) {
-		if (!php_stream_gets(dba->fp, buf.dptr, 15)) break;
+		if (!php_stream_gets(dba->fp, buf.dptr, 15)) {
+			break;
+		}
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			buf.dptr = erealloc(buf.dptr, (buf_size+1)*sizeof(char));
 		}
 		num = php_stream_read(dba->fp, buf.dptr, num);
-		if (num<0) 
+		if (num < 0)  {
 			break;
-		if (!php_stream_gets(dba->fp, buf.dptr, 15)) 
+		}
+		if (!php_stream_gets(dba->fp, buf.dptr, 15)) {
 			break;
+		}
 		num = atoi(buf.dptr);
 		if (num > buf_size) {
 			buf_size+=num;
 			buf.dptr = erealloc(buf.dptr, (buf_size+1)*sizeof(char));
 		}
 		num = php_stream_read(dba->fp, buf.dptr, num);
-		if (num<0) 
+		if (num < 0) {
 			break;
+		}
 		buf.dsize = num;
 		if (*(buf.dptr)!=0) {
 			dba->CurrentFlatFilePos = php_stream_tell(dba->fp);
 			return(buf);
 		}
 	}
-	if (buf.dptr) 
+	if (buf.dptr) {
 		efree(buf.dptr);
+	}
 	buf.dptr = NULL;
 	return(buf);
 }	
