@@ -66,40 +66,51 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length)
 	return sent;
 }
 
+#define COMBINE_HEADERS 30
+
 static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
 	char buf[1024];
-
+	struct iovec vec[COMBINE_HEADERS];
+	int n = 0;
+	zend_llist_position pos;
+	sapi_header_struct *h;
+	
 	if (!SG(sapi_headers).http_status_line) {
 		size_t len;
 
 		snprintf(buf, 1023, "HTTP/1.0 %d Something\r\n", SG(sapi_headers).http_response_code);
 		len = strlen(buf);
-		send(TG(hc)->conn_fd, buf, len, 0);
+		vec[n].iov_base = buf;
+		vec[n++].iov_len = len;
 		TG(hc)->status = SG(sapi_headers).http_response_code;
 		TG(hc)->bytes += len;
 	}
-	
-	return SAPI_HEADER_DO_SEND;
-}
 
-static void sapi_thttpd_send_header(sapi_header_struct *sapi_header, void *server_context)
-{
-	struct iovec vec[2];
-	int n = 0;
-	TLS_FETCH();
-
-	if (sapi_header) {
-		vec[n].iov_base = sapi_header->header;
-		vec[n++].iov_len = sapi_header->header_len;
-		TG(hc)->bytes += sapi_header->header_len;
+	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
+	while (h) {
+		vec[n].iov_base = h->header;
+		vec[n++].iov_len = h->header_len;
+		if (n >= COMBINE_HEADERS - 1) {
+			if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
+				php_handle_aborted_connection();
+			n = 0;
+		}
+		vec[n].iov_base = "\r\n";
+		vec[n++].iov_len = 2;
+		
+		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
+
 	vec[n].iov_base = "\r\n";
 	vec[n++].iov_len = 2;
-	TG(hc)->bytes += 2;
+
+	if (n) {
+		if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
+			php_handle_aborted_connection();
+	}
 	
-	if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
-		php_handle_aborted_connection();
+	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
 static int sapi_thttpd_read_post(char *buffer, uint count_bytes SLS_DC)
@@ -211,7 +222,7 @@ static sapi_module_struct thttpd_sapi_module = {
 	
 	NULL,
 	sapi_thttpd_send_headers,
-	sapi_thttpd_send_header,
+	NULL,
 	sapi_thttpd_read_post,
 	sapi_thttpd_read_cookies,
 
