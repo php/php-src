@@ -91,7 +91,7 @@ case $host_alias in
 *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
 *darwin*|*rhapsody*)
-    CPPFLAGS="$CPPFLAGS -traditional-cpp";;
+    CPPFLAGS="$CPPFLAGS -no-cpp-precomp";;
 *bsdi*)
     BSD_MAKEFILE=yes;;
 *beos*)
