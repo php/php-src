@@ -670,11 +670,13 @@ _php_math_basetolong(zval *arg, int base) {
  */
 PHPAPI int
 _php_math_basetozval(zval *arg, int base, zval *ret) {
-	long num = 0, digit, onum;
+	long num = 0;
 	double fnum;
 	int i;
 	int mode = 0;
 	char c, *s;
+	unsigned long cutoff;
+	int cutlim;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
 		return FAILURE;
@@ -682,30 +684,37 @@ _php_math_basetozval(zval *arg, int base, zval *ret) {
 
 	s = Z_STRVAL_P(arg);
 
+	cutoff = LONG_MAX / base;
+	cutlim = LONG_MAX % base;
+	
 	for (i = Z_STRLEN_P(arg); i > 0; i--) {
 		c = *s++;
 
-		digit = (c >= '0' && c <= '9') ? c - '0'
-			: (c >= 'A' && c <= 'Z') ? c - 'A' + 10
-			: (c >= 'a' && c <= 'z') ? c - 'a' + 10
-			: base;
+		/* might not work for EBCDIC */
+		if (c >= '0' && c <= '9') 
+			c -= '0';
+		else if (c >= 'A' && c <= 'Z') 
+			c -= 'A' - 10;
+		else if (c >= 'a' && c <= 'z') 
+			c -= 'a' - 10;
+		else
+			continue;
 
-		if (digit >= base)
+		if (c >= base)
 			continue;
 		
 		switch (mode) {
 		case 0: /* Integer */
-			onum = num;
-			num = num * base + digit;
-
-			if (num > onum)
-				break; /* No overflow, continue */
-			
-			fnum = onum;
-			mode = 1;
+			if (num < cutoff || (num == cutoff && c <= cutlim)) {
+				num = num * base + c;
+				break;
+			} else {
+				fnum = num;
+				mode = 1;
+			}
 			/* fall-through */
 		case 1: /* Float */
-			fnum = fnum * base + digit;
+			fnum = fnum * base + c;
 		}	
 	}
 
