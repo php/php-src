@@ -85,6 +85,8 @@ PHP_FUNCTION(pg_lowrite);
 PHP_FUNCTION(pg_loreadall);
 PHP_FUNCTION(pg_loimport);
 PHP_FUNCTION(pg_loexport);
+PHP_FUNCTION(pg_putline);
+PHP_FUNCTION(pg_endcopy);
 #if HAVE_PQCLIENTENCODING
 PHP_FUNCTION(pg_clientencoding);
 PHP_FUNCTION(pg_setclientencoding);
