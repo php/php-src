@@ -41,6 +41,17 @@
 
 DBA_OPEN_FUNC(flatfile)
 {
+	int fd, flags;
+
+	if (info->mode != DBA_READER) {
+		if (SUCCESS != php_stream_cast(info->fp, PHP_STREAM_AS_FD, (void*)&fd, 1)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not cast stream");
+			return FAILURE;
+		}
+		flags = fcntl(fd, F_SETFL);
+		fcntl(fd, F_SETFL, flags & ~O_APPEND);
+	}
+
 	info->dbf = pemalloc(sizeof(flatfile), info->flags&DBA_PERSISTENT);
 	memset(info->dbf, 0, sizeof(flatfile));
 
@@ -53,8 +64,9 @@ DBA_CLOSE_FUNC(flatfile)
 {
 	FLATFILE_DATA;
 
-	if (dba->nextkey.dptr)
+	if (dba->nextkey.dptr) {
 		efree(dba->nextkey.dptr);
+	}
 	pefree(dba, info->flags&DBA_PERSISTENT);
 }
 
@@ -67,8 +79,10 @@ DBA_FETCH_FUNC(flatfile)
 	FLATFILE_GKEY;
 
 	gval = flatfile_fetch(dba, gkey TSRMLS_CC);
-	if(gval.dptr) {
-		if(newlen) *newlen = gval.dsize;
+	if (gval.dptr) {
+		if (newlen) {
+			*newlen = gval.dsize;
+		}
 		new = estrndup(gval.dptr, gval.dsize);
 		efree(gval.dptr);
 	}
@@ -104,7 +118,7 @@ DBA_EXISTS_FUNC(flatfile)
 	FLATFILE_GKEY;
 	
 	gval = flatfile_fetch(dba, gkey TSRMLS_CC);
-	if(gval.dptr) {
+	if (gval.dptr) {
 		efree(gval.dptr);
 		return SUCCESS;
 	}
@@ -122,12 +136,14 @@ DBA_FIRSTKEY_FUNC(flatfile)
 {
 	FLATFILE_DATA;
 
-	if (dba->nextkey.dptr)
+	if (dba->nextkey.dptr) {
 		efree(dba->nextkey.dptr);
+	}
 	dba->nextkey = flatfile_firstkey(dba TSRMLS_CC);
-	if(dba->nextkey.dptr) {
-		if(newlen) 
+	if (dba->nextkey.dptr) {
+		if (newlen)  {
 			*newlen = dba->nextkey.dsize;
+		}
 		return estrndup(dba->nextkey.dptr, dba->nextkey.dsize);
 	}
 	return NULL;
@@ -137,15 +153,18 @@ DBA_NEXTKEY_FUNC(flatfile)
 {
 	FLATFILE_DATA;
 	
-	if(!dba->nextkey.dptr) 
+	if (!dba->nextkey.dptr) {
 		return NULL;
+	}
 	
-	if (dba->nextkey.dptr)
+	if (dba->nextkey.dptr) {
 		efree(dba->nextkey.dptr);
+	}
 	dba->nextkey = flatfile_nextkey(dba TSRMLS_CC);
-	if(dba->nextkey.dptr) {
-		if(newlen) 
+	if (dba->nextkey.dptr) {
+		if (newlen) {
 			*newlen = dba->nextkey.dsize;
+		}
 		return estrndup(dba->nextkey.dptr, dba->nextkey.dsize);
 	}
 	return NULL;

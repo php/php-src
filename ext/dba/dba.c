@@ -27,7 +27,6 @@
 
 #if HAVE_DBA
 
-#include "ext/standard/flock_compat.h" 
 #include "php_ini.h"
 #include <stdio.h> 
 #include <fcntl.h>
@@ -38,6 +37,7 @@
 #include "php_dba.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
+#include "ext/standard/flock_compat.h" 
 
 #include "php_gdbm.h"
 #include "php_ndbm.h"
@@ -651,22 +651,36 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 'c': 
 			modenr = DBA_CREAT; 
 			lock_mode = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
+			if (lock_mode) {
+				if (lock_dbf) {
+					/* the create/append check will be done on the lock
+					 * when the lib opens the file it is already created
+					 */
+					file_mode = "r+b";       /* read & write, seek 0 */
+					lock_file_mode = "a+b";  /* append */
+				} else {
+					file_mode = "a+b";       /* append */
+					lock_file_mode = "w+b";  /* create/truncate */
+				}
+			} else {
 			file_mode = "a+b";
-			if (!lock_mode || !lock_dbf) {
-				break;
 			}
-			/* When we lock the db file it will be created before the handler
-			 * even tries to open it, hence we must change to truncate mode.
+			/* In case of the 'a+b' append mode, the handler is responsible 
+			 * to handle any rewind problems (see flatfile handler).
 			 */
+			break;
 		case 'n':
 			modenr = DBA_TRUNC;
 			lock_mode = (lock_flag & DBA_LOCK_TRUNC) ? LOCK_EX : 0;
 			file_mode = "w+b";
 			break;
 		default:
-			modenr = 0;
-			lock_mode = 0;
-			file_mode = "";
+			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
+			FREENOW;
+			RETURN_FALSE;
+	}
+	if (!lock_file_mode) {
+		lock_file_mode = file_mode;
 	}
 	if (*pmode=='d' || *pmode=='l' || *pmode=='-') {
 		pmode++; /* done already - skip here */
@@ -692,7 +706,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			lock_mode |= LOCK_NB; /* test =: non blocking */
 		}
 	}
-	if (*pmode || !modenr) {
+	if (*pmode) {
 		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
 		FREENOW;
 		RETURN_FALSE;
@@ -724,7 +738,6 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (!error && lock_mode) {
 		if (lock_dbf) {
 			info->lock.name = pestrdup(info->path, persistent);
-			lock_file_mode = file_mode;
 		} else {
 			spprintf(&info->lock.name, 0, "%s.lck", info->path);
 			if (!strcmp(file_mode, "r")) {
@@ -742,12 +755,6 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, NULL);
 		}
 		if (!info->lock.fp) {
-			dba_close(info TSRMLS_CC);
-			/* stream operation already wrote an error message */
-			FREENOW;
-			RETURN_FALSE;
-		}
-		if (php_stream_cast(info->lock.fp, PHP_STREAM_AS_FD, (void*)&info->lock.fd, 1) == FAILURE)	{
 			dba_close(info TSRMLS_CC);
 			/* stream operation already wrote an error message */
 			FREENOW;
