@@ -1248,7 +1248,9 @@ binary_assign_op_addr: {
 				NEXT_OPCODE();
 			case ZEND_FETCH_UNSET:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
-				AI_USE_PTR(Ts[opline->result.u.var].var);
+				if (Ts[opline->result.u.var].var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
+					SEPARATE_ZVAL(Ts[opline->result.u.var].var.ptr_ptr);
+				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_IS:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
@@ -1282,11 +1284,15 @@ binary_assign_op_addr: {
 				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_UNSET:
+				/* Not needed in DIM_UNSET
 				if (opline->extended_value == ZEND_FETCH_ADD_LOCK) {
 					PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 				}
+				*/
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
-				AI_USE_PTR(Ts[opline->result.u.var].var);
+				if (Ts[opline->result.u.var].var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
+					SEPARATE_ZVAL(Ts[opline->result.u.var].var.ptr_ptr);
+				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_OBJ_R:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
@@ -1313,7 +1319,9 @@ binary_assign_op_addr: {
 				NEXT_OPCODE();
 			case ZEND_FETCH_OBJ_UNSET:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
-				AI_USE_PTR(Ts[opline->result.u.var].var);
+				if (Ts[opline->result.u.var].var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
+					SEPARATE_ZVAL(Ts[opline->result.u.var].var.ptr_ptr);
+				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_TMP_VAR:
 				zend_fetch_dimension_address_from_tmp_var(&opline->result, &opline->op1, &opline->op2, Ts ELS_CC);
