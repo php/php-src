@@ -614,6 +614,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		MAKE_STD_ZVAL(newval);
 		*newval = *(stream->wrapperdata);
 		zval_copy_ctor(newval);
+		INIT_PZVAL(newval);
 
 		add_assoc_zval(return_value, "wrapper_data", newval);
 	}
@@ -994,10 +995,9 @@ PHP_FUNCTION(stream_context_get_options)
 	context = decode_context_param(zcontext TSRMLS_CC);
 	ZEND_VERIFY_RESOURCE(context);
 
-	array_init(return_value);
 	*return_value = *context->options;
 	zval_copy_ctor(return_value);
-		
+	INIT_PZVAL(return_value);
 }
 /* }}} */
 
