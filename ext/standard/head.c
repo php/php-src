@@ -76,8 +76,9 @@ PHPAPI void php3_noheader(void)
 }
 
 
+#ifndef ZTS
 /* Adds header information */
-void php4i_add_header_information(char *header_information)
+void php4i_add_header_information(char *header_information, uint header_length)
 {
 	char *r;
 #if APACHE
@@ -202,6 +203,12 @@ void php4i_add_header_information(char *header_information)
 	}
 #endif
 }
+#else
+void php4i_add_header_information(char *header_information, uint header_length)
+{
+	sapi_add_header(header_information, header_length);
+}
+#endif
 
 
 /* Implementation of the language Header() function */
@@ -213,12 +220,14 @@ void php3_Header(INTERNAL_FUNCTION_PARAMETERS)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg1);
-	php4i_add_header_information(arg1->value.str.val);
+	php4i_add_header_information(arg1->value.str.val, arg1->value.str.len);
 }
 
 
 
 
+
+#ifndef ZTS
 /*
  * php3_header() flushes the header info built up using calls to
  * the Header() function.  If type is 1, a redirect to str is done.
@@ -384,6 +393,20 @@ PHPAPI int php3_header(void)
 	PG(header_is_being_sent) = 0;
 	return(1);
 }
+#else
+PHPAPI int php3_header()
+{
+	SLS_FETCH();
+
+	if (sapi_send_headers()==FAILURE || SG(request_info).headers_only) {
+		return 0; /* don't allow output */
+	} else {
+		return 1; /* allow output */
+	}
+}
+#endif
+
+
 
 void php3_PushCookieList(char *name, char *value, time_t expires, char *path, char *domain, int secure)
 {
