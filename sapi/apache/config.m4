@@ -2,17 +2,6 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PHP_AP_EXTRACT_VERSION,[
-  ac_output=`$1 -v 2>&1`
-  ac_IFS=$IFS
-IFS="- /.
-"
-  set $ac_output
-  IFS=$ac_IFS
-
-  APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
-])
-
 AC_MSG_CHECKING(for Apache 1.x module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]      Build shared Apache 1.x module. FILE is the optional
