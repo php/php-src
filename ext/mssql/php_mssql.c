@@ -683,7 +683,7 @@ PHP_FUNCTION(mssql_pconnect)
 
 /* }}} */
 
-/* {{{ proto int mssql_close([int connectionid])
+/* {{{ proto bool mssql_close([resource conn_id])
    Closes a connection to a MS-SQL server */
 PHP_FUNCTION(mssql_close)
 {
@@ -718,7 +718,7 @@ PHP_FUNCTION(mssql_close)
 
 /* }}} */
 
-/* {{{ proto bool mssql_select_db(string database_name [, int conn_id])
+/* {{{ proto bool mssql_select_db(string database_name [, resource conn_id])
    Select a MS-SQL database */
 PHP_FUNCTION(mssql_select_db)
 {
@@ -1078,7 +1078,7 @@ PHP_FUNCTION(mssql_fetch_batch)
 }
 /* }}} */
 
-/* {{{ proto int mssql_query(string query [, int conn_id [, int batch_size]])
+/* {{{ proto resource mssql_query(string query [, resource conn_id [, int batch_size]])
    Perform an SQL query on a MS-SQL server database */
 PHP_FUNCTION(mssql_query)
 {
@@ -1165,7 +1165,7 @@ PHP_FUNCTION(mssql_query)
 }
 /* }}} */
 
-/* {{{ proto int mssql_rows_affected(int conn_id)
+/* {{{ proto int mssql_rows_affected(resource conn_id)
    Returns the number of records affected by the query */
 PHP_FUNCTION(mssql_rows_affected)
 {
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(mssql_rows_affected)
 /* }}} */
 
 
-/* {{{ proto int mssql_free_result(resource result_index)
+/* {{{ proto bool mssql_free_result(resource result_index)
    Free a MS-SQL result index */
 PHP_FUNCTION(mssql_free_result)
 {
@@ -1224,7 +1224,7 @@ PHP_FUNCTION(mssql_get_last_message)
 
 /* }}} */
 
-/* {{{ proto int mssql_num_rows(int mssql_result_index)
+/* {{{ proto int mssql_num_rows(resource mssql_result_index)
    Returns the number of rows fetched in from the result id specified */
 PHP_FUNCTION(mssql_num_rows)
 {
@@ -1243,7 +1243,7 @@ PHP_FUNCTION(mssql_num_rows)
 
 /* }}} */
 
-/* {{{ proto int mssql_num_fields(int mssql_result_index)
+/* {{{ proto int mssql_num_fields(resource mssql_result_index)
    Returns the number of fields fetched in from the result id specified */
 PHP_FUNCTION(mssql_num_fields)
 {
@@ -1357,7 +1357,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	result->cur_row++;
 }
 
-/* {{{ proto array mssql_fetch_row(int result_id [, int result_type])
+/* {{{ proto array mssql_fetch_row(resource result_id [, int result_type])
    Returns an array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_row)
 {
@@ -1366,7 +1366,7 @@ PHP_FUNCTION(mssql_fetch_row)
 
 /* }}} */
 
-/* {{{ proto object mssql_fetch_object(int result_id [, int result_type])
+/* {{{ proto object mssql_fetch_object(resource result_id [, int result_type])
    Returns a psuedo-object of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_object)
 {
@@ -1378,7 +1378,7 @@ PHP_FUNCTION(mssql_fetch_object)
 
 /* }}} */
 
-/* {{{ proto array mssql_fetch_array(int result_id [, int result_type])
+/* {{{ proto array mssql_fetch_array(resource result_id [, int result_type])
    Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_array)
 {
@@ -1387,7 +1387,7 @@ PHP_FUNCTION(mssql_fetch_array)
 
 /* }}} */
 
-/* {{{ proto array mssql_fetch_assoc(int result_id [, int result_type])
+/* {{{ proto array mssql_fetch_assoc(resource result_id [, int result_type])
    Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_assoc)
 {
@@ -1396,7 +1396,7 @@ PHP_FUNCTION(mssql_fetch_assoc)
 
 /* }}} */
 
-/* {{{ proto int mssql_data_seek(int result_id, int offset)
+/* {{{ proto bool mssql_data_seek(resource result_id, int offset)
    Moves the internal row pointer of the MS-SQL result associated with the specified result identifier to pointer to the specified row number */
 PHP_FUNCTION(mssql_data_seek)
 {
@@ -1472,7 +1472,7 @@ static char *php_mssql_get_field_name(int type)
 	}
 }
 
-/* {{{ proto object mssql_fetch_field(int result_id [, int offset])
+/* {{{ proto object mssql_fetch_field(resource result_id [, int offset])
    Gets information about certain fields in a query result */
 PHP_FUNCTION(mssql_fetch_field)
 {
@@ -1525,7 +1525,7 @@ PHP_FUNCTION(mssql_fetch_field)
 
 /* }}} */
 
-/* {{{ proto int mssql_field_length(int result_id [, int offset])
+/* {{{ proto int mssql_field_length(resource result_id [, int offset])
    Get the length of a MS-SQL field */
 PHP_FUNCTION(mssql_field_length)
 {
@@ -1572,7 +1572,7 @@ PHP_FUNCTION(mssql_field_length)
 
 /* }}} */
 
-/* {{{ proto string mssql_field_name(int result_id [, int offset])
+/* {{{ proto string mssql_field_name(resource result_id [, int offset])
    Returns the name of the field given by offset in the result set given by result_id */
 PHP_FUNCTION(mssql_field_name)
 {
@@ -1620,7 +1620,7 @@ PHP_FUNCTION(mssql_field_name)
 
 /* }}} */
 
-/* {{{ proto string mssql_field_type(int result_id [, int offset])
+/* {{{ proto string mssql_field_type(resource result_id [, int offset])
    Returns the type of a field */
 PHP_FUNCTION(mssql_field_type)
 {
@@ -1696,7 +1696,7 @@ PHP_FUNCTION(mssql_field_seek)
 
 /* }}} */
 
-/* {{{ proto string mssql_result(int result_id, int row, mixed field)
+/* {{{ proto string mssql_result(resource result_id, int row, mixed field)
    Returns the contents of one cell from a MS-SQL result set */
 PHP_FUNCTION(mssql_result)
 {
@@ -1747,7 +1747,7 @@ PHP_FUNCTION(mssql_result)
 }
 /* }}} */
 
-/* {{{ proto bool mssql_next_result(int result_id)
+/* {{{ proto bool mssql_next_result(resource result_id)
    Move the internal result pointer to the next result */
 PHP_FUNCTION(mssql_next_result)
 {
@@ -1818,7 +1818,7 @@ PHP_FUNCTION(mssql_min_message_severity)
 }
 /* }}} */
 
-/* {{{ proto int mssql_init(string sp_name [, int conn_id])
+/* {{{ proto int mssql_init(string sp_name [, resource conn_id])
    Initializes a stored procedure or a remote stored procedure  */
 PHP_FUNCTION(mssql_init)
 {
@@ -1875,7 +1875,7 @@ PHP_FUNCTION(mssql_init)
 }
 /* }}} */
 
-/* {{{ proto int mssql_bind(int stmt, string param_name, mixed var, int type 
+/* {{{ proto bool mssql_bind(resource stmt, string param_name, mixed var, int type 
 		[, int is_output[, int is_null[, int maxlen]]])
    Adds a parameter to a stored procedure or a remote stored procedure  */
 PHP_FUNCTION(mssql_bind)
@@ -2033,7 +2033,7 @@ PHP_FUNCTION(mssql_bind)
 }
 /* }}} */
 
-/* {{{ proto int mssql_execute(int stmt [, bool skip_results = false])
+/* {{{ proto mixed mssql_execute(resource stmt [, bool skip_results = false])
    Executes a stored procedure on a MS-SQL server database */
 PHP_FUNCTION(mssql_execute)
 {
@@ -2122,7 +2122,7 @@ PHP_FUNCTION(mssql_execute)
 }
 /* }}} */
 
-/* {{{ proto int mssql_free_statement(resource result_index)
+/* {{{ proto bool mssql_free_statement(resource result_index)
    Free a MS-SQL statement index */
 PHP_FUNCTION(mssql_free_statement)
 {
