@@ -201,6 +201,7 @@ dnl
 
 PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
 [  --enable-mbstring       Enable multibyte string support])
+mbstring_shared=$ext_shared
 
 PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support],
 [  --disable-mbregex         MBSTRING: Disable multibyte regex support], yes, no)
@@ -220,5 +221,6 @@ if test "$PHP_MBSTRING" != "no"; then
   
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
+  ext_shared=$mbstring_shared
   PHP_MBSTRING_EXTENSION
 fi
