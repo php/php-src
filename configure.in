@@ -406,6 +406,7 @@ sys/wait.h \
 unistd.h \
 unix.h \
 utime.h \
+sys/utsname.h \
 )
 
 
