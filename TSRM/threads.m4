@@ -45,6 +45,8 @@ AC_DEFUN(PTHREADS_FLAGS,[
     PTHREAD_FLAGS="-D_THREAD_SAFE";;
   *irix*)
     PTHREAD_FLAGS="-D_POSIX_THREAD_SAFE_FUNCTIONS";;
+  *hpux*)
+    PTHREAD_FLAGS="-D_REENTRANT";;
   esac
 
   if test -n "$PTHREAD_FLAGS"; then
