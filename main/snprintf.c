@@ -439,7 +439,7 @@ ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 	return (buf);
 }
 
-#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || defined(BROKEN_SNPRINTF) || defined(BROKEN_VSNPRINTF)
+#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || PHP_BROKEN_SNPRINTF || PHP_BROKEN_VSNPRINTF
 
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
