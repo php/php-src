@@ -37,15 +37,17 @@
 
 /* query result set data */
 typedef struct ifx_res {
-	char connecid[16];
-	char cursorid[16];
-	char descrpid[16];
-	char statemid[16];
+	char connecid[32];
+	char cursorid[32];
+	char descrpid[32];
+	char i_descrpid[32];
+	char statemid[32];
 	int  isscroll;
 	int  ishold;
 	int  iscursory;
 	int  paramquery;
 	int  numcols;
+	int  numicols;
 	int  rowid;
 	int  affected_rows;
 	long sqlerrd[6];

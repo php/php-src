@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2002 The PHP Group                                |
+   | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,13 +67,19 @@
 static void php_ifx_set_default_link(int id TSRMLS_DC);
 static long php_intifx_getType(long id, HashTable *list TSRMLS_DC);
 static long php_intifx_create_blob(long type, long mode, char* param, long len, HashTable *list TSRMLS_DC);
+static long php_intifx_init_blob(loc_t *blob, long mode, long new TSRMLS_DC);
+static long php_intifx_init_blob_inmem(loc_t *blob, long new TSRMLS_DC);
+static long php_intifx_init_blob_infile(loc_t *blob, long new TSRMLS_DC);
+static void php_intifx_release_blob(loc_t *blob TSRMLS_DC);
 static long php_intifx_free_blob(long id, HashTable *list TSRMLS_DC);
-static long php_intifx2_free_blob(long id, HashTable *list TSRMLS_DC);
 static long php_intifx_get_blob(long bid, HashTable *list, char** content TSRMLS_DC);
 static long php_intifx_update_blob(long bid, char* param, long len, HashTable *list TSRMLS_DC);
 static loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC);
-static char* php_intifx_create_tmpfile(long bid TSRMLS_DC);
+static char* php_intifx_create_tmpfile(TSRMLS_D);
 static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC);
+static long php_intifx_alloc_ibind(IFX_RES *Ifx_Result, int items TSRMLS_DC);
+static long php_intifx_preparse(char *statement TSRMLS_DC);
+static long php_intifx_count_descriptors(char *p_statemid TSRMLS_DC);
 static char* php_intifx_null(TSRMLS_D);
 static long php_intifx_create_char(char* param, long len, HashTable *list TSRMLS_DC);
 static long php_intifx_free_char(long id, HashTable *list TSRMLS_DC);
@@ -111,7 +117,7 @@ EXEC SQL include sqlstype;
 #include <errno.h>
 
 typedef char IFX[128];
-#define SAFE_STRING(s) ((s)?(s):"")
+#define SAFE_STRING(s) ((s) ? (s) : "")
 #define PHP_IFX_CHECK_CONNECTION(ifx)       \
         {                                   \
             if (ifx_check() < 0) {          \
@@ -258,7 +264,7 @@ EXEC SQL END DECLARE SECTION;
 	}
 
 	ifx_err_msg = emalloc(64);
-	sprintf(ifx_err_msg,"%c [SQLSTATE=%c%c %c%c%c  SQLCODE=%d]",
+	sprintf(ifx_err_msg, "%c [SQLSTATE=%c%c %c%c%c  SQLCODE=%d]",
 		c,
 		SQLSTATE[0],
 		SQLSTATE[1],
@@ -312,6 +318,14 @@ static void ifx_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(Ifx_Result);
 }
 
+static void ifx_free_blob(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	IFX_IDRES *Ifx_blob = (IFX_IDRES *)rsrc->ptr;
+
+	php_intifx_release_blob(&Ifx_blob->BLOB.blob_data TSRMLS_CC);
+	efree(Ifx_blob); 
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("ifx.allow_persistent", "1",  PHP_INI_SYSTEM, OnUpdateInt,    allow_persistent, zend_ifx_globals, ifx_globals)
 	STD_PHP_INI_ENTRY_EX("ifx.max_persistent",  "-1", PHP_INI_SYSTEM, OnUpdateInt,    max_persistent,   zend_ifx_globals, ifx_globals, display_link_numbers)
@@ -341,12 +355,12 @@ PHP_MINIT_FUNCTION(ifx)
 
 	REGISTER_INI_ENTRIES();
 
-	le_result   = zend_register_list_destructors_ex(ifx_free_result,NULL, "informix result",    module_number);
-	le_idresult = zend_register_list_destructors_ex(NULL, NULL, "informix id result", module_number);
-	le_link     = zend_register_list_destructors_ex(_close_ifx_link,NULL, "informix link",      module_number);
-	le_plink    = zend_register_list_destructors_ex(NULL,_close_ifx_plink,"informix persistent link", module_number);
+	le_result   = zend_register_list_destructors_ex(ifx_free_result, NULL,  "informix result",          module_number);
+	le_idresult = zend_register_list_destructors_ex(ifx_free_blob,   NULL,  "informix id result",       module_number);
+	le_link     = zend_register_list_destructors_ex(_close_ifx_link, NULL,  "informix link",            module_number);
+	le_plink    = zend_register_list_destructors_ex(NULL, _close_ifx_plink, "informix persistent link", module_number);
 	ifx_module_entry.type = type;
-    
+
 	REGISTER_LONG_CONSTANT("IFX_SCROLL",      IFX_SCROLL,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IFX_HOLD",        IFX_HOLD,    CONST_CS | CONST_PERSISTENT);
 $ifdef HAVE_IFX_IUS;
@@ -369,7 +383,7 @@ PHP_MSHUTDOWN_FUNCTION(ifx)
 
 PHP_RINIT_FUNCTION(ifx) 
 {
-	IFXG(default_link)=-1;
+	IFXG(default_link) = -1;
 	IFXG(num_links) = IFXG(num_persistent);
 	return SUCCESS;
 }
@@ -409,7 +423,7 @@ static void php_ifx_set_default_link(int id TSRMLS_DC)
 ** ----------------------------------------------------------------------
 */
 
-static void php_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
+static void php_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *hashed_details;
 	int hashed_details_length;
@@ -420,14 +434,14 @@ EXEC SQL BEGIN DECLARE SECTION;
 EXEC SQL END DECLARE SECTION;
 
 	if (PG(sql_safe_mode)) {
-		if (ZEND_NUM_ARGS()>0) {
+		if (ZEND_NUM_ARGS() > 0) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "SQL safe mode in effect - ignoring host/user/password information");
 		}
 		host = passwd = NULL;
 		user = php_get_current_user();
-		hashed_details_length = strlen(user)+3+3;
-		hashed_details = (char *) emalloc(hashed_details_length+1);
-		sprintf(hashed_details,"ifx__%s_",user);
+		hashed_details_length = strlen(user) + 3 + 3;
+		hashed_details = (char *) emalloc(hashed_details_length + 1);
+		sprintf(hashed_details, "ifx__%s_", user);
 	} else {
 		int host_len = 0, user_len = 0, passwd_len = 0;
 		host = user = passwd = NULL;
@@ -451,28 +465,29 @@ EXEC SQL END DECLARE SECTION;
 		}
 
 		hashed_details_length = sizeof("ifx___") - 1 + host_len + user_len + passwd_len;
-		hashed_details = (char *) emalloc(hashed_details_length+1);
-		sprintf(hashed_details,"ifx_%s_%s_%s", SAFE_STRING(host), SAFE_STRING(user), SAFE_STRING(passwd));
+		hashed_details = (char *) emalloc(hashed_details_length + 1);
+		sprintf(hashed_details, "ifx_%s_%s_%s", SAFE_STRING(host), SAFE_STRING(user), SAFE_STRING(passwd));
 	}
 
 	IFXG(sv_sqlcode) = 0;
 
 	if (!IFXG(allow_persistent)) {
-		persistent=0;
+		persistent = 0;
 	}
+
 	if (persistent) {
 		list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void **) &le) == FAILURE) {  /* we don't */
 			list_entry new_le;
 
-			if (IFXG(max_links)!=-1 && IFXG(num_links) >= IFXG(max_links)) {
+			if (IFXG(max_links) != -1 && IFXG(num_links) >= IFXG(max_links)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", IFXG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
-			if (IFXG(max_persistent)!=-1 && IFXG(num_persistent) >= IFXG(max_persistent)) {
+			if (IFXG(max_persistent) != -1 && IFXG(num_persistent) >= IFXG(max_persistent)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%d)", IFXG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
@@ -481,7 +496,7 @@ EXEC SQL END DECLARE SECTION;
 			/* create the link */
 			ifx = (char *) malloc(sizeof(IFX));
 			IFXG(connectionid)++;
-			sprintf(ifx,"%s%x", SAFE_STRING(user), IFXG(connectionid));
+			sprintf(ifx, "%s%x", SAFE_STRING(user), IFXG(connectionid));
 			
 			EXEC SQL CONNECT TO :host AS :ifx USER :user USING :passwd WITH CONCURRENT TRANSACTION;  
 	
@@ -496,8 +511,7 @@ EXEC SQL END DECLARE SECTION;
 			/* hash it up */
 			new_le.type = le_plink;
 			new_le.ptr = ifx;
-			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) 
-			{
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void *) &new_le, sizeof(list_entry), NULL) == FAILURE) {
 				free(ifx);
 				efree(hashed_details);
 				RETURN_FALSE;
@@ -518,7 +532,7 @@ EXEC SQL END DECLARE SECTION;
 				if (ifx_check() == IFX_ERROR) {
 					IFXG(sv_sqlcode) = SQLCODE;
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Link to server lost, unable to reconnect (%s)", ifx_error(ifx));
-					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
+					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length + 1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
@@ -534,7 +548,7 @@ EXEC SQL END DECLARE SECTION;
 		 * if it doesn't, open a new ifx link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1, (void **) &index_ptr) == SUCCESS) 
+		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length + 1, (void **) &index_ptr) == SUCCESS)
 		{
 			int type,link;
 			void *ptr;
@@ -544,7 +558,7 @@ EXEC SQL END DECLARE SECTION;
 			}
 			link = (int) index_ptr->ptr;
 			ptr = zend_list_find(link, &type);   /* check if the link is still there */
-			if (ptr && (type==le_link || type==le_plink)) {
+			if (ptr && (type == le_link || type == le_plink)) {
 				/* ensure that the link is not closed */
 				ifx = ptr;
 				EXEC SQL SET CONNECTION :ifx;
@@ -556,7 +570,7 @@ EXEC SQL END DECLARE SECTION;
 					if (ifx_check() == IFX_ERROR) {
 						IFXG(sv_sqlcode) = SQLCODE;
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to connect (%s)", ifx_error(ifx));
-						zend_hash_del(&EG(regular_list), hashed_details, hashed_details_length+1);
+						zend_hash_del(&EG(regular_list), hashed_details, hashed_details_length + 1);
 						efree(hashed_details);
 						RETURN_FALSE;
 					}
@@ -568,7 +582,7 @@ EXEC SQL END DECLARE SECTION;
 				efree(hashed_details);
 				return;
 			} else {
-				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list), hashed_details, hashed_details_length + 1);
 			}
 		}
 		if (IFXG(max_links) != -1 && IFXG(num_links) >= IFXG(max_links)) {
@@ -579,7 +593,7 @@ EXEC SQL END DECLARE SECTION;
 
 		ifx = (char *) emalloc(sizeof(IFX));
 		IFXG(connectionid)++;
-		sprintf(ifx,"connec%x", IFXG(connectionid));
+		sprintf(ifx, "connec%x", IFXG(connectionid));
 		
 		EXEC SQL CONNECT TO :host AS :ifx USER :user USING :passwd WITH CONCURRENT TRANSACTION;
 
@@ -597,8 +611,7 @@ EXEC SQL END DECLARE SECTION;
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1, (void *) &new_index_ptr, sizeof(list_entry), NULL) == FAILURE) 
-		{
+		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length + 1, (void *) &new_index_ptr, sizeof(list_entry), NULL) == FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -648,7 +661,7 @@ EXEC SQL END DECLARE SECTION;
 			id = IFXG(default_link);
 			break;
 		case 1:
-			if (zend_get_parameters_ex(1, &ifx_link)==FAILURE) {
+			if (zend_get_parameters_ex(1, &ifx_link) == FAILURE) {
 				RETURN_FALSE;
 			}
 			id=-1;
@@ -662,11 +675,11 @@ EXEC SQL END DECLARE SECTION;
 
 	ZEND_FETCH_RESOURCE2(ifx, char *, ifx_link, id, "Informix link", le_link, le_plink);
 
-	if (id==-1) { /* explicit resource number */
+	if (id == -1) { /* explicit resource number */
 		zend_list_delete(Z_RESVAL_PP(ifx_link));
 	}
 	
-	if (id!=-1 || (ifx_link && Z_RESVAL_PP(ifx_link)==IFXG(default_link))) {
+	if (id != -1 || (ifx_link && Z_RESVAL_PP(ifx_link) == IFXG(default_link))) {
 		zend_list_delete(IFXG(default_link));
 		IFXG(default_link) = -1;
 	}
@@ -710,22 +723,23 @@ EXEC SQL BEGIN DECLARE SECTION;
 	char cursorid[32];        /* query cursor id   */
 	char statemid[32];        /* statement id      */
 	char descrpid[32];        /* descriptor id     */
+	char i_descrpid[32];      /* input descriptor binding */
 	char *statement;          /* query text        */
 	int  fieldcount;          /* field count       */
 	int  i;                   /* field index       */
 	short fieldtype;
-	loc_t *locator;
+	loc_t *locator=NULL;
 	int loc_t_type=CLOCATORTYPE;  /* WORKAROUND:TYPE=CLOCATORTYPE doesn't work,  */
 	int sqlchar_type=SQLCHAR;     /* don't ask me, why. */
 	char *char_tmp;
 	long len;
 	int indicator;
+	int desc_count;
 $ifdef HAVE_IFX_IUS;
 	fixed binary 'blob' ifx_lo_t *slocator;
 $endif;
 EXEC SQL END DECLARE SECTION;
 
-	char *blobfilename;
 	int  locind;
 	int  ctype;
 	int  affected_rows;
@@ -735,8 +749,9 @@ EXEC SQL END DECLARE SECTION;
 	int  cursoryproc;
 	int  argc=ZEND_NUM_ARGS();
 	long ifx_type;
+	int num_params;
 
-	if(argc < 2 || zend_get_parameters_ex(argc, &query, &ifx_link, &dummy, &dummy)==FAILURE) {
+	if (argc < 2 || zend_get_parameters_ex(argc, &query, &ifx_link, &dummy, &dummy) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -752,6 +767,7 @@ EXEC SQL END DECLARE SECTION;
 	sprintf(statemid, "statem%x", IFXG(cursorid)); 
 	sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
 	sprintf(descrpid, "descrp%x", IFXG(cursorid)); 
+	sprintf(i_descrpid, "i_descrp%x", IFXG(cursorid));
 
 	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
@@ -766,7 +782,43 @@ EXEC SQL END DECLARE SECTION;
 	affected_rows = sqlca.sqlerrd[0];	/* save estimated affected rows */
 	for (e = 0; e < 6; e++) sqlerrd[e] = sqlca.sqlerrd[e];
    
-	EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX 384;
+	num_params = php_intifx_preparse(statement TSRMLS_CC);
+
+	Ifx_Result = (IFX_RES *) emalloc(sizeof(IFX_RES));
+	if (Ifx_Result == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory allocating IFX_RES");
+		EXEC SQL free :statemid;
+		RETURN_FALSE;
+	}
+
+	/* initialize result data structure */
+	Ifx_Result->rowid = 0;
+	strcpy(Ifx_Result->connecid, ifx);
+	strcpy(Ifx_Result->cursorid, cursorid);
+	strcpy(Ifx_Result->descrpid, descrpid);
+	strcpy(Ifx_Result->i_descrpid, i_descrpid);
+	strcpy(Ifx_Result->statemid, statemid);
+	Ifx_Result->numcols = 0;
+	Ifx_Result->numicols = 0;
+
+	for (i = 0; i < MAX_RESID; ++i) {
+		Ifx_Result->res_id[i] = -1;
+	}
+
+	if (!php_intifx_alloc_ibind(Ifx_Result, num_params TSRMLS_CC))   {
+		IFXG(sv_sqlcode) = SQLCODE;
+		EXEC SQL free :statemid;
+		efree(Ifx_Result);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Allocate i_desciptor <%s> fails (%s)", i_descrpid, ifx_error(ifx));
+		RETURN_FALSE;
+	}
+
+	desc_count = php_intifx_count_descriptors(statemid TSRMLS_CC);
+	if (desc_count == 0) {
+		desc_count = 1;
+	}
+
+	EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX :desc_count;
 	if (ifx_check() < 0) {
 		IFXG(sv_sqlcode) = SQLCODE;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Allocate desciptor <%s> fails (%s)", descrpid, ifx_error(ifx));
@@ -785,23 +837,6 @@ EXEC SQL END DECLARE SECTION;
 
 	query_type = sqlca.sqlcode;
 
-	Ifx_Result = (IFX_RES *) emalloc(sizeof(IFX_RES));
-	if (Ifx_Result == NULL) { 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory allocating IFX_RES");
-		EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
-		EXEC SQL free :statemid;
-		RETURN_FALSE;
-	}
-
-	/* initialize result data structure */
-
-	Ifx_Result->rowid = 0;
-	strcpy(Ifx_Result->connecid, ifx); 
-	strcpy(Ifx_Result->descrpid, descrpid);
-	for (i = 0; i < MAX_RESID; ++i) {
-		Ifx_Result->res_id[i] = -1;
-	}
-
 	cursoryproc = 0;
 	if (query_type == SQ_EXECPROC) {
 		EXEC SQL GET DESCRIPTOR :descrpid :i = COUNT;
@@ -810,8 +845,8 @@ EXEC SQL END DECLARE SECTION;
 		} 
 	}
 
-	Ifx_Result->iscursory = -1; /* prevent ifx_do */
-	Ifx_Result->paramquery=0;  
+	Ifx_Result->iscursory  = -1; /* prevent ifx_do */
+	Ifx_Result->paramquery = 0;  
 
 	if ((query_type != 0) && (!cursoryproc)) {  /* NO RESULT SET */
 		/* ##
@@ -820,19 +855,28 @@ EXEC SQL END DECLARE SECTION;
 		*/
 		zval **pblobidarr, **tmp;
 
-		Ifx_Result->iscursory = 0;
-		strcpy(Ifx_Result->cursorid, "");
-		strcpy(Ifx_Result->descrpid, descrpid);
-		strcpy(Ifx_Result->statemid, statemid);
+		/* We don't need this descriptor anymore, NONSELECT-STATEMENT */
+		EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
 
-		if(argc > 3) {
+		Ifx_Result->iscursory = 0;
+
+		if (argc > 3) {
 			WRONG_PARAM_COUNT;
 		}
 
-		if(argc == 3) {
+		if (argc == 3) {
+
+			if (Ifx_Result->numicols <= 0)   {
+				IFXG(sv_sqlcode) = SQLCODE;
+				EXEC SQL free :statemid;
+				efree(Ifx_Result);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "No placeholders (?) in Statement, but blob array param supplied");
+				RETURN_FALSE;
+			}
+
 			if (zend_get_parameters_ex(3, &dummy, &dummy, &pblobidarr) == FAILURE) {
 				IFXG(sv_sqlcode) = SQLCODE;
-				EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+				EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 				EXEC SQL free :statemid;
 				efree(Ifx_Result);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't get blob array param");
@@ -840,7 +884,7 @@ EXEC SQL END DECLARE SECTION;
 			}
 			if (Z_TYPE_PP(pblobidarr) != IS_ARRAY) {
 				IFXG(sv_sqlcode) = SQLCODE;
-				EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+				EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 				EXEC SQL free :statemid;
 				efree(Ifx_Result);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Blob-parameter is not an array");
@@ -848,37 +892,33 @@ EXEC SQL END DECLARE SECTION;
 			}
 
 			zend_hash_internal_pointer_reset((*pblobidarr)->value.ht);
-			i=1;
-			while (zend_hash_get_current_data((*pblobidarr)->value.ht, (void **) &tmp) == SUCCESS) {
+			for (i = 1; i <= Ifx_Result->numicols && (zend_hash_get_current_data((*pblobidarr)->value.ht, (void **) &tmp) == SUCCESS); ++i) {
 				convert_to_long(*tmp);
-				if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
-					EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
-				}
 
-				ifx_type=php_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list) TSRMLS_CC);
-				switch(ifx_type) {
+				ifx_type = php_intifx_getType((int)(*tmp)->value.lval, &EG(regular_list) TSRMLS_CC);
+				switch (ifx_type) {
 					case TYPE_BLTEXT:
 					case TYPE_BLBYTE:
-						locator=php_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list) TSRMLS_CC);
-						if(locator==NULL) {
+						locator = php_intifx_get_blobloc((int)((*tmp)->value.lval), &EG(regular_list) TSRMLS_CC);
+						if (locator == NULL) {
 							IFXG(sv_sqlcode) = SQLCODE;
-							EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+							EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 							EXEC SQL free :statemid;
 							efree(Ifx_Result);
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not an Informix blob-result index", (int)((*tmp)->value.lval));
 							RETURN_FALSE;
 						}
-						if(locator->loc_loctype==LOCFNAME) {
+						if (locator->loc_loctype == LOCFNAME) {
 							locator->loc_oflags=LOC_RONLY;
 						}
-						EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA= :*locator, TYPE= :loc_t_type;
+						EXEC SQL SET DESCRIPTOR :i_descrpid VALUE :i DATA = :*locator, TYPE = :loc_t_type;
 						break;
 
 					case TYPE_CHAR:
-						len=php_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp TSRMLS_CC);
-						indicator=0;
-						if(char_tmp==NULL || len<0) {
-							indicator=-1;
+						len = php_intifx_get_char((int) ((*tmp)->value.lval), &EG(regular_list), &char_tmp TSRMLS_CC);
+						indicator = 0;
+						if (char_tmp == NULL || len < 0) {
+							indicator = -1;
 						}
 						len++;
 
@@ -889,25 +929,46 @@ EXEC SQL END DECLARE SECTION;
 							TYPE= :sqlchar_type;
 						break;
 				}
-				i++;
+
+				if (ifx_check() < 0)   {
+					IFXG(sv_sqlcode) = SQLCODE;
+					EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
+					EXEC SQL free :statemid;
+					efree(Ifx_Result);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Execute immediate fails : %s", ifx_error(ifx));
+					RETURN_FALSE;
+				}
+
 				zend_hash_move_forward((*pblobidarr)->value.ht);
 			}
 			Ifx_Result->paramquery=1;  
-			EXEC SQL EXECUTE :statemid USING SQL DESCRIPTOR :descrpid;
+
+			if (i - 1 != Ifx_Result->numicols)   {
+				EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
+				EXEC SQL free :statemid;
+				efree(Ifx_Result);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Execute immediate fails : number of created blobs doesn't match placeholders (?)");
+				RETURN_FALSE;
+			}
+			EXEC SQL EXECUTE :statemid USING SQL DESCRIPTOR :i_descrpid;
 		} else {
 			EXEC SQL EXECUTE :statemid;
 		}
 
 		if (ifx_check() < 0) {
 			IFXG(sv_sqlcode) = SQLCODE;
-			EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+			if (Ifx_Result->numicols > 0)   {
+				EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
+			}
 			EXEC SQL free :statemid;
 			efree(Ifx_Result);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Execute immediate fails : %s (%s)", statement, ifx_error(ifx));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Execute immediate fails : %s", ifx_error(ifx));
 			RETURN_FALSE;
 		}
 		Ifx_Result->affected_rows = sqlca.sqlerrd[2]; /* really affected */
-		for (e = 0; e < 6; e++) Ifx_Result->sqlerrd[e] = sqlca.sqlerrd[e];
+		for (e = 0; e < 6; e++) {
+			Ifx_Result->sqlerrd[e] = sqlca.sqlerrd[e];
+		}
 	} else {
 		/* ##
 		   ## SELECT-STATEMENT 
@@ -920,7 +981,7 @@ EXEC SQL END DECLARE SECTION;
 			case 2:
 				break;
 			case 3:
-				if (zend_get_parameters_ex(3, &dummy, &dummy, &cursortype)==FAILURE) {
+				if (zend_get_parameters_ex(3, &dummy, &dummy, &cursortype) == FAILURE) {
 					RETURN_FALSE;
 				}
 				convert_to_long_ex(cursortype);
@@ -932,8 +993,10 @@ EXEC SQL END DECLARE SECTION;
 		}
 
 		Ifx_Result->affected_rows = affected_rows;   /* saved estimated from prepare */
-		for (e = 0; e < 6; e++) Ifx_Result->sqlerrd[e] = sqlerrd[e];
-
+		for (e = 0; e < 6; e++) {
+			Ifx_Result->sqlerrd[e] = sqlerrd[e];
+		}
+		
 		EXEC SQL GET DESCRIPTOR :descrpid :fieldcount = COUNT;
 		if (ifx_check() < 0) {
 			IFXG(sv_sqlcode) = SQLCODE;
@@ -953,6 +1016,10 @@ EXEC SQL END DECLARE SECTION;
 		if (ctype & IFX_HOLD) {
 			Ifx_Result->ishold = 1;
 		}
+
+		/*
+		 * ifx_do() part
+		 */
 
 		if (Ifx_Result->isscroll) {
 			if (Ifx_Result->ishold) {
@@ -987,9 +1054,6 @@ EXEC SQL END DECLARE SECTION;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Open cursor fails (%s)", ifx_error(ifx));
 			RETURN_FALSE;
 		}
-		strcpy(Ifx_Result->cursorid, cursorid);
-		strcpy(Ifx_Result->descrpid, descrpid);
-		strcpy(Ifx_Result->statemid, statemid);
 
 		/* check for text/blob columns */
 		locind = 0;
@@ -997,31 +1061,36 @@ EXEC SQL END DECLARE SECTION;
 			EXEC SQL GET DESCRIPTOR :descrpid VALUE :i  :fieldtype = TYPE;
 			if ((fieldtype == SQLTEXT) || (fieldtype == SQLBYTES)
 $ifdef HAVE_IFX_IUS;
-				|| (fieldtype==SQLUDTFIXED)
+				|| (fieldtype == SQLUDTFIXED)
 $endif;
 			) {
 				int bid = 0;
-				if(fieldtype==SQLTEXT) {
-					bid=php_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,&EG(regular_list) TSRMLS_CC);
-					locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
-					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
-				}
-				if(fieldtype==SQLBYTES) {
-					if(IFXG(blobinfile)==0) {
-						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,&EG(regular_list) TSRMLS_CC);
-						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
+				if (fieldtype == SQLTEXT) {
+					if (IFXG(blobinfile) == 0) {
+						bid = php_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM, "", -1, &EG(regular_list) TSRMLS_CC);
+						locator = php_intifx_get_blobloc(bid, &EG(regular_list) TSRMLS_CC);
 					} else {
-						blobfilename=php_intifx_create_tmpfile(i TSRMLS_CC);
-						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INFILE, blobfilename,strlen(blobfilename),&EG(regular_list) TSRMLS_CC);
-						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
-						locator->loc_oflags=LOC_WONLY;
+						bid = php_intifx_create_blob(TYPE_BLTEXT,BLMODE_INFILE, "",-1, &EG(regular_list) TSRMLS_CC);
+						locator = php_intifx_get_blobloc(bid, &EG(regular_list) TSRMLS_CC);
+					}
+
+					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
+				} else if (fieldtype == SQLBYTES) {
+					if (IFXG(blobinfile) == 0) {
+						bid = php_intifx_create_blob(TYPE_BLBYTE, BLMODE_INMEM, "", -1, &EG(regular_list) TSRMLS_CC);
+						locator = php_intifx_get_blobloc(bid, &EG(regular_list) TSRMLS_CC);
+					} else {
+						bid = php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INFILE, "", -1, &EG(regular_list) TSRMLS_CC);
+						locator = php_intifx_get_blobloc(bid, &EG(regular_list) TSRMLS_CC);
 					}
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
 				} 
+
+				php_intifx_release_blob(locator TSRMLS_CC);
 $ifdef HAVE_IFX_IUS;
-				if(fieldtype==SQLUDTFIXED) {
+				if (fieldtype == SQLUDTFIXED) {
 					bid = php_intifxus_new_slob(&EG(regular_list) TSRMLS_CC);
-					slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
+					slocator = php_intifxus_get_slobloc(bid, &EG(regular_list) TSRMLS_CC);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
 				}
 $endif;
@@ -1066,6 +1135,7 @@ EXEC SQL BEGIN DECLARE SECTION;
 	char cursorid[32];        /* query cursor id   */
 	char statemid[32];        /* statement id      */
 	char descrpid[32];        /* descriptor id     */
+	char i_descrpid[32];      /* input descriptor binding */
 	char *statement;          /* query text        */
 	int  fieldcount;          /* field count       */
 	int  i;                   /* field index       */
@@ -1077,16 +1147,17 @@ EXEC SQL BEGIN DECLARE SECTION;
 	int  indicator;    
 	long sqlerrd[6];
 	int e;
+	int desc_count;
 EXEC SQL END DECLARE SECTION;
-
 	int  ctype;
 	int  affected_rows;
 	int  query_type;
 	int  cursoryproc;
 	int  argc=ZEND_NUM_ARGS();
 	long ifx_type;
+	int num_params;
 
-	if(argc < 2 || zend_get_parameters_ex(argc, &query, &ifx_link, &dummy, &dummy)==FAILURE) {
+	if (argc < 2 || zend_get_parameters_ex(argc, &query, &ifx_link, &dummy, &dummy) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1102,6 +1173,7 @@ EXEC SQL END DECLARE SECTION;
 	sprintf(statemid, "statem%x", IFXG(cursorid)); 
 	sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
 	sprintf(descrpid, "descrp%x", IFXG(cursorid)); 
+	sprintf(i_descrpid, "i_descrp%x", IFXG(cursorid));
 
 	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
@@ -1114,9 +1186,47 @@ EXEC SQL END DECLARE SECTION;
 	}
 
 	affected_rows = sqlca.sqlerrd[0];	/* save estimated affected rows */
-	for (e = 0; e < 6; e++) sqlerrd[e] = sqlca.sqlerrd[e];
+	for (e = 0; e < 6; e++) {
+		sqlerrd[e] = sqlca.sqlerrd[e];
+	}
+	num_params = php_intifx_preparse(statement TSRMLS_CC);
 
-	EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX 384;
+	Ifx_Result = (IFX_RES *) emalloc(sizeof(IFX_RES));
+	if (Ifx_Result == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory allocating IFX_RES");
+		EXEC SQL free :statemid;
+		RETURN_FALSE;
+	}
+
+	/* initialize result data structure */
+
+	Ifx_Result->rowid = 0;
+	strcpy(Ifx_Result->connecid, ifx);
+	strcpy(Ifx_Result->cursorid, cursorid);
+	strcpy(Ifx_Result->descrpid, descrpid);
+	strcpy(Ifx_Result->i_descrpid, i_descrpid);
+	strcpy(Ifx_Result->statemid, statemid);
+	Ifx_Result->numcols = 0;
+	Ifx_Result->numicols = 0;
+
+	for (i = 0; i < MAX_RESID; ++i) {
+		Ifx_Result->res_id[i] = -1;
+	}
+
+	if (!php_intifx_alloc_ibind(Ifx_Result, num_params TSRMLS_CC))   {
+		IFXG(sv_sqlcode) = SQLCODE;
+		EXEC SQL free :statemid;
+		efree(Ifx_Result);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Allocate i_desciptor <%s> fails (%s)", i_descrpid, ifx_error(ifx));
+		RETURN_FALSE;
+	}
+
+	desc_count = php_intifx_count_descriptors(statemid TSRMLS_CC);
+	if (desc_count == 0) {
+		desc_count = 1;
+	}
+	
+	EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX :desc_count;
 	if (ifx_check() < 0) {
 		IFXG(sv_sqlcode) = SQLCODE;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Allocate desciptor <%s> fails (%s)", descrpid, ifx_error(ifx));
@@ -1134,24 +1244,6 @@ EXEC SQL END DECLARE SECTION;
 	}
 
 	query_type = sqlca.sqlcode;
-
-	Ifx_Result = (IFX_RES *) emalloc(sizeof(IFX_RES));
-	if (Ifx_Result == NULL) { 
-		IFXG(sv_sqlcode) = SQLCODE;
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory allocating IFX_RES");
-		EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
-		EXEC SQL free :statemid;
-		RETURN_FALSE;
-	}
-
-	/* initialize result data structure */
-	Ifx_Result->rowid = 0;
-	strcpy(Ifx_Result->connecid, ifx); 
-	strcpy(Ifx_Result->descrpid, descrpid);
-	strcpy(Ifx_Result->statemid, statemid);
-	for (i = 0; i < MAX_RESID; ++i) {
-		Ifx_Result->res_id[i] = -1;
-	}
 
 	cursoryproc = 0;
 	if (query_type == SQ_EXECPROC) {
@@ -1171,29 +1263,38 @@ EXEC SQL END DECLARE SECTION;
 		*/
 		zval **pblobidarr, **tmp;
 
-		Ifx_Result->iscursory = 0;
-		strcpy(Ifx_Result->cursorid, cursorid);
-		strcpy(Ifx_Result->cursorid, "");
-		strcpy(Ifx_Result->descrpid, descrpid);
+		/* We don't need this descriptor anymore, NONSELECT-STATEMENT */
+		EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
 
-		if(argc > 3) {
+		Ifx_Result->iscursory = 0;
+
+		if (argc > 3) {
 			WRONG_PARAM_COUNT;
 		}
 
-		if(argc == 3) {
-			Ifx_Result->paramquery=1;
-			if (zend_get_parameters_ex(3, &dummy, &dummy,&pblobidarr) == FAILURE) {
+		if (argc == 3) {
+			Ifx_Result->paramquery = 1;
+
+			if (Ifx_Result->numicols <= 0)   {
 				IFXG(sv_sqlcode) = SQLCODE;
-				EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+				EXEC SQL free :statemid;
+				efree(Ifx_Result);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "No placeholders (?) in Statement, but blob array param supplied");
+				RETURN_FALSE;
+			}
+
+			if (zend_get_parameters_ex(3, &dummy, &dummy, &pblobidarr) == FAILURE) {
+				IFXG(sv_sqlcode) = SQLCODE;
+				EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 				EXEC SQL free :statemid;
 				efree(Ifx_Result);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't get blob array param");
 				RETURN_FALSE;
 			}
 
-			if((*pblobidarr)->type != IS_ARRAY) {
+			if ((*pblobidarr)->type != IS_ARRAY) {
 				IFXG(sv_sqlcode) = SQLCODE;
-				EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+				EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 				EXEC SQL free :statemid;
 				efree(Ifx_Result);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Blob-parameter not an array");
@@ -1201,37 +1302,33 @@ EXEC SQL END DECLARE SECTION;
 			} 
 
 			zend_hash_internal_pointer_reset((*pblobidarr)->value.ht);
-			i=1;
-			while (zend_hash_get_current_data((*pblobidarr)->value.ht, (void **) &tmp) == SUCCESS) {
+			for (i = 1; i <= num_params && (zend_hash_get_current_data((*pblobidarr)->value.ht, (void **) &tmp) == SUCCESS); ++i) {
 				convert_to_long(*tmp);
-				if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
-					EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
-				}
 				
-				ifx_type=php_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list) TSRMLS_CC);
-				switch(ifx_type) {
+				ifx_type = php_intifx_getType((int)(*tmp)->value.lval, &EG(regular_list) TSRMLS_CC);
+				switch (ifx_type) {
 					case TYPE_BLTEXT:
 					case TYPE_BLBYTE:
-						locator=php_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list) TSRMLS_CC);
-						if(locator==NULL) {
+						locator = php_intifx_get_blobloc((int)((*tmp)->value.lval), &EG(regular_list) TSRMLS_CC);
+						if (locator == NULL) {
 							IFXG(sv_sqlcode) = SQLCODE;
-							EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
+							EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
 							EXEC SQL free :statemid;
 							efree(Ifx_Result);
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", (int)((*tmp)->value.lval));
 							RETURN_FALSE;
 						}
-						if(locator->loc_loctype==LOCFNAME) {
+						if (locator->loc_loctype == LOCFNAME) {
 							locator->loc_oflags=LOC_RONLY;
 						}
-						EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA= :*locator, TYPE=:loc_t_type; 
+						EXEC SQL SET DESCRIPTOR :i_descrpid VALUE :i DATA = :*locator, TYPE = :loc_t_type;
 						break;
 					case TYPE_CHAR:
-						len=php_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp TSRMLS_CC);
+						len = php_intifx_get_char((int)((*tmp)->value.lval), &EG(regular_list), &char_tmp TSRMLS_CC);
 						
-						indicator=0;
-						if(char_tmp==NULL || len < 0) {
-							indicator=-1;
+						indicator = 0;
+						if (char_tmp == NULL || len < 0) {
+							indicator = -1;
 						}
 						len++;
 						
@@ -1242,14 +1339,34 @@ EXEC SQL END DECLARE SECTION;
 							TYPE= :sqlchar_type;
 						break;
 				}
-				i++;
+
+				if (ifx_check() < 0)   {
+					IFXG(sv_sqlcode) = SQLCODE;
+					EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
+					EXEC SQL free :statemid;
+					efree(Ifx_Result);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Prepare fails : %s", ifx_error(ifx));
+					RETURN_FALSE;
+				}
+
 				zend_hash_move_forward((*pblobidarr)->value.ht);
 			} 
+
+			if (i - 1 != Ifx_Result->numicols)   {
+				EXEC SQL DEALLOCATE DESCRIPTOR :i_descrpid;
+				EXEC SQL free :statemid;
+				efree(Ifx_Result);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Prepare fails : number of created blobs doesn't match placeholders (?)");
+				RETURN_FALSE;
+			}
+
 		}
 
 		Ifx_Result->affected_rows = affected_rows;   /* saved estimated from prepare */
-		for (e = 0; e < 6; e++) Ifx_Result->sqlerrd[e] = sqlerrd[e];
-
+		for (e = 0; e < 6; e++) {
+			Ifx_Result->sqlerrd[e] = sqlerrd[e];
+		}
+		
 	} else {
 		/* ##
 		   ## SELECT-STATEMENT 
@@ -1257,11 +1374,11 @@ EXEC SQL END DECLARE SECTION;
 		*/
 		ctype = 0;   /* preset */
 
-		switch(argc) {
+		switch (argc) {
 			case 2:
 				break;
 			case 3:
-				if (zend_get_parameters_ex(3, &dummy, &dummy, &cursortype)==FAILURE) {
+				if (zend_get_parameters_ex(3, &dummy, &dummy, &cursortype) == FAILURE) {
 					RETURN_FALSE;
 				}
 				convert_to_long_ex(cursortype);
@@ -1272,11 +1389,12 @@ EXEC SQL END DECLARE SECTION;
 				break;
 		}
 		
-		strcpy(Ifx_Result->cursorid, cursorid);
 		Ifx_Result->iscursory = 1;
 
 		Ifx_Result->affected_rows = affected_rows;   /* saved estimated from prepare */
-		for (e = 0; e < 6; e++) Ifx_Result->sqlerrd[e] = sqlerrd[e];
+		for (e = 0; e < 6; e++) {
+			Ifx_Result->sqlerrd[e] = sqlerrd[e];
+		}
 
 		EXEC SQL GET DESCRIPTOR :descrpid :fieldcount = COUNT;
 		if (ifx_check() < 0) {
@@ -1297,6 +1415,7 @@ EXEC SQL END DECLARE SECTION;
 			Ifx_Result->ishold = 1;
 		}
 	}
+
 	ZEND_REGISTER_RESOURCE(return_value, Ifx_Result, le_result);
 }
 /* }}} */
@@ -1326,10 +1445,11 @@ EXEC SQL BEGIN DECLARE SECTION;
 	char *cursorid;           /* query cursor id   */
 	char *statemid;           /* statement id      */
 	char *descrpid;           /* descriptor id     */
+	char *i_descrpid;	  /* descriptor id     */
 	int  fieldcount;          /* field count       */
 	int  i;                   /* field index       */
 	short fieldtype;
-	loc_t *locator;
+	loc_t *locator=NULL;
 	int e;
 $ifdef HAVE_IFX_IUS;
 	fixed binary 'blob' ifx_lo_t *slocator;
@@ -1337,9 +1457,8 @@ $endif;
 EXEC SQL END DECLARE SECTION;
 
 	int  locind;
-	char *blobfilename;
 
-	if(ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &result)==FAILURE)) {
+	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &result) == FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1351,6 +1470,7 @@ EXEC SQL END DECLARE SECTION;
 	cursorid   = Ifx_Result->cursorid;
 	statemid   = Ifx_Result->statemid;
 	descrpid   = Ifx_Result->descrpid;
+	i_descrpid = Ifx_Result->i_descrpid;
 	fieldcount = Ifx_Result->numcols;
 
 	EXEC SQL set connection :ifx;
@@ -1361,9 +1481,9 @@ EXEC SQL END DECLARE SECTION;
 		RETURN_FALSE;
 	}
 
-	if (Ifx_Result->iscursory==0) {		/* execute immediate */
-		if(Ifx_Result->paramquery!=0) {
-			EXEC SQL EXECUTE :statemid USING SQL DESCRIPTOR :descrpid;
+	if (Ifx_Result->iscursory == 0) {		/* execute immediate */
+		if (Ifx_Result->paramquery != 0) {
+			EXEC SQL EXECUTE :statemid USING SQL DESCRIPTOR :i_descrpid;
 		} else {
 			EXEC SQL EXECUTE :statemid;
 		}
@@ -1373,7 +1493,9 @@ EXEC SQL END DECLARE SECTION;
 			RETURN_FALSE;
 		}
 		Ifx_Result->affected_rows = sqlca.sqlerrd[2]; /* really affected */
-		for (e = 0; e < 6; e++) Ifx_Result->sqlerrd[e] = sqlca.sqlerrd[e];
+		for (e = 0; e < 6; e++) {
+			Ifx_Result->sqlerrd[e] = sqlca.sqlerrd[e];
+		}
 	} else {	/* open cursor */
 		if (Ifx_Result->isscroll) {
 			if (Ifx_Result->ishold) {
@@ -1408,36 +1530,43 @@ EXEC SQL END DECLARE SECTION;
 			EXEC SQL GET DESCRIPTOR :descrpid VALUE :i  :fieldtype = TYPE;
 			if ((fieldtype == SQLTEXT) || (fieldtype == SQLBYTES) 
 $ifdef HAVE_IFX_IUS;
-				|| (fieldtype==SQLUDTFIXED)
+				|| (fieldtype == SQLUDTFIXED)
 $endif;
 			) {
 
 				int bid = 0;
-				if(fieldtype==SQLTEXT) {
-					bid=php_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,&EG(regular_list) TSRMLS_CC);
-					locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
+				if (fieldtype == SQLTEXT) {
+					if (IFXG(blobinfile) == 0) {
+						bid = php_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM, "", -1, &EG(regular_list) TSRMLS_CC);
+						locator = php_intifx_get_blobloc(bid, &EG(regular_list) TSRMLS_CC);
+					} else {
+						bid = php_intifx_create_blob(TYPE_BLTEXT,BLMODE_INFILE, "", -1, &EG(regular_list) TSRMLS_CC);
+						locator = php_intifx_get_blobloc(bid, &EG(regular_list) TSRMLS_CC);
+					}
+					
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
 				}
-				if(fieldtype==SQLBYTES) {
-					if(IFXG(blobinfile)==0) {
-						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,&EG(regular_list) TSRMLS_CC);
-						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
+				else if (fieldtype == SQLBYTES) {
+					if (IFXG(blobinfile) == 0) {
+						bid = php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM, "", -1, &EG(regular_list) TSRMLS_CC);
+						locator = php_intifx_get_blobloc(bid, &EG(regular_list) TSRMLS_CC);
 					} else {
-						blobfilename=php_intifx_create_tmpfile(i TSRMLS_CC);
-						bid=php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INFILE,blobfilename,strlen(blobfilename),&EG(regular_list) TSRMLS_CC);
-						locator=php_intifx_get_blobloc(bid,&EG(regular_list) TSRMLS_CC);
-						locator->loc_oflags=LOC_WONLY;
+						bid = php_intifx_create_blob(TYPE_BLBYTE,BLMODE_INFILE, "", -1, &EG(regular_list) TSRMLS_CC);
+						locator = php_intifx_get_blobloc(bid, &EG(regular_list) TSRMLS_CC);
+						locator->loc_oflags = LOC_WONLY;
 					}
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
 				}
+
+				php_intifx_release_blob(locator TSRMLS_CC);
 $ifdef HAVE_IFX_IUS;
-				if(fieldtype==SQLUDTFIXED) {
-					bid=php_intifxus_new_slob(&EG(regular_list) TSRMLS_CC);
-					slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
+				if (fieldtype == SQLUDTFIXED) {
+					bid = php_intifxus_new_slob(&EG(regular_list) TSRMLS_CC);
+					slocator = php_intifxus_get_slobloc(bid, &EG(regular_list) TSRMLS_CC);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
 				} 
 $endif;
-				Ifx_Result->res_id[locind]=bid;
+				Ifx_Result->res_id[locind] = bid;
 				++locind;
 			}
 		}
@@ -1467,7 +1596,7 @@ PHP_FUNCTION(ifx_error)
 			id = IFXG(default_link);
 			break;
 		case 1:
-			if (zend_get_parameters_ex(1, &ifx_link)==FAILURE) {
+			if (zend_get_parameters_ex(1, &ifx_link) == FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
@@ -1476,7 +1605,7 @@ PHP_FUNCTION(ifx_error)
 			break;
 	}
 
-	RETURN_STRING(ifx_error(0),0); /* ifx_error returns emalloced string */
+	RETURN_STRING(ifx_error(0), 0); /* ifx_error returns emalloced string */
 }
 /* }}} */
 
@@ -1509,7 +1638,7 @@ PHP_FUNCTION(ifx_errormsg)
 			}
 			break;
 		case 1:
-			if (zend_get_parameters_ex(1, &errcode)==FAILURE) {
+			if (zend_get_parameters_ex(1, &errcode) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(errcode);
@@ -1521,7 +1650,7 @@ PHP_FUNCTION(ifx_errormsg)
 	}
 
 	maxmsglen = 255;
-	ifx_errmsg = (char *)malloc(maxmsglen+1);
+	ifx_errmsg = (char *)malloc(maxmsglen + 1);
 	if (ifx_errorcode != 0) {
 		rgetlmsg(ifx_errorcode, ifx_errmsg, maxmsglen, &msglen);
 		if (msglen > maxmsglen) {
@@ -1535,7 +1664,7 @@ PHP_FUNCTION(ifx_errormsg)
 	}
 	
 	returnmsg = (char *) emalloc(strlen(ifx_errmsg) + 128);
-	sprintf(returnmsg,ifx_errmsg, sqlca.sqlerrm);
+	sprintf(returnmsg, ifx_errmsg, sqlca.sqlerrm);
 	free(ifx_errmsg);
 	RETURN_STRING(returnmsg,0); 
 }
@@ -1558,10 +1687,10 @@ PHP_FUNCTION(ifx_affected_rows)
 	zval **result;
 	IFX_RES *Ifx_Result;
 
-	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &result))==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &result)) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	IFXG(sv_sqlcode )= 0;
+	IFXG(sv_sqlcode) = 0;
 
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 	RETURN_LONG(Ifx_Result->affected_rows);
@@ -1625,20 +1754,19 @@ EXEC SQL END DECLARE SECTION;
 	char string_data[256];
 	long long_data;
 	char *p;
-	char *blobfilename;
 	char *fetch_pos;
 	char *nullstr;
 
-	switch(ZEND_NUM_ARGS()) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			if (zend_get_parameters_ex(1, &result)==FAILURE) {
+			if (zend_get_parameters_ex(1, &result) == FAILURE) {
 				RETURN_FALSE;
 			}
 			fetch_pos = NULL;
 			fetch_row = 0;
 			break;
 		case 2:
-			if (zend_get_parameters_ex(2, &result, &position)==FAILURE) {
+			if (zend_get_parameters_ex(2, &result, &position) == FAILURE) {
 				RETURN_FALSE;
 			}
 			if (Z_TYPE_PP(position) != IS_STRING) {
@@ -1656,10 +1784,10 @@ EXEC SQL END DECLARE SECTION;
 
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 
-	nullstr=php_intifx_null(TSRMLS_C);
+	nullstr = php_intifx_null(TSRMLS_C);
 	IFXG(sv_sqlcode) = 0;
 
-	if (strcmp(Ifx_Result->cursorid,"") == 0) {
+	if (strcmp(Ifx_Result->cursorid, "") == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a select cursor!");
 		RETURN_FALSE;
 	}
@@ -1673,6 +1801,32 @@ EXEC SQL END DECLARE SECTION;
 	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
 
+	locind = 0;
+	for (i = 1; i <= Ifx_Result->numcols; i++)   {
+		
+		EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :fieldtype = TYPE;
+		if (fieldtype == SQLBYTES || fieldtype == SQLTEXT)   {
+
+			bid_b = Ifx_Result->res_id[locind];
+
+			if ((locator_b = php_intifx_get_blobloc(bid_b, &EG(regular_list) TSRMLS_CC)) == NULL)   {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cant get BLOB from Result Set!");
+				RETURN_FALSE;
+			}
+
+			locind++;
+
+			if (IFXG(blobinfile) == 0)   {
+				php_intifx_init_blob(locator_b, BLMODE_INMEM, 1 TSRMLS_CC);
+			} else {
+				php_intifx_init_blob(locator_b, BLMODE_INFILE, 1 TSRMLS_CC);
+			}
+
+			EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator_b;
+
+		}
+	}
+			
 	if (!Ifx_Result->isscroll) {
 		EXEC SQL FETCH :cursorid USING SQL DESCRIPTOR :descrpid;
 	} else {
@@ -1683,15 +1837,15 @@ EXEC SQL END DECLARE SECTION;
 				EXEC SQL FETCH NEXT :cursorid USING SQL DESCRIPTOR :descrpid;
 			}
 		} else {
-			if (!strcasecmp(fetch_pos,"NEXT")) {
+			if (!strcasecmp(fetch_pos, "NEXT")) {
 				EXEC SQL FETCH NEXT     :cursorid USING SQL DESCRIPTOR :descrpid;
-			} else if (!strcasecmp(fetch_pos,"PREVIOUS")) {
+			} else if (!strcasecmp(fetch_pos, "PREVIOUS")) {
 				EXEC SQL FETCH PREVIOUS :cursorid USING SQL DESCRIPTOR :descrpid;
-			} else if (!strcasecmp(fetch_pos,"FIRST")) {
+			} else if (!strcasecmp(fetch_pos, "FIRST")) {
 				EXEC SQL FETCH FIRST    :cursorid USING SQL DESCRIPTOR :descrpid;
-			} else if (!strcasecmp(fetch_pos,"LAST")) {
+			} else if (!strcasecmp(fetch_pos, "LAST")) {
 				EXEC SQL FETCH LAST     :cursorid USING SQL DESCRIPTOR :descrpid;
-			} else if (!strcasecmp(fetch_pos,"CURRENT")) {
+			} else if (!strcasecmp(fetch_pos, "CURRENT")) {
 				EXEC SQL FETCH CURRENT  :cursorid USING SQL DESCRIPTOR :descrpid;
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid positioning arg on fetch");
@@ -1699,7 +1853,7 @@ EXEC SQL END DECLARE SECTION;
 		}
 	}  
 	
-	if(SQLCODE!=-451) {
+	if (SQLCODE != -451) {
 		switch (ifx_check()) {
 			case IFX_ERROR:
 				IFXG(sv_sqlcode) = SQLCODE;
@@ -1740,105 +1894,114 @@ EXEC SQL END DECLARE SECTION;
 		}
 		
 		if (indicator == -1) {	/* NULL */
-			if(	(IFXG(textasvarchar)==0 && fieldtype==SQLTEXT) || 
-				(IFXG(byteasvarchar)==0 && fieldtype==SQLBYTES)) {
-				bid_b=Ifx_Result->res_id[locind];
-				bid=php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
-				php_intifx_update_blob(bid,nullstr,strlen(nullstr),&EG(regular_list) TSRMLS_CC);
-				add_assoc_long(return_value,fieldname,bid);
+			if ((IFXG(textasvarchar) == 0 && fieldtype == SQLTEXT) || 
+				(IFXG(byteasvarchar) == 0 && fieldtype == SQLBYTES)) {
+				bid_b = Ifx_Result->res_id[locind];
+				/* call php_intifx_get_blobloc() to reset locator_b */
+				locator_b = php_intifx_get_blobloc(bid_b, &EG(regular_list) TSRMLS_CC);
+				bid = php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
+				php_intifx_update_blob(bid,nullstr, strlen(nullstr), &EG(regular_list) TSRMLS_CC);
+				add_assoc_long(return_value, fieldname, bid);
 				++locind;
+				php_intifx_release_blob(locator_b TSRMLS_CC);
 				continue; 
 			}
-			if ((fieldtype==SQLTEXT) || (fieldtype==SQLBYTES)
+			if ((fieldtype == SQLTEXT) || (fieldtype == SQLBYTES)
 $ifdef HAVE_IFX_IUS;
-			|| (fieldtype==SQLUDTFIXED)
+			|| (fieldtype == SQLUDTFIXED)
 $endif;
 			) {
+				/* call php_intifx_get_blobloc() to reset locator_b */
+				bid_b = Ifx_Result->res_id[locind];
+				locator_b = php_intifx_get_blobloc(bid_b, &EG(regular_list) TSRMLS_CC);
 				++locind;
+				php_intifx_release_blob(locator_b TSRMLS_CC);
 			}
 			add_assoc_string(return_value, fieldname, nullstr, DUP);
 			continue;
 		} /* NULL */
 
 		switch (fieldtype) {
-			case SQLSERIAL   : 
-			case SQLINT      :
+			case SQLSERIAL: 
+			case SQLINT:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :int_data = DATA;
 				long_data = int_data;
-				sprintf(string_data,"%ld", long_data); 
+				sprintf(string_data, "%ld", long_data); 
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
-			case SQLSMINT    :
+			case SQLSMINT:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :short_data = DATA;
 				long_data = short_data;
-				sprintf(string_data,"%ld", long_data); 
+				sprintf(string_data, "%ld", long_data); 
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
-			case SQLDECIMAL  :
-			case SQLMONEY    :
+			case SQLDECIMAL:
+			case SQLMONEY:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :dec_data = DATA;
 				memset(string_data, 0x20, 64);
 				dectoasc(&dec_data, string_data, 63, -1);
-				for (p =string_data; *p != ' '; ++p) ;
+				for (p = string_data; *p != ' '; ++p) ;
 				*p = 0;
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
-			case SQLSMFLOAT  :
+			case SQLSMFLOAT:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :float_data = DATA;
 				double_data = float_data;
-				sprintf(string_data,"%17.17g", double_data);
+				sprintf(string_data, "%17.17g", double_data);
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
-			case SQLFLOAT    :
+			case SQLFLOAT:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :double_data = DATA;
-				sprintf(string_data,"%17.17g", double_data);
+				sprintf(string_data, "%17.17g", double_data);
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
-			case SQLDATE     :
+			case SQLDATE:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :date_data = DATA;
 				rdatestr(date_data, string_data); 
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
-			case SQLDTIME    :
+			case SQLDTIME:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :dt_data = DATA;
 				dttoasc(&dt_data, string_data); 
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
-			case SQLINTERVAL :
+			case SQLINTERVAL:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :intvl_data = DATA;
 				intoasc(&intvl_data, string_data); 
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
 $ifdef HAVE_IFX_IUS;
-			case SQLSERIAL8  :
-			case SQLINT8     :
+			case SQLSERIAL8:
+			case SQLINT8:
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :int8_var = DATA;
 				memset(string_data, ' ', sizeof(string_data));
-				ifx_int8toasc(&int8_var,string_data,200);
+				ifx_int8toasc(&int8_var, string_data, 200);
 				p = string_data; /* rtrim string_data */
 				while ((*p != ' ') && (p < &string_data[sizeof(string_data) - 1])) ++p;
-				*p = 0;		
+				*p = 0;
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
-			case SQLLVARCHAR :
-				ifx_var_flag(&lvar_tmp,1);
+			case SQLLVARCHAR:
+				ifx_var_flag(&lvar_tmp, 1);
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :lvar_tmp = DATA;
-				fieldleng=ifx_var_getlen(&lvar_tmp);
- 				if (fieldleng > 2) fieldleng -= 2; /* fix by Alex Shepherd */
+				fieldleng = ifx_var_getlen(&lvar_tmp);
+ 				if (fieldleng > 2) { /* fix by Alex Shepherd */
+ 					fieldleng -= 2;
+ 				}
 				if ((char_data = (char *)emalloc(fieldleng + 1)) == NULL) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory");
 					RETURN_FALSE;
 				}
-				memcpy(char_data,ifx_var_getdata(&lvar_tmp),fieldleng);
+				memcpy(char_data, ifx_var_getdata(&lvar_tmp), fieldleng);
 				ifx_var_dealloc(&lvar_tmp);
-				add_assoc_stringl(return_value, fieldname, char_data, fieldleng,0);
+				add_assoc_stringl(return_value, fieldname, char_data, fieldleng, 0);
 				break;
-			case SQLBOOL     :
+			case SQLBOOL:
 $endif;
-			case SQLVCHAR    :
-			case SQLNVCHAR   :
-			case SQLCHAR     :
-			case SQLNCHAR    :
+			case SQLVCHAR:
+			case SQLNVCHAR:
+			case SQLCHAR:
+			case SQLNCHAR:
 				if ((char_data = (char *)emalloc(fieldleng + 1)) == NULL) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory");
 					RETURN_FALSE;
@@ -1852,21 +2015,28 @@ $endif;
 				char_data = NULL;
 				break;
 $ifdef HAVE_IFX_IUS;
-			case SQLUDTFIXED :
-				bid_b=Ifx_Result->res_id[locind];
-				add_assoc_long(return_value,fieldname,bid_b);
-				bid=php_intifxus_new_slob(&EG(regular_list) TSRMLS_CC);
-				slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
+			case SQLUDTFIXED:
+				bid_b = Ifx_Result->res_id[locind];
+				add_assoc_long(return_value, fieldname,bid_b);
+				bid = php_intifxus_new_slob(&EG(regular_list) TSRMLS_CC);
+				slocator = php_intifxus_get_slobloc(bid, &EG(regular_list) TSRMLS_CC);
 				EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
-				Ifx_Result->res_id[locind]=bid;
+				Ifx_Result->res_id[locind] = bid;
 				++locind;
 				break;
 $endif;
-			case SQLBYTES    :
-			case SQLTEXT     :
-				bid_b=Ifx_Result->res_id[locind];
-				locator_b=php_intifx_get_blobloc(bid_b,&EG(regular_list) TSRMLS_CC); 
+			case SQLBYTES:
+			case SQLTEXT:
+				bid_b = Ifx_Result->res_id[locind];
+				locator_b = php_intifx_get_blobloc(bid_b, &EG(regular_list) TSRMLS_CC); 
 				++locind;
+
+				if (IFXG(blobinfile) == 0)   {
+					php_intifx_init_blob(locator_b, BLMODE_INMEM, 0 TSRMLS_CC);
+				} else {
+					php_intifx_init_blob(locator_b, BLMODE_INFILE, 0 TSRMLS_CC);
+				}
+
 				EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :*locator_b = DATA;
 				
 				/* work around for ESQL/C bug with NULL values and BLOBS */
@@ -1876,20 +2046,22 @@ $endif;
 
 				/* normal check for NULL values */
 				if (locator_b->loc_indicator == -1) { 
-					if((IFXG(textasvarchar)==0 && fieldtype==SQLTEXT) 
-					|| (IFXG(byteasvarchar)==0 && fieldtype==SQLBYTES)) {
-						bid_b=Ifx_Result->res_id[locind];
-						bid=php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
-						php_intifx_update_blob(bid,nullstr,strlen(nullstr),&EG(regular_list) TSRMLS_CC);
-						add_assoc_long(return_value,fieldname,bid);
+					if ((IFXG(textasvarchar) == 0 && fieldtype == SQLTEXT) ||
+						(IFXG(byteasvarchar) == 0 && fieldtype == SQLBYTES)
+					) {
+						bid = php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
+						php_intifx_update_blob(bid,nullstr, strlen(nullstr), &EG(regular_list) TSRMLS_CC);
+						add_assoc_long(return_value, fieldname, bid);
+						php_intifx_release_blob(locator_b TSRMLS_CC);
 						break; 
 					}
-					if ((fieldtype==SQLTEXT) || (fieldtype==SQLBYTES)
+					if ((fieldtype == SQLTEXT) || (fieldtype == SQLBYTES)
 $ifdef HAVE_IFX_IUS;
-					|| (fieldtype==SQLUDTFIXED)
+					|| (fieldtype == SQLUDTFIXED)
 $endif;
 					) {
 						add_assoc_string(return_value, fieldname, nullstr, DUP);
+						php_intifx_release_blob(locator_b TSRMLS_CC);
 						break;
 					}
 				}
@@ -1899,44 +2071,37 @@ $endif;
 					RETURN_FALSE;
 				}
 		
-				/* copy blob */
-				bid=php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
-
-				/* and generate new tempfile for next row */
-				if(locator_b->loc_loctype==LOCFNAME) {
-					blobfilename=php_intifx_create_tmpfile(bid_b TSRMLS_CC);
-					php_intifx_update_blob(bid_b,blobfilename,strlen(blobfilename),&EG(regular_list) TSRMLS_CC);
-					efree(blobfilename);
-					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA= :*locator_b;
-				} 
- 
 				/* return blob as VARCHAR ?  */
 				/* note that in case of "blobinfile" */
 				/* you get the file name */
 				/* a new one for every row ! */
-				if((IFXG(textasvarchar) !=0 
-					&& fieldtype==SQLTEXT) 
-					|| (IFXG(byteasvarchar)!=0 
-					&& fieldtype==SQLBYTES)) {
-		
+				if ((IFXG(textasvarchar) != 0 && fieldtype == SQLTEXT) || 
+					(IFXG(byteasvarchar) != 0 && fieldtype == SQLBYTES)
+				) {
 					char *content;
 					long lg;
 			
-					lg=php_intifx_get_blob(bid, &EG(regular_list), &content TSRMLS_CC);
-					if(content == NULL || lg < 0) {
-						add_assoc_string(return_value,fieldname,nullstr,DUP);
+					lg = php_intifx_get_blob(bid_b, &EG(regular_list), &content TSRMLS_CC);
+					if (content == NULL || lg < 0) {
+						add_assoc_string(return_value, fieldname, nullstr, DUP);
 					} else {
-						add_assoc_stringl(return_value,fieldname,content,lg,DUP);
+						add_assoc_stringl(return_value, fieldname, content, lg, DUP);
 					}
-					php_intifx_free_blob(bid, &EG(regular_list) TSRMLS_CC);
+					
+					php_intifx_release_blob(locator_b TSRMLS_CC);
 					break;
 				} 
 
+				/* copy blob */
+				bid = php_intifx_copy_blob(bid_b, &EG(regular_list) TSRMLS_CC);
+
 				/* no, return as blob id */
-				add_assoc_long(return_value,fieldname,bid);
+				add_assoc_long(return_value, fieldname, bid);
+				php_intifx_release_blob(locator_b TSRMLS_CC);
 				break;
-			default  :
-				sprintf(string_data,"ESQL/C : %s : unsupported field type[%d]", fieldname, fieldleng);
+
+			default:
+				sprintf(string_data, "ESQL/C : %s : unsupported field type[%d]", fieldname, fieldleng);
 				add_assoc_string(return_value, fieldname, string_data, DUP);
 				break;
 		}
@@ -2003,13 +2168,13 @@ EXEC SQL END DECLARE SECTION;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			if (zend_get_parameters_ex(1, &result)==FAILURE) {
+			if (zend_get_parameters_ex(1, &result) == FAILURE) {
 				RETURN_FALSE;
 			}
 			table_options = NULL;
 			break;
 		case 2:
-			if (zend_get_parameters_ex(2, &result, &arg2)==FAILURE) {
+			if (zend_get_parameters_ex(2, &result, &arg2) == FAILURE) {
 				RETURN_FALSE;
 			}
 			table_options = (*arg2)->value.str.val;
@@ -2023,7 +2188,7 @@ EXEC SQL END DECLARE SECTION;
 
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 
-	if (strcmp(Ifx_Result->cursorid,"") == 0) {
+	if (strcmp(Ifx_Result->cursorid, "") == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a select cursor!");
 		RETURN_FALSE;
 	}
@@ -2053,7 +2218,7 @@ EXEC SQL END DECLARE SECTION;
 			break;
 	}
 	
-	if(!moredata) {
+	if (!moredata) {
 		php_printf("<h2>No rows found</h2>\n");
 		RETURN_LONG(0);
 	}
@@ -2104,7 +2269,7 @@ EXEC SQL END DECLARE SECTION;
 			}
 		
 			if (indicator == -1) {	/* NULL */
-				if(fieldtype==SQLTEXT || fieldtype==SQLBYTES) {
+				if (fieldtype == SQLTEXT || fieldtype == SQLBYTES) {
 					++locind;
 				}
 				php_printf("<td>%s</td>", nullstr);
@@ -2112,45 +2277,45 @@ EXEC SQL END DECLARE SECTION;
 			}
 
 			switch (fieldtype) {
-				case SQLSERIAL  :
-				case SQLINT     :
+				case SQLSERIAL:
+				case SQLINT:
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :int_data = DATA;
 					long_data = int_data;
-					sprintf(string_data,"%ld", long_data); 
+					sprintf(string_data, "%ld", long_data); 
 					php_printf("<td>%s</td>", string_data);
 					break;
-				case SQLSMINT   :
+				case SQLSMINT:
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :short_data = DATA;
 					long_data = short_data;
-					sprintf(string_data,"%ld", long_data); 
+					sprintf(string_data, "%ld", long_data); 
 					php_printf("<td>%s</td>", string_data);
 					break;
-				case SQLDECIMAL :
-				case SQLMONEY   :
+				case SQLDECIMAL:
+				case SQLMONEY:
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :dec_data = DATA;
 					memset(string_data, 0x20, 64);
 					dectoasc(&dec_data, string_data, 63, -1);
-					for (p =string_data; *p != ' '; ++p) ;
+					for (p = string_data; *p != ' '; ++p) ;
 					*p = 0;                
 					php_printf("<td>%s</td>", string_data);
 					break;
-				case SQLSMFLOAT :
+				case SQLSMFLOAT:
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :float_data = DATA;
 					double_data = float_data;
-					sprintf(string_data,"%17.17g", double_data);
+					sprintf(string_data, "%17.17g", double_data);
 					php_printf("<td>%s</td>", string_data);
 					break;
-				case SQLFLOAT   :
+				case SQLFLOAT:
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :double_data = DATA;
-					sprintf(string_data,"%17.17g", double_data);
+					sprintf(string_data, "%17.17g", double_data);
 					php_printf("<td>%s</td>", string_data);
 					break;
-				case SQLDATE    :
+				case SQLDATE:
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :date_data = DATA;
 					rdatestr(date_data, string_data); 
 					php_printf("<td>%s</td>", string_data);
 					break;
-				case SQLDTIME   :
+				case SQLDTIME:
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :dt_data = DATA;
 					dttoasc(&dt_data, string_data); 
 					php_printf("<td>%s</td>", string_data);
@@ -2162,35 +2327,36 @@ EXEC SQL END DECLARE SECTION;
 					break;
 $ifdef HAVE_IFX_IUS;
 				case SQLSERIAL8:
-				case SQLINT8   :
+				case SQLINT8:
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :int8_var = DATA;
 					memset(string_data, ' ', sizeof(string_data));
-					ifx_int8toasc(&int8_var,string_data,200);
-					p = string_data;         /* rtrim string_data */
+					ifx_int8toasc(&int8_var, string_data, 200);
+					p = string_data; /* rtrim string_data */
 					while ((*p != ' ') && (p < &string_data[sizeof(string_data) - 1])) ++p;
-					*p = 0;		
+					*p = 0;
 					php_printf("<td>%s</td>", string_data);
 					break;
 				case SQLLVARCHAR:
-					ifx_var_flag(&lvar_tmp,1);
+					ifx_var_flag(&lvar_tmp, 1);
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :lvar_tmp = DATA;
-					fieldleng=ifx_var_getlen(&lvar_tmp);
-					if (fieldleng > 2) fieldleng -= 2; /* fix by Alex Shepherd */
-
+					fieldleng = ifx_var_getlen(&lvar_tmp);
+					if (fieldleng > 2) { /* fix by Alex Shepherd */
+						 fieldleng -= 2;
+					}
 					if ((char_data = (char *)emalloc(fieldleng + 1)) == NULL) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory");
 						RETURN_FALSE;
 					}
-					memcpy(char_data,ifx_var_getdata(&lvar_tmp),fieldleng);
+					memcpy(char_data, ifx_var_getdata(&lvar_tmp), fieldleng);
 					ifx_var_dealloc(&lvar_tmp);
-					add_assoc_stringl(return_value, fieldname, char_data, fieldleng,0);
+					add_assoc_stringl(return_value, fieldname, char_data, fieldleng, 0);
 					break;
-				case SQLBOOL    :
+				case SQLBOOL:
 $endif;
-				case SQLCHAR    :
-				case SQLVCHAR   :
-				case SQLNCHAR   :
-				case SQLNVCHAR  :
+				case SQLCHAR:
+				case SQLVCHAR:
+				case SQLNCHAR:
+				case SQLNVCHAR:
 					if ((char_data = (char *)emalloc(fieldleng + 1)) == NULL) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of memory");
 						RETURN_FALSE;
@@ -2206,9 +2372,9 @@ $endif;
 				case SQLTEXT    :
 					/* treated always as a long VARCHAR here     */
 					/* if blobinbfile, too bad                   */
-					bid_b=Ifx_Result->res_id[locind];
+					bid_b = Ifx_Result->res_id[locind];
 					++locind;
-					locator_b=php_intifx_get_blobloc(bid_b,&EG(regular_list) TSRMLS_CC); 
+					locator_b = php_intifx_get_blobloc(bid_b, &EG(regular_list) TSRMLS_CC); 
 					EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :*locator_b = DATA;
 					
 					/* work around for ESQL/C bug with NULL values and BLOBS */                
@@ -2218,9 +2384,9 @@ $endif;
 					
 					/* normal check for NULL values */
 					if (locator_b->loc_indicator == -1) {
-						if ((fieldtype==SQLTEXT) || (fieldtype==SQLBYTES)
+						if ((fieldtype == SQLTEXT) || (fieldtype == SQLBYTES)
 $ifdef HAVE_IFX_IUS;
-						|| (fieldtype==SQLUDTFIXED)
+						|| (fieldtype == SQLUDTFIXED)
 $endif;
 						) {
 							php_printf("<td>%s</td>", nullstr);
@@ -2233,9 +2399,9 @@ $endif;
 					}
 
 					/* get blob contents */    
-					lg=php_intifx_get_blob(bid_b, &EG(regular_list), &content TSRMLS_CC);
+					lg = php_intifx_get_blob(bid_b, &EG(regular_list), &content TSRMLS_CC);
 					
-					if(content==NULL || lg<0) {
+					if (content == NULL || lg < 0) {
 						php_printf("<td>%s</td>", nullstr);
 					} else {
 						/* need an extra byte for string terminator */
@@ -2245,7 +2411,7 @@ $endif;
 							RETURN_FALSE;
 						}
 						memcpy(copy_content, content, lg);
-						copy_content[lg]=0;
+						copy_content[lg] = 0;
 						php_printf("<td>%s</td>", copy_content);
 						free(copy_content);
 					}
@@ -2263,6 +2429,7 @@ $endif;
 			continue;
 		}
 		php_printf("</tr>\n");    
+
 		/* fetch next row */ 
 		EXEC SQL FETCH :cursorid USING SQL DESCRIPTOR :descrpid;
 		switch (ifx_check()) {
@@ -2315,7 +2482,7 @@ EXEC SQL END DECLARE SECTION;
 	int num_fields;
 	char *p;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
     
@@ -2323,7 +2490,7 @@ EXEC SQL END DECLARE SECTION;
     
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 
-	if (strcmp(Ifx_Result->cursorid,"") == 0) {
+	if (strcmp(Ifx_Result->cursorid, "") == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a select cursor!");
 		RETURN_FALSE;
 	}
@@ -2347,7 +2514,7 @@ EXEC SQL END DECLARE SECTION;
 			RETURN_FALSE;
 		}
 
-		p = fieldname;         /* rtrim fieldname */
+		p = fieldname; /* rtrim fieldname */
 		while ((*p != ' ') && (p < &fieldname[sizeof(fieldname) - 1])) ++p;
 		*p = 0;
 		if (strcmp("(expression)", fieldname) == 0)	{ /* stored proc */
@@ -2355,74 +2522,74 @@ EXEC SQL END DECLARE SECTION;
 		}
 
 		switch (fieldtype) {
-			case SQLSERIAL  : 
+			case SQLSERIAL: 
 				char_data = "SQLSERIAL";
 				break;
-			case SQLINT     :
+			case SQLINT:
 				char_data = "SQLINT";
 				break;
-			case SQLSMINT   :
+			case SQLSMINT:
 				char_data = "SQLSMINT";
 				break;
-			case SQLDECIMAL :
+			case SQLDECIMAL:
 				char_data = "SQLDECIMAL";
 				break;
-			case SQLMONEY   :
+			case SQLMONEY:
 				char_data = "SQLMONEY";
 				break;
-			case SQLSMFLOAT :
+			case SQLSMFLOAT:
 				char_data = "SQLSMFLOAT";
 				break;
-			case SQLFLOAT   :
+			case SQLFLOAT:
 				char_data = "SQLFLOAT";
 				break;
-			case SQLDATE    :
+			case SQLDATE:
 				char_data = "SQLDATE";
 				break;
-			case SQLDTIME   :
+			case SQLDTIME:
 				char_data = "SQLDTIME";
 				break;
 			case SQLINTERVAL:
 				char_data = "SQLINTERVAL";
 				break;
-			case SQLCHAR    :
+			case SQLCHAR:
 				char_data = "SQLCHAR";
 				break;
-			case SQLVCHAR   :
+			case SQLVCHAR:
 				char_data = "SQLVCHAR";
 				break;
-			case  SQLNCHAR  :   
+			case  SQLNCHAR:   
 				char_data = "SQLNCHAR";
 				break;
-			case  SQLNVCHAR :   
+			case  SQLNVCHAR:   
 				char_data = "SQLNVCHAR";
 				break;
-			case SQLTEXT    :
+			case SQLTEXT:
 				char_data = "SQLTEXT";
 				break;
-			case SQLBYTES   :   
+			case SQLBYTES:   
 				char_data = "SQLBYTES";
 				break;
 $ifdef HAVE_IFX_IUS;
-			case  SQLUDTFIXED  :   
+			case  SQLUDTFIXED:   
 				char_data = "SQLUDTFIXED";
 				break;
-			case  SQLBOOL  :   
+			case  SQLBOOL:   
 				char_data = "SQLBOOL";
 				break;
-			case  SQLINT8  :   
+			case  SQLINT8:   
 				char_data = "SQLINT8";
 				break;
-			case  SQLSERIAL8   :   
+			case  SQLSERIAL8:   
 				char_data = "SQLSERIAL8";
 				break;
-			case  SQLLVARCHAR  :   
+			case  SQLLVARCHAR:   
 				char_data = "SQLLVARCHAR";
 				break;
 $endif;
-			default :
-				char_data=emalloc(20);
-				sprintf(char_data,"ESQL/C : %i",fieldtype);
+			default:
+				char_data = emalloc(20);
+				sprintf(char_data, "ESQL/C : %i", fieldtype);
 				break;
 		} /* switch (fieldtype) */
 
@@ -2471,7 +2638,7 @@ EXEC SQL END DECLARE SECTION;
 	char string_data[256];
 	char *p;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2479,7 +2646,7 @@ EXEC SQL END DECLARE SECTION;
 
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 
-	if (strcmp(Ifx_Result->cursorid,"") == 0) {
+	if (strcmp(Ifx_Result->cursorid, "") == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a select cursor!");
 		RETURN_FALSE;
 	}
@@ -2510,7 +2677,7 @@ EXEC SQL END DECLARE SECTION;
 			RETURN_FALSE;
 		}
 		
-		p = fieldname;         /* rtrim fieldname */
+		p = fieldname; /* rtrim fieldname */
 		while ((*p != ' ') && (p < &fieldname[sizeof(fieldname) - 1])) ++p;
 		*p = 0;
 		if (strcmp("(expression)", fieldname) == 0)	{ /* stored proc */
@@ -2518,78 +2685,78 @@ EXEC SQL END DECLARE SECTION;
 		}
 
 		switch (fieldtype) {
-			case SQLSERIAL  : 
+			case SQLSERIAL: 
 				char_data = "SQLSERIAL";
 				break;
-			case SQLINT     :
+			case SQLINT:
 				char_data = "SQLINT";
 				break;
-			case SQLSMINT   :
+			case SQLSMINT:
 				char_data = "SQLSMINT";
 				break;
-			case SQLDECIMAL :
+			case SQLDECIMAL:
 				char_data = "SQLDECIMAL";
 				break;
-			case SQLMONEY   :
+			case SQLMONEY:
 				char_data = "SQLMONEY";
 				break;
-			case SQLSMFLOAT :
+			case SQLSMFLOAT:
 				char_data = "SQLSMFLOAT";
 				break;
-			case SQLFLOAT   :
+			case SQLFLOAT:
 				char_data = "SQLFLOAT";
 				break;
-			case SQLDATE    :
+			case SQLDATE:
 				char_data = "SQLDATE";
 				break;
-			case SQLDTIME   :
+			case SQLDTIME:
 				char_data = "SQLDTIME";
 				break;
 			case SQLINTERVAL:
 				char_data = "SQLINTERVAL";
 				break;
-			case SQLCHAR    :
+			case SQLCHAR:
 				char_data = "SQLCHAR";
 				break;
-			case SQLVCHAR   :
+			case SQLVCHAR:
 				char_data = "SQLVCHAR";
 				break;
-			case SQLTEXT    :
+			case SQLTEXT:
 				char_data = "SQLTEXT";
 				break;
-			case SQLBYTES   :   
+			case SQLBYTES:   
 				char_data = "SQLBYTES";
 				break;
-			case  SQLNCHAR  :   
+			case  SQLNCHAR:   
 				char_data = "SQLNCHAR";
 				break;
-			case  SQLNVCHAR  :   
+			case  SQLNVCHAR:   
 				char_data = "SQLNVCHAR";
 				break;
 $ifdef HAVE_IFX_IUS;
-			case  SQLUDTFIXED  :   
+			case  SQLUDTFIXED:   
 				char_data = "SQLUDTFIXED";
 				break;
-			case  SQLBOOL  :   
+			case  SQLBOOL:   
 				char_data = "SQLBOOL";
 				break;
-			case  SQLINT8  :   
+			case  SQLINT8:   
 				char_data = "SQLINT8";
 				break;
-			case  SQLSERIAL8  :   
+			case  SQLSERIAL8:   
 				char_data = "SQLSERIAL8";
 				break;
-			case  SQLLVARCHAR  :   
+			case  SQLLVARCHAR:   
 				char_data = "SQLLVARCHAR";
 				break;
 $endif;
-			default         :
-				char_data=emalloc(20);
-				sprintf(char_data,"ESQL/C : %i",fieldtype);
+			default:
+				char_data = emalloc(20);
+				sprintf(char_data, "ESQL/C : %i", fieldtype);
 				break;
 		} /* switch (fieldtype) */
 
-		sprintf(string_data,"%s;%d;%d;%d;%c", char_data, size, precision, scale, (isnullable?'Y':'N'));   
+		sprintf(string_data, "%s;%d;%d;%d;%c", char_data, size, precision, scale, (isnullable ? 'Y' : 'N'));   
 		add_assoc_string(return_value, fieldname, string_data, DUP);
 	}   /* for() */ 
 }
@@ -2610,7 +2777,7 @@ PHP_FUNCTION(ifx_num_rows)
 	zval **result;
 	IFX_RES *Ifx_Result;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2640,7 +2807,7 @@ PHP_FUNCTION(ifx_getsqlca)
 	char fieldname[16];
 	int e;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2654,7 +2821,7 @@ PHP_FUNCTION(ifx_getsqlca)
 	/* fill array with 6 fields sqlerrd0 .. sqlerrd5 */
 	/* each ESQLC call saves these sqlca values  */
 	for (e = 0; e < 6; e++) {
-		sprintf(fieldname,"sqlerrd%d", e);
+		sprintf(fieldname, "sqlerrd%d", e);
 		add_assoc_long(return_value, fieldname, Ifx_Result->sqlerrd[e]);
 	}
 }
@@ -2675,7 +2842,7 @@ PHP_FUNCTION(ifx_num_fields)
 	zval **result;
 	IFX_RES *Ifx_Result;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2712,7 +2879,7 @@ EXEC SQL END DECLARE SECTION;
 
 	int i;    
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
     
@@ -2721,9 +2888,9 @@ EXEC SQL END DECLARE SECTION;
 	ZEND_FETCH_RESOURCE(Ifx_Result, IFX_RES *, result, -1, "Informix Result", le_result);
 
 	for (i = 0; i < MAX_RESID; ++i) {
-		if (Ifx_Result->res_id[i]>0) {
-			php_intifx2_free_blob(Ifx_Result->res_id[i],&EG(regular_list) TSRMLS_CC);
-			Ifx_Result->res_id[i]=-1;
+		if (Ifx_Result->res_id[i] > 0) {
+			zend_list_delete(Ifx_Result->res_id[i]);
+			Ifx_Result->res_id[i] = -1;
 		}
 	}
 
@@ -2765,8 +2932,8 @@ static long php_intifx_getType(long id, HashTable *list TSRMLS_DC)
 	IFX_IDRES *Ifx_res;
 	int type;
 
-	Ifx_res = (IFX_IDRES *) zend_list_find(id,&type);
-	if (type!=le_idresult) {
+	Ifx_res = (IFX_IDRES *) zend_list_find(id, &type);
+	if (type != le_idresult) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix id-result index", id);
 		return -1;
 	}
@@ -2793,7 +2960,7 @@ PHP_FUNCTION(ifx_create_blob)
 	long id;
 	long mode,type;
   
-	if (ZEND_NUM_ARGS() !=3 || zend_get_parameters_ex(3, &ptype,&pmode,&pparam) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &ptype, &pmode, &pparam) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2802,18 +2969,18 @@ PHP_FUNCTION(ifx_create_blob)
 	convert_to_long_ex(ptype);
 
 	type = Z_LVAL_PP(ptype);
-	if(type != 0) {
+	if (type != 0) {
 		type = TYPE_BLTEXT;
 	}
 
 	mode = Z_LVAL_PP(pmode);
-	if(mode != 0) {
+	if (mode != 0) {
 		mode=BLMODE_INFILE;
 	}
 
-	id=php_intifx_create_blob(type,mode,Z_STRVAL_PP(pparam),Z_STRLEN_PP(pparam),&EG(regular_list) TSRMLS_CC); 
+	id = php_intifx_create_blob(type, mode, Z_STRVAL_PP(pparam), Z_STRLEN_PP(pparam), &EG(regular_list) TSRMLS_CC); 
 
-	if(id < 0) {
+	if (id < 0) {
 		RETURN_FALSE;
 	} 
 	RETURN_LONG(id);
@@ -2824,7 +2991,7 @@ PHP_FUNCTION(ifx_create_blob)
  * internal function
  * long php_intifx_create_blob(long type, long mode, char* param, long len, HashTable *list TSRMLS_DC)
  *
- * creates an blob-object
+ * creates an blob-object for the PHP Resource list
  *  type: 1=TEXT, 0=BYTE
  *  mode: blob-object holds 0=the content in momory, 1=content in file
  *  param: if mode=0: pointer to the content
@@ -2839,57 +3006,164 @@ static long php_intifx_create_blob(long type, long mode, char* param, long len, 
 	IFX_IDRES *Ifx_blob;
 
 	Ifx_blob=emalloc(sizeof(IFX_IDRES));
-	if(Ifx_blob==NULL) {
+	if (Ifx_blob == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
 		return -1;
 	}
 	
 	memset(Ifx_blob, 0, sizeof(IFX_IDRES));
 	
-	if(type==0 ) {
-		Ifx_blob->type=TYPE_BLBYTE;
+	if (type == 0 ) {
+		Ifx_blob->type = TYPE_BLBYTE;
 	} else {
-		Ifx_blob->type=TYPE_BLTEXT;
+		Ifx_blob->type = TYPE_BLTEXT;
 	}
-	Ifx_blob->BLOB.mode=(int)mode;
+	Ifx_blob->BLOB.mode = (int) mode;
 
-	if(mode==BLMODE_INMEM) {
-		if(len>=0) {
-			char *content=emalloc(len);
-			if(content==NULL) {
+	if (php_intifx_init_blob(&Ifx_blob->BLOB.blob_data, mode, 1 TSRMLS_CC) < 0)   {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
+		return -1;
+	}
+
+	if (mode == BLMODE_INMEM) {
+		if (len >= 0) {
+			char *content = emalloc(len);
+			if (content == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
 				return -1;
 			}
 			memcpy(content,param,len);
-			Ifx_blob->BLOB.blob_data.loc_loctype=LOCMEMORY;
-			Ifx_blob->BLOB.blob_data.loc_buffer=content;
-			Ifx_blob->BLOB.blob_data.loc_bufsize=len;
-			Ifx_blob->BLOB.blob_data.loc_size=len;
-			Ifx_blob->BLOB.blob_data.loc_mflags=0;
-			Ifx_blob->BLOB.blob_data.loc_oflags=0;
-		} else {
-			Ifx_blob->BLOB.blob_data.loc_loctype=LOCMEMORY;
-			Ifx_blob->BLOB.blob_data.loc_buffer=NULL;
-			Ifx_blob->BLOB.blob_data.loc_bufsize=-1;
-			Ifx_blob->BLOB.blob_data.loc_size=-1;
-			Ifx_blob->BLOB.blob_data.loc_mflags=0;
-			Ifx_blob->BLOB.blob_data.loc_oflags=0;
+			Ifx_blob->BLOB.blob_data.loc_buffer = content;
+			Ifx_blob->BLOB.blob_data.loc_bufsize = len;
+			Ifx_blob->BLOB.blob_data.loc_size = len;
+			Ifx_blob->BLOB.blob_data.loc_oflags = 0;
 		}
-	} else { /* mode = BLMODE_INFILE */
-		char *filename=emalloc(len+1);
-		if(filename==NULL)  {
+	} else {
+
+		if (*param && param != "") {
+
+			char *filename;
+
+			if (Ifx_blob->BLOB.blob_data.loc_fname != NULL) {
+				unlink(Ifx_blob->BLOB.blob_data.loc_fname);
+				efree(Ifx_blob->BLOB.blob_data.loc_fname);
+			}
+			if ((filename = emalloc(len + 1)) == NULL)  {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
+				return -1;
+			}
+			memcpy(filename, param, len);
+			filename[len] = 0;
+			Ifx_blob->BLOB.blob_data.loc_fname = filename;
+			Ifx_blob->BLOB.blob_data.loc_size = -1;
+		}
+	}
+
+	return zend_list_insert(Ifx_blob,le_idresult);
+}
+
+static long php_intifx_init_blob(loc_t *blob, long mode, long new TSRMLS_DC)
+{
+	if (new)   {
+		memset(blob, 0, sizeof(loc_t));
+	}
+
+	blob->loc_status = 0;
+	blob->loc_type = SQLTEXT;
+	blob->loc_xfercount = 0;
+	blob->loc_indicator = 0;
+
+	if (mode == BLMODE_INMEM)   {
+		return php_intifx_init_blob_inmem(blob, new TSRMLS_CC);
+	} else {
+		return php_intifx_init_blob_infile(blob, new TSRMLS_CC);
+	}
+
+	return 1;
+}
+	
+static long php_intifx_init_blob_inmem(loc_t *blob, long new TSRMLS_DC)
+{
+	blob->loc_loctype = LOCMEMORY;
+
+	if (new)   {
+		blob->loc_buffer = NULL;
+		blob->loc_bufsize = -1;
+		blob->loc_size = 0;
+	}
+
+	blob->loc_mflags = 0;
+	blob->loc_oflags = 0;
+
+	return 1;
+}
+
+static long php_intifx_init_blob_infile(loc_t *blob, long new TSRMLS_DC)
+{
+	char *filename;
+
+	if (new) {
+
+		filename = php_intifx_create_tmpfile(TSRMLS_C);
+
+		if (filename == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
 			return -1;
 		}
-		memcpy(filename,param,len);
-		filename[len]=0;
-		Ifx_blob->BLOB.blob_data.loc_loctype=LOCFNAME;
-		Ifx_blob->BLOB.blob_data.loc_fname=filename;
-		Ifx_blob->BLOB.blob_data.loc_oflags=LOC_WONLY;
-		Ifx_blob->BLOB.blob_data.loc_size=-1;
+
+		blob->loc_fname = filename;
+		blob->loc_size = 0;
+		blob->loc_fd = -1;
 	}
-	return zend_list_insert(Ifx_blob,le_idresult);
+
+	return 1;
 }
+
+static void php_intifx_release_blob(loc_t *blob TSRMLS_DC)
+{
+
+#if IFX_VERSION < 724 /* this Informix  memory leak is fixed from 7.24 on     */
+                      /* according to the current PERL DBD::Informix          */
+                      /* and otherwise I get segmenation violations with 7.30 */
+
+	/* Not set to NULL, so function will free resources */
+#else
+	/* Set to NULL so php_intifx_release_blob() doens't try to free stuff it shouldn't */
+
+  	if (blob->loc_loctype == LOCMEMORY)   {
+		blob->loc_buffer = NULL;
+	}
+#endif
+
+	switch (blob->loc_loctype)   {
+
+		case LOCMEMORY:
+			if (blob->loc_buffer != NULL)   {
+				efree(blob->loc_buffer);
+				blob->loc_buffer = NULL;
+			}
+			break;
+
+		case LOCFNAME:
+			if (blob->loc_fd >= 0)   {
+				close(blob->loc_fd);
+			}
+			blob->loc_fd = -1;
+
+			if (blob->loc_fname != NULL)   {
+				unlink(blob->loc_fname);
+				efree(blob->loc_fname);
+				blob->loc_fname = NULL;
+			}
+			break;
+			
+		case LOCFILE:
+		case LOCUSER:
+		default:
+			break;
+	}
+}
+
 
 /* ----------------------------------------------------------------------
 ** int ifx_copy_blob(int bid)
@@ -2908,13 +3182,14 @@ PHP_FUNCTION(ifx_copy_blob)
 	zval **pbid;
 	long newid;
   
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &pbid)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pbid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
 
-	newid=php_intifx_copy_blob(Z_LVAL_PP(pbid),&EG(regular_list) TSRMLS_CC); 
-	if(newid<0) {
+	newid = php_intifx_copy_blob(Z_LVAL_PP(pbid), &EG(regular_list) TSRMLS_CC); 
+
+	if (newid < 0) {
 		RETURN_FALSE;
 	} 
 	RETURN_LONG(newid);
@@ -2925,73 +3200,65 @@ PHP_FUNCTION(ifx_copy_blob)
  * internal function
  * long php_intifx_copy_blob(long bid, HashTable *list)
  *
- * duplicates the given blob-object
+ * duplicates the given blob-object in the PHP resource list
  *  bid: Id of Blobobject
  *  list: internal hashlist of php
  * 
  * return -1 on error otherwise the new Blob-Object-id
  * ----------------------------------------------------------------------
 */
-static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC) 
+static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC)
 {
 	IFX_IDRES *Ifx_blob, *Ifx_blob_orig;
 	loc_t *locator, *locator_orig;
 	int type;
 
-	Ifx_blob_orig = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || !(Ifx_blob_orig->type==TYPE_BLBYTE || Ifx_blob_orig->type==TYPE_BLTEXT)) {
+	Ifx_blob_orig = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult || !(Ifx_blob_orig->type == TYPE_BLBYTE || Ifx_blob_orig->type == TYPE_BLTEXT)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
 		return -1;
 	}
 
-	Ifx_blob=emalloc(sizeof(IFX_IDRES));
-	if(Ifx_blob==NULL) {
+	Ifx_blob = emalloc(sizeof(IFX_IDRES));
+	if (Ifx_blob == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
 		return -1;
 	}
 	
 	memset(Ifx_blob, 0, sizeof(IFX_IDRES));
   
-	Ifx_blob->type=Ifx_blob_orig->type;
-	Ifx_blob->BLOB.mode=Ifx_blob_orig->BLOB.mode;
+	Ifx_blob->type = Ifx_blob_orig->type;
+	Ifx_blob->BLOB.mode = Ifx_blob_orig->BLOB.mode;
  
-	locator=&(Ifx_blob->BLOB.blob_data);
-	locator_orig=&(Ifx_blob_orig->BLOB.blob_data);
+	locator = &(Ifx_blob->BLOB.blob_data);
+	locator_orig = &(Ifx_blob_orig->BLOB.blob_data);
 
-	if(Ifx_blob->BLOB.mode==BLMODE_INMEM) {
+	if (php_intifx_init_blob(locator, Ifx_blob->BLOB.mode, 1 TSRMLS_CC) < 0)   {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
+		return -1;
+	}
+
+	if (Ifx_blob->BLOB.mode == BLMODE_INMEM) {
 		char *content;
-		if(locator_orig->loc_size>=0 && locator_orig->loc_buffer!=NULL) {
-			if((content=emalloc(locator_orig->loc_size))==NULL) {
+		if (locator_orig->loc_bufsize >= 0 && locator_orig->loc_buffer != NULL) {
+			if ((content = emalloc(locator_orig->loc_size)) == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
 				return -1;
 			}
-			memcpy(content,locator_orig->loc_buffer,  locator_orig->loc_size);
-			locator->loc_buffer=content;
-			locator->loc_bufsize=locator_orig->loc_size;
-			locator->loc_size=locator_orig->loc_size;
-		} else {
-			locator->loc_buffer=NULL;
-			locator->loc_bufsize=-1;
-			locator->loc_size=-1;
+			memcpy(content,locator_orig->loc_buffer, locator_orig->loc_bufsize);
+			locator->loc_buffer = content;
+			locator->loc_bufsize = locator_orig->loc_bufsize;
+			locator->loc_size = locator_orig->loc_size;
 		}
-		locator->loc_loctype=LOCMEMORY;
-		locator->loc_mflags=0;
-		locator->loc_oflags=0;
 	} else {  /* BLMODE_INFILE */
-		char *filename;
 		
-		if((filename=emalloc(strlen(locator_orig->loc_fname)+1))==NULL)  {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
-			return -1;
+		if (locator_orig->loc_size)   {
+			php_copy_file(locator_orig->loc_fname, locator->loc_fname TSRMLS_CC);
 		}
-
-		strcpy(filename,locator_orig->loc_fname);
-		locator->loc_loctype=LOCFNAME;
-		locator->loc_fname=filename;
-		locator->loc_size=-1;
-		locator->loc_oflags=locator_orig->loc_oflags;
+		
 	}
-	return zend_list_insert(Ifx_blob,le_idresult);
+	
+	return zend_list_insert(Ifx_blob, le_idresult);
 }
 
 /* ----------------------------------------------------------------------
@@ -3010,13 +3277,13 @@ PHP_FUNCTION(ifx_free_blob)
 	zval **pid;
 	long ret;
   
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pid) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pid);
 
-	ret=php_intifx_free_blob(Z_LVAL_PP(pid),&EG(regular_list) TSRMLS_CC); 
-	if(ret<0) {
+	ret = php_intifx_free_blob(Z_LVAL_PP(pid), &EG(regular_list) TSRMLS_CC); 
+	if (ret < 0) {
 		RETURN_FALSE;
 	} 
 	RETURN_TRUE;
@@ -3027,7 +3294,7 @@ PHP_FUNCTION(ifx_free_blob)
  * internal function
  * long php_intifx_free_blob(long bid, HashTable *list)
  *
- * deletes the blob-object
+ * deletes the blob-object from the PHP Resource List
  *  bid: Id of Blobobject
  *  list: internal hashlist of php
  * 
@@ -3040,67 +3307,19 @@ static long php_intifx_free_blob(long bid, HashTable *list TSRMLS_DC)
 	IFX_IDRES *Ifx_blob;
 	int type;
 
-	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+	Ifx_blob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult && !(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
 		return -1;
 	}
 
-	if(Ifx_blob->BLOB.mode==BLMODE_INMEM) {
-		if(Ifx_blob->BLOB.blob_data.loc_buffer==NULL || Ifx_blob->BLOB.blob_data.loc_size<=0) {;} else {
-			efree(Ifx_blob->BLOB.blob_data.loc_buffer);  
-		}
-	} else {   /* BLMODE_INFILE */
-		if(Ifx_blob->BLOB.blob_data.loc_fname!=NULL) {
-			efree(Ifx_blob->BLOB.blob_data.loc_fname); 
-		}
-	}
-	zend_list_delete(bid);
-	efree(Ifx_blob); 
-	return 0;
-}
-
-/* ----------------------------------------------------------------------
- * internal function
- * long php_intifx2_free_blob(long bid, HashTable *list)
- *
- * deletes the blob-object
- *  bid: Id of Blobobject
- *  list: internal hashlist of php
- * 
- * return -1 on error otherwise 0
- * FREES BYTE-MEMORY WITH FREE(), for blob memory allocated by ESQL/C  
- * use this for freeing blob-source after select (in ifx_free_result)
- * ----------------------------------------------------------------------
-*/
-static long php_intifx2_free_blob(long bid, HashTable *list TSRMLS_DC) 
-{
-	IFX_IDRES *Ifx_blob; 
-	int type;
-
-	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
+	if (!(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix BYTE or TEXT type", bid);
 		return -1;
 	}
 
-#if IFX_VERSION < 724 /* this Informix  memory leak is fixed from 7.24 on     */
-                      /* according to the current PERL DBD::Informix          */
-                      /* and otherwise I get segmenation violations with 7.30 */
-
-	if(Ifx_blob->BLOB.mode==BLMODE_INMEM) {
-		if(Ifx_blob->BLOB.blob_data.loc_buffer==NULL || Ifx_blob->BLOB.blob_data.loc_size<=0) {;} else {
-			free(Ifx_blob->BLOB.blob_data.loc_buffer);  
-		}
-	} else {
-		if(Ifx_blob->BLOB.blob_data.loc_fname!=NULL) {
-			efree(Ifx_blob->BLOB.blob_data.loc_fname); 
-		}
-	}
-#endif
-  
 	zend_list_delete(bid);
-	efree(Ifx_blob); 
+
 	return 0;
 }
 
@@ -3121,16 +3340,16 @@ PHP_FUNCTION(ifx_get_blob)
 	char *content;
 	long len;
   
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pbid) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pbid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
 
-	len=php_intifx_get_blob(Z_LVAL_PP(pbid),&EG(regular_list),&content TSRMLS_CC); 
-	if(content==NULL || len<0) {
-		RETURN_STRING(php_intifx_null(TSRMLS_C),1);
+	len = php_intifx_get_blob(Z_LVAL_PP(pbid), &EG(regular_list), &content TSRMLS_CC); 
+	if (content == NULL || len < 0) {
+		RETURN_STRING(php_intifx_null(TSRMLS_C), 1);
 	}
-	RETURN_STRINGL(content,len,1);
+	RETURN_STRINGL(content, len, 1);
 }
 /* }}} */
 
@@ -3151,23 +3370,23 @@ static long php_intifx_get_blob(long bid, HashTable *list, char** content TSRMLS
 	IFX_IDRES *Ifx_blob;
 	int type;
 
-	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+	Ifx_blob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult && !(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
 		return -1;
 	}
 
-	if(Ifx_blob->BLOB.mode==BLMODE_INMEM) {
-		*content=Ifx_blob->BLOB.blob_data.loc_buffer;
+	if (Ifx_blob->BLOB.mode == BLMODE_INMEM) {
+		*content = Ifx_blob->BLOB.blob_data.loc_buffer;
 		return Ifx_blob->BLOB.blob_data.loc_size;
 	}
-	*content=Ifx_blob->BLOB.blob_data.loc_fname;
+	*content = Ifx_blob->BLOB.blob_data.loc_fname;
 	return strlen(Ifx_blob->BLOB.blob_data.loc_fname);
 }
 
 /* ----------------------------------------------------------------------
  * internal function
- * loc_t *php_intifx_get_blobloc(long bid, HashTable *list)
+ * loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC)
  *
  * returns the blob-locator-structur
  *  bid: Id of Blobobject
@@ -3180,14 +3399,13 @@ static loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC)
 	IFX_IDRES *Ifx_blob;
 	int type;
 
-	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+	Ifx_blob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult && !(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
 		return NULL;
 	}
 	return &(Ifx_blob->BLOB.blob_data);
 }
-
 
 
 /* ----------------------------------------------------------------------
@@ -3206,13 +3424,13 @@ PHP_FUNCTION(ifx_update_blob)
 {
 	zval **pbid, **pparam;
   
-	if (ZEND_NUM_ARGS() !=2 || zend_get_parameters_ex(2, &pbid,&pparam) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pbid, &pparam) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
 	convert_to_string_ex(pparam);
 
-	if(php_intifx_update_blob(Z_LVAL_PP(pbid),Z_STRVAL_PP(pparam),Z_STRLEN_PP(pparam), &EG(regular_list) TSRMLS_CC) < 0) { 
+	if (php_intifx_update_blob(Z_LVAL_PP(pbid), Z_STRVAL_PP(pparam), Z_STRLEN_PP(pparam), &EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	} 
 	RETURN_TRUE;
@@ -3236,48 +3454,48 @@ static long php_intifx_update_blob(long bid, char* param, long len, HashTable *l
 	IFX_IDRES *Ifx_blob;
 	int type;
 
-	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
+	Ifx_blob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult && !(Ifx_blob->type == TYPE_BLTEXT || Ifx_blob->type == TYPE_BLBYTE)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix blob-result index", bid);
 		return -1;
 	}
 
-	if(Ifx_blob->BLOB.mode==BLMODE_INMEM) {
+	if (Ifx_blob->BLOB.mode == BLMODE_INMEM) {
 		char *content;
 		
-		if(Ifx_blob->BLOB.blob_data.loc_buffer!=NULL) {
+		if (Ifx_blob->BLOB.blob_data.loc_buffer != NULL) {
 			efree(Ifx_blob->BLOB.blob_data.loc_buffer);
 		}
-		if(len >= 0) {
-			if((content=emalloc(len))==NULL) {
+		if (len >= 0) {
+			if ((content = emalloc(len)) == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
 				return -1;
 			}
-			memcpy(content,param, len);
-			Ifx_blob->BLOB.blob_data.loc_buffer=content;
-			Ifx_blob->BLOB.blob_data.loc_bufsize=len;
-			Ifx_blob->BLOB.blob_data.loc_size=len;
+			memcpy(content, param, len);
+			Ifx_blob->BLOB.blob_data.loc_buffer = content;
+			Ifx_blob->BLOB.blob_data.loc_bufsize = len;
+			Ifx_blob->BLOB.blob_data.loc_size = len;
 		} else {
-			Ifx_blob->BLOB.blob_data.loc_buffer=NULL;
-			Ifx_blob->BLOB.blob_data.loc_bufsize=-1;
-			Ifx_blob->BLOB.blob_data.loc_size=-1;
+			Ifx_blob->BLOB.blob_data.loc_buffer = NULL;
+			Ifx_blob->BLOB.blob_data.loc_bufsize = -1;
+			Ifx_blob->BLOB.blob_data.loc_size = -1;
 		}
-		Ifx_blob->BLOB.blob_data.loc_mflags=0;
-		Ifx_blob->BLOB.blob_data.loc_oflags=0;
+		Ifx_blob->BLOB.blob_data.loc_mflags = 0;
+		Ifx_blob->BLOB.blob_data.loc_oflags = 0;
 	} else {
 		char *filename;
 
-		if(Ifx_blob->BLOB.blob_data.loc_fname!=NULL) {
+		if (Ifx_blob->BLOB.blob_data.loc_fname != NULL) {
 			efree(Ifx_blob->BLOB.blob_data.loc_fname);
 		}
-		if((filename=emalloc(len+1))==NULL)  {
+		if ((filename = emalloc(len + 1)) == NULL)  {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
 			return -1;
 		}
-		memcpy(filename,param, len);
-		filename[len]=0;
-		Ifx_blob->BLOB.blob_data.loc_fname=filename;
-		Ifx_blob->BLOB.blob_data.loc_size=-1;
+		memcpy(filename, param, len);
+		filename[len] = 0;
+		Ifx_blob->BLOB.blob_data.loc_fname = filename;
+		Ifx_blob->BLOB.blob_data.loc_size = -1;
 	}
 	return 0;
 }
@@ -3285,11 +3503,11 @@ static long php_intifx_update_blob(long bid, char* param, long len, HashTable *l
 /*-------------------------------------------------
  * internal function
  *
- * php_intifx_create_tmpfile(long bid TSRMLS_DC)
+ * php_intifx_create_tmpfile(TSRMLS_D)
  * creates a temporary file to store a blob in 
  *-------------------------------------------------
 */
-static char* php_intifx_create_tmpfile(long bid TSRMLS_DC) 
+static char* php_intifx_create_tmpfile(TSRMLS_D)
 {
 	char filename[10];
 	char *blobdir;
@@ -3298,17 +3516,148 @@ static char* php_intifx_create_tmpfile(long bid TSRMLS_DC)
 	FILE *fp;
 			 
 	if ((blobdir = getenv("php_blobdir")) == NULL) {
-		blobdir=".";
+		blobdir = ".";
 	}
-	sprintf(filename,"blb%d",(int)bid);
+
+	sprintf(filename, "blb");
 
 	if ((fp = php_open_temporary_file(blobdir, filename, &opened_path TSRMLS_CC))) {
 		fclose(fp);
-		retval=estrndup(opened_path, strlen(opened_path));
+		retval = estrndup(opened_path, strlen(opened_path));
+		efree(opened_path);
 	} else {
-		retval=NULL;
+		retval = NULL;
 	}
 	return retval;
+}
+
+/* ----------------------------------------------------------------------
+ * int php_intifx_alloc_ibind(IFX_RES *Ifx_Result, int items TSRMLS_DC)
+ *
+ * Allocates descriptors for input parameters
+ * return 0 for error. 1 for ok
+ * ----------------------------------------------------------------------
+*/
+static long php_intifx_alloc_ibind(IFX_RES *Ifx_Result, int items TSRMLS_DC)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char *i_bind = Ifx_Result->i_descrpid;
+	int bind_size = items;
+	EXEC SQL END DECLARE SECTION;
+	
+	if (items > Ifx_Result->numicols)   {
+	               
+		if (Ifx_Result->numicols > 0)   {
+			EXEC SQL DEALLOCATE DESCRIPTOR :i_bind;
+			if (ifx_check() < 0)   {
+				return 0;
+			}
+		}
+	
+		EXEC SQL ALLOCATE DESCRIPTOR :i_bind WITH MAX :bind_size;
+		if (ifx_check() < 0)   {
+			return 0;
+		}
+	
+		Ifx_Result->numicols = items;
+	}
+	
+	return 1;
+}
+
+/* ----------------------------------------------------------------------
+ * int php_intifx_preparse(char *statement TSRMLS_DC)
+ *
+ * Count the placeholders (?) parameters in the statement
+ * return -1 for error. 0 or number of question marks
+ *
+ * Thanks to DBD-Informix
+ *
+ * ----------------------------------------------------------------------
+*/
+static long php_intifx_preparse(char *statement TSRMLS_DC)
+{
+	char  end_quote = '\0';
+	char *src;
+	char *dst;
+	int   idx = 0;
+	int   style = 0;
+	int   laststyle = 0;
+	char  ch;
+
+	src = statement;
+	dst = statement;
+
+	while ((ch = *src++) != '\0') {
+		if (ch == end_quote) {
+			end_quote = '\0';
+		} else if (end_quote != '\0') {
+			*dst++ = ch;
+			continue;
+		} else if (ch == '\'' || ch == '\"') {
+			end_quote = ch;
+		} else if (ch == '{') {
+			end_quote = '}';
+		} else if (ch == '-' && *src == '-') {
+			end_quote = '\n';
+		}
+
+		if (ch == '?') {
+			/* X/Open standard       */
+			*dst++ = '?';
+			idx++;
+			style = 3;
+		} else {
+			/* Perhaps ':=' PL/SQL construct or dbase:table in Informix */
+			/* Or it could be :2 or :22 as part of a DATETIME/INTERVAL */
+			*dst++ = ch;
+			continue;
+		}
+
+		if (laststyle && style != laststyle) {
+			return -1;
+		}
+		laststyle = style;
+	}
+
+	*dst = '\0';
+	return(idx);
+}
+
+/* ----------------------------------------------------------------------
+ * int php_intifx_count_descriptors(char *p_statemid TSRMLS_DC)
+ *
+ * count the number of descriptors allocated for a certain statement
+ * return 384 or number of descriptors
+ * ----------------------------------------------------------------------
+*/
+static long php_intifx_count_descriptors(char *p_statemid TSRMLS_DC)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char *statemid = p_statemid;
+	EXEC SQL END DECLARE SECTION;
+
+	struct sqlda *s_da;
+	int ret = 384;
+
+	EXEC SQL DESCRIBE :statemid INTO s_da;
+
+	if (ifx_check() >= 0)   {
+
+		ret = s_da->sqld;
+               
+		/*
+		 * Thanks to DBD-Informix
+		 */
+
+#if (ESQLC_VERSION >= 720 || (ESQLC_VERSION >= 501 && ESQLC_VERSION < 600))
+		SqlFreeMem(s_da, SQLDA_FREE);
+	} else {
+		free(s_da);
+#endif
+	}
+
+	return ret;
 }
 
 /* ----------------------------------------------------------------------
@@ -3327,12 +3676,12 @@ PHP_FUNCTION(ifx_blobinfile_mode)
 {
 	zval **pmode;
 
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pmode);
 
-	IFXG(blobinfile)=Z_LVAL_PP(pmode);
+	IFXG(blobinfile) = Z_LVAL_PP(pmode);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3353,12 +3702,12 @@ PHP_FUNCTION(ifx_textasvarchar)
 {
 	zval **pmode;
 	
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pmode);
 
-	IFXG(textasvarchar)=Z_LVAL_PP(pmode);
+	IFXG(textasvarchar) = Z_LVAL_PP(pmode);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3379,12 +3728,12 @@ PHP_FUNCTION(ifx_byteasvarchar)
 {
 	zval **pmode;
 
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pmode);
 
-	IFXG(byteasvarchar)=Z_LVAL_PP(pmode);
+	IFXG(byteasvarchar) = Z_LVAL_PP(pmode);
 	RETURN_TRUE;
 }
 
@@ -3404,16 +3753,15 @@ PHP_FUNCTION(ifx_nullformat)
 {
 	zval **pmode;
 	
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pmode);
 
-	IFXG(nullformat)=Z_LVAL_PP(pmode);
+	IFXG(nullformat) = Z_LVAL_PP(pmode);
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* ----------------------------------------------------------------------
  * void php_intifx_null()
@@ -3426,10 +3774,10 @@ static char* php_intifx_null(TSRMLS_D)
 {
 	char* tmp;
 		
-	if(IFXG(nullformat)==0) {
-		tmp=IFXG(nullvalue);
+	if (IFXG(nullformat) == 0) {
+		tmp = IFXG(nullvalue);
 	} else {
-		tmp=IFXG(nullstring);
+		tmp = IFXG(nullstring);
 	}
 	return tmp;
 }
@@ -3450,14 +3798,14 @@ PHP_FUNCTION(ifx_create_char)
 	zval **pparam;
 	long id;
   
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pparam) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pparam) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(pparam);
 
-	id=php_intifx_create_char(Z_STRVAL_PP(pparam),Z_STRLEN_PP(pparam),&EG(regular_list) TSRMLS_CC); 
+	id = php_intifx_create_char(Z_STRVAL_PP(pparam), Z_STRLEN_PP(pparam), &EG(regular_list) TSRMLS_CC); 
 	
-	if(id < 0) {
+	if (id < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(id);
@@ -3479,29 +3827,29 @@ static long php_intifx_create_char(char* param, long len, HashTable *list TSRMLS
 {
 	IFX_IDRES *Ifx_char;
 
-	Ifx_char=emalloc(sizeof(IFX_IDRES));
-	if(Ifx_char==NULL) {
+	Ifx_char = emalloc(sizeof(IFX_IDRES));
+	if (Ifx_char == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create char-resource");
 		return -1;
 	}
 
-	Ifx_char->type=TYPE_CHAR;
+	Ifx_char->type = TYPE_CHAR;
 
-	if(param==NULL || len<0) {
-		Ifx_char->CHAR.char_data=NULL;
-		Ifx_char->CHAR.len=0;
+	if (param == NULL || len < 0) {
+		Ifx_char->CHAR.char_data = NULL;
+		Ifx_char->CHAR.len = 0;
 	} else {
-		Ifx_char->CHAR.char_data=emalloc(len+1);
-		if(Ifx_char->CHAR.char_data==NULL) {
+		Ifx_char->CHAR.char_data = emalloc(len + 1);
+		if (Ifx_char->CHAR.char_data == NULL) {
 			efree(Ifx_char);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create char-resource");
 			return -1;
 		}
-		memcpy(Ifx_char->CHAR.char_data,param,len);
-		Ifx_char->CHAR.char_data[len]=0;
-		Ifx_char->CHAR.len=len;
+		memcpy(Ifx_char->CHAR.char_data, param,len);
+		Ifx_char->CHAR.char_data[len] = 0;
+		Ifx_char->CHAR.len = len;
 	}
-	return zend_list_insert(Ifx_char,le_idresult);
+	return zend_list_insert(Ifx_char, le_idresult);
 }
 
 /* ----------------------------------------------------------------------
@@ -3521,16 +3869,16 @@ PHP_FUNCTION(ifx_get_char)
 	char *content;
 	long len;
 
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pbid) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pbid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
 
-	len=php_intifx_get_char(Z_LVAL_PP(pbid),&EG(regular_list),&content TSRMLS_CC); 
-	if(content==NULL || len < 0) {
-		RETURN_STRING("",1);
+	len = php_intifx_get_char(Z_LVAL_PP(pbid), &EG(regular_list), &content TSRMLS_CC); 
+	if (content == NULL || len < 0) {
+		RETURN_STRING("", 1);
 	}
-	RETURN_STRINGL(content,len,1);
+	RETURN_STRINGL(content, len, 1);
 }
 /* }}} */
 
@@ -3546,18 +3894,19 @@ PHP_FUNCTION(ifx_get_char)
  * returns the pointer to the content in char** content and the amount of content in bytes
  * ----------------------------------------------------------------------
 */
+
 static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS_DC) 
 {
 	IFX_IDRES *Ifx_char;
 	int type;
 
-	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
+	Ifx_char = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult && !(Ifx_char->type == TYPE_CHAR)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix char-result index", bid);
 		return -1;
 	}
 
-	*content=Ifx_char->CHAR.char_data;
+	*content = Ifx_char->CHAR.char_data;
 	return Ifx_char->CHAR.len;
 }
 
@@ -3576,12 +3925,12 @@ PHP_FUNCTION(ifx_free_char)
 {
 	zval **pid;
   
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pid) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pid);
 
-	if(php_intifx_free_char(Z_LVAL_PP(pid),&EG(regular_list) TSRMLS_CC) < 0) {
+	if (php_intifx_free_char(Z_LVAL_PP(pid), &EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -3590,7 +3939,7 @@ PHP_FUNCTION(ifx_free_char)
 
 /* ----------------------------------------------------------------------
  * internal function
- * long php_intifx_free_char(long bid, HashTable *list)
+ * long php_intifx_free_char(long bid, HashTable *list TSRMLS_DC)
  *
  * deletes the char-object
  *  bid: Id of Charobject
@@ -3604,13 +3953,13 @@ static long php_intifx_free_char(long bid, HashTable *list TSRMLS_DC)
 	IFX_IDRES *Ifx_char;
 	int type;
 
-	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
+	Ifx_char = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult && !(Ifx_char->type == TYPE_CHAR)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix char-result index", bid);
 		return -1;
 	}
 
-	if(Ifx_char->CHAR.char_data!=NULL) {
+	if (Ifx_char->CHAR.char_data != NULL) {
 		efree(Ifx_char->CHAR.char_data);
 	}
  	zend_list_delete(bid);
@@ -3634,13 +3983,13 @@ PHP_FUNCTION(ifx_update_char)
 {
 	zval **pbid, **pparam;
   
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &pbid,&pparam) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pbid, &pparam) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
 	convert_to_string_ex(pparam);
  
-	if(php_intifx_update_char(Z_LVAL_PP(pbid),Z_STRVAL_PP(pparam),Z_STRLEN_PP(pparam),&EG(regular_list) TSRMLS_CC) < 0) {
+	if (php_intifx_update_char(Z_LVAL_PP(pbid), Z_STRVAL_PP(pparam), Z_STRLEN_PP(pparam), &EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -3664,30 +4013,30 @@ static long php_intifx_update_char(long bid, char* param, long len, HashTable *l
 	IFX_IDRES *Ifx_char;
 	int type;
 
-	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
+	Ifx_char = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult && !(Ifx_char->type == TYPE_CHAR)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix char-result index", bid);
 		return -1;
 	}
 
-	if(Ifx_char->CHAR.char_data!=NULL) {
+	if (Ifx_char->CHAR.char_data != NULL) {
 		efree(Ifx_char->CHAR.char_data);
 	}
-	Ifx_char->CHAR.char_data=NULL;
-	Ifx_char->CHAR.len=0;
+	Ifx_char->CHAR.char_data = NULL;
+	Ifx_char->CHAR.len = 0;
  
-	if(param==NULL || len<0) {
-		Ifx_char->CHAR.char_data=NULL;
-		Ifx_char->CHAR.len=0;
+	if (param == NULL || len < 0) {
+		Ifx_char->CHAR.char_data = NULL;
+		Ifx_char->CHAR.len = 0;
 	} else {
-		Ifx_char->CHAR.char_data=emalloc(len+1);
-		if(Ifx_char->CHAR.char_data==NULL) {
+		Ifx_char->CHAR.char_data = emalloc(len + 1);
+		if (Ifx_char->CHAR.char_data == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create char-resource");
 			return -1;
 		}
-		memcpy(Ifx_char->CHAR.char_data,param,len);
-		Ifx_char->CHAR.char_data[len]=0;
-		Ifx_char->CHAR.len=len;
+		memcpy(Ifx_char->CHAR.char_data, param,len);
+		Ifx_char->CHAR.char_data[len] = 0;
+		Ifx_char->CHAR.len = len;
 	}
 	return 0;
 }
@@ -3709,31 +4058,38 @@ PHP_FUNCTION(ifxus_create_slob)
 {
 	zval **pmode;
 	long id;
-	long mode,create_mode;
+	long mode, create_mode;
   
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &pmode)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pmode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_long_ex(pmode);
-	mode=Z_LVAL_PP(pmode);
+	mode = Z_LVAL_PP(pmode);
  
-	create_mode=0;
-	if((mode&1) !=0)   
-		create_mode|=LO_RDONLY;
-	if((mode&2) !=0)   
-		create_mode|=LO_WRONLY;
-	if((mode&4) !=0)   
-		create_mode|=LO_APPEND;
-	if((mode&8) !=0)   
-		create_mode|=LO_RDWR;
-	if((mode&16) !=0)   
-		create_mode|=LO_BUFFER;
-	if((mode&32) !=0)   
-		create_mode|=LO_NOBUFFER;
-	
+	create_mode = 0;
+	if ((mode & 1) != 0) {
+		create_mode |= LO_RDONLY;
+	}
+	if ((mode & 2) != 0) {
+		create_mode |= LO_WRONLY;
+	}
+	if ((mode & 4) != 0) {
+		create_mode |= LO_APPEND;
+	}
+	if ((mode & 8) != 0) {
+		create_mode |= LO_RDWR;
+	}
+	if ((mode & 16) != 0) {
+		create_mode |= LO_BUFFER;
+	}
+	if ((mode & 32) != 0) {
+		create_mode |= LO_NOBUFFER;
+	}
+
 	id = php_intifxus_create_slob(create_mode, &EG(regular_list) TSRMLS_CC); 
 	
-	if(id < 0) {
+	if (id < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(id);
@@ -3755,25 +4111,25 @@ static long php_intifxus_create_slob(long create_mode, HashTable *list TSRMLS_DC
 	IFX_IDRES *Ifx_slob;
 	int errcode;
 	
-	Ifx_slob=emalloc(sizeof(IFX_IDRES));
-	if(Ifx_slob==NULL) {
+	Ifx_slob = emalloc(sizeof(IFX_IDRES));
+	if (Ifx_slob == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create slob-resource");
 		return -1;
 	}
 
-	errcode=ifx_lo_def_create_spec(&(Ifx_slob->SLOB.createspec));
-	if(errcode<0) {
+	errcode = ifx_lo_def_create_spec(&(Ifx_slob->SLOB.createspec));
+	if (errcode < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create slob-resource: %d", errcode);
 		return -1;
 	}
 
-	Ifx_slob->type=TYPE_SLOB;
-	Ifx_slob->SLOB.lofd=ifx_lo_create(Ifx_slob->SLOB.createspec,create_mode,&(Ifx_slob->SLOB.slob_data),&errcode);
-	if(errcode<0 || Ifx_slob->SLOB.lofd<0) {
+	Ifx_slob->type = TYPE_SLOB;
+	Ifx_slob->SLOB.lofd = ifx_lo_create(Ifx_slob->SLOB.createspec, create_mode, &(Ifx_slob->SLOB.slob_data), &errcode);
+	if (errcode < 0 || Ifx_slob->SLOB.lofd < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create slob-resource: %d", errcode);
 		return -1;
 	}
-	return zend_list_insert(Ifx_slob,le_idresult);
+	return zend_list_insert(Ifx_slob, le_idresult);
 }
 
 /* ----------------------------------------------------------------------
@@ -3791,12 +4147,12 @@ PHP_FUNCTION(ifxus_free_slob)
 {
 	zval **pid;
 
-	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &pid) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pid);
 
-	if(php_intifxus_free_slob(Z_LVAL_PP(pid),&EG(regular_list) TSRMLS_CC) < 0) {
+	if (php_intifxus_free_slob(Z_LVAL_PP(pid), &EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -3819,19 +4175,19 @@ static long php_intifxus_free_slob(long bid, HashTable *list TSRMLS_DC)
 	IFX_IDRES *Ifx_slob;
 	int type;
 	
-	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+	Ifx_slob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult || Ifx_slob->type != TYPE_SLOB) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix slob-result index", bid);
 		return -1;
 	}
 	
-	if(php_intifxus_close_slob(bid, &EG(regular_list) TSRMLS_CC) < 0) {
+	if (php_intifxus_close_slob(bid, &EG(regular_list) TSRMLS_CC) < 0) {
 		return -1;
 	}
 
-	if(Ifx_slob->SLOB.createspec!=NULL) {
+	if (Ifx_slob->SLOB.createspec != NULL) {
 		ifx_lo_spec_free(Ifx_slob->SLOB.createspec);
-		Ifx_slob->SLOB.createspec=NULL;
+		Ifx_slob->SLOB.createspec = NULL;
 	}
 	efree(Ifx_slob);
 	zend_list_delete(bid);
@@ -3853,11 +4209,12 @@ PHP_FUNCTION(ifxus_close_slob)
 {
 	zval **pid;
 	
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &pid) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pid);
-	if(php_intifxus_close_slob(Z_LVAL_PP(pid),&EG(regular_list) TSRMLS_CC) < 0) {
+
+	if (php_intifxus_close_slob(Z_LVAL_PP(pid), &EG(regular_list) TSRMLS_CC) < 0) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -3880,22 +4237,22 @@ static long php_intifxus_close_slob(long bid, HashTable *list TSRMLS_DC)
 	IFX_IDRES *Ifx_slob;
 	int type;
 
-	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+	Ifx_slob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult || Ifx_slob->type != TYPE_SLOB) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix slob-result index", bid);
 		return -1;
 	}
 	
-	if(Ifx_slob->SLOB.lofd<0) {
+	if (Ifx_slob->SLOB.lofd < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Slob-resource already closed");
 		return -1;
 	}
 
-	if(ifx_lo_close(Ifx_slob->SLOB.lofd)<0) {
+	if (ifx_lo_close(Ifx_slob->SLOB.lofd) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't close slob-resource");
 		return -1;
 	}
-	Ifx_slob->SLOB.lofd=-1;
+	Ifx_slob->SLOB.lofd = -1;
 	return 0;
 }
 
@@ -3916,28 +4273,34 @@ PHP_FUNCTION(ifxus_open_slob)
 	zval **pbid, **pmode;
 	long mode,create_mode;
 	  
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(1, &pbid, &pmode) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(1, &pbid, &pmode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pmode);
 	convert_to_long_ex(pbid);
-	mode=Z_LVAL_PP(pmode);
 
-	create_mode=0;
-	if((mode&1) !=0)   
+	mode = Z_LVAL_PP(pmode);
+	create_mode = 0;
+	if ((mode & 1) != 0) {
 		create_mode|=LO_RDONLY;
-	if((mode&2) !=0)   
+	}
+	if ((mode & 2) != 0) {
 		create_mode|=LO_WRONLY;
-	if((mode&4) !=0)   
+	}
+	if ((mode & 4) != 0) {
 		create_mode|=LO_APPEND;
-	if((mode&8) !=0)   
+	}
+	if ((mode & 8) != 0) {
 		create_mode|=LO_RDWR;
-	if((mode&16) !=0)   
+	}
+	if ((mode & 16) != 0) {
 		create_mode|=LO_BUFFER;
-	if((mode&32) !=0)   
+	}
+	if ((mode & 32) != 0) {
 		create_mode|=LO_NOBUFFER;
+	}
 
-	RETURN_LONG(php_intifxus_open_slob(Z_LVAL_PP(pbid),create_mode,&EG(regular_list) TSRMLS_CC));
+	RETURN_LONG(php_intifxus_open_slob(Z_LVAL_PP(pbid), create_mode, &EG(regular_list) TSRMLS_CC));
 }
 /* }}} */
 
@@ -3958,19 +4321,19 @@ static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list T
 	int errcode;
 	int type;
 
-	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+	Ifx_slob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult || Ifx_slob->type != TYPE_SLOB) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix slob-result index", bid);
 		return -1;
 	}
 
-	if(Ifx_slob->SLOB.lofd>0) {
+	if (Ifx_slob->SLOB.lofd > 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Slob-resource already open");
 		return -1;
 	}
 
-	Ifx_slob->SLOB.lofd=ifx_lo_open(&(Ifx_slob->SLOB.slob_data),create_mode,&errcode);
-	if(errcode < 0 || Ifx_slob->SLOB.lofd < 0) {
+	Ifx_slob->SLOB.lofd = ifx_lo_open(&(Ifx_slob->SLOB.slob_data), create_mode, &errcode);
+	if (errcode < 0 || Ifx_slob->SLOB.lofd < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't open slob-resource: %d", errcode);
 		return -1;
 	}
@@ -3990,16 +4353,16 @@ static long php_intifxus_new_slob(HashTable *list TSRMLS_DC)
 {
 	IFX_IDRES *Ifx_slob;
 
-	Ifx_slob=emalloc(sizeof(IFX_IDRES));
-	if(Ifx_slob==NULL) {
+	Ifx_slob = emalloc(sizeof(IFX_IDRES));
+	if (Ifx_slob == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create slob-resource");
 		return -1;
 	}
 	
-	Ifx_slob->type=TYPE_SLOB;
-	Ifx_slob->SLOB.lofd=-1;
-	Ifx_slob->SLOB.createspec=NULL;
-	return zend_list_insert(Ifx_slob,le_idresult);
+	Ifx_slob->type = TYPE_SLOB;
+	Ifx_slob->SLOB.lofd = -1;
+	Ifx_slob->SLOB.createspec = NULL;
+	return zend_list_insert(Ifx_slob, le_idresult);
 }
 
 /* ----------------------------------------------------------------------
@@ -4016,8 +4379,8 @@ static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list TSRMLS_DC)
 	IFX_IDRES *Ifx_slob;
 	int type;
 
-	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult  || Ifx_slob->type!=TYPE_SLOB) {
+	Ifx_slob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult  || Ifx_slob->type != TYPE_SLOB) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix slob-result index", bid);
 		return NULL;
 	}
@@ -4044,24 +4407,24 @@ PHP_FUNCTION(ifxus_tell_slob)
 	int type;
 	long lakt_seek_pos;
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &pbid) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pbid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
-	bid=Z_LVAL_PP(pbid);
+	bid = Z_LVAL_PP(pbid);
 
-	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+	Ifx_slob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult || Ifx_slob->type != TYPE_SLOB) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix slob-result index", bid);
 		RETURN_FALSE;
 	}
 
-	if(ifx_lo_tell(Ifx_slob->SLOB.lofd,&akt_seek_pos)<0) {
+	if (ifx_lo_tell(Ifx_slob->SLOB.lofd, &akt_seek_pos) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't perform tell-operation");
 		RETURN_FALSE;
 	}
 
-	if(ifx_int8tolong(&akt_seek_pos,&lakt_seek_pos)<0) {
+	if (ifx_int8tolong(&akt_seek_pos, &lakt_seek_pos) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Seek-position to large for long");
 		RETURN_FALSE;
 	}
@@ -4087,38 +4450,38 @@ PHP_FUNCTION(ifxus_seek_slob)
 	zval **pbid, **pmode, **poffset;
 	long bid,lakt_seek_pos;
 	IFX_IDRES *Ifx_slob;
-	ifx_int8_t akt_seek_pos,offset;
-	int type,mode;
+	ifx_int8_t akt_seek_pos, offset;
+	int type, mode;
 
-	if (ZEND_NUM_ARGS() !=3 || zend_get_parameters_ex(3, &pbid, &pmode, &poffset) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &pbid, &pmode, &poffset) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
 	convert_to_long_ex(pmode); 
 	convert_to_long_ex(poffset);
  
-	bid=Z_LVAL_PP(pbid);
-	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+	bid = Z_LVAL_PP(pbid);
+	Ifx_slob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult || Ifx_slob->type != TYPE_SLOB) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix slob-result index", bid);
 		RETURN_FALSE;
 	}
 
-	mode=LO_SEEK_SET;
-	if(Z_LVAL_PP(pmode)==1) {
-		mode=LO_SEEK_CUR;
+	mode = LO_SEEK_SET;
+	if (Z_LVAL_PP(pmode) == 1) {
+		mode = LO_SEEK_CUR;
 	}
-	if(Z_LVAL_PP(pmode)==2) {
-		mode=LO_SEEK_END;
+	if (Z_LVAL_PP(pmode) == 2) {
+		mode = LO_SEEK_END;
 	}
 
-	ifx_int8cvlong(Z_LVAL_PP(poffset),&offset);
-	if(ifx_lo_seek(Ifx_slob->SLOB.lofd,&offset,mode,&akt_seek_pos)<0) {
+	ifx_int8cvlong(Z_LVAL_PP(poffset), &offset);
+	if (ifx_lo_seek(Ifx_slob->SLOB.lofd, &offset, mode, &akt_seek_pos) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't perform seek-operation");
 		RETURN_FALSE;
 	}
 
-	if(ifx_int8tolong(&akt_seek_pos,&lakt_seek_pos)<0) {
+	if (ifx_int8tolong(&akt_seek_pos, &lakt_seek_pos) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Seek-position to large for long");
 		RETURN_FALSE;
 	}
@@ -4143,30 +4506,31 @@ PHP_FUNCTION(ifxus_read_slob)
 	zval **pbid, **pnbytes;
 	long bid, nbytes;
 	IFX_IDRES *Ifx_slob;
-	int errcode,type;
+	int errcode, type;
 	char *buffer;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &pbid, &pnbytes) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pbid, &pnbytes) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
 	convert_to_long_ex(pnbytes); 
  
-	bid=Z_LVAL_PP(pbid);
-	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+	bid = Z_LVAL_PP(pbid);
+	Ifx_slob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult || Ifx_slob->type != TYPE_SLOB) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix slob-result index", bid);
 		RETURN_FALSE;
 	}
 
-	nbytes=Z_LVAL_PP(pnbytes);
-	buffer=emalloc(nbytes);
-	if(ifx_lo_read(Ifx_slob->SLOB.lofd,buffer,nbytes,&errcode)<0) {
+	nbytes = Z_LVAL_PP(pnbytes);
+	buffer = emalloc(nbytes);
+
+	if (ifx_lo_read(Ifx_slob->SLOB.lofd, buffer, nbytes, &errcode) < 0) {
 		efree(buffer);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading slob: %d", errcode);
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(buffer,nbytes,0); 
+	RETURN_STRINGL(buffer, nbytes, 0); 
 }
 /* }}} */
 
@@ -4187,31 +4551,31 @@ PHP_FUNCTION(ifxus_write_slob)
 	zval **pbid, **pcontent;
 	long bid, nbytes;
 	IFX_IDRES *Ifx_slob;
-	int errcode,type;
+	int errcode, type;
 	char *buffer;
 
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &pbid, &pcontent) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pbid, &pcontent) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(pbid);
 	convert_to_string_ex(pcontent); 
  
-	bid=Z_LVAL_PP(pbid);
-	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
+	bid = Z_LVAL_PP(pbid);
+	Ifx_slob = (IFX_IDRES *) zend_list_find(bid, &type);
+	if (type != le_idresult || Ifx_slob->type != TYPE_SLOB) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Informix slob-result index", bid);
 		RETURN_FALSE;
 	}
 
-	buffer=Z_STRVAL_PP(pcontent);
-	nbytes=Z_STRLEN_PP(pcontent);
+	buffer = Z_STRVAL_PP(pcontent);
+	nbytes = Z_STRLEN_PP(pcontent);
 
-	if(nbytes<=0) {
+	if (nbytes <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "String has no content");
 		RETURN_FALSE;
 	}
 
-	if((nbytes=ifx_lo_write(Ifx_slob->SLOB.lofd,buffer,nbytes,&errcode))<0) {
+	if ((nbytes = ifx_lo_write(Ifx_slob->SLOB.lofd, buffer, nbytes, &errcode)) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error writing slob: %d", errcode);
 		RETURN_FALSE;
 	}
