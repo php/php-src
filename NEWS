@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.5
+- ext/odbc: IBM DB2 patch by Walter Franzini <walter@sys-net.it>
 - Made ldap_get_entries() return an array even if there are no entries
 - Empty entry. Enjoy
 
