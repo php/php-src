@@ -21,6 +21,9 @@
 //
 // $Id$
 
+/**
+ * @nodep Gtk
+ */
 ini_set('allow_url_fopen', true);
 set_time_limit(0);
 ob_implicit_flush(true);
@@ -36,7 +39,7 @@ PEAR_Command::setFrontendType('CLI');
 $all_commands = PEAR_Command::getCommands();
 
 $argv = Console_Getopt::readPHPArgv();
-$progname = basename(array_shift($argv));
+$progname = basename($argv[0]);
 $options = Console_Getopt::getopt($argv, "c:C:d:D:Gh?sSqu:v");
 if (PEAR::isError($options)) {
     usage($options);
@@ -120,7 +123,7 @@ if ($store_user_config) {
     $config->store('user');
 }
 
-$command = (isset($options[1][0])) ? array_shift($options[1]) : null;
+$command = (isset($options[1][0])) ? $options[1][0] : null;
 
 if (empty($command) && ($store_user_config || $store_system_config)) {
     exit;
