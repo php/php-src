@@ -1102,7 +1102,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	 * the beginning of the name speeds up the check process */
 	name_len = strlen(CG(active_op_array)->function_name);
 	zend_str_tolower_copy(lcname, CG(active_op_array)->function_name, MIN(name_len, sizeof(lcname)-1));
-	lcname[sizeof(lcname)-1] = '\0'; // zend_str_tolower_copy won't necessarily set the zero byte
+	lcname[sizeof(lcname)-1] = '\0'; /* zend_str_tolower_copy won't necessarily set the zero byte */
 
 	if (CG(active_class_entry)) {
 		if (name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)) && CG(active_op_array)->num_args != 0) {
