@@ -106,20 +106,6 @@ ZEND_GET_MODULE(iconv)
 #define iconv libiconv
 #endif
 
-/* {{{ typedef enum php_iconv_err_t */
-typedef enum _php_iconv_err_t {
-	PHP_ICONV_ERR_SUCCESS           = SUCCESS,
-	PHP_ICONV_ERR_CONVERTER         = 1,
-	PHP_ICONV_ERR_WRONG_CHARSET     = 2,
-	PHP_ICONV_ERR_TOO_BIG           = 3,
-	PHP_ICONV_ERR_ILLEGAL_SEQ       = 4,
-	PHP_ICONV_ERR_ILLEGAL_CHAR      = 5,
-	PHP_ICONV_ERR_UNKNOWN           = 6,
-	PHP_ICONV_ERR_MALFORMED         = 7,
-	PHP_ICONV_ERR_ALLOC             = 8
-} php_iconv_err_t;
-/* }}} */
-
 /* {{{ typedef enum php_iconv_enc_scheme_t */
 typedef enum _php_iconv_enc_scheme_t {
 	PHP_ICONV_ENC_SCHEME_BASE64,
@@ -133,8 +119,6 @@ typedef enum _php_iconv_enc_scheme_t {
 /* {{{ prototypes */ 
 static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l, iconv_t cd);
 static php_iconv_err_t _php_iconv_appendc(smart_str *d, const char c, iconv_t cd);
-
-static php_iconv_err_t php_iconv_string(const char * in_p, size_t in_len, char **out, size_t *out_len, const char *out_charset, const char *in_charset);
 
 static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, const char *in_charset TSRMLS_DC);
 
@@ -335,7 +319,7 @@ static php_iconv_err_t _php_iconv_appendc(smart_str *d, const char c, iconv_t cd
 
 /* {{{ php_iconv_string()
  */
-php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
+PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 							char **out, size_t *out_len,
 							const char *out_charset, const char *in_charset)
 {
