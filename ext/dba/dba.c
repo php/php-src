@@ -308,6 +308,7 @@ static void _php3_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->mode = modenr;
 	info->argc = ac - 3;
 	info->argv = args + 3;
+	info->hnd = NULL;
 
 	if(hptr->open(info) != SUCCESS) {
 		dba_close(info);
