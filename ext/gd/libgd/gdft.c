@@ -398,6 +398,11 @@ static void *fontFetch (char **error, void *key)
 			}
 		}
 		for (dir = strtok (path, PATHSEPARATOR); dir; dir = strtok (0, PATHSEPARATOR)) {
+			sprintf(fullname, "%s/%s", dir, name);
+			if (access (fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
 			sprintf(fullname, "%s/%s.ttf", dir, name);
 			if (access (fullname, R_OK) == 0) {
 				font_found++;
