@@ -31,34 +31,18 @@
 
 #include "php.h"
 
-#if PHP_API_VERSION < 19990421 
-  #include "internal_functions.h"
-  #include "php3_list.h"
-  #include "head.h"
-#else
-  #include "zend_globals.h"
-#endif
+#include "zend_globals.h"
 
 #if HAVE_ORACLE
 
-#if PHP_API_VERSION < 19990421 
-  #include "oracle.h"
-  #define HASH_DTOR (void (*)(void *))
-#else
-  #include "php3_oracle.h"
-  #define HASH_DTOR (int (*)(void *))
-#endif
-
-#ifndef ZEND_MODULE_INFO_FUNC_ARGS
-#define ZEND_MODULE_INFO_FUNC_ARGS void
-#endif
+#include "php3_oracle.h"
+#define HASH_DTOR (int (*)(void *))
 
 #ifdef WIN32
 # include "variables.h"
 #else
 # include "build-defs.h"
 #endif
-
 
 #include "snprintf.h"
 
@@ -93,7 +77,7 @@ static int _close_oracur(oraCursor *cur);
 static int _ora_ping(oraConnection *conn);
 int ora_set_param_values(oraCursor *cursor, int isout);
 
-void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent);
+void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 static int le_conn, le_pconn, le_cursor; 
 
@@ -207,6 +191,8 @@ DLEXPORT php3_module_entry *get_module() { return &oracle_module_entry; };
 static int _close_oraconn(oraConnection *conn)
 {
 	ORALS_FETCH();
+
+	printf("_close_oraconn\n");fflush(stdout);
 	
 	conn->open = 0;
 
@@ -223,6 +209,7 @@ static int _close_orapconn(oraConnection *conn)
 {
 	ORALS_FETCH();
   
+	printf("_close_orapconn\n");fflush(stdout);
 	conn->open = 0;
 
 	ologof(&conn->lda);
@@ -416,7 +403,7 @@ static int _ora_ping(oraConnection *conn)
    Open an Oracle connection */
 PHP_FUNCTION(ora_logon)
 {
-	php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	ora_do_logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -424,20 +411,19 @@ PHP_FUNCTION(ora_logon)
    Open a persistant Oracle connection */
 PHP_FUNCTION(ora_plogon)
 {
-	php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	ora_do_logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char    *user = NULL;
-	char    *pwd = NULL;
+	char *user,*passwd;
 	pval *arg1, *arg2;
-	oraConnection *db_conn;
-	list_entry *index_ptr;
 	char *hashed_details;
-	int hashed_len, len, id;
+	int hashed_details_length;
+	oraConnection *db_conn;
 	ORALS_FETCH();
+	PLS_FETCH();
 
 	if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -447,153 +433,153 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	convert_to_string(arg2);
   
 	user = arg1->value.str.val;
-	pwd = arg2->value.str.val;
+	passwd = arg2->value.str.val;
+
+	hashed_details_length = sizeof("oracle__")-1+strlen(user)+strlen(passwd);
+	hashed_details = (char *) emalloc(hashed_details_length+1);
+	sprintf(hashed_details,"oracle_%s_%s",user,passwd);
 
 	if (!ORA(allow_persistent)) {
-		persistent = 0;
+		persistent=0;
 	}
-  
-	if (ORA(max_links) != -1 &&
-		ORA(num_links) >=
-		ORA(max_links)) {
-		php_error(E_WARNING, "Oracle: Too many open links (%d)",
-				   ORA(num_links));
-		RETURN_FALSE;
-	}
-
-	/* the user requested a persistent connection */
-	if (persistent && 
-		ORA(max_persistent) != -1 &&
-		ORA(num_persistent) >=
-		ORA(max_persistent)) {
-		php_error(E_WARNING,"Oracle: Too many open persistent links (%d)",
-				   ORA(num_persistent));
-		RETURN_FALSE;
-	}
-	
-	len = strlen(user) + strlen(pwd) + 9; 
-	hashed_details = emalloc(len);
-
-	if (hashed_details == NULL) {
-		php_error(E_WARNING, "Out of memory");
-		RETURN_FALSE;
-	}
-
-	hashed_len = php_sprintf(hashed_details, "ora_%s_%s", user, pwd);
-
-	/* try to find if we already have this link in our persistent list,
-	 * no matter if it is to be persistent or not
-	 */
-
-	if (zend_hash_find(plist, hashed_details, hashed_len + 1,
-				  (void **) &index_ptr) == FAILURE) {
-		/* the link is not in the persistent list */
-		list_entry new_index_ptr;
-
-		if (persistent)
+	if (persistent) {
+		list_entry *le;
+		
+		/* try to find if we already have this link in our persistent list */
+		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+			list_entry new_le;
+			
+			if (ORA(max_links)!=-1 && ORA(num_links)>=ORA(max_links)) {
+				php_error(E_WARNING,"Oracle:  Too many open links (%d)",ORA(num_links));
+				efree(hashed_details);
+				RETURN_FALSE;
+			}
+			if (ORA(max_persistent)!=-1 && ORA(num_persistent)>=ORA(max_persistent)) {
+				php_error(E_WARNING,"MySQL:  Too many open persistent links (%d)",ORA(num_persistent));
+				efree(hashed_details);
+				RETURN_FALSE;
+			}
+			/* create the link */
 			db_conn = (oraConnection *)malloc(sizeof(oraConnection));
-		else
-			db_conn = (oraConnection *)emalloc(sizeof(oraConnection));
-		
-		if (db_conn == NULL){
-			efree(hashed_details);
-			php_error(E_WARNING, "Out of memory");
-			RETURN_FALSE;
-		}
-		
-		memset((void *) db_conn,0,sizeof(oraConnection));	
+			memset((void *) db_conn,0,sizeof(oraConnection));	
 
+			if (
 #if HAS_OLOG
-		if (olog(&db_conn->lda, db_conn->hda, user,
-				 strlen(user), pwd, strlen(pwd), 0, -1, OCI_LM_DEF)) {
+				olog(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0, -1, OCI_LM_DEF)
 #else
-		if (orlon(&db_conn->lda, db_conn->hda, user,
-				 strlen(user), pwd, strlen(pwd), 0)) {
+				orlon(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0)
 #endif
-			php_error(E_WARNING, "Unable to connect to ORACLE (%s)",
-					   ora_error(&db_conn->lda));
-			if (persistent)
-				free(db_conn);
-			else
-				efree(db_conn);
-			efree(hashed_details);
-			RETURN_FALSE;
-		}
-		
-		db_conn->open = 1;
-		if (persistent){
-			/*new_le.type = le_pconn;
-			  new_le.ptr = db_conn;*/
-			RETVAL_RESOURCE(php3_plist_insert(db_conn, le_pconn));
-			new_index_ptr.ptr = (void *) return_value->value.lval;
-#ifdef THREAD_SAFE
-			new_index_ptr.type = _php3_le_index_ptr();
-#else
-			new_index_ptr.type = le_index_ptr;
-#endif
-			if (zend_hash_update(plist,hashed_details,hashed_len + 1,(void *) &new_index_ptr,
-							sizeof(list_entry),NULL) == FAILURE) {
-				ologof(&db_conn->lda);
+				) {
+				php_error(E_WARNING, "Unable to connect to ORACLE (%s)",ora_error(&db_conn->lda));
+				
+				if (persistent) {
+					free(db_conn);
+				} else {
+					efree(db_conn);
+				}
+				
+				efree(hashed_details);
+				RETURN_FALSE;
+			}
+
+			/* hash it up */
+			new_le.type = le_pconn;
+			new_le.ptr = db_conn;
+			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				free(db_conn);
 				efree(hashed_details);
-				php_error(E_WARNING, "Can't update hashed details list");
 				RETURN_FALSE;
 			}
 			ORA(num_persistent)++;
-		} else {
-			/* non persistent, simply add to list */
-			RETVAL_RESOURCE(php3_list_insert(db_conn, le_conn));
-		}
-		
-		ORA(num_links)++;
-		
-	} else {
-		int type;
-    
-		/* the link is already in the persistent list */
-#ifdef THREAD_SAFE
-		if (index_ptr->type != _php3_le_index_ptr()) {
-#else
-		if (index_ptr->type != le_index_ptr) {
-#endif
-			efree(hashed_details);
-			php_error(E_WARNING, "Oops, something went completly wrong");
-			RETURN_FALSE;
-		}
-		id = (int) index_ptr->ptr;
-		db_conn = (oraConnection *)php3_plist_find(id, &type);
-    
-		if (db_conn && (type ==  le_conn ||
-					type == le_pconn)){
-			if(!_ora_ping(db_conn)) {
-				/* XXX Reinitialize lda, hda ? */
+			ORA(num_links)++;
+			zend_hash_add(ORA(conns),(void*)&db_conn,sizeof(void*),(void*)&db_conn,sizeof(void*),NULL);
+		} else {  /* we do */
+			if (le->type != le_pconn) {
+				RETURN_FALSE;
+			}
+
+			db_conn = (oraConnection *) le->ptr;
+
+			/* ensure that the link did not die */
+
+			if (!_ora_ping(db_conn)) {
+				if (
 #if HAS_OLOG
-				if(olog(&db_conn->lda, db_conn->hda, user,
-						 strlen(user), pwd, strlen(pwd), 0, -1, OCI_LM_DEF)) {
+					olog(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0, -1, OCI_LM_DEF)
 #else
-				if(orlon(&db_conn->lda, db_conn->hda, user,
-						 strlen(user), pwd, strlen(pwd), 0)) {
+					orlon(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0)
 #endif
-					php_error(E_WARNING, "Unable to reconnect to ORACLE (%s)",
-							   ora_error(&db_conn->lda));
-					/* Delete list entry for this connection */
-					php3_plist_delete(id);
-					/* Delete hashed list entry for this dead connection */
-					zend_hash_del(plist, hashed_details, hashed_len); 
+					) {
+					php_error(E_WARNING, "Oracle: Link to server lost, unable to reconnect",ora_error(&db_conn->lda));
+					zend_hash_del(plist, hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
 			}
-			RETVAL_RESOURCE(id);
 		}
-	}
+		ZEND_REGISTER_RESOURCE(return_value, db_conn, le_pconn);
+	} else { /* non persistent */
+		list_entry *index_ptr,new_index_ptr;
 		
-	zend_hash_add(ORA(conns),
-				   (void*)&db_conn,
-				   sizeof(void*),
-				   (void*)&db_conn,
-				   sizeof(void*),
-				   NULL);
+		/* first we check the hash for the hashed_details key.  if it exists,
+		 * it should point us to the right offset where the actual mysql link sits.
+		 * if it doesn't, open a new mysql link, add it to the resource list,
+		 * and add a pointer to it with hashed_details as the key.
+		 */
+		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+			int type,link;
+			void *ptr;
+
+			if (index_ptr->type != le_index_ptr) {
+				RETURN_FALSE;
+			}
+			link = (int) index_ptr->ptr;
+			ptr = zend_list_find(link,&type);   /* check if the link is still there */
+			if (ptr && (type==le_conn || type==le_pconn)) {
+				zend_list_addref(link);
+				return_value->value.lval = link;
+				return_value->type = IS_RESOURCE;
+				efree(hashed_details);
+				return;
+			} else {
+				zend_hash_del(list,hashed_details,hashed_details_length+1);
+			}
+		}
+		if (ORA(max_links)!=-1 && ORA(num_links)>=ORA(max_links)) {
+			php_error(E_WARNING,"Oracle:  Too many open links (%d)",ORA(num_links));
+			efree(hashed_details);
+			RETURN_FALSE;
+		}
+
+		db_conn = (oraConnection *) emalloc(sizeof(oraConnection));
+		memset((void *) db_conn,0,sizeof(oraConnection));	
+
+		if (
+#if HAS_OLOG
+			olog(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0, -1, OCI_LM_DEF)
+#else
+			orlon(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0)
+#endif
+			) {
+			php_error(E_WARNING,"Oracle: Connection Failed: %s\n",ora_error(&db_conn->lda));
+			efree(hashed_details);
+			efree(db_conn);
+			RETURN_FALSE;
+		}
+
+		/* add it to the list */
+		ZEND_REGISTER_RESOURCE(return_value, db_conn, le_conn);
+
+		/* add it to the hash */
+		new_index_ptr.ptr = (void *) return_value->value.lval;
+		new_index_ptr.type = le_index_ptr;
+		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+			efree(hashed_details);
+			RETURN_FALSE;
+		}
+		zend_hash_add(ORA(conns),(void*)&db_conn,sizeof(void*),(void*)&db_conn,sizeof(void*),NULL);
+		ORA(num_links)++;
+	}
 
 	efree(hashed_details);
 }
@@ -602,7 +588,6 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
    Close an Oracle connection */
 PHP_FUNCTION(ora_logoff)
 {								/* conn_index */
-	int type, ind;
 	oraConnection *conn;
 	pval *arg;
 	ORALS_FETCH();
@@ -611,15 +596,10 @@ PHP_FUNCTION(ora_logoff)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg);
-	ind = (int)arg->value.lval;
+	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
+	ZEND_VERIFY_RESOURCE(conn);
 
-	conn = (oraConnection *)php3_list_find(ind, &type);
-	if (!conn || (type != le_conn &&
-				  type != le_pconn)) {
-		return;
-	}
-	php3_list_delete(ind);
+	php3_list_delete(arg->value.lval);
 }
 /* }}} */
 
@@ -630,7 +610,6 @@ PHP_FUNCTION(ora_open)
 	pval *arg;
 	oraConnection *conn = NULL;
 	oraCursor *cursor = NULL;
-	int conn_ind;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -652,9 +631,8 @@ PHP_FUNCTION(ora_open)
 	}
 	cursor->open = 1;
 	cursor->conn_ptr = conn;	
-	cursor->conn_id = conn_ind;	
-
 	ZEND_REGISTER_RESOURCE(return_value, cursor, le_cursor);
+	cursor->conn_id = return_value->value.lval;
 }
 /* }}} */
 
@@ -1173,16 +1151,14 @@ PHP_FUNCTION(ora_fetch_into)
 	}
 	cursor->fetched++;
 
-#if PHP_API_VERSION < 19990421
-	tmp = emalloc(sizeof(pval));
-#endif
-
 	for (i = 0; i < cursor->ncols; i++) {
        
 		if (cursor->columns[i].col_retcode == 1405) {
 			if (!(flags&ORA_FETCHINTO_NULLS)){
 				continue; /* don't add anything for NULL columns, unless the calles wants it */
 			} else {
+				MAKE_STD_ZVAL(tmp);
+				
 				tmp->value.str.val = empty_string;
 				tmp->value.str.len = 0;
 			}
@@ -1196,9 +1172,7 @@ PHP_FUNCTION(ora_fetch_into)
 			/* return what we did get, in that case */
 			RETURN_FALSE;
 		} else {
-#if PHP_API_VERSION >= 19990421
 			MAKE_STD_ZVAL(tmp);
-#endif
 
 			tmp->type = IS_STRING;
 			tmp->value.str.len = 0;
@@ -1254,24 +1228,12 @@ PHP_FUNCTION(ora_fetch_into)
 		}
 
 		if (flags&ORA_FETCHINTO_ASSOC){
-#if PHP_API_VERSION >= 19990421
 			zend_hash_update(arr->value.ht, cursor->columns[i].cbuf, cursor->columns[i].cbufl+1, (void *) &tmp, sizeof(pval*), NULL);
-#else
-			zend_hash_update(arr->value.ht, cursor->columns[i].cbuf, cursor->columns[i].cbufl+1, (void *) tmp, sizeof(pval), NULL);
-#endif
 		} else {
-#if PHP_API_VERSION >= 19990421
 			zend_hash_index_update(arr->value.ht, i, (void *) &tmp, sizeof(pval*), NULL);
-#else
-			zend_hash_index_update(arr->value.ht, i, (void *) tmp, sizeof(pval), NULL);
-#endif
 		}
 
 	}
-
-#if PHP_API_VERSION < 19990421
-	efree(tmp); 
-#endif
 
 	RETURN_LONG(cursor->ncols); 
 }
@@ -1393,8 +1355,6 @@ PHP_FUNCTION(ora_columnsize)
 	if (ARG_COUNT(ht) != 2 || getParametersArray(ht, 2, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(argv[0]);
-
 	/* Find the cursor */
 	if ((cursor = ora_get_cursor(list, argv[0])) == NULL) {
 		RETURN_FALSE;
@@ -1496,54 +1456,44 @@ PHP_FUNCTION(ora_getcolumn)
 				RETURN_STRINGL(column->buf, min(column->col_retlen, column->dsize), 1);
 			case SQLT_LNG:
 			case SQLT_LBI:
-#if 0
-                {
-                ub4 ret_len;
-                /* XXX 64k max for LONG and LONG RAW */
-                oflng(&cursor->cda, (sword)(colno + 1), column->buf, DB_SIZE, 1,
-                      &ret_len, 0);
-                RETURN_STRINGL(column->buf, ret_len, 1);
-                } 
-#else
-					{ 
-						ub4 ret_len;
-						int offset = column->col_retlen;
-						sb2 result;
-						
-						if (column->col_retcode == 1406) { /* truncation -> get the rest! */
-							while (1) {
-								column->buf = erealloc(column->buf,offset + DB_SIZE + 1);
-								
-								if (! column->buf) {
-									offset = 0;
-									break;
-								}
-								
-								result = oflng(&cursor->cda, 
-											   (sword)(colno + 1),
-											   column->buf + offset, 
-											   DB_SIZE, 
-											   1,
-											   &ret_len, 
-											   offset);
-								if (result) {
-									break;
-								}
-								
-								if (ret_len <= 0) {
-									break;
-								}
-								
-								offset += ret_len;
+				{ 
+					ub4 ret_len;
+					int offset = column->col_retlen;
+					sb2 result;
+					
+					if (column->col_retcode == 1406) { /* truncation -> get the rest! */
+						while (1) {
+							column->buf = erealloc(column->buf,offset + DB_SIZE + 1);
+							
+							if (! column->buf) {
+								offset = 0;
+								break;
 							}
-						}
-						if (column->buf && offset) {
-							RETURN_STRINGL(column->buf, offset, 1);
-						} else {
-							RETURN_FALSE;
+							
+							result = oflng(&cursor->cda, 
+										   (sword)(colno + 1),
+										   column->buf + offset, 
+										   DB_SIZE, 
+										   1,
+										   &ret_len, 
+										   offset);
+							if (result) {
+								break;
+							}
+							
+							if (ret_len <= 0) {
+								break;
+							}
+							
+							offset += ret_len;
 						}
 					}
-#endif
+					if (column->buf && offset) {
+						RETURN_STRINGL(column->buf, offset, 1);
+					} else {
+						RETURN_FALSE;
+					}
+				}
 			default:
 				php_error(E_WARNING,
 						   "Ora_GetColumn found invalid type (%d)", type);
@@ -1768,16 +1718,8 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 {
 	char *paramname;
 	oraParam *param;
-#if PHP_API_VERSION < 19990421
-	pval *pdata;
-#else
 	pval **pdata;
-#endif
 	int i, len, plen;
-#if (WIN32|WINNT)
-	/* see variables.c */
-	HashTable *symbol_table=php3i_get_symbol_table();
-#endif
 
 	ELS_FETCH();
 
@@ -1801,64 +1743,29 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 		}
 
 		if(isout){
-#if (WIN32|WINNT)
-			/* see oracle_hack.c */
-			{ 
-				pval var; 
-				char *name=(paramname); 
-				var.value.str.val = estrdup(param->progv);
-				var.value.str.len = strlen(param->progv);
-				var.type = IS_STRING; 
-				zend_hash_update(symbol_table, name, strlen(name)+1, &var, sizeof(pval),NULL); 
-			} 
-#else
 			SET_VAR_STRINGL(paramname, estrdup(param->progv), strlen(param->progv));
-#endif
 			efree(paramname);
 			continue;
 		}
 		
 		/* doing the in-loop */
 
-		/* FIXME Globals don't work in extensions on windows, have to do something
-			else here.  See oracle_hack.c */
-#if (WIN32|WINNT)
-		if(zend_hash_find(symbol_table, paramname, strlen(paramname) + 1, (void **)&pdata) == FAILURE){
+		if (zend_hash_find(&EG(symbol_table), paramname, strlen(paramname) + 1, (void **)&pdata) == FAILURE){
 			php_error(E_WARNING, "Can't find variable for parameter");
 			efree(paramname);
 			return 0;
 		}
-#else
 
-#if PHP_API_VERSION < 19990421 
-		if(zend_hash_find(&GLOBAL(symbol_table), paramname, strlen(paramname) + 1, (void **)&pdata) == FAILURE){
-#else
-		if(zend_hash_find(&EG(symbol_table), paramname, strlen(paramname) + 1, (void **)&pdata) == FAILURE){
-#endif
-			php_error(E_WARNING, "Can't find variable for parameter");
-			efree(paramname);
-			return 0;
-		}
-#endif
-
-#if PHP_API_VERSION < 19990421 
-  		convert_to_string(pdata);
-		plen = pdata->value.str.len;
-#else
 		convert_to_string(*pdata);
 		plen = (*pdata)->value.str.len;
-#endif
+
  		if (param->progvl <= plen){
   			php_error(E_NOTICE, "Input value will be truncated");
   		}
 
 		len = min(param->progvl - 1, plen);
 
-#if PHP_API_VERSION < 19990421 
-		strncpy(param->progv, pdata->value.str.val, len);
-#else
 		strncpy(param->progv, (*pdata)->value.str.val, len);
-#endif
 		param->progv[len] = '\0';
 
 		efree(paramname);
