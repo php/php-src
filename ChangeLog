@@ -1,3 +1,74 @@
+2000-12-14  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen-wrappers.c: - This is the correct way of doing it
+
+2000-12-14  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/apache/php_apache.c: added missing SLS_FETCH()
+
+2000-12-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in: New m4 macros should go into acinclude.m4.
+
+2000-12-14  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/levenshtein.c:
+    enforce lenght limit and catch out-ouf-memory conditions
+
+2000-12-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ltconfig:
+    Fix OpenBSD behaviour WRT building shared libraries. Also add OpenBSD 2.8
+    support.
+
+2000-12-14  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/levenshtein.c
+      ext/standard/tests/general_functions/003.phpt: revert my last patch
+
+2000-12-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/string.c: MFH strtr fix
+
+    * ext/standard/string.c:
+    Don't define LC_MESSAGES, if LC_MESSAGES is not defined.
+
+    PR: #8259
+
+2000-12-14  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/tests/general_functions/003.phpt
+      ext/standard/levenshtein.c: levenshtein() fixes and regression test
+
+    * ext/standard/file.c
+      ext/standard/tests/general_functions/004.data
+      ext/standard/tests/general_functions/004.phpt:
+    fgetcsv() will now work correct with empty fields in tab delimited files
+
+2000-12-14  Daniel Beulshausen  <daniel@php4win.de>
+
+    * main/config.w32.h: added define for force cgi redirect
+
+2000-12-14  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/fribidi/README: Fix shared description
+
+    * ext/fribidi/fribidi.c: Add proto
+
+2000-12-14  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c:
+    - handled possible case that an Anchor has no Position
+      (This used to cause a segm fault)
+
+2000-12-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in
+      main/php_version.h: Preparing RC6
+
+    * ext/pgsql/pgsql.c: MFH fix for #8225
+
 2000-12-13  Zeev Suraski  <zeev@zend.com>
 
     * ext/standard/exec.c: Rollback bogus patch
