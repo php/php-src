@@ -43,7 +43,7 @@ class PEAR_Packager extends PEAR_Common
 
     function PEAR_Packager()
     {
-        $this->PEAR();
+        $this->PEAR_Common();
     }
 
     // }}}
