@@ -83,6 +83,17 @@ php_ps_globals ps_globals;
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
+static int session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen, zend_bool do_flush TSRMLS_DC)
+{
+	if (PS(define_sid) && (PS(session_status) == php_session_active)) {
+		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen, do_flush TSRMLS_CC);
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
+
 static void php_session_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
 {
 	zend_bool do_flush;
@@ -90,7 +101,9 @@ static void php_session_output_handler(char *output, uint output_len, char **han
 	if (mode&PHP_OUTPUT_HANDLER_END) {
 		do_flush=1;
 	}
-	session_adapt_uris(output, output_len, handled_output, handled_output_len, do_flush TSRMLS_CC);
+	if (session_adapt_uris(output, output_len, handled_output, handled_output_len, do_flush TSRMLS_CC)==FAILURE) {
+		*handled_output = NULL;
+	}
 }
 
 
@@ -1307,13 +1320,6 @@ PHP_FUNCTION(session_destroy)
 	}
 }
 /* }}} */
-
-void session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen, zend_bool do_flush TSRMLS_DC)
-{
-	if (PS(define_sid) && (PS(session_status) == php_session_active)) {
-		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen, do_flush TSRMLS_CC);
-	}
-}
 
 void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC)
 {
