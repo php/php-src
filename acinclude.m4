@@ -1408,9 +1408,44 @@ AC_DEFUN(PHP_FOPENCOOKIE,[
                      [ have_cookie_io_functions_t=yes ],
 										 [] )
 
-		  if test "$have_cookie_io_functions_t" = "yes" ; then
+      if test "$have_cookie_io_functions_t" = "yes" ; then
         cookie_io_functions_t=cookie_io_functions_t
-	      have_fopen_cookie=yes
+        have_fopen_cookie=yes
+
+		dnl even newer glibcs have a different seeker definition...
+
+		AC_TRY_RUN([
+#define _GNU_SOURCE
+#include <stdio.h>
+
+struct cookiedata {
+	fpos_t pos;
+};
+
+size_t reader(void *cookie, char *buffer, size_t size)
+{ return size; }
+size_t writer(void *cookie, const char *buffer, size_t size)
+{ return size; }
+int closer(void *cookie)
+{ return 0; }
+int seeker(void *cookie, fpos_t *position, int whence)
+{ ((struct cookiedata*)cookie)->pos = *position; return 0; }
+
+cookie_io_functions_t funcs = {reader, writer, seeker, closer};
+
+main() {
+  struct cookiedata g = { 0 };
+  FILE *fp = fopencookie(&g, "r", funcs);
+
+  if (fp && fseek(fp, 69, SEEK_SET) == 0 && g.pos == 69)
+	  exit(0);
+  exit(1);
+}
+
+					   ],
+					   [ cookie_io_functions_use_fpos_t=yes ],
+					   [ ] )
+		
       else
   	    dnl older glibc versions (up to 2.1.2 ?)
         dnl call it _IO_cookie_io_functions_t
@@ -1421,14 +1456,17 @@ AC_DEFUN(PHP_FOPENCOOKIE,[
                      [ have_IO_cookie_io_functions_t=yes ],
 										 [] )
 		    if test "$have_cookie_io_functions_t" = "yes" ; then
-          cookie_io_functions_t=_IO_cookie_io_functions_t
-	        have_fopen_cookie=yes
+              cookie_io_functions_t=_IO_cookie_io_functions_t
+              have_fopen_cookie=yes
 		    fi
-			fi
+      fi
 
-		  if test "$have_fopen_cookie" = "yes" ; then
-		    AC_DEFINE(HAVE_FOPENCOOKIE, 1, [ ])
-			  AC_DEFINE_UNQUOTED(COOKIE_IO_FUNCTIONS_T, $cookie_io_functions_t, [ ])
+      if test "$have_fopen_cookie" = "yes" ; then
+        AC_DEFINE(HAVE_FOPENCOOKIE, 1, [ ])
+        AC_DEFINE_UNQUOTED(COOKIE_IO_FUNCTIONS_T, $cookie_io_functions_t, [ ])
+		if test "$cookie_io_functions_use_fpos_t" = "yes" ; then
+          AC_DEFINE(COOKIE_SEEKER_USES_FPOS_T, 1, [ ])
+		fi
       fi      
 
   	fi
