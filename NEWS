@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added ob_flush and ob_clean functions, which flush and clean an
+  output buffer without destroying the buffer. (Derick)
 - Added a parameter to mysql_connect to force a new database link to be
   created. (Markus, Derick)
 - Added ldap_sort() function. (Stig Venaas)
