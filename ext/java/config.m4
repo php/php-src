@@ -49,6 +49,13 @@ AC_ARG_WITH(java,
       fi
     fi
 
+    # substitute zip for systems which don't have jar in the PATH
+    if JAVA_JAR=`which jar 2>/dev/null`; then
+      JAVA_JAR="$JAVA_JAR cf"
+    else
+      JAVA_JAR='zip -q0'
+    fi
+
     AC_DEFINE(HAVE_JAVA,1,[ ])
     PHP_EXTENSION(java, shared)
     PHP_BUILD_SHARED
@@ -64,5 +71,5 @@ PHP_SUBST(JAVA_CFLAGS)
 PHP_SUBST(JAVA_CLASSPATH)
 PHP_SUBST(JAVA_INCLUDE)
 PHP_SUBST(JAVA_SHARED)
-PHP_SUBST(JAVA_LFLAGS)
+PHP_SUBST(JAVA_JAR)
 
