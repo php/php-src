@@ -1396,10 +1396,6 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
-
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	if (result->fetch_abs) {
 		if (rownum > 0)
