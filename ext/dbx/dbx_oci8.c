@@ -24,7 +24,6 @@
 
 #include "dbx.h"
 #include "dbx_oci8.h"
-#include "ext/standard/php_string.h" /* for auto-change column names to lowercase*/
 
 #define OCI_ASSOC        1<<0
 #define OCI_NUM          1<<1
@@ -179,7 +178,6 @@ int dbx_oci8_getcolumnname(zval **rv, zval **result_handle, long column_index, I
 		return 0;
 	}
 	FREE_ZVAL(zval_column_index);
-	php_strtolower(Z_STRVAL_P(returned_zval), Z_STRLEN_P(returned_zval));
 	MOVE_RETURNED_TO_RV(rv, returned_zval);
 	return 1;
 }

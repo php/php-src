@@ -56,6 +56,15 @@ else {
                 }
             }
         }
+    // colnames_case flags
+    if ($dro=dbx_query($dlo, $sql_statement, DBX_COLNAMES_LOWERCASE)) {
+        print('column name lowercased: ');
+        print($dro->info["name"][0].".".$dro->data[0]['id'].".".$dro->data[0]['description']."\n");
+        }
+    if ($dro=dbx_query($dlo, $sql_statement, DBX_COLNAMES_UPPERCASE)) {
+        print('column name uppercased: ');
+        print($dro->info["name"][0].".".$dro->data[0]['ID'].".".$dro->data[0]['DESCRIPTION']."\n");
+        }
 
     // generate errors
     if (!@dbx_query(0, $sql_statement)) {
@@ -87,6 +96,8 @@ insert-query: dbx_query works ok
 update-query: dbx_query works ok
 999999.temporary_record.11
 delete-query: dbx_query works ok
+column name lowercased: id.1.root
+column name uppercased: ID.1.root
 wrong dbx_link_object: query failure works ok
 wrong sql-statement: query failure works ok
 too many parameters: query failure works ok
