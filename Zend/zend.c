@@ -697,6 +697,9 @@ void zend_shutdown(TSRMLS_D)
 	zend_shutdown_constants(TSRMLS_C);
 #ifdef ZTS
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
+	free(GLOBAL_FUNCTION_TABLE);
+	free(GLOBAL_CLASS_TABLE);
+	free(GLOBAL_CONSTANTS_TABLE);
 #endif
 }
 
