@@ -1714,7 +1714,26 @@ static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char
 		add_property_string(obj, "faultstring", fault_string, 1);
 	}
 	if (fault_code != NULL) {
-		add_property_string(obj, "faultcode", fault_code, 1);
+		int soap_version = SOAP_GLOBAL(soap_version);
+		smart_str code = {0};
+		if (soap_version == SOAP_1_1) {
+			smart_str_appendl(&code, SOAP_1_1_ENV_NS_PREFIX, sizeof(SOAP_1_1_ENV_NS_PREFIX)-1);
+			smart_str_appendc(&code, ':');
+			smart_str_appends(&code,fault_code);
+		} else if (soap_version == SOAP_1_2) {
+			smart_str_appendl(&code, SOAP_1_2_ENV_NS_PREFIX, sizeof(SOAP_1_2_ENV_NS_PREFIX)-1);
+			smart_str_appendc(&code, ':');
+			if (strcmp(fault_code,"Client") == 0) {
+				smart_str_appendl(&code,"Sencer",sizeof("Sender")-1);
+			} else if (strcmp(fault_code,"Server") == 0) {
+				smart_str_appendl(&code,"Receiver",sizeof("Receiver")-1);
+			} else {
+				smart_str_appends(&code,fault_code);
+			}
+		}
+		smart_str_0(&code);
+		add_property_string(obj, "faultcode", code.c, 1);
+		smart_str_free(&code);
 	}
 	if (fault_actor != NULL) {
 		add_property_string(obj, "faultactor", fault_actor, 1);
