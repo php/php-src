@@ -235,6 +235,12 @@ static int com_property_exists(zval *object, zval *member, int check_empty TSRML
 	return 0;
 }
 
+static int com_dimension_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Operation not yet supported on a COM object");
+	return 0;
+}
+
 static void com_property_delete(zval *object, zval *member TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a COM object");
@@ -511,6 +517,7 @@ zend_object_handlers php_com_object_handlers = {
 	com_object_set,
 	com_property_exists,
 	com_property_delete,
+	com_dimension_exists,
 	com_dimension_delete,
 	com_properties_get,
 	com_method_get,
