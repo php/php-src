@@ -59,7 +59,9 @@ int sqlitepager_unref(void*);
 Pgno sqlitepager_pagenumber(void*);
 int sqlitepager_write(void*);
 int sqlitepager_iswriteable(void*);
+int sqlitepager_overwrite(Pager *pPager, Pgno pgno, void*);
 int sqlitepager_pagecount(Pager*);
+int sqlitepager_truncate(Pager*,Pgno);
 int sqlitepager_begin(void*);
 int sqlitepager_commit(Pager*);
 int sqlitepager_rollback(Pager*);
@@ -71,6 +73,8 @@ void sqlitepager_dont_rollback(void*);
 void sqlitepager_dont_write(Pager*, Pgno);
 int *sqlitepager_stats(Pager*);
 void sqlitepager_set_safety_level(Pager*,int);
+const char *sqlitepager_filename(Pager*);
+int sqlitepager_rename(Pager*, const char *zNewName);
 
 #ifdef SQLITE_TEST
 void sqlitepager_refdump(Pager*);

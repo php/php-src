@@ -20,6 +20,86 @@
 #include <string.h>
 
 /*
+** How This Encoder Works
+**
+** The output is allowed to contain any character except 0x27 (') and
+** 0x00.  This is accomplished by using an escape character to encode
+** 0x27 and 0x00 as a two-byte sequence.  The escape character is always
+** 0x01.  An 0x00 is encoded as the two byte sequence 0x01 0x01.  The
+** 0x27 character is encoded as the two byte sequence 0x01 0x03.  Finally,
+** the escape character itself is encoded as the two-character sequence
+** 0x01 0x02.
+**
+** To summarize, the encoder works by using an escape sequences as follows:
+**
+**       0x00  ->  0x01 0x01
+**       0x01  ->  0x01 0x02
+**       0x27  ->  0x01 0x03
+**
+** If that were all the encoder did, it would work, but in certain cases
+** it could double the size of the encoded string.  For example, to
+** encode a string of 100 0x27 character would require 100 instances of
+** the 0x01 0x03 escape sequence resulting in a 200-character output.
+** We would prefer to keep the size of the encoded string smaller than
+** this.
+**
+** To minimize the encoding size, we first add a fixed offset value to each 
+** byte in the sequence.  The addition is module 256.  (That is to say, if
+** the sum of the original character value and the offset exceeds 256, then
+** the higher order bits are truncated.)  The offset is chosen to minimize
+** the number of characters in the string that need to be escaped.  For
+** example, in the case above where the string was composed of 100 0x27
+** characters, the offset might be 0x01.  Each of the 0x27 characters would
+** then be converted into an 0x28 character which would not need to be
+** escaped at all and so the 100 character input string would be converted
+** into just 100 characters of output.  Actually 101 characters of output - 
+** we have to record the offset used as the first byte in the sequence so
+** that the string can be decoded.  Since the offset value is stored as
+** part of the output string and the output string is not allowed to contain
+** characters 0x00 or 0x27, the offset cannot be 0x00 or 0x27.
+**
+** Here, then, are the encoding steps:
+**
+**     (1)   Choose an offset value and make it the first character of
+**           output.
+**
+**     (2)   Copy each input character into the output buffer, one by
+**           one, adding the offset value as you copy.
+**
+**     (3)   If the value of an input character plus offset is 0x00, replace
+**           that one character by the two-character sequence 0x01 0x01.
+**           If the sum is 0x01, replace it with 0x01 0x02.  If the sum
+**           is 0x27, replace it with 0x01 0x03.
+**
+**     (4)   Put a 0x00 terminator at the end of the output.
+**
+** Decoding is obvious:
+**
+**     (5)   Copy encoded characters except the first into the decode 
+**           buffer.  Set the first encoded character aside for use as
+**           the offset in step 7 below.
+**
+**     (6)   Convert each 0x01 0x01 sequence into a single character 0x00.
+**           Convert 0x01 0x02 into 0x01.  Convert 0x01 0x03 into 0x27.
+**
+**     (7)   Subtract the offset value that was the first character of
+**           the encoded buffer from all characters in the output buffer.
+**
+** The only tricky part is step (1) - how to compute an offset value to
+** minimize the size of the output buffer.  This is accomplished to testing
+** all offset values and picking the one that results in the fewest number
+** of escapes.  To do that, we first scan the entire input and count the
+** number of occurances of each character value in the input.  Suppose
+** the number of 0x00 characters is N(0), the number of occurances of 0x01
+** is N(1), and so forth up to the number of occurances of 0xff is N(256).
+** An offset of 0 is not allowed so we don't have to test it.  The number
+** of escapes required for an offset of 1 is N(1)+N(2)+N(40).  The number
+** of escapes required for an offset of 2 is N(2)+N(3)+N(41).  And so forth.
+** In this way we find the offset that gives the minimum number of escapes,
+** and thus minimizes the length of the output string.
+*/
+
+/*
 ** Encode a binary buffer "in" of size n bytes so that it contains
 ** no instances of characters '\'' or '\000'.  The output is 
 ** null-terminated and can be used as a string value in an INSERT

@@ -29,6 +29,13 @@ typedef struct {
   char **pzErrMsg;    /* Error message stored here */
 } InitData;
 
+/*
+** Fill the InitData structure with an error message that indicates
+** that the database is corrupt.
+*/
+static void corruptSchema(InitData *pData){
+  sqliteSetString(pData->pzErrMsg, "malformed database schema", 0);
+}
 
 /*
 ** This is the callback routine for the code that initializes the
@@ -40,7 +47,8 @@ typedef struct {
 **     argv[1] = table or index name or meta statement type.
 **     argv[2] = root page number for table or index.  NULL for meta.
 **     argv[3] = SQL text for a CREATE TABLE or CREATE INDEX statement.
-**     argv[4] = "1" for temporary files, "0" for main database
+**     argv[4] = "1" for temporary files, "0" for main database, "2" or more
+**               for auxiliary database files.
 **
 */
 static
@@ -49,15 +57,19 @@ int sqliteInitCallback(void *pInit, int argc, char **argv, char **azColName){
   Parse sParse;
   int nErr = 0;
 
-  /* TODO: Do some validity checks on all fields.  In particular,
-  ** make sure fields do not contain NULLs. Otherwise we might core
-  ** when attempting to initialize from a corrupt database file. */
-
   assert( argc==5 );
+  if( argv[0]==0 ){
+    corruptSchema(pData);
+    return 1;
+  }
   switch( argv[0][0] ){
     case 'v':
     case 'i':
     case 't': {  /* CREATE TABLE, CREATE INDEX, or CREATE VIEW statements */
+      if( argv[2]==0 || argv[4]==0 ){
+        corruptSchema(pData);
+        return 1;
+      }
       if( argv[3] && argv[3][0] ){
         /* Call the parser to process a CREATE TABLE, INDEX or VIEW.
         ** But because sParse.initFlag is set to 1, no VDBE code is generated
@@ -67,7 +79,8 @@ int sqliteInitCallback(void *pInit, int argc, char **argv, char **azColName){
         memset(&sParse, 0, sizeof(sParse));
         sParse.db = pData->db;
         sParse.initFlag = 1;
-        sParse.isTemp = argv[4][0] - '0';
+        sParse.iDb = atoi(argv[4]);
+        sParse.useDb = -1;
         sParse.newTnum = atoi(argv[2]);
         sParse.useCallback = 1;
         sqliteRunParser(&sParse, argv[3], pData->pzErrMsg);
@@ -78,7 +91,12 @@ int sqliteInitCallback(void *pInit, int argc, char **argv, char **azColName){
         ** been created when we processed the CREATE TABLE.  All we have
         ** to do here is record the root page number for that index.
         */
-        Index *pIndex = sqliteFindIndex(pData->db, argv[1]);
+        int iDb;
+        Index *pIndex;
+
+        iDb = atoi(argv[4]);
+        assert( iDb>=0 && iDb<pData->db->nDb );
+        pIndex = sqliteFindIndex(pData->db, argv[1], pData->db->aDb[iDb].zName);
         if( pIndex==0 || pIndex->tnum!=0 ){
           /* This can occur if there exists an index on a TEMP table which
           ** has the same name as another index on a permanent index.  Since
@@ -118,7 +136,7 @@ int upgrade_3_callback(void *pInit, int argc, char **argv, char **NotUsed){
   Trigger *pTrig;
   char *zErr = 0;
 
-  pTab = sqliteFindTable(pData->db, argv[0]);
+  pTab = sqliteFindTable(pData->db, argv[0], 0);
   assert( pTab!=0 );
   assert( sqliteStrICmp(pTab->zName, argv[0])==0 );
   if( pTab ){
@@ -141,7 +159,7 @@ int upgrade_3_callback(void *pInit, int argc, char **argv, char **NotUsed){
   ** cause the structure that pTab points to be deleted.  In case that
   ** happened, we need to refetch pTab.
   */
-  pTab = sqliteFindTable(pData->db, argv[0]);
+  pTab = sqliteFindTable(pData->db, argv[0], 0);
   if( pTab ){
     assert( sqliteStrICmp(pTab->zName, argv[0])==0 );
     pTab->pTrigger = pTrig;  /* Re-enable triggers */
@@ -153,22 +171,19 @@ int upgrade_3_callback(void *pInit, int argc, char **argv, char **NotUsed){
 
 /*
 ** Attempt to read the database schema and initialize internal
-** data structures.  Return one of the SQLITE_ error codes to
+** data structures for a single database file.  The index of the
+** database file is given by iDb.  iDb==0 is used for the main
+** database.  iDb==1 should never be used.  iDb>=2 is used for
+** auxiliary databases.  Return one of the SQLITE_ error codes to
 ** indicate success or failure.
-**
-** After the database is initialized, the SQLITE_Initialized
-** bit is set in the flags field of the sqlite structure.  An
-** attempt is made to initialize the database as soon as it
-** is opened.  If that fails (perhaps because another process
-** has the sqlite_master table locked) than another attempt
-** is made the first time the database is accessed.
 */
-int sqliteInit(sqlite *db, char **pzErrMsg){
+static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
   int rc;
   BtCursor *curMain;
   int size;
   Table *pTab;
   char *azArg[6];
+  char zDbNum[30];
   int meta[SQLITE_N_BTREE_META];
   Parse sParse;
   InitData initData;
@@ -223,103 +238,161 @@ int sqliteInit(sqlite *db, char **pzErrMsg){
      "WHERE type='index'";
 
 
+  assert( iDb>=0 && iDb!=1 && iDb<db->nDb );
+
   /* Construct the schema tables: sqlite_master and sqlite_temp_master
   */
   azArg[0] = "table";
   azArg[1] = MASTER_NAME;
   azArg[2] = "2";
   azArg[3] = master_schema;
-  azArg[4] = "0";
+  sprintf(zDbNum, "%d", iDb);
+  azArg[4] = zDbNum;
   azArg[5] = 0;
   initData.db = db;
   initData.pzErrMsg = pzErrMsg;
   sqliteInitCallback(&initData, 5, azArg, 0);
-  pTab = sqliteFindTable(db, MASTER_NAME);
+  pTab = sqliteFindTable(db, MASTER_NAME, "main");
   if( pTab ){
     pTab->readOnly = 1;
   }
-  azArg[1] = TEMP_MASTER_NAME;
-  azArg[3] = temp_master_schema;
-  azArg[4] = "1";
-  sqliteInitCallback(&initData, 5, azArg, 0);
-  pTab = sqliteFindTable(db, TEMP_MASTER_NAME);
-  if( pTab ){
-    pTab->readOnly = 1;
+  if( iDb==0 ){
+    azArg[1] = TEMP_MASTER_NAME;
+    azArg[3] = temp_master_schema;
+    azArg[4] = "1";
+    sqliteInitCallback(&initData, 5, azArg, 0);
+    pTab = sqliteFindTable(db, TEMP_MASTER_NAME, "temp");
+    if( pTab ){
+      pTab->readOnly = 1;
+    }
   }
 
   /* Create a cursor to hold the database open
   */
-  if( db->pBe==0 ) return SQLITE_OK;
-  rc = sqliteBtreeCursor(db->pBe, 2, 0, &curMain);
+  if( db->aDb[iDb].pBt==0 ) return SQLITE_OK;
+  rc = sqliteBtreeCursor(db->aDb[iDb].pBt, 2, 0, &curMain);
   if( rc ){
     sqliteSetString(pzErrMsg, sqlite_error_string(rc), 0);
-    sqliteResetInternalSchema(db);
     return rc;
   }
 
   /* Get the database meta information
   */
-  rc = sqliteBtreeGetMeta(db->pBe, meta);
+  rc = sqliteBtreeGetMeta(db->aDb[iDb].pBt, meta);
   if( rc ){
     sqliteSetString(pzErrMsg, sqlite_error_string(rc), 0);
-    sqliteResetInternalSchema(db);
     sqliteBtreeCloseCursor(curMain);
     return rc;
   }
-  db->schema_cookie = meta[1];
-  db->next_cookie = db->schema_cookie;
-  db->file_format = meta[2];
-  size = meta[3];
-  if( size==0 ){ size = MAX_PAGES; }
-  db->cache_size = size;
-  sqliteBtreeSetCacheSize(db->pBe, size);
-  db->safety_level = meta[4];
-  if( db->safety_level==0 ) db->safety_level = 2;
-  sqliteBtreeSetSafetyLevel(db->pBe, db->safety_level);
+  db->aDb[iDb].schema_cookie = meta[1];
+  if( iDb==0 ){
+    db->next_cookie = meta[1];
+    db->file_format = meta[2];
+    size = meta[3];
+    if( size==0 ){ size = MAX_PAGES; }
+    db->cache_size = size;
+    db->safety_level = meta[4];
+    if( db->safety_level==0 ) db->safety_level = 2;
 
-  /*
-  **     file_format==1    Version 2.1.0.
-  **     file_format==2    Version 2.2.0. Add support for INTEGER PRIMARY KEY.
-  **     file_format==3    Version 2.6.0. Fix empty-string index bug.
-  **     file_format==4    Version 2.7.0. Add support for separate numeric and
-  **                       text datatypes.
-  */
-  if( db->file_format==0 ){
-    /* This happens if the database was initially empty */
-    db->file_format = 4;
-  }else if( db->file_format>4 ){
-    sqliteBtreeCloseCursor(curMain);
-    sqliteSetString(pzErrMsg, "unsupported file format", 0);
-    return SQLITE_ERROR;
+    /*
+    **  file_format==1    Version 2.1.0.
+    **  file_format==2    Version 2.2.0. Add support for INTEGER PRIMARY KEY.
+    **  file_format==3    Version 2.6.0. Fix empty-string index bug.
+    **  file_format==4    Version 2.7.0. Add support for separate numeric and
+    **                    text datatypes.
+    */
+    if( db->file_format==0 ){
+      /* This happens if the database was initially empty */
+      db->file_format = 4;
+    }else if( db->file_format>4 ){
+      sqliteBtreeCloseCursor(curMain);
+      sqliteSetString(pzErrMsg, "unsupported file format", 0);
+      return SQLITE_ERROR;
+    }
+  }else if( db->file_format!=meta[2] || db->file_format<4 ){
+    assert( db->file_format>=4 );
+    if( meta[2]==0 ){
+      sqliteSetString(pzErrMsg, "cannot attach empty database: ",
+         db->aDb[iDb].zName, 0);
+    }else{
+      sqliteSetString(pzErrMsg, "incompatible file format in auxiliary "
+         "database: ", db->aDb[iDb].zName, 0);
+    }
+    sqliteBtreeClose(db->aDb[iDb].pBt);
+    db->aDb[iDb].pBt = 0;
+    return SQLITE_FORMAT;
   }
+  sqliteBtreeSetCacheSize(db->aDb[iDb].pBt, size);
+  sqliteBtreeSetSafetyLevel(db->aDb[iDb].pBt, meta[4]==0 ? 2 : meta[4]);
 
   /* Read the schema information out of the schema tables
   */
   memset(&sParse, 0, sizeof(sParse));
   sParse.db = db;
-  sParse.pBe = db->pBe;
   sParse.xCallback = sqliteInitCallback;
   sParse.pArg = (void*)&initData;
   sParse.initFlag = 1;
+  sParse.useDb = -1;
   sParse.useCallback = 1;
-  sqliteRunParser(&sParse,
-      db->file_format>=2 ? init_script : older_init_script,
-      pzErrMsg);
+  if( iDb==0 ){
+    sqliteRunParser(&sParse,
+        db->file_format>=2 ? init_script : older_init_script,
+        pzErrMsg);
+  }else{
+    char *zSql = 0;
+    sqliteSetString(&zSql, 
+       "SELECT type, name, rootpage, sql, ", zDbNum, " FROM \"",
+       db->aDb[iDb].zName, "\".sqlite_master", 0);
+    sqliteRunParser(&sParse, zSql, pzErrMsg);
+    sqliteFree(zSql);
+  }
+  sqliteBtreeCloseCursor(curMain);
   if( sqlite_malloc_failed ){
     sqliteSetString(pzErrMsg, "out of memory", 0);
     sParse.rc = SQLITE_NOMEM;
-    sqliteBtreeRollback(db->pBe);
-    sqliteResetInternalSchema(db);
+    sqliteResetInternalSchema(db, 0);
   }
   if( sParse.rc==SQLITE_OK ){
+    DbSetProperty(db, iDb, DB_SchemaLoaded);
+    if( iDb==0 ){
+      DbSetProperty(db, 1, DB_SchemaLoaded);
+    }
+  }else{
+    sqliteResetInternalSchema(db, iDb);
+  }
+  return sParse.rc;
+}
+
+/*
+** Initialize all database files - the main database file, the file
+** used to store temporary tables, and any additional database files
+** created using ATTACH statements.  Return a success code.  If an
+** error occurs, write an error message into *pzErrMsg.
+**
+** After the database is initialized, the SQLITE_Initialized
+** bit is set in the flags field of the sqlite structure.  An
+** attempt is made to initialize the database as soon as it
+** is opened.  If that fails (perhaps because another process
+** has the sqlite_master table locked) than another attempt
+** is made the first time the database is accessed.
+*/
+int sqliteInit(sqlite *db, char **pzErrMsg){
+  int i, rc;
+  
+  assert( (db->flags & SQLITE_Initialized)==0 );
+  rc = SQLITE_OK;
+  for(i=0; rc==SQLITE_OK && i<db->nDb; i++){
+    if( DbHasProperty(db, i, DB_SchemaLoaded) ) continue;
+    assert( i!=1 );  /* Should have been initialized together with 0 */
+    rc = sqliteInitOne(db, i, pzErrMsg);
+  }
+  if( rc==SQLITE_OK ){
     db->flags |= SQLITE_Initialized;
     sqliteCommitInternalChanges(db);
   }else{
     db->flags &= ~SQLITE_Initialized;
-    sqliteResetInternalSchema(db);
   }
-  sqliteBtreeCloseCursor(curMain);
-  return sParse.rc;
+  return rc;
 }
 
 /*
@@ -349,23 +422,27 @@ const char sqlite_encoding[] = "iso8859";
 */
 sqlite *sqlite_open(const char *zFilename, int mode, char **pzErrMsg){
   sqlite *db;
-  int rc;
+  int rc, i;
 
   /* Allocate the sqlite data structure */
   db = sqliteMalloc( sizeof(sqlite) );
   if( pzErrMsg ) *pzErrMsg = 0;
   if( db==0 ) goto no_mem_on_open;
-  sqliteHashInit(&db->tblHash, SQLITE_HASH_STRING, 0);
-  sqliteHashInit(&db->idxHash, SQLITE_HASH_STRING, 0);
-  sqliteHashInit(&db->trigHash, SQLITE_HASH_STRING, 0);
-  sqliteHashInit(&db->aFunc, SQLITE_HASH_STRING, 1);
-  sqliteHashInit(&db->aFKey, SQLITE_HASH_STRING, 1);
   db->onError = OE_Default;
   db->priorNewRowid = 0;
   db->magic = SQLITE_MAGIC_BUSY;
+  db->nDb = 2;
+  db->aDb = db->aDbStatic;
+  sqliteHashInit(&db->aFunc, SQLITE_HASH_STRING, 1);
+  for(i=0; i<db->nDb; i++){
+    sqliteHashInit(&db->aDb[i].tblHash, SQLITE_HASH_STRING, 0);
+    sqliteHashInit(&db->aDb[i].idxHash, SQLITE_HASH_STRING, 0);
+    sqliteHashInit(&db->aDb[i].trigHash, SQLITE_HASH_STRING, 0);
+    sqliteHashInit(&db->aDb[i].aFKey, SQLITE_HASH_STRING, 1);
+  }
   
   /* Open the backend database driver */
-  rc = sqliteBtreeOpen(zFilename, 0, MAX_PAGES, &db->pBe);
+  rc = sqliteBtreeFactory(db, zFilename, 0, MAX_PAGES, &db->aDb[0].pBt);
   if( rc!=SQLITE_OK ){
     switch( rc ){
       default: {
@@ -376,6 +453,8 @@ sqlite *sqlite_open(const char *zFilename, int mode, char **pzErrMsg){
     sqliteStrRealloc(pzErrMsg);
     return 0;
   }
+  db->aDb[0].zName = "main";
+  db->aDb[1].zName = "temp";
 
   /* Attempt to read the schema */
   sqliteRegisterBuiltinFunctions(db);
@@ -412,9 +491,9 @@ sqlite *sqlite_open(const char *zFilename, int mode, char **pzErrMsg){
       &initData,
       &zErr);
     if( rc==SQLITE_OK ){
-      sqliteBtreeGetMeta(db->pBe, meta);
+      sqliteBtreeGetMeta(db->aDb[0].pBt, meta);
       meta[2] = 4;
-      sqliteBtreeUpdateMeta(db->pBe, meta);
+      sqliteBtreeUpdateMeta(db->aDb[0].pBt, meta);
       sqlite_exec(db, "COMMIT", 0, 0, 0);
     }
     if( rc!=SQLITE_OK ){
@@ -457,17 +536,26 @@ int sqlite_changes(sqlite *db){
 */
 void sqlite_close(sqlite *db){
   HashElem *i;
+  int j;
   db->want_to_close = 1;
   if( sqliteSafetyCheck(db) || sqliteSafetyOn(db) ){
     /* printf("DID NOT CLOSE\n"); fflush(stdout); */
     return;
   }
   db->magic = SQLITE_MAGIC_CLOSED;
-  sqliteBtreeClose(db->pBe);
-  sqliteResetInternalSchema(db);
-  if( db->pBeTemp ){
-    sqliteBtreeClose(db->pBeTemp);
+  for(j=0; j<db->nDb; j++){
+    if( db->aDb[j].pBt ){
+      sqliteBtreeClose(db->aDb[j].pBt);
+      db->aDb[j].pBt = 0;
+    }
+    if( j>=2 ){
+      sqliteFree(db->aDb[j].zName);
+      db->aDb[j].zName = 0;
+    }
   }
+  sqliteResetInternalSchema(db, 0);
+  assert( db->nDb<=2 );
+  assert( db->aDb==db->aDbStatic );
   for(i=sqliteHashFirst(&db->aFunc); i; i=sqliteHashNext(i)){
     FuncDef *pFunc, *pNext;
     for(pFunc = (FuncDef*)sqliteHashData(i); pFunc; pFunc=pNext){
@@ -476,120 +564,21 @@ void sqlite_close(sqlite *db){
     }
   }
   sqliteHashClear(&db->aFunc);
-  sqliteHashClear(&db->aFKey);
   sqliteFree(db);
 }
 
 /*
-** Return TRUE if the given SQL string ends in a semicolon.
-**
-** Special handling is require for CREATE TRIGGER statements.
-** Whenever the CREATE TRIGGER keywords are seen, the statement
-** must end with ";END;".
+** Rollback all database files.
 */
-int sqlite_complete(const char *zSql){
-  int isComplete = 1;
-  int requireEnd = 0;
-  int seenText = 0;
-  int seenCreate = 0;
-  while( *zSql ){
-    switch( *zSql ){
-      case ';': {
-        isComplete = 1;
-        seenText = 1;
-        seenCreate = 0;
-        break;
-      }
-      case ' ':
-      case '\t':
-      case '\n':
-      case '\f': {
-        break;
-      }
-      case '[': {
-        isComplete = 0;
-        seenText = 1;
-        seenCreate = 0;
-        zSql++;
-        while( *zSql && *zSql!=']' ){ zSql++; }
-        if( *zSql==0 ) return 0;
-        break;
-      }
-      case '"':
-      case '\'': {
-        int c = *zSql;
-        isComplete = 0;
-        seenText = 1;
-        seenCreate = 0;
-        zSql++;
-        while( *zSql && *zSql!=c ){ zSql++; }
-        if( *zSql==0 ) return 0;
-        break;
-      }
-      case '-': {
-        if( zSql[1]!='-' ){
-          isComplete = 0;
-          seenCreate = 0;
-          break;
-        }
-        while( *zSql && *zSql!='\n' ){ zSql++; }
-        if( *zSql==0 ) return seenText && isComplete && requireEnd==0;
-        break;
-      }
-      case 'c':
-      case 'C': {
-        seenText = 1;
-        if( !isComplete ) break;
-        isComplete = 0;
-        if( sqliteStrNICmp(zSql, "create", 6)!=0 ) break;
-        if( !isspace(zSql[6]) ) break;
-        zSql += 5;
-        seenCreate = 1;
-        while( isspace(zSql[1]) ) zSql++;
-        if( sqliteStrNICmp(&zSql[1],"trigger", 7)!=0 ) break;
-        zSql += 7;
-        requireEnd++;
-        break;
-      }
-      case 't':
-      case 'T': {
-        seenText = 1;
-        if( !seenCreate ) break;
-        seenCreate = 0;
-        isComplete = 0;
-        if( sqliteStrNICmp(zSql, "trigger", 7)!=0 ) break;
-        if( !isspace(zSql[7]) ) break;
-        zSql += 6;
-        requireEnd++;
-        break;
-      }
-      case 'e':
-      case 'E': {
-        seenCreate = 0;
-        seenText = 1;
-        if( !isComplete ) break;
-        isComplete = 0;
-        if( requireEnd==0 ) break;
-        if( sqliteStrNICmp(zSql, "end", 3)!=0 ) break;
-        zSql += 2;
-        while( isspace(zSql[1]) ) zSql++;
-        if( zSql[1]==';' ){
-          zSql++;
-          isComplete = 1;
-          requireEnd--;
-        }
-        break;
-      }
-      default: {
-        seenCreate = 0;
-        seenText = 1;
-        isComplete = 0;
-        break;
-      }
+void sqliteRollbackAll(sqlite *db){
+  int i;
+  for(i=0; i<db->nDb; i++){
+    if( db->aDb[i].pBt ){
+      sqliteBtreeRollback(db->aDb[i].pBt);
+      db->aDb[i].inTrans = 0;
     }
-    zSql++;
   }
-  return seenText && isComplete && requireEnd==0;
+  sqliteRollbackInternalChanges(db);
 }
 
 /*
@@ -632,21 +621,18 @@ static int sqliteMain(
   if( db->pVdbe==0 ){ db->nChange = 0; }
   memset(&sParse, 0, sizeof(sParse));
   sParse.db = db;
-  sParse.pBe = db->pBe;
   sParse.xCallback = xCallback;
   sParse.pArg = pArg;
+  sParse.useDb = -1;
   sParse.useCallback = ppVm==0;
-#ifndef SQLITE_OMIT_TRACE
   if( db->xTrace ) db->xTrace(db->pTraceArg, zSql);
-#endif
   sqliteRunParser(&sParse, zSql, pzErrMsg);
   if( sqlite_malloc_failed ){
     sqliteSetString(pzErrMsg, "out of memory", 0);
     sParse.rc = SQLITE_NOMEM;
-    sqliteBtreeRollback(db->pBe);
-    if( db->pBeTemp ) sqliteBtreeRollback(db->pBeTemp);
+    sqliteRollbackAll(db);
+    sqliteResetInternalSchema(db, 0);
     db->flags &= ~SQLITE_InTrans;
-    sqliteResetInternalSchema(db);
   }
   if( sParse.rc==SQLITE_DONE ) sParse.rc = SQLITE_OK;
   if( sParse.rc!=SQLITE_OK && pzErrMsg && *pzErrMsg==0 ){
@@ -654,7 +640,7 @@ static int sqliteMain(
   }
   sqliteStrRealloc(pzErrMsg);
   if( sParse.rc==SQLITE_SCHEMA ){
-    sqliteResetInternalSchema(db);
+    sqliteResetInternalSchema(db, 0);
   }
   if( sParse.useCallback==0 ){
     assert( ppVm );
@@ -937,53 +923,69 @@ int sqlite_function_type(sqlite *db, const char *zName, int dataType){
 ** sqlite_exec().
 */
 void *sqlite_trace(sqlite *db, void (*xTrace)(void*,const char*), void *pArg){
-#ifndef SQLITE_OMIT_TRACE
   void *pOld = db->pTraceArg;
   db->xTrace = xTrace;
   db->pTraceArg = pArg;
   return pOld;
-#else
-  return 0;
-#endif
 }
 
-
 /*
-** Attempt to open the file named in the argument as the auxiliary database
-** file.  The auxiliary database file is used to store TEMP tables.  But
-** by using this API, it is possible to trick SQLite into opening two
-** separate databases and acting on them as if they were one.
+** This routine is called to create a connection to a database BTree
+** driver.  If zFilename is the name of a file, then that file is
+** opened and used.  If zFilename is the magic name ":memory:" then
+** the database is stored in memory (and is thus forgotten as soon as
+** the connection is closed.)  If zFilename is NULL then the database
+** is for temporary use only and is deleted as soon as the connection
+** is closed.
 **
-** This routine closes the existing auxiliary database file, which will
-** cause any previously created TEMP tables to be dropped.
+** A temporary database can be either a disk file (that is automatically
+** deleted when the file is closed) or a set of red-black trees held in memory,
+** depending on the values of the TEMP_STORE compile-time macro and the
+** db->temp_store variable, according to the following chart:
 **
-** The zName parameter can be a NULL pointer or an empty string to cause
-** a temporary file to be opened and automatically deleted when closed.
+**       TEMP_STORE     db->temp_store     Location of temporary database
+**       ----------     --------------     ------------------------------
+**           0               any             file
+**           1                1              file
+**           1                2              memory
+**           1                0              file
+**           2                1              file
+**           2                2              memory
+**           2                0              memory
+**           3               any             memory
 */
-int sqlite_open_aux_file(sqlite *db, const char *zName, char **pzErrMsg){
-  int rc;
-  if( zName && zName[0]==0 ) zName = 0;
-  if( sqliteSafetyOn(db) ) goto openaux_misuse;
-  sqliteResetInternalSchema(db);
-  if( db->pBeTemp!=0 ){
-    sqliteBtreeClose(db->pBeTemp);
-  }
-  rc = sqliteBtreeOpen(zName, 0, MAX_PAGES, &db->pBeTemp);
-  if( rc ){
-    if( zName==0 ) zName = "a temporary file";
-    sqliteSetString(pzErrMsg, "unable to open ", zName, 
-      ": ", sqlite_error_string(rc), 0);
-    sqliteStrRealloc(pzErrMsg);
-    sqliteSafetyOff(db);
-    return rc;
-  }
-  rc = sqliteInit(db, pzErrMsg);
-  if( sqliteSafetyOff(db) ) goto openaux_misuse;
-  sqliteStrRealloc(pzErrMsg);
-  return rc;
+int sqliteBtreeFactory(
+  const sqlite *db,	    /* Main database when opening aux otherwise 0 */
+  const char *zFilename,    /* Name of the file containing the BTree database */
+  int omitJournal,          /* if TRUE then do not journal this file */
+  int nCache,               /* How many pages in the page cache */
+  Btree **ppBtree){         /* Pointer to new Btree object written here */
 
-openaux_misuse:
-  sqliteSetString(pzErrMsg, sqlite_error_string(SQLITE_MISUSE), 0);
-  sqliteStrRealloc(pzErrMsg);
-  return SQLITE_MISUSE;
+  assert( ppBtree != 0);
+
+#ifndef SQLITE_OMIT_INMEMORYDB
+  if( zFilename==0 ){
+    if (TEMP_STORE == 0) {
+      /* Always use file based temporary DB */
+      return sqliteBtreeOpen(0, omitJournal, nCache, ppBtree);
+    } else if (TEMP_STORE == 1 || TEMP_STORE == 2) {
+      /* Switch depending on compile-time and/or runtime settings. */
+      int location = db->temp_store==0 ? TEMP_STORE : db->temp_store;
+
+      if (location == 1) {
+        return sqliteBtreeOpen(zFilename, omitJournal, nCache, ppBtree);
+      } else {
+        return sqliteRbtreeOpen(0, 0, 0, ppBtree);
+      }
+    } else {
+      /* Always use in-core DB */
+      return sqliteRbtreeOpen(0, 0, 0, ppBtree);
+    }
+  }else if( zFilename[0]==':' && strcmp(zFilename,":memory:")==0 ){
+    return sqliteRbtreeOpen(0, 0, 0, ppBtree);
+  }else
+#endif
+  {
+    return sqliteBtreeOpen(zFilename, omitJournal, nCache, ppBtree);
+  }
 }

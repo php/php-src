@@ -687,7 +687,6 @@ static void mout(void *arg, char *zNewText, int nNewChar){
 char *sqliteMPrintf(const char *zFormat, ...){
   va_list ap;
   struct sgMprintf sMprintf;
-  char *zNew;
   char zBuf[200];
 
   sMprintf.nChar = 0;

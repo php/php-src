@@ -77,7 +77,7 @@ PHP_FUNCTION(sqlite_create_aggregate);
 PHP_FUNCTION(sqlite_create_function);
 
 ZEND_BEGIN_MODULE_GLOBALS(sqlite)
-	 int assoc_case;
+	 long assoc_case;
 ZEND_END_MODULE_GLOBALS(sqlite)
 
 #ifdef ZTS

@@ -31,7 +31,11 @@
 # ifndef O_NOFOLLOW
 #  define O_NOFOLLOW 0
 # endif
+# ifndef O_BINARY
+#  define O_BINARY 0
+# endif
 #endif
+
 
 #if OS_WIN
 # include <winbase.h>
@@ -45,6 +49,16 @@
 # include <Folders.h>
 # include <Timer.h>
 # include <OSUtils.h>
+#endif
+
+/*
+** The DJGPP compiler environment looks mostly like Unix, but it
+** lacks the fcntl() system call.  So redefine fcntl() to be something
+** that always succeeds.  This means that locking does not occur under
+** DJGPP.  But its DOS - what did you expect?
+*/
+#ifdef __DJGPP__
+# define fcntl(A,B,C) 0
 #endif
 
 /*
@@ -268,6 +282,31 @@ int sqliteOsFileExists(const char *zFilename){
 }
 
 
+#if 0 /* NOT USED */
+/*
+** Change the name of an existing file.
+*/
+int sqliteOsFileRename(const char *zOldName, const char *zNewName){
+#if OS_UNIX
+  if( link(zOldName, zNewName) ){
+    return SQLITE_ERROR;
+  }
+  unlink(zOldName);
+  return SQLITE_OK;
+#endif
+#if OS_WIN
+  if( !MoveFile(zOldName, zNewName) ){
+    return SQLITE_ERROR;
+  }
+  return SQLITE_OK;
+#endif
+#if OS_MAC
+  /**** FIX ME ***/
+  return SQLITE_ERROR;
+#endif
+}
+#endif /* NOT USED */
+
 /*
 ** Attempt to open a file for both reading and writing.  If that
 ** fails, try opening it read-only.  If the file does not exist,
@@ -287,9 +326,9 @@ int sqliteOsOpenReadWrite(
   int *pReadonly
 ){
 #if OS_UNIX
-  id->fd = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE, 0644);
+  id->fd = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY, 0644);
   if( id->fd<0 ){
-    id->fd = open(zFilename, O_RDONLY|O_LARGEFILE);
+    id->fd = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
     if( id->fd<0 ){
       return SQLITE_CANTOPEN; 
     }
@@ -411,7 +450,8 @@ int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
   if( access(zFilename, 0)==0 ){
     return SQLITE_CANTOPEN;
   }
-  id->fd = open(zFilename, O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW|O_LARGEFILE, 0600);
+  id->fd = open(zFilename,
+                O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW|O_LARGEFILE|O_BINARY, 0600);
   if( id->fd<0 ){
     return SQLITE_CANTOPEN;
   }
@@ -496,7 +536,7 @@ int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
 */
 int sqliteOsOpenReadOnly(const char *zFilename, OsFile *id){
 #if OS_UNIX
-  id->fd = open(zFilename, O_RDONLY|O_LARGEFILE);
+  id->fd = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
   if( id->fd<0 ){
     return SQLITE_CANTOPEN;
   }
@@ -1036,7 +1076,7 @@ int sqliteOsReadLock(OsFile *id){
     lock.l_start = lock.l_len = 0L;
     s = fcntl(id->fd, F_SETLK, &lock);
     if( s!=0 ){
-      rc = (s==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
+      rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
       rc = SQLITE_OK;
       id->pLock->cnt = 1;
@@ -1132,7 +1172,7 @@ int sqliteOsWriteLock(OsFile *id){
     lock.l_start = lock.l_len = 0L;
     s = fcntl(id->fd, F_SETLK, &lock);
     if( s!=0 ){
-      rc = (s==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
+      rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
       rc = SQLITE_OK;
       id->pLock->cnt = -1;
@@ -1239,7 +1279,7 @@ int sqliteOsUnlock(OsFile *id){
     lock.l_start = lock.l_len = 0L;
     s = fcntl(id->fd, F_SETLK, &lock);
     if( s!=0 ){
-      rc = (s==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
+      rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
       rc = SQLITE_OK;
       id->pLock->cnt = 0;

@@ -184,16 +184,17 @@ ExprList *sqliteExprListDup(ExprList *p){
 SrcList *sqliteSrcListDup(SrcList *p){
   SrcList *pNew;
   int i;
+  int nByte;
   if( p==0 ) return 0;
-  pNew = sqliteMalloc( sizeof(*pNew) );
+  nByte = sizeof(*p) + (p->nSrc>0 ? sizeof(p->a[0]) * (p->nSrc-1) : 0);
+  pNew = sqliteMalloc( nByte );
   if( pNew==0 ) return 0;
   pNew->nSrc = p->nSrc;
-  pNew->a = sqliteMalloc( p->nSrc*sizeof(p->a[0]) );
-  if( pNew->a==0 && p->nSrc != 0 ) return 0;
   for(i=0; i<p->nSrc; i++){
     pNew->a[i].zName = sqliteStrDup(p->a[i].zName);
     pNew->a[i].zAlias = sqliteStrDup(p->a[i].zAlias);
     pNew->a[i].jointype = p->a[i].jointype;
+    pNew->a[i].iCursor = p->a[i].iCursor;
     pNew->a[i].pTab = 0;
     pNew->a[i].pSelect = sqliteSelectDup(p->a[i].pSelect);
     pNew->a[i].pOn = sqliteExprDup(p->a[i].pOn);
@@ -299,7 +300,9 @@ int sqliteExprIsConstant(Expr *p){
     case TK_ID:
     case TK_COLUMN:
     case TK_DOT:
+    case TK_FUNCTION:
       return 0;
+    case TK_NULL:
     case TK_STRING:
     case TK_INTEGER:
     case TK_FLOAT:
@@ -400,13 +403,16 @@ int sqliteIsRowid(const char *z){
 */
 int sqliteExprResolveIds(
   Parse *pParse,     /* The parser context */
-  int base,          /* VDBE cursor number for first entry in pTabList */
   SrcList *pTabList, /* List of tables used to resolve column names */
   ExprList *pEList,  /* List of expressions used to resolve "AS" */
   Expr *pExpr        /* The expression to be analyzed. */
 ){
+  int i;
+
   if( pExpr==0 || pTabList==0 ) return 0;
-  assert( base+pTabList->nSrc<=pParse->nTab );
+  for(i=0; i<pTabList->nSrc; i++){
+    assert( pTabList->a[i].iCursor>=0 && pTabList->a[i].iCursor<pParse->nTab );
+  }
   switch( pExpr->op ){
     /* Double-quoted strings (ex: "abc") are used as identifiers if
     ** possible.  Otherwise they remain as strings.  Single-quoted
@@ -428,8 +434,9 @@ int sqliteExprResolveIds(
     */
     case TK_ID: {
       int cnt = 0;      /* Number of matches */
-      int i;            /* Loop counter */
       char *z;
+      int iDb = -1;
+
       assert( pExpr->token.z );
       z = sqliteStrNDup(pExpr->token.z, pExpr->token.n);
       sqliteDequote(z);
@@ -438,11 +445,13 @@ int sqliteExprResolveIds(
         int j;
         Table *pTab = pTabList->a[i].pTab;
         if( pTab==0 ) continue;
+        iDb = pTab->iDb;
         assert( pTab->nCol>0 );
         for(j=0; j<pTab->nCol; j++){
           if( sqliteStrICmp(pTab->aCol[j].zName, z)==0 ){
             cnt++;
-            pExpr->iTable = i + base;
+            pExpr->iTable = pTabList->a[i].iCursor;
+            pExpr->iDb = pTab->iDb;
             if( j==pTab->iPKey ){
               /* Substitute the record number for the INTEGER PRIMARY KEY */
               pExpr->iColumn = -1;
@@ -468,41 +477,51 @@ int sqliteExprResolveIds(
           }
         } 
       }
-      if( cnt==0 && sqliteIsRowid(z) ){
+      if( cnt==0 && iDb>=0 && sqliteIsRowid(z) ){
         pExpr->iColumn = -1;
-        pExpr->iTable = base;
+        pExpr->iTable = pTabList->a[0].iCursor;
+        pExpr->iDb = iDb;
         cnt = 1 + (pTabList->nSrc>1);
         pExpr->op = TK_COLUMN;
         pExpr->dataType = SQLITE_SO_NUM;
       }
       sqliteFree(z);
       if( cnt==0 && pExpr->token.z[0]!='"' ){
-        sqliteSetNString(&pParse->zErrMsg, "no such column: ", -1,  
-          pExpr->token.z, pExpr->token.n, 0);
-        pParse->nErr++;
+        sqliteErrorMsg(pParse, "no such column: %T", &pExpr->token);
         return 1;
       }else if( cnt>1 ){
-        sqliteSetNString(&pParse->zErrMsg, "ambiguous column name: ", -1,  
-          pExpr->token.z, pExpr->token.n, 0);
-        pParse->nErr++;
+        sqliteErrorMsg(pParse, "ambiguous column name: %T", &pExpr->token);
         return 1;
       }
       if( pExpr->op==TK_COLUMN ){
-        sqliteAuthRead(pParse, pExpr, pTabList, base);
+        sqliteAuthRead(pParse, pExpr, pTabList);
       }
       break; 
     }
   
-    /* A table name and column name:  ID.ID */
+    /* A table name and column name:     ID.ID
+    ** Or a database, table and column:  ID.ID.ID
+    */
     case TK_DOT: {
       int cnt = 0;             /* Number of matches */
       int cntTab = 0;          /* Number of matching tables */
       int i;                   /* Loop counter */
       Expr *pLeft, *pRight;    /* Left and right subbranches of the expr */
       char *zLeft, *zRight;    /* Text of an identifier */
+      char *zDb;               /* Name of database holding table */
+      sqlite *db = pParse->db;
 
-      pLeft = pExpr->pLeft;
       pRight = pExpr->pRight;
+      if( pRight->op==TK_ID ){
+        pLeft = pExpr->pLeft;
+        zDb = 0;
+      }else{
+        Expr *pDb = pExpr->pLeft;
+        assert( pDb && pDb->op==TK_ID && pDb->token.z );
+        zDb = sqliteStrNDup(pDb->token.z, pDb->token.n);
+        pLeft = pRight->pLeft;
+        pRight = pRight->pRight;
+      }
       assert( pLeft && pLeft->op==TK_ID && pLeft->token.z );
       assert( pRight && pRight->op==TK_ID && pRight->token.z );
       zLeft = sqliteStrNDup(pLeft->token.z, pLeft->token.n);
@@ -510,8 +529,10 @@ int sqliteExprResolveIds(
       if( zLeft==0 || zRight==0 ){
         sqliteFree(zLeft);
         sqliteFree(zRight);
+        sqliteFree(zDb);
         return 1;
       }
+      sqliteDequote(zDb);
       sqliteDequote(zLeft);
       sqliteDequote(zRight);
       pExpr->iTable = -1;
@@ -523,21 +544,25 @@ int sqliteExprResolveIds(
         assert( pTab->nCol>0 );
         if( pTabList->a[i].zAlias ){
           zTab = pTabList->a[i].zAlias;
+          if( sqliteStrICmp(zTab, zLeft)!=0 ) continue;
         }else{
           zTab = pTab->zName;
+          if( zTab==0 || sqliteStrICmp(zTab, zLeft)!=0 ) continue;
+          if( zDb!=0 && sqliteStrICmp(db->aDb[pTab->iDb].zName, zDb)!=0 ){
+            continue;
+          }
         }
-        if( zTab==0 || sqliteStrICmp(zTab, zLeft)!=0 ) continue;
-        if( 0==(cntTab++) ) pExpr->iTable = i + base;
+        if( 0==(cntTab++) ){
+          pExpr->iTable = pTabList->a[i].iCursor;
+          pExpr->iDb = pTab->iDb;
+        }
         for(j=0; j<pTab->nCol; j++){
           if( sqliteStrICmp(pTab->aCol[j].zName, zRight)==0 ){
             cnt++;
-            pExpr->iTable = i + base;
-            if( j==pTab->iPKey ){
-              /* Substitute the record number for the INTEGER PRIMARY KEY */
-              pExpr->iColumn = -1;
-            }else{
-              pExpr->iColumn = j;
-            }
+            pExpr->iTable = pTabList->a[i].iCursor;
+            pExpr->iDb = pTab->iDb;
+            /* Substitute the rowid (column -1) for the INTEGER PRIMARY KEY */
+            pExpr->iColumn = j==pTab->iPKey ? -1 : j;
             pExpr->dataType = pTab->aCol[j].sortOrder & SQLITE_SO_TYPEMASK;
           }
         }
@@ -550,11 +575,15 @@ int sqliteExprResolveIds(
         int t = 0;
         if( pTriggerStack->newIdx != -1 && sqliteStrICmp("new", zLeft) == 0 ){
           pExpr->iTable = pTriggerStack->newIdx;
+          assert( pTriggerStack->pTab );
+          pExpr->iDb = pTriggerStack->pTab->iDb;
           cntTab++;
           t = 1;
         }
         if( pTriggerStack->oldIdx != -1 && sqliteStrICmp("old", zLeft) == 0 ){
           pExpr->iTable = pTriggerStack->oldIdx;
+          assert( pTriggerStack->pTab );
+          pExpr->iDb = pTriggerStack->pTab->iDb;
           cntTab++;
           t = 1;
         }
@@ -565,7 +594,7 @@ int sqliteExprResolveIds(
           for(j=0; j < pTab->nCol; j++) {
             if( sqliteStrICmp(pTab->aCol[j].zName, zRight)==0 ){
               cnt++;
-              pExpr->iColumn = j;
+              pExpr->iColumn = j==pTab->iPKey ? -1 : j;
               pExpr->dataType = pTab->aCol[j].sortOrder & SQLITE_SO_TYPEMASK;
             }
           }
@@ -577,34 +606,31 @@ int sqliteExprResolveIds(
         pExpr->iColumn = -1;
         pExpr->dataType = SQLITE_SO_NUM;
       }
+      sqliteFree(zDb);
       sqliteFree(zLeft);
       sqliteFree(zRight);
       if( cnt==0 ){
-        sqliteSetNString(&pParse->zErrMsg, "no such column: ", -1,  
-          pLeft->token.z, pLeft->token.n, ".", 1, 
-          pRight->token.z, pRight->token.n, 0);
-        pParse->nErr++;
+        sqliteErrorMsg(pParse, "no such column: %T.%T",
+               &pLeft->token, &pRight->token);
         return 1;
       }else if( cnt>1 ){
-        sqliteSetNString(&pParse->zErrMsg, "ambiguous column name: ", -1,  
-          pLeft->token.z, pLeft->token.n, ".", 1,
-          pRight->token.z, pRight->token.n, 0);
-        pParse->nErr++;
+        sqliteErrorMsg(pParse, "ambiguous column name: %T.%T",
+          &pLeft->token, &pRight->token);
         return 1;
       }
-      sqliteExprDelete(pLeft);
+      sqliteExprDelete(pExpr->pLeft);
       pExpr->pLeft = 0;
-      sqliteExprDelete(pRight);
+      sqliteExprDelete(pExpr->pRight);
       pExpr->pRight = 0;
       pExpr->op = TK_COLUMN;
-      sqliteAuthRead(pParse, pExpr, pTabList, base);
+      sqliteAuthRead(pParse, pExpr, pTabList);
       break;
     }
 
     case TK_IN: {
       Vdbe *v = sqliteGetVdbe(pParse);
       if( v==0 ) return 1;
-      if( sqliteExprResolveIds(pParse, base, pTabList, pEList, pExpr->pLeft) ){
+      if( sqliteExprResolveIds(pParse, pTabList, pEList, pExpr->pLeft) ){
         return 1;
       }
       if( pExpr->pSelect ){
@@ -627,9 +653,8 @@ int sqliteExprResolveIds(
         for(i=0; i<pExpr->pList->nExpr; i++){
           Expr *pE2 = pExpr->pList->a[i].pExpr;
           if( !sqliteExprIsConstant(pE2) ){
-            sqliteSetString(&pParse->zErrMsg,
-              "right-hand side of IN operator must be constant", 0);
-            pParse->nErr++;
+            sqliteErrorMsg(pParse,
+              "right-hand side of IN operator must be constant");
             return 1;
           }
           if( sqliteExprCheck(pParse, pE2, 0, 0) ){
@@ -675,11 +700,11 @@ int sqliteExprResolveIds(
     /* For all else, just recursively walk the tree */
     default: {
       if( pExpr->pLeft
-      && sqliteExprResolveIds(pParse, base, pTabList, pEList, pExpr->pLeft) ){
+      && sqliteExprResolveIds(pParse, pTabList, pEList, pExpr->pLeft) ){
         return 1;
       }
       if( pExpr->pRight 
-      && sqliteExprResolveIds(pParse, base, pTabList, pEList, pExpr->pRight) ){
+      && sqliteExprResolveIds(pParse, pTabList, pEList, pExpr->pRight) ){
         return 1;
       }
       if( pExpr->pList ){
@@ -687,7 +712,7 @@ int sqliteExprResolveIds(
         ExprList *pList = pExpr->pList;
         for(i=0; i<pList->nExpr; i++){
           Expr *pArg = pList->a[i].pExpr;
-          if( sqliteExprResolveIds(pParse, base, pTabList, pEList, pArg) ){
+          if( sqliteExprResolveIds(pParse, pTabList, pEList, pArg) ){
             return 1;
           }
         }
@@ -1199,8 +1224,8 @@ void sqliteExprCode(Parse *pParse, Expr *pExpr){
     }
     case TK_RAISE: {
       if( !pParse->trigStack ){
-        sqliteSetNString(&pParse->zErrMsg, 
-		"RAISE() may only be used within a trigger-program", -1, 0);
+        sqliteErrorMsg(pParse,
+                       "RAISE() may only be used within a trigger-program");
         pParse->nErr++;
 	return;
       }
