@@ -395,7 +395,12 @@ enable_dl = On
 ; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
 ; cgi.redirect_status_env = ;
 
-
+; FastCGI under IIS (on WINNT based OS) supports the ability to impersonate
+; security tokens of the calling client.  This allows IIS to define the
+; security context that the request runs under.  mod_fastcgi under Apache
+; does not currently support this feature (03/17/2002)
+; Set to 1 if running under IIS.  Default is zero.
+; fastcgi.impersonate = 1;
 
 ;;;;;;;;;;;;;;;;
 ; File Uploads ;
