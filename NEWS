@@ -39,6 +39,8 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- ZLIB extension is now built-in in the Windows distribution.
+  External extension (php_zlib.dll) has been removed. (Edin)
 - Fix a crash when using invalid color index with imagecolortransparent()
   (Pierre-Alain Joye).
 - Fixed bug #20987 (no handling for client certificates). (Ilia)
