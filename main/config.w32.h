@@ -292,3 +292,5 @@
 #undef HAVE_RINT
 
 #define HAVE_STRFTIME 1
+
+#define SIZEOF_INT 4

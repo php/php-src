@@ -97,6 +97,12 @@ PHPAPI void _php3_info(void)
 	php3_printf("System: %s<br>Build Date: %s\n<br>", php3_uname, __DATE__);
 	php3_printf("php3.ini path:  %s<br>\n", CONFIGURATION_FILE_PATH);
 
+	php3_printf("ZEND_DEBUG=%d<br>\n", ZEND_DEBUG);
+#ifdef ZTS
+	php3_printf("ZTS is defined");
+#else
+	php3_printf("ZTS is undefined");
+#endif
 	/* Zend Engine */
 	PUTS("<hr><a href=\"http://www.zend.com/\"><img src=\"");
 	if (SG(request_info).request_uri) {
