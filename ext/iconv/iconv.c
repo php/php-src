@@ -251,8 +251,10 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 
 	if (cd == (iconv_t)(-1)) {
 		if (errno == EINVAL) {
+			*out = NULL;
 			return PHP_ICONV_ERR_WRONG_CHARSET;
 		} else {
+			*out = NULL;
 			return PHP_ICONV_ERR_CONVERTER;
 		}
 	}
@@ -263,11 +265,11 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	out_buf = (char *) emalloc(bsz+1); 
 	out_p = out_buf;
 
-	while(in_left > 0) {
+	while (in_left > 0) {
 		result = icv(cd, (const char **) &in_p, &in_left, (char **) &out_p, &out_left);
 		out_size = bsz - out_left;
-		if( result == (size_t)(-1) ) {
-			if( errno == E2BIG && in_left > 0 ) {
+		if (result == (size_t)(-1)) {
+			if (errno == E2BIG && in_left > 0) {
 				/* converted string is longer than out buffer */
 				bsz += in_len;
 
