@@ -37,7 +37,9 @@ static int le_domxmlcdatap;
 static int le_domxmltextp;
 static int le_domxmlpip;
 static int le_domxmlcommentp;
+static int le_domxmlnotationp;
 static int le_domxmlentityp;
+static int le_domxmlentityrefp;
 static int le_domxmlnsp;
 
 #if defined(LIBXML_XPATH_ENABLED)
@@ -57,6 +59,7 @@ zend_class_entry *domxmlpi_class_entry;
 zend_class_entry *domxmlcomment_class_entry;
 zend_class_entry *domxmlnotation_class_entry;
 zend_class_entry *domxmlentity_class_entry;
+zend_class_entry *domxmlentityref_class_entry;
 zend_class_entry *domxmlns_class_entry;
 #if defined(LIBXML_XPATH_ENABLED)
 zend_class_entry *xpathctx_class_entry;
@@ -126,6 +129,8 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(create_processing_instruction,	domxml_doc_create_processing_instruction,	NULL)
 	PHP_FALIAS(children,	domxml_node_children,	NULL)
 	PHP_FALIAS(add_root,	domxml_add_root,	NULL)
+	PHP_FALIAS(importednode,	domxml_doc_imported_node,	NULL)
+	PHP_FALIAS(imported_node,	domxml_doc_imported_node,	NULL)
 	PHP_FALIAS(dtd,	domxml_intdtd,	NULL)
 	PHP_FALIAS(dumpmem,	domxml_dumpmem,	NULL)
 /*	PHP_FALIAS(createcdatasection,	domxml_create_cdata_section,	NULL)
@@ -228,11 +233,15 @@ static zend_function_entry php_domxmlcomment_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlnotation_class_functions[] = {
-/*	PHP_FALIAS(publicid,	domxml_notation_public_id,		NULL)
+	PHP_FALIAS(publicid,	domxml_notation_public_id,		NULL)
 	PHP_FALIAS(public_id,	domxml_notation_public_id,		NULL)
 	PHP_FALIAS(systemid,	domxml_notation_system_id,		NULL)
 	PHP_FALIAS(system_id,	domxml_notation_system_id,		NULL)
-*/	{NULL, NULL, NULL}
+	{NULL, NULL, NULL}
+};
+
+static zend_function_entry php_domxmlentityref_class_functions[] = {
+	{NULL, NULL, NULL}
 };
 
 static zend_function_entry php_domxmlentity_class_functions[] = {
@@ -480,9 +489,9 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
 	}
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 // The following test should be replaced with search in all parents
-//	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
-//		php_error(E_ERROR, "Underlying object missing or of invalid type");
-//	} 
+	if (!obj) { // || ((type != rsrc_type1) && (type != rsrc_type2))) {
+		php_error(E_ERROR, "Underlying object missing or of invalid type");
+	} 
 
 	return obj;
 }  
@@ -567,7 +576,26 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found) {
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
 			break;
 		}
-		case XML_ENTITY_REF_NODE:
+		case XML_PI_NODE: {
+			xmlNodePtr nodep = obj;
+			object_init_ex(wrapper, domxmlpi_class_entry);
+			rsrc_type = le_domxmlpip;
+			content = xmlNodeGetContent(nodep);
+			add_property_stringl(wrapper, "target", (char *) nodep->name, strlen(nodep->name), 1);
+			if(content)
+				add_property_stringl(wrapper, "data", (char *) content, strlen(content), 1);
+			break;
+		}
+		case XML_ENTITY_REF_NODE: {
+			xmlNodePtr nodep = obj;
+			object_init_ex(wrapper, domxmlentityref_class_entry);
+			rsrc_type = le_domxmlentityrefp;
+			content = xmlNodeGetContent(nodep);
+			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
+			if(content)
+				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
+			break;
+		}
 		case XML_ENTITY_DECL: 
 		case XML_ELEMENT_DECL: {
 			xmlNodePtr nodep = obj;
@@ -634,67 +662,6 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found) {
 	return(wrapper);
 }
 
-/* The following has been taken form the gnome gdome module */
-/* This is a separate implementation that avoids the roundtrip entity
-   encoding/decoding of the current (2000-01-06) gnome-xml
-   implementation, largely because that depends on node != NULL, which
-   is not the case in the invocation from
-   gdome_xml_doc_createAttribute. */
-xmlAttrPtr
-gdome_xmlNewProp(xmlNodePtr node, const xmlChar *name, const xmlChar *value) {
-    xmlAttrPtr cur;
-
-    if (name == NULL) {
-        fprintf(stderr, "xmlNewProp : name == NULL\n");
-	return(NULL);
-    }
-
-    /*
-     * Allocate a new property and fill the fields.
-     */
-    cur = (xmlAttrPtr) xmlMalloc(sizeof(xmlAttr));
-    if (cur == NULL) {
-        fprintf(stderr, "xmlNewProp : malloc failed\n");
-	return(NULL);
-    }
-
-    cur->type = XML_ATTRIBUTE_NODE;
-    cur->parent = node; 
-    cur->ns = NULL;
-    cur->name = xmlStrdup(name);
-//    if (value != NULL) {
-//        cur->val = xmlNewText (value);
-	if (node != NULL)
-		cur->doc = node->doc;
-	else
-		;
-//		cur->val = NULL;
-#ifndef XML_WITHOUT_CORBA
-    cur->_private = NULL;
-//    cur->vepv = NULL;
-#endif
-
-    /*
-     * Add it at the end to preserve parsing order ...
-     */
-    cur->next = NULL;
-    if (node != NULL) {
-	if (node->properties == NULL) {
-	    node->properties = cur;
-	} else {
-	    xmlAttrPtr prev = node->properties;
-
-	    while (prev->next != NULL) prev = prev->next;
-	    prev->next = cur;
-	}
-    }
-#ifndef XML_WITHOUT_CORBA
-    cur->_private = NULL;
-//    cur->vepv = NULL;
-#endif    
-    return(cur);
-}
-
 PHP_MINIT_FUNCTION(domxml)
 {
 	return SUCCESS;
@@ -752,8 +719,8 @@ PHP_RINIT_FUNCTION(domxml)
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomEntity", php_domxmlentity_class_functions, NULL, NULL, NULL);
 	domxmlentity_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL);
 
-	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomProcessingInstruction", php_domxmlpi_class_functions, NULL, NULL, NULL);
-	domxmlpi_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL);
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomEntityReference", php_domxmlentityref_class_functions, NULL, NULL, NULL);
+	domxmlentityref_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL);
 
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomNamespace", php_domxmlns_class_functions, NULL, NULL, NULL);
 	domxmlns_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL);
@@ -897,12 +864,12 @@ PHP_FUNCTION(domxml_attr_specified)
 PHP_FUNCTION(domxml_pi_target)
 {
 	zval *id;
-	xmlAttrPtr attrp;
+	xmlNodePtr nodep;
 	
 	id = getThis();
-	attrp = php_dom_get_object(id, le_domxmlpip, 0);
+	nodep = php_dom_get_object(id, le_domxmlpip, 0);
 
-	/* FIXME: needs to be implemented */
+	RETURN_STRING((char *)nodep->name, 1);
 }
 /* }}} */
 
@@ -911,12 +878,12 @@ PHP_FUNCTION(domxml_pi_target)
 PHP_FUNCTION(domxml_pi_data)
 {
 	zval *id;
-	xmlAttrPtr attrp;
+	xmlNodePtr nodep;
 	
 	id = getThis();
-	attrp = php_dom_get_object(id, le_domxmlpip, 0);
+	nodep = php_dom_get_object(id, le_domxmlpip, 0);
 
-	/* FIXME: needs to be implemented */
+	RETURN_STRING(xmlNodeGetContent(nodep), 1);
 }
 /* }}} */
 /* End of Methods of DomProcessingInstruction }}} */
@@ -1498,6 +1465,38 @@ PHP_FUNCTION(domxml_node_set_content)
 
 /* End of Methods DomNode }}} */
 
+/* {{{ Methods of Class DomNotation */
+
+/* {{{ proto string domxml_notation_public_id()
+   Returns public id of notation node */
+PHP_FUNCTION(domxml_notation_public_id)
+{
+	zval *id;
+	xmlNotationPtr nodep;
+	
+	id = getThis();
+	nodep = (xmlNotationPtr) php_dom_get_object(id, le_domxmlnotationp, 0);
+
+	RETURN_STRING((char *) (nodep->PublicID), 1);
+}
+/* }}} */
+
+/* {{{ proto string domxml_notation_system_id()
+   Returns system id of notation node */
+PHP_FUNCTION(domxml_notation_system_id)
+{
+	zval *id;
+	xmlNotationPtr nodep;
+	
+	id = getThis();
+	nodep = (xmlNotationPtr) php_dom_get_object(id, le_domxmlnotationp, 0);
+
+	RETURN_STRING((char *) (nodep->SystemID), 1);
+}
+/* }}} */
+
+/* End of Methods DomNotation }}} */
+
 /* {{{ Methods of Class DomElement */
 
 /* {{{ proto object domxml_element(string name)
@@ -1919,6 +1918,41 @@ PHP_FUNCTION(domxml_doc_create_processing_instruction)
 		RETURN_FALSE;
 	}
   node->doc = docp;
+
+	rv = php_domobject_new(node, &ret);
+	SEPARATE_ZVAL(&rv);
+	*return_value = *rv;
+}
+/* }}} */
+
+/* {{{ proto object domxml_doc_imported_node(int node, bool recursive)
+   Creates new element node */
+PHP_FUNCTION(domxml_doc_imported_node)
+{
+	zval *arg1, *arg2, *id, *rv;
+	xmlNodePtr node, srcnode;
+	xmlDocPtr docp;
+	int ret;
+	
+	id = getThis();
+	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
+		RETURN_FALSE;
+	}
+
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	srcnode =  php_dom_get_object(arg1, le_domxmlnodep, 0);
+	if(!srcnode)
+		RETURN_FALSE;
+
+	convert_to_long(arg2);
+
+	node = xmlCopyNode(srcnode, arg2->value.lval);
+	if (!node) {
+		RETURN_FALSE;
+	}
+  node->doc = docp; /* Not enough because other nodes in the tree are not set */
 
 	rv = php_domobject_new(node, &ret);
 	SEPARATE_ZVAL(&rv);
