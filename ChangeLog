@@ -1,3 +1,115 @@
+2003-04-02  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/bcmath/bcmath.c:
+      MFB: Check for negative precision
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS
+      ext/bcmath/bcmath.c:
+      Negative precision makes no sense, so check for that, but let the memory
+      manager error out on huge non-negative precision args
+
+    * ext/standard/basic_functions.c:
+      MFB: Fix unregister_tick_function crash
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS
+      ext/standard/basic_functions.c:
+      Fix unregister_tick_function crash
+
+2003-04-02  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/042.phpt:
+      fixed expected output
+
+2003-04-02  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/exif/exif.c:
+      MFB: Get rid of bogus dtors
+
+    * (PHP_4_3)
+      ext/exif/exif.c:
+      Get rid of bogus dtors
+
+    * ext/standard/string.c:
+      MFB: Fix the setlocale() segfault
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS
+      ext/standard/string.c:
+      Fix the setlocale() segfault
+
+2003-04-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in:
+      For now only bison 1.28, 1.35 and 1.75 are working properly
+
+2003-04-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/apache/.cvsignore:
+      - Update for new name
+
+2003-04-02  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-04-02  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/multi.c:
+      add the ability for curl_multi_info to introspect the handles.
+      
+
+2003-04-02  Colin Viebrock  <colin@easydns.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.c
+      ext/standard/info.h:
+      fixes for logo guid functions
+
+    * main/logos.h:
+      oops ... committed the wrong one
+
+    * main/logos.h:
+      fix logo (outline around letters)
+
+2003-04-02  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * ext/ldap/ldap.dsp:
+      Fixed bug #23008
+
+2003-04-02  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.c:
+      Patch for Bug #22774 by Rob Richards
+
+2003-04-02  Sara Golemon  <php@alphaweb.net>
+
+    * tests/strings/002.phpt:
+      Avoid having output_buffering cause this test to improperly fail.
+
+    * ext/standard/tests/file/userfilters.phpt:
+      New test for userfilters rewrite
+
+2003-04-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      Fixed possible integer overflow in str_repeat().
+
+2003-04-02  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * (PHP_4_3)
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+      MFH
+
 2003-04-01  Jay Smith  <jsmith@tutorbuddy.com>
 
     * ext/pgsql/pgsql.c
