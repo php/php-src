@@ -46,7 +46,7 @@ static zend_alloc_globals alloc_globals;
 
 # if MEMORY_LIMIT
 #  if ZEND_DEBUG
-#define CHECK_MEMORY_LIMIT(s) _CHECK_MEMORY_LIMIT(s,filename,lineno)
+#define CHECK_MEMORY_LIMIT(s) _CHECK_MEMORY_LIMIT(s ZEND_FILE_LINE_RELAY_CC)
 #  else
 #define CHECK_MEMORY_LIMIT(s)	_CHECK_MEMORY_LIMIT(s,NULL,0)
 #  endif
@@ -97,11 +97,7 @@ static zend_alloc_globals alloc_globals;
 
 
 
-#if ZEND_DEBUG
-ZEND_API void *_emalloc(size_t size, char *filename, uint lineno)
-#else
-ZEND_API void *_emalloc(size_t size)
-#endif
+ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC)
 {
 	mem_header *p;
 	ALS_FETCH();
@@ -111,8 +107,8 @@ ZEND_API void *_emalloc(size_t size)
 	if ((size < MAX_CACHED_MEMORY) && (AG(cache_count)[size] > 0)) {
 		p = AG(cache)[size][--AG(cache_count)[size]];
 #if ZEND_DEBUG
-		p->filename = filename;
-		p->lineno = lineno;
+		p->filename = __zend_filename;
+		p->lineno = __zend_lineno;
 		p->magic = MEM_BLOCK_START_MAGIC;
 		p->reported = 0;
 #endif
@@ -138,8 +134,8 @@ ZEND_API void *_emalloc(size_t size)
 	ADD_POINTER_TO_LIST(p);
 	p->size = size;
 #if ZEND_DEBUG
-	p->filename = filename;
-	p->lineno = lineno;
+	p->filename = __zend_filename;
+	p->lineno = __zend_lineno;
 	p->magic = MEM_BLOCK_START_MAGIC;
 	p->reported = 0;
 	*((long *)(((char *) p) + sizeof(mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size))) = MEM_BLOCK_END_MAGIC;
@@ -152,17 +148,13 @@ ZEND_API void *_emalloc(size_t size)
 }
 
 
-#if ZEND_DEBUG
-ZEND_API void _efree(void *ptr, char *filename, uint lineno)
-#else
-ZEND_API void _efree(void *ptr)
-#endif
+ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC)
 {
 	mem_header *p = (mem_header *) ((char *)ptr - sizeof(mem_header) - PLATFORM_PADDING);
 	ALS_FETCH();
 
 #if ZEND_DEBUG
-	if (!_mem_block_check(ptr, 1, filename, lineno)) {
+	if (!_mem_block_check(ptr, 1 ZEND_FILE_LINE_RELAY_CC)) {
 		return;
 	}
 	memset(ptr, 0x5a, p->size);
@@ -188,18 +180,14 @@ ZEND_API void _efree(void *ptr)
 }
 
 
-#if ZEND_DEBUG
-ZEND_API void *_ecalloc(size_t nmemb, size_t size, char *filename, uint lineno)
-#else
-ZEND_API void *_ecalloc(size_t nmemb, size_t size)
-#endif
+ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC)
 {
 	void *p;
 	int final_size=size*nmemb;
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-	p = _emalloc(final_size,filename,lineno);
+	p = _emalloc(final_size ZEND_FILE_LINE_RELAY_CC);
 #else
 	p = emalloc(final_size);
 #endif
@@ -213,11 +201,7 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size)
 }
 
 
-#if ZEND_DEBUG
-ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure, char *filename, uint lineno)
-#else
-ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure)
-#endif
+ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC)
 {
 	mem_header *p = (mem_header *) ((char *)ptr-sizeof(mem_header)-PLATFORM_PADDING);
 	mem_header *orig = p;
@@ -225,7 +209,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure)
 
 	if (!ptr) {
 #if ZEND_DEBUG
-		return _emalloc(size, filename, lineno);
+		return _emalloc(size ZEND_FILE_LINE_RELAY_CC);
 #else
 		return emalloc(size);
 #endif
@@ -248,8 +232,8 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure)
 	}
 	ADD_POINTER_TO_LIST(p);
 #if ZEND_DEBUG
-	p->filename = filename;
-	p->lineno = lineno;
+	p->filename = __zend_filename;
+	p->lineno = __zend_lineno;
 	p->magic = MEM_BLOCK_START_MAGIC;
 	*((long *)(((char *) p) + sizeof(mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size))) = MEM_BLOCK_END_MAGIC;
 #endif	
@@ -263,11 +247,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure)
 }
 
 
-#if ZEND_DEBUG
-ZEND_API char *_estrdup(const char *s, char *filename, uint lineno)
-#else
-ZEND_API char *_estrdup(const char *s)
-#endif
+ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC)
 {
 	int length;
 	char *p;
@@ -275,7 +255,7 @@ ZEND_API char *_estrdup(const char *s)
 	length = strlen(s)+1;
 	HANDLE_BLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-	p = (char *) _emalloc(length,filename,lineno);
+	p = (char *) _emalloc(length ZEND_FILE_LINE_RELAY_CC);
 #else
 	p = (char *) emalloc(length);
 #endif
@@ -289,17 +269,13 @@ ZEND_API char *_estrdup(const char *s)
 }
 
 
-#if ZEND_DEBUG
-ZEND_API char *_estrndup(const char *s, uint length, char *filename, uint lineno)
-#else
-ZEND_API char *_estrndup(const char *s, uint length)
-#endif
+ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC)
 {
 	char *p;
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-	p = (char *) _emalloc(length+1,filename,lineno);
+	p = (char *) _emalloc(length+1 ZEND_FILE_LINE_RELAY_CC);
 #else
 	p = (char *) emalloc(length+1);
 #endif
@@ -424,7 +400,7 @@ void zend_debug_alloc_output(char *format, ...)
 }
 
 
-ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
+ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC)
 {
 	mem_header *p = (mem_header *) ((char *)ptr - sizeof(mem_header) - PLATFORM_PADDING);
 	int no_cache_notice=0;
@@ -442,7 +418,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 	if (!silent) {
 		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
 		zend_debug_alloc_output("---------------------------------------\n");
-		zend_debug_alloc_output("%s(%d) : Block 0x%0.8lX status:\n", filename, lineno, (long) p);
+		zend_debug_alloc_output("%s(%d) : Block 0x%0.8lX status:\n" ZEND_FILE_LINE_RELAY_CC, (long) p);
 		zend_debug_alloc_output("%10s\t","Beginning:  ");
 	}
 
@@ -457,7 +433,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 				zend_debug_alloc_output("Freed\n");
 				had_problems=1;
 			} else {
-				return _mem_block_check(ptr, 0, filename, lineno);
+				return _mem_block_check(ptr, 0 ZEND_FILE_LINE_RELAY_CC);
 			}
 			break;
 		case MEM_BLOCK_CACHED_MAGIC:
@@ -468,7 +444,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 				}
 			} else {
 				if (!no_cache_notice) {
-					return _mem_block_check(ptr, 0, filename, lineno);
+					return _mem_block_check(ptr, 0 ZEND_FILE_LINE_RELAY_CC);
 				}
 			}
 			break;
@@ -476,7 +452,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 			if (!silent) {
 				zend_debug_alloc_output("Overrun (magic=0x%0.8lX, expected=0x%0.8lX)\n", p->magic, MEM_BLOCK_START_MAGIC);
 			} else {
-				return _mem_block_check(ptr, 0, filename, lineno);
+				return _mem_block_check(ptr, 0 ZEND_FILE_LINE_RELAY_CC);
 			}
 			had_problems=1;
 			valid_beginning=0;
@@ -492,7 +468,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 		int i;
 
 		if (silent) {
-			return _mem_block_check(ptr, 0, filename, lineno);
+			return _mem_block_check(ptr, 0 ZEND_FILE_LINE_RELAY_CC);
 		}
 		had_problems=1;
 		overflow_ptr = ((char *) p)+sizeof(mem_header)+p->size+PLATFORM_PADDING;
@@ -534,7 +510,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 }
 
 
-ZEND_API void _full_mem_check(int silent, char *filename, uint lineno)
+ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC)
 {
 	mem_header *p;
 	int errors=0;
@@ -544,31 +520,27 @@ ZEND_API void _full_mem_check(int silent, char *filename, uint lineno)
 	
 
 	zend_debug_alloc_output("------------------------------------------------\n");
-	zend_debug_alloc_output("Full Memory Check at %s:%d\n", filename, lineno);
+	zend_debug_alloc_output("Full Memory Check at %s:%d\n" ZEND_FILE_LINE_RELAY_CC);
 
 	while (p) {
-		if (!_mem_block_check((void *)((char *)p + sizeof(mem_header) + PLATFORM_PADDING), (silent?2:3), filename, lineno)) {
+		if (!_mem_block_check((void *)((char *)p + sizeof(mem_header) + PLATFORM_PADDING), (silent?2:3) ZEND_FILE_LINE_RELAY_CC)) {
 			errors++;
 		}
 		p = p->pNext;
 	}
-	zend_debug_alloc_output("End of full memory check %s:%d (%d errors)\n", filename, lineno, errors);
+	zend_debug_alloc_output("End of full memory check %s:%d (%d errors)\n" ZEND_FILE_LINE_RELAY_CC, errors);
 	zend_debug_alloc_output("------------------------------------------------\n");
 }
 #endif
 
 
-#if ZEND_DEBUG
-ZEND_API void _persist_alloc(void *ptr, char *filename, uint lineno)
-#else
-ZEND_API void _persist_alloc(void *ptr)
-#endif
+ZEND_API void _persist_alloc(void *ptr ZEND_FILE_LINE_DC)
 {
 	mem_header *p = (mem_header *) ((char *)ptr-sizeof(mem_header)-PLATFORM_PADDING);
 	ALS_FETCH();
 
 #if ZEND_DEBUG
-	_mem_block_check(ptr, 1, filename, lineno);
+	_mem_block_check(ptr, 1 ZEND_FILE_LINE_RELAY_CC);
 #endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
