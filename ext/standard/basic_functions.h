@@ -141,6 +141,7 @@ typedef signed int php_int32;
 typedef struct {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
+	zval **strtok_zval;
 	char *strtok_string;
 	char *locale_string;
 	char *strtok_last;
