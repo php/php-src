@@ -82,36 +82,6 @@ if test -n "$with_apache" && test -n "$with_apxs"; then
 fi
 
 
-
-dnl Platform-specific compile settings.
-dnl -------------------------------------------------------------------------
-
-dnl if host_alias is empty, ac_cv_host_alias may still have the info
-if test -z "$host_alias"; then
-    host_alias=$ac_cv_host_alias
-fi
-
-case $host_alias in
-*solaris*)
-    CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
-    if test "${enable_libgcc+set}" != "set" && test "$GCC" = "yes"; then
-      enable_libgcc=yes
-    fi
-    ;;
-*dgux*)
-    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
-*darwin*|*rhapsody*)
-    CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
-    php_multiple_shlib_versions_ok=yes;;
-*beos*)
-    beos_threads=1
-    LIBS="$LIBS -lbe -lroot";;
-*mips*)
-    CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
-esac
-
-
-
 dnl Settings we want to make before the checks.
 dnl -------------------------------------------------------------------------
 
@@ -184,6 +154,33 @@ if test "$ac_cv_c_const" = "yes" ; then
   LEX_CFLAGS="-DYY_USE_CONST"
 fi
 
+
+dnl Platform-specific compile settings.
+dnl -------------------------------------------------------------------------
+
+dnl if host_alias is empty, ac_cv_host_alias may still have the info
+if test -z "$host_alias"; then
+    host_alias=$ac_cv_host_alias
+fi
+
+case $host_alias in
+*solaris*)
+    CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
+    if test "${enable_libgcc+set}" != "set" && test "$GCC" = "yes"; then
+      enable_libgcc=yes
+    fi
+    ;;
+*dgux*)
+    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
+*darwin*|*rhapsody*)
+    CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
+    php_multiple_shlib_versions_ok=yes;;
+*beos*)
+    beos_threads=1
+    LIBS="$LIBS -lbe -lroot";;
+*mips*)
+    CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
+esac
 
 
 dnl Include Zend and TSRM configurations.
