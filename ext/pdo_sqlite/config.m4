@@ -118,7 +118,7 @@ EOF
       AC_CHECK_HEADERS(time.h)
     
   fi
-  PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
+  dnl PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
 fi
 
 fi
