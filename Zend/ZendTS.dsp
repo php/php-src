@@ -200,7 +200,7 @@ SOURCE=".\zend_language_parser.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_language_scanner.c
+SOURCE=".\zend_language_scanner.c"
 # End Source File
 # Begin Source File
 
@@ -241,6 +241,10 @@ SOURCE=.\zend_sprintf.c
 # Begin Source File
 
 SOURCE=.\zend_stack.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ts_hash.c
 # End Source File
 # Begin Source File
 
@@ -385,6 +389,10 @@ SOURCE=.\zend_qsort.h
 # Begin Source File
 
 SOURCE=.\zend_stack.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ts_hash.h
 # End Source File
 # Begin Source File
 
