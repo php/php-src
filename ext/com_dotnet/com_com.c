@@ -118,7 +118,10 @@ PHP_FUNCTION(com_create_instance)
 		IMoniker *pMoniker = NULL;
 		ULONG ulEaten;
 
-		if (server_name == NULL) {
+		if (server_params != NULL) {
+			/* TODO: review this.
+			 * The assumption seems to be that monikers cannot be invoked for remote servers.
+			 * The BindCtx might allow this however */
 			res = MK_E_SYNTAX;
 		} else if (SUCCEEDED(res = CreateBindCtx(0, &pBindCtx)) &&
 				SUCCEEDED(res = MkParseDisplayName(pBindCtx, moniker, &ulEaten, &pMoniker))) {
