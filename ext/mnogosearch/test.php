@@ -62,9 +62,10 @@
 		// Get result parameters
 		$total=Udm_Get_Res_Param($res,UDM_PARAM_FOUND);
 		$rows=Udm_Get_Res_Param($res,UDM_PARAM_NUM_ROWS);
+		$wordinfo=Udm_Get_Res_Param($res,UDM_PARAM_WORDINFO);
 
-		printf("Documents %d-%d from %d total found\n\n",
-			$first,$first+$rows-1,$total);
+		printf("Documents %d-%d from %d total found; %s\n\n",
+			$first,$first+$rows-1,$total,$wordinfo);
 
 		// Fetch all rows
 		for($i=0;$i<$rows;$i++){

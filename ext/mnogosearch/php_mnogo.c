@@ -32,14 +32,16 @@
 
 #define UDM_FIELD_URLID		1
 #define UDM_FIELD_URL		2
-#define UDM_FIELD_CONTENT	4	
-#define UDM_FIELD_TITLE		8
-#define UDM_FIELD_KEYWORDS	16
-#define UDM_FIELD_DESC		32
-#define UDM_FIELD_TEXT		64
-#define UDM_FIELD_SIZE		128
-#define UDM_FIELD_SCORE		256
-#define UDM_FIELD_MODIFIED	512
+#define UDM_FIELD_CONTENT	3	
+#define UDM_FIELD_TITLE		4
+#define UDM_FIELD_KEYWORDS	5
+#define UDM_FIELD_DESC		6
+#define UDM_FIELD_DESCRIPTION 	7
+#define UDM_FIELD_TEXT		8
+#define UDM_FIELD_SIZE		9
+#define UDM_FIELD_SCORE		10
+#define UDM_FIELD_RATING	11
+#define UDM_FIELD_MODIFIED	12
 
 /* udm_set_agent_param constants */
 #define UDM_PARAM_PAGE_SIZE	1
@@ -63,6 +65,7 @@
 /* udm_get_res_param constants */
 #define UDM_PARAM_NUM_ROWS	256
 #define UDM_PARAM_FOUND		257
+#define UDM_PARAM_WORDINFO	258
 
 /* True globals, no need for thread safety */
 static int le_link,le_res;
@@ -128,9 +131,11 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_FIELD_TITLE",	UDM_FIELD_TITLE,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_KEYWORDS",UDM_FIELD_KEYWORDS,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_DESC",	UDM_FIELD_DESC,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_FIELD_DESCRIPTION",	UDM_FIELD_DESCRIPTION,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_TEXT",	UDM_FIELD_TEXT,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_SIZE",	UDM_FIELD_SIZE,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_SCORE",	UDM_FIELD_SCORE,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_FIELD_RATING",	UDM_FIELD_RATING,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_MODIFIED",UDM_FIELD_MODIFIED,CONST_CS | CONST_PERSISTENT);
 
 	/* udm_set_agent_param constants */
@@ -152,6 +157,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	/* udm_get_res_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_FOUND",UDM_PARAM_FOUND,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_NUM_ROWS",UDM_PARAM_NUM_ROWS,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_WORDINFO",UDM_PARAM_WORDINFO,CONST_CS | CONST_PERSISTENT);
 
 	/* search modes */
 	REGISTER_LONG_CONSTANT("UDM_MODE_ALL",UDM_MODE_ALL,CONST_CS | CONST_PERSISTENT);
@@ -496,7 +502,7 @@ DLEXPORT PHP_FUNCTION(udm_find)
 /* }}} */
 
 
-/* {{{ proto int udm_get_res_field(int res, int row, int field)
+/* {{{ proto string udm_get_res_field(int res, int row, int field)
    Fetch mnoGoSearch result field */
 DLEXPORT PHP_FUNCTION(udm_get_res_field){
 	pval **yyres, **yyrow_num, **yyfield_name;
@@ -522,16 +528,48 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field){
 	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
 	if(row<Res->num_rows){
 		switch(field){
-			case UDM_FIELD_URL: 		RETURN_STRING((Res->Doc[row].url),1);break;
-			case UDM_FIELD_CONTENT: 	RETURN_STRING((Res->Doc[row].content_type),1);break;
-			case UDM_FIELD_TITLE:		RETURN_STRING((Res->Doc[row].title),1);break;
-			case UDM_FIELD_KEYWORDS:	RETURN_STRING((Res->Doc[row].keywords),1);break;
-			case UDM_FIELD_DESC:		RETURN_STRING((Res->Doc[row].description),1);break;
-			case UDM_FIELD_TEXT:		RETURN_STRING((Res->Doc[row].text),1);break;
-			case UDM_FIELD_SIZE:		RETURN_LONG((Res->Doc[row].size));break;
-			case UDM_FIELD_URLID:		RETURN_LONG((Res->Doc[row].url_id));break;
-			case UDM_FIELD_SCORE:		RETURN_LONG((Res->Doc[row].rating));break;
-			case UDM_FIELD_MODIFIED:	RETURN_LONG((Res->Doc[row].last_mod_time));break;
+			case UDM_FIELD_URL: 		
+				RETURN_STRING((Res->Doc[row].url),1);
+				break;
+				
+			case UDM_FIELD_CONTENT: 	
+				RETURN_STRING((Res->Doc[row].content_type),1);
+				break;
+				
+			case UDM_FIELD_TITLE:		
+				RETURN_STRING((Res->Doc[row].title),1);
+				break;
+				
+			case UDM_FIELD_KEYWORDS:	
+				RETURN_STRING((Res->Doc[row].keywords),1);
+				break;
+				
+			case UDM_FIELD_DESC:		
+			case UDM_FIELD_DESCRIPTION:		
+				RETURN_STRING((Res->Doc[row].description),1);
+				break;
+				
+			case UDM_FIELD_TEXT:		
+				RETURN_STRING((Res->Doc[row].text),1);
+				break;
+				
+			case UDM_FIELD_SIZE:		
+				RETURN_LONG((Res->Doc[row].size));
+				break;
+				
+			case UDM_FIELD_URLID:		
+				RETURN_LONG((Res->Doc[row].url_id));
+				break;
+				
+			case UDM_FIELD_SCORE:		
+			case UDM_FIELD_RATING:		
+				RETURN_LONG((Res->Doc[row].rating));
+				break;
+				
+			case UDM_FIELD_MODIFIED:	
+				RETURN_LONG((Res->Doc[row].last_mod_time));
+				break;
+				
 			default: 
 				php_error(E_WARNING,"Udm_Get_Res_Field: Unknown mnoGoSearch field name");
 				RETURN_FALSE;
@@ -545,7 +583,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field){
 /* }}} */
 
 
-/* {{{ proto int udm_get_res_param(int res, int param)
+/* {{{ proto string udm_get_res_param(int res, int param)
    Get mnoGoSearch result parameters */
 DLEXPORT PHP_FUNCTION(udm_get_res_param)
 {
@@ -567,8 +605,18 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 	}
 	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
 	switch(param){
-		case UDM_PARAM_NUM_ROWS: RETURN_LONG(Res->num_rows);break;
-		case UDM_PARAM_FOUND:	 RETURN_LONG(Res->total_found);break;
+		case UDM_PARAM_NUM_ROWS: 	
+			RETURN_LONG(Res->num_rows);
+			break;
+		
+		case UDM_PARAM_FOUND:	 	
+			RETURN_LONG(Res->total_found);
+			break;
+		
+		case UDM_PARAM_WORDINFO: 	
+			RETURN_STRING(Res->wordinfo,1);
+			break;
+		
 		default:
 			php_error(E_WARNING,"Udm_Get_Res_Param: Unknown mnoGoSearch param name");
 			RETURN_FALSE;
