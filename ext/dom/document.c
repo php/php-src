@@ -97,85 +97,6 @@ zend_function_entry php_dom_document_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static void php_dom_validate_error(void *ctx, const char *msg, ...)
-{
-	char *buf;
-	va_list ap;
-	int len;
-
-	va_start(ap, msg);
-	len = vspprintf(&buf, 0, msg, ap);
-	va_end(ap);
-	
-	/* remove any trailing \n */
-	while (len && buf[--len] == '\n') {
-		buf[len] = '\0';
-	}
-
-   	php_error(E_WARNING, "%s", buf);
-	efree(buf);
-}
-
-/* {{{ static void php_dom_ctx_error_level(int level, void *ctx, const char *msg, ...) */
-static void php_dom_ctx_error_level(int level, void *ctx, const char *msg)
-{
-	xmlParserCtxtPtr parser;
-	TSRMLS_FETCH();
-
-	parser = (xmlParserCtxtPtr) ctx;
-
-	if (parser != NULL && parser->input != NULL) {
-		if (parser->input->filename) {
-			php_error_docref(NULL TSRMLS_CC, level, "%s in %s, line: %d", msg, parser->input->filename, parser->input->line);
-		} else {
-			php_error_docref(NULL TSRMLS_CC, level, "%s in Entity, line: %d", msg, parser->input->line);
-		}
-	}
-}
-/* }}} end php_dom_ctx_error */
-
-/* {{{ static void php_dom_ctx_error(void *ctx, const char *msg, ...) */
-static void php_dom_ctx_error(void *ctx, const char *msg, ...)
-{
-	va_list ap;
-	char *buf;
-	int len;
-
-	va_start(ap, msg);
-	len = vspprintf(&buf, 0, msg, ap);
-	va_end(ap);
-	
-	/* remove any trailing \n */
-	while (len && buf[--len] == '\n') {
-		buf[len] = '\0';
-	}
-
-	php_dom_ctx_error_level(E_WARNING, ctx, buf);
-	efree(buf);
-}
-/* }}} end php_dom_ctx_error */
-
-static void php_dom_ctx_warning(void *ctx, const char *msg, ...)
-{
-	va_list ap;
-	char *buf;
-	int len;
-
-	va_start(ap, msg);
-	len = vspprintf(&buf, 0, msg, ap);
-	va_end(ap);
-	
-	/* remove any trailing \n */
-	while (len && buf[--len] == '\n') {
-		buf[len] = '\0';
-	}
-
-	php_dom_ctx_error_level(E_NOTICE, ctx, buf);
-	efree(buf);
-}
-/* }}} end php_dom_ctx_error */
-
-
 /* {{{ proto doctype	documenttype	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-B63ED1A31
@@ -1336,12 +1257,12 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
     ctxt->loadsubset = (resolve_externals * XML_COMPLETE_ATTRS);
 	ctxt->replaceEntities = substitute_ent;
 
-	ctxt->vctxt.error = php_dom_ctx_error;
-	ctxt->vctxt.warning = php_dom_ctx_warning;
+	ctxt->vctxt.error = php_libxml_ctx_error;
+	ctxt->vctxt.warning = php_libxml_ctx_warning;
 
 	if (ctxt->sax != NULL) {
-		ctxt->sax->error = php_dom_ctx_error;
-		ctxt->sax->warning = php_dom_ctx_warning;
+		ctxt->sax->error = php_libxml_ctx_error;
+		ctxt->sax->warning = php_libxml_ctx_warning;
 	}
 
 	xmlParseDocument(ctxt);
@@ -1559,8 +1480,8 @@ PHP_FUNCTION(dom_document_validate)
 	}
     
 	cvp.userData = NULL;
-	cvp.error    = (xmlValidityErrorFunc) php_dom_validate_error;
-	cvp.warning  = (xmlValidityErrorFunc) php_dom_validate_error;
+	cvp.error    = (xmlValidityErrorFunc) php_libxml_error_handler;
+	cvp.warning  = (xmlValidityErrorFunc) php_libxml_error_handler;
 
 	if (xmlValidateDocument(&cvp, docp)) {
 		RETVAL_TRUE;
@@ -1608,8 +1529,8 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	xmlSchemaSetParserErrors(parser,
-		(xmlSchemaValidityErrorFunc) php_dom_validate_error,
-		(xmlSchemaValidityWarningFunc) php_dom_validate_error,
+		(xmlSchemaValidityErrorFunc) php_libxml_error_handler,
+		(xmlSchemaValidityWarningFunc) php_libxml_error_handler,
 		parser);
 	sptr = xmlSchemaParse(parser);
 	xmlSchemaFreeParserCtxt(parser);
@@ -1627,7 +1548,7 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
-	xmlSchemaSetValidErrors(vptr, php_dom_validate_error, php_dom_validate_error, vptr);
+	xmlSchemaSetValidErrors(vptr, php_libxml_error_handler, php_libxml_error_handler, vptr);
 	is_valid = xmlSchemaValidateDoc(vptr, docp);
 	xmlSchemaFree(sptr);
 	xmlSchemaFreeValidCtxt(vptr);
@@ -1691,8 +1612,8 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	xmlRelaxNGSetParserErrors(parser,
-		(xmlRelaxNGValidityErrorFunc) php_dom_validate_error,
-		(xmlRelaxNGValidityWarningFunc) php_dom_validate_error,
+		(xmlRelaxNGValidityErrorFunc) php_libxml_error_handler,
+		(xmlRelaxNGValidityWarningFunc) php_libxml_error_handler,
 		parser);
 	sptr = xmlRelaxNGParse(parser);
 	xmlRelaxNGFreeParserCtxt(parser);
@@ -1710,7 +1631,7 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
-	xmlRelaxNGSetValidErrors(vptr, php_dom_validate_error, php_dom_validate_error, vptr);
+	xmlRelaxNGSetValidErrors(vptr, php_libxml_error_handler, php_libxml_error_handler, vptr);
 	is_valid = xmlRelaxNGValidateDoc(vptr, docp);
 	xmlRelaxNGFree(sptr);
 	xmlRelaxNGFreeValidCtxt(vptr);
@@ -1762,11 +1683,11 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		source_len = xmlStrlen(source);
 		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
 	}
-	ctxt->vctxt.error = php_dom_ctx_error;
-	ctxt->vctxt.warning = php_dom_ctx_warning;
+	ctxt->vctxt.error = php_libxml_ctx_error;
+	ctxt->vctxt.warning = php_libxml_ctx_warning;
 	if (ctxt->sax != NULL) {
-		ctxt->sax->error = php_dom_ctx_error;
-		ctxt->sax->warning = php_dom_ctx_warning;
+		ctxt->sax->error = php_libxml_ctx_error;
+		ctxt->sax->warning = php_libxml_ctx_warning;
 	}
 	htmlParseDocument(ctxt);
 	newdoc = ctxt->myDoc;
