@@ -925,8 +925,9 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 	*result = opline->result;
 	SET_UNUSED(opline->op2);
 
-	// Check how much this is really needed
-	//opline->op2.u.constant.value.lval = is_method;
+	/* Check how much this is really needed
+	  opline->op2.u.constant.value.lval = is_method;
+	*/
 	if (CG(throw_list) != NULL) {
 		long op_number = get_next_op_number(CG(active_op_array))-1;
 		zend_llist_add_element(CG(throw_list), &op_number);
@@ -1108,17 +1109,17 @@ void zend_do_try(znode *try_token CLS_DC)
 	try_token->throw_list = (void *) CG(throw_list);
 	CG(throw_list) = (zend_llist *) emalloc(sizeof(zend_llist));
 	zend_llist_init(CG(throw_list), sizeof(long), NULL, 0);
-	// Initialize try backpatch list used to backpatch throw, do_fcall
+	/* Initialize try backpatch list used to backpatch throw, do_fcall */
 }
 
 static void throw_list_applier(long *opline_num, long *catch_opline)
 {
 	zend_op *opline;
-	CLS_FETCH(); // Pass this by argument
+	CLS_FETCH(); /* Pass this by argument */
 
 	opline = &CG(active_op_array)->opcodes[*opline_num];
 
-	// Backpatch the opline of the catch statement
+	/* Backpatch the opline of the catch statement */
 	switch (opline->opcode) {
 		case ZEND_DO_FCALL:
 		case ZEND_DO_FCALL_BY_NAME:
@@ -1141,7 +1142,7 @@ void zend_do_begin_catch(znode *try_token, znode *catch_var CLS_DC)
 	opline->op1 = *catch_var;
 	SET_UNUSED(opline->op2);
 
-	zend_llist_apply_with_argument(CG(throw_list), throw_list_applier, &catch_op_number);
+	zend_llist_apply_with_argument(CG(throw_list), (llist_apply_with_arg_func_t) throw_list_applier, &catch_op_number);
 	zend_llist_destroy(CG(throw_list));
 	efree(CG(throw_list));
 	CG(throw_list) = (void *) try_token->throw_list;
@@ -1860,7 +1861,7 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC)
 	opline->extended_value = ZEND_DO_FCALL;
 	SET_UNUSED(opline->op2);
 
-	// FIXME: exception support not added to this op2
+	/* FIXME: exception support not added to this op2 */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_DO_FCALL;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
