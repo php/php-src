@@ -53,6 +53,8 @@ static SWFAction getAction(zval *id TSRMLS_DC);
 static SWFMorph getMorph(zval *id TSRMLS_DC);
 static SWFMovieClip getSprite(zval *id TSRMLS_DC);
 
+/* {{{ proto void ming_setcubicthreshold (int threshold)
+	Set cubic threshold (?) */
 PHP_FUNCTION(ming_setCubicThreshold)
 {
   zval **num;
@@ -64,7 +66,10 @@ PHP_FUNCTION(ming_setCubicThreshold)
 
   Ming_setCubicThreshold(Z_LVAL_PP(num));
 }
+/* }}} */
 
+/* {{{ proto void ming_setscale(int scale)
+	Set scale (?) */
 PHP_FUNCTION(ming_setScale)
 {
   zval **num;
@@ -76,7 +81,10 @@ PHP_FUNCTION(ming_setScale)
 
   Ming_setScale(Z_DVAL_PP(num));
 }
+/* }}} */
 
+/* {{{ proto void ming_useswfversion(int version)
+	Use SWF version (?) */ 
 PHP_FUNCTION(ming_useSWFVersion)
 {
   zval **num;
@@ -88,6 +96,7 @@ PHP_FUNCTION(ming_useSWFVersion)
 
   Ming_useSWFVersion(Z_LVAL_PP(num));
 }
+/* }}} */
 
 static int le_swfmoviep;
 static int le_swfshapep;
@@ -585,9 +594,9 @@ PHP_FUNCTION(swfbutton_addAction)
 }
 
 /* }}} */
-/* {{{ proto int swfbutton_keypress(string str)
-   Returns the action flag for keyPress(char) */
 
+/* {{{ proto int swfbutton_keypress(string str)
+  	Returns the action flag for keyPress(char) */
 PHP_FUNCTION(swfbutton_keypress)
 {
   zval **key;

@@ -217,7 +217,7 @@ PHP_FUNCTION(ngettext)
 #endif
 
 #if HAVE_DNGETTEXT
-/* {{{ proto string dngettext (string domain, string msgid1, string msgid2, long count)
+/* {{{ proto string dngettext (string domain, string msgid1, string msgid2, int count)
    Plural version of dgettext() */
 PHP_FUNCTION(dngettext)
 {
@@ -245,7 +245,7 @@ PHP_FUNCTION(dngettext)
 #endif
 
 #if HAVE_DCNGETTEXT
-/* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, long n, int category)
+/* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, int n, int category)
    Plural version of dcgettext() */								
 PHP_FUNCTION(dcngettext)
 {
