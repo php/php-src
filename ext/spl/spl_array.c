@@ -106,10 +106,7 @@ static void spl_array_object_dtor(void *object, zend_object_handle handle TSRMLS
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
 
-	if (!ZVAL_DELREF(intern->array)) {
-		zval_dtor(intern->array);
-		FREE_ZVAL(intern->array);
-	}
+	zval_ptr_dtor(&intern->array);
 
 	efree(object);
 }
@@ -275,6 +272,32 @@ static void spl_array_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ spl_array_has_dimension */
+static int spl_array_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC)
+{
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+	long index;
+
+	switch(Z_TYPE_P(offset)) {
+	case IS_STRING:
+		return zend_symtable_exists(HASH_OF(intern->array), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+	case IS_DOUBLE:
+	case IS_RESOURCE:
+	case IS_BOOL: 
+	case IS_LONG: 
+		if (offset->type == IS_DOUBLE) {
+			index = (long)Z_DVAL_P(offset);
+		} else {
+			index = Z_LVAL_P(offset);
+		}
+		return zend_hash_index_exists(HASH_OF(intern->array), index);
+	default:
+		zend_error(E_WARNING, "Illegal offset type");
+	}
+	return 0;
+}
+/* }}} */
+
 /* {{{ spl_array_get_properties */
 static HashTable *spl_array_get_properties(zval *object TSRMLS_DC)
 {
@@ -299,6 +322,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayClass.read_dimension = spl_array_read_dimension;
 	spl_handler_ArrayClass.write_dimension = spl_array_write_dimension;
 	spl_handler_ArrayClass.unset_dimension = spl_array_unset_dimension;
+	spl_handler_ArrayClass.has_dimension = spl_array_has_dimension;
 	spl_handler_ArrayClass.get_properties = spl_array_get_properties;
 
 	REGISTER_SPL_STD_CLASS_EX(ArrayIterator, spl_array_object_new, spl_funcs_ArrayIterator);
