@@ -1310,9 +1310,8 @@ PHP_FUNCTION(sqlite_array_query)
 /* {{{ php_sqlite_fetch_single */
 static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool decode_binary, zval *return_value TSRMLS_DC)
 {
-	int j, buffered = res->buffered;
-	const char **rowdata, **colnames;
-	char *decoded = NULL;
+	const char **rowdata;
+	char *decoded;
 	int decoded_len;
 	
 	/* check range of the row */
@@ -1342,6 +1341,9 @@ static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool dec
 			decoded = (char*)rowdata[0];
 			rowdata[0] = NULL;
 		}
+	} else {
+		decoded = NULL;
+		decoded_len = 0;
 	}
 
 	if (!res->buffered) {
@@ -1433,9 +1435,6 @@ PHP_FUNCTION(sqlite_fetch_single)
 	zval *zres;
 	zend_bool decode_binary = 1;
 	struct php_sqlite_result *res;
-	char *decoded = NULL;
-	int decoded_len;
-	const char **rowdata;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &zres, &decode_binary)) {
 		return;
