@@ -198,28 +198,28 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
 	} else {
 		zend_fcall_info_cache fcic;
-		
-		if (fn_proxy && !*fn_proxy) {
-			fcic.initialized = 0;
-			ZVAL_STRINGL(&z_fname, function_name, function_name_len, 0);
-			result = zend_call_function(&fci, &fcic TSRMLS_CC);
-			*fn_proxy = fcic.function_handler;
-		} else {
-			fcic.initialized = 1;
-			if (!fn_proxy) {
-				/* this doesn't handle 'function not found' error! */
-				zend_hash_find(&obj_ce->function_table, function_name, function_name_len+1, (void **) &fcic.function_handler);
-			} else {
-				fcic.function_handler = *fn_proxy;
-			}
-			fcic.calling_scope = obj_ce;
-			fcic.object_pp = object_pp;
-			result = zend_call_function(&fci, &fcic TSRMLS_CC);
+
+		fcic.initialized = 1;
+		if (!obj_ce) {
+			obj_ce = Z_OBJCE_PP(object_pp);
 		}
+		if (!fn_proxy || !*fn_proxy) {
+			if (zend_hash_find(&obj_ce->function_table, function_name, function_name_len+1, (void **) &fcic.function_handler) == FAILURE) {
+				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %s::%s\n", obj_ce->name, function_name);
+			}
+			if (fn_proxy) {
+				*fn_proxy = fcic.function_handler;
+			}
+		} else {
+			fcic.function_handler = *fn_proxy;
+		}
+		fcic.calling_scope = obj_ce;
+		fcic.object_pp = object_pp;
+		result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	}
-	if (!retval_ptr && fci.retval_ptr_ptr) {
-		zval_dtor(*fci.retval_ptr_ptr);
-		FREE_ZVAL(*fci.retval_ptr_ptr);
+	if (!retval_ptr && retval) {
+		zval_dtor(retval);
+		FREE_ZVAL(retval);
 	}
 	return result;
 }
