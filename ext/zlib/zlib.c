@@ -679,7 +679,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 	int start_offset = (do_start?10:0);
 	int end_offset = (do_end?8:0);
 
-	outlen = sizeof(char) * (str_length * 1.001 + 12) + 1; /* leave some room for a trailing \0 */
+	outlen = (uint)(sizeof(char) * (str_length * 1.001f + 12) + 1); /* leave some room for a trailing \0 */
 	if ((outlen+start_offset+end_offset) > *p_buffer_len) {
 		buffer = (Bytef *) emalloc(outlen+start_offset+end_offset);
 	} else {
@@ -1014,7 +1014,7 @@ int php_enable_output_compression(int buffer_size TSRMLS_DC)
 	}
 
 	php_start_ob_buffer(NULL, buffer_size, 0 TSRMLS_CC);
-	php_ob_set_internal_handler(php_gzip_output_handler, buffer_size*1.5, "zlib output compression", 0 TSRMLS_CC);
+	php_ob_set_internal_handler(php_gzip_output_handler, (uint)(buffer_size*1.5f), "zlib output compression", 0 TSRMLS_CC);
 	if (ZLIBG(output_handler) && strlen(ZLIBG(output_handler))) {
 		php_start_ob_buffer_named(ZLIBG(output_handler), 0, 1 TSRMLS_CC);
 	}
