@@ -47,10 +47,6 @@
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
-#elif defined(NETWARE) && !defined(NEW_LIBC)
-/*#include <ws2nlm.h>*/
-#include <sys/socket.h>
-#include "netware/param.h"
 #else
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
