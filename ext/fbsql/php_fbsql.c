@@ -563,14 +563,15 @@ PHPFBLink* phpfbConnect(INTERNAL_FUNCTION_PARAMETERS, char *hostName, char *user
 		result->results          = NULL;
 
 		le.ptr  = result;
-		le.type = le_link; 
+		le.type = persistant?le_plink:le_link;
 		if (zend_hash_update(persistant?&EG(persistent_list):&EG(regular_list), name, strlen(name), &le, sizeof(le), NULL)==FAILURE)
 		{
 /*			phpfbReleaseLink(result); */
 			return NULL;
         }
-		result->index = zend_list_insert (phpfbRetainLink(result), le_link);
+		result->index = zend_list_insert (phpfbRetainLink(result), le.type);
 		FB_SQL_G(linkCount)++;
+		if (persistant) FB_SQL_G(persistantCount)++;
 	}
 	return result;
 }
@@ -658,7 +659,7 @@ PHPFBLink* phpfbGetLink(int id)
 	{
 		php_error(E_WARNING,"FrontBase has no default connection");
 	}
-	else if ((!(phpLink = (PHPFBLink*) zend_list_find (id,&type))) || ((type != le_link)))
+	else if ((!(phpLink = (PHPFBLink*) zend_list_find (id,&type))) || ((type != le_link && type != le_plink)))
 	{
 		php_error(E_WARNING,"%d is not a FBSQL link index",id);
 		phpLink = NULL;
