@@ -239,9 +239,11 @@ class PEAR
      *                  is ignored.
      * @param $userinfo If you need to pass along for example debug
      *                  information, this parameter is meant for that.
-     *
      * @param $error_class The returned error object will be instantiated
      *                  from this class, if specified.
+     * @param $skipmsg  If true, raiseError will only pass error codes,
+     *                  the error message parameter will be dropped.
+     *
      *
      * @return object   a PEAR error object
      *
@@ -250,9 +252,13 @@ class PEAR
      * @since PHP 4.0.5
      */
 
-    function &raiseError($message = null, $code = null, $mode = null,
-                         $options = null, $userinfo = null,
-                         $error_class = null, $skipmsg = false)
+    function &raiseError($message = null,
+                         $code = null,
+                         $mode = null,
+                         $options = null,
+                         $userinfo = null,
+                         $error_class = null,
+                         $skipmsg = false)
     {
         if ($mode === null) {
             if (isset($this) && isset($this->_default_error_mode)) {
