@@ -2190,6 +2190,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", class_name->u.constant.value.str.val);
 	}
 
+	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->name = class_name->u.constant.value.str.val;
 	new_class_entry->name_length = class_name->u.constant.value.str.len;
 
