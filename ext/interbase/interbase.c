@@ -262,7 +262,6 @@ typedef struct {
 #endif
 	} val;
 	short sqlind;
-	void *allocated;
 } BIND_BUF;
 
 /* get blob identifier from argument
@@ -1320,7 +1319,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 	for (i = 0; i < sqlda->sqld; var++, i++) { /* bound vars */
 		
 		buf[i].sqlind = 0;
-		buf[i].allocated = NULL;
 		var->sqlind = &buf[i].sqlind;
 		b_var = b_vars[i];
 		
@@ -1486,8 +1484,8 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 						_php_ibase_error(TSRMLS_C);
 						return FAILURE;
 					}
-					buf[i].allocated = var->sqldata = (void ISC_FAR *) emalloc(sizeof(ISC_QUAD));
-					*(ISC_QUAD ISC_FAR *) var->sqldata = ib_blob.bl_qd;
+					buf[i].val.qval = ib_blob.bl_qd;
+					var->sqldata = (void ISC_FAR *) &buf[i].val.qval;
 					
 				} else {
 					var->sqldata = (void ISC_FAR *) &((ibase_blob_handle *) Z_STRVAL_P(b_var))->bl_qd;
@@ -1727,17 +1725,8 @@ _php_ibase_exec_error:		 /* I'm a bad boy... */
 	if (in_sqlda) {
 		efree(in_sqlda);
 	}
-	if (bind_buf) {
-		int i;
-
-		/* free memory allocated in binding stage */
-		for (i = 0; i < ib_query->in_sqlda->sqld; ++i) {
-			if (bind_buf[i].allocated != NULL) {
-				efree(bind_buf[i].allocated);
-			}
-		}
+	if (bind_buf)
 		efree(bind_buf);
-	}
 
 	if (rv == FAILURE) {
 		if (IB_RESULT) {
