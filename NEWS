@@ -2,7 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 22 July 2002, Version 4.2.2
 - Fixed a security problem in the file upload code, which allows remote parties
-  too crash the webserver child. On the sparc architecture this can be used to
+  to crash the webserver's child. On the Sparc architecture this can be used to
   run arbitrary code. (Stefan)
 - Fixed the build system for Solaris users. (Sascha)
 
