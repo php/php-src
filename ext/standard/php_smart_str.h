@@ -24,6 +24,7 @@
 #define smart_str_0(x) ((x)->c[(x)->len] = '\0')
 
 #define smart_str_alloc(d,n) {\
+	/* if (!d->c) d->len = d->a = 0; */ \
 	if (n >= d->a) {\
 		d->c = erealloc(d->c, n + 129); \
 		d->a = n + 128; \
@@ -31,19 +32,6 @@
 }
 
 #define smart_str_appends(dest, src) smart_str_appendl(dest, src, sizeof(src)-1)
-
-static inline void smart_str_append(smart_str *dest, smart_str *src)
-{
-	size_t newlen;
-
-	if (!dest->c)
-		dest->len = dest->a = 0;
-	
-	newlen = dest->len + src->len;
-	smart_str_alloc(dest, newlen);
-	memcpy(dest->c + dest->len, src->c, src->len);
-	dest->len = newlen;
-}
 
 static inline void smart_str_appendc(smart_str *dest, char c)
 {
@@ -61,21 +49,19 @@ static inline void smart_str_free(smart_str *s)
 	s->a = s->len = 0;
 }
 
-static inline void smart_str_copyl(smart_str *dest, const char *src, size_t len)
-{
-	smart_str_alloc(dest, len);
-	memcpy(dest->c, src, len);
-	dest->len = len;
-}
-
 static inline void smart_str_appendl(smart_str *dest, const char *src, size_t len)
 {
-	smart_str s;
+	size_t newlen;
 
-	s.c = (char *) src;
-	s.len = len;
+	newlen = dest->len + len;
+	smart_str_alloc(dest, newlen);
+	memcpy(dest->c + dest->len, src, len);
+	dest->len = newlen;
+}
 
-	smart_str_append(dest, &s);
+static inline void smart_str_append(smart_str *dest, smart_str *src)
+{
+	smart_str_appendl(dest, src->c, src->len);
 }
 
 static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
