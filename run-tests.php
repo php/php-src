@@ -270,7 +270,7 @@ if ($sum_results['FAILED']) {
 		$failed_tests_data .= "Autoconf:\n". shell_exec('autoconf --version'). "\n";
 		$failed_tests_data .= "Libtool:\n". shell_exec('libtool --version'). "\n";
 		$failed_tests_data .= "Bison:\n". shell_exec('bison --version'). "\n";
-		$failed_tests_data .= "Compiler:\n". shell_exec('cc --version'). "\n";
+		$failed_tests_data .= "Compiler:\n". shell_exec('cc -v'). "\n";
 		$failed_tests_data .= "\n\n";
 		
 		foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
