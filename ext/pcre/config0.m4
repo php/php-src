@@ -6,7 +6,7 @@ dnl if DIR is supplied, we'll use that for linking
 
 AC_MSG_CHECKING(whether to include PCRE support)
 AC_ARG_WITH(pcre-regex,
-[  --with-pcre-regex[=DIR] Include Perl Compatible Regular Expressions support],[
+[  --with-pcre-regex       Include Perl Compatible Regular Expressions support],[
   if test "$withval" = "yes"; then
     EXTRA_LIBS="-L$abs_builddir/ext/pcre/pcrelib -lpcre $EXTRA_LIBS"
     PCRE_SUBDIR="pcrelib"
