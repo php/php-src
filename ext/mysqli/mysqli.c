@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 4                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2002 The PHP Group                                |
+  | Copyright (c) 1997-2003 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 2.02 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -43,11 +43,9 @@ void php_clear_stmt_bind(STMT *stmt)
 {
 	unsigned int i;
 
-	/* 
-	 * we don't need to call mysql_stmt_close here.
-	 * in case mysqli_stmt_close wasn't called, all
-	 * statements will be freed via mysql_close
-	 */
+	if (stmt->stmt) {
+		mysql_stmt_close(stmt->stmt);
+	}
 
 	if (stmt->var_cnt) {
 		for (i = 0; i < stmt->var_cnt; i++) {
@@ -361,10 +359,11 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result"); 
 
-	array_init(return_value);
-
 	fields = mysql_fetch_fields(result);
-	row = mysql_fetch_row(result);
+	if (!(row = mysql_fetch_row(result))) {
+		RETURN_FALSE;
+	}
+	array_init(return_value);
 	field_len = mysql_fetch_lengths(result);
 
 	for (i = 0; i < mysql_num_fields(result); i++) {

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 4                                                        |
+  | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2002 The PHP Group                                |
+  | Copyright (c) 1997-2003 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 2.02 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -385,14 +385,6 @@ PHP_FUNCTION(mysqli_close)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
 
-	/*
-	 * Don't free initial struct if there exist 
-	 * non closed statements
-	 */
-	if (mysql->stmts) {
-		mysql->free_me = 0;
-	}
-
 	mysql_close(mysql);
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);	
 	RETURN_TRUE;
@@ -594,7 +586,7 @@ PHP_FUNCTION(mysqli_execute)
 						stmt->stmt->params[i].buffer = Z_STRVAL_PP(&stmt->vars[i]);
 						stmt->stmt->params[i].buffer_length = strlen(Z_STRVAL_PP(&stmt->vars[i]));
 						break;
-					case MYSQL_TYPE_FLOAT:
+					case MYSQL_TYPE_DOUBLE:
 						convert_to_double_ex(&stmt->vars[i]);
 						stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->vars[i]);
 						break;
@@ -663,8 +655,13 @@ PHP_FUNCTION(mysqli_fetch)
 								ZVAL_LONG(stmt->vars[i], lval);
 							}
 						} else {
-							stmt->bind[i].type = IS_STRING;
-							ZVAL_STRING(stmt->vars[i], stmt->bind[i].buffer, 1);
+							if (stmt->vars[i]->type == IS_STRING) {
+								efree(stmt->vars[i]->value.str.val);
+							} 
+							ZVAL_STRING(stmt->vars[i], stmt->bind[i].buffer, 1); 
+							/*	
+							stmt->vars[i]->value.str.len = strlen(stmt->bind[i].buffer);
+							stmt->vars[i]->value.str.val = stmt->bind[i].buffer; */
 						}
 						break;
 					default:
@@ -1530,6 +1527,7 @@ PHP_FUNCTION(mysqli_stmt_close)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt"); 
 	mysql_stmt_close(stmt->stmt);
+	stmt->stmt = NULL;
 	php_clear_stmt_bind(stmt); 
 	MYSQLI_CLEAR_RESOURCE(&mysql_stmt);
 	RETURN_TRUE;
