@@ -163,7 +163,7 @@ zend_module_entry sablot_module_entry = {
     PHP_MINIT(sablot),
 	PHP_MSHUTDOWN(sablot),
     NULL,
-    PHP_RSHUTDOWN(sablot),
+    NULL,
     PHP_MINFO(sablot),
     STANDARD_MODULE_PROPERTIES
 };
@@ -182,7 +182,7 @@ PHP_MINIT_FUNCTION(sablot)
     return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(sablot)
+PHP_MSHUTDOWN_FUNCTION(sablot)
 {
 	if (processor) {
 		SablotUnregHandler(processor, HLR_MESSAGE, NULL, NULL);

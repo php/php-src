@@ -37,9 +37,6 @@ PHP_MINIT_FUNCTION(sablot);
 PHP_MINFO_FUNCTION(sablot);
 PHP_MSHUTDOWN_FUNCTION(sablot);
 
-/* Request functions */
-PHP_RSHUTDOWN_FUNCTION(sablot);
-
 /* Output transformation functions */
 PHP_FUNCTION(xslt_output_begintransform);
 PHP_FUNCTION(xslt_output_endtransform);
