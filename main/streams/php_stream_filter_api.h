@@ -66,6 +66,7 @@ typedef enum {
 } php_stream_filter_status_t;
 
 /* Buckets API. */
+BEGIN_EXTERN_C()
 PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, size_t buflen, int own_buf, int buf_persistent TSRMLS_DC);
 PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **left, php_stream_bucket **right, size_t length TSRMLS_DC);
 PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket TSRMLS_DC);
@@ -74,6 +75,7 @@ PHPAPI void php_stream_bucket_prepend(php_stream_bucket_brigade *brigade, php_st
 PHPAPI void php_stream_bucket_append(php_stream_bucket_brigade *brigade, php_stream_bucket *bucket TSRMLS_DC);
 PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC);
 PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bucket TSRMLS_DC);
+END_EXTERN_C()
 
 #define PSFS_FLAG_NORMAL		0	/* regular read/write */
 #define PSFS_FLAG_FLUSH_INC		1	/* an incremental flush */
@@ -115,11 +117,13 @@ struct _php_stream_filter {
 };
 
 /* stack filter onto a stream */
+BEGIN_EXTERN_C()
 PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI void php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC TSRMLS_DC);
+END_EXTERN_C()
 #define php_stream_filter_alloc(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_CC TSRMLS_CC)
 #define php_stream_filter_alloc_rel(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_REL_CC TSRMLS_CC)
 
@@ -129,9 +133,11 @@ typedef struct _php_stream_filter_factory {
 	php_stream_filter *(*create_filter)(const char *filtername, zval *filterparams, int persistent TSRMLS_DC);
 } php_stream_filter_factory;
 
+BEGIN_EXTERN_C()
 PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC);
 PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS_DC);
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC);
+END_EXTERN_C()
 
 /*
  * Local variables:
