@@ -103,7 +103,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 { \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
 	if (!((__ptr) != (__type)intern->ptr)) {\
-		php_error(E_WARNING, "Couldn' fetch %s", intern->zo.ce->name);\
+		php_error(E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
 		RETURN_NULL();\
 	}\
 	__ptr = (__type)intern->ptr; \
