@@ -129,6 +129,7 @@ PHP_FUNCTION(pg_set_client_encoding);
 #if HAVE_PQESCAPE
 PHP_FUNCTION(pg_escape_string);
 PHP_FUNCTION(pg_escape_bytea);
+PHP_FUNCTION(pg_unescape_bytea);
 #endif
 
 /* misc functions */

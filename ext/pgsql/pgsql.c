@@ -142,6 +142,7 @@ function_entry pgsql_functions[] = {
 #if HAVE_PQESCAPE
 	PHP_FE(pg_escape_string,NULL)
 	PHP_FE(pg_escape_bytea, NULL)
+	PHP_FE(pg_unescape_bytea, NULL)
 #endif
 #if HAVE_PQCLIENTENCODING
 	PHP_FE(pg_client_encoding,		NULL)
