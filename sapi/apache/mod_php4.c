@@ -140,7 +140,7 @@ static int sapi_apache_ub_write(const char *str, uint str_length)
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
 	} else {
-		ret = fwrite(str, 1, str_length, stdout);
+		ret = fwrite(str, 1, str_length, stderr);
 	}
 	if(ret != str_length) {
 		PG(connection_status) = PHP_CONNECTION_ABORTED;
@@ -289,6 +289,15 @@ static void php_apache_log_message(char *message)
 }
 
 
+static void php_apache_request_shutdown(void *dummy)
+{
+	SLS_FETCH();
+
+	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
+	php_request_shutdown(dummy);
+}
+
+
 static int php_apache_sapi_activate(SLS_D)
 {
 	/*
@@ -300,7 +309,7 @@ static int php_apache_sapi_activate(SLS_D)
 	 * memory.  
 	 */
 	block_alarms();
-	register_cleanup(((request_rec *) SG(server_context))->pool, NULL, php_request_shutdown, php_request_shutdown_for_exec);
+	register_cleanup(((request_rec *) SG(server_context))->pool, NULL, php_apache_request_shutdown, php_request_shutdown_for_exec);
 	unblock_alarms();
 	return SUCCESS;
 }
