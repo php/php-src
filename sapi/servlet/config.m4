@@ -32,7 +32,8 @@ AC_ARG_WITH(servlet,
 
     AC_DEFINE(SAPI_SERVLET, 1, [Whether you use Servlet])
 
-    INSTALL_IT="\$(INSTALL) -m 0755 \$(srcdir)/sapi/servlet/phpsrvlt.jar \$(libdir)"
+    INSTALL_IT="\$(mkinstalldirs) \$(libdir)"
+    INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 \$(srcdir)/sapi/servlet/phpsrvlt.jar \$(libdir)"
     INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 $SAPI_SHARED \$(libdir)"
     PHP_SAPI=servlet
     PHP_BUILD_SHARED
