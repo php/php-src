@@ -312,7 +312,7 @@ zend_op_array *compile_filename(zval *filename CLS_DC)
 	}
 	file_handle.filename = filename->value.str.val;
 	file_handle.type = ZEND_HANDLE_FILENAME;
-	retval = zend_compile_files(0 CLS_CC, 1, &file_handle);
+	retval = zend_compile_files(1 CLS_CC, 1, &file_handle);
 	if (filename==&tmp) {
 		zval_dtor(&tmp);
 	}
