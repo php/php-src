@@ -49,6 +49,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_OPENSSL_EXT
+#include <openssl/err.h>
+#endif
+
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
