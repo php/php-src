@@ -163,11 +163,12 @@
 	function handle_resources_resource($attr) {
 		$this->_check_c_name($attr['name'], "resource name");
 
-		$this->resources[] = new php_resource($attr['name'], 
-																					@$attr['payload'], 
-																					@$attr['alloc'], 
-																					@$this->resource_destruct, 
-																					@$this->resource_description);
+    $this->resources[$attr['name']] = new php_resource($attr['name'],
+                                                       @$attr['payload'],
+                                                       @$attr['alloc'],
+                                                       @$this->resource_destruct, 
+                                                       @$this->resource_description
+                                                       );
 
 		unset($this->resource_description);
 		unset($this->resource_destruct);
