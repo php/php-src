@@ -66,6 +66,10 @@
 
 #if HAVE_MBSTRING
 
+#if HAVE_MBREGEX
+#include "mbregex.h"
+#endif
+
 static enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_jis,
@@ -78,6 +82,7 @@ static int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_ident
 
 static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 #if defined(MBSTR_ENC_TRANS)
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
@@ -95,8 +100,30 @@ static struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strrpos"},
 	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", "mb_orig_strrpos"},
 	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
+#if HAVE_MBREGEX
+	{MB_OVERLOAD_REGEX, "ereg", "mb_ereg", "mb_orig_ereg"},
+	{MB_OVERLOAD_REGEX, "eregi", "mb_eregi", "mb_orig_eregi"},
+	{MB_OVERLOAD_REGEX, "ereg_replace", "mb_ereg_replace", "mb_orig_ereg_replace"},
+	{MB_OVERLOAD_REGEX, "eregi_replace", "mb_eregi_replace", "mb_orig_eregi_replace"},
+	{MB_OVERLOAD_REGEX, "split", "mb_split", "mb_orig_split"},
+#endif
 	{0, NULL, NULL, NULL}
 }; 
+
+#if HAVE_MBREGEX
+struct def_mbctype_tbl {
+	enum mbfl_no_encoding mbfl_encoding;
+	int regex_encoding;
+};
+
+struct def_mbctype_tbl mbctype_tbl[] = {
+	{mbfl_no_encoding_ascii,MBCTYPE_ASCII},
+	{mbfl_no_encoding_euc_jp,MBCTYPE_EUC},
+	{mbfl_no_encoding_sjis,MBCTYPE_SJIS},
+	{mbfl_no_encoding_utf8,MBCTYPE_UTF8},
+	{mbfl_no_encoding_pass,-1}
+};
+#endif
 
 function_entry mbstring_functions[] = {
 	PHP_FE(mb_language,					NULL)
@@ -138,6 +165,36 @@ function_entry mbstring_functions[] = {
 	PHP_FALIAS(i18n_mime_header_encode,	mb_encode_mimeheader,	NULL)
 	PHP_FALIAS(i18n_mime_header_decode,	mb_decode_mimeheader,	NULL)
 	PHP_FALIAS(i18n_ja_jp_hantozen,		mb_convert_kana,		NULL)
+#if HAVE_MBREGEX
+	PHP_FE(mb_regex_encoding,	NULL)
+	PHP_FE(mb_ereg,			third_argument_force_ref)
+	PHP_FE(mb_eregi,			third_argument_force_ref)
+	PHP_FE(mb_ereg_replace,			NULL)
+	PHP_FE(mb_eregi_replace,			NULL)
+	PHP_FE(mb_split,					NULL)
+	PHP_FE(mb_ereg_match,			NULL)
+	PHP_FE(mb_ereg_search,			NULL)
+	PHP_FE(mb_ereg_search_pos,		NULL)
+	PHP_FE(mb_ereg_search_regs,		NULL)
+	PHP_FE(mb_ereg_search_init,		NULL)
+	PHP_FE(mb_ereg_search_getregs,	NULL)
+	PHP_FE(mb_ereg_search_getpos,	NULL)
+	PHP_FE(mb_ereg_search_setpos,	NULL)
+	PHP_FALIAS(mbregex_encoding,	mb_regex_encoding,	NULL)
+	PHP_FALIAS(mbereg,	mb_ereg,	NULL)
+	PHP_FALIAS(mberegi,	mb_eregi,	NULL)
+	PHP_FALIAS(mbereg_replace,	mb_ereg_replace,	NULL)
+	PHP_FALIAS(mberegi_replace,	mb_eregi_replace,	NULL)
+	PHP_FALIAS(mbsplit,	mb_split,	NULL)
+	PHP_FALIAS(mbereg_match,	mb_ereg_match,	NULL)
+	PHP_FALIAS(mbereg_search,	mb_ereg_search,	NULL)
+	PHP_FALIAS(mbereg_search_pos,	mb_ereg_search_pos,	NULL)
+	PHP_FALIAS(mbereg_search_regs,	mb_ereg_search_regs,	NULL)
+	PHP_FALIAS(mbereg_search_init,	mb_ereg_search_init,	NULL)
+	PHP_FALIAS(mbereg_search_getregs,	mb_ereg_search_getregs,	NULL)
+	PHP_FALIAS(mbereg_search_getpos,	mb_ereg_search_getpos,	NULL)
+	PHP_FALIAS(mbereg_search_setpos,	mb_ereg_search_setpos,	NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -295,6 +352,14 @@ php_mbstring_parse_encoding_array(zval *array, int **return_list, int *return_si
 	return 1;
 }
 
+#if HAVE_MBREGEX
+static void
+php_mbregex_free_cache(mb_regex_t *pre) 
+{
+	mbre_free_pattern(pre);
+}
+
+#endif
 
 /* php.ini directive handler */
 static PHP_INI_MH(OnUpdate_mbstring_detect_order)
@@ -351,11 +416,25 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
 	enum mbfl_no_encoding no_encoding;
+#if HAVE_MBREGEX
+	struct def_mbctype_tbl *p = NULL;
+#endif
 
 	no_encoding = mbfl_name2no_encoding(new_value);
 	if (no_encoding != mbfl_no_encoding_invalid) {
 		MBSTRG(internal_encoding) = no_encoding;
 		MBSTRG(current_internal_encoding) = no_encoding;
+#if HAVE_MBREGEX
+		p=&(mbctype_tbl[0]);
+		while(p->regex_encoding >= 0){
+			if (p->mbfl_encoding == MBSTRG(internal_encoding)){
+				MBSTRG(default_mbctype) = p->regex_encoding;
+				MBSTRG(current_mbctype) = p->regex_encoding;
+				break;
+			}
+			p++;
+		}
+#endif
 	} else {
 		if (new_value != NULL && new_value_length > 0) {
 			return FAILURE;
@@ -419,6 +498,16 @@ php_mbstring_init_globals(zend_mbstring_globals *pglobals)
 	pglobals->current_filter_illegal_substchar = 0x3f;	/* '?' */
 	pglobals->func_overload = 0;
 	pglobals->outconv = NULL;
+#if HAVE_MBREGEX
+	pglobals->default_mbctype = MBCTYPE_EUC;
+	pglobals->current_mbctype = MBCTYPE_EUC;
+	zend_hash_init(&(pglobals->ht_rc), 0, NULL, (void (*)(void *)) php_mbregex_free_cache, 1);
+	pglobals->search_str = (zval**)0;
+	pglobals->search_str_val = (zval*)0;
+	pglobals->search_re = (mb_regex_t*)0;
+	pglobals->search_pos = 0;
+	pglobals->search_regs = (struct mbre_registers*)0;
+#endif
 }
 
 PHP_MINIT_FUNCTION(mbstring)
@@ -433,6 +522,7 @@ PHP_MINIT_FUNCTION(mbstring)
 
 	REGISTER_LONG_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_OVERLOAD_REGEX", MB_OVERLOAD_REGEX, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -448,6 +538,10 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 	if (MBSTRG(detect_order_list)) {
 		free(MBSTRG(detect_order_list));
 	}
+
+#if HAVE_MBREGEX
+	zend_hash_destroy(&MBSTRG(ht_rc));
+#endif
 
 	return SUCCESS;
 }
@@ -545,6 +639,31 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 		}
 	}
 
+#if HAVE_MBREGEX
+	MBSTRG(current_mbctype) = MBSTRG(default_mbctype);
+	if (MBSTRG(search_str)) {
+		if (ZVAL_REFCOUNT(*MBSTRG(search_str)) > 1) {
+			ZVAL_DELREF(*MBSTRG(search_str));
+		} else {
+			zval_dtor(*MBSTRG(search_str));
+			FREE_ZVAL(*MBSTRG(search_str));
+		}
+		MBSTRG(search_str) = (zval **)0;
+		MBSTRG(search_str_val) = (zval *)0;
+	}
+	MBSTRG(search_pos) = 0;
+	if (MBSTRG(search_re)) {
+		efree(MBSTRG(search_re));
+		MBSTRG(search_re) = (mb_regex_t *)0;
+	}
+	if (MBSTRG(search_regs)) {
+		mbre_free_registers(MBSTRG(search_regs));
+		efree(MBSTRG(search_regs));
+		MBSTRG(search_regs) = (struct mbre_registers*)0;
+	}
+	zend_hash_clean(&MBSTRG(ht_rc));
+#endif
+
 	return SUCCESS;
 }
 
@@ -555,6 +674,9 @@ PHP_MINFO_FUNCTION(mbstring)
 	php_info_print_table_header(2, "Multibyte (Japanese) Support", "enabled");
 #if defined(MBSTR_ENC_TRANS)
 	php_info_print_table_row(2, "http input encoding translation", "enabled");	
+#endif
+#if defined(HAVE_MBREGEX)
+	php_info_print_table_row(2, "multibyte regex support", "enabled");	
 #endif
 	php_info_print_table_end();
 
@@ -855,16 +977,15 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 	char *var, *val;
 	char *strtok_buf = NULL, **val_list;
 	zval *array_ptr = (zval *) arg;
-	int n, num, *len_list, *elist, elistsz;
+	int n, num, val_len, *len_list, *elist, elistsz;
 	enum mbfl_no_encoding from_encoding, to_encoding;
-	mbfl_string string, result, *ret;
+	mbfl_string string, resvar, resval;
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
 
-	mbfl_string_init(&string);
-	mbfl_string_init(&result);
-	string.no_language = MBSTRG(current_language);
-	string.no_encoding = MBSTRG(current_internal_encoding);
+	mbfl_string_init_set(&string, MBSTRG(current_language), MBSTRG(current_internal_encoding));
+	mbfl_string_init_set(&resvar, MBSTRG(current_language), MBSTRG(current_internal_encoding));
+	mbfl_string_init_set(&resval, MBSTRG(current_language), MBSTRG(current_internal_encoding));
 	
 	/* count the variables contained in the query */
 	num = 0;
@@ -949,21 +1070,31 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 
 	/* convert encoding */
 	string.no_encoding = from_encoding;
+
 	n = 0;
 	while (n < num) {
-		string.val = val_list[n+1];
-		string.len = len_list[n+1];
-		ret = NULL;
-		if (convd) {
-			ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-		}
-		if (ret != NULL) {
-			php_register_variable_safe(val_list[n], ret->val, ret->len, array_ptr TSRMLS_CC);
-			efree(ret->val);
+		string.val = val_list[n];
+		string.len = len_list[n];
+		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resvar) != NULL) {
+			var = resvar.val;
 		} else {
-			php_register_variable_safe(val_list[n], val_list[n+1], len_list[n+1], array_ptr TSRMLS_CC);
+			var = val_list[n];
 		}
-		n+=2;
+		n++;
+		string.val = val_list[n];
+		string.len = len_list[n];
+		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resval) != NULL) {
+			val = resval.val;
+			val_len = resval.len;
+		} else {
+			val = val_list[n];
+			val_len = len_list[n];
+		}
+		n++;
+		/* add variable to symbol table */
+		php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
+		mbfl_string_clear(&resvar);
+		mbfl_string_clear(&resval);
 	}
 	MBSTRG(http_input_identify) = from_encoding;
 
