@@ -644,8 +644,8 @@ new_class_entry:
 ;
 
 namespace_prefix:
-	T_NAMESPACE_NAME 	{ $$ = $1; }
-	| T_STRING 			{ $$ = $1; }
+		T_NAMESPACE_NAME 	{ $$ = $1; }
+	|	T_STRING 			{ $$ = $1; }
 ;	
 
 static_or_variable_string:
