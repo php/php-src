@@ -247,10 +247,12 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	ELS_FETCH();
 
 	switch (t->method) {
+	case PHP_CURL_STDOUT:
+		PUTS(data);
+		break;
 	case PHP_CURL_FILE:
 		return fwrite(data, size, nmemb, t->fp);
 	case PHP_CURL_RETURN:
-	case PHP_CURL_STDOUT:
 		smart_str_appendl(&t->buf, data, (int) length);
 		break;
 	case PHP_CURL_USER: {
@@ -764,12 +766,6 @@ PHP_FUNCTION(curl_exec)
 		if (ch->handlers->write->type != PHP_CURL_BINARY) 
 			smart_str_0(&ch->handlers->write->buf);
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
-		smart_str_free(&ch->handlers->write->buf);
-	}
-	else if (ch->handlers->write->method == PHP_CURL_STDOUT) {
-		if (ch->handlers->write->type != PHP_CURL_BINARY) 
-			smart_str_0(&ch->handlers->write->buf);
-		PUTS(ch->handlers->write->buf.c);
 		smart_str_free(&ch->handlers->write->buf);
 	}
 
