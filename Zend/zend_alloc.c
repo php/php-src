@@ -406,7 +406,7 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 	AG(phead) = AG(head) = NULL;
 	
 #if MEMORY_LIMIT
-	AG(memory_limit) = 1<<30;		/* rediculous limit, effectively no limit */
+	AG(memory_limit) = 1<<30;		/* ridiculous limit, effectively no limit */
 	AG(allocated_memory) = 0;
 	AG(memory_exhausted) = 0;
 	AG(allocated_memory_peak) = 0;
