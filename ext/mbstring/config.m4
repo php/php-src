@@ -200,11 +200,10 @@ dnl Main config
 dnl
 
 PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
-[  --enable-mbstring       Enable multibyte string support])
-mbstring_shared=$ext_shared
+[  --enable-mbstring       Enable multibyte string support.])
 
 PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support],
-[  --disable-mbregex         MBSTRING: Disable multibyte regex support], yes, no)
+[  --disable-mbregex         MBSTRING: Disable multibyte regex support.], yes, no)
 
 PHP_ARG_WITH(libmbfl, [for external libmbfl],
 [  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl. DIR is the libmbfl install prefix.
@@ -221,6 +220,5 @@ if test "$PHP_MBSTRING" != "no"; then
   
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
-  ext_shared=$mbstring_shared
   PHP_MBSTRING_EXTENSION
 fi
