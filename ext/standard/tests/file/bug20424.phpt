@@ -1,5 +1,5 @@
 --TEST--
-Bug #20424: stream_get_meta_data craches on a normal file stream
+Bug #20424 (stream_get_meta_data crashes on a normal file stream)
 --POST--
 --GET--
 --FILE--
