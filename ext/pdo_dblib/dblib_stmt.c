@@ -148,7 +148,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 					break;
 
 				default:
-					if (dbwillconvert(S->cols[i].coltype, SYBCHAR)) {
+					if (dbwillconvert(S->cols[i].coltype, SQLCHAR)) {
 						val->len = 32 + (2 * dbdatlen(H->link, i+1));
 						val->data = emalloc(val->len);
 
