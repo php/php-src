@@ -1606,6 +1606,7 @@ AC_DEFUN([PHP_CHECK_LIBRARY], [
     $3
   ],[
     LDFLAGS=$save_old_LDFLAGS
+    unset ac_cv_func_$1
     $4
   ])dnl
 ])
