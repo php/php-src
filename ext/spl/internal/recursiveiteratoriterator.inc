@@ -18,6 +18,9 @@ define('RIT_CHILD_FIRST', 2);
  * @author  Marcus Boerger
  * @version 1.1
  *
+ * The objects of this class are created by instances of RecursiveIterator. 
+ * Elements of those iterators may be traversable themselves. If so these 
+ * sub elements are recursed into.
  */
 class RecursiveIteratorIterator implements OuterIterator
 {
@@ -63,7 +66,7 @@ class RecursiveIteratorIterator implements OuterIterator
 		return false;
 	}
 	
-	/** @reutrn current key
+	/** @return current key
 	 */
 	function key()
 	{

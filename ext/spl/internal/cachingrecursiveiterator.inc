@@ -14,7 +14,7 @@
  * @author  Marcus Boerger
  * @version 1.1
  *
- * @See CachingIterator
+ * @see CachingIterator
  */
 class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
 {
