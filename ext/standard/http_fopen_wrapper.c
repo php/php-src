@@ -164,15 +164,19 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
 
-	scratch_len = strlen(path) + 32;
-	scratch = emalloc(scratch_len);
-
 	if (context &&
-		php_stream_context_get_option(context, "http", "method", &tmpzval) == SUCCESS &&
-		Z_STRLEN_PP(tmpzval) > 0 &&
-		strncasecmp(Z_STRVAL_PP(tmpzval), "POST", Z_STRLEN_PP(tmpzval)) == 0) {
-		strcpy(scratch, "POST ");
-	} else {
+		php_stream_context_get_option(context, "http", "method", &tmpzval) == SUCCESS) {
+		if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
+			scratch_len = strlen(path) + 29 + Z_STRLEN_PP(tmpzval);
+			scratch = emalloc(scratch_len);
+			strlcpy(scratch, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) + 1);
+			strcat(scratch, " ");
+		}
+	}
+
+	if (!scratch) {
+		scratch_len = strlen(path) + 32;
+		scratch = emalloc(scratch_len);
 		strcpy(scratch, "GET ");
 	}
 
