@@ -36,7 +36,7 @@
 #	define GLOBAL_CONSTANTS_TABLE	CG(zend_constants)
 #endif
 
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
 BOOL WINAPI IsDebuggerPresent(VOID);
 #endif
 
@@ -606,7 +606,7 @@ ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ..
 	va_list args;
 
 	va_start(args, format);
-#	if ZEND_WIN32
+#	ifdef ZEND_WIN32
 	{
 		char output_buf[1024];
 
