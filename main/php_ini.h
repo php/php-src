@@ -1,18 +1,21 @@
-#ifndef _ZEND_INI_H
-#define _ZEND_INI_H
+#ifndef _PHP_INI_H
+#define _PHP_INI_H
 
 
-#define ZEND_INI_USER	(1<<0)
-#define ZEND_INI_PERDIR	(1<<1)
-#define ZEND_INI_SYSTEM	(1<<2)
+#define PHP_INI_USER	(1<<0)
+#define PHP_INI_PERDIR	(1<<1)
+#define PHP_INI_SYSTEM	(1<<2)
 
-#define ZEND_INI_ALL (ZEND_INI_USER|ZEND_INI_PERDIR|ZEND_INI_SYSTEM)
+#define PHP_INI_ALL (PHP_INI_USER|PHP_INI_PERDIR|PHP_INI_SYSTEM)
 
-typedef struct {
+typedef struct _php_ini_entry php_ini_entry;
+
+struct _php_ini_entry {
 	int module_number;
 	int modifyable;
 	char *name;
 	uint name_length;
+	int (*on_modify)(php_ini_entry *entry, pval *new_value);
 
 	char *value;
 	uint value_length;
@@ -20,29 +23,37 @@ typedef struct {
 	char *orig_value;
 	uint orig_value_length;
 	int modified;
-} zend_ini_entry;
+};
 
 
-int zend_ini_mstartup();
-int zend_ini_mshutdown();
-int zend_ini_rshutdown();
+int php_ini_mstartup();
+int php_ini_mshutdown();
+int php_ini_rshutdown();
 
-int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number);
-void zend_unregister_ini_entries(int module_number);
-int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type);
+int php_register_ini_entries(php_ini_entry *ini_entry, int module_number);
+void php_unregister_ini_entries(int module_number);
+int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type);
 
-long zend_ini_long(char *name, uint name_length);
-double zend_ini_double(char *name, uint name_length);
-char *zend_ini_string(char *name, uint name_length);
+long php_ini_long(char *name, uint name_length);
+double php_ini_double(char *name, uint name_length);
+char *php_ini_string(char *name, uint name_length);
 
-#define ZEND_INI_BEGIN()								static zend_ini_entry ini_entries[] = {
-#define ZEND_INI_ENTRY(name, default_value, modifyable)	{ 0, modifyable, name, sizeof(name), default_value, sizeof(default_value)-1, NULL, 0, 0 },
-#define ZEND_INI_END()									{ 0, 0, NULL, 0, NULL, 0, NULL, 0, 0 } };
+#define PHP_INI_BEGIN()								static php_ini_entry ini_entries[] = {
 
-#define INI_INT(name) zend_ini_long((name), sizeof(name))
-#define INI_FLT(name) zend_ini_double((name), sizeof(name))
-#define INI_STR(name) zend_ini_string((name), sizeof(name))
+#define PHP_INI_ENTRY(name, default_value, modifyable, on_modify) \
+	{ 0, modifyable, name, sizeof(name), on_modify, default_value, sizeof(default_value)-1, NULL, 0, 0 },
+
+#define PHP_INI_END() \
+	{ 0, 0, NULL, 0, NULL, NULL, 0, NULL, 0, 0 } };
+
+#define INI_INT(name) php_ini_long((name), sizeof(name))
+#define INI_FLT(name) php_ini_double((name), sizeof(name))
+#define INI_STR(name) php_ini_string((name), sizeof(name))
+
+
+#define REGISTER_INI_ENTRIES() php_register_ini_entries(ini_entries, module_number)
+#define UNREGISTER_INI_ENTRIES() php_unregister_ini_entries(module_number)
 
 pval *cfg_get_entry(char *name, uint name_length);
 
-#endif /* _ZEND_INI_H */
+#endif /* _PHP_INI_H */

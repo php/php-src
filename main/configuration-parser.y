@@ -278,7 +278,7 @@ int php3_shutdown_config(void)
 }
 
 
-int php3_mshutdown_browscap(void)
+int php3_mshutdown_browscap(SHUTDOWN_FUNC_ARGS)
 {
 	TLS_VARS;
 
