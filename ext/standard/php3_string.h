@@ -80,14 +80,6 @@ extern void php3_stristr(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_chunk_split(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_parsestr(INTERNAL_FUNCTION_PARAMETERS);
 
-#if HAVE_CRYPT
-extern php3_module_entry crypt_module_entry;
-#define crypt_module_ptr &crypt_module_entry
-extern void php3_crypt(INTERNAL_FUNCTION_PARAMETERS);
-#else
-#define crypt_module_ptr NULL
-#endif
-
 extern PHPAPI char *_php3_strtoupper(char *s);
 extern PHPAPI char *_php3_strtolower(char *s);
 extern char *_StrTr(char *string, char *str_from, char *str_to);

@@ -426,6 +426,9 @@ static void _php3_closesocket(int *sock) {
 #else
 		close(socketd);
 #endif
+#if HAVE_SHUTDOWN
+		shutdown(socketd, 0);
+#endif
 		efree(sock);
 	}
 }

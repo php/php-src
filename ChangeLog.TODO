@@ -12,7 +12,6 @@ over to PHP4.
 - fixed some NULL-column related problems in OCI8-module.
 - optimized fgets() and fread()
 - memory leak in operators.c fixed
-- socket leak fixed (Sascha Schumann)
 - Fixed the XML bug that caused garbage behind attributes
 - Some Informix driver improvements.
 - PUT method support (mlemos@acm.org)
@@ -25,7 +24,6 @@ over to PHP4.
   'n' - month, numeric, no leading zeros
 - Make fgetss() slightly smarter
 - Add strip_tags() which uses the fgetss state-machine but acts on a string
-- Add CRYPT_SALT_LENGTH constant
 
 March 1 1999, Version 3.0.7
 - Added pdf_put_image and pdf_execute_image
