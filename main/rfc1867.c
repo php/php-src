@@ -83,12 +83,6 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 
 
-static void free_filename(char **filename)
-{
-	efree(*filename);
-}
-
-
 static int unlink_filename(char **filename)
 {
 	V_UNLINK(*filename);
@@ -124,7 +118,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
 
 	ALLOC_HASHTABLE(SG(rfc1867_uploaded_files));
-	zend_hash_init(SG(rfc1867_uploaded_files), 5, NULL, (dtor_func_t) free_filename, 0);
+	zend_hash_init(SG(rfc1867_uploaded_files), 5, NULL, (dtor_func_t) free_estring, 0);
 
 	ALLOC_ZVAL(http_post_files);
 	array_init(http_post_files);
