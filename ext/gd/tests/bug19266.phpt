@@ -1,7 +1,7 @@
 --TEST--
 gdimagefill() function (Bug #19366 (in bundled libgd))
 --SKIPIF--
-<?php if (!extension_loaded('gd')) die("skip\n"); ?>
+<?php if (!extension_loaded('gd') || !HAVE_BUNDLED_GD) die("skip\n"); ?>
 --POST--
 --GET--
 --INI--
