@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Fixed possible crash bug in HTTP uploads. (Patch: Lucas Schroeder)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
 - Made the mbstring extension enabled by default. (Yasuo)
@@ -66,6 +65,11 @@ PHP 4                                                                      NEWS
   recursive make with one global Makefile and eases the integration of proper
   dependencies. Automake is only needed for its aclocal tool. The build 
   process is now more portable and less resource-consuming. (Sascha)
+
+xx xxx 2002, Version 4.2.1
+- Fixed the false logic in ext/session which made SID constant not to be
+  defined when cookies are disabled. (Sascha)
+- Fixed possible crash bug in HTTP uploads. (Patch: Lucas Schroeder)
 
 22 Apr 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
