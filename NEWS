@@ -7,7 +7,8 @@ PHP 4                                                                      NEWS
 - Fixed crash bug when non-existing save/serializer handler was used. (Jani)
 - Fixed memory leak in gethostbynamel() if an error occurs. (Sara)
 - Fixed FastCGI being unable to bind to a specific IP. (Sascha)
-- Fixed bug #25583 (Incorrect handling of absolute path without drive). (Ilia)
+- Fixed bug #25583 (Incorrect handling of paths starting with / on win32 
+  inside glob() function). (Ilia)
 - Fixed bug #25570 (Possible crash in apache2handler when zend_bailout called
   outside of zend_try {} block). (Ilia)
 - Fixed bug #25530 (checkdate() incorrectly handles floats). (Ilia)
