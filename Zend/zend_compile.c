@@ -1321,6 +1321,75 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	do_inherit_parent_constructor(ce);
 }
 
+static void create_class(HashTable *class_table, char *name, int name_length, zend_class_entry **ce)
+{
+	zend_class_entry new_class_entry;
+
+	new_class_entry.type = ZEND_USER_CLASS;
+	new_class_entry.name = estrndup(name, name_length);
+	new_class_entry.name_length = name_length;
+	new_class_entry.refcount = (int *) emalloc(sizeof(int));
+	*new_class_entry.refcount = 1;
+	new_class_entry.constants_updated = 0;
+
+	zend_str_tolower(new_class_entry.name, new_class_entry.name_length);
+
+	zend_hash_init(&new_class_entry.function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
+	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
+	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+	new_class_entry.static_members = (HashTable *) emalloc(sizeof(HashTable));
+	zend_hash_init(new_class_entry.static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry.constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
+
+	new_class_entry.constructor = NULL;
+
+	new_class_entry.handle_function_call = NULL;
+	new_class_entry.handle_property_set = NULL;
+	new_class_entry.handle_property_get = NULL;
+
+	new_class_entry.parent = NULL;
+
+	if (zend_hash_update(class_table, name, name_length+1, &new_class_entry, sizeof(zend_class_entry), ce) == FAILURE) {
+		zend_error(E_ERROR, "Can't create class. Fatal error, please report!");
+	}
+}
+
+
+#include "../TSRM/tsrm_strtok_r.h"
+
+static int create_nested_class(HashTable *class_table, char *path, zend_class_entry *new_ce)
+{
+	char *cur, *temp;
+	char *last;
+	zend_class_entry *ce;
+
+
+	cur = tsrm_strtok_r(path, ":", &temp);
+
+	if (zend_hash_find(class_table, cur, strlen(cur)+1, &ce) == FAILURE) {
+		create_class(class_table, cur, strlen(cur), &ce);
+	}
+
+	last = tsrm_strtok_r(NULL, ":", &temp);
+
+	for(;;) {
+		cur = tsrm_strtok_r(NULL, ":", &temp);
+		if (!cur) {
+			break;
+		}
+		if (zend_hash_find(&ce->class_table, last, strlen(last)+1, &ce) == FAILURE) {
+			create_class(&ce->class_table, last, strlen(last), &ce);
+		}
+		last = cur;
+	}
+	(*new_ce->refcount)++;
+	if (zend_hash_add(&ce->class_table, last, strlen(last)+1, new_ce, sizeof(zend_class_entry), NULL) == FAILURE) {
+		(*new_ce->refcount)--;
+		zend_error(E_ERROR, "Cannot redeclare class %s", last);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
 
 ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time)
 {
@@ -1357,6 +1426,9 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				if (zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &ce)==FAILURE) {
 					zend_error(E_ERROR, "Internal Zend error - Missing class information for %s", opline->op1.u.constant.value.str.val);
 					return FAILURE;
+				}
+				if (strchr(opline->op2.u.constant.value.str.val, ':')) {
+					return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce);
 				}
 				(*ce->refcount)++;
 				if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
@@ -1433,6 +1505,9 @@ void zend_do_early_binding(TSRMLS_D)
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 	HashTable *table;
 
+	if (strchr(opline->op2.u.constant.value.str.val, ':')) {
+		return;
+	}
 	if (do_bind_function_or_class(opline, CG(function_table), CG(class_table), 1)==FAILURE) {
 		return;
 	}
