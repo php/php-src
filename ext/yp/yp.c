@@ -47,7 +47,7 @@ zend_module_entry yp_module_entry = {
 };
 
 /* {{{ proto string yp_get_default_domain(void)
-	Returns the domain or false */
+   Returns the domain or false */
 PHP_FUNCTION(yp_get_default_domain) {
 	char *outdomain;
 
@@ -59,7 +59,7 @@ PHP_FUNCTION(yp_get_default_domain) {
 /* }}} */
 
 /* {{{ proto int yp_order(string domain, string map)            
-	Returns the order number or false */
+   Returns the order number or false */
 PHP_FUNCTION(yp_order) {
 	pval **domain, **map;
 
@@ -85,7 +85,7 @@ PHP_FUNCTION(yp_order) {
 /* }}} */
 
 /* {{{ proto string yp_master(string domain, string map)
-	Returns the machine name of the master */
+   Returns the machine name of the master */
 PHP_FUNCTION(yp_master) {
 	pval **domain, **map;
 	char *outname;
@@ -106,7 +106,7 @@ PHP_FUNCTION(yp_master) {
 /* }}} */
 
 /* {{{ proto string yp_match(string domain, string map, string key)
-	Returns the matched line or false */
+   Returns the matched line or false */
 PHP_FUNCTION(yp_match) {
 	pval **domain, **map, **key;
 	char *outval;
@@ -129,7 +129,7 @@ PHP_FUNCTION(yp_match) {
 /* }}} */
 
 /* {{{ proto array yp_first(string domain, string map)
-	Returns the first key as $var["key"] and the first line as $var["value"] */
+   Returns the first key as $var["key"] and the first line as $var["value"] */
 PHP_FUNCTION(yp_first) {
 	pval **domain, **map;
 	char *outval, *outkey;
@@ -152,7 +152,7 @@ PHP_FUNCTION(yp_first) {
 /* }}} */
 
 /* {{{ proto array yp_next(string domain, string map, string key)
-      Returns an array with $var[$key] and the the line as the value */
+   Returns an array with $var[$key] and the the line as the value */
 PHP_FUNCTION(yp_next) {
 	pval **domain, **map, **key;
 	char *outval, *outkey;
