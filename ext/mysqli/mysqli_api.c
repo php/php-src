@@ -258,7 +258,6 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	for (i=start; i < var_cnt + start ; i++) {
 		ofs = i - start;
 		stmt->result.is_null[ofs] = 0;
-		//bind[ofs].truncated = NULL;
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
 		switch (col_type) {
