@@ -343,7 +343,7 @@ static void _php_tidy_throw_exception(char *message, ...)
     if(TG(inst)) {
         zend_throw_exception(tidy_ce_exception, msg, 0 TSRMLS_CC);
     } else {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, msg);
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", msg);
     }
 	    
     va_end(ap);
@@ -987,7 +987,7 @@ PHP_FUNCTION(ob_tidyhandler)
 
 	if (input_len > 1) {
 		if (tidyParseString(doc, input) < 0 || tidyCleanAndRepair(doc) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, errbuf.bp);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf.bp);
 			RETVAL_NULL();
 		} else {
 			TidyBuffer output = {0};
