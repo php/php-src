@@ -999,6 +999,80 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 	return 1;
 }
 
+static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mode, int options, php_stream_context *context TSRMLS_DC)
+{
+	int ret, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
+	char *p;
+
+	if ((p = strstr(dir, "://")) != NULL) {
+		dir = p + 3;
+	}
+
+	if (!recursive) {
+		ret = php_mkdir(dir, mode TSRMLS_CC);
+	} else {
+		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
+		char *e, *buf;
+		struct stat sb;
+		int dir_len = strlen(dir);
+
+		buf = estrndup(dir, dir_len);
+		e = buf + dir_len;
+
+		/* find a top level directory we need to create */
+		while ((p = strrchr(buf, DEFAULT_SLASH))) {
+			*p = '\0';
+			if (VCWD_STAT(buf, &sb) == 0) {
+				*p = DEFAULT_SLASH;
+				break;
+			}
+		}
+		if (p == buf) {
+			ret = php_mkdir(dir, mode TSRMLS_CC);
+		} else if (!(ret = php_mkdir(buf, mode TSRMLS_CC))) {
+			if (!p) {
+				p = buf;
+			}
+			/* create any needed directories if the creation of the 1st directory worked */
+			while (++p != e) {
+				if (*p == '\0' && *(p + 1) != '\0') {
+					*p = DEFAULT_SLASH;
+					if ((ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+						break;
+					}
+				}
+			}
+		}
+		efree(buf);
+	}
+	if (ret < 0) {
+		/* Failure */
+		return 0;
+	} else {
+		/* Success */
+		return 1;
+	}
+}
+
+static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+{
+	if (PG(safe_mode) &&(!php_checkuid(url, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		return 0;
+	}
+
+	if (php_check_open_basedir(url TSRMLS_CC)) {
+		return 0;
+	}
+
+	if (VCWD_RMDIR(url) < 0) {
+		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(errno));
+		return 0;
+	}
+
+	return 1;
+}
+
 static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_stream_opener,
 	NULL,
@@ -1007,7 +1081,9 @@ static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_dir_opener,
 	"plainfile",
 	php_plain_files_unlink,
-	php_plain_files_rename
+	php_plain_files_rename,
+	php_plain_files_mkdir,
+	php_plain_files_rmdir
 };
 
 php_stream_wrapper php_plain_files_wrapper = {

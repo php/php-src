@@ -25,9 +25,9 @@ PHP                                                                        NEWS
   . stream_socket_sendto() and stream_socket_recvfrom(). (Wez)
   . iconv_mime_decode_headers(). (Moriyoshi)
   . get_declared_interfaces(). (Andrey, Marcus)
-- Added rename() support to userstreams. (Sara)
-- Added rename() support to ftp:// wrapper. (Sara)
-- Changed rename() to be routed via streams API. (Sara)
+- Added rename(), rmdir(), and mkdir() support to userstreams. (Sara)
+- Added rename(), rmdir(), and mkdir() support to ftp:// wrapper. (Sara)
+- Changed rename(), rmdir(), and mkdir() to be routed via streams API. (Sara)
 - Changed stat() and family to be routed via streams API. (Sara)
 - Fixed include_once() / require_once() on Windows to honor case-insensitivity
   of files. (Andi)

@@ -1273,93 +1273,42 @@ PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto bool mkdir(string pathname [, int mode [, bool recursive])
+/* {{{ proto bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
    Create a directory */
 PHP_FUNCTION(mkdir)
 {
-	int dir_len, ret;
-	long mode = 0777;
-	char *dir;
+	zval *zcontext = NULL;
+	long dir_len, mode = 0777;
 	zend_bool recursive = 0;
+	char *dir;
+	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lb", &dir, &dir_len, &mode, &recursive) == FAILURE) {
-		return;
-	}
-
-	if (!recursive) {
-		ret = php_mkdir(dir, mode TSRMLS_CC);
-	} else {
-		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
-		char *p, *e, *buf;
-		struct stat sb;
-		
-		buf = estrndup(dir, dir_len);
-		e = buf + dir_len;
-		
-		/* find a top level directory we need to create */
-		while ((p = strrchr(buf, DEFAULT_SLASH))) {
-			*p = '\0';
-			if (VCWD_STAT(buf, &sb) == 0) {
-				*p = DEFAULT_SLASH;
-				break;
-			}
-		}
-		if (p == buf) {
-			ret = php_mkdir(dir, mode TSRMLS_CC);
-		} else if (!(ret = php_mkdir(buf, mode TSRMLS_CC))) {
-			if (!p) {
-				p = buf;
-			}
-			/* create any needed directories if the creation of the 1st directory worked */
-			while (++p != e) {
-				if (*p == '\0' && *(p + 1) != '\0') {
-					*p = DEFAULT_SLASH;
-					if ((ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-						break;
-					}
-				}
-			}
-		}
-		efree(buf);
-	}
-
-	if (ret < 0) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lbr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+
+	context = php_stream_context_from_zval(zcontext, 0);
+
+	RETURN_BOOL(php_stream_mkdir(dir, mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
 }
 /* }}} */
 
-/* {{{ proto bool rmdir(string dirname)
+/* {{{ proto bool rmdir(string dirname[, resource context])
    Remove a directory */
 PHP_FUNCTION(rmdir)
 {
-	zval **arg1;
-	int ret;
+	char *dir;
+	long dir_len;
+	zval *zcontext = NULL;
+	php_stream_context *context;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(arg1);
-
-	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg1), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dir, &dir_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(Z_STRVAL_PP(arg1) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
+	context = php_stream_context_from_zval(zcontext, 0);
 
-	ret = VCWD_RMDIR(Z_STRVAL_PP(arg1));
-	if (ret < 0) {
-		php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), E_WARNING, "%s", strerror(errno));
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(php_stream_rmdir(dir, REPORT_ERRORS, context));
 }
 /* }}} */
 

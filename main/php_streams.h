@@ -151,6 +151,10 @@ typedef struct _php_stream_wrapper_ops {
 
 	/* rename a file */
 	int (*rename)(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC);
+
+	/* Create/Remove directory */
+	int (*mkdir)(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
+	int (*rmdir)(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
@@ -308,6 +312,12 @@ PHPAPI int _php_stream_stat_path(char *path, int flags, php_stream_statbuf *ssb,
 #define php_stream_stat_path(path, ssb)	_php_stream_stat_path((path), 0, (ssb), NULL TSRMLS_CC)
 #define php_stream_stat_path_ex(path, flags, ssb, context)	_php_stream_stat_path((path), (flags), (ssb), (context) TSRMLS_CC)
 
+PHPAPI int _php_stream_mkdir(char *path, int mode, int options, php_stream_context *context TSRMLS_DC);
+#define php_stream_mkdir(path, mode, options, context)	_php_stream_mkdir(path, mode, options, context TSRMLS_CC)
+
+PHPAPI int _php_stream_rmdir(char *path, int options, php_stream_context *context TSRMLS_DC);
+#define php_stream_rmdir(path, options, context)	_php_stream_rmdir(path, options, context TSRMLS_CC)
+
 PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC);
 #define php_stream_opendir(path, options, context)	_php_stream_opendir((path), (options), (context) STREAMS_CC TSRMLS_CC)
 PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC);
@@ -319,6 +329,13 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 #define php_stream_set_option(stream, option, value, ptrvalue)	_php_stream_set_option((stream), (option), (value), (ptrvalue) TSRMLS_CC)
 
 #define php_stream_set_chunk_size(stream, size) _php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL TSRMLS_CC)
+
+/* Flags for mkdir method in wrapper ops */
+#define PHP_STREAM_MKDIR_RECURSIVE	1
+/* define REPORT ERRORS 8 (below) */
+
+/* Flags for rmdir method in wrapper ops */
+/* define REPORT_ERRORS 8 (below) */
 
 /* Flags for url_stat method in wrapper ops */
 #define PHP_STREAM_URL_STAT_LINK	1
