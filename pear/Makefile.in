@@ -10,7 +10,6 @@ include $(top_srcdir)/build/rules.mk
 peardir=$(PEAR_INSTALLDIR)
 
 PEAR_SUBDIRS = \
-	Benchmark \
 	Cache \
 	Cache/Container \
 	Console \
@@ -21,19 +20,14 @@ PEAR_SUBDIRS = \
 	HTML \
 	HTTP \
 	Image \
-	Log \
 	Mail \
-	Math \
 	Net \
-	Numbers \
 	Payment \
 	PEAR \
 	Schedule \
 	XML 
 
 PEAR_FILES = \
-	Benchmark/Iterate.php \
-	Benchmark/Timer.php \
 	Cache.php \
 	Cache/Error.php \
 	Cache/Container.php \
@@ -80,25 +74,15 @@ PEAR_FILES = \
 	HTTP.php \
 	HTTP/Compress.php \
 	Image/Remote.php \
-	Log.php \
-	Log/composite.php \
-	Log/file.php \
-	Log/mcal.php \
-	Log/Observer.php \
-	Log/sql.php \
-	Log/syslog.php \
 	Mail.php \
 	Mail/RFC822.php \
 	Mail/sendmail.php \
 	Mail/smtp.php \
 	Mail/mime.php \
-	Math/Fraction.php \
-	Math/Util.php \
 	Net/Curl.php \
 	Net/Dig.php \
 	Net/SMTP.php \
 	Net/Socket.php \
-	Numbers/Roman.php \
 	PEAR.php \
 	PEAR/Autoloader.php \
 	PEAR/Common.php \
