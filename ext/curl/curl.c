@@ -609,7 +609,7 @@ PHP_FUNCTION(curl_init)
 }
 /* }}} */
 
-/* {{{ proto bool curl_setopt(int ch, string option, mixed value)
+/* {{{ proto bool curl_setopt(resource ch, string option, mixed value)
    Set an option for a CURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
@@ -873,7 +873,7 @@ PHP_FUNCTION(curl_setopt)
 }
 /* }}} */
 
-/* {{{ proto bool curl_exec(int ch)
+/* {{{ proto bool curl_exec(resource ch)
    Perform a CURL session */
 PHP_FUNCTION(curl_exec)
 {
@@ -909,7 +909,7 @@ PHP_FUNCTION(curl_exec)
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s), v);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s), v, 1);
 
-/* {{{ proto string curl_getinfo(int ch, int opt)
+/* {{{ proto string curl_getinfo(resource ch, int opt)
    Get information regarding a specific transfer */
 PHP_FUNCTION(curl_getinfo)
 {
@@ -1009,7 +1009,7 @@ PHP_FUNCTION(curl_getinfo)
 }
 /* }}} */
 
-/* {{{ proto string curl_error(int ch)
+/* {{{ proto string curl_error(resource ch)
    Return a string contain the last error for the current session */
 PHP_FUNCTION(curl_error)
 {
@@ -1027,7 +1027,7 @@ PHP_FUNCTION(curl_error)
 }
 /* }}} */
 
-/* {{{ proto int curl_errno(int ch)
+/* {{{ proto int curl_errno(resource ch)
    Return an integer containing the last error number */
 PHP_FUNCTION(curl_errno)
 {
@@ -1044,7 +1044,7 @@ PHP_FUNCTION(curl_errno)
 }
 /* }}} */
 
-/* {{{ proto void curl_close(int ch)
+/* {{{ proto void curl_close(resource ch)
    Close a CURL session */
 PHP_FUNCTION(curl_close)
 {
