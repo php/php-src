@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2 
+- Made a minor change to allow building with OpenLDAP 2.0 (Stig Venaas)
 - Fixed a bug in preg_replace() that would truncate subject string if the
   first argument was en empty array. (Andrei)
 - Added ob_get_length function (Stig)
