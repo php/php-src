@@ -27,7 +27,7 @@ AC_ARG_WITH(apxs2filter,
     AC_MSG_RESULT([3. Apache was not built using --enable-so (the apxs usage page is displayed)])
     AC_MSG_RESULT()
     AC_MSG_RESULT([The output of $APXS follows:])
-    $APXS
+    $APXS -q CFLAGS
     AC_MSG_ERROR([Aborting])
   fi 
 
