@@ -89,14 +89,14 @@ PHP_MINFO_FUNCTION(my_input_filter)
     php_info_print_table_end();
 }
 
-unsigned int  my_sapi_input_filter(int arg, char *var, char *val, unsigned int val_len)
+unsigned int  my_sapi_input_filter(int arg, char *var, char **val, unsigned int val_len)
 {
     zval new_var;
     zval *array_ptr = NULL;
     char *raw_var;
     int var_len;
 
-    assert(val != NULL);
+    assert(*val != NULL);
 
     switch(arg) {
         case PARSE_GET:
@@ -125,7 +125,7 @@ unsigned int  my_sapi_input_filter(int arg, char *var, char *val, unsigned int v
             break;
     }
     Z_STRLEN(new_var) = val_len;
-    Z_STRVAL(new_var) = estrndup(val, val_len);
+    Z_STRVAL(new_var) = estrndup(*val, val_len);
     Z_TYPE(new_var) = IS_STRING;
 
     var_len = strlen(var);
@@ -135,9 +135,9 @@ unsigned int  my_sapi_input_filter(int arg, char *var, char *val, unsigned int v
 
     php_register_variable_ex(raw_var, &new_var, array_ptr TSRMLS_DC);
 
-    php_strip_tags(val, val_len, NULL, NULL, 0);
+    php_strip_tags(*val, val_len, NULL, NULL, 0);
 
-    return strlen(val);
+    return strlen(*val);
 }
 
 PHP_FUNCTION(my_get_raw)
