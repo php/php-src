@@ -466,6 +466,9 @@ allow_url_fopen = On
 ; Define the anonymous ftp password (your email address)
 ;from="john@doe.com"
 
+; Define the User-Agent string
+; user_agent="PHP"
+
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Dynamic Extensions ;
