@@ -380,8 +380,80 @@ static void php_wddx_serialize_unset(wddx_packet *packet)
 }
 /* }}} */
 
-/* {{{ void php_wddx_serialize_hash(wddx_packet *packet, zval *var) */
-static void php_wddx_serialize_hash(wddx_packet *packet, zval *var)
+static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
+{
+	zval **ent, *retval, *fname, **varname;
+	char *key;
+	ulong idx;
+	char tmp_buf[WDDX_BUF_LEN];
+
+	MAKE_STD_ZVAL(fname);
+	ZVAL_STRING(fname, "__sleep", 1);
+
+	/*
+	 * We try to call __sleep() method on object. It's supposed to return an
+	 * array of property names to be serialized.
+	 */
+	if (call_user_function_ex(CG(function_table), obj, fname, &retval, 0, 0, 1) == SUCCESS) {
+		if (retval && HASH_OF(retval)) {
+			php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
+			sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
+			php_wddx_add_chunk(packet, tmp_buf);
+			php_wddx_add_chunk_static(packet, WDDX_STRING_S);
+			php_wddx_add_chunk_ex(packet, obj->value.obj.ce->name, obj->value.obj.ce->name_length);
+			php_wddx_add_chunk_static(packet, WDDX_STRING_E);
+			php_wddx_add_chunk_static(packet, WDDX_VAR_E);
+			
+			for (zend_hash_internal_pointer_reset(HASH_OF(retval));
+				 zend_hash_get_current_data(HASH_OF(retval), (void **)&varname) == SUCCESS;
+				 zend_hash_move_forward(HASH_OF(retval))) {
+				if (Z_TYPE_PP(varname) != IS_STRING) {
+					php_error(E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
+					continue;
+				}
+
+				if (zend_hash_find(HASH_OF(obj), Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, (void **)&ent) == SUCCESS) {
+					php_wddx_serialize_var(packet, *ent, Z_STRVAL_PP(varname));
+				}
+			}
+			
+			php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
+		}
+	} else {
+		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
+		sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
+		php_wddx_add_chunk(packet, tmp_buf);
+		php_wddx_add_chunk_static(packet, WDDX_STRING_S);
+		php_wddx_add_chunk_ex(packet, obj->value.obj.ce->name, obj->value.obj.ce->name_length);
+		php_wddx_add_chunk_static(packet, WDDX_STRING_E);
+		php_wddx_add_chunk_static(packet, WDDX_VAR_E);
+		for (zend_hash_internal_pointer_reset(HASH_OF(obj));
+			 zend_hash_get_current_data(HASH_OF(obj), (void**)&ent) == SUCCESS;
+			 zend_hash_move_forward(HASH_OF(obj))) {
+			if (*ent == obj)
+				continue;
+
+			if (zend_hash_get_current_key(HASH_OF(obj), &key, &idx) == HASH_KEY_IS_STRING) {
+				php_wddx_serialize_var(packet, *ent, key);
+				efree(key);
+			} else {
+				sprintf(tmp_buf, "%ld", idx);
+				php_wddx_serialize_var(packet, *ent, tmp_buf);
+			}
+		}
+		php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
+	}
+
+	zval_dtor(fname);
+	FREE_ZVAL(fname);
+
+	if (retval) {
+		zval_dtor(retval);
+		FREE_ZVAL(retval);
+	}
+}
+
+static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 {
 	zval **ent;
 	char *key;
@@ -389,54 +461,41 @@ static void php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 	ulong idx;
 	HashTable *target_hash;
 	char tmp_buf[WDDX_BUF_LEN];
+	int ind = 0,type;
 
-	target_hash = HASH_OF(var);
-	
-	/* If variable is an object, always use struct and serialize its classname */
-	if (var->type == IS_OBJECT) {
-		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
-		sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
-		php_wddx_add_chunk(packet, tmp_buf);
-		php_wddx_add_chunk_static(packet, WDDX_STRING_S);
-		php_wddx_add_chunk_ex(packet, var->value.obj.ce->name, var->value.obj.ce->name_length);
-		php_wddx_add_chunk_static(packet, WDDX_STRING_E);
-		php_wddx_add_chunk_static(packet, WDDX_VAR_E);
-		is_struct = 1;
-	} else {
-		int ind = 0,type;
+	target_hash = HASH_OF(arr);
 
-		for (zend_hash_internal_pointer_reset(target_hash);
-			 zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS;
-		  	 zend_hash_move_forward(target_hash)) {
+	for (zend_hash_internal_pointer_reset(target_hash);
+		 zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS;
+		 zend_hash_move_forward(target_hash)) {
 
-			type = zend_hash_get_current_key(target_hash, &key, &idx);
-			
-			if (type == HASH_KEY_IS_STRING) {
-				is_struct = 1;
-				efree(key);
-				break;
-			}
+		type = zend_hash_get_current_key(target_hash, &key, &idx);
 
-			if (idx != ind) {
-				is_struct = 1;
-				break;
-			}
-
-			ind++;
-		}				
-
-		if (is_struct) {
-			php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
-		} else {
-			sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
-			php_wddx_add_chunk(packet, tmp_buf);
+		if (type == HASH_KEY_IS_STRING) {
+			is_struct = 1;
+			efree(key);
+			break;
 		}
+
+		if (idx != ind) {
+			is_struct = 1;
+			break;
+		}
+
+		ind++;
+	}				
+
+	if (is_struct) {
+		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
+	} else {
+		sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
+		php_wddx_add_chunk(packet, tmp_buf);
 	}
 
 	for (zend_hash_internal_pointer_reset(target_hash);
 		 zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS;
 		 zend_hash_move_forward(target_hash)) {
-		if (*ent == var)
+		if (*ent == arr)
 			continue;
 
 		if (is_struct) {
@@ -459,7 +518,6 @@ static void php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 		php_wddx_add_chunk_static(packet, WDDX_ARRAY_E);
 	}
 }
-/* }}} */
 
 
 /* {{{ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name) */
@@ -491,8 +549,11 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name)
 			break;
 		
 		case IS_ARRAY:
+			php_wddx_serialize_array(packet, var);
+			break;
+
 		case IS_OBJECT:
-			php_wddx_serialize_hash(packet, var);
+			php_wddx_serialize_object(packet, var);
 			break;
 	}
 	
@@ -653,13 +714,12 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 				
 				if (ent1->varname) {
 					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
-						ent1->data->type == IS_STRING &&
-						ent1->data->value.str.len)
-					{
+						ent1->data->type == IS_STRING && ent1->data->value.str.len) {
+						zval *fname, *retval;
+
 						if (zend_hash_find(EG(class_table), ent1->data->value.str.val,
 										   ent1->data->value.str.len+1, (void **) &ce)==FAILURE) {
-							php_error(E_NOTICE, "Deserializing non-existant class: %s! No methods will be available!",
-									  ent1->data->value.str.val);
+							php_error(E_NOTICE, "Deserializing non-existant class: %s! No methods will be available!", ent1->data->value.str.val);
 							ce = &zend_standard_class_def;
 						}
 
@@ -684,6 +744,19 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 						/* Clean up class name var entry */
 						zval_dtor(ent1->data);
 						efree(ent1->data);
+
+						/* Call __wakeup() method on the object. */
+						MAKE_STD_ZVAL(fname);
+						ZVAL_STRING(fname, "__wakeup", 1);
+
+						call_user_function_ex(NULL, obj, fname, &retval, 0, 0, 0);
+
+						zval_dtor(fname);
+						FREE_ZVAL(fname);
+						if (retval) {
+							zval_dtor(retval);
+							FREE_ZVAL(retval);
+						}
 					}
 					else
 						zend_hash_update(target_hash,
