@@ -1,4 +1,6 @@
 <?php
+	mb_regex_set_options( '' );
+
 	$encs = array( 'EUC-JP', 'Shift_JIS', 'SJIS', 'UTF-8' );
 
 	function test_ereg( $test_enc, $pat, $str, $in_enc = 'EUC-JP' ) {
