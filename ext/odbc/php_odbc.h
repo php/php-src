@@ -269,14 +269,15 @@ void odbc_del_result(HashTable *list, int count);
 int odbc_add_conn(HashTable *list, HDBC conn);
 odbc_connection *odbc_get_conn(HashTable *list, int count);
 void odbc_del_conn(HashTable *list, int ind);
-
-#define ODBC_SQL_ERROR odbc_sql_error
-#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
-void odbc_sql_error(SQLHANDLE henv, SQLHANDLE conn, SQLHANDLE stmt, char *func);
-#else
-void odbc_sql_error(HENV henv, HDBC conn, HSTMT stmt, char *func);
-#endif
 int odbc_bindcols(odbc_result *result);
+
+#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
+#define ODBC_SQL_ERROR_PARAMS SQLHANDLE henv, SQLHANDLE conn, SQLHANDLE stmt, char *func
+#else
+#define ODBC_SQL_ERROR_PARAMS HENV henv, HDBC conn, HSTMT stmt, char *func
+#endif
+
+void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 
 #define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR)
 #define IS_SQL_BINARY(x) (x == SQL_BINARY || x == SQL_VARBINARY || x == SQL_LONGVARBINARY)
