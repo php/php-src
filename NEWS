@@ -43,6 +43,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21998 (array_pop() did not reset the current array position). (Jani)
 - Fixed bug #21815 (fpassthru() ignored buffered data but complained anyway). 
   (Wez)
+- Fixed bug #21809 (select would not always timeout during socket shutdown). (Wez)
 - Fixed bug #21725 (return behaviour differs between include and require). (Zeev)
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
 - Fixed bug #21549 (problem with Ingres II persistent connections). (Jani)
