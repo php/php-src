@@ -15,6 +15,9 @@ AC_ZEND_C_BIGENDIAN
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
+AC_CHECK_SIZEOF(long, 8)
+AC_CHECK_SIZEOF(int, 4)
+
 sinclude(Zend.m4)
 
 LIBZEND_BASIC_CHECKS
