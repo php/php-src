@@ -75,6 +75,10 @@ ZEND_GET_MODULE(sysvshm)
 
 THREAD_LS sysvshm_module php_sysvshm;
 
+static int php_put_shm_data(sysvshm_chunk_head *ptr, long key, char *data, long len);
+static long php_check_shm_data(sysvshm_chunk_head *ptr, long key);
+static int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos);
+
 /* {{{ php_release_sysvshm
  */
 static void php_release_sysvshm(zend_rsrc_list_entry *rsrc TSRMLS_DC)
