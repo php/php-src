@@ -151,10 +151,10 @@ int inet_aton(const char *cp, struct in_addr *inp) {
 }
 
 int fcntl(int fd, int cmd, ...) {
-    va_list va;
-	int retval;
-
-    va_start(va, cmd);
+	va_list va;
+	int retval, io, mode;
+	
+	va_start(va, cmd);
 
 	switch(cmd) {
 		case F_GETFL:
@@ -165,7 +165,9 @@ int fcntl(int fd, int cmd, ...) {
 			break;
 
 		case F_SETFL:
-			retval = ioctlsocket(fd, cmd, va_arg(va, int*));
+			io = va_arg(va, int);
+			mode = io == O_NONBLOCK ? 1 : 0;
+			retval = ioctlsocket(fd, io, &mode);
 			break;
 	}
 
