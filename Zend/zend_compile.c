@@ -1148,6 +1148,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 			break;
 		case ZEND_DECLARE_INHERITED_CLASS: {
 				zend_class_entry *ce, *parent_ce;
+				int parent_name_length;
 				char *class_name, *parent_name;
 				int found_ce;
 
@@ -1155,12 +1156,11 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				found_ce = zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &ce);
 
 				/* Restore base class / derived class names */
-				parent_name = opline->op2.u.constant.value.str.val;
 				class_name = strchr(opline->op2.u.constant.value.str.val, ':');
 				if (!class_name) {
 					zend_error(E_CORE_ERROR, "Invalid runtime class entry");
 				}
-				*class_name++ = 0;
+				class_name++;
 
 				if (found_ce==FAILURE) {
 					zend_error(E_ERROR, "Cannot redeclare class %s", class_name);
@@ -1170,14 +1170,17 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				(*ce->refcount)++;
 
 				/* Obtain parent class */
-				if (zend_hash_find(class_table, parent_name, strlen(parent_name)+1, (void **) &parent_ce)==FAILURE) {
+				parent_name_length = class_name - opline->op2.u.constant.value.str.val - 1;
+				parent_name = estrndup(opline->op2.u.constant.value.str.val, parent_name_length);
+				if (zend_hash_find(class_table, parent_name, parent_name_length+1, (void **) &parent_ce)==FAILURE) {
 					if (!compile_time) {
 						zend_error(E_ERROR, "Class %s:  Cannot inherit from undefined class %s", class_name, parent_name);
 					}
 					(*ce->refcount)--;
-					*(class_name-1) = ':';
+					efree(parent_name);
 					return FAILURE;
 				}
+				efree(parent_name);
 
 				do_inheritance(ce, parent_ce);
 
@@ -1189,10 +1192,8 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					(*ce->refcount)--;
 					zend_hash_destroy(&ce->function_table);
 					zend_hash_destroy(&ce->default_properties);
-					*(class_name-1) = ':';
 					return FAILURE;
 				}
-				*(class_name-1) = ':';
 				return SUCCESS;
 			}
 			break;
