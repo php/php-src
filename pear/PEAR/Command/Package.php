@@ -583,22 +583,14 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
                                     array('installroot' => $instroot,
                                           'nodeps' => true));
         $pkgdir = "$info[package]-$info[version]";
-//        print "instroot=$instroot\n";
-//        print_r($info);
-//        return true;
-
         $info['rpm_xml_dir'] = '/var/lib/pear';
         $this->config->set('verbose', $tmp);
         if (!$tar->extractList("$pkgdir/package.xml", $tmpdir, $pkgdir)) {
             return $this->raiseError("failed to extract $params[0]");
         }
-        if (!file_exists("$tmpdir/package.xml")) {
+        if (!file_exists("package.xml")) {
             return $this->raiseError("no package.xml found in $params[0]");
         }
-//        System::mkdir("-p $instroot$info[rpm_xml_dir]");
-//        if (!@copy("$tmpdir/package.xml", "$instroot$info[rpm_xml_dir]/$info[package].xml")) {
-//            return $this->raiseError("could not copy package.xml file: $php_errormsg");
-//        }
         if (isset($options['spec-template'])) {
             $spec_template = $options['spec-template'];
         } else {
@@ -631,7 +623,7 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         } else {
             $arch = 'noarch';
         }
-        $cfk = array('master_server', 'php_dir', 'ext_dir', 'doc_dir',
+        $cfg = array('master_server', 'php_dir', 'ext_dir', 'doc_dir',
                      'bin_dir', 'data_dir', 'test_dir');
         foreach ($cfg as $k) {
             $info[$k] = $this->config->get($k);
