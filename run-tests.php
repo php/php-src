@@ -706,11 +706,13 @@ TEST $file
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
 			save_text($tmp_skipif, $section_text['SKIPIF']);
-			$output = system_with_timeout("$php $info_params $tmp_skipif");
+			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
+				"unset REQUEST_METHOD;": "";
+			$output = system_with_timeout("$extra $php $info_params $tmp_skipif");
 			@unlink($tmp_skipif);
 			if (eregi("^skip", trim($output))) {
 				echo "SKIP $tested";
-				$reason = (ereg("^skip[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
+				$reason = (eregi("^skip[[:space:]]*(.+)\$", trim($output))) ? eregi_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					echo " (reason: $reason)\n";
 				} else {
