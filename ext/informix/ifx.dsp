@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /D ZEND_DEBUG=0 /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /D ZEND_DEBUG=0 /D HAVE_IFX_IUS=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /D HAVE_IFX_IUS=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "_DEBUG"
@@ -104,7 +104,7 @@ SOURCE=.\ifx.ec
 InputPath=.\ifx.ec
 
 ".\ifx.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	esql.exe -dcmdl -p -G -subsystem:windows -thread -I..\.. ifx.ec
+	esql.exe -dcmdl -p -G -subsystem:windows -EDHAVE_IFX_IUS=1 -thread -I..\.. ifx.ec
 
 # End Custom Build
 
@@ -114,7 +114,7 @@ InputPath=.\ifx.ec
 InputPath=.\ifx.ec
 
 ".\ifx.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	esql.exe -dcmdl -p -G -subsystem:windows -thread -I..\.. ifx.ec
+	esql.exe -dcmdl -p -G -subsystem:windows -EDHAVE_IFX_IUS=1 -thread -I..\.. ifx.ec
 
 # End Custom Build
 
@@ -128,6 +128,10 @@ InputPath=.\ifx.ec
 # Begin Source File
 
 SOURCE=.\php_informix.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_informix_includes.h
 # End Source File
 # End Group
 # End Target
