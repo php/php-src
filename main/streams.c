@@ -1626,6 +1626,10 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 #endif
 			
 		case PHP_STREAM_OPTION_WRITE_BUFFER:
+			if (data->file == NULL) {
+				return -1;
+			}
+
 			if (ptrparam)
 				size = *(size_t *)ptrparam;
 			else
