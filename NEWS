@@ -1,5 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2002, Version 4.2.4
+- Fixed GET/POST/COOKIE value handling when --enable-enc-trans and 
+  array values are used in GET/POST/COOKIE. (Yasuo)
+
 06 Sep 2002, Version 4.2.3
 - Enable UTF8 modifier support for PCRE on win32. (Wez, Edin)
 - Enabled strcoll() on win32. (Markus)
