@@ -1,3 +1,14 @@
+2000-09-16  Zak Greant  <zak@nucleus.com>
+
+    * ext/standard/filestat.c:
+    Thought that I had just committed something really stupid.
+    On closer inspection, realized that the proto comments
+    for chown and chgrp were reversed. :)
+    I did not realize this and had only fixed chown previously
+
+    * ext/standard/filestat.c: trivial change
+    corrected mistake in proto comment for chown fold
+
 2000-09-15  Chris Vandomelen  <chrisv@b0rked.dhs.org>
 
     * ext/sockets/sockets.c: Changed assignment in read() to be more sane.
