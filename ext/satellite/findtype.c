@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: David Eriksson <eriksson@php.net>                            |
+   | Author: David Eriksson <david@2good.com>                            |
    +----------------------------------------------------------------------+
  */
 
