@@ -47,9 +47,20 @@ foreach ($config_layers as $layer) {
 }
 $config->set('verbose', 0, 'default');
 
-$reg = &new PEAR_Registry($config->get('php_dir'));
+$options = array();
+$install_root = getenv("INSTALL_ROOT");
+$php_dir = $config->get('php_dir');
+if (!empty($install_root)) {
+    $options['installroot'] = $install_root;
+    $reg_dir = $install_root . $php_dir;
+} else {
+    $reg_dir = $php_dir;
+}
+
+$reg = &new PEAR_Registry($reg_dir);
 $ui = &new PEAR_Frontend_CLI();
 $installer = &new PEAR_Installer($ui);
+$installer->registry = &$reg;
 
 foreach ($install_files as $package => $instfile) {
     if ($reg->packageExists($package)) {
@@ -61,7 +72,9 @@ foreach ($install_files as $package => $instfile) {
         $new_ver = $info['version'];
         $old_ver = $reg->packageInfo($package, 'version');
         if (version_compare($new_ver, $old_ver, 'gt')) {
-            $err = $installer->install($instfile, array('upgrade' => true));
+            $options['upgrade'] = true;
+            print_r($options);
+            $err = $installer->install($instfile, $options);
             if (PEAR::isError($err)) {
                 $ui->outputData(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
                 continue;
@@ -69,7 +82,8 @@ foreach ($install_files as $package => $instfile) {
             $ui->outputData(sprintf("[PEAR] %-15s- upgraded:  %s", $package, $new_ver));
         } else {
             if (@$argv[1] == '--force') {
-                $err = $installer->install($instfile, array('force' => true));
+                $options['force'] = true;
+                $err = $installer->install($instfile, $options);
                 if (PEAR::isError($err)) {
                     $ui->outputData(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
                     continue;
@@ -80,7 +94,8 @@ foreach ($install_files as $package => $instfile) {
             }
         }
     } else {
-        $err = $installer->install($instfile, array('nodeps' => true));
+        $options['nodeps'] = true;
+        $err = $installer->install($instfile, $options);
         if (PEAR::isError($err)) {
             $ui->outputData(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
             continue;
