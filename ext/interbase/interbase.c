@@ -1337,7 +1337,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 			case SQL_TEXT:			   /* direct to variable */
 			case SQL_VARYING:
 				convert_to_string(b_var);
-				var->sqldata = (void ISC_FAR *) Z_STRVAL_P(b_var);
+				var->sqldata = (void *) Z_STRVAL_P(b_var);
 				var->sqllen	 = Z_STRLEN_P(b_var);
 				var->sqltype = SQL_TEXT + (var->sqltype & 1);
 				break;
@@ -1348,7 +1348,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 					return FAILURE;
 				}
 				buf[i].val.sval = (short) Z_LVAL_P(b_var);
-				var->sqldata = (void ISC_FAR *) (&buf[i].val.sval);
+				var->sqldata = (void *) (&buf[i].val.sval);
 				break;
 			case SQL_LONG:
 				if (var->sqlscale < 0) {
@@ -1358,22 +1358,22 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 					  handle it.
 					*/
 					convert_to_string(b_var);
-					var->sqldata = (void ISC_FAR *) Z_STRVAL_P(b_var);
+					var->sqldata = (void *) Z_STRVAL_P(b_var);
 					var->sqllen	 = Z_STRLEN_P(b_var);
 					var->sqltype = SQL_TEXT;
 				} else {
 					convert_to_long(b_var);
-					var->sqldata = (void ISC_FAR *) (&Z_LVAL_P(b_var));
+					var->sqldata = (void *) (&Z_LVAL_P(b_var));
 				}
 				break;
 			case SQL_FLOAT:
 				convert_to_double(b_var);
 				buf[i].val.fval = (float) Z_DVAL_P(b_var);
-				var->sqldata = (void ISC_FAR *) (&buf[i].val.fval);
+				var->sqldata = (void *) (&buf[i].val.fval);
 				break;
 			case SQL_DOUBLE:  /* direct to variable */
 				convert_to_double(b_var);
-				var->sqldata = (void ISC_FAR *) (&Z_DVAL_P(b_var));
+				var->sqldata = (void *) (&Z_DVAL_P(b_var));
 				break;
 #ifdef SQL_INT64
 			case SQL_INT64:
@@ -1383,7 +1383,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 				  to avoid rounding errors...
 				*/
 				convert_to_string(b_var);
-				var->sqldata = (void ISC_FAR *) Z_STRVAL_P(b_var);
+				var->sqldata = (void *) Z_STRVAL_P(b_var);
 				var->sqllen	 = Z_STRLEN_P(b_var);
 				var->sqltype = SQL_TEXT;
 				break;
@@ -1415,7 +1415,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 					t.tm_year -= 1900;
 					t.tm_mon--;
 					isc_encode_date(&t, &buf[i].val.qval);
-					var->sqldata = (void ISC_FAR *) (&buf[i].val.qval);
+					var->sqldata = (void *) (&buf[i].val.qval);
 				}
 #else
 				/*
@@ -1426,7 +1426,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 				  ask Sascha?
 				*/
 				convert_to_string(b_var);
-				var->sqldata = (void ISC_FAR *) Z_STRVAL_P(b_var);
+				var->sqldata = (void *) Z_STRVAL_P(b_var);
 				var->sqllen = Z_STRLEN_P(b_var);
 				var->sqltype = SQL_TEXT;
 #endif
@@ -1438,23 +1438,23 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 #ifndef SQL_TIMESTAMP
 					strptime(Z_STRVAL_P(b_var), IBG(timestampformat), &t);
 					isc_encode_date(&t, &buf[i].val.qval);
-					var->sqldata = (void ISC_FAR *) (&buf[i].val.qval);
+					var->sqldata = (void *) (&buf[i].val.qval);
 #else
 					switch (var->sqltype & ~1) {
 						case SQL_TIMESTAMP:
 							strptime(Z_STRVAL_P(b_var), IBG(timestampformat), &t);
 							isc_encode_timestamp(&t, &buf[i].val.tsval);
-							var->sqldata = (void ISC_FAR *) (&buf[i].val.tsval);
+							var->sqldata = (void *) (&buf[i].val.tsval);
 							break;
 						case SQL_TYPE_DATE:
 							strptime(Z_STRVAL_P(b_var), IBG(dateformat), &t);
 							isc_encode_sql_date(&t, &buf[i].val.dtval);
-							var->sqldata = (void ISC_FAR *) (&buf[i].val.dtval);
+							var->sqldata = (void *) (&buf[i].val.dtval);
 							break;
 						case SQL_TYPE_TIME:
 							strptime(Z_STRVAL_P(b_var), IBG(timeformat), &t);
 							isc_encode_sql_time(&t, &buf[i].val.tmval);
-							var->sqldata = (void ISC_FAR *) (&buf[i].val.tmval);
+							var->sqldata = (void *) (&buf[i].val.tmval);
 							break;
 					}
 #endif
@@ -1485,7 +1485,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 					}
 					buf[i].val.qval = ib_blob.bl_qd;
 				}
-				var->sqldata = (void ISC_FAR *) &buf[i].val.qval;
+				var->sqldata = (void *) &buf[i].val.qval;
 				break;
 			case SQL_ARRAY:
 				_php_ibase_module_error("Binding arrays not supported yet" TSRMLS_CC);
@@ -2591,7 +2591,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						unsigned short i;
 	
 						blob_handle.bl_handle = NULL;
-						blob_handle.bl_qd = *(ISC_QUAD ISC_FAR *) var->sqldata;
+						blob_handle.bl_qd = *(ISC_QUAD *) var->sqldata;
 			
 						if (isc_open_blob(IB_STATUS, &ib_result->link->handle, &ib_result->trans->handle, &blob_handle.bl_handle, &blob_handle.bl_qd)) {
 							_php_ibase_error(TSRMLS_C);
@@ -2637,13 +2637,13 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						}
 	
 					} else { /* blob id only */
-						ISC_QUAD bl_qd = *(ISC_QUAD ISC_FAR *) var->sqldata;
+						ISC_QUAD bl_qd = *(ISC_QUAD *) var->sqldata;
 						ZVAL_STRINGL(&tmp,_php_ibase_quad_to_string(bl_qd), BLOB_ID_LEN, 0);
 					}
 					break;
 				case SQL_ARRAY: {
 					if (flag & PHP_IBASE_FETCH_ARRAYS) { /* array can be *huge* so only fetch if asked */
-						ISC_QUAD ar_qd = *(ISC_QUAD ISC_FAR *) var->sqldata;
+						ISC_QUAD ar_qd = *(ISC_QUAD *) var->sqldata;
 						ibase_array *ib_array = &ib_result->out_array[arr_cnt];
 						void *ar_data;
 						char *tmp_ptr;
@@ -2664,7 +2664,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						efree(ar_data);
 
 					} else { /* blob id only */
-						ISC_QUAD ar_qd = *(ISC_QUAD ISC_FAR *) var->sqldata;
+						ISC_QUAD ar_qd = *(ISC_QUAD *) var->sqldata;
 						ZVAL_STRINGL(&tmp,_php_ibase_quad_to_string(ar_qd), BLOB_ID_LEN, 0);
 					}
 				}
