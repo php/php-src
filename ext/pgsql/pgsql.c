@@ -291,9 +291,10 @@ static void _free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("pgsql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_pgsql_globals,		pgsql_globals)
+	STD_PHP_INI_BOOLEAN("pgsql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateBool,		allow_persistent,	php_pgsql_globals,		pgsql_globals)
 	STD_PHP_INI_ENTRY_EX("pgsql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_pgsql_globals,		pgsql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("pgsql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_pgsql_globals,		pgsql_globals,	display_link_numbers)
+	STD_PHP_INI_BOOLEAN("pgsql.auto_reset_persistent",	"0",	PHP_INI_SYSTEM,		OnUpdateBool,		auto_reset_persistent,	php_pgsql_globals,		pgsql_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -535,19 +536,17 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			PGG(num_links)++;
 			PGG(num_persistent)++;
 		} else {  /* we do */
-			php_log_err("CONNECTION IS ALREADY OPENED :)" TSRMLS_CC);
 			if (Z_TYPE_P(le) != le_plink) {
 				RETURN_FALSE;
 			}
 			/* ensure that the link did not die */
-			{
+			if (PGG(auto_reset_persistent)) {
 				/* need to send & get something from backend to
 				   make sure we catch CONNECTION_BAD everytime */
 				PGresult *pg_result;
 				pg_result = PQexec(le->ptr, "select 1");
 				PQclear(pg_result);
 			}
-			PQconsumeInput(le->ptr); 
 			if (PQstatus(le->ptr)==CONNECTION_BAD) { /* the link died */
 				if (le->ptr == NULL) {
 					if (connstring) {
