@@ -93,6 +93,8 @@ typedef struct _zend_object_handlers {
 } zend_object_handlers;
 
 extern zend_object_handlers std_object_handlers;
+union _zend_function *zend_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC);
+
 
 #define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
 #define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)

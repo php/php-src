@@ -404,10 +404,78 @@ static void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 	efree(func);
 }
 
+/* Ensures that we're allowed to call a private method.
+ * Returns the function address that should be called, or NULL
+ * if no such function exists.
+ */
+inline zend_function *zend_check_private(zend_function *fbc, zend_class_entry *ce, int fn_flags, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+{
+	if (!ce) {
+		return 0;
+	}
+
+	/* We may call a private function if:
+	 * 1.  The class of our object is the same as the scope, and the private
+	 *     function (EX(fbc)) has the same scope.
+	 * 2.  One of our parent classes are the same as the scope, and it contains
+	 *     a private function with the same name that has the same scope.
+	 */
+	if (fbc->common.scope == ce && EG(scope) == ce) {
+		/* rule #1 checks out ok, allow the function call */
+		return fbc;
+	}
+
+
+	/* Check rule #2 */
+	ce = ce->parent;
+	while (ce) {
+		if (ce == EG(scope)) {
+			if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &fbc)==SUCCESS
+				&& fbc->op_array.fn_flags & ZEND_ACC_PRIVATE
+				&& fbc->common.scope == EG(scope)) {
+				return fbc;
+			}
+			break;
+		}
+		ce = ce->parent;
+	}
+	return NULL;
+}
+
+
+/* Ensures that we're allowed to call a protected method.
+ */
+inline int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
+{
+	zend_class_entry *fbc_scope = ce;
+
+	/* Is the context that's calling the function, the same as one of
+	 * the function's parents?
+	 */
+	while (fbc_scope) {
+		if (fbc_scope==scope) {
+			return 1;
+		}
+		fbc_scope = fbc_scope->parent;
+	}
+
+	/* Is the function's scope the same as our current object context,
+	 * or any of the parents of our context?
+	 */
+	while (scope) {
+		if (scope==ce) {
+			return 1;
+		}
+		scope = scope->parent;
+	}
+	return 0;
+}
+
+
 static union _zend_function *zend_std_get_method(zval *object, char *method_name, int method_len TSRMLS_DC)
 {
 	zend_object *zobj;
-	zend_function *func_method;
+	zend_function *fbc;
 	char *lc_method_name;
 	
 	lc_method_name = do_alloca(method_len+1);
@@ -416,7 +484,7 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 	zend_str_tolower(lc_method_name, method_len);
 		
 	zobj = Z_OBJ_P(object);
-	if (zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&func_method) == FAILURE) {
+	if (zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&fbc) == FAILURE) {
 		if (zobj->ce->__call) {
 			zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 			call_user_call->type = ZEND_INTERNAL_FUNCTION;
@@ -433,16 +501,98 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 		}
 	}
 
+	/* Check access level */
+	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
+		/* Ensure that we haven't overridden a private function and end up calling
+		 * the overriding public function...
+		 */
+		if (fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
+			zend_function *priv_fbc;
+
+			if (zend_hash_find(&EG(scope)->function_table, method_name, method_len+1, (void **) &priv_fbc)==SUCCESS
+				&& priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE) {
+				fbc = priv_fbc;
+			}
+		}
+	} else if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+		zend_function *updated_fbc;
+
+		/* Ensure that if we're calling a private function, we're allowed to do so.
+		 */
+		updated_fbc = zend_check_private(fbc, object->value.obj.handlers->get_class_entry(object TSRMLS_CC), fbc->common.fn_flags, method_name, method_len TSRMLS_CC);
+		if (!updated_fbc) {
+			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+		}
+		fbc = updated_fbc;
+	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
+		/* Ensure that if we're calling a protected function, we're allowed to do so.
+		 */
+		if (!zend_check_protected(fbc->common.scope, EG(scope))) {
+			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+		}
+	}
+
 	free_alloca(lc_method_name);
-	return func_method;
+	return fbc;
 }
+
+
+/* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
+zend_function *zend_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+{
+	zend_function *fbc;
+
+	if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &fbc)==FAILURE) {
+		zend_error(E_ERROR, "Call to undefined method %s::%s()", ce->name, function_name_strval);
+	}
+	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
+		/* No further checks necessary, most common case */
+	} else if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+		zend_function *updated_fbc;
+
+		/* Ensure that if we're calling a private function, we're allowed to do so.
+		 */
+		updated_fbc = zend_check_private(fbc, EG(scope), fbc->common.fn_flags, function_name_strval, function_name_strlen TSRMLS_CC); 
+		if (!updated_fbc) {
+			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
+		}
+		fbc = updated_fbc;
+	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
+		/* Ensure that if we're calling a protected function, we're allowed to do so.
+		 */
+		if (!zend_check_protected(EG(scope), fbc->common.scope)) {
+			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
+		}
+	}
+
+	return fbc;
+}
+
 
 static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 {
-	zend_object *zobj;
-	
-	zobj = Z_OBJ_P(object);
-	return zobj->ce->constructor;
+	zend_object *zobj = Z_OBJ_P(object);
+	zend_function *constructor = zobj->ce->constructor;
+
+	if (constructor) {
+		if (constructor->op_array.fn_flags & ZEND_ACC_PUBLIC) {
+			/* No further checks necessary */
+		} else if (constructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+			/* Ensure that if we're calling a private function, we're allowed to do so.
+			 */
+			if (object->value.obj.handlers->get_class_entry(object TSRMLS_CC) != EG(scope)) {
+				zend_error(E_ERROR, "Call to private constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+			}
+		} else if ((constructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
+			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 */
+			if (!zend_check_protected(constructor->common.scope, EG(scope))) {
+				zend_error(E_ERROR, "Call to protected constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+			}
+		}
+	}
+
+	return constructor;
 }
 
 int zend_compare_symbol_tables_i(HashTable *ht1, HashTable *ht2 TSRMLS_DC);
