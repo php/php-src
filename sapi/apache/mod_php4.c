@@ -243,7 +243,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 
 		if (elts[i].val) {
 			val = elts[i].val;
-			if (!strcmp(val, "SCRIPT_FILENAME")) {
+			if (!strcmp(elts[i].key, "SCRIPT_FILENAME")) {
 				script_filename = val;
 			}
 		} else {
@@ -254,9 +254,9 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 
 	/* insert special variables */
 	if (script_filename) {
-		php_register_variable("PATH_TRANSLATED", script_filename, NULL ELS_CC PLS_CC);
+		php_register_variable("PATH_TRANSLATED", script_filename, track_vars_array ELS_CC PLS_CC);
 	}
-	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, NULL ELS_CC PLS_CC);
+	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array ELS_CC PLS_CC);
 }
 
 static int
