@@ -2131,22 +2131,27 @@ send_by_ref:
 				}
 				NEXT_OPCODE();
 			case ZEND_FE_RESET: {
-					zval *array_ptr;
+					zval *array_ptr, **array_ptr_ptr;
 					HashTable *fe_ht;
 					
-					array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-
-					if (EG(free_op1)) { /* IS_TMP_VAR */
-						zval *tmp;
-
-						ALLOC_ZVAL(tmp);
-						*tmp = *array_ptr;
-						INIT_PZVAL(tmp);
-						array_ptr = tmp;
-					} else {
+					if (opline->extended_value) {
+						array_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
+						SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+						array_ptr = *array_ptr_ptr;
 						array_ptr->refcount++;
-					}
+					} else {
+						array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+						if (EG(free_op1)) { /* IS_TMP_VAR */
+							zval *tmp;
 
+							ALLOC_ZVAL(tmp);
+							*tmp = *array_ptr;
+							INIT_PZVAL(tmp);
+							array_ptr = tmp;
+						} else {
+							array_ptr->refcount++;
+						}
+					}
 					PZVAL_LOCK(array_ptr);
 					Ts[opline->result.u.var].var.ptr = array_ptr;
 					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;	
