@@ -85,8 +85,6 @@ struct _zend_compiler_globals {
 	int comment_start_line;
 	char *heredoc;
 	int heredoc_len;
-	char *doc_comment;
-	int doc_comment_len;
 
 	zend_op_array *active_op_array;
 

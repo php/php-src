@@ -74,6 +74,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
+    op_array->doc_comment = NULL;
+    op_array->doc_comment_len = 0;
 
 	op_array->arg_types = NULL;
 
@@ -157,6 +159,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			if (ce->num_interfaces > 0) {
 				efree(ce->interfaces);
 			}
+			if (ce->doc_comment) {
+				efree(ce->doc_comment);
+			}
 			efree(ce);
 			break;
 		case ZEND_INTERNAL_CLASS:
@@ -184,6 +189,9 @@ ZEND_API void destroy_zend_namespace(zend_namespace **pns)
 	zend_hash_destroy(&ns->constants_table);
 	zend_hash_destroy(ns->static_members);
 	FREE_HASHTABLE(ns->static_members);
+	if (ns->doc_comment) {
+		efree(ns->doc_comment);
+	}
 	efree(ns->name);
 	efree(ns);
 }
@@ -229,6 +237,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	if (op_array->function_name) {
 		efree(op_array->function_name);
 	}
+    if (op_array->doc_comment) {
+        efree(op_array->doc_comment);
+    }
 	if (op_array->arg_types) {
 		efree(op_array->arg_types);
 	}
