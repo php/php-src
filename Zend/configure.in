@@ -122,6 +122,17 @@ AC_ARG_ENABLE(memory-limit,
 ]) 
 
 
+AC_MSG_CHECKING(whether to build Zend thread-safe)
+AC_ARG_ENABLE(thread-safety,
+[  --enable-thread-safety  Whether to build Zend thread-safe.],[
+  AC_DEFINE(ZTS)
+  AC_MSG_RESULT(yes)
+],[
+  AC_MSG_RESULT(no)
+])
+AC_SUBST(TSRM_DIR)
+AC_SUBST(TSRM_LIB)
+
 AC_SUBST(CFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB_EXPORT)
