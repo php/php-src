@@ -29,6 +29,7 @@
     <state>beta</state>
     <date>yyyy-mm-dd</date>
     <notes>
+* HTTP proxy support when downloading packages
 </notes>
     <filelist>
       <file role="php" name="PEAR.php"/>
