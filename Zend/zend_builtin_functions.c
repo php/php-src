@@ -101,6 +101,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(restore_error_handler,	NULL)
 	ZEND_FE(get_declared_classes, NULL)
 	ZEND_FE(create_function,	NULL)
+	ZEND_FE(get_resource_type,	NULL)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
 #endif
