@@ -158,13 +158,6 @@ inline int zend_verify_property_access(zend_property_info *property_info, zend_c
 	switch (property_info->flags & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PUBLIC:
 			return 1;
-		case ZEND_ACC_PRIVATE:
-			if (ce == EG(scope)) {
-				return 1;
-			} else {
-				return 0;
-			}
-			break;
 		case ZEND_ACC_PROTECTED:
 			while (ce) {
 				if (ce==EG(scope)) {
@@ -177,6 +170,29 @@ inline int zend_verify_property_access(zend_property_info *property_info, zend_c
 	return 0;
 }
 
+static inline zend_property_info *zend_get_property_info(zend_object *zobj, zval *member TSRMLS_DC)
+{
+	zend_property_info *property_info;
+
+	ulong h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member)+1);
+	if (zend_hash_quick_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS) {
+		if (!zend_verify_property_access(property_info, zobj->ce TSRMLS_CC)) {
+			zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
+		}
+	} else if (EG(scope)
+				&& zend_hash_quick_find(&EG(scope)->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS
+				&& property_info->flags & ZEND_ACC_PRIVATE) {
+		/* ok */
+	} else {
+		EG(std_property_info).flags = ZEND_ACC_PUBLIC;
+		EG(std_property_info).name = Z_STRVAL_P(member);
+		EG(std_property_info).name_length = Z_STRLEN_P(member);
+		EG(std_property_info).h = zend_get_hash_value(EG(std_property_info).name, EG(std_property_info).name_length+1);
+		property_info = &EG(std_property_info);
+	}
+	return property_info;
+}
+
 
 zval *zend_std_read_property(zval *object, zval *member TSRMLS_DC)
 {
@@ -185,7 +201,6 @@ zval *zend_std_read_property(zval *object, zval *member TSRMLS_DC)
 	zval **retval;
 	zval *rv = NULL;
 	zend_property_info *property_info;
-	zend_property_info std_property_info;
 	
 	zobj = Z_OBJ_P(object);
 
@@ -200,22 +215,9 @@ zval *zend_std_read_property(zval *object, zval *member TSRMLS_DC)
 	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif			
 
-	if (zend_hash_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &property_info)==FAILURE) {
-		std_property_info.flags = ZEND_ACC_PUBLIC;
-		std_property_info.name = Z_STRVAL_P(member);
-		std_property_info.name_length = Z_STRLEN_P(member);
-		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
-		property_info = &std_property_info;
-	}
+	property_info = zend_get_property_info(zobj, member TSRMLS_CC);
 
-#if DEBUG_OBJECT_HANDLERS
-	zend_printf("Access type for %s::%s is %s\n", zobj->ce->name, Z_STRVAL_P(member), zend_visibility_string(property_info->flags));
-#endif
-	if (!zend_verify_property_access(property_info, zobj->ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
-	}
-
-	if (zend_hash_find(zobj->properties, property_info->name, property_info->name_length+1, (void **) &retval) == FAILURE) {
+	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
 		if (zobj->ce->__get && !zobj->in_get) {
 			/* have getter - try with it! */
 			zobj->in_get = 1; /* prevent circular getting */
@@ -229,6 +231,7 @@ zval *zend_std_read_property(zval *object, zval *member TSRMLS_DC)
 			}
 		} else {
 			zend_error(E_NOTICE,"Undefined property:  %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
+			retval = &EG(uninitialized_zval_ptr);
 		}
 	}
 	if (member == &tmp_member) {
@@ -245,7 +248,6 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	zval **variable_ptr;
 	int setter_done = 0;
 	zend_property_info *property_info;
-	zend_property_info std_property_info;
 	
 	zobj = Z_OBJ_P(object);
 
@@ -256,23 +258,9 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		member = &tmp_member;
 	}
 
-	if (zend_hash_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &property_info)==FAILURE) {
-		std_property_info.flags = ZEND_ACC_PUBLIC;
-		std_property_info.name = Z_STRVAL_P(member);
-		std_property_info.name_length = Z_STRLEN_P(member);
-		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
-		property_info = &std_property_info;
-	}
+	property_info = zend_get_property_info(zobj, member TSRMLS_CC);
 
-#if DEBUG_OBJECT_HANDLERS
-	zend_printf("Access type for %s::%s is %s\n", zobj->ce->name, Z_STRVAL_P(member), zend_visibility_string(property_info->flags));
-#endif
-
-	if (!zend_verify_property_access(property_info, zobj->ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
-	}
-
-	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, std_property_info.h, (void **) &variable_ptr) == SUCCESS) {
+	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &variable_ptr) == SUCCESS) {
 		if (*variable_ptr == value) {
 			/* if we already have this value there, we don't actually need to do anything */
 			setter_done = 1;
@@ -302,12 +290,14 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	}
 
 	if (!setter_done) {
+		zval **foo;
+
 		/* if we assign referenced variable, we should separate it */
 		value->refcount++;
 		if (PZVAL_IS_REF(value)) {
 			SEPARATE_ZVAL(&value);
 		}
-		zend_hash_update(zobj->properties, property_info->name, property_info->name_length+1, &value, sizeof(zval *), NULL);
+		zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void **) &foo);
 	}
 	if (member == &tmp_member) {
 		zval_dtor(member);
@@ -320,7 +310,6 @@ static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
 	zval tmp_member;
 	zval **retval;
 	zend_property_info *property_info;
-	zend_property_info std_property_info;
 	
 	zobj = Z_OBJ_P(object);
 
@@ -331,21 +320,11 @@ static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
 		member = &tmp_member;
 	}
 
-	if (zend_hash_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &property_info)==FAILURE) {
-		std_property_info.flags = ZEND_ACC_PUBLIC;
-		std_property_info.name = Z_STRVAL_P(member);
-		std_property_info.name_length = Z_STRLEN_P(member);
-		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
-		property_info = &std_property_info;
-	}
-
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Ptr object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif			
 
-	if (!zend_verify_property_access(property_info, zobj->ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
-	}
+	property_info = zend_get_property_info(zobj, member TSRMLS_CC);
 
 	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
 		zval *new_zval;
@@ -356,7 +335,7 @@ static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
 
 /* 			zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member)); */
 			new_zval->refcount++;
-			zend_hash_update(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, &new_zval, sizeof(zval *), (void **) &retval);
+			zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
 		} else {
 			/* we do have getter - fail and let it try again with usual get/set */
 			retval = NULL;
@@ -373,7 +352,6 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 	zend_object *zobj;
 	zval tmp_member;
 	zend_property_info *property_info;
-	zend_property_info std_property_info;
 	
 	zobj = Z_OBJ_P(object);
 
@@ -384,17 +362,7 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 		member = &tmp_member;
 	}
 
-	if (zend_hash_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &property_info)==FAILURE) {
-		std_property_info.flags = ZEND_ACC_PUBLIC;
-		std_property_info.name = Z_STRVAL_P(member);
-		std_property_info.name_length = Z_STRLEN_P(member);
-		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
-		property_info = &std_property_info;
-	}
-
-	if (!zend_verify_property_access(property_info, zobj->ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
-	}
+	property_info = zend_get_property_info(zobj, member TSRMLS_CC);
 	
 	zend_hash_del(zobj->properties, property_info->name, property_info->name_length+1);
 	if (member == &tmp_member) {
@@ -749,9 +717,7 @@ static int zend_std_has_property(zval *object, zval *member, int check_empty TSR
 	int result;
 	zval **value;
 	zval tmp_member;
-	
 	zend_property_info *property_info;
-	zend_property_info std_property_info;
 	
 	zobj = Z_OBJ_P(object);
 
@@ -766,22 +732,8 @@ static int zend_std_has_property(zval *object, zval *member, int check_empty TSR
 	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif			
 
-	if (zend_hash_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &property_info)==FAILURE) {
-		std_property_info.flags = ZEND_ACC_PUBLIC;
-		std_property_info.name = Z_STRVAL_P(member);
-		std_property_info.name_length = Z_STRLEN_P(member);
-		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
-		property_info = &std_property_info;
-	}
+	property_info = zend_get_property_info(zobj, member TSRMLS_CC);
 
-#if DEBUG_OBJECT_HANDLERS
-	zend_printf("Access type for %s::%s is %s\n", zobj->ce->name, Z_STRVAL_P(member), zend_visibility_string(property_info->flags));
-#endif
-	if (!zend_verify_property_access(property_info, zobj->ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
-	}
-
-		
 	if (zend_hash_find(zobj->properties, property_info->name, property_info->name_length+1, (void **) &value) == SUCCESS) {
 		if (check_empty) {
 			result = zend_is_true(*value);
