@@ -66,6 +66,59 @@ php_stream_ops php_stream_output_ops = {
 	NULL  /* set_option */
 };
 
+static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	return -1;
+}
+
+static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+	int read_bytes;
+	if(!stream->eof) {
+		if(SG(request_info).post_data) { /* data has already been read by a post handler */
+			read_bytes = SG(request_info).post_data_length - stream->position;
+			if(read_bytes <= count) {
+				stream->eof = 1;
+			} else {
+				read_bytes = count;
+			}
+			if(read_bytes) {
+				memcpy(buf, SG(request_info).post_data + stream->position, read_bytes);
+			}
+			return read_bytes;
+		} else {
+			read_bytes = sapi_module.read_post(buf, count TSRMLS_CC);
+			if(read_bytes <= 0){
+				stream->eof = 1;
+				read_bytes = 0;
+			}
+			return read_bytes;
+		}
+	}
+}
+
+static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	return 0;
+}
+
+static int php_stream_input_flush(php_stream *stream TSRMLS_DC)
+{
+	return -1;
+}
+
+php_stream_ops php_stream_input_ops = {
+	php_stream_input_write,
+	php_stream_input_read,
+	php_stream_input_close,
+	php_stream_input_flush,
+	"Input",
+	NULL, /* seek */
+	NULL, /* cast */
+	NULL, /* stat */
+	NULL  /* set_option */
+};
+
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	FILE * fp = NULL;
@@ -76,6 +129,10 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	
 	if (!strcasecmp(path, "output")) {
 		return php_stream_alloc(&php_stream_output_ops, NULL, 0, "wb");
+	}
+	
+	if (!strcasecmp(path, "input")) {
+		return php_stream_alloc(&php_stream_input_ops, NULL, 0, "rb");
 	}
 	
 	if (!strcasecmp(path, "stdin")) {

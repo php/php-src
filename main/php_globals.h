@@ -140,7 +140,6 @@ struct _php_core_globals {
 
 	zend_bool always_populate_raw_post_data;
 	
-	zend_bool allow_webdav_methods;
 };
 
 
