@@ -516,6 +516,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(var_dump,														NULL)
 	PHP_FE(var_export,														NULL)
+	PHP_FE(zval_debug_dump,														NULL)
 	PHP_FE(print_r,															NULL)
 
 	PHP_FE(register_shutdown_function,										NULL)
