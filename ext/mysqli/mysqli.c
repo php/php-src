@@ -108,7 +108,6 @@ void php_clear_stmt_bind(MY_STMT *stmt)
 /* {{{ php_clear_mysql */
 void php_clear_mysql(MY_MYSQL *mysql) {
 	if (mysql->li_read) {
-		printf("freeing...\n");
 		efree(Z_STRVAL_P(mysql->li_read));
 		FREE_ZVAL(mysql->li_read);
 		mysql->li_read = NULL;
@@ -920,12 +919,10 @@ void php_local_infile_end(void *ptr)
 	data= (mysqli_local_infile *)ptr;
 
 	if (!(mysql = data->userdata)) {
-		efree(data);
 		return;
 	}
 
 	php_stream_close(mysql->li_stream);
-	//efree(data);
 	return;	
 }
 /* }}} */
