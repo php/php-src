@@ -335,11 +335,28 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	}
 }
 
+zval *zend_std_read_dimension(zval *object, zval *offset TSRMLS_DC)
+{
+#if 1
+	zend_error(E_ERROR, "Cannot use object as array");
+#else
+	zend_printf("Fetching from object:  ");
+	zend_print_zval(object, 0);
+
+	zend_printf("\n the offset:  ");
+	zend_print_zval(offset, 0);
+
+	zend_printf("\n");
+#endif
+	return EG(uninitialized_zval_ptr);
+}
+
 
 static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
+#if 1
 	zend_error(E_ERROR, "Cannot use object as array");
-#if 0
+#else
 	zend_printf("Assigning to object:  ");
 	zend_print_zval(object, 0);
 
@@ -348,9 +365,9 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 
 	zend_printf("\n the value:  ");
 	zend_print_zval(value, 0);
-#endif
 
 	zend_printf("\n");
+#endif
 }
 
 
@@ -835,6 +852,7 @@ zend_object_handlers std_object_handlers = {
 	
 	zend_std_read_property,					/* read_property */
 	zend_std_write_property,				/* write_property */
+	zend_std_read_dimension,				/* read_dimension */
 	zend_std_write_dimension,				/* write_dimension */
 	zend_std_get_property_ptr,				/* get_property_ptr */
 	zend_std_get_property_ptr,				/* get_property_zval_ptr */

@@ -920,6 +920,17 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 				return;
 			}
 			break;
+		case IS_OBJECT:
+			if (type == BP_VAR_R) {
+				zval *dim = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+				zval *overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim TSRMLS_CC);
+				 
+				*retval = &overloaded_result;
+				AI_USE_PTR(T(result->u.var).var);
+				FREE_OP(Ts, op2, EG(free_op2));
+				SELECTIVE_PZVAL_LOCK(**retval, result);
+			}
+			break;
 		default: {
 				zval *offset;
 
