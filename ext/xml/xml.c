@@ -906,7 +906,7 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 	xml_parser *parser = (xml_parser *)userData;
 
 	if (parser && parser->unparsedEntityDeclHandler) {
-		zval *retval, *args[5];
+		zval *retval, *args[6];
 
 		args[0] = _xml_resource_zval(parser->index);
 		args[1] = _xml_xmlchar_zval(entityName, 0, parser->target_encoding);
