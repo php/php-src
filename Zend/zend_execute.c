@@ -57,7 +57,7 @@
 static zval get_overloaded_property(temp_variable *T TSRMLS_DC);
 static void set_overloaded_property(temp_variable *T, zval *value TSRMLS_DC);
 static void call_overloaded_function(temp_variable *T, int arg_count, zval *return_value TSRMLS_DC);
-static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC);
+static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type TSRMLS_DC);
 static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC);
 static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC);
 static void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1, znode *op2, temp_variable *Ts TSRMLS_DC);
@@ -522,20 +522,20 @@ static void print_refcount(zval *p, char *str)
 }
 
 
-static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC)
+static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type TSRMLS_DC)
 {
 	int free_op1;
-	zval *varname = get_zval_ptr(op1, Ts, &free_op1, BP_VAR_R);
+	zval *varname = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table=0;
 
-	switch (op2->u.fetch_type) {
+	switch (opline->extended_value) {
 		case ZEND_FETCH_LOCAL:
 			target_symbol_table = EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
-			if (op1->op_type == IS_VAR) {
+			if (opline->op1.op_type == IS_VAR) {
 				PZVAL_LOCK(varname);
 			}
 			target_symbol_table = &EG(symbol_table);
@@ -577,17 +577,17 @@ static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_v
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
-	if (op2->u.fetch_type == ZEND_FETCH_LOCAL) {
-		FREE_OP(Ts, op1, free_op1);
-	} else if (op2->u.fetch_type == ZEND_FETCH_STATIC) {
+	if (opline->extended_value == ZEND_FETCH_LOCAL) {
+		FREE_OP(Ts, &opline->op1, free_op1);
+	} else if (opline->extended_value == ZEND_FETCH_STATIC) {
 		zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	}
 
 	if (varname == &tmp_varname) {
 		zval_dtor(varname);
 	}
-	Ts[result->u.var].var.ptr_ptr = retval;
-	SELECTIVE_PZVAL_LOCK(*retval, result);
+	Ts[opline->result.u.var].var.ptr_ptr = retval;
+	SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
 }
 
 
@@ -1236,27 +1236,27 @@ binary_assign_op_addr: {
 				FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 				NEXT_OPCODE();
 			case ZEND_FETCH_R:
-				zend_fetch_var_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+				zend_fetch_var_address(EX(opline), EX(Ts), BP_VAR_R TSRMLS_CC);
 				AI_USE_PTR(EX(Ts)[EX(opline)->result.u.var].var);
 				NEXT_OPCODE();
 			case ZEND_FETCH_W:
-				zend_fetch_var_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
+				zend_fetch_var_address(EX(opline), EX(Ts), BP_VAR_W TSRMLS_CC);
 				NEXT_OPCODE();
 			case ZEND_FETCH_RW:
-				zend_fetch_var_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_RW TSRMLS_CC);
+				zend_fetch_var_address(EX(opline), EX(Ts), BP_VAR_RW TSRMLS_CC);
 				NEXT_OPCODE();
 			case ZEND_FETCH_FUNC_ARG:
 				if (ARG_SHOULD_BE_SENT_BY_REF(EX(opline)->extended_value, EX(fbc), EX(fbc)->common.arg_types)) {
 					/* Behave like FETCH_W */
-					zend_fetch_var_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
+					zend_fetch_var_address(EX(opline), EX(Ts), BP_VAR_W TSRMLS_CC);
 				} else {
 					/* Behave like FETCH_R */
-					zend_fetch_var_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+					zend_fetch_var_address(EX(opline), EX(Ts), BP_VAR_R TSRMLS_CC);
 					AI_USE_PTR(EX(Ts)[EX(opline)->result.u.var].var);
 				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_UNSET:
-				zend_fetch_var_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
+				zend_fetch_var_address(EX(opline), EX(Ts), BP_VAR_R TSRMLS_CC);
 				PZVAL_UNLOCK(*EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr);
 				if (EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
 					SEPARATE_ZVAL_IF_NOT_REF(EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr);
@@ -1264,7 +1264,7 @@ binary_assign_op_addr: {
 				PZVAL_LOCK(*EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr);
 				NEXT_OPCODE();
 			case ZEND_FETCH_IS:
-				zend_fetch_var_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_IS TSRMLS_CC);
+				zend_fetch_var_address(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
 				AI_USE_PTR(EX(Ts)[EX(opline)->result.u.var].var);
 				NEXT_OPCODE();
 			case ZEND_FETCH_DIM_R:

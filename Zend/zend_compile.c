@@ -237,9 +237,9 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op TSRM
 	if (varname->op_type == IS_CONST
 		&& varname->u.constant.type == IS_STRING
 		&& zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
-		opline_ptr->op2.u.fetch_type = ZEND_FETCH_GLOBAL;
+		opline_ptr->extended_value = ZEND_FETCH_GLOBAL;
 	} else {
-		opline_ptr->op2.u.fetch_type = ZEND_FETCH_LOCAL;
+		opline_ptr->extended_value = ZEND_FETCH_LOCAL;
 	}
 
 	if (bp) {
@@ -2120,7 +2120,7 @@ void zend_do_fetch_global_or_static_variable(znode *varname, znode *static_assig
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *varname;
 	SET_UNUSED(opline->op2);
-	opline->op2.u.fetch_type = fetch_type;
+	opline->extended_value = fetch_type;
 	result = opline->result;
 
 	if (varname->op_type == IS_CONST) {
