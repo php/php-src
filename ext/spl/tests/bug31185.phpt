@@ -15,6 +15,7 @@ class FooBar implements ArrayAccess {
 	}
 
 	public function offsetSet($index, $value) {
+		echo __METHOD__ . "($index, $value)\n";
 		$this->array[$index] = $value;
 	}
 
@@ -25,11 +26,11 @@ class FooBar implements ArrayAccess {
 
 }
 
-$i = 0;
+$i = 0; $j = 0;
 $foo = new FooBar();
-$foo[$i] = $i++;
-$foo[$i] = $i++;
-$foo[$i] = $i++;
+$foo[$j++] = $i++;
+$foo[$j++] = $i++;
+$foo[$j++] = $i++;
 try
 {
 	unset($foo[1]);
@@ -43,14 +44,17 @@ print_R($foo);
 ?>
 ===DONE===
 --EXPECT--
+FooBar::offsetSet(0, 0)
+FooBar::offsetSet(1, 1)
+FooBar::offsetSet(2, 2)
 CAUGHT: FAIL
 FooBar Object
 (
     [array:private] => Array
         (
-            [1] => 0
-            [2] => 1
-            [3] => 2
+            [0] => 0
+            [1] => 1
+            [2] => 2
         )
 
 )
