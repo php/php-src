@@ -326,6 +326,7 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 					seg = seg->next_segment;
 				}				
 			}
+			mm_block = (zend_mm_block *) ((char *) segment + ZEND_MM_ALIGNED_SEGMENT_SIZE);
 		}
 
 		mm_block->size = true_size;
