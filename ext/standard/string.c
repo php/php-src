@@ -32,6 +32,7 @@
 #endif
 #include "zend_execute.h"
 #include "php_globals.h"
+#include "basic_functions.h"
 
 int php_tag_find(char *tag, int len, char *set);
 
