@@ -23,6 +23,10 @@ class c implements spl_array_access {
 		echo __METHOD__ . "($index,$newval)\n";
 		/* return */ $this->a[$index] = $newval;
 	}
+	function del($index) {
+		echo __METHOD__ . "($index)\n";
+		unset($this->a[$index]);
+	}
 }
 
 $obj = new c();

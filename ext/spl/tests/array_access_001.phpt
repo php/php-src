@@ -22,6 +22,10 @@ class c implements spl_array_access {
 		echo __METHOD__ . "($index,$newval)\n";
 		return $this->a[$index] = $newval;
 	}
+	function del($index) {
+		echo __METHOD__ . "($index)\n";
+		unset($this->a[$index]);
+	}
 }
 
 $obj = new c();
@@ -54,6 +58,14 @@ var_dump($obj[2]);
 $x = $obj[6] = 'changed 6';
 var_dump($obj[6]);
 var_dump($x);
+
+echo "===unset===\n";
+var_dump($obj->a);
+unset($obj[2]);
+unset($obj['4th']);
+unset($obj[7]);
+unset($obj['8th']);
+var_dump($obj->a);
 
 print "Done\n";
 ?>
@@ -119,4 +131,33 @@ c::exists(6)
 c::get(6)
 string(9) "changed 6"
 string(9) "changed 6"
+===unset===
+array(6) {
+  [0]=>
+  string(3) "1st"
+  [1]=>
+  string(9) "Changed 1"
+  [2]=>
+  string(3) "3rd"
+  ["4th"]=>
+  string(11) "Changed 4th"
+  ["5th"]=>
+  string(9) "Added 5th"
+  [6]=>
+  string(9) "changed 6"
+}
+c::del(2)
+c::del(4th)
+c::del(7)
+c::del(8th)
+array(4) {
+  [0]=>
+  string(3) "1st"
+  [1]=>
+  string(9) "Changed 1"
+  ["5th"]=>
+  string(9) "Added 5th"
+  [6]=>
+  string(9) "changed 6"
+}
 Done

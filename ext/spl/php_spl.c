@@ -95,6 +95,7 @@ static void spl_init_globals(zend_spl_globals *spl_globals)
 
 #ifdef SPL_ARRAY_WRITE
 	ZEND_EXECUTE_HOOK(ZEND_ASSIGN_DIM);
+	ZEND_EXECUTE_HOOK(ZEND_UNSET_DIM_OBJ);
 #endif /* SPL_ARRAY_WRITE */
 }
 /* }}} */
@@ -106,13 +107,13 @@ PHP_FUNCTION(spl_abstract) {}
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_one_param, 0)
-	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_two_params, 0)
-	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
 
 function_entry spl_funcs_iterator[] = {
@@ -148,6 +149,7 @@ function_entry spl_funcs_array_read[] = {
 
 function_entry spl_funcs_array_access[] = {
 	SPL_ABSTRACT_FE(array_access, set,  arginfo_two_params)
+	SPL_ABSTRACT_FE(array_access, del,  arginfo_one_param)
 	{NULL, NULL, NULL}
 };
 

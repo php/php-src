@@ -240,6 +240,66 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN_DIM)
 #endif
 /* }}} */
 
+/* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_UNSET_DIM_OBJ) */
+#ifdef SPL_ARRAY_WRITE
+ZEND_EXECUTE_HOOK_FUNCTION(ZEND_UNSET_DIM_OBJ)
+{
+	zval **obj;
+	zend_class_entry *obj_ce;
+	spl_is_a is_a;
+
+	if (EX(opline)->extended_value != ZEND_UNSET_DIM) {
+		ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_UNSET_DIM_OBJ);
+	}
+
+	obj = spl_get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), 0 TSRMLS_CC);
+
+	if (!obj || (obj_ce = spl_get_class_entry(*obj TSRMLS_CC)) == NULL) {
+		ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_UNSET_DIM_OBJ);
+	}
+
+	is_a = spl_implements(obj_ce);
+
+	if (is_a & SPL_IS_A_ARRAY_ACCESS) {
+		znode *op2 = &EX(opline)->op2;
+		zval *index = spl_get_zval_ptr(op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+		zval tmp;
+		zval *retval;
+
+		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
+
+		/* here we are sure we are dealing with an object */
+		switch (op2->op_type) {
+			case IS_CONST:
+				/* already a constant string */
+				break;
+			case IS_VAR:
+				tmp = *index;
+				zval_copy_ctor(&tmp);
+				convert_to_string(&tmp);
+				index = &tmp;
+				break;
+			case IS_TMP_VAR:
+				convert_to_string(index);
+				break;
+		}
+
+		spl_begin_method_call_arg_ex1(obj, obj_ce, NULL, "del", sizeof("del")-1, &retval, index TSRMLS_CC);
+
+		if (index == &tmp) {
+			zval_dtor(index);
+		}
+
+		FREE_OP(Ts, op2, EG(free_op2));
+		DELETE_RET_ZVAL(retval);			
+
+		NEXT_OPCODE();
+	}
+	ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_UNSET_DIM_OBJ);
+}
+#endif
+/* }}} */
+
 SPL_CLASS_FUNCTION(array, __construct);
 SPL_CLASS_FUNCTION(array, new_iterator);
 SPL_CLASS_FUNCTION(array, rewind);
