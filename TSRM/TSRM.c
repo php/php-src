@@ -158,11 +158,6 @@ TSRM_API void tsrm_shutdown(void)
 
 				next_p = p->next;
 				for (j=0; j<p->count; j++) {
-					if (resource_types_table[j].dtor) {
-						resource_types_table[j].dtor(p->storage[j], &p->storage);
-					}
-				}
-				for (j=0; j<p->count; j++) {
 					if (resource_types_table && resource_types_table[j].dtor) {
 						resource_types_table[j].dtor(p->storage[j], &p->storage);
 					}
