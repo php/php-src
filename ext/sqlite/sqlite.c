@@ -733,15 +733,19 @@ PHP_FUNCTION(sqlite_popen)
 		return;
 	}
 
-	/* resolve the fully-qualified path name to use as the hash key */
-	fullpath = expand_filepath(filename, NULL TSRMLS_CC);
+	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
+		/* resolve the fully-qualified path name to use as the hash key */
+		fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 	
-	if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
+		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			RETURN_FALSE;
+		}
 
-	if (php_check_open_basedir(fullpath TSRMLS_CC)) {
-		RETURN_FALSE;
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
+	} else {
+		fullpath = estrndup(filename, filename_len);
 	}
 
 	hashkeylen = spprintf(&hashkey, 0, "sqlite_pdb_%s:%d", fullpath, mode);
@@ -791,12 +795,14 @@ PHP_FUNCTION(sqlite_open)
 		return;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
+	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
+		if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			RETURN_FALSE;
+		}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) {
-		RETURN_FALSE;
+		if (php_check_open_basedir(filename TSRMLS_CC)) {
+			RETURN_FALSE;
+		}
 	}
 	
 	php_sqlite_open(filename, mode, NULL, return_value, errmsg TSRMLS_CC);
