@@ -1,3 +1,395 @@
+2003-11-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_system.phpt:
+      fix one part - can't get the ereg() to match on windows, will fix when I
+      figure out why
+
+    * pear/tests/pear1.phpt
+      pear/tests/pear2.phpt
+      pear/tests/pear_common_buildProvidesArray.phpt
+      pear/tests/pear_common_infoFromString.phpt
+      pear/tests/pear_config.phpt
+      pear/tests/pear_registry.phpt:
+      fix up unit tests - registry was ridiculously out of date.  Guess nobody
+      ever runs these...
+
+2003-11-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/time.c:
+      Fix build for new usleep implementation.
+      NB: we now depend on windows 98 and later;
+      windows 95 does not have these timing functions.
+
+    * main/config.w32.h
+      win32/time.c:
+      implement usleep for win32
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h
+      ext/standard/tests/network/tcp4loop.phpt
+      main/network.c
+      main/php_network.h
+      main/streams/php_stream_transport.h
+      main/streams/transports.c
+      main/streams/xp_socket.c:
+      Add stream_socket_sendto and stream_socket_recvfrom which work very much
+      like sendto() and recvfrom() syscalls.
+
+2003-11-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp:
+      Add dom_iterators.c to project.
+
+2003-11-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      Fix:
+      Thanks to Manuel Lemos
+
+2003-11-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_common_buildProvidesArray.phpt:
+      new test case
+
+2003-11-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/dom_iterators.c:
+      guess this file should be added too :)
+
+    * ext/xsl/php_xsl.c:
+      fix ZTS build
+
+    * ext/dom/config.m4
+      ext/dom/document.c
+      ext/dom/documenttype.c
+      ext/dom/element.c
+      ext/dom/namednodemap.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/xml_common.h
+      ext/dom/examples/dom1.inc
+      ext/dom/examples/dom1.php
+      ext/dom/tests/dom001.phpt
+      ext/dom/tests/dom_test.inc:
+      implement namednodemap and nodelist
+      fix xsl/dom integration under windows
+      update tests and examples
+
+2003-11-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_common_infoFromString.phpt:
+      finish unit test
+
+2003-11-29  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Add in missing stat element and fix win32 build
+
+2003-11-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_common_analyzeSC.phpt
+      pear/tests/pear_config.phpt
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error2.phpt
+      pear/tests/pear_error3.phpt
+      pear/tests/pear_error4.phpt
+      pear/tests/pear_registry.phpt
+      pear/tests/pear_system.phpt:
+      add in environment variable for easy non-skipping
+
+    * pear/PEAR/Common.php:
+      fix some bugs found in the unit test
+
+    * pear/tests/pear_common_infoFromString.phpt:
+      start on a new unit test
+
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_iterators.c:
+      Fix memleak
+
+2003-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      Zend/zend_highlight.c
+      Zend/zend_language_scanner.l
+      ext/standard/tests/general_functions/highlight_heredoc.phpt
+      ext/tokenizer/tokenizer.c:
+      MFH: Fixed bug #26463 (Incorrect handling of semicolons after heredoc)
+
+    * ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_language_scanner.l
+      ext/tokenizer/tokenizer.c:
+      Fixed bug #26463 (Incorrect handling of semicolons after heredoc)
+
+    * ext/standard/tests/general_functions/highlight_heredoc.phpt:
+      
+      Fixed bug #26463 (Incorrect handling of semicolons after heredoc)
+
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.h:
+      This takes the address of a zval ptr
+
+2003-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/tokenizer/tokenizer.c:
+      MFH: Fixed a memory leak when tokenizing scripts with heredoc.
+
+    * ext/tokenizer/tokenizer.c:
+      Fixed a memory leak when tokenizing scripts with heredoc.
+
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      Fix return value.
+
+    * ZendEngine2/zend_API.h:
+      Add macros to return values of other zvals.
+      This is needed because one cannot use REPLACE_ZVAL_VALUE with
+      return_value.
+
+2003-11-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/package-PEAR.xml:
+      add dependency on xml extension - we need it for every installation/package
+      function
+
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      Remove test code
+
+2003-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_execute.c:
+      Restore original patch for bug #26281.
+      
+
+2003-11-29  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Finish off ftp://'s url_stat support
+
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Revert accidential commit until decision
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_default_classes.c:
+      Make exception code more robust:
+      - Fix error in calculation of trace-string length
+      - Allow to overload __strostring() and make it work for uncaught
+      exceptions
+      - Show exception thrown while displaying exceptions
+
+2003-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      The removed NEWS entry is already in 4.X news file.
+
+2003-11-29  Christian Stocker  <chregu@phant.ch>
+
+    * NEWS:
+      a dot too many
+
+    * NEWS:
+      Some news from ext/xsl
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      Fixed for Bug #26384 (domxslt->process causes segfault with xsl:key)
+
+2003-11-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Command.php:
+      fix Bug #324 pear -G gives Fatal Error (PHP-GTK not installed, but error is
+      at engine level)
+
+2003-11-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      typofix
+
+2003-11-29  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      README.input_filter:
+      - Update NEWS and README for input_filters
+
+    * README.input_filter
+      ext/mbstring/mb_gpc.c
+      main/SAPI.c
+      main/SAPI.h
+      main/php_variables.c
+      main/rfc1867.c:
+      - Fix sapi_input_filter patch. Returning 1 from the filter handler should
+        make PHP register the variable, returning 0 shouldn't. The new length of
+        the variables being filtered is now returned in the new_val_len argument
+        of the function.
+
+2003-11-29  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      ext/bcmath/.cvsignore
+      ext/bcmath/config.m4
+      ext/bcmath/libbcmath/src/bcmath.h:
+      MFH: - fixed Bug #26462 (phpize + ext/bcmath -> compile error)
+
+    * configure.in
+      ext/bcmath/.cvsignore
+      ext/bcmath/libbcmath/src/bcmath.h:
+      - Fixed bug #26462 (phpize + ext/bcmath -> compile error)
+
+2003-11-29  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/php_xsl.c:
+      follow coding standards.
+
+    * ext/xsl/php_xsl.c:
+      it's now possible to return a DomNode from userland functions back to the
+      xsl-processor
+
+2003-11-29  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/dom/tests/.cvsignore:
+      missing .cvsignore
+
+2003-11-29  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/dom_ce.h
+      ext/dom/php_dom.h
+      ext/dom/xml_common.h:
+      move some definitions to xml_common.h
+
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug21820.phpt:
+      Research reveals that the error text depends on the tools and their
+      versions used to create the language parser.
+
+2003-11-29  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/openssl/config0.m4
+      ext/openssl/php_openssl.h:
+      - Fixed bug #26447 (--with-openssl=shared causes compile errors).NEWS
+
+2003-11-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/standard/fsock.c
+      main/network.c
+      main/php_network.h
+      main/streams.c:
+      fix zts build...
+
+2003-11-29  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * tests/lang/bug24908.phpt:
+      test for bug #24908
+
+    * tests/lang/bug21820.phpt:
+      - Fix expected output.
+
+    * tests/lang/bug25652.php
+      tests/lang/bug25652.phpt:
+      oops..
+
+    * tests/lang/bug25652.phpt:
+      
+      file bug25652.phpt was initially added on branch PHP_4_3.
+
+    * tests/lang/bug25652.php:
+      test for bug #25652
+
+    * win32/php5ts.dsw:
+      - remove non-existing servlet entry
+
+2003-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news & corrections.
+
+    * (PHP_4_3)
+      tests/lang/overload_leak.phpt:
+      Added missing skip conditon.
+
+    * (PHP_4_3)
+      ext/standard/var.c
+      ext/standard/tests/array/bug26458.phpt:
+      MFH: Fixed bug #26458 (var_dump(), var_export(), debug_zval_dump() not
+      binary safe for array keys).
+
+    * ext/standard/var.c
+      ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/array_intersect_1.phpt
+      ext/standard/tests/array/bug26458.phpt:
+      Fixed bug #26458 (var_dump(), var_export(), debug_zval_dump() not binary
+      safe for array keys).
+
+2003-11-29  Sara Golemon  <php@alphaweb.net>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Update php.ini-* with E_STRICT error reporting level.  -dist excludes
+      E_STRICT, -recommended includes it.
+
+2003-11-29  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      news for xslt
+
+    * tests/lang/bug24926.phpt:
+      
+      test for bug #24926
+
+2003-11-29  Sara Golemon  <php@alphaweb.net>
+
+    * ext/ncurses/ncurses.c:
+      Handle dirty script exit.
+
+2003-11-29  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/tests/area_list.xsl
+      ext/domxml/tests/area_list.xsl
+      ext/domxml/tests/area_name.xml
+      ext/domxml/tests/area_name.xml:
+      
+      file area_list.xsl was initially added on branch PHP_4_3.
+
+    * ext/domxml/tests/bug26384.phpt
+      ext/domxml/tests/bug26384.phpt:
+      
+      file bug26384.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      enhanced bug-26384-fix. It now only does an DocCopy, if xsl:key was
+      found in xslt-document by default.
+
 2003-11-28  Sara Golemon  <php@alphaweb.net>
 
     * NEWS
