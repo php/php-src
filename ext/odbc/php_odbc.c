@@ -2065,7 +2065,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 #endif
 #ifdef HAVE_OPENLINK
 	{
-		char dsnbuf[300];
+		char dsnbuf[1024];
 		short dsnbuflen;
 
 		rc = SQLDriverConnect((*conn)->hdbc, NULL, db, SQL_NTS,
@@ -2107,8 +2107,8 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		}
 
 		if (direct) {
-			rc = SQLDriverConnect((*conn)->hdbc, NULL, ldb, strlen(ldb), dsnbuf, sizeof(dsnbuf),
-									&dsnbuflen, SQL_DRIVER_NOPROMPT);
+			rc = SQLDriverConnect((*conn)->hdbc, NULL, ldb, strlen(ldb), dsnbuf, 
+					              sizeof(dsnbuf) - 1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
 		} else {
 			rc = SQLConnect((*conn)->hdbc, db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
 		}
