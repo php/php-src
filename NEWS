@@ -3,15 +3,20 @@ PHP                                                                        NEWS
 ?? ??? 200?, Version 5.0.0
 
 ?? ??? 2003, PHP 5 Beta 2
-- Added function dbase_get_header_info. (Zak)
+- Added misc. new functions:
+  . pg_version(). (Marcus)
+  . dbase_get_header_info(). (Zak)
+  . snmp_read_mib(). (Jani)
+- Added optional parameter to OCIWriteTemporaryLob() to specify the type of LOB
+  (Patch by Novicky Marek <novicky@aarongroup.cz>). (Thies)
 - Added SQLite support to DBX. (Marc)
 - Added reflection API. (Andrei, George, Timm)
-- Added snmp_read_mib() which reads a MIB file into the active MIB tree. (Jani)
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
 - Fixed visibility of __construct and __clone. (Marcus)
 - Fixed bug #24729 ($obj = new $className; causes crash when $className is not 
   set). (Marcus)
+- Fixed bug #24565 (cannot read array elements recived via $_REQUEST). (Zeev)
 - Fixed bug #24445 (get_parent_class() returns different values).
   (Sterling, Stanislav)
 - Fixed bug #24403 (preg_replace() problem: Using $this when not in object 
@@ -29,15 +34,15 @@ PHP                                                                        NEWS
 - Switched to Zend Engine 2, which includes numerous engine level improvements.
   A full list is available at http://www.php.net/zend-engine-2.php.
 - Added SQLite (http://www.hwaci.com/sw/sqlite/) extension: (Wez, Marcus, Tal)
-  . Bundled SQLite
-  . Enabled by default 
+  . Includes bundled SQLite library
+  . Enabled by default
 - Completely Overhauled XML support:
-  . New simplexml extension (Sterling)
-  . New DOM extension (Rob, Chregu, Marcus)
-  . New XSL extension (Chregu, Rob)
-  . Moved the old DOM-XML and XSLT extensions to PECL (James, Sterling)
-  . ext/xml can now use both libxml2 and expat to parse XML (Sterling)
-  . Removed bundled expat (Jani)
+  . New simplexml extension. (Sterling)
+  . New DOM extension. (Rob, Chregu, Marcus)
+  . New XSL extension. (Chregu, Rob)
+  . Moved the old DOM-XML and XSLT extensions to PECL. (James, Sterling)
+  . ext/xml can now use either libxml2 or expat to parse XML. (Sterling)
+  . Removed bundled expat library. (Jani)
 - New php.ini options:
   . "session.hash_function" and "session.hash_bits_per_character". (Sascha)
   . "mail.force_extra_paramaters". (Derick)
