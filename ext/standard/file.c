@@ -1848,14 +1848,6 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(target), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(Z_STRVAL_PP(target) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
 	if (php_copy_file(Z_STRVAL_PP(source), Z_STRVAL_PP(target) TSRMLS_CC)==SUCCESS) {
 		RETURN_TRUE;
 	} else {
