@@ -43,6 +43,7 @@
 		
 		
 		static function docbook_xml_header($name) {
+			return
 "    <table>
      <title>$name constants</title>
       <tgroup cols='3'>
