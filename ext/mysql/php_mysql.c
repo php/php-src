@@ -299,7 +299,7 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static PHP_INI_MH(OnMySQLPort)
 {
 	if (new_value==NULL) { /* default port */
-#if !defined (PHP_WIN32) && ! defined (NETWARE)
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 		struct servent *serv_ptr;
 		char *env;
 		
@@ -1074,8 +1074,6 @@ PHP_FUNCTION(mysql_character_set_name)
 	RETURN_STRING((char *)mysql_character_set_name(&mysql->conn), 1);
 }
 /* }}} */
-
-
 #endif
 
 #if MYSQL_VERSION_ID < 40000
@@ -1109,16 +1107,12 @@ PHP_FUNCTION(mysql_create_db)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
-#ifndef NETWARE
+
 	if (mysql_create_db(&mysql->conn, Z_STRVAL_PP(db))==0) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
-#else
-	php_error(E_WARNING, "mysql_create_db is not supported on NetWare");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -1153,16 +1147,12 @@ PHP_FUNCTION(mysql_drop_db)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
-#ifndef NETWARE
+
 	if (mysql_drop_db(&mysql->conn, Z_STRVAL_PP(db))==0) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
-#else
-	php_error(E_WARNING, "mysql_drop_db is not supported on NetWare");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 #endif
