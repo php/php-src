@@ -42,8 +42,39 @@ echo 'valid match, has version: ';
 echo $installer->extractDownloadFileName('Testpackage-1.2', $ui);
 echo "\n";
 var_dump($ui);
-// '/^([A-Z][a-zA-Z0-9_]+|[a-z][a-z0-9_]+)(-([.0-9a-zA-Z]+))?$/'
-unlink ($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
+
+echo "\ntest checkDeps 1:\n";
+$fakerel = array('release_deps' =>
+array(
+    array(
+        'type' => 'pkg',
+        'rel '=> 'has',
+        'name' => 'foo',
+        'optional' => 'yes'
+    ),
+    array(
+        'type' => 'pkg',
+        'rel '=> 'ge',
+        'version' => '1.6',
+        'name' => 'bar',
+    ),
+));
+$res = '';
+var_dump($installer->checkDeps($fakerel, $res));
+var_dump($res);
+$fakerel = array('release_deps' =>
+array(
+    array(
+        'type' => 'pkg',
+        'rel '=> 'has',
+        'name' => 'foo',
+        'optional' => 'yes'
+    ),
+));
+echo "\ntest checkDeps 2:\n";
+$res = '';
+var_dump($installer->checkDeps($fakerel, $res));
+var_dump($res);unlink ($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
 rmdir($temp_path);
 ?>
 --GET--
@@ -59,3 +90,13 @@ invalid match, has invalid version: Testpackage-##
 NULL
 valid match, has version: Testpackage
 string(3) "1.2"
+
+test checkDeps 1:
+bool(true)
+string(23) "
+requires package `bar'"
+
+test checkDeps 2:
+bool(false)
+string(77) "Optional dependencies:
+package `foo' is recommended to utilize some features."
