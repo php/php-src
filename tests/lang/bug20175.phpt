@@ -82,4 +82,4 @@ foo:1
 bar:1
 bar:2
 wow:1
-wow:1
+wow:2
