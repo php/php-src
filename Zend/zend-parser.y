@@ -45,7 +45,7 @@
 %}
 
 %pure_parser
-%expect 7
+%expect 4
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL
 %left ','

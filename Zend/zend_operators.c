@@ -42,9 +42,6 @@
 #endif
 #endif
 
-#define NORMALIZE_BOOL(n)			\
-	((n) ? (((n)>0) ? 1 : -1) : 0)
-
 #if WITH_BCMATH
 #include "ext/bcmath/number.h"
 #endif
@@ -1039,7 +1036,7 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2)
 	convert_to_double(&op1_copy);
 	convert_to_double(&op2_copy);
 
-	result->value.lval = NORMALIZE_BOOL(op1_copy.value.dval-op2_copy.value.dval);
+	result->value.lval = ZEND_NORMALIZE_BOOL(op1_copy.value.dval-op2_copy.value.dval);
 	result->type = IS_LONG;
 
 	return SUCCESS;
@@ -1059,7 +1056,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 		zendi_convert_to_boolean(op1, op1_copy, result);
 		zendi_convert_to_boolean(op2, op2_copy, result);
 		result->type = IS_LONG;
-		result->value.lval = NORMALIZE_BOOL(op1->value.lval-op2->value.lval);
+		result->value.lval = ZEND_NORMALIZE_BOOL(op1->value.lval-op2->value.lval);
 		return SUCCESS;
 	}
 
@@ -1068,13 +1065,13 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		result->type = IS_LONG;
-		result->value.lval = NORMALIZE_BOOL(op1->value.lval-op2->value.lval);
+		result->value.lval = ZEND_NORMALIZE_BOOL(op1->value.lval-op2->value.lval);
 		return SUCCESS;
 	}
 	if ((op1->type == IS_DOUBLE || op1->type == IS_LONG)
 		&& (op2->type == IS_DOUBLE || op2->type == IS_LONG)) {
 		result->value.dval = (op1->type == IS_LONG ? (double) op1->value.lval : op1->value.dval) - (op2->type == IS_LONG ? (double) op2->value.lval : op2->value.dval);
-		result->value.lval = NORMALIZE_BOOL(result->value.dval);
+		result->value.lval = ZEND_NORMALIZE_BOOL(result->value.dval);
 		result->type = IS_LONG;
 		return SUCCESS;
 	}
@@ -1452,7 +1449,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 			str2num(&first,s1->value.str.val,100); /* this scale should do */
 			str2num(&second,s2->value.str.val,100); /* ditto */
 			result->value.lval = bc_compare(first,second);
-			result->value.lval = NORMALIZE_BOOL(result->value.lval);
+			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.lval);
 			result->type = IS_LONG;
 			free_num(&first);
 			free_num(&second);
@@ -1465,16 +1462,16 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 				dval2 = strtod(s2->value.str.val, NULL);
 			}
 			result->value.dval = dval1 - dval2;
-			result->value.lval = NORMALIZE_BOOL(result->value.dval);
+			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.dval);
 			result->type = IS_LONG;
 		} else { /* they both have to be long's */
 			result->value.lval = lval1 - lval2;
-			result->value.lval = NORMALIZE_BOOL(result->value.lval);
+			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.lval);
 			result->type = IS_LONG;
 		}
 	} else {
 		result->value.lval = zend_binary_zval_strcmp(s1, s2);
-		result->value.lval = NORMALIZE_BOOL(result->value.lval);
+		result->value.lval = ZEND_NORMALIZE_BOOL(result->value.lval);
 		result->type = IS_LONG;
 	}
 	return;	
