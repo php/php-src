@@ -37,13 +37,10 @@ run: stresstest T c:\php4-source
 
 TODO:
 
-Make an apropriate test of the output against the EXPECT data for the test files, right now it simply doesn't work since I'm burnt (tired that is).
-
 Make more options configurable: number of threads, itterations, etc.
 
 Improve stdout output to make it more usefull
 
-Log totals for each test.
-
 Implement support for SKIPIF
 
+Improve speed of CompareFile function (too slow on big files).

@@ -83,12 +83,11 @@ DWORD CALLBACK IsapiThread(void *);
 int stress_main(const char *filename, 
 				const char *arg, 
 				const char *postfile, 
-				const char *matchdata,
-				const char *testname);
+				const char *matchdata);
 
 
 
-BOOL test = FALSE;
+BOOL bUseTestFiles = FALSE;
 char temppath[MAX_PATH];
 
 void stripcrlf(char *line)
@@ -97,6 +96,37 @@ void stripcrlf(char *line)
 	if (line[l]==10 || line[l]==13) line[l]=0;
 	l = strlen(line)-1;
 	if (line[l]==10 || line[l]==13) line[l]=0;
+}
+
+
+BOOL CompareFiles(const char*f1, const char*f2)
+{
+	FILE *fp1 = fopen(f1,"r");
+	if (!fp1) return FALSE;
+	FILE *fp2 = fopen(f2,"r");
+	if (!fp2) {
+		fclose(fp1);
+		return FALSE;
+	}
+
+	CString file1, file2, line;
+	char buf[1024];
+	while (fgets(buf, sizeof(buf), fp1)) {
+		line = buf;
+		line.TrimLeft();
+		line.TrimRight();
+		file1+=line;
+	}
+	fclose(fp1);
+	while (fgets(buf, sizeof(buf), fp2)) {
+		line = buf;
+		line.TrimLeft();
+		line.TrimRight();
+		file2+=line;
+	}
+	fclose(fp2);
+
+	return file1==file2;
 }
 
 BOOL ReadGlobalEnvironment(const char *environment)
@@ -154,6 +184,8 @@ BOOL ReadFileList(const char *filelist)
 
 		i++;
 	}
+	Results.SetSize(TestNames.GetSize());
+
 	fclose(fp);
 	return IsapiFileList.GetSize() > 0;
 }
@@ -371,7 +403,7 @@ int main(int argc, char* argv[]) {
 		printf("USAGE: stresstest [L|T] filelist [environment]\r\n");
 		return 0;
 	} else {
-		if (argv[1][0]=='T') test = TRUE;
+		if (argv[1][0]=='T') bUseTestFiles = TRUE;
 		if (argc > 1) filelist = argv[2];
 		if (argc > 2) environment = argv[3];
 	}
@@ -416,7 +448,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	if (test) {
+	if (bUseTestFiles) {
 		char TestPath[MAX_PATH];
 		if (filelist != NULL) 
 			_snprintf(TestPath, sizeof(TestPath)-1, "%s\\tests", filelist);
@@ -443,16 +475,24 @@ DWORD CALLBACK IsapiThread(void *p)
 	for (DWORD j=0; j<ITERATIONS; j++) {
 		for (DWORD i=0; i<filecount; i++) {
 			// execute each file
-			printf("Thread %d File %s\n", GetCurrentThreadId(), IsapiFileList.GetAt(i));
-
+			CString testname = TestNames.GetAt(i);
+			BOOL ok = FALSE;
 			if (stress_main(IsapiFileList.GetAt(i), 
 						IsapiGetData.GetAt(i), 
 						IsapiPostData.GetAt(i),
-						IsapiMatchData.GetAt(i),
-						TestNames.GetAt(i)))
-				if (test) InterlockedIncrement(&Results[i].ok);
-			else
-				if (test) InterlockedIncrement(&Results[i].bad);
+						IsapiMatchData.GetAt(i))) {
+				InterlockedIncrement(&Results[i].ok);
+				ok = TRUE;
+			} else {
+				InterlockedIncrement(&Results[i].bad);
+				ok = FALSE;
+			}
+
+			if (testname.IsEmpty()) {
+				printf("Thread %d File %s\n", GetCurrentThreadId(), IsapiFileList.GetAt(i));
+			} else {
+				printf("tid %d: %s %s\n", GetCurrentThreadId(), testname, ok?"OK":"FAIL");
+			}
 			Sleep(10);
 		}
 	}
@@ -472,8 +512,7 @@ DWORD CALLBACK IsapiThread(void *p)
 BOOL stress_main(const char *filename, 
 				const char *arg, 
 				const char *postdata,
-				const char *matchdata,
-				const char *testname) 
+				const char *matchdata) 
 {
 
 	EXTENSION_CONTROL_BLOCK ECB;
@@ -485,7 +524,7 @@ BOOL stress_main(const char *filename,
 	CString fname;
 	fname.Format("%08X.out", context.tid);
 
-	context.out = CreateFile(fname, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
+	context.out = CreateFile(fname, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
 	if (context.out==INVALID_HANDLE_VALUE) {
 		printf("failed to open output file %s\n", fname);
 		return 0;
@@ -538,25 +577,14 @@ BOOL stress_main(const char *filename,
 
 	BOOL ok = TRUE;
 
+	if (context.out != INVALID_HANDLE_VALUE) CloseHandle(context.out);
+
 	// compare the output with the EXPECT section
 	if (matchdata && *matchdata != 0) {
-		// wimpy I know, but I'm tired and lazy now
-		HANDLE md = CreateFile(matchdata, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-		if (md) {
-			DWORD osz = 0, msz = 0;
-			GetFileSize(md, &msz);
-			GetFileSize(context.out, &osz);
-			if (osz == msz && osz != 0) {
-				printf("%s OK\r\n", testname);
-			} else {
-				printf("%s FAILED\r\n", testname);
-				ok = FALSE;
-			}
-		}
+		ok = CompareFiles(matchdata, fname);
 	}
 
-	if (context.out) CloseHandle(context.out);
-
+	DeleteFile(fname);
 	//if (rc == HSE_STATUS_PENDING) // We will exit in ServerSupportFunction
 	//	Sleep(INFINITE);
 
