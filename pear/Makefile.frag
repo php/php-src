@@ -28,57 +28,13 @@ peardir=$(PEAR_INSTALLDIR)
 # 	Net \
 #	Schedule \
 
-#PEAR_FILES = \
-#	 Archive/Tar.php \
-#	 Console/Getopt.php \
-#	 PEAR.php \
-#	 PEAR/Autoloader.php \
-#	 PEAR/Command.php \
-#	 PEAR/Command/Auth.php \
-#	 PEAR/Command/Common.php \
-#	 PEAR/Command/Config.php \
-#	 PEAR/Command/Install.php \
-#	 PEAR/Command/Package.php \
-#	 PEAR/Command/Registry.php \
-#	 PEAR/Command/Remote.php \
-#	 PEAR/Frontend/CLI.php \
-#	 PEAR/Frontend/Gtk.php \
-#	 PEAR/Common.php \
-#	 PEAR/Config.php \
-#	 PEAR/Dependency.php \
-#	 PEAR/Installer.php \
-#	 PEAR/Packager.php \
-#	 PEAR/Registry.php \
-#	 PEAR/Remote.php \
-#	 System.php \
-#	 XML/Parser.php 
-
 # These are moving to /pear (in cvs):
-# 	Crypt/CBC.php \
 # 	Crypt/HCEMD5.php \
-# 	DB.php \
-# 	DB/common.php \
-# 	DB/fbsql.php \
-# 	DB/ibase.php \
-# 	DB/ifx.php \
-# 	DB/msql.php \
-# 	DB/mssql.php \
-# 	DB/mysql.php \
-# 	DB/oci8.php \
-# 	DB/odbc.php \
-# 	DB/pgsql.php \
-# 	DB/storage.php \
-# 	DB/sybase.php \
 # 	Date/Calc.php \
 # 	Date/Human.php \
 # 	File/Find.php \
 # 	File/Passwd.php \
-# 	File/SearchReplace.php \
-# 	HTML/Common.php \
 # 	HTML/Form.php \
-# 	HTML/IT.php \
-# 	HTML/ITX.php \
-# 	HTML/IT_Error.php \
 # 	HTML/Page.php \
 # 	HTML/Processor.php \
 # 	HTML/Select.php \
@@ -92,7 +48,6 @@ peardir=$(PEAR_INSTALLDIR)
 # 	Net/Curl.php \
 # 	Net/Dig.php \
 # 	Net/SMTP.php \
-#	Net/Socket.php \
 #	Schedule/At.php \
 
 #PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
