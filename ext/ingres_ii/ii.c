@@ -172,6 +172,42 @@ static void _close_ii_plink(II_LINK *link)
   IIG(num_persistent)--;
 }
 
+/* cleans up the given persistent link.
+   used when the request ends to 'refresh' the link for use
+   by the next request
+*/
+static void _clean_ii_plink(II_LINK *link)
+{
+  IIAPI_AUTOPARM autoParm;
+  IILS_FETCH();
+
+  if(link->autocommit) {
+
+    if(link->stmtHandle && _close_statement(link)) {
+      php_error(E_WARNING,"Ingres II:  Unable to close statement !!");
+    }
+      
+    autoParm.ac_genParm.gp_callback = NULL;
+    autoParm.ac_genParm.gp_closure = NULL;
+    autoParm.ac_connHandle = link->connHandle;
+    autoParm.ac_tranHandle = link->tranHandle;
+
+    IIapi_autocommit(&autoParm);
+    ii_sync(&(autoParm.ac_genParm));
+
+    if(ii_success(&(autoParm.ac_genParm))==II_FAIL) {
+      php_error(E_WARNING,"Ingres II:  Unable to disable autocommit");
+    }
+    
+    link->autocommit = 0;
+    link->tranHandle = NULL;
+  }
+
+  if(link->tranHandle && _rollback_transaction(link)) {
+    php_error(E_WARNING,"Ingres II:  Unable to rollback transaction !!");
+  }
+} 
+
 /* sets the default link
 */
 static void php_ii_set_default_link(int id)
@@ -212,7 +248,7 @@ PHP_MINIT_FUNCTION(ii)
   REGISTER_INI_ENTRIES();
   
   le_ii_link = register_list_destructors(_close_ii_link,NULL);
-  le_ii_plink = register_list_destructors(NULL,_close_ii_plink);
+  le_ii_plink = register_list_destructors(_clean_ii_plink,_close_ii_plink);
 
   IIG(num_persistent) = 0;
 
@@ -444,6 +480,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
       link->stmtHandle = NULL;
       link->fieldCount = 0;
       link->descriptor = NULL;
+      link->autocommit = 0;
 
       /* hash it up */
       new_le.type = le_ii_plink;
@@ -526,6 +563,7 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
       link->stmtHandle = NULL;
       link->fieldCount = 0;
       link->descriptor = NULL;
+      link->autocommit = 0;
 
       /* add it to the list */
       ZEND_REGISTER_RESOURCE(return_value, link, le_ii_link);
@@ -1324,6 +1362,7 @@ PHP_FUNCTION(ingres_autocommit)
     RETURN_FALSE;
   }
   
+  ii_link->autocommit = (ii_link->autocommit ? 0 : 1);
   ii_link->tranHandle = autoParm.ac_tranHandle;
   RETURN_TRUE;
 }
