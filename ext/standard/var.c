@@ -432,10 +432,12 @@ static inline void php_var_serialize_class_name(smart_str *buf, zval **struc TSR
 
 static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_ptr, HashTable *var_hash TSRMLS_DC)
 {
-	int count = zend_hash_num_elements(HASH_OF(retval_ptr));
+	int count;
 
 	php_var_serialize_class_name(buf, struc TSRMLS_CC);
-
+	/* count after serializing name, since php_var_serialize_class_name
+	   changes the count if the variable is incomplete class */
+	count = zend_hash_num_elements(HASH_OF(retval_ptr));
 	smart_str_append_long(buf, count);
 	smart_str_appendl(buf, ":{", 2);
 
