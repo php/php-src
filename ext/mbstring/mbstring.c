@@ -138,7 +138,7 @@ static const unsigned char second_args_force_ref[]    = { 2, BYREF_NONE, BYREF_F
 static const unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 #endif
 
-static const sapi_post_entry mbstr_post_entries[] = {
+static sapi_post_entry mbstr_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data, php_mbstr_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
@@ -3371,7 +3371,7 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-PHPAPI int mbstr_encoding_translation(TSRMLS_D)
+PHPAPI int mbstr_encoding_translation(TSRMLS_D) 
 {
 	return MBSTRG(encoding_translation);
 }
