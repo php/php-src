@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Changed class type hints for function parameters to not allow the passing of
   NULL values. (Andi)
 - Changed tidy_node to tidyNode and removed tidy_exception. (John)
+- Added Firebird/InterBase UDF source that allows PHP functions to be called 
+  from SQL (Ard)
 - Fixed ip2long() to return FALSE if an IP address passed to this function
   is not valid. (Derick)
 - Fixed memory leak in memory manager. (Andi)
