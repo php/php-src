@@ -994,7 +994,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 	int start_offset = (do_start?10:0);
 	int end_offset = (do_end?8:0);
 
-	outlen = sizeof(char) * (str_length * 1.001 + 12);
+	outlen = sizeof(char) * (str_length * 1.001 + 12) + 1; /* leave some room for a trailing \0 */
 	if ((outlen+start_offset+end_offset) > *p_buffer_len) {
 		buffer = (Bytef *) emalloc(outlen+start_offset+end_offset);
 	} else {
@@ -1098,6 +1098,7 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 			trailer[5] = (char) (ZLIBG(stream).total_in >> 8) & 0xFF;
 			trailer[6] = (char) (ZLIBG(stream).total_in >> 16) & 0xFF;
 			trailer[7] = (char) (ZLIBG(stream).total_in >> 24) & 0xFF;
+			trailer[8] = '\0';
 			*new_length += 8;
 		}
 		deflateEnd(&ZLIBG(stream));
