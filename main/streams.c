@@ -1374,6 +1374,8 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			} else {
 				ret = fclose(data->file);
 			}
+		} else {
+			return 0;/* everything should be closed already -> success*/
 		}
 		if (data->temp_file_name) {
 			unlink(data->temp_file_name);
