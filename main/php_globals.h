@@ -80,6 +80,7 @@ struct _php_core_globals {
 	char *gpc_order;
 
 	zend_bool track_vars;
+	zend_bool gpc_globals;
 
 	zend_bool y2k_compliance;
 
