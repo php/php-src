@@ -20,6 +20,7 @@
 
 #ifdef WIN32
 # define TSRM_WIN32
+# include "tsrm_config.w32.h"
 #endif
 
 #ifdef TSRM_WIN32

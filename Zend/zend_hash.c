@@ -20,12 +20,6 @@
 
 #include "zend.h"
 
-#include <stdio.h>
-
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-
 #define HANDLE_NUMERIC(key, length, func) {												\
 	register char *tmp=key;																\
 																						\

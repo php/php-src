@@ -21,6 +21,13 @@
 #ifndef ZEND_CONFIG_W32_H
 #define ZEND_CONFIG_W32_H
 
+#define HAVE_ALLOCA 1
+#define HAVE_LIMITS_H 1
+#define _CRTDBG_MAP_ALLOC
+
+#include <malloc.h>
+#include <stdlib.h>
+#include <crtdbg.h>
 
 #include <string.h>
 #include <windows.h>
@@ -28,10 +35,6 @@
 
 typedef unsigned long ulong;
 typedef unsigned int uint;
-
-#define HAVE_ALLOCA 1
-#define HAVE_LIMITS_H 1
-#include <malloc.h>
 
 #undef HAVE_KILL
 #define HAVE_GETPID 1

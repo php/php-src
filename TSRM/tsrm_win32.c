@@ -18,7 +18,6 @@
 
 /* $Id$ */
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <io.h>
@@ -28,7 +27,6 @@
 #include "TSRM.h"
 
 #ifdef TSRM_WIN32
-#include <windows.h>
 #include "tsrm_win32.h"
 
 #ifdef ZTS

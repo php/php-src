@@ -15,7 +15,6 @@
 #ifdef ZTS
 
 #include <stdio.h>
-#include <stdlib.h>
 
 #if HAVE_STDARG_H
 #include <stdarg.h>

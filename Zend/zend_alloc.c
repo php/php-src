@@ -17,9 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-
-#include <stdlib.h>
-
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_globals.h"

@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <stdlib.h>
-#include <string.h>
 #include "zend.h"
 #include "zend_mm.h"
 
