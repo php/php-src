@@ -160,7 +160,7 @@ function_entry basic_functions[] = {
 	PHP_FE(trim,									NULL)
 	PHP_FE(ltrim,									NULL)
 	PHP_FE(strip_tags,								NULL)
-	PHP_FE(similar_text,							NULL)
+	PHP_FE(similar_text,							third_argument_force_ref)
 	PHP_FE(explode,									NULL)
 	PHP_FE(implode,									NULL)
 	PHP_FE(setlocale,								NULL)
