@@ -25,7 +25,7 @@
 #include "zend.h"
 #include "ap_compat.h"
 #else
-#include "build-defs.h"
+#include <build-defs.h>
 #endif
 
 #ifdef ZTS
