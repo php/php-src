@@ -1,3 +1,74 @@
+2001-07-23  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php:
+    * fix race conditions when dealing with new sequence emulation (form Oleg)
+
+2001-07-23  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/php_oci8.h: indention
+
+    * pear/DB/oci8.php: DB_OK is a very different thing from $DB_OK
+
+    * ext/standard/assert.c
+      ext/standard/basic_functions.c:
+    fix newly introduced mem-leak in assert-module
+
+2001-07-23  Paul Moosman  <PWMoosman@aol.com>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+    I added code to up the reference count of the database connection
+    reference. This change fixes bug #11489 in php version 4.0.6.
+    I derived this fix from the my_sql module.
+
+2001-07-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/main.c:
+    Unbreak various tests and transparent session id rewriting for now.  This
+    has been tested extensively.  Most SAPI modules (Apache 1.x, 2.0, thttpd,
+    AOLserver, CGI, TUX, Caudium, Roxen, NSAPI, Phttpd, Pi3web, Servlet)
+    call php_request_shutdown() right after php_execute_script (or
+    equivalent functionality), so that output is possible under an
+    overwhelmingly number of web-servers.
+
+2001-07-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Benchmark/Iterate.php
+      pear/Benchmark/Timer.php
+      pear/Math/Fraction.php
+      pear/Math/Util.php:
+    Make Math_Util a static class, synch Math_Fraction accordingly. Some whitespace fixes.
+
+2001-07-23  Phil Driscoll  <phil@dialsolutions.co.uk>
+
+    * win32/install.txt:
+    uploaded the install.txt version which was shipped with the 4.0.6 windows binary distributions with slight enhancement to cover the issue of dll location.
+
+2001-07-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Handle file buckets for now; that allows us to pass something to the
+    engine which it can handle.
+
+    * sapi/thttpd/thttpd.c: Remove accidentially committed line
+
+    * sapi/fastcgi/fastcgi.c:
+    Call php_request_shutdown only, if the startup was successful.
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c:
+    Use synchronous php_request_shutdown in the standard case and
+    let the pool cleanup function only become effective, when an
+    error has occured.
+
+    This fixes the problem that the request_conn was already dead
+    when the request_shutdown was reached.
+
+2001-07-23  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php:
+    fix getRow() and getAll() param compatibility fails in some circumstances
+    (thank to Oleg for the report)
+
 2001-07-22  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/session/tests/005.phpt
