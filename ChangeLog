@@ -1,3 +1,119 @@
+2005-02-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      MFH: Fixed bug #31514 (open_basedir uses path_translated rather then cwd
+      for .
+      translation).
+
+    * main/fopen_wrappers.c:
+      Fixed bug #31514 (open_basedir uses path_translated rather then cwd for .
+      translation).
+
+2005-02-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      pecl movement
+
+    * ext/w32api/.cvsignore
+      ext/w32api/CREDITS
+      ext/w32api/EXPERIMENTAL
+      ext/w32api/README
+      ext/w32api/TODO
+      ext/w32api/package.xml
+      ext/w32api/php_w32api.h
+      ext/w32api/w32api.c
+      ext/w32api/w32api.dsp
+      ext/w32api/w32api_function_definition_parser.y
+      ext/w32api/w32api_function_definition_scanner.l
+      ext/w32api/w32api_type_definition_parser.y
+      ext/w32api/w32api_type_definition_scanner.l:
+      - Moved ext/w32api to PECL.
+
+    * NEWS:
+      PECL
+
+    * ext/yp/.cvsignore
+      ext/yp/CREDITS
+      ext/yp/config.m4
+      ext/yp/package.xml
+      ext/yp/php_yp.h
+      ext/yp/yp.c:
+      - Moved ext/yp to PECL.
+
+    * NEWS:
+      NEWS
+
+    * ext/dio/.cvsignore
+      ext/dio/EXPERIMENTAL
+      ext/dio/config.m4
+      ext/dio/config.w32
+      ext/dio/dio.c
+      ext/dio/package.xml
+      ext/dio/php_dio.h
+      ext/dio/tests/.cvsignore
+      ext/dio/tests/001.phpt:
+      - Moved ext/dio to PECL.
+
+2005-02-02  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/array.c:
+      fix memory leak if function call fails
+
+    * ZendEngine2/zend_execute_API.c:
+      Fix #31720    Invalid object callbacks not caught in array_walk() (patch
+      from Antony Dovgal)
+
+2005-02-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #31747 (SOAP Digest Authentication doesn't work with "HTTP/1.1
+      100 Continue" response)
+
+2005-02-02  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/tests/bug31720.phpt:
+      test for Bug #31720
+
+    * ZendEngine2/tests/bug31720.phpt
+      ZendEngine2/tests/bug31720.phpt:
+      
+      file bug31720.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute_API.c:
+      Fix #31720  	Invalid object callbacks not caught in array_walk() (patch
+      from Antony Dovgal)
+
+    * (PHP_5_0)
+      ext/standard/array.c:
+      fix leak if function call fails
+
+2005-02-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #31755 (Cannot create SOAP header in no namespace)
+
+    * ZendEngine2/tests/bug31683.phpt
+      ZendEngine2/tests/bug31683.phpt:
+      
+      file bug31683.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug31683.phpt:
+      Fixed bugs #29767 and #31683 (__get and __set methods must not modify
+      property name).
+
 2005-02-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

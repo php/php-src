@@ -1,3 +1,37 @@
+2005-02-02  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute_API.c:
+      Fix #31720    Invalid object callbacks not caught in array_walk() (patch
+      from Antony Dovgal)
+
+    * tests/bug31720.phpt:
+      test for Bug #31720
+
+    * tests/bug31720.phpt
+      tests/bug31720.phpt:
+      
+      file bug31720.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute_API.c:
+      Fix #31720  	Invalid object callbacks not caught in array_walk() (patch
+      from Antony Dovgal)
+
+2005-02-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend.h
+      zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug31683.phpt:
+      Fixed bugs #29767 and #31683 (__get and __set methods must not modify
+      property name).
+
+    * tests/bug31683.phpt
+      tests/bug31683.phpt:
+      
+      file bug31683.phpt was initially added on branch PHP_5_0.
+
 2005-02-01  Stanislav Malyshev  <stas@zend.com>
 
     * zend_builtin_functions.c
