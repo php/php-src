@@ -863,6 +863,8 @@ oci_handle_error(oci_connection *connection, ub4 errcode)
     	case 22:   /* ORA-00022 Invalid session id */
        	case 1012: /* ORA-01012: */
        	case 3113: /* ORA-03113: end-of-file on communication channel */
+		case 604:
+		case 1041:
         	connection->is_open = 0;
            	connection->session->is_open = 0;
            	connection->session->server->is_open = 0;
