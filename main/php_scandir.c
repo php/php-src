@@ -27,8 +27,6 @@
 
 #include "php_scandir.h"
 
-#ifndef HAVE_SCANDIR
-
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -36,6 +34,8 @@
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
+
+#ifndef HAVE_SCANDIR
 
 #ifdef PHP_WIN32
 #include "win32/readdir.h"
