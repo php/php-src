@@ -1,3 +1,54 @@
+2002-05-06  Jason Greene  <jason@inetgurus.net>
+
+    * ext/pcntl/pcntl.c: MFH
+
+    * ext/pcntl/pcntl.c:
+    Fix invalid warning caused by bogus convert_to_* calls
+    Fix possible invalid data in status for pcntl_waitpid()
+
+2002-05-06  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/datetime.c: - WS fix as pointed out by fabwash@hotmail.com
+
+2002-05-06  Jason Greene  <jason@inetgurus.net>
+
+    * ext/pcntl/pcntl.c: MFH
+    Fix for ZTS and crash bugs
+
+    * ext/pcntl/pcntl.c: Fix type-o that broke ZTS build
+    Fix 3 nasty crash bugs that could occur if pcntl_exec's call to execve errored
+
+2002-05-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in
+      main/php_version.h: - Swap back version number
+
+    * NEWS: - Fix release date
+
+2002-05-06  jim winstead  <jimw@apache.org>
+
+    * ext/standard/file.c: MFH: fix problem with mkdir() on freebsd
+
+    * ext/standard/file.c: fix problem with mkdir() on freebsd
+
+2002-05-06  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/README:
+    Update README with register_argc_argv settings override.
+
+2002-05-06  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c: Merge two SEGV fixes from the trunk:
+    - startup SEGV caused by delaying the initialization too long.
+    - graceful restart SEGV caused by not re-initializing.
+
+2002-05-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Fix release day
+
+    * main/php_version.h
+      configure.in: - GO with rc2
+
 2002-05-05  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/html.c:
