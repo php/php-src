@@ -58,6 +58,29 @@
 #endif
 
 PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC);
+void php_save_umask(void);
+void php_restore_umask(void);
+int sapi_apache_read_post(char *buffer, uint count_bytes SLS_DC);
+char *sapi_apache_read_cookies(SLS_D);
+int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC);
+int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC);
+int send_php(request_rec *r, int display_source_mode, char *filename);
+int send_parsed_php(request_rec * r);
+int send_parsed_php_source(request_rec * r);
+int php_xbithack_handler(request_rec * r);
+void php_init_handler(server_rec *s, pool *p);
+
+#if MODULE_MAGIC_NUMBER > 19961007
+#define CONST_PREFIX const
+#else
+#define CONST_PREFIX
+#endif
+CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
+CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
+CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
 
 /* ### these should be defined in mod_php4.h or somewhere else */
 #define USE_PATH 1
@@ -94,7 +117,7 @@ php_apache_info_struct php_apache_info;		/* active config */
 
 /* some systems are missing these from their header files */
 
-void php_save_umask()
+void php_save_umask(void)
 {
 	saved_umask = umask(077);
 	umask(saved_umask);
@@ -208,7 +231,7 @@ sapi_module_struct sapi_module = {
 };
 
 
-void php_restore_umask()
+void php_restore_umask(void)
 {
 	umask(saved_umask);
 }
@@ -399,12 +422,6 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 }
 
 
-#if MODULE_MAGIC_NUMBER > 19961007
-#define CONST_PREFIX const
-#else
-#define CONST_PREFIX
-#endif
-
 CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode)
 {
 	php_per_dir_entry per_dir_entry;
@@ -498,7 +515,7 @@ static void apache_php_module_shutdown_wrapper(void)
 
 void php_init_handler(server_rec *s, pool *p)
 {
-	register_cleanup(p, NULL, (void (*)(void *))apache_php_module_shutdown_wrapper, php_module_shutdown_for_exec);
+	register_cleanup(p, NULL, (void (*)(void *))apache_php_module_shutdown_wrapper, (void (*)(void *))php_module_shutdown_for_exec);
 	if (!apache_php_initialized) {
 		sapi_startup(&sapi_module);
 		php_module_startup(&sapi_module);
