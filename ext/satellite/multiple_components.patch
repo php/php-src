@@ -1,0 +1,34 @@
+diff -ur ../src/ORBit-20000902/src/orb/orbit_object.c ORBit-20000902/src/orb/orbit_object.c
+--- ../src/ORBit-20000902/src/orb/orbit_object.c	Thu Aug  3 01:30:45 2000
++++ ORBit-20000902/src/orb/orbit_object.c	Thu Aug  9 20:13:55 2001
+@@ -166,7 +166,7 @@
+ 	} else if(info->profile_type == IOP_TAG_ORBIT_SPECIFIC) {
+ 		g_free(info->tag.orbitinfo.unix_sock_path);
+ 	} else {
+-		g_warning("ORBit_free_profile asked to free type %d", info->profile_type);
++/*		g_warning("ORBit_free_profile asked to free type %d", info->profile_type);*/
+ 	}
+ 
+ 	g_free(info);	/* Check its safe to free the item within a foreach func */
+@@ -304,10 +304,10 @@
+ 	case IOP_TAG_MULTIPLE_COMPONENTS:
+ 	default:
+ 		GET_ATOM(subpart_len);
+-		g_warning("IOP_TAG_MULTIPLE_COMPONENTS decoding needs finishing");
++/*		g_warning("IOP_TAG_MULTIPLE_COMPONENTS decoding needs finishing");*/
+ 		object_info->profile_type = IOP_TAG_MULTIPLE_COMPONENTS;
+ 		recv_buffer->cur = ((guchar *)recv_buffer->cur) + subpart_len;
+-		return(object_info);
++		return NULL; /*(object_info);*/
+ 		break;
+ 
+ 	case IOP_TAG_ORBIT_SPECIFIC:
+@@ -381,7 +381,7 @@
+ 		GET_ATOM(profile_id);
+ 		object_info=ORBit_demarshal_profile(recv_buffer, profile_id);
+ 		if(object_info==NULL) {
+-			goto error_exit;
++			/*goto error_exit;*/
+ 		} else {
+ 			profiles=g_slist_append(profiles, object_info);
+ 		}
