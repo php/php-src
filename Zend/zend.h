@@ -207,10 +207,10 @@ BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...);
 extern ZEND_API int (*zend_write)(const char *str, uint str_length);
 extern ZEND_API void (*zend_error)(int type, const char *format, ...);
-extern FILE *(*zend_fopen)(const char *filename);
-extern void (*zend_block_interruptions)();
-extern void (*zend_unblock_interruptions)();
-extern void (*zend_message_dispatcher)(long message, void *data);
+extern ZEND_API FILE *(*zend_fopen)(const char *filename);
+extern ZEND_API void (*zend_block_interruptions)();
+extern ZEND_API void (*zend_unblock_interruptions)();
+extern ZEND_API void (*zend_message_dispatcher)(long message, void *data);
 extern ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
 END_EXTERN_C()
 

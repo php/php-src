@@ -42,10 +42,10 @@ ZEND_API zend_class_entry zend_standard_class_def;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API int (*zend_write)(const char *str, uint str_length);
 ZEND_API void (*zend_error)(int type, const char *format, ...);
-void (*zend_message_dispatcher)(long message, void *data);
-FILE *(*zend_fopen)(const char *filename);
-void (*zend_block_interruptions)();
-void (*zend_unblock_interruptions)();
+ZEND_API void (*zend_message_dispatcher)(long message, void *data);
+ZEND_API FILE *(*zend_fopen)(const char *filename);
+ZEND_API void (*zend_block_interruptions)();
+ZEND_API void (*zend_unblock_interruptions)();
 ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
 
 #ifdef ZTS
