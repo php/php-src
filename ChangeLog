@@ -1,3 +1,134 @@
+2002-03-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:    -Add -x
+
+2002-03-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in: - Oops... I didn't mean to commit this
+
+    * configure.in: MFH
+
+2002-03-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xmlrpc/config.m4
+      ext/xslt/config.m4: fix the fix
+
+    * ext/xslt/config.m4
+      ext/xmlrpc/config.m4:
+    - Fixed minor inconvenience with iconv detection when iconv is found in libc
+
+    * configure.in: MFH
+
+2002-03-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Frontend/CLI.php:
+    * don't start table cells with a space in borderless tables
+
+    * pear/PEAR/Command/Registry.php: * typo fix
+
+    * pear/PEAR/Command/Config.php:
+    * use PEAR_Frontend tables in config-show command
+
+2002-03-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/informix/ifx.ec: - oops :)
+
+    * ext/informix/ifx.ec: MFH for bug 14664
+
+    * ext/informix/ifx.ec:
+    - Fix for bug #14644 (patch by samuel_carriere@hotmail.com)
+
+2002-03-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Registry.php: * now using PEAR_Frontend tables
+
+    * pear/PEAR/Frontend/CLI.php: * ncurses note
+
+    * pear/PEAR/Frontend/CLI.php: * table support working
+    * added bold support for xterm/vt220/vt100 terminals
+
+    * pear/scripts/pear.in: * setUIType -> setFrontendType
+
+2002-03-22  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * configure.in:
+    manual is fixed to have static anchors generated from ids for the faq part
+
+2002-03-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Auth.php: * rename class/methods
+
+    * pear/Makefile.frag: * temporarily added: nuke old files/dirs
+
+2002-03-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/genif.sh: de-overquotation
+
+    * acinclude.m4:
+    A cli-specific extension should be named once only, not twice.
+
+    Noticed by: Derick
+
+2002-03-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.frag: * one last CommandUI -> Frontend change
+
+2002-03-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/XML/tests/003.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/XML/tests/002.phpt
+      pear/DB/tests/db_error.phpt: - Fix tests
+
+2002-03-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Frontend/CLI.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/List.php
+      pear/PEAR/Command/Login.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/Command.php
+      pear/PEAR/Installer.php
+      pear/Makefile.frag: * rename PEAR_CommandUI* to PEAR_Frontend*
+    * rename PEAR/Command/Login.php to PEAR/Command/Auth.php
+    * replace PEAR/Command/Info.php with PEAR/Command/Registry.php (will contain
+      more commands related to the local registry)
+    * started working on Frontend table output
+
+2002-03-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/dbx/dbx.c: MFH: Fix phpinfo() output
+
+    * tests/strings/002.phpt: - Add test for sprintf()'s zero'th argument
+
+    * ext/standard/formatted_print.c:
+    - Fix handling of zero'th argument for sprintf()'s argument swapping code
+      (Patch by Morten Poulsen <morten@afdelingp.dk>)
+
+    * NEWS: - Add note about changed fopen wrappers
+
+2002-03-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Registry.php:
+    * No point in creating the lock file directory if it does not exist (so many
+      other things would fail anyway).  Throw an error instead.
+
+2002-03-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/aggregation.c: MFH fix for bug #16182
+
+2002-03-22  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/basic_functions.c
+      ext/xslt/sablot.c
+      main/php.h
+      ext/pdf/pdf.c
+      ext/readline/readline.c: getting rid of the warn_not_available alias
+
 2002-03-21  Markus Fischer  <mfischer@guru.josefine.at>
 
     * configure.in: - Fix #16206.
