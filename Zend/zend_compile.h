@@ -556,6 +556,14 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_CLASS_SELF		1
 #define ZEND_FETCH_CLASS_MAIN		2
 
+/* variable parsing type (compile-time) */
+#define ZEND_PARSED_MEMBER			(1<<0)
+#define ZEND_PARSED_METHOD_CALL		(1<<1)
+#define ZEND_PARSED_STATIC_MEMBER	(1<<2)
+#define ZEND_PARSED_FUNCTION_CALL	(1<<3)
+#define ZEND_PARSED_VARIABLE		(1<<4)
+
+
 /* unset types */
 #define ZEND_UNSET_REG 0
 #define ZEND_UNSET_OBJ 1
