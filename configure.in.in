@@ -74,6 +74,11 @@ AM_MAINTAINER_MODE
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
+dnl If we're using cc on HP-UX, add the -Ae to CFLAGS
+if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"; then
+   test -n "$GCC" || CFLAGS="-Ae $CFLAGS -D_HPUX_SOURCE"
+fi
+
 dnl Checks for programs.
 AM_PROG_LIBTOOL
 AC_PROG_YACC
@@ -873,7 +878,7 @@ AC_SUBST(LDFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB_EXPORT)
 AC_SUBST(RPATHS)
 AC_SUBST(RAW_RPATHS)
-
+	
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_SUBST(PHP_BUILD_DATE)
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE")
