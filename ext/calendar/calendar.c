@@ -381,7 +381,7 @@ PHP_FUNCTION(jdtogregorian)
 	for example both: year '5' and year '5000' product 'ä'.
 	use the numeric one for calculations. 
  */
-char* heb_number_to_chars(int n) {
+static char* heb_number_to_chars(int n) {
 		char *p, *old, *ret;
 		
 		p = emalloc(10);
