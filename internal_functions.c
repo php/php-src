@@ -42,6 +42,7 @@
 
 #include "ext/standard/php3_standard.h"
 #include "ext/gd/php3_gd.h"
+#include "ext/dbase/dbase.h"
 
 #include "functions/php3_ifx.h"
 #include "functions/php3_ldap.h"
@@ -60,7 +61,6 @@
 #include "functions/post.h"
 #include "functions/php3_solid.h"
 #include "functions/adabasd.h"
-#include "functions/dbase.h"
 #include "functions/hw.h"
 #include "functions/filepro.h"
 #include "functions/db.h"
