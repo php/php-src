@@ -29,6 +29,9 @@
 #define ZEND_MM_FREE_BLOCK	0
 #define ZEND_MM_USED_BLOCK	1
 
+#ifndef MAX
+#define MAX(a, b) (((a)>(b))?(a):(b))
+#endif
 
 /* Platform alignment test */
 typedef union _mm_align_test {
@@ -155,7 +158,7 @@ void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
 	size_t remaining_size;
 
 	/* The max() can probably be optimized with an if() which checks more specific cases */
-	true_size = max(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
+	true_size = MAX(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
 	for (p = heap->free_list; p; p = p->next_free_block) {
 		if (p->size == true_size) {
 			best_fit = p;
@@ -248,7 +251,7 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 {
 	void *ptr;
 	zend_mm_block *mm_block = ZEND_MM_HEADER_OF(p);
-	size_t true_size = max(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
+	size_t true_size = MAX(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
 
 	if (true_size <= mm_block->size) {
 		return p;
