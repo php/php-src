@@ -410,9 +410,11 @@ PHP_MINFO_FUNCTION(pdo)
 		ldrivers = drivers;
 	}
 	
-	php_info_print_table_row(2, "PDO drivers", drivers+2);
-	
-	efree(drivers);
+	php_info_print_table_row(2, "PDO drivers", drivers ? drivers+2 : "");
+
+	if (drivers) {
+		efree(drivers);
+	}
 
 	php_info_print_table_end();
 
