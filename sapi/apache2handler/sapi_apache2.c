@@ -71,6 +71,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	apr_bucket_brigade *brigade;
 	request_rec *r;
 	php_struct *ctx;
+	char *copy_str;
 
 	if (str_length == 0) {
 		return 0;
@@ -80,18 +81,11 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	r = ctx->r;
 	brigade = ctx->brigade;
 	
-	bucket = apr_bucket_transient_create(str, str_length,
-						 r->connection->bucket_alloc);
+	copy_str = apr_pmemdup( r->pool, str, str_length+1);
+	bucket = apr_bucket_pool_create(copy_str, str_length, r->pool, r->connection->bucket_alloc);
+						 
 	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
 
-	/* Add a Flush bucket to the end of this brigade, so that
-	 * the transient buckets above are more likely to make it out
-	 * the end of the filter instead of having to be copied into
-	 * someone's setaside.
-	 */
-	bucket = apr_bucket_flush_create(r->connection->bucket_alloc);
-	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
-	
 	if (ap_pass_brigade(r->output_filters, brigade) != APR_SUCCESS) {
 		php_handle_aborted_connection();
 	}
