@@ -1705,11 +1705,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 	ptr = EG(current_execute_data);
 
 	/* skip debug_backtrace() */
-	ptr = ptr->prev_execute_data;
 	if (skip_last--) {
 		int arg_count = *((ulong*)(cur_arg_pos - 2));
 		cur_arg_pos -= (arg_count + 2);
 		frames_on_stack--;
+		ptr = ptr->prev_execute_data;
 	}
 
 	array_init(return_value);
