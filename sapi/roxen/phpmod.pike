@@ -59,7 +59,7 @@ class PHPScript
     mid->do_not_disconnect = 0;
     //    destruct(interpretor);
     mid->file = ([ "len": written, "raw":1 ]);
-    mid->do_log();
+    //    mid->do_log();
   }
   void write_callback() 
   {
@@ -158,8 +158,8 @@ class PHPScript
     mapping options = ([
       "env":environment,
     ]);
-    interpretor->run(command, options, this_object(), done);
     mid->my_fd->set_close_callback(done);
+    interpretor->run(command, options, this_object(), done);
     return this_object();
   }
 
