@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _ZEND_GLOBALS_H
-#define _ZEND_GLOBALS_H
+#ifndef _T_GLOBALS_H
+#define _T_GLOBALS_H
 
 #include <setjmp.h>
 
@@ -212,4 +212,4 @@ struct _zend_alloc_globals {
 };
 
 
-#endif /* _ZEND_GLOBALS_H */
+#endif /* _T_GLOBALS_H */

@@ -226,7 +226,7 @@ void do_print(znode *result, znode *arg CLS_DC)
 
 	opline->result.op_type = IS_TMP_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->opcode = ZEND_PRINT_OP;
+	opline->opcode = T_PRINT_OP;
 	opline->op1 = *arg;
 	SET_UNUSED(opline->op2);
 	*result = opline->result;
@@ -237,7 +237,7 @@ void do_echo(znode *arg CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
-	opline->opcode = ZEND_ECHO_OP;
+	opline->opcode = T_ECHO_OP;
 	opline->op1 = *arg;
 	SET_UNUSED(opline->op2);
 }
@@ -247,7 +247,7 @@ void do_assign(znode *result, znode *variable, znode *value CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
-	opline->opcode = ZEND_ASSIGN;
+	opline->opcode = T_ASSIGN;
 	opline->result.op_type = IS_VAR;
 	opline->result.u.EA.type = 0;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
@@ -261,7 +261,7 @@ void do_assign_ref(znode *result, znode *lvar, znode *rvar CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
-	opline->opcode = ZEND_ASSIGN_REF;
+	opline->opcode = T_ASSIGN_REF;
 	if (result) {
 		opline->result.op_type = IS_VAR;
 		opline->result.u.EA.type = 0;
@@ -1537,11 +1537,11 @@ void do_unset(znode *variable CLS_DC)
 
 	switch (last_op->opcode) {
 		case ZEND_FETCH_R:
-			last_op->opcode = ZEND_UNSET_VAR;
+			last_op->opcode = T_UNSET_VAR;
 			break;
 		case ZEND_FETCH_DIM_R:
 		case ZEND_FETCH_OBJ_R:
-			last_op->opcode = ZEND_UNSET_DIM_OBJ;
+			last_op->opcode = T_UNSET_DIM_OBJ;
 			break;
 
 	}
@@ -1830,16 +1830,16 @@ int zendlex(znode *zendlval CLS_DC)
 	zendlval->u.constant.type = IS_LONG;
 	retval = lex_scan(&zendlval->u.constant CLS_CC);
 	switch(retval) {
-		case ZEND_COMMENT:
-		case PHP_OPEN_TAG:
+		case T_COMMENT:
+		case T_OPEN_TAG:
 		case T_WHITESPACE:
 			retval = zendlex(zendlval CLS_CC);
 			break;
-		case PHP_CLOSE_TAG:
+		case T_CLOSE_TAG:
 			retval = ';'; /* implicit ; */
 			break;
-		case PHP_OPEN_TAG_WITH_ECHO:
-			retval = ZEND_ECHO;
+		case T_OPEN_TAG_WITH_ECHO:
+			retval = T_ECHO;
 			break;
 	}
 		

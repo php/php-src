@@ -56,7 +56,7 @@ void zend_indent()
 	token.type = 0;
 	while ((token_type=lex_scan(&token CLS_CC))) {
 		switch (token_type) {
-			case INLINE_HTML:
+			case T_INLINE_HTML:
 				zend_write(zendtext, zendleng);
 				break;
 			case T_WHITESPACE: {
@@ -127,8 +127,8 @@ dflt_printout:
 		}
 		if (token.type == IS_STRING) {
 			switch (token_type) {
-			case PHP_OPEN_TAG:
-			case PHP_CLOSE_TAG:
+			case T_OPEN_TAG:
+			case T_CLOSE_TAG:
 			case T_WHITESPACE:
 				break;
 			default:
