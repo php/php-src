@@ -214,7 +214,7 @@
       ext/bcmath/php_bcmath.h
       ext/dav/php_dav.h:
     Changed lots of PHP 3 licence headers to PHP 4, mainly in .h files.
-    Added a few RCS $Id$ tags.
+    Added a few RCS Ids
 
 
 2000-07-23  Jani Taskinen  <sniper@iki.fi>
