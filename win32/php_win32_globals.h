@@ -12,55 +12,47 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Sterling Hughes <sterling@php.net>                           |
+   | Author: Wez Furlong <wez@php.net>                                    |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#include "php.h"				/*php specific */
-#include <lmaccess.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <lmapibuf.h>
+#ifndef PHP_WIN32_GLOBALS_H
+#define PHP_WIN32_GLOBALS_H
+
+/* misc globals for thread-safety under win32 */
+
 #include "pwd.h"
-#include "grp.h"
-#include "php_win32_globals.h"
 
-static char *home_dir = ".";
-static char *login_shell = "not command.com!";
+typedef struct _php_win32_core_globals php_win32_core_globals;
 
-struct passwd *
-getpwnam(char *name)
-{
-	return (struct passwd *) 0;
-}
+#ifdef ZTS
+# define PW32G(v)		TSRMG(php_win32_core_globals_id, php_win32_core_globals*, v)
+extern PHPAPI int php_win32_core_globals_id;
+#else
+# define PW32G(v)		(php_win32_core_globals.v)
+extern PHPAPI struct _php_win32_core_globals php_win32_core_globals;
+#endif
 
+struct _php_win32_core_globals {
+	/* syslog */
+	char *log_header;
+	HANDLE log_source;
 
-char *
-getlogin()
-{
-	char name[256];
-	DWORD max_len = 256;
-	TSRMLS_FETCH();
+	/* getpwuid */
+	struct passwd pwd;
 
-	STR_FREE(PW32G(login_name));	
-	GetUserName(name, &max_len);
-	name[max_len] = '\0';
-	PW32G(login_name) = strdup(name);
-	return PW32G(login_name);
-}
+	/* getlogin */
+	char *login_name;
 
-struct passwd *
-getpwuid(int user_id)
-{
-	TSRMLS_FETCH();
-	PW32G(pwd).pw_name = getlogin();
-	PW32G(pwd).pw_dir = home_dir;
-	PW32G(pwd).pw_shell = login_shell;
-	PW32G(pwd).pw_uid = 0;
+	/* time */
+	struct timeval starttime;
+	__int64			lasttime, freq;
+};
 
-	return &PW32G(pwd);
-}
+void php_win32_core_globals_ctor(void *vg TSRMLS_DC);
+PHP_RSHUTDOWN_FUNCTION(win32_core_globals);
+
+#endif
 
