@@ -1477,6 +1477,7 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 			zend_hash_destroy(statement->columns);
 			efree(statement->columns);
 			statement->columns = 0;
+			statement->ncolumns = 0;
 		}
 		statement->executed = 0;
 
