@@ -902,7 +902,7 @@ PHP_FUNCTION(pathinfo)
 		int idx;
 
 		p = strrchr(Z_STRVAL_PP(path), '.');
-		if (*p) {
+		if (p) {
 			idx = p - Z_STRVAL_PP(path);
 			add_assoc_stringl(tmp, "extension", Z_STRVAL_PP(path) + idx + 1, len - idx - 1, 1);
 		}
