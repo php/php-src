@@ -425,12 +425,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		PGG(num_links)++;
 	}
 	efree(hashed_details);
-<<<<<<< pgsql.c
 	php_pgsql_set_default_link(return_value->value.lval);
-=======
-	PGG(default_link)=return_value->value.lval;
-	zend_list_addref(return_value->value.lval);
->>>>>>> 1.63
 }
 
 
