@@ -160,6 +160,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	pdo_odbc_stmt *S = ecalloc(1, sizeof(*S));
+	enum pdo_cursor_type cursor_type = PDO_CURSOR_FWDONLY;
 
 	S->H = H;
 	
@@ -171,6 +172,25 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 		return 0;
 	}
 
+	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC);
+	if (cursor_type != PDO_CURSOR_FWDONLY) {
+		SQLUINTEGER cursor;
+
+		switch (cursor_type) {
+			case PDO_CURSOR_SCROLL:
+				cursor = SQL_CURSOR_STATIC;
+			default:
+				;
+		}
+
+		rc = SQLSetStmtAttr(S->stmt, SQL_CURSOR_TYPE, (void*)cursor, SQL_IS_UINTEGER);
+		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+			pdo_odbc_stmt_error("SQLSetStmtOption: SQL_CURSOR_TYPE");
+			SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
+			return 0;
+		}
+	}
+	
 	rc = SQLPrepare(S->stmt, (char*)sql, SQL_NTS);
 
 	if (rc != SQL_SUCCESS) {
@@ -263,7 +283,6 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 		}
 	}
 	return 1;
-
 }
 
 
@@ -338,6 +357,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 		return 0;
 	}
 	
+
 	if (strchr(dbh->data_source, ';')) {
 		char dsnbuf[1024];
 		short dsnbuflen;
