@@ -223,7 +223,7 @@ PHP_FUNCTION(msg_get_queue)
 		/* doesn't already exist; create it */
 		mq->id = msgget(key, IPC_CREAT|IPC_EXCL|perms);
 		if (mq->id < 0)	{
-			zend_error(E_WARNING, "%s: msgget() failed for key 0x%x: %s",
+			zend_error(E_WARNING, "%s: msgget() failed for key 0x%lx: %s",
 					get_active_function_name(TSRMLS_C), key, strerror(errno));
 			efree(mq);
 			RETURN_FALSE;

@@ -243,10 +243,10 @@ static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
 static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
 static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
 
-#define EXIF_ERRLOG_FILEEOF    php_error_docref(NULL TSRMLS_CC, E_WARNING, EXIF_ERROR_FILEEOF);
-#define EXIF_ERRLOG_CORRUPT    php_error_docref(NULL TSRMLS_CC, E_WARNING, EXIF_ERROR_CORRUPT);
-#define EXIF_ERRLOG_THUMBEOF   php_error_docref(NULL TSRMLS_CC, E_WARNING, EXIF_ERROR_THUMBEOF);
-#define EXIF_ERRLOG_FSREALLOC  php_error_docref(NULL TSRMLS_CC, E_WARNING, EXIF_ERROR_FSREALLOC);
+#define EXIF_ERRLOG_FILEEOF    php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", EXIF_ERROR_FILEEOF);
+#define EXIF_ERRLOG_CORRUPT    php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", EXIF_ERROR_CORRUPT);
+#define EXIF_ERRLOG_THUMBEOF   php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", EXIF_ERROR_THUMBEOF);
+#define EXIF_ERRLOG_FSREALLOC  php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", EXIF_ERROR_FSREALLOC);
 /* }}} */
 
 /* {{{ format description defines
