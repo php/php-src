@@ -241,6 +241,14 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 		DL_UNLOAD(handle);
 		RETURN_FALSE;
 	}
+
+	if ((type == MODULE_TEMPORARY) && module_entry->request_startup_func) {
+		if (module_entry->request_startup_func(type, module_entry->module_number TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to initialize module '%s'", module_entry->name);
+			DL_UNLOAD(handle);
+			RETURN_FALSE;
+		}
+	}
 	
 	RETURN_TRUE;
 }
