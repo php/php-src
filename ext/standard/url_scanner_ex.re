@@ -35,8 +35,6 @@
 
 #define url_adapt_ext url_adapt_ext_ex
 #define url_scanner url_scanner_ex
-#define url_adapt_state url_adapt_state_ex
-#define url_adapt_state_t url_adapt_state_ex_t
 
 static inline void smart_str_append(smart_str *dest, smart_str *src)
 {
@@ -88,15 +86,14 @@ static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
 	dest->c = (char *) src;
 }
 
-static inline void smart_str_appends(smart_str *dest, const char *src)
-{
-	smart_str_appendl(dest, src, strlen(src));
-}
+#define smart_str_appends(dest, src) smart_str_appendl(dest, src, sizeof(src)-1)
 
+#if 0
 static inline void smart_str_copys(smart_str *dest, const char *src)
 {
 	smart_str_copyl(dest, src, strlen(src));
 }
+#endif
 
 static inline void smart_str_sets(smart_str *dest, const char *src)
 {
@@ -105,9 +102,9 @@ static inline void smart_str_sets(smart_str *dest, const char *src)
 
 static inline void attach_url(smart_str *url, smart_str *name, smart_str *val, const char *separator)
 {
-	if (strchr(url->c, ':')) return;
+	if (memchr(url->c, ':', url->len)) return;
 
-	if (strchr(url->c, '?'))
+	if (memchr(url->c, '?', url->len))
 		smart_str_appendl(url, separator, 1);
 	else
 		smart_str_appendl(url, "?", 1);
@@ -129,12 +126,14 @@ struct php_tag_arg {
 static struct php_tag_arg check_tag_arg[] = {
 	TAG_ARG_ENTRY(a, href)
 	TAG_ARG_ENTRY(area, href)
-	TAG_ARG_ENTRY(frame, source)
+	TAG_ARG_ENTRY(frame, src)
 	TAG_ARG_ENTRY(img, src)
+	TAG_ARG_ENTRY(input, src)
+	TAG_ARG_ENTRY(form, fake_entry_for_passing_on_form_tag)
 	{0}
 };
 
-static inline void tag_arg(url_adapt_state_t *ctx PLS_DC)
+static inline void tag_arg(url_adapt_state_ex_t *ctx PLS_DC)
 {
 	char f = 0;
 	int i;
@@ -151,261 +150,225 @@ static inline void tag_arg(url_adapt_state_t *ctx PLS_DC)
 
 	smart_str_appends(&ctx->result, "\"");
 	if (f) {
-		attach_url(&ctx->para, &ctx->name, &ctx->value, PG(arg_separator));
+		attach_url(&ctx->val, &ctx->q_name, &ctx->q_value, PG(arg_separator));
 	}
-	smart_str_append(&ctx->result, &ctx->para);
+	smart_str_append(&ctx->result, &ctx->val);
 	smart_str_appends(&ctx->result, "\"");
 }
-
-/*!re2c
-all = [\000-\377];
-*/
-
-#define NEXT continue
-
-#define COPY_ALL \
-	smart_str_appendl(&ctx->result, start, YYCURSOR - start); \
-	start = NULL; \
-	NEXT
-	
-#define YYFILL(n) goto finish
-#define YYCTYPE unsigned char
-#define YYLIMIT endptr
-#define YYCURSOR cursor
-#define YYMARKER marker
-
-#define HANDLE_FORM \
-	if (ctx->tag.len == 4 && strncasecmp(ctx->tag.c, "form", ctx->tag.len) == 0) { \
-		smart_str_appends(&ctx->result, "><INPUT TYPE=HIDDEN NAME=\""); \
-		smart_str_append(&ctx->result, &ctx->name); \
-		smart_str_appends(&ctx->result, "\" VALUE=\""); \
-		smart_str_append(&ctx->result, &ctx->value); \
-		smart_str_appends(&ctx->result, "\""); \
-	}
-
-#define GO(n) ctx->state = n
 
 enum {
 	STATE_PLAIN,
 	STATE_TAG,
 	STATE_NEXT_ARG,
 	STATE_ARG,
-	STATE_PARA
+	STATE_BEFORE_VAL,
+	STATE_VAL
 };
 
-static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
+#define YYFILL(n) goto stop
+#define YYCTYPE char
+#define YYCURSOR xp
+#define YYLIMIT end
+#define YYMARKER q
+#define STATE ctx->state
+
+#define PASSTHRU() {\
+	smart_str_appendl(&ctx->result, start, YYCURSOR - start); \
+}
+
+#define HANDLE_FORM() {\
+	if (ctx->tag.len == 4 && strncasecmp(ctx->tag.c, "form", 4) == 0) {\
+		smart_str_appends(&ctx->result, "<INPUT TYPE=HIDDEN NAME=\""); \
+		smart_str_append(&ctx->result, &ctx->q_name); \
+		smart_str_appends(&ctx->result, "\" VALUE=\""); \
+		smart_str_append(&ctx->result, &ctx->q_value); \
+		smart_str_appends(&ctx->result, "\">"); \
+	} \
+}
+
+/*
+ *  HANDLE_TAG copies the HTML Tag and checks whether we 
+ *  have that tag in our table. If we might modify it,
+ *  we continue to scan the tag, otherwise we simply copy the complete
+ *  HTML stuff to the result buffer.
+ */
+
+#define HANDLE_TAG() {\
+	int __ok = 0; \
+	int i; \
+	smart_str_setl(&ctx->tag, start, YYCURSOR - start); \
+	for (i = 0; check_tag_arg[i].tag; i++) { \
+		if (ctx->tag.len == check_tag_arg[i].taglen \
+				&& strncasecmp(ctx->tag.c, check_tag_arg[i].tag, ctx->tag.len) == 0) { \
+			__ok = 1; \
+			break; \
+		} \
+	} \
+	STATE = __ok ? STATE_NEXT_ARG : STATE_PLAIN; \
+}
+
+#define HANDLE_ARG() {\
+	smart_str_setl(&ctx->arg, start, YYCURSOR - start); \
+}
+#define HANDLE_VAL(quotes) {\
+	smart_str_copyl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2); \
+	tag_arg(ctx PLS_CC); \
+}
+
+/*
+ * Since arg/tag are read-only during the mainloop, we do not need
+ * to copy them. We need those variables across multiple calls 
+ * to url_adapt() though, but they point to a private buffer. So we
+ * copy them before leaving the mainloop() and restore them at
+ * the beginning.
+ */
+
+#define MOVE_TO_CTX(X) \
+	if (ctx->X.c) \
+		smart_str_copyl(&ctx->c_##X, ctx->X.c, ctx->X.len); \
+	else \
+		smart_str_free(&ctx->c_##X)
+
+#define FETCH_FROM_CTX(X) \
+	smart_str_setl(&ctx->X, ctx->c_##X.c, ctx->c_##X.len)
+	
+static inline void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen)
 {
-	char *para_start, *arg_start, *tag_start;
-	char *start = NULL;
-	char *cursor;
-	char *marker;
-	char *endptr;
+	char *end, *q;
+	char *xp;
+	char *start;
+	int rest;
 	PLS_FETCH();
 
-	arg_start = para_start = tag_start = NULL;
-	smart_str_append(&ctx->work, newstuff);
-	smart_str_free(&ctx->result);
+	FETCH_FROM_CTX(arg);
+	FETCH_FROM_CTX(tag);
 
-	smart_str_setl(&ctx->arg, ctx->c_arg.c, ctx->c_arg.len);
-	smart_str_setl(&ctx->tag, ctx->c_tag.c, ctx->c_tag.len);
-
-	cursor = ctx->work.c;
-	endptr = ctx->work.c + ctx->work.len;
+	smart_str_appendl(&ctx->buf, newdata, newlen);
 	
-	while (YYCURSOR < YYLIMIT) {
-		start = YYCURSOR;
+	YYCURSOR = ctx->buf.c;
+	YYLIMIT = ctx->buf.c + ctx->buf.len;
 
+/*!re2c
+any = [\000-\377];
+alpha = [a-zA-Z];
+*/
+	
+	while(1) {
+		start = YYCURSOR;
 #ifdef SCANNER_DEBUG
-	printf("state %d:%s'\n", ctx->state, YYCURSOR);
+		printf("state %d at %s\n", STATE, YYCURSOR);
 #endif
-		switch (ctx->state) {
-			
+	switch(STATE) {
+		
 		case STATE_PLAIN:
 /*!re2c
-  "<" 			{ tag_start = YYCURSOR; GO(STATE_TAG); COPY_ALL;}
-  (all\[<])+ 	{ COPY_ALL; }
+  [<]			{ PASSTHRU(); STATE = STATE_TAG; continue; }
+  (any\[<])		{ PASSTHRU(); continue; }
 */
-  			break;
-		
+			break;
+			
 		case STATE_TAG:
 /*!re2c
-  [a-zA-Z]+ [ >]	{ 
-  						YYCURSOR--; 
-  						arg_start = YYCURSOR;
-						smart_str_setl(&ctx->tag, start, YYCURSOR - start); 
-#ifdef SCANNER_DEBUG
-						printf("TAG(%s)\n", ctx->tag.c);
-#endif
-						GO(STATE_NEXT_ARG);
-						COPY_ALL; 
-				}
-  all			{ 
-  						YYCURSOR--; 
-						GO(STATE_PLAIN);
-						tag_start = NULL; 
-						NEXT;
-				}
+  alpha+	{ HANDLE_TAG() /* Sets STATE */; PASSTHRU(); continue; }
+  any		{ PASSTHRU(); continue; }
 */
-			break;
-
+  			break;
+			
 		case STATE_NEXT_ARG:
 /*!re2c
-  [ ]+			{
-  						GO(STATE_ARG);
-						NEXT; 
-				}
-  ">"			{
-  						HANDLE_FORM;
-						GO(STATE_PLAIN);
-						tag_start = NULL;
-						COPY_ALL;
-				}
+  ">"		{ PASSTHRU(); HANDLE_FORM(); STATE = STATE_PLAIN; continue; }
+  [ \n]		{ PASSTHRU(); continue; }
+  alpha		{ YYCURSOR--; STATE = STATE_ARG; continue; }
+  any		{ PASSTHRU(); continue; }
 */
-			break;
+ 	 		break;
 
 		case STATE_ARG:
-				smart_str_appendl(&ctx->result, " ", 1);
 /*!re2c
-  [a-zA-Z]+ [ ]* "=" [ ]*  		{
-  						char *p;
+  alpha+	{ PASSTHRU(); HANDLE_ARG(); STATE = STATE_BEFORE_VAL; continue; }
+  any		{ PASSTHRU(); STATE = STATE_NEXT_ARG; continue; }
+*/
 
-						for (p = start; isalpha(*p); p++);
-						smart_str_setl(&ctx->arg, start, p - start);
-#ifdef SCANNER_DEBUG
-						printf("ARG(%s)\n", ctx->arg.c);
-#endif
-						para_start = YYCURSOR;
-						ctx->state++;
-						COPY_ALL;
-				}
-  (all\[ =>])*		{
-  						arg_start = YYCURSOR;
-						ctx->state--;
-						COPY_ALL;
-				}
+		case STATE_BEFORE_VAL:
+/*!re2c
+  [ ]* "=" [ ]*		{ PASSTHRU(); STATE = STATE_VAL; continue; }
+  any				{ YYCURSOR--; STATE = STATE_NEXT_ARG; continue; }
 */
 			break;
 
-		case STATE_PARA:
+		case STATE_VAL:
 /*!re2c
-  ["] (all\[^>"])* ["] [ >]		{
-  						YYCURSOR--;
-						para_start = NULL;
-						smart_str_copyl(&ctx->para, start + 1, YYCURSOR - start - 2);
-#ifdef SCANNER_DEBUG
-						printf("PARA(%s)\n", ctx->para.c);
-#endif
-						tag_arg(ctx PLS_CC);
-						arg_start = YYCURSOR;
-						GO(STATE_NEXT_ARG);
-						NEXT;
-				}
-  (all\[^> ])+ [ >]		{
-  						YYCURSOR--;
-						para_start = NULL;
-						smart_str_copyl(&ctx->para, start, YYCURSOR - start);
-#ifdef SCANNER_DEBUG
-						printf("PARA(%s)\n", ctx->para.c);
-#endif
-						tag_arg(ctx PLS_CC);
-						arg_start = YYCURSOR;
-						GO(STATE_NEXT_ARG);
-						NEXT;
-				}
-  all			{
-  						YYCURSOR--;
-						ctx->state = 2;
-						NEXT;
-				}
+  ["] (any\[">])+ ["]	{ HANDLE_VAL(1); STATE = STATE_NEXT_ARG; continue; }
+  (any\[ \n>"])+		{ HANDLE_VAL(0); STATE = STATE_NEXT_ARG; continue; }
+  any					{ PASSTHRU(); STATE = STATE_NEXT_ARG; continue; }
 */
 			break;
-		}
+	}
 	}
 
-#define PRESERVE(s) \
-	size_t n = ctx->work.len - (s - ctx->work.c); \
-	memmove(ctx->work.c, s, n + 1); \
-	ctx->work.len = n
-	
-finish:
-	if (ctx->arg.c)
-		smart_str_copyl(&ctx->c_arg, ctx->arg.c, ctx->arg.len);
-	else
-		smart_str_free(&ctx->c_arg);
-	if (ctx->tag.c)
-		smart_str_copyl(&ctx->c_tag, ctx->tag.c, ctx->tag.len);
-	else
-		smart_str_free(&ctx->c_tag);
-	
-	if (ctx->state >= 2) {
-		if (para_start) {
-			PRESERVE(para_start);
-			ctx->state = 4;
-		} else {
-			if (arg_start) { PRESERVE(arg_start); }
-			ctx->state = 2;
-		}
-	} else if (tag_start) {
-		PRESERVE(tag_start);
-		ctx->state = 1;
-	} else {
-		ctx->state = 0;
-		if (start) smart_str_appendl(&ctx->result, start, YYCURSOR - start);
-		smart_str_free(&ctx->work);
-	}
-
-#ifdef SCANNER_DEBUG 
-	if (ctx->work.c) {
-		printf("PRESERVING %s'\n", ctx->work.c);
-	}
+stop:
+#ifdef SCANNER_DEBUG
+	printf("stopped in state %d at pos %d (%d:%c)\n", STATE, YYCURSOR - ctx->buf.c, *YYCURSOR, *YYCURSOR);
 #endif
+
+	MOVE_TO_CTX(tag);
+	MOVE_TO_CTX(arg);
+
+	rest = YYLIMIT - start;
+		
+	memmove(ctx->buf.c, start, rest);
+	ctx->buf.c[rest] = '\0';
+	ctx->buf.len = rest;
 }
+
 
 char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen)
 {
-	smart_str str = {0,0};
 	char *ret;
+	url_adapt_state_ex_t *ctx;
 	BLS_FETCH();
 
-	smart_str_sets(&BG(url_adapt_state).name, name);
-	smart_str_sets(&BG(url_adapt_state).value, value);
-	str.c = (char *) src;
-	str.len = srclen;
-	mainloop(&BG(url_adapt_state), &str);
+	ctx = &BG(url_adapt_state_ex);
 
-	*newlen = BG(url_adapt_state).result.len;
+	smart_str_sets(&ctx->q_name, name);
+	smart_str_sets(&ctx->q_value, value);
+	mainloop(ctx, src, srclen);
 
-#ifdef SCANNER_DEBUG
-	printf("(%d)NEW(%d): %s'\n", srclen, BG(url_adapt_state).result.len, BG(url_adapt_state).result.c);
-#endif
+	*newlen = ctx->result.len;
 
-#if 1
-	ret = BG(url_adapt_state).result.c;
-	BG(url_adapt_state).result.c = NULL;
+	if (ctx->result.len == 0) {
+		return strdup("");
+	}
+	ret = ctx->result.c;
+	ctx->result.c = NULL;
+	ctx->result.len = ctx->result.a = 0;
 	return ret;
-#else
-	return strdup(BG(url_adapt_state).result.c);
-#endif
 }
 
 PHP_RINIT_FUNCTION(url_scanner)
 {
+	url_adapt_state_ex_t *ctx;
 	BLS_FETCH();
+	
+	ctx = &BG(url_adapt_state_ex);
 
-	memset(&BG(url_adapt_state), 0, sizeof(BG(url_adapt_state)));
+	memset(ctx, 0, sizeof(*ctx));
 
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(url_scanner)
 {
+	url_adapt_state_ex_t *ctx;
 	BLS_FETCH();
+	
+	ctx = &BG(url_adapt_state_ex);
 
-	smart_str_free(&BG(url_adapt_state).result);
-	smart_str_free(&BG(url_adapt_state).work);
-	smart_str_free(&BG(url_adapt_state).c_tag);
-	smart_str_free(&BG(url_adapt_state).c_arg);
-	smart_str_free(&BG(url_adapt_state).para);
+	smart_str_free(&ctx->result);
+	smart_str_free(&ctx->buf);
+	smart_str_free(&ctx->c_tag);
+	smart_str_free(&ctx->c_arg);
+	smart_str_free(&ctx->val);
 
 	return SUCCESS;
 }

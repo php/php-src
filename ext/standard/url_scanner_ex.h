@@ -30,17 +30,26 @@ typedef struct {
 	size_t a;
 } smart_str;
 
+
 typedef struct {
-	smart_str c_arg;
+	/* Used by the mainloop of the scanner */
+	smart_str tag; /* read only */
+	smart_str arg; /* read only */
+	smart_str val;
+	smart_str buf;
+
+	/* Dito, but they are used only for preserving data across calls */
 	smart_str c_tag;
-	smart_str arg;
-	smart_str tag;
-	smart_str para;
-	smart_str work;
+	smart_str c_arg;
+
+	/* The result buffer */
 	smart_str result;
+
+	/* The data which is appended to each relative URL */
+	smart_str q_name;
+	smart_str q_value;
+
 	int state;
-	smart_str name;
-	smart_str value;
 } url_adapt_state_ex_t;
 
 #endif
