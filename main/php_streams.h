@@ -467,7 +467,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 #define STREAM_LOCATE_WRAPPERS_ONLY	64
 
 #ifdef PHP_WIN32
-# define IGNORE_URL_WIN IGNORE_URL
+# define IGNORE_URL_WIN STREAM_MUST_SEEK
 #else
 # define IGNORE_URL_WIN 0
 #endif
