@@ -395,6 +395,7 @@ static void *fontFetch (char **error, void *key)
 		}
 		for (dir = strtok (path, PATHSEPARATOR); dir; dir = strtok (0, PATHSEPARATOR)) {
 			if (!strcmp(dir, ".")) {
+				TSRMLS_FETCH();
 #if HAVE_GETCWD
 				dir = VCWD_GETCWD(cur_dir, MAXPATHLEN);
 #elif HAVE_GETWD
