@@ -257,7 +257,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	if (obj) {
 		string_printf(str, "%sObject of class [ ", indent);
 	} else {
-		string_printf(str, "%sClass [ ", indent);
+		string_printf(str, "%s%s [ ", indent, (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : "Class");
 	}
 	string_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user>  " : "<internal> ");
 	if (ce->ce_flags & ZEND_ACC_ABSTRACT) {
@@ -335,7 +335,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 		/* static properties */		
 		string_printf(str, "\n%s  - Static properties [%d] {\n", indent, count_static_props);
-		if (count > 0) {
+		if (count_static_props > 0) {
 			HashPosition pos;
 			zend_property_info *prop;
 
