@@ -382,6 +382,10 @@ static void register_standard_class(TSRMLS_D)
 	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
 }
 
+static void unregister_standard_class()
+{
+	destroy_zend_class(&zend_standard_class_def);
+}
 
 static void zend_set_default_compile_time_values(TSRMLS_D)
 {
@@ -657,17 +661,19 @@ void zend_shutdown(TSRMLS_D)
 	zend_hash_graceful_reverse_destroy(&module_registry);
 	zend_destroy_rsrc_list_dtors();
 
-#ifndef ZTS
-	/* In ZTS mode these are freed by compiler_globals_dtor() */
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
-#endif
 
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 	zend_shutdown_extensions(TSRMLS_C);
 	free(zend_version_info);
+
 	zend_shutdown_constants(TSRMLS_C);
+#ifdef ZTS
+	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
+#endif
+	unregister_standard_class();
 }
 
 
