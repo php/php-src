@@ -23,8 +23,11 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 #include "php.h"
 #include "php_versioning.h"
+
+#define sign(n) ((n)<0?-1:((n)>0?1:0))
 
 PHPAPI char *
 php_canonicalize_version(const char *version)
@@ -78,18 +81,18 @@ compare_special_version_forms(const char *form1, const char *form2)
 	};
 
 	for (pp = special_forms, i = 0; *pp != NULL; pp++, i++) {
-		if (strcmp(form1, *pp) == 0) {
+		if (strncmp(form1, *pp, strlen(*pp)) == 0) {
 			found1 = i;
 			break;
 		}
 	}
 	for (pp = special_forms, i = 0; *pp != NULL; pp++, i++) {
-		if (strcmp(form2, *pp) == 0) {
+		if (strncmp(form2, *pp, strlen(*pp)) == 0) {
 			found2 = i;
 			break;
 		}
 	}
-	return abs(found1 - found2);
+	return sign(found1 - found2);
 }
 
 PHPAPI int
@@ -114,7 +117,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 			/* compare element numerically */
 			l1 = strtol(p1, NULL, 10);
 			l2 = strtol(p2, NULL, 10);
-			compare = abs(l1 - l2);
+			compare = sign(l1 - l2);
 		} else if (!isdigit(*p1) && !isdigit(*p2)) {
 			/* compare element names */
 			compare = compare_special_version_forms(p1, p2);
@@ -138,16 +141,16 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	}
 	if (compare == 0) {
 		if (n1 != NULL) {
-			if (isdigit(*n1)) {
+			if (isdigit(*p1)) {
 				compare = 1;
 			} else {
-				compare = compare_special_version_forms(n1, "#N#");
+				compare = php_version_compare(p1, "#N#");
 			}
 		} else if (n2 != NULL) {
-			if (isdigit(*n2)) {
+			if (isdigit(*p2)) {
 				compare = -1;
 			} else {
-				compare = compare_special_version_forms("#N", n2);
+				compare = php_version_compare("#N#", p2);
 			}
 		}
 	}
