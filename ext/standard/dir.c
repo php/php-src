@@ -130,6 +130,14 @@ PHP_MINIT_FUNCTION(dir)
 	tmpstr[1] = '\0';
 	REGISTER_STRING_CONSTANT("DIRECTORY_SEPARATOR", tmpstr, CONST_CS|CONST_PERSISTENT);
 
+#if HAVE_GLOB
+	REGISTER_LONG_CONSTANT("GLOB_MARK", GLOB_MARK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_NOMATCH", GLOB_NOMATCH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_CS | CONST_PERSISTENT);
+#endif
+
 	return SUCCESS;
 }
 
@@ -330,19 +338,32 @@ PHP_NAMED_FUNCTION(php_if_readdir)
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
+	cwd_state new_state;
+	char cwd[MAXPATHLEN];
+	int cwd_skip = 0;
+	char work_pattern[MAXPATHLEN];
+	char *result;
 	char *pattern = NULL;
 	int pattern_len;
 	long flags = 0;
 	glob_t globbuf;
 	int n, ret;
-
-	if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Safe Mode restriction in effect, function is disabled");
-		RETURN_FALSE;
-	}
+	TSRMLS_FETCH();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) 
 		return;
+
+#ifdef ZTS 
+	if(!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
+		result = VCWD_GETCWD(cwd, MAXPATHLEN);	
+		if (!result) {
+			cwd[0] = '\0';
+		}
+		cwd_skip = strlen(cwd)+1;
+		snprintf(work_pattern, MAXPATHLEN, "%s/%s", cwd, pattern);
+		pattern = work_pattern;
+	} 
+#endif
 
 	globbuf.gl_offs = 0;
 	if (0 != (ret = glob(pattern, flags, NULL, &globbuf))) {
@@ -350,7 +371,7 @@ PHP_FUNCTION(glob)
 		if (GLOB_NOMATCH == ret) {
 			/* Linux handles no matches as an error condition, but FreeBSD
 			 * doesn't. This ensure that if no match is found, an empty array
-			 * is always returned so it can be used with worrying in e.g.
+			 * is always returned so it can be used without worrying in e.g.
 			 * foreach() */
 			array_init(return_value);
 			return;
@@ -359,10 +380,22 @@ PHP_FUNCTION(glob)
 		RETURN_FALSE;
 	}
 
+	/* we assume that any glob pattern will match files from one directory only
+	   so checking the dirname of the first match should be sufficient */
+	strncpy(cwd, globbuf.gl_pathv[0], MAXPATHLEN);
+	if (PG(safe_mode) && (!php_checkuid(cwd, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
+	if(php_check_open_basedir(cwd TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
-		add_next_index_string(return_value, globbuf.gl_pathv[n], 1);
+		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
 	}
+
 	globfree(&globbuf);
 }
 /* }}} */
