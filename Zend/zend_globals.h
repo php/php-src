@@ -150,6 +150,7 @@ struct _zend_executor_globals {
 	jmp_buf bailout;
 
 	int error_reporting;
+	int orig_error_reporting;
 
 	zend_op_array *active_op_array;
 	zend_op_array *main_op_array;
