@@ -8139,6 +8139,13 @@ mbfl_strcut(
 	result->no_language = string->no_language;
 	result->no_encoding = string->no_encoding;
 
+	if (from > (int)string->len) {
+		result->len = 0;
+		result->val = mbfl_malloc(1);
+		result->val[0] = '\0';
+		return result; 
+	}
+
 	if ((encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE | MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) ||
 	   encoding->mblen_table != NULL) {
 		len = string->len;
