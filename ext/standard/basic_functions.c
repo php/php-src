@@ -813,6 +813,7 @@ function_entry basic_functions[] = {
 	PHP_FE(uksort,					first_arg_force_ref)
 	PHP_FE(shuffle,					first_arg_force_ref)
 	PHP_FE(array_walk,				first_arg_force_ref)
+	PHP_FE(array_walk_recursive,			first_arg_force_ref)
 	PHP_FE(count,															NULL)
 	PHP_FE(end,						first_arg_force_ref)
 	PHP_FE(prev,					first_arg_force_ref)
