@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Sascha Schumann <sascha@schumann.cx>                        |
-   |          Andrei Zmievski <andrei@ispi.net>                           |
+   |          Andrei Zmievski <andrei@php.net>                            |
    +----------------------------------------------------------------------+
  */
 
