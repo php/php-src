@@ -1,21 +1,38 @@
 --TEST--
 ZE2: set_exception_handler()
 --SKIPIF--
-<?php if (version_compare(zend_version(), "2", "<")) print "skip"; ?>
+<?php if (version_compare(zend_version(), "2.0.0-dev", "<")) print "skip Zend engine 2 required"; ?>
 --FILE--
 <?php
+class MyException {
+	function MyException($_error) {
+		$this->error = $_error;	
+	}
+	
+	function getException()
+	{
+		return $this->error;	
+	}
+}
 
-set_exception_handler("my_handler");
+function ThrowException()
+{
+	throw new MyException("'This is an exception!'");	
+}
+
+
 try {
-    throw new exception();
-} catch (stdClass $e) {
-    print "BAR\n";
+} catch (MyException $exception) {
+	print "There shouldn't be an exception: " . $exception->getException();
+	print "\n";
 }
 
-function my_handler($exception) {
-    print "FOO\n";
+try {
+	ThrowException();	
+} catch (MyException $exception) {
+	print "There was an exception: " . $exception->getException();
+	print "\n";
 }
-
 ?>
 --EXPECT--
-FOO
+There was an exception: 'This is an exception!'
