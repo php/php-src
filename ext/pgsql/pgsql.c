@@ -2532,7 +2532,7 @@ PHP_FUNCTION(pg_connection_reset)
 														  
 /* {{{ php_pgsql_flush_query
  */
-static int php_pgsql_flush_query(PGconn *pgsql) 
+static int php_pgsql_flush_query(PGconn *pgsql TSRMLS_DC) 
 {
 	PGresult *res;
 	int leftover = 0;
@@ -2943,7 +2943,7 @@ static int php_pgsql_convert_match(const char *str, const char *regex , int icas
 /* {{{ php_pgsql_convert_add_quote
  * add quotes around string.
  */
-static int php_pgsql_add_quotes(zval *src, zend_bool should_free) 
+static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC) 
 {
 	char *dist;
 	assert(Z_TYPE_P(src) == IS_STRING);
@@ -3102,7 +3102,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([+-]{0,1}[0-9]+)$", 0) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([+-]{0,1}[0-9]+)$", 0 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3145,7 +3145,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([+-]{0,1}[0-9]+)|([+-]{0,1}[0-9]*[\\.][0-9]+)|([+-]{0,1}[0-9]+[\\.][0-9]*)$", 0) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([+-]{0,1}[0-9]+)|([+-]{0,1}[0-9]*[\\.][0-9]+)|([+-]{0,1}[0-9]+[\\.][0-9]*)$", 0 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3235,7 +3235,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: Better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^[0-9]+$", 0) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^[0-9]+$", 0 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							} 
 							else {
@@ -3278,7 +3278,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: Better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{1,3}\\.){3}[0-9]{1,3}(/[0-9]{1,2}){0,1}$", 0) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{1,3}\\.){3}[0-9]{1,3}(/[0-9]{1,2}){0,1}$", 0 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3311,7 +3311,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})([ \\t]+(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1})){0,1}$", 1) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})([ \\t]+(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1})){0,1}$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3342,7 +3342,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})$", 1) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3373,7 +3373,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1})){0,1}$", 1) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1})){0,1}$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3404,8 +3404,8 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^[+-]{0,1}[ \\t]+((second|seconds|minute|minute|hour|hour|day|days|week|weeks|month|monthes|year|years|decade|decades|century|centuries|millennium|millenniums){1,1}[ \\t]+)+([ \\t]+ago){0,1}$", 1) == FAILURE &&
-								php_pgsql_convert_match(Z_STRVAL_PP(val), "^@[ \\t]+[+-]{0,1}[ \\t]+(second|seconds|minute|minute|hour|hour|day|days|week|weeks|month|monthes|year|years|decade|decades|century|centuries|millennium|millenniums){1,1}[ \\t]+)+([ \\t]+ago$", 1) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^[+-]{0,1}[ \\t]+((second|seconds|minute|minute|hour|hour|day|days|week|weeks|month|monthes|year|years|decade|decades|century|centuries|millennium|millenniums){1,1}[ \\t]+)+([ \\t]+ago){0,1}$", 1 TSRMLS_CC) == FAILURE &&
+								php_pgsql_convert_match(Z_STRVAL_PP(val), "^@[ \\t]+[+-]{0,1}[ \\t]+(second|seconds|minute|minute|hour|hour|day|days|week|weeks|month|monthes|year|years|decade|decades|century|centuries|millennium|millenniums){1,1}[ \\t]+)+([ \\t]+ago$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3480,7 +3480,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						}
 						else {
 							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{2,2}:){5,5}[0-9]{2,2}$", 1) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{2,2}:){5,5}[0-9]{2,2}$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3576,7 +3576,7 @@ PHP_FUNCTION(pg_convert)
 				  get_active_function_name(TSRMLS_C));
 	}
 	array_init(return_value);
-	if (php_pgsql_convert(pg_link, table_name, values, return_value TSRMLS_C) == FAILURE) {
+	if (php_pgsql_convert(pg_link, table_name, values, return_value TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -3588,7 +3588,7 @@ PHP_FUNCTION(pg_convert)
  */
 PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, zend_bool convert, zend_bool async TSRMLS_DC)
 {
-	zval **val, *converted;
+	zval **val, *converted = NULL;
 	char *query_tpl = "INSERT INTO %s (%s) VALUES (%s);";
 	char *query, *fields, *fields_pos, *values, *values_pos, *fld, buf[256];
 	size_t fields_len = 1, values_len = 1;
@@ -3606,7 +3606,7 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 	if (convert) {
 		MAKE_STD_ZVAL(converted);
 		array_init(converted);
-		if (php_pgsql_convert(pg_link, table, var_array, converted TSRMLS_C) == FAILURE) {
+		if (php_pgsql_convert(pg_link, table, var_array, converted TSRMLS_CC) == FAILURE) {
 			zval_dtor(converted);			
 			FREE_ZVAL(converted);
 			return FAILURE;
@@ -3812,7 +3812,7 @@ PHP_FUNCTION(pg_insert)
  */
 PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, zend_bool convert, zend_bool async TSRMLS_DC) 
 {
-	zval **val, *var_converted, *ids_converted;
+	zval **val, *var_converted = NULL, *ids_converted = NULL;
 	char *query_tpl = "UPDATE %s SET %s WHERE %s;";
 	char *query, *values, *values_pos, *ids, *ids_pos, *fld, buf[256];
 	size_t fields_len = 1, values_len = 1, idsf_len = 1, idsv_len = 1, fld_len;
@@ -3830,7 +3830,7 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 	if (convert) {
 		MAKE_STD_ZVAL(var_converted);
 		array_init(var_converted);
-		if (php_pgsql_convert(pg_link, table, var_array, var_converted TSRMLS_C) == FAILURE) {
+		if (php_pgsql_convert(pg_link, table, var_array, var_converted TSRMLS_CC) == FAILURE) {
 			zval_dtor(var_converted);
 			FREE_ZVAL(var_converted);
 			return FAILURE;
@@ -3838,7 +3838,7 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 		var_array = var_converted;
 		MAKE_STD_ZVAL(ids_converted);
 		array_init(ids_converted);
-		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_C) == FAILURE) {
+		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_CC) == FAILURE) {
 			zval_dtor(var_converted);
 			FREE_ZVAL(var_converted);
 			zval_dtor(ids_converted);			
@@ -4128,7 +4128,7 @@ PHP_FUNCTION(pg_update)
 		php_error(E_NOTICE, "%s detected unhandled result(s) in connection",
 				  get_active_function_name(TSRMLS_C));
 	}
-	if (php_pgsql_update(pg_link, table, values, ids, convert, async TSRMLS_C) == FAILURE) {
+	if (php_pgsql_update(pg_link, table, values, ids, convert, async TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -4139,7 +4139,7 @@ PHP_FUNCTION(pg_update)
  */
 PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, zend_bool convert, zend_bool async TSRMLS_DC) 
 {
-	zval **val, *ids_converted;
+	zval **val, *ids_converted = NULL;
 	char *query_tpl = "DELETE FROM %s WHERE %s;";
 	char *query, *ids, *ids_pos, *fld, buf[256];
 	size_t idsf_len = 1, idsv_len = 1, fld_len;
@@ -4156,7 +4156,7 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 	if (convert) {
 		MAKE_STD_ZVAL(ids_converted);
 		array_init(ids_converted);
-		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_C) == FAILURE) {
+		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_CC) == FAILURE) {
 			zval_dtor(ids_converted);			
 			FREE_ZVAL(ids_converted);
 			return FAILURE;
@@ -4324,7 +4324,7 @@ PHP_FUNCTION(pg_delete)
 		php_error(E_NOTICE, "%s detected unhandled result(s) in connection",
 				  get_active_function_name(TSRMLS_C));
 	}
-	if (php_pgsql_delete(pg_link, table, ids, convert, async TSRMLS_C) == FAILURE) {
+	if (php_pgsql_delete(pg_link, table, ids, convert, async TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -4333,7 +4333,7 @@ PHP_FUNCTION(pg_delete)
 
 /* {{{ php_pgsql_result2array
  */
-PHPAPI int php_pgsql_result2array(PGresult *pg_result, zval *ret_array) 
+PHPAPI int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC) 
 {
 	zval *row;
 	char *field_name, *element, *data;
@@ -4376,7 +4376,7 @@ PHPAPI int php_pgsql_result2array(PGresult *pg_result, zval *ret_array)
  */
 PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_bool convert TSRMLS_DC) 
 {
-	zval **val, *ids_converted;
+	zval **val, *ids_converted = NULL;
 	char *query_tpl = "SELECT * FROM %s WHERE %s;";
 	char *query, *ids, *ids_pos, *fld, buf[256];
 	size_t idsf_len = 1, idsv_len = 1, fld_len;
@@ -4394,7 +4394,7 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 	if (convert) {
 		MAKE_STD_ZVAL(ids_converted);
 		array_init(ids_converted);
-		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_C) == FAILURE) {
+		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_CC) == FAILURE) {
 			zval_dtor(ids_converted);			
 			FREE_ZVAL(ids_converted);
 			return FAILURE;
@@ -4530,7 +4530,7 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 	efree(query);
 	
 	if (ret == SUCCESS) {
-		ret = php_pgsql_result2array(pg_result, ret_array);
+		ret = php_pgsql_result2array(pg_result, ret_array TSRMLS_CC);
 	}
 	return ret;
 }
@@ -4559,7 +4559,7 @@ PHP_FUNCTION(pg_select)
 				  get_active_function_name(TSRMLS_C));
 	}
 	array_init(return_value);
-	if (php_pgsql_select(pg_link, table, ids, return_value, convert TSRMLS_C) == FAILURE) {
+	if (php_pgsql_select(pg_link, table, ids, return_value, convert TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
