@@ -100,8 +100,8 @@ typedef struct {
 	dvoid *ocidescr;
 	ub4 type;
 	int lob_current_position; 
-	int lob_size;  // -1 = Lob wasn't initialized yet
-	int buffering; // 0 - off, 1 - on, 2 - on and buffer was used
+	int lob_size;  /* -1 = Lob wasn't initialized yet */
+	int buffering; /* 0 - off, 1 - on, 2 - on and buffer was used */
 } oci_descriptor;
 
 typedef struct {

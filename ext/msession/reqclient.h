@@ -107,11 +107,11 @@ typedef struct _requestPacket
 
 typedef struct _requestBuf
 {
-	unsigned int type;	// Type of packet, dynamic/static
-	unsigned int size;	// size of memory block
+	unsigned int type;	/* Type of packet, dynamic/static */
+	unsigned int size;	/* size of memory block */
 #if (REQCLIENT_VER >= 030113)
-	unsigned int fmt;	// format, binary/ascii
-	unsigned int reserved;	// Just in case
+	unsigned int fmt;	/* format, binary/ascii */
+	unsigned int reserved;	/* Just in case */
 #else
 #warning You are using an old Phoenix definition, this will have problems with a newer version
 #endif
