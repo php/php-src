@@ -2678,7 +2678,7 @@ PHP_FUNCTION(ini_restore)
 }
 /* }}} */
 
-/* {{{ proto string set_include_path(string varname, string newvalue)
+/* {{{ proto string set_include_path(string new_include_path)
    Sets the include_path configuration option */
 
 PHP_FUNCTION(set_include_path)
