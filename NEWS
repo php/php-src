@@ -21,7 +21,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #25308 (php -m crashes when zend extensions are loaded). (Stas)
 - Fixed bug #25307 (Crash with WDDX serializer). (Sascha, Jani)
 - Fixed bug #25295 (QNX6: php_ini.c:414: 'alphasort' undeclared). (Jani)
-- Fixed buf #25294 (ext/ftp: NLST failure leads to crash on exit). (Sara, Rob)
+- Fixed bug #25294 (ext/ftp: NLST failure leads to crash on exit). (Sara, Rob)
 - Fixed bug #25239 (ftp_fopen_wrapper not RFC compliant). (Sara)
 - Fixed bug #25211 (image.c compile failure with AIX). (Marcus)
 - Fixed bug #25166 (WDDX serializer handler missing in win32). (Jani)
