@@ -104,6 +104,10 @@ size_t strlcpy(char *dst, const char *src, size_t siz);
 size_t strlcat(char *dst, const char *src, size_t siz);
 #endif
 
+#ifndef HAVE_STRTOK_R
+char *strtok_r(char *s, const char *delim, char **last);
+#endif
+
 #include "request_info.h"
 
 #if HAVE_LIBDL

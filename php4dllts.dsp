@@ -165,6 +165,10 @@ SOURCE=.\strlcat.c
 
 SOURCE=.\strlcpy.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\strtok_r.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
