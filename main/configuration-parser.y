@@ -40,7 +40,6 @@
 #include "win32/wfile.h"
 #endif
 
-#undef YYSTYPE
 #define YYSTYPE pval
 
 #define PARSING_MODE_CFG 0
