@@ -101,19 +101,19 @@
 #define	mbfl_pfree		free
 
 /* unicode table */
-extern const unsigned short cp1252_ucs_table[];
-extern const unsigned short iso8859_2_ucs_table[];
-extern const unsigned short iso8859_3_ucs_table[];
-extern const unsigned short iso8859_4_ucs_table[];
-extern const unsigned short iso8859_5_ucs_table[];
-extern const unsigned short iso8859_6_ucs_table[];
-extern const unsigned short iso8859_7_ucs_table[];
-extern const unsigned short iso8859_8_ucs_table[];
-extern const unsigned short iso8859_9_ucs_table[];
-extern const unsigned short iso8859_10_ucs_table[];
-extern const unsigned short iso8859_13_ucs_table[];
-extern const unsigned short iso8859_14_ucs_table[];
-extern const unsigned short iso8859_15_ucs_table[];
+static const unsigned short cp1252_ucs_table[];
+static const unsigned short iso8859_2_ucs_table[];
+static const unsigned short iso8859_3_ucs_table[];
+static const unsigned short iso8859_4_ucs_table[];
+static const unsigned short iso8859_5_ucs_table[];
+static const unsigned short iso8859_6_ucs_table[];
+static const unsigned short iso8859_7_ucs_table[];
+static const unsigned short iso8859_8_ucs_table[];
+static const unsigned short iso8859_9_ucs_table[];
+static const unsigned short iso8859_10_ucs_table[];
+static const unsigned short iso8859_13_ucs_table[];
+static const unsigned short iso8859_14_ucs_table[];
+static const unsigned short iso8859_15_ucs_table[];
 
 /* charactor property table */
 #define MBFL_CHP_CTL		0x01
@@ -123,7 +123,7 @@ extern const unsigned short iso8859_15_ucs_table[];
 #define MBFL_CHP_MMHQENC	0x10	/* must Q-encoding in MIME Header encoded-word */
 #define MBFL_CHP_MSPECIAL	0x20	/* RFC822 Special characters */
 
-extern const unsigned char mbfl_charprop_table[];
+static const unsigned char mbfl_charprop_table[];
 
 
 /* language structure */
