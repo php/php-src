@@ -674,9 +674,8 @@ int dom_node_prefix_read(dom_object *obj, zval **retval TSRMLS_DC)
 int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	zval value_copy;
-	xmlNode *nodep;
-	xmlDocPtr doc;
-	xmlNsPtr ns, curns = NULL;
+	xmlNode *nodep, *nsnode = NULL;
+	xmlNsPtr ns = NULL, curns;
 	char *strURI;
 	char *prefix;
 
@@ -689,7 +688,14 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
+			nsnode = nodep;
 		case XML_ATTRIBUTE_NODE:
+			if (nsnode == NULL) {
+				nsnode = nodep->parent;
+				if (nsnode == NULL) {
+					nsnode = xmlDocGetRootElement(nodep->doc);
+				}
+			}
 			if (newval->type != IS_STRING) {
 				if(newval->refcount > 1) {
 					value_copy = *newval;
@@ -699,38 +705,37 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 				convert_to_string(newval);
 			}
 			prefix = Z_STRVAL_P(newval);
-			if (nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
+			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
 				if (strURI == NULL || 
 					(!strcmp (prefix, "xml") && strcmp(strURI, XML_XML_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp (prefix, "xmlns") &&
 					 strcmp (strURI, DOM_XMLNS_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp (nodep->name, "xmlns"))) {
+					ns = NULL;
+				} else {
+					curns = nsnode->nsDef;
+					while (curns != NULL) {
+						if (xmlStrEqual((xmlChar *)prefix, curns->prefix) && xmlStrEqual(nodep->ns->href, curns->href)) {
+							ns = curns;
+							break;
+						}
+						curns = curns->next;
+					}
+					if (ns == NULL) {
+						ns = xmlNewNs(nsnode, nodep->ns->href, (xmlChar *)prefix);
+					}
+				}
+
+				if (ns == NULL) {
 					if (newval == &value_copy) {
 						zval_dtor(newval);
 					}
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document) TSRMLS_CC);
-					return FAILURE;	
-				}
-				ns = xmlNewNs(NULL, nodep->ns->href, (xmlChar *)prefix);
-				if (nodep->doc != NULL) {
-					doc = nodep->doc;
-					if (doc->oldNs == NULL) {
-						doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
-						memset(doc->oldNs, 0, sizeof(xmlNs));
-						doc->oldNs->type = XML_LOCAL_NAMESPACE;
-						doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE); 
-						doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml"); 
-					}
-
-					curns = doc->oldNs;
-					while (curns->next != NULL) {
-						curns = curns->next;
-					}
-					curns->next = ns;
+					return FAILURE;
 				}
 
-				nodep->ns = curns;
+				xmlSetNs(nodep, ns);
 			}
 			if (newval == &value_copy) {
 				zval_dtor(newval);
