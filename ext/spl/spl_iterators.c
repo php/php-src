@@ -50,7 +50,8 @@ SPL_METHOD(RecursiveIteratorIterator, getLevel);
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it___construct, 0) 
-	ZEND_ARG_INFO(0, iterator)  /* parameter name */
+	ZEND_ARG_INFO(0, iterator)
+	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
@@ -64,16 +65,32 @@ static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
 	{NULL, NULL, NULL}
 };
 
+typedef enum {
+	RIT_LEAVES_ONLY = 0,
+	RIT_SELF_FIRST  = 1,
+	RIT_CHILD_FIRST = 2
+} RecursiveIteratorMode;
+
+typedef enum {
+	RS_NEXT  = 0,
+	RS_TEST  = 1,
+	RS_SELF  = 2,
+	RS_CHILD = 3,
+	RS_START = 4
+} RecursiveIteratorState;
+
 typedef struct _spl_sub_iterator {
 	zend_object_iterator    *iterator;
 	zval                    *zobject;
 	zend_class_entry        *ce;
+	RecursiveIteratorState  state;
 } spl_sub_iterator;
 
 typedef struct _spl_recursive_it_object {
 	zend_object              std;
 	spl_sub_iterator         *iterators;
 	int                      level;
+	RecursiveIteratorMode    mode;
 } spl_recursive_it_object;
 
 typedef struct _spl_recursive_it_iterator {
@@ -153,19 +170,56 @@ static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object TSR
 	zend_object_iterator      *sub_iter;
 
 	while (1) {
+next_step:
 		iterator = object->iterators[object->level].iterator;
-		iterator->funcs->move_forward(iterator TSRMLS_CC);
-		if (iterator->funcs->has_more(iterator TSRMLS_CC) == SUCCESS) {
-			zobject = object->iterators[object->level].zobject;
-			ce = object->iterators[object->level].ce;
-			zend_call_method_with_0_params(&zobject, ce, NULL, "haschildren", &retval);
-			if (zend_is_true(retval)) {
+		switch (object->iterators[object->level].state) {
+			case RS_NEXT:
+				iterator->funcs->move_forward(iterator TSRMLS_CC);
+			case RS_START:
+				if (iterator->funcs->has_more(iterator TSRMLS_CC) == FAILURE) {
+					break;
+				}
+				object->iterators[object->level].state = RS_TEST;					
+				/* break; */
+			case RS_TEST:
+				ce = object->iterators[object->level].ce;
+				zobject = object->iterators[object->level].zobject;
+				zend_call_method_with_0_params(&zobject, ce, NULL, "haschildren", &retval);
+				if (zend_is_true(retval)) {
+					zval_ptr_dtor(&retval);
+					switch (object->mode) {
+						case RIT_LEAVES_ONLY:
+						case RIT_CHILD_FIRST:
+							object->iterators[object->level].state = RS_CHILD;
+							goto next_step;
+						case RIT_SELF_FIRST:
+							object->iterators[object->level].state = RS_SELF;
+							goto next_step;
+					}
+				}
+				zval_ptr_dtor(&retval);
+				object->iterators[object->level].state = RS_NEXT;
+				return /* self */;
+			case RS_SELF:
+				if (object->mode == RIT_SELF_FIRST) {
+					object->iterators[object->level].state = RS_CHILD;
+				} else {
+					object->iterators[object->level].state = RS_NEXT;
+				}
+				return /* self */;
+			case RS_CHILD:
+				ce = object->iterators[object->level].ce;
+				zobject = object->iterators[object->level].zobject;
 				zend_call_method_with_0_params(&zobject, ce, NULL, "getchildren", &child);
 				ce = Z_OBJCE_P(child);
 				if (!ce || !instanceof_function(ce, spl_ce_RecursiveIterator TSRMLS_CC)) {
 					zend_throw_exception(zend_exception_get_default(), "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
-					zval_ptr_dtor(&retval);
 					return;
+				}
+				if (object->mode == RIT_CHILD_FIRST) {
+					object->iterators[object->level].state = RS_SELF;
+				} else {
+					object->iterators[object->level].state = RS_NEXT;
 				}
 				object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator) * (++object->level+1));
 				sub_iter = ce->get_iterator(ce, child TSRMLS_CC);
@@ -175,9 +229,8 @@ static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object TSR
 				object->iterators[object->level].iterator = sub_iter;
 				object->iterators[object->level].zobject = child;
 				object->iterators[object->level].ce = ce;
-			}
-			zval_ptr_dtor(&retval);
-			return; /* return the element */
+				object->iterators[object->level].state = RS_START;
+				goto next_step;
 		}
 		/* no more elements */
 		if (object->level > 0) {
@@ -200,10 +253,12 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object TSRMLS_DC
 		zval_ptr_dtor(&object->iterators[object->level--].zobject);
 	}
 	erealloc(object->iterators, sizeof(spl_sub_iterator));
+	object->iterators[0].state = RS_START;
 	sub_iter = object->iterators[0].iterator;
 	if (sub_iter->funcs->rewind) {
 		sub_iter->funcs->rewind(sub_iter TSRMLS_CC);
 	}
+	spl_recursive_it_move_forward_ex(object TSRMLS_CC);
 }
 
 static void spl_recursive_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
@@ -243,10 +298,11 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	spl_recursive_it_object   *intern;
 	zval                      *iterator;
 	zend_class_entry          *ce_iterator;
+	int                       mode = RIT_LEAVES_ONLY;
 
 	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &iterator, spl_ce_RecursiveIterator) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|l", &iterator, spl_ce_RecursiveIterator, &mode) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 		return;
 	}
@@ -254,10 +310,12 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	intern = (spl_recursive_it_object*)zend_object_store_get_object(object TSRMLS_CC);
 	intern->iterators = emalloc(sizeof(spl_sub_iterator));
 	intern->level = 0;
+	intern->mode = mode;
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator TSRMLS_CC);
 	intern->iterators[0].zobject = iterator;
 	intern->iterators[0].ce = ce_iterator;
+	intern->iterators[0].state = RS_START;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 }
@@ -385,6 +443,9 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
 	spl_ce_RecursiveIteratorIterator->iterator_funcs.funcs = &spl_recursive_it_iterator_funcs;
 
+	REGISTER_LONG_CONSTANT("RIT_LEAVES_ONLY",  (long)RIT_LEAVES_ONLY,  CONST_CS | CONST_PERSISTENT); 
+	REGISTER_LONG_CONSTANT("RIT_SELF_FIRST",   (long)RIT_SELF_FIRST,   CONST_CS | CONST_PERSISTENT); 
+	REGISTER_LONG_CONSTANT("RIT_CHILD_FIRST",  (long)RIT_CHILD_FIRST,  CONST_CS | CONST_PERSISTENT); 
 	return SUCCESS;
 }
 /* }}} */
