@@ -2911,8 +2911,7 @@ PHP_FUNCTION(ibase_blob_import)
 		RETURN_FALSE;
 	}
 
-	stream = (php_stream*)zend_fetch_resource(file_arg TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
-	ZEND_VERIFY_RESOURCE(stream);
+	php_stream_from_zval(stream, file_arg);
 	
 	ib_blob.link = ib_link->link;
 	ib_blob.trans_handle = ib_link->trans[trans_n];

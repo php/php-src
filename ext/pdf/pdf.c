@@ -449,30 +449,30 @@ PHP_FUNCTION(pdf_set_info_keywords)
 PHP_FUNCTION(pdf_open)
 {
 	zval **file;
-	void *what;
-	int type;
 	FILE *fp = NULL;
 	PDF *pdf;
 	int argc = ZEND_NUM_ARGS();
 
-	if(argc > 1) 
+	if(argc > 1)  {
 		WRONG_PARAM_COUNT;
-	if (argc != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+	} else if (argc != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		fp = NULL;
 	} else {
-		what = zend_fetch_resource(file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
-		ZEND_VERIFY_RESOURCE(what);
+		php_stream *stream;
+
+		php_stream_from_zval(stream, file);
 		
-		if (php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void*)&fp, 1) == FAILURE)	{
+		if (php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void*)&fp, 1) == FAILURE)	{
 			RETURN_FALSE;
 		}
-		/* XXX should do a zend_list_addref for <fp> here! */
 	}
 
 	pdf = PDF_new2(custom_errorhandler, pdf_emalloc, pdf_realloc, pdf_efree, NULL);
 
 	if(fp) {
-		if (PDF_open_fp(pdf, fp) < 0) RETURN_FALSE;
+		if (PDF_open_fp(pdf, fp) < 0) {
+			RETURN_FALSE;
+		}
 	} else {
 		PDF_open_mem(pdf, pdf_flushwrite);
 	}

@@ -195,13 +195,15 @@ static void destroy_SWFInput_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 static SWFInput getInput(zval **zfile TSRMLS_DC)
 {
 	FILE *file;
-	void *what;
-	int type;
+	php_stream *stream;
 	SWFInput input;
 
-	what = zend_fetch_resource(zfile TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
+	php_stream_from_zval_no_verify(stream, zfile);
 
-	if (php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void *) &file, REPORT_ERRORS) != SUCCESS) {
+	if (stream == NULL)
+		return NULL;
+
+	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void *) &file, REPORT_ERRORS) != SUCCESS) {
 		return NULL;
 	}
   
@@ -1449,7 +1451,7 @@ PHP_FUNCTION(swfmovie_saveToFile)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &x) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(what, php_stream *, x, -1,"File-Handle",php_file_le_stream());
+	php_stream_from_zval(what, x);
 	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what));
 }
 /* }}} */
@@ -1467,7 +1469,7 @@ PHP_FUNCTION(swfmovie_save)
 	}
 
 	if (Z_TYPE_PP(x) == IS_RESOURCE) {
-		ZEND_FETCH_RESOURCE(stream, php_stream *, x, -1,"File-Handle",php_file_le_stream());
+		php_stream_from_zval(stream, x);
 		RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream));
 	}
 
