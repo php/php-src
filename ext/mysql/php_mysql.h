@@ -95,7 +95,7 @@ ZEND_END_MODULE_GLOBALS(mysql);
 # define MySLS_C	mysql_globals
 # define MySLS_CC , MySLS_C
 # define MySG(v) (mysql_globals->v)
-# define MySLS_FETCH()	zend_mysql_globals *mysql_globals = ts_resource(mysql_module_entry.globals_id)
+# define MySLS_FETCH()	zend_mysql_globals *mysql_globals = ts_resource(mysql_globals_id)
 #else
 # define MySLS_D
 # define MySLS_DC
