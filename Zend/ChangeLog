@@ -1,3 +1,21 @@
+2004-01-12  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Return the PHP 4 behavior of not allowing class declerations within
+      - class declerations. This happened when declaring a class within a
+      - method.
+      class A {
+      	function foo() {
+      		class B {
+      		}
+      	}
+      }
+
+2004-01-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h:
+      Add missing macro
+
 2004-01-11  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_compile.c
