@@ -74,6 +74,7 @@ HEADER_DIRS = \
 	Zend \
 	TSRM \
 	ext/standard \
+	main \
 	regex
 
 install-headers:
