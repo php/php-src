@@ -23,6 +23,8 @@
 
 #include "php.h"
 
+typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, int status);
+
 PHPAPI void php_output_startup(void);
 void php_output_register_constants(void);
 PHPAPI int  php_body_write(const char *str, uint str_length);
@@ -36,6 +38,7 @@ PHPAPI void php_start_implicit_flush(void);
 PHPAPI void php_end_implicit_flush(void);
 PHPAPI char *php_get_output_start_filename(void);
 PHPAPI int php_get_output_start_lineno(void);
+PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size);
 
 PHP_FUNCTION(ob_start);
 PHP_FUNCTION(ob_end_flush);
@@ -51,9 +54,12 @@ typedef struct _php_ob_buffer {
 	uint size;
 	uint text_length;
 	int block_size;
-	zval *output_handler;
 	uint chunk_size;
 	int status;
+	zval *output_handler;
+	php_output_handler_func_t internal_output_handler;
+	char *internal_output_handler_buffer;
+	uint internal_output_handler_buffer_size;
 } php_ob_buffer;
 
 typedef struct _php_output_globals {
