@@ -43,7 +43,7 @@ static zend_object_value zend_default_exception_new(zend_class_entry *class_type
 	return obj.value.obj;
 }
 
-ZEND_FUNCTION(exception)
+ZEND_METHOD(exception, __construct)
 {
 	char  *message = NULL;
 	long   code = 0;
@@ -80,28 +80,28 @@ static void _default_exception_get_entry(zval *object, char *name, int name_len,
 	zval_copy_ctor(return_value);
 }
 
-ZEND_FUNCTION(getfile)
+ZEND_METHOD(exception, getfile)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "file", sizeof("file")-1, return_value TSRMLS_CC);
 }
 
-ZEND_FUNCTION(getline)
+ZEND_METHOD(exception, getline)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "line", sizeof("line")-1, return_value TSRMLS_CC);
 }
 
-ZEND_FUNCTION(getmessage)
+ZEND_METHOD(exception, getmessage)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "message", sizeof("message")-1, return_value TSRMLS_CC);
 }
 
-ZEND_FUNCTION(getcode)
+ZEND_METHOD(exception, getcode)
 {
 	DEFAULT_0_PARAMS;
 
@@ -109,11 +109,11 @@ ZEND_FUNCTION(getcode)
 }
 
 static zend_function_entry default_exception_functions[] = {
-	ZEND_FE(exception, NULL)
-	ZEND_FE(getmessage, NULL)
-	ZEND_FE(getcode, NULL)
-	ZEND_FE(getfile, NULL)
-	ZEND_FE(getline, NULL)
+	ZEND_ME(exception, __construct, NULL, 0)
+	ZEND_ME(exception, getmessage, NULL, 0)
+	ZEND_ME(exception, getcode, NULL, 0)
+	ZEND_ME(exception, getfile, NULL, 0)
+	ZEND_ME(exception, getline, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
