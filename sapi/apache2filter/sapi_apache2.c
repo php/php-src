@@ -48,6 +48,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	apr_bucket *b;
 	apr_bucket_brigade *bb;
+	apr_bucket_alloc_t *ba;
 	php_struct *ctx;
 	uint now;
 
@@ -55,10 +56,11 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 	if (str_length == 0) return 0;
 	
-	bb = apr_brigade_create(ctx->f->r->pool);
+	ba = ctx->f->r->connection->bucket_alloc;
+	bb = apr_brigade_create(ctx->f->r->pool, ba);
 	while (str_length > 0) {
 		now = MIN(str_length, 4096);
-		b = apr_bucket_transient_create(str, now);
+		b = apr_bucket_transient_create(str, now, ba);
 		APR_BRIGADE_INSERT_TAIL(bb, b);
 		str += now;
 		str_length -= now;
@@ -161,6 +163,7 @@ php_apache_sapi_flush(void *server_context)
 {
 	php_struct *ctx = server_context;
 	apr_bucket_brigade *bb;
+	apr_bucket_alloc_t *ba;
 	apr_bucket *b;
 
 	if (!server_context)
@@ -171,8 +174,9 @@ php_apache_sapi_flush(void *server_context)
 	 * all further flush buckets.
 	 */
 	
-	bb = apr_brigade_create(ctx->f->r->pool);
-	b = apr_bucket_flush_create();
+	ba = ctx->f->r->connection->bucket_alloc;
+	bb = apr_brigade_create(ctx->f->r->pool, ba);
+	b = apr_bucket_flush_create(ba);
 	APR_BRIGADE_INSERT_TAIL(bb, b);
 	if (ap_pass_brigade(ctx->f->next, bb) != APR_SUCCESS) {
 		php_handle_aborted_connection();
@@ -234,7 +238,7 @@ AP_MODULE_DECLARE_DATA module php4_module;
 	if (ctx == NULL) { \
 		/* Initialize filter context */ \
 		SG(server_context) = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));  \
-		ctx->bb = apr_brigade_create(f->c->pool); \
+		ctx->bb = apr_brigade_create(f->c->pool, f->c->bucket_alloc); \
 	}
 
 static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb, 
@@ -383,7 +387,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 				
 #define PHP_NO_DATA "The PHP Filter did not receive suitable input data"
 				
-				eos = apr_bucket_transient_create(PHP_NO_DATA, sizeof(PHP_NO_DATA)-1);
+				eos = apr_bucket_transient_create(PHP_NO_DATA, sizeof(PHP_NO_DATA)-1, f->c->bucket_alloc);
 				APR_BRIGADE_INSERT_HEAD(bb, eos);
 			}
 		}
@@ -392,7 +396,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 
 		SG(server_context) = 0;
 		/* Pass EOS bucket to next filter to signal end of request */
-		eos = apr_bucket_eos_create();
+		eos = apr_bucket_eos_create(f->c->bucket_alloc);
 		APR_BRIGADE_INSERT_TAIL(bb, eos);
 		
 		return ap_pass_brigade(f->next, bb);
