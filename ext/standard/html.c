@@ -544,10 +544,10 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 		case cs_big5hkscs:
 			{
 				/* check if this is the first of a 2-byte sequence */
-				if (this_char >= 0xa1 && this_char <= 0xf9) {
+				if (this_char >= 0xa1 && this_char <= 0xfe) {
 					/* peek at the next char */
 					unsigned char next_char = str[pos];
-					if ((next_char >= 0x40 && next_char <= 0x73) ||
+					if ((next_char >= 0x40 && next_char <= 0x7e) ||
 							(next_char >= 0xa1 && next_char <= 0xfe)) {
 						/* yes, this a wide char */
 						this_char <<= 8;

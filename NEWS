@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? Feb 2004, Version 4.3.5
 - Fixed possible crashes inside socket extension, due to missing check inside
   allocation functions. (Ilia)
+- Fixed bug #27505 (htmlentities() does not handle BIG5 correctly). (Ilia, 
+  ywliu at hotmail dot com)
 - Fixed bug #27443 (defined() returns wrong type). (Derick)
 - Fixed bug #27437 (wrong freetype include inside GD library). (Ilia)
 - Fixed bug #27384 (unpack() misbehaves with 1 char string). (GeorgeS)
