@@ -48,7 +48,7 @@ PHP_FUNCTION(abs)
 	if ((*value)->type == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs((*value)->value.dval));
 	} else if ((*value)->type == IS_LONG) {
-		RETURN_LONG(labs((*value)->value.lval));
+		RETURN_LONG((*value)->value.lval < 0 ? -(*value)->value.lval : (*value)->value.lval);
 	}
 
 	RETURN_FALSE;
