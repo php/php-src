@@ -26,12 +26,14 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 
 #include "php_spl.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_array.h"
+#include "spl_exceptions.h"
 
 SPL_METHOD(Array, __construct);
 SPL_METHOD(Array, getIterator);
@@ -643,7 +645,7 @@ SPL_METHOD(Array, __construct)
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
 	}
-	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);*/
+	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -658,7 +660,7 @@ SPL_METHOD(Array, __construct)
 	} else {
 		if (!HASH_OF(*array)) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead");
+			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
 		zval_dtor(intern->array);
