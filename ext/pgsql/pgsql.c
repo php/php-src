@@ -651,42 +651,36 @@ PHP_FUNCTION(pg_exec)
    Sync with backend. Completes the Copy command */
 PHP_FUNCTION(pg_endcopy)
 {
-   zval **query, **pgsql_link;
-   int id = -1;
-   PGconn *pgsql;
-   int result = 0;
-   ExecStatusType status;
-   pgsql_result_handle *pg_result;
-   PGLS_FETCH();
+	zval **pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+	int result = 0;
+	PGLS_FETCH();
 
-   switch(ZEND_NUM_ARGS()) {
-	   case 1:
-		   if (zend_get_parameters_ex(1, &query)==FAILURE) {
-			   RETURN_FALSE;
-		   }
-		   id = PGG(default_link);
-		   break;
-	   case 2:
-		   if (zend_get_parameters_ex(2, &pgsql_link, &query)==FAILURE) {
-			   RETURN_FALSE;
-		   }
-		   break;
-	   default:
-		   WRONG_PARAM_COUNT;
-		   break;
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	result = PQendcopy(pgsql);
+
+	if (result!=0) {
+		php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
+		RETURN_FALSE;
    }
-
-   ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-
-   convert_to_string_ex(query);
-   result = PQendcopy(pgsql);
-
-/* if (result!=0)
-   {
-	   php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
-	   RETURN_FALSE;
-   } */
-   RETURN_FALSE;
+   RETURN_TRUE;
 }
 /* }}} */
 
@@ -694,42 +688,40 @@ PHP_FUNCTION(pg_endcopy)
    Send null-terminated string to backend server*/
 PHP_FUNCTION(pg_putline)
 {
-   zval **query, **pgsql_link;
-   int id = -1;
-   PGconn *pgsql;
-   int result = 0;
-   ExecStatusType status;
-   pgsql_result_handle *pg_result;
-   PGLS_FETCH();
+	zval **query, **pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+	int result = 0;
+	PGLS_FETCH();
 
-   switch(ZEND_NUM_ARGS()) {
-	   case 1:
-		   if (zend_get_parameters_ex(1, &query)==FAILURE) {
-			   RETURN_FALSE;
-		   }
-		   id = PGG(default_link);
-		   break;
-	   case 2:
-		   if (zend_get_parameters_ex(2, &pgsql_link, &query)==FAILURE) {
-			   RETURN_FALSE;
-		   }
-		   break;
-	   default:
-		   WRONG_PARAM_COUNT;
-		   break;
-   }
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &query)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &pgsql_link, &query)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
 
-   ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-   convert_to_string_ex(query);
-   result = PQputline(pgsql, Z_STRVAL_PP(query));
+	convert_to_string_ex(query);
+	result = PQputline(pgsql, Z_STRVAL_PP(query));
 
-   if (result==EOF)
-   {
-	   php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
-	   RETURN_FALSE;
-   }
-   RETURN_FALSE;
+	if (result==EOF) {
+		php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 #define PHP_PG_NUM_ROWS 1
