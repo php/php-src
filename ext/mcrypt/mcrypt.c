@@ -678,9 +678,11 @@ PHP_FUNCTION(mcrypt_generic_end)
 	MCRYPT_GET_TD_ARG
 
 #if HAVE_MCRYPT_GENERIC_DEINIT
-	php_error(E_WARNING, "mcrypt_generic_end is deprecated, please use mcrypt_generic_deinit");
-#endif
+	php_error(E_NOTICE, "mcrypt_generic_end is deprecated, please use mcrypt_generic_deinit");
+	if (mcrypt_generic_deinit (td) < 0) {
+#else
 	if (mcrypt_generic_end (td) < 0) {
+#endif
 		php_error (E_WARNING, "could not terminate encryption specifier");
 		RETURN_FALSE
 	}
