@@ -4,7 +4,7 @@ dnl
 
 PHP_ARG_WITH(ingres, for Ingres II support,
 [  --with-ingres[=DIR]     Include Ingres II support. DIR is the Ingres
-                          base directory (default $II_SYSTEM/II/ingres)])
+                          base directory (default $II_SYSTEM/ingres)])
 
 if test "$PHP_INGRES" != "no"; then
   AC_DEFINE(HAVE_II, 1, [Whether you have Ingres II])
