@@ -39,7 +39,9 @@ typedef long pid_t;
 #define M_PI             3.14159265358979323846
 #define M_TWOPI         (M_PI * 2.0)
 #define M_PI_2           1.57079632679489661923
+#ifndef M_PI_4
 #define M_PI_4           0.78539816339744830962
+#endif
 
 #if !PHP_DEBUG
 #ifdef inline
