@@ -818,7 +818,7 @@ static void php_free_xslt_stylesheet(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 }
 
-void *php_xsltstylesheet_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
+static void *php_xsltstylesheet_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
 	void *obj;
 	zval **handle;
@@ -867,8 +867,9 @@ static void php_xsltstylesheet_set_object(zval *wrapper, void *obj, int rsrc_typ
 }
 #endif  /* HAVE_DOMXSLT */
 
-
-void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
+/* Not used? */
+/*
+static void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
 	void *obj;
 	zval **handle;
@@ -897,6 +898,7 @@ void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_
 
 	return obj;
 }
+*/
 
 static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found TSRMLS_DC)
 {
@@ -907,7 +909,7 @@ static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found TSRMLS_DC)
 	return (wrapper);
 }
 
-void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
+static void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
 	void *obj;
 	zval **handle;
@@ -1101,7 +1103,7 @@ static char **php_xmlparser_make_params(zval *idvars TSRMLS_DC)
 /* }}} */
 /* end parser stuff */
 
-void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
+static void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
 	void *obj;
 	zval **handle;
@@ -1475,8 +1477,8 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
 	
 }
 
-xmlDocPtr php_dom_xmlSAXParse(xmlSAXHandlerPtr sax, const char *buffer, int size, int recovery, void *data) {
-
+static xmlDocPtr php_dom_xmlSAXParse(xmlSAXHandlerPtr sax, const char *buffer, int size, int recovery, void *data)
+{
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt;
     domxml_ErrorCtxt errorCtxt;
@@ -3118,7 +3120,8 @@ struct _idsIterator {
 	    xmlNode *element;
 };
 
-static void idsHashScanner(void *payload, void *data, xmlChar *name) {
+static void idsHashScanner(void *payload, void *data, xmlChar *name)
+{
 	idsIterator *priv = (idsIterator *)data;
 
 	if (priv->element == NULL && xmlStrEqual (name, priv->elementId))
