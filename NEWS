@@ -5,7 +5,7 @@ PHP 4                                                                      NEWS
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
 - Fixed bug #17825 (ob_start() chunk size option didn't work well). (Yasuo)
-- Fixed output buffering implicit flush. (Yasuo) 
+- Fixed output buffering implicit flush. (Yasuo, Marcus) 
 - Added getopt() for parsing command line options and arguments. (Jon)
 - Added pg_fetch_assoc(), pg_fetch_all(), pg_ping(), pg_meta_data(), pg_convert(), 
   pg_insert(), pg_select(), pg_update(), pg_delete(), pg_data_seek() and
