@@ -16,6 +16,4 @@ EOF
 (cd main && make configuration-parser.c configuration-scanner.c)
 (cd ext/standard && make parsedate.c)
 
-# rm config_vars.mk .deps ext/standard/libs.mk $files
-
-	
+rm config_vars.mk .deps ext/standard/libs.mk $files
