@@ -71,9 +71,11 @@
   #include "internal_functions.h"
   #include "php3_list.h"
   #include "head.h"
+  #define HASH_DTOR (void (*)(void *))
 #else
   #include "ext/standard/head.h"
   #define php3tls_pval_destructor(a) zval_dtor(a)
+  #define HASH_DTOR (int (*)(void *))
 #endif
 
 
@@ -174,7 +176,7 @@ static void oci8_debug(const char *format,...);
 static void _oci8_close_conn(oci8_connection *connection);
 static void _oci8_free_stmt(oci8_statement *statement);
 static void _oci8_free_column(oci8_out_column *column);
-static void _oci8_free_descr(oci8_descriptor *descr);
+static int _oci8_free_descr(oci8_descriptor *descr);
 
 static oci8_connection *oci8_get_conn(int, const char *, HashTable *);
 static oci8_statement *oci8_get_stmt(int, const char *, HashTable *);
@@ -592,7 +594,7 @@ oci8_free_define(oci8_define *define)
 		efree(define->name);
 		define->name = 0;
 	}
-	return 0;
+	return 1;
 }
 
 /* }}} */
@@ -888,7 +890,9 @@ oci8_make_pval(pval *value,oci8_statement *statement,oci8_out_column *column, ch
 			oci8_debug("oci8_make_pval: %16s,retlen = %4d,cb_retlen = %d,storage_size4 = %4d,indicator %4d, retcode = %4d",
 					   column->name,column->retlen,column->cb_retlen,column->storage_size4,column->indicator,column->retcode);
 
+/*
 	memset(value,0,sizeof(pval));
+*/
 
 	if (column->indicator == -1) { /* column is NULL */
 		var_reset(value); /* XXX we NEED to make sure that there's no data attached to this yet!!! */
@@ -1112,7 +1116,7 @@ oci8_execute(oci8_statement *statement, char *func,ub4 mode, HashTable *list)
 
 		statement->columns = emalloc(sizeof(HashTable));
 		if (!statement->columns ||
-			_php3_hash_init(statement->columns, 13, NULL,(void (*)(void *))_oci8_free_column, 0) == FAILURE) {
+			_php3_hash_init(statement->columns, 13, NULL,HASH_DTOR _oci8_free_column, 0) == FAILURE) {
 			/* out of memory */
 			return 0;
 		}
@@ -1423,7 +1427,7 @@ oci8_fetch(oci8_statement *statement, ub4 nrows, char *func)
 			if (! column->define) {
 				continue;
 			}
-				 
+			
 			php3tls_pval_destructor(column->define->pval);
 
 			oci8_make_pval(column->define->pval,statement,column,"OCIFetch",0);
@@ -1994,7 +1998,7 @@ _oci8_close_user(oci8_session *session)
 /* {{{ _oci8_free_descr()
  */
 
-static void
+static int
 _oci8_free_descr(oci8_descriptor *descr)
 {
     OCI8_TLS_VARS;
@@ -2002,6 +2006,8 @@ _oci8_free_descr(oci8_descriptor *descr)
     oci8_debug("oci8_free_descr: %x",descr->ocidescr);
 
     OCIDescriptorFree(descr->ocidescr, descr->type);
+
+	return 1;
 }
 /* }}} */
 /* {{{ oci8_open_server()
@@ -2285,7 +2291,7 @@ static void oci8_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int excl
 
 	connection->descriptors = emalloc(sizeof(HashTable));
 	if (!connection->descriptors ||
-		_php3_hash_init(connection->descriptors, 13, NULL,(void (*)(void *))_oci8_free_descr, 0) == FAILURE) {
+		_php3_hash_init(connection->descriptors, 13, NULL,HASH_DTOR _oci8_free_descr, 0) == FAILURE) {
         goto CLEANUP;
     }
 
@@ -2348,7 +2354,7 @@ PHP_FUNCTION(oci8_definebyname)
 	if (statement->defines == NULL) {
 		statement->defines = emalloc(sizeof(HashTable));
 		if (statement->defines == NULL ||
-			_php3_hash_init(statement->defines, 13, NULL, (void (*)(void *))oci8_free_define, 0) == FAILURE) {
+			_php3_hash_init(statement->defines, 13, NULL,HASH_DTOR oci8_free_define, 0) == FAILURE) {
 			/* out of memory */
 			RETURN_FALSE;
 		}
@@ -3166,11 +3172,11 @@ PHP_FUNCTION(oci8_fetchinto)
 
 #if PHP_API_VERSION >= 19990421
 		element = emalloc(sizeof(pval));
-		INIT_PZVAL(element);
 #endif
 
 		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) { /* OCI_NUM is default */
 			oci8_make_pval(element,statement,column, "OCIFetchInto",mode);
+
 #if PHP_API_VERSION >= 19990421
 			INIT_PZVAL(element);
 			_php3_hash_index_update(array->value.ht, i, (void *)&element, sizeof(pval*), NULL);
@@ -3183,6 +3189,7 @@ PHP_FUNCTION(oci8_fetchinto)
 			oci8_make_pval(element,statement,column, "OCIFetchInto",mode);
 
 #if PHP_API_VERSION >= 19990421
+			INIT_PZVAL(element);
 		  	_php3_hash_update(array->value.ht, column->name, column->name_len+1, (void *)&element, sizeof(pval*), NULL);
 #else
 		  	_php3_hash_update(array->value.ht, column->name, column->name_len+1, (void *)element, sizeof(pval), NULL);
