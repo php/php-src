@@ -378,6 +378,23 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 			last = tsrm_strtok_r(p->value.str.val, ":", &temp);
 
+			if (strcasecmp(last, "self")==0) {
+				if (EG(scope)) {
+					last = EG(scope)->name;
+				} else {
+					zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
+				}
+			} else if (strcasecmp(last, "parent")==0) {
+				if (!EG(scope)) {
+					zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
+				} else if (!EG(scope)->parent) {
+					zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
+				} else {
+					last = EG(scope)->parent->name;
+				}
+			}
+
+
 			if (zend_lookup_class(last, strlen(last), &ce TSRMLS_CC) == FAILURE) {
 				zend_error(E_ERROR, "Undefined class '%s'", last);
 			}
