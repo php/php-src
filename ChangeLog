@@ -1,3 +1,36 @@
+2001-12-25  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h:
+    activated ncurses_instr
+    New functions: ncurses_longname, ncurses_termname, ncurses_mousemask
+
+2001-12-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - MFH: Remove redundant code
+
+    * ext/mcrypt/mcrypt.c:
+    - Fix for bug 14691: Invalidate mcrypt resource if the key size is 0
+
+2001-12-25  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/config.m4
+      ext/ldap/ldap.c:
+    Added check for ldap_parse_reference() (needed for broken Solaris 2.8), and
+    report more detailed library version info in the info function.
+
+2001-12-25  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/ncurses/ncurses_functions.c:
+    functions ncurses_erasechar, ncurses_inch, mcurses_killchar:
+    changed return values from bool to string (char)
+
+2001-12-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php: * implemented DB_FETCHMODE_ASSOC mode for getAssoc
+
 2001-12-24  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * NEWS: added my name for NEWS.
