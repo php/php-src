@@ -460,11 +460,11 @@ PHP_FUNCTION(mcrypt_generic_init)
 	int max_key_size, key_size, iv_size;
 	MCRYPT td;
 	int argc;
+	int result = 0;
 	
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_CHECK_PARAM_COUNT (3,3)
 	
-	int result = 0;
 	zend_get_parameters_ex(3, &mcryptind, &key, &iv);
 	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", le_mcrypt);				
 	convert_to_string_ex (key);
