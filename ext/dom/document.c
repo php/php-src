@@ -85,6 +85,7 @@ zend_function_entry php_dom_document_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+/* {{{ void add_domdocument_properties(zval *id) */
 void add_domdocument_properties(zval *id TSRMLS_DC) {
 	add_property_bool(id, "formatOutput", 0);
 	add_property_bool(id, "validateOnParse", 0);
@@ -92,7 +93,9 @@ void add_domdocument_properties(zval *id TSRMLS_DC) {
 	add_property_bool(id, "preserveWhiteSpace", 1);
 	add_property_bool(id, "substituteEntities", 0);
 }
+/* }}} end add_domdocument_properties */
 
+/* {{{ static int dom_document_get_property_int(zval *id, char *property TSRMLS_DC) */
 static int dom_document_get_property_int(zval *id, char *property TSRMLS_DC) {
 	zval *format, *member;
 	zend_object_handlers *std_hnd;
@@ -113,6 +116,7 @@ static int dom_document_get_property_int(zval *id, char *property TSRMLS_DC) {
 
 	return retformat;
 }
+/* }}} end dom_document_get_property_int */
 
 static void php_dom_validate_error(void *ctx, const char *msg, ...)
 {
@@ -133,6 +137,7 @@ static void php_dom_validate_error(void *ctx, const char *msg, ...)
 	efree(buf);
 }
 
+/* {{{ static void php_dom_ctx_error(void *ctx, const char *msg, ...) */
 static void php_dom_ctx_error(void *ctx, const char *msg, ...)
 {
 	va_list ap;
@@ -154,6 +159,7 @@ static void php_dom_ctx_error(void *ctx, const char *msg, ...)
 	php_error(E_WARNING, "%s in %s, line: %d", buf, parser->input->filename, parser->input->line);
 	efree(buf);
 }
+/* }}} end php_dom_ctx_error */
 
 /* {{{ proto doctype	documenttype	
 readonly=yes 
@@ -1077,6 +1083,7 @@ PHP_FUNCTION(dom_document_document)
 }
 /* }}} end dom_document_document */
 
+/* {{{ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC) */
 static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC) {
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt;
@@ -1140,7 +1147,9 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	return(ret);
 }
+/* }}} end dom_parser_document */
 
+/* {{{ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) */
 static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	zval *id, *rv = NULL;
 	xmlDoc *docp = NULL, *newdoc;
@@ -1187,6 +1196,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		DOM_RET_OBJ(rv, (xmlNodePtr) newdoc, &ret, NULL);
 	}
 }
+/* }}} end dom_parser_document */
 
 /* {{{ proto boolean domnode dom_document_load(string source);
 URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-load
