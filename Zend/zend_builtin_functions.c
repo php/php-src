@@ -845,7 +845,7 @@ ZEND_FUNCTION(lambda)
 
 		do {
 			sprintf(function_name, "%clambda_%d", 0, ++EG(lambda_count));
-			function_name_length = strlen(function_name);
+			function_name_length = strlen(function_name+1)+1;
 		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, func, sizeof(zend_function), NULL)==FAILURE);
 		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
 		RETURN_STRINGL(function_name, function_name_length, 0);
