@@ -456,7 +456,9 @@ PHP_FUNCTION(getenv)
 #endif
 	pval *str;
 	char *ptr;
+#if APACHE
 	SLS_FETCH();
+#endif
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1177,7 +1179,9 @@ void php3_flush(HashTable *)
 PHP_FUNCTION(flush)
 #endif
 {
+#if APACHE 
 	SLS_FETCH();
+#endif
 	
 #if APACHE
 #  if MODULE_MAGIC_NUMBER > 19970110
