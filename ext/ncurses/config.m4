@@ -7,21 +7,20 @@ PHP_ARG_WITH(ncurses, for ncurses support,
 
 if test "$PHP_NCURSES" != "no"; then
 
-   # --with-ncurses -> check with-path
-   SEARCH_PATH="/usr/local /usr"     
-   SEARCH_FOR="/include/curses.h"
+   SEARCH_PATH="$PHP_NCURSES /usr/local /usr"     
 
-   if test -d $PHP_NCURSES/; then # path given as parameter
-     NCURSES_DIR=$PHP_NCURSES
-   else # search default path list
-     AC_MSG_CHECKING(for ncurses files in default path)
-     for i in $SEARCH_PATH ; do
-       if test -r $i/$SEARCH_FOR; then
+   for i in $SEARCH_PATH ; do
+     if test -d $i/include; then
+       if test -r $i/include/ncurses.h; then
          NCURSES_DIR=$i
-         AC_MSG_RESULT(found in $i)
+         AC_DEFINE(HAVE_NCURSES_H,1,[ ])
+         break
+       elif test -r $i/include/curses.h; then
+         NCURSES_DIR=$i
+         break
        fi
-     done
-   fi
+     fi
+   done
   
    if test -z "$NCURSES_DIR"; then
      AC_MSG_RESULT(not found)
