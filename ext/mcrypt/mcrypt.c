@@ -624,7 +624,8 @@ PHP_FUNCTION(mcrypt_enc_self_test)
 }
 /* }}} */
 
-
+/* {{{ proto bool mcrypt_module_close(resource td)
+   Free the descriptor td */
 PHP_FUNCTION(mcrypt_module_close)
 {
 	zval **mcryptind;
@@ -635,7 +636,7 @@ PHP_FUNCTION(mcrypt_module_close)
 	zend_list_delete (Z_LVAL_PP(mcryptind));
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 /* {{{ proto bool mcrypt_generic_end(resource td)
    This function terminates encrypt specified by the descriptor td */
