@@ -40,7 +40,7 @@ for($i=0,$u=count($array);$i<$u;++$i) {
         echo "true\n";
     }
 }
-
+?>
 --EXPECT--
 I : true
 will : true
