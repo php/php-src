@@ -11,6 +11,7 @@ PHP_FUNCTION(mcrypt_cbc);
 PHP_FUNCTION(mcrypt_cfb);
 PHP_FUNCTION(mcrypt_get_block_size);
 PHP_FUNCTION(mcrypt_get_key_size);
+PHP_FUNCTION(mcrypt_create_iv);
 
 #else
 #define mcrypt_module_ptr NULL
