@@ -56,7 +56,7 @@
 #define CONFIGURATION_FILE_PATH "php.ini"
 #define USE_CONFIG_FILE 1
 
-#define PHP_INCLUDE_PATH	NULL
+#define PHP_INCLUDE_PATH	"c:\\php4\\pear"
 
 
 /* Undefine if you want stricter XML/SGML compliance by default */
@@ -250,7 +250,7 @@
 #define HAVE_STRFTIME 1
 
 /* Default directory for loading extensions.  */
-#define PHP_EXTENSION_DIR NULL
+#define PHP_EXTENSION_DIR "c:\\php4"
 
 #define SIZEOF_INT 4
 
