@@ -1885,10 +1885,13 @@ ZEND_FUNCTION(get_extension_funcs)
 
 	convert_to_string_ex(extension_name);
 	if (strncasecmp(Z_STRVAL_PP(extension_name), "zend", sizeof("zend"))) {
-		if (zend_hash_find(&module_registry, Z_STRVAL_PP(extension_name), 
+		char *lcname = zend_str_tolower_dup(Z_STRVAL_PP(extension_name), Z_STRLEN_PP(extension_name));
+		if (zend_hash_find(&module_registry, lcname,
 			Z_STRLEN_PP(extension_name)+1, (void**)&module) == FAILURE) {
+		    efree(lcname);
 			RETURN_FALSE;
 		}
+	    efree(lcname);
 		
 		if (!(func = module->functions)) {
 			RETURN_FALSE;
