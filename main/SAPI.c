@@ -28,9 +28,6 @@
 #endif
 
 #include "rfc1867.h"
-#if HAVE_FDFLIB
-#include "fdfdata.h"
-#endif
 
 #ifdef PHP_WIN32
 #define STRCASECMP stricmp
@@ -39,17 +36,6 @@
 #endif
 
 #include "php_content_types.h"
-
-SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
-SAPI_POST_READER_FUNC(php_default_post_reader);
-
-static sapi_post_entry supported_post_entries[] = {
-#if HAVE_FDFLIB
-	{ "application/vnd.fdf",	sizeof("application/vnd.fdf")-1,	php_default_post_reader, fdf_post_handler},
-#endif
-	{ NULL, 0, NULL }
-};
-
 
 static HashTable known_post_content_types;
 
@@ -76,8 +62,6 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 {
 	sapi_module = *sf;
 	zend_hash_init_ex(&known_post_content_types, 5, NULL, NULL, 1, 0);
-
-	sapi_register_post_entries(supported_post_entries);
 
 #ifdef ZTS
 	sapi_globals_id = ts_allocate_id(sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, NULL);
@@ -543,12 +527,10 @@ SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry)
 	return zend_hash_add(&known_post_content_types, post_entry->content_type, post_entry->content_type_len+1, (void *) post_entry, sizeof(sapi_post_entry), NULL);
 }
 
-
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry)
 {
 	zend_hash_del(&known_post_content_types, post_entry->content_type, post_entry->content_type_len+1);
 }
-
 
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(SLS_D))
 {
