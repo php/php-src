@@ -95,6 +95,7 @@ typedef unsigned char uchar;
 
 static
 ZEND_BEGIN_ARG_INFO(exif_thumbnail_force_ref, 1)
+	ZEND_ARG_PASS_INFO(0)
 ZEND_END_ARG_INFO();
 
 
