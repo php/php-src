@@ -27,8 +27,10 @@ var_dump($t);
 ?>
 --EXPECT--
 __sleep called
-O:1:"t":1:{s:1:"a";s:5:"hello";}
-object(t)(1) {
+O:1:"t":2:{s:1:"a";s:5:"hello";s:1:"b";N;}
+object(t)(2) {
   ["a"]=>
   string(5) "hello"
+  ["b"]=>
+  NULL
 }
