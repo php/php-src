@@ -30,6 +30,21 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
+static int free_cols(pdo_odbc_stmt *S TSRMLS_DC)
+{
+	int i;
+
+	if (S->cols) {
+		for (i = 0; i < stmt->column_count; i++) {
+			if (S->cols[i].data) {
+				efree(S->cols[i].data);
+			}
+		}
+		efree(S->cols);
+		S->cols = NULL;
+	}
+}
+
 static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -43,15 +58,8 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->stmt = SQL_NULL_HANDLE;
 	}
 
-	if (S->cols) {
-		for (i = 0; i < stmt->column_count; i++) {
-			if (S->cols[i].data) {
-				efree(S->cols[i].data);
-			}
-		}
-		efree(S->cols);
-		S->cols = NULL;
-	}
+	free_cols(S TSRMLS_CC);
+
 	efree(S);
 
 	return 1;
@@ -250,8 +258,28 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 			strcpy(S->einfo.last_state, "IM0001");
 			return -1;
 	}
+}
 
+static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
+{
+	SQLRETURN rc;
+	SQLSMALLINT colcount;
+	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 
+	free_cols(S TSRMLS_CC);
+
+	rc = SQLMoreResults(S->stmt);
+
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		return 0;
+	}
+
+	/* how many columns do we have ? */
+	SQLNumResultCols(S->stmt, &colcount);
+	stmt->column_count = (int)colcount;
+	S->cols = ecalloc(colcount, sizeof(pdo_odbc_column));
+
+	return 1;
 }
 
 struct pdo_stmt_methods odbc_stmt_methods = {
@@ -262,7 +290,9 @@ struct pdo_stmt_methods odbc_stmt_methods = {
 	odbc_stmt_get_col,
 	odbc_stmt_param_hook,
 	odbc_stmt_set_param,
-	NULL
+	NULL, /* get attr */
+	NULL, /* get column meta */
+	odbc_stmt_next_rowset
 };
 
 /*
