@@ -156,6 +156,9 @@ ZEND_END_MODULE_GLOBALS(soap)
 #include "TSRM.h"
 #endif
 
+extern zend_module_entry soap_module_entry;
+#define soap_module_ptr &soap_module_entry
+
 ZEND_EXTERN_MODULE_GLOBALS(soap);
 
 #ifdef ZTS
