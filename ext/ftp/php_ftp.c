@@ -115,7 +115,7 @@ PHP_MINFO_FUNCTION(ftp)
 #define	FTPBUF(ftp, pval) { \
 	int	id, type; \
 	convert_to_long(pval); \
-	id = (pval)->value.lval; \
+	id = Z_LVAL_P(pval); \
 	(ftp) = zend_list_find(id, &type); \
 	if (!(ftp) || type != le_ftpbuf) { \
 		php_error(E_WARNING, "Unable to find ftpbuf %d", id); \
@@ -125,13 +125,13 @@ PHP_MINFO_FUNCTION(ftp)
 
 #define	XTYPE(xtype, pval) { \
 	convert_to_long(pval); \
-	if (	pval->value.lval != FTPTYPE_ASCII && \
-		pval->value.lval != FTPTYPE_IMAGE) \
+	if (	Z_LVAL_P(pval) != FTPTYPE_ASCII && \
+		Z_LVAL_P(pval) != FTPTYPE_IMAGE) \
 	{ \
 		php_error(E_WARNING, "arg4 must be FTP_ASCII or FTP_IMAGE"); \
 		RETURN_FALSE; \
 	} \
-	(xtype) = pval->value.lval; \
+	(xtype) = Z_LVAL_P(pval); \
 	}
 
 #define	FILEP(fp, pval) { \
@@ -160,7 +160,7 @@ PHP_FUNCTION(ftp_connect)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long(arg2);
-		port = (short) arg2->value.lval;
+		port = (short) Z_LVAL_P(arg2);
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -169,7 +169,7 @@ PHP_FUNCTION(ftp_connect)
 	convert_to_string(arg1);
 
 	/* connect */
-	ftp = ftp_open(arg1->value.str.val, htons(port));
+	ftp = ftp_open(Z_STRVAL_P(arg1), htons(port));
 	if (ftp == NULL)
 		RETURN_FALSE;
 
@@ -200,7 +200,7 @@ PHP_FUNCTION(ftp_login)
 	FTPBUF(ftp, arg1);
 
 	/* log in */
-	if (!ftp_login(ftp, arg2->value.str.val, arg3->value.str.val)) {
+	if (!ftp_login(ftp, Z_STRVAL_P(arg2), Z_STRVAL_P(arg3))) {
 		php_error(E_WARNING, "ftp_login: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -280,7 +280,7 @@ PHP_FUNCTION(ftp_chdir)
 	FTPBUF(ftp, arg1);
 
 	/* change directories */
-	if (!ftp_chdir(ftp, arg2->value.str.val)) {
+	if (!ftp_chdir(ftp, Z_STRVAL_P(arg2))) {
 		php_error(E_WARNING, "ftp_chdir: %s", ftp->inbuf);
 			RETURN_FALSE;
 	}
@@ -310,7 +310,7 @@ PHP_FUNCTION(ftp_exec)
 	FTPBUF(ftp, arg1);
 
 	/* change directories */
-	if (!ftp_exec(ftp, arg2->value.str.val)) {
+	if (!ftp_exec(ftp, Z_STRVAL_P(arg2))) {
 		php_error(E_WARNING, "ftp_exec: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -341,7 +341,7 @@ PHP_FUNCTION(ftp_mkdir)
 	FTPBUF(ftp, arg1);
 
 	/* change directories */
-	tmp = ftp_mkdir(ftp, arg2->value.str.val);
+	tmp = ftp_mkdir(ftp, Z_STRVAL_P(arg2));
 	if (tmp == NULL) {
 		php_error(E_WARNING, "ftp_mkdir: %s", ftp->inbuf);
 		RETURN_FALSE;
@@ -378,7 +378,7 @@ PHP_FUNCTION(ftp_rmdir)
 	FTPBUF(ftp, arg1);
 
 	/* change directories */
-	if (!ftp_rmdir(ftp, arg2->value.str.val)) {
+	if (!ftp_rmdir(ftp, Z_STRVAL_P(arg2))) {
 		php_error(E_WARNING, "ftp_rmdir: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -409,7 +409,7 @@ PHP_FUNCTION(ftp_nlist)
 	FTPBUF(ftp, arg1);
 
 	/* get list of files */
-	nlist = ftp_nlist(ftp, arg2->value.str.val);
+	nlist = ftp_nlist(ftp, Z_STRVAL_P(arg2));
 	if (nlist == NULL) {
 		RETURN_FALSE;
 	}
@@ -443,7 +443,7 @@ PHP_FUNCTION(ftp_rawlist)
 	FTPBUF(ftp, arg1);
 
 	/* get directory listing */
-	llist = ftp_list(ftp, arg2->value.str.val);
+	llist = ftp_list(ftp, Z_STRVAL_P(arg2));
 	if (llist == NULL) {
 		RETURN_FALSE;
 	}
@@ -508,13 +508,13 @@ PHP_FUNCTION(ftp_fget)
 	convert_to_string(arg3);
 	XTYPE(xtype, arg4);
 
-	if (!ftp_get(ftp, fp, arg3->value.str.val, xtype) || ferror(fp)) {
+	if (!ftp_get(ftp, fp, Z_STRVAL_P(arg3), xtype) || ferror(fp)) {
 		php_error(E_WARNING, "ftp_get: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
 
 	if (ferror(fp)) {
-		php_error(E_WARNING, "error writing %s", arg2->value.str.val);
+		php_error(E_WARNING, "error writing %s", Z_STRVAL_P(arg2));
 		RETURN_FALSE;
 	}
 
@@ -541,7 +541,7 @@ PHP_FUNCTION(ftp_pasv)
 	FTPBUF(ftp, arg1);
 	convert_to_long(arg2);
 
-	if (!ftp_pasv(ftp, (arg2->value.lval) ? 1 : 0))
+	if (!ftp_pasv(ftp, (Z_LVAL_P(arg2)) ? 1 : 0))
 		RETURN_FALSE;
 
 	RETURN_TRUE;
@@ -583,7 +583,7 @@ PHP_FUNCTION(ftp_get)
 		RETURN_FALSE;
 	}
 
-	if (	!ftp_get(ftp, tmpfp, arg3->value.str.val, xtype) ||
+	if (	!ftp_get(ftp, tmpfp, Z_STRVAL_P(arg3), xtype) ||
 		ferror(tmpfp))
 	{
 		fclose(tmpfp);
@@ -592,12 +592,12 @@ PHP_FUNCTION(ftp_get)
 	}
 
 #ifdef PHP_WIN32
-	if ((outfp = V_FOPEN(arg2->value.str.val, "wb")) == NULL) {
+	if ((outfp = V_FOPEN(Z_STRVAL_P(arg2), "wb")) == NULL) {
 #else
-	if ((outfp = V_FOPEN(arg2->value.str.val, "w")) == NULL) {
+	if ((outfp = V_FOPEN(Z_STRVAL_P(arg2), "w")) == NULL) {
 #endif
 		fclose(tmpfp);
-		php_error(E_WARNING, "error opening %s", arg2->value.str.val);
+		php_error(E_WARNING, "error opening %s", Z_STRVAL_P(arg2));
 		RETURN_FALSE;
 	}
 
@@ -608,7 +608,7 @@ PHP_FUNCTION(ftp_get)
 	if (ferror(tmpfp) || ferror(outfp)) {
 		fclose(tmpfp);
 		fclose(outfp);
-		php_error(E_WARNING, "error writing %s", arg2->value.str.val);
+		php_error(E_WARNING, "error writing %s", Z_STRVAL_P(arg2));
 		RETURN_FALSE;
 	}
 
@@ -644,7 +644,7 @@ PHP_FUNCTION(ftp_fput)
 	FILEP(fp, arg3);
 	XTYPE(xtype, arg4);
 
-	if (!ftp_put(ftp, arg2->value.str.val, fp, xtype)) {
+	if (!ftp_put(ftp, Z_STRVAL_P(arg2), fp, xtype)) {
 		php_error(E_WARNING, "ftp_put: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -680,14 +680,14 @@ PHP_FUNCTION(ftp_put)
 	XTYPE(xtype, arg4);
 
 #ifdef PHP_WIN32
-	if ((infp = V_FOPEN(arg3->value.str.val, "rb")) == NULL) {
+	if ((infp = V_FOPEN(Z_STRVAL_P(arg3), "rb")) == NULL) {
 #else
-	if ((infp = V_FOPEN(arg3->value.str.val, "r")) == NULL) {
+	if ((infp = V_FOPEN(Z_STRVAL_P(arg3), "r")) == NULL) {
 #endif
-		php_error(E_WARNING, "error opening %s", arg3->value.str.val);
+		php_error(E_WARNING, "error opening %s", Z_STRVAL_P(arg3));
 		RETURN_FALSE;
 	}
-	if (	!ftp_put(ftp, arg2->value.str.val, infp, xtype) ||
+	if (	!ftp_put(ftp, Z_STRVAL_P(arg2), infp, xtype) ||
 		ferror(infp))
 	{
 		fclose(infp);
@@ -720,7 +720,7 @@ PHP_FUNCTION(ftp_size)
 	convert_to_string(arg2);
 
 	/* get file size */
-	RETURN_LONG(ftp_size(ftp, arg2->value.str.val));
+	RETURN_LONG(ftp_size(ftp, Z_STRVAL_P(arg2)));
 }
 /* }}} */
 
@@ -744,7 +744,7 @@ PHP_FUNCTION(ftp_mdtm)
 	convert_to_string(arg2);
 
 	/* get file mod time */
-	RETURN_LONG(ftp_mdtm(ftp, arg2->value.str.val));
+	RETURN_LONG(ftp_mdtm(ftp, Z_STRVAL_P(arg2)));
 }
 /* }}} */
 
@@ -770,7 +770,7 @@ PHP_FUNCTION(ftp_rename)
 	convert_to_string(arg3);
 
 	/* rename the file */
-	if (!ftp_rename(ftp, arg2->value.str.val, arg3->value.str.val)) {
+	if (!ftp_rename(ftp, Z_STRVAL_P(arg2), Z_STRVAL_P(arg3))) {
 		php_error(E_WARNING, "ftp_rename: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -799,7 +799,7 @@ PHP_FUNCTION(ftp_delete)
 	convert_to_string(arg2);
 
 	/* delete the file */
-	if (!ftp_delete(ftp, arg2->value.str.val)) {
+	if (!ftp_delete(ftp, Z_STRVAL_P(arg2))) {
 		php_error(E_WARNING, "ftp_delete: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -828,7 +828,7 @@ PHP_FUNCTION(ftp_site)
 	convert_to_string(arg2);
 
 	/* send the site command */
-	if (!ftp_site(ftp, arg2->value.str.val)) {
+	if (!ftp_site(ftp, Z_STRVAL_P(arg2))) {
 		php_error(E_WARNING, "ftp_site: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -850,7 +850,7 @@ PHP_FUNCTION(ftp_quit)
 		WRONG_PARAM_COUNT;
 	}
 
-	id = arg1->value.lval;
+	id = Z_LVAL_P(arg1);
 	if (zend_list_find(id, &type) && type == le_ftpbuf)
 		zend_list_delete(id);
 
