@@ -39,7 +39,7 @@
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
  */
-static int _Exec(int type, char *cmd, pval *array, pval *return_value)
+int _Exec(int type, char *cmd, pval *array, pval *return_value)
 {
 	FILE *fp;
 	char *buf, *tmp=NULL;
