@@ -1,4 +1,4 @@
-#!@prefix@/bin/php -Cqd include_path=@include_path@
+#!@prefix@/bin/php -Cq
 <?php // -*- PHP -*-
 //
 // +----------------------------------------------------------------------+
@@ -24,6 +24,7 @@
 /**
  * @nodep Gtk
  */
+ini_set('include_path', '@include_path@');
 ini_set('allow_url_fopen', true);
 set_time_limit(0);
 ob_implicit_flush(true);
