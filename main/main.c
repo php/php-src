@@ -556,7 +556,6 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	} else {
 		spprintf(&message, 0, "%s: %s", origin, buffer);
 	}
-	efree(buffer);
 	efree(origin);
 	if (docref_buf) {
 		efree(docref_buf);
@@ -570,6 +569,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(pval *), NULL);
 	}
+	efree(buffer);
 }
 /* }}} */
 
