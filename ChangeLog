@@ -1,3 +1,48 @@
+2004-05-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/bug26973.phpt
+      tests/strings/002.phpt:
+      Correct output.
+
+2004-05-17  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      BugFix# 27982: Provide error message when trying to overwrite an existant
+      file without overwrite context option.
+
+2004-05-17  Andrei Zmievski  <andreiz@gmail.com>
+
+    * ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.l:
+      Revert the .ini vars patch. Will have to try again next Christmas
+      apparently.
+
+    * ZendEngine2/zend_ini_parser.y:
+      Fix the apparent bug (; at the end of parse rule block).
+
+2004-05-17  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      php.ini-dist
+      php.ini-recommended:
+      - MFH: Document the smtp_post setting in php.ini*
+
+    * php.ini-dist
+      php.ini-recommended:
+      - Document the smtp_port setting in php.ini
+
+2004-05-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      As discussed with Andi, add this helper API for setting the object pointer
+      from
+      within the constructor.
+      
+      Please read the comment for notes about how to use it; in general, you
+      don't
+      need it, so don't use it.
+
 2004-05-16  Pierre-Alain Joye  <pierre@dotgeek.org>
 
     * pear/PEAR/Common.php:
