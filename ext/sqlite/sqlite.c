@@ -1663,7 +1663,7 @@ PHP_FUNCTION(sqlite_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object sqlite_fetch_object(resource result [, string class_name [, array ctor_params [, bool decode_binary]]])
+/* {{{ proto object sqlite_fetch_object(resource result [, string class_name [, NULL|array ctor_params [, bool decode_binary]]])
    Fetches the next row from a result set as an object. */
    /* note that you can do array(&$val) for param ctor_params */
 PHP_FUNCTION(sqlite_fetch_object)
@@ -1768,6 +1768,8 @@ PHP_FUNCTION(sqlite_fetch_object)
 		if (fci.params) {
 			efree(fci.params);
 		}
+	} else if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
+		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Class %s does not have a constructor use NULL for parameter ctor_params", class_name);
 	}
 }
 /* }}} */
