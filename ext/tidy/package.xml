@@ -19,10 +19,10 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.5.2</version>
-  <date>2003-05-06</date>
+  <version>0.5.3</version>
+  <date>2003-05-07</date>
   <notes>
-    Initial package release.
+    Bugfixes and updates for the changes in ZE2
   </notes>
   <configureoptions>
     <configureoption name="with-tidy" default="autodetect" prompt="Tidy library installation dir?"/>
