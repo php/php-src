@@ -47,7 +47,7 @@ static MUTEX_T reentrant_locks[NUMBER_OF_LOCKS];
 
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 
-struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
+PHPAPI struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
 {
 	struct tm *tmp;
 	
@@ -65,7 +65,7 @@ struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
 
 #if !defined(HAVE_CTIME_R) && defined(HAVE_CTIME)
 
-char *ctime_r(const time_t *clock, char *buf)
+PHPAPI char *ctime_r(const time_t *clock, char *buf)
 {
 	char *tmp;
 	
@@ -83,7 +83,7 @@ char *ctime_r(const time_t *clock, char *buf)
 
 #if !defined(HAVE_ASCTIME_R) && defined(HAVE_ASCTIME)
 
-char *asctime_r(const struct tm *tm, char *buf)
+PHPAPI char *asctime_r(const struct tm *tm, char *buf)
 {
 	char *tmp;
 	
@@ -101,7 +101,7 @@ char *asctime_r(const struct tm *tm, char *buf)
 
 #if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME)
 
-struct tm *gmtime_r(const time_t *const timep, struct tm *p_tm)
+PHPAPI struct tm *gmtime_r(const time_t *const timep, struct tm *p_tm)
 {
 	struct tm *tmp;
 	
@@ -186,7 +186,7 @@ do_rand(unsigned long *ctx)
 }
 
 
-int
+PHPAPI int
 rand_r(unsigned int *ctx)
 {
 	u_long val = (u_long) *ctx;
@@ -243,9 +243,8 @@ rand_r(unsigned int *ctx)
  */
 
 #include <stddef.h>
-#include <string.h>
 
-char *
+PHPAPI char *
 strtok_r(char *s, const char *delim, char **last)
 {
     char *spanp;
