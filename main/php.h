@@ -322,7 +322,6 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define PHP_NAMED_FE	ZEND_NAMED_FE
 #define PHP_FE			ZEND_FE
 #define PHP_FALIAS		ZEND_FALIAS
-#define PHP_STATIC_FE	ZEND_STATIC_FE
 #define PHP_ME          ZEND_ME
 
 #define PHP_MODULE_STARTUP_N	ZEND_MODULE_STARTUP_N
