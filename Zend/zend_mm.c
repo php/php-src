@@ -48,6 +48,7 @@ typedef union _mm_align_test {
 #define ZEND_MM_ALIGNED_SIZE(size)	(size+(((ZEND_MM_ALIGNMENT-size)%ZEND_MM_ALIGNMENT+ZEND_MM_ALIGNMENT)%ZEND_MM_ALIGNMENT))
 #define ZEND_MM_ALIGNED_HEADER_SIZE	ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_block))
 #define ZEND_MM_ALIGNED_FREE_HEADER_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_free_block))
+#define ZEND_MM_ALIGNED_SEGMENT_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_segment))
 
 
 /* Memory calculations */
@@ -87,16 +88,24 @@ static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_fre
 
 zend_bool zend_mm_add_memory_block(zend_mm_heap *heap, size_t block_size)
 {
+	/* We need to make sure that block_size is big enough for the minimum segment size */
 	zend_mm_free_block *mm_block;
 	zend_mm_block *guard_block;
+	zend_mm_segment *segment;
 
 	/* align block size downwards */
 	block_size -= block_size % ZEND_MM_ALIGNMENT;
 
-	mm_block = (zend_mm_free_block *) malloc(block_size);
-	if (!mm_block) {
+	segment = (zend_mm_segment *) malloc(block_size);
+	if (!segment) {
 		return 1;
 	}
+	segment->next_segment = heap->segments_list;
+	heap->segments_list = segment;
+
+	block_size -= ZEND_MM_ALIGNED_SEGMENT_SIZE;
+	mm_block = (zend_mm_free_block *) ((char *) segment + ZEND_MM_ALIGNED_SEGMENT_SIZE);
+	
 	mm_block->size = block_size - ZEND_MM_ALIGNED_FREE_HEADER_SIZE; /* keep one guard block in the end */
 	mm_block->type = ZEND_MM_FREE_BLOCK;
 	mm_block->prev_size = 0; /* Size is always at least ZEND_MM_ALIGNED_HEADER_SIZE big (>0) so 0 is OK */
@@ -119,16 +128,23 @@ zend_bool zend_mm_add_memory_block(zend_mm_heap *heap, size_t block_size)
  */
 zend_bool zend_mm_startup(zend_mm_heap *heap, size_t block_size)
 {
-	block_size -= block_size % ZEND_MM_ALIGNMENT;
 	heap->block_size = block_size;
 	heap->free_list = NULL;
-
+	heap->segments_list = NULL;
 	return zend_mm_add_memory_block(heap, block_size);
 }
 
 
 void zend_mm_shutdown(zend_mm_heap *heap)
 {
+	zend_mm_segment *segment = heap->segments_list;
+	zend_mm_segment *prev;
+
+	while (segment) {
+		prev = segment;
+		segment = segment->next_segment;
+		free(prev);
+	}
 }
 
 void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
@@ -149,9 +165,9 @@ void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
 		}
 	}
 	if (!best_fit) {
-		if (true_size > (heap->block_size - ZEND_MM_ALIGNED_HEADER_SIZE)) {
+		if (true_size > (heap->block_size - ZEND_MM_ALIGNED_SEGMENT_SIZE - ZEND_MM_ALIGNED_FREE_HEADER_SIZE)) {
 			/* Make sure we add a memory block which is big enough */
-			zend_mm_add_memory_block(heap, true_size + ZEND_MM_ALIGNED_HEADER_SIZE);
+			zend_mm_add_memory_block(heap, true_size + ZEND_MM_ALIGNED_SEGMENT_SIZE + ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
 		} else {
 			zend_mm_add_memory_block(heap, heap->block_size);
 		}
