@@ -643,8 +643,7 @@ SPL_METHOD(Array, __construct)
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
 	}
-/* exceptions do not work yet
-	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);*/
+	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);*/
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -658,8 +657,8 @@ SPL_METHOD(Array, __construct)
 		intern->array = other->array;		
 	} else {
 		if (!HASH_OF(*array)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object, using empty array instead");
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead");
 			return;
 		}
 		zval_dtor(intern->array);
