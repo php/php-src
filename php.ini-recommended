@@ -5,9 +5,13 @@
 ;;;;;;;;;;;;;;;;;;;
 ;
 ; This is the recommended, PHP 4-style version of the php.ini-dist file.  It
-; sets some non standard settings, that make PHP more efficient and more secure.
+; sets some non standard settings, that make PHP more efficient, more secure,
+; and encourage cleaner coding.
 ; The price is that with these settings, PHP may be incompatible with some
-; applications.  Using this file is warmly recommended for production sites.
+; applications, and sometimes, more difficult to develop with.  Using this
+; file is warmly recommended for production sites.  As all of the changes from
+; the standard settings are thoroughly documented, you can go over each one,
+; and decide whether you want to use it or not.
 ;
 ; For general information about the php.ini file, please consult the php.ini-dist
 ; file, included in your PHP distribution.
@@ -58,6 +62,11 @@
 ; - variables_order = "GPCS"       [Performance]
 ;     The environment variables are not hashed into the $HTTP_ENV_VARS[].  To access
 ;     environment variables, you can use getenv() instead.
+; - error_reporting = E_ALL        [Code Cleanliness, Security(?)]
+;     By default, PHP surpresses errors of type E_NOTICE.  These error messages
+;     are emitted for non-critical errors, but that could be a symptom of a bigger
+;     problem.  Most notably, this will cause error messages about the use
+;     of uninitialized variables to be displayed.
 ; - allow_call_time_pass_reference = Off     [Code cleanliness]
 ;     It's not possible to decide to force a variable to be passed by reference
 ;     when calling a function.  The PHP 4 style to do this is by making the
@@ -232,7 +241,7 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ;
 ;   - Show all errors except for notices
 ;
-error_reporting  =  E_ALL & ~E_NOTICE
+error_reporting  =  E_ALL
 
 ; Print out errors (as a part of the output).  For production web sites,
 ; you're strongly encouraged to turn this feature off, and use error logging
