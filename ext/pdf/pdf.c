@@ -1889,7 +1889,7 @@ PHP_FUNCTION(pdf_open_memory_image)
 {
 	zval **arg1, **arg2;
 	int i, j, color, count;
-	int pdf_image, *img;
+	int pdf_image;
 	gdImagePtr im;
 	unsigned char *buffer, *ptr;
 	PDF *pdf;
