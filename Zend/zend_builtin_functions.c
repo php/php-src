@@ -1087,12 +1087,16 @@ ZEND_FUNCTION(get_extension_funcs)
 
 	convert_to_string_ex(extension_name);
 	if (zend_hash_find(&module_registry, Z_STRVAL_PP(extension_name),
-					   Z_STRLEN_PP(extension_name)+1, (void**)&module) == FAILURE) {
+		Z_STRLEN_PP(extension_name)+1, (void**)&module) == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
 	func = module->functions;
+	if (!func) {
+		return;
+	}
+
 	while (func->fname) {
 		add_next_index_string(return_value, func->fname, 1);
 		func++;
