@@ -379,11 +379,13 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 {
 	ulong var_no;
 	char id[32], *p;
+	register int len;
 
-	p = smart_str_print_long(id, (long) var);
-	*p = '\0';
-
-	if (var_old && zend_hash_find(var_hash, id, p - id, var_old) == SUCCESS) {
+	/* relies on "(long)" being a perfect hash function for data pointers */
+	p = smart_str_print_long(id + sizeof(id) - 1, (long) var);
+	len = id + sizeof(id) - 1 - p;
+	
+	if (var_old && zend_hash_find(var_hash, p, len, var_old) == SUCCESS) {
 		if (!var->is_ref) {
 			/* we still need to bump up the counter, since non-refs will
 			   be counted separately by unserializer */
@@ -395,7 +397,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	
 	/* +1 because otherwise hash will think we are trying to store NULL pointer */
 	var_no = zend_hash_num_elements(var_hash) + 1;
-	zend_hash_add(var_hash, id, p - id, &var_no, sizeof(var_no), NULL);
+	zend_hash_add(var_hash, p, len, &var_no, sizeof(var_no), NULL);
 	return SUCCESS;
 }
 
