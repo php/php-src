@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
-- ACHTUNG!! register_globals defaults to 'off' now !!!
+- ATTENTION!! register_globals defaults to 'off' now !!!
 - Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is
   enabled. (Jason)
 - Added CLI (command line interface) sapi which is more suitable for writing 
