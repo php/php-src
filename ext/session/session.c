@@ -846,7 +846,7 @@ PHP_FUNCTION(session_name)
 
 	old = estrdup(PS(session_name));
 
-	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
@@ -870,7 +870,7 @@ PHP_FUNCTION(session_module_name)
 
 	old = estrdup(PS(mod)->name);
 
-	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
@@ -935,7 +935,7 @@ PHP_FUNCTION(session_save_path)
 
 	old = estrdup(PS(save_path));
 
-	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
@@ -960,7 +960,7 @@ PHP_FUNCTION(session_id)
 	if (PS(id))
 		old = estrdup(PS(id));
 
-	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
