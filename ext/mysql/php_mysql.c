@@ -34,6 +34,8 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 
+#if HAVE_MYSQL
+
 #ifdef PHP_WIN32
 #include <winsock.h>
 #define signal(a, b) NULL
@@ -2254,6 +2256,8 @@ PHP_FUNCTION(mysql_ping)
 	RETURN_BOOL(! mysql_ping(&mysql->conn));
 }
 /* }}} */
+
+#endif
 
 /*
  * Local variables:
