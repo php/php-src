@@ -1313,7 +1313,7 @@ php_printf("%s", object);
 /* }}} */
 
 /* {{{ proto string hw_getobject(int link, int objid [, string linkroot])
-   Returns object record  */
+   Returns object record */
 PHP_FUNCTION(hw_getobject) {
 	pval **argv[3];
 	int argc, link, id, type, multi;
@@ -2278,12 +2278,14 @@ PHP_FUNCTION(hw_setlinkroot) {
 }
 /* }}} */
 
-/* {{{ proto hwdoc hw_pipedocument(int link, int objid [, array urlprefixes ] )
-   Returns document with links inserted. Optionally a array with five urlprefixes
-   may be passed, which will be inserted for the different types of anchors. This should
-   be a named array with the following keys: HW_DEFAULT_LINK, HW_IMAGE_LINK, HW_BACKGROUND_LINK, 
-   HW_INTAG_LINK, and HW_APPLET_LINK.
-*/
+/* {{{ proto hwdoc hw_pipedocument(int link, int objid [, array urlprefixes])
+   Returns document with links inserted */
+
+/* Optionally a array with five urlprefixes may be passed, which will be 
+   inserted for the different types of anchors. This should be a named 
+   array with the following keys: HW_DEFAULT_LINK, HW_IMAGE_LINK, 
+   HW_BACKGROUND_LINK, HW_INTAG_LINK, and HW_APPLET_LINK. */
+
 PHP_FUNCTION(hw_pipedocument) {
 	pval *arg1, *arg2, *arg3;
 	int i, link, id, type, argc, mode;
@@ -2584,7 +2586,7 @@ PHP_FUNCTION(hw_insertdocument) {
 /* }}} */
 
 /* {{{ proto hwdoc hw_new_document(string objrec, string data, int size)
-   Create a new document */
+   Creates a new document */
 PHP_FUNCTION(hw_new_document) {
 	pval *arg1, *arg2, *arg3;
 	char *ptr;
@@ -2673,7 +2675,7 @@ PHP_FUNCTION(hw_output_document) {
 /* }}} */
 
 /* {{{ proto string hw_document_bodytag(hwdoc doc [, string prefix])
-   Return bodytag prefixed by prefix */
+   Returns bodytag prefixed by prefix */
 PHP_FUNCTION(hw_document_bodytag) {
 	pval *argv[2];
 	int id, type, argc;
@@ -3177,7 +3179,7 @@ PHP_FUNCTION(hw_getobjectbyquery) {
 /* }}} */
 
 /* {{{ proto array hw_getobjectbyqueryobj(int link, string query, int maxhits)
-   Search for query and return maxhits object records */
+   Searches for query and returns maxhits object records */
 PHP_FUNCTION(hw_getobjectbyqueryobj) {
 	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
@@ -3215,7 +3217,7 @@ PHP_FUNCTION(hw_getobjectbyqueryobj) {
 /* }}} */
 
 /* {{{ proto array hw_getobjectbyquerycoll(int link, int collid, string query, int maxhits)
-   Search for query in collection and return maxhits objids */
+   Searches for query in collection and returns maxhits objids */
 PHP_FUNCTION(hw_getobjectbyquerycoll) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
@@ -3260,7 +3262,7 @@ PHP_FUNCTION(hw_getobjectbyquerycoll) {
 /* }}} */
 
 /* {{{ proto array hw_getobjectbyquerycollobj(int link, int collid, string query, int maxhits)
-   Search for query in collection and return maxhits object records */
+   Searches for query in collection and returns maxhits object records */
 PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
@@ -3300,7 +3302,7 @@ PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 /* }}} */
 
 /* {{{ proto array hw_getobjectbyftquery(int link, string query, int maxhits)
-   Search for query as fulltext and return maxhits objids */
+   Searches for query as fulltext and returns maxhits objids */
 PHP_FUNCTION(hw_getobjectbyftquery) {
 	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
@@ -3344,7 +3346,7 @@ PHP_FUNCTION(hw_getobjectbyftquery) {
 /* }}} */
 
 /* {{{ proto array hw_getobjectbyftqueryobj(int link, string query, int maxhits)
-   Search for query as fulltext and return maxhits object records */
+   Searches for query as fulltext and returns maxhits object records */
 PHP_FUNCTION(hw_getobjectbyftqueryobj) {
 	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
@@ -3383,7 +3385,7 @@ PHP_FUNCTION(hw_getobjectbyftqueryobj) {
 /* }}} */
 
 /* {{{ proto array hw_getobjectbyftquerycoll(int link, int collid, string query, int maxhits)
-   Search for fulltext query in collection and return maxhits objids */
+   Searches for fulltext query in collection and returns maxhits objids */
 PHP_FUNCTION(hw_getobjectbyftquerycoll) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
@@ -3429,7 +3431,7 @@ PHP_FUNCTION(hw_getobjectbyftquerycoll) {
 /* }}} */
 
 /* {{{ proto array hw_getobjectbyftquerycollobj(int link, int collid, string query, int maxhits)
-   Search for fulltext query in collection and return maxhits object records */
+   Searches for fulltext query in collection and returns maxhits object records */
 PHP_FUNCTION(hw_getobjectbyftquerycollobj) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
@@ -3544,7 +3546,7 @@ PHP_FUNCTION(hw_getchilddoccollobj) {
 /* }}} */
 
 /* {{{ proto array hw_getanchors(int link, int objid)
-   Return all anchors of object */
+   Returns all anchors of object */
 PHP_FUNCTION(hw_getanchors) {
 	pval **arg1, **arg2;
 	int link, id, type;
@@ -3583,7 +3585,7 @@ PHP_FUNCTION(hw_getanchors) {
 /* }}} */
 
 /* {{{ proto array hw_getanchorsobj(int link, int objid)
-   Return all object records of anchors of object */
+   Returns all object records of anchors of object */
 PHP_FUNCTION(hw_getanchorsobj) {
 	pval **arg1, **arg2;
 	int link, id, type;
@@ -3689,7 +3691,7 @@ PHP_FUNCTION(hw_identify) {
 }
 /* }}} */
 
-/* {{{ proto array hw_objrec2array(string objrec, [array format])
+/* {{{ proto array hw_objrec2array(string objrec [, array format])
    Returns object array of object record */
 PHP_FUNCTION(hw_objrec2array) {
 	zval **arg1, **arg2;
@@ -3941,7 +3943,7 @@ PHP_FUNCTION(hw_mapid) {
 /* }}} */
 
 /* {{{ proto string hw_getrellink(int link, int rootid, int sourceid, int destid)
-   Get link from source to dest relative to rootid */
+   Gets link from source to dest relative to rootid */
 PHP_FUNCTION(hw_getrellink) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, type;
