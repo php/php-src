@@ -585,7 +585,7 @@
       ext/filepro/filepro.c
       main.h
       php.h
-      php3_realpath.c
+      php_realpath.c
       php_realpath.h
       safe_mode.h
       config.guess
@@ -7871,7 +7871,7 @@
       output.c
       output.h
       php.h
-      php3_realpath.c
+      php_realpath.c
       php3_realpath.h
       php_sprintf.c
       php_globals.h
@@ -10394,7 +10394,7 @@
       fopen-wrappers.c
       main.c
       mod_php3.c
-      php3_realpath.c
+      php_realpath.c
       request_info.c
       safe_mode.c
       tls.c: Remove tls.[ch]
@@ -11603,7 +11603,7 @@
       php_ini.h
       php_version.h: PHP 4.0
 
-    * php3_realpath.c
+    * php_realpath.c
       php3_realpath.h
       php_sprintf.c
       php3_threads.c
@@ -11611,7 +11611,7 @@
       php3extra.dsw
       php3sapi.dsw: New file.
 
-    * php3_realpath.c
+    * php_realpath.c
       php3_realpath.h
       php_sprintf.c
       php3_threads.c

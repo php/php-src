@@ -127,7 +127,7 @@ SOURCE=.\mergesort.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php3_realpath.c
+SOURCE=.\php_realpath.c
 # End Source File
 # Begin Source File
 
