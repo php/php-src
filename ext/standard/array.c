@@ -39,6 +39,7 @@
 #include "win32/unistd.h"
 #endif
 #include "zend_globals.h"
+#include "zend_interfaces.h"
 #include "php_globals.h"
 #include "php_array.h"
 #include "basic_functions.h"
@@ -301,13 +302,25 @@ PHP_FUNCTION(count)
 		case IS_ARRAY:
 			RETURN_LONG (php_count_recursive (array, mode TSRMLS_CC));
 			break;
-		case IS_OBJECT:
+		case IS_OBJECT: {
+#if HAVE_SPL
+			zend_class_entry **pce = NULL;
+			zval *retval;
+
+			if (zend_lookup_class("countable", sizeof("countable")-1, &pce TSRMLS_CC) == SUCCESS) {
+				zend_call_method_with_0_params(&array, NULL, NULL, "count", &retval);
+				RETVAL_LONG(Z_LVAL_P(retval));
+				zval_ptr_dtor(&retval);
+				return;
+			}
+#endif
 			if (Z_OBJ_HT(*array)->count_elements) {
 				RETVAL_LONG(1);
 				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value) TSRMLS_CC)) {
 					return;
 				}
 			}
+		}
 		default:
 			RETURN_LONG(1);
 			break;

@@ -169,6 +169,16 @@ class RecursiveIteratorIterator implements Iterator
 	function getSubIterator([$level]);
 }
 
+/** @ingroup SPL
+ * @brief This Interface allows to hook into the global count() function.
+ */
+interface Countable
+{
+	/** @return the number the global function count() should show
+	 */
+	function count();
+}
+
 /** \ingroup SPL
  * \brief An Array wrapper
  *
@@ -177,7 +187,7 @@ class RecursiveIteratorIterator implements Iterator
  *
  * \see ArrayIterator
  */
-class ArrayObject implements IteratorAggregate, ArrayAccess
+class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 {
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
@@ -239,7 +249,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess
  * refer to it either by using foreach or by calling its getIterator() 
  * method manually.
  */
-class ArrayIterator implements Iterator, SeekableIterator, ArrayAccess
+class ArrayIterator implements Iterator, SeekableIterator, ArrayAccess, Countable
 {
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
