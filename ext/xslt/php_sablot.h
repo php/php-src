@@ -48,6 +48,8 @@ extern zend_module_entry xslt_module_entry;
 #define XSLT_LOG(handle)       ((handle)->err->log)
 
 #define XSLT_FUNCH_FREE(__var) if (__var) zval_ptr_dtor(&(__var)); 
+#define XSLT_REG_ERRMSG(msg, handle)	if (XSLT_ERRSTR(handle)) efree(XSLT_ERRSTR(handle)); \
+					XSLT_ERRSTR(handle) = estrdup(msg);
 
 PHP_MINIT_FUNCTION(xslt);
 PHP_MINFO_FUNCTION(xslt);
