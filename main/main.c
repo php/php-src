@@ -248,12 +248,6 @@ static int module_initialized = 0;
  * Globals yet to be protected
  */
 
-#if WIN32|WINNT
-unsigned int wintimer;
-unsigned int timerstart;
-unsigned int wintimer_counter = 0;
-#endif
-
 #if APACHE
 request_rec *php3_rqst = NULL;	/* request record pointer for apache module version */
 #endif
@@ -496,14 +490,8 @@ static void php3_timeout(int dummy)
 static void php3_set_timeout(long seconds)
 {
 #if WIN32|WINNT
-	if (seconds > 0) {
-		timerstart = (unsigned int) clock();
-		wintimer = timerstart + (CLOCKS_PER_SEC * seconds);
-	} else {
-		wintimer = 0;
-	}
 #else
-#if HAVE_SETITIMER
+#	if HAVE_SETITIMER
 	struct itimerval t_r;		/* timeout requested */
 
 	t_r.it_value.tv_sec = seconds;
@@ -511,7 +499,7 @@ static void php3_set_timeout(long seconds)
 
 	setitimer(ITIMER_PROF, &t_r, NULL);
 	signal(SIGPROF, php3_timeout);
-#endif
+#	endif
 #endif
 }
 
@@ -519,15 +507,14 @@ static void php3_set_timeout(long seconds)
 static void php3_unset_timeout()
 {
 #if WIN32|WINNT
-	wintimer = 0;
 #else
-#if HAVE_SETITIMER
+#	if HAVE_SETITIMER
 	struct itimerval no_timeout;
 
 	no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
 
 	setitimer(ITIMER_PROF, &no_timeout, NULL);
-#endif
+#	endif
 #endif
 }
 
