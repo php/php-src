@@ -16,8 +16,7 @@ for ($i=1;$i<=100000;$i++) {
 	list($micro,$time)=explode(" ",microtime());
 	if ($time > $last_t || ($time == $last_t && $micro > $last_m)) {
 		$passed++;
-	} else {
-		$failed++;
+	} else if ($failed++ <=10) {
 		$result .= sprintf('%06d', $i).": $time $micro < $last_t $last_m\n";
 	}
 	$last_m = $micro;
