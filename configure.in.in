@@ -16,6 +16,13 @@ for arg in $@; do
 	esac
 done
 
+if test "$with_shared_apache" != "no" ; then
+  echo ""
+  echo "ERROR: --with-shared-apache is not supported."
+  echo "       Please read INSTALL.DSO for instructions on using APXS."
+  exit 1
+fi
+
 if test "$recurse" = "yes"; then
 	cwd=`pwd`
 	(set -x; test -d libzend || mkdir libzend ; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cwd/config.cache $@)
@@ -364,64 +371,6 @@ AC_ARG_WITH(apxs,
 
 
 APACHE_INSTALL_FILES="$srcdir/mod_php4.* libphp4.module"
-
-AC_MSG_CHECKING(for Apache module support via DSO through APACI)
-AC_ARG_WITH(shared-apache,
-[  --with-shared-apache[=DIR] Build shared Apache module.  DIR is the top-level 
-                          Apache build directory, defaults to /usr/local/etc/httpd.
-                          (This option needs Perl installed)],
-[
-	if test "$withval" = "yes"; then
-	  # Apache's default directory
-	  withval=/usr/local/etc/httpd
-	fi
-	if test "$withval" != "no"; then
-      rpath_raw=yes
-	  if test -f $withval/src/include/httpd.h; then
-        AC_EXPAND_PATH($withval, withval)
-	    APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
-	    APACHE_TARGET=$withval/src/modules/php4
-		if test ! -d $APACHE_TARGET; then
-			mkdir $APACHE_TARGET
-		fi
-		CFLAGS_SHLIB=`perl -V:cccdlflags | cut -d\' -f2`
-		LDFLAGS_SHLIB=`perl -V:lddlflags | cut -d\' -f2`
-		LDFLAGS_SHLIB_EXPORT=`perl -V:ccdlflags | cut -d\' -f2`
-		PHP_LIBS=
-	    BINNAME=libmodphp4-so.a
-	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-	    AC_DEFINE(APACHE)
-	    AC_MSG_RESULT(yes - Shared Apache 1.3.x)
-		STRONGHOLD=
-		if test -f $withval/src/include/ap_config.h; then
-		AC_DEFINE(HAVE_AP_CONFIG_H)
-		fi
-		if test -f $withval/src/include/ap_compat.h; then
-		AC_DEFINE(HAVE_AP_COMPAT_H)
-		if test ! -f $withval/src/include/ap_config_auto.h; then
-    	AC_MSG_ERROR(Please run Apache's configure or src/Configure program once and try again)
-		fi
-		else
-		if test -f $withval/src/include/compat.h; then
-		AC_DEFINE(HAVE_OLD_COMPAT_H)
-		fi
-		fi
-      else
-	    AC_MSG_RESULT(no)
-	    AC_MSG_ERROR(Invalid Apache directory - unable to find httpd.h under $withval/src/include)
-	  fi
-	fi
-    INCLUDES="$INCLUDES $APACHE_INCLUDE"
-    AC_SUBST(APACHE_INCLUDE)
-	AC_SUBST(APACHE_TARGET)
-	AC_SUBST(INSTALL_IT)
-	AC_SUBST(BINNAME)
-	AC_SUBST(PHP_LIBS)
-],[
-	AC_MSG_RESULT(no)
-])
-
-
 
 if test "$BINNAME" != "libmodphp4-so.a"; then
 if test "$BINNAME" != "libphp4.so"; then
@@ -916,6 +865,7 @@ AC_SUBST(CFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB_EXPORT)
 AC_SUBST(RPATHS)
+AC_SUBST(RAW_RPATHS)
 
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_SUBST(PHP_BUILD_DATE)
