@@ -638,7 +638,7 @@ int spprintf(char **pbuf, size_t max_len, const char *format, ...)
 	va_list ap;
 
 	va_start(ap, format);
-	vspprintf(pbuf, max_len, format, ap);
+	cc = vspprintf(pbuf, max_len, format, ap);
 	va_end(ap);
 	return (cc);
 }
