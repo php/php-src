@@ -1,3 +1,34 @@
+2000-11-26  Jon Parise  <jon@csh.rit.edu>
+
+    * CODING_STANDARDS:
+    Added a brief section documenting the preference of tabs over spaces.
+    There are a few touch-ups in this commit, too.
+
+2000-11-26  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gmp/Makefile.in
+      ext/gmp/README
+      ext/gmp/TODO
+      ext/gmp/config.m4
+      ext/gmp/gmp.c
+      ext/gmp/php_gmp.h: GNU GMP - arbitrary precision nubers library
+
+2000-11-26  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c: Fix windows build
+
+    * ext/bcmath/Makefile.in
+      ext/bcmath/config.m4
+      ext/bcmath/libbcmath/Makefile.in
+      ext/bcmath/libbcmath/src/Makefile.in
+      ext/bcmath/libbcmath/src/config.h
+      ext/bcmath/libbcmath/src/div.c
+      ext/bcmath/libbcmath/src/num2str.c
+      ext/bcmath/libbcmath/src/output.c
+      ext/bcmath/libbcmath/src/recmul.c:
+    - Add bcmath to the standard UNIX build
+    - Change a couple of malloc()'s and free()'s to emalloc()'s and efree()'s
+
 2000-11-25  Sterling Hughes  <Sterling.Hughes@pentap.net>
 
     * NEWS:
