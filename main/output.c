@@ -575,6 +575,14 @@ PHP_FUNCTION(ob_get_contents)
 }
 /* }}} */
 
+/* {{{ proto integer ob_get_level(void)
+   Return the nesting level of the output buffer */
+PHP_FUNCTION(ob_get_level)
+{
+	RETURN_LONG (OG(ob_nesting_level));
+}
+/* }}} */
+
 /* {{{ proto string ob_get_length(void)
    Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
