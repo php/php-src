@@ -24,7 +24,7 @@
 
 #include "php_iconv.h"
 #include "ext/standard/info.h"
-
+#include "ext/standard/php_output.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(iconv)
 
@@ -171,19 +171,22 @@ PHP_FUNCTION(iconv)
 }
 /* }}} */
 
-/* {{{ proto string ob_iconv_handler(string contents)
+/* {{{ proto string ob_iconv_handler(string contents, int status)
    Returns str in output buffer converted to the iconv.output_encoding character set */
 PHP_FUNCTION(ob_iconv_handler)
 {
 	int coding;
 	char *out_buffer;
-	zval **zv_string;
+	zval **zv_string, **zv_status;
 	SLS_FETCH();
 	ICONVLS_FETCH();
 
-	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &zv_string)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &zv_string, &zv_status)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
+	convert_to_string_ex(zv_string);
+	convert_to_long_ex(zv_status);
 
 	if (SG(sapi_headers).send_default_content_type &&
 		php_iconv_string(Z_STRVAL_PP(zv_string), &out_buffer,
