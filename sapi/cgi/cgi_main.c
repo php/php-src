@@ -1374,32 +1374,6 @@ consult the installation file that came with this distribution, or visit \n\
 				}
 			}
 
-			if (!SG(request_info).query_string) {
-				len = 0;
-				if (script_file) {
-					len += strlen(script_file) + 1;
-				}
-				for (i = ap_php_optind; i < argc; i++) {
-					len += strlen(argv[i]) + 1;
-				}
-
-				s = malloc(len + 1);	/* leak - but only for command line version, so ok */
-				*s = '\0';			/* we are pretending it came from the environment  */
-				if (script_file) {
-					strcpy(s, script_file);
-					if (ap_php_optind<argc) {
-						strcat(s, "+");
-					}
-				}
-				for (i = ap_php_optind, len = 0; i < argc; i++) {
-					strcat(s, argv[i]);
-					if (i < (argc - 1)) {
-						strcat(s, "+");
-					}
-				}
-				SG(request_info).query_string = s;
-			}
-
 			if (script_file) {
 				/* override path_translated if -f on command line */
 				SG(request_info).path_translated = script_file;
@@ -1412,7 +1386,33 @@ consult the installation file that came with this distribution, or visit \n\
 
 			if (!SG(request_info).path_translated && argc > ap_php_optind) {
 				/* file is on command line, but not in -f opt */
-				SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
+				SG(request_info).path_translated = estrdup(argv[ap_php_optind++]);
+			}
+
+			/* all remaining arguments are part of the query string
+			   this section of code concatenates all remaining arguments
+			   into a single string, seperating args with a &
+			   this allows command lines like:
+
+			   test.php v1=test v2=hello+world!
+			   test.php "v1=test&v2=hello world!"
+			   test.php v1=test "v2=hello world!"
+			*/
+			if (!SG(request_info).query_string) {
+				len = 0;
+				for (i = ap_php_optind; i < argc; i++) {
+					len += strlen(argv[i]) + 1;
+				}
+
+				s = malloc(len + 1);	/* leak - but only for command line version, so ok */
+				*s = '\0';			/* we are pretending it came from the environment  */
+				for (i = ap_php_optind, len = 0; i < argc; i++) {
+					strcat(s, argv[i]);
+					if (i < (argc - 1)) {
+						strcat(s, "&");
+					}
+				}
+				SG(request_info).query_string = s;
 			}
 		} /* end !cgi && !fastcgi */
 
