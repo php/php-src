@@ -1,3 +1,7 @@
+2001-11-29  Brian Bruns	<camber@ais.org
+
+    * ext/sybase_ct/config.m4: detect FreeTDS and adjust libs accordingly
+
 2001-11-29  Stig Venaas  <venaas@uninett.no>
 
     * ext/ldap/config.m4
