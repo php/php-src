@@ -131,6 +131,8 @@ PHP_FUNCTION(ncurses_init)
 	(void) nonl();         /* tell curses not to do NL->CR/NL on output */
 	(void) cbreak();       /* take input chars one at a time, no wait for \n */
 
+	NCURSES_G(is_initialised) = 1;
+
 	if (!NCURSES_G(registered_constants)) {
 		zend_constant c;
 		
@@ -315,7 +317,12 @@ PHP_FUNCTION(ncurses_refresh)
    Starts using colors */
 PHP_FUNCTION(ncurses_start_color)
 {
-	RETURN_LONG(start_color());
+	if (NCURSES_G(is_initialised)) {
+		RETURN_LONG(start_color());
+	} else {
+		php_error(E_WARNING, "ncurses library is not initialised by ncurses_init().");
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 

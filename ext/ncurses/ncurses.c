@@ -84,11 +84,19 @@ PHP_INI_END()
 #define PHP_NCURSES_CONST(x)  REGISTER_LONG_CONSTANT("NCURSES_"#x, x, CONST_CS | CONST_PERSISTENT)
 #define PHP_NCURSES_FKEY_CONST(x)  REGISTER_LONG_CONSTANT("NCURSES_KEY_F"#x, KEY_F0 + x, CONST_CS | CONST_PERSISTENT)
 
+/* {{{ php_ncurses_globals_ctor */
+static void php_ncurses_globals_ctor(zend_ncurses_globals *pglobals)
+{
+	pglobals->registered_constants = 0;
+	pglobals->is_initialised = 0;
+}
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(ncurses)
 {
+	ZEND_INIT_MODULE_GLOBALS(ncurses, php_ncurses_globals_ctor, NULL);
     /* color constants */
     PHP_NCURSES_CONST(COLOR_BLACK);
     PHP_NCURSES_CONST(COLOR_RED);
