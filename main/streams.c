@@ -263,7 +263,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 }
 /* }}} */
 
-int _php_stream_free_persistent(list_entry *le, void *pStream TSRMLS_DC)
+static int _php_stream_free_persistent(list_entry *le, void *pStream TSRMLS_DC)
 {
 	return le->ptr == pStream;
 }
