@@ -131,10 +131,9 @@ class PEAR_Config extends PEAR
         'preferred_state' => array(
             'type' => 'set',
             'default' => 'stable',
-            'doc' => 'the installer will prefer releases with this state
-when installing packages without a version or state specified',
+            'doc' => 'the installer will prefer releases with this state when installing packages without a version or state specified',
             'valid_set' => array(
-                'stable', 'beta', 'alpha', 'devel', 'snapshot', 'any'),
+                'stable', 'beta', 'alpha', 'devel', 'snapshot'),
             ),
         'http_proxy' => array(
             'type' => 'string',
