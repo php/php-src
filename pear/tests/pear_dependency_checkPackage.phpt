@@ -2,6 +2,7 @@
 PEAR_Dependency::checkPackage() test
 --SKIPIF--
 <?php
+echo 'skip';
 ?>
 --FILE--
 <?php
