@@ -83,6 +83,7 @@ if (getenv('TEST_PHP_SRCDIR')) {
 putenv('SSH_CLIENT=deleted');
 putenv('SSH_AUTH_SOCK=deleted');
 putenv('SSH_TTY=deleted');
+putenv('SSH_CONNECTION=deleted');
 
 $cwd = getcwd();
 set_time_limit(0);
@@ -484,10 +485,10 @@ if (!getenv('NO_INTERACTION')) {
 			$automake = shell_exec('automake --version');
 			$autoconf = shell_exec('autoconf --version');
 			/* Always use the generated libtool - Mac OSX uses 'glibtool' */
-			$libtool = shell_exec($_SERVER['PWD'] . '/libtool --version');
+			$libtool = shell_exec($CUR_DIR . '/libtool --version');
 
 			/* Use shtool to find out if there is glibtool present (MacOSX) */
-			$sys_libtool_path = shell_exec("{$_SERVER['PWD']}/build/shtool path glibtool libtool");
+			$sys_libtool_path = shell_exec("./build/shtool path glibtool libtool");
 			$sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
 
 			/* Try the most common flags for 'version' */
