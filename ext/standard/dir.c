@@ -39,6 +39,10 @@
 #include "win32/readdir.h"
 #endif
 
+#ifdef HAVE_GLOB
+#include <glob.h>
+#endif
+
 typedef struct {
 	int default_dir;
 } php_dir_globals;
@@ -326,6 +330,7 @@ PHP_FUNCTION(rewinddir)
 	rewinddir(dirp->dir);
 }
 /* }}} */
+
 /* {{{ proto string readdir([resource dir_handle])
    Read directory entry from dir_handle */
 
@@ -346,6 +351,41 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 
 /* }}} */
 
+#ifdef HAVE_GLOB
+/* {{{ proto array glob(string pattern [, int flags])
+    */
+PHP_FUNCTION(glob)
+{
+	char *pattern = NULL;
+	int argc = ZEND_NUM_ARGS();
+	int pattern_len;
+	long flags;
+	glob_t globbuf;
+	zval *new_val;
+	int n;
+	char path[MAXPATHLEN];
+	char *ret=NULL;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) 
+		return;
+
+	globbuf.gl_offs = 0;
+	if(glob(pattern, 0, NULL, &globbuf)) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	for(n=0;n<globbuf.gl_pathc;n++) {
+		MAKE_STD_ZVAL(new_val);
+		ZVAL_STRING(new_val, globbuf.gl_pathv[n], 1);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val,
+												sizeof(zval *), NULL);
+		ret = VCWD_GETCWD(path, MAXPATHLEN);
+	}
+	globfree(&globbuf);
+}
+/* }}} */
+#endif 
 
 /*
  * Local variables:

@@ -34,5 +34,6 @@ PHP_FUNCTION(getcwd);
 PHP_FUNCTION(rewinddir);
 PHP_NAMED_FUNCTION(php_if_readdir);
 PHP_FUNCTION(getdir);
+PHP_FUNCTION(glob);
 
 #endif /* PHP_DIR_H */
