@@ -1,3 +1,54 @@
+1999-12-06  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/parsedate.y:
+    First step in making parsedate.y thread safe - use a pure parser
+
+1999-12-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/string.c: fixed warning
+
+    * ext/standard/string.c:    we save one buffer-copy as well (hehe)
+
+    * ext/standard/string.c:
+1999-12-06  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/pcre/php_pcre.c: Add another item.
+
+1999-12-06  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/parsedate.y:
+    This is no longer needed.  Note that we'll always need to undefine YYSTYPE, since
+    the template bison generated .h file defines it if it's not already defined.
+
+1999-12-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/libphp4.module.in
+      configure.in
+      acinclude.m4:
+    Separate libpaths into PHP_LDFLAGS, so that we can address them
+    separately (required for Apache build).
+
+1999-12-06  Zeev Suraski  <zeev@php.net>
+
+    * fopen-wrappers.c: opened_path could end up uninitialized - fixed
+
+1999-12-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/parsedate.y: removed unneded CLS_FETCH()
+
+1999-12-06  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/parsedate.y: build error: wrong num parms to date_parse
+
+    * ext/java/reflect.java: first pass at method overloading
+
+    * sapi/servlet/servlet.c:
+    Hmmm...must have misplaced the getcwd/chdir logic...
+
+1999-12-06  Evan Klinger  <evan715@sirius.com>
+
+    * NEWS: *** empty log message ***
+
 1999-12-05  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/session.c: Give it a nicer looking module name
