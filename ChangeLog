@@ -1,3 +1,96 @@
+2001-05-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pdf/pdf.c: - Nuke warning
+
+    * ext/pdf/pdf.c: - No need to include "zend" in include line
+
+2001-05-21  James Moore  <James@phpuk.org>
+
+    * ext/cpdf/cpdf.c
+      ext/pdf/pdf.c: Fix for #8539
+
+2001-05-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/config.m4: MFH
+
+2001-05-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4: MFH
+
+    * ext/ldap/config.m4: Fixed bug: #10777
+
+2001-05-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/sockets/php_sockets.h: Fix compile warning.
+
+2001-05-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4
+      ext/gd/gd.c: MFH
+
+    * ext/gd/config.m4
+      ext/gd/gd.c: fixed bug: #10593
+
+2001-05-21  James Moore  <James@phpuk.org>
+
+    * ext/gd/gd.c:  Remove unused variable from imagesetstyle
+
+2001-05-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/sockets/sockets.c:
+    one of these days I'll get this commit correct, just you watch!
+
+
+    * ext/sockets/sockets.c: typo
+
+2001-05-21  Andi Gutmans  <andi@zend.com>
+
+    * main/php_logos.c
+      main/php_logos.h:
+    - MFH so that no one starts using the wrongly called function name,
+
+    * main/php_logos.c
+      main/php_logos.h: - Fix name of function.
+
+2001-05-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/sockets/sockets.c: Fix socket_read to work under Linux again.
+
+    * ext/sockets/sockets.c:
+     WS fix (php_read) and correct checking of the return value from inet_aton,
+    which returns *non-zero* on success (fix by Till Gerken).
+
+    * ext/sockets/sockets.c:
+    Fixed bug where socket_connect() return the wrong value (report and fix by
+    Till Gerken)
+
+2001-05-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/iconv/config.m4: MFH
+
+    * ext/iconv/config.m4: Fixed bug: #10742
+
+2001-05-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h: Moving some functions into Zend.
+
+2001-05-21  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/basic_functions.c:
+    - EG's are passed automatically to internal functions.
+
+2001-05-21  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    Added get_defined_constants() function.  Returns an associative array of
+    constants mapped to their values.
+
+2001-05-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/xml/Makefile.in: Remove extraneous tab
+
 2001-05-20  Sascha Schumann  <sascha@schumann.cx>
 
     * acinclude.m4
