@@ -1,12 +1,15 @@
 dnl $Id$
 
 AC_DEFUN(IMAP_INC_CHK,[if test -r $i$1/rfc822.h; then IMAP_DIR=$i; IMAP_INC_DIR=$i$1])
+
 AC_DEFUN(IMAP_LIB_CHK,[
-		str="$IMAP_DIR/$1/lib$lib."
-		if test "`echo $str*`" != $str'*'; then
-			IMAP_LIB_DIR=$IMAP_DIR/$1
-			break 2
-		fi
+		str="$IMAP_DIR/$1/lib$lib.*"
+		for i in `echo $str`; do
+			if test -r $i; then
+				IMAP_LIB_DIR=$IMAP_DIR/$1
+				break 2
+			fi
+		done
 		])
 
 RESULT=no
@@ -35,7 +38,7 @@ AC_ARG_WITH(imap,
       ln -s "$IMAP_DIR/c-client/c-client.a" "$IMAP_DIR/c-client/libc-client.a" >/dev/null 2>&1
     fi
 
-    for lib in imap c-client c-client4; do
+    for lib in imap c-client4 c-client; do
       IMAP_LIB=$lib
       IMAP_LIB_CHK(lib)
       IMAP_LIB_CHK(c-client)
