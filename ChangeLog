@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fix sem_get() on AIX (Sascha)
 - Make fopen() work with URL's in Win32 (Andi & Zeev)
 - Fix for include_path for Win32 (Andi, Zend library)
 - Fixed bug in ISAPI header sending function (Charles)
