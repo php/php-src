@@ -138,7 +138,7 @@ zend.ze1_compatibility_mode = Off
 ; servers which are not under your control, because short tags may not
 ; be supported on the target server. For portable, redistributable code,
 ; be sure not to use short tags.
-short_open_tag = On
+short_open_tag = Off
 
 ; Allow ASP-style <% %> tags.
 asp_tags = Off
@@ -345,9 +345,9 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ;
 ;error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR
 ;
-;   - Show all errors
+;   - Show all errors, including coding standards warnings
 ;
-error_reporting  =  E_ALL
+error_reporting  =  E_ALL | E_STRICT
 
 ; Print out errors (as a part of the output).  For production web sites,
 ; you're strongly encouraged to turn this feature off, and use error logging
