@@ -898,12 +898,16 @@ int php_module_startup(sapi_module_struct *sf)
 	WSADATA wsaData;
 #endif
 #if WIN32|WINNT
-    /* Get build numbers for Windows NT or Win95 */
-    if (dwVersion < 0x80000000){
-        php_os="WINNT";
-    } else {
-        php_os="WIN32";
-    }
+	{
+		DWORD dwVersion = GetVersion();
+
+		/* Get build numbers for Windows NT or Win95 */
+		if (dwVersion < 0x80000000){
+			php_os="WINNT";
+		} else {
+			php_os="WIN32";
+		}
+	}
 #else
     php_os=PHP_OS;
 #endif

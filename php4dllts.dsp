@@ -411,7 +411,7 @@ SOURCE=.\ext\standard\parsedate.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\mcal\php3_mcal.c
+SOURCE=.\ext\mcal\php_mcal.c
 # End Source File
 # Begin Source File
 
