@@ -16,6 +16,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27037 (fixed possible crash in apache2handler output code). (Ilia)
 - Fixed bug #27011 (64bit int/long confusion in preg_match*() functions).
   (Ilia)
+- Fixed bug #27007 (missing connection closure when connect fails in pgsql).
+  (Ilia)
 - Fixed bug #26974 (rename() doesn't check the destination file against 
   safe_mode/open_basedir). (Ilia)
 - Fixed bug #26973 (*printf() '+' modifier broken). (Jani)

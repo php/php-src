@@ -671,6 +671,9 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
 			PHP_PQ_ERROR("Unable to connect to PostgreSQL server: %s", pgsql);
+			if (pgsql) {
+				PQfinish(pgsql);
+			}
 			goto err;
 		}
 
