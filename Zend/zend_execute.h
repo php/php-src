@@ -24,7 +24,6 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_variables.h"
-#include "zend_execute_locks.h"
 
 typedef union _temp_variable {
 	zval tmp_var;
@@ -155,57 +154,7 @@ void zend_shutdown_timeout_thread();
 
 #define active_opline (*EG(opline_ptr))
 
-static inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC)
-{
-	zval *variable_ptr;
-	zval *value_ptr;
-
-	if (!value_ptr_ptr || !variable_ptr_ptr) {
-		zend_error(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
-		return;
-	}
-
-	variable_ptr = *variable_ptr_ptr;
-	value_ptr = *value_ptr_ptr;
-
-	if (variable_ptr == EG(error_zval_ptr) || value_ptr==EG(error_zval_ptr)) {
-		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
-/*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
-	} else if (variable_ptr_ptr != value_ptr_ptr) {
-		variable_ptr->refcount--;
-		if (variable_ptr->refcount==0) {
-			zendi_zval_dtor(*variable_ptr);
-			FREE_ZVAL(variable_ptr);
-		}
-
-		if (!PZVAL_IS_REF(value_ptr)) {
-			/* break it away */
-			value_ptr->refcount--;
-			if (value_ptr->refcount>0) {
-				ALLOC_ZVAL(*value_ptr_ptr);
-				**value_ptr_ptr = *value_ptr;
-				value_ptr = *value_ptr_ptr;
-				zendi_zval_copy_ctor(*value_ptr);
-			}
-			value_ptr->refcount = 1;
-			value_ptr->is_ref = 1;
-		}
-
-		*variable_ptr_ptr = value_ptr;
-		value_ptr->refcount++;
-	} else {
-		if (variable_ptr->refcount>1) { /* we need to break away */
-			SEPARATE_ZVAL(variable_ptr_ptr);
-		}
-		(*variable_ptr_ptr)->is_ref = 1;
-	}
-
-	if (result && !(result->u.EA.type & EXT_TYPE_UNUSED)) {
-		Ts[result->u.var].var.ptr_ptr = variable_ptr_ptr;
-		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
-		AI_USE_PTR(Ts[result->u.var].var);
-	}
-}
+void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC);
 
 #define IS_OVERLOADED_OBJECT 1
 #define IS_STRING_OFFSET 2
