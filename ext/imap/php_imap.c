@@ -136,6 +136,8 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_errors,			NULL)
 	PHP_FE(imap_last_error,		NULL)
 #ifndef PHP_WIN32
+	PHP_FALIAS(pdf_open_memory_image, warn_not_available, NULL)
+#else
 	PHP_FE(imap_mail,           NULL)
 #endif
 	PHP_FE(imap_search,			NULL)
@@ -1075,9 +1077,9 @@ PHP_FUNCTION(imap_headers)
 		tmp[5] = cache->draft ? 'X' : ' ';
 		sprintf(tmp + 6, "%4ld) ", cache->msgno);
 		mail_date(tmp+11, cache);
-		tmp[18] = ' ';
-		tmp[19] = '\0';
-		mail_fetchfrom(tmp+19, imap_le_struct->imap_stream, msgno, (long)20);
+		tmp[22] = ' ';
+		tmp[23] = '\0';
+		mail_fetchfrom(tmp+23, imap_le_struct->imap_stream, msgno, (long)20);
 		strcat(tmp, " ");
 		if ((i = cache->user_flags)) {
 			strcat(tmp, "{");
@@ -3213,7 +3215,11 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 #endif
 	return 1;
 }
+#endif
 
+
+
+#ifndef PHP_WIN32
 /* {{{ proto int imap_mail(string to, string subject, string message [, string additional_headers [, string cc [, string bcc [, string rpath]]]])
    Send an email message */
 PHP_FUNCTION(imap_mail)
