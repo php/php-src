@@ -90,4 +90,15 @@ if test "$PHP_LDAP" != "no"; then
   PHP_ADD_INCLUDE($LDAP_INCDIR)
   PHP_SUBST(LDAP_SHARED_LIBADD)
   AC_DEFINE(HAVE_LDAP,1,[ ])
+
+  dnl Check for 3 arg ldap_set_rebind_proc
+  _SAVE_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS -I$LDAP_INCDIR"
+  AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc], ac_cv_3arg_setrebindproc,
+  [AC_TRY_COMPILE([#include <ldap.h>], [ldap_set_rebind_proc(0,0,0)],
+  ac_cv_3arg_setrebindproc=yes, ac_cv_3arg_setrebindproc=no)])
+  if test "$ac_cv_3arg_setrebindproc" = yes; then
+    AC_DEFINE(HAVE_3ARG_SETREBINDPROC,1,[Whether 3 arg set_rebind_proc()])
+  fi
+  CPPFLAGS=$_SAVE_CPPFLAGS
 fi 

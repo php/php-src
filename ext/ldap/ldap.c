@@ -53,6 +53,9 @@
 
 typedef struct {
 	LDAP *link;
+#ifdef HAVE_3ARG_SETREBINDPROC
+	zval *rebindproc;
+#endif
 } ldap_linkdata;
 
 ZEND_DECLARE_MODULE_GLOBALS(ldap)
@@ -119,6 +122,10 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_start_tls,								NULL)
 #endif
 
+#ifdef HAVE_3ARG_SETREBINDPROC
+	PHP_FE(ldap_set_rebind_proc,						NULL)
+#endif
+
 #ifdef STR_TRANSLATION
 	PHP_FE(ldap_t61_to_8859,							NULL)
 	PHP_FE(ldap_8859_to_t61,							NULL)
@@ -152,6 +159,12 @@ static void _close_ldap_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	ldap_linkdata *ld = (ldap_linkdata *)rsrc->ptr;
 
 	ldap_unbind_s(ld->link);
+#ifdef HAVE_3ARG_SETREBINDPROC
+	if (ld->rebindproc != NULL) {
+		zval_dtor(ld->rebindproc);
+		FREE_ZVAL(ld->rebindproc);
+	}
+#endif
 	efree(ld);
 	LDAPG(num_links)--;
 }
@@ -1989,6 +2002,89 @@ PHP_FUNCTION(ldap_start_tls)
 	}
 }
 /* }}} */
+#endif
+
+
+#ifdef HAVE_3ARG_SETREBINDPROC
+int _ldap_rebind_proc(LDAP *ldap, LDAP_CONST char *url, ber_tag_t req, ber_int_t msgid, void *params) {
+	ldap_linkdata *ld;
+	int retval;
+	zval *cb_url;
+	zval **cb_args[2];
+	zval *cb_retval;
+	zval *cb_link = (zval *) params;
+
+	ld = (ldap_linkdata *) zend_fetch_resource(&cb_link TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
+
+	/* link exists and callback set? */
+	if (ld == NULL || ld->rebindproc == NULL) {
+		php_error(E_WARNING, "%s(): Link not found or no callback set", get_active_function_name(TSRMLS_C));
+		return LDAP_OTHER;
+	}
+
+	/* callback */
+	MAKE_STD_ZVAL(cb_url);
+   	ZVAL_STRING(cb_url, estrdup(url), 0);
+	cb_args[0] = &cb_link;
+	cb_args[1] = &cb_url;
+	if (call_user_function_ex(EG(function_table), NULL, ld->rebindproc, &cb_retval, 2, cb_args, 0, NULL) == SUCCESS && cb_retval) {
+		convert_to_long_ex(&cb_retval);
+		retval = Z_LVAL_P(cb_retval);
+		zval_ptr_dtor(&cb_retval);
+	} else {
+		php_error(E_WARNING, "LDAP: rebind_proc php callback failed");
+		retval = LDAP_OTHER;
+	}
+	zval_dtor(cb_url);
+	FREE_ZVAL(cb_url);
+	return retval;
+}
+
+
+/* {{{ proto int ldap_set_rebind_proc(int link, string callback)
+   Set a callback function to do re-binds on referral chasing. */
+PHP_FUNCTION(ldap_set_rebind_proc)
+{
+	zval *link, *callback;
+	ldap_linkdata *ld;
+	char *callback_name;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz", &link, &callback) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
+
+	if (Z_TYPE_P(callback) == IS_STRING && Z_STRLEN_P(callback) == 0) {
+		/* unregister rebind procedure */
+		if (ld->rebindproc != NULL) {
+			zval_dtor(ld->rebindproc);
+			ld->rebindproc = NULL;
+			ldap_set_rebind_proc(ld->link, NULL, NULL);
+		}
+		RETURN_TRUE;
+	}
+
+	/* callable? */
+	if (!zend_is_callable(callback, 0, &callback_name)) {
+		php_error(E_WARNING, "%s() expects argument 2, '%s', to be a valid callback", get_active_function_name(TSRMLS_C), callback_name);
+		efree(callback_name);
+		RETURN_FALSE;
+	}
+	efree(callback_name);
+
+	/* register rebind procedure */
+	if (ld->rebindproc == NULL) {
+		ldap_set_rebind_proc(ld->link, _ldap_rebind_proc, (void *) link);
+	} else {
+		zval_dtor(ld->rebindproc);
+	}
+
+	ALLOC_ZVAL(ld->rebindproc);
+	*ld->rebindproc = *callback;
+	zval_copy_ctor(ld->rebindproc);
+	RETURN_TRUE;
+}
 #endif
 
 
