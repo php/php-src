@@ -1436,10 +1436,16 @@ PHP_FUNCTION(range)
 		if (low>high) {
 			for (; low >= high; (low)--) {
 				add_next_index_stringl(return_value, (char *)&low, 1, 1);
+				if ((int)low == 0) {
+					break;
+				}
 			}	
 		} else {
 			for (; low <= high; (low)++) {
 				add_next_index_stringl(return_value, (char *)&low, 1, 1);
+				if ((int)low == 255) {
+					break;
+				}
 			}	
 		}
 	} else {
