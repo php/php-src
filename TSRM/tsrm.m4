@@ -43,19 +43,19 @@ AC_MSG_RESULT(yes - installed in $PTH_PREFIX)
 
 AC_DEFUN(TSRM_CHECK_PTHREADS,[
 
-old_LDFLAGS="$LDFLAGS"
+old_CFLAGS="$CFLAGS"
 
 if test -n "$GCC"; then
   dnl FreeBSD/Linux 
   TSRM_CHECK_GCC_ARG(-pthread, gcc_pthread)
 
   if test "$gcc_pthread" = "yes"; then
-    LDFLAGS="$LDFLAGS -pthread"
+    CFLAGS="$CFLAGS -pthread"
   else
     dnl gcc on Solaris
     TSRM_CHECK_GCC_ARG(-pthreads, gcc_pthreads)
     if test "$gcc_pthreads" = "yes"; then
-      LDFLAGS="$LDFLAGS -pthreads"
+      CFLAGS="$CFLAGS -pthreads"
     fi
   fi
 
@@ -63,7 +63,7 @@ if test -n "$GCC"; then
 fi
 
 if test "$ac_cv_func_pthread_kill" != "yes"; then
-  LDFLAGS="$old_LDFLAGS"
+  CFLAGS="$old_CFLAGS"
 dnl Fall back to the standard -lpthread
   AC_CHECK_LIB(pthread, pthread_kill)
   unset ac_cv_func_pthread_kill
