@@ -568,7 +568,7 @@ void execute_new_code(CLS_D)
 	}
 
     opline=CG(active_op_array)->opcodes + CG(active_op_array)->start_op_number;
-	end=opline+CG(active_op_array)->last;
+	end=CG(active_op_array)->opcodes+CG(active_op_array)->last;
 
     while (opline<end) {
         if (opline->op1.op_type==IS_CONST) {
