@@ -54,4 +54,4 @@ object(simplexml_element)#%d (1) {
   [0]=>
   string(9) "JoeFooBar"
 }
-===Done===
+===DONE===

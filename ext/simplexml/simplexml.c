@@ -1077,15 +1077,6 @@ sxe_object_clone(void *object, void **clone_ptr TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ _free_ns_entry()
- */
-static void
-_free_ns_entry(void *p, xmlChar *data)
-{
-	xmlFree(p);
-}
-/* }}} */
-
 /* {{{ sxe_object_free_storage()
  */
 static void sxe_object_free_storage(void *object TSRMLS_DC)
@@ -1150,7 +1141,7 @@ php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 {
 	zend_object_value rv;
 
-	rv.handle = zend_objects_store_put(intern, NULL, sxe_object_free_storage, sxe_object_clone TSRMLS_CC);
+	rv.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t)sxe_object_free_storage, sxe_object_clone TSRMLS_CC);
 	rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
 
 	return rv;
