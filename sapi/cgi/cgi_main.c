@@ -340,7 +340,7 @@ static void define_command_line_ini_entry(char *arg)
 }
 
 
-void php_register_command_line_global_vars(char **arg)
+static void php_register_command_line_global_vars(char **arg)
 {
 	char *var, *val;
 	ELS_FETCH();
