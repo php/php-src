@@ -363,7 +363,6 @@ main() {
   hpux) AC_DEFINE(PHP_HPUX_TIME_R,1,[Whether you have HP-UX 10.x]) ;;
   irix) AC_DEFINE(PHP_IRIX_TIME_R,1,[Whether you have IRIX-style functions]) ;;
   esac
-fi
 ])
 
 AC_DEFUN(PHP_SUBST,[
