@@ -263,7 +263,7 @@ PHP_FUNCTION(swf_closefile)
 		int b;
 		
 		if ((f = VCWD_FOPEN(SWFG(tmpfile_name), "r")) == NULL) {
-			php_error(E_WARNING, "Cannot create temporary file for stdout support with SWF");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create temporary file for stdout support with SWF");
 			RETURN_NULL();
 		}
 		
@@ -606,8 +606,8 @@ PHP_FUNCTION(swf_definepoly)
 	convert_to_double_ex(width);
 	
 	if (Z_TYPE_PP(coordinates) != IS_ARRAY) {
-		return;
-		php_error(E_WARNING, "Wrong datatype of second argument to swf_definepoly");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong datatype of second argument to swf_definepoly");
+		RETURN_FALSE;
 	}
 	
 	npoints = Z_LVAL_PP(NumPoints);
