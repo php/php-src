@@ -1369,6 +1369,7 @@ static int php_hash_environment(TSRMLS_D)
 	int _gpc_flags[5] = {0, 0, 0, 0, 0};
 	zend_bool have_variables_order;
 	zval *dummy_track_vars_array = NULL;
+	zval *env_vars = NULL;
 	zend_bool initialized_dummy_track_vars_array=0;
 	int i;
 	char *variables_order;
@@ -1401,9 +1402,10 @@ static int php_hash_environment(TSRMLS_D)
 	} else {
 		variables_order = PG(gpc_order);
 		have_variables_order=0;
-		ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
-		array_init(PG(http_globals)[TRACK_VARS_ENV]);
-		INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+		ALLOC_ZVAL(env_vars);
+		array_init(env_vars);
+		INIT_PZVAL(env_vars);
+		PG(http_globals)[TRACK_VARS_ENV] = env_vars;
 		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 		if (PG(register_globals)) {
 			php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV]) TSRMLS_CC);
@@ -1446,9 +1448,10 @@ static int php_hash_environment(TSRMLS_D)
 			case 'E':
 				if (!_gpc_flags[3]) {
 					if (have_variables_order) {
-						ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
-						array_init(PG(http_globals)[TRACK_VARS_ENV]);
-						INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+						ALLOC_ZVAL(env_vars);
+						array_init(env_vars);
+						INIT_PZVAL(env_vars);
+						PG(http_globals)[TRACK_VARS_ENV] = env_vars;
 						php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 						if (PG(register_globals)) {
 							php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV]) TSRMLS_CC);

@@ -458,11 +458,13 @@ PHP_MSHUTDOWN_FUNCTION(sybase)
 PHP_RSHUTDOWN_FUNCTION(sybase)
 {
 	efree(SybCtG(appname));
+	SybCtG(appname) = NULL;
 	if (SybCtG(callback_name)) {
 		zval_ptr_dtor(&SybCtG(callback_name));
 		SybCtG(callback_name)= NULL;
 	}
 	STR_FREE(SybCtG(server_message));
+	SybCtG(server_message) = NULL;
 	return SUCCESS;
 }
 

@@ -290,20 +290,26 @@ PHP_MSHUTDOWN_FUNCTION(w32api)
  */
 PHP_RINIT_FUNCTION(w32api)
 {
+	HashTable *tmp;
+	WG(funcs) = WG(libraries) = WG(callbacks) = WG(types) = NULL;
+	
 	/* Allocate Request Specific HT's here
 	 */
-	ALLOC_HASHTABLE(WG(funcs));
-	zend_hash_init(WG(funcs), 1, NULL, php_w32api_hash_func_dtor, 1);
+	ALLOC_HASHTABLE(tmp);
+	zend_hash_init(tmp, 1, NULL, php_w32api_hash_func_dtor, 1);
+	WG(funcs) = tmp;
 
-	ALLOC_HASHTABLE(WG(libraries));
-	zend_hash_init(WG(libraries), 1, NULL, php_w32api_hash_lib_dtor, 1);
+	ALLOC_HASHTABLE(tmp);
+	zend_hash_init(tmp, 1, NULL, php_w32api_hash_lib_dtor, 1);
+	WG(libraries) = tmp;
 
-	ALLOC_HASHTABLE(WG(callbacks));
-	zend_hash_init(WG(callbacks), 1, NULL, php_w32api_hash_callback_dtor, 1);
+	ALLOC_HASHTABLE(tmp);
+	zend_hash_init(tmp, 1, NULL, php_w32api_hash_callback_dtor, 1);
+	WG(callbacks) = tmp;
 
-	ALLOC_HASHTABLE(WG(types));
-	zend_hash_init(WG(types), 1, NULL, php_w32api_hash_type_dtor, 1);
-
+	ALLOC_HASHTABLE(tmp);
+	zend_hash_init(tmp, 1, NULL, php_w32api_hash_type_dtor, 1);
+	WG(types) = tmp;
 
 	return SUCCESS;
 
@@ -330,6 +336,7 @@ PHP_RSHUTDOWN_FUNCTION(w32api)
 	zend_hash_destroy(WG(types));
 	FREE_HASHTABLE(WG(types));
 
+	WG(funcs) = WG(libraries) = WG(callbacks) = WG(types) = NULL;
 
 	return SUCCESS;
 }

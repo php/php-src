@@ -465,7 +465,7 @@ static void init_request_info(TSRMLS_D)
 	request_rec *r = ((request_rec *) SG(server_context));
 	char *content_length = (char *) table_get(r->subprocess_env, "CONTENT_LENGTH");
 	const char *authorization=NULL;
-	char *tmp;
+	char *tmp, *tmp_user;
 
 	SG(request_info).query_string = r->args;
 	SG(request_info).path_translated = r->filename;
@@ -482,15 +482,16 @@ static void init_request_info(TSRMLS_D)
 		&& (!PG(safe_mode) || (PG(safe_mode) && !auth_type(r)))
 		&& !strcasecmp(getword(r->pool, &authorization, ' '), "Basic")) {
 		tmp = uudecode(r->pool, authorization);
-		SG(request_info).auth_user = getword_nulls_nc(r->pool, &tmp, ':');
-		if (SG(request_info).auth_user) {
-			r->connection->user = pstrdup(r->connection->pool, SG(request_info).auth_user);
+		tmp_user = getword_nulls_nc(r->pool, &tmp, ':');
+		SG(request_info).auth_user = NULL;
+		if (tmp_user) {
+			r->connection->user = pstrdup(r->connection->pool, tmp_user);
 			r->connection->ap_auth_type = "Basic";
-			SG(request_info).auth_user = estrdup(SG(request_info).auth_user);
+			SG(request_info).auth_user = estrdup(tmp_user);
 		}
-		SG(request_info).auth_password = tmp;
-		if (SG(request_info).auth_password) {
-			SG(request_info).auth_password = estrdup(SG(request_info).auth_password);
+		SG(request_info).auth_password = NULL;
+		if (tmp) {
+			SG(request_info).auth_password = estrdup(tmp);
 		}
 	} else {
 		SG(request_info).auth_user = NULL;
