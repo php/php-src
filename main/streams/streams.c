@@ -265,7 +265,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 	int release_cast = 1;
 
 #if STREAM_DEBUG
-fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->label, stream, stream->__orig_path, stream->in_free, close_options);
+fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->label, stream, stream->orig_path, stream->in_free, close_options);
 #endif
 
 	/* recursion protection */
@@ -295,7 +295,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->la
 
 #if STREAM_DEBUG
 fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remove_rsrc=%d\n",
-		stream->ops->label, stream, stream->__orig_path, preserve_handle, release_cast, remove_rsrc);
+		stream->ops->label, stream, stream->orig_path, preserve_handle, release_cast, remove_rsrc);
 #endif
 
 	/* make sure everything is saved */
@@ -368,11 +368,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			 * as leaked; it will log a warning, but lets help it out and display what kind
 			 * of stream it was. */
 			char *leakinfo;
-			spprintf(&leakinfo, 0, __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed\n", __LINE__, stream->ops->label, stream, stream->__orig_path);
+			spprintf(&leakinfo, 0, __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed\n", __LINE__, stream->ops->label, stream, stream->orig_path);
 
-			if (stream->__orig_path) {
-				pefree(stream->__orig_path, stream->is_persistent);
-				stream->__orig_path = NULL;
+			if (stream->orig_path) {
+				pefree(stream->orig_path, stream->is_persistent);
+				stream->orig_path = NULL;
 			}
 			
 # if defined(PHP_WIN32)
@@ -382,14 +382,19 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 # endif
 			efree(leakinfo);
 		} else {
-			if (stream->__orig_path) {
-				pefree(stream->__orig_path, stream->is_persistent);
-				stream->__orig_path = NULL;
+			if (stream->orig_path) {
+				pefree(stream->orig_path, stream->is_persistent);
+				stream->orig_path = NULL;
 			}
 
 			pefree(stream, stream->is_persistent);
 		}
 #else
+		if (stream->orig_path) {
+			pefree(stream->orig_path, stream->is_persistent);
+			stream->orig_path = NULL;
+		}
+
 		pefree(stream, stream->is_persistent);
 #endif
 	}
@@ -1516,10 +1521,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	php_stream *stream = NULL;
 	php_stream_wrapper *wrapper = NULL;
 	char *path_to_open;
-#if ZEND_DEBUG
 	int persistent = options & STREAM_OPEN_PERSISTENT;
 	char *copy_of_path = NULL;
-#endif
 
 	
 	if (opened_path) {
@@ -1558,12 +1561,10 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		}
 	}
 
-#if ZEND_DEBUG
 	if (stream) {
 		copy_of_path = pestrdup(path, persistent);
-		stream->__orig_path = copy_of_path;
+		stream->orig_path = copy_of_path;
 	}
-#endif
 
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
 		php_stream *newstream;
@@ -1574,9 +1575,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 			case PHP_STREAM_UNCHANGED:
 				return stream;
 			case PHP_STREAM_RELEASED:
-#if ZEND_DEBUG
-				newstream->__orig_path = pestrdup(path, persistent);
-#endif
+				newstream->orig_path = pestrdup(path, persistent);
 				return newstream;
 			default:
 				php_stream_close(stream);

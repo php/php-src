@@ -194,8 +194,8 @@ struct _php_stream  {
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
 #if ZEND_DEBUG
 	int __exposed;	/* non-zero if exposed as a zval somewhere */
-	char *__orig_path; /* it really helps when debugging "unclosed" streams */
 #endif
+	char *orig_path;
 
 	php_stream_context *context;
 	int flags;	/* PHP_STREAM_FLAG_XXX */
