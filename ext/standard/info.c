@@ -638,6 +638,18 @@ PHP_FUNCTION(zend_logo_guid)
 	RETURN_STRINGL(ZEND_LOGO_GUID, sizeof(ZEND_LOGO_GUID)-1, 1);
 }
 
+/* {{{ proto string sapi_module_name(void)
+   Return the current SAPI module name */
+PHP_FUNCTION(php_sapi_name)
+{
+	if(sapi_module.name)
+		RETURN_STRING(sapi_module.name,1);
+	else
+		RETURN_FALSE;
+}
+
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

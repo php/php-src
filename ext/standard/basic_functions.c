@@ -122,6 +122,7 @@ function_entry basic_functions[] = {
 	PHP_FE(phpcredits,								NULL)
 	PHP_FE(php_logo_guid,							NULL)
 	PHP_FE(zend_logo_guid,							NULL)
+	PHP_FE(php_sapi_name,							NULL)
 	
 	PHP_FE(strnatcmp,								NULL)
 	PHP_FE(strnatcasecmp,							NULL)
