@@ -328,7 +328,7 @@ PHPAPI int php_printf(const char *format, ...)
 /* extended error handling function */
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list orig_args)
 {
-	char buffer[1024],buf2[1024],*alt_func = NULL;
+	char buffer[1024];
 	int size = 0;
 	va_list args;
 	ELS_FETCH();
@@ -371,44 +371,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			va_end(args);
 			buffer[sizeof(buffer) - 1] = 0;
 
-			if(strstr(format,"Call to undefined function:")) {
-				int dist,min,stat;
-				char *name,*str,*p;
-				char *string_key;
-				ulong num_key;
-				
-				size = vsnprintf(buf2, sizeof(buf2) - 1, "%s", args);
-				buf2[sizeof(buf2) - 1] = 0;
-
-				str=estrdup(buf2);
-				for(p=str;*p;p++)
-					*p=tolower(*p);			
-
-				min=5; 
-				if(strlen(str)<10) min=3;
-				if(strlen(str)<6) min=2;
-				
-				zend_hash_internal_pointer_reset(EG(function_table));
-				while(1) {
-					stat=zend_hash_get_current_key(EG(function_table),&string_key,&num_key);
-					if(stat==HASH_KEY_IS_STRING)
-						{
-							dist = fastest_levdist(str,string_key);
-							if(dist<=min) {
-								if(alt_func!=NULL) efree(alt_func);
-								alt_func=estrdup(string_key);
-								min=dist;
-							} 
-						}
-					else if(stat==HASH_KEY_IS_LONG)
-						{ /* empty */ }
-					else
-						break;
-					zend_hash_move_forward(EG(function_table));
-				}
-				efree(str);
-			}
-
 			if (!module_initialized || PG(log_errors)) {
 				char log_buffer[1024];
 
@@ -419,10 +381,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 #endif
 				snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 				php_log_err(log_buffer);
-				if(alt_func) {
-					snprintf(log_buffer, 1024, "    ( maybe you were looking for %s() instead of %s() ? )",alt_func,buf2);
-					php_log_err(log_buffer);
-				}
 			}
 			if (module_initialized && PG(display_errors)) {
 				char *prepend_string = INI_STR("error_prepend_string");
@@ -438,9 +396,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				}
 				php_printf(error_format, error_type_str, buffer,
 						   error_filename, error_lineno);
-				if(alt_func) {
-					php_printf("&nbsp;&nbsp;&nbsp;( maybe you were looking for <b>%s()</b> instead of <b>%s()</b> ? )<br>\n",alt_func,buf2);
-				}
 				if (append_string) {
 					PUTS(append_string);
 				}
