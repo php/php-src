@@ -337,431 +337,6 @@ SOURCE=..\main\win95nt.h
 # Begin Group "Function Modules"
 
 # PROP Default_Filter ""
-# Begin Group "Source Files No. 1"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\standard\array.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\assert.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\base64.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\basic_functions.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\bcmath\bcmath.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\browscap.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\crc32.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\credits.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\crypt.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\datetime.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\dir.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\dl.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\dns.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\exec.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\file.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\filestat.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\flock_compat.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\formatted_print.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\fsock.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\ftp_fopen_wrapper.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\head.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\html.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\http_fopen_wrapper.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\image.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\incomplete_class.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\info.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\iptc.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\lcg.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\levenshtein.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\link.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\mail.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\math.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\md5.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\metaphone.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\microtime.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\session\mod_files.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\session\mod_user.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\pack.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\pageinfo.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\parsedate.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_fopen_wrapper.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mcal\php_mcal.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mysql\php_mysql.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\odbc\php_odbc.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\pcre\php_pcre.c
-# ADD CPP /D "STATIC"
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\rand.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\reg.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\scanf.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\session\session.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\soundex.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\string.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\strnatcmp.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\syslog.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\type.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\uniqid.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\url.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\url_scanner.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\url_scanner_ex.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\var.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\var_unserializer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\versioning.c
-# End Source File
-# End Group
-# Begin Group "Header Files No. 1"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\standard\base64.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\basic_functions.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\datetime.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\dl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\dns.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\exec.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\file.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\flock_compat.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\fsock.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\functions\global.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\head.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\html.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\info.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\md5.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\session\mod_user.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\bcmath\number.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\pageinfo.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_array.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\bcmath\php_bcmath.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_crypt.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_dir.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_filestat.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_fopen_wrappers.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_lcg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\ldap\php_ldap.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_mail.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mcal\php_mcal.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mysql\php_mysql.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\odbc\php_odbc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\pcre\php_pcre.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_rand.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\session\php_session.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_string.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_syslog.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\functions\phpdir.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\functions\phpmath.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\reg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\scanf.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\type.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\uniqid.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\url.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\url_scanner.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\url_scanner_ex.h
-# End Source File
-# End Group
 # Begin Group "PCRE"
 
 # PROP Default_Filter ""
@@ -1730,13 +1305,12 @@ SOURCE=..\ext\bcmath\libbcmath\src\private.h
 # End Source File
 # End Group
 # End Group
-# End Group
-# Begin Group "Win32"
+# Begin Group "COM"
 
 # PROP Default_Filter ""
-# Begin Group "Source Files No. 2"
+# Begin Group "Source Files No. 9"
 
-# PROP Default_Filter ""
+# PROP Default_Filter ".c"
 # Begin Source File
 
 SOURCE=..\ext\com\COM.c
@@ -1745,6 +1319,472 @@ SOURCE=..\ext\com\COM.c
 
 SOURCE=..\ext\com\conversion.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\VARIANT.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 9"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\com\com.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\conversion.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\php_COM.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\php_VARIANT.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\variant.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "Standard"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 1"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\standard\array.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\assert.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\base64.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\basic_functions.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\bcmath.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\browscap.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\crc32.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\credits.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\crypt.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\datetime.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\dir.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\dl.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\dns.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\exec.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\file.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\filestat.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\flock_compat.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\formatted_print.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\fsock.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\ftp_fopen_wrapper.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\head.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\html.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\http_fopen_wrapper.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\image.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\incomplete_class.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\info.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\iptc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\lcg.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\levenshtein.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\link.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\mail.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\math.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\md5.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\metaphone.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\microtime.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\session\mod_files.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\session\mod_user.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\pack.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\pageinfo.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\parsedate.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_fopen_wrapper.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mcal\php_mcal.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mysql\php_mysql.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\odbc\php_odbc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\php_pcre.c
+# ADD CPP /D "STATIC"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\rand.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\reg.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\scanf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\session\session.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\soundex.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\string.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\strnatcmp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\syslog.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\type.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\uniqid.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner_ex.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\var.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\var_unserializer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\versioning.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 1"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\standard\base64.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\basic_functions.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\datetime.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\dl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\dns.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\exec.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\file.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\flock_compat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\fsock.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\functions\global.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\head.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\html.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\info.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\md5.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\session\mod_user.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\number.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\pageinfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_array.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\php_bcmath.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_crypt.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_dir.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_filestat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_fopen_wrappers.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_lcg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\ldap\php_ldap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_mail.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mcal\php_mcal.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mysql\php_mysql.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\odbc\php_odbc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\pcre\php_pcre.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_rand.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\session\php_session.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_string.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_syslog.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\functions\phpdir.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\functions\phpmath.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\reg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\scanf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\type.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\uniqid.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner_ex.h
+# End Source File
+# End Group
+# End Group
+# End Group
+# Begin Group "Win32"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 2"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=..\win32\pwd.c
@@ -1764,10 +1804,6 @@ SOURCE=..\win32\sendmail.c
 # Begin Source File
 
 SOURCE=..\win32\time.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\VARIANT.c
 # End Source File
 # Begin Source File
 
@@ -1791,14 +1827,6 @@ SOURCE=..\win32\wsyslog.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\ext\com\com.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\conversion.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\win32\grp.h
 # End Source File
 # Begin Source File
@@ -1807,19 +1835,7 @@ SOURCE=..\win32\param.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\com\php_COM.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\win32\php_registry.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\php_VARIANT.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\php_versioning.h
 # End Source File
 # Begin Source File
 
@@ -1847,11 +1863,11 @@ SOURCE=..\win32\unistd.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\com\variant.h
+SOURCE=..\win32\wfile.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\win32\wfile.h
+SOURCE=.\winutil.h
 # End Source File
 # End Group
 # End Group
@@ -1909,10 +1925,6 @@ InputPath=..\ext\standard\parsedate.y
 !ENDIF 
 
 # End Source File
-# End Group
-# Begin Group "Scanners"
-
-# PROP Default_Filter ""
 # End Group
 # Begin Group "Text Files"
 
