@@ -238,7 +238,7 @@ AP_MODULE_DECLARE_DATA module php4_module;
 	}
 
 static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb, 
-		ap_input_mode_t mode, apr_read_type_e block, apr_off_t *readbytes)
+		ap_input_mode_t mode, apr_read_type_e block, apr_off_t readbytes)
 {
 	php_struct *ctx;
 	long old_index;
