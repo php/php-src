@@ -1,3 +1,8 @@
+2003-02-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      Syntactic sugar is sweet.
+
 2003-02-25  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:

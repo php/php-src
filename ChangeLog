@@ -1,3 +1,87 @@
+2003-02-26  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/gd.c:
+      add imagesavealpha wrapper (Jukka Holappa <jukkaho@mail.student.oulu.fi>,
+            2 Pierre-Alain Joye)
+
+    * ext/gd/php_gd.h:
+      add imagesavealpha wrapper (Jukka Holappa <jukkaho@mail.student.oulu.fi>,
+      Pierre-Alain Joye)
+
+2003-02-26  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/main.c:
+      MFB: Get rid of a redundant syscall on non-Windows
+
+    * (PHP_4_3)
+      main/main.c:
+      Get rid of an unnecessary syscall on non-Windows.  We don't need two
+      setitimer() calls here in order to reset the timer.
+
+2003-02-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/exec.c
+      ext/standard/exec.h:
+      1) Make the output of system() binary safe
+      2) Solved a memory leak when the return_value variable passed by reference
+      is
+         not an integer in system()/exec()/passthru().
+      3) Solved a bug in exec(), which would make it append to the 2nd parameter
+         (passed by reference) if the parameter is an array instead of
+      overwriting it.
+      4) Changed the code to use the streams code, resulting in a smaller code
+      base.
+      5) Various cleanups resulting in reduction of overall code base inside the
+      file
+         by ~ 1/3.
+      6) Speed improvements of ~2.5 times compared to previous performance
+      (based on
+         attached PHP script).
+
+2003-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      allow keys as array(group, name) for handler inifile
+
+    * ext/dba/dba_flatfile.c:
+      ws
+
+    * ext/dba/libcdb/cdb.c:
+      make it faster
+
+    * ext/dba/libinifile/inifile.c:
+      if skip param of dba_fetch is -1 stop do not restart search after last
+      element
+
+2003-02-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/mail.c
+      main/main.c:
+      - Added an extra ini setting with which extra commands can be forced to
+        the sendmail deamon on a per-vhost base. The value in this ini setting
+        will override all extra commands passed as the 5th parameter to mail()
+        and will work in Safe Mode.
+
+    * ext/standard/file.c:
+      - Fix proto
+
+    * ext/standard/basic_functions.c:
+      - Whitespace
+
+2003-02-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * (PHP_4_3)
+      ext/yp/yp.c
+      ext/yp/yp.c:
+      MFphp5
+
+    * ext/yp/yp.c:
+      changed to emalloc just to be safe
+
+    * scripts/ext_skel_ng/php_logo.php
+      scripts/ext_skel_ng/php_resource.php:
+      forgot to add these two on my last commit :(
+
 2003-02-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/exec.c:
