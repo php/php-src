@@ -1,6 +1,12 @@
 #ifndef PHP_COMPAT_H
 #define PHP_COMPAT_H
 
+#ifdef PHP_WIN32
+#include "config.w32.h"
+#else
+#include "php_config.h"
+#endif
+
 #if defined(HAVE_BUNDLED_PCRE) || !defined(PHP_VERSION)
 #define pcre_compile 			php_pcre_compile
 #define pcre_copy_substring		php_pcre_copy_substring

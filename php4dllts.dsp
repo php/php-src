@@ -149,10 +149,6 @@ SOURCE=.\main.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_ticks.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\mergesort.c
 # End Source File
 # Begin Source File
@@ -166,6 +162,10 @@ SOURCE=.\php_ini.c
 # Begin Source File
 
 SOURCE=.\php_realpath.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_ticks.c
 # End Source File
 # Begin Source File
 
@@ -246,6 +246,10 @@ SOURCE=.\php.h
 # Begin Source File
 
 SOURCE=.\php3_compat.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_compat.h
 # End Source File
 # Begin Source File
 
