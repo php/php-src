@@ -1,3 +1,22 @@
+2003-03-29  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Add missing initialization
+
+    * zend_compile.c:
+      Fix crash
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h:
+      Initial support for enforcing prototype of abstract/interface method
+      implementations
+
+2003-03-29  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend.c:
+      remove unused variable
+
 2003-03-27  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute.c:
