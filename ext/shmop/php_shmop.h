@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Slava Poliakov <slavapl@mailandnews.com>                    |
-   |          Ilia Alshanetsky <iliaa@home.com>                           |
+   | Authors: Slava Poliakov <hackie@prohost.org>                         |
+   |          Ilia Alshanetsky <ilia@prohost.org>                         |
    +----------------------------------------------------------------------+
  */
 #ifndef PHP_SHMOP_H
