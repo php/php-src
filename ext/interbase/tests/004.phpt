@@ -98,14 +98,18 @@ InterBase: BLOB test
     ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
     $bl_s = ibase_blob_close($bl_h);
     ibase_query("insert into test4 (v_integer, v_blob) values (3, ?)", $bl_s);
-
+	ibase_commit();
     echo "echo blob 3\n";
 
     $q = ibase_query("select v_blob from test4 where v_integer = 3");
     $row = ibase_fetch_object($q);
+	ibase_commit();
+	ibase_close();
+	    
+    ibase_connect($test_base);
     ibase_blob_echo($row->V_BLOB);
     ibase_free_result($q);
-    
+
     echo "fetch blob 3\n";
     $q = ibase_query("select v_blob from test4 where v_integer = 3");
     $row = ibase_fetch_object($q,IBASE_TEXT);
