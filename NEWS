@@ -73,6 +73,7 @@ PHP                                                                        NEWS
   (Kamesh Jayachandran).
 - Fixed bug #29385 (Soapserver always uses std class). (David, Dmitry)
 - Fixed bug #29211 (SoapClient doesn't request wsdl through proxy). (Rob)
+- Fixed bug #28817 (Var problem when extending domDocument). (Georg)
 - Fixed bug #28599 (strtotime fails with zero base time). (Derick)
 - Fixed bug #28220 (mb_strwidth() returns wrong width values for some hangul
   characters). (Moriyoshi)
