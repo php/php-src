@@ -67,12 +67,12 @@ class HTTP {
      * @author Stig Bakken <ssb@fast.no>
      */
     function negotiateLanguage(&$supported, $default = 'en_US') {
-	global $HTTP_ACCEPT_LANGUAGE;
+	global $HTTP_SERVER_VARS;
 
 	/* If the client has sent an Accept-Language: header, see if
 	 * it contains a language we support.
 	 */
-	if ($HTTP_ACCEPT_LANGUAGE) {
+	if (isset($HTTP_SERVER_VARS['HTTP_ACCEPT_LANGUAGE'])) {
 	    $accepted = split(',[[:space:]]*', $HTTP_ACCEPT_LANGUAGE);
 	    for ($i = 0; $i < count($accepted); $i++) {
 		if (eregi('^([a-z]+);[[:space:]]*q=([0-9\.]+)', $accepted[$i], &$arr)) {
@@ -82,7 +82,7 @@ class HTTP {
 		    $q = 42;
 		    $l = $accepted[$i];
 		}
-		if ($supported[$l] && $q > 0.0) {
+		if (!empty($supported[$l]) && ($q > 0.0)) {
 		    if ($q == 42) {
 			return $l;
 		    }
@@ -99,9 +99,9 @@ class HTTP {
 	/* Check for a valid language code in the top-level domain of
 	 * the client's host address.
 	 */
-	if (eregi("\.[^\.]+$", $REMOTE_HOST, &$arr)) {
+	if (ereg("\.[^\.]+$", $HTTP_SERVER_VARS['REMOTE_HOST'], &$arr)) {
 	    $lang = strtolower($arr[1]);
-	    if ($supported[$lang]) {
+	    if (!empty($supported[$lang])) {
 		return $lang;
 	    }
 	}
@@ -109,5 +109,4 @@ class HTTP {
 	return $default;
     }
 }
-
 ?>
