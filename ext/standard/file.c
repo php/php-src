@@ -339,6 +339,7 @@ PHP_FUNCTION(get_meta_tags)
 
 				/* get the variable value from the content attribute of the meta tag */
 				tmp = php_memnstr(buf_lcase, "content=\"", sizeof("content=\"")-1, buf_lcase + 8191);
+				val = NULL;
 				if(tmp) {
 					tmp = &buf[tmp - buf_lcase];
 					tmp+=9;
