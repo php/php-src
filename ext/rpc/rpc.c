@@ -171,7 +171,7 @@ ZEND_MINIT_FUNCTION(rpc)
 
 		/* register classes and functions */
 		*HANDLER.ce = zend_register_internal_class_ex(&ce, rpc_entry, NULL TSRMLS_CC);
-		zend_register_functions(NULLHANDLER.functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
+		zend_register_functions(NULL, HANDLER.functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
 		zend_register_ini_entries(HANDLER.ini, module_number TSRMLS_CC);
 	}
 
