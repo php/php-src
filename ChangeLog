@@ -1,3 +1,44 @@
+2004-08-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/simplexml/php_simplexml_exports.h
+      ext/simplexml/simplexml.c:
+      php_error() -> php_error_docref()
+
+2004-08-05  Gabor Hojtsy  <gabor@hojtsy.hu>
+
+    * ext/standard/credits.c:
+      update documentation credits, mentioning that more contributors are listed
+      in the manual
+
+2004-08-05  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      README.CVS-RULES
+      README.CVS-RULES:
+      MFH: remove all references to @ thing, as it's not recommended
+
+    * README.CVS-RULES:
+      remove all references to @ thing, as it's not recommended.
+      always add it to NEWS yourself please (c) Derick =)
+
+    * NEWS:
+      news entry
+
+    * ext/xsl/xsltprocessor.c:
+      change xsl_xsltprocessor_set_parameter() to support parameter->value arrays
+      add test for it
+
+2004-08-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/syslog.reg:
+      Generate a .reg file for the syslog stuff
+      NB: still need a solution for zts and non-zts on the same machine.
+
+2004-08-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Eliminate unneeded variable.
+
 2004-08-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c
