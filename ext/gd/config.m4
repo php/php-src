@@ -237,7 +237,7 @@ if test "$PHP_GD" = "php"; then
 		libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
 		libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c"
 
-  PHP_NEW_EXTENSION(gd, gd.c gdt1.c $sources, $ext_shared,, \\$(GDLIB_CFLAGS))
+  PHP_NEW_EXTENSION(gd, gd.c $sources, $ext_shared,, \\$(GDLIB_CFLAGS))
   PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
 dnl PNG is required by GD library
@@ -295,7 +295,7 @@ else
 
  if test "$PHP_GD" != "no"; then
 
-  PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c gdt1.c, $ext_shared)
+  PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c, $ext_shared)
   PHP_SUBST(GD_SHARED_LIBADD)
 
 dnl Various checks for GD features
