@@ -37,12 +37,14 @@ enable_shared=yes
 
 AC_PROG_LIBTOOL
 
-SHLIBTOOL='$(LIBTOOL)'
+SHARED_LIBTOOL='$(LIBTOOL)'
 PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
 phplibdir="`pwd`/modules"
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+EXTENSION_DIR="$prefix/lib/php/modules"
 
 PHP_SUBST(prefix)
 PHP_SUBST(exec_prefix)
@@ -57,19 +59,22 @@ PHP_SUBST(CPP)
 PHP_SUBST(CPPFLAGS)
 PHP_SUBST(CXX)
 PHP_SUBST(DEFS)
+PHP_SUBST(EXTENSION_DIR)
 PHP_SUBST(EXTRA_LDFLAGS)
 PHP_SUBST(EXTRA_LIBS)
 PHP_SUBST(INCLUDES)
 PHP_SUBST(LEX)
 PHP_SUBST(LEX_OUTPUT_ROOT)
 PHP_SUBST(LFLAGS)
-PHP_SUBST(SHLIBTOOL)
+PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(SHELL)
 
 PHP_FAST_OUTPUT(Makefile)
 
 PHP_FAST_GENERATE
+
+test -d modules || mkdir modules
 
 AC_CONFIG_HEADER(php_config.h)
 
