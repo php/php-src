@@ -224,24 +224,22 @@ AC_ARG_WITH(regex,
 ])
 
 AC_FUNC_FNMATCH	
-AC_CHECK_FUNCS(glob)
 
-AC_CHECK_FUNCS(strfmon)
-
-AC_CHECK_FUNCS(getopt_long getopt_long_only)
+AC_CHECK_FUNCS(glob strfmon getopt_long getopt_long_only)
 
 if test "$PHP_SAPI" = "cgi"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi
 
-PHP_NEW_EXTENSION(standard,	array.c base64.c basic_functions.c browscap.c crc32.c crypt.c cyr_convert.c datetime.c \
-	dir.c dl.c dns.c exec.c file.c filestat.c flock_compat.c \
-	formatted_print.c fsock.c head.c html.c image.c info.c iptc.c lcg.c \
-	link.c mail.c math.c md5.c metaphone.c microtime.c pack.c pageinfo.c \
-        parsedate.c quot_print.c rand.c reg.c soundex.c string.c scanf.c \
-	syslog.c type.c uniqid.c url.c url_scanner.c var.c versioning.c assert.c \
-	strnatcmp.c levenshtein.c incomplete_class.c url_scanner_ex.c \
-	ftp_fopen_wrapper.c http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
-	var_unserializer.c ftok.c aggregation.c sha1.c )
+PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
+                            cyr_convert.c datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
+                            flock_compat.c formatted_print.c fsock.c head.c html.c image.c \
+                            info.c iptc.c lcg.c link.c mail.c math.c md5.c metaphone.c \
+                            microtime.c pack.c pageinfo.c parsedate.c quot_print.c rand.c \
+                            reg.c soundex.c string.c scanf.c syslog.c type.c uniqid.c url.c \
+                            url_scanner.c var.c versioning.c assert.c strnatcmp.c levenshtein.c \
+                            incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
+                            http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
+                            var_unserializer.c ftok.c aggregation.c sha1.c )
 
 PHP_ADD_MAKEFILE_FRAGMENT
