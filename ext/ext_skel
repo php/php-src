@@ -44,27 +44,15 @@ dnl don't forget to call PHP_EXTENSION($extname)
 
 dnl If your extension references something external, use with:
 
-AC_MSG_CHECKING(whether to include $extname support)
-AC_MSG_WITH($extname,
+PHP_ARG_WITH($extname, for $extname support,
 dnl Make sure that the comment is aligned:
-[  --with-$extname             Include $extname support.],[
-  PHP_$EXTNAME=\$withval
-],[
-  PHP_$EXTNAME=no
-])
-AC_MSG_RESULT(\$PHP_$EXTNAME)
+[  --with-$extname             Include $extname support])
 
 dnl Otherwise use enable:
 
-AC_MSG_CHECKING(whether to enable $extname)
-AC_MSG_ENABLE($extname,
+PHP_ARG_ENABLE($extname, whether to enable $extname support,
 dnl Make sure that the comment is aligned:
-[  --enable-$extname           Include $extname support.],[
-  PHP_$EXTNAME=\$enableval
-],[
-  PHP_$EXTNAME=no
-])
-AC_MSG_RESULT(\$PHP_$EXTNAME)
+[  --enable-$extname           Enable $extname support])
 
 if test "\$PHP_$EXTNAME" != "no"; then
   dnl Action..

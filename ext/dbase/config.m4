@@ -1,18 +1,13 @@
 dnl $Id$
 
-AC_MSG_CHECKING(whether to include the bundled dbase library)
-AC_ARG_WITH(dbase,
-[  --with-dbase            Include the bundled dbase library],
-[
-  if test "$withval" = "yes"; then
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(DBASE,1,[ ])
-	PHP_EXTENSION(dbase)
-  else
-	AC_MSG_RESULT(no)
-	AC_DEFINE(DBASE,0,[ ])
-  fi
-],[
-  AC_MSG_RESULT(no)
+AC_ARG_WITH(dbase,[],[enable_dbase=$withval])
+
+PHP_ARG_ENABLE(dbase,whether to enable the bundled dbase library,
+[  --enable-dbase          Enable the bundled dbase library])
+
+if test "$PHP_DBASE" = "yes"; then
+  AC_DEFINE(DBASE,1,[ ])
+  PHP_EXTENSION(dbase)
+else
   AC_DEFINE(DBASE,0,[ ])
-])
+fi
