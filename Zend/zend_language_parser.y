@@ -456,8 +456,8 @@ variable_modifier:
 ;
 
 method_modifiers:
-		/* empty */							{ $$.u.constant.value.lval = 0; }
-	|	non_empty_method_modifiers			{ $$ = $1; }
+		/* empty */							{ $$.u.constant.value.lval = ZEND_ACC_PUBLIC; }
+	|	non_empty_method_modifiers			{ $$ = $1;  if (!($$.u.constant.value.lval & ZEND_ACC_PPP_MASK)) { $$.u.constant.value.lval |= ZEND_ACC_PUBLIC; } }
 ;
 
 non_empty_method_modifiers:

@@ -97,10 +97,7 @@ typedef struct _zend_brk_cont_element {
 #define ZEND_ACC_PUBLIC    0x10
 #define ZEND_ACC_PROTECTED 0x20
 #define ZEND_ACC_PRIVATE   0x40
-
-/* AND mask for accessing only public/protected/private of fn_flags
- */
-#define ZEND_FN_PPP_MASK  0xF0
+#define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 
 char *zend_visibility_string(zend_uint fn_flags);
 
