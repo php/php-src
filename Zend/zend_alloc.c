@@ -592,7 +592,7 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 #endif
 
 
-ZEND_API void _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+ZEND_API int _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mem_header *p = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-PLATFORM_PADDING);
 	ALS_FETCH();
@@ -611,6 +611,7 @@ ZEND_API void _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	/* add the block to the persistent list */
 	ADD_POINTER_TO_LIST(p);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
+	return p->size;
 }
 
 
