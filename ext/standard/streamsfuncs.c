@@ -726,7 +726,6 @@ PHP_FUNCTION(stream_context_get_options)
 	context = decode_context_param(zcontext TSRMLS_CC);
 	ZEND_VERIFY_RESOURCE(context);
 
-	array_init(return_value);
 	*return_value = *context->options;
 	zval_copy_ctor(return_value);
 		
