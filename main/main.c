@@ -415,7 +415,7 @@ PHPAPI void php_error(int type, const char *format,...)
 			if (PG(log_errors)) {
 				char log_buffer[1024];
 
-				snprintf(log_buffer, 1024, "PHP 3 %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+				snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 				php3_log_err(log_buffer);
 			}
 			if (PG(display_errors)) {
