@@ -17,6 +17,7 @@
 
 /* set to enable bundled expat library */
 #define HAVE_LIBEXPAT 1
+#define HAVE_WDDX 1
 
 /* should be added to runtime config*/
 #define PHP3_URL_FOPEN 1
