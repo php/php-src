@@ -41,11 +41,11 @@ zend_class_entry COM_class_entry;
 
 END_EXTERN_C()
 
-#define COM_module_ptr &COM_module_entry
+#define phpext_com_ptr &COM_module_entry
 
 #else
 
-#define COM_module_ptr NULL
+#define phpext_com_ptr NULL
 
 #endif  /* PHP_WIN32 */
 
