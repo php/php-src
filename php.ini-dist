@@ -930,7 +930,7 @@ sockets.use_system_read = On
 [Crack]
 ; Modify the setting below to match the directory location of the cracklib
 ; dictionary files.  Include the base filename, but not the file extension.
-crack.default_dictionary = "c:\php4\lib\cracklib_dict"
+; crack.default_dictionary = "c:\php\lib\cracklib_dict"
 
 ; Local Variables:
 ; tab-width: 4
