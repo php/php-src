@@ -239,9 +239,10 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result)
 }
 
 
-ZEND_API void zend_register_constant(zend_constant *c ELS_DC)
+ZEND_API int zend_register_constant(zend_constant *c ELS_DC)
 {
 	char *lowercase_name = zend_strndup(c->name, c->name_len);
+	int ret = SUCCESS;
 
 #if 0
 	printf("Registering constant for module %d\n",c->module_number);
@@ -250,8 +251,11 @@ ZEND_API void zend_register_constant(zend_constant *c ELS_DC)
 	zend_str_tolower(lowercase_name, c->name_len);
 	if (zend_hash_add(EG(zend_constants), lowercase_name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
 		zval_dtor(&c->value);
+		zend_error(E_NOTICE,"Constant %s already defined",lowercase_name);
+		ret = FAILURE;
 	}
 	free(lowercase_name);
+	return ret;
 }
 
 

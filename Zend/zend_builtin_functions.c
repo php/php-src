@@ -394,6 +394,7 @@ ZEND_FUNCTION(define)
 			ZEND_WRONG_PARAM_COUNT();
 			break;
 	}
+
 	switch((*val)->type) {
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -414,8 +415,11 @@ ZEND_FUNCTION(define)
 	c.flags = case_sensitive; /* non persistent */
 	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
 	c.name_len = (*var)->value.str.len+1;
-	zend_register_constant(&c ELS_CC);
-	RETURN_TRUE;
+	if(zend_register_constant(&c ELS_CC) == SUCCESS) {
+	  RETURN_TRUE;
+	} else {
+	  RETURN_FALSE;
+	}
 }
 
 
