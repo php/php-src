@@ -31,9 +31,9 @@ AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
 mkdir include >/dev/null 2>&1
 > Makefile.objects
 > Makefile.fragments
-dnl We need to play tricks here to avoid matching the egrep line itself
+dnl We need to play tricks here to avoid matching the grep line itself
 pattern=define
-egrep $pattern'.*include/php' $srcdir/configure|sed 's/.*>//'|xargs touch 2>/dev/null
+grep -E $pattern'.*include/php' $srcdir/configure|sed 's/.*>//'|xargs touch 2>/dev/null
 ])
 
 dnl PHP_GEN_GLOBAL_MAKEFILE
@@ -1114,7 +1114,7 @@ AC_DEFUN([PHP_CHECK_CC_OPTION],[
   changequote([,])
   AC_MSG_CHECKING([if compiler supports -$1 really])
   ac_php_compile="${CC-cc} -$opt -o conftest $CFLAGS $CPPFLAGS conftest.$ac_ext 2>&1"
-  if eval $ac_php_compile 2>&1 | egrep "$opt" > /dev/null 2>&1 ; then
+  if eval $ac_php_compile 2>&1 | grep -E "$opt" > /dev/null 2>&1 ; then
     eval php_cc_$var=no
 	AC_MSG_RESULT([no])
   else
@@ -1771,7 +1771,7 @@ $debug ||
   _sed=sed
 
   # Check for GNU sed and select it if it is found.
-  if "${_sed}" --version 2>&1 < /dev/null | egrep '(GNU)' > /dev/null; then
+  if "${_sed}" --version 2>&1 < /dev/null | grep -E '(GNU)' > /dev/null; then
     ac_cv_path_sed=${_sed}
   else
     cat /dev/null > "$tmp/sed.in"

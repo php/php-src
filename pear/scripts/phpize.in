@@ -30,9 +30,9 @@ autoheader
 libtoolize -f -c
 
 # dumping API NOs:
-PHP_API_VERSION=`egrep '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
-ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO//'`
-ZEND_EXTENSION_API_NO=`egrep '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|sed 's/#define ZEND_EXTENSION_API_NO//'`
+PHP_API_VERSION=`grep -E '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
+ZEND_MODULE_API_NO=`grep -E '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO//'`
+ZEND_EXTENSION_API_NO=`grep -E '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|sed 's/#define ZEND_EXTENSION_API_NO//'`
 
 echo "Configuring for:"
 echo "  PHP Api Version:  "$PHP_API_VERSION
