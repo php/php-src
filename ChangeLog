@@ -1,3 +1,127 @@
+2000-08-24  Dan Kalowsky  <dkalowsky@wgate.com>
+
+    * ext/odbc/config.m4:
+    prefer -gt to -lt, and dropped the version number to 2 instead of 3
+
+2000-08-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * makedist:
+    Don't distribute buildmk.stamp to the end user. Otherwise, buildcheck.sh
+    won't be run on the user's system, when they try to use buildconf.
+
+2000-08-24  Zeev Suraski  <zeev@php.net>
+
+    * ext/interbase/interbase.dsp: Update .dsp
+
+    * main/php.h
+      ext/imap/php_imap.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h: - Fix IMAP build problem
+    - Allow external DLLs to use warn_not_available
+
+2000-08-24  Sterling Hughes  <stirling@bestweb.net>
+
+    * pear/DB.php:
+    Remove bogus commit that made DB::DB() an alias for DB::connect()
+
+2000-08-24  Daniel Beulshausen  <daniel@php4win.de>
+
+    * php_modules.dsw: updated dsw with fdf and gd
+
+    * ext/gd/gd.dsp: added the gd extension - see the comment!
+
+    * ext/fdf/fdf.dsp: dsp for the win32 fdf extension
+
+    * ext/sybase_ct/sybase_ct.dsp
+      ext/zlib/zlib.dsp
+      ext/pgsql/pgsql.dsp
+      ext/pdf/pdf.dsp
+      ext/oracle/oracle.dsp
+      ext/oci8/oci8.dsp
+      ext/mssql/mssql.dsp
+      ext/ldap/ldap.dsp
+      ext/java/java.dsp
+      ext/imap/imap.dsp
+      ext/interbase/interbase.dsp
+      ext/curl/curl.dsp
+      ext/dbase/dbase.dsp
+      ext/domxml/domxml.dsp
+      ext/exif/exif.dsp
+      ext/ftp/ftp.dsp
+      ext/calendar/calendar.dsp
+      ext/cpdf/cpdf.dsp:
+    deleted a few unnecceasary defines and added the Release_TS_Inline path to the libpath
+
+2000-08-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Andi's suggestion.
+
+2000-08-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/readline/readline.c: beautify
+
+2000-08-24  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/readline/readline.c: Fix segfault on readline without parameters
+
+2000-08-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mysql/libmysql/fix_copyright: More complete set of (C) notes
+
+    * ext/mysql/libmysql/fix_copyright:
+    Script for replacing the copyright messages
+
+    * scripts/armerge
+      scripts/mkextlib.in
+      scripts/preconfig: These scripts are not in use anymore. RIP.
+
+2000-08-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    - Fixed a bug that did not respect limit parameter in preg_replace() when
+      using /e modifier. 
+
+2000-08-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/Makefile.in: builddir is used by the Unix build framework.
+
+    Rename builddir to phpbuilddir
+
+    * build/mkdep.awk: Small speedup
+
+    * build/mkdep.awk: Speed it up by moving the two sub's into the main loop.
+
+    Also print out dependencies immediately instead of buffering them.
+
+    * build/mkdep.awk
+      build/rules.mk:
+    Create dependencies using an awk script. Works much nicer in vpath
+    environments.
+
+    * ext/java/README: Typo
+
+    * buildconf: Some crappy makes don't handle the .PHONY target correctly.
+
+    So we force a rebuild of generated_lists
+
+2000-08-24  Sterling Hughes  <stirling@bestweb.net>
+
+    * pear/DB/odbc.php: I didn't work on this file.
+
+
+    * pear/DB.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/odbc.php
+      pear/DB/sybase.php
+      pear/File/Find.php
+      pear/PEAR.php.in: -Add getCode() method to PEAR_Error
+    -Correct license versions + My Address for DB/* mods
+    -Correct ibase module
+    -Javadocize File_Find
+    -Add a optional constructor to DB that passes it on to DB::connect()
+
 2000-08-23  Andrei Zmievski  <andrei@ispi.net>
 
     * EXTENSIONS: ext/icap is obsolete.
