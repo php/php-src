@@ -734,7 +734,7 @@ PHP_FUNCTION(wddx_packet_start)
 
 	packet = emalloc(sizeof(wddx_packet));
 	if (!packet) {
-		zend_error(E_WARNING, "Unable to allocate memory in php_wddx_packet_start");
+		zend_error(E_WARNING, "Unable to allocate memory in wddx_packet_start");
 		RETURN_FALSE;
 	}
 	
@@ -749,8 +749,8 @@ PHP_FUNCTION(wddx_packet_start)
 		_php_wddx_packet_start(packet, NULL);
 	
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
-	
-	RETURN_LONG(zend_list_insert(packet, le_wddx));
+
+	RETURN_RESOURCE(zend_list_insert(packet, le_wddx));
 }
 /* }}} */
 
@@ -768,7 +768,11 @@ PHP_FUNCTION(wddx_packet_end)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(packet_id);
+	if (packet_id->type != IS_RESOURCE)
+	{
+		zend_error(E_WARNING, "Invalid packet ID in call to wddx_packet_end");
+		return;
+	}
 	id = packet_id->value.lval;
 	packet = zend_list_find(id, &type);
 	if (type!=le_wddx) {
@@ -812,7 +816,11 @@ PHP_FUNCTION(wddx_add_vars)
 	
 	packet_id = args[0];
 	
-	convert_to_long(packet_id);
+	if (packet_id->type != IS_RESOURCE)
+	{
+		zend_error(E_WARNING, "Invalid packet ID in call to wddx_add_vars");
+		return;
+	}
 	id = packet_id->value.lval;
 	packet = zend_list_find(id, &type);
 	if (type!=le_wddx) {
