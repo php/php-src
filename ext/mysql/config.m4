@@ -1,6 +1,4 @@
 dnl $Id$
-dnl config.m4 for extension mysql
-dnl don't forget to call PHP_EXTENSION(mysql)
 
 AC_MSG_CHECKING(for MySQL support)
 AC_ARG_WITH(mysql,
@@ -8,31 +6,35 @@ AC_ARG_WITH(mysql,
                           install directory, defaults to /usr/local.],
 [
   if test "$withval" != "no"; then
-        if test "$withval" = "yes"; then
-                MYSQL_INCDIR=/usr/local/include/mysql
-                MYSQL_LIBDIR=/usr/local/lib/mysql
-        else
-                if test -f $withval/include/mysql/mysql.h; then
-                        MYSQL_INCDIR=$withval/include/mysql
-                        MYSQL_LIBDIR=$withval/lib/mysql
-                elif test -f $withval/include/mysql.h; then
-                        MYSQL_INCDIR=$withval/include
-                        MYSQL_LIBDIR=$withval/lib
-                else
-                        AC_MSG_RESULT(no)
-                        AC_MSG_ERROR(Invalid MySQL directory - unable to find mysql.h under $withval)
-                fi
-        fi
+    if test "$withval" = "yes"; then
+      MYSQL_INCDIR=/usr/local/include/mysql
+      MYSQL_LIBDIR=/usr/local/lib/mysql
+    else
+      if test -f $withval/include/mysql/mysql.h; then
+        MYSQL_INCDIR=$withval/include/mysql
+        MYSQL_LIBDIR=$withval/lib/mysql
+      elif test -f $withval/include/mysql.h; then
+        MYSQL_INCDIR=$withval/include
+        MYSQL_LIBDIR=$withval/lib
+      else
+        AC_MSG_RESULT(no)
+        AC_MSG_ERROR(Invalid MySQL directory - unable to find mysql.h under $withval)
+      fi
+    fi
     MYSQL_INCLUDE=-I$MYSQL_INCDIR
-        if test -n "$APXS"; then
-                MYSQL_LFLAGS="'${apxs_runpath_switch}$MYSQL_LIBDIR' -L$MYSQL_LIBDIR"
-        else
-                MYSQL_LFLAGS="${ld_runpath_switch}$MYSQL_LIBDIR -L$MYSQL_LIBDIR"
-        fi
+    if test -n "$APXS"; then
+      MYSQL_LFLAGS="'${apxs_runpath_switch}$MYSQL_LIBDIR' -L$MYSQL_LIBDIR"
+    else
+      MYSQL_LFLAGS="${ld_runpath_switch}$MYSQL_LIBDIR -L$MYSQL_LIBDIR"
+    fi
     MYSQL_LIBS=-lmysqlclient
 
     AC_DEFINE(HAVE_MYSQL)
     AC_MSG_RESULT(yes)
+
+    EXTRA_LIBS="$EXTRA_LIBS $MYSQL_LFLAGS $MYSQL_LIBS"
+    INCLUDES="$INCLUDES $MYSQL_INCLUDE"
+    PHP_EXTENSION(mysql)
 
     dnl check for errmsg.h, which isn't installed by some versions of 3.21
     old_CPPFLAGS="$CPPFLAGS"
@@ -40,11 +42,9 @@ AC_ARG_WITH(mysql,
     AC_CHECK_HEADERS(errmsg.h mysql.h)
     CPPFLAGS="$old_CPPFLAGS"
   else
-        AC_MSG_RESULT(no)
-        AC_DEFINE(HAVE_MYSQL, 0)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(HAVE_MYSQL, 0)
   fi
 ],[
   AC_MSG_RESULT(no)
 ])
-EXTRA_LIBS="$EXTRA_LIBS $MYSQL_LFLAGS $MYSQL_LIBS"
-INCLUDES="$INCLUDES $MYSQL_INCLUDE"
