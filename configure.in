@@ -91,6 +91,11 @@ AC_AIX
 
 BSD_MAKEFILE=no
 
+dnl if host_alias is empty, ac_cv_host_alias may still have the info
+if test -z "$host_alias"; then
+    host_alias=$ac_cv_host_alias
+fi
+
 case $host_alias in
 *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
