@@ -87,6 +87,8 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 				*lval = local_lval;
 			}
 			return IS_LONG;
+		} else if (end_ptr_long == str && *end_ptr_long != '\0') { /* ignore partial string matches */
+			return 0;
 		}
 	} else {
 		end_ptr_long=NULL;
