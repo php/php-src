@@ -32,7 +32,7 @@
 #define BLOB_CLOSE		1
 #define BLOB_CANCEL		2
 
-inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd) /* {{{ */
+int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd) /* {{{ */
 {
 	/* shortcut for most common case */
 	if (sizeof(ISC_QUAD) == sizeof(ISC_UINT64)) {
@@ -49,7 +49,7 @@ inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd) /* {{{ */
 }
 /* }}} */
 
-inline char *_php_ibase_quad_to_string(ISC_QUAD const qd) /* {{{ */
+char *_php_ibase_quad_to_string(ISC_QUAD const qd) /* {{{ */
 {
 	char *result = (char *) emalloc(BLOB_ID_LEN+1);
 
