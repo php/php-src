@@ -945,12 +945,22 @@ PHP_FUNCTION(ldap_get_entries)
 			add_index_string(tmp1, num_attrib, attribute, 1);
 
 			num_attrib++;
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
+			ldap_memfree(attribute);
+#endif
 			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 		}
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
+		if (ber != NULL)
+			ber_free(ber, 0);
+#endif
 
 		add_assoc_long(tmp1, "count", num_attrib);
 		dn = ldap_get_dn(ldap, ldap_result_entry);
 		add_assoc_string(tmp1, "dn", dn, 1);
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP || WINDOWS
+		ldap_memfree(dn);
+#endif
 
 		zend_hash_index_update(return_value->value.ht, num_entries, (void *) &tmp1, sizeof(pval *), NULL);
 		
