@@ -399,6 +399,8 @@ static void init_request_info(SLS_D)
 		tmp = uudecode(r->pool, authorization);
 		SG(request_info).auth_user = getword_nulls_nc(r->pool, &tmp, ':');
 		if (SG(request_info).auth_user) {
+			r->connection->user = pstrdup(r->connection->pool,SG(request_info).auth_user);
+			r->connection->ap_auth_type = "Basic";
 			SG(request_info).auth_user = estrdup(SG(request_info).auth_user);
 		}
 		SG(request_info).auth_password = tmp;
