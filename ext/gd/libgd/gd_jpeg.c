@@ -21,10 +21,6 @@
  * Christian Aberger 
  */
 
-#if PHP_WIN32 && !defined(ssize_t)
-typedef int ssize_t;
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
@@ -41,6 +37,10 @@ typedef int ssize_t;
 /* 1.8.1: remove dependency on jinclude.h */
 #include "jpeglib.h"
 #include "jerror.h"
+
+#if PHP_WIN32
+typedef SSIZE_T ssize_t;
+#endif
 
 static const char *const GD_JPEG_VERSION = "1.0";
 
