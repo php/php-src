@@ -447,9 +447,6 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner)
 PHP_RINIT_FUNCTION(url_scanner)
 {
 	BG(url_adapt_state_ex).active = 0;
-
-	smart_str_free(&BG(url_adapt_state_ex).form_app);
-	smart_str_free(&BG(url_adapt_state_ex).url_app);
 	
 	return SUCCESS;
 }
@@ -460,6 +457,9 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 		php_url_scanner_ex_deactivate(TSRMLS_C);
 		BG(url_adapt_state_ex).active = 0;
 	}
+
+	smart_str_free(&BG(url_adapt_state_ex).form_app);
+	smart_str_free(&BG(url_adapt_state_ex).url_app);
 
 	return SUCCESS;
 }
