@@ -277,13 +277,7 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 		return;
 	}
 
-	if (arg == PARSE_COOKIE) {
-		var = php_strtok_r(res, ";", &strtok_buf);
-	} else if (arg == PARSE_POST) {
-		var = php_strtok_r(res, "&", &strtok_buf);
-	} else {
-		var = php_strtok_r(res, PG(arg_separator), &strtok_buf);
-	}
+	var = php_strtok_r(res, ";&", &strtok_buf);
 
 	while (var) {
 		val = strchr(var, '=');
@@ -295,17 +289,12 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 			val_len = php_url_decode(val, strlen(val));
 			php_register_variable_safe(var, val, val_len, array_ptr ELS_CC PLS_CC);
 		}
-		if (arg == PARSE_COOKIE) {
-			var = php_strtok_r(NULL, ";", &strtok_buf);
-		} else {
-			var = php_strtok_r(NULL, PG(arg_separator), &strtok_buf);
-		}
+		var = php_strtok_r(NULL, ";&", &strtok_buf);
 	}
 	if (free_buffer) {
 		efree(res);
 	}
 }
-
 
 
 void php_import_environment_variables(zval *array_ptr ELS_DC PLS_DC)
