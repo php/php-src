@@ -18,7 +18,7 @@ PHP_ARG_WITH(pdo_mysql, for MySQL support,
 if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
 
-  for i in $PHP_PDO_MYSQL /usr/local /usr; do
+  for i in $PHP_PDO_MYSQL /usr/local /usr ; do
       MYSQL_DIR=$i
       PDO_MYSQL_CONFIG=$MYSQL_DIR/bin/mysql_config
       if test -r $i/include/mysql; then
@@ -26,8 +26,14 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       else
 	MYSQL_INC_DIR=$i/include
       fi      
-      MYSQL_LIBS=$i/lib
-      break
+      if test -r $i/lib/mysql; then
+        MYSQL_LIBS=$i/lib/mysql
+      else
+        MYSQL_LIBS=$i/lib
+      fi
+      if test -x $PDO_MYSQL_CONFIG; then
+        break
+      fi
   done
 
   if test -z "$MYSQL_DIR"; then
