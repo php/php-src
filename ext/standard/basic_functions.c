@@ -1551,6 +1551,7 @@ PHP_FUNCTION(call_user_func_array)
     HashTable *params_ar;
     int num_elems,
         element = 0;
+	CLS_FETCH();
     
     if (ZEND_NUM_ARGS() != 2 ||
         zend_get_parameters_ex(2, &func_name, &params) == FAILURE) {
