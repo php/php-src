@@ -1,3 +1,130 @@
+2005-01-25  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/browscap.c:
+      Don't depend on empty_string.
+
+2005-01-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/pack.c:
+      MFH: Fixed bug #31465 (False warning in unpack() when working with *).
+
+    * ext/standard/pack.c:
+      Fixed bug #31465 (False warning in unpack() when working with *).
+
+2005-01-25  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/browscap.c
+      ext/standard/browscap.c
+      sapi/embed/php_embed.c
+      sapi/embed/php_embed.c:
+      MFB (Fix several egregious leaks in ext/browscap and sapi/embed).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/browscap.c
+      sapi/embed/php_embed.c:
+      Fix several egregious leaks in ext/browscap and sapi/embed.
+
+2005-01-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      - Proto fix
+
+2005-01-25  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/imap/php_imap.c:
+      check body for NULL before using and prevent segfaults
+
+2005-01-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/dio/dio.c
+      ext/dio/dio.c:
+      MFH: - Fixed bug #31684 (dio_tcsetattr(): misconfigured termios settings)
+
+    * ext/dio/dio.c:
+      - Fixed bug #31684 (dio_tcsetattr(): misconfigured termios settings)
+
+    * ZendEngine2/zend.h:
+      New versions of glibc support a RTLD_DEEPBIND flag to dlopen.  The
+      effect of this flag when loading a "foo.so" with undefined symbols is
+      that the search that symbol starts at foo.so and its dependencies
+      *before* the loading process' global symbol table.
+      
+      This is an effective workaround for symbol namespace collisions between
+      various modules and the libraries on which they depend (where fixing the
+      respective modules or libraries is not possible e.g. due to API
+      constraints).
+      
+      (By: Joe Orton)
+
+    * (PHP_4_3)
+      acinclude.m4
+      acinclude.m4:
+      MFH: - Fix macosx shared extension build
+
+    * acinclude.m4:
+      - Fix macosx shared extension build
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      scripts/phpize.in
+      scripts/phpize.in:
+      MFH: - Return of the automake requirement
+
+    * scripts/phpize.in:
+      - Return of the automake requirement.
+
+    * (PHP_5_0)
+      NEWS:
+      order + typos
+
+2005-01-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #28041 (SOAP HTTP Digest Access Authentication was implemented)
+
+2005-01-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/tests/bug26229.phpt:
+      - MFH #26229 (getIterator() segfaults when it returns arrays or scalars)
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug26229.phpt:
+      - Bugfix #26229 (getIterator() segfaults when it returns arrays or scalars)
+
+    * ZendEngine2/Makefile.frag:
+      - Fix dependency
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      - Use correct freeing (thx Dmitry)
+
+2005-01-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      NEWS
+      NEWS:
+      massage
+
 2005-01-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
