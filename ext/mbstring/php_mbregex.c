@@ -229,7 +229,7 @@ PHP_FUNCTION(mb_regex_encoding)
 		convert_to_string_ex(arg1);
 		mbctype = php_mbregex_name2mbctype(Z_STRVAL_PP(arg1));
 		if (mbctype < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
 			RETVAL_FALSE;
 		} else {
 			MBSTRG(current_mbctype) = mbctype;
@@ -726,11 +726,11 @@ php_mbereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (!MBSTRG(search_re)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no regex for search");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No regex given");
 		RETURN_FALSE;
 	}
 	if (!str) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no string for search");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No string given");
 		RETURN_FALSE;
 	}
 	if (MBSTRG(search_regs)) {
@@ -962,8 +962,11 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 	}
 	convert_to_long_ex(arg_pos);
 	n = Z_LVAL_PP(arg_pos);
-	if (n < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "position is minus value");
+	if (n < 0
+	    || ( MBSTRG(search_str) != NULL && *MBSTRG(search_str) != NULL &&
+	         Z_TYPE_PP(MBSTRG(search_str)) == IS_STRING && 
+	         n >= Z_STRLEN_PP(MBSTRG(search_str)) ) ) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Position is out of range");
 		MBSTRG(search_pos) = 0;
 		RETVAL_FALSE;
 	} else {
