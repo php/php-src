@@ -180,7 +180,7 @@ MAILSTREAM *mail_close_it (pils *imap_le_struct)
 	return ret;
 }
 
-inline int add_assoc_object(pval *arg, char *key, pval *tmp)
+static int add_assoc_object(pval *arg, char *key, pval *tmp)
 {
 	HashTable *symtable;
 	
