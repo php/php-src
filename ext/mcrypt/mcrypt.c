@@ -42,6 +42,7 @@ function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_cbc, NULL)
 	PHP_FE(mcrypt_cfb, NULL)
 	PHP_FE(mcrypt_ofb, NULL)
+	PHP_FE(mcrypt_get_algorithms_name, NULL)
 	PHP_FE(mcrypt_get_block_size, NULL)
 	PHP_FE(mcrypt_get_key_size, NULL)
 	PHP_FE(mcrypt_create_iv, NULL)
@@ -122,8 +123,8 @@ static mcrypt_global_struct mcryptg;
 static int php3_minit_mcrypt(INIT_FUNC_ARGS)
 {
 	/* modes for mcrypt_??? routines */
-	REGISTER_LONG_CONSTANT("MCRYPT_ENCODE", 0, 0);
-	REGISTER_LONG_CONSTANT("MCRYPT_DECODE", 1, 0);
+	REGISTER_LONG_CONSTANT("MCRYPT_ENCRYPT", 0, 0);
+	REGISTER_LONG_CONSTANT("MCRYPT_DECRYPT", 1, 0);
 	
 	/* sources for mcrypt_create_iv */
 	REGISTER_LONG_CONSTANT("MCRYPT_DEV_RANDOM", 0, 0);
@@ -192,6 +193,26 @@ PHP_FUNCTION(mcrypt_create_iv)
 		}
 	}
 	RETURN_STRINGL(iv, size->value.lval, 0);
+}
+
+/* proto mcrypt_get_algorithms_name(int cipher)
+   get the name of cipher */
+PHP_FUNCTION(mcrypt_get_algorithms_name)
+{
+	pval *cipher;
+	char *str, *nstr;
+
+	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &cipher) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(cipher);
+
+	str = get_algorithms_name(cipher->value.lval);
+	nstr = estrdup(str);
+	free(str);
+
+	RETURN_STRING(nstr, 0);
 }
 
 /* proto mcrypt_get_key_size(int cipher)
