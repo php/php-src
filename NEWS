@@ -1,8 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
-- Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
+- Changed phpize not to require automake and libtool. (Jani)
+- Fixed build system to always use bundled libtool files. (Jani)  
+- Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
 - Fixed bug #31580 (fgetcsv() problematic with "" escape sequences). (Ilia)
 - Fixed bug #31480 (Possible infinite loop in imap_mail_compose()). (Ilia)
 - Fixed bug #31479 (Fixed crash in chunk_split(), when chunklen > strlen). (Ilia)

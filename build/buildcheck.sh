@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.21.2.10 2005-01-19 22:27:59 sniper Exp $ 
+# $Id: buildcheck.sh,v 1.21.2.11 2005-01-20 01:43:18 sniper Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -41,49 +41,10 @@ else
 echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
-
 if test "$1" = "2" && test "$2" -ge "50"; then
   echo "buildconf: running cvsclean."
   ./cvsclean
   stamp=
-fi
-
-# libtoolize 1.4.3 or newer
-# Prefer glibtoolize over libtoolize for Mac OS X compatibility
-libtoolize=`./build/shtool path glibtoolize libtoolize 2> /dev/null`
-lt_pversion=`$libtoolize --version 2>/dev/null|head -n 1|awk -F' ' '{print $NF}'`
-if test "$lt_pversion" = ""; then
-echo "buildconf: libtool not found."
-echo "           You need libtool version 1.4.3 or newer installed"
-echo "           to build PHP from CVS."
-exit 1
-fi
-IFS=.; set $lt_pversion; IFS=' '
-
-if test "$3" = ""; then
-  third=0
-else
-  third=$3
-fi
-
-if test "$1" -gt "1" || test "$2" -ge "5" || (test "$2" -ge "4" && test "$third" -ge "3")
-then
-echo "buildconf: libtool version $lt_pversion (ok)"
-else
-echo "buildconf: libtool version $lt_pversion found."
-echo "           You need libtool version 1.4.3 or newer installed"
-echo "           to build PHP from CVS."
-exit 1
-fi
-
-ltpath=`echo $libtoolize | sed -e 's#/[^/]*/[^/]*$##'`
-ltfile="$ltpath/share/aclocal/libtool.m4"
-if test -r "$ltfile"; then
-  :
-else
-  echo "buildconf: $ltfile does not exist."
-  echo "           Please reinstall libtool."
-  exit 1
 fi
 
 test -n "$stamp" && touch $stamp

@@ -34,11 +34,12 @@ targets = $(TOUCH_FILES) configure $(config_h_in)
 
 ifeq ($(SHOW_WARNINGS), no)
 	SUPPRESS_WARNINGS = 2>&1 | (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_DECL_YYTEXT is expanded from...|the top level)'||true)
-	libtoolize_flags = --automake
+else
+	debug_target = debugging
 endif
 
 
-all: $(targets)
+all: $(targets) $(debug_target)
 
 acconfig.h: $(acconfig_h_SOURCES)
 	@echo rebuilding $@
@@ -49,19 +50,19 @@ $(config_h_in): configure acconfig.h
 # correctly otherwise (timestamps are not updated)
 	@echo rebuilding $@
 	@rm -f $@
-	@autoheader $(SUPPRESS_WARNINGS)
+	autoheader $(SUPPRESS_WARNINGS)
 
 $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
 
 aclocal.m4: configure.in acinclude.m4
 	@echo rebuilding $@
-	@libtoolize=`./build/shtool path glibtoolize libtoolize`; \
-	$$libtoolize --copy $(libtoolize_flags); \
-	ltpath=`dirname $$libtoolize`; \
-	ltfile=`cd $$ltpath/../share/aclocal; pwd`/libtool.m4; \
-	cat acinclude.m4 $$ltfile > $@
+	cat acinclude.m4 ./build/libtool.m4 > $@
 
 configure: aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding $@
-	@autoconf $(SUPPRESS_WARNINGS)
+	autoconf $(SUPPRESS_WARNINGS)
+
+debugging:
+	@libtoolize=`./build/shtool path glibtoolize libtoolize`; \
+	$$libtoolize

@@ -10,11 +10,15 @@ BUILD_FILES = \
 	scripts/phpize.m4 \
 	build/mkdep.awk \
 	build/scan_makefile_in.awk \
+	build/libtool.m4 \
 	Makefile.global \
-	acinclude.m4
+	acinclude.m4 \
+	ltmain.sh
 
 BUILD_FILES_EXEC = \
-	build/shtool
+	build/shtool \
+	config.guess \
+	config.sub
 
 bin_SCRIPTS = phpize php-config
 bin_src_SCRIPTS = phpextdist
