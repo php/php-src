@@ -18,7 +18,9 @@
 #define _MODULES_H
 
 #define INIT_FUNC_ARGS		int type, int module_number
+#define INIT_FUNC_ARGS_PASSTHRU	type, module_number
 #define SHUTDOWN_FUNC_ARGS	int type, int module_number
+#define SHUTDOWN_FUNC_ARGS_PASSTHRU type, module_number
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
 
 #define STANDARD_MODULE_PROPERTIES 0, 0, 0, NULL, 0
