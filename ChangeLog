@@ -1,3 +1,51 @@
+2004-09-15  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/nsapi/nsapi.c:
+      Sorry REVERT bevor 4.3.9 is out because of not critical!!!!
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      Fixed bug #29805 (HTTP Authentication Issues)
+
+2004-09-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/math/bug30069.phpt:
+      
+      Test for bug #30069
+
+2004-09-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      Zend/zend_operators.h
+      ZendEngine2/zend_operators.h:
+      MFH: Fixed a bug causing ".123" * "90" and alike to return a 0.
+
+    * (PHP_5_0)
+      ZendEngine2/zend_operators.h:
+      Fixed a bug causing ".123" * "90" and alike to return a 0.
+
+2004-09-15  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_config.w32.h:
+      - Windows support strcoll too.
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/array.c:
+      - MFH: Added new boolean (fourth) parameter to array_slice() that turns on
+      the
+        preservation of keys in the returned array.
+
+    * ext/standard/array.c:
+      - Added new boolean (fourth) parameter to array_slice() that turns on the
+        preservation of keys in the returned array.
+
 2004-09-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/session/session.c:
