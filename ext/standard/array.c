@@ -3629,7 +3629,6 @@ PHP_FUNCTION(array_key_exists)
 {
 	zval **key,					/* key to check for */
 		 **array;				/* array to check in */
-	long   lvalue;
 
 	if (ZEND_NUM_ARGS() != 2 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &key, &array) == FAILURE) {
