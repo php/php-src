@@ -281,5 +281,6 @@ class Cache {
             $last_run = time();
         }
     } // end func garbageCollection
+    
 } // end class cache 
 ?>
