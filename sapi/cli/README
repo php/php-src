@@ -15,3 +15,4 @@ The main differences between the two:
 * implicit_flush always on
 * -r option which allows execution of PHP code directly from
   the command line (e.g. php -r 'echo md5("test");' )
+* max_execution_time is set to unlimited, overriding php.ini setting.
