@@ -291,11 +291,9 @@ PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanup 
 	if (C_HASENUM(obj) = SUCCEEDED(C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), DISPID_NEWENUM, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
 															  DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, var_result, NULL, NULL))) {
 		if (V_VT(var_result) == VT_UNKNOWN) {
-			V_UNKNOWN(var_result)->lpVtbl->AddRef(V_UNKNOWN(var_result));
 			C_HASENUM(obj) = SUCCEEDED(V_UNKNOWN(var_result)->lpVtbl->QueryInterface(V_UNKNOWN(var_result), &IID_IEnumVARIANT,
 																					 (void**)&C_ENUMVARIANT(obj)));
 		} else if (V_VT(var_result) == VT_DISPATCH) {
-			V_DISPATCH(var_result)->lpVtbl->AddRef(V_DISPATCH(var_result));
 			C_HASENUM(obj) = SUCCEEDED(V_DISPATCH(var_result)->lpVtbl->QueryInterface(V_DISPATCH(var_result), &IID_IEnumVARIANT,
 																					  (void**)&C_ENUMVARIANT(obj)));
 		}
@@ -1872,6 +1870,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 		switch (Z_TYPE_P(overloaded_property)) {
 			case OE_IS_ARRAY:
 				if (do_COM_offget(var_result, obj, &overloaded_property->element, FALSE TSRMLS_CC) == FAILURE) {
+					pval_destructor(&overloaded_property->element);
 					FREE_VARIANT(var_result);
 					FREE_COM(obj_prop);
 
@@ -1881,6 +1880,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 			case OE_IS_OBJECT:
 				if (do_COM_propget(var_result, obj, &overloaded_property->element, FALSE TSRMLS_CC) == FAILURE) {
+					pval_destructor(&overloaded_property->element);
 					FREE_VARIANT(var_result);
 					FREE_COM(obj_prop);
 
@@ -1888,20 +1888,23 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 				}
 				break;
 
-			case OE_IS_METHOD: {
-					FREE_VARIANT(var_result);
-					if (obj != obj_prop) {
-						FREE_COM(obj_prop);
+			case OE_IS_METHOD:
+				pval_destructor(&overloaded_property->element);
+				FREE_VARIANT(var_result);
 
-						return_value = *object;
-						ZVAL_ADDREF(&return_value);
-					} else {
-						RETVAL_COM(obj);
-					}
-					return return_value;
+				if (obj != obj_prop) {
+					FREE_COM(obj_prop);
+
+					return_value = *object;
+					ZVAL_ADDREF(&return_value);
+				} else {
+					RETVAL_COM(obj);
 				}
-				break;
+
+				return return_value;
 		}
+
+		pval_destructor(&overloaded_property->element);
 
 		if (V_VT(var_result) == VT_DISPATCH) {
 			if (V_DISPATCH(var_result) == NULL) {
@@ -1920,8 +1923,6 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 			FREE_COM(obj_prop);
 			obj_prop = NULL;
 		}
-
-		pval_destructor(&overloaded_property->element);
 	}
 
 	if (obj_prop != NULL) {
