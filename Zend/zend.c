@@ -275,14 +275,14 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals)
 		zend_startup_constants(ELS_C);
 		zend_copy_constants(executor_globals->zend_constants, global_constants_table);
 	}
-	init_resource_plist(ELS_C);
+	zend_init_rsrc_plist(ELS_C);
 }
 
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals)
 {
 	zend_shutdown_constants(ELS_C);
-	destroy_resource_plist(ELS_C);
+	zend_destroy_rsrc_plist(ELS_C);
 }
 
 
@@ -334,7 +334,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_hash_init(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1);
 	register_standard_class();
 	zend_hash_init(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1);
-	zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
+	zend_init_rsrc_list_dtors();
 
 	/* This zval can be used to initialize allocate zval's to an uninit'ed value */
 	zval_used_for_init.is_ref = 0;
@@ -358,7 +358,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_register_standard_constants(ELS_C);
 
 #ifndef ZTS
-	init_resource_plist(ELS_C);
+	zend_init_rsrc_plist(ELS_C);
 #endif
 
 	if (start_builtin_functions) {
@@ -372,9 +372,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 void zend_shutdown()
 {
 #ifndef ZTS
-	destroy_resource_plist();
+	destroy_rsrc_plist();
 #endif
-	zend_hash_destroy(&list_destructors);
+	zend_destroy_rsrc_list_dtors();
 	zend_hash_destroy(&module_registry);
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	free(GLOBAL_FUNCTION_TABLE);

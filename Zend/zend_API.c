@@ -30,7 +30,7 @@
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
 static int module_count=0;
-HashTable list_destructors, module_registry;
+HashTable module_registry;
 
 /* this function doesn't check for too many parameters */
 ZEND_API int zend_get_parameters(int ht, int param_count, ...)
@@ -707,26 +707,6 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 }
 
 
-ZEND_API int _register_list_destructors(void (*list_destructor)(void *), void (*plist_destructor)(void *), int module_number)
-{
-	list_destructors_entry ld;
-	
-#if 0
-	printf("Registering destructors %d for module %d\n", list_destructors.nNextFreeElement, module_number);
-#endif
-	
-	ld.list_destructor=(void (*)(void *)) list_destructor;
-	ld.plist_destructor=(void (*)(void *)) plist_destructor;
-	ld.module_number = module_number;
-	ld.resource_id = list_destructors.nNextFreeElement;
-	
-	if (zend_hash_next_index_insert(&list_destructors,(void *) &ld,sizeof(list_destructors_entry),NULL)==FAILURE) {
-		return FAILURE;
-	}
-	return list_destructors.nNextFreeElement-1;
-}
-
-
 /* registers all functions in *library_functions in the function hash */
 int zend_register_functions(zend_function_entry *functions, HashTable *function_table)
 {
@@ -815,7 +795,7 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 void module_destructor(zend_module_entry *module)
 {
 	if (module->type == MODULE_TEMPORARY) {
-		zend_hash_apply_with_argument(&list_destructors, (int (*)(void *,void *)) clean_module_resource_destructors, (void *) &(module->module_number));
+		zend_clean_module_rsrc_dtors(module->module_number);
 		clean_module_constants(module->module_number);
 	}
 
