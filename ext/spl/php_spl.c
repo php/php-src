@@ -41,36 +41,6 @@ ZEND_GET_MODULE(spl)
 
 ZEND_DECLARE_MODULE_GLOBALS(spl)
 
-/* {{{ spl_functions
- */
-function_entry spl_functions[] = {
-	PHP_FE(spl_classes,             NULL)
-	PHP_FE(class_parents,           NULL)
-	PHP_FE(class_implements,        NULL)
-#ifdef SPL_ITERATORS_H
-	PHP_FE(iterator_to_array,       NULL)
-	PHP_FE(iterator_count,          NULL)
-#endif /* SPL_ITERATORS_H */
-	{NULL, NULL, NULL}
-};
-/* }}} */
-
-/* {{{ spl_module_entry
- */
-zend_module_entry spl_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"SPL",
-	spl_functions,
-	PHP_MINIT(spl),
-	NULL,
-	NULL,
-	NULL,
-	PHP_MINFO(spl),
-	"0.2",
-	STANDARD_MODULE_PROPERTIES
-};
-/* }}} */
-
 /* {{{ spl_functions_none
  */
 function_entry spl_functions_none[] = {
@@ -82,23 +52,6 @@ function_entry spl_functions_none[] = {
  */
 static void spl_init_globals(zend_spl_globals *spl_globals)
 {
-}
-/* }}} */
-
-/* {{{ PHP_MINIT_FUNCTION(spl)
- */
-PHP_MINIT_FUNCTION(spl)
-{
-	ZEND_INIT_MODULE_GLOBALS(spl, spl_init_globals, NULL);
-
-	PHP_MINIT(spl_iterators)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(spl_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
-
-	return SUCCESS;
 }
 /* }}} */
 
@@ -183,7 +136,7 @@ PHP_FUNCTION(spl_classes)
 }
 /* }}} */
 
-int spl_build_class_list_string(zval **entry, char **list TSRMLS_DC)
+int spl_build_class_list_string(zval **entry, char **list TSRMLS_DC) /* {{{ */
 {
 	char *res;
 	
@@ -191,7 +144,7 @@ int spl_build_class_list_string(zval **entry, char **list TSRMLS_DC)
 	efree(*list);
 	*list = res;
 	return ZEND_HASH_APPLY_KEEP;
-}
+} /* }}} */
 
 /* {{{ PHP_MINFO(spl)
  */
@@ -223,6 +176,53 @@ PHP_MINFO_FUNCTION(spl)
 
 	php_info_print_table_end();
 }
+/* }}} */
+
+/* {{{ spl_functions
+ */
+function_entry spl_functions[] = {
+	PHP_FE(spl_classes,             NULL)
+	PHP_FE(class_parents,           NULL)
+	PHP_FE(class_implements,        NULL)
+#ifdef SPL_ITERATORS_H
+	PHP_FE(iterator_to_array,       NULL)
+	PHP_FE(iterator_count,          NULL)
+#endif /* SPL_ITERATORS_H */
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
+/* {{{ PHP_MINIT_FUNCTION(spl)
+ */
+PHP_MINIT_FUNCTION(spl)
+{
+	ZEND_INIT_MODULE_GLOBALS(spl, spl_init_globals, NULL);
+
+	PHP_MINIT(spl_iterators)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ spl_module_entry
+ */
+zend_module_entry spl_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"SPL",
+	spl_functions,
+	PHP_MINIT(spl),
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(spl),
+	"0.2",
+	STANDARD_MODULE_PROPERTIES
+};
 /* }}} */
 
 /*
