@@ -109,21 +109,18 @@ PHP_MINIT_FUNCTION(imagetypes)
 static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	unsigned char a[2];
+	char dim[5];
+
+	if (php_stream_seek(stream, 3, SEEK_CUR))
+		return NULL;
+
+	if (php_stream_read(stream, dim, sizeof(dim)) != sizeof(dim))
+		return NULL;
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-
-	php_stream_seek(stream, 3, SEEK_CUR);
-
-	php_stream_read(stream, a, sizeof(a)); /*	fread(a, sizeof(a), 1, fp); */
-	result->width = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
-
-	php_stream_read(stream, a, sizeof(a)); /*	fread(a, sizeof(a), 1, fp); */
-	result->height = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
-
-	php_stream_read(stream, a, 1);
-
-	result->bits     = a[0]&0x80 ? ((a[0]&0x07) + 1) : 0;
+	result->width    = (unsigned int)dim[0] | (((unsigned int)dim[1])<<8);
+	result->height   = (unsigned int)dim[2] | (((unsigned int)dim[3])<<8);
+	result->bits     = dim[4]&0x80 ? ((((unsigned int)dim[4])&0x07) + 1) : 0;
 	result->channels = 3; /* allways */
 
 	return result;
@@ -135,25 +132,17 @@ static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	unsigned char a[8];
-	char temp[11];
-	unsigned long in_width, in_height;
+	char dim[8];
+
+	if (php_stream_seek(stream, 11, SEEK_CUR))
+		return NULL;
+
+	if (php_stream_read(stream, dim, sizeof(dim)) != sizeof(dim))
+		return NULL;
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-	php_stream_read(stream, temp, sizeof(temp));
-
-	if((php_stream_read(stream, a, sizeof(a))) <= 0) {
-		in_height = 0;
-		in_width  = 0;
-	} else {
-		in_height =  (((unsigned long) a[ 0 ]) << 24) + (((unsigned long) a[ 1 ]) << 16) + (((unsigned long) a[ 2 ]) << 8) + ((unsigned long) a[ 3 ]);
-		in_width  =  (((unsigned long) a[ 4 ]) << 24) + (((unsigned long) a[ 5 ]) << 16) + (((unsigned long) a[ 6 ]) << 8) + ((unsigned long) a[ 7 ]);
-	}
-
-	result->width    = (unsigned int) in_width;
-	result->height   = (unsigned int) in_height;
-	result->bits     = 0;
-	result->channels = 0;
+	result->height   =  (((unsigned int)dim[0]) << 24) + (((unsigned int)dim[1]) << 16) + (((unsigned int)dim[2]) << 8) + ((unsigned int)dim[3]);
+	result->width    =  (((unsigned int)dim[4]) << 24) + (((unsigned int)dim[5]) << 16) + (((unsigned int)dim[6]) << 8) + ((unsigned int)dim[7]);
 
 	return result;
 }
@@ -164,28 +153,18 @@ static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
 static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	char temp[15];
+	char dim[12];
 
-	struct {
-		unsigned long in_width, in_height;
-		unsigned short trash, bits;
-	} dim;
+	if (php_stream_seek(stream, 15, SEEK_CUR))
+		return NULL;
+
+	if (php_stream_read(stream, dim, sizeof(dim)) != sizeof(dim))
+		return NULL;
 
 	result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
-
-	php_stream_read(stream, temp, sizeof(temp));
-	php_stream_read(stream, (char*) &dim, sizeof(dim));
-
-#ifdef WORDS_BIGENDIAN
-	dim.in_width = (dim.in_width & 0x000000FF) << 24 | (dim.in_width & 0x0000FF00) << 8 | (dim.in_width & 0x00FF0000) >> 8 | (dim.in_width & 0xFF000000) >> 24;
-	dim.in_height = (dim.in_height & 0x000000FF) << 24 | (dim.in_height & 0x0000FF00) << 8 | (dim.in_height & 0x00FF0000) >> 8 | (dim.in_height & 0xFF000000) >> 24;
-	dim.bits = (dim.bits & 0x00FF) << 8 | (dim.bits & 0xFF00) >> 8;
-#endif	
-	
-	result->width    = dim.in_width;
-	result->height   = dim.in_height;
-	result->bits     = dim.bits;
-	result->channels = 0;
+	result->width    =  (((unsigned int)dim[ 3]) << 24) + (((unsigned int)dim[ 2]) << 16) + (((unsigned int)dim[ 1]) << 8) + ((unsigned int) dim[ 0]);
+	result->height   =  (((unsigned int)dim[ 7]) << 24) + (((unsigned int)dim[ 6]) << 16) + (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
+	result->bits     =  (((unsigned int)dim[11]) <<  8) +  ((unsigned int)dim[10]);
 
 	return result;
 }
@@ -223,13 +202,17 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 
 	b = ecalloc (1, len + 1);
 
-	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
-	php_stream_seek(stream, 5, SEEK_CUR);
+	if (php_stream_seek(stream, 5, SEEK_CUR))
+		return NULL;
 
-	php_stream_read(stream, a, sizeof(a)); /* fread(a, sizeof(a), 1, fp); */
+	if (php_stream_read(stream, a, sizeof(a)) != sizeof(a))
+		return NULL;
+
 	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
 		/* failed to decompress the file, will try reading the rest of the file */
-		php_stream_seek(stream, 8, SEEK_SET);
+		if (php_stream_seek(stream, 8, SEEK_SET))
+			return NULL;
+
 		slength = php_stream_copy_to_mem(stream, &bufz, PHP_STREAM_COPY_ALL, 0);
 		
 		/*
@@ -247,7 +230,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 				status = 1;
 				break;
 			} 
-		        status = uncompress(buf, &szlength, bufz, slength);
+			status = uncompress(buf, &szlength, bufz, slength);
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 		
 		if (bufz) {
@@ -264,18 +247,17 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 	}
 	
 	if (!status) {
+		result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
 		bits = php_swf_get_bits (b, 0, 5);
 		result->width = (php_swf_get_bits (b, 5 + bits, bits) -
 			php_swf_get_bits (b, 5, bits)) / 20;
 		result->height = (php_swf_get_bits (b, 5 + (3 * bits), bits) -
 			php_swf_get_bits (b, 5 + (2 * bits), bits)) / 20;
 	} else {
-		result->width = result->height = 0;
+		result = NULL;
 	}	
 		
 	efree (b);
-	result->bits     = 0;
-	result->channels = 0;
 	return result;
 }
 /* }}} */
@@ -289,10 +271,13 @@ static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
 	long bits;
 	unsigned char a[32];
 
-	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
-	php_stream_seek(stream, 5, SEEK_CUR);
+	if (php_stream_seek(stream, 5, SEEK_CUR))
+		return NULL;
 
-	php_stream_read(stream, a, sizeof(a)); /*	fread(a, sizeof(a), 1, fp); */
+	if (php_stream_read(stream, a, sizeof(a)) != sizeof(a))
+		return NULL;
+
+	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
 	bits = php_swf_get_bits (a, 0, 5);
 	result->width = (php_swf_get_bits (a, 5 + bits, bits) -
 		php_swf_get_bits (a, 5, bits)) / 20;
@@ -309,23 +294,17 @@ static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
 static struct gfxinfo *php_handle_png (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	unsigned long in_width, in_height;
-	unsigned char a[8];
+	char dim[8];
+
+	if (php_stream_seek(stream, 8, SEEK_CUR))
+		return NULL;
+
+	if((php_stream_read(stream, dim, sizeof(dim))) < sizeof(dim))
+		return NULL;
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-
-	php_stream_seek(stream, 8, SEEK_CUR);
-
-	if((php_stream_read(stream, a, sizeof(a))) <= 0) {
-		in_width  = 0;
-		in_height = 0;
-	} else {
-		in_width =  (((unsigned long) a[ 0 ]) << 24) + (((unsigned long) a[ 1 ]) << 16) + (((unsigned long) a[ 2 ]) << 8) + ((unsigned long) a[ 3 ]);
-		in_height = (((unsigned long) a[ 4 ]) << 24) + (((unsigned long) a[ 5 ]) << 16) + (((unsigned long) a[ 6 ]) << 8) + ((unsigned long) a[ 7 ]);
-	}
-
-	result->width  = (unsigned int) in_width;
-	result->height = (unsigned int) in_height;
+	result->width  = (((unsigned int)dim[0]) << 24) + (((unsigned int)dim[1]) << 16) + (((unsigned int)dim[2]) << 8) + ((unsigned int)dim[3]);
+	result->height = (((unsigned int)dim[4]) << 24) + (((unsigned int)dim[5]) << 16) + (((unsigned int)dim[6]) << 8) + ((unsigned int)dim[7]);
 	return result;
 }
 /* }}} */
@@ -517,7 +496,8 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info TSRMLS_D
 					result->channels = php_stream_getc(stream);
 					if (!info || length<8) /* if we don't want an extanded info -> return */
 						return result;
-					php_stream_seek(stream, length-8, SEEK_CUR);
+					if (php_stream_seek(stream, length-8, SEEK_CUR)) /* file error after info */
+						return result;
 				} else {
 					php_skip_variable(stream TSRMLS_CC);
 				}
@@ -549,7 +529,6 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info TSRMLS_D
 			case M_SOS:
 			case M_EOI:
 				return result;	/* we're about to hit image data, or are at EOF. stop processing. */
-				break;
 
 			default:
 				php_skip_variable(stream TSRMLS_CC);		/* anything else isn't interesting */
@@ -574,7 +553,7 @@ static unsigned int php_read4(php_stream * stream TSRMLS_DC)
 	unsigned char a[4];
 
 	/* just return 0 if we hit the end-of-file */
-	if((php_stream_read(stream, a, sizeof(a))) <= 0) return 0;
+	if ((php_stream_read(stream, a, sizeof(a))) != sizeof(a)) return 0;
 
 	return (((unsigned int)a[0]) << 24)
 	     + (((unsigned int)a[1]) << 16)
@@ -696,17 +675,25 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 	int entry_tag , entry_type;
 	char *ifd_data, ifd_ptr[4];
 
-	php_stream_read(stream, ifd_ptr, 4);
+	if (php_stream_read(stream, ifd_ptr, 4) != 4)
+		return NULL;
 	ifd_addr = php_ifd_get32u(ifd_ptr, motorola_intel);
-	php_stream_seek(stream, ifd_addr-8, SEEK_CUR);
+	if (php_stream_seek(stream, ifd_addr-8, SEEK_CUR))
+		return NULL;
 	ifd_size = 2;
 	ifd_data = emalloc(ifd_size);
-	php_stream_read(stream, ifd_data, 2);
+	if (php_stream_read(stream, ifd_data, 2) != 2) {
+		efree(ifd_data);
+		return NULL;
+	}
 	num_entries = php_ifd_get16u(ifd_data, motorola_intel);
 	dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
 	ifd_size = dir_size;
 	ifd_data = erealloc(ifd_data,ifd_size);
-	php_stream_read(stream, ifd_data+2, dir_size-2);
+	if (php_stream_read(stream, ifd_data+2, dir_size-2) != dir_size-2) {
+		efree(ifd_data);
+		return NULL;
+	}
 	/* now we have the directory we can look how long it should be */
 	ifd_size = dir_size;
 	for(i=0;i<num_entries;i++) {
@@ -797,7 +784,10 @@ static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
 			if (result->width > 0 && result->height > 0 && result->bits > 0 && result->bits < 33)
 				return result;
 		} else {
-			php_stream_seek(stream, size, SEEK_CUR);
+			if (php_stream_seek(stream, size, SEEK_CUR)) {
+				efree(result);
+				return NULL;
+			}
 		}
 	} while (1);
 }
@@ -905,7 +895,7 @@ PHP_FUNCTION(getimagesize)
 {
 	zval **arg1, **info = NULL;
 	int itype = 0;
-	char temp[64];
+	char *temp;
 	struct gfxinfo *result = NULL;
 	php_stream * stream = NULL;
 
@@ -998,8 +988,8 @@ PHP_FUNCTION(getimagesize)
 		add_index_long(return_value, 0, result->width);
 		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
-		sprintf(temp, "width=\"%d\" height=\"%d\"", result->width, result->height); /* safe */
-		add_index_string(return_value, 3, temp, 1);
+		spprintf(&temp, 0, "width=\"%d\" height=\"%d\"", result->width, result->height);
+		add_index_string(return_value, 3, temp, 0);
 
 		if (result->bits != 0) {
 			add_assoc_long(return_value, "bits", result->bits);
