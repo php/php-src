@@ -40,7 +40,7 @@ PHP_MINFO_FUNCTION(basic);
 
 PHP_FUNCTION(constant);
 PHP_FUNCTION(intval);
-PHP_FUNCTION(doubleval);
+PHP_FUNCTION(floatval);
 PHP_FUNCTION(strval);
 PHP_FUNCTION(toggle_short_open_tag);
 PHP_FUNCTION(sleep);
@@ -68,7 +68,7 @@ PHP_FUNCTION(is_null);
 PHP_FUNCTION(is_resource);
 PHP_FUNCTION(is_bool);
 PHP_FUNCTION(is_long);
-PHP_FUNCTION(is_double);
+PHP_FUNCTION(is_float);
 PHP_FUNCTION(is_numeric);
 PHP_FUNCTION(is_string);
 PHP_FUNCTION(is_array);

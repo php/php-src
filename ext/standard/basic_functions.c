@@ -249,7 +249,8 @@ void test_class_startup(void)
 function_entry basic_functions[] = {
 	PHP_FE(constant,														NULL)
 	PHP_FE(intval,															NULL)
-	PHP_FE(doubleval,														NULL)
+	PHP_FE(floatval,														NULL)
+	PHP_FALIAS(doubleval,          floatval,				                NULL)
 	PHP_FE(strval,															NULL)
 	PHP_FE(bin2hex,															NULL)
 	PHP_FE(sleep,															NULL)
@@ -510,11 +511,11 @@ function_entry basic_functions[] = {
 	PHP_FE(is_resource,														NULL)
 	PHP_FE(is_bool,															NULL)
 	PHP_FE(is_long,															NULL)
-	PHP_FE(is_double,														NULL)
+	PHP_FE(is_float,														NULL)
 	PHP_FALIAS(is_int,				is_long,								NULL)
 	PHP_FALIAS(is_integer,			is_long,								NULL)
-	PHP_FALIAS(is_float,			is_double,								NULL)
-	PHP_FALIAS(is_real,				is_double,								NULL)
+	PHP_FALIAS(is_double,			is_float,								NULL)
+	PHP_FALIAS(is_real,				is_float,								NULL)
 	PHP_FE(is_numeric,														NULL)
 	PHP_FE(is_string,														NULL)
 	PHP_FE(is_array,														NULL)
@@ -1295,9 +1296,9 @@ PHP_FUNCTION(intval)
 }
 /* }}} */
 
-/* {{{ proto double doubleval(mixed var)
-   Get the double-precision value of a variable */
-PHP_FUNCTION(doubleval)
+/* {{{ proto double floatval(mixed var)
+   Get the float value of a variable */
+PHP_FUNCTION(floatval)
 {
 	pval **num;
 
@@ -1577,9 +1578,9 @@ PHP_FUNCTION(is_long)
 }
 /* }}} */
 
-/* {{{ proto bool is_double(mixed var)
-   Returns true if variable is a double */
-PHP_FUNCTION(is_double)
+/* {{{ proto bool is_float(mixed var)
+   Returns true if variable is float point*/
+PHP_FUNCTION(is_float)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
 }
