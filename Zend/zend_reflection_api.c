@@ -146,6 +146,7 @@ typedef struct _property_reference {
 /* Struct for parameters */
 typedef struct _parameter_reference {
 	int offset;
+	int required;
 	struct _zend_arg_info *arg_info;
 } parameter_reference;
 
@@ -501,9 +502,14 @@ static void _const_string(string *str, char *name, zval *value, char *indent TSR
 /* }}} */
 
 /* {{{ _parameter_string */
-static void _parameter_string(string *str, struct _zend_arg_info *arg_info, int offset, char* indent TSRMLS_DC)
+static void _parameter_string(string *str, struct _zend_arg_info *arg_info, int offset, int required, char* indent TSRMLS_DC)
 {
 	string_printf(str, "Parameter #%d [ ", offset);
+	if (offset >= required) {
+		string_printf(str, "<optional> ");
+	} else {
+		string_printf(str, "<required> ");
+	}
 	if (arg_info->class_name) {
 		string_printf(str, "%s ", arg_info->class_name);
 		if (arg_info->allow_null) {
@@ -527,6 +533,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 {
 	zend_uint i;
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
+	int required = fptr->common.required_num_args;
 
 	if (!arg_info) {
 		return;
@@ -536,7 +543,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 	string_printf(str, "%s- Parameters [%d] {\n", indent, fptr->common.num_args);
 	for (i = 0; i < fptr->common.num_args; i++) {
 		string_printf(str, "%s  ", indent);
-		_parameter_string(str, arg_info, i, indent TSRMLS_CC);
+		_parameter_string(str, arg_info, i, required, indent TSRMLS_CC);
 		string_write(str, "\n", sizeof("\n")-1);
 		arg_info++;
 	}
@@ -1511,6 +1518,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	ref->arg_info = &arg_info[position];
 	ref->offset = position;
+	ref->required = fptr->common.required_num_args;
 	intern->ptr = ref;
 	intern->free_ptr = 1;
 }
@@ -1527,7 +1535,7 @@ ZEND_METHOD(reflection_parameter, __toString)
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(param);
 	string_init(&str);
-	_parameter_string(&str, param->arg_info, param->offset, "" TSRMLS_CC);
+	_parameter_string(&str, param->arg_info, param->offset, param->required, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
 }
 /* }}} */
@@ -1594,6 +1602,20 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->pass_by_reference);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isOptional()
+   Returns whether this parameter is an optional parameter */
+ZEND_METHOD(reflection_parameter, isOptional)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	METHOD_NOTSTATIC_NUMPARAMS(0);
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->offset >= param->required);
 }
 /* }}} */
 
@@ -3331,6 +3353,7 @@ static zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isPassedByReference, NULL, 0)
 	ZEND_ME(reflection_parameter, getClass, NULL, 0)
 	ZEND_ME(reflection_parameter, allowsNull, NULL, 0)
+	ZEND_ME(reflection_parameter, isOptional, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
