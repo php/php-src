@@ -1216,7 +1216,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 	class_entry->constants_updated = 0;
 	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1);
-
+	zend_hash_init(&class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 1);
 
 	if (class_entry->builtin_functions) {
 		zend_register_functions(class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
