@@ -31,7 +31,7 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.1-dev</version>
+    <version>1.1</version>
     <state>stable</state>
     <date>2003-01-10</date>
     <notes>
@@ -94,17 +94,23 @@ PEAR INSTALLER:
         <file role="php" name="Guess.php"/>
       </dir>
       <dir name="scripts">
-        <file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
+        <file baseinstalldir="/" role="script" install-as="pear" name="pear_unices">
           <replace from="@php_bin@" to="php_bin" type="pear-config"/>
           <replace from="@php_dir@" to="php_dir" type="pear-config"/>
           <replace from="@pear_version@" to="version" type="package-info"/>
           <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
         <file baseinstalldir="/" role="script" platform="windows" install-as="pear.bat" name="pear.bat">
-	  <replace from='"@bin_dir@"' to="bin_dir" type="pear-config"/>
-	  <replace from='"@php_bin@"' to="php_bin" type="pear-config"/>
-	  <replace from='"@include_path@"' to="php_dir" type="pear-config"/>
-	</file>
+	      <replace from="@bin_dir@" to="bin_dir" type="pear-config"/>
+	      <replace from="@php_bin@" to="php_bin" type="pear-config"/>
+	      <replace from="@include_path@" to="php_dir" type="pear-config"/>
+        </file>
+        <file baseinstalldir="/" role="php" install-as="pearcmd.php" name="pear.in">
+          <replace from="@php_bin@" to="php_bin" type="pear-config"/>
+          <replace from="@php_dir@" to="php_dir" type="pear-config"/>
+          <replace from="@pear_version@" to="version" type="package-info"/>
+          <replace from="@include_path@" to="php_dir" type="pear-config"/>
+        </file>
       </dir>
     </filelist>
     <deps>
