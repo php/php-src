@@ -28,7 +28,7 @@ for ($left = strlen($test_string); $left > 0;) {
 	if (++$n >1000) {
 	  print "terminated after 1000 iterations\n";
 	  break;
-  }
+	}
 	$read_fds = array($pipes[1]);
 	$retval = stream_select($read_fds, $write_fds = NULL, $exp_fds = NULL, 1);
 	if ($retval === false) {
