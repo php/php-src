@@ -1791,6 +1791,7 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 	*element = expr->u.constant;
 	if (offset) {
 		switch (offset->u.constant.type) {
+		    case IS_CONSTANT:
 			case IS_STRING:
 				zend_hash_update(result->u.constant.value.ht, offset->u.constant.value.str.val, offset->u.constant.value.str.len+1, &element, sizeof(zval *), NULL);
 				zval_dtor(&offset->u.constant);
