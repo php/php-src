@@ -2628,7 +2628,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior TSRMLS_DC)
 	int argc, i, c;
 	Bucket ***lists, **list, ***ptrs, *p;
 
-	/* Get the argument count and check it */	
+	/* Get the argument count and check it */
 	argc = ARG_COUNT(ht);
 	if (argc < 2) {
 		WRONG_PARAM_COUNT;
@@ -2643,20 +2643,22 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior TSRMLS_DC)
 	lists = (Bucket ***)emalloc(argc * sizeof(Bucket **));
 	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
 	set_compare_func(SORT_STRING TSRMLS_CC);
-	for (i=0; i<argc; i++) {
+	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i+1);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
 			argc = i; /* only free up to i-1 */
 			goto out;
 		}
 		hash = HASH_OF(*args[i]);
 		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
-		if (!list)
-				RETURN_FALSE;
+		if (!list) {
+			RETURN_FALSE;
+		}
 		lists[i] = list;
 		ptrs[i] = list;
-		for (p = hash->pListHead; p; p = p->pListNext)
-				*list++ = p;
+		for (p = hash->pListHead; p; p = p->pListNext) {
+			*list++ = p;
+		}
 		*list = NULL;
 		if (behavior == 0) {
 			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
@@ -2673,18 +2675,21 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior TSRMLS_DC)
 		   that are not in the others */
 	while (*ptrs[0]) {
 		c = 1;
-		for (i=1; i<argc; i++) {
+		for (i = 1; i < argc; i++) {
 			if (behavior == 0) {
-				while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
+				while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
+				}
 			} else if (behavior == 1) {
-				while (*ptrs[i] && (0 < (c = array_key_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
+				while (*ptrs[i] && (0 < (c = array_key_compare(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
+				}
 			}
 			if (!c) {
 				if (behavior == 0) {
-					if (*ptrs[i])
+					if (*ptrs[i]) {
 						ptrs[i]++;
+					}
 					break;
 				} else if (behavior == 1) {
 					if (*ptrs[i]) {
@@ -2702,15 +2707,18 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior TSRMLS_DC)
 			/* delete all entries with value as ptrs[0] */
 			for (;;) {
 				p = *ptrs[0];
-				if (p->nKeyLength)
+				if (p->nKeyLength) {
 					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
-				else
-					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
-				if (!*++ptrs[0])
+				} else {
+					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
+				}
+				if (!*++ptrs[0]) {
 					goto out;
+				}
 				if (behavior == 0) {
-					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+					if (array_data_compare(ptrs[0] - 1, ptrs[0] TSRMLS_CC)) {
 						break;
+					}
 				} else if (behavior == 1) {
 					/* in this case no array_key_compare is needed */
 					break;
@@ -2720,11 +2728,13 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior TSRMLS_DC)
 			/* ptrs[0] in none of the other arguments */
 			/* skip all entries with value as ptrs[0] */
 			for (;;) {
-				if (!*++ptrs[0])
+				if (!*++ptrs[0]) {
 					goto out;
+				}
 				if (behavior == 0) {
-					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC)) {
 						break;
+					}
 				} else if (behavior == 1) {
 					/* in this case no array_key_compare is needed */
 					break;
@@ -2733,8 +2743,8 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior TSRMLS_DC)
 		}
 	}
 out:
-	for (i=0; i<argc; i++) {
-			hash = HASH_OF(*args[i]);
+	for (i = 0; i < argc; i++) {
+		hash = HASH_OF(*args[i]);
 		pefree(lists[i], hash->persistent);
 	}
 	efree(ptrs);
