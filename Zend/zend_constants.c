@@ -58,9 +58,9 @@ void zend_copy_constants(HashTable *target, HashTable *source)
 static int clean_non_persistent_constant(zend_constant *c TSRMLS_DC)
 {
 	if (c->flags & CONST_PERSISTENT) {
-		return ZEND_HASH_APPLY_STOP;
+		return EG(full_tables_cleanup) ? 0 : ZEND_HASH_APPLY_STOP;
 	} else {
-		return ZEND_HASH_APPLY_REMOVE;
+		return EG(full_tables_cleanup) ? 1 : ZEND_HASH_APPLY_REMOVE;
 	}
 }
 
@@ -160,7 +160,11 @@ int zend_shutdown_constants(TSRMLS_D)
 
 void clean_non_persistent_constants(TSRMLS_D)
 {
-	zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant TSRMLS_CC);
+	if (EG(full_tables_cleanup)) {
+		zend_hash_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant TSRMLS_CC);
+	} else {
+		zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant TSRMLS_CC);
+	}
 }
 
 

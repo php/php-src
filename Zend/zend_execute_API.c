@@ -93,9 +93,9 @@ static void zend_extension_deactivator(zend_extension *extension TSRMLS_DC)
 static int is_not_internal_function(zend_function *function TSRMLS_DC)
 {
 	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		return ZEND_HASH_APPLY_STOP;
+		return EG(full_tables_cleanup) ? 0 : ZEND_HASH_APPLY_STOP;
 	} else {
-		return ZEND_HASH_APPLY_REMOVE;
+		return EG(full_tables_cleanup) ? 1 : ZEND_HASH_APPLY_REMOVE;
 	}
 }
 
@@ -103,9 +103,9 @@ static int is_not_internal_function(zend_function *function TSRMLS_DC)
 static int is_not_internal_class(zend_class_entry *ce TSRMLS_DC)
 {
 	if (ce->type == ZEND_INTERNAL_CLASS) {
-		return ZEND_HASH_APPLY_STOP;
+		return EG(full_tables_cleanup) ? 0 : ZEND_HASH_APPLY_STOP;
 	} else {
-		return ZEND_HASH_APPLY_REMOVE;
+		return EG(full_tables_cleanup) ? 1 : ZEND_HASH_APPLY_REMOVE;
 	}
 }
 
@@ -183,8 +183,13 @@ void shutdown_executor(TSRMLS_D)
 		zend_ptr_stack_destroy(&EG(argument_stack));
 
 		/* Destroy all op arrays */
-		zend_hash_reverse_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
-		zend_hash_reverse_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
+		if (EG(full_tables_cleanup) {
+			zend_hash_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
+			zend_hash_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
+		} else {
+			zend_hash_reverse_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
+			zend_hash_reverse_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
+		}
 	} zend_end_try();
 
 	/* The regular list must be destroyed after the main symbol table and
@@ -666,6 +671,7 @@ ZEND_API void zend_timeout(int dummy)
 }
 
 
+	EG(full_tables_cleanup) = 0;
 #ifdef ZEND_WIN32
 static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 {
