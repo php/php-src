@@ -3161,17 +3161,24 @@ void zend_destroy_property_info(zend_property_info *property_info)
 
 void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers)
 {
+	zend_bool persistent_hashes = (ce->type == ZEND_INTERNAL_CLASS) ? 1 : 0;
+
 	ce->refcount = 1;
 	ce->constants_updated = 0;
 	ce->ce_flags = 0;
 
-	zend_hash_init_ex(&ce->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) zend_destroy_property_info, 1, 0);
-	ce->static_members = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(ce->static_members, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_hash_init_ex(&ce->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1, 0);
-	zend_hash_init_ex(&ce->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+	zend_hash_init_ex(&ce->default_properties, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) zend_destroy_property_info, persistent_hashes, 0);
+
+	if (persistent_hashes) {
+		ce->static_members = (HashTable *) malloc(sizeof(HashTable));
+	} else {
+		ALLOC_HASHTABLE(ce->static_members);
+	}
+	zend_hash_init_ex(ce->static_members, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->constants_table, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->class_table, 10, NULL, ZEND_CLASS_DTOR, persistent_hashes, 0);
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;
