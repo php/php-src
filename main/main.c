@@ -401,15 +401,13 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 				smart_str_appendl(&s, "&amp;", sizeof("&amp;")-1);
 				break;
 			case ' ': {
-					const char *nextchar = p+1, *prevchar = p-1;
+					const char *nextchar = p;
 
-					/* series of spaces should be converted to &nbsp;'s */
-					if (((nextchar < end) && *nextchar==' ')
-						|| ((prevchar >= str) && *prevchar==' ')) {
-						smart_str_appendl(&s, "&nbsp;", sizeof("&nbsp;")-1);
-					} else {
-						smart_str_appendc(&s, ' ');
-					}
+					while (++nextchar < end && *nextchar == ' ');
+
+					p = nextchar;
+					smart_str_appends(&s, "&nbsp;");
+					continue;
 				}
 				break;
 			case '\t':
