@@ -75,6 +75,11 @@ a. Requirements
          only the Build Environment (around 30MB), but I haven't
          tried this.
 
+         ** Note: it seems that MS don't include the 32 bit
+            build tools in the platform SDK any longer, so
+            you will probably have very limited luck if you
+            don't also have VC++ or VS.Net already installed.
+
     2. Once installed, you will have an icon on your start menu
        that will launch the build environment; the latest SDK's
        install a number of different versions of this; you probably
