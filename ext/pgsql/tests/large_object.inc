@@ -2,7 +2,7 @@
 
 include('config.inc');
 
-$db = pg_connect("host=localhost");
+$db = pg_connect($conn_str);
 pg_exec ($db, "begin");
 $oid = pg_lo_create ($db);
 if (!$oid) echo ("pg_lo_create() error\n");
