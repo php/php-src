@@ -18,6 +18,10 @@ documentation
     * add remarks in the documentation which functions are not implemented on win32.
     * add remarks in the documentation which functions are not binary-safe.
 
+ext/apache
+--------
+	* all apache specific functions should be in sapi/apache
+
 ext/oci8
 --------
 	* map boolean value false to oracle NULL.
