@@ -80,6 +80,8 @@ PHP 4.0                                                                    NEWS
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
 ?? ??? 200?, Version 4.1.0
+- Removed the sablotron extension in favor of the new XSLT extension.
+  (Sterling)
 - Fixed a bug preg_match_all() that would return results under improper indices
   in certain cases. (Andrei)
 - Fixed a crash in str_replace() that would happen if search parameter was an
