@@ -41,6 +41,7 @@ extern zend_module_entry mysql_module_entry;
 extern PHP_MINIT_FUNCTION(mysql);
 extern PHP_RINIT_FUNCTION(mysql);
 extern PHP_MSHUTDOWN_FUNCTION(mysql);
+extern PHP_RSHUTDOWN_FUNCTION(mysql);
 PHP_MINFO_FUNCTION(mysql);
 
 PHP_FUNCTION(mysql_connect);

@@ -173,7 +173,7 @@ function_entry mysql_functions[] = {
 };
 
 zend_module_entry mysql_module_entry = {
-	"mysql", mysql_functions, PHP_MINIT(mysql), PHP_MSHUTDOWN(mysql), PHP_RINIT(mysql), NULL, 
+	"mysql", mysql_functions, PHP_MINIT(mysql), PHP_MSHUTDOWN(mysql), PHP_RINIT(mysql), PHP_RSHUTDOWN(mysql), 
 			 PHP_MINFO(mysql), STANDARD_MODULE_PROPERTIES
 };
 
@@ -323,11 +323,17 @@ PHP_RINIT_FUNCTION(mysql)
 	MySG(default_link)=-1;
 	MySG(num_links) = MySG(num_persistent);
 	/* Reset connect error/errno on every request */
+	MySG(connect_error) = NULL;
+	MySG(connect_errno)=0;
+	return SUCCESS;
+}
+
+
+PHP_RSHUTDOWN_FUNCTION(mysql)
+{
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
-		MySG(connect_error)=NULL;
 	}
-	MySG(connect_errno)=0;
 	return SUCCESS;
 }
 
