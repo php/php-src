@@ -1503,6 +1503,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 		function_add_ref(function);
 	}
 	ce->constructor = ce->parent->constructor;
+	ce->__get = ce->parent->__get;
+	ce->__set = ce->parent->__set;
+	ce->__call = ce->parent->__call;
 }
 
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
