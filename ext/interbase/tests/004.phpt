@@ -55,14 +55,7 @@ InterBase: BLOB test
 
     echo "create blob 2\n";
 
-    $bl_h = ibase_blob_create();
-    $ftmp = fopen($name,"r");
-    while($piece = fread($ftmp, 1 + rand() % 1024)){
-    	ibase_blob_add($bl_h, $piece);
-    }
-    fclose($ftmp);
-    $bl_s = ibase_blob_close($bl_h);
-    ibase_query("insert into test4 (v_integer, v_blob) values (2, ?)", $bl_s);
+    ibase_query("insert into test4 (v_integer, v_blob) values (2, ?)", $blob_str);
 
     echo "test blob 2\n";
 
