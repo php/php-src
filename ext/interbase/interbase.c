@@ -3306,7 +3306,7 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var)
 				precision = 9;
 				break;
 #ifdef SQL_INT64
-			case SQL_INT64:     
+			case SQL_INT64:
 				precision = 18;
 				break;
 #endif
@@ -3317,8 +3317,8 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var)
 	} else {
 		switch (var->sqltype & ~1) {
 			case SQL_TEXT:
-			    s = "CHAR"; 
-			    break;
+				s = "CHAR"; 
+				break;
 			case SQL_VARYING:
 				s = "VARCHAR"; 
 				break;
@@ -3328,13 +3328,13 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var)
 			case SQL_LONG:
 				s = "INTEGER"; 
 				break;
-			case SQL_FLOAT:	    
+			case SQL_FLOAT:
 				s = "FLOAT"; break;
-			case SQL_DOUBLE:    
-			case SQL_D_FLOAT:   
+			case SQL_DOUBLE:
+			case SQL_D_FLOAT:
 				s = "DOUBLE PRECISION"; break;
 #ifdef SQL_INT64
-			case SQL_INT64:     
+			case SQL_INT64: 
 				s = "BIGINT"; 
 				break;
 #endif
@@ -4498,13 +4498,13 @@ PHP_FUNCTION(ibase_gen_id)
 	/* don't return the generator value as a string unless it doesn't fit in a long */
 #ifdef SQL_INT64
 	if (result > LONG_MAX) 
-#endif
 	{
 		char res[24];
 
 		sprintf(res,"%" LL_MASK "d", result);
 		RETURN_STRING(res,1);
 	}
+#endif
 	RETURN_LONG((long)result);
 }
 
