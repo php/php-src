@@ -45,6 +45,8 @@
 
 #define STREAM_DEBUG 0
 
+#define STREAM_WRAPPER_PLAIN_FILES	((php_stream_wrapper*)-1)
+
 /* {{{ some macros to help track leaks */
 #if ZEND_DEBUG
 #define emalloc_rel_orig(size)	\
@@ -134,8 +136,8 @@ fprintf(stderr, "stream_free: %s:%p in_free=%d opts=%08x\n", stream->ops->label,
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
 
-		if (stream->wrapper && stream->wrapper->wops && stream->wrapper->wops->closer) {
-			stream->wrapper->wops->closer(stream->wrapper, stream TSRMLS_CC);
+		if (stream->wrapper && stream->wrapper->wops && stream->wrapper->wops->stream_closer) {
+			stream->wrapper->wops->stream_closer(stream->wrapper, stream TSRMLS_CC);
 			stream->wrapper = NULL;
 		}
 
@@ -169,7 +171,7 @@ fprintf(stderr, "stream_free: %s:%p in_free=%d opts=%08x\n", stream->ops->label,
 /* {{{ generic stream operations */
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
-	return stream->ops->read(stream, buf, size TSRMLS_CC);
+	return stream->ops->read == NULL ? 0 : stream->ops->read(stream, buf, size TSRMLS_CC);
 }
 
 PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
@@ -177,7 +179,7 @@ PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
 	/* we define our stream reading function so that it
 	   must return EOF when an EOF condition occurs, when
 	   working in unbuffered mode and called with these args */
-	return stream->ops->read(stream, NULL, 0 TSRMLS_CC) == EOF ? 1 : 0;
+	return stream->ops->read == NULL ? -1 : stream->ops->read(stream, NULL, 0 TSRMLS_CC) == EOF ? 1 : 0;
 }
 
 PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC)
@@ -242,6 +244,8 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 
 	if (stream->ops->gets) {
 		return stream->ops->gets(stream, buf, maxlen TSRMLS_CC);
+	} else if (stream->ops->read == NULL) {
+		return NULL;
 	} else {
 		/* unbuffered fgets - poor performance ! */
 		size_t n = 1;
@@ -273,7 +277,7 @@ PHPAPI int _php_stream_flush(php_stream *stream TSRMLS_DC)
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	assert(stream);
-	if (buf == NULL || count == 0)
+	if (buf == NULL || count == 0 || stream->ops->write == NULL)
 		return 0;
 	return stream->ops->write(stream, buf, count TSRMLS_CC);
 }
@@ -1037,45 +1041,145 @@ exit_success:
 /* {{{ wrapper init and registration */
 int php_init_stream_wrappers(TSRMLS_D)
 {
-	if (PG(allow_url_fopen)) {
-		return zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1);
-	}
-	return SUCCESS;
+	return zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1);
 }
 
 int php_shutdown_stream_wrappers(TSRMLS_D)
 {
-	if (PG(allow_url_fopen)) {
-		zend_hash_destroy(&url_stream_wrappers_hash);
-	}
+	zend_hash_destroy(&url_stream_wrappers_hash);
 	return SUCCESS;
 }
 
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	if (PG(allow_url_fopen)) {
-		return zend_hash_add(&url_stream_wrappers_hash, protocol, strlen(protocol), wrapper, sizeof(*wrapper), NULL);
-	}
-	return FAILURE;
+	if (!PG(allow_url_fopen) && wrapper->is_url)
+		return FAILURE;
+
+	return zend_hash_add(&url_stream_wrappers_hash, protocol, strlen(protocol), wrapper, sizeof(*wrapper), NULL);
 }
 
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
 {
-	if (PG(allow_url_fopen)) {
-		return zend_hash_del(&url_stream_wrappers_hash, protocol, strlen(protocol));
-	}
-	return SUCCESS;
+	return zend_hash_del(&url_stream_wrappers_hash, protocol, strlen(protocol));
 }
 /* }}} */
 
-/* {{{ php_stream_open_url */
-static php_stream *php_stream_open_url(char *path, char *mode, int options,
-	char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+
+static size_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	php_stream_wrapper *wrapper;
+	DIR *dir = (DIR*)stream->abstract;
+	/* avoid libc5 readdir problems */
+	char entry[sizeof(struct dirent)+MAXPATHLEN];
+	struct dirent *result = (struct dirent *)&entry;
+	php_stream_dirent *ent = (php_stream_dirent*)buf;
+
+	/* avoid problems if someone mis-uses the stream */
+	if (count != sizeof(php_stream_dirent))
+		return 0;
+
+	if (php_readdir_r(dir, (struct dirent *)entry, &result) == 0 && result) {
+		PHP_STRLCPY(ent->d_name, result->d_name, sizeof(ent->d_name), strlen(result->d_name));
+		return sizeof(php_stream_dirent);
+	}
+	return 0;
+}
+
+static int php_plain_files_dirstream_close(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	return closedir((DIR *)stream->abstract);
+}
+
+static int php_plain_files_dirstream_rewind(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+{
+	rewinddir((DIR *)stream->abstract);
+	return 0;
+}
+
+static php_stream_ops	php_plain_files_dirstream_ops = {
+	NULL, php_plain_files_dirstream_read,
+	php_plain_files_dirstream_close, NULL,
+	"dir",
+	php_plain_files_dirstream_rewind,
+	NULL, NULL,
+	NULL
+};
+
+static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, char *path, char *mode,
+		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+{
+	DIR *dir = NULL;
+	php_stream *stream = NULL;
+
+	if (php_check_open_basedir(path TSRMLS_CC)) {
+		return NULL;
+	}
+	
+	if (PG(safe_mode) &&(!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+		return NULL;
+	}
+	
+	dir = VCWD_OPENDIR(path);
+
+#ifdef PHP_WIN32
+	if (dir && dir->finished) {
+		closedir(dir);
+		dir = NULL;
+	}
+#endif
+	if (dir) {
+		stream = php_stream_alloc(&php_plain_files_dirstream_ops, dir, 0, mode);
+		if (stream == NULL)
+			closedir(dir);
+	}
+		
+	return stream;
+}
+
+
+
+static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, char *path, char *mode,
+		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+{
+	if ((options & USE_PATH) && PG(include_path) != NULL) {
+		return php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path);
+	}
+
+	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
+		return NULL;
+
+	return php_stream_fopen_rel(path, mode, opened_path);
+}
+
+static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	return VCWD_STAT(url, &ssb->sb);
+}
+
+static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
+	php_plain_files_stream_opener,
+	NULL,
+	NULL,
+	php_plain_files_url_stater,
+	php_plain_files_dir_opener
+};
+
+static php_stream_wrapper php_plain_files_wrapper = {
+	&php_plain_files_wrapper_ops,
+	NULL,
+	0
+};
+
+static php_stream_wrapper *locate_url_wrapper(char *path, char **path_for_open, int options TSRMLS_DC)
+{
+	php_stream_wrapper *wrapper = NULL;
 	const char *p, *protocol = NULL;
 	int n = 0;
 
+	*path_for_open = path;
+
+	if (options & IGNORE_URL)
+		return &php_plain_files_wrapper;
+	
 	for (p = path; isalnum((int)*p); p++) {
 		n++;
 	}
@@ -1103,57 +1207,113 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options,
 			wrapper = NULL;
 			protocol = NULL;
 		}
-		if (wrapper)	{
-			php_stream *stream = wrapper->wops->opener(wrapper, path, mode, options, opened_path, context STREAMS_REL_CC TSRMLS_CC);
-			if (stream)
-				stream->wrapper = wrapper;
-			return stream;
-		}
 	}
-
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
 		if (protocol && path[n+1] == '/' && path[n+2] == '/')	{
 			zend_error(E_WARNING, "remote host file access not supported, %s", path);
 			return NULL;
 		}
 		if (protocol)
-			path += n + 1;
-
+			*path_for_open = path + n + 1;
+		
 		/* fall back on regular file access */
-		return php_stream_open_wrapper_rel(path, mode, (options & ~REPORT_ERRORS) | IGNORE_URL,
-				opened_path);
+		return &php_plain_files_wrapper;
 	}
-	return NULL;
+
+	if (wrapper && wrapper->is_url && !PG(allow_url_fopen)) {
+		zend_error(E_WARNING, "URL file-access is disabled in the server configuration");
+		return NULL;
+	}
+	
+	return wrapper;
+}
+
+PHPAPI int _php_stream_stat_path(char *path, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	php_stream_wrapper *wrapper = NULL;
+	char *path_to_open = path;
+
+	wrapper = locate_url_wrapper(path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
+	if (wrapper && wrapper->wops->url_stat) {
+		return wrapper->wops->url_stat(wrapper, path_to_open, ssb TSRMLS_CC);
+	}
+	return -1;
+}
+
+/* {{{ php_stream_opendir */
+PHPAPI php_stream *_php_stream_opendir(char *path, int options,
+		php_stream_context *context STREAMS_DC TSRMLS_DC)
+{
+	php_stream *stream = NULL;
+	php_stream_wrapper *wrapper = NULL;
+	char *path_to_open;
+	
+	if (!path || !*path)
+		return NULL;
+
+	path_to_open = path;
+
+	wrapper = locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
+
+	if (wrapper && wrapper->wops->dir_opener)	{
+		stream = wrapper->wops->dir_opener(wrapper,
+				path_to_open, "r", options, NULL,
+				context STREAMS_REL_CC TSRMLS_CC);
+
+		if (stream)
+			stream->wrapper = wrapper;
+	}
+
+	if (stream == NULL && (options & REPORT_ERRORS)) {
+		char *tmp = estrdup(path);
+		char *msg;
+
+		if (wrapper)
+			msg = strerror(errno);
+		else
+			msg = "no suitable wrapper could be found";
+		
+		php_strip_url_passwd(tmp);
+		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_C), tmp, msg);
+		efree(tmp);
+	}
+	return stream;
 }
 /* }}} */
+
+PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC)
+{
+	if (sizeof(php_stream_dirent) == php_stream_read(dirstream, (char*)ent, sizeof(php_stream_dirent)))
+		return ent;
+	
+	return NULL;
+}
 
 /* {{{ php_stream_open_wrapper_ex */
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options,
 		char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
-
+	php_stream_wrapper *wrapper = NULL;
+	char *path_to_open;
+	
 	if (opened_path)
 		*opened_path = NULL;
 
 	if (!path || !*path)
 		return NULL;
 
-	if (PG(allow_url_fopen) && !(options & IGNORE_URL))	{
-		stream = php_stream_open_url(path, mode, options, opened_path, context STREAMS_REL_CC TSRMLS_CC);
-		goto out;
+	path_to_open = path;
+
+	wrapper = locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
+
+	if (wrapper)	{
+		stream = wrapper->wops->stream_opener(wrapper,
+				path_to_open, mode, options,
+				opened_path, context STREAMS_REL_CC TSRMLS_CC);
+		if (stream)
+			stream->wrapper = wrapper;
 	}
-
-	if ((options & USE_PATH) && PG(include_path) != NULL) {
-		stream = php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path);
-		goto out;
-	}
-
-	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
-		return NULL;
-
-	stream = php_stream_fopen_rel(path, mode, opened_path);
-out:
 
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
 		php_stream *newstream;
@@ -1179,8 +1339,15 @@ out:
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		char *tmp = estrdup(path);
+		char *msg;
+
+		if (wrapper)
+			msg = strerror(errno);
+		else
+			msg = "no suitable wrapper could be found";
+		
 		php_strip_url_passwd(tmp);
-		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_C), tmp, strerror(errno));
+		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_C), tmp, msg);
 		efree(tmp);
 	}
 	return stream;

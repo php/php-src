@@ -97,7 +97,8 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 
 php_stream_wrapper php_stream_ftp_wrapper =	{
 	&ftp_stream_wops,
-	NULL
+	NULL,
+	1 /* is_url */
 };
 
 

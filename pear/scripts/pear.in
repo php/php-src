@@ -186,5 +186,6 @@ function cmdHelp($command)
  * indent-tabs-mode: nil
  * End:
  */
+// vim600:syn=php
 
 ?>

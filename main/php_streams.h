@@ -104,6 +104,10 @@ typedef struct _php_stream_statbuf {
 	/* extended info to go here some day */
 } php_stream_statbuf;
 
+typedef struct _php_stream_dirent {
+	char d_name[MAXPATHLEN];
+} php_stream_dirent;
+
 #define PHP_STREAM_NOTIFIER_PROGRESS	1
 
 typedef struct _php_stream_notifier {
@@ -128,6 +132,7 @@ typedef struct _php_stream_wrapper_options {
 	 * to go here some day */
 } php_stream_wrapper_options;
 
+/* operations on streams that are file-handles */
 typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
 	size_t (*write)(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
@@ -146,21 +151,25 @@ typedef struct _php_stream_ops  {
 
 typedef struct _php_stream_wrapper_ops {
 	/* open/create a wrapped stream */
-	php_stream *(*opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
+	php_stream *(*stream_opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 	/* close/destroy a wrapped stream */
-	int (*closer)(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC);
+	int (*stream_closer)(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC);
 	/* stat a wrapped stream */
 	int (*stream_stat)(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 	/* stat a URL */
-	int (*url_stat)(php_stream_wrapper *wrapper, php_stream_statbuf *ssb TSRMLS_DC);
+	int (*url_stat)(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC);
+	/* open a "directory" stream */
+	php_stream *(*dir_opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
+			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
 	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
+	int is_url;						/* so that PG(allow_url_fopen) can be respected */
 };
-
 
 struct _php_stream  {
 	php_stream_ops *ops;
@@ -255,11 +264,23 @@ PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);
 PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 #define php_stream_stat(stream, ssb)	_php_stream_stat((stream), (ssb) TSRMLS_CC)
 
+PHPAPI int _php_stream_stat_path(char *path, php_stream_statbuf *ssb TSRMLS_DC);
+#define php_stream_stat_path(path, ssb)	_php_stream_stat((path), (ssb) TSRMLS_CC)
+
+PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC);
+#define php_stream_opendir(path, options, context)	_php_stream_opendir((path), (options), (context) STREAMS_CC TSRMLS_CC)
+PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_dirent *ent TSRMLS_DC);
+#define php_stream_readdir(dirstream, dirent)	_php_stream_readdir((dirstream), (dirent) TSRMLS_CC)
+#define php_stream_closedir(dirstream)	php_stream_close((dirstream))
+#define php_stream_rewinddir(dirstream)	php_stream_rewind((dirstream))
+
+
 /* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
  * Uses mmap if the src is a plain file and at offset 0 */
 #define PHP_STREAM_COPY_ALL		-1
 PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC);
 #define php_stream_copy_to_stream(src, dest, maxlen)	_php_stream_copy_to_stream((src), (dest), (maxlen) STREAMS_CC TSRMLS_CC)
+
 
 /* read all data from stream and put into a buffer. Caller must free buffer when done.
  * The copy will use mmap if available. */
@@ -364,7 +385,7 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int opt
 #define php_stream_open_wrapper_as_file(path, mode, options, opened_path) _php_stream_open_wrapper_as_file((path), (mode), (options), (opened_path) STREAMS_CC TSRMLS_CC)
 
 /* for user-space streams */
-extern php_stream_ops php_stream_userspace_ops;
+PHPAPI extern php_stream_ops php_stream_userspace_ops;
 #define PHP_STREAM_IS_USERSPACE	&php_stream_userspace_ops
 
 PHPAPI void php_stream_context_free(php_stream_context *context);
