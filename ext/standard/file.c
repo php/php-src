@@ -465,9 +465,9 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto string file_set_contents(string file, string data)
+/* {{{ proto string file_put_contents(string file, string data)
    Write/Create a file with contents data */
-PHP_FUNCTION(file_set_contents)
+PHP_FUNCTION(file_put_contents)
 {
 	php_stream *stream;
 	char *filename, *data;
