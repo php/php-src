@@ -43,7 +43,7 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 	switch(pval_arg->type)
 	{
 		case IS_NULL:
-			var_arg->vt = VT_EMPTY;
+			var_arg->vt = VT_NULL;
 			break;
 
 		case IS_BOOL:
@@ -73,7 +73,7 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 				obj = (i_dispatch *)zend_list_find((*idispatch_handle)->value.lval, &type);
 				if(!obj || (type != php_COM_get_le_idispatch()) || !obj->referenced)
 				{
-					var_arg->vt = VT_EMPTY;
+					VariantInit(var_arg);
 				}
 				else
 				{
@@ -82,20 +82,20 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 				}
 			}
 			else
-				var_arg->vt	= VT_EMPTY;
+				VariantInit(var_arg);
 			break;
 
 		case IS_ARRAY:
 		{
 			/* TODO: Walk the hash and convert the elements */
 			/* into a SafeArray. */
-			var_arg->vt = VT_EMPTY;
+			VariantInit(var_arg);
 			break;
 		}
 		case IS_RESOURCE:
 		case IS_CONSTANT:
 		case IS_CONSTANT_ARRAY:
-			var_arg->vt = VT_EMPTY;
+			VariantInit(var_arg);
 			break;
 
 		case IS_LONG:
@@ -204,7 +204,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != VT_DISPATCH)
 			{
-				var_arg->vt = VT_EMPTY;
+				VariantInit(var_arg);
 			}
 			else
 			{
@@ -215,7 +215,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 				if(FAILED(hr))
 				{
 					php_error(E_WARNING,"can't query IUnknown");
-					var_arg->vt = VT_EMPTY;
+					VariantInit(var_arg);
 				}
 				else
 				{
@@ -228,7 +228,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != VT_DISPATCH)
 			{
-				var_arg->vt = VT_EMPTY;
+				VariantInit(var_arg);
 			}
 			break;
 
@@ -301,7 +301,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != VT_DISPATCH)
 			{
-				var_arg->vt = VT_EMPTY;
+				VariantInit(var_arg);
 			}
 			else
 			{
@@ -312,7 +312,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 				if(FAILED(hr))
 				{
 					php_error(E_WARNING,"can't query IUnknown");
-					var_arg->vt = VT_EMPTY;
+					VariantInit(var_arg);
 				}
 				else
 				{
@@ -325,7 +325,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != VT_DISPATCH)
 			{
-				var_arg->vt = VT_EMPTY;
+				VariantInit(var_arg);
 			}
 			else
 			{
@@ -337,7 +337,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != (VT_VARIANT | VT_BYREF))
 			{
-				var_arg->vt = VT_EMPTY;
+				VariantInit(var_arg);
 			}
 			break;
 
@@ -401,92 +401,96 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 	/* Changed the function to return a value for recursive error testing */
 	/* Existing calls will be unaffected by the change - so it */
 	/* seemed like the smallest impact on unfamiliar code */
-	int ret = 1; 
+	int ret = SUCCESS; 
 
 	/* Add SafeArray support */
-	if (var_arg->vt & VT_ARRAY)
-	{
-		SAFEARRAY *array = V_ARRAY(var_arg);
-		LONG indices[1];
-		LONG lbound=0, ubound;
-		VARTYPE vartype;
-		register int ii;
-		UINT Dims;
-		VARIANT vv;
-		pval *element;
-
-		/* TODO: Add support for multi-dimensional SafeArrays */
-		/* For now just validate that the SafeArray has one dimension */
-		if (1 != (Dims = SafeArrayGetDim(array)))
-		{
-			php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
-			var_reset(pval_arg);
-			return 0;
-		}
-
-		/* This call has failed for everything I have tried */
-		/* But best leave it to be on the safe side */
-		if (S_OK != SafeArrayGetVartype(array, &vartype))
-		{
-			/* Fall back to what we do know */
-			/* Mask off the array bit and assume */
-			/* what is left is the type of the array */
-			/* elements */
-			vartype = var_arg->vt & ~VT_ARRAY;
-		}
-		SafeArrayGetUBound(array, 1, &ubound);
-		SafeArrayGetLBound(array, 1, &lbound);
-
-		/* Since COM returned an array we set up the php */
-		/* return value to be an array */
-		array_init(pval_arg);
-		INIT_PZVAL(pval_arg);
-
-		/* Walk the safe array */
-		for (ii=lbound;ii<=ubound;ii++)
-		{
-			indices[0] = ii;
-			VariantInit(&vv); /* Docs say this just set the vt field, but you never know */
-			/* Set up a variant to pass to a recursive call */
-			/* So that we do not need to have two copies */
-			/* of the code */
-			vv.vt = vartype;
-			SafeArrayGetElement(array, indices, (VOID *) &(vv.lVal));
-			/* Create an element to be added to the array */
-			ALLOC_ZVAL(element);
-			/* Call ourself again to handle the base type conversion */
-			/* If SafeArrayGetElement proclaims to allocate */
-			/* memory for a BSTR, so the recursive call frees */
-			/* the string correctly */
-			if (0 == php_variant_to_pval(&vv, element, persistent, codepage))
+	switch(var_arg->vt & ~VT_BYREF)
+	{		
+		case VT_ARRAY:
 			{
-				/* Error occurred setting up array element */
-				/* Error was displayed by the recursive call */
-				FREE_ZVAL(element);
-				/* TODO: Do we stop here, or go on and */
-				/* try to make sense of the rest of the array */
-				/* Going on leads to multiple errors displayed */
-				/* for the same conversion. For large arrays that */
-				/* could be very annoying */
-				/* And if we don't go on - what to do about */
-				/* the parts of the array that are OK? */
-				/* break; */
-			}
-			else
-			{
-				/* Just insert the element into our return array */
-				pval_copy_constructor(element);
-				INIT_PZVAL(element);
-				zend_hash_index_update(pval_arg->value.ht, ii, &element, sizeof(pval *), NULL);
-			}
-		}
+				SAFEARRAY *array = V_ARRAY(var_arg);
+				LONG indices[1];
+				LONG lbound=0, ubound;
+				VARTYPE vartype;
+				register int ii;
+				UINT Dims;
+				VARIANT vv;
+				pval *element;
 
-		/* Clean up the SafeArray since that is our responsibility */
-		SafeArrayDestroyData(array);
-		SafeArrayDestroyDescriptor(array);
-	}
-	else switch(var_arg->vt & ~VT_BYREF)
-	{
+				/* TODO: Add support for multi-dimensional SafeArrays */
+				/* For now just validate that the SafeArray has one dimension */
+				if (1 != (Dims = SafeArrayGetDim(array)))
+				{
+					php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
+					var_reset(pval_arg);
+					return FAILURE;
+				}
+
+				/* This call has failed for everything I have tried */
+				/* But best leave it to be on the safe side */
+				if (S_OK != SafeArrayGetVartype(array, &vartype))
+				{
+					/* Fall back to what we do know */
+					/* Mask off the array bit and assume */
+					/* what is left is the type of the array */
+					/* elements */
+					vartype = var_arg->vt & ~VT_ARRAY;
+				}
+				SafeArrayGetUBound(array, 1, &ubound);
+				SafeArrayGetLBound(array, 1, &lbound);
+
+				/* Since COM returned an array we set up the php */
+				/* return value to be an array */
+				array_init(pval_arg);
+
+				/* Walk the safe array */
+				for (ii=lbound;ii<=ubound;ii++)
+				{
+					indices[0] = ii;
+					VariantInit(&vv); /* Docs say this just set the vt field, but you never know */
+					/* Set up a variant to pass to a recursive call */
+					/* So that we do not need to have two copies */
+					/* of the code */
+					vv.vt = vartype;
+					if (S_OK != SafeArrayGetElement(array, indices, (VOID *) &(vv.lVal)))
+                    {
+						/* Failure to retieve an element probably means the array is sparse */
+						/* So leave the php array sparse too */
+						continue;
+                    }
+					/* Create an element to be added to the array */
+					ALLOC_ZVAL(element);
+					/* Call ourself again to handle the base type conversion */
+					/* If SafeArrayGetElement proclaims to allocate */
+					/* memory for a BSTR, so the recursive call frees */
+					/* the string correctly */
+					if (FAILURE == php_variant_to_pval(&vv, element, persistent, codepage))
+					{
+						/* Error occurred setting up array element */
+						/* Error was displayed by the recursive call */
+						FREE_ZVAL(element);
+						/* TODO: Do we stop here, or go on and */
+						/* try to make sense of the rest of the array */
+						/* Going on leads to multiple errors displayed */
+						/* for the same conversion. For large arrays that */
+						/* could be very annoying */
+						/* And if we don't go on - what to do about */
+						/* the parts of the array that are OK? */
+						/* break; */
+					}
+					else
+					{
+						/* Just insert the element into our return array */
+						add_index_zval(pval_arg, ii, element);
+					}
+				}
+
+				/* Clean up the SafeArray since that is our responsibility */
+				SafeArrayDestroyData(array);
+				SafeArrayDestroyDescriptor(array);
+			}
+			break;
+
 		case VT_EMPTY:
 			var_uninit(pval_arg);
 			break;
@@ -494,85 +498,80 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 		case VT_UI1:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.lval = (long)*(var_arg->pbVal);
+				ZVAL_LONG(pval_arg, (long)*(var_arg->pbVal));
 			}
 			else
 			{
-				pval_arg->value.lval = (long) var_arg->bVal;
+				ZVAL_LONG(pval_arg, (long)var_arg->pbVal);
 			}
-
-			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_I2:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.lval = (long )*(var_arg->piVal);
+				ZVAL_LONG(pval_arg, (long )*(var_arg->piVal));
 			}
 			else
 			{
-				pval_arg->value.lval = (long) var_arg->iVal;
+				ZVAL_LONG(pval_arg, (long)var_arg->iVal);
 			}
-
-			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_I4:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.lval = *(var_arg->plVal);
+				ZVAL_LONG(pval_arg, *(var_arg->plVal));
 			}
 			else
 			{
-				pval_arg->value.lval = var_arg->lVal;
+				ZVAL_LONG(pval_arg, var_arg->lVal);
 			}
-
-			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_R4:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.dval = (double)*(var_arg->pfltVal);
+				ZVAL_DOUBLE(pval_arg, (double)*(var_arg->pfltVal));
 			}
 			else
 			{
-				pval_arg->value.dval = (double) var_arg->fltVal;
+				ZVAL_DOUBLE(pval_arg, (double)var_arg->fltVal);
 			}
-
-			pval_arg->type = IS_DOUBLE;
 			break;
 
 		case VT_R8:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.dval = *(var_arg->pdblVal);
+				ZVAL_DOUBLE(pval_arg, *(var_arg->pdblVal));
 			}
 			else
 			{
-				pval_arg->value.dval = var_arg->dblVal;
+				ZVAL_DOUBLE(pval_arg, var_arg->dblVal);
 			}
-
-			pval_arg->type = IS_DOUBLE;
 			break;
 
+		/* 96bit uint */
 		case VT_DECIMAL:
 			{
 				OLECHAR *unicode_str;
 				switch(VarBstrFromDec(&var_arg->decVal, LOCALE_SYSTEM_DEFAULT, 0, &unicode_str))
 				{
 					case S_OK:
+						
 						pval_arg->value.str.val = php_OLECHAR_to_char(unicode_str, &pval_arg->value.str.len, persistent, codepage);
 						pval_arg->type = IS_STRING;
 						break;
 
 					default:
-						php_error(E_WARNING, "Error converting DECIMAL value to PHP floating point");
+						ZVAL_NULL(pval_arg);
+						ret = FAILURE;
+						php_error(E_WARNING, "Error converting DECIMAL value to PHP string");
 						break;
 				}
 			}
 			break;
 
+		/* Currency */
 		case VT_CY:
 			if(var_arg->vt & VT_BYREF)
 			{
@@ -582,40 +581,23 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 			{
 				VarR8FromCy(*(var_arg->pcyVal), &(pval_arg->value.dval));
 			}
-
 			pval_arg->type = IS_DOUBLE;
 			break;
 
 		case VT_BOOL:
 			if(var_arg->vt & VT_BYREF)
 			{
-				if(*(var_arg->pboolVal) & 0xFFFF)
-				{
-					pval_arg->value.lval = 1;
-				}
-				else
-				{
-					pval_arg->value.lval = 0;
-				}
+				ZVAL_BOOL(pval_arg, *(var_arg->pboolVal));
 			}
 			else
 			{
-				if(var_arg->boolVal & 0xFFFF)
-				{
-					pval_arg->value.lval = 1;
-				}
-				else
-				{
-					pval_arg->value.lval = 0;
-				}
+				ZVAL_BOOL(pval_arg, var_arg->boolVal);
 			}
-
-			pval_arg->type = IS_BOOL;
 			break;
 
 		case VT_NULL:
 		case VT_VOID:
-			pval_arg->type = IS_NULL;
+			ZVAL_NULL(pval_arg);
 			break;
 
 		case VT_VARIANT:
@@ -642,7 +624,14 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				SYSTEMTIME wintime;
 				struct tm phptime;
 
-				VariantTimeToSystemTime(var_arg->date, &wintime);
+				if((var_arg->vt & VT_BYREF) != VT_BYREF)
+				{
+					VariantTimeToSystemTime(var_arg->date, &wintime);
+				}
+				else
+				{
+					VariantTimeToSystemTime(*(var_arg->pdate), &wintime);
+				}
 
 				phptime.tm_year  = wintime.wYear - 1900;
 				phptime.tm_mon   = wintime.wMonth - 1;
@@ -653,15 +642,14 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				phptime.tm_isdst = -1;
 
 				tzset();
-				pval_arg->value.lval = mktime(&phptime);
-				pval_arg->type = IS_LONG;
+				ZVAL_LONG(pval_arg, mktime(&phptime));
 			}
 			break;
 
 		case VT_UNKNOWN:
 			if(var_arg->punkVal == NULL)
 			{
-				pval_arg->type = IS_NULL;
+				var_arg->pdispVal = NULL;
 			}
 			else
 			{
@@ -681,13 +669,15 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				}
 			}
 			/* break missing intentionaly */
-		case VT_DISPATCH: {
+		case VT_DISPATCH:
+			{
 				pval *handle;
 				i_dispatch *obj;
 
 				if(var_arg->pdispVal == NULL)
 				{
-					pval_arg->type = IS_NULL;
+					ret = FAILURE;
+					ZVAL_NULL(pval_arg);
 				}
 				else
 				{
@@ -710,75 +700,66 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				}
 			}
 			break;
+
 		case VT_I1:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.lval = (long)*(var_arg->pcVal);
+				ZVAL_LONG(pval_arg, (long)*(var_arg->pcVal));
 			}
 			else
 			{
-				pval_arg->value.lval = (long) var_arg->cVal;
+				ZVAL_LONG(pval_arg, (long)var_arg->cVal);
 			}
-
-			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_UI2:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.lval = (long)*(var_arg->puiVal);
+				ZVAL_LONG(pval_arg, (long)*(var_arg->puiVal));
 			}
 			else
 			{
-				pval_arg->value.lval = (long) var_arg->uiVal;
+				ZVAL_LONG(pval_arg, (long)var_arg->uiVal);
 			}
-
-			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_UI4:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.lval = (long)*(var_arg->pulVal);
+				ZVAL_LONG(pval_arg, (long)*(var_arg->pulVal));
 			}
 			else
 			{
-				pval_arg->value.lval = (long) var_arg->ulVal;
+				ZVAL_LONG(pval_arg, (long)var_arg->ulVal);
 			}
-
-			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_INT:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.lval = (long)*(var_arg->pintVal);
+				ZVAL_LONG(pval_arg, (long)*(var_arg->pintVal));
 			}
 			else
 			{
-				pval_arg->value.lval = (long) var_arg->intVal;
+				ZVAL_LONG(pval_arg, (long)var_arg->intVal);
 			}
-
-			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_UINT:
 			if(var_arg->vt & VT_BYREF)
 			{
-				pval_arg->value.lval = (long)*(var_arg->puintVal);
+				ZVAL_LONG(pval_arg, (long)*(var_arg->puintVal));
 			}
 			else
 			{
-				pval_arg->value.lval = (long) var_arg->uintVal;
+				ZVAL_LONG(pval_arg, (long)var_arg->uintVal);
 			}
-
-			pval_arg->type = IS_LONG;
 			break;
 
 		default:
 			php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", var_arg->vt, var_arg->vt);
-			var_reset(pval_arg);
-			ret = 0;
+			ZVAL_NULL(pval_arg);
+			ret = FAILURE;
 			break;
 	}
 	return ret;
