@@ -1,3 +1,131 @@
+2002-03-29  Marko Karppinen  <karppinen@pobox.com>
+
+    * .cvsignore:
+    Mac's Find By Content indexing sprinkles these annoying files around
+
+    * sapi/apache/config.m4: Prepare for MH_BUNDLE build on Mac OS X / Darwin
+
+2002-03-29  Sander Roobol  <phy@wanadoo.nl>
+
+    * tests/lang/002.phpt
+      tests/lang/003.phpt
+      tests/lang/004.phpt
+      tests/lang/005.phpt
+      tests/lang/006.phpt
+      tests/lang/007.phpt
+      tests/lang/008.phpt
+      tests/lang/009.phpt
+      tests/lang/010.phpt
+      tests/lang/012.phpt
+      tests/lang/013.phpt
+      tests/lang/014.phpt
+      tests/lang/015.phpt
+      tests/lang/016.inc
+      tests/lang/016.phpt
+      tests/lang/017.phpt
+      tests/lang/022.phpt
+      tests/lang/025.phpt
+      tests/lang/029.phpt
+      tests/lang/030.phpt
+      tests/lang/031.phpt
+      tests/lang/033.phpt:
+    Updating tests: remove alternative syntax in tests, added a special
+    alternative-syntax testfile.
+
+    * php.ini-dist
+      php.ini-recommended: Added crack extension to php.ini-*
+
+2002-03-29  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/session/session.c
+      ext/session/php_session.h:
+    Added field to ps_module structure to hold function pointer for the creation
+    of the session ID string. Default PS_MOD() macro sets this to be the default
+    creation routine. PS_MOD_SID() macro sets this to a handlers session ID
+    creation routine.
+
+2002-03-29  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    adjust to recent apr bucket api changes
+
+2002-03-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bz2/bz2.c: MFH fix for some bug
+
+    * ext/standard/tests/aggregation/aggregate.lib
+      ext/standard/tests/aggregation/aggregate.lib.php
+      ext/standard/tests/aggregation/aggregate.phpt
+      ext/standard/tests/aggregation/aggregate_methods.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregate_properties.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregation_info.phpt
+      ext/standard/tests/aggregation/deaggregate.phpt:
+    - MFH fixes for these tests.
+
+    * NEWS: - Added missing entry for mysql_info() and fixed some entries
+
+    * ext/mysql/php_mysql.c: WS fix
+
+2002-03-29  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:  - add mysql_info function
+
+2002-03-29  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c: Fix build failure with PostgreSQL 6.5.x
+
+2002-03-29  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/info.c:
+    (PHP php_uname) display runtime uname rather than compile-time uname, added
+                    an optional parameter to get single fields (like uname(1))
+
+2002-03-29  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * tests/lang/031.phpt: Trying to be more clear.
+
+2002-03-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Remote.php:
+    * implemented "pear list-upgrades", which will show you what releases
+      are available on the server (shows newer releases with the same state)
+
+    * pear/PEAR/Command/Package.php: * always require PEAR/Common.php
+
+    * pear/PEAR/Config.php: * allow "any" as a preferred_state value
+
+    * pear/PEAR/Remote.php: * pass on xmlrpc faults as pear errors
+
+2002-03-29  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * tests/lang/032.phpt:
+    Added class method registration test. It does not test
+    for multiple method definitions due to test script limitation.
+
+    * tests/lang/031.phpt: Change title to reasonable one.
+
+2002-03-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/001.phpt
+      ext/exif/tests/test2.jpg: -fix test image
+
+    * ext/exif/exif.c: -fix possible problem on low memory
+    -fix problem on failure
+
+2002-03-29  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/user_streams.c: Fix ZE2 build.
+
+2002-03-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php: * fix tempfile cleanup
+
 2002-03-28  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Command/Package.php: * per-command fold marks

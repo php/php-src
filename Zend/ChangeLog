@@ -1,3 +1,7 @@
+2002-03-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_compile.c: - revert patch
+
 2002-03-25  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * zend_compile.c: - MFZE1
