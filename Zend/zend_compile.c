@@ -895,10 +895,6 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 	}		
 }
 
-#define ZEND_CLONE_FUNC_NAME		"__clone"
-#define ZEND_CONSTRUCTOR_FUNC_NAME	"__construct"
-#define ZEND_DESTRUCTOR_FUNC_NAME	"__destruct"
-
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference  TSRMLS_DC)
 {
 	zend_op_array op_array;
@@ -938,6 +934,12 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)))) {
 			CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
+		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
+			CG(active_class_entry)->__call = (zend_function *) CG(active_op_array);
+		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)))) {
+			CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
+		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
+			CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
 		}
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1551,6 +1553,9 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	new_class_entry->constructor = NULL;
 	new_class_entry->destructor = NULL;
 	new_class_entry->clone = NULL;
+	new_class_entry->__get = NULL;
+	new_class_entry->__set = NULL;
+	new_class_entry->__call = NULL;
 
 	new_class_entry->create_object = NULL;
 	new_class_entry->handle_function_call = NULL;
@@ -2050,6 +2055,9 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->constructor = NULL;
 	new_class_entry->destructor = NULL;
 	new_class_entry->clone = NULL;
+	new_class_entry->__get = NULL;
+	new_class_entry->__set = NULL;
+	new_class_entry->__call = NULL;
 
 	new_class_entry->create_object = NULL;
 	new_class_entry->handle_function_call = NULL;
