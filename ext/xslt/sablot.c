@@ -541,6 +541,7 @@ PHP_FUNCTION(xslt_process)
 		/* Can return NULL */
 		if (args) {
 			char *baseuri;
+			TSRMLS_FETCH();
 			i=0;
 			while (args[i]) {
 				/* We can safely add args[i+1] since xslt_make_array sets args[i] to NULL if
@@ -553,7 +554,6 @@ PHP_FUNCTION(xslt_process)
 			/* Since we have args passed, we need to set the base uri, so pull in executor
 				globals and set the base, using the current filename, specifally for the
 				'arg' scheme */
-			TSRMLS_FETCH();
 			baseuri = (char *)emalloc(strlen(zend_get_executed_filename(TSRMLS_C))+7+1);
 			sprintf(baseuri, "file://%s", zend_get_executed_filename(TSRMLS_C));
 
