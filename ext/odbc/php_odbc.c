@@ -807,7 +807,7 @@ PHP_FUNCTION(odbc_close_all)
 }
 /* }}} */
 
-/* {{{ proto int odbc_binmode(int result_id, int mode)
+/* {{{ proto bool odbc_binmode(int result_id, int mode)
    Handle binary column data */
 PHP_FUNCTION(odbc_binmode)
 {
@@ -815,7 +815,7 @@ PHP_FUNCTION(odbc_binmode)
 }
 /* }}} */
 
-/* {{{ proto int odbc_longreadlen(int result_id, int length)
+/* {{{ proto bool odbc_longreadlen(int result_id, int length)
    Handle LONG columns */
 PHP_FUNCTION(odbc_longreadlen)
 {
@@ -823,7 +823,7 @@ PHP_FUNCTION(odbc_longreadlen)
 }
 /* }}} */
 
-/* {{{ proto int odbc_prepare(int connection_id, string query)
+/* {{{ proto resource odbc_prepare(resource connection_id, string query)
    Prepares a statement for execution */
 PHP_FUNCTION(odbc_prepare)
 {
@@ -919,7 +919,7 @@ PHP_FUNCTION(odbc_prepare)
  * Execute prepared SQL statement. Supports only input parameters.
  */
 
-/* {{{ proto int odbc_execute(int result_id [, array parameters_array])
+/* {{{ proto bool odbc_execute(resource result_id [, array parameters_array])
    Execute a prepared statement */
 PHP_FUNCTION(odbc_execute)
 { 
@@ -1115,7 +1115,7 @@ PHP_FUNCTION(odbc_execute)
 }
 /* }}} */
 
-/* {{{ proto string odbc_cursor(int result_id)
+/* {{{ proto string odbc_cursor(resource result_id)
    Get cursor name */
 PHP_FUNCTION(odbc_cursor)
 {
@@ -1172,7 +1172,7 @@ PHP_FUNCTION(odbc_cursor)
 /* }}} */
 
 #ifdef HAVE_SQLDATASOURCES
-/* {{{ proto array odbc_data_source(int connection_id, int fetch_type)
+/* {{{ proto array odbc_data_source(resource connection_id, int fetch_type)
    Return information about the currently connected data source */
 PHP_FUNCTION(odbc_data_source)
 {
@@ -1234,7 +1234,7 @@ PHP_FUNCTION(odbc_data_source)
 /* }}} */
 #endif /* HAVE_SQLDATASOURCES *
 
-/* {{{ proto int odbc_exec(int connection_id, string query [, int flags])
+/* {{{ proto resource odbc_exec(resource connection_id, string query [, int flags])
    Prepare and execute an SQL statement */
 /* XXX Use flags */
 PHP_FUNCTION(odbc_exec)
@@ -1488,7 +1488,7 @@ PHP_FUNCTION(odbc_fetch_array)
 /* }}} */
 #endif
 
-/* {{{ proto int odbc_fetch_into(int result_id, array result_array, [, int rownumber])
+/* {{{ proto int odbc_fetch_into(resource result_id, array result_array, [, int rownumber])
    Fetch one result row into an array */ 
 PHP_FUNCTION(odbc_fetch_into)
 {
@@ -1616,7 +1616,8 @@ PHP_FUNCTION(odbc_fetch_into)
 }
 /* }}} */
 
-/* {{{ solid_fetch_prev */
+/* {{{ proto bool solid_fetch_prev(resource result_id)
+   */ 
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35)
 PHP_FUNCTION(solid_fetch_prev)
 {
@@ -1646,7 +1647,7 @@ PHP_FUNCTION(solid_fetch_prev)
 #endif
 /* }}} */
 
-/* {{{ proto int odbc_fetch_row(int result_id [, int row_number])
+/* {{{ proto bool odbc_fetch_row(resource result_id [, int row_number])
    Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
@@ -1707,7 +1708,7 @@ PHP_FUNCTION(odbc_fetch_row)
 }	
 /* }}} */
 
-/* {{{ proto string odbc_result(int result_id, mixed field)
+/* {{{ proto mixed odbc_result(resource result_id, mixed field)
    Get result data */ 
 PHP_FUNCTION(odbc_result)
 {
@@ -1880,7 +1881,7 @@ PHP_FUNCTION(odbc_result)
 }
 /* }}} */
 
-/* {{{ proto int odbc_result_all(int result_id [, string format])
+/* {{{ proto int odbc_result_all(resource result_id [, string format])
    Print result as HTML table */
 PHP_FUNCTION(odbc_result_all)
 {
@@ -2003,7 +2004,7 @@ PHP_FUNCTION(odbc_result_all)
 }
 /* }}} */
 
-/* {{{ proto int odbc_free_result(int result_id)
+/* {{{ proto bool odbc_free_result(resource result_id)
    Free resources associated with a result */
 PHP_FUNCTION(odbc_free_result)
 {
@@ -2032,7 +2033,7 @@ PHP_FUNCTION(odbc_free_result)
 }
 /* }}} */
 
-/* {{{ proto int odbc_connect(string DSN, string user, string password [, int cursor_option])
+/* {{{ proto resource odbc_connect(string DSN, string user, string password [, int cursor_option])
    Connect to a datasource */
 PHP_FUNCTION(odbc_connect)
 {
@@ -2040,7 +2041,7 @@ PHP_FUNCTION(odbc_connect)
 }
 /* }}} */
 
-/* {{{ proto int odbc_pconnect(string DSN, string user, string password [, int cursor_option])
+/* {{{ proto resource odbc_pconnect(string DSN, string user, string password [, int cursor_option])
    Establish a persistent connection to a datasource */
 PHP_FUNCTION(odbc_pconnect)
 {
@@ -2326,7 +2327,7 @@ try_and_get_another_connection:
 }
 /* }}} */
 
-/* {{{ proto void odbc_close(int connection_id)
+/* {{{ proto void odbc_close(resource connection_id)
    Close an ODBC connection */
 PHP_FUNCTION(odbc_close)
 {
@@ -2370,7 +2371,7 @@ PHP_FUNCTION(odbc_close)
 }
 /* }}} */
 
-/* {{{ proto int odbc_num_rows(int result_id)
+/* {{{ proto int odbc_num_rows(resource result_id)
    Get number of rows in a result */
 PHP_FUNCTION(odbc_num_rows)
 {
@@ -2388,7 +2389,7 @@ PHP_FUNCTION(odbc_num_rows)
 /* }}} */
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
-/* {{{ proto bool odbc_next_result(int result_id)
+/* {{{ proto bool odbc_next_result(resource result_id)
    Checks if multiple results are avaiable */
 PHP_FUNCTION(odbc_next_result)
 {
@@ -2437,7 +2438,7 @@ PHP_FUNCTION(odbc_next_result)
 /* }}} */
 #endif
 
-/* {{{ proto int odbc_num_fields(int result_id)
+/* {{{ proto int odbc_num_fields(resource result_id)
    Get number of columns in a result */
 PHP_FUNCTION(odbc_num_fields)
 {
@@ -2452,7 +2453,7 @@ PHP_FUNCTION(odbc_num_fields)
 }
 /* }}} */
 
-/* {{{ proto string odbc_field_name(int result_id, int field_number)
+/* {{{ proto string odbc_field_name(resource result_id, int field_number)
    Get a column name */
 PHP_FUNCTION(odbc_field_name)
 {
@@ -2486,7 +2487,7 @@ PHP_FUNCTION(odbc_field_name)
 }
 /* }}} */
 
-/* {{{ proto string odbc_field_type(int result_id, int field_number)
+/* {{{ proto string odbc_field_type(resource result_id, int field_number)
    Get the datatype of a column */
 PHP_FUNCTION(odbc_field_type)
 {
@@ -2524,7 +2525,7 @@ PHP_FUNCTION(odbc_field_type)
 }
 /* }}} */
 
-/* {{{ proto int odbc_field_len(int result_id, int field_number)
+/* {{{ proto int odbc_field_len(resource result_id, int field_number)
    Get the length (precision) of a column */
 PHP_FUNCTION(odbc_field_len)
 {
@@ -2532,7 +2533,7 @@ PHP_FUNCTION(odbc_field_len)
 }
 /* }}} */
 
-/* {{{ proto int odbc_field_scale(int result_id, int field_number)
+/* {{{ proto int odbc_field_scale(resource result_id, int field_number)
    Get the scale of a column */
 PHP_FUNCTION(odbc_field_scale)
 {
@@ -2540,7 +2541,7 @@ PHP_FUNCTION(odbc_field_scale)
 }
 /* }}} */
 
-/* {{{ proto int odbc_field_num(int result_id, string field_name)
+/* {{{ proto int odbc_field_num(resource result_id, string field_name)
    Return column number */
 PHP_FUNCTION(odbc_field_num)
 {
@@ -2576,7 +2577,7 @@ PHP_FUNCTION(odbc_field_num)
 }
 /* }}} */
 
-/* {{{ proto int odbc_autocommit(int connection_id [, int OnOff])
+/* {{{ proto mixed odbc_autocommit(resource connection_id [, int OnOff])
    Toggle autocommit mode or get status */
 /* There can be problems with pconnections!*/
 PHP_FUNCTION(odbc_autocommit)
@@ -2624,7 +2625,7 @@ PHP_FUNCTION(odbc_autocommit)
 }
 /* }}} */
 
-/* {{{ proto int odbc_commit(int connection_id)
+/* {{{ proto bool odbc_commit(resource connection_id)
    Commit an ODBC transaction */
 PHP_FUNCTION(odbc_commit)
 {
@@ -2632,7 +2633,7 @@ PHP_FUNCTION(odbc_commit)
 }
 /* }}} */
 
-/* {{{ proto int odbc_rollback(int connection_id)
+/* {{{ proto bool odbc_rollback(resource connection_id)
    Rollback a transaction */
 PHP_FUNCTION(odbc_rollback)
 {
@@ -2678,7 +2679,7 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 }
 /* }}} */
 
-/* {{{ proto string odbc_error([int connection_id])
+/* {{{ proto string odbc_error([resource connection_id])
    Get the last error code */
 PHP_FUNCTION(odbc_error)
 {
@@ -2686,7 +2687,7 @@ PHP_FUNCTION(odbc_error)
 }
 /* }}} */
 
-/* {{{ proto string odbc_errormsg([int connection_id])
+/* {{{ proto string odbc_errormsg([resource connection_id])
    Get the last error message */
 PHP_FUNCTION(odbc_errormsg)
 {
@@ -2694,7 +2695,7 @@ PHP_FUNCTION(odbc_errormsg)
 }
 /* }}} */
 
-/* {{{ proto int odbc_setoption(int conn_id|result_id, int which, int option, int value)
+/* {{{ proto bool odbc_setoption(resource conn_id|result_id, int which, int option, int value)
    Sets connection or statement options */
 /* This one has to be used carefully. We can't allow to set connection options for
    persistent connections. I think that SetStmtOption is of little use, since most
@@ -2754,7 +2755,7 @@ PHP_FUNCTION(odbc_setoption)
  * metadata functions
  */
 
-/* {{{ proto int odbc_tables(int connection_id [, string qualifier, string owner, string name, string table_types])
+/* {{{ proto resource odbc_tables(resource connection_id [, string qualifier, string owner, string name, string table_types])
    Call the SQLTables function */
 PHP_FUNCTION(odbc_tables)
 {
@@ -2833,7 +2834,7 @@ PHP_FUNCTION(odbc_tables)
 }
 /* }}} */
 
-/* {{{ proto int odbc_columns(int connection_id, string qualifier, string owner, string table_name, string column_name)
+/* {{{ proto resource odbc_columns(resource connection_id, string qualifier, string owner, string table_name, string column_name)
    Returns a result identifier that can be used to fetch a list of column names in specified tables */
 PHP_FUNCTION(odbc_columns)
 {
@@ -2920,7 +2921,7 @@ PHP_FUNCTION(odbc_columns)
 /* }}} */
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
-/* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column)
+/* {{{ proto resource odbc_columnprivileges(resource connection_id, string catalog, string schema, string table, string column)
    Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
 PHP_FUNCTION(odbc_columnprivileges)
 {
@@ -2996,7 +2997,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 #endif /* HAVE_DBMAKER || HAVE_SOLID*/
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
-/* {{{ proto int odbc_foreignkeys(int connection_id, string pk_qualifier, string pk_owner, string pk_table, string fk_qualifier, string fk_owner, string fk_table)
+/* {{{ proto resource odbc_foreignkeys(resource connection_id, string pk_qualifier, string pk_owner, string pk_table, string fk_qualifier, string fk_owner, string fk_table)
    Returns a result identifier to either a list of foreign keys in the specified table or a list of foreign keys in other tables that refer to the primary key in the specified table */
 PHP_FUNCTION(odbc_foreignkeys)
 {
@@ -3091,7 +3092,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 /* }}} */
 #endif /* HAVE_SOLID */
 
-/* {{{ proto int odbc_gettypeinfo(int connection_id [, int data_type])
+/* {{{ proto resource odbc_gettypeinfo(resource connection_id [, int data_type])
    Returns a result identifier containing information about data types supported by the data source */
 PHP_FUNCTION(odbc_gettypeinfo)
 {
@@ -3159,7 +3160,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 }
 /* }}} */
 
-/* {{{ proto int odbc_primarykeys(int connection_id, string qualifier, string owner, string table)
+/* {{{ proto resource odbc_primarykeys(resource connection_id, string qualifier, string owner, string table)
    Returns a result identifier listing the column names that comprise the primary key for a table */
 PHP_FUNCTION(odbc_primarykeys)
 {
@@ -3231,7 +3232,7 @@ PHP_FUNCTION(odbc_primarykeys)
 /* }}} */
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
-/* {{{ proto int odbc_procedurecolumns(int connection_id [, string qualifier, string owner, string proc, string column])
+/* {{{ proto resource odbc_procedurecolumns(resource connection_id [, string qualifier, string owner, string proc, string column])
    Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
 PHP_FUNCTION(odbc_procedurecolumns)
 {
@@ -3311,7 +3312,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 #endif /* HAVE_SOLID */
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
-/* {{{ proto int odbc_procedures(int connection_id [, string qualifier, string owner, string name])
+/* {{{ proto resource odbc_procedures(resource connection_id [, string qualifier, string owner, string name])
    Returns a result identifier containg the list of procedure names in a datasource */
 PHP_FUNCTION(odbc_procedures)
 {
@@ -3387,7 +3388,7 @@ PHP_FUNCTION(odbc_procedures)
 /* }}} */
 #endif /* HAVE_SOLID */
 
-/* {{{ proto int odbc_specialcolumns(int connection_id, int type, string qualifier, string owner, string table, int scope, int nullable)
+/* {{{ proto resource odbc_specialcolumns(resource connection_id, int type, string qualifier, string owner, string table, int scope, int nullable)
    Returns a result identifier containing either the optimal set of columns that uniquely identifies a row in the table or columns that are automatically updated when any value in the row is updated by a transaction */
 PHP_FUNCTION(odbc_specialcolumns)
 {
@@ -3471,7 +3472,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 }
 /* }}} */
 
-/* {{{ proto int odbc_statistics(int connection_id, string qualifier, string owner, string name, int unique, int accuracy)
+/* {{{ proto resource odbc_statistics(resource connection_id, string qualifier, string owner, string name, int unique, int accuracy)
    Returns a result identifier that contains statistics about a single table and the indexes associated with the table */
 PHP_FUNCTION(odbc_statistics)
 {
@@ -3552,7 +3553,7 @@ PHP_FUNCTION(odbc_statistics)
 /* }}} */
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
-/* {{{ proto int odbc_tableprivileges(int connection_id, string qualifier, string owner, string name)
+/* {{{ proto resource odbc_tableprivileges(resource connection_id, string qualifier, string owner, string name)
    Returns a result identifier containing a list of tables and the privileges associated with each table */
 PHP_FUNCTION(odbc_tableprivileges)
 {
