@@ -2800,6 +2800,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 						state = 0;
 						tp = tbuf;
 					}
+				} else {
+					*(rp++) = c;
 				}
 				break;
 
