@@ -1,3 +1,8 @@
+2003-09-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Add public array Reflection_Class::getDefaultProperties()
+
 2003-09-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c:

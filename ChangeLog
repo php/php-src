@@ -1,3 +1,59 @@
+2003-09-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/string.c:
+      MFB Avoid zero-length keys which result in a spinning process
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      Avoid zero-length keys which result in a spinning process
+
+2003-09-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Add public array Reflection_Class::getDefaultProperties()
+
+2003-09-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd_patch:
+      Fix potential buffer overrun
+
+2003-09-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * win32/glob.c:
+      Nuke compile warnings
+
+2003-09-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/dir.c:
+      MFH: Fixed bug #25583 (Incorrect handling of paths starting with / on win32
+      inside glob() function).
+
+    * ext/standard/dir.c:
+      Fixed bug #25583 (Incorrect handling of paths starting with / on win32
+      inside glob() function).
+
+    * (PHP_4_3)
+      TSRM/tsrm_virtual_cwd.h:
+      Revert previous patch.
+
+    * TSRM/tsrm_virtual_cwd.h:
+      Revert patch r1.40, bug is in glob() not IS_ABSOLUTE_PATH()
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      TSRM/tsrm_virtual_cwd.h:
+      MFH: Fixed bug #25583 (Incorrect handling of absolute path without drive).
+
+    * TSRM/tsrm_virtual_cwd.h:
+      Fixed bug #25583 (Incorrect handling of absolute path without drive).
+
 2003-09-19  Tomas V.V.Cox  <cox@idecnet.com>
 
     * pear/docs/rfc01_PEAR_pecl-binaries.txt:
