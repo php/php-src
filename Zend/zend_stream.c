@@ -35,7 +35,7 @@ static void zend_stream_stdio_closer(void *handle TSRMLS_DC)
 		fclose((FILE*)handle);
 }
 
-int zend_stream_open(const char *filename, zend_file_handle *handle TSRMLS_DC)
+ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSRMLS_DC)
 {
 	if (zend_stream_open_function) {
 		return zend_stream_open_function(filename, handle TSRMLS_CC);
