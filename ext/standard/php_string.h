@@ -57,6 +57,8 @@ PHP_FUNCTION(hebrev);
 PHP_FUNCTION(hebrevc);
 PHP_FUNCTION(user_sprintf);
 PHP_FUNCTION(user_printf);
+PHP_FUNCTION(vprintf);
+PHP_FUNCTION(vsprintf);
 PHP_FUNCTION(addcslashes);
 PHP_FUNCTION(addslashes);
 PHP_FUNCTION(stripcslashes);

@@ -408,23 +408,40 @@ php_sprintf_getnumber(char *buffer, int *pos)
  *
  */
 static char *
-php_formatted_print(int ht, int *len TSRMLS_DC)
+php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 {
-	pval ***args;
+	zval ***args, **z_format, **array;
 	int argc, size = 240, inpos = 0, outpos = 0, temppos;
 	int alignment, width, precision, currarg, adjusting, argnum;
 	char *format, *result, padding;
 
 	argc = ZEND_NUM_ARGS();
 
-	if (argc < 1) {
-		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
-	}
-	args = (pval ***)emalloc(argc * sizeof(pval *));
+	if (use_array) {
+		int i = 1;
 
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
+		if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(argc, &z_format, &array) == FAILURE) {
+			WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
+		}
+		SEPARATE_ZVAL(array);
+		convert_to_array_ex(array);
+		argc = 1 + zend_hash_num_elements(Z_ARRVAL_PP(array));
+		args = (zval ***)emalloc(argc * sizeof(zval *));
+		args[0] = z_format;
+		for (zend_hash_internal_pointer_reset(Z_ARRVAL_PP(array));
+			 zend_hash_get_current_data(Z_ARRVAL_PP(array), (void **)&args[i++]) == SUCCESS;
+			 zend_hash_move_forward(Z_ARRVAL_PP(array)));
+	} else {
+		if (argc < 1) {
+			WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
+		}
+
+		args = (zval ***)emalloc(argc * sizeof(zval *));
+
+		if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
+			efree(args);
+			WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
+		}
 	}
 	convert_to_string_ex(args[0]);
 	format = (*args[0])->value.str.val;
@@ -632,7 +649,22 @@ PHP_FUNCTION(user_sprintf)
 	char *result;
 	int len;
 	
-	if ((result=php_formatted_print(ht, &len TSRMLS_CC))==NULL) {
+	if ((result=php_formatted_print(ht, &len, 0 TSRMLS_CC))==NULL) {
+		RETURN_FALSE;
+	}
+	RETVAL_STRINGL(result,len,1);
+	efree(result);
+}
+/* }}} */
+
+/* {{{ proto string vsprintf(string format, array args)
+   Return a formatted string */
+PHP_FUNCTION(vsprintf)
+{
+	char *result;
+	int len;
+	
+	if ((result=php_formatted_print(ht, &len, 1 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
 	RETVAL_STRINGL(result,len,1);
@@ -647,7 +679,22 @@ PHP_FUNCTION(user_printf)
 	char *result;
 	int len;
 	
-	if ((result=php_formatted_print(ht, &len TSRMLS_CC))==NULL) {
+	if ((result=php_formatted_print(ht, &len, 0 TSRMLS_CC))==NULL) {
+		RETURN_FALSE;
+	}
+	PHPWRITE(result,len);
+	efree(result);
+}
+/* }}} */
+
+/* {{{ proto int printf(string format, array args)
+   Output a formatted string */
+PHP_FUNCTION(vprintf)
+{
+	char *result;
+	int len;
+	
+	if ((result=php_formatted_print(ht, &len, 1 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
 	PHPWRITE(result,len);
