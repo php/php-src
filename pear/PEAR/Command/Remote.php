@@ -86,6 +86,27 @@ class PEAR_Command_Remote extends PEAR_Command_Common
             // {{{ list-remote-packages
 
             case 'list-remote-packages': {
+                $r = new PEAR_Remote($this->config);
+                $available = $r->call('package.listAll', true);
+                if (PEAR::isError($available)) {
+                    return $this->raiseError($available);
+                }
+                $i = $j = 0;
+                $this->ui->startTable(
+                    array('caption' => 'Available packages:',
+                          'border' => true));
+                foreach ($available as $name => $info) {
+                    if ($i++ % 20 == 0) {
+                        $this->ui->tableRow(
+                            array('Package', 'Version'),
+                            array('bold' => true));
+                    }
+                    $this->ui->tableRow(array($name, $info['stable']));
+                }
+                if ($i == 0) {
+                    $this->ui->tableRow(array('(no packages installed yet)'));
+                }
+                $this->ui->endTable();
                 break;
             }
 
