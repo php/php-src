@@ -510,11 +510,22 @@ Changes in the Zend Engine 2.0
         $backtrace = debug_backtrace();
 
         foreach ($backtrace as $step) {
-            $class = isset($step['class']) ? $step['class'] . '::' : '';
+            if (!empty($step['args'])) {
+                foreach ($step['args'] as $arg) {
+                    $args  = isset($args) ? $args . ', ' : '';
+                    $args .= var_export($arg, true);
+                }
+            } else {
+                $args = '';
+            }
+
+            $args = str_replace("\n", '', $args);
 
             printf(
-              "%s [%s:%s]\n",
+              "%s%s(%s) [%s:%s]\n",
+              isset($step['class']) ? $step['class'] . '::' : '',
               $step['function'],
+              $args,
               $step['file'],
               $step['line']
             );
