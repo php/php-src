@@ -49,6 +49,7 @@ PHP_FUNCTION(sqlite_query);
 PHP_FUNCTION(sqlite_unbuffered_query);
 PHP_FUNCTION(sqlite_fetch_array);
 PHP_FUNCTION(sqlite_current);
+PHP_FUNCTION(sqlite_column);
 
 PHP_FUNCTION(sqlite_num_rows);
 PHP_FUNCTION(sqlite_num_fields);

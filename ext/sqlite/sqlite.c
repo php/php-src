@@ -116,6 +116,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_query, NULL)
 	PHP_FE(sqlite_fetch_array, NULL)
 	PHP_FE(sqlite_current, NULL)
+	PHP_FE(sqlite_column, NULL)
 	PHP_FE(sqlite_libversion, NULL)
 	PHP_FE(sqlite_libencoding, NULL)
 	PHP_FE(sqlite_changes, NULL)
@@ -1075,13 +1076,73 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 	}
 
 	if (move_next) {
-	if (!res->buffered) {
-		/* non buffered: fetch next row */
-		php_sqlite_fetch(res TSRMLS_CC);
+		if (!res->buffered) {
+			/* non buffered: fetch next row */
+			php_sqlite_fetch(res TSRMLS_CC);
+		}
+		/* advance the row pointer */
+		res->curr_row++;
 	}
-	/* advance the row pointer */
-	res->curr_row++;
 }
+/* }}} */
+
+/* {{{ php_sqlite_fetch_column */
+static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, zend_bool decode_binary, zval *return_value TSRMLS_DC)
+{
+	int j;
+	const char **rowdata, **colnames;
+	char *decoded = NULL;
+	int decoded_len;
+
+	/* check range of the row */
+	if (res->curr_row >= res->nrows) {
+		/* no more */
+		RETURN_FALSE;
+	}
+	colnames = (const char**)res->col_names;
+	if (res->buffered) {
+		rowdata = (const char**)&res->table[res->curr_row * res->ncolumns];
+	} else {
+		rowdata = (const char**)res->table;
+	}
+
+	if (Z_TYPE_P(which) == IS_LONG) {
+		j = Z_LVAL_P(which);
+	} else {
+		convert_to_string_ex(&which);
+		for (j = 0; j < res->ncolumns; j++) {
+			if (!strcasecmp((char*)colnames[j], Z_STRVAL_P(which))) {
+				break;
+			}
+		}
+	}
+	if (j < 0 || j >= res->ncolumns) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such column %d", j);
+		RETURN_FALSE;
+	}
+
+	if (decode_binary && rowdata[j] != NULL && rowdata[j][0] == '\x01') {
+		int l = strlen(rowdata[j]);
+		decoded = do_alloca(l);
+		decoded_len = sqlite_decode_binary(rowdata[j]+1, decoded);
+	} else {
+		decoded = (char*)rowdata[j];
+		if (decoded) {
+			decoded_len = strlen(decoded);
+		} else {
+			decoded_len = 0;
+		}
+	}
+	
+	if (decoded == NULL) {
+		RETURN_NULL();
+	} else {
+		RETURN_STRINGL(decoded, decoded_len, 1);
+	}
+
+	if (decode_binary && rowdata[j] != NULL && rowdata[j][0] == '\x01') {
+		free_alloca(decoded);
+	}
 }
 /* }}} */
 
@@ -1107,7 +1168,7 @@ PHP_FUNCTION(sqlite_fetch_array)
 /* }}} */
 
 /* {{{ proto array sqlite_fetch_array(resource result [, int result_type, bool decode_binary])
-   Fetches the next row from a result set as an array */
+   Fetches the current row from a result set as an array */
 PHP_FUNCTION(sqlite_current)
 {
 	zval *zres;
@@ -1124,6 +1185,24 @@ PHP_FUNCTION(sqlite_current)
 	}
 
 	php_sqlite_fetch_array(res, mode, decode_binary, 0, return_value TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto array sqlite_column(resource result, mixed index_or_name [, bool decode_binary])
+   Fetches a column from the current row from a result set */
+PHP_FUNCTION(sqlite_column)
+{
+	zval *zres;
+	zval *which;
+	zend_bool decode_binary = 1;
+	struct php_sqlite_result *res;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|b", &zres, &which, &decode_binary)) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+
+	php_sqlite_fetch_column(res, which, decode_binary, return_value TSRMLS_CC);
 }
 /* }}} */
 
