@@ -1,3 +1,119 @@
+2003-10-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_dependency_checkPackage.phpt:
+      add optional dependencies to test
+
+    * pear/PEAR/Dependency.php:
+      better error messages, fix potential problems in the future
+
+    * pear/PEAR/Installer.php:
+      fix warning
+
+    * pear/tests/pear_installer1.phpt:
+      fix test
+
+    * pear/tests/pear_installer2.phpt:
+      add fancy SKIPIF code, fix test
+
+    * pear/tests/pear_installer3.phpt:
+      add fancy SKIPIF code
+
+    * pear/tests/pear_installer1.phpt:
+      fix test 1, add in nifty SKIPIF code
+
+    * pear/PEAR/Installer.php:
+      deleted code says it all
+
+    * pear/tests/pear_dependency_checkPackage.phpt:
+      add in skip to match other tests
+
+    * pear/tests/pear_dependency_checkPackage.phpt:
+      new test  case
+
+2003-10-31  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c:
+      fix header handler
+
+2003-10-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Dependency.php:
+      major bug - "not" dependency check would completely fail.  Guess nobody
+      ever tried it before :)
+
+2003-10-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/tests/bug26010.phpt:
+      Add test case for bug #26010
+
+2003-10-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Dependency.php:
+      was checking the wrong parameter for a v. - should be checking version
+
+    * pear/PEAR/Dependency.php:
+      phpdoc fix
+
+2003-10-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/dom/tests/dom004.phpt
+      ext/dom/tests/dom_xinclude.phpt:
+      SKIP tests if compress.zlib wrapper is not available.
+
+2003-10-31  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/mysqli/config.m4:
+      cosmetics
+
+2003-10-31  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      Send correct default content type from php.ini not static text/html
+      (important for other charsets than iso-8859-1)
+
+2003-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * makerpm:
+      Make this work again
+
+2003-10-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_common_analyzeSC.phpt:
+      finished unit test
+
+    * pear/package-PEAR.xml:
+      bump to 1.3b4, add note about fix for #171
+
+    * pear/PEAR/Installer.php:
+      fix #171, --alldeps with a rel="eq" should install the required version, if
+      possible
+
+2003-10-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mcrypt/mcrypt.c:
+      Fixed bug #26042 (memory leak if mcrypt_generic_deinit() is not called
+      after every mcrypt_generic_init() call).
+      
+
+2003-10-31  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * sapi/cgi/cgi_main.c:
+      MFB
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      Fix "bug" #26039
+
+2003-10-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Common.php:
+      add some error control to analyzeSourceCode() for really rare cases -
+      invalid PHP
+
+    * pear/tests/pear_common_analyzeSC.phpt:
+      start on unit test for PEAR_Common
+
 2003-10-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * NEWS
