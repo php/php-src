@@ -63,6 +63,8 @@ Encoding
 
 WSDL
 ----
++ wsdl and schema import
++ support for <opperation> without <input>
 ? support for style "rpc"/"document" encoding
 ? support for "encoded"/"literal" encoding
 ? support for "nillable" and "nil"
@@ -120,6 +122,7 @@ Transport
 + support for persistent HTTP connections (keep_alive)
 - support for HTTP compression (gzip,x-gzip,defalte)
 + support for HTTP authentication
++ HTTP Cookies support 
 - support for HTTP proxies
 - transport abstraction layer
 ? SoapAction HTTP header field
