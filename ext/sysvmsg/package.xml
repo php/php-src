@@ -16,7 +16,7 @@ Unix System V IPC Message Queues
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
+  <state>stable</state>
   <version>5.0.0rc1</version>
   <date>2004-03-19</date>
   <notes>
