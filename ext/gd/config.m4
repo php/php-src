@@ -261,6 +261,8 @@ dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_GD2,              1, [ ])
   AC_DEFINE(HAVE_GD_PNG,              1, [ ])
 
+  AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
+
   GDLIB_CFLAGS="-DHAVE_LIBPNG"
 
 dnl Depending which libraries were included to PHP configure,
