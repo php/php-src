@@ -1,3 +1,32 @@
+2000-07-19  David Croft  <david@infotrek.co.uk>
+
+    * ext/pfpro/pfpro.c:
+    automatically initialise library at first use if necessary
+    automatically cleanup library at request end if user hasn't done so
+    libpfpro library version shown on phpinfo()
+
+    * ext/pfpro/php_pfpro.h:
+2000-07-19  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/config.m4: Itanium patch from Steve Robb <steve@eu.c2.net>
+
+2000-07-19  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * pear/DB/oci8.php:
+    Updates to the oci8 driver from James L. Pine <jpine@valinux.com>:
+
+    ok, there are a few changes that make this thing act more like the other
+    wrappers now.
+
+    changed the DSN to take the tnsnames.ora name as host instead of database
+    (it makes more sense in terms of the dsn format) changed fetchrow() and
+    fetchinto() to include keys whose values are null, as well as return lob
+    contents as values
+
+    this is definitely the way things should have been done before, but this is
+    the first that people other than me have tried using the file.  I'm sure
+    more things will come up shortly.
+
 2000-07-18  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ingres_ii/README: typo
