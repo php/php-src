@@ -94,6 +94,8 @@ struct _php_core_globals {
 	char *gpc_order;
 	char *variables_order;
 
+	HashTable rfc1867_protected_variables;
+
 	short connection_status;
 	short ignore_user_abort;
 
@@ -113,7 +115,7 @@ struct _php_core_globals {
 
 	zend_bool html_errors;
 
-	zend_bool modules_activated;
+	zend_bool modules_activated;	
 };
 
 
