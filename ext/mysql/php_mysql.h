@@ -75,6 +75,7 @@ PHP_FUNCTION(mysql_field_table);
 PHP_FUNCTION(mysql_field_len);
 PHP_FUNCTION(mysql_field_type);
 PHP_FUNCTION(mysql_field_flags);
+PHP_FUNCTION(mysql_escape_string);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long default_link;
