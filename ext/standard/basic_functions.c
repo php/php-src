@@ -152,6 +152,7 @@ function_entry basic_functions[] = {
 	PHP_FE(nl2br,									NULL)
 	PHP_FE(basename,								NULL)
 	PHP_FE(dirname,									NULL)
+	PHP_FE(pathinfo,								NULL)
 	PHP_FE(stripslashes,							NULL)
 	PHP_FE(stripcslashes,							NULL)
 	PHP_FE(strstr,									NULL)
