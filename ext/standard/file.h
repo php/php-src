@@ -122,7 +122,7 @@ typedef struct {
 extern PHPAPI int file_globals_id;
 #else
 #define FG(v) (file_globals.v)
-extern php_file_globals file_globals;
+extern PHPAPI php_file_globals file_globals;
 #endif
 
 
