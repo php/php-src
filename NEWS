@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   longer then the original string). (Ilia)
 - Fixed bug #32491 (File upload error - unable to create a temporary file).
   (Uwe Schindler)
+- Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit) (Georg).
 - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
   (kameshj at fastmail dot fm)
 
