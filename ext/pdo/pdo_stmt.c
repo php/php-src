@@ -617,7 +617,7 @@ static PHP_METHOD(PDOStatement, errorCode)
 }
 /* }}} */
 
-/* {{{ proto int PDOStatement::errorInfo()
+/* {{{ proto array PDOStatement::errorInfo()
    Fetch extended error information associated with the last operation on the statement handle */
 static PHP_METHOD(PDOStatement, errorInfo)
 {
