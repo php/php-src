@@ -286,7 +286,7 @@ class PEAR
      *
      * @return int     the new depth of the "expected errors" stack
      */
-    function expectError($code)
+    function expectError($code = "*")
     {
         if (is_array($code)) {
             array_push($this->_expected_errors, $code);
@@ -366,8 +366,12 @@ class PEAR
             $message     = $message->getMessage();
         }
 
-        if (isset($this) && isset($this->_expected_errors) && sizeof($this->_expected_errors) > 0 && in_array($code, end($this->_expected_errors))) {
-            $mode = PEAR_ERROR_RETURN;
+        if (isset($this) && isset($this->_expected_errors) && sizeof($this->_expected_errors) > 0 && sizeof($exp = end($this->_expected_errors))) {
+            if ($exp[0] == "*" ||
+                (is_int(reset($exp)) && in_array($code, $exp)) ||
+                (is_string(reset($exp)) && in_array($message, $exp))) {
+                $mode = PEAR_ERROR_RETURN;
+            }
         }
 
         if ($mode === null) {

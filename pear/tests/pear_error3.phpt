@@ -1,16 +1,16 @@
 --TEST--
-PEAR default error handling
+PEAR_Error: default error handling
 --FILE--
-<?php // -*- C++ -*-
+<?php // -*- PHP -*-
 
 // Test for: PEAR.php
 // Parts tested: - PEAR_Error class
 //               - PEAR::setErrorHandling
 //               - PEAR::raiseError method
 
-require_once "PEAR.php";
+require "../PEAR.php";
 
-error_reporting(4095);
+error_reporting(E_ALL);
 
 function errorhandler($eobj)
 {
