@@ -31,8 +31,8 @@
 *         ENTRY_POINT 'udf_call_php1' MODULE_NAME 'php_ibase_udf'
 * 
 *     DECLARE EXTERNAL FUNCTION CALL_PHP2
-*         CSTRING(xx),CSTRING(xx),CSTRING(256) RETURNS VARCHAR(4096)
-*         ENTRY_POINT 'udf_call_php1' MODULE_NAME 'php_ibase_udf'
+*         CSTRING(xx),CSTRING(xx),CSTRING(xx) RETURNS VARCHAR(4096)
+*         ENTRY_POINT 'udf_call_php2' MODULE_NAME 'php_ibase_udf'
 * 
 *     ... and so on.
 * 
@@ -56,6 +56,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "php.h"
 
 #include "stdarg.h"
 
@@ -63,8 +64,10 @@
 #error This functionality is not available in ZTS mode
 #endif
 
+#define min(a,b) ((a)<(b)?(a):(b))
+
 /* VARCHAR result ignores first short, but must not be 0 */
-static char result[4096] = { 1, 1 };
+static char result[4099] = { 1, 1 };
 
 static void call_php(char *name, int argc, ...)
 {
@@ -75,31 +78,44 @@ static void call_php(char *name, int argc, ...)
 	INIT_ZVAL(callback);
 	ZVAL_STRING(&callback,name,0);
 
-	/* check if the requested function exists */
-	if (!zend_is_callable(&callback, 0, NULL)) {
-		return;
-	}
-
-	va_start(va, argc);
-
-	/* create the argument array */
-	for (i = 0; i < argc; ++i) {
-		char *arg = va_arg(va, char*);
-		
-		INIT_ZVAL(args[i]);
-		argp[i] = &args[i];
-		ZVAL_STRING(argp[i] = &args[i], arg, 0);
-	}
+	do {
+		/* check if the requested function exists */
+		if (!zend_is_callable(&callback, 0, NULL)) {
+			break;
+		}
 	
-	/* now call the function */
-	if (FAILURE == call_user_function(EG(function_table), NULL,
-			&callback, &return_value, argc, argp)) {
+		va_start(va, argc);
+	
+		/* create the argument array */
+		for (i = 0; i < argc; ++i) {
+			char *arg = va_arg(va, char*);
+			
+			INIT_ZVAL(args[i]);
+			ZVAL_STRING(argp[i] = &args[i], arg, 0);
+		}
+		
+		va_end(va);
+		
+		/* now call the function */
+		if (FAILURE == call_user_function(EG(function_table), NULL,
+				&callback, &return_value, argc, argp)) {
+			break;
+		}
+	
+		convert_to_string(&return_value);
+	
+		memcpy(&result[2], Z_STRVAL(return_value), min(sizeof(result)-1,Z_STRLEN(return_value)+1));
+		result[sizeof(result)-1] = 0;
+	
 		return;
-	}
 
-	convert_to_string(&return_value);
-
-	memcpy(&result[2], Z_STRVAL(return_value), Z_STRLEN(return_value)+1);
+	} while (0);
+	
+	/**
+	* If we end up here, we should report an error back to the DB engine, but
+	* that's not possible. We can however report it back to PHP.
+	*/
+	php_error_docref(NULL, E_WARNING, "Error calling function '%s' from database", name);
 }
 
 char *udf_call_php1(char *name, char *arg1)
@@ -125,3 +141,4 @@ char *udf_call_php4(char *name, char *arg1, char *arg2, char *arg3, char *arg4)
 	call_php(name, 4, arg1, arg2, arg3, arg4);
 	return result;
 }
+
