@@ -204,7 +204,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 
 	switch (retformat) {
 		case SUNFUNCS_RET_TIMESTAMP:
-			RETURN_LONG((int) (time - (time % (24 * 3600))) + (int) (60 * ret));
+			RETURN_LONG((int) (time - (time % (24 * 3600))) + (int) (3600 * ret));
 			break;
 		case SUNFUNCS_RET_STRING:
 			N = (int) ret;
