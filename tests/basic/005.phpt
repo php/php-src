@@ -1,7 +1,7 @@
 --TEST--
 Three variables in POST data
 --SKIPIF--
-<?php if(php_sapi_name()=='cli'); echo 'skip'; ?>
+<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --POST--
 a=Hello+World&b=Hello+Again+World&c=1
 --GET--
