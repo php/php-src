@@ -37,6 +37,9 @@ define("DB_ERROR_INVALID_NUMBER", -11);
 define("DB_ERROR_INVALID_DATE",   -12);
 define("DB_ERROR_DIVZERO",        -13);
 define("DB_ERROR_NODBSELECTED",   -14);
+define("DB_ERROR_CANNOT_CREATE",  -15);
+define("DB_ERROR_CANNOT_DELETE",  -16);
+define("DB_ERROR_CANNOT_DROP",    -17);
 
 // }}}
 // {{{ Prepare/execute parameter types
@@ -64,6 +67,8 @@ define("DB_BINMODE_CONVERT",        3);
  * @since    4.0b4
  */
 class DB {
+    // {{{ factory()
+
 	/**
 	 * Create a new DB object for the specified database type.
 	 * @param   $type   database type
@@ -85,6 +90,9 @@ class DB {
 		return $obj;
     }
 
+    // }}}
+    // {{{ connect()
+
 	function connect($dsn, $persistent = false) {
 		global $USED_PACKAGES;
 
@@ -105,6 +113,9 @@ class DB {
 		return $obj; // XXX ADDREF
 	}
 
+    // }}}
+    // {{{ apiVersion()
+
 	/**
 	 * Return the DB API version.
 	 * @return  int     the DB API version number
@@ -112,6 +123,9 @@ class DB {
     function apiVersion() {
 		return 100;
     }
+
+    // }}}
+    // {{{ isError()
 
 	/**
 	 * Tell whether a result code from a DB method is an error.
@@ -121,6 +135,9 @@ class DB {
 	function isError($code) {
 		return is_int($code) && ($code < 0);
 	}
+
+    // }}}
+    // {{{ errorMessage()
 
 	/**
 	 * Return a textual error message for an error code.
@@ -148,6 +165,9 @@ class DB {
 		}
 		return $errorMessages[$code];
 	}
+
+    // }}}
+    // {{{ parseDSN()
 
 	/**
 	 * Parse a data source name and return an associative array with
@@ -236,6 +256,8 @@ class DB {
 
 		return $parsed; // XXX ADDREF
 	}
+
+    // }}}
 }
 
 // }}}
@@ -250,6 +272,8 @@ class DB_result {
     var $dbh;
     var $result;
 
+    // {{{ DB_result()
+
     /**
 	 * DB_result constructor.
 	 * @param   $dbh    DB object reference
@@ -260,6 +284,9 @@ class DB_result {
 		$this->result = $result;
     }
 
+    // }}}
+    // {{{ fetchRow()
+
 	/**
 	 * Fetch and return a row of data.
 	 * @return  array   a row of data, or false on error
@@ -268,14 +295,33 @@ class DB_result {
 		return $this->dbh->fetchRow($this->result);
     }
 
+    // }}}
+    // {{{ fetchInto()
+
     /**
 	 * Fetch a row of data into an existing array.
+	 *
 	 * @param   $arr    reference to data array
 	 * @return  int     error code
 	 */
     function fetchInto(&$arr) {
 		return $this->dbh->fetchInto($this->result, &$arr);
     }
+
+    // }}}
+	// {{{ numCols()
+
+	/**
+	 * Get the the number of columns in a result set.
+	 *
+	 * @return int the number of columns, or a DB error code
+	 */
+	function numCols() {
+		return $this->dbh->numCols($this->result);
+	}
+
+	// }}}
+    // {{{ free()
 
     /**
 	 * Frees the resource for this result and reset ourselves.
@@ -289,6 +335,8 @@ class DB_result {
 		$this->dbh = $this->result = false;
 		return true;
     }
+
+    // }}}
 }
 
 // }}}
