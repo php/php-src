@@ -375,17 +375,18 @@ void php_print_credits(int flag)
 		php_info_print_table_start();
 		php_info_print_table_colspan_header(2, "SAPI Modules");
 		php_info_print_table_header(2, "Contribution", "Authors");
-		CREDIT_LINE("Apache", "Rasmus Lerdorf, Zeev Suraski");
-		CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
-		CREDIT_LINE("CGI", "Rasmus Lerdorf, Stig Bakken");
 		CREDIT_LINE("AOLserver", "Sascha Schumann");
-		CREDIT_LINE("Java Servlet", "Sam Ruby");
+		CREDIT_LINE("Apache 1.3", "Rasmus Lerdorf, Zeev Suraski");
+		CREDIT_LINE("Apache 2.0", "Sascha Schumann");
 		CREDIT_LINE("Caudium / Roxen", "David Hedbor");
-		CREDIT_LINE("thttpd", "Sascha Schumann");
+		CREDIT_LINE("CGI", "Rasmus Lerdorf, Stig Bakken");
 		CREDIT_LINE("fhttpd", "Alex Belits");
+		CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
+		CREDIT_LINE("Java Servlet", "Sam Ruby");
 		CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy");
 		CREDIT_LINE("phttpd", "Thies C. Arntzen");
 		CREDIT_LINE("pi3web", "Holger Zimmermann");
+		CREDIT_LINE("thttpd", "Sascha Schumann");
 		php_info_print_table_end();
 	}
 
