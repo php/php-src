@@ -58,6 +58,7 @@ $rootnode = $dom->root();
    class node, see ext/domxml/domxml.c */
 $attr = $rootnode->getattr("language");
 
+/* if the above weren't there, php will probably crash somewhere after here */
 output_node($rootnode);
 
 ?>
