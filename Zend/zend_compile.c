@@ -1713,7 +1713,7 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 	zend_uint i;
 	zend_function *proto = fe->common.prototype;
 
-	if (!proto) {
+	if (!proto || !proto->common.arg_info) {
 		return 1;
 	}
 
@@ -3275,6 +3275,10 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 			is_variable = 1;
 		}
 		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
+		if (CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode == ZEND_FETCH_OBJ_W) {
+			/* FIXME:  This will cause a leak, we have to unlock at the end of foreach() */
+			CG(active_op_array)->opcodes[CG(active_op_array)->last-1].extended_value |= ZEND_FETCH_ADD_LOCK;
+		}
 	} else {
 		is_variable = 0;
 	}

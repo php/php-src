@@ -1221,7 +1221,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 			internal_function->arg_info = ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
-			internal_function->required_num_args = ptr->num_args;
+			if (ptr->arg_info[0].required_num_args == -1) {
+				internal_function->required_num_args = ptr->num_args;
+			} else {
+				internal_function->required_num_args = ptr->arg_info[0].required_num_args;
+			}
 			internal_function->pass_rest_by_reference = ptr->arg_info[0].pass_by_reference;
 			internal_function->return_reference = ptr->arg_info[0].return_reference;
 		} else {
