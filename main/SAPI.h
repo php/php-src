@@ -4,6 +4,7 @@
 #include "zend.h"
 #include "zend_llist.h"
 
+#define SAPI_POST_BLOCK_SIZE 4000
 
 #if WIN32||WINNT
 #	ifdef SAPI_EXPORTS
@@ -55,6 +56,7 @@ typedef struct {
 	void *server_context;
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
+	uint read_post_bytes;
 	unsigned char headers_sent;
 } sapi_globals_struct;
 
@@ -99,7 +101,7 @@ struct _sapi_module_struct {
 	int (*send_headers)(sapi_headers_struct *sapi_headers SLS_DC);
 	void (*send_header)(sapi_header_struct *sapi_header, void *server_context);
 
-	char *(*read_post)(SLS_D);
+	int (*read_post)(char *buffer, uint count_bytes SLS_DC);
 	char *(*read_cookies)(SLS_D);
 };
 

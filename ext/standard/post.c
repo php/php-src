@@ -320,6 +320,7 @@ void php3_treat_data(int arg, char *str)
 {
 	char *res = NULL, *var, *val;
 	pval *array_ptr;
+	int free_buffer;
 	ELS_FETCH();
 	PLS_FETCH();
 	SLS_FETCH();
@@ -353,20 +354,28 @@ void php3_treat_data(int arg, char *str)
 			break;
 	}
 
-	if (arg == PARSE_POST) {
+	if (arg == PARSE_POST) {			/* POST data */
 		res = php3_getpost(array_ptr PLS_CC);
-	} else if (arg == PARSE_GET) {		/* Get data */
+		free_buffer = 0;
+	} else if (arg == PARSE_GET) {		/* GET data */
 		var = SG(request_info).query_string;
 		if (var && *var) {
 			res = (char *) estrdup(var);
+			free_buffer = 1;
+		} else {
+			free_buffer = 0;
 		}
 	} else if (arg == PARSE_COOKIE) {		/* Cookie data */
 		var = SG(request_info).cookie_data;
 		if (var && *var) {
 			res = (char *) estrdup(var);
+			free_buffer = 1;
+		} else {
+			free_buffer = 0;
 		}
 	} else if (arg == PARSE_STRING) {		/* String data */
 		res = str;
+		free_buffer = 1;
 	}
 	if (!res) {
 		return;
@@ -397,7 +406,9 @@ void php3_treat_data(int arg, char *str)
 			var = strtok(NULL, PG(arg_separator));
 		}
 	}
-	efree(res);
+	if (free_buffer) {
+		efree(res);
+	}
 }
 
 

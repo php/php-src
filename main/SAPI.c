@@ -58,14 +58,43 @@ static void sapi_free_header(sapi_header_struct *sapi_header)
 }
 
 
+#undef SAPI_POST_BLOCK_SIZE
+#define SAPI_POST_BLOCK_SIZE 2
+
+static void sapi_read_post_data(SLS_D)
+{
+	int read_bytes, total_read_bytes=0;
+	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
+
+	SG(request_info).post_data = emalloc(allocated_bytes);
+
+	for (;;) {
+		read_bytes = sapi_module.read_post(SG(request_info).post_data+total_read_bytes, SAPI_POST_BLOCK_SIZE SLS_CC);
+		if (read_bytes<=0) {
+			break;
+		}
+		total_read_bytes += read_bytes;
+		if (read_bytes < SAPI_POST_BLOCK_SIZE) {
+			break;
+		}
+		if (total_read_bytes+SAPI_POST_BLOCK_SIZE >= allocated_bytes) {
+			allocated_bytes = total_read_bytes+SAPI_POST_BLOCK_SIZE+1;
+			SG(request_info).post_data = erealloc(SG(request_info).post_data, allocated_bytes);
+		}
+	}
+	SG(request_info).post_data[total_read_bytes] = 0;  /* terminating NULL */
+}
+
+
 SAPI_API void sapi_activate(SLS_D)
 {
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 	SG(sapi_headers).http_response_code = 200;
 	SG(headers_sent) = 0;
+	SG(read_post_bytes) = 0;
 	if (SG(server_context)) {
-		SG(request_info).post_data = sapi_module.read_post(SLS_C);
+		sapi_read_post_data(SLS_C);
 		SG(request_info).cookie_data = sapi_module.read_cookies(SLS_C);
 	}
 }
