@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed scanning decimal numbers in internationalized environments. They should
+  always be in standard US format e.g. 23.3. (Andi, Zend Engine)
 - Added second argument to preg_quote() which allows quoting of
   one additional character, usually the regex delimiter. (Andrei)
 - Uncommitted outstanding OCI8 transactions are now rolled back
