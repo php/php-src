@@ -125,6 +125,8 @@
 			<!-- 3.2.9 validateCountryCode -->
 			<element name="validateCountryCode" type="xsd:string"/>
 
+			<element name="validateCountryCodeResponse" type="xsd:string"/>
+
 			<!-- 3.2.10 validateCountryCodeFault -->
 			<element name="validateCountryCodeFault" type="xsd:string"/>
 
@@ -346,6 +348,17 @@
 		<part name="Unknown" type="types:UnknownType" />
 	</message>
 
+	<message name="validateCountryCodeRequest">
+		<part name="validateCountryCode" element="test:validateCountryCode" />
+	</message>
+	<message name="validateCountryCodeFault">
+		<part name="validateCountryCodeFault" element="test:validateCountryCodeFault" />
+	</message>
+	<message name="validateCountryCodeResponse">
+		<part name="validateCountryCodeResponse" element="test:validateCountryCodeResponse" />
+	</message>
+
+
   	<portType name="Soap12TestPortTypeDoc">
     		<operation name="emptyBody">
       			<input message="tns:emptyBodyRequest" />
@@ -487,13 +500,15 @@
       			<input>
         			<soap12:body use="literal" />
         			<soap12:header message="tns:echoOkRequest" part="echoOk" use="literal" />
-				<soap12:header message="tns:UnknownHdrBlockLit" part="Unknown" use="literal" />
-
+        			<soap12:header message="tns:UnknownHdrBlockLit" part="Unknown" use="literal" />
+        			<soap12:header message="tns:validateCountryCodeRequest" part="validateCountryCode" use="literal">
+        			  <soap12:headerfault message="tns:validateCountryCodeFault" part="validateCountryCodeFault" use="literal"/>
+        			</soap12:header>
       			</input>
       			<output>
         			<soap12:body use="literal" />
         			<soap12:header message="tns:echoOkResponse" part="responseOk" use="literal" />
-
+        			<soap12:header message="tns:validateCountryCodeResponse" part="validateCountryCodeResponse" use="literal"/>
       			</output>
     		</operation>
     		<operation name="echoOk">
