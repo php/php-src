@@ -7,7 +7,7 @@ interface OuterIterator extends Iterator
 {
 	/** \return inner iterator
 	 */
-    abstract function getInnerIterator();
+    function getInnerIterator();
 }
 
 ?>
