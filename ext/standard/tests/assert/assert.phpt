@@ -3,7 +3,7 @@ assert()
 --POST--
 --GET--
 --FILE--
-<?
+<?php
 function a($file,$line,$myev)
 { 
 	echo "assertion failed $line,\"$myev\"\n";
