@@ -72,12 +72,12 @@ struct PHPFBLink;
 typedef struct PHPFBLink PHPFBLink;
 
 /*	The PHPFBLink structure represents a fbsql link. The lion is used for
-	a connection to a machine, it may be persistant and is reference counted.
+	a connection to a machine, it may be persistent and is reference counted.
 	The reason for refcounting is mostly to avoid to think, it work independent of 
 	any wierd and unforseen allocation deallocation order.
 
 	The PHPFBDatabse structure implements to actual connection to a FrontBase server
-	ot may be persistant is the link it is connected to is persistant, and refcounted
+	ot may be persistent is the link it is connected to is persistent, and refcounted
 	for the same reasons as above.
 
 	The PHPFBResult structure implements a result from the FrontBase server, and does all
@@ -92,7 +92,7 @@ typedef struct PHPFBLink PHPFBLink;
 	user name.  So connecting twice to the same database as the same user will return the same database id.
 	We use the same coding for that as fbsql does, explioiting the underlying implementation of the lists.
 
-	Persistant objects are put in the persistent list as well, but only by name, if you connect to a persistant object
+	Persistent objects are put in the persistent list as well, but only by name, if you connect to a persistent object
 	and it is not in the list it is simply added and get a new index, and refcounted.  Tricky, tricky ...
 */
 
@@ -134,7 +134,7 @@ struct PHPFBResult
 
 struct PHPFBLink
 {
-	int						persistant;			/* persistant ? */
+	int						persistent;			/* persistent ? */
 	char*					hostName;			/* Host name  */
 	char*					userName;			/* User name */
 	char*					userPassword;		/* User password */
@@ -327,7 +327,7 @@ static void phpfbReleasePLink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		if (link->execHandler) fbcehRelease(link->execHandler);
 		free(link);
 		FB_SQL_G(linkCount)--;
-		FB_SQL_G(persistantCount)--;
+		FB_SQL_G(persistentCount)--;
 	}
 }
 
@@ -355,10 +355,10 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN  ("fbsql.allow_persistant",				"1",		PHP_INI_SYSTEM, OnUpdateInt,    allowPersistent,  zend_fbsql_globals, fbsql_globals)
+	STD_PHP_INI_BOOLEAN  ("fbsql.allow_persistent",				"1",		PHP_INI_SYSTEM, OnUpdateInt,    allowPersistent,  zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_BOOLEAN  ("fbsql.generate_warnings",			"0",		PHP_INI_SYSTEM, OnUpdateInt,    generateWarnings, zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_BOOLEAN  ("fbsql.autocommit",					"1",		PHP_INI_SYSTEM, OnUpdateInt,    autoCommit,	      zend_fbsql_globals, fbsql_globals)
-	STD_PHP_INI_ENTRY_EX ("fbsql.max_persistent",				"-1",		PHP_INI_SYSTEM, OnUpdateInt,    maxPersistant,    zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX ("fbsql.max_persistent",				"-1",		PHP_INI_SYSTEM, OnUpdateInt,    maxPersistent,    zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_links",					"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxLinks,         zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_connections",				"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxConnections,   zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_results",					"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxResults,       zend_fbsql_globals, fbsql_globals, display_link_numbers)
@@ -373,7 +373,7 @@ PHP_INI_END()
 
 static void php_fbsql_init_globals(zend_fbsql_globals *fbsql_globals)
 {
-	fbsql_globals->persistantCount = 0;
+	fbsql_globals->persistentCount = 0;
 
 	if (fbsql_globals->hostName==NULL)
 	{
@@ -383,7 +383,7 @@ static void php_fbsql_init_globals(zend_fbsql_globals *fbsql_globals)
 		fbsql_globals->hostName = strdup(name);
 	}
 
-	fbsql_globals->persistantCount	= 0;
+	fbsql_globals->persistentCount	= 0;
 	fbsql_globals->linkCount		= 0;
 }
                                         
@@ -438,7 +438,7 @@ PHP_MSHUTDOWN_FUNCTION(fbsql)
 PHP_RINIT_FUNCTION(fbsql)
 {
 	FB_SQL_G(linkIndex) = -1;
-	FB_SQL_G(linkCount) = FB_SQL_G(persistantCount);
+	FB_SQL_G(linkCount) = FB_SQL_G(persistentCount);
 	return SUCCESS;
 }
 
@@ -458,8 +458,8 @@ PHP_MINFO_FUNCTION(fbsql)
 
 	if (FB_SQL_G(allowPersistent))
 	{
-		sprintf(buf, "%ld", FB_SQL_G(persistantCount));
-		php_info_print_table_row(2, "Active Persistant Links", buf);
+		sprintf(buf, "%ld", FB_SQL_G(persistentCount));
+		php_info_print_table_row(2, "Active Persistent Links", buf);
 	}
 
 	sprintf(buf, "%ld", FB_SQL_G(linkCount));
@@ -475,7 +475,7 @@ PHP_MINFO_FUNCTION(fbsql)
 	DISPLAY_INI_ENTRIES();
 }
 
-static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
+static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	PHPFBLink* phpLink;
 	list_entry *lep;
@@ -509,9 +509,9 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 	sprintf(name, "fbsql_%s_%s_%s", hostName, userName, userPassword);
 
 	if (!FB_SQL_G(allowPersistent)) {
-		persistant=0;
+		persistent=0;
 	}
-	if (persistant) {
+	if (persistent) {
 		if (zend_hash_find(&EG(persistent_list), name, strlen(name) + 1, (void **)&lep) == SUCCESS)
 		{
 			phpLink = (PHPFBLink*)lep->ptr;
@@ -526,15 +526,15 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 				RETURN_FALSE;
 			}
 
-			if ((FB_SQL_G(maxPersistant) != -1 && FB_SQL_G(persistantCount) == FB_SQL_G(maxPersistant)))
+			if ((FB_SQL_G(maxPersistent) != -1 && FB_SQL_G(persistentCount) == FB_SQL_G(maxPersistent)))
 			{
 				if (FB_SQL_G(generateWarnings))
-					php_error(E_WARNING, "FrontBase persistant link limit %d exceeded ", FB_SQL_G(maxPersistant));
+					php_error(E_WARNING, "FrontBase persistent link limit %d exceeded ", FB_SQL_G(maxPersistent));
 				RETURN_FALSE;
 			}
 
 			phpLink = malloc(sizeof(PHPFBLink));
-			phpLink->persistant       = persistant;
+			phpLink->persistent       = persistent;
 			phpLink->hostName         = strdup(hostName);
 			phpLink->userName         = strdup(userName);
 			phpLink->userPassword     = strdup(userPassword);
@@ -560,7 +560,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 				RETURN_FALSE;
 			}
 			FB_SQL_G(linkCount)++;
-			FB_SQL_G(persistantCount)++;
+			FB_SQL_G(persistentCount)++;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, phpLink, le_plink);
 	}
@@ -595,7 +595,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 		}
 
 		phpLink = emalloc(sizeof(PHPFBLink));
-		phpLink->persistant       = persistant;
+		phpLink->persistent       = persistent;
 		phpLink->hostName         = strdup(hostName);
 		phpLink->userName         = strdup(userName);
 		phpLink->userPassword     = strdup(userPassword);
