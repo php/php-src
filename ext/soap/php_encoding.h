@@ -162,8 +162,6 @@ struct _encode {
 	xmlNodePtr (*to_xml_after)(encodeTypePtr type, xmlNodePtr data, int style);
 };
 
-smart_str *build_soap_action(zval *this_ptr, char *soapaction);
-
 /* Master functions all encode/decode should be called thur these functions */
 xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr parent);
 zval *master_to_zval(encodePtr encode, xmlNodePtr data);

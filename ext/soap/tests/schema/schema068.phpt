@@ -15,4 +15,4 @@ test_schema($schema,'type="tns:testType"',(object)array("str"=>"str","int"=>4));
 echo "ok";
 ?>
 --EXPECTF--
-Fatal error: Attribute 'int' has fixed value '5' (value '4' is not allowed) in %stest_schema.inc on line %d
+Fatal error: SOAP-ERROR: Encoding: Attribute 'int' has fixed value '5' (value '4' is not allowed) in %stest_schema.inc on line %d
