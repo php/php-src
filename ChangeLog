@@ -3,6 +3,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- Fixed crash in HTTP_RAW_POST_DATA handling (Thies)
 - You can use resources as array-indices again (Thies, Zend library)
 - Fixed pg_fetch_array() with three arguments (Sascha)
   Patch submitted by: brian@soda.berkeley.edu
