@@ -17,7 +17,7 @@ SUBDIRS = libzend TSRM
 
 STAMP = buildmk.stamp
 
-makefile_am_files = Makefile.am $(shell find ext sapi regex pecl -name Makefile.am)
+makefile_am_files = Makefile.am $(shell find ext sapi regex pear -name Makefile.am)
 makefile_in_files = $(makefile_am_files:.am=.in)
 makefile_files    = $(makefile_am_files:e.am=e)
 

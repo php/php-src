@@ -711,7 +711,7 @@ AC_SUBST(PHP_SAPI)
 AC_SUBST(INSTALL_IT)
 
 #libphp4.module 
-AC_OUTPUT([Makefile php4.spec ext/Makefile sapi/Makefile pecl/Makefile
+AC_OUTPUT([Makefile php4.spec ext/Makefile sapi/Makefile pear/Makefile
            $PHP_OUTPUT_FILES
            scripts/mkextlib build-defs.h], [], [
 
