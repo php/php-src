@@ -229,23 +229,18 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	char *data=NULL, *cfg_file=NULL, *arg1;
 	int cfg_file_len, arg1_len;
 	zend_bool use_include_path = 0;
-	zval *object = getThis();
-	PHPTidyObj *obj;
-
-	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sb", &arg1, &arg1_len, &cfg_file, &cfg_file_len, &use_include_path) == FAILURE) {
-			RETURN_FALSE;
-		}
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|sb", &object, tidy_ce_doc,
-								 &arg1, &arg1_len, &cfg_file, &cfg_file_len, &use_include_path) == FAILURE) {
-			return;
-		}
-
-		tidy_instanciate(tidy_ce_doc, return_value TSRMLS_CC);
+	TidyDoc doc;
+	TidyBuffer *errbuf;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sb", &arg1, &arg1_len, &cfg_file, &cfg_file_len, &use_include_path) == FAILURE) {
+		RETURN_FALSE;
 	}
-
-	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	
+	if (getThis()) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call this function from an object context");
+		RETURN_FALSE;
+		
+	} 
 
 	if (is_file) {
 		if (!(data = php_tidy_file_to_mem(arg1, use_include_path TSRMLS_CC))) {
@@ -255,24 +250,36 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 		data = arg1;
 	}
 
+	doc = tidyCreate();
+	errbuf = emalloc(sizeof(TidyBuffer));
+	tidyBufInit(errbuf);
+	
+	if (tidySetErrorBuffer(doc, errbuf) != 0) {
+		zend_error(E_ERROR, "Could not set Tidy error buffer");
+	}
+	
+	tidyOptSetBool(doc, TidyForceOutput, yes);
+	tidyOptSetBool(doc, TidyMark, no);
+	
+	TIDY_SET_DEFAULT_CONFIG(doc);
+	
 	if (cfg_file && cfg_file[0]) {
 		TIDY_SAFE_MODE_CHECK(cfg_file);
-		if (tidyLoadConfig(obj->ptdoc->doc, cfg_file) < 0) {
+		if (tidyLoadConfig(doc, cfg_file) < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", cfg_file);
 			RETVAL_FALSE;
 		}
 	}
 
 	if (data) {
-		if (tidyParseString(obj->ptdoc->doc, data) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
+		if (tidyParseString(doc, data) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errbuf->bp);
 			RETVAL_FALSE;
 		} else {
-			obj->ptdoc->parsed = TRUE;
-			if (tidyCleanAndRepair(obj->ptdoc->doc) >= 0) {
+			if (tidyCleanAndRepair(doc) >= 0) {
 				TidyBuffer output = {0};
 
-				tidySaveBuffer (obj->ptdoc->doc, &output);
+				tidySaveBuffer (doc, &output);
 				RETVAL_STRING(output.bp, 1);
 				tidyBufFree(&output);
 			} else {
@@ -284,6 +291,10 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	if (is_file) {
 		efree(data);
 	}
+	
+	tidyBufFree(errbuf);
+	efree(errbuf);
+	tidyRelease(doc);
 }
 
 static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path TSRMLS_DC)
