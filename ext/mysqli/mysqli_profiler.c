@@ -32,6 +32,7 @@
 PR_COMMON *php_mysqli_profiler_new_object(PR_COMMON *parent, unsigned int type, unsigned int settime)
 {
 	PR_COMMON	*prnew, *child;
+	TSRMLS_FETCH();
 
 	switch (type) {
 		case MYSQLI_PR_MYSQL:
