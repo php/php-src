@@ -1,3 +1,31 @@
+2000-04-27  Zeev Suraski  <zeev@php.net>
+
+    * main.c: Change to using macros
+
+    * ext/standard/info.c
+      php.h
+      php4dll.dsp
+      main.c: More error handling work (still completely disabled)
+
+2000-04-27  Joey Smith  <joey@samaritan.com>
+
+    * README.bcmath: Please, no more bug reports about bcmath
+
+2000-04-27  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO
+      ext/standard/string.c: TODO update and fix for C++ comments.
+
+2000-04-27  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.dsp: using vi to update DevStudio Files, yeah!
+
+    * ext/oci8/oci8.c: .
+
+    * ext/oci8/Makefile.in
+      ext/oci8/config.m4
+      ext/oci8/oci8.c: allow oci8 to be build as loadable module.
+
 2000-04-26  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/standard/string.c: Small proto fix.
