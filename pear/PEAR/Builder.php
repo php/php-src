@@ -310,7 +310,7 @@ class PEAR_Builder extends PEAR_Common
         if ($what != 'cmdoutput') {
             return;
         }
-        $this->log(3, rtrim($data));
+        $this->log(1, rtrim($data));
         if (preg_match('/You should update your .aclocal.m4/', $data)) {
             return;
         }
@@ -320,8 +320,8 @@ class PEAR_Builder extends PEAR_Common
             $apino = (int)$matches[2];
             if (isset($this->$member)) {
                 $this->$member = $apino;
-                $msg = sprintf("%-22s : %d", $matches[1], $apino);
-                $this->log(1, $msg);
+                //$msg = sprintf("%-22s : %d", $matches[1], $apino);
+                //$this->log(1, $msg);
             }
         }
     }
@@ -352,12 +352,20 @@ class PEAR_Builder extends PEAR_Common
         if (!$pp) {
             return $this->raiseError("failed to run `$command'");
         }
+        if ($callback && $callback[0]->debug == 1) {
+            $olddbg = $callback[0]->debug;
+            $callback[0]->debug = 2;
+        }
+
         while ($line = fgets($pp, 1024)) {
             if ($callback) {
                 call_user_func($callback, 'cmdoutput', $line);
             } else {
                 $this->log(2, rtrim($line));
             }
+        }
+        if ($callback && isset($olddbg)) {
+            $callback[0]->debug = $olddbg;
         }
         $exitcode = @pclose($pp);
         return ($exitcode == 0);
