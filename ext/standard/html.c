@@ -777,13 +777,58 @@ det_charset:
 }
 /* }}} */
 
+/* {{{ php_utf32_utf8 */
+size_t php_utf32_utf8(unsigned char *buf, int k)
+{
+	size_t retval = 0;
+
+	if (k < 0x80) {
+		buf[0] = k;
+		retval = 1;
+	} else if (k < 0x800) {
+		buf[0] = 0xc0 | (k >> 6);
+		buf[1] = 0x80 | (k & 0x3f);
+		retval = 2;
+	} else if (k < 0x10000) {
+		buf[0] = 0xe0 | (k >> 12);
+		buf[1] = 0x80 | ((k >> 6) & 0x3f);
+		buf[2] = 0x80 | (k & 0x3f);
+		retval = 3;
+	} else if (k < 0x200000) {
+		buf[0] = 0xf0 | (k >> 18);
+		buf[1] = 0x80 | ((k >> 12) & 0x3f);
+		buf[2] = 0x80 | ((k >> 6) & 0x3f);
+		buf[3] = 0x80 | (k & 0x3f);
+		retval = 4;
+	} else if (k < 0x4000000) {
+		buf[0] = 0xf8 | (k >> 24);
+		buf[1] = 0x80 | ((k >> 18) & 0x3f);
+		buf[2] = 0x80 | ((k >> 12) & 0x3f);
+		buf[3] = 0x80 | ((k >> 6) & 0x3f);
+		buf[4] = 0x80 | (k & 0x3f);
+		retval = 5;
+	} else {
+		buf[0] = 0xfc | (k >> 30);
+		buf[1] = 0x80 | ((k >> 24) & 0x3f);
+		buf[2] = 0x80 | ((k >> 18) & 0x3f);
+		buf[3] = 0x80 | ((k >> 12) & 0x3f);
+		buf[4] = 0x80 | ((k >> 6) & 0x3f);
+		buf[5] = 0x80 | (k & 0x3f);
+		retval = 6;
+	}
+	buf[retval] = '\0';
+
+	return retval;
+}
+/* }}} */
+
 /* {{{ php_unescape_html_entities
  */
 PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset TSRMLS_DC)
 {
 	int retlen;
 	int j, k;
-	char *replaced, *ret;
+	char *replaced, *ret, *p, *q, *lim, *next;
 	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
 	unsigned char replacement[15];
 	
@@ -815,11 +860,34 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 				entity_length += 2;
 
 				/* When we have MBCS entities in the tables above, this will need to handle it */
-				if (k > 0xff) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot yet handle MBCS!");
+				switch (charset) {
+					case cs_8859_1:
+					case cs_cp1252:
+					case cs_8859_15:
+					case cs_cp1251:
+					case cs_8859_5:
+					case cs_cp866:
+						replacement[0] = k;
+						replacement[1] = '\0';
+
+					case cs_big5:
+					case cs_gb2312:
+					case cs_big5hkscs:
+					case cs_sjis:
+					case cs_eucjp:
+						replacement[0] = (char)((unsigned int)k >> 8);
+						replacement[1] = (k & 0xff);
+						replacement[2] = '\0';
+						break;
+
+					case cs_utf_8:
+						php_utf32_utf8(replacement, k);
+						break;
+
+					default:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot yet handle MBCS!");
+						return 0;
 				}
-				replacement[0] = k;
-				replacement[1] = '\0';
 
 				replaced = php_str_to_str(ret, retlen, entity, entity_length, replacement, 1, &retlen);
 				efree(ret);
@@ -840,6 +908,59 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 		efree(ret);
 		ret = replaced;
 	}
+
+	/* replace numeric entities */
+	lim = ret + retlen;
+	for (p = ret, q = ret; p < lim; p++) {
+		int code;
+
+		if (p < lim - 1 && p[0] == '&' && p[1] == '#') {
+			code = strtol(p + 2, &next, 10);
+			if (next != NULL && *next == ';') {
+				switch (charset) {
+					case cs_utf_8:
+						q += php_utf32_utf8(q, code);
+						break;
+
+					case cs_8859_1:
+					case cs_8859_5:
+					case cs_8859_15:
+						if (0xa0 <= code && code <= 0xff) {
+							*(q++) = code;
+						}
+						break;
+
+					case cs_cp1252:
+					case cs_cp1251:
+					case cs_cp866:
+						if (0x80 <= code && code <= 0xff) {
+							*(q++) = code;
+						}
+						break;
+
+					case cs_big5:
+					case cs_gb2312:
+					case cs_big5hkscs:
+					case cs_sjis:
+					case cs_eucjp:
+						if (code <= 0x7f) {
+							*(q++) = code;
+						}
+						break;
+
+					default:
+						break;
+				}
+				p = next;
+			} else {
+				*(q++) = *p;
+			}
+		} else {
+			*(q++) = *p;
+		}
+	}
+	*q = '\0';
+	retlen = (size_t)(q - ret);
 empty_source:	
 	*newlen = retlen;
 	return ret;
