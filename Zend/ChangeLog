@@ -1,3 +1,8 @@
+2004-09-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_compile.c:
+      Fugbix typo.
+
 2004-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
