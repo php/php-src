@@ -31,7 +31,7 @@
 #include "ext/standard/php_string.h"
 #include "php_simplexml.h"
 
-#if HAVE_SPL
+#if HAVE_SPL && !defined(COMPILE_DL_SPL)
 #include "ext/spl/spl_iterators.h"
 #endif
 
@@ -1613,7 +1613,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	INIT_CLASS_ENTRY(sxe, "simplexml_element", sxe_functions);
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe TSRMLS_CC);
-#if HAVE_SPL
+#if HAVE_SPL && !defined(COMPILE_DL_SPL)
 	zend_class_implements(sxe_class_entry TSRMLS_CC, 1, spl_ce_RecursiveIterator);
 #endif
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
