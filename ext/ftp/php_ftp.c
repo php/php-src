@@ -602,6 +602,10 @@ PHP_FUNCTION(ftp_get)
 		RETURN_FALSE;
 	}
 
+#ifdef PHP_WIN32
+	mode = FTPTYPE_IMAGE;
+#endif
+
 	if (ftp->autoseek && resumepos) {
 		if (PG(safe_mode) && (!php_checkuid(local, mode == FTPTYPE_ASCII ? "rt+" : "rb+", CHECKUID_CHECK_MODE_PARAM))) {
 			RETURN_FALSE;
