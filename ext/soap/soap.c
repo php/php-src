@@ -1088,10 +1088,17 @@ PHP_METHOD(soapserver, handle)
 			/* If new session or something wierd happned */
 			if (soap_obj == NULL) {
 				zval *tmp_soap;
+				char *class_name;
+				int class_name_len;
+
 				MAKE_STD_ZVAL(tmp_soap);
 				object_init_ex(tmp_soap, service->soap_class.ce);
+				
 				/* Call constructor */
-				if (zend_hash_exists(&Z_OBJCE_P(tmp_soap)->function_table, service->soap_class.ce->name, strlen(service->soap_class.ce->name) + 1)) {
+				class_name_len = strlen(service->soap_class.ce->name);
+				class_name = emalloc(class_name_len+1);
+				memcpy(class_name, service->soap_class.ce->name,class_name_len+1);
+				if (zend_hash_exists(&Z_OBJCE_P(tmp_soap)->function_table, php_strtolower(class_name, class_name_len), class_name_len+1)) {
 					zval c_ret, constructor;
 
 					INIT_ZVAL(c_ret);
@@ -1104,6 +1111,7 @@ PHP_METHOD(soapserver, handle)
 					zval_dtor(&constructor);
 					zval_dtor(&c_ret);
 				}
+				efree(class_name);
 #if HAVE_PHP_SESSION
 				/* If session then update session hash with new object */
 				if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
