@@ -100,7 +100,7 @@ WARNING: You specified Informix base install directory that is different
 PHP_SUBST(INFORMIXDIR)
 PHP_SUBST(IFX_LIBS)
 	
-divert(6)dnl
+divert(7)dnl
 
 dnl Warn if Informix support was requested but environment is not set up correctly.
 if test "$INFORMIX_WARNING" != ""; then
