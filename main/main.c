@@ -353,9 +353,9 @@ PHPAPI void php_error(int type, const char *format,...)
 	uint error_lineno;
 	char buffer[1024];
 	int size = 0;
+	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
-
 
 	switch (type) {
 		case E_CORE_ERROR:
@@ -365,21 +365,20 @@ PHPAPI void php_error(int type, const char *format,...)
 			break;
 		case E_PARSE:
 		case E_COMPILE_ERROR:
-		case E_COMPILE_WARNING: {
-				CLS_FETCH();
-
-				error_filename = zend_get_compiled_filename();
-				error_lineno = CG(zend_lineno);
-				if (!error_filename) {
-					error_filename = zend_get_executed_filename(ELS_C);
-				}
-			}
-			break;
+		case E_COMPILE_WARNING:
 		case E_ERROR:
 		case E_NOTICE:
 		case E_WARNING:
-			error_filename = zend_get_executed_filename(ELS_C);
-			error_lineno = zend_get_executed_lineno(ELS_C);
+			if (zend_is_compiling()) {
+				error_filename = zend_get_compiled_filename(CLS_C);
+				error_lineno = zend_get_compiled_lineno(CLS_C);
+			} else if (zend_is_executing()) {
+				error_filename = zend_get_executed_filename(ELS_C);
+				error_lineno = zend_get_executed_lineno(ELS_C);
+			} else {
+				error_filename = NULL;
+				error_lineno = 0;
+			}
 			break;
 		default:
 			error_filename = NULL;

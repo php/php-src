@@ -46,6 +46,8 @@ typedef struct {
 	uint ob_block_size;
 	uint ob_text_length;
 	unsigned char implicit_flush;
+	char *output_start_filename;
+	int output_start_lineno;
 } php_output_globals;
 
 #ifdef ZTS
@@ -79,6 +81,8 @@ static void php_output_init_globals(OLS_D)
 	OG(ob_block_size) = 0;
 	OG(ob_text_length) = 0;
 	OG(implicit_flush) = 0;
+	OG(output_start_filename) = NULL;
+	OG(output_start_lineno) = 0;
 }
 
 
@@ -342,6 +346,18 @@ static int php_ub_body_write(const char *str, uint str_length)
 		zend_bailout();
 	}
 	if (php_header()) {
+		if (zend_is_compiling()) {
+			CLS_FETCH();
+
+			OG(output_start_filename) = zend_get_compiled_filename(CLS_C);
+			OG(output_start_lineno) = zend_get_compiled_lineno(CLS_C);
+		} else if (zend_is_executing()) {
+			ELS_FETCH();
+
+			OG(output_start_filename) = zend_get_executed_filename(ELS_C);
+			OG(output_start_lineno) = zend_get_executed_lineno(ELS_C);
+		}
+
 		OG(php_body_write) = php_ub_body_write_no_header;
 		result = php_ub_body_write_no_header(str, str_length);
 	}
@@ -406,6 +422,22 @@ PHP_FUNCTION(ob_implicit_flush)
 	} else {
 		php_end_implicit_flush();
 	}
+}
+
+
+PHPAPI char *php_get_output_start_filename()
+{
+	OLS_FETCH();
+
+	return OG(output_start_filename);
+}
+
+
+PHPAPI int php_get_output_start_lineno()
+{
+	OLS_FETCH();
+
+	return OG(output_start_lineno);
 }
 
 

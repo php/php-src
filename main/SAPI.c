@@ -229,7 +229,15 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 	SLS_FETCH();
 
 	if (SG(headers_sent)) {
-		sapi_module.sapi_error(E_WARNING, "Cannot add header information - headers already sent");
+		char *output_start_filename = php_get_output_start_filename();
+		int output_start_lineno = php_get_output_start_lineno();
+
+		if (output_start_filename) {
+			sapi_module.sapi_error(E_WARNING, "Cannot add header information - headers already sent by (output started at %s:%d)",
+				output_start_filename, output_start_lineno);
+		} else {
+			sapi_module.sapi_error(E_WARNING, "Cannot add header information - headers already sent");
+		}
 		efree(header_line);
 		return FAILURE;
 	}
