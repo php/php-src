@@ -425,9 +425,7 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 {
 	if (MySG(trace_mode)) {
 		if (MySG(result_allocated)){
-			char tmp[128];
-			sprintf((char *)&tmp, "%lu result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query()", MySG(result_allocated));
-			php_error_docref("function.mysql-free-result" TSRMLS_CC, E_WARNING, tmp);
+			php_error_docref("function.mysql-free-result" TSRMLS_CC, E_WARNING, "%lu result set(s) not freed. Use mysql_free_result to free result sets which were requested using mysql_query()", MySG(result_allocated));
 		}
 	}
 
@@ -1239,7 +1237,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 			mysql_real_query(&mysql->conn, newquery, strlen(newquery));
 			efree (newquery);
 			if (mysql_errno(&mysql->conn)) {
-				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, mysql_error(&mysql->conn));
+				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "%s", mysql_error(&mysql->conn));
 				RETURN_FALSE;
 			}
 			else {
@@ -1272,7 +1270,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 		/* check possible error */
 		if (MySG(trace_mode)){
 			if (mysql_errno(&mysql->conn)){
-				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, mysql_error(&mysql->conn)); 
+				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "%s", mysql_error(&mysql->conn)); 
 			}
 		}
 		RETURN_FALSE;
