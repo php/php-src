@@ -424,7 +424,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 		else ret = -1;
 #else
 #if PHP_DEBUG
-		php_error1(NULL TSRMLS_CC, filename, E_WARNING, "errno = %d [%s]\n", errno, strerror(errno));
+		php_error_docref1(NULL TSRMLS_CC, filename, E_WARNING, "errno = %d [%s]\n", errno, strerror(errno));
 #endif
 		if (errno) ret=errno;
 		else ret = -1;
