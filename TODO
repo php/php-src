@@ -133,10 +133,6 @@ ext/session
     * Provide a callback facility which is executed upon encountering
       an unknown class name during deserialization
 
-ext/sockets
------------
-    * Review/Fix vectors
-
 ext/standard
 ------------
     * Add a version number to data serialized via serialize().
