@@ -732,7 +732,7 @@ void php_request_shutdown(void *dummy)
 	SLS_FETCH();
 
 	sapi_send_headers();
-	zend_end_ob_buffering(1);
+	zend_end_ob_buffering(SG(request_info).headers_only?0:1);
 
 	php3_call_shutdown_functions();
 	

@@ -70,7 +70,7 @@ void zend_end_ob_buffering(int send_buffer)
 	if (!ob_buffer) {
 		return;
 	}
-	if (SG(headers_sent)) {
+	if (SG(headers_sent) && !SG(request_info).headers_only) {
 		zend_body_write = zend_ub_body_write_no_header;
 	} else {
 		zend_body_write = zend_ub_body_write;
