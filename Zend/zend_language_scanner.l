@@ -24,6 +24,10 @@
 #define yytext_ptr SCNG(yy_text)
 #define yyin SCNG(yy_in)
 #define yyout SCNG(yy_out)
+#define yy_last_accepting_state SCNG(_yy_last_accepting_state)
+#define yy_last_accepting_cpos SCNG(_yy_last_accepting_cpos)
+#define yy_more_flag SCNG(_yy_more_flag)
+#define yy_more_len SCNG(_yy_more_len)
 
 %}
 

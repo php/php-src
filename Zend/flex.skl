@@ -214,6 +214,7 @@ struct yy_buffer_state
 
 %- Standard (non-C++) definition
 #define yy_current_buffer SCNG(current_buffer)
+#define yy_hold_char SCNG(_yy_hold_char)
 %*
 
 /* We provide macros for accessing buffer states in case in the
@@ -225,9 +226,12 @@ struct yy_buffer_state
 
 %- Standard (non-C++) definition
 /* yy_hold_char holds the character lost when yytext is formed. */
+
+#if 0
 static char yy_hold_char;
 
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
+#endif
 
 /* Points to current character in buffer. */
 #define yy_c_buf_p SCNG(c_buf_p)
@@ -249,7 +253,8 @@ static int yy_n_chars;		/* number of characters read into yy_ch_buf */
 /* Flag which is used to allow yywrap()'s to do buffer switches
  * instead of setting up a fresh yyin.  A bit of a hack ...
  */
-static int yy_did_buffer_switch_on_eof;
+/* static int yy_did_buffer_switch_on_eof; */
+#define yy_did_buffer_switch_on_eof SCNG(_yy_did_buffer_switch_on_eof)
 
 void yyrestart YY_PROTO(( FILE *input_file TSRMLS_DC ));
 
@@ -300,6 +305,15 @@ static void yy_flex_free YY_PROTO(( void * ));
 #define yyin SCNG(yy_in)
 #undef yyout
 #define yyout SCNG(yy_out)
+#undef yy_last_accepting_state
+#define yy_last_accepting_state SCNG(_yy_last_accepting_state)
+#undef yy_last_accepting_cpos
+#define yy_last_accepting_cpos SCNG(_yy_last_accepting_cpos)
+#undef yy_more_flag
+#define yy_more_flag SCNG(_yy_more_flag)
+#undef yy_more_len
+#define yy_more_len SCNG(_yy_more_len)
+
 
 %- Standard (non-C++) definition
 static yy_state_type yy_get_previous_state YY_PROTO(( TSRMLS_D ));
@@ -329,6 +343,11 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 #undef yytext_ptr
 #undef yyin
 #undef yyout
+#undef yy_last_accepting_state
+#undef yy_last_accepting_cpos
+#undef yy_more_flag
+#undef yy_more_len
+
 
 %% data tables for the DFA and the user's section 1 definitions go here
 
@@ -570,7 +589,7 @@ do_action:	/* This label is used only to access EOF actions. */
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
-			yy_n_chars = yy_current_buffer->yy_n_chars;
+			SCNG(yy_n_chars) = yy_current_buffer->yy_n_chars;
 			yy_current_buffer->yy_input_file = SCNG(yy_in);
 			yy_current_buffer->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
@@ -582,7 +601,7 @@ do_action:	/* This label is used only to access EOF actions. */
 		 * end-of-buffer state).  Contrast this with the test
 		 * in input().
 		 */
-		if ( yy_c_buf_p <= &yy_current_buffer->yy_ch_buf[yy_n_chars] )
+		if ( yy_c_buf_p <= &yy_current_buffer->yy_ch_buf[SCNG(yy_n_chars)] )
 			{ /* This was really a NUL. */
 			yy_state_type yy_next_state;
 
@@ -661,7 +680,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 			case EOB_ACT_LAST_MATCH:
 				yy_c_buf_p =
-				&yy_current_buffer->yy_ch_buf[yy_n_chars];
+				&yy_current_buffer->yy_ch_buf[SCNG(yy_n_chars)];
 
 				yy_current_state = yy_get_previous_state(TSRMLS_C);
 
@@ -777,7 +796,7 @@ int yyFlexLexer::yy_get_next_buffer(TSRMLS_D)
 	register int number_to_move, i;
 	int ret_val;
 
-	if ( yy_c_buf_p > &yy_current_buffer->yy_ch_buf[yy_n_chars + 1] )
+	if ( yy_c_buf_p > &yy_current_buffer->yy_ch_buf[SCNG(yy_n_chars) + 1] )
 		YY_FATAL_ERROR(
 		"fatal flex scanner internal error--end of buffer missed" );
 
@@ -812,7 +831,7 @@ int yyFlexLexer::yy_get_next_buffer(TSRMLS_D)
 		/* don't do the read, it's not guaranteed to return an EOF,
 		 * just force an EOF
 		 */
-		yy_current_buffer->yy_n_chars = yy_n_chars = 0;
+		yy_current_buffer->yy_n_chars = SCNG(yy_n_chars) = 0;
 
 	else
 		{
@@ -866,12 +885,12 @@ int yyFlexLexer::yy_get_next_buffer(TSRMLS_D)
 
 		/* Read in more data. */
 		YY_INPUT( (&yy_current_buffer->yy_ch_buf[number_to_move]),
-			yy_n_chars, num_to_read );
+			SCNG(yy_n_chars), num_to_read );
 
-		yy_current_buffer->yy_n_chars = yy_n_chars;
+		yy_current_buffer->yy_n_chars = SCNG(yy_n_chars);
 		}
 
-	if ( yy_n_chars == 0 )
+	if ( SCNG(yy_n_chars) == 0 )
 		{
 		if ( number_to_move == YY_MORE_ADJ )
 			{
@@ -890,9 +909,9 @@ int yyFlexLexer::yy_get_next_buffer(TSRMLS_D)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	yy_n_chars += number_to_move;
-	yy_current_buffer->yy_ch_buf[yy_n_chars] = YY_END_OF_BUFFER_CHAR;
-	yy_current_buffer->yy_ch_buf[yy_n_chars + 1] = YY_END_OF_BUFFER_CHAR;
+	SCNG(yy_n_chars) += number_to_move;
+	yy_current_buffer->yy_ch_buf[SCNG(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
+	yy_current_buffer->yy_ch_buf[SCNG(yy_n_chars) + 1] = YY_END_OF_BUFFER_CHAR;
 
 	yytext_ptr = &yy_current_buffer->yy_ch_buf[0];
 
@@ -973,7 +992,7 @@ void yyFlexLexer::yyunput( int c, register char* yy_bp TSRMLS_DC )
 	if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register int number_to_move = yy_n_chars + 2;
+		register int number_to_move = SCNG(yy_n_chars) + 2;
 		register char *dest = &yy_current_buffer->yy_ch_buf[
 					yy_current_buffer->yy_buf_size + 2];
 		register char *source =
@@ -985,7 +1004,7 @@ void yyFlexLexer::yyunput( int c, register char* yy_bp TSRMLS_DC )
 		yy_cp += (int) (dest - source);
 		yy_bp += (int) (dest - source);
 		yy_current_buffer->yy_n_chars =
-			yy_n_chars = yy_current_buffer->yy_buf_size;
+			SCNG(yy_n_chars) = yy_current_buffer->yy_buf_size;
 
 		if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 )
 			YY_FATAL_ERROR( "flex scanner push-back overflow" );
@@ -1027,7 +1046,7 @@ int yyFlexLexer::yyinput(TSRMLS_D)
 		 * If this occurs *before* the EOB characters, then it's a
 		 * valid NUL; if not, then we've hit the end of the buffer.
 		 */
-		if ( yy_c_buf_p < &yy_current_buffer->yy_ch_buf[yy_n_chars] )
+		if ( yy_c_buf_p < &yy_current_buffer->yy_ch_buf[SCNG(yy_n_chars)] )
 			/* This was really a NUL. */
 			*yy_c_buf_p = '\0';
 
@@ -1126,7 +1145,7 @@ void yyFlexLexer::yy_switch_to_buffer( YY_BUFFER_STATE new_buffer TSRMLS_DC )
 		/* Flush out information for old buffer. */
 		*yy_c_buf_p = yy_hold_char;
 		yy_current_buffer->yy_buf_pos = yy_c_buf_p;
-		yy_current_buffer->yy_n_chars = yy_n_chars;
+		yy_current_buffer->yy_n_chars = SCNG(yy_n_chars);
 		}
 
 	yy_current_buffer = new_buffer;
@@ -1154,7 +1173,7 @@ void ***tsrm_ls;
 void yyFlexLexer::yy_load_buffer_state()
 %*
 	{
-	yy_n_chars = yy_current_buffer->yy_n_chars;
+	SCNG(yy_n_chars) = yy_current_buffer->yy_n_chars;
 	yytext_ptr = yy_c_buf_p = yy_current_buffer->yy_buf_pos;
 	SCNG(yy_in) = yy_current_buffer->yy_input_file;
 	yy_hold_char = *yy_c_buf_p;
