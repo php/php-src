@@ -60,7 +60,7 @@ static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_
 /* uncomment this if/when we actually need it - tired of seeing the warning
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 */
-static pval *user_compare_func_name;
+static pval **user_compare_func_name;
 static HashTable *user_shutdown_function_names;
 
 typedef struct _php_shutdown_function_entry {
@@ -454,25 +454,25 @@ PHP_FUNCTION(getenv)
 #if FHTTPD
 	int i;
 #endif
-	pval *str;
+	pval **str;
 	char *ptr;
 #if APACHE
 	SLS_FETCH();
 #endif
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(str);
+	convert_to_string_ex(str);
 
 #if FHTTPD
 	ptr=NULL;
-	if (str->type == IS_STRING && req){
+	if ((*str)->type == IS_STRING && req){
 		for(i=0;i<req->nlines;i++){
 			if (req->lines[i].paramc>1){
 				if (req->lines[i].params[0]){
 					if (!strcmp(req->lines[i].params[0],
-							   str->value.str.val)){
+								(*str)->value.str.val)){
 						ptr=req->lines[i].params[1];
 						i=req->nlines;
 					}
@@ -480,20 +480,20 @@ PHP_FUNCTION(getenv)
 			}
 		}
 	}
-	if (!ptr) ptr = getenv(str->value.str.val);
+	if (!ptr) ptr = getenv((*str)->value.str.val);
 	if (ptr
 #else
 
-	if (str->type == IS_STRING &&
+	if ((*str)->type == IS_STRING &&
 #if APACHE
-		((ptr = (char *)table_get(((request_rec *) SG(server_context))->subprocess_env, str->value.str.val)) || (ptr = getenv(str->value.str.val)))
+		((ptr = (char *)table_get(((request_rec *) SG(server_context))->subprocess_env, (*str)->value.str.val)) || (ptr = getenv((*str)->value.str.val)))
 #endif
 #if CGI_BINARY
-		(ptr = getenv(str->value.str.val))
+		(ptr = getenv((*str)->value.str.val))
 #endif
 
 #if USE_SAPI
-		(ptr = sapi_rqst->getenv(sapi_rqst->scid,str->value.str.val))
+		(ptr = sapi_rqst->getenv(sapi_rqst->scid,(*str)->value.str.val))
 #endif
 #endif
 		) {
@@ -506,21 +506,20 @@ PHP_FUNCTION(getenv)
 #ifdef HAVE_PUTENV
 PHP_FUNCTION(putenv)
 {
+	pval **str;
 
-	pval *str;
-
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(str);
+	convert_to_string_ex(str);
 
-	if (str->value.str.val && *(str->value.str.val)) {
+	if ((*str)->value.str.val && *((*str)->value.str.val)) {
 		int ret;
 		char *p,**env;
 		putenv_entry pe;
 		
-		pe.putenv_string = estrndup(str->value.str.val,str->value.str.len);
-		pe.key = str->value.str.val;
+		pe.putenv_string = estrndup((*str)->value.str.val,(*str)->value.str.len);
+		pe.key = (*str)->value.str.val;
 		if ((p=strchr(pe.key,'='))) { /* nullify the '=' if there is one */
 			*p='\0';
 		}
@@ -556,16 +555,16 @@ PHP_FUNCTION(toggle_short_open_tag)
 {
 	/* has to be implemented within Zend */
 #if 0
-	pval *value;
+	pval **value;
 	int ret;
 	
 	ret = php3_ini.short_open_tag;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&value) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1,&value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(value);
-	php3_ini.short_open_tag = value->value.lval;
+	convert_to_long_ex(value);
+	php3_ini.short_open_tag = (*value)->value.lval;
 	RETURN_LONG(ret);
 #endif
 }
@@ -576,54 +575,55 @@ PHP_FUNCTION(toggle_short_open_tag)
 
 PHP_FUNCTION(intval)
 {
-	pval *num, *arg_base;
+	pval **num, **arg_base;
 	int base;
 	
 	switch(ARG_COUNT(ht)) {
 	case 1:
-		if (getParameters(ht, 1, &num) == FAILURE) {
+		if (getParametersEx(1, &num) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		base = 10;
 		break;
 	case 2:
-		if (getParameters(ht, 2, &num, &arg_base) == FAILURE) {
+		if (getParametersEx(2, &num, &arg_base) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(arg_base);
-		base = arg_base->value.lval;
+		convert_to_long_ex(arg_base);
+		base = (*arg_base)->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long_base(num, base);
-	*return_value = *num;
+	*return_value=**num;
+	zval_copy_ctor(return_value);
+	convert_to_long_base(return_value,base);
 }
 
 
 PHP_FUNCTION(doubleval)
 {
-	pval *num;
+	pval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_double(num);
-	*return_value = *num;
+	*return_value=**num;
+	zval_copy_ctor(return_value);
+	convert_to_double(return_value);
 }
 
-
+ 
 PHP_FUNCTION(strval)
 {
-	pval *num;
+	pval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(num);
-	*return_value = *num;
-	pval_copy_constructor(return_value);
+	*return_value=**num;
+	zval_copy_ctor(return_value);
+	convert_to_string(return_value);
 }
 
 static int array_key_compare(const void *a, const void *b)
@@ -657,19 +657,15 @@ static int array_reverse_key_compare(const void *a, const void *b)
 
 PHP_FUNCTION(krsort)
 {
-	pval *array;
+	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in krsort() call");
-		return;
-	}
-	if (!ParameterPassedByReference(ht,1)) {
-		php_error(E_WARNING, "Array not passed by reference in call to krsort()");
 		return;
 	}
 	if (zend_hash_sort(target_hash, array_reverse_key_compare,0) == FAILURE) {
@@ -680,19 +676,15 @@ PHP_FUNCTION(krsort)
 
 PHP_FUNCTION(ksort)
 {
-	pval *array;
+	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in ksort() call");
-		return;
-	}
-	if (!ParameterPassedByReference(ht,1)) {
-		php_error(E_WARNING, "Array not passed by reference in call to ksort()");
 		return;
 	}
 	if (zend_hash_sort(target_hash, array_key_compare,0) == FAILURE) {
@@ -710,7 +702,6 @@ PHP_FUNCTION(count)
 	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		if ((*array)->type == IS_STRING && (*array)->value.str.val==undefined_variable_string) {
@@ -782,21 +773,17 @@ static int array_reverse_data_compare(const void *a, const void *b)
 
 PHP_FUNCTION(asort)
 {
-	pval *array;
+	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in asort() call");
 		return;
 	}
-    if (!ParameterPassedByReference(ht,1)) {
-        php_error(E_WARNING, "Array not passed by reference in call to asort()");
-		return;
-    }
 	if (zend_hash_sort(target_hash, array_data_compare,0) == FAILURE) {
 		return;
 	}
@@ -805,21 +792,17 @@ PHP_FUNCTION(asort)
 
 PHP_FUNCTION(arsort)
 {
-	pval *array;
+	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in arsort() call");
 		return;
 	}
-    if (!ParameterPassedByReference(ht,1)) {
-        php_error(E_WARNING, "Array not passed by reference in call to arsort()");
-		return;
-    }
 	if (zend_hash_sort(target_hash, array_reverse_data_compare,0) == FAILURE) {
 		return;
 	}
@@ -828,21 +811,17 @@ PHP_FUNCTION(arsort)
 
 PHP_FUNCTION(sort)
 {
-	pval *array;
+	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in sort() call");
 		return;
 	}
-    if (!ParameterPassedByReference(ht,1)) {
-        php_error(E_WARNING, "Array not passed by reference in call to sort()");
-		return;
-    }
 	if (zend_hash_sort(target_hash, array_data_compare,1) == FAILURE) {
 		return;
 	}
@@ -851,21 +830,17 @@ PHP_FUNCTION(sort)
 
 PHP_FUNCTION(rsort)
 {
-	pval *array;
+	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in rsort() call");
 		return;
 	}
-    if (!ParameterPassedByReference(ht,1)) {
-        php_error(E_WARNING, "Array not passed by reference in call to rsort()");
-		return;
-    }
 	if (zend_hash_sort(target_hash, array_reverse_data_compare,1) == FAILURE) {
 		return;
 	}
@@ -887,7 +862,7 @@ static int array_user_compare(const void *a, const void *b)
 	args[0] = (pval **) f->pData;
 	args[1] = (pval **) s->pData;
 
-	if (call_user_function_ex(CG(function_table), NULL, user_compare_func_name, &retval, 2, args, 0)==SUCCESS) {
+	if (call_user_function_ex(CG(function_table), NULL, *user_compare_func_name, &retval, 2, args, 0)==SUCCESS) {
 		convert_to_long(&retval);
 		return retval.value.lval;
 	} else {
@@ -898,22 +873,22 @@ static int array_user_compare(const void *a, const void *b)
 
 PHP_FUNCTION(usort)
 {
-	pval *array;
-	pval *old_compare_func;
+	pval **array;
+	pval **old_compare_func;
 	HashTable *target_hash;
 
 	old_compare_func = user_compare_func_name;
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &user_compare_func_name) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &user_compare_func_name) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in usort() call");
 		user_compare_func_name = old_compare_func;
 		return;
 	}
-	convert_to_string(user_compare_func_name);
+	convert_to_string_ex(user_compare_func_name);
 	if (zend_hash_sort(target_hash, array_user_compare, 1) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
@@ -924,22 +899,22 @@ PHP_FUNCTION(usort)
 
 PHP_FUNCTION(uasort)
 {
-	pval *array;
-	pval *old_compare_func;
+	pval **array;
+	pval **old_compare_func;
 	HashTable *target_hash;
 
 	old_compare_func = user_compare_func_name;
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &user_compare_func_name) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &user_compare_func_name) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in uasort() call");
 		user_compare_func_name = old_compare_func;
 		return;
 	}
-	convert_to_string(user_compare_func_name);
+	convert_to_string_ex(user_compare_func_name);
 	if (zend_hash_sort(target_hash, array_user_compare, 0) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
@@ -984,7 +959,7 @@ static int array_user_key_compare(const void *a, const void *b)
 		key2.type = IS_LONG;
 	}
 
-	status = call_user_function(CG(function_table), NULL, user_compare_func_name, &retval, 2, args);
+	status = call_user_function(CG(function_table), NULL, *user_compare_func_name, &retval, 2, args);
 	
 	pval_destructor(&key1);
 	pval_destructor(&key2);
@@ -1000,22 +975,22 @@ static int array_user_key_compare(const void *a, const void *b)
 
 PHP_FUNCTION(uksort)
 {
-	pval *array;
-	pval *old_compare_func;
+	pval **array;
+	pval **old_compare_func;
 	HashTable *target_hash;
 
 	old_compare_func = user_compare_func_name;
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &user_compare_func_name) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &array, &user_compare_func_name) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in uksort() call");
 		user_compare_func_name = old_compare_func;
 		return;
 	}
-	convert_to_string(user_compare_func_name);
+	convert_to_string_ex(user_compare_func_name);
 	if (zend_hash_sort(target_hash, array_user_key_compare, 0) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
@@ -1024,23 +999,19 @@ PHP_FUNCTION(uksort)
 	RETURN_TRUE;
 }
 
-
 PHP_FUNCTION(end)
 {
-	pval *array, **entry;
+	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to end() is not an array or object");
 		return;
 	}
-    if (!ParameterPassedByReference(ht,1)) {
-        php_error(E_WARNING, "Array not passed by reference in call to end()");
-    }
 	zend_hash_internal_pointer_end(target_hash);
 	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
@@ -1052,13 +1023,13 @@ PHP_FUNCTION(end)
 
 PHP_FUNCTION(prev)
 {
-	pval *array, **entry;
+	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to prev() is not an array or object");
 		RETURN_FALSE;
@@ -1075,13 +1046,13 @@ PHP_FUNCTION(prev)
 
 PHP_FUNCTION(next)
 {
-	pval *array, **entry;
+	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to next() is not an array or object");
 		RETURN_FALSE;
@@ -1098,13 +1069,13 @@ PHP_FUNCTION(next)
 	
 PHP_FUNCTION(reset)
 {
-	pval *array, **entry;
+	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to reset() is not an array or object");
 		return;
@@ -1116,18 +1087,18 @@ PHP_FUNCTION(reset)
 		
 	*return_value = **entry;
 	pval_copy_constructor(return_value);
-	INIT_PZVAL(return_value);
+	INIT_PZVAL(return_value); /* XXX is this needed? */
 }
 
 PHP_FUNCTION(current)
 {
-	pval *array, **entry;
+	pval **array, **entry;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to current() is not an array or object");
 		return;
@@ -1142,22 +1113,19 @@ PHP_FUNCTION(current)
 
 PHP_FUNCTION(key)
 {
-	pval *array;
+	pval **array;
 	char *string_key;
 	ulong num_key;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to key() is not an array or object");
 		return;
 	}
-    if (!ParameterPassedByReference(ht,1)) {
-        php_error(E_WARNING, "Array not passed by reference in call to key()");
-    }
 	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
 		case HASH_KEY_IS_STRING:
 			return_value->value.str.val = string_key;
@@ -1204,36 +1172,36 @@ PHP_FUNCTION(flush)
 
 PHP_FUNCTION(sleep)
 {
-	pval *num;
+	pval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(num);
-	sleep(num->value.lval);
+	convert_to_long_ex(num);
+	sleep((*num)->value.lval);
 }
 
 PHP_FUNCTION(usleep)
 {
 #if HAVE_USLEEP
-	pval *num;
+	pval **num;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &num) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(num);
-	usleep(num->value.lval);
+	convert_to_long_ex(num);
+	usleep((*num)->value.lval);
 #endif
 }
 
 PHP_FUNCTION(gettype)
 {
-	pval *arg;
+	pval **arg;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	switch (arg->type) {
+	switch ((*arg)->type) {
 		case IS_BOOL:
 			RETVAL_STRING("boolean",1);
 			break;
@@ -1275,28 +1243,27 @@ PHP_FUNCTION(gettype)
 
 PHP_FUNCTION(settype)
 {
-	pval *var, *type;
+	pval **var, **type;
 	char *new_type;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &var, &type) ==
-		FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &var, &type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(type);
-	new_type = type->value.str.val;
+	convert_to_string_ex(type);
+	new_type = (*type)->value.str.val;
 
 	if (!strcasecmp(new_type, "integer")) {
-		convert_to_long(var);
+		convert_to_long(*var);
 	} else if (!strcasecmp(new_type, "double")) {
-		convert_to_double(var);
+		convert_to_double(*var);
 	} else if (!strcasecmp(new_type, "string")) {
-		convert_to_string(var);
+		convert_to_string(*var);
 	} else if (!strcasecmp(new_type, "array")) {
-		convert_to_array(var);
+		convert_to_array(*var);
 	} else if (!strcasecmp(new_type, "object")) {
-		convert_to_object(var);
+		convert_to_object(*var);
 	} else if (!strcasecmp(new_type, "boolean")) {
-		convert_to_boolean(var);
+		convert_to_boolean(*var);
 	} else if (!strcasecmp(new_type, "resource")) {
 		php_error(E_WARNING, "settype: cannot convert to resource type");
 		RETURN_FALSE;
@@ -1319,25 +1286,24 @@ PHP_FUNCTION(min)
 		return;
 	}
 	if (argc == 1) {
-		pval *arr;
+		pval **arr;
 
-		if (getParameters(ht, 1, &arr) == FAILURE ||
-			arr->type != IS_ARRAY) {
+		if (getParametersEx(1, &arr) == FAILURE || (*arr)->type != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax(arr->value.ht, array_data_compare, 0, (void **) &result)==SUCCESS) {
+		if (zend_hash_minmax((*arr)->value.ht, array_data_compare, 0, (void **) &result)==SUCCESS) {
 			*return_value = **result;
 			pval_copy_constructor(return_value);
 		} else {
 			php_error(E_WARNING, "min: array must contain at least 1 element");
-			var_uninit(return_value);
+			RETURN_FALSE;
 		}
 	} else {
-		pval **args = (pval **) emalloc(sizeof(pval *)*ARG_COUNT(ht));
-		pval *min, result;
+		pval ***args = (pval ***) emalloc(sizeof(pval **)*ARG_COUNT(ht));
+		pval **min, result;
 		int i;
 
-		if (getParametersArray(ht, ARG_COUNT(ht), args)==FAILURE) {
+		if (getParametersArrayEx(ARG_COUNT(ht), args)==FAILURE) {
 			efree(args);
 			WRONG_PARAM_COUNT;
 		}
@@ -1345,13 +1311,13 @@ PHP_FUNCTION(min)
 		min = args[0];
 
 		for (i=1; i<ARG_COUNT(ht); i++) {
-			is_smaller_function(&result, args[i], min);
+			is_smaller_function(&result, *args[i], *min);
 			if (result.value.lval == 1) {
 				min = args[i];
 			}
 		}
 
-		*return_value = *min;
+		*return_value = **min;
 		pval_copy_constructor(return_value);
 
 		efree(args);
@@ -1370,25 +1336,24 @@ PHP_FUNCTION(max)
 		return;
 	}
 	if (argc == 1) {
-		pval *arr;
+		pval **arr;
 
-		if (getParameters(ht, 1, &arr) == FAILURE ||
-			arr->type != IS_ARRAY) {
+		if (getParametersEx(1, &arr) == FAILURE || (*arr)->type != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax(arr->value.ht, array_data_compare, 1, (void **) &result)==SUCCESS) {
+		if (zend_hash_minmax((*arr)->value.ht, array_data_compare, 1, (void **) &result)==SUCCESS) {
 			*return_value = **result;
 			pval_copy_constructor(return_value);
 		} else {
 			php_error(E_WARNING, "max: array must contain at least 1 element");
-			var_uninit(return_value);
+			RETURN_FALSE;
 		}
 	} else {
-		pval **args = (pval **) emalloc(sizeof(pval *)*ARG_COUNT(ht));
-		pval *max, result;
+		pval ***args = (pval ***) emalloc(sizeof(pval **)*ARG_COUNT(ht));
+		pval **max, result;
 		int i;
 
-		if (getParametersArray(ht, ARG_COUNT(ht), args)==FAILURE) {
+		if (getParametersArrayEx(ARG_COUNT(ht), args)==FAILURE) {
 			efree(args);
 			WRONG_PARAM_COUNT;
 		}
@@ -1396,13 +1361,13 @@ PHP_FUNCTION(max)
 		max = args[0];
 
 		for (i=1; i<ARG_COUNT(ht); i++) {
-			is_smaller_or_equal_function(&result, args[i], max);
+			is_smaller_or_equal_function(&result, *args[i], *max);
 			if (result.value.lval == 0) {
 				max = args[i];
 			}
 		}
 
-		*return_value = *max;
+		*return_value = **max;
 		pval_copy_constructor(return_value);
 
 		efree(args);
@@ -1482,73 +1447,6 @@ PHP_FUNCTION(array_walk) {
 	RETURN_TRUE;
 }
 
-#if 0
-PHP_FUNCTION(max)
-{
-	pval **argv;
-	int argc, i;
-	unsigned short max_type = IS_LONG;
-
-	argc = ARG_COUNT(ht);
-	/* if there is one parameter and this parameter is an array of
-	 * 2 or more elements, use that array
-	 */
-	if (argc == 1) {
-		argv = (pval **)emalloc(sizeof(pval *) * argc);
-		if (getParametersArray(ht, argc, argv) == FAILURE ||
-			argv[0]->type != IS_ARRAY) {
-			WRONG_PARAM_COUNT;
-		}
-		if (argv[0]->value.ht->nNumOfElements < 2) {
-			php_error(E_WARNING,
-					   "min: array must contain at least 2 elements");
-			RETURN_FALSE;
-		}
-		/* replace the function parameters with the array */
-		ht = argv[0]->value.ht;
-		argc = zend_hash_num_elements(ht);
-		efree(argv);
-	} else if (argc < 2) {
-		WRONG_PARAM_COUNT;
-	}
-	argv = (pval **)emalloc(sizeof(pval *) * argc);
-	if (getParametersArray(ht, argc, argv) == FAILURE) {
-		efree(argv);
-		WRONG_PARAM_COUNT;
-	}
-	/* figure out what types to compare
-	 * if the arguments contain a double, convert all of them to a double
-	 * else convert all of them to long
-	 */
-	for (i = 0; i < argc; i++) {
-		if (argv[i]->type == IS_DOUBLE) {
-			max_type = IS_DOUBLE;
-			break;
-		}
-	}
-	if (max_type == IS_LONG) {
-		convert_to_long(argv[0]);
-		return_value->value.lval = argv[0]->value.lval;
-		for (i = 1; i < argc; i++) {
-			convert_to_long(argv[i]);
-			if (argv[i]->value.lval > return_value->value.lval) {
-				return_value->value.lval = argv[i]->value.lval;
-			}
-		}
-	} else {
-		convert_to_double(argv[0]);
-		return_value->value.dval = argv[0]->value.dval;
-		for (i = 1; i < argc; i++) {
-			convert_to_double(argv[i]);
-			if (argv[i]->value.dval > return_value->value.dval) {
-				return_value->value.dval = argv[i]->value.dval;
-			}
-		}
-	}
-	efree(argv);
-	return_value->type = max_type;
-}
-#endif
 
 PHP_FUNCTION(get_current_user)
 {
@@ -1558,16 +1456,16 @@ PHP_FUNCTION(get_current_user)
 
 PHP_FUNCTION(get_cfg_var)
 {
-	pval *varname;
+	pval **varname;
 	char *value;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &varname)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &varname)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string(varname);
+	convert_to_string_ex(varname);
 	
-	if (cfg_get_string(varname->value.str.val,&value)==FAILURE) {
+	if (cfg_get_string((*varname)->value.str.val,&value)==FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_STRING(value,1);
@@ -1575,15 +1473,15 @@ PHP_FUNCTION(get_cfg_var)
 
 PHP_FUNCTION(set_magic_quotes_runtime)
 {
-	pval *new_setting;
+	pval **new_setting;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &new_setting)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &new_setting)==FAILURE) {
 		RETURN_FALSE;
 	}
-	convert_to_boolean(new_setting);
+	convert_to_boolean_ex(new_setting);
 	
-	PG(magic_quotes_runtime) = (zend_bool) new_setting->value.lval;
+	PG(magic_quotes_runtime) = (zend_bool) (*new_setting)->value.lval;
 	RETURN_TRUE;
 }
 	
@@ -1658,37 +1556,37 @@ PHP_FUNCTION(is_object)
 
 PHP_FUNCTION(error_log)
 {
-	pval *string, *erropt = NULL, *option = NULL, *emailhead = NULL;
+	pval **string, **erropt = NULL, **option = NULL, **emailhead = NULL;
 	int opt_err = 0;
 	char *message, *opt=NULL, *headers=NULL;
 
 	switch(ARG_COUNT(ht)) {
 	case 1:
-		if (getParameters(ht,1,&string) == FAILURE) {
+		if (getParametersEx(1,&string) == FAILURE) {
 			php_error(E_WARNING,"Invalid argument 1 in error_log");
 			RETURN_FALSE;
 		}
 		break;
 	case 2:
-		if (getParameters(ht,2,&string,&erropt) == FAILURE) {
+		if (getParametersEx(2,&string,&erropt) == FAILURE) {
 			php_error(E_WARNING,"Invalid arguments in error_log");
 			RETURN_FALSE;
 		}
-		convert_to_long(erropt);
-		opt_err=erropt->value.lval;
+		convert_to_long_ex(erropt);
+		opt_err=(*erropt)->value.lval;
 		break;
 	case 3:
-		if (getParameters(ht,3,&string,&erropt,&option) == FAILURE){
+		if (getParametersEx(3,&string,&erropt,&option) == FAILURE){
 			php_error(E_WARNING,"Invalid arguments in error_log");
 			RETURN_FALSE;
 		}
-		convert_to_long(erropt);
-		opt_err=erropt->value.lval;
-		convert_to_string(option);
-		opt=option->value.str.val;
+		convert_to_long_ex(erropt);
+		opt_err=(*erropt)->value.lval;
+		convert_to_string_ex(option);
+		opt=(*option)->value.str.val;
 		break;
 	case 4:
-		if (getParameters(ht,4,&string,&erropt,&option,&emailhead) == FAILURE){
+		if (getParametersEx(4,&string,&erropt,&option,&emailhead) == FAILURE){
 			php_error(E_WARNING,"Invalid arguments in error_log");
 			RETURN_FALSE;
 		}
@@ -1697,19 +1595,19 @@ PHP_FUNCTION(error_log)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(string);
-	message=string->value.str.val;
+	convert_to_string_ex(string);
+	message=(*string)->value.str.val;
 	if (erropt != NULL) {
-		convert_to_long(erropt);
-		opt_err=erropt->value.lval;
+		convert_to_long_ex(erropt);
+		opt_err=(*erropt)->value.lval;
 	}
 	if (option != NULL) {
-		convert_to_string(option);
-		opt=option->value.str.val;
+		convert_to_string_ex(option);
+		opt=(*option)->value.str.val;
 	}
 	if (emailhead != NULL) {
-		convert_to_string(emailhead);
-		headers=emailhead->value.str.val;
+		convert_to_string_ex(emailhead);
+		headers=(*emailhead)->value.str.val;
 	}
 
 	if (_php_error_log(opt_err,message,opt,headers)==FAILURE) {
@@ -1887,18 +1785,18 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
    Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
-	pval *filename;
+	pval **filename;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &filename)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &filename)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
-	if (highlight_file(filename->value.str.val, &syntax_highlighter_ini)==FAILURE) {
+	if (highlight_file((*filename)->value.str.val, &syntax_highlighter_ini)==FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1910,18 +1808,18 @@ PHP_FUNCTION(highlight_file)
    Syntax highlight a string */
 PHP_FUNCTION(highlight_string)
 {
-	pval *expr;
+	pval **expr;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &expr)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &expr)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string(expr);
+	convert_to_string_ex(expr);
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
-	if (highlight_string(expr, &syntax_highlighter_ini)==FAILURE) {
+	if (highlight_string(*expr, &syntax_highlighter_ini)==FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -2081,13 +1979,15 @@ PHP_FUNCTION(ob_get_contents)
 
 PHP_FUNCTION(ini_get)
 {
-	pval *varname;
+	pval **varname;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &varname)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &varname)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	return_value->value.str.val = php_ini_string(varname->value.str.val, varname->value.str.len+1, 0);
+	convert_to_string_ex(varname);
+
+	return_value->value.str.val = php_ini_string((*varname)->value.str.val, (*varname)->value.str.len+1, 0);
 
 	if (!return_value->value.str.val) {
 		RETURN_FALSE;
@@ -2101,19 +2001,19 @@ PHP_FUNCTION(ini_get)
 
 PHP_FUNCTION(ini_alter)
 {
-	pval *varname, *new_value;
+	pval **varname, **new_value;
 	char *old_value;
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &varname, &new_value)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &varname, &new_value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	old_value = php_ini_string(varname->value.str.val, varname->value.str.len+1, 0);
+	convert_to_string_ex(varname);
+	convert_to_string_ex(new_value);
 
+	old_value = php_ini_string((*varname)->value.str.val, (*varname)->value.str.len+1, 0);
 
-	convert_to_string(new_value);
-
-	if (php_alter_ini_entry(varname->value.str.val, varname->value.str.len+1, new_value->value.str.val, new_value->value.str.len, PHP_INI_USER)==FAILURE) {
+	if (php_alter_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, (*new_value)->value.str.val, (*new_value)->value.str.len, PHP_INI_USER)==FAILURE) {
 		RETURN_FALSE;
 	}
 	if (old_value) {
@@ -2127,27 +2027,28 @@ PHP_FUNCTION(ini_alter)
 
 PHP_FUNCTION(ini_restore)
 {
-	pval *varname;
+	pval **varname;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &varname)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &varname)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(varname);
+	convert_to_string_ex(varname);
 
-	php_restore_ini_entry(varname->value.str.val, varname->value.str.len);
+	php_restore_ini_entry((*varname)->value.str.val, (*varname)->value.str.len);
 }
 
 
 PHP_FUNCTION(print_r)
 {
-	pval *expr;
+	pval **expr;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &expr)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &expr)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	zend_print_pval_r(expr, 0);
+	zend_print_pval_r(*expr, 0);
+
 	RETURN_TRUE;
 }
 
@@ -2188,7 +2089,7 @@ PHP_FUNCTION(connection_status)
    Set whether we want to ignore a user abort event or not */
 PHP_FUNCTION(ignore_user_abort)
 {
-    pval *arg;
+    pval **arg;
     int old_setting;
 	PLS_FETCH();
 
@@ -2197,11 +2098,11 @@ PHP_FUNCTION(ignore_user_abort)
         case 0:
             break;
         case 1:
-            if (getParameters(ht,1,&arg) == FAILURE) {
+            if (getParametersEx(1, &arg) == FAILURE) {
                 RETURN_FALSE;
             }
-            convert_to_boolean(arg);
-            PG(ignore_user_abort) = (zend_bool) arg->value.lval;
+            convert_to_boolean_ex(arg);
+            PG(ignore_user_abort) = (zend_bool) (*arg)->value.lval;
             break;
         default:
             WRONG_PARAM_COUNT;
@@ -2215,19 +2116,20 @@ PHP_FUNCTION(ignore_user_abort)
    Checks if a given function has been defined */
 PHP_FUNCTION(function_exists)
 {
-	pval *fname;
+	pval **fname;
 	pval *tmp;
 	char *lcname;
 	CLS_FETCH();
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &fname)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &fname)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	
-	lcname = estrdup(fname->value.str.val);
-	zend_str_tolower(lcname, fname->value.str.len);
+	convert_to_string_ex(fname);
+
+	lcname = estrdup((*fname)->value.str.val);
+	zend_str_tolower(lcname, (*fname)->value.str.len);
 	if (zend_hash_find(CG(function_table), lcname,
-						fname->value.str.len+1, (void**)&tmp) == FAILURE) {
+						(*fname)->value.str.len+1, (void**)&tmp) == FAILURE) {
 		efree(lcname);
 		RETURN_FALSE;
 	} else {
@@ -2243,32 +2145,32 @@ PHP_FUNCTION(function_exists)
    Checks if the given value exists in the array */
 PHP_FUNCTION(in_array)
 {
-	zval *value,				/* value to check for */
-		 *array,				/* array to check in */
+	zval **value,				/* value to check for */
+		 **array,				/* array to check in */
 		 **entry_ptr,			/* pointer to array entry */
 		 *entry,				/* actual array entry */
 		  res;					/* comparison result */
 	HashTable *target_hash;		/* array hashtable */
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &value, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &value, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (value->type == IS_ARRAY || value->type == IS_OBJECT) {
+	if ((*value)->type == IS_ARRAY || (*value)->type == IS_OBJECT) {
 		zend_error(E_WARNING, "Wrong datatype for first argument in call to in_array()");
 		return;
 	}
 	
-	if (array->type != IS_ARRAY) {
+	if ((*array)->type != IS_ARRAY) {
 		zend_error(E_WARNING, "Wrong datatype for second argument in call to in_array()");
 		return;
 	}
 
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	zend_hash_internal_pointer_reset(target_hash);
 	while(zend_hash_get_current_data(target_hash, (void **)&entry_ptr) == SUCCESS) {
 		entry = *entry_ptr;
-     	is_equal_function(&res, value, entry);
+     	is_equal_function(&res, *value, entry);
 		if (zval_is_true(&res)) {
 			RETURN_TRUE;
 		}
@@ -2311,7 +2213,7 @@ static int _valid_var_name(char *varname)
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
-	zval *var_array, *etype, *prefix;
+	zval **var_array, **etype, **prefix;
 	zval **entry_ptr, *entry, *exist;
 	zval *data;
 	char *varname, *finalname;
@@ -2321,29 +2223,30 @@ PHP_FUNCTION(extract)
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &var_array) == FAILURE) {
+			if (getParametersEx(1, &var_array) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			extype = EXTR_OVERWRITE;
 			break;
 
 		case 2:
-			if (getParameters(ht, 2, &var_array, &etype) == FAILURE) {
+			if (getParametersEx(2, &var_array, &etype) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			convert_to_long(etype);
-			extype = etype->value.lval;
+			convert_to_long_ex(etype);
+			extype = (*etype)->value.lval;
 			if (extype > EXTR_SKIP && extype <= EXTR_PREFIX_ALL) {
 				WRONG_PARAM_COUNT;
 			}
 			break;
 			
 		case 3:
-			if (getParameters(ht, 3, &var_array, &etype, &prefix) == FAILURE) {
+			if (getParametersEx(3, &var_array, &etype, &prefix) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			convert_to_long(etype);
-			extype = etype->value.lval;
+			convert_to_long_ex(etype);
+			extype = (*etype)->value.lval;
+			convert_to_string_ex(prefix);
 			break;
 
 		default:
@@ -2356,17 +2259,16 @@ PHP_FUNCTION(extract)
 		return;
 	}
 	
-	if (var_array->type != IS_ARRAY) {
+	if ((*var_array)->type != IS_ARRAY) {
 		zend_error(E_WARNING, "Wrong datatype in call to extract()");
 		return;
 	}
 		
-	zend_hash_internal_pointer_reset(var_array->value.ht);
-	while(zend_hash_get_current_data(var_array->value.ht, (void **)&entry_ptr) == SUCCESS) {
+	zend_hash_internal_pointer_reset((*var_array)->value.ht);
+	while(zend_hash_get_current_data((*var_array)->value.ht, (void **)&entry_ptr) == SUCCESS) {
 		entry = *entry_ptr;
 
-		if (zend_hash_get_current_key(var_array->value.ht, &varname, &lkey) ==
-				HASH_KEY_IS_STRING) {
+		if (zend_hash_get_current_key((*var_array)->value.ht, &varname, &lkey) == HASH_KEY_IS_STRING) {
 
 			if (_valid_var_name(varname)) {
 				finalname = NULL;
@@ -2385,8 +2287,8 @@ PHP_FUNCTION(extract)
 
 					case EXTR_PREFIX_ALL:
 						if (!finalname) {
-							finalname = emalloc(strlen(varname) + prefix->value.str.len + 2);
-							strcpy(finalname, prefix->value.str.val);
+							finalname = emalloc(strlen(varname) + (*prefix)->value.str.len + 2);
+							strcpy(finalname, (*prefix)->value.str.val);
 							strcat(finalname, "_");
 							strcat(finalname, varname);
 						}
@@ -2413,7 +2315,7 @@ PHP_FUNCTION(extract)
 			efree(varname);
 		}
 
-		zend_hash_move_forward(var_array->value.ht);
+		zend_hash_move_forward((*var_array)->value.ht);
 	}
 }
 /* }}} */
@@ -2455,13 +2357,13 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
-	zval **args;			/* function arguments array */
+	zval ***args;			/* function arguments array */
 	int i;
 	ELS_FETCH();
 	
-	args = (zval **)emalloc(ARG_COUNT(ht) * sizeof(zval *));
+	args = (zval ***)emalloc(ARG_COUNT(ht) * sizeof(zval **));
 	
-	if (getParametersArray(ht, ARG_COUNT(ht), args) == FAILURE) {
+	if (getParametersArrayEx(ARG_COUNT(ht), args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -2470,7 +2372,7 @@ PHP_FUNCTION(compact)
 	
 	for (i=0; i<ARG_COUNT(ht); i++)
 	{
-		_compact_var(EG(active_symbol_table), return_value, args[i]);
+		_compact_var(EG(active_symbol_table), return_value, *args[i]);
 	}
 	
 	efree(args);
@@ -2481,20 +2383,20 @@ PHP_FUNCTION(compact)
    Create an array containing the range of integers from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
-	zval *zlow, *zhigh;
+	zval **zlow, **zhigh;
 	int low, high;
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&zlow,&zhigh) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2,&zlow,&zhigh) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(zlow);
-	convert_to_long(zhigh);
-	low = zlow->value.lval;
-	high = zhigh->value.lval;
+	convert_to_long_ex(zlow);
+	convert_to_long_ex(zhigh);
+	low = (*zlow)->value.lval;
+	high = (*zhigh)->value.lval;
 
     /* allocate an array for return */
     if (array_init(return_value) == FAILURE) {
-            RETURN_FALSE;
+		RETURN_FALSE;
     }
 
 	for (; low <= high; low++) {
@@ -2531,10 +2433,6 @@ PHP_FUNCTION(shuffle)
 	}
 	if ((*array)->type != IS_ARRAY) {
 		php_error(E_WARNING, "Wrong datatype in shuffle() call");
-		return;
-	}
-	if (!ParameterPassedByReference(ht,1)) {
-		php_error(E_WARNING, "Array not passed by reference in call to shuffle()");
 		return;
 	}
 	if (zend_hash_sort((*array)->value.ht, array_data_shuffle, 1) == FAILURE) {
