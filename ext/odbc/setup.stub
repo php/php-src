@@ -24,8 +24,21 @@ define_option with-iodbc 'iODBC support?' yesnodir \
 '    Whether to build PHP with iODBC support.  This feature was first\n
     developed for iODBC Driver Manager, a freely redistributable ODBC\n
     driver manager which runs under many flavors of UNIX.\n
-    More info about iODBC can be found on the FreeODBC Pages at \n
-    http://users.ids.net/~bjepson/freeODBC/.'
+    More info about iODBC can be found on the iODBC page at \n
+    http://www.iodbc.org'
+fi
+
+# unixODBC
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no"; then
+define_option with-unixODBC 'unixODBC support?' yesnodir \
+    'no /usr/local unixODBC install' \
+'    Whether to build PHP with unixODBC support.  This feature was first\n
+    developed for unixODBC Driver Manager, a freely redistributable ODBC\n
+    driver manager which runs under many flavors of UNIX and conforms to\n
+    the ODBC 3.5 specification.\n
+    More info about unixODBC can be found on the unixODBC home page at \n
+    http://www.unixodbc.org'
 fi
 
 # OpenLink

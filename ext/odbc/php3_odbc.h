@@ -77,6 +77,13 @@ PHP_FUNCTION(solid_fetch_prev);
 #define SQL_LEN_DATA_AT_EXEC_OFFSET  (-100)
 #define SQL_LEN_DATA_AT_EXEC(length) (-(length)+SQL_LEN_DATA_AT_EXEC_OFFSET)
 
+#elif HAVE_UNIXODBC /* unixODBC library */
+
+#define ODBC_TYPE "unixODBC"
+#include <sql.h>
+#include <sqlext.h>
+#define HAVE_SQL_EXTENDED_FETCH 1
+
 #elif HAVE_OPENLINK /* OpenLink ODBC drivers */
 
 #define ODBC_TYPE "Openlink"

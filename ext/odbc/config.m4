@@ -223,6 +223,32 @@ AC_ARG_WITH(iodbc,
 fi
 
 if test -z "$ODBC_TYPE"; then
+AC_MSG_CHECKING(for unixODBC support)
+AC_ARG_WITH(unixODBC,
+[  --with-unixODBC[=DIR]   Include unixODBC support.  DIR is the unixODBC base
+                          install directory, defaults to /usr/local.],
+[
+  if test "$withval" = "yes"; then
+    withval=/usr/local
+  fi
+  if test "$withval" != "no"; then
+    ODBC_INCDIR=$withval/include
+    ODBC_LIBDIR=$withval/lib
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_LIBS=-lodbc
+    ODBC_TYPE=unixODBC
+    AC_DEFINE(HAVE_UNIXODBC)
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_MSG_RESULT(no)
+])
+fi
+
+if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for OpenLink ODBC support)
 AC_ARG_WITH(openlink,
 [  --with-openlink[=DIR]   Include OpenLink ODBC support.  DIR is the
