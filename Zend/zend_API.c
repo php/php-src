@@ -603,51 +603,40 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 }
 
 
-ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, zend_class_entry *ce, void **object, ...)
+ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...)
 {
-	void **arg_stack = EG(argument_stack).top_element;
 	va_list va;
 	int retval;
+	char *p = type_spec;
+	zval **object;
+	zend_class_entry *ce;
 	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
 
-	*object = this_ptr;
+	if (!this_ptr) {
+		va_start(va, type_spec);
+		retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
+		va_end(va);
+	} else {
+		p++;
+		va_start(va, type_spec);
 
-	if (!*object) {
-		zval **parameter;
-
-		if (zend_get_parameters_ex(1, &parameter) != SUCCESS) {
+		object = va_arg(va, zval **);
+		ce = va_arg(va, zend_class_entry *);
+		*object = this_ptr;
+		if (ce && !instanceof_function(Z_OBJCE_P(this_ptr), ce TSRMLS_CC)) {
 			if (!quiet) {
-				zend_error(E_WARNING, "%s() expects an object of class %s as first parameter, none was given",
-					get_active_function_name(TSRMLS_C), ce->name);
+				zend_error(E_CORE_ERROR, "%s::%s() must be derived from %s::%s",
+					ce->name, get_active_function_name(TSRMLS_C), Z_OBJCE_P(this_ptr)->name, get_active_function_name(TSRMLS_C));
 			}
-
 			return FAILURE;
-		} else {
-			if (Z_TYPE_PP(parameter) == IS_OBJECT &&
-					instanceof_function(Z_OBJCE_PP(parameter), ce TSRMLS_CC)) {
-				*object = *parameter;
-			} else {
-				if (!quiet) {
-					zend_error(E_WARNING, "%s() expects parameter 1 to be %s, %s given",
-						get_active_function_name(TSRMLS_C), ce->name,
-						zend_zval_type_name(*parameter));
-				}
-
-				return FAILURE;
-			}
-
-			EG(argument_stack).top_element++;
 		}
+
+		retval = zend_parse_va_args(num_args, p, &va, flags TSRMLS_CC);
+		va_end(va);
 	}
-	
-	va_start(va, object);
-	retval = zend_parse_va_args(num_args, type_spec, &va, flags TSRMLS_CC);
-	va_end(va);
-
-	EG(argument_stack).top_element = arg_stack;
-
 	return retval;
 }
+
 
 /* Argument parsing API -- andrei */
 

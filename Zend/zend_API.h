@@ -159,7 +159,7 @@ ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *t
 ZEND_API char *zend_zval_type_name(zval *arg);
 
 ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...);
-ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, zend_class_entry *ce, void **object, ...);
+ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...);
 
 /* End of parameter parsing API -- andrei */
 
