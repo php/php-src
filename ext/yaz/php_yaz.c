@@ -31,6 +31,16 @@
 #include <yaz/proto.h>
 #include <yaz/tcpip.h>
 #include <yaz/pquery.h>
+
+#ifdef YAZ_DATE
+#if YAZ_DATE >= 20010808L
+#define YAZ_HAS_SORT_SPEC 1
+#endif
+#endif
+
+#if YAZ_HAS_SORT_SPEC
+#include <yaz/sortspec.h>
+#endif
 #include <yaz/diagbib1.h>
 #include <yaz/otherinfo.h>
 #include <yaz/marcdisp.h>
@@ -57,6 +67,7 @@ struct Yaz_ResultSetInfo {
 	int resultCount;
 	Yaz_ResultSet next;
 	Z_NamePlusRecordList *recordList;
+	int sorted;
 };
 
 #define PHP_YAZ_SELECT_READ 1
@@ -84,6 +95,7 @@ struct Yaz_AssociationInfo {
 	char *group;
 	char *pass;
 	char *proxy;
+	int piggyback;
 	int error;
 	char *addinfo;
 	Yaz_ResultSet resultSets;
@@ -93,6 +105,7 @@ struct Yaz_AssociationInfo {
 	int state;
 	int mask_select;
 	int reconnect_flag;
+	char *sort_criteria;
 	ODR odr_in;
 	ODR odr_out;
 	ODR odr_scan;
@@ -129,7 +142,7 @@ static Yaz_Association yaz_association_mk ()
 	p->error = 0;
 	p->addinfo = 0;
 	p->resultSets = 0;
-        p->in_use = 0;
+	p->in_use = 0;
 	p->order = 0;
 	p->state = PHP_YAZ_STATE_CLOSED;
 	p->mask_select = 0;
@@ -151,6 +164,7 @@ static Yaz_Association yaz_association_mk ()
 	p->preferredRecordSyntax = 0;
 	p->ccl_parser = ccl_parser_create();
 	p->ccl_parser->bibset = 0;
+	p->sort_criteria = 0;
 	return p;
 }
 
@@ -168,6 +182,7 @@ static void yaz_association_destroy (Yaz_Association p)
 		cs_close (p->cs);
 	xfree (p->cookie_in);
 	xfree (p->cookie_out);
+	xfree (p->sort_criteria);
 	xfree (p->user);
 	xfree (p->group);
 	xfree (p->pass);
@@ -197,6 +212,7 @@ static Yaz_ResultSet yaz_resultset_mk()
 	p->resultCount = 0;
 	p->next = 0;
 	p->recordList = 0;
+	p->sorted = 0;
 	return p;
 }
 
@@ -244,6 +260,7 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_ccl_conf, NULL)
 	PHP_FE(yaz_ccl_parse, third_argument_force_ref)
 	PHP_FE(yaz_database, NULL)
+	PHP_FE(yaz_sort, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -253,20 +270,22 @@ static void get_assoc (INTERNAL_FUNCTION_PARAMETERS, pval **id,
 	Yaz_Association *as = 0;
 	YAZSLS_FETCH();
 	
+	*assocp = 0;
 #ifdef ZTS
 	tsrm_mutex_lock (yaz_mutex);
 #endif
 	ZEND_FETCH_RESOURCE(as, Yaz_Association *, id, -1,
 						"YAZ link", le_link);
 	if (as && *as && (*as)->order == YAZSG(assoc_seq) && (*as)->in_use)
+	{
 		*assocp = *as;
+	}
 	else
 	{
 #ifdef ZTS
 		tsrm_mutex_unlock (yaz_mutex);
 #endif
 		php_error(E_WARNING, "Invalid YAZ handle");
-		*assocp = 0;
 	}
 }
 
@@ -384,6 +403,8 @@ static long *array_lookup_bool(HashTable *ht, const char *idx)
 }
 
 static int send_present (Yaz_Association t);
+static int send_sort_present (Yaz_Association t);
+static int send_sort (Yaz_Association t);
 
 static void handle_records (Yaz_Association t, Z_Records *sr,
 							int present_phase)
@@ -473,7 +494,7 @@ static void present_response (Yaz_Association t, Z_PresentResponse *pr)
 	handle_records (t, pr->records, 1);
 }
 
-void scan_response (Yaz_Association t, Z_ScanResponse *res)
+static void scan_response (Yaz_Association t, Z_ScanResponse *res)
 {
 	NMEM nmem = odr_extract_mem (t->odr_in);
 	if (res->entries && res->entries->nonsurrogateDiagnostics)
@@ -483,47 +504,20 @@ void scan_response (Yaz_Association t, Z_ScanResponse *res)
 	nmem_destroy (nmem);
 }
 
-void es_response (Yaz_Association t,
-				  Z_ExtendedServicesResponse *res)
+static void sort_response (Yaz_Association t, Z_SortResponse *res)
 {
-#if 0
-    Odr_oct *id = res->referenceId;
-	
-    if (id)
-		html_var_n (req, "refid", id->buf, id->len);
-    else
-		html_var (req, "refid", "");
-	
-    html_var (req, "targetreference", "");
-    if (res->taskPackage && 
-		res->taskPackage->which == Z_External_extendedService)
-    {
-		Z_TaskPackage *taskPackage = res->taskPackage->u.extendedService;
-		Odr_oct *id = taskPackage->targetReference;
-		
-		if (id)
-			html_var_n (req, "targetreference", id->buf, id->len);
-    }
-    switch (*res->operationStatus)
-    {
-    case Z_ExtendedServicesResponse_done:
-		html_dump (req, "es-response done");
-		break;
-    case Z_ExtendedServicesResponse_accepted:
-		html_dump (req, "es-response accepted");
-		break;
-    case Z_ExtendedServicesResponse_failure:
-		html_dump (req, "es-response failure");
-		break;
-    default:
-		html_dump (req, "es-response unknown");
-		break;
-    }
-#endif
+	if (t->resultSets)
+		t->resultSets->sorted = 1;
+	if (res->diagnostics && res->num_diagnostics > 0)
+		response_diag (t, res->diagnostics[0]);
+}
+
+static void es_response (Yaz_Association t,
+						 Z_ExtendedServicesResponse *res)
+{
     if (res->diagnostics && res->num_diagnostics > 0)
 		response_diag(t, res->diagnostics[0]);
 }
-
 
 static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
 {
@@ -556,7 +550,7 @@ static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
 		break;
 	case Z_APDU_searchResponse:
 		search_response (t, apdu->u.searchResponse);
-		send_present (t);
+		send_sort_present (t);
 		break;
 	case Z_APDU_presentResponse:
 		present_response (t, apdu->u.presentResponse);
@@ -567,6 +561,10 @@ static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
 		break;
 	case Z_APDU_extendedServicesResponse:
 		es_response (t, apdu->u.extendedServicesResponse);
+		break;
+	case Z_APDU_sortResponse:
+		sort_response (t, apdu->u.sortResponse);
+		send_present (t);
 		break;
 	case Z_APDU_close:
 		do_close(t);
@@ -765,10 +763,11 @@ static int send_search (Yaz_Association t)
 	Z_SearchRequest *sreq = apdu->u.searchRequest;
 	
 	/* resultSetPrepare (req, t, req->cur_pa); */
-	if (t->resultSetStartPoint == 1)
+	if (t->resultSetStartPoint == 1 && t->piggyback  &&
+		(t->sort_criteria == 0 || *t->sort_criteria == 0) )
 	{
 		sreq->largeSetLowerBound = odr_malloc (t->odr_out, sizeof(int));
-		*sreq->largeSetLowerBound = 999999;
+		*sreq->largeSetLowerBound = 9999999;
 		sreq->smallSetUpperBound = &t->numberOfRecordsRequested;
 		sreq->mediumSetPresentNumber = &t->numberOfRecordsRequested;
 		if (t->elementSetNames && *t->elementSetNames)
@@ -805,6 +804,12 @@ static int send_search (Yaz_Association t)
 
 	send_APDU (t, apdu);
 	return 1;
+}
+
+static int send_sort_present (Yaz_Association t)
+{
+	if (!send_sort(t))
+		send_present (t);
 }
 
 static int send_present (Yaz_Association t)
@@ -868,6 +873,150 @@ static int send_present (Yaz_Association t)
 	return 1;
 }
 
+#if YAZ_HAS_SORT_SPEC
+
+#else
+
+static int *odr_intdup(ODR o, int v)
+{
+    int *dst = (int*) odr_malloc (o, sizeof(int));
+    *dst = v;
+    return dst;
+}
+
+static Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
+{
+    int oid[OID_SIZE];
+    oident bib1;
+    char sort_string_buf[32], sort_flags[32];
+    Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
+        odr_malloc (out, sizeof(*sksl));
+    int off;
+    
+    sksl->num_specs = 0;
+    sksl->specs = (Z_SortKeySpec **)odr_malloc (out, sizeof(sksl->specs) * 20);
+    
+    bib1.proto = PROTO_Z3950;
+    bib1.oclass = CLASS_ATTSET;
+    bib1.value = VAL_BIB1;
+    while ((sscanf (arg, "%31s %31s%n", sort_string_buf,
+		    sort_flags, &off)) == 2  && off > 1)
+    {
+        int i;
+		char *sort_string_sep;
+		char *sort_string = sort_string_buf;
+        Z_SortKeySpec *sks = (Z_SortKeySpec *)odr_malloc (out, sizeof(*sks));
+        Z_SortKey *sk = (Z_SortKey *)odr_malloc (out, sizeof(*sk));
+	
+        arg += off;
+        sksl->specs[sksl->num_specs++] = sks;
+        sks->sortElement = (Z_SortElement *)
+	    odr_malloc (out, sizeof(*sks->sortElement));
+        sks->sortElement->which = Z_SortElement_generic;
+        sks->sortElement->u.generic = sk;
+        
+        if ((sort_string_sep = strchr (sort_string, '=')))
+        {
+			int i = 0;
+			sk->which = Z_SortKey_sortAttributes;
+            sk->u.sortAttributes = (Z_SortAttributes *)
+				odr_malloc (out, sizeof(*sk->u.sortAttributes));
+            sk->u.sortAttributes->id = oid_ent_to_oid(&bib1, oid);
+            sk->u.sortAttributes->list = (Z_AttributeList *)
+				odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
+            sk->u.sortAttributes->list->attributes = (Z_AttributeElement **)
+				odr_malloc (out, 10 * 
+							sizeof(*sk->u.sortAttributes->list->attributes));
+			while (i < 10 && sort_string && sort_string_sep)
+			{
+				Z_AttributeElement *el = (Z_AttributeElement *)
+					odr_malloc (out, sizeof(*el));
+				sk->u.sortAttributes->list->attributes[i] = el;
+				el->attributeSet = 0;
+				el->attributeType = odr_intdup (out, atoi (sort_string));
+				el->which = Z_AttributeValue_numeric;
+				el->value.numeric =
+					odr_intdup (out, atoi (sort_string_sep + 1));
+				i++;
+				sort_string = strchr(sort_string, ',');
+				if (sort_string)
+				{
+					sort_string++;
+					sort_string_sep = strchr (sort_string, '=');
+				}
+			}
+            sk->u.sortAttributes->list->num_attributes = i;
+        }
+        else
+        {
+            sk->which = Z_SortKey_sortField;
+            sk->u.sortField = odr_strdup (out, sort_string);
+        }
+        sks->sortRelation = odr_intdup (out, Z_SortRelation_ascending);
+        sks->caseSensitivity = odr_intdup (out, Z_SortCase_caseSensitive);
+
+        sks->which = Z_SortKeySpec_null;
+        sks->u.null = odr_nullval ();
+	
+        for (i = 0; sort_flags[i]; i++)
+        {
+            switch (sort_flags[i])
+            {
+            case 'd':
+            case 'D':
+            case '>':
+                *sks->sortRelation = Z_SortRelation_descending;
+                break;
+            case 'a':
+            case 'A':
+            case '<':
+                *sks->sortRelation = Z_SortRelation_ascending;
+                break;
+            case 'i':
+            case 'I':
+                *sks->caseSensitivity = Z_SortCase_caseInsensitive;
+                break;
+            case 'S':
+            case 's':
+                *sks->caseSensitivity = Z_SortCase_caseSensitive;
+                break;
+            }
+        }
+    }
+    if (!sksl->num_specs)
+		return 0;
+    return sksl;
+}
+#endif
+
+static int send_sort (Yaz_Association t)
+{
+	if (t->error)
+		return 0;
+	if (!t->resultSets || t->resultSets->sorted)
+		return 0;
+	if (t->sort_criteria && *t->sort_criteria)
+	{
+		Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_sortRequest);
+		Z_SortRequest *req = apdu->u.sortRequest;
+	
+		req->num_inputResultSetNames = 1;
+		req->inputResultSetNames = (Z_InternationalString **)
+			odr_malloc (t->odr_out, sizeof(*req->inputResultSetNames));
+		req->inputResultSetNames[0] = odr_strdup (t->odr_out, "default");
+		req->sortedResultSetName = odr_strdup (t->odr_out, "default");
+		req->sortSequence = yaz_sort_spec (t->odr_out, t->sort_criteria);
+		if (!req->sortSequence)
+		{
+			t->resultSets->sorted = 1;
+			return 0;
+		}
+		send_APDU (t, apdu);
+		return 1;
+	}
+	return 0;
+}
+
 static void send_init(Yaz_Association t)
 {
 	Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_initRequest);
@@ -881,6 +1030,7 @@ static void send_init(Yaz_Association t)
 	ODR_MASK_SET(ireq->options, Z_Options_present);
 	ODR_MASK_SET(ireq->options, Z_Options_namedResultSets);
 	ODR_MASK_SET(ireq->options, Z_Options_scan);
+	ODR_MASK_SET(ireq->options, Z_Options_sort);
 	ODR_MASK_SET(ireq->options, Z_Options_extendedServices);
 	
 	ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_1);
@@ -1050,6 +1200,7 @@ PHP_FUNCTION(yaz_connect)
 	const char *user_str = 0, *group_str = 0, *pass_str = 0;
 	const char *cookie_str = 0, *proxy_str = 0;
 	int persistent = 1;
+	int piggyback = 1;
 	pval **zurl, **user = 0;
 	Yaz_Association as;
 	YAZSLS_FETCH();
@@ -1067,6 +1218,7 @@ PHP_FUNCTION(yaz_connect)
 		if (Z_TYPE_PP(user) == IS_ARRAY)
 		{
 			long *persistent_val;
+			long *piggyback_val;
 			HashTable *ht = Z_ARRVAL_PP(user);
 			user_str = array_lookup_string(ht, "user");
 			group_str = array_lookup_string(ht, "group");
@@ -1076,6 +1228,9 @@ PHP_FUNCTION(yaz_connect)
 			persistent_val = array_lookup_bool(ht, "persistent");
 			if (persistent_val)
 				persistent = *persistent_val;
+			piggyback_val = array_lookup_bool(ht, "piggyback");
+			if (piggyback_val)
+				piggyback = *piggyback_val;
 		}
 		else
 		{
@@ -1151,10 +1306,14 @@ PHP_FUNCTION(yaz_connect)
 		if (proxy_str)
 			as->proxy = xstrdup (proxy_str);	
 	}
+	as->action = 0;
 	as->in_use = 1;
 	as->persistent = persistent;
 	as->order = YAZSG(assoc_seq);
 	as->error = 0;
+	xfree (as->sort_criteria);
+	as->sort_criteria = 0;
+	as->piggyback = piggyback;
 	as->numberOfRecordsRequested = 10;
 	as->resultSetStartPoint = 1;
 	xfree (as->local_databases);
@@ -1163,7 +1322,6 @@ PHP_FUNCTION(yaz_connect)
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
 	ZEND_REGISTER_RESOURCE(return_value, &shared_associations[i], le_link);
-/* 	RETURN_LONG(i+1); */
 }
 /* }}} */
 
@@ -1273,7 +1431,7 @@ PHP_FUNCTION(yaz_present)
 	if (p->resultSets)
 	{
 		p->resultSets->recordList = 0;
-		p->action = send_present;
+		p->action = send_sort_present;
 	}
 	release_assoc (p);
 	RETURN_TRUE;
@@ -1743,9 +1901,10 @@ PHP_FUNCTION(yaz_record)
 		pos >= p->resultSetStartPoint &&
 		pos < p->resultSetStartPoint + p->resultSets->recordList->num_records)
 	{
-		Z_NamePlusRecord *npr =
-			p->resultSets->recordList->records[pos - p->resultSetStartPoint];
-		if (npr->which == Z_NamePlusRecord_databaseRecord)
+		Z_NamePlusRecord *npr;
+		npr = p->resultSets->recordList->records[pos - p->resultSetStartPoint];
+
+		if (npr && npr->which == Z_NamePlusRecord_databaseRecord)
 		{
 			Z_External *r = (Z_External *) npr->u.databaseRecord;
 			oident *ent = oid_getentbyoid(r->direct_reference);
@@ -1887,6 +2046,36 @@ PHP_FUNCTION(yaz_range)
 			p->resultSetStartPoint = 1;
 		convert_to_long_ex (pval_number);
 		p->numberOfRecordsRequested = (*pval_number)->value.lval;
+	}
+	release_assoc (p);
+}
+/* }}} */
+
+/* {{{ proto int yaz_sort(int id, string sortspec)
+   Set result set sorting criteria */
+
+PHP_FUNCTION(yaz_sort)
+{
+	pval **pval_id, **pval_criteria;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() != 2 || 
+		zend_get_parameters_ex(2, &pval_id, &pval_criteria) ==
+		FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	if (p)
+	{
+		convert_to_string_ex (pval_criteria);
+		if (p->resultSets && p->resultSets->sorted)
+		{
+			if (!p->sort_criteria || strcmp (p->sort_criteria,
+											 (*pval_criteria)->value.str.val))
+				p->resultSets->sorted = 0;
+		}
+		xfree (p->sort_criteria);
+		p->sort_criteria = xstrdup ((*pval_criteria)->value.str.val);
 	}
 	release_assoc (p);
 }
