@@ -176,7 +176,6 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 	}
 
 	if (top_gpc_p) {
-		(*top_gpc_p)->is_ref = 1;
 		if (symtable2) {
 			zend_hash_update_ptr(symtable2, var, var_len+1, *top_gpc_p, sizeof(zval *), NULL);
 			(*top_gpc_p)->refcount++;
