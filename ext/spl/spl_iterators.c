@@ -1265,7 +1265,7 @@ static zend_function_entry spl_funcs_CachingIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto CachingRecursiveIterator::__constrcut(RecursiveIterator $it)
+/* {{{ proto CachingRecursiveIterator::__construct(RecursiveIterator $it)
    Create an iterator from a RecursiveIterator */
 SPL_METHOD(CachingRecursiveIterator, __construct)
 {
