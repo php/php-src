@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Fixed bug #29821 (Fixed possible crashes in convert_uudecode() on invalid
   data). (Ilia)
 - Fixed bug #29808 (array_count_values() breaks with numeric strings). (Ilia)
+- Fixed bug #29795 (SegFault with Soap and Amazon's Web Services). (Dmitry)
 - Fixed bug #29737 (ip2long should return -1 if IP is 255.255.255.255 and FALSE
   on error). (Tony)
 - Fixed bug #29711 (Changed ext/xml to default to UTF-8 output). (Rob)
@@ -25,6 +26,8 @@ PHP                                                                        NEWS
   (Christian, Rob)
 - Fixed bug #29656 (segfault on result and statement properties). (Georg)
 - Fixed bug #29447 (Reflection API issues). (Marcus)
+- Fixed bug #27994 (segfault with Soapserver when WSDL-Cache is enabled).
+  (Dmitry)
 - Fixed bug #27791 (Apache 2.0 SAPI build against Apache 2 HEAD). (Joe Orton,
   Derick)
 - Fixed bug #26737 (private/protected properties not serialized when user
