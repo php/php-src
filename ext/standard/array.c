@@ -84,6 +84,10 @@ php_array_globals array_globals;
 
 #define INTERSECT_NORMAL		0
 #define INTERSECT_ASSOC			1
+#define INTERSECT_COMP_DATA_INTERNAL 0
+#define INTERSECT_COMP_DATA_USER     1
+#define INTERSECT_COMP_KEY_INTERNAL  0
+#define INTERSECT_COMP_KEY_USER      1
 
 #define DOUBLE_DRIFT_FIX	0.000000000000001
 
@@ -2712,47 +2716,177 @@ PHP_FUNCTION(array_unique)
 }
 /* }}} */
 
-static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_compare_type, int key_compare_type)
 {
 	zval ***args = NULL;
 	HashTable *hash;
-	int argc, i, c = 0;
+	int argc, arr_argc, i, c = 0;
 	Bucket ***lists, **list, ***ptrs, *p;
+	
+	char *callback_name;
+	zval **old_compare_func;
+	
+	int (*intersect_key_compare_func)(const void *, const void * TSRMLS_DC);
+	int (*intersect_data_compare_func)(const void *, const void * TSRMLS_DC);
 
-	/* Get the argument count and check it */	
+	/* Get the argument count */
 	argc = ZEND_NUM_ARGS();
-	if (argc < 2) {
-		WRONG_PARAM_COUNT;
-	}
 	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
+
+	old_compare_func = BG(user_compare_func_name);
+
+	if (behavior == INTERSECT_NORMAL) {
+		intersect_key_compare_func = array_key_compare;
+		if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL) {
+			/* array_intersect() */
+
+			if (argc < 2) {
+				efree(args);
+				WRONG_PARAM_COUNT;
+			}
+			arr_argc = argc;
+			intersect_data_compare_func = array_data_compare;
+		} else if (data_compare_type == INTERSECT_COMP_DATA_USER) {
+			/* array_uintersect() */
+			if (argc < 3) {
+				efree(args);
+				WRONG_PARAM_COUNT;
+			}
+			arr_argc = argc - 1;
+			intersect_data_compare_func = array_user_compare;
+			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
+				efree(callback_name);
+				efree(args);
+				return;
+			}
+			efree(callback_name);
+			
+			BG(user_compare_func_name) = args[arr_argc];
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
+			return;
+		}
+	} else if (behavior == INTERSECT_ASSOC) {
+		intersect_key_compare_func = array_key_compare;
+		if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL
+				&&
+			key_compare_type == INTERSECT_COMP_KEY_INTERNAL) {
+			/* array_intersect_assoc() */
+			
+			if (argc < 2) {
+				efree(args);
+				WRONG_PARAM_COUNT;
+			}
+			arr_argc = argc;
+			intersect_key_compare_func = array_key_compare;
+			intersect_data_compare_func = array_data_compare;
+		} else if (data_compare_type == INTERSECT_COMP_DATA_USER 
+				&&
+				key_compare_type == INTERSECT_COMP_KEY_INTERNAL) {
+			/* array_uintersect_assoc() */
+			
+			if (argc < 3) {
+				efree(args);
+				WRONG_PARAM_COUNT;
+			}
+			arr_argc = argc - 1;
+			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
+				efree(callback_name);
+				efree(args);
+				return;
+			}
+			efree(callback_name);
+			intersect_key_compare_func = array_key_compare;
+			intersect_data_compare_func = array_user_compare;
+		} else if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL
+				&&
+				key_compare_type == INTERSECT_COMP_KEY_USER) {
+				/* array_intersect_uassoc() */
+				
+				if (argc < 3) {
+					efree(args);
+					WRONG_PARAM_COUNT;
+				}
+				arr_argc = argc - 1;
+				if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
+					efree(callback_name);
+					efree(args);
+					return;
+				}
+				efree(callback_name);
+				intersect_key_compare_func = array_user_key_compare;
+				intersect_data_compare_func = array_data_compare;
+				BG(user_compare_func_name) = args[arr_argc];
+		} else if (data_compare_type == INTERSECT_COMP_DATA_USER
+				&&
+				key_compare_type == INTERSECT_COMP_KEY_USER) {
+				/* array_uintersect_uassoc() */
+
+				if (argc < 4) {
+					efree(args);
+					WRONG_PARAM_COUNT;
+				}
+				arr_argc = argc - 2;
+				if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
+					efree(callback_name);
+					efree(args);
+					return;
+				} 
+				efree(callback_name);
+				if (!zend_is_callable(*args[arr_argc + 1], 0, &callback_name)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
+					efree(callback_name);
+					efree(args);
+					return;
+				}
+				efree(callback_name);
+				intersect_key_compare_func = array_user_key_compare;
+				intersect_data_compare_func = array_user_compare;
+				BG(user_compare_func_name) = args[arr_argc + 1];/* data - key */
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug.", data_compare_type, key_compare_type);
+			return;
+		}		
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "behavior is %d. This should never happen. Please report as a bug", behavior);
+		return;
+	}
+
+
 	/* for each argument, create and sort list with pointers to the hash buckets */
-	lists = (Bucket ***)safe_emalloc(argc, sizeof(Bucket **), 0);
-	ptrs = (Bucket ***)safe_emalloc(argc, sizeof(Bucket **), 0);
+	lists = (Bucket ***)safe_emalloc(arr_argc, sizeof(Bucket **), 0);
+	ptrs = (Bucket ***)safe_emalloc(arr_argc, sizeof(Bucket **), 0);
 	set_compare_func(SORT_STRING TSRMLS_CC);
-	for (i=0; i<argc; i++) {
+	for (i = 0; i < arr_argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i+1);
-			argc = i; /* only free up to i-1 */
+			arr_argc = i; /* only free up to i-1 */
 			goto out;
 		}
 		hash = HASH_OF(*args[i]);
 		list = (Bucket **) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket *), hash->persistent);
-		if (!list)
+		if (!list) {
 			RETURN_FALSE;
+		}
 		lists[i] = list;
 		ptrs[i] = list;
-		for (p = hash->pListHead; p; p = p->pListNext)
+		for (p = hash->pListHead; p; p = p->pListNext) {
 			*list++ = p;
+		}
 		*list = NULL;
 		if (behavior == INTERSECT_NORMAL) {
-			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
+			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), intersect_data_compare_func TSRMLS_CC);
 		} else if (behavior == INTERSECT_ASSOC) {
-			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_key_compare TSRMLS_CC);
+			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), intersect_key_compare_func TSRMLS_CC);
 		}
 	}
 
@@ -2760,21 +2894,40 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	*return_value = **args[0];
 	zval_copy_ctor(return_value);
 
+	if (behavior == INTERSECT_NORMAL && data_compare_type == INTERSECT_COMP_DATA_USER) {
+		/* array_uintersect() */
+		BG(user_compare_func_name) = args[arr_argc];
+	}
+	
 	/* go through the lists and look for common values */
 	while (*ptrs[0]) {
-		for (i=1; i<argc; i++) {
+		if (behavior == INTERSECT_ASSOC
+				&&
+			key_compare_type == INTERSECT_COMP_KEY_USER) {
+
+			BG(user_compare_func_name) = args[argc - 1];
+		}
+
+		for (i = 1; i < arr_argc; i++) {
 			if (behavior == INTERSECT_NORMAL) {
-				while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC)))) {
+				while (*ptrs[i] && (0 < (c = intersect_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
 				}
 			} else if (behavior == INTERSECT_ASSOC) {
-				while (*ptrs[i] && (0 < (c = array_key_compare(ptrs[0], ptrs[i] TSRMLS_CC)))) {
+				while (*ptrs[i] && (0 < (c = intersect_key_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
 				}
 				if (!c && *ptrs[i]) { /* this means that ptrs[i] is not NULL so we can compare */
 					/* and "c==0" is from last operation */
-				 	if (array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
+					if (data_compare_type == INTERSECT_COMP_DATA_USER) {
+						BG(user_compare_func_name) = args[arr_argc];
+					}
+				 	if (intersect_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
 				 		c = 1;
+				 		if (key_compare_type == INTERSECT_COMP_KEY_USER) {
+				 			BG(user_compare_func_name) = args[argc - 1];
+				 			/* When KEY_USER the last parameter is always the callback */
+				 		}
 				 		/* we are going to the break */
 				 	} else {
 				 		/* continue looping */
@@ -2815,7 +2968,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 					goto out;
 				}
 				if (behavior == INTERSECT_NORMAL) {
-					if (0 <= array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC)) {
+					if (0 <= intersect_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)) {
 						break;
 					}
 				} else if (behavior == INTERSECT_ASSOC) {
@@ -2831,7 +2984,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 					goto out;
 				}
 				if (behavior == INTERSECT_NORMAL) {
-					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC)) {
+					if (intersect_data_compare_func(ptrs[0]-1, ptrs[0] TSRMLS_CC)) {
 						break;
 					}
 				} else if (behavior == INTERSECT_ASSOC) {
@@ -2841,12 +2994,14 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 			}
 		}
 	}
-
 out:
-	for (i=0; i<argc; i++) {
+	for (i = 0; i < arr_argc; i++) {
 		hash = HASH_OF(*args[i]);
 		pefree(lists[i], hash->persistent);
 	}
+	
+	BG(user_compare_func_name) = old_compare_func;
+	
 	efree(ptrs);
 	efree(lists);
 	efree(args);
@@ -2856,15 +3011,55 @@ out:
    Returns the entries of arr1 that have values which are present in all the other arguments */
 PHP_FUNCTION(array_intersect)
 {
-	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL);
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL, 
+				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
 }
 /* }}} */
 
+/* {{{ proto array array_uintersect(array arr1, array arr2 [, array ...], callback data_compare_func)
+   Returns the entries of arr1 that have values which are present in all the other arguments. Data is compared by using an user-supplied callback. */
+PHP_FUNCTION(array_uintersect)
+{
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL,
+				INTERSECT_COMP_DATA_USER, INTERSECT_COMP_KEY_INTERNAL);
+}
+/* }}} */
+
+
 /* {{{ proto array array_intersect_assoc(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrctive check */
+   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check */
 PHP_FUNCTION(array_intersect_assoc)
 {
-	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC);
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC,
+				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
+}
+/* }}} */
+
+
+/* {{{ proto array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)
+   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Data is compared by using an user-supplied callback. */
+PHP_FUNCTION(array_uintersect_assoc)
+{
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC,
+				INTERSECT_COMP_DATA_USER, INTERSECT_COMP_KEY_INTERNAL);
+}
+/* }}} */
+
+/* {{{ proto array array_intersect_uassoc(array arr1, array arr2 [, array ...], callback key_compare_func)
+   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check and they are compared by using an user-supplied callback. */
+PHP_FUNCTION(array_intersect_uassoc)
+{
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC,
+				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_USER);
+}
+/* }}} */
+
+/* {{{ proto array array_uintersect_uassoc(array arr1, array arr2 [, array ...], callback data_compare_func, callback key_compare_func)
+   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Both data and keys are compared by using user-supplied callbacks. */
+PHP_FUNCTION(array_uintersect_uassoc)
+{
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC,
+				INTERSECT_COMP_DATA_USER, INTERSECT_COMP_KEY_USER);
 }
 /* }}} */
 
@@ -2882,8 +3077,9 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	int (*diff_data_compare_func)(const void *, const void * TSRMLS_DC);
 	
 
-	/* Get the argument count and check it */
+	/* Get the argument count */
 	argc = ZEND_NUM_ARGS();
+	/* Allocate arguments array and get the arguments, checking for errors. */
 	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
@@ -2920,6 +3116,9 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			efree(callback_name);
 
 			BG(user_compare_func_name) = args[arr_argc];
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
+			return;		
 		}
 	} else if (behavior == DIFF_ASSOC) {
 		diff_key_compare_func = array_key_compare;
@@ -3001,9 +3200,14 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			diff_key_compare_func = array_user_key_compare;
 			diff_data_compare_func = array_user_compare;
 			BG(user_compare_func_name) = args[arr_argc + 1];/* data - key*/
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
+			return;	
 		}			
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "behavior is %d. This should never happen. Please report as a bug", behavior);
+		return;	
 	}
-	/* Allocate arguments array and get the arguments, checking for errors. */
 
 	
 	/* for each argument, create and sort list with pointers to the hash buckets */
