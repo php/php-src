@@ -115,7 +115,7 @@ static php_stream *user_wrapper_factory(char *filename, char *mode, int options,
 	zval **args[4];	
 	int call_result;
 	php_stream *stream = NULL;
-	
+
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;	
 

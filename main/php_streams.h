@@ -120,10 +120,15 @@ struct _php_stream  {
 
 	int is_persistent;
 	char mode[16];			/* "rwb" etc. ala stdio */
+	int rsrc_id;			/* used for auto-cleanup */
+	int in_free;			/* to prevent recursion during free */
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
 	int fclose_stdiocast;
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
+#if ZEND_DEBUG
+	int __exposed;	/* non-zero if exposed as a zval somewhere */
+#endif
 }; /* php_stream */
 /* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0
@@ -135,9 +140,24 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 		int persistent, const char *mode STREAMS_DC TSRMLS_DC);
 #define php_stream_alloc(ops, thisptr, persistent, mode)	_php_stream_alloc((ops), (thisptr), (persistent), (mode) STREAMS_CC TSRMLS_CC)
 
+#define php_stream_get_resource_id(stream)		(stream)->rsrc_id
+
+#if ZEND_DEBUG
+/* use this to tell the stream that it is OK if we don't explicitly close it */
+# define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
+/* use this to assign the stream to a zval and tell the stream that is
+ * has been exported to the engine; it will expect to be closed automatically
+ * when the resources are auto-destructed */
+# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); (stream)->__exposed++; }
+#else
+# define php_stream_auto_cleanup(stream)	/* nothing */
+# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); }
+#endif
+
 #define PHP_STREAM_FREE_CALL_DTOR			1 /* call ops->close */
 #define PHP_STREAM_FREE_RELEASE_STREAM		2 /* pefree(stream) */
 #define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close it's underlying handle */
+#define PHP_STREAM_FREE_RSRC_DTOR			8 /* called from the resource list dtor */
 #define PHP_STREAM_FREE_CLOSE				(PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_RELEASE_STREAM)
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC);
 #define php_stream_free(stream, close_options)	_php_stream_free((stream), (close_options) TSRMLS_CC)

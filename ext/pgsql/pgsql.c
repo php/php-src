@@ -1478,7 +1478,7 @@ PHP_FUNCTION(pg_trace)
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
+	php_stream_auto_cleanup(stream);
 	PQtrace(pgsql, fp);
 	RETURN_TRUE;
 }

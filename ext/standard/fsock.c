@@ -141,7 +141,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				(void *) &stream) == SUCCESS)
 	{
 		efree(hashkey);
-		ZEND_REGISTER_RESOURCE(return_value, stream, php_file_le_stream());
+		php_stream_to_zval(stream, return_value);
 		return;
 	}
 
@@ -241,7 +241,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		RETURN_FALSE;
 	}
 		
-	ZEND_REGISTER_RESOURCE(return_value, stream, php_file_le_stream());
+	php_stream_to_zval(stream, return_value);
 }
 
 /* }}} */

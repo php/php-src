@@ -255,15 +255,9 @@ static gzFile php_gzopen_wrapper(char *path, char *mode, int options TSRMLS_DC)
 
 	stream = php_stream_open_wrapper(path, mode, options | REPORT_ERRORS, NULL);
 	if (stream)	{
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD|PHP_STREAM_CAST_TRY_HARD, (void**)&fd, 1))
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_CAST_RELEASE|PHP_STREAM_AS_FD|PHP_STREAM_CAST_TRY_HARD, (void**)&fd, 1))
 		{
-			gzFile ret = gzdopen(fd, mode);
-			if (ret)	{
-				/* arrange to clean up the actual stream */
-				ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
-/*				php_stream_auto_cleanup(stream); */
-				return ret;
-			}
+			return gzdopen(fd, mode);
 		}
 		php_stream_close(stream);
 	}
