@@ -288,6 +288,8 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	if (retval) {
 		*result = c->value;
 		zval_copy_ctor(result);
+		result->refcount = 1;
+		result->is_ref = 0;
 	}
 
 	return retval;

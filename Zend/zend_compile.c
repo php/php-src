@@ -2513,6 +2513,7 @@ void zend_do_fold_constant(znode *result, znode *constant_name TSRMLS_DC)
 	if (zend_hash_find(&CG(active_class_entry)->constants_table, constant_name->u.constant.value.str.val,
 	                   constant_name->u.constant.value.str.len+1, (void **) &zresult) != SUCCESS) {
 		if (zend_get_constant(constant_name->u.constant.value.str.val, constant_name->u.constant.value.str.len, &result->u.constant TSRMLS_CC)) {
+			zval_dtor(&constant_name->u.constant);
 			return;
 		} else {
 			zend_error(E_COMPILE_ERROR, "Cannot find %s constant in class %s\n", 
@@ -2522,6 +2523,7 @@ void zend_do_fold_constant(znode *result, znode *constant_name TSRMLS_DC)
 
 	result->u.constant = **zresult;
 	zval_copy_ctor(&result->u.constant);
+	zval_dtor(&constant_name->u.constant);
 }
 
 void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC)
