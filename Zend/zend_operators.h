@@ -225,9 +225,7 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 
 #define convert_to_ex_master(ppzv, lower_type, upper_type)	\
 	if ((*ppzv)->type!=IS_##upper_type) {					\
-		if (!(*ppzv)->is_ref) {								\
-			SEPARATE_ZVAL(ppzv);							\
-		}													\
+		SEPARATE_ZVAL_IF_NOT_REF(ppzv);						\
 		convert_to_##lower_type(*ppzv);						\
 	}
 
