@@ -67,14 +67,14 @@ static int nope = 0;		/* for use in asserts; shuts lint up */
 #undef	SNAMES
 
 /* macros for manipulating states, large version */
-#define	states	char *
+#define	states	unsigned char *
 #define	CLEAR(v)	memset(v, 0, m->g->nstates)
 #define	SET0(v, n)	((v)[n] = 0)
 #define	SET1(v, n)	((v)[n] = 1)
 #define	ISSET(v, n)	((v)[n])
 #define	ASSIGN(d, s)	memcpy(d, s, m->g->nstates)
 #define	EQ(a, b)	(memcmp(a, b, m->g->nstates) == 0)
-#define	STATEVARS	int vn; char *space
+#define	STATEVARS	int vn; unsigned char *space
 #define	STATESETUP(m, nv)	{ (m)->space = malloc((nv)*(m)->g->nstates); \
 				if ((m)->space == NULL) return(REG_ESPACE); \
 				(m)->vn = 0; }
@@ -132,7 +132,7 @@ int eflags;
 	eflags = GOODFLAGS(eflags);
 
 	if (g->nstates <= CHAR_BIT*sizeof(states1) && !(eflags&REG_LARGE))
-		return(smatcher(g, (char *)string, nmatch, pmatch, eflags));
+		return(smatcher(g, (unsigned char *)string, nmatch, pmatch, eflags));
 	else
-		return(lmatcher(g, (char *)string, nmatch, pmatch, eflags));
+		return(lmatcher(g, (unsigned char *)string, nmatch, pmatch, eflags));
 }

@@ -19,8 +19,8 @@
  * other clumsinesses
  */
 struct parse {
-	char *next;		/* next character in RE */
-	char *end;		/* end of string (-> NUL normally) */
+	unsigned char *next;		/* next character in RE */
+	unsigned char *end;		/* end of string (-> NUL normally) */
 	int error;		/* has an error been seen? */
 	sop *strip;		/* malloced strip */
 	sopno ssize;		/* malloced strip size (allocated) */
@@ -34,7 +34,7 @@ struct parse {
 
 #include "regcomp.ih"
 
-static char nuls[10];		/* place to point scanner in event of error */
+static unsigned char nuls[10];		/* place to point scanner in event of error */
 
 /*
  * macros for use with parse structure
@@ -127,7 +127,7 @@ int cflags;
 
 	/* set things up */
 	p->g = g;
-	p->next = (char *)pattern;	/* convenience; we do not modify it */
+	p->next = (unsigned char *)pattern;	/* convenience; we do not modify it */
 	p->end = p->next + len;
 	p->error = 0;
 	p->ncsalloc = 0;
@@ -147,7 +147,7 @@ int cflags;
 	g->mlen = 0;
 	g->nsub = 0;
 	g->ncategories = 1;	/* category 0 is "everything else" */
-	g->categories = &g->catspace[-(CHAR_MIN)];
+	g->categories = &g->catspace[0];
 	(void) memset((char *)g->catspace, 0, NC*sizeof(cat_t));
 	g->backrefs = 0;
 
@@ -193,7 +193,7 @@ p_ere(p, stop)
 register struct parse *p;
 int stop;			/* character this ERE should end at */
 {
-	register char c;
+	register unsigned char c;
 	register sopno prevback = 0;
 	register sopno prevfwd = 0;
 	register sopno conc;
@@ -238,7 +238,7 @@ static void
 p_ere_exp(p)
 register struct parse *p;
 {
-	register char c;
+	register unsigned char c;
 	register sopno pos;
 	register int count;
 	register int count2;
@@ -518,7 +518,7 @@ int starordinary;		/* is a leading * an ordinary character? */
 		REQUIRE(starordinary, REG_BADRPT);
 		/* FALLTHROUGH */
 	default:
-		ordinary(p, (char)c);	/* takes off BACKSL, if any */
+		ordinary(p, (unsigned char)c);	/* takes off BACKSL, if any */
 		break;
 	}
 
@@ -657,8 +657,8 @@ p_b_term(p, cs)
 register struct parse *p;
 register cset *cs;
 {
-	register char c;
-	register char start, finish;
+	register unsigned char c;
+	register unsigned char start, finish;
 	register int i;
 
 	/* classify what we've got */
@@ -723,11 +723,11 @@ p_b_cclass(p, cs)
 register struct parse *p;
 register cset *cs;
 {
-	register char *sp = p->next;
+	register unsigned char *sp = p->next;
 	register struct cclass *cp;
 	register size_t len;
-	register char *u;
-	register char c;
+	register unsigned char *u;
+	register unsigned char c;
 
 	while (MORE() && isalpha(PEEK()))
 		NEXT();
@@ -759,7 +759,7 @@ p_b_eclass(p, cs)
 register struct parse *p;
 register cset *cs;
 {
-	register char c;
+	register unsigned char c;
 
 	c = p_b_coll_elem(p, '=');
 	CHadd(cs, c);
@@ -769,11 +769,11 @@ register cset *cs;
  - p_b_symbol - parse a character or [..]ed multicharacter collating symbol
  == static char p_b_symbol(register struct parse *p);
  */
-static char			/* value of symbol */
+static unsigned char			/* value of symbol */
 p_b_symbol(p)
 register struct parse *p;
 {
-	register char value;
+	register unsigned char value;
 
 	REQUIRE(MORE(), REG_EBRACK);
 	if (!EATTWO('[', '.'))
@@ -789,12 +789,12 @@ register struct parse *p;
  - p_b_coll_elem - parse a collating-element name and look it up
  == static char p_b_coll_elem(register struct parse *p, int endc);
  */
-static char			/* value of collating element */
+static unsigned char			/* value of collating element */
 p_b_coll_elem(p, endc)
 register struct parse *p;
 int endc;			/* name ended by endc,']' */
 {
-	register char *sp = p->next;
+	register unsigned char *sp = p->next;
 	register struct cname *cp;
 	register int len;
 
@@ -818,7 +818,7 @@ int endc;			/* name ended by endc,']' */
  - othercase - return the case counterpart of an alphabetic
  == static char othercase(int ch);
  */
-static char			/* if no counterpart, return ch */
+static unsigned char			/* if no counterpart, return ch */
 othercase(ch)
 int ch;
 {
@@ -842,9 +842,9 @@ bothcases(p, ch)
 register struct parse *p;
 int ch;
 {
-	register char *oldnext = p->next;
-	register char *oldend = p->end;
-	char bracket[3];
+	register unsigned char *oldnext = p->next;
+	register unsigned char *oldend = p->end;
+	unsigned char bracket[3];
 
 	assert(othercase(ch) != ch);	/* p_bracket() would recurse */
 	p->next = bracket;
@@ -888,9 +888,9 @@ static void
 nonnewline(p)
 register struct parse *p;
 {
-	register char *oldnext = p->next;
-	register char *oldend = p->end;
-	char bracket[4];
+	register unsigned char *oldnext = p->next;
+	register unsigned char *oldend = p->end;
+	unsigned char bracket[4];
 
 	p->next = bracket;
 	p->end = bracket+3;
@@ -1015,19 +1015,19 @@ register struct parse *p;
 		if (p->g->sets == NULL)
 			p->g->sets = (cset *)malloc(nc * sizeof(cset));
 		else
-			p->g->sets = (cset *)realloc((char *)p->g->sets,
+			p->g->sets = (cset *)realloc((unsigned char *)p->g->sets,
 							nc * sizeof(cset));
 		if (p->g->setbits == NULL)
 			p->g->setbits = (uch *)malloc(nbytes);
 		else {
-			p->g->setbits = (uch *)realloc((char *)p->g->setbits,
+			p->g->setbits = (uch *)realloc((unsigned char *)p->g->setbits,
 								nbytes);
 			/* xxx this isn't right if setbits is now NULL */
 			for (i = 0; i < no; i++)
 				p->g->sets[i].ptr = p->g->setbits + css*(i/CHAR_BIT);
 		}
 		if (p->g->sets != NULL && p->g->setbits != NULL)
-			(void) memset((char *)p->g->setbits + (nbytes - css),
+			(void) memset((unsigned char *)p->g->setbits + (nbytes - css),
 								0, css);
 		else {
 			no = 0;
@@ -1120,7 +1120,7 @@ register cset *cs;
 
 	for (i = 0; i < css; i++)
 		if (CHIN(cs, i))
-			return((char)i);
+			return((unsigned char)i);
 	assert(never);
 	return(0);		/* arbitrary */
 }
@@ -1153,7 +1153,7 @@ static void
 mcadd(p, cs, cp)
 register struct parse *p;
 register cset *cs;
-register char *cp;
+register unsigned char *cp;
 {
 	register size_t oldend = cs->smultis;
 
@@ -1174,14 +1174,14 @@ register char *cp;
 #if 0
 /*
  - mcsub - subtract a collating element from a cset
- == static void mcsub(register cset *cs, register char *cp);
+ == static void mcsub(register cset *cs, register unsigned char *cp);
  */
 static void
 mcsub(cs, cp)
-register cset *cs;
-register char *cp;
+register unsigned cset *cs;
+register unsigned char *cp;
 {
-	register char *fp = mcfind(cs, cp);
+	register unsigned char *fp = mcfind(cs, cp);
 	register size_t len = strlen(fp);
 
 	assert(fp != NULL);
@@ -1201,12 +1201,12 @@ register char *cp;
 
 /*
  - mcin - is a collating element in a cset?
- == static int mcin(register cset *cs, register char *cp);
+ == static int mcin(register cset *cs, register unsigned char *cp);
  */
 static int
 mcin(cs, cp)
 register cset *cs;
-register char *cp;
+register unsigned char *cp;
 {
 	return(mcfind(cs, cp) != NULL);
 }
@@ -1214,14 +1214,14 @@ register char *cp;
 
 /*
  - mcfind - find a collating element in a cset
- == static char *mcfind(register cset *cs, register char *cp);
+ == static unsigned char *mcfind(register cset *cs, register unsigned char *cp);
  */
-static char *
+static unsigned char *
 mcfind(cs, cp)
 register cset *cs;
-register char *cp;
+register unsigned char *cp;
 {
-	register char *p;
+	register unsigned char *p;
 
 	if (cs->multis == NULL)
 		return(NULL);
@@ -1322,11 +1322,11 @@ register struct re_guts *g;
 	if (p->error != 0)
 		return;
 
-	for (c = CHAR_MIN; c <= CHAR_MAX; c++)
+	for (c = 0; c <= UCHAR_MAX; c++)
 		if (cats[c] == 0 && isinsets(g, c)) {
 			cat = g->ncategories++;
 			cats[c] = cat;
-			for (c2 = c+1; c2 <= CHAR_MAX; c2++)
+			for (c2 = c+1; c2 <= UCHAR_MAX; c2++)
 				if (cats[c2] == 0 && samesets(g, c, c2))
 					cats[c2] = cat;
 		}
@@ -1477,7 +1477,7 @@ register struct parse *p;
 register struct re_guts *g;
 {
 	g->nstates = p->slen;
-	g->strip = (sop *)realloc((char *)p->strip, p->slen * sizeof(sop));
+	g->strip = (sop *)realloc((unsigned char *)p->strip, p->slen * sizeof(sop));
 	if (g->strip == NULL) {
 		SETERROR(REG_ESPACE);
 		g->strip = p->strip;
@@ -1504,7 +1504,7 @@ register struct re_guts *g;
 	register sop *newstart = NULL;
 	register sopno newlen;
 	register sop s;
-	register char *cp;
+	register unsigned char *cp;
 	register sopno i;
 
 	/* avoid making error situations worse */
@@ -1565,7 +1565,7 @@ register struct re_guts *g;
 		while (OP(s = *scan++) != OCHAR)
 			continue;
 		assert(cp < g->must + g->mlen);
-		*cp++ = (char)OPND(s);
+		*cp++ = (unsigned char)OPND(s);
 	}
 	assert(cp == g->must + g->mlen);
 	*cp++ = '\0';		/* just on general principles */
