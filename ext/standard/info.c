@@ -301,12 +301,13 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", (*data)->value.str.val);
 		}
-		php_print_gpcse_array("HTTP_GET_VARS", sizeof("HTTP_GET_VARS")-1 TSRMLS_CC);
-		php_print_gpcse_array("HTTP_POST_VARS", sizeof("HTTP_POST_VARS")-1 TSRMLS_CC);
-		php_print_gpcse_array("HTTP_POST_FILES", sizeof("HTTP_POST_FILES")-1 TSRMLS_CC);
-		php_print_gpcse_array("HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS")-1 TSRMLS_CC);
-		php_print_gpcse_array("HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS")-1 TSRMLS_CC);
-		php_print_gpcse_array("HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS")-1 TSRMLS_CC);
+		php_print_gpcse_array("_FORM", sizeof("_FORM")-1 TSRMLS_CC);
+		php_print_gpcse_array("_GET", sizeof("_GET")-1 TSRMLS_CC);
+		php_print_gpcse_array("_POST", sizeof("_POST")-1 TSRMLS_CC);
+		php_print_gpcse_array("_FILES", sizeof("_FILES")-1 TSRMLS_CC);
+		php_print_gpcse_array("_COOKIE", sizeof("_COOKIE")-1 TSRMLS_CC);
+		php_print_gpcse_array("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
+		php_print_gpcse_array("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
 		php_info_print_table_end();
 	}
 

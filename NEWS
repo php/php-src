@@ -1,6 +1,13 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Introduced a new $_FORM variable, which includes any GET, POST or COOKIE
+  variables.  Like the other new variables, this variable is also available
+  regardless of the context.  (Andi & Zeev)
+- Introduced $_GET, $_POST, $_COOKIE, $_SERVER and $_ENV variables, which
+  deprecate the old $HTTP_*_VARS arrays.  In addition to be much shorter to
+  type - these variables are also available regardless of the scope, and 
+  there's no need to import them using the 'global' statement.  (Andi & Zeev)
 - Added vprintf() and vsprintf() functions that allow passing all arguments
   after format as an array. (Andrei)
 - Added support for GD2 image type for ImageCreateFromString() (Jani)

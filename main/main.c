@@ -894,6 +894,7 @@ int php_module_startup(sapi_module_struct *sf)
 	for (i=0; i<6; i++) {
 		zend_register_auto_global(short_track_vars_names[i], short_track_vars_names_length[i]-1 TSRMLS_CC);
 	}
+	zend_register_auto_global("_FORM", sizeof("_FORM")-1 TSRMLS_CC);
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
 
@@ -1036,6 +1037,7 @@ static int php_hash_environment(TSRMLS_D)
 	zval *dummy_track_vars_array;
 	zend_bool initialized_dummy_track_vars_array=0;
 	int i;
+	char *variables_order;
 	char *track_vars_names[] = {
 		"HTTP_POST_VARS",
 		"HTTP_GET_VARS",
@@ -1060,10 +1062,10 @@ static int php_hash_environment(TSRMLS_D)
 	}
 
 	if (PG(variables_order)) {
-		p = PG(variables_order);
+		variables_order = PG(variables_order);
 		have_variables_order=1;
 	} else {
-		p = PG(gpc_order);
+		variables_order = PG(gpc_order);
 		have_variables_order=0;
 		ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
 		array_init(PG(http_globals)[TRACK_VARS_ENV]);
@@ -1071,8 +1073,8 @@ static int php_hash_environment(TSRMLS_D)
 		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 	}
 
-	while(p && *p) {
-		switch(*p++) {
+	for (p=variables_order; p && *p; p++) {
+		switch(*p) {
 			case 'p':
 			case 'P':
 				if (!_gpc_flags[0] && !SG(headers_sent) && SG(request_info).request_method && !strcasecmp(SG(request_info).request_method, "POST")) {
@@ -1132,6 +1134,34 @@ static int php_hash_environment(TSRMLS_D)
 		PG(http_globals)[i]->refcount++;
 		zend_hash_update(&EG(symbol_table), short_track_vars_names[i], short_track_vars_names_length[i], &PG(http_globals)[i], sizeof(zval *), NULL);
 	}
+
+	{
+		zval *form_variables;
+
+		ALLOC_ZVAL(form_variables);
+		array_init(form_variables);
+		INIT_PZVAL(form_variables);
+
+		for (p=variables_order; p && *p; p++) {
+			switch (*p) {
+				case 'g':
+				case 'G':
+					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 0);
+					break;
+				case 'p':
+				case 'P':
+					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 0);
+					break;
+				case 'c':
+				case 'C':
+					zend_hash_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), (void (*)(void *pData)) zval_add_ref, NULL, sizeof(zval *), 0);
+					break;
+			}
+		}
+
+		zend_hash_update(&EG(symbol_table), "_FORM", sizeof("_FORM"), &form_variables, sizeof(zval *), NULL);
+	}
+
 	return SUCCESS;
 }
 /* }}} */
