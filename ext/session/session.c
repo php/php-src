@@ -83,6 +83,33 @@ php_ps_globals ps_globals;
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
+static void php_session_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
+{
+	zend_bool do_flush;
+	
+	if (mode&PHP_OUTPUT_HANDLER_END) {
+		do_flush=1;
+	}
+	session_adapt_uris(output, output_len, handled_output, handled_output_len, do_flush TSRMLS_CC);
+}
+
+
+static void php_session_start_output_handler(INIT_FUNC_ARGS, uint chunk_size)
+{
+	PHP_RINIT(url_scanner)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_RINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
+	php_start_ob_buffer(NULL, chunk_size TSRMLS_CC);
+	php_ob_set_internal_handler(php_session_output_handler, chunk_size TSRMLS_CC);
+}
+
+
+static void php_session_end_output_handler(SHUTDOWN_FUNC_ARGS)
+{
+	PHP_RSHUTDOWN(url_scanner_ex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_RSHUTDOWN(url_scanner)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+}
+
+
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
@@ -123,6 +150,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.entropy_length",		"0",			PHP_INI_ALL, OnUpdateInt,			entropy_length,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_limiter",		"nocache",		PHP_INI_ALL, OnUpdateString,		cache_limiter,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",		"180",			PHP_INI_ALL, OnUpdateInt,			cache_expire,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.use_trans_sid",		"1",			PHP_INI_ALL, OnUpdateBool,			use_trans_sid,		php_ps_globals,	ps_globals)
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
 PHP_INI_END()
@@ -1360,6 +1388,10 @@ PHP_RINIT_FUNCTION(session)
 		php_session_start(TSRMLS_C);
 	}
 
+	if (PS(use_trans_sid)) {
+		php_session_start_output_handler(INIT_FUNC_ARGS_PASSTHRU, 4096);
+	}
+
 	return SUCCESS;
 }
 
@@ -1378,6 +1410,9 @@ PHP_FUNCTION(session_write_close)
 
 PHP_RSHUTDOWN_FUNCTION(session)
 {
+	if (PS(use_trans_sid)) {
+		php_session_end_output_handler(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	}
 	php_session_flush(TSRMLS_C);
 	php_rshutdown_session_globals(TSRMLS_C);
 	return SUCCESS;
@@ -1417,34 +1452,6 @@ PHP_MINFO_FUNCTION(session)
 	DISPLAY_INI_ENTRIES();
 }
 
-
-static void php_session_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
-{
-	zend_bool do_flush;
-	
-	if (mode&PHP_OUTPUT_HANDLER_END) {
-		do_flush=1;
-	}
-	session_adapt_uris(output, output_len, handled_output, handled_output_len, do_flush TSRMLS_CC);
-}
-
-
-void php_session_start_output_handler(INIT_FUNC_ARGS, uint chunk_size)
-{
-	memset(&BG(url_adapt_state), 0, sizeof(BG(url_adapt_state)));
-	memset(&BG(url_adapt_state_ex), 0, sizeof(BG(url_adapt_state_ex)));
-	PHP_RINIT(url_scanner)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_RINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
-	php_start_ob_buffer(NULL, chunk_size TSRMLS_CC);
-	php_ob_set_internal_handler(php_session_output_handler, chunk_size TSRMLS_CC);
-}
-
-
-void php_session_end_output_handler(SHUTDOWN_FUNC_ARGS)
-{
-	PHP_RSHUTDOWN(url_scanner_ex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-	PHP_RSHUTDOWN(url_scanner)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
-}
 
 /*
  * Local variables:
