@@ -35,11 +35,11 @@ eof
 
 echo -n " setup.stub"
 cat >setup.stub <<eof
+# \$Source\$
 # \$Id\$
 
-define_option with-$extname '$extname support?' yesnodir \\
-    "defs" \\
-'    Whether to include $extname support.'
+define_option with-$extname '$extname support?' yesnodir no \\
+'    Whether to build the $extname extension.'
 	
 eof
 
