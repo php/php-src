@@ -2,6 +2,7 @@
 
 #include "php.h"
 #include "php_COM.h"
+#include "unknwn.h"
 
 #ifdef CP_THREAD_ACP
 #define PHP_UNICODE_CODEPAGE CP_THREAD_ACP
@@ -62,6 +63,8 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg)
 					var_arg->pdispVal = i_dispatch;
 				}
 			}
+			else
+				var_arg->vt = VT_DISPATCH;
 			break;
 		
 		case IS_RESOURCE:
@@ -140,7 +143,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 
 		// is safearray
 		if(!strcmp(pval_type->value.str.val, "VT_ARRAY"))
-			var_arg->vt |= VT_ARRAY;
+			var_arg->vt |= VT_ARRAY;	// have to read msdn first
 
 		// by reference
 		if(!strcmp(pval_type->value.str.val, "VT_BYREF"))
@@ -183,9 +186,27 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 				var_arg->scode = pval_arg->value.lval;
 				break;
 
-			/* case VT_CY:	not yet implemented, no idea what this is */
+			case VT_CY:
+				convert_to_double_ex(&pval_arg);
+				VarCyFromR8(pval_arg->value.dval, &(var_arg->cyVal));
+				break;
 
-			/* case DATE:	not yet implemented, strange format */
+			case VT_DATE:
+			{
+				SYSTEMTIME wintime;
+				struct tm *phptime;
+
+				phptime = gmtime(&(pval_arg->value.lval));
+				
+				wintime.wYear = phptime->tm_year + 1900;
+				wintime.wMonth = phptime->tm_mon + 1;
+				wintime.wDay = phptime->tm_mday;
+				wintime.wHour = phptime->tm_hour;
+				wintime.wMinute = phptime->tm_min;
+				wintime.wSecond = phptime->tm_sec;
+
+				SystemTimeToVariantTime(&wintime, &(var_arg->date));
+			}
 
 			case VT_BSTR:
 				convert_to_string_ex(&pval_arg);
@@ -194,13 +215,43 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 				efree(unicode_str);
 				break;
 
-			/* case VT_DECIMAL|VT_BYREF:	not yet implemented, solution for 96-bit numbers needed
-											- perhaps use a string */
+			case VT_DECIMAL:
+				convert_to_string_ex(&pval_arg);
+				unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
+				VarDecFromStr(unicode_str, LOCALE_SYSTEM_DEFAULT, 0, &(var_arg->decVal));
+				break;
+			
+			case VT_DECIMAL|VT_BYREF:
+				convert_to_string_ex(&pval_arg);
+				unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
+				VarDecFromStr(unicode_str, LOCALE_SYSTEM_DEFAULT, 0, var_arg->pdecVal);
+				break;
 
-			/* case VT_UNKNOWN:				not yet implemented, get IUnknown from IDispatch ? */
+			case VT_UNKNOWN:
+				php_pval_to_variant(pval_arg, var_arg);
+				if(var_arg->vt != VT_DISPATCH)
+					var_arg->vt = VT_EMPTY;
+				else
+				{
+					HRESULT hr;
 
-			/* case VT_DISPATCH:			not yet implemented, pass IDispatch from another COM Object
-											- should be no problem */
+					hr = var_arg->pdispVal->lpVtbl->QueryInterface(var_arg->pdispVal, &IID_IUnknown, &(var_arg->punkVal));
+
+					if (FAILED(hr))
+					{
+						php_error(E_WARNING,"can't query IUnknown");
+						var_arg->vt = VT_EMPTY;
+					}
+					else
+						var_arg->vt = VT_UNKNOWN;
+				}
+				break;
+
+			case VT_DISPATCH:
+				php_pval_to_variant(pval_arg, var_arg);
+				if(var_arg->vt != VT_DISPATCH)
+					var_arg->vt = VT_EMPTY;
+				break;
 
 			case VT_UI1|VT_BYREF:
 				convert_to_long(pval_arg);
@@ -237,9 +288,27 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 				var_arg->pscode = (long FAR*) &(pval_arg->value.lval);
 				break;
 
-			/* case VT_CY|VT_BYREF */
+			case VT_CY|VT_BYREF:
+				convert_to_double_ex(&pval_arg);
+				VarCyFromR8(pval_arg->value.dval, var_arg->pcyVal);
+				break;
 
-			/* case VT_DATE|VT_BYREF */
+			case VT_DATE|VT_BYREF:
+			{
+				SYSTEMTIME wintime;
+				struct tm *phptime;
+
+				phptime = gmtime(&(pval_arg->value.lval));
+				
+				wintime.wYear   = phptime->tm_year + 1900;
+				wintime.wMonth  = phptime->tm_mon + 1;
+				wintime.wDay    = phptime->tm_mday;
+				wintime.wHour   = phptime->tm_hour;
+				wintime.wMinute = phptime->tm_min;
+				wintime.wSecond = phptime->tm_sec;
+
+				SystemTimeToVariantTime(&wintime, var_arg->pdate);
+			}
 
 			case VT_BSTR|VT_BYREF:
 				convert_to_string(pval_arg);
@@ -249,13 +318,39 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 				efree(unicode_str);
 				break;
 
-			/* case VT_UNKNOWN|VT_BYREF: */
+			case VT_UNKNOWN|VT_BYREF:
+				php_pval_to_variant(pval_arg, var_arg);
+				if(var_arg->vt != VT_DISPATCH)
+					var_arg->vt = VT_EMPTY;
+				else
+				{
+					HRESULT hr;
 
-			/* case VT_DISPATCH|VT_BYREF: */
+					hr = var_arg->pdispVal->lpVtbl->QueryInterface(var_arg->pdispVal, &IID_IUnknown, &(var_arg->punkVal));
 
-			/* case VT_VARIANT|VT_BYREF:	not yet implemented, pass a VARIANT object */
+					if (FAILED(hr))
+					{
+						php_error(E_WARNING,"can't query IUnknown");
+						var_arg->vt = VT_EMPTY;
+					}
+					else
+						var_arg->vt = VT_UNKNOWN|VT_BYREF;
+				}
+				break;
 
-			/* case VT_BYREF:				not yet implemented, what should be passed here ? */
+			case VT_DISPATCH|VT_BYREF:
+				php_pval_to_variant(pval_arg, var_arg);
+				if(var_arg->vt != VT_DISPATCH)
+					var_arg->vt = VT_EMPTY;
+				else
+					var_arg->vt |= VT_BYREF;
+				break;
+
+			case VT_VARIANT|VT_BYREF:
+				php_pval_to_variant(pval_arg, var_arg);
+				if(var_arg->vt != (VT_VARIANT | VT_BYREF))
+					var_arg->vt = VT_EMPTY;
+				break;
 
 			case VT_I1:
 				convert_to_long_ex(&pval_arg);
@@ -316,86 +411,98 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent)
 {
 	
-	switch (var_arg->vt & ~VT_BYREF) {
+	switch(var_arg->vt & ~VT_BYREF)
+	{
 		case VT_EMPTY:
 			var_uninit(pval_arg);
 			break;
+
 		case VT_UI1:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
-				pval_arg->value.lval = (long) var_arg->bVal;
-			} else {
+			if(var_arg->vt & VT_BYREF)
 				pval_arg->value.lval = (long)*(var_arg->pbVal);
-			}
+			else
+				pval_arg->value.lval = (long) var_arg->bVal;
+
 			pval_arg->type = IS_LONG;
 			break;
+
 		case VT_I2:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
-				pval_arg->value.lval = (long) var_arg->iVal;
-			} else {
+			if(var_arg->vt & VT_BYREF)
 				pval_arg->value.lval = (long )*(var_arg->piVal);
-			}
+			else
+				pval_arg->value.lval = (long) var_arg->iVal;
+
 			pval_arg->type = IS_LONG;
 			break;
+		
 		case VT_I4:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
-				pval_arg->value.lval = var_arg->lVal;
-			} else {
+			if(var_arg->vt & VT_BYREF)
 				pval_arg->value.lval = *(var_arg->plVal);
-			}
+			else
+				pval_arg->value.lval = var_arg->lVal;
+
 			pval_arg->type = IS_LONG;
 			break;
+
 		case VT_R4:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
-				pval_arg->value.dval = (double) var_arg->fltVal;
-			} else {
+			if(var_arg->vt & VT_BYREF)
 				pval_arg->value.dval = (double)*(var_arg->pfltVal);
-			}
+			else
+				pval_arg->value.dval = (double) var_arg->fltVal;
+
 			pval_arg->type = IS_DOUBLE;
 			break;
+
 		case VT_R8:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
-				pval_arg->value.dval = var_arg->dblVal;
-			} else {
+			if(var_arg->vt & VT_BYREF)
 				pval_arg->value.dval = *(var_arg->pdblVal);
-			}
+			else
+				pval_arg->value.dval = var_arg->dblVal;
+
 			pval_arg->type = IS_DOUBLE;
 			break;
+
 		case VT_DECIMAL:
-			switch (VarR8FromDec(&var_arg->decVal, &pval_arg->value.dval)) {
-				case DISP_E_OVERFLOW:
-					php_error(E_WARNING, "Overflow converting DECIMAL value to PHP floating point - number truncated");
-					pval_arg->value.dval = DBL_MAX;
-					/* break missing intentionally */
-				case S_OK:
-					pval_arg->type = IS_DOUBLE;
-					break;
-				default:
-					php_error(E_WARNING, "Error converting DECIMAL value to PHP floating point");
-					break;
+			{
+				OLECHAR *unicode_str;
+				switch(VarBstrFromDec(&var_arg->decVal, LOCALE_SYSTEM_DEFAULT, 0, &unicode_str))
+				{
+					case S_OK:
+						pval_arg->value.str.val = php_OLECHAR_to_char(unicode_str, &pval_arg->value.str.len, persistent);
+						pval_arg->type = IS_STRING;
+						break;
+
+					default:
+						php_error(E_WARNING, "Error converting DECIMAL value to PHP floating point");
+						break;
+				}
 			}
 			break;
+
 		case VT_BOOL:
-			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
-				if (var_arg->boolVal & 0xFFFF) {
+			if (var_arg->vt & VT_BYREF)
+				if (*(var_arg->pboolVal) & 0xFFFF)
 					pval_arg->value.lval = 1;
-				} else {
+				else
 					pval_arg->value.lval = 0;
-				}
-			} else {
-				if (*(var_arg->pboolVal) & 0xFFFF) {
+			else
+				if (var_arg->boolVal & 0xFFFF)
 					pval_arg->value.lval = 1;
-				} else {
+				else
 					pval_arg->value.lval = 0;
-				}
-			}
+
 			pval_arg->type = IS_BOOL;
 			break;
+
+		case VT_NULL:
 		case VT_VOID:
 			pval_arg->type = IS_NULL;
 			break;
+
 		case VT_VARIANT:
-			php_variant_to_pval(var_arg->pvarVal, pval_arg, 0);
+			php_variant_to_pval(var_arg->pvarVal, pval_arg, persistent);
 			break;
+
 		case VT_BSTR:
 			if (pval_arg->is_ref == 0  || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				pval_arg->value.str.val = php_OLECHAR_to_char(var_arg->bstrVal, &pval_arg->value.str.len, persistent);
@@ -405,20 +512,23 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
 				SysFreeString(*(var_arg->pbstrVal));
 				efree(var_arg->pbstrVal);
 			}
+
 			pval_arg->type = IS_STRING;
 			break;
+
 		case VT_DATE: {
 				SYSTEMTIME wintime;
 				struct tm phptime;
 
 				VariantTimeToSystemTime(var_arg->date, &wintime);
-				phptime.tm_year = wintime.wYear-1900;
-				phptime.tm_mon  = wintime.wMonth-1;
-				phptime.tm_mday = wintime.wDay;
-				phptime.tm_hour = wintime.wHour;
-				phptime.tm_min  = wintime.wMinute;
-				phptime.tm_sec  = wintime.wSecond;
-				phptime.tm_isdst= -1;
+
+				phptime.tm_year  = wintime.wYear - 1900;
+				phptime.tm_mon   = wintime.wMonth - 1;
+				phptime.tm_mday  = wintime.wDay;
+				phptime.tm_hour  = wintime.wHour;
+				phptime.tm_min   = wintime.wMinute;
+				phptime.tm_sec   = wintime.wSecond;
+				phptime.tm_isdst = -1;
 
 				tzset();
 				pval_arg->value.lval = mktime(&phptime);
