@@ -1300,7 +1300,38 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 	return NULL;
 }
 
+PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode STREAMS_DC TSRMLS_DC)
+{
+	php_stdio_stream_data *self;
+	php_stream *stream;
+	
+	self = emalloc_rel_orig(sizeof(*self));
+	self->file = NULL;
+	self->is_pipe = 0;
+	self->is_process_pipe = 0;
+	self->temp_file_name = NULL;
+	self->fd = fd;
 
+#ifdef S_ISFIFO
+	/* detect if this is a pipe */
+	if (self->fd >= 0) {
+		struct stat sb;
+		self->is_pipe = (fstat(self->fd, &sb) == 0 && S_ISFIFO(sb.st_mode)) ? 1 : 0;
+	}
+#endif
+	
+	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
+
+	if (stream) {
+		if (self->is_pipe) {
+			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+		} else {
+			stream->position = lseek(self->fd, 0, SEEK_CUR);
+		}
+	}
+
+	return stream;
+}
 
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC TSRMLS_DC)
 {
@@ -1357,6 +1388,8 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 	return stream;
 }
+
+#define PHP_STDIOP_GET_FD(anfd, data)	anfd = (data)->file ? fileno((data)->file) : (data)->fd
 
 static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
@@ -1429,17 +1462,23 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 #endif
 			} else {
 				ret = fclose(data->file);
+				data->file = NULL;
 			}
+		} else if (data->fd != -1) {
+			ret = close(data->fd);
+			data->fd = -1;
 		} else {
-			return 0;/* everything should be closed already -> success*/
+			return 0; /* everything should be closed already -> success */
 		}
 		if (data->temp_file_name) {
 			unlink(data->temp_file_name);
 			efree(data->temp_file_name);
+			data->temp_file_name = NULL;
 		}
 	} else {
 		ret = 0;
 		data->file = NULL;
+		data->fd = -1;
 	}
 
 	/* STDIO streams are never persistent! */
@@ -1459,7 +1498,7 @@ static int php_stdiop_flush(php_stream *stream TSRMLS_DC)
 	 * data is send to the kernel using write(2). fsync'ing is
 	 * something completely different.
 	 */
-	if (data->fd < 0) {
+	if (data->file) {
 		return fflush(data->file);
 	}
 	return 0;
@@ -1507,6 +1546,13 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 	switch (castas)	{
 		case PHP_STREAM_AS_STDIO:
 			if (ret) {
+
+				if (data->file == NULL) {
+					/* we were opened as a plain file descriptor, so we
+					 * need fdopen now */
+					data->file = fdopen(data->fd, stream->mode);
+				}
+				
 				*ret = data->file;
 				data->fd = -1;
 			}
@@ -1516,12 +1562,15 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 			/* fetch the fileno rather than using data->fd, since we may
 			 * have zeroed that member if someone requested the FILE*
 			 * first (see above case) */
-			fd = fileno(data->file);
+			PHP_STDIOP_GET_FD(fd, data);
+
 			if (fd < 0) {
 				return FAILURE;
 			}
-			if (ret) {
+			if (data->file) {
 				fflush(data->file);
+			}
+			if (ret) {
 				*ret = (void*)fd;
 			}
 			return SUCCESS;
@@ -1537,8 +1586,8 @@ static int php_stdiop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 
 	assert(data != NULL);
 
-	fd = fileno(data->file);
-
+	PHP_STDIOP_GET_FD(fd, data);
+	
 	return fstat(fd, &ssb->sb);
 }
 
@@ -1553,10 +1602,10 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 	int oldval;
 #endif
 	
+	PHP_STDIOP_GET_FD(fd, data);
+	
 	switch(option) {
 		case PHP_STREAM_OPTION_BLOCKING:
-			fd = fileno(data->file);
-
 			if (fd == -1)
 				return -1;
 #ifdef O_NONBLOCK
@@ -1575,6 +1624,11 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 #endif
 			
 		case PHP_STREAM_OPTION_WRITE_BUFFER:
+
+			if (data->file == NULL) {
+				return -1;
+			}
+			
 			if (ptrparam)
 				size = *(size_t *)ptrparam;
 			else
@@ -1792,21 +1846,73 @@ stream_done:
 #define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
 #endif
 
+/* parse standard "fopen" modes into open() flags */
+PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
+{
+	int flags;
+
+	switch (mode[0]) {
+		case 'r':
+			if (strchr(mode, '+')) {
+				flags = O_RDWR;
+			} else {
+				flags = O_RDONLY;
+			}
+			break;
+		case 'w':
+			if (strchr(mode, '+')) {
+				flags = O_RDWR;
+			} else {
+				flags = O_WRONLY;
+			}
+			flags |= O_TRUNC|O_CREAT;
+			break;
+		case 'a':
+			if (strchr(mode, '+')) {
+				flags = O_RDWR;
+			} else {
+				flags = O_WRONLY;
+			}
+			flags |= O_CREAT|O_APPEND;
+			break;
+		default:
+			/* unknown mode */
+			return FAILURE;
+	}
+
+#ifdef O_BINARY
+	if (strchr(mode, 'b')) {
+		flags |= O_BINARY;
+	}
+#endif
+	
+	*open_flags = flags;
+	return SUCCESS;
+}
+
 /* {{{ php_stream_fopen */
 PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path, int options STREAMS_DC TSRMLS_DC)
 {
-	FILE *fp;
 	char *realpath = NULL;
 	struct stat st;
+	int open_flags;
+	int fd;
 	php_stream *ret;
 
+	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "`%s' is not a valid mode for fopen", mode);
+		}
+		return NULL;
+	}
+	
 	realpath = expand_filepath(filename, NULL TSRMLS_CC);
 
-	fp = fopen(realpath, mode);
+	fd = open(realpath, open_flags, 0666);
 
-	if (fp)	{
+	if (fd != -1)	{
 		/* sanity checks for include/require */
-		if (options & STREAM_OPEN_FOR_INCLUDE && (fstat(fileno(fp), &st) == -1 || !S_ISREG(st.st_mode))) {
+		if (options & STREAM_OPEN_FOR_INCLUDE && (fstat(fd, &st) == -1 || !S_ISREG(st.st_mode))) {
 #ifdef PHP_WIN32
 			/* skip the sanity check; fstat doesn't appear to work on
 			 * UNC paths */
@@ -1815,7 +1921,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 				goto err;
 		} 
 	
-		ret = php_stream_fopen_from_file_rel(fp, mode);
+		ret = php_stream_fopen_from_fd_rel(fd, mode);
 
 		if (ret)	{
 			if (opened_path)	{
@@ -1828,7 +1934,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 			return ret;
 		}
 err:
-		fclose(fp);
+		close(fd);
 	}
 	efree(realpath);
 	return NULL;
