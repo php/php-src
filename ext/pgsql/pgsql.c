@@ -471,105 +471,59 @@ PHP_MINFO_FUNCTION(pgsql)
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host=NULL,*port=NULL,*options=NULL,*tty=NULL,*dbname=NULL,*connstring=NULL;
-	char *hashed_details;
-	int hashed_details_length;
 	PGconn *pgsql;
+	smart_str str = {0};
+	zval **args[5];
+	int i;
+
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() == 2 || ZEND_NUM_ARGS() > 5
+			|| zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	smart_str_appends(&str, "pgsql");
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 1: { /* new style, using connection string */
-			zval **yyconnstring;
-			if (zend_get_parameters_ex(1, &yyconnstring) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(yyconnstring);
-			connstring = Z_STRVAL_PP(yyconnstring);
-			hashed_details_length = Z_STRLEN_PP(yyconnstring)+5+1;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
-			sprintf(hashed_details, "pgsql_%s", connstring); /* SAFE */
+	for (i = 0; i < ZEND_NUM_ARGS(); i++) {
+		convert_to_string_ex(args[i]);
+		smart_str_appendc(&str, '_');
+		smart_str_appendl(&str, Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]));
+	}
+
+	smart_str_0(&str);
+
+	if (ZEND_NUM_ARGS() == 1) { /* new style, using connection string */
+		connstring = Z_STRVAL_PP(args[0]);
+	} else {
+		host = Z_STRVAL_PP(args[0]);
+		port = Z_STRVAL_PP(args[1]);
+		dbname = Z_STRVAL_PP(args[ZEND_NUM_ARGS()-1]);
+
+		switch (ZEND_NUM_ARGS()) {
+		case 5:
+			tty = Z_STRVAL_PP(args[3]);
+			/* fall through */
+		case 4:
+			options = Z_STRVAL_PP(args[2]);
+			break;
 		}
-			break;
-		case 3: { /* host, port, dbname */
-			zval **yyhost, **yyport, **yydbname;
-				
-			if (zend_get_parameters_ex(3, &yyhost, &yyport, &yydbname) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(yyhost);
-			convert_to_string_ex(yyport);
-			convert_to_string_ex(yydbname);
-			host = Z_STRVAL_PP(yyhost);
-			port = Z_STRVAL_PP(yyport);
-			dbname = Z_STRVAL_PP(yydbname);
-			options=tty=NULL;
-			hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yydbname) + 5 + 5;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
-			sprintf(hashed_details, "pgsql_%s_%s___%s", host, port, dbname);  /* SAFE */
-		}
-			break;
-		case 4: { /* host, port, options, dbname */
-			zval **yyhost, **yyport, **yyoptions, **yydbname;
-				
-			if (zend_get_parameters_ex(4, &yyhost, &yyport, &yyoptions, &yydbname) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(yyhost);
-			convert_to_string_ex(yyport);
-			convert_to_string_ex(yyoptions);
-			convert_to_string_ex(yydbname);
-			host = Z_STRVAL_PP(yyhost);
-			port = Z_STRVAL_PP(yyport);
-			options = Z_STRVAL_PP(yyoptions);
-			dbname = Z_STRVAL_PP(yydbname);
-			tty=NULL;
-			hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yyoptions) + Z_STRLEN_PP(yydbname) + 5 + 5;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
-			sprintf(hashed_details, "pgsql_%s_%s_%s__%s", host, port, options, dbname);  /* SAFE */
-		}
-			break;
-		case 5: { /* host, port, options, tty, dbname */
-			zval **yyhost, **yyport, **yyoptions, **yytty, **yydbname;
-				
-			if (zend_get_parameters_ex(5, &yyhost, &yyport, &yyoptions, &yytty, &yydbname) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(yyhost);
-			convert_to_string_ex(yyport);
-			convert_to_string_ex(yyoptions);
-			convert_to_string_ex(yytty);
-			convert_to_string_ex(yydbname);
-			host = Z_STRVAL_PP(yyhost);
-			port = Z_STRVAL_PP(yyport);
-			options = Z_STRVAL_PP(yyoptions);
-			tty = Z_STRVAL_PP(yytty);
-			dbname = Z_STRVAL_PP(yydbname);
-			hashed_details_length = Z_STRLEN_PP(yyhost) + Z_STRLEN_PP(yyport) + Z_STRLEN_PP(yyoptions) + Z_STRLEN_PP(yytty) + Z_STRLEN_PP(yydbname) + 5 + 5;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
-			sprintf(hashed_details, "pgsql_%s_%s_%s_%s_%s", host, port, options, tty, dbname);  /* SAFE */
-		}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
 	}
 	
 	if (persistent && PGG(allow_persistent)) {
 		list_entry *le;
 		
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(&EG(persistent_list), str.c, str.len+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 			
 			if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
 				php_error(E_WARNING,"%s() cannot create new link. Too many open links (%d)",
 						  get_active_function_name(TSRMLS_C), PGG(num_links));
-				efree(hashed_details);
-				RETURN_FALSE;
+				goto err;
 			}
 			if (PGG(max_persistent)!=-1 && PGG(num_persistent)>=PGG(max_persistent)) {
 				php_error(E_WARNING,"%s() cannot create new link. Too many open persistent links (%d)",
 						  get_active_function_name(TSRMLS_C), PGG(num_persistent));
-				efree(hashed_details);
-				RETURN_FALSE;
+				goto err;
 			}
 
 			/* create the link */
@@ -584,16 +538,14 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				if (pgsql) {
 					PQfinish(pgsql);
 				}
-				efree(hashed_details);
-				RETURN_FALSE;
+				goto err;
 			}
 
 			/* hash it up */
 			Z_TYPE(new_le) = le_plink;
 			new_le.ptr = pgsql;
-			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
-				efree(hashed_details);
-				RETURN_FALSE;
+			if (zend_hash_update(&EG(persistent_list), str.c, str.len+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+				goto err;
 			}
 			PGG(num_links)++;
 			PGG(num_persistent)++;
@@ -623,9 +575,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				if (le->ptr==NULL || PQstatus(le->ptr)==CONNECTION_BAD) {
 					php_error(E_WARNING,"%s() PostgreSQL link lost, unable to reconnect",
 							  get_active_function_name(TSRMLS_C));
-					zend_hash_del(&EG(persistent_list),hashed_details,hashed_details_length+1);
-					efree(hashed_details);
-					RETURN_FALSE;
+					zend_hash_del(&EG(persistent_list),str.c,str.len+1);
+					goto err;
 				}
 			}
 			pgsql = (PGconn *) le->ptr;
@@ -639,31 +590,29 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new pgsql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(&EG(regular_list),str.c,str.len+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				RETURN_FALSE;
 			}
-			link = (int) (long) index_ptr->ptr;
+			link = (int) (long) index_ptr->ptr; /* XXX: bogus? cast */
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				Z_LVAL_P(return_value) = link;
 				zend_list_addref(link);
 				php_pgsql_set_default_link(link TSRMLS_CC);
 				Z_TYPE_P(return_value) = IS_RESOURCE;
-				efree(hashed_details);
-				return;
+				goto cleanup;
 			} else {
-				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list),str.c,str.len+1);
 			}
 		}
 		if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
 			php_error(E_WARNING,"%s() cannot create new link. Too many open links (%d)",
 					  get_active_function_name(TSRMLS_C), PGG(num_links));
-			efree(hashed_details);
-			RETURN_FALSE;
+			goto err;
 		}
 		if (connstring) {
 			pgsql = PQconnectdb(connstring);
@@ -673,8 +622,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (pgsql==NULL || PQstatus(pgsql)==CONNECTION_BAD) {
 			php_error(E_WARNING,"%s() unable to connect to PostgreSQL server: %s",
 					  get_active_function_name(TSRMLS_C), PQerrorMessage(pgsql));
-			efree(hashed_details);
-			RETURN_FALSE;
+			goto err;
 		}
 
 		/* add it to the list */
@@ -683,9 +631,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
-		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
-			efree(hashed_details);
-			RETURN_FALSE;
+		if (zend_hash_update(&EG(regular_list),str.c,str.len+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+			goto err;
 		}
 		PGG(num_links)++;
 	}
@@ -693,8 +640,15 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (! PGG(ignore_notices) && Z_TYPE_P(return_value) == IS_RESOURCE) {
 		PQsetNoticeProcessor(pgsql, _php_pgsql_notice_handler, (void *)&Z_RESVAL_P(return_value));
 	}
-	efree(hashed_details);
 	php_pgsql_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
+	
+cleanup:
+	smart_str_free(&str);
+	return;
+	
+err:
+	smart_str_free(&str);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -2850,26 +2804,33 @@ PHP_FUNCTION(pg_result_status)
 PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC) 
 {
 	PGresult *pg_result;
-	char query_buf[QUERY_BUF_SIZE+1], *tmp_name;
-	char *query_tpl =
-	"SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotNULL, a.atthasdef "
-	"FROM pg_class as c, pg_attribute a, pg_type t "
-	"WHERE a.attnum > 0 AND a.attrelid = c.oid AND c.relname = '%s' AND a.atttypid = t.oid "
-	"ORDER BY a.attnum;";
+	char *tmp_name;
+	smart_str querystr = {0};
 	size_t new_len;
 	int i, num_rows;
 	zval *elem;
 	
+	smart_str_appends(&querystr, 
+			"SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotNULL, a.atthasdef "
+			"FROM pg_class as c, pg_attribute a, pg_type t "
+			"WHERE a.attnum > 0 AND a.attrelid = c.oid AND c.relname = '");
+	
 	tmp_name = php_addslashes((char *)table_name, strlen(table_name), &new_len, 0 TSRMLS_CC);
-	snprintf(query_buf, QUERY_BUF_SIZE, query_tpl, tmp_name);
+	smart_str_appendl(&querystr, tmp_name, new_len);
 	efree(tmp_name);
-	pg_result = PQexec(pg_link, query_buf);
+
+	smart_str_appends(&querystr, "' AND a.atttypid = t.oid ORDER BY a.attnum;");
+	smart_str_0(&querystr);
+	
+	pg_result = PQexec(pg_link, querystr.c);
 	if (PQresultStatus(pg_result) != PGRES_TUPLES_OK || (num_rows = PQntuples(pg_result)) == 0) {
 		php_error(E_NOTICE, "%s() failed to query metadata for '%s' table %s",
-				  get_active_function_name(TSRMLS_C), table_name, query_buf);
+				  get_active_function_name(TSRMLS_C), table_name, querystr.c);
+		smart_str_free(&querystr);
 		PQclear(pg_result);
 		return FAILURE;
 	}
+	smart_str_free(&querystr);
 
 	for (i = 0; i < num_rows; i++) {
 		char *name;
@@ -3066,20 +3027,21 @@ static int php_pgsql_convert_match(const char *str, const char *regex , int icas
  */
 static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC) 
 {
-	char *dist;
+	smart_str str = {0};
+	
 	assert(Z_TYPE_P(src) == IS_STRING);
 	assert(should_free == 1 || should_free == 0);
 
-	dist = (char *)emalloc(Z_STRLEN_P(src)+3);
-	memcpy(dist+1, Z_STRVAL_P(src), Z_STRLEN_P(src));
-	dist[0] = '\'';
-	dist[Z_STRLEN_P(src)+1] = '\'';
-	dist[Z_STRLEN_P(src)+2] = '\0';
-	Z_STRLEN_P(src) += 2;
+	smart_str_appendc(&str, '\'');
+	smart_str_appendl(&str, Z_STRVAL_P(src), Z_STRLEN_P(src));
+	smart_str_appendc(&str, '\'');
+	smart_str_0(&str);
+	
 	if (should_free) {
 		efree(Z_STRVAL_P(src));
 	}
-	Z_STRVAL_P(src) = dist;
+	Z_STRVAL_P(src) = str.c;
+	Z_STRLEN_P(src) = str.len;
 
 	return SUCCESS;
 }
