@@ -76,6 +76,23 @@ class PEAR_Frontend_CLI extends PEAR
     }
 
     // }}}
+    // {{{ displayError(eobj)
+
+    function displayError($eobj)
+    {
+        return $this->displayLine($eobj->getMessage());
+    }
+
+    // }}}
+    // {{{ displayFatalError(eobj)
+
+    function displayFatalError($eobj)
+    {
+        $this->displayError($eobj);
+        exit(1);
+    }
+
+    // }}}
     // {{{ displayHeading(title)
 
     function displayHeading($title)
