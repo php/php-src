@@ -45,6 +45,11 @@
  * VARIANT datatype and pass_by_reference support
  */
 
+/*
+ * 03.6.2001
+ * Enhanced Typelib support to include a search by name
+ */
+
 #ifdef PHP_WIN32
 
 #define _WIN32_DCOM
@@ -68,6 +73,7 @@ PHP_FUNCTION(com_propget);
 PHP_FUNCTION(com_propput);
 
 PHPAPI int php_COM_get_le_idispatch();
+static ITypeLib *php_COM_find_typelib(char *search_string, int mode);
 static int php_COM_load_typelib(char *typelib_name, int mode);
 
 static int le_idispatch;
@@ -96,19 +102,37 @@ static PHP_MINFO_FUNCTION(COM)
 PHPAPI HRESULT php_COM_invoke(i_dispatch *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult)
 {
 	HRESULT hr;
+	int failed = FALSE;
 
 	if(obj->referenced)
 	{
-		if(obj->typelib) {
+		if(obj->typelib)
+		{
 			hr = obj->i.typeinfo->lpVtbl->Invoke(obj->i.typeinfo, obj->i.dispatch, dispIdMember,
 												   wFlags, pDispParams, pVarResult, NULL, NULL);
-			if(!FAILED(hr))
+			if(FAILED(hr))
 			{
-				return hr;
+				hr = obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
+												   wFlags, pDispParams, pVarResult, NULL, NULL);
+				if(SUCCEEDED(hr))
+				{
+					/*
+					 * ITypLib doesn't work
+					 * Release ITypeLib and fall back to IDispatch
+					 */
+
+					obj->i.typeinfo->lpVtbl->Release(obj->i.typeinfo);
+					obj->typelib = FALSE;
+				}
 			}
 		}
-		return obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
-												   wFlags, pDispParams, pVarResult, NULL, NULL);
+		else
+		{
+			hr = obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
+								   wFlags, pDispParams, pVarResult, NULL, NULL);
+		}
+
+		return hr;
 	}
 	else
 	{
@@ -122,14 +146,32 @@ PHPAPI HRESULT php_COM_get_ids_of_names(i_dispatch *obj, OLECHAR FAR* FAR* rgszN
 
 	if(obj->referenced)
 	{
-		if(obj->typelib) {
+		if(obj->typelib)
+		{
 			hr = obj->i.typeinfo->lpVtbl->GetIDsOfNames(obj->i.typeinfo, rgszNames, 1, rgDispId);
-			if(!FAILED(hr))
+
+			if(FAILED(hr))
 			{
-				return hr;
+				hr = obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
+
+				if(SUCCEEDED(hr))
+				{
+					/*
+					 * ITypLib doesn't work
+					 * Release ITypeLib and fall back to IDispatch
+					 */
+
+					obj->i.typeinfo->lpVtbl->Release(obj->i.typeinfo);
+					obj->typelib = FALSE;
+				}
 			}
 		}
-		return obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
+		else
+		{
+			hr = obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
+		}
+
+		return hr;
 	}
 	else
 	{
@@ -172,7 +214,6 @@ PHPAPI HRESULT php_COM_set(i_dispatch *obj, IDispatch FAR* pDisp, int cleanup)
 
 	obj->i.dispatch = pDisp;
 	obj->referenced = 1;
-	
 	obj->typelib = !FAILED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &(obj->i.typeinfo)));
 
 	if(!cleanup)
@@ -1012,7 +1053,6 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		PHP_FN(com_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		if(!zend_is_true(return_value))
 		{
-			pval_destructor(&function_name->element);
 			var_reset(object);
 			return;
 		}
@@ -1041,10 +1081,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 
 	if(!obj || (type!=le_idispatch))
 	{
-		if(property.refcount == 1)
-		{
-			pval_destructor(&property);
-		}
+		pval_destructor(&property);
 		pval_destructor(&function_name->element);
 		return;
 	}
@@ -1092,39 +1129,61 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 	pval_destructor(&function_name->element);
 }
 
-
-static int php_COM_load_typelib(char *typelib_name, int mode)
+static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 {
-	ITypeLib *TypeLib;
-	ITypeComp *TypeComp;
-	OLECHAR *p;
-	CLSID clsid;
+	ITypeLib *TypeLib = NULL;
 	char *strtok_buf, *major, *minor;
-	int i;
-	int interfaces;
-	ELS_FETCH();
+	CLSID clsid;
+	OLECHAR *p;
+	char *ptr;
 
-
-	typelib_name = php_strtok_r(typelib_name, ",", &strtok_buf);
+	/* Type Libraries:
+	 * The string we have is either:
+	 * a) a file name
+	 * b) a CLSID, major, minor e.g. "{00000200-0000-0010-8000-00AA006D2EA4},2,0"
+	 * c) a Type Library name e.g. "Microsoft OLE DB ActiveX Data Objects 1.0 Library"
+	 * Searching for the name will be more expensive that the
+	 * other two, so we will do that when both other attempts
+	 * fail.
+	 */
+	search_string = php_strtok_r(search_string, ",", &strtok_buf);
 	major = php_strtok_r(NULL, ",", &strtok_buf);
 	minor = php_strtok_r(NULL, ",", &strtok_buf);
 
-	p = php_char_to_OLECHAR(typelib_name, strlen(typelib_name), codepage);
+	/* Remove leading/training white spaces on search_string */
+	while (isspace(*search_string)) /* Ends on '\0' in worst case */
+	{
+		search_string ++;
+	}
+	ptr = search_string + strlen(search_string) - 1;
+	while ((ptr != search_string) && isspace(*ptr))
+	{
+		*ptr = '\0';
+		ptr--;
+	}
 
+	p = php_char_to_OLECHAR(search_string, strlen(search_string), codepage);
+	/* Is the string a GUID ? */
 	if(!FAILED(CLSIDFromString(p, &clsid)))
 	{
 		HRESULT hr;
 		WORD major_i = 1;
 		WORD minor_i = 0;
 
+		/* We have a valid GUID, check to see if a major/minor */
+		/* version was specified otherwise assume 1,0 */
 		if(major && minor)
 		{
 			major_i = (WORD) atoi(major);
 			minor_i = (WORD) atoi(minor);
 		}
 
+		/* The GUID will either be a typelibrary or a CLSID */
 		hr = LoadRegTypeLib((REFGUID) &clsid, major_i, minor_i, LANG_NEUTRAL, &TypeLib);
 
+		/* If the LoadRegTypeLib fails, let's try to instantiate */
+		/* the class itself and then QI for the TypeInfo and */
+		/* retrieve the type info from that interface */
 		if(FAILED(hr) && (!major || !minor))
 		{
 			IDispatch *Dispatch;
@@ -1134,20 +1193,20 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 			if(FAILED(CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID *) &Dispatch)))
 			{
 				efree(p);
-				return FAILURE;
+				return NULL;
 			}
 			if(FAILED(Dispatch->lpVtbl->GetTypeInfo(Dispatch, 0, LANG_NEUTRAL, &TypeInfo)))
 			{
 				Dispatch->lpVtbl->Release(Dispatch);
 				efree(p);
-				return FAILURE;
+				return NULL;
 			}
 			Dispatch->lpVtbl->Release(Dispatch);
 			if(FAILED(TypeInfo->lpVtbl->GetContainingTypeLib(TypeInfo, &TypeLib, &idx)))
 			{
 				TypeInfo->lpVtbl->Release(TypeInfo);
 				efree(p);
-				return FAILURE;
+				return NULL;
 			}
 			TypeInfo->lpVtbl->Release(TypeInfo);
 		}
@@ -1156,9 +1215,125 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 	{
 		if(FAILED(LoadTypeLib(p, &TypeLib)))
 		{
+			/* Walk HKCR/TypeLib looking for the string */
+			/* If that succeeds, call ourself recursively */
+			/* using the CLSID found, else give up and bail */
+			HKEY hkey, hsubkey;
+			DWORD SubKeys, MaxSubKeyLength;
+			char *keyname;
+			register unsigned int ii, jj;
+			DWORD VersionCount;
+			char version[20]; /* All the version keys are 1.0, 4.6, ... */
+			char *libname;
+			DWORD libnamelen;
+
+			/* No Need for Unicode version any more */
 			efree(p);
-			return FAILURE;
+
+			/* Starting at HKEY_CLASSES_ROOT/TypeLib */
+			/* Walk all subkeys (Typelib GUIDs) looking */
+			/* at each version for a string match to the */
+			/* supplied argument */
+			if (ERROR_SUCCESS != RegOpenKey(HKEY_CLASSES_ROOT, "TypeLib",&hkey))
+			{
+				/* This is pretty bad - better bail */
+				return NULL;
+			}
+			if (ERROR_SUCCESS != RegQueryInfoKey(hkey, NULL, NULL, NULL, &SubKeys, &MaxSubKeyLength, NULL, NULL, NULL, NULL, NULL, NULL))
+			{
+				RegCloseKey(hkey);
+				return NULL;
+			}
+			keyname = malloc(MaxSubKeyLength);
+			libname = malloc(strlen(search_string)+1);
+			for (ii=0;ii<SubKeys;ii++)
+			{
+				if (ERROR_SUCCESS != RegEnumKey(hkey, ii, keyname, MaxSubKeyLength))
+				{
+					/* Failed - who cares */
+					continue;
+				}
+				if (ERROR_SUCCESS != RegOpenKey(hkey, keyname, &hsubkey))
+				{
+					/* Failed - who cares */
+					continue;
+				}
+				if (ERROR_SUCCESS != RegQueryInfoKey(hsubkey, NULL, NULL, NULL, &VersionCount, NULL, NULL, NULL, NULL, NULL, NULL, NULL))
+				{
+					/* Failed - who cares */
+					RegCloseKey(hsubkey);
+					continue;
+				}
+				for (jj=0;jj<VersionCount;jj++)
+				{
+					if (ERROR_SUCCESS != RegEnumKey(hsubkey, jj, version, sizeof(version)))
+					{
+						/* Failed - who cares */
+						continue;
+					}
+					/* OK we just need to retrieve the default */
+					/* value for this key and see if it matches */
+					libnamelen = strlen(search_string)+1;
+					if (ERROR_SUCCESS == RegQueryValue(hsubkey, version, libname, &libnamelen))
+					{
+						if ((mode & CONST_CS) ? (strcmp(libname, search_string) == 0) : (stricmp(libname, search_string) == 0))
+						{
+							char *str;
+							int major, minor;
+
+							/* Found it */
+							RegCloseKey(hkey);
+							RegCloseKey(hsubkey);
+							efree(libname);
+							/* We can either open up the "win32" key and find the DLL name */
+							/* Or just parse the version string and pass that in */
+							/* The version string seems like a more portable solution */
+							/* Given that there is a COM on Unix */
+							if (2 != sscanf(version, "%d.%d", &major, &minor))
+							{
+								major = 1;
+								minor = 0;
+							}
+							str = malloc(strlen(keyname)+strlen(version)+20); /* 18 == safety, 2 == extra comma and \0 */
+							sprintf(str, "%s,%d,%d", keyname, major, minor);
+							free(keyname);
+							TypeLib = php_COM_find_typelib(str, mode);
+							free(str);
+							/* This is probbaly much harder to read and follow */
+							/* But it is MUCH more effiecient than trying to */
+							/* test for errors and leave through a single "return" */
+							return TypeLib;
+						}
+					}
+					else
+					{
+						/* Failed - perhaps too small abuffer */
+						/* But if too small, then the name does not match */
+					}
+				}
+				RegCloseKey(hsubkey);
+			}
+			free(keyname);
+			free(libname);
+			return NULL;
 		}
+	}
+	efree(p);
+	return TypeLib;
+}
+
+static int php_COM_load_typelib(char *typelib_name, int mode)
+{
+	ITypeLib *TypeLib;
+	ITypeComp *TypeComp;
+	int i;
+	int interfaces;
+	ELS_FETCH();
+
+	TypeLib = php_COM_find_typelib(typelib_name, mode);
+	if (NULL == TypeLib)
+	{
+		return FAILURE;
 	}
 
 	interfaces = TypeLib->lpVtbl->GetTypeInfoCount(TypeLib);
@@ -1217,7 +1392,6 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 
 
 	TypeLib->lpVtbl->Release(TypeLib);
-	efree(p);
 	return SUCCESS;
 }
 
