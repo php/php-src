@@ -49,26 +49,27 @@ typedef struct {
 
 #define FINISH { catchup(state); goto finish; }
 
-#define BEGIN(x) \
-		switch(state->state) { \
-			case INITIAL: \
-				catchup(state); \
-				break; \
-			case REF: \
-				screw_url(state); \
-				break; \
-		} \
-		state->state = x; \
-		state->start = state->crs; \
+#define BEGIN(x) 						\
+		switch(state->state) { 			\
+			case INITIAL: 				\
+				catchup(state); 		\
+				break; 					\
+			case REF: 					\
+				screw_url(state); 		\
+				break; 					\
+		} 								\
+		state->state = x; 				\
+		state->start = state->crs; 		\
 		goto nextiter
 
-#define ATTACH(s, n) { \
-	size_t _newlen = state->targetsize + n; \
-	state->target = realloc(state->target, _newlen + 1); \
-	memcpy(state->target + state->targetsize, s, n); \
-	state->targetsize = _newlen; \
-	state->target[_newlen] = '\0'; \
-	}
+#define ATTACH(s, n) 										\
+{ 															\
+	size_t _newlen = state->targetsize + n; 				\
+	state->target = realloc(state->target, _newlen + 1); 	\
+	memcpy(state->target + state->targetsize, s, n); 		\
+	state->targetsize = _newlen; 							\
+	state->target[_newlen] = '\0'; 							\
+}
 	
 #define URLLEN 512
 	
