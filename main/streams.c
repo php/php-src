@@ -363,6 +363,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			stream->readbuf = NULL;
 		}
 		
+		if (stream->is_persistent) {
+			/* we don't work with *stream but need its value for comparison */
+			zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) _php_stream_free_persistent, stream TSRMLS_CC);
+		}
+	
 #if ZEND_DEBUG
 		if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) && (stream->__exposed == 0) && (EG(error_reporting) & E_WARNING)) {
 			/* it leaked: Lets deliberately NOT pefree it so that the memory manager shows it
@@ -392,10 +397,6 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 #else
 		pefree(stream, stream->is_persistent);
 #endif
-		if (stream->is_persistent) {
-			/* we don't work with *stream but need its value for comparison */
-			zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) _php_stream_free_persistent, stream TSRMLS_CC);
-		}
 	}
 
 	return ret;
