@@ -56,6 +56,22 @@ zend_function_entry php_dom_node_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) {
+	xmlNsPtr nsptr;
+
+	if (nodep->type == XML_ELEMENT_NODE) {
+		/* Following if block primarily used for inserting nodes created via createElementNS */
+		if (nodep->nsDef != NULL && nodep->nsDef->href != NULL) {
+			if((nsptr = xmlSearchNsByHref(doc, nodep->parent, nodep->nsDef->href)) && 
+				(nodep->nsDef->prefix == NULL || xmlStrEqual(nsptr->prefix, nodep->nsDef->prefix))) {
+				dom_set_old_ns(doc, nodep->ns);
+				nodep->nsDef = NULL;
+			}
+		}
+		xmlReconciliateNs(doc, nodep);
+	}
+}
+
 /* {{{ proto nodeName	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
@@ -867,6 +883,8 @@ PHP_FUNCTION(dom_node_insert_before)
 		RETURN_FALSE;
 	}
 
+	dom_reconcile_ns(parentp->doc, new_child);
+
 	DOM_RET_OBJ(rv, new_child, &ret, intern);
 
 }
@@ -941,6 +959,7 @@ PHP_FUNCTION(dom_node_replace_child)
 				php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL TSRMLS_CC);
 			}
 			node = xmlReplaceNode(oldchild, newchild);
+			dom_reconcile_ns(nodep->doc, newchild);
 		}
 		DOM_RET_OBJ(rv, oldchild, &ret, intern);
 		return;
@@ -1015,7 +1034,6 @@ PHP_FUNCTION(dom_node_append_child)
 	zval *id, *node, *rv = NULL;
 	xmlNodePtr child, nodep, new_child = NULL;
 	dom_object *intern, *childobj;
-	xmlNsPtr nsptr;
 	int ret, stricterror;
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
@@ -1101,14 +1119,7 @@ PHP_FUNCTION(dom_node_append_child)
 		RETURN_FALSE;
 	}
 
-    if (new_child->nsDef != NULL && new_child->type == XML_ELEMENT_NODE && new_child->nsDef->href != NULL) {
-		if((nsptr = xmlSearchNsByHref(nodep->doc, new_child->parent, new_child->nsDef->href)) && 
-			(new_child->nsDef->prefix == NULL || xmlStrEqual(nsptr->prefix, new_child->nsDef->prefix))) {
-			dom_set_old_ns(nodep->doc, new_child->ns);
-			new_child->nsDef = NULL;
-			new_child->ns = nsptr;
-		}
-    }
+	dom_reconcile_ns(nodep->doc, new_child);
 
 	DOM_RET_OBJ(rv, new_child, &ret, intern);
 }
