@@ -220,12 +220,33 @@ static void php_set_session_var(char *name, size_t namelen,
 	state_val_copy->refcount = 0;
 
 	if (PG(register_globals)) {
-		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
-	} else {
-		if (PG(register_globals)) {
-			zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, &EG(symbol_table));
-		}
+		zval **old_symbol;
+		if(zend_hash_find(&EG(symbol_table),name,namelen+1,&old_symbol) == SUCCESS) { 
+			/* 
+			   There where old one, we need to replace it accurately.
+			   hash_update in zend_set_hash_symbol is not good, because
+			   it will leave referenced variables (such as local instances
+			   of a global variable) dangling.
+			 */
+			int is_ref, refcount;
 
+			zval_dtor(*old_symbol);
+
+			/* replace variable contents while saving is_ref and reference 
+			   count */
+			is_ref = (*old_symbol)->is_ref;
+			refcount = (*old_symbol)->refcount;
+			**old_symbol = *state_val_copy;
+			(*old_symbol)->is_ref = is_ref;
+			(*old_symbol)->refcount = refcount;
+
+			FREE_ZVAL(state_val_copy);
+
+			zend_set_hash_symbol(*old_symbol, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
+		} else {
+			zend_set_hash_symbol(state_val_copy, name, namelen, 0, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
+		}
+	} else {
 		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
 	}
 }
