@@ -33,7 +33,6 @@ ob_implicit_flush(true);
 ini_set('track_errors', true);
 ini_set('html_errors', false);
 ini_set('magic_quotes_runtime', false);
-error_reporting(E_ALL & ~E_NOTICE);
 set_error_handler('error_handler');
 
 $pear_package_version = "@pear_version@";
@@ -265,21 +264,21 @@ function cmdHelp($command)
 // }}}
 
 function error_handler($errno, $errmsg, $file, $line, $vars) {
-    if (error_reporting() == 0) {
+    if ((defined('E_STRICT') && $errno & E_STRICT) || !error_reporting()) {
         return; // @silenced error
     }
     $errortype = array (
-        1   =>  "Error",
-        2   =>  "Warning",
-        4   =>  "Parsing Error",
-        8   =>  "Notice",
-        16  =>  "Core Error",
-        32  =>  "Core Warning",
-        64  =>  "Compile Error",
-        128 =>  "Compile Warning",
-        256 =>  "User Error",
-        512 =>  "User Warning",
-        1024=>  "User Notice"
+        E_ERROR   =>  "Error",
+        E_WARNING   =>  "Warning",
+        E_PARSE   =>  "Parsing Error",
+        E_NOTICE   =>  "Notice",
+        E_CORE_ERROR  =>  "Core Error",
+        E_CORE_WARNING  =>  "Core Warning",
+        E_COMPILE_ERROR  =>  "Compile Error",
+        E_COMPILE_WARNING =>  "Compile Warning",
+        E_USER_ERROR =>  "User Error",
+        E_USER_WARNING =>  "User Warning",
+        E_USER_NOTICE =>  "User Notice"
     );
     $prefix = $errortype[$errno];
     $file = basename($file);
