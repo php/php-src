@@ -296,7 +296,7 @@ PHP_FUNCTION(get_meta_tags)
 	int saw_name = 0, saw_content = 0;
 	char *name = NULL, *value = NULL, *temp = NULL;
 	php_meta_tags_token tok, tok_last;
-	php_meta_tags_data md;
+	php_meta_tags_data md = {NULL, 0, 0, 0, 0, NULL, NULL, 0, 0};
 
 	/* Parse arguments */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
@@ -319,11 +319,6 @@ PHP_FUNCTION(get_meta_tags)
 	array_init(return_value);
 
 	tok_last = TOK_EOF;
-
-	md.ulc        = 0;
-	md.token_data = NULL;
-	md.token_len  = 0;
-	md.in_meta    = 0;
 
 	while (!done && (tok = php_next_meta_token(&md)) != TOK_EOF) {
 		if (tok == TOK_ID) {
