@@ -1280,8 +1280,6 @@ ZEND_FUNCTION(debug_backtrace)
 	char *include_filename = NULL;
 	zval *stack_frame;
 	void **cur_arg_pos = EG(argument_stack).top_element;
-	int get_args;
-
 
 	if (ZEND_NUM_ARGS()) {
 		WRONG_PARAM_COUNT;
@@ -1312,11 +1310,6 @@ ZEND_FUNCTION(debug_backtrace)
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
 			 * and debug_baktrace() might have been called by the error_handler. in this case we don't 
 			 * want to pop anything of the argument-stack */
-			if ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL)) {
-				get_args = 1;
-			} else {
-				get_args = 0;
-			}
 		} else {
 			filename = NULL;
 		}
@@ -1342,7 +1335,7 @@ ZEND_FUNCTION(debug_backtrace)
 				add_assoc_string_ex(stack_frame, "type", sizeof("type"), call_type, 1);
 			}
 
-			if (get_args) {
+			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
 				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
 			}	
 		} else {
