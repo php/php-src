@@ -128,8 +128,8 @@ CURRENT LIMITATIONS, BUGS AND OTHER ODDITIES
   It can't handle correctly, and probably never will, variable list of
   of arguments. (void foo(int bar [, ...])
 
-  Don't trust too much the generated code. It tries to be useful in most of
-  the situations you might encounter, but automatic code generating will never
+  Don't trust the generated code too much. It tries to be useful in most of
+  the situations you might encounter, but automatic code generation will never
   beat a programmer who knows the real situation at hand. ext_skel is generally
   best suited for quickly generating a wrapper for c-library functions you
   might want to have available in PHP too.
@@ -154,7 +154,7 @@ PHP_FUNCTION(my_drawtext)
 	int argc;
 	int image_id = -1;
 	int font_id = -1;
-	???LS_FETCH();
+	TSRMLS_FETCH();
 
 	argc = ZEND_NUM_ARGS();
 	if (argc < 5 || argc > 6 || zend_get_parameters_ex(argc, &image, &text, &font, &x, &y, &color) == FAILURE) {
