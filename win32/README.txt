@@ -99,6 +99,8 @@ by adding a line like the following to your php.ini file:
 extension=path\to\extension\extension_name.dll
 Loading these extensions extends the functionality of PHP to support more
 functions and protocols.
+Note:  MySQL support is *built-in* as of PHP 4.0.  You don't need to load any
+       additional extensions in order to use the MySQL functions.
 
 Good luck,
 
