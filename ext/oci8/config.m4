@@ -80,13 +80,17 @@ PHP_ARG_WITH(oci8, for Oracle (OCI8) support using ORACLE_HOME installation,
 [  --with-oci8[=DIR]       Include Oracle (OCI8) support using an ORACLE_HOME
                           install. The default DIR is ORACLE_HOME])
 
-PHP_ARG_WITH(oci8-instant-client, for Oracle (OCI8) support using Oracle Instant Client,
-[  --with-oci8-instant-client[=DIR]    
+if test "$PHP_OCI8" = "no"; then
+  PHP_ARG_WITH(oci8-instant-client, for Oracle (OCI8) support using Oracle Instant Client,
+  [  --with-oci8-instant-client[=DIR]    
                           Include Oracle (OCI8) support using
                           Oracle Instant Client. DIR is the directory with the
                           Instant Client libraries. On Linux it will default to
                           /usr/lib/oracle/<most_recent_version>/client/lib
                           Other platforms will need to have it explicitly specified.])
+else 
+  PHP_OCI8_INSTANT_CLIENT="no";
+fi
 
 if test "$PHP_OCI8" != "no"; then
   if test "$PHP_OCI8_INSTANT_CLIENT" != "no"; then
