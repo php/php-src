@@ -111,6 +111,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_CURSOR,			/* cursor type */
 	PDO_ATTR_ORACLE_NULLS,		/* convert empty strings to NULL */
 	PDO_ATTR_PERSISTENT,		/* pconnect style connection */
+	PDO_ATTR_STATEMENT_CLASS,	/* array(classname, array(ctor_args)) to specify the class of the constructed statement */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
