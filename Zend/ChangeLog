@@ -1,3 +1,24 @@
+2003-07-23  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_globals.h
+      zend_opcode.c:
+      Remove namespace leftovers
+
+2003-07-23  Zeev Suraski  <zeev@zend.com>
+
+    * zend_hash.c
+      zend_hash.h:
+      Go back to ZE1-like code
+
+2003-07-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_reflection_api.c:
+      Fix segfault. Patch by Timm Friebe <thekid@thekid.de>.
+
 2003-07-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_hash.h:
