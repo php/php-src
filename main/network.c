@@ -386,6 +386,28 @@ void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port)
 }
 /* }}} */
 
+/* {{{ php_sockaddr_size
+ * Returns the size of struct sockaddr_xx for the family
+ */
+int php_sockaddr_size(php_sockaddr_storage *addr)
+{
+	switch (((struct sockaddr *)addr)->sa_family) {
+	case AF_INET:
+		return sizeof(struct sockaddr_in);
+#ifdef AF_INET6
+	case AF_INET6:
+		return sizeof(struct sockaddr_in6);
+#endif
+#ifdef AF_UNIX
+	case AF_UNIX:
+		return sizeof(struct sockaddr_un);
+#endif
+	default:
+		return 0;
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 8
