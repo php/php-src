@@ -362,7 +362,7 @@ char *GetSMErrorText(int index)
 int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
 			 char *headers, char *headers_lc, char **error_message)
 {
-	int res, i;
+	int res;
 	char *p;
 	char *tempMailTo, *token, *pos1, *pos2;
 	char *server_response = NULL;
@@ -596,35 +596,30 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 	 * uses ZVAL as it's parameters */
 	data_cln = php_str_to_str(data, strlen(data), PHP_WIN32_MAIL_DOT_PATTERN, sizeof(PHP_WIN32_MAIL_DOT_PATTERN) - 1,
 					PHP_WIN32_MAIL_DOT_REPLACE, sizeof(PHP_WIN32_MAIL_DOT_REPLACE) - 1, &data_cln_len);
+	if (!data_cln) {
+		data_cln = estrdup("");
+		data_cln_len = 1;		
+	}
 
 	/* send message contents in 1024 chunks */
-	if (data_cln_len <= 1024) {
-		if ((res = Post(data_cln)) != SUCCESS) {
-			efree(data_cln);
-			return (res);
-		}
-	} else {
-		int parts = (int) floor(data_cln_len / 1024);
+	{
+		char c, *e2, *e = data_cln + data_cln_len;
 		p = data_cln;
 
-		for (i = 0; i < parts; i++) {
-			strlcpy(Buffer, p, 1024);
-			Buffer[1024] = '\0';
-			p += 1024;
-send_chunk:
-			/* send chunk */
-			if ((res = Post(Buffer)) != SUCCESS) {
+		while (e - p > 1024) {
+			e2 = p + 1024;
+			c = *e2;
+			*e2 = '\0';
+			if ((res = Post(p)) != SUCCESS) {
 				efree(data_cln);
-				return (res);
+				return(res);
 			}
+			*e2 = c;
+			p = e2;
 		}
-
-		if ((parts * 1024) < data_cln_len) {
-			i = data_cln_len - (parts * 1024);
-			strlcpy(Buffer, p, i);
-			Buffer[i] = '\0';
-			parts++;
-			goto send_chunk;
+		if ((res = Post(p)) != SUCCESS) {
+			efree(data_cln);
+			return(res);
 		}
 	}
 
