@@ -1760,11 +1760,16 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 	int lastBorder;
 	/* Seek left */
 	int leftLimit = -1, rightLimit;
-	int i;
+	int i, restoreAlphaBleding=0;
 
 	if (border < 0) {
 		/* Refuse to fill to a non-solid border */
 		return;
+	}
+
+	if (im->alphaBlendingFlag) {
+		restoreAlphaBleding = 1;
+		im->alphaBlendingFlag = 0;
 	}
 
 	if (x >= im->sx) {
@@ -1809,6 +1814,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 			}
 		}
 	}
+
 	/* Below */
 	if (y < ((im->sy) - 1)) {
 		lastBorder = 1;
@@ -1825,8 +1831,11 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 			}
 		}
 	}
-}
+	if (restoreAlphaBleding) {
+		im->alphaBlendingFlag = 1;
+	}
 
+}
 
 /*
  * set the pixel at (x,y) and its 4-connected neighbors
