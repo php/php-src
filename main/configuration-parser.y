@@ -27,7 +27,6 @@
 #include "php_ini.h"
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_browscap.h"
 #include "zend_extensions.h"
 
 
@@ -41,14 +40,11 @@
 #define YYSTYPE zval
 
 #define PARSING_MODE_CFG		0
-#define PARSING_MODE_BROWSCAP	1
 #define PARSING_MODE_STANDALONE	2
 
 static HashTable configuration_hash;
-extern HashTable browser_hash;
 PHPAPI extern char *php_ini_path;
 static HashTable *active_hash_table;
-static zval *current_section;
 static char *currently_parsed_filename;
 
 static int parsing_mode;
@@ -136,19 +132,10 @@ static void yyerror(char *str)
 
 
 static void pvalue_config_destructor(zval *pvalue)
-{
-	if (pvalue->type == IS_STRING && pvalue->value.str.val != empty_string) {
-		free(pvalue->value.str.val);
-	}
-}
-
-
-static void pvalue_browscap_destructor(zval *pvalue)
-{
-	if (pvalue->type == IS_OBJECT || pvalue->type == IS_ARRAY) {
-		zend_hash_destroy(pvalue->value.obj.properties);
-		free(pvalue->value.obj.properties);
-	}
+{   
+    if (pvalue->type == IS_STRING && pvalue->value.str.val != empty_string) {
+        free(pvalue->value.str.val);
+    }
 }
 
 
@@ -247,87 +234,10 @@ int php_init_config(void)
 }
 
 
-PHP_MINIT_FUNCTION(browscap)
-{
-	char *browscap = INI_STR("browscap");
-
-	if (browscap) {
-		if (zend_hash_init(&browser_hash, 0, NULL, (dtor_func_t) pvalue_browscap_destructor, 1)==FAILURE) {
-			return FAILURE;
-		}
-
-		cfgin = V_FOPEN(browscap, "r");
-		if (!cfgin) {
-			php_error(E_WARNING,"Cannot open '%s' for reading", browscap);
-			return FAILURE;
-		}
-		init_cfg_scanner();
-		active_hash_table = &browser_hash;
-		parsing_mode = PARSING_MODE_BROWSCAP;
-		currently_parsed_filename = browscap;
-		yyparse();
-		fclose(cfgin);
-	}
-
-	return SUCCESS;
-}
-
-
 int php_shutdown_config(void)
 {
 	zend_hash_destroy(&configuration_hash);
 	return SUCCESS;
-}
-
-
-PHP_MSHUTDOWN_FUNCTION(browscap)
-{
-	if (INI_STR("browscap")) {
-		zend_hash_destroy(&browser_hash);
-	}
-	return SUCCESS;
-}
-
-
-static void convert_browscap_pattern(zval *pattern)
-{
-	register int i,j;
-	char *t;
-
-	for (i=0; i<pattern->value.str.len; i++) {
-		if (pattern->value.str.val[i]=='*' || pattern->value.str.val[i]=='?' || pattern->value.str.val[i]=='.') {
-			break;
-		}
-	}
-
-	if (i==pattern->value.str.len) { /* no wildcards */
-		pattern->value.str.val = zend_strndup(pattern->value.str.val, pattern->value.str.len);
-		return;
-	}
-
-	t = (char *) malloc(pattern->value.str.len*2);
-	
-	for (i=0,j=0; i<pattern->value.str.len; i++,j++) {
-		switch (pattern->value.str.val[i]) {
-			case '?':
-				t[j] = '.';
-				break;
-			case '*':
-				t[j++] = '.';
-				t[j] = '*';
-				break;
-			case '.':
-				t[j++] = '\\';
-				t[j] = '.';
-				break;
-			default:
-				t[j] = pattern->value.str.val[i];
-				break;
-		}
-	}
-	t[j]=0;
-	pattern->value.str.val = t;
-	pattern->value.str.len = j;
 }
 
 
@@ -426,23 +336,6 @@ statement:
 						zend_alter_ini_entry($1.value.str.val, $1.value.str.len+1, $3.value.str.val, $3.value.str.len+1, PHP_INI_SYSTEM, PHP_INI_STAGE_STARTUP);
 					}
 					break;
-				case PARSING_MODE_BROWSCAP:
-					if (current_section) {
-						zval *new_property;
-						char *new_key;
-
-						new_property = (zval *) malloc(sizeof(zval));
-						INIT_PZVAL(new_property);
-						new_property->value.str.val = $3.value.str.val;
-						new_property->value.str.len = $3.value.str.len;
-						new_property->type = IS_STRING;
-						
-						new_key = zend_strndup($1.value.str.val, $1.value.str.len);
-						zend_str_tolower(new_key,$1.value.str.len);
-						zend_hash_update(current_section->value.obj.properties, new_key, $1.value.str.len+1, &new_property, sizeof(zval *), NULL);
-						free(new_key);
-					}
-					break;
 				case PARSING_MODE_STANDALONE: {
 						zval *entry;
 
@@ -500,30 +393,7 @@ statement:
 				free($3.value.str.val);
 			}
 		}
-	|	SECTION { 
-			if (parsing_mode==PARSING_MODE_BROWSCAP) {
-				zval *processed;
-
-				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len+1);*/
-				current_section = (zval *) malloc(sizeof(zval));
-				INIT_PZVAL(current_section);
-				processed = (zval *) malloc(sizeof(zval));
-				INIT_PZVAL(processed);
-
-				current_section->value.obj.ce = &zend_standard_class_def;
-				current_section->value.obj.properties = (HashTable *) malloc(sizeof(HashTable));
-				current_section->type = IS_OBJECT;
-				zend_hash_init(current_section->value.obj.properties, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1);
-				zend_hash_update(active_hash_table, $1.value.str.val, $1.value.str.len+1, (void *) &current_section, sizeof(zval *), NULL);
-
-				processed->value.str.val = $1.value.str.val;
-				processed->value.str.len = $1.value.str.len;
-				processed->type = IS_STRING;
-				convert_browscap_pattern(processed);
-				zend_hash_update(current_section->value.obj.properties, "browser_name_pattern", sizeof("browser_name_pattern"), (void *) &processed, sizeof(zval *), NULL);
-			}
-			free($1.value.str.val);
-		}
+	|	SECTION { free($1.value.str.val); }
 	|	'\n'
 ;
 

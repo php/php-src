@@ -25,9 +25,140 @@
 
 #include "zend_globals.h"
 
-HashTable browser_hash;
+static HashTable browser_hash;
+static zval *current_section;
 
 #define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
+
+
+static void browscap_entry_dtor(zval *pvalue)
+{
+	if (pvalue->type == IS_OBJECT || pvalue->type == IS_ARRAY) {
+		zend_hash_destroy(pvalue->value.obj.properties);
+		free(pvalue->value.obj.properties);
+	}
+}
+
+
+static void convert_browscap_pattern(zval *pattern)
+{
+	register int i,j;
+	char *t;
+
+	for (i=0; i<pattern->value.str.len; i++) {
+		if (pattern->value.str.val[i]=='*' || pattern->value.str.val[i]=='?' || pattern->value.str.val[i]=='.') {
+			break;
+		}
+	}
+
+	if (i==pattern->value.str.len) { /* no wildcards */
+		pattern->value.str.val = zend_strndup(pattern->value.str.val, pattern->value.str.len);
+		return;
+	}
+
+	t = (char *) malloc(pattern->value.str.len*2);
+	
+	for (i=0,j=0; i<pattern->value.str.len; i++,j++) {
+		switch (pattern->value.str.val[i]) {
+			case '?':
+				t[j] = '.';
+				break;
+			case '*':
+				t[j++] = '.';
+				t[j] = '*';
+				break;
+			case '.':
+				t[j++] = '\\';
+				t[j] = '.';
+				break;
+			default:
+				t[j] = pattern->value.str.val[i];
+				break;
+		}
+	}
+	t[j]=0;
+	pattern->value.str.val = t;
+	pattern->value.str.len = j;
+}
+
+
+static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg)
+{
+	switch (callback_type) {
+		case ZEND_INI_PARSER_ENTRY:
+			if (current_section) {
+				zval *new_property;
+				char *new_key;
+
+				new_property = (zval *) malloc(sizeof(zval));
+				INIT_PZVAL(new_property);
+				new_property->value.str.val = Z_STRVAL_P(arg2);
+				new_property->value.str.len = Z_STRLEN_P(arg2);
+				new_property->type = IS_STRING;
+				
+				new_key = zend_strndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				zend_str_tolower(new_key, Z_STRLEN_P(arg1));
+				zend_hash_update(current_section->value.obj.properties, new_key, Z_STRLEN_P(arg1)+1, &new_property, sizeof(zval *), NULL);
+				free(new_key);
+			}
+			break;
+		case ZEND_INI_PARSER_SECTION: {
+				zval *processed;
+
+				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len+1);*/
+				current_section = (zval *) malloc(sizeof(zval));
+				INIT_PZVAL(current_section);
+				processed = (zval *) malloc(sizeof(zval));
+				INIT_PZVAL(processed);
+
+				current_section->value.obj.ce = &zend_standard_class_def;
+				current_section->value.obj.properties = (HashTable *) malloc(sizeof(HashTable));
+				current_section->type = IS_OBJECT;
+				zend_hash_init(current_section->value.obj.properties, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1);
+				zend_hash_update(&browser_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void *) &current_section, sizeof(zval *), NULL);  
+
+				processed->value.str.val = Z_STRVAL_P(arg1);
+				processed->value.str.len = Z_STRLEN_P(arg1);
+				processed->type = IS_STRING;
+				convert_browscap_pattern(processed);
+				zend_hash_update(current_section->value.obj.properties, "browser_name_pattern", sizeof("browser_name_pattern"), (void *) &processed, sizeof(zval *), NULL);
+			}
+			break;
+	}
+}
+
+
+PHP_MINIT_FUNCTION(browscap)
+{
+	char *browscap = INI_STR("browscap");
+
+	if (browscap) {
+		zend_file_handle fh;
+
+		if (zend_hash_init(&browser_hash, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1)==FAILURE) {
+			return FAILURE;
+		}
+
+		fh.handle.fp = V_FOPEN(browscap, "r");
+		if (!fh.handle.fp) {
+			php_error(E_WARNING,"Cannot open '%s' for reading", browscap);
+			return FAILURE;
+		}
+		zend_parse_ini_file(&fh, (zend_ini_parser_cb_t) php_browscap_parser_cb, &browser_hash);
+	}
+
+	return SUCCESS;
+}
+
+
+PHP_MSHUTDOWN_FUNCTION(browscap)
+{
+	if (INI_STR("browscap")) {
+		zend_hash_destroy(&browser_hash);
+	}
+	return SUCCESS;
+}
+
 
 static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_hash_key *key)
 {
