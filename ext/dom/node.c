@@ -351,7 +351,7 @@ int dom_node_child_nodes_read(dom_object *obj, zval **retval TSRMLS_DC)
 	} else {
 		php_dom_create_interator(*retval, DOM_NODELIST TSRMLS_CC);
 		intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
-		dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
+		dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -529,7 +529,7 @@ int dom_node_attributes_read(dom_object *obj, zval **retval TSRMLS_DC)
 	if (nodep->type == XML_ELEMENT_NODE) {
 		php_dom_create_interator(*retval, DOM_NAMEDNODEMAP TSRMLS_CC);
 		intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
-		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL);
+		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL TSRMLS_CC);
 	} else {
 		ZVAL_NULL(*retval);
 	}
