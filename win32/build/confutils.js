@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.42.2.1 2005-01-20 03:28:04 wez Exp $
+// $Id: confutils.js,v 1.42.2.2 2005-02-13 21:40:28 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -349,7 +349,8 @@ can be built that way. \
 		'debug', 'crt-debug', 'lzf-better-compression',
 		 'php-build', 'snapshot-template',
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
-		 'path-info-check', 'zts', 'ipv6', 'memory-limit'
+		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
+		 'zend-multibyte'
 		);
 	var force;
 
