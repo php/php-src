@@ -185,6 +185,7 @@ InputPath=.\servlet.java
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
 	$(JAVA_HOME)\bin\javac net\php\servlet.java 
+	$(JAVA_HOME)\bin\javac net\php\reflect.java 
 	$(JAVA_HOME)\bin\javac net\php\formatter.java 
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
@@ -210,6 +211,7 @@ InputPath=.\servlet.java
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
 	$(JAVA_HOME)\bin\javac -g net\php\servlet.java 
+	$(JAVA_HOME)\bin\javac -g net\php\reflect.java 
 	$(JAVA_HOME)\bin\javac -g net\php\formatter.java 
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
@@ -235,6 +237,7 @@ InputPath=.\servlet.java
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
 	$(JAVA_HOME)\bin\javac -g net\php\servlet.java 
+	$(JAVA_HOME)\bin\javac -g net\php\reflect.java 
 	$(JAVA_HOME)\bin\javac -g net\php\formatter.java 
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
@@ -260,6 +263,7 @@ InputPath=.\servlet.java
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
 	$(JAVA_HOME)\bin\javac net\php\servlet.java 
+	$(JAVA_HOME)\bin\javac net\php\reflect.java 
 	$(JAVA_HOME)\bin\javac net\php\formatter.java 
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
