@@ -410,6 +410,33 @@ PHPAPI int php_printf(const char *format, ...)
 }
 /* }}} */
 
+static char *get_active_class_name(char **space TSRMLS_DC)
+{
+	if (!zend_is_executing(TSRMLS_C)) {
+		if (space) {
+			*space = "";
+		}
+		return "";
+	}
+	switch (EG(function_state_ptr)->function->type) {
+		case ZEND_USER_FUNCTION:
+		case ZEND_INTERNAL_FUNCTION:
+		{
+			zend_class_entry *ce = EG(function_state_ptr)->function->common.scope;
+
+			if (space) {
+				*space = ce ? "::" : "";
+			}
+			return ce ? ce->name : "";
+		}
+		default:
+			if (space) {
+				*space = "";
+			}
+			return "";
+	}
+}
+
 /* {{{ php_verror */
 /* php_verror is called from php_error_docref<n> functions.
  * Its purpose is to unify error messages and automatically generate clickable
@@ -422,6 +449,8 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *docref_target = "", *docref_root = "";
 	char *function, *p;
 	int buffer_len = 0;
+	char *space;
+	char *class_name = get_active_class_name(&space TSRMLS_CC);
 	
 	buffer_len = vspprintf(&buffer, 0, format, args);
 	if (buffer) {
@@ -477,11 +506,11 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			}
 			if (!PG(html_errors) || !strlen(PG(docref_root))) {
 				/* no docref and no html errors -> do not point to any documentation (e.g. production boxes) */
-				php_error(type, "%s(%s): %s", get_active_function_name(TSRMLS_C), params, buffer);
+				php_error(type, "%s%s%s(%s): %s", class_name, space, get_active_function_name(TSRMLS_C), params, buffer);
 			} else if (PG(html_errors)) {
-				php_error(type, "%s(%s) [<a href='%s%s%s'>%s</a>]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, docref, buffer);
+				php_error(type, "%s%s%s(%s) [<a href='%s%s%s'>%s</a>]: %s", class_name, space, get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, docref, buffer);
 			} else {
-				php_error(type, "%s(%s) [%s%s%s]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, buffer);
+				php_error(type, "%s%s%s(%s) [%s%s%s]: %s", class_name, space, get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, buffer);
 			}
 			if (target) {
 				efree(target);
@@ -490,7 +519,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			docref = get_active_function_name(TSRMLS_C);
 			if (!docref)
 				docref = "Unknown";
-			php_error(type, "%s(%s): %s", docref, params, buffer);
+			php_error(type, "%s(%s): %s", class_name, space, docref, params, buffer);
 		}
 
 		if (PG(track_errors) && EG(active_symbol_table)) {
@@ -507,7 +536,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			efree(docref_buf);
 		}
 	} else {
-		php_error(E_ERROR, "%s(%s): Out of memory", get_active_function_name(TSRMLS_C), params);
+		php_error(E_ERROR, "%s%s%s(%s): Out of memory", class_name, space, get_active_function_name(TSRMLS_C), params);
 	}
 }
 /* }}} */
@@ -615,7 +644,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	}
 
 	/* according to error handling mode, suppress error, throw exception or show it */
-	if (PG(error_handling)) {
+	if (PG(error_handling) != EH_NORMAL) {
 		switch (type) {
 			case E_ERROR:
 			case E_CORE_ERROR:
@@ -629,22 +658,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				 * but DO NOT overwrite a pending excepption
 				 */
 				if (PG(error_handling) == EH_THROW && !EG(exception)) {
-					zval *tmp;
-					ALLOC_ZVAL(EG(exception));
-					Z_TYPE_P(EG(exception)) = IS_OBJECT;
-					object_init_ex(EG(exception), PG(exception_class) ? PG(exception_class) : zend_exception_get_default());
-					EG(exception)->refcount = 1;
-					EG(exception)->is_ref = 1;
-					MAKE_STD_ZVAL(tmp);
-					ZVAL_STRING(tmp, buffer, 0);
-					zend_hash_update(Z_OBJPROP_P(EG(exception)), "message", sizeof("message"), (void **) &tmp, sizeof(zval *), NULL);
-					MAKE_STD_ZVAL(tmp);
-					ZVAL_STRING(tmp, (char*)error_filename, 1);
-					zend_hash_update(Z_OBJPROP_P(EG(exception)), "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL);
-					MAKE_STD_ZVAL(tmp);
-					ZVAL_LONG(tmp, error_lineno);
-					zend_hash_update(Z_OBJPROP_P(EG(exception)), "line", sizeof("line"), (void **) &tmp, sizeof(zval *), NULL);
+					zend_throw_exception(PG(exception_class), buffer, 0 TSRMLS_CC);
 				}
+				efree(buffer);
 				return;
 		}
 	}
