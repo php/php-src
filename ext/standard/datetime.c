@@ -180,7 +180,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	RETURN_LONG(seconds);
 }
 
-/* {{{ proto int mktime(int hour, int min, int sec, int mon, int mday, int year)
+/* {{{ proto int mktime(int hour, int min, int sec, int mon, int day, int year)
    Get UNIX timestamp for a date */
 PHP_FUNCTION(mktime)
 {
@@ -188,7 +188,7 @@ PHP_FUNCTION(mktime)
 }
 /* }}} */
 
-/* {{{ proto int gmmktime(int hour, int min, int sec, int mon, int mday, int year)
+/* {{{ proto int gmmktime(int hour, int min, int sec, int mon, int day, int year)
    Get UNIX timestamp for a GMT date */
 PHP_FUNCTION(gmmktime)
 {
