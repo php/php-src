@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirill Maximov <kir@rus.net>                                |
+   | Authors: Kirill Maximov <kir@actimind.com>                                |
    +----------------------------------------------------------------------+
  */
 
@@ -61,7 +61,7 @@ PHP_FUNCTION(quoted_printable_decode)
 {
 	pval **arg1;
 	char *str_in, *str_out;
-	int i = 0, j = 0;
+	int i = 0, j = 0, k;
 	
     if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&arg1)==FAILURE) 
     {
@@ -78,24 +78,49 @@ PHP_FUNCTION(quoted_printable_decode)
 	str_out = emalloc((*arg1)->value.str.len+1);
     while ( str_in[i] )
     {
-    	if ( (str_in[i] == '=') && str_in[i+1] && str_in[i+2] &&
-    	     ( isdigit((int)str_in[i+1]) || (str_in[i+1]<='F' && str_in[i+1]>='A'))
-    	     &&
-    	     ( isdigit((int)str_in[i+2]) || (str_in[i+2]<='F' && str_in[i+2]>='A'))
-    	   )
-    	{
-    		str_out[j++] = (php_hex2int((int)str_in[i+1]) << 4 ) 
-    		           + php_hex2int((int)str_in[i+2]);
-    		i += 3;
-    	}
-    	else if ( str_in[i] == 13 )
-    	{
-    		i++;
-    	}
-    	else
-    	{	
+        switch (str_in[i])
+        {
+        case '=':
+            if (str_in[i+1] && str_in[i+2] && 
+                isxdigit((int)str_in[i+1]) && 
+                isxdigit((int)str_in[i+1]) )
+            {
+                str_out[j++] = (php_hex2int((int)str_in[i+1]) << 4 ) 
+                           + php_hex2int((int)str_in[i+2]);
+                i += 3;
+            }
+            else   /* check for soft line break according to RFC 2045*/
+            {
+                k = 1;
+                while ( str_in[i+k] && ((str_in[i+k] == 32) || (str_in[i+k] == 9)) ) 
+                {
+                   /* Possibly, skip spaces/tabs at the end of line */
+                    k++;
+                }
+                if (!str_in[i+k])
+                {
+                    /* End of line reached */
+                    i += k;
+                }
+                else if ( (str_in[i+k] == 10) && (str_in[i+k+1] == 13))
+                {
+                    /* CRLF */
+                    i += k+2;
+                }
+                else if ( (str_in[i+k] == 13) || (str_in[i+k] == 10) )
+                {
+                    /* CR or LF */
+                    i += k+1;
+                }
+                else
+                {
+            		str_out[j++] = str_in[i++];
+                }
+            }
+            break;
+        default:
     		str_out[j++] = str_in[i++];
-    	}
+        }
     }
     str_out[j] = '\0';
     
