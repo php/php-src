@@ -368,7 +368,7 @@ void php_print_credits(int flag)
 		/* SAPI Modules */
 
 		php_info_print_table_start();
-		php_info_print_table_colspan_header(2, "SAPI Module");
+		php_info_print_table_colspan_header(2, "SAPI Modules");
 		php_info_print_table_header(2, "Contribution", "Authors");
 		CREDIT_LINE("Apache", "Rasmus Lerdorf, Zeev Suraski");
 		CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
