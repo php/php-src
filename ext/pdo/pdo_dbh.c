@@ -406,6 +406,7 @@ static PHP_METHOD(PDO, prepare)
 	stmt->query_string = estrndup(statement, statement_len);
 	stmt->query_stringlen = statement_len;
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
+	stmt->dbh = dbh;
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, driver_options TSRMLS_CC)) {
 		/* prepared; create a statement object for PHP land to access it */
