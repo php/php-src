@@ -24,13 +24,19 @@ typedef struct comval_ {
 END_EXTERN_C()
 
 #define ZVAL_COM(z,o) {																\
-			zval *handle;															\
+			zval *handle = NULL;													\
+			ZVAL_COM_EX(z,o,handle)													\
+		}
+
+#define ZVAL_COM_EX(z,o,handle) {													\
 			HashTable *properties;													\
 																					\
 			ALLOC_HASHTABLE(properties);											\
 			zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);					\
 																					\
-			MAKE_STD_ZVAL(handle);													\
+			if (handle == NULL) {													\
+				MAKE_STD_ZVAL(handle);												\
+			}																		\
 			ZVAL_LONG(handle, zend_list_insert((o), IS_COM));						\
 																					\
 			zval_copy_ctor(handle);													\

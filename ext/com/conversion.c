@@ -56,8 +56,6 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage T
 		case IS_OBJECT:
 			if (!strcmp(Z_OBJCE_P(pval_arg)->name, "VARIANT")) {
 				type = VT_VARIANT|VT_BYREF;
-			} else if (!strcmp(Z_OBJCE_P(pval_arg)->name, "COM")) {
-				type = VT_DISPATCH;
 			} else {
 				type = VT_DISPATCH;
 			}
@@ -275,8 +273,9 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 					comval_to_variant(pval_arg, var_arg TSRMLS_CC);
 				} else {
 					V_DISPATCH(var_arg) = php_COM_export_object(pval_arg TSRMLS_CC);
-					if (V_DISPATCH(var_arg))
+					if (V_DISPATCH(var_arg)) {
 						V_VT(var_arg) = VT_DISPATCH;
+					}
 				}
 				if (V_VT(var_arg) != VT_DISPATCH) {
 					VariantInit(var_arg);
