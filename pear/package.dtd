@@ -1,10 +1,10 @@
 <!--
-     $Id: package.dtd,v 1.5 2001-04-15 23:52:42 ssb Exp $
+     $Id: package.dtd,v 1.6 2001-05-28 11:14:47 ssb Exp $
 
-     This is the PEAR package description, version 1.0.
+     This is the PEAR package description, version 1.1b1.
      It should be used with the informal public identifier:
 
-         "-//PHP Group//DTD PEAR Package 1.0//EN//XML"
+         "-//PHP Group//DTD PEAR Package 1.1b1//EN//XML"
 
      Copyright (c) 1997-2001 The PHP Group             
 
@@ -79,7 +79,7 @@
 	%global.atts; 
 >
 <!--=============== ELEMENT: FileList ======================================-->
-<!ELEMENT FileList (Dir | File)*>
+<!ELEMENT FileList (Dir | File | LibFile)*>
 <!ATTLIST FileList
 	%global.atts; 
 >
@@ -95,4 +95,31 @@
 	%role.atts; 
 	%extension.atts; 
 	%format.atts; 
+>
+<!--=============== ELEMENT: LibFile =======================================-->
+<!ELEMENT LibFile (LibName,Sources,Includes?,LibAdd?)>
+<!ATTLIST LibFile
+	%global.atts; 
+	%role.atts; 
+>
+<!--=============== ELEMENT: LibFile =======================================-->
+<!ELEMENT LibFile (LibName,Sources,Includes?,LibAdd?)>
+<!ATTLIST LibFile
+	%global.atts; 
+	%role.atts; 
+>
+<!--=============== ELEMENT: LibName =======================================-->
+<!ELEMENT LibName (#PCDATA)>
+<!ATTLIST LibName
+	%global.atts; 
+>
+<!--=============== ELEMENT: Sources =======================================-->
+<!ELEMENT Sources (#PCDATA)>
+<!ATTLIST Sources
+	%global.atts; 
+>
+<!--=============== ELEMENT: LibAdd ========================================-->
+<!ELEMENT LibAdd (#PCDATA)>
+<!ATTLIST LibAdd
+	%global.atts; 
 >
