@@ -10,8 +10,6 @@ PHP                                                                        NEWS
   (Dmitry, Andi)
 - Changed __construct() to always take precedence over old style constructor.
   (Dmitry)
-- Fixed bug #27687 (Bug Adding Default Charset to "text/*" Content-Type 
-  Header). (Marcus)
 - Fixed bug #27641 (Object cloning in ze1_compatibility_mode was reimplemented)
   (Dmitry, Andi)
 - Fixed bug #27628 (Simplify the process of making a POST request via stream
