@@ -36,6 +36,7 @@
 #include "ext/standard/head.h"
 #include "exec.h"
 #include "php_globals.h"
+#include "SAPI.h"
 
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -118,12 +119,14 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 	if (type != 3) {
 		while (fgets(buf, EXEC_INPUT_BUF - 1, fp)) {
 			if (type == 1) {
+				SLS_FETCH();
+				
 				if (output) PUTS(buf);
 #if APACHE
 #  if MODULE_MAGIC_NUMBER > 19970110
-				if (output) rflush(php3_rqst);
+				if (output) rflush(((request_rec *) SG(server_context)));
 #  else
-				if (output) bflush(php3_rqst->connection->client);
+				if (output) bflush(((request_rec *) SG(server_context))->connection->client);
 #  endif
 #endif
 #if CGI_BINARY

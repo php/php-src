@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #include "ext/standard/pageinfo.h"
 #include "safe_mode.h"
+#include "SAPI.h"
 
 /*
  * _php3_checkuid
@@ -125,6 +126,7 @@ PHPAPI char *_php3_get_current_user()
 #endif
 	struct passwd *pwd;
 	int uid;
+	SLS_FETCH();
 
 	if (request_info.current_user) {
 		return request_info.current_user;
@@ -140,7 +142,7 @@ PHPAPI char *_php3_get_current_user()
 	uid = statbuf.st_uid;
 #endif
 #if APACHE
-	uid = php3_rqst->finfo.st_uid;
+	uid = ((request_rec *) SG(server_context))->finfo.st_uid;
 #endif
 
 	if ((pwd=getpwuid(uid))==NULL) {

@@ -169,7 +169,7 @@ PHPAPI void php3_fhttpd_puts_header(char *s)
 	}
 }
 
-void fhttpd_flush( /*php3_rqst->connection */ void)
+void fhttpd_flush(void)
 {
 }
 

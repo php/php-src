@@ -30,6 +30,7 @@
 
 #include "php.h"
 #include "pageinfo.h"
+#include "SAPI.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,6 +60,11 @@ static void _php3_statpage(void)
 #if !APACHE
 	char *path;
 	struct stat sb;
+#else
+	request_rec *r;
+	SLS_FETCH();
+	
+	r = ((request_rec *) SG(server_context));
 #endif
 	
 #if APACHE
@@ -67,9 +73,9 @@ static void _php3_statpage(void)
 	   values. We can afford it, and it means we don't have to
 	   worry about resetting the static variables after every
 	   hit. */
-	page_uid   = php3_rqst->finfo.st_uid;
-	page_inode = php3_rqst->finfo.st_ino;
-	page_mtime = php3_rqst->finfo.st_mtime;
+	page_uid   = r ->finfo.st_uid;
+	page_inode = r->finfo.st_ino;
+	page_mtime = r->finfo.st_mtime;
 #else
 	if (page_uid == -1) {
 		path = request_info.filename;

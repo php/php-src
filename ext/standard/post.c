@@ -32,6 +32,7 @@
 #include "php.h"
 #include "php3_standard.h"
 #include "php_globals.h"
+#include "SAPI.h"
 
 #include "zend_globals.h"
 
@@ -54,6 +55,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 	int file_upload = 0;
 	char *mb;
 	char boundary[100];
+	SLS_FETCH();
 	
 	ctype = request_info.content_type;
 	if (!ctype) {
@@ -92,29 +94,29 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
     buf[length]=0;
 #else
 #if MODULE_MAGIC_NUMBER > 19961007
-	if (should_client_block(php3_rqst)) {
+	if (should_client_block(SG(server_context))) {
 		void (*handler) (int);
 		int dbsize, len_read, dbpos = 0;
 
-		hard_timeout("copy script args", php3_rqst);	/* start timeout timer */
+		hard_timeout("copy script args", ((request_rec *) SG(server_context)));	/* start timeout timer */
 		handler = signal(SIGPIPE, SIG_IGN);		/* Ignore sigpipes for now */
-		while ((len_read = get_client_block(php3_rqst, argsbuffer, HUGE_STRING_LEN)) > 0) {
+		while ((len_read = get_client_block(((request_rec *) SG(server_context)), argsbuffer, HUGE_STRING_LEN)) > 0) {
 			if ((dbpos + len_read) > length)
 				dbsize = length - dbpos;
 			else
 				dbsize = len_read;
-			reset_timeout(php3_rqst);	/* Make sure we don't timeout */
+			reset_timeout(((request_rec *) SG(server_context)));	/* Make sure we don't timeout */
 			memcpy(buf + dbpos, argsbuffer, dbsize);
 			dbpos += dbsize;
 		}
 		signal(SIGPIPE, handler);	/* restore normal sigpipe handling */
-		kill_timeout(php3_rqst);	/* stop timeout timer */
+		kill_timeout(((request_rec *) SG(server_context)));	/* stop timeout timer */
 	}
 #else
 	cnt = 0;
 	do {
 #if APACHE
-		bytes = read_client_block(php3_rqst, buf + cnt, length - cnt);
+		bytes = read_client_block(((request_rec *) SG(server_context)), buf + cnt, length - cnt);
 #endif
 #if CGI_BINARY
 		bytes = fread(buf + cnt, 1, length - cnt, stdin);
@@ -405,29 +407,33 @@ PHPAPI void php3_TreatHeaders(void)
 	char *user, *type;
 	int len;
 	char *escaped_str;
+	request_rec *r;
 	PLS_FETCH();
+	SLS_FETCH();
 
-	if (php3_rqst->headers_in)
-		s = table_get(php3_rqst->headers_in, "Authorization");
+	r = ((request_rec *) SG(server_context));
+	
+	if (r->headers_in)
+		s = table_get(r->headers_in, "Authorization");
 	if (!s)
 		return;
 
 	/* Check to make sure that this URL isn't authenticated
 	   using a traditional auth module mechanism */
-	if (auth_type(php3_rqst)) {
+	if (auth_type(r)) {
 		/*php3_error(E_WARNING, "Authentication done by server module\n");*/
 		return;
 	}
-	if (strcmp(t=getword(php3_rqst->pool, &s, ' '), "Basic")) {
+	if (strcmp(t=getword(r->pool, &s, ' '), "Basic")) {
 		/* Client tried to authenticate using wrong auth scheme */
 		php3_error(E_WARNING, "client used wrong authentication scheme (%s)", t);
 		return;
 	}
-	t = uudecode(php3_rqst->pool, s);
+	t = uudecode(r->pool, s);
 #if MODULE_MAGIC_NUMBER > 19961007
-	user = getword_nulls_nc(php3_rqst->pool, &t, ':');
+	user = getword_nulls_nc(r->pool, &t, ':');
 #else
-	user = getword(php3_rqst->pool, &t, ':');
+	user = getword(r->pool, &t, ':');
 #endif
 	type = "Basic";
 

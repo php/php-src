@@ -33,6 +33,7 @@
 #include "php_globals.h"
 #include "ext/standard/head.h"
 #include "info.h"
+#include "SAPI.h"
 #ifndef MSVC5
 #include "build-defs.h"
 #endif
@@ -88,7 +89,6 @@ PHPAPI void _php3_info(void)
 	ELS_FETCH();
 	PLS_FETCH();
 	
-	
 #if WIN32|WINNT
 	// Get build numbers for Windows NT or Win95
 	if (dwVersion < 0x80000000){
@@ -104,7 +104,7 @@ PHPAPI void _php3_info(void)
 
 
 	PUTS("<img src=\"");
-	/*PUTS(php3_rqst->uri);*/
+	/*PUTS(r->uri);*/
 	PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" width=\"100\" height=\"56\" align=\"right\">\n");
 	php3_printf("<center><h1>PHP Version %s</h1></center>\n", PHP_VERSION);
 	PUTS("<p>by <a href=\"mailto:rasmus@lerdorf.on.ca\">Rasmus Lerdorf</a>,\n");
@@ -321,9 +321,15 @@ PHPAPI void _php3_info(void)
 #if APACHE
 	{
 		register int i;
-		array_header *arr = table_elts(php3_rqst->subprocess_env);
-		table_entry *elts = (table_entry *)arr->elts;
+		array_header *arr;
+		table_entry *elts;
+		request_rec *r;
+		SLS_FETCH();
 
+		r = ((request_rec *) SG(server_context));
+		arr = table_elts(r->subprocess_env);
+		elts = (table_entry *)arr->elts;
+		
 		SECTION("Apache Environment");	
 		PUTS("<table border=5 width=\"600\">\n");
 		PUTS("<tr><th bgcolor=\"" HEADER_COLOR "\">Variable</th><th bgcolor=\"" HEADER_COLOR "\">Value</th></tr>\n");
@@ -343,14 +349,17 @@ PHPAPI void _php3_info(void)
 		array_header *env_arr;
 		table_entry *env;
 		int i;
-
+		request_rec *r;
+		SLS_FETCH();
+		
+		r = ((request_rec *) SG(server_context));
 		SECTION("HTTP Headers Information");
 		PUTS("<table border=5 width=\"600\">\n");
 		PUTS(" <tr><th colspan=2 bgcolor=\"" HEADER_COLOR "\">HTTP Request Headers</th></tr>\n");
 		PUTS("<tr><td bgcolor=\"" ENTRY_NAME_COLOR "\">HTTP Request</td><td bgcolor=\"" CONTENTS_COLOR "\">");
-		PUTS(php3_rqst->the_request);
+		PUTS(r->the_request);
 		PUTS("&nbsp;</td></tr>\n");
-		env_arr = table_elts(php3_rqst->headers_in);
+		env_arr = table_elts(r->headers_in);
 		env = (table_entry *)env_arr->elts;
 		for (i = 0; i < env_arr->nelts; ++i) {
 			if (env[i].key) {
@@ -362,7 +371,7 @@ PHPAPI void _php3_info(void)
 			}
 		}
 		PUTS(" <tr><th colspan=2  bgcolor=\"" HEADER_COLOR "\">HTTP Response Headers</th></tr>\n");
-		env_arr = table_elts(php3_rqst->headers_out);
+		env_arr = table_elts(r->headers_out);
 		env = (table_entry *)env_arr->elts;
 		for(i = 0; i < env_arr->nelts; ++i) {
 			if (env[i].key) {
@@ -383,7 +392,7 @@ PHPAPI void _php3_info(void)
 	PUTS("<table width=\"100%%\"><tr>\n");
 	php3_printf("<td><h2>Zend</h2>This program makes use of the Zend scripting language engine:<br><pre>%s</pre></td>", get_zend_version());
 	PUTS("<td width=\"100\"><a href=\"http://www.zend.com/\"><img src=\"");
-	/*PUTS(php3_rqst->uri);*/
+	/*PUTS(r->uri);*/
 	PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" width=\"100\" height=\"89\"></a></td>\n");
 	PUTS("</tr></table>\n");
 

@@ -39,6 +39,7 @@
 #include "php.h"
 #include "ext/standard/head.h"
 #include <math.h>
+#include "SAPI.h"
 #include "php3_gd.h"
 
 #if HAVE_SYS_WAIT_H
@@ -189,7 +190,8 @@ void php3_info_gd(void) {
 #endif
 }
 
-int php3_mend_gd(void){
+int php3_mend_gd(SHUTDOWN_FUNC_ARGS)
+{
 	GD_TLS_VARS;
 #ifdef THREAD_SAFE
 	PHP3_TLS_THREAD_FREE(gdlib_globals);
@@ -776,11 +778,13 @@ void php3_imagegif (INTERNAL_FUNCTION_PARAMETERS) {
 		output = php3_header();
 
 		if (output) {
+			SLS_FETCH();
+			
 			gdImageGif (im, tmp);
 			fseek(tmp, 0, SEEK_SET);
 #if APACHE && defined(CHARSET_EBCDIC)
 			/* This is a binary file already: avoid EBCDIC->ASCII conversion */
-			ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
+			ap_bsetflag(((request_rec *) SG(server_context))->connection->client, B_EBCDIC2ASCII, 0);
 #endif
 			while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
 				php3_write(buf, b);

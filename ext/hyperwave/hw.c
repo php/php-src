@@ -1681,7 +1681,10 @@ void php3_hw_pipedocument(INTERNAL_FUNCTION_PARAMETERS) {
 	hw_connection *ptr;
 	hw_document *doc;
 #if APACHE
-	server_rec *serv = php3_rqst->server;
+	server_rec *serv;
+	SLS_FETCH();
+	
+	serv = ((request_rec *) SG(server_context))->server;
 #endif
 
 	argc = ARG_COUNT(ht);
@@ -1748,7 +1751,10 @@ void php3_hw_pipecgi(INTERNAL_FUNCTION_PARAMETERS) {
 	hw_document *doc;
 	char cgi_env_str[1000];
 #if APACHE
-	server_rec *serv = php3_rqst->server;
+	server_rec *serv;
+	SLS_FETCH();
+	
+	serv = ((request_rec *) SG(server_context))->server;
 #endif
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
@@ -1809,7 +1815,10 @@ void php3_hw_insertdocument(INTERNAL_FUNCTION_PARAMETERS) {
 	hw_connection *ptr;
 	hw_document *docptr;
 #if APACHE
-	server_rec *serv = php3_rqst->server;
+	server_rec *serv;
+	SLS_FETCH();
+	
+	serv = ((request_rec *) SG(server_context))->server;
 #endif
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {

@@ -197,9 +197,6 @@ extern char *strerror(int);
 #include "http_log.h"
 #define BLOCK_INTERRUPTIONS block_alarms
 #define UNBLOCK_INTERRUPTIONS unblock_alarms
-# ifndef THREAD_SAFE
-extern request_rec *php3_rqst;
-# endif
 #endif
 
 #if HAVE_PWD_H

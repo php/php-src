@@ -44,6 +44,7 @@
 #include "http_protocol.h"
 #include "http_request.h"
 #include "http_log.h"
+#include "SAPI.h"
 
 
 /* These are taken out of php_ini.h
@@ -101,8 +102,10 @@ void php3_save_umask()
 
 static int zend_apache_ub_write(const char *str, uint str_length)
 {
-	if (php3_rqst) {
-		return rwrite(str, str_length, php3_rqst);
+	SLS_FETCH();
+	
+	if (SG(server_context)) {
+		return rwrite(str, str_length, (request_rec *) SG(server_context));
 	} else {
 		return fwrite(str, 1, str_length, stdout);
 	}
