@@ -236,25 +236,26 @@ PHPAPI int connect_nonb(int sockfd,
    to this variable.
 */
 static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
-	pval *args[5];
+	pval **args[5];
 	int *sock=emalloc(sizeof(int));
 	int *sockp;
 	int arg_count=ARG_COUNT(ht);
 	int socketd = -1;
+	unsigned char udp = 0;
 	struct timeval timeout = { 60, 0 };
 	unsigned short portno;
 	unsigned long conv;
 	char *key = NULL;
 	FLS_FETCH();
 	
-	if (arg_count > 5 || arg_count < 2 || getParametersArray(ht,arg_count,args)==FAILURE) {
+	if (arg_count > 5 || arg_count < 2 || zend_get_parameters_array_ex(arg_count,args)==FAILURE) {
 		FREE_SOCK;
 		WRONG_PARAM_COUNT;
 	}
 	switch(arg_count) {
 		case 5:
-			convert_to_double(args[4]);
-			conv = (unsigned long) (args[4]->value.dval * 1000000.0);
+			convert_to_double_ex(args[4]);
+			conv = (unsigned long) ((*args[4])->value.dval * 1000000.0);
 			timeout.tv_sec = conv / 1000000;
 			timeout.tv_usec = conv % 1000000;
 			/* fall-through */
@@ -262,25 +263,25 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			if(!ParameterPassedByReference(ht,4)) {
 				php_error(E_WARNING,"error string argument to fsockopen not passed by reference");
 			}
-			pval_copy_constructor(args[3]);
-			args[3]->value.str.val = empty_string;
-			args[3]->value.str.len = 0;
-			args[3]->type = IS_STRING;
+			pval_copy_constructor(*args[3]);
+			(*args[3])->value.str.val = empty_string;
+			(*args[3])->value.str.len = 0;
+			(*args[3])->type = IS_STRING;
 			/* fall-through */
 		case 3:
 			if(!ParameterPassedByReference(ht,3)) {
 				php_error(E_WARNING,"error argument to fsockopen not passed by reference");
 			}
-			args[2]->type = IS_LONG;
-			args[2]->value.lval = 0;
+			(*args[2])->type = IS_LONG;
+			(*args[2])->value.lval = 0;
 			break;
 	}
-	convert_to_string(args[0]);
-	convert_to_long(args[1]);
-	portno = (unsigned short) args[1]->value.lval;
+	convert_to_string_ex(args[0]);
+	convert_to_long_ex(args[1]);
+	portno = (unsigned short) (*args[1])->value.lval;
 
-	key = emalloc(args[0]->value.str.len + 10);
-	sprintf(key, "%s:%d", args[0]->value.str.val, portno);
+	key = emalloc((*args[0])->value.str.len + 10);
+	sprintf(key, "%s:%d", (*args[0])->value.str.val, portno);
 
 	if (persistent && zend_hash_find(&FG(ht_fsock_keys), key, strlen(key) + 1,
 				(void *) &sockp) == SUCCESS) {
@@ -294,7 +295,17 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		struct sockaddr_in server;
 
 		memset(&server, 0, sizeof(server));
-		socketd = socket(AF_INET, SOCK_STREAM, 0);
+		if((*args[0])->value.str.val[0] == 'u' &&
+			(*args[0])->value.str.val[1] == 'd' &&
+			(*args[0])->value.str.val[2] == 'p' &&
+			(*args[0])->value.str.val[3] == ':' &&
+			(*args[0])->value.str.val[4] == '/' &&
+			(*args[0])->value.str.val[5] == '/') {
+			udp = 1;
+		}
+		
+		socketd = socket(AF_INET,udp ? SOCK_DGRAM : SOCK_STREAM,0);
+
 		if (socketd == SOCK_ERR) {
 			FREE_SOCK;
 			RETURN_FALSE;
@@ -302,7 +313,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	  
 		server.sin_family = AF_INET;
 		
-		if (lookup_hostname(args[0]->value.str.val, &server.sin_addr)) {
+		if(lookup_hostname(udp ? &(*args[0])->value.str.val[6] : (*args[0])->value.str.val,&server.sin_addr)) {
 			FREE_SOCK;
 			RETURN_FALSE;
 		}
@@ -311,10 +322,10 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
   
 		if (connect_nonb(socketd, (struct sockaddr *)&server, sizeof(server), &timeout) == SOCK_CONN_ERR) {
 			FREE_SOCK;
-			if(arg_count>2) args[2]->value.lval = errno;
+			if(arg_count>2) (*args[2])->value.lval = errno;
 			if(arg_count>3) {
-				args[3]->value.str.val = estrdup(strerror(errno));
-				args[3]->value.str.len = strlen(args[3]->value.str.val);
+				(*args[3])->value.str.val = estrdup(strerror(errno));
+				(*args[3])->value.str.len = strlen((*args[3])->value.str.val);
 			}
 			RETURN_FALSE;
 		}
@@ -330,14 +341,14 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	  
 		memset(&unix_addr,(char)0,sizeof(unix_addr));
 		unix_addr.sun_family = AF_UNIX;
-		strcpy(unix_addr.sun_path, args[0]->value.str.val);
+		strcpy(unix_addr.sun_path, (*args[0])->value.str.val);
 
 		if (connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), &timeout) == SOCK_CONN_ERR) {
 			FREE_SOCK;
-			if(arg_count>2) args[2]->value.lval = errno;
+			if(arg_count>2) (*args[2])->value.lval = errno;
 			if(arg_count>3) {
-				args[3]->value.str.val = estrdup(strerror(errno));
-				args[3]->value.str.len = strlen(args[3]->value.str.val);
+				(*args[3])->value.str.val = estrdup(strerror(errno));
+				(*args[3])->value.str.len = strlen((*args[3])->value.str.val);
 			}
 			RETURN_FALSE;
 		}
