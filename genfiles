@@ -2,7 +2,7 @@
 
 STD='make -f Makefile.am LEX="flex -L" YACC="bison -y -l" srcdir=.'
 
-(cd Zend && eval "$STD zend_language_parser.c zend_language_scanner.c zend_language_scanner_cc.cc zend_ini_parser.c zend_ini_scanner.c zend_ini_scanner_cc.cc")
+(cd Zend && eval "$STD zend_language_parser.c zend_language_scanner.c zend_ini_parser.c zend_ini_scanner.c")
 
 files="Makefile main/Makefile ext/standard/Makefile"
 sh build/fastgen.sh . yes no $files
