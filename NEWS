@@ -1,10 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
-- Add interface_exists() and make class_exists() only return true for real
-  classes. (Andrey Hristov)
-- Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
-  exhaustion. (Andrei)
 - Improved performance of switch statement. (Dmitry)
 - Removed garbage manager in Zend Engine which results in more aggressive
   freeing of data. (Dmitry, Andi)
