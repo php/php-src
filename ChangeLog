@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Return false from mysql_query() and mysql_db_query() in case saving the
+  result set data fails (Zeev)
 - Improved the resource mechanism - resources were not getting freed as soon
   as they could (Zeev)
 - Added shared memory module for session data storage (Sascha)
