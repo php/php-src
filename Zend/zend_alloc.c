@@ -516,7 +516,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 			}
 #endif
 #if MEMORY_LIMIT
-			AG(allocated_memory) -= t->size;
+			AG(allocated_memory) -= REAL_SIZE(t->size);
 #endif
 			p = t->pNext;
 			REMOVE_POINTER_FROM_LIST(t);
