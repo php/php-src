@@ -1,3 +1,43 @@
+2003-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h
+      zend_builtin_functions.c
+      zend_execute.c
+      zend_object_handlers.c
+      zend_operators.c
+      zend_reflection_api.c:
+      Fix warnings
+
+2003-08-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend.h:
+      One bit fields need to be unsigned, otherwise there is no storage for
+      the sign bit
+      
+      "A signed bit field has a length of 1 bit."
+
+    * zend_API.h:
+      explicitly cast size_t to zend_uint to avoid warnings on 64 bit platforms.
+
+2003-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Remove unnecessary if
+
+    * zend_execute.c:
+      Put the code where it belongs - fixes a warning and confusion
+
+    * zend_compile.c
+      zend_execute.c:
+      Implement a TBD: JMP to the end of foreach
+
+    * zend_compile.c:
+      WS
+
+    * zend_API.c:
+      - Show class names in error messages when dealing with methods
+      - Mark class as abstract if it gets an abstract method
+
 2003-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
