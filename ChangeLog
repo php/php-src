@@ -1,3 +1,147 @@
+2001-01-09  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/sablot/config.m4:
+    added a option to dedine libexpat install directory (by Jani Taskinen)
+
+2001-01-09  Colin Viebrock  <colin@easydns.com>
+
+    * pear/README: I should learn how to spell
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+    * pear/README: Now the coding standards are defined elsewhere ...
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+    * pear/Schedule/At.php:
+    Attempt to use PEAR error class ... someone please check this over
+
+2001-01-09  Zeev Suraski  <zeev@zend.com>
+
+    * ext/pdf/pdf.c
+      NEWS: Merge Daniel's PDF fixes
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-09  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Schedule/At.php: more docs, remove debugging line
+
+2001-01-09  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/sablot.c:
+    Move the definition of the xslt_set_encoding to the "proper" place in the file and
+    fix the prototype.
+
+2001-01-09  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Schedule/At.php:
+    Schedule_AT class: interface to the Unix "at" command
+
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-09  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/CODING_STANDARDS: Update the copyright year range to 1997-2001.
+
+2001-01-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.re
+      ext/standard/output.c
+      ext/standard/url_scanner_ex.c:
+    Avoid possible memory leak in the URL scanner, if the connection is
+    interrupted during writing the output.
+
+2001-01-09  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/iconv/iconv.c: Sorry, two lines are enough.
+
+    * ext/iconv/iconv.c: Fixed protos.
+
+2001-01-09  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/iconv/tests/001.phpt: added test code to iconv.
+
+    * ext/iconv/Makefile.in
+      ext/iconv/config.m4
+      ext/iconv/iconv.c
+      ext/iconv/php_iconv.h:
+    move iconv related functions to separate iconv extension.
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/config.m4
+      ext/standard/php_string.h
+      ext/standard/string.c: added iconv extension.
+
+2001-01-09  Thies C. Arntzen  <thies@thieso.net>
+
+    * main/safe_mode.c:
+    - Allow access to uploaded files in safe_mode. Beware that you can only
+      read the file. If you copy it to new location the copy will not have the
+      right UID and you script won't be able to access that copy. 
+
+2001-01-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: Update documentation/add status
+
+2001-01-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c:
+    If TZ environment variable is changed call tzset().
+
+2001-01-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Propagate the response code/HTTP status code back to thttpd for logging.
+
+    * sapi/thttpd/thttpd.c: Account the number of sent bytes properly
+
+    * ext/ircg/ircg.c:
+    Handle the case that the IRC server kills our connection more gracefully
+    (i.e. without segfaulting the whole server).
+
+2001-01-09  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * pear/php-config.in: fix for Bug id #8606
+
+2001-01-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var.c:
+    php_add_var_hash() uses sizeof(id) in the calls to zend_hash_*, implying
+    that all bytes in the character array have been set (they are used
+    to compute the hash value using hashpjw).
+
+    The function assumes that sprintf's %p modifier would always prefix
+    the output with "0x".  On HPUX, this is not the case.  Hence, not
+    all bytes may be properly initialized before being read.
+
+    This has been addressed by using only initialized bytes as the key.
+
+    * ext/ircg/ircg.c:
+    Use sapi_send_headers() and use the simpler zend_llist_apply*
+    function for traversing the message buffer.
+
+    * ext/ircg/ircg.c:
+    Add an irc handler for (non-)fatal error messages and don't free
+    our default strings which are static.
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h: Add ircg_is_conn_alive()
+
+    * ext/ircg/ircg.c:
+    Kill a warning, initialize some variables properly in mirc_colors(),
+    and make the standard output XHTML compatible (to a certain degree).
+
 2001-01-08  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/apache2filter/sapi_apache2.c
