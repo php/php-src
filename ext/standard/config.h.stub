@@ -12,3 +12,6 @@
 
 /* Define if you have libdl (used for dynamic linking) */
 #define HAVE_LIBDL 0
+
+#undef HAVE_GETWD
+#undef HAVE_GETCWD

@@ -118,6 +118,8 @@ AC_CHECK_LIB(crypt, crypt, [
  AC_ADD_LIBRARY(crypt)
  AC_DEFINE(HAVE_LIBCRYPT) ], [])
 
+AC_CHECK_FUNCS(getcwd)
+AC_CHECK_FUNCS(getwd)
 
 divert(3)
 
