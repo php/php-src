@@ -354,6 +354,7 @@ unistd.h \
 unix.h \
 utime.h \
 sys/utsname.h \
+sys/ipc.h \
 ],[],[],[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
