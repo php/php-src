@@ -860,12 +860,12 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 				ptr = s;
 			}
 #else
-			while ((s = memchr(ptr, '\r', (e - ptr)))) {
+			while (e > ptr && (s = memchr(ptr, '\r', (e - ptr)))) {
 				php_stream_write(outstream, ptr, (s - ptr));
 				if (*(s + 1) == '\n') {
 					s++;
+					php_stream_putc(outstream, '\n');
 				}
-				php_stream_putc(outstream, '\n');
 				ptr = s + 1;
 			}
 #endif
