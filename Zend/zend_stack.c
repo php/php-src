@@ -118,7 +118,7 @@ ZEND_API int zend_stack_count(zend_stack *stack)
 }
 
 
-ZEND_API void zend_stack_apply(zend_stack *stack, int (*apply_function)(void *element), int type)
+ZEND_API void zend_stack_apply(zend_stack *stack, int type, int (*apply_function)(void *element))
 {
 	int i;
 
@@ -141,7 +141,7 @@ ZEND_API void zend_stack_apply(zend_stack *stack, int (*apply_function)(void *el
 }
 
 
-ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int (*apply_function)(void *element, void *arg), int type, void *arg)
+ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg)
 {
 	int i;
 
