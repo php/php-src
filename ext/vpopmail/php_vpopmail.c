@@ -844,7 +844,7 @@ PHP_FUNCTION(vpopmail_alias_del_domain)
 }
 /* }}} */
 
-/* {{{ proto bool vpopmail_alias_get(string alias, string domain)
+/* {{{ proto array vpopmail_alias_get(string alias, string domain)
    get all lines of an alias for a domain */
 PHP_FUNCTION(vpopmail_alias_get)
 {
