@@ -57,7 +57,7 @@ static ps_mm *ps_mm_instance = NULL;
 #if 0
 #define ps_mm_debug(a...) fprintf(stderr, a)
 #else
-#define ps_mm_debug(a...)
+#define ps_mm_debug
 #endif
 
 #define BITS_IN_int (sizeof(int) * CHAR_BIT)
