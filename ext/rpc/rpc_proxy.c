@@ -1,6 +1,7 @@
 #include "php.h"
 
 #include "rpc_proxy.h"
+#include "handler.h"
 
 /* object handler */
 static void rpc_proxy_add_ref(zval * TSRMLS_DC);
@@ -22,7 +23,7 @@ static int rpc_proxy_get_classname(zval *, char **, zend_uint *, int  TSRMLS_DC)
 static int rpc_proxy_compare(zval *, zval * TSRMLS_DC);
 /**/
 
-static zend_object_handlers rpc_proxy_handlers = {
+zend_object_handlers rpc_proxy_handlers = {
 	rpc_proxy_add_ref,
 	rpc_proxy_del_ref,
 	rpc_proxy_delete,

@@ -14,6 +14,7 @@ ZEND_DECLARE_MODULE_GLOBALS(rpc)
 
 static void rpc_globals_ctor(zend_rpc_globals * TSRMLS_DC);
 static void rpc_instance_dtor(void *);
+static void rpc_proxy_dtor(void *pDest);
 static void rpc_class_dtor(void *);
 static void rpc_string_dtor(void *);
 static void rpc_export_functions(char *, zend_class_entry *, function_entry[] TSRMLS_DC);
@@ -43,6 +44,8 @@ static int rpc_compare(zval *, zval * TSRMLS_DC);
 static void rpc_internal_get(rpc_internal *, char *, zend_uint, zval *);
 static void rpc_internal_set(rpc_internal *, char *, zend_uint, zval *);
 /**/
+
+extern zend_object_handlers rpc_proxy_handlers;
 
 static zend_object_handlers rpc_handlers = {
 	rpc_add_ref,
@@ -91,6 +94,7 @@ zend_module_entry rpc_module_entry = {
 
 static HashTable *handlers;
 static TsHashTable *instance;
+static TsHashTable *proxy;
 static TsHashTable *classes;
 static zend_llist *classes_list;
 
@@ -115,11 +119,13 @@ ZEND_MINIT_FUNCTION(rpc)
 {
 	handlers = (HashTable *) pemalloc(sizeof(HashTable), TRUE);
 	instance = (TsHashTable *) pemalloc(sizeof(TsHashTable), TRUE);
+	proxy = (TsHashTable *) pemalloc(sizeof(TsHashTable), TRUE);
 	classes = (TsHashTable *) pemalloc(sizeof(TsHashTable), TRUE);
 	classes_list = (zend_llist *) pemalloc(sizeof(zend_llist), TRUE);
 
 	zend_hash_init(handlers, 0, NULL, NULL, TRUE);	
 	zend_ts_hash_init(instance, 0, NULL, rpc_instance_dtor, TRUE);
+	zend_ts_hash_init(proxy, 0, NULL, rpc_proxy_dtor, TRUE);
 	zend_ts_hash_init(classes, 0, NULL, NULL, TRUE);
 	zend_llist_init(classes_list, sizeof(rpc_class_hash **), rpc_class_dtor, TRUE);
 
@@ -157,6 +163,7 @@ ZEND_MSHUTDOWN_FUNCTION(rpc)
 {
 	/* destroy instances first */
 	zend_ts_hash_destroy(instance);
+	zend_ts_hash_destroy(proxy);
 	zend_ts_hash_destroy(classes);
 
 	zend_llist_destroy(classes_list);
@@ -164,6 +171,7 @@ ZEND_MSHUTDOWN_FUNCTION(rpc)
 
 	pefree(handlers, TRUE);
 	pefree(instance, TRUE);
+	pefree(proxy, TRUE);
 	pefree(classes, TRUE);
 
 	UNREGISTER_INI_ENTRIES();
@@ -196,6 +204,15 @@ static void rpc_instance_dtor(void *pDest)
 	tsrm_mutex_free((*intern)->mx_handler);
 
 	pefree(*intern, TRUE);
+}
+
+static void rpc_proxy_dtor(void *pDest)
+{
+	rpc_proxy **proxy_intern;
+	
+	proxy_intern = (rpc_proxy **) pDest;
+	
+	pefree(*proxy_intern, TRUE);
 }
 
 static void rpc_class_dtor(void *pDest)
@@ -259,6 +276,31 @@ static zend_object_value rpc_create_object(zend_class_entry *class_type TSRMLS_D
 		zend_ts_hash_next_index_insert(instance, &intern, sizeof(rpc_internal *), NULL);
 	}
 	tsrm_mutex_unlock(instance->mx_writer);
+
+	return *zov;
+}
+
+static zend_object_value rpc_create_proxy(TSRMLS_D)
+{
+	zend_object_value *zov;
+	rpc_proxy *proxy_intern;
+
+	/* set up the object value struct */
+	zov = (zend_object_value*) pemalloc(sizeof(zend_object_value), TRUE);
+	zov->handlers = &rpc_proxy_handlers;
+
+	/* set up the internal representation of the proxy */
+	proxy_intern = (rpc_proxy *) pemalloc(sizeof(rpc_proxy), TRUE);
+
+	/* store the instance in a hash and set the key as handle, thus
+	 * we can find it later easily
+	 */
+	tsrm_mutex_lock(proxy->mx_writer);
+	{
+		zov->handle = zend_hash_next_free_element(&(proxy->hash));
+		zend_ts_hash_next_index_insert(proxy, &proxy_intern, sizeof(rpc_proxy *), NULL);
+	}
+	tsrm_mutex_unlock(proxy->mx_writer);
 
 	return *zov;
 }
@@ -356,10 +398,16 @@ static void rpc_write(zval *object, zval *member, zval *value TSRMLS_DC)
 
 static zval** rpc_get_property(zval *object, zval *member TSRMLS_DC)
 {
+	zval **return_value;
 	GET_INTERNAL(intern);
 
-	/* FIXME */
-	return NULL;
+	return_value = emalloc(sizeof(zval *));
+	MAKE_STD_ZVAL(*return_value);
+//	ZVAL_DELREF(*return_value);
+	Z_TYPE_P(object) = IS_OBJECT;
+	(*return_value)->value.obj = rpc_create_proxy(TSRMLS_C);
+
+	return return_value;
 }
 
 static zval* rpc_get(zval *property TSRMLS_DC)
