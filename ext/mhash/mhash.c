@@ -59,7 +59,7 @@ ZEND_GET_MODULE(mhash)
 /* SALTED S2K uses a fixed salt */
 #define SALT_SIZE 8
 
-static PHP_MINIT_FUNCTION(mhash)
+PHP_MINIT_FUNCTION(mhash)
 {
 	int i, n, l;
 	char *name;
