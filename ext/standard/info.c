@@ -115,7 +115,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
 					if (PG(html_errors)) {
-						PUTS(php_info_html_esc( string_key ));
+						PUTS(php_info_html_esc(string_key TSRMLS_CC));
 					} else {
 						PUTS(string_key);
 					}	
@@ -146,7 +146,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					if (Z_STRLEN(tmp2) == 0) {
 						PUTS("<i>no value</i>");
 					} else {
-						PUTS(php_info_html_esc( Z_STRVAL(tmp2) ));
+						PUTS(php_info_html_esc(Z_STRVAL(tmp2) TSRMLS_CC));
 					} 
 				} else {
 					PUTS(Z_STRVAL(tmp2));
@@ -157,7 +157,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					if (Z_STRLEN_PP(tmp) == 0) {
 						PUTS("<i>no value</i>");
 					} else {
-						PUTS(php_info_html_esc( Z_STRVAL_PP(tmp) ));
+						PUTS(php_info_html_esc(Z_STRVAL_PP(tmp) TSRMLS_CC));
 					}
 				} else {
 					PUTS(Z_STRVAL_PP(tmp));
@@ -187,10 +187,10 @@ void php_info_print_style(void)
 
 /* {{{ php_info_html_esc
  */
-PHPAPI char *php_info_html_esc(char *string)
+PHPAPI char *php_info_html_esc(char *string TSRMLS_DC)
 {
 	int new_len;
-	return php_escape_html_entities(string, strlen(string), &new_len, 1, ENT_COMPAT, NULL);
+	return php_escape_html_entities(string, strlen(string), &new_len, 1, ENT_COMPAT, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -274,7 +274,7 @@ PHPAPI char *php_get_uname(char mode)
 
 /* {{{ php_print_info_htmlhead
  */
-PHPAPI void php_print_info_htmlhead()
+PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 {
 	const char *charset = NULL;
 
@@ -328,7 +328,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	ta = php_localtime_r(&the_time, &tmbuf);
 
 	if (PG(html_errors)) {
-		php_print_info_htmlhead();
+		php_print_info_htmlhead(TSRMLS_C);
 	} else {
 		PUTS("       _           _        __        ____  \n");
 		PUTS(" _ __ | |__  _ __ (_)_ __  / _| ___  / /\\ \\ \n");
@@ -672,7 +672,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 		}
 		if (PG(html_errors)) {
 			PUTS("<th>");
-			PUTS(php_info_html_esc( row_element ));
+			PUTS(php_info_html_esc(row_element TSRMLS_CC));
 			PUTS("</th>");
 		} else {
 			PUTS(row_element);
@@ -724,7 +724,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 			}
 		} else {
 			if (PG(html_errors)) {
-				PUTS(php_info_html_esc( row_element ));
+				PUTS(php_info_html_esc(row_element TSRMLS_CC));
 			} else {
 				PUTS(row_element);
 				if (i < num_cols-1) {

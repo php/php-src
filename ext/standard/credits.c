@@ -31,7 +31,7 @@ PHPAPI void php_print_credits(int flag)
 	TSRMLS_FETCH();
 
 	if (flag & PHP_CREDITS_FULLPAGE) {
-		php_print_info_htmlhead();
+		php_print_info_htmlhead(TSRMLS_C);
 	}
 
 	PUTS("<h1>PHP Credits</h1>\n");
