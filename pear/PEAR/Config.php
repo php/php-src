@@ -149,7 +149,7 @@ if (isset($_ENV['PHP_PEAR_UMASK'])) {
 if (isset($_ENV['PHP_PEAR_CACHE_TTL'])) {
     define('PEAR_CONFIG_DEFAULT_CACHE_TTL', $_ENV['PHP_PEAR_CACHE_TTL']);
 } else {
-    define('PEAR_CONFIG_DEFAULT_CACHE_TTL', 0);
+    define('PEAR_CONFIG_DEFAULT_CACHE_TTL', 3600);
 }
 
 // Default for sig_type
