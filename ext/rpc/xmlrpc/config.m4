@@ -32,18 +32,25 @@ if test "$PHP_XMLRPC" != "no"; then
     AC_MSG_ERROR(XML-RPC support requires libexpat. Use --with-expat-dir=<DIR>)
   fi
 
+  found_iconv=no
 
-dnl  found_iconv=no
-  AC_CHECK_LIB(c, iconv_open, found_iconv=yes)
-  if test "$found_iconv" = "no"; then
-      for i in /usr /usr/local $ICONV_DIR; do
-        if test -f $i/lib/libiconv.a -o -f $i/lib/libiconv.$SHLIB_SUFFIX_NAME; then
-          PHP_ADD_LIBRARY_WITH_PATH(iconv, $i/lib, XMLRPC_SHARED_LIBADD)
-          found_iconv=yes
-        fi
-      done
+  if test -z "$ICONV_DIR"; then
+    AC_MSG_ERROR(Please specify the location of iconv with --with-iconv)
   fi
-  
+
+  if test -f $ICONV_DIR/lib/lib${iconv_lib_name}.a ||
+     test -f $ICONV_DIR/lib/lib${iconv_lib_name}.$SHLIB_SUFFIX_NAME
+  then
+    PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/lib, XMLRPC_SHARED_LIBADD)
+    AC_CHECK_LIB($iconv_lib_name, libiconv_open, [
+      found_iconv=yes
+    ])
+  else
+    AC_CHECK_LIB(c, iconv_open, [
+      found_iconv=yes
+    ])
+  fi
+
   if test "$found_iconv" = "no"; then
     AC_MSG_ERROR([iconv not found, in order to build xmlrpc you need the iconv library])
   fi
