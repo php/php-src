@@ -198,13 +198,20 @@ PHPAPI php_url *php_url_parse(char const *str)
 		
 		s = p + 1;
 	}
-	
-	/* check for port */
-	/* memrchr is a GNU specific extension
-	   Emulate for wide compatability */
-	for(p = e; *p != ':' && p >= s; p--);
 
-	if (*p == ':') {
+	/* check for port */
+	if (*s == '[' && *(e-1) == ']') {
+		/* Short circuit portscan, 
+		   we're dealing with an 
+		   IPv6 embedded address */
+		p = s;
+	} else {
+		/* memrchr is a GNU specific extension
+		   Emulate for wide compatability */
+		for(p = e; *p != ':' && p >= s; p--);
+	}
+
+	if (p >= s && *p == ':') {
 		if (!ret->port) {
 			p++;
 			if (e-p > 5) { /* port cannot be longer then 5 characters */
@@ -224,6 +231,11 @@ PHPAPI php_url *php_url_parse(char const *str)
 		p = e;
 	}
 	
+	if (*s == '[' && *(p-1) == ']') {
+		s++;
+		p--;
+	}
+
 	/* check if we have a valid host, if we don't reject the string as url */
 	if ((p-s) < 1) {
 		STR_FREE(ret->scheme);
