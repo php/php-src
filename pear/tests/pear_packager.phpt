@@ -60,8 +60,10 @@ if (!empty($home)) {
     putenv('HOME="'.$temp_path);
 }
 require_once "PEAR/Packager.php";
-
+require_once 'PEAR/Registry.php';
+$reg = &new PEAR_Registry($temp_path . DIRECTORY_SEPARATOR . 'php');
 $packager = new PEAR_Packager();
+$packager->setRegistry($reg);
 $curdir = getcwd();
 chdir(dirname(__FILE__));
 

@@ -139,20 +139,8 @@ bool(true)
 array(6) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -162,7 +150,7 @@ array(6) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -224,15 +212,27 @@ array(6) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
 }
 string(823) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -257,20 +257,8 @@ bool(true)
 array(6) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -280,7 +268,7 @@ array(6) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -342,15 +330,27 @@ array(6) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
 }
 string(823) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -376,20 +376,8 @@ bool(true)
 array(6) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -399,7 +387,7 @@ array(6) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -461,15 +449,27 @@ array(6) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
 }
 string(823) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -494,20 +494,8 @@ bool(true)
 array(6) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -517,7 +505,7 @@ array(6) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -579,15 +567,27 @@ array(6) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
 }
 string(823) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -612,20 +612,8 @@ test add packagenameregex
 array(7) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -635,7 +623,7 @@ array(7) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -697,18 +685,30 @@ array(7) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
   ["packagenameregex"]=>
   string(6) "[A-Z]+"
 }
 string(868) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <packagenameregex>[A-Z]+</packagenameregex>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -733,20 +733,8 @@ bool(true)
 array(7) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -758,7 +746,7 @@ array(7) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -820,16 +808,28 @@ array(7) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
 }
 string(868) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <packagenameregex>[A-Z]+</packagenameregex>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -854,20 +854,8 @@ test add protocols
 array(8) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -879,7 +867,7 @@ array(8) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -941,6 +929,18 @@ array(8) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
   ["provides"]=>
   array(3) {
     [1]=>
@@ -973,7 +973,7 @@ array(8) {
 string(1065) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <provides>
@@ -983,7 +983,7 @@ string(1065) "<?xml version="1.0" encoding="ISO-8859-1" ?>
  </provides>
  <packagenameregex>[A-Z]+</packagenameregex>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -1008,20 +1008,8 @@ bool(true)
 array(8) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -1061,7 +1049,7 @@ array(8) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -1123,11 +1111,23 @@ array(8) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
 }
 string(1065) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <provides>
@@ -1137,7 +1137,7 @@ string(1065) "<?xml version="1.0" encoding="ISO-8859-1" ?>
  </provides>
  <packagenameregex>[A-Z]+</packagenameregex>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -1162,20 +1162,8 @@ test add mirror
 array(9) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -1215,7 +1203,7 @@ array(9) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -1275,6 +1263,18 @@ array(9) {
           string(5) "5.1.0"
         }
       }
+    }
+  }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
     }
   }
   ["mirrors"]=>
@@ -1312,7 +1312,7 @@ array(9) {
 string(1313) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <provides>
@@ -1330,7 +1330,7 @@ string(1313) "<?xml version="1.0" encoding="ISO-8859-1" ?>
   </mirror>
  </mirrors>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>
@@ -1355,20 +1355,8 @@ bool(true)
 array(9) {
   ["version"]=>
   string(3) "1.0"
-  ["deps"]=>
-  array(1) {
-    [1]=>
-    array(3) {
-      ["type"]=>
-      string(3) "php"
-      ["rel"]=>
-      string(2) "ge"
-      ["version"]=>
-      string(5) "5.0.0"
-    }
-  }
   ["name"]=>
-  string(5) "PEAR5"
+  string(5) "pear5"
   ["summary"]=>
   string(23) "PEAR packages for PHP 5"
   ["server"]=>
@@ -1402,7 +1390,7 @@ array(9) {
     }
   }
   ["packagenameregex"]=>
-  string(12) "release.list"
+  string(6) "[A-Z]+"
   ["mirrors"]=>
   array(1) {
     [1]=>
@@ -1439,7 +1427,7 @@ array(9) {
     [1]=>
     array(4) {
       ["name"]=>
-      string(8) "PEAR5.qa"
+      string(8) "pear5.qa"
       ["server"]=>
       string(15) "qa.pear.php.net"
       ["summary"]=>
@@ -1501,11 +1489,23 @@ array(9) {
       }
     }
   }
+  ["deps"]=>
+  array(1) {
+    [1]=>
+    array(3) {
+      ["type"]=>
+      string(3) "php"
+      ["rel"]=>
+      string(2) "ge"
+      ["version"]=>
+      string(5) "5.0.0"
+    }
+  }
 }
-string(1319) "<?xml version="1.0" encoding="ISO-8859-1" ?>
+string(1313) "<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/channel-1.0">
 <channel version="1.0">
- <name>PEAR5</name>
+ <name>pear5</name>
  <summary>PEAR packages for PHP 5</summary>
  <server>pear.php.net</server>
  <provides>
@@ -1513,7 +1513,7 @@ string(1319) "<?xml version="1.0" encoding="ISO-8859-1" ?>
   <protocol type="xml-rpc" version="1.0">release.list</protocol>
   <protocol type="get" version="1.0"/>
  </provides>
- <packagenameregex>release.list</packagenameregex>
+ <packagenameregex>[A-Z]+</packagenameregex>
  <mirrors>
   <mirror type="server" name="mirror.php.net">
    <provides>
@@ -1523,7 +1523,7 @@ string(1319) "<?xml version="1.0" encoding="ISO-8859-1" ?>
   </mirror>
  </mirrors>
  <subchannels>
-  <subchannel name="PEAR5.qa" server="qa.pear.php.net">
+  <subchannel name="pear5.qa" server="qa.pear.php.net">
    <summary>Quality Assurance releases of unmaintained packages</summary>
    <deps>
     <dep type="pkg" rel="ge" version="1.4">PEAR</dep>

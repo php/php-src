@@ -225,43 +225,43 @@ not pkg2 works? yes
 no error
 has pkg2 works? no
 $ret is PEAR_DEPENDENCY_MISSING? yes
-requires package `pkg2'
+requires package `pear::pkg2'
 has optional pkg2 works? no
 $ret is PEAR_DEPENDENCY_MISSING_OPTIONAL? yes
-package `pkg2' is recommended to utilize some features.
+package `pear::pkg2' is recommended to utilize some features.
 le 0.9 works? no
 $ret is PEAR_DEPENDENCY_CONFLICT? yes
-requires package `pkg1' <= 0.9
+requires package `pear::pkg1' <= 0.9
 optional le 0.9 works? no
 $ret is PEAR_DEPENDENCY_CONFLICT_OPTIONAL? yes
-package `pkg1' version <= 0.9 is recommended to utilize some features.  Installed version is 1.0
+package `pear::pkg1' version <= 0.9 is recommended to utilize some features.  Installed version is 1.0
 ne 1.0 works? no
 $ret is PEAR_DEPENDENCY_CONFLICT? yes
-requires package `pkg1' != 1.0
+requires package `pear::pkg1' != 1.0
 optional ne 1.0 works? no
 $ret is PEAR_DEPENDENCY_CONFLICT_OPTIONAL? yes
-package `pkg1' version != 1.0 is recommended to utilize some features.  Installed version is 1.0
+package `pear::pkg1' version != 1.0 is recommended to utilize some features.  Installed version is 1.0
 ge 1.1 works? no
 $ret is PEAR_DEPENDENCY_UPGRADE_MINOR? yes
-requires package `pkg1' >= 1.1
+requires package `pear::pkg1' >= 1.1
 optional ge 1.1 works? no
 $ret is PEAR_DEPENDENCY_UPGRADE_MINOR_OPTIONAL? yes
-package `pkg1' version >= 1.1 is recommended to utilize some features.  Installed version is 1.0
+package `pear::pkg1' version >= 1.1 is recommended to utilize some features.  Installed version is 1.0
 ge 2.0 works? no
 $ret is PEAR_DEPENDENCY_UPGRADE_MAJOR? yes
-requires package `pkg1' >= 2.0
+requires package `pear::pkg1' >= 2.0
 optional ge 2.0 works? no
 $ret is PEAR_DEPENDENCY_UPGRADE_MAJOR_OPTIONAL? yes
-package `pkg1' version >= 2.0 is recommended to utilize some features.  Installed version is 1.0
+package `pear::pkg1' version >= 2.0 is recommended to utilize some features.  Installed version is 1.0
 gt 1.0 works? no
 $ret is PEAR_DEPENDENCY_UPGRADE_MINOR? yes
-requires package `pkg1' > 1.0
+requires package `pear::pkg1' > 1.0
 optional gt 1.0 works? no
 $ret is PEAR_DEPENDENCY_UPGRADE_MINOR_OPTIONAL? yes
-package `pkg1' version > 1.0 is recommended to utilize some features.  Installed version is 1.0
+package `pear::pkg1' version > 1.0 is recommended to utilize some features.  Installed version is 1.0
 not pkg1 works? no
 $ret is PEAR_DEPENDENCY_CONFLICT? yes
-conflicts with package `pkg1'
+conflicts with package `pear::pkg1'
 foobar pkg1 works? no
 $ret is PEAR_DEPENDENCY_BAD_DEPENDENCY? yes
-relation 'foobar' with requirement '' is not supported (name=pkg1)
+relation 'foobar' with requirement '' is not supported (name=pear::pkg1)
