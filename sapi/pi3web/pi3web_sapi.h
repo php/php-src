@@ -3,7 +3,6 @@
 
 #ifdef PHP_WIN32
 #	include <windows.h>
-#	include <httpext.h>
 #	ifdef PHP5PI3WEB_EXPORTS
 #		define MODULE_API __declspec(dllexport) 
 #	else
@@ -15,7 +14,6 @@
 
 	typedef int BOOL;
 	typedef void far *LPVOID;
-	typedef LPVOID HCONN;
 	typedef unsigned long DWORD;
 	typedef DWORD far *LPDWORD;
 	typedef char CHAR;
@@ -23,6 +21,8 @@
 	typedef unsigned char BYTE;
 	typedef BYTE far *LPBYTE;
 #endif
+
+	typedef LPVOID HCONN;
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,17 +59,20 @@ typedef struct _CONTROL_BLOCK {
     LPSTR     lpszContentType;        // Content type of client data
 	DWORD     dwBehavior;			  // PHP behavior (standard, highlight, intend
 
+
+    LPVOID (* GetVariableNames) (HCONN      hConn);
+
     BOOL (* GetServerVariable) ( HCONN       hConn,
                                  LPSTR       lpszVariableName,
                                  LPVOID      lpvBuffer,
                                  LPDWORD     lpdwSize );
 
-    BOOL (* WriteClient)  ( HCONN      ConnID,
-                            LPVOID     Buffer,
+    BOOL (* WriteClient)  ( HCONN      hConn,
+                            LPVOID     lpvBuffer,
                             LPDWORD    lpdwBytes,
                             DWORD      dwReserved );
 
-    BOOL (* ReadClient)  ( HCONN      ConnID,
+    BOOL (* ReadClient)  ( HCONN      hConn,
                            LPVOID     lpvBuffer,
                            LPDWORD    lpdwSize );
 
