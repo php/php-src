@@ -1035,13 +1035,13 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				zend_function *function;
 
 				zend_hash_find(function_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &function);
-				(*function->op_array.refcount)++;
-				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
+				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), (void **) &function)==FAILURE) {
 					if (!compile_time) {
 						zend_error(E_ERROR, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
 					}
 					return FAILURE;
 				} else {
+					function_add_ref(function);
 					return SUCCESS;
 				}
 			}
