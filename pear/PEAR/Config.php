@@ -80,9 +80,10 @@ class PEAR_Config extends PEAR
         if (!$fp) {
             return $this->raiseError($php_errormsg);
         }
-        $contents = fread($fp, filesize($file));
+        $size = filesize($file);
+        $contents = fread($fp, $size);
         $data = unserialize($contents);
-        if ($data === false) {
+        if ($data === false && $size > 1) {
             return $this->raiseError("PEAR_Config::readConfigFile: bad data");
         }
         $this->configuration = $data;
@@ -123,10 +124,10 @@ class PEAR_Config extends PEAR
 
     function writeConfigFile($file = null, $what_keys = 'userdefined')
     {
-        print "storing $what_keys keys\n";
         if ($what_keys == 'both') {
             $this->writeConfigFile($file, 'userdefined');
             $this->writeConfigFile($file, 'default');
+            return;
         }
         if ($file === null) {
             if ($what_keys == 'default') {
@@ -150,7 +151,7 @@ class PEAR_Config extends PEAR
         }
         $fp = @fopen($file, "w");
         if (!$fp) {
-            return $this->raiseError("PEAR_Config::writeConfigFile fopen failed");
+            return $this->raiseError("PEAR_Config::writeConfigFile fopen('$file','w') failed");
         }
         if (!@fwrite($fp, serialize($data))) {
             return $this->raiseError("PEAR_Config::writeConfigFile serialize failed");

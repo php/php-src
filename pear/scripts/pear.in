@@ -24,6 +24,8 @@ require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL ^ E_NOTICE);
 
+PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
+
 // {{{ config file and option parsing
 
 $options = Console_Getopt::getopt($argv, "c:C:d:D:h?sS");
@@ -76,6 +78,18 @@ foreach ($opts as $opt) {
     }
 }
 
+if ($store_default_config) {
+    if (@is_writeable($pear_default_config)) {
+        $config->writeConfigFile($pear_default_config, 'default');
+    } else {
+        die("You don't have write access to $pear_default_config, exiting!\n");
+    }
+}
+
+if ($store_user_config) {
+    $config->writeConfigFile($pear_user_config, 'userdefined');
+}
+
 $fallback_config = array(
     'php_dir' => PEAR_INSTALL_DIR,
     'ext_dir' => PEAR_EXTENSION_DIR,
@@ -95,8 +109,6 @@ $ext_dir    = $config->get("ext_dir");
 $doc_dir    = $config->get("doc_dir");
 
 // }}}
-
-PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
 $command = $options[1][1];
 switch ($command) {
