@@ -45,6 +45,7 @@
 #endif
 
 #include "ftp.h"
+#include "ext/standard/fsock.h"
 
 /* define closesocket macro for portability */
 #ifndef PHP_WIN32
