@@ -6,20 +6,20 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 	protected $getChildren;
 	protected $catch_get_child;
 
-	function __construct(RecursiveIterator $it, $catch_get_child = false)
+	function __construct(RecursiveIterator $it, $getStrVal = true, $catch_get_child = false)
 	{
 		$this->catch_get_child = $catch_get_child;
-		parent::__construct($it);
+		parent::__construct($it, $getStrVal);
 	}
 	
 	function next()
 	{
 		if ($this->hasChildren = $this->it->hasChildren()) {
 			try {
-				//$this->getChildren = new CachingRecursiveIterator($this->it->getChildren(), $this->catch_get_child);
+				//$this->getChildren = new CachingRecursiveIterator($this->it->getChildren(), $this->getStrVal, $this->catch_get_child);
 				// workaround memleaks...
 				$child = $this->it->getChildren();
-				$this->getChildren = new CachingRecursiveIterator($child, $this->catch_get_child);
+				$this->getChildren = new CachingRecursiveIterator($child, $this->getStrVal, $this->catch_get_child);
 			}
 			catch(Exception $e) {
 				if (!$this->catch_get_child) {
