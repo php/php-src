@@ -36,8 +36,8 @@ HOW TO INSTALL
     At the end of conf/httpd.conf, add:
 
         <Files *.php>
-        AddOutputFilter PHP
-        AddInputFilter PHP
+        SetOutputFilter PHP
+        SetInputFilter PHP
         </Files>
 
     That's it. Now start bin/httpd.
