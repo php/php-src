@@ -447,7 +447,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 	return NULL;
 }
 
-PHPAPI php_stream *_php_stream_fopen_tmpfile(STREAMS_D TSRMLS_DC)
+PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 {
 	FILE *fp;
 	php_stream *stream;

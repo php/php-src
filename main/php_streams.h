@@ -41,12 +41,12 @@
 # define STREAMS_REL_CC	, STREAMS_REL_C
 
 #else
-# define STREAMS_D		TSRMLS_D
-# define STREAMS_C		TSRMLS_C
-# define STREAMS_REL_C	TSRMLS_C
-# define STREAMS_DC		TSRMLS_DC
-# define STREAMS_CC		TSRMLS_CC
-# define STREAMS_REL_CC	TSRMLS_CC
+# define STREAMS_D
+# define STREAMS_C
+# define STREAMS_REL_C
+# define STREAMS_DC
+# define STREAMS_CC
+# define STREAMS_REL_CC
 #endif
 
 /* these functions relay the file/line number information. They are depth aware, so they will pass
@@ -63,7 +63,7 @@
 	
 #define php_stream_fopen_from_pipe_rel(file, mode)	 _php_stream_fopen_from_pipe((file), (mode) STREAMS_REL_CC TSRMLS_CC)
 	
-#define php_stream_fopen_tmpfile_rel()	_php_stream_fopen_tmpfile(STREAMS_REL_C TSRMLS_CC)
+#define php_stream_fopen_tmpfile_rel()	_php_stream_fopen_tmpfile(0 STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_fopen_temporary_file_rel(dir, pfx, opened_path)	_php_stream_fopen_temporary_file((dir), (pfx), (opened_path) STREAMS_REL_CC TSRMLS_CC)
 	
@@ -205,8 +205,8 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STREAMS_DC TSRMLS_DC);
 #define php_stream_fopen_from_pipe(file, mode)	_php_stream_fopen_from_pipe((file), (mode) STREAMS_CC TSRMLS_CC)
 
-PHPAPI php_stream *_php_stream_fopen_tmpfile(STREAMS_D TSRMLS_DC);
-#define php_stream_fopen_tmpfile()	_php_stream_fopen_tmpfile(STREAMS_C TSRMLS_CC)
+PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC);
+#define php_stream_fopen_tmpfile()	_php_stream_fopen_tmpfile(0 STREAMS_CC TSRMLS_CC)
 
 PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path STREAMS_DC TSRMLS_DC);
 #define php_stream_fopen_temporary_file(dir, pfx, opened_path)	_php_stream_fopen_temporary_file((dir), (pfx), (opened_path) STREAMS_CC TSRMLS_CC)
