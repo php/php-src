@@ -19,7 +19,7 @@ void zend_objects_store_destroy(zend_objects_store *objects)
 	efree(objects->object_buckets);
 }
 
-void zend_objects_store_call_destructors(zend_objects_store *objects)
+void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC)
 {
 	zend_uint i = 1;
 
