@@ -1,0 +1,18 @@
+<?xml encoding='US-ASCII'?>
+
+<!ELEMENT sxe    elem1>
+<!ATTLIST sxe    id>
+
+<!ELEMENT elem1  elem2>
+<!ATTLIST elem1  attr1  CDATA  #required
+                 attr2  CDATA  "default>
+
+<!ELEMENT elem2  elem3>
+<!ATTLIST elem2>
+
+<!ELEMENT elem3  elem4>
+<!ATTLIST elem3>
+
+<!ELEMENT elem4  EMPTY>
+<!ATTLIST elem4>
+
