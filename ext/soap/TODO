@@ -117,13 +117,11 @@ Schema
 	? list
 	? union
 - support for user defined complex types
+  - simpleContent restriction
   - simpleContent extension   
+  - complexContent restriction
+  - complexContent extension   
   + base
-  - group
-  	- name
-  	- all
-  	- choice
-  	- sequence
   - all
   	- element
   - choice
@@ -138,7 +136,10 @@ Schema
   	- choice
   	- sequence
   	- any ???
-  - attribute
+  - group
+  ? attribute
+  + attributeGroup
+  - anyAttribute
 
 Error Handling
 --------------

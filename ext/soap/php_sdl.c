@@ -988,6 +988,14 @@ void delete_sdl(void *handle)
 		zend_hash_destroy(tmp->elements);
 		free(tmp->elements);
 	}
+	if (tmp->attributes) {
+		zend_hash_destroy(tmp->attributes);
+		free(tmp->attributes);
+	}
+	if (tmp->attributeGroups) {
+		zend_hash_destroy(tmp->attributeGroups);
+		free(tmp->attributeGroups);
+	}
 	if (tmp->bindings) {
 		zend_hash_destroy(tmp->bindings);
 		free(tmp->bindings);

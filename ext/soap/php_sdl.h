@@ -15,13 +15,15 @@
 #define SOAP_LITERAL 2
 
 struct _sdl {
-	HashTable docs;         /* pointer to the parsed xml file */
-	HashTable functions;    /* array of sdlFunction */
-	HashTable *types;       /* array of sdlTypesPtr */
-	HashTable *elements;    /* array of sdlTypesPtr */
-	HashTable *encoders;    /* array of encodePtr */
-	HashTable *bindings;    /* array of sdlBindings (key'd by name) */
-	HashTable *requests;    /* array of sdlFunction (references) */
+	HashTable docs;              /* pointer to the parsed xml file */
+	HashTable functions;         /* array of sdlFunction */
+	HashTable *types;            /* array of sdlTypesPtr */
+	HashTable *elements;         /* array of sdlTypesPtr */
+	HashTable *encoders;         /* array of encodePtr */
+	HashTable *bindings;         /* array of sdlBindings (key'd by name) */
+	HashTable *requests;         /* array of sdlFunction (references) */
+	HashTable *attributes;       /* array of sdlAttributePtr */
+	HashTable *attributeGroups;  /* array of sdlTypesPtr */
 	char *target_ns;
 	char *source;
 };
