@@ -48,6 +48,83 @@ static int mcve_init;  /* For Safe Memory Deallocation */
 /* {{{ extension definition structures */
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 function_entry mcve_functions[] = {
+	PHP_FE(m_initengine,			NULL)
+	PHP_FE(m_initconn,			NULL)
+	PHP_FE(m_deleteresponse,		NULL)
+	PHP_FE(m_destroyconn,			NULL)
+	PHP_FE(m_setdropfile,			NULL)
+	PHP_FE(m_setip,				NULL)
+	PHP_FE(m_setssl,			NULL)
+	PHP_FE(m_setssl_files,			NULL)
+	PHP_FE(m_settimeout,			NULL)
+	PHP_FE(m_setblocking,			NULL)
+	PHP_FE(m_verifyconnection,		NULL)
+	PHP_FE(m_verifysslcert,			NULL)
+	PHP_FE(m_maxconntimeout,		NULL)
+	PHP_FE(m_connectionerror,		NULL)
+	PHP_FE(m_deletetrans,			NULL)
+	PHP_FE(m_connect,			NULL)
+	PHP_FE(m_transnew,			NULL)
+	PHP_FE(m_transparam,			NULL)
+	PHP_FE(m_transsend,			NULL)
+	PHP_FE(m_ping,				NULL)
+	PHP_FE(m_responseparam,			NULL)
+	PHP_FE(m_returnstatus,			NULL)
+	PHP_FE(m_returncode,			NULL)
+	PHP_FE(m_transactionssent,		NULL)
+	PHP_FE(m_transactionitem,		NULL)
+	PHP_FE(m_transactionbatch,		NULL)
+	PHP_FE(m_transactionid,			NULL)
+	PHP_FE(m_transactionauth,		NULL)
+	PHP_FE(m_transactiontext,		NULL)
+	PHP_FE(m_transactionavs,		NULL)
+	PHP_FE(m_transactioncv,			NULL)
+	PHP_FE(m_getuserparam,			NULL)
+	PHP_FE(m_monitor,			NULL)
+	PHP_FE(m_transinqueue,			NULL)
+	PHP_FE(m_checkstatus,			NULL)
+	PHP_FE(m_completeauthorizations,	second_arg_force_ref)
+	PHP_FE(m_sale,				NULL)
+	PHP_FE(m_preauth,			NULL)
+	PHP_FE(m_void,				NULL)
+	PHP_FE(m_preauthcompletion,		NULL)
+	PHP_FE(m_force,				NULL)
+	PHP_FE(m_override,			NULL)
+	PHP_FE(m_return,			NULL)
+	PHP_FE(m_iscommadelimited,		NULL)
+	PHP_FE(m_parsecommadelimited,		NULL)
+	PHP_FE(m_getcommadelimited,		NULL)
+	PHP_FE(m_getcell,			NULL)
+	PHP_FE(m_getcellbynum,			NULL)
+	PHP_FE(m_numcolumns,			NULL)
+	PHP_FE(m_numrows,			NULL)
+	PHP_FE(m_getheader,			NULL)
+	PHP_FE(m_destroyengine,			NULL)
+	PHP_FE(m_settle,			NULL)
+	PHP_FE(m_gut,				NULL)
+	PHP_FE(m_gl,				NULL)
+	PHP_FE(m_gft,				NULL)
+	PHP_FE(m_qc,				NULL)
+	PHP_FE(m_ub,				NULL)
+	PHP_FE(m_chkpwd,			NULL)
+	PHP_FE(m_bt,				NULL)
+	PHP_FE(m_uwait,				NULL)
+	PHP_FE(m_text_code,			NULL)
+	PHP_FE(m_text_avs,			NULL)
+	PHP_FE(m_text_cv,			NULL)
+	PHP_FE(m_chngpwd,			NULL)
+	PHP_FE(m_listusers,			NULL)
+	PHP_FE(m_adduser,			NULL)
+	PHP_FE(m_enableuser,			NULL)
+	PHP_FE(m_disableuser,			NULL)
+	PHP_FE(m_getuserarg,			NULL)
+	PHP_FE(m_adduserarg,			NULL)
+	PHP_FE(m_deleteusersetup,		NULL)
+	PHP_FE(m_initusersetup,			NULL)
+	PHP_FE(m_deluser,			NULL)
+	PHP_FE(m_edituser,			NULL)
+	PHP_FE(m_liststats,			NULL)
+	/* Backwards compatability functions below */
 	PHP_FE(mcve_initengine,			NULL)
 	PHP_FE(mcve_initconn,			NULL)
 	PHP_FE(mcve_deleteresponse,		NULL)
@@ -100,32 +177,30 @@ function_entry mcve_functions[] = {
 	PHP_FE(mcve_numrows,			NULL)
 	PHP_FE(mcve_getheader,			NULL)
 	PHP_FE(mcve_destroyengine,		NULL)
-	PHP_FE(mcve_settle,		NULL)
-	PHP_FE(mcve_gut,		NULL)
-	PHP_FE(mcve_gl,		NULL)
-	PHP_FE(mcve_gft,		NULL)
-	PHP_FE(mcve_qc,		NULL)
-	PHP_FE(mcve_ub,		NULL)
-	PHP_FE(mcve_chkpwd,		NULL)
-	PHP_FE(mcve_bt,		NULL)
-	PHP_FE(mcve_uwait,		NULL)
-	PHP_FE(mcve_text_code,		NULL)
-	PHP_FE(mcve_text_avs,		NULL)
-	PHP_FE(mcve_text_cv,		NULL)
-/* Administrator Functions */
-	PHP_FE(mcve_chngpwd,		NULL)
-	PHP_FE(mcve_listusers,		NULL)
-	PHP_FE(mcve_adduser,		NULL)
-	PHP_FE(mcve_enableuser,		NULL)
+	PHP_FE(mcve_settle,			NULL)
+	PHP_FE(mcve_gut,			NULL)
+	PHP_FE(mcve_gl,				NULL)
+	PHP_FE(mcve_gft,			NULL)
+	PHP_FE(mcve_qc,				NULL)
+	PHP_FE(mcve_ub,				NULL)
+	PHP_FE(mcve_chkpwd,			NULL)
+	PHP_FE(mcve_bt,				NULL)
+	PHP_FE(mcve_uwait,			NULL)
+	PHP_FE(mcve_text_code,			NULL)
+	PHP_FE(mcve_text_avs,			NULL)
+	PHP_FE(mcve_text_cv,			NULL)
+	PHP_FE(mcve_chngpwd,			NULL)
+	PHP_FE(mcve_listusers,			NULL)
+	PHP_FE(mcve_adduser,			NULL)
+	PHP_FE(mcve_enableuser,			NULL)
 	PHP_FE(mcve_disableuser,		NULL)
-	PHP_FE(mcve_getuserarg,		NULL)
-	PHP_FE(mcve_adduserarg,		NULL)
+	PHP_FE(mcve_getuserarg,			NULL)
+	PHP_FE(mcve_adduserarg,			NULL)
 	PHP_FE(mcve_deleteusersetup,		NULL)
 	PHP_FE(mcve_initusersetup,		NULL)
-	PHP_FE(mcve_deluser,		NULL)
-	PHP_FE(mcve_edituser,		NULL)
-	PHP_FE(mcve_liststats,		NULL)
-
+	PHP_FE(mcve_deluser,			NULL)
+	PHP_FE(mcve_edituser,			NULL)
+	PHP_FE(mcve_liststats,			NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -361,18 +436,65 @@ PHP_MINIT_FUNCTION(mcve)
 	REGISTER_LONG_CONSTANT("MC_ADMIN_FIELDEDIT", MC_ADMIN_FIELDEDIT, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MC_ADMIN_CLOSEBATCH", MC_ADMIN_CLOSEBATCH, MCVE_CONST);
 
-	/* set up the mcve defines */
+	REGISTER_LONG_CONSTANT("M_UNUSED", MCVE_UNUSED, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_NEW", MCVE_NEW, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_PENDING", MCVE_PENDING, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_DONE", MCVE_DONE, MCVE_CONST);
+
+	REGISTER_LONG_CONSTANT("M_GOOD", MCVE_GOOD, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_BAD", MCVE_BAD, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_STREET", MCVE_STREET, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_ZIP", MCVE_ZIP, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_UNKNOWN", MCVE_UNKNOWN, MCVE_CONST);
+
+	REGISTER_LONG_CONSTANT("M_ERROR", MCVE_ERROR, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_FAIL", MCVE_FAIL, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_SUCCESS", MCVE_SUCCESS, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_AUTH", MCVE_AUTH, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_DENY", MCVE_DENY, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_CALL", MCVE_CALL, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_DUPL", MCVE_DUPL, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_PKUP", MCVE_PKUP, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_RETRY", MCVE_RETRY, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_SETUP", MCVE_SETUP, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_TIMEOUT", MCVE_TIMEOUT, MCVE_CONST);
+
+	REGISTER_LONG_CONSTANT("M_SALE", MCVE_SALE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_PREAUTH", MCVE_PREAUTH, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_FORCE", MCVE_FORCE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_OVERRIDE", MCVE_OVERRIDE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_RETURN", MCVE_RETURN, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_SETTLE", MCVE_SETTLE, MCVE_CONST);
+
+	REGISTER_LONG_CONSTANT("M_PROC", MCVE_PROC, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_USER", MCVE_USER, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_PWD", MCVE_PWD, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_INDCODE", MCVE_INDCODE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_MERCHID", MCVE_MERCHID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_BANKID", MCVE_BANKID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_TERMID", MCVE_TERMID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_CLIENTNUM", MCVE_CLIENTNUM, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_STOREID", MCVE_STOREID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_AGENTID", MCVE_AGENTID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_CHAINID", MCVE_CHAINID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_ZIPCODE", MCVE_ZIPCODE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_TIMEZONE", MCVE_TIMEZONE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_MERCHCAT", MCVE_MERCHCAT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_MERNAME", MCVE_MERNAME, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_MERCHLOC", MCVE_MERCHLOC, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_STATECODE", MCVE_STATECODE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("M_SERVICEPHONE", MCVE_SERVICEPHONE, MCVE_CONST);
+
+	/* COMPATABILITY VARIABLES */
 	REGISTER_LONG_CONSTANT("MCVE_UNUSED", MCVE_UNUSED, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_NEW", MCVE_NEW, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_PENDING", MCVE_PENDING, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_DONE", MCVE_DONE, MCVE_CONST);
-
 	REGISTER_LONG_CONSTANT("MCVE_GOOD", MCVE_GOOD, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_BAD", MCVE_BAD, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_STREET", MCVE_STREET, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_ZIP", MCVE_ZIP, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_UNKNOWN", MCVE_UNKNOWN, MCVE_CONST);
-
 	REGISTER_LONG_CONSTANT("MCVE_ERROR", MCVE_ERROR, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_FAIL", MCVE_FAIL, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_SUCCESS", MCVE_SUCCESS, MCVE_CONST);
@@ -384,14 +506,12 @@ PHP_MINIT_FUNCTION(mcve)
 	REGISTER_LONG_CONSTANT("MCVE_RETRY", MCVE_RETRY, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_SETUP", MCVE_SETUP, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_TIMEOUT", MCVE_TIMEOUT, MCVE_CONST);
-
 	REGISTER_LONG_CONSTANT("MCVE_SALE", MCVE_SALE, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_PREAUTH", MCVE_PREAUTH, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_FORCE", MCVE_FORCE, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_OVERRIDE", MCVE_OVERRIDE, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_RETURN", MCVE_RETURN, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_SETTLE", MCVE_SETTLE, MCVE_CONST);
-
 	REGISTER_LONG_CONSTANT("MCVE_PROC", MCVE_PROC, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_USER", MCVE_USER, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_PWD", MCVE_PWD, MCVE_CONST);
@@ -427,9 +547,9 @@ PHP_MINFO_FUNCTION(mcve)
 /* }}} */
 
 
-/* {{{ proto int mcve_initengine(string location)
+/* {{{ proto int m_initengine(string location)
    Ready the client for IP/SSL Communication */
-PHP_FUNCTION(mcve_initengine)
+PHP_FUNCTION(m_initengine)
 {
 	int ret;
 	zval **arg;
@@ -449,9 +569,9 @@ PHP_FUNCTION(mcve_initengine)
 }
 /* }}} */
 
-/* {{{ proto resource mcve_initconn(void)
+/* {{{ proto resource m_initconn(void)
    Create and initialize an MCVE_CONN structure */
-PHP_FUNCTION(mcve_initconn)
+PHP_FUNCTION(m_initconn)
 {
 	MCVE_CONN *conn;
 
@@ -464,9 +584,9 @@ PHP_FUNCTION(mcve_initconn)
 /* }}} */
 
 
-/* {{{ proto bool mcve_deleteresponse(resource conn, int identifier)
+/* {{{ proto bool m_deleteresponse(resource conn, int identifier)
    Delete specified transaction from MCVE_CONN structure */
-PHP_FUNCTION(mcve_deleteresponse)
+PHP_FUNCTION(m_deleteresponse)
 {
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
@@ -484,9 +604,9 @@ PHP_FUNCTION(mcve_deleteresponse)
 }
 /* }}} */
 
-/* {{{ proto bool mcve_deletetrans(resource conn, int identifier)
+/* {{{ proto bool m_deletetrans(resource conn, int identifier)
    Delete specified transaction from MCVE_CONN structure */
-PHP_FUNCTION(mcve_deletetrans)
+PHP_FUNCTION(m_deletetrans)
 {
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
@@ -505,9 +625,9 @@ PHP_FUNCTION(mcve_deletetrans)
 }
 /* }}} */
 
-/* {{{ proto void mcve_destroyconn(resource conn)
+/* {{{ proto void m_destroyconn(resource conn)
    Destroy the connection and MCVE_CONN structure */
-PHP_FUNCTION(mcve_destroyconn)
+PHP_FUNCTION(m_destroyconn)
 {
 #if 0
 	MCVE_CONN *conn;
@@ -532,9 +652,9 @@ PHP_FUNCTION(mcve_destroyconn)
 }
 /* }}} */
 
-/* {{{ proto int mcve_setdropfile(resource conn, string directory)
+/* {{{ proto int m_setdropfile(resource conn, string directory)
    Set the connection method to Drop-File */
-PHP_FUNCTION(mcve_setdropfile)
+PHP_FUNCTION(m_setdropfile)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -553,9 +673,9 @@ PHP_FUNCTION(mcve_setdropfile)
 }
 /* }}} */
 
-/* {{{ proto int mcve_setip(resource conn, string host, int port)
+/* {{{ proto int m_setip(resource conn, string host, int port)
    Set the connection method to IP */
-PHP_FUNCTION(mcve_setip)
+PHP_FUNCTION(m_setip)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -575,9 +695,9 @@ PHP_FUNCTION(mcve_setip)
 }
 /* }}} */
 
-/* {{{ proto int mcve_setssl(resource conn, string host, int port)
+/* {{{ proto int m_setssl(resource conn, string host, int port)
    Set the connection method to SSL */
-PHP_FUNCTION(mcve_setssl)
+PHP_FUNCTION(m_setssl)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -597,11 +717,11 @@ PHP_FUNCTION(mcve_setssl)
 }
 /* }}} */
 
-/* {{{ proto int mcve_setssl_files(string sslkeyfile, string sslcertfile)
+/* {{{ proto int m_setssl_files(string sslkeyfile, string sslcertfile)
    Set certificate key files and certificates if server requires client certificate
    verification
 */
-PHP_FUNCTION(mcve_setssl_files)
+PHP_FUNCTION(m_setssl_files)
 {
 	int retval;
 	zval **arg1, **arg2;
@@ -618,10 +738,10 @@ PHP_FUNCTION(mcve_setssl_files)
 }
 /* }}} */
 
-/* {{{ proto int mcve_settimeout(resource conn, int seconds)
+/* {{{ proto int m_settimeout(resource conn, int seconds)
    Set maximum transaction time (per trans)
 */
-PHP_FUNCTION(mcve_settimeout)
+PHP_FUNCTION(m_settimeout)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -640,10 +760,10 @@ PHP_FUNCTION(mcve_settimeout)
 }
 /* }}} */
 
-/* {{{ proto int mcve_setblocking(resource conn, int tf)
+/* {{{ proto int m_setblocking(resource conn, int tf)
    Set blocking/non-blocking mode for connection
 */
-PHP_FUNCTION(mcve_setblocking)
+PHP_FUNCTION(m_setblocking)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -662,10 +782,10 @@ PHP_FUNCTION(mcve_setblocking)
 }
 /* }}} */
 
-/* {{{ proto bool mcve_verifyconnection(resource conn, int tf)
+/* {{{ proto bool m_verifyconnection(resource conn, int tf)
    Set whether or not to PING upon connect to verify connection
 */
-PHP_FUNCTION(mcve_verifyconnection)
+PHP_FUNCTION(m_verifyconnection)
 {
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
@@ -683,10 +803,10 @@ PHP_FUNCTION(mcve_verifyconnection)
 }
 /* }}} */
 
-/* {{{ proto bool mcve_verifysslcert(resource conn, int tf)
+/* {{{ proto bool m_verifysslcert(resource conn, int tf)
    Set whether or not to verify the server ssl certificate
 */
-PHP_FUNCTION(mcve_verifysslcert)
+PHP_FUNCTION(m_verifysslcert)
 {
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
@@ -704,10 +824,10 @@ PHP_FUNCTION(mcve_verifysslcert)
 }
 /* }}} */
 
-/* {{{ proto bool mcve_maxconntimeout(resource conn, int secs)
+/* {{{ proto bool m_maxconntimeout(resource conn, int secs)
    The maximum amount of time the API will attempt a connection to MCVE
 */
-PHP_FUNCTION(mcve_maxconntimeout)
+PHP_FUNCTION(m_maxconntimeout)
 {
 	MCVE_CONN *conn;
 	zval **arg1, **arg2;
@@ -725,9 +845,9 @@ PHP_FUNCTION(mcve_maxconntimeout)
 }
 /* }}} */
 
-/* {{{ proto int mcve_connect(resource conn)
+/* {{{ proto int m_connect(resource conn)
    Establish the connection to MCVE */
-PHP_FUNCTION(mcve_connect)
+PHP_FUNCTION(m_connect)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -744,9 +864,9 @@ PHP_FUNCTION(mcve_connect)
 }
 /* }}} */
 
-/* {{{ proto string mcve_connectionerror(resource conn)
+/* {{{ proto string m_connectionerror(resource conn)
    Get a textual representation of why a connection failed */
-PHP_FUNCTION(mcve_connectionerror)
+PHP_FUNCTION(m_connectionerror)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -767,9 +887,9 @@ PHP_FUNCTION(mcve_connectionerror)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionssent(resource conn)
+/* {{{ proto int m_transactionssent(resource conn)
    Check to see if outgoing buffer is clear */
-PHP_FUNCTION(mcve_transactionssent)
+PHP_FUNCTION(m_transactionssent)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -786,9 +906,9 @@ PHP_FUNCTION(mcve_transactionssent)
 }
 /* }}} */
 
-/* {{{ proto int mcve_ping(resource conn)
+/* {{{ proto int m_ping(resource conn)
    Send a ping request to MCVE */
-PHP_FUNCTION(mcve_ping)
+PHP_FUNCTION(m_ping)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -805,9 +925,9 @@ PHP_FUNCTION(mcve_ping)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transnew(resource conn)
+/* {{{ proto int m_transnew(resource conn)
    Start a new transaction */
-PHP_FUNCTION(mcve_transnew)
+PHP_FUNCTION(m_transnew)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -824,9 +944,9 @@ PHP_FUNCTION(mcve_transnew)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transparam(resource conn, long identifier, int key, ...)
+/* {{{ proto int m_transparam(resource conn, long identifier, int key, ...)
    Add a parameter to a transaction */
-PHP_FUNCTION(mcve_transparam)
+PHP_FUNCTION(m_transparam)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -909,9 +1029,9 @@ PHP_FUNCTION(mcve_transparam)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transsend(resource conn, long identifier)
+/* {{{ proto int m_transsend(resource conn, long identifier)
    Finalize and send the transaction */
-PHP_FUNCTION(mcve_transsend)
+PHP_FUNCTION(m_transsend)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -930,9 +1050,9 @@ PHP_FUNCTION(mcve_transsend)
 }
 /* }}} */
 
-/* {{{ proto string mcve_responseparam(resource conn, long identifier, string key)
+/* {{{ proto string m_responseparam(resource conn, long identifier, string key)
    Get a custom response parameter */
-PHP_FUNCTION(mcve_responseparam)
+PHP_FUNCTION(m_responseparam)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -957,9 +1077,9 @@ PHP_FUNCTION(mcve_responseparam)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getuserparam(resource conn, long identifier, int key)
+/* {{{ proto string m_getuserparam(resource conn, long identifier, int key)
    Get a user response parameter */
-PHP_FUNCTION(mcve_getuserparam)
+PHP_FUNCTION(m_getuserparam)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -984,9 +1104,9 @@ PHP_FUNCTION(mcve_getuserparam)
 }
 /* }}} */
 
-/* {{{ proto int mcve_returnstatus(resource conn, int identifier)
+/* {{{ proto int m_returnstatus(resource conn, int identifier)
    Check to see if the transaction was successful */
-PHP_FUNCTION(mcve_returnstatus)
+PHP_FUNCTION(m_returnstatus)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1005,9 +1125,9 @@ PHP_FUNCTION(mcve_returnstatus)
 }
 /* }}} */
 
-/* {{{ proto int mcve_returncode(resource conn, int identifier)
+/* {{{ proto int m_returncode(resource conn, int identifier)
    Grab the exact return code from the transaction */
-PHP_FUNCTION(mcve_returncode)
+PHP_FUNCTION(m_returncode)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1026,9 +1146,9 @@ PHP_FUNCTION(mcve_returncode)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionitem(resource conn, int identifier)
+/* {{{ proto int m_transactionitem(resource conn, int identifier)
    Get the ITEM number in the associated batch for this transaction */
-PHP_FUNCTION(mcve_transactionitem)
+PHP_FUNCTION(m_transactionitem)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1047,9 +1167,9 @@ PHP_FUNCTION(mcve_transactionitem)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionavs(resource conn, int identifier)
+/* {{{ proto int m_transactionavs(resource conn, int identifier)
    Get the Address Verification return status */
-PHP_FUNCTION(mcve_transactionavs)
+PHP_FUNCTION(m_transactionavs)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1069,9 +1189,9 @@ PHP_FUNCTION(mcve_transactionavs)
 /* }}} */
 
 
-/* {{{ proto int mcve_transactioncv(resource conn, int identifier)
+/* {{{ proto int m_transactioncv(resource conn, int identifier)
    Get the CVC2/CVV2/CID return status */
-PHP_FUNCTION(mcve_transactioncv)
+PHP_FUNCTION(m_transactioncv)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1090,9 +1210,9 @@ PHP_FUNCTION(mcve_transactioncv)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionbatch(resource conn, int identifier)
+/* {{{ proto int m_transactionbatch(resource conn, int identifier)
    Get the batch number associated with the transaction */
-PHP_FUNCTION(mcve_transactionbatch)
+PHP_FUNCTION(m_transactionbatch)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1111,10 +1231,10 @@ PHP_FUNCTION(mcve_transactionbatch)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transactionid(resource conn, int identifier)
+/* {{{ proto int m_transactionid(resource conn, int identifier)
    Get the unique system id for the transaction
 */
-PHP_FUNCTION(mcve_transactionid)
+PHP_FUNCTION(m_transactionid)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1133,9 +1253,9 @@ PHP_FUNCTION(mcve_transactionid)
 }
 /* }}} */
 
-/* {{{ proto string mcve_transactionauth(resource conn, int identifier)
+/* {{{ proto string m_transactionauth(resource conn, int identifier)
    Get the authorization number returned for the transaction (alpha-numeric) */
-PHP_FUNCTION(mcve_transactionauth)
+PHP_FUNCTION(m_transactionauth)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -1158,9 +1278,9 @@ PHP_FUNCTION(mcve_transactionauth)
 }
 /* }}} */
 
-/* {{{ proto string mcve_transactiontext(resource conn, int identifier)
+/* {{{ proto string m_transactiontext(resource conn, int identifier)
    Get verbiage (text) return from MCVE or processing institution */
-PHP_FUNCTION(mcve_transactiontext)
+PHP_FUNCTION(m_transactiontext)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -1182,9 +1302,9 @@ PHP_FUNCTION(mcve_transactiontext)
 }
 /* }}} */
 
-/* {{{ proto int mcve_monitor(resource conn)
+/* {{{ proto int m_monitor(resource conn)
    Perform communication with MCVE (send/receive data)   Non-blocking */
-PHP_FUNCTION(mcve_monitor)
+PHP_FUNCTION(m_monitor)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1201,9 +1321,9 @@ PHP_FUNCTION(mcve_monitor)
 }
 /* }}} */
 
-/* {{{ proto int mcve_transinqueue(resource conn)
+/* {{{ proto int m_transinqueue(resource conn)
    Number of transactions in client-queue */
-PHP_FUNCTION(mcve_transinqueue)
+PHP_FUNCTION(m_transinqueue)
 {
 	MCVE_CONN *conn;
 	int retval;
@@ -1220,9 +1340,9 @@ PHP_FUNCTION(mcve_transinqueue)
 }
 /* }}} */
 
-/* {{{ proto int mcve_checkstatus(resource conn, int identifier)
+/* {{{ proto int m_checkstatus(resource conn, int identifier)
    Check to see if a transaction has completed */
-PHP_FUNCTION(mcve_checkstatus)
+PHP_FUNCTION(m_checkstatus)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1241,9 +1361,9 @@ PHP_FUNCTION(mcve_checkstatus)
 }
 /* }}} */
 
-/* {{{ proto int mcve_completeauthorizations(resource conn, int &array)
+/* {{{ proto int m_completeauthorizations(resource conn, int &array)
    Number of complete authorizations in queue, returning an array of their identifiers */
-PHP_FUNCTION(mcve_completeauthorizations)
+PHP_FUNCTION(m_completeauthorizations)
 {
 	MCVE_CONN *conn;
 	long i, *list, listnum;
@@ -1269,9 +1389,9 @@ PHP_FUNCTION(mcve_completeauthorizations)
 }
 /* }}} */
 
-/* {{{ proto int mcve_sale(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments, string clerkid, string stationid, int ptrannum)
+/* {{{ proto int m_sale(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments, string clerkid, string stationid, int ptrannum)
    Send a SALE to MCVE */
-PHP_FUNCTION(mcve_sale)
+PHP_FUNCTION(m_sale)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1309,9 +1429,9 @@ PHP_FUNCTION(mcve_sale)
 }
 /* }}} */
 
-/* {{{ proto int mcve_preauth(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments,	string clerkid, string stationid, int ptrannum)
+/* {{{ proto int m_preauth(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments,	string clerkid, string stationid, int ptrannum)
    Send a PREAUTHORIZATION to MCVE */
-PHP_FUNCTION(mcve_preauth)
+PHP_FUNCTION(m_preauth)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1349,9 +1469,9 @@ PHP_FUNCTION(mcve_preauth)
 }
 /* }}} */
 
-/* {{{ proto int mcve_override(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments, string clerkid, string stationid, int ptrannum)
+/* {{{ proto int m_override(resource conn, string username, string password, string trackdata, string account, string expdate, float amount, string street, string zip, string cv, string comments, string clerkid, string stationid, int ptrannum)
    Send an OVERRIDE to MCVE */
-PHP_FUNCTION(mcve_override)
+PHP_FUNCTION(m_override)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1389,9 +1509,9 @@ PHP_FUNCTION(mcve_override)
 }
 /* }}} */
 
-/* {{{ proto int mcve_void(resource conn, string username, string password, int sid, int ptrannum)
+/* {{{ proto int m_void(resource conn, string username, string password, int sid, int ptrannum)
    VOID a transaction in the settlement queue */
-PHP_FUNCTION(mcve_void)
+PHP_FUNCTION(m_void)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1414,9 +1534,9 @@ PHP_FUNCTION(mcve_void)
 }
 /* }}} */
 
-/* {{{ proto int mcve_preauthcompletion(resource conn, string username, string password, float finalamount, int sid, int ptrannum)
+/* {{{ proto int m_preauthcompletion(resource conn, string username, string password, float finalamount, int sid, int ptrannum)
    Complete a PREAUTHORIZATION... Ready it for settlement */
-PHP_FUNCTION(mcve_preauthcompletion)
+PHP_FUNCTION(m_preauthcompletion)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1441,9 +1561,9 @@ PHP_FUNCTION(mcve_preauthcompletion)
 }
 /* }}} */
 
-/* {{{ proto int mcve_force(resiurce conn, string username, string password, string trackdata, string account, string expdate, float amount, string authcode, string comments, string clerkid, string stationid, int ptrannum)
+/* {{{ proto int m_force(resiurce conn, string username, string password, string trackdata, string account, string expdate, float amount, string authcode, string comments, string clerkid, string stationid, int ptrannum)
    Send a FORCE to MCVE.  (typically, a phone-authorization) */
-PHP_FUNCTION(mcve_force)
+PHP_FUNCTION(m_force)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1477,9 +1597,9 @@ PHP_FUNCTION(mcve_force)
 }
 /* }}} */
 
-/* {{{ proto int mcve_return(int conn, string username, string password, string trackdata, string account, string expdate, float amount, string comments, string clerkid, string stationid, int ptrannum)
+/* {{{ proto int m_return(int conn, string username, string password, string trackdata, string account, string expdate, float amount, string comments, string clerkid, string stationid, int ptrannum)
    Issue a RETURN or CREDIT to MCVE */
-PHP_FUNCTION(mcve_return)
+PHP_FUNCTION(m_return)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1513,9 +1633,9 @@ PHP_FUNCTION(mcve_return)
 /* }}} */
 
 
-/* {{{ proto int mcve_settle(resource conn, string username, string password, string batch)
+/* {{{ proto int m_settle(resource conn, string username, string password, string batch)
    Issue a settlement command to do a batch deposit */
-PHP_FUNCTION(mcve_settle)
+PHP_FUNCTION(m_settle)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1536,9 +1656,9 @@ PHP_FUNCTION(mcve_settle)
 }
 /* }}} */
 
-/* {{{ proto int mcve_ub(resource conn, string username, string password)
+/* {{{ proto int m_ub(resource conn, string username, string password)
    Get a list of all Unsettled batches */
-PHP_FUNCTION(mcve_ub)
+PHP_FUNCTION(m_ub)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1558,9 +1678,9 @@ PHP_FUNCTION(mcve_ub)
 }
 /* }}} */
 
-/* {{{ proto int mcve_qc(resource conn, string username, string password, string clerkid, string stationid, string comments, int ptrannum)
+/* {{{ proto int m_qc(resource conn, string username, string password, string clerkid, string stationid, string comments, int ptrannum)
    Audit MCVE for a list of transactions in the outgoing queue */
-PHP_FUNCTION(mcve_qc)
+PHP_FUNCTION(m_qc)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1586,9 +1706,9 @@ PHP_FUNCTION(mcve_qc)
 }
 /* }}} */
 
-/* {{{ proto int mcve_gut(resource conn, string username, string password, int type, string account, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
+/* {{{ proto int m_gut(resource conn, string username, string password, int type, string account, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
    Audit MCVE for Unsettled Transactions */
-PHP_FUNCTION(mcve_gut)
+PHP_FUNCTION(m_gut)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1619,9 +1739,9 @@ PHP_FUNCTION(mcve_gut)
 }
 /* }}} */
 
-/* {{{ proto int mcve_gl(int conn, string username, string password, int type, string account, string batch, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
+/* {{{ proto int m_gl(int conn, string username, string password, int type, string account, string batch, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
    Audit MCVE for settled transactions */
-PHP_FUNCTION(mcve_gl)
+PHP_FUNCTION(m_gl)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1653,10 +1773,10 @@ PHP_FUNCTION(mcve_gl)
 }
 /* }}} */
 
-/* {{{ proto int mcve_gft(resource conn, string username, string password, int type, string account, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
+/* {{{ proto int m_gft(resource conn, string username, string password, int type, string account, string clerkid, string stationid, string comments, int ptrannum, string startdate, string enddate)
    Audit MCVE for Failed transactions
 */
-PHP_FUNCTION(mcve_gft)
+PHP_FUNCTION(m_gft)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1687,9 +1807,9 @@ PHP_FUNCTION(mcve_gft)
 }
 /* }}} */
 
-/* {{{ proto int mcve_chkpwd(resource conn, string username, string password)
+/* {{{ proto int m_chkpwd(resource conn, string username, string password)
    Verify Password */
-PHP_FUNCTION(mcve_chkpwd)
+PHP_FUNCTION(m_chkpwd)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1709,9 +1829,9 @@ PHP_FUNCTION(mcve_chkpwd)
 }
 /* }}} */
 
-/* {{{ proto int mcve_bt(resource conn, string username, string password)
+/* {{{ proto int m_bt(resource conn, string username, string password)
    Get unsettled batch totals */
-PHP_FUNCTION(mcve_bt)
+PHP_FUNCTION(m_bt)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1731,9 +1851,9 @@ PHP_FUNCTION(mcve_bt)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getcell(resource conn, int identifier, string column, int row)
+/* {{{ proto string m_getcell(resource conn, int identifier, string column, int row)
    Get a specific cell from a comma delimited response by column name */
-PHP_FUNCTION(mcve_getcell)
+PHP_FUNCTION(m_getcell)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -1758,9 +1878,9 @@ PHP_FUNCTION(mcve_getcell)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getcellbynum(resource conn, int identifier, int column, int row)
+/* {{{ proto string m_getcellbynum(resource conn, int identifier, int column, int row)
    Get a specific cell from a comma delimited response by column number */
-PHP_FUNCTION(mcve_getcellbynum)
+PHP_FUNCTION(m_getcellbynum)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -1785,9 +1905,9 @@ PHP_FUNCTION(mcve_getcellbynum)
 }
 /* }}} */
 
-/* {{{ proto int mcve_numcolumns(resource conn, int identifier)
+/* {{{ proto int m_numcolumns(resource conn, int identifier)
    Number of columns returned in a comma delimited response */
-PHP_FUNCTION(mcve_numcolumns)
+PHP_FUNCTION(m_numcolumns)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1806,9 +1926,9 @@ PHP_FUNCTION(mcve_numcolumns)
 }
 /* }}} */
 
-/* {{{ proto int mcve_numrows(resource conn, int identifier)
+/* {{{ proto int m_numrows(resource conn, int identifier)
    Number of rows returned in a comma delimited response */
-PHP_FUNCTION(mcve_numrows)
+PHP_FUNCTION(m_numrows)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1827,9 +1947,9 @@ PHP_FUNCTION(mcve_numrows)
 }
 /* }}} */
 
-/* {{{ proto int mcve_iscommadelimited(resource conn, int identifier)
+/* {{{ proto int m_iscommadelimited(resource conn, int identifier)
    Checks to see if response is comma delimited */
-PHP_FUNCTION(mcve_iscommadelimited)
+PHP_FUNCTION(m_iscommadelimited)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1848,9 +1968,9 @@ PHP_FUNCTION(mcve_iscommadelimited)
 }
 /* }}} */
 
-/* {{{ proto int mcve_parsecommadelimited(resource conn, int identifier)
-   Parse the comma delimited response so mcve_getcell, etc will work */
-PHP_FUNCTION(mcve_parsecommadelimited)
+/* {{{ proto int m_parsecommadelimited(resource conn, int identifier)
+   Parse the comma delimited response so m_getcell, etc will work */
+PHP_FUNCTION(m_parsecommadelimited)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1869,9 +1989,9 @@ PHP_FUNCTION(mcve_parsecommadelimited)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getcommadelimited(resource conn, int identifier)
+/* {{{ proto string m_getcommadelimited(resource conn, int identifier)
    Get the RAW comma delimited data returned from MCVE */
-PHP_FUNCTION(mcve_getcommadelimited)
+PHP_FUNCTION(m_getcommadelimited)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -1890,9 +2010,9 @@ PHP_FUNCTION(mcve_getcommadelimited)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getheader(resource conn, int identifier, int column_num)
+/* {{{ proto string m_getheader(resource conn, int identifier, int column_num)
    Get the name of the column in a comma-delimited response */
-PHP_FUNCTION(mcve_getheader)
+PHP_FUNCTION(m_getheader)
 {
 	MCVE_CONN *conn;
 	char *retval;
@@ -1912,18 +2032,18 @@ PHP_FUNCTION(mcve_getheader)
 }
 /* }}} */
 
-/* {{{ proto void mcve_destroyengine(void)
+/* {{{ proto void m_destroyengine(void)
    Free memory associated with IP/SSL connectivity */
-PHP_FUNCTION(mcve_destroyengine)
+PHP_FUNCTION(m_destroyengine)
 {
 	MCVE_DestroyEngine();
 	mcve_init = 0;
 }
 /* }}} */
 
-/* {{{ proto int mcve_chngpwd(resource conn, string admin_password, string new_password)
+/* {{{ proto int m_chngpwd(resource conn, string admin_password, string new_password)
    Change the system administrator's password */
-PHP_FUNCTION(mcve_chngpwd)
+PHP_FUNCTION(m_chngpwd)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1943,9 +2063,9 @@ PHP_FUNCTION(mcve_chngpwd)
 }
 /* }}} */
 
-/* {{{ proto int mcve_listusers(resource conn, string admin_password)
+/* {{{ proto int m_listusers(resource conn, string admin_password)
    List all users on MCVE system */
-PHP_FUNCTION(mcve_listusers)
+PHP_FUNCTION(m_listusers)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1964,9 +2084,9 @@ PHP_FUNCTION(mcve_listusers)
 }
 /* }}} */
 
-/* {{{ proto int mcve_enableuser(resource conn, string admin_password, string username)
+/* {{{ proto int m_enableuser(resource conn, string admin_password, string username)
    Enable an inactive MCVE user account */
-PHP_FUNCTION(mcve_enableuser)
+PHP_FUNCTION(m_enableuser)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -1986,9 +2106,9 @@ PHP_FUNCTION(mcve_enableuser)
 }
 /* }}} */
 
-/* {{{ proto int mcve_disableuser(resource conn, string admin_password, string username)
+/* {{{ proto int m_disableuser(resource conn, string admin_password, string username)
    Disable an active MCVE user account */
-PHP_FUNCTION(mcve_disableuser)
+PHP_FUNCTION(m_disableuser)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -2008,9 +2128,9 @@ PHP_FUNCTION(mcve_disableuser)
 }
 /* }}} */
 
-/* {{{ proto int mcve_deluser(resource conn, string admin_password, string username)
+/* {{{ proto int m_deluser(resource conn, string admin_password, string username)
    Delete an MCVE user account */
-PHP_FUNCTION(mcve_deluser)
+PHP_FUNCTION(m_deluser)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -2030,9 +2150,9 @@ PHP_FUNCTION(mcve_deluser)
 }
 /* }}} */
 
-/* {{{ proto int mcve_liststats(resource conn, string admin_password)
+/* {{{ proto int m_liststats(resource conn, string admin_password)
    List statistics for all users on MCVE system */
-PHP_FUNCTION(mcve_liststats)
+PHP_FUNCTION(m_liststats)
 {
 	MCVE_CONN *conn;
 	long retval;
@@ -2051,9 +2171,9 @@ PHP_FUNCTION(mcve_liststats)
 }
 /* }}} */
 
-/* {{{ proto resource mcve_initusersetup(void)
+/* {{{ proto resource m_initusersetup(void)
    Initialize structure to store user data */
-PHP_FUNCTION(mcve_initusersetup)
+PHP_FUNCTION(m_initusersetup)
 {
 	MCVE_UserSetup *usersetup;
 
@@ -2065,9 +2185,9 @@ PHP_FUNCTION(mcve_initusersetup)
 }
 /* }}} */
 
-/* {{{ proto void mcve_deleteusersetup(resource usersetup)
+/* {{{ proto void m_deleteusersetup(resource usersetup)
    Deallocate data associated with usersetup structure */
-PHP_FUNCTION(mcve_deleteusersetup)
+PHP_FUNCTION(m_deleteusersetup)
 {
 	MCVE_UserSetup *usersetup;
 	zval **arg;
@@ -2084,9 +2204,9 @@ PHP_FUNCTION(mcve_deleteusersetup)
 }
 /* }}} */
 
-/* {{{ proto int mcve_adduserarg(resource usersetup, int argtype, string argval)
+/* {{{ proto int m_adduserarg(resource usersetup, int argtype, string argval)
    Add a value to user configuration structure */
-PHP_FUNCTION(mcve_adduserarg)
+PHP_FUNCTION(m_adduserarg)
 {
 	MCVE_UserSetup *usersetup;
 	long retval;
@@ -2106,9 +2226,9 @@ PHP_FUNCTION(mcve_adduserarg)
 }
 /* }}} */
 
-/* {{{ proto string mcve_getuserarg(resource usersetup, int argtype)
+/* {{{ proto string m_getuserarg(resource usersetup, int argtype)
    Grab a value from usersetup structure */
-PHP_FUNCTION(mcve_getuserarg)
+PHP_FUNCTION(m_getuserarg)
 {
 	MCVE_UserSetup *usersetup;
 	char *retval;
@@ -2127,9 +2247,9 @@ PHP_FUNCTION(mcve_getuserarg)
 }
 /* }}} */
 
-/* {{{ proto int mcve_adduser(resource conn, string admin_password, int usersetup)
+/* {{{ proto int m_adduser(resource conn, string admin_password, int usersetup)
    Add an MCVE user using usersetup structure */
-PHP_FUNCTION(mcve_adduser)
+PHP_FUNCTION(m_adduser)
 {
 	MCVE_CONN *conn;
 	MCVE_UserSetup *usersetup;
@@ -2150,9 +2270,9 @@ PHP_FUNCTION(mcve_adduser)
 }
 /* }}} */
 
-/* {{{ proto int mcve_edituser(resource conn, string admin_password, int usersetup)
+/* {{{ proto int m_edituser(resource conn, string admin_password, int usersetup)
    Edit MCVE user using usersetup structure */
-PHP_FUNCTION(mcve_edituser)
+PHP_FUNCTION(m_edituser)
 {
 	MCVE_CONN *conn;
 	MCVE_UserSetup *usersetup;
@@ -2174,9 +2294,9 @@ PHP_FUNCTION(mcve_edituser)
 /* }}} */
 
 
-/* {{{ proto int mcve_uwait(long microsecs)
+/* {{{ proto int m_uwait(long microsecs)
    Wait x microsecs */
-PHP_FUNCTION(mcve_uwait)
+PHP_FUNCTION(m_uwait)
 {
 	long retval;
 	zval **arg;
@@ -2192,9 +2312,9 @@ PHP_FUNCTION(mcve_uwait)
 }
 /* }}} */
 
-/* {{{ proto string mcve_text_code(string code)
+/* {{{ proto string m_text_code(string code)
    Get a textual representation of the return_code */
-PHP_FUNCTION(mcve_text_code)
+PHP_FUNCTION(m_text_code)
 {
 	char *retval;
 	zval **arg;
@@ -2214,9 +2334,9 @@ PHP_FUNCTION(mcve_text_code)
 }
 /* }}} */
 
-/* {{{ proto string mcve_text_avs(string code)
+/* {{{ proto string m_text_avs(string code)
    Get a textual representation of the return_avs */
-PHP_FUNCTION(mcve_text_avs)
+PHP_FUNCTION(m_text_avs)
 {
 	char *retval;
 	zval **arg;
@@ -2236,9 +2356,9 @@ PHP_FUNCTION(mcve_text_avs)
 }
 /* }}} */
 
-/* {{{ proto string mcve_text_cv(int code)
+/* {{{ proto string m_text_cv(int code)
    Get a textual representation of the return_cv */
-PHP_FUNCTION(mcve_text_cv)
+PHP_FUNCTION(m_text_cv)
 {
 	char *retval;
 	zval **arg;
@@ -2258,6 +2378,84 @@ PHP_FUNCTION(mcve_text_cv)
 }
 /* }}} */
 
+/* Map new funnction names to old function names for compatability */
+M_map_function(m_initengine,			mcve_initengine)
+M_map_function(m_initconn,			mcve_initconn)
+M_map_function(m_deleteresponse,		mcve_deleteresponse)
+M_map_function(m_destroyconn,			mcve_destroyconn)
+M_map_function(m_setdropfile,			mcve_setdropfile)
+M_map_function(m_setip,				mcve_setip)
+M_map_function(m_setssl,			mcve_setssl)
+M_map_function(m_setssl_files,			mcve_setssl_files)
+M_map_function(m_settimeout,			mcve_settimeout)
+M_map_function(m_setblocking,			mcve_setblocking)
+M_map_function(m_verifyconnection,		mcve_verifyconnection)
+M_map_function(m_verifysslcert,			mcve_verifysslcert)
+M_map_function(m_maxconntimeout,		mcve_maxconntimeout)
+M_map_function(m_connectionerror,		mcve_connectionerror)
+M_map_function(m_deletetrans,			mcve_deletetrans)
+M_map_function(m_connect,			mcve_connect)
+M_map_function(m_transnew,			mcve_transnew)
+M_map_function(m_transparam,			mcve_transparam)
+M_map_function(m_transsend,			mcve_transsend)
+M_map_function(m_ping,				mcve_ping)
+M_map_function(m_responseparam,			mcve_responseparam)
+M_map_function(m_returnstatus,			mcve_returnstatus)
+M_map_function(m_returncode,			mcve_returncode)
+M_map_function(m_transactionssent,		mcve_transactionssent)
+M_map_function(m_transactionitem,		mcve_transactionitem)
+M_map_function(m_transactionbatch,		mcve_transactionbatch)
+M_map_function(m_transactionid,			mcve_transactionid)
+M_map_function(m_transactionauth,		mcve_transactionauth)
+M_map_function(m_transactiontext,		mcve_transactiontext)
+M_map_function(m_transactionavs,		mcve_transactionavs)
+M_map_function(m_transactioncv,			mcve_transactioncv)
+M_map_function(m_getuserparam,			mcve_getuserparam)
+M_map_function(m_monitor,			mcve_monitor)
+M_map_function(m_transinqueue,			mcve_transinqueue)
+M_map_function(m_checkstatus,			mcve_checkstatus)
+M_map_function(m_completeauthorizations,	mcve_completeauthorizations)
+M_map_function(m_sale,				mcve_sale)
+M_map_function(m_preauth,			mcve_preauth)
+M_map_function(m_void,				mcve_void)
+M_map_function(m_preauthcompletion,		mcve_preauthcompletion)
+M_map_function(m_force,				mcve_force)
+M_map_function(m_override,			mcve_override)
+M_map_function(m_return,			mcve_return)
+M_map_function(m_iscommadelimited,		mcve_iscommadelimited)
+M_map_function(m_parsecommadelimited,		mcve_parsecommadelimited)
+M_map_function(m_getcommadelimited,		mcve_getcommadelimited)
+M_map_function(m_getcell,			mcve_getcell)
+M_map_function(m_getcellbynum,			mcve_getcellbynum)
+M_map_function(m_numcolumns,			mcve_numcolumns)
+M_map_function(m_numrows,			mcve_numrows)
+M_map_function(m_getheader,			mcve_getheader)
+M_map_function(m_destroyengine,			mcve_destroyengine)
+M_map_function(m_settle,			mcve_settle)
+M_map_function(m_gut,				mcve_gut)
+M_map_function(m_gl,				mcve_gl)
+M_map_function(m_gft,				mcve_gft)
+M_map_function(m_qc,				mcve_qc)
+M_map_function(m_ub,				mcve_ub)
+M_map_function(m_chkpwd,			mcve_chkpwd)
+M_map_function(m_bt,				mcve_bt)
+M_map_function(m_uwait,				mcve_uwait)
+M_map_function(m_text_code,			mcve_text_code)
+M_map_function(m_text_avs,			mcve_text_avs)
+M_map_function(m_text_cv,			mcve_text_cv)
+M_map_function(m_chngpwd,			mcve_chngpwd)
+M_map_function(m_listusers,			mcve_listusers)
+M_map_function(m_adduser,			mcve_adduser)
+M_map_function(m_enableuser,			mcve_enableuser)
+M_map_function(m_disableuser,			mcve_disableuser)
+M_map_function(m_getuserarg,			mcve_getuserarg)
+M_map_function(m_adduserarg,			mcve_adduserarg)
+M_map_function(m_deleteusersetup,		mcve_deleteusersetup)
+M_map_function(m_initusersetup,			mcve_initusersetup)
+M_map_function(m_deluser,			mcve_deluser)
+M_map_function(m_edituser,			mcve_edituser)
+M_map_function(m_liststats,			mcve_liststats)
+ 
 #endif
 
 /* END OF MCVE PHP EXTENSION */
