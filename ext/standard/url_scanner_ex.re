@@ -359,7 +359,7 @@ char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const cha
 }
 
 
-static char *url_adapt_ext(const char *src, uint srclen, uint *newlen, zend_bool do_flush TSRMLS_DC)
+static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_bool do_flush TSRMLS_DC)
 {
 	url_adapt_state_ex_t *ctx;
 	char *retval;
