@@ -6,6 +6,7 @@ PHP 4                                                                      NEWS
   . Added php.ini option 'dba.default_handler' to specify a default handler.
   . Added parameter full_info to dba_handlers() that can be set true to 
     receive information about the handlers such like the library version.
+  . Added support for internal error handling of Berkeley db libraries.
   . Disallow Berkeley db versions 4.1.0 to 4.1.24 due to locking problems.
   . Disallow linkage of Berkeley db submodules against libraries with 
     different major version.
