@@ -23,6 +23,12 @@
       <name>Tomas V.V.Cox</name>
       <email>cox@idecnet.com</email>
     </maintainer>
+    <maintainer>
+      <user>mj</user>
+      <role>helper</role>
+      <name>Martin Jansen</name>
+      <email>mj@php.net</email>
+    </maintainer>
   </maintainers>
   <release>
     <version>0.11-dev</version>
