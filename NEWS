@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)
 - Fixed bug #31980 (Unicode exif data not available on Windows). (Edin)
+- Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping columns
+  with NULL values). (Daniel Convissor)
 - Fixed bug #31878 (Segmentation fault using clone keyword on nodes). (Rob)
 - Fixed bug #31858 (--disable-cli does not force --without-pear). (Jani)
 - Fixed bug #31842 (*date('r') does not return RFC2822 conforming date string).
