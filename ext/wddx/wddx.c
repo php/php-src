@@ -136,14 +136,11 @@ static int wddx_stack_init(wddx_stack *stack)
 {
 	stack->top = 0;
 	stack->elements = (void **) emalloc(sizeof(void **) * STACK_BLOCK_SIZE);
-	if (!stack->elements) {
-		return FAILURE;
-	} else {
-		stack->max = STACK_BLOCK_SIZE;
-		stack->varname = NULL;
-		stack->done = 0;
-		return SUCCESS;
-	}
+	stack->max = STACK_BLOCK_SIZE;
+	stack->varname = NULL;
+	stack->done = 0;
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -154,9 +151,6 @@ static int wddx_stack_push(wddx_stack *stack, void *element, int size)
 	if (stack->top >= stack->max) {		/* we need to allocate more memory */
 		stack->elements = (void **) erealloc(stack->elements,
 				   (sizeof(void **) * (stack->max += STACK_BLOCK_SIZE)));
-		if (!stack->elements) {
-			return FAILURE;
-		}
 	}
 	stack->elements[stack->top] = (void *) emalloc(size);
 	memcpy(stack->elements[stack->top], element, size);
@@ -490,7 +484,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 				 zend_hash_get_current_data(HASH_OF(retval), (void **)&varname) == SUCCESS;
 				 zend_hash_move_forward(HASH_OF(retval))) {
 				if (Z_TYPE_PP(varname) != IS_STRING) {
-					php_error(E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
+					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
 					continue;
 				}
 
@@ -1133,9 +1127,7 @@ PHP_FUNCTION(wddx_serialize_vars)
 		
 	argc = ZEND_NUM_ARGS();
 	if (argc < 1) {
-		php_error(E_WARNING, "%s() requires at least 1 argument, 0 given",
-				  get_active_function_name(TSRMLS_C));
-		return;
+		WRONG_PARAM_COUNT;
 	}
 
 	/* Allocate arguments array and get the arguments, checking for errors. */
@@ -1250,9 +1242,7 @@ PHP_FUNCTION(wddx_add_vars)
 	
 	argc = ZEND_NUM_ARGS();
 	if (argc < 2) {
-		php_error(E_WARNING, "%s() requires at least 2 arguments, %d given",
-				  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS());
-		return;	
+		WRONG_PARAM_COUNT;
 	}
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
