@@ -41,6 +41,38 @@
     Fixed memory leaks in ldap_get_entries() and ldap_get_dn() when using
     RFC1823 API
 
+2001-07-14  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php: not quote integers in quote()
+
+    * pear/DB/pgsql.php: added a native quote method
+
+2001-07-14  Bertrand Mansion  <bmansion@mamasam.com>
+
+    * pear/HTML/Table.php:
+    Now compatible with error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE). Thanks to Olivier and a fix on variables existence check.
+
+2001-07-14  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/http_fopen_wrapper.c: - Faster without calling strlen()
+
+2001-07-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/http_fopen_wrapper.c: Fix for bug #11632
+
+2001-07-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/bz2/config.m4: Fix NEWS.
+
+2001-07-14  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/gd/gd.c: Fix for bug #12065
+
+2001-07-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: clearify ocisetprefetch
+
 2001-07-13  Boian Bonev  <boian@bonev.com>
 
     * ext/vpopmail/php_vpopmail.c:
