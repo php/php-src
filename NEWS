@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Much more work on domxml. Build xml tree, create xml doc works (Uwe)
 - Made foreach() work on objects. (Thies, Zend library)
 - Added domxml extension based on libxml, still little functionality (Uwe)
 - Fixed memory corruption in fgetss(), strip_tags() and gzgetss() (Zeev)

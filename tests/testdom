@@ -37,8 +37,8 @@ function list_attr($node) {
 $xmlstr = "<?xml version='1.0'?>
 <!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'>
 <chapter language='en'><title language='en'>Title</title>
-<para language='en'>
-<informaltable language='en'>
+<para language='ge'>
+<informaltable language='sp'>
 <tgroup cols='3'>
 <tbody>
 <row><entry>a1</entry><entry morerows='1'>b1</entry><entry>c1</entry></row>
@@ -50,17 +50,25 @@ $xmlstr = "<?xml version='1.0'?>
 </para>
 </chapter> ";
 
-$dom = dom($xmlstr);
+/* The following code traverses the xml tree node by node
+   by using the methods of the xmlnode object
+*/
+echo "Test 1: accessing single nodes from php\n";
+$dom = xmldoc($xmlstr);
 echo "XML Version: ".$dom->version."\n";
 $dtd = $dom->dtd();
 $rootnode = $dom->root();
-/* The following line causes a segm fault if more than 5 methods are in
-   class node, see ext/domxml/domxml.c */
-$attr = $rootnode->getattr("language");
-
-/* if the above weren't there, php will probably crash somewhere after here */
 output_node($rootnode);
 
+/* This one creates a dom tree made of php objects */
+echo "Test 2: creating a tree with php objects\n";
+$dom = xmltree($xmlstr);
+var_dump($dom);
+echo $dom->root->name;
+echo "\n";
+
+/* The following builds a xml document from scratch */
+echo "Test 3: building a xml document from scratch\n";
 $doc = newxmldoc("1.0");
 $root = $doc->addroot("HTML");
 $head = $root->newchild("HEAD", "");
