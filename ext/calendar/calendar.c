@@ -369,17 +369,19 @@ caution: the Hebrew format produces non unique result.
 for example both: year '5' and year '5000' produce 'ä'.
 use the numeric one for calculations. 
  */
-static char *heb_number_to_chars(int n, int fl)
+static char *heb_number_to_chars(int n, int fl, char **ret)
 {
-	char *p, old[18], *ret, *endofalafim;
+	char *p, old[18], *endofalafim;
 
 	p = endofalafim = old;
 /* 
    prevents the option breaking the jewish beliefs, and some other 
    critical resources ;)
  */
-	if (n > 9999 || n < 1)
+	if (n > 9999 || n < 1) {
+		*ret = NULL;
 		return NULL;
+	}	
 
 /* alafim (thousands) case */
 	if (n / 1000) {
@@ -450,9 +452,9 @@ static char *heb_number_to_chars(int n, int fl)
 	}
 
 	*p = '\0';
-	ret = emalloc((int) (p - old) + 1);
-	strncpy(ret, old, (int) (p - old) + 1);
-	return ret;
+	*ret = estrndup(old, (p - old) + 1);
+	p = *ret;
+	return p;
 }
 /* }}} */
 
@@ -464,6 +466,7 @@ PHP_FUNCTION(jdtojewish)
 	zend_bool heb   = 0;
 	int year, month, day;
 	char date[10], hebdate[25];
+	char *dayp, *yearp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|bl", &julday, &heb, &fl) == FAILURE) {
 		RETURN_FALSE;
@@ -479,7 +482,14 @@ PHP_FUNCTION(jdtojewish)
 			RETURN_FALSE;
 		}
 
-		sprintf(hebdate, "%s %s %s", heb_number_to_chars(day, fl), JewishMonthHebName[month], heb_number_to_chars(year, fl));
+		sprintf(hebdate, "%s %s %s", heb_number_to_chars(day, fl, &dayp), JewishMonthHebName[month], heb_number_to_chars(year, fl, &yearp));
+
+		if (dayp) {
+			efree(dayp);
+		}
+		if (yearp) {
+			efree(yearp);
+		}
 
 		RETURN_STRING(hebdate, 1);
 
