@@ -3964,7 +3964,7 @@ static xmlDocPtr domxml_document_parser(int mode, int loadtype, char *source, vo
 	domxml_ErrorCtxt errorCtxt;
 	char *directory = NULL;
 	int validate = 0, resolve_externals = 0;
-	int keep_blanks = 1, recovery = 1, substitute_ent;
+	int keep_blanks = 1, recovery = 0, substitute_ent;
 
 	substitute_ent = xmlSubstituteEntitiesDefaultValue;
 
