@@ -462,7 +462,6 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 			static SYSTEM_INFO si;
 			static MEMORY_BASIC_INFORMATION mi;
 			static DWORD dwOldProtect;
-			HSE_SEND_HEADER_EX_INFO header_info;
 
 			GetSystemInfo(&si);
 
@@ -487,16 +486,20 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 
 			CG(unclean_shutdown)=1;
 
-			header_info.pszStatus = "500 Internal Server Error";
-#ifndef WITH_ZEUS
-			header_info.cchStatus = strlen(header_info.pszStatus);
-#endif
-			header_info.pszHeader = "Content-Type: text/html\r\n\r\n";
-			header_info.cchHeader = strlen(header_info.pszHeader);
+			if (!SG(headers_sent)) {
+				HSE_SEND_HEADER_EX_INFO header_info;
 
-			lpECB->dwHttpStatusCode = 500;
-			lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
-			SG(headers_sent)=1;
+				header_info.pszStatus = "500 Internal Server Error";
+#ifndef WITH_ZEUS
+				header_info.cchStatus = strlen(header_info.pszStatus);
+#endif
+				header_info.pszHeader = "Content-Type: text/html\r\n\r\n";
+				header_info.cchHeader = strlen(header_info.pszHeader);
+
+				lpECB->dwHttpStatusCode = 500;
+				lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
+				SG(headers_sent)=1;
+			}
 			sapi_isapi_ub_write("Stack Overflow", sizeof("Stack Overflow")-1);		
 		} else {
 			ExitThread(0);
