@@ -44,7 +44,7 @@ derived::inc();
 base::show();
 derived::show();
 
-$r = new reflection_class('derived');
+$r = new ReflectionClass('derived');
 echo 'Number of properties: '. count($r->getStaticProperties()) . "\n";
 
 echo "Done\n";
