@@ -1,3 +1,80 @@
+2002-05-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/image.c
+      ext/standard/php_image.h:
+    - Added support for compressed SWF (Flash MX) files to getimagesize().
+      (Fixes feature request #17272).
+    - Added support to getimagesize() for compressed Flash MX files. 
+
+2002-05-23  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php: TODO++
+    Check dependencies break on package uninstall (when no force given)
+
+    * pear/PEAR/Dependency.php:
+    Fix package dependency check (reported by Rasmus)
+
+2002-05-23  Andrei Zmievski  <andrei@php.net>
+
+    * ext/pcre/php_pcre.c
+      NEWS:
+    This code adds string offset capturing in preg_split() results. Original
+    patch by David Brown, modified by me.
+
+2002-05-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Revamped timeout handling to be more consistent; it disconnects users
+    which are not associated with a stream window within 3 minutes.
+
+    Improved the id generator, so that it becomes more unlikely that
+    two or more consecutive runs/instances will yield the same ids.
+
+    Improved error message collecting to run at constant time intervals.
+
+    Added a facility which aims at ensuring that the extension does not
+    shutdown(2) unrelated sockets.  This has been disabled for now,
+    because of lack of extensive testing.
+
+    The current time is now easily accessible through a wrapper function.
+    This replaces the ugly #ifdefs spread through the code.
+
+    IRCG does not generate "Pragma: no-cache" headers anymore.  Additionally,
+    ircg_set_current() will not cause the HTTP header to be sent, so you
+    can add/change headers afterwards.
+
+    And some cleanup.
+
+2002-05-23  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/math.c:
+    MFH (patch for allowing strings in pow() args, fixes #17374)
+
+2002-05-23  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/file.c: - Fix typo
+
+2002-05-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/general_functions/proc_open.phpt:
+    Add simple test case for proc_open
+
+    * ext/standard/exec.c: Fix (stupid) segfault. #17379
+
+2002-05-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/exec.c:
+    - Fix unchecked return values with parameters to proc_open. (Fixes
+      bug #17375)
+
+    * ext/standard/file.c: - Fix errormessage and whitespace
+
+2002-05-23  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/standard/file.c:
+    Added 4th parameter to specify enclosure character. Patch by Dean Richard Benson <dean@vipersoft.co.uk>
+    Spit more meaningful error messages when delim and/or enclosure char is null.
+
 2002-05-22  Jani Taskinen  <sniper@iki.fi>
 
     * run-tests.php: Skip POST data if it is empty.
