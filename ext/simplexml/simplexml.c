@@ -360,7 +360,7 @@ _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval **value TSRM
 	if (node->children && node->children->type == XML_TEXT_NODE && !xmlIsBlankNode(node->children)) {
 		contents = xmlNodeListGetString(node->doc, node->children, 1);
 		if (contents) {
-			ZVAL_STRING(*value, contents, 0);
+			ZVAL_STRING(*value, contents, 1);
 		}
 	} else {
 		subnode = php_sxe_object_new(TSRMLS_C);
@@ -739,6 +739,8 @@ cast_object(zval *object, int type, char *contents TSRMLS_DC)
 {
 	if (contents) {
 		ZVAL_STRINGL(object, contents, strlen(contents), 1);
+		object->refcount = 1;
+		object->is_ref = 0;
 	}
 
 	switch (type) {
@@ -794,7 +796,7 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 		xmlFree(contents);
 	}
 	if (should_free) {
-		zval_dtor(&free_obj);
+		/*zval_dtor(&free_obj);*/
 	}
 	return rv;
 }
