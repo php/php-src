@@ -11,6 +11,7 @@ PHP 4                                                                      NEWS
 - Fixed bugs #31107, #31110, #31111 (Compile failure of zend_strtod.c). (Jani)
 - Fixed bug #31106 (Fixed crash in overloaded objects). (Stas)
 - Fixed bug #31103 (Better error message when c-client cannot be found). (Ilia)
+- Fixed bug #31101 (missing kerberos header file path with --with-openssl). (Jani)
 - Fixed bug #31072 (var_export() does not output an array element with an empty
   string key). (Derick)
 - Fixed bug #31056 (php_std_date() returns invalid formatted date if 
