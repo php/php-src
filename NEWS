@@ -44,6 +44,7 @@ PHP                                                                        NEWS
 - Fixed bug #19859 (allow fast_call_user_function to support __call). 
   (Stanislav)
 - Fixed bug #17988 (strtotime failed to parse postgresql timestamp). (Derick)
+- Fixed bug #25218 ("deflate" compressed pages had a gzip header). (Stefan)
 
 29 Jun 2003, PHP 5 Beta 1 
 - Removed the bundled MySQL client library. (Sterling)
