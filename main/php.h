@@ -273,6 +273,14 @@ int cfgparse(void);
 
 #define php_error zend_error
 
+typedef enum {
+	EH_NORMAL = 0,
+	EH_SUPPRESS,
+	EH_THROW
+} error_handling_t;
+
+PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC);
+
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC) ;
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
