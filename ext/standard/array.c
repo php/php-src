@@ -2195,7 +2195,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 {
 	zval ***args = NULL;
-	int argc, i;
+	int argc, i, params_ok = 1;
 
 	/* Get the argument count and check it */	
 	argc = ZEND_NUM_ARGS();
@@ -2210,12 +2210,15 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 		WRONG_PARAM_COUNT;
 	}
 
-	for (i=0; i<argc; i++) {
+	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i+1);
-			efree(args);
-			return;
+			params_ok = 0;
 		}
+	}
+	if (params_ok == 0) {
+		efree(args);
+		return;
 	}
 
 	array_init(return_value);
