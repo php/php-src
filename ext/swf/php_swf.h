@@ -62,6 +62,7 @@ PHP_FUNCTION(swf_actionsettarget);
 PHP_FUNCTION(swf_actiongotolabel);
 PHP_FUNCTION(swf_defineline);
 PHP_FUNCTION(swf_definerect);
+PHP_FUNCTION(swf_definepoly);
 PHP_FUNCTION(swf_startshape);
 PHP_FUNCTION(swf_shapelinesolid);
 PHP_FUNCTION(swf_shapefilloff);
