@@ -3,6 +3,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 #ifndef _mysys_err_h
 #define _mysys_err_h
+
+#include <errno.h>
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
