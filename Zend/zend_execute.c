@@ -2413,7 +2413,6 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	EX(object) = get_obj_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R TSRMLS_CC);
 			
 	if (EX(object) && EX(object)->type == IS_OBJECT) {
-
 		/* First, locate the function. */
 		EX(fbc) = Z_OBJ_HT_P(EX(object))->get_method(EX(object), function_name_strval, function_name_strlen TSRMLS_CC);
 		if (!EX(fbc)) {
