@@ -20,32 +20,22 @@
 
 /* $Id$ */
 
-/* This file is based on the Adabas D extension.
- * Adabas D will no longer be supported as separate module.
- */
-#include "php.h"
+#if COMPILE_DL
+#include "dl/phpdl.h"
+#endif
 
-#undef THREAD_SAFE
+#include "php.h"
+#include "php_globals.h"
+#include "ext/standard/php3_standard.h"
+# include "php3_odbc.h"
 
 #if HAVE_UODBC
 
-# if !(WIN32|WINNT)
-#  include "php_config.h"
-#  include "build-defs.h"
-# endif
-  
 # include <fcntl.h>
-
-# include "dl/phpdl.h"
-# include "ext/standard/php3_standard.h"
-# include "php3_odbc.h"
 # include "ext/standard/head.h"
 # include "snprintf.h"
 # include "php_ini.h"
-
-# ifndef ZS
-php_odbc_globals odbc_globals;
-# endif
+void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 function_entry odbc_functions[] = {
 	PHP_FE(odbc_setoption, NULL)
@@ -73,6 +63,8 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_rollback, NULL)
 	PHP_FE(odbc_binmode, NULL)
 	PHP_FE(odbc_longreadlen, NULL)
+/*	PHP_FE(odbc_bind_param, NULL)
+	PHP_FE(odbc_define, NULL)*/
 	PHP_FALIAS(odbc_do, odbc_exec, NULL)
 	{ NULL, NULL, NULL }
 };
@@ -88,13 +80,18 @@ php3_module_entry odbc_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef ZTS
+int odbc_globals_id;
+#else
+ZEND_API php_odbc_globals odbc_globals;
+#endif
 
 #if COMPILE_DL
 DLEXPORT php3_module_entry *get_module() { return &odbc_module_entry; };
 #endif
 
 
-static void _free_result(odbc_result *res)
+static void _free_odbc_result(odbc_result *res)
 {
 	int i;
 	
@@ -121,49 +118,26 @@ static void _free_result(odbc_result *res)
 	}
 }
 
-static int _results_cleanup(list_entry *le)
-{
-	ODBC_TLS_VARS;
 
-	if (le->type == ODBCG(le_result)) {
-		odbc_connection *conn = ((odbc_result *) le->ptr)->conn_ptr;
-		if (!conn->open && ((odbc_result *) le->ptr)->stmt){
-			SQLFreeStmt(((odbc_result *) le->ptr)->stmt,SQL_DROP);
-#if !HAVE_DB2
-			((odbc_result *) le->ptr)->stmt = NULL;
-#endif
-		}
-	}
-	return 0;
-}
-
-static void _close_connection(odbc_connection *conn)
+static void _close_odbc_conn(odbc_connection *conn)
 {
 	/* FIXME
 	 * Closing a connection will fail if there are
-	 * pending transactions
+	 * pending transactions. It is in the responsibility
+	 * of the user to avoid this.
 	 */
-	ODBC_TLS_VARS;
 
-	conn->open = 0;
-	zend_hash_apply(ODBCG(resource_list),
-				(int (*)(void *))_results_cleanup);
-	SQLDisconnect(conn->hdbc);
+   	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
 	efree(conn);
 	ODBCG(num_links)--;
 }
 
 
-static void _close_pconnection(odbc_connection *conn)
+static void _close_odbc_pconn(odbc_connection *conn)
 {
-	ODBC_TLS_VARS;
-
 
 	conn->open = 0;
-	zend_hash_apply(ODBCG(resource_plist),
-				(int (*)(void *))_results_cleanup);
-
 	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
 	free(conn);
@@ -175,8 +149,9 @@ static void _close_pconnection(odbc_connection *conn)
 
 static PHP_INI_MH(odbc_param_int)
 {
-	long *p;
 	ODBC_TLS_VARS;
+
+	long *p;
 
 	p = (long *) (globals + (size_t)mh_arg1);
 	*p = atoi(new_value);
@@ -187,8 +162,9 @@ static PHP_INI_MH(odbc_param_int)
 
 static PHP_INI_MH(odbc_param_str)
 {
-	char **p;
 	ODBC_TLS_VARS;
+
+	char **p;
 
 	p = (char **) (globals + (size_t)mh_arg1);
 	*p = new_value;
@@ -215,15 +191,14 @@ PHP_MINIT_FUNCTION(odbc)
 	HDBC    foobar;
 	RETCODE rc;
 #endif
-	ODBC_TLS_VARS;
 
 	REGISTER_INI_ENTRIES();
 	SQLAllocEnv(&ODBCG(henv));
 	
 	ODBCG(num_persistent) = 0;
-	ODBCG(le_result) = register_list_destructors(_free_result, NULL);
-	ODBCG(le_conn) = register_list_destructors(_close_connection, NULL);
-	ODBCG(le_pconn) = register_list_destructors(NULL, _close_pconnection);
+	ODBCG(le_result) = register_list_destructors(_free_odbc_result, NULL);
+	ODBCG(le_conn) = register_list_destructors(_close_odbc_conn, NULL);
+	ODBCG(le_pconn) = register_list_destructors(NULL, _close_odbc_pconn);
 
 #ifdef SQLANY_BUG
 /* Make a dumb connection to avoid crash on SQLFreeEnv(),
@@ -245,20 +220,35 @@ PHP_MINIT_FUNCTION(odbc)
 	REGISTER_LONG_CONSTANT("ODBC_BINMODE_PASSTHRU", 0, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ODBC_BINMODE_RETURN", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ODBC_BINMODE_CONVERT", 2, CONST_CS | CONST_PERSISTENT);
-	/* Define Constants for different cursor options
+	/* Define Constants for options
 	   these Constants are are defined in <sqlext.h>
 	*/
-	REGISTER_MAIN_LONG_CONSTANT("SQL_CUR_USE_IF_NEEDED", SQL_CUR_USE_IF_NEEDED, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("SQL_CUR_USE_ODBC", SQL_CUR_USE_ODBC, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("SQL_CUR_USE_DRIVER", SQL_CUR_USE_DRIVER, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("SQL_CUR_DEFAULT", SQL_CUR_DEFAULT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_ODBC_CURSORS", SQL_ODBC_CURSORS, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CUR_USE_DRIVER", SQL_CUR_USE_DRIVER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CUR_USE_IF_NEEDED", SQL_CUR_USE_IF_NEEDED, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CUR_USE_ODBC", SQL_CUR_USE_ODBC, CONST_PERSISTENT | CONST_CS);
+
+
+	REGISTER_LONG_CONSTANT("SQL_CONCURRENCY", SQL_CONCURRENCY, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CONCUR_READ_ONLY", SQL_CONCUR_READ_ONLY, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CONCUR_LOCK", SQL_CONCUR_LOCK, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CONCUR_ROWVER", SQL_CONCUR_ROWVER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CONCUR_VALUES", SQL_CONCUR_VALUES, CONST_PERSISTENT | CONST_CS);
+
+	REGISTER_LONG_CONSTANT("SQL_CURSOR_TYPE", SQL_CURSOR_TYPE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CURSOR_FORWARD_ONLY", SQL_CURSOR_FORWARD_ONLY, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CURSOR_KEYSET_DRIVEN", SQL_CURSOR_KEYSET_DRIVEN, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CURSOR_DYNAMIC", SQL_CURSOR_DYNAMIC, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_CURSOR_STATIC", SQL_CURSOR_STATIC, CONST_PERSISTENT | CONST_CS);
+	
+	REGISTER_LONG_CONSTANT("SQL_KEYSET_SIZE", SQL_KEYSET_SIZE, CONST_PERSISTENT | CONST_CS);
+
 	return SUCCESS;
 }
 
 
 PHP_RINIT_FUNCTION(odbc)
 {
-	ODBC_TLS_VARS;
 
 	ODBCG(defConn) = -1;
 	ODBCG(num_links) = ODBCG(num_persistent);
@@ -268,7 +258,6 @@ PHP_RINIT_FUNCTION(odbc)
 
 PHP_MSHUTDOWN_FUNCTION(odbc)
 {
-	ODBC_TLS_VARS;
 
 	SQLFreeEnv(ODBCG(henv));
 
@@ -278,7 +267,6 @@ PHP_MSHUTDOWN_FUNCTION(odbc)
 
 PHP_MINFO_FUNCTION(odbc)
 {
-	ODBC_TLS_VARS;
 
 	php_printf("ODBC compiled with \"" ODBC_TYPE "\" library");
 	php_printf("<BR>");
@@ -291,8 +279,6 @@ PHP_MINFO_FUNCTION(odbc)
 	php_printf("max_persistent: %d<br>\n",   ODBCG(max_persistent));
 	php_printf("max_links: %d<br>\n",        ODBCG(max_links));
 }	 
-	 
-	 
 
 /*
  * List management functions
@@ -308,7 +294,6 @@ odbc_result *odbc_get_result(HashTable *list, int ind)
 {
 	odbc_result *res;
 	int type;
-	ODBC_TLS_VARS;
 
 	res = (odbc_result*)php3_list_find(ind, &type);
 	if (!res || type != ODBCG(le_result)) {
@@ -322,7 +307,6 @@ void odbc_del_result(HashTable *list, int ind)
 {
 	odbc_result *res;
 	int type;
-	ODBC_TLS_VARS;
 
 	res = (odbc_result *)php3_list_find(ind, &type);
 	if (!res || type != ODBCG(le_result)) {
@@ -337,7 +321,6 @@ odbc_connection *odbc_get_conn(HashTable *list, int ind)
 	odbc_connection *conn = NULL;
 	int type;
 	HashTable *plist;
-	ODBC_TLS_VARS;
 	
 	plist = ODBCG(resource_plist);
 
@@ -377,26 +360,6 @@ void ODBC_SQL_ERROR(HDBC conn, HSTMT stmt, char *func)
 	}
 }
 
-/* Main User Functions */
-/* {{{ proto odbc_close_all(void)
-   Close all ODBC connections */
-PHP_FUNCTION(odbc_close_all)
-{
-	void *ptr;
-	int type;
-	int i, nument = zend_hash_next_free_element(list);
-	ODBC_TLS_VARS;
-
-	for (i = 1; i < nument; i++) {
-		ptr = php3_list_find(i, &type);
-		if (ptr && (type == ODBCG(le_conn) ||
-				   type == ODBCG(le_pconn))) {
-			php3_list_delete(i);
-		}
-	}
-}
-/* }}} */
-
 void php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	int         res_ind;
@@ -430,21 +393,6 @@ void php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	RETURN_TRUE
 }
 
-/* {{{ proto odbc_binmode(int result_id, int mode)
-   Handle binary column data */
-PHP_FUNCTION(odbc_binmode)
-{
-	php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
-}
-/* }}} */
-
-/* {{{ proto odbc_longreadlen(int result_id, int length)
-   Handle LONG columns */
-PHP_FUNCTION(odbc_longreadlen)
-{
-	php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
-}
-/* }}} */
 
 int odbc_bindcols(odbc_result *result)
 {
@@ -505,6 +453,70 @@ int odbc_bindcols(odbc_result *result)
     return 1;
 }
 
+void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
+{
+	odbc_connection *curr_conn;
+	RETCODE rc;
+	pval *arg1;
+	ODBC_TLS_VARS;
+
+ 	if ( getParameters(ht, 1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}                            
+ 
+    convert_to_long(arg1);
+
+	if ((curr_conn = odbc_get_conn(list, arg1->value.lval)) == NULL){
+		RETURN_FALSE;
+	}
+
+	rc = SQLTransact(ODBCG(henv), curr_conn->hdbc, (UWORD)((type)?SQL_COMMIT:SQL_ROLLBACK));
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO){
+		ODBC_SQL_ERROR(curr_conn->hdbc, SQL_NULL_HSTMT, "SQLTransact");
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+
+/* Main User Functions */
+/* {{{ proto odbc_close_all(void)
+   Close all ODBC connections */
+PHP_FUNCTION(odbc_close_all)
+{
+	void *ptr;
+	int type;
+	int i, nument = zend_hash_next_free_element(list);
+	ODBC_TLS_VARS;
+
+	for (i = 1; i < nument; i++) {
+		ptr = php3_list_find(i, &type);
+		if (ptr && (type == ODBCG(le_conn) ||
+				   type == ODBCG(le_pconn))) {
+			php3_list_delete(i);
+		}
+	}
+}
+/* }}} */
+
+/* {{{ proto odbc_binmode(int result_id, int mode)
+   Handle binary column data */
+PHP_FUNCTION(odbc_binmode)
+{
+	php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+}
+/* }}} */
+
+/* {{{ proto odbc_longreadlen(int result_id, int length)
+   Handle LONG columns */
+PHP_FUNCTION(odbc_longreadlen)
+{
+	php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+}
+/* }}} */
+
+
+
 /* {{{ proto odbc_prepare(int connection_id, string query)
    Prepares a statement for execution */
 PHP_FUNCTION(odbc_prepare)
@@ -527,10 +539,6 @@ PHP_FUNCTION(odbc_prepare)
 	if ((curr_conn = odbc_get_conn(list, conn)) == NULL){
 		RETURN_FALSE;
 	}
-
-#if 0
-	_php3_stripslashes(query,NULL);
-#endif
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if (result == NULL){
@@ -583,14 +591,14 @@ PHP_FUNCTION(odbc_prepare)
    Execute a prepared statement */
 PHP_FUNCTION(odbc_execute)
 { 
-    pval *arg1, *arg2, arr, *tmp;
+    pval *arg1, *arg2, **tmp;
     typedef struct params_t {
 		SDWORD vallen;
 		int fp;
 	} params_t;
 	params_t *params = NULL;
 	char *filename;
-   	SWORD sqltype, scale, nullable;
+   	SWORD sqltype, ctype, scale, nullable;
 	UDWORD precision;
    	odbc_result   *result=NULL;
 	int res_ind, numArgs, i, ne;
@@ -604,8 +612,7 @@ PHP_FUNCTION(odbc_execute)
 		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 			WRONG_PARAM_COUNT;
 
-        arr = *arg2;
-        if (arr.type != IS_ARRAY) {
+        if (arg2->type != IS_ARRAY) {
             php_error(E_WARNING, "No array passed to odbc_execute()");
             return;
         }
@@ -618,49 +625,58 @@ PHP_FUNCTION(odbc_execute)
 	if ((result = odbc_get_result(list, res_ind)) == NULL){
 		RETURN_FALSE;
 	}
-	
+
+	/* XXX check for already bound parameters*/
 	if (result->numparams > 0 && numArgs == 1) {
 		php_error(E_WARNING, "No parameters to SQL statement given");
 		RETURN_FALSE;
 	}
 
     if (result->numparams > 0){
-		if ((ne = zend_hash_num_elements(arr.value.ht)) < result->numparams){
+		if ((ne = zend_hash_num_elements(arg2->value.ht)) < result->numparams){
 			php_error(E_WARNING,"Not enough parameters (%d should be %d) given",
 					   ne, result->numparams);
 			RETURN_FALSE;
 		}
 
-        pval_copy_constructor(arg2);
-        zend_hash_internal_pointer_reset(arr.value.ht);
+       /* if(pval_copy_constructor(arg2) == FAILURE){
+			RETURN_FALSE;
+		}
+		*/
+		zend_hash_internal_pointer_reset(arg2->value.ht);
         params = (params_t *)emalloc(sizeof(params_t) * result->numparams);
 		
 		for (i = 1; i <= result->numparams; i++) {
-            if (zend_hash_get_current_data(arr.value.ht, (void **) &tmp) == FAILURE) {
+            if (zend_hash_get_current_data(arg2->value.ht, (void **) &tmp) == FAILURE) {
                 php_error(E_WARNING,"Error getting parameter");
                 SQLFreeStmt(result->stmt,SQL_RESET_PARAMS);
 				efree(params);
                 RETURN_FALSE;
             }
-            convert_to_string(tmp);
-			if (tmp->type != IS_STRING) {
+            convert_to_string(*tmp);
+			if ((*tmp)->type != IS_STRING) {
 				php_error(E_WARNING,"Error converting parameter");
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
-				zend_hash_destroy(arr.value.ht);
-				efree(arr.value.ht);
+				//zend_hash_destroy(arg2->value.ht);
+				//efree(arr.value.ht);
 				efree(params);
 				RETURN_FALSE;
 			}
 			
             SQLDescribeParam(result->stmt, (UWORD)i, &sqltype, &precision,
 							 &scale, &nullable);
-			params[i-1].vallen = tmp->value.str.len;
+			params[i-1].vallen = (*tmp)->value.str.len;
 			params[i-1].fp = -1;
 
+			if(IS_SQL_BINARY(sqltype))
+				ctype = SQL_C_BINARY;
+			else
+				ctype = SQL_C_CHAR;
 
-			if (tmp->value.str.val[0] == '\'') {
-				filename = &tmp->value.str.val[1];
-				filename[tmp->value.str.len - 2] = '\0';
+			if ((*tmp)->value.str.val[0] == '\'' && 
+				(*tmp)->value.str.val[(*tmp)->value.str.len - 2] == '\'') {
+				filename = &(*tmp)->value.str.val[1];
+				filename[(*tmp)->value.str.len - 2] = '\0';
 
                 if ((params[i-1].fp = open(filename,O_RDONLY)) == -1) {
 					php_error(E_WARNING,"Can't open file %s", filename);
@@ -670,8 +686,9 @@ PHP_FUNCTION(odbc_execute)
 							close(params[i].fp);
 						}
 					}
-					zend_hash_destroy(arr.value.ht);
+					/*zend_hash_destroy(arr.value.ht);
 					efree(arr.value.ht);
+					*/
 					efree(params);
 					RETURN_FALSE;
 				}
@@ -679,25 +696,16 @@ PHP_FUNCTION(odbc_execute)
 				params[i-1].vallen = SQL_LEN_DATA_AT_EXEC(0);
 
 				rc = SQLBindParameter(result->stmt, (UWORD)i, SQL_PARAM_INPUT,
-									  SQL_C_BINARY, sqltype, precision, scale,
+									  ctype, sqltype, precision, scale,
 									  (void *)params[i-1].fp, 0,
 									  &params[i-1].vallen);
 			} else {
-				/*if (IS_SQL_BINARY(sqltype)){
-	   				php_error(E_WARNING,"No Filename for binary parameter");
-					SQLFreeStmt(result->stmt,SQL_RESET_PARAMS);
-					zend_hash_destroy(arr.value.ht);
-					efree(arr.value.ht);
-					efree(params);
-					RETURN_FALSE;
-				}
-*/
 				rc = SQLBindParameter(result->stmt, (UWORD)i, SQL_PARAM_INPUT,
-									  SQL_C_CHAR, sqltype, precision, scale,
-									  tmp->value.str.val, 0,
+									  ctype, sqltype, precision, scale,
+									  (*tmp)->value.str.val, 0,
 									  &params[i-1].vallen);
 			}
-			zend_hash_move_forward(arr.value.ht);
+			zend_hash_move_forward(arg2->value.ht);
 		}
 	}
 	/* Close cursor, needed for doing multiple selects */
@@ -733,20 +741,32 @@ PHP_FUNCTION(odbc_execute)
 			if (params[i].fp != -1)
 				close(params[i].fp);
 		}
+		/*
 		zend_hash_destroy(arr.value.ht);
 		efree(arr.value.ht);
+		*/
 		efree(params);
 	}
 
 	if (rc == SQL_SUCCESS){
 		RETVAL_TRUE;
 	}
+
+	if (result->numcols == 0){
+		SQLNumResultCols(result->stmt, &(result->numcols));
+
+		if (result->numcols > 0){
+			if (!odbc_bindcols(result)){
+				efree(result);
+				RETVAL_FALSE;
+			}
+		} else {
+			result->values = NULL;
+		}
+	}
 }
 /* }}} */
 
-/* odbc_cursor simply returns a cursor name for the given stmt
- * Adabas automagically generates cursor names, other drivers may not
- */
 /* {{{ proto odbc_cursor(int result_id)
    Get cursor name */
 PHP_FUNCTION(odbc_cursor)
@@ -814,12 +834,12 @@ PHP_FUNCTION(odbc_cursor)
 }
 /* }}} */
 
-/* {{{ proto odbc_exec(int connection_id, string query)
+/* {{{ proto odbc_exec(int connection_id, string query [, int flags])
    Prepare and execute an SQL statement */
 PHP_FUNCTION(odbc_exec)
 {
-	pval 	*arg1, *arg2;
-	int         conn;
+	pval 	*arg1, *arg2, *arg3;
+	int         conn, numArgs;
 	char        *query;
 	odbc_result   *result=NULL;
 	odbc_connection *curr_conn=NULL;
@@ -828,9 +848,16 @@ PHP_FUNCTION(odbc_exec)
 	UDWORD      scrollopts;
 #endif
 
-	if (getParameters(ht, 2, &arg1, &arg2) == FAILURE){
-		WRONG_PARAM_COUNT;
+	numArgs = ARG_COUNT(ht);
+	if (numArgs > 2){
+		if (getParameters(ht, 3, &arg1,&arg2, &arg3) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long(arg3);
+	} else {
+		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+			WRONG_PARAM_COUNT;
 	}
+
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	conn = arg1->value.lval;
@@ -839,10 +866,6 @@ PHP_FUNCTION(odbc_exec)
 	if ((curr_conn = odbc_get_conn(list, conn)) == NULL){
 		RETURN_FALSE;
 	}
-
-#if 0
-	_php3_stripslashes(query,NULL);
-#endif
 	
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if (result == NULL){
@@ -852,7 +875,7 @@ PHP_FUNCTION(odbc_exec)
 
 	rc = SQLAllocStmt(curr_conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE){
-		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle' in PHP3_ODBC_DO");
+		php_error(E_WARNING, "SQLAllocStmt error 'Invalid Handle'");
 		efree(result);
 		RETURN_FALSE;
 	}
@@ -872,7 +895,7 @@ PHP_FUNCTION(odbc_exec)
 			/* Try to set CURSOR_TYPE to dynamic. Driver will replace this with other
 			   type if not possible.
 			 */
-			if (SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, SQL_CURSOR_DYNAMIC)
+			if(SQLSetStmtOption(result->stmt, SQL_CURSOR_TYPE, SQL_CURSOR_DYNAMIC)
 				== SQL_ERROR){
 				ODBC_SQL_ERROR(curr_conn->hdbc, result->stmt, " SQLSetStmtOption");
 				SQLFreeStmt(result->stmt, SQL_DROP);
@@ -1491,7 +1514,7 @@ PHP_FUNCTION(odbc_free_result)
    Connect to a datasource */
 PHP_FUNCTION(odbc_connect)
 {
-	php3_odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1499,7 +1522,7 @@ PHP_FUNCTION(odbc_connect)
    Establish a persistant connection to a datasource */
 PHP_FUNCTION(odbc_pconnect)
 {
-	php3_odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	odbc_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -1516,7 +1539,7 @@ PHP_FUNCTION(odbc_pconnect)
  * "globals" in this module should actualy be per-connection variables.  I
  * simply fixed things to get them working for now.  Shane
  */
-void php3_odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char    *db = NULL;
 	char    *uid = NULL;
@@ -1528,10 +1551,8 @@ void php3_odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *hashed_details;
 	int hashed_len, len, id, cur_opt;
 	int type;
-	ODBC_TLS_VARS;
-
-	ODBCG(resource_list) = list;
-	ODBCG(resource_plist) = plist;
+	ODBCLS_FETCH();
+	PLS_FETCH();
 
 	/*  Now an optional 4th parameter specifying the cursor type
 	 *  defaulting to the cursors default
@@ -1616,8 +1637,10 @@ void php3_odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		if (persistent) {
 			db_conn = (odbc_connection *)malloc(sizeof(odbc_connection));
+			db_conn->persistent = 1;
 		} else {
 			db_conn = (odbc_connection *)emalloc(sizeof(odbc_connection));
+			db_conn->persistent = 0;
 		}
 
 		SQLAllocConnect(ODBCG(henv), &db_conn->hdbc);
@@ -1632,7 +1655,7 @@ void php3_odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			rc = SQLDriverConnect(db_conn->hdbc, NULL, db, SQL_NTS,
 								  dsnbuf, sizeof(dsnbuf)-1, &dsnbuflen,
-								  SQL_DRIVER_COMPLETE);
+								  SQL_DRIVER_NOPROMPT);
 		}
 #else
 		if(cur_opt != SQL_CUR_DEFAULT){
@@ -2047,37 +2070,11 @@ PHP_FUNCTION(odbc_autocommit)
 }
 /* }}} */
 
-void PHP3_ODBC_TRANSACT(INTERNAL_FUNCTION_PARAMETERS, int type)
-{
-	odbc_connection *curr_conn;
-	RETCODE rc;
-	pval *arg1;
-	ODBC_TLS_VARS;
-
- 	if ( getParameters(ht, 1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}                            
- 
-    convert_to_long(arg1);
-
-	if ((curr_conn = odbc_get_conn(list, arg1->value.lval)) == NULL){
-		RETURN_FALSE;
-	}
-
-	rc = SQLTransact(ODBCG(henv), curr_conn->hdbc, (UWORD)((type)?SQL_COMMIT:SQL_ROLLBACK));
-	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO){
-		ODBC_SQL_ERROR(curr_conn->hdbc, SQL_NULL_HSTMT, "SQLTransact");
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
-}
-
 /* {{{ proto odbc_commit(int connection_id)
    Commit an ODBC transaction */
 PHP_FUNCTION(odbc_commit)
 {
-	PHP3_ODBC_TRANSACT(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	odbc_transact(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -2085,12 +2082,19 @@ PHP_FUNCTION(odbc_commit)
    Rollback a transaction */
 PHP_FUNCTION(odbc_rollback)
 {
-	PHP3_ODBC_TRANSACT(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	odbc_transact(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto odbc_setoption(??)
-   ?? */
+
+/* {{{ proto odbc_setoption(int conn_id|result_id, int which, int option, int value)
+   Sets connection or statement options */
+/* This one has to be used carefully. We can't allow to set connection options for
+   persistent connections. I think that SetStmtOption is of little use, since most
+   of those can only be specified for not already prepared/executed statements.
+   On the other hand, they can be made connection wide default through SetConnectOption
+   - but will be overidden by calls to SetStmtOption() in odbc_prepare/odbc_do
+*/
 PHP_FUNCTION(odbc_setoption)
 {
 	odbc_connection *curr_conn;
@@ -2110,6 +2114,10 @@ PHP_FUNCTION(odbc_setoption)
 	switch (arg2->value.lval) {
 		case 1:		/* SQLSetConnectOption */
 			if ((curr_conn = odbc_get_conn(list, arg1->value.lval)) == NULL){
+				RETURN_FALSE;
+			}
+			if(curr_conn->persistent){
+				php_error(E_WARNING, "Can't set option for persistent connection");
 				RETURN_FALSE;
 			}
 			rc = SQLSetConnectOption(curr_conn->hdbc, (unsigned short)(arg3->value.lval), (arg4->value.lval));
