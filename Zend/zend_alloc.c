@@ -442,7 +442,9 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 				}
 			}
 #endif
+#if MEMORY_LIMIT
 			AG(allocated_memory) -= t->size;
+#endif
 			p = t->pNext;
 			REMOVE_POINTER_FROM_LIST(t);
 			free(t);
@@ -459,7 +461,9 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 			}
 		}
 	}
+#if MEMORY_LIMIT
 	AG(memory_exhausted)=0;
+#endif
 
 #if (ZEND_DEBUG)
 	do {
