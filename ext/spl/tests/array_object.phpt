@@ -30,6 +30,10 @@ unset($ar[7]);
 unset($ar["c"]);
 var_dump($ar);
 
+$ar[] = '3';
+$ar[] = 4;
+var_dump($ar);
+
 ?>
 ===DONE===
 <?php exit(0); ?>
@@ -85,5 +89,15 @@ object(ArrayObject)#1 (2) {
   int(0)
   [2]=>
   int(2)
+}
+object(ArrayObject)#1 (4) {
+  [0]=>
+  int(0)
+  [2]=>
+  int(2)
+  [4]=>
+  string(1) "3"
+  [5]=>
+  int(4)
 }
 ===DONE===
