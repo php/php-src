@@ -39,9 +39,9 @@ to LDAP servers is also avaible from a separate package).
     </maintainer>
   </maintainers>
   <release>
-    <version>2.0</version>
+    <version>1.2</version>
     <state>stable</state>
-    <date>2002-04-07</date>
+    <date>2002-04-24</date>
     <notes>First packaged release.</notes>
     <filelist>
       <file role="php" baseinstalldir="/">DB.php</file>
