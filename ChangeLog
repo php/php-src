@@ -1,3 +1,18 @@
+2002-07-27  phanto  <phanto@pb1.pair.com>
+
+    * win32/php4dllts.dsp: add dispatch.c
+
+2002-07-27  hirokawa  <hirokawa@pb1.pair.com>
+
+    * ext/mbstring/mbstring.c
+      main/SAPI.c
+      main/SAPI.h:
+    fixed: output encoding translation by mb_output_handler() in ext/mbstring was not usable when Content-Type is set by header().
+
+2002-07-27  sesser  <sesser@pb1.pair.com>
+
+    * ext/ftp/ftp.c: Do not leak data connection.
+
 2002-07-26  sniper  <sniper@pb1.pair.com>
 
     * ext/curl/curl.c:
