@@ -64,7 +64,6 @@
 
 
 #define APACHE 0
-#define CGI_BINARY 0
 
 #if HAVE_UNIX_H
 #include <unix.h>
