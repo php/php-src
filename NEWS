@@ -1,9 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2004, Version 4.3.5
-- Fixed bug #27582 (possible crashes inside imagefilltoborder()). (Pierre)
 - Fixed possible crashes inside socket extension, due to missing check inside
   allocation functions. (Ilia)
+- Fixed bug #27582 (possible crashes in imagefilltoborder()). (Pierre)
 - Fixed bug #27530 (broken http auth when safe_mode is on and PCRE is
   disabled). (Ilia)
 - Fixed bug #27509 (broken getaddrinfo() causes fsockopen() error). (Sara)
