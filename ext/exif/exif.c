@@ -122,6 +122,9 @@ PHP_MINFO_FUNCTION(exif)
 }
 /* }}} */
 
+static char * exif_encoding_unicode = "ISO-8859-15"; 
+static char * exif_encoding_jis     = NULL; /* default to internal encoding */
+
 /* {{{ PHP_MINIT_FUNCTION(exif)
    Get the size of an image as 4-element array */
 PHP_MINIT_FUNCTION(exif)
@@ -538,7 +541,7 @@ static char * exif_get_tagname(int tag_num, char *ret, int len)
 
 /* {{{ exif_char_dump
  * Do not use! This is a debug function... */
-#ifdef EXIF_DEBUG
+//#ifdef EXIF_DEBUG
 static unsigned char* exif_char_dump( unsigned char * addr, int len, int hex)
 {
 	static unsigned char buf[1024+1];
@@ -563,7 +566,7 @@ static unsigned char* exif_char_dump( unsigned char * addr, int len, int hex)
 	buf[sizeof(buf)-1]=0;
 	return buf;
 }
-#endif
+//#endif
 /* }}} */
 
 /* {{{ php_jpg_get16
@@ -2003,7 +2006,7 @@ static int exif_process_string_raw(char **result,char *value,size_t byte_count) 
 
 /* {{{ exif_process_string
  * Copy a string in Exif header to a character string and return length of allocated buffer if any.
- * In contrast to exif_process_undefined this function does allways return a string buffer */
+ * In contrast to exif_process_string this function does allways return a string buffer */
 static int exif_process_string(char **result,char *value,size_t byte_count) {
 	/* we cannot use strlcpy - here the problem is that we cannot use strlen to
 	 * determin length of string and we cannot use strlcpy with len=byte_count+1
@@ -2026,7 +2029,7 @@ static int exif_process_string(char **result,char *value,size_t byte_count) {
 
 /* {{{ exif_process_user_comment
  * Process UserComment in IFD. */
-static int exif_process_user_comment(char **pszInfoPtr, char **szEncoding, char *szValuePtr, int ByteCount, int motorola_intel TSRMLS_DC)
+static int exif_process_user_comment(char **pszInfoPtr, char **pszEncoding, char *szValuePtr, int ByteCount, int motorola_intel TSRMLS_DC)
 {
 	int   a;
 
@@ -2034,38 +2037,45 @@ static int exif_process_user_comment(char **pszInfoPtr, char **szEncoding, char 
 	size_t len;;
 #endif
 
+	*pszEncoding = NULL;
 	/* Copy the comment */
 	if ( ByteCount>=8) {
 		if (!memcmp(szValuePtr, "UNICODE\0", 8)) {
-			*szEncoding= estrdup((const char*)szValuePtr);
+			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 #ifdef HAVE_MBSTRING
 			if ( motorola_intel) {
-				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, "ISO-8859-15", "UCS-2BE", &len TSRMLS_CC);
+				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, exif_encoding_unicode, "UCS-2BE", &len TSRMLS_CC);
 			} else {
-				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, "ISO-8859-15", "UCS-2LE", &len TSRMLS_CC);
+				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, exif_encoding_unicode, "UCS-2LE", &len TSRMLS_CC);
 			}
+			/*php_error(E_NOTICE,"converted(%d,%s): %s", len, *pszEncoding, *pszInfoPtr);*/
 			return len;
 #else
 			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 #endif
 		} else
 		if ( !memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
-			*szEncoding= estrdup((const char*)szValuePtr);
+			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 		} else
 		if ( !memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
 			/* JIS should be tanslated to MB or we leave it to the user - leave it to the user */
-			*szEncoding= estrdup((const char*)szValuePtr);
+			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
+#ifdef HAVE_MBSTRING
+			*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, exif_encoding_jis, "JIS", &len TSRMLS_CC);
+			return len;
+#else
 			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
+#endif
 		} else
 		if ( !memcmp(szValuePtr,"\0\0\0\0\0\0\0\0",8)) {
 			/* 8 NULL means undefined and should be ASCII... */
-			*szEncoding= estrdup((const char*)szValuePtr);
+			*pszEncoding = estrdup("UNDEFINED");
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 		}
@@ -2075,7 +2085,8 @@ static int exif_process_user_comment(char **pszInfoPtr, char **szEncoding, char 
 	if (ByteCount>0) for (a=ByteCount-1;a && szValuePtr[a]==' ';a--) (szValuePtr)[a] = '\0';
 
 	/* normal text without encoding */
-	return exif_process_string(pszInfoPtr, szValuePtr, ByteCount);
+	exif_process_string(pszInfoPtr, szValuePtr, ByteCount);
+	return strlen(*pszInfoPtr);
 }
 /* }}} */
 
