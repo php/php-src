@@ -30,7 +30,7 @@
 	".\zend_config.w32.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
-	".\modules.h"\
+	".\zend_modules.h"\
 	".\zend_operators.h"\
 	".\zend_ptr_stack.h"\
 	".\zend_stack.h"\
@@ -63,7 +63,7 @@
 	".\zend_constants.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
-	".\modules.h"\
+	".\zend_modules.h"\
 	".\zend_operators.h"\
 	".\zend_ptr_stack.h"\
 	".\zend_stack.h"\
@@ -110,7 +110,7 @@
 	".\zend_config.w32.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
-	".\modules.h"\
+	".\zend_modules.h"\
 	".\zend_operators.h"\
 	".\zend_ptr_stack.h"\
 	".\zend_stack.h"\
@@ -168,7 +168,7 @@
 	".\zend_constants.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
-	".\modules.h"\
+	".\zend_modules.h"\
 	".\zend_ptr_stack.h"\
 	".\zend_stack.h"\
 	".\zend_variables.h"\
@@ -200,7 +200,7 @@
 	".\zend_constants.h"\
 	".\zend_execute.h"\
 	".\zend_llist.h"\
-	".\modules.h"\
+	".\zend_modules.h"\
 	".\zend_operators.h"\
 	".\zend_ptr_stack.h"\
 	".\zend_stack.h"\

@@ -20,7 +20,7 @@
 
 #include "zend.h"
 #include "zend_extensions.h"
-#include "modules.h"
+#include "zend_modules.h"
 #include "zend_constants.h"
 #include "zend_list.h"
 #include "zend_API.h"
