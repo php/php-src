@@ -1,3 +1,124 @@
+2003-03-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+      Allow shared modules to be built using $(CXX)
+
+2003-03-05  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      I was bored..
+
+2003-03-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Fixed a small leak in the convert filter code
+
+2003-03-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4)
+      configure.in:
+      test commit
+
+2003-03-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * main/rfc1867.c:
+      Fixed bug #22550 (overflow protection for upload_max_filesize ini setting).
+
+    * (PHP_4_3)
+      NEWS:
+      GD news.
+
+    * ext/gd/tests/bug22544.phpt:
+      
+      Added test case for bug #22544.
+
+2003-03-05  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      - Fix for some unixware compile problem. (comment by Sascha :)
+
+2003-03-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Better identification of bundled GD library.
+
+    * (PHP_4_3)
+      ext/gd/gd.c
+      ext/gd/gdcache.c
+      ext/gd/gdcache.h
+      ext/gd/gdttf.c
+      ext/gd/php_gd.h
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_arc_f_buggy.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_ss.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdcache.c
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.c
+      ext/gd/libgd/gdhelpers.h
+      ext/gd/libgd/gdkanji.c
+      ext/gd/libgd/gdxpm.c:
+      Synchronized bundled gd with gd 2.0.11 (bug fixes).
+      MFH
+        1) Use Zend allocation macros instead of native allocation functions.
+        2) Better error reporting mechanism.
+        3) Some style fixes, which allow easier code synchronization &
+      maintenance.
+
+    * ext/gd/libgd/gd_png.c:
+      Fixed bug #22544 (missing fix from official gd).
+
+2003-03-05  Ben Mansell  <ben@zeus.com>
+
+    * sapi/cgi/libfcgi/fcgiapp.c:
+      C++ -> C comments
+
+2003-03-05  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/ifx.ec:
+      - Reverted emalloc(),efree() changed for persistant connection resources
+
+2003-03-05  Ben Mansell  <ben@zeus.com>
+
+    * README.Zeus:
+      Update build instructions for Zeus web server
+
+2003-03-05  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/ifx.ec:
+      - Changed malloc() and free() to emalloc() and efree()
+
+2003-03-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      MFH: added missing phpinfo entry (Russian support)
+
+    * ext/mbstring/mbstring.c:
+      Added missing phpinfo entry (Russian support)
+
+2003-03-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/network.c
+      main/streams.c:
+      Fix some signed/unsigned issues with read() and SSL_read() return values.
+      Allow SSL_connect() to retry for non-blocking sockets.
+      Correctly declare the char as unsigned for php_stream_getc(), as per
+      fgetc() semantics.
+
 2003-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/dba/dba.c
