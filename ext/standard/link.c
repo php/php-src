@@ -82,7 +82,7 @@ PHP_FUNCTION(linkinfo)
 {
 	zval **filename;
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-    struct stat_libc sb;
+	struct stat_libc sb;
 #else
 	struct stat sb;
 #endif
