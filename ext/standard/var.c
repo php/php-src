@@ -199,7 +199,7 @@ void php3api_var_serialize(pval *buf, pval **struc)
 			STR_CAT(buf, s, slen);
 			if (i > 0) {
 				char *key;
-				pval *data,*d;
+				pval **data,*d;
 				ulong index;
 				
 				_php3_hash_internal_pointer_reset((*struc)->value.ht);
@@ -207,10 +207,8 @@ void php3api_var_serialize(pval *buf, pval **struc)
 					if ((i = _php3_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (_php3_hash_get_current_data((*struc)->value.ht, (void **) (&data)) != SUCCESS || !data || (data == (*struc))) {
-						continue;
-					}
-					if (data->type==IS_STRING && data->value.str.val==undefined_variable_string) {
+					if (_php3_hash_get_current_data((*struc)->value.ht, (void **) (&data)) !=
+							SUCCESS || !data || ((*data) == (*struc))) {
 						continue;
 					}
 
@@ -244,7 +242,7 @@ void php3api_var_serialize(pval *buf, pval **struc)
 			STR_CAT(buf, s, slen);
 			if (i > 0) {
 				char *key;
-				pval *data,*d;
+				pval **data,*d;
 				ulong index;
 
 				zend_hash_internal_pointer_reset((*struc)->value.obj.properties);
@@ -252,10 +250,8 @@ void php3api_var_serialize(pval *buf, pval **struc)
 					if ((i = _php3_hash_get_current_key((*struc)->value.obj.properties, &key, &index)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (_php3_hash_get_current_data((*struc)->value.obj.properties, (void **) (&data)) != SUCCESS || !data || (data == (*struc))) {
-						continue;
-					}
-					if (data->type==IS_STRING && data->value.str.val==undefined_variable_string) {
+					if (_php3_hash_get_current_data((*struc)->value.obj.properties, (void **)
+							(&data)) != SUCCESS || !data || ((*data) == (*struc))) {
 						continue;
 					}
 
