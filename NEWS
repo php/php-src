@@ -17,7 +17,7 @@ PHP 4                                                                      NEWS
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
 - Fixed ext/yaz to not log unless yaz.log_file is set. (Adam Dickmeiss)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
-- Synchronized bundled GD library with GD 2.0.14. (Ilia)
+- Synchronized bundled GD library with GD 2.0.15. (Ilia)
 - Added integer overflow checks to bundled GD library. (Ilia)
 - Fixed bug #23913 (make rename() work across partitions on *nix). (Ilia)
 - Fixed bug #23912 (Invalid CSS in phpinfo() output). (Ilia)
