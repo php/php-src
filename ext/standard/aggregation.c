@@ -28,16 +28,19 @@
 static void aggregation_info_dtor(aggregation_info *info)
 {
 	/* FIXME: This is here to make it compile with Engine 2 but part of this module will need rewriting */
+	
 #ifndef ZEND_ENGINE_2
 	destroy_zend_class(info->new_ce);
 	efree(info->new_ce);
 #else
-	/* FIXME: In ZE2, this dtor is called prior to deleting the objects,
-	 * which causes this new_ce to be destroyed twice (which is bad news).
-	 * Skipping deleting it here will prevent a segfault but will leak
-	 * the class name, the static_members hash and the ce itself */
+	/* FIXME: In ZE2, there seems to be an issue with refcounts or something between
+	 * this class entry and the original; there are problems when destroying the
+	 * function table.
+	 * Skipping deleting here will prevent a segfault but will leak
+	 * the class name, the static_members hash and the ce itself.
+	 * */
 
-	/*	destroy_zend_class(&info->new_ce); */
+	/* destroy_zend_class(&info->new_ce); */
 #endif
 	zval_ptr_dtor(&info->aggr_members);
 
@@ -131,6 +134,7 @@ static void aggregate_methods(zend_class_entry *ce, zend_class_entry *from_ce, i
 			 */
 			if (zend_hash_add(&ce->function_table, func_name, func_name_len,
 							  (void*)function, sizeof(zend_function), NULL) == SUCCESS) {
+
 				add_next_index_stringl(aggr_methods, func_name, func_name_len-1, 1);
 			}
 
