@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Added XML_Parser class in PEAR (Stig)
+- Added "make test" target in pear/ and added some regression tests (Stig)
+- Fix bug in strip_tags function as per bug #5857 (Rasmus)
 - Fix reading of IPTC via GetImageInfo() for certain JPEG files. (Thies)
 - Improved the output-buffering functions to be re-entrant (Zeev)
 - Made ldap_add(), ldap_modify(), ldap_mod_add(), ldap_mod_replace()
