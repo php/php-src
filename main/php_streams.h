@@ -104,11 +104,7 @@ typedef struct _php_stream_filter php_stream_filter;
 #include "streams/php_stream_filter_api.h"
 
 typedef struct _php_stream_statbuf {
-#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-	struct stat_libc sb; /* regular info */
-#else
 	struct stat sb; /* regular info */
-#endif
 	/* extended info to go here some day: content-type etc. etc. */
 } php_stream_statbuf;
 
