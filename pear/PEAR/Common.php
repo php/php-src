@@ -1407,7 +1407,7 @@ class PEAR_Common extends PEAR
                     }
                     continue 2;
                 case T_DOUBLE_COLON:
-                    if ($tokens[$i - 1][0] != T_STRING) {
+                    if (!($tokens[$i - 1][0] == T_STRING || $tokens[$i - 1][0] == T_STRING)) {
                         PEAR::raiseError("Parser error: Invalid PHP file $file",
                             PEAR_COMMON_ERROR_INVALIDPHP);
                         return false;
