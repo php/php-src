@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.30.2.2 2004-12-30 16:07:43 rasmus Exp $ 
+# $Id: buildcheck.sh,v 1.30.2.3 2005-01-19 22:27:47 sniper Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -24,8 +24,7 @@ echo "buildconf: checking installation..."
 stamp=$1
 
 # autoconf 2.13 or newer
-autoconf=`./build/shtool path autoconf-2.13 autoconf 2> /dev/null`
-ac_version=`$autoconf --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+ac_version=`autoconf --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
 echo "buildconf: autoconf not found."
 echo "           You need autoconf version 2.13 or newer installed"
