@@ -599,13 +599,13 @@ PHP_MINIT_FUNCTION(proc_open)
 	le_proc_open = zend_register_list_destructors_ex(proc_open_rsrc_dtor, NULL, "process", module_number);
 	return SUCCESS;
 }
-
 /* }}} */
 
 /* {{{ proto int proc_close(resource process)
    close a process opened by proc_open */
 PHP_FUNCTION(proc_close)
 {
+#ifndef NETWARE	/* This is removed for NetWare because there is not way to execute a new process using fork() */
 	zval *proc;
 	void *child;
 	
@@ -617,6 +617,7 @@ PHP_FUNCTION(proc_close)
 	
 	zend_list_delete(Z_LVAL_P(proc));
 	RETURN_LONG(FG(pclose_ret));
+#endif	/* NETWARE */
 }
 /* }}} */
 
@@ -667,6 +668,8 @@ struct php_proc_open_descriptor_item {
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
+#ifndef NETWARE	/* This is removed for NetWare because there is not way to execute a new process using fork() */
+
 #define MAX_DESCRIPTORS	16
 
 	char *command;
@@ -896,18 +899,6 @@ PHP_FUNCTION(proc_open)
 	child = pi.hProcess;
 	CloseHandle(pi.hThread);
 
-#elif defined(NETWARE)
-
-	/* clean up all the descriptors */
-	for (i = 0; i < ndesc; i++) {
-		close(descriptors[i].childend);
-		close(descriptors[i].parentend);
-	}
-
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "fork not supported on NetWare");
-
-	goto exit_fail;
-
 #else
 	/* the unix way */
 
@@ -1008,7 +999,7 @@ exit_fail:
 	efree(command);
 	RETURN_FALSE;
 
-	
+#endif	/* NETWARE */
 }
 /* }}} */
 
