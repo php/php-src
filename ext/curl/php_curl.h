@@ -87,16 +87,15 @@ PHP_FUNCTION(curl_close);
 #define CE_BAD_CALLING_ORDER 44
 #define C_LAST 45
 
-struct curl_fileid_table
-{
+struct curl_file_id_table {
 	int id;
-	struct curl_fileid_table *next;
+	struct curl_file_id_table *next;
 };
 
 typedef struct {
 	int use_file;
 	int le_curl;
-	struct curl_fileid_table *output_node, output_start;
+	struct curl_file_id_table *output_node, output_start;
 } php_curl_globals;
 
 #ifdef ZTS
