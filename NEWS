@@ -1,5 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2003, Version 4.3.4
+- Fixed disk_total_space() and disk_free_space() under FreeBSD. (Jon Parise)
+- Fixed false warning on zero-size BLOB fetch. (Ard Biesheuve)
+
 25 Aug 2003, Version 4.3.3
 - Upgraded the bundled Expat library to version 1.95.6. (Jani)
 - Upgraded the bundled PCRE library to version 4.3. (Andrei)
