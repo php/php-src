@@ -1,5 +1,7 @@
 <?php
 
+/* $Id$ */
+
 $pear_dir = dirname(__FILE__);
 ini_set('include_path', $pear_dir);
 ##//include_once 'PEAR/Config.php';
