@@ -90,6 +90,7 @@ PEAR_FILES = \
 	Mail/RFC822.php \
 	Mail/sendmail.php \
 	Mail/smtp.php \
+	Mail/mime.php \
 	Math/Fraction.php \
 	Math/Util.php \
 	Net/Curl.php \
