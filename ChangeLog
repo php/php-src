@@ -1,3 +1,23 @@
+1999-12-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    Added get_loaded_extensions(), extension_loaded(), and
+    get_extension_funcs() functions.
+    get_extension_funcs() functions. (Andrei)
+
+    * TODO: A little renaming.
+
+1999-12-16  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/config.m4: force ext/java to be built as a shared library
+
+1999-12-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c:
+    (php_ns_request_handler) set SG(server_context) to non-NULL
+
 1999-12-15  Andrei Zmievski  <andrei@ispi.net>
 
     * TODO: And still more stuff.
