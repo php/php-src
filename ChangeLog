@@ -1,3 +1,24 @@
+2001-11-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+    Add support for redirecting output to a file while maintaining an
+    open HTTP connection.
+
+    The output can be used to render a complete textual representation
+    of a user's chat which can be stored in a simple .html file and
+    served to the end-user.  Because it is static, thttpd is an
+    excellent choice for this task.
+
+    We continue to use an open HTTP connection to figure out when
+    a client departs.
+
+2001-11-27  Frank M. Kromann  <frank@frontbase.com>
+
+    * sapi/servlet/servlet.dsp
+      ext/java/java.dsp:
+    Removing winutil.c from this project. the functions needed are found in php4ts.dll
+
 2001-11-26  Jani Taskinen  <sniper@iki.fi>
 
     * ext/zlib/zlib.c: Show the registered ini entry in phpinfo()
