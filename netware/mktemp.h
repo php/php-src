@@ -1,0 +1,1 @@
+char* mktemp(char* templateStr);
