@@ -9,7 +9,8 @@ static zend_object_handlers zoh = {
 	NULL,
 	zend_objects_add_ref,
 	zend_objects_del_ref,
-	zend_objects_delete_obj
+	zend_objects_delete_obj,
+	zend_objects_clone_obj
 };
 
 void zend_objects_init(zend_objects *objects, zend_uint init_size)
@@ -50,7 +51,7 @@ zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class
 	(*object)->ce = class_type;
 
 	retval.handle = handle;
-	retval.handlers = zoh;
+	retval.handlers = &zoh;
 #if ZEND_DEBUG_OBJECTS
 	fprintf(stderr, "Allocated object id #%d\n", handle);
 #endif
@@ -124,4 +125,28 @@ void zend_objects_del_ref(zend_object_handle handle)
 		fprintf(stderr, "Decreased refcount of object id #%d\n", handle);
 	}
 #endif
+}
+
+zend_object_value zend_objects_clone_obj(zend_object_handle handle)
+{
+	zend_object_value retval;
+	zend_object *old_object;
+	zend_object *new_object;
+
+	TSRMLS_FETCH();
+
+	if (!EG(objects).object_buckets[handle].valid) {
+		zend_error(E_ERROR, "Trying to clone invalid object");
+	}
+
+	old_object = &EG(objects).object_buckets[handle].bucket.obj.object;
+	retval = zend_objects_new(&new_object, old_object->ce);
+	ALLOC_HASHTABLE(new_object->properties);
+	zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
+
+#if ZEND_DEBUG_OBJECTS
+	fprintf(stderr, "Allocated object id #%d\n", handle);
+#endif
+	return retval;
 }

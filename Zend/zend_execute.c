@@ -139,7 +139,6 @@ static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *sh
 			if (Ts[node->u.var].var.ptr_ptr) {
 				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
 				*should_free = 0;
-				SEPARATE_ZVAL_IF_NOT_REF(Ts[node->u.var].var.ptr_ptr);
 				return *Ts[node->u.var].var.ptr_ptr;
 			} else {
 				if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
@@ -2185,7 +2184,7 @@ send_by_ref:
 						if (Z_TYPE_PP(object) != IS_OBJECT) {
 							zend_error(E_ERROR, "Cannot call delete on non-object type");
 						}
-						(*object)->value.obj.handlers.delete_obj((*object)->value.obj.handle);
+						(*object)->value.obj.handlers->delete_obj((*object)->value.obj.handle);
 					}
 
 					zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
@@ -2240,7 +2239,7 @@ send_by_ref:
 											if (Z_TYPE_PP(object) != IS_OBJECT) {
 												zend_error(E_ERROR, "Cannot call delete on non-object type");
 											}
-											(*object)->value.obj.handlers.delete_obj((*object)->value.obj.handle);
+											(*object)->value.obj.handlers->delete_obj((*object)->value.obj.handle);
 										}
 					
 										zend_hash_index_del(ht, index);
@@ -2254,7 +2253,7 @@ send_by_ref:
 										if (Z_TYPE_PP(object) != IS_OBJECT) {
 											zend_error(E_ERROR, "Cannot call delete on non-object type");
 										}
-										(*object)->value.obj.handlers.delete_obj((*object)->value.obj.handle);
+										(*object)->value.obj.handlers->delete_obj((*object)->value.obj.handle);
 									}
 
 									zend_hash_del(ht, offset->value.str.val, offset->value.str.len+1);
@@ -2267,7 +2266,7 @@ send_by_ref:
 										if (Z_TYPE_PP(object) != IS_OBJECT) {
 											zend_error(E_ERROR, "Cannot call delete on non-object type");
 										}
-										(*object)->value.obj.handlers.delete_obj((*object)->value.obj.handle);
+										(*object)->value.obj.handlers->delete_obj((*object)->value.obj.handle);
 									}
 
 									zend_hash_del(ht, "", sizeof(""));
@@ -2373,7 +2372,7 @@ send_by_ref:
 					}
 					
 					object_zval = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-					object = object_zval->value.obj.handlers.get_address(object_zval->value.obj.handle);
+					object = object_zval->value.obj.handlers->get_address(object_zval->value.obj.handle);
 
 					if (!object->ce->handle_function_call
 						&& !zend_hash_exists(&object->ce->function_table, object->ce->name, object->ce->name_length+1)) {
