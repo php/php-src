@@ -40,6 +40,10 @@
 #error YAZ version 1.9 or later must be used.
 #endif
 
+#ifdef PHP_WIN32
+#include <process.h>
+#endif
+
 #include <yaz/proto.h>
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-util.h>
@@ -83,7 +87,6 @@ static Yaz_Association yaz_association_mk ()
 
 static void yaz_association_destroy (Yaz_Association p)
 {
-	int i;
 	if (!p)
 		return ;
 	ZOOM_resultset_destroy (p->zoom_set);
@@ -506,7 +509,7 @@ PHP_FUNCTION(yaz_wait)
 {
 	int no = 0;
 	ZOOM_connection conn_ar[MAX_ASSOC];
-	int i, id, timeout = 15;
+	int i, timeout = 15;
 
 	if (ZEND_NUM_ARGS() == 1)
 	{
@@ -1248,7 +1251,6 @@ PHP_FUNCTION(yaz_scan_result)
 	if (p && p->zoom_scan)
 	{
 		int pos = 0;
-		const char *term;
 		int occ, len;
 		int size = ZOOM_scanset_size (p->zoom_scan);
 		
