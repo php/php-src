@@ -1631,7 +1631,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int num_interfaces, ...)
 {
 	zend_class_entry *interface_entry;
-	int ce_num = class_entry->num_interfaces;
+	int ce_num = class_entry->num_interfaces, impl_num;
 	va_list interface_list;
 	va_start(interface_list, num_interfaces);
 
@@ -1645,7 +1645,8 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int
 		interface_entry = va_arg(interface_list, zend_class_entry *);
 		class_entry->interfaces[class_entry->num_interfaces++] = interface_entry;
 	}
-	while(ce_num < class_entry->num_interfaces) {
+	impl_num = class_entry->num_interfaces;
+	while(ce_num < impl_num) {
 		zend_do_implement_interface(class_entry, class_entry->interfaces[ce_num++] TSRMLS_CC);
 	}
 	va_end(interface_list);
