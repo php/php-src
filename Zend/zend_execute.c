@@ -378,6 +378,9 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 			target_symbol_table = EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
+			if (op1->op_type == IS_VAR) {
+				EG(AiCount)++;
+			}
 			target_symbol_table = &EG(symbol_table);
 			break;
 		case ZEND_FETCH_STATIC:
@@ -550,7 +553,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 		return;
 	}
 
-	if (container->type == IS_STRING && container->value.str.val == undefined_variable_string) {
+	if (container->type == IS_STRING && container->value.str.len==0) {
 		switch (type) {
 			case BP_VAR_RW:
 			case BP_VAR_W:
@@ -718,7 +721,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 
 
 
-	if (container->type == IS_STRING && container->value.str.val == undefined_variable_string) {
+	if (container->type == IS_STRING && container->value.str.len==0) {
 		switch (type) {
 			case BP_VAR_RW:
 			case BP_VAR_W:
@@ -1383,6 +1386,7 @@ overloaded_function_call_cont:
 						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list) ELS_CC);
 						efree(function_being_called);
 					}
+					function_being_called = NULL;
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
 					zend_ptr_stack_clear_multiple(ELS_C);

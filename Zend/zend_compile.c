@@ -724,6 +724,7 @@ void do_begin_dynamic_function_call(znode *function_name CLS_DC)
 
 	if (last_op_number>=0 && CG(active_op_array)->opcodes[last_op_number].opcode == ZEND_FETCH_OBJ_R) {
 		CG(active_op_array)->opcodes[last_op_number].opcode = ZEND_INIT_FCALL_BY_NAME;
+		CG(active_op_array)->opcodes[last_op_number].extended_value = ZEND_MEMBER_FUNC_CALL;
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	
