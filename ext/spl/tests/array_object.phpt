@@ -30,8 +30,9 @@ unset($ar[7]);
 unset($ar["c"]);
 var_dump($ar);
 
-echo "Done\n";
 ?>
+===DONE===
+<?php exit(0); ?>
 --EXPECTF--
 object(ArrayObject)#1 (2) {
   [0]=>
@@ -47,9 +48,9 @@ array(6) {
   [1]=>
   int(1)
   [2]=>
-  &int(2)
+  int(2)
   [3]=>
-  &int(3)
+  int(3)
   [4]=>
   int(4)
   [5]=>
@@ -62,11 +63,11 @@ object(ArrayObject)#1 (5) {
   [1]=>
   int(1)
   [2]=>
-  &int(2)
+  int(2)
   [3]=>
-  &int(3)
+  int(3)
   ["a"]=>
-  &string(1) "a"
+  string(1) "a"
 }
 int(0)
 
@@ -83,6 +84,6 @@ object(ArrayObject)#1 (2) {
   [0]=>
   int(0)
   [2]=>
-  &int(2)
+  int(2)
 }
-Done
+===DONE===

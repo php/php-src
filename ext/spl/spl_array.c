@@ -152,7 +152,7 @@ static zend_object_value spl_array_object_clone(zval *zobject TSRMLS_DC)
 /* }}} */
 
 /* {{{ spl_array_read_dimension */
-static zval *spl_array_read_dimension(zval *object, zval *offset TSRMLS_DC)
+static zval *spl_array_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	zval **retval;
@@ -161,9 +161,10 @@ static zval *spl_array_read_dimension(zval *object, zval *offset TSRMLS_DC)
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 		if (zend_symtable_find(HASH_OF(intern->array), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+			zend_error(E_NOTICE, "Undefined index:  %s", Z_STRVAL_P(offset));
 			return EG(uninitialized_zval_ptr);
 		} else {
+			(*retval)->refcount++;
 			return *retval;
 		}
 	case IS_DOUBLE:
@@ -176,7 +177,7 @@ static zval *spl_array_read_dimension(zval *object, zval *offset TSRMLS_DC)
 			index = Z_LVAL_P(offset);
 		}
 		if (zend_hash_index_find(HASH_OF(intern->array), index, (void **) &retval) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined offset:  %ld", Z_LVAL_P(offset));
+			zend_error(E_NOTICE, "Undefined offset:  %ld", Z_LVAL_P(offset));
 			return EG(uninitialized_zval_ptr);
 		} else {
 			return *retval;
@@ -197,6 +198,11 @@ static void spl_array_write_dimension(zval *object, zval *offset, zval *value TS
 
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
+		if (!value->is_ref) {
+			value->refcount++;
+		} else {
+			SEPARATE_ZVAL_IF_NOT_REF(&value);
+		}
 		zend_symtable_update(HASH_OF(intern->array), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
 		return;
 	case IS_DOUBLE:
@@ -207,6 +213,11 @@ static void spl_array_write_dimension(zval *object, zval *offset, zval *value TS
 			index = (long)Z_DVAL_P(offset);
 		} else {
 			index = Z_LVAL_P(offset);
+		}
+		if (!value->is_ref) {
+			value->refcount++;
+		} else {
+			SEPARATE_ZVAL_IF_NOT_REF(&value);
 		}
 		add_index_zval(intern->array, index, value);
 		return;
