@@ -2516,12 +2516,6 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 					break;
 			}
 			*result = opline_ptr->result;
-			if (CG(active_class_entry)
-				&& property->op_type == IS_CONST
-				&& !zend_hash_exists(&CG(active_class_entry)->properties_info, property->u.constant.value.str.val, property->u.constant.value.str.len+1)) {
-				property->u.constant.value.str.val = estrndup(property->u.constant.value.str.val, property->u.constant.value.str.len);
-				zend_do_declare_property(property, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_IMPLICIT_PUBLIC TSRMLS_CC);
-			}
 			return;
 		}
 	}
@@ -2539,6 +2533,36 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 }
 
 
+
+void zend_do_declare_implicit_property(TSRMLS_D)
+{
+	zend_op *opline_ptr;
+	zend_llist_element *le;
+	zend_llist *fetch_list_ptr;
+
+
+	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+
+	if (fetch_list_ptr->count != 1) {
+		return;
+	}
+
+	le = fetch_list_ptr->head;
+	opline_ptr = (zend_op *) le->data;
+
+	if (opline_ptr->op1.op_type == IS_UNUSED
+		&& CG(active_class_entry)
+		&& opline_ptr->op2.op_type == IS_CONST
+		&& !zend_hash_exists(&CG(active_class_entry)->properties_info, opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len+1)) {
+		znode property;
+
+		property = opline_ptr->op2;
+		property.u.constant.value.str.val = estrndup(opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len);
+		zend_do_declare_property(&property, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_IMPLICIT_PUBLIC TSRMLS_CC);
+	}
+}
+
+
 void zend_do_push_object(znode *object TSRMLS_DC)
 {
 	zend_stack_push(&CG(object_stack), object, sizeof(znode));
@@ -2547,10 +2571,12 @@ void zend_do_push_object(znode *object TSRMLS_DC)
 
 void zend_do_pop_object(znode *object TSRMLS_DC)
 {
-	znode *tmp;
+	if (object) {
+		znode *tmp;
 
-	zend_stack_top(&CG(object_stack), (void **) &tmp);
-	*object = *tmp;
+		zend_stack_top(&CG(object_stack), (void **) &tmp);
+		*object = *tmp;
+	}
 	zend_stack_del_top(&CG(object_stack));
 }
 

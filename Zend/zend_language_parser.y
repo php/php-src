@@ -746,7 +746,7 @@ method_or_not:
 				function_call_parameter_list ')' 
 			{ zend_do_end_function_call(&$1, &$$, &$3, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);
 			  zend_do_push_object(&$$ TSRMLS_CC); $$.u.EA.type = ZEND_PARSED_METHOD_CALL; }
-	|	/* empty */ { $$.u.EA.type = ZEND_PARSED_MEMBER; }
+	|	/* empty */ { zend_do_declare_implicit_property(TSRMLS_C); $$.u.EA.type = ZEND_PARSED_MEMBER; }
 ;
 
 variable_without_objects:
