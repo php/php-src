@@ -9,8 +9,8 @@ To compile PHP 4.0 as a module for AOLserver, you need:
 
 Read doc/install.txt in the source distribution
 
-It usually boils down to changing the INST path in include/Makefile.global
-and running make all install.
+It usually boils down to changing the INST/PREFIX variable in 
+include/Makefile.global and running make all install.
 
 2.) Configuring PHP
 
