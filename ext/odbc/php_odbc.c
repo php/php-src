@@ -16,6 +16,7 @@
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
    |          Frank M. Kromann <frank@frontbase.com> Support for DB/2 CLI |
    |	      Kevin N. Shallow <kshallow@tampabay.rr.com> Velocis Support |
+   |		  Daniel R. Kalowsky <kalowsky@php.net>						  |
    +----------------------------------------------------------------------+
  */
 
@@ -64,7 +65,7 @@ static int le_result, le_conn, le_pconn;
 
 #define SAFE_SQL_NTS(n) ((SWORD) ((n)?(SQL_NTS):0))
 
-static unsigned char a3_arg3_force_ref[] = { 3, BYREF_NONE, BYREF_ALLOW, BYREF_FORCE };
+static unsigned char a3_arg3_and_3_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 
 function_entry odbc_functions[] = {
     PHP_FE(odbc_error, NULL)
@@ -85,7 +86,7 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_prepare, NULL)
 	PHP_FE(odbc_execute, NULL)
 	PHP_FE(odbc_fetch_row, NULL)
-	PHP_FE(odbc_fetch_into, a3_arg3_force_ref)
+	PHP_FE(odbc_fetch_into, a3_arg3_and_3_force_ref)
 	PHP_FE(odbc_field_len, NULL)
 	PHP_FE(odbc_field_scale, NULL)
 	PHP_FE(odbc_field_name, NULL)
@@ -1364,6 +1365,7 @@ PHP_FUNCTION(odbc_fetch_into)
 		case 3:
 			if (zend_get_parameters_ex(3, &pv_res, &pv_row, &pv_res_arr) == FAILURE)
 				WRONG_PARAM_COUNT;
+			SEPARATE_ZVAL(pv_row);
 			convert_to_long_ex(pv_row);
 			rownum = (*pv_row)->value.lval;
 			break;
@@ -1380,11 +1382,6 @@ PHP_FUNCTION(odbc_fetch_into)
 		WRONG_PARAM_COUNT;
 	}
 #endif
-	
-	if (!ParameterPassedByReference(ht, numArgs)) {
-		php_error(E_WARNING, "Array not passed by reference in call to odbc_fetch_into()");
-		RETURN_FALSE;
-	}
 
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
@@ -1922,6 +1919,10 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 			return FALSE;
 		}
 	}
+/*  Possible fix for bug #
+ *  Needs testing on UnixODBC < 2.0.5 though.
+ *	 #if defined(HAVE_EMPRESS) || defined(HAVE_UNIXODBC)
+ *  Uncomment the line above, and comment line below to fully test */
 #ifdef HAVE_EMPRESS
 	{
 		int     direct = 0;
