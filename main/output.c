@@ -214,6 +214,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 				zend_stack_destroy(&OG(ob_buffers));
 			}
 		}
+		OG(nesting_level)--;
 	}
 
 	if (send_buffer) {
@@ -226,8 +227,6 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 
 	if (!just_flush) {
 		efree(to_be_destroyed_buffer);
-
-		OG(nesting_level)--;
 	} else {
 		OG(active_ob_buffer).text_length = 0;
 		OG(active_ob_buffer).status |= PHP_OUTPUT_HANDLER_START;
