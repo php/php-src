@@ -1834,6 +1834,65 @@ PHPAPI int php_stream_context_del_link(php_stream_context *context,
 }
 /* }}} */
 
+/* {{{ php_stream_dirent_alphasort
+ */
+PHPAPI int php_stream_dirent_alphasort(const php_stream_dirent **a, const php_stream_dirent **b)
+{
+	return strcoll((*a)->d_name,(*b)->d_name);
+}
+/* }}} */
+
+/* {{{ php_stream_dirent_alphasortr
+ */
+PHPAPI int php_stream_dirent_alphasortr(const php_stream_dirent **a, const php_stream_dirent **b)
+{
+	return strcoll((*b)->d_name,(*a)->d_name);
+}
+/* }}} */
+
+/* {{{ php_stream_scandir
+ */
+PHPAPI int _php_stream_scandir(char *dirname, php_stream_dirent **namelist[], int flags, php_stream_context *context,
+			  int (*compare) (const php_stream_dirent **a, const php_stream_dirent **b) TSRMLS_DC)
+{
+	php_stream *stream;
+	php_stream_dirent sdp;
+	php_stream_dirent **vector = NULL;
+	int vector_size = 0;
+	int nfiles = 0;
+
+	if (!namelist) {
+		return FAILURE;
+	}
+
+	stream = php_stream_opendir(dirname, ENFORCE_SAFE_MODE | REPORT_ERRORS, context);
+	if (!stream) {
+		return FAILURE;
+	}
+
+	while (php_stream_readdir(stream, &sdp)) {
+		if (nfiles == vector_size) {
+			if (vector_size == 0) {
+				vector_size = 10;
+			} else {
+				vector_size *= 2;
+			}
+			vector = (php_stream_dirent **) erealloc(vector, vector_size * sizeof(php_stream_dirent *));
+		}
+
+		vector[nfiles++] = (php_stream_dirent*)estrndup(&sdp, sizeof(php_stream_dirent) + ((strlen(sdp.d_name) + 1) * sizeof(char)));
+	}
+	php_stream_closedir(stream);
+
+	*namelist = vector;
+
+	if (compare) {
+		qsort(*namelist, nfiles, sizeof(php_stream_dirent *), compare);
+	}
+	return nfiles;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
