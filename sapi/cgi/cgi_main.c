@@ -233,6 +233,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 		ret = sapi_cgibin_single_write(ptr, remaining TSRMLS_CC);
 		if (!ret) {
 			php_handle_aborted_connection();
+			return str_length - remaining;
 		}
 		ptr += ret;
 		remaining -= ret;
