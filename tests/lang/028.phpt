@@ -51,7 +51,7 @@ endfor;
 
 $dafna = new dafna_class();
 
-print $name=call_user_method("GetMyName", &$dafna);
+print $name=call_user_method("GetMyName", $dafna);
 print "\n";
 
 ?>

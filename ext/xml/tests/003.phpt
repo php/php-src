@@ -7,7 +7,7 @@ XML parser test, xml_set_object callbacks
 
 $xml_parser = xml_parser_create();
 $obj = new myclass;
-xml_set_object($xml_parser, &$obj);
+xml_set_object($xml_parser, $obj);
 xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, 1);
 xml_set_element_handler($xml_parser, "startElement", "endElement");
 xml_set_character_data_handler($xml_parser, "characterData");
