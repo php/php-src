@@ -263,6 +263,7 @@ static void php_cgi_usage(char *argv0)
 static void init_request_info(SLS_D)
 {
 	char *content_length = getenv("CONTENT_LENGTH");
+	char *content_type = getenv("CONTENT_TYPE");
 	const char *auth;
 
 #if 0
@@ -311,7 +312,7 @@ static void init_request_info(SLS_D)
 		SG(request_info).request_uri = getenv("SCRIPT_NAME");
 	}
 	SG(request_info).path_translated = NULL; /* we have to update it later, when we have that information */
-	SG(request_info).content_type = getenv("CONTENT_TYPE");
+	SG(request_info).content_type = (content_type ? content_type : "" );
 	SG(request_info).content_length = (content_length?atoi(content_length):0);
 	SG(sapi_headers).http_response_code = 200;
 	
