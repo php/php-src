@@ -233,7 +233,7 @@ onigenc_single_byte_code_to_mbc_first(OnigCodePoint code)
 extern int
 onigenc_single_byte_code_to_mbc(OnigCodePoint code, UChar *buf)
 {
-  *buf = (code & 0xff);
+  *buf = (UChar )(code & 0xff);
   return 1;
 }
 
@@ -355,9 +355,9 @@ onigenc_mb2_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   UChar *p = buf;
 
   if ((code & 0xff00) != 0) {
-    *p++ = ((code >>  8) & 0xff);
+    *p++ = (UChar )((code >>  8) & 0xff);
   }
-  *p++ = (code & 0xff);
+  *p++ = (UChar )(code & 0xff);
 
 #if 1
   if (enc_len(enc, buf[0]) != (p - buf))
@@ -372,15 +372,15 @@ onigenc_mb4_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   UChar *p = buf;
 
   if ((code & 0xff000000) != 0) {
-    *p++ = ((code >> 24) & 0xff);
+    *p++ = (UChar )((code >> 24) & 0xff);
   }
   if ((code & 0xff0000) != 0) {
-    *p++ = ((code >> 16) & 0xff);
+    *p++ = (UChar )((code >> 16) & 0xff);
   }
   if ((code & 0xff00) != 0) {
-    *p++ = ((code >> 8) & 0xff);
+    *p++ = (UChar )((code >> 8) & 0xff);
   }
-  *p++ = (code & 0xff);
+  *p++ = (UChar )(code & 0xff);
 
 #if 1
   if (enc_len(enc, buf[0]) != (p - buf))

@@ -70,9 +70,9 @@ eucjp_code_to_mbc(OnigCodePoint code, UChar *buf)
 {
   UChar *p = buf;
 
-  if ((code & 0xff0000) != 0) *p++ = ((code >> 16) & 0xff);
-  if ((code &   0xff00) != 0) *p++ = ((code >>  8) & 0xff);
-  *p++ = (code & 0xff);
+  if ((code & 0xff0000) != 0) *p++ = (UChar )(((code >> 16) & 0xff));
+  if ((code &   0xff00) != 0) *p++ = (UChar )(((code >>  8) & 0xff));
+  *p++ = (UChar )(code & 0xff);
 
 #if 1
   if (enc_len(ONIG_ENCODING_EUC_JP, buf[0]) != (p - buf))

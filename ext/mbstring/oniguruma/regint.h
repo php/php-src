@@ -79,8 +79,6 @@
 #endif
 #endif
 
-#define ONIG_RUBY_DEFINE_GLOBAL_FUNCTION(s,f,n) \
-        rb_define_global_function(s, f, n)
 #endif /* else NOT_RUBY */
 
 #define THREAD_PASS_LIMIT_COUNT    10
@@ -340,14 +338,14 @@ typedef struct _BBuf {
 } while (0)
 
 #define BBUF_EXPAND(buf,low) do{\
-  do { (buf)->alloc *= 2; } while ((buf)->alloc < low);\
+  do { (buf)->alloc *= 2; } while ((buf)->alloc < (unsigned int )low);\
   (buf)->p = (UChar* )xrealloc((buf)->p, (buf)->alloc);\
   if (IS_NULL((buf)->p)) return(ONIGERR_MEMORY);\
 } while (0)
 
 #define BBUF_ENSURE_SIZE(buf,size) do{\
-  int new_alloc = (buf)->alloc;\
-  while (new_alloc < (size)) { new_alloc *= 2; }\
+  unsigned int new_alloc = (buf)->alloc;\
+  while (new_alloc < (unsigned int )(size)) { new_alloc *= 2; }\
   if ((buf)->alloc != new_alloc) {\
     (buf)->p = (UChar* )xrealloc((buf)->p, new_alloc);\
     if (IS_NULL((buf)->p)) return(ONIGERR_MEMORY);\
@@ -357,16 +355,16 @@ typedef struct _BBuf {
 
 #define BBUF_WRITE(buf,pos,bytes,n) do{\
   int used = (pos) + (n);\
-  if ((buf)->alloc < used) BBUF_EXPAND((buf),used);\
+  if ((buf)->alloc < (unsigned int )used) BBUF_EXPAND((buf),used);\
   xmemcpy((buf)->p + (pos), (bytes), (n));\
-  if ((buf)->used < used) (buf)->used = used;\
+  if ((buf)->used < (unsigned int )used) (buf)->used = used;\
 } while (0)
 
 #define BBUF_WRITE1(buf,pos,byte) do{\
   int used = (pos) + 1;\
-  if ((buf)->alloc < used) BBUF_EXPAND((buf),used);\
+  if ((buf)->alloc < (unsigned int )used) BBUF_EXPAND((buf),used);\
   (buf)->p[(pos)] = (byte);\
-  if ((buf)->used < used) (buf)->used = used;\
+  if ((buf)->used < (unsigned int )used) (buf)->used = used;\
 } while (0)
 
 #define BBUF_ADD(buf,bytes,n)       BBUF_WRITE((buf),(buf)->used,(bytes),(n))
@@ -376,9 +374,9 @@ typedef struct _BBuf {
 
 /* from < to */
 #define BBUF_MOVE_RIGHT(buf,from,to,n) do {\
-  if ((to) + (n) > (buf)->alloc) BBUF_EXPAND((buf),(to) + (n));\
+  if ((unsigned int )((to)+(n)) > (buf)->alloc) BBUF_EXPAND((buf),(to) + (n));\
   xmemmove((buf)->p + (to), (buf)->p + (from), (n));\
-  if ((to) + (n) > (buf)->used) (buf)->used = (to) + (n);\
+  if ((unsigned int )((to)+(n)) > (buf)->used) (buf)->used = (to) + (n);\
 } while (0)
 
 /* from > to */
@@ -639,12 +637,12 @@ typedef int         RepeatNumType;
 
 
 typedef struct {
-  OnigCodePoint esc;
-  OnigCodePoint anychar;
-  OnigCodePoint anytime;
-  OnigCodePoint zero_or_one_time;
-  OnigCodePoint one_or_more_time;
-  OnigCodePoint anychar_anytime;
+  UChar esc;
+  UChar anychar;
+  UChar anytime;
+  UChar zero_or_one_time;
+  UChar one_or_more_time;
+  UChar anychar_anytime;
 } OnigMetaCharTableType;
 
 extern OnigMetaCharTableType OnigMetaCharTable;

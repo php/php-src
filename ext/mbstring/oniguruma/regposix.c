@@ -166,7 +166,7 @@ regexec(regex_t* reg, const char* str, size_t nmatch,
   }
   else if (r == ONIG_MISMATCH) {
     r = REG_NOMATCH;
-    for (i = 0; i < nmatch; i++)
+    for (i = 0; i < (int )nmatch; i++)
       pmatch[i].rm_so = pmatch[i].rm_eo = ONIG_REGION_NOTPOS;
   }
   else {

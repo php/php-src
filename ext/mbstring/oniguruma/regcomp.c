@@ -830,7 +830,7 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
 	r = compile_tree_empty_check(qn->target, reg, empty_info);
 	if (r) return r;
 	r = add_opcode_rel_addr(reg, OP_JUMP,
-		     -(mod_tlen + SIZE_OP_JUMP + SIZE_OP_PUSH_OR_JUMP_EXACT1));
+	-(mod_tlen + (int )SIZE_OP_JUMP + (int )SIZE_OP_PUSH_OR_JUMP_EXACT1));
       }
       else if (IS_NOT_NULL(qn->next_head_exact)) {
 	r = add_opcode_rel_addr(reg, OP_PUSH_IF_PEEK_NEXT,
@@ -840,7 +840,7 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
 	r = compile_tree_empty_check(qn->target, reg, empty_info);
 	if (r) return r;
 	r = add_opcode_rel_addr(reg, OP_JUMP,
-		     -(mod_tlen + SIZE_OP_JUMP + SIZE_OP_PUSH_IF_PEEK_NEXT));
+          -(mod_tlen + (int )SIZE_OP_JUMP + (int )SIZE_OP_PUSH_IF_PEEK_NEXT));
       }
       else {
 	r = add_opcode_rel_addr(reg, OP_PUSH, mod_tlen + SIZE_OP_JUMP);
@@ -848,7 +848,7 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
 	r = compile_tree_empty_check(qn->target, reg, empty_info);
 	if (r) return r;
 	r = add_opcode_rel_addr(reg, OP_JUMP,
-			     -(mod_tlen + SIZE_OP_JUMP + SIZE_OP_PUSH));
+		     -(mod_tlen + (int )SIZE_OP_JUMP + (int )SIZE_OP_PUSH));
       }
     }
     else {
@@ -856,7 +856,7 @@ compile_qualifier_node(QualifierNode* qn, regex_t* reg)
       if (r) return r;
       r = compile_tree_empty_check(qn->target, reg, empty_info);
       if (r) return r;
-      r = add_opcode_rel_addr(reg, OP_PUSH, -(mod_tlen + SIZE_OP_PUSH));
+      r = add_opcode_rel_addr(reg, OP_PUSH, -(mod_tlen + (int )SIZE_OP_PUSH));
     }
   }
   else if (qn->upper == 0 && qn->is_refered != 0) { /* /(?<n>..){0}/ */
@@ -1088,7 +1088,7 @@ compile_effect_node(EffectNode* node, regex_t* reg)
       r = add_opcode(reg, OP_POP);
       if (r) return r;
       r = add_opcode_rel_addr(reg, OP_JUMP,
-		      -(SIZE_OP_PUSH + len + SIZE_OP_POP + SIZE_OP_JUMP));
+	 -((int )SIZE_OP_PUSH + len + (int )SIZE_OP_POP + (int )SIZE_OP_JUMP));
     }
     else {
       r = add_opcode(reg, OP_PUSH_STOP_BT);
@@ -3803,7 +3803,7 @@ concat_left_node_opt_info(NodeOptInfo* to, NodeOptInfo* add)
 
   if (to->expr.len > 0) {
     if (add->len.max > 0) {
-      if (to->expr.len > add->len.max)
+      if (to->expr.len > (int )add->len.max)
 	to->expr.len = add->len.max;
 
       if (to->expr.mmd.max == 0)
