@@ -1,3 +1,113 @@
+2005-04-04  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      MFH rev 1.72 (of main/streams/streams.c)
+
+    * main/streams/streams.c:
+      BugFix #32563
+      
+      This could have been done in stream_wrapper_register()
+      without introducing the slight performance hit on
+      wrapper registration since anyone registering a wrapper
+      in an extension should know better.
+      
+      The important thing is that since locate_wrapper makes
+      the assumption that all schemes will be /^[a-z0-9+.-]+$/i
+      Anything which registers them should make the same assumption as well.
+
+2005-04-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      ext/standard/credits_ext.h:
+      update
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h:
+      - Update
+
+    * ext/standard/credits_ext.h:
+      Update credits
+
+    * ext/standard/tests/file/bug30362.txt
+      ext/standard/tests/file/bug30362.txt:
+      
+      remove empty lines
+
+    * ext/standard/tests/file/bug30362.phpt
+      ext/standard/tests/file/bug30362.phpt
+      ext/standard/tests/file/bug30362.txt:
+      
+      Added testcase for bug #30362
+
+2005-04-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      MF50: fix backtraces - non-Zend classes have names too
+
+    * (PHP_5_0)
+      ZendEngine2/zend_builtin_functions.c:
+      fix backtraces - non-Zend classes have names too
+
+2005-04-04  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gmp/gmp.c:
+      fix #32567 (ext/gmp fails to compile with thread safety enabled)
+
+2005-04-04  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/php_variables.c
+      sapi/apache/mod_php5.c
+      sapi/apache_hooks/mod_php5.c:
+      added a server variable PHP_AUTH_DIGEST to support HTTP Digest
+      Authentication.
+
+2005-04-04  Uwe Schindler  <uwe@thetaphi.de>
+
+    * NEWS
+      NEWS
+      NEWS
+      main/rfc1867.c
+      main/rfc1867.c
+      main/rfc1867.c:
+      Bug #32491 (File upload error - unable to create a temporary file) -
+      Changing file upload from stdio to posix
+
+2005-04-04  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      NEWS
+      ext/odbc/config.m4:
+      MFH: configure looks for incorrect db2 library
+
+    * ext/odbc/config.m4:
+      fix #32560 (configure looks for incorrect library - libdb2.so instead of
+      libdb2.a,
+      which is used actually)
+
+2005-04-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * php.ini-recommended:
+      - If this is supposed to be the configuration we recommend,
+        we've been recommending to not use short-open-tag for a long time.
+        E_STRICT too for 5.1 since it promotes the right ways (tm) to do things.
+
+2005-04-04  Jon Parise  <jon+php@csh.rit.edu>
+
+    * NEWS
+      build/build2.mk
+      build/buildcheck.sh:
+      Adding the ability to override the autotools executables used by the
+      buildconf script via the PHP_AUTOCONF and PHP_AUTOHEADER environmental
+      variables.
+
 2005-04-03  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * NEWS:
