@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Fixed a bug that prevented $argv and $argc from being defined in the command
+  line version of PHP (Stas)
 - Fixed a bug that prevented a changed compile-time extension_dir from
   affecting modules that were loaded via php.ini (Zeev)
 - Fixed a bug in ftp_mkdir() when used on ftp server which doesn't return
