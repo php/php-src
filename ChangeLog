@@ -1,3 +1,67 @@
+2003-09-16  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer3.phpt:
+      adding transaction test file (unfinished)
+
+    * pear/PEAR/Installer.php:
+      Document addFileOperation()
+      Add basic test for invalid input, since it is a public method
+
+2003-09-16  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Use isc_get_version() for client lib info if available
+
+2003-09-16  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/imap/php_imap.c
+      ext/interbase/interbase.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      proto fix
+
+2003-09-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Make it clear whether it is an interface or a class
+      - Fix static properties
+
+2003-09-16  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/config.m4:
+      Check for Firebird libfbclient.so first
+
+2003-09-16  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/System.php:
+      more debug code removed *sigh*
+
+    * pear/System.php:
+      removed debug code
+
+2003-09-16  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      tweak Tomas's patch for
+      $ pear install Package-v.tgz
+      
+      which should work for local files first before checking to see if it can
+      be downloaded
+
+    * pear/PEAR/Common.php:
+      fix regexps for package detection and download - should be case-insensitive
+
+    * pear/PEAR/Installer.php:
+      fix invalid replacements - add tests for bad pear-config/package-info
+      replacements
+
+    * pear/tests/pear_installer2.phpt:
+      add tests for invalid replacements
+
+    * pear/PEAR/Installer.php:
+      file transactions used - but startFileTransaction() was never used
+      inline docs for install() were out of date
+
 2003-09-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
