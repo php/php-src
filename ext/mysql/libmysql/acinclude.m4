@@ -295,6 +295,30 @@ then
 fi
 ])
 
+AC_DEFUN(MYSQL_CHECK_INT_8_16_32,
+[AC_MSG_CHECKING([for int8])
+AC_TRY_RUN([
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STDDEF_H
+#include <stddef.h>
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+int main()
+{
+    int8 i;
+    return 0;
+}
+], AC_DEFINE(HAVE_INT_8_16_32, , [ ]) AC_MSG_RESULT([yes]), AC_MSG_RESULT([no])
+)
+])
+
 AC_DEFUN(MYSQL_HEADER_CHECKS,[
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sgtty.h sys/ioctl.h \
@@ -322,6 +346,7 @@ AC_TYPE_UID_T
 MYSQL_CHECK_ULONG
 MYSQL_CHECK_UCHAR
 MYSQL_CHECK_UINT
+MYSQL_CHECK_INT_8_16_32
 
 MYSQL_TYPE_ACCEPT
 MYSQL_TYPE_QSORT

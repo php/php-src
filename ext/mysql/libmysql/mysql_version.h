@@ -13,8 +13,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define MYSQL_VERSION_ID		32332
 #define MYSQL_PORT			3306
 
-/* This is defined at configure time and found in main/php_config.h */
-/* #define MYSQL_UNIX_ADDR			"/tmp/mysql.sock" */
+#ifndef MYSQL_UNIX_ADDR
+#define MYSQL_UNIX_ADDR	"/tmp/mysql.sock"
+#endif
 
 /* mysqld compile time options */
 #ifndef MYSQL_CHARSET
