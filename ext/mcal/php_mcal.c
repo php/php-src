@@ -100,6 +100,7 @@ function_entry mcal_functions[] = {
 	PHP_FE(mcal_event_set_end,NULL)
 	PHP_FE(mcal_event_set_alarm,NULL)
 	PHP_FE(mcal_event_set_class,NULL)
+	PHP_FE(mcal_event_add_attribute,NULL)
 	PHP_FE(mcal_is_leap_year,NULL)
 	PHP_FE(mcal_days_in_month,NULL)
 	PHP_FE(mcal_date_valid,NULL)
@@ -206,7 +207,7 @@ PHP_MINIT_FUNCTION(mcal)
 static int add_assoc_object(pval *arg, char *key, pval *tmp)
 {
 	HashTable *symtable;
-        
+	
 	if (arg->type == IS_OBJECT) {
 		symtable = arg->value.obj.properties;
 	} else {
@@ -263,7 +264,9 @@ void php_mcal_event_init(struct _php_mcal_le_struct *mystruct)
 
 void make_event_object(pval *mypvalue, CALEVENT *event)
 {
-	pval *start, *end, *recurend;
+	pval *start, *end, *recurend, *attrlist;
+	CALATTR *attr;
+	
 	object_init(mypvalue);
 	add_property_long(mypvalue,"id",event->id);
 	add_property_long(mypvalue,"public",event->public);
@@ -321,6 +324,16 @@ void make_event_object(pval *mypvalue, CALEVENT *event)
 	add_assoc_object(mypvalue, "recur_enddate", recurend);
 	
 	add_property_long(mypvalue,"recur_data",event->recur_data.weekly_wday);	
+	
+	if (event->attrlist) {
+		MAKE_STD_ZVAL(attrlist);
+		object_init(attrlist);
+		array_init(attrlist);
+		for (attr = event->attrlist; attr; attr = attr->next) {
+			add_assoc_string(attrlist, attr->name, attr->value, 1);
+		}
+		add_assoc_object(mypvalue, "attrlist", attrlist);
+	}
 }
 
 /* {{{ proto int mcal_close(int stream_id [, int options])
@@ -1080,6 +1093,42 @@ PHP_FUNCTION(mcal_event_set_class)
 		RETURN_FALSE;
 	}
 	mcal_le_struct->event->public=class->value.lval;
+}
+/* }}} */
+
+/* {{{ proto string mcal_event_add_attribute(int stream_id, string attribute,string value)
+    Add an attribute and value to an event */
+PHP_FUNCTION(mcal_event_add_attribute)
+{
+	pval *streamind,*attribute,*val;
+	int ind, ind_type;
+	pils *mcal_le_struct; 
+	int myargc;
+	
+	myargc=ARG_COUNT(ht);
+	if (myargc !=3 || getParameters(ht,myargc,&streamind,&attribute,&val) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_long(streamind);
+	convert_to_string(attribute);
+	convert_to_string(val);
+	
+	ind = streamind->value.lval;
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
+	if (!mcal_le_struct ) {
+		php_error(E_WARNING, "Unable to find stream pointer");
+		RETURN_FALSE;
+	}
+#if MCALVER >= 20000121
+	if (calevent_setattr(mcal_le_struct->event, attribute->value.str.val, val->value.str.val)) {
+		RETURN_TRUE;
+	}
+	else
+#endif
+		{
+			RETURN_FALSE;
+		}
 }
 /* }}} */
 
