@@ -23,9 +23,22 @@ GetImageSize()
 	var_dump($result);
 ?>
 --EXPECT--
-array(9) {
-  ["test1pix.bmp"]=>
+array(11) {
+  ["test13pix.swf"]=>
   array(5) {
+    [0]=>
+    int(550)
+    [1]=>
+    int(400)
+    [2]=>
+    int(13)
+    [3]=>
+    string(24) "width="550" height="400""
+    ["mime"]=>
+    string(29) "application/x-shockwave-flash"
+  }
+  ["test1pix.bmp"]=>
+  array(6) {
     [0]=>
     int(1)
     [1]=>
@@ -34,6 +47,8 @@ array(9) {
     int(6)
     [3]=>
     string(20) "width="1" height="1""
+    ["bits"]=>
+    int(24)
     ["mime"]=>
     string(9) "image/bmp"
   }
@@ -143,6 +158,19 @@ array(9) {
     string(20) "width="4" height="1""
     ["mime"]=>
     string(9) "image/psd"
+  }
+  ["test4pix.swf"]=>
+  array(5) {
+    [0]=>
+    int(550)
+    [1]=>
+    int(400)
+    [2]=>
+    int(4)
+    [3]=>
+    string(24) "width="550" height="400""
+    ["mime"]=>
+    string(29) "application/x-shockwave-flash"
   }
   ["test4pix.tif"]=>
   array(5) {
