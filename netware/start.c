@@ -1,28 +1,22 @@
-/*=============================================================================
-=  CodeWarrior Stationery for Creating a NetWare Executable with NKS/LibC
-=
-=  Copyright (C) Unpublished Work of Novell, Inc. All Rights Reserved.
-=
-=  This work is an unpublished work and contains confidential, proprietary and
-=  trade  secret information of Novell, Inc. Access to this work is restricted
-=  to (i) Novell, Inc. employees who have a need to know how to perform  tasks
-=  within  the scope of their assignments and (ii) entities other than Novell,
-=  Inc. who have entered into appropriate license agreements. No part of  this
-=  work may be used, practiced, performed, copied, distributed, revised, modi-
-=  fied, translated, abridged, condensed, expanded, collected, compiled, link-
-=  ed,  recast,  transformed  or  adapted without the prior written consent of
-=  Novell, Inc. Any use or exploitation of  this  work  without  authorization
-=  could subject the perpetrator to criminal and civil liability.
-=
-=  CodeWarrior is a trademark of Metrowerks Corporation, a Motorola Company.
-=  NetWare is a trademark of Novell, Inc.
-=
-=  When this file is used to instantiate real source code in the CodeWarrior
-=  IDE, this copyright notice should be removed and replaced with a different
-=  copyright indicating ownership by the developer. Novell assumes no
-=  liability for how this sample code is used or modified by any developer.
-===============================================================================
-*/
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2002 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Novell, Inc.                                                 |
+   +----------------------------------------------------------------------+
+ */
+
+
 #include <library.h>
 #include <netware.h>
 #include <nks/synch.h>
