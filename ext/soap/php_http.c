@@ -573,7 +573,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 			cmplen = strlen(content_type);
 		}
 		if (strncmp(content_type, "text/xml", cmplen) == 0 ||
-		    strncmp(content_type, "application/soap+xml", cmplen == 0)) {
+		    strncmp(content_type, "application/soap+xml", cmplen) == 0) {
 /*
 			if (strncmp(http_body, "<?xml", 5)) {
 				zval *err;

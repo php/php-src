@@ -1178,7 +1178,7 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 
 	WSDL_CACHE_GET_INT(i, in);
 	if (i > 0) {
-		elements = do_alloca((i+1) * sizeof(sdlTypePtr));
+		elements = emalloc((i+1) * sizeof(sdlTypePtr));
 		elements[0] = NULL;
 		type->elements = emalloc(sizeof(HashTable));
 		zend_hash_init(type->elements, i, NULL, delete_type, 0);
@@ -1212,7 +1212,7 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 		WSDL_CACHE_SKIP(1, in);
 	}
 	if (elements != NULL) {
-		free_alloca(elements);
+		efree(elements);
 	}
 }
 
@@ -1335,17 +1335,17 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 		close(f);
 		return NULL;
 	}
-	buf = in = do_alloca(st.st_size);
+	buf = in = emalloc(st.st_size);
 	if (read(f, in, st.st_size) != st.st_size) {
 		close(f);
-		free_alloca(in);
+		efree(in);
 		return NULL;
 	}
 	close(f);
 
 	if (strncmp(in,"wsdl",4) != 0 || in[4] != WSDL_CACHE_VERSION || in[5] != '\0') {
 		unlink(fn);
-		free_alloca(buf);
+		efree(buf);
 		return NULL;
 	}
 	in += 6;
@@ -1353,14 +1353,14 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 	WSDL_CACHE_GET(old_t, time_t, &in);
 	if (old_t < t) {
 		unlink(fn);
-		free_alloca(buf);
+		efree(buf);
 		return NULL;
 	}
 
 	WSDL_CACHE_GET_INT(i, &in);
 	if (i == 0 && strncmp(in, uri, i) != 0) {
 		unlink(fn);
-		free_alloca(buf);
+		efree(buf);
 		return NULL;
 	}
 	WSDL_CACHE_SKIP(i, &in);
@@ -1377,7 +1377,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 	WSDL_CACHE_GET_INT(num_encoders, &in);
 
 	i = num_groups+num_types+num_elements;
-	types = do_alloca((i+1)*sizeof(sdlTypePtr));
+	types = emalloc((i+1)*sizeof(sdlTypePtr));
 	types[0] = NULL;
 	while (i > 0) {
 		types[i] = emalloc(sizeof(sdlType));
@@ -1390,7 +1390,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 	while (enc->details.type != END_KNOWN_TYPES) {
 		i++; enc++;
 	}
-	encoders = do_alloca((i+1)*sizeof(encodePtr));
+	encoders = emalloc((i+1)*sizeof(encodePtr));
 	i = num_encoders;
 	encoders[0] = NULL;
 	while (i > 0) {
@@ -1448,7 +1448,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 
 	/* deserialize bindings */
 	WSDL_CACHE_GET_INT(num_bindings, &in);
-	bindings = do_alloca(num_bindings*sizeof(sdlBindingPtr));
+	bindings = emalloc(num_bindings*sizeof(sdlBindingPtr));
 	if (num_bindings > 0) {
 		sdl->bindings = emalloc(sizeof(HashTable));
 		zend_hash_init(sdl->bindings, num_bindings, NULL, delete_binding, 0);
@@ -1475,7 +1475,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 	/* deserialize functions */
 	WSDL_CACHE_GET_INT(num_func, &in);
 	zend_hash_init(&sdl->functions, num_func, NULL, delete_function, 0);
-	functions = do_alloca(num_func*sizeof(sdlFunctionPtr));
+	functions = emalloc(num_func*sizeof(sdlFunctionPtr));
 	for (i = 0; i < num_func; i++) {
 		int binding_num, num_faults;
 		sdlFunctionPtr func = emalloc(sizeof(sdlFunction));
@@ -1555,11 +1555,11 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 		}
 	}
 
-	free_alloca(functions);
-	free_alloca(bindings);
-	free_alloca(encoders);
-	free_alloca(types);
-	free_alloca(buf);
+	efree(functions);
+	efree(bindings);
+	efree(encoders);
+	efree(types);
+	efree(buf);
 	return sdl;
 }
 
