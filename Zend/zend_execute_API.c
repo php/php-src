@@ -652,8 +652,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 						zend_error(E_ERROR, "Class '%s' not found", Z_STRVAL_PP(fci->object_pp));
 					}
 					if (EG(This) && 
-						instanceof_function(Z_OBJCE_P(EG(This)), scope) &&
-						instanceof_function(scope, *ce)) {
+						instanceof_function(Z_OBJCE_P(EG(This)), scope TSRMLS_CC) &&
+						instanceof_function(scope, *ce TSRMLS_CC)) {
 						fci->object_pp = &EG(This);
 					} else {
 						fci->object_pp = NULL;
