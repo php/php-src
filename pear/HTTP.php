@@ -80,7 +80,7 @@ class HTTP {
          * it contains a language we support.
          */
         if (isset($HTTP_SERVER_VARS['HTTP_ACCEPT_LANGUAGE'])) {
-            $accepted = split(',[[:space:]]*', $HTTP_ACCEPT_LANGUAGE);
+            $accepted = split(',[[:space:]]*', $HTTP_SERVER_VARS['HTTP_ACCEPT_LANGUAGE']);
             for ($i = 0; $i < count($accepted); $i++) {
                 if (eregi('^([a-z]+);[[:space:]]*q=([0-9\.]+)', $accepted[$i], $arr)) {
                     $q = (double)$arr[2];
