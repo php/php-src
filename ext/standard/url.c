@@ -116,8 +116,8 @@ php_url *url_parse(char *str)
 
 		regfree(&re);			/* free the old regex */
 		
-		if ((cerr=regcomp(&re, "^(([^@:]+)(:([^@:]+))?@)?([^:@]+)(:([^:@]+))?", REG_EXTENDED))
-			|| (err=regexec(&re, result, 10, subs, 0))) {
+		if ((cerr=regcomp(&re, "^(([^@:]+)(:([^@:]+))?@)?((\\[(.*)\\])|([^:@]+))(:([^:@]+))?", REG_EXTENDED))
+			|| (err=regexec(&re, result, 11, subs, 0))) {
 			STR_FREE(ret->scheme);
 			STR_FREE(ret->path);
 			STR_FREE(ret->query);
@@ -135,11 +135,13 @@ php_url *url_parse(char *str)
 		if (subs[4].rm_so != -1 && subs[4].rm_so < length) {
 			ret->pass = estrndup(result + subs[4].rm_so, subs[4].rm_eo - subs[4].rm_so);
 		}
-		if (subs[5].rm_so != -1 && subs[5].rm_so < length) {
-			ret->host = estrndup(result + subs[5].rm_so, subs[5].rm_eo - subs[5].rm_so);
-		}
 		if (subs[7].rm_so != -1 && subs[7].rm_so < length) {
-			ret->port = (unsigned short) strtol(result + subs[7].rm_so, NULL, 10);
+			ret->host = estrndup(result + subs[7].rm_so, subs[7].rm_eo - subs[7].rm_so);
+		} else if (subs[8].rm_so != -1 && subs[8].rm_so < length) {
+			ret->host = estrndup(result + subs[8].rm_so, subs[8].rm_eo - subs[8].rm_so);
+		}
+		if (subs[10].rm_so != -1 && subs[10].rm_so < length) {
+			ret->port = (unsigned short) strtol(result + subs[10].rm_so, NULL, 10);
 		}
 		efree(result);
 	}
