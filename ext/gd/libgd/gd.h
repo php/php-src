@@ -256,6 +256,7 @@ gdImagePtr gdImageCreateFromGd2Part(FILE *in, int srcx, int srcy, int w, int h);
 gdImagePtr gdImageCreateFromGd2PartCtx(gdIOCtxPtr in, int srcx, int srcy, int w, int h);
 
 gdImagePtr gdImageCreateFromXbm(FILE *fd);
+void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out);
 
 gdImagePtr gdImageCreateFromXpm (char *filename);
 

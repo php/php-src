@@ -1,5 +1,24 @@
-#include "php_gd.h"
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2003 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.0 of the PHP license,       |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_0.txt.                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Stanislav Malyshev <stas@php.net>                           |
+   +----------------------------------------------------------------------+
+ */
 
+/* $Id$ */
+
+#include "php_gd.h"
 
 #define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
 	
@@ -21,7 +40,8 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx)
 		efree(ctx);
 	}
 }
-	
+
+/* {{{ _php_image_output_ctx */	
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)()) 
 {
 	zval **imgind, **file, **quality;
@@ -32,8 +52,14 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	int q = -1, i;
 	gdIOCtx *ctx;
 
-	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
+	/* The third (quality) parameter for Wbmp stands for the threshold when called from image2wbmp().
+	 * The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
+	 * from imagey<type>().
+	 */
 	
+	if (argc < 2 && image_type == PHP_GDIMG_TYPE_XBM) {
+		WRONG_PARAM_COUNT;
+	}
 	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &quality) == FAILURE) 
 	{
 		WRONG_PARAM_COUNT;
@@ -46,7 +72,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		fn = Z_STRVAL_PP(file);
 		if (argc == 3) {
 			convert_to_long_ex(quality);
-			q = Z_LVAL_PP(quality);
+			q = Z_LVAL_PP(quality);/* or colorindex for foreground of BW images (defaults to black) */
 		}
 	}
 
@@ -88,11 +114,19 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		case PHP_GDIMG_TYPE_JPG:
 			(*func_p)(im, ctx, q);
 			break;
+		case PHP_GDIMG_TYPE_XBM:
 		case PHP_GDIMG_TYPE_WBM:
-			for(i=0; i < gdImageColorsTotal(im); i++) {
-				if(gdImageRed(im, i) == 0) break;
-			} 
-			(*func_p)(im, i, ctx);
+			if (argc < 3) {
+				for(i=0; i < gdImageColorsTotal(im); i++) {
+					if(!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
+				}
+				q = i;
+			}
+			if (image_type == PHP_GDIMG_TYPE_XBM) {
+				(*func_p)(im, fn, q, ctx);
+			} else {
+				(*func_p)(im, q, ctx);
+			}
 			break;
 		default:
 			(*func_p)(im, ctx);
@@ -112,3 +146,13 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	
     RETURN_TRUE;
 }
+/* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -175,6 +175,7 @@ PHP_FUNCTION(image2wbmp);
 PHP_FUNCTION(imagelayereffect);
 PHP_FUNCTION(imagecolormatch);
 PHP_FUNCTION(imagefilter);
+PHP_FUNCTION(imagexbm);
 #endif
 
 PHP_GD_API int phpi_get_le_gd(void);
