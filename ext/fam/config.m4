@@ -8,8 +8,7 @@ dnl without editing.
 dnl If your extension references something external, use with:
 
 PHP_ARG_WITH(fam, for fam support,
-Make sure that the comment is aligned:
-[  --with-fam             Include fam support])
+[  --with-fam              Include fam support])
 
 if test "$PHP_FAM" != "no"; then
   dnl Write more examples of tests here...
