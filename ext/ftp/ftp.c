@@ -117,7 +117,7 @@ ftp_open(const char *host, short port, long timeout_sec)
 		return NULL;
 	}
 
-	ftp->fd = php_hostconnect(host, port ? port : 21, SOCK_STREAM, (int) timeout_sec);
+	ftp->fd = php_hostconnect(host, (unsigned short) (port ? port : 21), SOCK_STREAM, (int) timeout_sec);
 	if (ftp->fd == -1) {
 		goto bail;
 	}
@@ -1050,14 +1050,14 @@ ftp_getdata(ftpbuf_t *ftp)
 		goto bail;
 	}
 
-	size = sizeof(php_sockaddr_storage);
-
 	/* passive connection handler */
 	if (ftp->pasv) {
 		/* clear the ready status */
 		ftp->pasv = 1;
 
 		/* connect */
+		/* Win 95/98 seems not to like size > sizeof(sockaddr_in) */
+		size = php_sockaddr_size(&ftp->pasvaddr);
 		tv.tv_sec = ftp->timeout_sec;
 		tv.tv_usec = 0;
 		if (php_connect_nonb(fd, (struct sockaddr*) &ftp->pasvaddr, size, &tv) == -1) {
@@ -1075,6 +1075,7 @@ ftp_getdata(ftpbuf_t *ftp)
 
 	/* bind to a local address */
 	php_any_addr(sa->sa_family, &addr, 0);
+	size = php_sockaddr_size(&addr);
 
 	if (bind(fd, (struct sockaddr*) &addr, size) == -1) {
 		perror("bind");
