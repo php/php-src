@@ -273,7 +273,7 @@ static void apache_request_int_slot(int offset, INTERNAL_FUNCTION_PARAMETERS)
 /* {{{ access string slots of request rec
  */
 
-/* {{{ proto string $request->filename([string new_filename])
+/* {{{ proto string ApacheRequest::filename([string new_filename])
  */
 PHP_FUNCTION(apache_request_filename)
 {
@@ -281,7 +281,7 @@ PHP_FUNCTION(apache_request_filename)
 }
 /* }}} */
 
-/* {{{ proto string $request->uri([string new_uri])
+/* {{{ proto string ApacheRequest::uri([string new_uri])
  */
 PHP_FUNCTION(apache_request_uri)
 {
@@ -289,7 +289,7 @@ PHP_FUNCTION(apache_request_uri)
 }
 /* }}} */
 
-/* {{{ proto string $request->unparsed_uri([string new_unparsed_uri])
+/* {{{ proto string ApacheRequest::unparsed_uri([string new_unparsed_uri])
  */
 PHP_FUNCTION(apache_request_unparsed_uri)
 {
@@ -297,7 +297,7 @@ PHP_FUNCTION(apache_request_unparsed_uri)
 }
 /* }}} */
 
-/* {{{ proto string $request->path_info([string new_path_info])
+/* {{{ proto string ApacheRequest::path_info([string new_path_info])
  */
 PHP_FUNCTION(apache_request_path_info)
 {
@@ -305,7 +305,7 @@ PHP_FUNCTION(apache_request_path_info)
 }
 /* }}} */
 
-/* {{{ proto string $request->args([string new_args])
+/* {{{ proto string ApacheRequest::args([string new_args])
  */
 PHP_FUNCTION(apache_request_args)
 {
@@ -313,7 +313,7 @@ PHP_FUNCTION(apache_request_args)
 }
 /* }}} */
 
-/* {{{ proto string $request->boundary()
+/* {{{ proto string ApacheRequest::boundary()
  */
 PHP_FUNCTION(apache_request_boundary)
 {
@@ -322,7 +322,7 @@ PHP_FUNCTION(apache_request_boundary)
 /* }}} */
 
 
-/* {{{ proto string $request->content_type([string new_type])
+/* {{{ proto string ApacheRequest::content_type([string new_type])
  */
 PHP_FUNCTION(apache_request_content_type)
 {
@@ -330,7 +330,7 @@ PHP_FUNCTION(apache_request_content_type)
 }
 /* }}} */
 
-/* {{{ proto string $request->content_encoding([string new_encoding])
+/* {{{ proto string ApacheRequest::content_encoding([string new_encoding])
  */
 PHP_FUNCTION(apache_request_content_encoding)
 {
@@ -338,7 +338,7 @@ PHP_FUNCTION(apache_request_content_encoding)
 }
 /* }}} */
 
-/* {{{ proto string $request->handler([string new_handler])
+/* {{{ proto string ApacheRequest::handler([string new_handler])
  */
 PHP_FUNCTION(apache_request_handler)
 {
@@ -346,7 +346,7 @@ PHP_FUNCTION(apache_request_handler)
 }
 /* }}} */
 
-/* {{{ proto string $request->the_request()
+/* {{{ proto string ApacheRequest::the_request()
  */
 PHP_FUNCTION(apache_request_the_request)
 {
@@ -354,7 +354,7 @@ PHP_FUNCTION(apache_request_the_request)
 }
 /* }}} */
 
-/* {{{ proto string $request->protocol()
+/* {{{ proto string ApacheRequest::protocol()
  */
 PHP_FUNCTION(apache_request_protocol)
 {
@@ -362,7 +362,7 @@ PHP_FUNCTION(apache_request_protocol)
 }
 /* }}} */
 
-/* {{{ proto string $request->hostname()
+/* {{{ proto string ApacheRequest::hostname()
  */
 PHP_FUNCTION(apache_request_hostname)
 {
@@ -370,7 +370,7 @@ PHP_FUNCTION(apache_request_hostname)
 }
 /* }}} */
 
-/* {{{ proto string $request->status_line([string new_status_line])
+/* {{{ proto string ApacheRequest::status_line([string new_status_line])
  */
 PHP_FUNCTION(apache_request_status_line)
 {
@@ -378,7 +378,7 @@ PHP_FUNCTION(apache_request_status_line)
 }
 /* }}} */
 
-/* {{{ proto string $request->method()
+/* {{{ proto string ApacheRequest::method()
  */
 PHP_FUNCTION(apache_request_method)
 {
@@ -391,7 +391,7 @@ PHP_FUNCTION(apache_request_method)
 /* {{{ access int slots of request_rec
  */
 
-/* {{{ proto int $request->proto_num()
+/* {{{ proto int ApacheRequest::proto_num()
  */
 PHP_FUNCTION(apache_request_proto_num)
 {
@@ -399,7 +399,7 @@ PHP_FUNCTION(apache_request_proto_num)
 }
 /* }}} */
 
-/* {{{ proto int $request->assbackwards()
+/* {{{ proto int ApacheRequest::assbackwards()
  */
 PHP_FUNCTION(apache_request_assbackwards)
 {
@@ -408,7 +408,7 @@ PHP_FUNCTION(apache_request_assbackwards)
 /* }}} */
 
 
-/* {{{ proto int $request->proxyreq([int new_proxyreq])
+/* {{{ proto int ApacheRequest::proxyreq([int new_proxyreq])
  */
 PHP_FUNCTION(apache_request_proxyreq)
 {
@@ -416,7 +416,7 @@ PHP_FUNCTION(apache_request_proxyreq)
 }
 /* }}} */
 
-/* {{{ proto int $request->chunked()
+/* {{{ proto int ApacheRequest::chunked()
  */
 PHP_FUNCTION(apache_request_chunked)
 {
@@ -425,7 +425,7 @@ PHP_FUNCTION(apache_request_chunked)
 /* }}} */
 
 
-/* {{{ proto int $request->header_only()
+/* {{{ proto int ApacheRequest::header_only()
  */
 PHP_FUNCTION(apache_request_header_only)
 {
@@ -433,7 +433,7 @@ PHP_FUNCTION(apache_request_header_only)
 }
 /* }}} */
 
-/* {{{ proto int $request->request_time()
+/* {{{ proto int ApacheRequest::request_time()
  */
 PHP_FUNCTION(apache_request_request_time)
 {
@@ -441,7 +441,7 @@ PHP_FUNCTION(apache_request_request_time)
 }
 /* }}} */
 
-/* {{{ proto int $request->status([int new_status])
+/* {{{ proto int ApacheRequest::status([int new_status])
  */
 PHP_FUNCTION(apache_request_status)
 {
@@ -449,7 +449,7 @@ PHP_FUNCTION(apache_request_status)
 }
 /* }}} */
 
-/* {{{ proto int $request->method_number([int method_number])
+/* {{{ proto int ApacheRequest::method_number([int method_number])
  */
 PHP_FUNCTION(apache_request_method_number)
 {
@@ -457,7 +457,7 @@ PHP_FUNCTION(apache_request_method_number)
 }
 /* }}} */
 
-/* {{{ proto int $request->allowed([int allowed])
+/* {{{ proto int ApacheRequest::allowed([int allowed])
  */
 PHP_FUNCTION(apache_request_allowed)
 {
@@ -465,7 +465,7 @@ PHP_FUNCTION(apache_request_allowed)
 }
 /* }}} */
 
-/* {{{ proto int $request->bytes_sent()
+/* {{{ proto int ApacheRequest::bytes_sent()
  */
 PHP_FUNCTION(apache_request_bytes_sent)
 {
@@ -473,7 +473,7 @@ PHP_FUNCTION(apache_request_bytes_sent)
 }
 /* }}} */
 
-/* {{{ proto int $request->mtime()
+/* {{{ proto int ApacheRequest::mtime()
  */
 PHP_FUNCTION(apache_request_mtime)
 {
@@ -481,7 +481,7 @@ PHP_FUNCTION(apache_request_mtime)
 }
 /* }}} */
 
-/* {{{ proto int $request->content_length([int new_content_length])
+/* {{{ proto int ApacheRequest::content_length([int new_content_length])
  */
 PHP_FUNCTION(apache_request_content_length)
 {
@@ -508,7 +508,7 @@ PHP_FUNCTION(apache_request_content_length)
 }
 /* }}} */
 
-/* {{{ proto int $request->remaining()
+/* {{{ proto int ApacheRequest::remaining()
  */
 PHP_FUNCTION(apache_request_remaining)
 {
@@ -516,7 +516,7 @@ PHP_FUNCTION(apache_request_remaining)
 }
 /* }}} */
 
-/* {{{ proto int $request->no_cache()
+/* {{{ proto int ApacheRequest::no_cache()
  */
 PHP_FUNCTION(apache_request_no_cache)
 {
@@ -524,7 +524,7 @@ PHP_FUNCTION(apache_request_no_cache)
 }
 /* }}} */
 
-/* {{{ proto int $request->no_local_copy()
+/* {{{ proto int ApacheRequest::no_local_copy()
  */
 PHP_FUNCTION(apache_request_no_local_copy)
 {
@@ -532,7 +532,7 @@ PHP_FUNCTION(apache_request_no_local_copy)
 }
 /* }}} */
 
-/* {{{ proto int $request->read_body()
+/* {{{ proto int ApacheRequest::read_body()
  */
 PHP_FUNCTION(apache_request_read_body)
 {
