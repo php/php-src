@@ -211,6 +211,13 @@ AC_C_INLINE
 
 AC_SUBST(INLINE_CFLAGS)
 
+AC_MSG_CHECKING(target system is Darwin)
+if echo "$target" | grep "darwin"; then
+  AC_DEFINE([DARWIN], 1, [Define if the target system is darwin])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
 
 dnl test and set the alignment define for ZEND_MM
 dnl this also does the logarithmic test for ZEND_MM.
