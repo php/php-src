@@ -105,21 +105,17 @@ PHPAPI int php_unregister_url_wrapper(char *protocol)
 		return zend_hash_del(&fopen_url_wrappers_hash, protocol, strlen(protocol));
 	} else {
 		return SUCCESS;
-	}
+ 	}
 }
 
 int php_init_fopen_wrappers(void) 
 {
-	int status = SUCCESS;
 	PLS_FETCH();
 
-	if(PG(allow_url_fopen)) {
-		if (zend_hash_init(&fopen_url_wrappers_hash, 0, NULL, NULL, 1)==FAILURE) {
-			return FAILURE;
-		}
-	}
-
-	return status;
+	if(PG(allow_url_fopen)) 
+		return zend_hash_init(&fopen_url_wrappers_hash, 0, NULL, NULL, 1);
+	
+	return SUCCESS;
 }
 
 int php_shutdown_fopen_wrappers(void) 
