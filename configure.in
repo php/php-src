@@ -1,4 +1,4 @@
-dnl ## $Id$ -*- sh -*-
+dnl ## $Id$ -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
 divert(1)
@@ -123,6 +123,11 @@ AC_AIX
 
 dnl AC_PROG_CXX
 dnl AC_PROG_CXXCPP
+
+dnl Support systems with system libraries in e.g. /usr/lib64
+AC_ARG_WITH(libdir,
+[  --with-libdir=NAME     Look for libraries in .../NAME rather than .../lib],
+[PHP_LIBDIR=$withval], [PHP_LIBDIR=lib])
 
 dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
