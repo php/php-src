@@ -287,7 +287,7 @@ static void php_skip_variable(int socketd, FILE *fp, int issock)
 
 /* {{{ php_read_APP
  */
-static void php_read_APP(int socketd, FILE *fp, int issock, unsigned int marker, pval *info)
+static void php_read_APP(int socketd, FILE *fp, int issock, unsigned int marker, zval *info)
 {
 	unsigned short length;
 	unsigned char *buffer;
@@ -401,7 +401,7 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
-	pval **arg1, **info = 0;
+	zval **arg1, **info = NULL;
 	FILE *fp;
 	int issock=0, socketd=0, rsrc_id;
  	int itype = 0;
