@@ -463,6 +463,12 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPEXTENSION_CON
 	SG(request_info).request_uri = lpECB->lpszPathInfo;
 	SG(request_info).content_type = lpECB->lpszContentType;
 	SG(request_info).content_length = lpECB->cbTotalBytes;
+	SG(sapi_headers).http_response_code = 200;  /* I think dwHttpStatusCode is invalid at this stage -RL */
+	if (!strcmp(lpECB->lpszMethod, "HEAD")) {
+		SG(request_info).headers_only = 1;
+	} else {
+		SG(request_info).headers_only = 0;
+	}
 	{
 		char *path_end = strrchr(SG(request_info).path_translated, SEPARATOR);
 

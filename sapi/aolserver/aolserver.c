@@ -473,6 +473,12 @@ php_ns_request_ctor(NSLS_D SLS_DC)
 	index = Ns_SetIFind(NSG(conn)->headers, "content-type");
 	SG(request_info).content_type = index == -1 ? NULL : 
 		Ns_SetValue(NSG(conn)->headers, index);
+	if (!strcmp(NSG(conn)->request->method, "HEAD")) {
+		SG(request_info).headers_only = 1;
+	} else {
+		SG(request_info).headers_only = 0;
+	}
+	SG(sapi_headers).http_response_code = 200;
 
 	tmp = Ns_ConnAuthUser(NSG(conn));
 	if(tmp) {
