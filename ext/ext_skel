@@ -162,7 +162,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl LIBS=\$old_LIBS
   dnl
   dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
-  dnl PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, SAPRFC_SHARED_LIBADD)
+  dnl PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, ${EXTNAME}_SHARED_LIBADD)
 
   PHP_EXTENSION($extname, \$ext_shared)
 fi
