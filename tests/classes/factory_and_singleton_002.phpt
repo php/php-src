@@ -1,7 +1,7 @@
 --TEST--
 ZE2 factory and singleton, test 2
 --SKIPIF--
-<?php die('skip currently stucks due to destructor corruption'); if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
+<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 class test {
@@ -19,7 +19,7 @@ class test {
     }
   }
 
-  function __construct($x) {
+  protected function __construct($x) {
     test::$cnt++;
     $this->x = $x;
   }
@@ -28,7 +28,7 @@ class test {
     test::$test = NULL;
   }
 
-  function __destruct() {
+  protected function __destruct() {
   	test::$cnt--;
   }
 
@@ -96,3 +96,5 @@ Destruct y
 int(1)
 int(1)
 Done
+
+Warning: Call to protected test::__destruct from context '' during shutdown ignored in Unknown on line 0
