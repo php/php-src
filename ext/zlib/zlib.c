@@ -1283,8 +1283,8 @@ int php_enable_output_compression(int buffer_size TSRMLS_DC)
 		return FAILURE;
 	}
 	
-	php_start_ob_buffer(NULL, buffer_size TSRMLS_CC);
-	php_ob_set_internal_handler(php_gzip_output_handler, buffer_size*1.5 TSRMLS_CC);
+	php_start_ob_buffer(NULL, buffer_size, 0 TSRMLS_CC);
+	php_ob_set_internal_handler(php_gzip_output_handler, buffer_size*1.5, "zlib output compression", 0 TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
