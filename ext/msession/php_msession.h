@@ -41,7 +41,6 @@ PHP_RSHUTDOWN_FUNCTION(msession);
 PHP_MINFO_FUNCTION(msession);
 
 PHP_FUNCTION(confirm_msession_compiled);	/* For testing, remove later. */
-PHP_FUNCTION();
 PHP_FUNCTION(msession_connect);
 PHP_FUNCTION(msession_disconnect);
 PHP_FUNCTION(msession_lock);
@@ -53,6 +52,7 @@ PHP_FUNCTION(msession_set);
 PHP_FUNCTION(msession_get);
 PHP_FUNCTION(msession_find);
 PHP_FUNCTION(msession_get_array);
+PHP_FUNCTION(msession_set_array);
 PHP_FUNCTION(msession_timeout);
 PHP_FUNCTION(msession_inc);
 PHP_FUNCTION(msession_setdata);
@@ -61,7 +61,7 @@ PHP_FUNCTION(msession_listvar);
 PHP_FUNCTION(msession_list);
 PHP_FUNCTION(msession_uniq);
 PHP_FUNCTION(msession_randstr);
-PHP_FUNCTION();
+PHP_FUNCTION(msession_plugin);
 
 /* 
   	Declare any global variables you may need between the BEGIN

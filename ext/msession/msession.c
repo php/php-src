@@ -56,7 +56,6 @@ ZEND_DECLARE_MODULE_GLOBALS(msession)
 */
 
 /* True global resources - no need for thread safety here */
-static int	le_msession;
 static char	g_defhost[]="localhost";
 static char *	g_host=g_defhost;
 static int	g_port=8086;
@@ -83,6 +82,7 @@ function_entry msession_functions[] = {
 	PHP_FE(msession_get,NULL)
 	PHP_FE(msession_find,NULL)
 	PHP_FE(msession_get_array,NULL)
+	PHP_FE(msession_set_array,NULL)
 	PHP_FE(msession_timeout,NULL)
 	PHP_FE(msession_inc,NULL)
 	PHP_FE(msession_setdata,NULL)
@@ -91,6 +91,7 @@ function_entry msession_functions[] = {
 	PHP_FE(msession_list,NULL)
 	PHP_FE(msession_uniq,NULL)
 	PHP_FE(msession_randstr,NULL)
+	PHP_FE(msession_plugin,NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in msession_functions[] */
 };
 
@@ -241,8 +242,11 @@ char *PHPMsessionGetData(const char *session)
 	char *ret = NULL;
 
 #ifdef ERR_DEBUG
-	sprintf(buffer,"PHPMsessionGetData: %s (%X)\n", session, (unsigned)g_conn);
-	php_log_err(buffer);
+	{
+		char buffer [256];
+		sprintf(buffer,"PHPMsessionGetData: %s (%X)\n", session, (unsigned)g_conn);
+		php_log_err(buffer);
+	}
 #endif
 	if(!g_reqb) 
 	{ 
@@ -260,8 +264,11 @@ int PHPMsessionSetData(const char *session, const char *data)
 {
 	int ret=0;
 #ifdef ERR_DEBUG
-	sprintf(buffer,"PHPMsessionSetData: %s=%s (%X)\n", session, data, (unsigned)g_conn);
-	php_log_err(buffer);
+	{
+		char buffer [256];
+		sprintf(buffer,"PHPMsessionSetData: %s=%s (%X)\n", session, data, (unsigned)g_conn);
+		php_log_err(buffer);
+	}
 #endif
 	if(!g_reqb) 
 	{ 
@@ -338,7 +345,6 @@ PHP_FUNCTION(msession_count)
 PHP_FUNCTION(msession_create)
 {
 	int stat;
-	char *val;
 	zval **session;
 	GET_REQB
 	
@@ -368,7 +374,6 @@ PHP_FUNCTION(msession_create)
 
 PHP_FUNCTION(msession_destroy)
 {
-	char *val;
 	zval **session;
 	
 	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
@@ -388,7 +393,6 @@ PHP_FUNCTION(msession_destroy)
 PHP_FUNCTION(msession_lock)
 {
 	long key;
-	char *val;
 	zval **session;
 	GET_REQB
 	
@@ -412,7 +416,6 @@ PHP_FUNCTION(msession_lock)
 PHP_FUNCTION(msession_unlock)
 {
 	long lkey;
-	char *val;
 	zval **session;
 	zval **key;
 	GET_REQB
@@ -603,8 +606,6 @@ PHP_FUNCTION(msession_find)
 }
 PHP_FUNCTION(msession_list)
 {
-	zval **name;
-	zval **value;
 	GET_REQB
 	
 	if(!g_conn)
@@ -680,9 +681,85 @@ PHP_FUNCTION(msession_get_array)
 		}
 	}
 }
-PHP_FUNCTION(msession_listvar)
+PHP_FUNCTION(msession_set_array)
 {
 	zval **session;
+	zval **tuples;
+	HashPosition pos;
+	zval **entry;
+	char *key;
+	uint keylen;
+	ulong numndx;
+	int ndx=0;
+	char **pairs;
+	HashTable *htTuples;
+	int i;
+	
+	int countpair; 
+	
+	GET_REQB
+	
+	ELOG("msession_set_array");
+
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &session, &tuples) == FAILURE)
+ 	{
+                WRONG_PARAM_COUNT;
+        }
+	if(!g_conn)
+	{
+		RETURN_FALSE;
+	}
+	htTuples = Z_ARRVAL_PP(tuples);
+
+	countpair = zend_hash_num_elements(htTuples);
+
+	pairs = (char **)emalloc(sizeof(char *) * countpair * 2);
+
+	if(!pairs)
+	{
+		ELOG("no pairs");
+		RETURN_FALSE;
+	}
+
+	ELOG("have pairs");
+
+	// Initializes pos
+	zend_hash_internal_pointer_reset_ex(htTuples, &pos);
+
+	ELOG("reset pointer");
+
+	for(i=0; i < countpair; i++)
+	{
+		if(zend_hash_get_current_data_ex(htTuples, (void **)&entry, &pos) != SUCCESS) 
+			break;
+
+		if(entry)
+		{
+			convert_to_string_ex(entry);
+        		if(zend_hash_get_current_key_ex(htTuples,&key,&keylen,&numndx,0,&pos)== HASH_KEY_IS_STRING)
+			{
+#ifdef ERR_DEBUG
+				{
+					char buffer [256];
+					sprintf(buffer, "%s=%s\n", key, Z_STRVAL_PP(entry));
+					ELOG(buffer);
+				}
+#endif
+				pairs[ndx++] = key;
+				pairs[ndx++] = Z_STRVAL_PP(entry);
+			}
+		}
+		zend_hash_move_forward_ex(htTuples, &pos);
+	}
+
+	ELOG("FormatMulti");
+	FormatRequestMulti(&g_reqb, REQ_SETVAL, Z_STRVAL_PP(session), countpair, pairs,0);
+	DoRequest(g_conn,&g_reqb);
+	efree((void *)pairs);
+}
+
+PHP_FUNCTION(msession_listvar)
+{
 	zval **name;
 	GET_REQB
 	
@@ -729,7 +806,6 @@ PHP_FUNCTION(msession_listvar)
 
 PHP_FUNCTION(msession_timeout)
 {
-	char *val;
 	zval **session;
 	int ac = ZEND_NUM_ARGS();
 	int zstat = FAILURE;
@@ -855,6 +931,50 @@ PHP_FUNCTION(msession_setdata)
 	{
 		RETURN_FALSE;
 	}
+}
+PHP_FUNCTION(msession_plugin)
+{
+	int ret;
+	char *retval;
+	zval **session;
+	zval **val;
+	zval **param=NULL;
+	GET_REQB
+	
+	if(ZEND_NUM_ARGS() == 3)
+	{
+		ret = zend_get_parameters_ex(3, &session, &val, &param);
+		convert_to_string_ex(param);
+	}
+	else if(ZEND_NUM_ARGS() == 2)
+	{
+		ret = zend_get_parameters_ex(2, &session, &val);
+	}
+	else
+ 	{
+                WRONG_PARAM_COUNT;
+        }
+	if(ret == FAILURE)
+	{
+                WRONG_PARAM_COUNT;
+	}
+	if(!g_conn)
+	{
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(session);
+	convert_to_string_ex(val);
+
+	ret = atoi(Z_STRVAL_PP(val));
+
+	FormatRequest(&g_reqb, REQ_PLUGIN, Z_STRVAL_PP(session), Z_STRVAL_PP(val), param ? Z_STRVAL_PP(param) : "",ret);
+	DoRequest(g_conn, &g_reqb);
+
+	if(g_reqb->req.stat==REQ_OK && g_reqb->req.len)
+		retval = safe_estrdup(g_reqb->req.datum);
+
+	RETURN_STRING(retval, 0)
 }
 
 PS_OPEN_FUNC(msession)
