@@ -1,3 +1,64 @@
+2004-01-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c:
+      Fix shutdown
+
+    * (PHP_4_3)
+      ext/dba/dba.c:
+      Add missing fd creation
+
+2004-01-15  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/sqlite/package.xml:
+      - Fix the php dependency
+      (wide copy/paste is not that good no? ;) )
+
+2004-01-15  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend.c:
+      Nice patch Christian, but it wasn't at all enabled? :)
+      
+      Fix bug #26883
+
+2004-01-15  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      Fix bug #26892, ORA-21301 in ocinewcollection() call.
+      				pEnv should be initialized in object mode too.
+
+2004-01-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c:
+      Drop userspace iteration correctly.
+
+2004-01-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8.c:
+      Fix typo
+
+    * (PHP_4_3)
+      ext/mime_magic/mime_magic.c:
+      Fix overflow
+
+    * NEWS
+      ext/mime_magic/mime_magic.c:
+      - Fixed bug #26844 (ext/mime_magic: magic file validation broken).
+
+2004-01-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #26909 (crash in imap_mime_header_decode() when no encoding
+      is
+      used).
+
+    * ext/imap/php_imap.c:
+      Fixed bug #26909 (crash in imap_mime_header_decode() when no encoding is
+      used).
+
 2004-01-14  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/PEAR.php:
