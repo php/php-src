@@ -23,6 +23,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 
 #if HAVE_IBASE
 
@@ -553,7 +554,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 				case SQL_TIMESTAMP:
 					convert_to_string(val);
 #ifdef HAVE_STRPTIME
-					strptime(Z_STRVAL_P(val), IBG(timestampformat), &t);
+					strptime(Z_STRVAL_P(val), INI_STR("ibase.timestampformat"), &t);
 #else
 					n = sscanf(Z_STRVAL_P(val), "%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d", 
 						&t.tm_mon, &t.tm_mday, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec);
@@ -571,7 +572,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 				case SQL_TYPE_DATE:
 					convert_to_string(val);
 #ifdef HAVE_STRPTIME
-					strptime(Z_STRVAL_P(val), IBG(dateformat), &t);
+					strptime(Z_STRVAL_P(val), INI_STR("ibase.dateformat"), &t);
 #else
 					n = sscanf(Z_STRVAL_P(val), "%d%*[/]%d%*[/]%d", &t.tm_mon, &t.tm_mday, &t.tm_year);
 
@@ -588,7 +589,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 				case SQL_TYPE_TIME:
 					convert_to_string(val);
 #ifdef HAVE_STRPTIME
-					strptime(Z_STRVAL_P(val), IBG(timeformat), &t);
+					strptime(Z_STRVAL_P(val), INI_STR("ibase.timeformat"), &t);
 #else
 					n = sscanf(Z_STRVAL_P(val), "%d%*[:]%d%*[:]%d", &t.tm_hour, &t.tm_min, &t.tm_sec);
 
@@ -678,16 +679,16 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 					t = *gmtime(&Z_LVAL_P(b_var));
 				} else {
 #ifdef HAVE_STRPTIME
-					char *format = IBG(timestampformat);
+					char *format = INI_STR("ibase.timestampformat");
 
 					convert_to_string(b_var);
 
 					switch (var->sqltype & ~1) {
 						case SQL_TYPE_DATE:
-							format = IBG(dateformat);
+							format = INI_STR("ibase.dateformat");
 							break;
 						case SQL_TYPE_TIME:
-							format = IBG(timeformat);
+							format = INI_STR("ibase.timeformat");
 					}
 					if (! strptime(Z_STRVAL_P(b_var), format, &t)) {
 						/* strptime() cannot handle it, so let IB have a try */
@@ -1083,9 +1084,9 @@ PHP_FUNCTION(ibase_query)
 					_php_ibase_module_error("CREATE DATABASE is not allowed in SQL safe mode"
 						TSRMLS_CC);
 
-				} else if ((IBG(max_links) != -1) && (IBG(num_links) >= IBG(max_links))) {
+				} else if (((l = INI_INT("ibase.max_links")) != -1) && (IBG(num_links) >= l)) {
 					_php_ibase_module_error("CREATE DATABASE is not allowed: maximum link count "
-						"(%ld) reached" TSRMLS_CC, IBG(max_links));
+						"(%ld) reached" TSRMLS_CC, l);
 
 				} else if (isc_dsql_execute_immediate(IB_STATUS, &db, &trans, (short)query_len, 
 						query, SQL_DIALECT_CURRENT, NULL)) {
@@ -1355,15 +1356,15 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			ZVAL_DOUBLE(val, *(double *) data);
 			break;
 		case SQL_DATE: /* == case SQL_TIMESTAMP: */
-			format = IBG(timestampformat);
+			format = INI_STR("ibase.timestampformat");
 			isc_decode_timestamp((ISC_TIMESTAMP *) data, &t);
 			goto format_date_time;
 		case SQL_TYPE_DATE:
-			format = IBG(dateformat);
+			format = INI_STR("ibase.dateformat");
 			isc_decode_sql_date((ISC_DATE *) data, &t);
 			goto format_date_time;
 		case SQL_TYPE_TIME:
-			format = IBG(timeformat);
+			format = INI_STR("ibase.timeformat");
 			isc_decode_sql_time((ISC_TIME *) data, &t);
 
 format_date_time:

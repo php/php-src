@@ -436,16 +436,16 @@ static PHP_INI_DISP(php_ibase_password_displayer_cb)
 
 /* {{{ startup, shutdown and info functions */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("ibase.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateBool, allow_persistent, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY_EX("ibase.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_persistent, zend_ibase_globals, ibase_globals, display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("ibase.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_links, zend_ibase_globals, ibase_globals, display_link_numbers)
-	STD_PHP_INI_ENTRY("ibase.default_db", NULL, PHP_INI_SYSTEM, OnUpdateString, default_db, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY_EX("ibase.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ibase_globals, ibase_globals,php_ibase_password_displayer_cb)
-	STD_PHP_INI_ENTRY("ibase.default_charset", NULL, PHP_INI_ALL, OnUpdateString, default_charset, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.timestampformat", IB_DEF_DATE_FMT " " IB_DEF_TIME_FMT, PHP_INI_ALL, OnUpdateString, timestampformat, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.dateformat", IB_DEF_DATE_FMT, PHP_INI_ALL, OnUpdateString, dateformat, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.timeformat", IB_DEF_TIME_FMT, PHP_INI_ALL, OnUpdateString, timeformat, zend_ibase_globals, ibase_globals)
+	PHP_INI_ENTRY_EX("ibase.allow_persistent", "1", PHP_INI_SYSTEM, NULL, zend_ini_boolean_displayer_cb)
+	PHP_INI_ENTRY_EX("ibase.max_persistent", "-1", PHP_INI_SYSTEM, NULL, display_link_numbers)
+	PHP_INI_ENTRY_EX("ibase.max_links", "-1", PHP_INI_SYSTEM, NULL, display_link_numbers)
+	PHP_INI_ENTRY("ibase.default_db", NULL, PHP_INI_SYSTEM, NULL)
+	PHP_INI_ENTRY("ibase.default_user", NULL, PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY_EX("ibase.default_password", NULL, PHP_INI_ALL, NULL, php_ibase_password_displayer_cb)
+	PHP_INI_ENTRY("ibase.default_charset", NULL, PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("ibase.timestampformat", IB_DEF_DATE_FMT " " IB_DEF_TIME_FMT, PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("ibase.dateformat", IB_DEF_DATE_FMT, PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("ibase.timeformat", IB_DEF_TIME_FMT, PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 static void php_ibase_init_globals(zend_ibase_globals *ibase_globals)
@@ -612,7 +612,7 @@ int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db T
 
 static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* {{{ */
 {
-	char hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
+	char *c, hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
 	int i, len[] = { 0, 0, 0, 0, 0 };
 	long largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
@@ -630,21 +630,21 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	}
 	
 	/* restrict to the server/db in the .ini if in safe mode */
-	if ((!len[DB] || PG(sql_safe_mode)) && IBG(default_db)) { 
-		args[DB] = IBG(default_db);
-		len[DB] = strlen(IBG(default_db));
+	if ((!len[DB] || PG(sql_safe_mode)) && (c = INI_STR("ibase.default_db"))) { 
+		args[DB] = c;
+		len[DB] = strlen(c);
 	}
-	if (!len[USER] && IBG(default_user)) {
-		args[USER] = IBG(default_user);
-		len[USER] = strlen(args[USER]);
+	if (!len[USER] && (c = INI_STR("ibase.default_user"))) {
+		args[USER] = c;
+		len[USER] = strlen(c);
 	}
-	if (!len[PASS] && IBG(default_password)) {
-		args[PASS] = IBG(default_password);
-		len[PASS] = strlen(args[PASS]);
+	if (!len[PASS] && (c = INI_STR("ibase.default_password"))) {
+		args[PASS] = c;
+		len[PASS] = strlen(c);
 	}
-	if (!len[CSET] && IBG(default_charset)) {
-		args[CSET] = IBG(default_charset);
-		len[CSET] = strlen(args[CSET]);
+	if (!len[CSET] && (c = INI_STR("ibase.default_charset"))) {
+		args[CSET] = c;
+		len[CSET] = strlen(c);
 	}
 	
 	/* don't want usernames and passwords floating around */
@@ -677,6 +677,8 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 	/* ... or a persistent one */
 	switch (zend_hash_find(&EG(persistent_list), hash, sizeof(hash), (void *) &le)) {
+		long l;
+		
 		static char info[] = { isc_info_base_level, isc_info_end };
 		char result[8];
 		ISC_STATUS status[20];
@@ -698,7 +700,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 		/* no link found, so we have to open one */
 	
-		if (IBG(max_links) != -1 && IBG(num_links) >= IBG(max_links)) {
+		if ((l = INI_INT("ibase.max_links")) != -1 && IBG(num_links) >= l) {
 			_php_ibase_module_error("Too many open links (%ld)" TSRMLS_CC, IBG(num_links));
 			RETURN_FALSE;
 		}
@@ -709,7 +711,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		}
 	
 		/* use non-persistent if allowed number of persistent links is exceeded */
-		if (!persistent || (IBG(max_persistent) != -1 && IBG(num_persistent) >= IBG(max_persistent))) {
+		if (!persistent || ((l = INI_INT("ibase.max_persistent") != -1) && IBG(num_persistent) >= l)) {
 			ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
 		} else {
@@ -759,7 +761,7 @@ PHP_FUNCTION(ibase_connect)
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
 {
-	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, IBG(allow_persistent));
+	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INI_INT("ibase.allow_persistent"));
 }
 /* }}} */
 

@@ -64,10 +64,6 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	ISC_STATUS status[20];
 	long default_link;
 	long num_links, num_persistent;
-	long max_links, max_persistent;
-	long allow_persistent;
-	char *default_db, *default_user, *default_password, *default_charset;
-	char *timestampformat, *dateformat, *timeformat;
 	char errmsg[MAX_ERRMSG];
 	long sql_code;
 ZEND_END_MODULE_GLOBALS(ibase)
