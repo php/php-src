@@ -55,6 +55,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Fixed a bug in sending multiple HTTP Cookies under Apache (Zeev)
 - Fixed implicit connect on the MySQL, mSQL, PostgreSQL and Sybase
   modules (Zeev)
+- Gave PHP4's SNMP extension all the functionality of PHP 3.0.12 (SteveL)
   
   
 July 19 1999, Version 4.0 Beta 1
