@@ -69,6 +69,7 @@ function_entry openssl_functions[] = {
 	PHP_FE(openssl_pkey_free,			NULL)
 	PHP_FE(openssl_pkey_new,			NULL)
 	PHP_FE(openssl_pkey_export,			second_arg_force_ref)
+	PHP_FE(openssl_pkey_export_to_file,	NULL)
 	PHP_FE(openssl_pkey_get_private,	NULL)
 	PHP_FE(openssl_pkey_get_public,		NULL)
 
@@ -83,10 +84,12 @@ function_entry openssl_functions[] = {
 	PHP_FE(openssl_x509_checkpurpose,		NULL)
 	PHP_FE(openssl_x509_check_private_key,	NULL)
 	PHP_FE(openssl_x509_export,				second_arg_force_ref)
+	PHP_FE(openssl_x509_export_to_file,		NULL)
 
 /* CSR funcs */
 	PHP_FE(openssl_csr_new,				second_arg_force_ref)
 	PHP_FE(openssl_csr_export,			second_arg_force_ref)
+	PHP_FE(openssl_csr_export_to_file,	NULL)
 	PHP_FE(openssl_csr_sign,			NULL)
 
 	
@@ -673,17 +676,19 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 
 /* }}} */
 
-/* {{{ proto openssl_x509_export(mixed x509, string &out, bool tofile[, bool notext = true])
+/* {{{ proto openssl_x509_export_to_file(mixed x509, string outfilename[, bool notext = true])
 	Export a cert to file or a var */
-PHP_FUNCTION(openssl_x509_export)
+PHP_FUNCTION(openssl_x509_export_to_file)
 {
 	X509 * cert;
-	zval * zcert = NULL, *zout=NULL;
-	zend_bool tofile = 0, notext = 1;
+	zval * zcert = NULL;
+	zend_bool notext = 1;
 	BIO * bio_out;
 	long certresource;
+	char * filename;
+	long filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzb|b", &zcert, &zout, &tofile, &notext) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &zcert, &filename, &filename_len, &notext) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
@@ -694,38 +699,62 @@ PHP_FUNCTION(openssl_x509_export)
 		return;
 	}
 
-	if (tofile)	{
-		/* TODO: export to named file */
-		bio_out = BIO_new_file(Z_STRVAL_P(zout), "w");
-		if (bio_out)	{
-			if (!notext)
-				X509_print(bio_out, cert);
-			PEM_write_bio_X509(bio_out, cert);
-			
-			RETVAL_TRUE;
-		}
-		else
-			zend_error(E_WARNING, "error opening file %s", Z_STRVAL_P(zout));
-	}
-	else	{
-		/* export to a var */
-		char * bio_mem_ptr;
-		long bio_mem_len;
-
-		bio_out = BIO_new(BIO_s_mem());
+	bio_out = BIO_new_file(filename, "w");
+	if (bio_out)	{
 		if (!notext)
 			X509_print(bio_out, cert);
 		PEM_write_bio_X509(bio_out, cert);
 
-		bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
-		ZVAL_STRINGL(zout, bio_mem_ptr, bio_mem_len, 1);
-
 		RETVAL_TRUE;
 	}
-	
+	else
+		zend_error(E_WARNING, "error opening file %s", filename);
+
 	if (certresource == -1 && cert)
 		X509_free(cert);
-	
+
+	BIO_free(bio_out);
+
+}
+/* }}} */
+
+/* {{{ proto openssl_x509_export(mixed x509, string &out[, bool notext = true])
+	Export a cert to file or a var */
+PHP_FUNCTION(openssl_x509_export)
+{
+	X509 * cert;
+	zval * zcert = NULL, *zout=NULL;
+	zend_bool notext = 1;
+	BIO * bio_out;
+	long certresource;
+	char * bio_mem_ptr;
+	long bio_mem_len;
+
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|b", &zcert, &zout, &notext) == FAILURE)
+		return;
+
+	RETVAL_FALSE;
+
+	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
+	if (cert == NULL)	{
+		zend_error(E_WARNING, "cannot get cert from parameter 1");
+		return;
+	}
+
+	bio_out = BIO_new(BIO_s_mem());
+	if (!notext)
+		X509_print(bio_out, cert);
+	PEM_write_bio_X509(bio_out, cert);
+
+	bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
+	ZVAL_STRINGL(zout, bio_mem_ptr, bio_mem_len, 1);
+
+	RETVAL_TRUE;
+
+	if (certresource == -1 && cert)
+		X509_free(cert);
+
 	BIO_free(bio_out);
 
 }
@@ -923,7 +952,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 	check the cert to see if it can be used for the purpose in purpose. cainfo holds information about trusted CAs */
 PHP_FUNCTION(openssl_x509_checkpurpose)
 {
-	zval * zcert, * zcainfo;
+	zval * zcert, * zcainfo = NULL;
 	X509_STORE * cainfo = NULL;
 	X509 * cert = NULL;
 	long certresource = -1;
@@ -932,7 +961,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	char * untrusted = NULL;
 	long untrusted_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zla|s", &zcert, &purpose, &zcainfo, &untrusted, &untrusted_len)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl|a!s", &zcert, &purpose, &zcainfo, &untrusted, &untrusted_len)
 			== FAILURE)
 		return;
 
@@ -952,7 +981,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	if (cert == NULL)
 		goto clean_exit;
 
-	RETVAL_BOOL(check_cert(cainfo, cert, untrustedchain, purpose));
+	RETVAL_LONG(check_cert(cainfo, cert, untrustedchain, purpose));
 
 clean_exit:
 	if (certresource == 1 && cert)
@@ -1256,17 +1285,18 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 }
 /* }}} */
 
-/* {{{ proto openssl_csr_export(resource csr, string &out, bool tofile, [bool notext=true])
+/* {{{ proto openssl_csr_export_to_file(resource csr, string outfilename[, bool notext=true])
 	Exports a CSR to file or a var */
-PHP_FUNCTION(openssl_csr_export)
+PHP_FUNCTION(openssl_csr_export_to_file)
 {
 	X509_REQ * csr;
-	zval * zcsr = NULL, *zout=NULL;
-	zend_bool tofile = 0, notext = 1;
+	zval * zcsr = NULL;
+	zend_bool notext = 1;
+	char * filename = NULL; long filename_len;
 	BIO * bio_out;
 	long csr_resource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzb|b", &zcsr, &zout, &tofile, &notext) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &zcsr, &filename, &filename_len, &notext) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
@@ -1277,37 +1307,63 @@ PHP_FUNCTION(openssl_csr_export)
 		return;
 	}
 
-	if (tofile)	{
-		/* TODO: export to named file */
-		bio_out = BIO_new_file(Z_STRVAL_P(zout), "w");
-		if (bio_out)	{
-			if (!notext)
-				X509_REQ_print(bio_out, csr);
-			PEM_write_bio_X509_REQ(bio_out, csr);
-			RETVAL_TRUE;
-		}
-		else
-			zend_error(E_WARNING, "error opening file %s", Z_STRVAL_P(zout));
-	}
-	else	{
-		/* export to a var */
-		char * bio_mem_ptr;
-		long bio_mem_len;
-
-		bio_out = BIO_new(BIO_s_mem());
+	bio_out = BIO_new_file(filename, "w");
+	if (bio_out)	{
 		if (!notext)
 			X509_REQ_print(bio_out, csr);
 		PEM_write_bio_X509_REQ(bio_out, csr);
-
-		bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
-		ZVAL_STRINGL(zout, bio_mem_ptr, bio_mem_len, 1);
-
 		RETVAL_TRUE;
 	}
-	
+	else
+		zend_error(E_WARNING, "error opening file %s", filename);
+
 	if (csr_resource == -1 && csr)
 		X509_REQ_free(csr);
-	
+
+	BIO_free(bio_out);
+}
+/* }}} */
+
+
+
+/* {{{ proto openssl_csr_export(resource csr, string &out[,bool notext=true])
+	Exports a CSR to file or a var */
+PHP_FUNCTION(openssl_csr_export)
+{
+	X509_REQ * csr;
+	zval * zcsr = NULL, *zout=NULL;
+	zend_bool notext = 1;
+	BIO * bio_out;
+	long csr_resource;
+	char * bio_mem_ptr;
+	long bio_mem_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|b", &zcsr, &zout, &notext) == FAILURE)
+		return;
+
+	RETVAL_FALSE;
+
+	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
+	if (csr == NULL)	{
+		zend_error(E_WARNING, "cannot get CSR from parameter 1");
+		return;
+	}
+
+	/* export to a var */
+
+	bio_out = BIO_new(BIO_s_mem());
+	if (!notext)
+		X509_REQ_print(bio_out, csr);
+	PEM_write_bio_X509_REQ(bio_out, csr);
+
+	bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
+	ZVAL_STRINGL(zout, bio_mem_ptr, bio_mem_len, 1);
+
+	RETVAL_TRUE;
+
+	if (csr_resource == -1 && csr)
+		X509_REQ_free(csr);
+
 	BIO_free(bio_out);
 }
 /* }}} */
@@ -1699,20 +1755,20 @@ PHP_FUNCTION(openssl_pkey_new)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkey_export(mixed key, &mixed out, bool tofile[, string passphrase, array config_args)
-   Get an exportable representation of a key into a string or file */
-PHP_FUNCTION(openssl_pkey_export)
+/* {{{ proto bool openssl_pkey_export_to_file(mixed key, string outfilename[, string passphrase, array config_args)
+   Get an exportable representation of a key into a file */
+PHP_FUNCTION(openssl_pkey_export_to_file)
 {
 	struct php_x509_request req;
-	zval * zpkey, * args = NULL, *out;
+	zval * zpkey, * args = NULL;
 	char * passphrase = NULL; long passphrase_len = 0;
+	char * filename = NULL; long filename_len = 0;
 	long key_resource = -1;
-	zend_bool tofile = 0;
 	EVP_PKEY * key;
 	BIO * bio_out = NULL;
 	EVP_CIPHER * cipher;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzb|s!a!", &zpkey, &out, &tofile, &passphrase, &passphrase_len, &args) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|s!a!", &zpkey, &filename, &filename_len, &passphrase, &passphrase_len, &args) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
@@ -1728,10 +1784,7 @@ PHP_FUNCTION(openssl_pkey_export)
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS)
 	{
-		if (tofile)
-			bio_out = BIO_new_file(Z_STRVAL_P(out), "w");
-		else
-			bio_out = BIO_new(BIO_s_mem());
+		bio_out = BIO_new_file(filename, "w");
 
 		if (passphrase && req.priv_key_encrypt)
 			cipher = EVP_des_ede3_cbc();
@@ -1742,14 +1795,63 @@ PHP_FUNCTION(openssl_pkey_export)
 			/* Success!
 			 * If returning the output as a string, do so now */
 			RETVAL_TRUE;
+		}
+	}
+	PHP_SSL_REQ_DISPOSE(&req);
 
-			if (!tofile)	{
-				char * bio_mem_ptr;
-				long bio_mem_len;
-				
-				bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
-				ZVAL_STRINGL(out, bio_mem_ptr, bio_mem_len, 1);
-			}
+	if (key_resource == -1 && key)	{
+		EVP_PKEY_free(key);
+	}
+	if (bio_out)
+		BIO_free(bio_out);
+}
+/* }}} */
+
+/* {{{ proto bool openssl_pkey_export(mixed key, &mixed out[, string passphrase, array config_args)
+   Get an exportable representation of a key into a string or file */
+PHP_FUNCTION(openssl_pkey_export)
+{
+	struct php_x509_request req;
+	zval * zpkey, * args = NULL, *out;
+	char * passphrase = NULL; long passphrase_len = 0;
+	long key_resource = -1;
+	EVP_PKEY * key;
+	BIO * bio_out = NULL;
+	EVP_CIPHER * cipher;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|s!a!", &zpkey, &out, &passphrase, &passphrase_len, &args) == FAILURE)
+		return;
+
+	RETVAL_FALSE;
+
+	key = php_openssl_evp_from_zval(&zpkey, 0, passphrase, 0, &key_resource TSRMLS_C);
+
+	if (key == NULL)	{
+		zend_error(E_WARNING, "cannot get key from parameter 1");
+		RETURN_FALSE;
+	}
+	
+	PHP_SSL_REQ_INIT(&req);
+
+	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS)
+	{
+		bio_out = BIO_new(BIO_s_mem());
+
+		if (passphrase && req.priv_key_encrypt)
+			cipher = EVP_des_ede3_cbc();
+		else
+			cipher = NULL;
+		
+		if (PEM_write_bio_PrivateKey(bio_out, key, cipher, passphrase, passphrase_len, NULL, NULL))	{
+			/* Success!
+			 * If returning the output as a string, do so now */
+
+			char * bio_mem_ptr;
+			long bio_mem_len;
+			RETVAL_TRUE;
+
+			bio_mem_len = BIO_get_mem_data(bio_out, &bio_mem_ptr);
+			ZVAL_STRINGL(out, bio_mem_ptr, bio_mem_len, 1);
 		}
 	}
 	PHP_SSL_REQ_DISPOSE(&req);
@@ -1815,6 +1917,8 @@ PHP_FUNCTION(openssl_pkey_get_private)
 		RETURN_FALSE;
 	}
 }
+
+/* }}} */
 
 /* }}} */
 
