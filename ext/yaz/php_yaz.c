@@ -898,6 +898,74 @@ static void retval_array2_grs1(zval *return_value, Z_GenericRecord *p)
 	}
 }
 
+static int iconv_grs1(Z_GenericRecord *p, ODR odr,
+					   const char *to, const char *from)
+{
+	size_t outbuf_size = 10;
+	char *outbuf = (char*) odr_malloc(odr, outbuf_size);
+
+	Z_GenericRecord *grs[20];
+	int eno[20];
+	int level = 0;
+	yaz_iconv_t cd;
+	if (!to || to[0]==0)
+		to = "UTF-8";
+	if (!from || !to)
+		return 0;
+	cd = yaz_iconv_open(to, from);
+	if (!cd)
+		return -1;
+
+	eno[level] = 0;
+	grs[level] = p;
+
+	while(level >= 0) {
+		Z_TaggedElement *e = 0;
+		Z_GenericRecord *p = grs[level];
+
+		if (eno[level] >= p->num_elements) {
+			--level;
+			if (level >= 0)
+				eno[level]++;
+			continue;
+		}
+		e = grs[level]->elements[eno[level]];
+		switch (e->content->which) {
+		case Z_ElementData_string:
+			while(1) {
+				size_t inbytesleft = strlen(e->content->u.string);
+				const char *inp = e->content->u.string;
+				size_t outbytesleft = outbuf_size;
+				char *outp = outbuf;
+				size_t r = yaz_iconv(cd, (char**) &inp, &inbytesleft,
+								   &outp, &outbytesleft);
+				if (r == (size_t) (-1))	{
+					int e = yaz_iconv_error(cd);
+					if (e != YAZ_ICONV_E2BIG || outbuf_size > 200000)
+						break;
+					outbuf_size = outbuf_size * 2 + 30;
+					outbuf = (char*) odr_malloc(odr, outbuf_size);
+				} else {
+					e->content->u.string = odr_malloc(odr, 1+(outp-outbuf));
+					memcpy(e->content->u.string, outbuf, outp-outbuf);
+					e->content->u.string[outp-outbuf] = '\0';
+					break;
+				}
+			}
+			break;
+		case Z_ElementData_subtree:
+			if (level < 20)	{
+				level++;
+				grs[level] = e->content->u.subtree;
+				eno[level] = -1;
+			}
+		}
+		eno[level]++;
+	}
+	yaz_iconv_close(cd);
+	return 0;
+}
+
 static void retval_array1_grs1(zval *return_value, Z_GenericRecord *p)
 {
 	Z_GenericRecord *grs[20];
@@ -918,13 +986,10 @@ static void retval_array1_grs1(zval *return_value, Z_GenericRecord *p)
 
 		if (eno[level] >= p->num_elements) {
 			--level;
-			if (level >= 0) {
+			if (level >= 0)
 				eno[level]++;
-			}
 			continue;
 		}
-		/* eno[level]++; */
-
 		*tag = '\0';
 		for (i = 0; i <= level; i++) {
 			int tag_type = 3;
@@ -966,11 +1031,12 @@ static void retval_array1_grs1(zval *return_value, Z_GenericRecord *p)
 				add_next_index_long(my_zval, *e->content->u.trueOrFalse);
 				break;
 			case Z_ElementData_subtree:
-				level++;
-				grs[level] = e->content->u.subtree;
-				eno[level] = -1;
+				if (level < 20)	{
+					level++;
+					grs[level] = e->content->u.subtree;
+					eno[level] = -1;
+				}
 		}
-
 		zend_hash_next_index_insert(return_value->value.ht, (void *) &my_zval, sizeof(zval *), NULL);
 		eno[level]++;
 	}
@@ -1001,54 +1067,68 @@ PHP_FUNCTION(yaz_record)
 	type = (*pval_type)->value.str.val;
 
 	if (p && p->zoom_set) {
+		char type_args[4][60];  /*  0; 1=2,3  (1 is assumed charset) */
+		type_args[0][0] = 0;
+		type_args[1][0] = 0;
+		type_args[2][0] = 0;
+		type_args[3][0] = 0;
+		sscanf(type, "%59[^;];%59[^=]=%59[^,],%59[^,]", type_args[0],
+			   type_args[1], type_args[2], type_args[3]);
 		ZOOM_record r = ZOOM_resultset_record(p->zoom_set, pos-1);
-		if (!strcmp(type, "string")) {
+		if (!strcmp(type_args[0], "string")) {
 			type = "render";
 		}
 		if (r) {
-			if (!strcmp(type, "array") || !strcmp(type, "array1")) {
+			if (!strcmp(type_args[0], "array") ||
+				!strcmp(type_args[0], "array1")) {
 				Z_External *ext = (Z_External *) ZOOM_record_get(r, "ext", 0);
 				if (ext->which == Z_External_OPAC)
 					ext = ext->u.opac->bibliographicRecord;
 				if (ext) {
 					oident *ent = oid_getentbyoid(ext->direct_reference);
+					ODR odr = odr_createmem(ODR_DECODE);
 					
 					if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1) {
+						if (type_args[2][0])
+							iconv_grs1(ext->u.grs1, odr, type_args[3],
+									   type_args[2]);
 						retval_array1_grs1(return_value, ext->u.grs1);
 					} else if (ext->which == Z_External_octet) {
 						char *buf = (char *) (ext->u.octet_aligned->buf);
-						ODR odr = odr_createmem(ODR_DECODE);
 						Z_GenericRecord *rec = 0;
 						
 						switch (ent->value) {
 						case VAL_SOIF:
 						case VAL_HTML:
-							break;
 						case VAL_TEXT_XML:
 						case VAL_APPLICATION_XML:
-							/* text2grs1(&buf, &len, t->odr_in, 0, 0); */
 							break;
 						default:
 							rec = marc_to_grs1(buf, odr);
 						}
 						if (rec) {
+							if (type_args[2][0])
+								iconv_grs1(rec, odr, type_args[3], type_args[2]);
 							retval_array1_grs1(return_value, rec);
 						}
-						odr_destroy(odr);
 					}
+					odr_destroy(odr);
 				}
-			} else if (!strcmp(type, "array2")) {
+			} else if (!strcmp(type_args[0], "array2")) {
 				Z_External *ext = (Z_External *) ZOOM_record_get(r, "ext", 0);
 				if (ext->which == Z_External_OPAC)
 					ext = ext->u.opac->bibliographicRecord;
 				if (ext) {
 					oident *ent = oid_getentbyoid(ext->direct_reference);
+					ODR odr = odr_createmem(ODR_DECODE);
 					
 					if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1) {
+						if (type_args[2][0])
+							iconv_grs1(ext->u.grs1, odr, type_args[3],
+									   type_args[2]);
 						retval_array2_grs1(return_value, ext->u.grs1);
 					} else if (ext->which == Z_External_octet) {
 						char *buf = (char *) (ext->u.octet_aligned->buf);
-						ODR odr = odr_createmem(ODR_DECODE);
 						Z_GenericRecord *rec = 0;
 						
 						switch (ent->value) {
@@ -1063,22 +1143,22 @@ PHP_FUNCTION(yaz_record)
 							rec = marc_to_grs1(buf, odr);
 						}
 						if (rec) {
+							if (type_args[2][0])
+								iconv_grs1(rec, odr, type_args[3], type_args[2]);
 							retval_array2_grs1(return_value, rec);
 						}
-						odr_destroy(odr);
 					}
+					odr_destroy(odr);
 				}
 			} else {
 				int rlen;
 				const char *info = ZOOM_record_get(r, type, &rlen);
-#if 0
-				return_value->value.str.len = 1;
-				return_value->value.str.val = "X";
-#else			  
-				return_value->value.str.len = (rlen > 0) ? rlen : 0;
-				return_value->value.str.val = estrndup(info, return_value->value.str.len);
-#endif
-				return_value->type = IS_STRING;
+				if (info) {
+					return_value->value.str.len = (rlen > 0) ? rlen : 0;
+					return_value->value.str.val =
+						estrndup(info, return_value->value.str.len);
+					return_value->type = IS_STRING;
+				}
 			}
 		}
 	}
