@@ -65,7 +65,7 @@ PHPAPI int php_file_le_pstream(void);
 #define php_stream_fopen_with_path_rel(filename, mode, path, opened, options) _php_stream_fopen_with_path((filename), (mode), (path), (opened), (options) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_fopen_from_file_rel(file, mode)	 _php_stream_fopen_from_file((file), (mode) STREAMS_REL_CC TSRMLS_CC)
-#define php_stream_fopen_from_fd_rel(fd, mode)	 	_php_stream_fopen_from_fd((fd), (mode) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_fopen_from_fd_rel(fd, mode, persistent_id)	 	_php_stream_fopen_from_fd((fd), (mode), (persistent_id) STREAMS_REL_CC TSRMLS_CC)
 	
 #define php_stream_fopen_from_pipe_rel(file, mode)	 _php_stream_fopen_from_pipe((file), (mode) STREAMS_REL_CC TSRMLS_CC)
 	
@@ -440,8 +440,8 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path, int options STREAMS_DC TSRMLS_DC);
 #define php_stream_fopen_with_path(filename, mode, path, opened)	_php_stream_fopen_with_path((filename), (mode), (path), (opened) STREAMS_CC TSRMLS_CC)
 
-PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode STREAMS_DC TSRMLS_DC);
-#define php_stream_fopen_from_fd(fd, mode)  _php_stream_fopen_from_fd((fd), (mode) STREAMS_CC TSRMLS_CC)
+PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC TSRMLS_DC);
+#define php_stream_fopen_from_fd(fd, mode, persistent_id)  _php_stream_fopen_from_fd((fd), (mode), (persistent_id) STREAMS_CC TSRMLS_CC)
 
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC TSRMLS_DC);
 #define php_stream_fopen_from_file(file, mode)	_php_stream_fopen_from_file((file), (mode) STREAMS_CC TSRMLS_CC)
@@ -510,6 +510,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 /* if set, skip open_basedir checks */
 #define STREAM_DISABLE_OPEN_BASEDIR	1024
+
+/* get (or create) a persistent version of the stream */
+#define STREAM_OPEN_PERSISTENT 2048
 
 /* Antique - no longer has meaning */
 #define IGNORE_URL_WIN 0
