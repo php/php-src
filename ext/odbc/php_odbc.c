@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
-   |          Frank M. Kromann <fmk@businessnet.dk> Support for DB/2 CLI  |
+   |          Frank M. Kromann <frank@frontbase.com> Support for DB/2 CLI |
    +----------------------------------------------------------------------+
  */
 
@@ -91,6 +91,7 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_field_type, NULL)
 	PHP_FE(odbc_field_num, NULL)
 	PHP_FE(odbc_free_result, NULL)
+	PHP_FE(odbc_next_result, NULL)
 	PHP_FE(odbc_num_fields, NULL)
 	PHP_FE(odbc_num_rows, NULL)
 	PHP_FE(odbc_result, NULL)
@@ -2204,6 +2205,54 @@ PHP_FUNCTION(odbc_num_rows)
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	SQLRowCount(result->stmt, &rows);
 	RETURN_LONG(rows);
+}
+/* }}} */
+
+/* {{{ proto bool next_result(int result_id)
+   Checks if multiple results are avaiable */
+PHP_FUNCTION(odbc_next_result)
+{
+	odbc_result   *result;
+	pval     **pv_res;
+	int rc, i;
+
+ 	if (zend_get_parameters_ex(1, &pv_res) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}                            
+	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result); 
+
+	if (result->values) {
+		for(i = 0; i < result->numcols; i++) {
+			if (result->values[i].value)
+				efree(result->values[i].value);
+		}
+		efree(result->values);
+		result->values = NULL;
+	}
+
+	result->fetched = 0;
+	rc = SQLMoreResults(result->stmt);
+	if (rc == SQL_SUCCESS) {
+		RETURN_TRUE;
+	}
+	else if (rc == SQL_SUCCESS_WITH_INFO) {
+		rc = SQLFreeStmt(result->stmt, SQL_UNBIND);
+		SQLNumParams(result->stmt, &(result->numparams));
+		SQLNumResultCols(result->stmt, &(result->numcols));
+
+		if (result->numcols > 0) {
+			if (!odbc_bindcols(result)) {
+				efree(result);
+				RETVAL_FALSE;
+			}
+		} else {
+			result->values = NULL;
+		}
+		RETURN_TRUE;
+	}
+	else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
