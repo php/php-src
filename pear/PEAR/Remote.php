@@ -62,10 +62,17 @@ class PEAR_Remote extends PEAR
         if (!file_exists($filename)) {
             return null;
         };
+		
+        $fp = fopen($filename, "rb");
+        if ($fp === null) {
+            return null;
+        }
+        $content  = fread($fp, filesize($filename));
+        fclose($fp);
         $result   = array(
             'age'        => time() - filemtime($filename),
             'lastChange' => filemtime($filename),
-            'content'    => unserialize(implode('', file($filename))),
+            'content'    => unserialize($content),
             );
         return $result;
     }
@@ -83,7 +90,7 @@ class PEAR_Remote extends PEAR
         }
         $filename = $cachedir.'/xmlrpc_cache_'.$id;
         
-        $fp = @fopen($filename, "w");
+        $fp = @fopen($filename, "wb");
         if ($fp !== null) {
             fwrite($fp, serialize($data));
             fclose($fp);
