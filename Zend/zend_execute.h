@@ -52,7 +52,7 @@ ZEND_API extern void (*zend_execute)(zend_op_array *op_array ELS_DC);
 
 void init_executor(CLS_D ELS_DC);
 void shutdown_executor(ELS_D);
-void execute(zend_op_array *op_array ELS_DC);
+ZEND_API void execute(zend_op_array *op_array ELS_DC);
 ZEND_API int zend_is_true(zval *op);
 static inline void safe_free_zval_ptr(zval *p)
 {
