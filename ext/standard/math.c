@@ -621,7 +621,7 @@ PHP_FUNCTION(hypot)
 	}
 	convert_to_double_ex(num1);
 	convert_to_double_ex(num2);
-	Z_DVAL_P(return_value) = hypot((*num1)->value.dval, (*num2)->value.dval);
+	Z_DVAL_P(return_value) = hypot(Z_DVAL_PP(num1), Z_DVAL_PP(num2));
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
 
