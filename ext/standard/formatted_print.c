@@ -159,6 +159,10 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 		npad=0;
 	}
 	
+	if (sign) {
+		len--;
+	}
+	
 	PRINTF_DEBUG(("sprintf: appendstring(%x, %d, %d, \"%s\", %d, '%c', %d)\n",
 				  *buffer, *pos, *size, add, min_width, padding, alignment));
 	if (max_width == 0) {
