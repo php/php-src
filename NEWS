@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
+- Note: Apache2 support is EXPERIMENTAL.
 - Moved ext/mailparse to PECL. See http://thebrainroom.com/opensource/php/
   for more information and to download the extension. (Wez/Jim)
 - Fixed pg_last_notice() crash. (Yasuo)
