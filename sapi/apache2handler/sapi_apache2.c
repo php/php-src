@@ -22,6 +22,8 @@
 
 #include <fcntl.h>
 
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+
 #include "php.h"
 #include "php_main.h"
 #include "php_ini.h"
