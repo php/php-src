@@ -35,11 +35,13 @@ dnl
 dnl add a library to linkpath/runpath
 dnl
 AC_DEFUN(AC_ADD_LIBPATH,[
-  AC_EXPAND_PATH($1, ai_p)
-  AC_PHP_ONCE(LIBPATH, $ai_p, [
-    EXTRA_LIBS="$EXTRA_LIBS -L$ai_p"
-    PHP_RPATHS="$PHP_RPATHS $ai_p"
-  ])
+  if test "$1" != "/usr/lib"; then
+    AC_EXPAND_PATH($1, ai_p)
+    AC_PHP_ONCE(LIBPATH, $ai_p, [
+      EXTRA_LIBS="$EXTRA_LIBS -L$ai_p"
+      PHP_RPATHS="$PHP_RPATHS $ai_p"
+    ])
+  fi
 ])
 
 dnl
@@ -67,10 +69,12 @@ dnl
 dnl add a include path
 dnl
 AC_DEFUN(AC_ADD_INCLUDE,[
-  AC_EXPAND_PATH($1, ai_p)
-  AC_PHP_ONCE(INCLUDEPATH, $ai_p, [
-    INCLUDES="$INCLUDES -I$ai_p"
-  ])
+  if test "$1" != "/usr/include"; then
+    AC_EXPAND_PATH($1, ai_p)
+    AC_PHP_ONCE(INCLUDEPATH, $ai_p, [
+      INCLUDES="$INCLUDES -I$ai_p"
+    ])
+  fi
 ])
 
 dnl
