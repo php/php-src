@@ -21,7 +21,7 @@ $t = new pass();
 $t->show();
 fail::show();
 
-echo "Done\n"; // shouldn't be displayed of cause
+echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
 Fatal error: Cannot make non static method pass::show() static in class fail in %s on line %d
