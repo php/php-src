@@ -353,6 +353,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	int len2;
 	char *class_name;
 	zend_class_entry *ce;
+	zend_class_entry **pce;
 	int incomplete_class = 0;
 	
 	zval *user_func;
@@ -373,50 +374,60 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 			class_name[len] = class_name[len] - 'A' + 'a';
 		}
 	}
-
-	if (zend_hash_find(CG(class_table), class_name, len2 + 1, (void **) &ce) != SUCCESS) {
+	
+	do {
+		/* Try to find class directly */
+		if (zend_lookup_ns_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
+			ce = *pce;
+			break;
+		}
+		
+		/* Check for unserialize callback */
 		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
-		} else {
-			MAKE_STD_ZVAL(user_func);
-			ZVAL_STRING(user_func, PG(unserialize_callback_func), 1);
-
-			args[0] = &arg_func_name;
-			MAKE_STD_ZVAL(arg_func_name);
-			ZVAL_STRING(arg_func_name, class_name, 1);
-				
-			if (call_user_function_ex(CG(function_table), NULL, user_func, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "defined (%s) but not found", user_func->value.str.val);
-				incomplete_class = 1;
-				ce = PHP_IC_ENTRY;
-			} else {
-				if (zend_hash_find(CG(class_table), class_name, len2 + 1, (void **) &ce) != SUCCESS) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%s) hasn't defined the class it was called for", user_func->value.str.val);
-					incomplete_class = 1;
-					ce = PHP_IC_ENTRY;
-				} else {
-#ifdef ZEND_ENGINE_2
-					ce = *(zend_class_entry **)ce; /* Bad hack, TBF! */
-#endif	
-					efree(class_name);
-				}
-			}
+			break;
 		}
-	} else {
-#ifdef ZEND_ENGINE_2
-		ce = *(zend_class_entry **)ce; /* Bad hack, TBF! */
-#endif	
-		efree(class_name);
-	}
+		
+		/* Call unserialize callback */
+		MAKE_STD_ZVAL(user_func);
+		ZVAL_STRING(user_func, PG(unserialize_callback_func), 1);
+		args[0] = &arg_func_name;
+		MAKE_STD_ZVAL(arg_func_name);
+		ZVAL_STRING(arg_func_name, class_name, 1);
+		if (call_user_function_ex(CG(function_table), NULL, user_func, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "defined (%s) but not found", user_func->value.str.val);
+			incomplete_class = 1;
+			ce = PHP_IC_ENTRY;
+			zval_ptr_dtor(&user_func);
+			zval_ptr_dtor(&arg_func_name);
+			break;
+		}
+		if (retval_ptr) {
+			zval_ptr_dtor(&retval_ptr);
+		}
+		
+		/* The callback function may have defined the class */
+		if (zend_lookup_ns_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
+			ce = *pce;
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function %s() hasn't defined the class it was called for", user_func->value.str.val);
+			incomplete_class = 1;
+			ce = PHP_IC_ENTRY;
+		}
 
+		zval_ptr_dtor(&user_func);
+		zval_ptr_dtor(&arg_func_name);
+		break;
+	} while (1);
+	
 	*p = YYCURSOR;
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
 
 	if (incomplete_class) {
 		php_store_class_name(*rval, class_name, len2);
-		efree(class_name);
 	}
+	efree(class_name);
 
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
 }
