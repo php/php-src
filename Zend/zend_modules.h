@@ -34,7 +34,7 @@ ZEND_API extern unsigned char first_arg_force_ref[];
 ZEND_API extern unsigned char second_arg_force_ref[];
 ZEND_API extern unsigned char third_arg_force_ref[];
 
-#define ZEND_MODULE_API_NO 20010927
+#define ZEND_MODULE_API_NO 20020429
 #ifdef ZTS
 #define USING_ZTS 1
 #else
