@@ -672,6 +672,7 @@ function_entry basic_functions[] = {
 	PHP_STATIC_FE("tmpfile",		php_if_tmpfile,							NULL)
 	PHP_FE(file,															NULL)
 	PHP_FE(file_get_contents,												NULL)
+	PHP_FE(file_set_contents,												NULL)
 	PHP_FE(stream_select,					  first_through_third_args_force_ref)
 	PHP_FE(stream_context_create,											NULL)
 	PHP_FE(stream_context_set_params,										NULL)
