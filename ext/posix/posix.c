@@ -23,9 +23,11 @@
 #endif
 
 #include "php.h"
+#include <unistd.h>
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "php_posix.h"
+
 
 #if HAVE_POSIX
 
@@ -33,7 +35,6 @@
 #include <sys/time.h>
 #endif
 
-#include <unistd.h>
 #include <sys/resource.h>
 #include <sys/utsname.h>
 #include <sys/types.h>

@@ -17,7 +17,7 @@ TRUE  === in_array('a', \$arr1)
 'key'=== array_search('d', \$arr4)
 TESTS;
 
-include('tests/quicktester.inc');
+include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
 
 --EXPECT--
 OK
