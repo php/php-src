@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Win32 mail() supports parsing 'From:' field from header (msisolak@yahoo.com, Markus).
 - Improve IMAP performance when dealing with large mailboxes.
 - Minor fix to rmdir() under safe-mode (Rasmus)
 - Added optional 5th parameter to domxml_xslt_process(). When set, profiling
