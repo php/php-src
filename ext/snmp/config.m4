@@ -10,6 +10,7 @@ PHP_ARG_WITH(snmp,for SNMP support,
                           to build as a dl and still specify DIR.])
 
   if test "$PHP_SNMP" != "no"; then
+
     if test "$PHP_SNMP" = "yes"; then
       for i in /usr/include /usr/local/include; do
         test -f $i/snmp.h                       && SNMP_INCDIR=$i
@@ -22,7 +23,7 @@ PHP_ARG_WITH(snmp,for SNMP support,
       done
     else
       SNMP_INCDIR=$PHP_SNMP/include
-      test -d $PHP_SNMP/include/ucd-snmp && SNMP_INCDIR=$withval/include/ucd-snmp
+      test -d $PHP_SNMP/include/ucd-snmp && SNMP_INCDIR=$PHP_SNMP/include/ucd-snmp
       SNMP_LIBDIR=$PHP_SNMP/lib
     fi
 
@@ -32,41 +33,46 @@ PHP_ARG_WITH(snmp,for SNMP support,
       AC_MSG_ERROR(libsnmp not found. Check your SNMP installation.)
     fi
 
-    AC_DEFINE(HAVE_SNMP,1,[ ])
-    PHP_ADD_INCLUDE($SNMP_INCDIR)
-    PHP_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR, SNMP_SHARED_LIBADD)
-
     old_CPPFLAGS=$CPPFLAGS
-    CPPFLAGS="$INCLUDES $CPPFLAGS"
+    CPPFLAGS=-I$SNMP_INCDIR
     AC_CHECK_HEADERS(default_store.h)
     if test "$ac_cv_header_default_store_h" = "yes"; then
-      dnl UCD SNMP 4.1.x
-      AC_TRY_RUN([
-#include <ucd-snmp-config.h>
-main() { exit(USE_OPENSSL != 1); }
+      AC_MSG_CHECKING(for OpenSSL support in SNMP libraries)
+      AC_EGREP_CPP(yes,[
+        #include <ucd-snmp-config.h>
+        #if USE_OPENSSL
+        yes
+        #endif
       ],[
         SNMP_SSL=yes
       ],[
         SNMP_SSL=no
-      ],[
-        SNMP_SSL=no
       ])
-
-      if test "$SNMP_SSL" = "yes"; then
-        PHP_SETUP_OPENSSL
-      fi
     fi
     CPPFLAGS=$old_CPPFLAGS
+    AC_MSG_RESULT($SNMP_SSL)
+  
+    if test "$SNMP_SSL" = "yes"; then
+      if test "$PHP_OPENSSL" != "no"; then
+        PHP_ADD_LIBRARY(ssl,   1, SNMP_SHARED_LIBADD)
+        PHP_ADD_LIBRARY(crypto,1, SNMP_SHARED_LIBADD)
+      else
+        AC_MSG_ERROR(The UCD-SNMP in this system is build with SSL support. 
 
-    PHP_EXTENSION(snmp,$ext_shared)
-    PHP_SUBST(SNMP_SHARED_LIBADD)
-    
+        Add --with-openssl<=DIR> to your configure line.)
+      fi
+    fi
+
     AC_CHECK_LIB(kstat, kstat_read, [ PHP_ADD_LIBRARY(kstat,,SNMP_SHARED_LIBADD) ])
-    SNMP_INCLUDE=-I$SNMP_INCDIR
+
+    AC_DEFINE(HAVE_SNMP,1,[ ])
+    PHP_ADD_INCLUDE($SNMP_INCDIR)
+    PHP_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR, SNMP_SHARED_LIBADD)
+
+    PHP_EXTENSION(snmp, $ext_shared)
+    PHP_SUBST(SNMP_SHARED_LIBADD)
   fi
 
-PHP_SUBST(SNMP_LIBDIR)
-PHP_SUBST(SNMP_INCLUDE)
 
 AC_MSG_CHECKING(whether to enable UCD SNMP hack)
 AC_ARG_ENABLE(ucd-snmp-hack,

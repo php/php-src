@@ -4,6 +4,4 @@ LTLIBRARY_SOURCES = snmp.c
 LTLIBRARY_SHARED_NAME = snmp.la
 LTLIBRARY_SHARED_LIBADD = $(SNMP_SHARED_LIBADD)
 
-EXTRA_INCLUDES = $(SNMP_INCLUDE)
-
 include $(top_srcdir)/build/dynlib.mk
