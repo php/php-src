@@ -778,10 +778,11 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			free(cgi_sapi_module.php_ini_path_override);
 		}
 
-		php_module_shutdown();
 	} zend_catch {
 		exit_status = -1;
 	} zend_end_try();
+
+	php_module_shutdown();
 
 #ifdef ZTS
 	tsrm_shutdown();
