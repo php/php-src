@@ -21,6 +21,9 @@
 
 #include "zend_ini.h"
 
+int php_init_config(void);
+int php_shutdown_config(void);
+
 #define PHP_INI_USER	ZEND_INI_USER
 #define PHP_INI_PERDIR	ZEND_INI_PERDIR
 #define PHP_INI_SYSTEM	ZEND_INI_SYSTEM
