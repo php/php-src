@@ -1,3 +1,25 @@
+2004-11-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/iconv/php_iconv.h:
+      MFH: Fixed compilation when PHP is built in separate directory.
+
+    * ext/iconv/php_iconv.h:
+      Fixed compilation when PHP is built in separate directory.
+
+2004-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix Bug #30856 (ReflectionClass::getStaticProperties segfaults)
+
+    * ZendEngine2/tests/bug30856.phpt:
+      
+      - Add new test
+
 2004-11-23  Dmitry Stogov  <dmitry@zend.com>
 
     * ext/gd/tests/imagefilter.phpt
