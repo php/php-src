@@ -166,7 +166,7 @@ int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC)
 	spl_add_interfaces(list, pce TSRMLS_CC);
 	while (pce->parent) {
 		pce = pce->parent;
-		spl_add_classes(&pce->parent, list TSRMLS_CC);
+		spl_add_classes(&pce, list TSRMLS_CC);
 	}
 	return 0;
 }
