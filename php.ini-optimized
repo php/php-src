@@ -291,6 +291,7 @@ allow_url_fopen = On                ; Whether to allow the treatment of URLs (li
 ;extension=php_domxml.dll
 ;extension=php_dotnet.dll
 ;extension=php_exif.dll
+;extension=php_fbsql.dll
 ;extension=php_fdf.dll
 ;extension=php_filepro.dll
 ;extension=php_gd.dll
@@ -536,6 +537,21 @@ sockets.use_system_read		=	Off	; Use the system read() function instead of
 ;mbstring.http_output = SJIS
 ;mbstring.detect_order = auto
 ;mbstring.substitute_character = none;
+
+[FrontBase]
+;fbsql.allow_persistant = On
+;fbsql.autocommit = On
+;fbsql.default_database = 
+;fbsql.default_database_password =
+;fbsql.default_host =
+;fbsql.default_password =
+;fbsql.default_user = "_SYSTEM"
+;fbsql.generate_warnings = Off
+;fbsql.max_connections = 128
+;fbsql.max_links = 128
+;fbsql.max_persistent = -1
+;fbsql.max_results = 128
+;fbsql.mbatchSize = 1000
 
 ; Local Variables:
 ; tab-width: 4
