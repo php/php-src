@@ -1793,7 +1793,7 @@ send_by_ref:
 						assignment_value = *param;
 					}
 
-					if (PZVAL_IS_REF(assignment_value)) {
+					if (PZVAL_IS_REF(assignment_value) && param) {
 						zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&opline->result, Ts, BP_VAR_W), param, NULL ELS_CC);
 					} else {
 						zend_assign_to_variable(NULL, &opline->result, NULL, assignment_value, IS_VAR, Ts ELS_CC);
