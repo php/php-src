@@ -502,7 +502,8 @@ static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	if (ib_blob->bl_handle != NULL) { /* blob open*/
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "You can lose data. Close any blob after reading of writing it. Use ibase_blob_close() before calling ibase_close()");
+			_php_ibase_module_error("You can lose data. Close any blob after " 
+				"reading from or writing to it. Use ibase_blob_close() before calling ibase_close()");
 		}
 	}
 	efree(ib_blob);
@@ -2500,8 +2501,8 @@ static int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned
 
 /* {{{ _php_ibase_fetch_hash() */
 
-#define FETCH_ROW 	2
-#define FETCH_ARRAY 4
+#define FETCH_ROW 	1
+#define FETCH_ARRAY 2
 
 static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 {
@@ -2570,7 +2571,8 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						ibase_blob blob_handle;
 						unsigned long max_len = 0;
 						static char bl_items[] = {isc_info_blob_total_length};
-						char bl_info[20], *p;
+						char bl_info[20];
+						unsigned short i;
 	
 						blob_handle.bl_handle = NULL;
 						blob_handle.bl_qd = *(ISC_QUAD ISC_FAR *) var->sqldata;
@@ -2586,25 +2588,29 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						}
 						
 						/* find total length of blob's data */
-						for (p = bl_info; *p != isc_info_end && p < bl_info + sizeof(bl_info);) {
+						for (i = 0; i < sizeof(bl_info); ) {
 							unsigned short item_len;
-							char item = *p++;
+							char item = bl_info[i++];
 	
-							item_len = (unsigned short) isc_vax_integer(p, 2);
-							p += 2;
+							if (item == isc_info_end || item == isc_info_truncated || 
+								item == isc_info_error || i >= sizeof(bl_info)) {
+
+								_php_ibase_module_error("Could not determine BLOB size (internal error)");
+								RETURN_FALSE;
+							}								
+
+							item_len = (unsigned short) isc_vax_integer(&bl_info[i], 2);
+
 							if (item == isc_info_blob_total_length) {
-								max_len = isc_vax_integer(p, item_len);
+								max_len = isc_vax_integer(&bl_info[i+2], item_len);
 								break;
 							}
-							p += item_len;
+							i += item_len+2;
 						}
 						
 						if (max_len == 0) {
-							_php_ibase_module_error("Could not determine BLOB size (internal error)");
-							RETURN_FALSE;
-						}
-						
-						if (_php_ibase_blob_get(&tmp, &blob_handle, max_len TSRMLS_CC) != SUCCESS) {
+							ZVAL_STRING(&tmp, "", 1);
+						} else if (_php_ibase_blob_get(&tmp, &blob_handle, max_len TSRMLS_CC) != SUCCESS) {
 							RETURN_FALSE;
 						}
 						
@@ -3971,8 +3977,12 @@ static isc_callback _php_ibase_callback(ibase_event *event, unsigned short buffe
 
 		unsigned short i;
 		unsigned long occurred_event[15];
-		zval event_name, link_id, return_value, *args[2] = { &event_name, &link_id };
+		zval event_name, link_id, return_value, *args[2];
 
+		/* initialize at runtime to satisify picky compilers */
+		args[0] = &event_name; 
+		args[1] = &link_id; 
+		
 		/* copy the updated results into the result buffer */
 		memcpy(event->result_buffer, result_buf, buffer_size);
 		
