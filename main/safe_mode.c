@@ -52,6 +52,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	long uid=0L, gid=0L, duid=0L, dgid=0L;
 	char path[MAXPATHLEN];
 	char *s, filenamecopy[MAXPATHLEN];
+	php_stream_wrapper *wrapper = NULL;
 	TSRMLS_FETCH();
 
 	strlcpy(filenamecopy, filename, MAXPATHLEN);
@@ -73,9 +74,9 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	 * If given filepath is a URL, allow - safe mode stuff
 	 * related to URL's is checked in individual functions
 	 */
-	if (!strncasecmp(filename,"http://", 7) || !strncasecmp(filename,"ftp://", 6) || !strncasecmp(filename,"https://", 8)) {
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC);
+	if (wrapper != NULL)
 		return 1;
-	}
 		
 	/* First we see if the file is owned by the same user...
 	 * If that fails, passthrough and check directory...

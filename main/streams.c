@@ -1166,16 +1166,17 @@ static php_stream_wrapper php_plain_files_wrapper = {
 	0
 };
 
-static php_stream_wrapper *locate_url_wrapper(char *path, char **path_for_open, int options TSRMLS_DC)
+PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper = NULL;
 	const char *p, *protocol = NULL;
 	int n = 0;
 
-	*path_for_open = path;
+	if (path_for_open)
+		*path_for_open = (char*)path;
 
 	if (options & IGNORE_URL)
-		return &php_plain_files_wrapper;
+		return (options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper;
 	
 	for (p = path; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
@@ -1205,20 +1206,23 @@ static php_stream_wrapper *locate_url_wrapper(char *path, char **path_for_open, 
 			protocol = NULL;
 		}
 	}
+	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
 		if (protocol && path[n+1] == '/' && path[n+2] == '/')	{
-			zend_error(E_WARNING, "remote host file access not supported, %s", path);
+			if (options & REPORT_ERRORS)
+				zend_error(E_WARNING, "remote host file access not supported, %s", path);
 			return NULL;
 		}
-		if (protocol)
-			*path_for_open = path + n + 1;
+		if (protocol && path_for_open)
+			*path_for_open = (char*)path + n + 1;
 		
 		/* fall back on regular file access */
-		return &php_plain_files_wrapper;
+		return (options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper;
 	}
 
 	if (wrapper && wrapper->is_url && !PG(allow_url_fopen)) {
-		zend_error(E_WARNING, "URL file-access is disabled in the server configuration");
+		if (options & REPORT_ERRORS)
+			zend_error(E_WARNING, "URL file-access is disabled in the server configuration");
 		return NULL;
 	}
 	
@@ -1230,7 +1234,7 @@ PHPAPI int _php_stream_stat_path(char *path, php_stream_statbuf *ssb TSRMLS_DC)
 	php_stream_wrapper *wrapper = NULL;
 	char *path_to_open = path;
 
-	wrapper = locate_url_wrapper(path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (wrapper && wrapper->wops->url_stat) {
 		return wrapper->wops->url_stat(wrapper, path_to_open, ssb TSRMLS_CC);
 	}
@@ -1250,7 +1254,7 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options,
 
 	path_to_open = path;
 
-	wrapper = locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
 
 	if (wrapper && wrapper->wops->dir_opener)	{
 		stream = wrapper->wops->dir_opener(wrapper,
@@ -1322,7 +1326,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 
 	path_to_open = path;
 
-	wrapper = locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
 
 	if (wrapper)	{
 
