@@ -80,11 +80,11 @@ static long php_intifx_free_char(long id, HashTable *list TSRMLS_DC);
 static long php_intifx_update_char(long bid, char* param, long len, HashTable *list TSRMLS_DC);
 static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS_DC);
 #if HAVE_IFX_IUS
-static long php_intifxus_create_slob(long create_mode, HashTable *list);
+static long php_intifxus_create_slob(long create_mode, HashTable *list TSRMLS_DC);
 static long php_intifxus_free_slob(long bid, HashTable *list TSRMLS_DC);
 static long php_intifxus_close_slob(long bid, HashTable *list TSRMLS_DC);
 static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list TSRMLS_DC);
-static long php_intifxus_new_slob(HashTable *list);
+static long php_intifxus_new_slob(HashTable *list TSRMLS_DC);
 static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list TSRMLS_DC);
 #endif
 
@@ -1020,7 +1020,7 @@ $endif;
 				} 
 $ifdef HAVE_IFX_IUS;
 				if(fieldtype==SQLUDTFIXED) {
-					bid=php_intifxus_new_slob(&EG(regular_list));
+					bid = php_intifxus_new_slob(&EG(regular_list) TSRMLS_CC);
 					slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
 				}
@@ -1432,7 +1432,7 @@ $endif;
 				}
 $ifdef HAVE_IFX_IUS;
 				if(fieldtype==SQLUDTFIXED) {
-					bid=php_intifxus_new_slob(&EG(regular_list));
+					bid=php_intifxus_new_slob(&EG(regular_list) TSRMLS_CC);
 					slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
 					EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
 				} 
@@ -1857,7 +1857,7 @@ $ifdef HAVE_IFX_IUS;
 			case SQLUDTFIXED :
 				bid_b=Ifx_Result->res_id[locind];
 				add_assoc_long(return_value,fieldname,bid_b);
-				bid=php_intifxus_new_slob(&EG(regular_list));
+				bid=php_intifxus_new_slob(&EG(regular_list) TSRMLS_CC);
 				slocator=php_intifxus_get_slobloc(bid,&EG(regular_list) TSRMLS_CC);
 				EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
 				Ifx_Result->res_id[locind]=bid;
@@ -3739,7 +3739,7 @@ PHP_FUNCTION(ifxus_create_slob)
 	if((mode&32) !=0)   
 		create_mode|=LO_NOBUFFER;
 	
-	id=php_intifxus_create_slob(create_mode,&EG(regular_list)); 
+	id = php_intifxus_create_slob(create_mode, &EG(regular_list) TSRMLS_CC); 
 	
 	if(id < 0) {
 		RETURN_FALSE;
@@ -3987,14 +3987,14 @@ static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list T
 
 /* ----------------------------------------------------------------------
  * internal function
- * long php_intifxus_new_slob(HashTable *list)
+ * long php_intifxus_new_slob(HashTable *list TSRMLS_DC)
  *
  * creates an slob-object but don't open it
  *  list: internal hashlist of php
  * return -1 on error otherwise the new slob-Object-id
  * ----------------------------------------------------------------------
 */
-static long php_intifxus_new_slob(HashTable *list)
+static long php_intifxus_new_slob(HashTable *list TSRMLS_DC)
 {
 	IFX_IDRES *Ifx_slob;
 
