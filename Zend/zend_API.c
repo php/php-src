@@ -1387,7 +1387,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 	return class_entry;
 }
 
-ZEND_API zend_class_entry *zend_register_internal_class_in_ns(zend_class_entry *class_entry, zend_class_entry *parent_ce, zend_namespace *ns, char *ns_name TSRMLS_DC)
+ZEND_API zend_class_entry *zend_register_internal_ns_class(zend_class_entry *class_entry, zend_class_entry *parent_ce, zend_namespace *ns, char *ns_name TSRMLS_DC)
 {
 	zend_class_entry *register_class;
 	zend_namespace *orig_namespace = NULL;

@@ -139,7 +139,7 @@ ZEND_API int zend_register_module(zend_module_entry *module_entry);
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC);
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC);
-ZEND_API zend_class_entry *zend_register_internal_class_in_ns(zend_class_entry *class_entry, zend_class_entry *parent_ce, zend_namespace *ns, char *ns_name TSRMLS_DC);
+ZEND_API zend_class_entry *zend_register_internal_ns_class(zend_class_entry *class_entry, zend_class_entry *parent_ce, zend_namespace *ns, char *ns_name TSRMLS_DC);
 ZEND_API zend_namespace *zend_register_internal_namespace(zend_namespace *ns TSRMLS_DC);
 
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC);
