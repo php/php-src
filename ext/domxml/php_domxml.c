@@ -196,11 +196,15 @@ zend_class_entry *domxsltstylesheet_class_entry;
 static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC);
 static int node_children(zval **children, xmlNode *nodep TSRMLS_DC);
 
+static unsigned char first_args_force_ref[]  = { 1, BYREF_FORCE };
+static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+static unsigned char third_args_force_ref[]  = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+
 static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_version,												NULL)
-	PHP_FE(xmldoc,														third_arg_force_ref)
+	PHP_FE(xmldoc,														third_args_force_ref)
 	PHP_FALIAS(domxml_open_mem,				xmldoc,	NULL)
-	PHP_FE(xmldocfile,														third_arg_force_ref)
+	PHP_FE(xmldocfile,														third_args_force_ref)
 	PHP_FALIAS(domxml_open_file,				xmldocfile,	NULL)
 #if defined(LIBXML_HTML_ENABLED)
 	PHP_FE(html_doc,													NULL)
@@ -279,7 +283,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FALIAS(set_content,				domxml_node_set_content,		NULL)
 	PHP_FALIAS(new_xmldoc,				domxml_new_xmldoc,				NULL)
 	PHP_FALIAS(domxml_dumpmem,			domxml_dump_mem,				NULL)
-	PHP_FE(domxml_doc_validate,											second_arg_force_ref)
+	PHP_FE(domxml_doc_validate,											second_args_force_ref)
 	{NULL, NULL, NULL}
 };
 
@@ -320,7 +324,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(xpath_new_context,		xpath_new_context,				NULL)
 	PHP_FALIAS(xptr_new_context,		xptr_new_context,				NULL)
 #endif
-	PHP_FALIAS(validate,				domxml_doc_validate,				first_arg_force_ref)
+	PHP_FALIAS(validate,				domxml_doc_validate,				first_args_force_ref)
 
 	{NULL, NULL, NULL}
 };
