@@ -922,6 +922,30 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_DNUMBER;
 }
 
+<ST_IN_SCRIPTING>"__CLASS__" {
+	char *class_name = CG(active_class_entry)->name;
+	
+	if (!class_name) {
+		class_name = "";
+	}
+	zendlval->value.str.len = CG(active_class_entry)->name_length;
+	zendlval->value.str.val = estrndup(class_name, zendlval->value.str.len);
+	zendlval->type = IS_STRING;
+	return T_CLASS_C;
+}
+
+<ST_IN_SCRIPTING>"__FUNCTION__" {
+	char *func_name = CG(active_op_array)->function_name;
+	
+	if (!func_name) {
+		func_name = "";
+	}
+	zendlval->value.str.len = strlen(func_name);
+	zendlval->value.str.val = estrndup(func_name, zendlval->value.str.len);
+	zendlval->type = IS_STRING;
+	return T_FUNC_C;
+}
+
 <ST_IN_SCRIPTING>"__LINE__" {
 	zendlval->value.lval = CG(zend_lineno);
 	zendlval->type = IS_LONG;
