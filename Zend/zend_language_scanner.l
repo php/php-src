@@ -474,7 +474,6 @@ DNUM	([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM	"0x"[0-9a-fA-F]+
 LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
-ENCAPSED_STRING ([a-zA-Z0-9_\x7f-\xff \t #'.:;,()|^&+/*=%!~<>?@]|"-"[^>])+
 ENCAPSED_STRING_WITH_NEWLINE ([a-zA-Z0-9_\x7f-\xff \t\n\r #'.:;,()|^&+/*=%!~<>?@]|"-"[^>])+
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
