@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- exif_read_data() can decode MarkerNote of several Cameras. (Marcus)
+- zlib.output_compression is disabled for "image/" content-type
+  headers and can be changed during script execution. (Stefan)
 - Added new aysnchronous FTP functions (Stefan)
 - Added optional 5th parameter to FTP functions to support resuming (Stefan)
 - Added optional 2nd parameter to print_r() to make it return the variable
