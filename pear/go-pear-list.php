@@ -13,7 +13,7 @@ $packages  = array(
 "Archive_Tar"           =>    "1.2",
 
 // required packages for the web frontend
-"PEAR_Frontend_Web"     =>    "0.4"
+"PEAR_Frontend_Web"     =>    "0.4",
 "HTML_Template_IT"      =>    "1.1",
 "Net_UserAgent_Detect"  =>    "1.0",
 );
