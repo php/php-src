@@ -37,7 +37,7 @@ php_extname_globals extname_globals;
 */
 function_entry extname_functions[] = {
 	PHP_FE(confirm_extname_compiled,	NULL)		/* For testing, remove later. */
-__function_entries_here__
+	/* __function_entries_here__ */
 	{NULL, NULL, NULL}	/* Must be the last line in extname_functions[] */
 };
 
@@ -108,7 +108,7 @@ PHP_MINFO_FUNCTION(extname)
 /* Every user-visible function in PHP should document itself in the source */
 /* {{{ proto string confirm_extname_compiled(string arg)
    Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(extname_test)
+PHP_FUNCTION(confirm_extname_compiled)
 {
 	zval **arg;
 	int len;
@@ -130,7 +130,7 @@ PHP_FUNCTION(extname_test)
    this convention for the convenience of others editing your code.
 */
 
-__function_stubs_here__
+/* __function_stubs_here__ */
 
 #endif	/* HAVE_EXTNAME */
 
