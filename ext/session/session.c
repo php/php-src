@@ -108,12 +108,12 @@ static PHP_INI_MH(OnUpdateStringCopy)
 
 	p = (char **) (base+(size_t) mh_arg1);
 
-	if(*p && stage != PHP_INI_STAGE_STARTUP) {
+	if (*p && entry->modified) {
 		STR_FREE(*p);
 	}
 
-	if(stage != PHP_INI_STAGE_DEACTIVATE) {
-	  *p = estrdup(new_value);
+	if (stage != PHP_INI_STAGE_DEACTIVATE) {
+		*p = estrdup(new_value);
 	}
 	return SUCCESS;
 }
