@@ -57,6 +57,7 @@ define("DB_ERROR_NOT_LOCKED",         -21);
 define("DB_ERROR_VALUE_COUNT_ON_ROW", -22);
 define("DB_ERROR_INVALID_DSN",        -23);
 define("DB_ERROR_CONNECT_FAILED",     -24);
+define("DB_ERROR_EXTENSION_NOT_FOUND",-25);
 
 /*
  * Warnings are not detected as errors by DB::isError(), and are not
@@ -375,7 +376,8 @@ class DB
                 DB_OK                       => 'no error',
                 DB_WARNING                  => 'unknown warning',
                 DB_WARNING_READ_ONLY        => 'read only',
-                DB_ERROR_NEED_MORE_DATA     => 'insufficient data supplied'
+                DB_ERROR_NEED_MORE_DATA     => 'insufficient data supplied',
+                DB_ERROR_EXTENSION_NOT_FOUND=> 'extension not found'
             );
         }
 
@@ -512,16 +514,10 @@ class DB
     function assertExtension($name)
     {
         if (!extension_loaded($name)) {
-            $dlext = (substr(PHP_OS, 0, 3) == 'WIN') ? '.dll' : '.so';
+            $dlext = OS_WINDOWS ? '.dll' : '.so';
             @dl($name . $dlext);
         }
-        if (!extension_loaded($name)) {
-            trigger_error("The extension '$name' couldn't be loaded. ".
-                            'Probably you don\'t have support in your PHP '.
-                            'to this Database backend', E_USER_ERROR);
-            return false;
-        }
-        return true;
+        return extension_loaded($name);
     }
 }
 
