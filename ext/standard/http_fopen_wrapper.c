@@ -211,19 +211,23 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 #define _UA_HEADER "User-Agent: %s\r\n"
 		char *ua;
 		size_t ua_len;
-
+		
 		ua_len = sizeof(_UA_HEADER) + strlen(ua_str);
-		ua = emalloc(ua_len + 1);
-		if ((ua_len = snprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
-			ua[ua_len] = 0;
-			php_stream_write(stream, ua, ua_len);
-		} else {
-			php_error(E_WARNING, "Cannot construct User-agent header");
-		}
+		
+		/* ensure the header is only sent if user_agent is not blank */
+		if (ua_len > sizeof(_UA_HEADER)) {
+			ua = emalloc(ua_len + 1);
+			if ((ua_len = snprintf(ua, ua_len, _UA_HEADER, ua_str)) > 0) {
+				ua[ua_len] = 0;
+				php_stream_write(stream, ua, ua_len);
+			} else {
+				php_error(E_WARNING, "Cannot construct User-agent header");
+			}
 
-		if (ua) {
-			efree(ua);
-		}
+			if (ua) {
+				efree(ua);
+			}
+		}	
 	}
 
 	php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
@@ -271,7 +275,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 		}
 	}
 	
-	if( reqok ) {
+	if (reqok) {
 		/* read past HTTP headers */
 	
 		http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
