@@ -770,7 +770,7 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRML
 
 	if (strlen == -1) {
 		/* request needed buffersize */
-		strlen = MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
+		strlen = MultiByteToWideChar(codepage, (codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED) | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
 	} else {
 		/* \0 terminator */
 		strlen++;
@@ -780,7 +780,7 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRML
 		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR) * strlen);
 
 		/* convert string */
-		error = !MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, strlen, unicode_str, strlen);
+		error = !MultiByteToWideChar(codepage, (codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED) | MB_ERR_INVALID_CHARS, C_str, strlen, unicode_str, strlen);
 	} else {
 		/* return a zero-length string */
 		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR));
@@ -812,13 +812,13 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int cod
 	uint length = 0;
 
 	/* request needed buffersize */
-	uint reqSize = WideCharToMultiByte(codepage, WC_COMPOSITECHECK, unicode_str, -1, NULL, 0, NULL, NULL);
+	uint reqSize = WideCharToMultiByte(codepage, codepage == CP_UTF8 ? 0 : WC_COMPOSITECHECK, unicode_str, -1, NULL, 0, NULL, NULL);
 
 	if (reqSize) {
 		C_str = (char *) emalloc(sizeof(char) * reqSize);
 
 		/* convert string */
-		length = WideCharToMultiByte(codepage, WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
+		length = WideCharToMultiByte(codepage, codepage == CP_UTF8 ? 0 : WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
 	} else {
 		C_str = (char *) emalloc(sizeof(char));
 		*C_str = 0;
