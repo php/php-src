@@ -121,7 +121,7 @@ class PEAR_Packager extends PEAR_Common
             return $this->raiseError("PEAR_Packager: mktemp failed");
         }
         $newpkgfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
-        $np = @fopen($newpkgfile, "w");
+        $np = @fopen($newpkgfile, "wb");
         if (!$np) {
             chdir($oldcwd);
             return $this->raiseError("PEAR_Packager: unable to rewrite $pkgfile as $newpkgfile");
