@@ -135,8 +135,8 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	long timeout=SNMP_DEFAULT_TIMEOUT;
 	long retries=SNMP_DEFAULT_RETRIES;
 	int myargc = ARG_COUNT(ht);
-    char type;
-    char *value;
+    char type = (char) 0;
+    char *value = (char *) 0;
 	
 	switch(st) {
 	case 4:
