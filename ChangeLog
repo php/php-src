@@ -1,3 +1,62 @@
+2001-04-29  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: layout
+
+2001-04-29  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/dir.c:
+    - Remove leak from opendir() under Windows. Maybe readdir.c should be
+      changed to use emalloc()
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+    * NEWS: - Some news
+
+    * ext/standard/dir.c:
+    - Fix bug Bug id #5987. It could be fixed by changing readdir.c but I
+    - prefered not to touch that code but to treat windows a bit differently
+    - in dir.c
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-04-29  Zeev Suraski  <zeev@zend.com>
+
+    * ext/pgsql/pgsql.c: Accept the fix suggestion from bug #9562
+
+2001-04-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/datetime.c: - 'Fix' for bug #10145
+
+2001-04-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * TODO-4.1.txt: Added not about 'thread-safing' all extensions for 4.1.
+
+2001-04-29  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/string.c: Fix proto decription.
+
+    * ext/standard/string.c: Really fix bug #10362.
+
+2001-04-29  Andi Gutmans  <andi@zend.com>
+
+    * main/main.c: - Update to work with latest Zend
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-04-29  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c: whitespace fix
+
+2001-04-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/config.m4: Fix bug #10545.
+
 2001-04-28  Sean Bright  <elixer@erols.com>
 
     * ext/standard/string.c: Fix for bug #10362
