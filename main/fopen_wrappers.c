@@ -36,6 +36,14 @@
 #include <winsock.h>
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
+#elif defined(NETWARE)
+/*#include <ws2nlm.h>*/
+/*#include <sys/socket.h>*/
+#ifdef NEW_LIBC
+#include <sys/param.h>
+#else
+#include "netware/param.h"
+#endif
 #else
 #include <sys/param.h>
 #endif
@@ -49,6 +57,8 @@
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
+#elif defined(NETWARE)
+#include "netware/pwd.h"
 #else
 #include <pwd.h>
 #endif
@@ -65,6 +75,9 @@
 
 #ifdef PHP_WIN32
 #include <winsock.h>
+#elif defined(NETWARE) && defined(USE_WINSOCK)
+/*#include <ws2nlm.h>*/
+#include <novsock2.h>
 #else
 #include <netinet/in.h>
 #include <netdb.h>
@@ -73,7 +86,7 @@
 #endif
 #endif
 
-#if defined(PHP_WIN32) || defined(__riscos__)
+#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
 #undef AF_UNIX
 #endif
 
