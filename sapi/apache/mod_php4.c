@@ -156,20 +156,21 @@ int sapi_stack_destroy(sapi_stack *stack)
 
 int sapi_stack_apply_with_argument_all(sapi_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg)
 {
-        int i;   
+        int i, retval;   
 
         switch (type) {                
                 case ZEND_STACK_APPLY_TOPDOWN:
                         for (i=stack->top-1; i>=0; i--) {
-                                apply_function(stack->elements[i], arg); 
+                                retval = apply_function(stack->elements[i], arg); 
                         }
                         break;
                 case ZEND_STACK_APPLY_BOTTOMUP:
                         for (i=0; i<stack->top; i++) {        
-                                apply_function(stack->elements[i], arg);
+                                retval = apply_function(stack->elements[i], arg);
                         }      
                         break;
         }
+        return retval;
 }
 
 
@@ -1366,7 +1367,7 @@ static int php_response_handler(request_rec *r)
     php_per_dir_config *conf;
     AP(current_hook) = AP_RESPONSE;
     conf = get_module_config(r->per_dir_config, &php4_module);
-    sapi_stack_apply_with_argument_all(&conf->response_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
+    return sapi_stack_apply_with_argument_all(&conf->response_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
 }
 
 /* {{{ handler_rec php_handlers[]
