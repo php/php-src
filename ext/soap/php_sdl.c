@@ -73,7 +73,6 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
-	TSRMLS_FETCH();
 
 	nscat = emalloc(strlen(ns) + strlen(type) + 2);
 	sprintf(nscat, "%s:%s", ns, type);
@@ -303,6 +302,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 	xmlNodePtr root, definitions, trav;
 	xmlAttrPtr targetNamespace;
 	int old_error_reporting;
+	TSRMLS_FETCH();
 
 	/* TODO: WSDL Caching */
 
