@@ -80,7 +80,7 @@ typedef struct {
 /* Per thread storage area id... */
 static int roxen_globals_id;
 
-# define GET_THIS() php_roxen_request *_request = ts_resource(roxen_globals_id);
+# define GET_THIS() php_roxen_request *_request = ts_resource(roxen_globals_id)
 # define THIS _request
 #else
 static php_roxen_request *current_request = NULL;
@@ -266,6 +266,12 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
 static int
 php_roxen_sapi_ub_write(const char *str, uint str_length)
 {
+#ifdef ZTS
+  PLS_FETCH();
+#endif
+#ifdef ROXEN_USE_ZTS
+  GET_THIS();
+#endif
   int sent_bytes = 0, fd = MY_FD;
   if(fd)
   {
@@ -367,6 +373,9 @@ php_roxen_sapi_header_handler(sapi_header_struct *sapi_header,
 static int
 php_roxen_low_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
+#ifdef ZTS
+  PLS_FETCH();
+#endif
   struct pike_string *ind;
   struct svalue *s_headermap;
 #ifdef ROXEN_USE_ZTS
@@ -412,8 +421,12 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-  fprintf(stderr, "read post (%d bytes max)\n", count_bytes);
+#ifdef ZTS
+  PLS_FETCH();
+#endif
 
+  fprintf(stderr, "read post (%d bytes max)\n", count_bytes);
+  
   if(!MY_FD_OBJ->prog) {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
     zend_bailout();
@@ -422,7 +435,7 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 
   push_int(count_bytes);
   safe_apply(MY_FD_OBJ, "read_post", 1);
-  if(sp[-1].type == T_STRING) {
+  if(sp[-1].type == PIKE_T_STRING) {
     MEMCPY(buf, sp[-1].u.string->str, total_read = sp[-1].u.string->len);
     buf[total_read] = '\0';
   } else
@@ -454,8 +467,7 @@ php_roxen_sapi_read_cookies(SLS_D)
 
 static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
 {
-#if 0
-  char buf[512];
+  //  char buf[512];
 	
   PUTS("<table border=5 width=600>\n");
   php_info_print_table_row(2, "SAPI module version", "$Id$");
@@ -476,7 +488,6 @@ static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
       php_info_print_table_row(2, "Server uptime", buf);
   */
   PUTS("</table>");
-#endif
 }
 
 static zend_module_entry php_roxen_module = {
@@ -568,7 +579,7 @@ php_roxen_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
 	pval->type = IS_STRING;
 	pval->value.str.len = val->u.string->len;
 	pval->value.str.val = estrndup(val->u.string->str, pval->value.str.len);
-	/*	fprintf(stderr, "Header: %s(%d)=%s\n", buf, buf_len, val->u.string->str);*/
+	fprintf(stderr, "Header: %s(%d)=%s\n", buf, buf_len, val->u.string->str);
 	
 	zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &pval, sizeof(zval *), NULL);
       }
