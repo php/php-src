@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
@@ -44,9 +44,9 @@
 #ifdef PHP_WIN32
 #include "win95nt.h"
 #	ifdef PHP_EXPORTS
-#	define PHPAPI __declspec(dllexport) 
+#	define PHPAPI __declspec(dllexport)
 #	else
-#	define PHPAPI __declspec(dllimport) 
+#	define PHPAPI __declspec(dllimport)
 #	endif
 #define PHP_DIR_SEPARATOR '\\'
 #else
@@ -127,11 +127,11 @@ typedef unsigned int socklen_t;
 #endif
 #if HAVE_STDARG_H
 #include <stdarg.h>
-#else   
+#else
 # if HAVE_SYS_VARARGS_H
 # include <sys/varargs.h>
-# endif 
-#endif 
+# endif
+#endif
 
 
 #include "zend_hash.h"
@@ -156,6 +156,7 @@ typedef unsigned int socklen_t;
 char *strerror(int);
 #endif
 
+#include "php_streams.h"
 #include "fopen_wrappers.h"
 
 #if (REGEX == 1 || REGEX == 0) && !defined(NO_REGEX_EXTRA_H)
@@ -307,7 +308,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 
 #define XtOffset(p_type,field) ((unsigned int)&(((p_type)NULL)->field))
 
-#endif /* !CRAY2 */  
+#endif /* !CRAY2 */
 #endif /* __STDC__ */
 #else /* ! (CRAY || __arm) */
 
