@@ -76,6 +76,7 @@ dnl A whole whack of possible places where this might be
 		LIBS="$LIBS -lpng -lz"
         AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1)])
         AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1)])
+        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1)])
         
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
@@ -97,6 +98,7 @@ dnl A whole whack of possible places where this might be
 		LIBS="$LIBS -lpng -lz"
         AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1)])
         AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1)])
+        AC_CHECK_LIB(gd, gdImageCreateFromGif, [AC_DEFINE(HAVE_GD_GIF, 1)])
         
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
