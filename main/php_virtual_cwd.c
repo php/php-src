@@ -245,7 +245,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size)
 	return buf;
 }
 
-
+/* Resolve path relatively to state and put the real path into state */
 /* returns 0 for ok, 1 for error */
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path)
 {
@@ -350,7 +350,7 @@ CWD_API int virtual_chdir(char *path)
 {
 	CWDLS_FETCH();
 
-	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok);
+	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok)?-1:0;
 }
 
 CWD_API int virtual_chdir_file(char *path)
