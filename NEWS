@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Fixed a bug which made readdir() unusable in some systems. (Jani)
 - Added the get_defined_functions() function which returns a list of all 
   currently defined functions. (Sterling)
 - Added the get_defined_vars() function which returns an associative array
