@@ -300,6 +300,10 @@ PHP_FUNCTION(ocicolltrim);
 #define OCI_RETURN_NULLS       	1<<2
 #define OCI_RETURN_LOBS       	1<<3
 
+#define OCI_FETCHSTATEMENT_BY_COLUMN	1<<4
+#define OCI_FETCHSTATEMENT_BY_ROW		1<<5
+#define OCI_FETCHSTATEMENT_BY			(OCI_FETCHSTATEMENT_BY_COLUMN | OCI_FETCHSTATEMENT_BY_ROW)
+
 static unsigned char a3_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 static unsigned char a2_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 
@@ -524,6 +528,10 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_B_ROWID",SQLT_RDD, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_CURSOR",SQLT_RSET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_BIN",SQLT_BIN, CONST_CS | CONST_PERSISTENT);
+
+/* for OCIFetchStatement */
+	REGISTER_LONG_CONSTANT("OCI_FETCHSTATEMENT_BY_COLUMN", OCI_FETCHSTATEMENT_BY_COLUMN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_FETCHSTATEMENT_BY_ROW", OCI_FETCHSTATEMENT_BY_ROW, CONST_CS | CONST_PERSISTENT);
 
 /* for OCIFetchInto &  OCIResult */
 	REGISTER_LONG_CONSTANT("OCI_ASSOC",OCI_ASSOC, CONST_CS | CONST_PERSISTENT);
@@ -3937,31 +3945,36 @@ PHP_FUNCTION(ocifetchinto)
 
 /* }}} */
 
-/* {{{ proto int ocifetchstatement(int stmt, array &output)
+/* {{{ proto int ocifetchstatement(int stmt, array &output[, int skip][, int maxrows][, int flags])
    Fetch all rows of result data into an array */
 
 PHP_FUNCTION(ocifetchstatement)
 {
-	zval **stmt, **array, *element, **fmode, *tmp;
+	zval **stmt, **array, *element, **zskip, **zmaxrows, **zflags, *tmp;
 	oci_statement *statement;
 	oci_out_column **columns;
 	zval ***outarrs;
 	ub4 nrows = 1;
 	int i;
-	int mode = OCI_NUM;
+	int skip = 0, maxrows = -1;
+	int flags = 0;
 	int rows = 0;
-	char *namebuf;
 	int ac = ZEND_NUM_ARGS();
 
-	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &stmt, &array, &fmode) == FAILURE) {
+	if (ac < 2 || ac > 5 || zend_get_parameters_ex(ac, &stmt, &array, &zskip, &zmaxrows, &zflags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
     switch (ac) {
+	case 5:
+		convert_to_long_ex(zflags);
+		flags = Z_LVAL_PP(zflags);
+	case 4:
+		convert_to_long_ex(zmaxrows);
+		maxrows = Z_LVAL_PP(zmaxrows);
 	case 3:
-		convert_to_long_ex(fmode);
-		mode = Z_LVAL_PP(fmode);
-		/* possible breakthru */
+		convert_to_long_ex(zskip);
+		skip = Z_LVAL_PP(zskip);
 	}
 
 	OCI_GET_STMT(statement,stmt);
@@ -3969,34 +3982,96 @@ PHP_FUNCTION(ocifetchstatement)
 	zval_dtor(*array);
 	array_init(*array);
 
-	columns = emalloc(statement->ncolumns * sizeof(oci_out_column *));
-	outarrs = emalloc(statement->ncolumns * sizeof(zval*));
-	
-	for (i = 0; i < statement->ncolumns; i++) {
-		columns[ i ] = oci_get_col(statement, i + 1, 0);
-		
-		MAKE_STD_ZVAL(tmp);
-		array_init(tmp);
-
-		namebuf = estrndup(columns[ i ]->name,columns[ i ]->name_len);
-				
-		zend_hash_update(Z_ARRVAL_PP(array), namebuf, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
-		efree(namebuf);
+	while (skip--) {
+		if (! oci_fetch(statement, nrows, "OCIFetchStatement" TSRMLS_CC))
+			RETURN_LONG(0);
 	}
 
-	while (oci_fetch(statement, nrows, "OCIFetchStatement" TSRMLS_CC)) {
+	if (flags & OCI_FETCHSTATEMENT_BY_ROW) {
+		columns = emalloc(statement->ncolumns * sizeof(oci_out_column *));
+
 		for (i = 0; i < statement->ncolumns; i++) {
-			MAKE_STD_ZVAL(element);
-
-			_oci_make_zval(element,statement,columns[ i ], "OCIFetchStatement",OCI_RETURN_LOBS TSRMLS_CC);
-
-			zend_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(zval*), NULL);
+			columns[ i ] = oci_get_col(statement, i + 1, 0);
 		}
-		rows++;
-	}
-	
-	efree(columns);
-	efree(outarrs);
+
+		while (oci_fetch(statement, nrows, "OCIFetchStatement" TSRMLS_CC)) {
+			zval *row;
+
+			MAKE_STD_ZVAL(row);
+			array_init(row);
+
+			for (i = 0; i < statement->ncolumns; i++) {
+				MAKE_STD_ZVAL(element);
+
+				_oci_make_zval(element,statement,columns[ i ], "OCIFetchStatement",OCI_RETURN_LOBS TSRMLS_CC);
+
+				if (flags & OCI_NUM) {
+					zend_hash_next_index_insert(Z_ARRVAL_P(row), &element, sizeof(zval*), NULL);
+				} else { /* default to ASSOC */
+					zend_hash_update(Z_ARRVAL_P(row), 
+							columns[ i ]->name, columns[ i ]->name_len+1, 
+							&element, sizeof(zval*), NULL);
+				}
+			}
+
+			zend_hash_next_index_insert(Z_ARRVAL_PP(array), &row, sizeof(zval*), NULL),
+
+			rows++;
+
+			if ((maxrows != -1) && (rows == maxrows)) {
+				oci_fetch(statement, 0, "OCIFetchStatement" TSRMLS_CC);
+				break;
+			}
+		}
+
+		efree(columns);
+	} else { /* default to BY_COLUMN */
+		columns = emalloc(statement->ncolumns * sizeof(oci_out_column *));
+		outarrs = emalloc(statement->ncolumns * sizeof(zval*));
+		
+		if (flags & OCI_NUM) {
+			for (i = 0; i < statement->ncolumns; i++) {
+				columns[ i ] = oci_get_col(statement, i + 1, 0);
+				
+				MAKE_STD_ZVAL(tmp);
+				array_init(tmp);
+						
+				zend_hash_next_index_insert(Z_ARRVAL_PP(array), 
+						&tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
+			}
+		} else { /* default to ASSOC */
+			for (i = 0; i < statement->ncolumns; i++) {
+				columns[ i ] = oci_get_col(statement, i + 1, 0);
+				
+				MAKE_STD_ZVAL(tmp);
+				array_init(tmp);
+						
+				zend_hash_update(Z_ARRVAL_PP(array), 
+						columns[ i ]->name, columns[ i ]->name_len+1, 
+						(void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
+			}
+		}
+
+		while (oci_fetch(statement, nrows, "OCIFetchStatement" TSRMLS_CC)) {
+			for (i = 0; i < statement->ncolumns; i++) {
+				MAKE_STD_ZVAL(element);
+
+				_oci_make_zval(element,statement,columns[ i ], "OCIFetchStatement",OCI_RETURN_LOBS TSRMLS_CC);
+
+				zend_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(zval*), NULL);
+			}
+
+			rows++;
+
+			if ((maxrows != -1) && (rows == maxrows)) {
+				oci_fetch(statement, 0, "OCIFetchStatement" TSRMLS_CC);
+				break;
+			}
+		}
+		
+		efree(columns);
+		efree(outarrs);
+	} 
 
 	RETURN_LONG(rows);
 }
