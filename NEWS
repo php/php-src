@@ -47,7 +47,7 @@ PHP                                                                        NEWS
 - Fixed bug #24766 (strange result array from unpack()). (Moriyoshi)
 - Fixed bug #24729 ($obj = new $className; causes crash when $className is not 
   set). (Marcus)
-- Fixed bug #24565 (cannot read array elements recived via $_REQUEST). (Zeev)
+- Fixed bug #24565 (cannot read array elements received via $_REQUEST). (Zeev)
 - Fixed bug #24445 (get_parent_class() returns different values).
   (Sterling, Stanislav)
 - Fixed bug #24403 (preg_replace() problem: Using $this when not in object 
