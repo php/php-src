@@ -176,6 +176,11 @@ function_entry gd_functions[] = {
 	PHP_FE(imagepstext,								NULL)
 	PHP_FE(imagepsbbox,								NULL)
 	PHP_FE(imagetypes,								NULL)
+	
+	PHP_FE(jpeg2wbmp,								NULL)
+	PHP_FE(png2wbmp,								NULL)
+	PHP_FE(image2wbmp,								NULL)
+	
 	{NULL, NULL, NULL}
 };
 
@@ -788,6 +793,9 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	int output = 1, q = -1;
 	GDLS_FETCH();
 
+	/* The quality parameter for Wbmp stands for the threshold
+	   So the q variable */
+
 	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &quality) == FAILURE) 
 	{
 		WRONG_PARAM_COUNT;
@@ -815,10 +823,20 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 			php_error(E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(), fn);
 			RETURN_FALSE;
 		}
-		if (image_type == PHP_GDIMG_TYPE_JPG) {
-			(*func_p)(im, fp, q);
-		} else {
-			(*func_p)(im, fp);
+		
+		switch(image_type) {
+			case PHP_GDIMG_TYPE_JPG:
+				(*func_p)(im, fp, q);
+				break;
+			case PHP_GDIMG_TYPE_WBM:
+				if(q<0||q>255) {
+					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+				}
+				(*func_p)(im, q, fp);
+				break;
+			default:
+				(*func_p)(im, fp);
+				break;
 		}
 		fflush(fp);
 		fclose(fp);
@@ -834,11 +852,21 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 		output = php_header();
 		if (output) {
-			if (image_type == PHP_GDIMG_TYPE_JPG) {
-				(*func_p)(im, tmp, q);
-			} else {
-				(*func_p)(im, tmp);
+			switch(image_type) {
+				case PHP_GDIMG_TYPE_JPG:
+					(*func_p)(im, tmp, q);
+					break;
+				case PHP_GDIMG_TYPE_WBM:
+					if(q<0||q>255) {
+						php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+					}
+					(*func_p)(im, q, fp);
+					break;
+				default:
+					(*func_p)(im, fp);
+					break;
 			}
+
             fseek(tmp, 0, SEEK_SET);
 #if APACHE && defined(CHARSET_EBCDIC)
 			SLS_FETCH();
@@ -2617,8 +2645,270 @@ PHP_FUNCTION(imagepsbbox)
 }
 /* }}} */
 
-#endif	/* HAVE_LIBGD */
 
+/* {{{ proto int image2wbmp(int im [, string filename [, int threshold]])
+   Output WBMP image to browser or file */
+PHP_FUNCTION(image2wbmp)
+{
+#ifdef HAVE_GD_WBMP
+	_php_image_output (INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", _php_image_bw_convert);
+#else /* HAVE_GD_WBMP */
+	php_error(E_WARNING, "Image2Wbmp: No WBMP support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_WBMP */
+}
+
+
+/* {{{ proto void jpeg2wbmp (string f_org, string f_dest, d_height, d_width)
+   Convert Jpeg Image to Wbmp image */
+PHP_FUNCTION(jpeg2wbmp)
+{
+#ifdef HAVE_GD_JPG
+	_php_image_convert (INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG);
+#else /* HAVE_GD_JPG */
+	php_error(E_WARNING, "jpeg2wbmp: No JPG support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_JPG */
+}
+/* }}} */
+
+/* {{{ proto void png2wbmp (string f_org, string f_dest, d_height, d_width)
+   Convert Png Image to Wbmp image */
+PHP_FUNCTION(png2wbmp)
+{
+#ifdef HAVE_GD_PNG
+	_php_image_convert (INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG);
+#else /* HAVE_GD_PNG */
+	php_error(E_WARNING, "png2wbmp: No PNG support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_PNG */
+}
+/* }}} */
+
+
+/* It converts a gd Image to bw using a threshold value */
+static void _php_image_bw_convert( gdImagePtr im_org, int threshold, FILE *out) {
+	gdImagePtr im_dest;
+	int white, black;
+	int color, color_org, median;
+	int dest_height = gdImageSY (im_org);
+	int dest_width = gdImageSX (im_org);
+	int x,y;
+
+	im_dest = gdImageCreate (dest_width, dest_height);
+	if (im_dest == NULL) {
+		php_error (E_WARNING, "%s: unable to allocate temporary buffer", get_active_function_name());
+		return;
+	}
+	white = gdImageColorAllocate (im_dest, 255, 255, 255);
+	if( white == -1) {
+		php_error (E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name());
+		return;
+	}
+
+	black = gdImageColorAllocate (im_dest, 0, 0, 0);
+	if (black == -1) {
+		php_error (E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name());
+		return;
+	}
+
+	for (y = 0; y < dest_height; y++) {
+		for (x = 0; x < dest_width; x++) {
+			color_org = gdImageGetPixel (im_org, x, y);
+			median = (im_org->red[color_org] + im_org->green[color_org] + im_org->blue[color_org]) / 3;
+			if (median < threshold) {
+				color = black;
+			}
+			else {
+				color = white;
+			}
+			gdImageSetPixel (im_dest, x, y, color);
+		}
+	}
+
+	gdImageWBMP (im_dest, black, out);
+}
+
+
+/* _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */
+static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
+	zval **f_org, **f_dest, **height, **width, **threshold;
+	gdImagePtr im_org, im_dest, im_tmp;
+	char *fn_org = NULL;
+	char *fn_dest = NULL;
+	FILE *org,*dest;
+	int argc;
+	int dest_height = -1;
+	int dest_width = -1;
+	int org_height, org_width;
+	int output = 1;
+	int q = -1;
+	int white, black;
+	int color, color_org, median;
+	int int_threshold;
+	int x, y;
+	float x_ratio, y_ratio;
+	GDLS_FETCH();
+
+	argc = ZEND_NUM_ARGS();
+	if (argc < 1 || argc > 5 || zend_get_parameters_ex(argc, &f_org, &f_dest, &height, &width, &threshold) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (argc == 5) {
+		convert_to_string_ex (f_org);
+		convert_to_string_ex (f_dest);
+		fn_org  = Z_STRVAL_PP(f_org);
+		fn_dest = Z_STRVAL_PP(f_dest);
+		convert_to_long_ex(height);
+		dest_height = Z_LVAL_PP(height);
+		convert_to_long_ex(width);
+		dest_width = Z_LVAL_PP(width);
+		convert_to_long_ex(threshold);
+		int_threshold = Z_LVAL_PP(threshold);
+
+		/* Check threshold value */
+		if( int_threshold < 0 || int_threshold > 8 ) {
+			php_error (E_WARNING, "Invalid threshold value '%d' in %s",int_threshold, get_active_function_name());
+			RETURN_FALSE;
+		}
+
+		/* Check origin file */
+		if (!fn_org || fn_org == empty_string || php_check_open_basedir(fn_org)) {
+			php_error (E_WARNING, "%s: invalid origin filename '%s'", get_active_function_name(), fn_org);
+			RETURN_FALSE;
+		}
+
+		/* Check destination file */
+		if (!fn_dest || fn_dest == empty_string || php_check_open_basedir(fn_dest)) {
+			php_error (E_WARNING, "%s: invalid destination filename '%s'", get_active_function_name(), fn_dest);
+			RETURN_FALSE;
+		}
+
+		/* Open origin file */
+		org = V_FOPEN(fn_org, "rb");
+		if (!org) {
+			php_error (E_WARNING, "%s: unable to open '%s' for reading", get_active_function_name(), fn_org);
+			RETURN_FALSE;
+		}
+
+		/* Open destination file */
+		dest = V_FOPEN(fn_dest, "wb");
+		if (!dest) {
+			php_error (E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(), fn_dest);
+			RETURN_FALSE;
+		}
+
+		switch (image_type) {
+			case PHP_GDIMG_TYPE_JPG:
+				im_org = gdImageCreateFromJpeg (org);
+				if (im_org == NULL) {
+					php_error (E_WARNING, "%s: unable to open '%s' Not a valid jpeg file", get_active_function_name(), fn_dest);
+					RETURN_FALSE;
+				}
+				break;
+			case PHP_GDIMG_TYPE_PNG:
+				im_org = gdImageCreateFromPng(org);
+				if (im_org == NULL) {
+					php_error (E_WARNING, "%s: unable to open '%s' Not a valid png file", get_active_function_name(), fn_dest);
+					RETURN_FALSE;
+				}
+				break;
+			default:
+				php_error(E_WARNING, "%s: Format not supported", get_active_function_name());
+				break;
+		}
+
+		org_width  = gdImageSX (im_org);
+		org_height = gdImageSY (im_org);
+
+		x_ratio = (float) org_width / (float) dest_width;
+		y_ratio = (float) org_height / (float) dest_height;
+
+		if (x_ratio > 1 && y_ratio > 1) {
+			if (y_ratio > x_ratio) {
+				x_ratio = y_ratio;
+			}
+			else {
+				y_ratio = x_ratio;
+			}
+			dest_width = org_width / x_ratio;
+			dest_height = org_height / y_ratio;
+		}
+		else {
+			x_ratio = (float) dest_width / (float) org_width;
+			y_ratio = (float) dest_height / (float) org_height;
+
+			if (y_ratio < x_ratio) {
+				x_ratio = y_ratio;
+			}
+			else {
+				y_ratio = x_ratio;
+			}
+			dest_width = org_width * x_ratio;
+			dest_height = org_height * y_ratio;
+		}
+
+		im_tmp = gdImageCreate (dest_width, dest_height);
+		if (im_tmp == NULL ) {
+			php_error(E_WARNING, "%s: unable to allocate temporary buffer", get_active_function_name());
+			RETURN_FALSE;
+		}
+
+		gdImageCopyResized (im_tmp, im_org, 0, 0, 0, 0, dest_width, dest_height, org_width, org_height);
+
+		gdImageDestroy(im_org);
+
+		fclose(org);
+
+		im_dest = gdImageCreate(dest_width, dest_height);
+		if (im_dest == NULL) {
+			php_error(E_WARNING, "%s: unable to allocate destination buffer", get_active_function_name());
+			RETURN_FALSE;
+		}
+		white = gdImageColorAllocate(im_dest, 255, 255, 255);
+		if (white == -1) {
+			php_error(E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name());
+			RETURN_FALSE;
+		}
+
+		black = gdImageColorAllocate(im_dest, 0, 0, 0);
+		if (black == -1) {
+			php_error(E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name());
+			RETURN_FALSE;
+		}
+
+		int_threshold = int_threshold * 32;
+
+		for (y = 0; y < dest_height; y++) {
+			for(x = 0; x < dest_width; x++) {
+				color_org = gdImageGetPixel (im_tmp, x, y);
+				median = (im_tmp->red[color_org] + im_tmp->green[color_org] + im_tmp->blue[color_org]) / 3;
+				if (median < int_threshold) {
+					color = black;
+				}
+				else {
+					color = white;
+				}
+				gdImageSetPixel (im_dest, x, y, color);
+			}
+		}
+
+		gdImageDestroy (im_tmp );
+
+		gdImageWBMP (im_dest, black , dest);
+
+		fflush(dest);
+		fclose(dest);
+
+		gdImageDestroy( im_dest );
+		
+		RETURN_TRUE;
+	}
+	WRONG_PARAM_COUNT;
+}
+
+#endif	/* HAVE_LIBGD */
 
 /*
  * Local variables:
