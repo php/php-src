@@ -1,3 +1,77 @@
+2004-05-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/proc_open.c:
+      Turn this off then
+
+2004-05-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/PEAR_test_mock_pearweb.php.inc
+      pear/tests/pear_downloader_invalid.phpt
+      pear/tests/php_dump.php.inc:
+      modify php_dump.php, .cvsignore ignores *.php
+      move include to the place where it is used
+
+    * pear/tests/pear_installer2.phpt:
+      update _installFile() test for channels
+
+    * pear/tests/pear_installer1.phpt:
+      update checkDeps/extractDownloadFilename tests for channels
+
+    * pear/tests/pear_registry.phpt:
+      update registry test for channels
+
+    * pear/tests/pear_downloader_invalid.phpt
+      pear/tests/pear_downloader_new.phpt
+      pear/tests/pear_downloader_old.phpt:
+      use fake pearweb - now anyone can run the download unit tests.
+      
+      These tests require channels to pass
+
+    * pear/tests/depnoreleases-1.0.tgz
+      pear/tests/depunstable-1.0.tgz
+      pear/tests/pkg1-1.1.tgz
+      pear/tests/pkg1-2.0b1.tgz
+      pear/tests/pkg2-1.1.tgz
+      pear/tests/pkg3-1.1.tgz
+      pear/tests/pkg3-1.4.tgz
+      pear/tests/pkg4-1.1.tgz
+      pear/tests/pkg4AndAHalf-1.3.tgz
+      pear/tests/pkg5-1.1.tgz
+      pear/tests/stabilitytoolow-0.3.tgz
+      pear/tests/stabilitytoolow-0.5.tgz
+      pear/tests/stabilitytoolow-0.6beta.tgz
+      pear/tests/stabilitytoolow-1.0b1.tgz
+      pear/tests/stabilitytoolow-2.0a1.tgz
+      pear/tests/stabilitytoolow-2.0b1.tgz
+      pear/tests/stabilitytoolow-2.0dev.tgz
+      pear/tests/stabilitytoolow-3.0dev.tgz:
+      fake pearweb package files, for unit testing downloads without an installed
+      pearweb
+
+    * pear/tests/pear_config.phpt
+      pear/tests/pear_config_1.1.phpt:
+      config unit tests, ready for channels
+
+    * pear/tests/PEAR_test_mock_pearweb.php.inc
+      pear/tests/download_test.config.inc
+      pear/tests/download_test_classes.php.inc
+      pear/tests/merge2.input
+      pear/tests/pear_channelfile.phpt
+      pear/tests/pear_installer_installFile_channels.phpt
+      pear/tests/pear_installer_install_channels.phpt
+      pear/tests/pear_registry_1.1.phpt
+      pear/tests/user3.input:
+      new unit tests
+      pearweb mock object is complete
+
+    * pear/tests/pear_installer4.phpt:
+      update for conflicting file test
+
+2004-05-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/proc_open.c:
+      Don't rely on TIOCNOTTY.
+
 2004-05-28  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/interbase/interbase.c
