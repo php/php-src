@@ -1284,7 +1284,7 @@ _oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char
 
 			descr = oci_get_desc(column->descid TSRMLS_CC);
 			if (! descr) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to find my descriptor %d",column->data);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to find my descriptor %p",column->data);
 				return -1;
 			}
 			
@@ -2157,11 +2157,13 @@ oci_bind_out_callback(dvoid *octxp,      /* context pointer */
 
  */
 
+#include "ext/standard/php_smart_str.h"
+
 static oci_session *_oci_open_session(oci_server* server,char *username,char *password,int persistent,int exclusive,char *charset)
 {
 	oci_session *session = 0, *psession = 0;
 	OCISvcCtx *svchp = 0;
-	char *hashed_details;
+	smart_str hashed_details = {0};
 #ifdef HAVE_OCI_9_2
 	ub2 charsetid = 0;
 #endif
@@ -2173,27 +2175,55 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	   we will reuse authenticated users within a request no matter if the user requested a persistent 
 	   connections or not!
 	   
-	   but only as pesistent requested connections will be kept between requests!
+	   but only as persistent requested connections will be kept between requests!
 	*/
 
-	hashed_details = (char *) malloc(strlen(SAFE_STRING(username))+
-									 strlen(SAFE_STRING(password))+
-									 strlen(SAFE_STRING(server->dbname))+1);
-	
-	sprintf(hashed_details,"%s%s%s",
-			SAFE_STRING(username),
-			SAFE_STRING(password),
-			SAFE_STRING(server->dbname));
+#if defined(HAVE_OCI_9_2)
+	if (*charset) {
+		smart_str_appends_ex(&hashed_details, charset, 1);
+	} else {
+		size_t rsize;
+
+		/* Safe, charsetid is initialized to 0 */
+		CALL_OCI(OCINlsEnvironmentVariableGet(&charsetid, 
+				2, 
+				OCI_NLS_CHARSET_ID, 
+                0,
+				&rsize));
+
+		smart_str_append_long_ex(&hashed_details, charsetid, 1);
+
+        charsetid = 0;
+	}
+#else
+	{
+		char *nls_lang = getenv("NLS_LANG");
+
+		/* extract charset from NLS_LANG=LANUAGE_TERRITORY.CHARSET */
+		if (nls_lang) {
+			char *p = strchr(nls_lang, '.');
+
+			if (p) {
+				smart_str_appends_ex(&hashed_details, p + 1, 1);
+			}
+		}
+	}
+#endif
+
+	smart_str_appends_ex(&hashed_details, SAFE_STRING(username), 1);
+	smart_str_appends_ex(&hashed_details, SAFE_STRING(password), 1);
+	smart_str_appends_ex(&hashed_details, SAFE_STRING(server->dbname), 1);
+	smart_str_0(&hashed_details);
 
 	if (! exclusive) {
-		zend_hash_find(OCI(user), hashed_details, strlen(hashed_details)+1, (void **) &session);
+		zend_hash_find(OCI(user), hashed_details.c, hashed_details.len+1, (void **) &session);
 
 		if (session) {
 			if (session->is_open) {
 				if (persistent) {
 					session->persistent = 1;
 				}
-				free(hashed_details);
+				smart_str_free_ex(&hashed_details, 1);
 				return session;
 			} else {
 				_oci_close_session(session);
@@ -2209,7 +2239,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	}
 
 	session->persistent = persistent;
-	session->hashed_details = hashed_details;
+	session->hashed_details = hashed_details.c;
 	session->server = server;
 	session->exclusive = exclusive;
 
