@@ -54,6 +54,8 @@ extern zend_function_entry php_dom_xpath_class_functions[];
 
 /* domexception errors */
 typedef enum {
+/* PHP_ERR is non-spec code for PHP errors: */
+	PHP_ERR                        = 0,
 	INDEX_SIZE_ERR                 = 1,
 	DOMSTRING_SIZE_ERR             = 2,
 	HIERARCHY_REQUEST_ERR          = 3,
@@ -64,17 +66,17 @@ typedef enum {
 	NOT_FOUND_ERR                  = 8,
 	NOT_SUPPORTED_ERR              = 9,
 	INUSE_ATTRIBUTE_ERR            = 10,
-// Introduced in DOM Level 2:
+/* Introduced in DOM Level 2: */
 	INVALID_STATE_ERR              = 11,
-// Introduced in DOM Level 2:
+/* Introduced in DOM Level 2: */
 	SYNTAX_ERR                     = 12,
-// Introduced in DOM Level 2:
+/* Introduced in DOM Level 2: */
 	INVALID_MODIFICATION_ERR       = 13,
-// Introduced in DOM Level 2:
+/* Introduced in DOM Level 2: */
 	NAMESPACE_ERR                  = 14,
-// Introduced in DOM Level 2:
+/* Introduced in DOM Level 2: */
 	INVALID_ACCESS_ERR             = 15,
-// Introduced in DOM Level 3:
+/* Introduced in DOM Level 3: */
 	VALIDATION_ERR                 = 16
 } dom_exception_code;
 

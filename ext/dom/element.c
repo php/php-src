@@ -68,15 +68,19 @@ PHP_METHOD(domelement, __construct)
 	char *name, *value = NULL, *uri = NULL;
 	char *localname = NULL, *prefix = NULL;
 	int errorcode = 0, uri_len = 0;
-	int name_len, value_len = 0;
+	int name_len, value_len = 0, name_valid;
 	xmlNsPtr nsptr = NULL;
 
+	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s!s", &id, dom_element_class_entry, &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
+		php_std_error_handling();
 		return;
 	}
 
-	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Element name is required");
+	php_std_error_handling();
+	name_valid = xmlValidateName((xmlChar *) name, 0);
+	if (name_valid != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -98,15 +102,17 @@ PHP_METHOD(domelement, __construct)
 			if (nodep != NULL) {
 				xmlFree(nodep);
 			}
-			php_dom_throw_error(errorcode, 0 TSRMLS_CC);
+			php_dom_throw_error(errorcode, 1 TSRMLS_CC);
 			RETURN_FALSE;
 		}
 	} else {
 		nodep = xmlNewNode(NULL, (xmlChar *) name);
 	}
 
-	if (!nodep)
+	if (!nodep) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
+	}
 
 	if (value_len > 0) {
 		xmlNodeSetContentLen(nodep, value, value_len);

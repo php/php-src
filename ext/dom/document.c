@@ -740,7 +740,7 @@ int dom_document_config_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto domelement dom_document_create_element(string tagName);
+/* {{{ proto domelement dom_document_create_element(string tagName [, string value]);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-2141741547
 Since: 
 */
@@ -1296,13 +1296,19 @@ PHP_METHOD(domdocument, __construct)
 	char *encoding, *version = NULL;
 	int encoding_len = 0, version_len = 0, refcount;
 
+	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ss", &id, dom_document_class_entry, &version, &version_len, &encoding, &encoding_len) == FAILURE) {
+		php_std_error_handling();
 		return;
 	}
 
+	php_std_error_handling();
 	docp = xmlNewDoc(version);
-	if (!docp)
+
+	if (!docp) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
+	}
 
 	if (encoding_len > 0) {
 		docp->encoding = (const xmlChar*)xmlStrdup(encoding);

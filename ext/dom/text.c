@@ -53,14 +53,19 @@ PHP_METHOD(domtext, __construct)
 	char *value = NULL;
 	int value_len;
 
+	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|s", &id, dom_text_class_entry, &value, &value_len) == FAILURE) {
+		php_std_error_handling();
 		return;
 	}
 
+	php_std_error_handling();
 	nodep = xmlNewText((xmlChar *) value);
 
-	if (!nodep)
+	if (!nodep) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
+	}
 
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern != NULL) {

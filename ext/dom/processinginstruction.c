@@ -50,19 +50,24 @@ PHP_METHOD(domprocessinginstruction, __construct)
 	char *name, *value = NULL;
 	int name_len, value_len;
 
+	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_processinginstruction_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+		php_std_error_handling();
 		return;
 	}
 
+	php_std_error_handling();
 	if (name_len == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "PI name is required");
+		php_dom_throw_error(INVALID_CHARACTER_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	nodep = xmlNewPI((xmlChar *) name, (xmlChar *) value);
 
-	if (!nodep)
+	if (!nodep) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
 		RETURN_FALSE;
+	}
 
 	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern != NULL) {
