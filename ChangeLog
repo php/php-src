@@ -1,3 +1,89 @@
+2003-01-10  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * main/config.w32.h
+      main/internal_functions_win32.c
+      win32/php4dllts.dsp:
+      HEAD defaults to build with ZE2 now
+
+2003-01-10  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      Fixing copy and paste errors
+
+    * ext/mssql/php_mssql.c:
+      Avoid warnings when running stored procedures returning multiple results
+      before setting output and return values.
+      Additional results can be skipped by the optional parameter to
+      mssql_execute
+
+2003-01-10  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+      Throw error if object is not a XML_DOCUMENT_NODE in domxml_dump_node()
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Throw error if object is not a XML_DOCUMENT_NODE
+
+2003-01-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/math.c:
+      Fix the number format fix when the number of decimal places is 0.
+
+2003-01-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      - Fixed bug #20155: xmlrpc compile problem with zendengine2 (Path by Jan
+        Schneider)
+
+2003-01-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mime_magic/mime_magic.c
+      ext/standard/reg.c:
+      Reduced compiler warnings
+
+    * ext/iconv/iconv.c:
+      Added missing cast operators
+
+2003-01-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd.c:
+      Fixed ImageRotate when rotation angle is 90 degrees, patch by
+      leon@leonatkinson.com.
+
+2003-01-10  Stig Bakken  <ssb@fast.no>
+
+    * (RELEASE_1_0_1)
+      pear/package-PEAR.xml:
+      - prepare 1.0.1 release
+
+2003-01-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+2003-01-10  Stig Bakken  <ssb@fast.no>
+
+    * (RELEASE_1_0_1)
+      pear/scripts/pear.in:
+      - obey PHP_PEAR_INSTALL_DIR and PHP_PEAR_PHP_BIN environment variables
+
+    * (RELEASE_1_0_1)
+      pear/PEAR/Command/Package.php:
+      - verbosity fix for cvstag and cvsdiff commands
+
+    * (RELEASE_1_0_1)
+      pear/OS/Guess.php:
+      - TODO item
+
+    * pear/PEAR/Command/Package.php:
+      - add "cvsdiff" command
+
+    * (RELEASE_1_0_1)
+      pear/PEAR/Config.php:
+      - use getenv() instead of $_ENV[]
+
 2003-01-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/file.c:
