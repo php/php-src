@@ -1458,6 +1458,11 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			} else {
 				ret = fclose(data->file);
 			}
+			data->file = NULL;
+			data->fd = -1;
+		} else if (data->fd != -1) {
+			ret = close(data->fd);
+			data->fd = -1;
 		} else {
 			return 0;/* everything should be closed already -> success*/
 		}
@@ -1470,7 +1475,6 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		ret = 0;
 		data->file = NULL;
 	}
-
 	pefree(data, stream->is_persistent);
 
 	return ret;
@@ -1550,7 +1554,9 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 				return FAILURE;
 			}
 			if (ret) {
-				fflush(data->file);
+				if (data->file) {
+					fflush(data->file);
+				}
 				*(int*)ret = fd;
 			}
 			return SUCCESS;
