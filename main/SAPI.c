@@ -303,7 +303,6 @@ SAPI_API void sapi_activate(TSRMLS_D)
 		if (SG(request_info).request_method 
 			&& !strcmp(SG(request_info).request_method, "POST")) {
 			if (!SG(request_info).content_type) {
-				sapi_module.sapi_error(E_WARNING, "No content-type in POST request");
 				SG(request_info).content_type_dup = NULL;
 				if(PG(always_populate_raw_post_data)) {
 					SG(request_info).post_entry = NULL;
@@ -316,6 +315,8 @@ SAPI_API void sapi_activate(TSRMLS_D)
 							sapi_module.default_post_reader(TSRMLS_C);
 						}
 					}
+				} else {
+					sapi_module.sapi_error(E_WARNING, "No content-type in POST request");
 				}
 			} else {
 				sapi_read_post_data(TSRMLS_C);
