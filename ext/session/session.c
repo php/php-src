@@ -296,6 +296,8 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 			smart_str_appendc(&buf, (unsigned char) (key_length & PS_BIN_UNDEF));
 			smart_str_appendl(&buf, key, key_length);
 	);
+	
+	smart_str_0(&buf);
 
 	if (newlen) *newlen = buf.len;
 	*newstr = buf.c;
@@ -363,6 +365,8 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 			smart_str_appendl(&buf, key, key_length);
 			smart_str_appendc(&buf, PS_DELIMITER);
 	);
+	
+	smart_str_0(&buf);
 
 	if (newlen) *newlen = buf.len;
 	*newstr = buf.c;
