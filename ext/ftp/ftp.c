@@ -605,6 +605,38 @@ ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filenam
 }
 /* }}} */
 
+/* {{{ ftp_alloc
+ */
+int
+ftp_alloc(ftpbuf_t *ftp, const int size, char **response)
+{
+	char buffer[64];
+
+	if (ftp == NULL || size <= 0) {
+		return 0;
+	}
+
+	snprintf(buffer, 64, "%d", size);
+
+	if (!ftp_putcmd(ftp, "ALLO", buffer)) {
+		return 0;
+	}
+
+	if (!ftp_getresp(ftp)) {
+		return 0;
+	}
+
+	if (response && ftp->inbuf) {
+		*response = estrdup(ftp->inbuf);
+	}
+
+	if (ftp->resp < 200 || ftp->resp >= 300) {
+		return 0;
+	}
+
+	return 1;	
+}
+/* }}} */
 
 /* {{{ ftp_nlist
  */

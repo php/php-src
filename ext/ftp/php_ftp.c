@@ -50,6 +50,13 @@
 static int	le_ftpbuf;
 #define le_ftpbuf_name "FTP Buffer"
 
+static
+    ZEND_BEGIN_ARG_INFO(third_and_rest_force_ref, 1)
+        ZEND_ARG_PASS_INFO(0)
+        ZEND_ARG_PASS_INFO(0)
+        ZEND_ARG_PASS_INFO(1)
+    ZEND_END_ARG_INFO()
+
 function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			NULL)
 #ifdef HAVE_OPENSSL_EXT
@@ -64,6 +71,7 @@ function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_mkdir,			NULL)
 	PHP_FE(ftp_rmdir,			NULL)
 	PHP_FE(ftp_chmod,			NULL)
+	PHP_FE(ftp_alloc,			third_and_rest_force_ref)
 	PHP_FE(ftp_nlist,			NULL)
 	PHP_FE(ftp_rawlist,			NULL)
 	PHP_FE(ftp_systype,			NULL)
@@ -427,6 +435,35 @@ PHP_FUNCTION(ftp_chmod)
 	}
 
 	RETURN_LONG(mode);
+}
+/* }}} */
+
+/* {{{ proto bool ftp_alloc(resource stream, int size[, &response])
+   Attempt to allocate space on the remote FTP server */
+PHP_FUNCTION(ftp_alloc)
+{
+	zval		*z_ftp, *zresponse = NULL;
+	ftpbuf_t	*ftp;
+	int			size, ret;
+	char		*response = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &z_ftp, &size, &zresponse) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+
+	ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
+	if (response) {
+		zval_dtor(zresponse);
+		ZVAL_STRING(zresponse, response, 0);
+	}
+
+	if (!ret) {
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 

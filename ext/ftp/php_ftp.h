@@ -47,6 +47,7 @@ PHP_FUNCTION(ftp_raw);
 PHP_FUNCTION(ftp_mkdir);
 PHP_FUNCTION(ftp_rmdir);
 PHP_FUNCTION(ftp_chmod);
+PHP_FUNCTION(ftp_alloc);
 PHP_FUNCTION(ftp_nlist);
 PHP_FUNCTION(ftp_rawlist);
 PHP_FUNCTION(ftp_systype);
