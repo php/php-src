@@ -1,3 +1,9 @@
+2004-04-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Bugfix #27519 Reflection_Function constructor crashes with non-existant
+      function's name
+
 2004-04-07  Andi Gutmans  <andi@zend.com>
 
     * zend_builtin_functions.c:
