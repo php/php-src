@@ -54,6 +54,18 @@
 # define ZEND_PATHS_SEPARATOR		':'
 #endif
 
+
+#ifdef ZEND_WIN32
+/* Only use this macro if you know for sure that all of the switches values
+   are covered by its case statements */
+#define EMPTY_SWITCH_DEFAULT_CASE() \
+			default:				\
+				__assume(0);		\
+				break;
+#else
+#define EMPTY_SWITCH_DEFAULT_CASE()
+#endif
+
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
 #ifdef HAVE_UNIX_H
@@ -541,16 +553,6 @@ ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 
-#ifdef ZEND_WIN32
-/* Only use this macro if you know for sure that all of the switches values
-   are covered by its case statements */
-#define EMPTY_SWITCH_DEFAULT_CASE() \
-			default:				\
-				__assume(0);		\
-				break;
-#else
-#define EMPTY_SWITCH_DEFAULT_CASE()
-#endif
 
 #endif /* ZEND_H */
 

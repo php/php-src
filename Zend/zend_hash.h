@@ -21,6 +21,7 @@
 #define ZEND_HASH_H
 
 #include <sys/types.h>
+#include "zend.h"
 
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
@@ -244,7 +245,8 @@ static inline ulong zend_inline_hash_func(char *arKey, uint nKeyLength)
 		case 3: hash = ((hash << 5) + hash) + *arKey++; /* fallthrough... */
 		case 2: hash = ((hash << 5) + hash) + *arKey++; /* fallthrough... */
 		case 1: hash = ((hash << 5) + hash) + *arKey++; break;
-		default: /* case 0: */ break;
+		case 0: break;
+EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return hash;
 }
