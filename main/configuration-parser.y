@@ -44,10 +44,8 @@
 #define PARSING_MODE_BROWSCAP 1
 
 static HashTable configuration_hash;
-#ifndef THREAD_SAFE
 extern HashTable browser_hash;
 PHPAPI extern char *php_ini_path;
-#endif
 static HashTable *active_hash_table;
 static zval *current_section;
 static char *currently_parsed_filename;
@@ -428,7 +426,7 @@ statement:
 			free($1.value.str.val);
 		}
 	|	TC_STRING { free($1.value.str.val); }
-	|	EXTENSION '=' string_foo {
+	|	EXTENSION '=' cfg_string {
 			zval dummy;
 #if DEBUG_CFG_PARSER
 			printf("Loading '%s'\n",$3.value.str.val);
@@ -436,25 +434,25 @@ statement:
 			
 			php_dl(&$3,MODULE_PERSISTENT,&dummy);
 		}
-	|	T_ZEND_EXTENSION '=' string_foo {
+	|	T_ZEND_EXTENSION '=' cfg_string {
 #if !defined(ZTS) && !ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
-	|	T_ZEND_EXTENSION_TS '=' string_foo { 
+	|	T_ZEND_EXTENSION_TS '=' cfg_string { 
 #if defined(ZTS) && !ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
-	|	T_ZEND_EXTENSION_DEBUG '=' string_foo { 
+	|	T_ZEND_EXTENSION_DEBUG '=' cfg_string { 
 #if !defined(ZTS) && ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
-	|	T_ZEND_EXTENSION_DEBUG_TS '=' string_foo { 
+	|	T_ZEND_EXTENSION_DEBUG_TS '=' cfg_string { 
 #if defined(ZTS) && ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
@@ -488,7 +486,7 @@ statement:
 ;
 
 
-string_foo:
+cfg_string:
 		TC_STRING { $$ = $1; }
 	|	TC_ENCAPSULATED_STRING { $$ = $1; }
 ;
