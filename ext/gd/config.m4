@@ -366,6 +366,10 @@ if test "$PHP_GD" != "no"; then
     PHP_ADD_INCLUDE($GD_INCLUDE)
   fi
 
+  PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
+    AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
+  ], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+
   PHP_SUBST(GDLIB_CFLAGS)
   PHP_SUBST(GD_SHARED_LIBADD)
 fi
