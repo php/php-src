@@ -17,8 +17,11 @@
  */
 /* $Id$ */
 
-#include <stdio.h>
+#define _XOPEN_SOURCE
+#define _BSD_SOURCE
+
 #include "php.h"
+#include <stdio.h>
 #include <ctype.h>
 #include "php_string.h"
 #include "safe_mode.h"
@@ -35,9 +38,6 @@
 #include <signal.h>
 #endif
 
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
@@ -51,6 +51,13 @@
  * around the alternate code.
  * */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
+
+
+#if HAVE_PTSNAME && HAVE_GRANTPT && HAVE_UNLOCKPT && HAVE_SYS_IOCTL_H && HAVE_TERMIOS_H
+# define PHP_CAN_DO_PTS	1
+# include <sys/ioctl.h>
+# include <termios.h>
+#endif
 
 #include "proc_open.h"
 
@@ -472,6 +479,10 @@ PHP_FUNCTION(proc_open)
 	struct php_process_handle *proc;
 	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
 	int suppress_errors = 0;
+#if PHP_CAN_DO_PTS
+	php_file_descriptor_t dev_ptmx = -1;	/* master */
+	php_file_descriptor_t slave_pty = -1;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz|s!a!a!", &command,
 				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
@@ -640,7 +651,32 @@ PHP_FUNCTION(proc_open)
 #else
 				descriptors[ndesc].childend = fd;
 #endif
+			} else if (strcmp(Z_STRVAL_PP(ztype), "pty") == 0) {
+#if PHP_CAN_DO_PTS
+				if (dev_ptmx == -1) {
+					/* open things up */
+					dev_ptmx = open("/dev/ptmx", O_RDWR);
+					if (dev_ptmx == -1) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to open /dev/ptmx, errno %d", errno);
+						goto exit_fail;
+					}
+					grantpt(dev_ptmx);
+					unlockpt(dev_ptmx);
+					slave_pty = open(ptsname(dev_ptmx), O_RDWR);
 
+					if (slave_pty == -1) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to open slave pty, errno %d", errno);
+						goto exit_fail;
+					}
+				}
+				descriptors[ndesc].mode = DESC_PIPE;
+				descriptors[ndesc].childend = dup(slave_pty);
+				descriptors[ndesc].parentend = dup(dev_ptmx);
+				descriptors[ndesc].mode_flags = O_RDWR;
+#else
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "pty pseudo terminal is not support on this system");
+				goto exit_fail;
+#endif
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a valid descriptor spec/mode", Z_STRVAL_PP(ztype));
 				goto exit_fail;
@@ -709,6 +745,18 @@ PHP_FUNCTION(proc_open)
 	if (child == 0) {
 		/* this is the child process */
 
+#if PHP_CAN_DO_PTS
+		if (dev_ptmx >= 0) {
+			int my_pid = getpid();
+
+			/* detach from original tty. Might only need this if isatty(0) is true */
+			ioctl(0,TIOCNOTTY,NULL);
+			/* become process group leader */
+			setpgid(my_pid, my_pid);
+			tcsetpgrp(0, my_pid);
+		}
+#endif
+		
 		/* close those descriptors that we just opened for the parent stuff,
 		 * dup new descriptors into required descriptors and close the original
 		 * cruft */
@@ -723,6 +771,14 @@ PHP_FUNCTION(proc_open)
 			if (descriptors[i].childend != descriptors[i].index)
 				close(descriptors[i].childend);
 		}
+
+#if PHP_CAN_DO_PTS
+		if (dev_ptmx >= 0) {
+			close(dev_ptmx);
+			close(slave_pty);
+		}
+#endif
+		
 		if (cwd) {
 			chdir(cwd);
 		}
@@ -765,12 +821,18 @@ PHP_FUNCTION(proc_open)
 	}
 	array_init(pipes);
 
+#if PHP_CAN_DO_PTS
+	if (dev_ptmx >= 0) {
+		close(dev_ptmx);
+		close(slave_pty);
+	}
+#endif
+
 	/* clean up all the child ends and then open streams on the parent
 	 * ends, where appropriate */
 	for (i = 0; i < ndesc; i++) {
-		FILE *fp;
 		char *mode_string=NULL;
-		php_stream *stream;
+		php_stream *stream = NULL;
 
 		close_descriptor(descriptors[i].childend);
 
@@ -791,24 +853,27 @@ PHP_FUNCTION(proc_open)
 					case O_RDONLY:
 						mode_string = "r";
 						break;
+					case O_RDWR:
+						mode_string = "r+";
+						break;
 				}
 #ifdef PHP_WIN32
-				fp = _fdopen(_open_osfhandle((long)descriptors[i].parentend,
-							descriptors[i].mode_flags), mode_string);
+				stream = php_stream_fopen_from_fd(_open_osfhandle((long)descriptors[i].parentend,
+							descriptors[i].mode_flags), mode_string, NULL);
 #else
-				fp = fdopen(descriptors[i].parentend, mode_string);
+				stream = php_stream_fopen_from_fd(descriptors[i].parentend, mode_string, NULL);
 #endif
-				if (fp) {
-					stream = php_stream_fopen_from_file(fp, mode_string);
-					if (stream) {
-						zval *retfp;
+				if (stream) {
+					zval *retfp;
 
-						MAKE_STD_ZVAL(retfp);
-						php_stream_to_zval(stream, retfp);
-						add_index_zval(pipes, descriptors[i].index, retfp);
+					/* nasty hack; don't copy it */
+					stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+					
+					MAKE_STD_ZVAL(retfp);
+					php_stream_to_zval(stream, retfp);
+					add_index_zval(pipes, descriptors[i].index, retfp);
 
-						proc->pipes[i] = Z_LVAL_P(retfp);
-					}
+					proc->pipes[i] = Z_LVAL_P(retfp);
 				}
 				break;
 			default:
@@ -822,6 +887,14 @@ PHP_FUNCTION(proc_open)
 exit_fail:
 	_php_free_envp(env, is_persistent);
 	pefree(command, is_persistent);
+#if PHP_CAN_DO_PTS
+	if (dev_ptmx >= 0) {
+		close(dev_ptmx);
+	}
+	if (slave_pty >= 0) {
+		close(slave_pty);
+	}
+#endif
 	RETURN_FALSE;
 
 }
