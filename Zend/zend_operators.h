@@ -143,6 +143,31 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 	return 0;
 }
 
+static inline char *
+zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
+{
+	char *p = haystack;
+	char ne = needle[needle_len-1];
+
+	end -= needle_len;
+
+	while (p <= end) {
+		if ((p = memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
+			if (!memcmp(needle, p, needle_len-1)) {
+				return p;
+			}
+		}
+		
+		if (p == NULL) {
+			return NULL;
+		}
+		
+		p++;
+	}
+	
+	return NULL;
+}
+
 ZEND_API int increment_function(zval *op1);
 ZEND_API int decrement_function(zval *op2);
 
