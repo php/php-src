@@ -324,7 +324,7 @@ php3_module_entry basic_functions_module = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef HAVE_PUTENV
+#if defined(HAVE_PUTENV) && !defined(ZTS)
 static HashTable putenv_ht;
 
 static int _php3_putenv_destructor(putenv_entry *pe)
