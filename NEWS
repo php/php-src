@@ -1,9 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ????, Version 4.1.1
-- Fixed several crash bugs in the xslt extension (Markus, Derick)
+- Fixed several crash bugs in the xslt extension. (Markus, Derick)
 - Fixed problem with dbase not returning very large (larger than long)
-- integers properly. (Vlad)
+  integers properly. (Vlad)
 - Fixed several bugs and memleaks in the domxml extension. (Markus)
 - Fixed Bug #9878. Patch by bfoddy@mediaone.net. (jmoore)
 - Fixed bug #13885 (gmdate() timezone handling on windows). (jmoore)
@@ -13,7 +13,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug where the is_file() family of functions would in-correctly give 
   an error when they were given filenames that didn't exist. (Sterling)
 - Fixed a bug in the strtotime() function where it was incorrectly recognizing 
-  GMT +100 and GMT -100. (Derick)
+  GMT +0100 and GMT -1000. (Derick)
 
 10 Dec 2001, Version 4.1.0
 - Worked around a bug in the MySQL client library that could cause PHP to hang
