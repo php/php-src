@@ -651,6 +651,79 @@ Changes in the Zend Engine 2.0
       TBD: Respect visibility: Show protected only when inside class
            method and only otherwise public properties only.
 
+      Each class whose instances can be iterated with foreach should 
+      implement the empty interface 'Traversable'. Hence any object
+      that says it implements 'Traversable' can be used with forach.
+
+      The interfaces 'IteratorAggregate' and 'Iterator' allow to specify
+      how class objects are iterated in PHP code. The first of them simply
+      has a method 'getIterator' which must return an array or an object
+      that either implements the interface 'Iterator' or is instantiated
+      from an internal class that can be iterated.
+
+      Example:
+
+        <?php
+            class ObjectIterator implements Iterator {
+            
+                private $obj;
+                private $num;
+            
+                function __construct($obj) {
+                    $this->obj = $obj;
+                }
+                function rewind() {
+                    $this->num = 0;
+                }
+                function hasMore() {
+                    return $this->num < $this->obj->max;
+                }
+                function key() {
+                    return $this->num;
+                }
+                function current() {
+                    switch($this->num) {
+                        case 0: return "1st";
+                        case 1: return "2nd";
+                        case 2: return "3rd";
+                        default: return $this->num."th";
+                    }
+                }
+                function next() {
+                    $this->num++;
+                }
+            }
+                
+            class Oject implements IteratorAggregate {
+            
+                public $max = 3;
+            
+                function getIterator() {
+                    return new ObjectIterator($this);
+                }
+            } 
+            
+            $obj = new Object;
+            
+            // this foreach ...
+            foreach($obj as $key => $val) {
+                echo "$key = $val\n";
+            }
+            
+            // matches the following 7 lines with the for directive.
+            $it = $obj->getIterator();
+            for($it->rewind(); $it->hasMore(); $it->next) {
+                $key = $it->current();
+                $val = $it->key();
+                echo "$key = $val\n";
+            }
+            unset($it);
+        ?>
+
+      The matching for directive is very intersting here since it shows 
+      the use of all abstract methods declared in the interfaces Iterator
+      and IteratorAggregate respectively.
+
     * __METHOD__
 
       The pseudo constant __METHOD__ shows the current class and method 

@@ -1588,8 +1588,23 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 				return 1;
 
 			lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(callable)+1)) 
+			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(callable)+1)) {
 				retval = 1;
+			} else {
+				char *func_pos;
+				if ((func_pos=strstr(lcname, "::"))) {
+					int lcclass_len = (int)(func_pos - lcname);
+					char *lcclass = estrndup(lcname, lcclass_len);
+					zend_class_entry **ce;
+		
+					if (zend_lookup_class(lcclass, lcclass_len, &ce TSRMLS_CC) == SUCCESS) {
+						int func_len = Z_STRLEN_P(callable) - lcclass_len - 2;
+						func_pos += 2;
+						retval = zend_hash_exists(&(*ce)->function_table, func_pos, func_len + 1) ? 1 : 0;
+					}
+					efree(lcclass);
+		        }
+			}
 			efree(lcname);
 			break;
 
