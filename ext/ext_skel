@@ -22,7 +22,7 @@ echo "  --string-lens"
 exit 1
 }
 
-if test $# -eq 0; then
+if test $# = 0; then
   usage
 fi
 
@@ -69,12 +69,12 @@ while test $# -gt 0; do
   shift
 done
 
-if [ -z "$assign_params" -a ! -z "$string_lens" ]; then
-    usage
+if test -z "$assign_params" && test -n "$string_lens"; then
+  usage
 fi
 
 if test -d "$extname" ; then
-	givup "Directory $extname already exists."
+  givup "Directory $extname already exists."
 fi
 
 test -f ext_skel || givup "ext_skel must be in the current directory"
@@ -89,20 +89,19 @@ else
     ECHO_C='\c'
 fi
 
-if [ -z $stubs ]; then
-echo "Creating directory $extname"
-stubfile=$extname"/function_stubs"
-
-mkdir $extname || givup "Cannot create directory $extname"
+if test -z "$stubs"; then
+  echo "Creating directory $extname"
+  stubfile=$extname"/function_stubs"
+  mkdir $extname || givup "Cannot create directory $extname"
 fi
 
-if [ ! -z $proto ]; then
-    cat $proto | awk -v extname=$extname -v stubs=$stubs -v stubfile=$stubfile -v xml=$xml -v full_xml=$full_xml -v i_know_what_to_do_shut_up_i_dont_need_your_help_mode=$no_help -v assign_params=$assign_params -v string_lens=$string_lens -f ./skeleton/create_stubs
+if test -n "$proto"; then
+  cat $proto | awk -v extname=$extname -v stubs=$stubs -v stubfile=$stubfile -v xml=$xml -v full_xml=$full_xml -v i_know_what_to_do_shut_up_i_dont_need_your_help_mode=$no_help -v assign_params=$assign_params -v string_lens=$string_lens -f ./skeleton/create_stubs
 fi
 
-if [ -z $stubs ]; then
-cd $extname
-chmod 755 .
+if test -z "$stubs"; then
+  cd $extname
+  chmod 755 .
 
 $ECHO_N "Creating basic files:$ECHO_C"
 
@@ -180,7 +179,7 @@ if [ ! -z $no_help ]; then
     echo '/^[[:space:]]*\/\*/,/^[[:space:]]*\*\//D' >> sedscript
 fi
 
-cat ../skeleton/skeleton.c | sed -f sedscript > $extname.c
+sed -f sedscript <../skeleton/skeleton.c > $extname.c
 
 
 $ECHO_N " php_$extname.h$ECHO_C"
@@ -198,31 +197,32 @@ if [ ! -z $no_help ]; then
     echo 's/^\/\*.*\*\/$//' >> sedscript
     echo '/^[[:space:]]*\/\*/,/^[[:space:]]*\*\//D' >> sedscript
 fi
-cat ../skeleton/php_skeleton.h | sed -f sedscript > php_$extname.h
+sed -f sedscript <../skeleton/php_skeleton.h > php_$extname.h
 
 rm sedscript
 
-if [ -z "$stubs" -a -z "$no_help" ]; then
-$ECHO_N " $extname.php$ECHO_C"
-cat ../skeleton/skeleton.php | sed \
--e "s/extname/$extname/g" \
-> $extname.php
+if test -z "$stubs" && test -z "$no_help"; then
+  $ECHO_N " $extname.php$ECHO_C"
+  sed \
+    -e "s/extname/$extname/g" \
+    <../skeleton/skeleton.php \
+    > $extname.php
 fi
 
-if [ ! -z $proto ]; then
-    if [ -z $stubs ]; then
-	rm function_entries
-	rm function_declarations
-	rm function_stubs
-    fi
-    if [ -f function_warning ]; then
-	rm function_warning
-	warning="
+if test -n "$proto"; then
+  if test -z "$stubs"; then
+    rm function_entries
+    rm function_declarations
+    rm function_stubs
+  fi
+  if test -f function_warning; then
+    rm function_warning
+    warning="
 NOTE! Because some arguments to functions were resources, the code generated
 cannot yet be compiled without editing. Please consider this to be step 4.5
 in the instructions above. 
 "
-    fi
+  fi
 fi
 
 chmod 644 *
@@ -230,8 +230,8 @@ fi
 
 echo " [done]."
 
-if [ -z "$no_help" -a -z "$stubs" ]; then
-cat <<eof
+if test -z "$no_help" && test -z "$stubs"; then
+  cat <<eof
 
 To use your new extension, you will have to execute the following steps:
 
