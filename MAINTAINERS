@@ -115,6 +115,10 @@ EXTENSION:           xml
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           yaz
+PRIMARY MAINTAINER:  Adam Dickmeiss <adam@indexdata.dk>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           zlib
 PRIMARY MAINTAINER:  Stefan Roehrich <sr@linux.de>
 STATUS:              Maintained

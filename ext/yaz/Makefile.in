@@ -1,0 +1,5 @@
+LTLIBRARY_NAME    = libyaz.la
+LTLIBRARY_SOURCES = php_yaz.c
+
+include $(top_srcdir)/build/dynlib.mk
+
