@@ -1750,7 +1750,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 
 	if (parent_info->flags & ZEND_ACC_PRIVATE) {
 		if (zend_hash_quick_find(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child_info)==SUCCESS) {
-				child_info->flags |= ZEND_ACC_CHANGED;
+			child_info->flags |= ZEND_ACC_CHANGED;
 		}
 		return 0; /* don't copy access information to child */
 	}
@@ -1765,13 +1765,15 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if (child_info->flags & ZEND_ACC_IMPLICIT_PUBLIC) {
-			/* Explicitly copy the value from the parent */
-			zval **pvalue;
-
-			if (zend_hash_quick_find(&parent_ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, (void **) &pvalue)==SUCCESS) {
-				zend_hash_quick_update(&ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, pvalue, sizeof(zval *), NULL);
-				(*pvalue)->refcount++;
-				zend_hash_del(&ce->default_properties, child_info->name, child_info->name_length+1);
+			if (!(parent_info->flags & ZEND_ACC_IMPLICIT_PUBLIC)) {
+				/* Explicitly copy the default value from the parent (if it has one) */
+				zval **pvalue;
+	
+				if (zend_hash_quick_find(&parent_ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, (void **) &pvalue)==SUCCESS) {
+					(*pvalue)->refcount++;
+					zend_hash_del(&ce->default_properties, child_info->name, child_info->name_length+1);
+					zend_hash_quick_update(&ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, pvalue, sizeof(zval *), NULL);
+				}
 			}
 			return 1; /* Inherit from the parent */
 		} else if ((child_info->flags & ZEND_ACC_PUBLIC) && (parent_info->flags & ZEND_ACC_PROTECTED)) {
