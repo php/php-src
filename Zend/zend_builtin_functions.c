@@ -60,6 +60,10 @@ static ZEND_FUNCTION(get_defined_functions);
 static ZEND_FUNCTION(get_defined_vars);
 static ZEND_FUNCTION(create_function);
 static ZEND_FUNCTION(get_resource_type);
+static ZEND_FUNCTION(get_loaded_extensions);
+static ZEND_FUNCTION(extension_loaded);
+static ZEND_FUNCTION(get_extension_funcs);
+static ZEND_FUNCTION(get_defined_constants);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
 #endif
@@ -107,6 +111,10 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_defined_vars,	NULL)
 	ZEND_FE(create_function,	NULL)
 	ZEND_FE(get_resource_type,	NULL)
+	ZEND_FE(get_loaded_extensions,		NULL)
+	ZEND_FE(extension_loaded,			NULL)
+	ZEND_FE(get_extension_funcs,		NULL)
+	ZEND_FE(get_defined_constants,		NULL)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
 #endif
@@ -996,3 +1004,92 @@ ZEND_FUNCTION(get_resource_type)
 		RETURN_STRING("Unknown", 1);
 	}
 }
+
+
+static int add_extension_info(zend_module_entry *module, void *arg)
+{
+	zval *name_array = (zval *)arg;
+	add_next_index_string(name_array, module->name, 1);
+	return 0;
+}
+
+static int add_constant_info(zend_constant *constant, void *arg)
+{
+	zval *name_array = (zval *)arg;
+	add_assoc_zval(name_array, constant->name, &(constant->value));
+	return 0;
+}
+
+/* {{{ proto array get_loaded_extensions(void)
+   Return an array containing names of loaded extensions */
+ZEND_FUNCTION(get_loaded_extensions)
+{
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	array_init(return_value);
+	zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void*)) add_extension_info, return_value);
+}
+/* }}} */
+
+
+/* {{{ proto array get_defined_constants(void)
+   Return an array containing the names and values of all defined constants */
+ZEND_FUNCTION(get_defined_constants)
+{
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	array_init(return_value);
+	zend_hash_apply_with_argument(EG(zend_constants), (int (*)(void *, void*)) add_constant_info, return_value);
+}
+
+
+/* {{{ proto bool extension_loaded(string extension_name)
+   Returns true if the named extension is loaded */
+ZEND_FUNCTION(extension_loaded)
+{
+	zval **extension_name;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(extension_name);
+	if (zend_hash_exists(&module_registry, Z_STRVAL_PP(extension_name), Z_STRLEN_PP(extension_name)+1)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto array get_extension_funcs(string extension_name)
+   Returns an array with the names of functions belonging to the named extension */
+ZEND_FUNCTION(get_extension_funcs)
+{
+	zval **extension_name;
+	zend_module_entry *module;
+	zend_function_entry *func;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(extension_name);
+	if (zend_hash_find(&module_registry, Z_STRVAL_PP(extension_name),
+					   Z_STRLEN_PP(extension_name)+1, (void**)&module) == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	func = module->functions;
+	while (func->fname) {
+		add_next_index_string(return_value, func->fname, 1);
+		func++;
+	}
+}
+/* }}} */
