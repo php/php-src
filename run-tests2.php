@@ -18,6 +18,7 @@
    |          Marcus Boerger <helly@php.net>                              |
    |          Derick Rethans <derick@php.net>                             |
    |          Sander Roobol <sander@php.net>                              |
+   |          John Coggeshall <john@php.net                               |
    | (based on version by: Stig Bakken <ssb@fast.no>)                     |
    | (based on the PHP 3 test framework by Rasmus Lerdorf)                |
    +----------------------------------------------------------------------+
@@ -27,6 +28,134 @@ ob_implicit_flush();
 error_reporting(E_ALL);
 define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
+
+class webHarness extends testHarness {
+    
+    var $textdata;
+    
+    function checkSafeMode() {
+        if (ini_get('safe_mode')) {
+        
+?>
+<CENTER>
+<TABLE CELLPADDING=5 CELLSPACING=0 BORDER=1>
+<TR>
+<TD BGCOLOR="#FE8C97" ALIGN=CENTER><B>WARNING</B>
+<HR NOSHADE COLOR=#000000>
+You are running this test-suite with "safe_mode" <B>ENABLED</B>!<BR><BR>
+Chances are high that none of the tests will work at all, depending on
+how you configured "safe_mode".
+</TD>
+</TR>
+</TABLE>
+</CENTER>
+<?php           
+            return true;
+        }
+        return false;
+    }
+    
+    function runHeader() {
+            
+?>
+<TABLE CELLPADDING=3 CELLSPACING=0 BORDER=0 STYLE="border: thin solid black;">
+<TR>
+    <TD>TESTED FUNCTIONALITY</TD>
+    <TD>RESULT</TD>
+</TR>
+<?php
+        
+    }
+    
+    function runFooter() {
+    
+    
+?>
+<TR>
+<TD COLSPAN=2 ALIGN=CENTER><FONT SIZE=3>Additional Notes</FONT><HR><?php $this->displaymsg(); ?></TD>
+</TR>
+</TABLE><BR><BR>
+<?php 
+    }
+    
+    function error($message)
+    {
+            $this->writemsg("ERROR: {$message}\n");
+            exit(1);
+    }
+    
+    // Use this function to do any displaying of text, so that
+    // things can be over-written as necessary.
+    
+    function writemsg($msg) {
+      
+        $this->textdata = $this->textdata . $msg;
+        
+    }
+    
+    function displaymsg() {
+        
+?>
+<TEXTAREA ROWS=10 COLS=80><?=$this->textdata?></TEXTAREA>
+<?php
+    }
+    
+    // Another wrapper function, this one should be used any time
+    // a particular test passes or fails
+    
+    function showstatus($item, $status, $reason = '') 
+    {
+        static $color = "#FAE998";
+        
+        $color = ($color == "#FAE998") ? "#FFFFFF" : "#FAE998";
+        
+        switch($status) {
+        
+            case 'PASSED':
+            
+                ?>
+                <TR>
+                <TD BGCOLOR=<?=$color?>><?=$item?></TD>
+                <TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#00FF00>PASSED</FONT></TD>
+                </TR>
+                <TR>
+                <TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+                </TR>
+                <?php
+                
+                break;
+                
+            case 'FAILED':
+                
+                ?>
+                <TR>
+                <TD BGCOLOR=<?=$color?>><?=$item?></TD>
+                <TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#FF0000>FAILED</FONT></TD>
+                </TR>
+                <TR>
+                <TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+                </TR>
+                <?php
+                
+                break;
+                
+            case 'SKIPPED':
+            
+                ?>
+                <TR>
+                <TD BGCOLOR=<?=$color?>><?=$item?></TD>
+                <TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#000000>SKIPPED</FONT></TD>
+                </TR>
+                <TR>
+                <TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+                </TR>
+                <?php
+                break;
+            
+        }
+    
+    }
+}
 
 class testHarness {
 	var $cwd;
@@ -103,6 +232,43 @@ class testHarness {
 		$this->run();
 		$this->summarizeResults();
 	}
+
+        // Use this function to do any displaying of text, so that
+        // things can be over-written as necessary.
+        
+	function writemsg($msg) {
+	    
+	    echo $msg;
+	    
+	}
+	
+	// Another wrapper function, this one should be used any time
+	// a particular test passes or fails
+	
+	function showstatus($item, $status, $reason = '') {
+            
+            switch($status) {
+                
+                case 'PASSED':
+                
+                    $this->writemsg("PASSED: $item ($reason)\n");
+                    
+                    break;
+                    
+                case 'FAILED':
+                    
+                    $this->writemsg("FAILED: $item ($reason)\n");
+                    
+                    break;
+                    
+                case 'SKIPPED':
+                
+                    $this->writemsg("SKIPPED: $item ($reason)\n");
+                    break;
+                    
+            }
+	    
+	}
 	
 	function help()
 	{
@@ -130,8 +296,8 @@ class testHarness {
 			if ($argv[$i][0] != '-') continue;
 			$opt = $argv[$i++][1];
 			$value = 0;
-			if ($argv[$i][0] != '-') {
-				$value = $argv[$i++];
+			if (@$argv[$i][0] != '-') {
+				@$value = $argv[$i++];
 			}
 			switch($opt) {
 				case 'd':
@@ -206,7 +372,7 @@ class testHarness {
 	
 	function checkSafeMode() {
 		if (ini_get('safe_mode')) {
-			echo <<< SAFE_MODE_WARNING
+			$safewarn =  <<< SAFE_MODE_WARNING
 
 +-----------------------------------------------------------+
 |                       ! WARNING !                         |
@@ -218,6 +384,7 @@ class testHarness {
 
 
 SAFE_MODE_WARNING;
+                        writemsg($safewarn);
 			return true;
 		}
 		return false;
@@ -233,7 +400,7 @@ SAFE_MODE_WARNING;
 			$ini=php_ini_scanned_files();
 		}
 		
-		echo "\n$this->ddash\n".
+		$this->writemsg("\n$this->ddash\n".
 			"CWD         : {$this->cwd}\n".
 			"PHP         : {$this->TEST_PHP_EXECUTABLE}\n".
 			"PHP_SAPI    : " . PHP_SAPI . "\n".
@@ -241,11 +408,11 @@ SAFE_MODE_WARNING;
 			"PHP_OS      : " . PHP_OS . "\n".
 			"INI actual  : " . realpath(get_cfg_var('cfg_file_path')) . "\n".
 			"More .INIs  : " . str_replace("\n","", $ini) . "\n".
-			"Test Dirs   : ";
+			"Test Dirs   : ");
 		foreach ($this->test_dirs as $test_dir) {
-			echo "{$test_dir}\n              ";
+			$this->writemsg("{$test_dir}\n              ");
 		}
-		echo "\n$this->ddash\n";
+		$this->writemsg("\n$this->ddash\n");
 	}
 	
 	function loadFileList()
@@ -290,7 +457,16 @@ SAFE_MODE_WARNING;
 	
 	function runHeader()
 	{
-		echo "TIME START " . date('Y-m-d H:i:s', $this->start_time) . "\n".$this->ddash."\n";
+		$this->writemsg("TIME START " . date('Y-m-d H:i:s', $this->start_time) . "\n".$this->ddash."\n");
+		$this->writemsg("Running selected tests.\n");
+	}
+	
+	// Probably unnecessary for CLI, but used when overloading a
+	// web-based test class
+	
+	function runFooter()
+	{
+            
 	}
 	
 	function run()
@@ -299,7 +475,7 @@ SAFE_MODE_WARNING;
 		$this->runHeader();
 		// Run selected tests.
 		if (count($this->test_to_run)) {
-			echo "Running selected tests.\n";
+			
 			foreach($this->test_to_run as $name=>$runnable) {
 				if(!preg_match("/\.phpt$/", $name))
 					continue;
@@ -313,12 +489,13 @@ SAFE_MODE_WARNING;
 			}
 		}
 		$this->end_time = time();
+		$this->runFooter();
 	}
 
 	function summarizeResults()
 	{
 		if (count($this->test_results) == 0) {
-			echo "No tests were run.\n";
+			$this->writemsg("No tests were run.\n");
 			return;
 		}
 		
@@ -335,7 +512,7 @@ SAFE_MODE_WARNING;
 			$percent_results[$v] = (100.0 * $n) / $n_total;
 		}
 		
-		echo "\n".$this->ddash."\n".
+		$this->writemsg("\n".$this->ddash."\n".
 			"TIME END " . date('Y-m-d H:i:s', $this->end_time) . "\n".
 			$this->ddash."\n".
 			"TEST RESULT SUMMARY\n".
@@ -349,7 +526,7 @@ SAFE_MODE_WARNING;
 			"Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . "\n".
 			$this->sdash."\n".
 			"Time taken      : " . sprintf("%4d seconds", $this->end_time - $this->start_time) . "\n".
-			$this->ddash."\n";
+			$this->ddash."\n");
 		
 		$failed_test_summary = '';
 		if ($this->failed_tests) {
@@ -362,13 +539,13 @@ SAFE_MODE_WARNING;
 		}
 		
 		if ($failed_test_summary && !$this->NO_PHPTEST_SUMMARY) {
-			echo $failed_test_summary;
+			$this->writemsg($failed_test_summary);
 		}
 
 		/* We got failed Tests, offer the user to send and e-mail to QA team, unless NO_INTERACTION is set */
 		if ($sum_results['FAILED'] && !$this->NO_INTERACTION) {
 			$fp = fopen("php://stdin", "r+");
-			echo "Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ";
+			$this->writemsg("Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ");
 			$user_input = fgets($fp, 10);
 			
 			if (strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
@@ -420,7 +597,7 @@ SAFE_MODE_WARNING;
 					fwrite($fp, $failed_tests_data);
 					fclose($fp);
 				
-					echo "\nThe test script was unable to automatically send the report to PHP's QA Team\nPlease send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n";
+					$this->writemsg("\nThe test script was unable to automatically send the report to PHP's QA Team\nPlease send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n");
 				}
 			}
 		}
@@ -524,13 +701,10 @@ SAFE_MODE_WARNING;
 				$output = `{$this->TEST_PHP_EXECUTABLE} $tmp_skipif`;
 				@unlink($tmp_skipif);
 				if (ereg("^skip", trim($output))){
-					echo "SKIP {$section_text['TEST']}";
+				
 					$reason = (ereg("^skip[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
-					if ($reason) {
-						echo " (reason: $reason)\n";
-					} else {
-						echo "\n";
-					}
+                                        $this->showstatus($section_text['TEST'], 'SKIPPED', $reason);
+        
 					return 'SKIPPED';
 				}
 			}
@@ -544,7 +718,7 @@ SAFE_MODE_WARNING;
 	function run_test($file)
 	{
 		if ($this->TEST_PHP_DETAILED)
-			echo "\n=================\nTEST $file\n";
+			$this->writemsg("\n=================\nTEST $file\n");
 	
 		$section_text = $this->getSectionText($file);
 	
@@ -609,14 +783,14 @@ SAFE_MODE_WARNING;
 		}
 	
 		if ($this->TEST_PHP_DETAILED)
-			echo 	"\nCONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . 
+			$this->writemsg("\nCONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . 
 					"\nCONTENT_TYPE    = " . $env['CONTENT_TYPE'] . 
 					"\nPATH_TRANSLATED = " . $env['PATH_TRANSLATED'] . 
 					"\nQUERY_STRING    = " . $env['QUERY_STRING'] . 
 					"\nREDIRECT_STATUS = " . $env['REDIRECT_STATUS'] . 
 					"\nREQUEST_METHOD  = " . $env['REQUEST_METHOD'] . 
 					"\nSCRIPT_FILENAME = " . $env['SCRIPT_FILENAME'] . 
-					"\nCOMMAND $cmd\n";
+					"\nCOMMAND $cmd\n");
 	
 		$this->setEnvironment($env);
 		
@@ -653,7 +827,7 @@ SAFE_MODE_WARNING;
 	*/
 			if (preg_match("/^$wanted_re\$/s", $output)) {
 				@unlink($tmp_file);
-				echo "PASS $tested\n";
+				$this->showstatus($tested, 'PASSED');
 				return 'PASSED';
 			}
 	
@@ -664,13 +838,13 @@ SAFE_MODE_WARNING;
 			$ok = (0 == strcmp($output,$wanted));
 			if ($ok) {
 				@unlink($tmp_file);
-				echo "PASS $tested\n";
+				$this->showstatus($tested, 'PASSED');
 				return 'PASSED';
 			}
 		}
 	
 		// Test failed so we need to report details.
-		echo "FAIL $tested\n";
+		$this->showstatus($tested, 'FAILED');
 	
 		$this->failed_tests[] = array(
 							'name' => $file,
@@ -726,7 +900,7 @@ SAFE_MODE_WARNING;
 			return FALSE;
 		}
 	
-		echo "Posting to {$url_bits['host']} {$url_bits['path']}\n";
+		$this->writemsg("Posting to {$url_bits['host']} {$url_bits['path']}\n");
 		fwrite($fs, "POST ".$url_bits['path']." HTTP/1.1\r\n");
 		fwrite($fs, "Host: ".$url_bits['host']."\r\n");
 		fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
@@ -749,7 +923,7 @@ SAFE_MODE_WARNING;
 		fwrite($fp,$text);
 		fclose($fp);
 		if (1 < $this->TEST_PHP_DETAILED) {
-			echo "\nFILE $filename {{{\n$text\n}}}\n";
+			$this->writemsg("\nFILE $filename {{{\n$text\n}}}\n");
 		}
 	}
 
@@ -761,13 +935,14 @@ SAFE_MODE_WARNING;
 		$testname = realpath($testname);
 		$logname  = realpath($logname);
 		switch ($this->TEST_PHP_ERROR_STYLE) {
+		default:
 		case 'MSVC':
-			echo $testname . "(1) : $tested\n";
-			echo $logname . "(1) :  $tested\n";
+			$this->writemsg($testname . "(1) : $tested\n");
+			$this->writemsg($logname . "(1) :  $tested\n");
 			break;
 		case 'EMACS':
-			echo $testname . ":1: $tested\n";
-			echo $logname . ":1:  $tested\n";
+			$this->writemsg($testname . ":1: $tested\n");
+			$this->writemsg($logname . ":1:  $tested\n");
 			break;
 		}
 	}
@@ -789,12 +964,12 @@ SAFE_MODE_WARNING;
 
 	function error($message)
 	{
-		echo "ERROR: {$message}\n";
+		$this->writemsg("ERROR: {$message}\n");
 		exit(1);
 	}
 }
 
-$test = new testHarness();
+$test = new webHarness();
 /*
  * Local variables:
  * tab-width: 4

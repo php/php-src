@@ -1,5 +1,5 @@
 --TEST--
-rewriter handles <form> and <fieldset> correctly
+rewriter handles form and fieldset tags correctly
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
