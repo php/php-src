@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed problems with longlong values in mysqli. (Georg)
 - Fixed class name case preserving of user defined classes. (Marcus)
+- Fixed bug #26938 (exec() has problems reading long lines).
+  (Ilia, runekl[at]opoint[dot]com
 - Fixed bug #26947 (ext/dom: Crash when using DomDocument::getElementById()).
   (Christian)
 - Fixed bug #26911 (crash in sqlite extension when fetching data from empty 
