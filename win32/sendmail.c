@@ -47,6 +47,18 @@ static char *days[] =
 static char *months[] =
 {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+/* '*error_message' has to be passed around from php_mail() */
+#define SMTP_ERROR_RESPONSE_SPEC	"SMTP server response: %s"
+/* Convinient way to handle error messages from the SMTP server.
+   response is ecalloc()d in Ack() itself and efree()d here
+   because the content is in *error_message now */
+#define SMTP_ERROR_RESPONSE(response)	{ \
+											if (NULL != (*error_message = ecalloc(1, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response)))) { \
+												snprintf(*error_message, sizeof(SMTP_ERROR_RESPONSE_SPEC) + strlen(response), SMTP_ERROR_RESPONSE_SPEC, response); \
+											} \
+											efree(response); \
+										}
+
 #ifndef THREAD_SAFE
 char Buffer[MAIL_BUFFER_SIZE];
 
@@ -62,7 +74,7 @@ char MailHost[HOST_NAME_LEN];
 char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
-char *php_mailer = "PHP 4.0 WIN32";
+char *php_mailer = "PHP 4 WIN32";
 
 char *get_header(char *h, char *headers);
 
@@ -88,8 +100,7 @@ static char *ErrorMessages[] =
 	{"Bad Message Return Path"},
 	{"Bad Mail Host"},
 	{"Bad Message File"},
-	{"\"sendmail_from\" not set in php.ini"},
-
+	{"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing"},
 	{"Mailserver rejected our \"sendmail_from\" setting"} /* 20 */
 };
 
@@ -108,7 +119,7 @@ static char *ErrorMessages[] =
 //
 //  See SendText() for additional args!
 //********************************************************************/
-int TSendMail(char *host, int *error,
+int TSendMail(char *host, int *error, char **error_message,
 			  char *headers, char *Subject, char *mailTo, char *data)
 {
 	int ret;
@@ -118,10 +129,10 @@ int TSendMail(char *host, int *error,
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
-		return BAD_MAIL_HOST;
+		return FAILURE;
 	} else if (strlen(host) >= HOST_NAME_LEN) {
 		*error = BAD_MAIL_HOST;
-		return BAD_MAIL_HOST;
+		return FAILURE;
 	} else {
 		strcpy(MailHost, host);
 	}
@@ -162,16 +173,25 @@ int TSendMail(char *host, int *error,
 	/* attempt to connect with mail host */
 	*error = MailConnect();
 	if (*error != 0) {
-		if(RPath)efree(RPath);
-		return *error;
+		if (RPath) {
+			efree(RPath);
+		}
+		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
+			return FAILURE;
+		}
+		snprintf(*error_message, HOST_NAME_LEN + 128, "Failed to connect to mailserver at \"%s\", verify your \"SMTP\" setting in php.ini", MailHost);
+		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, data, headers);
+		ret = SendText(RPath, Subject, mailTo, data, headers, error_message);
 		TSMClose();
+		if (RPath) {
+			efree(RPath);
+		}
 		if (ret != SUCCESS) {
 			*error = ret;
+			return FAILURE;
 		}
-		if(RPath)efree(RPath);
-		return ret;
+		return SUCCESS;
 	}
 }
 
@@ -186,7 +206,7 @@ int TSendMail(char *host, int *error,
 void TSMClose()
 {
 	Post("QUIT\r\n");
-	Ack();
+	Ack(NULL);
 	/* to guarantee that the cleanup is not made twice and 
 	   compomise the rest of the application if sockets are used
 	   elesewhere 
@@ -207,8 +227,6 @@ void TSMClose()
 //*******************************************************************/
 char *GetSMErrorText(int index)
 {
-
-
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
 
@@ -233,11 +251,12 @@ char *GetSMErrorText(int index)
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers)
+int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers, char **error_message)
 {
 	int res, i;
 	char *p;
 	char *tempMailTo, *token, *pos1, *pos2;
+	char *server_response = NULL;
 
 	/* check for NULL parameters */
 	if (data == NULL)
@@ -249,8 +268,12 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 
 	/* simple checks for the mailto address */
 	/* have ampersand ? */
+	/* mfischer, 20020514: I commented this out because it really
+	   seems bogus. Only a username for example may still be a
+	   valid address at the destination system.
 	if (strchr(mailTo, '@') == NULL)
 		return (BAD_MSG_DESTINATION);
+	*/
 
 	sprintf(Buffer, "HELO %s\r\n", LocalHost);
 
@@ -261,14 +284,18 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 		if ((res = Post(Buffer)) != SUCCESS)
 			return (res);
 	}
-	if ((res = Ack()) != SUCCESS)
+	if ((res = Ack(&server_response)) != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
 		return (res);
+	}
 
 	sprintf(Buffer, "MAIL FROM:<%s>\r\n", RPath);
 	if ((res = Post(Buffer)) != SUCCESS)
 		return (res);
-	if ((res = Ack()) != SUCCESS)
+	if ((res = Ack(&server_response)) != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
 		return W32_SM_SENDMAIL_FROM_MALFORMED;
+	}
 
 
 	tempMailTo = estrdup(mailTo);
@@ -280,8 +307,10 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 		sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
 		if ((res = Post(Buffer)) != SUCCESS)
 			return (res);
-		if ((res = Ack()) != SUCCESS)
+		if ((res = Ack(&server_response)) != SUCCESS) {
+			SMTP_ERROR_RESPONSE(server_response);
 			return (res);
+		}
 		token = strtok(NULL, ",");
 	}
 
@@ -304,8 +333,10 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
 			if ((res = Post(Buffer)) != SUCCESS)
 				return (res);
-			if ((res = Ack()) != SUCCESS)
+			if ((res = Ack(&server_response)) != SUCCESS) {
+				SMTP_ERROR_RESPONSE(server_response);
 				return (res);
+			}
 			token = strtok(NULL, ",");
 		}
 		efree(tempMailTo);
@@ -313,8 +344,10 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 
 	if ((res = Post("DATA\r\n")) != SUCCESS)
 		return (res);
-	if ((res = Ack()) != SUCCESS)
+	if ((res = Ack(&server_response)) != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
 		return (res);
+	}
 
 
 	/* send message header */
@@ -354,8 +387,10 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	/*send termination dot */
 	if ((res = Post("\r\n.\r\n")) != SUCCESS)
 		return (res);
-	if ((res = Ack()) != SUCCESS)
+	if ((res = Ack(&server_response)) != SUCCESS) {
+		SMTP_ERROR_RESPONSE(server_response);
 		return (res);
+	}
 
 	return (SUCCESS);
 }
@@ -471,7 +506,7 @@ int MailConnect()
 		return (FAILED_TO_CONNECT);
 
 	/* receive Server welcome message */
-	res = Ack();
+	res = Ack(NULL);
 	return (res);
 }
 
@@ -515,20 +550,16 @@ int Post(LPCSTR msg)
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-int Ack()
+int Ack(char **server_response)
 {
-	static char *buf;
+	static char buf[MAIL_BUFFER_SIZE];
 	int rlen;
 	int Index = 0;
 	int Received = 0;
 
-	if (!buf)
-		if ((buf = (char *) malloc(1024 * 4)) == NULL)
-			return (OUT_OF_MEMORY);
-
   again:
 
-	if ((rlen = recv(sc, buf + Index, ((1024 * 4) - 1) - Received, 0)) < 1)
+	if ((rlen = recv(sc, buf + Index, ((MAIL_BUFFER_SIZE) - 1) - Received, 0)) < 1)
 		return (FAILED_TO_RECEIVE);
 
 	Received += rlen;
@@ -544,8 +575,24 @@ int Ack()
 		goto again;				/* Incomplete data. Line must be terminated by CRLF
 		                           And not contain a space followed by a '-' */
 
-	if (buf[0] > '3')
+	if (buf[0] > '3') {
+		/* If we've a valid pointer, return the SMTP server response so the error messages give away more information */
+		if (server_response) {
+			int dec = 0;
+			/* See if we have something like \r, \n, \r\n or \n\r at the end of the message and chop it off */
+			if (Received > 2) {
+				if (buf[Received-1] == '\n' || buf[Received-1] == '\r') {
+					dec++;
+					if (buf[Received-2] == '\r' || buf[Received-2] == '\n') {
+						dec++;
+					}
+				}
+
+			}
+			*server_response = estrndup(buf, Received - dec);
+		}
 		return (SMTP_SERVER_ERROR);
+	}
 
 	return (SUCCESS);
 }

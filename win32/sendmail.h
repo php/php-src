@@ -31,16 +31,16 @@
 #define MAX_ERROR_INDEX					21 /* Always last error message + 1 */
 
 
-int TSendMail(char *smtpaddr, int *returnerror,
+int TSendMail(char *smtpaddr, int *returnerror, char **error_message,
 			  char *RPath, char *Subject, char *mailTo, char *data);
 void TSMClose(void);
-int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers);
+int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers, char **error_message);
 char *GetSMErrorText(int index);
 
 int MailConnect();
 int PostHeader(char *, char *, char *, char *, char *);
 int Post(LPCSTR);
-int Ack();
+int Ack(char **server_response);
 unsigned long GetAddr(LPSTR szHost);
 
 
