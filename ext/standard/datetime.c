@@ -664,6 +664,9 @@ void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	if ((*format_arg)->value.str.len==0) {
 		RETURN_FALSE;
 	}
+	if (timestamp < 0) {
+		RETURN_FALSE;
+	}
 	format = (*format_arg)->value.str.val;
 	if (gm) {
 		ta = php_gmtime_r(&timestamp, &tmbuf);
