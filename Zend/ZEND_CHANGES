@@ -492,16 +492,21 @@ Changes in the Zend Engine 2.0
         ShapeFactoryMethod('Square')->draw();
         ?>
 
-    * Static member variables of classes can now be initialized.
+    * Member variables of classes can now be initialized.
 
       Example:
 
         <?php
         class foo {
             static $my_static = 5;
+            public $my_prop = 'bla';
         }
 
         print foo::$my_static;
+        
+        $obj = foo;
+        
+        print $obj->my_prop;
         ?>
 
     * Static Methods.
