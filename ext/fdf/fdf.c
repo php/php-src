@@ -217,6 +217,13 @@ PHP_FUNCTION(fdf_get_value) {
 	err = FDFGetValue(fdf, arg2->value.str.val, NULL, 0, &nr);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
+  /* In the inofficial version of FdfTK 4.0 (as FDFGetVersion says. The
+     library has a name with version 3.0, don't know what adobe has in
+     mind) the number of bytes of the value doesn't include the trailing
+     '\0'. This was not the case in 2.0
+  */
+	if(strcmp(FDFGetVersion(), "2.0"))
+		nr++;
 	buffer = emalloc(nr);
 	err = FDFGetValue(fdf, arg2->value.str.val, buffer, nr, &nr);
 	if(err != FDFErcOK)

@@ -18,7 +18,7 @@ AC_ARG_WITH(fdftk,
       ],[AC_MSG_ERROR(fdftk module requires fdftk 2.0)])
       ;;
     *)
-      test -f $withval/include/Fdftk.h && FDFLIB_INCLUDE="-I$withval/include"
+      test -f $withval/include/FdfTk.h && FDFLIB_INCLUDE="-I$withval/include"
       if test -n "$FDFLIB_INCLUDE" ; then
         AC_MSG_RESULT(yes)
         PHP_EXTENSION(fdf)
