@@ -305,7 +305,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	if (!cgi) {					/* never execute the arguments if you are a CGI */
 		request_info.php_argv0 = NULL;
-		while ((c = getopt(argc, argv, "cd:qvisnaeh?vf:")) != -1) {
+		while ((c = getopt(argc, argv, "c:d:qvisnaeh?vf:")) != -1) {
 			switch (c) {
 				case 'f':
 					if (!cgi_started){ 
