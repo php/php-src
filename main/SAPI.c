@@ -205,6 +205,8 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
 	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: "));
 	memcpy(default_header->header+sizeof("Content-type: ")-1, default_content_type, default_content_type_len);
 	default_header->header[default_header->header_len] = 0;
+
+	efree(default_content_type);
 }
 
 /*
@@ -444,8 +446,6 @@ SAPI_API int sapi_send_headers()
 			}
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) sapi_module.send_header, SG(server_context));
 			if(SG(sapi_headers).send_default_content_type) {
-				char *default_content_type = sapi_get_default_content_type(SLS_C);
-				int default_content_type_len = strlen(default_content_type);
 				sapi_header_struct default_header;
 
 				sapi_get_default_content_type_header(&default_header SLS_CC);
