@@ -4,7 +4,7 @@ dnl
 
 PHP_ARG_WITH(pspell,for PSPELL support,
 [  --with-pspell[=DIR]     Include PSPELL support.
-                          This replaces the old ASPELL extension.])
+                          GNU Aspell version 0.50.0 or higher required.])
 
 if test "$PHP_PSPELL" != "no"; then
 	PHP_NEW_EXTENSION(pspell, pspell.c, $ext_shared)
