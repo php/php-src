@@ -663,7 +663,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* ensure that the link did not die */
 #if MYSQL_VERSION_ID > 32230 /* Use mysql_ping to ensure link is alive (and to reconnect if needed) */
 			if (mysql_ping(le->ptr)) {
-					php_error(E_WARNING, "%s: Link to server lost, unable to reconnect", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Link to server lost, unable to reconnect");
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					MYSQL_DO_CONNECT_RETURN_FALSE();
@@ -682,7 +682,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #else
 				if (mysql_connect(le->ptr, host, user, passwd)==NULL) {
 #endif
-					php_error(E_WARNING, "%s: Link to server lost, unable to reconnect", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Link to server lost, unable to reconnect");
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					MYSQL_DO_CONNECT_RETURN_FALSE();
@@ -988,7 +988,7 @@ PHP_FUNCTION(mysql_get_server_info)
 PHP_FUNCTION(mysql_info)
 {
 	zval **mysql_link;
-	int id;
+	int id = -1;
 	char *str;
 	php_mysql_conn *mysql;
 
@@ -1192,8 +1192,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 		mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);
 		if (mysql_result && type==le_result) {
 			if (!mysql_eof(mysql_result)) {
-				php_error(E_NOTICE, "%s(): Function called without first fetching all rows from a previous unbuffered query",
-							get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s(): Function called without first fetching all rows from a previous unbuffered query");
 				while (mysql_fetch_row(mysql_result));
 			}
 			zend_list_delete(mysql->active_result_id);
