@@ -14,6 +14,8 @@ PHP 4                                                                      NEWS
   (gavin at ipalsoftware dot com, Ilia)
 - Fixed bug #28525 (gmp_powm() does not work with hexadecimal string modulo
   represented as a string). (pickett at sumu dot org, Ilia)
+- Fixed bug #28175 (Allow bundled GD to compile against freetype 2.1.2).
+  (Elf, Ilia)
 
 03 Jun 2004, Version 4.3.7
 - Upgraded bundled GD library to 2.0.23. (Ilia)
