@@ -24,6 +24,7 @@
 #include "reg.h"
 #include "html.h"
 #include "php_string.h"
+#include "SAPI.h"
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif
@@ -529,7 +530,7 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 	if (charset_hint == NULL)
 		return cs_8859_1;
 
-	if (strlen(charset_hint) == 0)	{
+	if ((len = strlen(charset_hint)) == 0) {
 #if HAVE_MBSTRING
 	/* XXX: Ugly things. Why don't we look for a more sophisticated way? */
 		switch (MBSTRG(internal_encoding)) {
@@ -563,46 +564,45 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 				return cs_gb2312;
 		}
 #endif
-		/* try to detect the charset for the locale */
+		charset_hint = SG(default_charset);
+		if (charset_hint == NULL || (len=strlen(charset_hint)) == 0) {
+			/* try to detect the charset for the locale */
 #if HAVE_NL_LANGINFO && HAVE_LOCALE_H && defined(CODESET)
-		charset_hint = nl_langinfo(CODESET);
+			charset_hint = nl_langinfo(CODESET);
 #endif
 #if HAVE_LOCALE_H
-		if (charset_hint == NULL) {
-			/* try to figure out the charset from the locale */
-			char *localename;
-			char *dot, *at;
+			if (charset_hint == NULL) {
+				/* try to figure out the charset from the locale */
+				char *localename;
+				char *dot, *at;
 
-			/* lang[_territory][.codeset][@modifier] */
-			localename = setlocale(LC_CTYPE, NULL);
+				/* lang[_territory][.codeset][@modifier] */
+				localename = setlocale(LC_CTYPE, NULL);
 
-			dot = strchr(localename, '.');
-			if (dot) {
-				dot++;
-				/* locale specifies a codeset */
-				at = strchr(dot, '@');
-				if (at)
-					len = at - dot;
-				else
-					len = strlen(dot);
-				charset_hint = dot;
+				dot = strchr(localename, '.');
+				if (dot) {
+					dot++;
+					/* locale specifies a codeset */
+					at = strchr(dot, '@');
+					if (at)
+						len = at - dot;
+					else
+						len = strlen(dot);
+					charset_hint = dot;
+				} else {
+					/* no explicit name; see if the name itself
+					 * is the charset */
+					charset_hint = localename;
+					len = strlen(charset_hint);
+				}
 			} else {
-				/* no explicit name; see if the name itself
-				 * is the charset */
-				charset_hint = localename;
 				len = strlen(charset_hint);
 			}
-		} else
-			len = strlen(charset_hint);
-#else
-		if (charset_hint)
-			len = strlen(charset_hint);
 #endif
+		}
 	}
 	if (charset_hint) {
 		int found = 0;
-		if (!len)
-			len = strlen(charset_hint);
 		
 		/* now walk the charset map and look for the codeset */
 		for (i = 0; charset_map[i].codeset; i++)	{
