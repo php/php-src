@@ -1,4 +1,29 @@
 <?php
+
+$header_text = <<< DATA
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2005 Zend Technologies Ltd. (http://www.zend.com) |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.00 of the Zend license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@zend.com so we can mail you a copy immediately.              |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+/* \$Id$ */
+
+
+DATA;
+
 /*
 	This script creates zend_vm_execute.h and zend_vm_opcodes.h
 	from existing zend_vm_def.h and zend_vm_execute.skl
@@ -930,6 +955,10 @@ function gen_vm($def, $skel) {
 	// Generate opcode #defines (zend_vm_opcodes.h)
 	$code_len = strlen((string)$max_opcode);
 	$f = fopen("zend_vm_opcodes.h", "w+") or die("ERROR: Cannot create zend_vm_opcodes.h\n");
+
+	// Insert header 
+	out($f, $GLOBALS['header_text']);
+
 	foreach ($opcodes as $code => $dsc) {
 		$code = str_pad((string)$code,$code_len," ",STR_PAD_LEFT);
 		$op = str_pad($dsc["op"],$max_opcode_len);
@@ -941,6 +970,9 @@ function gen_vm($def, $skel) {
 	// Generate zend_vm_execute.h
 	$f = fopen("zend_vm_execute.h", "w+") or die("ERROR: Cannot create zend_vm_execute.h\n");
 	$executor_file = realpath("zend_vm_execute.h");
+
+	// Insert header 
+	out($f, $GLOBALS['header_text']);
 
 	// Generate specialized executor
 	gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_KIND, "execute", "zend_init_opcodes_handlers", 0);
