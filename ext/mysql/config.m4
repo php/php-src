@@ -7,7 +7,7 @@ sinclude(ext/mysql/libmysql/mysql.m4)
 sinclude(libmysql/acinclude.m4)
 sinclude(libmysql/mysql.m4)
 
-AC_DEFUN(MYSQL_LIB_CHK,[
+AC_DEFUN(MYSQL_LIB_CHK, [
   str="$MYSQL_DIR/$1/libmysqlclient.*"
   for j in `echo $str`; do
     if test -r $j; then
@@ -17,51 +17,52 @@ AC_DEFUN(MYSQL_LIB_CHK,[
   done
 ])
 
-PHP_ARG_WITH(mysql-sock, Location of the MySQL Socket pointer,
-[  --with-mysql-sock[=DIR]      Optionally reference the pointer to the MySQL Socket.
-                                If unspecified, it will search default locations for the socket.], no)
-
-if test "$PHP_MYSQL_SOCK" != "no"; then
-	AC_MSG_CHECKING($PHP_MYSQL_SOCK)
-        MYSQL_SOCK=$PHP_MYSQL_SOCK
-        AC_MSG_CHECKING(for specified MySQL UNIX socket)
-        AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
-        AC_MSG_RESULT($MYSQL_SOCK)
-fi
-
- AC_DEFUN(PHP_MYSQL_SOCK,[
- AC_MSG_CHECKING(for MySQL UNIX socket)
-     for i in  \
-        /var/run/mysqld/mysqld.sock \
-        /var/tmp/mysql.sock \
-        /var/run/mysql/mysql.sock \
-        /var/lib/mysql/mysql.sock \
-        /var/mysql/mysql.sock \
-        /usr/local/mysql/var/mysql.sock \	
-        /Private/tmp/mysql.sock \
-        /tmp/mysql.sock \
-        ; do
-      if test -r $i; then
-        MYSQL_SOCK=$i
-      else
-        MYSQL_SOCK=/var/lib/mysql/mysql.sock	
-      fi
-    done
+AC_DEFUN(PHP_MYSQL_SOCKET_SEARCH, [
+  for i in  \
+    /var/run/mysqld/mysqld.sock \
+    /var/tmp/mysql.sock \
+    /var/run/mysql/mysql.sock \
+    /var/lib/mysql/mysql.sock \
+    /var/mysql/mysql.sock \
+    /usr/local/mysql/var/mysql.sock \	
+    /Private/tmp/mysql.sock \
+    /tmp/mysql.sock \
+  ; do
+    if test -r $i; then
+      MYSQL_SOCK=$i
+      break 2
+    fi
+  done
   
   AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
-  AC_MSG_RESULT($MYSQL_SOCK)
+  AC_MSG_RESULT([$MYSQL_SOCK])
 ])
+
 
 PHP_ARG_WITH(mysql, for MySQL support,
 [  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.
                           If unspecified, the bundled MySQL library will be used.], yes)
 
+PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
+[  --with-mysql-sock[=DIR] Location of the MySQL unix socket pointer.
+                          If unspecified, the default locations are searched.])
+
+
 if test "$PHP_MYSQL" != "no"; then
- $PHP_MYSQL_SOCK
- if test "$PHP_MYSQL_SOCK" = "no"; then 
-  PHP_MYSQL_SOCK
- fi
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
+
+  AC_MSG_CHECKING(for MySQL UNIX socket location)
+  if test "$PHP_MYSQL_SOCK" != "no"; then
+    if test -r $PHP_MYSQL_SOCK; then
+      MYSQL_SOCK=$PHP_MYSQL_SOCK
+      AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
+      AC_MSG_RESULT([$MYSQL_SOCK])
+    else
+      AC_MSG_RESULT([warning: The specified $PHP_MYSQL_SOCK was not found!])
+    fi
+  else 
+    PHP_MYSQL_SOCKET_SEARCH
+  fi
 fi
 
 if test "$PHP_MYSQL" = "yes"; then
