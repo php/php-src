@@ -1047,8 +1047,10 @@ void zend_do_return(znode *expr, int do_end_vparse CLS_DC)
 		} else {
 			zend_do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
 		}
+#if 0
 	} else if (expr && CG(active_op_array)->return_reference) {
 		zend_error(E_COMPILE_ERROR, "Only variables may be returned by reference");
+#endif
 	}
 
 #ifdef ZTS
