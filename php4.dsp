@@ -233,7 +233,7 @@ SOURCE=.\win95nt.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\functions\apache.c
+SOURCE=.\ext\apache\apache.c
 # End Source File
 # Begin Source File
 
@@ -245,7 +245,7 @@ SOURCE=.\ext\standard\basic_functions.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\bcmath.c
+SOURCE=.\ext\bcmath\bcmath.c
 # End Source File
 # Begin Source File
 
@@ -261,7 +261,7 @@ SOURCE=.\ext\standard\dir.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\dl.c
+SOURCE=.\ext\standard\dl.c
 # End Source File
 # Begin Source File
 
@@ -293,7 +293,7 @@ SOURCE=.\ext\standard\fsock.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\head.c
+SOURCE=.\ext\standard\head.c
 # End Source File
 # Begin Source File
 
@@ -333,11 +333,11 @@ SOURCE=.\ext\standard\microtime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\mime.c
+SOURCE=.\ext\standard\mime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\number.c
+SOURCE=.\ext\bcmath\number.c
 # End Source File
 # Begin Source File
 
@@ -353,7 +353,7 @@ SOURCE=.\ext\standard\pageinfo.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\post.c
+SOURCE=.\ext\standard\post.c
 # End Source File
 # Begin Source File
 
@@ -553,7 +553,7 @@ SOURCE=.\regex\regfree.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\functions\COM.c
+SOURCE=.\ext\com\COM.c
 # End Source File
 # Begin Source File
 
