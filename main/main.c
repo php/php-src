@@ -80,6 +80,7 @@
 #endif /* defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING) */
 
 #include "SAPI.h"
+#include "rfc1867.h"
 /* }}} */
 
 #ifndef ZTS
@@ -973,6 +974,7 @@ int php_module_startup(sapi_module_struct *sf)
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_CONFIG_FILE_PATH", PHP_CONFIG_FILE_PATH, sizeof(PHP_CONFIG_FILE_PATH)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SHLIB_SUFFIX", PHP_SHLIB_SUFFIX, sizeof(PHP_SHLIB_SUFFIX)-1, CONST_PERSISTENT | CONST_CS);
 	php_output_register_constants(TSRMLS_C);
+	php_rfc1867_register_constants(TSRMLS_C);
 
 	if (php_startup_ticks(TSRMLS_C) == FAILURE) {
 		php_printf("Unable to start PHP ticks\n");
