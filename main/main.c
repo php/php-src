@@ -840,7 +840,7 @@ int php_module_startup(sapi_module_struct *sf)
 #endif
 
 	SET_MUTEX(gLock);
-	le_index_ptr = _register_list_destructors(NULL, NULL, 0);
+	le_index_ptr = zend_register_list_destructors(NULL, NULL, 0, NULL);
 	FREE_MUTEX(gLock);
 
 	php_ini_mstartup();
