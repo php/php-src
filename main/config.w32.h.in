@@ -48,7 +48,6 @@
 #define HAVE_MBSTR_KR 1
 #define HAVE_MBSTR_RU 1
 #define HAVE_MBSTR_TW 1
-#define MBSTR_ENC_TRANS 1
 
 /* Enable / Disable MySQL extension (default: enabled) */
 #define HAVE_MYSQL 1
