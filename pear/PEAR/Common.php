@@ -699,7 +699,7 @@ class PEAR_Common extends PEAR
                 break;
             }
         }
-        $tmpdir = System::mkTemp('-d pear');
+        $tmpdir = System::mkTemp(array('-d', 'pear'));
         $this->addTempFile($tmpdir);
         if (!$xml || !$tar->extractList(array($xml), $tmpdir)) {
             return $this->raiseError('could not extract the package.xml file');
@@ -1712,6 +1712,173 @@ class PEAR_Common extends PEAR
             call_user_func($callback, 'done', $bytes);
         }
         return $dest_file;
+    }
+
+    // }}}
+    // {{{ sortPkgDeps()
+
+    /**
+     * Sort a list of arrays of array(downloaded packagefilename) by dependency.
+     *
+     * It also removes duplicate dependencies
+     * @param array
+     * @param boolean Sort packages in reverse order if true
+     * @return array array of array(packagefilename, package.xml contents)
+     */
+    function sortPkgDeps(&$packages, $uninstall = false)
+    {
+        $ret = array();
+        if ($uninstall) {
+            foreach($packages as $packageinfo) {
+                $ret[] = array('info' => $packageinfo);
+            }
+        } else {
+            foreach($packages as $packagefile) {
+                if (!is_array($packagefile)) {
+                    $ret[] = array('file' => $packagefile,
+                                   'info' => $a = $this->infoFromAny($packagefile),
+                                   'pkg' => $a['package']);
+                } else {
+                    $ret[] = $packagefile;
+                }
+            }
+        }
+        $checkdupes = array();
+        $newret = array();
+        foreach($ret as $i => $p) {
+            if (!isset($checkdupes[$p['info']['package']])) {
+                $checkdupes[$p['info']['package']][] = $i;
+                $newret[] = $p;
+            }
+        }
+        
+        $func = $uninstall ? '_sortPkgDepsRev' : '_sortPkgDeps';
+        usort($newret, array('PEAR_Common', $func));
+        $packages = $newret;
+    }
+
+    // }}}
+    // {{{ _sortPkgDeps()
+
+    /**
+     * Compare two package's package.xml, and sort
+     * so that dependencies are installed first
+     *
+     * This is a crude compare, real dependency checking is done on install.
+     * The only purpose this serves is to make the command-line
+     * order-independent (you can list a dependent package first, and
+     * installation occurs in the order required)
+     * @access private
+     */
+    function _sortPkgDeps($p1, $p2)
+    {
+        $p1name = $p1['info']['package'];
+        $p2name = $p2['info']['package'];
+        $p1deps = PEAR_Common::_getPkgDeps($p1);
+        $p2deps = PEAR_Common::_getPkgDeps($p2);
+        if (!count($p1deps) && !count($p2deps)) {
+            return 0; // order makes no difference
+        }
+        if (!count($p1deps)) {
+            return -1; // package 2 has dependencies, package 1 doesn't
+        }
+        if (!count($p2deps)) {
+            return 1; // package 2 has dependencies, package 1 doesn't
+        }
+        // both have dependencies
+        if (in_array($p1name, $p2deps)) {
+            return -1; // put package 1 first
+        }
+        if (in_array($p2name, $p1deps)) {
+            return 1; // put package 2 first
+        }
+        // doesn't really matter if neither depends on the other
+        return 0;
+    }
+
+    // }}}
+    // {{{ _sortPkgDepsRev()
+
+    /**
+     * Compare two package's package.xml, and sort
+     * so that dependencies are uninstalled last
+     *
+     * This is a crude compare, real dependency checking is done on uninstall.
+     * The only purpose this serves is to make the command-line
+     * order-independent (you can list a dependency first, and
+     * uninstallation occurs in the order required)
+     * @access private
+     */
+    function _sortPkgDepsRev($p1, $p2)
+    {
+        $p1name = $p1['info']['package'];
+        $p2name = $p2['info']['package'];
+        $p1deps = PEAR_Common::_getRevPkgDeps($p1);
+        $p2deps = PEAR_Common::_getRevPkgDeps($p2);
+        if (!count($p1deps) && !count($p2deps)) {
+            return 0; // order makes no difference
+        }
+        if (!count($p1deps)) {
+            return 1; // package 2 has dependencies, package 1 doesn't
+        }
+        if (!count($p2deps)) {
+            return -1; // package 2 has dependencies, package 1 doesn't
+        }
+        // both have dependencies
+        if (in_array($p1name, $p2deps)) {
+            return 1; // put package 1 last
+        }
+        if (in_array($p2name, $p1deps)) {
+            return -1; // put package 2 last
+        }
+        // doesn't really matter if neither depends on the other
+        return 0;
+    }
+
+    // }}}
+    // {{{ _getPkgDeps()
+
+    /**
+     * get an array of package dependency names
+     * @access private
+     */
+    function _getPkgDeps($p)
+    {
+        if (!isset($p['info']['releases'])) {
+            return array();
+        }
+        $rel = array_shift($p['info']['releases']);
+        if (!isset($rel['deps'])) {
+            return array();
+        }
+        $ret = array();
+        foreach($rel['deps'] as $dep) {
+            if ($dep['type'] == 'pkg') {
+                $ret[] = $dep['name'];
+            }
+        }
+        return $ret;
+    }
+
+    // }}}
+    // {{{ _getRevPkgDeps()
+
+    /**
+     * get an array of package dependency names for uninstall
+     * @access private
+     */
+    function _getRevPkgDeps($p)
+    {
+        if (!isset($p['info']['release_deps'])) {
+            return array();
+        }
+        $ret = array();
+        foreach($p['info']['release_deps'] as $dep) {
+            if ($dep['type'] == 'pkg') {
+                $ret[] = $dep['name'];
+            }
+        }
+        return $ret;
     }
 
     // }}}

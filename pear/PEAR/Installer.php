@@ -464,7 +464,235 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+    // {{{ _downloadFile()
+    function _downloadFile($pkgfile, &$config, $options, &$errors)
+    {
+        $need_download = false;
+        if (preg_match('#^(http|ftp)://#', $pkgfile)) {
+            $need_download = true;
+        } elseif (!@is_file($pkgfile)) {
+            if ($this->validPackageName($pkgfile)) {
+                if ($this->registry->packageExists($pkgfile)) {
+                    if (empty($options['upgrade']) && empty($options['force'])) {
+                        $errors[] = "$pkgfile already installed";
+                        return;
+                    }
+                }
+                $pkgfile = $this->getPackageDownloadUrl($pkgfile);
+                $need_download = true;
+            } else {
+                if (strlen($pkgfile)) {
+                    $errors[] = "Could not open the package file: $pkgfile";
+                } else {
+                    $errors[] = "No package file given";
+                }
+                return;
+            }
+        }
 
+        // Download package -----------------------------------------------
+        if ($need_download) {
+            $downloaddir = $config->get('download_dir');
+            if (empty($downloaddir)) {
+                if (PEAR::isError($downloaddir = System::mktemp('-d'))) {
+                    return $downloaddir;
+                }
+                $this->log(2, '+ tmp dir created at ' . $downloaddir);
+            }
+            $callback = $this->ui ? array(&$this, '_downloadCallback') : null;
+            $file = $this->downloadHttp($pkgfile, $this->ui, $downloaddir, $callback);
+            if (PEAR::isError($file)) {
+                return $this->raiseError($file);
+            }
+            $pkgfile = $file;
+        }
+        return $pkgfile;
+    }
+
+    // }}}
+    // {{{ download()
+
+    /**
+     * Download any files and their dependencies, if necessary
+     *
+     * @param array a mixed list of package names, local files, or package.xml
+     * @param PEAR_Config
+     * @param array options from the command line
+     * @param array this is the array that will be populated with packages to
+     *              install.  Format of each entry:
+     *
+     * <code>
+     * array('pkg' => 'package_name', 'file' => '/path/to/local/file',
+     *    'info' => array() // parsed package.xml
+     * );
+     * </code>
+     * @param array this will be populated with any error messages
+     * @param false private recursion variable
+     * @param false private recursion variable
+     * @param false private recursion variable
+     */
+    function download($packages, $options, &$config, &$installpackages,
+        &$errors, $installed = false, $willinstall = false, $state = false)
+    {
+        // recognized options:
+        // - onlyreqdeps   : install all required dependencies as well
+        // - alldeps       : install all dependencies, including optional
+        //
+        if (!$willinstall) {
+            $willinstall = array();
+        }
+        $mywillinstall = array();
+        $php_dir = $config->get('php_dir');
+        if (isset($options['installroot'])) {
+            if (substr($options['installroot'], -1) == DIRECTORY_SEPARATOR) {
+                $options['installroot'] = substr($options['installroot'], 0, -1);
+            }
+            $php_dir = $this->_prependPath($php_dir, $options['installroot']);
+            $this->installroot = $options['installroot'];
+        } else {
+            $this->installroot = '';
+        }
+        $this->registry = &new PEAR_Registry($php_dir);
+
+        // download files in this list if necessary
+        foreach($packages as $pkgfile) {
+            if ($this->validPackageName($pkgfile) && !isset($options['upgrade'])) {
+                if ($this->registry->packageExists($pkgfile)) {
+                    // ignore dependencies that are installed unless we are upgrading
+                    continue;
+                }
+            }
+            $pkgfile = $this->_downloadFile($pkgfile, $config, $options, $errors);
+            if (PEAR::isError($pkgfile)) {
+                return $pkgfile;
+            }
+            $tempinfo = $this->infoFromAny($pkgfile);
+            if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
+                // ignore dependencies if there are any errors
+                if (!PEAR::isError($tempinfo)) {
+                    $mywillinstall[strtolower($tempinfo['package'])] = @$tempinfo['release_deps'];
+                }
+            }
+            $installpackages[] = array('pkg' => $tempinfo['package'],
+                'file' => $pkgfile, 'info' => $tempinfo);
+        }
+
+        // extract dependencies from downloaded files and then download them
+        // if necessary
+        if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
+            $reg = new PEAR_Registry($config->get('php_dir'));
+            if (!$installed) {
+                $state = $config->get('preferred_state');
+                $installed = $reg->listPackages();
+                array_walk($installed, create_function('&$v,$k','$v = strtolower($v);'));
+                $installed = array_flip($installed);
+            }
+            include_once "PEAR/Remote.php";
+            $remote = new PEAR_Remote($config);
+            $deppackages = array();
+            // construct the list of dependencies for each file
+            foreach ($mywillinstall as $package => $alldeps) {
+                if (!is_array($alldeps)) {
+                    continue;
+                }
+                foreach($alldeps as $info) {
+                    if ($info['type'] != 'pkg') {
+                        continue;
+                    }
+                    if (!isset($options['alldeps']) && isset($info['optional']) &&
+                          $info['optional'] == 'yes') {
+                        // skip optional deps
+                        $this->log(0, "skipping Package $package optional dependency $info[name]");
+                        continue;
+                    }
+                    // get releases
+                    $releases = $remote->call('package.info', $info['name'], 'releases');
+                    if (PEAR::isError($releases)) {
+                        return $releases;
+                    }
+                    if (!count($releases)) {
+                        if (!isset($installed[strtolower($info['name'])])) {
+                            $errors[] = "Package $package dependency $info[name] ".
+                                "has no releases";
+                        }
+                        continue;
+                    }
+                    $found = false;
+                    $save = $releases;
+                    while(count($releases) && !$found) {
+                        if (!empty($state) && $state != 'any') {
+                            list($release_version,$release) = each($releases);
+                            if ($state != $release['state'] &&
+                                  !in_array($release['state'],
+                                    $this->betterStates($state))) {
+                                // drop this release - it ain't stable enough
+                                array_shift($releases);
+                            } else {
+                                $found = true;
+                            }
+                        } else {
+                            $found = true;
+                        }
+                    }
+                    if (!count($releases) && !$found) {
+                        $get = array();
+                        foreach($save as $release) {
+                            $get = array_merge($get,
+                                $this->betterStates($release['state'], true));
+                        }
+                        $savestate = array_shift($get);
+                        $errors[] = "Release for $package dependency $info[name] " .
+                            "has state '$savestate', requires $state";
+                        continue;
+                    }
+                    if (in_array(strtolower($info['name']), $willinstall) ||
+                          isset($mywillinstall[strtolower($info['name'])])) {
+                        // skip upgrade check for packages we will install
+                        continue;
+                    }
+                    if (!isset($installed[strtolower($info['name'])])) {
+                        // skip upgrade check for packages we don't have installed
+                        $deppackages[] = $info['name'];
+                        continue;
+                    }
+
+                    // see if a dependency must be upgraded
+                    $inst_version = $reg->packageInfo($info['name'], 'version');
+                    if (!isset($info['version'])) {
+                        // this is a rel='has' dependency, check against latest
+                        if (version_compare($release_version, $inst_version, 'le')) {
+                            continue;
+                        } else {
+                            $deppackages[] = $info['name'];
+                            continue;
+                        }
+                    }
+                    if (version_compare($info['version'], $inst_version, 'le')) {
+                        // installed version is up-to-date
+                        continue;
+                    }
+                    $deppackages[] = $info['name'];
+                } // foreach($alldeps
+            } // foreach($willinstall
+
+            if (count($deppackages)) {
+                // check dependencies' dependencies
+                // combine the list of packages to install
+                $temppack = array();
+                foreach($installpackages as $p) {
+                    $temppack[] = strtolower($p['info']['package']);
+                }
+                foreach($deppackages as $pack) {
+                    $temppack[] = strtolower($pack);
+                }
+                $willinstall = array_merge($willinstall, $temppack);
+                $this->download($deppackages, $options, $config, $installpackages,
+                    $errors, $installed, $willinstall, $state);
+            }
+        } // if --alldeps or --onlyreqdeps
+    }
+
+    // }}}
     // {{{ install()
 
     /**
@@ -497,42 +725,6 @@ class PEAR_Installer extends PEAR_Common
         $need_download = false;
         //  ==> XXX should be removed later on
         $flag_old_format = false;
-        if (preg_match('#^(http|ftp)://#', $pkgfile)) {
-            $need_download = true;
-        } elseif (!@is_file($pkgfile)) {
-            if ($this->validPackageName($pkgfile)) {
-                if ($this->registry->packageExists($pkgfile) &&
-                    empty($options['upgrade']) && empty($options['force']))
-                {
-                    return $this->raiseError("$pkgfile already installed");
-                }
-                $pkgfile = $this->getPackageDownloadUrl($pkgfile);
-                $need_download = true;
-            } else {
-                if (strlen($pkgfile)) {
-                    return $this->raiseError("Could not open the package file: $pkgfile");
-                } else {
-                    return $this->raiseError("No package file given");
-                }
-            }
-        }
-
-        // Download package -----------------------------------------------
-        if ($need_download) {
-            $downloaddir = $this->config->get('download_dir');
-            if (empty($downloaddir)) {
-                if (PEAR::isError($downloaddir = System::mktemp('-d'))) {
-                    return $downloaddir;
-                }
-                $this->log(2, '+ tmp dir created at ' . $downloaddir);
-            }
-            $callback = $this->ui ? array(&$this, '_downloadCallback') : null;
-            $file = $this->downloadHttp($pkgfile, $this->ui, $downloaddir, $callback);
-            if (PEAR::isError($file)) {
-                return $this->raiseError($file);
-            }
-            $pkgfile = $file;
-        }
 
         if (substr($pkgfile, -4) == '.xml') {
             $descfile = $pkgfile;
@@ -644,19 +836,21 @@ class PEAR_Installer extends PEAR_Common
             }
         } else {
             // checks to do only when upgrading packages
-            if (!$this->registry->packageExists($pkgname)) {
+/*            if (!$this->registry->packageExists($pkgname)) {
                 return $this->raiseError("$pkgname not installed");
-            }
-            $v1 = $this->registry->packageInfo($pkgname, 'version');
-            $v2 = $pkginfo['version'];
-            $cmp = version_compare("$v1", "$v2", 'gt');
-            if (empty($options['force']) && !version_compare("$v2", "$v1", 'gt')) {
-                return $this->raiseError("upgrade to a newer version ($v2 is not newer than $v1)");
-            }
-            if (empty($options['register-only'])) {
-                // when upgrading, remove old release's files first:
-                if (PEAR::isError($err = $this->_deletePackageFiles($pkgname))) {
-                    return $this->raiseError($err);
+            }*/
+            if ($this->registry->packageExists($pkgname)) {
+                $v1 = $this->registry->packageInfo($pkgname, 'version');
+                $v2 = $pkginfo['version'];
+                $cmp = version_compare("$v1", "$v2", 'gt');
+                if (empty($options['force']) && !version_compare("$v2", "$v1", 'gt')) {
+                    return $this->raiseError("upgrade to a newer version ($v2 is not newer than $v1)");
+                }
+                if (empty($options['register-only'])) {
+                    // when upgrading, remove old release's files first:
+                    if (PEAR::isError($err = $this->_deletePackageFiles($pkgname))) {
+                        return $this->raiseError($err);
+                    }
                 }
             }
         }
@@ -750,7 +944,12 @@ class PEAR_Installer extends PEAR_Common
             }
             $ret = $this->registry->addPackage($pkgname, $pkginfo);
         } else {
-            $ret = $this->registry->updatePackage($pkgname, $pkginfo, false);
+            // new: upgrade installs a package if it isn't installed
+            if (!$this->registry->packageExists($pkgname)) {
+                $ret = $this->registry->addPackage($pkgname, $pkginfo);
+            } else {
+                $ret = $this->registry->updatePackage($pkgname, $pkginfo, false);
+            }
         }
         if (!$ret) {
             return null;

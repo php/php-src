@@ -37,15 +37,15 @@
     </maintainer>
     <maintainer>
       <user>cellog</user>
-      <role>helper</role>
+      <role>developer</role>
       <name>Greg Beaver</name>
       <email>cellog@php.net</email>
     </maintainer>
   </maintainers>
   <release>
-    <version>1.2.2</version>
-    <date>2003-08-25</date>
-    <state>stable</state>
+    <version>1.3b1</version>
+    <date>2003-08-27</date>
+    <state>alpha</state>
     <notes>
 * Fixed #25131 - OS_Guess warnings on empty lines from
   popen(&quot;/usr/bin/cpp $tmpfile&quot;, &quot;r&quot;);
@@ -54,6 +54,12 @@
 * Added ability to use a static method callback for error-handling, and removed
 use of inadvisable @ in setErrorHandling (Greg)
 * Added dependency on XML_RPC, and optional dependency on xmlrpc extension (Greg)
+* Added --alldeps and --onlyreqdeps options to pear install/pear upgrade (Greg)
+* Sorting of installation/uninstallation so package order on the command-line is
+  insignificant (fixes upgrade-all if every package is installed) (Greg)
+* pear upgrade will now install if the package is not installed (necessary for
+  pear upgrade --alldeps, as installation is often necessary for new
+  dependencies) (Greg)
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
