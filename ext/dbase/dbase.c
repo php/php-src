@@ -114,6 +114,7 @@ PHP_FUNCTION(dbase_open) {
 	pval *dbf_name, *options;
 	dbhead_t *dbh;
 	int handle;
+	PLS_FETCH();
 	DBase_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&dbf_name,&options)==FAILURE) {
@@ -571,6 +572,7 @@ PHP_FUNCTION(dbase_create) {
 	int num_fields;
 	dbfield_t *dbf, *cur_f;
 	int i, rlen, handle;
+	PLS_FETCH();
 	DBase_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&filename,&fields)==FAILURE) {

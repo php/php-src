@@ -185,6 +185,7 @@ PHP_FUNCTION(filepro)
 	char *strtok_buf = NULL;
 	int i;
 	FP_FIELD *new_field, *tmp;
+	PLS_FETCH();
 	FP_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &dir) == FAILURE) {
@@ -279,6 +280,7 @@ PHP_FUNCTION(filepro_rowcount)
 	char workbuf[MAXPATHLEN];
 	char readbuf[256];
 	int recsize = 0, records = 0;
+	PLS_FETCH();
 	FP_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 0) {
@@ -470,6 +472,7 @@ PHP_FUNCTION(filepro_retrieve)
 	char readbuf[1024]; /* FIX - Work out better buffering! */
     int i, fnum, rnum;
     long offset;
+	PLS_FETCH();
 	FP_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &rno, &fno) == FAILURE) {
