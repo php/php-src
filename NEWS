@@ -30,6 +30,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #22355 (PHP would remove folding from Subject & To fields). (Ilia)
 - Fixed bug #22330 (overloaded strrpos() gives wrong results).
   (david@santinoli.com, Moriyoshi)
+- Fixed bug #22312 (crash on failed connection when curl_getinfo() was called).
+  (Phil Oleson <poleson@verio.net>)
 - Fixed bug #22308 (optimized passthru, code is now ~40 times faster). (Ilia)
 - Fixed bug #22306 (pg_lo_seek($h, 0, PGSQL_SEEK_SET) succeeds but returns false).
   (Jani)
