@@ -55,7 +55,7 @@ static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
 static ZEND_FUNCTION(get_declared_classes);
-static ZEND_FUNCTION(lambda);
+static ZEND_FUNCTION(create_function);
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
@@ -94,7 +94,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FALIAS(user_error,		trigger_error,		NULL)
 	ZEND_FE(set_error_handler,		NULL)
 	ZEND_FE(get_declared_classes, NULL)
-	ZEND_FE(lambda,				NULL)
+	ZEND_FE(create_function,	NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -806,7 +806,7 @@ ZEND_FUNCTION(get_declared_classes)
 
 /* {{{ proto string lambda(string args, string code)
    Creates an anonymous function, and returns its name (funny, eh?) */
-ZEND_FUNCTION(lambda)
+ZEND_FUNCTION(create_function)
 {
 	char *eval_code, *function_name;
 	int eval_code_length, function_name_length;
