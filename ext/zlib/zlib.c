@@ -19,15 +19,6 @@
 /* $Id$ */
 #define IS_EXT_MODULE
 
-#ifndef PHP_WIN32
-#include "php_config.h"
-#endif
-
-#if HAVE_FOPENCOOKIE 
-#define _GNU_SOURCE
-#include <stdio.h>
-#endif 
-
 #include "php.h"
 #include "SAPI.h"
 
@@ -80,10 +71,6 @@ int zlib_globals_id;
 #else
 static php_zlib_globals zlib_globals;
 #endif
-
-#if HAVE_FOPENCOOKIE 
-static FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
-#endif 
 
 #define OS_CODE			0x03 /* FIXME */
 #define CODING_GZIP		1
@@ -941,78 +928,6 @@ PHP_FUNCTION(gzinflate)
 }
 /* }}} */
 
-#if HAVE_FOPENCOOKIE
-struct gz_cookie {
-	gzFile gz_file;
-};
-
-static ssize_t gz_reader(void *cookie, char *buffer, size_t size)
-{
-	return gzread(((struct gz_cookie *)cookie)->gz_file,buffer,size); 
-}
-
-static ssize_t gz_writer(void *cookie, const char *buffer, size_t size) {
-	return gzwrite(((struct gz_cookie *)cookie)->gz_file,(char *)buffer,size); 
-}
-
-static int gz_seeker(void *cookie,off_t position, int whence) {
-	return gzseek(((struct gz_cookie *)cookie)->gz_file,(z_off_t)position,whence); 
-}
-
-static int gz_closer(void *cookie) {
-	int ret=gzclose(((struct gz_cookie *)cookie)->gz_file);
-	efree(cookie);
-	cookie=NULL;  
-	return ret;
-}
-
-
-
-static COOKIE_IO_FUNCTIONS_T gz_cookie_functions =   
-{ gz_reader 
-, gz_writer
-, gz_seeker
-, gz_closer
-};
-
-static FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
-{
-	struct gz_cookie *gc = NULL;
-	FILE *fp;
-    int fissock=0, fsocketd=0;
-
-	gc = (struct gz_cookie *)emalloc(sizeof(struct gz_cookie));
-
-	if(gc) {
-		*issock = 0;
-		
-		while(*path!=':') 
-			path++;
-		
-		path++;
-
-		fp = php_fopen_wrapper(path, mode, options|IGNORE_URL, &fissock, &fsocketd, NULL);
-		
-		if (!fp) {
-			efree(gc);
-			return NULL;
-		}
-		
-		gc->gz_file = gzdopen(fileno(fp), mode);
-                
-		if(gc->gz_file) {
-			return fopencookie(gc,mode,gz_cookie_functions);		
-		} else {
-			efree(gc);
-			return NULL;
-		}
-	}
-	errno = ENOENT;
-	return NULL;
-}
-
-
-#endif
 
 
 static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buf_used ZLIBLS_DC)
