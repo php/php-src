@@ -41,9 +41,6 @@
 /* Enable / Disable FTP extension (default: enabled) */
 #define HAVE_FTP 1
 
-/* Enable / Disable OpenSSL extension (default: enabled) */
-#define HAVE_OPENSSL_EXT 1
-
 /* Enable / Disable MBSTRING extension (default: enabled) */
 #define HAVE_MBSTRING 1
 #define HAVE_MBREGEX 1
