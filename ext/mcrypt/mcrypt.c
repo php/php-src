@@ -466,14 +466,14 @@ PHP_FUNCTION(mcrypt_generic_init)
 			Z_STRLEN_PP(key), max_key_size);
 		php_error (E_NOTICE, dummy);
 	}
-	strncpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
+	memcpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
 
 	if (Z_STRLEN_PP(iv) != iv_size) {
 		sprintf (dummy, "iv size incorrect; supplied length: %d, needed: %d", 
 			Z_STRLEN_PP(iv), iv_size);
 		php_error (E_WARNING, dummy);
 	}
-	strncpy (iv_s, Z_STRVAL_PP(iv), iv_size);
+	memcpy (iv_s, Z_STRVAL_PP(iv), iv_size);
 
 	RETVAL_LONG (mcrypt_generic_init (td, key_s, Z_STRLEN_PP(key), iv_s));
 	efree (iv_s);
@@ -1236,13 +1236,15 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	}
 	key_length_sizes = mcrypt_enc_get_supported_key_sizes (td, &count);
 	if (count == 0 && key_length_sizes == NULL) { /* all lengths 1 - k_l_s = OK */
-		key_s = estrdup (Z_STRVAL_PP(key));
 		use_key_length = Z_STRLEN_PP(key);
+		key_s = emalloc (use_key_length);
+		memset (key_s, 0, use_key_length);
+		memcpy (key_s, Z_STRVAL_PP(key), use_key_length);
 	}
 	else if (count == 1) {  /* only m_k_l = OK */
 		key_s = emalloc (key_length_sizes[0]);
 		memset (key_s, 0, key_length_sizes[0]);
-		strcpy (key_s, Z_STRVAL_PP(key));
+		memcpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
 		use_key_length = key_length_sizes[0];
 	}
 	else { /* derterminating smallest supported key > length of requested key */
@@ -1256,7 +1258,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 		}
 		key_s = emalloc (use_key_length);
 		memset (key_s, 0, use_key_length);
-		strcpy (key_s, Z_STRVAL_PP(key));
+		memcpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
 	}
 	mcrypt_free (key_length_sizes);
 	
