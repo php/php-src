@@ -139,7 +139,7 @@ start:
 ;
 
 top_statement_list:
-		top_statement_list  { zend_do_extended_info(TSRMLS_C); } top_statement { TSRMLS_FETCH(); HANDLE_INTERACTIVE(); }
+		top_statement_list  { zend_do_extended_info(TSRMLS_C); } top_statement { HANDLE_INTERACTIVE(); }
 	|	/* empty */
 ;
 
@@ -151,7 +151,7 @@ top_statement:
 
 
 inner_statement_list:
-		inner_statement_list  { zend_do_extended_info(TSRMLS_C); } inner_statement { TSRMLS_FETCH(); HANDLE_INTERACTIVE(); }
+		inner_statement_list  { zend_do_extended_info(TSRMLS_C); } inner_statement { HANDLE_INTERACTIVE(); }
 	|	/* empty */
 ;
 
@@ -530,7 +530,7 @@ static_scalar: /* compile-time evaluated scalars */
 		common_scalar		{ $$ = $1; }
 	|	T_STRING 		{ zend_do_fetch_constant(&$$, &$1, ZEND_CT TSRMLS_CC); }
 	|	'+' static_scalar	{ $$ = $1; }
-	|	'-' static_scalar	{ zval minus_one;  minus_one.type = IS_LONG; minus_one.value.lval = -1;  mul_function(&$2.u.constant, &$2.u.constant, &minus_one);  $$ = $2; }
+	|	'-' static_scalar	{ zval minus_one;  minus_one.type = IS_LONG; minus_one.value.lval = -1;  mul_function(&$2.u.constant, &$2.u.constant, &minus_one TSRMLS_CC);  $$ = $2; }
 	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; $$.u.constant.type = IS_CONSTANT_ARRAY; }
 ;
 

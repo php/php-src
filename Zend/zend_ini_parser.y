@@ -128,7 +128,7 @@ static void ini_error(char *str)
 	error_buf_len = 128+strlen(currently_parsed_filename); /* should be more than enough */
 	error_buf = (char *) emalloc(error_buf_len);
 
-	sprintf(error_buf, "Error parsing %s on line %d\n", currently_parsed_filename, zend_ini_scanner_get_lineno());
+	sprintf(error_buf, "Error parsing %s on line %d\n", currently_parsed_filename, zend_ini_scanner_get_lineno(TSRMLS_C));
 
 	if (CG(ini_parser_unbuffered_errors)) {
 #ifdef PHP_WIN32

@@ -70,10 +70,8 @@ char *zend_ini_scanner_get_filename()
 
 #else /* ZTS */
 
-int zend_ini_scanner_get_lineno()
+int zend_ini_scanner_get_lineno(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	return CG(ini_scanner)->lineno();
 }
 

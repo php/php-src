@@ -1000,7 +1000,7 @@ ZEND_FUNCTION(get_resource_type)
 		RETURN_FALSE;
 	}
 
-	resource_type = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(z_resource_type));
+	resource_type = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(z_resource_type) TSRMLS_CC);
 	if (resource_type) {
 		RETURN_STRING(resource_type, 1);
 	} else {
