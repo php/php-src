@@ -1,19 +1,76 @@
 #!/bin/sh
 
-extname="$1"
-EXTNAME=`echo $1|tr a-z A-Z`
-if [ ! -z $2 -a -r $2 ]; then
-    functions=$2
-    echo=$2
-fi
-
 givup() {
 	echo $*
 	exit 1
 }
 
-if test "$extname" = ""; then
-	givup "usage: $0 extension-name [function-list]"
+usage() {
+echo "$0 --extname=module [--proto=file] [--stubs=file] [--xml[=file]]"
+echo "           [--full-xml] [--no-help] [--assign-params [--string-lens]]"
+echo ""
+echo "  --extname=module   module is the name of your extension"
+echo "  --proto=file       file contains prototypes of functions to create"
+echo "  --stubs=file       generate only function stubs in file"
+echo "  --xml              generate xml documentation to be added to phpdoc-cvs"
+echo "  --full-xml         generate xml documentation for a self-contained extension"
+echo "                     (not yet implemented)"
+echo "  --no-help          don't try to be nice and create comments in the code"
+echo "                     and helper functions to test if the module compiled"
+echo "  --assign-params"
+echo "  --string-lens"
+exit 1
+}
+
+if test $# -eq 0; then
+  usage
+fi
+
+while test $# -gt 0; do
+  case "$1" in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *) optarg= ;;
+  esac
+
+  case $1 in
+    --extname=?*)
+	extname=$optarg
+	EXTNAME=`echo $extname | tr a-z A-Z`
+	;;
+    --proto=?*)
+	proto=$optarg
+	;;
+    --stubs=*)
+	stubs=yes
+	stubfile=$optarg
+	;;
+    --xml)
+	xml="yes"
+	;;
+    --xml=?*)
+	xml=$optarg
+	;;
+    --full-xml)
+	full_xml="yes"
+	;;
+    --no-help)
+	no_help="yes"
+	;;
+    --assign-params)
+	assign_params="yes"
+	;;
+    --string-lens)
+	string_lens="yes"
+	;;
+    *)
+	usage
+	;;
+  esac
+  shift
+done
+
+if [ -z "$assign_params" -a ! -z "$string_lens" ]; then
+    usage
 fi
 
 if test -d "$extname" ; then
@@ -32,15 +89,18 @@ else
     ECHO_C='\c'
 fi
 
-echo "Creating directory"
+if [ -z $stubs ]; then
+echo "Creating directory $extname"
+stubfile=$extname"/function_stubs"
 
 mkdir $extname || givup "Cannot create directory $extname"
-
-if [ ! -z $functions ]; then
-    echo $functions
-    cat $functions | awk -v extname=$extname -f ./skeleton/create_stubs
 fi
 
+if [ ! -z $proto ]; then
+    cat $proto | awk -v extname=$extname -v stubs=$stubs -v stubfile=$stubfile -v xml=$xml -v full_xml=$full_xml -v i_know_what_to_do_shut_up_i_dont_need_your_help_mode=$no_help -v assign_params=$assign_params -v string_lens=$string_lens -f ./skeleton/create_stubs
+fi
+
+if [ -z $stubs ]; then
 cd $extname
 chmod 755 .
 
@@ -102,32 +162,59 @@ libs.mk
 eof
 
 $ECHO_N " $extname.c$ECHO_C"
-cat ../skeleton/skeleton.c | sed \
--e "s/extname/$extname/g" \
--e "s/EXTNAME/$EXTNAME/g" \
--e '/__function_entries_here__/r function_entries' \
--e '/__function_stubs_here__/r function_stubs' \
--e '/__function_entries_here__/D' \
--e '/__function_stubs_here__/D' \
-> $extname.c
+echo "s/extname/$extname/g" > sedscript
+echo "s/EXTNAME/$EXTNAME/g"  >> sedscript
+echo '/__function_entries_here__/r function_entries'  >> sedscript
+echo '/__function_stubs_here__/r function_stubs'  >> sedscript
+echo '/__header_here__/r ../../header'  >> sedscript
+echo '/__footer_here__/r ../../footer'  >> sedscript
+echo '/__function_entries_here__/D'  >> sedscript
+echo '/__function_stubs_here__/D'  >> sedscript
+echo '/__header_here__/D'  >> sedscript
+echo '/__footer_here__/D'  >> sedscript
+if [ ! -z $no_help ]; then
+    echo "/confirm_$extname_compiled/D" >> sedscript
+    echo '/Remove the following/,/^\*\//D' >> sedscript
+    echo 's/[[:space:]]\/\*.\+\*\///' >> sedscript
+    echo 's/^\/\*.*\*\/$//' >> sedscript
+    echo '/^[[:space:]]*\/\*/,/^[[:space:]]*\*\//D' >> sedscript
+fi
+
+cat ../skeleton/skeleton.c | sed -f sedscript > $extname.c
+
 
 $ECHO_N " php_$extname.h$ECHO_C"
-cat ../skeleton/php_skeleton.h | sed \
--e "s/extname/$extname/g" \
--e "s/EXTNAME/$EXTNAME/g" \
--e '/__function_declarations_here__/r function_declarations' \
--e '/__function_declarations_here__/D' \
-> php_$extname.h
+echo "s/extname/$extname/g" > sedscript
+echo "s/EXTNAME/$EXTNAME/g" >> sedscript
+echo '/__function_declarations_here__/r function_declarations' >> sedscript
+echo '/__header_here__/r ../../header'  >> sedscript
+echo '/__footer_here__/r ../../footer'  >> sedscript
+echo '/__function_declarations_here__/D' >> sedscript
+echo '/__header_here__/D'  >> sedscript
+echo '/__footer_here__/D'  >> sedscript
+if [ ! -z $no_help ]; then
+    echo "/confirm_$extname_compiled/D" >> sedscript
+    echo 's/[[:space:]]\/\*.\+\*\///' >> sedscript
+    echo 's/^\/\*.*\*\/$//' >> sedscript
+    echo '/^[[:space:]]*\/\*/,/^[[:space:]]*\*\//D' >> sedscript
+fi
+cat ../skeleton/php_skeleton.h | sed -f sedscript > php_$extname.h
 
+rm sedscript
+
+if [ -z "$stubs" -a -z "$no_help" ]; then
 $ECHO_N " $extname.php$ECHO_C"
 cat ../skeleton/skeleton.php | sed \
 -e "s/extname/$extname/g" \
 > $extname.php
+fi
 
-if [ ! -z $functions ]; then
-    rm function_entries
-    rm function_declarations
-    rm function_stubs
+if [ ! -z $proto ]; then
+    if [ -z $stubs ]; then
+	rm function_entries
+	rm function_declarations
+	rm function_stubs
+    fi
     if [ -f function_warning ]; then
 	rm function_warning
 	warning="
@@ -139,9 +226,11 @@ in the instructions above.
 fi
 
 chmod 644 *
+fi
 
 echo " [done]."
 
+if [ -z "$no_help" -a -z "$stubs" ]; then
 cat <<eof
 
 To use your new extension, you will have to execute the following steps:
@@ -160,3 +249,4 @@ step 6 confirms that your module is compiled in PHP. Then, start writing
 code and repeat the last two steps as often as necessary.
 $warning
 eof
+fi
