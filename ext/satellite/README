@@ -1,8 +1,0 @@
-$Id$
-
-Satellite has been moved to PEAR, The PHP Extension and Application Repository.
-
-It is located in /pear/PECL/satellite/
-
-See http://pear.php.net/faq.php#faq-6 for information about installing a C module from PEAR.
-
