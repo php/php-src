@@ -13,6 +13,7 @@ libzend_a_SOURCES=\
 	zend_list.c zend_indent.c zend_builtin_functions.c
 
 # taken from automake 1.4
+CXXFLAGS= @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 
 # automake isn't too clever about "non-standard" use of lex and yacc
