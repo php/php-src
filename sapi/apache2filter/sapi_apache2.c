@@ -390,9 +390,15 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	php_struct *ctx;
 	apr_bucket *b;
 	void *conf = ap_get_module_config(f->r->per_dir_config, &php4_module);
+	char *p = get_php_config(conf, "engine", sizeof("engine"));
 	TSRMLS_FETCH();
 
 	if (f->r->proxyreq) {
+		return ap_pass_brigade(f->next, bb);
+	}
+	
+	/* handle situations where user turns the engine off */
+	if (*p == '0') {
 		return ap_pass_brigade(f->next, bb);
 	}
 

@@ -53,23 +53,18 @@ static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name,
 {
 	php_conf_rec *d = dummy;
 	php_dir_entry e;
-	php_dir_entry *pe;
-	size_t str_len;
 
 	phpapdebug((stderr, "Getting %s=%s for %p (%d)\n", name, value, dummy, zend_hash_num_elements(&d->config)));
+	
+	if (!strncasecmp(value, "none", sizeof("none"))) {
+		value = "";
+	}
+	
 	e.value = apr_pstrdup(cmd->pool, value);
 	e.value_len = strlen(value);
 	e.status = status;
 	
-	str_len = strlen(name);
-	
-	if (zend_hash_find(&d->config, (char *) name, str_len + 1, (void **) &pe) == SUCCESS) {
-		if (pe->status > status)
-			return NULL;
-	}
-	
-	zend_hash_update(&d->config, (char *) name, strlen(name) + 1, &e, sizeof(e),
-			NULL);
+	zend_hash_update(&d->config, (char *) name, strlen(name) + 1, &e, sizeof(e), NULL);
 	return NULL;
 }
 
@@ -139,6 +134,18 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str, data->status, pe?pe->status:-1));
 	}
 	return new_conf;
+}
+
+char *get_php_config(void *conf, char *name, size_t name_len)
+{
+	php_conf_rec *d = conf;
+	php_dir_entry *pe;
+	
+	if (zend_hash_find(&d->config, name, name_len, (void **) &pe) == SUCCESS) {
+		return pe->value;
+	}
+
+	return "";
 }
 
 void apply_config(void *dummy)
