@@ -234,6 +234,14 @@ SOURCE=..\main\SAPI.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\snprintf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\streams.c
 # End Source File
 # Begin Source File
@@ -243,23 +251,6 @@ SOURCE=..\main\strlcat.c
 # Begin Source File
 
 SOURCE=..\main\strlcpy.c
-
-# End Source File
-
-# Begin Source File
-
-
-
-SOURCE=..\main\snprintf.c
-
-# End Source File
-
-# Begin Source File
-
-
-
-SOURCE=..\main\spprintf.c
-
 # End Source File
 # Begin Source File
 
@@ -351,24 +342,6 @@ SOURCE=..\main\php_streams.h
 # End Source File
 # Begin Source File
 
-
-
-SOURCE=..\main\snprintf.h
-
-# End Source File
-
-# Begin Source File
-
-
-
-SOURCE=..\main\spprintf.h
-
-# End Source File
-
-# Begin Source File
-
-
-
 SOURCE=..\main\php_variables.h
 # End Source File
 # Begin Source File
@@ -386,6 +359,14 @@ SOURCE=..\main\safe_mode.h
 # Begin Source File
 
 SOURCE=..\main\SAPI.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\snprintf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.h
 # End Source File
 # Begin Source File
 
@@ -469,19 +450,53 @@ SOURCE=..\regex\regfree.c
 # PROP Default_Filter ".c"
 # Begin Source File
 
+SOURCE=..\ext\ctype\ctype.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter_cn.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter_ja.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter_kr.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter_ru.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter_tw.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbregex.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbstring.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\overload\overload.c
 # End Source File
 # Begin Source File
 
-
-
-SOURCE=..\ext\tokenizer\tokenizer.c
-
+SOURCE=..\ext\mbstring\php_mbregex.c
 # End Source File
-
 # Begin Source File
 
-
+SOURCE=..\ext\tokenizer\tokenizer.c
+# End Source File
+# Begin Source File
 
 SOURCE=..\ext\wddx\wddx.c
 
@@ -1808,9 +1823,7 @@ SOURCE=..\ext\standard\url_scanner.h
 
 SOURCE=..\ext\standard\url_scanner_ex.h
 # End Source File
-
 # End Group
-
 # End Group
 
 # Begin Group "rpc"
@@ -1886,7 +1899,6 @@ SOURCE=..\ext\rpc\rpc.h
 
 
 # PROP Default_Filter ""
-
 # Begin Source File
 
 
@@ -1940,7 +1952,16 @@ SOURCE=..\ext\rpc\tests\test1.php
 # PROP Default_Filter ""
 # Begin Source File
 
+
 SOURCE=.\crypt_win32.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\glob.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\md5crypt.c
 # End Source File
 # Begin Source File
 
@@ -1985,6 +2006,10 @@ SOURCE=..\win32\wsyslog.c
 # Begin Source File
 
 SOURCE=.\crypt_win32.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\glob.h
 # End Source File
 # Begin Source File
 
@@ -2194,5 +2219,13 @@ SOURCE=..\ext\xml\expat\xmltok_impl.h
 # End Group
 # End Group
 # End Group
+# Begin Source File
+
+SOURCE=.\php4dllts.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\php4dllts.rc2
+# End Source File
 # End Target
 # End Project
