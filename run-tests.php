@@ -189,6 +189,8 @@ function initialize()
         $php = $_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}";
     } elseif (@is_executable("./sapi/cli/php{$ext}")) {
         $php = getcwd() . "/sapi/cli/php{$ext}";
+    } elseif (@is_executable(PHP_BINDIR . "/php{$ext}")) {
+        $php = PHP_BINDIR . "/php{$ext}";
     }
 // Test result can be bogus, if we use php binary in path. - yohgaki@php.net
 //     if (empty($php)) {
@@ -629,4 +631,11 @@ function run_test($file)
 	return $status;
 }
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */
 ?>
