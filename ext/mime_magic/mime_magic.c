@@ -324,7 +324,7 @@ PHP_FUNCTION(mime_content_type)
 		{
 			php_stream *stream;
 
-			php_stream_from_zval(stream, &what);
+			php_stream_from_zval_no_verify(stream, &what);
 			if (stream) {
 				break;
 			}
