@@ -777,7 +777,7 @@ static int php3_ifx_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
    close informix connection */
 PHP_FUNCTION(ifx_close)
 {
-    pval *ifx_link;
+    pval **ifx_link = NULL;
     int id;
 
 EXEC SQL BEGIN DECLARE SECTION;
@@ -795,7 +795,7 @@ EXEC SQL END DECLARE SECTION;
             id = IFXG(default_link);
             break;
         case 1:
-            if (getParameters(ht, 1, &ifx_link)==FAILURE) {
+            if (getParametersEx(1, &ifx_link)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -845,7 +845,7 @@ EXEC SQL END DECLARE SECTION;
    perform a query on a given connection */
 PHP_FUNCTION(ifx_query)
 {
-    pval *query,*ifx_link, *cursortype, *dummy;
+    pval **query,**ifx_link, **cursortype, **dummy;
     int id;
     IFX_RES *Ifx_Result;
     
@@ -891,15 +891,15 @@ EXEC SQL END DECLARE SECTION;
       php4 insists on the correct number of arguments */
     switch(ARG_COUNT(ht)) {
       case 2:
-        if (getParameters(ht, 2, &query, &ifx_link)==FAILURE)  
+        if (getParametersEx(2, &query, &ifx_link)==FAILURE)  
 	  RETURN_FALSE;
         break;
       case 3:
-        if (getParameters(ht, 3, &query, &ifx_link, &dummy)==FAILURE)  
+        if (getParametersEx(3, &query, &ifx_link, &dummy)==FAILURE)  
 	  RETURN_FALSE;
         break;
       case 4:
-        if (getParameters(ht, 4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
+        if (getParametersEx(4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
 	  RETURN_FALSE;
         break;
     }
@@ -911,9 +911,9 @@ EXEC SQL END DECLARE SECTION;
    
     affected_rows = -1;      /* invalid */
 
-    convert_to_string(query);
+    convert_to_string_ex(query);
 
-    statement = query->value.str.val;
+    statement = (*query)->value.str.val;
     IFXG(cursorid)++;    
     sprintf(statemid, "statem%x", IFXG(cursorid)); 
     sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
@@ -991,7 +991,7 @@ EXEC SQL END DECLARE SECTION;
          ## NONSELECT-STATEMENT 
          ##
       */
-      pval *pblobidarr, **tmp;
+      pval **pblobidarr, **tmp;
 
       Ifx_Result->iscursory = 0;
       
@@ -1004,14 +1004,14 @@ EXEC SQL END DECLARE SECTION;
       }
 
       if(ARG_COUNT(ht)==3) {
-          if (getParameters(ht, 3, &dummy, &dummy, &pblobidarr) == FAILURE) {
+          if (getParametersEx(3, &dummy, &dummy, &pblobidarr) == FAILURE) {
               php_error(E_WARNING,"Can't get blob array param");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
               EXEC SQL free :statemid;
               efree(Ifx_Result);
               RETURN_FALSE;
           } 
-          if (pblobidarr->type != IS_ARRAY) {
+          if ((*pblobidarr)->type != IS_ARRAY) {
               php_error(E_WARNING,"blob-parameter not an array");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
               EXEC SQL free :statemid;
@@ -1019,9 +1019,9 @@ EXEC SQL END DECLARE SECTION;
               RETURN_FALSE;
           }
 
-          zend_hash_internal_pointer_reset(pblobidarr->value.ht);
+          zend_hash_internal_pointer_reset((*pblobidarr)->value.ht);
           i=1;
-          while (zend_hash_get_current_data(pblobidarr->value.ht, 
+          while (zend_hash_get_current_data((*pblobidarr)->value.ht, 
                                            (void **) &tmp) == SUCCESS) {
               convert_to_long(*tmp);
               if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
@@ -1062,7 +1062,7 @@ EXEC SQL END DECLARE SECTION;
               
               
               i++;
-              zend_hash_move_forward(pblobidarr->value.ht);
+              zend_hash_move_forward((*pblobidarr)->value.ht);
           }
           Ifx_Result->paramquery=1;  
           EXEC SQL EXECUTE :statemid USING SQL DESCRIPTOR :descrpid;
@@ -1093,14 +1093,14 @@ EXEC SQL END DECLARE SECTION;
        case 2:
          break;
        case 3:
-         if (getParameters(ht, 3, 
+         if (getParametersEx(3, 
                               &dummy, 
                               &dummy,
                               &cursortype)==FAILURE) {
                 RETURN_FALSE;
          }
-         convert_to_long(cursortype);
-         ctype = cursortype->value.lval;
+         convert_to_long_ex(cursortype);
+         ctype = (*cursortype)->value.lval;
          break;
        default:
          WRONG_PARAM_COUNT;
@@ -1239,7 +1239,7 @@ $endif;
 PHP_FUNCTION(ifx_prepare)
 {
    
-    pval *query,*ifx_link, *cursortype, *dummy;
+    pval **query,**ifx_link, **cursortype, **dummy;
     int id;
     IFX_RES *Ifx_Result;
     
@@ -1280,15 +1280,15 @@ EXEC SQL END DECLARE SECTION;
       php4 insists on the correct number of arguments */
     switch(ARG_COUNT(ht)) {
       case 2:
-        if (getParameters(ht, 2, &query, &ifx_link)==FAILURE)  
+        if (getParametersEx(2, &query, &ifx_link)==FAILURE)  
 	  RETURN_FALSE;
         break;
       case 3:
-        if (getParameters(ht, 3, &query, &ifx_link, &dummy)==FAILURE)  
+        if (getParametersEx(3, &query, &ifx_link, &dummy)==FAILURE)  
 	  RETURN_FALSE;
         break;
       case 4:
-        if (getParameters(ht, 4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
+        if (getParametersEx(4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
 	  RETURN_FALSE;
         break;
     }
@@ -1300,9 +1300,9 @@ EXEC SQL END DECLARE SECTION;
     affected_rows = -1;      /* invalid */
 
 
-    convert_to_string(query);
+    convert_to_string_ex(query);
 
-    statement = query->value.str.val;
+    statement = (*query)->value.str.val;
     IFXG(cursorid)++;    
     sprintf(statemid, "statem%x", IFXG(cursorid)); 
     sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
@@ -1380,7 +1380,7 @@ EXEC SQL END DECLARE SECTION;
          ## NONSELECT-STATEMENT 
          ##
       */
-      pval *pblobidarr, **tmp;
+      pval **pblobidarr, **tmp;
 
       Ifx_Result->iscursory = 0;
 
@@ -1394,23 +1394,23 @@ EXEC SQL END DECLARE SECTION;
       }
       if(ARG_COUNT(ht)==3) {
           Ifx_Result->paramquery=1;
-          if (getParameters(ht, 3, &dummy, &dummy,&pblobidarr) == FAILURE) {
+          if (getParametersEx(3, &dummy, &dummy,&pblobidarr) == FAILURE) {
               php_error(E_WARNING,"Can't get blob array param");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
               EXEC SQL free :statemid;
               efree(Ifx_Result);
               RETURN_FALSE;
           } 
-          if(pblobidarr->type != IS_ARRAY) {
+          if((*pblobidarr)->type != IS_ARRAY) {
               php_error(E_WARNING,"blob-parameter not an array");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
               EXEC SQL free :statemid;
               efree(Ifx_Result);
               RETURN_FALSE;
            } 
-           zend_hash_internal_pointer_reset(pblobidarr->value.ht);
+           zend_hash_internal_pointer_reset((*pblobidarr)->value.ht);
            i=1;
-           while (zend_hash_get_current_data(pblobidarr->value.ht, 
+           while (zend_hash_get_current_data((*pblobidarr)->value.ht, 
                                               (void **) &tmp) == SUCCESS) {
               convert_to_long(*tmp);
               if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
@@ -1449,7 +1449,7 @@ EXEC SQL END DECLARE SECTION;
               }
                
               i++;
-              zend_hash_move_forward(pblobidarr->value.ht);
+              zend_hash_move_forward((*pblobidarr)->value.ht);
             } /* while */
       } /* if paramquery */
       Ifx_Result->affected_rows = affected_rows;   /* saved estimated from prepare */
@@ -1466,14 +1466,11 @@ EXEC SQL END DECLARE SECTION;
        case 2:
          break;
        case 3:
-         if (getParameters(ht, 3, 
-                              &dummy, 
-                              &dummy,
-                              &cursortype)==FAILURE) {
+         if (getParametersEx(3, &dummy, &dummy, &cursortype)==FAILURE) {
                 RETURN_FALSE;
          }
-         convert_to_long(cursortype);
-         ctype = cursortype->value.lval;
+         convert_to_long_ex(cursortype);
+         ctype = (*cursortype)->value.lval;
          break;
        default:
          WRONG_PARAM_COUNT;
@@ -1527,7 +1524,7 @@ EXEC SQL END DECLARE SECTION;
    executes a previously prepared query or opens a cursor for it */
 PHP_FUNCTION(ifx_do)
 {
-    pval *result;
+    pval **result;
     IFX_RES *Ifx_Result;
 
 EXEC SQL BEGIN DECLARE SECTION;
@@ -1558,7 +1555,7 @@ EXEC SQL END DECLARE SECTION;
             WRONG_PARAM_COUNT;
             break;
         case 1:
-            if (getParameters(ht, 1, &result)==FAILURE) {
+            if (getParametersEx(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -1588,7 +1585,7 @@ EXEC SQL END DECLARE SECTION;
     
     if (Ifx_Result->iscursory < 0) {
         php_error(E_WARNING, "Resultindex %d is not a prepared query",
-                   result->value.lval);
+                   (*result)->value.lval);
         RETURN_FALSE;
     }
     if (Ifx_Result->iscursory==0) {        /* execute immediate */
@@ -1697,7 +1694,7 @@ $endif;
    returns the Informix error codes (SQLSTATE & SQLCODE) */
 PHP_FUNCTION(ifx_error)
 {
-    pval *ifx_link;
+    pval **ifx_link;
     int id;
     IFXLS_FETCH();
 
@@ -1707,7 +1704,7 @@ PHP_FUNCTION(ifx_error)
             id = IFXG(default_link);
             break;
         case 1:
-            if (getParameters(ht, 1, &ifx_link)==FAILURE) {
+            if (getParametersEx(1, &ifx_link)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -1734,7 +1731,7 @@ PHP_FUNCTION(ifx_error)
    returns the Informix errormessage associated with  */
 PHP_FUNCTION(ifx_errormsg)
 {
-    pval *errcode;
+    pval **errcode;
 
     int ifx_errorcode;
     int msglen, maxmsglen;
@@ -1751,11 +1748,11 @@ PHP_FUNCTION(ifx_errormsg)
                 ifx_errorcode = IFXG(sv_sqlcode);
             break;
         case 1:
-            if (getParameters(ht, 1, &errcode)==FAILURE) {
+            if (getParametersEx(1, &errcode)==FAILURE) {
                 RETURN_FALSE;
             }
-            convert_to_long(errcode);
-            ifx_errorcode = errcode->value.lval;
+            convert_to_long_ex(errcode);
+            ifx_errorcode = (*errcode)->value.lval;
             break;
         default:
             WRONG_PARAM_COUNT;
@@ -1798,7 +1795,7 @@ PHP_FUNCTION(ifx_errormsg)
    returns the number of rows affected by query identified by resultid */
 PHP_FUNCTION(ifx_affected_rows)
 {
-    pval *result;
+    pval **result;
     IFX_RES *Ifx_Result;
 
     IFXLS_FETCH();
@@ -1808,7 +1805,7 @@ PHP_FUNCTION(ifx_affected_rows)
             WRONG_PARAM_COUNT;
             break;
         case 1:
-            if (getParameters(ht, 1, &result)==FAILURE) {
+            if (getParametersEx(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             break;
@@ -1844,7 +1841,7 @@ PHP_FUNCTION(ifx_affected_rows)
    fetches the next row or <position> row if using a scroll cursor */
 PHP_FUNCTION(ifx_fetch_row)
 {
-    pval *result, *position;
+    pval **result, **position;
     IFX_RES *Ifx_Result;
 
 EXEC SQL BEGIN DECLARE SECTION;
@@ -1901,21 +1898,21 @@ EXEC SQL END DECLARE SECTION;
             WRONG_PARAM_COUNT;
             break;
         case 1:
-            if (getParameters(ht, 1, &result)==FAILURE) {
+            if (getParametersEx(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             fetch_pos = NULL;
             fetch_row = 0;
             break;
         case 2:
-            if (getParameters(ht, 2, &result, &position)==FAILURE) {
+            if (getParametersEx(2, &result, &position)==FAILURE) {
                 RETURN_FALSE;
             }
-            if (position->type != IS_STRING) {
+            if ((*position)->type != IS_STRING) {
                 fetch_pos = NULL;
-                fetch_row = position->value.lval;
+                fetch_row = (*position)->value.lval;
             } else {
-                fetch_pos = position->value.str.val;
+                fetch_pos = (*position)->value.str.val;
                 fetch_row = 0;
             }
             break;
@@ -2228,7 +2225,7 @@ $endif;
    formats all rows of the $resultid query into a html table */
 PHP_FUNCTION(ifx_htmltbl_result)
 {
-    pval *result, *arg2;
+    pval **result, **arg2;
     IFX_RES *Ifx_Result;
 
 EXEC SQL BEGIN DECLARE SECTION;
@@ -2280,16 +2277,16 @@ EXEC SQL END DECLARE SECTION;
 
     switch (ARG_COUNT(ht)) {
         case 1:
-            if (getParameters(ht, 1, &result)==FAILURE) {
+            if (getParametersEx(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
             table_options = NULL;
             break;
         case 2:
-            if (getParameters(ht, 2, &result, &arg2)==FAILURE) {
+            if (getParametersEx(2, &result, &arg2)==FAILURE) {
                 RETURN_FALSE;
             }
-            table_options = arg2->value.str.val;
+            table_options = (*arg2)->value.str.val;
             break;
         default:
             WRONG_PARAM_COUNT;
@@ -2580,7 +2577,7 @@ $endif;
    returns an associative array with fieldnames as key for query <resultid> */
 PHP_FUNCTION(ifx_fieldtypes)
 {
-    pval *result, *arg2;
+    pval **result;
     IFX_RES *Ifx_Result;
 
 EXEC SQL BEGIN DECLARE SECTION;
@@ -2600,22 +2597,14 @@ EXEC SQL END DECLARE SECTION;
     int num_fields;
     
     char *p;
-    char *table_options;
             
     IFXLS_FETCH();
 
     switch (ARG_COUNT(ht)) {
         case 1:
-            if (getParameters(ht, 1, &result)==FAILURE) {
+            if (getParametersEx(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
-            table_options = NULL;
-            break;
-        case 2:
-            if (getParameters(ht, 2, &result, &arg2)==FAILURE) {
-                RETURN_FALSE;
-            }
-            table_options = arg2->value.str.val;
             break;
         default:
             WRONG_PARAM_COUNT;
@@ -2764,7 +2753,7 @@ $endif;
    returns an associative for query <resultid> array with fieldnames as key */
 PHP_FUNCTION(ifx_fieldproperties)
 {
-    pval *result, *arg2;
+    pval **result;
     IFX_RES *Ifx_Result;
 
 EXEC SQL BEGIN DECLARE SECTION;
@@ -2787,22 +2776,14 @@ EXEC SQL END DECLARE SECTION;
     
     char string_data[256];
     char *p;
-    char *table_options;
             
     IFXLS_FETCH();
 
     switch (ARG_COUNT(ht)) {
         case 1:
-            if (getParameters(ht, 1, &result)==FAILURE) {
+            if (getParametersEx(1, &result)==FAILURE) {
                 RETURN_FALSE;
             }
-            table_options = NULL;
-            break;
-        case 2:
-            if (getParameters(ht, 2, &result, &arg2)==FAILURE) {
-                RETURN_FALSE;
-            }
-            table_options = arg2->value.str.val;
             break;
         default:
             WRONG_PARAM_COUNT;
@@ -2957,12 +2938,12 @@ $endif;
    returns the number of rows already fetched for query identified by resultid */
 PHP_FUNCTION(ifx_num_rows)
 {
-    pval *result;
+    pval **result;
     IFX_RES *Ifx_Result;
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+    if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -2989,7 +2970,7 @@ PHP_FUNCTION(ifx_num_rows)
    returns the sqlerrd[] fields of the sqlca struct for query $resultid */
 PHP_FUNCTION(ifx_getsqlca)
 {
-    pval *result;
+    pval **result;
     IFX_RES *Ifx_Result;
 
     char fieldname[16];
@@ -2997,7 +2978,7 @@ PHP_FUNCTION(ifx_getsqlca)
    
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+    if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -3033,12 +3014,12 @@ PHP_FUNCTION(ifx_getsqlca)
    returns the number of columns in query resultid */
 PHP_FUNCTION(ifx_num_fields)
 {
-    pval *result;
+    pval **result;
     IFX_RES *Ifx_Result;
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+    if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -3067,7 +3048,7 @@ PHP_FUNCTION(ifx_num_fields)
    releases resources for query associated with resultid */
 PHP_FUNCTION(ifx_free_result)
 {
-    pval *result;
+    pval **result;
     IFX_RES *Ifx_Result;
     
 EXEC SQL BEGIN DECLARE SECTION;
@@ -3081,7 +3062,7 @@ EXEC SQL END DECLARE SECTION;
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+    if (ARG_COUNT(ht)!=1 || getParametersEx(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -3122,7 +3103,7 @@ EXEC SQL END DECLARE SECTION;
         
     efree(Ifx_Result);             /* this can be safely done now */
   
-    zend_list_delete(result->value.lval);
+    zend_list_delete((*result)->value.lval);
     RETURN_TRUE;
 }
 /* }}} */
