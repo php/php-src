@@ -141,6 +141,13 @@ interface spl_forward {
 
 	/*! \brief Check if more elements are available.
 	 *
+	 * This method is meant to be called right after calls to rewind() or
+	 * next(). When you use foreach hooking then this is done automatically
+	 * but you can use it inside a for loop yourself:
+	 * \code
+	   for(; $it->has_more(); $it->next()) { ... }
+	   \endcode
+	 *
 	 * \return \c bool whether or not more elements are available
 	 */
 	function has_more();
