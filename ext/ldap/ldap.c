@@ -564,7 +564,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			}
 
 			num_attribs = zend_hash_num_elements(Z_ARRVAL_PP(attrs));
-			if ((ldap_attrs = emalloc((num_attribs+1) * sizeof(char *))) == NULL) {
+			if ((ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0)) == NULL) {
 				php_error(E_WARNING, "%s(): Could not allocate memory", get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			}
@@ -644,8 +644,8 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			ldap_filter = Z_STRVAL_PP(filter);
 		}
 
-		lds = emalloc(nlinks * sizeof(ldap_linkdata));
-		rcs = emalloc(nlinks * sizeof(*rcs));
+		lds = safe_emalloc(nlinks, sizeof(ldap_linkdata), 0);
+		rcs = safe_emalloc(nlinks, sizeof(*rcs), 0);
 		
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(link));
 		for (i=0; i<nlinks; i++) {
@@ -1285,8 +1285,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	ldap_dn = Z_STRVAL_PP(dn);
 
 	num_attribs = zend_hash_num_elements(Z_ARRVAL_PP(entry));
-	ldap_mods = emalloc((num_attribs+1) * sizeof(LDAPMod *));
-	num_berval = emalloc(num_attribs * sizeof(int));
+	ldap_mods = safe_emalloc((num_attribs+1), sizeof(LDAPMod *), 0);
+	num_berval = safe_emalloc(num_attribs, sizeof(int), 0);
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(entry));
 
 	/* added by gerrit thomson to fix ldap_add using ldap_mod_add */
@@ -1322,7 +1322,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		}
 		
 		num_berval[i] = num_values;
-		ldap_mods[i]->mod_bvalues = emalloc((num_values + 1) * sizeof(struct berval *));
+		ldap_mods[i]->mod_bvalues = safe_emalloc((num_values + 1), sizeof(struct berval *), 0);
 
 /* allow for arrays with one element, no allowance for arrays with none but probably not required, gerrit thomson. */
 		if ((num_values == 1) && (Z_TYPE_PP(value) != IS_ARRAY)) {
@@ -1714,7 +1714,7 @@ PHP_FUNCTION(ldap_set_option)
 				php_error(E_WARNING, "%s(): Expected non-empty array value for this option", get_active_function_name(TSRMLS_C));
                                 RETURN_FALSE;
                         }
-			ctrls = emalloc((1 + ncontrols) * sizeof(*ctrls));
+			ctrls = safe_emalloc((1 + ncontrols), sizeof(*ctrls), 0);
 			*ctrls = NULL;
 			ctrlp = ctrls;
 			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(newval));
