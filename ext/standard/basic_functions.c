@@ -487,6 +487,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_reverse,							NULL)
 	PHP_FE(array_pad,								NULL)
 	PHP_FE(array_flip,								NULL)
+	PHP_FE(array_rand,								NULL)
 	/* aliases from array.c */
 	PHP_FALIAS(pos,				current,			first_arg_force_ref)
 	PHP_FALIAS(sizeof,			count,				first_arg_allow_ref)

@@ -40,6 +40,7 @@
 #include "php_array.h"
 #include "basic_functions.h"
 #include "php_string.h"
+#include "php_rand.h"
 
 #ifdef ZTS
 int array_globals_id;
@@ -2220,6 +2221,84 @@ PHP_FUNCTION(array_multisort)
 	efree(arrays);
 	efree(args);
 	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto mixed array_rand(array input [, int num_req ])
+   Return key/keys for random entry/entries in the array */
+PHP_FUNCTION(array_rand)
+{
+	zval **input, **num_req;
+	long randval;
+	int num_req_val, num_avail, key_type;
+	char *string_key;
+	ulong num_key;
+
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &num_req) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
+		zend_error(E_WARNING, "Argument to %s() has to be an array",
+				   get_active_function_name());
+		return;
+	}
+
+	num_avail = zend_hash_num_elements(Z_ARRVAL_PP(input));
+
+	if (ZEND_NUM_ARGS() > 1) {
+		convert_to_long_ex(num_req);
+		num_req_val = Z_LVAL_PP(num_req);
+		if (num_req_val <= 0 || num_req_val > num_avail) {
+			zend_error(E_WARNING, "Second argument to %s() has to be between 1 and the number of elements in the array", get_active_function_name());
+			return;
+		}
+	} else
+		num_req_val = 1;
+
+	/* Make the return value an array only if we need to pass back more than one
+	   result. */
+	if (num_req_val > 1)
+		array_init(return_value);
+
+	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(input));
+	while (num_req_val && (key_type = zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key)) != HASH_KEY_NON_EXISTANT) {
+
+#ifdef HAVE_LRAND48
+		randval = lrand48();
+#else
+#ifdef HAVE_RANDOM
+		randval = random();
+#else
+		randval = rand();
+#endif
+#endif
+
+		if ((double)(randval/(PHP_RAND_MAX+1.0)) < (double)num_req_val/(double)num_avail) {
+			/* If we are returning a single result, just do it. */
+			if (Z_TYPE_P(return_value) != IS_ARRAY) {
+				if (key_type == HASH_KEY_IS_STRING) {
+					RETURN_STRING(string_key, 0);
+				} else {
+					RETURN_LONG(num_key);
+				}
+			} else {
+				/* Append the result to the return value. */
+				if (key_type == HASH_KEY_IS_STRING)
+					add_next_index_string(return_value, string_key, 0);
+				else
+					add_next_index_long(return_value, num_key);
+			}
+			num_req_val--;
+		} else if (key_type == HASH_KEY_IS_STRING)
+			efree(string_key);
+
+		num_avail--;
+		zend_hash_move_forward(Z_ARRVAL_PP(input));
+	}
 }
 /* }}} */
 
