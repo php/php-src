@@ -18,6 +18,8 @@
 #define _TSRM_H
 
 #ifdef HAVE_CONFIG_H
+# undef PACKAGE
+# undef VERSION
 # include "tsrm_config.h"
 #endif
 
