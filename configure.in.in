@@ -38,7 +38,7 @@ dnl ## libraries and so on.
 dnl ## In diversion 2 we check for compile-time options to the PHP
 dnl ## core and how to deal with different system dependencies.  This
 dnl ## includes what regex library is used and whether debugging or short
-dnl ## tags are enabled, and the default behaviour of php3.ini options.
+dnl ## tags are enabled, and the default behaviour of php.ini options.
 dnl ## This is also where an SAPI interface is selected (choosing between
 dnl ## Apache module, CGI etc.)
 
@@ -598,7 +598,7 @@ AC_SUBST(FHTTPD_TARGET)
 
 AC_MSG_CHECKING(whether to use a configuration file)
 AC_ARG_WITH(config-file-path,
-[  --with-config-file-path=PATH  Sets the path in which to look for php3.ini
+[  --with-config-file-path=PATH  Sets the path in which to look for php.ini
                           defaults to /usr/local/lib],
 [
   if test "$withval" = "yes"; then
