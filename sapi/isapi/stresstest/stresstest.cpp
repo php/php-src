@@ -57,7 +57,7 @@ char * MakeDateStr(VOID);
 char * GetEnv(char *);
 
 
-#define NUM_THREADS 1
+#define NUM_THREADS 10
 #define ITERATIONS 1
 HANDLE terminate[NUM_THREADS];
 HANDLE StartNow;

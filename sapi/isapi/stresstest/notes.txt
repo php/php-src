@@ -1,0 +1,18 @@
+This stress test program is for debugging threading issues with the isapi module.
+
+Create a file that contains a list of php script files, one per line.  If you need to provide input, you can create an input file for each script file.  File contents would look like:
+
+e:\inetpub\pages\index.php
+e:\inetpub\pages\info.php
+e:\inetpub\pages\posttest.php e:\inetpub\pages\postdata.txt
+
+If you need to set special environement variables, in addition to your regular environment, create a file that contains them, one setting per line:
+
+MY_ENV_VAR=XXXXXXXX
+
+This can be used to simulate isapi environment variables if need be.
+
+By default, stress test uses 10 threads.  To change this, change the define NUM_THREADS in stresstest.cpp.
+
+This test program is a work in progress, no garauntees on it working right.
+
