@@ -27,9 +27,15 @@
 
 static void aggregation_info_dtor(aggregation_info *info)
 {
+	/* FIXME: This is here to make it compile with Engine 2 but part of this module will need rewriting */
+#ifndef ZEND_ENGINE_2
 	destroy_zend_class(info->new_ce);
+#else
+	destroy_zend_class(&info->new_ce);
+#endif
 	efree(info->new_ce);
 	zval_ptr_dtor(&info->aggr_members);
+
 }
 
 /* {{{ static zval* array_to_hash */
@@ -334,8 +340,12 @@ static void aggregate(INTERNAL_FUNCTION_PARAMETERS, int aggr_what, int aggr_type
 		new_ce->name = estrndup(Z_OBJCE_P(obj)->name, Z_OBJCE_P(obj)->name_length);
 		new_ce->name_length = Z_OBJCE_P(obj)->name_length;
 		new_ce->parent = Z_OBJCE_P(obj)->parent;
+#ifdef ZEND_ENGINE_2
+		new_ce->refcount = 1;
+#else
 		new_ce->refcount = (int *) emalloc(sizeof(int));
 		*new_ce->refcount = 1;
+#endif
 		new_ce->constants_updated = Z_OBJCE_P(obj)->constants_updated;
 		zend_hash_init(&new_ce->function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 		zend_hash_init(&new_ce->default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
