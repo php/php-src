@@ -19,7 +19,6 @@
 #define _WIN32_DCOM
 
 #include "../rpc.h"
-#include "../php_rpc.h"
 #include "../handler.h"
 
 #include "com.h"
@@ -35,7 +34,7 @@ static int com_hash(rpc_string, rpc_string *, void *, int, char *, int);
 static int com_name(rpc_string, rpc_string *, void *, int);
 static int com_ctor(rpc_string, void **, int , zval ***);
 static int com_dtor(void *);
-static int com_describe(rpc_string, void *, char **);
+static int com_describe(rpc_string, void *, char **, unsigned char **);
 static int com_call(rpc_string, void **, zval *, int, zval ***);
 static int com_get(rpc_string, zval *, void **);
 static int com_set(rpc_string, zval *, void **);
@@ -454,7 +453,7 @@ static int com_dtor(void *data)
 	return SUCCESS;
 }
 
-static int com_describe(rpc_string method_name, void *data, char **arg_types)
+static int com_describe(rpc_string method_name, void *data, char **arg_types, unsigned char **ref_types)
 {
 	return SUCCESS;
 }

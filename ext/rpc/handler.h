@@ -90,7 +90,7 @@ typedef struct _rpc_object_handlers {
 	int (*rpc_name)(rpc_string hash, rpc_string *name, void *data, int type);
 	int (*rpc_ctor)(rpc_string class_name, void **data, int num_args, zval **args[]);
 	int (*rpc_dtor)(void *data);
-	int (*rpc_describe)(rpc_string method_name, void *data, char **arg_types);
+	int (*rpc_describe)(rpc_string method_name, void *data, char **arg_types, unsigned char **ref_types);
 	int (*rpc_call)(rpc_string method_name, void **data, zval *return_value, int num_args, zval **args[]);
 	int (*rpc_get)(rpc_string property_name, zval *return_value, void **data);
 	int (*rpc_set)(rpc_string property_name, zval *value, void **data);

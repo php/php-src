@@ -857,7 +857,7 @@ ZEND_API int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 			while (SUCCEEDED(TypeInfo->lpVtbl->GetVarDesc(TypeInfo, j, &pVarDesc))) {
 				BSTR bstr_ids;
 				zend_constant c;
-				zval exists, results;
+				zval exists, results, value;
 				char *const_name;
 
 				TypeInfo->lpVtbl->GetNames(TypeInfo, pVarDesc->memid, &bstr_ids, 1, &NameCount);
@@ -883,10 +883,16 @@ ZEND_API int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 					continue;
 				}
 
-				php_variant_to_zval(pVarDesc->lpvarValue, &c.value, CP_ACP);
-				c.flags = mode;
+				php_variant_to_zval(pVarDesc->lpvarValue, &value, CP_ACP);
+				 /* we only import enumerations (=int) */
+				if (Z_TYPE(value) == IS_LONG) {
+					c.flags = mode;
+					c.value.type = IS_LONG;
+					c.value.value.lval = Z_LVAL(value);
+					c.module_number = 0; /* the module number is not available here */
 
-				zend_register_constant(&c TSRMLS_CC);
+					zend_register_constant(&c TSRMLS_CC);
+				}
 
 				j++;
 			}
