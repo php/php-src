@@ -2261,7 +2261,7 @@ PHP_FUNCTION(fgetcsv)
 		s++;
 	}
 	/* strip trailing spaces */
-	while (e >= s && isspace((int)*(unsigned char *)(--e)) && *e != delimiter);
+	while (--e >= s && isspace((int)*(unsigned char *)(e)) && *e != delimiter);
 	e++;
 
 	array_init(return_value);
