@@ -320,7 +320,7 @@ zend_module_entry gd_module_entry = {
 	PHP_MINIT(gd),
 	NULL,
 	NULL,
-	NULL,
+	PHP_RSHUTDOWN(gd),
 	PHP_MINFO(gd),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -407,6 +407,17 @@ PHP_MINIT_FUNCTION(gd)
     /* End Section Filters */
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
+#endif
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION
+ */
+PHP_RSHUTDOWN_FUNCTION(gd)
+{
+#if HAVE_LIBGD20
+	gdFreeFontCache();
 #endif
 	return SUCCESS;
 }
