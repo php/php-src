@@ -1,3 +1,16 @@
+2003-03-01  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix mem leak
+
+2003-03-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Make __construct() have higher priority than class name functions
+      - for constructors.
+      - Fix problem with the engine allowing final/abstract for the same method.
+      - Both patches are by Marcus Börger.
+
 2003-02-27  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * zend_ini_scanner.l:
