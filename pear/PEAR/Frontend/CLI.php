@@ -406,12 +406,16 @@ class PEAR_Frontend_CLI extends PEAR
     }
 
     // }}}
+    // {{{ log(text)
+
     
     function log($text)
     {
         return $this->_displayLine($text);
     }
     
+
+    // }}}
     // {{{ bold($text)
 
     function bold($text)
