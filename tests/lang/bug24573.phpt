@@ -9,7 +9,7 @@ class Foo {
     $this = null;
     debug_backtrace();
     $this = $__this;
-  } 
+  }
 }
 
 $f = new Foo;
@@ -19,5 +19,6 @@ $f->Bar();
 echo "OK\n";
 
 ?>
---EXPECT--
-OK
+--EXPECTF--
+
+Fatal error: Cannot re-assign $this in %s on line %d
