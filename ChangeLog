@@ -1,3 +1,35 @@
+1999-11-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * build.mk: - limit find to PHP's automake Makefiles
+    - check whether patches were applied correctly
+
+    * ext/session/session.c:
+    Disable auto_start until we find a way to access the necessary data fields.
+
+1999-11-06  Zeev Suraski  <zeev@php.net>
+
+    * configure.in
+      php_version.h: Version update
+
+    * ext/standard/basic_functions.c
+      ext/session/session.c
+      ext/com/COM.c
+      NEWS
+      mergesort.c
+      php_ini.h: - Win32 fixes
+    - COM module improvements from Boris Wedl
+
+1999-11-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c:
+    (PHP var_dump, serialize) now use php.ini's precision size when displying/serializing doubles
+
+1999-11-06  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-11-05  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/mysql/php_mysql.c:
