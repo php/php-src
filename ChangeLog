@@ -1,3 +1,87 @@
+2003-12-08  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/standard/parsedate.y:
+      reduce/reduce conflicts resolved
+
+2003-12-08  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/imap/config.w32
+      ext/imap/php_imap.def:
+      Adding config file for win32. This allows to build with c-client 2002e
+
+    * win32/sendmail.c
+      win32/sendmail.h:
+      Exporting symbols used in the imap extension
+
+2003-12-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/mysqli/config.m4:
+      ws
+
+2003-12-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/dom_iterators.c
+      ext/dom/php_dom.c:
+      fix getElementsByTagname iteration
+
+2003-12-08  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Make it compile again
+
+2003-12-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/dom.dsp
+      ext/iconv/iconv.dsp
+      ext/simplexml/simplexml.dsp
+      ext/xmlrpc/xmlrpc.dsp
+      ext/xsl/xsl.dsp
+      win32/builddef.bat
+      win32/php4dllts.dsp:
+      export libxml2 and iconv symbols
+      extensions no longer link against either of those
+
+2003-12-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      typofix
+
+2003-12-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      Fix build
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      Corrected ibase_close() fix
+
+2003-12-08  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.c:
+      - A bug in Udm_Hash32 function was fixed.
+
+2003-12-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/config.m4:
+      MFH(r-1.45): Avoid using non-portable test syntax.
+
+    * ext/mbstring/config.m4:
+      Avoid using non-portable test syntax. This was causing problems on
+      Solaris. (Reported by Uwe Schindler. Thanks!)
+
+    * ext/xml/xml.c:
+      NULL pointers can be passed to free_fcn. This is the correct behaviour.
+
+    * ext/iconv/iconv.c:
+      Fix iconv stream filter to properly handle multibyte characters that
+      span at the alignment of a hunk.
+
+    * ext/standard/filters.c:
+      Fix a convert filters bug that occurs when multiple buckets are coming in.
+
 2003-12-06  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/PEAR/Dependency.php:

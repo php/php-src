@@ -1,3 +1,8 @@
+2003-12-08  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_builtin_functions.c:
+      - Make it compile again
+
 2003-12-07  Stanislav Malyshev  <stas@zend.com>
 
     * zend_builtin_functions.c:
