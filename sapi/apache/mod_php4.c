@@ -124,10 +124,8 @@ static int sapi_apache_ub_write(const char *str, uint str_length)
 		
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
-	} else {
-		ret = fwrite(str, 1, str_length, stderr);
 	}
-	if(ret != str_length) {
+	if (ret != str_length) {
 		php_handle_aborted_connection();
 	}
 	return ret;
