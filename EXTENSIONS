@@ -149,6 +149,7 @@ EXTENSION:           pgsql
 PRIMARY MAINTAINER:  Yasuo Ohgaki <yohgaki@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
+COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less have fatal bug.
 -------------------------------------------------------------------------------
 EXTENSION:           sybase
 MAINTENANCE:         Unknown
