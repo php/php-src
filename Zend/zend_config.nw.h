@@ -34,7 +34,7 @@ typedef unsigned int uint;
 /* #include <malloc.h> */
 
 #define HAVE_STRING_H 1
-
+#define HAVE_STDLIB_H 1
 #undef HAVE_KILL
 #define HAVE_GETPID 1
 /* #define HAVE_ALLOCA_H 1 */
