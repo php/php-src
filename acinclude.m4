@@ -1164,7 +1164,7 @@ AC_DEFUN(PHP_MISSING_FCLOSE_DECL,[
 ])
 
 dnl
-dnl Check for broken sprintf()
+dnl Check for broken sprintf(), C99 conformance
 dnl
 AC_DEFUN(PHP_AC_BROKEN_SPRINTF,[
   AC_CACHE_CHECK(whether sprintf is broken, ac_cv_broken_sprintf,[
@@ -1177,9 +1177,42 @@ AC_DEFUN(PHP_AC_BROKEN_SPRINTF,[
     ])
   ])
   if test "$ac_cv_broken_sprintf" = "yes"; then
-    AC_DEFINE(PHP_BROKEN_SPRINTF, 1, [ ])
+    AC_DEFINE(PHP_BROKEN_SPRINTF, 1, [Whether sprintf is C99 conform])
   else
-    AC_DEFINE(PHP_BROKEN_SPRINTF, 0, [ ])
+    AC_DEFINE(PHP_BROKEN_SPRINTF, 0, [Whether sprintf is C99 conform])
+  fi
+])
+
+dnl
+dnl Check for broken snprintf(), C99 conformance
+dnl
+AC_DEFUN(PHP_AC_BROKEN_SNPRINTF,[
+  AC_CACHE_CHECK(whether snprintf is broken, ac_cv_broken_snprintf,[
+    AC_TRY_RUN([
+#define NULL (0L)
+main() {
+	char buf[20];
+	int res = 0;
+	res = res || (snprintf(buf, 2, "marcus") != 6); 
+	res = res || (buf[1] != '\0');
+	res = res || (snprintf(buf, 0, "boerger") != 7);
+	res = res || (buf[0] != 'm');
+	res = res || (snprintf(NULL, 0, "boerger") != 7);
+	res = res || (snprintf(buf, sizeof(buf), "%f", 0.12345678) != 8);
+	exit(res); 
+}
+    ],[
+      ac_cv_broken_snprintf=no
+    ],[
+      ac_cv_broken_snprintf=yes
+    ],[
+      ac_cv_broken_snprintf=no
+    ])
+  ])
+  if test "$ac_cv_broken_snprintf" = "yes"; then
+    AC_DEFINE(PHP_BROKEN_SNPRINTF, 1, [Whether snprintf is C99 conform])
+  else
+    AC_DEFINE(PHP_BROKEN_SNPRINTF, 0, [Whether snprintf is C99 conform])
   fi
 ])
 
