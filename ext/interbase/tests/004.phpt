@@ -9,10 +9,10 @@ InterBase: BLOB test
 
     require("interbase.inc");
     
-    ibase_connect($test_base);
+    $link = ibase_connect($test_base);
 
     ibase_query(
-    	"create table test4 (
+    	"CREATE TABLE test4 (
     		v_integer   integer,
             v_blob		blob)");
     ibase_commit();
@@ -28,10 +28,14 @@ InterBase: BLOB test
     echo "import blob 1\n";
     $ftmp = fopen($name,"r");
     $bl_s = ibase_blob_import($ftmp);
-    ibase_query("insert into test4 (v_integer, v_blob) values (1, ?)", $bl_s);
+    ibase_query("INSERT INTO test4 (v_integer, v_blob) VALUES (1, ?)", $bl_s);
+
+    $bl_s = ibase_blob_import($ftmp,$link);
+    ibase_query($link, "INSERT INTO test4 (v_integer, v_blob) VALUES (1, ?)", $bl_s);
 
     echo "test blob 1\n";
-    $q = ibase_query("select v_blob from test4 where v_integer = 1");
+    $q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 1");
+
     $row = ibase_fetch_object($q);
     $bl_h = ibase_blob_open($row->V_BLOB);
 
@@ -42,7 +46,7 @@ InterBase: BLOB test
 		echo " BLOB 1 fail (1)\n";
     ibase_blob_close($bl_h);
 
-    $bl_h = ibase_blob_open($row->V_BLOB);
+    $bl_h = ibase_blob_open($row->V_BLOB,$link);
 
 	$blob = '';    
     while($piece = ibase_blob_get($bl_h, 100 * 1024))
@@ -55,11 +59,11 @@ InterBase: BLOB test
 
     echo "create blob 2\n";
 
-    ibase_query("insert into test4 (v_integer, v_blob) values (2, ?)", $blob_str);
+    ibase_query("INSERT INTO test4 (v_integer, v_blob) VALUES (2, ?)", $blob_str);
 
     echo "test blob 2\n";
 
-    $q = ibase_query("select v_blob from test4 where v_integer = 2");
+    $q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 2");
     $row = ibase_fetch_object($q,IBASE_TEXT);
 
     if($row->V_BLOB != $blob_str)
@@ -70,7 +74,7 @@ InterBase: BLOB test
 
     echo "create blob 3\n";
 
-    $bl_h = ibase_blob_create();
+    $bl_h = ibase_blob_create($link);
 
     ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
     ibase_blob_add($bl_h, "| PHP HTML Embedded Scripting Language Version 3.0                     |\n");
@@ -97,21 +101,21 @@ InterBase: BLOB test
     ibase_blob_add($bl_h, "| contact core@php.net.                                                |\n");
     ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
     $bl_s = ibase_blob_close($bl_h);
-    ibase_query("insert into test4 (v_integer, v_blob) values (3, ?)", $bl_s);
+    ibase_query("INSERT INTO test4 (v_integer, v_blob) VALUES (3, ?)", $bl_s);
 	ibase_commit();
     echo "echo blob 3\n";
 
-    $q = ibase_query("select v_blob from test4 where v_integer = 3");
+    $q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 3");
     $row = ibase_fetch_object($q);
 	ibase_commit();
 	ibase_close();
 	    
     ibase_connect($test_base);
-    ibase_blob_echo($row->V_BLOB);
+    ibase_blob_echo($row->V_BLOB, $link);
     ibase_free_result($q);
 
     echo "fetch blob 3\n";
-    $q = ibase_query("select v_blob from test4 where v_integer = 3");
+    $q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 3");
     $row = ibase_fetch_object($q,IBASE_TEXT);
     echo $row->V_BLOB;
     ibase_free_result($q);
