@@ -585,11 +585,8 @@ int main(int argc, char *argv[])
 
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
-			if (php_execute_script(&file_handle TSRMLS_CC)) {
-				exit_status = EG(exit_status);
-			} else {
-				exit_status = 255;
-			}
+			php_execute_script(&file_handle TSRMLS_CC);
+			exit_status = EG(exit_status);
 			break;
 		case PHP_MODE_LINT:
 			PG(during_request_startup) = 0;
