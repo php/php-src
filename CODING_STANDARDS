@@ -60,6 +60,9 @@ Exceptions:
     check its man page again, and only then, consider using it, and even then,
     try avoiding it.
 
+[7] Use ZEND_* macro instead of PHP_* macro. Use of PHP_* macros are
+    not recommended. Since most of PHP_* macros are ZEND_* macro alias, use of
+    PHP_* macro makes browsing source with tag search harder.
 
 Naming Conventions
 ------------------
