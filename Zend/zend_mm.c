@@ -57,8 +57,6 @@
 #define ZEND_MM_ALIGNED_FREE_HEADER_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_free_block))
 #define ZEND_MM_ALIGNED_SEGMENT_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_segment))
 
-#define ZEND_MM_ALIGNED_MAX_HEADER_SIZE MAX(ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE)
-
 /* Memory calculations */
 #define ZEND_MM_BLOCK_AT(blk, offset)		((zend_mm_block *) (((char *) (blk))+(offset)))
 #define ZEND_MM_DATA_OF(p)				((void *) (((char *) (p))+ZEND_MM_ALIGNED_HEADER_SIZE))
@@ -313,10 +311,21 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 		/* segment size, size of block and size of guard block */
 		realloc_to_size = ZEND_MM_ALIGNED_SEGMENT_SIZE+true_size+ZEND_MM_ALIGNED_HEADER_SIZE;
 		segment = realloc(segment, realloc_to_size);
+
 		if (segment != segment_copy) {
-			/* The segment moved. Fix the segment list */
-			fprintf(stderr, "Segment moved! This is not handled right now\n");
-			exit(1);
+			if (heap->segments_list == segment_copy) {
+				heap->segments_list = segment;
+			} else {
+				zend_mm_segment *seg = heap->segments_list;
+
+				while (seg) {
+					if (seg->next_segment == segment_copy) {
+						seg->next_segment = segment;
+						break;
+					}
+					segment = segment->next_segment;
+				}				
+			}
 		}
 
 		mm_block->size = true_size;
