@@ -358,6 +358,7 @@ dnl Checks for library functions.
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(
 asctime_r \
+chroot \
 crypt \
 ctime_r \
 cuserid \

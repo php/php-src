@@ -465,8 +465,10 @@ function_entry basic_functions[] = {
 	PHP_FE(opendir,				NULL)
 	PHP_FE(closedir,			NULL)
 	PHP_FE(chdir,				NULL)
-#if !defined(ZEND_WIN32)&&!defined(ZTS)
+#if defined(HAVE_CHROOT) && !defined(ZTS)
 	PHP_FE(chroot,				NULL)
+#else
+	PHP_FALIAS(chroot, warn_not_available, NULL)
 #endif
 	PHP_FE(getcwd,				NULL)
 	PHP_FE(rewinddir,			NULL)

@@ -28,7 +28,7 @@ PHP_RINIT_FUNCTION(dir);
 PHP_FUNCTION(opendir);
 PHP_FUNCTION(closedir);
 PHP_FUNCTION(chdir);
-#if !defined(ZEND_WIN32)&&!defined(ZTS)
+#if defined(HAVE_CHROOT) && !defined(ZTS)
 PHP_FUNCTION(chroot);
 #endif
 PHP_FUNCTION(getcwd);

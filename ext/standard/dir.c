@@ -223,7 +223,7 @@ PHP_FUNCTION(closedir)
 
 /* }}} */
 
-#if !defined(ZEND_WIN32)&&!defined(ZTS)
+#if defined(HAVE_CHROOT) && !defined(ZTS)
 /* {{{ proto int chroot(string directory)
    Change root directory */
 
