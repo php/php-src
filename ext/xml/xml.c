@@ -388,12 +388,12 @@ static void xml_set_handler(zval **handler, zval **data)
 /* {{{ xml_call_handler() */
 static zval *xml_call_handler(xml_parser *parser, zval *handler, zend_function *function_ptr, int argc, zval **argv)
 {
+	int i;	
 	TSRMLS_FETCH();
 
-	if (parser && handler) {
+	if (parser && handler && !EG(exception)) {
 		zval ***args;
 		zval *retval;
-		int i;	
 		int result;
 		zend_fcall_info fci;
 
@@ -437,10 +437,14 @@ static zval *xml_call_handler(xml_parser *parser, zval *handler, zend_function *
 		if (result == FAILURE) {
 			return NULL;
 		} else {
-			return retval;
+			return EG(exception) ? NULL : retval;
 		}
+	} else {
+		for (i = 0; i < argc; i++) {
+			zval_ptr_dtor(&argv[i]);
+		}
+		return NULL;
 	}
-	return NULL;
 }
 /* }}} */
 
