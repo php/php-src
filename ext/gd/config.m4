@@ -263,7 +263,7 @@ dnl Various checks for GD features
     AC_DEFINE(HAVE_LIBGD,1,[ ])
     PHP_GD_CHECK_VERSION
   else
-    AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $withval])
+    AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $GD_SEARCH_PATHS])
   fi 
 
 dnl NetBSD package structure
