@@ -24,14 +24,14 @@ unset($foo);
 $foo = &foo();
 var_dump($foo->fubar);
 ?>
---EXPECT--
-object(foo)(1) {
+--EXPECTF--
+object(foo)#%d (1) {
   ["fubar"]=>
   string(5) "fubar"
 }
 string(5) "fubar"
 string(5) "fubar"
-object(foo)(1) {
+object(foo)#%d (1) {
   ["fubar"]=>
   string(5) "fubar"
 }
