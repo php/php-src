@@ -132,12 +132,15 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 
 static php_stream_wrapper_ops gzip_stream_wops = {
 	php_stream_gzopen,
+	NULL,
+	NULL,
 	NULL
 };
 
 php_stream_wrapper php_stream_gzip_wrapper =	{
 	&gzip_stream_wops,
-	NULL
+	NULL,
+	0, /* is_url */
 };
 
 

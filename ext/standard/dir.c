@@ -22,7 +22,7 @@
 
 #include "php.h"
 #include "fopen_wrappers.h"
-
+#include "file.h"
 #include "php_dir.h"
 
 #ifdef HAVE_DIRENT_H
@@ -55,12 +55,14 @@ int dir_globals_id;
 php_dir_globals dir_globals;
 #endif
 
+#if 0
 typedef struct {
 	int id;
 	DIR *dir;
 } php_dir;
 
 static int le_dirp;
+#endif
 
 static zend_class_entry *dir_class_entry_ptr;
 
@@ -72,14 +74,14 @@ static zend_class_entry *dir_class_entry_ptr;
 				php_error(E_WARNING, "unable to find my handle property"); \
 				RETURN_FALSE; \
 			} \
-			ZEND_FETCH_RESOURCE(dirp, php_dir *, tmp, -1, "Directory", le_dirp); \
+			ZEND_FETCH_RESOURCE(dirp, php_stream *, tmp, -1, "Directory", php_file_le_stream()); \
 		} else { \
-			ZEND_FETCH_RESOURCE(dirp, php_dir *, 0, DIRG(default_dir), "Directory", le_dirp); \
+			ZEND_FETCH_RESOURCE(dirp, php_stream *, 0, DIRG(default_dir), "Directory", php_file_le_stream()); \
 		} \
 	} else if ((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &id) == FAILURE) { \
 		WRONG_PARAM_COUNT; \
 	} else { \
-		ZEND_FETCH_RESOURCE(dirp, php_dir *, id,-1, "Directory", le_dirp); \
+		ZEND_FETCH_RESOURCE(dirp, php_stream *, id,-1, "Directory", php_file_le_stream()); \
 	} 
 
 static zend_function_entry php_dir_class_functions[] = {
@@ -103,15 +105,6 @@ static void php_set_default_dir(int id TSRMLS_DC)
 	DIRG(default_dir) = id;
 }
 
-
-static void _dir_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	php_dir *dirp = (php_dir *)rsrc->ptr;
-
-	closedir(dirp->dir);
-	efree(dirp);
-}
-
 PHP_RINIT_FUNCTION(dir)
 {
 	DIRG(default_dir) = -1;
@@ -122,8 +115,6 @@ PHP_MINIT_FUNCTION(dir)
 {
 	static char tmpstr[2];
 	zend_class_entry dir_class_entry;
-
-	le_dirp = zend_register_list_destructors_ex(_dir_dtor, NULL, "dir", module_number);
 
 	INIT_CLASS_ENTRY(dir_class_entry, "Directory", php_dir_class_functions);
 	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry TSRMLS_CC);
@@ -144,49 +135,29 @@ PHP_MINIT_FUNCTION(dir)
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
 	pval **arg;
-	php_dir *dirp;
+	php_stream *dirp;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
-
-	if (php_check_open_basedir(Z_STRVAL_PP(arg) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
 	
-	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg), NULL, CHECKUID_ALLOW_ONLY_FILE))) {
+	dirp = php_stream_opendir(Z_STRVAL_PP(arg), ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+
+	if (dirp == NULL) {
 		RETURN_FALSE;
 	}
-	
-	dirp = emalloc(sizeof(php_dir));
-
-	dirp->dir = VCWD_OPENDIR(Z_STRVAL_PP(arg));
-
-#ifdef PHP_WIN32
-	if (!dirp->dir || dirp->dir->finished) {
-		if (dirp->dir) {
-			closedir(dirp->dir);
-		}
-#else
-	if (!dirp->dir) {
-#endif
-		efree(dirp);
-		php_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno), errno);
-		RETURN_FALSE;
-	}
-
-	dirp->id = zend_list_insert(dirp, le_dirp);
-
-	php_set_default_dir(dirp->id TSRMLS_CC);
+		
+	php_set_default_dir(dirp->rsrc_id TSRMLS_CC);
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
 		add_property_stringl(return_value, "path", Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), 1);
-		add_property_resource(return_value, "handle", dirp->id);
-		zend_list_addref(dirp->id);
+		add_property_resource(return_value, "handle", dirp->rsrc_id);
+		zend_list_addref(dirp->rsrc_id); /* might not be needed */
+		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */
 	} else {
-		RETURN_RESOURCE(dirp->id);
+		php_stream_to_zval(dirp, return_value);
 	}
 }
 
@@ -215,13 +186,13 @@ PHP_FUNCTION(getdir)
 PHP_FUNCTION(closedir)
 {
 	pval **id, **tmp, *myself;
-	php_dir *dirp;
+	php_stream *dirp;
 
 	FETCH_DIRP();
 
-	zend_list_delete(dirp->id);
+	zend_list_delete(dirp->rsrc_id);
 
-	if (dirp->id == DIRG(default_dir)) {
+	if (dirp->rsrc_id == DIRG(default_dir)) {
 		php_set_default_dir(-1 TSRMLS_CC);
 	}
 }
@@ -323,11 +294,11 @@ PHP_FUNCTION(getcwd)
 PHP_FUNCTION(rewinddir)
 {
 	pval **id, **tmp, *myself;
-	php_dir *dirp;
+	php_stream *dirp;
 	
 	FETCH_DIRP();
 
-	rewinddir(dirp->dir);
+	php_stream_rewinddir(dirp);
 }
 /* }}} */
 
@@ -337,14 +308,13 @@ PHP_FUNCTION(rewinddir)
 PHP_NAMED_FUNCTION(php_if_readdir)
 {
 	pval **id, **tmp, *myself;
-	php_dir *dirp;
-	char entry[sizeof(struct dirent)+MAXPATHLEN];
-	struct dirent *result = (struct dirent *)&entry; /* patch for libc5 readdir problems */
+	php_stream *dirp;
+	php_stream_dirent entry;
 
 	FETCH_DIRP();
 
-	if (php_readdir_r(dirp->dir, (struct dirent *) entry, &result) == 0 && result) {
-		RETURN_STRINGL(result->d_name, strlen(result->d_name), 1);
+	if (php_stream_readdir(dirp, &entry)) {
+		RETURN_STRINGL(entry.d_name, strlen(entry.d_name), 1);
 	}
 	RETURN_FALSE;
 }

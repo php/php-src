@@ -983,21 +983,14 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(url_scanner_ex) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(proc_open) (INIT_FUNC_ARGS_PASSTHRU);
 
+	PHP_MINIT(user_streams) (INIT_FUNC_ARGS_PASSTHRU);
 
-	if (PG(allow_url_fopen)) {
-		PHP_MINIT(user_streams) (INIT_FUNC_ARGS_PASSTHRU);
-
-		if (FAILURE == php_register_url_stream_wrapper("http", &php_stream_http_wrapper TSRMLS_CC))
-			return FAILURE;
-		if (FAILURE == php_register_url_stream_wrapper("php", &php_stream_php_wrapper TSRMLS_CC))
-			return FAILURE;
-		if (FAILURE == php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper TSRMLS_CC))
-			return FAILURE;
+	php_register_url_stream_wrapper("http", &php_stream_http_wrapper TSRMLS_CC);
+	php_register_url_stream_wrapper("php", &php_stream_php_wrapper TSRMLS_CC);
+	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper TSRMLS_CC);
 # if HAVE_OPENSSL_EXT
-		if (FAILURE == php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC))
-			return FAILURE;
+	php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC);
 # endif
-	}
 
 	return SUCCESS;
 }
@@ -1011,15 +1004,12 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 	basic_globals_dtor(&basic_globals TSRMLS_CC);
 #endif
 
-	if (PG(allow_url_fopen)) {
-		php_unregister_url_stream_wrapper("http" TSRMLS_CC);
-		php_unregister_url_stream_wrapper("ftp" TSRMLS_CC);
-		php_unregister_url_stream_wrapper("php" TSRMLS_CC);
+	php_unregister_url_stream_wrapper("http" TSRMLS_CC);
+	php_unregister_url_stream_wrapper("ftp" TSRMLS_CC);
+	php_unregister_url_stream_wrapper("php" TSRMLS_CC);
 # if HAVE_OPENSSL_EXT
-		php_unregister_url_stream_wrapper("https" TSRMLS_CC);
+	php_unregister_url_stream_wrapper("https" TSRMLS_CC);
 # endif
-
-	}
 
 	UNREGISTER_INI_ENTRIES();
 

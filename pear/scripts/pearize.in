@@ -1,6 +1,5 @@
 #!@prefix@/bin/php -Cq
 <?php // -*- PHP -*-
-
 main($argc, $argv, $_ENV);
 
 // {{{ main()
@@ -222,4 +221,5 @@ function cdata_handler($xp, $data)
  * indent-tabs-mode: t
  * End:
  */
+// vim600:syn=php
 ?>
