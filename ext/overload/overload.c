@@ -19,7 +19,7 @@
 
 /* 
  * TODO:
- * - provide a way for user to enable/disabling overloading of get/set/call
+ * + provide a way for user to enable/disabling overloading of get/set/call
  *   individually 
  * - call original overloaded handlers if necessary
  * + use local copy of CE with NULL'ed out handler when calling object's
@@ -137,7 +137,7 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	int call_result;
 	zend_class_entry temp_ce, *orig_ce;
 	zval result, *result_ptr = &result;
-	zval method_name;
+	zval get_handler;
 	zval **args[2];
 	zval *retval = NULL;
 	oo_class_data oo_data;
@@ -158,13 +158,13 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	result_ptr->refcount = 1;
 	ZVAL_NULL(result_ptr);
 
-	ZVAL_STRINGL(&method_name, GET_HANDLER, sizeof(GET_HANDLER)-1, 0);
+	ZVAL_STRINGL(&get_handler, GET_HANDLER, sizeof(GET_HANDLER)-1, 0);
 	args[0] = &prop_name;
 	args[1] = &result_ptr;
 
 	call_result = call_user_function_ex(NULL,
 										&object,
-										&method_name,
+										&get_handler,
 										&retval,
 										2, args,
 										0, NULL TSRMLS_CC);
@@ -203,7 +203,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 {
 	int call_result;
 	zend_class_entry temp_ce, *orig_ce;
-	zval method_name;
+	zval set_handler;
 	zval *value_copy;
 	zval **args[2];
 	zval *retval = NULL;
@@ -221,7 +221,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	orig_ce = Z_OBJCE_P(object);
 	Z_OBJCE_P(object) = &temp_ce;
 
-	ZVAL_STRINGL(&method_name, SET_HANDLER, sizeof(SET_HANDLER)-1, 0);
+	ZVAL_STRINGL(&set_handler, SET_HANDLER, sizeof(SET_HANDLER)-1, 0);
 	if (value->refcount == 0) {
 		MAKE_STD_ZVAL(value_copy);
 		*value_copy = *value;
@@ -233,7 +233,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 
 	call_result = call_user_function_ex(NULL,
 										&object,
-										&method_name,
+										&set_handler,
 										&retval,
 										2, args,
 										0, NULL TSRMLS_CC);
@@ -417,6 +417,52 @@ static int overload_set_property(zend_property_reference *property_reference, zv
 
 static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
+	zval ***args;
+	zval *retval = NULL;
+	int call_result;
+	zend_class_entry temp_ce, *orig_ce;
+	zval *object = property_reference->object;
+	zval call_handler, method_name, *method_name_ptr = &method_name;
+	zend_overloaded_element *method = (zend_overloaded_element *)property_reference->elements_list->tail->data;
+
+	args = (zval ***)emalloc((ZEND_NUM_ARGS() + 1) * sizeof(zval **));
+
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), &args[1]) == FAILURE) {
+		efree(args);
+		php_error(E_WARNING, "unable to obtain arguments");
+		return;
+	}
+
+	temp_ce = *Z_OBJCE_P(object);
+	DISABLE_HANDLERS(temp_ce);
+	orig_ce = Z_OBJCE_P(object);
+	Z_OBJCE_P(object) = &temp_ce;
+
+	ZVAL_STRINGL(&call_handler, CALL_HANDLER, sizeof(CALL_HANDLER)-1, 0);
+	ZVAL_STRINGL(&method_name, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
+	INIT_PZVAL(method_name_ptr);
+	args[0] = &method_name_ptr;
+	
+	call_result = call_user_function_ex(NULL,
+										&object,
+										&call_handler,
+										&retval,
+										ZEND_NUM_ARGS() + 1, args,
+										0, NULL TSRMLS_CC);
+	/* Restore object's original CE. */
+	Z_OBJCE_P(object) = orig_ce;
+
+	if (call_result == FAILURE || !retval) {
+		efree(args);
+		php_error(E_WARNING, "unable to call %s::__call() handler", orig_ce->name);
+		return;
+	}
+
+	*return_value = *retval;
+	INIT_PZVAL(return_value);
+	FREE_ZVAL(retval);
+	efree(args);
+	zval_dtor(&method->element);
 }
 
 /* {{{ proto void overload(string class_entry)
@@ -455,9 +501,11 @@ PHP_FUNCTION(overload)
 	} else
 		oo_data.handle_property_set = NULL;
 
-	/*
-	oo_data.handle_function_call = ce->handle_function_call;
-	*/
+	if (zend_hash_exists(&ce->function_table, CALL_HANDLER, sizeof(CALL_HANDLER))) {
+		oo_data.handle_function_call = ce->handle_function_call;
+		ce->handle_function_call = overload_call_method;
+	} else
+		oo_data.handle_function_call = NULL;
 
 	zend_hash_index_update(&OOG(overloaded_classes), (long)ce, &oo_data, sizeof(oo_data), NULL);
 
