@@ -31,6 +31,7 @@
 #include "SAPI.h"
 #include "php_gd.h"
 #include "ext/standard/fsock.h"
+#include "ext/standard/info.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -45,7 +46,10 @@
 
 #if HAVE_LIBGD
 
-#include "ext/standard/info.h"
+static int le_gd, le_gd_font;
+#if HAVE_LIBT1
+static int le_ps_font, le_ps_enc;
+#endif
 
 #include <gd.h>
 #include <gdfontt.h>  /* 1 Tiny font */
@@ -227,14 +231,14 @@ PHP_MINIT_FUNCTION(gd)
 		return FAILURE;
 	}
 #endif
-	GDG(le_gd) = zend_register_list_destructors_ex(php_free_gd_image, NULL, "gd", module_number);
-	GDG(le_gd_font) = zend_register_list_destructors_ex(php_free_gd_font, NULL, "gd font", module_number);
+	le_gd = zend_register_list_destructors_ex(php_free_gd_image, NULL, "gd", module_number);
+	le_gd_font = zend_register_list_destructors_ex(php_free_gd_font, NULL, "gd font", module_number);
 #if HAVE_LIBT1
 	T1_SetBitmapPad(8);
 	T1_InitLib(NO_LOGFILE|IGNORE_CONFIGFILE|IGNORE_FONTDATABASE);
 	T1_SetLogLevel(T1LOG_DEBUG);
-	GDG(le_ps_font) = zend_register_list_destructors_ex(php_free_ps_font, NULL, "gd PS font", module_number);
-	GDG(le_ps_enc) = zend_register_list_destructors_ex(php_free_ps_enc, NULL, "gd PS encoding", module_number);
+	le_ps_font = zend_register_list_destructors_ex(php_free_ps_font, NULL, "gd PS font", module_number);
+	le_ps_enc = zend_register_list_destructors_ex(php_free_ps_enc, NULL, "gd PS encoding", module_number);
 #endif
 	REGISTER_LONG_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPG", 2, CONST_CS | CONST_PERSISTENT);
@@ -299,7 +303,7 @@ PHPAPI int phpi_get_le_gd(void)
 {
 	GDLS_FETCH();
 
-	return GDG(le_gd);
+	return le_gd;
 }
 
 #ifndef HAVE_GDIMAGECOLORRESOLVE
@@ -432,7 +436,7 @@ PHP_FUNCTION(imageloadfont)
 	 * that overlap with the old fonts (with indices 1-5).  The first
 	 * list index given out is always 1.
 	 */
-	ind = 5 + zend_list_insert(font, GDG(le_gd_font));
+	ind = 5 + zend_list_insert(font, le_gd_font);
 
 	RETURN_LONG(ind);
 }
@@ -455,7 +459,7 @@ PHP_FUNCTION(imagecreate)
 
 	im = gdImageCreate(Z_LVAL_PP(x_size), Z_LVAL_PP(y_size));
 
-	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
+	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 }
 /* }}} */
 
@@ -604,7 +608,7 @@ PHP_FUNCTION (imagecreatefromstring)
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, im, GDG (le_gd));
+	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 #else
 	php_error(E_ERROR, "ImageCreateFromString: Only available with GD 1.5+");
 #endif
@@ -688,7 +692,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, im, GDG(le_gd));
+	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 }
 
 /* {{{ proto int imagecreatefromgif(string filename)
@@ -788,7 +792,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", le_gd);
 
 	if (argc > 1) {
 		convert_to_string_ex(file);
@@ -949,7 +953,7 @@ PHP_FUNCTION(imagedestroy)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	zend_list_delete(Z_LVAL_PP(IM));
 
@@ -970,7 +974,7 @@ PHP_FUNCTION(imagecolorallocate)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(red);
 	convert_to_long_ex(green);
@@ -994,8 +998,8 @@ PHP_FUNCTION(imagepalettecopy)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(dst, gdImagePtr, dstim, -1, "Image", GDG(le_gd));
-	ZEND_FETCH_RESOURCE(src, gdImagePtr, srcim, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(dst, gdImagePtr, dstim, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(src, gdImagePtr, srcim, -1, "Image", le_gd);
 
 	gdImagePaletteCopy(dst, src);
 #else
@@ -1019,7 +1023,7 @@ PHP_FUNCTION(imagecolorat)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(x);
 	convert_to_long_ex(y);
@@ -1050,7 +1054,7 @@ PHP_FUNCTION(imagecolorclosest)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(red);
 	convert_to_long_ex(green);
@@ -1074,7 +1078,7 @@ PHP_FUNCTION(imagecolorclosesthwb)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 	
 	convert_to_long_ex(red);
 	convert_to_long_ex(green);
@@ -1102,7 +1106,7 @@ PHP_FUNCTION(imagecolordeallocate)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(index);
 	col = Z_LVAL_PP(index);
@@ -1130,7 +1134,7 @@ PHP_FUNCTION(imagecolorresolve)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(red);
 	convert_to_long_ex(green);
@@ -1153,7 +1157,7 @@ PHP_FUNCTION(imagecolorexact)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(red);
 	convert_to_long_ex(green);
@@ -1177,7 +1181,7 @@ PHP_FUNCTION(imagecolorset)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(color);
 	convert_to_long_ex(red);
@@ -1210,7 +1214,7 @@ PHP_FUNCTION(imagecolorsforindex)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(index);
 	col = Z_LVAL_PP(index);
@@ -1250,7 +1254,7 @@ PHP_FUNCTION(imagegammacorrect)
 	input = Z_DVAL_PP(inputgamma);
 	output = Z_DVAL_PP(outputgamma);
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	for (i = 0; i < gdImageColorsTotal(im); i++) {
 		im->red[i]   = (int)((pow((pow((im->red[i]   / 255.0), input)), 1.0 / output) * 255)+.5);
@@ -1275,7 +1279,7 @@ PHP_FUNCTION(imagesetpixel)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(x);
 	convert_to_long_ex(y);
@@ -1300,7 +1304,7 @@ PHP_FUNCTION(imageline)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(x1);
 	convert_to_long_ex(y1);
@@ -1326,7 +1330,7 @@ PHP_FUNCTION(imagedashedline)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(x1);
 	convert_to_long_ex(y1);
@@ -1353,7 +1357,7 @@ PHP_FUNCTION(imagerectangle)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(x1);
 	convert_to_long_ex(y1);
@@ -1380,7 +1384,7 @@ PHP_FUNCTION(imagefilledrectangle)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(x1);
 	convert_to_long_ex(y1);
@@ -1407,7 +1411,7 @@ PHP_FUNCTION(imagearc)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(cx);
 	convert_to_long_ex(cy);
@@ -1442,7 +1446,7 @@ PHP_FUNCTION(imagefilltoborder)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(x);
 	convert_to_long_ex(y);
@@ -1468,7 +1472,7 @@ PHP_FUNCTION(imagefill)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(x);
 	convert_to_long_ex(y);
@@ -1492,7 +1496,7 @@ PHP_FUNCTION(imagecolorstotal)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	RETURN_LONG(gdImageColorsTotal(im));
 }
@@ -1523,7 +1527,7 @@ PHP_FUNCTION(imagecolortransparent)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	if (ZEND_NUM_ARGS() > 1) {
 		gdImageColorTransparent(im, Z_LVAL_PP(COL));
@@ -1558,7 +1562,7 @@ PHP_FUNCTION(imageinterlace)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	if (ZEND_NUM_ARGS() > 1) {
 		gdImageInterlace(im,Z_LVAL_PP(INT));
@@ -1584,7 +1588,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(NPOINTS);
 	convert_to_long_ex(COL);
@@ -1675,7 +1679,7 @@ static gdFontPtr php_find_gd_font(int size)
 			 break;
 	    default:
 			font = zend_list_find(size - 5, &ind_type);
-			 if (!font || ind_type != GDG(le_gd_font)) {
+			 if (!font || ind_type != le_gd_font) {
 				  if (size < 1) {
 					   font = gdFontTiny;
 				  } else {
@@ -1770,7 +1774,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	convert_to_long_ex(SIZE);
 	convert_to_long_ex(X);
@@ -1869,8 +1873,8 @@ PHP_FUNCTION(imagecopy)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", GDG(le_gd));
-	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
 
 	convert_to_long_ex(SX);
 	convert_to_long_ex(SY);
@@ -1907,8 +1911,8 @@ PHP_FUNCTION(imagecopymerge)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", GDG(le_gd));
-	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
 
 	convert_to_long_ex(SX);
 	convert_to_long_ex(SY);
@@ -1950,8 +1954,8 @@ PHP_FUNCTION(imagecopyresized)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", GDG(le_gd));
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
 
 	convert_to_long_ex(SX);
 	convert_to_long_ex(SY);
@@ -1988,7 +1992,7 @@ PHP_FUNCTION(imagesx)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	RETURN_LONG(gdImageSX(im));
 }
@@ -2006,7 +2010,7 @@ PHP_FUNCTION(imagesy)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
 	RETURN_LONG(gdImageSY(im));
 }
@@ -2063,7 +2067,7 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		if (ZEND_NUM_ARGS() != 8 || zend_get_parameters_ex(8, &IM, &PTSIZE, &ANGLE, &X, &Y, &COL, &FONTNAME, &C) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", GDG(le_gd));
+		ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 	}
 
 	convert_to_double_ex(PTSIZE);
@@ -2171,7 +2175,7 @@ PHP_FUNCTION(imagepsloadfont)
 
 	font = (int *) emalloc(sizeof(int));
 	*font = f_ind;
-	ZEND_REGISTER_RESOURCE(return_value, font, GDG(le_ps_font));
+	ZEND_REGISTER_RESOURCE(return_value, font, le_ps_font);
 #else 
 	php_error(E_WARNING, "ImagePsLoadFont: No T1lib support in this PHP build");
 	RETURN_FALSE;
@@ -2198,7 +2202,7 @@ PHP_FUNCTION(imagepscopyfont)
 
 	of_ind = zend_list_find(Z_LVAL_PP(fnt), &type);
 
-	if (type != GDG(le_ps_font)) {
+	if (type != le_ps_font) {
 		php_error(E_WARNING, "%d is not a Type 1 font index", Z_LVAL_PP(fnt));
 		RETURN_FALSE;
 	}
@@ -2230,7 +2234,7 @@ PHP_FUNCTION(imagepscopyfont)
 	}
 
 	nf_ind->extend = 1;
-	l_ind = zend_list_insert(nf_ind, GDG(le_ps_font));
+	l_ind = zend_list_insert(nf_ind, le_ps_font);
 	RETURN_LONG(l_ind);
 #else 
 	php_error(E_WARNING, "ImagePsCopyFont: No T1lib support in this PHP build");
@@ -2252,7 +2256,7 @@ PHP_FUNCTION(imagepsfreefont)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
 	zend_list_delete(Z_LVAL_PP(fnt));
 	RETURN_TRUE;
@@ -2278,7 +2282,7 @@ PHP_FUNCTION(imagepsencodefont)
 
 	convert_to_string_ex(enc);
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
 	if ((enc_vector = T1_LoadEncoding(Z_STRVAL_PP(enc))) == NULL) {
 		php_error(E_WARNING, "Couldn't load encoding vector from %s", Z_STRVAL_PP(enc));
@@ -2291,7 +2295,7 @@ PHP_FUNCTION(imagepsencodefont)
 		php_error(E_WARNING, "Couldn't reencode font");
 		RETURN_FALSE;
 	}
-	zend_list_insert(enc_vector, GDG(le_ps_enc));
+	zend_list_insert(enc_vector, le_ps_enc);
 	RETURN_TRUE;
 #else 
 	php_error(E_WARNING, "ImagePsEncodeFont: No T1lib support in this PHP build");
@@ -2314,7 +2318,7 @@ PHP_FUNCTION(imagepsextendfont)
 
 	convert_to_double_ex(ext);
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
 	if (T1_ExtendFont(*f_ind, Z_DVAL_PP(ext)) != 0) RETURN_FALSE;
 
@@ -2340,7 +2344,7 @@ PHP_FUNCTION(imagepsslantfont)
 
 	convert_to_double_ex(slt);
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
 	if (T1_SlantFont(*f_ind, Z_DVAL_PP(slt)) != 0) RETURN_FALSE;
 	RETURN_TRUE;
@@ -2399,8 +2403,8 @@ PHP_FUNCTION(imagepstext)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, img, -1, "Image", GDG(le_gd));
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
+	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, img, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
 	x = Z_LVAL_PP(px);
 	y = Z_LVAL_PP(py);
@@ -2540,7 +2544,7 @@ PHP_FUNCTION(imagepsbbox)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", GDG(le_ps_font));
+	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
 	convert_to_string_ex(str);
 	convert_to_long_ex(sz);
