@@ -2985,7 +2985,7 @@ PHP_FUNCTION(ibase_timefmt)
 /* }}} */
 #endif
 
-/* {{{ proto int ibase_num_fields(resource query|result)
+/* {{{ proto int ibase_num_fields(resource query_result)
    Get the number of fields in result */
 PHP_FUNCTION(ibase_num_fields)
 {
@@ -3024,68 +3024,85 @@ PHP_FUNCTION(ibase_num_fields)
 /* {{{ static char * _php_ibase_field_type() */
 static char * _php_ibase_field_type(XSQLVAR *var)
 {
-	char buf[32], *s;
-	int precision;
+	char *s = "(unknown type)";
 	
-	switch (var->sqltype & ~1) {
-		case SQL_TEXT:	    s = "CHAR"; break;
-		case SQL_VARYING:   s = "VARCHAR"; break;
-		case SQL_SHORT:
-			if (var->sqlscale < 0) {
+	if (var->sqlscale < 0) {
+		char buf[16];
+		unsigned short precision;
+
+		switch (var->sqltype & ~1) {
+
+			case SQL_SHORT:
 				precision = 4;
-			} else {
-				s = "SMALLINT"; 
-			}
-			break;
-		case SQL_LONG:
-			if (var->sqlscale < 0) {
+				break;
+			case SQL_LONG:
 				precision = 9;
-			} else {
-				s = "INTEGER"; 
-			}
-			break;
-		case SQL_FLOAT:	    s = "FLOAT"; break;
-		case SQL_DOUBLE:    
-		case SQL_D_FLOAT:   s = "DOUBLE PRECISION"; break;
+				break;
 #ifdef SQL_INT64
-		case SQL_INT64:     
-			if (var->sqlscale < 0) {
+			case SQL_INT64:     
 				precision = 18;
-			} else {
+				break;
+#endif
+		}
+		sprintf(buf, "NUMERIC(%d,%d)", precision, -var->sqlscale);
+		return estrdup(buf);
+	} else {
+		switch (var->sqltype & ~1) {
+			case SQL_TEXT:
+			    s = "CHAR"; 
+			    break;
+			case SQL_VARYING:
+				s = "VARCHAR"; 
+				break;
+			case SQL_SHORT:
+				s = "SMALLINT"; 
+				break;
+			case SQL_LONG:
+				s = "INTEGER"; 
+				break;
+			case SQL_FLOAT:	    
+				s = "FLOAT"; break;
+			case SQL_DOUBLE:    
+			case SQL_D_FLOAT:   
+				s = "DOUBLE PRECISION"; break;
+#ifdef SQL_INT64
+			case SQL_INT64:     
 				s = "BIGINT"; 
-			}
-			break;
+				break;
 #endif
 #ifdef SQL_TIMESTAMP
-		case SQL_TIMESTAMP:	s = "TIMESTAMP"; break;
-		case SQL_TYPE_DATE:	s = "DATE"; break;
-		case SQL_TYPE_TIME:	s = "TIME"; break;
+			case SQL_TIMESTAMP:	
+				s = "TIMESTAMP"; 
+				break;
+			case SQL_TYPE_DATE:
+				s = "DATE";
+				break;
+			case SQL_TYPE_TIME:
+				s = "TIME"; 
+				break;
 #else
-		case SQL_DATE:	    s = "DATE"; break;
+			case SQL_DATE:
+				s = "DATE"; 
+				break;
 #endif
-		case SQL_BLOB:	    s = "BLOB"; break;
-		case SQL_ARRAY:	    s = "ARRAY"; break;
-
-				/* TODO provide more detailed information about the field type, field size
-				   and array dimensions */
-			
-		case SQL_QUAD:	    s = "QUAD"; break;
-
-		default:
-			sprintf(buf, "unknown (%d)", var->sqltype & ~1);
-			s = buf;
-			break;
+			case SQL_BLOB:
+				s = "BLOB"; 
+				break;
+			case SQL_ARRAY:
+				s = "ARRAY";
+				break;
+				/* FIXME: provide more detailed information about the field type, field size
+				 * and array dimensions */
+			case SQL_QUAD:
+				s = "QUAD";
+				break;
+		}
 	}
-	if (var->sqlscale < 0) {
-		sprintf(buf, "NUMERIC(%d,%d)", precision, -var->sqlscale);
-		s = buf;
-	}
-	
 	return estrdup(s);
 }
 /* }}} */
 
-/* {{{ proto array ibase_field_info(resource query|result, int field_number)
+/* {{{ proto array ibase_field_info(resource query_result, int field_number)
    Get information about a field */
 PHP_FUNCTION(ibase_field_info)
 {
