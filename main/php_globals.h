@@ -50,6 +50,8 @@ struct _php_core_globals {
 
 	zend_bool asp_tags;
 	zend_bool short_tags;
+	zend_bool allow_call_time_pass_reference;
+	zend_bool zend_set_utility_values;
 	zend_bool output_buffering;
 
 	zend_bool safe_mode;
