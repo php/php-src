@@ -1,3 +1,19 @@
+1999-10-29  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/imap/imap.c: Fix typo found by hholzgra@media-engineering.de
+
+    * ext/standard/dl.c
+      regex/regex.h
+      php_regex.h: Kill the regex header file warnings
+
+    * NEWS: Looked like this was done by RedHat the way I wrote it.
+
+1999-10-29  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-10-28  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/odbc/config.h.stub
