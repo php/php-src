@@ -299,7 +299,6 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	parser = (XML_Parser) emalloc(sizeof(struct _XML_Parser));
 	memset(parser, 0, sizeof(struct _XML_Parser));
 	parser->use_namespace = 0;
-	parser->mem_hdlrs = *memsuite;
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
 	if (parser->parser == NULL) {
 		efree(parser);
