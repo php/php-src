@@ -8,17 +8,17 @@ AC_DEFUN(PHP_GD_JPEG,[
 
   if test "$PHP_JPEG_DIR" != "no"; then
 
-    if test "$PHP_JPEG_DIR" = "yes"; then
-      PHP_JPEG_DIR=/usr/local
-    fi
+    for i in /usr /usr/local $PHP_JPEG_DIR; do
+      test -f "$i/lib/libjpeg.s?" -o -f "$i/lib/libjpeg.a" && GD_JPEG_DIR=$i
+    done
 
     AC_CHECK_LIB(jpeg,jpeg_read_header,
     [
-      PHP_ADD_LIBRARY_WITH_PATH(jpeg, $PHP_JPEG_DIR/lib, GD_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(jpeg, $GD_JPEG_DIR/lib, GD_SHARED_LIBADD)
     ],[
-      AC_MSG_ERROR(libjpeg not found!)
+      AC_MSG_ERROR(Problem with libjpeg.(a|so). Please check config.log for more information.) 
     ],[
-      -L$PHP_JPEG_DIR/lib
+      -L$GD_JPEG_DIR/lib
     ])
   else 
     AC_MSG_RESULT(If configure fails try --with-jpeg-dir=<DIR>)
@@ -31,9 +31,9 @@ AC_DEFUN(PHP_GD_PNG,[
 
   if test "$PHP_PNG_DIR" != "no"; then
 
-    if test "$PHP_PNG_DIR" = "yes"; then
-      PHP_PNG_DIR=/usr/local
-    fi
+    for i in /usr /usr/local $PHP_PNG_DIR; do
+      test -f "$i/lib/libpng.s?" -o -f "$i/lib/libpng.a" && GD_PNG_DIR=$i
+    done
 
     if test "$PHP_ZLIB_DIR" = "no"; then
       AC_MSG_ERROR(PNG support requires ZLIB. Use --with-zlib-dir=<DIR>)
@@ -42,11 +42,11 @@ AC_DEFUN(PHP_GD_PNG,[
     AC_CHECK_LIB(png,png_info_init,
     [
       PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, GD_SHARED_LIBADD)
-      PHP_ADD_LIBRARY_WITH_PATH(png, $PHP_PNG_DIR/lib, GD_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(png, $GD_PNG_DIR/lib, GD_SHARED_LIBADD)
     ],[
-      AC_MSG_ERROR(libpng not found!)
+      AC_MSG_ERROR(Problem with libpng.(a|so) or libz.(a|so). Please check config.log for more information.) 
     ],[
-      -L$PHP_ZLIB_DIR/lib -lz -L$PHP_PNG_DIR/lib
+      -L$PHP_ZLIB_DIR/lib -lz -L$GD_PNG_DIR/lib
     ])
   else 
     AC_MSG_RESULT(If configure fails try --with-png-dir=<DIR> and --with-zlib-dir=<DIR>)
@@ -58,18 +58,18 @@ AC_DEFUN(PHP_GD_XPM,[
   [  --with-xpm-dir=DIR        GD: Set the path to libXpm install prefix.])
 
   if test "$PHP_XPM_DIR" != "no"; then
-    if test "$PHP_XPM_DIR" = "yes"; then
-      PHP_XPM_DIR=/usr/local
-    fi
+    for i in /usr /usr/local /usr/X11R6 $PHP_XPM_DIR; do
+      test -f "$i/lib/libXpm.s?" -o -f "$i/lib/libXpm.a" && GD_XPM_DIR=$i
+    done
 
     AC_CHECK_LIB(Xpm,XpmFreeXpmImage, 
     [
-      PHP_ADD_LIBRARY_WITH_PATH(Xpm, $PHP_XPM_DIR/lib, GD_SHARED_LIBADD)
-      PHP_ADD_LIBRARY_WITH_PATH(X11, $PHP_XPM_DIR/lib, GD_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(Xpm, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
+      PHP_ADD_LIBRARY_WITH_PATH(X11, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
     ],[
-      AC_MSG_ERROR(libXpm.(a|so) or libX11.(a|so) not found!)
+      AC_MSG_ERROR(Problem with libXpm.(a|so) or libX11.(a|so). Please check config.log for more information.) 
     ],[
-      -L$PHP_XPM_DIR/lib -lX11
+      -L$GD_XPM_DIR/lib -lX11
     ])
   else 
     AC_MSG_RESULT(If configure fails try --with-xpm-dir=<DIR>)
@@ -83,7 +83,7 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
   if test "$PHP_TTF" != "no"; then
     if test "$PHP_FREETYPE_DIR" = "no" -o "$PHP_FREETYPE_DIR" = ""; then
       if test -n "$PHP_TTF" ; then
-        for i in /usr /usr/local "$PHP_TTF" ; do
+        for i in /usr /usr/local $PHP_TTF; do
           if test -f "$i/include/freetype.h" ; then
             TTF_DIR=$i
             unset TTF_INC_DIR
@@ -113,7 +113,7 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
   [  --with-freetype-dir=DIR   GD: Set the path to freetype2 install prefix.])
 
   if test "$PHP_FREETYPE_DIR" != "no"; then
-    for i in /usr /usr/local "$PHP_FREETYPE_DIR" ; do
+    for i in /usr /usr/local $PHP_FREETYPE_DIR; do
       if test -f "$i/include/freetype2/freetype/freetype.h"; then
         FREETYPE2_DIR=$i
         FREETYPE2_INC_DIR=$i/include/freetype2/freetype
@@ -139,9 +139,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
 
   if test "$PHP_T1LIB" != "no"; then
     for i in /usr /usr/local $PHP_T1LIB; do
-      if test -f "$i/include/t1lib.h"; then
-        T1_DIR=$i
-      fi
+      test -f "$i/include/t1lib.h" && T1_DIR=$i
     done
 
     if test -n "$T1_DIR"; then
