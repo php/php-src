@@ -19,10 +19,9 @@
 #ifndef PHP_GMP_H
 #define PHP_GMP_H
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
 #if HAVE_GMP
+
+#include <gmp.h>
 
 extern zend_module_entry gmp_module_entry;
 #define phpext_gmp_ptr &gmp_module_entry
@@ -35,6 +34,7 @@ extern zend_module_entry gmp_module_entry;
 
 ZEND_MODULE_STARTUP_D(gmp);
 ZEND_MODULE_SHUTDOWN_D(gmp);
+ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);
 
 ZEND_FUNCTION(gmp_init);
@@ -76,24 +76,13 @@ ZEND_FUNCTION(gmp_scan1);
 ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 
-/* 
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
-
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
-	int global_variable;
+	zend_bool rand_initialized;
+	gmp_randstate_t rand_state;
 ZEND_END_MODULE_GLOBALS(gmp)
-*/
-
-/* In every function that needs to use variables in php_gmp_globals,
-   do call GMPLS_FETCH(); after declaring other variables used by
-   that function, and always refer to them as GMPG(variable).
-   You are encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
 
 #ifdef ZTS
-#define GMPG(v) TSRMG(gmp_globals_id, php_gmp_globals *, v)
+#define GMPG(v) TSRMG(gmp_globals_id, zend_gmp_globals *, v)
 #else
 #define GMPG(v) (gmp_globals.v)
 #endif
