@@ -854,8 +854,8 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
       if (ch == '\r')
 	{
 	  penf.x = 0;
-	  x1 = (penf.x * cos_a - penf.y * sin_a + 32) / 64;
-	  y1 = (penf.x * sin_a + penf.y * cos_a + 32) / 64;
+	  x1 = (int)((penf.x * cos_a - penf.y * sin_a + 32.0) / 64.0);
+	  y1 = (int)((penf.x * sin_a + penf.y * cos_a + 32.0) / 64.0);
 	  pen.x = pen.y = 0;
 	  previous = 0;		/* clear kerning flag */
 	  next++;
@@ -864,10 +864,10 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
       /* newlines */
       if (ch == '\n')
 	{
-	  penf.y -= face->size->metrics.height * LINESPACE;
+	  penf.y = penf.y - (int)(face->size->metrics.height * LINESPACE);
 	  penf.y = (penf.y - 32) & -64;		/* round to next pixel row */
-	  x1 = (penf.x * cos_a - penf.y * sin_a + 32) / 64;
-	  y1 = (penf.x * sin_a + penf.y * cos_a + 32) / 64;
+	  x1 = (int)((penf.x * cos_a - penf.y * sin_a + 32.0) / 64.0);
+	  y1 = (int)((penf.x * sin_a + penf.y * cos_a + 32.0) / 64.0);
 	  pen.x = pen.y = 0;
 	  previous = 0;		/* clear kerning flag */
 	  next++;

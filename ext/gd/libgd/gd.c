@@ -2236,10 +2236,10 @@ void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double
 	for (i = 0; i < src->sx; i++) {
 		pxlSrc = f (src,i,uRow);
 
-		r = gdImageRed(src,pxlSrc) * dWeight;
-		g = gdImageGreen(src,pxlSrc) * dWeight;
-		b = gdImageBlue(src,pxlSrc) * dWeight;
-		a = gdImageAlpha(src,pxlSrc) * dWeight;
+		r = (int)(gdImageRed(src,pxlSrc) * dWeight);
+		g = (int)(gdImageGreen(src,pxlSrc) * dWeight);
+		b = (int)(gdImageBlue(src,pxlSrc) * dWeight);
+		a = (int)(gdImageAlpha(src,pxlSrc) * dWeight);
 
 		pxlLeft = gdImageColorAllocateAlpha(src, r, g, b, a);
 		
@@ -2299,7 +2299,7 @@ void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double
 void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double dWeight, int clrBack)
 {
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
-	int i, iYPos, r, g, b, a;
+	int i, iYPos=0, r, g, b, a;
 	FuncPtr f;
 	int pxlOldLeft, pxlLeft, pxlSrc;
 
@@ -2319,10 +2319,10 @@ void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double
 		pxlSrc = f (src, uCol, i);
 		iYPos = i + iOffset;
 
-		r = gdImageRed(src,pxlSrc) * dWeight;
-		g = gdImageGreen(src,pxlSrc) * dWeight;
-		b = gdImageBlue(src,pxlSrc) * dWeight;
-		a = gdImageAlpha(src,pxlSrc) * dWeight;
+		r = (int)(gdImageRed(src,pxlSrc) * dWeight);
+		g = (int)(gdImageGreen(src,pxlSrc) * dWeight);
+		b = (int)(gdImageBlue(src,pxlSrc) * dWeight);
+		a = (int)(gdImageAlpha(src,pxlSrc) * dWeight);
 		
 		pxlLeft = gdImageColorAllocateAlpha(src, r, g, b, a);
 		
@@ -2482,7 +2482,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 	dSinE = sin (dRadAngle);
 	dTan = tan (dRadAngle / 2.0);
 
-	newx = src->sx + src->sy * fabs(dTan);
+	newx = (int)(src->sx + src->sy * fabs(dTan));
 	newy = src->sy;
 
 	/* 1st shear */
@@ -2517,7 +2517,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 			dShear = ((double)(u - dst1->sy) + 0.5) * dTan;
 		}
 
-		iShear = floor(dShear);
+		iShear = (int)floor(dShear);
 		
 		gdImageSkewX(dst1, src, u, iShear, (dShear - iShear), clrBack);
 	}
@@ -2547,7 +2547,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 	}
 	
 	for (u = 0; u < dst2->sx; u++, dOffset -= dSinE) {
-		iShear = floor (dOffset);
+		iShear = (int)floor (dOffset);
 		gdImageSkewY(dst2, dst1, u, iShear, (dOffset - iShear), clrBack);
 	}
 
