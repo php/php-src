@@ -1344,8 +1344,8 @@ PHP_FUNCTION(tidy_getopt)
 
 TIDY_DOC_METHOD(__construct)
 {
-	char *inputfile, *enc = NULL;
-	int input_len, enc_len = 0;
+	char *inputfile = NULL, *enc = NULL;
+	int input_len = 0, enc_len = 0;
 	zend_bool use_include_path = 0;
 	char *contents;
 	zval *options = NULL;
