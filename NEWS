@@ -1,6 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed bug with Apache which let PHP_AUTH_* variables to be set when
+  external basic auth mechanism was used. (Jani)
+- Fixed bzopen() crash in thread-safe mode. (Andrei)
+- Added better error-messages (3rd parameter) and validating of DTDs (2nd parameter) to
+  domxml_open_mem(string xml[, int mode[, array errors]]) and domxml_open_file(string filename[, int mode[, array errors]]).
+  Added domxml_doc_validate([array errors]) for validating existing DomDocuments with a DTD.
 - Added ability to capture string offsets in preg_match_*() results.
   (David Brown, Andrei)
 - Fixed set_error_handler() to accept methods as callbacks and also report
