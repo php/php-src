@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 dnl
 dnl Figure out which library file to link with for the Solid support.

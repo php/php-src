@@ -1,8 +1,8 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension posix
-dnl don't forget to call PHP_EXTENSION(posix)
+dnl
 
-PHP_ARG_ENABLE(posix,whether to include POSIX-like functions,
+PHP_ARG_ENABLE(posix,whether to enable POSIX-like functions,
 [  --disable-posix         Disable POSIX-like functions], yes)
 
 if test "$PHP_POSIX" = "yes"; then

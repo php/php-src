@@ -91,7 +91,7 @@ AC_DEFUN(PHP_GD_XPM,[
 ])
 
 AC_DEFUN(PHP_GD_FREETYPE1,[
-  PHP_ARG_WITH(ttf,whether to include include FreeType 1.x support,
+  PHP_ARG_WITH(ttf,for FreeType 1.x support,
   [  --with-ttf[=DIR]          GD: Include FreeType 1.x support])
   
   if test "$PHP_TTF" != "no"; then
@@ -148,7 +148,7 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
 ])
 
 AC_DEFUN(PHP_GD_T1LIB,[
-  PHP_ARG_WITH(t1lib, whether to include T1lib support,
+  PHP_ARG_WITH(t1lib, for T1lib support,
   [  --with-t1lib[=DIR]        GD: Include T1lib support.])
 
   if test "$PHP_T1LIB" != "no"; then
@@ -175,8 +175,8 @@ AC_DEFUN(PHP_GD_T1LIB,[
 ])
 
 AC_DEFUN(PHP_GD_TTSTR,[
-  PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in gd,
-  [  --enable-gd-native-ttf    GD: Enable TrueType string function in gd])
+  PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
+  [  --enable-gd-native-ttf    GD: Enable TrueType string function.])
   
   if test "$PHP_GD_NATIVE_TTF" = "yes"; then
     AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
@@ -205,10 +205,8 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
 ])
 
 
-PHP_ARG_WITH(gd, whether to include GD support,
-[  --with-gd[=DIR]         Include GD support (DIR is GD's install dir).
-                          Set DIR to "shared" to build as a dl, or 
-                          "shared,DIR" to build as a dl and still specify DIR.])
+PHP_ARG_WITH(gd, for GD support,
+[  --with-gd[=DIR]         Include GD support (DIR is GD's install dir).])
 
 if test "$PHP_GD" != "no"; then
 

@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 PHP_ARG_ENABLE(calendar,whether to enable calendar conversion support,
 [  --enable-calendar       Enable support for calendar conversion])

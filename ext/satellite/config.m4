@@ -1,10 +1,9 @@
+dnl
 dnl $Id$
+dnl
 dnl vim: syntax=config
 
-dnl My first config.m4 - now much improved... :-)
-
-PHP_ARG_WITH(satellite, whether to enable CORBA support via Satellite,
-dnl Make sure that the comment is aligned:
+PHP_ARG_WITH(satellite, for CORBA support via Satellite,
 [  --with-satellite[=DIR]  Enable CORBA support via Satellite (EXPERIMENTIAL)
                           DIR is the base directory for ORBit])
 

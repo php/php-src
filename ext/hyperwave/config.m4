@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 AC_MSG_CHECKING(for Hyperwave support)
 AC_ARG_WITH(hyperwave,

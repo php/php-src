@@ -1,6 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension ftp
-dnl don't forget to call PHP_EXTENSION(ftp)
+dnl
 
 PHP_ARG_ENABLE(ftp,whether to enable FTP support,
 [  --enable-ftp            Enable FTP support])

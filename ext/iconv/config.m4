@@ -1,5 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension iconv
+dnl
 
 PHP_ARG_WITH(iconv, for iconv support,
 [  --with-iconv[=DIR]      Include iconv support])

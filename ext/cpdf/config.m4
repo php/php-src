@@ -1,10 +1,8 @@
 dnl $Id$
 
-AC_MSG_CHECKING(whether to include cpdflib support)
+AC_MSG_CHECKING(for cpdflib support)
 AC_ARG_WITH(cpdflib,
-[  --with-cpdflib[=DIR]    Include cpdflib support (requires cpdflib >= 2).
-                          DIR is the cpdfllib install directory,
-                          defaults to /usr.],
+[  --with-cpdflib[=DIR]    Include cpdflib support (requires cpdflib >= 2).],
 [
   case $withval in
     no)

@@ -1,6 +1,8 @@
+dnl
 dnl $Id$
+dnl
 
-PHP_ARG_WITH(crack, whether to include crack support,
+PHP_ARG_WITH(crack, for CRACKlib support,
 [  --with-crack[=DIR]      Include crack support.])
 
 if test "$PHP_CRACK" != "no"; then

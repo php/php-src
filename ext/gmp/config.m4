@@ -1,11 +1,9 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension gmp
+dnl
 
-dnl If your extension references something external, use with:
-
-PHP_ARG_WITH(gmp, for gmp support,
-dnl Make sure that the comment is aligned:
-[  --with-gmp              Include gmp support])
+PHP_ARG_WITH(gmp, for GNU MP support,
+[  --with-gmp              Include GNU MP support])
 
 if test "$PHP_GMP" != "no"; then
 

@@ -1,6 +1,8 @@
+dnl
 dnl $Id$
+dnl
 
-PHP_ARG_ENABLE(bcmath, for bc style precision math functions,
+PHP_ARG_ENABLE(bcmath, whether to enable bc style precision math functions,
 [  --enable-bcmath         Enable bc style precision math functions.])
 
 if test "$PHP_BCMATH" != "no"; then
@@ -10,7 +12,3 @@ if test "$PHP_BCMATH" != "no"; then
   LIB_BUILD($ext_builddir/libbcmath,$ext_shared,yes)
   LIB_BUILD($ext_builddir/libbcmath/src,$ext_shared,yes)
 fi
-
-dnl ## Local Variables:
-dnl ## tab-width: 4
-dnl ## End:

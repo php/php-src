@@ -1,8 +1,10 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension pcntl
+dnl
 
 dnl Process Control (pcntl) extentsion --EXPERIMENTAL--
 dnl TODO - Add platform checks 
+
 PHP_ARG_ENABLE(pcntl, whether to enable pcntl support,
 [  --enable-pcntl          Enable experimental pcntl support (CGI ONLY!)])
 

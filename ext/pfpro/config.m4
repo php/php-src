@@ -1,8 +1,9 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension pfpro
+dnl
 
-PHP_ARG_WITH(pfpro, whether to include Verisign Payflow Pro support,
-[  --with-pfpro[=DIR]      Include Verisign Payflow Pro support])
+PHP_ARG_WITH(pfpro, for Verisign Payflow Pro support,
+[  --with-pfpro[=DIR]      Include Verisign Payflow Pro support.])
 
 if test "$PHP_PFPRO" != "no"; then
   PFPRO_LIB=libpfpro.so

@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 sinclude(ext/mysql/libmysql/acinclude.m4)
 sinclude(ext/mysql/libmysql/mysql.m4)
@@ -34,9 +36,8 @@ AC_DEFUN(PHP_MYSQL_SOCK,[
 ])
 
 PHP_ARG_WITH(mysql, for MySQL support,
-[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base
-                          directory. If unspecified, the bundled MySQL library
-                          will be used.], yes)
+[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.
+                          If unspecified, the bundled MySQL library will be used.], yes)
 
 if test "$PHP_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])

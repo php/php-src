@@ -1,8 +1,9 @@
+dnl
 dnl $Id$
+dnl
 
 PHP_ARG_WITH(fbsql, for FrontBase SQL92 (fbsql) support,
-[  --with-fbsql[=DIR]      Include FrontBase support. DIR is the FrontBase base
-                          directory.])
+[  --with-fbsql[=DIR]      Include FrontBase support. DIR is the FrontBase base directory.])
 
 if test "$PHP_FBSQL" != "no"; then
 

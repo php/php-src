@@ -1,5 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension vpopmail
+dnl
 
 PHP_ARG_WITH(vpopmail, for vpopmail support,
 [  --with-vpopmail[=DIR]   Include vpopmail support.])

@@ -1,9 +1,9 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension exif
+dnl
 
-PHP_ARG_ENABLE(exif, whether to enable exif support,
-dnl Make sure that the comment is aligned:
-[  --enable-exif           Enable exif support])
+PHP_ARG_ENABLE(exif, whether to enable EXIF support,
+[  --enable-exif           Enable EXIF support])
 
 if test "$PHP_EXIF" != "no"; then
   AC_DEFINE(HAVE_EXIF, 1, [Whether you want exif support])

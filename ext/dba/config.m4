@@ -1,6 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension dba
-dnl don't forget to call PHP_EXTENSION(dba)
+dnl
 
 AC_DEFUN(PHP_TEMP_LDFLAGS,[
   old_LDFLAGS=$LDFLAGS

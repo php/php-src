@@ -1,12 +1,12 @@
+dnl
 dnl $Id$
+dnl
 
 AC_DEFUN(PGSQL_INC_CHK,[if test -r $i$1/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i$1])
 
 PHP_ARG_WITH(pgsql,for PostgreSQL support,
 [  --with-pgsql[=DIR]      Include PostgreSQL support.  DIR is the PostgreSQL
-                          base install directory, defaults to /usr/local/pgsql.
-                          Set DIR to "shared" to build as a dl, or "shared,DIR" 
-                          to build as a dl and still specify DIR.])
+                          base install directory, defaults to /usr/local/pgsql.])
 
 if test "$PHP_PGSQL" != "no"; then
   PHP_EXPAND_PATH($PHP_PGSQL, PHP_PGSQL)
@@ -40,7 +40,7 @@ if test "$PHP_PGSQL" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(pq, $PGSQL_LIBDIR, PGSQL_SHARED_LIBADD)
   
   PHP_EXTENSION(pgsql,$ext_shared)
+  PHP_SUBST(PGSQL_SHARED_LIBADD)
+  PHP_SUBST(PGSQL_INCLUDE)
 fi
 
-PHP_SUBST(PGSQL_INCLUDE)
-PHP_SUBST(PGSQL_SHARED_LIBADD)

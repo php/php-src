@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 PHP_ARG_WITH(mcal,for MCAL support,
 [  --with-mcal[=DIR]       Include MCAL support.])

@@ -3,11 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(snmp,for SNMP support,
-[  --with-snmp[=DIR]       Include SNMP support.  DIR is the SNMP base
-                          install directory, defaults to searching through
-                          a number of common locations for the snmp install.
-                          Set DIR to "shared" to build as a dl, or "shared,DIR"
-                          to build as a dl and still specify DIR.])
+[  --with-snmp[=DIR]       Include SNMP support.])
 
   if test "$PHP_SNMP" != "no"; then
 
