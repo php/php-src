@@ -86,9 +86,9 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 	 * exception instead */
 	
 	if (supp && *pdo_err == PDO_ERR_CANT_MAP) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d %s", native_code, supp);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld %s", native_code, supp);
 	} else if (supp) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: %d %s", msg, native_code, supp);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: %ld %s", msg, native_code, supp);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", msg);
 	}
@@ -107,7 +107,6 @@ static PHP_FUNCTION(dbh_constructor)
 	zend_bool is_persistent = FALSE;
 	char *data_source;
 	long data_source_len;
-	char *driver_name_length;
 	char *colon;
 	char *username, *password;
 	long usernamelen, passwordlen;
