@@ -32,9 +32,6 @@ typedef struct _zend_object_iterator_funcs {
 	/* release all resources associated with this iterator instance */
 	void (*dtor)(zend_object_iterator *iter TSRMLS_DC);
 	
-	/* rewind to start of data (optional, may be NULL) */
-	void (*rewind)(zend_object_iterator *iter TSRMLS_DC);
-
 	/* check for end of iteration (FAILURE or SUCCESS for more data) */
 	int (*has_more)(zend_object_iterator *iter TSRMLS_DC);
 
@@ -46,6 +43,9 @@ typedef struct _zend_object_iterator_funcs {
 
 	/* step forwards to next element */
 	void (*move_forward)(zend_object_iterator *iter TSRMLS_DC);
+
+	/* rewind to start of data (optional, may be NULL) */
+	void (*rewind)(zend_object_iterator *iter TSRMLS_DC);
 } zend_object_iterator_funcs;
 
 struct _zend_object_iterator {
