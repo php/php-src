@@ -3,7 +3,7 @@
 
 #include "zend.h"
 
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 #       ifdef CWD_EXPORTS
 #       define CWD_API __declspec(dllexport)
 #       else
