@@ -154,7 +154,7 @@ PHP_FUNCTION(zip_read)
 
 	ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *, zzip_dp, -1, le_zip_dir_name, le_zip_dir);
 
-	entry = (php_zzip_dirent *) emalloc(sizeof(php_zzip_dirent));
+	entry = emalloc(sizeof(php_zzip_dirent));
 
 	ret = zzip_dir_read(archive_p, &entry->dirent);
 	if (ret == 0) {
