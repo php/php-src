@@ -139,8 +139,8 @@ ZEND_API char *zend_get_executed_filename(ELS_D);
 ZEND_API uint zend_get_executed_lineno(ELS_D);
 ZEND_API zend_bool zend_is_executing(void);
 
-void zend_set_timeout(long seconds);
-void zend_unset_timeout(void);
+ZEND_API void zend_set_timeout(long seconds);
+ZEND_API void zend_unset_timeout(void);
 ZEND_API void zend_timeout(int dummy);
 
 #ifdef ZEND_WIN32
