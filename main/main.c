@@ -1529,6 +1529,8 @@ void php_module_shutdown(TSRMLS_D)
 #ifndef ZTS
 	zend_ini_shutdown(TSRMLS_C);
 	shutdown_memory_manager(CG(unclean_shutdown), 1 TSRMLS_CC);
+#else
+	zend_ini_global_shutdown(TSRMLS_C);
 #endif
 
 	module_initialized = 0;
