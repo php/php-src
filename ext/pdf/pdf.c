@@ -43,6 +43,7 @@
 #include "ext/standard/head.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
+#include "ext/gd/php_gd.h"
 
 #include <math.h>
 
