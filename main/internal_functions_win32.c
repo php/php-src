@@ -51,7 +51,7 @@
 #include "ext/standard/php_assert.h"
 #include "ext/calendar/php_calendar.h"
 #include "ext/com/php_COM.h"
-#include "ext/com/php_typedef_VARIANT.h"
+#include "ext/com/php_VARIANT.h"
 #include "ext/ftp/php_ftp.h"
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"

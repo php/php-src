@@ -1875,7 +1875,7 @@ SOURCE=..\win32\time.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\com\typedef_VARIANT.c
+SOURCE=..\ext\com\VARIANT.c
 # End Source File
 # Begin Source File
 
@@ -1923,7 +1923,7 @@ SOURCE=..\win32\php_registry.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\com\php_typedef_VARIANT.h
+SOURCE=..\ext\com\php_VARIANT.h
 # End Source File
 # Begin Source File
 
