@@ -840,7 +840,7 @@ fetch_string_dim:
 			}
 			break;
 		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%ld used as offset, casting to integer (%ld)", dim->value.lval, dim->value.lval);
+			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", dim->value.lval, dim->value.lval);
 			/* Fall Through */
 		case IS_DOUBLE:
 		case IS_BOOL: 
