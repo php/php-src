@@ -21,6 +21,7 @@
 
 #include "zend.h"
 #include "zend_constants.h"
+#include "zend_execute.h"
 #include "zend_variables.h"
 #include "zend_operators.h"
 #include "zend_globals.h"
@@ -225,7 +226,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 		lookup_name = do_alloca(class_name_len+1);
 		zend_str_tolower_copy(lookup_name, name, class_name_len);
 		lookup_name[class_name_len] = '\0';
-		if(zend_lookup_class(lookup_name, class_name_len, &ce) != SUCCESS) {
+		if(zend_lookup_class(lookup_name, class_name_len, &ce TSRMLS_CC) != SUCCESS) {
 			retval = 0;
 		} else {
 			if (zend_hash_find(&((*ce)->constants_table), constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
