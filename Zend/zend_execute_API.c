@@ -152,6 +152,8 @@ void init_executor(TSRMLS_D)
 
 	EG(orig_error_reporting) = EG(error_reporting);
 	zend_objects_init(&EG(objects), 1024);
+
+	EG(full_tables_cleanup) = 0;
 #ifdef ZEND_WIN32
 	EG(timed_out) = 0;
 #endif
@@ -183,7 +185,7 @@ void shutdown_executor(TSRMLS_D)
 		zend_ptr_stack_destroy(&EG(argument_stack));
 
 		/* Destroy all op arrays */
-		if (EG(full_tables_cleanup) {
+		if (EG(full_tables_cleanup)) {
 			zend_hash_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
 			zend_hash_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
 		} else {
@@ -671,7 +673,6 @@ ZEND_API void zend_timeout(int dummy)
 }
 
 
-	EG(full_tables_cleanup) = 0;
 #ifdef ZEND_WIN32
 static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 {
