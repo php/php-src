@@ -165,7 +165,9 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 			}
 			attr = node->properties;
 			while (attr) {
-				if (!xmlStrcmp(attr->name, localname) && (prefix==NULL || (attr->ns && !xmlStrcmp(attr->ns->prefix, prefix)))) {
+				if (!xmlStrcmp(attr->name, localname) && (prefix==NULL || 
+					(attr->ns && (!xmlStrcmp(attr->ns->prefix, prefix) || match_ns(sxe, (xmlNodePtr) attr, prefix))))) {
+
 					APPEND_PREV_ELEMENT(counter, value);
 					
 					MAKE_STD_ZVAL(value);
@@ -292,7 +294,7 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	xmlNodePtr      node;
 	xmlNodePtr      newnode = NULL;
 	xmlNodePtr		tempnode;
-	xmlAttrPtr      attr = NULL;
+	xmlAttrPtr      attrptr, attr = NULL;
 	int             counter = 0;
 	int             is_attr = 0;
 	zval            tmp_zv, trim_zv;
@@ -335,15 +337,17 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 			if (localname == NULL) {
 				localname = (xmlChar *)name;
 			}
-			attr = node->properties;
-			while (attr) {
-				if (!xmlStrcmp(attr->name, localname) && (prefix==NULL || (attr->ns && !xmlStrcmp(attr->ns->prefix, prefix)))) {
+			attrptr = node->properties;
+			while (attrptr) {
+				if (!xmlStrcmp(attrptr->name, localname) && (prefix==NULL || 
+					(attrptr->ns && (!xmlStrcmp(attrptr->ns->prefix, prefix) || match_ns(sxe, (xmlNodePtr) attrptr, prefix))))) {
+
+					attr = attrptr;
 					is_attr = 1;
 					++counter;
-					break;
 				}
 	
-				attr = attr->next;
+				attrptr = attrptr->next;
 			}
 			if (prefix) {
 				xmlFree(prefix);
@@ -440,7 +444,9 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 			}
 			attr = node->properties;
 			while (attr) {
-				if (!xmlStrcmp(attr->name, localname) && (prefix==NULL || (attr->ns && !xmlStrcmp(attr->ns->prefix, prefix)))) {
+				if (!xmlStrcmp(attr->name, localname) && (prefix==NULL || 
+					(attr->ns && (!xmlStrcmp(attr->ns->prefix, prefix) || match_ns(sxe, (xmlNodePtr) attr, prefix))))) {
+
 					exists = 1;
 					break;
 				}
@@ -523,7 +529,9 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 			attr = node->properties;
 			while (attr) {
 				anext = attr->next;
-				if (!xmlStrcmp(attr->name, localname) && (prefix==NULL || (attr->ns && !xmlStrcmp(attr->ns->prefix, prefix)))) {
+				if (!xmlStrcmp(attr->name, localname) && (prefix==NULL || 
+					(attr->ns && (!xmlStrcmp(attr->ns->prefix, prefix) || match_ns(sxe, (xmlNodePtr) attr, prefix))))) {
+
 					xmlUnlinkNode((xmlNodePtr) attr);
 					php_libxml_node_free_resource((xmlNodePtr) attr TSRMLS_CC);
 				}
