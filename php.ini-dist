@@ -897,9 +897,17 @@ session.cache_expire = 180
 session.use_trans_sid = 0
 
 ; Select a hash function
-; 0: MD5   (128 bits, 32 characters, [0-9a-f])
-; 1: SHA-1 (160 bits, 32 characters, [0-9a-v])
+; 0: MD5   (128 bits)
+; 1: SHA-1 (160 bits)
 session.hash_function = 0
+
+; Define how many bits are stored in each character when converting
+; the binary hash data to something readable.
+;
+; 4 bits: 0-9, a-f
+; 5 bits: 0-9, a-v
+; 6 bits: 0-9, a-z, A-Z, "-", ","
+session.hash_bits_per_character = 4
 
 ; The URL rewriter will look for URLs in a defined set of HTML tags.
 ; form/fieldset are special; if you include them here, the rewriter will
