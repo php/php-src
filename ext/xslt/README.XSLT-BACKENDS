@@ -74,6 +74,9 @@
  
     array(&$obj, "method")
 
+ Note:  You do not need to handle the array(&$obj, "method") syntax by yourself
+        as this is handled in the call_xslt_function() library function (and
+        more specifically, Zend's call_user_function_ex() function. 
  Note:  The given array does not need to contain all of the different scheme
         handler elements (although it can), but it only needs to conform to 
 		the "handler" => "function" format described above.
