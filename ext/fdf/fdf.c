@@ -214,7 +214,7 @@ PHP_FUNCTION(fdf_get_value) {
 		RETURN_FALSE;
 	}
 
-	err = FDFGetValue(fdf, arg2->value.str.val, NULL, 0, &nr);
+	err = FDFGetValue(fdf, (*arg2)->value.str.val, NULL, 0, &nr);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
   /* In the inofficial version of FdfTK 4.0 (as FDFGetVersion says. The
@@ -225,7 +225,7 @@ PHP_FUNCTION(fdf_get_value) {
 	if(strcmp(FDFGetVersion(), "2.0"))
 		nr++;
 	buffer = emalloc(nr);
-	err = FDFGetValue(fdf, arg2->value.str.val, buffer, nr, &nr);
+	err = FDFGetValue(fdf, (*arg2)->value.str.val, buffer, nr, &nr);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
 
@@ -553,7 +553,7 @@ PHP_FUNCTION(fdf_add_template) {
 	}
 
 	filespec.FS = NULL;
-	filespec.F = arg3->value.str.val;
+	filespec.F = (*arg3)->value.str.val;
 	filespec.Mac = NULL;
 	filespec.DOS = NULL;
 	filespec.Unix = NULL;
