@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML without CDATA
+SimpleXML and clone
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
@@ -7,7 +7,9 @@ SimpleXML without CDATA
 
 $sxe = simplexml_load_file(dirname(__FILE__).'/sxe.xml');
 
-print_r($sxe);
+$copy = $sxe->__clone;
+
+print_r($copy);
 
 echo "---Done---\n";
 
