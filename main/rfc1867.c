@@ -729,7 +729,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			cancel_upload = 0;
 
 			if(strlen(filename) == 0) {
+#ifdef DEBUG_FILE_UPLOAD
 				sapi_module.sapi_error(E_NOTICE, "No file uploaded");
+#endif
 				cancel_upload = UPLOAD_ERROR_D;
 			}
 
