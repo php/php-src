@@ -220,7 +220,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
     ],[
       AC_MSG_ERROR([Problem with libt1.(a|so). Please check config.log for more information.]) 
     ],[
-      -L$GD_T1_DIR/lib
+      -L$GD_T1_DIR/$PHP_LIBDIR
     ])
   fi
 ])
@@ -363,7 +363,7 @@ dnl Header path
   done
 
 dnl Library path
-  for i in lib/gd1.3 lib/gd lib gd1.3 gd ""; do
+  for i in $PHP_LIBDIR/gd1.3 $PHP_LIBDIR/gd $PHP_LIBDIR gd1.3 gd ""; do
     test -f "$PHP_GD/$i/libgd.$SHLIB_SUFFIX_NAME" -o -f "$PHP_GD/$i/libgd.a" && GD_LIB="$PHP_GD/$i"
   done
 
