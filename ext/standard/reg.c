@@ -261,6 +261,8 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			end = subs[i].rm_eo;
 			if (start != -1 && end > 0 && start < string_len && end < string_len && start < end) {
 				add_index_stringl(array, i, string+start, end-start, 1);
+			} else {
+				add_index_bool(array, i, 0);
 			}
 		}
 		efree(buf);
