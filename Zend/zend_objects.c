@@ -1,6 +1,7 @@
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_variables.h"
+#include "zend_API.h"
 
 #define ZEND_DEBUG_OBJECTS 0
 
@@ -141,9 +142,48 @@ zend_object_value zend_objects_clone_obj(zend_object_handle handle)
 
 	old_object = &EG(objects).object_buckets[handle].bucket.obj.object;
 	retval = zend_objects_new(&new_object, old_object->ce);
-	ALLOC_HASHTABLE(new_object->properties);
-	zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
+
+	if (old_object->ce->clone) {
+		zval *old_obj;
+		zval *new_obj;
+		zval *clone_func_name;
+		zval *retval_ptr;
+		HashTable symbol_table;
+
+		MAKE_STD_ZVAL(new_obj);
+		new_obj->type = IS_OBJECT;
+		new_obj->value.obj = retval;
+		zval_copy_ctor(new_obj);
+
+		MAKE_STD_ZVAL(old_obj);
+		old_obj->type = IS_OBJECT;
+		old_obj->value.obj.handle = handle;
+		old_obj->value.obj.handlers = &zoh; /* If we reached here than the handlers are zoh */
+		zval_copy_ctor(old_obj);
+
+		/* FIXME: Optimize this so that we use the old_object->ce->clone function pointer instead of the name */
+		MAKE_STD_ZVAL(clone_func_name);
+		clone_func_name->type = IS_STRING;
+		clone_func_name->value.str.val = estrndup("_clone", sizeof("_clone")-1);
+		clone_func_name->value.str.len = sizeof("_clone")-1;
+
+		ALLOC_HASHTABLE(new_object->properties);
+		zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+		ZEND_INIT_SYMTABLE(&symbol_table);
+		ZEND_SET_SYMBOL(&symbol_table, "clone", old_obj);
+		
+		call_user_function_ex(NULL, &new_obj, clone_func_name, &retval_ptr, 0, NULL, 0, &symbol_table TSRMLS_CC);
+
+		zend_hash_destroy(&symbol_table);
+		zval_ptr_dtor(&new_obj);
+		zval_ptr_dtor(&clone_func_name);
+		zval_ptr_dtor(&retval_ptr);
+	} else {
+		ALLOC_HASHTABLE(new_object->properties);
+		zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
+	}
 
 	return retval;
 }
