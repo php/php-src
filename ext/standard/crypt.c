@@ -70,6 +70,17 @@ extern char *crypt(char *__key,char *__salt);
 #define PHP_MAX_SALT_LEN 17
 #endif
 
+ /*
+  * If the configure-time checks fail, we provide DES.
+  * XXX: This is a hack. Fix the real problem
+  */
+
+#ifndef PHP_MAX_SALT_LEN
+#define PHP_MAX_SALT_LEN 2
+#undef PHP_STD_DES_CRYPT
+#define PHP_STD_DES_CRYPT 1
+#endif
+
 #if HAVE_LRAND48
 #define PHP_CRYPT_RAND lrand48()
 #else
