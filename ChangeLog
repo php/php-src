@@ -1,3 +1,61 @@
+2001-10-30  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/servlet/config.m4: ws fix
+
+    * sapi/servlet/config.m4: MFH
+
+    * sapi/servlet/config.m4:
+    Installing into non-existing dir is not very good idea..
+
+2001-10-30  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/README: Cocoon/lib -> xml-cocoon2/lib
+
+2001-10-30  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Net/Curl.php: * typo
+
+2001-10-30  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php:
+    * disable case-folding in the xml parser (for consistency now that the
+      DTD is all lowercase)
+
+    * pear/PEAR/Remote.php: * improved error reporting in PEAR_Remote::call
+
+    * pear/PEAR/Config.php: * added getKeys method
+
+    * pear/PEAR/Common.php: ws
+
+    * pear/package.dtd: * moved <filelist> from <package> to <release>
+    * added <state> element
+
+2001-10-30  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/Net/Curl.php:
+     Add an option to set the User-Agent ($obj->userAgent) to Net_Curl
+     (graeme@i7.com.au)
+
+2001-10-30  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/sockets.c: Fix possible leak.
+
+2001-10-30  Dan Libby  <dan@libby.com>
+
+    * ext/xmlrpc/libxmlrpc/xmlrpc.h
+      ext/xmlrpc/libxmlrpc/xmlrpc_private.h
+      ext/xmlrpc/libxmlrpc/Makefile.in
+      ext/xmlrpc/libxmlrpc/queue.c
+      ext/xmlrpc/libxmlrpc/xml_to_dandarpc.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.h
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/xmlrpc-epi-php.c:
+    patches to sync with sourceforge project, version 0.50.  primary change: adds support for SOAP v 1.1
+
 2001-10-29  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/mssql/php_mssql.c:
