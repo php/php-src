@@ -560,7 +560,7 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 
 PHP_RINIT_FUNCTION(mbstring)
 {
-	int n, *list, *entry;
+	int n, *list=NULL, *entry;
 	zend_function *func, *orig;
 	struct mb_overload_def *p;
 
@@ -766,7 +766,7 @@ PHP_FUNCTION(mb_internal_encoding)
 PHP_FUNCTION(mb_http_input)
 {
 	pval **arg1;
-	int result, retname, n, *entry;
+	int result=0, retname, n, *entry;
 	char *name;
 
 	retname = 1;
@@ -2053,7 +2053,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_buffer_converter *convd;
 	int size, *list;
-	char *output;
+	char *output=NULL;
 
 	if (output_len) {
 		*output_len = 0;
@@ -2739,7 +2739,7 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	pval **arg1, **arg2, **arg3, **hash_entry;
 	HashTable *target_hash;
-	int argc, i, *convmap, *mapelm, mapsize;
+	int argc, i, *convmap, *mapelm, mapsize=0;
 	mbfl_string string, result, *ret;
 	enum mbfl_no_encoding no_encoding;
 

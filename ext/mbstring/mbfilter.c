@@ -4095,7 +4095,7 @@ mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
 static int
 mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
 {
-	int s, n;
+	int s=-1, n;
 
 	if (c >= 0x100)	{
 		/* look it up from the cp1252 table */
