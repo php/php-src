@@ -169,6 +169,7 @@ PHP_FUNCTION(ocifreedesc);
 PHP_FUNCTION(ocisavelob);
 PHP_FUNCTION(ocisavelobfile);
 PHP_FUNCTION(ociloadlob);
+PHP_FUNCTION(ociwritelobtofile);
 PHP_FUNCTION(ocicommit);
 PHP_FUNCTION(ocirollback);
 PHP_FUNCTION(ocinewdescriptor);
@@ -237,6 +238,7 @@ static zend_function_entry php_oci_functions[] = {
     PHP_FE(ocisavelob,       NULL)
     PHP_FE(ocisavelobfile,   NULL)
     PHP_FE(ociloadlob,       NULL)
+    PHP_FE(ociwritelobtofile,NULL)
     PHP_FE(ocicommit,        NULL)
     PHP_FE(ocirollback,      NULL)
     PHP_FE(ocinewdescriptor, NULL)
@@ -245,10 +247,11 @@ static zend_function_entry php_oci_functions[] = {
 };
 
 static zend_function_entry php_oci_lob_class_functions[] = {
-    PHP_FALIAS(load,	ociloadlob,       NULL)
-    PHP_FALIAS(save,	ocisavelob,       NULL)
-    PHP_FALIAS(savefile,ocisavelobfile,   NULL)
-    PHP_FALIAS(free,	ocifreedesc,      NULL)
+    PHP_FALIAS(load,	    ociloadlob,       NULL)
+    PHP_FALIAS(writetofile,	ociwritelobtofile,NULL)
+    PHP_FALIAS(save,	    ocisavelob,       NULL)
+    PHP_FALIAS(savefile,    ocisavelobfile,   NULL)
+    PHP_FALIAS(free,	    ocifreedesc,      NULL)
     {NULL,NULL,NULL}
 };
 
@@ -2614,6 +2617,197 @@ PHP_FUNCTION(ociloadlob)
 	}
 
   RETURN_FALSE;
+}
+/* }}} */
+/* {{{ proto void ociwritelobtofile(object lob [,string filename][,int start][,int length])
+ */
+
+PHP_FUNCTION(ociwritelobtofile)
+{
+	pval *id, **tmp, **conn, **zfilename, **zstart, **zlength;
+	char *filename = NULL;
+	int start = -1;
+	ub4 length = -1;
+	oci_connection *connection;
+	oci_descriptor *descr;
+	char *buffer;
+	ub4 loblen;
+	int ac = ARG_COUNT(ht);
+	int fp = -1;
+	OCILobLocator *mylob;
+	int coffs;
+
+	if ((id = getThis()) != 0) {
+   		if (zend_hash_find(id->value.obj.properties, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
+			php_error(E_WARNING, "unable to find my statement property");
+			RETURN_FALSE;
+		}
+
+		OCI_GET_CONN(connection,conn);
+
+   		if (zend_hash_find(id->value.obj.properties, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my locator property");
+			RETURN_FALSE;
+		}
+
+        if (zend_hash_index_find(connection->descriptors, (*tmp)->value.lval, (void **)&descr) == FAILURE) {
+        	php_error(E_WARNING, "unable to find my descriptor %d",(*tmp)->value.lval);
+            RETURN_FALSE;
+        }
+
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+	    if (ac < 0 || ac > 3 || getParametersEx(ac, &zfilename, &zstart, &zlength) == FAILURE) {
+        	WRONG_PARAM_COUNT;
+    	}
+
+		switch (ac) {
+		case 3:
+			convert_to_long_ex(zlength);
+			length = (*zlength)->value.lval;
+		case 2:
+			convert_to_long_ex(zstart);
+			start = (*zstart)->value.lval;
+		case 1:
+			convert_to_string_ex(zfilename);
+			filename = (*zfilename)->value.str.val;
+		}
+
+		if (filename && *filename) {
+			if (_php3_check_open_basedir(filename)) {
+				goto bail;
+			}
+
+			if ((fp = open(filename,O_CREAT|O_TRUNC|O_WRONLY)) == -1) {
+				php_error(E_WARNING, "Can't create file %s", filename);
+				goto bail;
+			} 
+		}
+
+		connection->error = 
+			OCILobGetLength(connection->pServiceContext,
+							connection->pError,
+							descr->ocidescr,
+							&loblen);
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobGetLength", connection->error);
+			goto bail;
+		}
+		
+		if (descr->type == OCI_DTYPE_FILE) {
+			connection->error = 
+				OCILobFileOpen(connection->pServiceContext,
+							   connection->pError,
+							   descr->ocidescr,
+							   OCI_FILE_READONLY);
+			if (connection->error) {
+				oci_error(connection->pError, "OCILobFileOpen",connection->error);
+				goto bail;
+			}
+		}
+
+		if (start == -1) {
+			start = 0;
+		}
+
+		if (length == -1) {
+			length = loblen - start;
+		}
+		
+		if ((start + length) > loblen) {
+			length = loblen - start;
+		}
+
+#define OCI_LOB_READ_BUFFER 128*1024
+
+		buffer = emalloc(OCI_LOB_READ_BUFFER);
+
+		coffs = start;
+
+		oci_debug("ociwritelobtofile(start = %d, length = %d, loblen = %d",start,length,loblen);
+
+		while (length > 0) {
+			ub4 toread;
+
+			if (length > OCI_LOB_READ_BUFFER) {
+				toread = OCI_LOB_READ_BUFFER;
+			} else {
+				toread = length;
+			}
+
+			oci_debug("OCILobRead(coffs = %d, toread = %d",coffs,toread);
+
+			connection->error = 
+				OCILobRead(connection->pServiceContext, 
+						   connection->pError,
+						   descr->ocidescr,
+						   &toread,				   /* IN/OUT bytes toread/read */
+						   coffs+1,				   /* offset (starts with 1) */ 
+						   (dvoid *) buffer,	
+						   toread, 				   /* size of buffer */
+						   (dvoid *)0,
+						   (OCICallbackLobRead) 0, /* callback... */
+						   (ub2) 0, 			   /* The character set ID of the buffer data. */
+						   (ub1) SQLCS_IMPLICIT);  /* The character set form of the buffer data. */
+			
+			oci_debug("OCILobRead(read - %d",toread);
+
+			if (connection->error) {
+				oci_error(connection->pError, "OCILobRead", connection->error);
+				goto bail;
+			}
+
+			if (fp != -1) {
+				if (write(fp,buffer,toread) != toread) {
+					php_error(E_WARNING, "cannot write file!");
+					goto bail;
+				}
+			} else {
+				if (php3_header()) {
+					PHPWRITE(buffer,toread);
+				}
+			}
+
+			length -= toread;
+			coffs += toread;
+		}
+
+		efree(buffer);
+		buffer = 0;
+		
+		if (fp != -1) {
+			close(fp);
+			fp = 0;
+		}
+
+		if (descr->type == OCI_DTYPE_FILE) {
+			connection->error = 
+				OCILobFileClose(connection->pServiceContext,
+								connection->pError,
+								descr->ocidescr);
+			if (connection->error) {
+				oci_error(connection->pError, "OCILobFileClose", connection->error);
+				goto bail;
+			}
+		}
+		RETURN_TRUE;
+	}
+	
+ bail:
+	if (fp != -1) {
+		close(fp);
+	}
+	
+	if (buffer) {
+		efree(buffer);
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 /* {{{ proto string OCINewDescriptor(int connection [,int type ])
