@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Stig Venaas <venaas@uninett.no>                              |
+   | Streams work by Wez Furlong <wez@thebrainroom.com>                   |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -668,28 +669,6 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
       return ret;
 }
 
-PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode TSRMLS_DC)
-{
-	int oldmode;
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-
-	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET))
-		return 0;
-	
-	oldmode = sock->is_blocked;
-	
-	/* no need to change anything */
-	if (mode == oldmode)
-		return oldmode;
-	
-	if (SUCCESS == php_set_sock_blocking(sock->socket, mode TSRMLS_CC)) {
-		sock->is_blocked = mode;
-		return oldmode;
-	}
-
-	return -1;
-}
-
 PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size TSRMLS_DC)
 {
 	size_t oldsize;
@@ -887,9 +866,9 @@ DUMP_SOCK_STATE("check for EOF", sock);
 		 * socket is still active, try to read a chunk of data,
 		 * but lets not block. */
 		sock->timeout_event = 0;
-		save_blocked = php_stream_sock_set_blocking(stream, 1 TSRMLS_CC);
+		save_blocked = php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, 0, NULL);
 		php_sock_stream_read_internal(stream, sock TSRMLS_CC);
-		php_stream_sock_set_blocking(stream, save_blocked TSRMLS_CC);
+		php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, save_blocked, NULL);
 		
 		if (sock->eof)
 			return EOF;
@@ -959,6 +938,32 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	return fstat(sock->socket, &ssb->sb);
+}
+
+static int php_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
+{
+	int oldmode;
+	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+
+	switch(option) {
+		case PHP_STREAM_OPTION_BLOCKING:
+	
+			oldmode = sock->is_blocked;
+	
+			/* no need to change anything */
+			if (value == oldmode)
+				return oldmode;
+	
+			if (SUCCESS == php_set_sock_blocking(sock->socket, value TSRMLS_CC)) {
+				sock->is_blocked = value;
+				return oldmode;
+			}
+
+			return -1;
+
+		default:
+			return -1;
+	}
 }
 
 static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
@@ -1065,7 +1070,8 @@ php_stream_ops php_stream_socket_ops = {
 	"socket",
 	NULL, php_sockop_gets,
 	php_sockop_cast,
-	php_sockop_stat
+	php_sockop_stat,
+	php_sockop_set_option
 };
 
 

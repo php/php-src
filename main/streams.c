@@ -33,6 +33,8 @@
 #include <sys/mman.h>
 #endif
 
+#include <fcntl.h>
+
 #ifndef MAP_FAILED
 #define MAP_FAILED ((void *) -1)
 #endif
@@ -308,6 +310,13 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	}
 
 	zend_error(E_WARNING, "streams of type %s do not support seeking", stream->ops->label);
+	return -1;
+}
+
+PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
+{
+	if (stream->ops->set_option)
+		return stream->ops->set_option(stream, option, value, ptrparam TSRMLS_CC);
 	return -1;
 }
 
@@ -742,13 +751,68 @@ static int php_stdiop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 	return fstat(fd, &ssb->sb);
 }
 
+static int php_stdiop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
+{
+	php_stdio_stream_data *data = (php_stdio_stream_data*) stream->abstract;
+	size_t size;
+	int fd;
+	int flags;
+	int oldval;
+	
+	switch(option) {
+		case PHP_STREAM_OPTION_BLOCKING:
+			fd = fileno(data->file);
+
+			if (fd == -1)
+				return -1;
+#ifdef O_NONBLOCK
+			flags = fcntl(fd, F_GETFL, 0);
+			oldval = (flags & O_NONBLOCK) ? 0 : 1;
+			if (value)
+				flags ^= O_NONBLOCK;
+			else
+				flags |= O_NONBLOCK;
+			
+			if (-1 == fcntl(fd, F_SETFL, flags))
+				return -1;
+			return oldval;
+#else
+			return -1; /* not yet implemented */
+#endif
+			
+		case PHP_STREAM_OPTION_BUFFER:
+			if (ptrparam)
+				size = *(size_t *)ptrparam;
+			else
+				size = BUFSIZ;
+
+			switch(value) {
+				case PHP_STREAM_BUFFER_NONE:
+					return setvbuf(data->file, NULL, _IONBF, 0);
+					
+				case PHP_STREAM_BUFFER_LINE:
+					return setvbuf(data->file, NULL, _IOLBF, size);
+					
+				case PHP_STREAM_BUFFER_FULL:
+					return setvbuf(data->file, NULL, _IOFBF, size);
+
+				default:
+					return -1;
+			}
+			break;
+		default:
+			return -1;
+	}
+}
+
 PHPAPI php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_write, php_stdiop_read,
 	php_stdiop_close, php_stdiop_flush,
 	"STDIO",
 	php_stdiop_seek,
 	php_stdiop_gets, php_stdiop_cast,
-	php_stdiop_stat
+	php_stdiop_stat,
+	php_stdiop_set_option
 };
 /* }}} */
 

@@ -101,7 +101,7 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
 
 typedef struct _php_stream_statbuf {
 	struct stat sb; /* regular info */
-	/* extended info to go here some day */
+	/* extended info to go here some day: content-type etc. etc. */
 } php_stream_statbuf;
 
 typedef struct _php_stream_dirent {
@@ -147,6 +147,7 @@ typedef struct _php_stream_ops  {
 	char *(*gets)(php_stream *stream, char *buf, size_t size TSRMLS_DC);
 	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
 	int (*stat)(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
+	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
 } php_stream_ops;
 
 typedef struct _php_stream_wrapper_ops {
@@ -283,6 +284,19 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 #define php_stream_closedir(dirstream)	php_stream_close((dirstream))
 #define php_stream_rewinddir(dirstream)	php_stream_rewind((dirstream))
 
+PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
+#define php_stream_set_option(stream, option, value, ptrvalue)	_php_stream_set_option((stream), (option), (value), (ptrvalue) TSRMLS_CC)
+
+/* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
+#define PHP_STREAM_OPTION_BLOCKING	1
+
+/* change the buffering mode of stream. value is a PHP_STREAM_BUFFER_XXXX value, ptrparam is a ptr to a size_t holding
+ * the required buffer size */
+#define PHP_STREAM_OPTION_BUFFER	2
+
+#define PHP_STREAM_BUFFER_NONE	0	/* unbuffered */
+#define PHP_STREAM_BUFFER_LINE	1	/* line buffered */
+#define PHP_STREAM_BUFFER_FULL	2	/* fully buffered */
 
 /* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
  * Uses mmap if the src is a plain file and at offset 0 */
@@ -419,6 +433,7 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);
 
+/* not all notification codes are implemented */
 #define PHP_STREAM_NOTIFY_RESOLVE		1
 #define PHP_STREAM_NOTIFY_CONNECT		2
 #define PHP_STREAM_NOTIFY_AUTH_REQUIRED		3
