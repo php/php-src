@@ -44,6 +44,7 @@ static ZEND_FUNCTION(get_class);
 static ZEND_FUNCTION(get_parent_class);
 static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(class_exists);
+static ZEND_FUNCTION(interface_exists);
 static ZEND_FUNCTION(function_exists);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(leak);
@@ -102,6 +103,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_parent_class,	NULL)
 	ZEND_FE(method_exists,		NULL)
 	ZEND_FE(class_exists,		NULL)
+	ZEND_FE(interface_exists,	NULL)
 	ZEND_FE(function_exists,	NULL)
 #if ZEND_DEBUG
 	ZEND_FE(leak,				NULL)
@@ -848,11 +850,42 @@ ZEND_FUNCTION(class_exists)
 	
 		found = zend_hash_find(EG(class_table), lc_name, class_name_len+1, (void **) &ce);
 		free_alloca(lc_name);
-		RETURN_BOOL(found == SUCCESS);
+		RETURN_BOOL(found == SUCCESS && !((*ce)->ce_flags & ZEND_ACC_INTERFACE));
 	}
 
  	if (zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC) == SUCCESS) {
-		RETURN_TRUE;
+ 		RETURN_BOOL(((*ce)->ce_flags & ZEND_ACC_INTERFACE) == 0);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool interface_exists(string classname [, bool autoload])
+   Checks if the class exists */
+ZEND_FUNCTION(interface_exists)
+{
+	char *iface_name, *lc_name;
+	zend_class_entry **ce;
+	int iface_name_len;
+	zend_bool autoload = 1;
+	int found;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &iface_name, &iface_name_len, &autoload) == FAILURE) {
+		return;
+	}
+
+	if (!autoload) {
+		lc_name = do_alloca(iface_name_len + 1);
+		zend_str_tolower_copy(lc_name, iface_name, iface_name_len);
+	
+		found = zend_hash_find(EG(class_table), lc_name, iface_name_len+1, (void **) &ce);
+		free_alloca(lc_name);
+		RETURN_BOOL(found == SUCCESS && (*ce)->ce_flags & ZEND_ACC_INTERFACE);
+	}
+
+ 	if (zend_lookup_class(iface_name, iface_name_len, &ce TSRMLS_CC) == SUCCESS) {
+ 		RETURN_BOOL(((*ce)->ce_flags & ZEND_ACC_INTERFACE) > 0);
 	} else {
 		RETURN_FALSE;
 	}
