@@ -1944,28 +1944,28 @@ PHPAPI int php_stream_context_del_link(php_stream_context *context,
 
 /* {{{ php_stream_dirent_alphasort
  */
-PHPAPI int php_stream_dirent_alphasort(const php_stream_dirent **a, const php_stream_dirent **b)
+PHPAPI int php_stream_dirent_alphasort(const char **a, const char **b)
 {
-	return strcoll((*a)->d_name,(*b)->d_name);
+	return strcoll(*a, *b);
 }
 /* }}} */
 
 /* {{{ php_stream_dirent_alphasortr
  */
-PHPAPI int php_stream_dirent_alphasortr(const php_stream_dirent **a, const php_stream_dirent **b)
+PHPAPI int php_stream_dirent_alphasortr(const char **a, const char **b)
 {
-	return strcoll((*b)->d_name,(*a)->d_name);
+	return strcoll(*b, *a);
 }
 /* }}} */
 
 /* {{{ php_stream_scandir
  */
-PHPAPI int _php_stream_scandir(char *dirname, php_stream_dirent **namelist[], int flags, php_stream_context *context,
-			  int (*compare) (const php_stream_dirent **a, const php_stream_dirent **b) TSRMLS_DC)
+PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_stream_context *context,
+			  int (*compare) (const char **a, const char **b) TSRMLS_DC)
 {
 	php_stream *stream;
 	php_stream_dirent sdp;
-	php_stream_dirent **vector = NULL;
+	char **vector = NULL;
 	int vector_size = 0;
 	int nfiles = 0;
 
@@ -1985,11 +1985,10 @@ PHPAPI int _php_stream_scandir(char *dirname, php_stream_dirent **namelist[], in
 			} else {
 				vector_size *= 2;
 			}
-			vector = (php_stream_dirent **) erealloc(vector, vector_size * sizeof(php_stream_dirent *));
+			vector = (char **) erealloc(vector, vector_size * sizeof(char *));
 		}
 
-		vector[nfiles] = emalloc(sizeof(php_stream_dirent));
-		memcpy(vector[nfiles], &sdp, sizeof(sdp));
+		vector[nfiles] = estrdup(sdp.d_name);
 
 		nfiles++;
 	}
@@ -1998,7 +1997,7 @@ PHPAPI int _php_stream_scandir(char *dirname, php_stream_dirent **namelist[], in
 	*namelist = vector;
 
 	if (compare) {
-		qsort(*namelist, nfiles, sizeof(php_stream_dirent *), (int(*)(const void *, const void *))compare);
+		qsort(*namelist, nfiles, sizeof(char *), (int(*)(const void *, const void *))compare);
 	}
 	return nfiles;
 }
