@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -49,6 +51,8 @@
 #include "mod_files.h"
 #include "mod_user.h"
 
+/* {{{ session_functions[]
+ */
 function_entry session_functions[] = {
 	PHP_FE(session_name, NULL)
 	PHP_FE(session_module_name, NULL)
@@ -69,6 +73,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_write_close, NULL)
 	{0}
 };
+/* }}} */
 
 #ifdef ZTS
 int ps_globals_id;
@@ -103,7 +108,8 @@ static PHP_INI_MH(OnUpdateSerializer)
 }
 
 
-
+/* {{{ PHP_INI
+ */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.save_path",			"/tmp",			PHP_INI_ALL, OnUpdateString,		save_path,			php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.name",				"PHPSESSID",	PHP_INI_ALL, OnUpdateString,		session_name,		php_ps_globals,	ps_globals)
@@ -125,6 +131,7 @@ PHP_INI_BEGIN()
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
 PHP_INI_END()
+/* }}} */
 
 PS_SERIALIZER_FUNCS(php);
 PS_SERIALIZER_FUNCS(php_binary);
@@ -1142,7 +1149,6 @@ PHP_FUNCTION(session_cache_limiter)
 }
 /* }}} */
 
-
 /* {{{ static void php_register_var(zval** entry PSLS_DC PLS_DC) */
 static void php_register_var(zval** entry PSLS_DC PLS_DC)
 {
@@ -1163,7 +1169,6 @@ static void php_register_var(zval** entry PSLS_DC PLS_DC)
 	}
 }
 /* }}} */
-
 
 /* {{{ proto bool session_register(mixed var_names [, mixed ...])
    Adds varname(s) to the list of variables which are freezed at the session end */
@@ -1219,7 +1224,6 @@ PHP_FUNCTION(session_unregister)
 }
 /* }}} */
 
-
 /* {{{ proto bool session_is_registered(string varname)
    Checks if a variable is registered in session */
 PHP_FUNCTION(session_is_registered)
@@ -1241,7 +1245,6 @@ PHP_FUNCTION(session_is_registered)
 		RETURN_FALSE;
 }
 /* }}} */
-
 
 /* {{{ proto string session_encode(void)
    Serializes the current setup and returns the serialized representation */
@@ -1443,3 +1446,12 @@ PHP_MINFO_FUNCTION(session)
 
 	DISPLAY_INI_ENTRIES();
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */

@@ -215,6 +215,8 @@ PHP_FUNCTION(yp_next) {
 }
 /* }}} */
 
+/* {{{ php_foreach_all
+ */
 static int php_foreach_all (int instatus, char *inkey, int inkeylen, char *inval, int invallen, char *indata)
 {
 	int r;
@@ -253,6 +255,7 @@ static int php_foreach_all (int instatus, char *inkey, int inkeylen, char *inval
 
 	return r;
 }
+/* }}} */
 
 /* {{{ proto void yp_all(string domain, string map, string callback)
    Traverse the map and call a function on each entry */
@@ -276,6 +279,8 @@ PHP_FUNCTION(yp_all) {
 }
 /* }}} */
 
+/* {{{ php_foreach_cat
+ */
 static int php_foreach_cat (int instatus, char *inkey, int inkeylen, char *inval, int invallen, char *indata)
 {
 	int err;
@@ -299,6 +304,7 @@ static int php_foreach_cat (int instatus, char *inkey, int inkeylen, char *inval
 
 	return 0;
 }
+/* }}} */
 
 /* {{{ proto array yp_cat(string domain, string map)
    Return an array containing the entire map */
@@ -355,6 +361,8 @@ PHP_FUNCTION(yp_err_string) {
 }
 /* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(yp)
 {
 #ifdef ZTS
@@ -379,6 +387,7 @@ PHP_MINIT_FUNCTION(yp)
 
 	return SUCCESS;
 }
+/* }}} */
 
 PHP_RINIT_FUNCTION(yp)
 {
@@ -392,3 +401,12 @@ PHP_MINFO_FUNCTION(yp) {
 	php_info_print_table_end();
 }
 #endif /* HAVE_YP */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */
