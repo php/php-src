@@ -4,9 +4,8 @@ PHP 4.0                                                                    NEWS
 ?? ??? 200?, Version 4.0.6
 - Modified get_parent_class() and get_class_methods() to accept a class name as
   well as a class instance. (Andrei, Zend Engine)
-- Added support for UNC style paths (\\server\share\file & //server/share/file)
+- Added support for UNC style paths. (\\server\share\file, //server/share/file)
   (Daniel, TSRM)
-- Changed C++ style comments to C-style comments (Marc)
 - Added dbx module (database abstraction) to the repository. (Marc)
 - Using ITypeInfo instead of IDispatch if possible. This makes DCOM calls
   and even COM calls much faster.
@@ -14,11 +13,10 @@ PHP 4.0                                                                    NEWS
   Now you need not provide a path to the file containing the typelib, you can
   also provide the GUID of the TypeLib - entry or an IID for preloading
   type - information. (phanto)
-- Rewrite of domxml. It's now mostly DOM Level 2 conform (Uwe)
+- Rewrite of domxml. It's now mostly DOM Level 2 conform. (Uwe)
 - Added array_map() function that applies a callback to the elements
   of given arrays and returns the result. It can also be used with a
   null callback to transpose arrays. (Andrei)
-- New FastCGI server module. (Ben Mansell)
 - Added array_filter(), which allows filtering of array elements via
   the specified callback. (Andrei)
 - Fixed all relevant array functions to avoid moving the internal array
@@ -29,6 +27,7 @@ PHP 4.0                                                                    NEWS
   (Zeev)
 
 ?? ??? 200?, Version 4.0.5
+- New FastCGI server module. (Ben Mansell)
 - Added array_reduce(), which allows iterative reduction of an array
   to a single value via a callback function. (Andrei)
 - The imageloadfont function of the gd extension should be not platform
@@ -39,30 +38,32 @@ PHP 4.0                                                                    NEWS
   and vice versa. (alex@zend.com)
 - Fixed argument checking for call_user_func* functions and allowed
   specifying array($obj, 'method') syntax for call_user_func_array. (Andrei)
-- Fixed parent::method() to also work with runtime bindings (Zeev, Zend Engine)
+- Fixed parent::method() to also work with runtime bindings.
+  (Zeev, Zend Engine)
 - Implemented high-performance zlib-based output compression - see
-  zlib.output_compression INI directive (Zeev)
-- Improved ob_gzhandler() to support chunked output buffering - it's recommended
-  to use it with 4KB chunks (Zeev)
-- Fixed chunked output buffering (Zeev)
+  zlib.output_compression INI directive. (Zeev)
+- Improved ob_gzhandler() to support chunked output buffering - it's 
+  recommended to use it with 4KB chunks. (Zeev)
+- Fixed chunked output buffering. (Zeev)
 - Forced call_user_method() and call_user_method_array() to take the
   object argument by reference. (Andrei)
 - Fixed binding of ROWIDs in OCI8. (Thies)
 - Added PEAR/Cache as a generic Caching System. (Sebastian, PEAR/Cache)
-- IMAP quota support (imap_set_quota, imap_get_quota) enabled/added via
-  c-client2000 (kalowsky)
+- Added IMAP quota support (imap_set_quota, imap_get_quota), enabled/added via
+  c-client2000. (kalowsky)
 - Upgraded PCRE to version 3.4. (Andrei)
 - Added array_search which works similar to in_array but returns
   the key instead of a boolean. (jason@php.net)
-- Fixed pgsql transaction support (Stig, PEAR/DB)
+- Fixed pgsql transaction support. (Stig, PEAR/DB)
 - Added new object VARIANT() to encapsulate values for use with
   the COM and DOTNET module. Therefore it is now possible to pass
   values by reference, convert php values to extended variant types (currency,
   date, idispatch, iunknown, ...) and define the codepage that should
   be used for unicode - conversion.
-- Improved overall speed of IRCG, added URL handling to message scanner (Sascha)
+- Improved overall speed of IRCG, added URL handling to message scanner.
+  (Sascha)
 - Fixed some modules to allow using output-buffering. (Thies)
-- Added the chroot() function (Derick)
+- Added the chroot() function. (Derick)
 - PostgreSQL now does a rollback at the end of a request on every
   persistent connection. This is done by doing an "empty" transaction
   on the connection. This was advised by someone from the PostgreSQL
@@ -70,8 +71,8 @@ PHP 4.0                                                                    NEWS
 - Fixed PostgeSQL pg_connect() bug. We would sometimes close the default
   link by accident. (Patch by: aja@nlgroup.ca)
 - Improved OCI8 dead-session detection. (Patch by: George Schlossnagle)
-- Fixed get_meta_tags() multiline bug #4556 (Sean)
-- Prefer random() over *rand48() (JimJag)
+- Fixed get_meta_tags() multiline bug #4556. (Sean)
+- Prefer random() over *rand48(). (JimJag)
 - Sped up WDDX serialization 2x. (Andrei)
 - Added a new parameter to mail() which appends aditional command line
   parameters to the mail program. (Derick)
@@ -81,7 +82,7 @@ PHP 4.0                                                                    NEWS
 - Static methods can now be called via call_user_method_* functions, e.g.
   call_user_method('method', 'class'), and also array('class', 'method')
   constructs (for array_walk(), for example). (Andrei, Zend Engine)
-- microtime under windows now returns accurate values (James)
+- microtime() under Windows now returns accurate values. (James)
 - Added PREG_SPLIT_DELIM_CAPTURE flag to preg_split() that allows for Perl-like
   functionality of capturing parenthesized delimiter expression. (Andrei)
 - Fixed strip_tags() to not strip a lone > character. (Rasmus)
@@ -95,12 +96,12 @@ PHP 4.0                                                                    NEWS
 - Major change of the php pdf api. It could break some functions though
   backwards compatibility was tried to maintain. Adding some still
   missing functions as well. (Uwe)
-- Added mnoGoSearch extension - http://search.mnogo.ru (Sergey K)
-- Allow url encoding in DB usernames and passwords (Stig, PEAR)
-- Added raiseError and setErrorHandling methods to PEAR class (Stig, PEAR)
+- Added mnoGoSearch extension - http://search.mnogo.ru. (Sergey K)
+- Allow URL encoding in DB usernames and passwords. (Stig, PEAR)
+- Added raiseError and setErrorHandling methods to PEAR class. (Stig, PEAR)
 - Added support for converting images from JPG/PNG on the fly with the GD
-  extension, which is usefull for creating dynamic WAP-sites (Derick)
-- Updated ext/mysql/libmysql to version 3.23.32; bug fixes (tim@mysql.com)
+  extension, which is usefull for creating dynamic WAP-sites. (Derick)
+- Updated ext/mysql/libmysql to version 3.23.32; bug fixes. (tim@mysql.com)
 - Fixed possible crash in all (non-pcre) regex functions. (Thies)
 - Improved str_replace() to accept an array for any parameter - similar
   to preg_replace(). (Andrei)
@@ -108,32 +109,32 @@ PHP 4.0                                                                    NEWS
   used. (Andrei)
 - Added EXTR_PREFIX_INVALID flag to extract() to automatically prefix
   string keys that do not constitute valid variable names. (Andrei)
-- BeOS patch from svanegmond@bang.dhs.org modified somewhat by Rasmus
+- BeOS patch from svanegmond@bang.dhs.org, modified somewhat by Rasmus.
 - Fixed the Apache module to overwrite PATH_TRANSLATED with SCRIPT_FILENAME,
-  only if PATH_TRANSLATED is not previously set (Zeev)
-- Fixed crash bug in highlight_string() (Rasmus)
-- Added URL support for getimagesize() function (Jani)
-- Added xslt_set_scheme_handler() function (carmelo@akooe.com)
-- Added the pg_lolseek and pg_lotell functions (Derick)
-- Fixed wrong breaking with the wordwrap function (Derick)
+  only if PATH_TRANSLATED is not previously set. (Zeev)
+- Fixed crash bug in highlight_string(). (Rasmus)
+- Added URL support for getimagesize() function. (Jani)
+- Added xslt_set_scheme_handler() function. (carmelo@akooe.com)
+- Added the pg_lolseek and pg_lotell functions. (Derick)
+- Fixed wrong breaking with the wordwrap function. (Derick)
 - Fixed 'O' and 'r' flags of date() to have correct sign for timezone
   offset. (Andrei)
 - Changed 'Z' flag to date() to always return timezone offset with
   negative sign if it's west of UTC. (Andrei)
-- Added the HTML_Processor class which provides common functions for processing HTML.
-  (Sterling)
+- Added the HTML_Processor class which provides common functions for 
+  processing HTML. (Sterling)
 - Added localeconv() and strcoll() functions for localization. (Sean)
 - Added the xslt_set_base function. (Sterling)
-- Support Zeus 3.3.8
-- Added odbc_error() and odbc_errormsg() functions (Stig)
-- vpopmail extension updated to working alfa. give it a try but keep in
-  mind that it is not ready for production environments (Boian Bonev)
-- New extension for vpopmail - http://www.inter7.com/vpopmail (David Croft)
-- Added sybase_get_last_message() to the Sybase CT module (Jan Fedak)
+- Added support for Zeus 3.3.8.
+- Added odbc_error() and odbc_errormsg() functions. (Stig)
+- New extension for vpopmail - http://www.inter7.com/vpopmail,
+  give it a try, but keep in mind that it is not ready for production 
+  environments. (David Croft, Boian Bonev)
+- Added sybase_get_last_message() to the Sybase CT module. (Jan Fedak)
 - Made ldap_list(), ldap_read() and ldap_search() do parallel search when
-  first parameter is an array of link identifiers (Stig Venaas)
+  first parameter is an array of link identifiers. (Stig Venaas)
 - Made fopen() of HTTP URL follow redirects, $http_response_header will
-  contain all headers with empty string as delimiter (Stig Venaas)
+  contain all headers with empty string as delimiter. (Stig Venaas)
 - Added Console_Getopt class for parsing command-line args. (Andrei, PEAR)
 - Added an experimental version of the ZZipLib extension which provides the
   ability to read zip files. (Sterling)
@@ -142,22 +143,22 @@ PHP 4.0                                                                    NEWS
   right UID and you script won't be able to access that copy. (Thies)
 - Changed extract() to check that prefixed name is a valid one. (Andrei)
 - Changed extract() to return the number of variables extracted. (Andrei)
-- Added ldap_rename() function (Stig Venaas)
-- Made ldap_set_option() support controls (Stig Venaas)
+- Added ldap_rename() function. (Stig Venaas)
+- Made ldap_set_option() support controls. (Stig Venaas)
 - Changed ldap_search() and added functions ldap_parse_result(),
   ldap_first_reference(), ldap_next_reference() and ldap_parse_reference()
   to cope with LDAPv3 stuff like referrals and references. (Stig Venaas)
-- Fixed date('r') overflow
+- Fixed date('r') overflow.
 - Made the php.ini path reported in phpinfo() always point to the absolute
-  path that was opened (Zeev)
-- Made the INI mechanism thread safe (Zeev, Zend Engine)
+  path that was opened. (Zeev)
+- Made the INI mechanism thread safe. (Zeev, Zend Engine)
 - Changed setlocale() to use LC_* constants. (Jani)
-- ctype functions now follow the extension naming conventions (Hartmut)
-- Added iconv() function (using libc or libiconv) (Stig)
-- Added ODBC_TYPE constant (Stig)
+- ctype functions now follow the extension naming conventions. (Hartmut)
+- Added iconv() function (using libc or libiconv). (Stig)
+- Added ODBC_TYPE constant. (Stig)
 - Added the call_user_method_array function which allows you to call a method
   with an arbitrary number of parameters. (Sterling)
-- ext/odbc: IBM DB2 patch by Walter Franzini <walter@sys-net.it>
+- ext/odbc: IBM DB2 patch by Walter Franzini. <walter@sys-net.it>
 - Added extension for the cracklib library. (Alexander Feldman)
 
 19 Dec. 2000, Version 4.0.4
