@@ -131,8 +131,8 @@ PHP_MINIT_FUNCTION(dir)
 	dirsep_str[0] = DEFAULT_SLASH;
 	dirsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("DIRECTORY_SEPARATOR", dirsep_str, CONST_CS|CONST_PERSISTENT);
-    pathsep_str[0] = ZEND_PATHS_SEPARATOR;
-    pathsep_str[1] = '\0';
+	pathsep_str[0] = ZEND_PATHS_SEPARATOR;
+	pathsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_CS|CONST_PERSISTENT);
 
 #ifdef HAVE_GLOB
