@@ -58,10 +58,10 @@ ZEND_FUNCTION(dbx_test);
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
 */
-/*ZEND_BEGIN_MODULE_GLOBALS(dbx)
-	void * dbx_global;
-  ZEND_END_MODULE_GLOBALS(dbx)
-*/
+ZEND_BEGIN_MODULE_GLOBALS(dbx)
+	 int row_count;
+	 int num_rows;
+ZEND_END_MODULE_GLOBALS(dbx)
 
 /* In every function that needs to use variables in php_dbx_globals,
    do call dbxLS_FETCH(); after declaring other variables used by
@@ -71,9 +71,17 @@ ZEND_FUNCTION(dbx_test);
 */
 
 #ifdef ZTS
+#define DBXLS_D	zend_dbx_globals *dbx_globals
+#define DBXLS_DC	, DBXLS_D
+#define DBXLS_C	dbx_globals
+#define DBXLS_CC , DBXLS_C
 #define DBXG(v) (dbx_globals->v)
 #define DBXLS_FETCH() zend_dbx_globals *dbx_globals = ts_resource(dbx_globals_id)
 #else
+#define DBXLS_D
+#define DBXLS_DC
+#define DBXLS_C
+#define DBXLS_CC
 #define DBXG(v) (dbx_globals.v)
 #define DBXLS_FETCH()
 #endif

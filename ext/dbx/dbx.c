@@ -32,10 +32,12 @@
 #define DBX_UNKNOWN 0
 #define DBX_MYSQL 1
 #define DBX_ODBC 2
+#define DBX_PGSQL 3
 /*/ includes for supported databases /*/
 #include "dbx.h"
 #include "dbx_mysql.h"
 #include "dbx_odbc.h"
+#include "dbx_pgsql.h"
 
 /*/ support routines /*/
 int module_exists(char * module_name) {
@@ -48,6 +50,7 @@ int module_exists(char * module_name) {
 int get_module_identifier(char * module_name) {
     if (!strcmp("mysql", module_name)) return DBX_MYSQL;
     if (!strcmp("odbc", module_name)) return DBX_ODBC;
+    if (!strcmp("pgsql", module_name)) return DBX_PGSQL;
     return DBX_UNKNOWN;
     }
 
@@ -98,10 +101,21 @@ int switch_dbx_getrow(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAM
 int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
     /*/ returns string /*/
 
+#ifdef ZTS
+int dbx_globals_id;
+#else
+ZEND_DBX_API zend_dbx_globals dbx_globals;
+#endif
 /* If you declare any globals in php_dbx.h uncomment this: */
-/*/ZEND_DECLARE_MODULE_GLOBALS(dbx) /*/
+/* ZEND_DECLARE_MODULE_GLOBALS(dbx) */
 /* True global resources - no need for thread safety here */
 static int le_dbx;
+
+static void zend_dbx_init_globals(PGLS_D)
+{
+	DBXG(row_count) = 0;
+	DBXG(num_rows) = 0;
+}
 
 /* Every user visible function must have an entry in dbx_functions[].
 */
@@ -141,8 +155,12 @@ ZEND_GET_MODULE(dbx)
 /*/
 ZEND_MINIT_FUNCTION(dbx)
 {
-/*/    zend_dbx_globals *dbx_globals; /*/
-/*/	ZEND_INIT_MODULE_GLOBALS(dbx, NULL, NULL); /*/
+
+#ifdef ZTS
+	dbx_globals_id = ts_allocate_id(sizeof(zend_dbx_globals), (ts_allocate_ctor) zend_dbx_init_globals, NULL);
+#else
+	zend_dbx_init_globals(DBXLS_C);
+#endif
 
 /*/	REGISTER_INI_ENTRIES(); /*/
 
@@ -151,20 +169,14 @@ ZEND_MINIT_FUNCTION(dbx)
     REGISTER_LONG_CONSTANT("DBX_RESULT_INDEX", DBX_RESULT_INDEX, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_RESULT_ASSOC", DBX_RESULT_ASSOC, CONST_CS | CONST_PERSISTENT);
 
-/*/    dbx_globals = ts_resource(dbx_globals_id); /*/
-/*/    global_dbx_ctor(&DBXG(dbx_global));  /*/
-
     return SUCCESS;
     }
 
 ZEND_MSHUTDOWN_FUNCTION(dbx)
 {
-/*/    DBXLS_FETCH(); /*/
-/*/    global_dbx_dtor(&DBXG(dbx_global));  /*/
-
 /*/    UNREGISTER_INI_ENTRIES(); /*/
 	return SUCCESS;
-    }
+}
     
 /* Remove if there's nothing to do at request start */
 /*ZEND_RINIT_FUNCTION(dbx)
@@ -182,6 +194,7 @@ ZEND_MINFO_FUNCTION(dbx)
     php_info_print_table_row(2, "dbx support", "enabled");
     php_info_print_table_row(2, "dbx support for MySQL", "enabled");
     php_info_print_table_row(2, "dbx support for ODBC", "enabled");
+    php_info_print_table_row(2, "dbx support for PostgreSQL", "enabled");
     php_info_print_table_end();
 /*/    DISPLAY_INI_ENTRIES(); /*/
 }
@@ -677,6 +690,7 @@ int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, z
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_connect: not supported in this module");
     return 0;
@@ -687,6 +701,7 @@ int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, 
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_pconnect: not supported in this module");
     return 0;
@@ -697,6 +712,7 @@ int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETER
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_close: not supported in this module");
     return 0;
@@ -707,6 +723,7 @@ int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTE
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_query(rv, dbx_handle, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_query(rv, dbx_handle, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_query(rv, dbx_handle, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_query: not supported in this module");
     return 0;
@@ -717,6 +734,7 @@ int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTI
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_getcolumncount: not supported in this module");
     return 0;
@@ -727,6 +745,7 @@ int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_inde
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_getcolumnname: not supported in this module");
     return 0;
@@ -737,6 +756,7 @@ int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_inde
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_getcolumntype: not supported in this module");
     return 0;
@@ -747,6 +767,7 @@ int switch_dbx_getrow(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAM
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getrow(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_getrow(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_getrow(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_getrow: not supported in this module");
     return 0;
@@ -757,6 +778,7 @@ int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETER
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_error: not supported in this module");
     return 0;
