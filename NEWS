@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
+- Fixed bug #28451 (corupt EXIF headers have unlimited recursive IFD directory
+  entries). (Andrei)
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Changed phpize not to require automake and libtool. (Jani)
 - Fixed build system to always use bundled libtool files. (Jani)  
