@@ -2018,7 +2018,7 @@ send_by_ref:
 				}
 				break;
 			case ZEND_ISSET_ISEMPTY: {
-					zval *var = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_IS);
+					zval **var = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_IS);
 					int isset;
 
 					if (!var) {
@@ -2032,8 +2032,8 @@ send_by_ref:
 						} else {
 							isset = 1;
 						}
-					} else if (var==EG(uninitialized_zval_ptr)
-						|| (var->type == IS_STRING && var->value.str.val == undefined_variable_string)) {
+					} else if (*var==EG(uninitialized_zval_ptr)
+						|| ((*var)->type == IS_STRING && (*var)->value.str.val == undefined_variable_string)) {
 						isset = 0;
 					} else {
 						isset = 1;
@@ -2051,7 +2051,7 @@ send_by_ref:
 								} else {
 									Ts[opline->result.u.var].tmp_var.value.lval = 0;
 								}
-							} else if (!isset || !zend_is_true(var)) {
+							} else if (!isset || !zend_is_true((*var))) {
 								Ts[opline->result.u.var].tmp_var.value.lval = 1;
 							} else {
 								Ts[opline->result.u.var].tmp_var.value.lval = 0;
