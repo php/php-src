@@ -20,6 +20,16 @@ Build and install it somewhere; then register the engine like this:
 
   regsvr32 php5activescript.dll
 
+Configuration.
+==============
+
+ActivePHP will not use the default php.ini file.
+Instead, it will look only in the same directory as the .exe that caused it to
+load.
+
+You should create php-activescript.ini and place it in that folder, if you wish
+to load extensions etc.
+
 Usage.
 ======
 

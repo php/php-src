@@ -27,8 +27,6 @@
 #define ACTIVEPHP_THREADING_MODE	COINIT_APARTMENTTHREADED
 #endif
 
-#define ACTIVEPHP_HAS_OWN_THREAD	1
-
 #define WM_ACTIVEPHP_SERIALIZE	WM_USER + 200
 
 enum activephp_engine_func { /* if you change the order, change marshal.cpp too */
@@ -40,6 +38,7 @@ enum activephp_engine_func { /* if you change the order, change marshal.cpp too 
 	APHP_Close,
 	APHP_AddTypeLib,
 	APHP_AddScriptlet,
+	APHP_ParseProcedureText,
 	APHP__Max
 };
 
