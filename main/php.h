@@ -96,11 +96,11 @@ extern unsigned char second_arg_allow_ref[];
 #endif
 
 #ifndef HAVE_STRLCPY
-size_t strlcpy(char *dst, const char *src, size_t siz);
+PHPAPI size_t strlcpy(char *dst, const char *src, size_t siz);
 #endif
 
 #ifndef HAVE_STRLCAT
-size_t strlcat(char *dst, const char *src, size_t siz);
+PHPAPI size_t strlcat(char *dst, const char *src, size_t siz);
 #endif
 
 #ifndef HAVE_STRTOK_R
