@@ -141,9 +141,8 @@ sapi_nsapi_ub_write(const char *str, unsigned int str_length)
 	rc = (nsapi_request_context *)SG(server_context);
 	retval = net_write(rc->sn->csd, (char *)str, str_length);
 	if (retval == IO_ERROR /*-1*/ || retval == IO_EOF /*0*/)
-		return -1;
-	else
-		return retval;
+		php_handle_aborted_connection();
+	return retval;
 }
 
 static int
