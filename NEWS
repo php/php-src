@@ -11,6 +11,12 @@ PHP 4                                                                      NEWS
 - Fixed compile errors in the FriBidi extension (Bug #16414). (Tal)
 - Fixed bugs #7472, #12120 and #12989 as well as other potential problems
   with strip_tags() function. (Ilia)
+- Fixed bugs #17570 and #17957 (Regexps related). (Andrei, Ilia)
+- Fixed bugs #18167 and #16859 (SEGV with session_decode). (Ilia)
+- Fixed bugs #19573 and #13472 (Session, XHTML compliance and
+  trans_sid). (Sascha)
+- Fix #19570 (last character was missing in
+  get_html_translation_table). (Wez)
 - Upgraded PCRE to version 3.9. (Wez)
 - Fixed bug in OCIResult() which returned garbage when called on 
   empty result-sets. (Thies)
