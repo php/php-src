@@ -330,9 +330,9 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		} else {
 			cmplen = strlen(content_type);
 		}
-
 		if (strncmp(content_type, "text/xml", cmplen) == 0 ||
 		    strncmp(content_type, "application/soap+xml", cmplen == 0)) {
+/*
 			if (strncmp(http_body, "<?xml", 5)) {
 				zval *err;
 				MAKE_STD_ZVAL(err);
@@ -343,6 +343,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 				efree(http_body);
 				return FALSE;
 			}
+*/
 		}
 		efree(content_type);
 	}
