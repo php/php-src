@@ -32,6 +32,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27328 (ftp extension relies on 32-bit longs). (Sara)
 - Fixed bug #27295 (memory leak inside sscanf()). (Ilia)
 - Fixed bug #27293 (two crashes inside image2wbmp()). (Ilia)
+- Fixed bug #27291 (get_browser matches browscap.ini patterns incorrectly).
+  (Jay)
 - Fixed bug #27278 (*printf() functions treat arguments as if passed by
   reference). (Ilia)
 - Fixed bug #27238 (iptcparse() function misses some fields). (Pierre)

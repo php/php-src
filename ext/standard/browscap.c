@@ -22,6 +22,7 @@
 #include "php_regex.h"
 #include "php_browscap.h"
 #include "php_ini.h"
+#include "php_string.h"
 
 #include "zend_globals.h"
 
@@ -47,9 +48,13 @@ static void convert_browscap_pattern(zval *pattern)
 	register int i, j;
 	char *t;
 
-	t = (char *) malloc(Z_STRLEN_P(pattern)*2 + 1);
+	php_strtolower(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
 
-	for (i=0, j=0; i<Z_STRLEN_P(pattern); i++, j++) {
+	t = (char *) malloc(Z_STRLEN_P(pattern)*2 + 3);
+
+	t[0] = '^';
+
+	for (i=0, j=1; i<Z_STRLEN_P(pattern); i++, j++) {
 		switch (Z_STRVAL_P(pattern)[i]) {
 			case '?':
 				t[j] = '.';
@@ -68,9 +73,7 @@ static void convert_browscap_pattern(zval *pattern)
 		}
 	}
 
-	if (j && (t[j-1] == '.')) {
-		t[j++] = '*';
-	}
+	t[j++] = '$';
 
 	t[j]=0;
 	Z_STRVAL_P(pattern) = t;
@@ -181,36 +184,89 @@ PHP_MSHUTDOWN_FUNCTION(browscap)
 }
 /* }}} */
 
+
 /* {{{ browser_reg_compare
  */
 static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_hash_key *key)
 {
-	zval **browser_name, **current;
+	zval **browser_regex, **previous_match;
 	regex_t r;
 	char *lookup_browser_name = va_arg(args, char *);
 	zval **found_browser_entry = va_arg(args, zval **);
 
-	if (zend_hash_find(Z_ARRVAL_PP(browser), "browser_name_regex", sizeof("browser_name_regex"), (void **) &browser_name) == FAILURE) {
+	/* See if we have an exact match, if so, we're done... */
+	if (*found_browser_entry) {
+		if (zend_hash_find(Z_ARRVAL_PP(found_browser_entry), "browser_name_pattern", sizeof("browser_name_pattern"), (void**) &previous_match) == FAILURE) {
+			return 0;
+		}
+		else if (!strcasecmp(Z_STRVAL_PP(previous_match), lookup_browser_name)) {
+			return 0;
+		}
+	}
+
+
+	if (zend_hash_find(Z_ARRVAL_PP(browser), "browser_name_regex", sizeof("browser_name_regex"), (void **) &browser_regex) == FAILURE) {
 		return 0;
 	}
 
-	if (*found_browser_entry) {
-		/* If we've found a possible browser, check it's length. Longer user
-		   agent strings are assumed to be more precise, so use them. */
-		if (zend_hash_find(Z_ARRVAL_PP(found_browser_entry), "browser_name_regex", sizeof("browser_name_regex"), (void**) &current) == FAILURE) {
-			return 0;
-		}
-		else if (Z_STRLEN_PP(current) > Z_STRLEN_PP(browser_name)) {
-			return 0;
-		}
-	}
-	if (regcomp(&r, Z_STRVAL_PP(browser_name), REG_NOSUB)!=0) {
+	if (regcomp(&r, Z_STRVAL_PP(browser_regex), REG_NOSUB)!=0) {
 		return 0;
 	}
 	if (regexec(&r, lookup_browser_name, 0, NULL, 0)==0) {
-		*found_browser_entry = *browser;
+		/* If we've found a possible browser, we need to do a comparison of the
+		   number of characters changed in the user agent being checked versus
+		   the previous match found and the current match. */
+		if (*found_browser_entry) {
+			int i, prev_len = 0, curr_len = 0, ua_len;
+			zval **current_match;
+
+			if (zend_hash_find(Z_ARRVAL_PP(browser), "browser_name_pattern", sizeof("browser_name_pattern"), (void**) &current_match) == FAILURE) {
+				regfree(&r);
+				return 0;
+			}
+
+			ua_len = strlen(lookup_browser_name);
+
+			for (i = 0; i < Z_STRLEN_PP(previous_match); i++) {
+				switch (Z_STRVAL_PP(previous_match)[i]) {
+					case '?':
+					case '*':
+						/* do nothing, ignore these characters in the count */
+					break;
+
+					default:
+						++prev_len;
+				}
+			}
+
+			for (i = 0; i < Z_STRLEN_PP(current_match); i++) {
+				switch (Z_STRVAL_PP(current_match)[i]) {
+					case '?':
+					case '*':
+						/* do nothing, ignore these characters in the count */
+					break;
+
+					default:
+						++curr_len;
+				}
+			}
+
+
+			/* Pick which browser pattern replaces the least amount of
+			   characters when compared to the original user agent string... */
+			if (ua_len - prev_len > ua_len - curr_len) {
+				*found_browser_entry = *browser;
+			}
+		}
+		else {
+			*found_browser_entry = *browser;
+		}
 	}
-	regfree(&r);
+
+	if (&r) {
+		regfree(&r);
+	}
+
 	return 0;
 }
 /* }}} */
@@ -235,7 +291,7 @@ PHP_FUNCTION(get_browser)
 	if (ZEND_NUM_ARGS() > 2 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &agent_name, &retarr) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-	
+
 	if (agent_name == NULL || Z_TYPE_PP(agent_name) == IS_NULL) {
 		if (!PG(http_globals)[TRACK_VARS_SERVER]
 			|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
@@ -245,20 +301,22 @@ PHP_FUNCTION(get_browser)
 	}
 
 	convert_to_string_ex(agent_name);
+	lookup_browser_name = estrndup(Z_STRVAL_PP(agent_name), Z_STRLEN_PP(agent_name));
+	php_strtolower(lookup_browser_name, strlen(lookup_browser_name));
 
 	if (ZEND_NUM_ARGS() == 2) {
 		convert_to_boolean_ex(retarr);
 		return_array = Z_BVAL_PP(retarr);
 	}
 
-	if (zend_hash_find(&browser_hash, Z_STRVAL_PP(agent_name), Z_STRLEN_PP(agent_name)+1, (void **) &agent)==FAILURE) {
-		lookup_browser_name = Z_STRVAL_PP(agent_name);
+	if (zend_hash_find(&browser_hash, lookup_browser_name, strlen(lookup_browser_name)+1, (void **) &agent)==FAILURE) {
 		found_browser_entry = NULL;
 		zend_hash_apply_with_arguments(&browser_hash, (apply_func_args_t) browser_reg_compare, 2, lookup_browser_name, &found_browser_entry);
 
 		if (found_browser_entry) {
 			agent = &found_browser_entry;
 		} else if (zend_hash_find(&browser_hash, DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME), (void **) &agent)==FAILURE) {
+			efree(lookup_browser_name);
 			RETURN_FALSE;
 		}
 	}
@@ -283,6 +341,10 @@ PHP_FUNCTION(get_browser)
 		else {
 			zend_hash_merge(Z_OBJPROP_P(return_value), Z_ARRVAL_PP(agent), (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *), 0);
 		}
+	}
+
+	if (lookup_browser_name) {
+		efree(lookup_browser_name);
 	}
 }
 /* }}} */
