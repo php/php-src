@@ -2,7 +2,15 @@
 #define _PHP_REGEX_H
 
 #if REGEX == 1
+/* get aliases */
+#include "regex/regex_extra.h"
 #include "regex/regex.h"
+
+/* get rid of aliases */
+#define PHP_NO_ALIASES
+#include "regex/regex_extra.h"
+#undef PHP_NO_ALIASES
+
 #ifndef _REGEX_H
 #define _REGEX_H 1				/* this should stop Apache from loading the system version of regex.h */
 #endif
