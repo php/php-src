@@ -19,19 +19,6 @@
 #include "zend_API.h"
 #include "zend_globals.h"
 
-#if 0
-#if HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-
-#if MSVC5
-#if !(APACHE)
-#define NEEDRDH 1
-#endif
-#include "win32/readdir.h"
-#endif
-#endif
-
 
 int le_index_ptr;
 
