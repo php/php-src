@@ -351,13 +351,12 @@ PHP_FUNCTION(gzopen)
 	}
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
-	p = estrndup(Z_STRVAL_PP(arg2),Z_STRLEN_PP(arg2));
 	
-	stream = php_stream_gzopen(NULL, Z_STRVAL_PP(arg1), p, use_include_path|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, Z_STRVAL_PP(arg1), Z_STRVAL_PP(arg2), use_include_path|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+
 	if (!stream) {
 		RETURN_FALSE;
 	}
-	efree(p);
 	php_stream_to_zval(stream, return_value);
 }	
 /* }}} */
