@@ -1,9 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed a crash bug in token_get_all(). (Andrei)
 - Implemented glob() for Unix/Win32. (Hartmut, Edin, Markus)
 - Added domxml_doc_set_root() to change the root node. (Lukas Schroeder)
-- Fix crash bug in stripslashes() when working in sybase mode (Rasmus)
+- Fixed a crash bug in stripslashes() when working in sybase mode (Rasmus)
 - Added experimental support for Simplified Chinese, Traditional Chinese and
   Korean encoding in mbstring. (Rui)
 - Misc. Win32 mail() enhancements: support 'From:' header (msisolak@yahoo.com),
