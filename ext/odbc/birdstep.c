@@ -236,7 +236,7 @@ PHP_FUNCTION(birdstep_connect)
 	long ind;
 
 	if ( php_birdstep_module.max_links != -1 && php_birdstep_module.num_links == php_birdstep_module.max_links ) {
-		php_error(E_WARNING,"Birdstep: Too many open connections (%d)",php_birdstep_module.num_links);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Too many open connections (%d)",php_birdstep_module.num_links);
 		RETURN_FALSE;
 	}
 	if (ZEND_NUM_ARGS() != 3 || getParameters(ht,3,&serv,&user,&pass) == FAILURE ) {
@@ -250,21 +250,16 @@ PHP_FUNCTION(birdstep_connect)
 	Pass = Z_STRVAL_P(pass);
 	stat = SQLAllocConnect(henv,&hdbc);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Birdstep: Could not allocate connection handle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Could not allocate connection handle");
 		RETURN_FALSE;
 	}
 	stat = SQLConnect(hdbc,Serv,SQL_NTS,User,SQL_NTS,Pass,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: Could not connect to server \"%s\" for %s",Serv,User);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Could not connect to server \"%s\" for %s",Serv,User);
 		SQLFreeConnect(hdbc);
 		RETURN_FALSE;
 	}
 	new = (VConn *)emalloc(sizeof(VConn));
-	if ( new == NULL ) {
-		php_error(E_WARNING,"Birdstep: Out of memory for store connection");
-		SQLFreeConnect(hdbc);
-		RETURN_FALSE;
-	}
 	ind = birdstep_add_conn(list,new,hdbc);
 	php_birdstep_module.num_links++;
 	RETURN_LONG(ind);
@@ -284,7 +279,7 @@ PHP_FUNCTION(birdstep_close)
 	convert_to_long(id);
 	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	SQLDisconnect(conn->hdbc);
@@ -314,26 +309,22 @@ PHP_FUNCTION(birdstep_exec)
 	convert_to_long(ind);
 	conn = birdstep_find_conn(list,Z_LVAL_P(ind));
 	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(ind));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	convert_to_string(exec_str);
 	query = Z_STRVAL_P(exec_str);
 
 	res = (Vresult *)emalloc(sizeof(Vresult));
-	if ( res == NULL ) {
-		php_error(E_WARNING,"Birdstep: Out of memory for result");
-		RETURN_FALSE;
-	}
 	stat = SQLAllocStmt(conn->hdbc,&res->hstmt);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: SQLAllocStmt return %d",stat);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLAllocStmt return %d",stat);
 		efree(res);
 		RETURN_FALSE;
 	}
 	stat = SQLExecDirect(res->hstmt,query,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: Can not execute \"%s\" query",query);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Can not execute \"%s\" query",query);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
@@ -341,7 +332,7 @@ PHP_FUNCTION(birdstep_exec)
 	/* Success query */
 	stat = SQLNumResultCols(res->hstmt,&cols);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Birdstep: SQLNumResultCols return %d",stat);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLNumResultCols return %d",stat);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
@@ -349,7 +340,7 @@ PHP_FUNCTION(birdstep_exec)
 	if ( !cols ) { /* Was INSERT, UPDATE, DELETE, etc. query */
 		stat = SQLRowCount(res->hstmt,&rows);
 		if ( stat != SQL_SUCCESS ) {
-			php_error(E_WARNING,"Birdstep: SQLNumResultCols return %d",stat);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLNumResultCols return %d",stat);
 			SQLFreeStmt(res->hstmt,SQL_DROP);
 			efree(res);
 			RETURN_FALSE;
@@ -359,12 +350,6 @@ PHP_FUNCTION(birdstep_exec)
 		RETURN_LONG(rows);
 	} else {  /* Was SELECT query */
 		res->values = (VResVal *)emalloc(sizeof(VResVal)*cols);
-		if ( res->values == NULL ) {
-			php_error(E_WARNING,"Birdstep: Out of memory for result columns");
-			SQLFreeStmt(res->hstmt,SQL_DROP);
-			efree(res);
-			RETURN_FALSE;
-		}
 		res->numcols = cols;
 		for ( i = 0; i < cols; i++ ) {
 			SQLColAttributes(res->hstmt,i+1,SQL_COLUMN_NAME,
@@ -412,7 +397,7 @@ PHP_FUNCTION(birdstep_fetch)
 	convert_to_long(ind);
 	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d)",Z_LVAL_P(ind));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
@@ -422,7 +407,7 @@ PHP_FUNCTION(birdstep_fetch)
 		RETURN_FALSE;
 	}
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: SQLFetch return error");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLFetch return error");
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		birdstep_del_result(list,Z_LVAL_P(ind));
 		RETURN_FALSE;
@@ -451,7 +436,7 @@ PHP_FUNCTION(birdstep_result)
 	convert_to_long(ind);
 	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
 	if ( Z_TYPE_P(col) == IS_STRING ) {
@@ -468,12 +453,12 @@ PHP_FUNCTION(birdstep_result)
 			}
 		}
 		if ( indx < 0 ) {
-			php_error(E_WARNING, "Field %s not found",field);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,  "Field %s not found",field);
 			RETURN_FALSE;
 		}
 	} else {
 		if ( indx < 0 || indx >= res->numcols ) {
-			php_error(E_WARNING,"Birdstep: Field index not in range");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Field index not in range");
 			RETURN_FALSE;
 		}
 	}
@@ -485,7 +470,7 @@ PHP_FUNCTION(birdstep_result)
 			RETURN_FALSE;
 		}
 		if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-			php_error(E_WARNING,"Birdstep: SQLFetch return error");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLFetch return error");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
 			birdstep_del_result(list,Z_LVAL_P(ind));
 			RETURN_FALSE;
@@ -501,10 +486,6 @@ PHP_FUNCTION(birdstep_result)
 l1:
 			if ( !res->values[indx].value ) {
 				res->values[indx].value = emalloc(4096);
-				if ( !res->values[indx].value ) {
-					php_error(E_WARNING,"Out of memory");
-					RETURN_FALSE;
-				}
 			}
 			stat = SQLGetData(res->hstmt,indx+1,sql_c_type,
 				res->values[indx].value,4095,&res->values[indx].vallen);
@@ -514,7 +495,7 @@ l1:
 				RETURN_FALSE;
 			}
 			if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-				php_error(E_WARNING,"Birdstep: SQLGetData return error");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLGetData return error");
 				SQLFreeStmt(res->hstmt,SQL_DROP);
 				birdstep_del_result(list,Z_LVAL_P(ind));
 				RETURN_FALSE;
@@ -545,7 +526,7 @@ PHP_FUNCTION(birdstep_freeresult)
 	convert_to_long(ind);
 	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d)",Z_LVAL_P(ind));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	SQLFreeStmt(res->hstmt,SQL_DROP);
@@ -568,12 +549,12 @@ PHP_FUNCTION(birdstep_autocommit)
 	convert_to_long(id);
 	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_ON);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: Set autocommit_on option failure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Set autocommit_on option failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -594,12 +575,12 @@ PHP_FUNCTION(birdstep_off_autocommit)
 	convert_to_long(id);
 	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_OFF);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Birdstep: Set autocommit_off option failure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Set autocommit_off option failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -620,12 +601,12 @@ PHP_FUNCTION(birdstep_commit)
 	convert_to_long(id);
 	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLTransact(NULL,conn->hdbc,SQL_COMMIT);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Birdstep: Commit failure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Commit failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -646,12 +627,12 @@ PHP_FUNCTION(birdstep_rollback)
 	convert_to_long(id);
 	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLTransact(NULL,conn->hdbc,SQL_ROLLBACK);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Birdstep: Rollback failure");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Rollback failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -672,13 +653,13 @@ PHP_FUNCTION(birdstep_fieldname)
 	convert_to_long(ind);
 	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
 	convert_to_long(col);
 	indx = Z_LVAL_P(col);
 	if ( indx < 0 || indx >= res->numcols ) {
-		php_error(E_WARNING,"Birdstep: Field index not in range");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Field index not in range");
 		RETURN_FALSE;
 	}
 	RETURN_STRING(res->values[indx].name,TRUE);
@@ -698,7 +679,7 @@ PHP_FUNCTION(birdstep_fieldnum)
 	convert_to_long(ind);
 	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(res->numcols);

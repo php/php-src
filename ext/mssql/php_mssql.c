@@ -102,7 +102,7 @@ ZEND_DECLARE_MODULE_GLOBALS(mssql)
 ZEND_GET_MODULE(mssql)
 #endif
 
-#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING, "%s(): A link to the server could not be established", get_active_function_name(TSRMLS_C)); RETURN_FALSE; } }
+#define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
 
 static PHP_INI_DISP(display_text_size)
 {

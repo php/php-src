@@ -1659,11 +1659,11 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, MH_LEVEL level, char **fields)
 {
 	php_xslt *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
+	TSRMLS_FETCH();
 	
 	if (XSLT_ERROR(handle)) {
 		zval   *argv[4];   /* Arguments to the error function */
 		zval   *retval;    /* Return value from the error function */
-        TSRMLS_FETCH();
         
 		/* Allocate and initialize */
 		MAKE_STD_ZVAL(argv[0]);
