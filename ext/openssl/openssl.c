@@ -158,6 +158,20 @@ static void php_csr_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ openssl safe_mode & open_basedir checks */
+inline static int php_openssl_safe_mode_chk(char *filename TSRMLS_DC)
+{
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		return -1;
+	}
+	if (php_check_open_basedir(filename TSRMLS_CC)) {
+		return -1;
+	}
+	
+	return 0;
+}
+/* }}} */
+
 /* {{{ openssl -> PHP "bridging" */
 /* true global; readonly after module startup */
 static char default_ssl_conf_filename[MAXPATHLEN];
@@ -384,8 +398,8 @@ static int php_openssl_parse_config(
 
 	/* read in the oids */
 	str = CONF_get_string(req->req_config, NULL, "oid_file");
-	if (str)	{
-		BIO * oid_bio = BIO_new_file(str, "r");
+	if (str && !php_openssl_safe_mode_chk(str TSRMLS_CC)) {
+		BIO *oid_bio = BIO_new_file(str, "r");
 		if (oid_bio)	{
 			OBJ_create_objects(oid_bio);
 			BIO_free(oid_bio);
@@ -654,6 +668,10 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 		/* read cert from the named file */
 		BIO *in;
 
+		if (php_openssl_safe_mode_chk(Z_STRVAL_PP(val) + 7 TSRMLS_CC)) {
+			return NULL;
+		}
+
 		in = BIO_new_file(Z_STRVAL_PP(val) + 7, "r");
 		if (in == NULL)
 			return NULL;
@@ -702,6 +720,10 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	cert = php_openssl_x509_from_zval(&zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL)	{
 		zend_error(E_WARNING, "cannot get cert from parameter 1");
+		return;
+	}
+
+	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
 		return;
 	}
 
@@ -897,6 +919,10 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 
 	if(!(stack = sk_X509_new_null())) {
 		zend_error(E_ERROR, "%s(): memory allocation failure", get_active_function_name(TSRMLS_C));
+		goto end;
+	}
+
+	if (php_openssl_safe_mode_chk(certfile TSRMLS_CC)) {
 		goto end;
 	}
 
@@ -1286,8 +1312,12 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 	if (Z_STRLEN_PP(val) > 7 && memcmp(Z_STRVAL_PP(val), "file://", 7) == 0)
 		filename = Z_STRVAL_PP(val) + 7;
 
-	if (filename)
+	if (filename) {
+		if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+			return NULL;
+		}
 		in = BIO_new_file(filename, "r");
+	}	
 	else
 		in = BIO_new_mem_buf(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 	
@@ -1317,6 +1347,10 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	csr = php_openssl_csr_from_zval(&zcsr, 0, &csr_resource TSRMLS_CC);
 	if (csr == NULL)	{
 		zend_error(E_WARNING, "cannot get CSR from parameter 1");
+		return;
+	}
+
+	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
 		return;
 	}
 
@@ -1669,7 +1703,11 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		else	{
 			/* we want the private key */
 			if (filename)	{
-				BIO *in = BIO_new_file(filename, "r");
+				BIO *in;
+				if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+					return NULL;
+				}
+				in = BIO_new_file(filename, "r");
 				if (in == NULL)
 					return NULL;
 				key = PEM_read_bio_PrivateKey(in, NULL,NULL, passphrase);
@@ -1790,6 +1828,10 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 
 	if (key == NULL)	{
 		zend_error(E_WARNING, "cannot get key from parameter 1");
+		RETURN_FALSE;
+	}
+	
+	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	
@@ -1972,6 +2014,10 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	if (!store)
 		goto clean_exit;
 
+	if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+		goto clean_exit;
+	}
+
 	in = BIO_new_file(filename, (flags & PKCS7_BINARY) ? "rb" : "r");
 	if (in == NULL)
 		goto clean_exit;
@@ -1990,8 +2036,14 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 		RETVAL_TRUE;
 
-		if (signersfilename)	{
-			BIO * certout = BIO_new_file(signersfilename, "w");
+		if (signersfilename) {
+			BIO *certout;
+		
+			if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
+				goto clean_exit;
+			}
+		
+			certout = BIO_new_file(signersfilename, "w");
 			if (certout)	{
 				int i;
 				signers = PKCS7_get0_signers(p7, NULL, flags);
@@ -2045,6 +2097,10 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssza!|l", &infilename, &infilename_len,
 				&outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags) == FAILURE)
 		return;
+
+	if (php_openssl_safe_mode_chk(infilename TSRMLS_CC) || php_openssl_safe_mode_chk(outfilename TSRMLS_CC)) {
+		return;
+	}
 
 	infile = BIO_new_file(infilename, "r");
 	if (infile == NULL)
@@ -2190,6 +2246,10 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		goto clean_exit;
 	}
 
+	if (php_openssl_safe_mode_chk(infilename TSRMLS_CC) || php_openssl_safe_mode_chk(outfilename TSRMLS_CC)) {
+		goto clean_exit;
+	}
+
 	infile = BIO_new_file(infilename, "r");
 	if (infile == NULL)	{
 		zend_error(E_WARNING, "%s(): error opening input file %s!", get_active_function_name(TSRMLS_C), infilename);
@@ -2273,6 +2333,10 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 	key = php_openssl_evp_from_zval(recipkey ? &recipkey : &recipcert, 0, "", 0, &keyresval TSRMLS_CC);
 	if (key == NULL)	{
 		zend_error(E_WARNING, "%s(): unable to get private key", get_active_function_name(TSRMLS_C));
+		goto clean_exit;
+	}
+	
+	if (php_openssl_safe_mode_chk(infilename TSRMLS_CC) || php_openssl_safe_mode_chk(outfilename TSRMLS_CC)) {
 		goto clean_exit;
 	}
 
