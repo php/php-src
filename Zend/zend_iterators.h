@@ -46,6 +46,9 @@ typedef struct _zend_object_iterator_funcs {
 
 	/* rewind to start of data (optional, may be NULL) */
 	void (*rewind)(zend_object_iterator *iter TSRMLS_DC);
+	
+	/* invalidate current value/key (optional, may be NULL) */
+	void (*invalidate_current)(zend_object_iterator *iter TSRMLS_DC);
 } zend_object_iterator_funcs;
 
 struct _zend_object_iterator {
