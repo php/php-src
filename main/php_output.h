@@ -21,8 +21,6 @@
 #ifndef PHP_OUTPUT_H
 #define PHP_OUTPUT_H
 
-#include "php.h"
-
 typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC);
 
 PHPAPI void php_output_startup(void);
