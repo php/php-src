@@ -1,3 +1,81 @@
+2004-11-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Fixed bug #30826 (Certain reference relations cannot be unserialized
+      properly).
+
+2004-11-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/xml/compat.c:
+      MFH: Fixed bug #30061 (xml_set_start_namespace_decl_handler not called)
+      hopefully resolve a bunch of entity issues
+
+    * ext/xml/compat.c:
+      Fixed bug #30061 (xml_set_start_namespace_decl_handler not called)
+      hopefully resolve a bunch of entity issues
+
+    * ext/dom/attr.c
+      ext/dom/characterdata.c
+      ext/dom/document.c
+      ext/dom/documenttype.c
+      ext/dom/domerror.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domlocator.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entity.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/notation.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/typeinfo.c
+      ext/dom/userdatahandler.c
+      ext/dom/xpath.c:
+      prototype fixes (Jakub Vrána)
+
+    * (PHP_5_0)
+      NEWS:
+      BFN and re-order news
+
+    * (PHP_5_0)
+      ext/xml/compat.c:
+      MFH: Fixed bug #30832 ("!" stripped off comments in xml parser)
+      reset sax->initialized flag when not using SAX2
+
+    * ext/xml/compat.c:
+      Fixed bug #30832 ("!" stripped off comments in xml parser)
+      reset sax->initialized flag when not using SAX2
+
+    * (PHP_5_0)
+      ext/xml/compat.c:
+      MFH: fix SAX2 handling to work with libxml 2.6.16
+
+    * ext/xml/compat.c:
+      fix SAX2 handling to work with libxml 2.6.16
+
+    * ext/curl/interface.c:
+      fix typo so it compiles
+
+2004-11-18  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      run-tests2.php:
+      MFH: run-test2 should be able to emulate POST & GET in the same time
+
+    * run-tests2.php:
+      run-test2 should be able to emulate POST & GET in the same time
+
 2004-11-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
