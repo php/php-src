@@ -89,6 +89,10 @@ typedef struct {
 	long allow_persistent;
 	int le_blob, le_link, le_plink, le_result, le_query;
 	char *default_user, *default_password;
+	char *timestampformat;
+	char *cfg_timestampformat;
+	char *dateformat;
+	char *cfg_dateformat;
 	char *timeformat;
 	char *cfg_timeformat;
 	char *errmsg;
@@ -143,11 +147,14 @@ typedef struct _php_ibase_varchar {
 enum php_interbase_option {
 	PHP_IBASE_DEFAULT = 0,
 	PHP_IBASE_TEXT = 1,
-	PHP_IBASE_TIMESTAMP = 2,
+	PHP_IBASE_UNIXTIME = 2,
 	PHP_IBASE_READ = 4,
 	PHP_IBASE_COMMITTED = 8,
 	PHP_IBASE_CONSISTENCY = 16,
-	PHP_IBASE_NOWAIT = 32
+	PHP_IBASE_NOWAIT = 32,
+	PHP_IBASE_TIMESTAMP = 64,
+	PHP_IBASE_DATE = 128,
+	PHP_IBASE_TIME = 256
 };
 
 #ifdef ZTS
