@@ -119,6 +119,7 @@ typedef struct {
 	HashTable *defines;
 	int ncolumns;
 	int executed;
+	int has_data;
 	ub2 stmttype;
 } oci_statement;
 
