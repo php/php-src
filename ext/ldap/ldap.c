@@ -660,6 +660,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			for(i=0; i<num_attribs; i++) {
 				if(zend_hash_index_find((*attrs)->value.ht, i, (void **) &attr) == FAILURE) {
 					php_error(E_WARNING, "LDAP: Array initialization wrong");
+					efree(ldap_attrs);
 					RETURN_FALSE;
 				}
 
@@ -778,7 +779,12 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	}
 
 	ldap = _get_ldap_link(link);
-	if (ldap == NULL) RETURN_FALSE;
+	if (ldap == NULL) {
+		if (ldap_attrs != NULL) {
+			efree(ldap_attrs);
+		}
+		RETURN_FALSE;
+	}
 
 	php_set_opts(ldap, ldap_sizelimit, ldap_timelimit, ldap_deref);
 
@@ -1387,6 +1393,12 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			ldap_mods[i]->mod_type = estrdup(attribute);
 		} else {
 			php_error(E_ERROR, "LDAP: Unknown Attribute in the data");
+			/* Free allocated memory */
+			while (i >= 0) {
+				efree(ldap_mods[i--]);
+			}
+			efree(num_berval);
+			efree(ldap_mods);	
 			RETURN_FALSE;
 		}
 
@@ -1770,9 +1782,6 @@ PHP_FUNCTION(ldap_set_option) {
                                 RETURN_FALSE;
                         }
 			ctrls = emalloc((1 + ncontrols) * sizeof(*ctrls));
-			if (ctrls == NULL) {
-				RETURN_FALSE;
-			}
 			*ctrls = NULL;
 			ctrlp = ctrls;
 			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(newval));
@@ -1781,7 +1790,6 @@ PHP_FUNCTION(ldap_set_option) {
 					php_error(E_WARNING, "The array value must contain only arrays, where each array is a control");
 					error = 1;
 					break;
-					RETURN_FALSE;
 				}
 				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "oid", sizeof("oid"), (void **) &val) == FAILURE) {
 					php_error(E_WARNING, "Control must have an oid key");
@@ -1789,10 +1797,6 @@ PHP_FUNCTION(ldap_set_option) {
 					break;
 				}
 				ctrl = *ctrlp = emalloc(sizeof(**ctrlp));
-				if (ctrl == NULL) {
-					error = 1;
-					break;
-				}
 				convert_to_string_ex(val);
 				ctrl->ldctl_oid = Z_STRVAL_PP(val);
 				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "value", sizeof("value"), (void **) &val) == SUCCESS) {
