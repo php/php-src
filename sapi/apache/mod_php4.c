@@ -295,7 +295,7 @@ static int php_apache_sapi_activate(SLS_D)
 	 * memory.  
 	 */
 	block_alarms();
-	register_cleanup(((request_rec *) (server_context))->pool, NULL, php_request_shutdown, php_request_shutdown_for_exec);
+	register_cleanup(((request_rec *) SG(server_context))->pool, NULL, php_request_shutdown, php_request_shutdown_for_exec);
 	unblock_alarms();
 }
 
