@@ -10,10 +10,15 @@
 
 static int op_func(int c, void *dat)
 {
-	unsigned char C = (unsigned char)c;
 	struct rfc2045 * p = (struct rfc2045*)dat;
-	
-	(*p->udecode_func)(&C, 1, p->misc_decode_ptr);
+
+	rfc2045_add_workbufch(p, c);
+
+	/* drain buffer */
+	if (p->workbuflen >= 4096)	{
+		(*p->udecode_func)(p->workbuf, p->workbuflen, p->misc_decode_ptr);
+		p->workbuflen = 0;
+	}
 	
 	return c;
 }
@@ -57,6 +62,8 @@ int rfc2045_cdecode_end(struct rfc2045 *p)
 		mbfl_convert_filter_flush(p->decode_filter);
 		mbfl_convert_filter_delete(p->decode_filter);
 		p->decode_filter = NULL;
+		if (p->workbuflen > 0)
+			(*p->udecode_func)(p->workbuf, p->workbuflen, p->misc_decode_ptr);
 	}
 	return 0;
 }

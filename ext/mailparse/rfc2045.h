@@ -195,6 +195,12 @@ char *rfc2045_content_base(struct rfc2045 *p);
 char *rfc2045_append_url(const char *, const char *);
 	/* Do this with two arbitrary URLs */
 
+
+
+void rfc2045_add_workbuf(struct rfc2045 *h, const char *p, size_t len);
+void rfc2045_add_workbufch(struct rfc2045 *h, int c);
+
+
 #ifdef  __cplusplus
 }
 #endif
