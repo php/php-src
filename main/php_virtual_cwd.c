@@ -182,7 +182,7 @@ CWD_API void virtual_cwd_startup(void)
 #endif
 }
 
-CWD_API void virtual_cwd_activate(char *filename)
+CWD_API void virtual_cwd_activate(const char *filename)
 {
 #if VIRTUAL_CWD_DEBUG
 	fprintf(stderr, "Changing dir to %s\n", filename);
@@ -402,14 +402,14 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	return (ret);
 }
 
-CWD_API int virtual_chdir(char *path)
+CWD_API int virtual_chdir(const char *path)
 {
 	CWDLS_FETCH();
 
 	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok)?-1:0;
 }
 
-CWD_API int virtual_chdir_file(char *path)
+CWD_API int virtual_chdir_file(const char *path)
 {
 	int length = strlen(path);
 	char *temp;
@@ -439,7 +439,7 @@ CWD_API int virtual_chdir_file(char *path)
 	return retval;
 }
 
-CWD_API char *virtual_realpath(char *path, char *real_path)
+CWD_API char *virtual_realpath(const char *path, char *real_path)
 {
 	cwd_state new_state;
 	int retval;
@@ -458,7 +458,7 @@ CWD_API char *virtual_realpath(char *path, char *real_path)
 	return NULL;
 }
 
-CWD_API int virtual_filepath(char *path, char **filepath)
+CWD_API int virtual_filepath(const char *path, char **filepath)
 {
 	cwd_state new_state;
 	int retval;
