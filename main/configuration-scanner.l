@@ -64,6 +64,17 @@ void init_cfg_scanner()
 	return T_ZEND_EXTENSION_TS;
 }
 
+
+<INITIAL>"zend_extension_debug" {
+	return T_ZEND_EXTENSION_DEBUG;
+}
+
+
+<INITIAL>"zend_extension_debug_ts" {
+	return T_ZEND_EXTENSION_DEBUG_TS;
+}
+
+
 <INITIAL>[ ]*("true"|"on"|"yes")[ ]* {
 	cfglval->value.str.val = php3_strndup("1",1);
 	cfglval->value.str.len = 1;

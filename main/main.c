@@ -597,8 +597,10 @@ static void php_message_handler_for_zend(long message, void *data)
 
 
 
-int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
+int php_request_startup(CLS_D ELS_DC PLS_DC)
 {
+	PG(unclean_shutdown) = 0;
+
 	zend_output_startup();
 
 	php3_set_timeout(PG(max_execution_time));
@@ -629,7 +631,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	
 	init_compiler(CLS_C ELS_CC);
 	init_executor(CLS_C ELS_CC);
-
 	startup_scanner(CLS_C);
 
 
@@ -659,6 +660,7 @@ void php_request_shutdown(void *dummy)
 #endif
 	CLS_FETCH();
 	ELS_FETCH();
+	PLS_FETCH();
 
 	php3_header();
 	zend_end_ob_buffering(1);
@@ -673,7 +675,7 @@ void php_request_shutdown(void *dummy)
 	shutdown_executor(ELS_C);
 
 	php3_destroy_request_info(NULL);
-	shutdown_memory_manager(0, 0);
+	shutdown_memory_manager(PG(unclean_shutdown), 0);
 	php3_unset_timeout();
 
 
@@ -1130,6 +1132,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	}
 
 	if (setjmp(EG(bailout))!=0) {
+		PG(unclean_shutdown) = 1;
 		return;
 	}
 	_php3_hash_environment(PLS_C);
@@ -1156,6 +1159,8 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (EG(main_op_array)) {
 		EG(active_op_array) = EG(main_op_array);
 		zend_execute(EG(main_op_array) ELS_CC);
+	} else {
+		PG(unclean_shutdown) = 1;
 	}
 }
 
