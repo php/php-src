@@ -88,8 +88,10 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(holder).value.lval = strtol((op)->value.str.val, NULL, 10); \
 				break; \
 			case IS_ARRAY: \
-			case IS_OBJECT: \
 				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0); \
+				break; \
+			case IS_OBJECT: \
+				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0); \
 				break; \
 			default: \
 				zend_error(E_WARNING, "Cannot convert to ordinal value"); \
@@ -120,8 +122,10 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				} \
 				break; \
 			case IS_ARRAY: \
-			case IS_OBJECT: \
 				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0); \
+				break; \
+			case IS_OBJECT: \
+				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0); \
 				break; \
 			default: \
 				(holder).value.lval = 0; \
@@ -243,12 +247,17 @@ ZEND_API void convert_to_double(zval *op)
 			STR_FREE(strval);
 			break;
 		case IS_ARRAY:
-		case IS_OBJECT:
 			tmp = (zend_hash_num_elements(op->value.ht)?1:0);
 			zval_dtor(op);
 			op->value.dval = tmp;
 			op->type = IS_DOUBLE;
 			break;
+		case IS_OBJECT:
+			tmp = (zend_hash_num_elements(op->value.obj.properties)?1:0);
+			zval_dtor(op);
+			op->value.dval = tmp;
+			op->type = IS_DOUBLE;
+			break;			
 		default:
 			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", op->type);
 			zval_dtor(op);
@@ -286,8 +295,12 @@ ZEND_API void convert_to_boolean(zval *op)
 			STR_FREE(strval);
 			break;
 		case IS_ARRAY:
-		case IS_OBJECT:
 			tmp = (zend_hash_num_elements(op->value.ht)?1:0);
+			zval_dtor(op);
+			op->value.lval = tmp;
+			break;
+		case IS_OBJECT:
+			tmp = (zend_hash_num_elements(op->value.obj.properties)?1:0);
 			zval_dtor(op);
 			op->value.lval = tmp;
 			break;
@@ -879,8 +892,8 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 	}
 	
 	if (op1->type == IS_BOOL || op2->type == IS_BOOL) {
-		convert_to_boolean(op1);
-		convert_to_boolean(op2);
+		zendi_convert_to_boolean(op1, op1_copy);
+		zendi_convert_to_boolean(op2, op2_copy);
 		result->type = IS_LONG;
 		result->value.lval = (op1->value.lval!=op2->value.lval);
 		return SUCCESS;
