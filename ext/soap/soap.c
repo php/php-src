@@ -3172,6 +3172,10 @@ static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int inde
 	} else {
 		ht = function->responseParameters;
 	}
+	
+	if (ht == NULL) {
+	  return NULL;
+	}
 
 	if (param_name != NULL) {
 		if (zend_hash_find(ht, param_name, strlen(param_name), (void **)&tmp) != FAILURE) {
