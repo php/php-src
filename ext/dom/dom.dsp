@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\Zend" /I "..\..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_DOM" /D ZTS=1 /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DOM_EXPORTS" /D "COMPILE_DL_DOM" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DOM=1 /D HAVE_DOMXSLT=1 /D LIBXML_STATIC=1 /D LIBXSLT_STATIC=1 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DOM_EXPORTS" /D "COMPILE_DL_DOM" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DOM=1 /D LIBXML_THREAD_ENABLED=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386
-# ADD LINK32 wsock32.lib php4ts.lib libxml2_a.lib libxslt_a.lib iconv.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_dom.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\bindlib_w32\Release" /libpath:"..\..\..\php_build\lib\libxslt"
+# ADD LINK32 wsock32.lib php4ts.lib libxml2.lib iconv.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /machine:I386 /out:"..\..\Release_TS/php_dom.dll" /implib:"..\..\Release_TS/php_dom.lib" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\bindlib_w32\Release"
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "dom - Win32 Debug_TS"
@@ -72,7 +72,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "mssql-70" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_DOM" /D ZTS=1 /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DOM_EXPORTS" /D "COMPILE_DL_DOM" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DOM=1 /D LIBXML_STATIC=1 /FR /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DOM_EXPORTS" /D "COMPILE_DL_DOM" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_DOM=1 /D LIBXML_THREAD_ENABLED=1 /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -82,7 +82,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386
-# ADD LINK32 php4ts_debug.lib ws2_32.lib libxml2_a.lib iconv.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"msvcrt" /out:"..\..\Debug_TS/php_dom.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\bindlib_w32\Release" /libpath:"..\..\..\php_build\lib\libxslt"
+# ADD LINK32 php4ts_debug.lib ws2_32.lib libxml2.lib iconv.lib resolv.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"msvcrt" /out:"..\..\Debug_TS\php_dom.dll" /implib:"..\..\Debug_TS/php_dom.lib" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\bindlib_w32\Release"
 
 !ENDIF 
 
