@@ -348,6 +348,76 @@ class PEAR
     }
 
     // }}}
+   // {{{ _checkDelExpect()
+
+    /**
+     * This method checks unsets an error code if available
+     * 
+     * @param mixed error code
+     * @return bool true if the error code was unset, false otherwise
+     * @access private
+     * @since PHP 4.3.0
+     */
+    function _checkDelExpect($error_code)
+    {   
+        $deleted = false;
+        
+        foreach ($this->_expected_errors AS $key => $error_array) {
+            if (in_array($error_code, $error_array)) {
+                unset($this->_expected_errors[$key][array_search($error_code, $error_array)]);
+                $deleted = true;
+            }
+            
+            // clean up empty arrays
+            if (0 == count($this->_expected_errors[$key])) {
+                unset($this->_expected_errors[$key]);
+            }
+        }
+        return $deleted;
+    }
+
+    // }}}
+    // {{{ delExpect()
+
+    /**
+     * This method deletes all occurences of the specified element from 
+     * the expected error codes stack.
+     *
+     * @param  mixed $error_code error code that should be deleted
+     * @return mixed list of error codes that were deleted or error
+     * @access public
+     * @since PHP 4.3.0
+     */
+    function delExpect($error_code)
+    {
+        $deleted = false;
+        
+        if ((is_array($error_code) && (0 != count($error_code)))) {
+            // $error_code is a non-empty array here;
+            // we walk through it trying to unset all
+            // values
+            foreach($error_code AS $key => $error) {
+                if ($this->_checkDelExpect($error)) {
+                    $deleted =  true;    
+                } else {
+                    $deleted = false;
+                }   
+            }
+            return $deleted?true:PEAR::raiseError("The expected error you submitted does not exist"); // IMPROVE ME
+        } elseif (!empty($error_code)) {
+            // $error_code comes alone, trying to unset it
+            if ($this->_checkDelExpect($error_code)) {
+                return true;    
+            } else {
+                return PEAR::raiseError("The expected error you submitted does not exist"); // IMPROVE ME
+            }
+        } else {
+            // $error_code is empty
+            return PEAR::raiseError("The expected error you submitted is empty"); // IMPROVE ME
+        }
+    }
+
+    // }}}
     // {{{ raiseError()
 
     /**
