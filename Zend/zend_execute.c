@@ -33,6 +33,7 @@
 #include "zend_extensions.h"
 #include "zend_fast_cache.h"
 #include "zend_ini.h"
+#include "zend_default_classes.h"
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free TSRMLS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts TSRMLS_CC)
@@ -2498,7 +2499,12 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	zval *current_this;
 	int return_value_used = RETURN_VALUE_USED(EX(opline));
 	zend_bool should_change_scope;
-	
+
+	if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		zend_throw_exception_ex(zend_exception_get_abstract(), 0 TSRMLS_CC, "Abstract method %s::%s called", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
+		goto fcall_exception;
+	}
+
 	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) EX(opline)->extended_value, NULL);
 
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
@@ -2629,6 +2635,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	EG(function_state_ptr) = &EX(function_state);
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 
+fcall_exception:
 	if (EG(exception)) {
 		if (return_value_used && EX_T(EX(opline)->result.u.var).var.ptr) {
 			zval_ptr_dtor(&EX_T(EX(opline)->result.u.var).var.ptr);
