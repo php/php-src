@@ -48,81 +48,27 @@ Exceptions:
     doing so, should return that new length, so it doesn't have to be
     recalculated with strlen() (e.g. php_addslashes())
 
-[5] Use php_error_docref() group of functions to report any errors/warnings 
-    during code execution. Use descriptive error messages, and try to avoid 
-    using identical error strings for different stages of an error. For 
-    example, if in order to obtain a URL you have to parse the URL, connect,
-    and retreive the text, assuming something can go wrong at each of these 
-    stages, don't report an error "Unable to get URL" on all of them, but 
-    instead, write something like "Unable to parse URL", "Unable to connect 
-    to URL server" and "Unable to fetch URL text", respectively.
-
-    It has been silently agreed to prefix every php_error() message with the
-    name of the current function if applicable:
-
-    php_error(E_WHATEVER, "%s(): Desc.", get_active_function_name(TSRMLS_C));
-
-    This can be done automatically using php_error_docref(). The first
-    parameter, docref, is either NULL or the URL of a page describing the 
-    error in detail. In most cases you will pass NULL, to generate the URL
-    from the name of the function being executed:
-
-    php_error_docref(NULL TSRMLS_CC, E_WHATEVER, "Desc.");
-
-    If you pass a URL, it can either be a full URL beginning with "http://":
-
-    php_error_docref("http://externalsite.tld/page.ext#error" 
-                     TSRMLS_CC, E_WHATEVER, "Desc.");
-
-    Or the name of a manual page without file extension, but with an optional 
-    target anchor. Or simply the anchor within the manual page of the current
-    function. When using function names you must replace '_' by '-':
-
-    php_error_docref("function.ext-func#error" TSRMLS_CC, E_WHATEVER, "Desc.");
-
-    To display one or two important parameters after the function name, use 
-    php_error_docref1() or php_error_docref2(). For example, file functions 
-    should display the name of the file opened:
-
-    php_error_docref1("function.fopen" TSRMLS_CC, filename, 
-                      E_WHATEVER, "Desc.");
-
-    php_error_docref2("function.fopen" TSRMLS_CC, filename, openmode, 
-                      E_WHATEVER, "Desc.");
-
-    Fixing ("unifying") existing php_error() message is a good thing [tm].
-
-[6] NEVER USE strncat().  If you're absolutely sure you know what you're doing,
+[5] NEVER USE strncat().  If you're absolutely sure you know what you're doing,
     check its man page again, and only then, consider using it, and even then,
     try avoiding it.
 
-[7] Use PHP_* macros in the PHP source, and ZEND_* macros in the Zend
+[6] Use PHP_* macros in the PHP source, and ZEND_* macros in the Zend
     part of the source. Although the PHP_* macro's are mostly aliased to the
     ZEND_* macros it gives a better understanding on what kind of macro you're
     calling.
 
-[8] Use assert(). assert.h is included in php.h if it is available.  Not only
-    does good assertion catch bugs, but it also helps with code readability.
-     - Do not use assert for error handling. Use assert only for the 
-       condition that must be always true.
-     - Do not use assignments in assert conditions.  If you assign inside an 
-       assert condition, you risk an elusive bug that would be very difficult 
-       to spot in a debug build, due to the side effect of the assignment.  
-       Function calls in assert conditions may also cause this problem, if 
-       they modify one of their arguments or global variables.
-
-[9] When commenting out code using a #if statement, do NOT use 0 only. Instead
+[7] When commenting out code using a #if statement, do NOT use 0 only. Instead
     use "<cvs username here>_0". For example, #if FOO_0, where FOO is your
     cvs user foo.  This allows easier tracking of why code was commented out, 
     especially in bundled libraries.  
 
-[10] Do not define functions that are not available.  For instance, if a
+[8] Do not define functions that are not available.  For instance, if a
      library is missing a function, do not define the PHP version of the
      function, and do not raise a run-time error about the function not
      existing.  End users should use function_exists() to test for the
      existence of a function
 
-[11] Prefer emalloc(), efree(), estrdup(), etc. to their standard C library
+[9] Prefer emalloc(), efree(), estrdup(), etc. to their standard C library
      counterparts.  These functions implement an internal "safety-net"
      mechanism that ensures the deallocation of any unfreed memory at the
      end of a request.  They also provide useful allocation and overflow
