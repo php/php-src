@@ -220,8 +220,6 @@ struct _zend_alloc_globals {
 #endif
 };
 
-typedef int yy_state_type;
-
 struct _zend_scanner_globals {
 	FILE *yy_in;
 	FILE *yy_out;
@@ -234,7 +232,9 @@ struct _zend_scanner_globals {
 	char _yy_hold_char;
 	int yy_n_chars;
 	int _yy_did_buffer_switch_on_eof;
-	yy_state_type _yy_last_accepting_state;
+	int _yy_last_accepting_state; /* Must be of the same type as yy_state_type,
+								   * if for whatever reason it's no longer int!
+								   */
 	char *_yy_last_accepting_cpos;
 	int _yy_more_flag;
 	int _yy_more_len;
