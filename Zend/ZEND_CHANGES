@@ -160,8 +160,7 @@ Changes in the Zend Engine 2.0
       defaulting to the current global one. The current namespace may
       be changed on a file-by-file basis. Symbols in other namespaces
       than the current one may be referenced using a new namespace
-      operator. It is possible to "import" symbols from one namespace
-      into another.
+      operator.
 
       Namespaces and classes are the same with the Zend Engine 2.0, 
       except that you can't instantiate a namespace with "new". This 
@@ -256,36 +255,53 @@ Changes in the Zend Engine 2.0
           This prints "foobar" two times, since a bar() method exists 
           in the current namespace.
 
-      Old code that does not take advantage of namespaces will run
-      without modifications.
+        * It is possible to "import" symbols from one namespace into
+          another.
 
-    * import statement.
+          Example:
 
-      With the new import statement it is possible to import classes
-      and methods from other classes (namespaces) to the current scope.
+            <?php
+            class MyClass {
+              function hello() {
+                print "Hello, World\n";
+              }
 
-      Example:
-
-        <?php
-        class MyClass {
-          function hello() {
-            print "Hello, World\n";
-          }
-
-          class MyClass2 {
-            function hello() {
-              print "Hello, World in MyClass2\n";
+              class MyClass2 {
+                function hello() {
+                  print "Hello, World in MyClass2\n";
+                }
+              }
             }
-          }
-        }
 
-        import function hello, class MyClass2 from MyClass;
+            import function hello, class MyClass2 from MyClass;
 
-        MyClass2::hello();
-        hello();
-        ?>
+            MyClass2::hello();
+            hello();
+            ?>
 
-      Old code that has no user-defined function 'import' will run
+          Example:
+
+            <?php
+            class MyOuterClass {
+              class MyInnerClass {
+                function func1() {
+                  print "func1()\n";
+                }
+
+                function func2() {
+                  print "func2()\n";
+                }
+              }
+            }
+
+            import class * from MyOuterClass;
+            import function func2 from MyOuterClass::MyInnerClass;
+
+            MyInnerClass::func1();
+            func2();
+            ?>
+
+      Old code that does not take advantage of namespaces will run
       without modifications.
 
     * Unified Constructors.
