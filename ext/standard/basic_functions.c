@@ -1869,7 +1869,7 @@ pval test_class_get_property(zend_property_reference *property_reference)
 		}
 		switch (overloaded_property->element.type) {
 			case IS_LONG:
-				printf("%d (numeric)\n", overloaded_property->element.value.lval);
+				printf("%ld (numeric)\n", overloaded_property->element.value.lval);
 				break;
 			case IS_STRING:
 				printf("'%s'\n", overloaded_property->element.value.str.val);
@@ -1907,7 +1907,7 @@ int test_class_set_property(zend_property_reference *property_reference, pval *v
 		}
 		switch (overloaded_property->element.type) {
 			case IS_LONG:
-				printf("%d (numeric)\n", overloaded_property->element.value.lval);
+				printf("%ld (numeric)\n", overloaded_property->element.value.lval);
 				break;
 			case IS_STRING:
 				printf("'%s'\n", overloaded_property->element.value.str.val);
@@ -1943,7 +1943,7 @@ void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_refere
 		}
 		switch (overloaded_property->element.type) {
 			case IS_LONG:
-				printf("%d (numeric)\n", overloaded_property->element.value.lval);
+				printf("%ld (numeric)\n", overloaded_property->element.value.lval);
 				break;
 			case IS_STRING:
 				printf("'%s'\n", overloaded_property->element.value.str.val);
