@@ -1,3 +1,23 @@
+2000-04-14  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/info.c: Small corrections.
+
+2000-04-14  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c: Add the documentation team to the credits page
+
+2000-04-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main.c
+      php_globals.h: Make error_prepend_string and error_append_string work
+
+    * php_version.h: Undo bogus commit
+
+    * ext/sysvsem/sysvsem.c
+      php_version.h:
+    I don't see why this should be gcc dependant and this fixes bugs 4140
+    and 4143
+
 2000-04-13  Andrei Zmievski  <andrei@ispi.net>
 
     * TODO: fseek() idea.
