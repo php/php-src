@@ -1,3 +1,605 @@
+2001-12-11  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in: fixed bug #14414
+
+2001-12-11  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/reg.c:
+    ereg functions will now take in account the real number of
+    subexpressions instead of simply assuming a fixed count of 10
+
+2001-12-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/winutil.c
+      win32/winutil.h
+      win32/imap_sendmail.c
+      sapi/webjames/webjames.c
+      scripts/conv_z_macros
+      sapi/webjames/php_webjames.h
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.java
+      sapi/thttpd/php_thttpd.h
+      sapi/servlet/formatter.java
+      sapi/roxen/roxen.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/phttpd/phttpd.c
+      sapi/phttpd/php_phttpd.h
+      sapi/nsapi/nsapi.c
+      sapi/isapi/php4isapi.c
+      sapi/fhttpd/fhttpd.c
+      sapi/fastcgi/fastcgi.c
+      sapi/fastcgi/php_fastcgi.h
+      sapi/cgi/cgi_main.c
+      sapi/caudium/caudium.c
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      sapi/apache2filter/apache_config.c
+      sapi/apache/mod_php4.h
+      sapi/apache/mod_php4.c
+      pear/scripts/pearwin.php
+      sapi/aolserver/aolserver.c
+      pear/scripts/pear.in
+      pear/XML/Render.php
+      pear/scripts/pear.bat
+      pear/XML/Parser.php
+      pear/Schedule/At.php
+      pear/Payment/Verisign.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/Uploader.php
+      pear/PEAR/WebInstaller.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Common.php
+      pear/Numbers/Roman.php
+      pear/Net/Socket.php
+      pear/Net/SMTP.php
+      pear/Net/Dig.php
+      pear/Math/Util.php
+      pear/Net/Curl.php
+      pear/Math/Fraction.php
+      pear/Mail/mimePart.php
+      pear/Mail/sendmail.php
+      pear/Mail/smtp.php
+      pear/Mail/mail.php
+      pear/Mail/mime.php
+      pear/Mail/mimeDecode.php
+      pear/Mail/RFC822.php
+      pear/HTTP/Compress.php
+      pear/Image/Remote.php
+      pear/HTML/Page.php
+      pear/HTML/Processor.php
+      pear/HTML/Select.php
+      pear/HTML/Table.php
+      pear/HTML/Menu.php
+      pear/HTML/Menu_Browser.php
+      pear/HTML/ITX.php
+      pear/HTML/IT_Error.php
+      pear/HTML/Form.php
+      pear/HTML/IT.php
+      pear/HTML/Common.php
+      pear/File/Passwd.php
+      pear/File/SearchReplace.php
+      pear/Experimental/Image/gtext.php
+      pear/File/Find.php
+      pear/Experimental/Image/gbutton.php
+      pear/DB/sybase.php
+      pear/Date/Human.php
+      pear/Experimental/Image/color_helper.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB/mysql.php
+      pear/DB/fbsql.php
+      pear/DB/ibase.php
+      pear/DB/ifx.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/Crypt/HCEMD5.php
+      pear/DB/common.php
+      pear/Cache/Container/phplib.php
+      pear/Cache/Container/shm.php
+      pear/Console/Getopt.php
+      pear/Crypt/CBC.php
+      pear/Cache/Container/db.php
+      pear/Cache/Container/dbx.php
+      pear/Cache/Container/file.php
+      pear/Cache/DB.php
+      pear/Cache/Error.php
+      pear/Cache/Function.php
+      pear/Cache/Graphics.php
+      pear/Cache/Output.php
+      pear/Cache/OutputCompression.php
+      pear/Benchmark/Iterate.php
+      pear/Benchmark/Timer.php
+      pear/Cache/Container.php
+      pear/HTTP.php
+      pear/Mail.php
+      pear/PEAR.php
+      pear/System.php
+      pear/package.dtd
+      pear/DB.php
+      pear/CMD.php
+      pear/Cache.php
+      main/php_sprintf.c
+      main/php_streams.h
+      main/php_ticks.c
+      main/php_ticks.h
+      main/php_variables.c
+      main/php_variables.h
+      main/reentrancy.c
+      main/rfc1867.c
+      main/safe_mode.c
+      main/snprintf.h
+      main/streams.c
+      main/php_ini.c
+      main/php_ini.h
+      main/php_logos.c
+      main/php_main.h
+      main/php_network.h
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h
+      main/php_output.h
+      main/php_reentrancy.h
+      main/network.c
+      main/output.c
+      main/php.h
+      main/php_content_types.c
+      main/php_globals.h
+      main/fopen_wrappers.h
+      main/internal_functions.c.in
+      main/internal_functions_registry.h
+      main/internal_functions_win32.c
+      main/main.c
+      main/SAPI.h
+      main/build-defs.h.in
+      main/fopen_wrappers.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/SAPI.c
+      ext/zlib/zlib.c
+      ext/zip/php_zip.h
+      ext/zip/zip.c
+      ext/zlib/php_zlib.h
+      ext/yp/php_yp.h
+      ext/yp/yp.c
+      ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h
+      ext/xslt/php_xslt.h
+      ext/xslt/sablot.c
+      ext/xslt/xslt.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xslt/php_sablot.h
+      ext/xml/xml.c
+      ext/xmlrpc/php_xmlrpc.h
+      ext/wddx/wddx.c
+      ext/xml/php_xml.h
+      ext/wddx/php_wddx_api.h
+      ext/wddx/php_wddx.h
+      ext/w32api/test_dll/dll_test.h
+      ext/w32api/test_dll/test_dll.c
+      ext/w32api/examples/uptime.php
+      ext/w32api/php_w32api.h
+      ext/w32api/w32api.c
+      ext/sysvshm/sysvshm.c
+      ext/vpopmail/php_vpopmail.c
+      ext/vpopmail/php_vpopmail.h
+      ext/sysvsem/php_sysvsem.h
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/php_sysvshm.h
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.h
+      ext/sybase/php_sybase_db.c
+      ext/sybase/php_sybase_db.h
+      ext/swf/php_swf.h
+      ext/swf/swf.c
+      ext/standard/syslog.c
+      ext/standard/type.c
+      ext/standard/type.h
+      ext/standard/uniqid.c
+      ext/standard/uniqid.h
+      ext/standard/url.c
+      ext/standard/url.h
+      ext/standard/url_scanner.c
+      ext/standard/url_scanner.h
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re
+      ext/standard/var.c
+      ext/standard/versioning.c
+      ext/standard/php_versioning.h
+      ext/standard/quot_print.c
+      ext/standard/quot_print.h
+      ext/standard/rand.c
+      ext/standard/reg.c
+      ext/standard/reg.h
+      ext/standard/scanf.c
+      ext/standard/scanf.h
+      ext/standard/soundex.c
+      ext/standard/string.c
+      ext/standard/php_assert.h
+      ext/standard/php_browscap.h
+      ext/standard/php_crypt.h
+      ext/standard/php_dir.h
+      ext/standard/php_ext_syslog.h
+      ext/standard/php_filestat.h
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrappers.h
+      ext/standard/php_ftok.h
+      ext/standard/php_image.h
+      ext/standard/php_incomplete_class.h
+      ext/standard/php_iptc.h
+      ext/standard/php_lcg.h
+      ext/standard/php_link.h
+      ext/standard/php_mail.h
+      ext/standard/php_math.h
+      ext/standard/php_metaphone.h
+      ext/standard/php_parsedate.h
+      ext/standard/php_rand.h
+      ext/standard/php_smart_str.h
+      ext/standard/php_smart_str_public.h
+      ext/standard/php_standard.h
+      ext/standard/php_string.h
+      ext/standard/php_var.h
+      ext/standard/md5.c
+      ext/standard/md5.h
+      ext/standard/metaphone.c
+      ext/standard/microtime.c
+      ext/standard/microtime.h
+      ext/standard/pack.c
+      ext/standard/pack.h
+      ext/standard/pageinfo.c
+      ext/standard/pageinfo.h
+      ext/standard/php_array.h
+      ext/standard/info.h
+      ext/standard/iptc.c
+      ext/standard/lcg.c
+      ext/standard/levenshtein.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/math.c
+      ext/standard/image.c
+      ext/standard/incomplete_class.c
+      ext/standard/info.c
+      ext/standard/flock_compat.c
+      ext/standard/flock_compat.h
+      ext/standard/formatted_print.c
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/ftok.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/head.c
+      ext/standard/head.h
+      ext/standard/html.c
+      ext/standard/html.h
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/filestat.c
+      ext/standard/dl.c
+      ext/standard/dl.h
+      ext/standard/dns.c
+      ext/standard/dns.h
+      ext/standard/exec.c
+      ext/standard/exec.h
+      ext/standard/assert.c
+      ext/standard/base64.c
+      ext/standard/base64.h
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/browscap.c
+      ext/standard/crc32.c
+      ext/standard/credits.c
+      ext/standard/credits.h
+      ext/standard/crypt.c
+      ext/standard/cyr_convert.c
+      ext/standard/cyr_convert.h
+      ext/standard/datetime.c
+      ext/standard/datetime.h
+      ext/standard/dir.c
+      ext/standard/array.c
+      ext/sockets/php_sockets_win.c
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c
+      ext/snmp/snmp.c
+      ext/sockets/php_sockets.h
+      ext/snmp/php_snmp.h
+      ext/shmop/php_shmop.h
+      ext/shmop/shmop.c
+      ext/session/mod_files.h
+      ext/session/mod_mm.c
+      ext/session/mod_mm.h
+      ext/session/mod_user.c
+      ext/session/mod_user.h
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/satellite/typemanager.c
+      ext/satellite/typemanager.h
+      ext/satellite/zval_to_namedvalue.c
+      ext/satellite/zval_to_namedvalue.h
+      ext/session/mod_files.c
+      ext/satellite/class.c
+      ext/satellite/class.h
+      ext/satellite/common.c
+      ext/satellite/common.h
+      ext/satellite/corba.c
+      ext/satellite/corba.h
+      ext/satellite/enum.c
+      ext/satellite/enum.h
+      ext/satellite/findtype.c
+      ext/satellite/findtype.h
+      ext/satellite/hashtable.c
+      ext/satellite/hashtable.h
+      ext/satellite/namedvalue_to_zval.c
+      ext/satellite/namedvalue_to_zval.h
+      ext/satellite/object.c
+      ext/satellite/object.h
+      ext/satellite/php_orbit.c
+      ext/satellite/php_orbit.h
+      ext/satellite/struct.c
+      ext/satellite/struct.h
+      ext/satellite/typecode.c
+      ext/satellite/typecode.h
+      ext/recode/recode.c
+      ext/satellite/Makefile.in
+      ext/recode/php_recode.h
+      ext/readline/php_readline.h
+      ext/readline/readline.c
+      ext/pspell/pspell.c
+      ext/qtdom/qtdom.c
+      ext/qtdom/qtdom.h
+      ext/printer/printer.c
+      ext/pspell/php_pspell.h
+      ext/posix/php_posix.h
+      ext/posix/posix.c
+      ext/printer/php_printer.h
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h
+      ext/pfpro/php_pfpro.h
+      ext/pdf/php_pdf.h
+      ext/pfpro/pfpro.c
+      ext/pdf/pdf.c
+      ext/pcre/php_pcre.h
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/php_signal.c
+      ext/pcntl/php_signal.h
+      ext/pcre/php_pcre.c
+      ext/pcntl/pcntl.c
+      ext/ovrimos/ovrimos.c
+      ext/oracle/oracle.c
+      ext/overload/overload.c
+      ext/overload/php_overload.h
+      ext/openssl/php_openssl.h
+      ext/odbc/php_odbc.h
+      ext/odbc/php_velocis.h
+      ext/odbc/velocis.c
+      ext/openssl/openssl.c
+      ext/oci8/php_oci8.h
+      ext/odbc/php_odbc.c
+      ext/oci8/oci8.c
+      ext/mysql/php_mysql.h
+      ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses.h
+      ext/ncurses/php_ncurses_fe.h
+      ext/notes/php_notes.c
+      ext/notes/php_notes.h
+      ext/msql/php_msql.h
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h
+      ext/mysql/php_mysql.c
+      ext/msession/php_msession.h
+      ext/msession/reqclient.h
+      ext/msql/php_msql.c
+      ext/msession/msession.c
+      ext/ming/php_ming.h
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h
+      ext/mhash/mhash.c
+      ext/ming/ming.c
+      ext/mcrypt/mcrypt.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mcal/php_mcal.c
+      ext/mailparse/mailparse.c
+      ext/mailparse/php_mailparse.h
+      ext/mailparse/rfc2045appendurl.c
+      ext/ldap/php_ldap.h
+      ext/java/java.c
+      ext/java/reflect.java
+      ext/ldap/ldap.c
+      ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re
+      ext/ircg/php_ircg.h
+      ext/ircg/ircg.c
+      ext/interbase/php_interbase.h
+      ext/ingres_ii/ii.h
+      ext/ingres_ii/php_ii.h
+      ext/interbase/interbase.c
+      ext/informix/php_informix.h
+      ext/ingres_ii/ii.c
+      ext/informix/ifx.ec
+      ext/imap/php_imap.h
+      ext/iisfunc/iisfunc.h
+      ext/iisfunc/setup.c
+      ext/iisfunc/setup.h
+      ext/imap/php_imap.c
+      ext/iconv/php_iconv.h
+      ext/iisfunc/iisfunc.cpp
+      ext/iconv/iconv.c
+      ext/icap/php_icap.c
+      ext/hyperwave/php_hyperwave.h
+      ext/hyperwave/hg_comm.h
+      ext/hyperwave/hw.c
+      ext/hyperwave/hw_error.h
+      ext/gmp/gmp.c
+      ext/gmp/php_gmp.h
+      ext/hyperwave/hg_comm.c
+      ext/gettext/php_gettext.h
+      ext/gettext/gettext.c
+      ext/gd/gdt1.c
+      ext/gd/gdt1.h
+      ext/gd/php_gd.h
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h
+      ext/gd/gd.c
+      ext/fribidi/php_fribidi.h
+      ext/ftp/ftp.c
+      ext/filepro/php_filepro.h
+      ext/fribidi/fribidi.c
+      ext/filepro/filepro.c
+      ext/fdf/php_fdf.h
+      ext/fbsql/php_fbsql.h
+      ext/fdf/fdf.c
+      ext/exif/exif.c
+      ext/exif/php_exif.h
+      ext/fbsql/php_fbsql.c
+      ext/dotnet/dotnet.cpp
+      ext/dio/dio.c
+      ext/dio/php_dio.h
+      ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h
+      ext/dbx/dbx.h
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.h
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mssql.h
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_oci8.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/php_dbx.h
+      ext/dbase/php_dbase.h
+      ext/dbplus/dbplus.c
+      ext/dbplus/php_dbplus.c
+      ext/dbplus/php_dbplus.h
+      ext/dbx/dbx.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c
+      ext/dba/php_dba.h
+      ext/dbase/dbase.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/db/php_db.h
+      ext/dba/dba.c
+      ext/cybermut/cybermut.c
+      ext/cybermut/php_cybermut.h
+      ext/cyrus/cyrus.c
+      ext/cyrus/php_cyrus.h
+      ext/db/db.c
+      ext/curl/php_curl.h
+      ext/cybercash/cybercash.c
+      ext/cybercash/cybercash.h
+      ext/ctype/ctype.c
+      ext/ctype/php_ctype.h
+      ext/curl/curl.c
+      ext/cpdf/cpdf.c
+      ext/cpdf/php_cpdf.h
+      ext/crack/crack.c
+      ext/crack/php_crack.h
+      ext/ccvs/ccvs.h
+      ext/com/COM.c
+      ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/bcmath/php_bcmath.h
+      ext/bz2/bz2.c
+      ext/bz2/php_bz2.h
+      ext/calendar/cal_unix.c
+      ext/calendar/calendar.c
+      ext/calendar/easter.c
+      ext/ccvs/ccvs.c
+      build/bsd_makefile
+      build/build.mk
+      build/build2.mk
+      build/buildcheck.sh
+      build/dynlib.mk
+      build/fastgen.sh
+      build/library.mk
+      build/ltlib.mk
+      build/mkdep.awk
+      build/program.mk
+      build/rules.mk
+      build/rules_common.mk
+      build/rules_pear.mk
+      build/sysv_makefile
+      dynlib.m4
+      ext/aspell/aspell.c
+      ext/aspell/php_aspell.h
+      ext/bcmath/bcmath.c
+      header
+      run-tests.php: Update headers.
+
+2001-12-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * EXTENSIONS: Adding overload extension.
+
+2001-12-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: thttpd/ircg update
+
+2001-12-11  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Forward-port 4.1.0 changes
+
+2001-12-11  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+    Some typo, consistency fixes and removed some stuff that is not needed.
+
+2001-12-11  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.in: * fixed the sub-command option parsing
+    * added -r option to install/uninstall (registers package without
+      installing any files, for use by rpm and the like)
+
+    * pear/PEAR/Installer.php:
+    * added "register_only" option for install/uninstall
+
+2001-12-11  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/README: More README update.
+
+2001-12-11  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update NEWS entry about latest domxml changes.
+
+2001-12-11  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/README: README update
+
+    * ext/pgsql/CREDITS
+      ext/pgsql/README: Added README file for pgsql module
+    Added my self to CREDIT
+
+2001-12-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/README: Show example of property-specific accessors.
+
+    * ext/overload/overload.c
+      ext/overload/php_overload.h:
+    This commit implements property-specific accessors.
+
+    When overload() is called, it not only scans for general handlers, but
+    also for any methods beginning with __get_ and __set_ and saves a list of
+    them. Then when a property is accessed, e.g. $obj->x, the extension will first
+    check whether __get_x() is available, and will call it if it is, otherwise
+    it will invoke the general __get() handler.
+
 2001-12-10  Jouni Ahto  <jahto@welho.com>
 
     * EXTENSIONS:
