@@ -156,6 +156,7 @@ void session_adapt_uris(const char *, uint, char **, uint *);
 #endif
 
 void _php_session_auto_start(void *data);
+void _php_session_shutdown(void *data);
 
 #if HAVE_WDDX
 #define WDDX_SERIALIZER

@@ -1173,6 +1173,17 @@ void _php_session_auto_start(void *data)
 	_php_session_start(PSLS_C);
 }
 
+void _php_session_shutdown(void *data)
+{
+	PSLS_FETCH();
+
+	if(PS(nr_open_sessions) > 0) {
+		_php_session_save_current_state(PSLS_C);
+		PS(nr_open_sessions)--;
+	}
+	php_rshutdown_session_globals(PSLS_C);
+}
+
 PHP_RINIT_FUNCTION(session)
 {
 	PSLS_FETCH();
@@ -1189,11 +1200,16 @@ PHP_RINIT_FUNCTION(session)
 		php_register_post_request_startup(_php_session_auto_start, NULL);
 	}
 
+	php_register_pre_request_shutdown(_php_session_shutdown, NULL);
+
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(session)
 {
+    /* 
+	this now done in _php_session_shutdown
+
 	PSLS_FETCH();
 
 	if(PS(nr_open_sessions) > 0) {
@@ -1201,7 +1217,10 @@ PHP_RSHUTDOWN_FUNCTION(session)
 		PS(nr_open_sessions)--;
 	}
 	php_rshutdown_session_globals(PSLS_C);
-	return SUCCESS;
+
+    */
+  
+    return SUCCESS;
 }
 
 PHP_MINIT_FUNCTION(session)
