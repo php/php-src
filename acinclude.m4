@@ -1199,7 +1199,7 @@ dnl
 AC_DEFUN(PHP_SETUP_ICONV, [
   found_iconv=no
   
-  AC_CHECK_LIB(c, iconv_open, [
+  AC_CHECK_FUNCS(iconv libiconv, [
     AC_DEFINE(HAVE_ICONV, 1, [ ])
     found_iconv=yes
   ], [
@@ -1222,7 +1222,7 @@ AC_DEFUN(PHP_SETUP_ICONV, [
     if test -f $ICONV_DIR/lib/lib${iconv_lib_name}.a ||
        test -f $ICONV_DIR/lib/lib${iconv_lib_name}.$SHLIB_SUFFIX_NAME
     then
-      PHP_CHECK_LIBRARY($iconv_lib_name, libiconv_open, [
+      PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
         PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/lib, $1)
         AC_DEFINE(HAVE_ICONV, 1, [ ])
