@@ -1,3 +1,63 @@
+2000-11-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Fix bug with handling multiple users in user_add and add new_topic handler.
+
+    * sapi/thttpd/thttpd_patch: Clear idle_read_timer
+
+2000-11-15  Jan Borsodi  <jb@ez.no>
+
+    * ext/qtdom/qtdom.c:
+    Removed an unneccesary #warning which was used for testing purposes only.
+
+    * ext/qtdom/qtdom.php:
+    Initial import, PHP program for testing if the qtdom extension is available.
+
+    * ext/qtdom/qtdom_qt.cpp
+      ext/qtdom/qtdom_qt.h:
+    Initial import, since PHP cannot be compiled with a C++ compiler all C++ specific calls had to be moved to a separate file without any php includes.
+    It has several C functions which are used for initiating a QDomDocument and traversing it.
+
+    * ext/qtdom/qtdom.c
+      ext/qtdom/qtdom.h:
+    Initial import, contains PHP specific extensions, takes care of converting C++ QDom objects to PHP objects.
+    This version has only one function: qdom_tree() which returns a tree of a string containing an XML document.
+
+    * ext/qtdom/config.m4:
+    Autoconf configure script for qt dom, needs some more checking in the future.
+
+    * ext/qtdom/Makefile.in:
+    Makefile source, has a fix for compiling C++ files.
+
+    * ext/qtdom/.cvsignore: Initial import, ignores standard files.
+
+2000-11-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/fdf.c:
+    - fixed silly bug (did check for 5 arguments but expected only 4)
+
+2000-11-15  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php: updated description of weeksInMonth() function
+
+    * pear/Date/Calc.php:
+    rearranged arguments in functions to day,month,year for better usability.
+    also other small fixes and updates, see http://www.phpinsider.com
+
+2000-11-15  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c: Fix crash (#7802)
+
+2000-11-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO
+      ext/pcre/php_pcre.c
+      NEWS:
+    - Modified preg_replace() to take Perl-style $1 backreferences in addition
+      to \\n ones.
+    - Modified preg_grep() to always return the results with the keys
+      from the original array.
+
 2000-11-14  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/php_smart_str.h: Fix allocation
