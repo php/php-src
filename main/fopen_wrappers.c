@@ -241,12 +241,13 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 {
 	PLS_FETCH();
 
+    if(!path) return NULL;
+	if(!*path) return NULL;
+
 	if (opened_path) {
 		*opened_path = NULL;
 	}
 
-	/* FIXME  Lets not get in the habit of doing stuff like this.  This should
-	   be runtime enabled, NOT compile time. */
 	if(PG(allow_url_fopen)) {
 		if (!(options & IGNORE_URL)) {
 			return php_fopen_url_wrapper(path, mode, options, issock, socketd, opened_path);
@@ -476,12 +477,6 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 	php_error(E_WARNING, "Invalid URL specified, %s", path);
 	return NULL;
 }
-
-PHPAPI int php_is_url(char *path)
-{
-	return (!strncasecmp(path, "http://", 7) || !strncasecmp(path, "ftp://", 6));
-}
-
 
 PHPAPI char *php_strip_url_passwd(char *url)
 {
