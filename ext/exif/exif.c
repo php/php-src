@@ -2031,6 +2031,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	int tag, format, components;
 	char *value_ptr, tagname[64], cbuf[32], *outside=NULL;
 	size_t byte_count, offset_val, fpos, fgot;
+	TSRMLS_FETCH();
 
 	tag = php_ifd_get16u(dir_entry, ImageInfo->motorola_intel);
 	format = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
@@ -2427,6 +2428,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 	uchar *Data;
 	size_t fpos, size;
 	jpeg_sof_info	sof_info;
+	TSRMLS_FETCH();
 
 	for(section=0;;section++)
 	{
@@ -2666,6 +2668,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 	unsigned char *dir_entry;
 	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value, fgot;
 	int entry_tag , entry_type;
+	TSRMLS_FETCH();
 
 	if ( ImageInfo->FileSize >= dir_offset+2) {
 		if ( (sn=exif_file_sections_add(ImageInfo, M_PSEUDO, 2, NULL))==-1) {
@@ -2865,6 +2868,7 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo)
 {
     unsigned char file_header[8];
     int ret = FALSE;
+	TSRMLS_FETCH();
 
     ImageInfo->FileType = IMAGE_FILETYPE_UNKNOWN;
 
