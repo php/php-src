@@ -53,9 +53,8 @@ typedef struct {
 
 typedef struct {
 	MYSQL		*mysql;
-	/* callback functions for load data local infile support */
-	zval		callback_func[3];
-	zval		*local_infile;
+	zval		*li_read;
+	php_stream	*li_stream;
 } MY_MYSQL;
 
 typedef struct {
@@ -112,6 +111,7 @@ extern mysqli_property_entry mysqli_stmt_property_entries[];
 
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(MY_STMT *stmt);
+void php_clear_mysql(MY_MYSQL *);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(char *sqlstate, int errorno, char *error TSRMLS_DC);
 extern void php_mysqli_report_index(char *query, unsigned int status TSRMLS_DC);
@@ -119,6 +119,7 @@ extern int php_local_infile_init(void **, const char *, void *);
 extern int php_local_infile_read(void *, char *, uint);
 extern void php_local_infile_end(void *);
 extern int php_local_infile_error(void *, char *, uint);
+extern void php_set_local_infile_handler_default(MY_MYSQL *);
 
 zend_class_entry *mysqli_link_class_entry;
 zend_class_entry *mysqli_stmt_class_entry;
@@ -180,7 +181,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	} \
 	__ptr = (__type)my_res->ptr; \
 	if (!strcmp((char *)__name, "mysqli_stmt")) {\
-		if (! ((MY_STMT *)__ptr)->stmt->mysql) {\
+		if (!((MY_STMT *)__ptr)->stmt->mysql) {\
   			php_error(E_WARNING, "Statement isn't valid anymore");\
 			RETURN_NULL();\
 		}\
