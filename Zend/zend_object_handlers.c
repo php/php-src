@@ -528,7 +528,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval ***args;
 	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
-	zval method_name, method_args, __call_name;
+	zval __call_name;
 	zval *method_name_ptr, *method_args_ptr;
 	zval **call_args[2];
 	zval *method_result_ptr = NULL;
@@ -542,11 +542,11 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	method_name_ptr = &method_name;
+	ALLOC_ZVAL(method_name_ptr);
 	INIT_PZVAL(method_name_ptr);
 	ZVAL_STRING(method_name_ptr, func->function_name, 0); /* no dup - it's a copy */
 
-	method_args_ptr = &method_args;
+	ALLOC_ZVAL(method_args_ptr);
 	INIT_PZVAL(method_args_ptr);
 	array_init(method_args_ptr);
 
@@ -591,8 +591,8 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	/* now destruct all auxiliaries */
-	zval_dtor(method_args_ptr);
-	zval_dtor(method_name_ptr);
+	zval_ptr_dtor(&method_args_ptr);
+	zval_ptr_dtor(&method_name_ptr);
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	efree(func);
