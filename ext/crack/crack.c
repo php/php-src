@@ -230,6 +230,7 @@ ZEND_FUNCTION(crack_check)
 			if (zend_get_parameters_ex(2, &dictionary, &password) == FAILURE) {
 				RETURN_FALSE;
 			}
+			id = Z_LVAL_PP(dictionary);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
