@@ -53,6 +53,8 @@ SPL_METHOD(DirectoryIterator, getPathname);
 SPL_METHOD(DirectoryIterator, isDot);
 SPL_METHOD(DirectoryIterator, isDir);
 
+SPL_METHOD(DirectoryTreeIterator, rewind);
+SPL_METHOD(DirectoryTreeIterator, next);
 SPL_METHOD(DirectoryTreeIterator, key);
 SPL_METHOD(DirectoryTreeIterator, hasChildren);
 SPL_METHOD(DirectoryTreeIterator, getChildren);
@@ -84,6 +86,8 @@ static zend_function_entry spl_ce_dir_class_functions[] = {
 };
 
 static zend_function_entry spl_ce_dir_tree_class_functions[] = {
+	SPL_ME(DirectoryTreeIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryTreeIterator, next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryTreeIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryTreeIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryTreeIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
@@ -400,7 +404,42 @@ SPL_METHOD(DirectoryIterator, isDir)
 }
 /* }}} */
 
-/* {{{ proto bool DirectoryIterator::hasChildren()
+/* {{{ proto void DirectoryTreeIterator::rewind()
+   Rewind dir back to the start */
+SPL_METHOD(DirectoryTreeIterator, rewind)
+{
+	zval *object = getThis();
+	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
+
+	intern->index = 0;
+	if (intern->dirp) {
+		php_stream_rewinddir(intern->dirp);
+	}
+	do {
+		if (!intern->dirp || !php_stream_readdir(intern->dirp, &intern->entry)) {
+			intern->entry.d_name[0] = '\0';
+		}
+	} while (!strcmp(intern->entry.d_name, ".") || !strcmp(intern->entry.d_name, ".."));
+}
+/* }}} */
+
+/* {{{ proto void DirectoryTreeIterator::next()
+   Move to next entry */
+SPL_METHOD(DirectoryTreeIterator, next)
+{
+	zval *object = getThis();
+	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
+
+	intern->index++;
+	do {
+		if (!intern->dirp || !php_stream_readdir(intern->dirp, &intern->entry)) {
+			intern->entry.d_name[0] = '\0';
+		}
+	} while (!strcmp(intern->entry.d_name, ".") || !strcmp(intern->entry.d_name, ".."));
+}
+/* }}} */
+
+/* {{{ proto bool DirectoryTreeIterator::hasChildren()
    Returns whether current entry is a directory and not '.' or '..' */
 SPL_METHOD(DirectoryTreeIterator, hasChildren)
 {
@@ -419,7 +458,7 @@ SPL_METHOD(DirectoryTreeIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto DirectoryIterator DirectoryIterator::getChildren()
+/* {{{ proto DirectoryTreeIterator DirectoryIterator::getChildren()
    Returns an iterator fo rthe current entry if it is a directory */
 SPL_METHOD(DirectoryTreeIterator, getChildren)
 {
