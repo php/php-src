@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
   build process is now more portable and less resource-consuming. (Sascha)
 
 ?? ??? 2002, Version 4.2.0
+- Modfied the mysql extension to disable 'LOAD LOCAL' when safe mode is
+  enabled. (Jason)
 - read_exif_data is now an alias for exif_read_data
   important to differenciate old/new version for tests)
 - new function exif_tagname returns the names of tags
