@@ -128,7 +128,7 @@ static char *php_gethostbyaddr(char *ip)
 	hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
 #endif
 
-	if (!hp) {
+	if (!hp || hp->h_name == NULL || hp->h_name == '\0') {
 		return estrdup(ip);
 	}
 
