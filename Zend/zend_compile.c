@@ -286,11 +286,8 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING) {
 		zend_auto_global *auto_global;
 
-		if (zend_hash_find(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, (void **) &auto_global)==SUCCESS) {
+		if (zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len+1 TSRMLS_CC)) {
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
-			if (auto_global->armed) {
-				auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
-			}
 		} else {
 /*			if (CG(active_op_array)->static_variables && zend_hash_exists(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
 				opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC;
@@ -3168,6 +3165,21 @@ void zend_auto_global_dtor(zend_auto_global *auto_global)
 {
 	free(auto_global->name);
 }
+
+
+zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC)
+{
+	zend_auto_global *auto_global;
+
+	if (zend_hash_find(CG(auto_globals), name, name_len+1, (void **) &auto_global)==SUCCESS) {
+		if (auto_global->armed) {
+			auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
+		}
+		return 1;
+	}
+	return 0;
+}
+
 
 int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC)
 {
