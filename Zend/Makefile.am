@@ -6,8 +6,8 @@ libzend_a_SOURCES=\
 	zend_alloc.c zend_compile.c zend_constants.c \
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
 	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
-	zend_variables.c zend-parser.c zend-scanner.c zend.c zend_API.c \
-	zend_extensions.c zend_hash.c zend_list.c zend_indent.c
+	zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
+	zend_list.c zend_indent.c
 
 # automake isn't too clever about "non-standard" use of lex and yacc
 
