@@ -90,10 +90,6 @@
 #include "php_logos.h"
 #include "php_streams.h"
 
-#if defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING)
-#include "ext/mbstring/mbstring.h"
-#endif /* defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING) */
-
 #include "SAPI.h"
 #include "rfc1867.h"
 /* }}} */
