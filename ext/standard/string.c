@@ -1737,6 +1737,15 @@ PHP_FUNCTION(addcslashes)
 	}
 	convert_to_string_ex(str);
 	convert_to_string_ex(what);
+
+	if(Z_STRLEN_PP(str) == 0) {
+		RETURN_EMPTY_STRING();
+	}
+
+	if(Z_STRLEN_PP(what) == 0) {
+		RETURN_STRINGL(Z_STRVAL_PP(str),Z_STRLEN_PP(str),1);
+	}
+
 	return_value->value.str.val = php_addcslashes((*str)->value.str.val,(*str)->value.str.len,&return_value->value.str.len,0,(*what)->value.str.val,(*what)->value.str.len);
 	return_value->type = IS_STRING;
 }
@@ -1752,6 +1761,11 @@ PHP_FUNCTION(addslashes)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
+
+	if(Z_STRLEN_PP(str) == 0) {
+		RETURN_EMPTY_STRING();
+	}
+
 	return_value->value.str.val = php_addslashes((*str)->value.str.val,(*str)->value.str.len,&return_value->value.str.len,0);
 	return_value->type = IS_STRING;
 }
