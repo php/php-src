@@ -74,7 +74,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			PUTS("[\"");
 			switch (zend_hash_get_current_key(Z_ARRVAL_PP(data), &string_key, &num_key, 0)) {
 				case HASH_KEY_IS_STRING:
-					zend_html_puts(string_key, strlen(string_key));
+					PHPWRITE(string_key, strlen(string_key));
 					break;
 				case HASH_KEY_IS_LONG:
 					php_printf("%ld", num_key);
@@ -89,10 +89,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				tmp2 = **tmp;
 				zval_copy_ctor(&tmp2);
 				convert_to_string(&tmp2);
-				zend_html_puts(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+				PHPWRITE(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
 				zval_dtor(&tmp2);
 			} else {
-				zend_html_puts(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+				PHPWRITE(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 			}
 			PUTS("&nbsp;</td></tr>\n");
 			zend_hash_move_forward(Z_ARRVAL_PP(data));
@@ -226,7 +226,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			PUTS("?="ZEND_LOGO_GUID"\" border=\"0\" align=\"right\" alt=\"Zend logo\"></a>\n");
 		}
 		php_printf("This program makes use of the Zend Scripting Language Engine:<br />");
-		zend_html_puts(zend_version, strlen(zend_version));
+		PHPWRITE(zend_version, strlen(zend_version));
 		php_info_print_box_end();
 		efree(php_uname);
 	}
@@ -417,7 +417,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 		if (!row_element || !*row_element) {
 			php_printf("&nbsp;");
 		} else {
-			zend_html_puts(row_element, strlen(row_element));
+			PHPWRITE(row_element, strlen(row_element));
 		}
 
 		php_printf("%s</td>", (i==0?"</b>":""));
