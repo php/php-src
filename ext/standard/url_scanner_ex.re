@@ -36,74 +36,7 @@
 #define url_adapt_ext url_adapt_ext_ex
 #define url_scanner url_scanner_ex
 
-#define smart_str_0(x) ((x)->c[(x)->len] = '\0')
-
-#define smart_str_alloc(d,n) {\
-	if (n >= d->a) {\
-		d->c = erealloc(d->c, n + 129); \
-		d->a = n + 128; \
-	}\
-}
-
-static inline void smart_str_append(smart_str *dest, smart_str *src)
-{
-	size_t newlen;
-
-	if (!dest->c)
-		dest->len = dest->a = 0;
-	
-	newlen = dest->len + src->len;
-	smart_str_alloc(dest, newlen);
-	memcpy(dest->c + dest->len, src->c, src->len);
-	dest->len = newlen;
-}
-
-static inline void smart_str_appendc(smart_str *dest, char c)
-{
-	++dest->len;
-	smart_str_alloc(dest, dest->len);
-	dest->c[dest->len - 1] = c;
-}
-
-static inline void smart_str_free(smart_str *s)
-{
-	if (s->c) {
-		efree(s->c);
-		s->c = NULL;
-	}
-	s->a = s->len = 0;
-}
-
-static inline void smart_str_copyl(smart_str *dest, const char *src, size_t len)
-{
-	smart_str_alloc(dest, len);
-	memcpy(dest->c, src, len);
-	dest->len = len;
-}
-
-static inline void smart_str_appendl(smart_str *dest, const char *src, size_t len)
-{
-	smart_str s;
-
-	s.c = (char *) src;
-	s.len = len;
-
-	smart_str_append(dest, &s);
-}
-
-static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
-{
-	dest->len = len;
-	dest->a = len + 1;
-	dest->c = (char *) src;
-}
-
-#define smart_str_appends(dest, src) smart_str_appendl(dest, src, sizeof(src)-1)
-
-static inline void smart_str_sets(smart_str *dest, const char *src)
-{
-	smart_str_setl(dest, src, strlen(src));
-}
+#include "php_smart_str.h"
 
 static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *name, smart_str *val, const char *separator)
 {
@@ -311,6 +244,7 @@ alpha = [a-zA-Z];
 		case STATE_VAL:
 /*!re2c
   ["] (any\[">])* ["]	{ HANDLE_VAL(1); STATE = STATE_NEXT_ARG; continue; }
+  ['] (any\['>])* [']	{ HANDLE_VAL(1); STATE = STATE_NEXT_ARG; continue; }
   (any\[ \n>"])+		{ HANDLE_VAL(0); STATE = STATE_NEXT_ARG; continue; }
   any					{ PASSTHRU(); STATE = STATE_NEXT_ARG; continue; }
 */
