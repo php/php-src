@@ -7,11 +7,13 @@ Verbose tidy_get_error_buffer()
 --INI--
 --FILE--
 <?php 
-
-    tidy_parse_string("<HTML><asd asdf></HTML>");
-    
-    echo tidy_get_error_buffer(true);
-
+	if (class_exists("tidy_doc")) {
+		$a = tidy_parse_string("<HTML><asd asdf></HTML>");
+		echo tidy_get_error_buffer($a);
+	} else {
+		tidy_parse_string("<HTML><asd asdf></HTML>");
+		echo tidy_get_error_buffer(true);
+	}
 ?>
 --EXPECT--
 line 1 column 1 - Warning: missing <!DOCTYPE> declaration
