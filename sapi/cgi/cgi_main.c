@@ -468,12 +468,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static void sapi_cgi_log_message(char *message)
 {
-	TSRMLS_FETCH();
-
-	if (php_header(TSRMLS_C)) {
-		fprintf(stderr, "%s", message);
-		fprintf(stderr, "\n");
-	}
+	fprintf(stderr, "%s\n", message);
 }
 
 static int sapi_cgi_deactivate(TSRMLS_D)
