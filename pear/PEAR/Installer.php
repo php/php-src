@@ -23,6 +23,7 @@
 require_once 'PEAR/Common.php';
 require_once 'PEAR/Registry.php';
 require_once 'PEAR/Dependency.php';
+require_once 'PEAR/Downloader.php';
 require_once 'System.php';
 
 define('PEAR_INSTALLER_OK',       1);
@@ -43,8 +44,9 @@ define('PEAR_INSTALLER_ERROR_NO_PREF_STATE', 2);
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@php.net>
  * @author Martin Jansen <mj@php.net>
+ * @author Greg Beaver <cellog@php.net>
  */
-class PEAR_Installer extends PEAR_Common
+class PEAR_Installer extends PEAR_Downloader
 {
     // {{{ properties
 
@@ -529,26 +531,6 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
-    // {{{ getPackageDownloadUrl()
-
-    function getPackageDownloadUrl($package, $version = null)
-    {
-        if ($version) {
-            $package .= "-$version";
-        }
-        if ($this === null || $this->config === null) {
-            $package = "http://pear.php.net/get/$package";
-        } else {
-            $package = "http://" . $this->config->get('master_server') .
-                "/get/$package";
-        }
-        if (!extension_loaded("zlib")) {
-            $package .= '?uncompress=yes';
-        }
-        return $package;
-    }
-
-    // }}}
     // {{{ mkDirHier($dir)
 
     function mkDirHier($dir)
@@ -573,106 +555,6 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
-    // {{{ extractDownloadFileName($pkgfile, &$version)
-
-    function extractDownloadFileName($pkgfile, &$version)
-    {
-        if (@is_file($pkgfile)) {
-            return $pkgfile;
-        }
-        // regex defined in Common.php
-        if (preg_match(PEAR_COMMON_PACKAGE_DOWNLOAD_PREG, $pkgfile, $m)) {
-            $version = (isset($m[3])) ? $m[3] : null;
-            return $m[1];
-        }
-        $version = null;
-        return $pkgfile;
-    }
-
-    // }}}
-    // {{{ _downloadFile()
-    /**
-     * @param string filename to download
-     * @param PEAR_Config Configuration object
-     * @param array options returned from Console_GetOpt
-     * @param array empty array to populate with error messages, if any
-     * @param string version/state
-     * @param string original value passed to command-line
-     * @param string preferred state (snapshot/devel/alpha/beta/stable)
-     * @return null|PEAR_Error|string
-     * @access private
-     */
-    function _downloadFile($pkgfile, &$config, $options, &$errors, $version,
-                           $origpkgfile, $state)
-    {
-        // {{{ check the package filename, and whether it's already installed
-        $need_download = false;
-        if (preg_match('#^(http|ftp)://#', $pkgfile)) {
-            $need_download = true;
-        } elseif (!@is_file($pkgfile)) {
-            if ($this->validPackageName($pkgfile)) {
-                if ($this->registry->packageExists($pkgfile)) {
-                    if (empty($options['upgrade']) && empty($options['force'])) {
-                        $errors[] = "$pkgfile already installed";
-                        return;
-                    }
-                }
-                $pkgfile = $this->getPackageDownloadUrl($pkgfile, $version);
-                $need_download = true;
-            } else {
-                if (strlen($pkgfile)) {
-                    $errors[] = "Could not open the package file: $pkgfile";
-                } else {
-                    $errors[] = "No package file given";
-                }
-                return;
-            }
-        }
-        // }}}
-
-        // {{{ Download package -----------------------------------------------
-        if ($need_download) {
-            $downloaddir = $config->get('download_dir');
-            if (empty($downloaddir)) {
-                if (PEAR::isError($downloaddir = System::mktemp('-d'))) {
-                    return $downloaddir;
-                }
-                $this->log(3, '+ tmp dir created at ' . $downloaddir);
-            }
-            $callback = $this->ui ? array(&$this, '_downloadCallback') : null;
-            $this->pushErrorHandling(PEAR_ERROR_RETURN);
-            $file = $this->downloadHttp($pkgfile, $this->ui, $downloaddir, $callback);
-            $this->popErrorHandling();
-            if (PEAR::isError($file)) {
-                if ($this->validPackageName($origpkgfile)) {
-                    include_once 'PEAR/Remote.php';
-                    $remote = new PEAR_Remote($config);
-                    if (!PEAR::isError($info = $remote->call('package.info',
-                          $origpkgfile))) {
-                        if (!count($info['releases'])) {
-                            return $this->raiseError('Package ' . $origpkgfile .
-                            ' has no releases');
-                        } else {
-                            return $this->raiseError('No releases of preferred state "'
-                            . $state . '" exist for package ' . $origpkgfile .
-                            '.  Use ' . $origpkgfile . '-state to install another' .
-                            ' state (like ' . $origpkgfile .'-beta)',
-                            PEAR_INSTALLER_ERROR_NO_PREF_STATE);
-                        }
-                    } else {
-                        return $pkgfile;
-                    }
-                } else {
-                    return $this->raiseError($file);
-                }
-            }
-            $pkgfile = $file;
-        }
-        // }}}
-        return $pkgfile;
-    }
-
-    // }}}
     // {{{ download()
 
     /**
@@ -693,269 +575,19 @@ class PEAR_Installer extends PEAR_Common
      * @param false private recursion variable
      * @param false private recursion variable
      * @param false private recursion variable
+     * @deprecated in favor of PEAR_Downloader
      */
     function download($packages, $options, &$config, &$installpackages,
                       &$errors, $installed = false, $willinstall = false, $state = false)
     {
-        // recognized options:
-        // - onlyreqdeps   : install all required dependencies as well
-        // - alldeps       : install all dependencies, including optional
-        //
-        // {{{ determine preferred state, installroot, etc
-        if (!$willinstall) {
-            $willinstall = array();
-        }
-        if (!$state) {
-            $state = $config->get('preferred_state');
-            if (!$state) {
-                // don't inadvertantly use a non-set preferred_state
-                $state = null;
-            }
-        }
-        $mywillinstall = array();
-        $php_dir = $config->get('php_dir');
-        if (isset($options['installroot'])) {
-            if (substr($options['installroot'], -1) == DIRECTORY_SEPARATOR) {
-                $options['installroot'] = substr($options['installroot'], 0, -1);
-            }
-            $php_dir = $this->_prependPath($php_dir, $options['installroot']);
-            $this->installroot = $options['installroot'];
-        } else {
-            $this->installroot = '';
-        }
-        // }}}
-        $this->registry = &new PEAR_Registry($php_dir);
-
-        // {{{ download files in this list if necessary
-        foreach($packages as $pkgfile) {
-            if (!is_file($pkgfile)) {
-                $origpkgfile = $pkgfile;
-                $pkgfile = $this->extractDownloadFileName($pkgfile, $version);
-                if (preg_match('#^(http|ftp)://#', $pkgfile)) {
-                    $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
-                                                    $errors, $version, $origpkgfile,
-                                                    $state);
-                    if (PEAR::isError($pkgfile)) {
-                        return $pkgfile;
-                    }
-                    $tempinfo = $this->infoFromAny($pkgfile);
-                    if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
-                        // ignore dependencies if there are any errors
-                        if (!PEAR::isError($tempinfo)) {
-                            $mywillinstall[strtolower($tempinfo['package'])] = @$tempinfo['release_deps'];
-                        }
-                    }
-                    $installpackages[] = array('pkg' => $tempinfo['package'],
-                                               'file' => $pkgfile, 'info' => $tempinfo);
-                    continue;
-                }
-                if (!$this->validPackageName($pkgfile)) {
-                    return $this->raiseError("Package name '$pkgfile' not valid");
-                }
-                // ignore packages that are installed unless we are upgrading
-                $curinfo = $this->registry->packageInfo($pkgfile);
-                if ($this->registry->packageExists($pkgfile) && empty($options['upgrade']) && empty($options['force'])) {
-                    $this->log(0, "Package '{$curinfo['package']}' already installed, skipping");
-                    continue;
-                }
-                // Retrieve remote release list
-                include_once 'PEAR/Remote.php';
-                $curver = $curinfo['version'];
-                $remote = &new PEAR_Remote($config);
-                $releases = $remote->call('package.info', $pkgfile, 'releases');
-                if (!count($releases)) {
-                    return $this->raiseError("No releases found for package '$pkgfile'");
-                }
-                // Want a specific version/state
-                if ($version !== null) {
-                    // Passed Foo-1.2
-                    if ($this->validPackageVersion($version)) {
-                        if (!isset($releases[$version])) {
-                            return $this->raiseError("No release with version '$version' found for '$pkgfile'");
-                        }
-                    // Passed Foo-alpha
-                    } elseif (in_array($version, $this->getReleaseStates())) {
-                        $state = $version;
-                        $version = 0;
-                        foreach ($releases as $ver => $inf) {
-                            if ($inf['state'] == $state && version_compare("$version", "$ver") < 0) {
-                                $version = $ver;
-                            }
-                        }
-                        if ($version == 0) {
-                            return $this->raiseError("No release with state '$state' found for '$pkgfile'");
-                        }
-                    // invalid postfix passed
-                    } else {
-                        return $this->raiseError("Invalid postfix '-$version', be sure to pass a valid PEAR ".
-                                                 "version number or release state");
-                    }
-                // Guess what to download
-                } else {
-                    $states = $this->betterStates($state, true);
-                    $possible = false;
-                    $version = 0;
-                    foreach ($releases as $ver => $inf) {
-                        if (in_array($inf['state'], $states) && version_compare("$version", "$ver") < 0) {
-                            $version = $ver;
-                        }
-                    }
-                    if ($version == 0 && !isset($options['force'])) {
-                        return $this->raiseError('No release with state equal to: \'' . implode(', ', $states) .
-                                                 "' found for '$pkgfile'");
-                    } elseif ($version == 0) {
-                        $this->log(0, "Warning: $pkgfile is state '$inf[state]' which is less stable " .
-                                      "than state '$state'");
-                    }
-                }
-                // Check if we haven't already the version
-                if (empty($options['force'])) {
-                    if ($curinfo['version'] == $version) {
-                        $this->log(0, "Package '{$curinfo['package']}-{$curinfo['version']}' already installed, skipping");
-                        continue;
-                    } elseif (version_compare("$version", "{$curinfo['version']}") < 0) {
-                        $this->log(0, "Already got '{$curinfo['package']}-{$curinfo['version']}' greater than requested '$version', skipping");
-                        continue;
-                    }
-                }
-                $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
-                                                $errors, $version, $origpkgfile,
-                                                $state);
-                if (PEAR::isError($pkgfile)) {
-                    return $pkgfile;
-                }
-            } // end is_file()
-            $tempinfo = $this->infoFromAny($pkgfile);
-            if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
-                // ignore dependencies if there are any errors
-                if (!PEAR::isError($tempinfo)) {
-                    $mywillinstall[strtolower($tempinfo['package'])] = @$tempinfo['release_deps'];
-                }
-            }
-            $installpackages[] = array('pkg' => $tempinfo['package'],
-                                       'file' => $pkgfile, 'info' => $tempinfo);
-        } // end foreach($packages)
-        // }}}
-
-        // {{{ extract dependencies from downloaded files and then download
-        // them if necessary
-        if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
-            include_once "PEAR/Remote.php";
-            $remote = new PEAR_Remote($config);
-            if (!$installed) {
-                $installed = $this->registry->listPackages();
-                array_walk($installed, create_function('&$v,$k','$v = strtolower($v);'));
-                $installed = array_flip($installed);
-            }
-            $deppackages = array();
-            // {{{ construct the list of dependencies for each file
-            foreach ($mywillinstall as $package => $alldeps) {
-                if (!is_array($alldeps)) {
-                    continue;
-                }
-                foreach($alldeps as $info) {
-                    if ($info['type'] != 'pkg') {
-                        continue;
-                    }
-                    if (!isset($options['alldeps']) && isset($info['optional']) &&
-                          $info['optional'] == 'yes') {
-                        // skip optional deps
-                        $this->log(0, "skipping Package $package optional dependency $info[name]");
-                        continue;
-                    }
-                    // {{{ get releases
-                    $releases = $remote->call('package.info', $info['name'], 'releases');
-                    if (PEAR::isError($releases)) {
-                        return $releases;
-                    }
-                    if (!count($releases)) {
-                        if (!isset($installed[strtolower($info['name'])])) {
-                            $errors[] = "Package $package dependency $info[name] ".
-                                        "has no releases";
-                        }
-                        continue;
-                    }
-                    $found = false;
-                    $save = $releases;
-                    while(count($releases) && !$found) {
-                        if (!empty($state) && $state != 'any') {
-                            list($release_version,$release) = each($releases);
-                            if ($state != $release['state'] &&
-                                !in_array($release['state'], $this->betterStates($state)))
-                            {
-                                // drop this release - it ain't stable enough
-                                array_shift($releases);
-                            } else {
-                                $found = true;
-                            }
-                        } else {
-                            $found = true;
-                        }
-                    }
-                    if (!count($releases) && !$found) {
-                        $get = array();
-                        foreach($save as $release) {
-                            $get = array_merge($get,
-                                $this->betterStates($release['state'], true));
-                        }
-                        $savestate = array_shift($get);
-                        $errors[] = "Release for $package dependency $info[name] " .
-                            "has state '$savestate', requires $state";
-                        continue;
-                    }
-                    if (in_array(strtolower($info['name']), $willinstall) ||
-                          isset($mywillinstall[strtolower($info['name'])])) {
-                        // skip upgrade check for packages we will install
-                        continue;
-                    }
-                    if (!isset($installed[strtolower($info['name'])])) {
-                        // check to see if we can install the specific version required
-                        if ($info['rel'] == 'eq') {
-                            $deppackages[] = $info['name'] . '-' . $info['version'];
-                            continue;
-                        }
-                        // skip upgrade check for packages we don't have installed
-                        $deppackages[] = $info['name'];
-                        continue;
-                    }
-                    // }}}
-
-                    // {{{ see if a dependency must be upgraded
-                    $inst_version = $this->registry->packageInfo($info['name'], 'version');
-                    if (!isset($info['version'])) {
-                        // this is a rel='has' dependency, check against latest
-                        if (version_compare($release_version, $inst_version, 'le')) {
-                            continue;
-                        } else {
-                            $deppackages[] = $info['name'];
-                            continue;
-                        }
-                    }
-                    if (version_compare($info['version'], $inst_version, 'le')) {
-                        // installed version is up-to-date
-                        continue;
-                    }
-                    $deppackages[] = $info['name'];
-                    // }}}
-                } // foreach($alldeps
-            }
-            // }}} foreach($willinstall
-
-            if (count($deppackages)) {
-                // check dependencies' dependencies
-                // combine the list of packages to install
-                $temppack = array();
-                foreach($installpackages as $p) {
-                    $temppack[] = strtolower($p['info']['package']);
-                }
-                foreach($deppackages as $pack) {
-                    $temppack[] = strtolower($pack);
-                }
-                $willinstall = array_merge($willinstall, $temppack);
-                $this->download($deppackages, $options, $config, $installpackages,
-                                $errors, $installed, $willinstall, $state);
-            }
-        } // }}} if --alldeps or --onlyreqdeps
+        // trickiness: initialize here
+        parent::PEAR_Downloader($this->ui, $options, $config);
+        $ret = parent::download($packages);
+        $errors = $this->getErrorMsgs();
+        $installpackages = $this->getDownloadedPackages();
+        trigger_error("PEAR Warning: PEAR_Installer::download() is deprecated " .
+                      "in favor of PEAR_Downloader class", E_USER_WARNING);
+        return $ret;
     }
 
     // }}}
@@ -1248,6 +880,8 @@ class PEAR_Installer extends PEAR_Common
      * @param array Command-line options.  Possibilities include:
      *
      *              - installroot: base installation dir, if not the default
+     *              - nodeps: do not process dependencies of other packages to ensure
+     *                        uninstallation does not break things
      */
     function uninstall($package, $options = array())
     {
@@ -1398,36 +1032,6 @@ class PEAR_Installer extends PEAR_Common
             // }}}
         }
         return false;
-    }
-
-    // }}}
-    // {{{ _downloadCallback()
-
-    function _downloadCallback($msg, $params = null)
-    {
-        switch ($msg) {
-            case 'saveas':
-                $this->log(1, "downloading $params ...");
-                break;
-            case 'done':
-                $this->log(1, '...done: ' . number_format($params, 0, '', ',') . ' bytes');
-                break;
-            case 'bytesread':
-                static $bytes;
-                if (empty($bytes)) {
-                    $bytes = 0;
-                }
-                if (!($bytes % 10240)) {
-                    $this->log(1, '.', false);
-                }
-                $bytes += $params;
-                break;
-            case 'start':
-                $this->log(1, "Starting to download {$params[0]} (".number_format($params[1], 0, '', ',')." bytes)");
-                break;
-        }
-        if (method_exists($this->ui, '_downloadCallback'))
-            $this->ui->_downloadCallback($msg, $params);
     }
 
     // }}}
