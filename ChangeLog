@@ -1,3 +1,66 @@
+2004-06-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/iptc.c:
+      Added missing safe_mode check.
+
+2004-06-21  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.h
+      ext/standard/user_filters.c
+      main/php_streams.h
+      main/streams/filter.c
+      main/streams/php_stream_filter_api.h
+      main/streams/streams.c:
+      BugFix#28868 (Part Two): This fixes thread unsafety in the userspace
+      filters which relates to the fix just applied for userspace wrappers.
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c
+      ext/standard/file.h
+      main/php_streams.h
+      main/streams.c
+      main/user_streams.c:
+      MFH: BugFix#28868 Wrapper hash not thread-safe
+
+2004-06-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      Fixed bug #28822: ArrayObject::offsetExists() works inverted
+
+2004-06-21  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.h
+      main/php_streams.h
+      main/streams/streams.c
+      main/streams/userspace.c:
+      BugFix#28868: Wrapper hash not thread-safe.
+      
+      Userdefined wrappers were being registered into a global wrapper hash
+      which can cross threads.  Termination of once instance then has the
+      potential to leave an active stream in another instance with no wrapper
+      leading to segfault.
+
+2004-06-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Exception.php:
+      More output magic on nested exceptions
+
+    * pear/PEAR/Exception.php:
+      Be more consistent with CS
+
+    * pear/PEAR/Exception.php:
+      Some API changes:
+      - addObserver() params order switched
+      - signal() -> _signal()
+      - public:getCauseMessage() -> private:_getCauseMessage()
+      - some more docs
+
 2004-06-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/levenshtein.c:
