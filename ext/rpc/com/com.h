@@ -22,7 +22,9 @@
 #include "../handler.h"
 #include "../php_rpc.h"
 
+#ifndef PHP_COM_DONT_DECLARE_RPC_HANDLER
 RPC_DECLARE_HANDLER(com);
+#endif
 
 ZEND_MINIT_FUNCTION(com);
 ZEND_MSHUTDOWN_FUNCTION(com);
