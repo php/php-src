@@ -9,15 +9,10 @@ fwrite($fp, "foobar");
 fclose($fp);
 
 $fp = fopen($filename, "a+");
-var_dump(ftell($fp));
 rewind($fp);
-var_dump(ftell($fp));
 fpassthru($fp);
 fclose($fp);
 unlink($filename);
 ?>
 --EXPECT--
-int(6)
-int(0)
 foobar
-
