@@ -364,15 +364,15 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 		}
 
 		if ( isdigit( (int)*ch ) ) { 
-		   /*
-			* Check for an XPG3-style %n$ specification.  Note: there
-			* must not be a mixture of XPG3 specs and non-XPG3 specs
-			* in the same format string.
-			*/
+			/*
+			 * Check for an XPG3-style %n$ specification.  Note: there
+			 * must not be a mixture of XPG3 specs and non-XPG3 specs
+			 * in the same format string.
+			 */
 
-		   value = strtoul(format-1, &end, 10); 
-		   if (*end != '$') {
-			  goto notXpg;
+			value = strtoul(format-1, &end, 10); 
+			if (*end != '$') {
+				goto notXpg;
 			}
 			format = end+1;
 			ch     = format++;
@@ -391,10 +391,10 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 				 * guaranteed to be > 0.
 				 */
 
-				 /* set a lower artificial limit on this
-				  * in the interest of security and resource friendliness
-				  * 255 arguments should be more than enough. - cc
-				  */
+				/* set a lower artificial limit on this
+				 * in the interest of security and resource friendliness
+				 * 255 arguments should be more than enough. - cc
+				 */
 				if (value > SCAN_MAX_ARGS) {
 					goto badIndex;
 				}
@@ -402,7 +402,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 				xpgSize = (xpgSize > value) ? xpgSize : value;
 			}
 			goto xpgCheckDone;
-	}
+		}
 
 	notXpg:
 		gotSequential = 1;
@@ -413,52 +413,52 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 		}
 
 	xpgCheckDone:
-	/*
-	 * Parse any width specifier.
-	 */
+		/*
+		 * Parse any width specifier.
+		 */
 
-	if (isdigit(UCHAR(*ch))) { 
-		value = strtoul(format-1, &format, 10);
-		flags |= SCAN_WIDTH;
-		ch = format++;
-	}
+		if (isdigit(UCHAR(*ch))) { 
+			value = strtoul(format-1, &format, 10);
+			flags |= SCAN_WIDTH;
+			ch = format++;
+		}
 
-	/*
-	 * Ignore size specifier.
-	 */
+		/*
+		 * Ignore size specifier.
+		 */
 
-	if ((*ch == 'l') || (*ch == 'L') || (*ch == 'h')) {
-		ch = format++;
-	}
+		if ((*ch == 'l') || (*ch == 'L') || (*ch == 'h')) {
+			ch = format++;
+		}
 
-	if (!(flags & SCAN_SUPPRESS) && numVars && (objIndex >= numVars)) {
-		goto badIndex;
-	}
+		if (!(flags & SCAN_SUPPRESS) && numVars && (objIndex >= numVars)) {
+			goto badIndex;
+		}
 
-	/*
-	 * Handle the various field types.
-	 */
+		/*
+		 * Handle the various field types.
+		 */
 
-   switch (*ch) {
-		case 'n':
-		case 'd':
-		case 'D':		
-		case 'i':
-		case 'o':
-		case 'x':
-		case 'X':		
-		case 'u':
-		case 'f':
-		case 'e':
-		case 'E':		
-		case 'g':
-		case 's':
-			  break;
-		case 'c':
-			/* we differ here with the TCL implementation in allowing for */
-			/* a character width specification, to be more consistent with */
-			/* ANSI. since Zend auto allocates space for vars, this is no */
-			/* problem - cc                                               */
+		switch (*ch) {
+			case 'n':
+			case 'd':
+			case 'D':		
+			case 'i':
+			case 'o':
+			case 'x':
+			case 'X':		
+			case 'u':
+			case 'f':
+			case 'e':
+			case 'E':		
+			case 'g':
+			case 's':
+				  break;
+			case 'c':
+				/* we differ here with the TCL implementation in allowing for */
+				/* a character width specification, to be more consistent with */
+				/* ANSI. since Zend auto allocates space for vars, this is no */
+				/* problem - cc                                               */
 				/*
 				if (flags & SCAN_WIDTH) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field width may not be specified in %c conversion");
@@ -466,68 +466,68 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 				}
 				*/
 				break;
-		case '[':
-			if (*format == '\0') {
-				goto badSet;
-			}
-			ch = format++;
-			if (*ch == '^') {
+			case '[':
 				if (*format == '\0') {
 					goto badSet;
 				}
 				ch = format++;
-			}
-			if (*ch == ']') {
-				if (*format == '\0') {
-					goto badSet;
+				if (*ch == '^') {
+					if (*format == '\0') {
+						goto badSet;
+					}
+					ch = format++;
 				}
-				ch = format++;
-			}
-			while (*ch != ']') {
-				if (*format == '\0') {
-					goto badSet;
+				if (*ch == ']') {
+					if (*format == '\0') {
+						goto badSet;
+					}
+					ch = format++;
 				}
-				ch = format++;
-			}
-			break;
-		badSet:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unmatched [ in format string");
-			goto error;
-		default:
-			{
-			 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", ch);
-			 goto error;
-		   }
-	}
-	if (!(flags & SCAN_SUPPRESS)) {
-		if (objIndex >= nspace) {
-			/*
-			 * Expand the nassign buffer.  If we are using XPG specifiers,
-			 * make sure that we grow to a large enough size.  xpgSize is
-			 * guaranteed to be at least one larger than objIndex.
-			 */
-			value = nspace;
-			if (xpgSize) {
-				nspace = xpgSize;
-			} else {
-				nspace += STATIC_LIST_SIZE;
-			}
-			if (nassign == staticAssign) {
-				nassign = (void *)emalloc(nspace * sizeof(int));
-				for (i = 0; i < STATIC_LIST_SIZE; ++i) {
-					nassign[i] = staticAssign[i];
+				while (*ch != ']') {
+					if (*format == '\0') {
+						goto badSet;
+					}
+					ch = format++;
 				}
-			} else {
-				nassign = (void *)erealloc((void *)nassign, nspace * sizeof(int));
-			}
-			for (i = value; i < nspace; i++) {
-				nassign[i] = 0;
-			}
+				break;
+			badSet:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unmatched [ in format string");
+				goto error;
+			default:
+				{
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", ch);
+				goto error;
+				}
 		}
-		nassign[objIndex]++;
-		objIndex++;
-	 }
-   }  /* while (*format != '\0') */
+		if (!(flags & SCAN_SUPPRESS)) {
+			if (objIndex >= nspace) {
+				/*
+				 * Expand the nassign buffer.  If we are using XPG specifiers,
+				 * make sure that we grow to a large enough size.  xpgSize is
+				 * guaranteed to be at least one larger than objIndex.
+				 */
+				value = nspace;
+				if (xpgSize) {
+					nspace = xpgSize;
+				} else {
+					nspace += STATIC_LIST_SIZE;
+				}
+				if (nassign == staticAssign) {
+					nassign = (void *)emalloc(nspace * sizeof(int));
+					for (i = 0; i < STATIC_LIST_SIZE; ++i) {
+						nassign[i] = staticAssign[i];
+					}
+				} else {
+					nassign = (void *)erealloc((void *)nassign, nspace * sizeof(int));
+				}
+				for (i = value; i < nspace; i++) {
+					nassign[i] = 0;
+				}
+			}
+			nassign[objIndex]++;
+			objIndex++;
+		}
+	}  /* while (*format != '\0') */
 
 	/*
 	 * Verify that all of the variable were assigned exactly once.
@@ -562,17 +562,17 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 	}
 	return SCAN_SUCCESS;
 
-	badIndex:
-		if (gotXpg) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "\"%n$\" argument index out of range");
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Different numbers of variable names and field specifiers");
-		}
+badIndex:
+	if (gotXpg) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "\"%n$\" argument index out of range");
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Different numbers of variable names and field specifiers");
+	}
 
-	error:
-		if (nassign != staticAssign) {
-			efree((char *)nassign);
-		}
+error:
+	if (nassign != staticAssign) {
+		efree((char *)nassign);
+	}
 	return SCAN_ERROR_INVALID_FORMAT;
 #undef STATIC_LIST_SIZE
 }
