@@ -36,7 +36,8 @@ $(makefile_in_files): $(makefile_am_files) aclocal.m4 configure.in $(config_m4_f
 			cp $$i.bak $$i; \
 		fi; \
 	done
-	@automake -a -i $(AMFLAGS) $(makefile_files) 2>&1 \
+	@test -f want_dependencies || flag=-i; \
+	automake -a $$flag $(AMFLAGS) $(makefile_files) 2>&1 \
 		| grep -v PHP_OUTPUT_FILES || true >&2
 	@for i in $(LT_TARGETS); do mv $$i.bak $$i; done
 
