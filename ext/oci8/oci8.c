@@ -3834,7 +3834,7 @@ PHP_FUNCTION(ocicolumnprecision)
 
 /* }}} */
 
-/* {{{ proto mixed ocicolumntype(int stmt, int col)
+/* {{{ proto int ocicolumntype(int stmt, int col)
    Tell the data type of a column */
 
 PHP_FUNCTION(ocicolumntype)
@@ -4998,7 +4998,7 @@ PHP_FUNCTION(ocicollgetelem)
 
 		/* Return null if the value is null */
 		if(*elemind == OCI_IND_NULL) {
-			RETURN_FALSE;
+			RETURN_NULL();
 		} 
 
 		switch (coll->element_typecode) {
