@@ -66,13 +66,8 @@ ZEND_BEGIN_MODULE_GLOBALS(sybase)
 	char *hostname;
 	char *server_message;
 	long min_server_severity, min_client_severity;
-<<<<<<< php_sybase_ct.h
 	CS_CONTEXT *context;
 ZEND_END_MODULE_GLOBALS(sybase)
-=======
-	long cfg_min_server_severity, cfg_min_client_severity;
-ZEND_END_MODULE_GLOBALS(sybase)
->>>>>>> 1.7
 
 typedef struct {
 	CS_CONNECTION *connection;
