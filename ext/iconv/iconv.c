@@ -326,7 +326,7 @@ PHP_FUNCTION(ob_iconv_handler)
 		if ((s = strchr(SG(sapi_headers).mimetype,';')) == NULL){
 			mimetype = estrdup(SG(sapi_headers).mimetype);
 		} else {
-			mimetype = estrndup(SG(sapi_headers).mimetype,s-SG(sapi_headers).mimetype);
+			mimetype = estrndup(SG(sapi_headers).mimetype, s-SG(sapi_headers).mimetype);
 		}
 	} else if (SG(sapi_headers).send_default_content_type) {
 		mimetype = estrdup(SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE);
