@@ -53,7 +53,7 @@
 %left T_LOGICAL_XOR
 %left T_LOGICAL_AND
 %right T_PRINT
-%left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL XT_OR_EQUAL T_SL_EQUAL T_SR_EQUAL
+%left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL
 %left '?' ':'
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND
@@ -426,7 +426,7 @@ expr_without_variable:
 	|	cvar T_MOD_EQUAL expr		{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_MOD, &$$, &$1, &$3 CLS_CC); }
 	|	cvar T_AND_EQUAL expr		{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_BW_AND, &$$, &$1, &$3 CLS_CC); }
 	|	cvar T_OR_EQUAL expr 		{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_BW_OR, &$$, &$1, &$3 CLS_CC); }
-	|	cvar XT_OR_EQUAL expr 		{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_BW_XOR, &$$, &$1, &$3 CLS_CC); }
+	|	cvar T_XOR_EQUAL expr 		{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_BW_XOR, &$$, &$1, &$3 CLS_CC); }
 	|	cvar T_SL_EQUAL expr	{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_SL, &$$, &$1, &$3 CLS_CC); } 
 	|	cvar T_SR_EQUAL expr	{ do_end_variable_parse(BP_VAR_RW, 0 CLS_CC); do_binary_assign_op(ZEND_ASSIGN_SR, &$$, &$1, &$3 CLS_CC); } 
 	|	rw_cvar T_INC { do_post_incdec(&$$, &$1, ZEND_POST_INC CLS_CC); }
