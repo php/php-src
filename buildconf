@@ -93,6 +93,8 @@ fi
 
 ./scripts/preconfig
 
+libtoolize --automake $automake_flags --force
+
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
 if cmp aclocal.m4.old aclocal.m4 > /dev/null 2>&1; then
