@@ -2,6 +2,8 @@
 Test array_sum()
 --FILE--
 <?php
+$old_memory_limit = ini_get("memory_limit");
+ini_set("memory_limit","16M");
 $i = 0;
 while ($i++ < 1000) {
 	$a[] = $i;
@@ -19,6 +21,7 @@ while ($j++ < 100000) {
 $s3 = array_sum($c);
 $s4 = array_sum($d);
 var_dump($s3, $s4);
+ini_set("memory_limit",$old_memory_limit);
 ?>
 --EXPECT--
 int(500500)
