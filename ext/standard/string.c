@@ -3005,6 +3005,13 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 			}
 			return new_str;
 		} else {
+			if (!case_sensitivity) {
+				haystack_dup = estrndup(haystack, length);
+				needle_dup = estrndup(needle, needle_len);
+				php_strtolower(haystack_dup, length);
+				php_strtolower(needle_dup, needle_len);
+			}
+
 			if (str_len < needle_len) {
 				new_str = emalloc(length + 1);
 			} else {
@@ -3015,10 +3022,6 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 					o = haystack;
 					n = needle;
 				} else {
-					haystack_dup = estrndup(haystack, length);
-					needle_dup = estrndup(needle, needle_len);
-					php_strtolower(haystack_dup, length);
-					php_strtolower(needle_dup, needle_len);
 					o = haystack_dup;
 					n = needle_dup;
 				}
