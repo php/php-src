@@ -1720,6 +1720,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 
 		switch (image_type) {
+#ifdef HAVE_GD_WBMP
 			case PHP_GDIMG_CONVERT_WBM:
 				if (q == -1) {
 					q = 0;
@@ -1729,6 +1730,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				}
 				gdImageWBMP(im, q, fp);
 				break;
+#endif
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, fp, q);
 				break;
@@ -1767,6 +1769,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 
 		switch (image_type) {
+#ifdef HAVE_GD_WBMP
 			case PHP_GDIMG_CONVERT_WBM:
  				if (q == -1) {
   					q = 0;
@@ -1776,6 +1779,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
   				}
 				gdImageWBMP(im, q, tmp);
 				break;
+#endif
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, tmp, q);
 				break;
