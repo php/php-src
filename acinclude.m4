@@ -1701,6 +1701,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
 
   echo > ext/iconv/php_have_libiconv.h
   echo > ext/iconv/php_have_iconv.h
+  echo > ext/iconv/php_php_iconv_impl.h
 
   dnl
   dnl Check libc first if no path is provided in --with-iconv
