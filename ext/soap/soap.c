@@ -1278,7 +1278,7 @@ void soap_error_handler(int error_num, const char *error_filename, const uint er
 
 		zval_dtor(&outbuf);
 		zval_dtor(&outbuflen);
-		zval_dtor(&ret);
+//		zval_dtor(&ret);
 
 		zend_bailout();
 	}
@@ -1471,6 +1471,11 @@ zend_try {
 			*return_value = **fault;
 		} else {
 			*return_value = *add_soap_fault(thisObj, "SOAP-ENV:Client", "Unknown Error", NULL, NULL TSRMLS_CC);
+		}
+	} else {
+  	zval** fault;
+		if(zend_hash_find(Z_OBJPROP_P(thisObj), "__soap_fault", sizeof("__soap_fault"), (void **) &fault) == SUCCESS) {
+			*return_value = **fault;
 		}
 	}
 	SOAP_GLOBAL(sdl) = NULL;
@@ -1669,6 +1674,9 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 	zval *fault;
 	MAKE_STD_ZVAL(fault);
 	set_soap_fault(fault, fault_string, fault_code, fault_actor, fault_detail TSRMLS_CC);
+#ifdef ZEND_ENGINE_2
+	fault->refcount--;
+#endif
 	add_property_zval(obj, "__soap_fault", fault);
 	return fault;
 }
@@ -1689,8 +1697,8 @@ void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 
 	if(fault_detail != NULL)
 	{
-#ifndef ZEND_ENGINE_2
-		zval_add_ref(&fault_detail);
+#ifdef ZEND_ENGINE_2
+	fault_detail->refcount--;
 #endif
 		add_property_zval(obj, "detail", fault_detail);
 	}

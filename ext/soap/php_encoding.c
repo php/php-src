@@ -20,6 +20,7 @@ encode defaultEncoding[] = {
 	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_string},
 	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL}, to_zval_double, to_xml_double},
 	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_NAMESPACE, NULL}, to_zval_double, to_xml_double},
+
 	{{XSD_DATETIME, XSD_DATETIME_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_datetime},
 	{{XSD_TIME, XSD_TIME_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_time},
 	{{XSD_DATE, XSD_DATE_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_date},
@@ -28,6 +29,8 @@ encode defaultEncoding[] = {
 	{{XSD_GMONTHDAY, XSD_GMONTHDAY_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_gmonthday},
 	{{XSD_GDAY, XSD_GDAY_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_gday},
 	{{XSD_GMONTH, XSD_GMONTH_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_gmonth},
+	{{XSD_DURATION, XSD_DURATION_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_duration},
+
 	{{XSD_HEXBINARY, XSD_HEXBINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_stringl},
 	{{XSD_BASE64BINARY, XSD_BASE64BINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_stringl},
 
@@ -42,6 +45,7 @@ encode defaultEncoding[] = {
 	{{XSD_UNSIGNEDBYTE, XSD_UNSIGNEDBYTE_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_UNSIGNEDSHORT, XSD_UNSIGNEDSHORT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_UNSIGNEDINT, XSD_UNSIGNEDINT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
+  {{XSD_UNSIGNEDLONG, XSD_UNSIGNEDLONG_STRING, XSD_NAMESPACE, NULL}, to_zval_ulong, to_xml_ulong}, 
 
 	{{APACHE_MAP, APACHE_MAP_STRING, APACHE_NAMESPACE, NULL}, to_zval_map, to_xml_map},
 
@@ -54,48 +58,14 @@ encode defaultEncoding[] = {
 	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_string, to_xml_string},
 	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_double, to_xml_double},
 	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_double, to_xml_double},
+
 	{{XSD_LONG, XSD_LONG_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_INT, XSD_INT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_SHORT, XSD_SHORT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
+	{{XSD_BYTE, XSD_BYTE_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_1999_TIMEINSTANT, XSD_1999_TIMEINSTANT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_string, to_xml_string},
 
 	{{END_KNOWN_TYPES, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert}
-
-/* TODO: finish off encoding */
-/*
-#define XSD_DURATION 107
-#define XSD_DURATION_STRING "duration"
-#define XSD_ANYURI 118
-#define XSD_ANYURI_STRING "anyURI"
-#define XSD_QNAME 119
-#define XSD_QNAME_STRING "QName"
-#define XSD_NOTATION 120
-#define XSD_NOTATION_STRING "NOTATION"
-#define XSD_NORMALIZEDSTRING 121
-#define XSD_NORMALIZEDSTRING_STRING "normalizedString"
-#define XSD_TOKEN 122
-#define XSD_TOKEN_STRING "token"
-#define XSD_LANGUAGE 123
-#define XSD_LANGUAGE_STRING "language"
-#define XSD_NMTOKEN 124
-#define XSD_NMTOKEN_STRING "NMTOKEN"
-#define XSD_NAME 124
-#define XSD_NAME_STRING "Name"
-#define XSD_NCNAME 125
-#define XSD_NCNAME_STRING "NCName"
-#define XSD_ID 126
-#define XSD_ID_STRING "ID"
-#define XSD_IDREF 127
-#define XSD_IDREF_STRING "IDREF"
-#define XSD_IDREFS 127
-#define XSD_IDREFS_STRING "IDREFS"
-#define XSD_ENTITY 128
-#define XSD_ENTITY_STRING "ENTITY"
-#define XSD_ENTITYS 129
-#define XSD_ENTITYS_STRING "ENTITYS"
-#define XSD_UNSIGNEDLONG 138
-#define XSD_UNSIGNEDLONG_STRING "unsignedLong"
-*/
 };
 
 xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style)
@@ -358,6 +328,21 @@ zval *to_zval_long(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
+zval *to_zval_ulong(encodeType type, xmlNodePtr data)
+{
+	zval *ret;
+	MAKE_STD_ZVAL(ret);
+	FIND_XML_NULL(data, ret);
+
+	if (data && data->children && data->children->content) {
+	  /* TODO: long overflow */
+		ZVAL_LONG(ret, atol(data->children->content));
+	} else {
+		ZVAL_NULL(ret);
+	}
+	return ret;
+}
+
 xmlNodePtr to_xml_long(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
@@ -366,6 +351,29 @@ xmlNodePtr to_xml_long(encodeType type, zval *data, int style)
 	ret = xmlNewNode(NULL, "BOGUS");
 	FIND_ZVAL_NULL(data, ret, style);
 
+	tmp = *data;
+  zval_copy_ctor(&tmp);
+  if (Z_TYPE(tmp) != IS_LONG) {
+		convert_to_long(&tmp);
+	}
+	convert_to_string(&tmp);
+	xmlNodeSetContentLen(ret, Z_STRVAL(tmp), Z_STRLEN(tmp));
+	zval_dtor(&tmp);
+
+	if(style == SOAP_ENCODED)
+		set_ns_and_type(ret, type);
+	return ret;
+}
+
+xmlNodePtr to_xml_ulong(encodeType type, zval *data, int style)
+{
+	xmlNodePtr ret;
+  zval tmp;
+
+	ret = xmlNewNode(NULL, "BOGUS");
+	FIND_ZVAL_NULL(data, ret, style);
+
+	/* TODO: long overflow */
 	tmp = *data;
   zval_copy_ctor(&tmp);
   if (Z_TYPE(tmp) != IS_LONG) {
@@ -1055,44 +1063,59 @@ xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int sty
 	return xmlParam;
 }
 
+xmlNodePtr to_xml_duration(encodeType type, zval *data, int style)
+{
+	/* TODO: '-'?P([0-9]+Y)?([0-9]+M)?([0-9]+D)?T([0-9]+H)?([0-9]+M)?([0-9]+S)? */
+	return to_xml_string(type, data, style);
+}
+
 xmlNodePtr to_xml_datetime(encodeType type, zval *data, int style)
 {
+	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "%Y-%m-%dT%H:%M:%S", style);
 }
 
 xmlNodePtr to_xml_time(encodeType type, zval *data, int style)
 {
+	/* TODO: time zone */
+	/* TODO: microsecconds */
 	return to_xml_datetime_ex(type, data, "%H:%M:%S", style);
 }
 
 xmlNodePtr to_xml_date(encodeType type, zval *data, int style)
 {
+	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "%Y-%m-%d", style);
 }
 
 xmlNodePtr to_xml_gyearmonth(encodeType type, zval *data, int style)
 {
+	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "%Y-%m", style);
 }
 
 xmlNodePtr to_xml_gyear(encodeType type, zval *data, int style)
 {
+	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "%Y", style);
 }
 
 xmlNodePtr to_xml_gmonthday(encodeType type, zval *data, int style)
 {
+	/* TODO: time zone */
 	return to_xml_datetime_ex(type, data, "--%m-%d", style);
 }
 
 xmlNodePtr to_xml_gday(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%d", style);
+	/* TODO: time zone */
+	return to_xml_datetime_ex(type, data, "---%d", style);
 }
 
 xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style)
 {
-	return to_xml_datetime_ex(type, data, "%m", style);
+	/* TODO: time zone */
+	return to_xml_datetime_ex(type, data, "--%m--", style);
 }
 
 void set_ns_and_type(xmlNodePtr node, encodeType type)
