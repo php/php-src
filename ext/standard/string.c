@@ -46,9 +46,10 @@
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
 #define STR_PAD_BOTH			2
-#define PHP_PATHINFO_DIRNAME 	0
-#define PHP_PATHINFO_BASENAME 	1
-#define PHP_PATHINFO_EXTENSION 	2
+#define PHP_PATHINFO_DIRNAME 	1
+#define PHP_PATHINFO_BASENAME 	2
+#define PHP_PATHINFO_EXTENSION 	4
+#define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION)
 
 /* {{{ register_string_constants
  */
@@ -1164,59 +1165,65 @@ PHP_FUNCTION(dirname)
    Returns information about a certain string */
 PHP_FUNCTION(pathinfo)
 {
-	zval **path, **uopt, *tmp;
-	char *ret;
-	int argc = ZEND_NUM_ARGS(), opt, len;
-	
-	if (argc < 1 || argc > 2 ||
-	    zend_get_parameters_ex(argc, &path, &uopt) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(path);
-	len = Z_STRLEN_PP(path);
-	
-	if (argc > 1) {
-		convert_to_long_ex(uopt);
-		opt = Z_LVAL_PP(uopt);
-		if (opt < PHP_PATHINFO_DIRNAME || opt > PHP_PATHINFO_EXTENSION) {
-			php_error(E_WARNING, "Invalid option in call to pathinfo()");
-			RETURN_FALSE;
-		}
+	zval *tmp;
+	char *path, *ret;
+	int path_len;
+	int opt = PHP_PATHINFO_ALL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &path_len, &opt) == FAILURE) {
+		return;
 	}
 
 	MAKE_STD_ZVAL(tmp);
 	array_init(tmp);
 	
-	if (argc < 2 || opt == PHP_PATHINFO_DIRNAME) {
-		ret = estrndup(Z_STRVAL_PP(path), len);
-		php_dirname(ret, len);
+	if ((opt & PHP_PATHINFO_DIRNAME) == PHP_PATHINFO_DIRNAME) {
+		ret = estrndup(path, path_len);
+		php_dirname(ret, path_len);
 		if (*ret)
 			add_assoc_string(tmp, "dirname", ret, 1);
 		efree(ret);
 	}
 	
-	if (argc < 2 || opt == PHP_PATHINFO_BASENAME) {
-		ret = php_basename(Z_STRVAL_PP(path), len, NULL, 0);
+	if ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME) {
+		ret = php_basename(path, path_len, NULL, 0);
 		add_assoc_string(tmp, "basename", ret, 0);
 	}			
 	
-	if (argc < 2 || opt == PHP_PATHINFO_EXTENSION) {
+	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
 		char *p;
 		int idx;
+		int ret_len;
+		int have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
 
-		p = strrchr(Z_STRVAL_PP(path), '.');
+		/* Have we alrady looked up the basename? */
+		if (!have_basename) {
+			ret = php_basename(path, path_len, NULL, 0);
+		}
+
+		ret_len = strlen(ret);
+
+		p = strrchr(ret, '.');
+
 		if (p) {
-			idx = p - Z_STRVAL_PP(path);
-			add_assoc_stringl(tmp, "extension", Z_STRVAL_PP(path) + idx + 1, len - idx - 1, 1);
+			idx = p - ret;
+			add_assoc_stringl(tmp, "extension", ret + idx + 1, ret_len - idx - 1, 1);
+		}
+
+		if (!have_basename) {
+			efree(ret);
 		}
 	}
 
-	if (argc == 2) {
-		zval **element;
-		zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **) &element);
-		*return_value = **element;
-	} else {
+	if (opt == PHP_PATHINFO_ALL) {
 		*return_value = *tmp;
+	} else {
+		zval **element;
+		if (zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **) &element) == SUCCESS) {
+			*return_value = **element;
+		} else {
+			ZVAL_EMPTY_STRING(return_value);
+		}
 	}
 
 	zval_copy_ctor(return_value);
