@@ -394,6 +394,10 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
 void zend_shutdown(TSRMLS_D);
 
+#ifdef ZTS
+void zend_post_startup(TSRMLS_D);
+#endif
+
 void zend_set_utility_values(zend_utility_values *utility_values);
 
 BEGIN_EXTERN_C()
