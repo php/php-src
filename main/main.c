@@ -595,6 +595,7 @@ static void sigchld_handler(int apar)
 }
 #endif
 
+static int php_hash_environment(ELS_D SLS_DC PLS_DC);
 
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
@@ -630,6 +631,10 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 
 	/* We turn this off in php_execute_script() */
 	/* PG(during_request_startup) = 0; */
+
+	php_hash_environment(ELS_C SLS_CC PLS_CC);
+	zend_activate_modules();
+	PG(modules_activated)=1;
 
 	return SUCCESS;
 }
@@ -1135,10 +1140,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	char *old_cwd;
 	SLS_FETCH();
 
-	php_hash_environment(ELS_C SLS_CC PLS_CC);
-
-	zend_activate_modules();
-	PG(modules_activated)=1;
 
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
 		&& PG(expose_php)) {
