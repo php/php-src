@@ -869,9 +869,9 @@ static int copy_function_name(zend_function *func, int num_args, va_list args, z
 	}
 
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		add_next_index_stringl(internal_ar, hash_key->arKey, hash_key->nKeyLength, 1);
+		add_next_index_stringl(internal_ar, hash_key->arKey, hash_key->nKeyLength-1, 1);
 	} else if (func->type == ZEND_USER_FUNCTION) {
-		add_next_index_stringl(user_ar, hash_key->arKey, hash_key->nKeyLength, 1);
+		add_next_index_stringl(user_ar, hash_key->arKey, hash_key->nKeyLength-1, 1);
 	}
 	
 	return 0;
