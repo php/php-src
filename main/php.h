@@ -71,13 +71,6 @@ extern unsigned char second_arg_allow_ref[];
 #define PHP_DEBUG ZEND_DEBUG
 
 
-#if PHP_DEBUG || !(defined(__GNUC__)||defined(PHP_WIN32))
-#ifdef inline
-#undef inline
-#endif
-#define inline
-#endif
-
 #define APACHE 0
 #define CGI_BINARY 0
 
