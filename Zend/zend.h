@@ -361,6 +361,9 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define ZEND_STRS(str)		(str), (sizeof(str))
 #define ZEND_NORMALIZE_BOOL(n)			\
 	((n) ? (((n)>0) ? 1 : -1) : 0)
+#define ZEND_TRUTH(x)		((x) ? 1 : 0)
+#define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
+
 
 
 /* data types */
