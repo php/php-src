@@ -117,7 +117,7 @@ class PEAR_Installer extends PEAR_Common
         parent::PEAR_Common();
         $this->setFrontendObject($ui);
         $this->debug = $this->config->get('verbose');
-        $this->registry = &new PEAR_Registry($this->config->get('php_dir'));
+        //$this->registry = &new PEAR_Registry($this->config->get('php_dir'));
     }
 
     // }}}
@@ -801,6 +801,9 @@ class PEAR_Installer extends PEAR_Common
      */
     function checkDeps(&$pkginfo, &$errors)
     {
+        if (empty($this->registry)) {
+            $this->registry = &new PEAR_Registry($this->config->get('php_dir'));
+        }
         $depchecker = &new PEAR_Dependency($this->registry);
         $error = $errors = '';
         $failed_deps = $optional_deps = array();
