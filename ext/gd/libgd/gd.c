@@ -2547,7 +2547,7 @@ gdImagePtr gdImageRotate90 (gdImagePtr src)
 		dst = gdImageCreate (src->sy, src->sx);
 		f = gdImageGetPixel;
 	}
-
+	dst = gdImageCreateTrueColor(src->sy, src->sx);
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
 		
@@ -2572,13 +2572,11 @@ gdImagePtr gdImageRotate180 (gdImagePtr src)
 	FuncPtr f;
 
 	if (src->trueColor) {
-		dst = gdImageCreateTrueColor ( src->sx,src->sy);
 		f = gdImageGetTrueColorPixel;
 	} else {
-		dst = gdImageCreate (src->sx, src->sy);
 		f = gdImageGetPixel;
 	}
-
+	dst = gdImageCreateTrueColor(src->sx, src->sy);
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
 		
@@ -2603,12 +2601,11 @@ gdImagePtr gdImageRotate270 ( gdImagePtr src )
 	FuncPtr f;
 
 	if (src->trueColor) {
-		dst = gdImageCreateTrueColor (src->sy, src->sx);
 		f = gdImageGetTrueColorPixel;
 	} else {
-		dst = gdImageCreate (src->sy, src->sx);
 		f = gdImageGetPixel;
 	}
+	dst = gdImageCreateTrueColor(src->sy, src->sx);
 
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
@@ -2643,12 +2640,11 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 
 	/* 1st shear */
 	if (src->trueColor) {
-		dst1 = gdImageCreateTrueColor (newx, newy);
 		f = gdImageGetTrueColorPixel;
 	} else {
-		dst1 = gdImageCreate (newx, newy);
 		f = gdImageGetPixel;
 	}
+	dst1 = gdImageCreateTrueColor(newx, newy);
 
 	/******* Perform 1st shear (horizontal) ******/
 	if (dst1 == NULL) {
@@ -2749,6 +2745,11 @@ gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack)
 	if (src == NULL) {
 		return NULL;
 	}
+
+	if (!gdImageTrueColor(src) && clrBack>=gdImageColorsTotal(src)) {
+		return NULL;
+	}
+
 
 	while (dAngle >= 360.0) {
 		dAngle -= 360.0;
