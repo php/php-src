@@ -132,6 +132,7 @@ PHP_FUNCTION(hw_insdoc);
 PHP_FUNCTION(hw_identify);
 PHP_FUNCTION(hw_free_document);
 PHP_FUNCTION(hw_new_document);
+PHP_FUNCTION(hw_new_document_from_file);
 PHP_FUNCTION(hw_output_document);
 PHP_FUNCTION(hw_document_size);
 PHP_FUNCTION(hw_document_attributes);
