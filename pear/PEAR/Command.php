@@ -205,6 +205,15 @@ class PEAR_Command
         }
         return $GLOBALS['_PEAR_Command_commandopts'];
     }
+
+    function getHelp($command)
+    {
+        $cmds = PEAR_Command::getCommands();
+        if (isset($cmds[$command])) {
+            return call_user_func(array($cmds[$command], 'getHelp'), $command);
+        }
+        return false;
+    }
 }
 
 ?>

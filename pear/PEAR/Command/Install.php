@@ -57,6 +57,21 @@ class PEAR_Command_Install extends PEAR_Command_Common
         return array('install', 'uninstall', 'upgrade');
     }
 
+    function getHelp($command)
+    {
+        switch ($command) {
+            case 'install':
+                return array('<pear package>',
+                             'Installs a PEAR package created by the "package" command');
+            case 'uninstall':
+                return array('<package>',
+                             'Uninstalls a previously installed PEAR package');
+            case 'upgrade':
+                return array('<pear package>',
+                             'Upgrades a PEAR package installed in the system');
+        }
+    }
+
     // }}}
     // {{{ run()
 
