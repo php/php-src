@@ -416,6 +416,9 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
+	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
+		return FAILURE;
+	}
 
 	/* Make sure we detect we are a cgi - a bit redundancy here,
 	   but the default case is that we have to check only the first one. */
@@ -472,9 +475,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		ap_php_optarg = orig_optarg;
 	}
 
-	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
-		return FAILURE;
-	}
 #ifdef ZTS
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
