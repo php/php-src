@@ -24,9 +24,7 @@ Zend
 
 global
 ------
-    For PHP 4.3.0:
-    * Change PHP error messages, so that they point to pages or sections 
-      in the PHP Manual.   
+    For PHP 5.0.0
     * Make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
     * on some platforms unimplemented function will just do nothing 
@@ -35,8 +33,6 @@ global
     * Use arg_separator.input to implode args in the CGI sapi extension
       and arg_separator.input to explode in php_build_argv(). (DONE?)
     * Implement flush feature suitable for nested output buffers.
-
-    For PHP 5.0.0
     * bundle and use curl lib for fopen wrapper.
     * --enable-all in configure. (--enable-shared=max ...)
     * make configure print out a summary when it's done (like XEmacs)
@@ -50,7 +46,6 @@ global
     * Move most extensions and PEAR packages out of the PHP CVS tree,
       include them again during release packaging.
 
-
     Other
     * use thread-safe resolver functions (either require BIND 8 or adns).
     * implement javadoc based function docs template system.
@@ -58,7 +53,6 @@ global
     * find a better way to implement script timeouts. SIGVTALRM is used
       by some POSIX threads implementations (i.e. OpenBSD) and is not
       available in ZTS mode.
-
 
 documentation
 -------------
