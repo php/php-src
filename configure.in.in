@@ -333,7 +333,7 @@ AC_ARG_WITH(system-regex,
 [  --with-system-regex     Do not use the bundled regex library],
 [
     if test -n "$APXS"; then
-        if test -z "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
+        if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
             HSREGEX=yes
         else
             HSREGEX=no
@@ -347,7 +347,7 @@ AC_ARG_WITH(system-regex,
     fi
 ],[
     if test -n "$APXS"; then
-        if test -z "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
+        if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
             HSREGEX=yes
         else
             HSREGEX=no
