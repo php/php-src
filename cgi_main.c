@@ -143,7 +143,9 @@ static sapi_module_struct sapi_module = {
 	sapi_cgi_send_header,			/* send header handler */
 
 	sapi_cgi_read_post,				/* read POST data */
-	sapi_cgi_read_cookies			/* read Cookies */
+	sapi_cgi_read_cookies,			/* read Cookies */
+
+	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
 

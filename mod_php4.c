@@ -193,7 +193,9 @@ sapi_module_struct sapi_module = {
 	NULL,							/* send header handler */
 
 	sapi_apache_read_post,			/* read POST data */
-	sapi_apache_read_cookies		/* read Cookies */
+	sapi_apache_read_cookies,		/* read Cookies */
+
+	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
 

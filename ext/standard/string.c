@@ -82,13 +82,13 @@ PHP_FUNCTION(bin2hex)
    Get string length */
 PHP_FUNCTION(strlen)
 {
-	pval *str;
+	pval **str;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(str);
-	RETVAL_LONG(str->value.str.len);
+	convert_to_string_ex(str);
+	RETVAL_LONG((*str)->value.str.len);
 }
 /* }}} */
 

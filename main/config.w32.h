@@ -10,7 +10,11 @@
 #define HAVE_BINDLIB 1
 
 /* set to enable bcmath */
-#define WITH_BCMATH 0
+#define WITH_BCMATH 1
+
+/* set to enable bundled PCRE library */
+#define HAVE_BUNDLED_PCRE	1
+
 /* should be added to runtime config*/
 #define PHP3_URL_FOPEN 1
 

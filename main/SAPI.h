@@ -63,6 +63,7 @@ typedef struct {
 	char *post_data;
 	char *cookie_data;
 	uint content_length;
+	uint post_data_length;
 
 	char *path_translated;
 	char *request_uri;
@@ -118,8 +119,10 @@ SAPI_API void sapi_deactivate(SLS_D);
 SAPI_API int sapi_add_header(char *header_line, uint header_line_len);
 SAPI_API int sapi_send_headers();
 
+SAPI_API int sapi_register_post_readers(sapi_post_content_type_reader *post_content_type_readers);
 SAPI_API int sapi_register_post_reader(sapi_post_content_type_reader *post_content_type_reader);
 SAPI_API void sapi_unregister_post_reader(sapi_post_content_type_reader *post_content_type_reader);
+SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(char *content_type_dup SLS_DC));
 
 struct _sapi_module_struct {
 	char *name;
@@ -137,6 +140,8 @@ struct _sapi_module_struct {
 
 	int (*read_post)(char *buffer, uint count_bytes SLS_DC);
 	char *(*read_cookies)(SLS_D);
+
+	void (*default_post_reader)(char *content_type_dup SLS_DC);
 };
 
 
@@ -156,5 +161,7 @@ struct _sapi_module_struct {
 #define SAPI_POST_READER_FUNC(post_reader) void post_reader(char *content_type_dup SLS_DC)
 
 SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
+
+#define STANDARD_SAPI_MODULE_PROPERTIES NULL
 
 #endif /* _NEW_SAPI_H */

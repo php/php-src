@@ -384,6 +384,15 @@ SOURCE=.\ext\odbc\php_odbc.c
 # Begin Source File
 
 SOURCE=.\ext\pcre\php_pcre.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -595,22 +604,67 @@ SOURCE=.\regex\regfree.c
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\chartables.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\get.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\maketables.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\pcre.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\study.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "Header Files No. 3"
