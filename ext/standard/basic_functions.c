@@ -47,6 +47,17 @@
 #include "php_globals.h"
 #include "SAPI.h"
 
+#if APACHE 
+/* 
+  	ap_compat.h does a 
+  	#define md5 ap_md5
+  	which "kills" out md5 function.
+*/
+#ifdef md5
+#undef md5
+#endif
+#endif
+
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static pval *user_compare_func_name;
