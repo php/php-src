@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- added 'W' flag to date() function to return week number of year using 
+  ISO 8601 standard (Colin)
 - Allow the PostgreSQL driver to do internal row counting when iterating
   through result sets. (gvz@2scale.net)
 - Updated ext/mysql/libmysql to version 3.23.39; Portability fixes, minor
