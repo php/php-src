@@ -101,7 +101,7 @@ extern int le_fp;
 /*
  * Converts a host name to an IP address.
  */
-int lookup_hostname(const char *addr, struct in_addr *in)
+PHPAPI int lookup_hostname(const char *addr, struct in_addr *in)
 {
 	struct hostent *host_info;
 
@@ -119,7 +119,7 @@ int lookup_hostname(const char *addr, struct in_addr *in)
 /* }}} */
 /* {{{ php_is_persistent_sock */
 
-int php_is_persistent_sock(int sock)
+PHPAPI int php_is_persistent_sock(int sock)
 {
 	char *key;
 	FLS_FETCH();
@@ -371,7 +371,7 @@ PHP_FUNCTION(pfsockopen)
 			FG(phpsockbuf) = sock->next; \
 		pefree(sock, sock->persistent)
 
-void php_cleanup_sockbuf(int persistent FLS_DC)
+PHPAPI void php_cleanup_sockbuf(int persistent FLS_DC)
 {
 	php_sockbuf *now, *next;
 
@@ -429,7 +429,7 @@ PHPAPI php_sockbuf *php_get_socket(int socket)
 	return sock;
 }
 
-size_t php_sock_set_def_chunk_size(size_t size)
+PHPAPI size_t php_sock_set_def_chunk_size(size_t size)
 {
 	size_t old;
 	FLS_FETCH();
@@ -442,7 +442,7 @@ size_t php_sock_set_def_chunk_size(size_t size)
 	return old;
 }
 
-int php_sockdestroy(int socket)
+PHPAPI int php_sockdestroy(int socket)
 {
 	int ret = 0;
 	php_sockbuf *sock;
@@ -469,7 +469,7 @@ int php_sockdestroy(int socket)
 
 #define SOCK_CLOSE(s) shutdown(s, 0); closesocket(s)
 
-int php_sock_close(int socket)
+PHPAPI int php_sock_close(int socket)
 {
 	int ret = 0;
 	php_sockbuf *sock;
@@ -579,7 +579,7 @@ static size_t php_sockread(php_sockbuf *sock)
 	return nr_read;
 }
 
-int php_sockset_blocking(int socket, int mode)
+PHPAPI int php_sockset_blocking(int socket, int mode)
 {
 	int old;
 	SOCK_FIND(sock, socket);
@@ -591,7 +591,7 @@ int php_sockset_blocking(int socket, int mode)
 	return old;
 }
 
-void php_sockset_timeout(int socket, struct timeval *timeout)
+PHPAPI void php_sockset_timeout(int socket, struct timeval *timeout)
 {
 	SOCK_FIND(sock, socket);
 
@@ -606,7 +606,7 @@ void php_sockset_timeout(int socket, struct timeval *timeout)
 /*
  * FIXME: fgets depends on '\n' as line delimiter
  */
-char *php_sock_fgets(char *buf, size_t maxlen, int socket)
+PHPAPI char *php_sock_fgets(char *buf, size_t maxlen, int socket)
 {
 	char *p = NULL;
 	char *ret = NULL;
@@ -665,7 +665,7 @@ char *php_sock_fgets(char *buf, size_t maxlen, int socket)
  * ss@2ns.de 19990528
  */
 
-int php_sock_fgetc(int socket)
+PHPAPI int php_sock_fgetc(int socket)
 {
 	int ret = EOF;
 	SOCK_FIND_AND_READ_MAX(1);
@@ -678,7 +678,7 @@ int php_sock_fgetc(int socket)
 	return ret;
 }
 
-int php_sock_feof(int socket)
+PHPAPI int php_sock_feof(int socket)
 {
 	int ret = 0;
 	SOCK_FIND(sock, socket);
@@ -694,7 +694,7 @@ int php_sock_feof(int socket)
 
 /* {{{ php_sock_fread() */
 
-size_t php_sock_fread(char *ptr, size_t size, int socket)
+PHPAPI size_t php_sock_fread(char *ptr, size_t size, int socket)
 {
 	size_t ret = 0;
 	SOCK_FIND_AND_READ_MAX(size);
@@ -715,7 +715,7 @@ size_t php_sock_fread(char *ptr, size_t size, int socket)
 /* {{{ module start/shutdown functions */
 
 	/* {{{ php_msock_destroy */
-void php_msock_destroy(int *data)
+PHPAPI void php_msock_destroy(int *data)
 {
 	close(*data);
 }
