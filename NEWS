@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2004, Version 4.3.7
+- Fixed bug #28564 (Problem building informix as a shared extension). 
+  (roques at mti dot ag, Ilia)
 
 25 May 2004, Version 4.3.7RC1
 - Upgraded bundled GD library to 2.0.23. (Ilia)

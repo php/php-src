@@ -37,6 +37,10 @@
 /* prevent mod_ssl.h's header file from being included. */
 #define AP_HOOK_H
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/php_standard.h"
