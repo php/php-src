@@ -60,7 +60,7 @@
 #define CONFIGURATION_FILE_PATH "php.ini"
 #define USE_CONFIG_FILE 1
 
-#define PHP_INCLUDE_PATH	"c:\\php4\\pear"
+#define PHP_INCLUDE_PATH	".;c:\\php4\\pear"
 
 
 /* Undefine if you want stricter XML/SGML compliance by default */
