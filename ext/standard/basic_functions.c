@@ -2796,7 +2796,7 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	return 0;
 }
 
-/* {{{ proto bool import_request_variables(string types, string prefix)
+/* {{{ proto bool import_request_variables(string types [, string prefix])
    Import GET/POST/Cookie variables into the global scope */
 PHP_FUNCTION(import_request_variables)
 {
