@@ -70,6 +70,7 @@ typedef struct _zend_class_iterator_funcs {
 enum zend_object_iterator_kind {
 	ZEND_ITER_INVALID,
 	ZEND_ITER_PLAIN_ARRAY,
+	ZEND_ITER_PLAIN_OBJECT,
 	ZEND_ITER_OBJECT
 };
 
