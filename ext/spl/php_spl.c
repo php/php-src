@@ -211,7 +211,7 @@ PHP_FUNCTION(spl_classes)
 	array_init(return_value);
 
 	SPL_ADD_CLASS(ArrayAccess);
-	SPL_ADD_CLASS(ArrayClass);
+	SPL_ADD_CLASS(ArrayObject);
 	SPL_ADD_CLASS(ArrayIterator);
 	SPL_ADD_CLASS(ArrayRead);
 	SPL_ADD_CLASS(DirectoryIterator);
