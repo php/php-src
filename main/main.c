@@ -574,13 +574,13 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_FAILED_INCLUDE_FOPEN: {
 				PLS_FETCH();
 
-				php3_error(E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php3_strip_url_passwd((char *) data), PG(include_path));
+				php3_error(E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php3_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_REQUIRE_FOPEN: {
 				PLS_FETCH();
 
-				php3_error(E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php3_strip_url_passwd((char *) data), PG(include_path));
+				php3_error(E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php3_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
