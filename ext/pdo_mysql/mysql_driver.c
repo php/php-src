@@ -30,7 +30,7 @@
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 
-int _mysql_error(char *what, int errno, const char *file, int line TSRMLS_DC) /* {{{ */
+int _pdo_mysql_error(char *what, int errno, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	switch (errno) {
 		default:
@@ -59,7 +59,7 @@ static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt TSRMLS_DC)
+static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, long options, zval *driver_options TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
