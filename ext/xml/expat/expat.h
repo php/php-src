@@ -15,6 +15,7 @@
 #endif
 
 #include <stdlib.h>
+#include "php_compat.h"
 
 #ifndef XMLPARSEAPI
 #if defined(_MSC_EXTENSIONS) && !defined(__BEOS__) && !defined(__CYGWIN__)
