@@ -1533,7 +1533,7 @@ PHP_FUNCTION(rmdir)
 
 	convert_to_string_ex(arg1);
 
-	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg1), NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg1), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
