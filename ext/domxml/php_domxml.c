@@ -232,6 +232,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_node_unlink_node,										NULL)
 	PHP_FE(domxml_node_set_content,										NULL)
 	PHP_FE(domxml_node_get_content,										NULL)
+	PHP_FE(domxml_node_add_namespace,									NULL)
 	PHP_FE(domxml_new_xmldoc,											NULL)
 	PHP_FALIAS(domxml_new_doc,				domxml_new_xmldoc,	NULL)
 	PHP_FE(domxml_parser,												NULL)
@@ -295,6 +296,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(implementation,			domxml_doc_implementation,		NULL)
 	PHP_FALIAS(document_element,		domxml_doc_document_element,	NULL)
 	PHP_FALIAS(create_element,			domxml_doc_create_element,		NULL)
+	PHP_FALIAS(create_element_ns,		domxml_doc_create_element_ns,	NULL)
 	PHP_FALIAS(create_text_node,		domxml_doc_create_text_node,	NULL)
 	PHP_FALIAS(create_comment,			domxml_doc_create_comment,		NULL)
 	PHP_FALIAS(create_attribute,		domxml_doc_create_attribute,	NULL)
@@ -392,6 +394,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(namespace_uri,			domxml_node_namespace_uri,				NULL)
 	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
 /* Non DOM functions start here */
+	PHP_FALIAS(add_namespace,			domxml_node_add_namespace,		NULL)
 	PHP_FALIAS(add_child,				domxml_node_append_child,		NULL)
 	PHP_FALIAS(append_sibling,			domxml_node_append_sibling,		NULL)
 	PHP_FALIAS(node,					domxml_node,					NULL)
@@ -2374,6 +2377,11 @@ PHP_FUNCTION(domxml_node_append_child)
 		RETURN_FALSE;
 	}
 
+	/* copy namespace if one is there */
+	if (child->ns) {
+		new_child->ns = child->ns;
+	}
+
 	/* FIXME reverted xmlAddChildList; crashes
 	 * Uwe: must have been a temporary problem. It works for me with both
 	 * xmlAddChildList and xmlAddChild
@@ -3282,6 +3290,69 @@ PHP_FUNCTION(domxml_doc_create_element)
 	} else {
 		DOMXML_RET_OBJ(rv, node, &ret);
 	}
+}
+/* }}} */
+
+/* {{{ proto object domxml_doc_create_element_ns(string uri, string name)
+   Creates new element node with a namespace*/
+PHP_FUNCTION(domxml_doc_create_element_ns)
+{
+	zval *id, *rv = NULL;
+	xmlNode *node;
+	xmlNs	*nsptr;
+	xmlDocPtr docp = NULL;
+	int ret, name_len, uri_len;
+	char *name, *uri;
+
+	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "ss", &uri, &uri_len, &name, &name_len);
+
+	nsptr = xmlSearchNsByHref(docp, xmlDocGetRootElement(docp), (xmlChar*) uri);
+	node = xmlNewNode(nsptr, name);
+
+	if (!node) {
+		RETURN_FALSE;
+	}
+	/* if no namespace with the same uri was found, we have to create a new one.
+	     I do this here with a + the adress of the node. this is not very sophisticated,
+		 therefore if someone has a better idea in creating unique prefixes, here's your
+		 chance (a0,a1, etc would be good enough, this is the way mozilla does it). I'm
+		 to lazy right now to think of a better solution... */
+	
+	if (nsptr == NULL) {
+		char prefix[20];
+		sprintf(prefix, "a%d",node);
+		nsptr = xmlNewNs(node, uri, prefix);
+		xmlSetNs(node, nsptr);
+	}
+	
+	node->doc = docp;
+
+	if(DOMXML_IS_TYPE(getThis(), domxmlelement_class_entry)) {
+		DOMXML_DOMOBJ_NEW(getThis(), node, &ret);
+	} else {
+		DOMXML_RET_OBJ(rv, node, &ret);
+	}
+}
+/* }}} */
+
+/* {{{ proto object domxml_node_add_namespace(string uri, string prefix)
+   Adds a namespace declaration to a node */
+PHP_FUNCTION(domxml_node_add_namespace)
+{
+	zval *id;
+	xmlNode *nodep;
+	xmlNs	*nsptr;
+	int prefix_len, uri_len;
+	char *prefix, *uri;
+
+	DOMXML_PARAM_FOUR(nodep, id, le_domxmldocp, "ss", &uri, &uri_len, &prefix, &prefix_len);
+
+	if (NULL == (nsptr = xmlNewNs(nodep,uri,prefix))) {
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+	
 }
 /* }}} */
 
