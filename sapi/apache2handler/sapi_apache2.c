@@ -487,6 +487,8 @@ static int php_handler(request_rec *r)
 		ap_add_cgi_vars(r);
 	}
 
+zend_first_try {
+
 	ctx = SG(server_context);
 	if (ctx == NULL) {
 		ctx = SG(server_context) = apr_pcalloc(r->pool, sizeof(*ctx));
@@ -555,6 +557,8 @@ static int php_handler(request_rec *r)
 	} else {
 		ctx->r = parent_req;
 	}
+
+} zend_end_try();
 
 	return OK;
 }
