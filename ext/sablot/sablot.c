@@ -886,7 +886,7 @@ PHP_FUNCTION(xslt_set_base)
 	SABLOTLS_FETCH();
 
 	if (argc < 2 || argc > 3 ||
-	    zend_get_parameters_ex(argc, &xh, &scheme, &base,) == FAILURE) {
+	    zend_get_parameters_ex(argc, &xh, &scheme, &base) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
