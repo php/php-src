@@ -642,13 +642,8 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			case BP_VAR_RW:
 			case BP_VAR_W:
 				if (!PZVAL_IS_REF(container)) {
-					container->refcount--;
-					if (container->refcount>0) {
-						ALLOC_ZVAL(container);
-						*container_ptr = container;
-						container->is_ref=0;
-					}
-					container->refcount=1;
+					SEPARATE_ZVAL(container_ptr);
+					container = *container_ptr;
 				}
 				array_init(container);
 				break;
@@ -658,12 +653,8 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 	switch (container->type) {
 		case IS_ARRAY:
 			if ((type==BP_VAR_W || type==BP_VAR_RW) && container->refcount>1 && !PZVAL_IS_REF(container)) {
-				container->refcount--;
-				ALLOC_ZVAL(*container_ptr);
-				**container_ptr = *container;
+				SEPARATE_ZVAL(container_ptr);
 				container = *container_ptr;
-				INIT_PZVAL(container);
-				zendi_zval_copy_ctor(*container);
 			}
 			if (op2->op_type == IS_UNUSED) {
 				zval *new_zval = &EG(uninitialized_zval);
@@ -826,13 +817,8 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 			case BP_VAR_RW:
 			case BP_VAR_W:
 				if (!PZVAL_IS_REF(container)) {
-					container->refcount--;
-					if (container->refcount>0) {
-						ALLOC_ZVAL(container);
-						*container_ptr = container;
-						container->is_ref=0;
-					}
-					container->refcount=1;
+					SEPARATE_ZVAL(container_ptr);
+					container = *container_ptr;
 				}
 				object_init(container);
 				break;
@@ -855,12 +841,8 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 
 
 	if ((type==BP_VAR_W || type==BP_VAR_RW) && container->refcount>1 && !PZVAL_IS_REF(container)) {
-		container->refcount--;
-		ALLOC_ZVAL(*container_ptr);
-		**container_ptr = *container;
+		SEPARATE_ZVAL(container_ptr);
 		container = *container_ptr;
-		INIT_PZVAL(container);
-		zendi_zval_copy_ctor(*container);
 	}
 	*retval = zend_fetch_property_address_inner(container->value.obj.properties, op2, Ts, type ELS_CC);
 	SELECTIVE_PZVAL_LOCK(**retval, result);
