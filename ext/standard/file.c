@@ -254,7 +254,7 @@ PHP_FUNCTION(get_meta_tags)
 
 	tok_last = TOK_EOF;
 
-	while (!done && (tok = php_next_meta_token(&md)) != TOK_EOF) {
+	while (!done && (tok = php_next_meta_token(&md TSRMLS_CC)) != TOK_EOF) {
 		if (tok == TOK_ID) {
 			if (tok_last == TOK_OPENTAG) {
 				md.in_meta = !strcasecmp("meta", md.token_data);
@@ -785,7 +785,7 @@ PHP_FUNCTION(socket_set_blocking)
 		if (php_set_sock_blocking(socketd, block) == FAILURE)
 			RETURN_FALSE;
 
-		php_stream_sock_set_blocking((php_stream*)what, block == 0 ? 0 : 1);
+		php_stream_sock_set_blocking((php_stream*)what, block == 0 ? 0 : 1 TSRMLS_CC);
 		RETURN_TRUE;	
 	}
 	RETURN_FALSE;
@@ -832,7 +832,7 @@ PHP_FUNCTION(socket_set_timeout)
 		t.tv_usec = 0;
 
 	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
-		php_stream_sock_set_timeout((php_stream*)what, &t);
+		php_stream_sock_set_timeout((php_stream*)what, &t TSRMLS_CC);
 		RETURN_TRUE;
 	}
 
@@ -1947,7 +1947,7 @@ PHP_FUNCTION(realpath)
 
 /* {{{ php_next_meta_token
    Tokenizes an HTML file for get_meta_tags */
-php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
+php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 {
 	int ch = 0, compliment;
 	char buff[META_DEF_BUFSIZE + 1];

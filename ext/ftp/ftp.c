@@ -547,6 +547,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type)
 	char			*ptr;
 	int			lastch;
 	int			rcvd;
+	TSRMLS_FETCH();
 
 	if (ftp == NULL)
 		return 0;
@@ -619,6 +620,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type)
 	int			size;
 	char			*ptr;
 	int			ch;
+	TSRMLS_FETCH();
 
 	if (ftp == NULL)
 		return 0;
