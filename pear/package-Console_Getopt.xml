@@ -13,12 +13,6 @@ loaded.
   <license>PHP License</license>
   <maintainers>
     <maintainer>
-      <user>vblavet</user>
-      <role>lead</role>
-      <name>Vincent Blavet</name>
-      <email>vincent@blavet.net</email>
-    </maintainer>
-    <maintainer>
       <user>andrei</user>
       <role>lead</role>
       <name>Andrei Zmievski</name>
