@@ -1,7 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
-- added mb_get_info() to get internal settings of mbstring.
+- Added second parameter to count() that can be used to specify either normal
+  or recursive counting. (patch by Vlad Bosinceanu <glipy@fx.ro>)
+- Added mb_get_info() to get internal settings of mbstring.
 - Added async query functions to PostgreSQL module (Yasuo)
 - Added pg_copy_to()/pg_copy_from() for PostgreSQL module (Youichi, Yasuo)
 - Added IPv6 support in FTP extension. (Stig Venaas)
