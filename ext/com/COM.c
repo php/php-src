@@ -1846,10 +1846,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 				return retval;
 		}
 
-		if (obj == obj_prop) {
-			// not head
-			pval_destructor(&overloaded_property->element);
-		}
+		pval_destructor(&overloaded_property->element);
 
 		if (V_VT(var_result) == VT_DISPATCH) {
 			if (V_DISPATCH(var_result) == NULL) {
