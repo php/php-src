@@ -29,10 +29,6 @@
 #endif
 #if HAVE_FBSQL
 
-#ifdef ZTS
-#include "TSRM.h"
-#endif
-
 extern zend_module_entry fbsql_module_entry;
 #define fbsql_module_ptr &fbsql_module_entry
 
