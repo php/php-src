@@ -676,7 +676,8 @@ ZEND_API int _register_list_destructors(void (*list_destructor)(void *), void (*
 int zend_register_functions(zend_function_entry *functions, HashTable *function_table)
 {
 	zend_function_entry *ptr = functions;
-	zend_internal_function internal_function;
+	zend_function function;
+	zend_internal_function *internal_function = &function;
 	int count=0,unload=0;
 	HashTable *target_function_table = function_table;
 	CLS_FETCH();
@@ -684,18 +685,18 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 	if (!target_function_table) {
 		target_function_table = CG(function_table);
 	}
-	internal_function.type = ZEND_INTERNAL_FUNCTION;
+	internal_function->type = ZEND_INTERNAL_FUNCTION;
 	
 	while (ptr->fname) {
-		internal_function.handler = ptr->handler;
-		internal_function.arg_types = ptr->func_arg_types;
-		internal_function.function_name = ptr->fname;
-		if (!internal_function.handler) {
+		internal_function->handler = ptr->handler;
+		internal_function->arg_types = ptr->func_arg_types;
+		internal_function->function_name = ptr->fname;
+		if (!internal_function->handler) {
 			zend_error(E_CORE_WARNING,"Null function defined as active function");
 			zend_unregister_functions(functions, count, target_function_table);
 			return FAILURE;
 		}
-		if (zend_hash_add(target_function_table, ptr->fname, strlen(ptr->fname)+1, &internal_function, sizeof(zend_internal_function), NULL) == FAILURE) {
+		if (zend_hash_add(target_function_table, ptr->fname, strlen(ptr->fname)+1, &function, sizeof(zend_function), NULL) == FAILURE) {
 			unload=1;
 			break;
 		}
