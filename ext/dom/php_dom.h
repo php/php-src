@@ -62,6 +62,8 @@ extern zend_module_entry dom_module_entry;
    Can be checked with phpversion("dom");
 */
 #define DOM_API_VERSION "20031129"
+/* Define a custom type for iterating using an unused nodetype */
+#define DOM_NODESET XML_XINCLUDE_START
 
 typedef struct _dom_nnodemap_object {
 	dom_object *baseobj;
