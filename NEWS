@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Added zend_declare_property_...() and zend_update_property_...()
+  API functions for bool, double and binary safe strings. (Hartmut)
 - Moved extensions to PECL:
   . ext/dio    (Jani, Derick)
   . ext/yp     (Jani, Derick)
