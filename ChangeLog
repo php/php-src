@@ -1,3 +1,53 @@
+2004-04-25  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/tests/bug28147.phpt:
+      - MFB: Fixed bug #28147 (Crash with drawing anti-alised lines)
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/libgd/gd.c
+      ext/gd/tests/bug28147.phpt
+      ext/gd/tests/bug28147.phpt:
+      - Fixed bug #28147 (Crash with drawing anti-aliased lines)
+
+2004-04-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Skip correct amount of stack entries
+
+    * ZendEngine2/zend_interfaces.c:
+      Capture potential problem by error message
+
+    * ZendEngine2/zend_reflection_api.c:
+      Show number of classes
+
+    * NEWS:
+      BFN
+
+2004-04-25  Andi Gutmans  <andi@zend.com>
+
+    * NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - RC3-dev
+
+    * (php_5_0_0RC2)
+      NEWS:
+      - This was forgotten
+
+    * NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - RC2
+
+2004-04-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      Spell it out.
+
 2004-04-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * tests/strings/002.phpt:

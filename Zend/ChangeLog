@@ -1,3 +1,23 @@
+2004-04-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      Skip correct amount of stack entries
+
+    * zend_interfaces.c:
+      Capture potential problem by error message
+
+    * zend_reflection_api.c:
+      Show number of classes
+
+2004-04-25  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - RC3-dev
+
+    * (php_5_0_0RC2)
+      zend.h:
+      - RC2
+
 2004-04-23  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c:
