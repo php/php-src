@@ -1,3 +1,17 @@
+2000-09-18  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php:
+    * added return* methods for all form elements (by Urs Gehrig <urs@cicle.ch>)
+
+2000-09-18  Daniel Beulshausen  <daniel@php4win.de>
+
+    * main/config.w32.h
+      win32/php4dllts.dsp: let windows build with trans sid
+
+2000-09-18  Stanislav Malyshev  <stas@zend.com>
+
+    * main/network.c: Fix crash
+
 2000-09-17  Stanislav Malyshev  <stas@zend.com>
 
     * ext/standard/math.c: Fix decbin
