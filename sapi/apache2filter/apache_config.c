@@ -122,7 +122,7 @@ const command_rec dir_cmds[] =
 {
 	AP_INIT_TAKE2("php_value", php_apache_value_handler, NULL, OR_OPTIONS,
                   "PHP Value Modifier"),
-	AP_INIT_TAKE2("php_admin_value", php_apache_admin_value_handler, NULL, OR_OPTIONS,
+	AP_INIT_TAKE2("php_admin_value", php_apache_admin_value_handler, NULL, OR_NONE,
                   "PHP Value Modifier"),
    {NULL}
 };
