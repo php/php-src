@@ -189,7 +189,7 @@ ZEND_API void wrong_param_count()
 ZEND_API inline int array_init(zval *arg)
 {
 	arg->value.ht = (HashTable *) emalloc(sizeof(HashTable));
-	if (!arg->value.ht || zend_hash_init(arg->value.ht, 0, NULL, PVAL_PTR_DTOR, 0)) {
+	if (!arg->value.ht || zend_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0)) {
 		zend_error(E_CORE_ERROR, "Cannot allocate memory for array");
 		return FAILURE;
 	}
@@ -207,7 +207,7 @@ ZEND_API inline int object_init_ex(zval *arg, zend_class_entry *class_type)
 		class_type->constants_updated = 1;
 	}
 	arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
-	zend_hash_init(arg->value.obj.properties, 0, NULL, PVAL_PTR_DTOR, 0);
+	zend_hash_init(arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(arg->value.obj.properties, &class_type->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	arg->type = IS_OBJECT;
 	arg->value.obj.ce = class_type;
@@ -812,7 +812,7 @@ ZEND_API zend_class_entry *register_internal_class(zend_class_entry *class_entry
 	class_entry->refcount = (int *) malloc(sizeof(int));
 	*class_entry->refcount = 1;
 	class_entry->constants_updated = 0;
-	zend_hash_init(&class_entry->default_properties, 0, NULL, PVAL_PTR_DTOR, 1);
+	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1);
 
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);

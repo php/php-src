@@ -1205,7 +1205,7 @@ HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
 
 	/* Create and initialize output hash */
 	out_hash = (HashTable *)emalloc(sizeof(HashTable));
-	zend_hash_init(out_hash, 0, NULL, PVAL_PTR_DTOR, 0);
+	zend_hash_init(out_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
 	/* Start at the beginning of the input hash and copy
 	   entries to output hash until offset is reached */

@@ -414,7 +414,7 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			pval_arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
 			pval_arg->is_ref=1;
 			pval_arg->refcount=1;
-			zend_hash_init(pval_arg->value.obj.properties, 0, NULL, PVAL_PTR_DTOR, 0);
+			zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 			handle = (pval *) emalloc(sizeof(pval));
 			handle->type = IS_LONG;

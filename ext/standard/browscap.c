@@ -104,13 +104,13 @@ PHP_FUNCTION(get_browser)
 	*return_value = **agent;
 	return_value->type = IS_OBJECT;
 	pval_copy_constructor(return_value);
-	return_value->value.ht->pDestructor = PVAL_DESTRUCTOR;
+	return_value->value.ht->pDestructor = ZVAL_DESTRUCTOR;
 
 	while (zend_hash_find((*agent)->value.ht, "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
 		if (zend_hash_find(&browser_hash,(*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **)&agent)==FAILURE) {
 			break;
 		}
-		zend_hash_merge(return_value->value.ht,(*agent)->value.ht, PVAL_COPY_CTOR, (void *) &tmp, sizeof(pval), 0);
+		zend_hash_merge(return_value->value.ht,(*agent)->value.ht, ZVAL_COPY_CTOR, (void *) &tmp, sizeof(pval), 0);
 	}
 }
 

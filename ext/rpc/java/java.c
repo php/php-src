@@ -497,7 +497,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
     presult->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
     presult->is_ref=1;
     presult->refcount=1;
-    zend_hash_init(presult->value.obj.properties, 0, NULL, PVAL_PTR_DTOR, 0);
+    zend_hash_init(presult->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
   };
 
   handle = (pval *) emalloc(sizeof(pval));

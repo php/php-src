@@ -51,9 +51,9 @@ END_EXTERN_C()
 void zval_add_ref(zval **p);
 void zval_del_ref(zval **p);
 
-#define PVAL_DESTRUCTOR (int (*)(void *)) zval_dtor_wrapper
-#define PVAL_PTR_DTOR (int (*)(void *)) zval_ptr_dtor_wrapper
-#define PVAL_COPY_CTOR (void (*)(void *)) zval_copy_ctor_wrapper
+#define ZVAL_DESTRUCTOR (int (*)(void *)) zval_dtor_wrapper
+#define ZVAL_PTR_DTOR (int (*)(void *)) zval_ptr_dtor_wrapper
+#define ZVAL_COPY_CTOR (void (*)(void *)) zval_copy_ctor_wrapper
 
 ZEND_API void var_reset(zval *var);
 ZEND_API void var_uninit(zval *var);
