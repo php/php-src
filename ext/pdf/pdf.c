@@ -42,6 +42,7 @@
 #include "php_globals.h"
 #include "ext/standard/head.h"
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 
 #include <math.h>
 
