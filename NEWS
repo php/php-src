@@ -5,7 +5,7 @@ PHP 4.0                                                                    NEWS
 - Fixed problems with POST requests under the NSAPI module (Roberto Biancardi)
 - Added spliti() function. (Thies)
 - Fixed serializer behaviour with regards to serializing objects which class
-  definition was not available in the current context. (Sascha)
+  definition was not available in the deserializing context. (Sascha)
 - Improve memory cache performance and increase cache size. (Stas, Zend Engine)
 - Added a crc32 checksum function - used by the UdmSearch search engine
   and currently run through a system call.  This will speed up the UdmSearch
