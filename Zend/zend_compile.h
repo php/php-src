@@ -204,7 +204,6 @@ typedef struct _zend_execute_data {
 #define IS_VAR		(1<<2)
 #define IS_UNUSED	(1<<3)	/* Unused variable */
 
-
 #define EXT_TYPE_UNUSED		(1<<0)
 
 #include "zend_globals.h"
@@ -617,7 +616,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_LOCAL			1
 #define ZEND_FETCH_STATIC			2
 #define ZEND_FETCH_STATIC_MEMBER	3
-#define ZEND_FETCH_FROM_THIS		4
 
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
