@@ -381,11 +381,12 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 }
 
 
-zend_op_array *compile_filename(zval *filename, zend_bool unique CLS_DC)
+zend_op_array *compile_filename(int mode, zval *filename CLS_DC ELS_DC)
 {
 	zend_file_handle file_handle;
 	zval tmp;
 	zend_op_array *retval;
+	int error_reporting;
 
 	if (filename->type != IS_STRING) {
 		tmp = *filename;
@@ -397,7 +398,25 @@ zend_op_array *compile_filename(zval *filename, zend_bool unique CLS_DC)
 	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.opened_path = NULL;
+
+
+	if (mode==ZEND_REQUIRE) {
+		/* We don't want to hear about inclusion failures;  If we fail,
+		 * we'll generate a require failure
+		 */
+		error_reporting = EG(error_reporting);
+		EG(error_reporting) = 0;
+	}
 	retval = zend_compile_files(1 CLS_CC, 1, &file_handle);
+
+	if (mode==ZEND_REQUIRE) {
+		EG(error_reporting) = error_reporting;
+		if (!retval) {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, filename->value.str.val);
+			zend_bailout();		
+		}
+	}
+
 	if (filename==&tmp) {
 		zval_dtor(&tmp);
 	}
