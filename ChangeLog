@@ -1,3 +1,68 @@
+2002-07-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dio/dio.c: Fix bug: #16707
+
+2002-07-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: nuke another instance of newline suppression
+
+2002-07-05  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c: MFH
+
+    * main/rfc1867.c: Fix typo
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: Fix typo.
+
+2002-07-05  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      main/rfc1867.c:
+    fixed shift_jis character corruption including 0x5c as second byte following a slash on uploaded filename.
+
+2002-07-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: some seds want to see a newline, so we give them a newline
+
+    PR: #17072 and others
+
+    * configure.in:
+    Fix the Solaris issue where CPP was set wrongly to "cc -E", because
+    the AIX macro invoked the CPP check before the CC check, so that
+    autoconf did not know which $CC to use.
+
+    You can now close all those bug reports about unix.h and misdetected
+    headers.
+
+    * configure.in: Remove remainings of bsd_makefile
+
+2002-07-05  Dan Libby  <dan@libby.com>
+
+    * ext/xmlrpc/libxmlrpc/queue.c
+      ext/xmlrpc/libxmlrpc/simplestring.c
+      ext/xmlrpc/libxmlrpc/simplestring.h
+      ext/xmlrpc/libxmlrpc/system_methods.c
+      ext/xmlrpc/libxmlrpc/xml_element.c
+      ext/xmlrpc/libxmlrpc/xml_to_soap.c
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.h
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c
+      ext/xmlrpc/libxmlrpc/xmlrpc_private.h
+      ext/xmlrpc/php_xmlrpc.h
+      ext/xmlrpc/xmlrpc-epi-php.c:
+    merged in updates from SF project.  bring php repository up to date with xmlrpc-epi version 0.51
+
+2002-07-05  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php: * define PEAR_ZE2 when running with Zend Engine 2
+
+    * ext/standard/versioning.c: * fix segfault in case of odd version numbers
+
+    * ext/standard/versioning.c:
+    (PHP version_compare) added "alpha" and "beta", make tests pass
+
 2002-07-04  Sascha Schumann  <sascha@schumann.cx>
 
     * acinclude.m4
