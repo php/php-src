@@ -188,6 +188,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(html_doc_file,												NULL)
 #endif
 	PHP_FE(xmltree,														NULL)
+	PHP_FE(domxml_substitute_entities_default,														NULL)
 	PHP_FE(domxml_add_root,												NULL)
 	PHP_FE(domxml_dump_mem,												NULL)
 	PHP_FE(domxml_dump_mem_file,										NULL)
@@ -2839,6 +2840,28 @@ PHP_FUNCTION(html_doc_file)
 }
 /* }}} */
 #endif  /* defined(LIBXML_HTML_ENABLED) */
+
+/* {{{ proto bool domxml_substitute_entities_default(bool enable)
+   Set and return the previous value for default entity support */
+PHP_FUNCTION(domxml_substitute_entities_default)
+{
+	zend_bool enable;
+	int old_val, new_val;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &enable) == FAILURE) {
+		return;
+	}
+
+	new_val = (enable) ? 1 : 0;
+	old_val = xmlSubstituteEntitiesDefault(new_val);
+
+	if (old_val) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 
 /* {{{ proto bool domxml_node_text_concat(string content)
    Add string tocontent of a node */
