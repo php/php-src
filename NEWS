@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Added substr_count() from Peter Kovacs. (Andrei)
 - Add an optional third argument to fseek to indicate were to seek from.
   (Andrei)
 - OCIBindByName() will no longer complain about bindlength beeing zero. (Thies)
