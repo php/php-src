@@ -32,7 +32,7 @@ if test "$PHP_SABLOT" != "no"; then
 
   testval=no
   for i in $PHP_EXPAT_DIR $SABLOT_DIR; do
-    if test -f $i/lib/libexpat.a" -o -f "$i/lib/libexpat.$SHLIB_SUFFIX_NAME; then
+    if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.$SHLIB_SUFFIX_NAME; then
       AC_DEFINE(HAVE_LIBEXPAT2,1,[ ])
       PHP_ADD_LIBRARY_WITH_PATH(expat, $i/lib, SABLOT_SHARED_LIBADD)
       PHP_ADD_INCLUDE($i/include)
