@@ -58,9 +58,6 @@ enum REQ_TYPES
 	REQ_SERIALIZE,
 	REQ_LAST,
 	REQ_INTERNAL_BEGIN=1023,
-	REQ_POPEN,
-	REQ_PCLOSE,
-	REQ_LOADDLL,
 	REQ_INTERNALLAST,
 };
 enum REQ_ERRORS
@@ -82,6 +79,10 @@ enum REQ_ERRORS
 	REQE_NOFN,
 	REQE_UNKNOWN
 };
+
+#define REQ_POPEN               1024
+#define REQ_PCLOSE              1025
+#define REQ_PING                1026
 
 typedef struct _requestPacket
 {
@@ -136,6 +137,8 @@ int FormatRequestStrings(REQB **ppreq, int stat, char *session, int n, char **st
 int DoSingleRequest(char *hostname, int port, REQB **preq);
 void *OpenReqConn(char *hostname, int port);
 void CloseReqConn(void *conn);
+void DeleteReqConn(void *conn);
+unsigned char ReopenReqConn(void *conn);
 int DoRequest(void *conn, REQB **preq);
 char *ReqbErr(REQB *reqb);
 
