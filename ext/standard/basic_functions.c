@@ -100,7 +100,6 @@ function_entry basic_functions[] = {
 	PHP_FE(reset, 									first_arg_force_ref)
 	PHP_FE(current, 								first_arg_force_ref)
 	PHP_FE(key, 									first_arg_force_ref)
-	PHP_FE(each, 									first_arg_force_ref)
 	PHP_FALIAS(pos,				current,			first_arg_force_ref)
 	
 	PHP_FE(time,									NULL)
@@ -137,11 +136,8 @@ function_entry basic_functions[] = {
 	PHP_FE(phpversion,								NULL)
 	PHP_FE(phpcredits,								NULL)
 	
-	PHP_FE(strlen,									NULL)
-	PHP_FE(strcmp,									NULL)
 	PHP_FE(strspn,									NULL)
 	PHP_FE(strcspn,									NULL)
-	PHP_FE(strcasecmp,								NULL)
 	PHP_FE(strtok,									NULL)
 	PHP_FE(strtoupper,								NULL)
 	PHP_FE(strtolower,								NULL)
@@ -216,8 +212,6 @@ function_entry basic_functions[] = {
 	PHP_FE(checkdnsrr,								NULL)
 	PHP_FE(getmxrr,									second_and_third_args_force_ref)
 #endif
-
-	PHP_FE(error_reporting,							NULL)
 
 	PHP_FE(getmyuid,								NULL)
 	PHP_FE(getmypid,								NULL)
@@ -557,30 +551,6 @@ PHP_FUNCTION(putenv)
 #endif
 
 
-PHP_FUNCTION(error_reporting)
-{
-	pval *arg;
-	int old_error_reporting;
-	ELS_FETCH();
-
-	old_error_reporting = EG(error_reporting);
-	switch (ARG_COUNT(ht)) {
-		case 0:
-			break;
-		case 1:
-			if (getParameters(ht,1,&arg) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long(arg);
-			EG(error_reporting)=arg->value.lval;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
-	
-	RETVAL_LONG(old_error_reporting);
-}
 
 PHP_FUNCTION(toggle_short_open_tag)
 {
@@ -1096,58 +1066,6 @@ PHP_FUNCTION(next)
 	
 	*return_value = **entry;
 	pval_copy_constructor(return_value);
-}
-
-
-PHP_FUNCTION(each)
-{
-	pval *array,*entry,**entry_ptr, *tmp;
-	char *string_key;
-	ulong num_key;
-	pval **inserted_pointer;
-	HashTable *target_hash;
-	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	target_hash = HASH_OF(array);
-	if (!target_hash) {
-		php_error(E_WARNING,"Variable passed to each() is not an array or object");
-		return;
-	}
-	if (zend_hash_get_current_data(target_hash, (void **) &entry_ptr)==FAILURE) {
-		RETURN_FALSE;
-	}
-	array_init(return_value);
-	entry = *entry_ptr;
-
-	/* add value elements */
-	if (entry->EA.is_ref) {
-		tmp = (pval *)emalloc(sizeof(pval));
-		*tmp = *entry;
-		pval_copy_constructor(tmp);
-		tmp->EA.is_ref=0;
-		tmp->EA.locks = 0;
-		tmp->refcount=0;
-		entry=tmp;
-	}
-	zend_hash_index_update(return_value->value.ht, 1, &entry, sizeof(pval *), NULL);
-	entry->refcount++;
-	zend_hash_update_ptr(return_value->value.ht, "value", sizeof("value"), entry, sizeof(pval *), NULL);
-	entry->refcount++;
-
-	/* add the key elements */
-	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
-		case HASH_KEY_IS_STRING:
-			add_get_index_string(return_value,0,string_key,(void **) &inserted_pointer,0);
-			break;
-		case HASH_KEY_IS_LONG:
-			add_get_index_long(return_value,0,num_key, (void **) &inserted_pointer);
-			break;
-	}
-	zend_hash_update(return_value->value.ht, "key", sizeof("key"), inserted_pointer, sizeof(pval *), NULL);
-	(*inserted_pointer)->refcount++;
-	zend_hash_move_forward(target_hash);
 }
 
 	
