@@ -691,7 +691,7 @@ static int php_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto int mysql_connect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
+/* {{{ proto resource mysql_connect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
    Open a connection to a MySQL Server */
 PHP_FUNCTION(mysql_connect)
 {
@@ -699,7 +699,7 @@ PHP_FUNCTION(mysql_connect)
 }
 /* }}} */
 
-/* {{{ proto int mysql_pconnect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
+/* {{{ proto resource mysql_pconnect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
    Open a persistent connection to a MySQL Server */
 PHP_FUNCTION(mysql_pconnect)
 {
@@ -707,7 +707,7 @@ PHP_FUNCTION(mysql_pconnect)
 }
 /* }}} */
 
-/* {{{ proto int mysql_close([int link_identifier])
+/* {{{ proto bool mysql_close([int link_identifier])
    Close a MySQL connection */
 PHP_FUNCTION(mysql_close)
 {
@@ -746,7 +746,7 @@ PHP_FUNCTION(mysql_close)
 }
 /* }}} */
 
-/* {{{ proto int mysql_select_db(string database_name [, int link_identifier])
+/* {{{ proto bool mysql_select_db(string database_name [, int link_identifier])
    Select a MySQL database */
 PHP_FUNCTION(mysql_select_db)
 {
@@ -893,7 +893,7 @@ PHP_FUNCTION(mysql_get_server_info)
 #endif
 
 #if MYSQL_VERSION_ID < 40000
-/* {{{ proto int mysql_create_db(string database_name [, int link_identifier])
+/* {{{ proto bool mysql_create_db(string database_name [, int link_identifier])
    Create a MySQL database */
 PHP_FUNCTION(mysql_create_db)
 {
@@ -931,7 +931,7 @@ PHP_FUNCTION(mysql_create_db)
 }
 /* }}} */
 
-/* {{{ proto int mysql_drop_db(string database_name [, int link_identifier])
+/* {{{ proto bool mysql_drop_db(string database_name [, int link_identifier])
    Drop (delete) a MySQL database */
 PHP_FUNCTION(mysql_drop_db)
 {
@@ -1062,7 +1062,7 @@ static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 }
 /* }}} */
 
-/* {{{ proto int mysql_query(string query [, int link_identifier] [, int result_mode])
+/* {{{ proto resource mysql_query(string query [, int link_identifier] [, int result_mode])
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_query)
 {
@@ -1071,7 +1071,7 @@ PHP_FUNCTION(mysql_query)
 /* }}} */
 
 
-/* {{{ proto int mysql_unbuffered_query(string query [, int link_identifier] [, int result_mode])
+/* {{{ proto resource mysql_unbuffered_query(string query [, int link_identifier] [, int result_mode])
    Send an SQL query to MySQL, without fetching and buffering the result rows */
 PHP_FUNCTION(mysql_unbuffered_query)
 {
@@ -1080,7 +1080,7 @@ PHP_FUNCTION(mysql_unbuffered_query)
 /* }}} */
 
 
-/* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier])
+/* {{{ proto resource mysql_db_query(string database_name, string query [, int link_identifier])
    Send an SQL query to MySQL */
 PHP_FUNCTION(mysql_db_query)
 {
@@ -1113,7 +1113,7 @@ PHP_FUNCTION(mysql_db_query)
 /* }}} */
 
 
-/* {{{ proto int mysql_list_dbs([int link_identifier])
+/* {{{ proto resource mysql_list_dbs([int link_identifier])
    List databases available on a MySQL server */
 PHP_FUNCTION(mysql_list_dbs)
 {
@@ -1149,7 +1149,7 @@ PHP_FUNCTION(mysql_list_dbs)
 /* }}} */
 
 
-/* {{{ proto int mysql_list_tables(string database_name [, int link_identifier])
+/* {{{ proto resource mysql_list_tables(string database_name [, int link_identifier])
    List tables in a MySQL database */
 PHP_FUNCTION(mysql_list_tables)
 {
@@ -1192,7 +1192,7 @@ PHP_FUNCTION(mysql_list_tables)
 /* }}} */
 
 
-/* {{{ proto int mysql_list_fields(string database_name, string table_name [, int link_identifier])
+/* {{{ proto resource mysql_list_fields(string database_name, string table_name [, int link_identifier])
    List MySQL result fields */
 PHP_FUNCTION(mysql_list_fields)
 {
@@ -1399,7 +1399,7 @@ PHP_FUNCTION(mysql_insert_id)
 /* }}} */
 
 
-/* {{{ proto int mysql_result(int result, int row [, mixed field])
+/* {{{ proto mixed mysql_result(int result, int row [, mixed field])
    Get result data */
 PHP_FUNCTION(mysql_result)
 {
@@ -1516,7 +1516,7 @@ PHP_FUNCTION(mysql_num_rows)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 	
 	/* conversion from int64 to long happing here */
-	Z_LVAL_P(return_value) = (long)mysql_num_rows(mysql_result);
+	Z_LVAL_P(return_value) = (long) mysql_num_rows(mysql_result);
 	Z_TYPE_P(return_value) = IS_LONG;
 }
 /* }}} */
@@ -1663,7 +1663,7 @@ PHP_FUNCTION(mysql_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto int mysql_data_seek(int result, int row_number)
+/* {{{ proto bool mysql_data_seek(int result, int row_number)
    Move internal result pointer */
 PHP_FUNCTION(mysql_data_seek)
 {
@@ -1831,7 +1831,7 @@ PHP_FUNCTION(mysql_fetch_field)
 /* }}} */
 
 
-/* {{{ proto int mysql_field_seek(int result, int field_offset)
+/* {{{ proto bool mysql_field_seek(int result, int field_offset)
    Set result pointer to a specific field offset */
 PHP_FUNCTION(mysql_field_seek)
 {
@@ -2033,7 +2033,7 @@ PHP_FUNCTION(mysql_field_flags)
 /* }}} */
 
 
-/* {{{ proto int mysql_free_result(int result)
+/* {{{ proto bool mysql_free_result(int result)
    Free result memory */
 PHP_FUNCTION(mysql_free_result)
 {
