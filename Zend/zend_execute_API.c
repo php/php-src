@@ -781,6 +781,7 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	zval *retval_ptr;
 	int retval;
 	char *lc_name;
+	zval *exception;
 
 	lc_name = do_alloca(name_length + 1);
 	zend_str_tolower_copy(lc_name, name, name_length+1);
@@ -797,17 +798,22 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	
 	args[0] = &class_name_ptr;
 
+	exception = EG(exception);
+	EG(exception) = NULL;
 	retval = call_user_function_ex(EG(function_table), NULL, &autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
 
 	if (retval == FAILURE) {
+		EG(exception) = exception;
 		free_alloca(lc_name);
 		return FAILURE;
 	}
 
 	if (EG(exception)) {
 		free_alloca(lc_name);
-		zend_error(E_ERROR, "__autoload threw an exception");
+		zend_error(E_ERROR, "__autoload(%s) threw an exception of type '%s'", name, Z_OBJCE_P(EG(exception))->name);
+		return FAILURE;
 	}
+	EG(exception) = exception;
 
 	/* If an exception is thrown retval_ptr will be NULL but we bailout before we reach this point */
 	zval_ptr_dtor(&retval_ptr);
