@@ -146,10 +146,6 @@ SAPI_API void sapi_handle_post(void *arg SLS_DC);
 
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
-SAPI_API int sapi_add_post_entry(char *content_type
-								 , void (*post_reader)(SLS_D)
-								 , void (*post_handler)(char *content_type_dup, void *arg SLS_DC));
-SAPI_API void sapi_remove_post_entry(char *content_type);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(SLS_D));
 
