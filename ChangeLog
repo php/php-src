@@ -1,3 +1,56 @@
+2004-06-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/math.c:
+      hypot() is not experimental.
+
+2004-06-10  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      configure.in:
+      - Fixed bug #28730 (Wrong website in configure output)
+
+2004-06-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mbstring/config.m4:
+      MFH: Fixed bug #28723 (Fixed mbstring config.m4 to work on OSes where test
+      command does not support -e parameter).
+
+    * ext/mbstring/config.m4:
+      Fixed bug #28723 (Fixed mbstring config.m4 to work on OSes where test
+      command does not support -e parameter).
+
+2004-06-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      Changed that a bit
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Require a single white-space char after /** to start a doc comment that
+        way we prevent /*** from becoming a doc comment (as requested Derick).
+
+    * ZendEngine2/zend_API.h:
+      Add missing declaration
+
+    * ZendEngine2/zend_reflection_api.c:
+      Small code layout change
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * ZendEngine2/zend_language_scanner.l:
+      Do not require NEWLINE at start of doccomment
+
+    * ZendEngine2/zend_reflection_api.c:
+      Bugfix #28699: Reflection api bugs
+
+2004-06-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bug #28702 (SOAP does not parse WSDL service address correctly).
+
 2004-06-09  Frank M. Kromann  <frank@kromann.info>
 
     * ext/dio/config.w32
