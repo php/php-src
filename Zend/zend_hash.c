@@ -1109,7 +1109,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 
 	IS_CONSISTENT(ht);
 
-	if (ht->nNumOfElements <= 1) {	/* Doesn't require sorting */
+	if (!(ht->nNumOfElements>1) && !(renumber && ht->nNumOfElements>0)) { /* Doesn't require sorting */
 		return SUCCESS;
 	}
 	arTmp = (Bucket **) pemalloc(ht->nNumOfElements * sizeof(Bucket *), ht->persistent);
