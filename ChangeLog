@@ -1,3 +1,30 @@
+2000-05-19  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+    added optional 3rd parameter 'limit' to explode() as in split()
+    (due to feature request in bug id #3251)
+
+2000-05-19  Zeev Suraski  <zeev@php.net>
+
+    * LICENSE: Give some more room for configurability
+
+    * LICENSE: be consistent with the URLs
+
+2000-05-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c: fix the fix (it's still a hack)
+
+    * main.c: make sigchild handler more robust.
+
+    * ext/oci8/config.m4
+      ext/oracle/config.m4: added some Notice about --enable-sigchild
+
+2000-05-19  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c
+      php.h: Minor output mods
+
 2000-05-18  Thies C. Arntzen  <thies@digicol.de>
 
     * main.c
