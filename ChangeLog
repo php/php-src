@@ -1,3 +1,53 @@
+1999-10-12  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/fsock.c
+      fopen-wrappers.h
+      rfc1867.c:
+    starting to clean-up/new API'ize and resourcify the file-stuff - nothing happened yet - just renaming things around.
+
+1999-10-12  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    (Informix driver) Thies introduced ZEND_FETCH_RESOURCE2 (Danny).
+
+1999-10-12  Thies C. Arntzen  <thies@digicol.de>
+
+    * MAINTAINERS: made nice
+
+    * MAINTAINERS: add myself
+
+    * ext/wddx/wddx.c: (wddx_add_vars) adjusted to new resource-API
+
+    * ext/sybase_ct/php_sybase_ct.c: (php sybase_close) fixed obvious bug.
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/oracle/oracle.c
+      ext/odbc/php_odbc.c
+      ext/oci8/oci8.c
+      ext/mysql/php_mysql.c
+      ext/msql/php_msql.c:
+    new improved resource-API (i hope everything still compiles)
+
+1999-10-12  Andrei Zmievski  <zmievski@ispi.net>
+
+    * MAINTAINERS: Just some formatting.
+
+1999-10-12  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * MAINTAINERS:
+    Added Informix driver to list of maintained extensions. (Danny).
+
+1999-10-12  changelog  <changelog@www>
+
+    * NEWS
+      ChangeLog: *** empty log message ***
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-10-11  Andrei Zmievski  <zmievski@ispi.net>
 
     * ext/standard/basic_functions.c:
