@@ -3659,7 +3659,7 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 				case IS_BOOL: 
 				case IS_LONG:
 					if (offset->type == IS_DOUBLE) {
-						index = (long) offset->value.lval;
+						index = (long) offset->value.dval;
 					} else {
 						index = offset->value.lval;
 					}
