@@ -1128,14 +1128,14 @@ PHP_FUNCTION(odbc_data_source)
 	int num_args = ZEND_NUM_ARGS();
 	UCHAR server_name[100],
 		  desc[200];
-	SQLSMALLINT len1, len2, fetch_type;
+	SQLSMALLINT len1=0, len2=0, fetch_type;
 
 	if (num_args != 2) {
 		WRONG_PARAM_COUNT;
 	}
 
 	if (zend_get_parameters_ex(2, &zv_conn, &zv_fetch_type) == FAILURE) {
-		php_error(E_WARNING, "Unable to get parameters");
+		php_error(E_WARNING, "%s(): Unable to get parameters", get_active_function_name(TSRMLS_C));
 	}
 
 	convert_to_long_ex(zv_fetch_type);
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(odbc_data_source)
 
 	if (!(fetch_type == SQL_FETCH_FIRST ||
 	      fetch_type == SQL_FETCH_NEXT)) {
-		php_error(E_WARNING, "odbc_data_source: Invalid fetch type (%d)", fetch_type);
+		php_error(E_WARNING, "%s(): Invalid fetch type (%d)", get_active_function_name(TSRMLS_C), fetch_type);
 		RETURN_FALSE;
 	}
 
@@ -1162,6 +1162,11 @@ PHP_FUNCTION(odbc_data_source)
 	if (rc != SQL_SUCCESS) {
 		/* ummm.... he did it */
 		odbc_sql_error(conn, NULL, "SQLDataSources");
+		RETURN_FALSE;
+	}
+
+	if (len1 == 0 || len2 == 0) {
+		/* we have a non-valid entry... so stop the looping */
 		RETURN_FALSE;
 	}
 
