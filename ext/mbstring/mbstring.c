@@ -642,8 +642,8 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 }
 /* }}} */
 
-/* {{{ ZEND_MULTIBYTE stuff */
 #ifdef ZEND_MULTIBYTE
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_script_encoding) */
 static PHP_INI_MH(OnUpdate_mbstring_script_encoding)
 {
 	int *list, size;
@@ -660,8 +660,8 @@ static PHP_INI_MH(OnUpdate_mbstring_script_encoding)
 
 	return SUCCESS;
 }
-#endif /* ZEND_MULTIBYTE */
 /* }}} */
+#endif /* ZEND_MULTIBYTE */
 
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_substitute_character) */
 static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
@@ -2415,7 +2415,7 @@ PHP_FUNCTION(mb_strimwidth)
 }
 /* }}} */
 
-/* {{{ php_mb_convert_encoding */
+/* {{{ PHPAPI char *php_mb_convert_encoding() */
 PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC)
 {
 	mbfl_string string, result, *ret;
