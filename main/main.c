@@ -629,11 +629,14 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_LOG_SCRIPT_NAME: {
 				struct tm *ta;
 				time_t curtime;
+				char *datetime_str;
 				SLS_FETCH();
 
 				time(&curtime);
 				ta = localtime(&curtime);
-				fprintf(stderr, "[%s]  Script:  '%s'\n", asctime(ta), SAFE_FILENAME(SG(request_info).path_translated));
+				datetime_str = asctime(ta);
+				datetime_str[strlen(datetime_str)-1]=0;	/* get rid of the traililng newline */
+				fprintf(stderr, "[%s]  Script:  '%s'\n", datetime_str, SAFE_FILENAME(SG(request_info).path_translated));
 			}
 			break;
 	}
