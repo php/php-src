@@ -806,6 +806,8 @@ void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
 		for (i = 0; i < stmt->column_count; i++) {
 			efree(cols[i].name);
 		}
+	}
+	if (stmt->columns) {
 		efree(stmt->columns);
 	}
 
