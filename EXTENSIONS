@@ -262,7 +262,7 @@ STATUS:              Unknown
 EXTENSION:           domxml
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Experimental
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           dotnet
 PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
