@@ -161,22 +161,6 @@ ZEND_API int getParametersArrayEx(int param_count, zval ***argument_array)
 }
 
 
-ZEND_API int getThis(zval **this_ptr)
-{
-	/* NEEDS TO BE IMPLEMENTED FOR ZEND */
-	/*
-	zval *data;
-
-	if (zend_hash_find(function_state.calling_symbol_table, "this", sizeof("this"), (void **)&data) == FAILURE) {
-		return FAILURE;
-	}
-
-	*this = data;
-	*/
-	return SUCCESS;
-}
-
-
 ZEND_API int ParameterPassedByReference(int ht, uint n)
 {
 	void **p;
@@ -609,13 +593,17 @@ ZEND_API int _register_list_destructors(void (*list_destructor)(void *), void (*
 
 
 /* registers all functions in *library_functions in the function hash */
-int zend_register_functions(zend_function_entry *functions)
+int zend_register_functions(zend_function_entry *functions, HashTable *function_table)
 {
 	zend_function_entry *ptr = functions;
 	zend_internal_function internal_function;
 	int count=0,unload=0;
+	HashTable *target_function_table = function_table;
 	CLS_FETCH();
 
+	if (!target_function_table) {
+		target_function_table = CG(function_table);
+	}
 	internal_function.type = ZEND_INTERNAL_FUNCTION;
 	
 	while (ptr->fname) {
@@ -624,10 +612,10 @@ int zend_register_functions(zend_function_entry *functions)
 		internal_function.function_name = ptr->fname;
 		if (!internal_function.handler) {
 			zend_error(E_CORE_WARNING,"Null function defined as active function");
-			zend_unregister_functions(functions,count);
+			zend_unregister_functions(functions, count, target_function_table);
 			return FAILURE;
 		}
-		if (zend_hash_add(CG(function_table), ptr->fname, strlen(ptr->fname)+1, &internal_function, sizeof(zend_internal_function), NULL) == FAILURE) {
+		if (zend_hash_add(target_function_table, ptr->fname, strlen(ptr->fname)+1, &internal_function, sizeof(zend_internal_function), NULL) == FAILURE) {
 			unload=1;
 			break;
 		}
@@ -636,12 +624,12 @@ int zend_register_functions(zend_function_entry *functions)
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		while (ptr->fname) {
-			if (zend_hash_exists(CG(function_table), ptr->fname, strlen(ptr->fname)+1)) {
-				zend_error(E_CORE_WARNING,"Module load failed - duplicate function name - %s",ptr->fname);
+			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
+				zend_error(E_CORE_WARNING, "Function registration failed - duplicate name - %s",ptr->fname);
 			}
 			ptr++;
 		}
-		zend_unregister_functions(functions,count);
+		zend_unregister_functions(functions, count, target_function_table);
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -650,20 +638,24 @@ int zend_register_functions(zend_function_entry *functions)
 /* count=-1 means erase all functions, otherwise, 
  * erase the first count functions
  */
-void zend_unregister_functions(zend_function_entry *functions,int count)
+void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table)
 {
 	zend_function_entry *ptr = functions;
 	int i=0;
+	HashTable *target_function_table = function_table;
 	CLS_FETCH();
 
+	if (!target_function_table) {
+		target_function_table = CG(function_table);
+	}
 	while (ptr->fname) {
 		if (count!=-1 && i>=count) {
 			break;
 		}
 #if 0
-		zend_printf("Unregistering %s()\n",ptr->fname);
+		zend_printf("Unregistering %s()\n", ptr->fname);
 #endif
-		zend_hash_del(CG(function_table),ptr->fname,strlen(ptr->fname)+1);
+		zend_hash_del(target_function_table, ptr->fname, strlen(ptr->fname)+1);
 		ptr++;
 		i++;
 	}
@@ -675,7 +667,7 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 #if 0
 	zend_printf("%s:  Registering module %d\n",module->name, module->module_number);
 #endif
-	if (module->functions && zend_register_functions(module->functions)==FAILURE) {
+	if (module->functions && zend_register_functions(module->functions, NULL)==FAILURE) {
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load",module->name);
 		return FAILURE;
 	}
@@ -706,7 +698,7 @@ void module_destructor(zend_module_entry *module)
 	}
 	module->module_started=0;
 	if (module->functions) {
-		zend_unregister_functions(module->functions,-1);
+		zend_unregister_functions(module->functions, -1, NULL);
 	}
 
 #if HAVE_LIBDL
@@ -779,6 +771,10 @@ ZEND_API zend_class_entry *register_internal_class(zend_class_entry *class_entry
 
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);
 	free(lowercase_name);
+	
+	if (class_entry->builtin_functions) {
+		zend_register_functions(class_entry->builtin_functions, &class_entry->function_table);
+	}
 	return register_class;
 }
 

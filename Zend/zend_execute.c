@@ -793,7 +793,7 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 	zend_property_reference *property_reference;
 
 	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-	(*(property_reference->object))->value.obj.ce->handle_function_call(arg_count, return_value, list, plist, property_reference);
+	(*(property_reference->object))->value.obj.ce->handle_function_call(arg_count, return_value, list, plist, *property_reference->object, property_reference);
 	//(*(property_reference->object))->value.obj.ce->handle_function_call(NULL, NULL, NULL, NULL, NULL);
 	zend_llist_destroy(&property_reference->elements_list);
 
@@ -1226,9 +1226,7 @@ binary_assign_op_addr: {
 					HashTable *active_function_table;
 					zval tmp;
 
-					if ((opline>EG(active_op_array)->opcodes)
-						&& opline->op1.op_type==IS_VAR
-						&& (opline-1)->opcode == ZEND_JMP_NO_CTOR) {
+					if (opline->extended_value & ZEND_CTOR_CALL) {
 						/* constructor call */
 						EG(AiCount)++; /* for op1 */
 						if (opline->op2.op_type==IS_VAR) {
@@ -1325,7 +1323,7 @@ overloaded_function_call_cont:
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
 						var_uninit(&Ts[opline->result.u.var].tmp_var);
-						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list));
+						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), (object_ptr?*object_ptr:NULL));
 					} else if (function_state.function->type==ZEND_USER_FUNCTION) {
 						if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 							//printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);

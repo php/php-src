@@ -28,6 +28,28 @@
 #define ZEND_FE(name, arg_types) ZEND_NAMED_FE(name, zend_if_##name, arg_types)
 
 
+#define INIT_CLASS_ENTRY(class_container, class_name, functions)	\
+	{																\
+		class_container.name = strdup(class_name);					\
+		class_container.name_length = sizeof(class_name)-1;			\
+		class_container.builtin_functions = functions;				\
+		class_container.handle_function_call = NULL;				\
+		class_container.handle_property_get = NULL;					\
+		class_container.handle_property_set = NULL;					\
+	}
+
+#define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
+	{															\
+		class_container.name = strdup(class_name);				\
+		class_container.name_length = sizeof(class_name)-1;		\
+		class_container.builtin_functions = functions;			\
+		class_container.handle_function_call = handle_fcall;	\
+		class_container.handle_property_get = handle_propget;	\
+		class_container.handle_property_set = handle_propset;	\
+	}
+
+
+
 int zend_next_free_module(void);
 
 ZEND_API int getParameters(int ht, int param_count,...);
@@ -35,16 +57,17 @@ ZEND_API int getParametersArray(int ht, int param_count, zval **argument_array);
 ZEND_API int getParametersEx(int param_count,...);
 ZEND_API int getParametersArrayEx(int param_count, zval ***argument_array);
 
-ZEND_API int getThis(zval **this_ptr);
 ZEND_API int ParameterPassedByReference(int ht, uint n);
 
-int zend_register_functions(zend_function_entry *functions);
-void zend_unregister_functions(zend_function_entry *functions, int count);
+int zend_register_functions(zend_function_entry *functions, HashTable *function_table);
+void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table);
 ZEND_API int zend_register_module(zend_module_entry *module_entry);
 ZEND_API zend_class_entry *register_internal_class(zend_class_entry *class_entry);
 ZEND_API zend_module_entry *zend_get_module(int module_number);
 
 ZEND_API void wrong_param_count(void);
+
+#define getThis() (this_ptr)
 
 #define WRONG_PARAM_COUNT { wrong_param_count(); return; }
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret) { wrong_param_count(); return ret; }
