@@ -767,6 +767,17 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 }
 /* }}} */
 
+
+/* {{{ php_open_wrapper_for_zend
+ */
+static zend_bool php_open_wrapper_for_zend(const char *filename, struct _zend_file_handle *fh)
+{
+	TSRMLS_FETCH();
+
+	return php_stream_open_wrapper_as_file_handle((char *)filename, "rb", ENFORCE_SAFE_MODE|USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, fh);
+}
+/* }}} */
+
 /* {{{ php_get_configuration_directive_for_zend
  */
 static int php_get_configuration_directive_for_zend(char *name, uint name_length, zval *contents)
@@ -1100,6 +1111,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.printf_function = php_printf;
 	zuf.write_function = php_body_write_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
+	zuf.open_function = php_open_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
 	zuf.block_interruptions = sapi_module.block_interruptions;
 	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
