@@ -291,7 +291,7 @@ static char *sapi_isapi_read_cookies(SLS_D)
 
 
 static sapi_module_struct sapi_module = {
-	"PHP Language",					/* name */
+	"ISAPI",						/* name */
 									
 	php_isapi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */

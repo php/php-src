@@ -100,7 +100,8 @@ PHPAPI void php_print_info(int flag)
 #endif
 		php_printf("php.ini path:  %s<br>\n", CONFIGURATION_FILE_PATH);
 		php_printf("ZEND_DEBUG=%d<br>\n", ZEND_DEBUG);
-		/*php_printf("SAPI=" PHP_SAPI "<br>\n");*/
+		if (sapi_module.name)
+			php_printf("SAPI=%s<br>\n", sapi_module.name);
 #ifdef ZTS
 		php_printf("ZTS is defined");
 #else

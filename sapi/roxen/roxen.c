@@ -505,7 +505,7 @@ static int php_roxen_startup(sapi_module_struct *sapi_module)
 void pike_module_exit(void);
 
 static sapi_module_struct sapi_module = {
-  "PHP Language",
+  "Roxen",
 
   php_module_startup,						/* startup */
   pike_module_exit,			/* shutdown */
