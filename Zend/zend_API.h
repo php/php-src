@@ -172,6 +172,8 @@ ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, c
 ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, char *name, int name_length, long value TSRMLS_DC);
 ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC);
 
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *name, int name_length, zend_bool silent TSRMLS_DC);
+
 ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC);
 
 #define getThis() (this_ptr)

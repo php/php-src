@@ -72,13 +72,11 @@ ZEND_FUNCTION(exception)
 
 static void _default_exception_get_entry(zval *object, char *name, int name_len, zval *return_value TSRMLS_DC)
 {
-	zval **value;
+	zval *value;
 
-	if (zend_hash_find(Z_OBJPROP_P(object), name, name_len, (void **) &value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	value = zend_read_property(Z_OBJCE_P(object), object, name, name_len, 0 TSRMLS_CC);
 
-	*return_value = **value;
+	*return_value = *value;
 	zval_copy_ctor(return_value);
 }
 
@@ -86,28 +84,28 @@ ZEND_FUNCTION(getfile)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "file", sizeof("file"), return_value TSRMLS_CC);
+	_default_exception_get_entry(getThis(), "file", sizeof("file")-1, return_value TSRMLS_CC);
 }
 
 ZEND_FUNCTION(getline)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "line", sizeof("line"), return_value TSRMLS_CC);
+	_default_exception_get_entry(getThis(), "line", sizeof("line")-1, return_value TSRMLS_CC);
 }
 
 ZEND_FUNCTION(getmessage)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "message", sizeof("message"), return_value TSRMLS_CC);
+	_default_exception_get_entry(getThis(), "message", sizeof("message")-1, return_value TSRMLS_CC);
 }
 
 ZEND_FUNCTION(getcode)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "code", sizeof("code"), return_value TSRMLS_CC);
+	_default_exception_get_entry(getThis(), "code", sizeof("code")-1, return_value TSRMLS_CC);
 }
 
 static zend_function_entry default_exception_functions[] = {
