@@ -901,7 +901,7 @@ out:
 	if (stream == NULL && (options & REPORT_ERRORS))	{
 		char *tmp = estrdup(path);
 		php_strip_url_passwd(tmp);
-		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_CC), tmp, strerror(errno) TSRMLS_CC);
+		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_C), tmp, strerror(errno));
 		efree(tmp);
 	}
 	return stream;
