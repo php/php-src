@@ -395,6 +395,20 @@ class PEAR_Frontend_CLI extends PEAR
                 };
                 $this->_endTable();
                 break;
+            case 'remote-info':
+                $data = array(
+                    'caption' => 'Package details:',
+                    'border' => false,
+                    'data' => array(
+                        array("Latest", $data['stable']),
+                        array("Installed", $data['installed']),
+                        array("Package", $data['name']),
+                        array("License", $data['license']),
+                        array("Category", $data['category']),
+                        array("Summary", $data['summary']),
+                        array("Description", $data['description']),
+                        ),
+                    );
             default:
                 if (is_array($data))
                 {
