@@ -1,3 +1,59 @@
+2000-12-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    (PHP session_unset) Return early, if no session was started.
+
+    PR: #8354
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Support multi-char arg separators.
+
+    PR: #8274
+
+    * ext/standard/file.c:
+    Signal an error condition, if write was unable to perform the complete
+    operation.
+
+    * ext/standard/file.c:
+    NULL is a valid return value of mmap.  Check against (void *) MAP_FAILED.
+
+    * ext/standard/file.c:
+    (php_file_copy) Use mmap to map the source file into our address space
+    and then simply write it out to the target file.  That avoids switching
+    between user and kernel land too many times.  If that does not work, we
+    fall back to the read/write method.
+
+2000-12-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c
+      ext/standard/array.c:
+    (PHP preg_replace) Fix to allow proper escaping of captured subpattern
+    references in the replacement string.
+    (PHP array_sum) Check that argument is an array.
+
+2000-12-22  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/array.c
+      ext/standard/info.c
+      ext/standard/string.c
+      ext/standard/var.c
+      ext/wddx/wddx.c
+      sapi/apache2filter/apache_config.c
+      ext/pcre/php_pcre.c
+      ext/pfpro/pfpro.c
+      ext/sablot/sablot.c
+      ext/session/session.c
+      ext/imap/php_imap.c
+      ext/java/java.c
+      ext/ldap/ldap.c
+      ext/oracle/oracle.c
+      ext/com/COM.c
+      ext/curl/curl.c
+      ext/hyperwave/hw.c: Heads up people!
+
+    Updated the get_current_key() API - the relevant authors, please take
+    a look at the updated code and make sure it's ok...
+
 2000-12-21  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/string.c:
