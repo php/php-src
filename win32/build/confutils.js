@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.38 2004-02-12 12:30:41 wez Exp $
+// $Id: confutils.js,v 1.39 2004-04-15 16:09:36 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -139,7 +139,7 @@ function ConfigureArg(type, optname, helptext, defval)
 {
 	var opptype = type == "enable" ? "disable" : "without";
 
-	if (defval == "yes") {
+	if (defval == "yes" || defval == "yes,shared") {
 		this.arg = "--" + opptype + "-" + optname;
 		this.imparg = "--" + type + "-" + optname;
 	} else {
