@@ -98,6 +98,11 @@
 #endif
 #include "snprintf.h"
 
+#if PHP_API_VERSION >= 19990421
+#define php3tls_pval_destructor(a) zval_dtor(a)
+#endif      
+
+
 /* }}} */
 /* {{{ thread safety stuff */
 
@@ -952,12 +957,8 @@ oci8_make_pval(pval *value,oci8_statement *statement,oci8_out_column *column, ch
 				/* this seems to be a BUG in oracle with 1-digit numbers */
 
 				if (column->rlen <= 0) {
-					if (column->indicator > 0) { /* XXX this is our "oci-bug" */
-						/*
-						size = column->indicator; 
-						*/
-
-						size = 1;
+					if (column->size2 > 0) { /* XXX this is our "oci-bug" */
+						size = column->size2;
 					} else {
 						size = 1;
 					}
@@ -1120,6 +1121,10 @@ oci8_execute(oci8_statement *statement, char *func,ub4 mode, HashTable *list)
 			statement->conn->open = 0;
 			statement->conn->session->open = 0;
 			statement->conn->session->server->open = 0;
+			return 0;
+			break;
+
+		default:
 			return 0;
 			break;
 		}
@@ -1377,12 +1382,7 @@ oci8_fetch(oci8_statement *statement, ub4 nrows, char *func)
 				continue;
 			}
 				 
-#if PHP_API_VERSION < 19990421 
 			php3tls_pval_destructor(column->define->pval);
-#else
-			pval_destructor(column->define->pval);
-#endif
-
 
 			oci8_make_pval(column->define->pval,statement,column,"OCIFetch",0);
 		}
@@ -2292,8 +2292,8 @@ static void oci8_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int excl
 
 	oci8_debug("oci8_do_connect: id=%d",connection->id);
 
-	RETURN_LONG(connection->id);
-	
+	RETURN_RESOURCE(connection->id);
+
  CLEANUP:
 	oci8_debug("oci8_do_connect: FAILURE -> CLEANUP called");
 
@@ -3146,16 +3146,12 @@ PHP_FUNCTION(oci8_fetchinto)
 			php3_error(E_WARNING, "OCIFetchInto: unable to convert arg 2 to array");
 			RETURN_FALSE;
 		}
-
-/*
-		array->is_ref = 0;
-		array->refcount = 1;
-*/
 	}
 
 #if PHP_API_VERSION < 19990421
 	element = emalloc(sizeof(pval));
 #endif
+
 
 	for (i = 0; i < statement->ncolumns; i++) {
 		column = oci8_get_col(statement, i + 1, 0, "OCIFetchInto");
@@ -3169,8 +3165,6 @@ PHP_FUNCTION(oci8_fetchinto)
 
 #if PHP_API_VERSION >= 19990421
 		element = emalloc(sizeof(pval));
-		element->is_ref = 0;
-		element->refcount = 1;
 #endif
 
 		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) { /* OCI_NUM is default */
@@ -3522,7 +3516,7 @@ PHP_FUNCTION(oci8_parse)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(oci8_parse(connection,
+	RETURN_RESOURCE(oci8_parse(connection,
 						   query->value.str.val,
 						   query->value.str.len,
 						   list));
