@@ -354,7 +354,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC);
-ZEND_API void zend_open_file_dtor(void *f);
+ZEND_API void zend_open_file_dtor(zend_file_handle *fh);
 END_EXTERN_C()
 
 ZEND_API int destroy_zend_function(zend_function *function);
@@ -543,10 +543,11 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_RT (1<<1)
 
 
-#define ZEND_HANDLE_FILENAME	0
-#define ZEND_HANDLE_FD			1
-#define ZEND_HANDLE_FP			2
-#define ZEND_HANDLE_ISTREAM		3
+#define ZEND_HANDLE_FILENAME		0
+#define ZEND_HANDLE_FD				1
+#define ZEND_HANDLE_FP				2
+#define ZEND_HANDLE_STDIOSTREAM		3
+#define ZEND_HANDLE_FSTREAM			4
 
 #define ZEND_DECLARE_CLASS				1
 #define ZEND_DECLARE_FUNCTION			2
