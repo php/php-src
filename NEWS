@@ -1,8 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-22 Dec 2001, Version 4.1.1
+26 Dec 2001, Version 4.1.1
 - Fixed incompatibility with Windows .NET / IIS 6 - may improve stability
-  under other versions of IIS (Zeev)
+  under other versions of IIS. (Zeev)
+- Fixed bug that caused crashes or error notices on shutdown on threaded
+  platforms. (Zeev)
 - Fixed several crash bugs in the xslt extension. (Markus, Derick)
 - Fixed problem with dbase not returning very large (larger than long)
   integers properly. (Vlad)
