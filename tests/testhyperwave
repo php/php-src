@@ -13,7 +13,7 @@
   }
 
   // Set all test to 'yes' if they shall be executed
-  $test_1 = "yes";    // Get the text document with id $id and output it
+  $test_1 = "no";    // Get the text document with id $id and output it
   $test_2 = "no";    // Check if id $id is in $collid
   $test_3 = "no";   // Convert object record to object array and back
   $test_4 = "no";   // Get object record of object with id $id
@@ -22,7 +22,9 @@
   $test_7 = "no";   // Insert a new text document
   $test_8 = "no";   // Remove the just inserted text document
   $test_9 = "no";   // Searching for objects with Name $query
-  $test_10= "yes";   // Listing all anchors of a document
+  $test_10= "no";   // Listing all anchors of a document
+  $test_11= "no";   // Creates document from file and outputs it.
+  $test_12= "yes";   // Creates document from file and outputs it.
 
   /* Lists an object array
   */
@@ -216,6 +218,17 @@
       $arr = hw_objrec2array($anchors[$i]);
       list_attr($arr);
     }
+	}
+
+  if($test_11 == "yes") {
+		$doc = hw_new_document_from_file("ObjectRecord", "hw_document.txt");
+    hw_output_document($doc);
+	}
+
+  if($test_12 == "yes") {
+		$doc = hw_new_document_from_file("ObjectRecord", "hw_document.txt");
+		hw_insertanchors($doc, array("Position=0x2 0x7\nObjectID=0x3\nTAnchor=Src\nDest=0x5"), array("ObjectID=0x5\nName=DestDoc"));
+    hw_output_document($doc);
 	}
 
   hw_close($connect);
