@@ -41,7 +41,7 @@ ZEND_DECLARE_MODULE_GLOBALS(imap)
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
-#if (WIN32|WINNT)
+#ifdef PHP_WIN32
 #include "winsock.h"
 MAILSTREAM DEFAULTPROTO;
 #endif
@@ -130,7 +130,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_alerts,			NULL)
 	PHP_FE(imap_errors,			NULL)
 	PHP_FE(imap_last_error,		NULL)
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	PHP_FE(imap_mail,           NULL)
 #endif
 	PHP_FE(imap_search,			NULL)
@@ -380,20 +380,20 @@ PHP_MINIT_FUNCTION(imap)
 	ZEND_INIT_MODULE_GLOBALS(imap, php_imap_init_globals, NULL)
 
 
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	mail_link(&unixdriver);   /* link in the unix driver */
 #endif
 	mail_link(&imapdriver);      /* link in the imap driver */
 	mail_link(&nntpdriver);      /* link in the nntp driver */
 	mail_link(&pop3driver);      /* link in the pop3 driver */
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	mail_link(&mhdriver);        /* link in the mh driver */
 	mail_link(&mxdriver);        /* link in the mx driver */
 #endif
 	mail_link(&mbxdriver);       /* link in the mbx driver */
 	mail_link(&tenexdriver);     /* link in the tenex driver */
 	mail_link(&mtxdriver);       /* link in the mtx driver */
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	mail_link(&mmdfdriver);      /* link in the mmdf driver */
 	mail_link(&newsdriver);      /* link in the news driver */
 	mail_link(&philedriver);     /* link in the phile driver */
@@ -3130,7 +3130,7 @@ PHP_FUNCTION(imap_mail_compose)
 }
 /* }}} */
 
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath)
 {
 #ifdef PHP_WIN32
