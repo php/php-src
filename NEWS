@@ -21,6 +21,7 @@ PHP 4                                                                      NEWS
   . ext/cybermut
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
 - Modified log() to accept multiple bases. (Jason)
+- Fixed bugs #16190/18746 (ext/db: flatfile support with windows). (Marcus)
 - Added gd_info() which returns an array of gd support information. (Marcus)
 - Implemented features/changes requested in Bug #16960 (Timm):
   . Added a new function sybase_unbuffered_query()
