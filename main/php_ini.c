@@ -62,16 +62,26 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 				display_string_length = ini_entry->orig_value_length;
 				esc_html=1;
 			} else {
-				display_string = (PG(html_errors))?"<i>no value</i>":"no value";
-				display_string_length = sizeof((PG(html_errors))?"<i>no value</i>":"no value")-1;
+				if (PG(html_errors)) {
+					display_string = "<i>no value</i>";
+					display_string_length = sizeof("<i>no value</i>")-1;
+				} else {
+					display_string = "no value";
+					display_string_length = sizeof("no value")-1;
+				}	
 			}
 		} else if (ini_entry->value && ini_entry->value[0]) {
 			display_string = ini_entry->value;
 			display_string_length = ini_entry->value_length;
 			esc_html=1;
 		} else {
-			display_string = (PG(html_errors))?"<i>no value</i>":"no value";
-			display_string_length = sizeof((PG(html_errors))?"<i>no value</i>":"no value")-1;
+			if (PG(html_errors)) {
+				display_string = "<i>no value</i>";
+				display_string_length = sizeof("<i>no value</i>")-1;
+			} else {
+				display_string = "no value";
+				display_string_length = sizeof("no value")-1;
+			}	
 		}
 		if(esc_html) {
 			php_html_puts(display_string, display_string_length TSRMLS_CC);
