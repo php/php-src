@@ -547,7 +547,7 @@ void php3_mcal_list_events(INTERNAL_FUNCTION_PARAMETERS)
 	datetime_t startdate=DT_INIT;
 	datetime_t enddate=DT_INIT;
 	myargc=ARG_COUNT(ht);
-	if (myargc !=1 || getParameters(ht,myargc,&streamind,&startyear,&startmonth,&startday,&endyear,&endmonth,&endday) == FAILURE) {
+	if ((myargc !=1 && myargc !=7)|| getParameters(ht,myargc,&streamind,&startyear,&startmonth,&startday,&endyear,&endmonth,&endday) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
