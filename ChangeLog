@@ -1,3 +1,18 @@
+2004-04-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/yp/yp.c:
+      Removed pointless check.
+
+2004-04-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix prototype
+
+2004-04-26  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      hmm. this comma is supposed to be a semicolon.
+
 2004-04-25  Derick Rethans  <php@derickrethans.nl>
 
     * ext/gd/libgd/gd.c
