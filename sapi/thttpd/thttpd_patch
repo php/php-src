@@ -121,14 +121,16 @@ diff -Nur thttpd-2.20b/libhttpd.h thttpd-2.20b-php/libhttpd.h
 diff -Nur thttpd-2.20b/thttpd.c thttpd-2.20b-php/thttpd.c
 --- thttpd-2.20b/thttpd.c	Wed Sep 27 21:31:48 2000
 +++ thttpd-2.20b-php/thttpd.c	Mon Nov 13 14:25:57 2000
-@@ -1333,6 +1333,10 @@
+@@ -1332,6 +1333,12 @@
+ 	c->bytes_sent = hc->bytes;
  	clear_connection( c, tvP );
  	return;
- 	}
++	}
 +	if (hc->file_address == (char *) 1) {
 +		tmr_cancel( c->idle_read_timer );
++		c->idle_read_timer = (Timer*) 0;
++		c->wouldblock_delay = 0;
 +		return;
-+	}
+ 	}
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
- 	/* There's nothing to send. */
