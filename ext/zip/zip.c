@@ -114,7 +114,7 @@ PHP_MINFO_FUNCTION(zip)
 }
 /* }}} */
 
-/* {{{ proto resource zip_opendir(string filename)
+/* {{{ proto resource zip_open(string filename)
    Open a new zip archive for reading */
 PHP_FUNCTION(zip_open)
 {
@@ -136,7 +136,7 @@ PHP_FUNCTION(zip_open)
 }
 /* }}} */
 
-/* {{{ proto resource zip_readdir(resource zip)
+/* {{{ proto resource zip_read(resource zip)
    Returns the next file in the archive */
 PHP_FUNCTION(zip_read)
 {
@@ -163,7 +163,7 @@ PHP_FUNCTION(zip_read)
 }
 /* }}} */
 
-/* {{{ proto void zip_closedir(resource zip)
+/* {{{ proto void zip_close(resource zip)
    Close a Zip archive */
 PHP_FUNCTION(zip_close)
 {
