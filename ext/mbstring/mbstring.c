@@ -1357,7 +1357,7 @@ PHP_FUNCTION(mb_detect_order)
 		size = 0;
 		switch (Z_TYPE_PP(arg1)) {
 		case IS_ARRAY:
-			if (!php_mb_parse_encoding_array(*arg1, &list, &size, 0)) {
+			if (!php_mb_parse_encoding_array(*arg1, &list, &size, 0 TSRMLS_CC)) {
 				if (list) {
 					efree(list);
 				}
@@ -2832,7 +2832,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	if (ZEND_NUM_ARGS() >= 2 &&  Z_STRVAL_PP(arg_list)) {
 		switch (Z_TYPE_PP(arg_list)) {
 		case IS_ARRAY:
-			if (!php_mb_parse_encoding_array(*arg_list, &list, &size, 0)) {
+			if (!php_mb_parse_encoding_array(*arg_list, &list, &size, 0 TSRMLS_CC)) {
 				if (list) {
 					efree(list);
 					size = 0;
@@ -3135,7 +3135,7 @@ PHP_FUNCTION(mb_convert_variables)
 	elistsz = 0;
 	switch (Z_TYPE_PP(args[1])) {
 	case IS_ARRAY:
-		php_mb_parse_encoding_array(*args[1], &elist, &elistsz, 0);
+		php_mb_parse_encoding_array(*args[1], &elist, &elistsz, 0 TSRMLS_CC);
 		break;
 	default:
 		convert_to_string_ex(args[1]);
