@@ -31,6 +31,7 @@ static ZEND_FUNCTION(func_get_arg);
 static ZEND_FUNCTION(func_get_args);
 static ZEND_FUNCTION(strlen);
 static ZEND_FUNCTION(strcmp);
+static ZEND_FUNCTION(strncmp);
 static ZEND_FUNCTION(strcasecmp);
 static ZEND_FUNCTION(each);
 static ZEND_FUNCTION(error_reporting);
@@ -55,6 +56,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(func_get_args,		NULL)
 	ZEND_FE(strlen,				NULL)
 	ZEND_FE(strcmp,				NULL)
+	ZEND_FE(strncmp,			NULL)
 	ZEND_FE(strcasecmp,			NULL)
 	ZEND_FE(each,				first_arg_force_ref)
 	ZEND_FE(error_reporting,	NULL)
@@ -194,6 +196,22 @@ ZEND_FUNCTION(strcmp)
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
 	RETURN_LONG(zend_binary_zval_strcmp(*s1,*s2));
+}
+/* }}} */
+
+/* {{{ proto int strncmp(string str1, string str2, int len)
+   Binary safe string comparison */
+ZEND_FUNCTION(strncmp)
+{
+	zval **s1, **s2, **s3;
+	
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &s1, &s2, &s3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(s1);
+	convert_to_string_ex(s2);
+	convert_to_long_ex(s3);
+	RETURN_LONG(zend_binary_zval_strncmp(*s1,*s2,*s3));
 }
 /* }}} */
 
