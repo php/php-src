@@ -320,7 +320,7 @@ void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 
 int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
-void zend_do_end_function_declaration(znode *function_token, znode *doc_comment TSRMLS_DC);
+void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, zend_uchar pass_type TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
@@ -362,7 +362,7 @@ void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC);
 void zend_do_default_before_statement(znode *case_list, znode *default_token TSRMLS_DC);
 
 void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC);
-void zend_do_end_class_declaration(znode *class_token, znode *parent_token, znode *doc_comment TSRMLS_DC);
+void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRMLS_DC);
 void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC);
 void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
@@ -451,7 +451,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
 void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC);
-void zend_do_end_namespace(znode *ns_token, znode *doc_comment TSRMLS_DC);
+void zend_do_end_namespace(znode *ns_token TSRMLS_DC);
 void zend_init_namespace(zend_namespace *ns TSRMLS_DC);
 void zend_do_declare_namespace_var(znode *name, znode *value TSRMLS_DC);
 void zend_do_declare_namespace_constant(znode *name, znode *value TSRMLS_DC);
