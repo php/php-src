@@ -1401,10 +1401,6 @@ binary_assign_op_addr: {
 							zend_class_entry *ce;
 							zval **object_ptr_ptr;
 
-							if (zend_hash_find(EG(class_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len+1, (void **) &ce)==FAILURE) {
-								zend_error(E_ERROR, "Undefined class name '%s'", opline->op1.u.constant.value.str.val);
-							}
-							active_function_table = &ce->function_table;
 							if (zend_hash_find(EG(active_symbol_table), "this", sizeof("this"), (void **) &object_ptr_ptr)==FAILURE) {
 								object.ptr=NULL;
 							} else {
@@ -1413,6 +1409,15 @@ binary_assign_op_addr: {
 								object.ptr = *object_ptr_ptr;
 								object.ptr->refcount++; /* For this pointer */
 							}
+							if (zend_hash_find(EG(class_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len+1, (void **) &ce)==FAILURE) { /* class doesn't exist */
+								/* test for parent:: special case - if it doesn't exist - error out */
+								if (opline->op1.u.constant.value.str.len!=(sizeof("parent")-1)
+									|| memcmp(opline->op1.u.constant.value.str.val, "parent", sizeof("parent")-1)!=0
+									|| !(ce = object.ptr->value.obj.ce->parent)) {
+									zend_error(E_ERROR, "Undefined class name '%s'", opline->op1.u.constant.value.str.val);
+								}
+							}
+							active_function_table = &ce->function_table;
 						} else { /* used for member function calls */
 							object.ptr = _get_object_zval_ptr(&opline->op1, Ts, &EG(free_op1) ELS_CC);
 							
