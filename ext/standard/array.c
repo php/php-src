@@ -523,6 +523,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 	Bucket *s;
 	zval **args[2];
 	zval *retval_ptr;
+	zend_fcall_info fci;
 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -530,7 +531,17 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 	args[0] = (zval **) f->pData;
 	args[1] = (zval **) s->pData;
 
-	if (fast_call_user_function(EG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0, NULL, &BG(user_compare_func_ptr) TSRMLS_CC)== SUCCESS
+	fci.size = sizeof(fci);
+	fci.function_table = EG(function_table);
+	fci.function_name = *BG(user_compare_func_name);
+	fci.symbol_table = NULL;
+	fci.object_pp = NULL;
+	fci.retval_ptr_ptr = &retval_ptr;
+	fci.param_count = 2;
+	fci.params = args;
+	fci.no_separation = 0;
+
+	if (zend_call_function(&fci, &BG(user_compare_fci_cache) TSRMLS_CC)== SUCCESS
 		&& retval_ptr) {
 		long retval;
 
@@ -552,7 +563,7 @@ PHP_FUNCTION(usort)
 	HashTable *target_hash;
 
 	old_compare_func = BG(user_compare_func_name);
-	BG(user_compare_func_ptr) = NULL;
+	BG(user_compare_fci_cache) = empty_fcall_info_cache;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
@@ -582,7 +593,7 @@ PHP_FUNCTION(uasort)
 	HashTable *target_hash;
 
 	old_compare_func = BG(user_compare_func_name);
-	BG(user_compare_func_ptr) = NULL;
+	BG(user_compare_fci_cache) = empty_fcall_info_cache;
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
@@ -975,6 +986,8 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 			}
 			php_array_walk(thash, userdata, recursive TSRMLS_CC);
 		} else {
+			zend_fcall_info fci;
+
 			/* Allocate space for key */
 			MAKE_STD_ZVAL(key);
 
@@ -985,11 +998,19 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 			} else {
 				ZVAL_STRINGL(key, string_key, string_key_len-1, 1);
 			}
-		
+
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = *BG(array_walk_func_name);
+			fci.symbol_table = NULL;
+			fci.object_pp = NULL;
+			fci.retval_ptr_ptr = &retval_ptr;
+			fci.param_count = userdata ? 3 : 2;
+			fci.params = args;
+			fci.no_separation = 0;
+
 			/* Call the userland function */
-			if (fast_call_user_function(EG(function_table), NULL, *BG(array_walk_func_name),
-							   &retval_ptr, userdata ? 3 : 2, args, 0, NULL, &BG(array_walk_func_ptr) TSRMLS_CC) == SUCCESS) {
-		
+			if (zend_call_function(&fci, &BG(array_walk_fci_cache) TSRMLS_CC) == SUCCESS) {
 				zval_ptr_dtor(&retval_ptr);
 			} else {
 				char *func_name;
@@ -1023,7 +1044,7 @@ PHP_FUNCTION(array_walk)
 	HashTable *target_hash;
 
 	argc = ZEND_NUM_ARGS();
-	BG(array_walk_func_ptr) = NULL;
+	BG(array_walk_fci_cache) = empty_fcall_info_cache;
 	old_walk_func_name = BG(array_walk_func_name);
 	if (argc < 2 || argc > 3 ||
 		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
@@ -3329,7 +3350,7 @@ PHP_FUNCTION(array_reduce)
 	zval **operand;
 	zval *result = NULL;
 	zval *retval;
-	zend_function *func_ptr = NULL;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	char *callback_name;
 	HashPosition pos;
 	HashTable *htbl;
@@ -3373,9 +3394,22 @@ PHP_FUNCTION(array_reduce)
 	zend_hash_internal_pointer_reset_ex(htbl, &pos);
 	while (zend_hash_get_current_data_ex(htbl, (void **)&operand, &pos) == SUCCESS) {
 		if (result) {
+			zend_fcall_info fci;
+
 			args[0] = &result;
 			args[1] = operand;
-			if (fast_call_user_function(EG(function_table), NULL, *callback, &retval, 2, args, 0, NULL, &func_ptr TSRMLS_CC) == SUCCESS && retval) {
+
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = *callback;
+			fci.symbol_table = NULL;
+			fci.object_pp = NULL;
+			fci.retval_ptr_ptr = &retval;
+			fci.param_count = 2;
+			fci.params = args;
+			fci.no_separation = 0;
+
+			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
 				zval_ptr_dtor(&result);
 				result = retval;
 			} else {
@@ -3407,7 +3441,7 @@ PHP_FUNCTION(array_filter)
 	zval *retval = NULL;
 	char *callback_name;
 	char *string_key;
-	zend_function *func_ptr = NULL;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	uint string_key_len;
 	ulong num_key;
 	HashPosition pos;
@@ -3441,8 +3475,21 @@ PHP_FUNCTION(array_filter)
 		 zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos)) {
 
 		if (callback) {
+			zend_fcall_info fci;
+
 			args[0] = operand;
-			if (fast_call_user_function(EG(function_table), NULL, *callback, &retval, 1, args, 0, NULL, &func_ptr TSRMLS_CC) == SUCCESS && retval) {
+
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = *callback;
+			fci.symbol_table = NULL;
+			fci.object_pp = NULL;
+			fci.retval_ptr_ptr = &retval;
+			fci.param_count = 1;
+			fci.params = args;
+			fci.no_separation = 0;
+
+			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
 				if (!zend_is_true(retval)) {
 					zval_ptr_dtor(&retval);
 					continue;
@@ -3483,7 +3530,7 @@ PHP_FUNCTION(array_map)
 	HashPosition *array_pos;
 	zval **args;
 	char *callback_name;
-	zend_function *func_ptr = NULL;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	int i, k, maxlen = 0;
 	int *array_len;
 
@@ -3593,7 +3640,19 @@ PHP_FUNCTION(array_map)
 		}
 
 		if (Z_TYPE_P(callback) != IS_NULL) {
-			if (!fast_call_user_function(EG(function_table), NULL, callback, &result, ZEND_NUM_ARGS() - 1, &params[1], 0, NULL, &func_ptr TSRMLS_CC) == SUCCESS && result) {
+			zend_fcall_info fci;
+
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = callback;
+			fci.symbol_table = NULL;
+			fci.object_pp = NULL;
+			fci.retval_ptr_ptr = &result;
+			fci.param_count = ZEND_NUM_ARGS()-1;
+			fci.params = &params[1];
+			fci.no_separation = 0;
+
+			if (!zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && result) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the map callback");
 				efree(array_len);
 				efree(args);
