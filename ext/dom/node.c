@@ -1129,9 +1129,55 @@ PHP_FUNCTION(dom_node_replace_child)
 	}
 
 	if (foundoldchild) {
+		xmlNodePtr node;
 		zval *rv = NULL;
-		if (oldchild != newchild) {
-			xmlNodePtr node;
+
+		if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
+			xmlNodePtr fragment, prevsib, nextsib;
+			fragment = newchild;
+			prevsib = oldchild->prev;
+			nextsib = oldchild->next;
+
+			newchild = fragment->children;
+
+			xmlUnlinkNode(oldchild);
+
+			if (prevsib == NULL && nextsib == NULL) {
+				nodep->children = newchild;
+				nodep->last = fragment->last;
+			} else {
+				if (newchild) {
+					prevsib->next = newchild;
+					newchild->prev = prevsib;
+
+					fragment->last->next = nextsib;
+					if (nextsib) {
+						nextsib->prev = fragment->last;
+					} else {
+						nodep->last = fragment->last;
+					}
+				}
+			}
+			node = newchild;
+			while (node != NULL) {
+				node->parent = nodep;
+				if (node->doc != nodep->doc) {
+					xmlSetTreeDoc(node, nodep->doc);
+					if (node->_private != NULL) {
+						newchildobj = node->_private;
+						newchildobj->document = intern->document;
+						php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL TSRMLS_CC);
+					}
+				}
+				if (node == fragment->last) {
+					break;
+				}
+				node = node->next;
+			}
+
+			fragment->children = NULL;
+			fragment->last = NULL;
+		} else if (oldchild != newchild) {
 			if (newchild->doc == NULL && nodep->doc != NULL) {
 				xmlSetTreeDoc(newchild, nodep->doc);
 				newchildobj->document = intern->document;
@@ -1146,7 +1192,6 @@ PHP_FUNCTION(dom_node_replace_child)
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
-
 }
 /* }}} end dom_node_replace_child */
 
