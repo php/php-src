@@ -1,3 +1,103 @@
+2001-07-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bz2/Makefile.in:
+    Added missing LTLIBRARY_SHARED_LIBADD line. PR: #12334
+
+    * ext/snmp/config.m4: Simplified a bit and made more readable.
+
+2001-07-27  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/Mail/mail.php:
+    Move Mail::send to Mail_mail::send to use it with the factory()-method
+
+2001-07-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/config.m4: Simplified this a bit and made more consistent.
+
+2001-07-27  Bertrand Mansion  <bmansion@mamasam.com>
+
+    * pear/HTML/ITX.php: Fixes for methods addBlock and addBlockfile.
+    It is now possible to use external files to replace internal template variables.
+
+2001-07-27  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/Config.php: Bugfix by Johannes Erdfelt
+
+2001-07-27  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/fastcgi/fastcgi.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      main/output.c
+      main/php_content_types.c
+      main/php_ini.c
+      main/php_main.h
+      main/php_variables.c
+      main/php_variables.h
+      main/rfc1867.c
+      main/SAPI.c
+      main/SAPI.h
+      main/fopen_wrappers.c
+      main/main.c
+      ext/xslt/xslt.c
+      ext/yp/yp.c
+      ext/zlib/zlib.c
+      ext/wddx/wddx.c
+      ext/xml/xml.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/standard/lcg.c
+      ext/standard/reg.c
+      ext/standard/string.c
+      ext/standard/syslog.c
+      ext/standard/var.c
+      ext/sybase/php_sybase_db.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/file.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/info.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/sablot/sablot.c
+      ext/session/mod_user.c
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/pcre/php_pcre.c
+      ext/pgsql/pgsql.c
+      ext/oracle/oracle.c
+      ext/odbc/php_odbc.c
+      ext/oci8/oci8.c
+      ext/mssql/php_mssql.c
+      ext/mailparse/mailparse.c
+      ext/mbstring/mbstring.c
+      ext/mhash/mhash.c
+      ext/java/java.c
+      ext/hyperwave/hg_comm.c
+      ext/db/db.c
+      ext/fdf/fdf.c
+      ext/ctype/ctype.c
+      ext/curl/curl.c
+      ext/com/COM.c: - Get rid of ELS_*(), and use TSRMLS_*() instead.
+    - Move to the new ts_allocate_id() API
+    This patch is *bound* to break some files, as I must have had typos somewhere.
+    If you use any uncommon extension, please try to build it...
+
+    * sapi/cgi/cgi_main.c: Fix a corrupted memory access
+
 2001-07-26  Thies C. Arntzen  <thies@thieso.net>
 
     * ext/oci8/config.m4: detect oracle9i
