@@ -7,6 +7,7 @@ PHP 4.0                                                                    NEWS
 - Fixed a very old legacy memory leak in the COM module (Zeev)
 - Fixed problems with object-overloading support - noteably, COM and Java (Zeev,
   Zend Engine)
+- WDDX charset now defaults to ISO-8859-1. (Thies)
 - Fixed an overrun in WDDX. (Thies)
 - Fixed a crash bug with modules loaded through dl() not properly freeing their
   resources (Zeev, Zend Engine)
