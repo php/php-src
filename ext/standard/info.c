@@ -452,7 +452,7 @@ PHPAPI void php_info_print_table_start()
 PHPAPI void php_info_print_table_end()
 {
 	php_printf("</TABLE><BR>\n");
-	php_printf("<CENTER>\n");
+	php_printf("</CENTER>\n");
 
 }
 
