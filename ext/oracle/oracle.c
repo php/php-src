@@ -322,7 +322,7 @@ PHP_MINIT_FUNCTION(oracle)
 	REGISTER_LONG_CONSTANT("ORA_FETCHINTO_ASSOC",ORA_FETCHINTO_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ORA_FETCHINTO_NULLS",ORA_FETCHINTO_NULLS, CONST_CS | CONST_PERSISTENT);
 
-#if NEEDED
+#ifdef ZTS
 	opinit(OCI_EV_TSF); /* initialize threaded environment - must match the threaded mode 
 						   of the oci8 driver if both are used at the same time!! */
 #endif
