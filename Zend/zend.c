@@ -134,6 +134,34 @@ static void print_hash(HashTable *ht, int indent)
 	ZEND_PUTS(")\n");
 }
 
+static void print_flat_hash(HashTable *ht)
+{
+    zval **tmp;
+    char *string_key;
+    HashPosition iterator;
+    ulong num_key;
+    uint str_len;
+    int i = 0;
+
+    zend_hash_internal_pointer_reset_ex(ht, &iterator);
+    while (zend_hash_get_current_data_ex(ht, (void **) &tmp, &iterator) == SUCCESS) {
+	if (i++ > 0) {
+	    ZEND_PUTS(",");
+	}
+	ZEND_PUTS("[");
+	switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, 0, &iterator)) {
+	    case HASH_KEY_IS_STRING:
+		ZEND_PUTS(string_key);
+		break;
+	    case HASH_KEY_IS_LONG:
+		zend_printf("%ld", num_key);
+		break;
+	}
+	ZEND_PUTS("] => ");
+	zend_print_flat_zval_r(*tmp);
+	zend_hash_move_forward_ex(ht, &iterator);
+    }
+}
 
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy)
 {
@@ -216,6 +244,42 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 	return expr->value.str.len;
 }
 
+ZEND_API void zend_print_flat_zval_r(zval *expr)
+{
+    zend_write_func_t write_func = zend_write;
+
+    switch (expr->type) {
+	case IS_ARRAY:
+	    ZEND_PUTS("Array (");
+	    if (++expr->value.ht->nApplyCount>1) {
+		ZEND_PUTS(" *RECURSION*");
+		expr->value.ht->nApplyCount--;
+		return;
+	    }
+	    print_flat_hash(expr->value.ht);
+	    ZEND_PUTS(")");
+	    expr->value.ht->nApplyCount--;
+	    break;
+	case IS_OBJECT:
+	    {
+		zend_object *object = Z_OBJ_P(expr);
+
+		if (++object->properties->nApplyCount>1) {
+		    ZEND_PUTS(" *RECURSION*");
+		    object->properties->nApplyCount--;
+		    return;
+		}   
+		zend_printf("%s Object (", object->ce->name);
+		print_flat_hash(object->properties);
+		ZEND_PUTS(")");
+		object->properties->nApplyCount--;
+		break;
+	    }
+	default:
+	    zend_print_variable(expr);
+	    break;
+    }
+}
 
 ZEND_API void zend_print_zval_r(zval *expr, int indent)
 {
