@@ -84,9 +84,8 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
 #define PHP_BINARY_READ 0x0002
 
 #define PHP_SOCKET_ERROR(socket,msg,errn)	socket->error = errn;	\
-											SOCKETS_G(last_error) = errn; \
-											php_error(E_WARNING, "%s() %s [%d]: %s", \
-													  get_active_function_name(TSRMLS_C), msg, errn, php_strerror(errn TSRMLS_CC))
+						SOCKETS_G(last_error) = errn; \
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, errn, php_strerror(errn TSRMLS_CC))
 
 static int le_iov;
 #define le_iov_name "Socket I/O vector"
@@ -385,7 +384,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 			return 0;
 		}
 		if (host_entry->h_addrtype != AF_INET) {
-			php_error(E_WARNING, "%s() Host lookup failed: Non AF_INET domain returned on AF_INET socket", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host lookup failed: Non AF_INET domain returned on AF_INET socket");
 			return 0;
 		}
 		memcpy(&(sin->sin_addr.s_addr), host_entry->h_addr_list[0], host_entry->h_length);
@@ -569,7 +568,7 @@ PHP_FUNCTION(socket_select)
 	if (e_array != NULL) sets += php_sock_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
 
 	if (!sets) {
-		php_error(E_WARNING, "%s() no resource arrays were passed to select", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no resource arrays were passed to select");
 		RETURN_FALSE;
 	}
 
@@ -585,7 +584,7 @@ PHP_FUNCTION(socket_select)
 
 	if (retval == -1) {
 		SOCKETS_G(last_error) = errno;
-		php_error(E_WARNING, "%s() %s [%d]: %s", get_active_function_name(TSRMLS_C), "unable to select", errno, php_strerror(errno TSRMLS_CC));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to select [%d]: %s", errno, php_strerror(errno TSRMLS_CC));
 		RETURN_FALSE;
 	}
 
@@ -629,8 +628,7 @@ PHP_FUNCTION(socket_accept)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 	
 	if (!accept_connect(php_sock, &new_sock, (struct sockaddr *) &sa TSRMLS_CC)) {
-		php_error(E_WARNING, "%s() unable to accept socket connection [%d]: %s",
-				  get_active_function_name(TSRMLS_C), errno, php_strerror(errno TSRMLS_CC));
+		PHP_SOCKET_ERROR(new_sock, "unable to accept socket connection", errno);
 		RETURN_FALSE;
 	}
 	
@@ -851,8 +849,7 @@ PHP_FUNCTION(socket_getsockname)
 			RETURN_TRUE;
 
 		default:
-			php_error(E_WARNING, "%s() Unsupported address family %d",
-					  get_active_function_name(TSRMLS_C), sa->sa_family);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported address family %d", sa->sa_family);
 			RETURN_FALSE;
 	}
 }
@@ -909,8 +906,7 @@ PHP_FUNCTION(socket_getpeername)
 			RETURN_TRUE;
 
 		default:
-			php_error(E_WARNING, "%s() Unsupported address family %d",
-					  get_active_function_name(TSRMLS_C), sa->sa_family);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported address family %d", sa->sa_family);
 			RETURN_FALSE;
 	}
 }
@@ -929,12 +925,12 @@ PHP_FUNCTION(socket_create)
     }
 
 	if (arg1 != AF_UNIX && arg1 != AF_INET) {
-		php_error(E_WARNING, "%s() invalid socket domain [%d] specified for argument 1, assuming AF_INET", get_active_function_name(TSRMLS_C), arg1);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket domain [%d] specified for argument 1, assuming AF_INET", arg1);
 		arg1 = AF_INET;
 	}
 
 	if (arg2 > 10) {
-		php_error(E_WARNING, "%s() invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", get_active_function_name(TSRMLS_C), arg2);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", arg2);
 		arg2 = SOCK_STREAM;
 	}
 	
@@ -943,8 +939,7 @@ PHP_FUNCTION(socket_create)
 
 	if (IS_INVALID_SOCKET(php_sock)) {
 		SOCKETS_G(last_error) = errno;
-		php_error(E_WARNING, "%s() Unable to create socket [%d]: %s",
-				  get_active_function_name(TSRMLS_C), errno, php_strerror(errno TSRMLS_CC));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create socket [%d]: %s", errno, php_strerror(errno TSRMLS_CC));
 		efree(php_sock);
 		RETURN_FALSE;
 	}
@@ -972,8 +967,7 @@ PHP_FUNCTION(socket_connect)
 	switch(php_sock->type) {
 		case AF_INET:
 			if (ZEND_NUM_ARGS() != 3) {
-				php_error(E_WARNING, "%s() Socket of type AF_INET requires 3 arguments",
-						  get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Socket of type AF_INET requires 3 arguments");
 				RETURN_FALSE;
 			}
 
@@ -994,8 +988,7 @@ PHP_FUNCTION(socket_connect)
 			break;
 
 		default:
-			php_error(E_WARNING, "%s() Unsupported socket type %d",
-					  get_active_function_name(TSRMLS_C), php_sock->type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported socket type %d", php_sock->type);
 			RETURN_FALSE;
 		}	
 	
@@ -1067,8 +1060,7 @@ PHP_FUNCTION(socket_bind)
 			}
 		
 		default:
-			php_error(E_WARNING, "%s() unsupported socket type '%d', must be AF_UNIX or AF_INET", 
-                     get_active_function_name(TSRMLS_C), php_sock->type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unsupported socket type '%d', must be AF_UNIX or AF_INET", php_sock->type);
 			RETURN_FALSE;
 	}
 
@@ -1136,7 +1128,7 @@ PHP_FUNCTION(socket_iovec_fetch)
 	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, &iovec_id, -1, le_iov_name, le_iov);
 
 	if (iovec_position >= vector->count) {
-		php_error(E_WARNING, "%s() can't access a vector position past the amount of vectors set in the array", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't access a vector position past the amount of vectors set in the array");
 		RETURN_EMPTY_STRING();
 	}
 
@@ -1160,7 +1152,7 @@ PHP_FUNCTION(socket_iovec_set)
 	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, &iovec_id, -1, le_iov_name, le_iov);
 
 	if (iovec_position >= vector->count) {
-		php_error(E_WARNING, "%s() can't access a vector position outside of the vector array bounds", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't access a vector position outside of the vector array bounds");
 		RETURN_FALSE;
 	}
 	
@@ -1218,7 +1210,7 @@ PHP_FUNCTION(socket_iovec_delete)
 	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, &iovec_id, -1, le_iov_name, le_iov);
 
 	if (iov_pos > vector->count) {
-		php_error(E_WARNING, "%s() can't delete an IO vector that is out of array bounds", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "can't delete an IO vector that is out of array bounds");
 		RETURN_FALSE;
 	}
 
@@ -1438,8 +1430,7 @@ PHP_FUNCTION(socket_recvfrom)
 			break;
 
 		default:
-			php_error(E_WARNING, "%s() Unsupported socket type %d",
-					  get_active_function_name(TSRMLS_C), php_sock->type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported socket type %d", php_sock->type);
 			RETURN_FALSE;
 	}
 
@@ -1490,8 +1481,7 @@ PHP_FUNCTION(socket_sendto)
 			break;
 
 		default:
-			php_error(E_WARNING, "%s() Unsupported socket type %d",
-					  get_active_function_name(TSRMLS_C), php_sock->type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported socket type %d", php_sock->type);
 			RETURN_FALSE;
 	}
 
@@ -1570,10 +1560,7 @@ PHP_FUNCTION(socket_recvmsg)
 #endif
 				ZVAL_LONG(arg7, ntohs(sin->sin_port));
 				
-				if (array_init(arg3) == FAILURE) {
-					php_error(E_WARNING, "%s() cannot intialize array", get_active_function_name(TSRMLS_C));
-					RETURN_FALSE;
-				}
+				array_init(arg3);
 				
 				if (mhdr != NULL) {
 					add_assoc_long(arg3,	"cmsg_level",	mhdr->cmsg_level);
@@ -1630,10 +1617,7 @@ PHP_FUNCTION(socket_recvmsg)
 				ZVAL_LONG(arg5, hdr.msg_flags);
 #endif
 				
-				if (array_init(arg3) == FAILURE) {
-					php_error(E_WARNING, "%s() cannot initialize return value", get_active_function_name(TSRMLS_C));
-					RETURN_FALSE;
-				}
+				array_init(arg3);
 				
 				add_assoc_long(arg3, "cmsg_level", mhdr->cmsg_level);
 				add_assoc_long(arg3, "cmsg_type", mhdr->cmsg_type);
@@ -1646,8 +1630,7 @@ PHP_FUNCTION(socket_recvmsg)
 		}
 		
 	default:
-		php_error(E_WARNING, "%s() Unsupported address family %d",
-				  get_active_function_name(TSRMLS_C), sa->sa_family);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported address family %d", sa->sa_family);
 		RETURN_FALSE;
 	}
 }
@@ -1732,8 +1715,7 @@ PHP_FUNCTION(socket_sendmsg)
 			}
 
 		default:
-			php_error(E_WARNING, "%s() Unsupported address family %d",
-					  get_active_function_name(TSRMLS_C), sa.sa_family);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported address family %d", sa.sa_family);
 			RETURN_FALSE;
 	}
 }
@@ -1764,9 +1746,7 @@ PHP_FUNCTION(socket_get_option)
 				RETURN_FALSE;
 			}
 
-			if (array_init(return_value) == FAILURE) {
-				RETURN_FALSE;
-			}
+			array_init(return_value);
 
 			add_assoc_long(return_value, "l_onoff", linger_val.l_onoff);
 			add_assoc_long(return_value, "l_linger", linger_val.l_linger);
@@ -1781,9 +1761,7 @@ PHP_FUNCTION(socket_get_option)
 				RETURN_FALSE;
 			}
 
-			if (array_init(return_value) == FAILURE) {
-				RETURN_FALSE;
-			}
+			array_init(return_value);
 			
 			add_assoc_long(return_value, "sec", tv.tv_sec);
 			add_assoc_long(return_value, "usec", tv.tv_usec);
@@ -1837,11 +1815,11 @@ PHP_FUNCTION(socket_set_option)
 			opt_ht = HASH_OF(arg4);
 
 			if (zend_hash_find(opt_ht, l_onoff_key, strlen(l_onoff_key) + 1, (void **)&l_onoff) == FAILURE) {
-				php_error(E_WARNING, "%s() no key \"%s\" passed in optval", get_active_function_name(TSRMLS_C), l_onoff_key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "no key \"%s\" passed in optval", l_onoff_key);
 				RETURN_FALSE;
 			}
 			if (zend_hash_find(opt_ht, l_linger_key, strlen(l_linger_key) + 1, (void **)&l_linger) == FAILURE) {
-				php_error(E_WARNING, "%s() no key \"%s\" passed in optval", get_active_function_name(TSRMLS_C), l_linger_key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "no key \"%s\" passed in optval", l_linger_key);
 				RETURN_FALSE;
 			}
 
@@ -1860,11 +1838,11 @@ PHP_FUNCTION(socket_set_option)
 			opt_ht = HASH_OF(arg4);
 
 			if (zend_hash_find(opt_ht, sec_key, strlen(sec_key) + 1, (void **)&sec) == FAILURE) {
-				php_error(E_WARNING, "%s() no key \"%s\" passed in optval", get_active_function_name(TSRMLS_C), sec_key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "no key \"%s\" passed in optval", sec_key);
 				RETURN_FALSE;
 			}
 			if (zend_hash_find(opt_ht, usec_key, strlen(usec_key) + 1, (void **)&usec) == FAILURE) {
-				php_error(E_WARNING, "%s() no key \"%s\" passed in optval", get_active_function_name(TSRMLS_C), usec_key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "no key \"%s\" passed in optval", usec_key);
 				RETURN_FALSE;
 			}
 			
@@ -1912,30 +1890,25 @@ PHP_FUNCTION(socket_create_pair)
 	php_sock[1] = (php_socket*)emalloc(sizeof(php_socket));
 
 	if (domain != AF_INET && domain != AF_UNIX) {
-		php_error(E_WARNING, "%s() invalid socket domain [%d] specified for argument 1, assuming AF_INET", get_active_function_name(TSRMLS_C), domain);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket domain [%d] specified for argument 1, assuming AF_INET", domain);
 		domain = AF_INET;
 	}
 	
 	if (type > 10) {
-		php_error(E_WARNING, "%s() invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", get_active_function_name(TSRMLS_C), type);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", type);
 		type = SOCK_STREAM;
 	}
 	
 	if (socketpair(domain, type, protocol, fds_array) != 0) {
 		SOCKETS_G(last_error) = errno;
-		php_error(E_WARNING, "%s() unable to create socket pair [%d]: %s", get_active_function_name(TSRMLS_C), errno, php_strerror(errno TSRMLS_CC));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create socket pair [%d]: %s", errno, php_strerror(errno TSRMLS_CC));
 		efree(php_sock[0]);
 		efree(php_sock[1]);
 		RETURN_FALSE;
 	}
 
 	zval_dtor(fds_array_zval);
-	if (array_init(fds_array_zval) == FAILURE) {
-		php_error(E_WARNING, "%s() can't initialize array for 4th argument", get_active_function_name(TSRMLS_C));
-		efree(php_sock[0]);
-		efree(php_sock[1]);
-		RETURN_FALSE;
-	}
+	array_init(fds_array_zval);
 
 	MAKE_STD_ZVAL(retval[0]);
 	MAKE_STD_ZVAL(retval[1]);
