@@ -71,7 +71,8 @@ class PEAR_Command_Package extends PEAR_Command_Common
                      'package-info' => 'Show Package Info',
                      'package-list' => 'List Files in Package',
                      'package-validate' => 'Validate Package',
-                     'cvstag' => 'Set CVS Release Tag');
+                     'cvstag' => 'Set CVS Release Tag',
+                     'run-tests' => 'Run Regression Tests');
     }
 
     // }}}
@@ -386,6 +387,24 @@ class PEAR_Command_Package extends PEAR_Command_Common
                     }
                     pclose($fp);
                 }
+                break;
+            }
+
+            // }}}
+            // {{{ run-tests 
+
+            case 'run-tests': {
+                $cwd = getcwd();
+                $php = PHP_BINDIR . '/php' . (OS_WINDOWS ? '.exe' : '');
+                $ip = ini_get("include_path");
+                $ps = OS_WINDOWS ? ';' : ':';
+                $run_tests = $this->config->get('php_dir') . DIRECTORY_SEPARATOR . 'run-tests.php';
+                if (!file_exists($run_tests)) {
+                    $run_tests = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . 'run-tests.php';
+                }
+                $plist = implode(" ", $params);
+                $cmd = "$php -d include_path=$cwd$ps$ip $run_tests $plist";
+                system($cmd);
                 break;
             }
 
