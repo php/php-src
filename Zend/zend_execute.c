@@ -976,7 +976,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 					  ZVAL_LONG(&tmp, lval);
 						offset = &tmp;
 					} else {
-						if (type != BP_VAR_IS && type != BP_VAR_UNSET) {
+						if (type != BP_VAR_IS) {
 							zend_error(E_NOTICE, "Trying to get string index from a string");
 						}
 						*retval = &EG(error_zval_ptr);;
