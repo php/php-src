@@ -183,7 +183,7 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(1, "Apache for Windows 95/NT");
 	php_info_print_table_end();
 	php_info_print_table_start();
-#elif
+#elif defined(NETWARE)
 	php_info_print_table_row(1, "Apache for NetWare");
 	php_info_print_table_end();
 	php_info_print_table_start();
