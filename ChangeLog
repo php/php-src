@@ -1,3 +1,73 @@
+2000-02-17  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: The list grows.
+
+    * ext/wddx/wddx.c: Don't need dlist.h anymore.
+
+    * ext/wddx/wddx.c:
+    Updated to use Zend's internal doubly-linked list instead of dlist.[ch]
+    implementation.
+    Also fixed serialization to always output objects as struct. In the past,
+    if the object did not have any member variables initialized it would've
+    been output as array of length 0.
+
+2000-02-17  Zeev Suraski  <zeev@php.net>
+
+    * SAPI.c: Fix duplicate freeing
+
+2000-02-17  Stig Bakken  <ssb@fast.no>
+
+    * main.c: typo
+
+2000-02-17  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      tests/testdom: - fixed bug if attribute value is entity
+
+2000-02-17  Zeev Suraski  <zeev@php.net>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c:
+    No need for a value (not that it seems to work anyway...)
+
+    * ext/fdf/fdf.c
+      SAPI.c
+      SAPI.h
+      main.c
+      php_content_types.c
+      php_content_types.h
+      php_variables.c
+      php_variables.h
+      rfc1867.c
+      rfc1867.h:
+    Make POST handling the way it should be.  RFC1867, and any future POST handlers we might
+    have in the future now obey to the variables_order directive, and there's a real way modular
+    way to handle POST content.
+    This is all untested, BEFORE_SAPI_POST_PATCH_17_FEB_2000 tagged before submission
+
+2000-02-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.in: install DB_pgsql and DB_storage
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB.php: * prepare/execute emulation moved into DB_common
+    * returning references everywhere in DB_mysql and DB_pgsql
+    * added a todo note to DB_pgsql
+
+2000-02-17  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testdom
+      ext/domxml/domxml.c
+      ext/domxml/php_domxml.h: - change some function name into php style
+
+2000-02-17  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/reflect.java: Allow non-public enumerations to be accessed
+
 2000-02-16  Frank M. Kromann  <fmk@swwwing.com>
 
     * ext/mssql/mssql.dsp
