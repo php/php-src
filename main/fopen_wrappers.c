@@ -107,6 +107,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	char resolved_basedir[MAXPATHLEN];
 	char local_open_basedir[MAXPATHLEN];
 	int local_open_basedir_pos;
+	int resolved_basedir_len;
 	
 	/* Special case basedir==".": Use script-directory */
 	if ((strcmp(basedir, ".") == 0) && 
@@ -128,11 +129,20 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 
 	/* Resolve the real path into resolved_name */
 	if ((expand_filepath(path, resolved_name TSRMLS_CC) != NULL) && (expand_filepath(local_open_basedir, resolved_basedir TSRMLS_CC) != NULL)) {
+		/* Handler for basedirs that end with a / */		
+		if (basedir[strlen(basedir)-1] == PHP_DIR_SEPARATOR) {
+			resolved_basedir_len = strlen(resolved_basedir);
+			resolved_basedir[resolved_basedir_len] = '/';
+			resolved_basedir[++resolved_basedir_len] = '\0';
+		} else {
+			resolved_basedir_len = strlen(resolved_basedir);	
+		}
+		
 		/* Check the path */
 #ifdef PHP_WIN32
-		if (strncasecmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
+		if (strncasecmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
 #else
-		if (strncmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
+		if (strncmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
 #endif
 			/* File is in the right directory */
 			return 0;
