@@ -2202,81 +2202,39 @@ int zend_add_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
+
 int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_class_entry **pce;
-	zend_class_entry *ce = NULL;
-	zend_bool is_const;
 	char *class_name_strval;
-	zend_uint class_name_strlen;
-	zend_bool free_class_name = 0;
-	zval *class_name;					
+	zval *class_name;
 	
+
 	if (EX(opline)->op2.op_type == IS_UNUSED) {
-		if (EX(opline)->extended_value == ZEND_FETCH_CLASS_SELF) {
-			if (!EG(scope)) {
-				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
-			}
-			EX_T(EX(opline)->result.u.var).EA.class_entry = EG(scope);
-			NEXT_OPCODE();
-		} else if (EX(opline)->extended_value == ZEND_FETCH_CLASS_PARENT) {
-			if (!EG(scope)) {
-				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
-			}
-			if (!EG(scope)->parent) {
-				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
-			}
-			EX_T(EX(opline)->result.u.var).EA.class_entry = EG(scope)->parent;
-			NEXT_OPCODE();
-		} 
+		EX_T(EX(opline)->result.u.var).EA.class_entry = zend_fetch_class(NULL, 0, EX(opline)->extended_value TSRMLS_CC);
+		NEXT_OPCODE();
 	}
 
-	is_const = (EX(opline)->op2.op_type == IS_CONST);
+	class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
-	if (is_const) {
-		class_name_strval = EX(opline)->op2.u.constant.value.str.val;
-		class_name_strlen = EX(opline)->op2.u.constant.value.str.len;
-	} else {
-		class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
-
-		switch (class_name->type) {
-			case IS_OBJECT:
-				ce = Z_OBJCE_P(class_name);
-				break;
-			case IS_STRING:
-				convert_to_string_ex(&class_name);
+	switch (class_name->type) {
+		case IS_OBJECT:
+			EX_T(EX(opline)->result.u.var).EA.class_entry = Z_OBJCE_P(class_name);
+			break;
+		case IS_STRING:
+			if (EX(opline)->op2.op_type != IS_CONST) {
 				class_name_strval = zend_str_tolower_dup(class_name->value.str.val, class_name->value.str.len);
-				class_name_strlen = class_name->value.str.len;
-				free_class_name = 1;
-				break;
-			default:
-				zend_error(E_ERROR, "Class name must be a valid object or a string");
-				break;
-		}
-	}
-	
-	if (!ce) {
-		int retval;
-
-		if (EX(opline)->op1.op_type == IS_UNUSED) {
-			retval = zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC);
-		}
-		if (retval==SUCCESS) {
-			ce = *pce;
-		}
+				EX_T(EX(opline)->result.u.var).EA.class_entry = zend_fetch_class(class_name_strval, Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+				efree(class_name_strval);
+			} else {
+				EX_T(EX(opline)->result.u.var).EA.class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			}
+			break;
+		default:
+			zend_error(E_ERROR, "Class name must be a valid object or a string");
+			break;
 	}
 
-	if (!ce) {
-		zend_error(E_ERROR, "Class '%s' not found", class_name_strval);
-	} else {
-		EX_T(EX(opline)->result.u.var).EA.class_entry = ce;
-	}
-	if (!is_const) {
-		if (free_class_name) {
-			efree(class_name_strval);
-		}
-		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
-	}
+	FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	NEXT_OPCODE();
 }
 

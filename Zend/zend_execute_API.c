@@ -1049,6 +1049,43 @@ void zend_unset_timeout(TSRMLS_D)
 #endif
 }
 
+
+zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
+{
+	zend_class_entry **pce;
+	zend_class_entry *ce = NULL;
+	zend_bool free_class_name = 0;
+
+check_fetch_type:
+	switch (fetch_type) {
+		case ZEND_FETCH_CLASS_SELF:
+			if (!EG(scope)) {
+				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
+			}
+			return EG(scope);
+		case ZEND_FETCH_CLASS_PARENT:
+			if (!EG(scope)) {
+				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
+			}
+			if (!EG(scope)->parent) {
+				zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
+			}
+			return EG(scope)->parent;
+		case ZEND_FETCH_CLASS_AUTO: {
+				fetch_type = zend_get_class_fetch_type(class_name, class_name_len);
+				if (fetch_type!=ZEND_FETCH_CLASS_DEFAULT) {
+					goto check_fetch_type;
+				}
+			}
+			break;
+	}
+
+	if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC)==FAILURE) {
+		zend_error(E_ERROR, "Class '%s' not found", class_name);
+	}
+	return *pce;
+}
+
 /*
  * Local variables:
  * tab-width: 4

@@ -465,6 +465,7 @@ zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC);
 void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
+int zend_get_class_fetch_type(char *class_name, uint class_name_len);
 
 typedef zend_bool (*zend_auto_global_callback)(char *name, uint name_len TSRMLS_DC);
 typedef struct _zend_auto_global {
@@ -680,6 +681,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_CLASS_PARENT		2
 #define ZEND_FETCH_CLASS_MAIN		3
 #define ZEND_FETCH_CLASS_GLOBAL		4
+#define ZEND_FETCH_CLASS_AUTO		5
 
 
 /* variable parsing type (compile-time) */
