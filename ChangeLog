@@ -1,3 +1,124 @@
+2003-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_interfaces.c:
+      Prevent some SEGV's when Exceptions are thorown inside iterators.
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Removedouble efree call
+
+2003-11-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/ftp/php_ftp.c:
+      MFH: Fixed bug #26113 (remove leftover local file when ftp_get/ftp_nb_get
+      fails).
+
+    * ext/ftp/php_ftp.c:
+      Fixed bug #26113 (remove leftover local file when ftp_get/ftp_nb_get fails)
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      Zend/zend.h:
+      Fixed bug #26105 (Compile failure on gcc version 3.0.X).
+      
+
+2003-11-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/zend_object_handlers.c:
+      __tostring() handler should be binary-safe
+
+    * ZendEngine2/tests/bug26010.phpt:
+      Fix one more test
+
+    * ext/xml/tests/xml001.phpt
+      ext/xml/tests/xml002.phpt
+      ext/xml/tests/xml003.phpt:
+      Fix tests
+
+    * ext/xml/xml.c:
+      Add XML_SAX_IMPL constant to determine which implementation (libxml /
+      expat)
+      is selected for SAX interface.
+
+    * NEWS:
+      BFN
+
+    * ext/standard/var.c:
+      Fixed bug #24394 (serializing cross-referenced objects causes segfault)
+
+2003-11-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/Makefile.am:
+      add zend_iterators.c zend_interfaces.c to make
+
+2003-11-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-11-04  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/hwapi/.cvsignore:
+      ignore some files
+
+    * ext/pdf/.cvsignore:
+      - added more files
+
+2003-11-04  Uwe Schindler  <uwe@thetaphi.de>
+
+    * win32/install.txt
+      win32/install.txt:
+      SunONE servers
+
+2003-11-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/dbase/dbase.c:
+      MFH: - limit writing of field data to field len + 1
+             This fixed many memory overrun errors which appeared
+             in several scripts when writing a record.
+      
+      by: Uwe Steinmann <steinm@php.net>
+
+    * ext/mime_magic/mime_magic.c
+      ext/mime_magic/mime_magic.dsp
+      ext/mime_magic/php_mime_magic.h
+      ext/mime_magic/phpmimemagic.h:
+      - Moved all the mime_magic.c specific stuff into their own header file
+        to prevent possible compile failures.
+      
+
+2003-11-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/libgd/gd.c:
+      MFH: Fixed bug #26097 (gdImageColorClosestAlpha() returns incorrect
+      results).
+
+    * ext/gd/libgd/gd.c:
+      Fixed bug #26097 (gdImageColorClosestAlpha() returns incorrect results).
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news
+
+    * (PHP_4_3)
+      ext/standard/image.c:
+      MFH: Fixed bug #25581 (getimagesize () return incorrect values on bitmap
+      (os2) files).
+
+    * (PHP_4_3)
+      ext/mcrypt/mcrypt.c:
+      MFH: Fixed bug #26042 (memory leak if mcrypt_generic_deinit() is not called
+      after every mcrypt_generic_init() call).
+
 2003-11-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)

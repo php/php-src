@@ -1,3 +1,25 @@
+2003-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c
+      zend_interfaces.c:
+      Prevent some SEGV's when Exceptions are thorown inside iterators.
+
+    * zend_builtin_functions.c:
+      Removedouble efree call
+
+2003-11-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_object_handlers.c:
+      __tostring() handler should be binary-safe
+
+    * tests/bug26010.phpt:
+      Fix one more test
+
+2003-11-04  Stanislav Malyshev  <stas@zend.com>
+
+    * Makefile.am:
+      add zend_iterators.c zend_interfaces.c to make
+
 2003-10-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * tests/bug26010.phpt:
