@@ -1042,7 +1042,7 @@ PHP_METHOD(soapserver, handle)
 		&& ((*raw_post)->type==IS_STRING)) {
 		int old_error_reporting = EG(error_reporting);
 		EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
-		
+
 		doc_request = xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
 		xmlCleanupParser();
 
@@ -1086,7 +1086,7 @@ PHP_METHOD(soapserver, handle)
 
 				MAKE_STD_ZVAL(tmp_soap);
 				object_init_ex(tmp_soap, service->soap_class.ce);
-				
+
 				/* Call constructor */
 				class_name_len = strlen(service->soap_class.ce->name);
 				class_name = emalloc(class_name_len+1);
@@ -1460,13 +1460,16 @@ zend_try {
 		zval** fault;
 		if (zend_hash_find(Z_OBJPROP_P(thisObj), "__soap_fault", sizeof("__soap_fault"), (void **) &fault) == SUCCESS) {
 			*return_value = **fault;
+			zval_copy_ctor(return_value);
 		} else {
 			*return_value = *add_soap_fault(thisObj, "SOAP-ENV:Client", "Unknown Error", NULL, NULL TSRMLS_CC);
+			zval_copy_ctor(return_value);
 		}
 	} else {
 		zval** fault;
 		if (zend_hash_find(Z_OBJPROP_P(thisObj), "__soap_fault", sizeof("__soap_fault"), (void **) &fault) == SUCCESS) {
 			*return_value = **fault;
+			zval_copy_ctor(return_value);
 		}
 	}
 	SOAP_GLOBAL(sdl) = NULL;
@@ -1847,6 +1850,7 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 	sdlParamPtr parameter = NULL;
 	smart_str *gen_ns = NULL;
 	int param_count;
+	int style, use;
 
 	encode_reset_ns();
 
@@ -1856,53 +1860,42 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 	doc->children = xmlNewDocNode(doc, NULL, "SOAP-ENV:Envelope", NULL);
 	envelope = doc->children;
 
-	/*TODO: if use="literal" SOAP-ENV:encodingStyle is not need */
-
 	if (version == SOAP_1_1) {
-/*
-		if ($style == 'rpc' && $use == 'encoded') {
-*/
-			xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_1_ENC);
-/*
-		}
-*/
-		xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_1_ENC);
 		ns = xmlNewNs(envelope, SOAP_1_1_ENV,"SOAP-ENV");
 	} else if (version == SOAP_1_2) {
-/*
-		if ($style == 'rpc' && $use == 'encoded') {
-*/
-			xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_2_ENC);
-/*
-		}
-*/
-		xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_2_ENC);
 		ns = xmlNewNs(envelope, SOAP_1_2_ENV,"SOAP-ENV");
 	} else {
 	  php_error(E_ERROR, "Unknown SOAP version");
 	}
-	xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-	xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
-	xmlSetProp(envelope, "xmlns:" APACHE_NS_PREFIX , APACHE_NAMESPACE);
 
 	body = xmlNewChild(envelope, ns, "Body", NULL);
 
 	if (Z_TYPE_P(ret) == IS_OBJECT &&
 		Z_OBJCE_P(ret) == soap_fault_class_entry) {
-		param = seralize_zval(ret, NULL, "SOAP-ENV:Fault", SOAP_ENCODED TSRMLS_CC);
+		use = SOAP_ENCODED;
+		param = seralize_zval(ret, NULL, "SOAP-ENV:Fault", use TSRMLS_CC);
 		xmlAddChild(body, param);
 	} else {
 		gen_ns = encode_new_ns();
-		ns = xmlNewNs(envelope, uri, gen_ns->c);
 
-		if (function != NULL) {
-			method = xmlNewChild(body, ns, function->responseName , NULL);
+		if (function != NULL && function->binding->bindingType == BINDING_SOAP) {
+			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
+
+			style = fnb->style;
+			use = fnb->output.use;
+			if (style == SOAP_RPC) {
+				ns = xmlNewNs(body, fnb->output.ns, gen_ns->c);
+				if (function->responseName) {
+					method = xmlNewChild(body, ns, function->responseName, NULL);
+				} else {
+					method = xmlNewChild(body, ns, function->functionName, NULL);
+				}
+			}
 		} else {
+			style = SOAP_RPC;
+			use = SOAP_ENCODED;
+			ns = xmlNewNs(body, uri, gen_ns->c);
 			method = xmlNewChild(body, ns, function_name, NULL);
-		}
-
-		if (uri) {
-			ns = xmlNewNs(method, uri, NULL);
 		}
 
 		if (function != NULL) {
@@ -1914,8 +1907,21 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 		if (param_count == 1) {
 			parameter = get_param(function, NULL, 0, TRUE);
 
-			param = seralize_parameter(parameter, ret, 0, "return", SOAP_ENCODED TSRMLS_CC);
-			xmlAddChild(method,param);
+			param = seralize_parameter(parameter, ret, 0, "return", use TSRMLS_CC);
+			if (style == SOAP_RPC) {
+				xmlAddChild(method,param);
+			} else {
+				if (function && function->binding->bindingType == BINDING_SOAP) {
+					sdlParamPtr *sparam;
+
+					if (zend_hash_index_find(function->responseParameters, 0, (void **)&sparam) == SUCCESS) {
+						ns = xmlNewNs(param, (*sparam)->encode->details.ns, gen_ns->c);
+						xmlNodeSetName(param, (*sparam)->encode->details.type_str);
+						xmlSetNs(param, ns);
+					}
+				}
+				xmlAddChild(body, param);
+			}
 		} else if (param_count > 1 && Z_TYPE_P(ret) == IS_ARRAY) {
 			HashPosition pos;
 			zval **data;
@@ -1930,12 +1936,41 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 				zend_hash_get_current_key_ex(Z_ARRVAL_P(ret), &param_name, &param_name_len, &param_index, 0, &pos);
 				parameter = get_param(function, param_name, param_index, TRUE);
 
-				param = seralize_parameter(parameter, *data, i, param_name, SOAP_ENCODED TSRMLS_CC);
-				xmlAddChild(method,param);
+				param = seralize_parameter(parameter, *data, i, param_name, use TSRMLS_CC);
+				if (style == SOAP_RPC) {
+					xmlAddChild(method,param);
+				} else {
+					if (function && function->binding->bindingType == BINDING_SOAP) {
+						sdlParamPtr *sparam;
+
+						if (zend_hash_index_find(function->responseParameters, i, (void **)&sparam) == SUCCESS) {
+							ns = xmlNewNs(param, (*sparam)->encode->details.ns, gen_ns->c);
+							xmlNodeSetName(param, (*sparam)->encode->details.type_str);
+							xmlSetNs(param, ns);
+						}
+					}
+					xmlAddChild(body, param);
+				}
 
 				zend_hash_move_forward_ex(Z_ARRVAL_P(ret), &pos);
 				i++;
 			}
+		}
+	}
+
+/* FIXME: if use="literal" SOAP-ENV:encodingStyle is not need.
+          What about arrayType?
+*/
+	if (use == SOAP_ENCODED) {
+		xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+		xmlSetProp(envelope, "xmlns:" APACHE_NS_PREFIX , APACHE_NAMESPACE);
+		if (version == SOAP_1_1) {
+			xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_1_ENC);
+			xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_1_ENC);
+		} else if (version == SOAP_1_2) {
+			xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_2_ENC);
+			xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_2_ENC);
 		}
 	}
 
@@ -1965,35 +2000,29 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 	xmlDocSetRootElement(doc, envelope);
 	if (version == SOAP_1_1) {
 		ns = xmlNewNs(envelope, SOAP_1_1_ENV, "SOAP-ENV");
-		xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_1_ENC);
-		xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_1_ENC);
 	} else if (version == SOAP_1_2) {
 		ns = xmlNewNs(envelope, SOAP_1_2_ENV, "SOAP-ENV");
-		xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_2_ENC);
-		xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_2_ENC);
 	} else {
 		php_error(E_ERROR, "Unknown SOAP version");
 	}
-	xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
-	xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
 	body = xmlNewChild(envelope, ns, "Body", NULL);
 
 	gen_ns = encode_new_ns();
 
-	if (function) {
-		if (function->binding->bindingType == BINDING_SOAP) {
-			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
+	if (function && function->binding->bindingType == BINDING_SOAP) {
+		sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
 
-			style = fnb->style;
-			use = fnb->input.use;
-			if (style == SOAP_RPC) {
-				ns = xmlNewNs(body, fnb->input.ns, gen_ns->c);
-				if (function->requestName) {
-					method = xmlNewChild(body, ns, function->requestName, NULL);
-				} else {
-					method = xmlNewChild(body, ns, function->functionName, NULL);
-				}
+		style = fnb->style;
+		/*FIXME: how to pass method name if style is SOAP_DOCUMENT */
+		/*style = SOAP_RPC;*/
+		use = fnb->input.use;
+		if (style == SOAP_RPC) {
+			ns = xmlNewNs(body, fnb->input.ns, gen_ns->c);
+			if (function->requestName) {
+				method = xmlNewChild(body, ns, function->requestName, NULL);
+			} else {
+				method = xmlNewChild(body, ns, function->functionName, NULL);
 			}
 		}
 	} else {
@@ -2002,22 +2031,37 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 		} else {
 			style = SOAP_RPC;
 		}
+		/*FIXME: how to pass method name if style is SOAP_DOCUMENT */
+		/*style = SOAP_RPC;*/
 		if (style == SOAP_RPC) {
 			ns = xmlNewNs(body, uri, gen_ns->c);
 			method = xmlNewChild(body, ns, function_name, NULL);
 		}
 
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "use", sizeof("use"), (void **)&zuse) == SUCCESS) {
-			if (Z_LVAL_PP(zuse) == SOAP_LITERAL) {
-				use = SOAP_LITERAL;
-			} else {
-				use = SOAP_ENCODED;
-			}
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "use", sizeof("use"), (void **)&zuse) == SUCCESS &&
+			  Z_LVAL_PP(zuse) == SOAP_LITERAL) {
+			use = SOAP_LITERAL;
 		} else {
 			use = SOAP_ENCODED;
 		}
 	}
-	
+
+/* FIXME: if use="literal" SOAP-ENV:encodingStyle is not need.
+          What about arrayType?
+*/
+	if (use == SOAP_ENCODED) {
+		xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+		xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		xmlSetProp(envelope, "xmlns:" APACHE_NS_PREFIX , APACHE_NAMESPACE);
+		if (version == SOAP_1_1) {
+			xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_1_ENC);
+			xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_1_ENC);
+		} else if (version == SOAP_1_2) {
+			xmlSetProp(envelope, "SOAP-ENV:encodingStyle", SOAP_1_2_ENC);
+			xmlSetProp(envelope, "xmlns:SOAP-ENC", SOAP_1_2_ENC);
+		}
+	}
+
 	for (i = 0;i < arg_count;i++) {
 		xmlNodePtr param;
 		sdlParamPtr parameter = get_param(function, NULL, i, FALSE);
@@ -2030,7 +2074,7 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 			if (function && function->binding->bindingType == BINDING_SOAP) {
 				sdlParamPtr *sparam;
 
-				if (zend_hash_index_find(function->requestParameters, 0, (void **)&sparam) == SUCCESS) {
+				if (zend_hash_index_find(function->requestParameters, i, (void **)&sparam) == SUCCESS) {
 					ns = xmlNewNs(param, (*sparam)->encode->details.ns, gen_ns->c);
 					xmlNodeSetName(param, (*sparam)->encode->details.type_str);
 					xmlSetNs(param, ns);

@@ -53,7 +53,7 @@ Encoding
   ? arrays of arrays
   - encoding of arrays with holes
 - full support for structures???  
-- references (id,href)
++ references (id,href)
 - references to external resources
 - default values
 - root attribute
@@ -65,8 +65,11 @@ WSDL
 ----
 + wsdl and schema import
 + support for <opperation> without <input>
-? support for style "rpc"/"document" encoding
-? support for "encoded"/"literal" encoding
++ support for style "rpc"/"document" encoding (client part)
+- support for style "rpc"/"document" encoding (server part)
+  How to get function name from request?
++ support for "encoded"/"literal" encoding
+? arrayType and "literal" encoding
 ? support for "nillable" and "nil"
 - support for user defined simple types
   - restiction
@@ -112,6 +115,10 @@ WSDL
 - wsdl caching
 - wsdl auto generation
 ? SOAP binding
+  ? <soap:body>
+    - "parts"
+  - <soap:fault>
+  - <soap:header> and <soap:headerfault>
 - HTTP GET/POST binding
 - MIME binding
 

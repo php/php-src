@@ -773,6 +773,7 @@ static xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		i = zend_hash_num_elements(Z_ARRVAL_P(data));
 
+		/*FIXME: arrayType and "literal" encoding? */
 		if (i > 0 && style == SOAP_ENCODED) {
 			get_array_type(data, &array_type TSRMLS_CC);
 			smart_str_append(&array_type_and_size, &array_type);
@@ -859,7 +860,9 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 	int* pos = NULL;
 	xmlAttrPtr arrayTypeAttr;
 	xmlAttrPtr offsetAttr;
+	xmlAttrPtr *tmp;
 	sdlPtr sdl;
+	sdlAttributePtr *arrayType;
 
 	TSRMLS_FETCH();
 
@@ -888,6 +891,30 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 		}
 		efree(type);
 		if (ns) {efree(ns);}
+	} else if (type.sdl_type != NULL &&
+	           type.sdl_type->attributes != NULL &&
+	           zend_hash_find(type.sdl_type->attributes, SOAP_ENC_NAMESPACE":arrayType",
+	                          sizeof(SOAP_ENC_NAMESPACE":arrayType"),
+	                          (void **)&arrayType) == SUCCESS &&
+	           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&tmp) == SUCCESS) {
+		char *type, *end, *ns;
+		xmlNsPtr nsptr;
+
+		arrayTypeAttr = *tmp;
+		parse_namespace(arrayTypeAttr->children->content, &type, &ns);
+		nsptr = xmlSearchNs(arrayTypeAttr->doc, arrayTypeAttr->parent, ns);
+
+		end = strrchr(type,'[');
+		if (end) {
+			*end = '\0';
+		}
+		if (nsptr != NULL) {
+			enc = get_encoder(SOAP_GLOBAL(sdl), nsptr->href, type);
+		}
+		efree(type);
+		if (ns) {efree(ns);}
+		dims = emalloc(sizeof(int));
+		*dims = 0;
 	}
 	if (dims == NULL) {
 		dims = emalloc(sizeof(int));
@@ -1177,7 +1204,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, 
 		}
 
 		/* Time zone support */
-#if HAVE_TM_GMTOFF				
+#if HAVE_TM_GMTOFF
 		sprintf(tzbuf, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( (ta->tm_gmtoff % 3600) / 60 ));
 #else
 		sprintf(tzbuf, "%c%02d%02d", ((ta->tm_isdst ? tzone - 3600:tzone)>0)?'-':'+', abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600), abs(((ta->tm_isdst ? tzone - 3600 : tzone) % 3600) / 60));
