@@ -160,37 +160,30 @@ class PEAR_Installer extends PEAR_Common
         }
 
         switch ($atts['role']) {
-            case 'test': case 'data': case 'ext':
-                // don't install test files for now
-                $this->log(2, "$file: $atts[role] file not installed yet");
-                return PEAR_INSTALLER_OK;
             case 'doc':
-                $dest_dir = $this->config->get('doc_dir') .
-                     DIRECTORY_SEPARATOR . $this->pkginfo['package'];
+            case 'data':
+            case 'test':
+                $dest_dir = $this->config->get($atts['role'] . '_dir') .
+                    DIRECTORY_SEPARATOR . $this->pkginfo['package'];
+                break;
+            case 'ext':
+            case 'php':
+                $dest_dir = $this->config->get($atts['role'] . '_dir');
+                break;
+            case 'script':
+                $dest_dir = $this->config->get('bin_dir');
                 break;
             case 'extsrc':
                 // don't install test files for now
                 $this->log(2, "$file: no support for building extensions yet");
                 return PEAR_INSTALLER_OK;
-            case 'php':
-                $dest_dir = $this->config->get('php_dir');
-                break;
-            case 'script': {
-                $dest_dir = $this->config->get('bin_dir');
-                break;
-            }
             default:
                 break;
         }
-        if (!isset($atts['baseinstalldir']) ||
-            $atts['baseinstalldir'] == '/' ||
-            $atts['baseinstalldir'] == DIRECTORY_SEPARATOR) {
-            $atts['baseinstalldir'] = '';
-        }
-        if (!empty($atts['baseinstalldir']) && $atts['role'] != 'doc') {
+        if (!empty($atts['baseinstalldir'])) {
             $dest_dir .= DIRECTORY_SEPARATOR . $atts['baseinstalldir'];
         }
-        if (dirname($file) != '.' && empty($atts['install-as'])) {
+        if (dirname($file) != '.' && empty($atts['install-as']) && empty($atts['baseinstalldir'])) {
             $dest_dir .= DIRECTORY_SEPARATOR . dirname($file);
         }
         if (empty($atts['install-as'])) {
@@ -199,18 +192,19 @@ class PEAR_Installer extends PEAR_Common
             $dest_file = $dest_dir . DIRECTORY_SEPARATOR . $atts['install-as'];
         }
         $dest_file = preg_replace('!//+!', '/', $dest_file);
+        $dest_dir = dirname($dest_file);
         if (!@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
-                return $this->raiseError(PEAR_INSTALLER_FAILED,
-                                         "failed to mkdir $dest_dir");
+                return $this->raiseError("failed to mkdir $dest_dir",
+                                         PEAR_INSTALLER_FAILED);
             }
             $this->log(3, "+ mkdir $dest_dir");
         }
         $orig_file = $tmp_path . DIRECTORY_SEPARATOR . $file;
         if (empty($atts['replacements'])) {
             if (!@copy($orig_file, $dest_file)) {
-                return $this->raiseError(PEAR_INSTALLER_FAILED,
-                                         "failed to copy $orig_file to $dest_file");
+                return $this->raiseError("failed to copy $orig_file to $dest_file",
+                                         PEAR_INSTALLER_FAILED);
             }
             $this->log(3, "+ cp $orig_file $dest_file");
         } else {
@@ -241,8 +235,8 @@ class PEAR_Installer extends PEAR_Common
             }
             $wp = @fopen($dest_file, "w");
             if (!is_resource($wp)) {
-                return $this->raiseError(PEAR_INSTALLER_FAILED,
-                                         "failed to create $dest_file");
+                return $this->raiseError("failed to create $dest_file",
+                                         PEAR_INSTALLER_FAILED);
             }
             fwrite($wp, $contents);
             fclose($wp);
@@ -455,8 +449,13 @@ class PEAR_Installer extends PEAR_Common
                 $this->expectError(PEAR_INSTALLER_FAILED);
                 $res = $this->_installFile($file, $atts, $tmp_path);
                 $this->popExpect();
-                if (PEAR::isError($res) && empty($options['force'])) {
-                    return $this->raiseError($res);
+                if (PEAR::isError($res)) {
+                    if (empty($options['force'])) {
+                        print "raising error!\n";
+                        return $this->raiseError($res);
+                    } else {
+                        $this->log(0, "Warning: " . $res->getMessage());
+                    }
                 }
                 if ($res != PEAR_INSTALLER_OK) {
                     // Do not register files that were not installed
