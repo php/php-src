@@ -93,6 +93,11 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_error,							NULL)
 	PHP_FE(ldap_compare,							NULL)
 
+#if LDAP_API_VERSION > 2000
+	PHP_FE(ldap_get_option,						third_argument_force_ref)
+	PHP_FE(ldap_set_option,							NULL)
+#endif
+	
 #ifdef STR_TRANSLATION
 	PHP_FE(ldap_t61_to_8859,						NULL)
 	PHP_FE(ldap_8859_to_t61,						NULL)
@@ -152,6 +157,22 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_DEREF_SEARCHING", LDAP_DEREF_SEARCHING, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_DEREF_FINDING", LDAP_DEREF_FINDING, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_DEREF_ALWAYS", LDAP_DEREF_ALWAYS, CONST_PERSISTENT | CONST_CS);
+
+
+#if LDAP_API_VERSION > 2000
+	/* LDAP options */
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_DEREF", LDAP_OPT_DEREF, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_SIZELIMIT", LDAP_OPT_SIZELIMIT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_TIMELIMIT", LDAP_OPT_TIMELIMIT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_PROTOCOL_VERSION", LDAP_OPT_PROTOCOL_VERSION, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_ERROR_NUMBER", LDAP_OPT_ERROR_NUMBER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_REFERRALS", LDAP_OPT_REFERRALS, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_RESTART", LDAP_OPT_RESTART, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_HOST_NAME", LDAP_OPT_HOST_NAME, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_ERROR_STRING", LDAP_OPT_ERROR_STRING, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_MATCHED_DN", LDAP_OPT_MATCHED_DN, CONST_PERSISTENT | CONST_CS);
+#endif
+
 #ifdef ORALDAP
 	REGISTER_MAIN_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT | CONST_CS);
@@ -1469,6 +1490,145 @@ PHP_FUNCTION(ldap_compare) {
 /* }}} */
 
 
+#if LDAP_API_VERSION > 2000
+/* {{{ proto int ldap_get_option(int link, int option, int retval)
+   Get the current value of various session-wide parameters */
+PHP_FUNCTION(ldap_get_option) {
+	LDAP *ldap;
+	pval **link, **option, **retval;
+	int opt;
+	
+	if (ZEND_NUM_ARGS() != 3 ||
+	    zend_get_parameters_ex(3, &link, &option, &retval) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) {
+		RETURN_FALSE;
+	}
+
+	convert_to_long_ex(option);
+	opt = (*option)->value.lval;
+
+	switch(opt) {
+		/* options with int value */
+	case LDAP_OPT_DEREF:
+	case LDAP_OPT_SIZELIMIT:
+	case LDAP_OPT_TIMELIMIT:
+	case LDAP_OPT_PROTOCOL_VERSION:
+	case LDAP_OPT_ERROR_NUMBER:
+	case LDAP_OPT_REFERRALS:
+	case LDAP_OPT_RESTART:
+		{
+			int val;
+			if (ldap_get_option(ldap, opt, &val)) {
+				RETURN_FALSE;
+			}
+			(*retval)->type = IS_LONG;
+			(*retval)->value.lval = val;  
+		} break;
+		/* options with string value */
+	case LDAP_OPT_HOST_NAME:
+	case LDAP_OPT_ERROR_STRING:
+	case LDAP_OPT_MATCHED_DN:
+	        {
+			char *val;
+			int len;
+			if (ldap_get_option(ldap, opt, &val)) {
+				RETURN_FALSE;
+			}
+			(*retval)->type = IS_STRING;
+			len = strlen(val);
+			(*retval)->value.str.len = len;
+			(*retval)->value.str.val = estrndup(val, len);
+			ldap_memfree(val);
+		} break;
+		/* options not implemented
+	case LDAP_OPT_SERVER_CONTROLS:
+	case LDAP_OPT_CLIENT_CONTROLS:
+	case LDAP_OPT_API_INFO:
+	case LDAP_OPT_API_FEATURE_INFO:
+		*/
+	default:
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto int ldap_set_option(int link, int option, int newval)
+   Set the value of various session-wide parameters */
+PHP_FUNCTION(ldap_set_option) {
+	LDAP *ldap;
+	pval **link, **option, **newval;
+	int opt;
+	
+	if (ZEND_NUM_ARGS() != 3 ||
+	    zend_get_parameters_ex(3, &link, &option, &newval) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) {
+		RETURN_FALSE;
+	}
+	convert_to_long_ex(option);
+	opt = (*option)->value.lval;
+
+	switch(opt) {
+		/* options with int value */
+	case LDAP_OPT_DEREF:
+	case LDAP_OPT_SIZELIMIT:
+	case LDAP_OPT_TIMELIMIT:
+	case LDAP_OPT_PROTOCOL_VERSION:
+	case LDAP_OPT_ERROR_NUMBER:
+		{
+			int val;
+			convert_to_long_ex(newval);
+			val = (*newval)->value.lval;
+			if (ldap_set_option(ldap, opt, &val)) {
+				RETURN_FALSE;
+			}
+		} break;
+		/* options with string value */
+	case LDAP_OPT_HOST_NAME:
+	case LDAP_OPT_ERROR_STRING:
+	case LDAP_OPT_MATCHED_DN:
+		{
+			char *val;
+			convert_to_string_ex(newval);
+			val = (*newval)->value.str.val;
+			if (ldap_set_option(ldap, opt, val)) {
+				RETURN_FALSE;
+			}
+		} break;
+		/* options with boolean value */
+	case LDAP_OPT_REFERRALS:
+	case LDAP_OPT_RESTART:
+		{
+			void *val;
+			convert_to_boolean_ex(newval);
+			val = (*newval)->value.lval
+				? LDAP_OPT_ON : LDAP_OPT_OFF;
+			if (ldap_set_option(ldap, opt, val)) {
+				RETURN_FALSE;
+			}
+		} break;
+		/* options not implemented
+	case LDAP_OPT_SERVER_CONTROLS:
+	case LDAP_OPT_CLIENT_CONTROLS:
+		*/
+	default:
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+	  
 #ifdef STR_TRANSLATION
 static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way) {
 	zval **value;
