@@ -557,7 +557,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 
 	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -582,7 +582,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 
 }
@@ -607,7 +607,7 @@ PHP_FUNCTION(imagesetthickness)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 
 }
@@ -637,7 +637,7 @@ PHP_FUNCTION(imageellipse)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -666,7 +666,7 @@ PHP_FUNCTION(imagefilledellipse)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -704,7 +704,7 @@ PHP_FUNCTION(imagefilledarc)
 	gdImageFilledArc(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), st, e, Z_LVAL_PP(col), Z_LVAL_PP(style));
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */	
@@ -728,7 +728,7 @@ PHP_FUNCTION(imagealphablending)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -754,7 +754,7 @@ PHP_FUNCTION(imagecolorresolvealpha)
 
 	RETURN_LONG(gdImageColorResolveAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 
 }
@@ -781,7 +781,7 @@ PHP_FUNCTION(imagecolorclosestalpha)
 
 	RETURN_LONG(gdImageColorClosestAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -807,7 +807,7 @@ PHP_FUNCTION(imagecolorexactalpha)
 	
 	RETURN_LONG(gdImageColorExactAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -850,7 +850,7 @@ PHP_FUNCTION(imagecopyresampled)
 	gdImageCopyResampled(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */	
@@ -874,7 +874,7 @@ PHP_FUNCTION(imagesettile)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires a more recent version of GD", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires a more recent version of GD", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -898,7 +898,7 @@ PHP_FUNCTION(imagesetbrush)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires a more recent version of GD", get_active_function_name(TSRMLS_C));
+	zend_error(E_WARNING, "%s(): requires a more recent version of GD", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -1095,7 +1095,7 @@ PHP_FUNCTION(imagecreatefromstring)
 
 	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 #else
-	php_error(E_ERROR, "ImageCreateFromString: Only available with GD 1.5+");
+	php_error(E_WARNING, "ImageCreateFromString: Only available with GD 1.5+");
 #endif
 }
 /* }}} */
@@ -2689,7 +2689,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 
 #if !HAVE_GD_STRINGFTEX
 	if (extended)	{
-		zend_error(E_ERROR, "%s(): gdImageStringFTEx not supported in this PHP build", get_active_function_name(TSRMLS_C));
+		zend_error(E_WARNING, "%s(): gdImageStringFTEx not supported in this PHP build", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 #endif
