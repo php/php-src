@@ -40,6 +40,15 @@ HOW TO INSTALL
 
     That's it. Now start bin/httpd.
 
+HOW TO CONFIGURE
+
+    The Apache 2.0 PHP module supports a new configuration directive that
+    allows an admin to override the php.ini search path. For example,
+    place your php.ini file in Apache's ServerRoot/conf directory and
+    add this to your httpd.conf file:
+
+        PHPINIDir "conf"
+
 DEBUGGING APACHE AND PHP
     
     To debug Apache, we recommened:
