@@ -1710,7 +1710,7 @@ PHP_FUNCTION(mysql_insert_id)
 /* }}} */
 
 
-/* {{{ proto mixed mysql_result(int result, int row [, mixed field])
+/* {{{ proto mixed mysql_result(resource result, int row [, mixed field])
    Gets result data */
 PHP_FUNCTION(mysql_result)
 {
@@ -1813,7 +1813,7 @@ PHP_FUNCTION(mysql_result)
 /* }}} */
 
 
-/* {{{ proto int mysql_num_rows(int result)
+/* {{{ proto int mysql_num_rows(resource result)
    Gets number of rows in a result */
 PHP_FUNCTION(mysql_num_rows)
 {
@@ -1832,7 +1832,7 @@ PHP_FUNCTION(mysql_num_rows)
 }
 /* }}} */
 
-/* {{{ proto int mysql_num_fields(int result)
+/* {{{ proto int mysql_num_fields(resource result)
    Gets number of fields in a result */
 PHP_FUNCTION(mysql_num_fields)
 {
@@ -1937,7 +1937,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 }
 /* }}} */
 
-/* {{{ proto array mysql_fetch_row(int result)
+/* {{{ proto array mysql_fetch_row(resource result)
    Gets a result row as an enumerated array */
 PHP_FUNCTION(mysql_fetch_row)
 {
@@ -1946,7 +1946,7 @@ PHP_FUNCTION(mysql_fetch_row)
 /* }}} */
 
 
-/* {{{ proto object mysql_fetch_object(int result [, int result_type])
+/* {{{ proto object mysql_fetch_object(resource result [, int result_type])
    Fetch a result row as an object */
 PHP_FUNCTION(mysql_fetch_object)
 {
@@ -1959,7 +1959,7 @@ PHP_FUNCTION(mysql_fetch_object)
 /* }}} */
 
 
-/* {{{ proto array mysql_fetch_array(int result [, int result_type])
+/* {{{ proto array mysql_fetch_array(resource result [, int result_type])
    Fetch a result row as an array (associative, numeric or both) */
 PHP_FUNCTION(mysql_fetch_array)
 {
@@ -1968,7 +1968,7 @@ PHP_FUNCTION(mysql_fetch_array)
 /* }}} */
 
 
-/* {{{ proto array mysql_fetch_assoc(int result)
+/* {{{ proto array mysql_fetch_assoc(resource result)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysql_fetch_assoc)
 {
@@ -1976,7 +1976,7 @@ PHP_FUNCTION(mysql_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto bool mysql_data_seek(int result, int row_number)
+/* {{{ proto bool mysql_data_seek(resource result, int row_number)
    Move internal result pointer */
 PHP_FUNCTION(mysql_data_seek)
 {
@@ -2000,7 +2000,7 @@ PHP_FUNCTION(mysql_data_seek)
 /* }}} */
 
 
-/* {{{ proto array mysql_fetch_lengths(int result)
+/* {{{ proto array mysql_fetch_lengths(resource result)
    Gets max data size of each column in a result */
 PHP_FUNCTION(mysql_fetch_lengths)
 {
@@ -2084,7 +2084,7 @@ static char *php_mysql_get_field_name(int field_type)
 }
 /* }}} */
 
-/* {{{ proto object mysql_fetch_field(int result [, int field_offset])
+/* {{{ proto object mysql_fetch_field(resource result [, int field_offset])
    Gets column information from a result and return as an object */
 PHP_FUNCTION(mysql_fetch_field)
 {
@@ -2139,7 +2139,7 @@ PHP_FUNCTION(mysql_fetch_field)
 /* }}} */
 
 
-/* {{{ proto bool mysql_field_seek(int result, int field_offset)
+/* {{{ proto bool mysql_field_seek(resource result, int field_offset)
    Sets result pointer to a specific field offset */
 PHP_FUNCTION(mysql_field_seek)
 {
@@ -2296,7 +2296,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 }
 /* }}} */
 
-/* {{{ proto string mysql_field_name(int result, int field_index)
+/* {{{ proto string mysql_field_name(resource result, int field_index)
    Gets the name of the specified field in a result */
 PHP_FUNCTION(mysql_field_name)
 {
@@ -2305,7 +2305,7 @@ PHP_FUNCTION(mysql_field_name)
 /* }}} */
 
 
-/* {{{ proto string mysql_field_table(int result, int field_offset)
+/* {{{ proto string mysql_field_table(resource result, int field_offset)
    Gets name of the table the specified field is in */
 PHP_FUNCTION(mysql_field_table)
 {
@@ -2314,7 +2314,7 @@ PHP_FUNCTION(mysql_field_table)
 /* }}} */
 
 
-/* {{{ proto int mysql_field_len(int result, int field_offset)
+/* {{{ proto int mysql_field_len(resource result, int field_offset)
    Returns the length of the specified field */
 PHP_FUNCTION(mysql_field_len)
 {
@@ -2323,7 +2323,7 @@ PHP_FUNCTION(mysql_field_len)
 /* }}} */
 
 
-/* {{{ proto string mysql_field_type(int result, int field_offset)
+/* {{{ proto string mysql_field_type(resource result, int field_offset)
    Gets the type of the specified field in a result */
 PHP_FUNCTION(mysql_field_type)
 {
@@ -2332,7 +2332,7 @@ PHP_FUNCTION(mysql_field_type)
 /* }}} */
 
 
-/* {{{ proto string mysql_field_flags(int result, int field_offset)
+/* {{{ proto string mysql_field_flags(resource result, int field_offset)
    Gets the flags associated with the specified field in a result */
 PHP_FUNCTION(mysql_field_flags)
 {
@@ -2341,7 +2341,7 @@ PHP_FUNCTION(mysql_field_flags)
 /* }}} */
 
 
-/* {{{ proto bool mysql_free_result(int result)
+/* {{{ proto bool mysql_free_result(resource result)
    Free result memory */
 PHP_FUNCTION(mysql_free_result)
 {
