@@ -89,6 +89,7 @@ static char *ErrorMessages[] =
 	{"Bad Mail Host"},
 	{"Bad Message File"},
 	{"\"sendmail_from\" not set in php.ini"},
+
 	{"Mailserver rejected our \"sendmail_from\" setting"} /* 20 */
 };
 
@@ -207,10 +208,13 @@ void TSMClose()
 char *GetSMErrorText(int index)
 {
 
+
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
+
 	} else {
 		return (ErrorMessages[UNKNOWN_ERROR]);
+
 	}
 }
 
@@ -285,9 +289,12 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	efree(tempMailTo);
 	if (headers && (pos1 = strstr(headers, "Cc:"))) {
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
+
 			tempMailTo = estrndup(pos1, strlen(pos1));
+
 		} else {
 			tempMailTo = estrndup(pos1, pos2-pos1);
+
 		}
 
 		token = strtok(tempMailTo, ",");
