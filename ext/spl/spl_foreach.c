@@ -37,22 +37,27 @@
 	memset(emalloc(size), 0, size)
 
 typedef struct {
-	zval             *obj;
-	zend_class_entry *obj_ce;
-	zend_uint        index;
-	spl_is_a         is_a;
-	zend_function    *f_next;
-	zend_function    *f_rewind;
-	zend_function    *f_more;
-	zend_function    *f_current;
-	zend_function    *f_key;
+	zend_function      *next;
+	zend_function      *rewind;
+	zend_function      *more;
+	zend_function      *current;
+	zend_function      *key;
+} spl_foreach_funcs;
+
+typedef struct {
+	zval               *obj;
+	zend_class_entry   *obj_ce;
+	zend_uint          index;
+	spl_is_a           is_a;
+	spl_foreach_funcs  funcs;
+	char               dummy; /* needed for '\0' but we can't set it due to compiler optimizations */
 } spl_foreach_proxy;
 
 /* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET) */
 ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 {
 	zval **obj, *retval;
-	spl_foreach_proxy proxy;
+	spl_foreach_proxy *proxy;
 	zend_class_entry *instance_ce;
 	spl_is_a is_a;
 
@@ -83,15 +88,18 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 	}
 
 	/* create the proxy */
-	memset(&proxy, 0, sizeof(spl_foreach_proxy));
-	proxy.obj = retval;
-	proxy.obj_ce = instance_ce;
-	proxy.is_a = is_a;
+	proxy = emalloc(sizeof(spl_foreach_proxy));
+	proxy->obj = retval;
+	proxy->obj_ce = instance_ce;
+	proxy->index = 0;
+	proxy->is_a = is_a;
+	memset(&proxy->funcs, 0, sizeof(spl_foreach_funcs));
+	((char*)proxy)[sizeof(spl_foreach_proxy)-1] = '\0';
 	/* And pack it into a zval. Since it is nowhere accessible using a 
 	 * zval of type STRING is the fastest approach of storing the proxy.
 	 */
 	ALLOC_INIT_ZVAL(retval);
-	ZVAL_STRINGL(retval, (char*)&proxy, sizeof(spl_foreach_proxy), 1);
+	ZVAL_STRINGL(retval, (char*)proxy, sizeof(spl_foreach_proxy)-1, 0);
 	retval->refcount += 2; /* lock two times */
 	/* return the created proxy container */
 	EX_T(EX(opline)->result.u.var).var.ptr = retval;
@@ -139,22 +147,22 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 		obj = &proxy->obj; /* will be optimized out */
 
 		if (proxy->index++) {
-			spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_next, "next", sizeof("next")-1, &tmp TSRMLS_CC);
+			spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->funcs.next, "next", sizeof("next")-1, &tmp TSRMLS_CC);
 		} else {
 			if (proxy->is_a & SPL_IS_A_SEQUENCE) {
-				spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_rewind, "rewind", sizeof("rewind")-1, &tmp TSRMLS_CC);
+				spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->funcs.rewind, "rewind", sizeof("rewind")-1, &tmp TSRMLS_CC);
 			}
 			op_array->opcodes[EX(opline)->op2.u.opline_num].op2 = *op1;
 		}
 
-		spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_more, "has_more", sizeof("has_more")-1, &more TSRMLS_CC);
+		spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->funcs.more, "has_more", sizeof("has_more")-1, &more TSRMLS_CC);
 		if (zend_is_true(&more)) {
 			result = &EX_T(EX(opline)->result.u.var).tmp_var;
 
-			spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->f_current, "current", sizeof("current")-1, &value TSRMLS_CC);
+			spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.current, "current", sizeof("current")-1, &value TSRMLS_CC);
 
 			if (proxy->is_a & SPL_IS_A_ASSOC) {
-				spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->f_key, "key", sizeof("key")-1, &key TSRMLS_CC);
+				spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.key, "key", sizeof("key")-1, &key TSRMLS_CC);
 			} else {
 				MAKE_STD_ZVAL(key);
 				key->value.lval = proxy->index;
