@@ -5,16 +5,15 @@
  <summary>Portable shared memory access</summary>
  <maintainers>
   <maintainer>
-   <user>???</user>
-   <name>Slava Poliakov</name>
-   <email>hackie@prohost.org</email>
-   <role>lead</role>
-  </maintainer>
-  <maintainer>
-   <user>???</user>
+   <user>iliaa</user>
    <name>Ilia Alshanetsky</name>
    <email>ilia@prohost.org</email>
    <role>lead</role>
+  </maintainer>
+  <maintainer>
+   <name>Slava Poliakov</name>
+   <email>hackie@prohost.org</email>
+   <role>developer</role>
   </maintainer>
  </maintainers>
  <description>
@@ -22,7 +21,7 @@
  </description> 
  <license>PHP</license>
  <release>
-  <state>beta</state>
+  <state>stable</state>
   <version>5.0.0rc1</version>
   <date>2004-03-19</date>
   <notes>
