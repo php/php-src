@@ -579,11 +579,6 @@ if test "$PHP_PEAR" = "yes"; then
   PEAR_DIR=pear
 fi
 
-PHP_OUTPUT(pear/pear)
-PHP_OUTPUT(pear/phpize)
-PHP_OUTPUT(pear/php-config)
-PHP_OUTPUT(pear/PEAR.php)
-
 
 divert(5)
 
@@ -668,7 +663,6 @@ EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $LIBS"
 LDFLAGS=""
 LIBS=""
-PHP_OUTPUT(TSRM/Makefile)
 
 
 phplibdir="`pwd`/modules"
@@ -762,7 +756,7 @@ PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(TSRM_DIR)
 PHP_SUBST(TSRM_LIB)
 PHP_SUBST(WARNING_LEVEL)
-PHP_SUBST(YACC)
+PHP_SUBST_OLD(YACC)
 
 PHP_CONFIGURE_PART(Configuring libtool)
 
@@ -824,7 +818,8 @@ PHP_CONFIGURE_PART(Generating files)
 
 PHP_GEN_CONFIG_VARS
 
-ALL_OUTPUT_FILES="php4.spec Zend/Makefile main/build-defs.h $PHP_OUTPUT_FILES"
+ALL_OUTPUT_FILES="php4.spec Zend/Makefile main/build-defs.h \
+pear/pear pear/phpize pear/php-config pear/PEAR.php TSRM/Makefile $PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [
 
@@ -863,9 +858,9 @@ if test -n "\$REDO_ALL"; then
   # Hacking while airborne considered harmful.
   #
   echo "creating main/internal_functions.c"
-  extensions=\`grep '^s.@EXT_STATIC@' \$0|sed -e 's/^.*@% *//' -e 's/%.*$//'\`
+  extensions="$EXT_STATIC"
 dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
-  sh $srcdir/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$extensions > main/internal_functions.c
+  sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$extensions > main/internal_functions.c
 dnl  if cmp main/internal_functions.c.old main/internal_functions.c > /dev/null 2>&1; then
 dnl      echo "main/internal_functions.c is unchanged"
 dnl      mv main/internal_functions.c.old main/internal_functions.c

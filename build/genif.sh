@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.10 2000-12-20 16:29:07 sas Exp $
+# $Id: genif.sh,v 1.1 2000-12-20 17:21:37 sas Exp $
 # replacement for genif.pl
 
 infile="$1"
@@ -27,7 +27,7 @@ for ext in ${1+"$@"} ; do
 	header_list="$header_list ext/$ext/*.h"
 done
 
-includes=`$awk -f $srcdir/build/print_include.awk $header_list`
+includes=`$awk -f ./build/print_include.awk $header_list`
 
 cd $olddir
 
