@@ -163,6 +163,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 			if(zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS) {
 				smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
 			}
+			smart_str_0(&auth);
 			buf = php_base64_encode(auth.c, auth.len, &len);
 			smart_str_append_const(&soap_headers, "Authorization: Basic ");
 			smart_str_appendl(&soap_headers, buf, len);
@@ -194,6 +195,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		smart_str_appendl(&soap_headers, buf, buf_size);
+		smart_str_0(&soap_headers);
 
 		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
 		if(err != soap_headers.len) {
