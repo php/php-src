@@ -1,3 +1,19 @@
+2004-11-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/proc_open.c:
+      Fix leaking handle.
+      Thanks to ilya77 at gmail dot com
+
+2004-11-10  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c:
+      Fixed return value of ibase_execute()
+
+2004-11-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c:
+      Fixed possible overflow.
+
 2004-11-09  Andrei Zmievski  <andreiz@gravitonic.com>
 
     * ZendEngine2/zend_ini_parser.y:
