@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Initital support for pdflib 2.20 (Uwe)
 - Added PostgreSQL support for DB (Rui Hirokawa <louis@cityfujisawa.ne.jp>)
 - Re-introduced "none" for disabling auto_prepend/append_file (Stig)
 - Added DB/storage to PEAR
