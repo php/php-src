@@ -130,6 +130,7 @@ struct PHPFBResult
 	FBCPList*				list;				/* The same special kind result just for property list from extract, schema info. */
 	unsigned int			selectResults;		/* number of results in select */
 	unsigned int			currentResult;		/* current result number */
+	int						lobMode;			/* 0=Fetch data (default); 1=Fetch handle */
 };
 
 struct PHPFBLink
@@ -157,11 +158,14 @@ struct PHPFBLink
 #define FBSQL_LOCK_OPTIMISTIC 1
 #define FBSQL_LOCK_PESSIMISTIC 2		// default
 
-#define FBSQL_ISO_READ_UNCOMMITED 0
-#define FBSQL_ISO_READ_COMMITED 1
+#define FBSQL_ISO_READ_UNCOMMITTED 0
+#define FBSQL_ISO_READ_COMMITTED 1
 #define FBSQL_ISO_REPEATABLE_READ 2
 #define FBSQL_ISO_SERIALIZABLE 3		// default
 #define FBSQL_ISO_VERSIONED 4
+
+#define FBSQL_LOB_DIRECT 0				// default
+#define FBSQL_LOB_HANDLE 1				// default
 
 
 /* {{{ fbsql_functions[]
@@ -212,6 +216,9 @@ function_entry fbsql_functions[] = {
 
 	PHP_FE(fbsql_create_blob,	NULL)
 	PHP_FE(fbsql_create_clob,	NULL)
+	PHP_FE(fbsql_set_lob_mode,	NULL)
+	PHP_FE(fbsql_read_blob,		NULL)
+	PHP_FE(fbsql_read_clob,		NULL)
 
 	PHP_FE(fbsql_hostname,		NULL)
 	PHP_FE(fbsql_database,		NULL)
@@ -397,8 +404,8 @@ PHP_MINIT_FUNCTION(fbsql)
 	REGISTER_LONG_CONSTANT("FBSQL_LOCK_OPTIMISTIC", FBSQL_LOCK_OPTIMISTIC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_LOCK_PESSIMISTIC", FBSQL_LOCK_PESSIMISTIC, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("FBSQL_ISO_READ_UNCOMMITED", FBSQL_ISO_READ_UNCOMMITED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FBSQL_ISO_READ_COMMITED", FBSQL_ISO_READ_COMMITED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_ISO_READ_UNCOMMITTED", FBSQL_ISO_READ_UNCOMMITTED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_ISO_READ_COMMITTED", FBSQL_ISO_READ_COMMITTED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_REPEATABLE_READ", FBSQL_ISO_REPEATABLE_READ, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_SERIALIZABLE ", FBSQL_ISO_SERIALIZABLE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_VERSIONED", FBSQL_ISO_VERSIONED, CONST_CS | CONST_PERSISTENT);
@@ -410,6 +417,9 @@ PHP_MINIT_FUNCTION(fbsql)
 	REGISTER_LONG_CONSTANT("FBSQL_RUNNING", FBRunning, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_STOPPING", FBStopping, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_NOEXEC", FBNoExec, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FBSQL_LOB_DIRECT", FBSQL_LOB_DIRECT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_LOB_HANDLE", FBSQL_LOB_HANDLE, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -768,7 +778,7 @@ PHP_FUNCTION(fbsql_set_transaction)
 	zval **fbsql_link_index = NULL, **Locking = NULL, **Isolation = NULL;
 	char strSQL[1024];
 	char *strLocking[] = {"DEFERRED", "OPTIMISTIC", "PESSIMISTIC"};
-	char *strIsolation[] = {"READ UNCOMMITED", "READ NCOMMITED", "REPEATABLE READ", "SERIALIZABLE", "VERSIONED"};
+	char *strIsolation[] = {"READ UNCOMMITTED", "READ NCOMMITTED", "REPEATABLE READ", "SERIALIZABLE", "VERSIONED"};
 
 	switch (ZEND_NUM_ARGS()) {
 		case 3:
@@ -962,6 +972,91 @@ PHP_FUNCTION(fbsql_create_blob)
 PHP_FUNCTION(fbsql_create_clob)
 {
 	php_fbsql_create_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto bool fbsql_set_lob_mode(resource result, int lob_mode)
+	*/
+PHP_FUNCTION(fbsql_set_lob_mode)
+{
+
+	PHPFBResult* result = NULL;
+	zval **fbsql_result_index = NULL, **lob_mode = NULL;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 2:
+			if (zend_get_parameters_ex(2, &fbsql_result_index, &lob_mode)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(lob_mode);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(result, PHPFBResult *, fbsql_result_index, -1, "FrontBase-Result", le_result);
+
+	result->lobMode = Z_LVAL_PP(lob_mode);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+static void php_fbsql_read_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
+{
+	PHPFBLink* phpLink = NULL;
+	zval	**lob_handle, **fbsql_link_index = NULL;
+	int id;
+	int length = 0;
+	char* value = NULL;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &lob_handle)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			CHECK_LINK(id);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &lob_handle, &fbsql_link_index)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
+
+	convert_to_string_ex(lob_handle);
+	length = fbcbhBlobSize((FBCBlobHandle *)Z_STRVAL_PP(lob_handle));
+
+	if (lob_type == 0) 
+		value = estrndup((char *)fbcdcReadBLOB(phpLink->connection, (FBCBlobHandle *)Z_STRVAL_PP(lob_handle)), length);
+	else
+		value = estrndup((char *)fbcdcReadCLOB(phpLink->connection, (FBCBlobHandle *)Z_STRVAL_PP(lob_handle)), length);
+	if (value) {
+		RETURN_STRINGL(value, length, 0);
+	}
+	else {
+		RETURN_FALSE;
+	}
+}
+/* {{{ proto string fbsql_read_blob(string blob_handle [, resource link_identifier])
+	*/
+PHP_FUNCTION(fbsql_read_blob)
+{
+	php_fbsql_read_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto string fbsql_read_clob(string clob_handle [, resource link_identifier])
+	*/
+PHP_FUNCTION(fbsql_read_clob)
+{
+	php_fbsql_read_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -1654,6 +1749,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 			result->list        = NULL;
 			result->selectResults = sR;
 			result->currentResult = cR;
+			result->lobMode		= FBSQL_LOB_DIRECT;
 
 			if (tp[0] != 'E')
 			{
@@ -2200,7 +2296,6 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 			if (*((unsigned char*) data) == '\1')
 			{  // Direct
 				*length = ((FBCBlobDirect *)data)->blobSize;
-
 				*value = estrndup((char *)((FBCBlobDirect *)data)->blobData, *length);
 			}
 			else
@@ -2211,10 +2306,15 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 				lobHandle = fbcbhInitWithHandle(handle);
 				*length = fbcbhBlobSize(lobHandle);
 
-				if (dtc == FB_BLOB) 
-					*value = estrndup((char *)fbcdcReadBLOB(result->link->connection, lobHandle), *length);
-				else
-					*value = estrndup((char *)fbcdcReadCLOB(result->link->connection, lobHandle), *length);
+				if (result->lobMode == FBSQL_LOB_HANDLE) {
+					phpfbestrdup(fbcbhDescription(lobHandle), length, value);
+				}
+				else {
+					if (dtc == FB_BLOB) 
+						*value = estrndup((char *)fbcdcReadBLOB(result->link->connection, lobHandle), *length);
+					else
+						*value = estrndup((char *)fbcdcReadCLOB(result->link->connection, lobHandle), *length);
+				}
 				fbcbhRelease(lobHandle); 
 			}
 		}
@@ -2472,7 +2572,7 @@ PHP_FUNCTION(fbsql_num_fields)
 }
 /* }}} */
 
-/* {{{ proto array fbsql_fetch_row(int result)
+/* {{{ proto array fbsql_fetch_row(resource result)
 	*/
 PHP_FUNCTION(fbsql_fetch_row)
 {
@@ -2480,7 +2580,7 @@ PHP_FUNCTION(fbsql_fetch_row)
 }
 /* }}} */
 
-/* {{{ proto object fbsql_fetch_assoc(int result)
+/* {{{ proto object fbsql_fetch_assoc(resource result)
 	*/
 PHP_FUNCTION(fbsql_fetch_assoc)
 {
@@ -2488,7 +2588,7 @@ PHP_FUNCTION(fbsql_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto object fbsql_fetch_object(int result [, int result_type])
+/* {{{ proto object fbsql_fetch_object(resource result [, int result_type])
 	*/
 PHP_FUNCTION(fbsql_fetch_object)
 {
@@ -2499,7 +2599,7 @@ PHP_FUNCTION(fbsql_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array fbsql_fetch_array(int result [, int result_type])
+/* {{{ proto array fbsql_fetch_array(resource result [, int result_type])
    Fetch a result row as an array (associative, numeric or both)*/
 PHP_FUNCTION(fbsql_fetch_array)
 {
@@ -2507,8 +2607,6 @@ PHP_FUNCTION(fbsql_fetch_array)
 }
 /* }}} */
 
-/* {{{ php_fbsql_fetch_hash
- */
 static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 
@@ -2617,7 +2715,6 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	result->rowIndex++;
 	result->columnIndex = 0;
 }
-/* }}} */
 
 /* {{{ proto int fbsql_data_seek(int result, int row_number)
 	*/
