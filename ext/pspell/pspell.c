@@ -32,14 +32,14 @@
 #include <pspell/pspell.h>
 #include "ext/standard/info.h"
 
-#define PSPELL_FAST 1
-#define PSPELL_NORMAL 2
-#define PSPELL_BAD_SPELLERS 3
+#define PSPELL_FAST 1L
+#define PSPELL_NORMAL 2L
+#define PSPELL_BAD_SPELLERS 3L
+#define PSPELL_SPEED_MASK_INTERNAL 3L
+#define PSPELL_RUN_TOGETHER 8L
 
 function_entry pspell_functions[] = {
 	PHP_FE(pspell_new,		NULL)
-	PHP_FE(pspell_mode,		NULL)
-	PHP_FE(pspell_runtogether,	NULL)
 	PHP_FE(pspell_check,		NULL)
 	PHP_FE(pspell_suggest,		NULL)
 	PHP_FE(pspell_store_replacement,		NULL)
@@ -67,14 +67,16 @@ PHP_MINIT_FUNCTION(pspell){
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_NORMAL", PSPELL_NORMAL, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_BAD_SPELLERS", PSPELL_BAD_SPELLERS, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PSPELL_RUN_TOGETHER", PSPELL_RUN_TOGETHER, CONST_PERSISTENT | CONST_CS);
 	le_pspell = register_list_destructors(php_pspell_close,NULL);
 	return SUCCESS;
 }
 
-/* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding]]])
+/* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding [, mode]]]])
    Load a dictionary */
 PHP_FUNCTION(pspell_new){
-	zval **language,**spelling,**jargon,**encoding;
+	zval **language,**spelling,**jargon,**encoding,**pmode;
+	long mode = 0L,  speed = 0L;
 	int argc;
 	int ind;
 
@@ -83,25 +85,53 @@ PHP_FUNCTION(pspell_new){
 	PspellConfig *config;
 	
 	argc = ZEND_NUM_ARGS();
-	if (argc < 1 || argc > 4 || zend_get_parameters_ex(argc,&language,&spelling,&jargon,&encoding) == FAILURE) {
+	if (argc < 1 || argc > 5 || zend_get_parameters_ex(argc,&language,&spelling,&jargon,&encoding,&pmode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	config = new_pspell_config();
 	convert_to_string_ex(language);
+	pspell_config_replace(config, "language-tag", (*language)->value.str.val);
+
 	if(argc > 1){
-		convert_to_string_ex(spelling) ;
-		pspell_config_replace(config, "spelling", (*spelling)->value.str.val);
+		convert_to_string_ex(spelling);
+	 	if((*spelling)->value.str.len > 0){
+			pspell_config_replace(config, "spelling", (*spelling)->value.str.val);
+		}
 	}
 
 	if(argc > 2){
-		convert_to_string_ex(jargon) ;
-		pspell_config_replace(config, "jargon", (*jargon)->value.str.val);
+		convert_to_string_ex(jargon);
+		if((*jargon)->value.str.len > 0){
+			pspell_config_replace(config, "jargon", (*jargon)->value.str.val);
+		}
 	}
 
 	if(argc > 3){
-		convert_to_string_ex(encoding) ;
-		pspell_config_replace(config, "encoding", (*encoding)->value.str.val);
+		convert_to_string_ex(encoding);
+		if((*encoding)->value.str.len > 0){
+			pspell_config_replace(config, "encoding", (*encoding)->value.str.val);
+		}
+	}
+
+	if(argc > 4){
+		convert_to_long_ex(pmode);
+		mode = Z_LVAL_PP(pmode);
+		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
+
+		/* First check what mode we want (how many suggestions) */
+		if(speed == PSPELL_FAST){
+			pspell_config_replace(config, "sug-mode", "fast");
+		}else if(speed == PSPELL_NORMAL){
+			pspell_config_replace(config, "sug-mode", "normal");
+		}else if(speed == PSPELL_BAD_SPELLERS){
+			pspell_config_replace(config, "sug-mode", "bad-spellers");
+		}
+		
+		/* Then we see if run-together words should be treated as valid components */
+		if(mode & PSPELL_RUN_TOGETHER){
+			pspell_config_replace(config, "run-together", "true");
+		}
 	}
 
 	ret = new_pspell_manager(config);
@@ -113,84 +143,8 @@ PHP_FUNCTION(pspell_new){
 	}
 	
 	manager = to_pspell_manager(ret);
-	config = pspell_manager_config(manager);
 	ind = zend_list_insert(manager, le_pspell);
 	RETURN_LONG(ind);
-}
-/* }}} */
-
-
-/* {{{ proto int pspell_mode(pspell int, string mode)
-   Change the mode between 'fast', 'normal' and 'bad-spellers' */
-PHP_FUNCTION(pspell_mode)
-{
-	int type;
-	zval **scin, **pmode;
-	int argc;
-	long mode = 0L;
-	PspellManager *manager;
-	PspellConfig *config;
-
-	argc = ZEND_NUM_ARGS();
-	if (argc != 2 || zend_get_parameters_ex(argc, &scin, &pmode) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_long_ex(scin);
-	convert_to_long_ex(pmode);
-	mode = Z_LVAL_PP(pmode);
-	manager = (PspellManager *) zend_list_find((*scin)->value.lval, &type);
-	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",(*scin)->value.lval);
-		RETURN_FALSE;
-	}
-	config = pspell_manager_config(manager);
-
-	if(mode == PSPELL_FAST){
-		pspell_config_replace(config, "sug-mode", "fast");
-	}else if(mode == PSPELL_NORMAL){
-		pspell_config_replace(config, "sug-mode", "normal");
-	}else if(mode == PSPELL_BAD_SPELLERS){
-		pspell_config_replace(config, "sug-mode", "bad-spellers");
-	}else{
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto int pspell_runtogether(pspell int, string mode)
-   Change the mode between whether we want to treat run-together words as valid */
-PHP_FUNCTION(pspell_runtogether)
-{
-	int type;
-	zval **scin, **pruntogether;
-	int argc;
-	int runtogether;
-	PspellManager *manager;
-	PspellConfig *config;
-
-	argc = ZEND_NUM_ARGS();
-	if (argc != 2 || zend_get_parameters_ex(argc, &scin, &pruntogether) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_long_ex(scin);
-	convert_to_boolean_ex(pruntogether);
-	runtogether = (*pruntogether)->value.lval;
-	manager = (PspellManager *) zend_list_find((*scin)->value.lval, &type);
-	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",(*scin)->value.lval);
-		RETURN_FALSE;
-	}
-	config = pspell_manager_config(manager);
-
-	if(runtogether){
-		pspell_config_replace(config, "run-together", "true");
-	}else{
-		pspell_config_replace(config, "run-together", "false");
-	}
-	RETURN_TRUE;
 }
 /* }}} */
 
