@@ -395,7 +395,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		}
 	}
 
-#if ZEND_DEBUG
+#if (ZEND_DEBUG)
 	do {
 		zval display_memory_cache_stats;
 		int i, j;

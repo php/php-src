@@ -2102,25 +2102,37 @@ send_by_ref:
 				}
 				NEXT_OPCODE();
 			case ZEND_FE_RESET: {
-					zval *array = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					zval *array_ptr;
+					zval **array_ptr_ptr;
+					
+					if ((opline->op1.op_type == IS_CONST) || (opline->op1.op_type == IS_TMP_VAR)) {
+						array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+						if (EG(free_op1)) { /* IS_TMP_VAR */
+							zval *tmp;
 
-					if (EG(free_op1)) { /* If TMP_VAR then make it a VAR */
-						zval *tmp;
-
-						ALLOC_ZVAL(tmp);
-						*tmp = *array;
-						INIT_PZVAL(tmp);
-						array = tmp;
+							ALLOC_ZVAL(tmp);
+							*tmp = *array_ptr;
+							INIT_PZVAL(tmp);
+							array_ptr = tmp;
+						} else { /* IS_CONST */
+							array_ptr->refcount++;
+						}
 					} else {
-						array->refcount++;
+						array_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
+						if (!PZVAL_IS_REF(*array_ptr_ptr)){
+							SEPARATE_ZVAL(array_ptr_ptr);
+						}
+						array_ptr = *array_ptr_ptr;
+						array_ptr->is_ref = 1;
+						array_ptr->refcount++;
 					}
-					PZVAL_LOCK(array);
-					Ts[opline->result.u.var].var.ptr = array;
+					PZVAL_LOCK(array_ptr);
+					Ts[opline->result.u.var].var.ptr = array_ptr;
 					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;	
 
-					if (array->type == IS_ARRAY) {
+					if (array_ptr->type == IS_ARRAY) {
 						/* probably redundant */
-						zend_hash_internal_pointer_reset(array->value.ht);
+						zend_hash_internal_pointer_reset(array_ptr->value.ht);
 					} else {
 						/* JMP to the end of foreach - TBD */
 					}
