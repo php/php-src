@@ -101,6 +101,7 @@ PEAR INSTALLER:
           <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
         <file baseinstalldir="/" role="script" platform="windows" install-as="pear.bat" name="pear.bat">
+	  <replace from='"@bin_dir@"' to="bin_dir" type="pear-config"/>
 	  <replace from='"@php_bin@"' to="php_bin" type="pear-config"/>
 	  <replace from='"@include_path@"' to="php_dir" type="pear-config"/>
 	</file>
