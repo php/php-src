@@ -1470,7 +1470,7 @@ static void exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart,
 	NumDirEntries = php_ifd_get16u(DirStart, ImageInfo->motorola_intel);
 
 	if ((DirStart+2+NumDirEntries*12) > (OffsetBase+IFDlength)) {
-		php_error(E_WARNING, "Illegally sized directory");
+		php_error(E_WARNING, "Illegally sized directory x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)DirStart+2-(int)OffsetBase, NumDirEntries, (int)DirStart+2+NumDirEntries*12-(int)OffsetBase, IFDlength);
 		return;
 	}
 
@@ -1546,6 +1546,9 @@ static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, unsigne
 		return;
 	}
 	exif_process_TIFF_in_JPEG(ImageInfo,CharBuf+8,length-8);
+	#ifdef EXIF_DEBUG
+	php_error(E_NOTICE,"process Exif done");
+	#endif
 }
 /* }}} */
 
@@ -1679,8 +1682,8 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 				break;
 
 			case M_EXIF:
-				ImageInfo->sections_found |= FOUND_EXIF;
-				if (ImageInfo->sections_count <= 2) {
+				if ( !(ImageInfo->sections_found&FOUND_EXIF)) {
+					ImageInfo->sections_found |= FOUND_EXIF;
 					/* Seen files from some 'U-lead' software with Vivitar scanner
 					   that uses marker 31 later in the file (no clue what for!) */
 					exif_process_APP1(ImageInfo, (char *)Data, itemlen);
