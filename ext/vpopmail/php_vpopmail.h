@@ -54,10 +54,13 @@ PHP_FUNCTION(vpopmail_passwd);
 PHP_FUNCTION(vpopmail_set_user_quota);
 PHP_FUNCTION(vpopmail_auth_user);
 /* alias management */
+#if HAVE_VPOPMAIL_VALIAS
 PHP_FUNCTION(vpopmail_alias_add);
 PHP_FUNCTION(vpopmail_alias_del);
 PHP_FUNCTION(vpopmail_alias_del_domain);
 PHP_FUNCTION(vpopmail_alias_get);
+PHP_FUNCTION(vpopmail_alias_get_all);
+#endif
 /* error handling */
 PHP_FUNCTION(vpopmail_error);
 
