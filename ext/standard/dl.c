@@ -83,10 +83,11 @@ void php_dl(pval *file,int type,pval *return_value)
 	zend_module_entry *(*get_module)(void);
 	PLS_FETCH();
 	ELS_FETCH();
-	
-	if (cfg_get_string("extension_dir",&PG(extension_dir))==SUCCESS
-		&& PG(extension_dir)
-		&& PG(extension_dir)[0]){
+
+	if (!PG(extension_dir))
+		cfg_get_string("extension_dir",&PG(extension_dir));
+
+	if (PG(extension_dir) && PG(extension_dir)[0]){
 		int extension_dir_len = strlen(PG(extension_dir));
 
 		libpath = emalloc(extension_dir_len+file->value.str.len+2);
