@@ -302,11 +302,6 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
-EXTENSION:           dio
-MAINTENANCE:         Orphaned
-STATUS:              Working
-SINCE:               4.0.6
--------------------------------------------------------------------------------
 EXTENSION:           exif
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
 MAINTENANCE:         Maintained
@@ -514,19 +509,11 @@ PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
-EXTENSION:           w32api
-MAINTENANCE:         Unknown
-STATUS:              Experimental
--------------------------------------------------------------------------------
 EXTENSION:           yaz
 PRIMARY MAINTAINER:  Adam Dickmeiss <adam@indexdata.dk>
 MAINTENANCE:         Maintained
 STATUS:              Unknown
 SINCE:               4.0.1
--------------------------------------------------------------------------------
-EXTENSION:           yp
-MAINTENANCE:         Unknown
-STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           zlib
 PRIMARY MAINTAINER:  Stefan Roehrich <sr@linux.de>
