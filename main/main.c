@@ -1173,7 +1173,7 @@ void _php_build_argv(char *s ELS_DC)
 
 	arr = (pval *) emalloc(sizeof(pval));
 	arr->value.ht = (HashTable *) emalloc(sizeof(HashTable));
-	if (zend_hash_init(arr->value.ht, 0, NULL, PVAL_PTR_DTOR, 0) == FAILURE) {
+	if (zend_hash_init(arr->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0) == FAILURE) {
 		php_error(E_WARNING, "Unable to create argv array");
 	} else {
 		arr->type = IS_ARRAY;

@@ -347,13 +347,13 @@ static void convert_scalar_to_array(zval *op, int type)
 	switch (type) {
 		case IS_ARRAY:
 			op->value.ht = (HashTable *) emalloc(sizeof(HashTable));
-			zend_hash_init(op->value.ht, 0, NULL, PVAL_PTR_DTOR, 0);
+			zend_hash_init(op->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_index_update(op->value.ht, 0, (void *) &entry, sizeof(zval *), NULL);
 			op->type = IS_ARRAY;
 			break;
 		case IS_OBJECT:
 			op->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
-			zend_hash_init(op->value.obj.properties, 0, NULL, PVAL_PTR_DTOR, 0);
+			zend_hash_init(op->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_update(op->value.obj.properties, "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
 			op->value.obj.ce = &zend_standard_class_def;
 			op->type = IS_OBJECT;

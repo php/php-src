@@ -1419,7 +1419,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 	zend_str_tolower(CG(class_entry).name, CG(class_entry).name_length);
 
 	zend_hash_init(&CG(class_entry).function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
-	zend_hash_init(&CG(class_entry).default_properties, 10, NULL, PVAL_PTR_DTOR, 0);
+	zend_hash_init(&CG(class_entry).default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 
 	/* code for inheritance from parent class */
 	if (parent_class_name) {
@@ -1807,7 +1807,7 @@ void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment
 		*tmp = static_assignment->u.constant;
 		if (!CG(active_op_array)->static_variables) {
 			CG(active_op_array)->static_variables = (HashTable *) emalloc(sizeof(HashTable));
-			zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, PVAL_PTR_DTOR, 0);
+			zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 		}
 		zend_hash_update_ptr(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, tmp, sizeof(zval *), NULL);
 	}

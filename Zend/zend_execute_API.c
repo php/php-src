@@ -105,7 +105,7 @@ void init_executor(CLS_D ELS_DC)
 	zend_ptr_stack_init(&EG(argument_stack));
 
 	EG(main_op_array) = NULL;
-	zend_hash_init(&EG(symbol_table), 50, NULL, PVAL_PTR_DTOR, 0);
+	zend_hash_init(&EG(symbol_table), 50, NULL, ZVAL_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table);
 
 	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_activator);
@@ -371,7 +371,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
 		EG(active_symbol_table) = (HashTable *) emalloc(sizeof(HashTable));
-		zend_hash_init(EG(active_symbol_table), 0, NULL, PVAL_PTR_DTOR, 0);
+		zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 		if (object) {
 			zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
 

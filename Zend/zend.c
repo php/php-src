@@ -68,7 +68,7 @@ static uint zend_version_info_length;
 #define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998, 1999 Andi Gutmans, Zeev Suraski\n"
 
 
-#define PRINT_PVAL_INDENT 4
+#define PRINT_ZVAL_INDENT 4
 
 static void print_hash(HashTable *ht, int indent)
 {
@@ -81,7 +81,7 @@ static void print_hash(HashTable *ht, int indent)
 		ZEND_PUTS(" ");
 	}
 	ZEND_PUTS("(\n");
-	indent += PRINT_PVAL_INDENT;
+	indent += PRINT_ZVAL_INDENT;
 	zend_hash_internal_pointer_reset(ht);
 	while (zend_hash_get_current_data(ht, (void **) &tmp) == SUCCESS) {
 		for (i=0; i<indent; i++) {
@@ -98,11 +98,11 @@ static void print_hash(HashTable *ht, int indent)
 				break;
 		}
 		ZEND_PUTS("] => ");
-		zend_print_zval_r(*tmp, indent+PRINT_PVAL_INDENT);
+		zend_print_zval_r(*tmp, indent+PRINT_ZVAL_INDENT);
 		ZEND_PUTS("\n");
 		zend_hash_move_forward(ht);
 	}
-	indent -= PRINT_PVAL_INDENT;
+	indent -= PRINT_ZVAL_INDENT;
 	for (i=0; i<indent; i++) {
 		ZEND_PUTS(" ");
 	}
@@ -225,7 +225,7 @@ static void register_standard_class(void)
 	zend_standard_class_def.name_length = sizeof("stdClass") - 1;
 	zend_standard_class_def.name = zend_strndup("stdClass", zend_standard_class_def.name_length);
 	zend_standard_class_def.parent = NULL;
-	zend_hash_init(&zend_standard_class_def.default_properties, 0, NULL, PVAL_PTR_DTOR, 1);
+	zend_hash_init(&zend_standard_class_def.default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&zend_standard_class_def.function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1);
 	zend_standard_class_def.handle_function_call = NULL;
 	zend_standard_class_def.handle_property_get = NULL;

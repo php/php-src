@@ -421,7 +421,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 			i = atoi(*p);
 
 			if (cur == 'a') { /* object_init_ex will init the HashTable for objects! */
-				zend_hash_init(myht, i + 1, NULL, PVAL_PTR_DTOR, 0);
+				zend_hash_init(myht, i + 1, NULL, ZVAL_PTR_DTOR, 0);
 			}
 
 			while (**p && **p != ':') {

@@ -460,7 +460,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 		case ZEND_FETCH_STATIC:
 			if (!EG(active_op_array)->static_variables) {
 				EG(active_op_array)->static_variables = (HashTable *) emalloc(sizeof(HashTable));
-				zend_hash_init(EG(active_op_array)->static_variables, 2, NULL, PVAL_PTR_DTOR, 0);
+				zend_hash_init(EG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 			}
 			target_symbol_table = EG(active_op_array)->static_variables;
 			break;
@@ -1502,7 +1502,7 @@ do_fcall_common:
 							function_state.function_symbol_table = *(EG(symtable_cache_ptr)--);
 						} else {
 							function_state.function_symbol_table = (HashTable *) emalloc(sizeof(HashTable));
-							zend_hash_init(function_state.function_symbol_table, 0, NULL, PVAL_PTR_DTOR, 0);
+							zend_hash_init(function_state.function_symbol_table, 0, NULL, ZVAL_PTR_DTOR, 0);
 							/*printf("Cache miss!  Initialized %x\n", function_state.function_symbol_table);*/
 						}
 						calling_symbol_table = EG(active_symbol_table);
