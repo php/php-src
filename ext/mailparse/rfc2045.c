@@ -758,7 +758,32 @@ static void do_header(struct rfc2045 *p)
 			val++;
 			while(isspace(*val))
 				val++;
-			add_assoc_string(p->headerhash, t, val, 1);
+
+			if (strcmp(t, "to") == 0 || strcmp(t, "cc") == 0) {
+				/* join multiple To: or Cc: lines together, so that
+				 * those addresses are not silently ignored by scripts
+				 * that do not parse headers manually */
+				zval **existing = NULL;
+
+				if (SUCCESS == zend_hash_find(Z_ARRVAL_P(p->headerhash), t, strlen(t)+1, (void**)&existing)) {
+					int newlen;
+					char *newstr;
+
+					newlen = strlen(val) + Z_STRLEN_PP(existing) + 3;
+					newstr = emalloc(newlen);
+					
+					strcpy(newstr, Z_STRVAL_PP(existing));
+					strcat(newstr, ", ");
+					strcat(newstr, val);
+		
+					add_assoc_string(p->headerhash, t, newstr, 0);
+				
+				} else {
+					add_assoc_string(p->headerhash, t, val, 1);
+				}
+			} else {
+				add_assoc_string(p->headerhash, t, val, 1);
+			}
 		}
 		if (strcmp(t, "mime-version") == 0)
 		{
