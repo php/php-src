@@ -61,7 +61,7 @@ typedef int ts_rsrc_id;
 
 typedef void (*ts_allocate_ctor)(void *);
 
-#define THREAD_HASH_OF(thr,ts)  thr%ts
+#define THREAD_HASH_OF(thr,ts)  (unsigned long)thr%(unsigned long)ts
 
 #ifdef __cplusplus
 extern "C" {
