@@ -337,6 +337,33 @@ PHP_FUNCTION(stream_get_meta_data)
 }
 /* }}} */
 
+/* {{{ proto array stream_get_transports()
+   Retrieves list of registered socket transports */
+PHP_FUNCTION(stream_get_transports)
+{
+	HashTable *stream_xport_hash;
+	char *stream_xport;
+	int key_flags, stream_xport_len;
+
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (stream_xport_hash = php_stream_xport_get_hash()) {
+		array_init(return_value);
+		for(zend_hash_internal_pointer_reset(stream_xport_hash);
+			(key_flags = zend_hash_get_current_key_ex(stream_xport_hash, &stream_xport, &stream_xport_len, NULL, 0, NULL)) != HASH_KEY_NON_EXISTANT;
+			zend_hash_move_forward(stream_xport_hash)) {
+				if (key_flags == HASH_KEY_IS_STRING) {
+					add_next_index_stringl(return_value, stream_xport, stream_xport_len, 1);
+				}
+		}
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto array stream_get_wrappers()
     Retrieves list of registered stream wrappers */
 PHP_FUNCTION(stream_get_wrappers)
