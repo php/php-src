@@ -778,12 +778,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				if (strchr(pair, '=')) {
 					key = php_ap_getword(&pair, '=');
 					
-					if (!strcmp(key, "name")) {
+					if (!strcasecmp(key, "name")) {
 						if (param) {
 							efree(param);
 						}
 						param = php_ap_getword_conf(&pair TSRMLS_CC);
-					} else if (!strcmp(key, "filename")) {
+					} else if (!strcasecmp(key, "filename")) {
 						if (filename) {
 							efree(filename);
 						}
@@ -807,7 +807,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 				sapi_module.input_filter(PARSE_POST, param, &value, strlen(value) TSRMLS_CC);
 				safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
-				if (!strcmp(param, "MAX_FILE_SIZE")) {
+				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
 					max_file_size = atol(value);
 				}
 
