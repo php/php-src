@@ -1,3 +1,126 @@
+2002-05-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml: * install pear.bat on Windows only
+
+2002-05-19  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/package-Archive_Tar.xml
+      pear/package-Console_Getopt.xml
+      pear/package-PEAR.xml: Make this actually work somewhat better..
+
+2002-05-19  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS: Give due credit to Markus.
+
+2002-05-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Dependency.php: * compat fix
+
+2002-05-19  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Mention the availability of glob().
+
+2002-05-19  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in: Put "pear help options" working again
+
+    * pear/PEAR/Command/Common.php: Put "pear help command" working again
+
+2002-05-19  Sander Roobol  <phy@wanadoo.nl>
+
+    * run-tests.php: Fix php.ini-related stuff in run-tests.php
+
+    * main/php_ini.c:
+    get_cfg_var("get_file_path") didn't work correctly when an alternative
+    php.ini _file_ was specified using -c
+
+2002-05-19  Edin Kadribasic  <edink@proventum.net>
+
+    * main/config.w32.h.in
+      win32/glob.c
+      win32/glob.h
+      win32/php4dllts.dsp
+      ext/standard/dir.c: Added glob() support for windows.
+
+2002-05-19  Sander Roobol  <phy@wanadoo.nl>
+
+    * php.ini-dist
+      php.ini-recommended: It's get_cfg_var() not cfg_get_var()
+
+    * tests/basic/.cvsignore
+      tests/classes/.cvsignore
+      tests/func/.cvsignore
+      tests/lang/.cvsignore
+      tests/strings/.cvsignore
+      pear/tests/.cvsignore
+      tests/.cvsignore
+      ext/zip/tests/.cvsignore
+      ext/zlib/tests/.cvsignore
+      pear/XML/tests/.cvsignore
+      ext/standard/tests/strings/.cvsignore
+      ext/standard/tests/time/.cvsignore
+      ext/standard/tests/versioning/.cvsignore
+      ext/xml/tests/.cvsignore
+      ext/xslt/tests/.cvsignore
+      ext/standard/tests/general_functions/.cvsignore
+      ext/standard/tests/math/.cvsignore
+      ext/standard/tests/reg/.cvsignore
+      ext/standard/tests/serialize/.cvsignore
+      ext/standard/tests/.cvsignore
+      ext/standard/tests/aggregation/.cvsignore
+      ext/standard/tests/array/.cvsignore
+      ext/standard/tests/assert/.cvsignore
+      ext/standard/tests/file/.cvsignore
+      ext/pspell/tests/.cvsignore
+      ext/session/tests/.cvsignore
+      ext/skeleton/tests/.cvsignore
+      ext/mcve/tests/.cvsignore
+      ext/ncurses/tests/.cvsignore
+      ext/openssl/tests/.cvsignore
+      ext/pcntl/tests/.cvsignore
+      ext/pgsql/tests/.cvsignore
+      ext/iconv/tests/.cvsignore
+      ext/interbase/tests/.cvsignore
+      ext/mbstring/tests/.cvsignore
+      ext/mcrypt/tests/.cvsignore
+      ext/dio/tests/.cvsignore
+      ext/domxml/tests/.cvsignore
+      ext/exif/tests/.cvsignore
+      ext/gmp/tests/.cvsignore
+      ext/db/tests/.cvsignore
+      ext/dbplus/tests/.cvsignore
+      ext/dbx/tests/.cvsignore
+      ext/crack/tests/.cvsignore
+      ext/ctype/tests/.cvsignore
+      ext/cybermut/tests/.cvsignore
+      ext/bz2/tests/.cvsignore
+      run-tests.php:
+    Fix temporary filename problems, and update .cvsignores with new extensions
+
+    * Makefile.global
+      run-tests.php: Fix make test and remove a warning
+
+    * Makefile.global
+      run-tests.php: Cleaned up run-tests.php, and fixed it on linux/unix
+
+2002-05-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php: * new command setup
+
+    * pear/PEAR/Installer.php: * support platform-specific files
+
+    * pear/OS/Guess.php: * take uname as optional constructor parameter
+
+2002-05-19  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Typo fixes
+
+    * ext/exif/exif.c
+      ext/domxml/php_domxml.c: MFH
+
+    * ext/exif/exif.c
+      ext/domxml/php_domxml.c: DO NOT use C++ comments!
+
 2002-05-18  Christian Stocker  <chregu@phant.ch>
 
     * ext/domxml/php_domxml.c:
