@@ -23,7 +23,7 @@
 
 #include "php.h"
 
-typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, int status);
+typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, int mode);
 
 PHPAPI void php_output_startup(void);
 void php_output_register_constants(void);
