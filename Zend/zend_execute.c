@@ -1465,7 +1465,8 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 		}
 
 		/* here property is a string */
-		if (Z_OBJ_HT_P(object)->get_property_zval_ptr) {
+		if (EX(opline)->extended_value == ZEND_ASSIGN_OBJ
+			&& Z_OBJ_HT_P(object)->get_property_zval_ptr) {
 			zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
 			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
 				SEPARATE_ZVAL_IF_NOT_REF(zptr);
@@ -1478,10 +1479,26 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 		}
 
 		if (!have_get_ptr) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
+			zval *z;
+			
+			switch (EX(opline)->extended_value) {
+				case ZEND_ASSIGN_OBJ:
+					z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
+					break;
+				case ZEND_ASSIGN_DIM:
+					z = Z_OBJ_HT_P(object)->read_dimension(object, property, 0 TSRMLS_CC);
+					break;
+			}
 			SEPARATE_ZVAL_IF_NOT_REF(&z);
 			binary_op(z, z, value TSRMLS_CC);
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			switch (EX(opline)->extended_value) {
+				case ZEND_ASSIGN_OBJ:
+					Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+					break;
+				case ZEND_ASSIGN_DIM:
+					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
+					break;
+			}
 			*retval = z;
 			SELECTIVE_PZVAL_LOCK(*retval, result);
 			if (z->refcount <= 1) {
@@ -1507,8 +1524,14 @@ inline int zend_binary_assign_op_helper(void *binary_op_arg, ZEND_OPCODE_HANDLER
 	zval **var_ptr;
 	int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 
-	if (EX(opline)->extended_value == ZEND_ASSIGN_OBJ) {
-		return zend_binary_assign_op_obj_helper(binary_op_arg, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	switch (EX(opline)->extended_value) {
+		case ZEND_ASSIGN_OBJ:
+		case ZEND_ASSIGN_DIM:
+			return zend_binary_assign_op_obj_helper(binary_op_arg, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			break;
+		default:
+			/* do nothing */
+			break;
 	}
 
 	var_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_RW);
