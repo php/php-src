@@ -8,7 +8,6 @@ PHP 4.0                                                                    NEWS
 - Added the call_user_method_array function which allows you to call a method
   with an arbitrary number of parameters. (Sterling)
 - ext/odbc: IBM DB2 patch by Walter Franzini <walter@sys-net.it>
-- Made ldap_get_entries() return an array even if there are no entries
 - Added extension for the cracklib library. (Alexander Feldman)
 
 ?? ??? 2000, Version 4.0.4
@@ -28,6 +27,8 @@ PHP 4.0                                                                    NEWS
   c. func($var); where func() is defined as function func(&$var) {...}
   You CAN'T count on any other expressions to be passable by reference.
   (Andi, Zend Engine)
+- Made ldap_get_entries() return an array even if there are no entries
+  in search result. (Jani)
 - Fixed bad mod_perl interaction which caused segfaults when using LFS (Sascha)
 - const CONSTNAME now gets recognized. Before the patch only @const CONSTNAME
   description was recognized.
