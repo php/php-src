@@ -4,7 +4,7 @@ References between variables in sessions
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
 ob_start();
-session_id("test");
+session_id("abtest");
 session_start();
 
 class a {
