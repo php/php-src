@@ -408,7 +408,7 @@ ZEND_FUNCTION(method_exists)
 		RETURN_FALSE;
 	}
 	convert_to_string_ex(method_name);
-	lcname = estrdup((*method_name)->value.str.val);
+	lcname = estrndup((*method_name)->value.str.val, (*method_name)->value.str.val);
 	zend_str_tolower(lcname, (*method_name)->value.str.len);
 	if(zend_hash_exists(&(*klass)->value.obj.ce->function_table, lcname, (*method_name)->value.str.len+1)) {
 		efree(lcname);
@@ -433,7 +433,7 @@ ZEND_FUNCTION(class_exists)
 		RETURN_FALSE;
 	}
 	convert_to_string_ex(class_name);
-	lcname = estrdup((*class_name)->value.str.val);
+	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
 	if (zend_hash_exists(CG(class_table), lcname, (*class_name)->value.str.len+1)) {
 		efree(lcname);
@@ -457,7 +457,7 @@ ZEND_FUNCTION(function_exists)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(function_name);
-	lcname = estrdup((*function_name)->value.str.val);
+	lcname = estrndup((*function_name)->value.str.val, (*function_name)->value.str.len);
 	zend_str_tolower(lcname, (*function_name)->value.str.len);
 	if (zend_hash_exists(CG(function_table), lcname, (*function_name)->value.str.len+1) == FAILURE) {
 		efree(lcname);
