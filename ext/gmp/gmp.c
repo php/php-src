@@ -214,7 +214,7 @@ static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base)
 					if (numstr[1] == 'x' || numstr[1] == 'X') {
 						base = 16;
 						skip_lead = 1;
-					} else if (numstr[1] == 'b' || numstr[1] == 'B') {
+					} else if (base != 16 && (numstr[1] == 'b' || numstr[1] == 'B')) {
 						base = 2;
 						skip_lead = 1;
 					}
