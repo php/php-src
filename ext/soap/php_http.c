@@ -59,6 +59,8 @@ static int stream_alive(php_stream *stream  TSRMLS_DC)
 static void proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 {
 	zval **login, **password;
+	TSRMLS_FETCH();
+
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login"), (void **)&login) == SUCCESS) {
 		char* buf;
 		int len;
