@@ -1,7 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
-- Fix --enable-safe-mode. This configure option was not working.
+- Added automatic connection reset for pgsql. Web server reboot is not needed
+  in most cases when PostgreSQL server is rebooted. (Yasuo)
+- Fix --enable-safe-mode. This configure option was not working. (Yasuo)
 - added function domxml_dump_node($doc,$node). Dumps a node plus all
   children into a string. (chregu)
 - Added function domxml_node_get_content() (chregu)
