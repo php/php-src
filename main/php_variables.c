@@ -537,7 +537,7 @@ static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRML
 int php_hash_environment(TSRMLS_D)
 {
 	char *p;
-	unsigned char _gpc_flags[3] = {0, 0, 0};
+	unsigned char _gpc_flags[5] = {0, 0, 0, 0, 0};
 	zend_bool have_variables_order;
 	zval *dummy_track_vars_array = NULL;
 	zend_bool initialized_dummy_track_vars_array=0;
@@ -575,6 +575,9 @@ int php_hash_environment(TSRMLS_D)
 		array_init(PG(http_globals)[TRACK_VARS_ENV]);
 		INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
 		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
+		if (PG(register_globals)) {
+			php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV]) TSRMLS_CC);
+		}
 	}
 
 	for (p=variables_order; p && *p; p++) {
@@ -584,6 +587,9 @@ int php_hash_environment(TSRMLS_D)
 				if (!_gpc_flags[0] && !SG(headers_sent) && SG(request_info).request_method && !strcasecmp(SG(request_info).request_method, "POST")) {
 					sapi_module.treat_data(PARSE_POST, NULL, NULL TSRMLS_CC);	/* POST Data */
 					_gpc_flags[0]=1;
+					if (PG(register_globals)) {
+						php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]) TSRMLS_CC);
+					}
 				}
 				break;
 			case 'c':
@@ -591,6 +597,9 @@ int php_hash_environment(TSRMLS_D)
 				if (!_gpc_flags[1]) {
 					sapi_module.treat_data(PARSE_COOKIE, NULL, NULL TSRMLS_CC);	/* Cookie Data */
 					_gpc_flags[1]=1;
+					if (PG(register_globals)) {
+						php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) TSRMLS_CC);
+					}
 				}
 				break;
 			case 'g':
@@ -598,36 +607,42 @@ int php_hash_environment(TSRMLS_D)
 				if (!_gpc_flags[2]) {
 					sapi_module.treat_data(PARSE_GET, NULL, NULL TSRMLS_CC);	/* GET Data */
 					_gpc_flags[2]=1;
+					if (PG(register_globals)) {
+						php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]) TSRMLS_CC);
+					}
 				}
 				break;
 			case 'e':
 			case 'E':
-				if (!jit_initialization) {
+				if (!jit_initialization && !_gpc_flags[3]) {
 					if (have_variables_order) {
 						php_auto_globals_create_env("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
+						if (PG(register_globals)) {
+							php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV]) TSRMLS_CC);
+						}
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
 					}
+					_gpc_flags[3]=1;
 				}
 				break;
 			case 's':
 			case 'S':
-				if (!jit_initialization) {
+				if (!jit_initialization && !_gpc_flags[4]) {
 					php_register_server_variables(TSRMLS_C);
+					_gpc_flags[4]=1;
+					if (PG(register_globals)) {
+						php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]) TSRMLS_CC);
+					}
 				}
 				break;
 		}
 	}
 
-	if (!jit_initialization && !have_variables_order) {
+	if (!jit_initialization && !_gpc_flags[4]) {
 		php_register_server_variables(TSRMLS_C);
-	}
-
-	if (PG(register_globals)) {
-		for (i = 0; i < 5; i++) {
-			if (PG(http_globals)[i]) {
-				php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[i]) TSRMLS_CC);
-			}
+		if (PG(register_globals)) {
+			php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]) TSRMLS_CC);
 		}
 	}
 
@@ -704,6 +719,7 @@ static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRML
 {
 	zval *form_variables;
 	char *variables_order;
+	unsigned char _gpc_flags[3] = {0, 0, 0};
 	char *p;
 
 	if (PG(variables_order)) {
@@ -720,15 +736,24 @@ static zend_bool php_auto_globals_create_request(char *name, uint name_len TSRML
 		switch (*p) {
 			case 'g':
 			case 'G':
-				php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]) TSRMLS_CC);
+				if (!_gpc_flags[0]) {
+					php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]) TSRMLS_CC);
+					_gpc_flags[0] = 1;
+				}
 				break;
 			case 'p':
 			case 'P':
-				php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]) TSRMLS_CC);
+				if (!_gpc_flags[1]) {
+					php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]) TSRMLS_CC);
+					_gpc_flags[1] = 1;
+				}
 				break;
 			case 'c':
 			case 'C':
-				php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) TSRMLS_CC);
+				if (!_gpc_flags[2]) {
+					php_autoglobal_merge(Z_ARRVAL_P(form_variables), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) TSRMLS_CC);
+					_gpc_flags[2] = 1;
+				}
 				break;
 		}
 	}
