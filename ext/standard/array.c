@@ -957,6 +957,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	ulong  string_key_len;
 	ulong  num_key;
 	HashPosition pos;
+	BLS_FETCH();
 	CLS_FETCH();
 	ELS_FETCH();
 
