@@ -1372,6 +1372,8 @@ PHP_FUNCTION(stristr)
 		RETVAL_FALSE;
 	}
 
+	zval_ptr_dtor(haystack);
+	zval_ptr_dtor(needle);
 	efree(haystack_orig);
 }
 /* }}} */
