@@ -43,6 +43,8 @@
 # include <sys/statvfs.h>
 #elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
 # include <sys/statfs.h>
+#elif defined(HAVE_SYS_MOUNT_H) && defined(HAVE_STATFS)
+# include <sys/mount.h>
 #endif
 
 #if HAVE_PWD_H
@@ -151,7 +153,7 @@ PHP_FUNCTION(diskfreespace)
 #else /* not - WINDOWS */
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
 	struct statvfs buf;
-#elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
+#elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
 	struct statfs buf;
 #endif
 	double bytesfree = 0;
@@ -214,7 +216,7 @@ PHP_FUNCTION(diskfreespace)
 	} else {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
 	}
-#elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
+#elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
 	if (statfs((*path)->value.str.val,&buf)) RETURN_FALSE;
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
 #endif
