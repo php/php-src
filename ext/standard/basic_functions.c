@@ -26,7 +26,6 @@
 #include "php_standard.h"
 #include "php_math.h"
 #include "ext/standard/info.h"
-#include "ext/standard/url_scanner.h"
 #include "zend_operators.h"
 #include <stdarg.h>
 #include <stdlib.h>
