@@ -715,11 +715,12 @@ class PEAR_Installer extends PEAR_Common
                     $this->rollbackFileTransaction();
                     return $built;
                 }
+                $this->log(1, "\nBuild process completed successfully");
                 foreach ($built as $ext) {
                     $bn = basename($ext['file']);
-                    $this->log(2, "installing $bn");
                     $dest = $this->config->get('ext_dir') . DIRECTORY_SEPARATOR . $bn;
-                    $this->log(3, "+ cp $ext[file] ext_dir");
+                    $this->log(1, "Installing '$bn' at ext_dir ($dest)");
+                    $this->log(3, "+ cp $ext[file] ext_dir ($dest)");
                     $copyto = $this->_prependPath($dest, $this->installroot);
                     if (!@copy($ext['file'], $copyto)) {
                         $this->rollbackFileTransaction();
