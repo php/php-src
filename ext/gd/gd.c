@@ -141,22 +141,45 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecopymergegray,						NULL)
 
 	PHP_FE(imagecreatefromstring,					NULL)
+#ifdef HAVE_GD_PNG
 	PHP_FE(imagecreatefrompng,						NULL)
+#endif
+#ifdef HAVE_GD_GIF_READ
 	PHP_FE(imagecreatefromgif,						NULL)
+#endif
+#ifdef HAVE_GD_JPG
 	PHP_FE(imagecreatefromjpeg,						NULL)
+#endif
+#ifdef HAVE_GD_WBMP
 	PHP_FE(imagecreatefromwbmp,						NULL)
+#endif
+#ifdef HAVE_GD_XBM
 	PHP_FE(imagecreatefromxbm,						NULL)
+#endif
+#ifdef HAVE_GD_XPM
 	PHP_FE(imagecreatefromxpm,						NULL)
+#endif
 	PHP_FE(imagecreatefromgd,						NULL)
+#ifdef HAVE_GD_GD2
 	PHP_FE(imagecreatefromgd2,						NULL)
 	PHP_FE(imagecreatefromgd2part,					NULL)
-
+#endif
+#ifdef HAVE_GD_PNG
 	PHP_FE(imagepng,								NULL)
+#endif
+#ifdef HAVE_GD_GIF_CREATE
 	PHP_FE(imagegif,								NULL)
+#endif
+#ifdef HAVE_GD_JPG
 	PHP_FE(imagejpeg,								NULL)
+#endif
+#ifdef HAVE_GD_WBMP
 	PHP_FE(imagewbmp,                               NULL)
+#endif
 	PHP_FE(imagegd,									NULL)
+#ifdef HAVE_GD_GD2
 	PHP_FE(imagegd2,								NULL)
+#endif
 
 	PHP_FE(imagedestroy,							NULL)
 	PHP_FE(imagegammacorrect,						NULL)
@@ -177,10 +200,13 @@ function_entry gd_functions[] = {
 	PHP_FE(imagesx,									NULL)
 	PHP_FE(imagesy,									NULL)
 	PHP_FE(imagedashedline,							NULL)
+#ifdef ENABLE_GD_TTF
 	PHP_FE(imagettfbbox,							NULL)
 	PHP_FE(imagettftext,							NULL)
-	PHP_FE(imageftbbox,							NULL)
-	PHP_FE(imagefttext,							NULL)
+	PHP_FE(imageftbbox,								NULL)
+	PHP_FE(imagefttext,								NULL)
+#endif
+#ifdef HAVE_LIBT1
 	PHP_FE(imagepsloadfont,							NULL)
 	/*
 	PHP_FE(imagepscopyfont,							NULL)
@@ -191,12 +217,18 @@ function_entry gd_functions[] = {
 	PHP_FE(imagepsslantfont,						NULL)
 	PHP_FE(imagepstext,								NULL)
 	PHP_FE(imagepsbbox,								NULL)
+#endif
 	PHP_FE(imagetypes,								NULL)
 	
+#if defined(HAVE_GD_JPG) && defined(HAVE_GD_WBMP)
 	PHP_FE(jpeg2wbmp,								NULL)
+#endif
+#if defined(HAVE_GD_PNG) && defined(HAVE_GD_WBMP)
 	PHP_FE(png2wbmp,								NULL)
+#endif
+#ifdef HAVE_GD_WBMP
 	PHP_FE(image2wbmp,								NULL)
-	
+#endif	
 	{NULL, NULL, NULL}
 };
 /* }}} */
