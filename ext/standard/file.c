@@ -33,6 +33,7 @@
 #include "ext/standard/exec.h"
 #include "ext/standard/php_filestat.h"
 #include "php_open_temporary_file.h"
+#include "ext/standard/basic_functions.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1548,7 +1549,11 @@ static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
 			len = sbuf.st_size - off;
 			p = mmap(0, len, PROT_READ, MAP_SHARED, fd, off);
 			if (p != (void *) MAP_FAILED) {
+				BLS_FETCH();
+				BG(mmap_file) = p;
+				BG(mmap_len) = len;
 				PHPWRITE(p, len);
+				BG(mmap_file) = NULL;
 				munmap(p, len);
 				bcount += len;
 				ready = 1;

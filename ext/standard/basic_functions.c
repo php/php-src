@@ -48,6 +48,9 @@
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif
+#if HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
 #include "safe_mode.h"
 #ifdef PHP_WIN32
 #include "win32/unistd.h"
@@ -830,6 +833,9 @@ PHP_RINIT_FUNCTION(basic)
 	BG(user_compare_func_name) = NULL;
 	BG(array_walk_func_name) = NULL;
 	BG(incomplete_class) = NULL;
+#ifdef HAVE_MMAP
+	BG(mmap_file) = NULL;
+#endif
 	BG(page_uid) = -1;
 	BG(page_inode) = -1;
 	BG(page_mtime) = -1;
@@ -896,6 +902,12 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		efree(BG(user_tick_functions));
 		BG(user_tick_functions) = NULL;
 	}
+
+#ifdef HAVE_MMAP
+	if (BG(mmap_file)) {
+		munmap(BG(mmap_file), BG(mmap_len));
+	}
+#endif
 
 	return SUCCESS;
 }
