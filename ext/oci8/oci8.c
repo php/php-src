@@ -1671,6 +1671,9 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 					}
 					
 					descr = oci_new_desc(dtype,statement->conn);
+					if (! descr) {
+						/* need better error checking XXX */
+					}
 					outcol->descid = descr->id;
 					buf =  &(descr->ocidescr);
 					break;
@@ -3616,6 +3619,10 @@ PHP_FUNCTION(ocinewdescriptor)
 	OCI_GET_CONN(connection,conn);
 
 	descr = oci_new_desc(dtype,connection);
+
+	if (! descr) {
+		RETURN_NULL();
+	}
 
 	object_init_ex(return_value, oci_lob_class_entry_ptr);
 	add_property_resource(return_value, "descriptor", descr->id);
