@@ -108,7 +108,7 @@ PHP_FUNCTION(levenshtein){
 	l = calc_levdist((*str1)->value.str.val, (*str2)->value.str.val);
 
 	if(l<0) {
-		php_error(E_WARNING,"levenshtein(): argument string(s) to long");
+		php_error(E_WARNING,"levenshtein(): argument string(s) too long");
 	}
 
 	RETURN_LONG(l);
