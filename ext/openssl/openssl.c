@@ -145,6 +145,9 @@ zend_module_entry openssl_module_entry = {
 
 #ifdef COMPILE_DL_OPENSSL
 ZEND_GET_MODULE(openssl)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif
 
 static int le_key;

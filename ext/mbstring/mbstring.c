@@ -227,6 +227,9 @@ ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 
 #ifdef COMPILE_DL_MBSTRING
 ZEND_GET_MODULE(mbstring)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif
 
 /* {{{ allocators */

@@ -144,6 +144,9 @@ PHP_OCI_API php_oci_globals oci_globals;
 
 #ifdef COMPILE_DL_OCI8
 ZEND_GET_MODULE(oci8)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif /* COMPILE_DL */
 
 /* }}} */

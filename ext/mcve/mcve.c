@@ -150,6 +150,9 @@ zend_module_entry mcve_module_entry = {
 /* declare the module for dynamic loading */
 #ifdef COMPILE_DL_MCVE
 ZEND_GET_MODULE(mcve)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
 #endif
 
 /* {{{ MCVE_CONN destructor */
