@@ -5,7 +5,12 @@ PHP_ARG_WITH(pspell,whether to include pspell support,
 
 if test "$PHP_PSPELL" != "no"; then
 	PHP_EXTENSION(pspell, $ext_shared)
-	for i in /usr/local /usr $PHP_PSPELL; do
+	if test "$PHP_PSPELL" != "yes"; then
+	    PSPELL_SEARCH_DIRS=$PHP_PSPELL
+	else
+	    PSPELL_SEARCH_DIRS="/usr/local /usr"
+	fi
+	for i in $PSPELL_SEARCH_DIRS; do
 		if test -f $i/include/pspell/pspell.h; then
 			PSPELL_DIR=$i
 			PSPELL_INCDIR=$i/include/pspell
