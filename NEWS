@@ -33,6 +33,8 @@ PHP                                                                        NEWS
   (Marcus)
 - Fixed bug #31623 (OCILogin does not support password grace period).
   (daniel dot beet at accuratesoftware dot com, Tony)
+- Fixed bug #31514 (open_basedir uses path_translated rather then cwd for .
+  translation). (Ilia)
 - Fixed bug #31480 (Possible infinite loop in imap_mail_compose()). (Ilia)
 - Fixed bug #31479 (Fixed crash in chunk_split(), when chunklen > strlen). (Ilia)
 - Fixed bug #31465 (False warning in unpack() when working with *). (Ilia)
