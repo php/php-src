@@ -41,6 +41,7 @@ zend_function_entry php_dom_domexception_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+/* {{{ php_dom_throw_error */
 void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC)
 {
 	char *error_message;
@@ -105,5 +106,6 @@ void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, error_message);
 	}
 }
+/* }}} end php_dom_throw_error */
 
 #endif /* HAVE_LIBXML && HAVE_DOM */
