@@ -12,6 +12,8 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #27040 (passing an array of form-fields to CURLOPT_POSTFIELDS
   does not work). (Ilia, Jani)
+- Fixed bug #27011 (64bit int/long confusion in preg_match*() functions).
+  (Ilia)
 - Fixed bug #26974 (rename() doesn't check the destination file against 
   safe_mode/open_basedir). (Ilia)
 - Fixed bug #26973 (*printf() '+' modifier broken). (Jani)

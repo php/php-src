@@ -347,7 +347,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	int			     regex_len;
 	int				 subject_len;
 	zval 			*subpats = NULL;	/* Array for subpatterns */
-	int				 flags;				/* Match control flags */
+	long				 flags;				/* Match control flags */
 
 	zval			*result_set,		/* Holds a set of subpatterns after
 										   a global match */
@@ -361,7 +361,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	int			 	*offsets;			/* Array of subpattern offsets */
 	int				 num_subpats;		/* Number of captured subpatterns */
 	int			 	 size_offsets;		/* Size of the offsets array */
-	int				 start_offset = 0;	/* Where the new search starts */
+	long				 start_offset = 0;	/* Where the new search starts */
 	int			 	 matched;			/* Has anything matched */
 	int				 subpats_order = 0; /* Order of subpattern matches */
 	int				 offset_capture = 0;/* Capture match offsets: yes/no */
