@@ -154,14 +154,25 @@ static int array_key_compare(const void *a, const void *b)
         return 0;
     } 
 
+    if (result.type == IS_DOUBLE) {
+        if (result.value.dval < 0) {
+			return -1;
+        } else if (result.value.dval > 0) {
+			return 1;
+        } else {
+			return 0;
+		}
+    }
+
 	convert_to_long(&result);
+
 	if (result.value.lval < 0) {
 		return -1;
 	} else if (result.value.lval > 0) {
 		return 1;
-	} else {
-		return 0;
-	}
+	} 
+
+	return 0;
 }
 
 static int array_reverse_key_compare(const void *a, const void *b)
@@ -251,14 +262,25 @@ static int array_data_compare(const void *a, const void *b)
         return 0;
     } 
 
+    if (result.type == IS_DOUBLE) {
+        if (result.value.dval < 0) {
+			return -1;
+        } else if (result.value.dval > 0) {
+			return 1;
+        } else {
+			return 0;
+		}
+    }
+
 	convert_to_long(&result);
+
 	if (result.value.lval < 0) {
 		return -1;
 	} else if (result.value.lval > 0) {
 		return 1;
-	} else {
-		return 0;
-	}
+	} 
+
+	return 0;
 }
 
 static int array_reverse_data_compare(const void *a, const void *b)
