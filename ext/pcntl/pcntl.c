@@ -41,7 +41,13 @@ static int pcntl_zend_extension_active;
 function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_fork,	NULL)	
 	PHP_FE(pcntl_waitpid,	NULL)	
-       	PHP_FE(pcntl_signal,	NULL)	
+       	PHP_FE(pcntl_signal,	NULL)
+	PHP_FE(pcntl_wifexited, NULL)
+   	PHP_FE(pcntl_wifstopped, NULL)
+   	PHP_FE(pcntl_wifsignaled, NULL)
+   	PHP_FE(pcntl_wexitstatus, NULL)
+   	PHP_FE(pcntl_wtermsig, NULL)
+   	PHP_FE(pcntl_wstopsig, NULL)
 	{NULL, NULL, NULL}	
 };
 
@@ -86,6 +92,16 @@ PCNTL_ZEND_EXT zend_extension pcntl_extension_entry = {
   
 void php_register_signal_constants(INIT_FUNC_ARGS)
 {
+   
+	/* Wait Constants */
+#ifdef WNOHANG
+	REGISTER_LONG_CONSTANT("WNOHANG",  (long) WNOHANG, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef WUNTRACED
+	REGISTER_LONG_CONSTANT("WUNTRACED",  (long) WUNTRACED, CONST_CS | CONST_PERSISTENT);
+#endif
+
+	/* Signal Constants */
 	REGISTER_LONG_CONSTANT("SIG_IGN",  (long) SIG_IGN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIG_DFL",  (long) SIG_DFL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIG_ERR",  (long) SIG_ERR, CONST_CS | CONST_PERSISTENT);
@@ -167,6 +183,7 @@ PHP_MINFO_FUNCTION(pcntl)
 	php_info_print_table_header(2, "pcntl support", "enabled");
 	php_info_print_table_end();
 }
+
 /* {{{ proto long pcntl_fork()
    Forks the currently running process following the same behavior as the UNIX fork() system call*/
 PHP_FUNCTION(pcntl_fork)
@@ -197,7 +214,11 @@ PHP_FUNCTION(pcntl_waitpid)
 	convert_to_long_ex(pid);
 	convert_to_long_ex(options);
    
-   	SEPARATE_ZVAL(status);
+	if (!ParameterPassedByReference(ht, 2)) {
+		php_error(E_WARNING, "Status not passed by reference in %s", get_active_function_name());
+		RETURN_FALSE;
+	}
+   
 	convert_to_long_ex(status);
 
         if (ZEND_NUM_ARGS()==2) temp_options=0;
@@ -206,6 +227,131 @@ PHP_FUNCTION(pcntl_waitpid)
 	temp_id = waitpid((pid_t) Z_LVAL_PP(pid), &temp_status, temp_options);
 	Z_LVAL_PP(status)=temp_status;
 	RETURN_LONG((long) temp_id);
+}
+/* }}} */
+
+/* {{{ proto bool pcntl_wifexited() 
+   Returns true if the child status code represents a successful exit */
+PHP_FUNCTION(pcntl_wifexited)
+{
+#ifdef WIFEXITED
+	zval **status;
+	int status_word;
+   
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+   
+	status_word = (int) Z_LVAL_PP(status);
+	
+ 	if (WIFEXITED(status_word)) RETURN_TRUE;
+#endif
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool pcntl_wifstopped() 
+    Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
+PHP_FUNCTION(pcntl_wifstopped)
+{
+#ifdef WIFSTOPPED
+	zval **status;
+	int status_word;
+   
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+   
+	status_word = (int) Z_LVAL_PP(status);
+	
+ 	if (WIFSTOPPED(status_word)) RETURN_TRUE;
+#endif
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool pcntl_wifsignaled() 
+   Returns true if the child status code represents a process that was terminated due to a signal */
+PHP_FUNCTION(pcntl_wifsignaled)
+{
+#ifdef WIFSIGNALED
+	zval **status;
+	int status_word;
+   
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+   
+	status_word = (int) Z_LVAL_PP(status);
+	
+ 	if (WIFSIGNALED(status_word)) RETURN_TRUE;
+#endif
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto long pcntl_wexitstatus() 
+   Returns the status code of a child's exit */
+PHP_FUNCTION(pcntl_wexitstatus)
+{
+#ifdef WEXITSTATUS
+	zval **status;
+	int status_word;
+   
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+   
+	status_word = (int) Z_LVAL_PP(status);
+
+	/* WEXITSTATUS only returns 8 bits so we *MUST* cast this to signed char
+	   if you want to have valid negative exit codes */
+ 	RETURN_LONG((signed char) WEXITSTATUS(status_word));
+#else
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+/* {{{ proto long pcntl_wtermsig() 
+   Returns the number of the signal that terminated the process who's status code is passed  */
+PHP_FUNCTION(pcntl_wtermsig)
+{
+#ifdef WTERMSIG
+	zval **status;
+	int status_word;
+   
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+   
+	status_word = (int) Z_LVAL_PP(status);
+
+ 	RETURN_LONG(WTERMSIG(status_word));
+#else
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+/* {{{ proto long pcntl_wstopsig() 
+   Returns the number of the signal that caused the process to stop who's status code is passed  */
+PHP_FUNCTION(pcntl_wstopsig)
+{
+#ifdef WSTOPSIG
+	zval **status;
+	int status_word;
+   
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &status) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+   
+	status_word = (int) Z_LVAL_PP(status);
+
+ 	RETURN_LONG(WSTOPSIG(status_word));
+#else
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 
