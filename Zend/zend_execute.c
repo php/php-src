@@ -347,16 +347,6 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		if (variable_ptr->refcount==0) {
 			switch (type) {
 				case IS_VAR:
-					/*
-					if (PZVAL_IS_LOCKED(value)) {
-						zval *orig_value = value;
-
-						ALLOC_ZVAL(value);
-						*value = *orig_value;
-						value->refcount=0;
-						zval_copy_ctor(value);
-					}
-					*/
 					/* break missing intentionally */
 				case IS_CONST:
 					if (variable_ptr==value) {
@@ -386,16 +376,6 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		} else { /* we need to split */
 			switch (type) {
 				case IS_VAR:
-					/*
-					if (PZVAL_IS_LOCKED(value)) {
-						zval *orig_value = value;
-
-						ALLOC_ZVAL(value);
-						*value = *orig_value;
-						value->refcount=0;
-						zval_copy_ctor(value);
-					}
-					*/
 					/* break missing intentionally */
 				case IS_CONST:
 					if (PZVAL_IS_REF(value) && value->refcount > 0) {
