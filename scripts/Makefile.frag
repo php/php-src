@@ -32,6 +32,8 @@ HEADER_DIRS = \
 	ext/xml/expat \
 	main \
 	ext/mbstring \
+	ext/mbstring/libmbfl \
+	ext/mbstring/libmbfl/mbfl \
 	ext/pgsql \
 	regex
 
