@@ -1208,29 +1208,33 @@ void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRM
 		SET_UNUSED(opline->op1);
 	}
 	CG(catch_begin) = fetch_class_op_number;
-	if(class_name) {
-		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
-	}
-	if(class_name == NULL) {
-		SET_UNUSED(opline->op2);
-		opline->extended_value = ZEND_FETCH_CLASS_MAIN;
-	} else if ((class_name->u.constant.value.str.len == (sizeof("self") - 1)) &&
-		!memcmp(class_name->u.constant.value.str.val, "self", sizeof("self"))) {
-		SET_UNUSED(opline->op2);
-		opline->extended_value = ZEND_FETCH_CLASS_SELF;
-		zval_dtor(&class_name->u.constant);
-	} else if ((class_name->u.constant.value.str.len == (sizeof("parent") - 1)) &&
-		!memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent"))) {
-		SET_UNUSED(opline->op2);
-		opline->extended_value = ZEND_FETCH_CLASS_PARENT;
-		zval_dtor(&class_name->u.constant);
-	} else if ((class_name->u.constant.value.str.len == (sizeof("main") - 1)) &&
-		!memcmp(class_name->u.constant.value.str.val, "main", sizeof("main"))) {
-		SET_UNUSED(opline->op2);
-		opline->extended_value = ZEND_FETCH_CLASS_MAIN;
-		zval_dtor(&class_name->u.constant);
+	if (class_name) {
+		if (class_name->op_type == IS_CONST) {
+			zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
+			if ((class_name->u.constant.value.str.len == (sizeof("self") - 1)) &&
+				!memcmp(class_name->u.constant.value.str.val, "self", sizeof("self"))) {
+				SET_UNUSED(opline->op2);
+				opline->extended_value = ZEND_FETCH_CLASS_SELF;
+				zval_dtor(&class_name->u.constant);
+			} else if ((class_name->u.constant.value.str.len == (sizeof("parent") - 1)) &&
+				!memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent"))) {
+				SET_UNUSED(opline->op2);
+				opline->extended_value = ZEND_FETCH_CLASS_PARENT;
+				zval_dtor(&class_name->u.constant);
+			} else if ((class_name->u.constant.value.str.len == (sizeof("main") - 1)) &&
+				!memcmp(class_name->u.constant.value.str.val, "main", sizeof("main"))) {
+				SET_UNUSED(opline->op2);
+				opline->extended_value = ZEND_FETCH_CLASS_MAIN;
+				zval_dtor(&class_name->u.constant);
+			} else {
+				opline->op2 = *class_name;
+			}
+		} else {
+			opline->op2 = *class_name;
+		}
 	} else {
-		opline->op2 = *class_name;
+		SET_UNUSED(opline->op2);
+		opline->extended_value = ZEND_FETCH_CLASS_MAIN;
 	}
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->result.op_type = IS_CONST; /* FIXME: Hack so that INIT_FCALL_BY_NAME still knows this is a class */
