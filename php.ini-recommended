@@ -738,6 +738,16 @@ sybct.min_server_severity = 10
 ; Minimum client message severity to display.
 sybct.min_client_severity = 10
 
+[dbx]
+; returned column names can be converted for compatibility reasons
+; possible values for dbx.colnames_case are
+; "unchanged" (default, if not set)
+; "lowercase"
+; "uppercase"
+; the recommended default is either upper- or lowercase, but
+; unchanged is currently set for backwards compatibility
+dbx.colnames_case = "lowercase"
+
 [bcmath]
 ; Number of decimal digits for all bcmath functions.
 bcmath.scale = 0
