@@ -420,10 +420,9 @@ break_outer_loop:
 	return SUCCESS;
 }
 
-static void php_session_track_init(void)
+static void php_session_track_init(TSRMLS_D)
 {
 	zval **old_vars = NULL;
-	TSRMLS_FETCH();
 
 	if (zend_hash_find(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), (void **)&old_vars) == SUCCESS && Z_TYPE_PP(old_vars) == IS_ARRAY) {
 	  PS(http_session_vars) = *old_vars;
@@ -450,7 +449,7 @@ static char *php_session_encode(int *newlen TSRMLS_DC)
 
 static void php_session_decode(const char *val, int vallen TSRMLS_DC)
 {
-	php_session_track_init();
+	php_session_track_init(TSRMLS_C);
 	if (PS(serializer)->decode(val, vallen TSRMLS_CC) == FAILURE) {
 		php_session_destroy(TSRMLS_C);
 		php_error(E_WARNING, "Failed to decode session object. Session has been destroyed.");
@@ -590,13 +589,12 @@ static void strcpy_gmt(char *ubuf, time_t *when)
 	ubuf[n] = '\0';
 }
 
-static void last_modified(void)
+static void last_modified(TSRMLS_D)
 {
 	const char *path;
 	struct stat sb;
 	char buf[MAX_STR + 1];
-	TSRMLS_FETCH();
-
+	
 	path = SG(request_info).path_translated;
 	if (path) {
 		if (VCWD_STAT(path, &sb) == -1) {
@@ -625,7 +623,7 @@ CACHE_LIMITER_FUNC(public)
 	sprintf(buf, "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60);
 	ADD_COOKIE(buf);
 	
-	last_modified();
+	last_modified(TSRMLS_C);
 }
 	
 CACHE_LIMITER_FUNC(private)
@@ -636,7 +634,7 @@ CACHE_LIMITER_FUNC(private)
 	sprintf(buf, "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60);
 	ADD_COOKIE(buf);
 
-	last_modified();
+	last_modified(TSRMLS_C);
 }
 
 CACHE_LIMITER_FUNC(nocache)
@@ -1270,18 +1268,14 @@ PHP_FUNCTION(session_destroy)
 /* }}} */
 
 #ifdef TRANS_SID
-void session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen)
+void session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (PS(define_sid) && (PS(session_status) == php_session_active))
 		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen);
 }
 
-void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen)
+void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (PS(define_sid) && (PS(session_status) == php_session_active))
 		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen);
 }

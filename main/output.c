@@ -459,7 +459,7 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 		return 0;
 	}
 	if (BG(use_trans_sid)) {
-		session_adapt_uris(str, str_length, &newstr, &new_length);
+		session_adapt_uris(str, str_length, &newstr, &new_length TSRMLS_CC);
 	}
 		
 	if (newstr) {
