@@ -603,7 +603,7 @@ PHP_FUNCTION(posix_mkfifo)
 	convert_to_string(path);
 	convert_to_long(mode);
 
-	if (php3_ini.safe_mode && (!php_checkuid(path->value.str.val, 3))) {
+	if (php3_ini.safe_mode && (!php_checkuid(path->value.str.val, NULL, 3))) {
 		RETURN_FALSE;
 	}
 	result = mkfifo(path->value.str.val, mode->value.lval);

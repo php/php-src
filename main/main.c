@@ -493,11 +493,11 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 	FILE *retval;
 	
 	old_chunk_size = php_sock_set_def_chunk_size(1);
-	retval=php_fopen_wrapper((char *) filename, "r", USE_PATH|IGNORE_URL_WIN, &issock, &socketd, opened_path);
+	retval=php_fopen_wrapper((char *) filename, "rb", USE_PATH|IGNORE_URL_WIN, &issock, &socketd, opened_path);
 	php_sock_set_def_chunk_size(old_chunk_size);
 	
 	if (issock) {
-		retval = fdopen(socketd, "r");
+		retval = fdopen(socketd, "rb");
 	}
 	return retval;
 }
