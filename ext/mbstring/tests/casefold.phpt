@@ -7,10 +7,14 @@ function_exists('mb_strtolower') or die("SKIP");
 --GET--
 --FILE--
 <?php
+	mb_internal_encoding( 'ISO-8859-1' );
 	print mb_strtolower( "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n" );
 	print mb_strtoupper( mb_strtolower( "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n" ) );
+	print mb_strtoupper( "ДКО\n" );
 ?>
 
 --EXPECT--
 abcdefghijklmnopqrstuvwxyz
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
+дко
+
