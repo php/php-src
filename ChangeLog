@@ -1,3 +1,34 @@
+2003-06-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c:
+      MFB
+
+2003-06-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4
+      ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+      - Added ldap_sasl_bind(). (Jani, peter_c60@hotmail.com)
+
+2003-06-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/openssl/openssl.c:
+      Fixed compile warnings.
+
+2003-06-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c:
+      ws & cs
+
+2003-06-08  Zeev Suraski  <zeev@zend.com>
+
+    * ext/xml/expat_compat.h:
+      XMLless build fix
+
+    * main/php_variables.c:
+      Make $_FILES auto global (bug #23680)
+
 2003-06-07  Tomas V.V.Cox  <cox@idecnet.com>
 
     * pear/PEAR/Command/Package.php:

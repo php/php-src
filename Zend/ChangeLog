@@ -1,3 +1,20 @@
+2003-06-08  Zeev Suraski  <zeev@zend.com>
+
+    * zend_object_handlers.c:
+      Fix casing issues in access level checks
+
+    * zend.c
+      zend_compile.c
+      zend_compile.h:
+      Nicer handling of protected/private members in print_r()
+
+    * zend_execute.c:
+      Fix handling of object property assignments in switch expressions
+      (bug #23925)
+
+    * zend_builtin_functions.c:
+      Fix set_error_handler()
+
 2003-06-06  Sascha Schumann  <sascha@schumann.cx>
 
     * zend_multiply.h:
