@@ -1,5 +1,35 @@
+AC_DEFUN(PHP_TEST_WRITE_STDOUT,[
+  AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
+    AC_TRY_RUN([
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#define TEXT "This is the test message -- "
+        
+main()
+{
+  int n;
+
+  n = write(1, TEXT, sizeof(TEXT)-1);
+  return (!(n == sizeof(TEXT)-1));
+}
+    ],[
+      ac_cv_write_stdout=yes
+    ],[
+      ac_cv_write_stdout=no
+    ],[
+      ac_cv_write_stdout=no
+    ])
+  ])
+  if test "$ac_cv_write_stdout" = "yes"; then
+    AC_DEFINE(PHP_WRITE_STDOUT, 1, [whether write(2) works])
+  fi
+])
 
 if test "$PHP_SAPI" = "cgi"; then
+
+  PHP_TEST_WRITE_STDOUT
 
   PHP_ARG_ENABLE(force-cgi-redirect,whether to force Apache CGI redirect,
 [  --enable-force-cgi-redirect
