@@ -190,7 +190,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
 
 
-static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname)
+static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC)
 {
 	zval * subitem;
 	int i;
@@ -818,7 +818,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		add_assoc_string(return_value, "name", cert->name, 1);
 /*	add_assoc_bool(return_value, "valid", cert->valid); */
 
-	add_assoc_name_entry(return_value, "subject", 		X509_get_subject_name(cert), useshortnames);
+	add_assoc_name_entry(return_value, "subject", 		X509_get_subject_name(cert), useshortnames TSRMLS_CC);
 	/* hash as used in CA directories to lookup cert by subject name */
 	{
 		char buf[32];
@@ -826,7 +826,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		add_assoc_string(return_value, "hash", buf, 1);
 	}
 	
-	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames);
+	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames TSRMLS_CC);
 	add_assoc_long(return_value, "version", 			X509_get_version(cert));
 	add_assoc_long(return_value, "serialNumber", 		ASN1_INTEGER_get(X509_get_serialNumber(cert)));
 
@@ -1107,7 +1107,7 @@ PHP_FUNCTION(openssl_x509_free)
 /* {{{ x509 CSR functions */
 
 /* {{{ php_openssl_make_REQ */
-static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, zval * dn, zval * attribs)
+static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, zval * dn, zval * attribs TSRMLS_DC)
 {
 	STACK_OF(CONF_VALUE) * dn_sk, *attr_sk = NULL;
 	char * str, *dn_sect, *attr_sect;
@@ -1539,7 +1539,7 @@ PHP_FUNCTION(openssl_csr_new)
 		else	{
 			csr = X509_REQ_new();
 			if (csr)	{
-				if (php_openssl_make_REQ(&req, csr, dn, attribs) == SUCCESS)	{
+				if (php_openssl_make_REQ(&req, csr, dn, attribs TSRMLS_CC) == SUCCESS)	{
 					X509V3_CTX ext_ctx;
 
 					X509V3_set_ctx(&ext_ctx, NULL, NULL, csr, NULL, 0);
