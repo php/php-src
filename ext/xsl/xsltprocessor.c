@@ -379,12 +379,12 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 {
 	zval *id, *rv = NULL, *docp = NULL;
 	xmlDoc *doc = NULL;
+	xmlNodePtr node = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
 	int ret, clone;
 	char **params = NULL;
 	xsl_object *intern;
-	php_libxml_node_object *docobj;
 	
 	id = getThis();
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
@@ -393,7 +393,16 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
-	DOC_GET_OBJ(doc, docp, xmlDocPtr, docobj);
+
+	node = php_libxml_import_node(docp TSRMLS_CC);
+	
+	if (node) {
+		doc = node->doc;
+	}
+	if (doc == NULL) {
+		php_error(E_WARNING, "Invalid Document");
+		RETURN_NULL();
+	}
 
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
@@ -437,11 +446,11 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	zval *id, *docp = NULL;
 	xmlDoc *doc = NULL;
 	xmlDoc *newdocp;
+	xmlNodePtr node = NULL;
 	xsltStylesheetPtr sheetp;
 	int ret, uri_len, clone;
 	char **params = NULL, *uri;
 	xsl_object *intern;
-	php_libxml_node_object *docobj;
 	
 	id = getThis();
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
@@ -451,7 +460,15 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 		RETURN_FALSE;
 	}
 
-	DOC_GET_OBJ(doc, docp, xmlDocPtr, docobj);
+	node = php_libxml_import_node(docp TSRMLS_CC);
+	
+	if (node) {
+		doc = node->doc;
+	}
+	if (doc == NULL) {
+		php_error(E_WARNING, "Invalid Document");
+		RETURN_NULL();
+	}
 
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
@@ -497,13 +514,13 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	zval *id, *docp = NULL;
 	xmlDoc *doc = NULL;
 	xmlDoc *newdocp;
+	xmlNodePtr node = NULL;
 	xsltStylesheetPtr sheetp;
 	int ret, clone;
 	xmlChar *doc_txt_ptr;
 	int doc_txt_len;
 	char **params = NULL;
 	xsl_object *intern;
-	php_libxml_node_object *docobj;
 	
 	id = getThis();
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
@@ -512,7 +529,16 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
-	DOC_GET_OBJ(doc, docp, xmlDocPtr, docobj);
+
+	node = php_libxml_import_node(docp TSRMLS_CC);
+	
+	if (node) {
+		doc = node->doc;
+	}
+	if (doc == NULL) {
+		php_error(E_WARNING, "Invalid Document");
+		RETURN_NULL();
+	}
 
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
