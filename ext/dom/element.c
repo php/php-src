@@ -183,6 +183,11 @@ PHP_FUNCTION(dom_element_set_attribute)
 		return;
 	}
 
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
 	attr = xmlHasProp(nodep,name);
 	if (attr != NULL) {
 		node_list_unlink(attr->children TSRMLS_CC);
@@ -216,6 +221,11 @@ PHP_FUNCTION(dom_element_remove_attribute)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
+	}
+
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
 	}
 
 	attrp = xmlHasProp(nodep,name);
@@ -284,6 +294,11 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 		return;
 	}
 
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	if (attrp->type != XML_ATTRIBUTE_NODE) {
@@ -338,6 +353,11 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",  &name, &name_len) == FAILURE) {
 		return;
+	}
+
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
 	}
 
 	attrp = xmlHasProp(nodep,name);
@@ -486,6 +506,12 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
 	}
+
+	if (dom_node_is_read_only(elemp) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
 	nsptr = xmlSearchNsByHref (elemp->doc, elemp, uri);
 	if (nsptr == NULL) {
 		nsptr = dom_get_ns(uri, name, uri_len, name_len, &errorcode, (char **) &localname);
@@ -536,6 +562,11 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		return;
+	}
+
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
 	}
 
 	if (xmlStrEqual(uri, DOM_XMLNS_NAMESPACE)) {
@@ -618,6 +649,11 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
 		return;
+	}
+
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
 	}
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);

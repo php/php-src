@@ -73,6 +73,42 @@ static zend_function_entry dom_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+/* {{{ int dom_node_is_read_only(xmlNodePtr node) */
+int dom_node_is_read_only(xmlNodePtr node) {
+	switch (node->type) {
+		case XML_ENTITY_REF_NODE:
+		case XML_ENTITY_NODE:
+		case XML_DOCUMENT_TYPE_NODE:
+		case XML_NOTATION_NODE:
+		case XML_DTD_NODE:
+		case XML_ELEMENT_DECL:
+		case XML_ATTRIBUTE_DECL:
+		case XML_ENTITY_DECL:
+		case XML_NAMESPACE_DECL:
+			return SUCCESS;
+			break;
+		default:
+			return FAILURE;
+	}
+}
+/* }}} end dom_node_is_read_only */
+
+/* {{{ int dom_node_children_valid(xmlNodePtr node) */
+int dom_node_children_valid(xmlNodePtr node) {
+	switch (node->type) {
+		case XML_DOCUMENT_TYPE_NODE:
+		case XML_DTD_NODE:
+		case XML_PI_NODE:
+		case XML_COMMENT_NODE:
+		case XML_TEXT_NODE:
+		case XML_CDATA_SECTION_NODE:
+			return FAILURE;
+			break;
+		default:
+			return SUCCESS;
+	}
+}
+/* }}} end dom_node_children_valid */
 
 /* {{{ int increment_document_reference(dom_object *object) */
 int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC) {
@@ -500,12 +536,15 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_documenttype_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler), 0);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_documenttype_prop_handlers, sizeof(dom_documenttype_prop_handlers), NULL);
 
-	REGISTER_DOM_CLASS(ce, "domnotation", dom_node_class_entry, php_dom_notation_class_functions, dom_notation_class_entry);
+	REGISTER_DOM_CLASS(ce, "domnotation", NULL, php_dom_notation_class_functions, dom_notation_class_entry);
 	
 	zend_hash_init(&dom_notation_prop_handlers, 0, NULL, NULL, 1);
 	dom_register_prop_handler(&dom_notation_prop_handlers, "publicId", dom_notation_public_id_read, NULL TSRMLS_CC);
 	dom_register_prop_handler(&dom_notation_prop_handlers, "systemId", dom_notation_system_id_read, NULL TSRMLS_CC);
-	zend_hash_merge(&dom_notation_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler), 0);
+	/* Notation nodes are special */
+	dom_register_prop_handler(&dom_notation_prop_handlers, "nodeName", dom_node_node_name_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_notation_prop_handlers, "nodeValue", dom_node_node_value_read, dom_node_node_value_write TSRMLS_CC);
+	dom_register_prop_handler(&dom_notation_prop_handlers, "attributes", dom_node_attributes_read, NULL TSRMLS_CC);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_notation_prop_handlers, sizeof(dom_notation_prop_handlers), NULL);
 
 	REGISTER_DOM_CLASS(ce, "domentity", dom_node_class_entry, php_dom_entity_class_functions, dom_entity_class_entry);
@@ -620,7 +659,7 @@ PHP_MSHUTDOWN_FUNCTION(dom)
 	uncomment the following line, this will tell you the amount of not freed memory
 	and the total used memory into apaches error_log  */
 /*  xmlMemoryDump();*/
-
+xmlMemoryDump();
 	return SUCCESS;
 }
 
@@ -669,6 +708,23 @@ void dom_node_free(xmlNodePtr node)
 				xmlFreeProp((xmlAttrPtr) node);
 				break;
 			case XML_ENTITY_DECL:
+			case XML_ELEMENT_DECL:
+			case XML_ATTRIBUTE_DECL:
+			case XML_NAMESPACE_DECL:
+				/* These can never stand alone */
+				break;
+			case XML_NOTATION_NODE:
+				/* These require special handling */
+				if (node->name != NULL) {
+					xmlFree((char *) node->name);
+				}
+				if (((xmlEntityPtr) node)->ExternalID != NULL) {
+					xmlFree((char *) ((xmlEntityPtr) node)->ExternalID);
+				}
+				if (((xmlEntityPtr) node)->SystemID != NULL) {
+					xmlFree((char *) ((xmlEntityPtr) node)->SystemID);
+				}
+				xmlFree(node);
 				break;
 			default:
 				xmlFreeNode(node);
@@ -688,6 +744,8 @@ void node_free_list(xmlNodePtr node TSRMLS_DC)
 			node = curnode;
 			switch (node->type) {
 				/* Skip property freeing for the following types */
+				case XML_NOTATION_NODE:
+					break;
 				case XML_ENTITY_REF_NODE:
 					node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
 					break;

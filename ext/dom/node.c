@@ -154,7 +154,7 @@ currently here as a convience method while developing */
 		ZVAL_STRING(*retval, str, 1);
 		xmlFree(str);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_NULL(*retval);
 	}
 
 
@@ -202,7 +202,14 @@ int dom_node_node_type_read(dom_object *obj, zval **retval TSRMLS_DC)
 	nodep = dom_object_get_node(obj);
 
 	ALLOC_ZVAL(*retval);
-	ZVAL_LONG(*retval, nodep->type);
+
+	/* Specs dictate that they are both type XML_DOCUMENT_TYPE_NODE */
+	if (nodep->type == XML_DTD_NODE) {
+		ZVAL_LONG(*retval, XML_DOCUMENT_TYPE_NODE);
+	} else {
+		ZVAL_LONG(*retval, nodep->type);
+	}
+
 	return SUCCESS;
 }
 
@@ -252,23 +259,27 @@ int dom_node_child_nodes_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
-	if ((nodep->type == XML_DOCUMENT_NODE) || (nodep->type == XML_HTML_DOCUMENT_NODE)) {
-		last = ((xmlDoc *) nodep)->children;
+	if (dom_node_children_valid(nodep) == SUCCESS) {
+		if ((nodep->type == XML_DOCUMENT_NODE) || (nodep->type == XML_HTML_DOCUMENT_NODE)) {
+			last = ((xmlDoc *) nodep)->children;
+		} else {
+			last = nodep->children;
+		}
 	} else {
-		last = nodep->children;
+		last = NULL;
 	}
+
 	MAKE_STD_ZVAL(*retval);
 	array_init(*retval);
 	
-	if (last) {
-		while (last) {
-			zval *child;
-			MAKE_STD_ZVAL(child);
-			child = php_dom_create_object(last, &ret, NULL, child, obj TSRMLS_CC);
-			add_next_index_zval(*retval, child);
-			last = last->next;
-		}
+	while (last) {
+		zval *child;
+		MAKE_STD_ZVAL(child);
+		child = php_dom_create_object(last, &ret, NULL, child, obj TSRMLS_CC);
+		add_next_index_zval(*retval, child);
+		last = last->next;
 	}
+
 	return SUCCESS;
 }
 
@@ -283,12 +294,15 @@ Since:
 */
 int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	xmlNode *nodep, *first;
+	xmlNode *nodep, *first = NULL;
 	int ret;
 
 	nodep = dom_object_get_node(obj);
 
-	first = nodep->children;
+	if (dom_node_children_valid(nodep) == SUCCESS) {
+		first = nodep->children;
+	}
+
 	if (!first) {
 		return FAILURE;
 	}
@@ -313,12 +327,15 @@ Since:
 */
 int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	xmlNode *nodep, *last;
+	xmlNode *nodep, *last = NULL;
 	int ret;
 
 	nodep = dom_object_get_node(obj);
 
-	last = nodep->last;
+	if (dom_node_children_valid(nodep) == SUCCESS) {
+		last = nodep->last;
+	}
+
 	if (!last) {
 		return FAILURE;
 	}
@@ -499,7 +516,7 @@ int dom_node_namespace_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 	if(str != NULL) {
 		ZVAL_STRING(*retval, str, 1);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_NULL(*retval);
 	}
 
 	return SUCCESS;
@@ -709,6 +726,12 @@ PHP_FUNCTION(dom_node_insert_before)
 
 	new_child = NULL;
 
+	if (dom_node_is_read_only(parentp) == SUCCESS || 
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
 	if (dom_hierarchy(parentp, child) == FAILURE) {
 		php_dom_throw_error(HIERARCHY_REQUEST_ERR, &return_value TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hierarchy Request Error");
@@ -854,6 +877,10 @@ PHP_FUNCTION(dom_node_replace_child)
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
+	if (dom_node_children_valid(nodep) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oo", &newnode, &oldnode) == FAILURE) {
 		return;
 	}
@@ -863,6 +890,12 @@ PHP_FUNCTION(dom_node_replace_child)
 
 	children = nodep->children;
 	if (!children) {
+		RETURN_FALSE;
+	}
+
+	if (dom_node_is_read_only(nodep) == SUCCESS || 
+		(newchild->parent != NULL && dom_node_is_read_only(newchild->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -892,6 +925,7 @@ PHP_FUNCTION(dom_node_replace_child)
 		if (oldchild != newchild) {
 			xmlNodePtr node;
 			if (newchild->doc == NULL && nodep->doc != NULL) {
+				xmlSetTreeDoc(newchild, nodep->doc);
 				newchildobj->document = intern->document;
 				increment_document_reference(newchildobj, NULL TSRMLS_CC);
 			}
@@ -925,7 +959,17 @@ PHP_FUNCTION(dom_node_remove_child)
 		return;
 	}
 
+	if (dom_node_children_valid(nodep) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
+
+	if (dom_node_is_read_only(nodep) == SUCCESS || 
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
+	}
 
 	children = nodep->children;
 	if (!children) {
@@ -966,7 +1010,17 @@ PHP_FUNCTION(dom_node_append_child)
 		return;
 	}
 
+	if (dom_node_children_valid(nodep) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
+
+	if (dom_node_is_read_only(nodep) == SUCCESS || 
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		RETURN_FALSE;
+	}
 
 	if (dom_hierarchy(nodep, child) == FAILURE) {
 		php_dom_throw_error(HIERARCHY_REQUEST_ERR, &return_value TSRMLS_CC);
@@ -1053,6 +1107,10 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	DOM_NO_ARGS();
+	
+	if (dom_node_children_valid(nodep) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	if (nodep->children) {
 		RETURN_TRUE;

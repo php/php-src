@@ -83,6 +83,8 @@ void php_dom_create_implementation(zval **retval  TSRMLS_DC);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 int dom_has_feature(char *feature, char *version);
 void add_domdocument_properties(zval *id TSRMLS_DC);
+int dom_node_is_read_only(xmlNodePtr node);
+int dom_node_children_valid(xmlNodePtr node);
 
 #define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
