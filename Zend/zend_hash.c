@@ -222,7 +222,6 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 		p->pDataPtr=NULL;
 	}
 	p->h = h;
-	p->bIsPointer = 0;
 	p->pNext = ht->arBuckets[nIndex];
 	if (pDest) {
 		*pDest = p->pData;
@@ -329,7 +328,6 @@ ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKey
 		p->pDataPtr=NULL;
 	}
 	p->h = h;
-	p->bIsPointer = 0;
 	p->pNext = ht->arBuckets[nIndex];
 	if (pDest) {
 		*pDest = p->pData;
@@ -430,7 +428,6 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 		memcpy(p->pData, pData, nDataSize);
 		p->pDataPtr=NULL;
 	}
-	p->bIsPointer = 0;
 	if (pDest) {
 		*pDest = p->pData;
 	}
@@ -461,212 +458,18 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 	return SUCCESS;
 }
 
+
 ZEND_API int zend_hash_pointer_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData)
 {
-	ulong h;
-	uint nIndex;
-	Bucket *p;
-
-	IS_CONSISTENT(ht);
-
-	if (nKeyLength <= 0) {
-#if ZEND_DEBUG
-		ZEND_PUTS("zend_hash_update: Can't put in empty key\n");
-#endif
-		return FAILURE;
-	}
-	
-	HANDLE_NUMERIC(arKey,nKeyLength,zend_hash_pointer_index_update_or_next_insert(ht,idx,pData,HASH_UPDATE));
-	
-	h = ht->pHashFunction(arKey, nKeyLength);
-	nIndex = h % ht->nTableSize;
-	
-	
-	p = ht->arBuckets[nIndex];
-	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
-#if ZEND_DEBUG
-				if (p->pData == pData) {
-					ZEND_PUTS("Fatal error in zend_hash_pointer_update: p->pData == pData\n");
-					return FAILURE;
-				}
-#endif
-				HANDLE_BLOCK_INTERRUPTIONS();
-				if (!p->bIsPointer && ht->pDestructor) {
-					ht->pDestructor(p->pData);
-					pefree(p->pData,ht->persistent);
-				}			
-				p->pData = pData;
-				p->bIsPointer = 1;
-				HANDLE_UNBLOCK_INTERRUPTIONS();
-				return SUCCESS;
-			}
-		}
-		p = p->pNext;
-	}
-	p = (Bucket *) pemalloc(sizeof(Bucket)-1+nKeyLength,ht->persistent);
-	if (!p) {
-		return FAILURE;
-	}
-	p->nKeyLength = nKeyLength;
-	p->pData = pData;
-	p->h = h;
-	p->bIsPointer = 1;
-	memcpy(p->arKey, arKey, nKeyLength);
-
-	p->pNext = ht->arBuckets[nIndex];
-
-	HANDLE_BLOCK_INTERRUPTIONS();
-	if (ht->pInternalPointer == NULL) {
-		ht->pInternalPointer = p;
-	}
-	ht->arBuckets[nIndex] = p;
-
-	/* Setup the double linked list */
-	p->pListLast = ht->pListTail;
-	ht->pListTail = p;
-	p->pListNext = NULL;
-	if (p->pListLast != NULL) {
-		p->pListLast->pListNext = p;
-	}
-	if (!ht->pListHead) {
-		ht->pListHead = p;
-	}
-	HANDLE_UNBLOCK_INTERRUPTIONS();
-
-	ht->nNumOfElements++;
-	if_full_do_resize(ht);		/* If the Hash table is full, resize it */
-	return SUCCESS;
+	zend_error(E_ERROR, "zend_hash_pointer_*() functions are no longer supported");
+	return FAILURE;
 }
 
 
 ZEND_API int zend_hash_pointer_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, int flag)
 {
-	uint nIndex;
-	Bucket *p;
-
-	IS_CONSISTENT(ht);
-
-	if (flag & HASH_NEXT_INSERT) {
-		h = ht->nNextFreeElement;
-	}
-	nIndex = h % ht->nTableSize;
-
-	p = ht->arBuckets[nIndex];
-	while (p != NULL) {
-		if ((p->nKeyLength == 0) && (p->h == h)) {
-			if (flag & HASH_NEXT_INSERT) {
-				return FAILURE;
-			}
-#if ZEND_DEBUG
-			if (p->pData == pData) {
-				ZEND_PUTS("Fatal error in zend_hash_pointer_update: p->pData == pData\n");
-				return FAILURE;
-			}
-#endif
-			HANDLE_BLOCK_INTERRUPTIONS();
-			if (!p->bIsPointer && ht->pDestructor) {
-				ht->pDestructor(p->pData);
-				pefree(p->pData,ht->persistent);
-			}
-			p->pData = pData;
-			p->bIsPointer = 1;
-            if (h >= ht->nNextFreeElement) {
-                ht->nNextFreeElement = h + 1;
-            }
-			HANDLE_UNBLOCK_INTERRUPTIONS();
-			return SUCCESS;
-		}
-		p = p->pNext;
-	}
-	p = (Bucket *) pemalloc(sizeof(Bucket)-1,ht->persistent);
-	if (!p) {
-		return FAILURE;
-	}
-	p->nKeyLength = 0;
-	p->pData = pData;
-	p->h = h;
-	p->bIsPointer = 1;
-
-	p->pNext = ht->arBuckets[nIndex];
-
-	HANDLE_BLOCK_INTERRUPTIONS();
-	if (ht->pInternalPointer == NULL) {
-		ht->pInternalPointer = p;
-	}
-	ht->arBuckets[nIndex] = p;
-
-	/* Setup the double linked list */
-	p->pListLast = ht->pListTail;
-	ht->pListTail = p;
-	p->pListNext = NULL;
-	if (p->pListLast != NULL) {
-		p->pListLast->pListNext = p;
-	}
-	if (!ht->pListHead) {
-		ht->pListHead = p;
-	}
-	HANDLE_UNBLOCK_INTERRUPTIONS();
-
-	ht->nNumOfElements++;
-    if (h >= ht->nNextFreeElement) {
-	    ht->nNextFreeElement = h + 1;
-    }
-	if_full_do_resize(ht);		/* If the Hash table is full, resize it */
-	return SUCCESS;
-}
-
-
-ZEND_API int zend_hash_is_pointer(HashTable *ht, char *arKey, uint nKeyLength)
-{
-	ulong h;
-	uint nIndex;
-	Bucket *p;
-
-	IS_CONSISTENT(ht);
-
-	if (nKeyLength <= 0) {
-#if ZEND_DEBUG
-		ZEND_PUTS("zend_hash_update: Can't check for empty key\n");
-#endif
-		return FAILURE;
-	}
-
-	HANDLE_NUMERIC(arKey,nKeyLength,zend_hash_index_is_pointer(ht, idx));
-		
-	h = ht->pHashFunction(arKey, nKeyLength);
-	nIndex = h % ht->nTableSize;
-
-	p = ht->arBuckets[nIndex];
-	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
-				return (p->bIsPointer);
-			}
-		}
-		p = p->pNext;
-	}
-	return 0;
-}
-
-ZEND_API int zend_hash_index_is_pointer(HashTable *ht, ulong h)
-{
-	uint nIndex;
-	Bucket *p;
-
-	IS_CONSISTENT(ht);
-
-	nIndex = h % ht->nTableSize;
-
-	p = ht->arBuckets[nIndex];
-	while (p != NULL) {
-		if ((p->nKeyLength == 0) && (p->h == h)) {
-			return (p->bIsPointer);
-		}
-		p = p->pNext;
-	}
-	return 0;
+	zend_error(E_ERROR, "zend_hash_pointer_*() functions are no longer supported");
+	return FAILURE;
 }
 
 
@@ -714,7 +517,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag)
 {
 	uint nIndex;
-	Bucket *p;		/* initialize just to shut gcc up with -Wall */
+	Bucket *p;
 
 	IS_CONSISTENT(ht);
 
@@ -743,13 +546,11 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 			} else {
 				ht->pListTail = p->pListLast;
 			}
-			if (!p->bIsPointer) {
-				if (ht->pDestructor) {
-					ht->pDestructor(p->pData);
-				}
-				if (!p->pDataPtr) {
-					pefree(p->pData,ht->persistent);
-				}
+			if (ht->pDestructor) {
+				ht->pDestructor(p->pData);
+			}
+			if (!p->pDataPtr) {
+				pefree(p->pData,ht->persistent);
 			}
 			if (ht->pInternalPointer == p) {
 				ht->pInternalPointer = p->pListNext;
@@ -777,13 +578,11 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 	while (p != NULL) {
 		q = p;
 		p = p->pListNext;
-		if (!q->bIsPointer) {
-			if (ht->pDestructor) {
-				ht->pDestructor(q->pData);
-			}
-			if (!q->pDataPtr && q->pData) {
-				pefree(q->pData,ht->persistent);
-			}
+		if (ht->pDestructor) {
+			ht->pDestructor(q->pData);
+		}
+		if (!q->pDataPtr && q->pData) {
+			pefree(q->pData,ht->persistent);
 		}
 		pefree(q,ht->persistent);
 	}
@@ -805,13 +604,11 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 	while (p != NULL) {
 		q = p;
 		p = p->pListNext;
-		if (!q->bIsPointer) {
-			if (ht->pDestructor) {
-				ht->pDestructor(q->pData);
-			}
-			if (!q->pDataPtr && q->pData) {
-				pefree(q->pData,ht->persistent);
-			}
+		if (ht->pDestructor) {
+			ht->pDestructor(q->pData);
+		}
+		if (!q->pDataPtr && q->pData) {
+			pefree(q->pData,ht->persistent);
 		}
 		pefree(q,ht->persistent);
 	}
@@ -840,13 +637,11 @@ static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 
 	nIndex = p->h % ht->nTableSize;
 
-	if (!p->bIsPointer) {
-		if (ht->pDestructor) {
-			ht->pDestructor(p->pData);
-		}
-		if (!p->pDataPtr) {
-			pefree(p->pData, ht->persistent);
-		}
+	if (ht->pDestructor) {
+		ht->pDestructor(p->pData);
+	}
+	if (!p->pDataPtr) {
+		pefree(p->pData, ht->persistent);
 	}
 	retval = p->pListNext;
 

@@ -177,7 +177,7 @@ ZEND_API void _zval_dtor_wrapper(zval *zvalue)
 
 ZEND_API void _zval_ptr_dtor_wrapper(zval **zval_ptr)
 {
-	return zval_ptr_dtor(zval_ptr);
+	zval_ptr_dtor(zval_ptr);
 }
 #endif
 
