@@ -5,10 +5,10 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 1997-2003 The PHP Group                                |
 // +----------------------------------------------------------------------+
-// | This source file is subject to version 2.02 of the PHP license,      |
+// | This source file is subject to version 3.0 of the PHP license,       |
 // | that is bundled with this package in the file LICENSE, and is        |
-// | available at through the world-wide-web at                           |
-// | http://www.php.net/license/2_02.txt.                                 |
+// | available through the world-wide-web at the following url:           |
+// | http://www.php.net/license/3_0.txt.                                  |
 // | If you did not receive a copy of the PHP license and are unable to   |
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
@@ -935,7 +935,11 @@ class PEAR_Common extends PEAR
         if (isset($pkginfo['provides'])) {
             foreach ($pkginfo['provides'] as $key => $what) {
                 $ret .= "$indent    <provides type=\"$what[type]\" ";
-                $ret .= "name=\"$what[name]\" />\n";
+                $ret .= "name=\"$what[name]\" ";
+                if (isset($what['extends'])) {
+                    $ret .= "extends=\"$what[extends]\" ";
+                }
+                $ret .= "/>\n";
             }
         }
         if (isset($pkginfo['filelist'])) {
@@ -1175,6 +1179,10 @@ class PEAR_Common extends PEAR
             }
             $this->pkginfo['provides'][$key] =
                 array('type' => 'class', 'name' => $class);
+            if (isset($srcinfo['inheritance'][$class])) {
+                $this->pkginfo['provides'][$key]['extends'] =
+                    $srcinfo['inheritance'][$class];
+            }
         }
         foreach ($srcinfo['declared_methods'] as $class => $methods) {
             foreach ($methods as $method) {
@@ -1243,6 +1251,7 @@ class PEAR_Common extends PEAR
         $declared_methods = array();
         $used_classes = array();
         $used_functions = array();
+        $extends = array();
         $nodeps = array();
         for ($i = 0; $i < sizeof($tokens); $i++) {
             if (is_array($tokens[$i])) {
@@ -1273,6 +1282,7 @@ class PEAR_Common extends PEAR
                 case T_CLASS:
                 case T_FUNCTION:
                 case T_NEW:
+                case T_EXTENDS:
                     $look_for = $token;
                     continue 2;
                 case T_STRING:
@@ -1280,6 +1290,8 @@ class PEAR_Common extends PEAR
                         $current_class = $data;
                         $current_class_level = $brace_level;
                         $declared_classes[] = $current_class;
+                    } elseif ($look_for == T_EXTENDS) {
+                        $extends[$current_class] = $data;
                     } elseif ($look_for == T_FUNCTION) {
                         if ($current_class) {
                             $current_function = "$current_class::$data";
@@ -1319,6 +1331,7 @@ class PEAR_Common extends PEAR
             "declared_methods" => $declared_methods,
             "declared_functions" => $declared_functions,
             "used_classes" => array_diff(array_keys($used_classes), $nodeps),
+            "inheritance" => $extends,
             );
     }
 
@@ -1344,6 +1357,7 @@ class PEAR_Common extends PEAR
             $decl_c = @array_merge($decl_c, $tmp['declared_classes']);
             $decl_f = @array_merge($decl_f, $tmp['declared_functions']);
             $decl_m = @array_merge($decl_m, $tmp['declared_methods']);
+            $inheri = @array_merge($inheri, $tmp['inheritance']);
         }
         $used_c = array_unique($used_c);
         $decl_c = array_unique($decl_c);
@@ -1353,6 +1367,7 @@ class PEAR_Common extends PEAR
                      'declared_methods' => $decl_m,
                      'declared_functions' => $decl_f,
                      'undeclared_classes' => $undecl_c,
+                     'inheritance' => $inheri,
                      );
     }
 

@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.27.4.4 2003-04-11 23:48:37 ssb Exp $
+     $Id: package.dtd,v 1.27.4.5 2003-06-17 17:13:17 pajoye Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
@@ -8,10 +8,10 @@
 
      Copyright (c) 1997-2002 The PHP Group             
 
-     This source file is subject to version 2.02 of the PHP license,
+     This source file is subject to version 3.0 of the PHP license, 
      that is bundled with this package in the file LICENSE, and is
      available at through the world-wide-web at
-     http://www.php.net/license/2_02.txt.
+     http://www.php.net/license/3_0.txt. 
      If you did not receive a copy of the PHP license and are unable to
      obtain it through the world-wide-web, please send a note to
      license@php.net so we can mail you a copy immediately.
@@ -83,14 +83,16 @@
 
 <!ELEMENT dep (#PCDATA)>
 <!ATTLIST dep
-	type    (pkg|ext|php|prog|ldlib|rtlib|os|websrv|sapi|zend) #REQUIRED
-	rel     (has|eq|lt|le|gt|ge) 'has'
-	version CDATA                #IMPLIED>
+	optional    (yes|no)    'no'
+	type        (pkg|ext|php|prog|ldlib|rtlib|os|websrv|sapi|zend) #REQUIRED
+	rel         (has|eq|lt|le|gt|ge) 'has'
+	version     CDATA                #IMPLIED>
 
 <!ELEMENT provides (#PCDATA)>
 <!ATTLIST provides
 	type    (ext|prog|class|function|feature|api)  #REQUIRED
-        name    CDATA                                  #REQUIRED>
+	name    CDATA                                  #REQUIRED
+	extends CDATA                                  #IMPLIED>
 
 <!ELEMENT script (#PCDATA)>
 <!ATTLIST script

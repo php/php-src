@@ -5,10 +5,10 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 1997-2003 The PHP Group                                |
 // +----------------------------------------------------------------------+
-// | This source file is subject to version 2.02 of the PHP license,      |
+// | This source file is subject to version 3.0 of the PHP license,       |
 // | that is bundled with this package in the file LICENSE, and is        |
-// | available at through the world-wide-web at                           |
-// | http://www.php.net/license/2_02.txt.                                 |
+// | available through the world-wide-web at the following url:           |
+// | http://www.php.net/license/3_0.txt.                                  |
 // | If you did not receive a copy of the PHP license and are unable to   |
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
@@ -196,7 +196,25 @@ more stable.
 Uninstalls one or more PEAR packages.  More than one package may be
 specified at once.
 '),
-
+        'bundle' => array(
+            'summary' => 'Unpacks a Pecl Package',
+            'function' => 'doBundle',
+            'shortcut' => 'bun',
+            'options' => array(
+                'destination' => array(
+                   'shortopt' => 'd',
+                    'arg' => 'DIR',
+                    'doc' => 'Optional destination directory for unpacking (defaults to current path or "ext" if exists)',
+                    ),
+                'force' => array(
+                    'shortopt' => 'f',
+                    'doc' => 'Force the unpacking even if there were errors in the package',
+                ),
+            ),
+            'doc' => '<package>
+Unpacks a Pecl Package into the selected location. It will download the
+package if needed.
+'),
     );
 
     // }}}
@@ -297,6 +315,101 @@ specified at once.
     }
 
     // }}}
-}
 
+
+    // }}}
+    // {{{ doBundle()
+    /*
+    (cox) It just downloads and untars the package, does not do
+            any check that the PEAR_Installer::_installFile() does.
+    */
+
+    function doBundle($command, $options, $params)
+    {
+        if (empty($this->installer)) {
+            $this->installer = &new PEAR_Installer($this->ui);
+        }
+        $installer = &$this->installer;
+        if (sizeof($params) < 1) {
+            return $this->raiseError("Please supply the package you want to bundle");
+        }
+        $pkgfile = $params[0];
+
+        if (preg_match('#^(http|ftp)://#', $pkgfile)) {
+            $need_download = true;
+        } elseif (!@is_file($pkgfile)) {
+            if ($installer->validPackageName($pkgfile)) {
+                $pkgfile = $installer->getPackageDownloadUrl($pkgfile);
+                $need_download = true;
+            } else {
+                if (strlen($pkgfile)) {
+                    return $this->raiseError("Could not open the package file: $pkgfile");
+                } else {
+                    return $this->raiseError("No package file given");
+                }
+            }
+        }
+
+        // Download package -----------------------------------------------
+        if ($need_download) {
+            $downloaddir = $installer->config->get('download_dir');
+            if (empty($downloaddir)) {
+                if (PEAR::isError($downloaddir = System::mktemp('-d'))) {
+                    return $downloaddir;
+                }
+                $installer->log(2, '+ tmp dir created at ' . $downloaddir);
+            }
+            $callback = $this->ui ? array(&$installer, '_downloadCallback') : null;
+            $file = $installer->downloadHttp($pkgfile, $this->ui, $downloaddir, $callback);
+            if (PEAR::isError($file)) {
+                return $this->raiseError($file);
+            }
+            $pkgfile = $file;
+        }
+
+       // Parse xml file -----------------------------------------------
+        $pkginfo = $installer->infoFromTgzFile($pkgfile);
+        if (PEAR::isError($pkginfo)) {
+            return $this->raiseError($pkginfo);
+        }
+        $installer->validatePackageInfo($pkginfo, $errors, $warnings);
+        // XXX We allow warnings, do we have to do it?
+        if (count($errors)) {
+             if (empty($options['force'])) {
+                return $this->raiseError("The following errors where found:\n".
+                                                 implode("\n", $errors));
+            } else {
+                $this->log(0, "warning : the following errors were found:\n".
+                           implode("\n", $errors));
+            }
+        }
+        $pkgname = $pkginfo['package'];
+
+        // Unpacking -------------------------------------------------
+
+        if (isset($options['destination'])) {
+            if (!is_dir($options['destination'])) {
+                System::mkdir('-p ' . $options['destination']);
+            }
+            $dest = realpath($options['destination']);
+        } else {
+            $pwd = getcwd();
+            if (is_dir($pwd . DIRECTORY_SEPARATOR . 'ext')) {
+                $dest = $pwd . DIRECTORY_SEPARATOR . 'ext';
+            } else {
+                $dest = $pwd;
+            }
+        }
+        $dest .= DIRECTORY_SEPARATOR . $pkgname;
+        $orig = $pkgname . '-' . $pkginfo['version'];
+
+        $tar = new Archive_Tar($pkgfile);
+        if (!@$tar->extractModify($dest, $orig)) {
+            return $this->raiseError("unable to unpack $pkgfile");
+        }
+        $this->ui->outputData("Package ready at '$dest'");
+    // }}}
+    }
+
+}
 ?>
