@@ -66,8 +66,6 @@
 #define IS_SOCKET		1
 #define BAD_URL			2
 
-extern int le_socket; /* a list for open sockets */
-
 extern PHPAPI FILE *php3_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd);
 
 PHPAPI FILE *php3_fopen_for_parser(void);

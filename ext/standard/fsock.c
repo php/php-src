@@ -284,7 +284,8 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 				(void *) &sockp) == SUCCESS) {
 		FREE_SOCK;
 		*sock = *sockp;
-		RETURN_LONG(php3_list_insert(sock, le_socket));
+		ZEND_REGISTER_RESOURCE(return_value,sock,php_file_le_socket());
+		return;
 	}
 	
 	if (portno) {
@@ -361,8 +362,8 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 				key, strlen(key) + 1, NULL);
 	}
 	if(key) efree(key);
-	id = php3_list_insert(sock,le_socket);
-	RETURN_LONG(id);
+
+	ZEND_REGISTER_RESOURCE(return_value,sock,php_file_le_socket());
 }
 /* }}} */
 
