@@ -449,6 +449,8 @@ PHP_MINIT_FUNCTION(sockets)
 
 #ifndef WIN32
 # include "unix_socket_constants.h"
+#else
+# include "win32_socket_constants.h"
 #endif
 
 	if ((pe = getprotobyname("tcp"))) {
