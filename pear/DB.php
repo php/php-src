@@ -73,11 +73,11 @@ define('DB_WARNING_READ_ONLY', -1001);
  *
  * The prepare/execute model in DB is mostly borrowed from the ODBC
  * extension, in a query the "?" character means a scalar parameter.
- * There is one extension though, a "&" character means an opaque
+ * There are two extensions though, a "&" character means an opaque
  * parameter.  An opaque parameter is simply a file name, the real
- * data are in that file (useful for stuff like putting uploaded files
- * into your database). The "!" char means a parameter that must be left
- * as it is.
+ * data are in that file (useful for putting uploaded files into your
+ * database and such). The "!" char means a parameter that must be
+ * left as it is.
  * They modify the quote behavoir:
  * DB_PARAM_SCALAR (?) => 'original string quoted'
  * DB_PARAM_OPAQUE (&) => 'string from file quoted'
@@ -170,6 +170,7 @@ define('DB_TABLEINFO_FULL', 3);
  *              connections, the object returned is an instance of this
  *              class.
  *
+ * @package  DB
  * @version  2
  * @author   Stig Bakken <ssb@fast.no>
  * @since    PHP 4.0
@@ -178,7 +179,8 @@ define('DB_TABLEINFO_FULL', 3);
 class DB
 {
     /**
-     * Create a new DB object for the specified database type
+     * Create a new DB connection object for the specified database
+     * type
      *
      * @param $type string database type, for example "mysql"
      *
@@ -203,23 +205,25 @@ class DB
     }
 
     /**
-     * Create a new DB object and connect to the specified database
+     * Create a new DB connection object and connect to the specified
+     * database
      *
      * @param $dsn mixed "data source name", see the DB::parseDSN
      * method for a description of the dsn format.  Can also be
      * specified as an array of the format returned by DB::parseDSN.
      *
-     * @param $options mixed if boolean (or scalar), tells whether
-     * this connection should be persistent (for backends that support
-     * this).  This parameter can also be an array of options, see
-     * DB_common::setOption for more information on connection
-     * options.
+     * @param $options mixed An associative array of option names and
+     * their values.  For backwards compatibility, this parameter may
+     * also be a boolean that tells whether the connection should be
+     * persistent.  See DB_common::setOption for more information on
+     * connection options.
      *
      * @return object a newly created DB connection object, or a DB
      * error object on error
      *
      * @see DB::parseDSN
      * @see DB::isError
+     * @see DB_common::setOption
      */
     function &connect($dsn, $options = false)
     {
@@ -322,9 +326,9 @@ class DB
      */
     function isWarning($value)
     {
-        return is_object($value) &&
-            (get_class( $value ) == "db_warning" ||
-             is_subclass_of($value, "db_warning"));
+        return (is_object($value) &&
+                (get_class($value) == "db_warning" ||
+                 is_subclass_of($value, "db_warning")));
     }
 
     /**
@@ -337,36 +341,34 @@ class DB
      */
     function errorMessage($value)
     {
-        if (!isset($errorMessages)) {
-            $errorMessages = array(
-                DB_ERROR                    => 'unknown error',
-                DB_ERROR_ALREADY_EXISTS     => 'already exists',
-                DB_ERROR_CANNOT_CREATE      => 'can not create',
-                DB_ERROR_CANNOT_DELETE      => 'can not delete',
-                DB_ERROR_CANNOT_DROP        => 'can not drop',
-                DB_ERROR_CONSTRAINT         => 'constraint violation',
-                DB_ERROR_DIVZERO            => 'division by zero',
-                DB_ERROR_INVALID            => 'invalid',
-                DB_ERROR_INVALID_DATE       => 'invalid date or time',
-                DB_ERROR_INVALID_NUMBER     => 'invalid number',
-                DB_ERROR_MISMATCH           => 'mismatch',
-                DB_ERROR_NODBSELECTED       => 'no database selected',
-                DB_ERROR_NOSUCHFIELD        => 'no such field',
-                DB_ERROR_NOSUCHTABLE        => 'no such table',
-                DB_ERROR_NOT_CAPABLE        => 'DB backend not capable',
-                DB_ERROR_NOT_FOUND          => 'not found',
-                DB_ERROR_NOT_LOCKED         => 'not locked',
-                DB_ERROR_SYNTAX             => 'syntax error',
-                DB_ERROR_UNSUPPORTED        => 'not supported',
-                DB_ERROR_VALUE_COUNT_ON_ROW => 'value count on row',
-                DB_ERROR_INVALID_DSN        => 'invalid DSN',
-                DB_ERROR_CONNECT_FAILED     => 'connect failed',
-                DB_OK                       => 'no error',
-                DB_WARNING                  => 'unknown warning',
-                DB_WARNING_READ_ONLY        => 'read only',
-                DB_ERROR_NEED_MORE_DATA     => 'insufficient data supplied'
-            );
-        }
+        static $errorMessages = array(
+            DB_ERROR                    => 'unknown error',
+            DB_ERROR_ALREADY_EXISTS     => 'already exists',
+            DB_ERROR_CANNOT_CREATE      => 'can not create',
+            DB_ERROR_CANNOT_DELETE      => 'can not delete',
+            DB_ERROR_CANNOT_DROP        => 'can not drop',
+            DB_ERROR_CONSTRAINT         => 'constraint violation',
+            DB_ERROR_DIVZERO            => 'division by zero',
+            DB_ERROR_INVALID            => 'invalid',
+            DB_ERROR_INVALID_DATE       => 'invalid date or time',
+            DB_ERROR_INVALID_NUMBER     => 'invalid number',
+            DB_ERROR_MISMATCH           => 'mismatch',
+            DB_ERROR_NODBSELECTED       => 'no database selected',
+            DB_ERROR_NOSUCHFIELD        => 'no such field',
+            DB_ERROR_NOSUCHTABLE        => 'no such table',
+            DB_ERROR_NOT_CAPABLE        => 'DB backend not capable',
+            DB_ERROR_NOT_FOUND          => 'not found',
+            DB_ERROR_NOT_LOCKED         => 'not locked',
+            DB_ERROR_SYNTAX             => 'syntax error',
+            DB_ERROR_UNSUPPORTED        => 'not supported',
+            DB_ERROR_VALUE_COUNT_ON_ROW => 'value count on row',
+            DB_ERROR_INVALID_DSN        => 'invalid DSN',
+            DB_ERROR_CONNECT_FAILED     => 'connect failed',
+            DB_OK                       => 'no error',
+            DB_WARNING                  => 'unknown warning',
+            DB_WARNING_READ_ONLY        => 'read only',
+            DB_ERROR_NEED_MORE_DATA     => 'insufficient data supplied'
+        );
 
         if (DB::isError($value)) {
             $value = $value->getCode();
@@ -515,6 +517,7 @@ class DB
  * DB_Error implements a class for reporting portable database error
  * messages.
  *
+ * @package  DB
  * @author Stig Bakken <ssb@fast.no>
  */
 class DB_Error extends PEAR_Error
@@ -547,6 +550,7 @@ class DB_Error extends PEAR_Error
  * DB_Warning implements a class for reporting portable database
  * warning messages.
  *
+ * @package  DB
  * @author Stig Bakken <ssb@fast.no>
  */
 class DB_Warning extends PEAR_Error
@@ -580,6 +584,7 @@ class DB_Warning extends PEAR_Error
  * A new instance of this class will be returned by the DB implementation
  * after processing a query that returns data.
  *
+ * @package  DB
  * @author Stig Bakken <ssb@fast.no>
  */
 
