@@ -32,6 +32,7 @@ documentation
 ext/wddx
 --------
     * should support IS_BOOL and IS_UNSET (NULL) natively
+	* implement to_javascript(). (Andrei)
 
 ext/apache
 --------
