@@ -64,7 +64,6 @@ static int browser_reg_compare(pval *browser)
 PHP_FUNCTION(get_browser)
 {
 	pval **agent_name,**agent,tmp;
-	ELS_FETCH();
 
 	if (!INI_STR("browscap")) {
 		RETURN_FALSE;

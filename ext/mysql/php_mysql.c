@@ -369,7 +369,6 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	MYSQL *mysql;
 	MySLS_FETCH();
 	PLS_FETCH();
-	ELS_FETCH();
 
 	if (PG(sql_safe_mode)) {
 		if (ARG_COUNT(ht)>0) {

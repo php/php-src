@@ -392,7 +392,6 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	char *hashed_details;
 	int hashed_details_length;
 	sybase_link *sybase_ptr;
-	ELS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 0: /* defaults */
