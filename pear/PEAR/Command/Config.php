@@ -29,6 +29,8 @@ require_once "PEAR/Config.php";
  */
 class PEAR_Command_Config extends PEAR_Command_Common
 {
+    // {{{ properties
+
     var $commands = array(
         'config-show' => array(
             'summary' => 'Show All Settings',
@@ -81,6 +83,9 @@ displays help for all configuration parameters.
            ),
         );
 
+    // }}}
+    // {{{ constructor
+
     /**
      * PEAR_Command_Config constructor.
      *
@@ -90,6 +95,10 @@ displays help for all configuration parameters.
     {
         parent::PEAR_Command_Common($ui, $config);
     }
+
+    // }}}
+
+    // {{{ doConfigShow()
 
     function doConfigShow($command, $options, $params)
     {
@@ -117,6 +126,9 @@ displays help for all configuration parameters.
         return true;
     }
 
+    // }}}
+    // {{{ doConfigGet()
+
     function doConfigGet($command, $options, $params)
     {
         // $params[0] -> the parameter
@@ -134,6 +146,9 @@ displays help for all configuration parameters.
         }
         return true;
     }
+
+    // }}}
+    // {{{ doConfigSet()
 
     function doConfigSet($command, $options, $params)
     {
@@ -161,6 +176,9 @@ displays help for all configuration parameters.
         return true;
     }
 
+    // }}}
+    // {{{ doConfigHelp()
+
     function doConfigHelp($command, $options, $params)
     {
         if (empty($params)) {
@@ -181,6 +199,9 @@ displays help for all configuration parameters.
         $this->ui->outputData($data, $command);
     }
 
+    // }}}
+    // {{{ _checkLayer()
+
     /**
      * Checks if a layer is defined or not
      *
@@ -198,6 +219,7 @@ displays help for all configuration parameters.
         return false;
     }
 
+    // }}}
 }
 
 ?>

@@ -28,6 +28,8 @@ require_once "PEAR/Config.php";
  */
 class PEAR_Command_Auth extends PEAR_Command_Common
 {
+    // {{{ properties
+
     var $commands = array(
         'login' => array(
             'summary' => 'Connects and authenticates to remote server',
@@ -55,6 +57,10 @@ password from your user configuration.',
 
         );
 
+    // }}}
+
+    // {{{ constructor
+
     /**
      * PEAR_Command_Auth constructor.
      *
@@ -64,6 +70,10 @@ password from your user configuration.',
     {
         parent::PEAR_Command_Common($ui, $config);
     }
+
+    // }}}
+
+    // {{{ doLogin()
 
     /**
      * Execute the 'login' command.
@@ -113,6 +123,9 @@ password from your user configuration.',
 
     }
 
+    // }}}
+    // {{{ doLogout()
+
     /**
      * Execute the 'logout' command.
      *
@@ -136,6 +149,7 @@ password from your user configuration.',
         $this->config->store();
     }
 
+    // }}}
 }
 
 ?>

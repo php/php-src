@@ -105,7 +105,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
 
     // }}}
 
-    // {{{ remote-info
+    // {{{ doRemoteInfo()
 
     function doRemoteInfo($command, $options, $params)
     {
@@ -128,7 +128,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     }
 
     // }}}
-    // {{{ list-remote
+    // {{{ doRemoteList()
 
     function doRemoteList($command, $options, $params)
     {
@@ -157,7 +157,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     }
 
     // }}}
-    // {{{ list-all
+    // {{{ doListAll()
 
     function doListAll($command, $options, $params)
     {
@@ -211,7 +211,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     }
 
     // }}}
-    // {{{ search
+    // {{{ doSearch()
 
     function doSearch($command, $options, $params)
     {
@@ -262,7 +262,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     }
 
     // }}}
-    // {{{ download
+    // {{{ doDownload()
 
     function doDownload($command, $options, $params)
     {
@@ -295,7 +295,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     }
 
     // }}}
-    // {{{ list-upgrades
+    // {{{ doListUpgrades()
 
     function doListUpgrades($command, $options, $params)
     {
