@@ -1,3 +1,58 @@
+2000-05-27  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/gd/config.m4:
+    added comments to the System/Distribution specific default
+    path tests for gd.h
+
+    ? can someone imagine a clever way to have that done for
+      _all_ packages in a simple and general way ?
+
+    * ext/gd/config.m4:
+    should make SuSE 6.x users happy (and anybody else with gh.d in
+      /usr/include/gd ... )
+
+2000-05-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Solve conflict with mysql's readdir_r check. Both defined HAVE_READDIR_R,
+    but with different values.
+
+2000-05-27  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/Makefile.in
+      ext/standard/basic_functions.c
+      ext/standard/crypt.c
+      ext/standard/datetime.c
+      ext/standard/dl.h
+      ext/standard/dns.c
+      ext/standard/microtime.c
+      ext/standard/php_noavail.c
+      ext/standard/php_noavail.h
+      php.h: a second (cleaner?) try on warnings about unsupported functions
+
+2000-05-27  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/crypt.c
+      ext/standard/datetime.c
+      ext/standard/dns.c
+      ext/standard/file.c
+      ext/standard/microtime.c
+      php.h:
+    - I'm not sure if PHP_NOT_IN_THIS_BUILD is the way to handle these
+    - functions but in any case I have changed it to PHP_NOT_IN_THIS_BUILD()
+
+    * NEWS
+      ext/session/mod_files.c
+      fopen-wrappers.c
+      sapi/cgi/cgi_main.c:
+    - Fix problem in sessions module under Win32. Need to use ; as an options
+    - delimiter in save_path instead of :.
+
+2000-05-27  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c: Add Sam Ruby
+
 2000-05-26  Rasmus Lerdorf  <rasmus@php.net>
 
     * sapi/apache/mod_php4.c:    Changed the Apache handler's return status to 'Declined' when a requested
