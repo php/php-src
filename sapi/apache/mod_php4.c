@@ -21,6 +21,7 @@
 
 #include "zend.h"
 #include "php.h"
+#include "php_variables.h"
 
 #include "httpd.h"
 #include "http_config.h"
@@ -137,7 +138,9 @@ static int sapi_apache_ub_write(const char *str, uint str_length)
 	}
 	if(ret != str_length) {
 		PG(connection_status) = PHP_CONNECTION_ABORTED;
-		if(!PG(ignore_user_abort)) zend_bailout();
+		if (!PG(ignore_user_abort)) {
+			zend_bailout();
+		}
 	}
 	return ret;
 }
@@ -224,11 +227,9 @@ int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 
 static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
 {
-	pval **tmp_ptr;
 	register int i;
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
 	table_entry *elts = (table_entry *) arr->elts;
-	int len;
 	char *script_filename=NULL;
 	ELS_FETCH();
 	PLS_FETCH();
@@ -251,9 +252,9 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	if (script_filename) {
 		php_register_variable(script_filename, "PATH_TRANSLATED", NULL ELS_CC PLS_CC);
 	}
-	php_register_variable(SG(server_context)->uri, "PHP_SELF", NULL ELS_CC PLS_CC);
+	php_register_variable(((request_rec *) SG(server_context))->uri, "PHP_SELF", NULL ELS_CC PLS_CC);
 }
-*
+
 
 static sapi_module_struct sapi_module = {
 	"Apache",						/* name */
