@@ -34,7 +34,7 @@
 #include "safe_mode.h"
 #include "fopen_wrappers.h"
 #include <string.h>
-#ifndef PHP_WIN32
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 #include <errno.h>
