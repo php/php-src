@@ -1463,7 +1463,12 @@ PHP_FUNCTION(mkdir)
 	convert_to_long_ex(arg2);
 
 	mode = (mode_t) Z_LVAL_PP(arg2);
+
 	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg1), NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(Z_STRVAL_PP(arg1) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -1488,7 +1493,12 @@ PHP_FUNCTION(rmdir)
 	}
 
 	convert_to_string_ex(arg1);
+
 	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg1), NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(Z_STRVAL_PP(arg1) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -1695,6 +1705,11 @@ PHP_FUNCTION(rename)
 	if (PG(safe_mode) &&(!php_checkuid(old_name, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
+
+	if (php_check_open_basedir(old_name TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	ret = VCWD_RENAME(old_name, new_name);
 
 	if (ret == -1) {
@@ -1719,6 +1734,10 @@ PHP_FUNCTION(unlink)
 	convert_to_string_ex(filename);
 
 	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
