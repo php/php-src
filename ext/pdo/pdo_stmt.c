@@ -530,6 +530,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
 	enum pdo_fetch_type really_how = how;
+	zend_class_entry * ce;
 
 	if (really_how == PDO_FETCH_USE_DEFAULT) {
 		really_how = how = stmt->default_fetch_type;
@@ -571,15 +572,20 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				break;
 
 			case PDO_FETCH_CLASS:
-				object_init_ex(return_value, stmt->fetch.cls.ce);
+				ce = stmt->fetch.cls.ce;
+				if (!ce) {
+					ce = zend_standard_class_def;
+				}
+				
+				object_init_ex(return_value, ce);
 
-				if (stmt->fetch.cls.ce->constructor) {
+				if (ce->constructor) {
 					zend_fcall_info fci;
 					zend_fcall_info_cache fcc;
 					zval *retval_ptr; 
 
 					fci.size = sizeof(fci);
-					fci.function_table = &stmt->fetch.cls.ce->function_table;
+					fci.function_table = &ce->function_table;
 					fci.function_name = NULL;
 					fci.symbol_table = NULL;
 					fci.object_pp = &return_value;
@@ -602,12 +608,12 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					fci.no_separation = 1;
 			
 					fcc.initialized = 1;
-					fcc.function_handler = stmt->fetch.cls.ce->constructor;
+					fcc.function_handler = ce->constructor;
 					fcc.calling_scope = EG(scope);
 					fcc.object_pp = &return_value;
 			
 					if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-						zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not execute %s::%s()", stmt->fetch.cls.ce->name, stmt->fetch.cls.ce->constructor->common.function_name);
+						zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
 					} else {
 						if (retval_ptr) {
 							zval_ptr_dtor(&retval_ptr);
@@ -617,7 +623,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 						efree(fci.params);
 					}
 				} else if (stmt->fetch.cls.ctor_args) {
-					zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", stmt->fetch.cls.ce->name);
+					zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", ce->name);
 				}
 				break;
 			
