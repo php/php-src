@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Renamed SoapClient->__call() to SoapClinet->__soapCall(). (Dmitry)
 - Fixed bug with raw_post_data not getting set (Brian)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
+- Fixed bug #30182 (SOAP module processing WSDL file dumps core). (Dmitry)
 - Fixed bug #30045 (Cannot pass big integers (> 2147483647) in SOAP requests).
   (Dmitry)
 - Fixed bug #29985 (unserialize()/ __PHP_Incomplete_class does not report 
