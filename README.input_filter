@@ -89,7 +89,7 @@ PHP_MINFO_FUNCTION(my_input_filter)
     php_info_print_table_end();
 }
 
-unsigned int  my_sapi_input_filter(int arg, char *var, char **val, unsigned int val_len)
+unsigned int  my_sapi_input_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len)
 {
     zval new_var;
     zval *array_ptr = NULL;
@@ -137,7 +137,8 @@ unsigned int  my_sapi_input_filter(int arg, char *var, char **val, unsigned int 
 
     php_strip_tags(*val, val_len, NULL, NULL, 0);
 
-    return strlen(*val);
+    *new_val_len = strlen(*val);
+	return 1;
 }
 
 PHP_FUNCTION(my_get_raw)

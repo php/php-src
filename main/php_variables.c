@@ -207,14 +207,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 	while (var) {
 		val = strchr(var, '=');
 		if (val) { /* have a value */
-			int val_len;
+			unsigned int val_len, new_val_len;
 
 			*val++ = '\0';
 			php_url_decode(var, strlen(var));
 			val_len = php_url_decode(val, strlen(val));
-			val_len = sapi_module.input_filter(PARSE_POST, var, &val, val_len TSRMLS_CC);
-			if (val_len) {
-				php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
+			if (sapi_module.input_filter(PARSE_POST, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
 			}
 		}
 		var = php_strtok_r(NULL, "&", &strtok_buf);
@@ -305,13 +304,13 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		val = strchr(var, '=');
 		if (val) { /* have a value */
 			int val_len;
+			unsigned int new_val_len;
 
 			*val++ = '\0';
 			php_url_decode(var, strlen(var));
 			val_len = php_url_decode(val, strlen(val));
-			val_len = sapi_module.input_filter(arg, var, &val, val_len TSRMLS_CC);
-			if (val_len) {
-				php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
+			if (sapi_module.input_filter(PARSE_POST, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
 			}
 		} else {
 			php_url_decode(var, strlen(var));

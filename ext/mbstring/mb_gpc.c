@@ -204,7 +204,8 @@ int _php_mb_encoding_handler_ex(int data_type, zval *arg, char *res, char *separ
 	char *var, *val, *s1, *s2;
 	char *strtok_buf = NULL, **val_list = NULL;
 	zval *array_ptr = (zval *) arg;
-	int n, num, val_len, *len_list = NULL, *elist, elistsz;
+	int n, num, *len_list = NULL, *elist, elistsz;
+	unsigned int val_len, new_val_len;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_string string, resvar, resval;
 	mbfl_encoding_detector *identd = NULL; 
@@ -342,9 +343,10 @@ int _php_mb_encoding_handler_ex(int data_type, zval *arg, char *res, char *separ
 			val_len = len_list[n];
 		}
 		n++;
-		val_len = sapi_module.input_filter(data_type, var, &val, val_len TSRMLS_CC);
-		/* add variable to symbol table */
-		php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
+		if (sapi_module.input_filter(data_type, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+			/* add variable to symbol table */
+			php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+		}
 		if (convd != NULL){
 			mbfl_string_clear(&resvar);
 			mbfl_string_clear(&resval);
