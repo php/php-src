@@ -7,9 +7,6 @@ Zend
       dimensional arrays.
     * Look at replacing c-lib call tolower().
     * Make hash API functions work with HASH_OF() to save time.
-    * Add configure test to determine if dlsym() requires underscore and set
-      DLSYM_NEEDS_UNDERSCORE accordingly. Perl and zsh have it in configure, 
-      for example. (DONE?)
     * Native large number support (probably with GNU GMP)
     * Const'ify APIs. Right now, many functions leave parameters untouched,
       but don't declare those as const. This makes interaction with other
