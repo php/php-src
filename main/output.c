@@ -268,8 +268,10 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		zval_ptr_dtor(&alternate_buffer);
 	}
 
-	if (!just_flush) {
+	if (status & PHP_OUTPUT_HANDLER_END) {
 		efree(to_be_destoryed_handler_name);
+	}
+	if (!just_flush) {
 		efree(to_be_destroyed_buffer);
 	} else {
 		OG(active_ob_buffer).text_length = 0;
@@ -370,10 +372,10 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 	else if (output_handler && output_handler->type == IS_ARRAY) {
 		/* FIXME: Array type is not supported yet.
 		   See call_user_function_ex() for detials. */
-		OG(active_ob_buffer).handler_name = "array is not supported yet";
+		OG(active_ob_buffer).handler_name = estrdup("array is not supported yet");
 	}
 	else {
-		OG(active_ob_buffer).handler_name = "default output handler";
+		OG(active_ob_buffer).handler_name = estrdup("default output handler");
 	}
 	OG(active_ob_buffer).erase = erase;	
 }
