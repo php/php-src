@@ -82,7 +82,6 @@ PHP_FUNCTION(ceil)
 /* }}} */
 /* {{{ proto float floor(float number)
    Returns the next lowest integer value from the number */
-
 PHP_FUNCTION(floor)
 {
 	zval **value;
@@ -96,7 +95,8 @@ PHP_FUNCTION(floor)
 	if (Z_TYPE_PP(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(floor(Z_DVAL_PP(value)));
 	} else if (Z_TYPE_PP(value) == IS_LONG) {
-		RETURN_LONG(Z_LVAL_PP(value));
+		convert_to_double_ex(value);
+		RETURN_DOUBLE(Z_DVAL_PP(value));
 	}
 
 	RETURN_FALSE;
