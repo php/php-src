@@ -48,6 +48,7 @@ function_entry php_mcve_functions[] = {
 	PHP_FE(mcve_setip,			NULL)
 	PHP_FE(mcve_setssl,			NULL)
 	PHP_FE(mcve_settimeout,			NULL)
+	PHP_FE(mcve_setblocking,		NULL)
 	PHP_FE(mcve_verifyconnection,		NULL)
 	PHP_FE(mcve_verifysslcert,		NULL)
 	PHP_FE(mcve_maxconntimeout,		NULL)
@@ -97,6 +98,10 @@ function_entry php_mcve_functions[] = {
 	PHP_FE(mcve_ub,		NULL)
 	PHP_FE(mcve_chkpwd,		NULL)
 	PHP_FE(mcve_bt,		NULL)
+	PHP_FE(mcve_uwait,		NULL)
+	PHP_FE(mcve_text_code,		NULL)
+	PHP_FE(mcve_text_avs,		NULL)
+	PHP_FE(mcve_text_cv,		NULL)
 /* Administrator Functions */
 	PHP_FE(mcve_chngpwd,		NULL)
 	PHP_FE(mcve_listusers,		NULL)
@@ -2074,6 +2079,91 @@ PHP_FUNCTION(mcve_edituser)
 	retval = MCVE_EditUser(conn, Z_STRVAL_PP(arg2), usersetup);
 
 	RETURN_LONG(retval);
+}
+/* }}} */
+
+
+/* {{{ proto int mcve_uwait(long microsecs)
+   Wait x microsecs */
+PHP_FUNCTION(mcve_uwait)
+{
+	long retval;
+	zval **arg;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(arg);
+
+	retval = MCVE_uwait(Z_LVAL_PP(arg));
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto string mcve_text_code(string code)
+   Get a textual representation of the return_code */
+PHP_FUNCTION(mcve_text_code)
+{
+	char *retval;
+	zval **arg;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(arg);
+
+	retval = MCVE_TEXT_AVS(Z_LVAL_PP(arg));
+
+	if (retval == NULL) {
+	  RETVAL_STRING("",1);
+	} else {
+	  RETVAL_STRING(retval, 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto string mcve_text_avs(string code)
+   Get a textual representation of the return_avs */
+PHP_FUNCTION(mcve_text_avs)
+{
+	char *retval;
+	zval **arg;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(arg);
+
+	retval = MCVE_TEXT_AVS(Z_LVAL_PP(arg));
+
+	if (retval == NULL) {
+	  RETVAL_STRING("",1);
+	} else {
+	  RETVAL_STRING(retval, 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto string mcve_text_cv(int code)
+   Get a textual representation of the return_cv */
+PHP_FUNCTION(mcve_text_cv)
+{
+	char *retval;
+	zval **arg;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(arg);
+
+	retval = MCVE_TEXT_CV(Z_LVAL_PP(arg));
+
+	if (retval == NULL) {
+	  RETVAL_STRING("",1);
+	} else {
+	  RETVAL_STRING(retval, 1);
+	}
 }
 /* }}} */
 
