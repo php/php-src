@@ -2826,7 +2826,10 @@ PHP_FUNCTION(domxml_dump_mem)
 
 	DOMXML_PARAM_ONE(docp, id, le_domxmldocp,"|l",&format);
 	if (format)
+	{
+		xmlKeepBlanksDefault(0);
 		xmlDocDumpFormatMemory(docp, &mem, &size, format);
+	}
 	else
 		xmlDocDumpMemory(docp, &mem, &size);
 
@@ -2846,12 +2849,21 @@ PHP_FUNCTION(domxml_dump_mem_file)
 	zval *id;
 	xmlDoc *docp;
 	int file_len, bytes;
+	int format = 0;
 	int compressmode = 0;
 	char *file;
-	DOMXML_PARAM_THREE(docp, id, le_domxmldocp, "s|l", &file, &file_len, &compressmode);
+	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|ll", &file, &file_len, &compressmode,&format);
 
 	xmlSetCompressMode (compressmode);
-	bytes = xmlSaveFile(file,docp);
+
+	if (format)
+	{
+		xmlKeepBlanksDefault(0);
+		bytes = xmlSaveFormatFile(file,docp,format);
+	}
+	else
+		bytes = xmlSaveFile(file,docp);
+
 	if (bytes == -1)
 	{
 		RETURN_FALSE;
