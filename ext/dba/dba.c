@@ -430,16 +430,21 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (pmode[0] && (pmode[1]=='d' || pmode[1]=='l' || pmode[1]=='-')) { /* force lock on db file or lck file or disable locking */
 		switch (pmode[1]) {
 		case 'd':
-			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
-			}
 			lock_dbf = 1;
 			/* no break */
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
+			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
+				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
+			}
 			break;
 		default:
 		case '-':
+			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
+				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Locking cannot be disabled for handler %s", hptr->name);
+				FREENOW;
+				RETURN_FALSE;
+			}
 			lock_flag = 0;
 			break;
 		}
