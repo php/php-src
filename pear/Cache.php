@@ -18,6 +18,8 @@
 //
 // $Id$
 
+require_once "Cache/Error.php";
+
 /**
 * Cache is a base class for cache implementations.
 *
@@ -136,7 +138,7 @@ class Cache {
     * @param    mixed   userdefined expire date
     * @param    string  cache group
     * @return   boolean
-    * @throws   CacheError
+    * @throws   Cache_Error
     * @access   public
     * @see      getUserdata()
     */
