@@ -33,7 +33,7 @@ mkdir include >/dev/null 2>&1
 > Makefile.fragments
 dnl We need to play tricks here to avoid matching the egrep line itself
 pattern=define
-egrep $pattern'.*include/php' $srcdir/configure|sed 's/.*>//'|xargs touch
+egrep $pattern'.*include/php' $srcdir/configure|sed 's/.*>//'|xargs touch 2>/dev/null
 ])
 
 dnl PHP_GEN_GLOBAL_MAKEFILE
@@ -1149,7 +1149,7 @@ AC_DEFUN(PHP_NEW_EXTENSION,[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
 
-  ifelse($5,,,[ac_extra=`echo $ac_n "$5$ac_c"|sed s#@ext_srcdir@#$ext_srcdir#g`])
+  ifelse($5,,ac_extra=,[ac_extra=`echo $ac_n "$5$ac_c"|sed s#@ext_srcdir@#$ext_srcdir#g`])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
