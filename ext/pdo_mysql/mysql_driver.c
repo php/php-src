@@ -30,10 +30,10 @@
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 
-int _pdo_mysql_error(pdo_dbh_t *dbh, const char *file, int line TSRMLS_DC) /* {{{ */
+int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-	enum pdo_error_type *pdo_err = &dbh->error_code;
+	enum pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
 	pdo_mysql_error_info *einfo = &H->einfo;
 
 	einfo->errcode = mysql_errno(H->server);
