@@ -58,10 +58,6 @@ typedef struct _zend_rsrc_list_dtors_entry {
 ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number);
 ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, char *type_name, int module_number);
 
-enum list_entry_type {
-	LE_DB=1000
-};
-
 void list_entry_destructor(void *ptr);
 void plist_entry_destructor(void *ptr);
 
