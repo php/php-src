@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed preg_replace() to automatically escape quotes in matched
+  strings when using /e modifier. (Andrei)
 - Itanium patch (Steve Robb)
 - Set default include_path so PEAR files can be reached (Stig)
 - Added "pear" executable, requires CGI version installed (Stig)
