@@ -1046,10 +1046,10 @@ PHP_FUNCTION(session_name)
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
-	old = estrdup(PS(session_name));
-
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
+	
+	old = estrdup(PS(session_name));
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
@@ -1068,10 +1068,10 @@ PHP_FUNCTION(session_module_name)
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
-	old = safe_estrdup(PS(mod)->name);
-
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
+	
+	old = safe_estrdup(PS(mod)->name);
 
 	if (ac == 1) {
 		ps_module *tempmod;
@@ -1132,10 +1132,10 @@ PHP_FUNCTION(session_save_path)
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
-	old = estrdup(PS(save_path));
-
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
+	
+	old = estrdup(PS(save_path));
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
@@ -1154,11 +1154,11 @@ PHP_FUNCTION(session_id)
 	int ac = ZEND_NUM_ARGS();
 	char *old = empty_string;
 
-	if (PS(id))
-		old = estrdup(PS(id));
-
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
+
+	if (PS(id))
+		old = estrdup(PS(id));
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
@@ -1178,10 +1178,10 @@ PHP_FUNCTION(session_cache_limiter)
 	int ac = ZEND_NUM_ARGS();
 	char *old;
 
-	old = estrdup(PS(cache_limiter));
-
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_cache_limiter) == FAILURE)
 		WRONG_PARAM_COUNT;
+	
+	old = estrdup(PS(cache_limiter));
 
 	if (ac == 1) {
 		convert_to_string_ex(p_cache_limiter);
