@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension simplexml
 
 PHP_ARG_WITH(simplexml, for simplexml support,
-[  --with-simplexml       Include simplexml support])
+[  --with-simplexml       Include simplexml support], yes)
 
 if test "$PHP_SIMPLEXML" != "no"; then
 
