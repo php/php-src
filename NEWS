@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added async query functions to PostgreSQL module (Yasuo)
+- Added pg_copy_to()/pg_copy_from() for PostgreSQL module (Youichi, Yasuo)
 - Added IPv6 support in FTP extension. (Stig Venaas)
 - Added CLI (command line intrerface) sapi based on a cut-down version
   of the CGI sapi which is more suited for writing shell scripts. Some of
