@@ -597,7 +597,7 @@ static void php_message_handler_for_zend(long message, void *data)
 
 
 
-int php_request_startup(CLS_D ELS_DC PLS_DC)
+int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
 	PG(unclean_shutdown) = 0;
 
@@ -628,11 +628,10 @@ int php_request_startup(CLS_D ELS_DC PLS_DC)
 		php3_printf("Unable to initialize request info.\n");
 		return FAILURE;
 	}
-	
+	sapi_activate(SLS_C);	
 	init_compiler(CLS_C ELS_CC);
 	init_executor(CLS_C ELS_CC);
 	startup_scanner(CLS_C);
-
 
 	return SUCCESS;
 }
@@ -661,10 +660,10 @@ void php_request_shutdown(void *dummy)
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
+	SLS_FETCH();
 
 	php3_header();
 	zend_end_ob_buffering(1);
-
 
 	php3_call_shutdown_functions();
 	
@@ -678,6 +677,8 @@ void php_request_shutdown(void *dummy)
 	shutdown_memory_manager(PG(unclean_shutdown), 0);
 	php3_unset_timeout();
 
+
+	sapi_deactivate(SLS_C);
 
 #if CGI_BINARY
 	fflush(stdout);
@@ -1193,7 +1194,7 @@ PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mo
 
 	SG(server_context) = r;
 
-	if (php_request_startup(CLS_C ELS_CC PLS_CC) == FAILURE) {
+	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 	php3_TreatHeaders();

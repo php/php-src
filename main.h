@@ -39,7 +39,7 @@
 #include "php_globals.h"
 #include "SAPI.h"
 
-PHPAPI int php_request_startup(CLS_D ELS_DC PLS_DC);
+PHPAPI int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI void php_request_shutdown_for_exec(void *dummy);
 PHPAPI int php_module_startup(sapi_module_struct *sf);

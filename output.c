@@ -19,8 +19,8 @@
 #include "SAPI.h"
 
 /* output functions */
-int (*zend_body_write)(const char *str, uint str_length);		/* string output */
-int (*zend_header_write)(const char *str, uint str_length);	/* unbuffer string output */
+PHPAPI int (*zend_body_write)(const char *str, uint str_length);		/* string output */
+PHPAPI int (*zend_header_write)(const char *str, uint str_length);	/* unbuffer string output */
 static int zend_ub_body_write(const char *str, uint str_length);
 static int zend_ub_body_write_no_header(const char *str, uint str_length);
 static int zend_b_body_write(const char *str, uint str_length);

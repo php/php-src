@@ -90,7 +90,7 @@ struct _sapi_module_struct {
 
 	int (*header_handler)(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers);
 	int (*send_headers)(sapi_headers_struct *sapi_headers SLS_DC);
-	void (*send_header)(void *server_context, sapi_header_struct *sapi_header);
+	void (*send_header)(sapi_header_struct *sapi_header, void *server_context);
 };
 
 
