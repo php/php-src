@@ -163,14 +163,14 @@ uninstall ok? yes
 
 
 uninstall ok? no
-Package 'pkg1' depends on 'pkg2'
+Package 'pear::pkg1' depends on 'pear::pkg2'
 
 
 uninstall ok? no
-Package 'pkg1' depends on 'pkg2'
+Package 'pear::pkg1' depends on 'pear::pkg2'
 
 
 uninstall ok? yes
 
 
-Warning: Package 'pkg1' optionally depends on 'pkg2'
+Warning: Package 'pear::pkg1' optionally depends on 'pear::pkg2'

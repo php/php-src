@@ -270,7 +270,7 @@ function cleanall($dir)
 --EXPECT--
 -=-=-=-=-=-=-=-=- Failure Tests -=-=-=-=-=-=-=-=-=-=-
 Test invalid package name:
-Caught error: Package name '/invalid+packagename' not valid
+Caught error: Package name '/invalid+packagename' not valid for channel 'pear'
 string(10) "pear_error"
 array(0) {
 }
@@ -305,7 +305,7 @@ array(0) {
 array(0) {
 }
 Test automatic version resolution (stable):
-Caught error: No release with state equal to: 'stable' found for 'pear::stabilitytoolow'
+Caught error: pear::stabilitytoolow is state 'devel' which is less stable than state 'stable', use --force to install
 string(10) "pear_error"
 array(0) {
 }
