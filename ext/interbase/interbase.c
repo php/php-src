@@ -39,7 +39,7 @@
 #endif
 
 #ifndef SQL_DIALECT_CURRENT
-#define SQL_DIALECT_CURRENT SQL_DIALECT_V5
+#define SQL_DIALECT_CURRENT 1 /* == SQL_DIALECT_V5 */
 #endif
 
 #ifdef ZEND_DEBUG_
@@ -53,11 +53,17 @@
 #define SAFE_STRING(s) ((s)?(s):"")
 
 #ifdef PHP_WIN32
-#define LL_MASK "I64"
-#define LL_LIT(lit) lit ## I64
+# ifndef ISC_UINT64
+#  define ISC_UINT64 unsigned __int64
+# endif
+# define LL_MASK "I64"
+# define LL_LIT(lit) lit ## I64
 #else
-#define LL_MASK "ll"
-#define LL_LIT(lit) lit ## ll
+# ifndef ISC_UINT64
+#  define ISC_UINT64 unsigned long long int
+# endif
+# define LL_MASK "ll"
+# define LL_LIT(lit) lit ## ll
 #endif
 
 #define QUERY_RESULT	1
@@ -111,7 +117,6 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_commit, NULL)
 	PHP_FE(ibase_rollback, NULL)
 	PHP_FE(ibase_commit_ret, NULL)
-	PHP_FE(ibase_rollback_ret, NULL)
 
 	PHP_FE(ibase_blob_info, NULL)
 	PHP_FE(ibase_blob_create, NULL)
@@ -129,6 +134,8 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_add_user, NULL)
 	PHP_FE(ibase_modify_user, NULL)
 	PHP_FE(ibase_delete_user, NULL)
+
+	PHP_FE(ibase_rollback_ret, NULL)
 #endif
 	PHP_FE(ibase_wait_event, NULL)
 	PHP_FE(ibase_set_event_handler, NULL)
@@ -253,7 +260,7 @@ typedef struct {
 } ISC_TEB;
 
 typedef struct {
-	ISC_USHORT vary_length;
+	unsigned short vary_length;
 	char vary_string[1];
 } IBVARY;
 
@@ -293,6 +300,7 @@ typedef struct {
 	union {
 		short sval;
 		float fval;
+		ISC_LONG lval;
 		ISC_QUAD qval;
 #ifdef ISC_TIMESTAMP
 		ISC_TIMESTAMP tsval;
@@ -312,7 +320,7 @@ static inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd)
 		ISC_UINT64 res;
 		if (sscanf(id, BLOB_ID_MASK, &res)) {
 			qd->gds_quad_high = (ISC_LONG) (res >> 0x20);
-			qd->gds_quad_low = (ISC_ULONG) (res & 0xFFFFFFFF);
+			qd->gds_quad_low = (unsigned ISC_LONG) (res & 0xFFFFFFFF);
 			return 1;
 		}
 		return 0;
@@ -465,9 +473,6 @@ static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		if (ib_result->stmt && ib_result->type != EXECUTE_RESULT) {
 			IBDEBUG("Dropping statement handle (free_result dtor)...");
 			isc_dsql_free_statement(IB_STATUS, &ib_result->stmt, DSQL_drop);
-		}
-		if (ib_result->out_array) {
-			efree(ib_result->out_array);
 		}
 		efree(ib_result);
 	}
@@ -1356,8 +1361,22 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 					break;
 				case SQL_LONG:
 					convert_to_long(b_var);
+#if (SIZEOF_LONG > 4)
+					/* ISC_LONG is always 32-bit */
+					if (Z_LVAL_P(b_var) > INT_MAX || Z_LVAL_P(b_var) < INT_MIN) {
+						_php_ibase_module_error("Parameter %d exceeds field width" TSRMLS_CC, i+1);
+						rv = FAILURE;
+					}
+#endif
+					buf[i].val.lval = (ISC_LONG) Z_LVAL_P(b_var);
+					var->sqldata = (void *) &buf[i].val.lval;
+					break;
+#if defined(SQL_INT64) && (SIZEOF_LONG == 8)
+				case SQL_INT64:
+					convert_to_long(b_var);
 					var->sqldata = (void *) &Z_LVAL_P(b_var);
 					break;
+#endif
 				case SQL_FLOAT:
 	 				convert_to_double(b_var);
 					buf[i].val.fval = (float) Z_DVAL_P(b_var);
@@ -1602,7 +1621,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 	/* allocate sqlda and output buffers */
 	if (ib_query->out_sqlda) { /* output variables in select, select for update */
 		IBDEBUG("Query wants XSQLDA for output");
-		IB_RESULT = emalloc(sizeof(ibase_result));
+		IB_RESULT = emalloc(sizeof(ibase_result) + sizeof(ibase_array) * (ib_query->out_sqlda->sqld-1));
 		IB_RESULT->link = ib_query->link;
 		IB_RESULT->trans = ib_query->trans;
 		IB_RESULT->stmt = ib_query->stmt; 
@@ -1615,10 +1634,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 		_php_ibase_alloc_xsqlda(out_sqlda);
 
 		if (ib_query->out_array) {
-			IB_RESULT->out_array = safe_emalloc(sizeof(ibase_array), out_sqlda->sqld, 0);
-			memcpy(IB_RESULT->out_array, ib_query->out_array, sizeof(ibase_array) * out_sqlda->sqld);
-		} else {
-			IB_RESULT->out_array = NULL;
+			memcpy(&IB_RESULT->out_array, ib_query->out_array, sizeof(ibase_array) * out_sqlda->sqld);
 		}
 	}
 
@@ -1949,9 +1965,11 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 		case COMMIT:
 			result = isc_commit_transaction(IB_STATUS, &trans->handle);
 			break;
+#ifdef SQL_DIALECT_V6
 		case (ROLLBACK | RETAIN):
 			result = isc_rollback_retaining(IB_STATUS, &trans->handle);
 			break;
+#endif
 		case (COMMIT | RETAIN):
 			result = isc_commit_retaining(IB_STATUS, &trans->handle);
 			break;
@@ -1996,10 +2014,14 @@ PHP_FUNCTION(ibase_commit_ret)
 
 /* {{{ proto bool ibase_rollback_ret( resource link_identifier )
    Rollback transaction and retain the transaction context */
+#ifdef SQL_DIALECT_V6
+
 PHP_FUNCTION(ibase_rollback_ret)
 {
 	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, ROLLBACK | RETAIN);
 }
+
+#endif
 /* }}} */
 
 /* {{{ proto mixed ibase_query([resource link_identifier, [ resource link_identifier, ]] string query [, mixed bind_arg [, mixed bind_arg [, ...]]])
@@ -2295,8 +2317,32 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 		case SQL_SHORT:
 			n = *(short *) data;
 			goto _sql_long;
+#ifdef SQL_INT64
+		case SQL_INT64:
+#if (SIZEOF_LONG >= 8)
+			n = *(long *) data;
+			goto _sql_long;
+#else
+			if (scale == 0) {
+				l = sprintf(string_data, "%.0" LL_MASK "d", *(ISC_INT64 *) data);
+				ZVAL_STRINGL(val,string_data,l,1);
+			} else {
+				ISC_INT64 n = *(ISC_INT64 *) data, f = scales[-scale];
+
+				if (n >= 0) {
+					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
+				} else if (n < -f) {
+					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
+ 				} else {
+					l = sprintf(string_data, "-0.%0*" LL_MASK "d", -scale, -n % f);
+				}
+				ZVAL_STRINGL(val,string_data,l,1);
+			}
+			break;
+#endif
+#endif
 		case SQL_LONG:
-			n = *(long *) data; 
+			n = *(ISC_LONG *) data; 
 		_sql_long:
 			if (scale == 0) {
 				ZVAL_LONG(val,n);
@@ -2319,24 +2365,6 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 		case SQL_DOUBLE:
 			ZVAL_DOUBLE(val, *(double *) data);
 			break;
-#ifdef SQL_INT64
-		case SQL_INT64:
-			if (scale == 0) {
-				l = sprintf(string_data, "%.0" LL_MASK "d", *(ISC_INT64 *) data);
-			} else {
-				ISC_INT64 n = *(ISC_INT64 *) data, f = scales[-scale];
-
-				if (n >= 0) {
-					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
-				} else if (n < -f) {
-					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
- 				} else {
-					l = sprintf(string_data, "-0.%0*" LL_MASK "d", -scale, -n % f);
-				}
-			}
-			ZVAL_STRINGL(val,string_data,l,1);
-			break;
-#endif
 		default: /* == any date/time type */
 		{
 			struct tm t;

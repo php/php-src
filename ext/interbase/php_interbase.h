@@ -64,7 +64,6 @@ PHP_FUNCTION(ibase_trans);
 PHP_FUNCTION(ibase_commit);
 PHP_FUNCTION(ibase_rollback);
 PHP_FUNCTION(ibase_commit_ret);
-PHP_FUNCTION(ibase_rollback_ret);
 
 PHP_FUNCTION(ibase_blob_create);
 PHP_FUNCTION(ibase_blob_add);
@@ -79,6 +78,8 @@ PHP_FUNCTION(ibase_blob_import);
 PHP_FUNCTION(ibase_add_user);
 PHP_FUNCTION(ibase_modify_user);
 PHP_FUNCTION(ibase_delete_user);
+
+PHP_FUNCTION(ibase_rollback_ret);
 #endif
 PHP_FUNCTION(ibase_errmsg);
 PHP_FUNCTION(ibase_errcode);
@@ -120,7 +121,7 @@ typedef struct {
 	isc_tr_handle handle;
 	unsigned short link_cnt;
 	unsigned long affected_rows;
-	ibase_db_link *db_link[1];
+	ibase_db_link *db_link[1]; /* last member */
 } ibase_trans;
 
 typedef struct tr_list {
@@ -147,7 +148,7 @@ typedef struct {
 	unsigned short type;
 	unsigned char has_more_rows, statement_type;
 	XSQLDA *out_sqlda;
-	ibase_array *out_array;
+	ibase_array out_array[1]; /* last member */
 } ibase_result;
 
 typedef struct {
