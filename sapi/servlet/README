@@ -16,7 +16,7 @@ Java Servlet SAPI Module for PHP 4
     engine, it has only been tested on Apache's Jakarta Tomcat to
     date. Bug reports, success stories and/or patches required to get
     this code to run on other engines would be appreciated; please
-    send them to the PHP Development Mailinglist.
+    send them to the PHP Development Mailinglist [2].
 
     Note: PHP has a habit of changing the working directory. The Java
     Servlet SAPI Module will eventually change it back, but while PHP
@@ -100,3 +100,7 @@ Java Servlet SAPI Module for PHP 4
   Installing PHP as a Generator into Apache's Cocoon2 Framework
 
     1.) 
+
+-- 
+ [1] http://jakarta.apache.org/tomcat/
+ [2] http://www.php.net/support.php
