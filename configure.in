@@ -127,14 +127,13 @@ dnl AC_PROG_CXXCPP
 
 dnl Support systems with system libraries in e.g. /usr/lib64
 AC_ARG_WITH(libdir,
-[  --with-libdir=NAME     Look for libraries in .../NAME rather than .../lib],
+[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib],
 [PHP_LIBDIR=$withval], [PHP_LIBDIR=lib])
 
 dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
 
 PHP_PROG_RE2C
-AC_PROG_RANLIB
 AC_PROG_LN_S
 
 dnl Some vendors force mawk before gawk; mawk is broken so we don't like that,
