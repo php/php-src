@@ -100,6 +100,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #28067 (partially incorrect utf8 to htmlentities mapping). (Derick,
   Benjamin Greiner)
 - Fixed bug #27633 (Double \r problem on ftp_get in ASCII mode on Win32). (Ilia)
+- Fixed bug #18613 (Multiple OUs in x509 certificate not handled properly). (Jani)
 - Fixed bug #7782 (Cannot use PATH_INFO fully with php isapi). (Unknown)
 
 15 Dec 2004, Version 4.3.10
