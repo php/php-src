@@ -144,18 +144,17 @@ typedef struct {
 typedef struct {
 	ibase_db_link *link;
 	ibase_trans *trans;
-	struct _ibase_query *query;
 	isc_stmt_handle stmt;
+	unsigned short type;
 	XSQLDA *out_sqlda;
 	ibase_array *out_array;
 	unsigned char has_more_rows;
 	char statement_type;
 } ibase_result;
 
-typedef struct _ibase_query {
+typedef struct {
 	ibase_db_link *link;
 	ibase_trans *trans;
-	ibase_result *result;
 	int result_res_id;
 	isc_stmt_handle stmt;
 	XSQLDA *in_sqlda, *out_sqlda;
