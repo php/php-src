@@ -1,3 +1,537 @@
+2002-03-07  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c:
+    Commented out a few lines that were causing a segfault in the unlink code.
+    This fixes bug #14522.  I've tested that it does not cause a segfault under
+    RH 7.2, and retains all functionality.  I recommend that this patch be
+    considered for the PHP_4_2_0 tree as well, as having a function that core
+    dumps every time is a bad thing(TM).
+
+2002-03-07  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/gd/config.m4: revert my patch to fix freetype2 related problem.
+
+2002-03-07  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c:
+    - Fixed the phpinfo() tables not to blow up when using very long
+      configure line.
+
+    * ext/exif/exif.c:
+    - Fixed some compile warnings and removed bogus comments.
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt:
+    These tests currently depend on register_globals=1
+
+2002-03-07  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS: Merge News Entry
+
+    * NEWS: News update
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.global: remove -module, it is added by configure.in
+
+    * Makefile.global: Update test target from rules.mk
+
+2002-03-07  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/ftp/ftp.c: MFH r1.45: header file correction
+
+2002-03-07  Jason Greene  <jason@inetgurus.net>
+
+    * ext/mysql/config.m4
+      ext/mysql/libmysql/libmysql.c:
+    Disallow mysql's 'LOAD LOCAL' when safe mode is enabled
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.global: Readd ZEND_EXTRA_LIBS (as in Makefile.in rev 1.106).
+
+2002-03-07  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/ftp/ftp.c:
+    Correct the header file ordering.  From 'man 3 inet' (FreeBSD 4.5):
+
+
+2002-03-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * build/build2.mk: - Fix typo in warning suppressor
+
+2002-03-07  Frank M. Kromann  <frank@frontbase.com>
+
+    * main/config.w32.h: Revert uppercase directory name to lower case.
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: ze2 handling
+
+2002-03-07  Frank M. Kromann  <frank@frontbase.com>
+
+    * main/config.w32.h
+      win32/crypt_win32.c
+      win32/crypt_win32.h
+      win32/php4dllts.dsp: Enabling crypt() on Win32
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Build libphp4.la as a module which can be dlopened.
+
+    This should not make a difference on common platforms,
+    but maybe esoteric ones.
+
+2002-03-07  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c:
+    Reverting the reverted patch.  I hope this is the last time.  No added functionality.  Just a bug fix of #15918
+
+    * ext/domxml/php_domxml.c:
+    Reverting patch at Derick's request.  Reverted to 1.118
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Fix typo
+
+2002-03-07  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mbstring/unicode_table.h
+      ext/mbstring/unicode_table_ja.h
+      ext/mbstring/cp932_table.h
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter_ja.c
+      ext/mbstring/mbstring.dsp: Making mbstring compile under WIn32
+
+2002-03-07  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c:
+    Added type attributes to XML_DTD_NODE and XML_ATTRIBUTE_NODE element types.
+    Reported in bug #15918.
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: some more information
+
+2002-03-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS: Add NEWS entry for the new build system.
+
+2002-03-07  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c:
+    Added type attribute wrappers to the remaining node types that did not have
+    them.  I.e. XML_ATTRIBUTE_NODE and XML_CDATA_SECTION_NODE.  Mentioned in
+    Bug #15918.
+
+    * ext/domxml/TODO:
+    Added TODO item to modify new_child so that more than just element nodes
+    can be created.
+
+2002-03-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/var_unserializer.c: - Remove CVS things
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var_unserializer.c: touch file
+
+    * configure.in: From APR CVS.
+
+    fitz        02/03/07 07:37:09
+
+      Modified:    build    apr_hints.m4
+      Log:
+      update for Mac OS X. -traditional-cpp is no longer recommended.
+
+2002-03-07  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/gd/config.m4: reverted my patch to fix freetype2 related problem.
+
+2002-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/dbplus/config.m4: Bad extension. Still using AC_ADD_INCLUDE!
+
+    * sapi/webjames/.cvsignore
+      sapi/servlet/.cvsignore
+      sapi/thttpd/.cvsignore
+      sapi/tux/.cvsignore
+      sapi/pi3web/.cvsignore
+      sapi/roxen/.cvsignore
+      sapi/isapi/.cvsignore
+      sapi/nsapi/.cvsignore
+      sapi/phttpd/.cvsignore
+      sapi/fastcgi/.cvsignore
+      sapi/fhttpd/.cvsignore
+      sapi/caudium/.cvsignore
+      sapi/cgi/.cvsignore
+      sapi/cli/.cvsignore
+      sapi/aolserver/.cvsignore
+      sapi/apache/.cvsignore
+      sapi/apache2filter/.cvsignore
+      main/.cvsignore
+      regex/.cvsignore
+      ext/zlib/.cvsignore
+      ext/zip/.cvsignore
+      ext/yp/.cvsignore
+      ext/xslt/.cvsignore
+      ext/yaz/.cvsignore
+      ext/xmlrpc/.cvsignore
+      ext/xmlrpc/libxmlrpc/.cvsignore
+      ext/xml/.cvsignore
+      ext/xml/expat/.cvsignore
+      ext/wddx/.cvsignore
+      ext/vpopmail/.cvsignore
+      ext/w32api/.cvsignore
+      ext/sysvshm/.cvsignore
+      ext/tokenizer/.cvsignore
+      ext/sybase_ct/.cvsignore
+      ext/sysvsem/.cvsignore
+      ext/swf/.cvsignore
+      ext/sybase/.cvsignore
+      ext/sockets/.cvsignore
+      ext/standard/.cvsignore
+      ext/snmp/.cvsignore
+      ext/skeleton/.cvsignore
+      ext/session/.cvsignore
+      ext/shmop/.cvsignore
+      ext/readline/.cvsignore
+      ext/recode/.cvsignore
+      ext/pspell/.cvsignore
+      ext/qtdom/.cvsignore
+      ext/posix/.cvsignore
+      ext/pdf/.cvsignore
+      ext/pfpro/.cvsignore
+      ext/pgsql/.cvsignore
+      ext/pcre/pcrelib/doc/.cvsignore
+      ext/pcre/pcrelib/testdata/.cvsignore
+      ext/pcre/.cvsignore
+      ext/pcre/pcrelib/.cvsignore
+      ext/ovrimos/.cvsignore
+      ext/pcntl/.cvsignore
+      ext/oracle/.cvsignore
+      ext/overload/.cvsignore
+      ext/oci8/.cvsignore
+      ext/odbc/.cvsignore
+      ext/openssl/.cvsignore
+      ext/ncurses/.cvsignore
+      ext/notes/.cvsignore
+      ext/mysql/libmysql/.cvsignore
+      ext/muscat/.cvsignore
+      ext/mysql/.cvsignore
+      ext/msql/.cvsignore
+      ext/mssql/.cvsignore
+      ext/mnogosearch/.cvsignore
+      ext/msession/.cvsignore
+      ext/mhash/.cvsignore
+      ext/ming/.cvsignore
+      ext/mcal/.cvsignore
+      ext/mcrypt/.cvsignore
+      ext/mailparse/tests/.cvsignore
+      ext/mbstring/.cvsignore
+      ext/java/.cvsignore
+      ext/ldap/.cvsignore
+      ext/mailparse/.cvsignore
+      ext/interbase/.cvsignore
+      ext/ircg/.cvsignore
+      ext/imap/.cvsignore
+      ext/informix/.cvsignore
+      ext/ingres_ii/.cvsignore
+      ext/hyperwave/.cvsignore
+      ext/icap/.cvsignore
+      ext/iconv/.cvsignore
+      ext/gettext/.cvsignore
+      ext/gmp/.cvsignore
+      ext/fribidi/.cvsignore
+      ext/ftp/.cvsignore
+      ext/gd/.cvsignore
+      ext/fdf/.cvsignore
+      ext/filepro/.cvsignore
+      ext/domxml/.cvsignore
+      ext/exif/.cvsignore
+      ext/fbsql/.cvsignore
+      ext/dbx/.cvsignore
+      ext/dio/.cvsignore
+      ext/dbase/.cvsignore
+      ext/dbplus/.cvsignore
+      ext/cyrus/.cvsignore
+      ext/db/.cvsignore
+      ext/dba/.cvsignore
+      ext/curl/.cvsignore
+      ext/cybercash/.cvsignore
+      ext/cybermut/.cvsignore
+      ext/cpdf/.cvsignore
+      ext/crack/.cvsignore
+      ext/ctype/.cvsignore
+      ext/ccvs/.cvsignore
+      ext/com/.cvsignore
+      ext/bcmath/libbcmath/src/.cvsignore
+      ext/bz2/.cvsignore
+      ext/calendar/.cvsignore
+      ext/aspell/.cvsignore
+      ext/bcmath/.cvsignore
+      ext/bcmath/libbcmath/.cvsignore
+      .cvsignore
+      ext/ext_skel: Remove .libs from .cvsignores, except /.
+
+    * TODO.BUILDv5: phpize is already working, remove from todo
+
+    * sapi/webjames/.cvsignore
+      sapi/webjames/Makefile.in
+      sapi/webjames/config.m4
+      sapi/thttpd/.cvsignore
+      sapi/thttpd/Makefile.in
+      sapi/thttpd/config.m4
+      sapi/tux/.cvsignore
+      sapi/tux/Makefile.in
+      sapi/tux/config.m4
+      sapi/servlet/Makefile.in
+      sapi/servlet/config.m4
+      sapi/roxen/config.m4
+      sapi/servlet/.cvsignore
+      sapi/servlet/Makefile.frag
+      sapi/roxen/.cvsignore
+      sapi/roxen/Makefile.in
+      sapi/pi3web/.cvsignore
+      sapi/pi3web/Makefile.in
+      sapi/pi3web/config.m4
+      sapi/nsapi/Makefile.in
+      sapi/nsapi/config.m4
+      sapi/phttpd/.cvsignore
+      sapi/phttpd/Makefile.in
+      sapi/phttpd/config.m4
+      sapi/isapi/.cvsignore
+      sapi/isapi/Makefile.in
+      sapi/isapi/config.m4
+      sapi/nsapi/.cvsignore
+      sapi/cgi/Makefile.in
+      sapi/cgi/config.m4
+      sapi/cli/.cvsignore
+      sapi/cli/Makefile.in
+      sapi/cli/config.m4
+      sapi/fastcgi/.cvsignore
+      sapi/fastcgi/Makefile.in
+      sapi/fastcgi/config.m4
+      sapi/fhttpd/.cvsignore
+      sapi/apache2filter/Makefile.in
+      sapi/apache2filter/config.m4
+      sapi/caudium/.cvsignore
+      sapi/caudium/Makefile.in
+      sapi/caudium/config.m4
+      sapi/cgi/.cvsignore
+      sapi/apache2filter/.cvsignore
+      sapi/aolserver/.cvsignore
+      sapi/aolserver/Makefile.in
+      sapi/aolserver/config.m4
+      sapi/apache/.cvsignore
+      sapi/apache/Makefile.in
+      sapi/apache/config.m4
+      pear/scripts/phpize.in
+      regex/.cvsignore
+      sapi/.cvsignore
+      sapi/Makefile.in
+      sapi/README
+      ext/zlib/.cvsignore
+      pear/.cvsignore
+      pear/Makefile.frag
+      pear/Makefile.in
+      pear/pear.m4
+      ext/xslt/.cvsignore
+      ext/yaz/.cvsignore
+      ext/yp/.cvsignore
+      ext/zip/.cvsignore
+      ext/xmlrpc/.cvsignore
+      ext/xmlrpc/config.m4
+      ext/xmlrpc/libxmlrpc/xmlrpc.m4
+      ext/xml/.cvsignore
+      ext/xml/config.m4
+      ext/xml/expat/.cvsignore
+      ext/w32api/.cvsignore
+      ext/wddx/.cvsignore
+      ext/sybase_ct/.cvsignore
+      ext/sysvsem/.cvsignore
+      ext/sysvshm/.cvsignore
+      ext/vpopmail/.cvsignore
+      ext/swf/.cvsignore
+      ext/sybase/.cvsignore
+      ext/sockets/.cvsignore
+      ext/standard/.cvsignore
+      ext/standard/Makefile.frag
+      ext/standard/Makefile.in
+      ext/standard/config.m4
+      ext/snmp/.cvsignore
+      ext/session/config.m4
+      ext/shmop/.cvsignore
+      ext/skeleton/.cvsignore
+      ext/readline/.cvsignore
+      ext/recode/.cvsignore
+      ext/session/.cvsignore
+      ext/session/Makefile.in
+      ext/pgsql/.cvsignore
+      ext/posix/.cvsignore
+      ext/pspell/.cvsignore
+      ext/qtdom/.cvsignore
+      ext/pdf/.cvsignore
+      ext/pdf/config.m4
+      ext/pfpro/.cvsignore
+      ext/pcre/pcrelib/.cvsignore
+      ext/pcre/pcrelib/doc/.cvsignore
+      ext/pcre/pcrelib/testdata/.cvsignore
+      ext/ovrimos/.cvsignore
+      ext/pcntl/.cvsignore
+      ext/pcre/.cvsignore
+      ext/pcre/config.m4
+      ext/openssl/.cvsignore
+      ext/oracle/.cvsignore
+      ext/overload/.cvsignore
+      ext/mysql/libmysql/.cvsignore
+      ext/mysql/libmysql/mysql.m4
+      ext/ncurses/.cvsignore
+      ext/notes/.cvsignore
+      ext/oci8/.cvsignore
+      ext/odbc/.cvsignore
+      ext/mysql/.cvsignore
+      ext/mysql/config.m4
+      ext/muscat/.cvsignore
+      ext/msql/.cvsignore
+      ext/mssql/.cvsignore
+      ext/msession/.cvsignore
+      ext/mnogosearch/.cvsignore
+      ext/ming/.cvsignore
+      ext/mhash/.cvsignore
+      ext/mcrypt/.cvsignore
+      ext/mcal/.cvsignore
+      ext/mbstring/.cvsignore
+      ext/ldap/.cvsignore
+      ext/java/.cvsignore
+      ext/ircg/.cvsignore
+      ext/ircg/Makefile.frag
+      ext/ircg/config.m4
+      ext/interbase/.cvsignore
+      ext/informix/.cvsignore
+      ext/informix/Makefile.frag
+      ext/ingres_ii/.cvsignore
+      ext/imap/.cvsignore
+      ext/iconv/.cvsignore
+      ext/icap/.cvsignore
+      ext/hyperwave/.cvsignore
+      ext/gmp/.cvsignore
+      ext/gettext/.cvsignore
+      ext/ftp/.cvsignore
+      ext/gd/.cvsignore
+      ext/fribidi/.cvsignore
+      ext/filepro/.cvsignore
+      ext/fdf/.cvsignore
+      ext/fbsql/.cvsignore
+      ext/exif/.cvsignore
+      ext/domxml/.cvsignore
+      ext/domxml/config.m4
+      ext/dio/.cvsignore
+      ext/dbx/.cvsignore
+      ext/dbplus/.cvsignore
+      ext/dbase/.cvsignore
+      ext/db/.cvsignore
+      ext/dba/.cvsignore
+      ext/cyrus/.cvsignore
+      ext/cybermut/.cvsignore
+      ext/cybercash/.cvsignore
+      ext/curl/.cvsignore
+      ext/ctype/.cvsignore
+      ext/crack/.cvsignore
+      ext/cpdf/.cvsignore
+      ext/com/.cvsignore
+      ext/ccvs/.cvsignore
+      ext/calendar/.cvsignore
+      ext/bz2/.cvsignore
+      ext/bcmath/libbcmath/src/Makefile.in
+      ext/bcmath/libbcmath/src/.cvsignore
+      ext/bcmath/libbcmath/.cvsignore
+      ext/bcmath/libbcmath/Makefile.in
+      ext/bcmath/config.m4
+      ext/bcmath/.cvsignore
+      ext/bcmath/Makefile.in
+      ext/aspell/.cvsignore
+      ext/ext_skel
+      build/sysv_makefile
+      build/shtool
+      build/ltlib.mk
+      build/fastgen.sh
+      build/library.mk
+      build/dynlib.mk
+      build/bsd_makefile
+      build/build2.mk
+      scan_makefile_in.awk
+      dynlib.m4
+      configure.in
+      TODO.BUILDv5
+      acinclude.m4
+      README.SELF-CONTAINED-EXTENSIONS
+      Makefile.in
+      .cvsignore
+      Makefile.frag
+      Makefile.global: Please welcome the new build system.
+
+    If you encounter any problems, please make sure to email sas@php.net
+    directly.
+
+    An introduction can be found on
+
+    http://schumann.cx/buildv5.txt
+
+2002-03-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Update NEWS
+
+2002-03-07  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/tests/002.inc
+      ext/mbstring/tests/003.inc
+      ext/mbstring/tests/004.inc
+      ext/mbstring/tests/005.inc
+      ext/mbstring/tests/006.inc
+      ext/mbstring/tests/008.inc
+      ext/mbstring/tests/009.inc
+      ext/mbstring/tests/010.inc
+      ext/mbstring/tests/011.inc
+      ext/mbstring/tests/012.inc
+      ext/mbstring/tests/013.inc
+      ext/mbstring/tests/014.inc
+      ext/mbstring/tests/015.inc
+      ext/mbstring/tests/016.inc
+      ext/mbstring/tests/017.inc
+      ext/mbstring/tests/018.inc
+      ext/mbstring/tests/019.inc
+      ext/mbstring/tests/019.phpt
+      ext/mbstring/tests/common.inc
+      ext/mbstring/tests/common.php:
+    Rename common.php to common.inc for easier deletion of garbages.
+    e.g. "rm -f *.php"
+
+2002-03-07  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS: MFH
+
+2002-03-07  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mcve/mcve.c: more proto stuff
+
+2002-03-07  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS: Add news entries representing the sockets rework.
+
+2002-03-07  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mcve/mcve.c: proto fixes:
+      - changed 'double' to 'float'
+      - changed 'int' to 'resource' where appropriate
+      - format change: proto has to be on a single line and description
+        on the very next one, some tools still rely on this
+
 2002-03-06  Dan Kalowsky  <dank@deadmime.org>
 
     * NEWS: iconv is back
