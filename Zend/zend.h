@@ -47,10 +47,10 @@
 # include "zend_config.nw.h"
 # include "acconfig.h"
 #elif defined(__riscos__)
-# include "zend_config.h"
+# include <zend_config.h>
 # define ZEND_PATHS_SEPARATOR		';'
 #else
-# include "zend_config.h"
+# include <zend_config.h>
 # define ZEND_PATHS_SEPARATOR		':'
 #endif
 

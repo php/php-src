@@ -23,7 +23,7 @@
 
 /* $Id$ */
 
-#include "php_config.h"
+#include <php_config.h>
 
 #if !HAVE_ALLOCA
 

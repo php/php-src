@@ -15,7 +15,7 @@
 
 /* #ifndef WIN32 */
 #if !defined(WIN32) && !defined(NETWARE)
-# include "tsrm_config.h"
+# include <tsrm_config.h>
 #endif
 
 #ifdef WIN32
