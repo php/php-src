@@ -27,6 +27,7 @@
 #include "ext/standard/dl.h"
 #include "zend_extensions.h"
 #include "zend_highlight.h"
+#include "SAPI.h"
 
 typedef struct _php_extension_lists {
 	zend_llist engine;
@@ -239,10 +240,18 @@ int php_init_config(char *php_ini_path_override)
 #endif
 		php_ini_search_path = (char *) emalloc(sizeof(".")+strlen(env_location)+strlen(default_location)+2+1);
 		free_ini_search_path = 1;
-		if(env_location && env_location[0]) {
-			sprintf(php_ini_search_path, ".%c%s%c%s", ZEND_PATHS_SEPARATOR, env_location, ZEND_PATHS_SEPARATOR, default_location);
+		if (strcmp(sapi_module.name, "cli")==0) {
+			if(env_location && env_location[0]) {
+				sprintf(php_ini_search_path, "%s%c%s", env_location, ZEND_PATHS_SEPARATOR, default_location);
+			} else {
+				sprintf(php_ini_search_path, "%s", default_location);
+			}
 		} else {
-			sprintf(php_ini_search_path, ".%c%s", ZEND_PATHS_SEPARATOR, default_location);
+			if(env_location && env_location[0]) {
+				sprintf(php_ini_search_path, ".%c%s%c%s", ZEND_PATHS_SEPARATOR, env_location, ZEND_PATHS_SEPARATOR, default_location);
+			} else {
+				sprintf(php_ini_search_path, ".%c%s", ZEND_PATHS_SEPARATOR, default_location);
+			}
 		}
 		if (free_default_location) {
 			efree(default_location);
