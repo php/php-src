@@ -72,14 +72,10 @@ function dowriteln($str)
     dowrite("$str\n");
 }
 
-// use this function to consistently work with '/' divided dirs instead of '\' divided ones
-function win_safe_path(&$str)  {
-    $str=str_replace('\\','/',$str);
-}
-
 function create_compiled_in_modules_list()  {
     global $php,$compiled_in_modules;
     $ret=`$php -m`;
+   
     $compiled_in_modules=explode("\n",$ret);
     foreach ($compiled_in_modules AS $key => $value) {
         if (!$value
@@ -133,19 +129,18 @@ function initialize()
 
     $windows_p = (substr(php_uname(), 0, 7) == "Windows");
     if ($windows_p) {
-        if (file_exists('Release_TS_inline/php.exe')) {
-            $php = 'Release_TS_inline\php.exe';
-        } elseif (file_exists('Release_TS/php.exe')) {
-            $php = 'Release_TS\php.exe';
+        if (file_exists('Release_TS_inline\\php.exe')) {
+            $php = 'Release_TS_inline\\php.exe';
+        } elseif (file_exists('Release_TS\\php.exe')) {
+            $php = 'Release_TS\\php.exe';
         } else {
-            $php=trim($windows_p ? `cd`:`pwd`).'/php';
-            win_safe_path($php);
+            $php=trim($windows_p ? `cd`:`pwd`).'\\php';
         }
     } else {
         // $php = $GLOBALS["TOP_BUILDDIR"]."/php"; // where should be the origin of this variable
-        $php=trim($windows_p ? `cd`:`pwd`).'/php';
-        win_safe_path($php);
+        $php=trim(`pwd`).'/php';
     }
+
     create_compiled_in_modules_list();
    
     if (!is_executable($php)) {
@@ -384,14 +379,16 @@ function compare_results($file1, $file2)
     while (!(feof($fp1) || feof($fp2))) {
         if (!feof($fp1) && trim($line1 = fgets($fp1, 10240)) != "") {
             //print "adding line1 $line1\n";
-            $data1 .= $line1;
+           
+            $data1 .= trim($line1);
         }
         if (!feof($fp2) && trim($line2 = fgets($fp2, 10240)) != "") {
             //print "adding line2 $line2\n";
-            $data2 .= $line2;
+            
+            $data2 .= trim($line2);
         }
     }
-   
+   echo strlen($data1).'|'.strlen($data2);
     fclose($fp1);
     fclose($fp2);
     if ((trim($data1) != trim($data2))
@@ -414,15 +411,14 @@ function run_test($file)
         return TEST_INTERNAL_ERROR;
     }
     $tmpdir = dirname($file);
-    win_safe_path($tmpdir);
     $tmpfix = "phpt.";
     $tmpfile["FILE"] = tempnam($tmpdir, $tmpfix);
     $tmpfile["SKIPIF"] = tempnam($tmpdir, $tmpfix);
     $tmpfile["POST"] = tempnam($tmpdir, $tmpfix);
+   
     $tmpfile["EXPECT"] = tempnam($tmpdir, $tmpfix);
     $tmpfile["OUTPUT"] = tempnam($tmpdir, $tmpfix);
     
-    array_walk($tmpfile,'win_safe_path');
     
     while ($line = fgets($fp, 4096)) {
         if (preg_match('/^--([A-Z]+)--/', $line, $matches)) {
@@ -489,6 +485,8 @@ function run_test($file)
         putenv("CONTENT_LENGTH=");
     }
     if (isset($fps["POST"])) {
+       
+        // XXX Fix me, I do not work on win32 (?)
         $cmd = "$php -q $tmpfile[FILE] < $tmpfile[POST]";
     } else {
         $cmd = "$php -q $tmpfile[FILE]";
@@ -499,6 +497,7 @@ function run_test($file)
         delete_tmpfiles();
         return TEST_INTERNAL_ERROR;
     }
+    //echo $cmd;
     $cp = popen($cmd, "r");
     if (!$cp) {
         dowriteln("Error: could not execute: $cmd");
