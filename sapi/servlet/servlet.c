@@ -210,7 +210,7 @@ static char *sapi_servlet_read_cookies(SLS_D)
  */
 
 static sapi_module_struct sapi_module = {
-	"PHP Language",					/* name */
+	"Java Servlet",					/* name */
 									
 	php_module_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */

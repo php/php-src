@@ -291,7 +291,7 @@ php_ns_startup(sapi_module_struct *sapi_module)
 /* this structure is static (as in "it does not change") */
 
 static sapi_module_struct sapi_module = {
-	"PHP Language",
+	"AOLserver",
 
 	php_ns_startup,							/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */

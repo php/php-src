@@ -102,7 +102,7 @@ static char *sapi_thttpd_read_cookies(SLS_D)
 }
 
 static sapi_module_struct sapi_module = {
-	"PHP Language",
+	"thttpd",
 	
 	php_module_startup,
 	php_module_shutdown_wrapper,

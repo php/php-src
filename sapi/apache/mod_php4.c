@@ -212,7 +212,7 @@ int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 
 
 sapi_module_struct sapi_module = {
-	"PHP Language",					/* name */
+	"Apache",						/* name */
 									
 	php_module_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
