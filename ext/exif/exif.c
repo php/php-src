@@ -3712,7 +3712,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 		return FALSE;
 	}
 
-	php_basename(FileName, strlen(FileName), NULL, 0, &(ImageInfo->FileName), NULL);
+	php_basename(FileName, strlen(FileName), NULL, 0, &(ImageInfo->FileName), NULL TSRMLS_CC);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
