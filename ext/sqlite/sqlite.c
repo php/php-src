@@ -757,7 +757,7 @@ static int sqlite_free_persistent(list_entry *le, void *ptr TSRMLS_DC)
 	return le->ptr == ptr ? ZEND_HASH_APPLY_REMOVE : ZEND_HASH_APPLY_KEEP;
 }
 
-static void sqlite_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+static void sqlite_object_free_storage(void *object TSRMLS_DC)
 {
 	sqlite_object *intern = (sqlite_object *)object;
 
@@ -791,7 +791,7 @@ static void sqlite_object_new(zend_class_entry *class_type, zend_object_handlers
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval->handle = zend_objects_store_put(intern, sqlite_object_dtor, NULL TSRMLS_CC);
+	retval->handle = zend_objects_store_put(intern, NULL, sqlite_object_free_storage, NULL TSRMLS_CC);
 	retval->handlers = handlers;
 }
 

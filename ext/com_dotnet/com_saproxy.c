@@ -261,7 +261,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_object_cast
 };
 
-static void saproxy_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+static void saproxy_free_storage(void *object TSRMLS_DC)
 {
 	php_com_saproxy *proxy = (php_com_saproxy *)object;
 
@@ -313,7 +313,7 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, long index TSRMLS_
 	proxy->indices[proxy->dimensions-1] = index;
 
 	Z_TYPE_P(proxy_out) = IS_OBJECT;
-	Z_OBJ_HANDLE_P(proxy_out) = zend_objects_store_put(proxy, saproxy_dtor, saproxy_clone TSRMLS_CC);
+	Z_OBJ_HANDLE_P(proxy_out) = zend_objects_store_put(proxy, NULL, saproxy_free_storage, saproxy_clone TSRMLS_CC);
 	Z_OBJ_HT_P(proxy_out) = &php_com_saproxy_handlers;
 	
 	return 1;

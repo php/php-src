@@ -77,7 +77,7 @@ zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *
 /* com_handlers.c */
 zend_object_value php_com_object_new(zend_class_entry *ce TSRMLS_DC);
 void php_com_object_clone(void *object, void **clone_ptr TSRMLS_DC);
-void php_com_object_dtor(void *object, zend_object_handle handle TSRMLS_DC);
+void php_com_object_free_storage(void *object TSRMLS_DC);
 zend_object_handlers php_com_object_handlers;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSRMLS_DC);
 
