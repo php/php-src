@@ -39,6 +39,16 @@ ZEND_API zend_alloc_globals alloc_globals;
 #define ZEND_DISABLE_MEMORY_CACHE 0
 
 
+#ifdef ZEND_WIN32
+#define ZEND_DO_MALLOC(size)		(AG(memory_heap) ? HeapAlloc(AG(memory_heap), HEAP_NO_SERIALIZE, size) : malloc(size))
+#define ZEND_DO_FREE(ptr)			(AG(memory_heap) ? HeapFree(AG(memory_heap), HEAP_NO_SERIALIZE, ptr) : free(ptr))
+#define ZEND_DO_REALLOC(ptr, size)	(AG(memory_heap) ? HeapReAlloc(AG(memory_heap), HEAP_NO_SERIALIZE, ptr, size) : realloc(ptr, size))
+#else
+#define ZEND_DO_MALLOC(size)		malloc(size)
+#define ZEND_DO_FREE(ptr)			free(size)
+#define ZEND_DO_REALLOC(ptr, size)	realloc(ptr, size)
+#endif
+
 #if ZEND_DEBUG
 # define END_MAGIC_SIZE sizeof(long)
 static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
@@ -152,7 +162,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 			AG(cache_stats)[CACHE_INDEX][0]++;
 		}
 #endif
-		p  = (zend_mem_header *) malloc(sizeof(zend_mem_header) + MEM_HEADER_PADDING + SIZE + END_MAGIC_SIZE);
+		p  = (zend_mem_header *) ZEND_DO_MALLOC(sizeof(zend_mem_header) + MEM_HEADER_PADDING + SIZE + END_MAGIC_SIZE);
 	}
 
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -233,7 +243,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	AG(allocated_memory) -= SIZE;
 #endif
 	
-	free(p);
+	ZEND_DO_FREE(p);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
@@ -285,7 +295,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	REMOVE_POINTER_FROM_LIST(p);
-	p = (zend_mem_header *) realloc(p,sizeof(zend_mem_header)+MEM_HEADER_PADDING+SIZE+END_MAGIC_SIZE);
+	p = (zend_mem_header *) ZEND_DO_REALLOC(p,sizeof(zend_mem_header)+MEM_HEADER_PADDING+SIZE+END_MAGIC_SIZE);
 	if (!p) {
 		if (!allow_failure) {
 			fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);
@@ -405,6 +415,10 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
 	memset(AG(cache_count), 0, sizeof(AG(cache_count)));
 
+#ifdef ZEND_WIN32
+	AG(memory_heap) = HeapCreate(HEAP_NO_SERIALIZE, 256*1024, 0);
+#endif
+
 #if 0
 #ifndef ZTS
 	/* Initialize cache, to prevent fragmentation */
@@ -441,6 +455,13 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	zend_fast_cache_list_entry *fast_cache_list_entry, *next_fast_cache_list_entry;
 	TSRMLS_FETCH();
 
+#if defined(ZEND_WIN32) && !ZEND_DEBUG
+	if (AG(memory_heap)) {
+		HeapDestroy(AG(memory_heap));
+		return;
+	}
+#endif
+
 	for (fci=0; fci<MAX_FAST_CACHE_TYPES; fci++) {
 		fast_cache_list_entry = AG(fast_cache_list_head)[fci];
 		while (fast_cache_list_entry) {
@@ -461,7 +482,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 				AG(allocated_memory) -= REAL_SIZE(ptr->size);
 #endif
 				REMOVE_POINTER_FROM_LIST(ptr);
-				free(ptr);
+				ZEND_DO_FREE(ptr);
 			}
 			AG(cache_count)[i] = 0;
 		}
@@ -500,7 +521,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 #endif
 			p = t->pNext;
 			REMOVE_POINTER_FROM_LIST(t);
-			free(t);
+			ZEND_DO_FREE(t);
 			t = p;
 		} else {
 			t = t->pNext;
@@ -551,6 +572,13 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		}
 					
 	} while (0);
+
+#if defined(ZEND_WIN32) && ZEND_DEBUG
+	if (clean_cache && AG(memory_heap)) {
+		HeapDestroy(AG(memory_heap));
+	}
+#endif
+
 #endif
 }
 
