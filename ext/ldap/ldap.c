@@ -156,10 +156,14 @@ PHP_MINFO_FUNCTION(ldap)
 #if HAVE_NSLDAP
 	LDAPVersion ver;
 	double SDKVersion;
-	/* Print version information */
+#endif
+
+	LDAPLS_FETCH();
+
+#if HAVE_NSLDAP
+/* Print version information */
 	SDKVersion = ldap_version( &ver );
 #endif
-	LDAPLS_FETCH();
 
 	if (LDAPG(max_links) == -1) {
 		strcpy(maxl, "Unlimited");
