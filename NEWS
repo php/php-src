@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2002, Version 4.2.2
+- Report the right exit code after a call to exit(). (Edin)
+
 13 May 2002, Version 4.2.1
 - Added safe-mode checks to show_source(), parse_ini_file() and rmdir(). Also
   fixed security problems with safe_mode_include_dir directive. (Rasmus)
