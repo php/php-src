@@ -2444,7 +2444,7 @@ PHP_FUNCTION(ocibindbyname)
     switch (ac) {
 	case 5:
 		convert_to_long_ex(type);
-		ocitype = (*type)->value.lval;
+		ocitype = (ub2) (*type)->value.lval;
 		/* possible breakthru */
 	case 4:
 		convert_to_long_ex(maxlen);
