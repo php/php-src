@@ -396,6 +396,8 @@ PHP_FUNCTION(pcntl_exec)
 		for ( zend_hash_internal_pointer_reset(args_hash), current_arg = argv+1; 
 			(argi < argc && (zend_hash_get_current_data(args_hash, (void **) &element) == SUCCESS));
 			(argi++, current_arg++, zend_hash_move_forward(args_hash)) ) {
+
+			convert_to_string_ex(element);
 			*current_arg = Z_STRVAL_PP(element);
 		}
 		*(current_arg) = NULL;
@@ -424,6 +426,9 @@ PHP_FUNCTION(pcntl_exec)
 					pair--;
 					continue;
 			}
+
+			convert_to_string_ex(element);
+
 			/* Length of element + equal sign + length of key + null */ 
 			pair_length = Z_STRLEN_PP(element) + key_length + 2;
 			*pair = emalloc(pair_length);
@@ -439,14 +444,16 @@ PHP_FUNCTION(pcntl_exec)
 	
 	if (execve(path, argv, envp) == -1) {
 		php_error(E_WARNING, "Error has occured in %s: (errno %d) %s",
-				  get_active_function_name(TSRMLS_CC), errno, strerror(errno));
+				  get_active_function_name(TSRMLS_C), errno, strerror(errno));
 	}
 	
 	/* Cleanup */
-	for (pair = envp; *pair != NULL; pair++) efree(*pair);
-	
+	if (envp != NULL) {
+		for (pair = envp; *pair != NULL; pair++) efree(*pair);
+		free_alloca(envp);
+	}
+
 	free_alloca(argv);
-	free_alloca(envp);
 	
 	RETURN_FALSE;
 }
