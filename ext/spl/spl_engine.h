@@ -34,7 +34,7 @@
 	EX(opline)++;			\
 	return 0;
 
-int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
+zval * spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
 
 /* {{{ zend_class_entry */
 static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
