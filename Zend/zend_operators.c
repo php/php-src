@@ -488,14 +488,20 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			break;
 		case IS_OBJECT:
 			if (op->value.obj.handlers->cast_object) {
+				zval tmp;
 				TSRMLS_FETCH();
-				op->value.obj.handlers->cast_object(op, op, IS_STRING, 1 TSRMLS_CC);
+				if (op->value.obj.handlers->cast_object(op, &tmp, IS_STRING, 1 TSRMLS_CC) == SUCCESS) {
+					zval_dtor(op);
+					*op = tmp;
+					break;
+				}
+				zend_error(E_NOTICE, "Object of class %s could not be converted to string", Z_OBJCE_P(op)->name);
 			} else {
-				zval_dtor(op);
-				op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
-				op->value.str.len = sizeof("Object")-1;
-				zend_error(E_NOTICE, "Object to string conversion");
+				zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name);
 			}
+			zval_dtor(op);
+			op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
+			op->value.str.len = sizeof("Object")-1;
 			break;
 		default:
 			zval_dtor(op);
