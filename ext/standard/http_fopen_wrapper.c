@@ -21,6 +21,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "php_network.h"
 
 #include <stdio.h>
 #include <stdlib.h>

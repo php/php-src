@@ -377,11 +377,19 @@ SOURCE=..\ext\standard\fsock.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\ftp_fopen_wrapper.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\head.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\standard\html.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\http_fopen_wrapper.c
 # End Source File
 # Begin Source File
 
@@ -458,6 +466,10 @@ SOURCE=..\ext\standard\pageinfo.c
 # Begin Source File
 
 SOURCE=..\ext\standard\parsedate.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_fopen_wrapper.c
 # End Source File
 # Begin Source File
 
@@ -619,6 +631,10 @@ SOURCE=..\ext\standard\php_dir.h
 # Begin Source File
 
 SOURCE=..\ext\standard\php_filestat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_fopen_wrappers.h
 # End Source File
 # Begin Source File
 
