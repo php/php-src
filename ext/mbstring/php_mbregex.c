@@ -283,11 +283,11 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, int patl
 	int found = 0;
 	php_mb_regex_t *retval = NULL, **rc = NULL;
 	OnigErrorInfo err_info;
-	UChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
+	OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 
 	found = zend_hash_find(&MBSTRG(ht_rc), (char *)pattern, patlen+1, (void **) &rc);
 	if (found == FAILURE || (*rc)->options != options || (*rc)->enc != enc || (*rc)->syntax != syntax) {
-		if ((err_code = onig_new(&retval, (UChar *)pattern, (UChar *)(pattern + patlen), options, enc, syntax, &err_info)) != ONIG_NORMAL) {
+		if ((err_code = onig_new(&retval, (OnigUChar *)pattern, (OnigUChar *)(pattern + patlen), options, enc, syntax, &err_info)) != ONIG_NORMAL) {
 			onig_error_code_to_str(err_str, err_code, err_info);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex compile err: %s", err_str);
 			retval = NULL;
@@ -559,7 +559,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	regs = onig_region_new();
 
 	/* actually execute the regular expression */
-	if (onig_search(re, (UChar *)string, (UChar *)(string + string_len), string, (UChar *)(string + string_len), regs, 0) < 0) {
+	if (onig_search(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), string, (OnigUChar *)(string + string_len), regs, 0) < 0) {
 		RETVAL_FALSE;
 		goto out;
 	}
@@ -634,8 +634,8 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	smart_str eval_buf = { 0 };
 	smart_str *pbuf;
 	int i, err, eval, n;
-	UChar *pos;
-	UChar *string_lim;
+	OnigUChar *pos;
+	OnigUChar *string_lim;
 	char *description = NULL;
 	char pat_buf[2];
 
@@ -699,12 +699,12 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	/* do the actual work */
 	err = 0;
 	pos = string;
-	string_lim = (UChar*)(string + string_len);
+	string_lim = (OnigUChar*)(string + string_len);
 	regs = onig_region_new();
 	while (err >= 0) {
-		err = onig_search(re, (UChar *)string, (UChar *)string_lim, pos, (UChar *)string_lim, regs, 0);
+		err = onig_search(re, (OnigUChar *)string, (OnigUChar *)string_lim, pos, (OnigUChar *)string_lim, regs, 0);
 		if (err <= -2) {
-			UChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
+			OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 			onig_error_code_to_str(err_str, err);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in php_mbereg_replace_exec(): %s", err_str);
 			break;
@@ -717,7 +717,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			}
 #endif
 			/* copy the part of the string before the match */
-			smart_str_appendl(&out_buf, pos, (size_t)((UChar *)(string + regs->beg[0]) - pos));
+			smart_str_appendl(&out_buf, pos, (size_t)((OnigUChar *)(string + regs->beg[0]) - pos));
 			/* copy replacement and backrefs */
 			i = 0;
 			p = replace;
@@ -754,7 +754,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				zval_dtor(&v);
 			}
 			n = regs->end[0];
-			if ((size_t)(pos - (UChar *)string) < n) {
+			if ((size_t)(pos - (OnigUChar *)string) < n) {
 				pos = string + n;
 			} else {
 				if (pos < string_lim) {
@@ -814,7 +814,7 @@ PHP_FUNCTION(mb_split)
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
 	char *string;
-	UChar *pos;
+	OnigUChar *pos;
 	int string_len;
 
 	int n, err;
@@ -835,28 +835,28 @@ PHP_FUNCTION(mb_split)
 
 	array_init(return_value);
 
-	pos = (UChar *)string;
+	pos = (OnigUChar *)string;
 	err = 0;
 	regs = onig_region_new();
 	/* churn through str, generating array entries as we go */
 	while ((--count != 0) &&
-		   (err = onig_search(re, (UChar *)string, (UChar *)(string + string_len), pos, (UChar *)(string + string_len), regs, 0)) >= 0) {
+		   (err = onig_search(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), pos, (OnigUChar *)(string + string_len), regs, 0)) >= 0) {
 		if (regs->beg[0] == regs->end[0]) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
 			break;
 		}
 
 		/* add it to the array */
-		if (regs->beg[0] < string_len && regs->beg[0] >= (size_t)(pos - (UChar *)string)) {
-			add_next_index_stringl(return_value, pos, ((UChar *)(string + regs->beg[0]) - pos), 1);
+		if (regs->beg[0] < string_len && regs->beg[0] >= (size_t)(pos - (OnigUChar *)string)) {
+			add_next_index_stringl(return_value, pos, ((OnigUChar *)(string + regs->beg[0]) - pos), 1);
 		} else {
 			err = -2;
 			break;
 		}
 		/* point at our new starting point */
 		n = regs->end[0];
-		if ((pos - (UChar *)string) < n) {
-			pos = (UChar *)string + n;
+		if ((pos - (OnigUChar *)string) < n) {
+			pos = (OnigUChar *)string + n;
 		}
 		if (count < 0) {
 			count = 0;
@@ -868,7 +868,7 @@ PHP_FUNCTION(mb_split)
 
 	/* see if we encountered an error */
 	if (err <= -2) {
-		UChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
+		OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 		onig_error_code_to_str(err_str, err);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in mbsplit(): %s", err_str);
 		zval_dtor(return_value);
@@ -876,7 +876,7 @@ PHP_FUNCTION(mb_split)
 	}
 
 	/* otherwise we just have one last element to add to the array */
-	n = ((UChar *)(string + string_len) - pos);
+	n = ((OnigUChar *)(string + string_len) - pos);
 	if (n > 0) {
 		add_next_index_stringl(return_value, pos, n, 1);
 	} else {
@@ -922,7 +922,7 @@ PHP_FUNCTION(mb_ereg_match)
 	}
 
 	/* match */
-	err = onig_match(re, (UChar *)string, (UChar *)(string + string_len), (UChar *)string, NULL, 0);
+	err = onig_match(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), (OnigUChar *)string, NULL, 0);
 	if (err >= 0) {
 		RETVAL_TRUE;
 	} else {
@@ -938,7 +938,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zval **arg_pattern, **arg_options;
 	int n, i, err, pos, len, beg, end, option;
-	UChar *str;
+	OnigUChar *str;
 	OnigSyntaxType *syntax;
 
 	option = MBSTRG(regex_default_options);
@@ -975,7 +975,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	str = NULL;
 	len = 0;
 	if (MBSTRG(search_str) != NULL && Z_TYPE_P(MBSTRG(search_str)) == IS_STRING){
-		str = (UChar *)Z_STRVAL_P(MBSTRG(search_str));
+		str = (OnigUChar *)Z_STRVAL_P(MBSTRG(search_str));
 		len = Z_STRLEN_P(MBSTRG(search_str));
 	}
 
@@ -999,7 +999,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		MBSTRG(search_pos) = len;
 		RETVAL_FALSE;
 	} else if (err <= -2) {
-		UChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
+		OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 		onig_error_code_to_str(err_str, err);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in mbregex_search(): %s", err_str);
 		RETVAL_FALSE;
@@ -1138,12 +1138,12 @@ PHP_FUNCTION(mb_ereg_search_init)
 PHP_FUNCTION(mb_ereg_search_getregs)
 {
 	int n, i, len, beg, end;
-	UChar *str;
+	OnigUChar *str;
 
 	if (MBSTRG(search_regs) != NULL && Z_TYPE_P(MBSTRG(search_str)) == IS_STRING && Z_STRVAL_P(MBSTRG(search_str)) != NULL) {
 		array_init(return_value);
 
-		str = (UChar *)Z_STRVAL_P(MBSTRG(search_str));
+		str = (OnigUChar *)Z_STRVAL_P(MBSTRG(search_str));
 		len = Z_STRLEN_P(MBSTRG(search_str));
 		n = MBSTRG(search_regs)->num_regs;
 		for (i = 0; i < n; i++) {

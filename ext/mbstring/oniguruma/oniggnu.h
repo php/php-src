@@ -56,47 +56,9 @@ extern "C" {
 #define RE_OPTION_DONT_CAPTURE_GROUP ONIG_OPTION_DONT_CAPTURE_GROUP
 #define RE_OPTION_CAPTURE_GROUP      ONIG_OPTION_CAPTURE_GROUP
 
-#ifdef RUBY_PLATFORM
 
-#ifndef ONIG_RUBY_M17N
-
-ONIG_EXTERN OnigEncoding    OnigEncDefaultCharEncoding;
-
-#undef ismbchar
-#define ismbchar(c) (mbclen((c)) != 1)
-#define mbclen(c)  \
-  ONIGENC_MBC_ENC_LEN(OnigEncDefaultCharEncoding, (UChar* )(&c))
-
-#endif /* ifndef ONIG_RUBY_M17N */
-
-#define re_mbcinit              ruby_re_mbcinit
-#define re_compile_pattern      ruby_re_compile_pattern
-#define re_recompile_pattern    ruby_re_recompile_pattern
-#define re_free_pattern         ruby_re_free_pattern
-#define re_adjust_startpos      ruby_re_adjust_startpos
-#define re_search               ruby_re_search
-#define re_match                ruby_re_match
-#define re_set_casetable        ruby_re_set_casetable
-#define re_copy_registers       ruby_re_copy_registers
-#define re_free_registers       ruby_re_free_registers
-#define register_info_type      ruby_register_info_type
-#define re_error_code_to_str    ruby_error_code_to_str
-
-#define ruby_error_code_to_str  onig_error_code_to_str
-#define ruby_re_copy_registers  onig_region_copy
-#else
-#define re_error_code_to_str    onig_error_code_to_str
-#define re_copy_registers       onig_region_copy
-#endif
-
-#ifdef ONIG_RUBY_M17N
-ONIG_EXTERN
-void re_mbcinit P_((OnigEncoding));
-#else
 ONIG_EXTERN
 void re_mbcinit P_((int));
-#endif
-
 ONIG_EXTERN
 int re_compile_pattern P_((const char*, int, struct re_pattern_buffer*, char* err_buf));
 ONIG_EXTERN

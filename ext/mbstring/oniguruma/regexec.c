@@ -3354,8 +3354,11 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
 	  if (sch_range > end) sch_range = (UChar* )end;
 	}
       }
-      if (reg->dmax != ONIG_INFINITE_DISTANCE &&
-	  (end - start) >= reg->threshold_len) {
+
+      if ((end - start) < reg->threshold_len)
+        goto mismatch;
+
+      if (reg->dmax != ONIG_INFINITE_DISTANCE) {
 	do {
 	  if (! forward_search_range(reg, str, end, s, sch_range,
 				     &low, &high, &low_prev)) goto mismatch;
@@ -3368,22 +3371,26 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
 	    prev = s;
 	    s += enc_len(reg->enc, s);
 	  }
-	  if ((reg->anchor & ANCHOR_ANYCHAR_STAR) != 0) {
-	    if (IS_NOT_NULL(prev)) {
-	      while (!ONIGENC_IS_MBC_NEWLINE(reg->enc, prev, end) &&
-                     s < range) {
-		prev = s;
-		s += enc_len(reg->enc, s);
-	      }
-	    }
-	  }
 	} while (s < range);
 	goto mismatch;
       }
       else { /* check only. */
-	if ((end - start) < reg->threshold_len ||
-	    ! forward_search_range(reg, str, end, s, sch_range,
+	if (! forward_search_range(reg, str, end, s, sch_range,
 				   &low, &high, (UChar** )NULL)) goto mismatch;
+
+        if ((reg->anchor & ANCHOR_ANYCHAR_STAR) != 0) {
+          do {
+            MATCH_AND_RETURN_CHECK;
+            prev = s;
+            s += enc_len(reg->enc, s);
+
+            while (!ONIGENC_IS_MBC_NEWLINE(reg->enc, prev, end) && s < range) {
+              prev = s;
+              s += enc_len(reg->enc, s);
+            }
+          } while (s < range);
+          goto mismatch;
+        }
       }
     }
 
