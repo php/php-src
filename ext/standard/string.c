@@ -1481,24 +1481,142 @@ PHP_FUNCTION(strpos)
 }
 /* }}} */
 
-/* {{{ proto int strrpos(string haystack, string needle)
+/* {{{ proto int stripos(string haystack, string needle [, int offset])
+   Finds position of first occurrence of a string within another, case insensitive */
+PHP_FUNCTION(stripos)
+{
+	char *found = NULL;
+	char *haystack;
+	int haystack_len;
+	long offset = 0;
+	char *needle_dup = NULL, *haystack_dup;
+	char needle_char[2];
+	zval *needle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
+		return;
+	}
+	if (offset < 0 || offset > haystack_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
+		RETURN_FALSE;
+	}
+
+	haystack_dup = estrndup(haystack, haystack_len);
+	php_strtolower(haystack_dup, haystack_len);
+
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		needle_dup = estrndup(Z_STRVAL_P(needle), Z_STRLEN_P(needle));
+		php_strtolower(needle_dup, Z_STRLEN_P(needle));
+		found = php_memnstr(haystack_dup + offset, needle_dup, Z_STRLEN_P(needle), haystack_dup + haystack_len);
+	} else {
+		switch (Z_TYPE_P(needle)) {
+			case IS_LONG:
+			case IS_BOOL:
+				needle_char[0] = tolower((char) Z_LVAL_P(needle));
+				break;
+			case IS_DOUBLE:
+				needle_char[0] = tolower((char) Z_DVAL_P(needle));
+				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "needle is not a string or an integer.");
+				efree(haystack_dup);
+				RETURN_FALSE;
+				break;
+					
+		}
+		needle_char[1] = '\0';
+		found = php_memnstr(haystack_dup + offset, needle_char, sizeof(needle_char) - 1, haystack_dup + haystack_len);
+	}
+
+	efree(haystack_dup);
+	if (needle_dup) {
+		efree(needle_dup);
+	}
+
+	if (found) {
+		RETURN_LONG(found - haystack_dup);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int strrpos(string haystack, string needle [, int offset])
    Finds position of last occurrence of a character in a string within another */
 PHP_FUNCTION(strrpos)
 {
-	zval **haystack, **needle;
+	zval **haystack, **needle, **offset;
 	char *found = NULL;
+	int argc = ZEND_NUM_ARGS();
+	int off = 0;
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
+	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &haystack, &needle, &offset) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(haystack);
 
+	if (argc == 3) {
+		convert_to_long_ex(offset);
+		if (Z_LVAL_PP(offset) < 0 || Z_LVAL_PP(offset) > Z_STRLEN_PP(haystack)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
+			RETURN_FALSE;
+		}
+		off = Z_LVAL_PP(offset); 
+	}
+
 	if (Z_TYPE_PP(needle) == IS_STRING) {
-		found = strrchr(Z_STRVAL_PP(haystack), *Z_STRVAL_PP(needle));
+		found = strrchr(Z_STRVAL_PP(haystack) + off, *Z_STRVAL_PP(needle));
 	} else {
 		convert_to_long_ex(needle);
-		found = strrchr(Z_STRVAL_PP(haystack), (char) Z_LVAL_PP(needle));
+		found = strrchr(Z_STRVAL_PP(haystack) + off, (char) Z_LVAL_PP(needle));
 	}
+
+	if (found) {
+		RETURN_LONG(Z_STRLEN_PP(haystack) - strlen(found));
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int strripos(string haystack, string needle [, int offset])
+   Finds position of last occurrence of a character in a string within another, case insensitive */
+PHP_FUNCTION(strripos)
+{
+	zval **haystack, **needle, **offset;
+	char *found = NULL;
+	int argc = ZEND_NUM_ARGS();
+	int off = 0;
+	char *haystack_dup;
+	char needle_dup;
+	
+	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &haystack, &needle, &offset) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(haystack);
+
+	if (argc == 3) {
+		convert_to_long_ex(offset);
+		if (Z_LVAL_PP(offset) < 0 || Z_LVAL_PP(offset) > Z_STRLEN_PP(haystack)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
+			RETURN_FALSE;
+		}
+		off = Z_LVAL_PP(offset); 
+	}
+
+	haystack_dup = estrndup(Z_STRVAL_PP(haystack), Z_STRLEN_PP(haystack));
+	php_strtolower(haystack_dup, Z_STRLEN_PP(haystack));
+
+	if (Z_TYPE_PP(needle) == IS_STRING) {
+		needle_dup = *Z_STRVAL_PP(needle);
+	} else {
+		convert_to_long_ex(needle);
+		needle_dup = (char) Z_LVAL_PP(needle);
+	}
+
+	found = strrchr(haystack_dup + off, tolower(needle_dup));
+
+	efree(haystack_dup);
 
 	if (found) {
 		RETURN_LONG(Z_STRLEN_PP(haystack) - strlen(found));
