@@ -29,7 +29,7 @@ AC_DEFUN(PHP_GD_XPM,[
             withval="/usr/X11R6"
           fi
           old_LIBS=$LIBS
-          LIBS="$LIBS -L$withval/lib"
+          LIBS="$LIBS -lX11 -L$withval/lib"
           AC_CHECK_LIB(Xpm,XpmFreeXpmImage, [LIBS="$LIBS -L$withval/lib -lXpm"],[AC_MSG_RESULT(no)],)
           LIBS=$old_LIBS
           AC_ADD_LIBRARY_WITH_PATH(Xpm, $withval/lib)
