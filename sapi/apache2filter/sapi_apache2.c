@@ -310,6 +310,8 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 	apr_bucket *b;
 	const char *str;
 	apr_size_t n;
+	const char *prev_fetched_str;
+	apr_size_t prev_fetched_str_len;
 	apr_status_t rv;
 	TSRMLS_FETCH();
 
@@ -328,8 +330,25 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 		return rv;
 	}
 
+	prev_fetched_str = NULL;
+	prev_fetched_str_len = -1;
+
 	for (b = APR_BRIGADE_FIRST(bb); b != APR_BRIGADE_SENTINEL(bb); b = APR_BUCKET_NEXT(b)) {
 		apr_bucket_read(b, &str, &n, 1);
+		if (APR_BUCKET_IS_HEAP(b)) {
+			if ((str == prev_fetched_str && n == prev_fetched_str_len)) {
+				char *brigade_dump = NULL;
+				apr_bucket *tmp;
+
+				for (tmp = APR_BRIGADE_FIRST(bb); tmp != APR_BRIGADE_SENTINEL(bb); tmp = APR_BUCKET_NEXT(tmp)) {
+					brigade_dump = apr_psprintf(f->r->pool, "%s[%s %x] ", (brigade_dump ? brigade_dump: ""), tmp->type->name, (int)tmp);
+				}
+
+				ap_log_error(APLOG_MARK, APLOG_WARNING, 0, 0, "* BUG * You encountered an apr bug. Please contact to php-dev@lists.php.net with the following information: %s", (brigade_dump ? brigade_dump: "(empty)"));
+			}
+			prev_fetched_str = str;
+			prev_fetched_str_len = n;
+		}
 		if (n > 0) {
 			old_index = ctx->post_len;
 			ctx->post_len += n;
