@@ -92,7 +92,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 /*!re2c
 iv = [+-]? [0-9]+;
 nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]+);
-nvexp = nv [eE] [+-]? iv;
+nvexp = (iv | nv) [eE] [+-]? iv;
 any = [\000-\277];
 */
 
