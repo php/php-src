@@ -252,12 +252,12 @@ static int _restore_connection_defaults(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 
 	/* rollback possible transactions */
-	strcpy (query, "ROLLBACK");
+	memcpy(query, "ROLLBACK", sizeof("ROLLBACK"));
 	/* Binary safe query not required here */
 	mysql_query(&link->conn, query);
 
 	/* restore session variable "autocommit" to default (=1) */
-	strcpy (query, "SET AUTOCOMMIT=1");
+	memcpy(query, "SET AUTOCOMMIT=1", sizeof("SET AUTOCOMMIT=1"));
 	/* Binary safe query not required here */
 	mysql_query(&link->conn, query);
 
@@ -2198,7 +2198,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_MYSQL_FIELD_FLAGS:
-			strcpy(buf, "");
+			memcpy(buf, "", sizeof(""));
 #ifdef IS_NOT_NULL
 			if (IS_NOT_NULL(mysql_field->flags)) {
 				strcat(buf, "not_null ");
