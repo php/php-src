@@ -200,9 +200,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_row(2, "Configuration File (php.ini) Path", php_ini_opened_path?php_ini_opened_path:PHP_CONFIG_FILE_PATH);
 
 #if ZEND_DEBUG
-		php_info_print_table_row(2, "ZEND_DEBUG", "enabled" );
+		php_info_print_table_row(2, "Debug Build", "Yes" );
 #else
-		php_info_print_table_row(2, "ZEND_DEBUG", "disabled" );
+		php_info_print_table_row(2, "Debug Build", "No" );
 #endif
 
 #ifdef ZTS
