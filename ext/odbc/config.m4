@@ -441,21 +441,25 @@ AC_MSG_CHECKING(for OpenLink ODBC support)
 AC_ARG_WITH(openlink,
 [  --with-openlink[=DIR]   Include OpenLink ODBC support.  DIR is the
                           OpenLink base install directory, defaults to
-                          /usr/local/openlink.],
+                          /usr/local.  This is the same as iODBC.],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
-    withval=/usr/local/openlink
+    withval=/usr/local
   fi
   if test "$withval" != "no"; then
-    ODBC_INCDIR=$withval/odbcsdk/include
-    ODBC_LIBDIR=$withval/odbcsdk/lib
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
+	PHP_ADD_LIBRARY_WITH_PATH(iodbc, $withval/lib)
+	PHP_ADD_INCLUDE($withval/include, 1)
+    ODBC_TYPE=iodbc
+    ODBC_INCLUDE=-I$withval/include
+    ODBC_LFLAGS=-L$withval/lib
     ODBC_LIBS=-liodbc
-    ODBC_TYPE=openlink
-    AC_DEFINE(HAVE_OPENLINK,1,[ ])
+    AC_DEFINE(HAVE_IODBC,1,[ ])
     AC_MSG_RESULT(yes)
+	echo "****************************************************************"
+	echo "  --with-openlink will not be valid in future releases.  Please "
+	echo " update your configure script to use --with-iodbc instead.      "
+	echo "****************************************************************"
   else
     AC_MSG_RESULT(no)
   fi
