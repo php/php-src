@@ -114,7 +114,7 @@ zend_module_entry session_module_entry = {
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
 	PHP_RINIT(session), PHP_RSHUTDOWN(session),
 	PHP_MINFO(session),
-	STANDARD_MODULE_PROPERTIES,
+	STANDARD_MODULE_PROPERTIES
 };
 
 typedef struct {
