@@ -1794,7 +1794,6 @@ AC_DEFUN([PHP_SETUP_LIBXML], [
         PHP_TEST_BUILD(xmlInitParser,
         [
           php_cv_libxml_build_works=yes
-          AC_DEFINE(HAVE_LIBXML, 1, [ ])
         ], [
           AC_MSG_RESULT(no)
           AC_MSG_ERROR([build test failed.  Please check the config.log for details.])
@@ -1802,6 +1801,9 @@ AC_DEFUN([PHP_SETUP_LIBXML], [
           [$]$1
         ])
       ])
+      if test "$php_cv_libxml_build_works" = "yes"; then
+        AC_DEFINE(HAVE_LIBXML, 1, [ ])
+      fi
       $2
     else
       AC_MSG_ERROR([libxml2 version 2.5.10 or greater required.])
