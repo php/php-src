@@ -43,7 +43,7 @@ char *program_name = "php";
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
-php_recode_globals recode_globals;
+ZEND_DECLARE_MODULE_GLOBALS(recode);
 extern int le_fp,le_pp;
 
 /* {{{ module stuff */

@@ -61,19 +61,20 @@ PHP_MINFO_FUNCTION(recode);
 PHP_FUNCTION(recode_string);
 PHP_FUNCTION(recode_file);
 
-typedef struct {
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
+ZEND_BEGIN_MODULE_GLOBALS(recode)
 	RECODE_OUTER   outer;
-} php_recode_globals;
+ZEND_END_MODULE_GLOBALS(recode)
 
 #ifdef ZTS
-# define ReSG(v) TSRMG(recode_globals_id, php_recode_globals *, v)
+#define ReSG(v) TSRMG(recode_globals_id, zend_recode_globals *, v)
 #else
-# define ReSG(v) (recode_globals.v)
-extern PHP_MYSQL_API php_recode_globals recode_globals;
+#define ReSG(v) (recode_globals.v)
 #endif
 
-#else
-#define phpext_recode_ptr NULL
 #endif
-
+	
 #endif /* PHP_RECODE_H */
