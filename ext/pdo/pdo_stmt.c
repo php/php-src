@@ -235,6 +235,8 @@ static PHP_METHOD(PDOStatement, execute)
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &input_params)) {
 		RETURN_FALSE;
 	}
+
+	PDO_STMT_CLEAR_ERR();
 	
 	if (input_params) {
 		struct pdo_bound_param_data param;
@@ -315,6 +317,7 @@ static PHP_METHOD(PDOStatement, execute)
 		efree(stmt->active_query_string);
 		stmt->active_query_string = NULL;
 	}
+	PDO_HANDLE_STMT_ERR();
 	RETURN_FALSE;
 }
 /* }}} */
@@ -379,7 +382,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, int do_bind TSRMLS_DC)
 
 				/* TODO: some smart thing that avoids duplicating the value in the
 				 * general loop below.  For now, if you're binding output columns,
-				 * it's better to use LAZY or NONE fetches if you want to shave
+				 * it's better to use LAZY or BOUND fetches if you want to shave
 				 * off those cycles */
 			}
 
@@ -439,7 +442,9 @@ static PHP_METHOD(PDOStatement, fetch)
 		RETURN_FALSE;
 	}
 
+	PDO_STMT_CLEAR_ERR();
 	if (!do_fetch(stmt, TRUE, return_value, how TSRMLS_CC)) {
+		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
 }
@@ -455,7 +460,9 @@ static PHP_METHOD(PDOStatement, fetchSingle)
 		RETURN_FALSE;
 	}
 
+	PDO_STMT_CLEAR_ERR();
 	if (!do_fetch_common(stmt, TRUE TSRMLS_CC)) {
+		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
 
@@ -475,8 +482,10 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		RETURN_FALSE;
 	}
 	
+	PDO_STMT_CLEAR_ERR();
 	MAKE_STD_ZVAL(data);
 	if (!do_fetch(stmt, TRUE, data, how TSRMLS_CC)) {
+		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
 
@@ -552,7 +561,8 @@ static PHP_METHOD(PDOStatement, rowCount)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_LONG(stmt->row_count);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This statement is not a scrollable cursor and does not know the row count");
+	RETURN_FALSE;
 }
 /* }}} */
 

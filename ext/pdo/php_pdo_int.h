@@ -36,6 +36,14 @@ extern zend_object_handlers pdo_dbstmt_object_handlers;
 
 extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);
 
+extern void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC);
+
+#define PDO_DBH_CLEAR_ERR()		dbh->error_code = PDO_ERR_NONE
+#define PDO_STMT_CLEAR_ERR()	stmt->error_code = PDO_ERR_NONE
+#define PDO_HANDLE_DBH_ERR()	pdo_handle_error(dbh, NULL TSRMLS_CC)
+#define PDO_HANDLE_STMT_ERR()	pdo_handle_error(stmt->dbh, stmt TSRMLS_CC)
+
+
 /*
  * Local variables:
  * tab-width: 4
