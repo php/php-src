@@ -1,3 +1,51 @@
+2003-08-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Fix ZTS
+
+    * zend_execute_API.c:
+      Nuke unused variables
+
+    * zend_reflection_api.c:
+      Add function/method parameter reflection
+
+2003-08-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute_API.c
+      tests/bug23104.phpt:
+      Fixed bug #23104 (hash position of static arrays not being reset)
+
+2003-08-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute_API.c:
+      oops. forgot function
+
+    * zend_execute_API.c:
+      fix crash #24842
+
+    * zend_compile.c:
+      fix leaks: bug #24831
+
+    * zend_execute.c:
+      use get_obj_zval_ptr
+
+    * tests/bug24884.phpt:
+      add test
+
+    * zend_execute.c:
+      Fix #24884 - clone $this
+
+2003-08-04  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Simplify code using XOR
+
+    * zend.h:
+      Add logical XOR, proves to be quite useful lately
+
+    * zend_opcode.c:
+      This check shouldn't be necessary
+
 2003-08-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_opcode.c:
