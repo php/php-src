@@ -1,3 +1,53 @@
+2001-08-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gettext/gettext.c: Coding style.
+
+2001-08-27  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/PEAR/WebInstaller.php:
+    * fixes to make package.xml parsing case insensitive
+
+    * run-tests.php: * typo
+
+    * run-tests.php:
+    * add the directory where php.exe was found to PATH to help Windows
+      find its DLLs
+
+    * run-tests.php: * Windows fix
+
+2001-08-27  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/gettext/gettext.c: shorter protos
+
+    * ext/gettext/gettext.c
+      ext/gettext/php_gettext.h:
+    add ngettext() support from Walter Franzini <walter@sys-net.it>, and use Z_*
+    macros.
+
+2001-08-27  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Moved to 4.0.7.
+
+    * NEWS
+      ext/standard/array.c: MFH
+
+2001-08-27  Stig Bakken  <ssb@fast.no>
+
+    * run-tests.php: * MTH (merge _to_ head)
+
+    * run-tests.php: * be smarter when trying to locate PHP binary
+
+2001-08-27  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/session.c: Cleanup
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/session/php_session.h
+      ext/session/session.c: More fixes and refinements
+
 2001-08-26  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
 
     * ext/standard/Makefile.in
