@@ -366,9 +366,9 @@ PHP_FUNCTION(get_meta_tags)
 
 /* }}} */
 
-/* {{{ proto string get_file_contents(string filename [, bool use_include_path])
+/* {{{ proto string file_get_contents(string filename [, bool use_include_path])
    Read the entire file into a string */
-PHP_FUNCTION(get_file_contents)
+PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
 	int filename_len;
