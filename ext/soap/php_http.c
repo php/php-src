@@ -55,6 +55,30 @@ static int stream_alive(php_stream *stream  TSRMLS_DC)
 	return TRUE;
 }
 
+/* Proxy HTTP Authentication */
+static void proxy_authentication(zval* this_ptr, smart_str* soap_headers)
+{
+	zval **login, **password;
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login"), (void **)&login) == SUCCESS) {
+		char* buf;
+		int len;
+		smart_str auth = {0};
+
+		smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
+		smart_str_appendc(&auth, ':');
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_password", sizeof("_proxy_password"), (void **)&password) == SUCCESS) {
+			smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
+		}
+		smart_str_0(&auth);
+		buf = php_base64_encode(auth.c, auth.len, &len);
+		smart_str_append_const(soap_headers, "Proxy-Authorization: Basic ");
+		smart_str_appendl(soap_headers, buf, len);
+		smart_str_append_const(soap_headers, "\r\n");
+		efree(buf);
+		smart_str_free(&auth);
+	}
+}
+
 int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *soapaction, int soap_version TSRMLS_DC)
 {
 	xmlChar *buf;
@@ -211,15 +235,38 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL TSRMLS_CC);
 			return FALSE;
 		}
-	}
+	} 
 
 	/* TODO: SSL & proxy */
+/*
+	if (stream && use_proxy && use_ssl) {
+		char *http_headers;
+		int http_header_size;
+
+		smart_str_append_const(&soap_headers, "CONNECT ");
+		smart_str_appends(&soap_headers, phpurl->host);
+		smart_str_appendc(&soap_headers, ':');
+		smart_str_append_unsigned(&soap_headers, phpurl->port);
+		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
+		proxy_authentication(this_ptr, &soap_headers);
+		smart_str_append_const(&soap_headers, "\r\n");
+		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
+		if (err != soap_headers.len) {
+		}
+   	smart_str_free(&soap_headers);
+
+		if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC) || http_headers == NULL) {
+		}
+		efree(http_headers);
+		FIXME: How to enbale SSL here???
+	}
+*/
 
 	if (stream) {
 		zval **cookies, **login, **password;
 
 		smart_str_append_const(&soap_headers, "POST ");
-		if (use_proxy) {
+		if (use_proxy && !use_ssl) {
 			smart_str_appends(&soap_headers, phpurl->scheme);
 			smart_str_append_const(&soap_headers, "://");
 			smart_str_appends(&soap_headers, phpurl->host);
@@ -275,23 +322,8 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 		}
 
 		/* Proxy HTTP Authentication */
-		if (use_proxy && zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login"), (void **)&login) == SUCCESS) {
-			char* buf;
-			int len;
-
-			smart_str auth = {0};
-			smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
-			smart_str_appendc(&auth, ':');
-			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_password", sizeof("_proxy_password"), (void **)&password) == SUCCESS) {
-				smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
-			}
-			smart_str_0(&auth);
-			buf = php_base64_encode(auth.c, auth.len, &len);
-			smart_str_append_const(&soap_headers, "Proxy-Authorization: Basic ");
-			smart_str_appendl(&soap_headers, buf, len);
-			smart_str_append_const(&soap_headers, "\r\n");
-			efree(buf);
-			smart_str_free(&auth);
+		if (use_proxy && !use_ssl) {
+			proxy_authentication(this_ptr, &soap_headers);
 		}
 
 		/* Send cookies along with request */
