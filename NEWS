@@ -1,16 +1,15 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
-- Fixed bugs in the mcrypt extension that caused crashes (Derick)
+- Fixed bugs in the mcrypt extension that caused crashes. (Derick)
 - Added the IMG_ARC_ROUNDED option for the ImageFilledArc() function, which
   specified that the drawn curve should be rounded. (Sterling)
 - Fixed getopt so it accepts arguments in the form -<option><value> not
-  just -<option> <value> (jmoore)
-- Updated the sockets extension to use resources instead of longs for the Socket
-  descriptors.
-  The socket functions have been renamed to conform with the PHP standard
-  instead of their C counterparts.
-  The sockets extension is now usable under Win32 (Daniel)
+  just -<option> <value>. (jmoore)
+- Updated the sockets extension to use resources instead of longs for the
+  ocket descriptors.  The socket functions have been renamed to conform with
+  the PHP standard instead of their C counterparts.  The sockets extension is now
+  usable under Win32. (Daniel)
 - Added disk_total_space() to return the total size of a filesystem.
   (Patch from Steven Bower)
 - Renamed diskfreespace() to disk_free_space() to conform to established
