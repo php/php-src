@@ -31,13 +31,12 @@
 #define PHP_MSSQL_API
 #endif
 
-
-#define MSSQL_VERSION "7.0"
 #include <sqlfront.h>
 #include <sqldb.h>
 
 typedef short TDS_SHORT;
-#if HAVE_FREETDS
+#ifdef HAVE_FREETDS
+#define MSSQL_VERSION "FreeTDS"
 #define SQLTEXT SYBTEXT
 #define SQLCHAR SYBCHAR
 #define SQLVARCHAR SYBVARCHAR
@@ -62,7 +61,6 @@ typedef short TDS_SHORT;
 #define SQLVARBINARY SYBVARBINARY
 #ifdef SQLUNIQUE /* FreeTSD 0.61+ */
 #define SQLUNIQUE SYBUNIQUE
-#define dbfreelogin dbloginfree
 #endif
 #define DBERRHANDLE(a, b) dberrhandle(b)
 #define DBMSGHANDLE(a, b) dbmsghandle(b)
@@ -73,6 +71,7 @@ typedef short TDS_SHORT;
 typedef unsigned char	*LPBYTE;
 typedef float           DBFLT4;
 #else
+#define MSSQL_VERSION "7.0"
 #define DBERRHANDLE(a, b) dbprocerrhandle(a, b)
 #define DBMSGHANDLE(a, b) dbprocmsghandle(a, b)
 #define EHANDLEFUNC DBERRHANDLE_PROC
