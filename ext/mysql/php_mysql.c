@@ -1001,7 +1001,7 @@ PHP_FUNCTION(mysql_info)
 		CHECK_LINK(id);
 	}
 
-	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	if ((str = (char *)mysql_info(&mysql->conn))) {
 		RETURN_STRING(str,1);
