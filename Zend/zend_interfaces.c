@@ -27,7 +27,7 @@ ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
-ZEND_API zend_class_entry *zend_ce_serializeable;
+ZEND_API zend_class_entry *zend_ce_serializable;
 
 /* {{{ zend_call_method 
  Only returns the returned zval if retval_ptr != NULL */
@@ -452,8 +452,8 @@ int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned ch
 }
 /* }}} */
 
-/* {{{ zend_implement_serializeable */
-static int zend_implement_serializeable(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
+/* {{{ zend_implement_serializable */
+static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
 	if ((class_type->serialize   && class_type->serialize   != zend_user_serialize)
 	||  (class_type->unserialize && class_type->unserialize != zend_user_unserialize)
@@ -508,13 +508,13 @@ zend_function_entry zend_funcs_arrayaccess[] = {
 };
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_serializeable_serialize, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_serializable_serialize, 0)
 	ZEND_ARG_INFO(0, serialized)
 ZEND_END_ARG_INFO();
 
-zend_function_entry zend_funcs_serializeable[] = {
-	ZEND_ABSTRACT_ME(serializeable, serialize,   NULL)
-	ZEND_FENTRY(unserialize, NULL, arginfo_serializeable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR) 
+zend_function_entry zend_funcs_serializable[] = {
+	ZEND_ABSTRACT_ME(serializable, serialize,   NULL)
+	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR) 
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -543,7 +543,7 @@ ZEND_API void zend_register_interfaces(TSRMLS_D)
 	
 	REGISTER_ITERATOR_INTERFACE(arrayaccess, ArrayAccess);
 	
-	REGISTER_ITERATOR_INTERFACE(serializeable, Serializeable)
+	REGISTER_ITERATOR_INTERFACE(serializable, Serializable)
 }
 /* }}} */
 
