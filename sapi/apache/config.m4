@@ -29,12 +29,12 @@ AC_ARG_WITH(apxs,
 	AC_DEFINE(HAVE_AP_CONFIG_H)
 	AC_DEFINE(HAVE_AP_COMPAT_H)
 	AC_MSG_RESULT(yes)
+	PHP_OUTPUT(sapi/apache/Makefile)
 ],[
 	AC_MSG_RESULT(no)
 ])
 
-APACHE_INSTALL_FILES="sapi/apache/mod_php4.* sapi/apache/libphp4.module"
-PHP_OUTPUT(sapi/apache/libphp4.module)
+APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php4.* sapi/apache/libphp4.module"
 
 if test "$SAPI_TARGET" != "libmodphp4-so.a"; then
 if test "$SAPI_TARGET" != "libphp4.so"; then
@@ -48,6 +48,8 @@ AC_ARG_WITH(apache,
 	  withval=/usr/local/apache
 	fi
 	if test "$withval" != "no"; then
+		APACHE_MODULE=yes
+		PHP_OUTPUT(sapi/apache/Makefile)
 		AC_EXPAND_PATH($withval, withval)
 		# For Apache 1.2.x
 		if test -f $withval/src/httpd.h; then 
@@ -181,6 +183,11 @@ AC_ARG_WITH(mod_charset,
 ],[
 	AC_MSG_RESULT(no)
 ])
+
+if test -n "$APACHE_MODULE"; then
+  PHP_OUTPUT(sapi/apache/libphp4.module)
+fi
+
 
 dnl ## Local Variables:
 dnl ## tab-width: 4
