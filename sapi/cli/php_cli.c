@@ -293,6 +293,8 @@ static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 
 	INI_DEFAULT("register_argc_argv", "1");
 	INI_DEFAULT("html_errors", "0");
+	INI_DEFAULT("report_zend_debug", "0");
+	INI_DEFAULT("display_errors", "1");
 	INI_DEFAULT("implicit_flush", "1");
 	INI_DEFAULT("max_execution_time", "0");
 
