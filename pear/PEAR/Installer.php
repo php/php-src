@@ -193,8 +193,8 @@ class PEAR_Installer extends PEAR_Common
         $tmp_path = dirname($descfile);
         foreach ($pkginfo['filelist'] as $fname => $atts) {
             $dest_dir = $this->phpdir . DIRECTORY_SEPARATOR;
-            if (isset($atts['BaseInstallDir'])) {
-                $dest_dir .= $atts['BaseInstallDir'] . DIRECTORY_SEPARATOR;
+            if (isset($atts['BASEINSTALLDIR'])) {
+                $dest_dir .= $atts['BASEINSTALLDIR'] . DIRECTORY_SEPARATOR;
             }
             if (dirname($fname) != '.') {
                 $dest_dir .= dirname($fname) . DIRECTORY_SEPARATOR;
@@ -205,9 +205,13 @@ class PEAR_Installer extends PEAR_Common
         return true;
     }
 
+    // }}}
+
+    // {{{ _installFile()
+
     function _installFile($file, $dest_dir, $atts)
     {
-        $type = strtolower($atts['Role']);
+        $type = strtolower($atts['ROLE']);
         switch ($type) {
             case "test":
                 // don't install test files for now
@@ -227,10 +231,12 @@ class PEAR_Installer extends PEAR_Common
             }
             $this->log(2, "+ created dir $dest_dir");
         }
+        $orig_perms = fileperms($file);
         if (!@copy($file, $dest_file)) {
             $this->log(0, "failed to copy $file to $dest_file");
             return false;
         }
+        chmod($dest_file, $orig_perms);
         $this->log(2, "+ copy $file to $dest_file");
         // FIXME Update Package database here
         //$this->updatePackageListFrom("$d/$file");

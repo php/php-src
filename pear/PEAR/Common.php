@@ -14,6 +14,7 @@
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
 // | Authors: Stig Bakken <ssb@fast.no>                                   |
+// |          Tomas V.V.Cox <cox@idecnet.com>                             |
 // |                                                                      |
 // +----------------------------------------------------------------------+
 //
@@ -26,7 +27,7 @@ require_once 'PEAR.php';
 *   - check in inforFromDescFile that the minimal data needed is present
 *     (pack name, version, files, others?)
 *   - perhaps use parser folding to be less restrictive with the format
-      of the package.xml file
+*     of the package.xml file
 */
 class PEAR_Common extends PEAR
 {
@@ -47,6 +48,16 @@ class PEAR_Common extends PEAR
     /** assoc with information about a package */
     var $pkginfo = array();
 
+    /**
+    * Permitted maintainer roles
+    * @var array
+    */
+    var $maintainer_roles = array('lead','developer','contributor','helper');
+    /**
+    * Permitted release states
+    * @var array
+    */
+    var $releases_states  = array('alpha','beta','stable','snapshot');
     // }}}
 
     // {{{ constructor
@@ -119,25 +130,50 @@ class PEAR_Common extends PEAR
     {
         array_push($this->element_stack, $name);
         $this->current_element = $name;
+        $this->prev_element    = $this->element_stack[sizeof($this->element_stack)-2];
         $this->current_attributes = $attribs;
         switch ($name) {
-            case 'Dir':
+            case 'DIR':
                 if (isset($this->dir_names)) {
-                    $this->dir_names[] = $attribs['Name'];
+                    $this->dir_names[] = $attribs['NAME'];
                 } else {
                     // Don't add the root dir
                     $this->dir_names = array();
                 }
-                if (isset($attribs['BaseInstallDir'])) {
-                    $this->dir_install = $attribs['BaseInstallDir'];
+                if (isset($attribs['BASEINSTALLDIR'])) {
+                    $this->dir_install = $attribs['BASEINSTALLDIR'];
                 }
-                if (isset($attribs['Role'])) {
-                    $this->dir_role = $attribs['Role'];
+                if (isset($attribs['ROLE'])) {
+                    $this->dir_role = $attribs['ROLE'];
                 }
                 break;
-            case 'LibFile':
+            case 'LIBFILE':
                 $this->lib_atts = $attribs;
-                $this->lib_atts['Role'] = 'extension';
+                $this->lib_atts['ROLE'] = 'extension';
+                break;
+            case 'MAINTAINERS':
+                $this->pkginfo['maintainers'] = array();
+                $this->m_i = 0; // maintainers array index
+                break;
+            case 'MAINTAINER':
+                // compatibility check
+                if (!isset($this->pkginfo['maintainers'])) {
+                    $this->pkginfo['maintainers'] = array();
+                    $this->m_i = 0;
+                }
+                $this->pkginfo['maintainers'][$this->m_i] = array();
+                $this->current_maintainer =& $this->pkginfo['maintainers'][$this->m_i];
+                break;
+            case 'CHANGELOG':
+                $this->pkginfo['changelog'] = array();
+                $this->c_i = 0; // changelog array index
+                $this->in_changelog = true;
+                break;
+            case 'RELEASE':
+                if ($this->in_changelog) {
+                    $this->pkginfo['changelog'][$this->c_i] = array();
+                    $this->current_release =& $this->pkginfo['changelog'][$this->c_i];
+                }
                 break;
         }
     }
@@ -148,12 +184,12 @@ class PEAR_Common extends PEAR
     function _element_end($xp, $name)
     {
         switch ($name) {
-            case 'Dir':
+            case 'DIR':
                 array_pop($this->dir_names);
                 unset($this->dir_install);
                 unset($this->dir_role);
                 break;
-            case 'File':
+            case 'FILE':
                 $path = '';
                 foreach ($this->dir_names as $dir) {
                     $path .= $dir . DIRECTORY_SEPARATOR;
@@ -161,17 +197,17 @@ class PEAR_Common extends PEAR
                 $path .= $this->current_file;
                 $this->filelist[$path] = $this->current_attributes;
                 // Set the baseinstalldir only if the file don't have this attrib
-                if (!isset($this->filelist[$path]['BaseInstallDir']) &&
+                if (!isset($this->filelist[$path]['BASEINSTALLDIR']) &&
                     isset($this->dir_install))
                 {
-                    $this->filelist[$path]['BaseInstallDir'] = $this->dir_install;
+                    $this->filelist[$path]['BASEINSTALLDIR'] = $this->dir_install;
                 }
                 // Set the Role
-                if (!isset($this->filelist[$path]['Role']) && isset($this->dir_role)) {
-                    $this->filelist[$path]['Role'] = $this->dir_role;
+                if (!isset($this->filelist[$path]['ROLE']) && isset($this->dir_role)) {
+                    $this->filelist[$path]['ROLE'] = $this->dir_role;
                 }
                 break;
-            case 'LibFile':
+            case 'LIBFILE':
                 $path = '';
                 foreach ($this->dir_names as $dir) {
                     $path .= $dir . DIRECTORY_SEPARATOR;
@@ -179,10 +215,10 @@ class PEAR_Common extends PEAR
                 $path .= $this->lib_name;
                 $this->filelist[$path] = $this->lib_atts;
                 // Set the baseinstalldir only if the file don't have this attrib
-                if (!isset($this->filelist[$path]['BaseInstallDir']) &&
+                if (!isset($this->filelist[$path]['BASEINSTALLDIR']) &&
                     isset($this->dir_install))
                 {
-                    $this->filelist[$path]['BaseInstallDir'] = $this->dir_install;
+                    $this->filelist[$path]['BASEINSTALLDIR'] = $this->dir_install;
                 }
                 if (isset($this->lib_sources)) {
                     $this->filelist[$path]['sources'] = $this->lib_sources;
@@ -190,6 +226,16 @@ class PEAR_Common extends PEAR
                 unset($this->lib_atts);
                 unset($this->lib_sources);
                 break;
+            case 'MAINTAINER':
+                $this->m_i++;
+                break;
+            case 'RELEASE':
+                if ($this->in_changelog) {
+                    $this->c_i++;
+                }
+                break;
+            case 'CHANGELOG':
+                $this->in_changelog = false;
         }
         array_pop($this->element_stack);
         $this->current_element = $this->element_stack[sizeof($this->element_stack)-1];
@@ -200,51 +246,73 @@ class PEAR_Common extends PEAR
 
     function _pkginfo_cdata($xp, $data)
     {
-        $prev = $this->element_stack[sizeof($this->element_stack)-2];
         switch ($this->current_element) {
-            case 'Name':
-                switch ($prev) {
-                    case 'Package':
+            case 'NAME':
+                switch ($this->prev_element) {
+                    case 'PACKAGE':
                         $this->pkginfo['package'] .= $data;
                         break;
-                    case 'Maintainer':
-                        $this->pkginfo['maintainer_name'] .= $data;
+                    case 'MAINTAINER':
+                        $this->current_maintainer['name'] .= $data;
                         break;
                 }
                 break;
-            case 'Summary':
+            case 'SUMMARY':
                 $this->pkginfo['summary'] .= $data;
                 break;
-            case 'Initials':
-                $this->pkginfo['maintainer_handle'] .= $data;
+            case 'INITIALS':
+                $this->current_maintainer['handle'] .= $data;
                 break;
-            case 'Email':
-                $this->pkginfo['maintainer_email'] .= $data;
+            case 'EMAIL':
+                $this->current_maintainer['email'] .= $data;
                 break;
-            case 'Version':
-                $this->pkginfo['version'] .= $data;
-                break;
-            case 'Date':
-                $this->pkginfo['release_date'] .= $data;
-                break;
-            case 'Notes':
-                $this->pkginfo['release_notes'] .= $data;
-                break;
-            case 'Dir':
-                if (!$this->phpdir) {
-                    break;
+            case 'ROLE':
+                if (!in_array($data, $this->maintainer_roles)) {
+                    trigger_error("The maintainer role: '$data' is not valid", E_USER_WARNING);
+                } else {
+                    $this->current_maintainer['role'] .= $data;
                 }
-                $dir = trim($data);
-                // XXX add to file list
                 break;
-            case 'File':
-                $role = strtolower($this->current_attributes['Role']);
+            case 'VERSION':
+                if ($this->in_changelog) {
+                    $this->current_release['version'] .= $data;
+                } else {
+                    $this->pkginfo['version'] .= $data;
+                }
+                break;
+            case 'DATE':
+                if ($this->in_changelog) {
+                    $this->current_release['release_date'] .= $data;
+                } else {
+                    $this->pkginfo['release_date'] .= $data;
+                }
+                break;
+            case 'NOTES':
+                if ($this->in_changelog) {
+                    $this->current_release['release_notes'] .= $data;
+                } else {
+                    $this->pkginfo['release_notes'] .= $data;
+                }
+                break;
+            case 'STATE':
+                if (!in_array($data, $this->releases_states)) {
+                    trigger_error("The release state: '$data' is not valid", E_USER_WARNING);
+                } elseif ($this->in_changelog) {
+                    $this->current_release['release_state'] = $data;
+                } else {
+                    $this->pkginfo['release_state'] .= $data;
+                }
+                break;
+            case 'DIR':
+                break;
+            case 'FILE':
+                $role = strtolower($this->current_attributes['ROLE']);
                 $this->current_file = trim($data);
                 break;
-            case 'LibName':
+            case 'LIBNAME':
                 $this->lib_name = trim($data);
                 break;
-            case 'Sources':
+            case 'SOURCES':
                 $this->lib_sources[] = trim($data);
                 break;
         }
@@ -266,18 +334,20 @@ class PEAR_Common extends PEAR
         xml_set_object($xp, $this);
         xml_set_element_handler($xp, '_element_start', '_element_end');
         xml_set_character_data_handler($xp, '_pkginfo_cdata');
-        xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
+        xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, true);
 
         $this->element_stack = array();
         $this->pkginfo = array();
         $this->current_element = false;
         $this->destdir = '';
-        $this->filelist = array();
+        $this->pkginfo['filelist'] = array();
+        $this->filelist =& $this->pkginfo['filelist'];
+        $this->in_changelog = false;
 
         // read the whole thing so we only get one cdata callback
         // for each block of cdata
         $data = fread($fp, filesize($descfile));
-        if (!@xml_parse($xp, $data, 1)) {
+        if (!xml_parse($xp, $data, 1)) {
             $msg = sprintf("XML error: %s at line %d",
                            xml_error_string(xml_get_error_code($xp)),
                            xml_get_current_line_number($xp));
@@ -288,12 +358,24 @@ class PEAR_Common extends PEAR
         xml_parser_free($xp);
 
         foreach ($this->pkginfo as $k => $v) {
-            $this->pkginfo[$k] = trim($v);
+            if (!is_array($v)) {
+                $this->pkginfo[$k] = trim($v);
+            }
         }
-        $this->pkginfo['filelist'] = &$this->filelist;
         return $this->pkginfo;
     }
-
     // }}}
+
+    /**
+    * Returns info from a tgz pear package
+    * (experimental)
+    */
+    function infoFromTgzFile($file)
+    {
+        // untar in temp
+        // chdir($tmp);
+        //return $this->infoFromDescriptionFile('package.xml');
+        // clean temp
+    }
 }
 ?>
