@@ -2,7 +2,6 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
-<<<<<<< NEWS
 - Fixed a bug regarding the $PHP_SELF being incorrectly registered when
   force-cgi-redirect was not enabled. (Sterling)
 - pfpro extension now supports version 3 of the Verisign SDK (John Donagher)
