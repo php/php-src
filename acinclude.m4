@@ -584,7 +584,7 @@ PHP_REAL_ARG_BUNDLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_),[ifelse($5,
 
 AC_DEFUN([PHP_REAL_ARG_BUNDLE],[
 ifelse([$2],,,[AC_MSG_CHECKING([$2])])
-AC_ARG_ENABLE($1,[$3],$5=[$]enableval,
+AC_ARG_WITH($1,[$3],$5=[$]enableval,
 [
   $5=ifelse($4,,no,$4)
 

@@ -1,0 +1,335 @@
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ../..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+AS = @AS@
+C14N_OBJ = @C14N_OBJ@
+CATALOG_OBJ = @CATALOG_OBJ@
+CC = @CC@
+CFLAGS = @CFLAGS@
+CPP = @CPP@
+DEBUG_OBJ = @DEBUG_OBJ@
+DLLTOOL = @DLLTOOL@
+DOCB_OBJ = @DOCB_OBJ@
+ECHO = @ECHO@
+EXEEXT = @EXEEXT@
+FTP_OBJ = @FTP_OBJ@
+HAVE_ISINF = @HAVE_ISINF@
+HAVE_ISNAN = @HAVE_ISNAN@
+HTML_DIR = @HTML_DIR@
+HTML_OBJ = @HTML_OBJ@
+HTTP_OBJ = @HTTP_OBJ@
+ICONV_LIBS = @ICONV_LIBS@
+LIBTOOL = @LIBTOOL@
+LIBXML_MAJOR_VERSION = @LIBXML_MAJOR_VERSION@
+LIBXML_MICRO_VERSION = @LIBXML_MICRO_VERSION@
+LIBXML_MINOR_VERSION = @LIBXML_MINOR_VERSION@
+LIBXML_VERSION = @LIBXML_VERSION@
+LIBXML_VERSION_INFO = @LIBXML_VERSION_INFO@
+LIBXML_VERSION_NUMBER = @LIBXML_VERSION_NUMBER@
+LN_S = @LN_S@
+MAINT = @MAINT@
+MAKEINFO = @MAKEINFO@
+MV = @MV@
+M_LIBS = @M_LIBS@
+OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
+PACKAGE = @PACKAGE@
+PYTHON = @PYTHON@
+PYTHON_INCLUDES = @PYTHON_INCLUDES@
+PYTHON_SITE_PACKAGES = @PYTHON_SITE_PACKAGES@
+PYTHON_SUBDIR = @PYTHON_SUBDIR@
+PYTHON_VERSION = @PYTHON_VERSION@
+RANLIB = @RANLIB@
+RDL_LIBS = @RDL_LIBS@
+RELDATE = @RELDATE@
+RM = @RM@
+STRIP = @STRIP@
+TAR = @TAR@
+TEST_REGEXPS = @TEST_REGEXPS@
+TEST_SCHEMAS = @TEST_SCHEMAS@
+TEST_THREADS = @TEST_THREADS@
+THREAD_CFLAGS = @THREAD_CFLAGS@
+THREAD_LIBS = @THREAD_LIBS@
+U = @U@
+VERSION = @VERSION@
+WITH_C14N = @WITH_C14N@
+WITH_CATALOG = @WITH_CATALOG@
+WITH_DEBUG = @WITH_DEBUG@
+WITH_DOCB = @WITH_DOCB@
+WITH_FTP = @WITH_FTP@
+WITH_HTML = @WITH_HTML@
+WITH_HTTP = @WITH_HTTP@
+WITH_ICONV = @WITH_ICONV@
+WITH_MEM_DEBUG = @WITH_MEM_DEBUG@
+WITH_REGEXPS = @WITH_REGEXPS@
+WITH_SCHEMAS = @WITH_SCHEMAS@
+WITH_THREADS = @WITH_THREADS@
+WITH_TRIO = @WITH_TRIO@
+WITH_XINCLUDE = @WITH_XINCLUDE@
+WITH_XPATH = @WITH_XPATH@
+WITH_XPTR = @WITH_XPTR@
+XINCLUDE_OBJ = @XINCLUDE_OBJ@
+XML_CFLAGS = @XML_CFLAGS@
+XML_INCLUDEDIR = @XML_INCLUDEDIR@
+XML_LIBDIR = @XML_LIBDIR@
+XML_LIBS = @XML_LIBS@
+XPATH_OBJ = @XPATH_OBJ@
+XPTR_OBJ = @XPTR_OBJ@
+Z_CFLAGS = @Z_CFLAGS@
+Z_LIBS = @Z_LIBS@
+
+xmlincdir = $(includedir)/libxml2/libxml
+
+xmlinc_HEADERS = \
+		SAX.h \
+		entities.h \
+		encoding.h \
+		parser.h \
+		parserInternals.h \
+		xmlerror.h \
+		HTMLparser.h \
+		HTMLtree.h \
+		debugXML.h \
+		tree.h \
+		list.h \
+		hash.h \
+		xpath.h \
+		xpathInternals.h \
+		xpointer.h \
+		xinclude.h \
+		xmlIO.h \
+		xmlmemory.h \
+		nanohttp.h \
+		nanoftp.h \
+		uri.h \
+		valid.h \
+		xlink.h \
+		xmlversion.h \
+		DOCBparser.h \
+		catalog.h \
+		threads.h \
+		globals.h \
+		c14n.h \
+		xmlautomata.h \
+		xmlregexp.h \
+		xmlschemas.h \
+		schemasInternals.h \
+		xmlschemastypes.h \
+		xmlunicode.h \
+		xmlreader.h
+
+
+EXTRA_DIST = xmlversion.h.in
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = ../../config.h
+CONFIG_CLEAN_FILES =  xmlversion.h
+HEADERS =  $(xmlinc_HEADERS)
+
+DIST_COMMON =  Makefile.am Makefile.in xmlversion.h.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+GZIP_ENV = --best
+all: all-redirect
+.SUFFIXES:
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps include/libxml/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+xmlversion.h: $(top_builddir)/config.status xmlversion.h.in
+	cd $(top_builddir) && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+install-xmlincHEADERS: $(xmlinc_HEADERS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(xmlincdir)
+	@list='$(xmlinc_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d= ; else d="$(srcdir)/"; fi; \
+	  echo " $(INSTALL_DATA) $$d$$p $(DESTDIR)$(xmlincdir)/$$p"; \
+	  $(INSTALL_DATA) $$d$$p $(DESTDIR)$(xmlincdir)/$$p; \
+	done
+
+uninstall-xmlincHEADERS:
+	@$(NORMAL_UNINSTALL)
+	list='$(xmlinc_HEADERS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(xmlincdir)/$$p; \
+	done
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = include/libxml
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
+install-exec: install-exec-am
+
+install-data-am: install-xmlincHEADERS
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am: uninstall-xmlincHEADERS
+uninstall: uninstall-am
+all-am: Makefile $(HEADERS)
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(xmlincdir)
+
+
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-tags mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-tags clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-tags distclean-generic clean-am
+	-rm -f libtool
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-tags maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: uninstall-xmlincHEADERS install-xmlincHEADERS tags \
+mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
+distdir info-am info dvi-am dvi check check-am installcheck-am \
+installcheck install-exec-am install-exec install-data-am install-data \
+install-am install uninstall-am uninstall all-redirect all-am all \
+installdirs mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+install-exec-hook:
+	$(mkinstalldirs) $(DESTDIR)$(xmlincdir)
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:
