@@ -20,7 +20,7 @@
 #define PHP_PCNTL_H
 
 #include "php_signal.h"
-
+#include "zend_extensions.h"
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry
 
@@ -39,10 +39,22 @@ PHP_MINFO_FUNCTION(pcntl);
 PHP_FUNCTION(pcntl_fork);	
 PHP_FUNCTION(pcntl_waitpid);
 PHP_FUNCTION(pcntl_signal);
+
 static void pcntl_signal_handler(int);
+
+/* Zend extension prototypes */ 
+int pcntl_zend_extension_startup(zend_extension *extension);
+void pcntl_zend_extension_shutdown(zend_extension *extension);
+void pcntl_zend_extension_activate(void);
+void pcntl_zend_extension_deactivate(void);
+void pcntl_zend_extension_statement_handler(zend_op_array *op_array);
+
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	HashTable php_signal_table;
+	zend_llist php_signal_queue;
+	int signal_queue_ready;
+	int processing_signal_queue;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #ifdef ZTS
