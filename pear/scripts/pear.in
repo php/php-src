@@ -33,18 +33,26 @@ require_once 'Console/Getopt.php';
 PEAR_Command::setFrontendType('CLI');
 $all_commands = PEAR_Command::getCommands();
 $cmd_options  = PEAR_Command::getOptions();
-$ui = &PEAR_Command::getFrontendObject();
 $progname = basename(__FILE__);
 
 // XXX change Getopt to use raiseError() ?
 $argv = Console_Getopt::readPHPArgv();
-$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v" . $cmd_options);
+$options = Console_Getopt::getopt($argv, "c:C:d:D:Gh?sSqu:v" . $cmd_options);
 if (PEAR::isError($options)) {
     usage($options);
 }
 
-PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, array($ui, "displayFatalError"));
 $opts = $options[0];
+
+$fetype = 'CLI';
+foreach ($opts as $opt) {
+    if ($opt[0] == 'G') {
+        $fetype = 'Gtk';
+    }
+}
+PEAR_Command::setFrontendType($fetype);
+$ui = &PEAR_Command::getFrontendObject();
+PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, array($ui, "displayFatalError"));
 
 $pear_user_config = '';
 $pear_system_config = '';
@@ -114,19 +122,23 @@ if (empty($command) && ($store_user_config || $store_system_config)) {
     exit;
 }
 
-if (empty($all_commands[$command]) || $command == 'help') {
-    usage(null, @$options[1][2]);
-}
-
-$cmd = PEAR_Command::factory($command, $config);
-if (PEAR::isError($cmd)) {
-    die($cmd->getMessage());
-}
-
-$cmdargs = array_slice($options[1], 2);
-$ok = $cmd->run($command, $cmdopts, $cmdargs);
-if ($ok === false) {
-    PEAR::raiseError("unknown command `$command'");
+if ($fetype == 'Gtk') {
+    Gtk::main();
+} else {
+    if (empty($all_commands[$command]) || $command == 'help') {
+        usage(null, @$options[1][2]);
+    }
+    
+    $cmd = PEAR_Command::factory($command, $config);
+    if (PEAR::isError($cmd)) {
+        die($cmd->getMessage());
+    }
+    
+    $cmdargs = array_slice($options[1], 2);
+    $ok = $cmd->run($command, $cmdopts, $cmdargs);
+    if ($ok === false) {
+        PEAR::raiseError("unknown command `$command'");
+    }
 }
 
 // {{{ usage()
@@ -148,9 +160,14 @@ function usage($error = null, $helpsubject = null)
             "Usage: $progname [options] command [command-options] <parameters>\n".
             "Type \"$progname help options\" to list all options.\n".
             "Type \"$progname help <command>\" to get the help for the specified command.\n".
-            "Commands:\n   " . implode("\n   ", array_keys($all_commands));
+            "Commands:\n";
+        $maxlen = max(array_map("strlen", $all_commands));
+        $formatstr = "%-{$maxlen}s  %s\n";
+        foreach ($all_commands as $cmd => $class) {
+            $put .= sprintf($formatstr, $cmd, PEAR_Command::getDescription($cmd));
+        }
     }
-    fputs($stderr, "$put\n\n");
+    fputs($stderr, "$put\n");
     fclose($stderr);
     exit;
 }
@@ -167,6 +184,7 @@ function cmdHelp($command)
         "     -C file    find system configuration in `file'\n".
         "     -d foo=bar set user config variable `foo' to `bar'\n".
         "     -D foo=bar set system config variable `foo' to `bar'\n".
+        "     -G         start in graphical (Gtk) mode\n".
         "     -s         store user configuration\n".
         "     -S         store system configuration\n".
         "     -u foo     unset `foo' in the user configuration\n".

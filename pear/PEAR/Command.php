@@ -197,8 +197,9 @@ class PEAR_Command
             include_once $file;
             // List of commands
             $implements = call_user_func(array($class, "getCommands"));
-            foreach ($implements as $command) {
+            foreach ($implements as $command => $desc) {
                 $GLOBALS['_PEAR_Command_commandlist'][$command] = $class;
+                $GLOBALS['_PEAR_Command_commanddesc'][$command] = $desc;
             }
             // List of options accepted
             $cmdopts = array_merge($cmdopts, call_user_func(array($class, "getOptions")));
@@ -237,6 +238,20 @@ class PEAR_Command
             PEAR_Command::registerCommands();
         }
         return $GLOBALS['_PEAR_Command_commandopts'];
+    }
+
+    /**
+     * Get description for a command.
+     *
+     * @param  string $command Name of the command
+     *
+     * @return string command description
+     *
+     * @access public
+     */
+    function getDescription($command)
+    {
+        return @$GLOBALS['_PEAR_Command_commanddesc'][$command];
     }
 
     /**

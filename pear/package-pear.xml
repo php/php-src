@@ -50,6 +50,7 @@
         <file role="php" name="Dependency.php"/>
         <dir name="Frontend">
           <file role="php" name="CLI.php"/>
+          <file role="php" name="Gtk.php"/>
         </dir>
         <file role="php" name="Installer.php"/>
         <file role="php" name="Packager.php"/>

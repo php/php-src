@@ -55,7 +55,9 @@ class PEAR_Command_Config extends PEAR_Command_Common
      */
     function getCommands()
     {
-        return array('config-show', 'config-get', 'config-set');
+        return array('config-show' => 'Show All Settings',
+                     'config-get' => 'Show One Setting',
+                     'config-set' => 'Change Setting');
     }
 
     // }}}

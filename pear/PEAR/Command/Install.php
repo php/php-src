@@ -51,7 +51,9 @@ class PEAR_Command_Install extends PEAR_Command_Common
      */
     function getCommands()
     {
-        return array('install', 'uninstall', 'upgrade');
+        return array('install' => 'Install Package',
+                     'uninstall' => 'Uninstall Package',
+                     'upgrade' => 'Upgrade Package');
     }
 
     function getHelp($command)

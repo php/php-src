@@ -94,17 +94,22 @@ PEAR_FILES = \
 #	Net/Socket.php \
 #	Schedule/At.php \
 
-PEAR_PACKAGES=\
-	Net_Socket-1.0.tgz
-
+#PEARCMD=$(top_builddir)/sapi/cli/php $(builddir)/scripts/pear
+#
+#install-pear-installer: $(top_builddir)/sapi/cli/php
+#	version=`grep '<version>' $(srcdir)/package-pear.xml|head -1|cut -d\> -f2|cut -d\< -f1`; \
+#	if $(PEARCMD) shell-test PEAR; then
+#	    if ! $(PEARCMD) shell-test PEAR $$version; then \
+#	        $(PEARCMD) upgrade package-pear.xml; \
+#	    fi; \
+#	else; \
+#	    $(PEARCMD) install package-pear.xml; \
+#	fi
 
 install-pear:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
 		for i in $(PEAR_SUBDIRS); do \
 			$(mkinstalldirs) $(INSTALL_ROOT)$(peardir)/$$i; \
-		done; \
-		for dir in PEAR/CommandUI; do \
-			test -d $(INSTALL_ROOT)$(peardir)/$$dir && rm -rf $(INSTALL_ROOT)$(peardir)/$$dir; \
 		done; \
 		for i in $(PEAR_FILES); do \
 			echo "Installing $$i"; \
@@ -112,7 +117,6 @@ install-pear:
 			$(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_ROOT)$(peardir)/$$dir; \
 		done; \
 		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/Command/Login.php; \
-		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/CommandUI/CLI.php; \
 		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/CommandResponse.php; \
 		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/Uploader.php; \
 	else \
