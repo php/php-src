@@ -54,6 +54,7 @@ PEAR_FILES = \
 	Date/Human.php \
 	DB.php \
 	DB/common.php \
+	DB/fbsql.php \
 	DB/ibase.php \
 	DB/ifx.php \
 	DB/msql.php \
