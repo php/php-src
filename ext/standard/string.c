@@ -412,7 +412,7 @@ PHP_FUNCTION(wordwrap)
 	}
 	else {
 		/* Multiple character line break */
-		newtext = emalloc((*ptext)->value.str.len * (breakcharlen+1));
+		newtext = emalloc((*ptext)->value.str.len * (breakcharlen+1)+1);
 		newtext[0] = '\0';
 
 		i = 0;
