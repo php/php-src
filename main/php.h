@@ -255,6 +255,8 @@ int cfgparse(void);
 
 #define php_error zend_error
 
+PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC) ;
+
 /* PHPAPI void php_error(int type, const char *format, ...); */
 PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...);
 PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...);
