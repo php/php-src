@@ -410,7 +410,12 @@ sxe_properties_get(zval *object TSRMLS_DC)
 		_get_base_node_value(sxe, node, &value TSRMLS_CC);
 		
 		name = (char *) node->name;
-		namelen = xmlStrlen(node->name) + 1;
+		if (!name) {
+			name = "CDATA";
+			namelen = sizeof("CDATA");
+		} else {
+			namelen = xmlStrlen(node->name) + 1;
+		}
 
 		h = zend_hash_func(name, namelen);
 		if (zend_hash_quick_find(rv, name, namelen, h, (void **) &data_ptr) == SUCCESS) {
