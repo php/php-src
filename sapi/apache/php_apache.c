@@ -90,7 +90,7 @@ PHP_INI_END()
 
 
 
-static void php_apache_globals_ctor(php_apache_info_struct *apache_globals_p TSRMLS_DC)
+static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRMLS_DC)
 {
 	apache_globals->in_request = 0;
 }
