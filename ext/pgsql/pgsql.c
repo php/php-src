@@ -1041,7 +1041,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 	char *ret=NULL;
 
 	/* try to lookup the type in the resource list */
-	snprintf(hashed_oid_key,31,"pgsql_oid_%d",(int) oid);
+	snprintf(hashed_oid_key,31,"pgsql_oid_%l", oid);
 	hashed_oid_key[31]=0;
 
 	if (zend_hash_find(list,hashed_oid_key,strlen(hashed_oid_key)+1,(void **) &field_type)==SUCCESS) {
@@ -1049,7 +1049,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 	} else { /* hash all oid's */
 		int i,num_rows;
 		int oid_offset,name_offset;
-		char *tmp_oid, *tmp_name;
+		char *tmp_oid, *end_ptr, *tmp_name;
 		list_entry new_oid_entry;
 
 		if ((result = PQexec(pgsql,"select oid,typname from pg_type")) == NULL) {
@@ -1070,7 +1070,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 			Z_TYPE(new_oid_entry) = le_string;
 			new_oid_entry.ptr = estrdup(tmp_name);
 			zend_hash_update(list,hashed_oid_key,strlen(hashed_oid_key)+1,(void *) &new_oid_entry, sizeof(list_entry), NULL);
-			if (!ret && atoi(tmp_oid)==oid) {
+			if (!ret && strtoul(tmp_oid, &end_ptr, 10)==oid) {
 				ret = estrdup(tmp_name);
 			}
 		}
@@ -3193,7 +3193,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						break;
 						
 					case IS_LONG:
-						ZVAL_LONG(new_val, Z_DVAL_PP(val));
+						ZVAL_LONG(new_val, Z_LVAL_PP(val));
 						break;
 						
 					case IS_DOUBLE:
@@ -3758,8 +3758,8 @@ PHP_FUNCTION(pg_convert)
 }
 /* }}} */
 
-#define MAX_LENGTH_OF_LONG   30
-#define MAX_LENGTH_OF_DOUBLE 60
+#define PGSQL_MAX_LENGTH_OF_LONG   30
+#define PGSQL_MAX_LENGTH_OF_DOUBLE 60
 
 /* {{{ php_pgsql_insert
  */
@@ -3809,10 +3809,10 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 				values_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				values_len += MAX_LENGTH_OF_LONG+1;
+				values_len += PGSQL_MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				values_len += MAX_LENGTH_OF_DOUBLE+1;
+				values_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				if (convert) {
@@ -4041,10 +4041,10 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 				values_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				values_len += MAX_LENGTH_OF_LONG+1;
+				values_len += PGSQL_MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				values_len += MAX_LENGTH_OF_DOUBLE+1;
+				values_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				php_error(E_NOTICE, "%s() expect scaler values other than null. Need to convert?",
@@ -4086,10 +4086,10 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 				idsv_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				idsv_len += MAX_LENGTH_OF_LONG+1;
+				idsv_len += PGSQL_MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				idsv_len += MAX_LENGTH_OF_DOUBLE+1;
+				idsv_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
@@ -4357,10 +4357,10 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 				idsv_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				idsv_len += MAX_LENGTH_OF_LONG+1;
+				idsv_len += PGSQL_MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				idsv_len += MAX_LENGTH_OF_DOUBLE+1;
+				idsv_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
@@ -4512,7 +4512,8 @@ PHPAPI int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC
 	zval *row;
 	char *field_name, *element, *data;
 	size_t num_fields, element_len, data_len;
-	int pg_numrows, pg_row, i;
+	int pg_numrows, pg_row;
+	uint i;
 	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
 
 	if ((pg_numrows = PQntuples(pg_result)) <= 0) {
@@ -4595,10 +4596,10 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 				idsv_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				idsv_len += MAX_LENGTH_OF_LONG+1;
+				idsv_len += PGSQL_MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				idsv_len += MAX_LENGTH_OF_DOUBLE+1;
+				idsv_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
