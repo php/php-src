@@ -31,7 +31,7 @@ mysqli_get_metadata
 --EXPECTF--
 array(2) {
   [0]=>
-  object(stdClass)#4 (11) {
+  object(stdClass)#5 (11) {
     ["name"]=>
     string(3) "foo"
     ["orgname"]=>
@@ -56,7 +56,7 @@ array(2) {
     int(0)
   }
   [1]=>
-  object(stdClass)#5 (11) {
+  object(stdClass)#6 (11) {
     ["name"]=>
     string(3) "bar"
     ["orgname"]=>

@@ -15,8 +15,8 @@ function test: mysqli_warning_count()
 	mysqli_query($link, "DROP TABLE IF EXISTS test_warnings");
 
 	mysqli_query($link, "CREATE TABLE test_warnings (a int not null");
+	mysqli_query($link, "INSERT INTO test_warnings VALUES (NULL)");
 
-	mysqli_query($link, "INSERT INTO test_warnings VALUES (1),(2),(NULL)");
 	$num = mysqli_warning_count($link);
 	var_dump($num);
 

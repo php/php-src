@@ -65,11 +65,10 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_disable_reads_from_master,			NULL)
 	PHP_FE(mysqli_disable_rpl_parse,					NULL)
 	PHP_FE(mysqli_dump_debug_info,						NULL)
-#ifdef HAVE_EMBEDDED_MYSQLI
-	PHP_FE(mysqli_embedded_connect,						NULL)
-#endif
 	PHP_FE(mysqli_enable_reads_from_master,				NULL)
 	PHP_FE(mysqli_enable_rpl_parse,						NULL)
+	PHP_FE(mysqli_embedded_server_end,					NULL)
+	PHP_FE(mysqli_embedded_server_start,				NULL)
 	PHP_FE(mysqli_errno,								NULL)
 	PHP_FE(mysqli_error,								NULL)
 	PHP_FE(mysqli_stmt_execute,							NULL)
@@ -132,10 +131,6 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_reset,							NULL)
 	PHP_FE(mysqli_stmt_param_count,						NULL)
 	PHP_FE(mysqli_send_query,							NULL)
-#ifdef HAVE_EMBEDDED_MYSQLI
-	PHP_FE(mysqli_server_end,							NULL)
-	PHP_FE(mysqli_server_init,							NULL)
-#endif
 	PHP_FE(mysqli_slave_query,							NULL)
 	PHP_FE(mysqli_sqlstate,   							NULL)
 	PHP_FE(mysqli_ssl_set,								NULL)
@@ -196,6 +191,7 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(enable_rpl_parse,mysqli_enable_rpl_parse,NULL)
 	PHP_FALIAS(get_client_info,mysqli_get_client_info,NULL)
 	PHP_FALIAS(get_server_info,mysqli_get_server_info,NULL)
+	PHP_FALIAS(get_warnings, mysqli_warning_construct,	NULL)
 	PHP_FALIAS(init,mysqli_init,NULL)
 	PHP_FALIAS(kill,mysqli_kill,NULL)
 	PHP_FALIAS(set_local_infile_default,mysqli_set_local_infile_default,NULL)
@@ -265,6 +261,7 @@ function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(data_seek,mysqli_stmt_data_seek,NULL)
 	PHP_FALIAS(execute,mysqli_stmt_execute,NULL)
 	PHP_FALIAS(fetch,mysqli_stmt_fetch,NULL)
+	PHP_FALIAS(get_warnings, mysqli_warning_construct,	NULL)
 	PHP_FALIAS(result_metadata, mysqli_stmt_result_metadata,NULL)
 	PHP_FALIAS(num_rows, mysqli_stmt_num_rows,NULL)
 	PHP_FALIAS(send_long_data,mysqli_stmt_send_long_data,NULL)
