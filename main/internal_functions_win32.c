@@ -48,8 +48,12 @@
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
+#if HAVE_CALENDAR
 #include "ext/calendar/php_calendar.h"
+#endif
+#if HAVE_COM
 #include "ext/com/php_COM.h"
+#endif
 #if HAVE_FTP
 #include "ext/ftp/php_ftp.h"
 #endif
@@ -58,7 +62,9 @@
 #if HAVE_UODBC
 #include "ext/odbc/php_odbc.h"
 #endif
+#if HAVE_SESSION
 #include "ext/session/php_session.h"
+#endif
 #if HAVE_LIBEXPAT
 #include "ext/xml/php_xml.h"
 #endif
@@ -72,18 +78,25 @@
 #if HAVE_OVERLOAD
 #include "ext/overload/php_overload.h"
 #endif
+#if HAVE_TOKENIZER
 #include "ext/tokenizer/php_tokenizer.h"
+#endif
 /* }}} */
 
 /* {{{ php_builtin_extensions[]
  */
 zend_module_entry *php_builtin_extensions[] = {
 	phpext_standard_ptr,
+	phpext_pcre_ptr,
 #if WITH_BCMATH
 	phpext_bcmath_ptr,
 #endif
+#if HAVE_CALENDAR
 	phpext_calendar_ptr,
+#endif
+#if HAVE_COM
 	phpext_com_ptr,
+#endif
 #if HAVE_FTP
 	phpext_ftp_ptr,
 #endif
@@ -99,15 +112,18 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_OVERLOAD
   phpext_overload_ptr,
 #endif
+#if HAVE_TOKENIZER
 	phpext_tokenizer_ptr,
-	phpext_pcre_ptr,
+#endif
 #if HAVE_LIBEXPAT
 	phpext_xml_ptr,
 #endif
 #if HAVE_LIBEXPAT && HAVE_WDDX
 	phpext_wddx_ptr,
 #endif
+#if HAVE_SESSION
 	phpext_session_ptr
+#endif
 };
 /* }}} */
 
