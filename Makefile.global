@@ -26,10 +26,10 @@ sapi/cli/php: $(PHP_GLOBAL_OBJS) $(PHP_CLI_OBJS)
 install: $(install_targets) 
 
 
-install-cli:
+install-cli: sapi/cli/php
 	$(INSTALL_CLI)
 
-install-sapi:
+install-sapi: libphp4.la
 	-@$(LIBTOOL) --silent --mode=install cp libphp4.la $(phptempdir)/libphp4.la >/dev/null 2>&1
 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	-@if test ! -r $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME); then \
