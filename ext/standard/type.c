@@ -180,14 +180,24 @@ PHP_FUNCTION(floatval)
 PHP_FUNCTION(strval)
 {
 	pval **num;
+	zval expr_copy;
+	int use_copy;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	*return_value = **num;
-	zval_copy_ctor(return_value);
-	convert_to_string(return_value);
+
+	zend_make_printable_zval(return_value, &expr_copy, &use_copy);
+	if (use_copy) {
+		*return_value = expr_copy;
+		INIT_PZVAL(return_value);
+		zval_copy_ctor(return_value);
+		zval_dtor(&expr_copy);
+	} else {
+		zval_copy_ctor(return_value);
+	}
 }
 /* }}} */
 
