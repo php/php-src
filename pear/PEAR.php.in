@@ -143,6 +143,7 @@ class PEAR_Error
 	
 	var $mode                 = PEAR_ERROR_RETURN;
 	var $level                = E_USER_NOTICE;
+	var $code                 = -1;
 	
 	var $message              = '';
 
@@ -204,6 +205,19 @@ class PEAR_Error
 		        $this->message       . $this->error_append);
 	}
 	
+
+    // }}}
+    // {{{ getCode()
+    
+	/**
+	 * Get error code from an error object
+	 *
+	 * @return int error code
+	 */
+	 function getCode ()
+	 {
+	 	return ($this->code);
+	 }
 
     // }}}
     // {{{ getType()
