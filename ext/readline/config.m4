@@ -24,7 +24,7 @@ AC_ARG_WITH(readline,
 
     AC_MSG_RESULT(yes)
 
-	AC_DEFINE(HAVE_LIBREADLINE, 1)
+	AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
 	PHP_EXTENSION(readline)
   else
     AC_MSG_RESULT(no)

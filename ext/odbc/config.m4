@@ -89,7 +89,7 @@ AC_ARG_WITH(adabas,
     AC_ADD_LIBRARY(sqlrte)
     AC_ADD_LIBRARY(sqlptc)
     ODBC_TYPE=adabas
-    AC_DEFINE(HAVE_ADABAS)
+    AC_DEFINE(HAVE_ADABAS,,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -113,7 +113,7 @@ AC_ARG_WITH(solid,
     ODBC_LIBDIR=$withval/lib
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=solid
-    AC_DEFINE(HAVE_SOLID)
+    AC_DEFINE(HAVE_SOLID,,[ ])
     AC_MSG_RESULT(yes)
     AC_FIND_SOLID_LIBS($ODBC_LIBDIR)
   else
@@ -141,7 +141,7 @@ AC_ARG_WITH(ibm-db2,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=db2
     ODBC_LIBS="-ldb2"
-    AC_DEFINE(HAVE_IBMDB2)
+    AC_DEFINE(HAVE_IBMDB2,,[ ])
 
     AC_MSG_RESULT(yes)
   else
@@ -168,7 +168,7 @@ AC_ARG_WITH(empress,
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=empress
-    AC_DEFINE(HAVE_EMPRESS)
+    AC_DEFINE(HAVE_EMPRESS,,[ ])
     AC_MSG_RESULT(yes)
     AC_FIND_EMPRESS_LIBS($ODBC_LIBDIR)
   else
@@ -202,7 +202,7 @@ AC_ARG_WITH(velocis,
         ODBC_LIBS="-l_rdbc -l_sql";;
     esac
     ODBC_TYPE=velocis
-    AC_DEFINE(HAVE_VELOCIS)
+    AC_DEFINE(HAVE_VELOCIS,,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -238,7 +238,7 @@ AC_ARG_WITH(custom-odbc,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=$CUSTOM_ODBC_LIBS
     ODBC_TYPE=custom
-    AC_DEFINE(HAVE_CODBC)
+    AC_DEFINE(HAVE_CODBC,,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -264,7 +264,7 @@ AC_ARG_WITH(iodbc,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-liodbc
     ODBC_TYPE=iodbc
-    AC_DEFINE(HAVE_IODBC)
+    AC_DEFINE(HAVE_IODBC,,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -291,7 +291,7 @@ AC_ARG_WITH(esoob,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-lesoobclient
     ODBC_TYPE=ESOOB
-    AC_DEFINE(HAVE_ESOOB)
+    AC_DEFINE(HAVE_ESOOB,,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -317,7 +317,7 @@ AC_ARG_WITH(unixODBC,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-lodbc
     ODBC_TYPE=unixODBC
-    AC_DEFINE(HAVE_UNIXODBC)
+    AC_DEFINE(HAVE_UNIXODBC,,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -344,7 +344,7 @@ AC_ARG_WITH(openlink,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-liodbc
     ODBC_TYPE=openlink
-    AC_DEFINE(HAVE_OPENLINK)
+    AC_DEFINE(HAVE_OPENLINK,,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -377,7 +377,7 @@ AC_ARG_WITH(dbmaker,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS="-ldmapic -lc"
     ODBC_TYPE=dbmaker
-    AC_DEFINE(HAVE_DBMAKER)
+    AC_DEFINE(HAVE_DBMAKER,,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -390,7 +390,7 @@ fi
 if test -n "$ODBC_TYPE" && test -n "$ODBC_INCLUDE"; then
   INCLUDES="$INCLUDES $ODBC_INCLUDE"
   EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
-  AC_DEFINE(HAVE_UODBC)
+  AC_DEFINE(HAVE_UODBC,,[ ])
   PHP_SUBST(ODBC_INCDIR)
   PHP_SUBST(ODBC_INCLUDE)
   PHP_SUBST(ODBC_LIBDIR)

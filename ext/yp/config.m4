@@ -8,13 +8,13 @@ AC_ARG_WITH(yp,
 [
 	if test "$withval" = "yes"; then
 		AC_MSG_RESULT(yes)
-		AC_DEFINE(HAVE_YP)
+		AC_DEFINE(HAVE_YP,,[ ])
 		PHP_EXTENSION(yp)
 		if test `uname` = "SunOS";then
 			release=`uname -r`
 			case "$release" in
 				5*)
-					AC_DEFINE(SOLARIS_YP)
+					AC_DEFINE(SOLARIS_YP,,[ ])
 					;;
 				*)
 					;;

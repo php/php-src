@@ -7,7 +7,7 @@ AC_ARG_ENABLE(bcmath,
                           get this module installed. ],
 [
   if test "$enableval" = "yes"; then
-    AC_DEFINE(WITH_BCMATH, 1)
+    AC_DEFINE(WITH_BCMATH, 1, [Whether you have bcmath])
     AC_MSG_RESULT(yes)
     PHP_EXTENSION(bcmath)
   else

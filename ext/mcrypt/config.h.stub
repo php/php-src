@@ -1,2 +1,0 @@
-/* define if you want to use the mcrypt extension */
-#undef HAVE_LIBMCRYPT

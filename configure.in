@@ -177,7 +177,7 @@ AC_CHECK_LIB(nsl, gethostbyaddr, [
 
 AC_CHECK_LIB(crypt, crypt, [
  AC_ADD_LIBRARY(crypt)
- AC_DEFINE(HAVE_LIBCRYPT) ], [])
+ AC_DEFINE(HAVE_LIBCRYPT,,[ ]) ], [])
 
 dnl The sin may be in a library which need not be specifed
 dnl as well as res_search resides in libsocket

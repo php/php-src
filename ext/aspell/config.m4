@@ -17,7 +17,7 @@ AC_ARG_WITH(aspell,
     if test ! -f "$ASPELL_DIR/include/aspell-c.h"; then
       AC_MSG_ERROR(Could not find aspell-c.h in $ASPELL_DIR/include - please copy it manually from the aspell sources to $ASPELL_DIR/include)
     fi
-    AC_DEFINE(HAVE_ASPELL)
+    AC_DEFINE(HAVE_ASPELL,1,[Whether you have aspell])
     AC_MSG_RESULT(yes)
 	PHP_EXTENSION(aspell)
   else

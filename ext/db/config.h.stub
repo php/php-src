@@ -1,5 +1,0 @@
-/* Define if you have an ndbm compatible library (-ldbm).  */
-#define NDBM 0
-
-/* Define if you have the gdbm library (-lgdbm).  */
-#define GDBM 0

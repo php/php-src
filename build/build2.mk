@@ -36,7 +36,7 @@ config_h_in = php_config.h.in
 
 acconfig_h_SOURCES = acconfig.h.in $(config_h_files)
 
-targets = $(makefile_in_files) configure $(config_h_in) $(TOUCH_FILES)
+targets = $(TOUCH_FILES) $(makefile_in_files) configure $(config_h_in)
 
 
 all: .deps Zend/Makefile.am TSRM/Makefile.am $(targets)

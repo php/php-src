@@ -57,17 +57,17 @@ WARNING: You specified Informix base install directory that is different
         if test "`uname -s 2>/dev/null`" = "AIX"; then
         CFLAGS="$CFLAGS -D__H_LOCALEDEF"
       fi
-      AC_DEFINE(HAVE_IFX)
+      AC_DEFINE(HAVE_IFX,,[ ])
       AC_MSG_CHECKING([Informix version])
       IFX_VERSION=[`esql -V | sed -ne '1 s/^[^0-9]*\([0-9]\)\.\([0-9]*\).*/\1\2/p'`]
       if test $IFX_VERSION -ge "900"; then
-        AC_DEFINE(HAVE_IFX_IUS)
+        AC_DEFINE(HAVE_IFX_IUS,,[ ])
         IFX_ESQL_FLAGS="-EDHAVE_IFX_IUS"
       else
         IFX_ESQL_FLAGS="-EUHAVE_IFX_IUS"
       fi
       PHP_SUBST(IFX_ESQL_FLAGS)
-      AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION)
+      AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION, [ ])
       AC_MSG_RESULT(yes)
       PHP_EXTENSION(informix)
       for i in $IFX_LIBS; do

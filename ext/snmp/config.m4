@@ -40,7 +40,7 @@ AC_ARG_WITH(snmp,
       test -d $withval/include/ucd-snmp && SNMP_INCDIR=$withval/include/ucd-snmp
       SNMP_LIBDIR=$withval/lib
     fi
-    AC_DEFINE(HAVE_SNMP)
+    AC_DEFINE(HAVE_SNMP,,[ ])
     if test "$shared" = "yes"; then
       AC_MSG_RESULT(yes (shared))
       SNMP_INCLUDE="-I$SNMP_INCDIR"
@@ -73,7 +73,7 @@ AC_MSG_CHECKING(whether to enable UCD SNMP hack)
 AC_ARG_ENABLE(ucd-snmp-hack,
 [  --enable-ucd-snmp-hack  Enable UCD SNMP hack],[
   if test "$enableval" = "yes" ; then
-    AC_DEFINE(UCD_SNMP_HACK, 1)
+    AC_DEFINE(UCD_SNMP_HACK, 1, [ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)

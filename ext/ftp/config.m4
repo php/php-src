@@ -7,7 +7,7 @@ AC_ARG_WITH(ftp,
 [  --with-ftp              Include FTP support.],
 [
   if test "$withval" != "no"; then
-    AC_DEFINE(HAVE_FTP)
+    AC_DEFINE(HAVE_FTP,,[ ])
     PHP_EXTENSION(ftp)
     AC_MSG_RESULT(yes)
   else

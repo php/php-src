@@ -35,7 +35,7 @@ AC_ARG_WITH(xml,
       fi
     fi
     fi
-    AC_DEFINE(HAVE_LIBEXPAT, 1)
+    AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
     PHP_EXTENSION(xml, $shared)
     if test "$shared" != "yes"; then
       EXTRA_LIBS="$EXTRA_LIBS $XML_LIBS"

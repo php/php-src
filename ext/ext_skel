@@ -65,18 +65,11 @@ eof
 $ECHO_N " .cvsignore$ECHO_C"
 cat >.cvsignore <<eof
 .deps
-Makefile.in
 Makefile
 *.o
 *.lo
 *.la
 .libs
-eof
-
-$ECHO_N " config.h.stub$ECHO_C"
-cat >config.h.stub<<eof
-/* define if you want to use the $extname extension */
-/* #undef HAVE_LIB$EXTNAME */
 eof
 
 chmod 644 *
