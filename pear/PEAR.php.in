@@ -5,7 +5,7 @@
 // +----------------------------------------------------------------------+
 // | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
 // +----------------------------------------------------------------------+
-// | This source file is subject to version 2.02 of the PHP license,      |
+// | This source file is subject to version 2.0 of the PHP license,       |
 // | that is bundled with this package in the file LICENSE, and is        |
 // | available at through the world-wide-web at                           |
 // | http://www.php.net/license/2_02.txt.                                 |
@@ -24,6 +24,10 @@ define('PEAR_ERROR_RETURN', 0);
 define('PEAR_ERROR_PRINT', 1);
 define('PEAR_ERROR_TRIGGER', 2);
 define('PEAR_ERROR_DIE', 3);
+
+define('PHP_BINDIR', '@prefix@/bin');
+define('PEAR_INSTALL_DIR', '@PEAR_INSTALLDIR@');
+define('PEAR_EXTENSION_DIR', '@EXTENSION_DIR@');
 
 $_PEAR_destructor_object_list = array();
 
@@ -45,17 +49,18 @@ $_PEAR_destructor_object_list = array();
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
  */
-class PEAR {
+class PEAR
+{
     // {{{ constructor
 
     /**
      * Constructor.  Registers this object in
      * $_PEAR_destructor_object_list for destructor emulation.
      */
-    function PEAR() {
-	global $_PEAR_destructor_object_list;
-	$_PEAR_destructor_object_list[] = &$this;
-    }
+	function PEAR() {
+		global $_PEAR_destructor_object_list;
+		$_PEAR_destructor_object_list[] = &$this;
+	}
 
     // }}}
     // {{{ destructor
@@ -75,13 +80,13 @@ class PEAR {
     /**
      * Tell whether a value is a PEAR error.
      *
-     * @param $data the value to test
-     *
-     * @return bool true if $data is an error
+     * @param	$data	the value to test
+     * @access	public
+     * @return	bool	true if $data is an error
      */
-    function isError(&$data) {
-	return is_object($data) && is_subclass_of($data, "PEAR_Error");
-    }
+	function isError(&$data) {
+		return is_object($data) && is_subclass_of($data, "PEAR_Error");
+	}
 
     // }}}
 }
@@ -170,7 +175,7 @@ class PEAR_Error
 	/**
 	 * Get the error message from an error object.
 	 *
-	 * @return string full error message
+	 * @return	string	full error message
 	 */
 	function getMessage ()
 	{
@@ -220,6 +225,7 @@ register_shutdown_function("_PEAR_call_destructors");
 
 /*
  * Local Variables:
+ * mode: c++
  * tab-width: 4
  * c-basic-offset: 4
  * End:
