@@ -443,6 +443,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 PHP_INI_BEGIN()
 PHP_INI_ENTRY_EX("com.allow_dcom", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY_EX("com.autoregister_typelib", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
+PHP_INI_ENTRY_EX("com.autoregister_verbose", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY_EX("com.autoregister_casesensitive", "1", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypelibFileChange)
 PHP_INI_END()
@@ -1640,7 +1641,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 				{
 					/* Oops, it already exists. No problem if it is defined as the same value */
 					/* Check to see if they are the same */
-					if (!compare_function(&results, &c.value, &exists))
+					if (!compare_function(&results, &c.value, &exists) && INI_INT("com.autoregister_verbose"))
 					{
 						php_error(E_WARNING,"Type library value %s is already defined and has a different value", c.name);
 					}
