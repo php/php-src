@@ -130,6 +130,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &pgsql_stmt_methods;
+	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 
 	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY TSRMLS_CC) == PDO_CURSOR_SCROLL;
@@ -375,7 +376,6 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	dbh->methods = &pgsql_methods;
 	dbh->alloc_own_columns = 1;
-	dbh->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	dbh->max_escaped_char_length = 2;
 
 	ret = 1;
