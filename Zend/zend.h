@@ -605,6 +605,20 @@ END_EXTERN_C()
 	(*ppzv_dest)->refcount = refcount;			\
 }
 
+#define SEPARATE_ARG_IF_REF(varptr) \
+	if (PZVAL_IS_REF(varptr)) { \
+		zval *original_var = varptr; \
+		ALLOC_ZVAL(varptr); \
+		varptr->value = original_var->value; \
+		varptr->type = original_var->type; \
+		varptr->is_ref = 0; \
+		varptr->refcount = 1; \
+		zval_copy_ctor(varptr); \
+	} else { \
+		varptr->refcount++; \
+	}
+
+
 #define ZEND_MAX_RESERVED_RESOURCES	4
 
 #include "zend_variables.h"
