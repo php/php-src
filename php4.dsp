@@ -19,6 +19,7 @@ CFG=php4 - Win32 Debug
 !MESSAGE 
 !MESSAGE "php4 - Win32 Release" (based on "Win32 (x86) Console Application")
 !MESSAGE "php4 - Win32 Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "php4 - Win32 Release_inline" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -79,12 +80,40 @@ LINK32=link.exe
 # ADD LINK32 winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4nts.lib /nologo /version:3.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /nodefaultlib:"libcmt" /out:"Debug\php.exe" /pdbtype:sept /libpath:"Debug"
 # SUBTRACT LINK32 /pdb:none
 
+!ELSEIF  "$(CFG)" == "php4 - Win32 Release_inline"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "php4___Win32_Release_inline"
+# PROP BASE Intermediate_Dir "php4___Win32_Release_inline"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "php4___Win32_Release_inline"
+# PROP Intermediate_Dir "php4___Win32_Release_inline"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "Zend" /I "." /I "regex\\" /I "..\bindlib_w32" /D "NDEBUG" /D "MSVC5" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /Fr /FD /c
+# SUBTRACT BASE CPP /YX /Yc /Yu
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "Zend" /I "." /I "regex\\" /I "..\bindlib_w32" /D "NDEBUG" /D "MSVC5" /D "_CONSOLE" /D ZEND_DEBUG=0 /D "WIN32" /D "_MBCS" /D "ZEND_WIN32_FORCE_INLINE" /Fr /FD /c
+# SUBTRACT CPP /YX /Yc /Yu
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 php4nts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release\php.exe" /libpath:"Release"
+# ADD LINK32 php4nts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release\php.exe" /libpath:"Release"
+
 !ENDIF 
 
 # Begin Target
 
 # Name "php4 - Win32 Release"
 # Name "php4 - Win32 Debug"
+# Name "php4 - Win32 Release_inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"
