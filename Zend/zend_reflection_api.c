@@ -593,6 +593,9 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 		case ZEND_ACC_PROTECTED:
 			string_printf(str, "protected ");
 			break;
+		default:
+		    string_printf(str, "<visibilty error> ");
+		    break;
 	}
 
 	string_printf(str, fptr->common.scope ? "method " : "function ");
