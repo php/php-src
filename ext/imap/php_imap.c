@@ -2748,12 +2748,18 @@ PHP_FUNCTION(imap_sort)
 	mypgm->next = NIL;
 	
 	slst = mail_sort(imap_le_struct->imap_stream, NIL, spg, mypgm, myargc >= 4 ? Z_LVAL_PP(flags) : NIL);
+	if (spg) {
+		mail_free_searchpgm(&spg);
+	}
+
 	
 	array_init(return_value);
-	for (sl = slst; *sl; sl++) { 
-		add_next_index_long(return_value, *sl);
+	if (slst != NIL && slst != 0) {
+		for (sl = slst; *sl; sl++) { 
+			add_next_index_long(return_value, *sl);
+		}
+		fs_give ((void **) &slst);
 	}
-	fs_give ((void **) &slst); 
 }
 /* }}} */
 
