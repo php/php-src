@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added context options to http_fopen_wrapper 'method', 'header', 'content'. (Sara)
 - Fixed bug #23009 (pg_select with timestamp). (Marcus, Jay)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
