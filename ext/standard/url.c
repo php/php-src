@@ -140,6 +140,14 @@ url *url_parse(char *string)
 		}
 		efree(result);
 	}
+	else {
+		STR_FREE(ret->scheme);
+		STR_FREE(ret->path);
+		STR_FREE(ret->query);
+		STR_FREE(ret->fragment);
+		efree(ret);
+		return NULL;
+	}
 	regfree(&re);
 	return ret;
 }
