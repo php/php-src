@@ -1,3 +1,207 @@
+2003-02-15  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3_1)
+      sapi/cgi/cgi_main.c:
+      revert this
+
+    * (PHP_4_3_1)
+      main/fopen_wrappers.c:
+      Revert this.
+
+    * (PHP_4_3)
+      sapi/apache2handler/.cvsignore
+      sapi/apache2handler/README:
+      - Remove all of it.
+
+2003-02-15  Ian Holsman  <Ian@holsman.net>
+
+    * (PHP_4_3)
+      sapi/apache2handler/CREDITS
+      sapi/apache2handler/README
+      sapi/apache2handler/apache_config.c
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/php.sym
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c:
+      
+          After short discussion, the #php.bugs mob decided that we don't want
+          this in PHP_4_3 branch. At least as long as it doesn't work as well
+          (or preferrably better :) than the apache2filter SAPI does.
+      
+          So please remove it from the branch for now..
+      
+          --Jani
+
+2003-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      New feature news.
+
+2003-02-15  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3_1)
+      configure.in
+      sapi/cgi/cgi_main.c:
+      - correct version plus the fix.
+
+2003-02-15  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3_1)
+      main/php_version.h:
+      New version number.
+
+2003-02-15  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-02-15  Stig Bakken  <ssb@fast.no>
+
+    * (PHP_4_3)
+      pear/PEAR.php
+      pear/System.php
+      pear/package-PEAR.xml
+      pear/package.dtd
+      pear/OS/Guess.php
+      pear/PEAR/Autoloader.php
+      pear/PEAR/Builder.php
+      pear/PEAR/Command.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php
+      pear/scripts/pear.bat
+      pear/scripts/pear.in:
+      - import PEAR 1.0.1
+
+2003-02-15  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c:
+      - Fix unsetting of open_basedir, safe_mode_exec_dir and user_dir with
+        "php_admin_value <ini option> none"
+      - Fixes bug #22220
+
+2003-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/config.m4:
+      Proper lib detection.
+
+2003-02-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      B.F.N.
+
+    * main/streams.c:
+      Fixed bug #22234
+
+2003-02-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * run-tests.php:
+      If a test does not have any data after 60 seconds of waiting, assume that
+      it died a horrible death and kill it.
+      This is useful on windows when a message box is popped-up during an
+      automated
+      test-run.
+
+    * ext/standard/proc_open.c:
+      Add optional signal parameter to proc_terminate.
+
+    * ext/standard/basic_functions.c
+      ext/standard/exec.h
+      ext/standard/proc_open.c:
+      Add proc_terminate() function to forcibly kill off a process created
+      with proc_open().
+
+2003-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/tests/014.phpt:
+      Fixed skip condition.
+
+2003-02-15  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt:
+      added skipif section (innodb-support)
+
+2003-02-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/formatted_print.c
+      ext/standard/tests/strings/bug22227.phpt:
+      MFH(r1.65): Fixed bug #22227
+      MFH: Added test case for bug #22227
+
+    * ext/standard/formatted_print.c
+      ext/standard/tests/strings/bug22227.phpt:
+      Fixed bug #22227
+      Added test case for bug #22227
+
+2003-02-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      fix parameter string (-R & -H)
+
+2003-02-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS:
+      bug fixed.
+
+2003-02-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug22231.phpt:
+      
+      Added test case for bug #22231
+
+2003-02-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/network.c:
+      MFH: Fix for Bug #21809 (select() never times out during socket shutdown)
+
+2003-02-15  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      Option -b needs an argument. This fixes #22229.
+
+2003-02-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mysqli/tests/.cvsignore:
+      Add .cvsignore for tests.
+
+2003-02-15  Ian Holsman  <Ian@holsman.net>
+
+    * (PHP_4_3)
+      sapi/apache2handler/.cvsignore
+      sapi/apache2handler/CREDITS
+      sapi/apache2handler/README
+      sapi/apache2handler/apache_config.c
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/php.sym
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c:
+      alternate apache2 SAPI.
+
 2003-02-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/mysqli/php_mysqli.h:
