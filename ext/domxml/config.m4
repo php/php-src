@@ -2,7 +2,7 @@ dnl $Id$
 
 AC_MSG_CHECKING(whether to include DOM support)
 AC_ARG_WITH(dom,
-[  --with-dom[=DIR]        Include DOM support (requires libxml >= 1.0).
+[  --with-dom[=DIR]        Include DOM support (requires libxml >= 2.0).
                           DIR is the libxml install directory,
                           defaults to /usr.],
 [
@@ -15,7 +15,7 @@ AC_ARG_WITH(dom,
       old_LIBS=$LIBS
       LIBS="$LIBS -lz"
       AC_CHECK_LIB(xml, xmlNewDoc, [AC_DEFINE(HAVE_DOMXML,1,[ ])],
-        [AC_MSG_ERROR(DOM module requires libxml >= 1.0)])
+        [AC_MSG_ERROR(DOM module requires libxml >= 2.0)])
       LIBS=$old_LIBS
       AC_ADD_LIBRARY(z)
       AC_ADD_LIBRARY(xml)
@@ -33,7 +33,7 @@ AC_ARG_WITH(dom,
           old_withval=$withval
           AC_MSG_CHECKING([for zlib (needed by DOM support)])
           AC_ARG_WITH(zlib-dir,
-          [  --with-zlib-dir[=DIR]   zlib dir for pdflib 2.0 or include zlib support],[
+          [  --with-zlib-dir[=DIR]   zlib dir for pdflib 3.0 or include zlib support],[
             AC_MSG_RESULT( )
             if test -z $withval; then
               withval="/usr/local"
@@ -47,12 +47,12 @@ AC_ARG_WITH(dom,
           ])
           withval=$old_withval
         else
-          echo "checking for libz needed by pdflib 2.0... already zlib support"
+          echo "checking for libz needed by pdflib 3.0... already zlib support"
           LIBS="$LIBS -L$withval/lib -lz"
         fi
 
         AC_CHECK_LIB(xml, xmlNewDoc, [AC_DEFINE(HAVE_DOMXML,1,[ ])],
-          [AC_MSG_ERROR(DOM module requires libxml >= 1.0.)])
+          [AC_MSG_ERROR(DOM module requires libxml >= 2.0.)])
         LIBS=$old_LIBS
         AC_ADD_LIBRARY_WITH_PATH(xml, $withval/lib)
         AC_ADD_INCLUDE($DOMXML_INCLUDE)
