@@ -35,6 +35,7 @@
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
+#include "SAPI.h"
 
 #include "php_streams_int.h"
 
