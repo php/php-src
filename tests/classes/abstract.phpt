@@ -1,5 +1,5 @@
 --TEST--
-An abstrcat function may not be called
+An abstrcat method may not be called
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
@@ -26,4 +26,4 @@ echo "Done\n"; // shouldn't be displayed of cause
 --EXPECTF--
 Call to function show()
 
-Fatal error: Cannot call abstract method show() in %s on line %d
+Fatal error: Cannot call abstract method fail::show() in %s on line %d
