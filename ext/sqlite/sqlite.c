@@ -354,10 +354,18 @@ PHP_FUNCTION(sqlite_fetch_array)
 	/* now populate the result */
 	for (j = 0; j < res->ncolumns; j++) {
 		if (mode & PHPSQLITE_NUM) {
-			add_index_string(return_value, j, res->table[i + j], 1);
+			if (res->table[i +j] == NULL) {
+				add_index_null(return_value, j);
+			} else {
+				add_index_string(return_value, j, res->table[i + j], 1);
+			}
 		}
 		if (mode & PHPSQLITE_ASSOC) {
-			add_assoc_string(return_value, res->table[j], res->table[i + j], 1);
+			if (res->table[i + j] == NULL) {
+				add_assoc_null(return_value, res->table[j]);
+			} else {
+				add_assoc_string(return_value, res->table[j], res->table[i + j], 1);
+			}
 		}
 	}
 
