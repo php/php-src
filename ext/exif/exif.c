@@ -2862,7 +2862,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 			case TAG_FNUMBER:
 				/* Simplest way of expressing aperture, so I trust it the most.
-				   (overwrite previously computd value if there is one) */
+				   (overwrite previously computed value if there is one) */
 				ImageInfo->ApertureFNumber = (float)exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel TSRMLS_CC);
 				break;
 
