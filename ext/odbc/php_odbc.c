@@ -1232,7 +1232,7 @@ PHP_FUNCTION(odbc_data_source)
 
 }
 /* }}} */
-#endif /* HAVE_SQLDATASOURCES *
+#endif /* HAVE_SQLDATASOURCES */
 
 /* {{{ proto resource odbc_exec(resource connection_id, string query [, int flags])
    Prepare and execute an SQL statement */
