@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- All special fopen wrappers ('php://', 'bz2://' and 'zlib://') now require the
+  '://' separator (instead of simply 'php:', 'bz2:' and 'zlib:') to avoid
+  ambiguities when filenames have ':' characters. (Wez)
 - Added URL-wrapper support to exif. (Marcus)
 - PHP now has a new stream system that allows it to do some clever stuff with
   fopen() and fsockopen().  As a result:
