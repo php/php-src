@@ -605,18 +605,6 @@ static void print_refcount(zval *p, char *str)
 	print_refcount(NULL, NULL);
 }
 
-static inline HashTable *zend_find_inherited_static(zend_class_entry *ce, zval *variable)
-{
-	zend_class_entry *orig_ce = ce;
-	
-	while (ce) {
-		if (zend_hash_exists(ce->static_members, Z_STRVAL_P(variable), Z_STRLEN_P(variable)+1)) {
-			return ce->static_members;
-		}
-		ce = ce->parent;
-	}
-	return orig_ce->static_members;
-}
 
 static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_variable *Ts, int type, zval *variable TSRMLS_DC)
 {
@@ -639,15 +627,6 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 			}
 			return EG(active_op_array)->static_variables;
 			break;
-		case ZEND_FETCH_STATIC_MEMBER:
-			if (T(opline->op2.u.var).EA.class_entry->parent) {
-				/* if inherited, try to look up */
-				return zend_find_inherited_static(T(opline->op2.u.var).EA.class_entry, variable);
-			} else {
-				/* if class is not inherited, no point in checking */
-				return T(opline->op2.u.var).EA.class_entry->static_members;
-			}
-			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
@@ -669,37 +648,45 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 		varname = &tmp_varname;
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline, Ts, type, varname TSRMLS_CC);
-	if (!target_symbol_table) {
-		return;
-	}
+	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
+		target_symbol_table = NULL;
+		retval = zend_get_static_property(T(opline->op2.u.var).EA.class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), type TSRMLS_CC);
+	} else {
+		target_symbol_table = zend_get_target_symbol_table(opline, Ts, type, varname TSRMLS_CC);
+		if (!target_symbol_table) {
+			return;
+		}
+		if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &retval) == FAILURE) {
+			switch (type) {
+				case BP_VAR_R: 
+					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					/* break missing intentionally */
+				case BP_VAR_IS:
+					retval = &EG(uninitialized_zval_ptr);
+					break;
+				case BP_VAR_RW:
+					zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
+					/* break missing intentionally */
+				case BP_VAR_W: {					
+						zval *new_zval = &EG(uninitialized_zval);
 
-	if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &retval) == FAILURE) {
-		switch (type) {
-			case BP_VAR_R: 
-				zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
-				/* break missing intentionally */
-			case BP_VAR_IS:
-				retval = &EG(uninitialized_zval_ptr);
+						new_zval->refcount++;
+						zend_hash_update(target_symbol_table, varname->value.str.val, varname->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
+					}
+					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
+			}
+		}
+		switch (opline->op2.u.EA.type) {
+			case ZEND_FETCH_LOCAL:
+				FREE_OP(Ts, &opline->op1, free_op1);
 				break;
-			case BP_VAR_RW:
-				zend_error(E_NOTICE,"Undefined variable:  %s", varname->value.str.val);
-				/* break missing intentionally */
-			case BP_VAR_W: {
-					zval *new_zval = &EG(uninitialized_zval);
-
-					new_zval->refcount++;
-					zend_hash_update(target_symbol_table, varname->value.str.val, varname->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
-				}
+			case ZEND_FETCH_STATIC:
+				zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 				break;
-			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
-	if (opline->op2.u.EA.type == ZEND_FETCH_LOCAL) {
-		FREE_OP(Ts, &opline->op1, free_op1);
-	} else if (opline->op2.u.EA.type == ZEND_FETCH_STATIC || opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		zval_update_constant(retval, (void *) 1 TSRMLS_CC);
-	}
+
 
 	if (varname == &tmp_varname) {
 		zval_dtor(varname);

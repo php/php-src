@@ -378,7 +378,7 @@ static void register_standard_class(void)
 	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
 	zend_standard_class_def->parent = NULL;
 	zend_hash_init_ex(&zend_standard_class_def->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
-	zend_hash_init_ex(&zend_standard_class_def->default_properties_info, 0, NULL, (dtor_func_t) zend_destroy_property_info, 1, 0);
+	zend_hash_init_ex(&zend_standard_class_def->properties_info, 0, NULL, (dtor_func_t) zend_destroy_property_info, 1, 0);
 	zend_standard_class_def->static_members = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(zend_standard_class_def->static_members, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
 	zend_hash_init_ex(&zend_standard_class_def->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
