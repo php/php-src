@@ -128,8 +128,8 @@ Timeframe:      ? (but shouldn't be much effort, most modules are probably ok)
 Component:      Input Filtering
                 - Implement a SAPI input filter hook that will get called
                   just before registering a variable in the 
-                  treat_data/post_handler hooks.
-                - Make sure this is also done in mbstring
+                  treat_data/post_handler hooks.  (done)
+                - Make sure this is also done in mbstring  (done)
                 - Provide access functions, or perhaps a new 
                   $_RAW_GET/POST/Cookie set of superglobals to get at the
                   unfiltered data
