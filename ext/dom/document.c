@@ -1441,19 +1441,65 @@ PHP_FUNCTION(dom_document_savexml)
 }
 /* }}} end dom_document_savexml */
 
+static xmlNodePtr php_dom_free_xinclude_node(xmlNodePtr cur TSRMLS_DC) {
+	xmlNodePtr xincnode;
+
+	xincnode = cur;
+	cur = cur->next;
+	xmlUnlinkNode(xincnode);
+	php_libxml_node_free_resource(xincnode TSRMLS_CC);
+
+	return cur;
+}
+
+static void php_dom_remove_xinclude_nodes(xmlNodePtr cur TSRMLS_DC) {
+	while(cur) {
+		if (cur->type == XML_XINCLUDE_START) {
+			cur = php_dom_free_xinclude_node(cur TSRMLS_CC);
+
+			/* XML_XINCLUDE_END node will be a sibling of XML_XINCLUDE_START */
+			while(cur && cur->type != XML_XINCLUDE_END) {
+				cur = cur->next;
+			}
+
+			if (cur && cur->type == XML_XINCLUDE_END) {
+				cur = php_dom_free_xinclude_node(cur TSRMLS_CC);
+			}
+		} else {
+			if (cur->type == XML_ELEMENT_NODE) {
+				php_dom_remove_xinclude_nodes(cur->children TSRMLS_CC);
+			}
+			cur = cur->next;
+		}
+	}
+}
+
 /* {{{ proto int dom_document_xinclude()
    Substitutues xincludes in a DomDocument */
 PHP_FUNCTION(dom_document_xinclude)
 {
 	zval *id;
 	xmlDoc *docp;
+	xmlNodePtr root;
 	int err; 
 	dom_object *intern;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
 	err = xmlXIncludeProcess (docp);
-	
+
+	/* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
+	are added via xmlXIncludeProcess to mark beginning and ending of xincluded document 
+	but are not wanted in resulting document - must be done even if err as it could fail after
+	having processed some xincludes */
+	root = (xmlNodePtr) docp->children;
+	while(root && root->type != XML_ELEMENT_NODE && root->type != XML_XINCLUDE_START) {
+		root = root->next;
+	}
+	if (root) {
+		php_dom_remove_xinclude_nodes(root TSRMLS_CC);
+	}
+
 	if (err) {
 		RETVAL_LONG(err);
 	} else {

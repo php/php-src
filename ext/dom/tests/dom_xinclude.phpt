@@ -10,7 +10,10 @@ array_search('compress.zlib', stream_get_wrappers()) || die('skip compress.zlib 
 $dom = new domdocument;
 $dom->load(dirname(__FILE__)."/xinclude.xml");
 $dom->xinclude();
-print $dom->saveXML();
+print $dom->saveXML()."\n";
+foreach ($dom->documentElement->childNodes as $node) {
+	print $node->nodeName."\n";
+}
 
 --EXPECT--
 <?xml version="1.0"?>
@@ -23,3 +26,8 @@ print $dom->saveXML();
   <author>John Steinbeck</author>
  </book>
  </foo>
+
+#text
+book
+book
+#text
