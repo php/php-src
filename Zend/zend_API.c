@@ -1611,7 +1611,7 @@ ZEND_API void zend_declare_property(zend_class_entry *ce, char *name, int namele
 	  }
 	  break;
 	  case ZEND_ACC_PUBLIC:
-		zend_hash_update(target_symbol_table, name, namelen, &property, sizeof(zval *), NULL);
+		zend_hash_update(target_symbol_table, name, namelen+1, &property, sizeof(zval *), NULL);
 		property_info.name = estrdup(name);
 		property_info.name_length = namelen;
 		break;
