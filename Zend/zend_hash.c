@@ -112,8 +112,10 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 	}
 
 
-#define HASH_UNPROTECT_RECURSION(ht)																\
-	(ht)->nApplyCount--;
+#define HASH_UNPROTECT_RECURSION(ht)													\
+	if ((ht)->bApplyProtection) {														\
+		(ht)->nApplyCount--;															\
+	}
 
 
 #define ZEND_HASH_IF_FULL_DO_RESIZE(ht)				\
