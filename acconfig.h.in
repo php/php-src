@@ -5,7 +5,6 @@
 #undef VERSION
 
 #undef HAVE_AOLSERVER
-#undef HAVE_ROXEN
 
 #undef HAVE_STRUCT_FLOCK
 #undef HAVE_TM_GMTOFF

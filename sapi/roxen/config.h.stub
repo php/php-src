@@ -1,0 +1,5 @@
+
+/* Define this if you want to build the Roxen PHP module
+ * It is currently VERY EXPERIMENTAL and not finished.
+ */
+#undef HAVE_ROXEN
