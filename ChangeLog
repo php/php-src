@@ -1,3 +1,22 @@
+2004-05-08  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+      - mnoGoSearch extension was updated to support CachedCopies of
+        mnogosearch-3.2.16 or later. Udm_Get_Agent_Param and
+        Udm_Store_Doc_Cgi functions were added. MnoGoSearch-3.2.3 stored API
+        was removed.
+
+2004-05-08  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/session.c:
+      MFH: if statement logic would never eval to false.
+
+    * ext/session/session.c:
+      if statement logic would never eval to false.
+
 2004-05-07  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/pcre/config.w32:
