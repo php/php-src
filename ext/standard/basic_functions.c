@@ -90,6 +90,7 @@ function_entry basic_functions[] = {
 	PHP_FE(usort,									first_arg_force_ref)
 	PHP_FE(uasort,									first_arg_force_ref)
 	PHP_FE(uksort,									first_arg_force_ref)
+	PHP_FE(shuffle,									first_arg_force_ref)
 	PHP_FE(array_walk,								first_arg_force_ref)
 	PHP_FALIAS(sizeof,			count,				first_arg_allow_ref)
 	PHP_FE(count,									first_arg_allow_ref)
@@ -317,6 +318,7 @@ function_entry basic_functions[] = {
 	PHP_FE(in_array,					NULL)
 	PHP_FE(extract,						NULL)
 	PHP_FE(compact,						NULL)
+	PHP_FE(range,						NULL)
 	PHP_FE(array_push,					first_arg_force_ref)
 	PHP_FE(array_pop,					first_arg_force_ref)
 	PHP_FE(array_shift,					first_arg_force_ref)
@@ -2468,6 +2470,73 @@ PHP_FUNCTION(compact)
 	}
 	
 	efree(args);
+}
+/* }}} */
+
+/* {{{ proto array range(int low, int high)
+   Create an array containing the range of integers from low to high (inclusive) */
+PHP_FUNCTION(range)
+{
+	zval *zlow, *zhigh;
+	int low, high;
+	
+	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&zlow,&zhigh) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(zlow);
+	convert_to_long(zhigh);
+	low = zlow->value.lval;
+	high = zhigh->value.lval;
+
+    /* allocate an array for return */
+    if (array_init(return_value) == FAILURE) {
+            RETURN_FALSE;
+    }
+
+	for (; low <= high; low++) {
+		add_next_index_long(return_value, low);
+	}	
+}
+/* }}} */
+
+
+static int array_data_shuffle(const void *a, const void*b) {
+	return (
+	/* This is just a little messy. */
+#ifdef HAVE_LRAND48
+        lrand48()
+#else
+#ifdef HAVE_RANDOM
+        random()
+#else
+        rand()
+#endif
+#endif
+	% 2) ? 1 : -1;
+}
+
+
+/* {{{ proto int shuffle(array array_arg)
+   Randomly shuffle the contents of an array */
+PHP_FUNCTION(shuffle)
+{
+	zval **array;
+
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	if ((*array)->type != IS_ARRAY) {
+		php_error(E_WARNING, "Wrong datatype in shuffle() call");
+		return;
+	}
+	if (!ParameterPassedByReference(ht,1)) {
+		php_error(E_WARNING, "Array not passed by reference in call to shuffle()");
+		return;
+	}
+	if (zend_hash_sort((*array)->value.ht, array_data_shuffle, 1) == FAILURE) {
+		return;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
