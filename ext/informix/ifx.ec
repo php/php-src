@@ -806,8 +806,7 @@ EXEC SQL END DECLARE SECTION;
     
     IFXG(sv_sqlcode) = 0;
 
-    ifx = zend_fetch_resource_ex(ifx_link, id, "IFX link", 2, IFXG(le_link), IFXG(le_plink));
-    ZEND_VERIFY_RESOURCE(ifx);
+    ZEND_FETCH_RESOURCE2(ifx, char *, ifx_link, id, "IFX link", IFXG(le_link), IFXG(le_plink));
     
     EXEC SQL SET CONNECTION :ifx;
     EXEC SQL close database;
@@ -905,8 +904,7 @@ EXEC SQL END DECLARE SECTION;
     }
 
     id = -1;
-    ifx = zend_fetch_resource_ex(ifx_link, id, "IFX link", 2, IFXG(le_link), IFXG(le_plink));
-    ZEND_VERIFY_RESOURCE(ifx);
+    ZEND_FETCH_RESOURCE2(ifx, char *, ifx_link, id, "IFX link", IFXG(le_link), IFXG(le_plink));
     
    
     affected_rows = -1;      /* invalid */
@@ -1294,8 +1292,7 @@ EXEC SQL END DECLARE SECTION;
     }
 
     id = -1;
-    ifx = zend_fetch_resource_ex(ifx_link, id, "IFX link", 2, IFXG(le_link), IFXG(le_plink));
-    ZEND_VERIFY_RESOURCE(ifx);
+    ZEND_FETCH_RESOURCE2(ifx, char *, ifx_link, id, "IFX link", IFXG(le_link), IFXG(le_plink));
 
     affected_rows = -1;      /* invalid */
 
