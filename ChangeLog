@@ -1,3 +1,145 @@
+2002-04-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2filter/config.m4
+      sapi/apache/config.m4:
+    - Added checks to prevent building the DSO with wrong configure option.
+
+2002-04-12  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Fix a typo and a build error detected by the lovely HPUX11 ANSI C compiler.
+
+2002-04-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/exif/exif.c: Fix the build.
+
+    * ext/zlib/zlib.c: Do NOT use C++ comments in C code.
+
+2002-04-12  jim winstead  <jimw@apache.org>
+
+    * RELEASE_PROCESS:
+    remove this, since it doesn't describe the current process, and is
+    under a silly license.
+
+2002-04-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_version.h
+      configure.in: - Swap back development version numbers
+
+2002-04-12  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/openssl.c: fix build with ZE2
+
+2002-04-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in
+      main/php_version.h: - Go with RC3
+
+2002-04-12  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/php_streams.h: fix segfault
+
+2002-04-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/rules.mk
+      build/rules_common.mk
+      build/rules_pear.mk
+      build/program.mk: Gone they are.. files related to the old build-system
+
+2002-04-12  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/pcntl/tests/001.phpt:  - MFB (4_2_0)
+
+    * ext/pcntl/tests/001.phpt:  - fix testcase
+     - patch by: Roman Neuhauser <neuhauser@mail.cz>
+
+2002-04-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c
+      ext/exif/tests/001.phpt
+      ext/exif/tests/003.phpt:
+    Ini settings for internal encoding and decoding of Unicode and JIS formatted user comments.
+
+2002-04-12  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/zlib/zlib.c: Removing a unused local variable.
+    Setting the size before returning the value in readgzfile
+
+2002-04-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mbstring/mbstring.h
+      ext/mbstring/mbstring.c: -new function php_mb_check_encoding_list
+    -mark module globals as const (thread safety)
+
+2002-04-12  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/mbstring/tests/003.phpt: MFH
+
+    * ext/mbstring/tests/003.phpt: This test should be skipped if(!cgi)
+
+2002-04-12  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    fixed a bug which causes crash when charset is not set.
+
+2002-04-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mbstring/mbstring.c: -fix mb_detect_order
+    -php_mbstring_parse_encoding_list/array return 0 on any illegal input
+
+2002-04-12  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c: - added method DomNode->remove_child()
+
+    * ext/domxml/php_domxml.h: - fixed stupid compile error
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    - insert_before(): copy node before doing the insert
+    - append_child(): actually do an append child and not and add sibling
+    - what is called xmlDtd in libxml is actually the class DocumentType
+      in DOM. The domxml extension used a class DomDtd which is not defined
+    	in the DOM standard. Instead of using DomDtd DomDocumentType is now
+    	used. DomDtd has been renamed to Dtd but has not meaning anymore.
+    - added more functions
+
+2002-04-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp: Sync with php4dllts.
+
+    * win32/php4dllts.dsp
+      win32/php4dll.dsp: MFH (Reduce warning level for re2c generated files.
+
+2002-04-12  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * run-tests.php:
+    Enable CGI binary for testing. CGI binary should be used when it's
+    available, since some tests cannot be performed by CLI. (And
+    many of them are just failing now)
+    Fixed SAPI and VERSION output.
+
+    * Makefile.global: Be nice to php.ini-recommended users.
+    php.ini-recommended uses output buffer resulting delayed output during
+    "make test". User php.ini file is used anyway, since run-tests.php
+    invoke php for each test from there.
+
+2002-04-12  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/tests/003.phpt:
+    This exif test was failing because the \0's in the expected output had
+    disappeared.  It may be CVS doing this.  I have put the nulls back, but we
+    may have to mark this as a binary file in th cvswrappers, or rewrite the
+    test to not output nulls.
+
+2002-04-12  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/xslt/config.m4: Update Sablotron version supported.
+
+    * sapi/cgi/cgi_main.c
+      main/php_ini.c
+      sapi/cli/php_cli.c: CGI/CLI take file and dir for -c option by this.
+
 2002-04-11  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/mbstring/mbstring.c:
