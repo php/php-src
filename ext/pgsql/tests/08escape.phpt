@@ -6,7 +6,7 @@ PostgreSQL escape functions
 <?php
 
 include 'config.inc';
-define('FILE_NAME', './php.gif');
+define('FILE_NAME', dirname(__FILE__) . '/php.gif');
 
 // pg_escape_string() test
 $before = "ABC\\ABC\'";
@@ -37,8 +37,7 @@ else {
 }
 
 // Test using database
-$fp   = fopen(FILE_NAME,'r');
-$data = fread($fp, filesize(FILE_NAME));
+$data = file_get_contents(FILE_NAME);
 $db   = pg_connect($conn_str);
 
 // Insert binary to DB

@@ -8,8 +8,7 @@ PostgreSQL pg_escape_bytea() functions
 
 include('config.inc');
 
-$fp = fopen('php.gif', 'r');
-$image = fread($fp, filesize('php.gif'));
+$image = file_get_contents(dirname(__FILE__) . '/php.gif');
 $esc_image = pg_escape_bytea($image);
 
 $db = pg_connect($conn_str);
