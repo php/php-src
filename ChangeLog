@@ -1,3 +1,81 @@
+2000-05-29  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/Makefile.in: Forgot to update the makefile
+
+    * NEWS
+      ext/mysql/php_mysql.c: Fix bug #4678
+
+    * main.c
+      php4dllts.dsp
+      php_globals.h: Fix startup sequence.  It should do it this time.
+
+    * NEWS
+      internal_functions_win32.c
+      main.c
+      php.ini-dist
+      php.ini-optimized: - Added disable_functions php.ini support
+    - Fixed Win32 build
+
+2000-05-29  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * php.h: warn_not_available() will be used by other modules besides
+    ext/standard in the (very near) future
+
+2000-05-29  Andi Gutmans  <andi@php.net>
+
+    * php_content_types.c
+      php_virtual_cwd.c: - License is at 2.02
+
+2000-05-29  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/basic_functions.c:
+    Oh yeah, I said there's no need for it to be defined didn't I? :)
+
+2000-05-29  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c
+      php_content_types.c
+      php_virtual_cwd.c:
+    Clean up EXIF code and give up on extracting the embedded thumbnail for
+    now.  Will return to it when I find some real specs on it.
+    Also added a couple of missing copyright headers
+
+2000-05-29  Zeev Suraski  <zeev@php.net>
+
+    * php.h: Remove stale reference to .h file
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/php_noavail.c
+      ext/standard/php_noavail.h:
+    There's really no need for an entire file for a one line function...
+
+2000-05-29  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: detab
+
+    * TODO: add some notes
+
+    * ext/standard/basic_functions.c:
+    allow_call_time_pass_reference fix: similar_text
+
+2000-05-29  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/file.c: Remove stale macro
+
+2000-05-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    `len' is not the actual length of the string, but the possible maximum
+    length. This fixes a couple of problems, like not setting the cookie path
+    correctly.
+
+2000-05-29  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/file.c: More secure mode
+
+    * php_virtual_cwd.c: Creat is creat is creat, no open
+
 2000-05-28  Jim Winstead  <jimw@php.net>
 
     * MAINTAINERS: Add maintainer info for dbase extension.
