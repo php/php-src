@@ -1,7 +1,8 @@
 --TEST--
 mysqli connect
 --FILE--
-<?
+<?php
+
 	$user = "root";
 	$passwd = "";
 	$dbname = "test";
