@@ -28,6 +28,9 @@
 /* Define if you have the resolv library (-lresolv). */
 #define HAVE_LIBRESOLV 0
 
+/* Define if you have the pam library (-lpam). */
+#define HAVE_LIBPAM 0
+
 /* Define if you want safe mode enabled by default. */
 #define PHP_SAFE_MODE 0
 
