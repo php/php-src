@@ -2309,7 +2309,7 @@ PHP_FUNCTION(imap_utf7_decode)
 				break;
 			case ST_DECODE2:
 				outp[1] = UNB64(*inp);
-				c = outpp[1] >> 2;
+				c = outp[1] >> 2;
 				*outp++ |= c;
 				*outp <<= 6;
 				state = ST_DECODE3;
