@@ -11,7 +11,7 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-echo $root->child['reserved:attribute'];
+echo $root->child->attributes('reserved')['attribute'];
 echo "\n---Done---\n";
 ?>
 --EXPECT--

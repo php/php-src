@@ -11,9 +11,9 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-echo $root->child['reserved:attribute'];
+echo $root->child->attributes('reserved')['attribute'];
 echo "\n";
-echo $root->child['special:attribute'];
+echo $root->child->attributes('special')['attribute'];
 foreach ($root->child['attribute'] as $attr) {
 	echo "$attr\n";
 }
