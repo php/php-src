@@ -1828,7 +1828,8 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 				sprintf(dt, "%%0.%df", -scale);
 				Z_STRLEN_P(val) = sprintf (string_data, dt, number / f);
 			} else {
-				Z_STRLEN_P(val) = sprintf (string_data, "%.0f", (double) (ISC_INT64) (*((ISC_INT64 *) data)));
+				Z_STRLEN_P(val) =sprintf (string_data, "%.0" ISC_INT64_FORMAT "d",
+							                                    (ISC_INT64) *(ISC_INT64 *) data);
 			}
 
 			Z_STRVAL_P(val) = estrdup(string_data);
