@@ -29,6 +29,13 @@
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_smart_str.h"
 
+/* In order to detect MSG_EXCEPT use at run time; we have no way
+ * of knowing what the bit definitions are, so we can't just define
+ * out own MSG_EXCEPT value. */
+#define PHP_MSG_IPC_NOWAIT	1
+#define PHP_MSG_NOERROR		2
+#define PHP_MSG_EXCEPT		4
+
 /* True global resources - no need for thread safety here */
 static int le_sysvmsg;
 
@@ -92,9 +99,9 @@ static void sysvmsg_release(zend_rsrc_list_entry *rsrc)
 PHP_MINIT_FUNCTION(sysvmsg)
 {
 	le_sysvmsg = zend_register_list_destructors_ex(sysvmsg_release, NULL, "sysvmsg queue", module_number);
-	REGISTER_LONG_CONSTANT("MSG_IPC_NOWAIT", IPC_NOWAIT, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("MSG_NOERROR", MSG_NOERROR, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("MSG_EXCEPT", MSG_EXCEPT, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("MSG_IPC_NOWAIT", PHP_MSG_IPC_NOWAIT, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("MSG_NOERROR", PHP_MSG_NOERROR, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("MSG_EXCEPT", PHP_MSG_EXCEPT, CONST_PERSISTENT|CONST_CS);
 	return SUCCESS;
 }
 /* }}} */
@@ -252,6 +259,7 @@ PHP_FUNCTION(msg_receive)
 {
 	zval *out_message, *queue, *out_msgtype, *zerrcode = NULL;
 	long desiredmsgtype, maxsize, flags = 0;
+	long realflags = 0;
 	zend_bool do_unserialize = 1;
 	sysvmsg_queue_t *mq = NULL;
 	struct msgbuf *messagebuffer = NULL; /* buffer to transmit */
@@ -264,11 +272,26 @@ PHP_FUNCTION(msg_receive)
 				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE)
 		return;
 
+	if (flags != 0) {
+		if (flags & PHP_MSG_EXCEPT) {
+#ifndef MSG_EXCEPT
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "MSG_EXCEPT is not supported on your system");
+			RETURN_FALSE;
+#else
+			realflags |= MSG_EXCEPT;
+#endif
+		}
+		if (flags & PHP_MSG_NOERROR)
+			realflags |= MSG_NOERROR;
+		if (flags & PHP_MSG_IPC_NOWAIT)
+			realflags |= IPC_NOWAIT;
+	}
+	
 	ZEND_FETCH_RESOURCE(mq, sysvmsg_queue_t *, &queue, -1, "sysvmsg queue", le_sysvmsg);
 
 	messagebuffer = (struct msgbuf*)emalloc(sizeof(struct msgbuf) + maxsize);
 	
-	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, flags);
+	result = msgrcv(mq->id, messagebuffer, maxsize, desiredmsgtype, realflags);
 		
 	zval_dtor(out_msgtype);
 	zval_dtor(out_message);	
