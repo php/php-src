@@ -99,26 +99,6 @@ int zend_startup_constants(ELS_D)
 
 void zend_register_standard_constants(ELS_D)
 {
-	/* ZEND_FIX:  Move to PHP */
-#if 0
-#if WIN32|WINNT
-	/* Get build numbers for Windows NT or Win95 */
-	if (dwVersion < 0x80000000){
-		php3_os="WINNT";
-	} else {
-		php3_os="WIN32";
-	}
-#else
-	php3_os=PHP_OS;
-#endif
-#endif
-
-
-#if 0
-	/* This should go back to PHP */
-	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php3_os, strlen(php3_os), CONST_PERSISTENT | CONST_CS);
-#endif
 	REGISTER_MAIN_LONG_CONSTANT("E_ERROR", E_ERROR, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("E_WARNING", E_WARNING, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("E_PARSE", E_PARSE, CONST_PERSISTENT | CONST_CS);
