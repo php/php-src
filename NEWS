@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2004, PHP 5 Release Candidate 1
+
 12 Feb 2004, PHP 5 Beta 4
 - Changed exceptions so that they must now inherit from the built-in Exception
   class. This allows for a general catch(Exception $e) statement to catch all
