@@ -517,7 +517,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 	switch (op) {
 	case SAPI_HEADER_SET_STATUS:
-		sapi_update_response_code((int) arg TSRMLS_CC);
+		sapi_update_response_code((long) arg TSRMLS_CC);
 		return SUCCESS;
 
 	case SAPI_HEADER_REPLACE:

@@ -430,7 +430,7 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote %d bytes more data than requested (%d written, %d max)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote %zd bytes more data than requested (%zd written, %zd max)",
 				us->wrapper->classname,
 				didwrite - count, didwrite, count);
 		didwrite = count;
@@ -471,7 +471,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 		convert_to_string(retval);
 		didread = Z_STRLEN_P(retval);
 		if (didread > count) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %d bytes more data than requested (%d read, %d max) - excess data will be lost",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %zd bytes more data than requested (%zd read, %zd max) - excess data will be lost",
 					us->wrapper->classname, didread - count, didread, count);
 			didread = count;
 		}

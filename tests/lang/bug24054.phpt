@@ -3,15 +3,24 @@ Bug #24054 (Assignment operator *= broken)
 --FILE--
 <?php
 
-	$i = 10000000;
+define('LONG_MAX', is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF);
+define('LONG_MIN', -LONG_MAX - 1);
+printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
+					   is_int(LONG_MIN-1),is_int(LONG_MAX+1));
+
+	$i = LONG_MAX;
+
+	$j = $i * 1001;
 	$i *= 1001;
+ 
 
-	$j = 10000000;
-	$j = $j * 1001;
+$tests = <<<TESTS
 
-	var_dump($i,$j);
+$i === $j
+TESTS;
 
-?>
+ include(dirname(__FILE__) . '/../quicktester.inc');
+ 
 --EXPECT--
-float(1.001E+10)
-float(1.001E+10)
+1,1,0,0
+OK

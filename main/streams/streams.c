@@ -368,7 +368,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			 * as leaked; it will log a warning, but lets help it out and display what kind
 			 * of stream it was. */
 			char leakbuf[512];
-			snprintf(leakbuf, sizeof(leakbuf), __FILE__ "(%d) : Stream of type '%s' 0x%08X (path:%s) was not closed\n", __LINE__, stream->ops->label, (unsigned int)stream, stream->__orig_path);
+			snprintf(leakbuf, sizeof(leakbuf), __FILE__ "(%d) : Stream of type '%s' %p (path:%s) was not closed\n", __LINE__, stream->ops->label, stream, stream->__orig_path);
 
 			if (stream->__orig_path) {
 				pefree(stream->__orig_path, stream->is_persistent);
