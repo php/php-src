@@ -55,7 +55,8 @@ static zend_function_entry php_domxml_functions[] = {
 
 
 static zend_function_entry php_domxmldoc_class_functions[] = {
-	PHP_FALIAS(root,	domxml_children,	NULL)
+	PHP_FALIAS(root,	domxml_root,	NULL)
+	PHP_FALIAS(children,	domxml_children,	NULL)
 	PHP_FALIAS(add_root,	domxml_add_root,	NULL)
 	PHP_FALIAS(dtd,	domxml_intdtd,	NULL)
 	PHP_FALIAS(dumpmem,	domxml_dumpmem,	NULL)
@@ -713,9 +714,9 @@ PHP_FUNCTION(domxml_attributes)
 }
 /* }}} */
 
-/* {{{ proto string domxml_root([int doc])
+/* {{{ proto string domxml_rootnew([int doc])
    Returns list of children nodes */
-PHP_FUNCTION(domxml_root)
+PHP_FUNCTION(domxml_rootnew)
 {
 	zval *id, **tmp;
 	int id_to_find;
@@ -778,7 +779,7 @@ PHP_FUNCTION(domxml_root)
 
 /* {{{ proto string domxml_root([int doc_handle])
    Returns root node of document */
-PHP_FUNCTION(domxml_rootold)
+PHP_FUNCTION(domxml_root)
 {
 	zval *id, **tmp;
 	int id_to_find;
@@ -815,16 +816,23 @@ PHP_FUNCTION(domxml_rootold)
 	if (!node) {
 		RETURN_FALSE;
 	}
-	ret = zend_list_insert(node, le_domxmlnodep);
 
-	/* construct an object with some methods */
-	object_init_ex(return_value, domxmlnode_class_entry_ptr);
-	add_property_resource(return_value, "node", ret);
-	add_property_long(return_value, "type", node->type);
-	add_property_stringl(return_value, "name", (char *) node->name, strlen(node->name), 1);
-	if(node->content)
-		add_property_stringl(return_value, "content", (char *) node->content, strlen(node->content), 1);
-	zend_list_addref(ret);
+	while(node) {
+		if(node->type == XML_ELEMENT_NODE) {
+			ret = zend_list_insert(node, le_domxmlnodep);
+
+			/* construct an object with some methods */
+			object_init_ex(return_value, domxmlnode_class_entry_ptr);
+			add_property_resource(return_value, "node", ret);
+			add_property_long(return_value, "type", node->type);
+			add_property_stringl(return_value, "name", (char *) node->name, strlen(node->name), 1);
+			if(node->content)
+				add_property_stringl(return_value, "content", (char *) node->content, strlen(node->content), 1);
+			zend_list_addref(ret);
+			return;
+		}
+		node = node->next;
+	}
 }
 /* }}} */
 

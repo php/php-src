@@ -73,9 +73,11 @@ if(!$dom = xmldoc($xmlstr)) {
 }
 echo "XML Version: ".$dom->version."\n";
 $dtd = $dom->dtd();
-$rootnode = $dom->root();
+$rootnode = $dom->children();
 foreach($rootnode as $root)
   output_node($root);
+$rootnode = $dom->root();
+  output_node($rootnode);
 
 /* This one creates a dom tree made of php objects */
 echo "Test 2: creating a tree with php objects\n";
