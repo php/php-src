@@ -1232,23 +1232,17 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	uint element_len;
 
 	switch (ZEND_NUM_ARGS()) {
-		case 1:
+		case 1: /* pg_fetch_*(result) */ 
 			if (zend_get_parameters_ex(1, &result) == FAILURE) {
 				RETURN_FALSE;
 			}
-			if (!result_type) {
-				result_type = PGSQL_BOTH;
-			}
 			break;
-		case 2:
+		case 2: /* pg_fetch_*(result, row) */
 			if (zend_get_parameters_ex(2, &result, &row) == FAILURE) {
 				RETURN_FALSE;
 			}
-			if (!result_type) {
-				result_type = PGSQL_BOTH;
-			}
 			break;
-		case 3:
+		case 3: /* pg_fetch_*(result, row, result_type) */
 			if (zend_get_parameters_ex(3, &result, &row, &arg3) == FAILURE) {
 				RETURN_FALSE;
 			}
@@ -1258,6 +1252,12 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		default:
 			WRONG_PARAM_COUNT;
 			break;
+	}
+	
+	if (!(result_type & PGSQL_BOTH)) {
+		php_error(E_WARNING, "%s(): invalid result type",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
 	}
 	
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, result, -1, "PostgreSQL result", le_result);
@@ -1281,7 +1281,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				RETURN_FALSE;
 			}
 		} else {
-			/* If 2nd param is NULL, ignore it and use the normal way of accessing the next row */
+			/* If 2nd param is NULL, use internal row counter to access next row */
 			pg_result->row++;
 			pgsql_row = pg_result->row;
 			if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
@@ -1329,7 +1329,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 }
 /* }}} */
 
-/* {{{ proto array pg_fetch_row(resource result [, int row])
+/* {{{ proto array pg_fetch_row(resource result [, int row [, int result_type]])
    Get a row as an enumerated array */ 
 PHP_FUNCTION(pg_fetch_row)
 {
@@ -1341,7 +1341,7 @@ PHP_FUNCTION(pg_fetch_row)
    Fetch a row as an array */
 PHP_FUNCTION(pg_fetch_array)
 {
-	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_BOTH);
 }
 /* }}} */
 
