@@ -40,12 +40,6 @@ AC_ARG_WITH(mysql,
 			fi
 		fi
 		MYSQL_INCLUDE=-I$MYSQL_INCDIR
-		if test -n "$APXS"; then
-			MYSQL_LFLAGS="${apxs_runpath_switch}$MYSQL_LIBDIR' -L$MYSQL_LIBDIR"
-		else
-			MYSQL_LFLAGS="${ld_runpath_switch}$MYSQL_LIBDIR -L$MYSQL_LIBDIR"
-		fi
-		MYSQL_LIBS=-lmysqlclient
 
 		AC_DEFINE(HAVE_MYSQL)
 		AC_MSG_RESULT(yes)
