@@ -20,7 +20,8 @@ foreach ($data as $str) {
 	sqlite_query("INSERT INTO strings VALUES('${str[0]}','${str[1]}')", $db);
 }
 
-$r = sqlite_unbuffered_query("SELECT a, b from strings", $db);
+echo "====BUFFERED====\n";
+$r = sqlite_query("SELECT a, b from strings", $db);
 while (sqlite_has_more($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	var_dump(sqlite_column($r, 0));
@@ -29,9 +30,19 @@ while (sqlite_has_more($r)) {
 	var_dump(sqlite_column($r, 'b'));
 	sqlite_next($r);
 }
+echo "====UNBUFFERED====\n";
+$r = sqlite_unbuffered_query("SELECT a, b from strings", $db);
+while (sqlite_has_more($r)) {
+	var_dump(sqlite_column($r, 0));
+	var_dump(sqlite_column($r, 'b'));
+	var_dump(sqlite_column($r, 1));
+	var_dump(sqlite_column($r, 'a'));
+	sqlite_next($r);
+}
 echo "DONE!\n";
 ?>
 --EXPECT--
+====BUFFERED====
 array(2) {
   [0]=>
   string(3) "one"
@@ -52,4 +63,13 @@ string(5) "three"
 string(4) "four"
 string(5) "three"
 string(4) "four"
+====UNBUFFERED====
+string(3) "one"
+string(3) "two"
+NULL
+NULL
+string(5) "three"
+string(4) "four"
+NULL
+NULL
 DONE!
