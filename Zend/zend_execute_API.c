@@ -551,8 +551,17 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	if (EG(current_execute_data)) {
 		execute_data = *EG(current_execute_data);
 	} else {
+		/* This only happens when we're called outside any execute()'s
+		 * It shouldn't be strictly necessary to NULL execute_data out,
+		 * but it may make bugs easier to spot
+		 */
 		memset(&execute_data, 0, sizeof(zend_execute_data));
 	}
+
+	/* we may return SUCCESS, and yet retval may be uninitialized,
+	 * if there was an exception...
+	 */
+	*fci->retval_ptr_ptr = NULL;
 
 	if (!fci_cache || !fci_cache->initialized) {
 		if (fci->function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
