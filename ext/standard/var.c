@@ -98,7 +98,9 @@ head_done:
 			break;
 		case IS_RESOURCE: {
 			char *type_name;
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc));
+			TSRMLS_FETCH();
+
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			php_printf("%sresource(%ld) of type (%s)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
 			break;
 		}

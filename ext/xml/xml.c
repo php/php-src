@@ -243,6 +243,8 @@ PHP_MINFO_FUNCTION(xml)
 static zval *_xml_resource_zval(long value)
 {
 	zval *ret;
+	TSRMLS_FETCH();
+
 	MAKE_STD_ZVAL(ret);
 
 	ret->type = IS_RESOURCE;

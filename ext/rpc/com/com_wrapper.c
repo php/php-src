@@ -1150,6 +1150,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 	int type;
 	comval *obj, *obj_prop;
 	VARIANT *var_result;
+	TSRMLS_FETCH();
 
 	INIT_ZVAL(return_value);    
 	ZVAL_NULL(&return_value);
@@ -1243,7 +1244,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 	comval *obj;
 	int type;
 	VARIANT var_result;
-
+	TSRMLS_FETCH();
 
 	/* fetch the IDispatch interface */
 	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &comval_handle);
@@ -1632,7 +1633,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 				{
 					/* Oops, it already exists. No problem if it is defined as the same value */
 					/* Check to see if they are the same */
-					if (!compare_function(&results, &c.value, &exists) && INI_INT("com.autoregister_verbose"))
+					if (!compare_function(&results, &c.value, &exists TSRMLS_CC) && INI_INT("com.autoregister_verbose"))
 					{
 						php_error(E_WARNING,"Type library value %s is already defined and has a different value", c.name);
 					}

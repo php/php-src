@@ -204,7 +204,7 @@ PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(file, -1, "File-Handle", &type, 2, php_file_le_fopen(), php_file_le_stream());
+	what = zend_fetch_resource(file TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_fopen(), php_file_le_stream());
 	ZEND_VERIFY_RESOURCE(what);
 
 #if HAVE_PHP_STREAM

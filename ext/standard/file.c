@@ -243,7 +243,7 @@ PHP_FUNCTION(flock)
         WRONG_PARAM_COUNT;
     }
 
-	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
+	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 #if HAVE_PHP_STREAM
@@ -705,7 +705,7 @@ PHP_FUNCTION(fclose)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 3, le_fopen, le_socket, le_stream);
+	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 3, le_fopen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 	zend_list_delete((*arg1)->value.lval);
@@ -783,7 +783,7 @@ PHP_FUNCTION(pclose)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,1,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",NULL,1,le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	zend_list_delete((*arg1)->value.lval);
@@ -805,7 +805,7 @@ PHP_FUNCTION(feof)
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
+	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -877,7 +877,7 @@ PHP_FUNCTION(socket_set_blocking)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 2, le_socket, le_stream);
+	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 2, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 	convert_to_long_ex(arg2);
@@ -925,7 +925,7 @@ PHP_FUNCTION(socket_set_timeout)
 		WRONG_PARAM_COUNT;
 	}
 	/* XXX: add stream support --Wez. */
-	what = zend_fetch_resource(socket, -1, "File-Handle", &type, 1, le_socket);
+	what = zend_fetch_resource(socket TSRMLS_CC, -1, "File-Handle", &type, 1, le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 	socketd = *(int *)what;
 
@@ -963,7 +963,7 @@ PHP_FUNCTION(socket_get_status)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(socket, -1, "File-Handle", &type, 1, le_socket);
+	what = zend_fetch_resource(socket TSRMLS_CC, -1, "File-Handle", &type, 1, le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 	socketd = *(int *)what;
 	sock = php_get_socket(socketd);
@@ -994,7 +994,7 @@ PHP_FUNCTION(fgets)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
+	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 	convert_to_long_ex(arg2);
@@ -1070,7 +1070,7 @@ PHP_FUNCTION(fgetc) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
+	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -1142,7 +1142,7 @@ PHP_FUNCTION(fgetss)
 		break;
 	}
 
-	what = zend_fetch_resource(fd, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
+	what = zend_fetch_resource(fd TSRMLS_CC, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -1210,7 +1210,7 @@ PHP_FUNCTION(fscanf)
 	file_handle    = args[0];
 	format_string  = args[1];
 
-	what = zend_fetch_resource(file_handle, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
+	what = zend_fetch_resource(file_handle TSRMLS_CC, -1, "File-Handle", &type, 4, le_fopen, le_popen, le_socket, le_stream);
 
 	/*
 	 * we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
@@ -1294,7 +1294,7 @@ PHP_FUNCTION(fwrite)
 		break;
 	}
 
-	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 4, le_fopen,
+	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 4, le_fopen,
 		  	le_popen, le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
@@ -1344,7 +1344,7 @@ PHP_FUNCTION(fflush)
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,4,le_fopen,le_popen,le_socket, le_stream);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",&type,4,le_fopen,le_popen,le_socket, le_stream);
 	ZEND_VERIFY_RESOURCE(what);
 
 #if HAVE_PHP_STREAM
@@ -1399,7 +1399,7 @@ PHP_FUNCTION(set_file_buffer)
 
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,2,le_fopen,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",&type,2,le_fopen,le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	convert_to_long_ex(arg2);
@@ -1429,7 +1429,7 @@ PHP_FUNCTION(rewind)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",NULL,2,le_fopen,le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	rewind((FILE*) what);
@@ -1451,7 +1451,7 @@ PHP_FUNCTION(ftell)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",NULL,2,le_fopen,le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	ret = ftell((FILE*) what);
@@ -1478,7 +1478,7 @@ PHP_FUNCTION(fseek)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,2,le_fopen,le_popen);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",NULL,2,le_fopen,le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	convert_to_long_ex(arg2);
@@ -1699,7 +1699,7 @@ PHP_FUNCTION(fpassthru)
 	}
 
 	/* XXX: add stream support --Wez. */
-	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -1788,7 +1788,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(fp,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(fp TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket)
@@ -1823,7 +1823,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(fp,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(fp TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (fstat(fileno((FILE *) what ), &stat_sb)) {
@@ -2003,7 +2003,7 @@ PHP_FUNCTION(fread)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(arg1 TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -2083,7 +2083,7 @@ PHP_FUNCTION(fgetcsv) {
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(fd,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	what = zend_fetch_resource(fd TSRMLS_CC,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == le_socket) {
@@ -2252,7 +2252,7 @@ PHP_FUNCTION(fd_set)
 				WRONG_PARAM_COUNT;
 		}
 	/* XXX: add stream support --Wez. */
-		what = zend_fetch_resource(arg,-1,"select",&type,3,le_fopen,le_socket,le_popen);
+		what = zend_fetch_resource(arg TSRMLS_CC,-1,"select",&type,3,le_fopen,le_socket,le_popen);
 		ZEND_VERIFY_RESOURCE(what);
 		if(type == le_socket) {
 				fd = *(int *)what;
@@ -2273,7 +2273,7 @@ PHP_FUNCTION(fd_set)
 		FD_ZERO(&readfd);
 		for(i = 0; i < ARG_COUNT(ht); i++) {
 	/* XXX: add stream support --Wez. */
-				what = zend_fetch_resource(*args,-1,"select",&type,3,le_fopen,le_socket,le_popen);
+				what = zend_fetch_resource(*args TSRMLS_CC,-1,"select",&type,3,le_fopen,le_socket,le_popen);
 				ZEND_VERIFY_RESOURCE(what);
 				if(type == le_socket) {
 						fd = *(int *)what;
@@ -2323,7 +2323,7 @@ PHP_FUNCTION(fd_isset)
 	}
 	/* XXX: add stream support --Wez. */
 
-	what = zend_fetch_resource(fdarg,-1,"select",&type,3,le_fopen,le_socket,le_popen);
+	what = zend_fetch_resource(fdarg TSRMLS_CC,-1,"select",&type,3,le_fopen,le_socket,le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 
 	if(type == le_socket) {

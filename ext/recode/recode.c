@@ -172,14 +172,14 @@ PHP_FUNCTION(recode_file)
 	 	WRONG_PARAM_COUNT;
 	}
 
-	in_fp = zend_fetch_resource(input,-1, "File-Handle", &in_type, 
+	in_fp = zend_fetch_resource(input TSRMLS_CC,-1, "File-Handle", &in_type, 
 		2, php_file_le_fopen(), php_file_le_popen());
 	if (!in_fp) {
 		php_error(E_WARNING,"Unable to find input file identifier");
 		RETURN_FALSE;
 	}
 
-	out_fp = zend_fetch_resource(output,-1, "File-Handle", &out_type,
+	out_fp = zend_fetch_resource(output TSRMLS_CC,-1, "File-Handle", &out_type,
 		2, php_file_le_fopen(), php_file_le_popen());
 	if (!out_fp) {
 		php_error(E_WARNING,"Unable to find output file identifier");

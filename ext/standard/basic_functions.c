@@ -1863,12 +1863,13 @@ static int user_tick_function_compare(user_tick_function_entry *tick_fe1,
 {
 	zval *func1 = tick_fe1->arguments[0];
 	zval *func2 = tick_fe2->arguments[0];
+	TSRMLS_FETCH();
 
 	if (Z_TYPE_P(func1) == IS_STRING && Z_TYPE_P(func2) == IS_STRING) {
 		return (zend_binary_zval_strcmp(func1, func2) == 0);
 	} else if (Z_TYPE_P(func1) == IS_ARRAY && Z_TYPE_P(func2) == IS_ARRAY) {
 		zval result;
-		zend_compare_arrays(&result, func1, func2);
+		zend_compare_arrays(&result, func1, func2 TSRMLS_CC);
 		return (Z_LVAL(result) == 0);
 	} else
 		return 0;
@@ -1933,7 +1934,6 @@ PHP_FUNCTION(highlight_file)
 	pval **filename;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 
-
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &filename)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1941,7 +1941,7 @@ PHP_FUNCTION(highlight_file)
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
-	if (highlight_file(Z_STRVAL_PP(filename), &syntax_highlighter_ini)==FAILURE) {
+	if (highlight_file(Z_STRVAL_PP(filename), &syntax_highlighter_ini TSRMLS_CC)==FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1967,7 +1967,7 @@ PHP_FUNCTION(highlight_string)
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code" TSRMLS_CC);
 
-	if (highlight_string(*expr, &syntax_highlighter_ini, hicompiled_string_description)==FAILURE) {
+	if (highlight_string(*expr, &syntax_highlighter_ini, hicompiled_string_description TSRMLS_CC)==FAILURE) {
 		efree(hicompiled_string_description);
 		RETURN_FALSE;
 	}

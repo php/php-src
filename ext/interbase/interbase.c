@@ -455,7 +455,7 @@ static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc)
 	ibase_db_link *ib_link;
 	TSRMLS_FETCH();
 
-	ib_link = (ibase_db_link *) zend_fetch_resource(NULL, ib_trans->link_rsrc, "InterBase link", NULL, 2, le_link, le_plink);
+	ib_link = (ibase_db_link *) zend_fetch_resource(NULL TSRMLS_CC, ib_trans->link_rsrc, "InterBase link", NULL, 2, le_link, le_plink);
 	
 	if (ib_link) {
 		if (ib_link->trans[ib_trans->trans_num] != NULL) {
@@ -2833,7 +2833,7 @@ PHP_FUNCTION(ibase_blob_import)
 		RETURN_FALSE;
 	}
 
-	what = zend_fetch_resource(file_arg, -1, "File-Handle", &type, 2, php_file_le_fopen(), php_file_le_stream());
+	what = zend_fetch_resource(file_arg TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_fopen(), php_file_le_stream());
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == php_file_le_fopen())

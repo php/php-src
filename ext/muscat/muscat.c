@@ -229,7 +229,7 @@ PHP_FUNCTION(muscat_setup_net)
 	zval_copy_ctor(handle->handles.muscatnet_handle.socketr);
 
 	// but for our convenience extract the FD
-	what=zend_fetch_resource(socket_arg,-1,"Socket-Handle",NULL,1,php_file_le_socket());
+	what=zend_fetch_resource(socket_arg TSRMLS_CC,-1,"Socket-Handle",NULL,1,php_file_le_socket());
         ZEND_VERIFY_RESOURCE(what);
 	handle->handles.muscatnet_handle.socketd=*(int*)what;
 	php_set_sock_blocking(handle->handles.muscatnet_handle.socketd,1);
@@ -254,7 +254,7 @@ PHP_FUNCTION(muscat_setup_net_)
 	*handle->handles.muscatnet_handle.socketr=*return_value;
 	zval_copy_ctor(handle->handles.muscatnet_handle.socketr);
 	// but for our convenience extract the FD
-	what=zend_fetch_resource(&return_value,-1,"File-Handle",NULL,1,php_file_le_socket);
+	what=zend_fetch_resource(&return_value TSRMLS_CC,-1,"File-Handle",NULL,1,php_file_le_socket);
         ZEND_VERIFY_RESOURCE(what);
 	handle->handles.muscatnet_handle.socketd=*(int*)what;
 	_discard(handle);

@@ -256,7 +256,7 @@ static mssql_statement* _mssql_get_statement(zval **stmt)
 {
 	mssql_statement *statement;
 
-	statement = (mssql_statement *) zend_fetch_resource(stmt, -1, "MS SQL-Statement", NULL, 1, le_statement);
+	statement = (mssql_statement *) zend_fetch_resource(stmt TSRMLS_CC, -1, "MS SQL-Statement", NULL, 1, le_statement);
 
 	if (statement) {
 		return statement;
