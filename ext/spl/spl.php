@@ -377,7 +377,7 @@ class DirectoryIterator implements Iterator
 	 */
 	function getMTime();
 
-	/** \return The current entry's creation time.
+	/** \return The current entry's last change time.
 	 */
 	function getCTime();
 
