@@ -40,6 +40,10 @@
 # include <openssl/ssl.h>
 #endif
 
+#ifdef regex_t
+#undef regex_t
+#endif
+
 #include "httpd.h"
 #include "http_config.h"
 
