@@ -1358,7 +1358,7 @@ PHP_METHOD(swffontchar, addUTF8Chars)
 /* }}} */
 
 static zend_function_entry swffontchar_functions[] = {
-	PHP_ME(swffontchar, __construct,   NULL, 0)
+	PHP_ME(swffontchar, addChars,   NULL, 0)
 	PHP_ME(swffontchar, addUTF8Chars,  NULL, 0)
 	{ NULL, NULL, NULL }
 };
@@ -1872,7 +1872,7 @@ PHP_METHOD(swfsoundinstance, loopCount)
 /* }}} */
 
 static zend_function_entry swfsoundinstance_functions[] = {
-	PHP_ME(swfsoundinstance, __construct,   NULL, 0)
+	PHP_ME(swfsoundinstance, noMultiple,    NULL, 0)
 	PHP_ME(swfsoundinstance, loopInPoint,   NULL, 0)
 	PHP_ME(swfsoundinstance, loopOutPoint,  NULL, 0)
 	PHP_ME(swfsoundinstance, loopCount,     NULL, 0)
@@ -2216,9 +2216,9 @@ PHP_METHOD(swfmovie, setFrames)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto void swfmovie_streamMp3(mixed file)
+/* {{{ proto void swfmovie_streamMP3(mixed file)
    Sets sound stream of the SWF movie. The parameter can be stream or string. */
-PHP_METHOD(swfmovie, streamMp3)
+PHP_METHOD(swfmovie, streamMP3)
 {
 	zval **zfile;
 	SWFSoundStream sound;
