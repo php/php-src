@@ -1032,18 +1032,18 @@ oci8_parse(oci8_connection *connection, char *query, int len, HashTable *list)
 		}
 	}
 
-#if 1 /* testing */
+#if 0 /* testing */
 	{ 
-		ub4   prefetch = 512*1024;
+		ub4   prefetch = 10;
 
 		statement->error = 
 			oci8_error(statement->pError, 
-					   "OCIAttrSet OCI_ATTR_PREFETCH_MEMORY",
+					   "OCIAttrSet OCI_ATTR_PREFETCH_ROWS",
 					   OCIAttrSet(statement->pStmt,
 								  OCI_HTYPE_STMT,
 								  &prefetch,
 								  0, 
-								  OCI_ATTR_PREFETCH_MEMORY,
+								  OCI_ATTR_PREFETCH_ROWS,
 								  statement->pError));
 	}
 #endif
