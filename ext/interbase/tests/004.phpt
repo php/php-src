@@ -5,7 +5,7 @@ InterBase: BLOB test
 --POST--
 --GET--
 --FILE--
-<?php
+<?php /* $Id$ */
 
     require("interbase.inc");
     

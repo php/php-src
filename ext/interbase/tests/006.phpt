@@ -5,7 +5,7 @@ InterBase: binding (may take a while)
 --POST--
 --GET--
 --FILE--
-<?php
+<?php /* $Id$ */
 
 	require("interbase.inc");
 	

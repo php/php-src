@@ -5,7 +5,7 @@ InterBase: array handling
 --POST--
 --GET--
 --FILE--
-<?php
+<?php /* $Id$ */
 
 	require("interbase.inc");
 	

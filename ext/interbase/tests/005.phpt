@@ -5,7 +5,7 @@ InterBase: transactions
 --POST--
 --GET--
 --FILE--
-<?php
+<?php /* $Id$ */
 
     require("interbase.inc");
     
