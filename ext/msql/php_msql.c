@@ -1125,11 +1125,11 @@ DLEXPORT PHP_FUNCTION(msql_field_seek)
 }
 /* }}} */
 
-#define PHP3_MSQL_FIELD_NAME 1
-#define PHP3_MSQL_FIELD_TABLE 2
-#define PHP3_MSQL_FIELD_LEN 3
-#define PHP3_MSQL_FIELD_TYPE 4
-#define PHP3_MSQL_FIELD_FLAGS 5
+#define PHP_MSQL_FIELD_NAME 1
+#define PHP_MSQL_FIELD_TABLE 2
+#define PHP_MSQL_FIELD_LEN 3
+#define PHP_MSQL_FIELD_TYPE 4
+#define PHP_MSQL_FIELD_FLAGS 5
  
 static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
@@ -1157,26 +1157,26 @@ static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	
 	switch (entry_type) {
-		case PHP3_MSQL_FIELD_NAME:
+		case PHP_MSQL_FIELD_NAME:
 			return_value->value.str.len = strlen(msql_field->name);
 			return_value->value.str.val = estrndup(msql_field->name,return_value->value.str.len);
 			return_value->type = IS_STRING;
 			break;
-		case PHP3_MSQL_FIELD_TABLE:
+		case PHP_MSQL_FIELD_TABLE:
 			return_value->value.str.len = strlen(msql_field->table);
 			return_value->value.str.val = estrndup(msql_field->table,return_value->value.str.len);
 			return_value->type = IS_STRING;
 			break;
-		case PHP3_MSQL_FIELD_LEN:
+		case PHP_MSQL_FIELD_LEN:
 			return_value->value.lval = msql_field->length;
 			return_value->type = IS_LONG;
 			break;
-		case PHP3_MSQL_FIELD_TYPE:
+		case PHP_MSQL_FIELD_TYPE:
 			return_value->value.str.val = estrdup(php_msql_get_field_name(msql_field->type));
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			return_value->type = IS_STRING;
 			break;
-		case PHP3_MSQL_FIELD_FLAGS:
+		case PHP_MSQL_FIELD_FLAGS:
 #if MSQL1
 			if ((msql_field->flags&NOT_NULL_FLAG) && (msql_field->flags&PRI_KEY_FLAG)) {
 				return_value->value.str.val = estrndup("primary key not null",20);
@@ -1220,7 +1220,7 @@ static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
    Get the name of the specified field in a result */
 DLEXPORT PHP_FUNCTION(msql_field_name)
 {
-	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_NAME);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_NAME);
 }
 /* }}} */
 
@@ -1228,7 +1228,7 @@ DLEXPORT PHP_FUNCTION(msql_field_name)
    Get name of the table the specified field is in */
 DLEXPORT PHP_FUNCTION(msql_field_table)
 {
-	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_TABLE);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_TABLE);
 }
 /* }}} */
 
@@ -1236,7 +1236,7 @@ DLEXPORT PHP_FUNCTION(msql_field_table)
    Returns the length of the specified field */
 DLEXPORT PHP_FUNCTION(msql_field_len)
 {
-	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_LEN);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_LEN);
 }
 /* }}} */
 
@@ -1244,7 +1244,7 @@ DLEXPORT PHP_FUNCTION(msql_field_len)
    Get the type of the specified field in a result */
 DLEXPORT PHP_FUNCTION(msql_field_type)
 {
-	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_TYPE);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_TYPE);
 }
 /* }}} */
 
@@ -1252,7 +1252,7 @@ DLEXPORT PHP_FUNCTION(msql_field_type)
    Get the flags associated with the specified field in a result */
 DLEXPORT PHP_FUNCTION(msql_field_flags)
 {
-	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_FLAGS);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_FLAGS);
 }
 /* }}} */
 

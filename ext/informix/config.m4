@@ -12,7 +12,7 @@ AC_ARG_WITH(informix,
       INFORMIX_WARNING="
 WARNING: You asked for Informix support, but don't have \\\$INFORMIXDIR
    environment value set up. Configuring and compiling Informix
-   support to PHP3 is impossible and has been turned off. Please
+   support to PHP is impossible and has been turned off. Please
    try again after setting up your environment."
       AC_MSG_RESULT(no)
     else

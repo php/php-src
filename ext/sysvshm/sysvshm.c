@@ -131,8 +131,8 @@ PHP_FUNCTION(shm_attach)
 
 	/* check if shm is already initialized */
 	chunk_ptr= (sysvshm_chunk_head*) shm_ptr;
-	if(strcmp((char*)&(chunk_ptr->magic),"PHP3SM")!=0) {
-		strcpy((char*)&(chunk_ptr->magic),"PHP3SM");	
+	if(strcmp((char*)&(chunk_ptr->magic),"PHP_SM")!=0) {
+		strcpy((char*)&(chunk_ptr->magic),"PHP_SM");	
 		chunk_ptr->start=sizeof(sysvshm_chunk_head);
 		chunk_ptr->end=chunk_ptr->start;
 		chunk_ptr->total=shm_size;

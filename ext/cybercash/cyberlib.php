@@ -8,7 +8,7 @@
  *    compiled.							     *
  *								     *
  *                                                                   *
- *    This is an attempt to duplicate the cybercash API for PHP3     *
+ *    This is an attempt to duplicate the cybercash API for PHP     *
  *    users.                                                         *
  *********************************************************************
  *  This does not require merchant_conf for reasons that any file    *

@@ -105,7 +105,7 @@
 /* Define if you want include() and other functions to be able to open
  * http and ftp URLs as files.
  */
-#define PHP3_URL_FOPEN 0
+#define PHP_URL_FOPEN 0
 
 /* Define if you have broken header files like SunOS 4 */
 #define MISSING_FCLOSE_DECL 0

@@ -32,7 +32,7 @@
 
 /* 
    We are still using a PHP2-style Push/Pop list here as opposed
-   to the PHP3 built-in list functionality because of the nature
+   to the PHP built-in list functionality because of the nature
    of this particular list.  It is just used as a structured
    buffer.  Doing this with the built-in list code would require
    some changes to allow a search for the first item with a

@@ -190,7 +190,7 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 
 	/* FIXME  Lets not get in the habit of doing stuff like this.  This should
 	   be runtime enabled, NOT compile time. */
-#if PHP3_URL_FOPEN
+#if PHP_URL_FOPEN
 	if (!(options & IGNORE_URL)) {
 		return php_fopen_url_wrapper(path, mode, options, issock, socketd, opened_path);
 	}

@@ -31,7 +31,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 {
 	pval **arg;
 	char md5str[33];
-	PHP3_MD5_CTX context;
+	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	int i;
 	char *r;
@@ -42,9 +42,9 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	convert_to_string_ex(arg);
 
 	md5str[0] = '\0';
-	PHP3_MD5Init(&context);
-	PHP3_MD5Update(&context, (*arg)->value.str.val, (*arg)->value.str.len);
-	PHP3_MD5Final(digest, &context);
+	PHP_MD5Init(&context);
+	PHP_MD5Update(&context, (*arg)->value.str.val, (*arg)->value.str.len);
+	PHP_MD5Final(digest, &context);
 	for (i = 0, r = md5str; i < 16; i++, r += 2) {
 		sprintf(r, "%02x", digest[i]);
 	}
@@ -154,7 +154,7 @@ static unsigned char PADDING[64] =
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-void PHP3_MD5Init(PHP3_MD5_CTX * context)
+void PHP_MD5Init(PHP_MD5_CTX * context)
 {
 	context->count[0] = context->count[1] = 0;
 	/* Load magic initialization constants.
@@ -169,7 +169,7 @@ void PHP3_MD5Init(PHP3_MD5_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-void PHP3_MD5Update(PHP3_MD5_CTX * context, const unsigned char *input,
+void PHP_MD5Update(PHP_MD5_CTX * context, const unsigned char *input,
 			   unsigned int inputLen)
 {
 	unsigned int i, index, partLen;
@@ -208,7 +208,7 @@ void PHP3_MD5Update(PHP3_MD5_CTX * context, const unsigned char *input,
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
-void PHP3_MD5Final(unsigned char digest[16], PHP3_MD5_CTX * context)
+void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
 {
 	unsigned char bits[8];
 	unsigned int index, padLen;
@@ -220,10 +220,10 @@ void PHP3_MD5Final(unsigned char digest[16], PHP3_MD5_CTX * context)
 	 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
 	padLen = (index < 56) ? (56 - index) : (120 - index);
-	PHP3_MD5Update(context, PADDING, padLen);
+	PHP_MD5Update(context, PADDING, padLen);
 
 	/* Append length (before padding) */
-	PHP3_MD5Update(context, bits, 8);
+	PHP_MD5Update(context, bits, 8);
 
 	/* Store state in digest */
 	Encode(digest, context->state, 16);

@@ -60,11 +60,11 @@ typedef struct {
 	UINT4 state[4];				/* state (ABCD) */
 	UINT4 count[2];				/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
-} PHP3_MD5_CTX;
+} PHP_MD5_CTX;
 
-void PHP3_MD5Init PROTO_LIST((PHP3_MD5_CTX *));
-void PHP3_MD5Update PROTO_LIST((PHP3_MD5_CTX *, const unsigned char *, unsigned int));
-void PHP3_MD5Final PROTO_LIST((unsigned char[16], PHP3_MD5_CTX *));
+void PHP_MD5Init PROTO_LIST((PHP_MD5_CTX *));
+void PHP_MD5Update PROTO_LIST((PHP_MD5_CTX *, const unsigned char *, unsigned int));
+void PHP_MD5Final PROTO_LIST((unsigned char[16], PHP_MD5_CTX *));
 
 PHP_NAMED_FUNCTION(php_if_md5);
 

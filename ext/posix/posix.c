@@ -455,7 +455,7 @@ PHP_FUNCTION(posix_uname)
 /* }}} */
 
 /* POSIX.1, 4.5.1 time() - Get System Time
-							already covered by PHP3
+							already covered by PHP
  */
 
 /* {{{ proto array posix_times(void) 
@@ -483,7 +483,7 @@ PHP_FUNCTION(posix_times)
 /* }}} */
 
 /* POSIX.1, 4.6.1 getenv() - Environment Access
-							already covered by PHP3
+							already covered by PHP
 */
 
 /* {{{ proto string posix_ctermid(void) 

@@ -23,7 +23,7 @@
 #define HAVE_WDDX 1
 
 /* should be added to runtime config*/
-#define PHP3_URL_FOPEN 1
+#define PHP_URL_FOPEN 1
 
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1

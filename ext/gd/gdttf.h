@@ -2,7 +2,7 @@
 
 #ifdef _OSD_POSIX
 #ifndef APACHE
-#error On this EBCDIC platform, PHP3 is only supported as an Apache module.
+#error On this EBCDIC platform, PHP is only supported as an Apache module.
 #else /*APACHE*/
 #ifndef CHARSET_EBCDIC
 #define CHARSET_EBCDIC /* this machine uses EBCDIC, not ASCII! */

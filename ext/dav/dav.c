@@ -105,19 +105,19 @@ PHP_MINIT_FUNCTION(phpdav)
 {
 #if defined(THREAD_SAFE)
     phpdav_global_struct *phpdav_globals;
-    PHP3_MUTEX_ALLOC(phpdav_mutex);
-    PHP3_MUTEX_LOCK(phpdav_mutex);
+    PHP_MUTEX_ALLOC(phpdav_mutex);
+    PHP_MUTEX_LOCK(phpdav_mutex);
     numthreads++;
     if (numthreads==1){
 		if (!PHP3_TLS_PROC_STARTUP(PHPDAVTls)){
-			PHP3_MUTEX_UNLOCK(phpdav_mutex);
-			PHP3_MUTEX_FREE(phpdav_mutex);
+			PHP_MUTEX_UNLOCK(phpdav_mutex);
+			PHP_MUTEX_FREE(phpdav_mutex);
 			return FAILURE;
 		}
     }
-    PHP3_MUTEX_UNLOCK(phdpav_mutex);
+    PHP_MUTEX_UNLOCK(phdpav_mutex);
     if(!PHP3_TLS_THREAD_INIT(PHPDAVTls,phpdav_globals,phpdav_global_struct)){
-		PHP3_MUTEX_FREE(phpdav_mutex);
+		PHP_MUTEX_FREE(phpdav_mutex);
 		return FAILURE;
     }
 #endif
@@ -130,15 +130,15 @@ PHP_MSHUTDOWN_FUNCTION(phpdav)
     DAV_TLS_VARS;
 #ifdef THREAD_SAFE
     PHP3_TLS_THREAD_FREE(phpdav_globals);
-    PHP3_MUTEX_LOCK(phpdav_mutex);
+    PHP_MUTEX_LOCK(phpdav_mutex);
     numthreads--;
     if (numthreads < 1) {
 		PHP3_TLS_PROC_SHUTDOWN(PHPDAVTls);
-		PHP3_MUTEX_UNLOCK(phpdav_mutex);
-		PHP3_MUTEX_FREE(phpdav_mutex);
+		PHP_MUTEX_UNLOCK(phpdav_mutex);
+		PHP_MUTEX_FREE(phpdav_mutex);
 		return SUCCESS;
     }
-    PHP3_MUTEX_UNLOCK(phpdav_mutex);
+    PHP_MUTEX_UNLOCK(phpdav_mutex);
 #endif
     return SUCCESS;
 }
