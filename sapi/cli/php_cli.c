@@ -93,6 +93,12 @@ static int _print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 	return 0;
 }
 
+static int _print_extension_info(zend_extension *module, void *arg TSRMLS_DC)
+{
+	php_printf("%s\n", module->name);
+	return 0;
+}
+
 #ifndef STDOUT_FILENO
 #define STDOUT_FILENO 1
 #endif
@@ -451,8 +457,7 @@ int main(int argc, char *argv[])
 				php_printf("[PHP Modules]\n");
 			zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _print_module_info, NULL TSRMLS_CC);
 			php_printf("\n[Zend Modules]\n");
-			/* zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) _print_module_info, NULL TSRMLS_CC); */
-			php_printf("Not Implemented\n");
+			zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) _print_extension_info, NULL TSRMLS_CC);
 			php_printf("\n");
 			php_end_ob_buffers(1 TSRMLS_CC);
 			exit(1);
