@@ -1,3 +1,68 @@
+2004-11-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/array.c:
+      - Remove doubled definition
+
+    * ext/standard/array.c:
+      - Add some comment
+
+    * ext/standard/array.c:
+      - Allow direct access to spl class entries (SPL cannot be build shared)
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:
+      - Use new way for global variables
+      - Cache class lookup
+
+    * ext/standard/array.c:
+      - Add interface Countable (PECL #30113)
+
+2004-11-01  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      added multi resultset support in mysql_connect
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_nonapi.c:
+      Added default multi resultset support for mysqli_connect (#30645)
+
+    * (PHP_5_0)
+      NEWS:
+      fixed error handling in mysqli_multi_query
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/020.phpt:
+      MFH:
+      Fixed tests for empty dates (see http://bugs.mysql.com/?id=6058)
+      Fixed memleak in mysqli_stmt_bind_result
+      Fixed error handling for mysqli_multi_query
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/020.phpt:
+      Fixed tests for empty dates (see http://bugs.mysql.com/?id=6058)
+      Fixed memleak in mysqli_stmt_bind_result
+      Fixed error handling for mysqli_multi_query
+
+2004-11-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/curl/curl.c:
+      MFH:  Fixed bug #30613 (Prevent infinite recursion in url redirection).
+
+    * ext/curl/interface.c:
+      MFB: Fixed bug #30613 (Prevent infinite recursion in url redirection).
+
+    * (PHP_5_0)
+      ext/curl/interface.c:
+      Fixed bug #30613 (Prevent infinite recursion in url redirection).
+
 2004-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:
