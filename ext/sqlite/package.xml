@@ -26,7 +26,7 @@
       <user>iliaa</user>
       <name>Ilia Alshanetsky</name>
       <email>ilia@php.net</email>
-      <role>developer</role>
+      <role>lead</role>
     </maintainer>
   </maintainers>
   <description>
@@ -39,31 +39,18 @@
 	http://snaps.php.net/win32/PECL_STABLE/php_sqlite.dll
   </description>
   <license>PHP</license>
-  <release>
-    <state>stable</state>
-    <version>1.0</version>
-    <date>2003-06-21</date>
-	<notes>
-		Added:
-			sqlite_udf_encode_binary() and sqlite_udf_decode_binary() for
-			handling binary data in UDF callbacks.
-			sqlite_popen() for persistent db connections.
-			sqlite_unbuffered_query() for high performance queries.
-			sqlite_last_error() returns error code from last operation.
-			sqlite_error_string() returns description of error.
-			sqlite_create_aggregate() for registering aggregating SQL functions.
-			sqlite_create_function() for registering regular SQL functions.
-			sqlite_fetch_string() for speedy access to first column of result sets.
-			sqlite_fetch_all() to receive all rowsets from a query as an array.
-			iteration interface
 
-			sqlite_query() functions accept resource/query string in either order,
-			for compatibility with mysql and postgresql extensions.
+<release>
+<state>stable</state>
+<version>1.0.1</version>
+<date>2004-01-17</date>
+<notes>
+Upgraded libsqlite to version 2.9.11
+Fixed crash bug in module shutdown
+Fixed crash with empty queries
+Fixed column name mangling bug
+</notes>
 
-		Fixed some build issues for thread-safe builds.
-
-		Increase the default busy timeout interval to 60 seconds.
-    </notes>
     <filelist>
       <file role="src" name="config.m4"/>
       <file role="src" name="sqlite.c"/>
@@ -105,6 +92,7 @@
 			<file role="src" name="btree_rb.c"/>
 			<file role="src" name="build.c"/>
 			<file role="src" name="copy.c"/>
+			<file role="src" name="date.c"/>
 			<file role="src" name="delete.c"/>
 			<file role="src" name="encode.c"/>
 			<file role="src" name="expr.c"/>
@@ -128,6 +116,7 @@
 			<file role="src" name="util.c"/>
 			<file role="src" name="vacuum.c"/>
 			<file role="src" name="vdbe.c"/>
+			<file role="src" name="vdbeaux.c"/>
 			<file role="src" name="where.c"/>
 			<file role="src" name="btree.h"/>
 			<file role="src" name="hash.h"/>
@@ -144,4 +133,34 @@
 	  </dir>
     </filelist>
   </release>
+
+  <changelog>
+    <release>
+      <state>stable</state>
+      <version>1.0</version>
+      <date>2003-06-21</date>
+	<notes>
+		Added:
+			sqlite_udf_encode_binary() and sqlite_udf_decode_binary() for
+			handling binary data in UDF callbacks.
+			sqlite_popen() for persistent db connections.
+			sqlite_unbuffered_query() for high performance queries.
+			sqlite_last_error() returns error code from last operation.
+			sqlite_error_string() returns description of error.
+			sqlite_create_aggregate() for registering aggregating SQL functions.
+			sqlite_create_function() for registering regular SQL functions.
+			sqlite_fetch_string() for speedy access to first column of result sets.
+			sqlite_fetch_all() to receive all rowsets from a query as an array.
+			iteration interface
+
+			sqlite_query() functions accept resource/query string in either order,
+			for compatibility with mysql and postgresql extensions.
+
+		Fixed some build issues for thread-safe builds.
+
+		Increase the default busy timeout interval to 60 seconds.
+    </notes>
+    </release>
+  </changelog>
+
 </package>
