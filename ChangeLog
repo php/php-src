@@ -1,3 +1,38 @@
+2005-02-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y:
+      - Cleanup foreach handling
+
+2005-02-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      TSRM/TSRM.c
+      TSRM/TSRM.h
+      TSRM/tsrm_config.nw.h
+      TSRM/tsrm_config_common.h
+      TSRM/tsrm_nw.c
+      TSRM/tsrm_nw.h
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_win32.c
+      TSRM/tsrm_win32.h:
+      Revert
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      Revert broken patch
+
+    * (PHP_5_0)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      Revert this patch
+
+    * sapi/cgi/cgi_main.c:
+      Revert previous patch
+
 2005-02-10  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_0)
