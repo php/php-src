@@ -111,6 +111,8 @@ void init_executor(CLS_D ELS_DC)
 		globals->is_ref = 0;
 		zend_hash_update(&EG(symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL);
 	}
+
+	EG(opline_ptr) = NULL;
 }
 
 
@@ -164,13 +166,21 @@ ZEND_API char *get_active_function_name(ELS_D)
 
 ZEND_API char *zend_get_executed_filename(ELS_D)
 {
-	return active_opline->filename;
+	if (EG(opline_ptr)) {
+		return active_opline->filename;
+	} else {
+		return "[no active file]";
+	}
 }
 
 
 ZEND_API uint zend_get_executed_lineno(ELS_D)
 {
-	return active_opline->lineno;
+	if (EG(opline_ptr)) {
+		return active_opline->lineno;
+	} else {
+		return 0;
+	}
 }
 
 
