@@ -18,6 +18,7 @@
 */
 
 /* $Id$ */
+/* Id: pdf.c,v 1.73 2001/02/26 06:07:11 andi Exp  */
 
 /* pdflib 2.02 ... 3.0x is subject to the ALADDIN FREE PUBLIC LICENSE.
    Copyright (C) 1997-1999 Thomas Merz. 2000-2001 PDFlib GmbH */
@@ -57,6 +58,9 @@ static int le_pdf;
  */
 #define PDFLIB_IMAGE_OFFSET	1
 #define PDFLIB_FONT_OFFSET	1
+#define PDFLIB_PDI_OFFSET	1
+#define PDFLIB_PATTERN_OFFSET	1
+#define PDFLIB_SPOT_OFFSET	1
 
 function_entry pdf_functions[] = {
 	/* sorry for sorting this stuff like the pdflib manual,
@@ -109,12 +113,6 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_closepath_fill_stroke, NULL)
 	PHP_FE(pdf_clip, NULL)
 	PHP_FE(pdf_endpath, NULL)
-	PHP_FE(pdf_setgray_fill, NULL)
-	PHP_FE(pdf_setgray_stroke, NULL)
-	PHP_FE(pdf_setgray, NULL)
-	PHP_FE(pdf_setrgbcolor_fill, NULL)
-	PHP_FE(pdf_setrgbcolor_stroke, NULL)
-	PHP_FE(pdf_setrgbcolor, NULL)
 	PHP_FE(pdf_open_image_file, NULL)  /* new parameters: [char *stringpram, int intparam] */
 	PHP_FE(pdf_open_ccitt, NULL)	/* new function */
 	PHP_FE(pdf_open_image, NULL)	/* new function */
@@ -174,6 +172,33 @@ function_entry pdf_functions[] = {
 #if HAVE_LIBGD13
 	PHP_FE(pdf_open_memory_image, NULL)
 #endif
+	/* depreciatet after V4.0 of PDFlib */
+	PHP_FE(pdf_setgray_fill, NULL)
+	PHP_FE(pdf_setgray_stroke, NULL)
+	PHP_FE(pdf_setgray, NULL)
+	PHP_FE(pdf_setrgbcolor_fill, NULL)
+	PHP_FE(pdf_setrgbcolor_stroke, NULL)
+	PHP_FE(pdf_setrgbcolor, NULL)
+
+#if (PDFLIB_MAJORVERSION >= 4)
+/* support for new functions in PDFlib V4.0 */
+	PHP_FE(pdf_open_pdi, NULL)
+	PHP_FE(pdf_close_pdi, NULL)
+	PHP_FE(pdf_open_pdi_page, NULL)
+	PHP_FE(pdf_close_pdi_page, NULL)
+	PHP_FE(pdf_get_pdi_parameter, NULL)
+	PHP_FE(pdf_get_pdi_value, NULL)
+	PHP_FE(pdf_begin_pattern, NULL)
+	PHP_FE(pdf_end_pattern, NULL)
+	PHP_FE(pdf_begin_template, NULL)
+	PHP_FE(pdf_end_template, NULL)
+	PHP_FE(pdf_setcolor, NULL)
+	PHP_FE(pdf_makespotcolor, NULL)
+	PHP_FE(pdf_arcn, NULL)
+	PHP_FE(pdf_add_thumbnail, NULL)
+	PHP_FE(pdf_initgraphics, NULL)
+	PHP_FE(pdf_setmatrix, NULL)
+#endif /* PDFlib >= V4 */
 
 	{NULL, NULL, NULL}
 };
@@ -263,7 +288,11 @@ PHP_MINFO_FUNCTION(pdf)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PDF Support", "enabled" );
+#if (PDFLIB_MAJORVERSION >= 4)
+	php_info_print_table_row(2, "PDFlib GmbH Version", PDFLIB_VERSIONSTRING );
+#else
 	php_info_print_table_row(2, "PDFlib GmbH Version", tmp );
+#endif
 	php_info_print_table_row(2, "Revision", "$Revision$" );
 	php_info_print_table_end();
 
@@ -271,6 +300,10 @@ PHP_MINFO_FUNCTION(pdf)
 
 PHP_MINIT_FUNCTION(pdf)
 {
+	if ((PDF_get_majorversion() != PDFLIB_MAJORVERSION) ||
+			(PDF_get_minorversion() != PDFLIB_MINORVERSION)) {
+		php_error(E_ERROR,"PDFlib error: Version mismatch in wrapper code");
+	}
 	le_pdf = zend_register_list_destructors_ex(_free_pdf_doc, NULL, "pdf object", module_number);
 
 	/* this does something like setlocale("C", ...) in PDFlib 3.x */
@@ -469,7 +502,7 @@ PHP_FUNCTION(pdf_show)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
 
 	convert_to_string_ex(arg2);
-	PDF_show(pdf, Z_STRVAL_PP(arg2));
+	PDF_show2(pdf, Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -490,7 +523,7 @@ PHP_FUNCTION(pdf_show_xy)
 	convert_to_string_ex(arg2);
 	convert_to_double_ex(arg3);
 	convert_to_double_ex(arg4);
-	PDF_show_xy(pdf, Z_STRVAL_PP(arg2), (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4));
+	PDF_show_xy2(pdf, Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2), (float) Z_DVAL_PP(arg3), (float) Z_DVAL_PP(arg4));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -803,7 +836,7 @@ PHP_FUNCTION(pdf_continue_text)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
 
 	convert_to_string_ex(arg2);
-	PDF_continue_text(pdf, Z_STRVAL_PP(arg2));
+	PDF_continue_text2(pdf, Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -843,7 +876,12 @@ PHP_FUNCTION(pdf_stringwidth)
 	    convert_to_double_ex(arg4);
 	    size = Z_DVAL_PP(arg4);
 	}
-	width = (double) PDF_stringwidth(pdf, Z_STRVAL_PP(arg2), font-PDFLIB_FONT_OFFSET, size);
+	width = (double) PDF_stringwidth2(pdf,
+		Z_STRVAL_PP(arg2),
+		Z_STRLEN_PP(arg2),
+		font-PDFLIB_FONT_OFFSET,
+		(float)size);
+
 	RETURN_DOUBLE((double) width);
 }
 /* }}} */
@@ -1903,7 +1941,7 @@ PHP_FUNCTION(pdf_get_image_width)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
 	convert_to_long_ex(arg2);
 
-	width = (int) PDF_get_value(pdf, "imagewidth", Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
+	width = (int) PDF_get_value(pdf, "imagewidth", (float)Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
 	RETURN_LONG(width);
 }
 /* }}} */
@@ -1923,7 +1961,7 @@ PHP_FUNCTION(pdf_get_image_height)
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
 	convert_to_long_ex(arg2);
 
-	height = (int) PDF_get_value(pdf, "imageheight", Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
+	height = (int) PDF_get_value(pdf, "imageheight", (float)Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
 	RETURN_LONG(height);
 }
 /* }}} */
@@ -2306,7 +2344,7 @@ PHP_FUNCTION(pdf_concat) {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2317,6 +2355,7 @@ PHP_FUNCTION(pdf_concat) {
 	convert_to_double_ex(arg4);
 	convert_to_double_ex(arg5);
 	convert_to_double_ex(arg6);
+	convert_to_double_ex(arg7);
 
 	PDF_concat(pdf,
 	    (float) Z_DVAL_PP(arg2),
@@ -2545,6 +2584,408 @@ PHP_FUNCTION(pdf_add_launchlink) {
 	RETURN_TRUE;
 }
 /* }}} */
+
+#if (PDFLIB_MAJORVERSION >= 4)
+
+/* {{{ proto int pdf_open_pdi(int pdf, string filename, string stringparam, int intparam);
+ * Open an existing PDF document and prepare it for later use. */
+PHP_FUNCTION(pdf_open_pdi) {
+	zval **arg1, **arg2, **arg3, **arg4;
+	PDF *pdf;
+	int pdi_handle;
+	char *file;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_string_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_long_ex(arg4);
+
+#ifdef VIRTUAL_DIR
+	virtual_filepath(Z_STRVAL_PP(arg2), &file);
+#else
+	file = Z_STRVAL_PP(arg2);
+#endif  
+
+	pdi_handle = PDF_open_pdi(pdf,
+		file,
+		Z_STRVAL_PP(arg3),
+		Z_LVAL_PP(arg4));
+
+	RETURN_LONG(pdi_handle+PDFLIB_PDI_OFFSET);
+}
+
+/* {{{ proto void pdf_close_pdi(int pdf, int doc);
+ * Close all open page handles, and close the input PDF document. */
+PHP_FUNCTION(pdf_close_pdi) {
+	zval **arg1, **arg2;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_long_ex(arg2);
+
+	PDF_close_pdi(pdf,
+		Z_LVAL_PP(arg2)-PDFLIB_PDI_OFFSET);
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto int pdf_open_pdi_page(int pdf, int doc, int page, string label);
+ * Prepare a page for later use with PDF_place_image(). */
+PHP_FUNCTION(pdf_open_pdi_page) {
+	zval **arg1, **arg2, **arg3, **arg4;
+	PDF *pdf;
+	int pdi_image;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_long_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_string_ex(arg4);
+
+	pdi_image = PDF_open_pdi_page(pdf,
+		Z_LVAL_PP(arg2)-PDFLIB_PDI_OFFSET,
+		Z_LVAL_PP(arg3),
+		Z_STRVAL_PP(arg4));
+
+	RETURN_LONG(pdi_image+PDFLIB_IMAGE_OFFSET);
+}
+
+/* {{{ proto void pdf_close_pdi_page(int pdf, int doc, int page);
+ * Close the page handle, and free all page-related resources. */
+PHP_FUNCTION(pdf_close_pdi_page) {
+	zval **arg1, **arg2, **arg3;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_long_ex(arg2);
+	convert_to_long_ex(arg3);
+
+	PDF_close_pdi_page(pdf,
+		Z_LVAL_PP(arg2)-PDFLIB_PDI_OFFSET,
+		Z_LVAL_PP(arg3)-PDFLIB_IMAGE_OFFSET);
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto string pdf_get_pdi_parameter(int pdf, string key, int doc, int page, int index);
+ * Get the contents of some PDI document parameter with string type. */
+PHP_FUNCTION(pdf_get_pdi_parameter) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5;
+	PDF *pdf;
+	const char *buffer;
+	int size;
+
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_long_ex(arg4);
+	convert_to_long_ex(arg5);
+
+	buffer = PDF_get_pdi_parameter(pdf,
+		Z_STRVAL_PP(arg2),
+		Z_LVAL_PP(arg3)-PDFLIB_PDI_OFFSET,
+		Z_LVAL_PP(arg4)-PDFLIB_IMAGE_OFFSET,
+		Z_LVAL_PP(arg5),
+		&size);
+
+	RETURN_STRINGL((char *)buffer, size, 1);
+}
+
+/* {{{ proto double pdf_get_pdi_value(int pdf, string key, int doc, int page, int index);
+ * Get the contents of some PDI document parameter with numerical type. */
+PHP_FUNCTION(pdf_get_pdi_value) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5;
+	PDF *pdf;
+	double value;
+
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_long_ex(arg4);
+	convert_to_long_ex(arg5);
+
+	value = (double)PDF_get_pdi_value(pdf,
+		Z_STRVAL_PP(arg2),
+		Z_LVAL_PP(arg3)-PDFLIB_PDI_OFFSET,
+		Z_LVAL_PP(arg4)-PDFLIB_IMAGE_OFFSET,
+		Z_LVAL_PP(arg5));
+
+	RETURN_DOUBLE(value);
+}
+
+/* {{{ proto int pdf_begin_pattern(int pdf, double width, double height, double xstep, double ystep, int painttype);
+ * Start a new pattern definition. */
+PHP_FUNCTION(pdf_begin_pattern) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
+	PDF *pdf;
+	int pattern_image;
+
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_long_ex(arg6);
+
+	pattern_image = PDF_begin_pattern(pdf,
+		(float) Z_DVAL_PP(arg2),
+		(float) Z_DVAL_PP(arg3),
+		(float) Z_DVAL_PP(arg4),
+		(float) Z_DVAL_PP(arg5),
+		Z_LVAL_PP(arg6));
+
+	RETURN_LONG(pattern_image+PDFLIB_PATTERN_OFFSET);
+}
+
+/* {{{ proto void pdf_end_pattern(int pdf);
+ * Finish the pattern definition. */
+PHP_FUNCTION(pdf_end_pattern) {
+	zval **arg1;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	PDF_end_pattern(pdf);
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto int pdf_begin_template(int pdf, double width, double height);
+ * Start a new template definition. */
+PHP_FUNCTION(pdf_begin_template) {
+	zval **arg1, **arg2, **arg3;
+	PDF *pdf;
+	int tmpl_image;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+
+	tmpl_image = PDF_begin_template(pdf,
+		(float) Z_DVAL_PP(arg2),
+		(float) Z_DVAL_PP(arg3));
+
+	RETURN_LONG(tmpl_image+PDFLIB_IMAGE_OFFSET);
+}
+
+/* {{{ proto void pdf_end_template(int pdf);
+ * Finish the template definition. */
+PHP_FUNCTION(pdf_end_template) {
+	zval **arg1;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+
+	PDF_end_template(pdf);
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto void pdf_setcolor(int pdf, string type, string colorspace, double c1, double c2, double c3, double c4);
+ * Set the current color space and color. */
+PHP_FUNCTION(pdf_setcolor) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
+	PDF *pdf;
+	int c1;
+
+	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_string_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_double_ex(arg6);
+	convert_to_double_ex(arg7);
+
+	if (0 == (strcmp(Z_STRVAL_PP(arg3), "spot"))) {
+	    c1 = (int) Z_DVAL_PP(arg4)-PDFLIB_SPOT_OFFSET;
+	} else if(0 == (strcmp(Z_STRVAL_PP(arg3), "pattern"))) {
+	    c1 = (int) Z_DVAL_PP(arg4)-PDFLIB_PATTERN_OFFSET;
+	} else {
+	    c1 = (float) Z_DVAL_PP(arg4);
+	}
+
+	PDF_setcolor(pdf,
+		Z_STRVAL_PP(arg2),
+		Z_STRVAL_PP(arg3),
+		(float) c1,
+		(float) Z_DVAL_PP(arg5),
+		(float) Z_DVAL_PP(arg6),
+		(float) Z_DVAL_PP(arg7));
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto int pdf_makespotcolor(int pdf, string spotname);
+ * Make a named spot color from the current color. */
+PHP_FUNCTION(pdf_makespotcolor) {
+	zval **arg1, **arg2;
+	PDF *pdf;
+	int spotcolor;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_string_ex(arg2);
+
+	spotcolor = PDF_makespotcolor(pdf,
+		Z_STRVAL_PP(arg2),
+		Z_STRLEN_PP(arg2));
+
+	RETURN_LONG(spotcolor+PDFLIB_SPOT_OFFSET);
+}
+
+/* {{{ proto void pdf_arcn(int pdf, double x, double y, double r, double alpha, double beta);
+ * Draw a clockwise circular arc from alpha to beta degrees. */
+PHP_FUNCTION(pdf_arcn) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_double_ex(arg6);
+
+	PDF_arcn(pdf,
+		(float) Z_DVAL_PP(arg2),
+		(float) Z_DVAL_PP(arg3),
+		(float) Z_DVAL_PP(arg4),
+		(float) Z_DVAL_PP(arg5),
+		(float) Z_DVAL_PP(arg6));
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto void pdf_initgraphics(int pdf);
+ * Reset all implicit color and graphics state parameters to their defaults. */
+PHP_FUNCTION(pdf_initgraphics) {
+	zval **arg1;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	PDF_initgraphics(pdf);
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto void pdf_add_thumbnail(int pdf, int image);
+ * Add an existing image as thumbnail for the current page. */
+PHP_FUNCTION(pdf_add_thumbnail) {
+	zval **arg1, **arg2;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_long_ex(arg2);
+
+	PDF_add_thumbnail(pdf,
+		Z_LVAL_PP(arg2)-PDFLIB_IMAGE_OFFSET);
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto void pdf_setmatrix(int pdf, double a, double b, double c, double d, double e, double f)
+   Explicitly set the current transformation matrix. */
+PHP_FUNCTION(pdf_setmatrix) {
+	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
+	PDF *pdf;
+
+	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
+
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_double_ex(arg6);
+	convert_to_double_ex(arg7);
+
+	PDF_setmatrix(pdf,
+	    (float) Z_DVAL_PP(arg2),
+	    (float) Z_DVAL_PP(arg3),
+	    (float) Z_DVAL_PP(arg4),
+	    (float) Z_DVAL_PP(arg5),
+	    (float) Z_DVAL_PP(arg6),
+	    (float) Z_DVAL_PP(arg7));
+
+	RETURN_TRUE;
+}
+
+#endif /* PDFlib >= V4 */
 
 #endif
 

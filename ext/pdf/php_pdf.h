@@ -146,6 +146,26 @@ PHP_FUNCTION(pdf_add_annotation);
 PHP_FUNCTION(pdf_open_memory_image);
 #endif
 
+#if (PDFLIB_MAJORVERSION >= 4)
+/* support for new functions in PDFlib V4.0 */
+PHP_FUNCTION(pdf_open_pdi);
+PHP_FUNCTION(pdf_close_pdi);
+PHP_FUNCTION(pdf_open_pdi_page);
+PHP_FUNCTION(pdf_close_pdi_page);
+PHP_FUNCTION(pdf_get_pdi_parameter);
+PHP_FUNCTION(pdf_get_pdi_value);
+PHP_FUNCTION(pdf_begin_pattern);
+PHP_FUNCTION(pdf_end_pattern);
+PHP_FUNCTION(pdf_setcolor);
+PHP_FUNCTION(pdf_makespotcolor);
+PHP_FUNCTION(pdf_begin_template);
+PHP_FUNCTION(pdf_end_template);
+PHP_FUNCTION(pdf_arcn);
+PHP_FUNCTION(pdf_add_thumbnail);
+PHP_FUNCTION(pdf_initgraphics);
+PHP_FUNCTION(pdf_setmatrix);
+#endif /* PDFlib >= V4 */
+
 #ifdef ZTS
 #define PDFG(v) (pdf_globals->v)
 #define PDFLS_FETCH() php_pdf_globals *pdf_globals = ts_resource(pdf_globals_id)
