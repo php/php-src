@@ -278,7 +278,8 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 						 int width, char padding,
 						 int alignment, int precision,
 						 int adjust, char fmt,
-						 int always_sign)
+						 int always_sign
+						 TSRMLS_DC)
 {
 	char numbuf[NUM_BUF_SIZE];
 	char *cvt;
@@ -608,7 +609,8 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 											 Z_DVAL_PP(args[argnum]),
 											 width, padding, alignment,
 											 precision, adjusting,
-											 format[inpos], always_sign);
+											 format[inpos], always_sign
+											 TSRMLS_CC);
 					break;
 					
 				case 'c':
