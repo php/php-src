@@ -579,6 +579,9 @@ PHP_FUNCTION(stristr)
 		FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
+	SEPARATE_ZVAL(haystack);
+	SEPARATE_ZVAL(needle);
 	convert_to_string_ex(haystack);
 
 	if ((*needle)->type == IS_STRING) {
@@ -586,12 +589,14 @@ PHP_FUNCTION(stristr)
 			php_error(E_WARNING,"Empty delimiter");
 			RETURN_FALSE;
 		}
+
 		found = php_stristr((*haystack)->value.str.val, (*needle)->value.str.val,
 							(*haystack)->value.str.len, (*needle)->value.str.len);
 	} else {
 		convert_to_long_ex(needle);
 		needle_char[0] = tolower((char) (*needle)->value.lval);
 		needle_char[1] = '\0';
+
 		found = php_stristr((*haystack)->value.str.val, needle_char,
 				            (*haystack)->value.str.len, 1);
 	}
