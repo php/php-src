@@ -87,7 +87,7 @@
  * SUCH DAMAGE.
  */
 
-static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **opened_path_p TSRMLS_DC)
+static FILE *php_do_open_temporary_file(const char *path, const char *pfx, char **opened_path_p TSRMLS_DC)
 {
 	char *trailing_slash;
 	FILE *fp;
@@ -141,6 +141,54 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
 }
 /* }}} */
 
+/*
+ *  Determine where to place temporary files.
+ */
+const char* get_temporary_directory()
+{
+	/* Cache the chosen temporary directory. */
+	static char* temporary_directory;
+
+	/* Did we determine the temporary directory already? */
+	if (temporary_directory) {
+		return temporary_directory;
+	}
+
+#ifdef PHP_WIN32
+	/* We can't count on the environment variables TEMP or TMP,
+	 * and so must make the Win32 API call to get the default
+	 * directory for temporary files.  Note this call checks
+	 * the environment values TMP and TEMP (in order) first.
+	 */
+	{
+		char sTemp[MAX_PATH];
+		DWORD n = GetTempPath(sizeof(sTemp),sTemp);
+		assert(0 < n);  /* should *never* fail! */
+		temporary_directory = strdup(sTemp);
+		return temporary_directory;
+	}
+#else
+	/* On Unix use the (usual) TMPDIR environment variable. */
+	{
+		char* s = getenv("TMPDIR");
+		if (s) {
+			temporary_directory = strdup(s);
+			return temporary_directory;
+		}
+	}
+#ifdef P_tmpdir
+	/* Use the standard default temporary directory. */
+	if (P_tmpdir) {
+		temporary_directory = P_tmpdir;
+		return temporary_directory;
+	}
+#endif
+	/* Shouldn't ever(!) end up here ... last ditch default. */
+	temporary_directory = "/tmp";
+	return temporary_directory;
+#endif
+}
+
 /* {{{ php_open_temporary_file
  *
  * Unlike tempnam(), the supplied dir argument takes precedence
@@ -150,47 +198,28 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
  */
 PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p TSRMLS_DC)
 {
-	static char path_tmp[] = "/tmp";
-	FILE *fp;
-	
-	
+	FILE* fp = 0;
+
 	if (!pfx) {
 		pfx = "tmp.";
 	}
-
 	if (opened_path_p) {
 		*opened_path_p = NULL;
 	}
 
-	if ((fp=php_do_open_temporary_file((char *) dir, pfx, opened_path_p TSRMLS_CC))) {
+	/* Try the directory given as parameter. */
+	fp = php_do_open_temporary_file(dir, pfx, opened_path_p TSRMLS_CC);
+	if (fp) {
 		return fp;
 	}
 
-	if ((fp=php_do_open_temporary_file(getenv("TMPDIR"), pfx, opened_path_p TSRMLS_CC))) {
-		return fp;
-	}
-#if PHP_WIN32
-	{
-		char *TempPath;
-
-		TempPath = (char *) emalloc(MAXPATHLEN);
-		if (GetTempPath(MAXPATHLEN, TempPath)) {
-			fp = php_do_open_temporary_file(TempPath, pfx, opened_path_p TSRMLS_CC);
-		}
-		efree(TempPath);
-		return fp;
-	}
-#else
-	if ((fp=php_do_open_temporary_file(P_tmpdir, pfx, opened_path_p TSRMLS_CC))) {
+	/* Use default temporary directory. */
+	fp = php_do_open_temporary_file(get_temporary_directory(), pfx, opened_path_p TSRMLS_CC);
+	if (fp) {
 		return fp;
 	}
 
-	if ((fp=php_do_open_temporary_file(path_tmp, pfx, opened_path_p TSRMLS_CC))) {
-		return fp;
-	}
-#endif
-
-	return NULL;
+	return 0;
 }
 /* }}} */
 
