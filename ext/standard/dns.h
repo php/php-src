@@ -34,11 +34,11 @@ PHP_FUNCTION(gethostbynamel);
 #if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32))
 
 PHP_FUNCTION(dns_check_record);
+PHP_FUNCTION(dns_get_mx);
 
 # if HAVE_DNS_FUNCS
 
 PHP_FUNCTION(dns_get_record);
-PHP_FUNCTION(dns_get_mx);
 
 PHP_MINIT_FUNCTION(dns);
 
