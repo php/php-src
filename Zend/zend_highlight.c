@@ -134,9 +134,6 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			}
 		}
 		switch (token_type) {
-			case T_DOLLAR_OPEN_CURLY_BRACES:
-				html_puts("{", 1);
-				break;
 			case T_END_HEREDOC:
 				html_puts(token.value.str.val, token.value.str.len);
 				break;
