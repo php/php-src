@@ -293,12 +293,8 @@ static void init_request_info(SLS_D)
 	   php_destroy_request_info()! */
 #if DISCARD_PATH
 	if (script_filename) {
-		SLS_FETCH();
-
 		SG(request_info).path_translated = estrdup(script_filename);
 	} else {
-		SLS_FETCH();
-
 		SG(request_info).path_translated = NULL;
 	}
 #endif
