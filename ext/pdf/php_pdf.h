@@ -42,6 +42,8 @@ PHP_FUNCTION(pdf_get_buffer);	/* new function */
 PHP_FUNCTION(pdf_close);
 PHP_FUNCTION(pdf_begin_page);
 PHP_FUNCTION(pdf_end_page);
+PHP_FUNCTION(pdf_get_majorversion);
+PHP_FUNCTION(pdf_get_minorversion);
 PHP_FUNCTION(pdf_get_value);
 PHP_FUNCTION(pdf_set_value);
 PHP_FUNCTION(pdf_get_parameter);
