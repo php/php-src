@@ -1,3 +1,27 @@
+2003-10-28  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y:
+      - Head up! I'm reverting the patch which allows for expressions in constant
+      - declerations. Allowing the access of other constants in this code is
+      - flawed. We are reverting back to PHP 4's static scalars.
+      - Don't worry if you get the following msg when compiling:
+      - "zend_language_parser.y contains 3 useless nonterminals and 22 useless
+      rules"
+      - I didn't nuke the code in case we have some brilliant ideas after beta 2
+
+2003-10-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c:
+      Give some freedon to c iterators but not in userspace.
+
+2003-10-28  Shane Caraveo  <shane@caraveo.com>
+
+    * zend_compile.c:
+      fix crash in do_implement_interface when compiling
+      pear/PHPUnit/Framework/TestCase.php line 63
+      while only interface_gets_implemented is the issue in this instance, both
+      these vars were unitialized, causing potential other issues
+
 2003-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c

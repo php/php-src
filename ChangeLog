@@ -1,3 +1,80 @@
+2003-10-28  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/user_filters.c:
+      Allow userfilter instantiation to programmatically fail by returning false.
+      Equivalent of Cspace filter "failure" by returning NULL.
+
+2003-10-28  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_language_parser.y:
+      - Head up! I'm reverting the patch which allows for expressions in constant
+      - declerations. Allowing the access of other constants in this code is
+      - flawed. We are reverting back to PHP 4's static scalars.
+      - Don't worry if you get the following msg when compiling:
+      - "zend_language_parser.y contains 3 useless nonterminals and 22 useless
+      rules"
+      - I didn't nuke the code in case we have some brilliant ideas after beta 2
+
+2003-10-28  Sara Golemon  <php@alphaweb.net>
+
+    * main/streams/filter.c:
+      Stop looking once we've found a matching filter.
+
+    * main/streams/filter.c:
+      Extend Filter matching to check wildcards at multiple levels.
+      Ex:  foo.bar.baz.bomb
+      Searches:
+           foo.bar.baz.bomb itself,
+           foo.bar.baz.*,
+           foo.bar.*, and
+           foo.*
+      
+      Also changed tempvar "char wildcard[128];" to an estrdup() to
+      deal with potential filternames longer than 127 bytes.
+
+2003-10-28  George Schlossnagle  <george@omniti.com>
+
+    * NEWS:
+      note pcntl_wait()
+
+2003-10-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      Give some freedon to c iterators but not in userspace.
+
+2003-10-28  George Schlossnagle  <george@omniti.com>
+
+    * ext/pcntl/config.m4
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h:
+      Added pcntl_wait, a wraspper around wait()/wait3()
+
+2003-10-28  Shane Caraveo  <shane@caraveo.com>
+
+    * ZendEngine2/zend_compile.c:
+      fix crash in do_implement_interface when compiling
+      pear/PHPUnit/Framework/TestCase.php line 63
+      while only interface_gets_implemented is the issue in this instance, both
+      these vars were unitialized, causing potential other issues
+
+2003-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/libsqlite/src/btree_rb.c:
+      Fixed compiler warning.
+
+2003-10-28  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/dom/document.c:
+      fix win32 build
+
+2003-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/php_uuencode.h
+      ext/standard/uuencode.c:
+      By popular demand renaming uu(encode/decode) to convert_uu(encode/decode).
+
 2003-10-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/file.c:
