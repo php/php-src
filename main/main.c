@@ -1029,13 +1029,15 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 	}
 
 	for (i=0; i<6; i++) {
-		if (!PG(http_globals)[i] && !initialized_dummy_track_vars_array) {
-			ALLOC_ZVAL(dummy_track_vars_array);
-			array_init(dummy_track_vars_array);
-			INIT_PZVAL(dummy_track_vars_array);
-			initialized_dummy_track_vars_array = 1;
-		} else {
-			dummy_track_vars_array->refcount++;
+		if (!PG(http_globals)[i]) {
+			if (!initialized_dummy_track_vars_array) {
+				ALLOC_ZVAL(dummy_track_vars_array);
+				array_init(dummy_track_vars_array);
+				INIT_PZVAL(dummy_track_vars_array);
+				initialized_dummy_track_vars_array = 1;
+			} else {
+				dummy_track_vars_array->refcount++;
+			}
 			PG(http_globals)[i] = dummy_track_vars_array;
 		}
 		zend_hash_update(&EG(symbol_table), track_vars_names[i], track_vars_names_length[i], &PG(http_globals)[i], sizeof(zval *), NULL);
