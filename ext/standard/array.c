@@ -4366,17 +4366,16 @@ PHP_FUNCTION(array_combine)
 		return;
 	}
 
-	if (zend_hash_num_elements(Z_ARRVAL_P(keys)) == 0 || zend_hash_num_elements(Z_ARRVAL_P(values)) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have at least 1 element");
-		RETURN_FALSE;
-	}
-
-		
 	if (zend_hash_num_elements(Z_ARRVAL_P(keys)) != zend_hash_num_elements(Z_ARRVAL_P(values))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have equal number of elements");
 		RETURN_FALSE;
 	}
-	
+
+	if (!zend_hash_num_elements(Z_ARRVAL_P(keys))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have at least 1 element");
+		RETURN_FALSE;
+	}
+
 	array_init(return_value);
 	
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(keys), &pos_keys);
