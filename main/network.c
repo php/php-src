@@ -606,7 +606,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 {
 	php_socket_t clisock = -1;
 	fd_set rset;
-	int error, n;
+	int error = 0, n;
 	php_sockaddr_storage sa;
 	socklen_t sl;
 
