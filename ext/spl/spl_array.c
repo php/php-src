@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 
 #include "php_spl.h"
 #include "spl_functions.h"
@@ -119,6 +120,7 @@ typedef struct _spl_array_object {
 	zend_object       std;
 	zval              *array;
 	HashPosition      pos;
+	int               is_ref;
 } spl_array_object;
 
 /* {{{ spl_array_object_free_storage */
@@ -154,9 +156,11 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 	if (orig) {
 		intern->array = orig->array;
 		ZVAL_ADDREF(intern->array);
+		intern->is_ref = 1;
 	} else {
 		MAKE_STD_ZVAL(intern->array);
 		array_init(intern->array);
+		intern->is_ref = 0;
 	}
 	zend_hash_internal_pointer_reset_ex(HASH_OF(intern->array), &intern->pos);
 
@@ -365,19 +369,11 @@ SPL_METHOD(Array, offsetSet)
 	spl_array_write_dimension(getThis(), index, value TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void ArrayObject::append(mixed $newval)
-       proto void ArrayIterator::append(mixed $newval)
- Appends the value (cannot be called for objects). */
-SPL_METHOD(Array, append)
+
+void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{{ */
 {
-	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = HASH_OF(intern->array);
-
-	zval *value;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
-		return;
-	}
 
 	if (!aht) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
@@ -388,10 +384,23 @@ SPL_METHOD(Array, append)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name);
 	}
 
-	spl_array_write_dimension(object, NULL, value TSRMLS_CC);
+	spl_array_write_dimension(object, NULL, append_value TSRMLS_CC);
 	if (!intern->pos) {
 		intern->pos = aht->pListTail;
 	}
+} /* }}} */
+
+/* {{{ proto void ArrayObject::append(mixed $newval)
+       proto void ArrayIterator::append(mixed $newval)
+ Appends the value (cannot be called for objects). */
+SPL_METHOD(Array, append)
+{
+	zval *value;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
+		return;
+	}
+	spl_array_iterator_append(getThis(), value TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto void ArrayObject::offsetUnset(mixed $index)
@@ -478,11 +487,16 @@ static int spl_array_next(spl_array_object *intern TSRMLS_DC) /* {{{ */
 {
 	HashTable *aht = HASH_OF(intern->array);
 
-	zend_hash_move_forward_ex(aht, &intern->pos);
-	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
-		return spl_array_skip_protected(intern TSRMLS_CC);
+	if (intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
+		return FAILURE;
 	} else {
-		return zend_hash_has_more_elements_ex(aht, &intern->pos);
+		zend_hash_move_forward_ex(aht, &intern->pos);
+		if (Z_TYPE_P(intern->array) == IS_OBJECT) {
+			return spl_array_skip_protected(intern TSRMLS_CC);
+		} else {
+			return zend_hash_has_more_elements_ex(aht, &intern->pos);
+		}
 	}
 } /* }}} */
 
@@ -513,7 +527,7 @@ static int spl_array_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 		return FAILURE;
 	}
 
-	if (object->pos && object->array->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+	if (object->pos && object->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::valid(): Array was modified outside object and internal position is no longer valid");
 		return FAILURE;
 	} else {
@@ -545,7 +559,7 @@ static int spl_array_it_get_current_key(zend_object_iterator *iter, char **str_k
 		return HASH_KEY_NON_EXISTANT;
 	}
 
-	if (object->array->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+	if (object->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and internal position is no longer valid");
 		return HASH_KEY_NON_EXISTANT;
 	}
@@ -566,7 +580,7 @@ static void spl_array_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {
 		return;
 	}
 
-	if (object->array->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+	if (object->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::next(): Array was modified outside object and internal position is no longer valid");
 	} else {
 		spl_array_next(object TSRMLS_CC);
@@ -626,8 +640,7 @@ SPL_METHOD(Array, __construct)
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
 	}
-/* exceptions do not work yet
-	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);*/
+	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -641,8 +654,8 @@ SPL_METHOD(Array, __construct)
 		intern->array = other->array;		
 	} else {
 		if (!HASH_OF(*array)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object, using empty array instead");
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+			zend_throw_exception(zend_exception_get_default(), "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
 		zval_dtor(intern->array);
@@ -773,7 +786,7 @@ SPL_METHOD(Array, current)
 		return;
 	}
 
-	if (intern->array->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+	if (intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
 		return;
 	}
@@ -802,7 +815,7 @@ SPL_METHOD(Array, key)
 		return;
 	}
 
-	if (intern->array->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+	if (intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
 		return;
 	}
@@ -833,11 +846,7 @@ SPL_METHOD(Array, next)
 		return;
 	}
 
-	if (intern->array->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
-	} else {
-		spl_array_next(intern TSRMLS_CC);
-	}
+	spl_array_next(intern TSRMLS_CC);
 }
 /* }}} */
 
@@ -854,7 +863,7 @@ SPL_METHOD(Array, valid)
 		return;
 	}
 
-	if (intern->pos && intern->array->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+	if (intern->pos && intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
 		RETURN_FALSE;
 	} else {
