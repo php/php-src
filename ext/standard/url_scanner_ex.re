@@ -96,7 +96,7 @@ alpha = [a-zA-Z];
 #define YYLIMIT q
 #define YYMARKER r
 	
-static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *name, smart_str *val, smart_str *udata_name, smart_str *udata_value, const char *separator)
+static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *name, smart_str *val, const char *separator)
 {
 	register const char *p, *q;
 	const char *bash = NULL;
@@ -128,12 +128,6 @@ done:
 	smart_str_append(dest, name);
 	smart_str_appendc(dest, '=');
 	smart_str_append(dest, val);
-	if (udata_name->len && udata_value->len) {
-		smart_str_appends(dest, separator);
-		smart_str_append(dest, udata_name);
-		smart_str_appendc(dest, '=');
-		smart_str_append(dest, udata_value);
-	}
 
 	if (bash)
 		smart_str_appendl(dest, bash, q - bash);
@@ -156,7 +150,7 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type TSR
 	if (quotes)
 		smart_str_appendc(&ctx->result, type);
 	if (f) {
-		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, &ctx->q_udata_name, &ctx->q_udata_value, PG(arg_separator).output);
+		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, PG(arg_separator).output);
 	} else {
 		smart_str_append(&ctx->result, &ctx->val);
 	}
@@ -196,14 +190,6 @@ static inline void handle_form(STD_PARA)
 		smart_str_appends(&ctx->result, "\" value=\"");
 		smart_str_append(&ctx->result, &ctx->q_value);
 		smart_str_appends(&ctx->result, "\" />");
-		
-		if (ctx->q_udata_name.len) {
-			smart_str_appends(&ctx->result, "<input type=\"hidden\" name=\""); 
-			smart_str_append(&ctx->result, &ctx->q_udata_name);
-			smart_str_appends(&ctx->result, "\" value=\"");
-			smart_str_append(&ctx->result, &ctx->q_udata_value);
-			smart_str_appends(&ctx->result, "\" />");
-		}	
 	}
 }
 
@@ -332,22 +318,18 @@ stop:
 }
 
 
-char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, char *udata_name, char *udata_value, size_t *newlen TSRMLS_DC)
+char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC)
 {
 	smart_str surl = {0};
 	smart_str buf = {0};
 	smart_str sname = {0};
 	smart_str sval = {0};
-	smart_str aname = {0};
-	smart_str avalue = {0};
 
 	smart_str_setl(&surl, url, urllen);
 	smart_str_sets(&sname, name);
 	smart_str_sets(&sval, value);
-	smart_str_sets(&aname, udata_name);
-	smart_str_sets(&avalue, udata_value);
 
-	append_modified_url(&surl, &buf, &sname, &sval, &aname, &avalue, PG(arg_separator).output);
+	append_modified_url(&surl, &buf, &sname, &sval, PG(arg_separator).output);
 
 	smart_str_0(&buf);
 	if (newlen) *newlen = buf.len;
@@ -355,7 +337,7 @@ char *url_adapt_single_url(const char *url, size_t urllen, const char *name, con
 	return buf.c;
 }
 
-char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, char *udata_name, char *udata_value, size_t *newlen, zend_bool do_flush TSRMLS_DC)
+char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen, zend_bool do_flush TSRMLS_DC)
 {
 	url_adapt_state_ex_t *ctx;
 	char *retval;
@@ -364,10 +346,6 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 
 	smart_str_sets(&ctx->q_name, name);
 	smart_str_sets(&ctx->q_value, value);
-
-	smart_str_sets(&ctx->q_udata_name, udata_name);
-	smart_str_sets(&ctx->q_udata_value, udata_value);
-
 	xx_mainloop(ctx, src, srclen TSRMLS_CC);
 
 	*newlen = ctx->result.len;

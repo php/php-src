@@ -24,9 +24,9 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
 int php_url_scanner_ex_activate(TSRMLS_D);
 int php_url_scanner_ex_deactivate(TSRMLS_D);
 
-char *url_adapt_ext_ex(const char *src, size_t srclen, const char *name, const char *value, char *udata_name, char *udata_value, size_t *newlen, zend_bool do_flush TSRMLS_DC);
+char *url_adapt_ext_ex(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen, zend_bool do_flush TSRMLS_DC);
 
-char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, char *udata_name, char *udata_value, size_t *newlen TSRMLS_DC);
+char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC);
 
 char *url_adapt_flush(size_t * TSRMLS_DC);
 
@@ -45,9 +45,6 @@ typedef struct {
 	/* The data which is appended to each relative URL */
 	smart_str q_name;
 	smart_str q_value;
-
-	smart_str q_udata_name;
-	smart_str q_udata_value;
 
 	char *lookup_data;
 	int state;

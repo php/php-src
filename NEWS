@@ -2,9 +2,6 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
 - If possible set Content-Length header in zlib.output_compression mode. (thies)
-- Added session_set_userdata() which enables you to specify one variable that
-  will be kept in the browser in addition to the session-id.
-  Note: This only works with trans-sid sessions (no cookie). (thies)
 - Major update of domxml. New functions and better DOM compliance. (Uwe)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
