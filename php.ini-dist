@@ -360,6 +360,10 @@ default_mimetype = "text/html"
 ;include_path = ".;c:\php\includes"
 
 ; The root of the PHP pages, used only if nonempty.
+; if PHP was not compiled with FORCE_REDIRECT, you SHOULD set doc_root
+; if you are running php as a CGI under any web server (other than IIS)
+; see documentation for security issues.  The alternate is to use the
+; cgi.force_redirect configuration below
 doc_root =
 
 ; The directory under which PHP opens the script using /~usernamem used only
@@ -374,6 +378,17 @@ extension_dir = ./
 ; disabled on them.
 enable_dl = On
 
+; cgi.force_redirect is necessary to provide security running PHP as a CGI under
+; most web servers.  Left undefined, PHP turns this on by default.  You can
+; turn it off here AT YOUR OWN RISK
+; **You CAN safely turn this off for IIS, in fact, you MUST.**
+; cgi.force_redirect = 1
+
+; if cgi.force_redirect is turned on, and you are not running under Apache or Netscape 
+; (iPlanet) web servers, you MAY need to set an environment variable name that PHP
+; will look for to know it is OK to continue execution.  Setting this variable MAY
+; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
+; cgi.redirect_status_env = ;
 
 ;;;;;;;;;;;;;;;;
 ; File Uploads ;
