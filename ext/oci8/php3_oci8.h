@@ -51,7 +51,6 @@
 # endif /* osf alpha */
 
 #include <oci.h>
-#include <xa.h>
 
 typedef struct {
 	int num;
@@ -91,7 +90,6 @@ typedef struct {
     text *name;
     ub4 name_len;
 	ub4 type;
-	char *data;			/* for pval cache */
 } oci8_define;
 
 typedef struct {
@@ -138,6 +136,12 @@ typedef struct {
 	int stmtid;
 	void *data;
 	oci8_define *define;
+
+	/* for piecewise read */
+	int piecewise;
+	int cursize;
+	int curoffs;
+    ub4 piecesize;
 } oci8_out_column;
 
 typedef struct {
@@ -174,8 +178,8 @@ extern php3_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry
 
 #define OCI8_MAX_NAME_LEN 64
-#define OCI8_MAX_DATA_SIZE 2097152 /* two megs */
-
+#define OCI8_MAX_DATA_SIZE INT_MAX
+#define OCI8_PIECE_SIZE (64*1024)-1
 # define OCI8_CONN_TYPE(x) ((x)==OCI8_GLOBAL(php3_oci8_module).le_conn)
 # define OCI8_STMT_TYPE(x) ((x)==OCI8_GLOBAL(php3_oci8_module).le_stmt)
 
