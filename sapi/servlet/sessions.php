@@ -43,6 +43,17 @@ Value of Session Attribute:
 <br>
 <input type=submit>
 </form>
+<P>GET based form:<br>
+<form action="<?php echo $PHP_SELF ?>" method=GET>
+Name of Session Attribute:
+<input type=text size=20 name=dataName>
+<br>
+Value of Session Attribute:
+<input type=text size=20 name=dataValue>
+<br>
+<input type=submit>
+</form>
+<p><a href="<?php echo $PHP_SELF ?>?dataName=foo&dataValue=bar" >URL encoded </a>
 </body>
 </html>
 </body>

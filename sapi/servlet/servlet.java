@@ -155,6 +155,8 @@ public class servlet extends HttpServlet {
        String servletPath=request.getServletPath();
        String contextPath=getServletContext().getRealPath(servletPath);
 
+System.out.println("queryString => " + request.getQueryString());
+
        send(request.getMethod(), request.getQueryString(),
             request.getPathInfo(), contextPath,
             request.getContentType(), request.getContentLength(),
