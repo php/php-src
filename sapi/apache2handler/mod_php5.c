@@ -20,6 +20,8 @@
 
 /* $Id$ */
 
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+
 #include "php.h"
 #include "php_apache.h"
 
