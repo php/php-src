@@ -544,6 +544,10 @@ SOURCE=..\ext\standard\var.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\var_unserializer.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\versioning.c
 # End Source File
 # End Group

@@ -259,7 +259,7 @@ typedef struct {
 
 #define MAX_STR 512
 
-void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash TSRMLS_DC)
+void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC)
 {
 
 	if (PG(register_globals)) {
@@ -344,7 +344,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 	zval *current;
 	int namelen;
 	int has_value;
-	php_serialize_data_t var_hash;
+	php_unserialize_data_t var_hash;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
@@ -411,7 +411,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	zval *current;
 	int namelen;
 	int has_value;
-	php_serialize_data_t var_hash;
+	php_unserialize_data_t var_hash;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
