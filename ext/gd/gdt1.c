@@ -19,10 +19,16 @@
 
 /* 	$Id$	 */
 
-void php_free_ps_font(gd_ps_font *f_ind)
+#if 0	/* Moved currently back to gd.c */
+
+#include "php.h"
+#include "php_gd.h"
+
+#if HAVE_LIBT1
+
+void php_free_ps_font(int font_id)
 {
-	T1_DeleteFont(f_ind->font_id);
-	efree(f_ind);
+	T1_DeleteFont(font_id);
 }
 
 void php_free_ps_enc(char **enc)
@@ -34,23 +40,19 @@ void php_free_ps_enc(char **enc)
    Load a new font from specified file */
 PHP_FUNCTION(imagepsloadfont)
 {
-	pval *file;
-	int l_ind;
-	gd_ps_font *f_ind;
+	zval **file;
+	int f_ind, l_ind;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(file);
+	convert_to_string_ex(file);
 
-	f_ind = emalloc(sizeof(gd_ps_font));
-	f_ind->font_id = T1_AddFont(file->value.str.val);
+	f_ind = T1_AddFont((*file)->value.str.val);
 
-	if (f_ind->font_id < 0) {
-		l_ind = f_ind->font_id;
-		efree(f_ind);
-		switch (l_ind) {
+	if (f_ind < 0) {
+		switch (f_ind) {
 		case -1:
 			php_error(E_WARNING, "Couldn't find the font file");
 			RETURN_FALSE;
@@ -67,10 +69,13 @@ PHP_FUNCTION(imagepsloadfont)
 		}
 	}
 
-	T1_LoadFont(f_ind->font_id);
-	f_ind->extend = 1;
-	l_ind = zend_list_insert(f_ind, GD_GLOBAL(le_ps_font));
+	T1_LoadFont(f_ind);
+	/*
+	l_ind = zend_list_insert(f_ind, T1_GLOBAL(le_ps_font));
 	RETURN_LONG(l_ind);
+	*/
+	zend_list_addref(f_ind);
+	RETURN_LONG(f_ind);
 }
 /* }}} */
 
@@ -134,23 +139,23 @@ PHP_FUNCTION(imagepscopyfont)
    Free memory used by a font */
 PHP_FUNCTION(imagepsfreefont)
 {
-	pval *fnt;
+	zval **fnt;
 	int type;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &fnt) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &fnt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(fnt);
+	convert_to_long_ex(fnt);
 
-	zend_list_find(fnt->value.lval, &type);
+	zend_list_find((*fnt)->value.lval, &type);
 
-	if (type != GD_GLOBAL(le_ps_font)) {
-		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+	if (type != T1_GLOBAL(le_ps_font)) {
+		php_error(E_WARNING, "%d is not a Type 1 font index", (*fnt)->value.lval);
 		RETURN_FALSE;
 	}
 
-	zend_list_delete(fnt->value.lval);
+	zend_list_delete((*fnt)->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -159,37 +164,37 @@ PHP_FUNCTION(imagepsfreefont)
    To change a fonts character encoding vector */
 PHP_FUNCTION(imagepsencodefont)
 {
-	pval *fnt, *enc;
+	zval **fnt, **enc;
 	char **enc_vector;
 	int type;
-	gd_ps_font *f_ind;
+	int f_ind;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &fnt, &enc) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &enc) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(fnt);
-	convert_to_string(enc);
+	convert_to_long_ex(fnt);
+	convert_to_string_ex(enc);
 
-	f_ind = zend_list_find(fnt->value.lval, &type);
+	f_ind = zend_list_find((*fnt)->value.lval, &type);
 
-	if (type != GD_GLOBAL(le_ps_font)) {
-		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+	if (type != T1_GLOBAL(le_ps_font)) {
+		php_error(E_WARNING, "%d is not a Type 1 font index", (*fnt)->value.lval);
 		RETURN_FALSE;
 	}
 
-	if ((enc_vector = T1_LoadEncoding(enc->value.str.val)) == NULL) {
-		php_error(E_WARNING, "Couldn't load encoding vector from %s", enc->value.str.val);
+	if ((enc_vector = T1_LoadEncoding((*enc)->value.str.val)) == NULL) {
+		php_error(E_WARNING, "Couldn't load encoding vector from %s", (*enc)->value.str.val);
 		RETURN_FALSE;
 	}
 
-	T1_DeleteAllSizes(f_ind->font_id);
-	if (T1_ReencodeFont(f_ind->font_id, enc_vector)) {
+	T1_DeleteAllSizes(f_ind);
+	if (T1_ReencodeFont(f_ind, enc_vector)) {
 		T1_DeleteEncoding(enc_vector);
 		php_error(E_WARNING, "Couldn't reencode font");
 		RETURN_FALSE;
 	}
-	zend_list_insert(enc_vector, GD_GLOBAL(le_ps_enc));
+	zend_list_insert(enc_vector, T1_GLOBAL(le_ps_enc));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -198,26 +203,28 @@ PHP_FUNCTION(imagepsencodefont)
    Extend or or condense (if extend < 1) a font */
 PHP_FUNCTION(imagepsextendfont)
 {
-	pval *fnt, *ext;
+	zval **fnt, **ext;
 	int type;
-	gd_ps_font *f_ind;
+	int f_ind;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &fnt, &ext) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &ext) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(fnt);
-	convert_to_double(ext);
+	convert_to_long_ex(fnt);
+	convert_to_double_ex(ext);
 
-	f_ind = zend_list_find(fnt->value.lval, &type);
+	f_ind = zend_list_find((*fnt)->value.lval, &type);
 
-	if (type != GD_GLOBAL(le_ps_font)) {
-		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+	if (type != T1_GLOBAL(le_ps_font)) {
+		php_error(E_WARNING, "%d is not a Type 1 font index", (*fnt)->value.lval);
 		RETURN_FALSE;
 	}
 
-	if (T1_ExtendFont(f_ind->font_id, ext->value.dval) != 0) RETURN_FALSE;
+	if (T1_ExtendFont(f_ind, (*ext)->value.dval) != 0) RETURN_FALSE;
+	/*
 	f_ind->extend = ext->value.dval;
+	*/
 	RETURN_TRUE;
 }
 /* }}} */
@@ -226,25 +233,25 @@ PHP_FUNCTION(imagepsextendfont)
    Slant a font */
 PHP_FUNCTION(imagepsslantfont)
 {
-	pval *fnt, *slt;
+	zval **fnt, **slt;
 	int type;
-	gd_ps_font*f_ind;
+	int f_ind;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &fnt, &slt) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &slt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(fnt);
-	convert_to_double(slt);
+	convert_to_long_ex(fnt);
+	convert_to_double_ex(slt);
 
-	f_ind = zend_list_find(fnt->value.lval, &type);
+	f_ind = zend_list_find((*fnt)->value.lval, &type);
 
-	if (type != GD_GLOBAL(le_ps_font)) {
-		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+	if (type != T1_GLOBAL(le_ps_font)) {
+		php_error(E_WARNING, "%d is not a Type 1 font index", (*fnt)->value.lval);
 		RETURN_FALSE;
 	}
 
-	if (T1_SlantFont(f_ind->font_id, slt->value.dval) != 0) RETURN_FALSE;
+	if (T1_SlantFont(f_ind, (*slt)->value.dval) != 0) RETURN_FALSE;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -253,10 +260,10 @@ PHP_FUNCTION(imagepsslantfont)
    Rasterize a string over an image */
 PHP_FUNCTION(imagepstext)
 {
-	pval *img, *str, *fnt, *sz, *fg, *bg, *sp, *px, *py, *aas, *wd, *ang;
+	zval **img, **str, **fnt, **sz, **fg, **bg, **sp, **px, **py, **aas, **wd, **ang;
 	int i, j, x, y;
 	int space, type;
-	gd_ps_font *f_ind;
+	int f_ind;
 	int h_lines, v_lines, c_ind;
 	int rd, gr, bl, fg_rd, fg_gr, fg_bl, bg_rd, bg_gr, bg_bl;
 	int aa[16], aa_steps;
@@ -265,58 +272,56 @@ PHP_FUNCTION(imagepstext)
 	unsigned long aa_greys[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 	gdImagePtr bg_img;
 	GLYPH *str_img;
-#ifdef HAVE_LIBT1_OUTLINE
 	T1_OUTLINE *char_path, *str_path;
 	T1_TMATRIX *transform = NULL;
-#endif
 
 	switch(ARG_COUNT(ht)) {
 	case 8:
-		if (zend_get_parameters(ht, 8, &img, &str, &fnt, &sz, &fg, &bg, &px, &py) == FAILURE) {
+		if (zend_get_parameters_ex(8, &img, &str, &fnt, &sz, &fg, &bg, &px, &py) == FAILURE) {
 			RETURN_FALSE;
 		}
-		convert_to_string(str);
-		convert_to_long(fnt);
-		convert_to_long(sz);
-		convert_to_long(fg);
-		convert_to_long(bg);
-		convert_to_long(px);
-		convert_to_long(py);
-		x = px->value.lval;
-		y = py->value.lval;
+		convert_to_string_ex(str);
+		convert_to_long_ex(fnt);
+		convert_to_long_ex(sz);
+		convert_to_long_ex(fg);
+		convert_to_long_ex(bg);
+		convert_to_long_ex(px);
+		convert_to_long_ex(py);
+		x = (*px)->value.lval;
+		y = (*py)->value.lval;
 		space = 0;
 		aa_steps = 4;
 		width = 0;
 		angle = 0;
 		break;
 	case 12:
-		if (zend_get_parameters(ht, 12, &img, &str, &fnt, &sz, &fg, &bg, &px, &py, &sp, &wd, &ang, &aas) == FAILURE) {
+		if (zend_get_parameters_ex(12, &img, &str, &fnt, &sz, &fg, &bg, &px, &py, &sp, &wd, &ang, &aas) == FAILURE) {
 			RETURN_FALSE;
 		}
-		convert_to_string(str);
-		convert_to_long(fnt);
-		convert_to_long(sz);
-		convert_to_long(sp);
-		convert_to_long(fg);
-		convert_to_long(bg);
-		convert_to_long(px);
-		convert_to_long(py);
-		x = px->value.lval;
-		y = py->value.lval;
-		convert_to_long(sp);
-		space = sp->value.lval;
-		convert_to_long(aas);
-		aa_steps = aas->value.lval;
-		convert_to_long(wd);
-		width = wd->value.lval;
-		convert_to_double(ang);
-		angle = ang->value.dval;
+		convert_to_string_ex(str);
+		convert_to_long_ex(fnt);
+		convert_to_long_ex(sz);
+		convert_to_long_ex(sp);
+		convert_to_long_ex(fg);
+		convert_to_long_ex(bg);
+		convert_to_long_ex(px);
+		convert_to_long_ex(py);
+		x = (*px)->value.lval;
+		y = (*py)->value.lval;
+		convert_to_long_ex(sp);
+		space = (*sp)->value.lval;
+		convert_to_long_ex(aas);
+		aa_steps = (*aas)->value.lval;
+		convert_to_long_ex(wd);
+		width = (*wd)->value.lval;
+		convert_to_double_ex(ang);
+		angle = (*ang)->value.dval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
 
-	bg_img = zend_list_find(img->value.lval, &type);
+	bg_img = zend_list_find((*img)->value.lval, &type);
 
 	if (!bg_img || type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
@@ -531,6 +536,10 @@ PHP_FUNCTION(imagepsbbox)
 	add_next_index_long(return_value, (int) ceil(((double) str_bbox.ury)*sz->value.lval/1000));
 }
 /* }}} */
+
+#endif	/* HAVE_LIBT1 */
+
+#endif	/* 0 */
 
 /*
  * Local variables:
