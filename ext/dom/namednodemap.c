@@ -55,8 +55,30 @@ Since:
 */
 int dom_namednodemap_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	dom_nnodemap_object *objmap;
+	xmlAttrPtr curnode;
+	xmlNodePtr nodep;
+	int count = 0;
+
+	objmap = (dom_nnodemap_object *)obj->ptr;
+	if (objmap->ht) {
+		count = xmlHashSize(objmap->ht);
+	} else {
+		nodep = dom_object_get_node(objmap->baseobj);
+		if (nodep) {
+			curnode = nodep->properties;
+			if (curnode) {
+				count++;
+				while (curnode->next != NULL) {
+					count++;
+					curnode = curnode->next;
+				}
+			}
+		}
+	}
+
+	MAKE_STD_ZVAL(*retval);
+	ZVAL_LONG(*retval, count);
 	return SUCCESS;
 }
 
@@ -71,7 +93,44 @@ Since:
 */
 PHP_FUNCTION(dom_namednodemap_get_named_item)
 {
- DOM_NOT_IMPLEMENTED();
+	zval *id, *rv = NULL;
+	int ret, namedlen=0;
+	dom_object *intern;
+	xmlNodePtr itemnode = NULL;
+	char *named;
+
+	dom_nnodemap_object *objmap;
+	xmlNodePtr nodep;
+	xmlNotation *notep = NULL;
+
+	id = getThis();
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &named, &namedlen) == FAILURE) {
+		return;
+	}
+
+	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+
+	objmap = (dom_nnodemap_object *)intern->ptr;
+	if (objmap->ht) {
+		if (objmap->nodetype == XML_ENTITY_NODE) {
+			itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+		} else {
+			notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+			itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+		}
+	} else {
+		nodep = dom_object_get_node(objmap->baseobj);
+		if (nodep) {
+			itemnode = (xmlNodePtr)xmlHasProp(nodep, named);
+		}
+	}
+
+	if (itemnode) {
+		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+	} else {
+		RETVAL_NULL();
+	}
 }
 /* }}} end dom_namednodemap_get_named_item */
 
@@ -104,7 +163,50 @@ Since:
 */
 PHP_FUNCTION(dom_namednodemap_item)
 {
- DOM_NOT_IMPLEMENTED();
+	zval *id, *rv = NULL;
+	int index, ret;
+	dom_object *intern;
+	xmlNodePtr itemnode = NULL;
+
+	dom_nnodemap_object *objmap;
+	xmlNodePtr nodep, curnode;
+	int count;
+
+	id = getThis();
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &index) == FAILURE) {
+		return;
+	}
+
+	if (index >= 0) {
+		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+
+		objmap = (dom_nnodemap_object *)intern->ptr;
+		if (objmap->ht) {
+			if (objmap->nodetype == XML_ENTITY_NODE) {
+				itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
+			} else {
+				itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
+			}
+		} else {
+			nodep = dom_object_get_node(objmap->baseobj);
+			if (nodep) {
+				curnode = (xmlNodePtr)nodep->properties;
+				count = 0;
+				while (count < index && curnode != NULL) {
+					count++;
+					curnode = (xmlNodePtr)curnode->next;
+				}
+				itemnode = curnode;
+			}
+		}
+	}
+
+	if (itemnode) {
+		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+	} else {
+		RETVAL_NULL();
+	}
 }
 /* }}} end dom_namednodemap_item */
 
@@ -115,7 +217,44 @@ Since: DOM Level 2
 */
 PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 {
- DOM_NOT_IMPLEMENTED();
+	zval *id, *rv = NULL;
+	int ret, namedlen=0, urilen=0;
+	dom_object *intern;
+	xmlNodePtr itemnode = NULL;
+	char *uri, *named;
+
+	dom_nnodemap_object *objmap;
+	xmlNodePtr nodep;
+	xmlNotation *notep = NULL;
+
+	id = getThis();
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &uri, &urilen, &named, &namedlen) == FAILURE) {
+		return;
+	}
+
+	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+
+	objmap = (dom_nnodemap_object *)intern->ptr;
+	if (objmap->ht) {
+		if (objmap->nodetype == XML_ENTITY_NODE) {
+			itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+		} else {
+			notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+			itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+		}
+	} else {
+		nodep = dom_object_get_node(objmap->baseobj);
+		if (nodep) {
+			itemnode = (xmlNodePtr)xmlHasNsProp(nodep, named, uri);
+		}
+	}
+
+	if (itemnode) {
+		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+	} else {
+		RETVAL_NULL();
+	}
 }
 /* }}} end dom_namednodemap_get_named_item_ns */
 

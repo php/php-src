@@ -61,13 +61,28 @@ extern zend_module_entry dom_module_entry;
     therefore it's easier for the script-programmers to check, what's working how
    Can be checked with phpversion("dom");
 */
-#define DOM_API_VERSION "20030901"
+#define DOM_API_VERSION "20031129"
+
+typedef struct _dom_nnodemap_object {
+	dom_object *baseobj;
+	int nodetype;
+	xmlHashTable *ht;
+	xmlChar *local;
+	xmlChar *ns;
+	zval *baseobjptr;
+} dom_nnodemap_object;
+
+typedef struct {
+	zend_object_iterator     intern;
+	zval *curobj;
+} php_dom_iterator;
 
 #include "dom_fe.h"
 
 dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
+zend_object_value dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #if defined(LIBXML_XPATH_ENABLED)
 zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #endif
@@ -79,12 +94,18 @@ xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void dom_normalize (xmlNodePtr nodep TSRMLS_DC);
-void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval, dom_object *intern  TSRMLS_DC);
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index);
 void php_dom_create_implementation(zval **retval  TSRMLS_DC);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 int dom_has_feature(char *feature, char *version);
 int dom_node_is_read_only(xmlNodePtr node);
 int dom_node_children_valid(xmlNodePtr node);
+void php_dom_create_interator(zval *return_value, int ce_type TSRMLS_DC);
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns);
+xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
+xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
+xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
+zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC);
 
 #define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
@@ -108,6 +129,9 @@ entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
 #define DOM_NOT_IMPLEMENTED() \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not yet implemented"); \
 	return;
+
+#define DOM_NODELIST 0
+#define DOM_NAMEDNODEMAP 1
 
 PHP_MINIT_FUNCTION(dom);
 PHP_MSHUTDOWN_FUNCTION(dom);

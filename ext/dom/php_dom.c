@@ -432,14 +432,20 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_document_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler), 0);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_document_prop_handlers, sizeof(dom_document_prop_handlers), NULL);
 
-	REGISTER_DOM_CLASS(ce, "domnodelist", NULL, php_dom_nodelist_class_functions, dom_nodelist_class_entry);
-	
+	INIT_CLASS_ENTRY(ce, "domnodelist", php_dom_nodelist_class_functions);
+	ce.create_object = dom_nnodemap_objects_new;
+	dom_nodelist_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+	dom_nodelist_class_entry->get_iterator = php_dom_get_iterator;
+
 	zend_hash_init(&dom_nodelist_prop_handlers, 0, NULL, NULL, 1);
 	dom_register_prop_handler(&dom_nodelist_prop_handlers, "length", dom_nodelist_length_read, NULL TSRMLS_CC);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_nodelist_prop_handlers, sizeof(dom_nodelist_prop_handlers), NULL);
 
-	REGISTER_DOM_CLASS(ce, "domnamednodemap", NULL, php_dom_namednodemap_class_functions, dom_namednodemap_class_entry);
-	
+	INIT_CLASS_ENTRY(ce, "domnamednodemap", php_dom_namednodemap_class_functions);
+	ce.create_object = dom_nnodemap_objects_new;
+	dom_namednodemap_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+	dom_namednodemap_class_entry->get_iterator = php_dom_get_iterator;
+
 	zend_hash_init(&dom_namednodemap_prop_handlers, 0, NULL, NULL, 1);
 	dom_register_prop_handler(&dom_namednodemap_prop_handlers, "length", dom_namednodemap_length_read, NULL TSRMLS_CC);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_namednodemap_prop_handlers, sizeof(dom_namednodemap_prop_handlers), NULL);
@@ -686,7 +692,7 @@ PHP_MSHUTDOWN_FUNCTION(dom)
 	uncomment the following line, this will tell you the amount of not freed memory
 	and the total used memory into apaches error_log  */
 /*  xmlMemoryDump();*/
-
+xmlMemoryDump();
 	return SUCCESS;
 }
 
@@ -773,7 +779,29 @@ void dom_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ dom_objects_set_class */
+void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns)
+{
+	dom_nnodemap_object *mapptr;
+	zval *baseobj = NULL;
+
+	mapptr = (dom_nnodemap_object *)intern->ptr;
+	if (basenode) {
+		MAKE_STD_ZVAL(baseobj);
+		baseobj->type = IS_OBJECT;
+		baseobj->is_ref = 1;
+		baseobj->value.obj.handle = basenode->handle;
+		baseobj->value.obj.handlers = &dom_object_handlers;
+		zval_copy_ctor(baseobj);
+	}
+	mapptr->baseobjptr = baseobj;
+	mapptr->baseobj = basenode;
+	mapptr->nodetype = ntype;
+	mapptr->ht = ht;
+	mapptr->local = local;
+	mapptr->ns = ns;
+
+}
+
 static dom_object* dom_objects_set_class(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_class_entry *base_class;
@@ -801,7 +829,6 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type TSRMLS_DC)
 
 	return intern;
 }
-/* }}} */
 
 /* {{{ dom_objects_new */
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
@@ -836,6 +863,70 @@ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 }
 /* }}} */
 #endif
+
+void dom_nnodemap_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+{
+	dom_nnodemap_object *objmap;
+	zval *baseobj;
+	dom_object *intern = (dom_object *)object;
+
+	php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
+	objmap = (dom_nnodemap_object *)intern->ptr;
+	if (objmap) {
+		if (objmap->local) {
+			xmlFree(objmap->local);
+		}
+		if (objmap->ns) {
+			xmlFree(objmap->ns);
+		}
+		if (objmap->baseobjptr) {
+			baseobj = objmap->baseobjptr;
+			zval_ptr_dtor((zval **)&baseobj);
+		}
+		efree(objmap);
+	}
+
+	zend_hash_destroy(intern->std.properties);
+	FREE_HASHTABLE(intern->std.properties);
+
+	efree(object);
+}
+
+zend_object_value dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	zend_object_value retval;
+	dom_object *intern;
+	dom_nnodemap_object *objmap;
+	
+	intern = dom_objects_set_class(class_type TSRMLS_CC);
+	intern->ptr = emalloc(sizeof(dom_nnodemap_object));
+	objmap = (dom_nnodemap_object *)intern->ptr;
+	objmap->baseobj = NULL;
+	objmap->baseobjptr = NULL;
+	objmap->nodetype = 0;
+	objmap->ht = NULL;
+	objmap->local = NULL;
+	objmap->ns = NULL;
+
+	retval.handle = zend_objects_store_put(intern, dom_nnodemap_objects_dtor, dom_objects_clone TSRMLS_CC);
+	intern->handle = retval.handle;
+	retval.handlers = &dom_object_handlers;
+
+	return retval;
+}
+
+void php_dom_create_interator(zval *return_value, int ce_type TSRMLS_DC)
+{
+	zend_class_entry *ce;
+
+	if (ce_type == DOM_NAMEDNODEMAP) {
+		ce = dom_namednodemap_class_entry;
+	} else {
+		ce = dom_nodelist_class_entry;
+	}
+
+	object_init_ex(return_value, ce);
+}
 
 /* {{{ php_dom_create_object */
 zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value, dom_object *domobj TSRMLS_DC)
@@ -995,24 +1086,27 @@ int dom_has_feature(char *feature, char *version)
 }
 /* }}} end dom_has_feature */
 
-/* {{{ void dom_element_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval  TSRMLS_DC) */
-void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval, dom_object *intern  TSRMLS_DC)
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index)
 {
-	int ret;
+	xmlNodePtr ret = NULL;
 
-	while (nodep != NULL) {
+	while (nodep != NULL && (*cur <= index || index == -1)) {
 		if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, local)) {
 			if (ns == NULL || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, ns))) {
-				zval *child;
-				MAKE_STD_ZVAL(child);
-
-				child = php_dom_create_object(nodep, &ret, NULL, child, intern TSRMLS_CC);
-				add_next_index_zval(*retval, child);
+				if (*cur == index) {
+					ret = nodep;
+					break;
+				}
+				(*cur)++;
 			}
 		}
-		dom_get_elements_by_tag_name_ns_raw(nodep->children, ns, local, retval, intern TSRMLS_CC);
+		ret = dom_get_elements_by_tag_name_ns_raw(nodep->children, ns, local, cur, index);
+		if (ret != NULL) {
+			break;
+		}
 		nodep = nodep->next;
 	}
+	return ret;
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns_raw */
 

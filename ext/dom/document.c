@@ -884,10 +884,10 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 {
 	zval *id;
 	xmlDocPtr docp;
-	xmlNodePtr elemp;
 	int name_len;
-	dom_object *intern;
+	dom_object *intern, *namednode;
 	char *name;
+	xmlChar *local;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
@@ -895,10 +895,10 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 		return;
 	}
 
-	array_init(return_value);
-	elemp = xmlDocGetRootElement(docp);
-
-	dom_get_elements_by_tag_name_ns_raw(elemp, NULL, name, &return_value, intern TSRMLS_CC);
+	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
+	namednode = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	local = xmlCharStrndup(name, name_len);
+	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL);
 }
 /* }}} end dom_document_get_elements_by_tag_name */
 
@@ -1075,10 +1075,10 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns)
 {
 	zval *id;
 	xmlDocPtr docp;
-	xmlNodePtr elemp;
 	int uri_len, name_len;
-	dom_object *intern;
+	dom_object *intern, *namednode;
 	char *uri, *name;
+	xmlChar *local, *nsuri;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
@@ -1086,10 +1086,11 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns)
 		return;
 	}
 
-	array_init(return_value);
-	elemp = xmlDocGetRootElement(docp);
-
-	dom_get_elements_by_tag_name_ns_raw(elemp, uri, name, &return_value, intern TSRMLS_CC);
+	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
+	namednode = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	local = xmlCharStrndup(name, name_len);
+	nsuri = xmlCharStrndup(uri, uri_len);
+	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri);
 }
 /* }}} end dom_document_get_elements_by_tag_name_ns */
 

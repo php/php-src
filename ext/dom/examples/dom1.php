@@ -60,7 +60,7 @@ $attrs = $rootnode->attributes;
 print_node_list($attrs);
 
 echo "--------- children of an attribute\n";
-$children = current($attrs)->childNodes;
+$children = $attrs->item(0)->childNodes;
 print_node_list($children);
 
 echo "--------- Add child to root\n";
@@ -80,8 +80,8 @@ $children = $rootnode->getElementsByTagName("Silly");
 print_node_list($children);
 
 echo "--------- Unlink Node\n";
-print_node($children[0]);
-$rootnode->removeChild($children[0]);
+print_node($children.item(0));
+$rootnode->removeChild($children.item(0));
 print_node_list($rootnode->childNodes);
 print $dom->savexml();
 

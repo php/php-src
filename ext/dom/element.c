@@ -394,8 +394,9 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 	zval *id;
 	xmlNodePtr elemp;
 	int name_len;
-	dom_object *intern;
+	dom_object *intern, *namednode;
 	char *name;
+	xmlChar *local;
 
 	DOM_GET_THIS_OBJ(elemp, id, xmlNodePtr, intern);
 
@@ -403,10 +404,10 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 		return;
 	}
 
-	array_init(return_value);
-	elemp = elemp->children;
-
-	dom_get_elements_by_tag_name_ns_raw(elemp, NULL, name, &return_value, intern TSRMLS_CC);
+	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
+	namednode = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	local = xmlCharStrndup(name, name_len);
+	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
@@ -708,8 +709,10 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 	zval *id;
 	xmlNodePtr elemp;
 	int uri_len, name_len;
-	dom_object *intern;
+	dom_object *intern, *namednode;
 	char *uri, *name;
+	xmlChar *local, *nsuri;
+// xmlHashTable *ht;
 
 	DOM_GET_THIS_OBJ(elemp, id, xmlNodePtr, intern);
 
@@ -717,9 +720,12 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 		return;
 	}
 
-	array_init(return_value);
+	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
+	namednode = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	local = xmlCharStrndup(name, name_len);
+	nsuri = xmlCharStrndup(uri, uri_len);
+	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri);
 
-	dom_get_elements_by_tag_name_ns_raw(elemp->children, uri, name, &return_value, intern TSRMLS_CC);
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 

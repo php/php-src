@@ -49,14 +49,40 @@ Since:
 */
 int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	dom_nnodemap_object *objmap;
+	xmlNodePtr nodep, curnode;
+	int count = 0;
+
+	objmap = (dom_nnodemap_object *)obj->ptr;
+	if (objmap->ht) {
+		count = xmlHashSize(objmap->ht);
+	} else {
+		nodep = dom_object_get_node(objmap->baseobj);
+		if (nodep) {
+			if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+				curnode = nodep->children;
+				if (curnode) {
+					count++;
+					while (curnode->next != NULL) {
+						count++;
+						curnode = curnode->next;
+					}
+				}
+			} else {
+				if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+					nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+				}
+				curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, -1);
+			}
+		}
+	}
+
+	MAKE_STD_ZVAL(*retval);
+	ZVAL_LONG(*retval, count);
 	return SUCCESS;
 }
 
 /* }}} */
-
-
 
 
 /* {{{ proto domnode dom_nodelist_item(unsigned long index);
@@ -65,7 +91,56 @@ Since:
 */
 PHP_FUNCTION(dom_nodelist_item)
 {
- DOM_NOT_IMPLEMENTED();
+	zval *id, *rv = NULL;
+	int index, ret;
+	dom_object *intern;
+	xmlNodePtr itemnode = NULL;
+
+	dom_nnodemap_object *objmap;
+	xmlNodePtr nodep, curnode;
+	int count = 0;
+
+	id = getThis();
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &index) == FAILURE) {
+		return;
+	}
+
+	if (index >= 0) {
+		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+
+		objmap = (dom_nnodemap_object *)intern->ptr;
+		if (objmap->ht) {
+			if (objmap->nodetype == XML_ENTITY_NODE) {
+				itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
+			} else {
+				itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
+			}
+		} else {
+			nodep = dom_object_get_node(objmap->baseobj);
+			if (nodep) {
+				if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+					curnode = nodep->children;
+					while (count < index && curnode != NULL) {
+						count++;
+						curnode = curnode->next;
+					}
+					itemnode = curnode;
+				} else {
+					if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+						nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+					}
+					itemnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, index);
+				}
+			}
+		}
+	}
+
+	if (itemnode) {
+		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+	} else {
+		RETVAL_NULL();
+	}
 }
 /* }}} end dom_nodelist_item */
 #endif
