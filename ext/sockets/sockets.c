@@ -489,13 +489,14 @@ int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) {
    Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(socket_select)
 {
-	zval			*r_array, *w_array, *e_array;
+	zval			*r_array, *w_array, *e_array, *sec;
 	struct timeval	tv;
+	struct timeval *tv_p=NULL;
 	fd_set			rfds, wfds, efds;
 	SOCKET			max_fd = 0;
-	int			retval, sets = 0, usec = 0, sec=0;
+	int			retval, sets = 0, usec = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!l|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
 		return;
 	
  	FD_ZERO(&rfds);  
@@ -511,17 +512,26 @@ PHP_FUNCTION(socket_select)
 		RETURN_FALSE;
 	}
 
-	tv.tv_sec = sec;
-	tv.tv_usec = usec;
-	
-   	retval = select(max_fd+1, &rfds, &wfds, &efds, &tv);
-	
+	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
+	if (sec != NULL) {
+ 		convert_to_long_ex(&sec);
+		tv.tv_sec = Z_LVAL_P(sec);
+		tv.tv_usec = usec;
+		tv_p=&tv;
+	} 
+   
+   	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+
+	if (retval == -1) {
+		php_error(E_WARNING, "%s() %s [%d]: %s", get_active_function_name(TSRMLS_C), "unable to select", errno, php_strerror(errno));
+		RETURN_FALSE;
+	}
+   
 	if (r_array != NULL) php_sock_array_from_fd_set(r_array, &rfds TSRMLS_CC);
 	if (w_array != NULL) php_sock_array_from_fd_set(w_array, &wfds TSRMLS_CC);
 	if (e_array != NULL) php_sock_array_from_fd_set(e_array, &efds TSRMLS_CC);   
    
-	RETURN_LONG(retval); 
-
+	RETURN_LONG(retval);
 }
 /* }}} */
 
@@ -1243,8 +1253,6 @@ PHP_FUNCTION(socket_recv)
 	memset(recv_buf, 0, len + 1);
 
 	if ((retval = recv(php_sock->bsd_socket, recv_buf, len, flags)) < 1) {
-		if (retval == -1) PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
-	   
 		efree(recv_buf);
 	   
 		zval_dtor(buf);
@@ -1259,7 +1267,12 @@ PHP_FUNCTION(socket_recv)
 		Z_STRLEN_P(buf)=retval;
 		Z_TYPE_P(buf)=IS_STRING;
 	}
-
+   
+	if (retval == -1) { 
+ 		PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
+		RETURN_FALSE;
+	}
+   
 	RETURN_LONG(retval);
 }
 /* }}} */
@@ -1279,7 +1292,12 @@ PHP_FUNCTION(socket_send)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
 	retval = send(php_sock->bsd_socket, buf, (buf_len < len ? buf_len : len), flags);
-	
+
+	if (retval == -1) {
+ 		PHP_SOCKET_ERROR(php_sock, "unable to write to socket", errno);
+		RETURN_FALSE;	
+	}
+   
 	RETURN_LONG(retval);
 }
 /* }}} */
@@ -1402,7 +1420,12 @@ PHP_FUNCTION(socket_sendto)
 			break;
 
 		default:
-			RETURN_LONG(0);
+			RETURN_FALSE;
+	}
+
+	if (retval == -1) {
+ 		PHP_SOCKET_ERROR(php_sock, "unable to write to socket", errno);
+		RETURN_FALSE;
 	}
 
 	RETURN_LONG(retval);
