@@ -1,3 +1,63 @@
+2000-08-10  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - The commit messages didn't seem to update the news file
+
+2000-08-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ftp/ftp.c:
+    - Fixed FTP module to accept multiline server replies 
+
+2000-08-10  Brendan W. McAdams  <brendan@plexmedia.com>
+
+    * ext/ccvs/ccvs.c: -  changed all pvals to zvals (like they were before)
+
+2000-08-10  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/php_pspell.h
+      ext/pspell/pspell.c:
+    Added capability to create and manipulate a config object that can be
+    used later to create an instance of the spellchecker based on that
+    config.
+
+2000-08-10  Brendan W. McAdams  <brendan@plexmedia.com>
+
+    * ext/ccvs/ccvs.c
+      ext/ccvs/ccvs.h:
+    - Homogonized CCVS with the rest of the modules in the ext/ tree:
+        - All ZEND_* macro calls changed to PHP_* macros.
+        - All zval's converted to pval's.
+
+2000-08-10  Andi Gutmans  <andi@php.net>
+
+    * main/php3_compat.h
+      main/php.h: - Move compat macros to php3_compat.h
+
+2000-08-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Remove bogus "by"
+
+2000-08-10  Joey Smith  <joey@joeysmith.com>
+
+    * ext/imap/php_imap.c: Cut and paste error? :)
+
+2000-08-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Formatting.
+
+2000-08-10  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/domxml/php_domxml.c:
+    last patch reverted, i didn't get the whole picture here
+
+    * ext/domxml/php_domxml.c: duplicate alias entry removed
+
+2000-08-10  David Croft  <david@infotrek.co.uk>
+
+    * ext/pspell/README:
+2000-08-10  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.c: Correct bug in headers only logic.
+
 2000-08-09  Zeev Suraski  <zeev@php.net>
 
     * NEWS:
