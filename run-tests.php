@@ -547,6 +547,7 @@ COMMAND $cmd
 		var_dump($output);
 */
 		if (preg_match("/^$wanted_re\$/s", $output)) {
+			@unlink($tmp_file);
 			echo "PASS $tested\n";
 			return 'PASSED';
 		}
