@@ -378,6 +378,8 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	if (path_length == 0) 
 		return (0);
+	if (path_length >= MAXPATHLEN)
+		return (1);
 
 #ifdef REALPATH_CACHE
 	if (use_realpath && CWDG(realpath_cache_size_limit)) {
@@ -386,7 +388,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			orig_path_len = path_length;
 		} else {
 			orig_path_len = path_length + state->cwd_length + 1;
-			if (orig_path_len+1 > MAXPATHLEN) {
+			if (orig_path_len >= MAXPATHLEN) {
 				return 1;
 			}
 			memcpy(orig_path, state->cwd, state->cwd_length);
@@ -417,9 +419,13 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	 * This can happen under solaris when a dir does not have read permissions
 	 * but *does* have execute permissions */
 	if (IS_ABSOLUTE_PATH(path, path_length) || (state->cwd_length < 1)) {
-		if (use_realpath && realpath(path, resolved_path)) {
-			path = resolved_path;
-			path_length = strlen(path);
+		if (use_realpath) {
+			if (realpath(path, resolved_path)) {
+				path = resolved_path;
+				path_length = strlen(path);
+			} else {
+				return 1;
+			}
 		}
 	} else { /* Concat current directory with relative path and then run realpath() on it */
 		char *tmp;
@@ -435,9 +441,18 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		memcpy(ptr, path, path_length);
 		ptr += path_length;
 		*ptr = '\0';
-		if (use_realpath && realpath(tmp, resolved_path)) {
-			path = resolved_path;
-			path_length = strlen(path);
+		if (strlen(tmp) >= MAXPATHLEN) {
+			free(tmp);
+			return 1;
+		}
+		if (use_realpath) {
+			if (realpath(tmp, resolved_path)) {
+				path = resolved_path;
+				path_length = strlen(path);
+			} else {
+				free(tmp);
+				return 1;
+			}
 		}
 		free(tmp);
 	}
