@@ -2,14 +2,14 @@
 Translit failure
 --SKIPIF--
 <?php
-include('skipif.inc');
+/* include('skipif.inc'); */
 ( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\""); 
 ?>
 --INI--
 error_reporting=2039
 --FILE--
 <?php
-include('test.inc');
+/* include('test.inc'); */
 // Should be ok.
 // Content from file is from libiconv testkit. Tested both
 // with a string as an implode, no difference.

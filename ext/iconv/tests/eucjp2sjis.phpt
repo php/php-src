@@ -1,12 +1,12 @@
 --TEST--
 EUC-JP to SJIS
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php /* include('skipif.inc'); */ ?>
 --INI--
 error_reporting=2039
 --FILE--
 <?php
-include('test.inc');
+/* include('test.inc'); */
 /* charset=EUC-JP */
 
 $str = "
