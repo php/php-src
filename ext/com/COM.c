@@ -15,9 +15,10 @@
    | Author: Zeev Suraski <zeev@zend.com>                                 |
    |         Harald Radi  <h.radi@nme.at>                                 |
    |         Alan Brown   <abrown@pobox.com>                              |
+   |         Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
-
+/* $Id$ */
 /*
  * This module implements support for COM components that support the IDispatch
  * interface.  Both local (COM) and remote (DCOM) components can be accessed.
@@ -1090,6 +1091,7 @@ static const struct {
 	{ VT_BYREF,		"VT_BYREF" },
 	{ VT_VOID,		"VT_VOID" },
 	{ VT_PTR,		"VT_PTR" },
+	{ VT_HRESULT,	"VT_HRESULT" },
 	{ 0, NULL }
 };
 
@@ -1117,7 +1119,7 @@ static int process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int prin
 		return 0;
 
 	/* verify that it is suitable */
-	if (attr->typekind == TKIND_DISPATCH) {
+	if (id_to_name == NULL || attr->typekind == TKIND_DISPATCH) {
 
 		if (guid)
 			memcpy(guid, &attr->guid, sizeof(GUID));
@@ -1142,98 +1144,111 @@ static int process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int prin
 		/* So we've got the dispatch interface; lets list the event methods */
 		for (i = 0; i < attr->cFuncs; i++) {
 			zval *tmp;
+			DISPID lastid = 0;	/* for props */
+			int isprop;
 
 			if (FAILED(typeinfo->lpVtbl->GetFuncDesc(typeinfo, i, &func)))
 				break;
 
-			typeinfo->lpVtbl->GetDocumentation(typeinfo, func->memid, &olename, NULL, NULL, NULL);
-			ansiname = php_OLECHAR_to_char(olename, &ansinamelen, codepage TSRMLS_CC);
-			SysFreeString(olename);
+			isprop = (func->invkind & DISPATCH_PROPERTYGET || func->invkind & DISPATCH_PROPERTYPUT);
 
-			if (printdef) {
-				int j;
-				char *funcdesc;
-				unsigned int funcdesclen, cnames = 0;
-				BSTR *names;
+			if (!isprop || lastid != func->memid) {
 
-				names = (BSTR*)emalloc((func->cParams + 1) * sizeof(BSTR));
-
-				typeinfo->lpVtbl->GetNames(typeinfo, func->memid, names, func->cParams + 1, &cnames);
-
-				/* first element is the function name */
-				SysFreeString(names[0]);
-
-				php_printf("\t/* DISPID=%d */\n\t", func->memid);
-
-				if (func->elemdescFunc.tdesc.vt != VT_VOID) {
-					php_printf(" /* %s [%d] */ ",
-							vt_to_string(func->elemdescFunc.tdesc.vt),
-							func->elemdescFunc.tdesc.vt
-							);
-				}
-
-				/* TODO: handle prop put and get */
+				lastid = func->memid;
 				
-				php_printf("function %s(\n", ansiname);
+				typeinfo->lpVtbl->GetDocumentation(typeinfo, func->memid, &olename, NULL, NULL, NULL);
+				ansiname = php_OLECHAR_to_char(olename, &ansinamelen, codepage TSRMLS_CC);
+				SysFreeString(olename);
 
-				for (j = 0; j < func->cParams; j++) {
-					ELEMDESC *elem = &func->lprgelemdescParam[j];
+				if (printdef) {
+					int j;
+					char *funcdesc;
+					unsigned int funcdesclen, cnames = 0;
+					BSTR *names;
 
-					php_printf("\t\t/* %s [%d] ", vt_to_string(elem->tdesc.vt), elem->tdesc.vt);
+					names = (BSTR*)emalloc((func->cParams + 1) * sizeof(BSTR));
 
-					if (elem->paramdesc.wParamFlags & PARAMFLAG_FIN)
-						php_printf("[in]");
-					if (elem->paramdesc.wParamFlags & PARAMFLAG_FOUT)
-						php_printf("[out]");
+					typeinfo->lpVtbl->GetNames(typeinfo, func->memid, names, func->cParams + 1, &cnames);
+					/* first element is the function name */
+					SysFreeString(names[0]);
 
-					if (elem->tdesc.vt == VT_PTR) {
-						/* what does it point to ? */
-						php_printf(" --> %s [%d] ",
-								vt_to_string(elem->tdesc.lptdesc->vt),
-								elem->tdesc.lptdesc->vt
+					php_printf("\t/* DISPID=%d */\n", func->memid);
+
+					if (func->elemdescFunc.tdesc.vt != VT_VOID) {
+						php_printf("\t/* %s [%d] */\n",
+								vt_to_string(func->elemdescFunc.tdesc.vt),
+								func->elemdescFunc.tdesc.vt
 								);
 					}
 
-					/* when we handle prop put and get, this will look nicer */
-					if (j+1 < (int)cnames) {
-						funcdesc = php_OLECHAR_to_char(names[j+1], &funcdesclen, codepage TSRMLS_CC);
-						SysFreeString(names[j+1]);
+					if (isprop) {
+
+						php_printf("\tvar $%s;\n\n", ansiname);
+
 					} else {
-						funcdesc = "???";
+						/* a function */
+
+						php_printf("\tfunction %s(\n", ansiname);
+
+						for (j = 0; j < func->cParams; j++) {
+							ELEMDESC *elem = &func->lprgelemdescParam[j];
+
+							php_printf("\t\t/* %s [%d] ", vt_to_string(elem->tdesc.vt), elem->tdesc.vt);
+
+							if (elem->paramdesc.wParamFlags & PARAMFLAG_FIN)
+								php_printf("[in]");
+							if (elem->paramdesc.wParamFlags & PARAMFLAG_FOUT)
+								php_printf("[out]");
+
+							if (elem->tdesc.vt == VT_PTR) {
+								/* what does it point to ? */
+								php_printf(" --> %s [%d] ",
+										vt_to_string(elem->tdesc.lptdesc->vt),
+										elem->tdesc.lptdesc->vt
+										);
+							}
+
+							/* when we handle prop put and get, this will look nicer */
+							if (j+1 < (int)cnames) {
+								funcdesc = php_OLECHAR_to_char(names[j+1], &funcdesclen, codepage TSRMLS_CC);
+								SysFreeString(names[j+1]);
+							} else {
+								funcdesc = "???";
+							}
+
+							php_printf(" */ %s%s%c\n",
+									elem->tdesc.vt == VT_PTR ? "&$" : "$",
+									funcdesc,
+									j == func->cParams - 1 ? ' ' : ','
+									);
+
+							if (j+1 < (int)cnames)
+								efree(funcdesc);
+						}
+
+						php_printf("\t\t)\n\t{\n");
+
+						typeinfo->lpVtbl->GetDocumentation(typeinfo, func->memid, NULL, &olename, NULL, NULL);
+						if (olename) {
+							funcdesc = php_OLECHAR_to_char(olename, &funcdesclen, codepage TSRMLS_CC);
+							SysFreeString(olename);
+							php_printf("\t\t/* %s */\n", funcdesc);
+							efree(funcdesc);
+						}
+
+						php_printf("\t}\n");
 					}
 
-					php_printf(" */ %s%s%c\n",
-							elem->tdesc.vt == VT_PTR ? "&$" : "$",
-							funcdesc,
-							j == func->cParams - 1 ? ' ' : ','
-							);
-
-					if (j+1 < (int)cnames)
-						efree(funcdesc);
+					efree(names);
 				}
 
-				php_printf("\t\t)\n\t{\n");
-
-				typeinfo->lpVtbl->GetDocumentation(typeinfo, func->memid, NULL, &olename, NULL, NULL);
-				if (olename) {
-					funcdesc = php_OLECHAR_to_char(olename, &funcdesclen, codepage TSRMLS_CC);
-					SysFreeString(olename);
-					php_printf("\t\t/* %s */\n", funcdesc);
-					efree(funcdesc);
+				if (id_to_name) {
+					zend_str_tolower(ansiname, ansinamelen);
+					MAKE_STD_ZVAL(tmp);
+					ZVAL_STRINGL(tmp, ansiname, ansinamelen, 0);
+					zend_hash_index_update(id_to_name, func->memid, (void*)&tmp, sizeof(zval *), NULL);
 				}
-
-				php_printf("\t}\n");
-
-				efree(names);
 			}
-
-			if (id_to_name) {
-				zend_str_tolower(ansiname, ansinamelen);
-				MAKE_STD_ZVAL(tmp);
-				ZVAL_STRINGL(tmp, ansiname, ansinamelen, 0);
-				zend_hash_index_update(id_to_name, func->memid, (void*)&tmp, sizeof(zval *), NULL);
-			}
-
 			typeinfo->lpVtbl->ReleaseFuncDesc(typeinfo, func);
 
 		}
@@ -1243,7 +1258,7 @@ static int process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int prin
 
 		ret = 1;
 	} else {
-		zend_error(E_WARNING, "Thats not a dispatchable interface!!\n");
+		zend_error(E_WARNING, "Thats not a dispatchable interface!! type kind = %08x\n", attr->typekind);
 	}
 
 	typeinfo->lpVtbl->ReleaseTypeAttr(typeinfo, attr);
@@ -1272,18 +1287,17 @@ static ITypeInfo *locate_typeinfo(char *typelibname, comval *obj, char *dispname
 				/* TODO: write some code here */
 				pci->lpVtbl->Release(pci);
 			}
-		} else if (dispname) {
+		} else if (dispname && C_HASTLIB(obj)) {
 			unsigned int idx;
-
 			/* get the library from the object; the rest will be dealt with later */
 			C_TYPEINFO_VT(obj)->GetContainingTypeLib(C_TYPEINFO(obj), &typelib, &idx);	
+		} else if (typelibname == NULL) {
+			C_DISPATCH_VT(obj)->GetTypeInfo(C_DISPATCH(obj), 0, LANG_NEUTRAL, &typeinfo);
 		}
 	} else if (typelibname) {
 		/* Fetch the typelibrary and use that to look things up */
 		typelib = php_COM_find_typelib(typelibname, CONST_CS TSRMLS_CC);
-	} else if (dispname) {
-		/* TODO: assume that the name is actually a progid */
-	}
+	} 
 
 	if (!gotguid && dispname && typelib) {
 		unsigned short cfound;
@@ -1291,8 +1305,45 @@ static ITypeInfo *locate_typeinfo(char *typelibname, comval *obj, char *dispname
 		OLECHAR *olename = php_char_to_OLECHAR(dispname, strlen(dispname), CP_ACP TSRMLS_CC);
 		
 		cfound = 1;
-		typelib->lpVtbl->FindName(typelib, olename, 0, &typeinfo, &memid, &cfound);
+		if (FAILED(typelib->lpVtbl->FindName(typelib, olename, 0, &typeinfo, &memid, &cfound)) || cfound == 0) {
+			CLSID coclass;
+			ITypeInfo *coinfo;
+			
+			/* assume that it might be a progid instead */
+			if (SUCCEEDED(CLSIDFromProgID(olename, &coclass)) &&
+					SUCCEEDED(typelib->lpVtbl->GetTypeInfoOfGuid(typelib, &coclass, &coinfo))) {
 
+				/* enumerate implemented interfaces and pick the one as indicated by sink */
+				TYPEATTR *attr;
+				int i;
+
+				coinfo->lpVtbl->GetTypeAttr(coinfo, &attr);
+
+				for (i = 0; i < attr->cImplTypes; i++) {
+					HREFTYPE rt;
+					int tf;
+
+					if (FAILED(coinfo->lpVtbl->GetImplTypeFlags(coinfo, i, &tf)))
+						continue;
+
+					if ((sink && tf == (IMPLTYPEFLAG_FSOURCE|IMPLTYPEFLAG_FDEFAULT)) ||
+						(!sink && (tf & IMPLTYPEFLAG_FSOURCE) == 0)) {
+
+						/* flags match what we are looking for */
+
+						if (SUCCEEDED(coinfo->lpVtbl->GetRefTypeOfImplType(coinfo, i, &rt)))
+							if (SUCCEEDED(coinfo->lpVtbl->GetRefTypeInfo(coinfo, rt, &typeinfo)))
+								break;
+						
+					}
+				}
+				
+				coinfo->lpVtbl->ReleaseTypeAttr(coinfo, attr);
+				coinfo->lpVtbl->Release(coinfo);
+			}
+		}
+
+		
 		efree(olename);
 	} else if (gotguid) {
 		typelib->lpVtbl->GetTypeInfoOfGuid(typelib, &iid, &typeinfo);
@@ -1309,14 +1360,14 @@ static ITypeInfo *locate_typeinfo(char *typelibname, comval *obj, char *dispname
 PHP_FUNCTION(com_print_typeinfo)
 {
 	zval *arg1;
-	char *ifacename;
+	char *ifacename = NULL;
 	char *typelibname = NULL;
 	int ifacelen;
-	zend_bool wantsink;
+	zend_bool wantsink = 0;
 	comval *obj = NULL;
 	ITypeInfo *typeinfo;
 	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/sb", &arg1, &ifacename,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/s!b", &arg1, &ifacename,
 				&ifacelen, &wantsink)) {
 		RETURN_FALSE;
 	}
@@ -1337,6 +1388,8 @@ PHP_FUNCTION(com_print_typeinfo)
 		process_typeinfo(typeinfo, NULL, 1, NULL TSRMLS_CC);
 		typeinfo->lpVtbl->Release(typeinfo);
 		RETURN_TRUE;
+	} else {
+		zend_error(E_WARNING, "Unable to find typeinfo using the parameters supplied");
 	}
 	RETURN_FALSE;
 }
