@@ -387,7 +387,7 @@ static int array_user_compare(const void *a, const void *b)
 	Bucket *f;
 	Bucket *s;
 	pval **args[2];
-	pval retval;
+	pval *retval_ptr;
 	CLS_FETCH();
 	BLS_FETCH();
 
@@ -397,9 +397,14 @@ static int array_user_compare(const void *a, const void *b)
 	args[0] = (pval **) f->pData;
 	args[1] = (pval **) s->pData;
 
-	if (call_user_function_ex(CG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args, 0)==SUCCESS) {
-		convert_to_long(&retval);
-		return retval.value.lval;
+	if (call_user_function_ex(CG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0)==SUCCESS
+		&& retval_ptr) {
+		long retval;
+
+		convert_to_long_ex(&retval_ptr);
+		retval = retval_ptr->value.lval;
+		zval_ptr_dtor(&retval_ptr);
+		return retval;
 	} else {
 		return 0;
 	}
@@ -795,7 +800,7 @@ PHP_FUNCTION(max)
 static int php_array_walk(HashTable *target_hash, zval **userdata)
 {
 	zval **args[3],			/* Arguments to userland function */
-		   retval,			/* Return value - unused */
+		  *retval_ptr,			/* Return value - unused */
 		  *key;				/* Entry key */
 	char  *string_key;
 	ulong  num_key;
@@ -823,8 +828,11 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 		
 		/* Call the userland function */
 		call_user_function_ex(CG(function_table), NULL, *BG(array_walk_func_name),
-						   &retval, userdata ? 3 : 2, args, 0);
+						   &retval_ptr, userdata ? 3 : 2, args, 0);
 		
+		if (retval_ptr) {
+			zval_ptr_dtor(&retval_ptr);
+		}
 		/* Clean up the key */
 		if (zend_hash_get_current_key_type(target_hash) == HASH_KEY_IS_STRING)
 			efree(key->value.str.val);
