@@ -40,7 +40,11 @@
 
 #if HAVE_LIBGD13
 #include "ext/gd/php_gd.h"
+#if HAVE_GD_BUNDLED
+#include "ext/gd/libgd/gd.h"
+#else
 #include "gd.h"
+#endif
 static int le_gd;
 #endif
 
