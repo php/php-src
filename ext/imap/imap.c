@@ -2203,7 +2203,7 @@ PHP_FUNCTION(imap_bodystruct)
 	}
 	if ( body->id ){
 		add_property_long( return_value, "ifid", 1 );
-		if(body->description) add_property_string( return_value, "id",  body->description, 1 );
+		if(body->description) add_property_string( return_value, "id",  body->id, 1 );
 	} else {
 		add_property_long( return_value, "ifid", 0 );
 	}
