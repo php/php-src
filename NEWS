@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev 
+- Reversed the destruction-order of resources. This fixes the reported OCI8 
+  "failed to rollback outstanding transactions!" message. (Thies Zend Engine)
 - Added option for returning XMLRPC fault packets. (Matt Allen, Sascha
   Schumann)
 - Improved range() function to support range('a','z') and range(9,0) types of
