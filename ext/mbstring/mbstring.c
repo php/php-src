@@ -3475,7 +3475,7 @@ PHPAPI size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC)
 PHPAPI char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
 {
 	register const char *p = s;
-	char *last;
+	char *last=NULL;
 
 	if (nbytes == (size_t)-1) {
 		while (*p != '\0') {

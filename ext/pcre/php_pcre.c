@@ -753,16 +753,16 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 	int				 backref;			/* Backreference number */
 	int				 eval;				/* If the replacement string should be eval'ed */
 	int				 start_offset;		/* Where the new search starts */
-	int				 g_notempty = 0;	/* If the match should not be empty */
-	int				 replace_len;		/* Length of replacement string */
+	int				 g_notempty=0;		/* If the match should not be empty */
+	int				 replace_len=0;		/* Length of replacement string */
 	char			*result,			/* Result of replacement */
-					*replace,			/* Replacement string */
+					*replace=NULL,		/* Replacement string */
 					*new_buf,			/* Temporary buffer for re-allocation */
 					*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
 					*match,				/* The current match */
 					*piece,				/* The current piece of subject */
-					*replace_end,		/* End of replacement string */
+					*replace_end=NULL,	/* End of replacement string */
 					*eval_result,		/* Result of eval or custom function */
 					 walk_last;			/* Last walked character */
 
