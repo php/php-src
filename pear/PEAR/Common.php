@@ -1285,7 +1285,8 @@ class PEAR_Common extends PEAR
      *  'start'     download is starting, parameter is number of bytes
      *              that are expected, or -1 if unknown
      *  'bytesread' parameter is the number of bytes read so far
-     *  'done'      download is complete, no parameter
+     *  'done'      download is complete, parameter is the total number
+     *              of bytes read
      *
      * If an HTTP proxy has been configured (http_proxy PEAR_Config
      * setting), the proxy will be used.
@@ -1293,8 +1294,8 @@ class PEAR_Common extends PEAR
      * @param string  $url       the URL to download
      * @param object  $ui        PEAR_Frontend_* instance
      * @param object  $config    PEAR_Config instance
-     * @param string  $save_dir  directory to save file in
-     * @param mixed   $callback  function/method to call for status
+     * @param string  $save_dir  (optional) directory to save file in
+     * @param mixed   $callback  (optional) function/method to call for status
      *                           updates
      *
      * @return string  Returns the full path of the downloaded file or a PEAR
@@ -1389,7 +1390,7 @@ class PEAR_Common extends PEAR
         fclose($fp);
         fclose($wp);
         if ($callback) {
-            call_user_func($callback, 'done');
+            call_user_func($callback, 'done', $bytes);
         }
         // callback: done!
         return $dest_file;
