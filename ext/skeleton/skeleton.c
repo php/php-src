@@ -97,7 +97,7 @@ PHP_FUNCTION(confirm_extname_compiled)
 
 	convert_to_string_ex(arg);
 
-	len = sprintf(string, "Congratulations, you have successfully modified ext/extname/config.m4, module %s is compiled into PHP", Z_STRVAL_PP(arg));
+	len = sprintf(string, "Congratulations, you have successfully modified ext/%.80s/config.m4, module %.80s is compiled into PHP", "extname", Z_STRVAL_PP(arg));
 	RETURN_STRINGL(string, len, 1);
 }
 /* }}} */
