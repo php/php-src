@@ -119,7 +119,7 @@ struct tm *gmtime_r(const time_t *const timep, struct tm *p_tm)
 
 #if defined(PHP_NEED_REENTRANCY)
 
-void reentrancy_shutdown(void)
+void reentrancy_startup(void)
 {
 	int i;
 
