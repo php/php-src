@@ -1041,12 +1041,13 @@ void zend_do_return(znode *expr, int do_end_vparse CLS_DC)
 {
 	zend_op *opline;
 	
-	if (do_end_vparse) {
-		if (CG(active_op_array)->return_reference) {
-			zend_do_end_variable_parse(BP_VAR_W, 0 CLS_CC);
-		} else {
-			zend_do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
+	if (CG(active_op_array)->return_reference) {
+		if (!do_end_vparse) {
+			zend_error(E_COMPILE_ERROR, "Only variables may be returned by reference");
 		}
+		zend_do_end_variable_parse(BP_VAR_W, 0 CLS_CC);
+	} else {
+		zend_do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
 	}
 #ifdef ZTS
 	zend_stack_apply_with_argument(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_switch_expr CLS_CC);
