@@ -52,6 +52,16 @@
 #define PGSQL_MAX_LENGTH_OF_LONG   30
 #define PGSQL_MAX_LENGTH_OF_DOUBLE 60
 
+#define PGSQL_RETURN_OID(oid) do { \
+	if (oid > LONG_MAX) { \
+		smart_str s = {0}; \
+		smart_str_append_unsigned(&s, oid); \
+		smart_str_0(&s); \
+		RETURN_STRINGL(s.c, s.len, 0); \
+	} \
+	RETURN_LONG((long)oid); \
+} while(0)
+
 
 #if HAVE_PQSETNONBLOCKING
 #define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
@@ -1502,18 +1512,12 @@ PHP_FUNCTION(pg_last_oid)
 	oid = PQoidValue(pgsql_result);
 	if (oid == InvalidOid) {
 		RETURN_FALSE;
-	} else if (oid > LONG_MAX) {
-		smart_str s = {0};
-
-		smart_str_append_unsigned(&s, oid);
-		
-		RETURN_STRINGL(s.c, s.len, 0);
 	}
-	RETURN_LONG((long)oid);
+	PGSQL_RETURN_OID(oid);
 #else
 	Z_STRVAL_P(return_value) = (char *) PQoidStatus(pgsql_result);
 	if (Z_STRVAL_P(return_value)) {
-		RETURN_STRING((Z_STRVAL_P(return_value), 1);
+		RETURN_STRING(Z_STRVAL_P(return_value), 1);
 	}
 	RETURN_STRING(empty_string, 0);
 #endif
@@ -1646,14 +1650,7 @@ PHP_FUNCTION(pg_lo_create)
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
-	if (pgsql_oid > LONG_MAX) {
-		smart_str s = {0};
-
-		smart_str_append_unsigned(&s, pgsql_oid);
-		
-		RETURN_STRINGL(str.c, str.len, 0);
-	}
-	RETURN_LONG((long)pgsql_oid);
+	PGSQL_RETURN_OID(pgsql_oid);	
 }
 /* }}} */
 
@@ -2030,15 +2027,8 @@ PHP_FUNCTION(pg_lo_import)
 
 	if (oid == InvalidOid) {
 		RETURN_FALSE;
-	} 
-	if (oid > LONG_MAX) {
-		smart_str s = {0};
-
-		smart_str_append_unsigned(&s, oid);
-		
-		RETURN_STRINGL(s.c, s.len, 0);
 	}
-	RETURN_LONG((long)oid);
+	PGSQL_RETURN_OID(oid);
 }
 /* }}} */
 
@@ -4208,7 +4198,8 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), " AND ", sizeof(" AND ")-1 TSRMLS_CC))
 		goto cleanup;
 
-	smart_str_appendc(&querystr, ';');	
+	smart_str_appendc(&querystr, ';');
+	smart_str_0(&querystr);
 
 	if (do_exec(&querystr, PGRES_TUPLES_OK, pg_link, async) == 0)
 		ret = SUCCESS;
@@ -4330,6 +4321,7 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 		goto cleanup;
 
 	smart_str_appendc(&querystr, ';');
+	smart_str_0(&querystr);
 
 	pg_result = PQexec(pg_link, querystr.c);
 	if (PQresultStatus(pg_result) == PGRES_TUPLES_OK) {
