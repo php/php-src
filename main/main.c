@@ -854,6 +854,54 @@ static void core_globals_ctor(php_core_globals *core_globals)
 #endif
 
 
+int php_startup_extensions(zend_module_entry **ptr, int count)
+{
+	zend_module_entry **end = ptr+count;
+
+	while (ptr < end) {
+		if (*ptr) {
+			if (zend_startup_module(*ptr)==FAILURE) {
+				return FAILURE;
+			}
+		}
+		ptr++;
+	}
+	return SUCCESS;
+}
+
+int php_global_startup_extensions(zend_module_entry **ptr, int count)
+{
+	zend_module_entry **end = ptr+count;
+
+	while (ptr < end) {
+		if (*ptr) {
+			if ((*ptr)->global_startup_func && 
+					(*ptr)->global_startup_func()==FAILURE) {
+				return FAILURE;
+			}
+		}
+		ptr++;
+	}
+	return SUCCESS;
+}
+
+int php_global_shutdown_extensions(zend_module_entry **ptr, int count)
+{
+	zend_module_entry **end = ptr+count;
+
+	while (ptr < end) {
+		if (*ptr) {
+			if ((*ptr)->global_shutdown_func && 
+					(*ptr)->global_shutdown_func()==FAILURE) {
+				return FAILURE;
+			}
+		}
+		ptr++;
+	}
+	return SUCCESS;
+}
+
+
 int php_module_startup(sapi_module_struct *sf)
 {
 	zend_utility_functions zuf;
@@ -934,8 +982,8 @@ int php_module_startup(sapi_module_struct *sf)
 	zend_set_utility_values(&zuv);
 	php_startup_SAPI_content_types();
 
-	if (module_startup_modules() == FAILURE) {
-		php_printf("Unable to start modules\n");
+	if (php_startup_internal_extensions() == FAILURE) {
+		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
 	}
 	module_initialized = 1;

@@ -22,6 +22,7 @@
 
 
 #include "php.h"
+#include "main.h"
 #include "modules.h"
 #include "internal_functions_registry.h"
 #include "zend_compile.h"
@@ -62,7 +63,7 @@ unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
 unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
 
-zend_module_entry *php3_builtin_modules[] = {
+zend_module_entry *php_builtin_extensions[] = {
     phpext_dl_ptr,
     phpext_file_ptr,
     phpext_fsock_ptr,
@@ -89,52 +90,22 @@ zend_module_entry *php3_builtin_modules[] = {
 	phpext_assert_ptr
 };
 
+#define EXTCOUNT (sizeof(php_builtin_extensions)/sizeof(zend_module_entry *))
+
 	
-int module_startup_modules(void)
+int php_startup_internal_extensions(void)
 {
-	zend_module_entry **ptr = php3_builtin_modules, **end = ptr+(sizeof(php3_builtin_modules)/sizeof(zend_module_entry *));
-
-	while (ptr < end) {
-		if (*ptr) {
-			if (zend_startup_module(*ptr)==FAILURE) {
-				return FAILURE;
-			}
-		}
-		ptr++;
-	}
-	return SUCCESS;
+	return php_startup_extensions(php_builtin_extensions, EXTCOUNT);
 }
 
-int module_global_startup_modules(void)
+int php_global_startup_internal_extensions(void)
 {
-	zend_module_entry **ptr = php3_builtin_modules, **end = ptr+(sizeof(php3_builtin_modules)/sizeof(zend_module_entry *));
-
-	while (ptr < end) {
-		if (*ptr) {
-			if ((*ptr)->global_startup_func && 
-					(*ptr)->global_startup_func()==FAILURE) {
-				return FAILURE;
-			}
-		}
-		ptr++;
-	}
-	return SUCCESS;
+	return php_global_startup_extensions(php_builtin_extensions, EXTCOUNT);
 }
 
-int module_global_shutdown_modules(void)
+int php_global_shutdown_internal_extensions(void)
 {
-	zend_module_entry **ptr = php3_builtin_modules, **end = ptr+(sizeof(php3_builtin_modules)/sizeof(zend_module_entry *));
-
-	while (ptr < end) {
-		if (*ptr) {
-			if ((*ptr)->global_shutdown_func && 
-					(*ptr)->global_shutdown_func()==FAILURE) {
-				return FAILURE;
-			}
-		}
-		ptr++;
-	}
-	return SUCCESS;
+	return php_global_shutdown_extensions(php_builtin_extensions, EXTCOUNT);
 }
 
 
