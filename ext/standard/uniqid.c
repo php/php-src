@@ -69,8 +69,9 @@ PHP_FUNCTION(uniqid)
 #if defined(__CYGWIN__)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "You must use 'more entropy' under CYGWIN.");
 		return;
-#endif
+#else
 		usleep(1);
+#endif
 	}
 #endif
 	gettimeofday((struct timeval *) &tv, (struct timezone *) NULL);
