@@ -792,7 +792,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			zval_ptr_dtor(&z_error_type);
 			zval_ptr_dtor(&z_error_filename);
 			zval_ptr_dtor(&z_error_lineno);
-			if (ZVAL_REFCOUNT(z_context)==2) {
+			if (ZVAL_REFCOUNT(z_context) == 2) {
 				FREE_ZVAL(z_context);
 			}
 			break;
@@ -800,7 +800,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 	va_end(args);
 
-	if (type==E_PARSE) {
+	if (type == E_PARSE) {
 		EG(exit_status) = 255;
 		zend_init_compiler_data_structures(TSRMLS_C);
 	}
