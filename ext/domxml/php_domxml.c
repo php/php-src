@@ -3188,7 +3188,7 @@ PHP_FUNCTION(domxml_intdtd)
 }
 /* }}} */
 
-/* {{{ proto string domxml_dump_mem(object doc_handle [, int format])
+/* {{{ proto string domxml_dump_mem(object doc_handle [, int format][, encoding])
    Dumps document into string and optionally formats it */
 PHP_FUNCTION(domxml_dump_mem)
 {
@@ -3197,13 +3197,24 @@ PHP_FUNCTION(domxml_dump_mem)
 	xmlChar *mem;
 	int format = 0;
 	int size;
+	int encoding_len = 0;
+	char *encoding;
+	
 
-	DOMXML_PARAM_ONE(docp, id, le_domxmldocp,"|l", &format);
+	DOMXML_PARAM_THREE(docp, id, le_domxmldocp,"|ls", &format,&encoding,&encoding_len);
 	if (format) {
 		xmlKeepBlanksDefault(0);
-		xmlDocDumpFormatMemory(docp, &mem, &size, format);
+		if (encoding_len) {
+			xmlDocDumpFormatMemoryEnc(docp, &mem, &size, encoding, format );
+		} else {
+			xmlDocDumpFormatMemory(docp, &mem, &size, format);
+		}			
 	} else {
-		xmlDocDumpMemory(docp, &mem, &size);
+		if (encoding_len) {
+			xmlDocDumpMemoryEnc(docp, &mem, &size, encoding);
+		} else {
+			xmlDocDumpMemory(docp, &mem, &size);
+		}
 	}
 
 	if (!size) {
@@ -3254,7 +3265,7 @@ PHP_FUNCTION(domxml_dump_node)
 	int level = 0;
 	int format = 0;
 	
-	DOMXML_PARAM_THREE(docp, id, le_domxmldocp,"o|ll",&nodep,&format,&level);
+	DOMXML_PARAM_THREE(docp, id, le_domxmldocp,"o|lls",&nodep,&format,&level);
 	
 	DOMXML_GET_OBJ(elementp, nodep, le_domxmlnodep);
 
