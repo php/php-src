@@ -35,6 +35,10 @@
  * AUTHOR
  *   Dan Libby, aka danda  (dan@libby.com)
  * HISTORY
+ *   $Log$
+ *   Revision 1.9  2001/09/29 21:58:05  danda
+ *   adding cvs log to history section
+ *
  *   4/10/2001 -- danda -- initial introspection support
  * TODO
  * NOTES

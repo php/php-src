@@ -43,11 +43,11 @@ extern "C" {
 
 /* allow version to be specified via compile line define */
 #ifndef XMLRPC_LIB_VERSION
- #define XMLRPC_LIB_VERSION "0.50"
+ #define XMLRPC_LIB_VERSION "0.51"
 #endif
 
 /* this number, representing the date, must be increased each time the API changes */
-#define XMLRPC_API_NO 20010721
+#define XMLRPC_API_NO 20020623
 
 /* this string should be changed with each packaged release */
 #define XMLRPC_VERSION_STR "xmlrpc-epi v. " XMLRPC_LIB_VERSION
@@ -191,8 +191,8 @@ typedef enum _xmlrpc_error_code {
  * SOURCE
  */
 typedef enum _xmlrpc_version {
-   xmlrpc_version_none,          /* not a recognized vocabulary    */ 
-   xmlrpc_version_1_0,           /* xmlrpc 1.0 standard vocab      */ 
+   xmlrpc_version_none = 0,      /* not a recognized vocabulary    */ 
+   xmlrpc_version_1_0 = 1,       /* xmlrpc 1.0 standard vocab      */ 
    xmlrpc_version_simple = 2,    /* alt more readable vocab        */ 
    xmlrpc_version_danda = 2,     /* same as simple. legacy         */
 	xmlrpc_version_soap_1_1 = 3	/* SOAP. version 1.1              */
@@ -334,6 +334,10 @@ XMLRPC_VALUE XMLRPC_CreateVector(const char* id, XMLRPC_VECTOR_TYPE type);
 /* Cleanup values */
 void XMLRPC_CleanupValue(XMLRPC_VALUE value);
 
+/* Request error */
+XMLRPC_VALUE XMLRPC_RequestSetError (XMLRPC_REQUEST request, XMLRPC_VALUE error);
+XMLRPC_VALUE XMLRPC_RequestGetError (XMLRPC_REQUEST request);
+
 /* Copy values */
 XMLRPC_VALUE XMLRPC_CopyValue(XMLRPC_VALUE value);
 XMLRPC_VALUE XMLRPC_DupValueNew(XMLRPC_VALUE xSource);
@@ -392,6 +396,15 @@ XMLRPC_Callback XMLRPC_ServerFindMethod(XMLRPC_SERVER server, const char* callNa
 XMLRPC_VALUE XMLRPC_ServerCallMethod(XMLRPC_SERVER server, XMLRPC_REQUEST request, void* userData);
 
 #include "xmlrpc_introspection.h"
+
+/* Fault interrogation funcs */
+int XMLRPC_ValueIsFault (XMLRPC_VALUE value);
+int XMLRPC_ResponseIsFault(XMLRPC_REQUEST response);
+int XMLRPC_GetValueFaultCode (XMLRPC_VALUE value);
+int XMLRPC_GetResponseFaultCode(XMLRPC_REQUEST response);
+const char* XMLRPC_GetValueFaultString (XMLRPC_VALUE value);
+const char* XMLRPC_GetResponseFaultString (XMLRPC_REQUEST response);
+
 
 /* Public Utility funcs */
 XMLRPC_VALUE XMLRPC_UtilityCreateFault(int fault_code, const char* fault_string);

@@ -5,7 +5,7 @@
 */
 
 
-/************************************************************************
+/*-**********************************************************************
 * TODO:                                                                 *
 *  - [SOAP-ENC:position] read sparse arrays (and write?)                *
 *  - [SOAP-ENC:offset] read partially transmitted arrays  (and write?)  *

@@ -160,7 +160,7 @@ typedef struct _server_method {
 /*----------------------------------------------------------------------------
  * Functions
  */
-extern server_method* find_method(XMLRPC_SERVER server, const char* name);
+server_method* find_method(XMLRPC_SERVER server, const char* name);
 const char* type_to_str(XMLRPC_VALUE_TYPE type, XMLRPC_VECTOR_TYPE vtype);
  
 /*----------------------------------------------------------------------------

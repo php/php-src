@@ -68,7 +68,7 @@
 #endif
 #include "xmlrpc.h"
 
-#define PHP_EXT_VERSION "0.50"
+#define PHP_EXT_VERSION "0.51"
 
 /* You should tweak config.m4 so this symbol (or some else suitable)
 	gets defined.  */
@@ -87,6 +87,7 @@ function_entry xmlrpc_functions[] = {
 	PHP_FE(xmlrpc_encode_request,							NULL)
 	PHP_FE(xmlrpc_get_type,									NULL)
 	PHP_FE(xmlrpc_set_type,									first_args_force_ref)
+	PHP_FE(xmlrpc_is_fault,									NULL)
 	PHP_FE(xmlrpc_server_create,							NULL)
 	PHP_FE(xmlrpc_server_destroy,							NULL)
 	PHP_FE(xmlrpc_server_register_method,					NULL)
@@ -176,8 +177,13 @@ typedef struct _xmlrpc_callback_data {
 /* value types */
 #define OBJECT_TYPE_ATTR  "xmlrpc_type"
 #define OBJECT_VALUE_ATTR "scalar"
+#define OBJECT_VALUE_TS_ATTR "timestamp"
 
-
+/* faults */
+#define FAULT_CODE       "faultCode"
+#define FAULT_CODE_LEN   (sizeof(FAULT_CODE) - 1)
+#define FAULT_STRING     "faultString"
+#define FAULT_STRING_LEN (sizeof(FAULT_STRING) - 1)
 
 /***********************
 * forward declarations *
@@ -753,7 +759,7 @@ PHP_FUNCTION(xmlrpc_decode_request)
       zval* retval = decode_request_worker(xml, encoding, method);
       if(retval) {
          *return_value = *retval;
-         zval_copy_ctor(return_value);
+         FREE_ZVAL(retval);
       }
    }
 }
@@ -779,7 +785,7 @@ PHP_FUNCTION(xmlrpc_decode)
       zval* retval = decode_request_worker(arg1, arg2, NULL);
       if(retval) {
          *return_value = *retval;
-		 FREE_ZVAL(retval);
+         FREE_ZVAL(retval);
       }
    }
 }
@@ -1119,14 +1125,6 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 							out.xmlrpc_out.version = opts->version;
 						}
 					}
-
-					/* automagically determine output serialization type from request type */
-					if (out.b_auto_version) { 
-						XMLRPC_REQUEST_OUTPUT_OPTIONS opts = XMLRPC_RequestGetOutputOptions(xRequest);
-						if (opts) {
-							out.xmlrpc_out.version = opts->version;
-						}
-					}
                  /* set some required request hoojum */
                  XMLRPC_RequestSetOutputOptions(xResponse, &out.xmlrpc_out);
                  XMLRPC_RequestSetRequestType(xResponse, xmlrpc_request_response);
@@ -1315,7 +1313,7 @@ XMLRPC_VECTOR_TYPE xmlrpc_str_as_vector_type(const char* str)
  * note: this only works on strings, and only for date and base64,
  *       which do not have native php types. black magic lies herein.
  */
-int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE type)
+int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype)
 {
    int bSuccess = FAILURE;
 
@@ -1323,8 +1321,8 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE type)
     * base64 and datetime.  all other types have corresponding php types
     */
    if (Z_TYPE_P(value) == IS_STRING) {
-      if (type == xmlrpc_base64 || type == xmlrpc_datetime) {
-         const char* typestr = xmlrpc_type_as_str(type, xmlrpc_vector_none);
+      if (newtype == xmlrpc_base64 || newtype == xmlrpc_datetime) {
+         const char* typestr = xmlrpc_type_as_str(newtype, xmlrpc_vector_none);
          zval* type;
 
          MAKE_STD_ZVAL(type);
@@ -1333,8 +1331,30 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE type)
          Z_STRVAL_P(type) = estrdup(typestr);
          Z_STRLEN_P(type) = strlen(typestr);
 
-         convert_to_object(value);
-         bSuccess = zend_hash_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR), (void *) &type, sizeof(zval *), NULL);
+         if(newtype == xmlrpc_datetime) {
+            XMLRPC_VALUE v = XMLRPC_CreateValueDateTime_ISO8601(NULL, value->value.str.val);
+            if(v) {
+               time_t timestamp = XMLRPC_GetValueDateTime(v);
+               if(time) {
+                  pval* ztimestamp;
+
+                  MAKE_STD_ZVAL(ztimestamp);
+
+                  ztimestamp->type = IS_LONG;
+                  ztimestamp->value.lval = timestamp;
+
+                  convert_to_object(value);
+                  if(SUCCESS == zend_hash_update(value->value.obj.properties, OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR), (void *) &type, sizeof(zval *), NULL)) {
+                     bSuccess = zend_hash_update(value->value.obj.properties, OBJECT_VALUE_TS_ATTR, sizeof(OBJECT_VALUE_TS_ATTR), (void *) &ztimestamp, sizeof(zval *), NULL);
+                  }
+               }
+               XMLRPC_CleanupValue(v);
+            }
+         }
+         else {
+            convert_to_object(value);
+            bSuccess = zend_hash_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR), (void *) &type, sizeof(zval *), NULL);
+         }
       }
    }
    
@@ -1456,6 +1476,37 @@ PHP_FUNCTION(xmlrpc_get_type)
    
    RETURN_STRING((char*) xmlrpc_type_as_str(type, vtype), 1);
 }
+
+/* {{{ proto string xmlrpc_is_fault(array)
+   Determines if an array value represents an XMLRPC fault. */
+PHP_FUNCTION(xmlrpc_is_fault)
+{
+   zval* arg, **val;
+
+   if (!(ARG_COUNT(ht) == 1) || getParameters(ht, ARG_COUNT(ht), &arg) == FAILURE) {
+      WRONG_PARAM_COUNT; /* prints/logs a warning and returns */
+   }
+
+	if (Z_TYPE_P(arg) != IS_ARRAY) {
+		php_error(E_NOTICE, "%s() expects argument to be an array", get_active_function_name(TSRMLS_CC));
+	}
+   else {
+      /* The "correct" way to do this would be to call the xmlrpc
+       * library XMLRPC_ValueIsFault() func.  However, doing that
+       * would require us to create an xmlrpc value from the php
+       * array, which is rather expensive, especially if it was
+       * a big array.  Thus, we resort to this not so clever hackery.
+       */
+      if( zend_hash_find(Z_ARRVAL_P(arg), FAULT_CODE, FAULT_CODE_LEN + 1, (void**) &val) == SUCCESS &&
+          zend_hash_find(Z_ARRVAL_P(arg), FAULT_STRING, FAULT_STRING_LEN + 1, (void**) &val) == SUCCESS)
+      {
+         RETURN_TRUE;
+      }
+   }
+
+   RETURN_FALSE;
+}
+
 
 
 /*
