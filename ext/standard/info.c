@@ -213,7 +213,7 @@ PHPAPI void php_print_info(int flag)
 				}
 				PUTS("\"]</b></td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 				if ((*tmp)->type == IS_ARRAY) {
-					PUTS("<br><pre>");
+					PUTS("<pre>");
 					zend_print_zval_r(*tmp, 0);
 					PUTS("</pre>");
 				} else {
