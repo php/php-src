@@ -71,6 +71,7 @@
 #include "win32/php_registry.h"
 #endif
 #include "php_syslog.h"
+#include "Zend/zend_default_classes.h"
 
 #if PHP_SIGCHILD
 #include <sys/types.h>
@@ -102,16 +103,6 @@ php_core_globals core_globals;
 #else
 PHPAPI int core_globals_id;
 #endif
-
-#define ERROR_BUF_LEN	1024
-
-typedef struct {
-	char buf[ERROR_BUF_LEN];
-	char filename[ERROR_BUF_LEN];
-	uint lineno;
-} last_error_type;
-
-static last_error_type last_error;
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
@@ -573,6 +564,22 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_suppress_errors */
+PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC) {
+	PG(error_handling) = error_handling;
+	PG(exception_class) = exception_class;
+	if (PG(last_error_message)) {
+		free(PG(last_error_message));
+		PG(last_error_message) = NULL;
+	}
+	if (PG(last_error_file)) {
+		free(PG(last_error_file));
+		PG(last_error_file) = NULL;
+	}
+	PG(last_error_lineno) = 0;
+}
+/* }}} */
+
 /* {{{ php_error_cb
  extended error handling function */
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
@@ -582,11 +589,15 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	TSRMLS_FETCH();
 
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
-	if (PG(ignore_repeated_errors)) {
-		if (strncmp(last_error.buf, buffer, sizeof(last_error.buf))
+
+	/* check for repeated errors to be ignored */
+	if (PG(ignore_repeated_errors) && PG(last_error_message)) {
+		/* no check for PG(last_error_file) is needed since it cannot
+		 * be NULL if PG(last_error_message) is not NULL */
+		if (strcmp(PG(last_error_message), buffer)
 			|| (!PG(ignore_repeated_source)
-				&& ((last_error.lineno != error_lineno)
-					|| strncmp(last_error.filename, error_filename, sizeof(last_error.filename))))) {
+				&& ((PG(last_error_lineno) != error_lineno)
+					|| strcmp(PG(last_error_file), error_filename)))) {
 			display = 1;
 		} else {
 			display = 0;
@@ -594,9 +605,54 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	} else {
 		display = 1;
 	}
-	strlcpy(last_error.buf, buffer, sizeof(last_error.buf));
-	strlcpy(last_error.filename, error_filename, sizeof(last_error.filename));
-	last_error.lineno = error_lineno;
+
+	/* store the error if it has changed */
+	if (display) {
+		if (PG(last_error_message)) {
+			free(PG(last_error_message));
+		}
+		if (PG(last_error_file)) {
+			free(PG(last_error_file));
+		}
+		PG(last_error_message) = strdup(buffer);
+		PG(last_error_file) = strdup(error_filename);
+		PG(last_error_lineno) = error_lineno;
+	}
+
+	/* according to error handling mode, suppress error, throw exception or show it */
+	if (PG(error_handling)) {
+		switch (type) {
+			case E_ERROR:
+			case E_CORE_ERROR:
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
+			case E_PARSE:
+				/* fatal errors are real errors and cannot be made exceptions */
+				break;
+			default:
+				/* throw an exception if we are in EH_THROW mode
+				 * but DO NOT overwrite a pending excepption
+				 */
+				if (PG(error_handling) == EH_THROW && !EG(exception)) {
+					zval *tmp;
+					ALLOC_ZVAL(EG(exception));
+					Z_TYPE_P(EG(exception)) = IS_OBJECT;
+					object_init_ex(EG(exception), PG(exception_class) ? PG(exception_class) : zend_exception_get_default());
+					EG(exception)->refcount = 1;
+					EG(exception)->is_ref = 1;
+					MAKE_STD_ZVAL(tmp);
+					ZVAL_STRING(tmp, buffer, 0);
+					zend_hash_update(Z_OBJPROP_P(EG(exception)), "message", sizeof("message"), (void **) &tmp, sizeof(zval *), NULL);
+					MAKE_STD_ZVAL(tmp);
+					ZVAL_STRING(tmp, (char*)error_filename, 1);
+					zend_hash_update(Z_OBJPROP_P(EG(exception)), "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL);
+					MAKE_STD_ZVAL(tmp);
+					ZVAL_LONG(tmp, error_lineno);
+					zend_hash_update(Z_OBJPROP_P(EG(exception)), "line", sizeof("line"), (void **) &tmp, sizeof(zval *), NULL);
+				}
+				return;
+		}
+	}
 
 	/* display/log the error if necessary */
 	if (display && (EG(error_reporting) & type || (type & E_CORE))
@@ -1250,6 +1306,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	SG(request_info).argv=(char **)NULL;
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
 	PG(during_request_startup) = 0;
+	PG(last_error_message) = NULL;
+	PG(last_error_file) = NULL;
+	PG(last_error_lineno) = 0;
+	PG(error_handling) = EH_NORMAL;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
@@ -1409,6 +1469,12 @@ void php_module_shutdown(TSRMLS_D)
 #endif
 
 	module_initialized = 0;
+	if (PG(last_error_message)) {
+		free(PG(last_error_message));
+	}
+	if (PG(last_error_file)) {
+		free(PG(last_error_file));
+	}
 }
 /* }}} */
 
