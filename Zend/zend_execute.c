@@ -3431,7 +3431,7 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 		EX(function_state).function = (zend_function *) new_op_array;
 		EX(object) = NULL;
-		zend_switch_namespace(EG(global_namespace_ptr));
+		zend_switch_namespace(EG(global_namespace_ptr) TSRMLS_CC);
 		
 		zend_execute(new_op_array TSRMLS_CC);
 		
