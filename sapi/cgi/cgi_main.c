@@ -467,20 +467,20 @@ int main(int argc, char *argv[])
 	/* startup after we get the above ini override se we get things right */
 	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
 #ifdef ZTS
-	        tsrm_shutdown();
+		tsrm_shutdown();
 #endif
 		return FAILURE;
 	}
 
 #if FORCE_CGI_REDIRECT
 	/* check force_cgi after startup, so we have proper output */
-        if (cfg_get_long("cgi.force_redirect", &force_redirect) == FAILURE) {
-            force_redirect = 1;
-        }
+	if (cfg_get_long("cgi.force_redirect", &force_redirect) == FAILURE) {
+        force_redirect = 1;
+	}
 	if (cgi && force_redirect) {
-                if (cfg_get_string("cgi.redirect_status_env", &redirect_status_env) == FAILURE) {
-                    redirect_status_env = NULL;
-                }
+        if (cfg_get_string("cgi.redirect_status_env", &redirect_status_env) == FAILURE) {
+            redirect_status_env = NULL;
+        }
 		/* Apache will generate REDIRECT_STATUS,
 		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
 		 * redirect.so and installation instructions available from
@@ -488,11 +488,11 @@ int main(int argc, char *argv[])
 		 *   -- kk@netuse.de
 		 */
 		if (!getenv("REDIRECT_STATUS") 
-                    && !getenv ("HTTP_REDIRECT_STATUS")
-                    /* this is to allow a different env var to be configured
-                        in case some server does something different than above */
-                    && (!redirect_status_env || !getenv(redirect_status_env))
-                    ) {
+			&& !getenv ("HTTP_REDIRECT_STATUS")
+			/* this is to allow a different env var to be configured
+			    in case some server does something different than above */
+			&& (!redirect_status_env || !getenv(redirect_status_env))
+			) {
 			PUTS("<b>Security Alert!</b>  PHP CGI cannot be accessed directly.\n\
 \n\
 <P>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
@@ -505,12 +505,13 @@ binary accessible somewhere in your web tree, people will be able to circumvent\
 this is to define doc_root in your php.ini file to something other than your\n\
 top-level DOCUMENT_ROOT.  This way you can separate the part of your web space\n\n\
 which uses PHP from the normal part using .htaccess security.  If you do not have\n\
-any .htaccess restrictions anywhere on your site you can leave doc_root undefined.\n\
+any .htaccess restrictions anywhere on your site you can leave doc_root undefined.\n\n\n\
+If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
 \n");
 
 			/* remove that detailed explanation some time */
 #ifdef ZTS
-	                tsrm_shutdown();
+	        tsrm_shutdown();
 #endif
 
 			return FAILURE;
