@@ -11,7 +11,7 @@ $data = new foo();
 $obj_vars = get_object_vars($data);
 var_dump($obj_vars);
 ?>
---TEST--
+--EXPECT--
 array(1) {
   ["public"]=>
   string(6) "public"
