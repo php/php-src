@@ -137,11 +137,12 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	php_stream *stream=NULL, *datastream=NULL;
 	php_url *resource=NULL;
 	char tmp_line[512];
+	char ip[sizeof("123.123.123.123")];
 	unsigned short portno;
 	char *scratch;
 	int result;
 	int i, use_ssl, use_ssl_on_data=0;
-	char *tpath, *ttpath;
+	char *tpath, *ttpath, *hoststart=NULL;
 	size_t file_size = 0;
 
 	if (strchr(mode, 'a') || strchr(mode, '+')) {
@@ -331,13 +332,20 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		for (tpath += 4; *tpath && !isdigit((int) *tpath); tpath++);
 		if (!*tpath)
 			goto errexit;
-		/* skip over the host ip, we just assume it's the same */
+		/* skip over the host ip, to get the port */
+		hoststart = tpath;
 		for (i = 0; i < 4; i++) {
 			for (; isdigit((int) *tpath); tpath++);
 			if (*tpath != ',')
 				goto errexit;
+			*tpath='.';	
 			tpath++;
 		}
+		tpath[-1] = '\0';
+		memcpy(ip, hoststart, sizeof(ip));
+		ip[sizeof(ip)-1] = '\0';
+		hoststart = ip;
+		
 		/* pull out the MSB of the port */
 		portno = (unsigned short) strtol(tpath, &ttpath, 10) * 256;
 		if (ttpath == NULL) {
@@ -392,7 +400,10 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	}
 
 	/* open the data channel */
-	datastream = php_stream_sock_open_host(resource->host, portno, SOCK_STREAM, 0, 0);
+	if (hoststart == NULL) {
+		hoststart = resource->host;
+	}
+	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
 	if (datastream == NULL)
 		goto errexit;
 		
