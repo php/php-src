@@ -4,7 +4,7 @@ dnl
 dnl This file contains Zend specific autoconf functions.
 dnl
 
-AC_DEFUN(LIBZEND_BISON_CHECK,[
+AC_DEFUN([LIBZEND_BISON_CHECK],[
 
 if test "$YACC" != "bison -y"; then
     AC_MSG_WARN(You will need bison if you want to regenerate the Zend parser.)
@@ -19,7 +19,7 @@ fi
 
 ])
 
-AC_DEFUN(LIBZEND_BASIC_CHECKS,[
+AC_DEFUN([LIBZEND_BASIC_CHECKS],[
 
 AC_REQUIRE([AC_PROG_YACC])
 AC_REQUIRE([AC_PROG_CC])
@@ -58,12 +58,12 @@ dlfcn.h)
 AC_TYPE_SIZE_T
 AC_TYPE_SIGNAL
 
-AC_DEFUN(LIBZEND_LIBDL_CHECKS,[
+AC_DEFUN([LIBZEND_LIBDL_CHECKS],[
 AC_CHECK_LIB(dl, dlopen, [LIBS="-ldl $LIBS"])
 AC_CHECK_FUNC(dlopen,[AC_DEFINE(HAVE_LIBDL, 1,[ ])])
 ])
 
-AC_DEFUN(LIBZEND_DLSYM_CHECK,[
+AC_DEFUN([LIBZEND_DLSYM_CHECK],[
 dnl
 dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
 dnl
@@ -95,7 +95,7 @@ ZEND_FP_EXCEPT
 	
 ])
 
-AC_DEFUN(LIBZEND_ENABLE_DEBUG,[
+AC_DEFUN([LIBZEND_ENABLE_DEBUG],[
 
 AC_ARG_ENABLE(debug,
 [  --enable-debug          Compile with debugging symbols],[
@@ -106,7 +106,7 @@ AC_ARG_ENABLE(debug,
 
 ])
 
-AC_DEFUN(LIBZEND_OTHER_CHECKS,[
+AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
 PHP_ARG_WITH(zend-vm,[virtual machine dispatch method],
 [  --with-zend-vm=TYPE     Sets virtual machine dispatch methos. Type is
@@ -267,7 +267,7 @@ AC_MSG_RESULT(done)
 ])
 
 
-AC_DEFUN(LIBZEND_CPLUSPLUS_CHECKS,[
+AC_DEFUN([LIBZEND_CPLUSPLUS_CHECKS],[
 
 ])
 

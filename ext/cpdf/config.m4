@@ -1,6 +1,6 @@
 dnl $Id$
 
-AC_DEFUN(CPDF_JPEG_TEST,[
+AC_DEFUN([CPDF_JPEG_TEST],[
   AC_ARG_WITH(jpeg-dir,
   [  --with-jpeg-dir[=DIR]     CPDF: Set the path to libjpeg install prefix.],[
     for i in $withval /usr/local /usr; do
@@ -22,7 +22,7 @@ AC_DEFUN(CPDF_JPEG_TEST,[
   ],)
 ])
 
-AC_DEFUN(CPDF_TIFF_TEST,[
+AC_DEFUN([CPDF_TIFF_TEST],[
   AC_ARG_WITH(tiff-dir,
   [  --with-tiff-dir[=DIR]     CPDF: Set the path to libtiff install prefix.],[
     for i in $withval /usr/local /usr; do

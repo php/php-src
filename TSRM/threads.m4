@@ -30,7 +30,7 @@ dnl PTHREADS_FLAGS
 dnl
 dnl Set some magic defines to achieve POSIX threads conformance
 dnl
-AC_DEFUN(PTHREADS_FLAGS,[
+AC_DEFUN([PTHREADS_FLAGS],[
   if test -z "$host_alias" && test -n "$host"; then
     host_alias=$host
   fi
@@ -65,7 +65,7 @@ dnl PTHREADS_CHECK_COMPILE
 dnl
 dnl Check whether the current setup can use POSIX threads calls
 dnl
-AC_DEFUN(PTHREADS_CHECK_COMPILE, [
+AC_DEFUN([PTHREADS_CHECK_COMPILE], [
 AC_TRY_RUN( [
 #include <pthread.h>
 #include <stddef.h>
@@ -100,7 +100,7 @@ dnl  -pthreads         gcc (Solaris)
 dnl  -qthreaded        AIX cc V5
 dnl  -threads          gcc (HP-UX)
 dnl
-AC_DEFUN(PTHREADS_CHECK,[
+AC_DEFUN([PTHREADS_CHECK],[
 
 if test "$beos_threads" = "1"; then
   pthreads_working="yes"
@@ -154,7 +154,7 @@ fi
 ])dnl
 dnl
 dnl
-AC_DEFUN(PTHREADS_ASSIGN_VARS,[
+AC_DEFUN([PTHREADS_ASSIGN_VARS],[
 if test -n "$ac_cv_pthreads_lib"; then
   LIBS="$LIBS -l$ac_cv_pthreads_lib"
 fi

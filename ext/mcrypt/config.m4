@@ -2,7 +2,7 @@ dnl
 dnl $Id$
 dnl 
 
-AC_DEFUN(PHP_MCRYPT_CHECK_VERSION,[
+AC_DEFUN([PHP_MCRYPT_CHECK_VERSION],[
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS=-I$MCRYPT_DIR/include
   AC_MSG_CHECKING(for libmcrypt version)

@@ -2,7 +2,7 @@ dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
 
-AC_DEFUN(ZEND_FP_EXCEPT,[
+AC_DEFUN([ZEND_FP_EXCEPT],[
   AC_CACHE_CHECK(whether fp_except is defined, ac_cv_type_fp_except,[
     AC_TRY_COMPILE([
 #include <floatingpoint.h>
@@ -23,7 +23,7 @@ fp_except x = (fp_except) 0;
 dnl
 dnl Check for broken sprintf()
 dnl
-AC_DEFUN(AC_ZEND_BROKEN_SPRINTF,[
+AC_DEFUN([AC_ZEND_BROKEN_SPRINTF],[
   AC_CACHE_CHECK(whether sprintf is broken, ac_cv_broken_sprintf,[
     AC_TRY_RUN([main() {char buf[20];exit(sprintf(buf,"testing 123")!=11); }],[
       ac_cv_broken_sprintf=no
@@ -41,7 +41,7 @@ AC_DEFUN(AC_ZEND_BROKEN_SPRINTF,[
   AC_DEFINE_UNQUOTED(ZEND_BROKEN_SPRINTF, $ac_result, [Whether sprintf is broken])
 ])
 
-AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
+AC_DEFUN([AM_SET_LIBTOOL_VARIABLE],[
   LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
 ])
 
