@@ -215,7 +215,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	int retval = 1;
 	char *colon;
 
-	if((colon = memchr(name, ':', name_len)) && colon[1] == ':') {
+	if ((colon = memchr(name, ':', name_len)) && colon[1] == ':') {
 		/* class constant */
 		zend_class_entry **ce = NULL, *scope;
 		int class_name_len = colon-name;
@@ -223,7 +223,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 		char *constant_name = colon+2;
 		zval **ret_constant;
 
-		if(EG(in_execution)) {
+		if (EG(in_execution)) {
 			scope = EG(scope);
 		} else {
 			scope = CG(active_class_entry);
@@ -232,8 +232,8 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 		lookup_name = do_alloca(class_name_len+1);
 		zend_str_tolower_copy(lookup_name, name, class_name_len);
 		lookup_name[class_name_len] = '\0';
-		if(class_name_len == sizeof("self")-1 && strcmp(lookup_name, "self") == 0) {
-			if(scope) {
+		if (class_name_len == sizeof("self")-1 && strcmp(lookup_name, "self") == 0) {
+			if (scope) {
 				ce = &scope;
 			} else {
 				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
@@ -248,12 +248,12 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 				ce = &scope->parent;
 			}
 		} else {
-			if(zend_lookup_class(lookup_name, class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+			if (zend_lookup_class(lookup_name, class_name_len, &ce TSRMLS_CC) != SUCCESS) {
 				retval = 0;
 			}
 		}
 
-		if(retval && ce) {
+		if (retval && ce) {
 			if (zend_hash_find(&((*ce)->constants_table), constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
 				retval = 0;
 			}
@@ -261,7 +261,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 			retval = 0;
 		}
 
-		if(retval) {
+		if (retval) {
 			*result = **ret_constant;
 			zval_copy_ctor(result);
 		}

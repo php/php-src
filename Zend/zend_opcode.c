@@ -119,7 +119,7 @@ static void zend_cleanup_op_array_data(zend_op_array *op_array)
 
 ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
 {
-	if(function->type == ZEND_USER_FUNCTION) {
+	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
 	}	
 	return 0;
@@ -127,7 +127,7 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
 
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 {
-	if((*pce)->type == ZEND_USER_CLASS) {
+	if ((*pce)->type == ZEND_USER_CLASS) {
 		/* Clean all parts that can contain run-time data */
 		/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */

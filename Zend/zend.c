@@ -305,7 +305,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 				Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 			}
 			zend_printf("%s Object (", class_name?class_name:"Unknown Class");
-			if(class_name) {
+			if (class_name) {
 				efree(class_name);
 			}
 			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
@@ -358,7 +358,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 				}
 				zend_printf("%s Object\n", class_name?class_name:"Unknown Class");
-				if(class_name) {
+				if (class_name) {
 					efree(class_name);
 				}
 				if (Z_OBJ_HANDLER_P(expr, get_properties)) {
@@ -1017,7 +1017,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			if (EG(exception)) {
 				char ex_class_name[128];
-				if(Z_TYPE_P(EG(exception)) == IS_OBJECT) {
+				if (Z_TYPE_P(EG(exception)) == IS_OBJECT) {
 					strncpy(ex_class_name, Z_OBJ_CLASS_NAME_P(EG(exception)), 127);
 					ex_class_name[127] = '\0';
 				} else {
@@ -1043,7 +1043,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 					}
 					efree(params);
 					zval_ptr_dtor(&old_exception);
-					if(EG(exception)) {
+					if (EG(exception)) {
 						zval_ptr_dtor(&EG(exception));
 						EG(exception) = NULL;
 					}

@@ -1321,9 +1321,9 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 	zend_op *opline;
 
 		
-	if(is_method && function_name && function_name->op_type == IS_UNUSED) {
+	if (is_method && function_name && function_name->op_type == IS_UNUSED) {
 		/* clone */
-		if(argument_list->u.constant.value.lval != 0) {
+		if (argument_list->u.constant.value.lval != 0) {
 			zend_error(E_WARNING, "Clone method does not require arguments");
 		}
 		opline = &CG(active_op_array)->opcodes[function_name->u.constant.value.lval];

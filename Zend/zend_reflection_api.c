@@ -93,13 +93,13 @@ ZEND_FUNCTION(reflection_function)
 
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL) {
+	if (intern == NULL) {
 			return;
 	}
 	convert_to_string_ex(name);
 	zval_add_ref(name);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) name, sizeof(zval *), NULL);
-	if(zend_hash_find(EG(function_table), (char *)Z_STRVAL_PP(name), (int)(Z_STRLEN_PP(name) + 1), (void **)&fptr) == FAILURE) {
+	if (zend_hash_find(EG(function_table), (char *)Z_STRVAL_PP(name), (int)(Z_STRLEN_PP(name) + 1), (void **)&fptr) == FAILURE) {
 		zval *ex;
 		zval *tmp;
 		MAKE_STD_ZVAL(ex);
@@ -144,10 +144,10 @@ ZEND_FUNCTION(reflection_function_isinternal)
 	}
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL) {
+	if (intern == NULL) {
 			RETURN_FALSE;
 	}
-	if((fptr = intern->ptr) == NULL) {
+	if ((fptr = intern->ptr) == NULL) {
 			RETURN_FALSE;
 	}
 	RETURN_BOOL(fptr->type == ZEND_INTERNAL_FUNCTION);
@@ -164,10 +164,10 @@ ZEND_FUNCTION(reflection_function_isuserdefined)
 	}
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL) {
+	if (intern == NULL) {
 			return;
 	}
-	if((fptr = intern->ptr) == NULL) {
+	if ((fptr = intern->ptr) == NULL) {
 			return;
 	}
 	RETURN_BOOL(fptr->type == ZEND_USER_FUNCTION);
@@ -184,13 +184,13 @@ ZEND_FUNCTION(reflection_function_getfilename)
 	}
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL) {
+	if (intern == NULL) {
 			return;
 	}
-	if((fptr = intern->ptr) == NULL) {
+	if ((fptr = intern->ptr) == NULL) {
 			return;
 	}
-	if(fptr->type == ZEND_USER_FUNCTION) {
+	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_STRING(fptr->op_array.filename, 1);
 	}
 	RETURN_FALSE;
@@ -207,13 +207,13 @@ ZEND_FUNCTION(reflection_function_getstartline)
 	}
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL) {
+	if (intern == NULL) {
 			return;
 	}
-	if((fptr = intern->ptr) == NULL) {
+	if ((fptr = intern->ptr) == NULL) {
 			return;
 	}
-	if(fptr->type == ZEND_USER_FUNCTION) {
+	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_LONG(fptr->op_array.line_start);
 	}
 	RETURN_FALSE;
@@ -230,13 +230,13 @@ ZEND_FUNCTION(reflection_function_getendline)
 	}
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL) {
+	if (intern == NULL) {
 			RETURN_FALSE;
 	}
-	if((fptr = intern->ptr) == NULL) {
+	if ((fptr = intern->ptr) == NULL) {
 			RETURN_FALSE;
 	}
-	if(fptr->type == ZEND_USER_FUNCTION) {
+	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_LONG(fptr->op_array.line_end);
 	}
 	RETURN_FALSE;
@@ -253,13 +253,13 @@ ZEND_FUNCTION(reflection_function_getdoccomment)
 	}
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL) {
+	if (intern == NULL) {
 			RETURN_FALSE;
 	}
-	if((fptr = intern->ptr) == NULL) {
+	if ((fptr = intern->ptr) == NULL) {
 			RETURN_FALSE;
 	}
-	if(fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		RETURN_STRINGL(fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, 1);
 	}
 	RETURN_FALSE;
@@ -276,10 +276,10 @@ ZEND_FUNCTION(reflection_function_getstaticvariables)
 	}
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL) {
+	if (intern == NULL) {
 		RETURN_FALSE;
 	}
-	if((fptr = intern->ptr) == NULL || fptr->op_array.static_variables == NULL) {
+	if ((fptr = intern->ptr) == NULL || fptr->op_array.static_variables == NULL) {
 		RETURN_FALSE;
 	}
 	array_init(return_value);
@@ -302,11 +302,11 @@ ZEND_FUNCTION(reflection_function_invoke)
 	}
 
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
-	if(intern == NULL || (fptr = intern->ptr) == NULL) {
+	if (intern == NULL || (fptr = intern->ptr) == NULL) {
 		efree(params);
 		RETURN_FALSE;
 	}
-	if(fast_call_user_function(EG(function_table), NULL, NULL,
+	if (fast_call_user_function(EG(function_table), NULL, NULL,
 							   &retval_ptr, argc, params, 
 							   1, NULL, &fptr TSRMLS_CC) == SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);

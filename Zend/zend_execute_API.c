@@ -542,10 +542,10 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 				int found = FAILURE;
 
 				lc_class = zend_str_tolower_dup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
-				if(EG(active_op_array) && strcmp(lc_class, "self") == 0) {
+				if (EG(active_op_array) && strcmp(lc_class, "self") == 0) {
 					ce = &(EG(active_op_array)->scope);
 					found = (*ce != NULL?SUCCESS:FAILURE);
-				} else if(strcmp(lc_class, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
+				} else if (strcmp(lc_class, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
 					ce = &(EG(active_op_array)->scope->parent);
 					found = (*ce != NULL?SUCCESS:FAILURE);
 				} else {

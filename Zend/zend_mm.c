@@ -204,7 +204,7 @@ void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
 	zend_mm_free_block **free_list_bucket;
 	size_t index;
 
-	/* The max() can probably be optimized with an if() which checks more specific cases */
+	/* The max() can probably be optimized with an if () which checks more specific cases */
 	true_size = MAX(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
 
 	index = ZEND_MM_BUCKET_INDEX(true_size);
