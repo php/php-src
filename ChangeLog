@@ -1,3 +1,134 @@
+2004-01-28  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/EXPERIMENTAL
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_report.c
+      ext/mysqli/php_mysqli.h:
+      removed experimental status
+      fixed bug in mysqli_data_seek (thx to Andrey "Effendi" Hristov)
+      various prototype fixes
+      moved some methods to properties which are part of mysql struct
+      added function mysqli_get_server_version
+
+2004-01-28  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      FTP dirstream_read should not leave whitespace/newlines on dirents
+
+2004-01-28  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Tweak checks to detect some additional cases.
+      Reorder checks to make more sense.
+
+2004-01-28  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/dir.c
+      main/php_streams.h
+      main/streams/streams.c:
+      'Bug Fix': scandir, being a new function in PHP5 should have always been
+      wrapper aware.
+
+2004-01-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcre/php_pcre.c:
+      MFH: Fixed bug #27011 (64bit int/long confusion in preg_match*() functions)
+
+    * ext/pcre/php_pcre.c:
+      Fixed bug #27011 (64bit int/long confusion in preg_match*() functions).
+
+2004-01-28  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/array.c:
+      this should not belong to HEAD
+
+2004-01-28  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2004-01-28  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * sapi/apache_hooks/mod_php5.c:
+      Fix applies to apache_hooks sapi as well.  See bug #25753 for details.
+
+    * sapi/apache/mod_php5.c:
+      MFB - see bug #25753 for details
+
+    * (PHP_4_3)
+      sapi/apache/mod_php4.c:
+      If we have a text/html file with the executable bit set, we load up the
+      current ini, but if php's xbithack option is not set we forgot to restore
+      the previous ini settings potentially leaking ini settings from one
+      request
+      to the next.  Closes bug #25753 and a few others.
+
+2004-01-28  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/gd/gd_ctx.c
+      ext/gd/gd_ctx.c:
+      Bug fix: Images would be broken on big-endian machines because the putc
+      function wrote the first (instead of "the low order") byte. That resulted
+      in unexpected zero bytes.
+
+2004-01-28  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Error message fix
+      - Prevent inheritance of the same constant from two interfaces
+
+    * ZendEngine2/zend_compile.c:
+      Fixlets
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h:
+      Prevent classes from implementing interfaces that have the same function
+
+    * ZendEngine2/zend_execute.c:
+      Whitespace
+
+    * ZendEngine2/zend_compile.c:
+      Code relayout
+
+    * ZendEngine2/zend_execute_API.c:
+      Forward-port fix for timeouts under Windows
+
+2004-01-28  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      two fixes:
+      -oci_lob_load shouldn't reset LOB's length to zero
+      -Oracle feels bad, but reports no error, when trying to erase LOB with
+      offset bigger than LOB
+
+2004-01-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      ext/sybase/php_sybase_db.c:
+      MFH: Fixed bug #27058 (crash in sybase_connect() with 2 arguments).
+
+    * ext/sybase/php_sybase_db.c:
+      Fixed bug #27058 (crash in sybase_connect() with 2 arguments).
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gd.c:
+      MFH: Fixed bug #27056 (ints used instead of longs inside some GD functions)
+
+    * ext/gd/gd.c:
+      Fixed bug #27056 (ints used instead of longs inside some GD functions).
+
 2004-01-27  Andrey Hristov  <php@hristov.com>
 
     * ext/mysql/php_mysql.c:

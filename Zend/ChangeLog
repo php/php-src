@@ -1,3 +1,29 @@
+2004-01-28  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Tweak checks to detect some additional cases.
+      Reorder checks to make more sense.
+
+    * zend_compile.c:
+      - Error message fix
+      - Prevent inheritance of the same constant from two interfaces
+
+    * zend_compile.c:
+      Fixlets
+
+    * zend_compile.c
+      zend_compile.h:
+      Prevent classes from implementing interfaces that have the same function
+
+    * zend_execute.c:
+      Whitespace
+
+    * zend_compile.c:
+      Code relayout
+
+    * zend_execute_API.c:
+      Forward-port fix for timeouts under Windows
+
 2004-01-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_interfaces.c
