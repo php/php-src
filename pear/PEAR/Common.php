@@ -26,7 +26,10 @@ require_once 'PEAR/Config.php';
 
 // {{{ constants and globals
 
-define('PEAR_COMMON_PACKAGE_NAME_PREG', '/^([A-Z][a-zA-Z0-9_]+|[a-z][a-z0-9_]+)$/');
+define('PEAR_COMMON_PACKAGE_NAME_PREG', '/^[A-Za-z][a-zA-Z0-9_]+$/');
+
+// XXX far from perfect :-)
+define('PEAR_COMMON_PACKAGE_DOWNLOAD_PREG', '/^([A-Za-z][a-zA-Z0-9_]+)(-([.0-9a-zA-Z]+))?$/');
 
 /**
  * List of temporary files and directories registered by
@@ -214,11 +217,11 @@ class PEAR_Common extends PEAR
      *
      * @access public
      */
-    function log($level, $msg)
+    function log($level, $msg, $append_crlf = true)
     {
         if ($this->debug >= $level) {
             if (is_object($this->ui)) {
-                $this->ui->log($msg);
+                $this->ui->log($msg, $append_crlf);
             } else {
                 print "$msg\n";
             }
@@ -329,6 +332,11 @@ class PEAR_Common extends PEAR
                 $elem_start = '_element_start_'. $vs;
                 $elem_end = '_element_end_'. $vs;
                 $cdata = '_pkginfo_cdata_'. $vs;
+                if (!method_exists($this, $elem_start) ||
+                      !method_exists($this, $elem_end) ||
+                      !method_exists($this, $cdata)) {
+                    $this->raiseError("No handlers for package.xml version $attribs[version]");
+                }
                 xml_set_element_handler($xp, $elem_start, $elem_end);
                 xml_set_character_data_handler($xp, $cdata);
                 break;
@@ -699,7 +707,7 @@ class PEAR_Common extends PEAR
                 break;
             }
         }
-        $tmpdir = System::mkTemp('-d pear');
+        $tmpdir = System::mkTemp(array('-d', 'pear'));
         $this->addTempFile($tmpdir);
         if (!$xml || !$tar->extractList(array($xml), $tmpdir)) {
             return $this->raiseError('could not extract the package.xml file');
@@ -924,6 +932,9 @@ class PEAR_Common extends PEAR
                 if (isset($dep['version'])) {
                     $ret .= " version=\"$dep[version]\"";
                 }
+                if (isset($dep['optional'])) {
+                    $ret .= " optional=\"$dep[optional]\"";
+                }
                 if (isset($dep['name'])) {
                     $ret .= ">$dep[name]</dep>\n";
                 } else {
@@ -1081,7 +1092,7 @@ class PEAR_Common extends PEAR
             $i = 1;
             foreach ($info['deps'] as $d) {
                 if (empty($d['type'])) {
-                    $errors[] = "depenency $i: missing type";
+                    $errors[] = "dependency $i: missing type";
                 } elseif (!in_array($d['type'], $_PEAR_Common_dependency_types)) {
                     $errors[] = "dependency $i: invalid type, should be one of: ".implode(' ', $_PEAR_Common_depenency_types);
                 }
@@ -1089,6 +1100,11 @@ class PEAR_Common extends PEAR
                     $errors[] = "dependency $i: missing relation";
                 } elseif (!in_array($d['rel'], $_PEAR_Common_dependency_relations)) {
                     $errors[] = "dependency $i: invalid relation, should be one of: ".implode(' ', $_PEAR_Common_dependency_relations);
+                }
+                if (!empty($d['optional'])) {
+                    if (!in_array($d['optional'], array('yes', 'no'))) {
+                        $errors[] = "dependency $i: invalid relation optional attribute, should be one of: yes no";
+                    }
                 }
                 if ($d['rel'] != 'has' && empty($d['version'])) {
                     $warnings[] = "dependency $i: missing version";
@@ -1347,6 +1363,30 @@ class PEAR_Common extends PEAR
             "used_classes" => array_diff(array_keys($used_classes), $nodeps),
             "inheritance" => $extends,
             );
+    }
+
+    // }}}
+    // {{{  betterStates()
+
+    /**
+     * Return an array containing all of the states that are more stable than
+     * or equal to the passed in state
+     *
+     * @param string Release state
+     * @param boolean Determines whether to include $state in the list
+     * @return false|array False if $state is not a valid release state
+     */
+    function betterStates($state, $include = false)
+    {
+        static $states = array('snapshot', 'devel', 'alpha', 'beta', 'stable');
+        $i = array_search($state, $states);
+        if ($i === false) {
+            return false;
+        }
+        if ($include) {
+            $i--;
+        }
+        return array_slice($states, $i + 1);
     }
 
     // }}}
@@ -1659,7 +1699,7 @@ class PEAR_Common extends PEAR
         }
         $bytes = 0;
         if ($callback) {
-            call_user_func($callback, 'start', $length);
+            call_user_func($callback, 'start', array(basename($dest_file), $length));
         }
         while ($data = @fread($fp, 1024)) {
             $bytes += strlen($data);
@@ -1680,6 +1720,173 @@ class PEAR_Common extends PEAR
             call_user_func($callback, 'done', $bytes);
         }
         return $dest_file;
+    }
+
+    // }}}
+    // {{{ sortPkgDeps()
+
+    /**
+     * Sort a list of arrays of array(downloaded packagefilename) by dependency.
+     *
+     * It also removes duplicate dependencies
+     * @param array
+     * @param boolean Sort packages in reverse order if true
+     * @return array array of array(packagefilename, package.xml contents)
+     */
+    function sortPkgDeps(&$packages, $uninstall = false)
+    {
+        $ret = array();
+        if ($uninstall) {
+            foreach($packages as $packageinfo) {
+                $ret[] = array('info' => $packageinfo);
+            }
+        } else {
+            foreach($packages as $packagefile) {
+                if (!is_array($packagefile)) {
+                    $ret[] = array('file' => $packagefile,
+                                   'info' => $a = $this->infoFromAny($packagefile),
+                                   'pkg' => $a['package']);
+                } else {
+                    $ret[] = $packagefile;
+                }
+            }
+        }
+        $checkdupes = array();
+        $newret = array();
+        foreach($ret as $i => $p) {
+            if (!isset($checkdupes[$p['info']['package']])) {
+                $checkdupes[$p['info']['package']][] = $i;
+                $newret[] = $p;
+            }
+        }
+
+        $func = $uninstall ? '_sortPkgDepsRev' : '_sortPkgDeps';
+        usort($newret, array('PEAR_Common', $func));
+        $packages = $newret;
+    }
+
+    // }}}
+    // {{{ _sortPkgDeps()
+
+    /**
+     * Compare two package's package.xml, and sort
+     * so that dependencies are installed first
+     *
+     * This is a crude compare, real dependency checking is done on install.
+     * The only purpose this serves is to make the command-line
+     * order-independent (you can list a dependent package first, and
+     * installation occurs in the order required)
+     * @access private
+     */
+    function _sortPkgDeps($p1, $p2)
+    {
+        $p1name = $p1['info']['package'];
+        $p2name = $p2['info']['package'];
+        $p1deps = PEAR_Common::_getPkgDeps($p1);
+        $p2deps = PEAR_Common::_getPkgDeps($p2);
+        if (!count($p1deps) && !count($p2deps)) {
+            return 0; // order makes no difference
+        }
+        if (!count($p1deps)) {
+            return -1; // package 2 has dependencies, package 1 doesn't
+        }
+        if (!count($p2deps)) {
+            return 1; // package 2 has dependencies, package 1 doesn't
+        }
+        // both have dependencies
+        if (in_array($p1name, $p2deps)) {
+            return -1; // put package 1 first
+        }
+        if (in_array($p2name, $p1deps)) {
+            return 1; // put package 2 first
+        }
+        // doesn't really matter if neither depends on the other
+        return 0;
+    }
+
+    // }}}
+    // {{{ _sortPkgDepsRev()
+
+    /**
+     * Compare two package's package.xml, and sort
+     * so that dependencies are uninstalled last
+     *
+     * This is a crude compare, real dependency checking is done on uninstall.
+     * The only purpose this serves is to make the command-line
+     * order-independent (you can list a dependency first, and
+     * uninstallation occurs in the order required)
+     * @access private
+     */
+    function _sortPkgDepsRev($p1, $p2)
+    {
+        $p1name = $p1['info']['package'];
+        $p2name = $p2['info']['package'];
+        $p1deps = PEAR_Common::_getRevPkgDeps($p1);
+        $p2deps = PEAR_Common::_getRevPkgDeps($p2);
+        if (!count($p1deps) && !count($p2deps)) {
+            return 0; // order makes no difference
+        }
+        if (!count($p1deps)) {
+            return 1; // package 2 has dependencies, package 1 doesn't
+        }
+        if (!count($p2deps)) {
+            return -1; // package 2 has dependencies, package 1 doesn't
+        }
+        // both have dependencies
+        if (in_array($p1name, $p2deps)) {
+            return 1; // put package 1 last
+        }
+        if (in_array($p2name, $p1deps)) {
+            return -1; // put package 2 last
+        }
+        // doesn't really matter if neither depends on the other
+        return 0;
+    }
+
+    // }}}
+    // {{{ _getPkgDeps()
+
+    /**
+     * get an array of package dependency names
+     * @access private
+     */
+    function _getPkgDeps($p)
+    {
+        if (!isset($p['info']['releases'])) {
+            return array();
+        }
+        $rel = array_shift($p['info']['releases']);
+        if (!isset($rel['deps'])) {
+            return array();
+        }
+        $ret = array();
+        foreach($rel['deps'] as $dep) {
+            if ($dep['type'] == 'pkg') {
+                $ret[] = $dep['name'];
+            }
+        }
+        return $ret;
+    }
+
+    // }}}
+    // {{{ _getRevPkgDeps()
+
+    /**
+     * get an array of package dependency names for uninstall
+     * @access private
+     */
+    function _getRevPkgDeps($p)
+    {
+        if (!isset($p['info']['release_deps'])) {
+            return array();
+        }
+        $ret = array();
+        foreach($p['info']['release_deps'] as $dep) {
+            if ($dep['type'] == 'pkg') {
+                $ret[] = $dep['name'];
+            }
+        }
+        return $ret;
     }
 
     // }}}

@@ -41,6 +41,11 @@ $GLOBALS['_System_temp_files'] = array();
 *    print "could not delete file1 or dir1";
 * }
 *
+* In case you need to to pass file names with spaces,
+* pass the params as an array:
+*
+* System::rm(array('-r', $file1, $dir1));
+*
 * @package  System
 * @author   Tomas V.V.Cox <cox@idecnet.com>
 * @version  $Revision$
@@ -123,16 +128,16 @@ class System
         }
         closedir($dir);
         sort($list);
+        if ($aktinst < $maxinst || $maxinst == 0) {
         foreach($list as $val) {
             $path = $sPath . DIRECTORY_SEPARATOR . $val;
             if (is_dir($path)) {
-                if ($aktinst < $maxinst || $maxinst == 0) {
                     $tmp = System::_dirToStruct($path, $maxinst, $aktinst+1);
                     $struct = array_merge_recursive($tmp, $struct);
-                }
             } else {
                 $struct['files'][] = $path;
             }
+        }
         }
         return $struct;
     }
@@ -444,6 +449,83 @@ class System
             }
         }
         return $fallback;
+    }
+
+    /**
+    * The "find" command
+    *
+    * Usage:
+    *
+    * System::find($dir);
+    * System::find("$dir -type d");
+    * System::find("$dir -type f");
+    * System::find("$dir -name *.php");
+    * System::find("$dir -name *.php -name *.htm*");
+    * System::find("$dir -maxdepth 1");
+    *
+    * Params implmented:
+    * $dir            -> Start the search at this directory
+    * -type d         -> return only directories
+    * -type f         -> return only files
+    * -maxdepth <n>   -> max depth of recursion
+    * -name <pattern> -> search pattern (bash style). Multiple -name param allowed
+    *
+    * @param  mixed Either array or string with the command line
+    * @return array Array of found files
+    *
+    */
+    function find($args)
+    {
+        if (!is_array($args)) {
+            $args = preg_split('/\s+/', $args, -1, PREG_SPLIT_NO_EMPTY);
+        }
+        $dir = array_shift($args);
+        $patterns = array();
+        $depth = 0;
+        $do_files = $do_dirs = true;
+        for ($i = 0; $i < count($args); $i++) {
+            switch ($args[$i]) {
+                case '-type':
+                    if (in_array($args[$i+1], array('d', 'f'))) {
+                        if ($args[$i+1] == 'd') {
+                             $do_files = false;
+                        } else {
+                            $do_dirs = false;
+                        }
+                    }
+                    $i++;
+                    break;
+                case '-name':
+                    $patterns[] = "(" . preg_replace(array('/\./', '/\*/'),
+                                                     array('\.', '.*'),
+                                                     $args[$i+1])
+                                      . ")";
+                    $i++;
+                    break;
+                case '-maxdepth':
+                    $depth = $args[$i+1];
+                    break;
+            }
+        }
+        $path = System::_dirToStruct($dir, $depth);
+        if ($do_files && $do_dirs) {
+            $files = array_merge($path['files'], $path['dirs']);
+        } elseif ($do_dirs) {
+            $files = $path['dirs'];
+        } else {
+            $files = $path['files'];
+        }
+        if (count($patterns)) {
+            $patterns = implode('|', $patterns);
+            $ret = array();
+            for ($i = 0; $i < count($files); $i++) {
+                if (preg_match("#^$patterns\$#", $files[$i])) {
+                    $ret[] = $files[$i];
+                }
+            }
+            return $ret;
+        }
+        return $files;
     }
 }
 ?>

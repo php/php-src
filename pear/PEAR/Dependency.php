@@ -26,6 +26,7 @@ define('PEAR_DEPENDENCY_CONFLICT',       -2);
 define('PEAR_DEPENDENCY_UPGRADE_MINOR',  -3);
 define('PEAR_DEPENDENCY_UPGRADE_MAJOR',  -4);
 define('PEAR_DEPENDENCY_BAD_DEPENDENCY', -5);
+define('PEAR_DEPENDENCY_MISSING_OPTIONAL', -6);
 
 /**
  * Dependency check for PEAR packages
@@ -54,13 +55,16 @@ class PEAR_Dependency
     * This method maps the XML dependency definition to the
     * corresponding one from PEAR_Dependency
     *
+    * <pre>
     * $opts => Array
     *    (
     *        [type] => pkg
     *        [rel] => ge
     *        [version] => 3.4
     *        [name] => HTML_Common
+    *        [optional] => false
     *    )
+    * </pre>
     *
     * @param  string Error message
     * @param  array  Options
@@ -71,13 +75,15 @@ class PEAR_Dependency
         $rel = isset($opts['rel']) ? $opts['rel'] : 'has';
         $req = isset($opts['version']) ? $opts['version'] : null;
         $name = isset($opts['name']) ? $opts['name'] : null;
+        $opt = (isset($opts['optional']) && $opts['optional'] == 'yes') ?
+            $opts['optional'] : null;
         $errmsg = '';
         switch ($opts['type']) {
             case 'pkg':
-                return $this->checkPackage($errmsg, $name, $req, $rel);
+                return $this->checkPackage($errmsg, $name, $req, $rel, $opt);
                 break;
             case 'ext':
-                return $this->checkExtension($errmsg, $name, $req, $rel);
+                return $this->checkExtension($errmsg, $name, $req, $rel, $opt);
                 break;
             case 'php':
                 return $this->checkPHP($errmsg, $req, $rel);
@@ -105,10 +111,12 @@ class PEAR_Dependency
      * @param string $name      Name of the package to test
      * @param string $version   The package version required
      * @param string $relation  How to compare versions with eachother
+     * @param bool   $opt       Whether the relationship is optional
      *
      * @return mixed bool false if no error or the error string
      */
-    function checkPackage(&$errmsg, $name, $req = null, $relation = 'has')
+    function checkPackage(&$errmsg, $name, $req = null, $relation = 'has',
+                          $opt = false)
     {
         if (substr($relation, 0, 2) == 'v.') {
             $relation = substr($relation, 2);
@@ -116,6 +124,10 @@ class PEAR_Dependency
         switch ($relation) {
             case 'has':
                 if (!$this->registry->packageExists($name)) {
+                    if ($opt) {
+                        $errmsg = "package `$name' is recommended to utilize some features.";
+                        return PEAR_DEPENDENCY_MISSING_OPTIONAL;
+                    }
                     $errmsg = "requires package `$name'";
                     return PEAR_DEPENDENCY_MISSING;
                 }
@@ -136,10 +148,14 @@ class PEAR_Dependency
                 if (!$this->registry->packageExists($name)
                     || !version_compare("$version", "$req", $relation))
                 {
+                    $code = $this->codeFromRelation($relation, $version, $req);
+                    if ($opt) {
+                        $errmsg = "package `$name' version $req is recommended to utilize some features.";
+                        return PEAR_DEPENDENCY_MISSING_OPTIONAL;
+                    }
                     $errmsg = "requires package `$name' " .
                         $this->signOperator($relation) . " $req";
-                    $code = $this->codeFromRelation($relation, $version, $req);
-                    return PEAR_DEPENDENCY_MISSING;
+                    return $code;
                 }
                 return false;
         }
@@ -151,11 +167,12 @@ class PEAR_Dependency
      * Check package dependencies on uninstall
      *
      * @param string $error     The resultant error string
+     * @param string $warning   The resultant warning string
      * @param string $name      Name of the package to test
      *
      * @return bool true if there were errors
      */
-    function checkPackageUninstall(&$error, $package)
+    function checkPackageUninstall(&$error, &$warning, $package)
     {
         $error = null;
         $packages = $this->registry->listPackages();
@@ -169,9 +186,13 @@ class PEAR_Dependency
             }
             foreach ($deps as $dep) {
                 if ($dep['type'] == 'pkg' && strcasecmp($dep['name'], $package) == 0) {
+                    if (isset($dep['optional']) && $dep['optional'] == 'yes') {
+                        $warning .= "\nWarning: Package '$pkg' optionally depends on '$package'";
+                    } else {
                     $error .= "Package '$pkg' depends on '$package'\n";
                 }
             }
+        }
         }
         return ($error) ? true : false;
     }
@@ -182,13 +203,19 @@ class PEAR_Dependency
      * @param string $name        Name of the extension to test
      * @param string $req_ext_ver Required extension version to compare with
      * @param string $relation    How to compare versions with eachother
+     * @param bool   $opt       Whether the relationship is optional
      *
      * @return mixed bool false if no error or the error string
      */
-    function checkExtension(&$errmsg, $name, $req = null, $relation = 'has')
+    function checkExtension(&$errmsg, $name, $req = null, $relation = 'has',
+        $opt = false)
     {
         // XXX (ssb): could we avoid loading the extension here?
         if (!PEAR::loadExtension($name)) {
+            if ($opt) {
+                $errmsg = "'$name' PHP extension is recommended to utilize some features";
+                return PEAR_DEPENDENCY_MISSING_OPTIONAL;
+            }
             $errmsg = "'$name' PHP extension is not installed";
             return PEAR_DEPENDENCY_MISSING;
         }
@@ -202,9 +229,13 @@ class PEAR_Dependency
             // Force params to be strings, otherwise the comparation will fail (ex. 0.9==0.90)
             settype($req, "string");
             if (!version_compare("$ext_ver", "$req", $operator)) {
-                $retval = "'$name' PHP extension version " .
+                $errmsg = "'$name' PHP extension version " .
                     $this->signOperator($operator) . " $req is required";
                 $code = $this->codeFromRelation($relation, $ext_ver, $req);
+                if ($opt) {
+                    $errmsg = "'$name' PHP extension version $req is recommended to utilize some features";
+                    return PEAR_DEPENDENCY_MISSING_OPTIONAL;
+                }
             }
         }
         return $code;

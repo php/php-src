@@ -16,22 +16,22 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)
 REM ----------------------------------------------------------------------
 REM
-REM  $Id: pear.bat,v 1.15 2003/06/10 20:03:44 imajes Exp $
+REM  $Id: pear.bat,v 1.17 2003/08/29 21:21:27 cellog Exp $
 
 REM change this lines to match the paths of your system
 REM -------------------
 
 @ECHO OFF
 :: Check PEAR global ENV, set them if they do not exist
-IF "%PHP_PEAR_INSTALL_DIR%"=="" SET PHP_PEAR_INSTALL_DIR=@include_path@
-IF "%PHP_PEAR_BIN_DIR%"=="" SET PHP_PEAR_BIN_DIR=@bin_dir@
-IF "%PHP_PEAR_PHP_BIN%"=="" SET  PHP_PEAR_PHP_BIN=@php_bin@
+IF "%PHP_PEAR_INSTALL_DIR%"=="" SET "PHP_PEAR_INSTALL_DIR=@include_path@"
+IF "%PHP_PEAR_BIN_DIR%"=="" SET "PHP_PEAR_BIN_DIR=@bin_dir@"
+IF "%PHP_PEAR_PHP_BIN%"=="" SET "PHP_PEAR_PHP_BIN=@php_bin@"
  
 :: Check Folders and files
-IF NOT EXIST %PHP_PEAR_INSTALL_DIR% GOTO PEAR_INSTALL_ERROR
-IF NOT EXIST %PHP_PEAR_INSTALL_DIR%\pearcmd.php GOTO PEAR_INSTALL_ERROR2
-IF NOT EXIST %PHP_PEAR_BIN_DIR% GOTO PEAR_BIN_ERROR
-IF NOT EXIST %PHP_PEAR_PHP_BIN% GOTO PEAR_PHPBIN_ERROR
+IF NOT EXIST "%PHP_PEAR_INSTALL_DIR%" GOTO PEAR_INSTALL_ERROR
+IF NOT EXIST "%PHP_PEAR_INSTALL_DIR%\pearcmd.php" GOTO PEAR_INSTALL_ERROR2
+IF NOT EXIST "%PHP_PEAR_BIN_DIR%" GOTO PEAR_BIN_ERROR
+IF NOT EXIST "%PHP_PEAR_PHP_BIN%" GOTO PEAR_PHPBIN_ERROR
 :: launch pearcmd
 GOTO RUN
 :PEAR_INSTALL_ERROR
@@ -64,6 +64,6 @@ ECHO The current value is:
 ECHO %PHP_PEAR_PHP_BIN%
 GOTO END
 :RUN
-%PHP_PEAR_PHP_BIN% -C -d output_buffering=1 -d include_path=%PHP_PEAR_INSTALL_DIR% -f %PHP_PEAR_INSTALL_DIR%\pearcmd.php -- %1 %2 %3 %4 %5 %6 %7 %8 %9
+"%PHP_PEAR_PHP_BIN%" -C -d output_buffering=1 -d include_path="%PHP_PEAR_INSTALL_DIR%" -f "%PHP_PEAR_INSTALL_DIR%\pearcmd.php" -- %1 %2 %3 %4 %5 %6 %7 %8 %9
 :END
 @ECHO ON

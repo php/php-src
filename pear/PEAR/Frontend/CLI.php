@@ -472,9 +472,12 @@ class PEAR_Frontend_CLI extends PEAR
     // {{{ log(text)
 
 
-    function log($text)
+    function log($text, $append_crlf = true)
     {
+        if ($append_crlf) {
         return $this->_displayLine($text);
+    }
+        return $this->_display($text);
     }
 
 

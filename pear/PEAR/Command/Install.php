@@ -20,7 +20,6 @@
 
 require_once "PEAR/Command/Common.php";
 require_once "PEAR/Installer.php";
-require_once "Console/Getopt.php";
 
 /**
  * PEAR commands for installation or deinstallation/upgrading of
@@ -68,6 +67,14 @@ class PEAR_Command_Install extends PEAR_Command_Common
                     ),
                 'ignore-errors' => array(
                     'doc' => 'force install even if there were errors',
+                    ),
+                'alldeps' => array(
+                    'shortopt' => 'a',
+                    'doc' => 'install all required and optional dependencies',
+                    ),
+                'onlyreqdeps' => array(
+                    'shortopt' => 'o',
+                    'doc' => 'install all required dependencies',
                     ),
                 ),
             'doc' => '<package> ...
@@ -122,6 +129,14 @@ four ways of specifying packages.
                     ),
                 'ignore-errors' => array(
                     'doc' => 'force install even if there were errors',
+                    ),
+                'alldeps' => array(
+                    'shortopt' => 'a',
+                    'doc' => 'install all required and optional dependencies',
+                    ),
+                'onlyreqdeps' => array(
+                    'shortopt' => 'o',
+                    'doc' => 'install all required dependencies',
                     ),
                 ),
             'doc' => '<package> ...
@@ -240,7 +255,7 @@ package if needed.
             $this->installer = &new PEAR_Installer($this->ui);
         }
         if ($command == 'upgrade') {
-            $options[$command] = true;
+            $options['upgrade'] = true;
         }
         if ($command == 'upgrade-all') {
             include_once "PEAR/Remote.php";
@@ -273,9 +288,25 @@ package if needed.
                 $this->ui->outputData(array('data' => "Will upgrade $package"), $command);
             }
         }
-        foreach ($params as $pkg) {
-            $bn = basename($pkg);
-            $info = $this->installer->install($pkg, $options, $this->config);
+        $errors = array();
+        $downloaded = array();
+        $this->installer->download($params, $options, $this->config, $downloaded,
+                                   $errors);
+        if ($command != 'upgrade-all') {
+            for ($i = 0; $i < count($params); $i++) {
+                $params[$i] = $this->installer->extractDownloadFileName($params[$i], $_tmp);
+            }
+        }
+        if (count($errors)) {
+            $err['data'] = array($errors);
+            $err['headline'] = 'Install Errors';
+            $this->ui->outputData($err);
+            return $this->raiseError("$command failed");
+        }
+        $this->installer->sortPkgDeps($downloaded);
+        foreach ($downloaded as $pkg) {
+            $bn = basename($pkg['file']);
+            $info = $this->installer->install($pkg['file'], $options, $this->config);
             if (is_array($info)) {
                 if ($this->config->get('verbose') > 0) {
                     $label = "$info[package] $info[version]";
@@ -303,6 +334,24 @@ package if needed.
         if (sizeof($params) < 1) {
             return $this->raiseError("Please supply the package(s) you want to uninstall");
         }
+        include_once 'PEAR/Registry.php';
+        $reg = new PEAR_Registry($this->config->get('php_dir'));
+        $newparams = array();
+        $badparams = array();
+        foreach ($params as $pkg) {
+            $info = $reg->packageInfo($pkg);
+            if ($info === null) {
+                $badparams[] = $pkg;
+            } else {
+                $newparams[] = $info;
+            }
+        }
+        PEAR_Common::sortPkgDeps($newparams, true);
+        $params = array();
+        foreach($newparams as $info) {
+            $params[] = $info['info']['package'];
+        }
+        $params = array_merge($params, $badparams);
         foreach ($params as $pkg) {
             if ($this->installer->uninstall($pkg, $options)) {
                 if ($this->config->get('verbose') > 0) {
