@@ -1,3 +1,46 @@
+2003-10-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Add oo support function zend_class_implements()
+
+    * ZendEngine2/zend_default_classes.c:
+      Fix cast function
+
+2003-10-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mssql/php_mssql.c:
+      MFH: Fixed bug #25777 (Do not rtrim() of text fields fetched from mssql).
+
+    * ext/mssql/php_mssql.c:
+      Fixed bug #25777 (Do not rtrim() of text fields fetched from mssql)
+
+2003-10-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      Don't forget to check for tzset...
+
+    * ext/standard/basic_functions.c:
+      MFB Fix for #25825
+
+2003-10-15  George Schlossnagle  <george@omniti.com>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      fix for dereferncing null pointer (mfladischer@gmx.net)
+
+2003-10-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c:
+      Fix bug #25825. tzset() was not called when resetting the TZ env var.
+      In addition, fix a slight error (made by sniper!) which would trigger
+      tzset() to be called for any env var beginning with TZ, and not just
+      TZ itself.
+
 2003-10-14  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_mm.c:
