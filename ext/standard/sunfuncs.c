@@ -219,7 +219,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 /* }}} */
 
 /* {{{ proto mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
-   Returns time of sunrise for a given day & location */
+   Returns time of sunrise for a given day and location */
 PHP_FUNCTION(date_sunrise)
 {
 	php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -227,7 +227,7 @@ PHP_FUNCTION(date_sunrise)
 /* }}} */
 
 /* {{{ proto mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
-   Returns time of sunset for a given day & location */
+   Returns time of sunset for a given day and location */
 PHP_FUNCTION(date_sunset)
 {
 	php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
