@@ -479,7 +479,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	zend_function_state *original_function_state_ptr;
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
-	int orig_free_op1, orig_free_op2;
+	zval *orig_free_op1, *orig_free_op2;
 	int (*orig_unary_op)(zval *result, zval *op1);
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 	zval function_name_copy;
