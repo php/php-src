@@ -531,33 +531,40 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 			calling_scope = Z_OBJCE_PP(object_pp);
 			function_table = &calling_scope->function_table;
 			EX(object) =  *object_pp;
-		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
-			zend_class_entry **ce;
-			char *lc_class;
-			int found = FAILURE;
-
-			lc_class = zend_str_tolower_dup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
-			if (EG(active_op_array) && strcmp(lc_class, "self") == 0) {
-				ce = &(EG(active_op_array)->scope);
-				found = (*ce != NULL?SUCCESS:FAILURE);
-			} else if (strcmp(lc_class, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
-				ce = &(EG(active_op_array)->scope->parent);
-				found = (*ce != NULL?SUCCESS:FAILURE);
-			} else {
-				found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
-			}
-			efree(lc_class);
-			if (found == FAILURE)
-				return FAILURE;
-
-			function_table = &(*ce)->function_table;
-			calling_scope = *ce;
-			object_pp = NULL;
-		} else
-			return FAILURE;
+		}
 	}
 
 	if (*function_pointer == NULL) {
+		if (object_pp) {
+			if (Z_TYPE_PP(object_pp) == IS_STRING) {
+				zend_class_entry **ce;
+				char *lc_class;
+				int found = FAILURE;
+
+				lc_class = zend_str_tolower_dup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
+				if (EG(active_op_array) && strcmp(lc_class, "self") == 0) {
+					ce = &(EG(active_op_array)->scope);
+					found = (*ce != NULL?SUCCESS:FAILURE);
+				} else if (strcmp(lc_class, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
+					ce = &(EG(active_op_array)->scope->parent);
+					found = (*ce != NULL?SUCCESS:FAILURE);
+				} else {
+					found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
+				}
+				efree(lc_class);
+				if (found == FAILURE)
+					return FAILURE;
+
+				function_table = &(*ce)->function_table;
+				calling_scope = *ce;
+				object_pp = NULL;
+			}
+
+			if (function_table == NULL) {
+				return FAILURE;
+			}
+		}
+
 		if (function_name->type!=IS_STRING) {
 			return FAILURE;
 		}
