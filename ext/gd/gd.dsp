@@ -214,6 +214,10 @@ SOURCE=.\libgd\gd_gif_in.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\libgd\gd_gif_out.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\libgd\gd_io.c
 
 !IF  "$(CFG)" == "gd - Win32 Release_TS GD2"

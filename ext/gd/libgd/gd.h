@@ -407,7 +407,10 @@ void gdImageColorDeallocate(gdImagePtr im, int color);
         conversion to palette is not great (for small images
         it can be negative) and the quality loss is ugly. */
 
+gdImagePtr gdImageCreatePaletteFromTrueColor (gdImagePtr im, int ditherFlag, int colorsWanted);
+
 void gdImageTrueColorToPalette(gdImagePtr im, int ditherFlag, int colorsWanted);
+
 
 /* An attempt at getting the results of gdImageTrueColorToPalette
 	to look a bit more like the original (im1 is the original
@@ -428,6 +431,8 @@ void gdImageColorTransparent(gdImagePtr im, int color);
 void gdImagePaletteCopy(gdImagePtr dst, gdImagePtr src);
 void gdImagePng(gdImagePtr im, FILE *out);
 void gdImagePngCtx(gdImagePtr im, gdIOCtx *out);
+void gdImageGif(gdImagePtr im, FILE *out);
+void gdImageGifCtx(gdImagePtr im, gdIOCtx *out);
 /* 2.0.12: Compression level: 0-9 or -1, where 0 is NO COMPRESSION at all,
  * 1 is FASTEST but produces larger files, 9 provides the best
  * compression (smallest files) but takes a long time to compress, and
