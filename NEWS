@@ -7,10 +7,10 @@ PHP 4                                                                      NEWS
   (Sebastian, Edin)
 - Improved dba extension (Marcus)
   . Added support for internal error handling of Berkeley db libraries.
-  . Disallow Berkeley db versions 4.1.0 to 4.1.24 due to locking problems.
-  . Disallow linkage of Berkeley db submodules against libraries with
-    different major version.
-  . Disallow configuring of more than one Berkeley db handler. 
+  . Disallowed Berkeley db versions 4.1.0 to 4.1.24 due to locking problems.
+  . Disallowed linkage of Berkeley db submodules against libraries with
+    different major versions.
+  . Disallowed configuring of more than one Berkeley db handler. 
   . Reenabled dba_popen() with new persistent STDIO streams.
 - Added a new Apache 2.0 SAPI module (sapi/apache2handler) based on the old 
   version (sapi/apache2filter). (Ian Holsman, Justin Erenkrantz)
@@ -40,8 +40,7 @@ PHP 4                                                                      NEWS
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
 - Fixed bug #23606 (Unable to build --with-db4 (db4.1.25)). (Marcus)
 - Fixed bug #23567 (pfsockopen() returns dead connections). (Wez)
-- Fixed bug #23527 (PostScript Type 1 font do not render properly)
-  (nid@home.se, Ilia)
+- Fixed bug #23527 (PostScript Type 1 fonts do not render properly). (nid@home.se, Ilia)
 - Fixed bug #23371 (configure falsely detects c-client using SSL). (Jani)
 - Fixed bug #23340 (fopen on multiple URLs causes memory corruption). (Wez)
 - Fixed bug #23298 (serialize cuts off floats & doubles). (Ilia)
@@ -53,7 +52,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #23187 (memory leaks in sybase_connect/sybase_pconnect). (Ilia)
 - Fixed bug #23162 (user_error() crashs if error message > 1024 bytes).
   (Jay, Marcus, Moriyoshi)
-- Fixed bug #23152 ($http_response_header empty on invalid URLs) (Ilia)
+- Fixed bug #23152 ($http_response_header empty on invalid URLs). (Ilia)
 - Fixed bug #23102 (integer overflow in exif_iif_add_value()). (Ilia)
 - Fixed bug #23099 (ext/interbase: "libgds.so: undefined reference to 'crypt'"). (Jani)
 - Fixed bug #23093 (highlight_string() crashed with __FUNCTION__). (Jani)
@@ -100,16 +99,13 @@ PHP 4                                                                      NEWS
 - Fixed bug #22312 (crash on failed connection when curl_getinfo() was called).
   (Phil Oleson <poleson@verio.net>)
 - Fixed bug #22308 (optimized passthru, code is now ~40 times faster). (Ilia)
-- Fixed bug #22306 (pg_lo_seek($h, 0, PGSQL_SEEK_SET) succeeds but returns false).
-  (Jani)
+- Fixed bug #22306 (pg_lo_seek($h, 0, PGSQL_SEEK_SET) succeeds but returns false). (Jani)
 - Fixed bug #22301 (htmlspecialchars() crashes Apache on Tru64). (Ilia)
-- Fixed bug #22299 (gethostbyname() with non-existing domain crashed on MacOSX).
-  (Jani)
+- Fixed bug #22299 (gethostbyname() with non-existing domain crashed on MacOSX). (Jani)
 - Fixed bug #22283 (possible crash when opening relative URLs). (Ilia)
 - Fixed bug #22238 (stream_select() clobbers fifos under win9x). (Wez)
 - Fixed bug #22234 (copy() fails if source file has 0 length). (Moriyoshi)
-- Fixed bug #22227 (printf() field limiters broke between 4.2.3 and 4.3.0).
-  (Moriyoshi)
+- Fixed bug #22227 (printf() field limiters broke between 4.2.3 and 4.3.0). (Moriyoshi)
 - Fixed bug #22224 (implode() changes object references in array). (Moriyoshi)
 - Fixed bug #22221 (bad rows count in the result object for postgresql). (Marc)
 - Fixed bug #22207 (e notation in *printf would be missing a 0 when there is
@@ -130,8 +126,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22042 (pg_result_seek() would never seek to the 1st row in the
   result due to always seeking to row next to the one requested). (Ilia)
 - Fixed bug #22031 (Made curl_write() & curl_write_header() binary safe). (Ilia)
-- Fixed bug #22022 (Crash in imap_mail_compose() if the body is an empty array).
-  (Ilia)
+- Fixed bug #22022 (Crash in imap_mail_compose() if the body is an empty array). (Ilia)
 - Fixed bug #22017 (date() does not support negative timestamps on win32). (Ilia)
 - Fixed bug #22008 (strip_tags() eliminates too much). (Moriyoshi)
 - Fixed bug #22004 (Overload extension and _call() breaks classes). (Shane)
@@ -139,8 +134,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21978, #21036 (win32 mail(), bcc: gets interpreted as cc:). (Sara)
 - Fixed bug #21885 (move_uploaded_file() does not ignore open_basedir). (Wez)
 - Fixed bug #21820 ("$arr['foo']" generates bogus E_NOTICE, should be E_PARSE). (Jani)
-- Fixed bug #21815 (fpassthru() ignored buffered data but complained anyway). 
-  (Wez)
+- Fixed bug #21815 (fpassthru() ignored buffered data but complained anyway). (Wez)
 - Fixed bug #21809 (select would not always timeout during socket shutdown). (Wez)
 - Fixed bug #21751 (default output buffer could not be deleted). (Marcus)
 - Fixed bug #21725 (return behaviour differs between include and require). (Zeev)
@@ -148,7 +142,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21708 (ucwords() trouble again). (Moriyoshi)
 - Fixed bug #21689 (fgetcsv() suppresses some characters before a separator).
   (Masahiro, Moriyoshi)
-- Fixed bug #21912, #21676 (GetImageSize() failed for remote files). (Wez)
+- Fixed bug #21912, #21676 (getimagesize() failed for remote files). (Wez)
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
 - Fixed bug #21549 (problem with Ingres II persistent connections). (Jani)
 - Fixed bug #21544 (Extended checks for where FreeTDS is installed). (Frank)
@@ -160,24 +154,20 @@ PHP 4                                                                      NEWS
 - Fixed bug #21523 (number_format() could cause a memory allocation for a
   negative memory size in situations where the sprintf implementation of the
   host system generated less decimal places than were requested). (Wez)
-- Fixed bug #21518 (imagecreatefromstring() crashed with invalid image files).
-  (Ilia)
+- Fixed bug #21518 (imagecreatefromstring() crashed with invalid image files). (Ilia)
 - Fixed bug #21511 (config.status warning). (Jani)
 - Fixed bug #21498 (mysql_pconnect connection problems). (Georg)
-- Fixed bug #21453 (improper handling of non-terminated < by strip_tags()).
-  (Ilia)
+- Fixed bug #21453 (improper handling of non-terminated < by strip_tags()). (Ilia)
 - Fixed bug #21445 (gd unable to open fonts). (Ilia)
-- Fixed bug #21443 (improper handling of ? surrounded by spaces in 
-  get_browser()). (Ilia)
-- Fixed bug #21442 (crash in mail() on Windows when 1st parameter is empty). 
-  (Edin)
+- Fixed bug #21443 (improper handling of ? surrounded by spaces in get_browser()). (Ilia)
+- Fixed bug #21442 (crash in mail() on Windows when 1st parameter is empty). (Edin)
 - Fixed bug #21410 (fixed handling of NULL or "" files on Win32). (Ilia)
 - Fixed bug #21378 (COM code crashes after update 4.2.1 to 4.3.0). (Harald)
 - Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
 - Fixed bug #21310 (Solaris has issues with getcwd() needing read permissions
   on directories instead of just execute). (Wez, jflemer)
-- Fixed bug #21297 (in CLI/CGI sapis on the #! it would leave a \n when the
-  the code encounters \r\n). (Ilia)
+- Fixed bug #21297 (in CLI/CGI sapis on the #! it would leave a \n when the code 
+  encounters \r\n). (Ilia)
 - Fixed bug #21268 (session_decode() returned FALSE on success). (Ilia)
 - Fixed bug #21267 (opening URLs that result in redirection to a relative
   path was failing). (Ilia)
@@ -191,22 +181,16 @@ PHP 4                                                                      NEWS
 - Fixed bug #20857 (snmpset() failed always, patch by: rs@epost.de). (Jani)
 - Fixed bug #20802 (PHP would die silently when memory limit reached). (Ilia)
 - Fixed bug #20715 (odbc could not be compiled as shared extension). (Jani)
-- Fixed bug #20641 (Numeric/decimal datatype overflow in the Interbase module
-  on Win32). (Daniela)
+- Fixed bug #20641 (Numeric/decimal datatype overflow in ext/interbase on Win32). (Daniela)
 - Fixed bug #20503 (imagesetbrush() not available on Windows). (Edin)
 - Fixed bug #20282 (COM memory leak). (Harald)
 - Fixed bug #20256 (snprintf() not defined on some systems). (Jani)
-- Fixed bug #19919 (crash in sapi_apache_header_handler under heavy load).
-  (George)
+- Fixed bug #19919 (crash in sapi_apache_header_handler under heavy load). (George)
 - Fixed bug #19795 (Problems with strnatcmp() / strnatcasecmp()). (Moriyoshi)
-- Fixed bug #17868 (multiple <!--include--> used to include PHP files crashes).
-  (Ilia)
-- Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned).
-  (Maxim)
-- Fixed bug #17098 (make Apache2 aware that PHP scripts should not be cached).
-  (Ilia)
-- Fixed bug #16798 (Compile failure with LOB support for Oracle version < 8.1).
-  (Maxim)
+- Fixed bug #17868 (multiple <!--include--> used to include PHP files crashes). (Ilia)
+- Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned). (Maxim)
+- Fixed bug #17098 (make Apache2 aware that PHP scripts should not be cached). (Ilia)
+- Fixed bug #16798 (Compile failure with LOB support for Oracle version < 8.1). (Maxim)
 - Fixed bug #14532 (fixed connection_status() to return 2 for timeouts). (Jani)
 - Fixed bug #14245 ('make install' fails on AIX when using --with-apxs). (Jani)
 - Fixed bug #13561 (--without-pear disabled phpize/php-config install). (Jani)
