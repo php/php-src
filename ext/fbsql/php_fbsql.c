@@ -932,12 +932,13 @@ static void php_fbsql_create_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 	}
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
+	convert_to_string_ex(lob_data);
 	switch (lob_type) {
 		case 0 : // BLOB
-				lobHandle = fbcdcWriteBLOB(phpLink->connection, Z_STRVAL_PP(lob_data), Z_STRLEN_PP(lob_data));
+			lobHandle = fbcdcWriteBLOB(phpLink->connection, Z_STRVAL_PP(lob_data), Z_STRLEN_PP(lob_data));
 			break;
 		case 1 : // CLOB
-				lobHandle = fbcdcWriteCLOB(phpLink->connection, Z_STRVAL_PP(lob_data));
+			lobHandle = fbcdcWriteCLOB(phpLink->connection, Z_STRVAL_PP(lob_data));
 			break;
 	}
 	if (lobHandle) {
@@ -2200,22 +2201,20 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 			{  // Direct
 				*length = ((FBCBlobDirect *)data)->blobSize;
 
-				*value = emalloc(*length + 1);
-				strncpy(*value, (char *)((FBCBlobDirect *)data)->blobData, *length);
+				*value = estrndup((char *)((FBCBlobDirect *)data)->blobData, *length);
 			}
 			else
 			{
 				FBCBlobHandle *lobHandle;
-				char *handle = (char *)(&((unsigned char*)data)[1]);
-
+				unsigned char *bytes = (unsigned char *)data;
+				char *handle = (char *)(&bytes[1]);
 				lobHandle = fbcbhInitWithHandle(handle);
 				*length = fbcbhBlobSize(lobHandle);
 
-				*value = emalloc(*length + 1);
 				if (dtc == FB_BLOB) 
-					strncpy(*value, (char *)fbcdcReadBLOB(result->link->connection, lobHandle), *length);
+					*value = estrndup((char *)fbcdcReadBLOB(result->link->connection, lobHandle), *length);
 				else
- 					strncpy(*value, (char *)fbcdcReadCLOB(result->link->connection, lobHandle), *length);
+					*value = estrndup((char *)fbcdcReadCLOB(result->link->connection, lobHandle), *length);
 				fbcbhRelease(lobHandle); 
 			}
 		}
