@@ -1,3 +1,18 @@
+2000-07-12  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testcpdfclock: - The pdfclock example using cpdf
+
+2000-07-12  Thies C. Arntzen  <thies@digicol.de>
+
+    * main/main.c:
+    (php_error) only set php_errormsg if we (still) have an active_symbol_table.
+
+2000-07-12  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - By mistake recommited bad entry
+
+    * NEWS: - Add some Zend Engine changes to the NEWS file
+
 2000-07-11  Danny Heijl  <Danny.Heijl@cevi.be>
 
     * ext/informix/ifx.ec: - typo
