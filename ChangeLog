@@ -1,3 +1,126 @@
+2001-12-10  Jouni Ahto  <jahto@welho.com>
+
+    * EXTENSIONS:
+    - Yasuo Ohgaki <yohgaki@php.net> is the new maintainer of pgsql module.
+
+2001-12-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/README
+      ext/overload/overload.c:
+    Modified __call() handler to accept a byref return value parameter that
+    should be filled in. The __call() handler is now supposed to return true
+    or false, depending on whether it was successful or not.
+
+2001-12-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h
+      main/internal_functions_win32.c
+      win32/php4dll.dsp
+      win32/php4dllts.dsp: Enable ext/overload by default on Win32, too.
+
+2001-12-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php: * now using ext/overload
+
+    * pear/PEAR/Registry.php:
+    * PEAR_Registry::packageInfo now takes a second arg for returning a single
+      attribute
+
+    * pear/PEAR/Installer.php:
+    * added fold marks, moved around some code and silenced some Archive_Tar
+      notices
+
+    * pear/PEAR/Dependency.php: * renamed check methods to checkXxx
+    * completed the extension check method
+    * added checks for os, php version, programs and sapi backend
+
+    * pear/PEAR/Autoloader.php: * fix phpdoc comments
+
+    * pear/Console/Getopt.php:
+    * stop parsing arguments when encoutering the first non-option arg
+
+2001-12-10  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in: Go with 4.1.0
+
+2001-12-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Fix type of conversion in ircg_pconnect
+
+    * sapi/thttpd/thttpd_patch:
+    Sent proper encodings for gzip/compress files, otherwise IE won't
+    display them.
+
+    Refer to section 3.5, RFC 2616 -- these are IANA registered.
+
+    Patch submitted to author.
+
+    * sapi/thttpd/thttpd_patch:
+    Add a nocache feature: If documents are stored under /nocache/,
+    appropiate HTTP headers will be sent which prevent client/proxy caching.
+
+2001-12-10  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: Spaces -> Tabs
+
+2001-12-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Add a generic disconnect format message which is written to the
+    file upon termination of the connection and free file messages
+    appropiately.
+
+2001-12-10  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/HTML/ITX.php:
+    Bugfix on addBlock(), recursively build the list of variables in inner,
+    nested blocks.
+
+    I should have never ever written ITX; I did so because it was simple to do
+    so. When you use addBlock & friends always keep in mind that these functions stand
+    against the nature of IT. IT analyses the nesting of blocks to give you a
+    simple block api and make your code easy to understand. It was not made to
+    manipulate the nesting during runtime. Use e.g. phplib templates
+    (which are ++FastTemplate) for this.
+
+2001-12-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: kill a couple of warnings
+
+    * ext/ircg/README.txt: URL update
+
+2001-12-10  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php:
+    - mnogosearch example updated to include searchd support
+
+    * ext/mnogosearch/php_mnogo.c:
+    - Fixed search daemon support in mnogosearch module.
+
+2001-12-10  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Fix proto
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Added async query functions
+
+2001-12-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Autoloader.php
+      pear/tests/pear_autoloader.phpt:
+    * initial commit of PEAR method autoloader
+
+2001-12-10  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: - Fixed the version detection of Bison.
+
+    * ext/overload/config.m4: Enable it for real.
+
+2001-12-10  Stig Bakken  <ssb@fast.no>
+
+    * ext/overload/config.m4: * enable overload extension by default
+
 2001-12-09  Zeev Suraski  <zeev@zend.com>
 
     * NEWS: Go with 4.1.0
