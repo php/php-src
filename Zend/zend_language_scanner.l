@@ -124,8 +124,6 @@ void startup_scanner(TSRMLS_D)
 {
 	CG(heredoc) = NULL;
 	CG(heredoc_len)=0;
-	CG(doc_comment) = NULL;
-	CG(doc_comment_len) = 0;
 	SCNG(yy_start_stack_ptr) = 0;
 	SCNG(yy_start_stack_depth) = 0;
 }
@@ -136,10 +134,6 @@ void shutdown_scanner(TSRMLS_D)
 	if (CG(heredoc)) {
 		efree(CG(heredoc));
 		CG(heredoc_len)=0;
-	}
-	if (CG(doc_comment)) {
-		efree(CG(doc_comment));
-		CG(doc_comment_len) = 0;
 	}
 }
 END_EXTERN_C()
@@ -1176,7 +1170,7 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	}
 }
 
-<ST_IN_SCRIPTING>"/** "{NEWLINE} {
+<ST_IN_SCRIPTING>"/**"{NEWLINE} {
 	CG(comment_start_line) = CG(zend_lineno);
 	BEGIN(ST_DOC_COMMENT);
 	yymore();
@@ -1194,11 +1188,9 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 }
 
 <ST_DOC_COMMENT>"*/" {
-	if (CG(doc_comment)) {
-		efree(CG(doc_comment));
-	}
-	CG(doc_comment) = estrndup(yytext, yyleng);
-	CG(doc_comment_len) = yyleng;
+	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_DOC_COMMENT;

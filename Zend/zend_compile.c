@@ -977,7 +977,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.ns = CG(active_namespace);
 	op_array.prototype = NULL;
 
-	op_array.line_start = CG(zend_lineno);
+	op_array.line_start = zend_get_compiled_lineno(TSRMLS_C);
 
 	if (is_method) {
 		char *short_class_name = CG(active_class_entry)->name;
@@ -1071,12 +1071,16 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 }
 
 
-void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
+void zend_do_end_function_declaration(znode *function_token, znode *doc_comment TSRMLS_DC)
 {
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
 	pass_two(CG(active_op_array) TSRMLS_CC);
-	CG(active_op_array)->line_end = CG(zend_lineno);
+	CG(active_op_array)->line_end = zend_get_compiled_lineno(TSRMLS_C);
+	if (doc_comment && doc_comment->op_type != IS_UNUSED) {
+		CG(active_op_array)->doc_comment = doc_comment->u.constant.value.str.val;
+		CG(active_op_array)->doc_comment_len = doc_comment->u.constant.value.str.len;
+	}
 	CG(active_op_array) = function_token->u.op_array;
 
 	/* Pop the switch and foreach seperators */
@@ -2202,6 +2206,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->num_interfaces = 0;
 
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
+	new_class_entry->filename = zend_get_compiled_filename(TSRMLS_C);
+	new_class_entry->line_start = zend_get_compiled_lineno(TSRMLS_C);
 	new_class_entry->ce_flags |= class_token->u.constant.value.lval;
 
 	if (parent_class_name->op_type != IS_UNUSED) {
@@ -2245,9 +2251,16 @@ static void do_verify_abstract_class(TSRMLS_D)
 }
 
 
-void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRMLS_DC)
+void zend_do_end_class_declaration(znode *class_token, znode *parent_token, znode *doc_comment TSRMLS_DC)
 {
 	do_inherit_parent_constructor(CG(active_class_entry));
+
+	CG(active_class_entry)->line_end = zend_get_compiled_lineno(TSRMLS_C);
+
+	if (doc_comment && doc_comment->op_type != IS_UNUSED) {
+		CG(active_class_entry)->doc_comment = doc_comment->u.constant.value.str.val;
+		CG(active_class_entry)->doc_comment_len = doc_comment->u.constant.value.str.len;
+	}
 
 	if (CG(active_class_entry)->num_interfaces > 0) {
 		CG(active_class_entry)->interfaces = (zend_class_entry **) emalloc(sizeof(zend_class_entry *)*CG(active_class_entry)->num_interfaces);
@@ -3279,7 +3292,6 @@ int zendlex(znode *zendlval TSRMLS_DC)
 	retval = lex_scan(&zendlval->u.constant TSRMLS_CC);
 	switch (retval) {
 		case T_COMMENT:
-		case T_DOC_COMMENT:
 		case T_OPEN_TAG:
 		case T_WHITESPACE:
 			retval = zendlex(zendlval TSRMLS_CC);
@@ -3318,12 +3330,30 @@ void zend_destroy_property_info(zend_property_info *property_info)
 
 void zend_init_namespace(zend_namespace *ns TSRMLS_DC)
 {
+	ns->refcount = 1;
+	ns->constants_updated = 0;
+	ns->ce_flags = 0;
+
+	ns->filename = NULL;
+	ns->doc_comment = NULL;
+	ns->doc_comment_len = 0;
+
 	zend_hash_init(&ns->function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&ns->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&ns->constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
 	ALLOC_HASHTABLE(ns->static_members);
 	zend_hash_init(ns->static_members, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	ns->parent = NULL;
+	ns->ns = NULL;
 	ns->constructor = NULL;
+	ns->destructor = NULL;
+	ns->clone = NULL;
+	ns->__get = NULL;
+	ns->__set = NULL;
+	ns->__call = NULL;
+	ns->create_object = NULL;
+
 	ns->type = ZEND_NAMESPACE;
 }
 
@@ -3346,6 +3376,7 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 		ns->name_length = ns_name->u.constant.value.str.len;
 		zend_hash_add(&CG(global_namespace).class_table, ns->name, ns->name_length+1, (void **)&ns, sizeof(zend_namespace *), NULL);
 		zend_init_namespace(ns TSRMLS_CC);
+		ns->line_start = zend_get_compiled_lineno(TSRMLS_C);
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -3367,10 +3398,33 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 	CG(function_table) = &ns->function_table;
 }
 
-void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
+void zend_do_end_namespace(znode *ns_token, znode *doc_comment TSRMLS_DC)
 {
 	zend_namespace *ns = ns_token->u.previously_active_namespace;
 	zend_op *opline;
+
+	/*
+	 * If the filename field has not been initialized yet, it means that we are
+	 * on the first definition of namespace and should capture the definition
+	 * information.
+	 */
+	if (CG(active_namespace)->filename == NULL) {
+		CG(active_namespace)->filename = zend_get_compiled_filename(TSRMLS_C);
+		CG(active_namespace)->line_end = zend_get_compiled_lineno(TSRMLS_C);
+	}
+
+	if (doc_comment && doc_comment->op_type != IS_UNUSED) {
+		/*
+		 * Do not overwrite previously declared doc comment in case the namespace is
+		 * split over several parts.
+		 */
+	   	if (CG(active_namespace)->doc_comment == NULL) {
+			CG(active_namespace)->doc_comment = doc_comment->u.constant.value.str.val;
+			CG(active_namespace)->doc_comment_len = doc_comment->u.constant.value.str.len;
+		} else {
+			zval_dtor(&doc_comment->u.constant);
+		}
+	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -3435,6 +3489,9 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 	ce->refcount = 1;
 	ce->constants_updated = 0;
 	ce->ce_flags = 0;
+
+	ce->doc_comment = NULL;
+	ce->doc_comment_len = 0;
 
 	zend_hash_init_ex(&ce->default_properties, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) zend_destroy_property_info, persistent_hashes, 0);

@@ -335,6 +335,12 @@ struct _zend_class_entry {
 	zend_class_entry **interfaces;
 	zend_uint num_interfaces;
 
+	char *filename;
+	zend_uint line_start;
+	zend_uint line_end;
+	char *doc_comment;
+	zend_uint doc_comment_len;
+
 	/* old handlers */
 #if 0
 	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
