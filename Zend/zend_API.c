@@ -1160,7 +1160,6 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		internal_function->handler = ptr->handler;
 		internal_function->function_name = ptr->fname;
 		internal_function->scope = scope;
-		internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		internal_function->prototype = NULL;
 		if (ptr->arg_info) {
 			internal_function->arg_info = ptr->arg_info+1;
