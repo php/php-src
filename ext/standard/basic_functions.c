@@ -1610,12 +1610,12 @@ PHP_FUNCTION(call_user_func)
 	zval       ***params;
 	zval         *retval_ptr;
 	char         *name;
-	zend_bool     callable;
 	int           argc = ZEND_NUM_ARGS();
 
 	if (argc < 1) {
 		WRONG_PARAM_COUNT;
 	}
+
 	params = emalloc(sizeof(zval **) * argc);
 
 	if (zend_get_parameters_array_ex(argc, params)==FAILURE) {
@@ -1628,9 +1628,10 @@ PHP_FUNCTION(call_user_func)
 		convert_to_string_ex(params[0]);
 	}
 
-	callable = zend_is_callable(*params[0], 0, &name);
-	if (! callable) {
-		php_error(E_WARNING, "Argument 1 to call_user_func() must be a valid callback");
+	if (!zend_is_callable(*params[0], 0, &name)) {
+		php_error(E_WARNING, "%s() expects first argument, '%s', to be a valid callback",
+				  get_active_function_name(), name);
+		efree(name);
 		efree(params);
 		RETURN_NULL();
 	}
@@ -1638,7 +1639,7 @@ PHP_FUNCTION(call_user_func)
 	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc - 1, params + 1, 0, NULL)==SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING, "Unable to call function %s()", name);
+		php_error(E_WARNING, "Unable to call %s()", name);
 	}
 
 	efree(name);
@@ -1656,7 +1657,6 @@ PHP_FUNCTION(call_user_func_array)
 	zval         *retval_ptr;
 	HashTable    *func_params_ht;
 	char         *name;
-	zend_bool     callable;
 	int           count;
 	int           current = 0;
 
@@ -1672,9 +1672,10 @@ PHP_FUNCTION(call_user_func_array)
 		convert_to_string_ex(func);
 	}
 
-	callable = zend_is_callable(*func, 0, &name);
-	if (! callable) {
-		php_error(E_WARNING, "Argument 1 to call_user_func_array() must be a valid callback");
+	if (!zend_is_callable(*func, 0, &name)) {
+		php_error(E_WARNING, "%s() expects first argument, '%s', to be a valid callback",
+				  get_active_function_name(), name);
+		efree(name);
 		RETURN_NULL();
 	}
 
