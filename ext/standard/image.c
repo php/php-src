@@ -110,7 +110,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, int pos, int c
 static struct gfxinfo *php_handle_swf (FILE* fp)
 {
 	struct gfxinfo *result = NULL;
-	unsigned char bits;
+	long bits;
 	unsigned char a[32];
 	
 	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
