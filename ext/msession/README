@@ -15,3 +15,8 @@ is probably wrong.
 
 You will need phoenix installed and built to compile this
 module.
+
+12/22/2001
+Changed msession_getdata(...) to msession_get_data(...)
+Changed msession_setdata(...) to msession_set_data(...)
+(docs to follow)

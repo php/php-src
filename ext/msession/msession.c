@@ -31,7 +31,7 @@
 
 /*
  * Please do not remove backward compatibility from this module.
- * this same souce must also work with 4.0 versions of PHP.
+ * this same source must also work with 4.0 versions of PHP.
  *
  * Also, please to not reformat braces ;-)
  * -MLW
@@ -92,8 +92,8 @@ function_entry msession_functions[] = {
 	PHP_FE(msession_set_array,NULL)
 	PHP_FE(msession_timeout,NULL)
 	PHP_FE(msession_inc,NULL)
-	PHP_FE(msession_setdata,NULL)
-	PHP_FE(msession_getdata,NULL)
+	PHP_FE(msession_set_data,NULL)
+	PHP_FE(msession_get_data,NULL)
 	PHP_FE(msession_listvar,NULL)
 	PHP_FE(msession_list,NULL)
 	PHP_FE(msession_uniq,NULL)
@@ -1107,9 +1107,9 @@ PHP_FUNCTION(msession_inc)
 }
 /* }}} */
 
-/* {{{ proto string msession_getdata(string session)
+/* {{{ proto string msession_get_data(string session)
    Get data ... ? */
-PHP_FUNCTION(msession_getdata)
+PHP_FUNCTION(msession_get_data)
 {
 	char *val;
 	zval **session;
@@ -1139,9 +1139,9 @@ PHP_FUNCTION(msession_getdata)
 }
 /* }}} */
 
-/* {{{ proto bool msession_setdata(string session, string value)
+/* {{{ proto bool msession_set_data(string session, string value)
    Set data  ... ?*/
-PHP_FUNCTION(msession_setdata)
+PHP_FUNCTION(msession_set_data)
 {
 	zval **session;
 	zval **value;
