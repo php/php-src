@@ -215,7 +215,7 @@ if test "$PHP_GD" == "php"; then
 		libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c libgd/gdfontmb.c libgd/gdfontl.c \
 		libgd/gdfontg.o libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
 		libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c"
-  PHP_NEW_EXTENSION(mysql, gd.c gdcache.c gdttf.c gdt1.c $sources, $ext_shared,,-I@ext_srcdir@/libgd)
+  PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c gdt1.c $sources, $ext_shared,,-I@ext_srcdir@/libgd)
   PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 else
  if test "$PHP_GD" != "no"; then
