@@ -433,8 +433,11 @@ TEST $file
 			save_text($tmp_skipif, $section_text['SKIPIF']);
 			$output = `$php $tmp_skipif`;
 			@unlink($tmp_skipif);
-			if (trim($output) == 'skip') {
+			if (ereg("^skip", trim($output))){
 				echo "SKIP $tested\n";
+				$reason = (ereg("^skip\s*(.+)$", trim($output))) ? ereg_replace("^skip\s*(.+)$", "\\1", trim($output)) : FALSE;
+				if($reason)
+					print "\treason: $reason\n";
 				return 'SKIPPED';
 			}
 		}
