@@ -11,7 +11,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #22154 (Possible crash when memory_limit is reached and
   output buffering in addition to session.use_trans_sid is used). (Ilia)
 - Fixed bug #22072 (Apache2 sapis do not detect aborted connections). (Ilia)
-- Fixed bug #21611 (version_compare() does not support "p" suffix). (Jani)
+- Fixed bug #21611 (version_compare() does not support "p" as suffix).
+  (Stefan Walk)
 
 30 Jul 2003, Version 4.3.3RC2
 - Improved the NSAPI SAPI module (Uwe Schindler)
