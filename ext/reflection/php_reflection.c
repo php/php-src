@@ -995,9 +995,6 @@ ZEND_METHOD(reflection_function, __construct)
 	if (intern == NULL) {
 		return;
 	}
-	MAKE_STD_ZVAL(name);
-	ZVAL_STRINGL(name, name_str, name_len, 1);
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	lcname = do_alloca(name_len + 1);
 	zend_str_tolower_copy(lcname, name_str, name_len);
 	if (zend_hash_find(EG(function_table), lcname, name_len + 1, (void **)&fptr) == FAILURE) {
@@ -1007,6 +1004,9 @@ ZEND_METHOD(reflection_function, __construct)
 		return;
 	}
 	free_alloca(lcname);
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRING(name, fptr->common.function_name, 1);
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = fptr;
 	intern->free_ptr = 0;
 }
@@ -1509,9 +1509,6 @@ ZEND_METHOD(reflection_method, __construct)
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
-	MAKE_STD_ZVAL(name);
-	ZVAL_STRINGL(name, name_str, name_len, 1);
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	lcname = do_alloca(name_len + 1);
 	zend_str_tolower_copy(lcname, name_str, name_len);
 
@@ -1522,6 +1519,10 @@ ZEND_METHOD(reflection_method, __construct)
 		return;
 	}
 	free_alloca(lcname);
+
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRING(name, mptr->common.function_name, 1);
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = mptr;
 	intern->free_ptr = 0;
 }
@@ -2515,6 +2516,7 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_class_entry *ce;
 	zend_property_info *property_info;
 	property_reference *reference;
+	char *lcname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
 		return;
@@ -2546,11 +2548,15 @@ ZEND_METHOD(reflection_property, __construct)
 			/* returns out of this function */
 	}
 
-	if (zend_hash_find(&ce->properties_info, name_str, name_len + 1, (void **) &property_info) == FAILURE) {
+	lcname = do_alloca(name_len + 1);
+	zend_str_tolower_copy(lcname, name_str, name_len);
+	if (zend_hash_find(&ce->properties_info, lcname, name_len + 1, (void **) &property_info) == FAILURE) {
+		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Property %s::$%s does not exist", ce->name, name_str);
 		return;
 	}
+	free_alloca(lcname);
 	
 	if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to seach the class hierarchy for this (implicit) public or protected property */
@@ -2569,7 +2575,7 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
 	MAKE_STD_ZVAL(name);
-	ZVAL_STRINGL(name, name_str, name_len, 1);
+	ZVAL_STRING(name, property_info->name, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 
 	reference = (property_reference*) emalloc(sizeof(property_reference));
@@ -2798,18 +2804,18 @@ ZEND_METHOD(reflection_extension, __construct)
 	if (intern == NULL) {
 		return;
 	}
-	MAKE_STD_ZVAL(name);
-	ZVAL_STRINGL(name, name_str, name_len, 1);
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	lcname = do_alloca(name_len + 1);
 	zend_str_tolower_copy(lcname, name_str, name_len);
-	if (zend_hash_find(&module_registry, lcname, (int)(Z_STRLEN_P(name) + 1), (void **)&module) == FAILURE) {
+	if (zend_hash_find(&module_registry, lcname, name_len + 1, (void **)&module) == FAILURE) {
 		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Extension %s does not exist", name_len);
+			"Extension %s does not exist", name_str);
 		return;
 	}
 	free_alloca(lcname);
+	MAKE_STD_ZVAL(name);
+	ZVAL_STRING(name, module->name, 1);
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = module;
 	intern->free_ptr = 0;
 }
