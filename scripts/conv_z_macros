@@ -24,7 +24,7 @@ for i in $@; do
 	-e 's/(\*\([^()]\+\))->type/Z_TYPE_PP(\1)/g' \
 	-e 's/\([a-z_][]a-z_0-9\[]*\)->type/Z_TYPE_P(\1)/g' \
 	-e 's/\([a-z_][]a-z_0-9\[]*\)\.type/Z_TYPE(\1)/g' \
-	-e 's/(\*\([^()]\+\)))->value\.dval/Z_DVAL_PP(\1)/g' \
+	-e 's/(\*\([^()]\+\))->value\.dval/Z_DVAL_PP(\1)/g' \
 	-e 's/\([a-z_][]a-z_0-9\[]*\)->value\.dval/Z_DVAL_P(\1)/g' \
 	-e 's/\([a-z_][]a-z_0-9\[]*\)\.value\.dval/Z_DVAL(\1)/g' \
 	-e 's/(\*\([^()]\+\))->value\.lval/Z_LVAL_PP(\1)/g' \
