@@ -83,6 +83,10 @@ function catchit($err)
     echo "Caught error: " . $err->getMessage() . "\n";
 }
 ob_start();
+if (!file_exists(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'dirtree' . DIRECTORY_SEPARATOR . 'CVS')) {
+    mkdir(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'dirtree' . DIRECTORY_SEPARATOR . 'CVS');
+    touch(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'dirtree' . DIRECTORY_SEPARATOR . 'CVS' . DIRECTORY_SEPARATOR . 'Root');
+}
 $packager->package(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'dirtree' . DIRECTORY_SEPARATOR . 'package.xml');
 $packager->package(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'dirtree' . DIRECTORY_SEPARATOR . 'package2.xml');
 $stuff = str_replace(array(dirname(__FILE__) . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR), array('', '/'),
