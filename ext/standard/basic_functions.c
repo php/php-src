@@ -302,7 +302,7 @@ function_entry basic_functions[] = {
 	PHP_FE(sleep,															NULL)
 	PHP_FE(usleep,															NULL)
 #if HAVE_NANOSLEEP
-	PHP_FE(nanosleep,														NULL)
+	PHP_FE(time_nanosleep,														NULL)
 #endif
 	PHP_FE(time,															NULL)
 	PHP_FE(mktime,															NULL)
@@ -1694,9 +1694,9 @@ PHP_FUNCTION(usleep)
 /* }}} */
 
 #if HAVE_NANOSLEEP
-/* {{{ proto mixed nanosleep(long seconds, long nanoseconds)
+/* {{{ proto mixed time_nanosleep(long seconds, long nanoseconds)
    Delay for a number of seconds and nano seconds */
-PHP_FUNCTION(nanosleep)
+PHP_FUNCTION(time_nanosleep)
 {
 	long tv_sec, tv_nsec;
 	struct timespec php_req, php_rem;
