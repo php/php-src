@@ -108,8 +108,6 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC)
 			return;
 		}
 
-		ce = Z_OBJCE(**struc);
-
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
 		efree(class_name);
