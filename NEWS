@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Fix a bug where PHP doesn't handle the Expect header properly. (Patch 
+  submitted by Ilia <ilia@prohost.org>)
 - Fix a bug in ODBC where closing the module would crash the Windows 
   executable.  (kalowsky)
 - Various memory leak fixes in the pack/unpack commands, patch submitted by
