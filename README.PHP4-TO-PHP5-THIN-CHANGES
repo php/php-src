@@ -15,4 +15,10 @@
    parameter will be throwed. Be careful because your code may start emitting E_WARNING out of the blue.
 
 4. Be careful when porting from ext/mysql to ext/mysqli. mysqli_fetch_row()/mysqli_fetch_array()/mysql_fetch_assoc()
-   retun NULL when there is no more data in the result set (ext/mysql's functions return FALSE).
+   return NULL when there is no more data in the result set (ext/mysql's functions return FALSE).
+
+5. PATH_TRANSLATED server variable is no longer set implicitly under
+   Apache2 SAPI in contrast to the situation in PHP4, where it is set to the
+   same value as the SCRIPT_FILENAME server variable when it is not populated
+   by Apache.  This change was made to comply with the CGI specification.
+   Please refer to bug #23610 for further information.
