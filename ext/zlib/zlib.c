@@ -181,7 +181,7 @@ PHP_MINIT_FUNCTION(zlib)
 #ifdef ZTS
 	ts_allocate_id(&zlib_globals_id, sizeof(zend_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
 #endif
-	php_register_url_stream_wrapper("zlib", &php_stream_gzip_wrapper TSRMLS_CC);
+	php_register_url_stream_wrapper("compress.zlib", &php_stream_gzip_wrapper TSRMLS_CC);
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", CODING_GZIP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", CODING_DEFLATE, CONST_CS | CONST_PERSISTENT);

@@ -1180,7 +1180,7 @@ static php_stream_wrapper *locate_url_wrapper(char *path, char **path_for_open, 
 	if (options & IGNORE_URL)
 		return &php_plain_files_wrapper;
 	
-	for (p = path; isalnum((int)*p); p++) {
+	for (p = path; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
 
@@ -1188,9 +1188,9 @@ static php_stream_wrapper *locate_url_wrapper(char *path, char **path_for_open, 
 		protocol = path;
 	} else if (strncasecmp(path, "zlib:", 5) == 0) {
 		/* BC with older php scripts and zlib wrapper */
-		protocol = path;
-		n = 4;
-		zend_error(E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"zlib://\" instead.");
+		protocol = "compress.zlib";
+		n = 13;
+		zend_error(E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead.");
 	}
 
 	if (protocol)	{

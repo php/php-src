@@ -33,9 +33,8 @@ PHP 4                                                                      NEWS
 - Added mysql_list_processes() and mysql_stat() functions. (Georg)
 - Added file_get_contents($filename), which returns the contents of a file
   as a string. It also supports URL wrappers. (Wez)
-- Changed fopen wrappers ('php://', 'bz2://' and 'zlib://') to require the
-  '://' separator (instead of simply 'php:', 'bz2:' and 'zlib:') to avoid
-  ambiguities when filenames have ':' characters. (Wez)
+- Changed 'zlib:' fopen wrapper to 'compress.zlib://' to avoid ambiguities
+  when filenames have ':' characters. (Wez)
 - Added URL-wrapper support to exif. (Marcus)
 - PHP now has a new stream system that allows it to do some clever stuff with
   fopen() and fsockopen().  As a result:
@@ -43,7 +42,7 @@ PHP 4                                                                      NEWS
   . fsockopen() adds support for ssl:// and tls:// connections via TCP/IP
   . copy($srcfilename, $destfilename) can now be used with URL wrappers
   . zlib wrappers/streams can be used even on systems without fopencookie()
-  . Added BZip2 stream support.
+  . Added 'compress.bzip2://' stream and wrapper support.
   . Added user-space streams - it is now possible to define a class in PHP
     code and register it as a URL wrapper.
   . Most extensions now support streams when passing files, which means

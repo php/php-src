@@ -465,7 +465,7 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int
 	memset(&unix_addr, 0, sizeof(unix_addr));
 	unix_addr.sun_family = AF_UNIX;
 
-	/* we need to be binary safe for the on systems that support an abstract
+	/* we need to be binary safe on systems that support an abstract
 	 * namespace */
 	if (pathlen >= sizeof(unix_addr.sun_path)) {
 		/* On linux, when the path begins with a NUL byte we are

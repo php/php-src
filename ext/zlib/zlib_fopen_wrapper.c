@@ -101,8 +101,8 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 	
 	self = emalloc(sizeof(*self));
 
-	if (strncasecmp("zlib://", path, 7) == 0)
-		path += 7;
+	if (strncasecmp("compress.zlib://", path, 16) == 0)
+		path += 16;
 	else if (strncasecmp("zlib:", path, 5) == 0)
 		path += 5;
 	
