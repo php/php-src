@@ -48,6 +48,9 @@ static zend_function_entry ming_functions[] = {
 	PHP_FALIAS(ming_setscale,           ming_setScale,           NULL)
 	PHP_FALIAS(ming_useswfversion,      ming_useSWFVersion,      NULL)
 	PHP_FALIAS(swfbutton_keypress,      swfbutton_keypress,      NULL)
+#ifdef HAVE_NEW_MING
+	PHP_FALIAS(ming_useconstants,		ming_useConstants,       NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -64,6 +67,8 @@ static SWFButton getButton(zval *id TSRMLS_DC);
 static SWFAction getAction(zval *id TSRMLS_DC);
 static SWFMorph getMorph(zval *id TSRMLS_DC);
 static SWFMovieClip getSprite(zval *id TSRMLS_DC);
+static SWFSound getSound(zval *id TSRMLS_DC);
+static SWFSoundInstance getSoundInstance(zval *id TSRMLS_DC);
 
 /* {{{ proto void ming_setcubicthreshold (int threshold)
    Set cubic threshold (?) */
@@ -107,12 +112,30 @@ PHP_FUNCTION(ming_useSWFVersion)
 }
 /* }}} */
 
+#ifdef HAVE_NEW_MING
+/* {{{ proto void ming_useconstants(int use)
+	Use constant pool (?) */ 
+PHP_FUNCTION(ming_useConstants)
+{
+	zval **num;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(num);
+
+	Ming_useConstants(Z_LVAL_PP(num));
+}
+/* }}} */
+#endif
+
 static int le_swfmoviep;
 static int le_swfshapep;
 static int le_swffillp;
 static int le_swfgradientp;
 static int le_swfbitmapp;
 static int le_swffontp;
+static int le_swffontcharp;
 static int le_swftextp;
 static int le_swftextfieldp;
 static int le_swfdisplayitemp;
@@ -121,6 +144,8 @@ static int le_swfactionp;
 static int le_swfmorphp;
 static int le_swfspritep;
 static int le_swfinputp;
+static int le_swfsoundp;
+static int le_swfsoundinstancep;
 
 zend_class_entry movie_class_entry;
 zend_class_entry shape_class_entry;
@@ -128,6 +153,7 @@ zend_class_entry fill_class_entry;
 zend_class_entry gradient_class_entry;
 zend_class_entry bitmap_class_entry;
 zend_class_entry font_class_entry;
+zend_class_entry fontchar_class_entry;
 zend_class_entry text_class_entry;
 zend_class_entry textfield_class_entry;
 zend_class_entry displayitem_class_entry;
@@ -135,6 +161,8 @@ zend_class_entry button_class_entry;
 zend_class_entry action_class_entry;
 zend_class_entry morph_class_entry;
 zend_class_entry sprite_class_entry;
+zend_class_entry sound_class_entry;
+zend_class_entry soundinstance_class_entry;
 
 /* {{{ internal function SWFgetProperty
 */
@@ -189,6 +217,10 @@ static SWFCharacter getCharacter(zval *id TSRMLS_DC)
 		return (SWFCharacter)getSprite(id TSRMLS_CC);
 	else if (Z_OBJCE_P(id) == &bitmap_class_entry)
 		return (SWFCharacter)getBitmap(id TSRMLS_CC);
+	else if(Z_OBJCE_P(id) == &sound_class_entry)
+		return (SWFCharacter)getSound(id TSRMLS_CC);
+//	else if(Z_OBJCE_P(id) == &soundinstance_class_entry)
+//		return (SWFCharacter)getSoundInstance(id TSRMLS_CC);
 	else
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFCharacter");
 		return NULL;
@@ -377,7 +409,13 @@ static zend_function_entry swfbutton_functions[] = {
 	PHP_FALIAS(setdown,                swfbutton_setDown,         NULL)
 	PHP_FALIAS(setaction,              swfbutton_setAction,       NULL)
 	PHP_FALIAS(addshape,               swfbutton_addShape,        NULL)
+#ifdef HAVE_NEW_MING
+	PHP_FALIAS(setmenu,                swfbutton_setMenu,         NULL)
+#endif
 	PHP_FALIAS(addaction,              swfbutton_addAction,       NULL)
+#ifdef HAVE_NEW_MING
+	PHP_FALIAS(addsound,               swfbutton_addSound,        NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -503,6 +541,23 @@ PHP_FUNCTION(swfbutton_addShape)
 }
 /* }}} */
 
+#ifdef HAVE_NEW_MING
+/* {{{ proto void swfbutton_setMenu(int flag)
+	enable track as menu button behaviour */
+
+PHP_FUNCTION(swfbutton_setMenu)
+{
+	zval **zflag;
+	SWFButton button = getButton(getThis() TSRMLS_CC);
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zflag) == FAILURE)
+		WRONG_PARAM_COUNT;	
+	convert_to_long_ex(zflag);
+
+	SWFButton_setMenu(button, Z_LVAL_PP(zflag));
+}
+/* }}} */
+#endif
+
 /* {{{ proto void swfbutton_setAction(object SWFAction)
    Sets the action to perform when button is pressed */
 PHP_FUNCTION(swfbutton_setAction)
@@ -520,6 +575,39 @@ PHP_FUNCTION(swfbutton_setAction)
 	SWFButton_addAction(button, action, SWFBUTTON_OVERDOWNTOOVERUP);
 }
 /* }}} */
+
+#ifdef HAVE_NEW_MING
+/* {{{ proto SWFSoundInstance * swfbutton_addASound(SWFSound sound, int flags)
+   associates a sound with a button transition
+	NOTE: the transitions are all wrong _UP, _OVER, _DOWN _HIT  */
+
+PHP_FUNCTION(swfbutton_addSound)
+{
+	zval **zsound, **flags;
+	SWFButton button = getButton(getThis() TSRMLS_CC);
+	SWFSound sound;
+	SWFSoundInstance item;
+	int ret;
+
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &zsound, &flags) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_object_ex(zsound);
+	sound = getSound(*zsound TSRMLS_CC);
+
+	convert_to_long_ex(flags);
+
+	item = SWFButton_addSound(button, sound, Z_LVAL_PP(flags));
+
+	if(item != NULL) {
+		/* try and create a soundinstance object */
+		ret = zend_list_insert(item, le_swfsoundinstancep);
+		object_init_ex(return_value, &soundinstance_class_entry);
+		add_property_resource(return_value, "soundinstance", ret);
+	}
+}
+/* }}} */
+#endif
 
 /* {{{ proto void swfbutton_addAction(object SWFAction, int flags)
    Sets the action to perform when conditions described in flags is met */
@@ -583,6 +671,18 @@ static zend_function_entry swfdisplayitem_functions[] = {
 	PHP_FALIAS(multcolor,    swfdisplayitem_multColor,   NULL)
 	PHP_FALIAS(setname,      swfdisplayitem_setName,     NULL)
 	PHP_FALIAS(addaction,    swfdisplayitem_addAction,   NULL)
+#ifdef HAVE_NEW_MING
+	PHP_FALIAS(remove,       swfdisplayitem_remove,      NULL)
+	PHP_FALIAS(setmasklevel, swfdisplayitem_setMaskLevel,NULL)
+	PHP_FALIAS(endmask,      swfdisplayitem_endMask,     NULL)
+	PHP_FALIAS(get_x,        swfdisplayitem_getX,        NULL)
+	PHP_FALIAS(get_y,        swfdisplayitem_getY,        NULL)
+	PHP_FALIAS(get_xscale,   swfdisplayitem_getXScale,   NULL)
+	PHP_FALIAS(get_yscale,   swfdisplayitem_getYScale,   NULL)
+	PHP_FALIAS(get_xskew,    swfdisplayitem_getXSkew,    NULL)
+	PHP_FALIAS(get_yskew,    swfdisplayitem_getYSkew,    NULL)
+	PHP_FALIAS(get_rot,      swfdisplayitem_getRot,      NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -908,6 +1008,157 @@ PHP_FUNCTION(swfdisplayitem_addAction)
 	SWFDisplayItem_addAction(item, action, Z_LVAL_PP(flags));
 }
 /* }}} */
+
+#ifdef HAVE_NEW_MING
+/* {{{ swfdisplayitem_remove */
+
+PHP_FUNCTION(swfdisplayitem_remove)
+{
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	SWFDisplayItem_remove(item);
+}
+/* }}} */
+
+/* {{{ proto void swfdisplayitem_setMaskLevel(int level)
+   defines a MASK layer at level */
+
+PHP_FUNCTION(swfdisplayitem_setMaskLevel)
+{
+	zval **level;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &level) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(level);
+
+	SWFDisplayItem_setMaskLevel(getDisplayItem(getThis() TSRMLS_CC), Z_LVAL_PP(level));
+}
+/* }}} */
+
+/* {{{ proto void swfdisplayitem_endMask()
+   another way of defining a MASK layer */
+
+PHP_FUNCTION(swfdisplayitem_endMask)
+{
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	SWFDisplayItem_endMask(item);
+}
+/* }}} */
+
+/* {{{ swfdisplayitem_getX */
+
+PHP_FUNCTION(swfdisplayitem_getX)
+{
+	float ret;
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	ret = SWFDisplayItem_get_x(item);
+	RETURN_DOUBLE(ret);
+}
+/* }}} */
+
+/* {{{ swfdisplayitem_getY */
+
+PHP_FUNCTION(swfdisplayitem_getY)
+{
+	float ret;
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	ret = SWFDisplayItem_get_y(item);
+	RETURN_DOUBLE(ret);
+}
+/* }}} */
+
+/* {{{ swfdisplayitem_getXScale */
+
+PHP_FUNCTION(swfdisplayitem_getXScale)
+{
+	float ret;
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	ret = SWFDisplayItem_get_xScale(item);
+	RETURN_DOUBLE(ret);
+}
+/* }}} */
+
+/* {{{ swfdisplayitem_getYScale */
+
+PHP_FUNCTION(swfdisplayitem_getYScale)
+{
+	float ret;
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	ret = SWFDisplayItem_get_yScale(item);
+	RETURN_DOUBLE(ret);
+}
+/* }}} */
+
+/* {{{ swfdisplayitem_getXSkew */
+
+PHP_FUNCTION(swfdisplayitem_getXSkew)
+{
+	float ret;
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	ret = SWFDisplayItem_get_xSkew(item);
+	RETURN_DOUBLE(ret);
+}
+/* }}} */
+
+/* {{{ swfdisplayitem_getYSkew */
+
+PHP_FUNCTION(swfdisplayitem_getYSkew)
+{
+	float ret;
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	ret = SWFDisplayItem_get_ySkew(item);
+	RETURN_DOUBLE(ret);
+}
+/* }}} */
+
+/* {{{ swfdisplayitem_getRot */
+
+PHP_FUNCTION(swfdisplayitem_getRot)
+{
+	float ret;
+	SWFDisplayItem item = getDisplayItem(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	ret = SWFDisplayItem_get_rot(item);
+	RETURN_DOUBLE(ret);
+}
+/* }}} */
+#endif
+
 /* }}} */
 
 /* {{{ SWFFill
@@ -1035,14 +1286,81 @@ PHP_FUNCTION(swffill_skewYTo)
 /* }}} */
 /* }}} */
 
+/* {{{ SWFFontCharacter */
+
+static zend_function_entry swffontchar_functions[] = {
+	PHP_FALIAS(addchars,         swffontchar_addChars,      NULL)
+	PHP_FALIAS(addutf8chars,     swffontchar_addUTF8Chars,  NULL)
+	{ NULL, NULL, NULL }
+};
+
+/* {{{ internal function SWFText getFont(zval *id)
+   Returns the Font object in zval *id */
+
+static
+SWFFontCharacter getFontCharacter(zval *id TSRMLS_DC)
+{
+	void *font = SWFgetProperty(id, "fontcharacter", 13, le_swffontcharp TSRMLS_CC);
+
+	if(!font)
+		php_error(E_ERROR, "called object is not an SWFFontCharacter!");
+
+	return (SWFFontCharacter)font;
+}
+
+static void destroy_SWFFontCharacter_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
+{
+	destroySWFBlock((SWFBlock)resource->ptr);
+}
+
+/* {{{ proto void swffontchar_addChars(string)
+   adds characters to a font for exporting font */
+
+PHP_FUNCTION(swffontchar_addChars)
+{
+	zval **zstring;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(zstring);
+
+	SWFFontCharacter_addChars(getFontCharacter(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
+}
+/* }}} */
+/* {{{ proto void swffontchar_addChars(string)
+   adds characters to a font for exporting font */
+
+PHP_FUNCTION(swffontchar_addUTF8Chars)
+{
+	zval **zstring;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(zstring);
+
+	SWFFontCharacter_addUTF8Chars(getFontCharacter(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
+}
+/* }}} */
+
+/* }}} */
 /* {{{ SWFFont
 */
 static zend_function_entry swffont_functions[] = {
 	PHP_FALIAS(swffont,          swffont_init,              NULL)
 	PHP_FALIAS(getwidth,         swffont_getWidth,          NULL)
+#ifdef HAVE_NEW_MING
+	PHP_FALIAS(getutf8width,     swffont_getUTF8Width,      NULL)
+/*	PHP_FALIAS(getwidewidth,     swffont_getWideWidth,      NULL)*/
+#endif
 	PHP_FALIAS(getascent,        swffont_getAscent,         NULL)
 	PHP_FALIAS(getdescent,       swffont_getDescent,        NULL)
 	PHP_FALIAS(getleading,       swffont_getLeading,        NULL)
+#ifdef HAVE_NEW_MING
+/*	PHP_FALIAS(addchars,         swffont_addChars,          NULL)*/
+	PHP_FALIAS(getshape,         swffont_getShape,          NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -1123,6 +1441,48 @@ PHP_FUNCTION(swffont_getWidth)
 }
 /* }}} */
 
+#ifdef HAVE_NEW_MING
+/* {{{ proto int swffont_getUTF8Width(string)
+   Calculates the width of the given string in this font at full height */
+
+PHP_FUNCTION(swffont_getUTF8Width)
+{
+	zval **zstring;
+	float width;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(zstring);
+
+	width = SWFFont_getUTF8StringWidth(getFont(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
+
+	RETURN_DOUBLE(width);
+}
+
+/* }}} */
+// not sure about 0 bytes !!!!!!!!!
+/* {{{ proto int swffont_getWideWidth(string)
+   Calculates the width of the given string in this font at full height */
+/*
+PHP_FUNCTION(swffont_getWideWidth)
+{
+	zval **zstring;
+	float width;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(zstring);
+
+	width = SWFFont_getWideStringWidth(getFont(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
+
+	RETURN_DOUBLE(width);
+}
+*/
+/* }}} */
+#endif
+
 /* {{{ proto float swffont_getAscent(void)
    Returns the ascent of the font, or 0 if not available */
 PHP_FUNCTION(swffont_getAscent)
@@ -1146,6 +1506,45 @@ PHP_FUNCTION(swffont_getLeading)
 	RETURN_DOUBLE(SWFFont_getLeading(getFont(getThis() TSRMLS_CC)));
 }
 /* }}} */
+
+#ifdef HAVE_NEW_MING
+/* {{{ proto void swffont_addChars(string)
+   adds characters to a font required within textfields */
+/*
+PHP_FUNCTION(swffont_addChars)
+{
+	zval **zstring;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(zstring);
+
+	SWFFont_addChars(getFont(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
+}
+*/
+/* }}} */
+
+/* {{{ proto char *swffont_getShape(code)
+   Returns the glyph shape of a char as a text string */
+
+PHP_FUNCTION(swffont_getShape)
+{
+	zval **zcode;
+	char *result;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zcode) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(zcode);
+
+	result = SWFFont_getShape(getFont(getThis() TSRMLS_CC), Z_LVAL_PP(zcode));
+	RETVAL_STRING(result, 1);
+	free(result);
+}
+/* }}} */
+#endif
+
 /* }}} */
 
 /* {{{ SWFGradient
@@ -1291,6 +1690,168 @@ PHP_FUNCTION(swfmorph_getShape2)
 /* }}} */
 /* }}} */
 
+/* {{{ SWFSound */
+
+static zend_function_entry swfsound_functions[] = {
+	PHP_FALIAS(swfsound,         swfsound_init,             NULL)
+	{ NULL, NULL, NULL }
+};
+
+/* {{{ internal function SWFSound getSound(zval *id)
+   Returns the Sound object in zval *id */
+
+SWFSound getSound(zval *id TSRMLS_DC)
+{
+	void *sound = SWFgetProperty(id, "sound", 5, le_swfsoundp TSRMLS_CC);
+
+	if(!sound)
+		php_error(E_ERROR, "called object is not an SWFSound!");
+
+	return (SWFSound)sound;
+}
+
+/* }}} */
+/* {{{ proto class swfsound_init(string filename, int flags)
+   Returns a new SWFSound object from given file */
+
+PHP_FUNCTION(swfsound_init)
+{
+	zval **zfile, **zflags;
+	SWFSound sound;
+	SWFInput input;
+	int flags;
+	int ret;
+
+	if(ZEND_NUM_ARGS() == 1)
+	{
+		if(zend_get_parameters_ex(1, &zfile) == FAILURE)
+			WRONG_PARAM_COUNT;
+		flags = 0;
+	}
+	else if(ZEND_NUM_ARGS() == 2)
+	{
+		if(zend_get_parameters_ex(2, &zfile, &zflags) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(zflags);
+		flags = Z_LVAL_PP(zflags);
+	}
+	else
+		WRONG_PARAM_COUNT;
+
+	if(Z_TYPE_PP(zfile) != IS_RESOURCE)
+	{
+		convert_to_string_ex(zfile);
+		input = newSWFInput_buffer(Z_STRVAL_PP(zfile), Z_STRLEN_PP(zfile));
+		zend_list_addref(zend_list_insert(input, le_swfinputp));
+	}
+	else
+		input = getInput(zfile TSRMLS_CC);
+
+	sound = newSWFSound_fromInput(input, flags);
+
+	ret = zend_list_insert(sound, le_swfsoundp);
+
+	object_init_ex(getThis(), &sound_class_entry);
+	add_property_resource(getThis(), "sound", ret);
+	zend_list_addref(ret);
+}
+static void destroy_SWFSound_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
+{
+	destroySWFBlock((SWFBlock)resource->ptr);
+}
+
+/* }}} */
+/* }}} */
+
+#ifdef HAVE_NEW_MING
+/* should handle envelope functions */
+/* {{{ SWFSoundInstance */
+
+static zend_function_entry swfsoundinstance_functions[] = {
+	PHP_FALIAS(nomultiple,     swfsoundinstance_noMultiple,    NULL)
+	PHP_FALIAS(loopinpoint,    swfsoundinstance_loopInPoint,   NULL)
+	PHP_FALIAS(loopoutpoint,   swfsoundinstance_loopOutPoint,  NULL)
+	PHP_FALIAS(loopcount,      swfsoundinstance_loopCount,     NULL)
+	{ NULL, NULL, NULL }
+};
+
+/* {{{ internal function SWFSoundInstance getSoundInstance(zval *id)
+   Returns the SoundInstance object in zval *id */
+
+SWFSoundInstance getSoundInstance(zval *id TSRMLS_DC)
+{
+	void *inst = SWFgetProperty(id, "soundinstance", 13, le_swfsoundinstancep TSRMLS_CC);
+
+	if (!inst)
+		php_error(E_ERROR, "called object is not an SWFSoundInstance!");
+
+	return (SWFSoundInstance)inst;
+}
+/* }}} */
+
+/* {{{ swfsoundinstance_nomultiple */
+
+PHP_FUNCTION(swfsoundinstance_noMultiple)
+{
+	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+
+	SWFSoundInstance_setNoMultiple(inst);
+}
+/* }}} */
+
+/* {{{ swfsoundinstance_loopinpoint(point) */
+
+PHP_FUNCTION(swfsoundinstance_loopInPoint)
+{
+	zval **zpoint;
+	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
+
+	if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &zpoint) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(zpoint);
+
+	SWFSoundInstance_setLoopInPoint(inst, Z_LVAL_PP(zpoint));
+}
+
+/* }}} */
+/* {{{ swfsoundinstance_loopoutpoint(point) */
+
+PHP_FUNCTION(swfsoundinstance_loopOutPoint)
+{
+	zval **zpoint;
+	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
+
+	if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &zpoint) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(zpoint);
+
+	SWFSoundInstance_setLoopOutPoint(inst, Z_LVAL_PP(zpoint));
+}
+/* }}} */
+
+/* {{{ swfsoundinstance_loopcount(point) */
+
+PHP_FUNCTION(swfsoundinstance_loopCount)
+{
+	zval **zcount;
+	SWFSoundInstance inst = getSoundInstance(getThis() TSRMLS_CC);
+
+	if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &zcount) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long_ex(zcount);
+
+	SWFSoundInstance_setLoopCount(inst, Z_LVAL_PP(zcount));
+}
+/* }}} */
+/* }}} */
+#endif
+
 /* {{{ SWFMovie
 */
 static zend_function_entry swfmovie_functions[] = {
@@ -1308,6 +1869,13 @@ static zend_function_entry swfmovie_functions[] = {
 	PHP_FALIAS(setframes,         swfmovie_setFrames,         NULL)
 #ifdef HAVE_NEW_MING
 	PHP_FALIAS(streammp3,         swfmovie_streamMp3,         NULL)
+	PHP_FALIAS(addexport,         swfmovie_addExport,         NULL)
+	PHP_FALIAS(writeexports,      swfmovie_writeExports,      NULL)
+	PHP_FALIAS(startsound,        swfmovie_startSound,        NULL)
+	PHP_FALIAS(stopsound,         swfmovie_stopSound,         NULL)
+	PHP_FALIAS(importchar,        swfmovie_importChar,        NULL)
+	PHP_FALIAS(importfont,        swfmovie_importFont,        NULL)
+	PHP_FALIAS(addfont,           swfmovie_addFont,           NULL)
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -1669,8 +2237,167 @@ PHP_FUNCTION(swfmovie_streamMp3)
 	SWFMovie_setSoundStream(movie, sound);
 }
 /* }}} */
-#endif
+
+/* {{{ swfmovie_addexport */
+
+PHP_FUNCTION(swfmovie_addExport)
+{
+	zval **zchar, **zname;
+	SWFBlock block;
+	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &zchar, &zname) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_object_ex(zchar);
+	convert_to_string_ex(zname);
+
+	block = (SWFBlock)getCharacter(*zchar TSRMLS_CC);
+
+	SWFMovie_addExport(movie, block,  Z_STRVAL_PP(zname));
+}
+
 /* }}} */
+
+/* {{{ swfmovie_writeexports */
+			
+PHP_FUNCTION(swfmovie_writeExports)
+{
+	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
+
+	SWFMovie_writeExports(movie);
+}
+
+/* }}} */
+/* {{{ SWFSoundInstance swfmovie_startsound */
+
+PHP_FUNCTION(swfmovie_startSound)
+{
+	zval **zsound;
+	int ret;
+	SWFSound sound;
+	SWFSoundInstance item;
+	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zsound) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_object_ex(zsound);
+	sound = (SWFSound)getSound(*zsound TSRMLS_CC);
+
+	item = SWFMovie_startSound(movie, sound);
+
+	if(item != NULL)
+	{
+		/* try and create a soundinstance object */
+		ret = zend_list_insert(item, le_swfsoundinstancep);
+		object_init_ex(return_value, &soundinstance_class_entry);
+		add_property_resource(return_value, "soundinstance", ret);
+	}
+}
+/* }}} */
+
+/* {{{ void swfmovie_stopsound */
+
+PHP_FUNCTION(swfmovie_stopSound)
+{
+	zval **zsound;
+	SWFSound sound;
+	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zsound) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_object_ex(zsound);
+	sound = (SWFSound)getSound(*zsound TSRMLS_CC);
+
+	SWFMovie_stopSound(movie, sound);
+}
+/* }}} */
+
+/* {{{ void swfmovie_importChar */
+
+PHP_FUNCTION(swfmovie_importChar)
+{
+	SWFMovie movie;
+	SWFCharacter res;
+	int ret;
+	zval **libswf, **name;
+
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &libswf, &name) == FAILURE)
+		WRONG_PARAM_COUNT;
+	convert_to_string_ex(libswf);
+	convert_to_string_ex(name);
+	movie = getMovie(getThis() TSRMLS_CC);
+	res = SWFMovie_importCharacter(movie, Z_STRVAL_PP(libswf), Z_STRVAL_PP(name));
+
+	if(res != NULL)
+	{
+		/* try and create a sprite object */
+    	ret = zend_list_insert(res, le_swfspritep);
+		object_init_ex(return_value, &sprite_class_entry);
+		add_property_resource(return_value, "sprite", ret);
+	}	
+}
+/* }}} */
+
+/* {{{ void swfmovie_importFont */
+
+PHP_FUNCTION(swfmovie_importFont)
+{
+	SWFMovie movie;
+	SWFFontCharacter res;
+	int ret;
+	zval **libswf, **name;
+
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &libswf, &name) == FAILURE)
+		WRONG_PARAM_COUNT;
+	convert_to_string_ex(libswf);
+	convert_to_string_ex(name);
+	movie = getMovie(getThis() TSRMLS_CC);
+	res = SWFMovie_importFont(movie, Z_STRVAL_PP(libswf), Z_STRVAL_PP(name));
+
+	if(res != NULL)
+	{
+		/* try and create a fontchar object */
+    	ret = zend_list_insert(res, le_swffontcharp);
+		object_init_ex(return_value, &fontchar_class_entry);
+		add_property_resource(return_value, "fontcharacter", ret);
+	}	
+}
+/* }}} */
+
+/* {{{ void swfmovie_addFont */
+
+PHP_FUNCTION(swfmovie_addFont)
+{
+	SWFMovie movie;
+	SWFFontCharacter res;
+	int ret;
+	SWFFont font;
+	zval **zfont;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zfont) == FAILURE)
+	    WRONG_PARAM_COUNT;
+
+	convert_to_object_ex(zfont);
+
+	movie = getMovie(getThis() TSRMLS_CC);
+	font = getFont(*zfont TSRMLS_CC);
+	res = SWFMovie_addFont(movie, font);
+
+	if(res != NULL)
+	{
+		/* try and create a fontchar object */
+    	ret = zend_list_insert(res, le_swffontcharp);
+		object_init_ex(return_value, &fontchar_class_entry);
+		add_property_resource(return_value, "fontcharacter", ret);
+	}	
+}
+/* }}} */
+/* }}} */
+
+#endif
 
 /* {{{ SWFShape
 */
@@ -2194,12 +2921,16 @@ PHP_FUNCTION(swfshape_drawcubicto)
 /* {{{ SWFSprite
 */
 static zend_function_entry swfsprite_functions[] = {
-	PHP_FALIAS(swfsprite,          swfsprite_init,              NULL)
-	PHP_FALIAS(add,                swfsprite_add,               NULL)
-	PHP_FALIAS(remove,             swfsprite_remove,            NULL)
-	PHP_FALIAS(nextframe,          swfsprite_nextFrame,         NULL)
-	PHP_FALIAS(labelframe,         swfsprite_labelFrame,        NULL)
-	PHP_FALIAS(setframes,          swfsprite_setFrames,         NULL)
+	PHP_FALIAS(swfsprite,			swfsprite_init,				NULL)
+	PHP_FALIAS(add,					swfsprite_add,				NULL)
+	PHP_FALIAS(remove,				swfsprite_remove,			NULL)
+	PHP_FALIAS(nextframe,			swfsprite_nextFrame,		NULL)
+	PHP_FALIAS(labelframe,			swfsprite_labelFrame,		NULL)
+	PHP_FALIAS(setframes,			swfsprite_setFrames,		NULL)
+#ifdef HAVE_NEW_MING
+	PHP_FALIAS(startsound,			swfsprite_startSound,		NULL)
+	PHP_FALIAS(stopsound,			swfsprite_stopSound,		NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -2320,6 +3051,53 @@ PHP_FUNCTION(swfsprite_setFrames)
 	SWFMovieClip_setNumberOfFrames(sprite, Z_LVAL_PP(frames));
 }
 /* }}} */
+
+#ifdef HAVE_NEW_MING
+/* {{{ SWFSoundInstance swfsprite_startsound */
+
+PHP_FUNCTION(swfsprite_startSound)
+{
+	zval **zsound;
+	int ret;
+	SWFSound sound;
+	SWFSoundInstance item;
+	SWFMovieClip sprite = getSprite(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zsound) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_object_ex(zsound);
+	sound = (SWFSound)getSound(*zsound TSRMLS_CC);
+
+	item = SWFMovieClip_startSound(sprite, sound);
+
+	if(item != NULL) {
+		/* try and create a displayitem object */
+		ret = zend_list_insert(item, le_swfsoundinstancep);
+		object_init_ex(return_value, &soundinstance_class_entry);
+		add_property_resource(return_value, "soundinstance", ret);
+	}
+}
+
+/* }}} */
+/* {{{ void swfsprite_stopsound */
+
+PHP_FUNCTION(swfsprite_stopSound)
+{
+	zval **zsound;
+	SWFSound sound;
+	SWFMovieClip sprite = getSprite(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zsound) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_object_ex(zsound);
+	sound = (SWFSound)getSound(*zsound TSRMLS_CC);
+
+	SWFMovieClip_stopSound(sprite, sound);
+}
+/* }}} */
+#endif
 /* }}} */
 
 /* {{{ SWFText
@@ -2332,7 +3110,15 @@ static zend_function_entry swftext_functions[] = {
 	PHP_FALIAS(setcolor,               swftext_setColor,          NULL)
 	PHP_FALIAS(moveto,                 swftext_moveTo,            NULL)
 	PHP_FALIAS(addstring,              swftext_addString,         NULL)
+#ifdef HAVE_NEW_MING
+	PHP_FALIAS(addutf8string,          swftext_addUTF8String,     NULL)
+/*	PHP_FALIAS(addwidestring,          swftext_addWideString,     NULL)*/
+#endif
 	PHP_FALIAS(getwidth,               swftext_getWidth,          NULL)
+#ifdef HAVE_NEW_MING
+	PHP_FALIAS(getutf8width,           swftext_getUTF8Width,      NULL)
+/*	PHP_FALIAS(getwidewidth,           swftext_getWideWidth,      NULL)*/
+#endif
 	PHP_FALIAS(getascent,              swftext_getAscent,         NULL)
 	PHP_FALIAS(getdescent,             swftext_getDescent,        NULL)
 	PHP_FALIAS(getleading,             swftext_getLeading,        NULL)
@@ -2480,6 +3266,45 @@ PHP_FUNCTION(swftext_addString)
 }
 /* }}} */
 
+#ifdef HAVE_NEW_MING
+/* {{{ proto void swftext_addUTF8String(string text)
+   Writes the given text into this SWFText object at the current pen position,
+   using the current font, height, spacing, and color */
+
+PHP_FUNCTION(swftext_addUTF8String)
+{
+	zval **s;
+	SWFText text = getText(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &s) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(s);
+
+	SWFText_addUTF8String(text, Z_STRVAL_PP(s), NULL);
+}
+
+/* }}} */
+/* {{{ proto void swftext_addWideString(string text)
+   Writes the given text into this SWFText object at the current pen position,
+   using the current font, height, spacing, and color */
+/*
+PHP_FUNCTION(swftext_addWideString)
+{
+	zval **s;
+	SWFText text = getText(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &s) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(s);
+
+	SWFText_addWideString(text, Z_STRVAL_PP(s), NULL);
+}
+*/
+/* }}} */
+#endif
+
 /* {{{ proto float swftext_getWidth(string str)
    Calculates the width of the given string in this text objects current font and size */
 PHP_FUNCTION(swftext_getWidth)
@@ -2493,6 +3318,47 @@ PHP_FUNCTION(swftext_getWidth)
 	RETURN_DOUBLE(SWFText_getStringWidth(getText(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring)));
 }
 /* }}} */
+
+#ifdef HAVE_NEW_MING
+/* {{{ proto double swftext_getUTF8Width(string)
+   calculates the width of the given string in this text objects current font and size */
+
+PHP_FUNCTION(swftext_getUTF8Width)
+{
+	zval **zstring;
+	int width;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(zstring);
+
+	width = SWFText_getUTF8StringWidth(getText(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
+
+	RETURN_DOUBLE(width);
+}
+
+/* }}} */
+/* {{{ proto double swftext_getWideWidth(string)
+   calculates the width of the given string in this text objects current font and size */
+/*
+PHP_FUNCTION(swftext_getWideWidth)
+{
+	zval **zstring;
+	int width;
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(zstring);
+
+	width = SWFText_getWideStringWidth(getText(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
+
+	RETURN_DOUBLE(width);
+}
+*/
+/* }}} */
+#endif
 
 /* {{{ proto float swftext_getAscent(void)
    Returns the ascent of the current font at its current size, or 0 if not available */
@@ -2535,6 +3401,8 @@ static zend_function_entry swftextfield_functions[] = {
 	PHP_FALIAS(setcolor,          swftextfield_setColor,        NULL)
 	PHP_FALIAS(setname,           swftextfield_setName,         NULL)
 	PHP_FALIAS(addstring,         swftextfield_addString,       NULL)
+	PHP_FALIAS(setpadding,        swftextfield_setPadding,      NULL)
+	PHP_FALIAS(addchars,          swftextfield_addChars,        NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -2558,12 +3426,12 @@ PHP_FUNCTION(swftextfield_init)
 		SWFTextField_setFlags(field, Z_LVAL_PP(flags));
 	}
 }
+/* }}} */
 
 static void destroy_SWFTextField_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 {
 	destroySWFTextField((SWFTextField)resource->ptr);
 }
-/* }}} */
 
 /* {{{ internal function getTextField
    Returns the SWFTextField object contained in zval *id */
@@ -2773,6 +3641,39 @@ PHP_FUNCTION(swftextfield_addString)
 	SWFTextField_addString(field, Z_STRVAL_PP(string));
 }
 /* }}} */
+
+/* {{{ proto void swftextfield_setPadding(float padding)
+   Sets the padding of this textfield */
+PHP_FUNCTION(swftextfield_setPadding)
+{
+	zval **padding;
+	SWFTextField field = getTextField(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &padding) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_double_ex(padding);
+
+	SWFTextField_setPadding(field, Z_DVAL_PP(padding));
+}
+/* }}} */
+
+/* {{{ proto void swftextfield_addChars(string)
+   adds characters to a font that will be available within a textfield */
+PHP_FUNCTION(swftextfield_addChars)
+{
+	zval **zstring;
+	SWFTextField field = getTextField(getThis() TSRMLS_CC);
+
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(zstring);
+
+	SWFTextField_addChars(field, Z_STRVAL_PP(zstring));
+
+}
+/* }}} */
 /* }}} */
 
 zend_module_entry ming_module_entry = {
@@ -2895,12 +3796,16 @@ PHP_MINIT_FUNCTION(ming)
 	le_swftextp = zend_register_list_destructors_ex(destroy_SWFText_resource, NULL, "SWFText", module_number);
 	le_swftextfieldp = zend_register_list_destructors_ex(destroy_SWFTextField_resource, NULL, "SWFTextField", module_number);
 	le_swffontp = zend_register_list_destructors_ex(destroy_SWFFont_resource, NULL, "SWFFont", module_number);
+	le_swffontcharp = zend_register_list_destructors_ex(destroy_SWFFontCharacter_resource, NULL, "SWFFontCharacter", module_number);
 	le_swfbuttonp = zend_register_list_destructors_ex(destroy_SWFButton_resource, NULL, "SWFButton", module_number);
 	le_swfmorphp = zend_register_list_destructors_ex(destroy_SWFMorph_resource, NULL, "SWFMorph", module_number);
 	le_swfspritep = zend_register_list_destructors_ex(destroy_SWFSprite_resource, NULL, "SWFSprite", module_number);
 	le_swfdisplayitemp = zend_register_list_destructors_ex(NULL, NULL, "SWFDisplayItem", module_number);
 	le_swfactionp = zend_register_list_destructors_ex(NULL, NULL, "SWFAction", module_number);
 	le_swfinputp = zend_register_list_destructors_ex(destroy_SWFInput_resource, NULL, "SWFInput", module_number);
+
+	le_swfsoundp = zend_register_list_destructors_ex(destroy_SWFSound_resource, NULL, "SWFSound", module_number);
+	le_swfsoundinstancep = zend_register_list_destructors_ex(NULL, NULL, "SWFSoundInstance", module_number);
 
 	INIT_CLASS_ENTRY(shape_class_entry, "swfshape", swfshape_functions);
 	INIT_CLASS_ENTRY(fill_class_entry, "swffill", swffill_functions);
@@ -2915,6 +3820,10 @@ PHP_MINIT_FUNCTION(ming)
 	INIT_CLASS_ENTRY(action_class_entry, "swfaction", swfaction_functions);
 	INIT_CLASS_ENTRY(morph_class_entry, "swfmorph", swfmorph_functions);
 	INIT_CLASS_ENTRY(sprite_class_entry, "swfsprite", swfsprite_functions);
+	INIT_CLASS_ENTRY(sound_class_entry, "swfsound", swfsound_functions);
+#ifdef HAVE_NEW_MING
+	INIT_CLASS_ENTRY(soundinstance_class_entry, "swfsoundinstance", swfsoundinstance_functions);
+#endif
 
 	zend_register_internal_class(&shape_class_entry TSRMLS_CC);
 	zend_register_internal_class(&fill_class_entry TSRMLS_CC);
