@@ -59,6 +59,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
  */
 function_entry curl_functions[] = {
 	PHP_FE(curl_init,                NULL)
+	PHP_FE(curl_copy_handle,         NULL)
 	PHP_FE(curl_version,             NULL)
 	PHP_FE(curl_setopt,              NULL)
 	PHP_FE(curl_exec,                NULL)
@@ -777,6 +778,40 @@ PHP_FUNCTION(curl_init)
 
 	ZEND_REGISTER_RESOURCE(return_value, ch, le_curl);
 	ch->id = Z_LVAL_P(return_value);
+}
+/* }}} */
+
+/* {{{ proto resource curl_copy_handle(resource ch)
+   Copy a cURL handle along with all of it's preferences */
+PHP_FUNCTION(curl_copy_handle)
+{
+	zval     *zid;
+	CURL     *cp;
+	php_curl *ch;
+	php_curl *dupch;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zid) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
+
+	cp = curl_easy_duphandle(ch->cp);
+	if (!cp) {
+		php_error(E_WARNING, "Cannot duplicate cURL handle");
+		RETURN_FALSE;
+	}
+
+	alloc_curl_handle(&dupch);
+	TSRMLS_SET_CTX(ch->thread_ctx);
+
+	dupch->cp = cp;
+	dupch->handlers->write->method = ch->handlers->write->method;
+	dupch->handlers->write->type   = ch->handlers->write->type;
+	dupch->handlers->read->method  = ch->handlers->read->method;
+	dupch->handlers->write_header->method = ch->handlers->write_header->method;
+
+	ZEND_REGISTER_RESOURCE(return_value, dupch, le_curl);
+	dupch->id = Z_LVAL_P(return_value);
 }
 /* }}} */
 

@@ -61,6 +61,7 @@ PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
 PHP_FUNCTION(curl_version);
 PHP_FUNCTION(curl_init);
+PHP_FUNCTION(curl_copy_handle);
 PHP_FUNCTION(curl_setopt);
 PHP_FUNCTION(curl_exec);
 PHP_FUNCTION(curl_getinfo);
