@@ -505,11 +505,9 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 	return SUCCESS;
 }
 
-static int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded)
+static int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded TSRMLS_DC)
 {
 	char buffer[MAXPATHLEN];
-	
-	TSRMLS_FETCH();
 	
 	if (egdsocket || !seeded) {
 		/* if we did not manage to read the seed file, we should not write
@@ -1797,7 +1795,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 		}
 	}
 
-	php_openssl_write_rand_file(randfile, egdsocket, seeded);
+	php_openssl_write_rand_file(randfile, egdsocket, seeded TSRMLS_CC);
 	
 	if (return_val == NULL) {
 		EVP_PKEY_free(req->priv_key);
@@ -3011,7 +3009,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
 	
 }
 
-PHP_OPENSSL_API int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC)
+int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC)
 {
 	zval **val = NULL;
 	char *cnmatch = NULL;
@@ -3099,7 +3097,7 @@ static int passwd_callback(char *buf, int num, int verify, void *data)
 	return 0;
 }
 
-PHP_OPENSSL_API SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC)
+SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC)
 {
 	zval **val = NULL;
 	char *cafile = NULL;
