@@ -405,7 +405,7 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC);
 
 void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable TSRMLS_DC);
-void zend_do_foreach_cont(znode *value, znode *key, znode *as_token TSRMLS_DC);
+void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *foreach_token TSRMLS_DC);
 void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token TSRMLS_DC);
 
 void zend_do_declare_begin(TSRMLS_D);
@@ -684,11 +684,12 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 
 /* variable parsing type (compile-time) */
-#define ZEND_PARSED_MEMBER			(1<<0)
-#define ZEND_PARSED_METHOD_CALL		(1<<1)
-#define ZEND_PARSED_STATIC_MEMBER	(1<<2)
-#define ZEND_PARSED_FUNCTION_CALL	(1<<3)
-#define ZEND_PARSED_VARIABLE		(1<<4)
+#define ZEND_PARSED_MEMBER				(1<<0)
+#define ZEND_PARSED_METHOD_CALL			(1<<1)
+#define ZEND_PARSED_STATIC_MEMBER		(1<<2)
+#define ZEND_PARSED_FUNCTION_CALL		(1<<3)
+#define ZEND_PARSED_VARIABLE			(1<<4)
+#define ZEND_PARSED_REFERENCE_VARIABLE	(1<<5)
 
 
 /* unset types */

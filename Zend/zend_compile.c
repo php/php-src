@@ -2973,15 +2973,17 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 	opline->result.op_type = IS_TMP_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *open_brackets_token;
+	opline->extended_value = 0;
 	SET_UNUSED(opline->op2);
 	*as_token = opline->result;
 }
 
 
-void zend_do_foreach_cont(znode *value, znode *key, znode *as_token TSRMLS_DC)
+void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *foreach_token TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	znode result_value, result_key, dummy;
+	zend_bool assign_by_ref=0;
 
 	if (key->op_type != IS_UNUSED) {
 		znode *tmp;
@@ -2990,6 +2992,18 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *as_token TSRMLS_DC)
 		tmp = key;
 		key = value;
 		value = tmp;
+	}
+
+	if (key->u.EA.type & ZEND_PARSED_REFERENCE_VARIABLE) {
+		zend_error(E_COMPILE_ERROR, "Key element cannot be a reference");
+	}
+	
+	if (value->u.EA.type & ZEND_PARSED_REFERENCE_VARIABLE) {
+		assign_by_ref = 1;
+		if (!CG(active_op_array)->opcodes[foreach_token->u.opline_num-1].extended_value) {
+			zend_error(E_COMPILE_ERROR, "Cannot create references to elements of a temporary array expression");
+		}
+		CG(active_op_array)->opcodes[foreach_token->u.opline_num].extended_value = 1;
 	}
 
 	opline->opcode = ZEND_FETCH_DIM_TMP_VAR;
@@ -3017,7 +3031,11 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *as_token TSRMLS_DC)
 		result_key = opline->result;
 	}
 
-	zend_do_assign(&dummy, value, &result_value TSRMLS_CC);
+	if (1 && assign_by_ref) {
+		zend_do_assign_ref(&dummy, value, &result_value TSRMLS_CC);
+	} else {
+		zend_do_assign(&dummy, value, &result_value TSRMLS_CC);
+	}
 	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
 	if (key->op_type != IS_UNUSED) {
 		zend_do_assign(&dummy, key, &result_key TSRMLS_CC);
