@@ -9,7 +9,6 @@ PHP                                                                        NEWS
 - Fixed bug #26819 (http_build_query() crashes on NULL output). (Ilia)
 - Fixed bug #26817 (http_build_query() does not handle private & protected 
   object properties correctly). (Ilia)
-- Fixed bug #25816 (disallow arrays in class constants). (Stanislav)
 - Fixed bug #26815 (foreach of (DOM) childnodes crashes when Xinclude is used).
   (Rob)
 - Fixed bug #26762 (unserialize() produces lowercase classnames). (Marcus)
@@ -28,6 +27,7 @@ PHP                                                                        NEWS
 - Fixed bug #26077 (memory leak when new() result is not assigned and no 
   constructor is defined). (Stanislav)
 - Fixed bug #26065 (Crash when nesting classes). (Marcus)
+- Fixed bug #25816 (disallow arrays in class constants). (Stanislav)
 - Fixed bug #25329 (sqlite_create_function with method and reference to $this).
   (Marcus) 
 - Fixed bug #25038 (call_user_func() issues a warning if function throws an
