@@ -249,7 +249,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_ALL,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("xmlrpc_errors",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			xmlrpc_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("xmlrpc_error_number",	"0",		PHP_INI_ALL,		OnUpdateInt,			xmlrpc_error_number,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("max_input_time",			"0",		PHP_INI_ALL,		OnUpdateInt,			max_input_time,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("max_input_time",			"-1",	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateInt,			max_input_time,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"0",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("implicit_flush",		"0",		PHP_INI_ALL,		OnUpdateBool,			implicit_flush,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
@@ -846,7 +846,11 @@ int php_request_startup(TSRMLS_D)
 		zend_activate(TSRMLS_C);
 		sapi_activate(TSRMLS_C);
 
-		zend_set_timeout(PG(max_input_time));
+		if (PG(max_input_time) == -1) {
+			zend_set_timeout(EG(timeout_seconds));
+		} else {
+			zend_set_timeout(PG(max_input_time));
+		}
 
 		if (PG(expose_php)) {
 			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
