@@ -70,7 +70,6 @@ PHP_NAMED_FUNCTION(php_if_fstat);
 /* temporary function for testing streams */
 PHP_FUNCTION(fopenstream);
 
-
 PHPAPI int php_set_sock_blocking(int socketd, int block);
 PHPAPI int php_file_le_fopen(void);
 PHPAPI int php_file_le_stream(void);
@@ -92,15 +91,26 @@ typedef enum _php_meta_tags_token {
 	TOK_OTHER
 } php_meta_tags_token;
 
-php_meta_tags_token php_next_meta_token(FILE *, int, int, int *, int *, char **, int *);
+typedef struct _php_meta_tags_data {
+  FILE *fp;
+  int socketd;
+  int issock;
+  int ulc;
+  int lc;
+  char *input_buffer;
+  char *token_data;
+  int token_len;
+} php_meta_tags_data;
+
+php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
 
 typedef struct {
-	int fgetss_state;
-	int pclose_ret;
-	HashTable ht_fsock_keys;
-	HashTable ht_fsock_socks;
-	struct php_sockbuf *phpsockbuf;
-	size_t def_chunk_size;
+  int fgetss_state;
+  int pclose_ret;
+  HashTable ht_fsock_keys;
+  HashTable ht_fsock_socks;
+  struct php_sockbuf *phpsockbuf;
+  size_t def_chunk_size;
 } php_file_globals;
 
 #ifdef ZTS
@@ -123,3 +133,4 @@ extern php_file_globals file_globals;
 
 
 #endif /* FILE_H */
+
