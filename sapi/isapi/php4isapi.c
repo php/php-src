@@ -509,7 +509,7 @@ BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO *pVer)
 {
 	pVer->dwExtensionVersion = HSE_VERSION;
 #ifdef WITH_ZEUS
-        strncpy( pVer->lpszExtensionDesc, sapi_module.name, HSE_MAX_EXT_DLL_NAME_LEN);
+	strncpy( pVer->lpszExtensionDesc, sapi_module.name, HSE_MAX_EXT_DLL_NAME_LEN);
 #else
 	lstrcpyn(pVer->lpszExtensionDesc, sapi_module.name, HSE_MAX_EXT_DLL_NAME_LEN);
 #endif
