@@ -45,7 +45,7 @@ install-data-local: PEAR.php
 	fi
 
 phpincludedir = $(includedir)/php
-builddir = $(prefix)/lib/php/build
+phpbuilddir = $(prefix)/lib/php/build
 
 BUILD_FILES = \
 	pear/pear.m4 \
@@ -64,8 +64,8 @@ BUILD_FILES = \
 bin_PROGRAMS = phpize php-config pear
 
 install-build:
-	$(mkinstalldirs) $(builddir) $(bindir) && \
-	(cd $(top_srcdir) && cp $(BUILD_FILES) $(builddir))
+	$(mkinstalldirs) $(phpbuilddir) $(bindir) && \
+	(cd $(top_srcdir) && cp $(BUILD_FILES) $(phpbuilddir))
 
 install-programs:
 	$(INSTALL) -m 755 $(srcdir)/phpextdist $(bindir)/phpextdist
