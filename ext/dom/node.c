@@ -78,9 +78,11 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 			if (ns != NULL && ns->prefix) {
 				qname = xmlStrdup(ns->prefix);
 				qname = xmlStrcat(qname, ":");
+				qname = xmlStrcat(qname, nodep->name);
+				str = qname;
+			} else {
+				str = (char *) nodep->name;
 			}
-			qname = xmlStrcat(qname, nodep->name);
-			str = qname;
 			break;
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
