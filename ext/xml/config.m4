@@ -24,7 +24,8 @@ if test "$PHP_XML" = "yes"; then
 if test "$PHP_EXPAT_DIR" = "no"; then
 
     AC_DEFINE(HAVE_LIBEXPAT_BUNDLED, 1, [ ])
-    PHP_NEW_EXTENSION(xml, xml.c expat/xmlparse.c expat/xmlrole.c expat/xmltok.c, $ext_shared,, -I@ext_srcdir@/expat -DXML_BYTE_ORDER=$order)
+    PHP_NEW_EXTENSION(xml, xml.c expat/xmlparse.c expat/xmlrole.c expat/xmltok.c, $ext_shared,,-DXML_BYTE_ORDER=$order)
+    PHP_ADD_INCLUDE($ext_srcdir/expat)
     PHP_ADD_BUILD_DIR($ext_builddir/expat)
 else
   
