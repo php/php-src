@@ -1,3 +1,56 @@
+2002-07-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/php_mysql.c: Partially reverted the netware related commit.
+
+    * ext/mysql/php_mysql.c: Beauify a bit..
+
+    * ext/mysql/php_mysql.c:
+    Some ws fixes. And removed the problems causing typedef for ushort.
+
+    * ext/standard/image.c:
+    - Fixed compile (bug #18297) on such systems which define uchar.
+
+    * ext/imap/config.m4:
+    Bail out the given path does not have the libraries in it.
+
+    * ext/openssl/openssl.c: MFH
+
+    * ext/openssl/openssl.c:
+    Fixed bug: #18295. e_os.h is not supposed to be included..
+
+2002-07-12  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/buildext.bat: File needed to build extensions for NetWare
+
+    * ext/mysql/mysql.mak
+      ext/mysql/php_mysql.c: Added NetWare changes
+
+2002-07-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/config.m4:
+    Make configure stop if something is wrong with libraries/linking.
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h: Fix ZTS build
+
+2002-07-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mbstring/mbstring.c: Remove unused variables.
+
+2002-07-12  Jani Taskinen  <sniper@iki.fi>
+
+    * .cvsignore: missing entry for config.h.in
+
+    * build/build.mk:
+    .libs/ directories are created when building shared extensions.
+
+    * NEWS: minor typo fixbug.
+
+    * main/main.c
+      main/rfc1867.c
+      main/rfc1867.h: - Added predefined constants for the upload errors.
+    - Removed the debugging error (not useful for end-users)
+
 2002-07-11  Jani Taskinen  <sniper@iki.fi>
 
     * ext/ftp/php_ftp.c: ws fix
