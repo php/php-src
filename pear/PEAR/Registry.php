@@ -210,8 +210,8 @@ class PEAR_Registry extends PEAR
             // XXX does not check type of lock (LOCK_SH/LOCK_EX)
             return true;
         }
-        if (PEAR::isError($err = $this->_assertStateDir())) {
-            return $err;
+        if (!@$this->_assertStateDir()) {
+            return $this->raiseError("could not create directory '{$this->statedir}'");
         }
         $this->lock_fp = @fopen($this->lockfile, 'w');
         if (!is_resource($this->lock_fp)) {
