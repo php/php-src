@@ -334,6 +334,13 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	zend_class_entry *ce;
 	int incomplete_class = 0;
 	
+	char *rval_temp;
+	
+	zval *user_func;
+	zval *retval_ptr;
+	zval **args[1];
+	zval *arg_func_name;
+	
 	INIT_PZVAL(*rval);
 	len2 = len = parse_iv(start + 2);
 	if (len == 0)
@@ -348,10 +355,32 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		}
 	}
 
-	if (zend_hash_find(EG(class_table), class_name, len2 + 1, (void **) &ce) != SUCCESS) {
-		incomplete_class = 1;
-		ce = PHP_IC_ENTRY;
-	} else
+	if (zend_hash_find(CG(class_table), class_name, len2 + 1, (void **) &ce) != SUCCESS) {
+		if (PG(unserialize_callback_func) == NULL) {
+			incomplete_class = 1;
+			ce = PHP_IC_ENTRY;
+		} else {
+			MAKE_STD_ZVAL(user_func);
+			ZVAL_STRING(user_func, PG(unserialize_callback_func), 1);
+
+			args[0] = &arg_func_name;
+			MAKE_STD_ZVAL(arg_func_name);
+			ZVAL_STRING(arg_func_name, class_name, 1);
+				
+			if (call_user_function_ex(CG(function_table), NULL, user_func, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
+				zend_error(E_WARNING, "'unserialize_callback_func' defined (%s) but not found", user_func->value.str.val);
+				incomplete_class = 1;
+				ce = PHP_IC_ENTRY;
+			} else {
+				if (zend_hash_find(CG(class_table), class_name, len2 + 1, (void **) &ce) != SUCCESS) {
+					zend_error(E_WARNING, "'unserialize_callback_func' (%s) hasn't defined the class it was called for", user_func->value.str.val);
+					incomplete_class = 1;
+					ce = PHP_IC_ENTRY;
+				} else
+					efree(class_name);
+			}
+		}
+	} else 
 		efree(class_name);
 
 	*p = YYCURSOR;
