@@ -1627,6 +1627,8 @@ binary_assign_op_addr_obj:
 				EX(Ts)[EX(opline)->result.u.var].tmp_var.value.str.val[0] = 0;
 				EX(Ts)[EX(opline)->result.u.var].tmp_var.value.str.len = 0;
 				EX(Ts)[EX(opline)->result.u.var].tmp_var.refcount = 1;
+				EX(Ts)[EX(opline)->result.u.var].tmp_var.type = IS_STRING;
+				EX(Ts)[EX(opline)->result.u.var].tmp_var.is_ref = 0;
 				NEXT_OPCODE();
 			case ZEND_ADD_CHAR:
 				add_char_to_string(	&EX(Ts)[EX(opline)->result.u.var].tmp_var,
