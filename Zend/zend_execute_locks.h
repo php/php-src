@@ -3,14 +3,14 @@
 
 #define PZVAL_LOCK(z) zend_pzval_lock_func(z)
 
-static inline zend_pzval_lock_func(zval *z)
+static inline void zend_pzval_lock_func(zval *z)
 {
 	((z)->refcount++);
 }
 
 #define PZVAL_UNLOCK(z) zend_pzval_unlock_func(z ELS_CC)
 
-static inline zend_pzval_unlock_func(zval *z ELS_DC)
+static inline void zend_pzval_unlock_func(zval *z ELS_DC)
 {
 	((z)->refcount--);
 	if (!(z)->refcount) {
@@ -20,7 +20,7 @@ static inline zend_pzval_unlock_func(zval *z ELS_DC)
 	}
 }
 
-static inline zend_clean_garbage(ELS_D)
+static inline void zend_clean_garbage(ELS_D)
 {
 	while (EG(garbage_ptr)) {
 		zval_ptr_dtor(&EG(garbage)[--EG(garbage_ptr)]);
