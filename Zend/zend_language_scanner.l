@@ -516,7 +516,7 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename);
 		return FAILURE;
 	}
-	zend_highlight(syntax_highlighter_ini);
+	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
 	restore_lexical_state(&original_lex_state TSRMLS_CC);
 	return SUCCESS;
@@ -540,7 +540,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 #endif
 		return FAILURE;
 	}
-	zend_highlight(syntax_highlighter_ini);
+	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
 	restore_lexical_state(&original_lex_state TSRMLS_CC);
 #ifdef ZTS
 	delete input_stream;
