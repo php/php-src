@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-18 Dec 2003, PHP 5 Beta 3
+19 Dec 2003, PHP 5 Beta 3
 - Bundled new tidy extension (John, Wez)
 - Upgraded PCRE library to version 4.5. (Andrei)
 - Dropped Windows 95 support. (Andi)
