@@ -98,11 +98,15 @@ STDMETHODIMP TPHPClassFactory::LockServer(BOOL fLock)
 
 STDMETHODIMP TPHPClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID iid, void **ppvObject)
 {
-	TPHPScriptingEngine *engine = new TPHPScriptingEngine;
+	IUnknown *punk = create_scripting_engine(NULL);
+	HRESULT ret;
 
-	HRESULT ret = engine->QueryInterface(iid, ppvObject);
-
-	engine->Release();
+	if (punk) {
+		ret = punk->QueryInterface(iid, ppvObject);
+		punk->Release();
+	} else {
+		ret = E_UNEXPECTED;
+	}
 	
 	return ret;
 }
@@ -161,7 +165,13 @@ static const GUID *script_engine_categories[] = {
 };
 
 static const struct reg_class classes_to_register[] = {
-	{ &CLSID_PHPActiveScriptEngine, "PHP Active Script Engine", "Both", engine_entries, script_engine_categories },
+	{ &CLSID_PHPActiveScriptEngine, "PHP Active Script Engine",
+#if ACTIVEPHP_THREADING_MODE == COINIT_MULTITHREADED
+		"Both",
+#else
+		"Apartment",
+#endif
+		engine_entries, script_engine_categories },
 	{ NULL, NULL, NULL, 0, NULL }
 };
 /* }}} */

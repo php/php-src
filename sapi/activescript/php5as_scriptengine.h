@@ -18,129 +18,68 @@
 /* $Id$ */
 
 #include <activscp.h>
-#if ACTIVEPHP_OBJECT_SAFETY
-# include <objsafe.h>
-#endif
+#include <objsafe.h>
 #include "zend.h"
-#include <setjmp.h>
 
-/* Definitions for thread messages */
-enum {
-	PHPSE_STATE_CHANGE = WM_USER + 20,
-	PHPSE_INIT_NEW,
-	PHPSE_PARSE_SCRIPT,
-	PHPSE_ADD_SCRIPTLET,
-	PHPSE_CLOSE,
-	PHPSE_CLONE,
-	PHPSE_ENTER,
-	PHPSE_LEAVE,
-	PHPSE_TERMINATE,
-	PHPSE_PARSE_PROC,
-	PHPSE_EXEC_PROC,
-	PHPSE_ADD_NAMED_ITEM,
-	PHPSE_SET_SITE,
-	PHPSE_ADD_TYPELIB,
-	PHPSE_TRIGGER_ERROR,
-	PHPSE_GET_DISPATCH,
-	PHPSE_DUMMY_TICK,
+#if 0
+#define ACTIVEPHP_THREADING_MODE	COINIT_MULTITHREADED
+#else
+#define ACTIVEPHP_THREADING_MODE	COINIT_APARTMENTTHREADED
+#endif
+
+#define ACTIVEPHP_HAS_OWN_THREAD	1
+
+#define WM_ACTIVEPHP_SERIALIZE	WM_USER + 200
+
+enum activephp_engine_func { /* if you change the order, change marshal.cpp too */
+	APHP_ParseScriptText,
+	APHP_InitNew,
+	APHP_AddNamedItem,
+	APHP_SetScriptState,
+	APHP_GetScriptDispatch,
+	APHP_Close,
+	APHP_AddTypeLib,
+	APHP_AddScriptlet,
+	APHP__Max
 };
 
-struct php_active_script_get_dispatch_info {
-	LPCOLESTR pstrItemName;
-	DWORD dispatch;
-};
-
-struct php_active_script_add_named_item_info {
-	LPCOLESTR pstrName;
-	DWORD dwFlags;
-	IUnknown *punk;
-	ITypeInfo *ptyp;
-	IDispatch *pdisp;
-	DWORD marshal;
-};
-
-struct php_active_script_add_scriptlet_info {
-	/* [in] */ LPCOLESTR pstrDefaultName;
-	/* [in] */ LPCOLESTR pstrCode;
-	/* [in] */ LPCOLESTR pstrItemName;
-	/* [in] */ LPCOLESTR pstrSubItemName;
-	/* [in] */ LPCOLESTR pstrEventName;
-	/* [in] */ LPCOLESTR pstrDelimiter;
-	/* [in] */ DWORD dwSourceContextCookie;
-	/* [in] */ ULONG ulStartingLineNumber;
-	/* [in] */ DWORD dwFlags;
-	/* [out] */ BSTR *pbstrName;
-	/* [out] */ EXCEPINFO *pexcepinfo;
-};
-
-struct php_active_script_parse_info {
-	/* [in] */ LPCOLESTR pstrCode;
-	/* [in] */ LPCOLESTR pstrItemName;
-	/* [in] */ IUnknown *punkContext;
-	/* [in] */ LPCOLESTR pstrDelimiter;
-	/* [in] */ DWORD dwSourceContextCookie;
-	/* [in] */ ULONG ulStartingLineNumber;
-	/* [in] */ DWORD dwFlags;
-	/* [out] */ VARIANT *pvarResult;
-	/* [out] */ EXCEPINFO *pexcepinfo;
-};
-
-struct php_active_script_parse_proc_info {
-	/* [in] */ LPCOLESTR pstrCode;
-	/* [in] */ LPCOLESTR pstrFormalParams;
-	/* [in] */ LPCOLESTR pstrProcedureName;
-	/* [in] */ LPCOLESTR pstrItemName;
-	/* [in] */ IUnknown *punkContext;
-	/* [in] */ LPCOLESTR pstrDelimiter;
-	/* [in] */ DWORD dwSourceContextCookie;
-	/* [in] */ ULONG ulStartingLineNumber;
-	/* [in] */ DWORD dwFlags;
-	DWORD dispcookie;
-};
-
-struct php_active_script_add_tlb_info {
-	/* [in] */ const GUID * rguidTypeLib;
-	/* [in] */ DWORD dwMajor;
-	/* [in] */ DWORD dwMinor;
-	/* [in] */ DWORD dwFlags;
-};
+HRESULT marshal_call(class TPHPScriptingEngine *engine, enum activephp_engine_func func, int nargs, ...);
+HRESULT marshal_stub(LPARAM lparam);
 
 class TPHPScriptingEngine:
 	public IActiveScript,
 	public IActiveScriptParse,
-	public IActiveScriptParseProcedure
-#if ACTIVEPHP_OBJECT_SAFETY
-	, public IObjectSafety
+	public IActiveScriptParseProcedure,
+	public IObjectSafety,
+	public IDispatch
+#if 0
+	, public IMarshal
 #endif
 {
 public:
 	volatile LONG m_refcount;
 	IActiveScriptSite *m_pass;
 	SCRIPTSTATE m_scriptstate;
-	MUTEX_T		m_mutex;	
-	HashTable	m_script_dispatchers;
-	HANDLE 		m_engine_thread_handle;
 
-	HANDLE		m_sync_thread_msg;
-	HRESULT		m_sync_thread_ret;
-
-	/* This is hacky, but only used when the host queries us for a script dispatch */
-	void *** m_tsrm_hack;
-	
 	void add_to_global_namespace(IDispatch *disp, DWORD flags, char *name TSRMLS_DC);
 	
 	THREAD_T	m_enginethread, m_basethread;
 	HashTable   m_frags;
 	ULONG		m_lambda_count;
-	IActiveScriptSite *m_pass_eng;
+	DWORD		m_gitcookie, m_asscookie;
+	HWND		m_queue;
 
-	jmp_buf *m_err_trap;
+	int m_done_init;
+
 	int m_in_main, m_stop_main;
-		
-	HRESULT SendThreadMessage(LONG msg, WPARAM wparam, LPARAM lparam);
 	
-	void engine_thread_func(void);
-	HRESULT engine_thread_handler(LONG msg, WPARAM wParam, LPARAM lParam, int *handled TSRMLS_DC);
+	void do_clone(TPHPScriptingEngine *src);
+void setup_engine_state(void);
+	int create_id(OLECHAR *name, DISPID *dispid TSRMLS_DC);
+
+	char *m_names[1024];
+	int m_lens[1024];
+	int m_ids;
 	
 public: /* IUnknown */
 	STDMETHODIMP QueryInterface(REFIID iid, void **ppvObject);
@@ -234,7 +173,6 @@ public: /* IActiveScriptParseProcedure */
 		/* [in] */ DWORD dwFlags,
 		/* [out] */ IDispatch **ppdisp);
 
-#if ACTIVEPHP_OBJECT_SAFETY
 public: /* IObjectSafety */
 	STDMETHODIMP GetInterfaceSafetyOptions(
 		/* [in]  */ REFIID	riid,						// Interface that we want options for
@@ -245,11 +183,33 @@ public: /* IObjectSafety */
 		/* [in]  */ REFIID		riid,					// Interface to set options for
 		/* [in]  */ DWORD		dwOptionSetMask,		// Options to change
 		/* [in]  */ DWORD		dwEnabledOptions);		// New option values
+#if 0
+public: /* IMarshal */
+	STDMETHODIMP GetUnmarshalClass(
+			REFIID riid, void *pv, DWORD dwDestContext, void *pvDestContext, DWORD mshlflags, CLSID *pCid);
+	STDMETHODIMP GetMarshalSizeMax(
+			REFIID riid, void *pv, DWORD dwDestContext, void *pvDestContext, DWORD mshlflags, ULONG *pSize);
+	STDMETHODIMP MarshalInterface(
+			IStream *pStm, REFIID riid, void *pv, DWORD dwDestContext, void *pvDestContext, DWORD mshflags);
+	STDMETHODIMP UnmarshalInterface(
+			IStream *pStm, REFIID riid, void **ppv);
+	STDMETHODIMP ReleaseMarshalData(IStream *pStm);
+	STDMETHODIMP DisconnectObject(DWORD dwReserved);
 #endif
+
+public:	/* IDispatch */
+	STDMETHODIMP GetIDsOfNames( REFIID  riid, OLECHAR **rgszNames, unsigned int cNames, LCID lcid, DISPID *rgDispId);
+	STDMETHODIMP Invoke( DISPID  dispIdMember, REFIID  riid, LCID  lcid, WORD  wFlags,
+		DISPPARAMS FAR*  pdp, VARIANT FAR*  pvarRes, EXCEPINFO FAR*  pei,
+		unsigned int FAR*  puArgErr);
+	STDMETHODIMP GetTypeInfoCount(unsigned int *  pctinfo);
+	STDMETHODIMP GetTypeInfo( unsigned int iTInfo, LCID lcid, ITypeInfo **ppTInfo);
 	
 public:
 	TPHPScriptingEngine();
 	~TPHPScriptingEngine();
-
+	
 };
+
+IUnknown *create_scripting_engine(TPHPScriptingEngine *tobecloned);
 

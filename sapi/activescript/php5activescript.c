@@ -145,6 +145,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 				activescript_sapi_module.shutdown(&sapi_module);
 			}
 			//OutputDebugString("PROCESS_DETACH\n");
+			sapi_shutdown();
 			tsrm_shutdown();
 			break;
 	}
