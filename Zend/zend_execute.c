@@ -595,8 +595,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 				zval *offset;
 				offset = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
 
-				if (container->value.str.val == undefined_variable_string 
-					|| type==BP_VAR_IS) {
+				if (container->value.str.val == undefined_variable_string) {
 					/* for read-mode only */
 					*retval = &EG(uninitialized_zval_ptr);
 					FREE_OP(op2, free_op2);
@@ -1843,7 +1842,18 @@ send_by_ref:
 					zval **var = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_IS);
 					int isset;
 
-					if (var==&EG(uninitialized_zval_ptr)
+					if (!var) {
+						if (Ts[opline->op1.u.var].EA.type==IS_STRING_OFFSET) {
+							if (Ts[opline->op1.u.var].EA.offset>=0
+								&& Ts[opline->op1.u.var].EA.offset<Ts[opline->op1.u.var].EA.str->value.str.len) {
+								isset = 1;
+							} else {
+								isset = 0;
+							}
+						} else {
+							isset = 1;
+						}
+					} else if (var==&EG(uninitialized_zval_ptr)
 						|| ((*var)->type == IS_STRING && (*var)->value.str.val == undefined_variable_string)) {
 						isset = 0;
 					} else {
@@ -1855,7 +1865,14 @@ send_by_ref:
 							Ts[opline->result.u.var].tmp_var.value.lval = isset;
 							break;
 						case ZEND_ISEMPTY:
-							if (!isset || !zend_is_true(*var)) {
+							if (!var) {
+								if (!isset
+									|| Ts[opline->op1.u.var].EA.str->value.str.val[Ts[opline->op1.u.var].EA.offset]=='0') {
+									Ts[opline->result.u.var].tmp_var.value.lval = 1;
+								} else {
+									Ts[opline->result.u.var].tmp_var.value.lval = 0;
+								}
+							} else if (!isset || !zend_is_true(*var)) {
 								Ts[opline->result.u.var].tmp_var.value.lval = 1;
 							} else {
 								Ts[opline->result.u.var].tmp_var.value.lval = 0;
