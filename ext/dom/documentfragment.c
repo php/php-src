@@ -75,6 +75,38 @@ PHP_METHOD(domdocumentfragment, __construct)
 }
 /* }}} end DOMDocumentFragment::__construct */
 
+/* php_dom_xmlSetTreeDoc is a custom implementation of xmlSetTreeDoc
+ needed for hack in appendXML due to libxml bug - no need to share this function */
+static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) {
+    xmlAttrPtr prop;
+	xmlNodePtr cur;
+
+    if (tree) {
+		if(tree->type == XML_ELEMENT_NODE) {
+			prop = tree->properties;
+			while (prop != NULL) {
+				prop->doc = doc;
+				if (prop->children) {
+					cur = prop->children;
+					while (cur != NULL) {
+						php_dom_xmlSetTreeDoc(cur, doc);
+						cur = cur->next;
+					}
+				}
+				prop = prop->next;
+			}
+		}
+		if (tree->children != NULL) {
+			cur = tree->children;
+			while (cur != NULL) {
+				php_dom_xmlSetTreeDoc(cur, doc);
+				cur = cur->next;
+			}
+		}
+		tree->doc = doc;
+    }
+}
+
 /* {{{ proto void DOMDocumentFragment::appendXML(string data); */
 PHP_METHOD(domdocumentfragment, appendXML) {
 	zval *id;
@@ -96,6 +128,11 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 		if (err != 0) {
 			RETURN_FALSE;
 		}
+		/* Following needed due to bug in libxml2 <= 2.6.14 
+		ifdef after next libxml release as bug is fixed in their cvs */
+		php_dom_xmlSetTreeDoc(lst, nodep->doc);
+		/* End stupid hack */
+
 		xmlAddChildList(nodep,lst);
 	}
 
