@@ -67,13 +67,6 @@ typedef struct {
 } sapi_globals_struct;
 
 
-typedef struct _sapi_post_content_type_reader {
-	char *content_type;
-	uint content_type_len;
-	void (*post_reader)(SLS_D);
-} sapi_post_content_type_reader;
-
-
 #ifdef ZTS
 # define SLS_D	sapi_globals_struct *sapi_globals
 # define SLS_DC	, SLS_D
@@ -91,6 +84,12 @@ SAPI_API extern int sapi_globals_id;
 # define SLS_FETCH()
 extern SAPI_API sapi_globals_struct sapi_globals;
 #endif
+
+typedef struct _sapi_post_content_type_reader {
+	char *content_type;
+	uint content_type_len;
+	void (*post_reader)(char *content_type_dup SLS_DC);
+} sapi_post_content_type_reader;
 
 
 SAPI_API void sapi_startup(sapi_module_struct *sf);
@@ -134,6 +133,6 @@ struct _sapi_module_struct {
 
 #define SAPI_DEFAULT_CONTENT_TYPE "Content-Type: text/html"
 
-#define SAPI_POST_READER_FUNC(post_reader) void post_reader(SLS_D)
+#define SAPI_POST_READER_FUNC(post_reader) void post_reader(char *content_type_dup SLS_DC)
 
 #endif /* _NEW_SAPI_H */

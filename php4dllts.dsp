@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\libzend" /I "." /I "regex\\" /I "..\tsrm" /I "..\bindlib_w32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "MSVC5" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "ZTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\libzend" /I "." /I "regex\\" /I "..\tsrm" /I "..\bindlib_w32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "MSVC5" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "ZTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -140,6 +140,10 @@ SOURCE=.\ext\standard\quot_print.c
 # Begin Source File
 
 SOURCE=.\request_info.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\rfc1867.c
 # End Source File
 # Begin Source File
 
@@ -220,6 +224,10 @@ SOURCE=.\ext\standard\quot_print.h
 # Begin Source File
 
 SOURCE=.\request_info.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\rfc1867.h
 # End Source File
 # Begin Source File
 
