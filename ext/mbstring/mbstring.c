@@ -466,7 +466,6 @@ php_mbregex_free_cache(mb_regex_t *pre)
 /* php.ini directive handler */
 static PHP_INI_MH(OnUpdate_mbstring_language)
 {
-	int *list, size;
 	enum mbfl_no_language no_language;
 
 	no_language = mbfl_name2no_language(new_value);
