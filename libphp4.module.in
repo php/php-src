@@ -1,7 +1,6 @@
 Name: php4_module
 ConfigStart
 	RULE_WANTHSREGEX=@HSREGEX@
-	LDFLAGS_SHLIB="@RAW_RPATHS@ $LDFLAGS_SHLIB"
 	LIBS="@RPATHS@ @PHP_LIBS@ @EXTRA_LIBS@ @LIBS@ @RDYNAMIC_LFLAGS@ $LIBS"
 	RULE_HIDE=yes
 	CFLAGS="$CFLAGS -I@abs_srcdir@ -I@abs_srcdir@/libzend -I@abs_builddir@/libzend -I@abs_builddir@"
