@@ -50,6 +50,7 @@ function dumpall(&$reg)
 		print $pkg["name"] . ":";
 		unset($pkg["name"]);
 		foreach ($pkg as $k => $v) {
+			if ($k == '_lastmodified') continue;
 			print " $k=\"$v\"";
 		}
 		print "\n";
