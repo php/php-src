@@ -1,0 +1,3 @@
+#! /bin/sh
+
+${MAKE:-make} -f build/build.mk cvsclean
