@@ -278,7 +278,7 @@ FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, int *is
 			*new_path='\0';
 			if (strlen(location)<8 || strncasecmp(location, "http://", 7)) {
 				strcpy(new_path, "http://");
-				strncat(new_path, resource->host, sizeof(new_path)-strlen(new_path)-1);
+				strlcat(new_path, resource->host, sizeof(new_path)-strlen(new_path)-1);
 				if (resource->port != 80) {
 					snprintf(new_path+strlen(new_path), sizeof(new_path)-strlen(new_path)-1, ":%d", resource->port);
 				}
@@ -286,10 +286,10 @@ FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, int *is
 					php_dirname(resource->path, strlen(resource->path));
 					snprintf (new_path+strlen(new_path), sizeof(new_path)-strlen(new_path)-1, "%s/", resource->path);
 				}
-				strncat(new_path, location, sizeof(new_path)-strlen(new_path)-1);
+				strlcat(new_path, location, sizeof(new_path)-strlen(new_path)-1);
 			}
 			else {
-				strncpy(new_path, location, sizeof(new_path));
+				strlcpy(new_path, location, sizeof(new_path));
 			}
 			php_url_free(resource);
 			fp = php_fopen_url_wrap_http(new_path, mode, options, issock, socketd, opened_path TSRMLS_CC);
