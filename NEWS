@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+???, Version 4.0 Beta 5
+
 20 February 2000, Version 4.0 Beta 4
 - Introduced $HTTP_POST_FILES[], that contains information about files uploaded
   through HTTP upload (Zeev)
