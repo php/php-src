@@ -39,8 +39,9 @@ extern zend_module_entry fbsql_module_entry;
 #include <FBCAccess/FBCAccess.h>
 
 extern PHP_MINIT_FUNCTION(fbsql);
-extern PHP_RINIT_FUNCTION(fbsql);
 extern PHP_MSHUTDOWN_FUNCTION(fbsql);
+extern PHP_RINIT_FUNCTION(fbsql);
+extern PHP_RSHUTDOWN_FUNCTION(fbsql);
 PHP_MINFO_FUNCTION(fbsql);
 PHP_FUNCTION(fbsql_connect);
 PHP_FUNCTION(fbsql_pconnect);
@@ -106,7 +107,7 @@ ZEND_BEGIN_MODULE_GLOBALS(fbsql)
    long databaseCount;
    long resultCount;
 
-   int linkIndex;
+   unsigned int linkIndex;
    int databaseIndex;
    int resultIndex;
 ZEND_END_MODULE_GLOBALS(fbsql)
