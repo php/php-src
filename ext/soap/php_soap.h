@@ -109,6 +109,7 @@ struct _soapService {
 	} soap_class;
 
 	HashTable *mapping;
+	int        version;
 	int        type;
 	char      *actor;
 	char      *uri;
@@ -126,6 +127,16 @@ struct _soapService {
 
 #define SOAP_1_1 1
 #define SOAP_1_2 2
+
+#define SOAP_ACTOR_NEXT             1
+#define SOAP_ACTOR_NONE             2
+#define SOAP_ACTOR_UNLIMATERECEIVER 3
+
+#define SOAP_1_1_ACTOR_NEXT             "http://schemas.xmlsoap.org/soap/actor/next"
+
+#define SOAP_1_2_ACTOR_NEXT             "http://www.w3.org/2003/05/soap-envelope/role/next"
+#define SOAP_1_2_ACTOR_NONE             "http://www.w3.org/2003/05/soap-envelope/role/none"
+#define SOAP_1_2_ACTOR_UNLIMATERECEIVER "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver"
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *defEncNs;

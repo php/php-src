@@ -262,11 +262,13 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			node = master_to_xml(enc, *zdata, style, parent);
 		}
 
-		if (zend_hash_find(Z_OBJPROP_P(data), "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
-			if (zend_hash_find(Z_OBJPROP_P(data), "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
-				set_ns_and_type_ex(node, Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
-			} else {
-				set_ns_and_type_ex(node, NULL, Z_STRVAL_PP(zstype));
+		if (style == SOAP_ENCODED) {
+			if (zend_hash_find(Z_OBJPROP_P(data), "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
+				if (zend_hash_find(Z_OBJPROP_P(data), "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
+					set_ns_and_type_ex(node, Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
+				} else {
+					set_ns_and_type_ex(node, NULL, Z_STRVAL_PP(zstype));
+				}
 			}
 		}
 
@@ -2329,7 +2331,7 @@ static xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 		href = get_attribute_ex(data->properties, "ref", SOAP_1_2_ENC_NAMESPACE);
 		if (href) {
 			char* id;
-            xmlNodePtr ret;
+			xmlNodePtr ret;
 
 			if (href->children->content[0] == '#') {
 				id = href->children->content+1;

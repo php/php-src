@@ -56,10 +56,9 @@ static int stream_alive(php_stream *stream  TSRMLS_DC)
 }
 
 /* Proxy HTTP Authentication */
-static void proxy_authentication(zval* this_ptr, smart_str* soap_headers)
+static void proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 {
 	zval **login, **password;
-	TSRMLS_FETCH();
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login"), (void **)&login) == SUCCESS) {
 		char* buf;
@@ -132,7 +131,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 		smart_str_appendc(&soap_headers, ':');
 		smart_str_append_unsigned(&soap_headers, phpurl->port);
 		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n");
-		proxy_authentication(this_ptr, &soap_headers);
+		proxy_authentication(this_ptr, &soap_headers TSRMLS_CC);
 		smart_str_append_const(&soap_headers, "\r\n");
 		if (php_stream_write(stream, soap_headers.c, soap_headers.len) != soap_headers.len) {
 			php_stream_close(stream);
@@ -332,7 +331,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 
 		/* Proxy HTTP Authentication */
 		if (use_proxy && !use_ssl) {
-			proxy_authentication(this_ptr, &soap_headers);
+			proxy_authentication(this_ptr, &soap_headers TSRMLS_CC);
 		}
 
 		/* Send cookies along with request */
