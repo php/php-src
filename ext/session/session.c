@@ -1076,9 +1076,7 @@ PHP_FUNCTION(session_module_name)
 {
 	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
-	char *old;
-
-	old = safe_estrdup(PS(mod)->name);
+	char *old = NULL;
 
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
@@ -1086,26 +1084,34 @@ PHP_FUNCTION(session_module_name)
 	if (ac == 1) {
 		ps_module *tempmod;
 
-		convert_to_string_ex(p_name);
-		tempmod = _php_find_ps_module(Z_STRVAL_PP(p_name) TSRMLS_CC);
-		if (tempmod) {
-			if (PS(mod_data))
-				PS(mod)->close(&PS(mod_data));
-			PS(mod) = tempmod;
-			PS(mod_data) = NULL;
-		} else {
-			efree(old);
-			php_error(E_ERROR, "Cannot find named PHP session module (%s)",
-					Z_STRVAL_PP(p_name));
+		if (PS(session_status) & (PS_ACTIVE|PS_ERROR)) {
+			php_error(E_NOTICE, "%s() cannot set session module name once session is started. "
+					  "Current session save handler (%s)",
+					  get_active_function_name(TSRMLS_C),
+					  (PS(mod)->name ? PS(mod)->name : "none"));
 			RETURN_FALSE;
 		}
+			
+		convert_to_string_ex(p_name);
+		tempmod = _php_find_ps_module(Z_STRVAL_PP(p_name) TSRMLS_CC);
+		if (!tempmod) {
+			php_error(E_NOTICE, "Cannot find named PHP session module (%s)",
+					  Z_STRVAL_PP(p_name));
+			RETURN_FALSE;
+		}
+		if (PS(mod_data))
+			PS(mod)->close(&PS(mod_data) TSRMLS_CC);
+		PS(mod) = tempmod;
+		PS(mod_data) = NULL;
+		PS(rinit_mod) = 1;
 	}
 
+	old = safe_estrdup(PS(mod)->name);
 	RETVAL_STRING(old, 0);
 }
 /* }}} */
 
-/* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc)
+/* {{{ proto bool session_set_save_handler(string open, string close, string read, string write, string destroy, string gc)
    Sets user-level functions */
 PHP_FUNCTION(session_set_save_handler)
 {
