@@ -204,6 +204,7 @@ char *strerror(int);
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || defined(BROKEN_SPRINTF) || defined(BROKEN_SNPRINTF) || defined(BROKEN_VSNPRINTF)
 #include "snprintf.h"
 #endif
+#include "spprintf.h"
 
 #define EXEC_INPUT_BUF 4096
 
