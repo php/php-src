@@ -710,7 +710,7 @@ internal_functions_in_yacc:
 		T_ISSET '(' cvar ')'	{ do_isset_or_isempty(ZEND_ISSET, &$$, &$3 CLS_CC); }
 	|	T_EMPTY '(' cvar ')'	{ do_isset_or_isempty(ZEND_ISEMPTY, &$$, &$3 CLS_CC); }
 	|	T_INCLUDE expr 			{ do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); }
-	|	T_INCLUDE_ONCE expr 	{ do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); }
+	|	T_INCLUDE_ONCE expr 	{ do_include_or_eval(ZEND_INCLUDE_ONCE, &$$, &$2 CLS_CC); }
 	|	T_EVAL '(' expr ')' 	{ do_include_or_eval(ZEND_EVAL, &$$, &$3 CLS_CC); }
 ;
 

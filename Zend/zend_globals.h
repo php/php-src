@@ -147,7 +147,7 @@ struct _zend_executor_globals {
 	HashTable *active_symbol_table;
 	HashTable symbol_table;		/* main symbol table */
 
-	HashTable imported_files;	/* files already included using 'import' */
+	HashTable included_files;	/* files already included */
 
 	jmp_buf bailout;
 

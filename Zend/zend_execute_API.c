@@ -115,7 +115,7 @@ void init_executor(CLS_D ELS_DC)
 	EG(opline_ptr) = NULL;
 	EG(garbage_ptr) = 0;
 
-	zend_hash_init(&EG(imported_files), 5, NULL, NULL, 0);
+	zend_hash_init(&EG(included_files), 5, NULL, NULL, 0);
 
 	EG(ticks_count) = 0;
 }
@@ -155,7 +155,7 @@ void shutdown_executor(ELS_D)
 #endif
 
 
-	zend_hash_destroy(&EG(imported_files));
+	zend_hash_destroy(&EG(included_files));
 }
 
 
