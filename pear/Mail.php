@@ -116,7 +116,9 @@ class Mail extends PEAR {
         
         foreach ($headers as $key => $val) {
             if ($key == 'From') {
-                $from_arr = imap_rfc822_parse_adrlist($val, 'localhost');
+                include_once 'Mail/rfc822.php';
+                
+                $from_arr = Mail_rfc822::parseAddressList($val, 'localhost');
                 $from = $from_arr[0]->mailbox . '@' . $from_arr[0]->host;
                 if (strstr($from, ' ')) {
                     // Reject outright envelope From addresses with spaces.
@@ -150,6 +152,8 @@ class Mail extends PEAR {
      */
     function parseRecipients($recipients)
     {
+        include_once 'Mail/rfc822.php';
+        
         // if we're passed an array, assume addresses are valid and
         // implode them before parsing.
         if (is_array($recipients)) {
@@ -159,11 +163,11 @@ class Mail extends PEAR {
         // Parse recipients, leaving out all personal info. This is
         // for smtp recipients, etc. All relevant personal information
         // should already be in the headers.
-        $addresses = imap_rfc822_parse_adrlist($recipients, 'localhost');
+        $addresses = Mail_rfc822::parseAddressList($recipients, 'localhost', false);
         $recipients = array();
         if (is_array($addresses)) {
             foreach ($addresses as $ob) {
-                $recipients[] = $ob->mailbox . '@' . $ob->host . ' ';
+                $recipients[] = $ob->mailbox . '@' . $ob->host;
             }
         }
         
