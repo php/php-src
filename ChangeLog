@@ -1,3 +1,198 @@
+2003-02-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+      supply mandir to makefile
+
+2003-02-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      main/SAPI.c:
+      MFH: reverted my patch & applying a new patch by Stefan Esser
+
+2003-02-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/imap/php_imap.c:
+      Fixed bug #22048 (crash in imap_headers when the e-mail contains an
+      abnormally large number of special characters).
+
+    * NEWS:
+      New function news.
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Added strpbrk(), which is essentially a wrapper around C's strpbrk function
+      that allows searching through a string for a character list.
+
+2003-02-11  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c:
+      size matters not.
+
+    * main/SAPI.c:
+      8 + 20 + 1 + 1 = 30
+      
+      There was no Bufferoverflow on 64bit systems.
+      
+      And the "fix" broke the header code on systems with old style snprintf.
+
+2003-02-11  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      build/buildcheck.sh:
+      - Fixed some weird crashes causd by the new default behaviour
+        of libtool 1.4.3
+      - Require libtool 1.4.3 or newer from now on.
+
+2003-02-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      Make that clear
+
+    * sapi/cli/php.1:
+      Document -H added by Ilia
+
+    * main/spprintf.c:
+      speed up
+
+2003-02-11  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/TODO:
+      Update time
+
+2003-02-11  Ian Holsman  <Ian@holsman.net>
+
+    * sapi/apache2handler/.cvsignore
+      sapi/apache2handler/CREDITS
+      sapi/apache2handler/README
+      sapi/apache2handler/apache_config.c
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/php.sym
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c:
+      initial checkin of the apache2 SAPI using a handler instead of filters.
+      TBD: src highlighting
+           better post handling
+
+2003-02-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cli/php_cli.c:
+      Added -H option to CLI binary. This option can be used to hide any
+      arguments
+      including the script name passed to the CLI binary.
+
+2003-02-11  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      fugbix news
+
+2003-02-11  Zeev Suraski  <zeev@zend.com>
+
+    * ext/rpc/rpc.c:
+      Fix random crashes
+
+2003-02-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Fixed ZTS build
+
+2003-02-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/readline/config.m4:
+      - There's no point in allowing using both --with-readline and
+      --with-libedit
+        the same time. Prefer --with-readline.
+      - Use PHP_ADD_LIBRARY when there is no path available.
+
+    * (PHP_4_3)
+      NEWS:
+      Moved one entry from HEAD here..
+
+    * NEWS:
+      moved entry to branch NEWS
+
+    * (PHP_4_3)
+      ext/ingres_ii/ii.c:
+      MFH: - Fixed bug: #21549 (problem with Ingres II persistent connections)
+
+    * ext/ingres_ii/ii.c:
+      - Fixed bug: #21549 (problem with Ingres II persistent connections)
+
+2003-02-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4:
+      move check to proper place
+
+    * sapi/apache/config.m4
+      sapi/apache/mod_php4.c:
+      Detect whether BUFFs contain a fd element. IBM is hiding the actual
+      descriptor behind a void *, so we just disable this for IBM servers
+
+2003-02-11  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      Bug #20426. Convert SMALLDATETIME correct
+
+2003-02-11  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.frag:
+      - clean up so Jani is not so confused
+
+2003-02-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+      Add "log to stdout" feature
+
+2003-02-11  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/handler.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h:
+      clean up source and improve hashing for implicitly
+      created objects (aka return values)
+
+    * ext/rpc/com/com.c
+      ext/rpc/com/com.h:
+      improved reverse lookup of ProgID based on an IDispatch pointer
+
+2003-02-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-dist
+      php.ini-recommended:
+      update regarding session.save_path
+
+    * ext/session/mod_files.c:
+      support setting the filemode using session.save_path
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+      use appropiate prefixes in the ps_module structure so we don't clash
+      with syscalls
+
+2003-02-11  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      fix news entry per for file() parameter..
+
+    * (PHP_4_3)
+      NEWS:
+      dots..I love ya..
+
+    * NEWS:
+      Blah
+
+    * NEWS:
+      krhm..
+
 2003-02-10  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/rpc/com/com_wrapper.c:
