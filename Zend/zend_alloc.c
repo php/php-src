@@ -307,10 +307,8 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 }
 
 
-ZEND_API void start_memory_manager(void)
+ZEND_API void start_memory_manager(ALS_D)
 {
-	ALS_FETCH();
-
 	AG(phead) = AG(head) = NULL;
 	
 #if MEMORY_LIMIT

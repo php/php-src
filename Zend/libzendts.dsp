@@ -226,6 +226,10 @@ SOURCE=.\zend_globals.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_globals_macros.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_hash.h
 # End Source File
 # Begin Source File

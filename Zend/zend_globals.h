@@ -21,7 +21,10 @@
 #ifndef _T_GLOBALS_H
 #define _T_GLOBALS_H
 
+
 #include <setjmp.h>
+
+#include "zend_globals_macros.h"
 
 #include "zend_stack.h"
 #include "zend_ptr_stack.h"
@@ -46,73 +49,8 @@ END_EXTERN_C()
 
 #endif
 
-typedef struct _zend_compiler_globals zend_compiler_globals;
-typedef struct _zend_executor_globals zend_executor_globals;
-typedef struct _zend_alloc_globals zend_alloc_globals;
-
 #define SYMTABLE_CACHE_SIZE 32
 
-
-/* Compiler */
-#ifdef ZTS
-# define CLS_D	zend_compiler_globals *compiler_globals
-# define CLS_DC	, CLS_D
-# define CLS_C	compiler_globals
-# define CLS_CC , CLS_C
-# define CG(v) (((zend_compiler_globals *) compiler_globals)->v)
-# define CLS_FETCH()	zend_compiler_globals *compiler_globals = (zend_compiler_globals *) ts_resource(compiler_globals_id)
-# define YYPARSE_PARAM compiler_globals
-# define YYLEX_PARAM compiler_globals
-BEGIN_EXTERN_C()
-int zendparse(void *compiler_globals);
-END_EXTERN_C()
-#else
-# define CLS_D
-# define CLS_DC
-# define CLS_C
-# define CLS_CC
-# define CG(v) (compiler_globals.v)
-# define CLS_FETCH()
-extern ZEND_API struct _zend_compiler_globals compiler_globals;
-int zendparse();
-#endif
-
-
-/* Executor */
-#ifdef ZTS
-# define ELS_D	zend_executor_globals *executor_globals
-# define ELS_DC	, ELS_D
-# define ELS_C	executor_globals
-# define ELS_CC , ELS_C
-# define EG(v) (executor_globals->v)
-# define ELS_FETCH()	zend_executor_globals *executor_globals = (zend_executor_globals *) ts_resource(executor_globals_id)
-#else
-# define ELS_D
-# define ELS_DC
-# define ELS_C
-# define ELS_CC
-# define EG(v) (executor_globals.v)
-# define ELS_FETCH()
-extern ZEND_API zend_executor_globals executor_globals;
-#endif
-
-
-/* Memory Manager */
-#ifdef ZTS
-# define ALS_D	zend_alloc_globals *alloc_globals
-# define ALS_DC	, ALS_D
-# define ALS_C	alloc_globals
-# define ALS_CC , ALS_C
-# define AG(v) (((zend_alloc_globals *) alloc_globals)->v)
-# define ALS_FETCH()	zend_alloc_globals *alloc_globals = (zend_alloc_globals *) ts_resource(alloc_globals_id)
-#else
-# define ALS_D
-# define ALS_DC
-# define ALS_C
-# define ALS_CC
-# define AG(v) (alloc_globals.v)
-# define ALS_FETCH()
-#endif
 
 #include "zend_compile.h"
 #include "zend_execute.h"
