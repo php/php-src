@@ -1,7 +1,3 @@
-#include <string.h>
-#include "zend.h"
-#include "zend_alloc.h"
-
 #if PHP_WIN32
 #include "../../../../main/config.w32.h"
 #elif defined(NETWARE)
@@ -9,3 +5,7 @@
 #else
 #include "php_config.h"
 #endif
+
+#include <string.h>
+#include "zend.h"
+#include "zend_alloc.h"
