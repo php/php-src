@@ -1199,6 +1199,8 @@ PHP_FUNCTION(preg_quote)
 		if (Z_STRLEN_PP(delim) > 0) {
 			delim_char = Z_STRVAL_PP(delim)[0];
 			quote_delim = 1;
+		} else {
+			delim_char = 0;
 		}
 	}
 	
