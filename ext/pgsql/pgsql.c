@@ -174,7 +174,7 @@ _notice_handler(void *arg, const char *message)
 	TSRMLS_FETCH();
 
 	if (! PGG(ignore_notices)) {
-		php_log_err((char *) message);
+		php_log_err((char *) message TSRMLS_CC);
 		if (PGG(last_notice) != NULL) {
 			efree(PGG(last_notice));
 		}

@@ -2335,7 +2335,7 @@ PHP_FUNCTION(cpdf_output_buffer)
 
 	buffer = cpdf_getBufferForPDF(pdf, &lenght);
 
-	php_write(buffer, lenght);
+	php_write(buffer, lenght TSRMLS_CC);
 
 	RETURN_TRUE;
 }

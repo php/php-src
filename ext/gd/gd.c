@@ -1382,7 +1382,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
 #endif
 		while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
-			php_write(buf, b);
+			php_write(buf, b TSRMLS_CC);
 		}
 
         fclose(tmp);

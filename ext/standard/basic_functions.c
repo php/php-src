@@ -1614,7 +1614,7 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 			fclose(logfile);
 			break;
 		default:
-			php_log_err(message);
+			php_log_err(message TSRMLS_CC);
 			break;
 	}
 	return SUCCESS;

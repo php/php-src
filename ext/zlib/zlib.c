@@ -67,7 +67,7 @@
 #define PUTC(a) PUTS(a)
 #endif
 #ifndef PHPWRITE
-#define PHPWRITE(a,n) php_write((a),(n))
+#define PHPWRITE(a,n) php_write((a),(n) TSRMLS_CC)
 #endif
 #endif
 

@@ -263,13 +263,12 @@ static int module_initialized = 0;
 
 /* {{{ php_log_err
  */
-PHPAPI void php_log_err(char *log_message)
+PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 {
 	FILE *log_file;
 	char error_time_str[128];
 	struct tm tmbuf;
 	time_t error_time;
-	TSRMLS_FETCH();
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
@@ -304,9 +303,8 @@ PHPAPI void php_log_err(char *log_message)
 
 /* {{{ php_write
    wrapper for modules to use PHPWRITE */
-PHPAPI int php_write(void *buf, uint size)
+PHPAPI int php_write(void *buf, uint size TSRMLS_DC)
 {
-	TSRMLS_FETCH();
 	return PHPWRITE(buf, size);
 }
 /* }}} */
@@ -388,7 +386,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			}
 #endif
 			snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-			php_log_err(log_buffer);
+			php_log_err(log_buffer TSRMLS_CC);
 		}
 		if (module_initialized && PG(display_errors)
 			&& (!PG(during_request_startup) || PG(display_startup_errors))) {
@@ -553,7 +551,6 @@ static void php_message_handler_for_zend(long message, void *data)
 				if (EG(error_reporting)&E_WARNING) {
 #if ZEND_DEBUG
 					char memory_leak_buf[512];
-					TSRMLS_FETCH();
 
 					if (message==ZMSG_MEMORY_LEAK_DETECTED) {
 						zend_mem_header *t = (zend_mem_header *) data;
@@ -931,17 +928,17 @@ void php_module_shutdown_for_exec()
  */
 int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 {
-	php_module_shutdown();
+	TSRMLS_FETCH();
+	php_module_shutdown(TSRMLS_C);
 	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_module_shutdown
  */
-void php_module_shutdown()
+void php_module_shutdown(TSRMLS_D)
 {
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
-	TSRMLS_FETCH();
 
 	if (!module_initialized) {
 		return;

@@ -563,7 +563,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 				case 'i': /* php info & quit */
 						if (php_request_startup(TSRMLS_C)==FAILURE) {
-							php_module_shutdown();
+							php_module_shutdown(TSRMLS_C);
 							return FAILURE;
 						}
 						if (no_headers) {
@@ -611,7 +611,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				case 'v': /* show php version & quit */
 						no_headers = 1;
 						if (php_request_startup(TSRMLS_C)==FAILURE) {
-							php_module_shutdown();
+							php_module_shutdown(TSRMLS_C);
 							return FAILURE;
 						}
 						if (no_headers) {
@@ -668,7 +668,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		}
 
 		if (php_request_startup(TSRMLS_C)==FAILURE) {
-			php_module_shutdown();
+			php_module_shutdown(TSRMLS_C);
 			return FAILURE;
 		}
 		if (no_headers) {
@@ -714,7 +714,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			if(!argv0 || !(file_handle.handle.fp = VCWD_FOPEN(argv0, "rb"))) {
 				PUTS("No input file specified.\n");
 				php_request_shutdown((void *) 0);
-				php_module_shutdown();
+				php_module_shutdown(TSRMLS_C);
 				return FAILURE;
 			}
 			file_handle.filename = argv0;
@@ -782,7 +782,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		exit_status = -1;
 	} zend_end_try();
 
-	php_module_shutdown();
+	php_module_shutdown(TSRMLS_C);
 
 #ifdef ZTS
 	tsrm_shutdown();

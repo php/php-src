@@ -255,7 +255,7 @@ PHP_FUNCTION(swf_closefile)
 		}
 		
 		while ((b = fread(buf, 1, sizeof(buf), f)) > 0)
-			php_write(buf, b);
+			php_write(buf, b TSRMLS_CC);
 		
 		fclose(f);
 		
