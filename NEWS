@@ -1,14 +1,25 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Oct 2003, Version 4.3.4RC3
-- Fixed bug #25955 (Compile failure on MacOSX 10.3 Panther). (Marko, Dan)
-- Fixed bug #25922 (Crash in error handler when 5th argument is modified). 
-  (Ilia)
+?? ??? 2003, Version 4.3.5
+- Fixed header handler in NSAPI SAPI (header->replace was ignored,
+  send_default_content_type now sends value from php.ini).
+  (Uwe Schindler)
+- Fixed bug #26025 (Segfault on glob() without GLOB_NOCHECK or GLOB_NOMAGIC
+  under *BSD platforms). (Moriyoshi)
 
-20 Oct 2003, Version 4.3.4RC2
+3 Nov 2003, Version 4.3.4
+- Made MCVE extension available on win32. (Jani)
+- Added apache_get_version() function. (Ilia)
+- Fixed disk_total_space() and disk_free_space() under FreeBSD. (Jon Parise)
+- Fixed crash bug when non-existing save/serializer handler was used. (Jani)
+- Fixed memory leak in gethostbynamel() if an error occurs. (Sara)
+- Fixed FastCGI being unable to bind to a specific IP. (Sascha)
 - Fixed multibyte regex engine to properly handle ".*" pattern under
   POSIX compatible mode. (K.Kosako <kosako at sofnec.co.jp>, Moriyoshi)
+- Fixed bug #25955 (Compile failure on MacOSX 10.3 Panther). (Marko, Dan)
 - Fixed bug #25923 (mail() modifies the to & subject arguments). (Ilia)
+- Fixed bug #25922 (Crash in error handler when 5th argument is modified).
+  (Ilia)
 - Fixed bug #25918 (Possible crash in mime_content_type()). (Ilia)
 - Fixed bug #25900 (document->get_elements_by_tag_name with default xmlns).
   (Rob)
@@ -17,62 +28,58 @@ PHP 4                                                                      NEWS
 - Fixed bug #25888 (Crash of php.exe when xpath_eval of a namespace). (Rob)
 - Fixed bug #25836 (last key of multi-dimensional array passed via GPC not
   being escaped when magic_quotes_gpc is on). (Ilia)
-- Fixed bug #25825 (tzset() was not called to reset libc environment
-  on request shutdown). (Wez)
+- Fixed bug #25825 (tzset() was not called to reset libc environment on
+  request shutdown). (Wez)
 - Fixed bug #25814 (Make flock() return correct value when 3rd argument is
   used). (Ilia)
 - Fixed bug #25800 (parse_url() could not parse urls with empty port). (Ilia)
 - Fixed bug #25780 (ext/session: invalid "session.cookie_lifetime" makes 
   session_start() to crash in win32). (Jani)
 - Fixed bug #25777 (Do not rtrim() of text fields fetched from mssql). (Ilia)
-- Fixed bug #25770 (Segfault with PHP and bison 1.875). (eggert@gnu.org, Marcus)
+- Fixed bug #25770 (Segfault with PHP and bison 1.875).
+  (eggert@gnu.org, Marcus)
 - Fixed bug #25764 (ldap_get_option() crashes with unbound ldap link). (Jani)
-- Fixed bug #25758 (var_export does not escape ' & \ inside array keys). (Ilia)
-- Fixed bug #25752 (ext/ncurses: ncurses.h instead of curses.h with BSD). (Jani)
-- Fixed bug #25746 (Do not bail out when unable to chdir original dir on 
+- Fixed bug #25758 (var_export does not escape ' & \ inside array keys).
+  (Ilia)
+- Fixed bug #25752 (ext/ncurses: ncurses.h instead of curses.h with BSD).
+  (Jani)
+- Fixed bug #25746 (Do not bail out when unable to chdir original dir on
   systems with broken getcwd()). (Ilia)
-- Fixed bug #25745 (ctype functions fail with non-ascii characters). (Moriyoshi)
+- Fixed bug #25745 (ctype functions fail with non-ascii characters).
+  (Moriyoshi)
 - Fixed bug #25744 (make ZTS build of ext/sybase compile). (Ilia)
-- Fixed bug #25738 (alloca() related issues on the Darwin platform). (Moriyoshi)
-- Fixed bug #25708 (extract($GLOBALS, EXTR_REFS) mangles $GLOBALS). (Moriyoshi)
+- Fixed bug #25738 (alloca() related issues on the Darwin platform).
+  (Moriyoshi)
+- Fixed bug #25708 (extract($GLOBALS, EXTR_REFS) mangles $GLOBALS).
+  (Moriyoshi)
 - Fixed bug #25707 (html_entity_decode() over-decodes &amp;lt;). (Moriyoshi)
 - Fixed bug #25703 (openssl configure check failed). (Jani)
 - Fixed bug #25701 (On flush() set headers_sent in apache2handler). (Ilia)
-- Fixed bug #25669 (eregi() with non-ascii characters). (Moriyoshi)
-- Fixed bug #25558 (ext/dbase: reverted fix for bug #23463). (Vlad)
-- Fixed bug #18534 (ifx_close() leaves open session). (nobbie@php.net)
-
-29 Sep 2003, Version 4.3.4RC1
-- Made MCVE extension available on win32. (Jani)
-- Added apache_get_version() function. (Ilia)
-- Fixed disk_total_space() and disk_free_space() under FreeBSD. (Jon Parise)
-- Fixed crash bug when non-existing save/serializer handler was used. (Jani)
-- Fixed memory leak in gethostbynamel() if an error occurs. (Sara)
-- Fixed FastCGI being unable to bind to a specific IP. (Sascha)
 - Fixed bug #25671 (str_replace() corrupts subarrays). (Sara)
-- Fixed Bug #25665 (var_dump() hangs on Nan and INF). (Ilia)
+- Fixed bug #25669 (eregi() with non-ascii characters). (Moriyoshi)
+- Fixed bug #25665 (var_dump() hangs on Nan and INF). (Ilia)
 - Fixed bug #25648 (xslt_set_encoding() not detected correctly). (Jani)
-- Fixed bug #25636 (SNMP Session not closed on success). 
+- Fixed bug #25636 (SNMP Session not closed on success).
   (Ilia, patch by: nesslage at mwsc dot edu)
 - Fixed bug #25635 (Make "make tests" to fail due to invalid include_path).
   (Ilia)
 - Fixed bug #25604 (HAVE_SNMP_PARSE_OID undefined with phpize build). (Jani)
-- Fixed bug #25583 (Incorrect handling of paths starting with "/" on win32 
+- Fixed bug #25583 (Incorrect handling of paths starting with "/" on win32
   inside glob() function). (Ilia)
 - Fixed bug #25570 (Possible crash in apache2handler when zend_bailout called
   outside of zend_try {} block). (Ilia)
+- Fixed bug #25558 (ext/dbase: reverted fix for bug #23463). (Vlad)
 - Fixed bug #25530 (checkdate() incorrectly handles floats). (Ilia)
 - Fixed bug #25525 (ldap_explode_dn() crashes when passed invalid dn).
   (Sara, patch by: mikael dot suvi at trigger dot ee)
 - Fixed bug #25504 (pcre_match_all() crashes when passed only 2 parameters).
   (Jani)
-- Fixed bug #23488 (zlib.output_compression overrides Vary header). (Stefan)
-- Fixed bug #25483 (ext/informix: bogus -469 error from ifx_query()). 
+- Fixed bug #25483 (ext/informix: bogus -469 error from ifx_query()).
   (Jani, patch by: denisov at kubsu dot ru)
 - Fixed bug #25463 (ext/cpdf: compile failure with bundled GD)
 - Fixed bug #25429 (fix copying of stdin using copy() function). (Ilia)
 - Fixed bug #25424 (ext/informix: lvarchar not supported in win32). (Jani)
-- Fixed bug #25404 (ext/pgsql: open transactions not closed when script ends). 
+- Fixed bug #25404 (ext/pgsql: open transactions not closed when script ends).
   (Marcus)
 - Fixed bug #25385 (ob_gzhandler(): typo in sapi_add_header_ex() call). (Jani)
 - Fixed bug #25378 (unserialize() crashes with invalid data). (Jani)
@@ -81,7 +88,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #25343 (is_dir() gives warning on FreeBSD). (Jani)
 - Fixed bug #25333 (Possible body corruption & crash in win32 mail()). (Ilia)
 - Fixed bug #25316 (Possible infinite loop inside _php_stream_write()). (Ilia)
-- Fixed bug #25314 (FTP_ASCII mode behaving like binary from Win->Unix). (Sara)
+- Fixed bug #25314 (FTP_ASCII mode behaving like binary from Win->Unix).
+  (Sara)
 - Fixed bug #25308 (php -m crashes when zend extensions are loaded). (Stas)
 - Fixed bug #25307 (Crash with WDDX serializer). (Sascha, Jani)
 - Fixed bug #25295 (QNX6: php_ini.c:414: 'alphasort' undeclared). (Jani)
@@ -95,11 +103,13 @@ PHP 4                                                                      NEWS
 - Fixed bug #25106 (Added more stringent checks on bzopen() mode). (Ilia)
 - Fixed bug #25070 (unlock session files on win32 before closing them). (Ilia)
 - Fixed bug #24402 (Compile failure with gettext 0.12.x). (Jani)
+- Fixed bug #23488 (zlib.output_compression overrides Vary header). (Stefan)
 - Fixed bug #23326 (ext/domxml: Attributes via append_child not supported).
   (Melvyn)
 - Fixed bug #21220 (Wrong Apache version shown in phpinfo() output). (Jani)
-- Fixed bug #14049 (realpath() returns invalid results for non-existent paths).
-  (Ilia)
+- Fixed bug #18534 (ifx_close() leaves open session). (nobbie@php.net)
+- Fixed bug #14049 (realpath() returns invalid results for non-existent 
+  paths). (Ilia)
 
 25 Aug 2003, Version 4.3.3
 - Upgraded the bundled Expat library to version 1.95.6. (Jani)
