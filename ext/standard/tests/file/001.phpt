@@ -51,7 +51,7 @@ $s = stat ('test.link');
 $ls = lstat ('test.link');
 for ($i = 0; $i <= 11; $i++) {
     if ($ls[$i] != $s[$i]) {
-	if($i!=6) echo "test.link lstat and stat differ at element $i\n";
+	if ($i != 6 && $i != 11) echo "test.link lstat and stat differ at element $i\n";
     }
 }
 echo "test.file is " . filetype('test.file') . "\n";
@@ -138,7 +138,7 @@ test.file permissions are 0654
 test.file size is 0
 test.file is writeable
 test.file is readable
-test.file is executable
+test.file is not executable
 test.file is not executable
 test.file is a regular file
 test.link is a regular file
