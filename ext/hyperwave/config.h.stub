@@ -1,0 +1,2 @@
+/* Define if you want Hyperwave support */
+#define HYPERWAVE 0
