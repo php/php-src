@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Apr 2004, Version 4.3.6
+- Fixed bug #27769 (domxml_xmltree crashes). (Rob)
+
 05 Apr 2004, Version 4.3.6RC2
 - Fixed a bug that prevented building of the GD extension against external GD
   lib 1.X. (Ilia, Nick Talbott).
