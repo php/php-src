@@ -166,6 +166,7 @@ typedef struct {
 	XSQLDA *out_sqlda;
 	ibase_array *out_array;
 	unsigned char has_more_rows;
+	char statement_type;
 } ibase_result;
 
 typedef struct _php_ibase_varchar {

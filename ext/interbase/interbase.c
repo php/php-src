@@ -82,8 +82,8 @@ A lot... */
 #endif
 
 #ifdef ZEND_DEBUG
-/* #define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__); */
-#define IBDEBUG(a)
+#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
+/* #define IBDEBUG(a) */
 #else
 #define IBDEBUG(a)
 #endif
@@ -1554,7 +1554,8 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 	BIND_BUF *bind_buf = NULL;
 	int rv = FAILURE;
 	char info_count[] = {isc_info_sql_records}, result[64];
-
+	ISC_STATUS isc_result;
+	
 	RESET_ERRMSG;
 
 	if (argc > 0 && args != NULL) {
@@ -1627,6 +1628,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 		IB_RESULT->link = ib_query->link->handle;
 		IB_RESULT->trans = ib_query->trans->handle;
 		IB_RESULT->stmt = ib_query->stmt; 
+		IB_RESULT->statement_type = ib_query->statement_type;
 		IB_RESULT->drop_stmt = 0; /* when free result close but not drop!*/
 
 		out_sqlda = IB_RESULT->out_sqlda = emalloc(XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
@@ -1656,7 +1658,12 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 		}
 	}
 
-	if (isc_dsql_execute(IB_STATUS, &ib_query->trans->handle, &ib_query->stmt, ib_query->dialect, in_sqlda)) {
+	if (ib_query->statement_type == isc_info_sql_stmt_exec_procedure) {
+		isc_result = isc_dsql_execute2(IB_STATUS, &ib_query->trans->handle, &ib_query->stmt, SQLDA_CURRENT_VERSION, in_sqlda, out_sqlda);
+	} else {
+		isc_result = isc_dsql_execute(IB_STATUS, &ib_query->trans->handle, &ib_query->stmt, SQLDA_CURRENT_VERSION, in_sqlda);
+	}
+	if (isc_result) {
 		IBDEBUG("Could not execute query");
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_exec_error;
@@ -2505,15 +2512,20 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 		RETURN_FALSE;
 	}
 
-	if (isc_dsql_fetch(IB_STATUS, &ib_result->stmt, 1, ib_result->out_sqlda)) {
+	if (ib_result->statement_type != isc_info_sql_stmt_exec_procedure) {
 
-		ib_result->has_more_rows = 0;
-		if (IB_STATUS[0] && IB_STATUS[1]) { /* error in fetch */
-			_php_ibase_error(TSRMLS_C);
+		if (isc_dsql_fetch(IB_STATUS, &ib_result->stmt, 1, ib_result->out_sqlda)) {
+	
+			ib_result->has_more_rows = 0;
+			if (IB_STATUS[0] && IB_STATUS[1]) { /* error in fetch */
+				_php_ibase_error(TSRMLS_C);
+			}
+			RETURN_FALSE;
 		}
-		RETURN_FALSE;
-	}
-
+	} else {
+		ib_result->has_more_rows = 0;
+	}	
+	
 	array_init(return_value);
 	
 	arr_cnt = 0;
