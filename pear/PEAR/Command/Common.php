@@ -19,7 +19,6 @@
 // $Id$
 
 require_once "PEAR.php";
-//require_once "PEAR/CommandResponse.php";
 
 class PEAR_Command_Common extends PEAR
 {
@@ -58,28 +57,6 @@ class PEAR_Command_Common extends PEAR
     {
         return array(null, 'No help avaible yet');
     }
-
-    /**
-     * Return a PEAR_CommandResponse object with parameters
-     * filled in.
-     *
-     * @param int     status code
-     * @param string  message text
-     * @param string  (optional) message character encoding
-     *
-     * @return object a PEAR_CommandResponse object
-     *
-     * @access public
-     *
-     * @see PEAR_CommandResponse
-     */
-/*
-    function &makeResponse($status, $message, $encoding = null)
-    {
-        $obj = &new PEAR_CommandResponse($status, $message, $encoding);
-        return $obj;
-    }
-*/
 }
 
 ?>
