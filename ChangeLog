@@ -1,3 +1,63 @@
+2004-05-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ingres_ii/ii.c:
+      Fixed possible memory leak.
+
+2004-05-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/strings/002.phpt:
+      Fix test
+
+    * ZendEngine2/zend_API.c:
+      - Need to operate on module pointer in hash table
+
+2004-05-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_execute_API.c:
+      Fix bug #28438: win32 build fails in non-zts mode
+
+2004-05-18  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ext/standard/dl.c:
+      Z_TYPE_P is for zvals
+
+2004-05-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/dl.c:
+      Fix dl() and extension=
+
+    * ZendEngine2/zend_API.c:
+      Register according to the type specified by the module.
+      (Helps to fix dl() bug)
+
+2004-05-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/exec.c:
+      MFH: Fixed command line escaping routines for win32.
+
+    * ext/standard/exec.c:
+      Fixed command line escaping routines for win32.
+
+2004-05-18  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/pspell/pspell.c:
+      Move declarations to the begining of function.
+      This allows it to actually compile on windows.
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      TSRM fix
+
+    * ext/sockets/sockets.c:
+      No length parameter -> estrdup()
+
+2004-05-18  Sara Golemon  <php@alphaweb.net>
+
+    * ZendEngine2/zend_execute.c:
+      Bugfix#28404 When type is double we need to access dval, not lval
+
 2004-05-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/strings/bug26973.phpt

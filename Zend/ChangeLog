@@ -1,3 +1,29 @@
+2004-05-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      - Need to operate on module pointer in hash table
+
+2004-05-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_execute_API.c:
+      Fix bug #28438: win32 build fails in non-zts mode
+
+2004-05-18  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c:
+      Z_TYPE_P is for zvals
+
+2004-05-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_API.c:
+      Register according to the type specified by the module.
+      (Helps to fix dl() bug)
+
+2004-05-18  Sara Golemon  <php@alphaweb.net>
+
+    * zend_execute.c:
+      Bugfix#28404 When type is double we need to access dval, not lval
+
 2004-05-17  Andrei Zmievski  <andreiz@gmail.com>
 
     * zend_ini_parser.y
