@@ -23,4 +23,3 @@ extern HINSTANCE module_handle;
 extern void activescript_error_func(int type, const char *error_msg, ...);
 extern void activescript_error_handler(int type, const char *error_filename,
 		const uint error_lineno, const char *format, va_list args);
-

@@ -38,12 +38,13 @@ enum {
 	PHPSE_SET_SITE,
 	PHPSE_ADD_TYPELIB,
 	PHPSE_TRIGGER_ERROR,
-	PHPSE_GET_DISPATCH
+	PHPSE_GET_DISPATCH,
+	PHPSE_DUMMY_TICK,
 };
 
 struct php_active_script_get_dispatch_info {
 	LPCOLESTR pstrItemName;
-	LPSTREAM dispatch;
+	DWORD dispatch;
 };
 
 struct php_active_script_add_named_item_info {
@@ -52,7 +53,7 @@ struct php_active_script_add_named_item_info {
 	IUnknown *punk;
 	ITypeInfo *ptyp;
 	IDispatch *pdisp;
-	LPSTREAM marshal;
+	DWORD marshal;
 };
 
 struct php_active_script_add_scriptlet_info {
@@ -91,7 +92,7 @@ struct php_active_script_parse_proc_info {
 	/* [in] */ DWORD dwSourceContextCookie;
 	/* [in] */ ULONG ulStartingLineNumber;
 	/* [in] */ DWORD dwFlags;
-	/* [out] */ IDispatch **ppdisp; 
+	DWORD dispcookie;
 };
 
 struct php_active_script_add_tlb_info {
