@@ -56,12 +56,9 @@ static PHP_INI_MH(OnChangeCallback)
 		zval_ptr_dtor(&ASSERTG(callback));
 	}
 
-	MAKE_STD_ZVAL(ASSERTG(callback));
-
-	if (new_value) {
+	if (new_value && (ASSERTG(callback) || new_value_length)) {
+		MAKE_STD_ZVAL(ASSERTG(callback));
 		ZVAL_STRINGL(ASSERTG(callback), new_value, new_value_length, 1);
-	} else {
-		ZVAL_EMPTY_STRING(ASSERTG(callback));
 	}
 
 	return SUCCESS;
