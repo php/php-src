@@ -187,6 +187,8 @@ static inline void handle_form(STD_PARA)
 	if (ctx->tag.len == 4 && strncasecmp(ctx->tag.c, "form", 4) == 0) {
 		smart_str_appends(&ctx->result, "<input type=\"hidden\" name=\""); 
 		smart_str_append(&ctx->result, &ctx->q_name);
+		smart_str_appends(&ctx->result, "\" id=\"");
+		smart_str_append(&ctx->result, &ctx->q_name);
 		smart_str_appends(&ctx->result, "\" value=\"");
 		smart_str_append(&ctx->result, &ctx->q_value);
 		smart_str_appends(&ctx->result, "\" />");
