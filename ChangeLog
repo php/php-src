@@ -1,3 +1,89 @@
+2000-02-02  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c
+      ext/wddx/wddx.c:
+    (PHP wddx_deserialize) Fixed a problem with deserializing empty values.
+    (php_addslashes) Guard against NULL data.
+
+2000-02-02  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/config.m4: - support libxml installed in gnome
+
+2000-02-02  Zeev Suraski  <zeev@php.net>
+
+    * ext/xml/expat/xmltok/utf8tab.h
+      ext/xml/expat/xmltok/xmldef.h
+      ext/xml/expat/xmltok/xmlrole.c
+      ext/xml/expat/xmltok/xmlrole.h
+      ext/xml/expat/xmltok/xmltok.c
+      ext/xml/expat/xmltok/xmltok.dsp
+      ext/xml/expat/xmltok/xmltok.h
+      ext/xml/expat/xmltok/xmltok_impl.c
+      ext/xml/expat/xmltok/xmltok_impl.h
+      ext/xml/expat/xmltok/xmltok_ns.c
+      ext/xml/expat/Makefile
+      ext/xml/expat/expat.dsw
+      ext/xml/expat/expat.html
+      ext/xml/expat/expat.mak
+      ext/xml/expat/xmlparse/hashtable.c
+      ext/xml/expat/xmlparse/hashtable.h
+      ext/xml/expat/xmlparse/xmlparse.c
+      ext/xml/expat/xmlparse/xmlparse.dsp
+      ext/xml/expat/xmlparse/xmlparse.h
+      ext/xml/expat/xmltok/asciitab.h
+      ext/xml/expat/xmltok/iasciitab.h
+      ext/xml/expat/xmltok/latin1tab.h
+      ext/xml/expat/xmltok/nametab.h
+      ext/xml/xml.c
+      config.w32.h
+      internal_functions_win32.c
+      php4dll.dsp
+      php4dllts.dsp: Add expat to the distribution
+    Add expat support to Win32 builds
+
+2000-02-02  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/fsock.c: (php_sock_fgets) Respect timeout event.
+
+    * sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/isapi/php4isapi.c:
+    Fixed SAPI modules to properly register their related modules.
+
+    * sapi/apache/mod_php4.c: Initialize apache properly.
+
+    * acinclude.m4: Remove crud.
+
+    * sapi/apache/php_apache.c: Forgot to add the actual file.
+
+    * NEWS
+      ext/standard/info.c: Some rearranging.
+
+2000-02-02  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: foreach note
+
+    * ext/standard/var.c: use FREE_ZVAL where appropiate
+
+2000-02-02  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/fdf.c
+      ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c
+      ext/pdf/config.m4
+      ext/pdf/pdf.c
+      ext/cpdf/cpdf.c: - several minor cleanups like removing unused variables
+
+2000-02-02  Andrei Zmievski  <andrei@ispi.net>
+
+    * sapi/apache/Makefile.in
+      sapi/apache/config.m4
+      sapi/apache/mod_php4.c
+      acinclude.m4
+      internal_functions_registry.h: Moved ext/apache into sapi/apache.
+
 2000-02-01  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/file.c: Not needed.
