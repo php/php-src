@@ -1,18 +1,18 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Release Candidate 3
-- Added MySQL 4.1.2-alpha and 4.1.3-beta support to MySQLI extension. (Georg)
 - Moved the PDFLib extension to PECL. (Wez)
+- Added MySQL 4.1.2-alpha and 4.1.3-beta support to MySQLI extension. (Georg)
 - Added support for dumping private/protected properties to var_dump().
   (Andrey)
 - Added count() support for COM arrays. (Wez)
+- Added Firebird/InterBase UDF source that allows PHP functions to be called 
+  from SQL (Ard)
 - Changed user error handler mechanism to relay to built-in error handler if it
   returns false. (Andrei)
 - Changed class type hints for function parameters to not allow the passing of
   NULL values. (Andi)
 - Changed tidy_node to tidyNode and removed tidy_exception. (John)
-- Added Firebird/InterBase UDF source that allows PHP functions to be called 
-  from SQL (Ard)
 - Fixed ip2long() to return FALSE if an IP address passed to this function
   is not valid. (Derick)
 - Fixed memory leak in memory manager. (Andi)
