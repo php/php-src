@@ -16,24 +16,18 @@ if test "$PHP_ICONV" != "no"; then
   if test "$iconv_avail" != "no"; then
     iconv_cflags_save="$CFLAGS"
     CFLAGS="$CFLAGS $INCLUDES"
+    if test "$PHP_ICONV" != "yes" -a -d "$PHP_ICONV/include"; then
+      CFLAGS="$CFLAGS -I$PHP_ICONV/include"
+    fi
     AC_MSG_CHECKING([if iconv supports errno])
     AC_TRY_RUN([
 #define LIBICONV_PLUG
 #include <iconv.h>
 #include <errno.h>
-#if defined(_LIBICONV_H)
-#define icv_open(a, b) libiconv_open(a, b)
-#define icv_close(a) libiconv_close(a)
-#define icv(a, b, c, d, e) libiconv(a, b, c, d, e)
-#else
-#define icv_open(a, b) iconv_open(a, b)
-#define icv_close(a) iconv_close(a)
-#define icv(a, b, c, d, e) iconv(a, b, c, d, e)
-#endif
 
 int main() {
 	iconv_t cd;
-	cd = icv_open( "*blahblah*", "*blahblah*" );
+	cd = iconv_open( "*blahblah*", "*blahblah*" );
 	if( cd == (iconv_t)(-1) ) {
 		if( errno == EINVAL ) {
 			return 0;
@@ -41,7 +35,7 @@ int main() {
 			return 1;
 		}
 	}
-	icv_close( cd );
+	iconv_close( cd );
 	return 2;
 }
     ],[
