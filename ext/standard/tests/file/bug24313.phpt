@@ -1,5 +1,5 @@
 --TEST--
-Bug #24313: file_exists() warning on non-existant files when is open_basedir enabled
+Bug #24313 (file_exists() warning on non-existant files when is open_basedir enabled)
 --INI--
 open_basedir=/tmp
 --FILE--

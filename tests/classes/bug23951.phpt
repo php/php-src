@@ -1,5 +1,5 @@
 --TEST--
-Bug #23951: Defines not working in inherited classes
+Bug #23951 (Defines not working in inherited classes)
 --FILE--
 <?php
 

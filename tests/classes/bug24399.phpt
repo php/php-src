@@ -1,5 +1,5 @@
 --TEST--
-Bug #24399: is_subclass_of() crashes when parent class doesn't exist.
+Bug #24399 (is_subclass_of() crashes when parent class doesn't exist)
 --FILE--
 <?php
 class dooh {
