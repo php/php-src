@@ -162,7 +162,7 @@ static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 		ps_mm_debug("optimizing\n");
 	}
 
-	ps_mm_debug(stderr, "lookup(%s): ret=%p,h=%d\n", key, ret, h);
+	ps_mm_debug("lookup(%s): ret=%p,h=%d\n", key, ret, h);
 	
 	return ret;
 }
@@ -277,9 +277,9 @@ PS_WRITE_FUNC(mm)
 	sd = ps_sd_lookup(data, key, 1);
 	if (!sd) {
 		sd = ps_sd_new(data, key, val, vallen);
-		ps_mm_debug(stderr, "new one for %s\n", key);
+		ps_mm_debug("new one for %s\n", key);
 	} else {
-		ps_mm_debug(stderr, "found existing one for %s\n", key);
+		ps_mm_debug("found existing one for %s\n", key);
 		mm_free(data->mm, sd->data);
 		sd->datalen = vallen;
 		sd->data = mm_malloc(data->mm, vallen);
