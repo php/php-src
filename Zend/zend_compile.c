@@ -1613,7 +1613,20 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 {
 	zend_function *function;
 
-	if (!ce->parent || ce->constructor) {
+	if (!ce->parent) {
+		return;
+	}
+    if (!ce->__get) {
+        ce->__get   = ce->parent->__get;
+    }
+    if (!ce->__set) {
+        ce->__set = ce->parent->__set;
+    }
+    if (!ce->__call) {
+        ce->__call = ce->parent->__call;
+    }
+	ce->create_object = ce->parent->create_object;
+	if (ce->constructor) {
 		return;
 	}
 
@@ -1632,16 +1645,6 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 		}
 	}
 	ce->constructor = ce->parent->constructor;
-    if (!ce->__get) {
-        ce->__get   = ce->parent->__get;
-    }
-    if (!ce->__set) {
-        ce->__set = ce->parent->__set;
-    }
-    if (!ce->__call) {
-        ce->__call = ce->parent->__call;
-    }
-	ce->create_object = ce->parent->create_object;
 }
 
 
