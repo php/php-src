@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   object properties correctly). (Ilia)
 - Fixed bug #26815 (foreach of (DOM) childnodes crashes when Xinclude is used).
   (Rob)
+- Fixed bug #26796 (SQLite causes crashes with other extensions *connect()
+  calls). (Marcus)
 - Fixed bug #26762 (unserialize() produces lowercase classnames). (Marcus)
 - Fixed bug #26743 (getElementsByTagName doesn't work properly). (Rob)
 - Fixed bug #26736 (__autoload not invoked for parent classes). (Marcus)
