@@ -2,15 +2,14 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
-
-#ifndef PHP_WIN32
-#include <unistd.h>
-#endif
-
 #include <limits.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#ifndef PHP_WIN32
+#include <unistd.h>
+#endif
 
 typedef unsigned int uint;
 
@@ -191,6 +190,8 @@ int virtual_chdir(cwd_state *state, char *path)
 		return (1);
 	}
 	
+	free(old_state->cwd);
+	free(old_state);
 	return (0);
 }
 
