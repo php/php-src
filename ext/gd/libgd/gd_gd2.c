@@ -262,7 +262,7 @@ gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
   int i;
   int ncx, ncy, nc, cs, cx, cy;
   int x, y, ylo, yhi, xlo, xhi;
-  int ch, vers, fmt;
+  int vers, fmt;
   t_chunk_info *chunkIdx = NULL;	/* So we can gdFree it with impunity. */
   unsigned char *chunkBuf = NULL;	/* So we can gdFree it with impunity. */
   int chunkNum = 0;
@@ -635,10 +635,10 @@ gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w, int h)
 		    {
 		      if (im->trueColor)
 			{
-			  ch = chunkBuf[chunkPos++] << 24 +
-			    chunkBuf[chunkPos++] << 16 +
-			    chunkBuf[chunkPos++] << 8 +
-			    chunkBuf[chunkPos++];
+			  ch = (chunkBuf[chunkPos++] << 24)
+			     + (chunkBuf[chunkPos++] << 16)
+			     + (chunkBuf[chunkPos++] <<  8)
+			     + (chunkBuf[chunkPos++]);
 			}
 		      else
 			{
@@ -762,7 +762,7 @@ _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
       /* The zlib notes say output buffer size should be (input size) * 1.01 * 12 */
       /* - we'll use 1.02 to be paranoid. */
       /* */
-      compMax = cs * bytesPerPixel * cs * 1.02 + 12;
+      compMax = (int)(cs * bytesPerPixel * cs * 1.02f + 12);
 
       /* */
       /* Allocate the buffers.  */

@@ -126,6 +126,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
   png_bytepp row_pointers = NULL;
   gdImagePtr im = NULL;
   int i, j, *open;
+  png_uint_32 ui, uj;
   volatile int transparent = -1;
   volatile int palette_allocated = FALSE;
 
@@ -318,9 +319,9 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
     }
 
   /* set the individual row_pointers to point at the correct offsets */
-  for (j = 0; j < height; ++j)
+  for (uj = 0; uj < height; ++uj)
     {
-      row_pointers[j] = image_data + j * rowbytes;
+      row_pointers[uj] = image_data + uj * rowbytes;
     }
 
   png_read_image (png_ptr, row_pointers);	/* read whole image... */
@@ -351,44 +352,44 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
   switch (color_type)
     {
     case PNG_COLOR_TYPE_RGB:
-      for (j = 0; j < height; j++)
+      for (uj = 0; uj < height; uj++)
 	{
 	  int boffset = 0;
-	  for (i = 0; i < width; i++)
+	  for (ui = 0; ui < width; ui++)
 	    {
-	      register png_byte r = row_pointers[j][boffset++];
-	      register png_byte g = row_pointers[j][boffset++];
-	      register png_byte b = row_pointers[j][boffset++];
-	      im->tpixels[j][i] = gdTrueColor (r, g, b);
+	      register png_byte r = row_pointers[uj][boffset++];
+	      register png_byte g = row_pointers[uj][boffset++];
+	      register png_byte b = row_pointers[uj][boffset++];
+	      im->tpixels[uj][ui] = gdTrueColor (r, g, b);
 	    }
 	}
       break;
     case PNG_COLOR_TYPE_RGB_ALPHA:
-      for (j = 0; j < height; j++)
+      for (uj = 0; uj < height; uj++)
 	{
 	  int boffset = 0;
-	  for (i = 0; i < width; i++)
+	  for (ui = 0; ui < width; ui++)
 	    {
-	      register png_byte r = row_pointers[j][boffset++];
-	      register png_byte g = row_pointers[j][boffset++];
-	      register png_byte b = row_pointers[j][boffset++];
+	      register png_byte r = row_pointers[uj][boffset++];
+	      register png_byte g = row_pointers[uj][boffset++];
+	      register png_byte b = row_pointers[uj][boffset++];
 	      /* gd has only 7 bits of alpha channel resolution, and
 	         127 is transparent, 0 opaque. A moment of convenience, 
 	         a lifetime of compatibility. */
 	      register png_byte a = gdAlphaMax -
-	      (row_pointers[j][boffset++] >> 1);
-	      im->tpixels[j][i] = gdTrueColorAlpha (r, g, b, a);
+	      (row_pointers[uj][boffset++] >> 1);
+	      im->tpixels[uj][ui] = gdTrueColorAlpha (r, g, b, a);
 	    }
 	}
       break;
     default:
       /* Palette image, or something coerced to be one */
-      for (j = 0; j < height; ++j)
+      for (uj = 0; uj < height; ++uj)
 	{
-	  for (i = 0; i < width; ++i)
+	  for (ui = 0; ui < width; ++ui)
 	    {
-	      register png_byte idx = row_pointers[j][i];
-	      im->pixels[j][i] = idx;
+	      register png_byte idx = row_pointers[uj][ui];
+	      im->pixels[uj][ui] = idx;
 	      open[idx] = 0;
 	    }
 	}
@@ -579,7 +580,6 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
       int i;
       int j;
       int k;
-      int highTrans = -1;
       for (i = 0; (i < im->colorsTotal); i++)
 	{
 	  if ((!im->open[i]) &&

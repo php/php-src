@@ -70,7 +70,7 @@
 void
 gd_putout (int i, void *out)
 {
-  gdPutC (i, (gdIOCtx *) out);
+  gdPutC ((unsigned char)i, (gdIOCtx *) out);
 }
 
 
