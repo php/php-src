@@ -1,0 +1,5 @@
+
+LTLIBRARY_NAME    = libsapi.la
+LTLIBRARY_SOURCES = fastcgi.c
+
+include $(top_srcdir)/build/ltlib.mk
