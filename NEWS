@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Added count() support for COM arrays. (Wez)
 - Added Firebird/InterBase UDF source that allows PHP functions to be called 
   from SQL (Ard)
+- Removed Firebird/Interbase function ibase_timefmt() (Ard)
 - Changed user error handler mechanism to relay to built-in error handler if it
   returns false. (Andrei)
 - Changed class type hints for function parameters to not allow the passing of
