@@ -509,7 +509,7 @@ ZEND_FUNCTION(define)
 	c.flags = case_sensitive; /* non persistent */
 	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
 	c.name_len = (*var)->value.str.len+1;
-	c.module_number = 2147483647;
+	c.module_number = PHP_USER_CONSTANT;
 	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
@@ -1343,7 +1343,7 @@ ZEND_FUNCTION(get_defined_constants)
 		while (zend_hash_get_current_data_ex(EG(zend_constants), (void **) &val, &pos) != FAILURE) {
 			zval *const_val;
 
-			if (val->module_number == 2147483647) {
+			if (val->module_number == PHP_USER_CONSTANT) {
 				module_number = i;
 			} else if (val->module_number > i || val->module_number < 0) {
 				/* should not happen */

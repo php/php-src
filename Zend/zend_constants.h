@@ -27,6 +27,8 @@
 #define CONST_CS				(1<<0)				/* Case Sensitive */
 #define CONST_PERSISTENT		(1<<1)				/* Persistent */
 
+#define	PHP_USER_CONSTANT LONG_MAX	/* a constant defined in user space */
+
 typedef struct _zend_constant {
 	zval value;
 	int flags;
