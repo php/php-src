@@ -2854,24 +2854,24 @@ PHP_FUNCTION(imap_mail_compose)
 			tmp_param->attribute = "CHARSET";
 			tmp_param->next = bod->parameter;
 			bod->parameter = tmp_param;
-            }
-        if (zend_hash_find(Z_ARRVAL_PP(data), "type.parameters", sizeof("type.parameters"), (void **) &pvalue)== SUCCESS) {
-           if(Z_TYPE_PP(pvalue) == IS_ARRAY) {
-               disp_param = tmp_param = NULL;
-               while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
-                   disp_param = mail_newbody_parameter();
-                   zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-                   disp_param->attribute = key;
-                   convert_to_string_ex(disp_data);
-                   disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
-                   memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
-                   zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
-                   disp_param->next = tmp_param;
-                   tmp_param = disp_param;
-                 }
-             bod->parameter = disp_param;
-             }
-        }
+		}
+		if (zend_hash_find(Z_ARRVAL_PP(data), "type.parameters", sizeof("type.parameters"), (void **) &pvalue)== SUCCESS) {
+			if(Z_TYPE_PP(pvalue) == IS_ARRAY) {
+				disp_param = tmp_param = NULL;
+				while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
+					disp_param = mail_newbody_parameter();
+					zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
+					disp_param->attribute = key;
+					convert_to_string_ex(disp_data);
+					disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
+					memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
+					zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
+					disp_param->next = tmp_param;
+					tmp_param = disp_param;
+				}
+			bod->parameter = disp_param;
+			}
+		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "subtype", sizeof("subtype"), (void **) &pvalue)== SUCCESS) {
 			convert_to_string_ex(pvalue);
 			bod->subtype = cpystr(Z_STRVAL_PP(pvalue));
@@ -2958,23 +2958,23 @@ PHP_FUNCTION(imap_mail_compose)
 				tmp_param->next = bod->parameter;
 				bod->parameter = tmp_param;
 			}
-            if (zend_hash_find(Z_ARRVAL_PP(data), "type.parameters", sizeof("type.parameters"), (void **) &pvalue)== SUCCESS) {
-               if(Z_TYPE_PP(pvalue) == IS_ARRAY) {
-                   disp_param = tmp_param = NULL;
-                   while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
-                       disp_param = mail_newbody_parameter();
-                       zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-                       disp_param->attribute = key;
-                       convert_to_string_ex(disp_data);
-                       disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
-                       memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
-                       zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
-                       disp_param->next = tmp_param;
-                       tmp_param = disp_param;
-                   }
-               bod->parameter = disp_param;
-               }
-            }
+			if (zend_hash_find(Z_ARRVAL_PP(data), "type.parameters", sizeof("type.parameters"), (void **) &pvalue)== SUCCESS) {
+				if(Z_TYPE_PP(pvalue) == IS_ARRAY) {
+					disp_param = tmp_param = NULL;
+					while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
+						disp_param = mail_newbody_parameter();
+						zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
+						disp_param->attribute = key;
+						convert_to_string_ex(disp_data);
+						disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
+						memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
+						zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
+						disp_param->next = tmp_param;
+						tmp_param = disp_param;
+					}
+				bod->parameter = disp_param;
+				}
+			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "subtype", sizeof("subtype"), (void **) &pvalue)== SUCCESS) {
 				convert_to_string_ex(pvalue);
 				bod->subtype = cpystr(Z_STRVAL_PP(pvalue));	
