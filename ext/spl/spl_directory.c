@@ -453,7 +453,8 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	
 	char *path;
 	int path_len = spprintf(&path, 0, "%s/%s", intern->path, intern->entry.d_name);
-	
+
+	INIT_PZVAL(&zpath);
 	ZVAL_STRINGL(&zpath, path, path_len, 0);
 
 	spl_instantiate_arg_ex1(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath TSRMLS_CC);
@@ -510,10 +511,9 @@ zend_object_iterator *spl_ce_dir_get_iterator(zend_class_entry *ce, zval *object
 static void spl_ce_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_ce_dir_it *iterator = (spl_ce_dir_it *)iter;
-	zval        *intern = (zval*)iterator->intern.data;
 
 	zval_ptr_dtor(&iterator->current);
-	zval_ptr_dtor(&intern);
+	zval_ptr_dtor((zval**)&iterator->intern.data);
 
 	efree(iterator);
 }
