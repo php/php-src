@@ -250,7 +250,7 @@ Web server configuration
   usually get an error like (also see the "Problems?" section at
   the end of the file):
 
-    Cannot load c:/php/sapi/php5apache.dll into server
+    Cannot load c:/php/php5apache.dll into server
 
   So where does php5ts.dll has to be to be properly loaded ?
   php5ts.dll is searched in the following order:
@@ -276,7 +276,7 @@ Web server configuration
   finally configure Apache to load the PHP module. Just add the
   following lines to your httpd.conf:
 
-   LoadModule php5_module c:/php/sapi/php5apache.dll
+   LoadModule php5_module c:/php/php5apache.dll
    AddModule mod_php5.c
    AddType application/x-httpd-php .php
 
@@ -329,15 +329,15 @@ Web server configuration
   On Win-Apache, path names can contain either forward- or backslashes.
   Example:
 
-    LoadModule php5_module C:\php\sapi\php5apache.dll
+    LoadModule php5_module C:\php\php5apache.dll
 
   works as good as 
 
-    LoadModule php5_module C:/php/sapi/php5apache.dll
+    LoadModule php5_module C:/php/php5apache.dll
 
   You even can mix the slash-style:
 
-    LoadModule php5_module C:\php/sapi\php5apache.dll
+    LoadModule php5_module C:\php/php5apache.dll
 
 ----------------------------------------------------------
 
@@ -524,7 +524,7 @@ Web server configuration
 
    From the List select "Associations" and enter the desired
    extension (".php") and the path to the CGI exe (ex. c:\php\php.exe)
-   or the ISAPI dll file (ex. c:\php\sapi\php5isapi.dll).
+   or the ISAPI dll file (ex. c:\php\php5isapi.dll).
 
    Select "Content Types" add the same extension ".php"
    and enter the content type. If you choose the CGI exe
@@ -712,13 +712,13 @@ Problems?
    php5apache.dll in httpd.conf, I always get:
 
    Syntax error on line 1025 of c:/apache/apache/conf/httpd.conf:
-   Cannot load c:/php/php-4.2.1-win32/sapi/php5apache.dll into server
+   Cannot load c:/php/php-4.2.1-win32/php5apache.dll into server
 
-   But c:/php/php-4.2.1-win32/sapi/php5apache.dll definitely
+   But c:/php/php-4.2.1-win32/php5apache.dll definitely
    exists:
 
-   dir c:\php\php-4.2.1-win32\sapi\php5apache.dll
-    Directory of c:\php\php-4.2.1-win32\sapi
+   dir c:\php\php-4.2.1-win32\php5apache.dll
+    Directory of c:\php\php-4.2.1-win32
     13.05.2002  00:01               24.576 php5apache.dll
 
    'strace'ing the apache.exe binary revealed the following:
@@ -729,7 +729,7 @@ Problems?
    Then looking into strace.txt:
    [...]
 729 3348 3248 NtOpenSection (0xe, {24, 24, 0x40, 0, 0, "php5ts.dll"}, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
-731 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\c:\php\php-4.2.1-win32\sapi\php5ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+731 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\c:\php\php-4.2.1-win32\php5ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
 733 3348 3248 NtQueryAttributesFile ({24, 108, 0x40, 0, 0, "php5ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
 735 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\C:\WINNT\System32\php5ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
    [...]
@@ -737,7 +737,7 @@ Problems?
    This went on quiet some time for all directories in the %PATH%
    environment variable. The solution finally was to copy
    php5ts.dll in any of the directories searched by the System (I
-   prefered to use c:\php\php-4.2.1-win32\sapi).
+   prefered to use c:\php\php-4.2.1-win32).
 
    Note: This does not only apply to php5ts.dll but in fact to every
          DLL which gets loaded through PHP too. So, if you've
