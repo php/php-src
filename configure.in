@@ -61,14 +61,13 @@ echo "#define PHP_MINOR_VERSION $MINOR_VERSION" >> php_version.h.new
 echo "#define PHP_RELEASE_VERSION $RELEASE_VERSION" >> php_version.h.new
 echo "#define PHP_EXTRA_VERSION \"$EXTRA_VERSION\"" >> php_version.h.new
 echo "#define PHP_VERSION \"$PHP_VERSION\"" >> php_version.h.new
-cmp php_version.h.new php_version.h >/dev/null 2>&1
+cmp php_version.h.new $srcdir/main/php_version.h >/dev/null 2>&1
 if test $? -ne 0 ; then
-    rm -f php_version.h && mv php_version.h.new php_version.h && \
-    echo 'Updated php_version.h'
+    rm -f $srcdir/main/php_version.h && mv php_version.h.new $srcdir/main/php_version.h && \
+    echo 'Updated main/php_version.h'
 else
     rm -f php_version.h.new
 fi
-
 
 
 dnl Catch common errors here to save a few seconds of our users' time
