@@ -961,7 +961,7 @@ void execute(zend_op_array *op_array ELS_DC)
 	zend_function_state function_state;
 	zend_function *fbc=NULL;  /* Function Being Called */
 	object_info object = {NULL};
-#if !defined (__GNUC__) || __GNUC__ < 2
+#if ZEND_DEBUG || (!defined (__GNUC__) || __GNUC__ < 2)
 	temp_variable *Ts = (temp_variable *) do_alloca(sizeof(temp_variable)*op_array->T);
 #else
 	temp_variable Ts[op_array->T];
