@@ -91,23 +91,23 @@ define('PEAR_ERRORSTACK_PUSHANDLOG', 1);
  * If this is returned, then the error will only be pushed onto the stack,
  * and not logged.
  */
-define("PEAR_ERRORSTACK_PUSH", 2);
+define('PEAR_ERRORSTACK_PUSH', 2);
 /**
  * If this is returned, then the error will only be logged, but not pushed
  * onto the error stack.
  */
-define("PEAR_ERRORSTACK_LOG", 3);
+define('PEAR_ERRORSTACK_LOG', 3);
 /**
  * If this is returned, then the error is completely ignored.
  */
-define("PEAR_ERRORSTACK_IGNORE", 4);
+define('PEAR_ERRORSTACK_IGNORE', 4);
 /**#@-*/
 
 /**
  * Error code for an attempt to instantiate a non-class as a PEAR_ErrorStack in
  * the singleton method.
  */
-define("PEAR_ERRORSTACK_ERR_NONCLASS", 1);
+define('PEAR_ERRORSTACK_ERR_NONCLASS', 1);
 
 /**
  * Error code for an attempt to pass an object into {@link PEAR_ErrorStack::getMessage()}
@@ -218,13 +218,16 @@ class PEAR_ErrorStack {
      *                 in PHP 5
      */
     function PEAR_ErrorStack($package, $msgCallback = false, $contextCallback = false,
-                         $throwPEAR_Error = false, $exceptionClass = 'Exception')
+                         $throwPEAR_Error = false, $exceptionClass = null)
     {
         $this->_package = $package;
         $this->setMessageCallback($msgCallback);
         $this->setContextCallback($contextCallback);
         $this->_compat = $throwPEAR_Error;
-        $this->_exceptionClass = $exceptionClass;
+        // this allows child classes to simply redefine $this->_exceptionClass
+        if (!is_null($exceptionClass)) {
+            $this->_exceptionClass = $exceptionClass;
+        }
     }
     
     /**
@@ -244,7 +247,7 @@ class PEAR_ErrorStack {
      * @return PEAR_ErrorStack
      */
     function &singleton($package, $msgCallback = false, $contextCallback = false,
-                         $throwPEAR_Error = false, $exceptionClass = 'Exception',
+                         $throwPEAR_Error = false, $exceptionClass = null,
                          $stackClass = 'PEAR_ErrorStack')
     {
         if (isset($GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package])) {
@@ -306,7 +309,6 @@ class PEAR_ErrorStack {
      * 
      * This method sets the callback that can be used to generate error
      * messages for any instance
-     * @param string $package Package Name
      * @param array|string Callback function/method
      */
     function setMessageCallback($msgCallback)
@@ -353,7 +355,6 @@ class PEAR_ErrorStack {
      * 
      * This method sets the callback that can be used to generate error
      * messages for any PEAR_ErrorStack instance
-     * @param string $package Package Name
      * @param array|string Callback function/method
      */
     function setContextCallback($contextCallback)
@@ -418,6 +419,7 @@ class PEAR_ErrorStack {
      * Remove a callback from every error callback stack
      * @see staticPushCallback()
      * @return array|string|false
+     * @static
      */
     function staticPopCallback()
     {
