@@ -456,7 +456,6 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int flags TSRMLS_DC)
 {
 	char *spec_walk;
-	char buf[1024];
 	int c, i;
 	int min_num_args = -1;
 	int max_num_args = 0;
@@ -487,7 +486,12 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 			default:
 				if (!quiet) {
-					zend_error(E_WARNING, "%s(): bad type specifier while parsing parameters", get_active_function_name(TSRMLS_C));
+					zend_function *active_function = EG(function_state_ptr)->function;
+					char *class_name = active_function->common.scope ? active_function->common.scope->name : "";
+					zend_error(E_WARNING, "%s%s%s(): bad type specifier while parsing parameters", 
+							class_name,
+							class_name[0] ? "::" : "",
+							get_active_function_name(TSRMLS_C));
 				}
 				return FAILURE;
 		}
@@ -499,13 +503,16 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 	if (num_args < min_num_args || num_args > max_num_args) {
 		if (!quiet) {
-			sprintf(buf, "%s() expects %s %d parameter%s, %d given",
+			zend_function *active_function = EG(function_state_ptr)->function;
+			char *class_name = active_function->common.scope ? active_function->common.scope->name : "";
+			zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
+					class_name,
+					class_name[0] ? "::" : "",
 					get_active_function_name(TSRMLS_C),
 					min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
 					num_args < min_num_args ? min_num_args : max_num_args,
 					(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
 					num_args);
-			zend_error(E_WARNING, buf);
 		}
 		return FAILURE;
 	}
