@@ -1,3 +1,48 @@
+2004-12-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      Fixed typo.
+
+    * ext/gd/gd.c:
+      Fixed compiler warnings.
+
+    * ext/imap/php_imap.c:
+      Fixed memory leaks.
+
+    * ext/imap/php_imap.c:
+      MFB: don't perform pointless operations.
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c:
+      Don't perform pointless operations (MFH5).
+
+    * (PHP_5_0)
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #31142 (imap_mail_compose() fails to generate correct
+      output).
+
+    * ext/gd/gd.c:
+      Don't forget to unload t1lib.
+
+2004-12-29  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/php_fbsql.c:
+      Fix typo
+
+2004-12-29  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_prop.c:
+      MFH: Added property 'id' to retrieve statement id (required by PEAR DB, to
+      support
+      mysqli prepared statements)
+
+    * ext/mysqli/mysqli_prop.c:
+      added property 'id' to retrieve statement id (required by PEAR DB, to
+      support
+      mysqli prepared statements)
+
 2004-12-28  Derick Rethans  <php@derickrethans.nl>
 
     * scripts/Makefile.frag:
