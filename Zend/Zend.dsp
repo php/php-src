@@ -223,6 +223,10 @@ SOURCE=.\zend_qsort.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_reflection_api.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_sprintf.c
 # End Source File
 # Begin Source File
@@ -388,6 +392,10 @@ SOURCE=.\zend_ptr_stack.h
 # Begin Source File
 
 SOURCE=.\zend_qsort.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_reflection_api.h
 # End Source File
 # Begin Source File
 
