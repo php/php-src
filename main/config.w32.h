@@ -96,6 +96,7 @@
 
 
 #define HAVE_GETCWD 1
+#define HAVE_POSIX_READDIR_R 1
 
 #define NEED_ISBLANK 1
 /* ----------------------------------------------------------------
