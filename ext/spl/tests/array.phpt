@@ -6,7 +6,7 @@ SPL: array
 <?php
 
 $ar = array(0=>0, 1=>1);
-$ar = new spl_array($ar);
+$ar = new ArrayObject($ar);
 
 var_dump($ar);
 
@@ -33,7 +33,7 @@ var_dump($ar);
 echo "Done\n";
 ?>
 --EXPECTF--
-object(spl_array)#1 (2) {
+object(ArrayObject)#1 (2) {
   [0]=>
   int(0)
   [1]=>
@@ -56,7 +56,7 @@ array(6) {
   int(5)
 }
 string(1) "a"
-object(spl_array)#1 (5) {
+object(ArrayObject)#1 (5) {
   [0]=>
   int(0)
   [1]=>
@@ -79,7 +79,7 @@ NULL
 Notice: Undefined offset:  7 in %sarray.php on line %d
 
 Notice: Undefined index:  c in %sarray.php on line %d
-object(spl_array)#1 (2) {
+object(ArrayObject)#1 (2) {
   [0]=>
   int(0)
   [2]=>

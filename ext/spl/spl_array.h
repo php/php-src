@@ -24,7 +24,7 @@
 
 extern zend_class_entry *spl_ce_ArrayRead;
 extern zend_class_entry *spl_ce_ArrayAccess;
-extern zend_class_entry *spl_ce_ArrayClass;
+extern zend_class_entry *spl_ce_ArrayObject;
 extern zend_class_entry *spl_ce_ArrayIterator;
 
 PHP_MINIT_FUNCTION(spl_array);
