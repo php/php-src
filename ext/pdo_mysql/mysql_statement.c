@@ -40,7 +40,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		mysql_free_result(S->result);
 		S->result = NULL;
 	}
-	if(S->cols) {
+	if (S->cols) {
 		efree(S->cols);
 		S->cols = NULL;
 	}
@@ -55,7 +55,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	if (stmt->executed) {
 		/* ensure that we free any previous unfetched results */
-		if(S->result) {
+		if (S->result) {
 			mysql_free_result(S->result);
 			S->result = NULL;
 		}
@@ -92,7 +92,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt,
 	if (!S->result) {
 		return 0;	
 	}
-	if((S->current_data = mysql_fetch_row(S->result)) == NULL) {
+	if ((S->current_data = mysql_fetch_row(S->result)) == NULL) {
 		/* there seems to be no way of distinguishing 'no data' from 'error' */
 		pdo_mysql_error_stmt(stmt);
 		return 0;
@@ -115,12 +115,12 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	/* fetch all on demand, this seems easiest 
 	** if we've been here before bail out 
 	*/
-	if(cols[0].name) {
+	if (cols[0].name) {
 		return 1;
 	}
 	num_fields = mysql_num_fields(R);
 	F = mysql_fetch_fields(R);
-	for(i=0; i < num_fields; i++) {
+	for (i=0; i < num_fields; i++) {
 		int namelen;
 		namelen = strlen(F[i].name);
 		cols[i].precision = F[i].decimals;
@@ -137,10 +137,10 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
-	if(S->current_data == NULL || !S->result) {
+	if (S->current_data == NULL || !S->result) {
 		return 0;
 	}
-	if(colno >= mysql_num_fields(S->result)) {
+	if (colno >= mysql_num_fields(S->result)) {
 		/* error invalid column */
 		pdo_mysql_error_stmt(stmt);
 		return 0;
@@ -191,10 +191,10 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	zval *flags;
 	char *str;
 	
-	if(!S->result) {
+	if (!S->result) {
 		return FAILURE;
 	}
-	if(colno >= mysql_num_fields(S->result)) {
+	if (colno >= mysql_num_fields(S->result)) {
 		/* error invalid column */
 		pdo_mysql_error_stmt(stmt);
 		return FAILURE;
