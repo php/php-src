@@ -27,20 +27,11 @@
 
 static void aggregation_info_dtor(aggregation_info *info)
 {
-	/* FIXME: This is here to make it compile with Engine 2 but part of this module will need rewriting */
-	
 #ifndef ZEND_ENGINE_2
 	destroy_zend_class(info->new_ce);
 	efree(info->new_ce);
 #else
-	/* FIXME: In ZE2, there seems to be an issue with refcounts or something between
-	 * this class entry and the original; there are problems when destroying the
-	 * function table.
-	 * Skipping deleting here will prevent a segfault but will leak
-	 * the class name, the static_members hash and the ce itself.
-	 * */
-
-	/* destroy_zend_class(&info->new_ce); */
+	destroy_zend_class(&info->new_ce);
 #endif
 	zval_ptr_dtor(&info->aggr_members);
 
@@ -393,6 +384,9 @@ static void aggregate(INTERNAL_FUNCTION_PARAMETERS, int aggr_what, int aggr_type
 
 		zend_hash_init(&new_ce->private_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_copy(&new_ce->private_properties, &Z_OBJCE_P(obj)->private_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+		zend_hash_init(&new_ce->protected_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(&new_ce->protected_properties, &Z_OBJCE_P(obj)->protected_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 		new_ce->constructor = Z_OBJCE_P(obj)->constructor;
 		new_ce->destructor = Z_OBJCE_P(obj)->destructor;
