@@ -48,19 +48,31 @@
 #endif
 
 #ifdef ZEND_DEBUG
-#define ZEND_FILE_LINE_D			char *__zend_filename, uint __zend_lineno
-#define ZEND_FILE_LINE_DC			, char *__zend_filename, uint __zend_lineno
-#define ZEND_FILE_LINE_RELAY_C		__zend_filename, __zend_lineno
-#define ZEND_FILE_LINE_RELAY_CC		, __zend_filename, __zend_lineno
-#define ZEND_FILE_LINE_C			__FILE__, __LINE__
-#define ZEND_FILE_LINE_CC			, __FILE__, __LINE__
+#define ZEND_FILE_LINE_D				char *__zend_filename, uint __zend_lineno
+#define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
+#define ZEND_FILE_LINE_ORIG_D			char *__zend_orig_filename, uint __zend_orig_lineno
+#define ZEND_FILE_LINE_ORIG_DC			, ZEND_FILE_LINE_ORIG_D
+#define ZEND_FILE_LINE_RELAY_C			__zend_filename, __zend_lineno
+#define ZEND_FILE_LINE_RELAY_CC			, ZEND_FILE_LINE_RELAY_C
+#define ZEND_FILE_LINE_C				__FILE__, __LINE__
+#define ZEND_FILE_LINE_CC				, ZEND_FILE_LINE_C
+#define ZEND_FILE_LINE_EMPTY_C			NULL, 0
+#define ZEND_FILE_LINE_EMPTY_CC			, ZEND_FILE_LINE_EMPTY_C
+#define ZEND_FILE_LINE_ORIG_RELAY_C		__zend_orig_filename, __zend_orig_lineno
+#define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
 #else
 #define ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_DC
+#define ZEND_FILE_LINE_ORIG_D
+#define ZEND_FILE_LINE_ORIG_DC
 #define ZEND_FILE_LINE_RELAY_C
 #define ZEND_FILE_LINE_RELAY_CC
 #define ZEND_FILE_LINE_C
 #define ZEND_FILE_LINE_CC
+#define ZEND_FILE_LINE_EMPTY_C
+#define ZEND_FILE_LINE_EMPTY_CC
+#define ZEND_FILE_LINE_ORIG_RELAY_C
+#define ZEND_FILE_LINE_ORIG_RELAY_CC
 #endif	/* ZEND_DEBUG */
 
 
