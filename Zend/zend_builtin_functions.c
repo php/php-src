@@ -113,7 +113,7 @@ ZEND_FUNCTION(func_get_arg)
 	long requested_offset;
 	ELS_FETCH();
 
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &z_requested_offset)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &z_requested_offset)==FAILURE) {
 		RETURN_FALSE;
 	}
 	convert_to_long_ex(z_requested_offset);
@@ -177,7 +177,7 @@ ZEND_FUNCTION(strlen)
 {
 	zval **str;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -191,7 +191,7 @@ ZEND_FUNCTION(strcmp)
 {
 	zval **s1, **s2;
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &s1, &s2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(s1);
@@ -206,7 +206,7 @@ ZEND_FUNCTION(strcasecmp)
 {
 	zval **s1, **s2;
 	
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &s1, &s2) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(s1);
@@ -223,7 +223,7 @@ ZEND_FUNCTION(each)
 	zval **inserted_pointer;
 	HashTable *target_hash;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -272,11 +272,11 @@ ZEND_FUNCTION(error_reporting)
 	ELS_FETCH();
 
 	old_error_reporting = EG(error_reporting);
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			break;
 		case 1:
-			if (getParametersEx(1,&arg) == FAILURE) {
+			if (zend_get_parameters_ex(1,&arg) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg);
@@ -297,15 +297,15 @@ ZEND_FUNCTION(define)
 	zend_constant c;
 	ELS_FETCH();
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 2:
-			if (getParametersEx(2, &var, &val)==FAILURE) {
+			if (zend_get_parameters_ex(2, &var, &val)==FAILURE) {
 				RETURN_FALSE;
 			}
 			case_sensitive = CONST_CS;
 			break;
 		case 3:
-			if (getParametersEx(3, &var, &val, &non_cs)==FAILURE) {
+			if (zend_get_parameters_ex(3, &var, &val, &non_cs)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(non_cs);
@@ -348,7 +348,7 @@ ZEND_FUNCTION(defined)
 	zval **var;
 	zval c;
 		
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &var)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &var)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -368,7 +368,7 @@ ZEND_FUNCTION(get_class)
 {
 	zval **arg;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		RETURN_FALSE;
 	}
 	if ((*arg)->type != IS_OBJECT) {
@@ -385,7 +385,7 @@ ZEND_FUNCTION(get_parent_class)
 {
 	zval **arg;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		RETURN_FALSE;
 	}
 	if (((*arg)->type != IS_OBJECT) || !(*arg)->value.obj.ce->parent) {
@@ -404,7 +404,7 @@ ZEND_FUNCTION(is_subclass_of)
 	zend_class_entry *parent_ce = NULL;
 	CLS_FETCH();
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &obj, &class_name)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &obj, &class_name)==FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -435,7 +435,7 @@ ZEND_FUNCTION(method_exists)
 	zval **klass, **method_name;
 	char *lcname;
 	
-	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &klass, &method_name)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &klass, &method_name)==FAILURE) {
 		RETURN_FALSE;
 	}
 	if ((*klass)->type != IS_OBJECT) {
@@ -463,7 +463,7 @@ ZEND_FUNCTION(class_exists)
 	char *lcname;
 	CLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &class_name)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
 		RETURN_FALSE;
 	}
 	convert_to_string_ex(class_name);
@@ -487,7 +487,7 @@ ZEND_FUNCTION(function_exists)
 	char *lcname;
 	CLS_FETCH();
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &function_name)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &function_name)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(function_name);
@@ -508,8 +508,8 @@ ZEND_FUNCTION(leak)
 	int leakbytes=3;
 	zval **leak;
 
-	if (ARG_COUNT(ht)>=1) {
-		if (getParametersEx(1, &leak)==SUCCESS) {
+	if (ZEND_NUM_ARGS()>=1) {
+		if (zend_get_parameters_ex(1, &leak)==SUCCESS) {
 			convert_to_long_ex(leak);
 			leakbytes = (*leak)->value.lval;
 		}
