@@ -156,4 +156,9 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty);
 #define ZEND_INI_STAGE_DEACTIVATE	(1<<3)
 #define ZEND_INI_STAGE_RUNTIME		(1<<4)
 
+/* INI parsing engine */
+int zend_parse_ini_file(zend_file_handle *fh, void (*zend_ini_parser_cb)(zval *arg1, zval *arg2, int callback_type));
+#define ZEND_INI_PARSER_ENTRY	1
+#define ZEND_INI_PARSER_SECTION	2
+
 #endif /* ZEND_INI_H */

@@ -18,6 +18,7 @@
 */
 
 #include "zend.h"
+#include "zend_globals.h"
 #include "zend_ini_parser.h"
 #include "zend_ini_scanner.h"
 
@@ -25,16 +26,39 @@
 #define YYSTYPE zval
 
 #ifdef ZTS
-#define YY_DECL int ZendIniFlexLexer::lex_scan(zval *inilval CLS_DC)
+#define YY_DECL int ZendIniFlexLexer::lex_scan(zval *ini_lval)
 #else
-#define YY_DECL int ini_lex_scan(zval *inilval CLS_DC)
+#define YY_DECL int ini_lex(zval *ini_lval)
 #endif
 
 #ifndef ZTS
 void init_cfg_scanner()
 {
-	inilineno=1;
+	ini_lineno=1;
 }
+
+
+int zend_ini_scanner_get_lineno()
+{
+	return ini_lineno;
+}
+
+#else /* ZTS */
+
+int zend_ini_scanner_get_lineno()
+{
+	CLS_FETCH();
+
+	return CG(ini_scanner)->lineno();
+}
+
+int ini_lex(zval *ini_lval)
+{
+	CLS_FETCH();
+
+	return CG(ini_scanner)->lex_scan(ini_lval);
+}
+
 #endif
 
 
@@ -45,46 +69,19 @@ void init_cfg_scanner()
 
 %%
 
-<INITIAL>"extension" {
-#if	0
-	printf("found extension\n");
-#endif
-	return EXTENSION;
-}
-
-
-<INITIAL>"zend_extension" {
-	return T_ZEND_EXTENSION;
-}
-
-
-<INITIAL>"zend_extension_ts" {
-	return T_ZEND_EXTENSION_TS;
-}
-
-
-<INITIAL>"zend_extension_debug" {
-	return T_ZEND_EXTENSION_DEBUG;
-}
-
-
-<INITIAL>"zend_extension_debug_ts" {
-	return T_ZEND_EXTENSION_DEBUG_TS;
-}
-
 
 <INITIAL>[ ]*("true"|"on"|"yes")[ ]* {
-	inilval->value.str.val = zend_strndup("1",1);
-	inilval->value.str.len = 1;
-	inilval->type = IS_STRING;
+	ini_lval->value.str.val = zend_strndup("1",1);
+	ini_lval->value.str.len = 1;
+	ini_lval->type = IS_STRING;
 	return CFG_TRUE;
 }
 
 
 <INITIAL>[ ]*("false"|"off"|"no"|"none")[ ]* {
-	inilval->value.str.val = zend_strndup("",0);
-	inilval->value.str.len = 0;
-	inilval->type = IS_STRING;
+	ini_lval->value.str.val = zend_strndup("",0);
+	ini_lval->value.str.len = 0;
+	ini_lval->type = IS_STRING;
 	return CFG_FALSE;
 }
 
@@ -101,9 +98,9 @@ void init_cfg_scanner()
 	yytext++;
 	yyleng--;
 
-	inilval->value.str.val = zend_strndup(yytext,yyleng);
-	inilval->value.str.len = yyleng;
-	inilval->type = IS_STRING;
+	ini_lval->value.str.val = zend_strndup(yytext,yyleng);
+	ini_lval->value.str.len = yyleng;
+	ini_lval->type = IS_STRING;
 	return SECTION;
 }
 
@@ -117,9 +114,9 @@ void init_cfg_scanner()
 	/* eat leading " */
 	yytext++;
 
-	inilval->value.str.val = zend_strndup(yytext, yyleng - 2);
-	inilval->value.str.len = yyleng - 2;
-	inilval->type = IS_STRING;
+	ini_lval->value.str.val = zend_strndup(yytext, yyleng - 2);
+	ini_lval->value.str.len = yyleng - 2;
+	ini_lval->type = IS_STRING;
 	return TC_ENCAPSULATED_STRING;
 }
 
@@ -151,9 +148,9 @@ void init_cfg_scanner()
 		}
 	}
 	if (yyleng!=0) {
-		inilval->value.str.val = zend_strndup(yytext,yyleng);
-		inilval->value.str.len = yyleng;
-		inilval->type = IS_STRING;
+		ini_lval->value.str.val = zend_strndup(yytext,yyleng);
+		ini_lval->value.str.len = yyleng;
+		ini_lval->type = IS_STRING;
 		return TC_STRING;
 	} else {
 		/* whitespace */

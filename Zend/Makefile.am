@@ -42,13 +42,13 @@ zend_language_parser.c: $(srcdir)/zend_language_parser.y
 # INI parser/scanner rules
 
 zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
-	$(YACC) -p ini -v -d $(srcdir)/zend_ini_parser.y -o zend_ini_parser.c
+	$(YACC) -p ini_ -v -d $(srcdir)/zend_ini_parser.y -o zend_ini_parser.c
 
 zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
-	$(LEX) -Pini -o$@ -i $(srcdir)/zend_ini_scanner.l
+	$(LEX) -Pini_ -o$@ -i $(srcdir)/zend_ini_scanner.l
 
 zend_ini_scanner_cc.cc: $(srcdir)/zend_ini_scanner.l
-	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pini -o$@ $(srcdir)/zend_ini_scanner.l
+	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pini_ -o$@ $(srcdir)/zend_ini_scanner.l
 
 depend:
 
