@@ -100,7 +100,6 @@ ZEND_API void display_ini_entries(zend_module_entry *module);
 ZEND_API long zend_ini_long(char *name, uint name_length, int orig);
 ZEND_API double zend_ini_double(char *name, uint name_length, int orig);
 ZEND_API char *zend_ini_string(char *name, uint name_length, int orig);
-zend_ini_entry *get_ini_entry(char *name, uint name_length);
 
 ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 

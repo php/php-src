@@ -158,9 +158,9 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 }
 
 
-ZEND_API void wrong_param_count()
+ZEND_API void zend_wrong_param_count(TSRMLS_D)
 {
-	zend_error(E_WARNING,"Wrong parameter count for %s()",get_active_function_name());
+	zend_error(E_WARNING, "Wrong parameter count for %s()", get_active_function_name(TSRMLS_C));
 }
 
 
@@ -429,7 +429,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec)
 	return NULL;
 }
 
-static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int quiet)
+static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int quiet TSRMLS_DC)
 {
 	char *expected_type = NULL;
 	char buf[1024];
@@ -438,7 +438,7 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 	if (expected_type) {
 		if (!quiet) {
 			sprintf(buf, "%s() expects argument %d to be %s, %s given",
-					get_active_function_name(), arg_num, expected_type,
+					get_active_function_name(TSRMLS_C), arg_num, expected_type,
 					zend_zval_type_name(*arg));
 			zend_error(E_WARNING, buf);
 		}
@@ -482,7 +482,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 			default:
 				if (!quiet) {
-					zend_error(E_WARNING, "%s(): bad type specifier while parsing arguments", get_active_function_name());
+					zend_error(E_WARNING, "%s(): bad type specifier while parsing arguments", get_active_function_name(TSRMLS_C));
 				}
 				return FAILURE;
 		}
@@ -495,7 +495,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	if (num_args < min_num_args || num_args > max_num_args) {
 		if (!quiet) {
 			sprintf(buf, "%s() requires %s %d argument%s, %d given",
-					get_active_function_name(),
+					get_active_function_name(TSRMLS_C),
 					min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
 					num_args < min_num_args ? min_num_args : max_num_args,
 					(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
@@ -510,7 +510,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain arguments for parsing",
-				   get_active_function_name());
+				   get_active_function_name(TSRMLS_C));
 		return FAILURE;
 	}
 
@@ -520,7 +520,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 		if (*type_spec == '|') {
 			type_spec++;
 		}
-		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet) == FAILURE) {
+		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
 			return FAILURE;
 		}
 		i++;
@@ -1101,7 +1101,7 @@ void module_destructor(zend_module_entry *module)
 
 	if (module->type == MODULE_TEMPORARY) {
 		zend_clean_module_rsrc_dtors(module->module_number);
-		clean_module_constants(module->module_number);
+		clean_module_constants(module->module_number TSRMLS_CC);
 		if (module->request_shutdown_func)
 			module->request_shutdown_func(module->type, module->module_number TSRMLS_CC);
 	}
@@ -1261,7 +1261,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 static ZEND_FUNCTION(display_disabled_function)
 {
-	zend_error(E_WARNING, "%s() has been disabled for security reasons", get_active_function_name());
+	zend_error(E_WARNING, "%s() has been disabled for security reasons", get_active_function_name(TSRMLS_C));
 }
 
 

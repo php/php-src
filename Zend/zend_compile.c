@@ -108,11 +108,10 @@ void shutdown_compiler(TSRMLS_D)
 }
 
 
-ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename)
+ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename TSRMLS_DC)
 {
 	char **pp, *p;
 	int length = strlen(new_compiled_filename);
-	TSRMLS_FETCH();
 
 	if (zend_hash_find(&CG(filenames_table), new_compiled_filename, length+1, (void **) &pp)==SUCCESS) {
 		CG(compiled_filename) = *pp;
@@ -125,10 +124,8 @@ ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename)
 }
 
 
-ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename)
+ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	CG(compiled_filename) = original_compiled_filename;
 }
 
@@ -145,10 +142,8 @@ ZEND_API int zend_get_compiled_lineno(TSRMLS_D)
 }
 
 
-ZEND_API zend_bool zend_is_compiling()
+ZEND_API zend_bool zend_is_compiling(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	return CG(in_compilation);
 }
 

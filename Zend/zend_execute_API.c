@@ -63,7 +63,7 @@ static void zend_handle_sigsegv(int dummy)
 		fprintf(stderr, "SIGSEGV caught on opcode %d on opline %d of %s() at %s:%d\n\n",
 				active_opline->opcode,
 				active_opline-EG(active_op_array)->opcodes,
-				get_active_function_name(),
+				get_active_function_name(TSRMLS_C),
 				zend_get_executed_filename(TSRMLS_C),
 				zend_get_executed_lineno(TSRMLS_C));
 	}
@@ -182,7 +182,7 @@ void shutdown_executor(TSRMLS_D)
 									*/
 
 	zend_try {
-		clean_non_persistent_constants();
+		clean_non_persistent_constants(TSRMLS_C);
 #if ZEND_DEBUG
 	signal(SIGSEGV, original_sigsegv_handler);
 #endif
@@ -202,10 +202,8 @@ void shutdown_executor(TSRMLS_D)
 }
 
 
-ZEND_API char *get_active_function_name()
+ZEND_API char *get_active_function_name(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	switch(EG(function_state_ptr)->function->type) {
 		case ZEND_USER_FUNCTION: {
 				char *function_name = ((zend_op_array *) EG(function_state_ptr)->function)->function_name;
@@ -246,10 +244,8 @@ ZEND_API uint zend_get_executed_lineno(TSRMLS_D)
 }
 
 
-ZEND_API zend_bool zend_is_executing()
+ZEND_API zend_bool zend_is_executing(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	return EG(in_execution);
 }
 
@@ -280,6 +276,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 	zval *p = *pp;
 	zend_bool inline_change = (zend_bool) (unsigned long) arg;
 	zval const_value;
+	TSRMLS_FETCH();
 
 	if (p->type == IS_CONSTANT) {
 		int refcount;
@@ -289,7 +286,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 
 		refcount = p->refcount;
 
-		if (!zend_get_constant(p->value.str.val, p->value.str.len, &const_value)) {
+		if (!zend_get_constant(p->value.str.val, p->value.str.len, &const_value TSRMLS_CC)) {
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 						p->value.str.val,
 						p->value.str.val);
@@ -326,7 +323,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 				zend_hash_move_forward(p->value.ht);
 				continue;
 			}
-			if (!zend_get_constant(str_index, str_index_len-1, &const_value)) {
+			if (!zend_get_constant(str_index, str_index_len-1, &const_value TSRMLS_CC)) {
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
 				zend_hash_move_forward(p->value.ht);
 				continue;
@@ -349,7 +346,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 }
 
 
-int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[])
+int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC)
 {
 	zval ***params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
 	int i;
@@ -359,7 +356,7 @@ int call_user_function(HashTable *function_table, zval **object_pp, zval *functi
 	for (i=0; i<param_count; i++) {
 		params_array[i] = &params[i];
 	}
-	ex_retval = call_user_function_ex(function_table, object_pp, function_name, &local_retval_ptr, param_count, params_array, 1, NULL);
+	ex_retval = call_user_function_ex(function_table, object_pp, function_name, &local_retval_ptr, param_count, params_array, 1, NULL TSRMLS_CC);
 	if (local_retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*retval_ptr, local_retval_ptr);
 	} else {
@@ -370,7 +367,7 @@ int call_user_function(HashTable *function_table, zval **object_pp, zval *functi
 }
 
 
-int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table)
+int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC)
 {
 	int i;
 	zval **original_return_value;
@@ -383,7 +380,6 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	int (*orig_unary_op)(zval *result, zval *op1);
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 	zval function_name_copy;
-	TSRMLS_FETCH();
 
 	*retval_ptr_ptr = NULL;
 
@@ -781,10 +777,8 @@ void zend_set_timeout(long seconds)
 }
 
 
-void zend_unset_timeout(void)
+void zend_unset_timeout(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 #ifdef ZEND_WIN32
 	PostThreadMessage(timeout_thread_id, WM_UNREGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) 0);
 #else

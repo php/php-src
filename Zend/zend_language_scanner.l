@@ -174,7 +174,7 @@ static inline void restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	CG(ZFL) = lex_state->ZFL;
 #endif
 	CG(zend_lineno) = lex_state->lineno;
-	zend_restore_compiled_filename(lex_state->filename);
+	zend_restore_compiled_filename(lex_state->filename TSRMLS_CC);
 }
 
 
@@ -314,7 +314,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		file_path = file_handle->filename;
 	}
 
-	zend_set_compiled_filename(file_path);
+	zend_set_compiled_filename(file_path TSRMLS_CC);
 	CG(zend_lineno) = 1;
 	return SUCCESS;
 }
@@ -431,7 +431,7 @@ static inline int prepare_string_for_scanning(zval *str, istrstream **input_stre
 
 	CG(ZFL)->switch_streams(*input_stream, &cout);
 #endif
-	zend_set_compiled_filename(filename);
+	zend_set_compiled_filename(filename TSRMLS_CC);
 	CG(zend_lineno) = 1;
 	return SUCCESS;
 }

@@ -81,14 +81,13 @@ ZEND_API void zend_html_puts(char *s, uint len)
 
 
 
-ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini)
+ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC)
 {
 	zval token;
 	int token_type;
 	char *last_color = syntax_highlighter_ini->highlight_html;
 	char *next_color;
 	int in_string=0;
-	TSRMLS_FETCH();
 
 	zend_printf("<code>");
 	zend_printf("<font color=\"%s\">\n", last_color);

@@ -1769,7 +1769,7 @@ send_by_ref:
 					zval **param;
 
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param TSRMLS_CC)==FAILURE) {
-						zend_error(E_WARNING, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name());
+						zend_error(E_WARNING, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name(TSRMLS_C));
 						if (opline->result.op_type == IS_VAR) {
 							PZVAL_UNLOCK(*Ts[opline->result.u.var].var.ptr_ptr);
 						}
@@ -1921,7 +1921,7 @@ send_by_ref:
 				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_CONSTANT:
-				if (!zend_get_constant(opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &Ts[opline->result.u.var].tmp_var)) {
+				if (!zend_get_constant(opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, &Ts[opline->result.u.var].tmp_var TSRMLS_CC)) {
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 								opline->op1.u.constant.value.str.val,
 								opline->op1.u.constant.value.str.val);
@@ -2036,7 +2036,6 @@ send_by_ref:
 					int return_value_used;
 					zval *inc_filename = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					zval tmp_inc_filename;
-					TSRMLS_FETCH();
 
 					if (inc_filename->type!=IS_STRING) {
 						tmp_inc_filename = *inc_filename;

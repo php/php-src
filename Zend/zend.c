@@ -606,10 +606,10 @@ ZEND_API void zend_error(int type, const char *format, ...)
 		case E_USER_ERROR:
 		case E_USER_WARNING:
 		case E_USER_NOTICE:
-			if (zend_is_compiling()) {
+			if (zend_is_compiling(TSRMLS_C)) {
 				error_filename = zend_get_compiled_filename(TSRMLS_C);
 				error_lineno = zend_get_compiled_lineno(TSRMLS_C);
-			} else if (zend_is_executing()) {
+			} else if (zend_is_executing(TSRMLS_C)) {
 				error_filename = zend_get_executed_filename(TSRMLS_C);
 				error_lineno = zend_get_executed_lineno(TSRMLS_C);
 			} else {
@@ -688,7 +688,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 			orig_user_error_handler = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
-			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL)==SUCCESS) {
+			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC)==SUCCESS) {
 				zval_ptr_dtor(&retval);
 			} else {
 				/* The user error handler failed, use built-in error handler */
@@ -783,10 +783,10 @@ ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC)
 	int cur_lineno;
 	char *compiled_string_description;
 
-	if (zend_is_compiling()) {
+	if (zend_is_compiling(TSRMLS_C)) {
 		cur_filename = zend_get_compiled_filename(TSRMLS_C);
 		cur_lineno = zend_get_compiled_lineno(TSRMLS_C);
-	} else if (zend_is_executing()) {
+	} else if (zend_is_executing(TSRMLS_C)) {
 		cur_filename = zend_get_executed_filename(TSRMLS_C);
 		cur_lineno = zend_get_executed_lineno(TSRMLS_C);
 	} else {

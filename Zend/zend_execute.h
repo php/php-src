@@ -132,13 +132,13 @@ void execute_new_code(TSRMLS_D);
 
 
 /* services */
-ZEND_API char *get_active_function_name(void);
+ZEND_API char *get_active_function_name(TSRMLS_D);
 ZEND_API char *zend_get_executed_filename(TSRMLS_D);
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D);
-ZEND_API zend_bool zend_is_executing(void);
+ZEND_API zend_bool zend_is_executing(TSRMLS_D);
 
 ZEND_API void zend_set_timeout(long seconds);
-ZEND_API void zend_unset_timeout(void);
+ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
 
 #ifdef ZEND_WIN32
