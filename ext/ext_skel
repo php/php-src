@@ -153,7 +153,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl PHP_ADD_INCLUDE(\$${EXTNAME}_DIR/include)
 
   dnl # --with-$extname -> chech for lib and symbol presence
-  dnl LIBNAME=$extname # you may wnat to change this
+  dnl LIBNAME=$extname # you may want to change this
   dnl LIBSYMBOL=$extname # you most likely want to change this 
   dnl old_LIBS=\$LIBS
   dnl LIBS="\$LIBS -L\$${EXTNAME}_DIR/lib -lm -ldl"
