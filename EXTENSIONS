@@ -73,6 +73,11 @@ EXTENSION:           thttpd
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
+EXTENSION:           webjames
+PRIMARY MAINTAINER:  Alex Waugh <alex@alexwaugh.com>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+-------------------------------------------------------------------------------
 
 
 == Database extensions ==
