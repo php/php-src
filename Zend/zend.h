@@ -140,6 +140,10 @@ typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
 
+#ifdef HAVE_LIMITS_H
+# include <limits.h>
+#endif
+
 #ifndef LONG_MAX
 #define LONG_MAX 2147483647L
 #endif
