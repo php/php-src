@@ -22,8 +22,8 @@
 
 /* $Id$ */
 
-#ifndef ZEND_DBX_MYSQL_H
-#define ZEND_DBX_MYSQL_H
+#ifndef ZEND_DBX_SYBASECT_H
+#define ZEND_DBX_SYBASECT_H
 
 #ifndef INIT_FUNC_ARGS
 #include "zend_modules.h"
@@ -50,7 +50,7 @@ int dbx_sybasect_getrow(zval **rv, zval **result_handle, long row_number, INTERN
 int dbx_sybasect_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS);
 	/* returns string */
 
-#endif /* ZEND_DBX_MYSQL_H */
+#endif /* ZEND_DBX_SYBASECT_H */
 
 /*
  * Local variables:
