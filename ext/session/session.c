@@ -141,7 +141,7 @@ PHP_MINFO_FUNCTION(session);
 
 static void php_rinit_session_globals(PSLS_D);
 static void php_rshutdown_session_globals(PSLS_D);
-static zend_bool _php_session_destroy(PSLS_D);
+static zend_bool php_session_destroy(PSLS_D);
 
 zend_module_entry session_module_entry = {
 	"session",
@@ -159,7 +159,7 @@ ZEND_GET_MODULE(session)
 typedef struct {
 	char *name;
 	void (*func)(PSLS_D);
-} php_session_cache_limiter;
+} php_session_cache_limiter_t;
 
 #define CACHE_LIMITER_FUNC(name) static void _php_cache_limiter_##name(PSLS_D)
 #define CACHE_LIMITER(name) { #name, _php_cache_limiter_##name },
@@ -485,7 +485,7 @@ static void php_session_track_init(void)
 	}
 }
 
-static char *_php_session_encode(int *newlen PSLS_DC)
+static char *php_session_encode(int *newlen PSLS_DC)
 {
 	char *ret = NULL;
 
@@ -495,13 +495,13 @@ static char *_php_session_encode(int *newlen PSLS_DC)
 	return ret;
 }
 
-static void _php_session_decode(const char *val, int vallen PSLS_DC)
+static void php_session_decode(const char *val, int vallen PSLS_DC)
 {
 	PLS_FETCH();
 
 	php_session_track_init();
 	if (PS(serializer)->decode(val, vallen PSLS_CC) == FAILURE) {
-		_php_session_destroy(PSLS_C);
+		php_session_destroy(PSLS_C);
 		php_error(E_WARNING, "Failed to decode session object. Session has been destroyed.");
 	}
 }
@@ -549,7 +549,7 @@ static char *_php_create_id(int *newlen PSLS_DC)
 	return estrdup(buf);
 }
 
-static void _php_session_initialize(PSLS_D)
+static void php_session_initialize(PSLS_D)
 {
 	char *val;
 	int vallen;
@@ -559,12 +559,12 @@ static void _php_session_initialize(PSLS_D)
 		return;
 	}
 	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == SUCCESS) {
-		_php_session_decode(val, vallen PSLS_CC);
+		php_session_decode(val, vallen PSLS_CC);
 		efree(val);
 	}
 }
 
-static void _php_session_save_current_state(PSLS_D)
+static void php_session_save_current_state(PSLS_D)
 {
 	char *val;
 	int vallen;
@@ -585,7 +585,7 @@ static void _php_session_save_current_state(PSLS_D)
 	  }
 	}
 
-	val = _php_session_encode(&vallen PSLS_CC);
+	val = php_session_encode(&vallen PSLS_CC);
 	if (val) {
 		ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
 		efree(val);
@@ -680,16 +680,16 @@ CACHE_LIMITER_FUNC(nocache)
 	ADD_COOKIE("Pragma: no-cache");
 }
 
-static php_session_cache_limiter php_session_cache_limiters[] = {
+static php_session_cache_limiter_t php_session_cache_limiters[] = {
 	CACHE_LIMITER(public)
 	CACHE_LIMITER(private)
 	CACHE_LIMITER(nocache)
 	{0}
 };
 
-static int _php_session_cache_limiter(PSLS_D)
+static int php_session_cache_limiter(PSLS_D)
 {
-	php_session_cache_limiter *lim;
+	php_session_cache_limiter_t *lim;
 	SLS_FETCH();
 
 	if (SG(headers_sent)) {
@@ -720,7 +720,7 @@ static int _php_session_cache_limiter(PSLS_D)
 #define COOKIE_PATH		"; path="
 #define COOKIE_DOMAIN	"; domain="
 
-static void _php_session_send_cookie(PSLS_D)
+static void php_session_send_cookie(PSLS_D)
 {
 	int len;
 	int pathlen;
@@ -812,7 +812,7 @@ static const ps_serializer *_php_find_ps_serializer(char *name PSLS_DC)
 		convert_to_string((*ppid)); \
 		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid))
 
-static void _php_session_start(PSLS_D)
+static void php_session_start(PSLS_D)
 {
 	pval **ppid;
 	pval **data;
@@ -907,7 +907,7 @@ static void _php_session_start(PSLS_D)
 	}
 	
 	if (send_cookie)
-		_php_session_send_cookie(PSLS_C);
+		php_session_send_cookie(PSLS_C);
 	
 	if (define_sid) {
 		char *buf;
@@ -921,8 +921,8 @@ static void _php_session_start(PSLS_D)
 
 	PS(nr_open_sessions)++;
 
-	_php_session_cache_limiter(PSLS_C);
-	_php_session_initialize(PSLS_C);
+	php_session_cache_limiter(PSLS_C);
+	php_session_initialize(PSLS_C);
 
 	if (PS(mod_data) && PS(gc_probability) > 0) {
 		int nrdels = -1;
@@ -937,7 +937,7 @@ static void _php_session_start(PSLS_D)
 	}
 }
 
-static zend_bool _php_session_destroy(PSLS_D)
+static zend_bool php_session_destroy(PSLS_D)
 {
 	zend_bool retval = SUCCESS;
 
@@ -1212,7 +1212,7 @@ PHP_FUNCTION(session_register)
 	}
 
 	if (PS(nr_open_sessions) == 0)
-		_php_session_start(PSLS_C);
+		php_session_start(PSLS_C);
 
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_ARRAY)
@@ -1277,7 +1277,7 @@ PHP_FUNCTION(session_encode)
 	char *enc;
 	PSLS_FETCH();
 
-	enc = _php_session_encode(&len PSLS_CC);
+	enc = php_session_encode(&len PSLS_CC);
 	RETVAL_STRINGL(enc, len, 0);
 }
 /* }}} */
@@ -1294,7 +1294,7 @@ PHP_FUNCTION(session_decode)
 
 	convert_to_string_ex(str);
 
-	_php_session_decode(Z_STRVAL_PP(str), Z_STRLEN_PP(str) PSLS_CC);
+	php_session_decode(Z_STRVAL_PP(str), Z_STRLEN_PP(str) PSLS_CC);
 }
 /* }}} */
 
@@ -1304,7 +1304,7 @@ PHP_FUNCTION(session_start)
 {
 	PSLS_FETCH();
 
-	_php_session_start(PSLS_C);
+	php_session_start(PSLS_C);
 
 	RETURN_TRUE;
 }
@@ -1316,7 +1316,7 @@ PHP_FUNCTION(session_destroy)
 {
 	PSLS_FETCH();
 
-	if (_php_session_destroy(PSLS_C) == SUCCESS) {
+	if (php_session_destroy(PSLS_C) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1393,7 +1393,7 @@ PHP_RINIT_FUNCTION(session)
 	}
 
 	if (PS(auto_start)) {
-		_php_session_start(PSLS_C);
+		php_session_start(PSLS_C);
 	}
 
 	return SUCCESS;
@@ -1405,7 +1405,7 @@ PHP_RSHUTDOWN_FUNCTION(session)
 	PSLS_FETCH();
 
 	if (PS(nr_open_sessions) > 0) {
-		_php_session_save_current_state(PSLS_C);
+		php_session_save_current_state(PSLS_C);
 		PS(nr_open_sessions)--;
 	}
 	php_rshutdown_session_globals(PSLS_C);
