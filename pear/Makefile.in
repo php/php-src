@@ -4,20 +4,35 @@ install_targets = install-data-local install-headers install-build
 include $(top_srcdir)/build/rules.mk
 
 peardir=$(prefix)/lib/php
-pear_DBdir=$(prefix)/lib/php/DB
-pear_Filedir=$(prefix)/lib/php/File
+
+PEAR_SUBDIRS = \
+	DB \
+	File
+
+PEAR_FILES = \
+	DB.php \
+	DB/common.php \
+	DB/odbc.php \
+	DB/mysql.php \
+	DB/mssql.php \
+	DB/pgsql.php \
+	DB/storage.php \
+	HTTP.php \
+	File/Find.php
 
 install-data-local:
-	-@$(mkinstalldirs) $(peardir) $(pear_DBdir) $(pear_Filedir)  && \
-	$(INSTALL_DATA) $(srcdir)/DB.php $(peardir) && \
-	$(INSTALL_DATA) $(srcdir)/DB/common.php $(pear_DBdir) && \
-	$(INSTALL_DATA) $(srcdir)/DB/odbc.php $(pear_DBdir) && \
-	$(INSTALL_DATA) $(srcdir)/DB/mysql.php $(pear_DBdir) && \
-	$(INSTALL_DATA) $(srcdir)/DB/mssql.php $(pear_DBdir) && \
-	$(INSTALL_DATA) $(srcdir)/DB/pgsql.php $(pear_DBdir) && \
-	$(INSTALL_DATA) $(srcdir)/DB/storage.php $(pear_DBdir) && \
-	$(INSTALL_DATA) $(srcdir)/HTTP.php $(peardir) && \
-	$(INSTALL_DATA) $(srcdir)/File/Find.php $(pear_Filedir)
+	@if $(mkinstalldirs) $(peardir); then \
+		for i in $(PEAR_SUBDIRS); do \
+			$(mkinstalldirs) $(peardir)/$$i; \
+		done; \
+		for i in $(PEAR_FILES); do \
+			dir=`echo $$i|sed 's%[^/][^/]*$%%'`; \
+			$(INSTALL_DATA) $(srcdir)/$$i $(peardir)/$$dir; \
+		done; \
+	else \
+		cat $(srcdir)/install-pear.txt; \
+		exit 5; \
+	fi
 
 phpincludedir = $(includedir)/php
 builddir = $(prefix)/lib/php/build

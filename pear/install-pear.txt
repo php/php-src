@@ -1,0 +1,11 @@
++----------------------------------------------------------------------+
+| The installation process is incomplete. The following resources were |
+| not installed:                                                       |
+|                                                                      |
+|   Self-contained Extension Support                                   |
+|   PEAR: PHP Extension and Add-on Repository                          |
+|                                                                      |
+| To install these components, become the superuser and execute:       |
+|                                                                      |
+|   # make install-su                                                  |
++----------------------------------------------------------------------+
