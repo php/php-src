@@ -67,8 +67,9 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 						state = 1;
 
 						eolsize = 2;
-						if(*(loc+len)==0x0a)
+						if(*(loc+len)==0x0a) {
 							eolsize = 1;
+						}
 
 						rem -= (loc - ptr) + len + eolsize;
 						ptr = loc + len + eolsize;
@@ -204,7 +205,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 					php_error(E_WARNING, "File Upload Error - No Mime boundary found after start of file header");
 					SAFE_RETURN;
 				}
-				fn = tempnam(PG(upload_tmp_dir), "php");
+					fn = tempnam(PG(upload_tmp_dir), "php");
 				if ((loc - ptr - 4) > PG(upload_max_filesize)) {
 					php_error(E_WARNING, "Max file size of %ld bytes exceeded - file [%s] not saved", PG(upload_max_filesize),namebuf);
 					bytes=0;	
@@ -217,7 +218,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 					bytes = 0;
 					SET_VAR_STRING(namebuf, estrdup("none"));
 				} else {
-					fp = fopen(fn, "w");
+					fp = fopen(fn, "wb");
 					if (!fp) {
 						php_error(E_WARNING, "File Upload Error - Unable to open temporary file [%s]", fn);
 						SAFE_RETURN;
