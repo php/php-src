@@ -236,6 +236,7 @@ static void php_cgi_usage(char *argv0)
 #endif
 				"  -d foo[=bar]   Define INI entry foo with value 'bar'\n"
 				"  -e             Generate extended information for debugger/profiler\n"
+				"  -z<file>       Load Zend extension <file>.\n"
 				"  -i             PHP information\n"
 				"  -h             This help\n", prog);
 }
@@ -313,6 +314,24 @@ static void define_command_line_ini_entry(char *arg)
 }
 
 
+void php_register_command_line_global_vars(char **arg)
+{
+	char *var, *val;
+
+	var = *arg;
+	val = strchr(var, '=');
+	if (!val) {
+		printf("No value specified for variable '%s'\n", var);
+	} else {
+		*val++ = NULL;
+		php_register_variable(var, val, NULL ELS_CC PLS_CC);
+	}
+	efree(*arg);
+}
+	
+
+
+
 int main(int argc, char *argv[])
 {
 	int cgi = 0, c, i, len;
@@ -326,6 +345,7 @@ int main(int argc, char *argv[])
 	int orig_optind=ap_php_optind;
 	char *orig_optarg=ap_php_optarg;
 	char *argv0=NULL;
+	zend_llist global_vars;
 #if SUPPORT_INTERACTIVE
 	int interactive=0;
 #endif
@@ -404,10 +424,16 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	if (!cgi) {
-		while ((c=ap_php_getopt(argc, argv, "c:d:qvisnaeh?vf:"))!=-1) {
+		while ((c=ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:"))!=-1) {
 			switch (c) {
 				case 'c':
 					php_ini_path = strdup(ap_php_optarg);		/* intentional leak */
+					break;
+				case '?':
+					php_output_startup();
+					SG(headers_sent) = 1;
+					php_cgi_usage(argv[0]);
+					exit(1);
 					break;
 			}
 		}
@@ -435,9 +461,11 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	SG(request_info).argv0 = argv0;
 
+	zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
+
 	if (!cgi) {					/* never execute the arguments if you are a CGI */
 		SG(request_info).argv0 = NULL;
-		while ((c = ap_php_getopt(argc, argv, "c:d:qvisnaeh?vf:")) != -1) {
+		while ((c = ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:")) != -1) {
 			switch (c) {
 				case 'f':
 					if (!cgi_started){ 
@@ -510,6 +538,15 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				case 'd':
 					define_command_line_ini_entry(ap_php_optarg);
 					break;
+				case 'g': {
+						char *arg = estrdup(ap_php_optarg);
+
+						zend_llist_add_element(&global_vars, &arg);
+					}
+					break;
+				case 'z':
+					zend_load_extension(ap_php_optarg);
+					break;
 				default:
 					break;
 			}
@@ -533,6 +570,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	file_handle.type = ZEND_HANDLE_FP;
 	file_handle.handle.fp = stdin;
 
+	/* This actually destructs the elements of the list - ugly hack */
+	zend_llist_apply(&global_vars, php_register_command_line_global_vars);
+	zend_llist_destroy(&global_vars);
 
 	if (!cgi) {
 		if (!SG(request_info).query_string) {
