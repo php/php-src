@@ -1,7 +1,10 @@
 --TEST--
 Bug #22367 (weird zval allocation problem)
+--SKIPIF--
+<?php if(version_compare(zend_version(), "2.0.0-dev", '>=')) echo "skip Overriden method does not match overriding method - incompatible with ZE2\n"; ?>
 --FILE--
 <?php
+
 class foo
 {
 	public $test = array(0, 1, 2, 3, 4); 
