@@ -1472,6 +1472,7 @@ send_by_ref:
 					//if (zend_hash_index_find(EG(active_symbol_table), opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param)==FAILURE) {
 						zend_error(E_NOTICE, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name());
+						DEC_AI_COUNT();
 					} else if ((*param)->is_ref) {
 						zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&opline->result, Ts, BP_VAR_W), param, NULL ELS_CC);
 					} else {
