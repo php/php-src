@@ -145,7 +145,7 @@ php_mbregex_compile_pattern(mb_regex_t *pre, const char *pattern, int patlen, in
 	if(zend_hash_find(&MBSTRG(ht_rc), (char *)pattern, patlen+1, (void **) &rc) == FAILURE ||
 			rc->options != options || rc->mbctype != mbctype) {
 		memset(pre, 0, sizeof(*pre));
-		pre->fastmap = (char*)emalloc((1 << MBRE_BYTEWIDTH)*sizeof(char));
+		pre->fastmap = (char*)safe_emalloc((1 << MBRE_BYTEWIDTH), sizeof(char), 0);
 		if (pre->fastmap) {
 			pre->options = options;
 			pre->mbctype = mbctype;
