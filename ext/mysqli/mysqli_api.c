@@ -1852,7 +1852,7 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 }
 /* }}} */
 
-/* {{{ proto string mysqli_stmt_error(object stmt)
+/* {{{ proto string mysqli_stmt_sqlstate(object stmt)
 */
 #if MYSQL_VERSION_ID >= 40101
 PHP_FUNCTION(mysqli_stmt_sqlstate) 

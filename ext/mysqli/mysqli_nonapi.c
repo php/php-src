@@ -100,7 +100,7 @@ PHP_FUNCTION(mysqli_connect)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_connct_errno()
+/* {{{ proto int mysqli_connect_errno()
    Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {
