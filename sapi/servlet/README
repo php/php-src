@@ -40,6 +40,9 @@ Java Servlet SAPI Module for PHP 4
 
     1.) Build the PHP 4 Java Servlet SAPI Module
 
+        The javax.servlet package should be in your CLASSPATH. If you're
+        using Tomcat, adding servlet.jar to your CLASSPATH is sufficient.
+
         UNIX
 
           o ./configure --with-servlet --with-java
