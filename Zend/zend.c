@@ -36,7 +36,7 @@
 #	define GLOBAL_CONSTANTS_TABLE	CG(zend_constants)
 #endif
 
-#ifdef ZEND_WIN32
+#if defined(ZEND_WIN32) && ZEND_DEBUG
 BOOL WINAPI IsDebuggerPresent(VOID);
 #endif
 
@@ -540,7 +540,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	va_list args;
 	zval ***params;
 	zval *retval;
-	zval *error_type, *error_message, *z_error_filename, *z_error_lineno;
+	zval *z_error_type, *z_error_message, *z_error_filename, *z_error_lineno, *z_context;
 	char *error_filename;
 	uint error_lineno;
 	zval *orig_user_error_handler;
@@ -601,22 +601,23 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			break;
 		default:
 			/* Handle the error in user space */
-			ALLOC_INIT_ZVAL(error_message);
-			ALLOC_INIT_ZVAL(error_type);
+			ALLOC_INIT_ZVAL(z_error_message);
+			ALLOC_INIT_ZVAL(z_error_type);
 			ALLOC_INIT_ZVAL(z_error_filename);
 			ALLOC_INIT_ZVAL(z_error_lineno);
-			error_message->value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
+			ALLOC_INIT_ZVAL(z_context);
+			z_error_message->value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
 
 #ifdef HAVE_VSNPRINTF
-			error_message->value.str.len = vsnprintf(error_message->value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
+			z_error_message->value.str.len = vsnprintf(z_error_message->value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
 #else
 			/* This is risky... */
-			error_message->value.str.len = vsprintf(error_message->value.str.val, format, args);
+			z_error_message->value.str.len = vsprintf(z_error_message->value.str.val, format, args);
 #endif
-			error_message->type = IS_STRING;
+			z_error_message->type = IS_STRING;
 
-			error_type->value.lval = type;
-			error_type->type = IS_LONG;
+			z_error_type->value.lval = type;
+			z_error_type->type = IS_LONG;
 
 			if (error_filename) {
 				z_error_filename->value.str.len = strlen(error_filename);
@@ -627,15 +628,20 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			z_error_lineno->value.lval = error_lineno;
 			z_error_lineno->type = IS_LONG;
 
-			params = (zval ***) emalloc(sizeof(zval **)*4);
-			params[0] = &error_type;
-			params[1] = &error_message;
+			z_context->value.ht = EG(active_symbol_table);
+			z_context->type = IS_ARRAY;
+			ZVAL_ADDREF(z_context);  /* we don't want this one to be freed */
+
+			params = (zval ***) emalloc(sizeof(zval **)*5);
+			params[0] = &z_error_type;
+			params[1] = &z_error_message;
 			params[2] = &z_error_filename;
 			params[3] = &z_error_lineno;
+			params[4] = &z_context;
 
 			orig_user_error_handler = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
-			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 4, params, 1, NULL)==SUCCESS) {
+			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL)==SUCCESS) {
 				zval_ptr_dtor(&retval);
 			} else {
 				/* The user error handler failed, use built-in error handler */
@@ -644,10 +650,13 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			EG(user_error_handler) = orig_user_error_handler;
 
 			efree(params);
-			zval_ptr_dtor(&error_message);
-			zval_ptr_dtor(&error_type);
+			zval_ptr_dtor(&z_error_message);
+			zval_ptr_dtor(&z_error_type);
 			zval_ptr_dtor(&z_error_filename);
 			zval_ptr_dtor(&z_error_lineno);
+			if (ZVAL_REFCOUNT(z_context)==2) {
+				FREE_ZVAL(z_context);
+			}
 			break;
 	}
 
