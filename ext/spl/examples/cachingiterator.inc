@@ -1,5 +1,8 @@
 <?php
 
+define('CIT_GET_STR_VALUE', 1);
+define('CIT_CATCH_GET_CHILD', 2);
+
 class CachingIterator
 {
 	protected $it;
@@ -9,10 +12,10 @@ class CachingIterator
 	protected $strValue;
 	protected $getStrVal;
 
-	function __construct(Iterator $it, $getStrVal = true)
+	function __construct(Iterator $it, $flags = CIT_GET_STR_VALUE)
 	{
 		$this->it = $it;
-		$this->getStrVal = (boolean)$getStrVal;
+		$this->flags = $flags & (CIT_GET_STR_VALUE|CIT_CATCH_GET_CHILD);
 	}
 
 	function rewind()
@@ -26,7 +29,7 @@ class CachingIterator
 		if ($this->more = $this->it->hasMore()) {
 			$this->current = $this->it->current();
 			$this->key = $this->it->key();
-			if ($this->getStrVal) {
+			if ($this->flags & CIT_GET_STR_VALUE) {
 				if (is_object($this->current)) {
 					$this->strValue = $this->current->__toString();
 				} else {
@@ -36,7 +39,7 @@ class CachingIterator
 		} else {
 			$this->current = NULL;
 			$this->key = NULL;
-			$this->strValue = '';
+			$this->strValue = NULL;
 		}
 		$this->it->next();
 	}
@@ -68,7 +71,7 @@ class CachingIterator
 	
 	function __toString()
 	{
-		if (!$this->getStrVal) {
+		if (!$this->flags & CIT_GET_STR_VALUE) {
 			throw new exception('CachingIterator does not fetch string value (see CachingIterator::__construct)');
 		}
 		return $this->strValue;
