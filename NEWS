@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 30 Jul 2003, Version 4.3.3RC2
-- Fixed bug #24760 (non-default SNMP port number) (Harrie)
 - Improved the NSAPI SAPI module (Uwe Schindler)
   . Added possibility to use PHP to generate HTTP error pages (404 Not Found..)
   . Added possibility to use PHP to generate directory listings for directories
@@ -18,6 +17,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug that under certain circumstances could invalidate safe_mode.
   (Ilia)
 - Fixed bug #24783 (foreach($ar as $key => $val), $key not binary safe). (Zeev)
+- Fixed bug #24760 (non-default SNMP port number not working). (Jani)
 - Fixed bug #24752 (Unhandled "uniqueidentifier" field type). 
   (Ilia, s.sonnenberg[at]coolspot.de)
 - Fixed bug #24710 (Crash when $obj->{0} is used). (Zeev)
