@@ -121,6 +121,7 @@ typedef struct {
 	XSQLDA *in_sqlda, *out_sqlda;
 	ibase_array *in_array, *out_array;
 	int in_array_cnt, out_array_cnt;
+	int dialect;
 } ibase_query;
 
 typedef struct {
