@@ -1,6 +1,4 @@
 <?php
-// this script is usefull for quickly testing stuff, use the 'pretty' file for html output
-//
 // +----------------------------------------------------------------------+
 // | PHP Version 4                                                        |
 // +----------------------------------------------------------------------+
@@ -19,25 +17,26 @@
 //
 // $Id$
 //
+
 set_time_limit(0);
 require_once 'client_round2_interop.php';
 
 $iop = new Interop_Client();
+$iop->html = 0;
+
 // force a fetch of endpoints, this happens irregardless if no endpoints in database
-#$iop->fetchEndpoints();
+$iop->fetchEndpoints();
 
 // set some options
-$iop->currentTest = 'base';      // see $tests above
-$iop->paramType = 'php';     // 'php' or 'soapval'
-$iop->useWSDL = 0;           // 1= do wsdl tests
-$iop->numServers = 0;        // 0 = all
-//$iop->specificEndpoint = '4s4c'; // test only this endpoint
-//$iop->testMethod = 'echoString';       // test only this method
-
-#XXX MS SOAP ToolKit 2.0/3.0 crashes php-soap in __getfault!
+$iop->currentTest = 'GroupC'; // see $tests above
+$iop->paramType = 'php';      // 'php' or 'soapval'
+$iop->useWSDL = 1;            // 1= do wsdl tests
+$iop->numServers = 0;         // 0 = all
+//$iop->specificEndpoint = 'PHP ext/soap'; // test only this endpoint
+//$iop->testMethod = 'echoString';         // test only this method
 
 // endpoints to skip
-$iop->skipEndpointList = array('Apache Axis','IONA XMLBus','IONA XMLBus (CORBA)','MS SOAP ToolKit 2.0','MS SOAP ToolKit 3.0','Spheon JSOAP','SQLData SOAP Server','WASP Advanced 3.0');
+//$iop->skipEndpointList = array('Apache Axis','IONA XMLBus','IONA XMLBus (CORBA)','MS SOAP ToolKit 2.0','MS SOAP ToolKit 3.0','Spheon JSOAP','SQLData SOAP Server','WASP Advanced 3.0');
 $iop->startAt='';
 $iop->nosave = 0; // 1= disable saving results to database
 // debug output
@@ -49,6 +48,6 @@ $iop->doTest();  // run a single set of tests using above options
 #$iop->doGroupTests(); // run a group of tests set in $currentTest
 #$iop->doTests();  // run all tests, ignore above options
 #$iop->outputTables();
-echo "done";
+echo "done\n";
 
 ?>
