@@ -116,13 +116,15 @@ typedef struct _zend_property_info {
 
 
 struct _zend_op_array {
-	zend_uchar type;			/* MUST be the first element of this struct! */
-
-	zend_uchar *arg_types;		/* MUST be the second element of this struct! */
-	char *function_name;		/* MUST be the third element of this struct! */
-	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
-	zend_uint fn_flags;				/* MUST be the fifth element of this struct! */
+	/* Common elements */
+	zend_uchar type;
+	zend_uchar *arg_types;
+	char *function_name;		
+	zend_class_entry *scope;
+	zend_uint fn_flags;
 	zend_namespace *ns;
+	union _zend_function *prototype;
+	/* END of common elements */
 
 	zend_uint *refcount;
 
@@ -154,13 +156,15 @@ struct _zend_op_array {
 
 
 typedef struct _zend_internal_function {
-	zend_uchar type;			/* MUST be the first element of this struct! */
-
-	zend_uchar *arg_types;		/* MUST be the second element of this struct! */
-	char *function_name;		/* MUST be the third element of this struct! */
-	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
-	zend_uint fn_flags;				/* MUST be the fifth element of this struct! */
+	/* Common elements */
+	zend_uchar type;
+	zend_uchar *arg_types;
+	char *function_name;		
+	zend_class_entry *scope;
+	zend_uint fn_flags;	
 	zend_namespace *ns;
+	union _zend_function *prototype;
+	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 } zend_internal_function;
@@ -177,6 +181,7 @@ typedef union _zend_function {
 		zend_class_entry *scope;
 		zend_uint fn_flags;
 		zend_namespace *ns;
+		union _zend_function *prototype;
 	} common;
 	
 	zend_op_array op_array;
