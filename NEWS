@@ -17,8 +17,7 @@ PHP 4                                                                      NEWS
 - Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
 - Added memory_get_usage(). Only available when PHP is configured with 
   --enable-memory-limit. (Andrey)
-- Fixed bug #22191 (frontbase build was broken for people using older versions
-  of frontbase). (Ilia)
+- Fixed bug #22191 (frontbase build broken with old version of frontbase). (Ilia)
 - Fixed bug #22187 (spprintf function did not handle floats correctly). (Ilia)
 - Fixed bug #22149 (incorrect insertion of session id when tabs are used to
   separate tag elements). (Ilia)
@@ -35,7 +34,8 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #22017 (date() does not support negative timestamps on win32). (Ilia)
 - Fixed bug #21998 (array_pop() did not reset the current array position). (Jani)
-- Fixed bug #21815 (fpassthru ignored buffered data but then complained anyway). (Wez)
+- Fixed bug #21815 (fpassthru() ignored buffered data but complained anyway). 
+  (Wez)
 - Fixed bug #21725 (return behaviour differs between include and require). (Zeev)
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
 - Fixed bug #21549 (problem with Ingres II persistent connections). (Jani)
