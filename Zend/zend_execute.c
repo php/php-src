@@ -2500,7 +2500,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	zend_bool should_change_scope;
 
 	if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
-		zend_error(E_ERROR, "Abstract method %s::%s called", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
+		zend_error(E_ERROR, "Cannot call abstract method %s::%s()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
 		NEXT_OPCODE(); /* Never reached */
 	}
 
