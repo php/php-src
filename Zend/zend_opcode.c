@@ -27,14 +27,12 @@
 #include "zend_extensions.h"
 #include "zend_API.h"
 
-
 static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_ctor) {
 		extension->op_array_ctor(op_array);
 	}
 }
-
 
 static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
@@ -43,13 +41,10 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-
 static void op_array_alloc_ops(zend_op_array *op_array)
 {
 	op_array->opcodes = erealloc(op_array->opcodes, (op_array->size)*sizeof(zend_op));
 }
-
-
 
 void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC)
 {
@@ -74,8 +69,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
-    op_array->doc_comment = NULL;
-    op_array->doc_comment_len = 0;
+	op_array->doc_comment = NULL;
+	op_array->doc_comment_len = 0;
 
 	op_array->arg_info = NULL;
 	op_array->num_args = 0;
@@ -99,7 +94,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array TSRMLS_CC);
 }
-
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 {
@@ -188,7 +182,6 @@ void zend_class_add_ref(zend_class_entry **ce)
 	(*ce)->refcount++;
 }
 
-
 ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline = op_array->opcodes;
@@ -225,9 +218,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	if (op_array->function_name) {
 		efree(op_array->function_name);
 	}
-    if (op_array->doc_comment) {
-        efree(op_array->doc_comment);
-    }
+	if (op_array->doc_comment) {
+		efree(op_array->doc_comment);
+	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
 	}
@@ -247,7 +240,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		efree(op_array->arg_info);
 	}
 }
-
 
 void init_op(zend_op *op TSRMLS_DC)
 {
@@ -279,14 +271,10 @@ zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
 	return next_op;
 }
 
-
 int get_next_op_number(zend_op_array *op_array)
 {
 	return op_array->last;
 }
-
-
-
 
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
 {
@@ -294,7 +282,6 @@ zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
 	op_array->brk_cont_array = erealloc(op_array->brk_cont_array, sizeof(zend_brk_cont_element)*op_array->last_brk_cont);
 	return &op_array->brk_cont_array[op_array->last_brk_cont-1];
 }
-
 
 static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC)
 {
@@ -319,15 +306,12 @@ static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC)
 	}
 }
 
-
-
 static void zend_extension_op_array_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_handler) {
 		extension->op_array_handler(op_array);
 	}
 }
-
 
 int pass_two(zend_op_array *op_array TSRMLS_DC)
 {
@@ -376,7 +360,6 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 	return 0;
 }
 
-
 int print_class(zend_class_entry *class_entry TSRMLS_DC)
 {
 	printf("Class %s:\n", class_entry->name);
@@ -399,7 +382,6 @@ ZEND_API unary_op_type get_unary_op(int opcode)
 			break;
 	}
 }
-
 
 ZEND_API void *get_binary_op(int opcode)
 {
