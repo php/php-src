@@ -743,9 +743,9 @@ Changes in the Zend Engine 2.0
 
       The interfaces 'IteratorAggregate' and 'Iterator' allow to specify
       how class objects are iterated in PHP code. The first of them simply
-      has a method 'getIterator' which must return an array or an object
-      that either implements the interface 'Iterator' or is instantiated
-      from an internal class that can be iterated.
+      has a method 'getIterator' which must return an object that either 
+      implements the interface 'Iterator' or is instantiated from an 
+      internal class that can be iterated.
 
       Example:
 
