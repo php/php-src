@@ -14,10 +14,9 @@ PHP 4                                                                      NEWS
   . mysql_create_db() 
   . mysql_drop_db() 
   . mysql_escape_string()
-- Added XsltObject->dump_file($result,$filename[,$compression]) for dumping
-  xslt-result directly into a file. (chregu)
-- Added XsltObject->dump_mem($result) for returning xslt-result directly
-  into a string. (morus.walter@web.de, chregu)
+- Added XsltObject->result_dump_mem($result) for returning xslt-result directly
+  into a string and XsltObject->result_dump_file($result,$file[,$compression]) 
+  for dumping into a file. (morus.walter@web.de, chregu)
 - Made mime_magic extension available on win32 platform. (Edin)
 - Added xslt_backend_version() and xslt_backend_name() for getting
   information about the processor backend. (chregu)
