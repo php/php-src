@@ -340,6 +340,7 @@ ZEND_API zend_op_array *compile_filename(zval *filename CLS_DC);
 ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
+ZEND_API void zend_close_file_handle(zend_file_handle *file_handle);
 END_EXTERN_C()
 
 ZEND_API void destroy_zend_function(zend_function *function);
