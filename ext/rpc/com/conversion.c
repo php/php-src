@@ -203,26 +203,39 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 					SYSTEMTIME wintime;
 					struct tm *phptime;
 
-					phptime = gmtime(&(Z_LVAL_P(pval_arg)));
-					memset(&wintime, 0, sizeof(wintime));
+					switch (Z_TYPE_P(pval_arg)) {
+						case IS_DOUBLE:
+							/* already a VariantTime value */
+							V_DATE(var_arg) = Z_DVAL_P(pval_arg);
+							break;
 
-					wintime.wYear = phptime->tm_year + 1900;
-					wintime.wMonth = phptime->tm_mon + 1;
-					wintime.wDay = phptime->tm_mday;
-					wintime.wHour = phptime->tm_hour;
-					wintime.wMinute = phptime->tm_min;
-					wintime.wSecond = phptime->tm_sec;
+						/** @todo
+						case IS_STRING:
+							/* string representation of a time value */
 
-					SystemTimeToVariantTime(&wintime, &V_DATE(var_arg));
+						default:
+							/* a PHP time value ? */
+							convert_to_long_ex(&pval_arg);
+							phptime = gmtime(&(Z_LVAL_P(pval_arg)));
+							memset(&wintime, 0, sizeof(wintime));
+
+							wintime.wYear = phptime->tm_year + 1900;
+							wintime.wMonth = phptime->tm_mon + 1;
+							wintime.wDay = phptime->tm_mday;
+							wintime.wHour = phptime->tm_hour;
+							wintime.wMinute = phptime->tm_min;
+							wintime.wSecond = phptime->tm_sec;
+
+							SystemTimeToVariantTime(&wintime, &V_DATE(var_arg));
+							break;
+					}
 				}
 				break;
 
 			case VT_BSTR:
 				convert_to_string_ex(&pval_arg);
 				unicode_str = php_char_to_OLECHAR(Z_STRVAL_P(pval_arg), Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
-				V_BSTR(var_arg) = SysAllocStringByteLen((char *) unicode_str, Z_STRLEN_P(pval_arg));
-/*				@todo test
-				V_BSTR(var_arg) = SysAllocString(unicode_str); */
+				V_BSTR(var_arg) = SysAllocStringByteLen((char *) unicode_str, Z_STRLEN_P(pval_arg) * sizeof(OLECHAR));
 				efree(unicode_str);
 				break;
 
@@ -745,26 +758,40 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 
 PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRMLS_DC)
 {
+	BOOL error = FALSE;
 	OLECHAR *unicode_str;
 
-	/* request needed buffersize */
-	uint reqSize = MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
+	if (strlen == -1) {
+		/* request needed buffersize */
+		strlen = MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
+	} else {
+		/* \0 terminator */
+		strlen++;
+	}
 
-	if (reqSize) {
-		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR) * reqSize);
+	if (strlen >= 0) {
+		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR) * strlen);
 
 		/* convert string */
-		MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, unicode_str, reqSize);
+		error = !MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, strlen, unicode_str, strlen);
 	} else {
+		/* return a zero-length string */
 		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR));
 		*unicode_str = 0;
 
+		error = TRUE;
+	}
+
+	if (error) {
 		switch (GetLastError()) {
 			case ERROR_NO_UNICODE_TRANSLATION:
-				php_error(E_WARNING,"No unicode translation available for the specified string");
+				php_error(E_WARNING, "No unicode translation available for the specified string");
+				break;
+			case ERROR_INSUFFICIENT_BUFFER:
+				php_error(E_WARNING, "Internal Error: Insufficient Buffer");
 				break;
 			default:
-				php_error(E_WARNING,"Error in php_char_to_OLECHAR()");
+				php_error(E_WARNING, "Unknown error in php_char_to_OLECHAR()");
 		}
 	}
 
