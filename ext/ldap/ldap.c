@@ -16,6 +16,7 @@
    |          Eric Warnke    <ericw@albany.edu>                           |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Gerrit Thomson <334647@swin.edu.au>                         |
+   | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
  
@@ -24,10 +25,8 @@
 #define IS_EXT_MODULE
 
 #include "php.h"
+#include "php_ini.h"
 
-#if HAVE_LDAP
-
-#include "dl/phpdl.h"
 #include "ext/standard/dl.h"
 #include "php_ldap.h"
 
@@ -47,18 +46,11 @@
 #include "ext/standard/php_string.h"
 
 
-#if THREAD_SAFE & HAVE_NSLDAP
-#include "php3_threads.h"
-/* Structure for LDAP error values */
-#define LDAP_TLS_VARS ldap_module *PHP3_TLS_GET(ldapTLS,php_ldap_module)
-#define LDAP_GLOBAL(a) php_ldap_module->a
-#else
-#define LDAP_TLS_VARS
-#define LDAP_GLOBAL(a) php_ldap_module.a
-ldap_module php_ldap_module;
-#endif
+ZEND_DECLARE_MODULE_GLOBALS(ldap)
 
 
+static int le_result, le_result_entry, le_ber_entry;
+static int le_link;
 
 /*
 	This is just a small subset of the functionality provided by the LDAP library. All the 
@@ -104,158 +96,59 @@ zend_module_entry ldap_module_entry = {
 
 
 
-#if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void ) { return &ldap_module_entry; }
+#ifdef COMPILE_DL_LDAP
+ZEND_DLEXPORT zend_module_entry *get_module(void ) { return &ldap_module_entry; }
 #endif
 
 
-#if 0 /* see my note in php_ldap.h.  smc */
-/* Function for setting thread-specific LDAP error values */
-static void php_ldap_set_ld_error( int err, char *matched, char *errmsg, void *dummy )
-{
-	LDAP_TLS_VARS;
-
-   /* Set the error code returned by the LDAP operation */
-   LDAP_GLOBAL(le_errno) = err;
-   /* Specify the components of the DN that matched (if 
-      an "NO_SUCH_OBJECT" error occurred */
-   if ( LDAP_GLOBAL(le_matched) != NULL ) {
-      ldap_memfree( LDAP_GLOBAL(le_matched) );
-   }
-   LDAP_GLOBAL(le_matched) = matched;
-   /* Specify the error message corresponding to the error code */
-   if ( LDAP_GLOBAL(le_errmsg) != NULL ) {
-      ldap_memfree( LDAP_GLOBAL(le_errmsg) );
-   }
-   LDAP_GLOBAL(le_errmsg) = errmsg;
-}
-
-/* Function for getting the thread-specific LDAP error values */
-static int php_ldap_get_ld_error( char **matched, char **errmsg, void *dummy )
-{
-	LDAP_TLS_VARS;
-   /* Retrieve the error values */
-   if ( matched != NULL ) {
-      *matched = LDAP_GLOBAL(le_matched);
-   }
-   if ( errmsg != NULL ) {
-      *errmsg = LDAP_GLOBAL(le_errmsg);
-   }
-   return( LDAP_GLOBAL(le_errno) );
-}
-
-/* Function for setting the value of the errno variable */
-static void php_ldap_set_errno( int err )
-{
-   errno = err;
-}
-
-/* Function for getting the value of the errno variable */
-static int php_ldap_get_errno( void )
-{
-   return( errno );
-}
-#endif /* THREAD_SAFE && NSLDAP */
-
 static void _close_ldap_link(LDAP *ld)
 {
-	LDAP_TLS_VARS;
-  	ldap_unbind_s(ld);
+	LDAPLS_FETCH();
+
+	ldap_unbind_s(ld);
 	/* php_printf("Freeing ldap connection");*/
-	LDAP_GLOBAL(num_links)--;
+	LDAPG(num_links)--;
 }
 
 
 static void _free_ldap_result(LDAPMessage *result)
 {
-        ldap_msgfree(result);
+	ldap_msgfree(result);
 }
+
+
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY_EX("ldap.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			zend_ldap_globals,		ldap_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY("mysql.base_dn",			NULL,	PHP_INI_ALL,			OnUpdateString,		base_dn,			zend_ldap_globals,		ldap_globals)
+PHP_INI_END()
+
+
+static void php_ldap_init_globals(zend_ldap_globals *ldap_globals)
+{
+	ldap_globals->num_links = 0;
+}
+
 
 PHP_MINIT_FUNCTION(ldap)
 {
-#if defined(THREAD_SAFE)
-	ldap_module	*php_ldap_module;
-	PHP_MUTEX_ALLOC(ldap_mutex);
-	PHP_MUTEX_LOCK(ldap_mutex);
-	numthreads++;
-	if (numthreads==1){
-		if (!PHP3_TLS_PROC_STARTUP(ldapTLS)){
-			PHP_MUTEX_UNLOCK(ldap_mutex);
-			PHP_MUTEX_FREE(ldap_mutex);
-			return 0;
-		}
-	}
-	PHP_MUTEX_UNLOCK(ldap_mutex);
-	if(!PHP3_TLS_THREAD_INIT(ldapTLS,php_ldap_module,ldap_module))
-		return 0;
-#if 0 /*HAVE_NSLDAP*/
-   /* Set up the ldap_thread_fns structure with pointers 
-      to the functions that you want called */
-   memset( &LDAP_GLOBAL(tfns), '\0', sizeof(struct ldap_thread_fns) );
-   /* Specify the functions that you want called */
-   /* Call the my_mutex_alloc() function whenever mutexes 
-      need to be allocated */
-   LDAP_GLOBAL(tfns).ltf_mutex_alloc = (void *(*)(void)) php3_mutex_alloc;
-   /* Call the my_mutex_free() function whenever mutexes 
-      need to be destroyed */
-   LDAP_GLOBAL(tfns).ltf_mutex_free = (void (*)(void *)) php3_mutex_free;
-   /* Call the pthread_mutex_lock() function whenever a 
-      thread needs to lock a mutex. */
-   LDAP_GLOBAL(tfns).ltf_mutex_lock = (int (*)(void *)) php3_mutex_lock;
-   /* Call the pthread_mutex_unlock() function whenever a 
-      thread needs to unlock a mutex. */
-   LDAP_GLOBAL(tfns).ltf_mutex_unlock = (int (*)(void *)) php3_mutex_unlock;
-   /* Call the get_errno() function to get the value of errno */
-   LDAP_GLOBAL(tfns).ltf_get_errno = php_ldap_get_errno;
-   /* Call the set_errno() function to set the value of errno */
-   LDAP_GLOBAL(tfns).ltf_set_errno = php_ldap_set_errno;
-   /* Call the get_ld_error() function to get error values from 
-      calls to functions in the libldap library */
-   LDAP_GLOBAL(tfns).ltf_get_lderrno = php_ldap_get_ld_error;
-   /* Call the set_ld_error() function to set error values for 
-      calls to functions in the libldap library */
-   LDAP_GLOBAL(tfns).ltf_set_lderrno = php_ldap_set_ld_error;
-   /* Don't pass any extra parameter to the functions for 
-     getting and setting libldap function call errors */
-   LDAP_GLOBAL(tfns).ltf_lderrno_arg = NULL;
-/* Set the session option that specifies the functions to call for multi-threaded clients */
-	if (ldap_set_option( ld, LDAP_OPT_THREAD_FN_PTRS, (void *) &LDAP_GLOBAL(tfns))!= 0) {
-		ldap_perror( ld, "ldap_set_option: thread pointers" );
-	}
-#endif
-#endif
-	if (cfg_get_long("ldap.max_links", &LDAP_GLOBAL(max_links)) == FAILURE) {
-		LDAP_GLOBAL(max_links) = -1;
-	}
+	ZEND_INIT_MODULE_GLOBALS(ldap, php_ldap_init_globals, NULL);
 
-	if (cfg_get_string("ldap.base_dn", &LDAP_GLOBAL(base_dn)) == FAILURE) {
-		LDAP_GLOBAL(base_dn) = NULL;
-	}
+	REGISTER_INI_ENTRIES();
 
-	LDAP_GLOBAL(le_result) = register_list_destructors(_free_ldap_result, NULL);
-	LDAP_GLOBAL(le_link) = register_list_destructors(_close_ldap_link, NULL);
+	le_result = register_list_destructors(_free_ldap_result, NULL);
+	le_link = register_list_destructors(_close_ldap_link, NULL);
 
-	/*FIXME is this safe in threaded environment? if so, please comment*/
 	ldap_module_entry.type = type;
 
 	return SUCCESS;
 }
 
+
 PHP_MSHUTDOWN_FUNCTION(ldap)
 {
-#ifdef THREAD_SAFE
-	LDAP_TLS_VARS;
-	PHP3_TLS_THREAD_FREE(php_ldap_module);
-	PHP_MUTEX_LOCK(ldap_mutex);
-	numthreads--;
-	if (!numthreads) {
-		PHP3_TLS_PROC_SHUTDOWN(ldapTLS);
-	}
-	PHP_MUTEX_UNLOCK(ldap_mutex);
-	PHP_MUTEX_FREE(ldap_mutex);
-#endif
 	return SUCCESS;
 }
+
 
 PHP_MINFO_FUNCTION(ldap)
 {
@@ -266,12 +159,12 @@ PHP_MINFO_FUNCTION(ldap)
 	/* Print version information */
 	SDKVersion = ldap_version( &ver );
 #endif
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
-	if (LDAP_GLOBAL(max_links) == -1) {
+	if (LDAPG(max_links) == -1) {
 		strcpy(maxl, "Unlimited");
 	} else {
-		snprintf(maxl, 15, "%ld", LDAP_GLOBAL(max_links));
+		snprintf(maxl, 15, "%ld", LDAPG(max_links));
 		maxl[15] = 0;
 	}
 
@@ -283,7 +176,7 @@ PHP_MINFO_FUNCTION(ldap)
 				"<tr><td>Highest LDAP Protocol Supported:</td><td>%f</td></tr>"
 				"<tr><td>SSL Level Supported:</td><td>%f</td></tr>"
 #endif
-				,LDAP_GLOBAL(num_links),maxl
+				,LDAPG(num_links), maxl
 #if HAVE_NSLDAP
 				,SDKVersion/100.0,ver.protocol_version/100.0,ver.SSL_version/100.0
 #endif
@@ -308,7 +201,7 @@ PHP_FUNCTION(ldap_connect)
 	/*	char *hashed_details;
 	int hashed_details_length;*/
 	LDAP *ldap;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 0: 
@@ -359,16 +252,16 @@ PHP_FUNCTION(ldap_connect)
 			break;
 	}
 
-	if (LDAP_GLOBAL(max_links)!=-1 && LDAP_GLOBAL(num_links)>=LDAP_GLOBAL(max_links)) {
-	  php_error(E_WARNING, "LDAP: Too many open links (%d)", LDAP_GLOBAL(num_links));
-	  RETURN_FALSE;
+	if (LDAPG(max_links)!=-1 && LDAPG(num_links)>=LDAPG(max_links)) {
+		php_error(E_WARNING, "LDAP: Too many open links (%d)", LDAPG(num_links));
+		RETURN_FALSE;
 	}
 
 	ldap = ldap_open(host,port);
 	if ( ldap == NULL ) {
-	  RETURN_FALSE;
+		RETURN_FALSE;
 	} else {
-	  RETURN_LONG(zend_list_insert((void*)ldap,LDAP_GLOBAL(le_link)));
+		RETURN_LONG(zend_list_insert((void*)ldap,le_link));
 	}
 
 }
@@ -379,12 +272,12 @@ static LDAP * _get_ldap_link(pval **link)
 {
 	LDAP *ldap;
 	int type;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	convert_to_long_ex(link);
 	ldap = (LDAP *) zend_list_find((*link)->value.lval, &type);
 	
-	if (!ldap || !(type == LDAP_GLOBAL(le_link))) {
+	if (!ldap || !(type == le_link)) {
 	  php_error(E_WARNING, "%d is not a LDAP link index",(*link)->value.lval);
 	  return NULL;
 	}
@@ -396,12 +289,12 @@ static LDAPMessage * _get_ldap_result(pval **result)
 {
 	LDAPMessage *ldap_result;
 	int type;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	convert_to_long_ex(result);
 	ldap_result = (LDAPMessage *)zend_list_find((*result)->value.lval, &type);
 
-	if (!ldap_result || type != LDAP_GLOBAL(le_result)) {
+	if (!ldap_result || type != le_result) {
 		php_error(E_WARNING, "%d is not a LDAP result index",(*result)->value.lval);
 		return NULL;
 	}
@@ -414,12 +307,12 @@ static LDAPMessage * _get_ldap_result_entry(pval **result)
 {
 	LDAPMessage *ldap_result_entry;
 	int type;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	convert_to_long_ex(result);
 	ldap_result_entry = (LDAPMessage *)zend_list_find((*result)->value.lval, &type);
 
-	if (!ldap_result_entry || type != LDAP_GLOBAL(le_result_entry)) {
+	if (!ldap_result_entry || type != le_result_entry) {
 		php_error(E_WARNING, "%d is not a LDAP result entry index", (*result)->value.lval);
 		return NULL;
 	}
@@ -432,12 +325,12 @@ static BerElement * _get_ber_entry(pval **berp)
 {
 	BerElement *ber;
 	int type;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	convert_to_long_ex(berp);
 	ber = (BerElement *) zend_list_find((*berp)->value.lval, &type);
 
-	if ( type != LDAP_GLOBAL(le_ber_entry)) {
+	if ( type != le_ber_entry) {
 		php_error(E_WARNING, "%d is not a BerElement index",(*berp)->value.lval);
 		return NULL;
 	}
@@ -546,7 +439,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	int attrsonly;
 	LDAPMessage *ldap_result;
 	int num_attribs=0, i;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 3 :
@@ -628,7 +521,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 #endif
 		RETVAL_FALSE;
 	} else  {
-		RETVAL_LONG(zend_list_insert(ldap_result, LDAP_GLOBAL(le_result)));
+		RETVAL_LONG(zend_list_insert(ldap_result, le_result));
 	}
 
 	if (ldap_attrs != NULL) {
@@ -715,7 +608,7 @@ PHP_FUNCTION(ldap_first_entry)
 	LDAP *ldap;
 	LDAPMessage *ldap_result;
 	LDAPMessage *ldap_result_entry;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &link, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -730,7 +623,7 @@ PHP_FUNCTION(ldap_first_entry)
 	if ((ldap_result_entry = ldap_first_entry(ldap, ldap_result)) == NULL) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(zend_list_insert(ldap_result_entry, LDAP_GLOBAL(le_result_entry)));
+		RETURN_LONG(zend_list_insert(ldap_result_entry, le_result_entry));
 	}
 }
 /* }}} */
@@ -742,7 +635,7 @@ PHP_FUNCTION(ldap_next_entry)
 	pval **result_entry, **link;
 	LDAP *ldap;
 	LDAPMessage *ldap_result_entry, *ldap_result_entry_next;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &link,&result_entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -757,7 +650,7 @@ PHP_FUNCTION(ldap_next_entry)
 	if ((ldap_result_entry_next = ldap_next_entry(ldap, ldap_result_entry)) == NULL) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(zend_list_insert(ldap_result_entry_next, LDAP_GLOBAL(le_result_entry)));
+		RETURN_LONG(zend_list_insert(ldap_result_entry_next, le_result_entry));
 	}
 }
 /* }}} */
@@ -858,7 +751,7 @@ PHP_FUNCTION(ldap_first_attribute)
 	LDAPMessage *ldap_result_entry;
 	BerElement *ber;
 	char *attribute;
-	LDAP_TLS_VARS;
+	LDAPLS_FETCH();
 
 	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &link,&result,&berp) == FAILURE || ParameterPassedByReference(ht,3)==0 ) {
 		WRONG_PARAM_COUNT;
@@ -875,7 +768,7 @@ PHP_FUNCTION(ldap_first_attribute)
 	} else {
 		/* brep is passed by ref so we do not have to account for memory */
 		(*berp)->type=IS_LONG;
-		(*berp)->value.lval=zend_list_insert(ber,LDAP_GLOBAL(le_ber_entry));
+		(*berp)->value.lval=zend_list_insert(ber,le_ber_entry);
 
 		RETVAL_STRING(attribute,1);
 #ifdef WINDOWS
@@ -1302,4 +1195,3 @@ PHP_FUNCTION(ldap_delete)
 }
 /* }}} */
 
-#endif
