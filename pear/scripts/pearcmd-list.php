@@ -1,6 +1,6 @@
 <?php
 
-$reg = new PEAR_Registry;
+$reg = new PEAR_Registry($script_dir);
 $installed = $reg->packageInfo();
 $i = $j = 0;
 heading("Installed packages:");
