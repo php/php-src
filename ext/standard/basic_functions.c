@@ -316,8 +316,10 @@ static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
 	protected_vars = estrndup(new_value, new_value_length);
 	zend_hash_clean(&BG(protected_env_vars));
 
-	while (protected_var=strtok(protected_vars, ",")) {
+	protected_var=strtok(protected_vars, ", ");
+	while (protected_var) {
 		zend_hash_update(&BG(protected_env_vars), protected_var, strlen(protected_var), &dummy, sizeof(int), NULL);
+		protected_var=strtok(NULL, ", ");
 	}
 	efree(protected_vars);
 	return SUCCESS;
@@ -545,6 +547,14 @@ PHP_FUNCTION(putenv)
 		pe.key_len = strlen(pe.key);
 		pe.key = estrndup(pe.key,pe.key_len);
 		
+		if (PG(safe_mode)
+			&& zend_hash_exists(&BG(protected_env_vars), pe.key, pe.key_len)) {
+			php_error(E_WARNING, "Safe Mode:  Cannot override protected environment variable '%s'", pe.key);
+			efree(pe.putenv_string);
+			efree(pe.key);
+			RETURN_FALSE;
+		}
+
 		zend_hash_del(&BG(putenv_ht),pe.key,pe.key_len+1);
 		
 		/* find previous value */
