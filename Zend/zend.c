@@ -277,6 +277,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals)
 		zend_copy_constants(executor_globals->zend_constants, global_constants_table);
 	}
 	zend_init_rsrc_plist(ELS_C);
+	EG(lambda_count)=0;
 }
 
 
@@ -594,3 +595,28 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	va_end(args);
 }
 
+
+ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...)
+{
+#if ZEND_DEBUG
+	va_list args;
+
+	va_start(args, format);
+#	if ZEND_WIN32
+	{
+		char output_buf[1024];
+
+		vsnprintf(output_buf, 1024, format, args);
+		OutputDebugString(output_buf);
+		OutputDebugString("\n");
+		if (trigger_break && IsDebuggerPresent()) {
+			DebugBreak();
+		}
+	}
+#	else
+	vfprintf(stderr, format, args);
+	fprintf(stderr, "\n");
+#	endif
+	va_end(args);
+#endif
+}

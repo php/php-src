@@ -363,6 +363,8 @@ void do_extended_fcall_end(CLS_D);
 
 void do_ticks(CLS_D);
 
+void function_add_ref(zend_function *function);
+
 #define INITIAL_OP_ARRAY_SIZE 64
 
 
