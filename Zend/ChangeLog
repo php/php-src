@@ -1,3 +1,7 @@
+2002-06-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend.c: - MFZE1
+
 2002-06-17  Andi Gutmans  <andi@zend.com>
 
     * zend_mm.c: - Improve speed of alignment calculation
