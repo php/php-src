@@ -48,7 +48,7 @@ exit 1
 fi
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
 IFS=.; set $lt_version; IFS=' '
-if test "$1" -gt "1" || test "$2" -gt "3" || test "$2" = "3" -a "$3" -ge "3"
+if test "$1" -gt "1" || test "$2" -gt "3" || test "$2" = "3" && (test "$3" = "c" || test "$3" -ge "3")
 then
 echo "buildconf: libtool version $lt_pversion (ok)"
 else
