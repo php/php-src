@@ -692,7 +692,7 @@ static int php_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 
 /* {{{ proto resource mysql_connect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
-   Open a connection to a MySQL Server */
+   Opens a connection to a MySQL Server */
 PHP_FUNCTION(mysql_connect)
 {
 	php_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -700,7 +700,7 @@ PHP_FUNCTION(mysql_connect)
 /* }}} */
 
 /* {{{ proto resource mysql_pconnect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
-   Open a persistent connection to a MySQL Server */
+   Opens a persistent connection to a MySQL Server */
 PHP_FUNCTION(mysql_pconnect)
 {
 	php_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -747,7 +747,7 @@ PHP_FUNCTION(mysql_close)
 /* }}} */
 
 /* {{{ proto bool mysql_select_db(string database_name [, int link_identifier])
-   Select a MySQL database */
+   Selects a MySQL database */
 PHP_FUNCTION(mysql_select_db)
 {
 	zval **db, **mysql_link;
@@ -932,7 +932,7 @@ PHP_FUNCTION(mysql_create_db)
 /* }}} */
 
 /* {{{ proto bool mysql_drop_db(string database_name [, int link_identifier])
-   Drop (delete) a MySQL database */
+   Drops (delete) a MySQL database */
 PHP_FUNCTION(mysql_drop_db)
 {
 	zval **db, **mysql_link;
@@ -1063,7 +1063,7 @@ static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 /* }}} */
 
 /* {{{ proto resource mysql_query(string query [, int link_identifier] [, int result_mode])
-   Send an SQL query to MySQL */
+   Sends an SQL query to MySQL */
 PHP_FUNCTION(mysql_query)
 {
 	php_mysql_do_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_STORE_RESULT);
@@ -1072,7 +1072,7 @@ PHP_FUNCTION(mysql_query)
 
 
 /* {{{ proto resource mysql_unbuffered_query(string query [, int link_identifier] [, int result_mode])
-   Send an SQL query to MySQL, without fetching and buffering the result rows */
+   Sends an SQL query to MySQL, without fetching and buffering the result rows */
 PHP_FUNCTION(mysql_unbuffered_query)
 {
 	php_mysql_do_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_USE_RESULT);
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(mysql_unbuffered_query)
 
 
 /* {{{ proto resource mysql_db_query(string database_name, string query [, int link_identifier])
-   Send an SQL query to MySQL */
+   Sends an SQL query to MySQL */
 PHP_FUNCTION(mysql_db_query)
 {
 	zval **db, **query, **mysql_link;
@@ -1313,7 +1313,7 @@ PHP_FUNCTION(mysql_errno)
 
 
 /* {{{ proto int mysql_affected_rows([int link_identifier])
-   Get number of affected rows in previous MySQL operation */
+   Gets number of affected rows in previous MySQL operation */
 PHP_FUNCTION(mysql_affected_rows)
 {
 	zval **mysql_link;
@@ -1367,7 +1367,7 @@ PHP_FUNCTION(mysql_escape_string)
 
 
 /* {{{ proto int mysql_insert_id([int link_identifier])
-   Get the id generated from the previous INSERT operation */
+   Gets the ID generated from the previous INSERT operation */
 PHP_FUNCTION(mysql_insert_id)
 {
 	zval **mysql_link;
@@ -1400,7 +1400,7 @@ PHP_FUNCTION(mysql_insert_id)
 
 
 /* {{{ proto mixed mysql_result(int result, int row [, mixed field])
-   Get result data */
+   Gets result data */
 PHP_FUNCTION(mysql_result)
 {
 	zval **result, **row, **field=NULL;
@@ -1503,7 +1503,7 @@ PHP_FUNCTION(mysql_result)
 
 
 /* {{{ proto int mysql_num_rows(int result)
-   Get number of rows in a result */
+   Gets number of rows in a result */
 PHP_FUNCTION(mysql_num_rows)
 {
 	zval **result;
@@ -1522,7 +1522,7 @@ PHP_FUNCTION(mysql_num_rows)
 /* }}} */
 
 /* {{{ proto int mysql_num_fields(int result)
-   Get number of fields in a result */
+   Gets number of fields in a result */
 PHP_FUNCTION(mysql_num_fields)
 {
 	zval **result;
@@ -1625,7 +1625,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 /* }}} */
 
 /* {{{ proto array mysql_fetch_row(int result)
-   Get a result row as an enumerated array */
+   Gets a result row as an enumerated array */
 PHP_FUNCTION(mysql_fetch_row)
 {
 	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_NUM, 1);
@@ -1647,7 +1647,7 @@ PHP_FUNCTION(mysql_fetch_object)
 
 
 /* {{{ proto array mysql_fetch_array(int result [, int result_type])
-   Fetch a result row as an array (associative, numeric or both)*/
+   Fetch a result row as an array (associative, numeric or both) */
 PHP_FUNCTION(mysql_fetch_array)
 {
 	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 2);
@@ -1688,7 +1688,7 @@ PHP_FUNCTION(mysql_data_seek)
 
 
 /* {{{ proto array mysql_fetch_lengths(int result)
-   Get max data size of each column in a result */
+   Gets max data size of each column in a result */
 PHP_FUNCTION(mysql_fetch_lengths)
 {
 	zval **result;
@@ -1775,7 +1775,7 @@ static char *php_mysql_get_field_name(int field_type)
 /* }}} */
 
 /* {{{ proto object mysql_fetch_field(int result [, int field_offset])
-   Get column information from a result and return as an object */
+   Gets column information from a result and return as an object */
 PHP_FUNCTION(mysql_fetch_field)
 {
 	zval **result, **field=NULL;
@@ -1832,7 +1832,7 @@ PHP_FUNCTION(mysql_fetch_field)
 
 
 /* {{{ proto bool mysql_field_seek(int result, int field_offset)
-   Set result pointer to a specific field offset */
+   Sets result pointer to a specific field offset */
 PHP_FUNCTION(mysql_field_seek)
 {
 	zval **result, **offset;
@@ -1989,7 +1989,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 /* }}} */
 
 /* {{{ proto string mysql_field_name(int result, int field_index)
-   Get the name of the specified field in a result */
+   Gets the name of the specified field in a result */
 PHP_FUNCTION(mysql_field_name)
 {
 	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_NAME);
@@ -1998,7 +1998,7 @@ PHP_FUNCTION(mysql_field_name)
 
 
 /* {{{ proto string mysql_field_table(int result, int field_offset)
-   Get name of the table the specified field is in */
+   Gets name of the table the specified field is in */
 PHP_FUNCTION(mysql_field_table)
 {
 	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_TABLE);
@@ -2016,7 +2016,7 @@ PHP_FUNCTION(mysql_field_len)
 
 
 /* {{{ proto string mysql_field_type(int result, int field_offset)
-   Get the type of the specified field in a result */
+   Gets the type of the specified field in a result */
 PHP_FUNCTION(mysql_field_type)
 {
 	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_TYPE);
@@ -2025,7 +2025,7 @@ PHP_FUNCTION(mysql_field_type)
 
 
 /* {{{ proto string mysql_field_flags(int result, int field_offset)
-   Get the flags associated with the specified field in a result */
+   Gets the flags associated with the specified field in a result */
 PHP_FUNCTION(mysql_field_flags)
 {
 	php_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_MYSQL_FIELD_FLAGS);
