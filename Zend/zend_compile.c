@@ -1649,7 +1649,7 @@ void do_shell_exec(znode *result, znode *cmd CLS_DC)
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 	opline->opcode = ZEND_DO_FCALL;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->result.op_type = IS_TMP_VAR;
+	opline->result.op_type = IS_VAR;
 	opline->op1.u.constant.value.str.val = estrndup("shell_exec",sizeof("shell_exec")-1);
 	opline->op1.u.constant.value.str.len = sizeof("shell_exec")-1;
 	INIT_PZVAL(&opline->op1.u.constant);
