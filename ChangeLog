@@ -1,3 +1,154 @@
+2001-08-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ming/ming.c
+      ext/qtdom/qtdom.c
+      ext/qtdom/qtdom.h: More TSRM work.
+
+2001-08-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: Remove reference to crappy irc server
+
+2001-08-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/dl.c
+      ext/standard/dl.h
+      main/php_ini.c
+      ext/ingres_ii/ii.c
+      ext/ingres_ii/ii.h
+      ext/mcal/php_mcal.c
+      ext/mcal/php_mcal.h: Yet another TSRM fix.
+
+2001-08-07  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/oci8/oci8.c: Fixing a TSRMLS_FETCH problem.
+
+2001-08-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/formatted_print.c
+      ext/standard/php_string.h
+      ext/standard/basic_functions.c:
+    - Added vprintf() and vsprintf() functions that allow passing all arguments
+      after format as an array. 
+
+2001-08-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xslt/php_xslt.h: Killed compile warnings.
+
+    * ext/standard/lcg.c: killed a compile warning.
+
+2001-08-07  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx.h
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.h
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mssql.h
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/php_dbx.h: Adding cvs ID to source files
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx.dsp
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.h: Adding FrontBase support to the DBX extension
+
+2001-08-07  Harald Radi  <h.radi@nme.at>
+
+    * ext/java/java.c: TSRM fix
+
+2001-08-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/informix/ifx.ec: More TSRMLS_FETCH() nuking.
+
+2001-08-07  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/odbc.php:
+    better error reporting, E_ALL conformance and other bugfixes/style
+
+2001-08-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gmp/gmp.c: Another TSRM fix. Plus killed some compile warnings.
+
+    * ext/imap/php_imap.c: Another TSRM fix.
+
+    * configure.in: This did not work as expected. Reverted.
+
+2001-08-07  Harald Radi  <h.radi@nme.at>
+
+    * ext/pdf/php_pdf.h
+      ext/pdf/pdf.c
+      ext/dotnet/dotnet.cpp: TSRM fix
+
+2001-08-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c: Missed these
+
+2001-08-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: Fix a couple of leaks.
+
+2001-08-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h: php_sig_gd2 is only needed for GD extension.
+
+    * ext/gd/php_gd.h: oops. Copy-paste-magic. :)
+
+    * ext/domxml/php_domxml.c: Yet another TSRM fix.
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h
+      ext/imap/config.m4: Beutifying. Also made a check for IMAP-2001.
+
+    * ext/gd/php_gd.h
+      ext/gd/gd.c:
+    - Added support for GD2 image type for ImageCreateFromString() 
+
+2001-08-07  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/shmop/php_shmop.h
+      ext/shmop/shmop.c
+      ext/shmop/shmop.dsp
+      php.ini-dist
+      php.ini-optimized
+      win32/php_modules.dsw: let ext\shmop build under win32
+
+2001-08-07  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: This was not supposed to be removed.
+
+2001-08-07  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/STATUS: added affectedRows() in sybase and msql
+
+    * pear/DB/msql.php: added affectedRows()
+
+    * pear/DB/sybase.php:
+    added affectedRows() and error detecting in connect()
+
+2001-08-07  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h: ZTS updates.
+
+2001-08-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: A CRLF at the end of a line is not so wrong.
+
+    * sapi/thttpd/thttpd.c:
+    The module usually did not send out Content-Type: text/html.
+
+    No major browser seems to care, Opera does though.
+
+2001-08-07  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/HTTP/Compress.php: fix PHPDoc
+
 2001-08-06  Adam Daniel  <adaniel2@cinci.rr.com>
 
     * pear/HTML/Table.php: fixed problem with spanning cells
