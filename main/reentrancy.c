@@ -205,11 +205,14 @@ PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 	local_lock(GMTIME_R);
 
 	tmp = gmtime(timep);
-	memcpy(p_tm, tmp, sizeof(struct tm));
+	if (tmp) {
+		memcpy(p_tm, tmp, sizeof(struct tm));
+		tmp = p_tm;
+	}
 	
 	local_unlock(GMTIME_R);
 
-	return p_tm;
+	return tmp;
 }
 
 #endif
