@@ -246,9 +246,9 @@ void zend_destroy_rsrc_list(ELS_D)
 		ht->pListTail = q;
 
 		if (ht->pDestructor) {
-			if (setjmp(EG(bailout))==0) {
+			zend_try {
 				ht->pDestructor(p->pData);
-			}
+			} zend_end_try();
 		}
 		if (!p->pDataPtr && p->pData) {
 			pefree(p->pData, ht->persistent);

@@ -305,18 +305,40 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 void zend_shutdown(void);
 
 void zend_set_utility_values(zend_utility_values *utility_values);
-BEGIN_EXTERN_C()
-ZEND_API void zend_bailout(void);
-END_EXTERN_C()
-ZEND_API char *get_zend_version(void);
 
+BEGIN_EXTERN_C()
+ZEND_API void _zend_bailout(ZEND_FILE_LINE_D);
+END_EXTERN_C()
+
+#if ZEND_DEBUG
+#define zend_bailout()		_zend_bailout(ZEND_FILE_LINE_C)
+#else
+#define zend_bailout()		_zend_bailout()
+#endif
+
+#define zend_try												\
+	{															\
+		jmp_buf orig_bailout;									\
+		zend_bool orig_bailout_set=EG(bailout_set);				\
+																\
+		EG(bailout_set) = 1;									\
+		memcpy(&orig_bailout, &EG(bailout), sizeof(jmp_buf));	\
+		if (setjmp(EG(bailout))==0)
+#define zend_catch												\
+		else
+#define zend_end_try()											\
+		memcpy(&EG(bailout), &orig_bailout, sizeof(jmp_buf));	\
+		EG(bailout_set) = orig_bailout_set;						\
+	}
+
+ZEND_API char *get_zend_version(void);
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
 ZEND_API int zend_print_zval(zval *expr, int indent);
 ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent);
-
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...);
+
 #if ZEND_DEBUG
 #define Z_DBG(expr)		(expr)
 #else
