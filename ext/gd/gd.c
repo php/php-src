@@ -77,6 +77,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
 #endif
 
 #ifndef USE_GD_IOCTX
+#define gdImageCreateFromGifCtx NULL
 #define gdImageCreateFromJpegCtx NULL
 #define gdImageCreateFromPngCtx  NULL
 #define gdImageCreateFromWBMPCtx NULL
@@ -700,7 +701,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 PHP_FUNCTION(imagecreatefromgif)
 {
 #ifdef HAVE_GD_GIF
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageCreateFromGif,NULL);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageCreateFromGif,gdImageCreateFromGifCtx);
 #else /* HAVE_GD_GIF */
 	php_error(E_WARNING, "ImageCreateFromGif: No GIF support in this PHP build");
 	RETURN_FALSE;
