@@ -386,7 +386,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 }
 
 
-static void zend_std_has_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
+static void zend_std_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC)
 {
 	zend_error(E_ERROR, "Cannot use object as array");
 }

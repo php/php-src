@@ -3871,13 +3871,13 @@ static int zend_isset_isempty_dim_prop_obj_handler(int prop_dim, ZEND_OPCODE_HAN
 
 int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_isset_isempty_dim_prop_obj_handler(0, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_isset_isempty_dim_prop_obj_handler(0, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
 int zend_isset_isempty_prop_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_isset_isempty_dim_prop_obj_handler(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_isset_isempty_dim_prop_obj_handler(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
