@@ -2295,6 +2295,13 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 	
 	METHOD_NOTSTATIC_NUMPARAMS(0);	
 	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (!ce->constants_updated) {
+		zend_hash_apply_with_argument(&ce->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+		zend_hash_apply_with_argument(ce->static_members, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+		ce->constants_updated = 1;
+	}
+
 	array_init(return_value);
 	zend_hash_copy(Z_ARRVAL_P(return_value), ce->static_members, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 }
