@@ -32,7 +32,7 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 
-	if (buf == NULL && count == 0)	{
+	if (buf == NULL && count == 0) {
 		if (gzeof(self->gz_file))
 			return EOF;
 		return 0;
@@ -60,13 +60,14 @@ static int php_gziop_seek(php_stream *stream, off_t offset, int whence)
 	return gzseek(self->gz_file, offset, whence);
 }
 
-static int php_gziop_close(php_stream *stream)
+static int php_gziop_close(php_stream *stream, int close_handle)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 	int ret;
 	
-	ret = gzclose(self->gz_file);
-	php_stream_close(self->stream);
+	if (close_handle)
+		ret = gzclose(self->gz_file);
+	php_stream_free(self->stream, close_handle);
 	efree(self);
 
 	return ret;
@@ -92,9 +93,9 @@ php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened
 	
 	self->stream = php_stream_open_wrapper(path, mode, options, opened_path TSRMLS_CC);
 	
-	if (self->stream)	{
+	if (self->stream) {
 		int fd;
-		if (SUCCESS == php_stream_cast(self->stream, PHP_STREAM_AS_FD, (void**)&fd, REPORT_ERRORS))	{
+		if (SUCCESS == php_stream_cast(self->stream, PHP_STREAM_AS_FD, (void**)&fd, REPORT_ERRORS)) {
 			self->gz_file = gzdopen(fd, mode);
 			if (self->gz_file)	{
 				stream = php_stream_alloc(&php_stream_gzio_ops, self, 0, mode);

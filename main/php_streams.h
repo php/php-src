@@ -43,7 +43,7 @@ typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
 	size_t (*write)(php_stream *stream, const char *buf, size_t count);
 	size_t (*read)(php_stream *stream, char *buf, size_t count);
-	int    (*close)(php_stream *stream);
+	int    (*close)(php_stream *stream, int close_handle);
 	int    (*flush)(php_stream *stream);
 	/* these are optional */
 	int    (*seek)(php_stream *stream, off_t offset, int whence);
@@ -132,7 +132,8 @@ PHPAPI php_stream *php_stream_fopen_temporary_file(const char *dir, const char *
 
 /* try really, really hard to make sure the cast happens (socketpair) */
 #define PHP_STREAM_CAST_TRY_HARD	0x80000000
-
+#define PHP_STREAM_CAST_RELEASE		0x40000000	/* stream becomes invalid on success */
+#define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE)
 PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_err);
 /* use this to check if a stream can be cast into another form */
 #define php_stream_can_cast(stream, as)	php_stream_cast(stream, as, NULL, 0)
