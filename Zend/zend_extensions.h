@@ -106,7 +106,6 @@ ZEND_API extern zend_llist zend_extensions;
 
 void zend_extension_dtor(zend_extension *extension);
 ZEND_API int zend_load_extension(char *path);
-ZEND_API int zend_load_extensions(char **extension_paths);
 ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 void zend_append_version_info(zend_extension *extension);
 int zend_startup_extensions_mechanism(void);
