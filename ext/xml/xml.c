@@ -101,7 +101,7 @@ DLEXPORT php3_module_entry *get_module() { return &xml_module_entry; };
 /* XXXXX this is AN UGLY HACK - we'll need to do a cleanup here!!! */
 
 #if PHP_API_VERSION >= 19990421
-#define php3tls_pval_destructor(a) pval_destructor(a)
+#define php3tls_pval_destructor(a) zval_dtor(a)
 #endif                                                                                                                                              
 static pval *php3i_long_pval(long value)
 {
@@ -646,6 +646,9 @@ static void php3i_add_to_info(xml_parser *parser,char *name)
 			php3_error(E_ERROR, "Unable to initialize array");
 			return;
 		}
+
+		values->is_ref = 0;
+		values->refcount = 1;
 		
 		_php3_hash_update(parser->info->value.ht, name, strlen(name)+1, (void *) &values, sizeof(pval*), (void **) &element);
 	} 
@@ -709,7 +712,13 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 			int atcnt = 0;
 
 			tag = emalloc(sizeof(pval));
+			tag->is_ref = 0;
+			tag->refcount = 1;
+
 			atr = emalloc(sizeof(pval));
+			atr->is_ref = 0;
+			atr->refcount = 1;
+
 			array_init(tag);
 			array_init(atr);
 
@@ -793,6 +802,8 @@ void php3i_xml_endElementHandler(void *userData, const char *name)
 				tag = emalloc(sizeof(pval));
 
 				array_init(tag);
+				tag->is_ref = 0;
+				tag->refcount = 1;
 				  
 				php3i_add_to_info(parser,((char *) name) + parser->toffset);
 
