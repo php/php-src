@@ -158,8 +158,17 @@ if test "$PHP_IMAP" != "no"; then
     ],[])
     CPPFLAGS=$old_CPPFLAGS
 
-    AC_CHECK_LIB(pam, pam_start) 
-    AC_CHECK_LIB(crypt, crypt)
+    PHP_CHECK_LIBRARY(pam, pam_start, 
+    [
+      PHP_ADD_LIBRARY(pam,, IMAP_SHARED_LIBADD)
+      AC_DEFINE(HAVE_LIBPAM,1,[ ])
+    ])
+
+    PHP_CHECK_LIBRARY(crypt, crypt, 
+    [
+      PHP_ADD_LIBRARY(crypt,, IMAP_SHARED_LIBADD)
+      AC_DEFINE(HAVE_LIBCRYPT,1,[ ])
+    ])
 	    
     PHP_EXPAND_PATH($IMAP_DIR, IMAP_DIR)
 
