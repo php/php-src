@@ -1,7 +1,7 @@
 --TEST--
 FDF POST data parsing
 --SKIPIF--
-<?php if (!extension_loaded("fdf")) print "skip"; ?>
+<?php if (php_sapi_name()=='cli' || !extension_loaded("fdf")) print "skip"; ?>
 --CGI--
 --HEADERS--
 return <<<END
