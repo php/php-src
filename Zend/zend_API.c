@@ -563,43 +563,30 @@ ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...)
 	return retval;
 }
 
-ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, zend_class_entry *ce, zval **object, ...)
+ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr, char *type_spec, ...)
 {
-	void **arg_stack = EG(argument_stack).top_element;
 	va_list va;
 	int retval;
+	char *p = type_spec;
+	zval **object;
+	zend_class_entry *ce;
 
-	*object = this_ptr;
-
-	if (!*object) {
-		zval **parameter;
-
-		if (zend_get_parameters_ex(1, &parameter) != SUCCESS) {
-			zend_error(E_WARNING, "%s() expects an object of class %s as first parameter, none was given",
-				get_active_function_name(TSRMLS_C), ce->name);
-
-			return FAILURE;
-		} else {
-			if (!zend_check_class(*parameter, ce)) {
-				zend_error(E_WARNING, "%s() expects parameter 1 to be %s, %s given",
-					get_active_function_name(TSRMLS_C), ce->name,
-					zend_zval_type_name(*parameter));
-
-				return FAILURE;
-			} else {
-				*object = *parameter;
-			}
-
-			EG(argument_stack).top_element++;
-		}
+	if (!this_ptr) {
+		va_start(va, type_spec);
+		retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
+		va_end(va);
 	}
-	
-	va_start(va, type_spec);
-	retval = zend_parse_va_args(num_args, type_spec, &va, 0 TSRMLS_CC);
-	va_end(va);
+	else {
+		p++;
+		va_start(va, type_spec);
 
-	EG(argument_stack).top_element = arg_stack;
+		object = va_arg(va, zval **);
+		ce = va_arg(va, zend_class_entry *);
+		*object = this_ptr;
 
+		retval = zend_parse_va_args(num_args, p, &va, 0 TSRMLS_CC);
+		va_end(va);
+	}
 	return retval;
 }
 
