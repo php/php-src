@@ -481,17 +481,14 @@ bound:
 PHPAPI int php_network_parse_network_address_with_port(const char *addr, long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC)
 {
 	char *colon;
-	char *host = NULL;
-	int is_v6;
 	char *tmp;
 	int ret = FAILURE;
 	short port;
 	struct sockaddr_in *in4 = (struct sockaddr_in*)sa;
-	struct sockaddr **sal, **psal;
+	struct sockaddr **psal;
 	int n;
 	char *errstr = NULL;
 #ifdef HAVE_IPV6
-	char *p;
 	struct sockaddr_in6 *in6 = (struct sockaddr_in6*)sa;
 #endif
 
