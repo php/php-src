@@ -56,10 +56,8 @@ echo sprintf("%s", $o);
 test1 Object
 (
 )
-
-Notice: Object of class test1 could not be converted to string in %stostring.php on line %d
-string(12) "Object id #%d"
-object(test1)#%d (0) {
+string(1%d) "Object id #%d"
+object(test1)#%d (%d) {
 }
 ====test2====
 test2 Object
@@ -67,23 +65,15 @@ test2 Object
 )
 test2::__toString()
 Converted
-object(test2)#%d (0) {
+object(test2)#%d (%d) {
 }
 ====test3====
 test2::__toString()
 Converted
 ====test4====
-test2::__toString()
-string:Converted
-====test5====
-test2::__toString()
-1Converted
-====test6====
-test2::__toString()
-test2::__toString()
-Converted
-Converted
-====test7====
+string:Object id #%d====test5====
+1Object id #%d====test6====
+Object id #%dObject id #2====test7====
 test2::__toString()
 
 Warning: Illegal offset type in %stostring.php on line %d
@@ -91,9 +81,6 @@ Warning: Illegal offset type in %stostring.php on line %d
 
 Notice: Object of class test2 to string conversion in %stostring.php on line %d
 string(6) "Object"
-test2::__toString()
-string(9) "Converted"
+string(1%d) "Object id #%d"
 ====test9====
-test2::__toString()
-Converted
-====DONE!====
+Object id #%d====DONE!====
