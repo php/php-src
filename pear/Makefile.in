@@ -11,6 +11,7 @@ peardir=$(PEAR_INSTALLDIR)
 
 PEAR_SUBDIRS = \
 	Benchmark \
+	Crypt \
 	Date \
 	DB \
 	File \
@@ -24,6 +25,7 @@ PEAR_SUBDIRS = \
 PEAR_FILES = \
 	Benchmark/Iterate.php \
 	Benchmark/Timer.php \
+	Crypt/HCEMD5.php \
 	Date/Calc.php \
 	DB.php \
 	DB/common.php \
