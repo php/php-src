@@ -786,8 +786,6 @@ if true; then
 
 fi
 
-PHP_SHOW_LD_LIBRARY_PATH
-
 ])
 
 divert
