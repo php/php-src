@@ -37,7 +37,7 @@
 extern "C" {  /* this should be included in the includes itself !! */
 
 #include "php.h"
-#include "php_ini.h"
+#include "ext/standard/info.h"
 
 }
 
@@ -179,14 +179,12 @@ function_entry DOTNET_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-
 static PHP_MINFO_FUNCTION(DOTNET)
 {
-	DISPLAY_INI_ENTRIES();
+	php_info_print_table_start();
+	php_info_print_table_row(2, "DOTNET support", "enabled");
+	php_info_print_table_end();
 }
-
-PHP_INI_BEGIN()
-PHP_INI_END()
 
 PHP_MINIT_FUNCTION(DOTNET)
 {
@@ -197,7 +195,6 @@ PHP_MINIT_FUNCTION(DOTNET)
 	if (FAILED(hr)) return hr;
 
 	php_register_DOTNET_class();
-	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
@@ -206,7 +203,6 @@ PHP_MSHUTDOWN_FUNCTION(DOTNET)
 {
 	dotnet_term();
 	CoUninitialize();
-	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 

@@ -50,7 +50,9 @@ function_entry VARIANT_functions[] = {
 
 static PHP_MINFO_FUNCTION(VARIANT)
 {
-	DISPLAY_INI_ENTRIES();
+	php_info_print_table_start();
+	php_info_print_table_row(2, "VARIANT support", "enabled");
+	php_info_print_table_end();
 }
 
 zend_module_entry VARIANT_module_entry = {
