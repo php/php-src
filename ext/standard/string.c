@@ -446,7 +446,7 @@ PHP_FUNCTION(strcoll)
  * it needs to be incrementing.  
  * Returns: FAILURE/SUCCESS wether the input was correct (i.e. no range errors)
  */
-int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
+static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
 {
 	unsigned char *end;
 	unsigned char c;
@@ -489,33 +489,20 @@ int php_charmask(unsigned char *input, int len, char *mask TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_trim
-       Compatibility function, ports old-API to new one. (DEPRECATED)
-*/
-void php_trim(zval **str, zval *return_value, int mode TSRMLS_DC)
-{
-	php_trim2(str, NULL, return_value, mode TSRMLS_CC);
-}
-/* }}} */
-
-/* {{{ php_trim2
+/* {{{ php_trim()
+ * mode 1 : trim left
+ * mode 2 : trim right
+ * mode 3 : trim left and right
+ * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-PHPAPI void php_trim2(zval **str, zval **what, zval *return_value, int mode TSRMLS_DC)
-/* mode 1 : trim left
-   mode 2 : trim right
-   mode 3 : trim left and right
-
-   what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
-*/
+PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_value, int mode TSRMLS_DC)
 {
 	register int i;
-	int len = Z_STRLEN_PP(str);
 	int trimmed = 0;
-	char *c = Z_STRVAL_PP(str);
 	char mask[256];
 
 	if (what) {
-		php_charmask(Z_STRVAL_PP(what), Z_STRLEN_PP(what), mask TSRMLS_CC);
+		php_charmask(what, what_len, mask TSRMLS_CC);
 	} else {
 		php_charmask(" \n\r\t\v\0", 6, mask TSRMLS_CC);
 	}
@@ -540,32 +527,37 @@ PHPAPI void php_trim2(zval **str, zval **what, zval *return_value, int mode TSRM
 			}
 		}
 	}
-	RETVAL_STRINGL(c, len, 1);
+
+	if (return_value) {
+		RETVAL_STRINGL(c, len, 1);
+	} else {
+		return estrndup(c, len);
+	}
+	return "";
 }
 /* }}} */
 
-/* {{{ proto string chop(string str [, string character_mask])
-   An alias for rtrim */
-/* }}} */
-
-/* {{{ proto string rtrim(string str [, string character_mask])
-   Removes trailing whitespace */
-PHP_FUNCTION(rtrim)
+/* {{{ php_do_trim
+ * Base for trim(), rtrim() and ltrim() functions.
+ */
+static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zval **str;
 	zval **what = NULL;
 	int    argc = ZEND_NUM_ARGS();
 
-	if (argc < 1 || argc > 2 ||
-	    zend_get_parameters_ex(argc, &str, &what) == FAILURE) {
+	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &str, &what) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_string_ex(str);
+
 	if (argc > 1) {
 		convert_to_string_ex(what);
+		php_trim(Z_STRVAL_PP(str), Z_STRLEN_PP(str), Z_STRVAL_PP(what), Z_STRLEN_PP(what), return_value, mode TSRMLS_CC);
+	} else {
+		php_trim(Z_STRVAL_PP(str), Z_STRLEN_PP(str), NULL, 0, return_value, mode TSRMLS_CC);
 	}
-
-	php_trim2(str, what, return_value, 2 TSRMLS_CC);
 }
 /* }}} */
 
@@ -573,20 +565,15 @@ PHP_FUNCTION(rtrim)
    Strips whitespace from the beginning and end of a string */
 PHP_FUNCTION(trim)
 {
-	zval **str;
-	zval **what = NULL;
-	int    argc = ZEND_NUM_ARGS();
+	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
+}
+/* }}} */
 
-	if (argc < 1 || argc > 2 ||
-	    zend_get_parameters_ex(argc, &str, &what) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(str);
-	if (argc > 1) {
-		convert_to_string_ex(what);
-	}
-
-	php_trim2(str, what, return_value, 3 TSRMLS_CC);
+/* {{{ proto string rtrim(string str [, string character_mask])
+   Removes trailing whitespace */
+PHP_FUNCTION(rtrim)
+{
+	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
 }
 /* }}} */
 
@@ -594,20 +581,7 @@ PHP_FUNCTION(trim)
    Strips whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
-	zval **str;
-	zval **what = NULL;
-	int    argc = ZEND_NUM_ARGS();
-
-	if (argc < 1 || argc > 2 ||
-	    zend_get_parameters_ex(argc, &str, &what) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(str);
-	if (argc > 1) {
-		convert_to_string_ex(what);
-	}
-	
-	php_trim2(str, what, return_value, 1 TSRMLS_CC);
+	php_do_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
