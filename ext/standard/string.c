@@ -2629,6 +2629,9 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 			convert_to_string(*search_entry);
 			if (Z_STRLEN_PP(search_entry) == 0) {
 				zend_hash_move_forward(Z_ARRVAL_P(search));
+				if (Z_TYPE_P(replace) == IS_ARRAY) {
+					zend_hash_move_forward(Z_ARRVAL_P(replace));
+				}
 				continue;
 			}
 
