@@ -754,7 +754,7 @@ PHP_MINFO_FUNCTION(ibase)
 #ifdef __GNUC__
 		void (*info_func)(char*) = dlsym(RTLD_DEFAULT, "isc_get_client_version");
 #else
-		void (__stdcall *info_func)(char*) = NULL;
+		void (__stdcall *info_func)(char*);
 
 		HMODULE l = GetModuleHandle("fbclient");
 
@@ -1615,8 +1615,8 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size,
 }		
 /* }}} */
 
-static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf,
-	ibase_query *ib_query TSRMLS_DC) /* {{{ */
+static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ */
+	ibase_query *ib_query TSRMLS_DC)
 {
 	int i, rv = SUCCESS;
 	XSQLVAR *var = sqlda->sqlvar;
@@ -1628,6 +1628,10 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf,
 		var->sqlind = &buf[i].sqlind;
 		
 		if (Z_TYPE_P(b_var) == IS_NULL) {
+			if ((var->sqltype & 1) != 1) {
+				_php_ibase_module_error("Parameter %d must have a value" TSRMLS_CC, i+1);
+				rv = FAILURE;
+			}
 			buf[i].sqlind = -1;
 		} else {
 			buf[i].sqlind = 0;
