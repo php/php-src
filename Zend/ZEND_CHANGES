@@ -397,8 +397,7 @@ Changes in the Zend Engine 2.0
       Example:
 
         <?php
-          function my_function(&$var = null)
-          {
+          function my_function(&$var = null) {
                if ($var === null) {
                    die('$var needs to have a value');
                }
