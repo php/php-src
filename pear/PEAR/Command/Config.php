@@ -187,7 +187,7 @@ displays help for all configuration parameters.
      */
     function _checkLayer($layer = null)
     {
-        if (!empty($layer)) {
+        if (!empty($layer) && $layer != 'default') {
             $layers = $this->config->getLayers();
             if (!in_array($layer, $layers)) {
                 return " only the layers: \"" . implode('" or "', $layers) . "\" are supported";
