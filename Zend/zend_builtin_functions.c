@@ -532,9 +532,13 @@ ZEND_FUNCTION(get_parent_class)
 		}
 		RETURN_STRINGL(name, name_length, 1);
 	} else if (Z_TYPE_PP(arg) == IS_STRING) {
+		zend_class_entry **pce;
+		
 		SEPARATE_ZVAL(arg);
 		zend_str_tolower(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
-		zend_hash_find(EG(class_table), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg)+1, (void **)&ce);
+		if(zend_hash_find(EG(class_table), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg)+1, (void **)&pce) == SUCCESS) {
+			ce = *pce;
+		}
 	}
 
 	if (ce && ce->parent) {
@@ -609,7 +613,7 @@ ZEND_FUNCTION(get_class_vars)
 {
 	zval **class_name;
 	char *lcname;
-	zend_class_entry *ce;
+	zend_class_entry *ce, **pce;
 	zval *tmp;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
@@ -620,10 +624,11 @@ ZEND_FUNCTION(get_class_vars)
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
 
-	if (zend_hash_find(EG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&ce)==FAILURE) {
+	if (zend_hash_find(EG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&pce) == FAILURE) {
 		efree(lcname);
 		RETURN_FALSE;
 	} else {
+		ce = *pce;
 		efree(lcname);
 		array_init(return_value);
 		if (!ce->constants_updated) {
@@ -667,7 +672,7 @@ ZEND_FUNCTION(get_class_methods)
 {
 	zval **class;
 	zval *method_name;
-	zend_class_entry *ce = NULL;
+	zend_class_entry *ce = NULL, **pce;
 	char *string_key;
 	ulong num_key;
 	int key_type;
@@ -685,7 +690,9 @@ ZEND_FUNCTION(get_class_methods)
 	} else if (Z_TYPE_PP(class) == IS_STRING) {
 		SEPARATE_ZVAL(class);
 		zend_str_tolower(Z_STRVAL_PP(class), Z_STRLEN_PP(class));
-		zend_hash_find(EG(class_table), Z_STRVAL_PP(class), Z_STRLEN_PP(class)+1, (void **)&ce);
+		if(zend_hash_find(EG(class_table), Z_STRVAL_PP(class), Z_STRLEN_PP(class)+1, (void **)&pce) == SUCCESS) {
+			ce = *pce;
+		}
 	}
 
 	if (!ce) {
@@ -926,9 +933,10 @@ ZEND_FUNCTION(restore_error_handler)
 }
 
 
-static int copy_class_name(zend_class_entry *ce, int num_args, va_list args, zend_hash_key *hash_key)
+static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *array = va_arg(args, zval *);
+	zend_class_entry *ce  = *pce;
 
 	if (hash_key->nKeyLength==0 || hash_key->arKey[0]!=0) {
 		add_next_index_stringl(array, ce->name, ce->name_length, 1);

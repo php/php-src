@@ -1737,7 +1737,7 @@ binary_assign_op_addr_obj:
 			case ZEND_IMPORT_CLASS:
 				{
 					zend_class_entry *ce;
-					zend_class_entry *import_ce;
+					zend_class_entry **import_ce;
 					
 					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
 
@@ -1751,14 +1751,14 @@ binary_assign_op_addr_obj:
 						if (zend_hash_find(&ce->class_table, class_name_strval, class_name_strlen + 1, (void **) &import_ce)==FAILURE) {
 							zend_error(E_ERROR, "Import: class %s not found", class_name_strval);
 						}
-						if (zend_hash_add(EG(class_table), class_name_strval, class_name_strlen + 1, import_ce, sizeof(zend_class_entry), NULL) == FAILURE) {
+						if (zend_hash_add(EG(class_table), class_name_strval, class_name_strlen + 1, import_ce, sizeof(zend_class_entry *), NULL) == FAILURE) {
 							zend_error(E_ERROR, "Import: class %s already exists in current scope", class_name_strval);
 						}
-						zend_class_add_ref(import_ce);
+						zend_class_add_ref(*import_ce);
 					} else {
-						zend_class_entry tmp_zend_class_entry;
+						zend_class_entry *tmp_zend_class_entry;
 
-						zend_hash_copy(EG(class_table), &ce->class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_zend_class_entry, sizeof(zend_class_entry));
+						zend_hash_copy(EG(class_table), &ce->class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_zend_class_entry, sizeof(zend_class_entry *));
 					}
 
 					NEXT_OPCODE();
@@ -1816,6 +1816,8 @@ binary_assign_op_addr_obj:
 				}
 			case ZEND_FETCH_CLASS:
 				{
+					zend_class_entry **pce;
+					
 					if (EX(opline)->op1.op_type == IS_UNUSED) {
 						zval tmp;
 						zval *class_name;
@@ -1860,16 +1862,20 @@ binary_assign_op_addr_obj:
 							class_name_strlen = tmp.value.str.len;
 						}
 					
-						if (zend_hash_find(EG(class_table), class_name_strval, class_name_strlen+1, (void **) &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
+						if (zend_hash_find(EG(class_table), class_name_strval, class_name_strlen+1, (void **) &pce) == FAILURE) {
 							zend_error(E_ERROR, "Class '%s' not found", class_name_strval);
+						} else {
+							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = *pce;
 						}
 						if (!is_const) {
 							zval_dtor(&tmp);
 							FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 						}
 					} else {
-						if (zend_hash_find(&EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->class_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
+						if (zend_hash_find(&EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->class_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **)&pce) == FAILURE) {
 							zend_error(E_ERROR, "Class '%s' not found", EX(opline)->op2.u.constant.value.str.val);
+						} else {
+							EX(Ts)[EX(opline)->result.u.var].EA.class_entry = *pce;
 						}
 					}
 					NEXT_OPCODE();
@@ -3026,20 +3032,29 @@ send_by_ref:
 					zval **value;
 					zend_bool isset = 1;
 					HashTable *target_symbol_table;
+		
+					if (EX(opline)->op2.u.EA.type == ZEND_FETCH_THIS) {
+						if (!EG(This)) {
+							isset = 0;
+						} else {
+							isset = 1;
+							value = &EG(This);
+						}
+					} else {
+						target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
 
-					target_symbol_table = zend_get_target_symbol_table(EX(opline), EX(Ts), BP_VAR_IS TSRMLS_CC);
-
-					if (variable->type != IS_STRING) {
-						tmp = *variable;
-						zval_copy_ctor(&tmp);
-						convert_to_string(&tmp);
-						variable = &tmp;
+						if (variable->type != IS_STRING) {
+							tmp = *variable;
+							zval_copy_ctor(&tmp);
+							convert_to_string(&tmp);
+							variable = &tmp;
+						}
+						
+						if (zend_hash_find(target_symbol_table, variable->value.str.val, variable->value.str.len+1, (void **) &value) == FAILURE) {
+							isset = 0;
+						}
 					}
-
-					if (zend_hash_find(target_symbol_table, variable->value.str.val, variable->value.str.len+1, (void **) &value) == FAILURE) {
-						isset = 0;
-					}
-
+						
 					EX(Ts)[EX(opline)->result.u.var].tmp_var.type = IS_BOOL;
 
 					switch (EX(opline)->extended_value) {

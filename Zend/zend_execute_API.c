@@ -100,9 +100,9 @@ static int is_not_internal_function(zend_function *function TSRMLS_DC)
 }
 
 
-static int is_not_internal_class(zend_class_entry *ce TSRMLS_DC)
+static int is_not_internal_class(zend_class_entry **ce TSRMLS_DC)
 {
-	if (ce->type == ZEND_INTERNAL_CLASS) {
+	if ((*ce)->type == ZEND_INTERNAL_CLASS) {
 		return EG(full_tables_cleanup) ? 0 : ZEND_HASH_APPLY_STOP;
 	} else {
 		return EG(full_tables_cleanup) ? 1 : ZEND_HASH_APPLY_REMOVE;
