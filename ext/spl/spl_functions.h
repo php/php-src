@@ -60,10 +60,10 @@ void spl_add_interfaces(zval * list, zend_class_entry * pce TSRMLS_DC);
 int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC);
 
 #define SPL_CLASS_FE(class_name, function_name, arg_info, flags) \
-	{ #function_name, spl_ ## class_name ## _ ## function_name, arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, flags },
+	PHP_ME( spl_ ## class_name, function_name, arg_info, flags)
 
 #define SPL_CLASS_FUNCTION(class_name, function_name) \
-	PHP_NAMED_FUNCTION(spl_ ## class_name ## _ ## function_name)
+	PHP_METHOD(spl_ ## class_name, function_name)
 
 #endif /* PHP_FUNCTIONS_H */
 

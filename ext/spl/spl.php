@@ -284,27 +284,57 @@ class spl_array_it implements spl_sequence_assoc {
 	 *
 	 * \param $array the array to use.
 	 */
-	private function __construct($array)
+	private function __construct($array);
 
 	/*! \copydoc spl_sequence::rewind
 	 */
-	function rewind()
+	function rewind();
 
 	/*! \copydoc spl_forward::current
 	 */
-	function current()
+	function current();
 
 	/*! \copydoc spl_assoc::key
 	 */
-	function key()
+	function key();
 
 	/*! \copydoc spl_forward::next
 	 */
-	function next()
+	function next();
 
 	/*! \copydoc spl_forward::has_more
 	 */
-	function has_more()
+	function has_more();
 }
 
+/*! \brief Directory iterator
+ */
+class spl_array_it implements spl_sequence {
+
+	/*! Construct a directory iterator from a path-string.
+	 *
+	 * \param $path directory to iterate.
+	 */
+	private function __construct($path);
+
+	/*! \copydoc spl_sequence::rewind
+	 */
+	function rewind();
+
+	/*! \copydoc spl_forward::current
+	 */
+	function current();
+
+	/*! \copydoc spl_forward::next
+	 */
+	function next();
+
+	/*! \copydoc spl_forward::has_more
+	 */
+	function has_more();
+	
+	/*! \return The opened path.
+	 */
+	function get_path();	
+}
 ?>
