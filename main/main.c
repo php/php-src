@@ -1512,9 +1512,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			if (VCWD_REALPATH(primary_file->filename, realfile)) {
 				realfile_len =  strlen(realfile);
 				zend_hash_add(&EG(included_files), realfile, realfile_len+1, (void *)&dummy, sizeof(int), NULL);
-				primary_file->opened_path = emalloc(realfile_len+1);
-				memcpy(primary_file->opened_path, realfile, realfile_len);
-				primary_file->opened_path[realfile_len] = '\0';
+				if (primary_file->opened_path == NULL && strncmp(realfile, primary_file->filename, realfile_len)) {
+					primary_file->opened_path = emalloc(realfile_len+1);
+					memcpy(primary_file->opened_path, realfile, realfile_len);
+					primary_file->opened_path[realfile_len] = '\0';
+				}	
 			}
 		}
 
