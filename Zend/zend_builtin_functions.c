@@ -342,7 +342,7 @@ ZEND_FUNCTION(error_reporting)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
+
 	RETVAL_LONG(old_error_reporting);
 }
 
