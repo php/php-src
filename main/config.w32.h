@@ -317,4 +317,7 @@
 
 #define HAVE_STRFTIME 1
 
+/* Default directory for loading extensions.  */
+#define PHP_EXTENSION_DIR NULL
+
 #define SIZEOF_INT 4
