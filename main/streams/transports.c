@@ -255,7 +255,7 @@ PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, char **error
 /* Get the next client and their address (as a string) */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 		char **textaddr, int *textaddrlen,
-		void **addr, size_t *addrlen,
+		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
 		char **error_text
 		TSRMLS_DC)
@@ -294,7 +294,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
 		char **textaddr, int *textaddrlen,
-		void **addr, size_t *addrlen
+		void **addr, socklen_t *addrlen
 		TSRMLS_DC)
 {
 	php_stream_xport_param param;
