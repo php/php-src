@@ -83,7 +83,7 @@ gdImagePtr gdImageCreateFromGifSource(gdSourcePtr inSource)
 
         im = gdImageCreateFromGifCtx(in);
 
-        in->free(in);
+        in->gd_free(in);
 
         return im;
 }
@@ -96,7 +96,7 @@ gdImageCreateFromGif(FILE *fdFile)
 
         im = gdImageCreateFromGifCtx(fd);
 
-        fd->free(fd);
+        fd->gd_free(fd);
 
         return im;
 }

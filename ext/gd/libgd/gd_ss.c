@@ -16,12 +16,13 @@ extern gdImagePtr gdImageCreateFromPngSource (gdSourcePtr inSource);
 /*#define GD_SS_DBG(s) (s) */
 #define GD_SS_DBG(s)
 
+#ifdef HAVE_LIBPNG
 void
 gdImagePngToSink (gdImagePtr im, gdSinkPtr outSink)
 {
   gdIOCtx *out = gdNewSSCtx (NULL, outSink);
   gdImagePngCtx (im, out);
-  out->free (out);
+  out->gd_free (out);
 }
 
 gdImagePtr
@@ -32,7 +33,21 @@ gdImageCreateFromPngSource (gdSourcePtr inSource)
 
   im = gdImageCreateFromPngCtx (in);
 
-  in->free (in);
+  in->gd_free (in);
 
   return im;
 }
+#else /* no HAVE_LIBPNG */
+void
+gdImagePngToSink (gdImagePtr im, gdSinkPtr outSink)
+{
+  fprintf(stderr,"PNG support is not available\n");
+}
+gdImagePtr
+gdImageCreateFromPngSource (gdSourcePtr inSource)
+{
+  fprintf(stderr,"PNG support is not available\n");
+  return NULL;
+}
+#endif /* HAVE_LIBPNG */
+

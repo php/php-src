@@ -71,7 +71,7 @@ gdNewSSCtx (gdSourcePtr src, gdSinkPtr snk)
   ctx->ctx.tell = NULL;
   ctx->ctx.seek = NULL;
 
-  ctx->ctx.free = gdFreeSsCtx;
+  ctx->ctx.gd_free = gdFreeSsCtx;
 
   return (gdIOCtx *) ctx;
 }

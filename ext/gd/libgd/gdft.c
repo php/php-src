@@ -15,7 +15,7 @@
 #ifndef MSWIN32
 #include <unistd.h>
 #else
-#define R_OK 2
+#include <io.h>
 #endif
 #ifdef WIN32
 extern int access(const char *pathname, int mode);
@@ -352,7 +352,6 @@ fontFetch (char **error, void *key)
   fontsearchpath = getenv ("GDFONTPATH");
   if (!fontsearchpath)
     fontsearchpath = DEFAULT_FONTPATH;
-  path = strdup (fontsearchpath);
   fontlist = strdup (a->fontlist);
 
   /*
@@ -362,6 +361,8 @@ fontFetch (char **error, void *key)
        name = gd_strtok_r (0, LISTSEPARATOR, &strtok_ptr))
     {
 
+      /* make a fresh copy each time - strtok corrupts it. */
+      path = strdup (fontsearchpath);
       /*
        * Allocate an oversized buffer that is guaranteed to be
        * big enough for all paths to be tested.
@@ -369,7 +370,7 @@ fontFetch (char **error, void *key)
       fullname = gdRealloc (fullname,
 			    strlen (fontsearchpath) + strlen (name) + 6);
       /* if name is an absolute filename then test directly */
-      if (*name == '/')
+      if (*name == '/' || (name[0] != 0 && name[1] == ':' && (name[2] == '/' || name[2] == '\\')))
 	{
 	  sprintf (fullname, "%s", name);
 	  if (access (fullname, R_OK) == 0)
@@ -387,11 +388,23 @@ fontFetch (char **error, void *key)
 	      font_found++;
 	      break;
 	    }
+          sprintf (fullname, "%s/%s.pfa", dir, name);
+          if (access (fullname, R_OK) == 0)
+            {
+	      font_found++;
+	      break;
 	}
-      if (font_found)
+	  sprintf (fullname, "%s/%s.pfb", dir, name);
+	  if (access (fullname, R_OK) == 0)
+	    {
+	      font_found++;
 	break;
     }
+	}
   gdFree (path);
+      if (font_found)
+	break;
+  }
   gdFree (fontlist);
   if (!font_found)
     {
@@ -481,7 +494,10 @@ tweenColorTest (void *element, void *key)
  * Computes a color in im's color table that is part way between
  * the background and foreground colors proportional to the gray
  * pixel value in the range 0-NUMCOLORS. The fg and bg colors must already
- * be in the color table.
+ * be in the color table for palette images. For truecolor images the
+ * returned value simply has an alpha component and gdImageAlphaBlend
+ * does the work so that text can be alpha blended across a complex
+ * background (TBB; and for real in 2.0.2).
  */
 static void *
 tweenColorFetch (char **error, void *key)
@@ -500,31 +516,34 @@ tweenColorFetch (char **error, void *key)
   /* if fg is specified by a negative color idx, then don't antialias */
   if (fg < 0)
     {
+      if ((pixel + pixel) >= NUMCOLORS)
       a->tweencolor = -fg;
+      else
+	  a->tweencolor = bg;
     }
   else
     {
       npixel = NUMCOLORS - pixel;
       if (im->trueColor)
-	{
-	  /* 2.0.1: use gdImageSetPixel to do the alpha blending work,
-	     or to just store the alpha level. All we have to do here
-	     is incorporate our knowledge of the percentage of this
-	     pixel that is really "lit" by pushing the alpha value
-	     up toward transparency in edge regions. */
-	  a->tweencolor = gdTrueColorAlpha (
-					     gdTrueColorGetRed (fg),
-					     gdTrueColorGetGreen (fg),
-					     gdTrueColorGetBlue (fg),
-					     gdAlphaMax - ((gdAlphaMax - gdTrueColorGetAlpha (fg)) * pixel / NUMCOLORS)				       );
-	}
+       {
+         /* 2.0.1: use gdImageSetPixel to do the alpha blending work,
+            or to just store the alpha level. All we have to do here
+            is incorporate our knowledge of the percentage of this
+            pixel that is really "lit" by pushing the alpha value
+            up toward transparency in edge regions. */
+         a->tweencolor = gdTrueColorAlpha (
+                                            gdTrueColorGetRed (fg),
+                                            gdTrueColorGetGreen (fg),
+                                            gdTrueColorGetBlue (fg),
+              gdAlphaMax - (gdTrueColorGetAlpha (fg) * pixel / NUMCOLORS));
+       }
       else
-	{
+       {
 	  a->tweencolor = gdImageColorResolve (im,
 		   (pixel * im->red[fg] + npixel * im->red[bg]) / NUMCOLORS,
 	       (pixel * im->green[fg] + npixel * im->green[bg]) / NUMCOLORS,
 		(pixel * im->blue[fg] + npixel * im->blue[bg]) / NUMCOLORS);
-	}
+    }
     }
   return (void *) a;
 }
@@ -537,29 +556,84 @@ tweenColorRelease (void *element)
 
 /* draw_bitmap - transfers glyph bitmap to GD image */
 static char *
-gdft_draw_bitmap (gdImage * im, int fg, FT_Bitmap bitmap, int pen_x, int pen_y)
+gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, FT_Bitmap bitmap, int pen_x, int pen_y)
 {
-  unsigned char *pixel;
+  unsigned char *pixel = NULL;
+  int *tpixel = NULL;
   int x, y, row, col, pc;
 
   tweencolor_t *tc_elem;
   tweencolorkey_t tc_key;
 
-  /* initialize tweenColorCache on first call */
-  static gdCache_head_t *tc_cache;
-
-  if (!tc_cache)
-    {
-      tc_cache = gdCacheCreate (TWEENCOLORCACHESIZE,
-			tweenColorTest, tweenColorFetch, tweenColorRelease);
-    }
-
   /* copy to image, mapping colors */
   tc_key.fgcolor = fg;
   tc_key.im = im;
+  /* Truecolor version; does not require the cache */
+  if (im->trueColor) 
+    {
+    for (row = 0; row < bitmap.rows; row++)
+      {
+        pc = row * bitmap.pitch;
+        y = pen_y + row;
+        /* clip if out of bounds */
+        if (y >= im->sy || y < 0)
+	  continue;
+      for (col = 0; col < bitmap.width; col++, pc++)
+	{
+          int level;  
+	  if (bitmap.pixel_mode == ft_pixel_mode_grays)
+	    {
+	      /*
+	       * Scale to 128 levels of alpha for gd use.
+               * alpha 0 is opacity, so be sure to invert at the end
+	       */
+	      level = (bitmap.buffer[pc] * gdAlphaMax /
+                (bitmap.num_grays - 1)); 
+            }
+          else if (bitmap.pixel_mode == ft_pixel_mode_mono)
+            {
+              level = ((bitmap.buffer[pc / 8]
+			       << (pc % 8)) & 128) ? gdAlphaOpaque :
+                gdAlphaTransparent;
+            }  
+          else 
+	    {
+	      return "Unsupported ft_pixel_mode";
+	    }
+          if (fg >= 0) {
+            /* Consider alpha in the foreground color itself to be an
+              upper bound on how opaque things get */
+            level = level * (gdAlphaMax - gdTrueColorGetAlpha(fg)) / gdAlphaMax;
+          }
+          level = gdAlphaMax - level;  
+          x = pen_x + col;
+	      /* clip if out of bounds */
+	      if (x >= im->sx || x < 0)
+		continue;
+	      /* get pixel location in gd buffer */
+	    tpixel = &im->tpixels[y][x];
+            if (fg < 0) {
+              if (level < (gdAlphaMax / 2)) {
+                *tpixel = -fg;
+              }
+            } else {
+              if (im->alphaBlendingFlag) { 
+                *tpixel = gdAlphaBlend(*tpixel, (level << 24) + (fg & 0xFFFFFF));
+              } else {    
+                *tpixel = (level << 24) + (fg & 0xFFFFFF);
+              }
+            }
+	  } 
+        }
+      return (char *) NULL;
+    }
+    /* Non-truecolor case, restored to its more or less original form */ 
   for (row = 0; row < bitmap.rows; row++)
     {
       pc = row * bitmap.pitch;
+      if(bitmap.pixel_mode==ft_pixel_mode_mono)
+             pc *= 8;    /* pc is measured in bits for monochrome images */
+
       y = pen_y + row;
 
       /* clip if out of bounds */
@@ -568,69 +642,54 @@ gdft_draw_bitmap (gdImage * im, int fg, FT_Bitmap bitmap, int pen_x, int pen_y)
 
       for (col = 0; col < bitmap.width; col++, pc++)
 	{
-			x = pen_x + col;
-
-			/* clip if out of bounds */
-			if (x >= im->sx || x < 0)
-				continue;
-
-			switch(bitmap.pixel_mode)	{
-				case ft_pixel_mode_grays:
+	  if (bitmap.pixel_mode == ft_pixel_mode_grays)
+	    {
 	      /*
 	       * Round to NUMCOLORS levels of antialiasing for
 	       * index color images since only 256 colors are
 	       * available.
 	       */
-
 	      tc_key.pixel = ((bitmap.buffer[pc] * NUMCOLORS)
 			      + bitmap.num_grays / 2)
 		/ (bitmap.num_grays - 1);
-					break;
-				case ft_pixel_mode_mono:
+	    }
+	  else if (bitmap.pixel_mode == ft_pixel_mode_mono)
+	    {
 	      tc_key.pixel = ((bitmap.buffer[pc / 8]
 			       << (pc % 8)) & 128) ? NUMCOLORS : 0;
-					break;
-				default:
+	    }
+	  else
+	    {
 	      return "Unsupported ft_pixel_mode";
 	    }
+	  if (tc_key.pixel > 0) /* if not background */
+	    {			
+	      x = pen_x + col;
 
-	  if (tc_key.pixel > 0)
-		{
-
-				if (im->trueColor)	{
-					tc_elem = (tweencolor_t *) gdCacheGet (
-							tc_cache, &tc_key);
-
-					gdImageSetPixel(im, x, y, tc_elem->tweencolor);
-		}
-				else	{
-		  pixel = &im->pixels[y][x];
+	      /* clip if out of bounds */
+	      if (x >= im->sx || x < 0)
+		continue;
+	      /* get pixel location in gd buffer */
+	      pixel = &im->pixels[y][x];
 	      if (tc_key.pixel == NUMCOLORS)
-		      *pixel = fg;
-					else	{
-		      tc_key.bgcolor = *pixel;
+		{
+		  /* use fg color directly. gd 2.0.2: watch out for
+                     negative indexes (thanks to David Marwood). */ 
+		    *pixel = (fg < 0) ? -fg : fg;
+		}
+	      else
+		{
+		  /* find antialised color */
+	
+		  tc_key.bgcolor = *pixel;
 		  tc_elem = (tweencolor_t *) gdCacheGet (
 							  tc_cache, &tc_key);
-		      *pixel = tc_elem->tweencolor;
-
-		    }
-
+		  *pixel = tc_elem->tweencolor;
 		}
 	    }
 	}
     }
   return (char *) NULL;
-}
-
-extern int any2eucjp (char *, char *, unsigned int);
-
-/********************************************************************/
-/* gdImageStringFT -  render a utf8 string onto a gd image          */
-char *
-gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
-		 double ptsize, double angle, int x, int y, char *string)
-{
-	return gdImageStringFTEx(im, brect, fg, fontlist, ptsize, angle, x, y, string, NULL);
 }
 
 static int
@@ -639,6 +698,32 @@ gdroundupdown (FT_F26Dot6 v1, int updown)
   return (!updown)
     ? (v1 < 0 ? ((v1 - 63) >> 6) : v1 >> 6)
     : (v1 > 0 ? ((v1 + 63) >> 6) : v1 >> 6);
+}
+
+extern int any2eucjp (char *, char *, unsigned int);
+
+/* Persistent font cache until explicitly cleared */
+/*     Fonts can be used across multiple images */
+static gdCache_head_t *fontCache;
+static FT_Library library;
+
+void
+gdFreeFontCache()
+{
+  if (fontCache)
+    {
+      gdCacheDelete(fontCache);
+      FT_Done_FreeType(library);
+    }
+}
+
+/********************************************************************/
+/* gdImageStringFT -  render a utf8 string onto a gd image          */
+char *
+gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
+                 double ptsize, double angle, int x, int y, char *string)
+{
+    return gdImageStringFTEx(im, brect, fg, fontlist, ptsize, angle, x, y, string, NULL);
 }
 
 char *
@@ -665,18 +750,30 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
   char *tmpstr = 0;
   int render = (im && (im->trueColor || (fg <= 255 && fg >= -255)));
   FT_BitmapGlyph bm;
+  int render_mode = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
 
-	/* fine tuning */
-	double linespace = LINESPACE;
-	
+  /* fine tuning */
+  double linespace = LINESPACE;
+
+  /*
+   *   make a new tweenColorCache on every call
+   *   because caching colormappings between calls
+   *   is not safe. If the im-pointer points to a
+   *   brand new image, the cache gives out bogus
+   *   colorindexes.          -- 27.06.2001 <krisku@arrak.fi>
+   */
+  gdCache_head_t  *tc_cache;
+
+  tc_cache = gdCacheCreate( TWEENCOLORCACHESIZE,
+               tweenColorTest, tweenColorFetch, tweenColorRelease );
+
 /***** initialize font library and font cache on first call ******/
-  static gdCache_head_t *fontCache;
-  static FT_Library library;
 
   if (!fontCache)
     {
       if (FT_Init_FreeType (&library))
 	{
+	  gdCacheDelete( tc_cache );
 	  return "Failure to initialize font library";
 	}
       fontCache = gdCacheCreate (FONTCACHESIZE,
@@ -690,6 +787,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
   font = (font_t *) gdCacheGet (fontCache, &fontkey);
   if (!font)
     {
+      gdCacheDelete( tc_cache );
       return fontCache->error;
     }
   face = font->face;		/* shortcut */
@@ -698,17 +796,16 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
   if (FT_Set_Char_Size (face, 0, (FT_F26Dot6) (ptsize * 64),
 			GD_RESOLUTION, GD_RESOLUTION))
     {
+      gdCacheDelete( tc_cache );
       return "Could not set character size";
     }
 
-	/* pull in supplied extended settings */
-	if (strex)	{
-		if ((strex->flags & gdFTEX_LINESPACE) == gdFTEX_LINESPACE)
-			linespace = strex->linespacing;
+    /* pull in supplied extended settings */
+    if (strex)      {
+        if ((strex->flags & gdFTEX_LINESPACE) == gdFTEX_LINESPACE)
+        linespace = strex->linespacing;
+    }
 
-	}
-
-	
   matrix.xx = (FT_Fixed) (cos_a * (1 << 16));
   matrix.yx = (FT_Fixed) (sin_a * (1 << 16));
   matrix.xy = -matrix.yx;
@@ -720,12 +817,16 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 
   use_kerning = FT_HAS_KERNING (face);
   previous = 0;
+  if (fg < 0)
+    {
+      render_mode |= FT_LOAD_MONOCHROME;
+    }
 
 #ifndef JISX0208
   if (font->have_char_map_sjis)
     {
 #endif
-      if ((tmpstr = (char *) gdMalloc (BUFSIZ)) != NULL)
+      if ((tmpstr = (char *) gdMalloc (BUFSIZ)))
 	{
 	  any2eucjp (tmpstr, string, BUFSIZ);
 	  next = tmpstr;
@@ -749,8 +850,8 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
       if (ch == '\r')
 	{
 	  penf.x = 0;
-	  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
-	  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
+	  x1 = (penf.x * cos_a - penf.y * sin_a + 32) / 64;
+	  y1 = (penf.x * sin_a + penf.y * cos_a + 32) / 64;
 	  pen.x = pen.y = 0;
 	  previous = 0;		/* clear kerning flag */
 	  next++;
@@ -759,10 +860,10 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
       /* newlines */
       if (ch == '\n')
 	{
-	  penf.y -= (long)(face->size->metrics.height * linespace);
+	  penf.y -= face->size->metrics.height * LINESPACE;
 	  penf.y = (penf.y - 32) & -64;		/* round to next pixel row */
-	  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
-	  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
+	  x1 = (penf.x * cos_a - penf.y * sin_a + 32) / 64;
+	  y1 = (penf.x * sin_a + penf.y * cos_a + 32) / 64;
 	  pen.x = pen.y = 0;
 	  previous = 0;		/* clear kerning flag */
 	  next++;
@@ -826,6 +927,9 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 	    }
 	}
 
+      /* set rotation transform */
+      FT_Set_Transform(face, &matrix, NULL);
+
       /* Convert character code to glyph index */
       glyph_index = FT_Get_Char_Index (face, ch);
 
@@ -838,24 +942,33 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 	}
 
       /* load glyph image into the slot (erase previous one) */
-      err = FT_Load_Glyph (face, glyph_index, FT_LOAD_DEFAULT);
+      err = FT_Load_Glyph (face, glyph_index, render_mode);
       if (err)
+	{
+	  gdCacheDelete( tc_cache );
 	return "Problem loading glyph";
+	}
 
       /* transform glyph image */
       FT_Get_Glyph (slot, &image);
       if (brect)
 	{			/* only if need brect */
 	  FT_Glyph_Get_CBox (image, ft_glyph_bbox_gridfit, &glyph_bbox);
-	  if (!i)
-	    {			/* if first character, init BB corner values */
-	      bbox.xMin = bbox.yMin = (1 << 30) - 1;
-	      bbox.xMax = bbox.yMax = -bbox.xMin;
-	    }
 	  glyph_bbox.xMin += penf.x;
 	  glyph_bbox.yMin += penf.y;
 	  glyph_bbox.xMax += penf.x;
 	  glyph_bbox.yMax += penf.y;
+	  if (ch == ' ')   /* special case for trailing space */
+             glyph_bbox.xMax += slot->metrics.horiAdvance;
+          if (!i)
+	     {                   /* if first character, init BB corner values */
+	        bbox.xMin = glyph_bbox.xMin;
+		bbox.yMin = glyph_bbox.yMin;
+		bbox.xMax = glyph_bbox.xMax;
+		bbox.yMax = glyph_bbox.yMax;
+	     }
+	   else
+	     {
 	  if (bbox.xMin > glyph_bbox.xMin)
 	    bbox.xMin = glyph_bbox.xMin;
 	  if (bbox.yMin > glyph_bbox.yMin)
@@ -864,11 +977,9 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 	    bbox.xMax = glyph_bbox.xMax;
 	  if (bbox.yMax < glyph_bbox.yMax)
 	    bbox.yMax = glyph_bbox.yMax;
+	     }
 	  i++;
 	}
-
-      /* transform glyph image */
-      FT_Glyph_Transform (image, &matrix, 0);
 
       if (render)
 	{
@@ -876,12 +987,15 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 	    {
 	      err = FT_Glyph_To_Bitmap (&image, ft_render_mode_normal, 0, 1);
 	      if (err)
+		{
+		  gdCacheDelete( tc_cache );
 		return "Problem rendering glyph";
+	    }
 	    }
 
 	  /* now, draw to our target surface */
 	  bm = (FT_BitmapGlyph) image;
-	  gdft_draw_bitmap (im, fg, bm->bitmap,
+	  gdft_draw_bitmap (tc_cache, im, fg, bm->bitmap,
 			    x + x1 + ((pen.x + 31) >> 6) + bm->left,
 			    y - y1 + ((pen.y + 31) >> 6) - bm->top);
 	}
@@ -927,6 +1041,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 
   if (tmpstr)
     gdFree (tmpstr);
+  gdCacheDelete( tc_cache );
   return (char *) NULL;
 }
 

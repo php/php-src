@@ -360,7 +360,7 @@ do_convert (unsigned char *to, unsigned char *from, const char *code)
   from_len = strlen ((const char *) from) + 1;
   to_len = BUFSIZ;
 
-  if (iconv (cd, (const char **) &from, &from_len,
+  if (iconv (cd, (char **) &from, &from_len,
 	     (char **) &to, &to_len) == -1)
     {
 #ifdef HAVE_ERRNO_H

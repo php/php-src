@@ -67,7 +67,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		ctx = emalloc(sizeof(gdIOCtx));
 		ctx->putC = _php_image_output_putc;
 		ctx->putBuf = _php_image_output_putbuf;
-		ctx->free = _php_image_output_ctxfree;
+		ctx->gd_free = _php_image_output_ctxfree;
 
 #if APACHE && defined(CHARSET_EBCDIC)
 		/* XXX this is unlikely to work any more thies@thieso.net */
@@ -95,7 +95,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			break;
 	}
 	
-	ctx->free(ctx);
+	ctx->gd_free(ctx);
 
 	if(fp) {
 		fflush(fp);

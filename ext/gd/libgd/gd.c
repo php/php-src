@@ -90,6 +90,7 @@ static int gdFullAlphaBlend(int dst, int src);
 static int gdLayerOverlay(int dst, int src);
 static int gdAlphaBlendColor(int b1, int b2, int a1, int a2);
 static int gdAlphaOverlayColor(int src, int dst, int max);
+static int gdImageGetTrueColorPixel(gdImagePtr im, int x, int y);
 
 gdImagePtr
 gdImageCreate (int sx, int sy)
@@ -152,8 +153,13 @@ gdImageCreateTrueColor (int sx, int sy)
   im->transparent = (-1);
   im->interlace = 0;
   im->trueColor = 1;
-  im->saveAlphaFlag = 1;
-  im->alphaBlendingFlag = 0;
+  /* 2.0.2: alpha blending is now on by default, and saving of alpha is
+    off by default. This allows font antialiasing to work as expected
+    on the first try in JPEGs -- quite important -- and also allows
+    for smaller PNGs when saving of alpha channel is not really
+    desired, which it usually isn't! */
+  im->saveAlphaFlag = 0;
+  im->alphaBlendingFlag = 1;
   im->thick = 1;
   return im;
 }
@@ -217,7 +223,8 @@ gdImageColorClosestAlpha (gdImagePtr im, int r, int g, int b, int a)
       rd = (im->red[i] - r);
       gd = (im->green[i] - g);
       bd = (im->blue[i] - b);
-      ad = (im->blue[i] - b);
+      /* gd 2.02: whoops, was - b (thanks to David Marwood) */
+      ad = (im->blue[i] - a);
       dist = rd * rd + gd * gd + bd * bd + ad * ad;
       if (first || (dist < mindist))
 	{
@@ -509,6 +516,12 @@ gdImageColorResolveAlpha (gdImagePtr im, int r, int g, int b, int a)
 	  op = c;		/* Save open slot */
 	  continue;		/* Color not in use */
 	}
+    if (c == im->transparent)
+    {
+        /* don't ever resolve to the color that has
+         * been designated as the transparent color */
+        continue;
+    }
       rd = (long) (im->red[c] - r);
       gd = (long) (im->green[c] - g);
       bd = (long) (im->blue[c] - b);
@@ -1336,7 +1349,7 @@ gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e, int
   gdPoint pts[3];
   int i;
   int lx = 0, ly = 0;
-  int fx, fy;
+  int fx = 0, fy = 0;
   int w2, h2;
   w2 = w / 2;
   h2 = h / 2;
@@ -1975,7 +1988,7 @@ gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX
 	  tox = dstX;
 	  for (x = srcX; (x < (srcX + srcW)); x++)
 	    {
-	      int nc;
+	      int nc = 0;
 	      int mapTo;
 	      if (!stx[x - srcX])
 		{
@@ -2073,7 +2086,6 @@ gdImageCopyResampled (gdImagePtr dst,
     {
       for (x = dstX; (x < dstX + dstW); x++)
 	{
-	  /*int pd = gdImageGetPixel (dst, x, y);*/
 	  float sy1, sy2, sx1, sx2;
 	  float sx, sy;
 	  float spixels = 0.0f;

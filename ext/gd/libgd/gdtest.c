@@ -82,7 +82,7 @@ main (int argc, char **argv)
   CompareImages ("GD->PNG ptr->GD", ref, im2);
 
   gdImageDestroy (im2);
-  ctx->free (ctx);
+  ctx->gd_free (ctx);
 
 
   /* */
@@ -117,7 +117,7 @@ main (int argc, char **argv)
   CompareImages ("GD->GD2 ptr->GD", ref, im2);
 
   gdImageDestroy (im2);
-  ctx->free (ctx);
+  ctx->gd_free (ctx);
 
 
   /* */
@@ -152,7 +152,7 @@ main (int argc, char **argv)
   CompareImages ("GD->GD ptr->GD", ref, im2);
 
   gdImageDestroy (im2);
-  ctx->free (ctx);
+  ctx->gd_free (ctx);
 
   /*
      ** Test gdImageCreateFromPngSource'

@@ -40,7 +40,10 @@
 /* header                                                */
 /*********************************************************/
 
-#include <malloc.h>
+#include <stdlib.h>
+#ifdef HAVE_MALLOC_H
+ #include <malloc.h>
+#endif
 #ifndef NULL
 #define NULL (void *)0
 #endif

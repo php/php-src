@@ -15,9 +15,10 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <zlib.h>
 #include "gd.h"
 #include "gdhelpers.h"
+
+#include <zlib.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -250,7 +251,7 @@ gdImageCreateFromGd2 (FILE * inFile)
 
   im = gdImageCreateFromGd2Ctx (in);
 
-  in->free (in);
+  in->gd_free (in);
 
   return im;
 }
@@ -266,10 +267,10 @@ gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
   t_chunk_info *chunkIdx = NULL;	/* So we can gdFree it with impunity. */
   unsigned char *chunkBuf = NULL;	/* So we can gdFree it with impunity. */
   int chunkNum = 0;
-  int chunkMax;
+  int chunkMax = 0;
   uLongf chunkLen;
-  int chunkPos;
-  int compMax;
+  int chunkPos = 0;
+  int compMax = 0;
   int bytesPerPixel;
   char *compBuf = NULL;		/* So we can gdFree it with impunity. */
 
@@ -433,7 +434,7 @@ gdImageCreateFromGd2Part (FILE * inFile, int srcx, int srcy, int w, int h)
 
   im = gdImageCreateFromGd2PartCtx (in, srcx, srcy, w, h);
 
-  in->free (in);
+  in->gd_free (in);
 
   return im;
 }
@@ -450,9 +451,9 @@ gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w, int h)
   t_chunk_info *chunkIdx = NULL;
   char *chunkBuf = NULL;
   int chunkNum;
-  int chunkMax;
+  int chunkMax = 0;
   uLongf chunkLen;
-  int chunkPos;
+  int chunkPos = 0;
   int compMax;
   char *compBuf = NULL;
 
@@ -635,10 +636,10 @@ gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w, int h)
 		    {
 		      if (im->trueColor)
 			{
-			  ch = (chunkBuf[chunkPos++] << 24)
-			     + (chunkBuf[chunkPos++] << 16)
-			     + (chunkBuf[chunkPos++] <<  8)
-			     + (chunkBuf[chunkPos++]);
+                          ch = chunkBuf[chunkPos++];
+                          ch = (ch << 8) + chunkBuf[chunkPos++];
+                          ch = (ch << 8) + chunkBuf[chunkPos++];
+                          ch = (ch << 8) + chunkBuf[chunkPos++];
 			}
 		      else
 			{
@@ -710,12 +711,12 @@ _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
   char *chunkData = NULL;	/* So we can gdFree it with impunity. */
   char *compData = NULL;	/* So we can gdFree it with impunity. */
   uLongf compLen;
-  int idxPos;
+  int idxPos = 0;
   int idxSize;
   t_chunk_info *chunkIdx = NULL;
   int posSave;
   int bytesPerPixel = im->trueColor ? 4 : 1;
-  int compMax;
+  int compMax = 0;
 
   /*printf("Trying to write GD2 file\n"); */
 
@@ -762,7 +763,7 @@ _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
       /* The zlib notes say output buffer size should be (input size) * 1.01 * 12 */
       /* - we'll use 1.02 to be paranoid. */
       /* */
-      compMax = (int)(cs * bytesPerPixel * cs * 1.02f + 12);
+      compMax = cs * bytesPerPixel * cs * 1.02 + 12;
 
       /* */
       /* Allocate the buffers.  */
@@ -908,7 +909,7 @@ gdImageGd2 (gdImagePtr im, FILE * outFile, int cs, int fmt)
 {
   gdIOCtx *out = gdNewFileCtx (outFile);
   _gdImageGd2 (im, out, cs, fmt);
-  out->free (out);
+  out->gd_free (out);
 }
 
 void *
@@ -918,6 +919,6 @@ gdImageGd2Ptr (gdImagePtr im, int cs, int fmt, int *size)
   gdIOCtx *out = gdNewDynamicCtx (2048, NULL);
   _gdImageGd2 (im, out, cs, fmt);
   rv = gdDPExtractData (out, size);
-  out->free (out);
+  out->gd_free (out);
   return rv;
 }

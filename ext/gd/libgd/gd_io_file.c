@@ -71,7 +71,7 @@ gdNewFileCtx (FILE * f)
   ctx->ctx.tell = fileTell;
   ctx->ctx.seek = fileSeek;
 
-  ctx->ctx.free = gdFreeFileCtx;
+  ctx->ctx.gd_free = gdFreeFileCtx;
 
   return (gdIOCtx *) ctx;
 }

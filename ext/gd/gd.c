@@ -1073,10 +1073,10 @@ static int _php_image_type (char data[8])
 		io_ctx = gdNewDynamicCtx (8, data);
 		if (io_ctx) {
 			if (getmbi((int(*)(void*))gdGetC, io_ctx) == 0 && skipheader((int(*)(void*))gdGetC, io_ctx) == 0 ) {
-				io_ctx->free(io_ctx);
+				io_ctx->gd_free(io_ctx);
 				return PHP_GDIMG_TYPE_WBM;
 			} else
-				io_ctx->free(io_ctx);
+				io_ctx->gd_free(io_ctx);
 		}
 	}
 #endif
@@ -1253,7 +1253,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		} else {
 			im = (*ioctx_func_p)(io_ctx);
 		}
-		io_ctx->free(io_ctx);
+		io_ctx->gd_free(io_ctx);
 #endif		
 	}
 	else	{

@@ -1,11 +1,12 @@
-
-#ifdef HAVE_LIBPNG
-
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
+
+/* JCE: Arrange HAVE_LIBPNG so that it can be set in gd.h */
+#ifdef HAVE_LIBPNG
+
 #include "gdhelpers.h"
 #include "png.h"		/* includes zlib.h and setjmp.h */
 
@@ -101,7 +102,7 @@ gdImageCreateFromPng (FILE * inFile)
   gdImagePtr im;
   gdIOCtx *in = gdNewFileCtx (inFile);
   im = gdImageCreateFromPngCtx (in);
-  in->free (in);
+  in->gd_free (in);
   return im;
 }
 
@@ -125,7 +126,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
   png_bytep image_data = NULL;
   png_bytepp row_pointers = NULL;
   gdImagePtr im = NULL;
-  int i, j, *open;
+  int i, j, *open = NULL;
   png_uint_32 ui, uj;
   volatile int transparent = -1;
   volatile int palette_allocated = FALSE;
@@ -422,7 +423,7 @@ gdImagePng (gdImagePtr im, FILE * outFile)
 {
   gdIOCtx *out = gdNewFileCtx (outFile);
   gdImagePngCtx (im, out);
-  out->free (out);
+  out->gd_free (out);
 }
 
 void *
@@ -432,7 +433,7 @@ gdImagePngPtr (gdImagePtr im, int *size)
   gdIOCtx *out = gdNewDynamicCtx (2048, NULL);
   gdImagePngCtx (im, out);
   rv = gdDPExtractData (out, size);
-  out->free (out);
+  out->gd_free (out);
   return rv;
 }
 
@@ -443,7 +444,7 @@ gdImagePngPtr (gdImagePtr im, int *size)
 void
 gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 {
-  int i, j, bit_depth, interlace_type;
+  int i, j, bit_depth = 0, interlace_type;
   int width = im->sx;
   int height = im->sy;
   int colors = im->colorsTotal;
