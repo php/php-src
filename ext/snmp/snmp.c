@@ -1,23 +1,24 @@
 /*
-+----------------------------------------------------------------------+
-| PHP Version 4                                                        |
-+----------------------------------------------------------------------+
-| Copyright (c) 1997-2003 The PHP Group                                |
-+----------------------------------------------------------------------+
-| This source file is subject to version 2.02 of the PHP license,      |
-| that is bundled with this package in the file LICENSE, and is        |
-| available at through the world-wide-web at                           |
-| http://www.php.net/license/2_02.txt.                                 |
-| If you did not receive a copy of the PHP license and are unable to   |
-| obtain it through the world-wide-web, please send a note to          |
-| license@php.net so we can mail you a copy immediately.               |
-+----------------------------------------------------------------------+
-| Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-|          Mike Jackson <mhjack@tscnet.com>                            |
-|          Steven Lawrance <slawrance@technologist.com>                |
-|          Harrie Hazewinkel <harrie@lisanza.net>                      |
-+----------------------------------------------------------------------+
-*/
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2003 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
+   |          Mike Jackson <mhjack@tscnet.com>                            |
+   |          Steven Lawrance <slawrance@technologist.com>                |
+   |          Harrie Hazewinkel <harrie@lisanza.net>                      |
+   +----------------------------------------------------------------------+
+ */
+
 /* $Id$ */
 
 #ifdef HAVE_CONFIG_H
@@ -194,10 +195,7 @@ PHP_MINFO_FUNCTION(snmp)
 * st=11  snmpset()  - query an agent and set a single value
 *
 */
-static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS,
-		int st,
-		struct snmp_session *session,
-		char *objid) 
+static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st, struct snmp_session *session, char *objid) 
 {
 	struct snmp_session *ss;
 	struct snmp_pdu *pdu=NULL, *response;
@@ -733,7 +731,8 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRM
 * st=11  snmp3_set() - query an agent and set a single value
 *
 */
-void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st) {
+static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
+{
 	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7, **a8, **a9, **a10, **a11, **a12;
 	struct snmp_session session;
 	long timeout=SNMP_DEFAULT_TIMEOUT;
@@ -784,6 +783,7 @@ void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid authentication protocol: %s", Z_STRVAL_PP(a4));
 		RETURN_FALSE;
 	}
+
 	/* Setting the authentication passphrase. */
 	convert_to_string_ex(a5);
 	if (netsnmp_session_gen_auth_key(&session, Z_STRVAL_PP(a5) TSRMLS_CC)) {
@@ -798,6 +798,7 @@ void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid security protocol: %s", Z_STRVAL_PP(a6));
 		RETURN_FALSE;
 	}
+
 	/* Setting the security protocol passphrase. */
 	convert_to_string_ex(a7);
 	if (netsnmp_session_gen_sec_key(&session, Z_STRVAL_PP(a7) TSRMLS_CC) &&
