@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP version 4.0                                                      |
+   | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2001 The PHP Group                                |
+   | Copyright (c) 1997-2002 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,42 +21,7 @@
  */
 /* $Id$ */
 
-#define NO_REGEX_EXTRA_H
-#ifdef WIN32
-#include <winsock2.h>
-#include <stddef.h>
-#endif
-
-#include "php.h"
-
-#include "httpd.h"
-#include "http_config.h"
-#if MODULE_MAGIC_NUMBER > 19980712
-# include "ap_compat.h"
-#else
-# if MODULE_MAGIC_NUMBER > 19980324
-#  include "compat.h"
-# endif
-#endif
-#include "http_core.h"
-#include "http_main.h"
-#include "http_protocol.h"
-#include "http_request.h"
-#include "http_log.h"
-
-#include "zend.h"
-#include "php_ini.h"
-#include "php_globals.h"
-#include "SAPI.h"
-#include "php_main.h"
-#include "zend_compile.h"
-#include "zend_execute.h"
-#include "zend_highlight.h"
-#include "zend_indent.h"
-#include "ext/standard/php_standard.h"
-#include "util_script.h"
-#include "php_version.h"
-#include "mod_php4.h"
+#include "php_apache_http.h"
 
 /* {{{ apache_php_module_main
  */
@@ -92,10 +57,6 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 
 	AP(in_request) = 0;
 	
-	zend_try {
-		php_request_shutdown(NULL);
-	} zend_end_try();
-	
 	return (OK);
 }
 /* }}} */
@@ -105,40 +66,46 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 int apache_php_module_hook(request_rec *r, char *filename, zval **ret TSRMLS_DC)
 {
 	zend_file_handle file_handle;
+	zval *req;
 
 #if PHP_SIGCHILD
-    signal(SIGCHLD, sigchld_handler);
+	signal(SIGCHLD, sigchld_handler);
 #endif
 
-	if (php_request_startup_for_hook(TSRMLS_C) == FAILURE) {
-		return FAILURE;
-	}
+    if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+            return FAILURE;
+
 
 	/* Add PHP_SELF_HOOK - Absolute path */
 	php_register_variable("PHP_SELF_HOOK", filename, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
 
+	req = php_apache_request_new(r);
+    if(PG(register_globals)) {
+        php_register_variable_ex("request", req, NULL TSRMLS_CC);
+    }
+    else {
+        php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+    }
+	memset(&file_handle, 0, sizeof(file_handle));
 	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.handle.fd = 0;
 	file_handle.filename = filename;
-	file_handle.opened_path = NULL;
-	file_handle.free_filename = 0;
 
 	(void) php_execute_simple_script(&file_handle, ret TSRMLS_CC);
 
+	zval_dtor(&req);
 	AP(in_request) = 0;
-	
-	zend_try {
-		php_request_shutdown_for_hook(NULL);
-	} zend_end_try();
-	
-	return (OK);
+
+	return OK;
 }
+
+/* }}} */
+
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

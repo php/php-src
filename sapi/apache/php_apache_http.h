@@ -36,3 +36,7 @@
 #include "ext/standard/php_standard.h"
 
 #include "mod_php4.h"
+
+
+PHPAPI zval *php_apache_request_new(request_rec *r);
+
