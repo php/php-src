@@ -272,9 +272,9 @@ static int php_object_element_export(zval **zv, int num_args, va_list args, zend
 
 	if (hash_key->nKeyLength != 0) {
 		php_printf("%*cvar $%s = ", level + 1, ' ', hash_key->arKey);
+		php_var_export(zv, level + 2 TSRMLS_CC);
+		PUTS (";\n");
 	}
-	php_var_export(zv, level + 2 TSRMLS_CC);
-	PUTS (";\n");
 	return 0;
 }
 
