@@ -406,7 +406,7 @@ static zend_function_entry php_domxmlns_class_functions[] = {
 
 #if HAVE_DOMXSLT
 static zend_function_entry php_domxsltstylesheet_class_functions[] = {
-/* TODO */
+/* TODO: maybe some more methods? */
 	PHP_FALIAS(process, 				domxml_xslt_process, 			NULL)
 	{NULL, NULL, NULL}
 };
@@ -3357,38 +3357,6 @@ static zval *php_xsltstylesheet_new(xsltStylesheetPtr obj, int *found TSRMLS_DC)
 	return (wrapper);
 }
 
-/* {{{ _php_libxslt_ht_char()
-   Translates a PHP array to a libxslt character array */
-static void _php_libxslt_ht_char(HashTable *php, char **arr)
-{
-/* TODO:
-	- make parameters array('key'=>'string',...) instead of array('key'=>'XPathExpression')
-	- change error reporting
-*/
-	zval **value;
-	char *string_key = NULL;
-	ulong num_key;
-	int i = 0;
-
-	for (zend_hash_internal_pointer_reset(php);
-		 zend_hash_get_current_data(php, (void **)&value) == SUCCESS;
-		 zend_hash_move_forward(php)) {
-
-	SEPARATE_ZVAL(value);
-	convert_to_string_ex(value);
-
-	if (zend_hash_get_current_key(php, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
-		php_error(E_WARNING, "Not a string key in the parameters array");
-	}
-	else
-	{
-			arr[i++] = string_key;
-			arr[i++] = Z_STRVAL_PP(value);
-		}
-	}
-	arr[i++] = NULL;
-}
-
 /* {{{ proto object domxml_xslt_stylesheet(string xsltstylesheet)
    Creates XSLT Stylesheet object from string */
 PHP_FUNCTION(domxml_xslt_stylesheet)
@@ -3473,74 +3441,128 @@ PHP_FUNCTION(domxml_xslt_stylesheet_file)
 }
 /* }}} */
 
+/* {{{ php_domxslt_string_to_xpathexpr()
+   Translates a string to a XPath Expression */
+static char *php_domxslt_string_to_xpathexpr(const char *str)
+{
+	const xmlChar *string = (const xmlChar *)str;
+	xmlChar *value;
 
-/* {{{ proto object domxml_xslt_process(object xslstylesheet, object xmldoc, [array xslt_parameters])
+        if (xmlStrchr(string, '"')) {
+    		if (xmlStrchr(string, '\'')) {
+			php_error(E_WARNING, "Cannot create XPath expression (string contains both quote and double-quotes) in %s",
+			          get_active_function_name(TSRMLS_C));
+                	return NULL;
+                }
+                value = xmlStrdup((const xmlChar *)"'");
+                value = xmlStrcat(value, string);
+                value = xmlStrcat(value, (const xmlChar *)"'");
+        }
+	else {
+        	value = xmlStrdup((const xmlChar *)"\"");
+                value = xmlStrcat(value, string);
+                value = xmlStrcat(value, (const xmlChar *)"\"");
+        }
+
+	return (char *)value;
+}
+
+/* {{{ php_domxslt_make_params()
+   Translates a PHP array to a libxslt parameters array */
+static char **php_domxslt_make_params(zval *idvars, int xpath_params)
+{
+	HashTable *parht;
+	int parsize;
+	zval **value;
+	char *xpath_expr, *string_key = NULL;
+	ulong num_key;
+	char **params = NULL;
+	int i = 0;
+
+	parht = HASH_OF(idvars);
+	parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
+	params = (char **)emalloc(parsize);
+	memset((char *)params, 0, parsize);
+
+	for (zend_hash_internal_pointer_reset(parht);
+		zend_hash_get_current_data(parht, (void **)&value) == SUCCESS;
+		zend_hash_move_forward(parht)) {
+
+		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
+			php_error(E_WARNING, "Invalid argument or parameter array to %s",
+			          get_active_function_name(TSRMLS_C));
+			return;
+		}
+		else {
+			SEPARATE_ZVAL(value);
+			convert_to_string_ex(value);
+
+			if (!xpath_params) {
+				xpath_expr = php_domxslt_string_to_xpathexpr(Z_STRVAL_PP(value));
+			}
+			else {
+				xpath_expr = Z_STRVAL_PP(value);
+			}
+
+			if (xpath_expr) {
+				params[i++] = string_key;
+				params[i++] = xpath_expr;
+			}
+		}
+	}
+
+	params[i++] = NULL;
+
+	return params;
+}
+
+/* {{{ proto object domxml_xslt_process(object xslstylesheet, object xmldoc [, array xslt_parameters [, bool xpath_parameters]])
    Perform an XSLT transformation */
 PHP_FUNCTION(domxml_xslt_process)
 {
 /* TODO:
-	- make & test memory deallocation
+	- test memory deallocation
 	- test other stuff
-	- move HashTable operations outside the function
 	- check xsltsp->errors ???
 */
-	zval *rv, *idxsl, *idxml, *idvars = NULL;
+	zval *rv, *idxsl, *idxml, *idparams = NULL;
+	zend_bool xpath_params = 0;
 	xsltStylesheetPtr xsltstp;
 	xmlDocPtr xmldocp;
 	xmlDocPtr docp;
 	char **params = NULL;
 	int ret, parsize;
 
-
 	DOMXML_GET_THIS(idxsl);
 
 	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
 	if (!xsltstp) {
-		php_error(E_WARNING, "%s(): cannot fetch XSLT Stylesheet", get_active_function_name(TSRMLS_C));
-			RETURN_FALSE;
+		php_error(E_WARNING, "%s(): underlying object missing",
+			  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|a", &idxml, &idvars) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|a|b", &idxml, &idparams, &xpath_params) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
 
-	if (idvars) {
-		HashTable *parht = HASH_OF(idvars);
-		parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
-			params = (char **)emalloc(parsize);
-			memset((char *)params, 0, parsize);
-			_php_libxslt_ht_char(parht, params);
+	if (idparams) {
+		params = php_domxslt_make_params(idparams, xpath_params);
 	}
 
 	docp = xsltApplyStylesheet(xsltstp, xmldocp, (const char**)params);
 
-/* ???: */
-	efree(params);
+	if (params) {
+		efree(params);
+	}
 
 	if (!docp) {
 		RETURN_FALSE;
 	}
 
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
-/* ???: */
-/*
-	add_property_resource(return_value, "doc", ret);
-	if(docp->name)
-		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
-	if(docp->URL)
-		add_property_stringl(return_value, "url", (char *) docp->name, strlen(docp->name), 1);
-	if(docp->version)
-		add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
-	if(docp->encoding)
-		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
-	add_property_long(return_value, "standalone", docp->standalone);
-	add_property_long(return_value, "type", docp->type);
-	add_property_long(return_value, "compression", docp->compression);
-	add_property_long(return_value, "charset", docp->charset);
-	zend_list_addref(ret);
-*/
 }
 /* }}} */
 
