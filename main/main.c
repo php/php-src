@@ -1307,7 +1307,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		} else {
 			append_file_p = NULL;
 		}
-		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, 3, prepend_file_p, primary_file, append_file_p);
+		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p);
 	} zend_end_try();
 
 	if (old_cwd[0] != '\0') {
