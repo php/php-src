@@ -103,7 +103,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	char *http_header_line = NULL;
 	char tmp_line[128];
 	size_t chunk_size = 0, file_size = 0;
-	int eol_detect;
+	int eol_detect = 0;
 	char *transport_string, *errstr = NULL;
 	int transport_len, have_header = 0;
 

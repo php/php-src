@@ -1181,6 +1181,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 	return PHP_CONV_ERR_SUCCESS;
 }
 
+#if IT_WAS_USED
 static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, long *pretval, char *field_name, size_t field_name_len)
 {
 	zval **tmpval;
@@ -1202,6 +1203,7 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, long *pretv
 	} 
 	return PHP_CONV_ERR_SUCCESS;
 }
+#endif
 
 static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, unsigned long *pretval, char *field_name, size_t field_name_len)
 {
@@ -1252,6 +1254,7 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 }
 
 
+#if IT_WAS_USED
 static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
 	long l;
@@ -1264,6 +1267,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 	}
 	return err;
 }
+#endif
 
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
@@ -1661,7 +1665,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 	php_stream_filter *retval = NULL;
 
 	char *dot;
-	int conv_mode;
+	int conv_mode = 0;
 
 	if (filterparams != NULL && Z_TYPE_P(filterparams) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid filter parameter", filtername);

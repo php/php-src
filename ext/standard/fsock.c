@@ -56,7 +56,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (port > 0) {
-		hostname_len = spprintf(&hostname, 0, "%s:%d", host, port);
+		hostname_len = spprintf(&hostname, 0, "%s:%ld", host, port);
 	} else {
 		hostname_len = host_len;
 		hostname = host;
