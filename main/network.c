@@ -862,7 +862,7 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		}
 #endif
 
-		shutdown(sock->socket, 0);
+		/* shutdown(sock->socket, 0); */
 		closesocket(sock->socket);
 
 	}
