@@ -725,9 +725,17 @@ class PEAR_Installer extends PEAR_Common
                         $curver = $this->registry->packageInfo($pkgfile, 'version');
                         $remote = &new PEAR_Remote($config);
                         $releases = $remote->call('package.info', $pkgfile, 'releases');
+                        if (!count($releases)) {
+                            return $this->raiseError("No releases found for package '$pkgfile'");
+                        }
                         $states = $this->betterStates($state, true);
                         $possible = false;
-                        foreach($releases as $ver => $inf) {
+                        $_err_latest = false;
+                        foreach ($releases as $ver => $inf) {
+                            if (!$_err_latest) {
+                                $_err_latest = "$pkgfile-$ver";
+                                $_err_latest_state = $inf['state'];
+                            }
                             if (in_array($inf['state'], $states)) {
                                 if (is_array($possible)) {
                                     if (version_compare(key($possible), $ver) < 0) {
@@ -738,17 +746,17 @@ class PEAR_Installer extends PEAR_Common
                                         $possible = array($ver => $inf['state']);
                                     }
                                 }
-                            } else {
-                                return $this->raiseError('No release with state equal to: \'' . implode(', ', $states) .
-                                                         "' found. The latest is $pkgfile-$ver ({$inf['state']}). Use " .
-                                                         "'pear install $pkgfile-$ver' or set the 'preferred_state' ".
-                                                         "to '{$inf['state']}' for installing this package.");
                             }
                         }
                         if ($possible) {
                             $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
                                                     $errors, key($possible), $origpkgfile,
                                                     $state);
+                        } else {
+                            return $this->raiseError('No release with state equal to: \'' . implode(', ', $states) .
+                                                     "' found. The latest is $_err_latest ($_err_latest_state). Use " .
+                                                     "'pear install $_err_latest' or set the 'preferred_state' ".
+                                                     "to '$_err_latest_state' for installing this package.");
                         }
                     } else {
                         $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
