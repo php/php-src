@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
+- Fixed bug #31056 (php_std_date() returns invalid formatted date if 
+  y2k_compliance is On). (Ilia)
 
 15 Dec 2004, Version 4.3.10
 - Added the %F modifier to *printf to render a non-locale-aware representation
