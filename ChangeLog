@@ -1,3 +1,56 @@
+2004-09-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/sqlite.c:
+      Probable fix for Bug #30147
+
+2004-09-25  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/rand.c:
+      removing the unwanted inclusion of headers
+
+    * ext/standard/pack.c:
+      removing unwanted comment
+
+    * ext/standard/head.c:
+      removing unwanted inclusion of socket header file
+
+    * ext/standard/flock_compat.c:
+      removed NEW_LIBC checks in NETWARE
+
+2004-09-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      - Fix lib substitution (rurban at x-ray dot at )
+
+2004-09-25  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/datetime.c:
+      removed redundant NEW_LIBC checks
+
+    * ext/standard/pageinfo.c:
+      removed redundance LIBC checks for NETWARE
+
+    * ext/standard/microtime.c:
+      removed unwanted NEW_LIBC checks as they are no more needed for NETAWRE
+
+    * ext/standard/mail.c:
+      removing unwanted header files getting included
+
+    * ext/standard/image.c:
+      removed unwanted NEW_LIBC checks
+
+    * ext/standard/link.c:
+      Now NetWare LibC supports proper stat structure no need of CLIB_STAT_PATCH
+      and all such checks
+
+    * ext/standard/fsock.h
+      ext/standard/lcg.c:
+      removed the redundant NEW_LIBC checks
+
+    * ext/standard/basic_functions.c:
+      cleaned up confusing NetWare specific check. disabled chown and chgrp for
+      NetWare
+
 2004-09-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_4_3)
