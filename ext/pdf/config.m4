@@ -1,18 +1,19 @@
 dnl $Id$
 
 AC_MSG_CHECKING(whether to include Pdflib 3.x support)
-AC_ARG_WITH(pdflib,
-[  --with-pdflib[=DIR]     Include pdflib 3.x support.
-                          DIR is the pdflib install directory,
-                          defaults to /usr/local.],
-[
-echo $withval
-  case "$withval" in
+
+PHP_ARG_WITH(pdflib,whether to include pdflib support,
+[  --with-pdflib[=DIR]     Include pdflib 3.x support. DIR is the pdflib
+			  base install directory, defaults to /usr/local
+			  Set DIR to "shared" to build as dl, or "shared,DIR"
+                          to build as dl and still specify DIR.])
+
+  case "$PHP_PDFLIB" in
     no)
       AC_MSG_RESULT(no) ;;
     yes)
       AC_MSG_RESULT(yes)
-      PHP_EXTENSION(pdf)
+      PHP_EXTENSION(pdf, $ext_shared)
       old_LDFLAGS=$LDFLAGS
 		  old_LIBS=$LIBS
 		  LIBS="$LIBS -ltiff -ljpeg -lpng -lz"
@@ -20,7 +21,8 @@ echo $withval
         [AC_MSG_ERROR(pdflib extension requires at least pdflib 3.x. You may also need libtiff and libjpeg. If so, use the options --with-tiff-dir=<DIR> and --with-jpeg-dir=<DIR>)])
       LIBS=$old_LIBS
       LDFLAGS=$old_LDFLAGS
-      AC_ADD_LIBRARY(pdf)
+      PHP_SUBST(PDFLIB_SHARED_LIBADD)
+      AC_ADD_LIBRARY(pdf, PDFLIB_SHARED_LIBADD)
       AC_ADD_LIBRARY(tiff)
       AC_ADD_LIBRARY(png)
       AC_ADD_LIBRARY(jpeg)
@@ -30,7 +32,7 @@ echo $withval
       test -f $withval/include/pdflib.h && PDFLIB_INCLUDE="$withval/include"
       if test -n "$PDFLIB_INCLUDE" ; then
         AC_MSG_RESULT(yes)
-        PHP_EXTENSION(pdf)
+        PHP_EXTENSION(pdf, $ext_shared)
         old_withval=$withval
 
         if test $HAVE_ZLIB; then
@@ -113,12 +115,10 @@ echo $withval
         AC_CHECK_LIB(pdf, PDF_show_boxed, [AC_DEFINE(HAVE_PDFLIB,1,[ ]) PDFLIB_LIBS="$PDFLIB_LIBS -L$withval/lib -lpdf"],
           [AC_MSG_ERROR(pdflib extension requires pdflib 3.x.)])
         LIBS=$old_LIBS
-        AC_ADD_LIBRARY_WITH_PATH(pdf, $withval/lib)
+	PHP_SUBST(PDFLIB_SHARED_LIBADD)
+        AC_ADD_LIBRARY_WITH_PATH(pdf, $withval/lib, PDFLIB_SHARED_LIBADD)
         AC_ADD_INCLUDE($PDFLIB_INCLUDE)
       else
         AC_MSG_RESULT(no)
       fi ;;
   esac
-],[
-  AC_MSG_RESULT(no)
-])
