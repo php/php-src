@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added man page for CLI version of PHP. (marcus)
 - Added array_walk_recursive() function that can apply user function 
   recursively to an array. (Ilia)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
