@@ -188,6 +188,9 @@
 #define HAVE_SETVBUF 1
 #endif
 
+/* Define if you have the `shutdown' function. */
+#define HAVE_SHUTDOWN 1
+
 /* Define if you have the snprintf function.  */
 #define HAVE_SNPRINTF 1
 #define HAVE_VSNPRINTF 1
