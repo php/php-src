@@ -134,6 +134,10 @@ SOURCE=copy.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\date.c
+# End Source File
+# Begin Source File
+
 SOURCE=delete.c
 # End Source File
 # Begin Source File
@@ -219,6 +223,10 @@ SOURCE=vacuum.c
 # Begin Source File
 
 SOURCE=vdbe.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\vdbeaux.c
 # End Source File
 # Begin Source File
 
