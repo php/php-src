@@ -17,8 +17,8 @@
 #ifndef _TSRM_H
 #define _TSRM_H
 
-#if !(WIN32||WINNT)
-# define PTHREADS
+#ifdef HAVE_CONFIG_H
+# include "config.h"
 #endif
 
 #if WIN32||WINNT

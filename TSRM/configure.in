@@ -1,0 +1,21 @@
+dnl $Id$
+dnl
+dnl Minimalistic configure.in for TSRM.
+dnl
+
+AC_INIT(TSRM.c)
+AM_INIT_AUTOMAKE(TSRM, 1.0)
+AM_CONFIG_HEADER(tsrm_config.h)
+
+AC_PROG_CC
+AC_PROG_CC_C_O
+AC_PROG_RANLIB
+
+AC_CHECK_LIB(pthread, pthread_create, [
+  AC_DEFINE(PTHREADS)
+  LIBS="$LIBS -lpthread"
+],[
+  AC_MSG_ERROR(You need pthreads to build TSRM.)
+])
+
+AC_OUTPUT(Makefile)
