@@ -21,7 +21,7 @@ Bug #22414: passthru() does not read data correctly
 	/* Binary Data Test */
 	@unlink($pwd . '/passthru_test');
 	
-	$cmd = "sapi/cli/php -r \\\" readfile(@getenv(TEST_PHP_EXECUTABLE)); \\\"";
+	$cmd = $php . " -r \\\" readfile(@getenv(TEST_PHP_EXECUTABLE)); \\\"";
 	$cmd = $php . ' -r \' passthru("'.$cmd.'"); \' > ' . $pwd . '/passthru_test';
 	exec($cmd);
 	
