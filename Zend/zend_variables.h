@@ -49,7 +49,6 @@ END_EXTERN_C()
 
 
 ZEND_API void zval_add_ref(zval **p);
-ZEND_API void zval_del_ref(zval **p);
 
 #define ZVAL_DESTRUCTOR (void (*)(void *)) zval_dtor_wrapper
 #define ZVAL_PTR_DTOR (void (*)(void *)) zval_ptr_dtor_wrapper
