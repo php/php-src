@@ -201,6 +201,8 @@ static void init_request_info(SLS_D)
 {
 	request_rec *r = ((request_rec *) SG(server_context));
 	char *content_length = (char *) table_get(r->subprocess_env, "CONTENT_LENGTH");
+	const char *authorization=NULL;
+	char *tmp;
 
 	SG(request_info).query_string = r->args;
 	SG(request_info).path_translated = r->filename;
@@ -208,6 +210,26 @@ static void init_request_info(SLS_D)
 	SG(request_info).request_method = r->method;
 	SG(request_info).content_type = (char *) table_get(r->subprocess_env, "CONTENT_TYPE");
 	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
+
+	if (r->headers_in) {
+		authorization = table_get(r->headers_in, "Authorization");
+	}
+	if (authorization
+		&& !auth_type(r)
+		&& !strcmp(getword(r->pool, &authorization, ' '), "Basic")) {
+		tmp = uudecode(r->pool, authorization);
+		SG(request_info).auth_user = getword_nulls_nc(r->pool, &tmp, ':');
+		if (SG(request_info).auth_user) {
+			SG(request_info).auth_user = estrdup(SG(request_info).auth_user);
+		}
+		SG(request_info).auth_password = tmp;
+		if (SG(request_info).auth_password) {
+			SG(request_info).auth_password = estrdup(SG(request_info).auth_password);
+		}
+	} else {
+		SG(request_info).auth_user = NULL;
+		SG(request_info).auth_password = NULL;
+	}
 }
 
 
@@ -275,7 +297,6 @@ int send_php3(request_rec *r, int display_source_mode, char *filename)
 	chdir_file(filename);
 	add_common_vars(r);
 	add_cgi_vars(r);
-	init_request_info();
 	apache_php3_module_main(r, fd, display_source_mode SLS_CC);
 
 	/* Done, restore umask, turn off timeout, close file and return */
