@@ -50,6 +50,11 @@
 #include <netinet/in.h>
 #endif
 
+#ifndef HAVE_USHORT
+#undef ushort
+typedef unsigned short ushort;
+#endif
+
 /* True globals, no need for thread safety */
 static int le_result, le_link, le_plink;
 
