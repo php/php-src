@@ -1397,7 +1397,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		}
 		while (ptr->fname) {
 			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
-				zend_error(error_type, "Function registration failed - duplicate name - %s", ptr->fname);
+				zend_error(error_type, "Function registration failed - duplicate name - %s%s%s", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
 			}
 			ptr++;
 		}
