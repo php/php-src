@@ -924,7 +924,8 @@ typedef enum mn_byte_order_t {
 
 typedef enum mn_offset_mode_t {
 	MN_OFFSET_NORMAL,
-	MN_OFFSET_MARKER
+	MN_OFFSET_MARKER,
+	MN_OFFSET_GUESS
 } mn_offset_mode_t;
 
 typedef struct {
@@ -939,7 +940,8 @@ typedef struct {
 } marker_note_type;
 
 static const marker_note_type marker_note_array[] = {
-  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_INTEL,    MN_OFFSET_GUESS},
+/*  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},*/
   { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,                       0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
   { tag_table_VND_FUJI,      "FUJIFILM",                NULL,  "FUJIFILM\x0C\x00\x00\x00", 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MARKER},
   { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
@@ -991,27 +993,35 @@ static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type t
 /* {{{ exif_char_dump
  * Do not use! This is a debug function... */
 #ifdef EXIF_DEBUG
-static unsigned char* exif_char_dump(unsigned char * addr, int len, int hex)
+static unsigned char* exif_char_dump(unsigned char * addr, int len, int offset)
 {
-	static unsigned char buf[1024+1];
-	int c, i, p=0, n = hex ? 5 : 3;
+	static unsigned char buf[4096+1];
+	static unsigned char tmp[20];
+	int c, i, p=0, n = 5+31;
 
-	for(i=0; i<len && p+n<=sizeof(buf); i++) {
-		if (i%64==0)
-			buf[p++] = '\n';
-		c = *addr++;
-		if (hex) {
-			sprintf(buf+p, "%02X ", c);
-			p += 3;
-		} else {
-			if (c>=32) {
-				buf[p++] = c;
+	p += sprintf(buf+p, "\nDump Len: %08X (%d)", len, len);
+	if (len) {
+		for(i=0; i<len+15 && p+n<=sizeof(buf); i++) {
+			if (i%16==0) {
+				p += sprintf(buf+p, "\n%08X: ", i+offset);
+			}
+			if (i<len) {
+				c = *addr++;
+				p += sprintf(buf+p, "%02X ", c);
+				tmp[i%16] = c>=32 ? c : '.';
+				tmp[(i%16)+1] = '\0';
 			} else {
-				buf[p++] = '?';
+				p += sprintf(buf+p, "   ");
+			}
+			if (i%16==15) {
+				p += sprintf(buf+p, "    %s", tmp);
+				if (i>=len) {
+					break;
+				}
 			}
 		}
 	}
-	buf[sizeof(buf)-1]=0;
+	buf[sizeof(buf)-1] = '\0';
 	return buf;
 }
 #endif
@@ -1556,8 +1566,12 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 		case TAG_FMT_STRING:
 			if (value) {
 				length = php_strnlen(value, length);
+				if (PG(magic_quotes_runtime)) {
+					info_data->value.s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+				} else {
+					info_value->s = estrndup(value, length);
+				}
 				info_data->length = length;
-				info_value->s = estrndup(value, length);
 			} else {
 				info_data->length = 0;
 				info_value->s = estrdup("");
@@ -1565,7 +1579,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (!info_value->s) {
 				EXIF_ERRLOG_EALLOC
 				info_data->length = 0;
-				break; /* better return with "" instead of possible casing problems */
+				break; /* better return with "" instead of possible causing problems */
 			}
 			break;
 
@@ -1583,7 +1597,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				break;
 		case TAG_FMT_UNDEFINED:
 			if (value) {
-				info_value->s = estrndup(value, length);
+				/* do not recompute length here */
+				if (PG(magic_quotes_runtime)) {
+					info_data->value.s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+				} else {
+					info_value->s = estrndup(value, length);
+				}
+				info_data->length = length;
 			} else {
 				info_data->length = 0;
 				info_value->s = estrdup("");
@@ -1724,10 +1744,14 @@ static void exif_iif_add_str(image_info_type *image_info, int section_index, cha
 			EXIF_ERRLOG_EALLOC
 			return;
 		}
-		info_data->value.s = estrdup(value);
-		if (!info_data->value.s) {
-			EXIF_ERRLOG_EALLOC
-			return;
+		if (PG(magic_quotes_runtime)) {
+			info_data->value.s = php_addslashes(value, strlen(value), NULL, 0 TSRMLS_CC);
+		} else {
+			info_data->value.s = estrdup(value);
+			if (!info_data->value.s) {
+				EXIF_ERRLOG_EALLOC
+				return;
+			}
 		}
 		image_info->sections_found |= 1<<section_index;
 		image_info->info_list[section_index].count++;
@@ -1777,13 +1801,20 @@ static void exif_iif_add_buffer(image_info_type *image_info, int section_index, 
 			EXIF_ERRLOG_EALLOC
 			return;
 		}
-		info_data->value.s = emalloc(length+1);
-		if (!info_data->value.s) {
-			EXIF_ERRLOG_EALLOC
-			return;
+		if (PG(magic_quotes_runtime)) {
+#ifdef EXIF_DEBUG
+			exif_error_docref(NULL TSRMLS_CC, image_info, E_NOTICE, "Adding %s as buffer%s", name, exif_char_dump(value, length, 0));
+#endif
+			info_data->value.s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+		} else {
+			info_data->value.s = emalloc(length+1);
+			if (!info_data->value.s) {
+				EXIF_ERRLOG_EALLOC
+				return;
+			}
+			memcpy(info_data->value.s, value, length);
+			info_data->value.s[length] = 0;
 		}
-		memcpy(info_data->value.s, value, length);
-		info_data->value.s[length] = 0;
 		image_info->sections_found |= 1<<section_index;
 		image_info->info_list[section_index].count++;
 	}
@@ -2655,7 +2686,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 static int exif_process_IFD_in_MARKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, char *offset_base, size_t IFDlength, size_t displacement TSRMLS_DC)
 {
 	int de, i=0, section_index = SECTION_MARKERNOTE;
-	int NumDirEntries, old_motorola_intel;
+	int NumDirEntries, old_motorola_intel, offset_diff;
 	const marker_note_type *marker_note;
 	char *dir_start;
 
@@ -2677,7 +2708,7 @@ static int exif_process_IFD_in_MARKERNOTE(image_info_type *ImageInfo, char * val
 	dir_start = value_ptr + marker_note->offset;
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "process %s @x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (int)dir_start-(int)offset_base+marker_note->offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, 1));
+	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "process %s @x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (int)dir_start-(int)offset_base+marker_note->offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, (int)dir_start-(int)offset_base+marker_note->offset+displacement));
 #endif
 
 	ImageInfo->sections_found |= FOUND_MARKERNOTE;
@@ -2694,16 +2725,24 @@ static int exif_process_IFD_in_MARKERNOTE(image_info_type *ImageInfo, char * val
 		case MN_ORDER_NORMAL:
 			break;
 	}
+
+	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
+
 	switch (marker_note->offset_mode) {
 		case MN_OFFSET_MARKER:
 			offset_base = value_ptr;
+			break;
+		case MN_OFFSET_GUESS:
+			offset_diff = 2 + NumDirEntries*12 + 4 - php_ifd_get32u(dir_start+10, ImageInfo->motorola_intel);
+#ifdef EXIF_DEBUG
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Using automatic offset correction: 0x%04X", ((int)dir_start-(int)offset_base+marker_note->offset+displacement) + offset_diff);
+#endif
+			offset_base = value_ptr + offset_diff;
 			break;
 		default:
 		case MN_OFFSET_NORMAL:
 			break;
 	}
-
-	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
 	if ((2+NumDirEntries*12) > value_len) {
 		exif_error_docref("exif_read_data#error_ifd" TSRMLS_CC, ImageInfo, E_WARNING, "illegal IFD size: 2 + x%04X*12 = x%04X > x%04X", NumDirEntries, 2+NumDirEntries*12, value_len);
@@ -3440,7 +3479,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 				return FALSE;
 			}
 			php_stream_read(ImageInfo->infile, ImageInfo->file.list[sn].data+2, dir_size-2);
-			/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Dump: %s", exif_char_dump(ImageInfo->file.list[sn].data, dir_size, 1));*/
+			/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Dump: %s", exif_char_dump(ImageInfo->file.list[sn].data, dir_size, 0));*/
 			next_offset = php_ifd_get32u(ImageInfo->file.list[sn].data + dir_size - 4, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
 			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read from TIFF done, next offset x%04X", next_offset);
