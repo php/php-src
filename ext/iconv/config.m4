@@ -27,7 +27,7 @@ dnl the giconv series of files under FreeBSD
     AC_MSG_ERROR(Please reinstall the iconv library.)
   fi
   
-  if test -f $ICONV_DIR/lib/libconv.a -o -f $ICONV_DIR/lib/lib${lib_name}.$SHLIB_SUFFIX_NAME ; then
+  if test -f $ICONV_DIR/lib/libiconv.a -o -f $ICONV_DIR/lib/lib${lib_name}.$SHLIB_SUFFIX_NAME ; then
     PHP_ADD_LIBRARY_WITH_PATH(iconv, $ICONV_DIR/lib, ICONV_SHARED_LIBADD)
     AC_CHECK_LIB(iconv, libiconv_open, [
     	AC_DEFINE(HAVE_ICONV, 1, [ ])
