@@ -27,7 +27,6 @@
 #define WDDX_ARRAY_E			"</array>"
 #define WDDX_BINARY_S			"<binary>"
 #define WDDX_BINARY_E			"</binary>"
-#define WDDX_BINARY			"<binary>%s</binary>"
 #define WDDX_BOOLEAN			"<boolean value='%s'/>"
 #define WDDX_CHAR				"<char code='%02X'/>"
 #define WDDX_COMMENT_S			"<comment>"
@@ -47,17 +46,6 @@
 #define WDDX_STRUCT_E			"</struct>"
 #define WDDX_VAR_S				"<var name='%s'>"
 #define WDDX_VAR_E				"</var>"
-
-#define WDDX_NUMBER_T    0
-#define WDDX_BOOLEAN_T   1
-#define WDDX_NULL_T      2
-#define WDDX_STRING_T    3
-#define WDDX_DATETIME_T  4
-#define WDDX_ARRAY_T     5
-#define WDDX_STRUCT_T    6
-#define WDDX_RECORDSET_T 7
-#define WDDX_BINARY_T    8
-
 
 #define php_wddx_add_chunk(packet, str)	smart_str_appends(packet, str)
 #define php_wddx_add_chunk_ex(packet, str, len)	smart_str_appendl(packet, str, len)

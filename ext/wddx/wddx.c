@@ -96,7 +96,6 @@ static void php_wddx_process_data(void *user_data, const char *s, int len);
  */
 function_entry wddx_functions[] = {
 	PHP_FE(wddx_serialize_value, NULL)
-	PHP_FE(wddx_serialize_type, NULL)
 	PHP_FE(wddx_serialize_vars, NULL)
 	PHP_FE(wddx_packet_start, NULL)
 	PHP_FE(wddx_packet_end, NULL)
@@ -305,15 +304,6 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 PHP_MINIT_FUNCTION(wddx)
 {
 	le_wddx = zend_register_list_destructors_ex(release_wddx_packet_rsrc, NULL, "wddx", module_number);
-	REGISTER_LONG_CONSTANT("WDDX_BOOLEAN", WDDX_BOOLEAN_T, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WDDX_NUMBER", WDDX_NUMBER_T, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WDDX_NULL", WDDX_NULL_T, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WDDX_DATETIME", WDDX_DATETIME_T, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WDDX_ARRAY", WDDX_ARRAY_T, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WDDX_RECORDSET", WDDX_RECORDSET_T, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WDDX_STRUCT", WDDX_STRUCT_T, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WDDX_STRING", WDDX_STRING_T, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("WDDX_BINARY", WDDX_BINARY_T, CONST_CS | CONST_PERSISTENT);
 
 #if HAVE_PHP_SESSION
 	php_session_register_serializer("wddx",
@@ -436,24 +426,6 @@ static void php_wddx_serialize_number(wddx_packet *packet, zval *var)
 	zval_copy_ctor(&tmp);
 	convert_to_string(&tmp);
 	sprintf(tmp_buf, WDDX_NUMBER, Z_STRVAL(tmp));
-	zval_dtor(&tmp);
-
-	php_wddx_add_chunk(packet, tmp_buf);	
-}
-/* }}} */
-
-/* {{{ php_wddx_serialize_binary
- */
-static void php_wddx_serialize_binary(wddx_packet *packet, zval *var)
-{
-	char tmp_buf[WDDX_BUF_LEN];
-	zval tmp;
-	
-	tmp = *var;
-	zval_copy_ctor(&tmp);
-	convert_to_string(&tmp);
-	
-	sprintf(tmp_buf, WDDX_BINARY, Z_STRVAL(tmp));
 	zval_dtor(&tmp);
 
 	php_wddx_add_chunk(packet, tmp_buf);	
@@ -1143,64 +1115,6 @@ PHP_FUNCTION(wddx_serialize_value)
 
 	php_wddx_packet_start(packet, comment, comment_len);
 	php_wddx_serialize_var(packet, var, NULL, 0 TSRMLS_CC);
-	php_wddx_packet_end(packet);
-					
-	ZVAL_STRINGL(return_value, packet->c, packet->len, 1);
-	smart_str_free(packet);
-	efree(packet);
-}
-/* }}} */
-
-/* {{{ proto string wddx_serialize_type(mixed var, int type,  [, string comment])
-   Creates a new packet, serializes the given value and casts the type*/
-PHP_FUNCTION(wddx_serialize_type)
-{
-	zval *var;
-	char *comment = NULL;
-	int comment_len = 0, type = 0;
-	wddx_packet *packet;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl|s",
-							  &var, &type,  &comment, &comment_len) == FAILURE)
-		return;
-	
-	packet = php_wddx_constructor();
-	if (!packet) {
-		RETURN_FALSE;
-	}
-
-	php_wddx_packet_start(packet, comment, comment_len);
-
-	switch(type) {
-	case WDDX_NULL_T:
-		php_wddx_serialize_unset(packet);
-		break;
-	case WDDX_BOOLEAN_T:
-		convert_to_boolean(var);
-		php_wddx_serialize_boolean(packet, var);
-		break;
-	case WDDX_NUMBER_T:
-		convert_to_long(var);
-		php_wddx_serialize_number(packet, var);
-		break;
-	case WDDX_DATETIME_T: /* break omitted intentionally! */
-	case WDDX_STRING_T:
-		convert_to_string(var);
-		php_wddx_serialize_string(packet, var);
-		break;
-	case WDDX_ARRAY_T:
-	case WDDX_STRUCT_T:  /* breaks omitted intentionally! */
-	case WDDX_RECORDSET_T: 
-		convert_to_array(var);
-		php_wddx_serialize_array(packet, var);
-		break;
-	case WDDX_BINARY_T:
-		php_wddx_serialize_binary(packet, var);
-		break;
-	default:
-		break;
-	}
-
 	php_wddx_packet_end(packet);
 					
 	ZVAL_STRINGL(return_value, packet->c, packet->len, 1);
