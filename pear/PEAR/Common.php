@@ -568,7 +568,11 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'license':
-                $this->pkginfo['release_license'] = $data;
+                if ($this->in_changelog) {
+                    $this->current_release['release_license'] = $data;
+                } else {
+                    $this->pkginfo['release_license'] = $data;
+                }
                 break;
             case 'dep':
                 if ($data && !$this->in_changelog) {
