@@ -2784,17 +2784,10 @@ PHP_FUNCTION(mb_encode_mimeheader)
 			RETURN_FALSE;
 		}
 	} else {
-		switch (MBSTRG(current_language)) {
-		case mbfl_no_language_japanese:
-			charset = mbfl_no_encoding_2022jp;
-			break;
-		case mbfl_no_language_english:
-			charset = mbfl_no_encoding_8859_1;
-			transenc = mbfl_no_encoding_qprint;
-			break;
-		default:
-			charset = mbfl_no_encoding_utf8;
-			break;
+		const mbfl_language *lang = mbfl_no2language(MBSTRG(current_language));
+		if (lang != NULL) {
+			charset = lang->mail_charset;
+			transenc = lang->mail_header_encoding;
 		}
 	}
 
