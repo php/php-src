@@ -456,9 +456,10 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 	expected_type = zend_parse_arg_impl(arg, va, spec);
 	if (expected_type) {
 		if (!quiet) {
-			sprintf(buf, "%s() expects parameter %d to be %s, %s given",
+			snprintf(buf, sizeof(buf)-1, "%s() expects parameter %d to be %s, %s given",
 					get_active_function_name(TSRMLS_C), arg_num, expected_type,
 					zend_zval_type_name(*arg));
+			buf[sizeof(buf)-1] = '\0';
 			zend_error(E_WARNING, buf);
 		}
 		return FAILURE;
