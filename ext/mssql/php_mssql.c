@@ -838,7 +838,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 	}
 }
 
-static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type  TSRMLS_DC)
+static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type TSRMLS_DC)
 {
 	if (dbdatlen(mssql_ptr->link,offset) == 0) {
 		ZVAL_NULL(result);
@@ -887,6 +887,65 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 	} else {
 		php_error(E_WARNING, "%s(): column %d has unknown data type (%d)", get_active_function_name(TSRMLS_C), offset, coltype(offset));
 		ZVAL_FALSE(result);
+	}
+}
+
+static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *statement TSRMLS_DC) 
+{
+	int i, num_rets, type;
+	char *parameter;
+	mssql_bind *bind;
+
+	/* Now to fetch RETVAL and OUTPUT values*/
+	num_rets = dbnumrets(mssql_ptr->link);
+	
+	if (num_rets!=0) {
+		for (i = 1; i <= num_rets; i++) {
+			parameter = (char*)dbretname(mssql_ptr->link, i);
+			type = dbrettype(mssql_ptr->link, i);
+						
+			if (statement->binds!=NULL ) {	/*	Maybe a non-parameter sp	*/
+				if (zend_hash_find(statement->binds, parameter, strlen(parameter), (void**)&bind)==SUCCESS) {
+					switch (type) {
+						case SQLBIT:
+						case SQLINT1:
+						case SQLINT2:
+						case SQLINT4:
+							convert_to_long_ex(&bind->zval);
+							Z_LVAL_P(bind->zval) = *((int *)(dbretdata(mssql_ptr->link,i)));
+							break;
+			
+						case SQLFLT8:
+						case SQLFLTN:
+							convert_to_double_ex(&bind->zval);
+							Z_DVAL_P(bind->zval) = *((double *)(dbretdata(mssql_ptr->link,i)));
+							break;
+
+						case SQLCHAR:
+						case SQLVARCHAR:
+						case SQLTEXT:
+							convert_to_string_ex(&bind->zval);
+							Z_STRLEN_P(bind->zval) = dbretlen(mssql_ptr->link,i);
+							Z_STRVAL_P(bind->zval) = estrndup(dbretdata(mssql_ptr->link,i),Z_STRLEN_P(bind->zval));
+							break;
+					}
+				}
+				else {
+					php_error(E_WARNING, "%s(): an output parameter variable was not provided", get_active_function_name(TSRMLS_C));
+				}
+			}
+		}
+	}
+	if (statement->binds!=NULL ) {	/*	Maybe a non-parameter sp	*/
+		if (zend_hash_find(statement->binds, "RETVAL", 6, (void**)&bind)==SUCCESS) {
+			if (dbhasretstat(mssql_ptr->link)) {
+				convert_to_long_ex(&bind->zval);
+				Z_LVAL_P(bind->zval)=dbretstatus(mssql_ptr->link);
+			}
+			else {
+				php_error(E_WARNING, "%s(): stored procedure has no return value. Nothing was returned into RETVAL", get_active_function_name(TSRMLS_C));
+			}
+		}
 	}
 }
 
@@ -1059,6 +1118,7 @@ PHP_FUNCTION(mssql_query)
 	}
 
 	result = (mssql_result *) emalloc(sizeof(mssql_result));
+	result->statement = NULL;
 	result->num_fields = num_fields;
 	result->blocks_initialized = 1;
 	
@@ -1673,7 +1733,13 @@ PHP_FUNCTION(mssql_next_result)
 
 	mssql_ptr = result->mssql_ptr;
 	retvalue = dbresults(mssql_ptr->link);
-	if (retvalue == FAIL || retvalue == NO_MORE_RESULTS || retvalue == NO_MORE_RPC_RESULTS) {
+	if (retvalue == FAIL) {
+		RETURN_FALSE;
+	}
+	else if (retvalue == NO_MORE_RESULTS || retvalue == NO_MORE_RPC_RESULTS) {
+		if (result->statement) {
+			_mssql_get_sp_result(result->mssql_ptr, result->statement TSRMLS_CC);
+		}
 		RETURN_FALSE;
 	}
 	else {
@@ -1948,14 +2014,11 @@ PHP_FUNCTION(mssql_execute)
 	int retvalue,retval_results;
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
-	mssql_bind *bind;
 	mssql_result *result;
-	int num_fields,num_rets,type;	
+	int num_fields;
 	int blocks_initialized=1;
-	int i;
 	int batchsize;
 	int ac = ZEND_NUM_ARGS();
-	char *parameter;
 
 	batchsize = MS_SQL_G(batchsize);
 	if (ac !=1 || zend_get_parameters_ex(1, &stmt)==FAILURE) {
@@ -1992,7 +2055,6 @@ PHP_FUNCTION(mssql_execute)
 			}
 			
 			result = (mssql_result *) emalloc(sizeof(mssql_result));
-		
 			result->batchsize = batchsize;
 			result->blocks_initialized = 1;
 			result->data = (zval **) emalloc(sizeof(zval *)*MSSQL_ROWS_BLOCK);
@@ -2002,74 +2064,13 @@ PHP_FUNCTION(mssql_execute)
 
 			result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*num_fields);
 			result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
+			result->statement = statement;
 		}
-		retval_results=dbresults(mssql_ptr->link);
+	}
+	else if (retval_results==NO_MORE_RESULTS) {
+		_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
 	}
 	
-	if (retval_results==SUCCEED) {
-		php_error(E_WARNING, "%s(): multiple recordsets from a stored procedure not supported yet! (Skipping...)", get_active_function_name(TSRMLS_C));
-		retval_results=dbresults(mssql_ptr->link);
-		
-		while (retval_results==SUCCEED) {
-			retval_results=dbresults(mssql_ptr->link);
-		}
-	}
-
-	if (retval_results==NO_MORE_RESULTS) {
-		/* Now to fetch RETVAL and OUTPUT values*/
-		num_rets = dbnumrets(mssql_ptr->link);
-		
-		if (num_rets!=0) {
-			for (i = 1; i <= num_rets; i++) {
-				parameter=(char*)dbretname(mssql_ptr->link, i);
-				type=dbrettype(mssql_ptr->link, i);
-							
-				if (statement->binds!=NULL ) {	/*	Maybe a non-parameter sp	*/
-					if (zend_hash_find(statement->binds, parameter, strlen(parameter), (void**)&bind)==SUCCESS) {
-						switch (type) {
-							case SQLBIT:
-							case SQLINT1:
-							case SQLINT2:
-							case SQLINT4:
-								convert_to_long_ex(&bind->zval);
-								Z_LVAL_P(bind->zval)=*((int *)(dbretdata(mssql_ptr->link,i)));
-								break;
-				
-							case SQLFLT8:
-							case SQLFLTN:
-								convert_to_double_ex(&bind->zval);
-								Z_DVAL_P(bind->zval)=*((double *)(dbretdata(mssql_ptr->link,i)));
-								break;
-
-							case SQLCHAR:
-							case SQLVARCHAR:
-							case SQLTEXT:
-								convert_to_string_ex(&bind->zval);
-								Z_STRLEN_P(bind->zval)=dbretlen(mssql_ptr->link,i);
-								Z_STRVAL_P(bind->zval) = estrndup(dbretdata(mssql_ptr->link,i),Z_STRLEN_P(bind->zval));
-								break;
-						}
-					}
-					else {
-						php_error(E_WARNING, "%s(): an output parameter variable was not provided", get_active_function_name(TSRMLS_C));
-					}
-				}
-			}
-		}
-		
-		if (statement->binds!=NULL ) {	/*	Maybe a non-parameter sp	*/
-			if (zend_hash_find(statement->binds, "RETVAL", 6, (void**)&bind)==SUCCESS) {
-				if (dbhasretstat(mssql_ptr->link)) {
-					convert_to_long_ex(&bind->zval);
-					Z_LVAL_P(bind->zval)=dbretstatus(mssql_ptr->link);
-				}
-				else {
-					php_error(E_WARNING, "%s(): stored procedure has no return value. Nothing was returned into RETVAL", get_active_function_name(TSRMLS_C));
-				}
-			}
-		}
-	}
-
 	if (result==NULL) {
 		RETURN_TRUE;	/* no recordset returned ...*/
 	}
