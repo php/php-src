@@ -1,3 +1,117 @@
+2004-05-16  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * pear/PEAR/Common.php:
+      - T_WHITESPACE for the 1st test...
+
+    * pear/PEAR/Common.php:
+      - PHP allows spaces before :: (parent :: foo(); )
+        Nota bene, requires another change to really check the syntax:
+        loop back to the first non white space element and valid it (parent,
+        string or var)
+
+2004-05-16  Timm Friebe  <thekid@thekid.de>
+
+    * (PHP_4_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - MFH: Fixed auto-conversion from long to double when LONG_MAX /
+        LONG_MIN where overflown
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - Fixed auto-conversion from long to double when LONG_MAX /
+        LONG_MIN where overflown
+
+2004-05-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c:
+      Better fix for a possible double free in sqlite_single|array_query() when
+      a failure occurs between query execution and data retrieval.
+
+2004-05-16  Stanislav Malyshev  <stas@zend.com>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c:
+      attempt to fix double free on failed query
+
+2004-05-16  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * pear/PEAR/Command.php:
+      - Fix #1329, closedir on exit (kameshj at fastmail dot fm)
+
+    * pear/PEAR/Command/Install.php:
+      - Fix #1330, unused variable
+
+    * pear/PEAR/Downloader.php:
+      - Fix #1249 (wrong print out the wrong state with force option)
+      - some NL issues, sorry, commit now too
+
+2004-05-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      MFH: Do not allocate error buffer at the start of every request.
+
+    * ext/sockets/sockets.c:
+      Do not allocate error buffer at the start of every request.
+
+2004-05-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/strings/sprintf_f.phpt:
+      
+      - Add new test
+
+2004-05-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/fdf/fdf.c:
+      MFH: Added missing safe_mode & open_basedir checks.
+
+    * ext/fdf/fdf.c:
+      Added missing safe_mode & open_basedir checks.
+
+2004-05-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/formatted_print.c:
+      - Fix printf with floats
+
+2004-05-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ext_skel:
+      ;
+
+    * ext/ext_skel:
+      Add config.w32 template to ext_skel
+
+2004-05-16  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/TODO
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/dom_fe.h
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c:
+      constructors throw DOMException
+      add DOM_PHP_ERR DomException code
+      validate tagnames in constructors
+      use C style comments
+      update TODO
+
+2004-05-16  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/config.m4
+      ext/mcve/config.m4:
+      update config.m4 for libmonetra 4.0 compatability.
+      Library no longer has MCVE_ symbols, the header file has #define\'s to
+      convert MCVE_ -> M_ to reflect the Monetra name change from MCVE.
+      More updates to follow.
+
 2004-05-14  Andrei Zmievski  <andrei@gravitonic.com>
 
     * NEWS:
