@@ -654,53 +654,46 @@ try_again:
 
 	}
 
-	if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
-		efree(http_headers);
-		if (request != buf) {efree(request);}
-		php_stream_close(stream);
-		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
-		add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
-		return FALSE;
-	}
-
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-	    Z_LVAL_PP(trace) > 0) {
-		add_property_stringl(this_ptr, "__last_response_headers", http_headers, http_header_size, 1);
-	}
-
-	/* Check to see what HTTP status was sent */
-	http_1_1 = 0;
-	http_status = 0;
-	http_version = get_http_header_value(http_headers,"HTTP/");
-	if (http_version) {
-		char *tmp;
-
-		if (strncmp(http_version,"1.1", 3)) {
-			http_1_1 = 1;
-		}
-
-		tmp = strstr(http_version," ");
-		if (tmp != NULL) {
-			tmp++;
-			http_status = atoi(tmp);
-		}
-		efree(http_version);
-
-		/* Try and get headers again */
-		if (http_status == 100) {
+	do {
+		if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
 			efree(http_headers);
-			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
+			if (request != buf) {efree(request);}
+			php_stream_close(stream);
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
+			add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
+			return FALSE;
+		}
+
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
+		    Z_LVAL_PP(trace) > 0) {
+			add_property_stringl(this_ptr, "__last_response_headers", http_headers, http_header_size, 1);
+		}
+
+		/* Check to see what HTTP status was sent */
+		http_1_1 = 0;
+		http_status = 0;
+		http_version = get_http_header_value(http_headers,"HTTP/");
+		if (http_version) {
+			char *tmp;
+
+			if (strncmp(http_version,"1.1", 3)) {
+				http_1_1 = 1;
+			}
+
+			tmp = strstr(http_version," ");
+			if (tmp != NULL) {
+				tmp++;
+				http_status = atoi(tmp);
+			}
+			efree(http_version);
+
+			/* Try and get headers again */
+			if (http_status == 100) {
 				efree(http_headers);
-				if (request != buf) {efree(request);}
-				php_stream_close(stream);
-				zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-				zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
-				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
-				return FALSE;
 			}
 		}
-	}
+	} while (http_status == 100);
 
 	/* Grab and send back every cookie */
 
