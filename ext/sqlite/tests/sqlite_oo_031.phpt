@@ -9,7 +9,7 @@ if (!extension_loaded("spl")) print "skip SPL is not present";
 <?php
 include "blankdb_oo.inc";
 
-$db->query("CREATE TABLE menu(id_l int, id_r int, key VARCHAR(10))");
+$db->query("CREATE TABLE menu(id_l int PRIMARY KEY, id_r int UNIQUE, key VARCHAR(10))");
 $db->query("INSERT INTO menu VALUES( 1, 12, 'A')"); 
 $db->query("INSERT INTO menu VALUES( 2,  9, 'B')"); 
 $db->query("INSERT INTO menu VALUES(10, 11, 'F')"); 
@@ -56,11 +56,11 @@ class SqliteNestedset implements RecursiveIterator
 	protected $id_r;
 	protected $entry;
 
-	function __construct($db, $id_l = 1, $id_r = 0)
+	function __construct($db, $id_l = 1)
 	{
 		$this->db = $db;
 		$this->id_l = $id_l;
-		$this->id_r = $id_r ? $id_r : $this->db->single_query('SELECT max(id_r) FROM menu', 1);
+		$this->id_r = $this->db->single_query('SELECT id_r FROM menu WHERE id_l='.$id_l, 1);
 		$this->id = $id_l;
 	}
 	
