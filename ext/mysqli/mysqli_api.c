@@ -1271,6 +1271,8 @@ PHP_FUNCTION(mysqli_real_connect)
 		RETURN_FALSE;
 	}
 	php_mysqli_set_error(mysql_errno(mysql), (char *)mysql_error(mysql) TSRMLS_CC);
+
+	mysql->reconnect = 0;
 	
 	if (object) {
 		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->valid = 1;
@@ -1658,7 +1660,7 @@ PHP_FUNCTION(mysqli_store_result)
 		RETURN_FALSE;
 	}
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-		php_mysqli_report_index("from previous mysql_real_connect", mysql->server_status TSRMLS_CC);
+		php_mysqli_report_index("from previous query", mysql->server_status TSRMLS_CC);
 	}
 	MYSQLI_DISABLE_MQ;
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
@@ -1713,7 +1715,7 @@ PHP_FUNCTION(mysqli_use_result)
 	}
 
 	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
-		php_mysqli_report_index("from previous mysql_real_connect", mysql->server_status TSRMLS_CC);
+		php_mysqli_report_index("from previous query", mysql->server_status TSRMLS_CC);
 	}
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
