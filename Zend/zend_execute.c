@@ -3825,6 +3825,11 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 				return 0; /* CHECK_ME */
 			}	
 			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
+			if (!value) {
+				/* failure in get_current_data */
+				SET_OPCODE(op_array->opcodes+opline->op2.u.opline_num);
+				return 0; /* CHECK_ME */
+			}
 			if (iter->funcs->get_current_key) {
 				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
 			} else {
