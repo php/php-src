@@ -198,31 +198,6 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #ifdef PHP_WIN32
 	sendmail = popen(sendmail_cmd, "wb");
 #else
-	/* make sure that sendmail_path contains a valid executable, failure to do
-	 * would make PHP abruptly exit without a useful error message. */
-	{
-		char *s=NULL, *p;
-	
-		if ((s = strchr(sendmail_path, ' '))) {
-			p = estrndup(sendmail_path, s - sendmail_path);
-		} else {
-			p = sendmail_path;
-		}
-		if (VCWD_ACCESS(p, X_OK)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
-			if (extra_cmd != NULL) {
-				efree(sendmail_cmd);
-			}
-			if (s) {
-				efree(p);
-			}
-			return 0;
-		}
-		if (s) {
-			efree(p);
-		}
-	}
-
 	/* Since popen() doesn't indicate if the internal fork() doesn't work
 	 * (e.g. the shell can't be executed) we explicitely set it to 0 to be
 	 * sure we don't catch any older errno value. */
