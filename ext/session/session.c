@@ -1375,13 +1375,16 @@ PHP_FUNCTION(session_unset)
 }
 /* }}} */
 
+PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC)
+{
+	if (PS(apply_trans_sid) && (PS(session_status) == php_session_active)) {
+		*new = php_url_scanner_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen TSRMLS_CC);
+	}
+}
 
 static void php_rinit_session_globals(TSRMLS_D)
 {		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
-#if I_KNOW_WHAT_THE_PURPOSE_OF_THIS_IS
-	php_url_scanner_reset_vars(TSRMLS_C); /* save even if we haven't registered */
-#endif
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
@@ -1461,7 +1464,7 @@ PHP_MINIT_FUNCTION(session)
 
 	zend_register_auto_global("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
 
-	PS(module_number) = module_number;
+	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
