@@ -10,6 +10,7 @@ int flock(int fd, int operation);
 #endif
 
 #ifdef PHP_WIN32
+#define EWOULDBLOCK WSAEWOULDBLOCK
 #	define fsync _commit
 #	define ftruncate(a,b) chsize(a,b)
 #endif /* defined(PHP_WIN32) */
