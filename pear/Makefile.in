@@ -52,6 +52,9 @@ PEAR_FILES = \
 	File/Passwd.php \
 	File/SearchReplace.php \
 	HTML/Form.php \
+	HTML/IT.php \
+	HTML/ITX.php \
+	HTML/Processor.php \
 	HTTP.php \
 	HTTP/Compress.php \
 	Image/Remote.php \
