@@ -16,8 +16,10 @@
 // +----------------------------------------------------------------------+
 // | Authors: Stig Bakken <ssb@fast.no>                                   |
 // |          Tomas V.V.Cox <cox@idecnet.com>                             |
+// |                                                                      |
 // +----------------------------------------------------------------------+
 //
+// $Id$
 
 ini_set('allow_url_fopen', true);
 set_time_limit(0);
@@ -128,14 +130,14 @@ if ($fetype == 'Gtk') {
     Gtk::main();
 } else do {
     if (empty($all_commands[$command]) || $command == 'help') {
-        usage(null, @$options[1][2]);
+        usage(null, @$options[1][0]);
     }
 
     $cmd = PEAR_Command::factory($command, $config);
     if (PEAR::isError($cmd)) {
         die($cmd->getMessage());
     }
-    
+
     $short_args = $long_args = null;
     PEAR_Command::getGetoptArgs($command, $short_args, $long_args);
     if (PEAR::isError($tmp = Console_Getopt::getopt($options[1], $short_args, $long_args))) {
@@ -217,9 +219,9 @@ function cmdHelp($command)
         "     -h, -?     display help/usage (this message)\n";
     } elseif ($help = PEAR_Command::getHelp($command)) {
         if (is_string($help)) {
-            return "Usage : $help";
+            return "$help\n";
         }
-        return "Usage : $progname $command {$help[0]}\n{$help[1]}";
+        return "{$help[0]}\n{$help[1]}";
     }
     return "No such command";
 }
