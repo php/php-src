@@ -289,7 +289,7 @@ class PEAR_Installer extends PEAR_Common
         }
         if (isset($md5sum)) {
             if (strtolower($md5sum) == strtolower($atts['md5sum'])) {
-                $this->log(3, "md5sum ok: $final_dest_file");
+                $this->log(2, "md5sum ok: $final_dest_file");
             } else {
                 if (empty($options['force'])) {
                     return $this->raiseError("bad md5sum for file $final_dest_file",
@@ -548,7 +548,7 @@ class PEAR_Installer extends PEAR_Common
                 if (PEAR::isError($downloaddir = System::mktemp('-d'))) {
                     return $downloaddir;
                 }
-                $this->log(2, '+ tmp dir created at ' . $downloaddir);
+                $this->log(3, '+ tmp dir created at ' . $downloaddir);
             }
             $callback = $this->ui ? array(&$this, '_downloadCallback') : null;
             $this->pushErrorHandling(PEAR_ERROR_RETURN);
@@ -827,7 +827,7 @@ class PEAR_Installer extends PEAR_Common
             if (PEAR::isError($tmpdir = System::mktemp('-d'))) {
                 return $tmpdir;
             }
-            $this->log(2, '+ tmp dir created at ' . $tmpdir);
+            $this->log(3, '+ tmp dir created at ' . $tmpdir);
 
             $tar = new Archive_Tar($pkgfile);
             if (!@$tar->extract($tmpdir)) {
