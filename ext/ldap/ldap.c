@@ -118,8 +118,9 @@ ZEND_GET_MODULE(ldap)
 #endif
 
 
-static void _close_ldap_link(LDAP *ld)
+static void _close_ldap_link(zend_rsrc_list_entry *rsrc)
 {
+	LDAP *ld = (LDAP *)rsrc->ptr;
 	LDAPLS_FETCH();
 
 	ldap_unbind_s(ld);
@@ -128,8 +129,9 @@ static void _close_ldap_link(LDAP *ld)
 }
 
 
-static void _free_ldap_result(LDAPMessage *result)
+static void _free_ldap_result(zend_rsrc_list_entry *rsrc)
 {
+	LDAPMessage *result = (LDAPMessage *)rsrc->ptr;
 	ldap_msgfree(result);
 }
 
@@ -179,8 +181,8 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_MAIN_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_CS);
 #endif
 
-	le_result = register_list_destructors(_free_ldap_result, NULL);
-	le_link = register_list_destructors(_close_ldap_link, NULL);
+	le_result = register_list_destructors(_free_ldap_result, NULL, "ldap result");
+	le_link = register_list_destructors(_close_ldap_link, NULL, "ldap link");
 
 	ldap_module_entry.type = type;
 

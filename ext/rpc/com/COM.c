@@ -148,8 +148,9 @@ static char *php_string_from_clsid(CLSID *clsid)
 }
 
 
-static void php_idispatch_destructor(IDispatch *i_dispatch)
+static void php_idispatch_destructor(zend_rsrc_list_entry *rsrc)
 {
+	IDispatch *i_dispatch = (IDispatch *)rsrc->ptr;
 	i_dispatch->lpVtbl->Release(i_dispatch);
 }
 
@@ -226,7 +227,7 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(COM)
 {
 	CoInitialize(NULL);
-	le_idispatch = register_list_destructors(php_idispatch_destructor, NULL);
+	le_idispatch = register_list_destructors(php_idispatch_destructor, NULL,"COM");
 	php_register_COM_class();
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;

@@ -332,10 +332,16 @@ static void _php_ibase_commit_link(ibase_db_link *link)
 }
 /* }}} */
 
+static void php_ibase_commit_link_rsrc(zend_rsrc_list_entry *rsrc)
+{
+	ibase_db_link *link = (ibase_db_link *)rsrc->ptr;
+	_php_ibase_commit_link(link);
+}
 
 /* {{{ _php_ibase_close_link() */
-static void _php_ibase_close_link(ibase_db_link *link)
+static void _php_ibase_close_link(zend_rsrc_list_entry *rsrc)
 {
+	ibase_db_link *link = (ibase_db_link *)rsrc->ptr;
 	IBLS_FETCH();
 
 	_php_ibase_commit_link(link);
@@ -348,8 +354,9 @@ static void _php_ibase_close_link(ibase_db_link *link)
 
 
 /* {{{ _php_ibase_close_plink() */
-static void _php_ibase_close_plink(ibase_db_link *link)
+static void _php_ibase_close_plink(zend_rsrc_list_entry *rsrc)
 {
+	ibase_db_link *link = (ibase_db_link *)rsrc->ptr;
 	IBLS_FETCH();
 
 	_php_ibase_commit_link(link);
@@ -363,8 +370,9 @@ static void _php_ibase_close_plink(ibase_db_link *link)
 
 
 /* {{{ _php_ibase_free_result() */
-static void _php_ibase_free_result(ibase_result *ib_result)
+static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc)
 {
+	ibase_result *ib_result = (ibase_result *)rsrc->ptr;
 	IBLS_FETCH();
 
 	IBDEBUG("Freeing result...");
@@ -426,10 +434,16 @@ static void _php_ibase_free_query(ibase_query *ib_query)
 }
 /* }}} */
 
+static void php_ibase_free_query_rsrc(zend_rsrc_list_entry *rsrc)
+{
+	ibase_query *query = (ibase_auery *)rsrc->ptr;
+	_php_ibase_free_query(query);
+}
 
 /* {{{ _php_ibase_free_blob()	*/
-static void _php_ibase_free_blob(ibase_blob_handle *ib_blob)
+static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc)
 {
+	ibase_blob_handle *ib_blob = (ibase_blob_handle *)rsrc->ptr;
 	IBLS_FETCH();
 
 	if (ib_blob->bl_handle != NULL) { /* blob open*/
@@ -443,8 +457,9 @@ static void _php_ibase_free_blob(ibase_blob_handle *ib_blob)
 
 
 /* {{{ _php_ibase_free_trans()	*/
-static void _php_ibase_free_trans(ibase_tr_link *ib_trans)
+static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc)
 {
+	ibase_tr_link *ib_trans = (ibase_tr_link *)rsrc->ptr;
 	ibase_db_link *ib_link;
 	IBLS_FETCH();
 
@@ -494,12 +509,12 @@ PHP_MINIT_FUNCTION(ibase)
 
 	REGISTER_INI_ENTRIES();
 
-	le_result = register_list_destructors(_php_ibase_free_result, NULL);
-	le_query = register_list_destructors(_php_ibase_free_query, NULL);
-	le_blob = register_list_destructors(_php_ibase_free_blob, NULL);
-	le_link = register_list_destructors(_php_ibase_close_link, NULL);
-	le_plink = register_list_destructors(_php_ibase_commit_link, _php_ibase_close_plink);
-	le_trans = register_list_destructors(_php_ibase_free_trans, NULL);
+	le_result = register_list_destructors(_php_ibase_free_result, NULL, "interbase result");
+	le_query = register_list_destructors(php_ibase_free_query_rsrc, NULL, "interbase query");
+	le_blob = register_list_destructors(_php_ibase_free_blob, NULL, "interbase blob");
+	le_link = register_list_destructors(_php_ibase_close_link, NULL, "interbase link");
+	le_plink = register_list_destructors(php_ibase_commit_link_rsrc, _php_ibase_close_plink, "interbase link persistent");
+	le_trans = register_list_destructors(_php_ibase_free_trans, NULL, "interbase transaction");
 
 	REGISTER_LONG_CONSTANT("IBASE_DEFAULT", PHP_IBASE_DEFAULT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_TEXT", PHP_IBASE_TEXT, CONST_PERSISTENT);

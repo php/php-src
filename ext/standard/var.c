@@ -97,9 +97,9 @@ head_done:
 			PUTS("}\n");
 			break;	
 		case IS_RESOURCE: {
-			int type;
-			zend_list_find((*struc)->value.lval, &type);
-			php_printf("%sresource(%ld) of type %d\n", COMMON, (*struc)->value.lval, type);
+			char *type_name;
+			type_name = zend_rsrc_list_get_rsrc_type((*struc)->value.lval);
+			php_printf("%sresource(%ld) of type (%s)\n", COMMON, (*struc)->value.lval, type_name ? type_name : "Unknown");
 			break;
 		}
 		default:

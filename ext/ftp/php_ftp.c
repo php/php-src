@@ -84,14 +84,15 @@ zend_module_entry php_ftp_module_entry = {
 ZEND_GET_MODULE(php_ftp)
 #endif
 
-static void ftp_destructor_ftpbuf(ftpbuf_t *ftp)
+static void ftp_destructor_ftpbuf(zend_rsrc_list_entry *rsrc)
 {
+	ftpbuf_t *ftp = (ftpbuf_t *)rsrc->ptr;
 	ftp_close(ftp);
 }
 
 PHP_MINIT_FUNCTION(ftp)
 {
-	le_ftpbuf = register_list_destructors(ftp_destructor_ftpbuf, NULL);
+	le_ftpbuf = register_list_destructors(ftp_destructor_ftpbuf, NULL, "ftp");
 	REGISTER_MAIN_LONG_CONSTANT("FTP_ASCII", FTPTYPE_ASCII,
 		CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("FTP_BINARY", FTPTYPE_IMAGE,

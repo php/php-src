@@ -138,11 +138,7 @@ static int _rollback_transaction(II_LINK *link)
   return 0;
 }
 
-/* closes the given link, actually disconnecting from server
-   and releasing associated resources after rolling back the
-   active transaction (if any)
-*/
-static void _close_ii_link(II_LINK *link)
+static void close_ii_link(II_LINK *link)
 {
   IIAPI_DISCONNPARM disconnParm;
   IILS_FETCH();
@@ -162,13 +158,25 @@ static void _close_ii_link(II_LINK *link)
   IIG(num_links)--;
 }
 
+/* closes the given link, actually disconnecting from server
+   and releasing associated resources after rolling back the
+   active transaction (if any)
+*/
+static void php_close_ii_link(zend_rsrc_list_entry *rsrc)
+{
+	II_LINK *link = (II_LINK *)rsrc->ptr;
+	close_ii_link(link);
+}
+
+
 /* closes the given persistent link, see _close_ii_link
 */
-static void _close_ii_plink(II_LINK *link)
+static void _close_ii_plink(zend_rsrc_list_entry *rsrc)
 {
+	II_LINK *link = (II_LINK *)rsrc->ptr;
   IILS_FETCH();
 
-  _close_ii_link(link);
+  close_ii_link(link);
   IIG(num_persistent)--;
 }
 
@@ -176,8 +184,9 @@ static void _close_ii_plink(II_LINK *link)
    used when the request ends to 'refresh' the link for use
    by the next request
 */
-static void _clean_ii_plink(II_LINK *link)
+static void _clean_ii_plink(zend_rsrc_list_entry *rsrc)
 {
+	II_LINK *link = (II_LINK *)rsrc->ptr;
   IIAPI_AUTOPARM autoParm;
   IILS_FETCH();
 
@@ -247,8 +256,8 @@ PHP_MINIT_FUNCTION(ii)
   
   REGISTER_INI_ENTRIES();
   
-  le_ii_link = register_list_destructors(_close_ii_link,NULL);
-  le_ii_plink = register_list_destructors(_clean_ii_plink,_close_ii_plink);
+  le_ii_link = register_list_destructors(php_close_ii_link,NULL,"ingres");
+  le_ii_plink = register_list_destructors(_clean_ii_plink,php_close_ii_plink,"ingres persistent");
 
   IIG(num_persistent) = 0;
 

@@ -132,8 +132,9 @@ ZEND_GET_MODULE(hw)
 
 void print_msg(hg_msg *msg, char *str, int txt);
 
-void _close_hw_link(hw_connection *conn)
+void _close_hw_link(zend_rsrc_list_entry *rsrc)
 {
+	hw_connection *conn = (hw_connection *)rsrc->ptr;
 	if(conn->hostname)
 		free(conn->hostname);
 	if(conn->username)
@@ -143,8 +144,9 @@ void _close_hw_link(hw_connection *conn)
 	HwSG(num_links)--;
 }
 
-void _close_hw_plink(hw_connection *conn)
+void _close_hw_plink(zend_rsrc_list_entry *rsrc)
 {
+	hw_connection *conn = (hw_connection *)rsrc->ptr;
 	if(conn->hostname)
 		free(conn->hostname);
 	if(conn->username)
@@ -155,8 +157,9 @@ void _close_hw_plink(hw_connection *conn)
 	HwSG(num_persistent)--;
 }
 
-void _free_hw_document(hw_document *doc)
+void _free_hw_document(zend_rsrc_list_entry *rsrc)
 {
+	hw_document *doc = (hw_document *)rsrc->ptr;
 	if(doc->data)
 		free(doc->data);
 	if(doc->attributes)
@@ -191,9 +194,9 @@ PHP_MINIT_FUNCTION(hw) {
 	ZEND_INIT_MODULE_GLOBALS(hw, php_hw_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
-	HwSG(le_socketp) = register_list_destructors(_close_hw_link,NULL);
-	HwSG(le_psocketp) = register_list_destructors(NULL,_close_hw_plink);
-	HwSG(le_document) = register_list_destructors(_free_hw_document,NULL);
+	HwSG(le_socketp) = register_list_destructors(_close_hw_link,NULL, "hyperwave link");
+	HwSG(le_psocketp) = register_list_destructors(NULL,_close_hw_plink, "hyperwave link persistent");
+	HwSG(le_document) = register_list_destructors(_free_hw_document,NULL, "hyperwave document");
 	hw_module_entry.type = type;
 
 	REGISTER_LONG_CONSTANT("HW_ATTR_LANG", HW_ATTR_LANG, CONST_CS | CONST_PERSISTENT);

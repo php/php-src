@@ -127,7 +127,9 @@ zend_module_entry php_zlib_module_entry = {
 ZEND_GET_MODULE(php_zlib)
 #endif
 
-static void phpi_destructor_gzclose(gzFile *zp) {
+static void phpi_destructor_gzclose(zend_rsrc_list_entry *rsrc)
+{
+	gzFile *zp = (gzFile *)rsrc->ptr;
 	(void)gzclose(zp);
 }
 
@@ -147,7 +149,7 @@ PHP_MINIT_FUNCTION(zlib)
 #else
         ZLIBG(gzgetss_state)=0;
 #endif
-	le_zp = register_list_destructors(phpi_destructor_gzclose,NULL);
+	le_zp = register_list_destructors(phpi_destructor_gzclose,NULL,"zlib");
 
 #if HAVE_FOPENCOOKIE
 

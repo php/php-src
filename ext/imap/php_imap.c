@@ -71,11 +71,11 @@ void *fs_get(size_t size);
 int imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char *rpath);
 
 
-void mail_close_it(pils *imap_le_struct);
+void mail_close_it(zend_rsrc_list_entry *rsrc);
 #ifdef OP_RELOGIN
 /* AJS: close persistent connection */
-void mail_userlogout_it(pils *imap_le_struct);
-void mail_nuke_chain(pils **headp);
+void mail_userlogout_it(zend_rsrc_list_entry *rsrc);
+void mail_nuke_chain(zend_rsrc_list_entry *rsrc);
 #endif
  
 function_entry imap_functions[] = {
@@ -180,16 +180,18 @@ extern char imsp_password[80];
 #endif
 
 
-void mail_close_it(pils *imap_le_struct)
+void mail_close_it(zend_rsrc_list_entry *rsrc)
 {
+	pils *imap_le_struct = (pils *)rsrc->ptr;
 	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags);
 	efree(imap_le_struct);
 }
 
 #ifdef OP_RELOGIN
 /* AJS: stream close functions for persistent connections */
-void mail_userlogout_it(pils *imap_le_struct)
+void mail_userlogout_it(zend_rsrc_list_entry *rsrc)
 {
+	pils *imap_le_struct = (pils *)rsrc->ptr;
 	/* Close this user's session, putting the stream back
 	 * into AUTHENTICATE state.  (Note that IMAP does not
 	 * support this behavior... yet)
@@ -198,8 +200,9 @@ void mail_userlogout_it(pils *imap_le_struct)
 	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags | CL_HALF);
 }
 
-void mail_nuke_chain(pils **headp)
+void mail_nuke_chain(zend_rsrc_list_entry *rsrc)
 {
+	pils **headp = (pils **)rsrc->ptr;
 	pils		*node, *next;
 
 	for (node = *headp; node; node = next) {
@@ -589,11 +592,11 @@ PHP_MINIT_FUNCTION(imap)
 	ENCOTHER                unknown
 	*/
 
-    le_imap = register_list_destructors(mail_close_it,NULL);
+    le_imap = register_list_destructors(mail_close_it,NULL,"imap");
 #ifdef OP_RELOGIN
     /* AJS: destructors for persistent connections */
-    le_pimap = register_list_destructors(mail_userlogout_it, NULL);
-    le_pimapchain = register_list_destructors(NULL, mail_nuke_chain);
+    le_pimap = register_list_destructors(mail_userlogout_it, NULL, "imap persistent");
+    le_pimapchain = register_list_destructors(NULL, mail_nuke_chain, "imap chain persistent");
 #endif
 	return SUCCESS;
 }

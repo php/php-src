@@ -187,9 +187,14 @@ static php_gd_globals gd_globals;
 ZEND_GET_MODULE(gd)
 #endif
 
-
-static void php_free_gd_font(gdFontPtr fp)
+static void php_free_gd_image(zend_rsrc_list_entry *rsrc)
 {
+	gdImageDestroy((gdImagePtr)rsrc->ptr);
+}
+
+static void php_free_gd_font(zend_rsrc_list_entry *rsrc)
+{
+	gdFontPtr fp = (gdFontPtr)rsrc->ptr;
 	if (fp->data) {
 		efree(fp->data);
 	}
@@ -220,14 +225,14 @@ PHP_MINIT_FUNCTION(gd)
 		return FAILURE;
 	}
 #endif
-	GDG(le_gd) = register_list_destructors(gdImageDestroy, NULL);
-	GDG(le_gd_font) = register_list_destructors(php_free_gd_font, NULL);
+	GDG(le_gd) = register_list_destructors(php_free_gd_image, NULL, "gd");
+	GDG(le_gd_font) = register_list_destructors(php_free_gd_font, NULL, "gd font");
 #if HAVE_LIBT1
 	T1_SetBitmapPad(8);
 	T1_InitLib(NO_LOGFILE|IGNORE_CONFIGFILE|IGNORE_FONTDATABASE);
 	T1_SetLogLevel(T1LOG_DEBUG);
-	GDG(le_ps_font) = register_list_destructors(php_free_ps_font, NULL);
-	GDG(le_ps_enc) = register_list_destructors(php_free_ps_enc, NULL);
+	GDG(le_ps_font) = register_list_destructors(php_free_ps_font, NULL, "gd PS font");
+	GDG(le_ps_enc) = register_list_destructors(php_free_ps_enc, NULL, "gd PS encoding");
 #endif
 	REGISTER_LONG_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPG", 2, CONST_CS | CONST_PERSISTENT);
@@ -2068,14 +2073,16 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 #if HAVE_LIBT1
 
-void php_free_ps_font(int *font)
+void php_free_ps_font(zend_rsrc_list_entry *rsrc)
 {
+	int *font = (int *)rsrc->ptr;
 	T1_DeleteFont(*font);
 	efree(font);
 }
 
-void php_free_ps_enc(char **enc)
+void php_free_ps_enc(zend_rsrc_list_entry *rsrc)
 {
+	char **enc = (char **)rsrc->ptr;
 	T1_DeleteEncoding(enc);
 }
 

@@ -60,19 +60,18 @@ zend_module_entry shmop_module_entry = {
 ZEND_GET_MODULE(shmop)
 #endif
 
-static void rsclean(struct php_shmop *shmop);
+static void rsclean(zend_rsrc_list_entry *rsrc)
+{
+	struct php_shmop *shmop = (struct php_shmop *)rsrc->ptr;
+	shmdt(shmop->addr);
+	efree(shmop);
+}
 
 PHP_MINIT_FUNCTION(shmop)
 {
-	shm_type = register_list_destructors(rsclean, NULL);
+	shm_type = register_list_destructors(rsclean, NULL, "shmop");
 	
 	return SUCCESS;
-}
-
-static void rsclean(struct php_shmop *shmop)
-{
-	shmdt(shmop->addr);
-	efree(shmop);
 }
 
 PHP_MSHUTDOWN_FUNCTION(shmop)

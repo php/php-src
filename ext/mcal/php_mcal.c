@@ -125,8 +125,9 @@ int le_mcal;
 char *mcal_user;
 char *mcal_password;
 
-CALSTREAM *cal_close_it (pils *mcal_le_struct)
+CALSTREAM *cal_close_it (zend_rsrc_list_entry *rsrc)
 {
+	pils *mcal_le_struct = (pils *)rsrc->ptr;
 	CALSTREAM *ret;
 	ret = cal_close (mcal_le_struct->mcal_stream,0);
 	efree(mcal_le_struct);
@@ -151,7 +152,7 @@ PHP_MINFO_FUNCTION(mcal)
 
 PHP_MINIT_FUNCTION(mcal)
 {
-    le_mcal = register_list_destructors(cal_close_it,NULL);
+    le_mcal = register_list_destructors(cal_close_it,NULL,"mcal");
 
     REGISTER_MAIN_LONG_CONSTANT("MCAL_SUNDAY",SUNDAY, CONST_PERSISTENT | CONST_CS);
     REGISTER_MAIN_LONG_CONSTANT("MCAL_MONDAY",MONDAY, CONST_PERSISTENT | CONST_CS);

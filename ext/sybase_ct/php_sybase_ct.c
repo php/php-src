@@ -127,9 +127,15 @@ static void _free_sybase_result(sybase_result *result)
 	efree(result);
 }
 
-
-static void _close_sybase_link(sybase_link *sybase_ptr)
+static void php_free_sybase_result(zend_rsrc_list_entry *rsrc)
 {
+	sybase_result *result = (sybase_result *)rsrc->ptr;
+	_free_sybase_result(result);
+}
+
+static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
+{
+	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
 	CS_INT con_status;
 	ELS_FETCH();
 	SybCtLS_FETCH();
@@ -160,8 +166,9 @@ static void _close_sybase_link(sybase_link *sybase_ptr)
 }
 
 
-static void _close_sybase_plink(sybase_link *sybase_ptr)
+static void _close_sybase_plink(zend_rsrc_list_entry *rsrc)
 {
+	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
 	CS_INT con_status;
 	SybCtLS_FETCH();
 
@@ -315,9 +322,9 @@ PHP_MINIT_FUNCTION(sybase)
 
 	REGISTER_INI_ENTRIES();
 
-	le_link = register_list_destructors(_close_sybase_link,NULL);
-	le_plink = register_list_destructors(NULL,_close_sybase_plink);
-	le_result = register_list_destructors(_free_sybase_result,NULL);
+	le_link = register_list_destructors(_close_sybase_link,NULL, "sybase-ct link");
+	le_plink = register_list_destructors(NULL,_close_sybase_plink, "sybase-ct link persistent");
+	le_result = register_list_destructors(php_free_sybase_result,NULL, "sybase-ct result");
 
 	return SUCCESS;
 }

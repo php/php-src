@@ -116,8 +116,9 @@ int le_picap;
 char icap_user[80]="";
 char icap_password[80]="";
 
-CALSTREAM *cal_close_it (pils *icap_le_struct)
+CALSTREAM *cal_close_it (zend_rsrc_list_entry *rsrc)
 {
+	pils *icap_le_struct = (pils *)rsrc->ptr;
 	CALSTREAM *ret;
 	ret = cal_close (icap_le_struct->icap_stream,0);
 	efree(icap_le_struct);
@@ -136,7 +137,7 @@ PHP_MINFO_FUNCTION(icap)
 PHP_MINIT_FUNCTION(icap)
 {
 
-    le_icap = register_list_destructors(cal_close_it,NULL);
+    le_icap = register_list_destructors(cal_close_it,NULL,"icap");
 
     return SUCCESS;
 }

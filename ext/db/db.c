@@ -423,8 +423,9 @@ PHP_FUNCTION(dbmclose) {
 }
 /* }}} */
 
-int php_dbm_close(dbm_info *info) {
+int php_dbm_close(zend_rsrc_list_entry *rsrc) {
 	int ret = 0;
+	dbm_info *info = (dbm_info *)rsrc->ptr;
 	DBM_TYPE dbf;
 	int lockfd;
 
@@ -1121,7 +1122,7 @@ PHP_MINIT_FUNCTION(db)
 	}
 #endif
 
-	le_db = register_list_destructors(php_dbm_close,NULL);
+	le_db = register_list_destructors(php_dbm_close,NULL,"dbm");
 	return SUCCESS;
 }
 

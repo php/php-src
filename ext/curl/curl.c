@@ -134,7 +134,7 @@ PHP_MINFO_FUNCTION(curl)
 
 PHP_MINIT_FUNCTION(curl)
 {
-	le_curl = register_list_destructors(_php_curl_close, NULL);
+	le_curl = register_list_destructors(_php_curl_close, NULL, "curl");
 	
 	/* Constants for curl_setopt() */
 	REGISTER_LONG_CONSTANT("CURLOPT_PORT", CURLOPT_PORT, CONST_CS | CONST_PERSISTENT);
@@ -785,8 +785,9 @@ PHP_FUNCTION(curl_close)
 
 /* {{{ _php_curl_close()
    List destructor for curl handles */
-static void _php_curl_close(php_curl *curl_handle)
+static void _php_curl_close(zend_rsrc_list_entry *rsrc)
 {
+	php_curl *curl_handle = (php_curl *)rsrc->ptr;
 	curl_easy_cleanup(curl_handle->cp);
 	efree(curl_handle);
 }

@@ -100,7 +100,9 @@ zend_module_entry fdf_module_entry = {
 ZEND_GET_MODULE(fdf)
 #endif
 
-static void phpi_FDFClose(FDFDoc fdf) {
+static void phpi_FDFClose(zend_rsrc_list_entry *rsrc)
+{
+	FDFDoc fdf = (FDFDoc)rsrc->ptr;
 	(void)FDFClose(fdf);
 }
 
@@ -116,7 +118,7 @@ static sapi_post_entry supported_post_entries[] = {
 PHP_MINIT_FUNCTION(fdf)
 {
 	FDFErc err;
-	FDF_GLOBAL(le_fdf) = register_list_destructors(phpi_FDFClose, NULL);
+	FDF_GLOBAL(le_fdf) = register_list_destructors(phpi_FDFClose, NULL, "fdf");
 
 	/* add handler for Acrobat FDF form post requests */
 	sapi_add_post_entry("application/vnd.fdf",	php_default_post_reader, fdf_post_handler);

@@ -137,8 +137,9 @@ ZEND_API php_odbc_globals odbc_globals;
 ZEND_GET_MODULE(odbc)
 #endif
 
-static void _free_odbc_result(odbc_result *res)
+static void _free_odbc_result(zend_rsrc_list_entry *rsrc)
 {
+	odbc_result *res = (odbc_result *)rsrc->ptr;
 	int i;
 	
 	if (res) {
@@ -165,8 +166,9 @@ static void _free_odbc_result(odbc_result *res)
 	}
 }
 
-static void _close_odbc_conn(odbc_connection *conn)
+static void _close_odbc_conn(zend_rsrc_list_entry *rsrc)
 {
+	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
 	/* FIXME
 	 * Closing a connection will fail if there are
 	 * pending transactions. It is in the responsibility
@@ -181,8 +183,9 @@ static void _close_odbc_conn(odbc_connection *conn)
 	ODBCG(num_links)--;
 }
 
-static void _close_odbc_pconn(odbc_connection *conn)
+static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc)
 {
+	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
 	ODBCLS_FETCH();
 	
 	SQLDisconnect(conn->hdbc);
@@ -328,9 +331,9 @@ PHP_MINIT_FUNCTION(odbc)
 #endif
 
 	REGISTER_INI_ENTRIES();
-	le_result = register_list_destructors(_free_odbc_result, NULL);
-	le_conn = register_list_destructors(_close_odbc_conn, NULL);
-	le_pconn = register_list_destructors(NULL, _close_odbc_pconn);
+	le_result = register_list_destructors(_free_odbc_result, NULL, "odbc result");
+	le_conn = register_list_destructors(_close_odbc_conn, NULL, "odbc link");
+	le_pconn = register_list_destructors(NULL, _close_odbc_pconn, "odbc link persistent");
 	odbc_module_entry.type = type;
 	
 	REGISTER_LONG_CONSTANT("ODBC_BINMODE_PASSTHRU", 0, CONST_CS | CONST_PERSISTENT);

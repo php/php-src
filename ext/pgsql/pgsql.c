@@ -122,8 +122,9 @@ static void php_pgsql_set_default_link(int id)
 }
 
 
-static void _close_pgsql_link(PGconn *link)
+static void _close_pgsql_link(zend_rsrc_list_entry *rsrc)
 {
+	PGconn *link = (PGconn *)rsrc->ptr;
 	PGLS_FETCH();
 
 	PQfinish(link);
@@ -131,8 +132,9 @@ static void _close_pgsql_link(PGconn *link)
 }
 
 
-static void _close_pgsql_plink(PGconn *link)
+static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
 {
+	PGconn *link = (PGconn *)rsrc->ptr;
 	PGLS_FETCH();
 
 	PQfinish(link);
@@ -141,14 +143,16 @@ static void _close_pgsql_plink(PGconn *link)
 }
 
 
-static void _free_ptr(pgLofp *lofp)
+static void _free_ptr(zend_rsrc_list_entry *rsrc)
 {
+	pgLofp *lofp = (pgLofp *)rsrc->ptr;
 	efree(lofp);
 }
 
 
-static void _free_result(pgsql_result_handle *pg_result)
+static void _free_result(zend_rsrc_list_entry *rsrc)
 {
+	pgsql_result_handle *pg_result = (pgsql_result_handle *)rsrc->ptr;
 	PQclear(pg_result->result);
 	efree(pg_result);
 }
@@ -175,12 +179,12 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	REGISTER_INI_ENTRIES();
 	
-	le_link = register_list_destructors(_close_pgsql_link,NULL);
-	le_plink = register_list_destructors(NULL,_close_pgsql_plink);
+	le_link = register_list_destructors(_close_pgsql_link,NULL, "pgsql link");
+	le_plink = register_list_destructors(NULL,_close_pgsql_plink, "pgsql link persistent");
 	/*	PGG(le_result = register_list_destructors(PQclear,NULL); */
-	le_result = register_list_destructors(_free_result,NULL);
-	le_lofp = register_list_destructors(_free_ptr,NULL);
-	le_string = register_list_destructors(_free_ptr,NULL);
+	le_result = register_list_destructors(_free_result,NULL, "pgsql result");
+	le_lofp = register_list_destructors(_free_ptr,NULL, "pgsql large object");
+	le_string = register_list_destructors(_free_ptr,NULL, "pgsql string");
 
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);

@@ -149,17 +149,15 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
-static void destroy_fd_sets(fd_set *set);
-static void destroy_iovec(php_iovec_t *iov);
-
-
-static void destroy_fd_sets(fd_set *set)
+static void destroy_fd_sets(zend_rsrc_list_entry *rsrc)
 {
+	fd_set *set = (fd_set *)rsrc->ptr;
 	efree(set);
 }
 
-static void destroy_iovec(php_iovec_t *iov)
+static void destroy_iovec(zend_rsrc_list_entry *rsrc)
 {
+	php_iovec_t *iov = (php_iovec_t *)rsrc->ptr;
 	int i;
 
 	if (iov->count && iov->iov_array) {
@@ -175,8 +173,8 @@ static void destroy_iovec(php_iovec_t *iov)
 PHP_MINIT_FUNCTION(sockets)
 {
 	SOCKETSLS_FETCH();
-	SOCKETSG(le_destroy) = register_list_destructors(destroy_fd_sets, NULL);
-	SOCKETSG(le_iov)     = register_list_destructors(destroy_iovec,   NULL);
+	SOCKETSG(le_destroy) = register_list_destructors(destroy_fd_sets, NULL, "sockets file descriptor set");
+	SOCKETSG(le_iov)     = register_list_destructors(destroy_iovec,   NULL, "sockets i/o vector");
 
 	REGISTER_LONG_CONSTANT("AF_UNIX", AF_UNIX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET", AF_INET, CONST_CS | CONST_PERSISTENT);
