@@ -1,3 +1,14 @@
+2004-07-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_exceptions.c:
+      - Be specific about visibility
+
+2004-07-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_builtin_functions.c:
+      Fix two possible crashes.  Latter is unlikely unless you are doing scary
+      things, but former looks nasty.
+
 2004-07-26  Stanislav Malyshev  <stas@zend.com>
 
     * zend_interfaces.c:
