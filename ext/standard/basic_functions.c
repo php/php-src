@@ -335,6 +335,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_values,				NULL)
 	PHP_FE(array_count_values,		   	NULL)
 	PHP_FE(array_reverse,				NULL)
+	PHP_FE(array_map,					NULL)
 
 	PHP_FE(connection_aborted,			NULL)
 	PHP_FE(connection_timeout,			NULL)
@@ -2457,7 +2458,7 @@ PHP_FUNCTION(shuffle)
 		php_error(E_WARNING, "Wrong datatype in shuffle() call");
 		return;
 	}
-	if (zend_hash_sort((*array)->value.ht, qsort, array_data_shuffle, 1) == FAILURE) {
+	if (zend_hash_sort((*array)->value.ht, mergesort, array_data_shuffle, 1) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -3140,6 +3141,22 @@ PHP_FUNCTION(array_reverse)
 	}
 }
 /* }}} */
+
+/* {{{ proto array array_map(array input, string value_exp [, string key_exp] */
+PHP_FUNCTION(array_map)
+{
+	zval		**input;
+	zval		**value_exp;
+	zval		**key_exp = NULL;
+	int			  argc;
+	
+	argc = ARG_COUNT(ht);
+	
+	if (argc < 2 || argc > 3 || getParametersEx(ht, &input, &value_exp, &key_exp) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+}
+
 
 /*
  * Local variables:
