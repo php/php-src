@@ -276,7 +276,11 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		parser->mem_hdlrs.free_fcn(parser->parser);
 		return NULL;
 	}
-	parser->parser->encoding = xmlStrdup(encoding);
+	if (encoding != NULL) {
+		parser->parser->encoding = xmlStrdup(encoding);
+	} else {
+		parser->parser->charset = XML_CHAR_ENCODING_NONE;
+	}
 	if (sep != NULL) {
 		parser->namespace = 1;
 		parser->_ns_map = xmlHashCreate(10);
