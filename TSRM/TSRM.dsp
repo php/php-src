@@ -145,6 +145,10 @@ SOURCE=.\tsrm_strtok_r.c
 
 SOURCE=.\tsrm_virtual_cwd.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\tsrm_win32.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -168,6 +172,10 @@ SOURCE=.\tsrm_strtok_r.h
 # Begin Source File
 
 SOURCE=.\tsrm_virtual_cwd.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tsrm_win32.h
 # End Source File
 # End Group
 # End Target

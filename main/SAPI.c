@@ -73,6 +73,10 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
 #endif
 
+#ifdef PHP_WIN32
+	tsrm_win32_startup();
+#endif
+
 	reentrancy_startup();
 
 	php_global_startup_internal_extensions();
@@ -84,6 +88,11 @@ SAPI_API void sapi_shutdown(void)
 #ifdef VIRTUAL_DIR
 	virtual_cwd_shutdown();
 #endif
+
+#ifdef PHP_WIN32
+	tsrm_win32_shutdown();
+#endif
+
 	php_global_shutdown_internal_extensions();
 	zend_hash_destroy(&known_post_content_types);
 }
