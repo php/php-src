@@ -42,6 +42,11 @@ if test "$DBM_LIB" = "-lgdbm"; then
       ])
     ])  
   ])
-    INCLUDES="$INCLUDES $GDBM_INCLUDES"
-dnl## AC_SUBST(GDBM_INCLUDE)
+
+if test -n "$DBM_LIB"; then
+  INCLUDES="$INCLUDES $GDBM_INCLUDE"
+  EXTRA_LIBS="$EXTRA_LIBS $DBM_LIB"
 fi
+
+PHP_EXTENSION(db)
+
