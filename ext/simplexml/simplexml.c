@@ -543,6 +543,8 @@ simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
 #define SCHEMA_BLOB 1
 #define SCHEMA_OBJECT 2
 
+#ifdef xmlSchemaParserCtxtPtr
+
 /* {{{ simplexml_ce_schema_validate_file()
  */
 static void
@@ -589,6 +591,8 @@ simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 }
 /* }}} */
+
+#endif
 
 /* {{{ simplexml_ce_register_ns()
  */
@@ -657,10 +661,12 @@ sxe_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (!strcmp(method, "xsearch")) {
 		simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+#ifdef xmlSchemaParserCtxtPtr
 	} else if (!strcmp(method, "validate_schema_file")) {
 		simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, SCHEMA_FILE);	
 	} else if (!strcmp(method, "validate_schema_buffer")) {
 		simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, SCHEMA_BLOB);
+#endif
 	} else if (!strcmp(method, "register_ns")) {
 		simplexml_ce_register_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	} else if (!strcmp(method, "to_xml")) {
