@@ -19,6 +19,8 @@
    jhead.c package with the author's consent.  The main changes have been
    to eliminate all the global variables to make it thread safe and to wrap
    it in the PHP 4 API.
+
+   Aug.3 2001 - Added support for multiple M_COM entries - Rasmus
   
    The original header from the jhead.c file was:
   
@@ -57,6 +59,7 @@ typedef unsigned char uchar;
     #define FALSE 0
 #endif
 
+#define EXIF_MAX_COMMENTS 12
 
 /* {{{ structs
    This structure stores Exif header image elements in a simple manner
@@ -78,7 +81,8 @@ typedef struct {
     float ApertureFNumber;
     float Distance;
     float CCDWidth;
-    char  Comments[200];
+    char  *Comments[EXIF_MAX_COMMENTS];
+	int numComments;
 	double FocalplaneXRes;
 	double FocalplaneUnits;
 	int ExifImageWidth;
@@ -201,6 +205,8 @@ static void process_COM (ImageInfoType *ImageInfo, uchar *Data, int length)
     int nch;
     int a;
 
+	if(ImageInfo->numComments == EXIF_MAX_COMMENTS) return;
+
     nch = 0;
 
     if (length > 200) length = 200; /* Truncate if it won't fit in our structure. */
@@ -219,13 +225,11 @@ static void process_COM (ImageInfoType *ImageInfo, uchar *Data, int length)
 
     Comment[nch] = '\0'; /* Null terminate */
 
-	/*
-    if (ShowTags) {
-        printf("COM marker comment: %s\n",Comment);
-    }
-	*/
-
-    strcpy(ImageInfo->Comments,Comment);
+	a = ImageInfo->numComments;
+	
+	(ImageInfo->Comments)[a] = emalloc(nch+1);
+    strcpy(ImageInfo->Comments[a],Comment);
+	(ImageInfo->numComments)++;
 }
 /* }}} */
  
@@ -649,16 +653,25 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
                 /* Copy the comment */
                 if (memcmp(ValuePtr, "ASCII",5) == 0) {
                     for (a=5;a<10;a++) {
-                        int c;
+                        int c; int l;
                         c = (ValuePtr)[a];
                         if (c != '\0' && c != ' ') {
-                            strlcpy(ImageInfo->Comments, a+ValuePtr, sizeof(ImageInfo->Comments));
+							l = strlen(a+ValuePtr)+1;
+							l = (l<200)?l:201;
+							(ImageInfo->Comments)[ImageInfo->numComments] = emalloc(l);
+                            strlcpy((ImageInfo->Comments)[ImageInfo->numComments], a+ValuePtr, l);
+							ImageInfo->numComments++;
                             break;
                         }
                     }
                     
                 } else {
-                    strlcpy(ImageInfo->Comments, ValuePtr, sizeof(ImageInfo->Comments));
+					int l;
+
+					l = strlen(ValuePtr)+1;
+					l = (l<200)?l:201;
+					(ImageInfo->Comments)[ImageInfo->numComments] = emalloc(l);
+                    strlcpy((ImageInfo->Comments)[ImageInfo->numComments], ValuePtr, l);
                 }
                 break;
 
@@ -962,6 +975,7 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
                 return FALSE;
 
             case M_COM: /* Comment section */
+				/*
                 if (HaveCom) {
                     (*SectionsRead) -= 1;
                     efree(Sections[*SectionsRead].Data);
@@ -969,6 +983,8 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
                     process_COM(ImageInfo, Data, itemlen);
                     HaveCom = TRUE;
                 }
+				*/
+				process_COM(ImageInfo, Data, itemlen);
                 break;
 
             case M_EXIF:
@@ -1119,7 +1135,7 @@ int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
    Reads the EXIF header data from a JPEG file */ 
 PHP_FUNCTION(read_exif_data) 
 {
-    pval **p_name, **p_readall;
+    pval **p_name, **p_readall, *tmpi;
     int ac = ZEND_NUM_ARGS(), ret, readall=1;
 	ImageInfoType ImageInfo;
 	char tmp[64];
@@ -1211,8 +1227,19 @@ PHP_FUNCTION(read_exif_data)
 	if (ImageInfo.Software[0]) {
 		add_assoc_string(return_value,"Software",ImageInfo.Software,1);
 	}
-	if(ImageInfo.Comments[0]) {
-		add_assoc_string(return_value,"Comments",ImageInfo.Comments,1);
+	if(ImageInfo.numComments) {
+		if(ImageInfo.numComments==1) {
+			add_assoc_string(return_value,"Comments",(ImageInfo.Comments)[0],0);
+		} else {
+			int i;
+
+			MAKE_STD_ZVAL(tmpi);
+			array_init(tmpi);
+			for(i=0; i<ImageInfo.numComments; i++) {
+				add_index_string(tmpi, i, (ImageInfo.Comments)[i], 0);
+			}
+			zend_hash_update(return_value->value.ht, "Comments", 9, &tmpi, sizeof(zval *), NULL);
+		}
 	}
 	if(ImageInfo.ThumbnailSize && ImageInfo.Thumbnail) {
 		add_assoc_stringl(return_value,"Thumbnail",ImageInfo.Thumbnail,ImageInfo.ThumbnailSize,1);
