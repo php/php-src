@@ -64,16 +64,10 @@ typedef union _align_test {
 #define MAX_CACHED_ENTRIES	256
 #define PRE_INIT_CACHE_ENTRIES	32
 
-#if __GNUC__ -0 >= 2
+#if ZEND_GCC_VERSION >= 2000
 # define PLATFORM_ALIGNMENT (__alignof__ (align_test))
 #else
 # define PLATFORM_ALIGNMENT (sizeof(align_test))
-#endif
-
-#if GCC_VERSION - 0 >= 2096
-# define ZEND_ATTRIBUTE_MALLOC __attribute__ ((malloc))
-#else
-# define ZEND_ATTRIBUTE_MALLOC
 #endif
 
 #define MEM_HEADER_PADDING (((PLATFORM_ALIGNMENT-sizeof(zend_mem_header))%PLATFORM_ALIGNMENT+PLATFORM_ALIGNMENT)%PLATFORM_ALIGNMENT)

@@ -146,6 +146,18 @@ char *alloca ();
 # endif
 #endif
 
+#ifdef __GNUC__
+# define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
+#else
+# define ZEND_GCC_VERSION
+#endif
+
+#if ZEND_GCC_VERSION >= 2096
+# define ZEND_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
+#else
+# define ZEND_ATTRIBUTE_MALLOC
+#endif
+
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX))
 # define do_alloca(p) alloca(p)
 # define free_alloca(p)
