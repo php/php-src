@@ -1117,11 +1117,11 @@ PHP_FUNCTION(stream_filter_remove)
 }
 /* }}} */
 
-/* {{{ proto string stream_get_line(resource stream, int maxlen, string ending)
+/* {{{ proto string stream_get_line(resource stream, int maxlen [, string ending])
    Read up to maxlen bytes from a stream or until the ending string is found */
 PHP_FUNCTION(stream_get_line)
 {
-	char *str;
+	char *str = NULL;
 	int str_len;
 	long max_length;
 	zval *zstream;
@@ -1129,7 +1129,7 @@ PHP_FUNCTION(stream_get_line)
 	size_t buf_size;
 	php_stream *stream;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &zstream, &max_length, &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|s", &zstream, &max_length, &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
