@@ -52,7 +52,7 @@ A lot... */
 #endif
 
 /*
-#define IBDEBUG(a) printf("::: %s\n", a);
+#define IBDEBUG(a) printf("::: %s (%d)\n", a, __LINE__);
 */
 #define IBDEBUG(a)
 
@@ -342,6 +342,7 @@ static void _php_ibase_close_plink(ibase_db_link *link)
 /* {{{ _php_ibase_free_result() */
 static void _php_ibase_free_result(ibase_result *ib_result)
 {
+	IBDEBUG("Freeing result...");
 	if (ib_result){
 		_php_ibase_free_xsqlda(ib_result->out_sqlda);
 		if (ib_result->drop_stmt && ib_result->stmt) {
@@ -367,7 +368,7 @@ static void _php_ibase_free_result(ibase_result *ib_result)
 /* {{{ _php_ibase_free_query() */
 static void _php_ibase_free_query(ibase_query *ib_query)
 {
-	
+	IBDEBUG("Freeing query...");
 	if (ib_query) {
 		if (ib_query->in_sqlda) {
 			efree(ib_query->in_sqlda);
@@ -387,7 +388,6 @@ static void _php_ibase_free_query(ibase_query *ib_query)
 		if (ib_query->out_array) {
 			efree(ib_query->out_array);
 		}
-		IBDEBUG("Freeing query...");
 		efree(ib_query);
 	}
 }
@@ -1297,7 +1297,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 
 	if (ib_query->in_sqlda) { /* has placeholders */
 		if (ib_query->in_sqlda->sqld != argc) {
-			_php_ibase_module_error("placeholders (%d) and variables (%d) mismatch",ib_query->in_sqlda->sqld, argc);
+			_php_ibase_module_error("placeholders (%d) and variables (%d) mismatch", ib_query->in_sqlda->sqld, argc);
 			goto _php_ibase_exec_error;  /* yes mommy, goto! */
 		}
 		in_sqlda = emalloc(XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
@@ -2236,24 +2236,18 @@ PHP_FUNCTION(ibase_timefmt)
    Get the number of fields in result */
 PHP_FUNCTION(ibase_num_fields)
 {
-	pval *result;
+	pval **result;
 	int type;
 	ibase_result *ib_result;
 	
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	ib_result = (ibase_result *) zend_list_find(result->value.lval, &type);
-	
-	if (type!=IBG(le_result)) {
-		_php_ibase_module_error("%d is not result index", result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result, -1, "InterBase result", IBG(le_result));
 
 	if (ib_result->out_sqlda == NULL) {
 		_php_ibase_module_error("trying to get num fields from a non-select query");
@@ -2283,11 +2277,7 @@ PHP_FUNCTION(ibase_field_info)
 	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &result_arg, &field_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	/*
-	convert_to_long(result_arg);
 
-	GET_RESULT(result_arg->value.lval, ib_result);
-	*/
 	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, "InterBase result", IBG(le_result));
 
 	if (ib_result->out_sqlda == NULL) {

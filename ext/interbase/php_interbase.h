@@ -122,6 +122,7 @@ typedef struct {
 	isc_db_handle link; /* db link for this result */
 	isc_tr_handle trans;
 	isc_stmt_handle stmt;
+	int drop_stmt;
 	XSQLDA *in_sqlda, *out_sqlda;
 	ibase_array *in_array, *out_array;
 	int in_array_cnt, out_array_cnt;
