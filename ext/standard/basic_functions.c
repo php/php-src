@@ -259,9 +259,6 @@ function_entry basic_functions[] = {
 #if HAVE_STRFTIME
 	PHP_FE(strftime,														NULL)
 	PHP_FE(gmstrftime,														NULL)
-#else
-	PHP_FALIAS(strftime,			warn_not_available,						NULL)
-	PHP_FALIAS(gmstrftime,			warn_not_available,						NULL)
 #endif
 
 	PHP_FE(strtotime,														NULL)
@@ -318,8 +315,6 @@ function_entry basic_functions[] = {
 
 #ifdef HAVE_STRCOLL
 	PHP_FE(strcoll,															NULL)
-#else
-	PHP_FALIAS(strcoll,				warn_not_available,						NULL)
 #endif
 
 	PHP_FE(substr,															NULL)
@@ -346,8 +341,6 @@ function_entry basic_functions[] = {
 
 #if HAVE_NL_LANGINFO
 	PHP_FE(nl_langinfo,														NULL)
-#else
-	PHP_FALIAS(nl_langinfo,			warn_not_available,						NULL)
 #endif
 
 	PHP_FE(soundex,															NULL)
@@ -375,11 +368,6 @@ function_entry basic_functions[] = {
 	PHP_FE(linkinfo,														NULL)
 	PHP_FE(symlink,															NULL)
 	PHP_FE(link,															NULL)
-#else
-	PHP_FALIAS(readlink,			warn_not_available,						NULL)
-	PHP_FALIAS(linkinfo,			warn_not_available,						NULL)
-	PHP_FALIAS(symlink,				warn_not_available,						NULL)
-	PHP_FALIAS(link,				warn_not_available,						NULL)
 #endif
 
 	PHP_FE(unlink,															NULL)
@@ -420,9 +408,6 @@ function_entry basic_functions[] = {
 #if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32))
 	PHP_FE(checkdnsrr,														NULL)
 	PHP_FE(getmxrr,second_and_third_args_force_ref)
-#else
-	PHP_FALIAS(checkdnsrr,			warn_not_available,						NULL)
-	PHP_FALIAS(getmxrr,				warn_not_available,						NULL)
 #endif
 
 	PHP_FE(getmyuid,														NULL)
@@ -484,8 +469,6 @@ function_entry basic_functions[] = {
 	PHP_FE(getenv,															NULL)
 #ifdef HAVE_PUTENV
 	PHP_FE(putenv,															NULL)
-#else
-	PHP_FALIAS(putenv,warn_not_available,									NULL)
 #endif
 
 	PHP_FE(microtime,														NULL)
@@ -493,8 +476,6 @@ function_entry basic_functions[] = {
 
 #ifdef HAVE_GETRUSAGE
 	PHP_FE(getrusage,														NULL)
-#else
-	PHP_FALIAS(getrusage,			warn_not_available,						NULL)
 #endif
 
 	PHP_FE(uniqid,															NULL)
@@ -628,22 +609,16 @@ function_entry basic_functions[] = {
 
 #if HAVE_SYS_TIME_H
 	PHP_FE(socket_set_timeout,												NULL)
-#else
-	PHP_FALIAS(socket_set_timeout, warn_not_available,						NULL)
 #endif
 
 	PHP_FE(socket_get_status,												NULL)
 
 #if (!defined(PHP_WIN32) && !defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 	PHP_FE(realpath,														NULL)
-#else
-	PHP_FALIAS(realpath,			warn_not_available,						NULL)
 #endif
 
 #ifdef HAVE_FNMATCH
 	PHP_FE(fnmatch,														    NULL)
-#else
-	PHP_FALIAS(fnmatch,				warn_not_available,						NULL)
 #endif
 
 	/* functions from fsock.c */
@@ -660,8 +635,6 @@ function_entry basic_functions[] = {
 #if HAVE_CRYPT
 	/* functions from crypt.c */
 	PHP_FE(crypt,															NULL)
-#else
-	PHP_FALIAS(crypt,				warn_not_available,						NULL)
 #endif
 
 	/* functions from dir.c */
@@ -671,8 +644,6 @@ function_entry basic_functions[] = {
 
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
 	PHP_FE(chroot,															NULL)
-#else
-	PHP_FALIAS(chroot,				warn_not_available,						NULL)
 #endif
 
 	PHP_FE(getcwd,															NULL)
@@ -681,8 +652,6 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(dir,					getdir,									NULL)
 #ifdef HAVE_GLOB
 	PHP_FE(glob,															NULL)
-#else
-	PHP_FALIAS(glob,				warn_not_available,						NULL)
 #endif
 	/* functions from filestat.c */
 	PHP_FE(fileatime,														NULL)
@@ -717,9 +686,6 @@ function_entry basic_functions[] = {
 #ifdef HAVE_SENDMAIL
 	PHP_FE(mail,															NULL)
 	PHP_FE(ezmlm_hash,														NULL)
-#else
-	PHP_FALIAS(mail,				warn_not_available,						NULL)
-	PHP_FALIAS(ezmlm_hash,			warn_not_available,						NULL)
 #endif
 
 	/* functions from syslog.c */
@@ -819,8 +785,6 @@ function_entry basic_functions[] = {
 	/* functions from ftok.c*/
 #if HAVE_SYSVSEM || HAVE_SYSVSHM  || HAVE_SHMOP
 	PHP_FE(ftok,	NULL)
-#else
-	PHP_FALIAS(ftok  , warn_not_available,      NULL)
 #endif	
 
 	PHP_FE(str_rot13, NULL)
@@ -2315,13 +2279,6 @@ PHP_FUNCTION(unregister_tick_function)
 	efree(tick_fe.arguments);
 }
 /* }}} */
-
-/* This function is not directly accessible to end users */
-PHPAPI PHP_FUNCTION(warn_not_available)
-{
-	php_error(E_WARNING, "%s() is  not supported in this PHP build", get_active_function_name(TSRMLS_C));
-	RETURN_FALSE;
-}
 
 /* {{{ proto bool is_uploaded_file(string path)
    Check if file was created by rfc1867 upload  */
