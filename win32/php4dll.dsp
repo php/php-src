@@ -205,11 +205,15 @@ SOURCE=..\main\SAPI.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\streams.c
+SOURCE=..\main\snprintf.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\user_streams.c
+SOURCE=..\main\spprintf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\streams.c
 # End Source File
 # Begin Source File
 
@@ -221,11 +225,7 @@ SOURCE=..\main\strlcpy.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\snprintf.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\spprintf.c
+SOURCE=..\main\user_streams.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -239,40 +239,20 @@ SOURCE=..\ext\standard\aggregation.h
 
 SOURCE=..\main\config.w32.h.in
 
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
 
 # Begin Custom Build - Generating main/config.w32.h
 InputPath=..\main\config.w32.h.in
 
 "config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h (
-	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
-	)
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# Begin Custom Build - Generating main/config.w32.h
-InputPath=..\main\config.w32.h.in
-
-"config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h (
-	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
-	)
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
-
-# Begin Custom Build - Generating main/config.w32.h
-InputPath=..\main\config.w32.h.in
-
-"config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h (
-	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
-	)
-
+	if not exist ..\main\config.w32.h ( 
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
+	) 
+	
 # End Custom Build
 
 !ENDIF 
@@ -348,14 +328,6 @@ SOURCE=..\main\php_variables.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\snprintf.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\spprintf.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\quot_print.h
 # End Source File
 # Begin Source File
@@ -369,6 +341,14 @@ SOURCE=..\main\safe_mode.h
 # Begin Source File
 
 SOURCE=..\main\SAPI.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\snprintf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\spprintf.h
 # End Source File
 # Begin Source File
 
@@ -908,50 +888,6 @@ SOURCE=..\ext\pcre\pcrelib\pcre.h
 # Begin Source File
 
 SOURCE=..\ext\ctype\ctype.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\mbfilter.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\mbfilter_cn.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\mbfilter_ja.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\mbfilter_kr.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\mbfilter_ru.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\mbfilter_tw.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\mbregex.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\mbstring.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\php_mbregex.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\php_unicode.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\mbstring\html_entities.c
 # End Source File
 # Begin Source File
 
