@@ -63,4 +63,21 @@ extern const command_rec php_dir_cmds[];
 
 #define APR_ARRAY_FOREACH_CLOSE() }}
 
+typedef struct {
+	long engine;
+	long xbithack;
+	long last_modified;
+} php_apache2_info_struct;
+
+extern zend_module_entry apache2_module_entry;
+
+#ifdef ZTS
+extern int php_apache2_info_id;
+#define AP2(v) TSRMG(php_apache2_info_id, php_apache2_info_struct *, v)
+#else
+extern php_apache2_info_struct php_apache2_info;
+#define AP2(v) (php_apache2_info.v)
+#endif
+
+
 #endif /* PHP_APACHE_H */
