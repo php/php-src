@@ -324,7 +324,7 @@ char * php_escape_shell_cmd(char *str) {
 }
 
 /* {{{ proto escapeshellcmd(string command)
-   escape shell metacharacters */
+   Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
 	pval **arg1;

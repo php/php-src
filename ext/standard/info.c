@@ -443,7 +443,6 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
 
 
 /* {{{ proto void phpinfo(void)
-
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
@@ -482,7 +481,6 @@ PHP_FUNCTION(phpversion)
 
 
 /* {{{ proto void phpcredits(int)
-
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
