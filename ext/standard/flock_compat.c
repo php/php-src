@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <php.h>
+#include "php.h"
 #include <errno.h>
 #include "ext/standard/flock_compat.h"
 

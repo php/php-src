@@ -72,7 +72,7 @@
 #endif
 #endif
 
-#include <php.h>
+#include "php.h"
 #include <sys/stat.h>
 
 #include <ctype.h>

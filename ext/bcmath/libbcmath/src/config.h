@@ -6,7 +6,7 @@
 #include "php_config.h"
 #endif
 
-#include <php.h>
+#include "php.h"
 #include <string.h>
 #include "zend.h"
 #include "zend_alloc.h"
