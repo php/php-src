@@ -2070,7 +2070,7 @@ PHP_FUNCTION(ini_get_all)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(&EG(ini_directives), (apply_func_args_t) php_ini_get_option, 2, return_value, extnumber TSRMLS_CC);
+	zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) php_ini_get_option, 2, return_value, extnumber TSRMLS_CC);
 }
 /* }}} */
 
@@ -2217,7 +2217,7 @@ PHP_FUNCTION(ignore_user_abort)
 			zend_alter_ini_entry("ignore_user_abort", sizeof("ignore_user_abort"), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			break;
 	
-		default:
+		default:	
 			WRONG_PARAM_COUNT;
 			break;
 	}
