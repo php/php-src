@@ -77,7 +77,11 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_image.h"
-#include "ext/standard/info.h"
+#include "ext/standard/info.h" 
+
+#ifdef HAVE_MBSTRING
+#include "ext/mbstring/mbstring.h"
+#endif
 
 typedef unsigned char uchar;
 
@@ -913,6 +917,7 @@ typedef struct {
 	int             motorola_intel; /* 1 Motorola; 0 Intel */
 
 	char            *UserComment;
+	int				UserCommentLength;
 	char            *UserCommentEncoding;
 	char            *Copyright;
 	char            *CopyrightPhotographer;
@@ -1235,6 +1240,43 @@ void exif_iif_add_str( image_info_type *image_info, int section_index, char *nam
 			EXIF_ERRLOG_EALLOC
 			return;
 		}
+		image_info->sections_found |= 1<<section_index;
+		image_info->info_list[section_index].count++;
+	}
+}
+/* }}} */
+
+/* {{{ exif_iif_add_str
+ Add a string value to image_info MUST BE NUL TERMINATED
+*/
+void exif_iif_add_buffer( image_info_type *image_info, int section_index, char *name, int length, char *value)
+{
+	image_info_data  *info_data;
+	image_info_data  *list;
+
+	if ( value) {
+		list = erealloc(image_info->info_list[section_index].list,(image_info->info_list[section_index].count+1)*sizeof(image_info_data));
+		if ( !list) {
+			EXIF_ERRLOG_EALLOC
+			return;
+		}
+		image_info->info_list[section_index].list = list;
+		info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+		info_data->tag    = TAG_NONE;
+		info_data->format = TAG_FMT_UNDEFINED;
+		info_data->length = length;
+		info_data->name   = estrdup(name);
+		if ( !info_data->name) {
+			EXIF_ERRLOG_EALLOC
+			return;
+		}
+		info_data->value.s = emalloc(length+1);
+		if ( !info_data->value.s) {
+			EXIF_ERRLOG_EALLOC
+			return;
+		}
+		memcpy(info_data->value.s, value, length);
+		info_data->value.s[length] = 0;
 		image_info->sections_found |= 1<<section_index;
 		image_info->info_list[section_index].count++;
 	}
@@ -1983,9 +2025,13 @@ static int exif_process_string(char **result,char *value,size_t byte_count) {
 
 /* {{{ exif_process_user_comment
  * Process UserComment in IFD. */
-static int exif_process_user_comment(char **pszInfoPtr,char **szEncoding,char *szValuePtr,int ByteCount)
+static int exif_process_user_comment(char **pszInfoPtr, char **szEncoding, char *szValuePtr, int ByteCount, int motorola_intel TSRMLS_DC)
 {
 	int   a;
+
+	#ifdef HAVE_MBSTRING
+	size_t len;;
+	#endif
 
 	/* Copy the comment */
 	if ( ByteCount>=8) {
@@ -1993,7 +2039,16 @@ static int exif_process_user_comment(char **pszInfoPtr,char **szEncoding,char *s
 			*szEncoding= estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
+			#ifdef HAVE_MBSTRING
+			if ( motorola_intel) {
+				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, "ISO-8859-15", "UCS-2BE", &len TSRMLS_CC);
+			} else {
+				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, "ISO-8859-15", "UCS-2LE", &len TSRMLS_CC);
+			}
+			return len;
+			#else
 			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
+			#endif
 		} else
 		if ( !memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
 			*szEncoding= estrdup((const char*)szValuePtr);
@@ -2168,7 +2223,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_USERCOMMENT:
-				exif_process_user_comment(&(ImageInfo->UserComment),&(ImageInfo->UserCommentEncoding),value_ptr,byte_count);
+				ImageInfo->UserCommentLength = exif_process_user_comment(&(ImageInfo->UserComment), &(ImageInfo->UserCommentEncoding), value_ptr,byte_count, ImageInfo->motorola_intel);
 				break;
 
 			case TAG_FNUMBER:
@@ -3125,7 +3180,7 @@ PHP_FUNCTION(exif_read_data)
 		}
 	}
 	if (ImageInfo.UserComment) {
-		exif_iif_add_str( &ImageInfo, SECTION_COMPUTED, "UserComment", ImageInfo.UserComment);
+		exif_iif_add_buffer( &ImageInfo, SECTION_COMPUTED, "UserComment", ImageInfo.UserCommentLength, ImageInfo.UserComment);
 		if ( ImageInfo.UserCommentEncoding && strlen(ImageInfo.UserCommentEncoding)) {
 			exif_iif_add_str( &ImageInfo, SECTION_COMPUTED, "UserCommentEncoding", ImageInfo.UserCommentEncoding);
 		}
