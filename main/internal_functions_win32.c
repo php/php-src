@@ -45,7 +45,7 @@
 #include "ext/standard/php3_syslog.h"
 #include "ext/standard/php3_standard.h"
 #include "ext/standard/php_lcg.h"
-#include "ext/COM/php3_COM.h"
+#include "ext/COM/php_COM.h"
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/odbc/php_odbc.h"
