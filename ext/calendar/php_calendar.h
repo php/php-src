@@ -25,7 +25,10 @@ PHP_FUNCTION(easter_days);
 PHP_FUNCTION(easter_date);
 PHP_FUNCTION(unixtojd);
 PHP_FUNCTION(jdtounix);
-
+PHP_FUNCTION(cal_from_jd);
+PHP_FUNCTION(cal_to_jd);
+PHP_FUNCTION(cal_days_in_month);
+PHP_FUNCTION(cal_info);
 
 #define phpext_calendar_ptr calendar_module_ptr
 
