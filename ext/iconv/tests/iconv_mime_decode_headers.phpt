@@ -82,7 +82,7 @@ array(17) {
   ["Content-Type"]=>
   string(28) "TEXT/PLAIN; charset=US-ASCII"
   ["Subject"]=>
-  string(54) "[PHP-DEV] [ICONV] test for iconv_mime_decode_headers()"
+  string(54) "[PHP-DEV] [ICONV] test for iconv mime decode headers()"
   ["X-UIDL"]=>
   string(20) "@eH!!h2:!!EOS!!A_c"!"
 }
