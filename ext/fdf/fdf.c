@@ -54,7 +54,7 @@
 #if HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 # include <io.h>
 # include <fcntl.h>
 #endif
@@ -115,7 +115,7 @@ PHP_MINIT_FUNCTION(fdf)
 {
 	FDFErc err;
 	FDF_GLOBAL(le_fdf) = register_list_destructors(phpi_FDFClose, NULL);
-#ifdef WIN32
+#ifdef PHP_WIN32
 	return SUCCESS;
 #endif
 	err = FDFInitialize();
@@ -136,7 +136,7 @@ PHP_MINFO_FUNCTION(fdf)
 PHP_MSHUTDOWN_FUNCTION(fdf)
 {
 	FDFErc err;
-#ifdef WIN32
+#ifdef PHP_WIN32
 	return SUCCESS;
 #endif
 	err = FDFFinalize();

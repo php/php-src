@@ -32,7 +32,7 @@
 #define PHP_FDF_H
 
 #if HAVE_FDFLIB
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #else
 #define UNIX_DEV
 #endif
