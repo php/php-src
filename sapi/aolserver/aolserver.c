@@ -311,7 +311,6 @@ php_ns_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	int i;
 	char buf[NS_BUF_SIZE + 1];
 	char *tmp;
-	TSRMLS_FETCH();
 
 	for(i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
 		char *key = Ns_SetKey(NSG(conn->headers), i);
@@ -412,8 +411,6 @@ static int
 php_ns_module_main(TSRMLS_D)
 {
 	zend_file_handle file_handle;
-	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;

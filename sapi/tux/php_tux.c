@@ -182,7 +182,6 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
-	TSRMLS_FETCH();
 
 	
 	sprintf(buf, "Server: %s", TUXAPI_version);
@@ -276,8 +275,6 @@ static sapi_module_struct tux_sapi_module = {
 static void tux_module_main(TSRMLS_D)
 {
 	zend_file_handle file_handle;
-	TSRMLS_FETCH()FETCH();
-	TSRMLS_FETCH()FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;

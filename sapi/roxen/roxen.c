@@ -214,12 +214,11 @@ static int
 php_roxen_low_ub_write(const char *str, uint str_length) {
   int sent_bytes = 0;
   struct pike_string *to_write = NULL;
-#ifdef ZTS
-  TSRMLS_FETCH();
-#endif
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
+  TSRMLS_FETCH();
+
   if(!MY_FD_OBJ->prog) {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
     zend_bailout();
@@ -246,12 +245,11 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
 static int
 php_roxen_sapi_ub_write(const char *str, uint str_length)
 {
-#ifdef ZTS
-  TSRMLS_FETCH();
-#endif
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
+  TSRMLS_FETCH();
+
   int sent_bytes = 0, fd = MY_FD;
   if(fd)
   {
@@ -352,14 +350,12 @@ php_roxen_sapi_header_handler(sapi_header_struct *sapi_header,
 static int
 php_roxen_low_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-#ifdef ZTS
-  TSRMLS_FETCH();
-#endif
   struct pike_string *ind;
   struct svalue *s_headermap;
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
+
   if(!MY_FD_OBJ->prog) {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
     zend_bailout();
@@ -399,9 +395,7 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-#ifdef ZTS
   TSRMLS_FETCH();
-#endif
   
   if(!MY_FD_OBJ->prog)
   {
@@ -583,11 +577,8 @@ static int php_roxen_module_main(TSRMLS_D)
   int res, len;
   char *dir;
   zend_file_handle file_handle;
-#ifdef ZTS
-  TSRMLS_FETCH();
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
-#endif
 #endif
 
   file_handle.type = ZEND_HANDLE_FILENAME;
@@ -621,10 +612,10 @@ void f_php_roxen_request_handler(INT32 args)
   struct svalue *done_callback, *raw_fd;
   struct pike_string *script, *ind;
   int status = 1;
-  TSRMLS_FETCH();
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
+  TSRMLS_FETCH();
 
   if(current_thread == th_self())
     error("PHP4.Interpreter->run: Tried to run a PHP-script from a PHP "
