@@ -1,3 +1,339 @@
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/microtime.c
+      ext/standard/microtime.h:
+    make microtime and gettimeofday unavailable instead of return false return
+    false in case needed library function is unavailable.
+
+2002-10-29  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd2topng.c
+      ext/gd/libgd/gd_gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gd_io.h
+      ext/gd/libgd/gd_io_dp.c
+      ext/gd/libgd/gd_io_file.c
+      ext/gd/libgd/gd_io_ss.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_ss.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdcache.h
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.h
+      ext/gd/libgd/gdkanji.c
+      ext/gd/libgd/gdparttopng.c
+      ext/gd/libgd/gdtest.c:
+    Update bundled gd library with relevant changes from gd-2.0.4
+    I still need to add a configure check for the gdIOCtx struct
+    changes so building against older external gd libs will work again.
+
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/xslt/tests/xslt_process-001.phpt
+      ext/xslt/tests/xslt_set_object.phpt
+      ext/xslt/tests/xslt_setopt.phpt: -add reason to --SKIPIF--
+    -add magic_quotes_runtime to --INI--
+    --use var_dump()
+
+    * ext/iconv/tests/skipif.inc
+      ext/iconv/tests/test.inc
+      ext/iconv/tests/translit-utf8.phpt: -do not dl() load
+    -magic_quotes_runtime
+
+    * CODING_STANDARDS: rewrite paragraph 9
+    No instances yet. And it does not work with #if 0_FOO but with #if FOO_0
+
+2002-10-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd.c: Corrected un-initialized variable usage.
+
+2002-10-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+    It's better to know the version is "unknown", rather than ""
+
+    * ext/mbstring/tests/mb_split-compat-01.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-03.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-04.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-05.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-06.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-07.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-08.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-09.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-10.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-11.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-12.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-13.phpt
+      ext/mbstring/tests/mb_ereg-compat-01.phpt
+      ext/mbstring/tests/mb_ereg-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-01.phpt:
+    Added test cases to check the compatibility with standard ereg functions.
+
+2002-10-29  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/tests/strings/strtoupper.phpt: Add locale for BSDi
+
+
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/domxml/php_domxml.c: fix warnings
+
+    * ext/domxml/php_domxml.c: -php_error => php_error_docref
+    -two warnings
+
+2002-10-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/htmlentities05.phpt
+      ext/standard/tests/strings/htmlentities06.phpt
+      ext/standard/tests/strings/htmlentities07.phpt
+      ext/standard/tests/strings/htmlentities08.phpt
+      ext/standard/tests/strings/htmlentities09.phpt
+      ext/iconv/tests/bug16069.phpt
+      ext/iconv/tests/eucjp2iso2022jp.phpt
+      ext/iconv/tests/eucjp2sjis.phpt
+      ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/iconv001.phpt
+      ext/iconv/tests/iconv002.phpt
+      ext/iconv/tests/ob_iconv_handler.phpt
+      ext/iconv/tests/translit-failure.phpt
+      ext/iconv/tests/translit-utf8.phpt: Removed dl() stuff
+
+2002-10-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * configure.in: Don't use autoconf 2.52 macros.
+
+2002-10-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/config.m4: Improved library identification
+
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/domxml/tests/domxml002.phpt: corrected output
+
+    * ext/domxml/tests/001.phpt
+      ext/domxml/tests/domxml001.phpt
+      ext/domxml/tests/domxml002.phpt: -Use skipif.inc
+    -split into two tests
+    -domxml001.phpt should work
+    -domxml002.phpt contains the part that fails
+
+    * ext/domxml/tests/skipif.inc
+      ext/domxml/tests/xmldoc.phpt: Add simple parsing test
+
+2002-10-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * pear/Makefile.frag:
+    Allows pear installer to run un-harassed by safe_mode & open_basedir.
+
+    * ext/standard/tests/time/002.phpt:
+    Added a skip condition for situations where the TZ variable could not be
+    set (safe_mode).
+
+    * Makefile.global:
+    Allows 'make test' to run without being harassed by open_basedir & safe_mode.
+
+2002-10-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/html.c: WS fix
+
+2002-10-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * configure.in
+      main/network.c
+      main/php_network.h: Fix for #19508 by poleson@verio.net.
+
+    * ext/standard/tests/file/userstreams.phpt:
+    I like my C comments, thanks very much.
+
+    * ext/standard/tests/file/userstreams.phpt:
+    length of lyrics is not part of the test.
+
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php: better use array_diff_assoc
+    the old way resulted in erroneus .diff
+
+2002-10-29  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/dbx_sybasect.c
+      ext/dbx/dbx_sybasect.h
+      ext/dbx/php_dbx.h
+      ext/dbx/dbx.c
+      ext/dbx/dbx.h
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.h
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mssql.h
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_oci8.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h: Added dbx_escape_string function
+
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/file/userstreams.phpt: -WS
+    -Use "//" instead of "/* ... */" comments
+
+    * ext/session/tests/008-php4.2.3.phpt:
+    -Only accept one single message which is expected.
+    -Move error related settings to --INI-- section
+
+2002-10-29  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/tests/009.phpt: Added test for dbx_escape_string
+
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/035.phpt:
+    Rewrite: Taken from ZE2 RFC + a little textual modification
+
+    * tests/lang/029.phpt: no notices here
+
+    * ext/standard/file.c: no C++ comments
+
+2002-10-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/start.c: NetWare related files.
+
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/file.c: fix overrun
+
+    * ext/xslt/tests/skipif.inc: add reason
+
+    * ext/xml/tests/xml001.phpt
+      ext/xml/tests/xml002.phpt
+      ext/xml/tests/xml003.phpt
+      ext/xml/tests/xml004.phpt
+      ext/xml/tests/xml007.phpt: Fix tests
+
+2002-10-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/sys/stat.h: Copyright change and adding some comments.
+
+2002-10-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/xml/tests/001.phpt
+      ext/xml/tests/002.phpt
+      ext/xml/tests/003.phpt
+      ext/xml/tests/004.phpt
+      ext/xml/tests/006.phpt
+      ext/xml/tests/007.phpt
+      ext/xml/tests/xml001.phpt
+      ext/xml/tests/xml002.phpt
+      ext/xml/tests/xml003.phpt
+      ext/xml/tests/xml004.phpt
+      ext/xml/tests/xml006.phpt
+      ext/xml/tests/xml007.phpt: rename and WS fixes
+
+    * ext/iconv/iconv.c: -php_error => php_error_docref
+
+    * ext/xml/tests/skipif.inc: do not dl() load in skipif.inc
+
+    * NEWS: update dba changes
+
+2002-10-29  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4:
+    - Remove the "which" call and just expect sed to be in PATH
+
+2002-10-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/build.bat
+      netware/buildext.bat
+      netware/buildlib.bat
+      netware/buildsapi.bat
+      netware/common.mif
+      netware/env.c
+      netware/env.h
+      netware/geterrnoptr.c
+      netware/grp.h
+      netware/libpq-fe.h
+      netware/libpq-fs.h
+      netware/libpq.imp
+      netware/mktemp.c
+      netware/mktemp.h
+      netware/param.h
+      netware/php-nw.bat
+      netware/php4apache.mak
+      netware/php4apache2filter.mak
+      netware/php4cli.mak
+      netware/phplib.imp
+      netware/phplib.mak
+      netware/pipe.c
+      netware/pipe.h
+      netware/postgres_ext.h
+      netware/pwd.c
+      netware/pwd.h
+      netware/setbuild.bat
+      netware/start.c
+      netware/sysexits.h
+      netware/time_nw.c
+      netware/time_nw.h
+      netware/tsrm.mak
+      netware/wfile.c
+      netware/wfile.h
+      netware/zend.mak: NetWare related files.
+
+    * netware/env.c
+      netware/env.h
+      netware/geterrnoptr.c
+      netware/grp.h
+      netware/libpq-fe.h
+      netware/libpq-fs.h
+      netware/libpq.imp
+      netware/mktemp.c
+      netware/param.h
+      netware/php4apache2filter.mak
+      netware/php4cli.mak
+      netware/pipe.c
+      netware/pipe.h
+      netware/postgres_ext.h
+      netware/pwd.c
+      netware/sysexits.h
+      netware/time_nw.c
+      netware/time_nw.h
+      netware/wfile.c
+      netware/wfile.h: New file.
+
+    * netware/sys/stat.h
+      netware/ApacheCore.imp
+      netware/BisonExtSTandard.bat: NetWare related files.
+
+    * netware/ApacheCore.imp
+      netware/BisonExtSTandard.bat: New file.
+
+2002-10-29  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Be a bit more wordy about when this function is available.
+
+2002-10-29  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update
+
+2002-10-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/iconv/iconv.c: Fixed compile warning.
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/gd.c
+      ext/gd/php_gd.h:
+    Added a patch by Pierre-Alain Joye <paj@pearfr.org>, which implements the
+    imagerotate() that allows rotation of images in gd.
+
 2002-10-28  Jani Taskinen  <sniper@iki.fi>
 
     * acinclude.m4: - Only test the sed in PATH. (testing others is useless)
