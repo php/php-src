@@ -9,6 +9,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27171 (crash inside gmp_hamdist()). (Jani)
 - Fixed bug #27149 (broken CLOB support in oci8 extension). (Antony)
 - Fixed bug #27135 (Possible crash inside mb_strlen()). (Moriyoshi)
+- Fixed bug #27026 (Added cgi.nph that allows forcing of the Status: 200
+  header that is not normally needed). (Ilia)
 - Fixed bug #24773 (unseting of strings as arrays causes a crash). (Sara)
 
 03 Feb 2004, Version 4.3.5RC2
