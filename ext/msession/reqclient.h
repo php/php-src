@@ -1,25 +1,21 @@
 /*
-    Mohawk Software Framework by Mohawk Software
-    Copyright (C) 1998-2001 Mark L. Woodward
- 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
- 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
- 
-    You should have received a copy of the GNU Library General Public
-    License along with this library; if not, write to the Free
-    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-    MA 02111-1307, USA
- 
-    If you want support or to professionally license this library, the author
-    can be reached at info@mohawksoft.com
-*/ 
+   +----------------------------------------------------------------------+
+   | msession 1.0                                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2001 Mark L. Woodward (Mohawk Software)                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Mark Woodward <markw@mohawksoft.com>                        |
+   |    Portions copyright the PHP group.                                 |
+   +----------------------------------------------------------------------+
+ */
 
 enum REQ_TYPES
 {
