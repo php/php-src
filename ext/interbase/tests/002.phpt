@@ -9,8 +9,6 @@ InterBase: connect, close and pconnect
 
 	require("interbase.inc");
     
-	$test_base = dirname(__FILE__)."/ibase_test.tmp";
-
 	ibase_connect($test_base);
 	out_table("test1");
 	ibase_close();
