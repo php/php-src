@@ -77,6 +77,7 @@ PHP_INI_END()
  */
 PHP_MINIT_FUNCTION(ncurses)
 {
+    /* color constants */
 	PHP_NCURSES_CONST(COLOR_BLACK);
 	PHP_NCURSES_CONST(COLOR_RED);
 	PHP_NCURSES_CONST(COLOR_GREEN);
@@ -86,6 +87,13 @@ PHP_MINIT_FUNCTION(ncurses)
 	PHP_NCURSES_CONST(COLOR_CYAN);
 	PHP_NCURSES_CONST(COLOR_WHITE);
 	
+    /* keyboard constants */
+    PHP_NCURSES_CONST(KEY_DOWN);
+    PHP_NCURSES_CONST(KEY_UP);
+    PHP_NCURSES_CONST(KEY_LEFT);
+    PHP_NCURSES_CONST(KEY_RIGHT);
+    PHP_NCURSES_CONST(KEY_BACKSPACE);
+
 	le_ncurses = zend_register_list_destructors_ex(ncurses_destruct, NULL, "ncurses_handle", module_number);	
 
 	return SUCCESS;
