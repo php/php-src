@@ -1,3 +1,32 @@
+2000-01-03  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/session/session.c
+      ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c
+      TODO:
+    * Implemented <boolean> and <null> types. We now support WDDX version 1.0
+      as best as we can.
+    * Cleaned up the API function names, _ was really not needed.
+    * Cleaned up the repetitive stack var name stuff with a macro.
+    * WDDX now no longer converts numbers to strings in arrays when during
+      serialization.
+
+2000-01-03  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: even better;-)
+
+    * TODO: yes sir!
+
+2000-01-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/rules.mk: FreeBSD 2.x/3.x fix.
+
+2000-01-03  Thies C. Arntzen  <thies@digicol.de>
+
+    * sapi/phttpd/README: *** empty log message ***
+
+    * NEWS: forgot
+
 2000-01-02  Thies C. Arntzen  <thies@digicol.de>
 
     * TODO: nice to have.
