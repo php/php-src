@@ -3971,7 +3971,7 @@ PHP_FUNCTION(ifxus_open_slob)
 	if((mode&32) !=0)   
 		create_mode|=LO_NOBUFFER;
 
-	RETURN_LONG(php_intifxus_open_slob(Z_LVAL_P(pbid),create_mode,&EG(regular_list) TSRMLS_CC));
+	RETURN_LONG(php_intifxus_open_slob(Z_LVAL_PP(pbid),create_mode,&EG(regular_list) TSRMLS_CC));
 }
 /* }}} */
 
