@@ -76,7 +76,7 @@ HRESULT dotnet_init() {
   return ERROR_SUCCESS;
 }
 
-HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, i_dispatch *object) {
+HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, comval *obj) {
   HRESULT hr;
 
   _ObjectHandle *pHandle;
@@ -89,7 +89,7 @@ HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, i_dispatch *object) 
   pHandle->Release();
   if (FAILED(hr)) return hr;
  
-  php_COM_set(object, unwrapped.pdispVal, TRUE);
+  php_COM_set(obj, unwrapped.pdispVal, TRUE);
   return ERROR_SUCCESS;
 }
   
@@ -109,7 +109,7 @@ PHP_FUNCTION(dotnet_load)
 	HRESULT hr;
 	pval *assembly_name, *datatype_name, *code_page;
 	OLECHAR *assembly, *datatype;
-	i_dispatch *obj;
+	comval *obj;
 
 	switch(ZEND_NUM_ARGS())
 	{
@@ -121,7 +121,7 @@ PHP_FUNCTION(dotnet_load)
 			getParameters(ht, 3, &assembly_name, &datatype_name, &code_page);
 
 			convert_to_long(code_page);
-			codepage = code_page->value.lval;
+			codepage = Z_LVAL_P(code_page);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -129,15 +129,15 @@ PHP_FUNCTION(dotnet_load)
 	}
 
 	convert_to_string(assembly_name);
-	assembly = php_char_to_OLECHAR(assembly_name->value.str.val, assembly_name->value.str.len, codepage);
+	assembly = php_char_to_OLECHAR(Z_STRVAL_P(assembly_name), Z_STRLEN_P(assembly_name), codepage);
 
 	convert_to_string(datatype_name);
-	datatype = php_char_to_OLECHAR(datatype_name->value.str.val, datatype_name->value.str.len, codepage);
+	datatype = php_char_to_OLECHAR(Z_STRVAL_P(datatype_name), Z_STRLEN_P(datatype_name), codepage);
 
-	obj = (i_dispatch *) emalloc(sizeof(i_dispatch));
+	ALLOC_COM(obj);
 
 	/* obtain IDispatch */
-	hr=dotnet_create(assembly, datatype, obj);
+	hr = dotnet_create(assembly, datatype, obj);
 	efree(assembly);
 	efree(datatype);
 	if (FAILED(hr)) {
@@ -148,13 +148,13 @@ PHP_FUNCTION(dotnet_load)
 		efree(obj);
 		RETURN_FALSE;
 	}
-	if (!obj->i.dispatch) {
+	if (C_DISPATCH(obj) == NULL) {
 		php_error(E_WARNING,"Unable to locate %s in assembly %s",datatype_name->value.str.val,assembly_name->value.str.val);
 		efree(obj);
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_list_insert(obj, php_COM_get_le_idispatch()));
+	RETURN_LONG(zend_list_insert(obj, IS_COM));
 }
 /* }}} */
 
@@ -165,7 +165,7 @@ void php_DOTNET_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_propert
 	zend_overloaded_element *function_name = (zend_overloaded_element *) property_reference->elements_list->tail->data;
 
 	if (zend_llist_count(property_reference->elements_list)==1
-		&& !strcmp(function_name->element.value.str.val, "dotnet")) { /* constructor */
+		&& !strcmp(Z_STRVAL(function_name->element), "dotnet")) { /* constructor */
 		pval *object_handle;
 
 		PHP_FN(dotnet_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
