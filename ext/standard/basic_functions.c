@@ -456,9 +456,9 @@ function_entry basic_functions[] = {
 #endif
 
 	PHP_FE(pi,																NULL)
-	PHP_FE(finite,															NULL)
-	PHP_FE(isnan,															NULL)
-	PHP_FE(isinf,															NULL)
+	PHP_FE(is_finite,														NULL)
+	PHP_FE(is_nan,															NULL)
+	PHP_FE(is_infinite,														NULL)
 	PHP_FE(pow,																NULL)
 	PHP_FE(exp,																NULL)
 	PHP_FE(log,																NULL)

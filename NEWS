@@ -10,7 +10,7 @@ PHP 4                                                                      NEWS
   the differences are: it prints no HTTP headers, displays plain text
   error messages, etc. (Edin)
 - Made wordwrap() significantly faster. (Jim)
-- Fixed pow(), and added finite(), isinf(), and isnan(). (Jim)
+- Fixed pow(), and added is_finite(), is_infinite(), and is_nan(). (Jim)
 - Fixed segfault in wordwrap() when wrapping to zero width and using
   multi-character break or trying to force cut (bug #12768). (Jim)
 - Fixed several bugs in dbase extension (dbase_pack() truncate file to right
