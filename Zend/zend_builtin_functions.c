@@ -107,7 +107,7 @@ static zend_function_entry builtin_functions[] = {
 
 int zend_startup_builtin_functions()
 {
-	return zend_register_functions(builtin_functions, NULL);
+	return zend_register_functions(builtin_functions, NULL, MODULE_PERSISTENT);
 }
 
 

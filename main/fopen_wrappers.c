@@ -361,7 +361,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		fp = NULL;
 	}
 	if (!fp) {
-		php_error(E_CORE_ERROR, "Unable to open %s", fn);
+		php_error(E_ERROR, "Unable to open %s", fn);
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		return NULL;
 	}

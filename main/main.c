@@ -364,29 +364,27 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			va_end(args);
 			buffer[sizeof(buffer) - 1] = 0;
 
-			if (PG(log_errors) || (!module_initialized)) {
+			if (!module_initialized || PG(log_errors)) {
 				char log_buffer[1024];
 
+#ifdef PHP_WIN32
+				if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
+					MessageBox(NULL, buffer, error_type_str, MB_OK);
+				}
+#endif
 				snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 				php_log_err(log_buffer);
 			}
-			if (PG(display_errors)) {
+			if (module_initialized && PG(display_errors)) {
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
 
-#ifdef PHP_WIN32
-				if (type==E_CORE_ERROR || type==E_CORE_WARNING)
-					MessageBox(NULL, buffer, error_type_str, MB_OK);
-				else
-#endif
-				{
-					if (prepend_string) {
-						PUTS(prepend_string);
-					}
-					php_printf("<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n", error_type_str, buffer, error_filename, error_lineno);
-					if (append_string) {
-						PUTS(append_string);
-					}
+				if (prepend_string) {
+					PUTS(prepend_string);
+				}
+				php_printf("<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n", error_type_str, buffer, error_filename, error_lineno);
+				if (append_string) {
+					PUTS(append_string);
 				}
 			}
 #if ZEND_DEBUG
@@ -1034,7 +1032,7 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 				if (have_variables_order) {
 					php_import_environment_variables(ELS_C PLS_CC);
 				} else {
-					php_error(E_CORE_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
+					php_error(E_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
 				}
 				break;
 			case 's':
