@@ -112,7 +112,9 @@ static unsigned char third_through_seventh_args_force_ref[] =
 {7, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
 
 /* Global buffer for php_strerror() */
+#if defined(PHP_WIN32) || (! defined(HAVE_HSTRERROR))
 static char php_strerror_buf[10000];
+#endif
 
 /* {{{ sockets_functions[]
  */
@@ -1521,12 +1523,12 @@ PHP_FUNCTION(socket_recvmsg)
 			}
 			
 			memset(sa, 0, sizeof(sa_storage));
-			hdr.msg_name	= sin;
+			hdr.msg_name	= (void *) sin;
 			hdr.msg_namelen	= sizeof(sa_storage);
 			hdr.msg_iov		= iov->iov_array;
 			hdr.msg_iovlen	= iov->count;
 
-			hdr.msg_control = ctl_buf ? ctl_buf : NULL;
+			hdr.msg_control = ctl_buf ? (void *) ctl_buf : NULL;
 			hdr.msg_controllen = ctl_buf ? Z_LVAL_P(arg4) : 0;
 #ifndef MISSING_MSGHDR_MSGFLAGS
 			hdr.msg_flags	= 0;
@@ -1575,13 +1577,13 @@ PHP_FUNCTION(socket_recvmsg)
 
 	case AF_UNIX:
 		memset(sa, 0, sizeof(sa_storage));
-		hdr.msg_name	= s_un;
+		hdr.msg_name	= (void *) s_un;
 		hdr.msg_namelen	= sizeof(struct sockaddr_un);
 		hdr.msg_iov		= iov->iov_array;
 		hdr.msg_iovlen	= iov->count;
 		
 		if (ctl_buf) {
-			hdr.msg_control = ctl_buf;
+			hdr.msg_control = (void *) ctl_buf;
 			hdr.msg_controllen = Z_LVAL_P(arg4);
 		} else {
 			hdr.msg_control = NULL;
@@ -1667,7 +1669,7 @@ PHP_FUNCTION(socket_sendmsg)
 				set_errno(0);
 				
 				memset(&hdr, 0, sizeof(hdr));
-				hdr.msg_name = &sa;
+				hdr.msg_name = (void *) &sa;
 				hdr.msg_namelen = sizeof(sa);
 				hdr.msg_iov = iov->iov_array;
 				hdr.msg_iovlen = iov->count;
@@ -1695,7 +1697,7 @@ PHP_FUNCTION(socket_sendmsg)
 				
 				set_errno(0);
 				
-				hdr.msg_name = s_un;
+				hdr.msg_name = (void *) s_un;
 				hdr.msg_iov = iov->iov_array;
 				hdr.msg_iovlen = iov->count;
 				
