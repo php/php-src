@@ -489,12 +489,11 @@ class PEAR_Installer extends PEAR_Common
                 $options['installroot'] = substr($options['installroot'], 0, -1);
             }
             $php_dir = $this->_prependPath($php_dir, $options['installroot']);
-            $this->registry = &new PEAR_Registry($php_dir);
             $this->installroot = $options['installroot'];
         } else {
-            $registry = &$this->registry;
             $this->installroot = '';
         }
+        $this->registry = &new PEAR_Registry($php_dir);
         $need_download = false;
         //  ==> XXX should be removed later on
         $flag_old_format = false;
