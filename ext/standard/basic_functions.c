@@ -1178,21 +1178,15 @@ PHP_FUNCTION(long2ip)
    Get the value of an environment variable */
 PHP_FUNCTION(getenv)
 {
-	pval **str;
-	char *ptr;
+	char *ptr, *str;
+	int str_len;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(str);
-
-	if (Z_TYPE_PP(str) != IS_STRING) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-
-	ptr = sapi_getenv(Z_STRVAL_PP(str), Z_STRLEN_PP(str) TSRMLS_CC);
-	if (!ptr) {
-		ptr = getenv(Z_STRVAL_PP(str));
+	ptr = sapi_getenv(str, str_len TSRMLS_CC);
+	if (! ptr) {
+		ptr = getenv(str);
 	}
 	if (ptr) {
 		RETURN_STRING(ptr, 1);
