@@ -94,7 +94,9 @@ function_entry basic_functions[] = {
 #if HAVE_STRFTIME
 	PHP_FE(strftime,								NULL)
 #endif
+#if !(WIN32|WINNT)
 	PHP_FE(strtotime,								NULL)
+#endif
 	PHP_FE(date,									NULL)
 	PHP_FE(gmdate,									NULL)
 	PHP_FE(getdate,									NULL)

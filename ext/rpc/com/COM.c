@@ -675,7 +675,7 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 	pval **idispatch_handle;
-	pval *object = *property_reference->object;
+	pval *object = property_reference->object;
 	IDispatch *i_dispatch;
 	int type;
 	VARIANTARG var_result;
@@ -748,7 +748,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 	pval **idispatch_handle;
-	pval *object = *property_reference->object;
+	pval *object = property_reference->object;
 	IDispatch *i_dispatch;
 	int type;
 	VARIANTARG var_result;
@@ -810,7 +810,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	zend_overloaded_element *overloaded_property;
-	pval *object = *property_reference->object;
+	pval *object = property_reference->object;
 	zend_overloaded_element *function_name = (zend_overloaded_element *) property_reference->elements_list.tail->data;
 
 	if (zend_llist_count(&property_reference->elements_list)==1

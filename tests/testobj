@@ -8,6 +8,7 @@ class foobar {
 };
 
 $foo = new foobar; // or die("Unable to construct foobar\n");
+print $foo->initialized;
 //$word = new COm("word.application");
 //$word->visible = true;
 //sleep(5);

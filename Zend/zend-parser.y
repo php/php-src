@@ -367,7 +367,7 @@ expr_without_variable:
 		T_LIST '(' { do_list_init(CLS_C); } assignment_list ')' '=' expr { do_list_end(&$$, &$7 CLS_CC); }
 	|	w_cvar '=' expr		{ do_assign(&$$, &$1, &$3 CLS_CC); }
 	|	w_cvar '=' '&' w_cvar	{ do_assign_ref(&$$, &$1, &$4 CLS_CC); }
-	|	w_cvar '=' T_NEW class_name { do_extended_fcall_begin(CLS_C); do_begin_new_object(&$2, &$1, &$3, &$4 CLS_CC); } ctor_arguments { do_end_new_object(&$4, &$3, &$6 CLS_CC); do_extended_fcall_end(CLS_C);  $$ = $2;}
+	|	T_NEW class_name { do_extended_fcall_begin(CLS_C); do_begin_new_object(&$1, &$2 CLS_CC); } ctor_arguments { do_end_new_object(&$$, &$2, &$1, &$4 CLS_CC); do_extended_fcall_end(CLS_C);}
 	|	rw_cvar T_PLUS_EQUAL expr 	{ do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 CLS_CC); }
 	|	rw_cvar T_MINUS_EQUAL expr	{ do_binary_assign_op(ZEND_ASSIGN_SUB, &$$, &$1, &$3 CLS_CC); }
 	|	rw_cvar T_MUL_EQUAL expr		{ do_binary_assign_op(ZEND_ASSIGN_MUL, &$$, &$1, &$3 CLS_CC); }
