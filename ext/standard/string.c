@@ -1270,7 +1270,9 @@ PHP_FUNCTION(substr_replace)
 		if (f < 0) {
 			f = 0;
 		}
-	}
+	} else if (f > (int)(*str)->value.str.len)
+		f = (int)(*str)->value.str.len;
+
 
 	/* if "length" position is negative, set it to the length
 	 * needed to stop that many chars from the end of the string
@@ -1280,10 +1282,6 @@ PHP_FUNCTION(substr_replace)
 		if (l < 0) {
 			l = 0;
 		}
-	}
-
-	if (f >= (int)(*str)->value.str.len) {
-		RETURN_STRINGL((*str)->value.str.val, (*str)->value.str.len, 1);
 	}
 
 	if((f+l) > (int)(*str)->value.str.len) {
