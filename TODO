@@ -5,6 +5,7 @@ Zend
 ----
     * allow foreach ($array as $k => &$val) syntax. right now we can not 
       traverse an array without copying each element.
+    * get_class_methods("classname")
 
 global
 ------
