@@ -75,6 +75,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_set_cookie_params, NULL)
 	PHP_FE(session_get_cookie_params, NULL)
 	PHP_FE(session_write_close,       NULL)
+	PHP_FALIAS(session_commit, session_write_close, NULL)
 	{NULL, NULL, NULL} 
 };
 /* }}} */
@@ -84,12 +85,16 @@ PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps);
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
+#define SESSION_CHECK_ACTIVE_STATE	\
+	if (PS(session_status) == php_session_active) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time."); \
+		return FAILURE; \
+	}
+
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
-	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");
-		return FAILURE;
-	}
+	SESSION_CHECK_ACTIVE_STATE;
+
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
 
 	if (PG(modules_activated) && !PS(mod)) {
@@ -101,10 +106,8 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 
 static PHP_INI_MH(OnUpdateSerializer)
 {
-	if (PS(session_status) == php_session_active) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time.");
-		return FAILURE;
-	}
+	SESSION_CHECK_ACTIVE_STATE;
+
 	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
 
 	if (PG(modules_activated) && !PS(serializer)) {
@@ -511,8 +514,7 @@ static void php_session_track_init(TSRMLS_D)
 	zval *session_vars = NULL;
 	
 	/* Unconditionally destroy existing arrays -- possible dirty data */
-	zend_hash_del(&EG(symbol_table), "HTTP_SESSION_VARS", 
-			sizeof("HTTP_SESSION_VARS"));
+	zend_hash_del(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"));
 	zend_hash_del(&EG(symbol_table), "_SESSION", sizeof("_SESSION"));
 
 	MAKE_STD_ZVAL(session_vars);
