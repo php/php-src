@@ -91,7 +91,11 @@
 #include "keytools.h"
 #include "parse.h"
 #include "mib.h"
-#include "version.h"
+#ifndef PHP_WIN32
+/* this doesn't appear to be needed under win32 (perhaps at all)
+ * and the header file is not present in my UCD-SNMP headers */
+# include "version.h"
+#endif
 #include "transform_oids.h"
 #endif
 /* Ugly macro, since the length of OIDs in UCD-SNMP and NET-SNMP
