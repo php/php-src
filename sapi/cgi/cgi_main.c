@@ -489,7 +489,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
 	if (!cgi) {					/* never execute the arguments if you are a CGI */
-		SG(request_info).argv0 = NULL;
+		if (!SG(request_info).argv0) {
+			free(SG(request_info).argv0);
+			SG(request_info).argv0 = NULL;
+		}
 		while ((c = ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:")) != -1) {
 			switch (c) {
 				case 'f':
@@ -630,6 +633,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		SG(request_info).path_translated = estrdup(getenv("SCRIPT_FILENAME"));
 #else
 		SG(request_info).path_translated = estrdup(getenv("PATH_TRANSLATED"));
+
 #endif
 	}
 	if (cgi || SG(request_info).path_translated) {
