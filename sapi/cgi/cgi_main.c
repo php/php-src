@@ -577,6 +577,14 @@ int main(int argc, char *argv[])
 	/* check force_cgi after startup, so we have proper output */
 	if (cfg_get_long("cgi.force_redirect", &force_redirect) == FAILURE) {
         force_redirect = 1;
+		{
+			/* We don't need force_cgi on if running under IIS. */
+			char* server_software = getenv("SERVER_SOFTWARE");
+			char* server_prefix_expected = "Microsoft-IIS";
+			if (server_software && (0 == strncmp(server_software,server_prefix_expected,strlen(server_prefix_expected)))) {
+				force_redirect = 0;
+			}
+		}
 	}
 	if (cgi && force_redirect) {
         if (cfg_get_string("cgi.redirect_status_env", &redirect_status_env) == FAILURE) {
