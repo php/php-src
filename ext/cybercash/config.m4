@@ -4,7 +4,7 @@ dnl don't forget to call PHP_EXTENSION(cybercash)
 AC_MSG_CHECKING(for CyberCash support)
 AC_ARG_WITH(cybercash,
 [  --with-cybercash[=DIR]  Include CyberCash support.  DIR is the CyberCash MCK 
-			  install directory.],
+                          install directory.],
 [
   if test "$withval" != "no"; then
       test -f $withval/mckcrypt.h && MCK_DIR="$withval"

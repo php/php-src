@@ -3,9 +3,9 @@
 
 AC_MSG_CHECKING(for Java support)
 AC_ARG_WITH(java,
-[  --with-java[=DIR]	  Include Java support. DIR is the base install
-			  directory for the JDK.  This extension can only
-			  be built as a shared dl.],
+[  --with-java[=DIR]       Include Java support. DIR is the base install
+                          directory for the JDK.  This extension can only
+                          be built as a shared dl.],
 [
   if test "$withval" != "no"; then
     JAVA_SHARED="libphp_java.la"
