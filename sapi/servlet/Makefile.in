@@ -1,9 +1,4 @@
 
-DEPTH     = ../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 LTLIBRARY_NAME = libsapi.la
 LTLIBRARY_SOURCES = servlet.c java.c
 LTLIBRARY_DEPENDENCIES = phpsrvlt.jar
@@ -11,7 +6,7 @@ LTLIBRARY_DEPENDENCIES = phpsrvlt.jar
 EXTRA_CFLAGS = $(JAVA_CFLAGS)
 EXTRA_INCLUDES = $(JAVA_INCLUDE)
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk
 
 java.c : ../../ext/java/java.c
 	@cp ../../ext/java/java.c .

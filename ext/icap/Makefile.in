@@ -1,10 +1,5 @@
 
-DEPTH     = ../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 LTLIBRARY_NAME    = libicap.la
 LTLIBRARY_SOURCES = php_icap.c
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk

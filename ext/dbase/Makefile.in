@@ -1,10 +1,5 @@
 
-DEPTH     = ../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 LTLIBRARY_NAME    = libdbase.la
 LTLIBRARY_SOURCES = dbf_head.c dbf_rec.c dbf_misc.c dbf_ndx.c dbase.c
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk

@@ -1,7 +1,3 @@
-DEPTH     = ../../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
 
 LTLIBRARY_NAME    = libmysql_client.la
 LTLIBRARY_SOURCES = libmysql.c errmsg.c net.c violite.c password.c \
@@ -17,4 +13,4 @@ LTLIBRARY_SOURCES = libmysql.c errmsg.c net.c violite.c password.c \
 	strcont.c strcend.c bchange.c bmove.c bmove_upp.c \
 	longlong2str.c strtoull.c strtoll.c ctype-latin1.c
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk

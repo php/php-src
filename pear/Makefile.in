@@ -1,12 +1,7 @@
 
-DEPTH     = ..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 install_targets = install-data-local install-headers install-build
 
-include $(topsrcdir)/build/rules.mk
+include $(top_srcdir)/build/rules.mk
 
 peardir=$(prefix)/lib/php
 pear_DBdir=$(prefix)/lib/php/DB
@@ -40,7 +35,7 @@ BUILD_FILES = \
 
 install-build:
 	-@$(mkinstalldirs) $(builddir) $(bindir) && \
-	(cd $(topsrcdir) && cp $(BUILD_FILES) $(builddir)) && \
+	(cd $(top_srcdir) && cp $(BUILD_FILES) $(builddir)) && \
 	echo "creating phpize" && \
 	sed \
 		-e 's#@PREFIX@#$(prefix)#' \
@@ -88,9 +83,9 @@ install-headers:
 	done; \
 	$(mkinstalldirs) $$paths && \
 	echo "creating header file hierarchy" && \
-	(cd $(topsrcdir) && cp $(SRC_HEADERS) $(phpincludedir)) && \
-	(cd $(topsrcdir)/ext/standard && cp *.h $(phpincludedir)/ext/standard) && \
-	(cd $(topsrcdir) && cp regex/regex.h regex/regex_extra.h $(phpincludedir)/regex) && \
-	(cd $(topsrcdir) && cp TSRM/TSRM.h $(phpincludedir)/TSRM) && \
-	(cd $(topsrcdir)/Zend && cp *.h $(phpincludedir)/Zend) && \
-	(cd $(DEPTH) && cp $(BUILD_HEADERS) $(phpincludedir))
+	(cd $(top_srcdir) && cp $(SRC_HEADERS) $(phpincludedir)) && \
+	(cd $(top_srcdir)/ext/standard && cp *.h $(phpincludedir)/ext/standard) && \
+	(cd $(top_srcdir) && cp regex/regex.h regex/regex_extra.h $(phpincludedir)/regex) && \
+	(cd $(top_srcdir) && cp TSRM/TSRM.h $(phpincludedir)/TSRM) && \
+	(cd $(top_srcdir)/Zend && cp *.h $(phpincludedir)/Zend) && \
+	(cd $(top_builddir) && cp $(BUILD_HEADERS) $(phpincludedir))

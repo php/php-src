@@ -1,10 +1,5 @@
 
-DEPTH     = ..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 LTLIBRARY_NAME = libregex.la
 LTLIBRARY_SOURCES = regcomp.c regexec.c regerror.c regfree.c
 
-include $(topsrcdir)/build/ltlib.mk
+include $(top_srcdir)/build/ltlib.mk
