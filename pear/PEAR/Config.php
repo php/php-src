@@ -19,6 +19,7 @@
 // $Id$
 
 require_once 'PEAR.php';
+require_once 'System.php';
 
 /**
  * Last created PEAR_Config instance.
@@ -49,6 +50,9 @@ define('PEAR_CONFIG_DEFAULT_DATADIR',
        PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
 define('PEAR_CONFIG_DEFAULT_TESTDIR',
        PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
+
+define('PEAR_CONFIG_DEFAULT_CACHEDIR', (System::tmpdir()).'/pear/cache');
+
 if (@is_dir(PHP_SYSCONFDIR)) {
     define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
 } else {
@@ -172,6 +176,13 @@ class PEAR_Config extends PEAR
             'prompt' => 'PEAR test directory',
             'group' => 'File Locations (Advanced)',
             ),
+        'cache_dir' => array(
+            'type' => 'directory',
+            'default' => PEAR_CONFIG_DEFAULT_CACHEDIR,
+            'doc' => 'directory which is used for XMLRPC cache',
+            'prompt' => 'PEAR Installer cache directory',
+            'group' => 'File Locations (Advanced)',
+            ),
         // Maintainers
         'username' => array(
             'type' => 'string',
@@ -213,6 +224,13 @@ class PEAR_Config extends PEAR
             'default' => PEAR_DEFAULT_UMASK,
             'doc' => 'umask used when creating files (Unix-like systems only)',
             'prompt' => 'Unix file mask',
+            'group' => 'Advanced',
+            ),
+        'cache_ttl' => array(
+            'type' => 'integer',
+            'default' => 0,
+            'doc' => 'amount of secs where the local cache is used and not updated',
+            'prompt' => 'Cache TimeToLive',
             'group' => 'Advanced',
             ),
 /*

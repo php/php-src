@@ -34,6 +34,7 @@ class PEAR_Remote extends PEAR
     // {{{ properties
 
     var $config = null;
+    var $cache  = null;
 
     // }}}
 
@@ -46,19 +47,63 @@ class PEAR_Remote extends PEAR
     }
 
     // }}}
-
+    
+    function getCache($args)
+    {
+        $id       = md5(serialize($args));
+        $cachedir = $this->config->get('cache_dir');
+        if (!file_exists($cachedir)) {
+            System::mkdir('-p '.$cachedir);
+        }
+        $filename = $cachedir.'/xmlrpc_cache_'.$id;
+        if (!file_exists($filename)) {
+            return null;
+        };
+        $result   = array(
+            'age'        => time() - filemtime($filename),
+            'lastChange' => filemtime($filename),
+            'content'    => unserialize(implode('', file($filename))),
+            );
+        return $result;
+    }
+    
+    function saveCache($args, $data)
+    {
+        $id       = md5(serialize($args));
+        $cachedir = $this->config->get('cache_dir');
+        if (!file_exists($cachedir)) {
+            System::mkdir('-p '.$cachedir);
+        }
+        $filename = $cachedir.'/xmlrpc_cache_'.$id;
+        
+        $fp = @fopen($filename, "w");
+        if ($fp !== null) {
+            fwrite($fp, serialize($data));
+            fclose($fp);
+        };
+    }
+    
     // {{{ call(method, [args...])
 
     function call($method)
     {
+        $_args = $args = func_get_args();
+        
+        $this->cache = $this->getCache($args);
+        $cachettl = $this->config->get('cache_ttl');
+        // If cache is newer than $cachettl seconds, we use the cache!
+        if ($this->cache !== null && $this->cache['age'] < $cachettl) {
+            return $this->cache['content'];
+        };
+        
         if (extension_loaded("xmlrpc")) {
-            $args = func_get_args();
-            return call_user_func_array(array(&$this, 'call_epi'), $args);
+            $result = call_user_func_array(array(&$this, 'call_epi'), $args);
+            $this->saveCache($_args, $result);
+            return $result;
         }
         if (!@include_once("XML/RPC.php")) {
             return $this->raiseError("For this remote PEAR operation you need to install the XML_RPC package");
         }
-        $args = func_get_args();
         array_shift($args);
         $server_host = $this->config->get('master_server');
         $username = $this->config->get('username');
@@ -66,7 +111,12 @@ class PEAR_Remote extends PEAR
         $eargs = array();
         foreach($args as $arg) $eargs[] = $this->_encode($arg);
         $f = new XML_RPC_Message($method, $eargs);
-        $c = new XML_RPC_Client('/xmlrpc.php', $server_host, 80);
+        if ($this->cache !== null) {
+            $maxAge = '?maxAge='.$this->cache['lastChange'];
+        } else {
+            $maxAge = '';
+        };
+        $c = new XML_RPC_Client('/xmlrpc.php'.$maxAge, $server_host, 80);
         if ($username && $password) {
             $c->setCredentials($username, $password);
         }
@@ -79,10 +129,15 @@ class PEAR_Remote extends PEAR
         }
         $v = $r->value();
         if ($e = $r->faultCode()) {
+            if ($e == $GLOBALS['XML_RPC_err']['http_error'] && strstr($r->faultString(), '304 Not Modified') !== false) {
+                return $this->cache['content'];
+            }
             return $this->raiseError($r->faultString(), $e);
         }
 
-        return XML_RPC_decode($v);
+        $result = XML_RPC_decode($v);
+        $this->saveCache($_args, $result);
+        return $result;
     }
 
     // }}}
@@ -139,22 +194,31 @@ class PEAR_Remote extends PEAR
             $tmp = base64_encode("$username:$password");
             $req_headers .= "Authorization: Basic $tmp\r\n";
         }
+        if ($this->cache !== null) {
+            $maxAge = '?maxAge='.$this->cache['lastChange'];
+        } else {
+            $maxAge = '';
+        };
+        
         if ($this->config->get('verbose') > 3) {
             print "XMLRPC REQUEST HEADERS:\n";
             var_dump($req_headers);
             print "XMLRPC REQUEST BODY:\n";
             var_dump($request);
         }
-        fwrite($fp, ("POST /xmlrpc.php HTTP/1.0\r\n$req_headers\r\n$request"));
+        
+        fwrite($fp, ("POST /xmlrpc.php$maxAge HTTP/1.0\r\n$req_headers\r\n$request"));
         $response = '';
         $line1 = fgets($fp, 2048);
         if (!preg_match('!^HTTP/[0-9\.]+ (\d+) (.*)!', $line1, $matches)) {
             return $this->raiseError("PEAR_Remote: invalid HTTP response from XML-RPC server");
         }
         switch ($matches[1]) {
-            case "200":
+            case "200": // OK
                 break;
-            case "401":
+            case "304": // Not Modified
+                return $this->cache['content'];
+            case "401": // Unauthorized
                 if ($username && $password) {
                     return $this->raiseError("PEAR_Remote: authorization failed", 401);
                 } else {
