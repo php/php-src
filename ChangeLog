@@ -1,3 +1,144 @@
+2002-05-20  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/posix/posix.c: - MFH fix for #17323.
+
+    * ext/posix/posix.c:
+    - Fix posix_isatty() and posix_ttyname() (Closes #17323)
+
+2002-05-20  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php: * disable debug in XML_RPC fallback
+
+2002-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/activescript/php4as_scriptengine.h
+      sapi/activescript/scriptengine.cpp
+      sapi/activescript/php4activescript.h:
+    Use the GIT for inter-thread marshalling.
+
+2002-05-20  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/zip/zip.c:
+    - Add safe_mode/uid and open_basedir check to zip_open() (closes #16927).
+
+    * ext/standard/filestat.c: - ZTS gotcha
+
+    * ext/standard/filestat.c:
+    - Add open_basedir check for all functions using php_stat() (filesize, stat,
+      etc), closes #11563.
+
+2002-05-20  Harald Radi  <h.radi@nme.at>
+
+    * sapi/activescript/classfactory.cpp
+      sapi/activescript/scriptengine.cpp: this way it even compiles
+
+    * ext/com/com.h
+      ext/com/conversion.c
+      ext/com/COM.c: integrating wez's patch
+
+2002-05-20  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Remote.php: * new command setup
+
+    * pear/packages/XML_RPC-1.0.2.tar
+      pear/packages/XML_RPC-1.0.3.tar:
+    * upgrade bundled XML_RPC package to 1.0.3
+
+    * pear/Makefile.frag
+      pear/install-pear.php: * new installer rule that does not depend on bash
+
+    * pear/PEAR/Common.php: * _infoFromAny goes public!
+
+    * pear/PEAR/Installer.php:
+    * some verbosity changes: 0 - only errors, 1 - status report when the
+      install is done, 2 - show each operation, 3 - show file operations
+
+    * pear/PEAR/Command/Install.php: * no output in verbosity level 0
+
+    * pear/PEAR/Config.php: * added PEAR_Config::removeLayer()
+
+    * pear/PEAR/Command/Package.php: * remove getCommands() from here
+    * added options to "pear cvstag": -q -Q -d -F
+
+2002-05-20  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: MFH
+
+2002-05-20  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.in: * support multiple -v and -q options
+
+    * pear/package-Archive_Tar.xml: * forgot to update the release date
+
+    * pear/package-Archive_Tar.xml: * fix fix
+
+    * pear/Archive/docs/Tar.txt
+      pear/Archive/Tar.php
+      pear/package-Archive_Tar.xml: * merge 0.4 files from /pear/Archive_Tar
+
+    * pear/package-Console_Getopt.xml: * prepare 0.10
+
+    * pear/PEAR/Command/Registry.php: * remove run() from this class
+
+2002-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/php4dllts.dsp:
+    This somehow got undone when I committed the rest...
+
+2002-05-20  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c:
+    Fixed possible pg_lo_write() overflow and make it more fail safe.
+
+2002-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/php4ts.dsw: Add activescript sapi to the workspace
+
+    * sapi/activescript/classfactory.cpp
+      sapi/activescript/php4activescript.c
+      sapi/activescript/php4activescript.def
+      sapi/activescript/php4activescript.dsp
+      sapi/activescript/php4activescript.h
+      sapi/activescript/php4as_classfactory.h
+      sapi/activescript/php4as_scriptengine.h
+      sapi/activescript/scriptengine.cpp: Implement ActiveScript interfaces.
+    This allows use of PHP in:
+      Client-side script in Internet Explorer
+      Windows Scripting Host
+      ASP and ASP.NET pages
+    It's mostly working... give it a go.
+    You will need to regsvr32 the php4activescript.dll manually.
+
+    * main/fopen_wrappers.h
+      main/spprintf.h: Protect C code with extern "C"
+
+    * ext/com/COM.c
+      ext/com/conversion.c
+      ext/com/dispatch.c
+      ext/com/php_COM.h: Added generic COM wrapper for PHP objects.
+
+2002-05-20  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Install.php: Added missing key 'doc' for -Z help
+
+    * pear/PEAR/Common.php:
+    Fix small bug making the baseinstalldir attrib persist
+
+2002-05-20  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c:
+    Improve large object performance. pg_lo_read() and pg_lo_read_all() should perform
+    much better now.
+    Fixed Old API support for pg_lo_import().
+
+2002-05-20  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Install.php: * no need for getCommands() here
+
+    * pear/PEAR/Command/Package.php: * new command setup
+
+    * pear/PEAR/Command/Auth.php: * typo fixes, wrapping
+
 2002-05-19  Stig Bakken  <ssb@fast.no>
 
     * pear/package-PEAR.xml: * install pear.bat on Windows only
