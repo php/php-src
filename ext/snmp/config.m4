@@ -44,7 +44,7 @@ AC_ARG_WITH(snmp,
       AC_MSG_RESULT(yes (static))
       AC_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR)
       AC_ADD_INCLUDE($SNMP_INCDIR)
-      SNMP_STATIC="libphpext_snmp.a"
+      SNMP_STATIC="libphpext_snmp.la"
     fi
     PHP_EXTENSION(snmp,$shared)
 	AC_CHECK_LIB(kstat, kstat_read, [
