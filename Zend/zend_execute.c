@@ -36,6 +36,21 @@
 #include "zend_exceptions.h"
 #include "zend_vm.h"
 
+#define _CONST_CODE  0
+#define _TMP_CODE    1
+#define _VAR_CODE    2
+#define _UNUSED_CODE 3
+#define _CV_CODE     4
+
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(ZEND_VM_OLD_EXECUTOR)
+#  define ZEND_VM_ALWAYS_INLINE  __attribute__ ((always_inline))
+void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
+/*extern void zend_error_noreturn(int type, const char *format, ...) __asm__("zend_error") __attribute__ ((noreturn));*/
+#else
+#  define ZEND_VM_ALWAYS_INLINE
+#  define zend_error_noreturn zend_error
+#endif
+
 typedef int (*incdec_t)(zval *);
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free, type TSRMLS_CC)
@@ -260,8 +275,6 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free
 	}
 }
 
-#ifdef ZEND_VM_SPEC
-
 static inline zval *_get_zval_ptr_const(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
 {
 	return &node->u.constant;
@@ -453,7 +466,6 @@ static inline zval **_get_obj_zval_ptr_ptr_unused(znode *op, temp_variable *Ts, 
 		return NULL;
 	}
 }
-#endif
 
 static inline void zend_switch_free(zend_op *opline, temp_variable *Ts TSRMLS_DC)
 {
@@ -1427,265 +1439,38 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 	((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, (*(temp_variable *)((char *) execute_data_ptr->Ts + execute_data_ptr->opline->result.u.var)).var.ptr, execute_data_ptr->object, return_value_used TSRMLS_CC);
 }
 
-ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
-{
-	zend_execute_data execute_data;
-	ZEND_VM_HELPER_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC))
-	ZEND_VM_HELPER_VAR(incdec_t incdec_op)
-	ZEND_VM_HELPER_VAR(int prop_dim)
-	ZEND_VM_HELPER_VAR(int type)
+#define ZEND_VM_NEXT_OPCODE() \
+     CHECK_SYMBOL_TABLES() \
+     EX(opline)++; \
+     ZEND_VM_CONTINUE()
 
-#if ZEND_VM_KIND == ZEND_VM_KIND_GOTO
-	if (op_array == NULL) {
-	  goto init_labels;
-	}
-#endif
+#define ZEND_VM_SET_OPCODE(new_op) \
+     CHECK_SYMBOL_TABLES() \
+     EX(opline) = new_op
 
-	/* Initialize execute_data */
-	EX(fbc) = NULL;
-	EX(object) = NULL;
-	if (op_array->T < TEMP_VAR_STACK_LIMIT) {
-		EX(Ts) = (temp_variable *) do_alloca(sizeof(temp_variable) * op_array->T);
-	} else {
-		EX(Ts) = (temp_variable *) safe_emalloc(sizeof(temp_variable), op_array->T, 0);
-	}
-	EX(CVs) = (zval***)do_alloca(sizeof(zval**) * op_array->last_var);
-	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
-	EX(op_array) = op_array;
-	EX(original_in_execution) = EG(in_execution);
-	EX(symbol_table) = EG(active_symbol_table);
-	EX(prev_execute_data) = EG(current_execute_data);
-	EG(current_execute_data) = &execute_data;
+#define ZEND_VM_INC_OPCODE() \
+     if (!EG(exception)) { \
+       CHECK_SYMBOL_TABLES() \
+       EX(opline)++; \
+     }
 
-	EG(in_execution) = 1;
-	if (op_array->start_op) {
-		ZEND_VM_SET_OPCODE(op_array->start_op);
-	} else {
-		ZEND_VM_SET_OPCODE(op_array->opcodes);
-	}
+#define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
+     free_alloca(EX(CVs)); \
+     if (EX(op_array)->T < TEMP_VAR_STACK_LIMIT) { \
+       free_alloca(EX(Ts)); \
+     } else { \
+       efree(EX(Ts)); \
+     } \
+     EG(in_execution) = EX(original_in_execution); \
+     EG(current_execute_data) = EX(prev_execute_data); \
+     ZEND_VM_RETURN()
 
-	if (op_array->uses_this && EG(This)) {
-		EG(This)->refcount++; /* For $this pointer */
-		if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
-			EG(This)->refcount--;
-		}
-	}
+#define ZEND_VM_CONTINUE_JMP() \
+     ZEND_VM_CONTINUE()    
 
-	EG(opline_ptr) = &EX(opline);
+static int zend_vm_old_executor = 0;
 
-	EX(function_state).function = (zend_function *) op_array;
-	EG(function_state_ptr) = &EX(function_state);
-#if ZEND_DEBUG
-	/* function_state.function_symbol_table is saved as-is to a stack,
-	 * which is an intentional UMR.  Shut it up if we're in DEBUG.
-	 */
-	EX(function_state).function_symbol_table = NULL;
-#endif
-	
-	while (1) {
-ZEND_VM_CONTINUE_LABEL
-#ifdef ZEND_WIN32
-		if (EG(timed_out)) {
-			zend_timeout(0);
-		}
-#endif
-
-		ZEND_VM_DISPATCH() {
-#if ZEND_VM_KIND == ZEND_VM_KIND_CALL
-			return;
-#else               
-#  include "zend_vm_spec.h"
-#endif
-		}
-
-	}
-	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
-#if ZEND_VM_KIND == ZEND_VM_KIND_GOTO
-	{
-		static const opcode_handler_t labels[] = {ZEND_VM_LABELS};
-
-  init_labels:
-		zend_opcode_handlers = (opcode_handler_t*)labels;
-		return;
-	}
-#endif
-}
-
-#if ZEND_VM_KIND == ZEND_VM_KIND_CALL
-#  undef EX
-#  define EX(element) execute_data->element
-#  include"zend_vm_spec.h"
-#endif
-
-void zend_init_opcodes_handlers()
-{
-#if ZEND_VM_KIND == ZEND_VM_KIND_GOTO
-	TSRMLS_FETCH();
-	zend_execute(NULL TSRMLS_CC);
-#else
-	static const opcode_handler_t labels[] = {ZEND_VM_LABELS};
-
-	zend_opcode_handlers = (opcode_handler_t*)labels;
-#endif
-}
-
-#ifdef ZEND_VM_HAVE_OLD_EXECUTOR
-/* Old Style Executor */
-/* TODO: remove it */
-
-#  undef EX
-#  define EX(element) execute_data.element
-
-/* Hack */
-#  define ZEND_VM_OLD_EXECUTOR
-#  undef ZEND_VM_H
-#  undef ZEND_VM_KIND
-#  define ZEND_VM_KIND ZEND_VM_KIND_CALL
-#  undef ZEND_VM_SPEC
-#  undef ZEND_VM_ALWAYS_INLINE
-#  undef zend_error_noreturn
-#  undef ZEND_VM_CODE
-#  undef ZEND_VM_SPEC_OPCODE
-#  undef ZEND_VM_SET_OPCODE_HANDLER
-#  undef EXECUTE_DATA
-#  undef ZEND_VM_HELPER_VAR
-#  undef ZEND_VM_DISPATCH
-#  undef ZEND_VM_HANDLER
-#  undef ZEND_VM_HANDLER_EX
-#  undef ZEND_VM_HELPER
-#  undef ZEND_VM_HELPER_EX
-#  undef ZEND_VM_SPEC_HANDLER
-#  undef ZEND_VM_SPEC_HANDLER_EX
-#  undef ZEND_VM_SPEC_HELPER
-#  undef ZEND_VM_SPEC_HELPER_EX
-#  undef ZEND_VM_NULL_HANDLER
-#  undef ZEND_VM_DISPATCH_TO_HANDLER
-#  undef ZEND_VM_DISPATCH_TO_HELPER
-#  undef ZEND_VM_DISPATCH_TO_HELPER_EX
-#  undef ZEND_VM_SPEC_DISPATCH_TO_HANDLER
-#  undef ZEND_VM_SPEC_DISPATCH_TO_HELPER
-#  undef ZEND_VM_SPEC_DISPATCH_TO_HELPER_EX
-#  undef ZEND_VM_CONTINUE
-#  undef ZEND_VM_NEXT_OPCODE
-#  undef ZEND_VM_RETURN_FROM_EXECUTE_LOOP
-#  undef ZEND_VM_LABEL
-#  undef ZEND_VM_NULL_LABEL
-#  undef ZEND_VM_SPEC_LABEL
-#  undef ZEND_VM_SPEC_NULL_LABEL
-#  undef ZEND_VM_CONTINUE_LABEL
-
-#  include "zend_vm.h"
-
-static void old_execute(zend_op_array *op_array TSRMLS_DC)
-{
-	zend_execute_data execute_data;
-
-	/* Initialize execute_data */
-	EX(fbc) = NULL;
-	EX(object) = NULL;
-	if (op_array->T < TEMP_VAR_STACK_LIMIT) {
-		EX(Ts) = (temp_variable *) do_alloca(sizeof(temp_variable) * op_array->T);
-	} else {
-		EX(Ts) = (temp_variable *) safe_emalloc(sizeof(temp_variable), op_array->T, 0);
-	}	
-	EX(CVs) = (zval***)do_alloca(sizeof(zval**) * op_array->last_var);
-	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
-	EX(op_array) = op_array;
-	EX(original_in_execution) = EG(in_execution);
-	EX(symbol_table) = EG(active_symbol_table);
-	EX(prev_execute_data) = EG(current_execute_data);
-	EG(current_execute_data) = &execute_data;
-
-	EG(in_execution) = 1;
-	if (op_array->start_op) {
-		ZEND_VM_SET_OPCODE(op_array->start_op);
-	} else {
-		ZEND_VM_SET_OPCODE(op_array->opcodes);
-	}
-
-	if (op_array->uses_this && EG(This)) {
-		EG(This)->refcount++; /* For $this pointer */
-		if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL)==FAILURE) {
-			EG(This)->refcount--;
-		}
-	}
-
-	EG(opline_ptr) = &EX(opline);
-
-	EX(function_state).function = (zend_function *) op_array;
-	EG(function_state_ptr) = &EX(function_state);
-#if ZEND_DEBUG
-	/* function_state.function_symbol_table is saved as-is to a stack,
-	 * which is an intentional UMR.  Shut it up if we're in DEBUG.
-	 */
-	EX(function_state).function_symbol_table = NULL;
-#endif
-	
-	while (1) {
-#ifdef ZEND_WIN32
-		if (EG(timed_out)) {
-			zend_timeout(0);
-		}
-#endif
-
-		ZEND_VM_DISPATCH() {
-			return;
-		}
-
-	}
-	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
-}
-#  undef EX
-#  define EX(element) execute_data->element
-
-/* Hack */
-#  undef OP1_OP2_MASK
-#  undef HAVE_OP
-#  undef ZEND_VM_C_GOTO
-#  undef ZEND_VM_C_LABEL
-
-#  include"zend_vm_spec.h"
-
-ZEND_API int zend_vm_old_executor = 0;
-
-void zend_vm_set_opcode_handler(zend_op* op)
-{
-	if (zend_vm_old_executor) {
-		op->handler = zend_opcode_handlers[op->opcode];
-	} else {
-		static const int zend_vm_decode[] = {
-			_UNUSED_CODE, /* 0              */
-			_CONST_CODE,  /* 1 = IS_CONST   */
-			_TMP_CODE,    /* 2 = IS_TMP_VAR */
-			_UNUSED_CODE, /* 3              */
-			_VAR_CODE,    /* 4 = IS_VAR     */
-			_UNUSED_CODE, /* 5              */
-			_UNUSED_CODE, /* 6              */
-			_UNUSED_CODE, /* 7              */
-			_UNUSED_CODE, /* 8 = IS_UNUSED  */
-			_UNUSED_CODE, /* 9              */
-			_UNUSED_CODE, /* 10             */
-			_UNUSED_CODE, /* 11             */
-			_UNUSED_CODE, /* 12             */
-			_UNUSED_CODE, /* 13             */
-			_UNUSED_CODE, /* 14             */
-			_UNUSED_CODE, /* 15             */
-			_CV_CODE      /* 16 = IS_CV     */
-		};
-		op->handler = zend_opcode_handlers[op->opcode * 25 + zend_vm_decode[op->op1.op_type] * 5 + zend_vm_decode[op->op2.op_type]];
-	}
-}
-
-
-ZEND_API void zend_vm_use_old_executor()
-{
-	static opcode_handler_t labels[512] = {ZEND_VM_LABELS};
-
-	zend_vm_old_executor = 1;
-	zend_opcode_handlers = (opcode_handler_t*)labels;
-	zend_execute = old_execute;
-}
-#endif
+#include "zend_vm_execute.h"
 
 /*
  * Local variables:
