@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifdef PHP_WIN32
 #include "config.w32.h"
 #else
@@ -26,7 +28,10 @@
 #include "php_scandir.h"
 
 #ifndef HAVE_SCANDIR
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -38,19 +43,23 @@
 
 #include <stdlib.h>
 #include <search.h>
-#endif
+
+#endif /* HAVE_SCANDIR */
 
 #ifndef HAVE_ALPHASORT
-#include <string.h>
 
-int alphasort(const struct dirent **a, const struct dirent **b)
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+int php_alphasort(const struct dirent **a, const struct dirent **b)
 {
 	return strcoll((*a)->d_name,(*b)->d_name);
 }
-#endif
+#endif /* HAVE_ALPHASORT */
 
 #ifndef HAVE_SCANDIR
-int scandir(const char *dirname, struct dirent **namelist[], int (*selector) (const struct dirent *entry), int (*compare) (const struct dirent **a, const struct dirent **b))
+int php_scandir(const char *dirname, struct dirent **namelist[], int (*selector) (const struct dirent *entry), int (*compare) (const struct dirent **a, const struct dirent **b))
 {
 	DIR *dirp = NULL;
 	struct dirent **vector = NULL;
@@ -117,3 +126,12 @@ fail:
 	return -1;	
 }
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
