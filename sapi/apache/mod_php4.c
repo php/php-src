@@ -307,6 +307,7 @@ static int php_apache_sapi_activate(SLS_D)
 	 */
 	block_alarms();
 	register_cleanup(((request_rec *) SG(server_context))->pool, NULL, php_apache_request_shutdown, php_request_shutdown_for_exec);
+	AP(in_request)=1;
 	unblock_alarms();
 
 	/* Override the default headers_only value - sometimes "GET" requests should actually only
@@ -458,7 +459,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		zend_execute_scripts(ZEND_INCLUDE CLS_CC ELS_CC, 1, &fh);
 		return OK;
 	}
-	AP(in_request)=1;
 
 	if (setjmp(EG(bailout))!=0) {
 		return OK;
