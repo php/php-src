@@ -105,7 +105,7 @@ PEAR INSTALLER:
 	      <replace from="@php_bin@" to="php_bin" type="pear-config"/>
 	      <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
-        <file baseinstalldir="/" role="php" install-as="pearcmd.php" name="pear.in">
+        <file baseinstalldir="/" role="php" name="pearcmd.php">
           <replace from="@php_bin@" to="php_bin" type="pear-config"/>
           <replace from="@php_dir@" to="php_dir" type="pear-config"/>
           <replace from="@pear_version@" to="version" type="package-info"/>
