@@ -26,7 +26,7 @@
 #include "zend_globals_macros.h"
 
 #define MEM_BLOCK_START_MAGIC	0x7312F8DCL
-#define MEM_BLOCK_END_MAGIC		0x2A8FCC84L
+#define MEM_BLOCK_END_MAGIC	0x2A8FCC84L
 #define MEM_BLOCK_FREED_MAGIC	0x99954317L
 #define MEM_BLOCK_CACHED_MAGIC	0xFB8277DCL
 
@@ -52,8 +52,10 @@ typedef union _align_test {
 	long lng;
 } align_test;
 
-#define MAX_CACHED_MEMORY	16
-#define MAX_CACHED_ENTRIES	24
+#define MAX_CACHED_MEMORY	11
+#define MAX_CACHED_ENTRIES	256
+#define PRE_INIT_CACHE_ENTRIES	32
+
 #if (defined (__GNUC__) && __GNUC__ >= 2)
 #define PLATFORM_ALIGNMENT (__alignof__ (align_test))
 #else
