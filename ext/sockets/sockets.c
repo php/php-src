@@ -56,7 +56,6 @@
 # define set_errno(a) (errno = a)
 # define set_h_errno(a) (h_errno = a)
 #else /* windows */
-# include <winsock.h>
 # include "php_sockets.h"
 # include "php_sockets_win.h"
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket == INVALID_SOCKET)
@@ -755,6 +754,8 @@ PHP_FUNCTION(socket_read)
 	retval = (*read_function)(php_sock->bsd_socket, tmpbuf, length);
 #else
 	retval = recv(php_sock->bsd_socket, tmpbuf, length, 0);
+	/* i don't know why, but it _does_ fix a memleak */
+	SleepEx(1, TRUE);
 #endif
 
 	if (retval == -1) {
