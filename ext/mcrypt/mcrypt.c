@@ -501,7 +501,7 @@ PHP_FUNCTION(mcrypt_generic)
 	convert_to_string_ex (data);
 
 	/* Check blocksize */
-	if (mcrypt_enc_is_block_algorithm (td) == 1) { /* It's a block algorithm */
+	if (mcrypt_enc_is_block_mode (td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size (td);
 		data_size = (((Z_STRLEN_PP(data) - 1) / block_size) + 1) * block_size;
 		data_s = emalloc (data_size);
@@ -542,7 +542,7 @@ PHP_FUNCTION(mdecrypt_generic)
 	convert_to_string_ex (data);
 
 	/* Check blocksize */
-	if (mcrypt_enc_is_block_algorithm (td) == 1) { /* It's a block algorithm */
+	if (mcrypt_enc_is_block_mode (td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size (td);
 		data_size = (((Z_STRLEN_PP(data) - 1) / block_size) + 1) * block_size;
 		data_s = emalloc (data_size);
@@ -1285,7 +1285,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	}
 
 	/* Check blocksize */
-	if (mcrypt_enc_is_block_algorithm (td) == 1) { /* It's a block algorithm */
+	if (mcrypt_enc_is_block_mode (td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size (td);
 		data_size = (((Z_STRLEN_PP(data) - 1) / block_size) + 1) * block_size;
 		data_s = emalloc (data_size);
