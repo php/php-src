@@ -4,7 +4,7 @@ Test usort, uksort and uasort
 precision=14
 --FILE--
 <?php
-require('ext/standard/tests/array/data.inc');
+require(dirname(__FILE__) . '/data.inc');
 
 function cmp ($a, $b) {
     is_array ($a)

@@ -4,7 +4,7 @@ deaggreating
 --GET--
 --FILE--
 <?php
-include "ext/standard/tests/aggregation/aggregate.lib";
+include dirname(__FILE__) . "/aggregate.lib";
 
 $obj = new simple();
 aggregate($obj, 'helper');

@@ -22,8 +22,7 @@ $blaat2 = bzdecompress(bzcompress($blaat));
 $tests = <<<TESTS
  \$blaat === \$blaat2
 TESTS;
-
- include('tests/quicktester.inc');
+ include(dirname(__FILE__) . '/../../../tests/quicktester.inc');
 
 --EXPECT--
 OK
