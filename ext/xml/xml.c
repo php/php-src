@@ -374,17 +374,17 @@ static void xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ xml_set_handler() */
 static void xml_set_handler(zval **handler, zval **data)
 {
-	/* IS_ARRAY might indicate that we're using array($obj, 'method') syntax */
-	if (Z_TYPE_PP(data) != IS_ARRAY) {
-		convert_to_string_ex(data);
-	}
-
 	/* If we have already a handler, release it */
 	if (*handler) {
 		zval_ptr_dtor(handler);
 	}
 
-	zval_add_ref(data);
+	/* IS_ARRAY might indicate that we're using array($obj, 'method') syntax */
+	if (Z_TYPE_PP(data) != IS_ARRAY) {
+		convert_to_string_ex(data);
+		zval_add_ref(data);
+	}
+
 	*handler = *data;
 }
 /* }}} */
