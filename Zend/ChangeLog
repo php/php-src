@@ -1,3 +1,9 @@
+2003-09-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend.c
+      zend_language_scanner.l:
+      Added missing format.
+
 2003-09-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
