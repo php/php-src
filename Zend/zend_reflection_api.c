@@ -51,17 +51,23 @@ zend_class_entry *reflection_extension_ptr;
 		ZEND_WRONG_PARAM_COUNT();                                                                           \
 	}                                                                                                       \
 
+/* Exception throwing macro */
+#define _DO_THROW(msg)                                                                                      \
+	zend_throw_exception(reflection_exception_ptr, msg, 0 TSRMLS_CC);                                       \
+	return;                                                                                                 \
+
+#define RETURN_ON_EXCEPTION                                                                                 \
+	if (EG(exception) && Z_OBJCE_P(EG(exception)) == reflection_exception_ptr) {                            \
+		return;                                                                                             \
+	}
+
 #define GET_REFLECTION_OBJECT_PTR(target)                                                                   \
 	intern = (reflection_object *) zend_object_store_get_object(getThis() TSRMLS_CC);                       \
 	if (intern == NULL || intern->ptr == NULL) {                                                            \
+		RETURN_ON_EXCEPTION                                                                                 \
 		zend_error(E_ERROR, "Internal error: Failed to retrieve the reflection object");                    \
 	}                                                                                                       \
 	target = intern->ptr;                                                                                   \
-
-/* Exception throwing macro */
-#define _DO_THROW(msg)                                                                                      \
-	zend_throw_exception(reflection_exception_ptr, msg, 0 TSRMLS_CC);                                                                 \
-	return;                                                                                                 \
 
 /* {{{ Smart string functions */
 typedef struct _string {
@@ -838,6 +844,8 @@ static void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce
 	fcc.object_pp = &reflector_ptr;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
+	
+	RETURN_ON_EXCEPTION
 
 	if (result == FAILURE) {
 		zval_dtor(&reflector);
@@ -2314,7 +2322,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			efree(params);
 			zval_ptr_dtor(&retval_ptr);
-			zend_error(E_WARNING, "Invokation of %s's constructor failed\n", ce->name);
+			zend_error(E_WARNING, "Invokation of %s's constructor failed", ce->name);
 			RETURN_NULL();
 		}
 		if (retval_ptr) {
