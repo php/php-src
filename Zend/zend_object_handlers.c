@@ -65,7 +65,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 {
 	zend_object *zobj;
 	zval tmp_member;
-	zval *variable_ptr;
+	zval **variable_ptr;
 	
 	zobj = Z_GET_OBJ(object);
 
@@ -77,19 +77,20 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	}
 
 	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member), (void **) &variable_ptr) == SUCCESS) {
-		if (variable_ptr == EG(error_zval_ptr) || member == EG(error_zval_ptr)) {
+		if (*variable_ptr == EG(error_zval_ptr) || member == EG(error_zval_ptr)) {
 			/* variable_ptr = EG(uninitialized_zval_ptr); */
 /*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
-		} else if (variable_ptr != value) {
-			variable_ptr->refcount--;
-			if (variable_ptr->refcount == 0) {
-				zendi_zval_dtor(*variable_ptr);
-				FREE_ZVAL(variable_ptr);
+		} else if (*variable_ptr != value) {
+			(*variable_ptr)->refcount--;
+			if ((*variable_ptr)->refcount == 0) {
+				zendi_zval_dtor(**variable_ptr);
+				FREE_ZVAL(*variable_ptr);
 			}
 		}
 	}
 
-	zend_hash_update(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, &value, sizeof(zval *), NULL); 
+	value->refcount++;
+	zend_hash_update(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, &value, sizeof(zval *), NULL);
 	if (member == &tmp_member) {
 		zval_dtor(member);
 	}
@@ -117,7 +118,7 @@ static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
 	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &retval) == FAILURE) {
 		zval *new_zval = &EG(uninitialized_zval);
 
-		// zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member));
+		zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member));
 		new_zval->refcount++;
 		zend_hash_update(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, &new_zval, sizeof(zval *), (void **) &retval);
 	}
@@ -243,6 +244,7 @@ zend_object_handlers std_object_handlers = {
 	zend_std_read_property,                  /* read_property */
 	zend_std_write_property,                 /* write_property */
 	zend_std_get_property_ptr,               /* get_property_ptr */
+	zend_std_get_property_ptr,               /* get_property_zval_ptr */
 	NULL,                                    /* get */
 	NULL,                                    /* set */
 	zend_std_has_property,                   /* has_property */

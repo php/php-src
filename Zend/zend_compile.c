@@ -181,17 +181,85 @@ void zend_do_unary_op(int op, znode *result, znode *op1 TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 }
 
+#define MAKE_NOP(opline)	{ opline->opcode = ZEND_NOP;  memset(&opline->result,0,sizeof(znode)); memset(&opline->op1,0,sizeof(znode)); memset(&opline->op2,0,sizeof(znode)); opline->result.op_type=opline->op1.op_type=opline->op2.op_type=IS_UNUSED;  }
+
+static void zend_replace_object_fetch(zend_op *last_op, znode *value TSRMLS_DC)
+{
+	if(value->op_type != IS_VAR) {
+		last_op->opcode = ZEND_MAKE_VAR;
+		last_op->result.op_type = IS_VAR;
+		last_op->result.u.EA.type = 0;
+		last_op->result.u.var = get_temporary_variable(CG(active_op_array));
+		last_op->op1 = *value;
+		SET_UNUSED(last_op->op2);
+		value->op_type = IS_VAR;
+		value->u.EA.type = 0;
+		value->u.var = last_op->result.u.var;
+	} else {
+		MAKE_NOP(last_op);
+	}
+}
 
 void zend_do_binary_assign_op(int op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
+	int last_op_number = get_next_op_number(CG(active_op_array))-1;
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = op;
+	if(last_op->opcode == ZEND_FETCH_OBJ_RW) {
+		
+		switch(op) {
+			case ZEND_ASSIGN_ADD:
+				opline->opcode = ZEND_ASSIGN_ADD_OBJ;
+				break;
+			case ZEND_ASSIGN_SUB:
+				opline->opcode = ZEND_ASSIGN_SUB_OBJ;
+				break;
+			case ZEND_ASSIGN_MUL:
+				opline->opcode = ZEND_ASSIGN_MUL_OBJ;
+				break;
+			case ZEND_ASSIGN_DIV:
+				opline->opcode = ZEND_ASSIGN_DIV_OBJ;
+				break;
+			case ZEND_ASSIGN_MOD:
+				opline->opcode = ZEND_ASSIGN_MOD_OBJ;
+				break;
+			case ZEND_ASSIGN_SL:
+				opline->opcode = ZEND_ASSIGN_SL_OBJ;
+				break;
+			case ZEND_ASSIGN_SR:
+				opline->opcode = ZEND_ASSIGN_SR_OBJ;
+				break;
+			case ZEND_ASSIGN_CONCAT:
+				opline->opcode = ZEND_ASSIGN_CONCAT_OBJ;
+				break;
+			case ZEND_ASSIGN_BW_OR:
+				opline->opcode = ZEND_ASSIGN_BW_OR_OBJ;
+				break;
+			case ZEND_ASSIGN_BW_AND:
+				opline->opcode = ZEND_ASSIGN_BW_AND_OBJ;
+				break;
+			case ZEND_ASSIGN_BW_XOR:
+				opline->opcode = ZEND_ASSIGN_BW_XOR_OBJ;
+				break;
+			default:
+				zend_error(E_ERROR, "Unknown binary op opcode %d", op);
+		}
+		
+		opline->op2 = last_op->op2;
+		opline->op1 = last_op->op1;
+		zend_replace_object_fetch(last_op, op2 TSRMLS_CC);
+		opline->extended_value = op2->u.var;
+		
+	} else {
+		opline->opcode = op;
+		opline->op1 = *op1;
+		opline->op2 = *op2;
+	}
+
 	opline->result.op_type = IS_VAR;
 	opline->result.u.EA.type = 0;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *op1;
-	opline->op2 = *op2;
 	*result = opline->result;
 }
 
@@ -316,14 +384,26 @@ void zend_do_echo(znode *arg TSRMLS_DC)
 
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 {
+	int last_op_number = get_next_op_number(CG(active_op_array))-1;
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_ASSIGN;
+	if(last_op->opcode == ZEND_FETCH_OBJ_W) {
+		opline->opcode = ZEND_ASSIGN_OBJ;
+		opline->op1 = last_op->op1;
+		opline->op2 = last_op->op2;
+		
+		zend_replace_object_fetch(last_op, value TSRMLS_CC);
+
+		opline->extended_value = value->u.var;
+	} else {
+		opline->opcode = ZEND_ASSIGN;
+		opline->op1 = *variable;
+		opline->op2 = *value;
+	}
 	opline->result.op_type = IS_VAR;
 	opline->result.u.EA.type = 0;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *variable;
-	opline->op2 = *value;
 	*result = opline->result;
 }
 
@@ -447,28 +527,49 @@ void zend_do_for_end(znode *second_semicolon_token TSRMLS_DC)
 
 void zend_do_pre_incdec(znode *result, znode *op1, int op TSRMLS_DC)
 {
+	int last_op_number = get_next_op_number(CG(active_op_array))-1;
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = op;
+	if(last_op->opcode == ZEND_FETCH_OBJ_RW) {
+		opline->opcode = (op==ZEND_PRE_INC)?ZEND_PRE_INC_OBJ:ZEND_PRE_DEC_OBJ;
+		opline->op1 = last_op->op1;
+		opline->op2 = last_op->op2;
+		
+		MAKE_NOP(last_op);
+	} else {
+		opline->opcode = op;
+		opline->op1 = *op1;
+		SET_UNUSED(opline->op2);
+	}
+
 	opline->result.op_type = IS_VAR;
 	opline->result.u.EA.type = 0;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *op1;
 	*result = opline->result;
-	SET_UNUSED(opline->op2);
 }
 
 
 void zend_do_post_incdec(znode *result, znode *op1, int op TSRMLS_DC)
 {
+	int last_op_number = get_next_op_number(CG(active_op_array))-1;
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = op;
+	if(last_op->opcode == ZEND_FETCH_OBJ_RW) {
+		opline->opcode = (op==ZEND_POST_INC)?ZEND_POST_INC_OBJ:ZEND_POST_DEC_OBJ;
+		opline->op1 = last_op->op1;
+		opline->op2 = last_op->op2;
+		
+		MAKE_NOP(last_op);
+	} else {
+		opline->opcode = op;
+		opline->op1 = *op1;
+		SET_UNUSED(opline->op2);
+	}
 	opline->result.op_type = IS_TMP_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *op1;
 	*result = opline->result;
-	SET_UNUSED(opline->op2);
 }
 
 
