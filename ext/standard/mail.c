@@ -34,6 +34,7 @@
 #endif
 #include "php_mail.h"
 #include "php_ini.h"
+#include "safe_mode.h"
 
 #if HAVE_SENDMAIL
 #ifdef PHP_WIN32
@@ -79,6 +80,7 @@ PHP_FUNCTION(mail)
 	pval **argv[5];
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
 	int argc;
+	PLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 	if (argc < 3 || argc > 5 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
@@ -96,7 +98,7 @@ PHP_FUNCTION(mail)
 	/* Subject: */
 	convert_to_string_ex(argv[1]);
 	if ((*argv[1])->value.str.val) {
-		subject = (*argv[1])->value.str.val;
+		subject = Z_STRVAL_PP(argv[1]);
 	} else {
 		php_error(E_WARNING, "No subject field in mail command");
 		RETURN_FALSE;
@@ -105,7 +107,7 @@ PHP_FUNCTION(mail)
 	/* message body */
 	convert_to_string_ex(argv[2]);
 	if ((*argv[2])->value.str.val) {
-		message = (*argv[2])->value.str.val;
+		message = Z_STRVAL_PP(argv[2]);
 	} else {
 		/* this is not really an error, so it is allowed. */
 		php_error(E_WARNING, "No message string in mail command");
@@ -114,19 +116,20 @@ PHP_FUNCTION(mail)
 
 	if (argc >= 4) {			/* other headers */
 		convert_to_string_ex(argv[3]);
-		headers = (*argv[3])->value.str.val;
+		headers = Z_STRVAL_PP(argv[3]);
 	}
 	
 	if (argc == 5) {			/* extra options that get passed to the mailer */
 		convert_to_string_ex(argv[4]);
-		extra_cmd = (*argv[4])->value.str.val;
+		extra_cmd = php_escape_shell_arg(Z_STRVAL_PP(argv[4]));
 	}
 	
 	if (php_mail(to, subject, message, headers, extra_cmd)) {
-		RETURN_TRUE;
+		RETVAL_TRUE;
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	efree (extra_cmd);
 }
 /* }}} */
 
