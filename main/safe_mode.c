@@ -124,7 +124,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		SLS_FETCH();
 
 		if (SG(rfc1867_uploaded_files)) {
-			if (zend_hash_exists(SG(rfc1867_uploaded_files),filename,strlen(filename)+1)) {
+			if (zend_hash_exists(SG(rfc1867_uploaded_files), (char *) filename, strlen(filename)+1)) {
 				return 1;
 			}
 		}
