@@ -52,13 +52,22 @@
    +----------------------------------------------------------------------+
  */
 
+/**********************************************************************
+* BUGS:                                                               *
+*  - when calling a php user function, there appears to be no way to  *
+*    distinguish between a return value of null, and no return value  *
+*    at all.  The xml serialization layer(s) will then return a value *
+*    of null, when the right thing may be no value at all. (SOAP)     *
+**********************************************************************/
+
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
 #include "php_xmlrpc.h"
+#include "php_config.h"
 #include "xmlrpc.h"
 
-#define PHP_EXT_VERSION "0.41"
+#define PHP_EXT_VERSION "0.50"
 
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.
@@ -125,6 +134,7 @@ typedef struct _xmlrpc_server_data {
 // how to format output
 typedef struct _php_output_options {
    int b_php_out;
+	int b_auto_version;
    STRUCT_XMLRPC_REQUEST_OUTPUT_OPTIONS xmlrpc_out;
 } php_output_options;
 
@@ -161,6 +171,8 @@ typedef struct _xmlrpc_callback_data {
 #define VERSION_KEY_LEN (sizeof(VERSION_KEY) - 1)
 #define VERSION_VALUE_SIMPLE "simple"
 #define VERSION_VALUE_XMLRPC "xmlrpc"
+#define VERSION_VALUE_SOAP11 "soap 1.1"
+#define VERSION_VALUE_AUTO "auto"
 
 #define ENCODING_KEY "encoding"
 #define ENCODING_KEY_LEN (sizeof(ENCODING_KEY) - 1)
@@ -327,6 +339,7 @@ static void set_output_options(php_output_options* options, pval* output_opts) {
 
       /* defaults */
       options->b_php_out = 0;
+		options->b_auto_version = 1;
       options->xmlrpc_out.version = xmlrpc_version_1_0;
       options->xmlrpc_out.xml_elem_opts.encoding = ENCODING_DEFAULT;
       options->xmlrpc_out.xml_elem_opts.verbosity = xml_elem_pretty;
@@ -335,7 +348,7 @@ static void set_output_options(php_output_options* options, pval* output_opts) {
      if(output_opts && Z_TYPE_P(output_opts) == IS_ARRAY) {
         pval** val;
 
-        /* verbosity of generated xml */
+        /* type of output (xml/php) */
         if(zend_hash_find(Z_ARRVAL_P(output_opts), 
                           OUTPUT_TYPE_KEY, OUTPUT_TYPE_KEY_LEN + 1, 
                           (void**)&val) == SUCCESS) {
@@ -371,11 +384,18 @@ static void set_output_options(php_output_options* options, pval* output_opts) {
                           VERSION_KEY, VERSION_KEY_LEN + 1, 
                           (void**)&val) == SUCCESS) {
            if(Z_TYPE_PP(val) == IS_STRING) {
+				  options->b_auto_version = 0;
               if(!strcmp(Z_STRVAL_PP(val), VERSION_VALUE_XMLRPC)) {
                  options->xmlrpc_out.version = xmlrpc_version_1_0;
               }
               else if(!strcmp(Z_STRVAL_PP(val), VERSION_VALUE_SIMPLE)) {
                  options->xmlrpc_out.version = xmlrpc_version_simple;
+              }
+              else if(!strcmp((*val)->value.str.val, VERSION_VALUE_SOAP11)) {
+                 options->xmlrpc_out.version = xmlrpc_version_soap_1_1;
+              }
+              else { // if(!strcmp((*val)->value.str.val, VERSION_VALUE_AUTO)) {
+					  options->b_auto_version = 1;
               }
            }
         }
@@ -493,7 +513,8 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker(const char* key, pval* in_val, int dept
          switch(type) {
             case xmlrpc_base64:
                if(Z_TYPE_P(val) == IS_NULL) {
-                  xReturn = XMLRPC_CreateValueBase64(key, "", 1);
+                  xReturn = XMLRPC_CreateValueEmpty();
+						XMLRPC_SetValueID(xReturn, key, 0);
                }
                else {
                   xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL_P(val), Z_STRLEN_P(val));
@@ -644,6 +665,7 @@ PHP_FUNCTION(xmlrpc_encode_request) {
    }
 
    set_output_options(&out, (ARG_COUNT(ht) == 3) ? out_opts : 0);
+
 
    if(return_value_used) {
       xRequest = XMLRPC_RequestNew();
@@ -874,6 +896,8 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
    call_user_function(CG(function_table), NULL, pData->php_function, pData->return_data, 3, callback_params TSRMLS_CC);
 
    pData->php_executed = 1;
+
+	return NULL;
 }
 
 /* called by the C server when it first receives an introspection request.  We pass this on to
@@ -1052,19 +1076,21 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
       xRequest = XMLRPC_REQUEST_FromXML(Z_STRVAL_P(rawxml), Z_STRLEN_P(rawxml), &input_opts);
 
       if(xRequest) {
-
-         /* check if we have a method name -- indicating success and all manner of good things */
-         if(XMLRPC_RequestGetMethodName(xRequest)) {
-			pval** php_function;
+				const char* methodname = XMLRPC_RequestGetMethodName(xRequest);
+				pval** php_function;
             XMLRPC_VALUE xAnswer = NULL;
             MAKE_STD_ZVAL(data.xmlrpc_method); /* init. very important.  spent a frustrating day finding this out. */
             MAKE_STD_ZVAL(data.return_data);
             Z_TYPE_P(data.return_data) = IS_NULL;  /* in case value is never init'd, we don't dtor to think it is a string or something */
             Z_TYPE_P(data.xmlrpc_method) = IS_NULL;
 
-            /* setup some data to pass to the callback function */
-            Z_STRVAL_P(data.xmlrpc_method) = estrdup(XMLRPC_RequestGetMethodName(xRequest));
-            Z_STRLEN_P(data.xmlrpc_method) = strlen(Z_STRVAL_P(data.xmlrpc_method));
+				if (!methodname) {
+					methodname = "";
+				}
+            
+				/* setup some data to pass to the callback function */
+            Z_STRVAL_P(data.xmlrpc_method) = estrdup(methodname);
+            Z_STRLEN_P(data.xmlrpc_method) = strlen(methodname);
             Z_TYPE_P(data.xmlrpc_method) = IS_STRING;
             data.caller_params = caller_params;
             data.php_executed = 0;
@@ -1104,10 +1130,26 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
                  char* outBuf = 0;
                  int buf_len = 0;
 
+					/* automagically determine output serialization type from request type */
+					if (out.b_auto_version) { 
+						XMLRPC_REQUEST_OUTPUT_OPTIONS opts = XMLRPC_RequestGetOutputOptions(xRequest);
+						if (opts) {
+							out.xmlrpc_out.version = opts->version;
+						}
+					}
+
+					/* automagically determine output serialization type from request type */
+					if (out.b_auto_version) { 
+						XMLRPC_REQUEST_OUTPUT_OPTIONS opts = XMLRPC_RequestGetOutputOptions(xRequest);
+						if (opts) {
+							out.xmlrpc_out.version = opts->version;
+						}
+					}
                  /* set some required request hoojum */
                  XMLRPC_RequestSetOutputOptions(xResponse, &out.xmlrpc_out);
                  XMLRPC_RequestSetRequestType(xResponse, xmlrpc_request_response);
                  XMLRPC_RequestSetData(xResponse, xAnswer);
+					  XMLRPC_RequestSetMethodName(xResponse, methodname);
 
                  /* generate xml */
                  outBuf = XMLRPC_REQUEST_ToXML(xResponse, &buf_len);
@@ -1134,7 +1176,6 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
             if(xAnswer) {
                XMLRPC_CleanupValue(xAnswer);
             }
-         }
 
          XMLRPC_RequestFree(xRequest, 1);
       }

@@ -2,8 +2,9 @@
 LTLIBRARY_NAME    = libxmlrpc.la
 LTLIBRARY_SOURCES = base64.c simplestring.c xml_to_dandarpc.c \
                     xmlrpc_introspection.c encodings.c system_methods.c \
-                    xml_to_xmlrpc.c queue.c xml_element.c xmlrpc.c
+                    xml_to_xmlrpc.c queue.c xml_element.c xmlrpc.c \
+                    xml_to_soap.c
 		    
-DEFS = -DVERSION="0.41"
+DEFS = -DVERSION="0.50"
 
 include $(top_srcdir)/build/dynlib.mk

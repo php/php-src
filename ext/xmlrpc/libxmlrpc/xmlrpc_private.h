@@ -122,7 +122,6 @@ typedef struct _xmlrpc_request {
 /* Vector type. Used by XMLRPC_VALUE.  Never visible to users of the API. */
 typedef struct _xmlrpc_vector {
    XMLRPC_VECTOR_TYPE type;                           /* vector type                       */
-   const char* id;                                    /* ??? unused?                       */
    queue *q;                                          /* list of child values              */
 } STRUCT_XMLRPC_VECTOR;
 /******/

@@ -113,7 +113,7 @@ XMLRPC_VALUE xml_element_to_DANDARPC_REQUEST_worker(XMLRPC_REQUEST request, XMLR
             XMLRPC_SetIsVector(xCurrent, xmlrpc_vector_mixed);
          }
          else if(!strcmp(type, ATTR_ARRAY)) {
-            XMLRPC_SetIsVector(xCurrent, xmlrpc_vector_mixed);
+				XMLRPC_SetIsVector(xCurrent, xmlrpc_vector_array);
          }
          else if(!strcmp(type, ATTR_STRUCT)) {
             XMLRPC_SetIsVector(xCurrent, xmlrpc_vector_struct);
