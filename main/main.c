@@ -636,15 +636,15 @@ void php_request_shutdown(void *dummy)
 	SLS_FETCH();
 	PLS_FETCH();
 
-	if (setjmp(EG(bailout)==0) {
+	if (setjmp(EG(bailout))==0) {
 		sapi_send_headers();
 	}
 
-	if (setjmp(EG(bailout)==0) {
+	if (setjmp(EG(bailout))==0) {
 		php_end_ob_buffers(SG(request_info).headers_only?0:1);
 	}
 
-	if (setjmp(EG(bailout)==0) {
+	if (setjmp(EG(bailout))==0) {
 		php_call_shutdown_functions();
 	}
 	
@@ -652,25 +652,25 @@ void php_request_shutdown(void *dummy)
 		zend_deactivate_modules();
 	}
 	
-	if (setjmp(EG(bailout)==0) {
+	if (setjmp(EG(bailout))==0) {
 		php_ini_rshutdown();
 	}
 	
 	zend_deactivate(CLS_C ELS_CC);
 
-	if (setjmp(EG(bailout)==0) {
+	if (setjmp(EG(bailout))==0) {
 		sapi_deactivate(SLS_C);
 	}
 
-	if (setjmp(EG(bailout)==0) { 
+	if (setjmp(EG(bailout))==0) { 
 		shutdown_memory_manager(CG(unclean_shutdown), 0);
 	}
 
-	if (setjmp(EG(bailout)==0) { 
+	if (setjmp(EG(bailout))==0) { 
 		zend_unset_timeout();
 	}
 
-	if (setjmp(EG(bailout)==0) { 
+	if (setjmp(EG(bailout))==0) { 
 		global_unlock();
 	}
 }
