@@ -21,11 +21,12 @@
 #ifndef PHP_MAIL_H
 #define PHP_MAIL_H
 
+PHP_FUNCTION(mail);
+PHP_MINFO_FUNCTION(mail);
+
 #if HAVE_SENDMAIL
 
-PHP_FUNCTION(mail);
 PHP_FUNCTION(ezmlm_hash);
-PHP_MINFO_FUNCTION(mail);
 PHPAPI extern int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd TSRMLS_DC);
 
 #endif
