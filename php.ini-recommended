@@ -966,6 +966,13 @@ sockets.use_system_read = On
 ; registered as output buffer to function
 ;mbstring.http_output = SJIS
 
+; enable automatic encoding translation accoding to 
+; mbstring.internal_encoding setting. Input chars are
+; converted to internal encoding by setting this to On.
+; Note: Do _not_ use automatic encoding translation for
+;       portable libs/applications.
+;mbstring.encoding_translation = Off
+
 ; automatic encoding detection order.
 ; auto means 
 ;mbstring.detect_order = auto
