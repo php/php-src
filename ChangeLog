@@ -1,3 +1,75 @@
+2003-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.h:
+      Add method alias macro
+
+2003-11-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/gmp/gmp.c:
+      - Fix the parameter setting. (this function has 1 optional parameter)
+
+2003-11-18  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_language_parser.y:
+      - Add E_STRICT, to be used to warn purists (like Jani :)
+
+2003-11-18  Uwe Schindler  <uwe@thetaphi.de>
+
+    * win32/install.txt:
+      change names to php5_xxx in NSAPI
+
+2003-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/iterators_006.phpt:
+      Add new iterator test inspired by bug #26527
+
+    * ZendEngine2/zend_compile.c:
+      Backpatch the correct opcode for list(), property overloading needs more
+      opcodes (Bugfix #26257).
+
+2003-11-18  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/standard/parsedate.y:
+      the military time zone offsets where pointing in the wrong direction
+
+    * ext/standard/parsedate.y:
+      make strtotime() understand the datetime format used with XML Schema
+
+2003-11-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/math.c
+      ext/standard/tests/math/bug25694.phpt:
+      MFH: Fixed Bug #25694 (round() and number_format() give inconsistent
+      results).
+
+    * ext/standard/tests/math/bug25694.phpt:
+      
+      Fixed Bug #25694 (round() and number_format() give inconsistent results).
+
+    * ext/standard/math.c:
+      Fixed Bug #25694 (round() and number_format() give inconsistent results).
+
+2003-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      Use correct order
+
+2003-11-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * win32/install.txt:
+      fix the docs
+
+2003-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      Use correct macro/function
+
 2003-11-17  Frank M. Kromann  <frank@kromann.info>
 
     * ext/mssql/php_mssql.c:
