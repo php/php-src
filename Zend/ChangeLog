@@ -1,3 +1,17 @@
+2003-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      no need to init zval - assignment will init
+
+    * zend_execute.c:
+      Fix bug #22592 - cascading assignments to string offsets
+
+    * zend_constants.c:
+      support for self:: and parent:: constants
+
+    * zend_builtin_functions.c:
+      fix lambda function static vars (related to #17115)
+
 2003-06-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_constants.c:
