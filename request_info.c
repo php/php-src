@@ -92,23 +92,13 @@ int php3_destroy_request_info(void *conf)
 #if APACHE
 int php3_init_request_info(void *conf)
 {
-	const char *buf;
 	request_rec *r;
 	SLS_FETCH();
 
 	r = ((request_rec *) SG(server_context));
-	SG(request_info).query_string = r->args;
-	SG(request_info).path_translated = r->filename;
-	SG(request_info).request_uri = r->uri;
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
-
 	request_info.filename = r->filename;
-	SG(request_info).request_method = r->method;
-	SG(request_info).content_type = table_get(r->subprocess_env, "CONTENT_TYPE");
-
-	buf = table_get(r->subprocess_env, "CONTENT_LENGTH");
-	SG(request_info).content_length = (buf ? atoi(buf) : 0);
 
 	return SUCCESS;
 }

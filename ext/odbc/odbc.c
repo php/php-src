@@ -41,7 +41,7 @@
 #if HAVE_UODBC
 
 # if !(WIN32|WINNT)
-#  include "config.h"
+#  include "php_config.h"
 #  include "build-defs.h"
 # endif
   

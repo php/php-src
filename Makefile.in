@@ -124,7 +124,7 @@ clean: clean-recursive
 distclean: clean distclean-recursive
 	-rm -f *-parser.[ch] *-scanner.c *.output
 	-rm -f config.status config.cache config.log
-	-rm -f Makefile Makefile.depend config.h build-defs.h
+	-rm -f Makefile Makefile.depend php_config.h build-defs.h
 	-rm -f libphp3.module stamp-h
 	-rm -f regex/*.o regex/*.a regex/*.ih
 	-rm -f doc/checkdoc doc/funcparse doc/version.ent
@@ -144,8 +144,8 @@ regression check: $(BINNAME)
 config.status: configure
 	./config.status --recheck
 
-build-defs.h config.h: stamp-h
-stamp-h: config.h.in config.status
+build-defs.h php_config.h: stamp-h
+stamp-h: php_config.h.in config.status
 	CONFIG_FILES='build-defs.h stamp-h' ./config.status
 
 Makefile: Makefile.in config.status
@@ -158,7 +158,7 @@ Makefile: Makefile.in config.status
 configure: @MAINT@ configure.in aclocal.m4
 	cd $(srcdir) && autoconf
 
-config.h.in: @MAINT@ stamp-h.in
+php_config.h.in: @MAINT@ stamp-h.in
 stamp-h.in: configure.in aclocal.m4 acconfig.h
 	cd ${srcdir} && autoheader && touch ${srcdir}/stamp-h.in
 

@@ -25,7 +25,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    | (with helpful hints from Dean Gaudet <dgaudet@arctic.org>            |
-   | PHP4 patches by Zeev Suraski <zeev@zend.com>                         |
+   | PHP 4.0 patches by Zeev Suraski <zeev@zend.com>                      |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -44,27 +44,11 @@
 #include "http_protocol.h"
 #include "http_request.h"
 #include "http_log.h"
+
+#include "php.h"
+#include "php_ini.h"
 #include "SAPI.h"
-
-
-/* These are taken out of php_ini.h
- * they must be updated if php_ini.h changes!
- */
-#define PHP_INI_USER    (1<<0)
-#define PHP_INI_PERDIR  (1<<1)
-#define PHP_INI_SYSTEM  (1<<2)
-
-/* These are taken out of main.h
- * they must be updated if main.h changes!
- */
-
-int apache_php3_module_main(request_rec * r, int fd, int display_source_mode);
-int php_module_startup(sapi_module_struct *sf);
-void php_module_shutdown();
-void php_module_shutdown_for_exec();
-int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
-
-int php3_error(int type, const char *format, ...);
+#include "main.h"
 
 #include "util_script.h"
 
@@ -73,6 +57,8 @@ int php3_error(int type, const char *format, ...);
 #if HAVE_MOD_DAV
 # include "mod_dav.h"
 #endif
+
+PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mode SLS_DC);
 
 /* ### these should be defined in mod_php3.h or somewhere else */
 #define USE_PATH 1
@@ -120,15 +106,15 @@ static int zend_apache_ub_write(const char *str, uint str_length)
 }
 
 
-char *sapi_apache_read_post(SLS_D)
+int sapi_apache_read_post(char *buffer, uint count_bytes SLS_DC)
 {
-	return NULL;
+	return 0;
 }
 
 
 char *sapi_apache_read_cookies(SLS_D)
 {
-	return table_get(r->subprocess_env, "HTTP_COOKIE");
+	return (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, "HTTP_COOKIE");
 }
 
 
@@ -146,11 +132,11 @@ int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 
 	*p = 0;
 	do {
-		header_content++
+		header_content++;
 	} while (*header_content==' ');
 
 	if (!strcasecmp(header_name, "Content-Type")) {
-		r->content_type = pstrdup(header_content);
+		r->content_type = pstrdup(r->pool, header_content);
 	} else if (!strcasecmp(header_name, "Location")) {
 		r->status = REDIRECT;
 	} else {
@@ -163,7 +149,7 @@ int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 }
 
 
-void sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
 	send_http_header((request_rec *) SG(server_context));
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
@@ -195,9 +181,24 @@ void php3_restore_umask()
 }
 
 
+static void init_request_info(SLS_D)
+{
+	request_rec *r = ((request_rec *) SG(server_context));
+	char *content_length = (char *) table_get(r->subprocess_env, "CONTENT_LENGTH");
+
+	SG(request_info).query_string = r->args;
+	SG(request_info).path_translated = r->filename;
+	SG(request_info).request_uri = r->uri;
+	SG(request_info).request_method = r->method;
+	SG(request_info).content_type = (char *) table_get(r->subprocess_env, "CONTENT_TYPE");
+	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
+}
+
+
 int send_php3(request_rec *r, int display_source_mode, char *filename)
 {
 	int fd, retval;
+	SLS_FETCH();
 
 	/* We don't accept OPTIONS requests, but take everything else */
 	if (r->method_number == M_OPTIONS) {
@@ -251,11 +252,15 @@ int send_php3(request_rec *r, int display_source_mode, char *filename)
 	/* Init timeout */
 	hard_timeout("send", r);
 
+	SG(server_context) = r;
+	init_request_info(SLS_C);
+	
 	php3_save_umask();
 	chdir_file(filename);
 	add_common_vars(r);
 	add_cgi_vars(r);
-	apache_php3_module_main(r, fd, display_source_mode);
+	init_request_info();
+	apache_php3_module_main(r, fd, display_source_mode SLS_CC);
 
 	/* Done, restore umask, turn off timeout, close file and return */
 	php3_restore_umask();

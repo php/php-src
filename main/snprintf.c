@@ -53,7 +53,7 @@
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
 
-#include "config.h"
+#include "php_config.h"
 
 #if !defined(APACHE) || (!APACHE)
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)

@@ -34,7 +34,7 @@
  */
 
 #ifndef MSVC5
-#include "config.h"
+#include "php_config.h"
 #endif
 
 

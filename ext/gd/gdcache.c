@@ -40,7 +40,7 @@
 #if (WIN32|WINNT)
 #define HAVE_LIBTTF 1
 #else
-#include "config.h"
+#include "php_config.h"
 #endif
 #if HAVE_LIBTTF
 

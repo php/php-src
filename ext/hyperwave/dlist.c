@@ -18,6 +18,9 @@
 * -----------------
 *
 * $Log$
+* Revision 1.1  1999/04/21 23:11:20  ssb
+* moved apache, com and hyperwave into ext/
+*
 * Revision 1.1.1.1  1999/04/07 21:03:31  zeev
 * PHP 4.0
 *
@@ -48,7 +51,7 @@
 ****************************************************************************/
 
 #ifndef MSVC5
-#include "config.h"
+#include "php_config.h"
 #endif
 
 #if HYPERWAVE

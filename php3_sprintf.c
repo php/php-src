@@ -30,7 +30,7 @@
 
 /* $Id$ */
 
-#include "config.h"
+#include "php_config.h"
 #include <stdio.h>
 #include <stdarg.h>
 

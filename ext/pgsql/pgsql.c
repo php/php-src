@@ -33,7 +33,7 @@
 #include <stdlib.h>
 
 #ifndef MSVC5
-#include "config.h"
+#include "php_config.h"
 #endif
 #include "php.h"
 #include "php3_pgsql.h"

@@ -33,8 +33,8 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-/* php.h includes the correct regex.h */
 #include "php.h"
+#include "php_regex.h"
 
 #include "url.h"
 #ifdef _OSD_POSIX
