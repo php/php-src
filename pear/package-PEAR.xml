@@ -35,9 +35,12 @@
     <state>stable</state>
     <date>2002-11-11</date>
     <notes>
-New Features, Installer:
-* installer aborts failed installs nicely (using
-  file "transactions")
+Changes, Installer:
+* --force option no longer ignores errors, use
+  --ignore-errors instead
+* installer transactions: failed installs abort
+  cleanly, without leaving half-installed packages
+  around
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
