@@ -102,6 +102,7 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_first_reference,    NULL)
 	PHP_FE(ldap_next_reference,     NULL)
 	PHP_FE(ldap_parse_reference,    third_argument_force_ref)
+	PHP_FE(ldap_rename,             NULL)
 #endif
 	
 #ifdef STR_TRANSLATION
@@ -1635,7 +1636,7 @@ PHP_FUNCTION(ldap_set_option) {
 		/* options with string value */
 	case LDAP_OPT_HOST_NAME:
 	case LDAP_OPT_ERROR_STRING:
-#ifndef HAVE_NSLDAP
+#ifdef LDAP_OPT_MATCHED_DN
 	case LDAP_OPT_MATCHED_DN:
 #endif
 		{
@@ -1917,6 +1918,46 @@ PHP_FUNCTION(ldap_parse_reference)
 		ldap_value_free(lreferrals);
 	}
 	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto boolean ldap_rename(int link, string dn, string newrdn,
+                                 string newparent, boolean deleteoldrdn);
+   Modify the name of an entry */
+PHP_FUNCTION(ldap_rename)
+{
+	pval **link, **dn, **newrdn, **newparent, **deleteoldrdn;
+	LDAP *ldap;
+	int rc;
+	
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &link, &dn, &newrdn, &newparent, &deleteoldrdn) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ldap = _get_ldap_link(link);
+	if (ldap == NULL) RETURN_FALSE;
+
+	convert_to_string_ex(dn);
+	convert_to_string_ex(newrdn);
+	convert_to_string_ex(newparent);
+	convert_to_boolean_ex(deleteoldrdn);
+
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP	
+	rc = ldap_rename_s(ldap, Z_STRVAL_PP(dn), Z_STRVAL_PP(newrdn), Z_STRVAL_PP(newparent), Z_BVAL_PP(deleteoldrdn), NULL, NULL);
+#else
+	if (Z_STRLEN_PP(newparent) != 0) {
+		php_error(E_WARNING, "You are using old LDAP API, newparent must be the empty string, can only modify RDN");
+		RETURN_FALSE;
+	}
+/* could support old APIs but need check for ldap_modrdn2()/ldap_modrdn() */
+	rc = ldap_modrdn2_s(ldap, Z_STRVAL_PP(dn), Z_STRVAL_PP(newrdn), Z_BVAL_PP(deleteoldrdn));
+#endif
+
+	if (rc == LDAP_SUCCESS) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 #endif
