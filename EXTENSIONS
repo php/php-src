@@ -27,24 +27,32 @@ Status legend
 == Server APIs ==
 
 -------------------------------------------------------------------------------
-EXTENSION:           aolserver
-MAINTENANCE:         Unknown
-STATUS:              Unknown
--------------------------------------------------------------------------------
 EXTENSION:           activescript
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>
 MAINTENANCE:         Odd Fixes
 STATUS:              Experimental
+-------------------------------------------------------------------------------
+EXTENSION:           aolserver
+MAINTENANCE:         Unknown
+STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           apache
 PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           apache2
+EXTENSION:           apache2handler / apache2filter
 PRIMARY MAINTAINER:  Aaron Bannert <aaron@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
+-------------------------------------------------------------------------------
+EXTENSION:           apache_hooks
+MAINTENANCE:         Unknown
+STATUS:              Unknown
+-------------------------------------------------------------------------------
+EXTENSION:           caudium
+MAINTENANCE:         Unknown
+STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           cgi
 MAINTENANCE:         Unknown
@@ -55,13 +63,18 @@ MAINTENANCE:         Marcus Boerger <helly@php.net>, Edin Kadribasic <edink@php.
 STATUS:              Working
 SINCE:               4.3.0
 -------------------------------------------------------------------------------
-EXTENSION:           fhttpd
-MAINTENANCE:         Unknown
-STATUS:              Unknown
+EXTENSION:           embed
+PRIMARY MAINTAINER:  Edin Kadribasic <edink@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           isapi
 MAINTENANCE:         Unknown
 STATUS:              Working
+-------------------------------------------------------------------------------
+EXTENSION:           milter
+MAINTENANCE:         Unknown
+STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           nsapi
 PRIMARY MAINTAINER:  Uwe Schindler <thetaphi@php.net>
@@ -80,12 +93,12 @@ EXTENSION:           roxen
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
-EXTENSION:           servlet
-PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
-MAINTENANCE:         Maintained
+EXTENSION:           thttpd
+PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
+MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           thttpd
+EXTENSION:           tux
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
@@ -121,10 +134,10 @@ EXTENSION:           filepro
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
-EXTENSION:           hyperwave
+EXTENSION:           hwapi
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
+MAINTENANCE:         Unknown
+STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           informix
 PRIMARY MAINTAINER:  Danny Heijl <Danny.Heijl@cevi.be>
@@ -145,12 +158,6 @@ STATUS:              Working
 EXTENSION:           msql
 MAINTENANCE:         Unknown
 STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           msession
-PRIMARY MAINTAINER   Mark L. Woodward mlwmohawk@mohawksoft.com
-MAINTENANCE:         Maintained
-STATUS:              Working/Experimental
-COMMENT:             Tested on Linux, should work on other UNIX platforms. Backend server code can compile under Windows.
 -------------------------------------------------------------------------------
 EXTENSION:           mssql
 PRIMARY MAINTAINER:  Frank M. Kromann <fmk@swwwing.com>
@@ -250,11 +257,6 @@ SINCE:               5.0
 == Other extensions ==
 
 -------------------------------------------------------------------------------
-EXTENSION:           aspell
-MAINTENANCE:         Unknown
-STATUS:              Working
-COMMENT:             For aspell .27 and greater, check out the pspell extension
--------------------------------------------------------------------------------
 EXTENSION:           bcmath
 MAINTENANCE:         Unknown
 STATUS:              Unknown
@@ -266,12 +268,6 @@ STATUS:              Working
 SINCE:               4.0.3
 -------------------------------------------------------------------------------
 EXTENSION:           dio
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Orphaned
-STATUS:              Working
-SINCE:               4.0.6
--------------------------------------------------------------------------------
-EXTENSION:           cyrus
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Orphaned
 STATUS:              Working
@@ -309,16 +305,6 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
-EXTENSION:           cybercash
-PRIMARY MAINTAINER:  Evan Klinger <evan715@sirius.com>
-MAINTENANCE:         Maintained
-STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           dotnet
-PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
-MAINTENANCE:         Maintained
-STATUS:              Experimental
--------------------------------------------------------------------------------
 EXTENSION:           exif
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
 MAINTENANCE:         Maintained
@@ -349,10 +335,6 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 SINCE:               4.0.4
 -------------------------------------------------------------------------------
-EXTENSION:           icap
-MAINTENANCE:         Unknown
-STATUS:              Obsolete
--------------------------------------------------------------------------------
 EXTENSION:           iconv
 PRIMARY MAINTAINER:  Moriyoshi Koizumi <moriyoshi@php.net>
 MAINTENANCE:         Maintained
@@ -361,11 +343,6 @@ STATUS:              Working
 EXTENSION:           imap
 PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org>
 MAINTENANCE:         Odd Fixes
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           java
-PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
-MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           ldap
@@ -393,23 +370,17 @@ PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           muscat
-PRIMARY MAINTAINER:  Sam Liddicott <sam@ananova.com>
+EXTENSION:           msession
+PRIMARY MAINTAINER   Mark L. Woodward mlwmohawk@mohawksoft.com
 MAINTENANCE:         Maintained
-STATUS:              Working
-SINCE:               4.0.5
-COMMENT:             Not tested against windows, only core API completed, rest under development
+STATUS:              Working/Experimental
+COMMENT:             Tested on Linux, should work on other UNIX platforms. Backend server code can compile under Windows.
 -------------------------------------------------------------------------------
 EXTENSION:           openssl
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
 SINCE:               4.0.4
--------------------------------------------------------------------------------
-EXTENSION:           overload
-PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Experimental
 -------------------------------------------------------------------------------
 EXTENSION:           pcre
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
@@ -432,23 +403,11 @@ PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           printer
-PRIMARY MAINTAINER:  Daniel Beulshausen <daniel@php4win.de>
-MAINTENANCE:         Maintained
-STATUS:              Working
-SINCE:               4.0.4
-COMMENT:             Only for Win32
--------------------------------------------------------------------------------
 EXTENSION:           pspell
 PRIMARY MAINTAINER:  Vlad Krupin <phpdevel@echospace.com>
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 SINCE:               4.0.2
--------------------------------------------------------------------------------
-EXTENSION:           qtdom
-MAINTENANCE:         Unknown
-STATUS:              Experimental
-SINCE:               4.0.4
 -------------------------------------------------------------------------------
 EXTENSION:           readline
 MAINTENANCE:         Unknown
@@ -458,18 +417,6 @@ EXTENSION:           recode
 PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           sablot
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Obsolete
-STATUS:              Experimental
-SINCE:               4.0.3
--------------------------------------------------------------------------------
-EXTENSION:           satellite
-PRIMARY MAINTAINER:  David Eriksson <eriksson@php.net>
-MAINTENANCE:         Odd Fixes
-STATUS:              Experimental
-SINCE:               4.0.3
 -------------------------------------------------------------------------------
 EXTENSION:           session
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
@@ -493,11 +440,9 @@ MAINTENANCE:         Maintained
 STATUS:              Experimental
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
-EXTENSION:           swf
-PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Orphaned
-STATUS:              Deprecated (Use the ming swf extension instead)
-COMMENT:             Only for Unix (won't change)
+EXTENSION:           sysvmsg
+MAINTENANCE:         Unknown
+STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           sysvsem
 MAINTENANCE:         Unknown
@@ -506,11 +451,6 @@ STATUS:              Unknown
 EXTENSION:           sysvshm
 MAINTENANCE:         Unknown
 STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           vpopmail
-MAINTENANCE:         Unknown
-STATUS:              Experimental
-SINCE:               4.0.5
 -------------------------------------------------------------------------------
 EXTENSION:           yaz
 PRIMARY MAINTAINER:  Adam Dickmeiss <adam@indexdata.dk>
@@ -526,10 +466,4 @@ EXTENSION:           zlib
 PRIMARY MAINTAINER:  Stefan Roehrich <sr@linux.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           zziplib
-PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
-MAINTENANCE:         Odd Fixes
-STATUS:              Working
-SINCE:               4.0.5
 -------------------------------------------------------------------------------
