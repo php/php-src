@@ -1,3 +1,23 @@
+2001-03-05  Rainer Schaaf  <rjs@pdflib.com>
+
+    * ext/pdf/pdf.c: fixed bug in PDF_getbuffer (happend only on Windows)
+    When using PDFlib V4.0 the pdf_set(grey/rgbcolor) functions are replaced
+    by the PDFlib V4.0 function pdf_setcolor
+
+2001-03-05  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cgi/cgi_main.c: Fix help text for -f
+
+    * sapi/cgi/cgi_main.c:
+    Can't output any error messages if there isn't any function initialized
+    to do it..
+
+2001-03-05  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/file.c:
+    get_meta_tags now handles single quoted attributes as well as those that
+    are double quoted.
+
 2001-03-04  Zeev Suraski  <zeev@zend.com>
 
     * ext/standard/info.c:
