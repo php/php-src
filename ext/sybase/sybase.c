@@ -23,9 +23,6 @@
 /* $Id$ */
 
 
-#ifndef MSVC5
-#include "php_config.h"
-#endif
 #include "php.h"
 #include "php3_sybase.h"
 #include "ext/standard/php3_standard.h"
