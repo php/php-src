@@ -71,3 +71,4 @@ cvsclean:
 	done
 
 .PHONY: $(ALWAYS) snapshot cvsclean
+.PRECIOUS: cvsclean
