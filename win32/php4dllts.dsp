@@ -165,6 +165,10 @@ SOURCE=..\main\php_ini.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_open_temporary_file.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
@@ -265,6 +269,10 @@ SOURCE=..\main\php_ini.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_open_temporary_file.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_regex.h
 # End Source File
 # Begin Source File
@@ -292,14 +300,6 @@ SOURCE=..\main\SAPI.h
 SOURCE=..\main\win95nt.h
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=..\main\php_open_temporary_file.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\php_open_temporary_file.h
-# End Source File
 # End Group
 # Begin Group "Function Modules"
 
@@ -522,6 +522,10 @@ SOURCE=..\ext\standard\url.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\url_scanner.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\var.c
 # End Source File
 # End Group
@@ -683,6 +687,10 @@ SOURCE=..\ext\standard\uniqid.h
 # Begin Source File
 
 SOURCE=..\ext\standard\url.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner.h
 # End Source File
 # End Group
 # Begin Group "PCRE"
