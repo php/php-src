@@ -572,7 +572,7 @@ ZEND_FUNCTION(get_parent_class)
 		
 		SEPARATE_ZVAL(arg);
 		zend_str_tolower(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
-		if (zend_lookup_class(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_lookup_ns_class(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
 	}
@@ -612,7 +612,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	lcname = estrndup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
 	zend_str_tolower(lcname, Z_STRLEN_PP(class_name));
 
-	if (zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(class_name)+1, (void **) &ce)==FAILURE) {
+	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == FAILURE) {
 		efree(lcname);
 		retval = 0;
 	} else {
@@ -670,7 +670,7 @@ ZEND_FUNCTION(get_class_vars)
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
 
-	if (zend_lookup_class(lcname, Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
+	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
 		efree(lcname);
 		RETURN_FALSE;
 	} else {
@@ -737,7 +737,7 @@ ZEND_FUNCTION(get_class_methods)
 		SEPARATE_ZVAL(class);
 		zend_str_tolower(Z_STRVAL_PP(class), Z_STRLEN_PP(class));
 
-		if (zend_lookup_class(Z_STRVAL_PP(class), Z_STRLEN_PP(class), &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_lookup_ns_class(Z_STRVAL_PP(class), Z_STRLEN_PP(class), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
 	}
@@ -814,40 +814,22 @@ static inline zend_namespace *get_namespace_from_zval(zval **namespace_name TSRM
 	return *pns;
 }
 
-/* {{{ proto bool class_exists(string classname[, string namespace])
+/* {{{ proto bool class_exists(string classname)
    Checks if the class exists */
 ZEND_FUNCTION(class_exists)
 {
-	zval **class_name, **namespace_name;
+	zval **class_name;
 	char *lcname;
-	zend_namespace *ns;
+	zend_class_entry **ce;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 0:
-			ZEND_WRONG_PARAM_COUNT();
-		case 1:
-			if(zend_get_parameters_ex(1, &class_name)==FAILURE) {
-				ZEND_WRONG_PARAM_COUNT();
-			}
-			ns = EG(active_namespace);
-			break;
-		case 2:
-			if(zend_get_parameters_ex(2, &class_name, &namespace_name)==FAILURE) {
-				ZEND_WRONG_PARAM_COUNT();
-			}
-			ns = get_namespace_from_zval(namespace_name TSRMLS_CC);
-			if(!ns) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
-		   
+
 	convert_to_string_ex(class_name);
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
-	if (zend_hash_exists(&ns->class_table, lcname, (*class_name)->value.str.len+1)) {
+	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == SUCCESS) {
 		efree(lcname);
 		RETURN_TRUE;
 	} else {
