@@ -187,6 +187,7 @@ PHP_FUNCTION(dio_read)
 	data = emalloc(bytes + 1);
 	res = read(f->fd, data, bytes);
 	if (res <= 0) {
+		efree(data);
 		RETURN_NULL();
 	}
 
