@@ -21,6 +21,8 @@
 # undef PACKAGE
 # undef VERSION
 # include "tsrm_config.h"
+# undef PACKAGE
+# undef VERSION
 #endif
 
 #if WIN32||WINNT
