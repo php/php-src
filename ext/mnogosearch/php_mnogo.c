@@ -48,6 +48,8 @@
 #define UDM_PARAM_CACHE_MODE	4
 #define UDM_PARAM_TRACK_MODE	5
 #define UDM_PARAM_CHARSET	6
+#define UDM_PARAM_STOPTABLE	7
+#define UDM_PARAM_STOPFILE	8
 
 #define UDM_TRACK_ENABLED	1
 #define UDM_TRACK_DISABLED	0
@@ -128,6 +130,8 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_CACHE_MODE",UDM_PARAM_CACHE_MODE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_TRACK_MODE",UDM_PARAM_TRACK_MODE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_CHARSET",UDM_PARAM_CHARSET,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_STOPTABLE",UDM_PARAM_STOPTABLE,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_STOPFILE",UDM_PARAM_STOPFILE,CONST_CS | CONST_PERSISTENT);	
 	
 	/* udm_get_res_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_FOUND",UDM_PARAM_FOUND,CONST_CS | CONST_PERSISTENT);
@@ -285,7 +289,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 						break;
 						
 					default:
-						RETURN_STRING("<Udm_Set_Agent_Param: Unknown search mode>",1);
+						php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown search mode");
+						RETURN_FALSE;
 						break;
 			}
 			
@@ -303,7 +308,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					
 				default:
 					Agent->cache_mode=UDM_CACHE_DISABLED;
-					RETURN_STRING("<Udm_Set_Agent_Param: Unknown cache mode>",1);
+					php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown cache mode");
+					RETURN_FALSE;
 					break;
 			}
 			
@@ -320,7 +326,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					break;
 					
 				default:
-					RETURN_STRING("<Udm_Set_Agent_Param: Unknown track_mode>",1);
+					php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown track mode");
+					RETURN_FALSE;
 					break;
 			}
 			
@@ -332,34 +339,26 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 
 			break;
 			
-		default:
-			RETURN_STRING("<Udm_Set_Agent_Param: Unknown agent parameter>",1);
+		case UDM_PARAM_STOPTABLE:
+			strcat(Agent->Conf->stop_tables," ");
+			strcat(Agent->Conf->stop_tables,val);
+
 			break;
-	}
-}
-/* }}} */
 
-
-
-/* {{{ proto int udm_free_agent(int agent_identifier)
-   Free mnoGoSearch session */
-DLEXPORT PHP_FUNCTION(udm_free_agent)
-{
-	pval ** yyagent;
-	UDM_RESULT * Agent;
-	switch(ZEND_NUM_ARGS()){
-		case 1: {
-				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
-					RETURN_FALSE;
-				}
+		case UDM_PARAM_STOPFILE: 
+			if (UdmFileLoadStopList(Agent->Conf,val)) {
+				php_error(E_WARNING,Agent->Conf->errstr);
+				RETURN_FALSE;
 			}
+			    
 			break;
+			
 		default:
-			WRONG_PARAM_COUNT;
+			php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown agent parameter");
+			RETURN_FALSE;
 			break;
 	}
-	ZEND_FETCH_RESOURCE(Agent, UDM_RESULT *, yyagent, -1, "mnoGoSearch-agent", le_link);
-	zend_list_delete((*yyagent)->value.lval);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -429,81 +428,14 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field){
 			case UDM_FIELD_SCORE:		RETURN_LONG((Res->Doc[row].rating));break;
 			case UDM_FIELD_MODIFIED:	RETURN_LONG((Res->Doc[row].last_mod_time));break;
 			default: 
-				RETURN_STRING("<Udm_Get_Res_Field: Unknown mnoGoSearch field name>",1);break;
+				php_error(E_WARNING,"Udm_Get_Res_Field: Unknown mnoGoSearch field name");
+				RETURN_FALSE;
+				break;
 		}
 	}else{
-		RETURN_STRING("<Udm_Get_Res_Field: row number too large>",1);
+		php_error(E_WARNING,"Udm_Get_Res_Field: row number too large");
+		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-
-/* {{{ proto int udm_free_res(int res_identifier)
-    mnoGoSearch free result */
-DLEXPORT PHP_FUNCTION(udm_free_res)
-{
-	pval ** yyres;
-	UDM_RESULT * Res;
-	switch(ZEND_NUM_ARGS()){
-		case 1: {
-				if (zend_get_parameters_ex(1, &yyres)==FAILURE) {
-					RETURN_FALSE;
-				}
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
-	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
-	zend_list_delete((*yyres)->value.lval);
-
-}
-/* }}} */
-
-
-/* {{{ proto int udm_error(int agent_identifier)
-    mnoGoSearch error message */
-DLEXPORT PHP_FUNCTION(udm_error)
-{
-	pval ** yyagent;
-	UDM_AGENT * Agent;
-	
-	switch(ZEND_NUM_ARGS()){
-		case 1: {
-				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
-					RETURN_FALSE;
-				}
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
-	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
-	RETURN_STRING(UdmDBErrorMsg(Agent->db),1);
-}
-/* }}} */
-
-/* {{{ proto int udm_errno(int agent_identifier)
-    mnoGoSearch error number */
-DLEXPORT PHP_FUNCTION(udm_errno)
-{
-	pval ** yyagent;
-	UDM_AGENT * Agent;
-	switch(ZEND_NUM_ARGS()){
-		case 1: {
-				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
-					RETURN_FALSE;
-				}
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
-	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
-	RETURN_LONG(UdmDBErrorCode(Agent->db));
 }
 /* }}} */
 
@@ -533,12 +465,107 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 		case UDM_PARAM_NUM_ROWS: RETURN_LONG(Res->num_rows);break;
 		case UDM_PARAM_FOUND:	 RETURN_LONG(Res->total_found);break;
 		default:
-			/* FIXME: unknown parameter */
-			RETURN_STRING("<Udm_Get_Res_Param: Unknown mnoGoSearch param name>",1);
+			php_error(E_WARNING,"Udm_Get_Res_Param: Unknown mnoGoSearch param name");
+			RETURN_FALSE;
 			break;
 	}
 }
 /* }}} */
+
+
+/* {{{ proto int udm_free_res(int res_identifier)
+    mnoGoSearch free result */
+DLEXPORT PHP_FUNCTION(udm_free_res)
+{
+	pval ** yyres;
+	UDM_RESULT * Res;
+	switch(ZEND_NUM_ARGS()){
+		case 1: {
+				if (zend_get_parameters_ex(1, &yyres)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
+	zend_list_delete((*yyres)->value.lval);
+
+}
+/* }}} */
+
+
+/* {{{ proto int udm_errno(int agent_identifier)
+    mnoGoSearch error number */
+DLEXPORT PHP_FUNCTION(udm_errno)
+{
+	pval ** yyagent;
+	UDM_AGENT * Agent;
+	switch(ZEND_NUM_ARGS()){
+		case 1: {
+				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
+	RETURN_LONG(UdmDBErrorCode(Agent->db));
+}
+/* }}} */
+
+
+/* {{{ proto int udm_error(int agent_identifier)
+    mnoGoSearch error message */
+DLEXPORT PHP_FUNCTION(udm_error)
+{
+	pval ** yyagent;
+	UDM_AGENT * Agent;
+	
+	switch(ZEND_NUM_ARGS()){
+		case 1: {
+				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
+	RETURN_STRING(UdmDBErrorMsg(Agent->db),1);
+}
+/* }}} */
+
+
+/* {{{ proto int udm_free_agent(int agent_identifier)
+   Free mnoGoSearch session */
+DLEXPORT PHP_FUNCTION(udm_free_agent)
+{
+	pval ** yyagent;
+	UDM_RESULT * Agent;
+	switch(ZEND_NUM_ARGS()){
+		case 1: {
+				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_RESULT *, yyagent, -1, "mnoGoSearch-agent", le_link);
+	zend_list_delete((*yyagent)->value.lval);
+}
+/* }}} */
+
 
 #endif
 

@@ -35,6 +35,8 @@
 	Udm_Set_Agent_Param($udm,UDM_PARAM_CACHE_MODE,UDM_CACHE_DISABLED);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_TRACK_MODE,UDM_TRACK_DISABLED);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_CHARSET,"koi8-r");
+	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPTABLE,"stopwords");
+//	Udm_Set_Agent_Param($udm,UDM_PARAM_STOPFILE,"stop.txt");
 	
 // Stage 3: perform search 
 

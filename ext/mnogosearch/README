@@ -1,7 +1,7 @@
 $Source$
 $Id$
 
-mnoGoSearch extension module version 0.3 for PHP4.
+mnoGoSearch extension module for PHP4.
 Basic mnoGoSearch function implementation.
 
 If used with mysql you should not use bundled mysql library 
@@ -12,8 +12,7 @@ library. To do this you should compile php with specefying mysql-dir
   TODO
   ----
 
-1. Implement more UdmSearch functions. Only basic minimal functions
-set is implemented for now.
+1. Implement more UdmSearch functions.
 
 2. Fix  config.m4 to detect whether UdmSearch is actually installed.
 Currently there is no any checking. ./configure just trust that UdmSearch
@@ -24,6 +23,3 @@ PHP4 by default and does not require any additional UdmSearch libraries.
   Actually it should work fine with other supported database.
 
 4. Write PHP interface documentation.
-
-5. Add nice warnings when unknown parameters are passed to PHP functions.
-Those places are marked with FIXME is php_udm.c
