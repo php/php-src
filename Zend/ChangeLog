@@ -1,3 +1,9 @@
+2003-10-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * Zend.dsp
+      ZendTS.dsp:
+      Add zend_interfaces.{c|h}.
+
 2003-10-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend.c:

@@ -1,3 +1,15 @@
+2003-10-23  Gabor Hojtsy  <gabor@hojtsy.hu>
+
+    * win32/install.txt:
+      The web server user name starts with IUSR_ and not ISUR_,
+      and some clarifications from Phil Driscoll
+
+2003-10-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/Zend.dsp
+      ZendEngine2/ZendTS.dsp:
+      Add zend_interfaces.{c|h}.
+
 2003-10-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
