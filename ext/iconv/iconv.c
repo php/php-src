@@ -1587,7 +1587,7 @@ PHP_FUNCTION(iconv_strrpos)
 }
 /* }}} */
 
-/* {{{ proto string iconv_mime_encode(string field_name, string field_value, string scheme, string out_charset [, string in_charset, int line_len, string lfchars])
+/* {{{ proto string iconv_mime_encode(string field_name, string field_value, [, array preference])
    Composes a mime header field with field_name and field_value in a specified scheme */
 PHP_FUNCTION(iconv_mime_encode)
 {
@@ -1595,16 +1595,13 @@ PHP_FUNCTION(iconv_mime_encode)
 	int field_name_len;
 	char *field_value;
 	int field_value_len;
-	char *scheme;
-	int scheme_len;	
+	zval *pref;
+	zval val, *pval, **ppval;
 	char *in_charset;
-	int in_charset_len;
 	char *out_charset;
-	int out_charset_len;
 	long line_len = 76;
 	char *lfchars = "\r\n";
-	int lfchars_len = sizeof("\r\n")-1; 
-	
+
 	php_iconv_enc_scheme_t scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
 
 	smart_str retval = {0};
@@ -1613,23 +1610,72 @@ PHP_FUNCTION(iconv_mime_encode)
 
 	in_charset = ICONVG(internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|sls",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|a",
 		&field_name, &field_name_len, &field_value, &field_value_len,
-		&scheme, &scheme_len, &out_charset, &out_charset_len,
-		&in_charset, &in_charset_len, &line_len, &lfchars, &lfchars_len) == FAILURE) {
+		&pref) == FAILURE) {
 
 		RETURN_FALSE;
 	}
 
-	if (scheme_len > 0) {
-		switch (scheme[0]) {
-			case 'B': case 'b':
-				scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
-				break;
+	if (zend_hash_find(Z_ARRVAL_P(pref), "scheme", sizeof("scheme"), (void **)&ppval) == SUCCESS) {
+		if (Z_TYPE_PP(ppval) == IS_STRING && Z_STRLEN_PP(ppval) > 0) {
+			switch (Z_STRVAL_PP(ppval)[0]) {
+				case 'B': case 'b':
+					scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
+					break;
 
-			case 'Q': case 'q':
-				scheme_id = PHP_ICONV_ENC_SCHEME_QPRINT;
-				break;
+				case 'Q': case 'q':
+					scheme_id = PHP_ICONV_ENC_SCHEME_QPRINT;
+					break;
+			}
+		}
+	}
+
+	if (zend_hash_find(Z_ARRVAL_P(pref), "input-charset", sizeof("input-charset"), (void **)&ppval) == SUCCESS) {
+		if (Z_TYPE_PP(ppval) == IS_STRING && Z_STRLEN_PP(ppval) > 0) {
+			in_charset = Z_STRVAL_PP(ppval);
+		} else {
+			in_charset = ICONVG(internal_encoding);
+		}
+	}
+
+	if (zend_hash_find(Z_ARRVAL_P(pref), "output-charset", sizeof("output-charset"), (void **)&ppval) == SUCCESS) {
+		if (Z_TYPE_PP(ppval) == IS_STRING && Z_STRLEN_PP(ppval) > 0) {
+			out_charset = Z_STRVAL_PP(ppval);
+		} else {
+			out_charset = in_charset;
+		}
+	}
+
+	if (zend_hash_find(Z_ARRVAL_P(pref), "line-length", sizeof("line-length"), (void **)&ppval) == SUCCESS) {
+		pval = *ppval;
+		if (Z_TYPE_P(pval) != IS_LONG) {
+			val = *pval;
+			zval_copy_ctor(&val);
+			convert_to_long(&val);
+			pval = &val;
+		}
+
+		line_len = Z_LVAL_P(pval);
+
+		if (pval == &val) {
+			zval_dtor(&val);
+		}
+	}
+
+	if (zend_hash_find(Z_ARRVAL_P(pref), "line-break-chars", sizeof("line-break-chars"), (void **)&ppval) == SUCCESS) {
+		pval = *ppval;
+		if (Z_TYPE_P(pval) != IS_STRING) {
+			val = *pval;
+			zval_copy_ctor(&val);
+			convert_to_string(&val);
+			pval = &val;
+		}
+
+		lfchars = Z_STRVAL_P(pval);
+
+		if (pval == &val) {
+			zval_dtor(&val);
 		}
 	}
 
