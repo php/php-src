@@ -447,17 +447,6 @@ static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valp
 	return TRUE;
 }
 
-void delete_restriction_var_int(void *rvi)
-{
-	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
-	if (ptr) {
-		if (ptr->id) {
-			free(ptr->id);
-		}
-		free(ptr);
-	}
-}
-
 static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr)
 {
 	xmlAttrPtr fixed, value, id;
@@ -488,20 +477,6 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 
 	(*valptr)->value = strdup(value->children->content);
 	return TRUE;
-}
-
-void delete_schema_restriction_var_char(void *srvc)
-{
-	sdlRestrictionCharPtr ptr = *((sdlRestrictionCharPtr*)srvc);
-	if (ptr) {
-		if (ptr->id) {
-			free(ptr->id);
-		}
-		if (ptr->value) {
-			free(ptr->value);
-		}
-		free(ptr);
-	}
 }
 
 /*

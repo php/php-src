@@ -15,11 +15,11 @@
 #define SOAP_LITERAL 2
 
 struct _sdl {
-	HashTable	docs;				/* pointer to the parsed xml file */
-	HashTable functions;	/* array of sdlFunction */
-	HashTable *types;			/* array of sdlTypesPtr */
-	HashTable *encoders;	/* array of encodePtr */
-	HashTable *bindings;	/* array of sdlBindings (key'd by name) */
+	HashTable docs;         /* pointer to the parsed xml file */
+	HashTable functions;    /* array of sdlFunction */
+	HashTable *types;       /* array of sdlTypesPtr */
+	HashTable *encoders;    /* array of encodePtr */
+	HashTable *bindings;    /* array of sdlBindings (key'd by name) */
 	char *target_ns;
 	char *source;
 };
@@ -113,7 +113,6 @@ struct _sdlFunction {
 	HashTable *requestParameters;		/* array of sdlParamPtr */
 	HashTable *responseParameters;		/* array of sdlParamPtr (this should only be one) */
 	struct _sdlBinding* binding;
-//	int bindingType;
 	void* bindingAttributes; /* sdlSoapBindingFunctionPtr */
 };
 
@@ -147,4 +146,7 @@ void delete_sdl(void *handle);
 void delete_type(void *type);
 void delete_attribute(void *attribute);
 void delete_mapping(void *data);
+void delete_restriction_var_int(void *rvi);
+void delete_schema_restriction_var_char(void *srvc);
+
 #endif
