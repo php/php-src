@@ -1,3 +1,90 @@
+2001-07-29  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/.cvsignore
+      ext/com/COM.c
+      ext/com/CREDITS
+      ext/com/VARIANT.c
+      ext/com/com.h
+      ext/com/conversion.c: - MFH and another set of memory fixes
+    - there were lots of changes in the zend core
+      and now the heap corruptions disapeared as
+      inconspicuous as they appeared.
+      maybe they were not our fault.
+
+2001-07-29  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * main/internal_functions_win32.c
+      ext/mbstring/mbstring.c: changed for input encoding conversion in win32.
+
+2001-07-29  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/File/Find.php: leftovers.
+
+    * pear/File/Find.php:
+    Fix bug in search that would skip over perl based regular expressions.
+
+2001-07-29  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xslt/xslt.c: buffer was too small
+
+2001-07-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Remove debug printfs
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+    Add a simple mechanism which enables IRCG users to retrieve the
+    error message which caused the irc connection to be killed.  We maintain
+    a separate list for this purpose which performs automatic gc.
+
+2001-07-29  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/browscap.c: *** empty log message ***
+
+    * ext/com/conversion.c: - Yet another one...
+
+    * ext/standard/basic_functions.c: - And more...
+
+    * ext/standard/php_incomplete_class.h
+      ext/standard/dir.c
+      ext/standard/var.c: - More object macros
+
+2001-07-29  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php:
+    use pop/push error handlers in nextID and createSequence
+
+    * pear/DB/common.php: raiseError(): support for error objects
+
+    * pear/PEAR.php:
+    raiseError() now can accepts a PEAR error object in its first argument. With
+    this, users can "re-throw" a previously created PEAR error object (very
+    useful after the use of (push|pop)ErrorHandling)
+
+    * pear/PEAR.php:
+    Added the methods pushErrorHandler and popErrorHandler. With this it's
+    posible to override the actual error handler with a new one for the time
+    you need and restore it back when finish.
+
+2001-07-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Eliminate a check from the tokenizer and add support for detecting
+    dead fds before setting them up as persistent HTTP connections.
+
+2001-07-29  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/pgsql/pgsql.c: Fix typo.
+
+2001-07-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php: * remove debug output
+
+    * pear/HTML/Form.php: * password row bugfix
+    * fixed a bug from the last commit
+
+    * pear/HTML/Form.php: * E_ALL fixes
+
 2001-07-28  Andi Gutmans  <andi@zend.com>
 
     * ext/odbc/php_odbc.c: - Object macros...
