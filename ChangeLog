@@ -1,3 +1,37 @@
+2003-03-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4)
+      ext/standard/php_smart_str.h:
+      Preserve explicit casting semantics from functions, so that you can
+      also pass void pointers to the macros.
+
+    * ext/standard/php_smart_str.h:
+      Merge macro changes
+
+2003-03-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * php.ini-dist
+      php.ini-recommended
+      main/main.c:
+      - disable html_errors per default as suggested by php.ini-<xxx>
+      - new error format that does not point to any documentation (if either
+        not html_errors or no docref_root given e.g.: production boxes and
+      default)
+      - documentation update in php.ini-<xxx>
+
+2003-03-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/interbase/interbase.c:
+      WS & CS fixes + some TSRM_FETCH() removals + pval -> zval
+
+    * (PHP_4_3)
+      NEWS
+      ext/interbase/interbase.c:
+      MFH: - Fixed bug #22709 (crash within interbase when database unavailable)
+
+    * ext/interbase/interbase.c:
+      - Fixed bug #22709 (crash within interbase when database unavailable)
+
 2003-03-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * tests/lang/bug22592.phpt:
