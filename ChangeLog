@@ -1,3 +1,44 @@
+2004-06-15  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/string.c:
+      Fixed: made 3rd parameter to strrpos 64bit safe.
+
+2004-06-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * ZendEngine2/zend_reflection_api.c:
+      
+
+2004-06-15  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * pear/PEAR/Command/Config.php:
+      - Fix #1602 (reported by Cox)
+        Do not display var=value using config-get (easy scripting)
+
+    * pear/PEAR.php
+      pear/System.php
+      pear/package-PEAR.xml:
+      - Fix licence (#1645)
+      - update my status there, reflecting the fact for the past 11 months
+
+2004-06-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * NEWS:
+      BFN
+
+    * ext/dom/php_dom.c
+      ext/dom/tests/bug28721.phpt:
+      Fixed bug #28771 (Segfault when using xslt and clone)
+      Add test case for bug #28721
+
+2004-06-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      A faster & more memory efficient php_addslashes() implementation.
+
 2004-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_language_scanner.l:
