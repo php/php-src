@@ -643,6 +643,7 @@ AC_ARG_ENABLE(thread-safety,
     AC_DEFINE(ZTS)
     INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
     CPPFLAGS="$CPPFLAGS -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS"
+    export CPPFLAGS
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
