@@ -84,7 +84,7 @@ zend_module_entry *php3_builtin_modules[] = {
 	phpext_lcg_ptr,
 	phpext_session_ptr,
 	phpext_output_ptr,
-	array_module_ptr
+	phpext_array_ptr
 };
 
 	
