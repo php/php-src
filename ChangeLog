@@ -1,3 +1,44 @@
+2001-12-21  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * pear/Makefile.in: Install session module haeder
+
+2001-12-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/math.c:
+    - Fix for bug #14646, floor() always returns a float now.
+
+2001-12-21  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/File/Passwd.php: - whitespace only, tabs replaces by spaces
+    - added some space around operators
+
+2001-12-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - More cleanup
+
+    * NEWS: - Typo
+
+2001-12-21  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/mailparse/mailparse.c: - Typo.
+
+2001-12-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/file.c:
+    - Added open basedir checks to file functions. (Patch by
+      Christoph Kassen <chkassen@chkassen.de>)
+
+2001-12-21  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/file.c: Use memset() instead.
+
+    * ext/standard/file.c:
+    Initialize variable to avoid bogus data and possible segfault.
+
+    * ext/standard/file.c:
+    Switched some functions to use zend_parse_parameters, cleaned up some
+    unused variables and some whitespace work.
+
 2001-12-20  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * configure.in
