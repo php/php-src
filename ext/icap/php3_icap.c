@@ -368,7 +368,7 @@ void php3_icap_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
 void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind,*begindate,*enddate;
-        pval *pvalue;
+        pval **pvalue;
 	int ind, ind_type;
 	unsigned long i;
 	char *t;
@@ -511,7 +511,7 @@ void php3_icap_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
 void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind, *date,*time;
-        pval *pvalue;
+        pval **pvalue;
 	caldate_t mydate;
 	caltime_t mytime;
 	int ind, ind_type;
@@ -689,7 +689,7 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	int icap_folders=0;
 	unsigned int msgno;
 	pils *icap_le_struct; 
-	pval *pvalue;
+	pval **pvalue;
 	cal_list_t *my_cal_list;
 	int myargc;
 	int uid;
@@ -791,7 +791,7 @@ void php3_icap_snooze(INTERNAL_FUNCTION_PARAMETERS)
 	pval *streamind,*uid;
 	int ind, ind_type;
 	pils *icap_le_struct; 
-	pval *pvalue;
+	pval **pvalue;
 	int myargc;
 	myargc=ARG_COUNT(ht);
 	if (myargc !=2 || getParameters(ht,myargc,&streamind,&uid) == FAILURE) {
