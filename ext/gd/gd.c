@@ -54,7 +54,6 @@ static int le_gd, le_gd_font;
 static int le_ps_font, le_ps_enc;
 #endif
 
-
 #include <gd.h>
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */
@@ -70,7 +69,7 @@ static int le_ps_font, le_ps_enc;
 #endif
 
 #ifdef ENABLE_GD_TTF
-static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
+static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 #endif
 
 #if HAVE_LIBGD15
@@ -180,6 +179,8 @@ function_entry gd_functions[] = {
 	PHP_FE(imagedashedline,							NULL)
 	PHP_FE(imagettfbbox,							NULL)
 	PHP_FE(imagettftext,							NULL)
+	PHP_FE(imageftbbox,							NULL)
+	PHP_FE(imagefttext,							NULL)
 	PHP_FE(imagepsloadfont,							NULL)
 	/*
 	PHP_FE(imagepscopyfont,							NULL)
@@ -1797,6 +1798,25 @@ PHP_FUNCTION(imagegammacorrect)
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
+#if HAVE_LIBGD20
+	if (gdImageTrueColor(im))	{
+		int x, y, c;
+
+		for (y = 0; y < gdImageSY(im); y++)	{
+			for (x = 0; x < gdImageSX(im); x++)	{
+				c = gdImageGetPixel(im, x, y);
+				gdImageSetPixel(im, x, y, 
+						gdTrueColor(
+							(int)((pow((pow((gdTrueColorGetRed(c) / 255.0), input)), 1.0 / output) * 255)+.5),
+							(int)((pow((pow((gdTrueColorGetGreen(c) / 255.0), input)), 1.0 / output) * 255)+.5),
+							(int)((pow((pow((gdTrueColorGetBlue(c) / 255.0), input)), 1.0 / output) * 255)+.5)
+							)
+						);
+			}
+		}
+		RETURN_TRUE;
+	}
+#endif
 	for (i = 0; i < gdImageColorsTotal(im); i++) {
 		im->red[i]   = (int)((pow((pow((im->red[i]   / 255.0), input)), 1.0 / output) * 255)+.5);
 		im->green[i] = (int)((pow((pow((im->green[i] / 255.0), input)), 1.0 / output) * 255)+.5);
@@ -2584,12 +2604,41 @@ PHP_FUNCTION(imagesy)
 #define TTFTEXT_BBOX 1
 #endif
 
+
+/* {{{ proto array imageftbbox(int size, int angle, string font_file, string text[, array extrainfo])
+   Give the bounding box of a text using fonts via freetype2 */
+PHP_FUNCTION(imageftbbox)
+{
+#if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 1);
+#else 
+	php_error(E_WARNING, "%s(): No FreeType 2 support in this PHP build", get_active_function_name());
+	RETURN_FALSE;
+#endif 
+}
+/* }}} */
+
+/* {{{ proto array imagettftext(int im, int size, int angle, int x, int y, int col, string font_file, string text, [array extrainfo])
+   Write text to the image using a TrueType font */
+PHP_FUNCTION(imagefttext)
+{
+#if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 1);
+#else 
+	php_error(E_WARNING, "%s(): No FreeType 2 support in this PHP build", get_active_function_name());
+	RETURN_FALSE;
+#endif 
+}
+/* }}} */
+
+
+
 /* {{{ proto array imagettfbbox(int size, int angle, string font_file, string text)
    Give the bounding box of a text using TrueType fonts */
 PHP_FUNCTION(imagettfbbox)
 {
 #ifdef ENABLE_GD_TTF
-	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX);
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 0);
 #else 
 	php_error(E_WARNING, "ImageTtfBBox: No TTF support in this PHP build");
 	RETURN_FALSE;
@@ -2602,7 +2651,7 @@ PHP_FUNCTION(imagettfbbox)
 PHP_FUNCTION(imagettftext)
 {
 #ifdef ENABLE_GD_TTF
-	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW);
+	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 0);
 #else 
 	php_error(E_WARNING, "ImageTtfText: No TTF support in this PHP build");
 	RETURN_FALSE;
@@ -2614,21 +2663,38 @@ PHP_FUNCTION(imagettftext)
 /* {{{ php_imagettftext_common
  */
 static
-void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
+void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extended)
 {
-	zval **IM, **PTSIZE, **ANGLE, **X, **Y, **C, **FONTNAME, **COL;
+	zval **IM, **PTSIZE, **ANGLE, **X, **Y, **C, **FONTNAME, **COL, **EXT = NULL;
 	gdImagePtr im=NULL;
 	int col, x, y, l=0, i, brect[8];
 	double ptsize, angle;
 	unsigned char *str = NULL, *fontname = NULL;
 	char *error;
+	int argc;
+#if HAVE_GD_STRINGFTEX
+	gdFTStringExtra strex;
+#endif
+
+#if !HAVE_GD_STRINGFTEX
+	if (extended)	{
+		zend_error(E_ERROR, "%s(): gdImageStringFTEx not supported in this PHP build", get_active_function_name());
+		RETURN_FALSE;
+	}
+#endif
+	
+	argc = ZEND_NUM_ARGS();
 
 	if (mode == TTFTEXT_BBOX) {
-		if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &PTSIZE, &ANGLE, &FONTNAME, &C) == FAILURE) {
+		if ((extended && argc != 5) || (!extended && argc != 4) ||
+			  	zend_get_parameters_ex(argc, &PTSIZE, &ANGLE, &FONTNAME, &C, &EXT) == FAILURE)
+	  	{
 			WRONG_PARAM_COUNT;
 		}
 	} else {
-		if (ZEND_NUM_ARGS() != 8 || zend_get_parameters_ex(8, &IM, &PTSIZE, &ANGLE, &X, &Y, &COL, &FONTNAME, &C) == FAILURE) {
+		if ((extended && argc != 9) || (!extended && argc != 8) ||
+			  	zend_get_parameters_ex(argc, &IM, &PTSIZE, &ANGLE, &X, &Y, &COL, &FONTNAME, &C, &EXT) == FAILURE)
+	  	{
 			WRONG_PARAM_COUNT;
 		}
 		ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2649,6 +2715,38 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		col = Z_LVAL_PP(COL);
 		y = Z_LVAL_PP(Y);
 		x = Z_LVAL_PP(X);
+
+#if HAVE_GD_STRINGFTEX
+		if (EXT)	{
+			/* parse extended info */
+			
+			HashPosition pos;
+			
+			convert_to_array_ex(EXT);
+			memset(&strex, 0, sizeof(strex));
+			
+			/* walk the assoc array */
+			zend_hash_internal_pointer_reset_ex(HASH_OF(*EXT), &pos);
+			do {
+			  zval ** item;
+			  char * key;
+
+			  if (zend_hash_get_current_key_ex(HASH_OF(*EXT), &key, NULL, NULL, 0, &pos) == FAILURE)
+				  continue;
+
+			  if (zend_hash_get_current_data_ex(HASH_OF(*EXT), (void**)&item, &pos) == FAILURE)
+				  continue;
+				
+			  if (strcmp("linespacing", key) == 0)	{
+					convert_to_double_ex(item);
+					strex.flags |= gdFTEX_LINESPACE;
+					strex.linespacing = Z_DVAL_PP(item);
+			  }
+			  
+			} while(zend_hash_move_forward_ex(HASH_OF(*EXT), &pos) == SUCCESS);
+		}
+#endif
+		
 	}
 
 	ptsize = Z_DVAL_PP(PTSIZE);
@@ -2658,8 +2756,16 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	l = strlen(str);
 	fontname = (unsigned char *) Z_STRVAL_PP(FONTNAME);
 
+	
 #ifdef USE_GD_IMGSTRTTF
 # if HAVE_LIBGD20 & HAVE_LIBFREETYPE
+
+#if HAVE_GD_STRINGFTEX
+	if (extended)	{
+		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
+	}
+	else
+#endif
 	error = gdImageStringFT(im, brect, col, fontname, ptsize, angle, x, y, str);
 # else
 	error = gdImageStringTTF(im, brect, col, fontname, ptsize, angle, x, y, str);

@@ -88,6 +88,8 @@ PHP_FUNCTION(imagecopymerge);
 PHP_FUNCTION(imagecopyresized);
 PHP_FUNCTION(imagetypes);
 PHP_FUNCTION(imagecreate);
+PHP_FUNCTION(imageftbbox);
+PHP_FUNCTION(imagefttext);
 
 PHP_FUNCTION(imagecreatetruecolor);
 PHP_FUNCTION(imagetruecolortopalette);
