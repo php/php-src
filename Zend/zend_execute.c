@@ -2159,16 +2159,31 @@ send_by_ref:
 								ht = NULL;
 								break;
 						}
-						if (ht) {
+						if (ht)	{
 							switch (offset->type) {
+								case IS_DOUBLE:
+								case IS_RESOURCE:
+								case IS_BOOL: 
 								case IS_LONG:
-									zend_hash_index_del(ht, offset->value.lval);
-									break;
-								case IS_NULL:
-									zend_hash_del(ht,"",1);
-									break;
+									{
+										long index;
+
+										if (offset->type == IS_DOUBLE) {
+											index = (long) offset->value.lval;
+										} else {
+											index = offset->value.lval;
+										}
+										zend_hash_index_del(ht, index);
+										break;
+									}
 								case IS_STRING:
 									zend_hash_del(ht, offset->value.str.val, offset->value.str.len+1);
+									break;
+								case IS_NULL:
+									zend_hash_del(ht, "", sizeof(""));
+									break;
+								default: 
+									zend_error(E_WARNING, "Illegal offset type in unset");
 									break;
 							}
 						}
