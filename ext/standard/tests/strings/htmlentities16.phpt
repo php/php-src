@@ -5,11 +5,9 @@ output_handler=
 --SKIPIF--
 <?php
 	extension_loaded("mbstring") or die("skip mbstring not available\n");
-	mb_internal_encoding('cp1251');
-	$php_errormsg = NULL;
-	@htmlentities("\x88\xa9\xd2\xcf\xd3\xcb\xcf\xdb\xce\xd9\xca", ENT_QUOTES, '');
-	if ($php_errormsg) {
-		die("skip cp1251 chracter set is not supported on this platform.\n");
+	if (!mb_internal_encoding('cp1251') ||
+		@htmlentities("\x88\xa9\xd2\xcf\xd3\xcb\xcf\xdb\xce\xd9\xca", ENT_QUOTES, '') == '') {
+		die("skip cp1251 chracter set is not available in this build.\n");
 	}
 ?>
 --FILE--
