@@ -1145,7 +1145,7 @@ consult the installation file that came with this distribution, or visit \n\
 	tsrm_shutdown();
 #endif
 
-#if PHP_WIN32 && ZEND_DEBUG
+#if PHP_WIN32 && ZEND_DEBUG && 0
 	_CrtDumpMemoryLeaks( );
 #endif
 
