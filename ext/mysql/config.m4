@@ -7,10 +7,10 @@ AC_ARG_WITH(mysql,[],[enable_mysql=$withval])
 	
 AC_MSG_CHECKING(for MySQL support)
 AC_ARG_ENABLE(mysql,
-[  --enable-mysql          Enable embedded MySQL support],[
+[  --disable-mysql          Disable embedded MySQL support],[
   PHP_MYSQL=$enableval
 ],[
-  PHP_MYSQL=no
+  PHP_MYSQL=yes
 ])
 AC_MSG_RESULT($PHP_MYSQL)
 
