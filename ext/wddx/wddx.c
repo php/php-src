@@ -246,7 +246,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	zval *retval;
 	zval **ent;
 	char *key;
-	ulong key_length;
+	uint key_length;
 	char tmp[128];
 	ulong idx;
 	int hash_type;
@@ -477,7 +477,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 		}
 	} else {
-		ulong key_len;
+		uint key_len;
 
 		PHP_CLASS_ATTRIBUTES;
 
@@ -524,7 +524,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 {
 	zval **ent;
 	char *key;
-	ulong key_len;
+	uint key_len;
 	int is_struct = 0, ent_type;
 	ulong idx;
 	HashTable *target_hash;

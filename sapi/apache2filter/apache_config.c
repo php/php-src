@@ -88,7 +88,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	php_dir_entry *pe;
 	php_dir_entry *data;
 	char *str;
-	ulong str_len;
+	uint str_len;
 	ulong num_index;
 
 	phpapdebug((stderr, "Merge dir (%p) (%p)\n", base_conf, new_conf));
@@ -110,7 +110,7 @@ void apply_config(void *dummy)
 {
 	php_conf_rec *d = dummy;
 	char *str;
-	ulong str_len;
+	uint str_len;
 	php_dir_entry *data;
 	
 	for (zend_hash_internal_pointer_reset(&d->config);

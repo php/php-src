@@ -174,7 +174,7 @@ int php_session_register_serializer(const char *name,
 
 #define PS_ENCODE_VARS 											\
 	char *key;													\
-	ulong key_length;											\
+	uint key_length;											\
 	ulong num_key;												\
 	zval **struc;
 
