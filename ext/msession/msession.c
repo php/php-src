@@ -23,6 +23,7 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 
+#define ERR_DEBUG
 
 /* Macros and such */
 #ifndef TRUE
@@ -30,6 +31,9 @@
 #endif
 #ifndef FALSE
 #define FALSE 0
+#endif
+#ifndef SID_LEN
+#define SID_LEN 32
 #endif
 
 #ifdef ERR_DEBUG
@@ -77,12 +81,18 @@
 
 #if HAVE_MSESSION
 #ifdef HAVE_PHP_SESSION
+#ifdef HAVE_PHP_SESSION_CREATESID
 /* If the PHP Session module is compiled or available, include support */
+PS_FUNCS_SID(msession);
+ps_module ps_mod_msession = {
+	PS_MOD_SID(msession)
+};
+#else
 PS_FUNCS(msession);
-
 ps_module ps_mod_msession = {
 	PS_MOD(msession)
 };
+#endif
 #endif
 
 /* Static strings */
@@ -250,8 +260,10 @@ char *PHPMsessionGetData(const char *session)
 
 	if(s_reqb->req.stat==REQ_OK)
 		ret = safe_estrdup(s_reqb->req.datum);
+#if 0 // If there is a session, there may no be data yet, which is valid.
 	else if(s_reqb->req.param !=  REQE_NOSESSION)
 		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+#endif
 	IFCONNECT_ENDVAL(0)
 	
 	return ret;
@@ -1151,6 +1163,31 @@ PS_GC_FUNC(msession)
 	ELOG( "ps_gc_msession");
 	return SUCCESS;
 }
+
+#ifdef HAVE_PHP_SESSION_CREATESID
+PS_CREATESID_FUNC(msession)
+{
+	if(s_reqb && s_conn) 
+	{
+		ELOG("Should create a new session");
+		FormatRequest(&s_reqb, REQ_UNIQ,"", "", "",SID_LEN);
+		DoRequest(s_conn, &s_reqb);
+
+		if(s_reqb->req.stat==REQ_OK)
+		{
+			if(newlen)
+				*newlen = SID_LEN;
+			return safe_estrdup(s_reqb->req.datum);
+		}
+		else
+		{
+			php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
+		}
+	}
+	ELOG("Yikes, could not get sid from msession");
+	return php_session_create_id(mod_data, newlen TSRMLS_DC);
+}
+#endif  /* HAVE_PHP_SESSION_CREATESID */
 #endif	/* HAVE_PHP_SESSION */
 #endif	/* HAVE_MSESSION */
 
