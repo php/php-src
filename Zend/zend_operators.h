@@ -207,6 +207,8 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2);
 #define Z_STRVAL(zval)		(zval).value.str.val
 #define Z_STRLEN(zval)		(zval).value.str.len
 #define Z_ARRVAL(zval)		(zval).value.ht
+#define Z_OBJPROP(zval)		(zval).value.obj.properties
+#define Z_OBJCE(zval)		(zval).value.obj.ce
 
 #define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
 #define Z_BVAL_P(zval_p)		Z_BVAL(*zval_p)
@@ -214,6 +216,8 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2);
 #define Z_STRVAL_P(zval_p)		Z_STRVAL(*zval_p)
 #define Z_STRLEN_P(zval_p)		Z_STRLEN(*zval_p)
 #define Z_ARRVAL_P(zval_p)		Z_ARRVAL(*zval_p)
+#define Z_OBJPROP_P(zval_p)		Z_OBJPROP(*zval_p)
+#define Z_OBJCE_P(zval_p)		Z_OBJCE(*zval_p)
 
 #define Z_LVAL_PP(zval_pp)		Z_LVAL(**zval_pp)
 #define Z_BVAL_PP(zval_pp)		Z_BVAL(**zval_pp)
@@ -221,6 +225,8 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2);
 #define Z_STRVAL_PP(zval_pp)	Z_STRVAL(**zval_pp)
 #define Z_STRLEN_PP(zval_pp)	Z_STRLEN(**zval_pp)
 #define Z_ARRVAL_PP(zval_pp)	Z_ARRVAL(**zval_pp)
+#define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
+#define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)
 
 #define Z_TYPE(zval)		(zval).type
 #define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)
