@@ -265,7 +265,7 @@ struct _zend_class_entry {
 	char *name;
 	uint name_length;
 	struct _zend_class_entry *parent; 
-	int *refcount;
+	int refcount;
 	zend_bool constants_updated;
 
 	HashTable function_table;

@@ -110,7 +110,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 {
 	zend_class_entry *ce = *pce;
 	
-	if (--(*ce->refcount)>0) {
+	if (--ce->refcount > 0) {
 		return;
 	}
 	switch (ce->type) {
@@ -119,7 +119,6 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->private_properties);
 			zend_hash_destroy(ce->static_members);
 			efree(ce->name);
-			efree(ce->refcount);
 			zend_hash_destroy(&ce->function_table);
 			FREE_HASHTABLE(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
@@ -131,7 +130,6 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->private_properties);
 			zend_hash_destroy(ce->static_members);
 			free(ce->name);
-			free(ce->refcount);
 			zend_hash_destroy(&ce->function_table);
 			free(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
@@ -144,7 +142,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 
 void zend_class_add_ref(zend_class_entry **ce)
 {
-	(*(*ce)->refcount)++;
+	(*ce)->refcount++;
 }
 
 

@@ -549,7 +549,7 @@ ZEND_API void convert_to_object(zval *op)
 				/* OBJECTS_OPTIMIZE */
 				TSRMLS_FETCH();
 
-				object_and_properties_init(op, &zend_standard_class_def, op->value.ht);
+				object_and_properties_init(op, zend_standard_class_def, op->value.ht);
 				return;
 				break;
 			}
