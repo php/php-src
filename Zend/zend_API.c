@@ -1146,6 +1146,8 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 	HashTable *target_function_table = function_table;
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL;
+	char *lowercase_name;
+	int fname_len;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -1170,8 +1172,13 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 			zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
 			return FAILURE;
 		}
-		if (zend_hash_add(target_function_table, ptr->fname, strlen(ptr->fname)+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
+		fname_len = strlen(ptr->fname);
+		lowercase_name = do_alloca(fname_len+1);
+		memcpy(lowercase_name, ptr->fname, fname_len+1);
+		zend_str_tolower(lowercase_name, fname_len);
+		if (zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
+			free_alloca(lowercase_name);
 			break;
 		}
 		if (scope) {
@@ -1191,6 +1198,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		}
 		ptr++;
 		count++;
+		free_alloca(lowercase_name);
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		while (ptr->fname) {
