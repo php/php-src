@@ -108,7 +108,7 @@ class PEAR
      * @access	public
      * @return	bool	true if $data is an error
      */
-	function isError(&$data) {
+	function isError($data) {
 		return (bool)(is_object($data) &&
 					  (get_class($data) == "pear_error" ||
 					   is_subclass_of($data, "pear_error")));
