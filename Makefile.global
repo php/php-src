@@ -7,7 +7,9 @@ COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(PHP_FRAMEWORK
 
 
 all: $(all_targets) 
-
+	@echo "Build complete."
+	@echo
+	
 build-modules: $(PHP_MODULES)
 
 libphp4.la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
