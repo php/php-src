@@ -82,6 +82,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS")-1 TSRMLS_CC);
+	CG(in_clone_method) = 0;
 }
 
 
@@ -934,6 +935,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)))) {
 			CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
+			CG(in_clone_method) = 1;
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
 			CG(active_class_entry)->__call = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)))) {
@@ -994,6 +996,8 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	zend_stack_del_top(&CG(foreach_copy_stack));
 
 	CG(throw_list) = function_token->throw_list;
+
+	CG(in_clone_method) = 0;
 }
 
 
@@ -2164,24 +2168,24 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 {
 	zend_op opline;
 	zend_llist *fetch_list_ptr;
+	zend_op *opline_ptr;
         
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
         
 	if (fetch_list_ptr->count == 1) {
 		zend_llist_element *le;
-		zend_op *opline_ptr;
 
 		le = fetch_list_ptr->head;
 		opline_ptr = (zend_op *) le->data;
-                
+
 		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
-		(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
-		!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+			(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
+			!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
 			efree(opline_ptr->op1.u.constant.value.str.val);
 			opline_ptr->op1 = *property;
 			SET_UNUSED(opline_ptr->op2);
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_FROM_THIS;
-                        
+
 			if (CG(active_class_entry) && (opline_ptr->op1.op_type == IS_CONST)) {
 				if (zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
 					char *priv_name;
@@ -2216,6 +2220,34 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 	opline.op1 = *object;
 	opline.op2 = *property;
 	*result = opline.result;
+
+	if (CG(in_clone_method)) {
+		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
+			(opline_ptr->op1.u.constant.value.str.len == (sizeof("clone")-1)) &&
+			!memcmp(opline_ptr->op1.u.constant.value.str.val, "clone", sizeof("clone"))) {
+			if (CG(active_class_entry) && (opline.op2.op_type == IS_CONST)) {
+				if (zend_hash_exists(&CG(active_class_entry)->private_properties, opline.op2.u.constant.value.str.val, opline.op2.u.constant.value.str.len+1)) {
+					char *priv_name;
+					int priv_name_length;
+                                
+					mangle_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, opline.op2.u.constant.value.str.val, opline.op2.u.constant.value.str.len);
+
+					STR_FREE(opline.op2.u.constant.value.str.val);
+					opline.op2.u.constant.value.str.val = priv_name;
+					opline.op2.u.constant.value.str.len = priv_name_length;
+				} else if (zend_hash_exists(&CG(active_class_entry)->protected_properties, opline.op2.u.constant.value.str.val, opline.op2.u.constant.value.str.len+1)) {
+					char *prot_name;
+					int prot_name_length;
+                                
+					mangle_property_name(&prot_name, &prot_name_length, "*", 1, opline.op2.u.constant.value.str.val, opline.op2.u.constant.value.str.len);
+
+					STR_FREE(opline.op2.u.constant.value.str.val);
+					opline.op2.u.constant.value.str.val = prot_name;
+					opline.op2.u.constant.value.str.len = prot_name_length;
+				}
+			}
+		}
+	}
 
 	zend_llist_add_element(fetch_list_ptr, &opline);
 }
