@@ -21,8 +21,10 @@ set_time_limit(5);
  */
 
 $test = 'Écrit par %s.';
-if (!iconv("ISO-8859-1", "ASCII//TRANSLIT", $test))
+
+if (!@iconv("ISO-8859-1", "ASCII//TRANSLIT", $test)) {
 	echo 'wrong is right';
+}
 ?>
 --EXPECT--
 wrong is right
