@@ -716,6 +716,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			if (dbwillconvert(column_type,SQLCHAR)) {
 				char *res_buf;
 				int res_length = dbdatlen(mssql_ptr->link,offset) + 1;
+				if (column_type == SQLDATETIM4) res_length += 14;
 				if (column_type == SQLDATETIME) res_length += 10;
 			
 				res_buf = (char *) emalloc(res_length);
