@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
 - Fixed crash bug when non-existing save/serializer handler was used. (Jani)
 - Fixed memory leak in gethostbynamel() if an error occurs. (Sara)
 - Fixed FastCGI being unable to bind to a specific IP. (Sascha)
+- Fixed bug #25494 (array_merge allowing "false" as argument (silent when 
+  non-array is passed)). (Jay)
 - Fixed bug #23488 (zlib.output_compression overrides Vary header). (Stefan)
 - Fixed bug #25463 (ext/cpdf: compile failure with bundled GD)
 - Fixed bug #25429 (fix copying of stdin using copy() function). (Ilia)
