@@ -1,3 +1,38 @@
+2001-12-05  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ircg/ircg.c: proto fixes
+
+    * ext/satellite/php_orbit.c
+      ext/notes/php_notes.c: proto fix
+
+    * ext/muscat/muscat.c
+      sapi/apache2filter/php_functions.c
+      ext/java/java.c: proto fixes
+
+    * ext/fdf/fdf.c
+      ext/domxml/php_domxml.c: proto fix
+
+    * ext/cyrus/cyrus.c
+      ext/com/COM.c: proto fixes
+
+2001-12-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var_unserializer.c:
+    increase timestamp, because make tries to regenerate this file without any reason
+
+2001-12-05  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_output.h: Remove redundant include
+
+2001-12-05  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c:
+    Store the read bytes so that some sapi modules know how much to read.
+
+    * php.ini-dist
+      php.ini-recommended:
+    Make it more clear what session.referer_check is about.
+
 2001-12-04  Frank M. Kromann  <frank@frontbase.com>
 
     * win32/sendmail.c:
