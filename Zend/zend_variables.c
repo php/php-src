@@ -122,10 +122,7 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 				HashTable *original_ht = zvalue->value.ht;
 				ELS_FETCH();
 
-				if (!zvalue->value.ht) {
-					var_reset(zvalue);
-					return FAILURE;
-				} else if (zvalue->value.ht==&EG(symbol_table)) {
+				if (zvalue->value.ht == &EG(symbol_table)) {
 					return SUCCESS; /* do nothing */
 				}
 				ALLOC_HASHTABLE_REL(zvalue->value.ht);
