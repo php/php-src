@@ -525,7 +525,7 @@ PHPFBLink* phpfbConnect(INTERNAL_FUNCTION_PARAMETERS, char *hostName, char *user
 		{
 			php_error(E_WARNING,"Cannot connect to host '%s'",hostName);
 			php_error(E_WARNING,fbcehClassErrorMessage());
-			return NULL;
+//			return NULL;
 		}
 		result = malloc(sizeof(PHPFBLink));
 		result->retainCount     = 1;
@@ -2780,17 +2780,16 @@ PHP_FUNCTION(fbsql_fetch_field)
 	add_property_string(return_value, "name",       (char*)fbccmdLabelName(fbcmdColumnMetaDataAtIndex(result->metaData, column)),1);
 	add_property_string(return_value, "table",      (char*)fbccmdTableName(fbcmdColumnMetaDataAtIndex(result->metaData,column)),1);
 	add_property_long(return_value,   "max_length", fbcdmdLength(fbccmdDatatype(fbcmdColumnMetaDataAtIndex(result->metaData,column))));
-	add_property_string(return_value, "type",       (char*)fbcdmdDatatypeString (fbcmdDatatypeMetaDataAtIndex(result->metaData, column)),1);
+	add_property_string(return_value, "type",       (char*)fbcdmdDatatypeString(fbcmdDatatypeMetaDataAtIndex(result->metaData, column)),1);
+	add_property_long(return_value,   "not_null",   !fbccmdIsNullable(fbcmdColumnMetaDataAtIndex(result->metaData, column)));
 /*	Remember to add the rest */
-/*	add_property_long(return_value, "not_null",IS_NOT_NULL(mysql_field->flags)?1:0); */
-/*	add_property_long(return_value, "primary_key",IS_PRI_KEY(mysql_field->flags)?1:0); */
-/*	add_property_long(return_value, "multiple_key",(mysql_field->flags&MULTIPLE_KEY_FLAG?1:0)); */
-/*	add_property_long(return_value, "unique_key",(mysql_field->flags&UNIQUE_KEY_FLAG?1:0)); */
-/*	add_property_long(return_value, "numeric",IS_NUM(mysql_field->type)?1:0); */
-/*	add_property_long(return_value, "blob",IS_BLOB(mysql_field->flags)?1:0); */
-/*	add_property_string(return_value, "type",php_mysql_get_field_name(mysql_field->type), 1); */
-/*	add_property_long(return_value, "unsigned",(mysql_field->flags&UNSIGNED_FLAG?1:0)); */
-/*	add_property_long(return_value, "zerofill",(mysql_field->flags&ZEROFILL_FLAG?1:0)); */
+/*	add_property_long(return_value, "primary_key",IS_PRI_KEY(fbsql_field->flags)?1:0); */
+/*	add_property_long(return_value, "multiple_key",(fbsql_field->flags&MULTIPLE_KEY_FLAG?1:0)); */
+/*	add_property_long(return_value, "unique_key",(fbsql_field->flags&UNIQUE_KEY_FLAG?1:0)); */
+/*	add_property_long(return_value, "numeric",IS_NUM(fbsql_field->type)?1:0); */
+/*	add_property_long(return_value, "blob",IS_BLOB(fbsql_field->flags)?1:0); */
+/*	add_property_long(return_value, "unsigned",(fbsql_field->flags&UNSIGNED_FLAG?1:0)); */
+/*	add_property_long(return_value, "zerofill",(fbsql_field->flags&ZEROFILL_FLAG?1:0)); */
 }
 /* }}} */
 
@@ -2843,7 +2842,7 @@ PHP_FUNCTION(fbsql_field_seek)
 /* }}} */
 
 
-/* {{{ proto string mysql_field_name(int result, int field_index)
+/* {{{ proto string fbsql_field_name(int result, int field_index)
 	*/
 PHP_FUNCTION(fbsql_field_name)
 {
@@ -3069,7 +3068,7 @@ PHP_FUNCTION(fbsql_field_type)
 /* }}} */
 
 
-/* {{{ proto string fbsql_field_flags(int result, int field_index)
+/* {{{ proto string string fbsql_field_flags(int result[, int field_index])
 	*/
 PHP_FUNCTION(fbsql_field_flags)
 {
@@ -3078,6 +3077,8 @@ PHP_FUNCTION(fbsql_field_flags)
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 column;
+	char buf[512];
+	int  len;
 	FBSQLLS_FETCH();
 
 	resultIndex = FB_SQL_G(resultIndex);
@@ -3109,12 +3110,51 @@ PHP_FUNCTION(fbsql_field_flags)
 			RETURN_FALSE;
 		}
 	}
-	if (array_init(return_value)==FAILURE)
-	{
-		RETURN_FALSE;
+	strcpy(buf, "");
+	if (!fbccmdIsNullable(fbcmdColumnMetaDataAtIndex(result->metaData, column))) {
+		strcat(buf, "not_null ");
 	}
-   /* We should create the result -- currently empty */
-
+#if 0
+	if (IS_PRI_KEY(fbsql_field->flags)) {
+		strcat(buf, "primary_key ");
+	}
+	if (fbsql_field->flags&UNIQUE_KEY_FLAG) {
+		strcat(buf, "unique_key ");
+	}
+	if (fbsql_field->flags&MULTIPLE_KEY_FLAG) {
+		strcat(buf, "multiple_key ");
+	}
+	if (IS_BLOB(fbsql_field->flags)) {
+		strcat(buf, "blob ");
+	}
+	if (fbsql_field->flags&UNSIGNED_FLAG) {
+		strcat(buf, "unsigned ");
+	}
+	if (fbsql_field->flags&ZEROFILL_FLAG) {
+		strcat(buf, "zerofill ");
+	}
+	if (fbsql_field->flags&BINARY_FLAG) {
+		strcat(buf, "binary ");
+	}
+	if (fbsql_field->flags&ENUM_FLAG) {
+		strcat(buf, "enum ");
+	}
+	if (fbsql_field->flags&AUTO_INCREMENT_FLAG) {
+		strcat(buf, "auto_increment ");
+	}
+	if (fbsql_field->flags&TIMESTAMP_FLAG) {
+		strcat(buf, "timestamp ");
+	}
+#endif
+	len = strlen(buf);
+	/* remove trailing space, if present */
+	if (len && buf[len-1] == ' ') {
+		buf[len-1] = 0;
+		len--;
+	}
+	return_value->value.str.len = len;
+   	return_value->value.str.val = estrndup(buf, len);
+   	return_value->type = IS_STRING;
 }
 /* }}} */
 
