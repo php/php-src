@@ -2362,7 +2362,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_private_decrypt(string data, string crypted, mixed key [, int padding])
+/* {{{ proto bool openssl_private_decrypt(string data, string decrypted, mixed key [, int padding])
    Decrypts data with private key */
 PHP_FUNCTION(openssl_private_decrypt)
 {
