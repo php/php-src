@@ -31,7 +31,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#if WITH_BCMATH
 #include "ext/bcmath/php_bcmath.h"
+#endif
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
 #include "ext/standard/fsock.h"
