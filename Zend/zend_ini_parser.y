@@ -33,16 +33,22 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winbase.h>
-//#include "win32/wfile.h"
 #endif
 
-int ini_lex(zval *ini_lval);
+
+typedef struct _zend_ini_parser_param {
+	zend_ini_parser_cb_t ini_parser_cb;
+	void *arg;
+} zend_ini_parser_param;
 
 #define YYSTYPE zval
+#define YYPARSE_PARAM ini_parser_param
 
-#define YYPARSE_PARAM zend_ini_parser_cb
+#define ZEND_INI_PARSER_CB	((zend_ini_parser_param *) ini_parser_param)->ini_parser_cb
+#define ZEND_INI_PARSER_ARG	((zend_ini_parser_param *) ini_parser_param)->arg
 
-#define ZEND_INI_PARSER_CB ((void (*)(zval *arg1, zval *arg2, int callback_type)) zend_ini_parser_cb)
+int ini_lex(zval *ini_lval);
+int ini_parse(void *ini_parser_param);
 
 #define PARSING_MODE_CFG		0
 #define PARSING_MODE_BROWSCAP	1
@@ -66,7 +72,7 @@ extern int ini_lineno;
 extern void init_cfg_scanner(void);
 #endif
 
-void do_cfg_op(char type, zval *result, zval *op1, zval *op2)
+void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 {
 	int i_result;
 	int i_op1, i_op2;
@@ -107,7 +113,7 @@ void do_cfg_op(char type, zval *result, zval *op1, zval *op2)
 }
 
 
-void do_cfg_get_constant(zval *result, zval *name)
+void zend_ini_get_constant(zval *result, zval *name)
 {
 	zval z_constant;
 
@@ -143,6 +149,24 @@ static void ini_error(char *str)
 }
 
 
+int zend_parse_ini_file(zend_file_handle *fh, zend_ini_parser_cb_t ini_parser_cb, void *arg)
+{
+	zend_ini_parser_param ini_parser_param;
+
+	ini_parser_param.ini_parser_cb = ini_parser_cb;
+	ini_parser_param.arg = arg;
+
+	if (zend_ini_open_file_for_scanning(fh)==FAILURE) {
+		return FAILURE;
+	}
+	if (ini_parse(&ini_parser_param)==0) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
+
 %}
 
 %pure_parser
@@ -166,10 +190,10 @@ statement:
 #if DEBUG_CFG_PARSER
 			printf("'%s' = '%s'\n",$1.value.str.val,$3.value.str.val);
 #endif
-			ZEND_INI_PARSER_CB(&$1, &$3, ZEND_INI_PARSER_ENTRY);
+			ZEND_INI_PARSER_CB(&$1, &$3, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG);
 		}
-	|	TC_STRING { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_ENTRY); }
-	|	SECTION { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_SECTION); }
+	|	TC_STRING { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG); }
+	|	SECTION { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG); }
 	|	'\n'
 ;
 
@@ -185,15 +209,15 @@ string_or_value:
 
 expr:
 		constant_string			{ $$ = $1; }
-	|	expr '|' expr			{ do_cfg_op('|', &$$, &$1, &$3); }
-	|	expr '&' expr			{ do_cfg_op('&', &$$, &$1, &$3); }
-	|	'~' expr				{ do_cfg_op('~', &$$, &$2, NULL); }
-	|	'!'	expr				{ do_cfg_op('!', &$$, &$2, NULL); }
+	|	expr '|' expr			{ zend_ini_do_op('|', &$$, &$1, &$3); }
+	|	expr '&' expr			{ zend_ini_do_op('&', &$$, &$1, &$3); }
+	|	'~' expr				{ zend_ini_do_op('~', &$$, &$2, NULL); }
+	|	'!'	expr				{ zend_ini_do_op('!', &$$, &$2, NULL); }
 	|	'(' expr ')'			{ $$ = $2; }
 ;
 
 constant_string:
-		TC_STRING { do_cfg_get_constant(&$$, &$1); }
+		TC_STRING { zend_ini_get_constant(&$$, &$1); }
 ;
 /*
  * Local variables:
