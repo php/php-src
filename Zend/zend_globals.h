@@ -121,7 +121,6 @@ struct _zend_compiler_globals {
 	zend_uint start_lineno;
 	zend_bool increment_lineno;
 
-	zend_llist import_commands;
 	znode implementing_class;
 
 	zend_uint access_type;
