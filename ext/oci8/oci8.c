@@ -4625,7 +4625,7 @@ PHP_FUNCTION(ocicollgetelem)
 	ub4  ndx;
 	int inx;
 	dvoid *elem;
-	OCIInd elemind;
+	OCIInd *elemind;
 	boolean exists;
 	OCIString *ocistr = (OCIString *)0;
 	text *str;
@@ -4667,7 +4667,7 @@ PHP_FUNCTION(ocicollgetelem)
 		}
 
 		/* Return null if the value is null */
-		if(elemind == OCI_IND_NULL) {
+		if(*elemind == OCI_IND_NULL) {
 			RETURN_FALSE;
 		} 
 
