@@ -1933,7 +1933,6 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	/* Free Temporary Service Context */
 	OCIHandleFree((dvoid *) svchp, (ub4) OCI_HTYPE_SVCCTX);
 
-
 	if (exclusive) {
 		psession = session;
 	} else {
@@ -2024,11 +2023,12 @@ _oci_close_session(oci_session *session)
 		if (OCI(error) != OCI_SUCCESS) {
 			oci_error(OCI(pError), "_oci_close_session: OCISessionEnd", OCI(error));
 		}
+
+		OCIHandleFree((dvoid *) svchp, (ub4) OCI_HTYPE_SVCCTX);
+
 	} else {
 		oci_debug("_oci_close_session: logging-off DEAD session");
 	}
-
-	OCIHandleFree((dvoid *) svchp, (ub4) OCI_HTYPE_SVCCTX);
 
 	if (session->pSession) {
 		OCIHandleFree((dvoid *) session->pSession, (ub4) OCI_HTYPE_SESSION);
