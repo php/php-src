@@ -579,15 +579,17 @@ static void php_message_handler_for_zend(long message, void *data)
 	switch (message) {
 		case ZMSG_ENABLE_TRACK_VARS: {
 				int old;
+				ELS_FETCH();
 				PLS_FETCH();
+				SLS_FETCH();
 				
 				old = PG(track_vars);
 				PG(track_vars) = 1;
 				
 				if(old == 0) {
-					php3_treat_data(PARSE_POST, NULL);
-					php3_treat_data(PARSE_COOKIE, NULL);
-					php3_treat_data(PARSE_GET, NULL);
+					php_treat_data(PARSE_POST, NULL ELS_CC PLS_CC SLS_CC);
+					php_treat_data(PARSE_COOKIE, NULL ELS_CC PLS_CC SLS_CC);
+					php_treat_data(PARSE_GET, NULL ELS_CC PLS_CC SLS_CC);
 				}
 			}
 			break;
@@ -943,12 +945,11 @@ void php_module_shutdown()
 
 
 /* in 3.1 some of this should move into sapi */
-int zend_hash_environment(PLS_D ELS_DC)
+static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 {
 	char **env, *p, *t;
 	unsigned char _gpc_flags[3] = {0,0,0};
 	pval *tmp;
-	SLS_FETCH();
 	
 	p = PG(gpc_order);
 	while(*p) {
@@ -956,21 +957,21 @@ int zend_hash_environment(PLS_D ELS_DC)
 			case 'p':
 			case 'P':
 				if (!_gpc_flags[0] && !SG(headers_sent) && SG(request_info).request_method && !strcasecmp(SG(request_info).request_method, "POST")) {
-					php3_treat_data(PARSE_POST, NULL);	/* POST Data */
+					php_treat_data(PARSE_POST, NULL ELS_CC PLS_CC SLS_CC);	/* POST Data */
 					_gpc_flags[0]=1;
 				}
 				break;
 			case 'c':
 			case 'C':
 				if (!_gpc_flags[1]) {
-					php3_treat_data(PARSE_COOKIE, NULL);	/* Cookie Data */
+					php_treat_data(PARSE_COOKIE, NULL ELS_CC PLS_CC SLS_CC);	/* Cookie Data */
 					_gpc_flags[1]=1;
 				}
 				break;
 			case 'g':
 			case 'G':
 				if (!_gpc_flags[2]) {
-					php3_treat_data(PARSE_GET, NULL);	/* GET Data */
+					php_treat_data(PARSE_GET, NULL ELS_CC PLS_CC SLS_CC);	/* GET Data */
 					_gpc_flags[2]=1;
 				}
 				break;
@@ -1150,7 +1151,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (setjmp(EG(bailout))!=0) {
 		return;
 	}
-	zend_hash_environment(PLS_C ELS_CC);
+	zend_hash_environment(PLS_C ELS_CC SLS_CC);
 
 #if WIN32||WINNT
 	UpdateIniFromRegistry(primary_file->filename);
@@ -1198,7 +1199,6 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return FAILURE;
 	}
-	php3_TreatHeaders();
 	file_handle.type = ZEND_HANDLE_FD;
 	file_handle.handle.fd = fd;
 	file_handle.filename = SG(request_info).path_translated;

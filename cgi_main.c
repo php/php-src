@@ -347,7 +347,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 						SG(headers_sent) = 1;
 					}
 					cgi_started=1;
-					php3_TreatHeaders();
 					php_print_info(0xFFFFFFFF);
 					exit(1);
 					break;
@@ -403,8 +402,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	file_handle.filename = "-";
 	file_handle.type = ZEND_HANDLE_FP;
 	file_handle.handle.fp = stdin;
-
-	php3_TreatHeaders();
 
 
 	if (!cgi) {

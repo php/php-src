@@ -33,14 +33,12 @@
  * the old TreatData function.  This is a temporary measure filling 
  * the gap until a more flexible parser can be built to do this.
  */
-void php_parse_gpc_data(char *val, char *var, pval *track_vars_array)
+void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
 {
 	int var_type;
 	char *ind, *tmp = NULL, *ret = NULL;
 	int var_len, val_len;
 	pval *entry;
-	ELS_FETCH();
-	PLS_FETCH();
 	
 	var_type = php3_check_ident_type(var);
 	if (var_type == GPC_INDEXED_ARRAY) {
@@ -176,14 +174,11 @@ void php_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 }
 
 
-void php3_treat_data(int arg, char *str)
+void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 {
 	char *res = NULL, *var, *val;
 	pval *array_ptr;
 	int free_buffer=0;
-	ELS_FETCH();
-	PLS_FETCH();
-	SLS_FETCH();
 	
 	switch (arg) {
 		case PARSE_POST:
@@ -255,7 +250,7 @@ void php3_treat_data(int arg, char *str)
 			/* FIXME: XXX: not binary safe, discards returned length */
 			_php3_urldecode(var, strlen(var));
 			_php3_urldecode(val, strlen(val));
-			php_parse_gpc_data(val,var,array_ptr);
+			php_parse_gpc_data(val,var,array_ptr ELS_CC PLS_CC);
 		}
 		if (arg == PARSE_COOKIE) {
 			var = strtok(NULL, ";");
@@ -270,106 +265,6 @@ void php3_treat_data(int arg, char *str)
 	}
 }
 
-
-PHPAPI void php3_TreatHeaders(void)
-{
-#if 0
-#if APACHE
-#if MODULE_MAGIC_NUMBER > 19961007
-	const char *s = NULL;
-#else
-	char *s = NULL;
-#endif
-	char *t;
-	char *user, *type;
-	int len;
-	char *escaped_str;
-	request_rec *r;
-	PLS_FETCH();
-	SLS_FETCH();
-
-	r = ((request_rec *) SG(server_context));
-	
-	if (r->headers_in)
-		s = table_get(r->headers_in, "Authorization");
-	if (!s)
-		return;
-
-	/* Check to make sure that this URL isn't authenticated
-	   using a traditional auth module mechanism */
-	if (auth_type(r)) {
-		/*php_error(E_WARNING, "Authentication done by server module\n");*/
-		return;
-	}
-	if (strcmp(t=getword(r->pool, &s, ' '), "Basic")) {
-		/* Client tried to authenticate using wrong auth scheme */
-		php_error(E_WARNING, "client used wrong authentication scheme (%s)", t);
-		return;
-	}
-	t = uudecode(r->pool, s);
-#if MODULE_MAGIC_NUMBER > 19961007
-	user = getword_nulls_nc(r->pool, &t, ':');
-#else
-	user = getword(r->pool, &t, ':');
-#endif
-	type = "Basic";
-
-	if (user) {
-		if (PG(magic_quotes_gpc)) {
-			escaped_str = php_addslashes(user, 0, &len, 0);
-			SET_VAR_STRINGL("PHP_AUTH_USER", escaped_str, len);
-		} else {
-			SET_VAR_STRING("PHP_AUTH_USER", estrdup(user));
-		}
-	}
-	if (t) {
-		if (PG(magic_quotes_gpc)) {
-			escaped_str = php_addslashes(t, 0, &len, 0);
-			SET_VAR_STRINGL("PHP_AUTH_PW", escaped_str, len);
-		} else {
-			SET_VAR_STRING("PHP_AUTH_PW", estrdup(t));
-		}
-	}
-	if (type) {
-		if (PG(magic_quotes_gpc)) {
-			escaped_str = php_addslashes(type, 0, &len, 0);
-			SET_VAR_STRINGL("PHP_AUTH_TYPE", escaped_str, len);
-		} else {
-			SET_VAR_STRING("PHP_AUTH_TYPE", estrdup(type));
-		}
-	}
-#endif
-#if FHTTPD
-	int i,len;
-	struct rline *l;
-	char *type;
-	char *escaped_str;
-
-	if(req && req->remote_user){
-		for(i=0; i < req->nlines; i++){
-			l=req->lines+i;
-			if((l->paramc > 1)&&!strcasecmp(l->params[0], "REMOTE_PW")){
-				type = "Basic";
-				if (PG(magic_quotes_gpc)) {
-					escaped_str = php_addslashes(type, 0, &len, 0);
-					SET_VAR_STRINGL("PHP_AUTH_TYPE", escaped_str, len);
-					escaped_str = php_addslashes(l->params[1], 0, &len, 0);
-					SET_VAR_STRINGL("PHP_AUTH_PW", escaped_str, len);
-					escaped_str = php_addslashes(req->remote_user, 0, &len, 0);
-					SET_VAR_STRINGL("PHP_AUTH_USER", escaped_str, len);
-
-				} else {
-					SET_VAR_STRING("PHP_AUTH_TYPE", estrdup(type));
-					SET_VAR_STRING("PHP_AUTH_PW", estrdup(l->params[1]));
-					SET_VAR_STRING("PHP_AUTH_USER", estrdup(req->remote_user));
-				}
-				i=req->nlines;
-			}
-		}
-	}
-#endif
-#endif
-}
 
 /*
  * Local variables:

@@ -1873,6 +1873,9 @@ PHP_FUNCTION(parse_str)
 {
 	pval *arg;
 	char *res = NULL;
+	ELS_FETCH();
+	PLS_FETCH();
+	SLS_FETCH();
 
 	if (getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1881,7 +1884,7 @@ PHP_FUNCTION(parse_str)
 	if (arg->value.str.val && *arg->value.str.val) {
 		res = estrndup(arg->value.str.val,arg->value.str.len);
 	}
-	php3_treat_data(PARSE_STRING, res);
+	php_treat_data(PARSE_STRING, res ELS_CC PLS_CC SLS_CC);
 }
 /* }}} */
 

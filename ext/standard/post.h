@@ -31,13 +31,14 @@
 #ifndef _POST_H
 #define _POST_H
 
+#include "SAPI.h"
+
 #define PARSE_POST 0
 #define PARSE_GET 1
 #define PARSE_COOKIE 2
 #define PARSE_STRING 3
 
-void php3_treat_data(int arg, char *str);
-void php_parse_gpc_data(char *, char *, pval *track_vars_array);
-PHPAPI void php3_TreatHeaders(void);
+void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC);
+void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC);
 
 #endif
