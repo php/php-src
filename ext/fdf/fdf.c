@@ -1495,12 +1495,12 @@ PHP_FUNCTION(fdf_get_attachment) {
 	  ZVAL_STRING(z_name, name, 1);
 	  args[0] = &z_name;
 
-	  if(*value) { // simple value 
+	  if(*value) { /* simple value */
 		  MAKE_STD_ZVAL(z_value);
 		  ZVAL_STRING(z_value, value, 1);
 		  args[1] = &z_value;
-	  } else { // empty value *might* be an array
-		  // todo do it like fdf_get_value (or re-implement yourself?)
+	  } else { /* empty value *might* be an array */
+		  /* todo do it like fdf_get_value (or re-implement yourself?) */
 	  }
 	  
 	  if(userdata) {
