@@ -1745,6 +1745,7 @@ PHP_FUNCTION(fbsql_list_dbs)
 	phpResult->connection  = NULL;
 	phpResult->fetchHandle = NULL;
 	phpResult->rowHandler  = NULL;
+	phpResult->ResultmetaData    = NULL;
 	phpResult->metaData    = NULL;
 	phpResult->batchSize   = FB_SQL_G(batchSize);
 	phpResult->columnCount = 1;
@@ -1763,11 +1764,11 @@ PHP_FUNCTION(fbsql_list_dbs)
 		phpLink->results     = realloc(phpLink->results,sizeof(PHPFBResult*)* phpLink->resultCount);
 		for (j=i; j < phpLink->resultCount ; j++)phpLink->results[j] = NULL;
 	}
-	phpLink->results[i]     = phpResult;
+	phpLink->results[i] = phpResult;
 	return_value->value.lval = phpResult->index;
-	return_value->type       = IS_LONG;
-	FB_SQL_G(resultIndex)      = phpResult->index;
-	FB_SQL_G(linkIndex)        = phpLink->index;
+	return_value->type = IS_LONG;
+	FB_SQL_G(resultIndex) = phpResult->index;
+	FB_SQL_G(linkIndex) = phpLink->index;
 }
 /* }}} */
 
@@ -2447,11 +2448,15 @@ PHP_FUNCTION(fbsql_num_rows)
 	result = phpfbGetResult(resultIndex);
 	if (result == NULL) RETURN_FALSE;
 
-	rowCount = fbcmdRowCount (result->metaData);
-	if (rowCount == -1)
-	{
-		phpfbFetchRow(result,0x7fffffff);
+	if (result->array)
 		rowCount = result->rowCount;
+	else {
+		rowCount = fbcmdRowCount(result->metaData);
+		if (rowCount == -1)
+		{
+			phpfbFetchRow(result,0x7fffffff);
+			rowCount = result->rowCount;
+		}
 	}
 	return_value->value.lval = rowCount;
 	return_value->type       = IS_LONG;
