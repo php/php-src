@@ -1,7 +1,10 @@
 --TEST--
 Translit failure
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+include('skipif.inc');
+( ICONV_IMPL != "libiconv" ) and die("skip"); 
+?>
 --FILE--
 <?php
 // Should be ok.
