@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Making pspell compile as a shared module
 - Added 3 additional arguments to the user-defined error handler - the file
   name and line number in which the error occured, and the context (local
   variables) of the code in which the error occured (Zeev, Zend Engine)
