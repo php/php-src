@@ -50,26 +50,16 @@
 
 #define _WIN32_DCOM
 
-#ifdef CP_THREAD_ACP
-#define PHP_COM_CODEPAGE CP_THREAD_ACP
-#else
-#define PHP_COM_CODEPAGE CP_ACP
-#endif
-
 #include <iostream.h>
 #include <math.h>
 
 #include "php.h"
 #include "php_ini.h"
+#include "com.h"
 
 #include "conversion.h"
-#include "unknwn.h"
-
-BEGIN_EXTERN_C()
 
 zend_class_entry com_class_entry;
-
-END_EXTERN_C()
 
 PHP_FUNCTION(COM_load);
 PHP_FUNCTION(COM_invoke);
@@ -101,27 +91,94 @@ static PHP_MINFO_FUNCTION(COM)
 
 static int php_COM_load_typelib(char *typelib_name, int mode);
 
+PHPAPI HRESULT php_COM_invoke(i_dispatch *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult)
+{
+	if(obj->typelib) {
+		return obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
+											   wFlags, pDispParams, pVarResult, NULL, NULL);
+	} else {
+		return obj->i.typeinfo->lpVtbl->Invoke(obj->i.typeinfo, obj->i.dispatch, dispIdMember,
+											   wFlags, pDispParams, pVarResult, NULL, NULL);
+	}
+}
+
+PHPAPI HRESULT php_COM_get_ids_of_names(i_dispatch *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId)
+{
+	if(obj->typelib) {
+		return obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
+	} else {
+		return obj->i.typeinfo->lpVtbl->GetIDsOfNames(obj->i.typeinfo, rgszNames, 1, rgDispId);
+	}
+}
+
+PHPAPI HRESULT php_COM_release(i_dispatch *obj)
+{
+	HRESULT hr;
+	
+	hr = obj->i.dispatch->lpVtbl->Release(obj->i.dispatch);
+	obj->i.dispatch = NULL;
+	obj->i.typeinfo = NULL;
+	obj->typelib = FALSE;
+
+	return hr;
+}
+
+PHPAPI HRESULT php_COM_set(i_dispatch *obj, IDispatch FAR* pDisp, int cleanup)
+{
+	HRESULT hr;
+
+	obj->i.dispatch = pDisp;
+	obj->typelib = !FAILED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &obj->i.typeinfo));
+
+	if(cleanup) {
+		pDisp = NULL;
+	} else {
+		hr = obj->i.dispatch->lpVtbl->AddRef(obj->i.dispatch);
+	}
+
+	return hr;
+}
+
+PHPAPI HRESULT php_COM_clone(i_dispatch *obj, i_dispatch *clone, int cleanup)
+{
+	HRESULT hr;
+
+	obj->typelib = clone->typelib;
+	obj->i.dispatch = clone->i.dispatch;
+	obj->i.typeinfo = clone->i.typeinfo;
+
+	if(cleanup) {
+		obj->i.dispatch = NULL;
+		obj->i.typeinfo = NULL;
+		obj->typelib = FALSE;
+	} else {
+		hr = obj->i.dispatch->lpVtbl->AddRef(obj->i.dispatch);
+	}
+
+	return hr;
+}
+
 PHPAPI char *php_COM_error_message(HRESULT hr)
 {
-	char *pMsgBuf;
+	void *pMsgBuf;
 
 	if (!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
 		hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &pMsgBuf, 0, NULL)) {
 		char error_string[] = "No description available";
 		
-		pMsgBuf = (char *) LocalAlloc(LMEM_FIXED, sizeof(error_string));
+		pMsgBuf = LocalAlloc(LMEM_FIXED, sizeof(error_string));
 		memcpy(pMsgBuf, error_string, sizeof(error_string));
 	}
 
 	return pMsgBuf;
 }
 
-static char *php_string_from_clsid(const CLSID clsid)
+static char *php_string_from_clsid(const CLSID *clsid)
 {
 	LPOLESTR ole_clsid;
 	char *clsid_str;
 
-	StringFromCLSID(&clsid, &ole_clsid);
+	StringFromCLSID(clsid, &ole_clsid);
 	clsid_str = php_OLECHAR_to_char(ole_clsid, NULL, 0, codepage);
 	LocalFree(ole_clsid);
 
@@ -130,9 +187,9 @@ static char *php_string_from_clsid(const CLSID clsid)
 
 static void php_idispatch_destructor(zend_rsrc_list_entry *rsrc)
 {
-	IDispatch *i_dispatch = (IDispatch *)rsrc->ptr;
-
-	i_dispatch->lpVtbl->Release(i_dispatch);
+	i_dispatch *obj = (i_dispatch *)rsrc->ptr;
+	php_COM_release(obj);
+	efree(obj);
 }
 
 static PHP_INI_MH(OnTypelibFileChange)
@@ -199,12 +256,12 @@ static PHP_INI_MH(OnTypelibFileChange)
 
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY1_EX("allow_dcom",		"0",		PHP_INI_SYSTEM,		NULL,					NULL,	php_ini_boolean_displayer_cb)
-	PHP_INI_ENTRY1("typelib_file",		NULL,		PHP_INI_SYSTEM,		OnTypelibFileChange,	NULL)
+	PHP_INI_ENTRY_EX("com.allow_dcom", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
+	PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypelibFileChange)
 PHP_INI_END()
 
 
-/* {{{ proto int com_load(string module_name)
+/* {{{ proto int com_load(string module_name [, string remote_host [, int codepage]])
    Loads a COM module */
 PHP_FUNCTION(COM_load)
 {
@@ -212,7 +269,7 @@ PHP_FUNCTION(COM_load)
 	CLSID clsid;
 	HRESULT hr;
 	OLECHAR *ProgID;
-	IDispatch *i_dispatch;
+	i_dispatch *obj;
 	char *error_message;
 	char *clsid_str;
 
@@ -222,7 +279,7 @@ PHP_FUNCTION(COM_load)
 			codepage = CP_ACP;
 			break;
 		case 2:
-			if (!INI_INT("allow_dcom")) {
+			if (!INI_INT("com.allow_dcom")) {
 				php_error(E_WARNING, "DCOM is disabled");
 				RETURN_FALSE;
 			}
@@ -237,7 +294,7 @@ PHP_FUNCTION(COM_load)
 				efree(server_name);
 				server_name = NULL;
 			} else {
-				if (!INI_INT("allow_dcom")) {
+				if (!INI_INT("com.allow_dcom")) {
 					php_error(E_WARNING, "DCOM is disabled");
 					RETURN_FALSE;
 				}
@@ -254,7 +311,7 @@ PHP_FUNCTION(COM_load)
 
 	convert_to_string(module_name);
 	ProgID = php_char_to_OLECHAR(module_name->value.str.val, module_name->value.str.len, codepage);
-	hr = CLSIDFromProgID(ProgID, &clsid);
+	hr=CLSIDFromProgID(ProgID, &clsid);
 	efree(ProgID);
 
 	/* obtain CLSID */
@@ -265,9 +322,12 @@ PHP_FUNCTION(COM_load)
 		RETURN_FALSE;
 	}
 
+	obj = (i_dispatch *) emalloc(sizeof(i_dispatch));
+
 	/* obtain IDispatch */
 	if (!server_name) {
-		hr = CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID *) &i_dispatch);
+		hr = CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID *) &(obj->i.dispatch));
+		php_COM_set(obj, obj->i.dispatch, TRUE);
 	} else {
 		COSERVERINFO server_info;
 		MULTI_QI pResults;
@@ -283,27 +343,28 @@ PHP_FUNCTION(COM_load)
 		hr=CoCreateInstanceEx(&clsid, NULL, CLSCTX_SERVER, &server_info, 1, &pResults);
 		if (SUCCEEDED(hr)) {
 			hr = pResults.hr;
-			i_dispatch = (IDispatch *) pResults.pItf;
+			obj->i.dispatch = (IDispatch *) pResults.pItf;
+			php_COM_set(obj, obj->i.dispatch, TRUE);
 		}
 		efree(server_info.pwszName);
 	}
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
-		clsid_str = php_string_from_clsid(clsid);
+		clsid_str = php_string_from_clsid(&clsid);
 		php_error(E_WARNING,"Unable to obtain IDispatch interface for CLSID %s:  %s",clsid_str,error_message);
 		LocalFree(error_message);
 		efree(clsid_str);
+		efree(obj);
 		RETURN_FALSE;
 	}
 
-
-	RETURN_LONG(zend_list_insert(i_dispatch,le_idispatch));
+	RETURN_LONG(zend_list_insert(obj, le_idispatch));
 }
 /* }}} */
 
 
-int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_result, pval **arguments, int arg_count)
+int do_COM_invoke(i_dispatch *obj, pval *function_name, VARIANTARG *var_result, pval **arguments, int arg_count)
 {
 	DISPID dispid;
 	HRESULT hr;
@@ -315,7 +376,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 
 	funcname = php_char_to_OLECHAR(function_name->value.str.val, function_name->value.str.len, codepage);
 
-	hr = i_dispatch->lpVtbl->GetIDsOfNames(i_dispatch, &IID_NULL, &funcname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
+	hr = php_COM_get_ids_of_names(obj, &funcname, &dispid);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -337,9 +398,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 	dispparams.cArgs = arg_count;
 	dispparams.cNamedArgs = 0;
 
-	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
-							LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
-							&dispparams, var_result, NULL, NULL);
+	hr = php_COM_invoke(obj, dispid, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, var_result);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -362,7 +421,7 @@ PHP_FUNCTION(COM_invoke)
 {
 	pval **arguments;
 	pval *object, *function_name;
-	IDispatch *i_dispatch;
+	i_dispatch *obj;
 	int type;
 	int arg_count = ZEND_NUM_ARGS();
 	VARIANTARG var_result;
@@ -378,10 +437,10 @@ PHP_FUNCTION(COM_invoke)
 	object = arguments[0];
 	function_name = arguments[1];
 
-	/* obtain i_dispatch interface */
+	/* obtain IDispatch interface */
 	convert_to_long(object);
-	i_dispatch = (IDispatch *)zend_list_find(object->value.lval, &type);
-	if (!i_dispatch || (type!=le_idispatch)) {
+	obj = (i_dispatch *)zend_list_find(object->value.lval, &type);
+	if (!obj || (type!=le_idispatch)) {
 		php_error(E_WARNING,"%d is not a COM object handler", function_name->value.str.val);
 		RETURN_FALSE;
 	}
@@ -389,7 +448,7 @@ PHP_FUNCTION(COM_invoke)
 	/* obtain property/method handler */
 	convert_to_string(function_name);
 
-	if (do_COM_invoke(i_dispatch, function_name, &var_result, arguments+2, arg_count-2)==FAILURE) {
+	if (do_COM_invoke(obj, function_name, &var_result, arguments+2, arg_count-2)==FAILURE) {
 		RETURN_FALSE;
 	}
 	efree(arguments);
@@ -403,16 +462,21 @@ static int do_COM_offget(VARIANTARG *var_result, VARIANTARG *array, pval *arg_pr
 	switch (array->vt) {
 		case VT_DISPATCH:	{	/* a Collection, possibly */
 			pval function_name;
-			IDispatch *i_dispatch = array->pdispVal;
+			i_dispatch *obj;
 			int retval;
+
+			obj = (i_dispatch *) emalloc(sizeof(i_dispatch));
+			php_COM_set(obj, array->pdispVal, TRUE);
 
 			function_name.value.str.val = "Item";
 			function_name.value.str.len = 4;
 			function_name.type = IS_STRING;
-			retval = do_COM_invoke(i_dispatch, &function_name, var_result, &arg_property, 1);
+			retval = do_COM_invoke(obj, &function_name, var_result, &arg_property, 1);
 			if (cleanup) {
-				i_dispatch->lpVtbl->Release(i_dispatch);
+				php_COM_release(obj);
 			}
+			efree(obj);
+
 			return retval;
 		}
 	}
@@ -420,7 +484,7 @@ static int do_COM_offget(VARIANTARG *var_result, VARIANTARG *array, pval *arg_pr
 }
 
 
-static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *arg_property, int cleanup)
+static int do_COM_propget(VARIANTARG *var_result, i_dispatch *obj, pval *arg_property, int cleanup)
 {
 	DISPID dispid;
 	HRESULT hr;
@@ -432,7 +496,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 	/* obtain property handler */
 	propname = php_char_to_OLECHAR(arg_property->value.str.val, arg_property->value.str.len, codepage);
 
-	hr = i_dispatch->lpVtbl->GetIDsOfNames(i_dispatch, &IID_NULL, &propname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
+	hr = php_COM_get_ids_of_names(obj, &propname, &dispid);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -440,7 +504,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 		LocalFree(error_message);
 		efree(propname);
 		if (cleanup) {
-			i_dispatch->lpVtbl->Release(i_dispatch);
+			php_COM_release(obj);
 		}
 		return FAILURE;
 	}
@@ -448,7 +512,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 	dispparams.cArgs = 0;
 	dispparams.cNamedArgs = 0;
 
-	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL, LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYGET, &dispparams, var_result, NULL, 0);
+	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -456,35 +520,37 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 		LocalFree(error_message);
 		efree(propname);
 		if (cleanup) {
-			i_dispatch->lpVtbl->Release(i_dispatch);
+			php_COM_release(obj);
 		}
 		return FAILURE;
 	}
 
 	efree(propname);
 	if (cleanup) {
-		i_dispatch->lpVtbl->Release(i_dispatch);
+		php_COM_release(obj);
 	}
 	return SUCCESS;
 }
 
 
-static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_property, pval *value)
+static void do_COM_propput(pval *return_value, i_dispatch *obj, pval *arg_property, pval *value)
 {
 	DISPID dispid;
 	HRESULT hr;
 	OLECHAR *propname;
 	char *error_message;
-	VARIANTARG var_result;
+	VARIANT *var_result;
 	DISPPARAMS dispparams;
 	VARIANTARG new_value;
 	DISPID mydispid = DISPID_PROPERTYPUT;
 
 
+	var_result = emalloc(sizeof(VARIANT));
+	
 	/* obtain property handler */
 	propname = php_char_to_OLECHAR(arg_property->value.str.val, arg_property->value.str.len, codepage);
 
-	hr = i_dispatch->lpVtbl->GetIDsOfNames(i_dispatch, &IID_NULL, &propname, 1, LOCALE_SYSTEM_DEFAULT, &dispid);
+	hr = php_COM_get_ids_of_names(obj, &propname, &dispid);
 
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
@@ -494,16 +560,14 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 		RETURN_FALSE;
 	}
 
-
 	php_pval_to_variant(value, &new_value, codepage);
 	dispparams.rgvarg = &new_value;
 	dispparams.rgdispidNamedArgs = &mydispid;
 	dispparams.cArgs = 1;
 	dispparams.cNamedArgs = 1;
 
-	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
-							LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYPUT,
-							&dispparams, NULL, NULL, 0);
+	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYPUT, &dispparams, NULL);
+
 	if (FAILED(hr)) {
 		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"PropPut() failed:  %s\n", error_message);
@@ -515,18 +579,16 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 	dispparams.cArgs = 0;
 	dispparams.cNamedArgs = 0;
 
-	hr = i_dispatch->lpVtbl->Invoke(i_dispatch, dispid, &IID_NULL,
-									LOCALE_SYSTEM_DEFAULT, DISPATCH_PROPERTYGET,
-									&dispparams, &var_result, NULL, 0);
-
+	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result);
 
 	if (SUCCEEDED(hr)) {
-		php_variant_to_pval(&var_result, return_value, 0, codepage);
+		php_variant_to_pval(var_result, return_value, 0, codepage);
 	} else {
 		*return_value = *value;
 		zval_copy_ctor(return_value);
 	}
 
+	efree(var_result);
 	efree(propname);
 }
 
@@ -537,23 +599,22 @@ PHP_FUNCTION(com_propget)
 {
 	pval *arg_idispatch, *arg_property;
 	int type;
-	IDispatch *i_dispatch;
+	i_dispatch *obj;
 	VARIANTARG var_result;
 
 	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &arg_idispatch, &arg_property)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	/* obtain i_dispatch interface */
+	/* obtain IDispatch interface */
 	convert_to_long(arg_idispatch);
-	/* obtain i_dispatch interface */
-	i_dispatch = (IDispatch *)zend_list_find(arg_idispatch->value.lval,&type);
-	if (!i_dispatch || (type!=le_idispatch)) {
+	obj = (i_dispatch *)zend_list_find(arg_idispatch->value.lval,&type);
+	if (!obj || (type!=le_idispatch)) {
 		php_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
 	}	
 	convert_to_string(arg_property);
 
-	if (do_COM_propget(&var_result, i_dispatch, arg_property, 0)==FAILURE) {
+	if (do_COM_propget(&var_result, obj, arg_property, 0)==FAILURE) {
 		RETURN_FALSE;
 	}
 	php_variant_to_pval(&var_result, return_value, 0, codepage);
@@ -567,7 +628,7 @@ PHP_FUNCTION(com_propput)
 {
 	pval *arg_idispatch, *arg_property, *arg_value;
 	int type;
-	IDispatch *i_dispatch;
+	i_dispatch *obj;
 
 	if (ZEND_NUM_ARGS()!=3 || getParameters(ht, 3, &arg_idispatch, &arg_property, &arg_value)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -576,62 +637,72 @@ PHP_FUNCTION(com_propput)
 	/* obtain i_dispatch interface */
 	convert_to_long(arg_idispatch);
 	/* obtain i_dispatch interface */
-	i_dispatch = (IDispatch *)zend_list_find(arg_idispatch->value.lval,&type);
-	if (!i_dispatch || (type!=le_idispatch)) {
+	obj = (i_dispatch *)zend_list_find(arg_idispatch->value.lval,&type);
+	if (!obj || (type!=le_idispatch)) {
 		php_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
 	}	
 	convert_to_string(arg_property);
 
-	do_COM_propput(return_value, i_dispatch, arg_property, arg_value);
+	do_COM_propput(return_value, obj, arg_property, arg_value);
 }
 /* }}} */
 
 
-VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_reference)
+VARIANT *_php_COM_get_property_handler(zend_property_reference *property_reference)
 {
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 	pval **idispatch_handle;
 	pval *object = property_reference->object;
-	IDispatch *i_dispatch;
 	int type;
-	VARIANTARG var_result;
+	VARIANT *var_result;
+	i_dispatch *obj, *obj_prop;
 
 
 	/* fetch the IDispatch interface */
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &idispatch_handle);
-	i_dispatch = (IDispatch *)zend_list_find((*idispatch_handle)->value.lval,&type);
-	if (!i_dispatch || (type!=le_idispatch)) {
-		var_result.vt = VT_EMPTY;
-		return var_result;
+	obj = (i_dispatch *) zend_list_find((*idispatch_handle)->value.lval, &type);
+	if (!obj || (type!=le_idispatch)) {
+		return NULL;
 	}
 
-	var_result.vt = VT_DISPATCH;
-	var_result.pdispVal = i_dispatch;
+	obj_prop = (i_dispatch *) emalloc(sizeof(i_dispatch));
+	php_COM_clone(obj_prop, obj, FALSE);
+	
+	var_result = (VARIANT *) emalloc(sizeof(VARIANT));
+	var_result->vt = VT_DISPATCH;
+	var_result->pdispVal = obj_prop->i.dispatch;
 
 	for (element=property_reference->elements_list->head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
 			case OE_IS_ARRAY:
-				if (do_COM_offget(&var_result, &var_result, &overloaded_property->element, element!=property_reference->elements_list->head)==FAILURE) {
-					var_result.vt = VT_EMPTY;
+				if (do_COM_offget(var_result, var_result, &overloaded_property->element, element!=property_reference->elements_list->head)==FAILURE) {
+					var_result->vt = VT_EMPTY;
+					efree(obj_prop);
 					return var_result;
 				}
-				/*printf("Array offset:  ");*/
 				break;
+
 			case OE_IS_OBJECT:
-				if (var_result.vt != VT_DISPATCH) {
-					var_result.vt = VT_EMPTY;
+				if (var_result->vt != VT_DISPATCH) {
+					var_result->vt = VT_EMPTY;
+					efree(obj_prop);
 					return var_result;
 				} else {
-					if (do_COM_propget(&var_result, var_result.pdispVal, &overloaded_property->element, element!=property_reference->elements_list->head)==FAILURE) {
-						var_result.vt = VT_EMPTY;
+					php_COM_set(obj_prop, var_result->pdispVal, TRUE);
+					if (do_COM_propget(var_result, obj_prop, &overloaded_property->element, element!=property_reference->elements_list->head)==FAILURE) {
+						var_result->vt = VT_EMPTY;
+						efree(obj_prop);
 						return var_result;
 					}
-					/*printf("Object property:  ");*/
+					
 				}
 				break;
+
 			case OE_IS_METHOD:
+				var_result->pdispVal = obj_prop->i.dispatch;
+				efree(obj_prop);
 				return var_result;
 				break;
 		}
@@ -647,15 +718,17 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 		*/
 		pval_destructor(&overloaded_property->element);
 	}
+	efree(obj_prop);
 	return var_result;
 }
 
 PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_reference)
 {
 	pval result;
-	VARIANTARG var_result = _php_COM_get_property_handler(property_reference);
+	VARIANT *var_result = _php_COM_get_property_handler(property_reference);
 
-	php_variant_to_pval(&var_result, &result, 0, codepage);
+	php_variant_to_pval(var_result, &result, 0, codepage);
+	efree(var_result);
 	return result;
 }
 
@@ -667,19 +740,19 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 	zend_llist_element *element;
 	pval **idispatch_handle;
 	pval *object = property_reference->object;
-	IDispatch *i_dispatch;
+	i_dispatch *obj;
 	int type;
 	VARIANTARG var_result;
 
 
 	/* fetch the IDispatch interface */
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &idispatch_handle);
-	i_dispatch = (IDispatch *)zend_list_find((*idispatch_handle)->value.lval,&type);
-	if (!i_dispatch || (type!=le_idispatch)) {
+	obj = (i_dispatch *)zend_list_find((*idispatch_handle)->value.lval,&type);
+	if (!obj || (type!=le_idispatch)) {
 		return FAILURE;
 	}
 	var_result.vt = VT_DISPATCH;
-	var_result.pdispVal = i_dispatch;
+	var_result.pdispVal = obj->i.dispatch;
 
 	for (element=property_reference->elements_list->head; element && element!=property_reference->elements_list->tail; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
@@ -691,7 +764,8 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 				if (var_result.vt != VT_DISPATCH) {
 					return FAILURE;
 				} else {
-					do_COM_propget(&var_result, i_dispatch, &overloaded_property->element, element!=property_reference->elements_list->head);
+					// ??????
+					do_COM_propget(&var_result, obj, &overloaded_property->element, element!=property_reference->elements_list->head);
 					/*printf("Object property:  ");*/
 				}
 				break;
@@ -715,9 +789,15 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 	if (var_result.vt != VT_DISPATCH) {
 		return FAILURE;
 	}
+	obj = (i_dispatch *) emalloc(sizeof(i_dispatch));
+	obj->typelib = FALSE;
+	obj->i.dispatch = var_result.pdispVal;
+
 	overloaded_property = (zend_overloaded_element *) element->data;
-	do_COM_propput(&result, var_result.pdispVal, &overloaded_property->element, value);
+	do_COM_propput(&result, obj, &overloaded_property->element, value);
 	pval_destructor(&overloaded_property->element);
+	efree(obj);
+
 	return SUCCESS;
 }
 
@@ -745,24 +825,26 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		zend_hash_index_update(object->value.obj.properties, 0, &object_handle, sizeof(pval *), NULL);
 		pval_destructor(&function_name->element);
 	} else {
-		VARIANTARG object_handle = _php_COM_get_property_handler(property_reference);
+		i_dispatch *obj;
 		pval **arguments;
 		int arg_count = ZEND_NUM_ARGS();
 		VARIANTARG var_result;
 
 		var_result.vt = VT_EMPTY;
 
-		if (object_handle.vt != VT_DISPATCH) {
-			/* that shouldn't happen */
-			return;
-		}
+		obj = (i_dispatch *) emalloc(sizeof(i_dispatch));
+		php_COM_set(obj, _php_COM_get_property_handler(property_reference)->pdispVal, TRUE);
+ 
 		arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
 		getParametersArray(ht, arg_count, arguments);
 
-		if (do_COM_invoke((IDispatch *) object_handle.pdispVal, &function_name->element, &var_result, arguments, arg_count)==FAILURE) {
+		if (do_COM_invoke(obj , &function_name->element, &var_result, arguments, arg_count)==FAILURE) {
 			RETVAL_FALSE;
 		}
+		
 		pval_destructor(&function_name->element);
+		php_COM_release(obj);
+		efree(obj);
 		efree(arguments);
 		php_variant_to_pval(&var_result, return_value, 0, codepage);
 	}
@@ -788,18 +870,52 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 	ITypeLib *TypeLib;
 	ITypeComp *TypeComp;
 	OLECHAR *p;
+	CLSID clsid;
+	char *strtok_buf, *major, *minor;
 	int i;
 	int interfaces;
 	ELS_FETCH();
 
+
+	typelib_name = php_strtok_r(typelib_name, ",", &strtok_buf);
+	major = php_strtok_r(NULL, ",", &strtok_buf);
+	minor = php_strtok_r(NULL, ",", &strtok_buf);
+	
 	p = php_char_to_OLECHAR(typelib_name, strlen(typelib_name), codepage);
 
-	if (FAILED(LoadTypeLib(p, &TypeLib))) {
-		efree(p);
-		return FAILURE;
+	if (!FAILED(CLSIDFromString(p, &clsid))) {
+		HRESULT hr;
+
+		if (major && minor) {
+			hr = LoadRegTypeLib((REFGUID) &clsid, 1, 0, LANG_NEUTRAL, &TypeLib);
+		}
+		
+		if (!major || !minor || FAILED(hr)) {
+			IDispatch *i_dispatch;
+			ITypeInfo *TypeInfo;
+			int idx;
+
+			if (FAILED(CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID *) &i_dispatch))) {
+				efree(p);
+				return FAILURE;
+			}
+			if (FAILED(i_dispatch->lpVtbl->GetTypeInfo(i_dispatch, 0, LANG_NEUTRAL, &TypeInfo))) {
+				efree(p);
+				return FAILURE;
+			}
+			if (FAILED(TypeInfo->lpVtbl->GetContainingTypeLib(TypeInfo, &TypeLib, &idx))) {
+				efree(p);
+				return FAILURE;
+			}
+		}
+	} else {
+		if (FAILED(LoadTypeLib(p, &TypeLib))) {
+			efree(p);
+			return FAILURE;
+		}
 	}
 
- 	interfaces = TypeLib->lpVtbl->GetTypeInfoCount(TypeLib);
+	interfaces = TypeLib->lpVtbl->GetTypeInfoCount(TypeLib);
 
 	TypeLib->lpVtbl->GetTypeComp(TypeLib, &TypeComp);
 	for (i=0; i<interfaces; i++) {
@@ -865,7 +981,6 @@ void php_register_COM_class()
 	zend_register_internal_class(&com_class_entry);
 }
 
-
 PHP_MINIT_FUNCTION(COM)
 {
 	CoInitialize(NULL);
@@ -883,7 +998,6 @@ PHP_MSHUTDOWN_FUNCTION(COM)
 	return SUCCESS;
 }
 
-BEGIN_EXTERN_C()
 // exports for external object creation
 
 zend_module_entry COM_module_entry = {
@@ -893,7 +1007,5 @@ zend_module_entry COM_module_entry = {
 PHPAPI int php_COM_get_le_idispatch() {
 	return le_idispatch;
 }
-
-END_EXTERN_C()
 
 #endif
