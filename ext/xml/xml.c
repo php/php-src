@@ -25,7 +25,7 @@
 #include "php_xml.h"
 #include "zend_variables.h"
 #include "ext/standard/php_string.h"
-
+#include "ext/standard/info.h"
 
 #if HAVE_LIBEXPAT
 
@@ -218,7 +218,10 @@ PHP_RSHUTDOWN_FUNCTION(xml)
 
 PHP_MINFO_FUNCTION(xml)
 {
-	PUTS("XML support active");
+
+        php_info_print_table_start();
+	php_info_print_table_row(2, "XML Support", "active");
+        php_info_print_table_end();
 }
 
 

@@ -23,6 +23,7 @@
 #include "php.h"
 #include "php_string.h"
 #include "reg.h"
+#include "ext/standard/info.h"
 
 #if 0
 zend_module_entry regexp_module_entry = {
@@ -107,9 +108,9 @@ PHP_MSHUTDOWN_FUNCTION(regex)
 PHP_MINFO_FUNCTION(regex)
 {
 #if HSREGEX
-	PUTS("Bundled regex library enabled<br>\n");
+	php_info_print_table_row(2, "Regex Library", "Bundled library enabled");
 #else
-	PUTS("System regex library enabled<br>\n");
+	php_info_print_table_row(2, "Regex Library", "System library enabled");
 #endif
 }
 

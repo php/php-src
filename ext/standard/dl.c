@@ -21,6 +21,7 @@
 #include "php.h"
 #include "dl.h"
 #include "php_globals.h"
+#include "ext/standard/info.h"
 
 #ifdef HAVE_LIBDL
 #include <stdlib.h>
@@ -181,7 +182,7 @@ void php_dl(pval *file,int type,pval *return_value)
 
 PHP_MINFO_FUNCTION(dl)
 {
-	PUTS("Dynamic Library support enabled<br>.\n");
+        php_info_print_table_row(2, "Dynamic Library Support", "enabled");
 }
 
 #else
