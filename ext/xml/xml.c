@@ -70,13 +70,13 @@ PHP_RSHUTDOWN_FUNCTION(xml);
 PHP_MINFO_FUNCTION(xml);
 
 static void xml_parser_dtor(xml_parser *);
-static void xml_set_handler(char **, zval **);
+static void xml_set_handler(zval **, zval **);
 inline static unsigned short xml_encode_iso_8859_1(unsigned char);
 inline static char xml_decode_iso_8859_1(unsigned short);
 inline static unsigned short xml_encode_us_ascii(unsigned char);
 inline static char xml_decode_us_ascii(unsigned short);
 static XML_Char *xml_utf8_encode(const char *, int, int *, const XML_Char *);
-static zval *xml_call_handler(xml_parser *, char *, int, zval **);
+static zval *xml_call_handler(xml_parser *, zval *, int, zval **);
 static zval *_xml_xmlchar_zval(const XML_Char *, int, const XML_Char *);
 static int _xml_xmlcharlen(const XML_Char *);
 static void _xml_add_to_info(xml_parser *parser,char *name);
@@ -295,31 +295,31 @@ xml_parser_dtor(xml_parser *parser)
 		efree(parser->ltags);
 	}
 	if (parser->startElementHandler) {
-		efree(parser->startElementHandler);
+		zval_del_ref(&parser->startElementHandler);
 	}
 	if (parser->endElementHandler) {
-		efree(parser->endElementHandler);
+		zval_del_ref(&parser->endElementHandler);
 	}
 	if (parser->characterDataHandler) {
-		efree(parser->characterDataHandler);
+		zval_del_ref(&parser->characterDataHandler);
 	}
 	if (parser->processingInstructionHandler) {
-		efree(parser->processingInstructionHandler);
+		zval_del_ref(&parser->processingInstructionHandler);
 	}
 	if (parser->defaultHandler) {
-		efree(parser->defaultHandler);
+		zval_del_ref(&parser->defaultHandler);
 	}
 	if (parser->unparsedEntityDeclHandler) {
-		efree(parser->unparsedEntityDeclHandler);
+		zval_del_ref(&parser->unparsedEntityDeclHandler);
 	}
 	if (parser->notationDeclHandler) {
-		efree(parser->notationDeclHandler);
+		zval_del_ref(&parser->notationDeclHandler);
 	}
 	if (parser->externalEntityRefHandler) {
-		efree(parser->externalEntityRefHandler);
+		zval_del_ref(&parser->externalEntityRefHandler);
 	}
 	if (parser->unknownEncodingHandler) {
-		efree(parser->unknownEncodingHandler);
+		zval_del_ref(&parser->unknownEncodingHandler);
 	}
 	if (parser->baseURI) {
 		efree(parser->baseURI);
@@ -332,52 +332,53 @@ xml_parser_dtor(xml_parser *parser)
     /* {{{ xml_set_handler() */
 
 static void
-xml_set_handler(char **nameBufp, zval **data)
+xml_set_handler(zval **handler, zval **data)
 {
-	convert_to_string_ex(data);
-
-	if ((*data)->value.str.len > 0) {
-		if (*nameBufp != NULL) {
-			efree(*nameBufp);
-		}
-		*nameBufp = estrndup((*data)->value.str.val, (*data)->value.str.len);
-	} else {
-		if (*nameBufp != NULL) {
-			efree(*nameBufp);
-		}
-		*nameBufp = NULL;
+	/* IS_ARRAY might indicate that we're using array($obj, 'method') syntax */
+	if (Z_TYPE_PP(data) != IS_ARRAY) {
+		convert_to_string_ex(data);
 	}
+
+	zval_add_ref(data);
+	*handler = *data;
 }
 
 /* }}} */
     /* {{{ xml_call_handler() */
 
 static zval *
-xml_call_handler(xml_parser *parser, char *funcName, int argc, zval **argv)
+xml_call_handler(xml_parser *parser, zval *handler, int argc, zval **argv)
 {
 	ELS_FETCH();
 
-	if (parser && funcName) {
-		zval *retval, *func;
+	if (parser && handler) {
+		zval *retval;
 		int i;	
 		int result;
-
-		func = _xml_string_zval(funcName);
 
 		MAKE_STD_ZVAL(retval);
 		retval->type = IS_BOOL;
 		retval->value.lval = 0;
 
-		result = call_user_function(EG(function_table), parser->object, func, retval, argc, argv);
+		result = call_user_function(EG(function_table), parser->object, handler, retval, argc, argv);
 
 		if (result == FAILURE) {
-			php_error(E_WARNING, "Unable to call %s()",funcName);
+			zval **method;
+			zval **obj;
+
+			if (Z_TYPE_P(handler) == IS_STRING) {
+				php_error(E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(handler));
+			} else if (zend_hash_index_find(handler->value.ht, 0, (void **) &obj) == SUCCESS &&
+					   zend_hash_index_find(handler->value.ht, 1, (void **) &method) == SUCCESS &&
+					   Z_TYPE_PP(obj) == IS_OBJECT &&
+					   Z_TYPE_PP(method) == IS_STRING) {
+				php_error(E_WARNING, "Unable to call handler %s::%s()", (*obj)->value.obj.ce->name, Z_STRVAL_PP(method));
+			} else
+				php_error(E_WARNING, "Unable to call handler");
 
 			zval_dtor(retval);
 			efree(retval);
 		}
-
-		zval_del_ref(&func);
 
 		for (i = 0; i < argc; i++) {
 			zval_del_ref(&(argv[i]));
