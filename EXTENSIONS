@@ -65,8 +65,9 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           servlet
-MAINTENANCE:         Unknown
-STATUS:              Unknown
+PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
+MAINTENANCE:         Maintained
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           thttpd
 MAINTENANCE:         Unknown
@@ -199,6 +200,11 @@ PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
 -------------------------------------------------------------------------------
+EXTENSION:           dotnet
+PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+-------------------------------------------------------------------------------
 EXTENSION:           exif
 MAINTENANCE:         Unknown
 STATUS:              Unknown
@@ -233,7 +239,7 @@ STATUS:              Working
 EXTENSION:           java
 PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
 MAINTENANCE:         Maintained
-STATUS:              Unknown
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           ldap
 PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>

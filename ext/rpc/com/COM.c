@@ -66,6 +66,10 @@ function_entry COM_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+__declspec(dllexport)
+int php_COM_get_le_idispatch() {
+	return le_idispatch;
+}
 
 static PHP_MINFO_FUNCTION(COM)
 {
@@ -81,7 +85,8 @@ void php_register_COM_class();
 
 static int php_COM_load_typelib(char *typelib_name, int mode);
 
-static char *php_COM_error_message(HRESULT hr)
+__declspec(dllexport)
+char *php_COM_error_message(HRESULT hr)
 {
 	void *pMsgBuf;
 
@@ -428,7 +433,7 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
 			/* fallthru */
 		default:
-			php_error(E_WARNING,"Unsupported variant type");
+			php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", var_arg->vt, var_arg->vt);
 			var_reset(pval_arg);
 			break;
 	}
@@ -834,6 +839,7 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 }
 
 
+__declspec(dllexport)
 pval php_COM_get_property_handler(zend_property_reference *property_reference)
 {
 	pval result;
@@ -844,6 +850,7 @@ pval php_COM_get_property_handler(zend_property_reference *property_reference)
 }
 
 
+__declspec(dllexport)
 int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value)
 {
 	pval result;
@@ -907,6 +914,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 
 
 
+__declspec(dllexport)
 void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	zend_overloaded_element *overloaded_property;
@@ -933,6 +941,8 @@ void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_r
 		pval **arguments;
 		int arg_count = ZEND_NUM_ARGS();
 		VARIANTARG var_result;
+
+		var_result.vt = VT_EMPTY;
 
 		if (object_handle.vt != VT_DISPATCH) {
 			/* that shouldn't happen */
