@@ -1,3 +1,50 @@
+2001-10-15  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+    Fixed bug #13083 in http_fopen_wrapper.c which is now able to handle
+    non absolute redirects.
+
+2001-10-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/overload/.cvsignore
+      ext/overload/CREDITS
+      ext/overload/EXPERIMENTAL
+      ext/overload/Makefile.in
+      ext/overload/README
+      ext/overload/config.m4
+      ext/overload/overload.c
+      ext/overload/php_overload.h:
+    Adding user-space object overloading extension.
+
+2001-10-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/php_version.h: Bump version.
+
+2001-10-15  Stig Bakken  <ssb@fast.no>
+
+    * ext/snmp/snmp.c: MFH
+
+    * configure.in: * bump version
+
+    * ext/snmp/snmp.c: fix bug #13479
+
+2001-10-15  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing problem with indirect blobs
+
+2001-10-15  Stig Bakken  <ssb@fast.no>
+
+    * main/config.w32.h:
+    * set PHP_EXTENSION_DIR to c:\php4 and change the default
+      PHP_INCLUDE_PATH to c:\php4\pear
+
+    * NEWS: * this line is from php-gtk.  hum.
+
+    * main/config.w32.h: * fix Windows default include path
+
+    * NEWS: * updated version numbers, moved extension version change to 4.1.0
+
 2001-10-14  Egon Schmid  <eschmid@s.netic.de>
 
     * CODING_STANDARDS: Fixed some spelling errors.
