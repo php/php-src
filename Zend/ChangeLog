@@ -1,3 +1,24 @@
+2002-06-26  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute_API.c:
+    - Autoloading support based on patch from Ivan Ristic.
+    - Again I hope this feature ends up working well because if it doesn't we
+    - might need to nuke it. This only works for global scoped classes and it
+    - will never work for sub-classes so don't even ask!!!!!
+    - Just define an __autoload() function in the global scope and it will be
+    - called with the class name as the parameter if it doesn't manage to find
+    - the class.
+
+    * zend_API.c
+      zend_builtin_functions.c
+      zend_mm.h: - Centralize global class fetch
+
+    * zend_alloc.c
+      zend_execute.c:
+    - Fix problem with scope's not changing correctly during method calls.
+    - Reapply a tiny optimization to the allocator so that in non-debug mode
+    - we clean memory without detecting leaks.
+
 2002-06-24  Andi Gutmans  <andi@zend.com>
 
     * zend_fast_cache.h:

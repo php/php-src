@@ -1,3 +1,109 @@
+2002-06-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c: MFH: fix for bug: #17999
+
+    * ext/imap/php_imap.c: - Fixed bug: #17999
+    - The errors should always be stored, but they are not supposed to be
+      shown at request shutdown unless E_NOTICES are allowed.
+
+2002-06-26  Anil Madhavapeddy  <anil@recoil.org>
+
+    * ext/ncurses/config.m4:
+    use LIBNAME consistently.  Useful on systems like OpenBSD where the curses
+    library is called 'curses' and not 'ncurses'
+
+    * ext/ncurses/example1.php:
+    the ncurses_getch() is in the wrong place and never gets run
+
+2002-06-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/config.m4: Better not pollute the EXTRA_LIBS with libpaths.
+
+2002-06-26  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/spprintf.c: -xbuf_resize does not need to have return value
+
+2002-06-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/main.c
+      main/php_globals.h
+      php.ini-dist
+      php.ini-recommended:
+    - Implement Andrei's request for disabling memory leak reporting in debug
+      builds.
+
+    * ext/standard/credits_sapi.h: - And the SAPI too
+
+    * ext/standard/credits_ext.h: - Update credits
+
+    * ext/mime_magic/TODO: - Update TODO
+
+    * ext/mime_magic/mime_magic.c: - Nuke some TSRMLS_FETCHes
+
+2002-06-26  Jani Taskinen  <sniper@iki.fi>
+
+    * build/buildcheck.sh: silence the warning when glibtool is not found..
+
+2002-06-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/gd.c: - Fix build
+
+    * Makefile.global:
+    - Let make clean follow symlinks (tested on Linux, IRIX, Solaris, FreeBSD
+      and Tru64)
+
+    * ext/pgsql/config.m4: - Fix typo
+
+    * ext/mcrypt/mcrypt.c: - Unify error messages
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/msession/msession.c: Unify error messages
+
+2002-06-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/buildcheck.sh:
+    Prefer glibtool over libtool for Mac OS X compatibility
+
+    Submitted by: various people, including blakers@mac.com
+
+2002-06-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c: Unify error messages
+
+2002-06-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/interbase/interbase.c
+      sapi/aolserver/aolserver.c:
+    Fix code which makes wrong assumptions about the return value of snprintf.
+
+    The AOLserver module did not use the return value, so simply drop it.
+
+2002-06-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/domxml/php_domxml.c
+      ext/dba/dba.c
+      ext/db/db.c: Unify error messages
+
+2002-06-26  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/var.c: - No idea why this wasn't crashing before.
+
+2002-06-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/cyrus/cyrus.c
+      ext/cybercash/cybercash.c
+      ext/curl/curl.c
+      ext/cpdf/cpdf.c
+      ext/com/COM.c
+      ext/ccvs/ccvs.c
+      ext/calendar/easter.c
+      ext/bcmath/bcmath.c
+      ext/aspell/aspell.c: Unify error messages
+
+    * ext/ldap/ldap.c: - Unify error messages
+
 2002-06-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/gd/gd.c: map imageellipse to imagearc if missing
