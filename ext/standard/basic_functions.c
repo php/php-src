@@ -322,8 +322,10 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(join,			implode,			NULL)
 	PHP_FE(sql_regcase,								NULL)
 
+#ifdef HAVE_LIBDL
 	/* functions from dl.c */
 	PHP_FE(dl,							NULL)
+#endif
 
 	/* functions from file.c */
 	PHP_FE(pclose,				NULL)
@@ -1417,7 +1419,7 @@ void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_
 }
 
 
-int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry)
+static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry)
 {
 	zval retval;
 	CLS_FETCH();
