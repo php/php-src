@@ -1323,30 +1323,22 @@ PHPAPI int php_handle_auth_data(const char *auth SLS_DC)
 PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 {
 	zend_op_array *op_array;
-	int retval;
 	SLS_FETCH();
-
-	php_hash_environment(ELS_C SLS_CC PLS_CC);
-
-	zend_activate_modules();
-	PG(modules_activated)=1;
 
 	if (setjmp(EG(bailout))!=0) {
 		return FAILURE;
 	}
 
-#ifdef PHP_WIN32
-	UpdateIniFromRegistry(file->filename);
-#endif
-
 	op_array = zend_compile_file(file, ZEND_INCLUDE CLS_CC);
-	retval = (op_array?SUCCESS:FAILURE);
 
-	if (op_array != NULL) {
+	if (op_array) {
 		destroy_op_array(op_array);
+		efree(op_array);
+		zend_destroy_file_handle(file CLS_CC);
+		return SUCCESS;
+	} else {
+		return FAILURE;
 	}
-
-	return retval;
 }
 /* }}} */
 
