@@ -383,7 +383,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			subpats_order = Z_LVAL_PP(flags) & 0xff;
 			if ((global && (subpats_order < PREG_PATTERN_ORDER || subpats_order > PREG_SET_ORDER)) ||
 				(!global && subpats_order != 0)) {
-				zend_error(E_WARNING, "Wrong value for parameter 4 in call to %s()", get_active_function_name());
+				zend_error(E_WARNING, "Wrong value for parameter 4 in call to %s()", get_active_function_name(TSRMLS_C));
 				return;
 			}
 			break;
