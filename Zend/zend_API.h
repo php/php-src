@@ -203,7 +203,7 @@ ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len,  char *
 ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
 #define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key)+1, __n)
-#define add_property_unset(__arg, __key) add_assoc_property_ex(__arg, __key, strlen(__key) + 1)
+#define add_property_unset(__arg, __key) add_property_unset_ex(__arg, __key, strlen(__key) + 1)
 #define add_property_bool(__arg, __key, __b) add_property_bool_ex(__arg, __key, strlen(__key)+1, __b)
 #define add_property_resource(__arg, __key, __r) add_property_resource_ex(__arg, __key, strlen(__key)+1, __r)
 #define add_property_double(__arg, __key, __d) add_property_double_ex(__arg, __key, strlen(__key)+1, __d) 
