@@ -420,7 +420,7 @@ PHP_FUNCTION(mysqli_commit)
 }
 /* }}} */
 
-/* {{{ proto void mysqli_data_seek(object result, int offset)
+/* {{{ proto bool mysqli_data_seek(object result, int offset)
    Move internal result pointer */
 PHP_FUNCTION(mysqli_data_seek)
 {
@@ -436,11 +436,15 @@ PHP_FUNCTION(mysqli_data_seek)
 
 	if (result->handle && result->handle->status == MYSQL_STATUS_USE_RESULT) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Function cannot be used with MYSQL_USE_RESULT");
-		RETURN_LONG(0);
+		RETURN_FALSE;
+	}
+
+	if (!offset || offset >= result->row_count) {
+	   RETURN_FALSE;
 	}
 
 	mysql_data_seek(result, offset);
-	return;
+	RETURN_TRUE;
 }
 /* }}} */
 
