@@ -25,6 +25,10 @@
 
 /* Note that there is no code from the gd package in this file */
 
+#ifdef PIC
+# define COMPILE_DL 1
+#endif
+
 #include "php.h"
 #include "ext/standard/head.h"
 #include <math.h>
