@@ -642,6 +642,14 @@ TEST $file
 					$tested .= $info;
 				}
 			}
+			if (eregi("^warn", trim($output))) {
+				$reason = (ereg("^warn[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^warn[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
+				if ($reason) {
+					$warn = true; /* only if there is a reason */
+					$info = " (warn: $reason)";
+					$tested .= $info;
+				}
+			}
 		}
 	}
 
@@ -756,7 +764,11 @@ COMMAND $cmd
 	}
 
 	// Test failed so we need to report details.
-	echo "FAIL $tested\n";
+	if ($warn) {
+		echo "WARN $tested\n";
+	} else {
+		echo "FAIL $tested\n";
+	}
 
 	$PHP_FAILED_TESTS[] = array(
 						'name' => $file,
@@ -805,7 +817,7 @@ $output
 		error_report($file,$logname,$tested);
 	}
 
-	return 'FAILED';
+	return $warn ? 'WARNED' : 'FAILED';
 }
 
 function generate_diff($wanted,$output)
@@ -862,7 +874,7 @@ function compute_summary()
 	$n_total = count($test_results);
 	$n_total += $ignored_by_ext;
 	
-	$sum_results = array('PASSED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
+	$sum_results = array('PASSED'=>0, 'WARNED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
 	foreach ($test_results as $v) {
 		$sum_results[$v]++;
 	}
@@ -891,6 +903,7 @@ Exts tested     : " . sprintf("%4d",$exts_tested) . "
 	$summary .= "
 Number of tests : " . sprintf("%4d",$n_total) . "
 Tests skipped   : " . sprintf("%4d (%2.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . "
+Tests warned    : " . sprintf("%4d (%2.1f%%)",$sum_results['WARNED'],$percent_results['WARNED']) . "
 Tests failed    : " . sprintf("%4d (%2.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . "
 Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . "
 ---------------------------------------------------------------------
