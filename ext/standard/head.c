@@ -143,7 +143,6 @@ PHP_FUNCTION(setcookie)
 		sprintf(cookie, "Set-Cookie: %s=deleted; expires=%s", Z_STRVAL_PP(z_name), dt);
 		efree(dt);
 	} else {
-		/* FIXME: XXX: this is not binary data safe */
 		sprintf(cookie, "Set-Cookie: %s=%s", Z_STRVAL_PP(z_name), (z_value && Z_STRVAL_PP(z_value)) ? encoded_value : "");
 		if (expires > 0) {
 			strcat(cookie, "; expires=");
