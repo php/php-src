@@ -1,9 +1,0 @@
-// $Id$
-// vim:ft=javascript
-
-ARG_ENABLE("filepro", "Enable the bundled read-only filePro support.", "no");
-
-if (PHP_FILEPRO != "no") {
-	EXTENSION("filepro", "filepro.c");
-	AC_DEFINE('HAVE_FILEPRO', 1, 'filepro support');
-}
