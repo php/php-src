@@ -2494,6 +2494,7 @@ PHP_FUNCTION(ocibindbyname)
 		case SQLT_CFILEE:
 		case SQLT_CLOB:
 		case SQLT_BLOB:
+		case SQLT_RDD:
 			if ((*var)->type != IS_OBJECT) {
 				php_error(E_WARNING,"Variable must be allocated using OCINewDescriptor()");
 				RETURN_FALSE;
