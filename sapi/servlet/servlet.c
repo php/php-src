@@ -326,7 +326,9 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 {
 
 	zend_file_handle file_handle;
+#ifndef VIRTUAL_DIR
 	char cwd[MAXPATHLEN+1];
+#endif
 	SLS_FETCH();
 	PLS_FETCH();
 	CLS_FETCH();
