@@ -231,7 +231,7 @@ class Cmd extends PEAR
     /**
      * Errorhandler. If option CMD_VERBOSE is true,
      * the error is printed to stdout, otherwise it 
-     * is avaliable in lastError
+     * is available in lastError
      *
      * @return bool always returns true 
      *

@@ -498,7 +498,7 @@ EXEC SQL END DECLARE SECTION;
 		int host_len = 0, user_len = 0, passwd_len = 0;
 		host = user = passwd = NULL;
 
-		/* set default values if any are avaliable */
+		/* set default values if any are available */
 		if (IFXG(default_host)) {
 			host = IFXG(default_host);
 			host_len = strlen(host);

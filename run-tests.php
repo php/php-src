@@ -37,7 +37,7 @@
  */
 
 
-/* Sanity check to ensure that pcre extension needed by this script is avaliable.
+/* Sanity check to ensure that pcre extension needed by this script is available.
  * In the event it is not, print a nice error message indicating that this script will
  * not run without it.
  */
@@ -568,7 +568,7 @@ TEST $file
 	}
 	fclose($fp);
 
-	/* For GET/POST tests, check if cgi sapi is avaliable and if it is, use it. */
+	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
 	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
 		if (file_exists("./sapi/cgi/php")) {
 			$old_php = $php;

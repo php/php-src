@@ -314,7 +314,7 @@ PHP_FUNCTION(mime_content_type)
 	}
 
 	if (conf->magic == (struct magic *)-1) {
-		php_error(E_ERROR, MODNAME " could not be initialized, magic file %s is not avaliable",  conf->magicfile);
+		php_error(E_ERROR, MODNAME " could not be initialized, magic file %s is not available",  conf->magicfile);
 		RETURN_FALSE;
 	} 
 

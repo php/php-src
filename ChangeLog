@@ -148,9 +148,9 @@
        * Changed all argument parsing to use the new zend_parse_parameters()
        * If a function is unavailable due to lack of support for a certain
       feature,
-         do not make the function avaliable, rather then making it print an
+         do not make the function available, rather then making it print an
       error
-         saying that the functionality offered by the function is not avaliable.
+         saying that the functionality offered by the function is not available.
        * Lots of WS fixes all over the file.
        * Change strcpy() to strncpy() to prevent possible buffer overflows.
       Fixed a bug in ncurses_pair_content(), 1st parameter was wrong.
@@ -1384,7 +1384,7 @@
 2002-12-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/exif/exif.c:
-      decode variable is only used when mbstring is avaliable.
+      decode variable is only used when mbstring is available.
 
     * ext/openssl/openssl.c:
       ZTS fix.
@@ -2193,7 +2193,7 @@
 2002-12-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/gd/gd.c:
-      MFH (build fix, when xpm support is not avaliable).
+      MFH (build fix, when xpm support is not available).
 
 2002-12-04  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
 
@@ -5864,7 +5864,7 @@
       Compile warning fix.
 
     * ext/mbstring/tests/overload.phpt:
-      Added a skip condition for when mail() function is not avaliable.
+      Added a skip condition for when mail() function is not available.
 
     * ext/mbstring/tests/mb_send_mail05.phpt
       ext/mbstring/tests/mb_send_mail06.phpt:
@@ -6758,7 +6758,7 @@
       ext/standard/tests/strings/htmlentities07.phpt
       ext/standard/tests/strings/htmlentities08.phpt
       ext/standard/tests/strings/htmlentities09.phpt:
-      Added skip conditions in the event the required charset is not avaliabled.
+      Added skip conditions in the event the required charset is not availabled.
       Removed old (commented out) module loading code.
 
     * run-tests.php:
@@ -6766,11 +6766,11 @@
 
     * ext/pspell/tests/01pspell_basic.phpt:
       Added a skip condition if the English dictionary needed for the test is not
-      avaliable.
+      available.
 
     * ext/pcntl/tests/001.phpt:
       Added a skip condition in the event posix_kill(), which is used by the test
-      is not avaliable.
+      is not available.
 
     * ext/exif/exif.c:
       
@@ -6903,7 +6903,7 @@
       main/safe_mode.c:
       
       Instead of checking whether realpath exists based on OS. Use the
-      HAVE_REALPATH define, which is set if realpath() is avaliable. This patch
+      HAVE_REALPATH define, which is set if realpath() is available. This patch
       also resolves bug #18868.
 
 2002-11-06  Sascha Schumann  <sascha@schumann.cx>
@@ -9030,7 +9030,7 @@
 
     * ext/standard/tests/strings/strtoupper.phpt:
     Added 'skip logic' to the test on platforms where the locale required by
-    this test is not avaliable.
+    this test is not available.
 
 2002-10-23  Melvyn Sopacua  <msopacua@idg.nl>
 
