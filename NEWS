@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed a corruption bug that could cause constants to become corrupted, and
+  possibly prevent resources from properly being cleaned up at the end of
+  a request (Zeev)
 - Added optional use of Boyer-Moore algorithm to str_replace() (Sascha)
 - Fixed and improved shared-memory session storage module (Sascha)
 - Add config option (always_populate_raw_post_data) which when enabled
