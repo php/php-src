@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Resourcified XML (Thies)
 - Fixed a memory leak in the Apache per-directory directives handler (Zeev)
 - Added array_count_values() function. (Thies)
 - snmp, pgsql, mysql and gd modules can be built as dynamically loaded 

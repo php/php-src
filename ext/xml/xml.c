@@ -25,20 +25,13 @@
 #endif
 
 #if COMPILE_DL
-# if PHP_31
-#  include "../phpdl.h"
-# else
-#  include "dl/phpdl.h"
-# endif
+# include "dl/phpdl.h"
 #endif
 #include "php.h"
 #include "php3_xml.h"
 #include "zend_variables.h"
-#include "../standard/php3_string.h" /* XXX don't like it! */
+#include "ext/standard/php3_string.h"
 
-#if defined(THREAD_SAFE) && !PHP_31
-#undef THREAD_SAFE
-#endif
 
 #if HAVE_LIBEXPAT
 
@@ -61,44 +54,23 @@
  * - Weird things happen with <![CDATA[]]> sections.
  */
 
-/* {{{ thread safety stuff */
 
-# ifdef THREAD_SAFE
-#  define XML_GLOBAL(a) xml_globals->a
-#  define XML_TLS_VARS xml_global_struct *xml_globals = TlsGetValue(XMLTls); 
+#ifdef ZTS
+int xml_globals_id;
+#else
+PHP_XML_API php_xml_globals xml_globals;
+#endif
 
-void *xml_mutex;
-DWORD XMLTls;
-static int numthreads=0;
-
-typedef struct xml_global_struct {
-	xml_module php3_xml_module;
-} xml_global_struct;
-
-# else /* !defined(THREAD_SAFE) */
-#  define XML_GLOBAL(a) a
-#  define XML_TLS_VARS
-
-xml_module php3_xml_module;
-
-# endif /* defined(THREAD_SAFE) */
-
-/* }}} */
 /* {{{ dynamically loadable module stuff */
 
 # if COMPILE_DL
-DLEXPORT php3_module_entry *get_module() { return &xml_module_entry; };
+DLEXPORT zend_module_entry *get_module(void) { return &xml_module_entry; }
 # endif /* COMPILE_DL */
 
 /* }}} */
 /* {{{ function prototypes */
 
-/* XXXXX this is AN UGLY HACK - we'll need to do a cleanup here!!! */
-
-#if PHP_API_VERSION >= 19990421
-#define php3tls_pval_destructor(a) zval_dtor(a)
-#endif                                                                                                                                              
-    /* {{{ php3i_long_pval() */
+/* {{{ php3i_long_pval() */
 
 PHPAPI pval *php3i_long_pval(long value)
 {
@@ -111,7 +83,7 @@ PHPAPI pval *php3i_long_pval(long value)
 }
 
 /* }}} */
-    /* {{{ php3i_double_pval() */
+/* {{{ php3i_double_pval() */
 
 PHPAPI pval *php3i_double_pval(double value)
 {
@@ -124,7 +96,7 @@ PHPAPI pval *php3i_double_pval(double value)
 }
 
 /* }}} */
-    /* {{{ php3i_string_pval() */
+/* {{{ php3i_string_pval() */
 
 PHPAPI pval *php3i_string_pval(const char *str)
 {
@@ -140,16 +112,12 @@ PHPAPI pval *php3i_string_pval(const char *str)
 
 /* }}} */
 
-/* end of UGLY HACK!!! */
+PHP_MINIT_FUNCTION(xml);
+PHP_RINIT_FUNCTION(xml);
+PHP_MSHUTDOWN_FUNCTION(xml);
+PHP_RSHUTDOWN_FUNCTION(xml);
+PHP_MINFO_FUNCTION(xml);
 
-
-int php3_minit_xml(INIT_FUNC_ARGS);
-int php3_rinit_xml(INIT_FUNC_ARGS);
-int php3_mshutdown_xml(SHUTDOWN_FUNC_ARGS);
-int php3_rshutdown_xml(SHUTDOWN_FUNC_ARGS);
-void php3_info_xml(ZEND_MODULE_INFO_FUNC_ARGS);
-
-static xml_parser *xml_get_parser(int, const char *, HashTable *);
 static void xml_destroy_parser(xml_parser *);
 static void xml_set_handler(char **, pval *);
 inline static unsigned short xml_encode_iso_8859_1(unsigned char);
@@ -203,11 +171,11 @@ function_entry xml_functions[] = {
 php3_module_entry xml_module_entry = {
     "XML",                /* extension name */
     xml_functions,        /* extension function list */
-    php3_minit_xml,       /* extension-wide startup function */
-    php3_mshutdown_xml,   /* extension-wide shutdown function */
-    php3_rinit_xml,       /* per-request startup function */
-    php3_rshutdown_xml,   /* per-request shutdown function */
-    php3_info_xml,        /* information function */
+    PHP_MINIT(xml),       /* extension-wide startup function */
+    PHP_MSHUTDOWN(xml),   /* extension-wide shutdown function */
+    PHP_RINIT(xml),       /* per-request startup function */
+    PHP_RSHUTDOWN(xml),   /* per-request shutdown function */
+    PHP_MINFO(xml),       /* information function */
     STANDARD_MODULE_PROPERTIES
 };
 
@@ -221,39 +189,33 @@ xml_encoding xml_encodings[] = {
     { NULL,         NULL,                  NULL                  }
 };
 
+/* True globals, no need for thread safety */
+static int le_xml_parser; 
+
 /* }}} */
 /* {{{ startup, shutdown and info functions */
 
-    /* {{{ php3_minit_xml */
+/* {{{ php3_minit_xml */
 
-int php3_minit_xml(INIT_FUNC_ARGS)
+#ifdef ZTS
+static void php_xml_init_globals(php_xml_globals *xml_globals)
+{
+	XML(default_encoding) = "ISO-8859-1";
+}
+#endif
+
+PHP_MINIT_FUNCTION(xml)
 {
 
 	ELS_FETCH();
 
-#if defined(THREAD_SAFE)
-	xml_global_struct *xml_globals;
-	PHP3_MUTEX_ALLOC(xml_mutex);
-	PHP3_MUTEX_LOCK(xml_mutex);
-	numthreads++;
-	if (numthreads==1){
-		if (!PHP3_TLS_PROC_STARTUP(XMLTls)){
-			PHP3_MUTEX_UNLOCK(xml_mutex);
-			PHP3_MUTEX_FREE(xml_mutex);
-			return FAILURE;
-		}
-	}
-	PHP3_MUTEX_UNLOCK(xml_mutex);
-	if(!PHP3_TLS_THREAD_INIT(XMLTls,xml_globals,xml_global_struct)){
-		PHP3_MUTEX_FREE(xml_mutex);
-		return FAILURE;
-	}
+	le_xml_parser =	register_list_destructors(xml_destroy_parser, NULL);
+
+#ifdef ZTS
+	xml_globals_id = ts_allocate_id(sizeof(php_xml_globals), php_xml_init_globals, NULL);
+#else
+	XML(default_encoding) = "ISO-8859-1";
 #endif
-
-	XML_GLOBAL(php3_xml_module).le_xml_parser =
-		register_list_destructors(xml_destroy_parser, NULL);
-
-	XML_GLOBAL(php3_xml_module).default_encoding = "ISO-8859-1";
 
 	REGISTER_LONG_CONSTANT("XML_ERROR_NONE", XML_ERROR_NONE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ERROR_NO_MEMORY", XML_ERROR_NO_MEMORY, CONST_CS|CONST_PERSISTENT);
@@ -288,48 +250,35 @@ int php3_minit_xml(INIT_FUNC_ARGS)
 }
 
 /* }}} */
-    /* {{{ php3_rinit_xml */
+/* {{{ php3_rinit_xml */
 
-int php3_rinit_xml(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(xml)
 {
     return SUCCESS;
 }
 
 /* }}} */
-    /* {{{ php3_mshutdown_xml() */
+/* {{{ php3_mshutdown_xml() */
 
-int php3_mshutdown_xml(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(xml)
 {
-	XML_TLS_VARS;
-#ifdef THREAD_SAFE
-	PHP3_TLS_THREAD_FREE(xml_globals);
-	PHP3_MUTEX_LOCK(xml_mutex);
-	numthreads--;
-	if (numthreads<1) {
-		PHP3_TLS_PROC_SHUTDOWN(XMLTls);
-		PHP3_MUTEX_UNLOCK(xml_mutex);
-		PHP3_MUTEX_FREE(xml_mutex);
-		return SUCCESS;
-	}
-	PHP3_MUTEX_UNLOCK(xml_mutex);
-#endif
 	return SUCCESS;
 }
 
 /* }}} */
-    /* {{{ php3_rshutdown_xml() */
+/* {{{ php3_rshutdown_xml() */
 
-int php3_rshutdown_xml(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(xml)
 {
     return SUCCESS;
 }
 
 /* }}} */
-    /* {{{ php3_info_xml() */
+/* {{{ php3_info_xml() */
 
-void php3_info_xml(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(xml)
 {
-		PUTS("XML support active");
+	PUTS("XML support active");
 }
 
 /* }}} */
@@ -337,31 +286,11 @@ void php3_info_xml(ZEND_MODULE_INFO_FUNC_ARGS)
 /* }}} */
 /* {{{ extension-internal functions */
 
-    /* {{{ xml_get_parser() */
-
-static xml_parser *
-xml_get_parser(int parser_ind, const char *func, HashTable *list)
-{
-	int type;
-	xml_parser *parser;
-	XML_TLS_VARS;
-
-	parser = (xml_parser *)php3_list_find(parser_ind, &type);
-	if (!parser || type != XML_GLOBAL(php3_xml_module).le_xml_parser) {
-		php_error(E_WARNING, "%s: invalid XML parser %d", func, parser_ind);
-		return (xml_parser *)NULL;
-	}
-	return parser;
-}
-
-/* }}} */
-    /* {{{ xml_destroy_parser() */
+/* {{{ xml_destroy_parser() */
 
 static void
 xml_destroy_parser(xml_parser *parser)
 {
-	XML_TLS_VARS;
-  
 	if (parser->parser) {
 		XML_ParserFree(parser->parser);
 	}
@@ -440,14 +369,14 @@ xml_call_handler(xml_parser *parser, char *funcName, int argc, pval **argv)
 		   it breaks any chance of compiling it as a module on windows.
 		   Instead, we create a callback function. */
 		if (call_user_function(EG(function_table), NULL, func, retval, argc, argv) == FAILURE) {
-			php3tls_pval_destructor(retval);
+			zval_dtor(retval);
 			efree(retval);
 			return NULL;
 		}
-		php3tls_pval_destructor(func);
+		zval_dtor(func);
 		efree(func);
 		for (i = 0; i < argc; i++) {
-			php3tls_pval_destructor(argv[i]);
+			zval_dtor(argv[i]);
 			efree(argv[i]);
 		}
 		return retval;
@@ -695,7 +624,6 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 {
 	xml_parser *parser = (xml_parser *)userData;
 	const char **attrs = attributes;
-	XML_TLS_VARS;
 
 	if (parser) {
 		pval *retval, *args[3];
@@ -731,7 +659,7 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 			}
 			
 			if ((retval = xml_call_handler(parser, parser->startElementHandler, 3, args))) {
-				php3tls_pval_destructor(retval);
+				zval_dtor(retval);
 				efree(retval);
 			}
 		} 
@@ -782,7 +710,7 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 			if (atcnt) {
 				zend_hash_add(tag->value.ht,"attributes",sizeof("attributes"),&atr,sizeof(pval*),NULL);
 			} else {
-				php3tls_pval_destructor(atr);
+				zval_dtor(atr);
 				efree(atr);
 			}
 
@@ -801,7 +729,6 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 void php3i_xml_endElementHandler(void *userData, const char *name)
 {
 	xml_parser *parser = (xml_parser *)userData;
-	XML_TLS_VARS;
 
 	if (parser) {
 		pval *retval, *args[2];
@@ -815,7 +742,7 @@ void php3i_xml_endElementHandler(void *userData, const char *name)
 			args[1] = php3i_string_pval(name);
 
 			if ((retval = xml_call_handler(parser, parser->endElementHandler, 2, args))) {
-				php3tls_pval_destructor(retval);
+				zval_dtor(retval);
 				efree(retval);
 			}
 		} 
@@ -859,7 +786,6 @@ void php3i_xml_endElementHandler(void *userData, const char *name)
 void php3i_xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 {
 	xml_parser *parser = (xml_parser *)userData;
-	XML_TLS_VARS;
 
 	if (parser) {
 		pval *retval, *args[2];
@@ -868,7 +794,7 @@ void php3i_xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			args[0] = php3i_long_pval(parser->index);
 			args[1] = php3i_xmlcharpval(s, len, parser->target_encoding);
 			if ((retval = xml_call_handler(parser, parser->characterDataHandler, 2, args))) {
-				php3tls_pval_destructor(retval);
+				zval_dtor(retval);
 				efree(retval);
 			}
 		} 
@@ -929,7 +855,6 @@ void php3i_xml_processingInstructionHandler(void *userData,
 											const XML_Char *data)
 {
 	xml_parser *parser = (xml_parser *)userData;
-	XML_TLS_VARS;
 
 	if (parser && parser->processingInstructionHandler) {
 		pval *retval, *args[3];
@@ -938,7 +863,7 @@ void php3i_xml_processingInstructionHandler(void *userData,
 		args[1] = php3i_xmlcharpval(target, 0, parser->target_encoding);
 		args[2] = php3i_xmlcharpval(data, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->processingInstructionHandler, 3, args))) {
-			php3tls_pval_destructor(retval);
+			zval_dtor(retval);
 			efree(retval);
 		}
 	}
@@ -950,7 +875,6 @@ void php3i_xml_processingInstructionHandler(void *userData,
 void php3i_xml_defaultHandler(void *userData, const XML_Char *s, int len)
 {
 	xml_parser *parser = (xml_parser *)userData;
-	XML_TLS_VARS;
 
 	if (parser && parser->defaultHandler) {
 		pval *retval, *args[2];
@@ -958,7 +882,7 @@ void php3i_xml_defaultHandler(void *userData, const XML_Char *s, int len)
 		args[0] = php3i_long_pval(parser->index);
 		args[1] = php3i_xmlcharpval(s, len, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->defaultHandler, 2, args))) {
-			php3tls_pval_destructor(retval);
+			zval_dtor(retval);
 			efree(retval);
 		}
 	}
@@ -975,7 +899,6 @@ void php3i_xml_unparsedEntityDeclHandler(void *userData,
 										 const XML_Char *notationName)
 {
 	xml_parser *parser = (xml_parser *)userData;
-	XML_TLS_VARS;
 
 	if (parser && parser->unparsedEntityDeclHandler) {
 		pval *retval, *args[5];
@@ -987,7 +910,7 @@ void php3i_xml_unparsedEntityDeclHandler(void *userData,
 		args[4] = php3i_xmlcharpval(publicId, 0, parser->target_encoding);
 		args[5] = php3i_xmlcharpval(notationName, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->unparsedEntityDeclHandler, 6, args))) {
-			php3tls_pval_destructor(retval);
+			zval_dtor(retval);
 			efree(retval);
 		}
 	}
@@ -1004,7 +927,6 @@ php3i_xml_notationDeclHandler(void *userData,
 							  const XML_Char *publicId)
 {
 	xml_parser *parser = (xml_parser *)userData;
-	XML_TLS_VARS;
 
 	if (parser && parser->notationDeclHandler) {
 		pval *retval, *args[5];
@@ -1015,7 +937,7 @@ php3i_xml_notationDeclHandler(void *userData,
 		args[3] = php3i_xmlcharpval(systemId, 0, parser->target_encoding);
 		args[4] = php3i_xmlcharpval(publicId, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->notationDeclHandler, 5, args))) {
-			php3tls_pval_destructor(retval);
+			zval_dtor(retval);
 			efree(retval);
 		}
 	}
@@ -1033,7 +955,6 @@ php3i_xml_externalEntityRefHandler(XML_Parser parserPtr,
 {
 	xml_parser *parser = XML_GetUserData(parserPtr);
 	int ret = 0; /* abort if no handler is set (should be configurable?) */
-	XML_TLS_VARS;
 
 	if (parser && parser->externalEntityRefHandler) {
 		pval *retval, *args[5];
@@ -1069,8 +990,8 @@ PHP_FUNCTION(xml_parser_create)
 	pval *encodingArg = NULL;
 	XML_Char *encoding;
 	char thisfunc[] = "xml_parser_create";
-	XML_TLS_VARS;
-
+	XMLLS_FETCH();
+	
 	argc = ARG_COUNT(ht);
 
 	if (argc > 1 || getParameters(ht, argc, &encodingArg) == FAILURE) {
@@ -1097,19 +1018,18 @@ PHP_FUNCTION(xml_parser_create)
 			RETURN_FALSE;
 		}
 	} else {
-		encoding = XML_GLOBAL(php3_xml_module).default_encoding;
+		encoding = XML(default_encoding);
 	}
 
 	parser = ecalloc(sizeof(xml_parser), 1);
 	parser->parser = XML_ParserCreate(encoding);
 	parser->target_encoding = encoding;
-	XML_SetUserData(parser->parser, parser);
-	id = php3_list_insert(parser, XML_GLOBAL(php3_xml_module).le_xml_parser);
-	parser = xml_get_parser(id, thisfunc, list);
 	parser->index = id;
 	parser->case_folding = 1;
+	XML_SetUserData(parser->parser, parser);
 
-	RETVAL_LONG(id);
+	ZEND_REGISTER_RESOURCE(return_value,parser,le_xml_parser);
+	parser->index = return_value->value.lval;
 }
 /* }}} */
 
@@ -1119,19 +1039,17 @@ PHP_FUNCTION(xml_set_element_handler)
 {
 	xml_parser *parser;
 	pval *pind, *shdl, *ehdl;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 ||
 		getParameters(ht, 3, &pind, &shdl, &ehdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(shdl);
 	convert_to_string(ehdl);
-	parser = xml_get_parser(pind->value.lval, "xml_set_element_handler", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	xml_set_handler(&parser->startElementHandler, shdl);
 	xml_set_handler(&parser->endElementHandler, ehdl);
 	XML_SetElementHandler(parser->parser, php3i_xml_startElementHandler, php3i_xml_endElementHandler);
@@ -1145,17 +1063,15 @@ PHP_FUNCTION(xml_set_character_data_handler)
 {
 	xml_parser *parser;
 	pval *pind, *hdl;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(hdl);
-	parser = xml_get_parser(pind->value.lval, "xml_set_character_data_handler", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	xml_set_handler(&parser->characterDataHandler, hdl);
 	XML_SetCharacterDataHandler(parser->parser, php3i_xml_characterDataHandler);
 	RETVAL_TRUE;
@@ -1168,17 +1084,15 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 {
 	xml_parser *parser;
 	pval *pind, *hdl;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(hdl);
-	parser = xml_get_parser(pind->value.lval, "xml_set_processing_instruction_handler", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	xml_set_handler(&parser->processingInstructionHandler, hdl);
 	XML_SetProcessingInstructionHandler(parser->parser, php3i_xml_processingInstructionHandler);
 	RETVAL_TRUE;
@@ -1191,17 +1105,14 @@ PHP_FUNCTION(xml_set_default_handler)
 {
 	xml_parser *parser;
 	pval *pind, *hdl;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(hdl);
-	parser = xml_get_parser(pind->value.lval, "xml_set_default_handler", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	xml_set_handler(&parser->defaultHandler, hdl);
 	XML_SetDefaultHandler(parser->parser, php3i_xml_defaultHandler);
 	RETVAL_TRUE;
@@ -1214,17 +1125,15 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 {
 	xml_parser *parser;
 	pval *pind, *hdl;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(hdl);
-	parser = xml_get_parser(pind->value.lval, "xml_set_unparsed_entity_decl_handler", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	xml_set_handler(&parser->unparsedEntityDeclHandler, hdl);
 	XML_SetUnparsedEntityDeclHandler(parser->parser, php3i_xml_unparsedEntityDeclHandler);
 	RETVAL_TRUE;
@@ -1237,17 +1146,14 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 {
 	xml_parser *parser;
 	pval *pind, *hdl;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(hdl);
-	parser = xml_get_parser(pind->value.lval, "xml_set_notation_decl_handler", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	xml_set_handler(&parser->notationDeclHandler, hdl);
 	XML_SetNotationDeclHandler(parser->parser, php3i_xml_notationDeclHandler);
 	RETVAL_TRUE;
@@ -1260,17 +1166,14 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 {
 	xml_parser *parser;
 	pval *pind, *hdl;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(hdl);
-	parser = xml_get_parser(pind->value.lval, "xml_set_external_entity_ref_handler", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	xml_set_handler(&parser->externalEntityRefHandler, hdl);
 	XML_SetExternalEntityRefHandler(parser->parser, php3i_xml_externalEntityRefHandler);
 	RETVAL_TRUE;
@@ -1284,25 +1187,22 @@ PHP_FUNCTION(xml_parse)
 	xml_parser *parser;
 	pval *pind, *data, *final;
 	int argc, isFinal, ret;
-	XML_TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 	if (argc < 2 || argc > 3 || getParameters(ht, argc, &pind, &data, &final) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(data);
+
 	if (argc == 3) {
 		convert_to_long(final);
 		isFinal = final->value.lval;
 	} else {
 		isFinal = 0;
 	}
-	parser = xml_get_parser(pind->value.lval, "XML_Parse", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
-	/* fflush(stdout); uups, that can't be serious?!?!?*/
+
 	ret = XML_Parse(parser->parser, data->value.str.val, data->value.str.len, isFinal);
 	RETVAL_LONG(ret);
 }
@@ -1316,7 +1216,6 @@ PHP_FUNCTION(xml_parse_into_struct)
 	xml_parser *parser;
 	pval *pind, *data, *xdata,*info = 0;
 	int argc, ret;
-	XML_TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 	if (getParameters(ht, 4, &pind, &data, &xdata,&info) == SUCCESS) {
@@ -1334,14 +1233,10 @@ PHP_FUNCTION(xml_parse_into_struct)
 		RETURN_FALSE;
 	}
 
-	convert_to_long(pind);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_string(data);
 	array_init(xdata);
-
-	parser = xml_get_parser(pind->value.lval, "XML_Parse_Into_Struct", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
 
 	parser->data = xdata;
 	parser->info = info;
@@ -1364,16 +1259,12 @@ PHP_FUNCTION(xml_get_error_code)
 {
 	xml_parser *parser;
 	pval *pind;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
-	parser = xml_get_parser(pind->value.lval, "xml_get_error_code", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	RETVAL_LONG((long)XML_GetErrorCode(parser->parser));
 }
 /* }}} */
@@ -1384,7 +1275,6 @@ PHP_FUNCTION(xml_error_string)
 {
 	pval *code;
 	char *str;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &code) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1403,16 +1293,12 @@ PHP_FUNCTION(xml_get_current_line_number)
 {
 	xml_parser *parser;
 	pval *pind;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
-	parser = xml_get_parser(pind->value.lval, "xml_get_current_line_number", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	RETVAL_LONG(XML_GetCurrentLineNumber(parser->parser));
 }
 /* }}} */
@@ -1424,16 +1310,12 @@ PHP_FUNCTION(xml_get_current_column_number)
 {
 	xml_parser *parser;
 	pval *pind;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
-	parser = xml_get_parser(pind->value.lval, "xml_get_current_column_number", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	RETVAL_LONG(XML_GetCurrentColumnNumber(parser->parser));
 }
 /* }}} */
@@ -1444,16 +1326,12 @@ PHP_FUNCTION(xml_get_current_byte_index)
 {
 	xml_parser *parser;
 	pval *pind;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
-	parser = xml_get_parser(pind->value.lval, "xml_get_current_byte_index", list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	RETVAL_LONG(XML_GetCurrentByteIndex(parser->parser));
 }
 /* }}} */
@@ -1463,15 +1341,18 @@ PHP_FUNCTION(xml_get_current_byte_index)
 PHP_FUNCTION(xml_parser_free)
 {
 	pval *pind;
-	XML_TLS_VARS;
+	xml_parser *parser;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
-	if (php3_list_delete(pind->value.lval) == FAILURE) {
+
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
+	if (php3_list_delete(parser->index) == FAILURE) {
 		RETURN_FALSE;
 	}
+
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1483,17 +1364,14 @@ PHP_FUNCTION(xml_parser_set_option)
 	xml_parser *parser;
 	pval *pind, *opt, *val;
 	char thisfunc[] = "xml_parser_set_option";
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &pind, &opt, &val) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_long(opt);
-	parser = xml_get_parser(pind->value.lval, thisfunc, list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	switch (opt->value.lval) {
 		case PHP3_XML_OPTION_CASE_FOLDING:
 			convert_to_long(val);
@@ -1533,17 +1411,14 @@ PHP_FUNCTION(xml_parser_get_option)
 	xml_parser *parser;
 	pval *pind, *opt;
 	char thisfunc[] = "xml_parser_get_option";
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &opt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(pind);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
 	convert_to_long(opt);
-	parser = xml_get_parser(pind->value.lval, thisfunc, list);
-	if (parser == NULL) {
-		RETURN_FALSE;
-	}
+
 	switch (opt->value.lval) {
 		case PHP3_XML_OPTION_CASE_FOLDING:
 			RETURN_LONG(parser->case_folding);
@@ -1567,7 +1442,6 @@ PHP_FUNCTION(utf8_encode)
 	pval *arg;
 	XML_Char *encoded;
 	int len;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1588,7 +1462,6 @@ PHP_FUNCTION(utf8_decode)
 	pval *arg;
 	XML_Char *decoded;
 	int len;
-	XML_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
