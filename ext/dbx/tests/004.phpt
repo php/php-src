@@ -8,7 +8,7 @@ include_once("skipif.inc");
 <?php 
 include_once("dbx_test.p");
 $dlo = dbx_connect($module, $host, $database, $username, $password);
-if ($module===DBX_OCI8) { // close for oci8 always return NULL since it doesn't do anything
+if ($module===DBX_OCI8 || $module===DBX_SQLITE) { // close for oci8 and sqlite always return NULL since it doesn't do anything
     print('close works ok'."\n");
     }
 else {

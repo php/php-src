@@ -34,6 +34,7 @@ else {
     if (!strlen(dbx_error($dlo)) || (($module==DBX_MSSQL || $module==DBX_SYBASECT) && dbx_error($dlo)=="Changed database context to '".$database."'.".($module==DBX_SYBASECT?"\n":""))) {
         print('query is valid: dbx_error works ok'."\n");
         }
+    else print(dbx_error($dlo));
     if (!@dbx_error(0)) {
         print('wrong dbx_link_object: dbx_error failure works ok'."\n");
         }
