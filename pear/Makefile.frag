@@ -76,7 +76,7 @@ PEAR_FILES = \
 	PEAR/Command/Install.php \
 	PEAR/Command/Package.php \
 	PEAR/Command/Registry.php \
-	PEAR/CommandResponse.php \
+	PEAR/Command/Remote.php \
 	PEAR/Frontend/CLI.php \
 	PEAR/Common.php \
 	PEAR/Config.php \
@@ -96,7 +96,7 @@ install-pear:
 			$(mkinstalldirs) $(INSTALL_ROOT)$(peardir)/$$i; \
 		done; \
 		for dir in PEAR/CommandUI; do \
-			test -d $(INSTALL_ROOT)$(peardir)/$$dir && rmdir $(INSTALL_ROOT)$(peardir)/$$dir; \
+			test -d $(INSTALL_ROOT)$(peardir)/$$dir && rm -rf $(INSTALL_ROOT)$(peardir)/$$dir; \
 		done; \
 		for i in $(PEAR_FILES); do \
 			echo "Installing $$i"; \
@@ -105,6 +105,7 @@ install-pear:
 		done; \
 		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/Command/Login.php; \
 		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/CommandUI/CLI.php; \
+		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/CommandResponse.php; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
 		exit 5; \
