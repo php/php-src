@@ -75,8 +75,15 @@ extern void timeout(int sig);
 ZEND_GET_MODULE(recode)
 #endif
 
+static void php_recode_init_globals (zend_recode_globals *rg)
+{
+	rg->outer = NULL;
+}
+
 PHP_MINIT_FUNCTION(recode)
 {
+	ZEND_INIT_MODULE_GLOBALS(recode, php_recode_init_globals, NULL);
+
 	ReSG(outer)	  = recode_new_outer(true);
 	if (ReSG(outer) == NULL)
 		return FAILURE;
