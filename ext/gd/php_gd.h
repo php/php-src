@@ -36,20 +36,22 @@
 #include "gdt1.h"
 #endif
 
-#define PHP_GDIMG_TYPE_GIF 1
-#define PHP_GDIMG_TYPE_PNG 2
-#define PHP_GDIMG_TYPE_JPG 3
-#define PHP_GDIMG_TYPE_WBM 4
-#define PHP_GDIMG_TYPE_XBM 5
-#define PHP_GDIMG_TYPE_XPM 6
-#define PHP_GDIMG_CONVERT_WBM 7
+#define PHP_GDIMG_TYPE_GIF      1
+#define PHP_GDIMG_TYPE_PNG      2
+#define PHP_GDIMG_TYPE_JPG      3
+#define PHP_GDIMG_TYPE_WBM      4
+#define PHP_GDIMG_TYPE_XBM      5
+#define PHP_GDIMG_TYPE_XPM      6
+#define PHP_GDIMG_CONVERT_WBM   7
+#define PHP_GDIMG_TYPE_GD       8
+#define PHP_GDIMG_TYPE_GD2      9
+#define PHP_GDIMG_TYPE_GD2PART 10
 
 #ifdef PHP_WIN32
 #define PHP_GD_API __declspec(dllexport)
 #else
 #define PHP_GD_API
 #endif
-
 
 PHPAPI extern const char php_sig_gif[3];
 PHPAPI extern const char php_sig_jpg[3];
@@ -64,7 +66,7 @@ extern PHP_MINIT_FUNCTION(gd);
 extern PHP_MSHUTDOWN_FUNCTION(gd);
 
 #ifndef HAVE_GDIMAGECOLORRESOLVE
-extern int gdImageColorResolve(gdImagePtr, int, int, int);
+static int gdImageColorResolve(gdImagePtr, int, int, int);
 #endif
 PHP_FUNCTION(imagearc);
 PHP_FUNCTION(imagechar);
@@ -110,6 +112,12 @@ PHP_FUNCTION(imagecreatefromgif);
 PHP_FUNCTION(imagecreatefromjpeg);
 PHP_FUNCTION(imagecreatefromxbm);
 PHP_FUNCTION(imagecreatefromxpm);
+PHP_FUNCTION(imagecreatefrompng);
+PHP_FUNCTION(imagecreatefromwbmp);
+PHP_FUNCTION(imagecreatefromgd);
+PHP_FUNCTION(imagecreatefromgd2);
+PHP_FUNCTION(imagecreatefromgd2part);
+
 PHP_FUNCTION(imagegammacorrect);
 PHP_FUNCTION(imagedestroy);
 PHP_FUNCTION(imagefill);
@@ -118,8 +126,14 @@ PHP_FUNCTION(imagefilledrectangle);
 PHP_FUNCTION(imagefilltoborder);
 PHP_FUNCTION(imagefontwidth);
 PHP_FUNCTION(imagefontheight);
+
 PHP_FUNCTION(imagegif );
 PHP_FUNCTION(imagejpeg );
+PHP_FUNCTION(imagepng);
+PHP_FUNCTION(imagewbmp);
+PHP_FUNCTION(imagegd);
+PHP_FUNCTION(imagegd2);
+
 PHP_FUNCTION(imageinterlace);
 PHP_FUNCTION(imageline);
 PHP_FUNCTION(imageloadfont);
@@ -130,11 +144,7 @@ PHP_FUNCTION(imagestring);
 PHP_FUNCTION(imagestringup);
 PHP_FUNCTION(imagesx);
 PHP_FUNCTION(imagesy);
-PHP_FUNCTION(imagecreatefrompng);
-PHP_FUNCTION(imagepng);
-PHP_FUNCTION(imagecreatefromwbmp);
-PHP_FUNCTION(imagewbmp);
-void php_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
+static void php_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
 PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);

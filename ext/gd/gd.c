@@ -83,15 +83,18 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
 #ifdef USE_GD_IOCTX
 #include "gd_ctx.c"
 #else
-#define gdImageCreateFromGifCtx NULL
-#define gdImageCreateFromJpegCtx NULL
-#define gdImageCreateFromPngCtx  NULL
-#define gdImageCreateFromWBMPCtx NULL
+#define gdImageCreateFromGdCtx      NULL
+#define gdImageCreateFromGd2Ctx     NULL
+#define gdImageCreateFromGd2partCtx NULL
+#define gdImageCreateFromGifCtx     NULL
+#define gdImageCreateFromJpegCtx    NULL
+#define gdImageCreateFromPngCtx     NULL
+#define gdImageCreateFromWBMPCtx    NULL
 typedef FILE gdIOCtx;
 #define CTX_PUTC(c,fp) fputc(c, fp)
 #endif
 
-gdImagePtr _php_image_create_from_string ( zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() );
+static gdImagePtr _php_image_create_from_string ( zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() );
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static int _php_image_type ( char data[8] );
@@ -120,17 +123,17 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreate,								NULL)
 
 	PHP_FE(imagecreatetruecolor,					NULL)
-	PHP_FE(imagetruecolortopalette,				NULL)
+	PHP_FE(imagetruecolortopalette,					NULL)
 	PHP_FE(imagesetthickness,						NULL)
-	PHP_FE(imageellipse,								NULL)
+	PHP_FE(imageellipse,							NULL)
 	PHP_FE(imagefilledellipse,						NULL)
 	PHP_FE(imagefilledarc,							NULL)
 	PHP_FE(imagealphablending,						NULL)
-	PHP_FE(imagecolorresolvealpha, 				NULL)
-	PHP_FE(imagecolorclosestalpha,				NULL)
+	PHP_FE(imagecolorresolvealpha, 					NULL)
+	PHP_FE(imagecolorclosestalpha,					NULL)
 	PHP_FE(imagecolorexactalpha,					NULL)
 	PHP_FE(imagecopyresampled,						NULL)
-	PHP_FE(imagesettile,								NULL)
+	PHP_FE(imagesettile,							NULL)
 
 	PHP_FE(imagesetbrush,							NULL)
 	PHP_FE(imagesetstyle,							NULL)
@@ -138,15 +141,22 @@ function_entry gd_functions[] = {
 
 	PHP_FE(imagecreatefromstring,					NULL)
 	PHP_FE(imagecreatefrompng,						NULL)
-	PHP_FE(imagepng,								NULL)
 	PHP_FE(imagecreatefromgif,						NULL)
-	PHP_FE(imagegif,								NULL)
 	PHP_FE(imagecreatefromjpeg,						NULL)
-	PHP_FE(imagejpeg,								NULL)
 	PHP_FE(imagecreatefromwbmp,                     NULL)
-	PHP_FE(imagewbmp,                               NULL)
 	PHP_FE(imagecreatefromxbm,						NULL)
 	PHP_FE(imagecreatefromxpm,						NULL)
+	PHP_FE(imagecreatefromgd,						NULL)
+	PHP_FE(imagecreatefromgd2,						NULL)
+	PHP_FE(imagecreatefromgd2part,					NULL)
+
+	PHP_FE(imagepng,								NULL)
+	PHP_FE(imagegif,								NULL)
+	PHP_FE(imagejpeg,								NULL)
+	PHP_FE(imagewbmp,                               NULL)
+	PHP_FE(imagegd,									NULL)
+	PHP_FE(imagegd2,								NULL)
+
 	PHP_FE(imagedestroy,							NULL)
 	PHP_FE(imagegammacorrect,						NULL)
 	PHP_FE(imagefill,								NULL)
@@ -898,7 +908,7 @@ PHP_FUNCTION(imagecreate)
 /* }}} */
 
 /* {{{ proto int imagetypes(void)
-   Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP */
+   Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP, 16=XPM */
 PHP_FUNCTION(imagetypes)
 {
 	int ret=0;	
@@ -913,6 +923,9 @@ PHP_FUNCTION(imagetypes)
 #endif
 #ifdef HAVE_GD_WBMP
 	ret |= 8;
+#endif
+#ifdef HAVE_GD_XPM
+	ret |= 16;
 #endif
 	RETURN_LONG(ret);
 }
@@ -1051,19 +1064,25 @@ PHP_FUNCTION (imagecreatefromstring)
 size_t php_fread_all(char **buf, int socket, FILE *fp, int issock);
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)()) 
 {
-	zval **file;
+	zval **file, **srcx, **srcy, **width, **height;
 	gdImagePtr im;
 	char *fn=NULL;
 	FILE *fp;
 	int issock=0, socketd=0;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) 
+	int argc=ZEND_NUM_ARGS();
+	
+	if ((image_type == PHP_GDIMG_TYPE_GD2PART && argc != 4) || 
+		argc != 1 || zend_get_parameters_ex(argc, &file, &srcx, &srcy, &width, &height) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
-
+	
 	convert_to_string_ex(file);
 
+	if (argc == 4 && image_type == PHP_GDIMG_TYPE_GD2PART) {
+		multi_convert_to_long_ex(4, srcx, srcy, width, height);
+	}
+	
 	fn = Z_STRVAL_PP(file);
 
 #ifdef PHP_WIN32
@@ -1108,11 +1127,19 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 			php_error(E_WARNING,"%s: Cannot allocate GD IO context",get_active_function_name());
 			RETURN_FALSE;
 		}
-		im = (*ioctx_func_p)(io_ctx);
+		if (image_type == PHP_GDIMG_TYPE_GD2PART) {
+			im = (*ioctx_func_p)(io_ctx, Z_LVAL_PP(srcx), Z_LVAL_PP(srcy), Z_LVAL_PP(width), Z_LVAL_PP(height));
+		} else {
+			im = (*ioctx_func_p)(io_ctx);
+		}
 		io_ctx->free(io_ctx);
 #endif
 	} else {
-		im = (*func_p)(fp);
+		if (image_type == PHP_GDIMG_TYPE_GD2PART) {
+			im = (*func_p)(fp, Z_LVAL_PP(srcx), Z_LVAL_PP(srcy), Z_LVAL_PP(width), Z_LVAL_PP(height));
+		} else {
+			im = (*func_p)(fp);
+		}
 
 		fflush(fp);
 		fclose(fp);
@@ -1205,6 +1232,40 @@ PHP_FUNCTION(imagecreatefromwbmp)
 	php_error(E_WARNING, "ImageCreateFromWBMP: No WBMP support in this PHP build");
 	RETURN_FALSE;
 #endif /* HAVE_GD_WBMP */
+}
+/* }}} */
+
+/* {{{ proto int imagecreatefromgd(string filename)
+   Create a new image from GD file or URL */
+PHP_FUNCTION(imagecreatefromgd)
+{
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD", gdImageCreateFromGd,gdImageCreateFromGdCtx);
+}
+/* }}} */
+
+/* {{{ proto int imagecreatefromgd2(string filename)
+   Create a new image from GD2 file or URL */
+PHP_FUNCTION(imagecreatefromgd2)
+{
+#ifdef HAVE_GD_GD2
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2", gdImageCreateFromGd2,gdImageCreateFromGd2Ctx);
+#else /* HAVE_GD_GD2 */
+	php_error(E_WARNING, "ImageCreateFromGd2: No GD2 support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_GD2 */
+}
+/* }}} */
+
+/* {{{ proto int imagecreatefromgd2part(string filename, int srcX, int srcY, int width, int height)
+   Create a new image from a given part of GD2 file or URL */
+PHP_FUNCTION(imagecreatefromgd2part)
+{
+#ifdef HAVE_GD_GD2
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2PART, "GD2", gdImageCreateFromGd2Part,gdImageCreateFromGd2PartCtx);
+#else /* HAVE_GD_GD2 */
+	php_error(E_WARNING, "ImageCreateFromGd2Part: No GD2 support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_GD2 */
 }
 /* }}} */
 
@@ -1351,7 +1412,6 @@ PHP_FUNCTION(imagepng)
 }
 /* }}} */
 
-
 /* {{{ proto int imagejpeg(int im [, string filename [, int quality]])
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
@@ -1383,6 +1443,27 @@ PHP_FUNCTION(imagewbmp)
 	php_error(E_WARNING, "ImageWBMP: No WBMP support in this PHP build");
 	RETURN_FALSE;
 #endif /* HAVE_GD_WBMP */
+}
+/* }}} */
+
+/* {{{ proto int imagegd(int im [, string filename])
+   Output GD image to browser or file */
+PHP_FUNCTION(imagegd)
+{
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD", gdImageGd);
+}
+/* }}} */
+
+/* {{{ proto int imagegd2(int im [, string filename])
+   Output GD2 image to browser or file */
+PHP_FUNCTION(imagegd2)
+{
+#ifdef HAVE_GD_GD2
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2", gdImageGd2);
+#else /* HAVE_GD_GD2 */
+	php_error(E_WARNING, "ImageGd2: No GD2 support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_GD2 */
 }
 /* }}} */
 

@@ -174,6 +174,7 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
   AC_CHECK_LIB(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
   AC_CHECK_LIB(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,  1, [ ])])
   AC_CHECK_LIB(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,  1, [ ])])
+  AC_CHECK_LIB(gd, gdImageCreateFromGd2,   [AC_DEFINE(HAVE_GD_GD2,  1, [ ])])
   AC_CHECK_LIB(gd, gdImageCreateTrueColor, [AC_DEFINE(HAVE_LIBGD20, 1, [ ])])
   AC_CHECK_LIB(gd, gdImageSetTile,         [AC_DEFINE(HAVE_GD_IMAGESETTILE,  1, [ ])])
   AC_CHECK_LIB(gd, gdImageSetBrush,        [AC_DEFINE(HAVE_GD_IMAGESETBRUSH, 1, [ ])])
