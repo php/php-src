@@ -1,3 +1,45 @@
+2004-08-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Show default value of optional parameters of user defined functions.
+
+2004-08-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/curl/curl.c
+      ext/curl/interface.c:
+      MFH: Fixed bug #29727 (Added missing CURL authentication directives).
+
+    * ext/curl/interface.c:
+      Fixed bug #29727 (Added missing CURL authentication directives).
+
+2004-08-18  Andrei Zmievski  <andreiz@gmail.com>
+
+    * ZendEngine2/zend_ini_parser.y:
+      Forgot to turn off debugging.
+
+    * NEWS
+      TODO-5.1
+      ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.l:
+      Re-add my patch for .ini variable access.
+
+2004-08-18  Antony Dovgal  <tony2001@phpclub.net>
+
+    * sapi/apache/config.m4
+      sapi/apache/config.m4:
+      MFB: typo in config.m4 (potential configuration problem with Stronghold)
+
+    * (PHP_4_3)
+      sapi/apache/config.m4:
+      typo in config.m4 (potential configuration problem with Stronghold)
+
+    * (PHP_4_3)
+      ext/xslt/config.m4:
+      fix #29625 (no quotes around the shell variable's value cause ./configure
+      to fail)
+
 2004-08-17  Andi Gutmans  <andi@zend.com>
 
     * php.ini-dist

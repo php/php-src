@@ -1,3 +1,17 @@
+2004-08-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Show default value of optional parameters of user defined functions.
+
+2004-08-18  Andrei Zmievski  <andreiz@gmail.com>
+
+    * zend_ini_parser.y:
+      Forgot to turn off debugging.
+
+    * zend_ini_parser.y
+      zend_ini_scanner.l:
+      Re-add my patch for .ini variable access.
+
 2004-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
