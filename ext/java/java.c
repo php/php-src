@@ -94,7 +94,7 @@ int java_globals_id;
 #define JG_DC
 #define JG_C
 #define JG_CC
-php_java_globals javadir_globals;
+php_java_globals java_globals;
 #endif
 
 static zend_class_entry java_class_entry;
@@ -159,8 +159,6 @@ static void addJVMOption(JavaVMInitArgs *vm_args, char *name, char *value) {
 #endif
 
 static int jvm_create() {
-  JG_FETCH();
-
   int rc;
   jobject local_php_reflect;
   jthrowable error;
@@ -178,6 +176,8 @@ static int jvm_create() {
   JavaVMOption options[3];
 #endif
 #endif
+
+  JG_FETCH();
 
   iniUpdated=0;
 
@@ -410,7 +410,6 @@ static int checkError(pval *value) {
 void java_call_function_handler
   (INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
-  JG_FETCH();
   JNIEnv *jenv;
 
   pval *object = property_reference->object;
@@ -419,8 +418,10 @@ void java_call_function_handler
 
   int arg_count = ZEND_NUM_ARGS();
   jlong result = 0;
-
   pval **arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
+
+  JG_FETCH();
+
   getParametersArray(ht, arg_count, arguments);
 
   if (iniUpdated && JG(jenv)) jvm_destroy();
@@ -483,10 +484,10 @@ void java_call_function_handler
 
 PHP_FUNCTION(java_last_exception_get)
 {
-  JG_FETCH();
-
   jlong result = 0;
   jmethodID lastEx;
+
+  JG_FETCH();
 
   if (ZEND_NUM_ARGS()!=0) WRONG_PARAM_COUNT;
 
@@ -502,10 +503,10 @@ PHP_FUNCTION(java_last_exception_get)
 
 PHP_FUNCTION(java_last_exception_clear)
 {
-  JG_FETCH();
-
   jlong result = 0;
   jmethodID clearEx;
+
+  JG_FETCH();
 
   if (ZEND_NUM_ARGS()!=0) WRONG_PARAM_COUNT;
 
@@ -522,9 +523,6 @@ PHP_FUNCTION(java_last_exception_clear)
 static pval _java_getset_property
   (zend_property_reference *property_reference, jobjectArray value)
 {
-  JG_FETCH();
-  JNIEnv *jenv = JG(jenv);
-
   pval presult;
   jlong result = 0;
   pval **pobject;
@@ -534,8 +532,13 @@ static pval _java_getset_property
   /* get the property name */
   zend_llist_element *element = property_reference->elements_list->head;
   zend_overloaded_element *property=(zend_overloaded_element *)element->data;
-  jstring propName =
-    (*jenv)->NewStringUTF(jenv, property->element.value.str.val);
+  jstring propName;
+
+  JNIEnv *jenv;
+  JG_FETCH(); 
+  jenv = JG(jenv);
+
+  propName = (*jenv)->NewStringUTF(jenv, property->element.value.str.val);
 
   /* get the object */
   zend_hash_index_find(property_reference->object->value.obj.properties,
@@ -572,8 +575,9 @@ pval java_get_property_handler
 int java_set_property_handler
   (zend_property_reference *property_reference, pval *value)
 {
+  pval presult;
   JG_FETCH();
-  pval presult = _java_getset_property
+  presult = _java_getset_property
     (property_reference, _java_makeArray(1, &value JG_CC));
   return checkError(&presult) ? FAILURE : SUCCESS;
 }
@@ -767,8 +771,8 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setException
 JNIEXPORT void JNICALL Java_net_php_reflect_setEnv
   (JNIEnv *newJenv, jclass self)
 {
-  JG_FETCH();
   jobject local_php_reflect;
+  JG_FETCH();
 
   iniUpdated=0;
   JG(jenv)=newJenv;
