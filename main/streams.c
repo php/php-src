@@ -659,6 +659,10 @@ PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
 	if (stream->writepos - stream->readpos > 0)
 		return 0;
 
+	if (!stream->eof && php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
+		stream->eof = !_php_network_is_stream_alive(stream);
+	}
+	
 	return stream->eof;
 }
 
