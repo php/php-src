@@ -120,7 +120,11 @@ void init_executor(CLS_D ELS_DC)
 
 void shutdown_executor(ELS_D)
 {
-	zval_dtor(&EG(global_return_value));
+	if (EG(global_return_value_ptr) == &EG(global_return_value)) {
+		zval_dtor(&EG(global_return_value));
+	} else {
+		zval_ptr_dtor(EG(return_value_ptr_ptr));
+	}
 	zend_ptr_stack_destroy(&EG(arg_types_stack));
 			
 	while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
