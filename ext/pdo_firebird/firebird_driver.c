@@ -22,6 +22,8 @@
 #include "config.h"
 #endif
 
+#define _GNU_SOURCE
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -30,14 +32,12 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-#define _GNU_SOURCE
-
 /* map driver specific error message to PDO error */
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long line TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = stmt ? ((pdo_firebird_stmt *)stmt->driver_data)->H 
 		: (pdo_firebird_db_handle *)dbh->driver_data;
-	long *error_code = stmt ? &stmt->error_code : &dbh->error_code;
+	enum pdo_error_type *error_code = stmt ? &stmt->error_code : &dbh->error_code;
 	
 	switch (isc_sqlcode(H->isc_status)) {
 
@@ -273,14 +273,13 @@ static long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len T
 static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, /* {{{ */
 	char **quoted, int *quotedlen TSRMLS_DC)
 {
-	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	int qcount = 0;
 	char const *c;
 	
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
 	
 	/* count the number of ' characters */
-	for (c = unquoted; c = strchr(c,'\''); qcount++, c++);
+	for (c = unquoted; (c = strchr(c,'\'')); qcount++, c++);
 	
 	if (!qcount) {
 		return 0;
@@ -292,7 +291,7 @@ static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unqu
 		*quoted = c = emalloc(*quotedlen+1);
 		
 		/* foreach (chunk that ends in a quote) */
-		for (l = unquoted; r = strchr(l,'\''); l = r+1) {
+		for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {
 			
 			/* copy the chunk */
 			strncpy(c, l, r-l);
@@ -362,7 +361,7 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 			/* if (the value is really being changed and a transaction is open) */			
 			if ((Z_LVAL_P(val)?1:0) ^ dbh->auto_commit && dbh->in_txn) {
 				
-				if (dbh->auto_commit = Z_BVAL_P(val)) {
+				if ((dbh->auto_commit = Z_BVAL_P(val))) {
 					/* just keep the running transaction but commit it */
 					if (isc_commit_retaining(H->isc_status, &H->tr)) {
 						RECORD_ERROR(dbh);
@@ -401,8 +400,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	switch (attr) {
-		char tmp[200] = "Firebird 1.0/Interbase 6";
-		info_func_t info_func;
+		char tmp[200];
 		
 		case PDO_ATTR_AUTOCOMMIT:
 			ZVAL_LONG(val,dbh->auto_commit);
@@ -414,20 +412,23 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 
 		case PDO_ATTR_CLIENT_VERSION: {
 #if defined(__GNUC__) || defined(PHP_WIN32)
+			info_func_t info_func = NULL;
 #ifdef __GNUC__
-			info_func_t info_func = (info_func_t)dlsym(RTLD_DEFAULT, "isc_get_client_version");
+			info_func = (info_func_t)dlsym(RTLD_DEFAULT, "isc_get_client_version");
 #else
 			HMODULE l = GetModuleHandle("fbclient");
 
 			if (!l && !(l = GetModuleHandle("gds32"))) {
-				return 0;
+				break;
 			}
 			info_func = (info_func_t)GetProcAddress(l, "isc_get_client_version");
 #endif
 			if (info_func) {
 				info_func(tmp);
+				ZVAL_STRING(val,tmp,1);
+			} else {
+				ZVAL_STRING(val,"Firebird 1.0/Interbase 6",1);
 			}
-			ZVAL_STRING(val,tmp,1);
 #else
 			ZVAL_NULL(val);
 #endif
@@ -458,7 +459,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 	if (sqlcode) {
 		add_next_index_long(info, sqlcode);
 
-		while (l = isc_interprete(&buf[i],&s)) {
+		while ((l = isc_interprete(&buf[i],&s))) {
 			i += l;
 			strcpy(&buf[i++], " ");
 		}
@@ -504,7 +505,6 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 			isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name };
 		char const *dpb_values[] = { dbh->username, dbh->password, vars[1].optval, vars[2].optval };
 		char dpb_buffer[256] = { isc_dpb_version1 }, *dpb;
-		short len;
 		
 		dpb = dpb_buffer + 1; 
 		
