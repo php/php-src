@@ -1,0 +1,5 @@
+/* define if you want to use the yp extension */
+/* #undef HAVE_LIBYP */
+
+#undef HAVE_YP
+#undef SOLARIS_YP
