@@ -1,3 +1,110 @@
+2001-12-16  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c: fixed: fix for my broken patch.
+
+    * main/SAPI.c: fixed: fix for my broken patch
+
+2001-12-16  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    added an option mbstring.func_overload to overload some function by multibyte enabled version of function in mbstring.
+
+2001-12-16  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c:
+    Freeing that TLS is just too complicated.  Since we're shutting
+    down anyway, remove it for now (it did not exist in 4.0.6)
+
+2001-12-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: Add entries
+
+    * NEWS: - More MHFs
+
+    * NEWS: Update NEWS
+
+2001-12-16  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c: whitespace. - now i know how code should look like ...
+
+    * main/SAPI.c: whitespace.
+
+    * main/SAPI.c: MFH : one byte heap corruption fixed
+
+    * main/SAPI.c:
+    fixed: WWW-Authenticate -> header_line got only freed when safe_mode was activ
+    fixed: WWW-Authenticate -> content of header_line was changed after it was freed
+
+2001-12-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: Make this compile again
+
+2001-12-16  Sam Ruby  <rubys@us.ibm.com>
+
+    * INSTALL: Update for 4.1
+
+2001-12-16  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: added support for <deps> and <dep> tags
+
+2001-12-16  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c: MFH : fixed bufferoverflow in sapi_add_header_ex
+
+2001-12-16  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/README
+      ext/pgsql/config.m4: README update
+    Raise error for bogus installation path for --with-pgsql
+    Added check for pg_escape_*
+
+2001-12-16  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php:
+    use the System class for mkDirHier() and mkTempDir()
+
+2001-12-16  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c:
+    fixed: bufferoverflow in sapi_add_header_ex triggerable by header("WWW-Authenticate: Basic foobar");
+
+    * main/rfc1867.c: fixed: php_ap_getword was unaware of quotes
+    	filenames with ; in it could not get uploaded
+
+    fixed: php_ap_getword_conf sometimes returned a static
+    	string that crashs php when freed
+    	(f.e. uploading the file "crash; name=  ;"
+    	crashed php)
+
+    fixed: magic_quotes was disabled while filling
+    	variables with user supplied input
+
+    fixed: memoryleak (some strings did not get freed)
+
+    fixed: assuming that adress of "" is always the same
+    	may fail on some compilers
+
+2001-12-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/math/pow.phpt: Mail should go to php-dev
+
+    * ext/standard/math.c: MFH for bug #14??? (pow() thing)
+
+    * ext/standard/math.c: - Fix for bug #14544, bogus warning in pow()
+
+2001-12-16  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/ftok.c
+      ext/pgsql/pgsql.c: proto fixes
+
+2001-12-16  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/System.php: improved phpdoc of mkTemp()
+
+    * pear/System.php:
+    Added System::mktemp() (Creates temporal files or directories)
+
 2001-12-15  Zeev Suraski  <zeev@zend.com>
 
     * ext/mysql/php_mysql.c: Fix bug #13456 - I'm unable to actually test it
