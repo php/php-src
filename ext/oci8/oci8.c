@@ -880,7 +880,7 @@ static int _oci_bind_post_exec(void *data TSRMLS_DC)
 
 	if (bind->indicator == -1) { /* NULL */
 		zval *val = bind->zval;
-		if (Z_TYPE_P(val) == IS_STRING)) {
+		if (Z_TYPE_P(val) == IS_STRING) {
 			*Z_STRVAL_P(val) = '\0'; /* XXX avoid warning in debug mode */
 		}
 		zval_dtor(val);
