@@ -86,7 +86,8 @@ int main() { return foo(10, "", 3.14); }
 ])
 
 AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
-  if test "$PHP_LIBMBFL" = "yes"; then
+  dnl libmbfl is required and can not be disabled
+  if test "$PHP_LIBMBFL" = "yes" || test "$PHP_LIBMBFL" = "no"; then
     dnl
     dnl Bundled libmbfl
     dnl
@@ -191,11 +192,6 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
       -LPHP_LIBMBFL/lib
     ])
   fi
-
-  dnl
-  dnl Common libmfl config
-  dnl
-  AC_DEFINE([HAVE_LIBMBFL], 1, [whether to have libmbfl support])
 ])
 
 dnl
@@ -208,9 +204,9 @@ PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
 PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support],
 [  --disable-mbregex         MBSTRING: Disable multibyte regex support], yes, no)
 
-PHP_ARG_WITH(libmbfl, [for libmbfl support],
-[  --with-libmbfl[=DIR]      MBSTRING: Include libmbfl support. DIR is the libmbfl install prefix.
-                            If DIR is not set, the bundled libmbfl will be used.], no, no)
+PHP_ARG_WITH(libmbfl, [for external libmbfl],
+[  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl. DIR is the libmbfl install prefix.
+                            If DIR is not set, the bundled libmbfl will be used.], yes, no)
 
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])
@@ -237,9 +233,7 @@ if test "$PHP_MBSTRING" != "no"; then
     PHP_MBSTRING_SETUP_MBREGEX
   fi
   
-  if test "$PHP_LIBMBFL" != "no"; then
-    PHP_MBSTRING_SETUP_LIBMBFL
-  fi
-
+  dnl libmbfl is required
+  PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION
 fi
