@@ -163,15 +163,21 @@ fprintf(stderr, "stream_free: %s:%p in_free=%d opts=%08x\n", stream->ops->label,
 			 * of stream it was. */
 			char leakbuf[512];
 			snprintf(leakbuf, sizeof(leakbuf), __FILE__ "(%d) : Stream of type '%s' 0x%08X (path:%s) was not closed\n", __LINE__, stream->ops->label, (unsigned int)stream, stream->__orig_path);
+
+			STR_FREE(stream->__orig_path);
+			
 # if defined(PHP_WIN32)
 			OutputDebugString(leakbuf);
 # else
 			fprintf(stderr, leakbuf);
 # endif
+		} else {
+			STR_FREE(stream->__orig_path);
+			pefree(stream, stream->is_persistent);
 		}
-		else
-#endif
+#else
 		pefree(stream, stream->is_persistent);
+#endif
 	}
 
 	return ret;
