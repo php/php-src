@@ -29,36 +29,19 @@ AC_ARG_WITH(imap,
 		if test ! -f $IMAP_INC_DIR/linkage.h; then
 			AC_MSG_ERROR(could not find linkage.h in $IMAP_INC_DIR !)
 		fi
-		if test -n "$APXS"; then
-			if test -f $IMAP_DIR/lib/libimap.a; then
-				IMAP_LIBDIR="$IMAP_DIR/lib"
-				IMAP_LIB="imap"
-			elif test ! -f $IMAP_DIR/lib/libc-client.a; then
-				if test ! -f $IMAP_DIR/lib/libc-client4.so; then
-					AC_MSG_ERROR(You need to copy or link $IMAP_DIR/lib/c-client.a to $IMAP_DIR/lib/libc-client.a)
-				else
-					IMAP_LIBDIR="$IMAP_DIR/lib"
-					IMAP_LIB="c-client4"
-				fi
+		if test -f $IMAP_DIR/lib/libimap.a; then
+			IMAP_LIBDIR="$IMAP_DIR/lib"
+			IMAP_LIB="imap"
+		elif test ! -f $IMAP_DIR/lib/libc-client.a; then
+			if test ! -f $IMAP_DIR/lib/libc-client4.so; then
+				AC_MSG_ERROR(You need to copy or link $IMAP_DIR/lib/c-client.a to $IMAP_DIR/lib/libc-client.a)
 			else
 				IMAP_LIBDIR="$IMAP_DIR/lib"
-				IMAP_LIB="c-client"
+				IMAP_LIB="c-client4"
 			fi
 		else
-			if test -f $IMAP_DIR/lib/libimap.a; then
-				IMAP_LIBDIR="$IMAP_DIR/lib"
-				IMAP_LIB="imap"
-			elif test ! -f $IMAP_DIR/lib/c-client.a; then
-				if test ! -f $IMAP_DIR/lib/libc-client4.so; then
-					AC_MSG_ERROR(could not find c-client.a in $IMAP_DIR/lib !)
-				else
-					IMAP_LIBDIR="$IMAP_DIR/lib"
-					IMAP_LIB="c-client4"
-				fi
-			else
-				IMAP_LIBS="$IMAP_DIR/lib"
-				IMAP_LIB="c-client"
-			fi
+			IMAP_LIBDIR="$IMAP_DIR/lib"
+			IMAP_LIB="c-client"
 		fi
 		AC_ADD_LIBRARY_WITH_PATH($IMAP_LIB, $IMAP_LIBDIR)
 		AC_ADD_INCLUDE($IMAP_INC_DIR)
