@@ -1,3 +1,54 @@
+2003-08-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_default_classes.c:
+      Add public read access to protected
+
+    * zend_default_classes.c
+      zend_default_classes.h:
+      Add zend_throw_exception_ex() which allows to format exception messages.
+
+    * zend.c:
+      Classe tables work this way
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.h
+      zend_default_classes.c:
+      - Split debug_backtrace() into lowlevel c function and php function wrapper
+      - Add trace property to default method based on new
+      zend_fetch_debug_backtrace
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend.h:
+      older gccs don't understand attribute((format)) on function pointers
+
+    * zend.h:
+      ZEND_GCC_VERSION should always be defined to a number so we can use
+      simple comparisons all the time.
+
+    * zend.h
+      zend_alloc.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_execute.c:
+      Add format attribute to a number of functions
+      
+      Kill a few warnings
+
+    * zend.h
+      zend_alloc.h:
+      cleanup & centralize ZEND_GCC_VERSION and ZEND_ATTRIBUTE_MALLOC so that
+      they can be used by downstream applications
+
+    * zend_alloc.h:
+      Enable attribute((malloc)) for GCC 2.96
+
+    * zend_alloc.h:
+      GCC 2 does not know about malloc yet.
+
+    * zend_alloc.h:
+      provide attribute((malloc)) where appropiate
+
 2003-08-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:

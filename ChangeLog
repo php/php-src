@@ -1,3 +1,428 @@
+2003-08-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c:
+      Add public read access to protected
+
+    * ext/sqlite/sqlite.c:
+      Need to check if we got any value before destroying it
+
+    * ext/sqlite/tests/sqlite_024.phpt
+      ext/sqlite/tests/sqlite_oo_024.phpt:
+      Match expected class and instantiated class
+
+    * ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_024.phpt
+      ext/sqlite/tests/sqlite_oo_024.phpt:
+      Add sqlite_fetch_object()
+
+    * ext/sqlite/tests/sqlite_oo_014.phpt
+      ext/sqlite/tests/sqlite_oo_021.phpt
+      ext/sqlite/tests/sqlite_oo_022.phpt:
+      Error messages show the class now
+
+    * ext/pgsql/pgsql.c:
+      format string fix and number of arguments
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h:
+      Add zend_throw_exception_ex() which allows to format exception messages.
+
+    * ZendEngine2/zend.c:
+      Classe tables work this way
+
+2003-08-28  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Prototype fixes
+      Return number of affected rows by ibase_query() and ibase_execute() if > 0
+
+2003-08-28  Andrey Hristov  <andrey@hristov.com>
+
+    * ext/pgsql/pgsql.c:
+      this is the right parameter
+
+    * ext/db/db.c
+      ext/dbase/dbase.c
+      ext/filepro/filepro.c
+      ext/gd/gd.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysqli/mysqli_api.c
+      ext/odbc/birdstep.c
+      ext/pgsql/pgsql.c
+      ext/pspell/pspell.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase/php_sybase_db.c:
+      format string fixes
+
+    * ext/mysqli/mysqli_profiler.c:
+      misplaced quote
+
+    * ext/session/session.c
+      ext/session/session.c:
+      \n at the end of the message is not needed
+
+2003-08-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.h
+      ZendEngine2/zend_default_classes.c:
+      - Split debug_backtrace() into lowlevel c function and php function wrapper
+      - Add trace property to default method based on new
+      zend_fetch_debug_backtrace
+
+2003-08-28  Andrey Hristov  <andrey@hristov.com>
+
+    * (PHP_4_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      format string fix and \n at the end of the message is not needed
+
+    * (PHP_4_3)
+      ext/gd/gd.c:
+      format string fix
+
+2003-08-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/iconv/iconv.c:
+      One more warning fix.
+
+    * (PHP_4_3)
+      ext/calendar/calendar.c
+      ext/db/db.c
+      ext/dio/dio.c
+      ext/filepro/filepro.c
+      ext/hyperwave/hw.c
+      ext/ldap/ldap.c
+      ext/mssql/php_mssql.c
+      ext/pspell/pspell.c
+      ext/sockets/sockets.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xslt/sablot.c
+      ext/zlib/zlib.c:
+      Compiler warning fixes.
+
+    * ext/ftp/php_ftp.c
+      ext/imap/php_imap.c
+      ext/mysql/php_mysql.c
+      main/streams/cast.c:
+      Fixed compiler warnings.
+
+    * ext/dba/dba.c:
+      Fixed format error.
+
+    * (PHP_4_3)
+      ext/pgsql/pgsql.c:
+      Fixed format errors & warning.
+
+    * sapi/apache/php_apache.c:
+      Fixed format bug
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c
+      ext/session/session.c:
+      format string fix
+
+    * (PHP_4_3)
+      Zend/zend.h
+      ZendEngine2/zend.h:
+      older gccs don't understand attribute((format)) on function pointers
+
+2003-08-28  Jani Taskinen  <sniper@iki.fi>
+
+    * win32/php_modules.dsw:
+      - added mcve to the modules workspace
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/pcre/php_pcre.c:
+      fix error message
+
+2003-08-28  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/mcve/config.m4:
+      Fix the build
+      The DOS line endings in this file caused buildconf to build a broken
+      configure script on fbsd
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pcre/php_pcre.c:
+      Fix error message
+
+    * (PHP_4_3)
+      Zend/zend.h
+      ZendEngine2/zend.h:
+      ZEND_GCC_VERSION should always be defined to a number so we can use
+      simple comparisons all the time.
+
+    * ext/standard/assert.c
+      ext/standard/assert.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filters.c
+      ext/standard/fsock.c
+      ext/standard/fsock.c
+      ext/standard/math.c
+      ext/standard/math.c
+      ext/standard/proc_open.c
+      ext/standard/scanf.c
+      ext/standard/scanf.c
+      ext/standard/var.c
+      main/SAPI.c
+      main/streams.c:
+      fix format strings
+
+    * main/php.h:
+      add format attribute where appropiate
+
+2003-08-28  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Fixed some format strings
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c:
+      Add format attribute to a number of functions
+      
+      Kill a few warnings
+
+2003-08-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      Revert the patch per Dan\´s request
+
+    * (PHP_4_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      sync with HEAD
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/exec.c
+      ext/standard/filters.c
+      ext/standard/fsock.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/var.c
+      main/SAPI.c
+      main/main.c
+      main/streams/streams.c:
+      kill warnings
+
+2003-08-28  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      MFH: some emalloc() -> safe_emalloc() fixes
+
+    * (PHP_4_3)
+      ext/sybase_ct/php_sybase_ct.c:
+      - Fixed bug #23682 (sybase_query() and multiple result sets: not returning
+      first row set)
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      Zend/zend_builtin_functions.c
+      Zend/zend_compile.c
+      Zend/zend_execute.c
+      Zend/zend_highlight.c:
+      (zend_builtin_functions.c zend_compile.c zend_execute.c)
+      fix format string usage
+      
+      (zend_highlight.c) explicitly discard value
+
+2003-08-28  Stefan Roehrich  <stefan@roehri.ch>
+
+    * NEWS:
+      Remove NEWS entry because fix was committed to 4.3 branch.
+
+    * (PHP_4_3)
+      NEWS
+      ext/zlib/zlib.c:
+      MFH: Fixed bug #25218 ("deflate" compressed pages had a gzip header, which
+      should only be sent with "gzip" compressed pages).
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      main/php.h:
+      add PHP_ATTRIBUTE_FORMAT to more functions
+      
+
+    * (PHP_4_3)
+      Zend/zend.h:
+      supply ZEND_ATTRIBUTE_FORMAT and enable it for various format functions
+      
+
+    * ext/standard/fsock.c:
+      fix format string (long port)
+
+    * (PHP_4_3)
+      ext/standard/fsock.c:
+      fix format (long port)
+
+2003-08-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mcve/.cvsignore
+      ext/mcve/config.m4
+      ext/mcve/mcve.c
+      ext/mcve/mcve.dsp
+      ext/mcve/php_mcve.h
+      ext/sybase_ct/php_sybase_ct.c:
+      MFB
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php.h
+      main/php.h:
+      Use ZEND_GCC_VERSION and ZEND_ATTRIBUTE_MALLOC
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_alloc.h:
+      cleanup & centralize ZEND_GCC_VERSION and ZEND_ATTRIBUTE_MALLOC so that
+      they can be used by downstream applications
+
+    * (PHP_4_3)
+      Zend/zend.h
+      Zend/zend_alloc.h:
+      cleanup & centralize ZEND_GCC_VERSION and ZEND_ATTRIBUTE_MALLOC so that
+      it can be used by downstream applications
+
+2003-08-28  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mcve/mcve.c:
+      remove dos line feeds..
+
+    * ext/mcve/mcve.dsp
+      ext/mcve/mcve.dsp
+      win32/php_modules.dsw:
+      
+      file mcve.dsp was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      NEWS
+      ext/mcve/config.m4
+      ext/mcve/mcve.c:
+      - Made MCVE extension available on win32.
+
+    * (PHP_4_3)
+      ext/curl/.cvsignore:
+      missing entries
+
+    * ext/mcve/.cvsignore
+      ext/mcve/.cvsignore:
+      
+      file .cvsignore was initially added on branch PHP_4_3.
+
+2003-08-28  Andrey Hristov  <andrey@hristov.com>
+
+    * ext/standard/basic_functions.c:
+      proto fix
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      Zend/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      Enable attribute((malloc)) for GCC 2.96
+
+2003-08-28  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cli/php_cli.c:
+      MF4: -m fix for premature extension unloading
+
+    * (PHP_4_3)
+      sapi/cli/php_cli.c:
+      Null dtor so that extensions won't be unloaded prematurely by list
+      destruction
+
+2003-08-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/php_odbc.c:
+      typofix
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      Zend/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      GCC 2 does not know about malloc yet.
+
+2003-08-28  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/iconv/config.m4:
+      MFH(r-1.25): add further check for "#include MACRO" style syntax
+
+    * ext/iconv/config.m4:
+      Add further check for "#include MACRO" style syntax
+
+2003-08-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      Zend/zend_alloc.h
+      ZendEngine2/zend_alloc.h:
+      provide attribute((malloc)) where appropiate
+
+    * main/php.h
+      main/snprintf.h
+      main/spprintf.h:
+      Let GCC check format arguments
+
+2003-08-28  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Command/Install.php:
+      - added --alldeps --onlyreqdeps options for pear install/upgrade.
+      * added automatic dependency sorting, so the order of packages on
+      command-line is unimportant for both install/uninstall
+      * added one more spaces in paths fix that was missed in PEAR_Common
+
+2003-08-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug #25109 (Possible crash when fetching field names in pgsql)
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #25109 (Possible crash when fetching field name)
+
+    * ext/pgsql/tests/05large_object.phpt
+      ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/11pg_meta_data.phpt
+      ext/pgsql/tests/18pg_escape_bytea.phpt:
+      Fixed tests that failed in ZTS due to incorrect file paths.
+      Fixed test that failed due to new array dimension property being fetched.
+
+2003-08-28  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/tests/006.phpt:
+      Test multiple execution of a prepared EXEC PROCEDURE statement
+
+    * ext/interbase/tests/004.phpt:
+      Test for BLOB ID survival of close()/connect()
+
+    * ext/interbase/interbase.c:
+      Removed TSRMLS_FETCH from _php_ibase_module_error()
+
 2003-08-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/mail.c:
