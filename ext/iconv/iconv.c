@@ -1800,7 +1800,7 @@ PHP_FUNCTION(iconv_set_encoding)
 }
 /* }}} */
 
-/* {{{ proto array iconv_get_encoding([string type])
+/* {{{ proto mixed iconv_get_encoding([string type])
    Get internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_get_encoding)
 {
