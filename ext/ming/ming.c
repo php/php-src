@@ -1563,6 +1563,8 @@ PHP_FUNCTION(swfmovie_output)
 
 void phpStreamOutputMethod(byte b, void * data)
 {
+	TSRMLS_FETCH();
+
 	php_stream_write((php_stream*)data, &b, 1);
 }
 
