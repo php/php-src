@@ -606,6 +606,7 @@ PHP_FUNCTION(serialize)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&buf, struc, &var_hash);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+	smart_str_0(&buf);
 	RETVAL_STRINGL(buf.c, buf.len, 0);
 }
 
