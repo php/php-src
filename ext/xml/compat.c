@@ -305,9 +305,10 @@ php_xml_compat_handlers = {
 	NULL,  /* getParameterEntity */
 	_cdata_handler, /* cdataBlock */
 	NULL, /* externalSubset */
-	1
-#if LIBXML_VERSION >= 20600 
-	,
+#if LIBXML_VERSION < 20600
+	1,
+#else
+	XML_SAX2_MAGIC,
 	NULL,
 	_start_element_handler_ns,
 	_end_element_handler_ns,
