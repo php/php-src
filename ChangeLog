@@ -1,3 +1,52 @@
+2003-03-14  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/standard/browscap.c:
+      
+
+2003-03-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mssql/php_mssql.c:
+      No c++ comments
+
+    * sapi/tux/php_tux.c:
+      no c++ comments
+
+    * ext/interbase/interbase.c:
+      No c++ comments!
+
+2003-03-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug19943.phpt:
+      Fixed typo
+
+2003-03-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd_gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_ss.c
+      ext/gd/libgd/gd_wbmp.c:
+      Whitespace fixes.
+
+2003-03-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * (PHP_4_3)
+      NEWS:
+      - Explain that it is interbase related (Thanks to Andrey)
+
+    * (PHP_4_3)
+      NEWS:
+      - BFN
+
+2003-03-14  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * (PHP_4_3)
+      ext/interbase/config.m4:
+      reverting to 1.8.4.1
+
+    * ext/interbase/config.m4:
+      reverting to version 1.9
+
 2003-03-13  Daniela Mariaschi  <mariaschi@libero.it>
 
     * ext/interbase/config.m4:
