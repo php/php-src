@@ -235,12 +235,14 @@ PHP_FUNCTION(ncurses_move)
 PHP_FUNCTION(ncurses_newpad)
 {
 	long rows,cols;
-	WINDOW **pwin = (WINDOW **)emalloc(sizeof(WINDOW *));
+	WINDOW **pwin;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&rows,&cols)==FAILURE) {
 		return;
 	}
 	IS_NCURSES_INITIALIZED();
+	
+	pwin = (WINDOW **)emalloc(sizeof(WINDOW *));
 	*pwin = newpad(rows,cols);
 
 	if(!*pwin) {
@@ -298,13 +300,14 @@ PHP_FUNCTION(ncurses_pnoutrefresh)
 PHP_FUNCTION(ncurses_newwin)
 {
 	long rows,cols,y,x;
-	WINDOW **pwin = (WINDOW **)emalloc(sizeof(WINDOW *));
+	WINDOW **pwin; 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll",&rows,&cols,&y,&x)==FAILURE) {
 		return;
 	}
 
 	IS_NCURSES_INITIALIZED();
+	pwin = (WINDOW **)emalloc(sizeof(WINDOW *));
 	*pwin=newwin(rows,cols,y,x);
 
 	if(!*pwin) {
@@ -2249,13 +2252,14 @@ PHP_FUNCTION(ncurses_new_panel)
 {
 	zval **handle;
 	WINDOW **win;
-	PANEL **panel = (PANEL **)emalloc(sizeof(PANEL *));
+	PANEL **panel;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	FETCH_WINRES(win, handle);
 
+	panel = (PANEL **)emalloc(sizeof(PANEL *));
 	*panel = new_panel(*win);
 
 	if (*panel == NULL) {
@@ -2455,13 +2459,15 @@ PHP_FUNCTION(ncurses_panel_window)
 {
 	zval *phandle = NULL;
 	PANEL **panel;
-	WINDOW **win = (WINDOW **)emalloc(sizeof(WINDOW *));
+	WINDOW **win;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &phandle)) {
 		return;
 	}
 
 	FETCH_PANEL(panel, &phandle);
+
+	win = (WINDOW **)emalloc(sizeof(WINDOW *));
 	*win = panel_window(*panel);
 
 	if (*win == NULL) {
