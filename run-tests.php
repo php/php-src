@@ -844,7 +844,6 @@ COMMAND $cmd
 			$wanted_re = preg_quote($wanted_re, '/');
 			// Stick to basics
 			$wanted_re = str_replace("%e", '\\' . DIRECTORY_SEPARATOR, $wanted_re);
-			echo $wanted_re;
 			$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
 			$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
 			$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
