@@ -27,6 +27,13 @@
 #include "ext/standard/info.h"
 #include "php_swf.h"
 
+#ifdef ZTS
+int swf_globals_id;
+#else
+php_swf_globals swf_globals;
+#endif
+
+
 function_entry swf_functions[] = {
 	PHP_FE(swf_openfile,		NULL)
 	PHP_FE(swf_closefile,		NULL)
@@ -103,7 +110,7 @@ zend_module_entry swf_module_entry = {
 	swf_functions,
 	PHP_MINIT(swf),
 	NULL,
-	NULL,
+	PHP_RINIT(swf),
 	NULL,
 	PHP_MINFO(swf),
 	STANDARD_MODULE_PROPERTIES
@@ -146,14 +153,19 @@ PHP_MINIT_FUNCTION(swf)
 	return SUCCESS;
 }
 
-
+PHP_RINIT_FUNCTION(swf)
+{
+	SWFG(use_file) = 0;
+}
          
 /* {{{ proto void swf_openfile(string name, double xsize, double ysize, double framerate, double r, double g, double b)
    Create a Shockwave Flash file given by name, with width xsize and height ysize at a frame rate of framerate and a background color specified by a red value of r, green value of g and a blue value of b */
 PHP_FUNCTION(swf_openfile)
 {
 	zval **name, **sizeX, **sizeY, **frameRate, **r, **g, **b;
-	char *na;
+	char *na, *tmpna;
+	SWFLS_FETCH();
+	
 	if (ZEND_NUM_ARGS() != 7 ||
 	    zend_get_parameters_ex(7, &name, &sizeX, &sizeY, &frameRate, &r, &g, &b) == FAILURE) {
 	    WRONG_PARAM_COUNT;
@@ -166,18 +178,31 @@ PHP_FUNCTION(swf_openfile)
 	convert_to_double_ex(r);
 	convert_to_double_ex(g);
 	convert_to_double_ex(b);
+
+
+	tmpna = Z_STRVAL_PP(name);
+
+	if (strcasecmp("php://stdout", tmpna) == 0) {
+		na = tempnam(NULL, "php_swf_stdout");
+		unlink((const char *)na);
 	
-	na = Z_STRVAL_PP(name);
+		SWFG(use_file) = 0;
+	} else {
+		na = tmpna;
+		SWFG(use_file) = 1;
+	}
 
 #ifdef VIRTUAL_DIR
 	if (virtual_filepath(na, &na)) {
 		return;
 	}
 #endif
-	
-	swf_openfile((strcasecmp("php://stdout", na)==0) ? "STDOUT" : na,
-			 (float)Z_DVAL_PP(sizeX), (float)Z_DVAL_PP(sizeY),
-      		 	 (float)Z_DVAL_PP(frameRate), (float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b));
+	if (!SWFG(use_file))
+		SWFG(tmpfile_name) = na;
+
+	swf_openfile(na,(float)Z_DVAL_PP(sizeX), (float)Z_DVAL_PP(sizeY),
+      		 	 (float)Z_DVAL_PP(frameRate), (float)Z_DVAL_PP(r), 
+      		 	 (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b));
 #ifdef VIRTUAL_DIR
 	free(na);
 #endif
@@ -188,7 +213,27 @@ PHP_FUNCTION(swf_openfile)
    Close a Shockwave flash file that was opened with swf_openfile */
 PHP_FUNCTION(swf_closefile)
 {
+	SWFLS_FETCH();
+	
 	swf_closefile();
+	
+	if (!SWFG(use_file)) {
+		FILE *f;
+		char buf[4096];
+		int b;
+		
+		if ((f = fopen(SWFG(tmpfile_name), "r")) == NULL) {
+			php_error(E_WARNING, "Cannot create temporary file for stdout support with SWF");
+			RETURN_NULL();
+		}
+		
+		while ((b = fread(buf, 1, sizeof(buf), f)) > 0)
+			php_write(buf, b);
+		
+		fclose(f);
+		
+		unlink((const char *)SWFG(tmpfile_name));
+	}
 }
 /* }}} */
 
