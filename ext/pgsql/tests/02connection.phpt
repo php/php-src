@@ -9,6 +9,8 @@ PostgreSQL connection
 include('config.inc');
 
 $db = pg_pconnect($conn_str);
+var_dump($db);
+
 if (pg_connection_status($db) != PGSQL_CONNECTION_OK) 
 {
 	echo "pg_connection_status() error\n";
@@ -44,7 +46,8 @@ if (pg_options($db))
 
 pg_close($db);
 
-echo "OK";
 ?>
---EXPECT--
-OK
+===DONE===
+--EXPECTF--
+resource(%d) of type (pgsql link%s)
+===DONE===
