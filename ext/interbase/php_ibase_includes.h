@@ -78,6 +78,7 @@ typedef struct {
 	isc_db_handle handle;
 	struct tr_list *tr_list;
 	unsigned short dialect;
+	struct event *event_head;
 } ibase_db_link;
 
 typedef struct {
@@ -100,8 +101,8 @@ typedef struct {
 
 typedef struct {
 	isc_blob_handle bl_handle;
-	ISC_QUAD bl_qd;
 	unsigned short type;
+	ISC_QUAD bl_qd;
 } ibase_blob;
 
 typedef struct {
@@ -127,7 +128,7 @@ typedef struct {
 	long trans_res_id;
 } ibase_query;
 
-typedef struct {
+typedef struct event {
 	ibase_db_link *link;
 	long link_res_id;
 	ISC_LONG event_id;
@@ -136,6 +137,8 @@ typedef struct {
 	char *event_buffer, *result_buffer;
 	zval *callback;
 	void **thread_ctx;
+	struct event *event_next;
+	enum event_state { NEW, ACTIVE, DEAD } state;
 } ibase_event;
 
 typedef struct {
@@ -197,6 +200,16 @@ void _php_ibase_error(TSRMLS_D);
 void _php_ibase_module_error(char * TSRMLS_DC, ...) 
 	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);
 
+/* determine if a resource is a link or transaction handle */
+#define PHP_IBASE_LINK_TRANS(pzval, lh, th) \
+	do { if (!pzval) { \
+			ZEND_FETCH_RESOURCE2(lh, ibase_db_link *, NULL, IBG(default_link), \
+				"InterBase link", le_link, le_plink) } \
+		else \
+			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, &pzval, &lh, &th); \
+		if (SUCCESS != _php_ibase_def_trans(lh, &th TSRMLS_CC)) { RETURN_FALSE; } \
+	} while (0)
+	
 int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC);
 void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id, 
 	ibase_db_link **ib_link, ibase_trans **trans);
