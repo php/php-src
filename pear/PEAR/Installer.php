@@ -122,12 +122,12 @@ class PEAR_Installer extends PEAR_Common
             }
             $path = $props['installed_as'];
             if (!@unlink($path)) {
-                $this->log(1, "unable to delete: $path");
+                $this->log(2, "unable to delete: $path");
             } else {
-                $this->log(1, "deleted file $path");
+                $this->log(2, "deleted file $path");
                 // Delete package directory if it's empty
                 if (@rmdir(dirname($path))) {
-                    $this->log(2, "+ rmdir $path");
+                    $this->log(3, "+ rmdir $path");
                 }
             }
         }
@@ -147,7 +147,7 @@ class PEAR_Installer extends PEAR_Common
             }
             // return if this file is meant for another platform
             if (!$os->matchSignature($atts['platform'])) {
-                $this->log(1, "skipped $file (meant for $atts[platform], we are ".$os->getSignature().")");
+                $this->log(2, "skipped $file (meant for $atts[platform], we are ".$os->getSignature().")");
                 return;
             }
         }
@@ -197,7 +197,7 @@ class PEAR_Installer extends PEAR_Common
                 $this->log(0, "failed to mkdir $dest_dir");
                 return false;
             }
-            $this->log(2, "+ mkdir $dest_dir");
+            $this->log(3, "+ mkdir $dest_dir");
         }
         $orig_file = $tmp_path . DIRECTORY_SEPARATOR . $file;
         if (empty($atts['replacements'])) {
@@ -205,7 +205,7 @@ class PEAR_Installer extends PEAR_Common
                 $this->log(0, "failed to copy $orig_file to $dest_file");
                 return false;
             }
-            $this->log(2, "+ cp $orig_file $dest_file");
+            $this->log(3, "+ cp $orig_file $dest_file");
         } else {
             $fp = fopen($orig_file, "r");
             $contents = fread($fp, filesize($orig_file));
@@ -228,7 +228,7 @@ class PEAR_Installer extends PEAR_Common
                     $subst_to = $to;
                 }
             }
-            $this->log(1, "doing ".sizeof($subst_from)." substitution(s) for $dest_file");
+            $this->log(2, "doing ".sizeof($subst_from)." substitution(s) for $dest_file");
             if (sizeof($subst_from)) {
                 $contents = str_replace($subst_from, $subst_to, $contents);
             }
@@ -243,7 +243,7 @@ class PEAR_Installer extends PEAR_Common
         if (!OS_WINDOWS) {
             if ($atts['role'] == 'script') {
                 $mode = 0777 & ~$this->config->get('umask');
-                $this->log(2, "+ chmod +x $dest_file");
+                $this->log(3, "+ chmod +x $dest_file");
             } else {
                 $mode = 0666 & ~$this->config->get('umask');
             }
@@ -255,7 +255,7 @@ class PEAR_Installer extends PEAR_Common
         // Store the full path where the file was installed for easy unistall
         $this->pkginfo['filelist'][$file]['installed_as'] = $dest_file;
 
-        $this->log(1, "installed file $dest_file");
+        $this->log(2, "installed file $dest_file");
         return true;
     }
 
