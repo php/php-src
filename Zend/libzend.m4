@@ -20,7 +20,6 @@ AC_REQUIRE([AC_PROG_YACC])
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([AC_PROG_CC_C_O])
 AC_REQUIRE([AM_PROG_LEX])
-AC_REQUIRE([AC_C_INLINE])
 AC_REQUIRE([AC_HEADER_STDC])
 
 LIBZEND_BISON_CHECK
@@ -169,7 +168,7 @@ else
 fi
 
 if test "$ZEND_INLINE" = "yes"; then
-  AC_DEFINE(inline, inline)
+  AC_C_INLINE
 else
   AC_DEFINE(inline, [])
 fi
