@@ -237,6 +237,16 @@ gdImagePtr gdImageCreateFromGd2 (FILE * inFile)
 	return im;
 }
 
+gdImagePtr gdImageCreateFromGd2Ptr (int size, void *data)
+{
+	gdImagePtr im;
+	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
+	im = gdImageCreateFromGd2Ctx(in);
+	in->gd_free(in);
+
+	return im;
+}
+
 gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 {
 	int sx, sy;
@@ -376,6 +386,16 @@ fail2:
 	}
 
 	return 0;
+}
+
+gdImagePtr gdImageCreateFromGd2PartPtr (int size, void *data, int srcx, int srcy, int w, int h)
+{
+	gdImagePtr im;
+	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
+	im = gdImageCreateFromGd2PartCtx(in, srcx, srcy, w, h);
+	in->gd_free(in);
+
+	return im;
 }
 
 gdImagePtr gdImageCreateFromGd2Part (FILE * inFile, int srcx, int srcy, int w, int h) 

@@ -1823,7 +1823,7 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 	if (y < ((im->sy) - 1)) {
 		lastBorder = 1;
 		for (i = leftLimit; i <= rightLimit; i++) {
-			int c = gdImageGetPixel(im, i, y + 1);
+			int c = gdImageGetTrueColorPixel(im, i, y + 1);
 
 			if (lastBorder) {
 				if ((c != border) && (c != color)) {
@@ -2292,7 +2292,8 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 					  	int tmp = gdImageGetPixel (src, x, y);
 		  				mapTo = gdImageGetTrueColorPixel (src, x, y);
 					  	if (gdImageGetTransparent (src) == tmp) {
-					  		tox++;
+							/* 2.0.21, TK: not tox++ */
+							tox += stx[x - srcX];
 					  		continue;
 					  	}	
 					} else {
@@ -2300,7 +2301,8 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 					  	mapTo = gdImageGetTrueColorPixel (src, x, y);
 						/* Added 7/24/95: support transparent copies */
 						if (gdImageGetTransparent (src) == mapTo) {
-							tox++;
+							/* 2.0.21, TK: not tox++ */
+							tox += stx[x - srcX];
 							continue;
 						}
 					}	
@@ -2356,22 +2358,24 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH)
 {
 	int x, y;
+	double sy1, sy2, sx1, sx2;
 	if (!dst->trueColor) {
 		gdImageCopyResized (dst, src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
 		return;
 	}
 	for (y = dstY; (y < dstY + dstH); y++) {
+		sy1 = ((double) y - (double) dstY) * (double) srcH / (double) dstH;
+		sy2 = ((double) (y + 1) - (double) dstY) * (double) srcH / (double) dstH;
 		for (x = dstX; (x < dstX + dstW); x++) {
-			float sy1, sy2, sx1, sx2;
-			float sx, sy;
-			float spixels = 0.0f;
-			float red = 0.0f, green = 0.0f, blue = 0.0f, alpha = 0.0f;
-			float alpha_factor, alpha_sum = 0.0f, contrib_sum = 0.0f;
-			sy1 = ((float)(y - dstY)) * (float)srcH / (float)dstH;
-			sy2 = ((float)(y + 1 - dstY)) * (float) srcH / (float) dstH;
+			double sx, sy;
+			double spixels = 0;
+			double red = 0.0, green = 0.0, blue = 0.0, alpha = 0.0;
+			double alpha_factor, alpha_sum = 0.0, contrib_sum = 0.0;
+			sx1 = ((double) x - (double) dstX) * (double) srcW / dstW;
+			sx2 = ((double) (x + 1) - (double) dstX) * (double) srcW / dstW;
 			sy = sy1;
 			do {
-				float yportion;
+				double yportion;
 				if (floor_cast(sy) == floor_cast(sy1)) {
 					yportion = 1.0f - (sy - floor_cast(sy));
 					if (yportion > sy2 - sy1) {
@@ -2383,12 +2387,10 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				} else {
 					yportion = 1.0f;
 				}
-				sx1 = ((float)(x - dstX)) * (float) srcW / dstW;
-				sx2 = ((float)(x + 1 - dstX)) * (float) srcW / dstW;
 				sx = sx1;
 				do {
-					float xportion;
-					float pcontribution;
+					double xportion;
+					double pcontribution;
 					int p;
 					if (floorf(sx) == floor_cast(sx1)) {
 						xportion = 1.0f - (sx - floor_cast(sx));

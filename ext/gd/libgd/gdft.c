@@ -79,9 +79,9 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 
 /*
  * The character (space) used to separate alternate fonts in the
- * fontlist parameter to gdImageStringFT.
+ * fontlist parameter to gdImageStringFT. 2.0.18: space was a oor choice for this.
  */
-#define LISTSEPARATOR " "
+#define LISTSEPARATOR ";"
 
 /*
  * DEFAULT_FONTPATH and PATHSEPARATOR are host type dependent and
@@ -473,7 +473,7 @@ static void *fontFetch (char **error, void *key)
 		encoding = charmap->encoding_id;
 
 /* EAM DEBUG - Newer versions of libfree2 make it easier by defining encodings */
-#ifdef FT_ENCODING_MS_SYMBOL
+#if (defined(FREETYPE_MAJOR) && (FREETYPE_MAJOR >=2 ) && (FREETYPE_MINOR >= 1))
 	if (charmap->encoding == FT_ENCODING_MS_SYMBOL
 		|| charmap->encoding == FT_ENCODING_ADOBE_CUSTOM
 		|| charmap->encoding == FT_ENCODING_ADOBE_STANDARD) {
@@ -482,7 +482,7 @@ static void *fontFetch (char **error, void *key)
 		a->face->charmap = charmap;
 		return (void *)a;
 	}
-#endif /* FT_ENCODING_MS_SYMBOL */
+#endif /* Freetype 2.1 or better */
 /* EAM DEBUG */
 
 		if ((platform == 3 && encoding == 1)		/* Windows Unicode */
@@ -777,6 +777,11 @@ void gdFontCacheShutdown()
  		FT_Done_FreeType(library);
 	}
 }
+
+void gdFreeFontCache()
+{
+	gdFontCacheShutdown();
+}
   
 int gdFontCacheSetup(void)
 {
@@ -965,7 +970,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		}
 
 /* EAM DEBUG */
-#ifdef FT_ENCODING_MS_SYMBOL
+#if (defined(FREETYPE_MAJOR) && (FREETYPE_MAJOR >=2 ) && (FREETYPE_MINOR >= 1))
 		if (font->face->charmap->encoding == FT_ENCODING_MS_SYMBOL) {
 			/* I do not know the significance of the constant 0xf000.
 			 * It was determined by inspection of the character codes
@@ -975,7 +980,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 			ch |= 0xf000;
 			next += len;
 		} else
-#endif /* FT_ENCODING_MS_SYMBOL */
+#endif /* Freetype 2.1 or better */
 /* EAM DEBUG */
 
 		switch (m) {

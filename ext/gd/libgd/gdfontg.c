@@ -4381,4 +4381,9 @@ gdFont gdFontGiantRep =
 
 gdFontPtr gdFontGiant = &gdFontGiantRep;
 
+gdFontPtr gdFontGetGiant(void)
+{
+	return gdFontGiant;
+}
+
 /* This file has not been truncated. */

@@ -21,6 +21,7 @@ extern "C" {
 #include "gd.h"
 
 extern gdFontPtr gdFontLarge;
+extern gdFontPtr gdFontGetLarge(void);
 
 #ifdef __cplusplus
 }

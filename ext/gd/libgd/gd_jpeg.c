@@ -221,7 +221,19 @@ gdImagePtr gdImageCreateFromJpeg (FILE * inFile)
 	return im;
 }
 
+gdImagePtr gdImageCreateFromJpegPtr (int size, void *data)
+{
+	gdImagePtr im;
+	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
+	im = gdImageCreateFromJpegCtx(in);
+	in->gd_free(in);
+
+	return im;
+}
+
 void jpeg_gdIOCtx_src (j_decompress_ptr cinfo, gdIOCtx * infile);
+
+static int CMYKToRGB(int c, int m, int y, int k, int inverted);
 
 /* 
  * Create a gd-format image from the JPEG-format INFILE.  Returns the
@@ -239,6 +251,8 @@ gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile)
 	unsigned int i, j;
 	int retval;
 	JDIMENSION nrows;
+	int channels = 3;
+	int inverted = 0;
 
 	memset (&cinfo, 0, sizeof (cinfo));
 	memset (&jerr, 0, sizeof (jerr));
@@ -262,6 +276,9 @@ gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile)
 
 	jpeg_gdIOCtx_src (&cinfo, infile);
 
+	/* 2.0.22: save the APP14 marker to check for Adobe Photoshop CMYK files with inverted components. */
+	jpeg_save_markers(&cinfo, JPEG_APP0 + 14, 256);
+
 	retval = jpeg_read_header (&cinfo, TRUE);
 	if (retval != JPEG_HEADER_OK) { 
 		php_gd_error_ex(E_WARNING, "gd-jpeg: warning: jpeg_read_header returned %d, expected %d", retval, JPEG_HEADER_OK);
@@ -281,8 +298,14 @@ gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile)
 		goto error;
 	}
 
-	/* Force the image into RGB colorspace, but don't reduce the number of colors anymore (GD 2.0) */
-	cinfo.out_color_space = JCS_RGB;
+	/* 2.0.22: very basic support for reading CMYK colorspace files. Nice for
+	 * thumbnails but there's no support for fussy adjustment of the
+	 * assumed properties of inks and paper. */
+	if ((cinfo.jpeg_color_space == JCS_CMYK) || (cinfo.jpeg_color_space == JCS_YCCK)) {
+		cinfo.out_color_space = JCS_CMYK;
+	} else {
+		cinfo.out_color_space = JCS_RGB;
+	}
 
 	if (jpeg_start_decompress (&cinfo) != TRUE) {
 		php_gd_error("gd-jpeg: warning: jpeg_start_decompress reports suspended data source");
@@ -301,8 +324,29 @@ gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile)
   gdImageInterlace (im, cinfo.progressive_mode != 0);
 #endif
 
-	if (cinfo.output_components != 3) {
-		php_gd_error_ex(E_WARNING, "gd-jpeg: error: JPEG color quantization request resulted in output_components == %d (expected 3)", cinfo.output_components);
+	if (cinfo.out_color_space == JCS_RGB) {
+		if (cinfo.output_components != 3) {
+			php_gd_error_ex(E_WARNING, "gd-jpeg: error: JPEG color quantization request resulted in output_components == %d (expected 3 for RGB)", cinfo.output_components);
+			goto error;
+		}
+		channels = 3;
+	} else if (cinfo.out_color_space == JCS_CMYK) {
+		jpeg_saved_marker_ptr marker;
+		if (cinfo.output_components != 4)  {
+			php_gd_error_ex(E_WARNING, "gd-jpeg: error: JPEG color quantization request resulted in output_components == %d (expected 4 for CMYK)", cinfo.output_components);
+			goto error;
+		}
+		channels = 4;
+		marker = cinfo.marker_list;
+		while (marker) {
+			if ((marker->marker == (JPEG_APP0 + 14)) && (marker->data_length >= 12) && (!strncmp((const char *) marker->data, "Adobe", 5))) {
+				inverted = 1;
+				break;
+			}
+			marker = marker->next;
+		}
+	} else {
+		php_gd_error_ex(E_WARNING, "gd-jpeg: error: unexpected colorspace.");
 		goto error;
 	}
 
@@ -311,22 +355,37 @@ gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile)
 	goto error;
 #endif /* BITS_IN_JSAMPLE == 12 */
 
-	row = safe_emalloc(cinfo.output_width * 3, sizeof(JSAMPLE), 0);
-	memset(row, 0, cinfo.output_width * 3 * sizeof(JSAMPLE));
+	row = safe_emalloc(cinfo.output_width * channels, sizeof(JSAMPLE), 0);
+	memset(row, 0, cinfo.output_width * channels * sizeof(JSAMPLE));
 	rowptr[0] = row;
 
-	for (i = 0; i < cinfo.output_height; i++) {
-		register JSAMPROW currow = row;
-		register int *tpix = im->tpixels[i];
-		nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
-		if (nrows != 1) {
-			php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
-			goto error;
+	if (cinfo.out_color_space == JCS_CMYK) {
+		for (i = 0; i < cinfo.output_height; i++) {
+			register JSAMPROW currow = row;
+			register int *tpix = im->tpixels[i];
+			nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
+			if (nrows != 1) {
+				php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
+				goto error;
+			}
+			for (j = 0; j < cinfo.output_width; j++, currow += 4, tpix++) {
+				*tpix = CMYKToRGB (currow[0], currow[1], currow[2], currow[3], inverted);
+			}
 		}
-		for (j = 0; j < cinfo.output_width; j++, currow += 3, tpix++) {
-			*tpix = gdTrueColor (currow[0], currow[1], currow[2]);
+	} else {
+		for (i = 0; i < cinfo.output_height; i++) {
+			register JSAMPROW currow = row;
+			register int *tpix = im->tpixels[i];
+			nrows = jpeg_read_scanlines (&cinfo, rowptr, 1);
+			if (nrows != 1) {
+				php_gd_error_ex(E_WARNING, "gd-jpeg: error: jpeg_read_scanlines returns %u, expected 1", nrows);
+				goto error;
+			}
+			for (j = 0; j < cinfo.output_width; j++, currow += 3, tpix++) {
+				*tpix = gdTrueColor (currow[0], currow[1], currow[2]);
+			}
 		}
-	}
+	} 
 
 	if (jpeg_finish_decompress (&cinfo) != TRUE) {
 		php_gd_error("gd-jpeg: warning: jpeg_finish_decompress reports suspended data source");
@@ -353,8 +412,19 @@ error:
 	return 0;
 }
 
-/*
+/* A very basic conversion approach, TBB */
+static int CMYKToRGB(int c, int m, int y, int k, int inverted)
+{
+	if (inverted) {
+		c = 255 - c;
+		m = 255 - m;
+		y = 255 - y;
+		k = 255 - k;
+	}
+	return gdTrueColor((255 - c) * (255 - k) / 255, (255 - m) * (255 - k) / 255, (255 - y) * (255 - k) / 255);
+}
 
+/*
  * gdIOCtx JPEG data sources and sinks, T. Boutell
  * almost a simple global replace from T. Lane's stdio versions.
  *

@@ -3868,4 +3868,9 @@ gdFont gdFontSmallRep =
 
 gdFontPtr gdFontSmall = &gdFontSmallRep;
 
+gdFontPtr gdFontGetSmall(void)
+{
+	return gdFontSmall;
+}
+
 /* This file has not been truncated. */
