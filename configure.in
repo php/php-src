@@ -252,7 +252,7 @@ AC_CHECK_LIB(m, sin)
 
 dnl Only include libbind if inet_aton is not found in 
 dnl libresolv.
-AC_CHECK_LIB(resolv, inet_aton. [], [
+AC_CHECK_LIB(resolv, inet_aton, [], [
   AC_CHECK_LIB(bind, inet_aton, [], [
     AC_CHECK_LIB(bind, __inet_aton)
   ])
