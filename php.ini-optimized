@@ -330,15 +330,15 @@ debugger.enabled	=	False
 sql.safe_mode	=	Off
 
 [ODBC]
-;uodbc.default_db		=	Not yet implemented
-;uodbc.default_user		=	Not yet implemented
-;uodbc.default_pw		=	Not yet implemented
-uodbc.allow_persistent	=	On	; allow or prevent persistent links
-uodbc.check_persistent  = 	On	; check that a connection is still validbefore reuse
-uodbc.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
-uodbc.max_links			=	-1	; maximum number of links (persistent+non persistent). -1 means no limit
-uodbc.defaultlrl	=	4096	; Handling of LONG fields. Returns number of bytes to variables, 0 means passthru
-uodbc.defaultbinmode	= 	1	; Handling of binary data. 0 means passthru, 1 return as is, 2 convert to char
+;odbc.default_db		=	Not yet implemented
+;odbc.default_user		=	Not yet implemented
+;odbc.default_pw		=	Not yet implemented
+odbc.allow_persistent	=	On	; allow or prevent persistent links
+odbc.check_persistent  = 	On	; check that a connection is still validbefore reuse
+odbc.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
+odbc.max_links			=	-1	; maximum number of links (persistent+non persistent). -1 means no limit
+odbc.defaultlrl	=	4096	; Handling of LONG fields. Returns number of bytes to variables, 0 means passthru
+odbc.defaultbinmode	= 	1	; Handling of binary data. 0 means passthru, 1 return as is, 2 convert to char
 ; See the documentation on odbc_binmode and odbc_longreadlen for an explanation of uodbc.defaultlrl
 ; and uodbc.defaultbinmode
 
