@@ -25,45 +25,45 @@ extern ZEND_API php_core_globals core_globals;
 
 
 struct _php_core_globals {
-    long magic_quotes_gpc;
-    long magic_quotes_runtime;
-    long magic_quotes_sybase;
+	long magic_quotes_gpc;
+	long magic_quotes_runtime;
+	long magic_quotes_sybase;
 
-    long asp_tags;
-    long short_tags;
+	long asp_tags;
+	long short_tags;
 
-    long safe_mode;
-    long sql_safe_mode;
-    char *safe_mode_exec_dir;
-    long enable_dl;
+	long safe_mode;
+	long sql_safe_mode;
+	char *safe_mode_exec_dir;
+	long enable_dl;
 
-    long memory_limit;
+	long memory_limit;
 
-    long track_errors;
-    long display_errors;
-    long log_errors;
-    char *error_log;
+	long track_errors;
+	long display_errors;
+	long log_errors;
+	char *error_log;
 
-    char *doc_root;
-    char *user_dir;
-    char *include_path;
-    char *open_basedir;
-    char *extension_dir;
+	char *doc_root;
+	char *user_dir;
+	char *include_path;
+	char *open_basedir;
+	char *extension_dir;
 
-    char *upload_tmp_dir;
-    long upload_max_filesize;
+	char *upload_tmp_dir;
+	long upload_max_filesize;
 
-    char *auto_prepend_file;
-    char *auto_append_file;
+	char *auto_prepend_file;
+	char *auto_append_file;
 
-    char *arg_separator;
-    char *gpc_order;
+	char *arg_separator;
+	char *gpc_order;
 
-    long track_vars;
+	long track_vars;
 
-    long y2k_compliance;
+	long y2k_compliance;
 
-    unsigned char header_is_being_sent;
+	unsigned char header_is_being_sent;
 };
 
 
