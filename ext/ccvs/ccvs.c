@@ -113,7 +113,7 @@ ZEND_GET_MODULE(ccvs)
 /* Full Functions (The actual CCVS functions and any internal php hooked functions such as MINFO) */
 
 /* {{{ proto string ccvs_init(string name)
- ??? */
+   Initialize CCVS for use */
 PHP_FUNCTION(ccvs_init) /* cv_init() */
 {
   zval **name;
@@ -161,7 +161,7 @@ PHP_FUNCTION(ccvs_init) /* cv_init() */
 /* }}} */
 
 /* {{{ proto string ccvs_done(string sess)
- ??? */
+   Terminate CCVS engine and do cleanup work */
 PHP_FUNCTION(ccvs_done) /* cv_done() */
 {
   zval **sess;
@@ -183,7 +183,7 @@ PHP_FUNCTION(ccvs_done) /* cv_done() */
 /* }}} */
 
 /* {{{ proto string ccvs_new(string session, string invoice)
- ??? */
+   Create a new, blank transaction */
 PHP_FUNCTION(ccvs_new) /* cv_new() */
 {
   zval **psess;
@@ -215,7 +215,7 @@ PHP_FUNCTION(ccvs_new) /* cv_new() */
 /* }}} */
 
 /* {{{ proto string ccvs_add(string session, string invoice, string argtype, string argval)
- ??? */
+   Add data to a transaction */
 PHP_FUNCTION(ccvs_add) /* cv_add() */
 {
   zval **psess;
@@ -260,7 +260,7 @@ PHP_FUNCTION(ccvs_add) /* cv_add() */
 */
 
 /* {{{ proto string ccvs_delete(string session, string invoice)
- ??? */
+   Delete a transaction */
 PHP_FUNCTION(ccvs_delete) /* cv_delete() */
 {
   zval **psess;
@@ -286,7 +286,7 @@ PHP_FUNCTION(ccvs_delete) /* cv_delete() */
 /* }}} */
 
 /* {{{ proto string ccvs_auth(string session, string invoice)
- ??? */
+   Perform credit authorization test on a transaction */
 PHP_FUNCTION(ccvs_auth) /* cv_auth() */
 {
   zval **psess;
@@ -312,7 +312,7 @@ PHP_FUNCTION(ccvs_auth) /* cv_auth() */
 /* }}} */
 
 /* {{{ proto string ccvs_return(string session, string invoice)
- ??? */
+   Transfer funds from the merchant to the credit card holder */
 PHP_FUNCTION(ccvs_return) /* cv_return() */
 {
   zval **psess;
@@ -338,7 +338,7 @@ PHP_FUNCTION(ccvs_return) /* cv_return() */
 /* }}} */
 
 /* {{{ proto string ccvs_reverse(string session, string invoice)
- ??? */
+   Perform a full reversal on an already-processed authorization */
 PHP_FUNCTION(ccvs_reverse) /* cv_reverse() */
 {
   zval **psess;
@@ -364,7 +364,7 @@ PHP_FUNCTION(ccvs_reverse) /* cv_reverse() */
 /* }}} */
 
 /* {{{ proto string ccvs_sale(string session, string invoice)
- ??? */
+   Transfer funds from the credit card holder to the merchant */
 PHP_FUNCTION(ccvs_sale) /* cv_sale() */
 {
   zval **psess;
@@ -390,7 +390,7 @@ PHP_FUNCTION(ccvs_sale) /* cv_sale() */
 /* }}} */
 
 /* {{{ proto string ccvs_void(string session, string invoice)
- ??? */
+   Perform a full reversal on a completed transaction */
 PHP_FUNCTION(ccvs_void) /* cv_void() */
 {
   zval **psess;
@@ -416,7 +416,7 @@ PHP_FUNCTION(ccvs_void) /* cv_void() */
 /* }}} */
 
 /* {{{ proto string ccvs_status(string session, string invoice)
- ??? */
+   Check the status of an invoice */
 PHP_FUNCTION(ccvs_status) /* cv_status() */
 {
   zval **psess;
@@ -442,7 +442,7 @@ PHP_FUNCTION(ccvs_status) /* cv_status() */
 /* }}} */
 
 /* {{{ proto int ccvs_count(string session, string type)
- ??? */
+   Find out how many transactions of a given type are stored in the system */
 PHP_FUNCTION(ccvs_count) /* cv_count() */
 {
   zval **psess;
@@ -468,7 +468,7 @@ PHP_FUNCTION(ccvs_count) /* cv_count() */
 /* }}} */
 
 /* {{{ proto string ccvs_lookup(string session, string invoice, int inum)
- ??? */
+   Look up an item of a particular type in the database */
 PHP_FUNCTION(ccvs_lookup) /* cv_lookup() */
 {
   zval **psess;
@@ -498,7 +498,7 @@ PHP_FUNCTION(ccvs_lookup) /* cv_lookup() */
 /* }}} */
 
 /* {{{ proto string ccvs_report(string session, string type)
- ??? */
+   Return the status of the background communication process */
 PHP_FUNCTION(ccvs_report) /* cv_report() */
 {
   zval **psess;
@@ -525,7 +525,7 @@ PHP_FUNCTION(ccvs_report) /* cv_report() */
 /* }}} */
 
 /* {{{ proto string ccvs_command(string session, string type, string argval)
- ??? */
+   Performs a command which is peculiar to a single protocol, and thus is not available in the general CCVS API */
 PHP_FUNCTION(ccvs_command) /* cv_command() */
 {
   zval **psess;
@@ -555,7 +555,7 @@ PHP_FUNCTION(ccvs_command) /* cv_command() */
 /* }}} */
 
 /* {{{ proto string ccvs_textvalue(string session)
- ??? */
+   Get text return value for previous function call */
 PHP_FUNCTION(ccvs_textvalue) /* cv_textvalue() */
 {
   zval **psess;
