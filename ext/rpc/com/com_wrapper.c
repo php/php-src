@@ -1427,25 +1427,13 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 PHPAPI zval *php_COM_object_from_dispatch(IDispatch *disp, zval *val TSRMLS_DC)
 {
 	comval *obj;
-	long rid;
 	zval *zobj;
 	
 	ALLOC_COM(obj);
-	C_DISPATCH(obj) = disp;
-	php_COM_set(obj, &C_DISPATCH(obj), FALSE TSRMLS_CC);
-	
-	/* resource */
-	rid = zend_list_insert(obj, IS_COM);
-
-	if (val == NULL)
-		MAKE_STD_ZVAL(val);
-	ZVAL_RESOURCE(val, rid);
-
-	/* now we want an object */
 	MAKE_STD_ZVAL(zobj);
-	object_init_ex(zobj, &COM_class_entry);
-	zend_hash_index_update(Z_OBJPROP_P(zobj), 0, &val, sizeof(zval *), NULL);	
-
+	php_COM_set(obj, &disp, FALSE TSRMLS_CC);
+	ZVAL_COM_EX(zobj, obj, val);
+	
 	return zobj;
 }
 
