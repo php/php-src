@@ -86,14 +86,6 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 						 r->connection->bucket_alloc);
 	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
 
-	/* Add a Flush bucket to the end of this brigade, so that
-	 * the transient buckets above are more likely to make it out
-	 * the end of the filter instead of having to be copied into
-	 * someone's setaside.
-	 */
-	bucket = apr_bucket_flush_create(r->connection->bucket_alloc);
-	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
-	
 	if (ap_pass_brigade(r->output_filters, brigade) != APR_SUCCESS) {
 		php_handle_aborted_connection();
 	}
