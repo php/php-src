@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
    | Authors: Preston L. Bannister <pbannister@php.net>                   |
    |          Sander Roobol <sander@php.net>                              |
+   |          Marcus Boerger <helly@php.net>                              |
    | (based on version by: Stig Bakken <ssb@fast.no>)                     |
    | (based on the PHP 3 test framework by Rasmus Lerdorf)                |
    +----------------------------------------------------------------------+
@@ -324,6 +325,12 @@ TEST $file
     putenv("CONTENT_TYPE=");
     putenv("CONTENT_LENGTH=");
     
+	// unlink old test results	
+	@unlink(ereg_replace('\.phpt$','.diff',$file));
+	@unlink(ereg_replace('\.phpt$','.log',$file));
+	@unlink(ereg_replace('\.phpt$','.exp',$file));
+	@unlink(ereg_replace('\.phpt$','.out',$file));
+
     // Check if test should be skipped.
 	if (array_key_exists('SKIPIF', $section_text)) {
 	    if (trim($section_text['SKIPIF'])) {
@@ -397,12 +404,6 @@ COMMAND $cmd
     @unlink($tmp_post);
     @unlink($tmp_file);
     
-	// unlink old test results	
-	@unlink(ereg_replace('\.phpt$','.diff',$file));
-	@unlink(ereg_replace('\.phpt$','.log',$file));
-	@unlink(ereg_replace('\.phpt$','.exp',$file));
-	@unlink(ereg_replace('\.phpt$','.out',$file));
-
     // Does the output match what is expected?
     
     $output = trim($out);
