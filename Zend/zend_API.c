@@ -1189,7 +1189,7 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 
 
 /* registers all functions in *library_functions in the function hash */
-int zend_register_functions(zend_class_entry *scope, zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC)
+ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC)
 {
 	zend_function_entry *ptr = functions;
 	zend_function function, *reg_function;
@@ -1311,7 +1311,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 /* count=-1 means erase all functions, otherwise, 
  * erase the first count functions
  */
-void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC)
+ZEND_API void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC)
 {
 	zend_function_entry *ptr = functions;
 	int i=0;
