@@ -544,7 +544,7 @@ static void php_cgi_usage(char *argv0)
 	php_printf("Usage: %s [-q] [-h] [-s] [-v] [-i] [-f <file>]\n"
 			   "       %s <file> [args...]\n"
 			   "  -a               Run interactively\n"
-#if PHP_FASTCGI
+#if PHP_FASTCGI && !defined(PHP_WIN32)
 			   "  -b <address:port>|<port> Bind Path for external FASTCGI Server mode\n"
 #endif
 			   "  -C               Do not chdir to the script's directory\n"
