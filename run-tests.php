@@ -336,7 +336,7 @@ FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
 	foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $failed_test_data) {
-		$failed_test_summary .=  $failed_test_data['test_name'] . "\n";
+		$failed_test_summary .=  $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
 	}
 	$failed_test_summary .=  "=====================================================================\n";
 }
@@ -385,7 +385,7 @@ if (!getenv('NO_INTERACTION')) {
 
 		if ($sum_results['FAILED']) {
 			foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
-				$failed_tests_data .= $sep . $test_info['name'];
+				$failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
 				$failed_tests_data .= $sep . "\n\n";
@@ -591,6 +591,7 @@ TEST $file
 	putenv("CONTENT_LENGTH=");
 
 	// Check if test should be skipped.
+	$info = '';
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
 			save_text($tmp_skipif, $section_text['SKIPIF']);
@@ -609,7 +610,8 @@ TEST $file
 			if (eregi("^info", trim($output))) {
 				$reason = (ereg("^info[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^info[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
-					$tested .= " (info: $reason)";
+					$info = " (info: $reason)";
+					$tested .= $info;
 				}
 			}
 		}
@@ -731,7 +733,8 @@ COMMAND $cmd
 						'name' => $file,
 						'test_name' => $tested,
 						'output' => ereg_replace('\.phpt$','.log', $file),
-						'diff'   => ereg_replace('\.phpt$','.diff', $file)
+						'diff'   => ereg_replace('\.phpt$','.diff', $file),
+						'info'   => $info
 						);
 
 	// write .exp
