@@ -48,6 +48,12 @@ extern zend_module_entry dom_module_entry;
 #include <libxml/xpointer.h>
 #endif
 
+#ifdef PHP_WIN32
+#ifndef DOM_EXPORTS
+#define DOM_EXPORTS
+#endif
+#endif
+
 #include "xml_common.h"
 
 /* DOM API_VERSION, please bump it up, if you change anything in the API
@@ -102,4 +108,4 @@ PHP_MINIT_FUNCTION(dom);
 PHP_MSHUTDOWN_FUNCTION(dom);
 PHP_MINFO_FUNCTION(dom);
 
-#endif /* _PHP_DIR_H */
+#endif /* PHP_DOM_H */
