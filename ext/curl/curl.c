@@ -599,14 +599,15 @@ PHP_FUNCTION(curl_exec)
 	
 		if (ret != CURLE_OK) {
 			SAVE_CURL_ERROR(curl_handle, ret);
-			RETURN_FALSE;
+			RETVAL_FALSE;
 		} else {
-			RETURN_TRUE;
+			RETVAL_TRUE;
 		}
 		
 		if (fp && is_temp_file) 
 			fclose(fp);
 
+		return;
 	}
 	
 	fseek(fp, 0, SEEK_SET);
@@ -626,6 +627,9 @@ PHP_FUNCTION(curl_exec)
 		struct stat stat_sb;
 
 		if (fstat(fileno(fp), &stat_sb)) {
+			if (is_temp_file) {
+				fclose(fp);
+			}
 			RETURN_FALSE;
 		}
 				
