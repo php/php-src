@@ -1,3 +1,133 @@
+2003-03-25  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      Make sure we never pass a negative arg to emalloc
+      (once again, this API needs to be fixed, so this is just for 4.3)
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      Restrict this function to a max of 65k io vectors to avoid weird
+      overflows.  Purely an arbitrary number.  This API needs cleaning up,
+      but it would break BC and I don't want to do that in 4.3.
+
+2003-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2handler/php_functions.c:
+      Added missing initialization, which causes AP2 to crash on startup in ZTS.
+
+2003-03-25  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/scripts/pear.bat:
+      - Changing to DOS line breaks.
+
+2003-03-25  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      acinclude.m4
+      configure.in:
+      MFH: Made "--with-pear" "--disable-all"-aware. Plus some cosmetics fixes.
+
+    * acinclude.m4
+      configure.in:
+      Made "--with-pear" "--disable-all"-aware. Plus some cosmetics fixes.
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB
+
+2003-03-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php5ts.dsw:
+      Leftover.
+
+2003-03-25  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/apache2handler/apache_config.c
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFB and more. Fixed various win32 compilation issues. Also the sapi
+      is now built as php4apach2.dll since the filter is being obsoleted.
+
+    * sapi/apache2filter/php4apache2.dsp:
+      MFB: Disable building of apache2filter (obsoleted by handler).
+
+    * ext/gd/gd.dsp
+      ext/gd/gd_bundled.dsp:
+      MFB: php_gd.dll is no longer bult and the bundled library is always used.
+
+    * php.ini-dist
+      php.ini-recommended:
+      MFB
+
+    * (PHP_4_3)
+      php.ini-dist
+      php.ini-recommended:
+      php_fbsql.dll hasn't been successfully built at least from 4.1.x.
+      Related to #22859.
+
+2003-03-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/ftp/ftp.c
+      ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.h
+      ext/session/session.c
+      ext/standard/aggregation.c
+      ext/standard/basic_functions.c
+      ext/standard/credits.c
+      ext/standard/credits.h
+      ext/standard/css.c
+      ext/standard/css.h
+      ext/standard/datetime.c
+      ext/standard/datetime.h
+      ext/standard/head.c
+      ext/standard/head.h
+      ext/standard/info.c
+      ext/standard/info.h
+      ext/standard/levenshtein.c
+      main/output.c
+      main/php_variables.c
+      sapi/apache/php_apache.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache_hooks/php_apache.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/servlet/servlet.c:
+      Eliminate some TSRMLS_FETCH() calls. Tested with Win32 build of SAPI/CGI
+      and SAPI/CLI on Win32.
+
+2003-03-25  Shane Caraveo  <shane@caraveo.com>
+
+    * README.TESTING2
+      run-tests-config.php
+      run-tests2.php
+      sapi/tests/test001.phpt
+      sapi/tests/test002.phpt
+      sapi/tests/test003.phpt
+      sapi/tests/test004.phpt
+      sapi/tests/test005.phpt
+      sapi/tests/test006.phpt
+      sapi/tests/test007.phpt:
+      many new enhancements to run-tests that allow for testing cgi and other
+      sapi modules via http.  see README.TESTING2 for more details
+      several sapi tests added
+
+    * sapi/cgi/cgi_main.c:
+      use the correct flush on deactivate
+      add some code to make debugging iis 5 cgi easier
+
+2003-03-25  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2filter/php_functions.c
+      sapi/apache2handler/php_functions.c:
+      - This is not supposed to be 'pretty' name. (ref. bug #22853)
+
+2003-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #22805 (Reading of user input could stop prematurely).
+
 2003-03-24  Jani Taskinen  <sniper@iki.fi>
 
     * NEWS:

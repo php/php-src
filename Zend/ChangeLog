@@ -1,3 +1,10 @@
+2003-03-25  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Temporarily fix problem with inheriting from an internal class. This
+      might
+      - need some rework in the future (thanks to Marcus)
+
 2003-03-24  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute.c:
