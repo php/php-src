@@ -826,6 +826,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 	int module_number = PS(module_number);
 	int nrand;
 	int lensess;
+	zend_constant *c;
 
 	PS(apply_trans_sid) = PS(use_trans_sid);
 
@@ -919,7 +920,11 @@ PHPAPI void php_session_start(TSRMLS_D)
 		php_session_send_cookie(TSRMLS_C);
 	}
 
-
+	/* check if SID constant exists, if it does destroy it. */
+	if (zend_hash_find(EG(zend_constants), "sid", 4, (void **) &c) != FAILURE) {
+		zend_hash_del(EG(zend_constants), "sid", 4);
+	}
+	
 	if (define_sid) {
 		smart_str var = {0};
 
