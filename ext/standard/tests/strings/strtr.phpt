@@ -2,8 +2,9 @@
 strtr() function
 --FILE--
 <?php
-$trans = array("hello" => "hi", "hi" => "hello","a" => "A","world" => "planet");
-echo strtr("# hi all, I said hello world! #", $trans) . "\n";
+/* Do not change this test it is a REATME.TESTING example. */
+$trans = array("hello"=>"hi", "hi"=>"hello", "a"=>"A", "world"=>"planet");
+var_dump(strtr("# hi all, I said hello world! #", $trans));
 ?>
 --EXPECT--
-# hello All, I sAid hi planet! #
+string(32) "# hello All, I sAid hi planet! #"
