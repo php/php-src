@@ -1,3 +1,41 @@
+2003-07-30  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c
+      zend_hash.c:
+      - Fix problem with hash when updating same bucket with data of different
+        sizes one after another.
+      - Fix number of arguments to read_dimension.
+
+2003-07-30  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      Get rid of an opcode
+
+    * zend_compile.c
+      zend_execute.c:
+      Support overloading of $foo["bar"] += "baz"
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      Improve array overloading - support unset($foo["bar"])
+
+    * zend_compile.h:
+      Remove garbage
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.h
+      zend_modules.h:
+      Add exec_finished() callback for modules - this is the last place where the
+      modules may touch the symbol table reliably
+
 2003-07-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * tests/bug22836.phpt:
