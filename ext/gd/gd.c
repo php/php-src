@@ -1894,7 +1894,7 @@ static
 void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zval **IM, **PTSIZE, **ANGLE, **X, **Y, **C, **FONTNAME, **COL;
-	gdImagePtr im;
+	gdImagePtr im=NULL;
 	int col, x, y, l=0, i;
 	int brect[8];
 	double ptsize, angle;
