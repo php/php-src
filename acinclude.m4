@@ -1807,7 +1807,7 @@ $debug ||
   done
   rm -rf "$tmp"
 ])
-if test -z "$SED"; then
+if test -z "$ac_cv_path_sed"; then
   AC_MSG_ERROR([Could not find working sed on this system. Please install GNU sed.])
 else
   SED=$ac_cv_path_sed
