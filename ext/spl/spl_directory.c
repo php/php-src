@@ -1045,7 +1045,6 @@ SPL_METHOD(File, fgets)
 	if (spl_file_object_read(intern, 0 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
-	intern->current_line_num++;
 	RETURN_STRINGL(intern->current_line, intern->current_line_len, 1);
 } /* }}} */
 
