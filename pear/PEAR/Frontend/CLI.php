@@ -16,7 +16,7 @@
   | Author: Stig Sæther Bakken <ssb@fast.no>                             |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 require_once "PEAR.php";
@@ -39,13 +39,13 @@ class PEAR_Frontend_CLI extends PEAR
     function PEAR_Frontend_CLI()
     {
         parent::PEAR();
-
-        if (isset($_ENV['TERM'])) {
+        $term = getenv('TERM'); //(cox) $_ENV is empty for me in 4.1.1
+        if ($term) {
             // XXX can use ncurses extension here, if available
-            if (preg_match('/^(xterm|vt220)/', $_ENV['TERM'])) {
+            if (preg_match('/^(xterm|vt220|linux)/', $term)) {
                 $this->term['bold'] = sprintf("%c%c%c%c", 27, 91, 49, 109);
                 $this->term['normal']=sprintf("%c%c%c", 27, 91, 109);
-            } elseif (preg_match('/^vt100/', $_ENV['TERM'])) {
+            } elseif (preg_match('/^vt100/', $term)) {
                 $this->term['bold'] = sprintf("%c%c%c%c%c%c", 27, 91, 49, 109, 0, 0);
                 $this->term['normal']=sprintf("%c%c%c%c%c", 27, 91, 109, 0, 0);
             }
@@ -150,7 +150,7 @@ class PEAR_Frontend_CLI extends PEAR
     {
         $highest = 1;
         for ($i = 0; $i < sizeof($columns); $i++) {
-            $col = $columns[$i];
+            $col = &$columns[$i];
             if (isset($colparams[$i]) && !empty($colparams[$i]['wrap'])) {
                 $col = wordwrap($col, $colparams[$i]['wrap'], "\n", 1);
             }
@@ -265,7 +265,7 @@ class PEAR_Frontend_CLI extends PEAR
                         // add bold escape characters to $cell
                         $cell .= str_repeat(' ', $w - $l);
                     }
-                    
+
                     $rowtext .= $cellstart . $cell . $cellend;
                 }
                 $rowtext .= $rowend;
