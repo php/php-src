@@ -221,7 +221,7 @@ PHP_FUNCTION(diskfreespace)
 	RETURN_DOUBLE(bytesfree);
 }
 
-/* {{{ bool bool chown(string filename, mixed user)
+/* {{{ proto bool chown(string filename, mixed user)
    Change file owner */
 PHP_FUNCTION(chgrp)
 {
