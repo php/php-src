@@ -2764,10 +2764,10 @@ PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *met
 			add_assoc_bool(elem, "not null", 0);
 		}
 		if (!strcmp(PQgetvalue(pg_result,i,5), "t")) {
-			add_assoc_bool(elem, "default", 1);
+			add_assoc_bool(elem, "has default", 1);
 		}
 		else {
-			add_assoc_bool(elem, "default", 0);
+			add_assoc_bool(elem, "has default", 0);
 		}
 		name = PQgetvalue(pg_result,i,0);
 		add_assoc_zval(meta, name, elem);
@@ -2940,7 +2940,7 @@ static int php_pgsql_convert_match(const char *str, const char *regex , int icas
 
 /* }}} */
 
-/* {{{ php_pgsql_convert_add_quote
+/* {{{ php_pgsql_add_quote
  * add quotes around string.
  */
 static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC) 
@@ -3580,6 +3580,8 @@ PHP_FUNCTION(pg_convert)
 }
 /* }}} */
 
+#define MAX_LENGTH_OF_LONG   30
+#define MAX_LENGTH_OF_DOUBLE 60
 
 /* {{{ php_pgsql_insert
  */
@@ -3629,10 +3631,10 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 				values_len += Z_STRLEN_PP(val);
 				break;
 			case IS_LONG:
-				values_len += 30;
+				values_len += MAX_LENGTH_OF_LONG;
 				break;
 			case IS_DOUBLE:
-				values_len += 60;
+				values_len += MAX_LENGTH_OF_DOUBLE;
 				break;
 			default:
 				if (convert) {
