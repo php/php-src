@@ -2058,7 +2058,7 @@ PHP_FUNCTION(strip_tags)
 			break;
 	}
 	convert_to_string_ex(str);
-	buf = estrdup((*str)->value.str.val);
+	buf = estrndup((*str)->value.str.val,(*str)->value.str.len);
 	php_strip_tags(buf, (*str)->value.str.len, 0, allowed_tags, allowed_tags_len);
 	RETURN_STRING(buf, 0);
 }
@@ -2210,7 +2210,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0;
 
-	buf = estrdup(rbuf);
+	buf = estrndup(rbuf,len);
 	c = *buf;
 	lc = '\0';
 	p = buf;
