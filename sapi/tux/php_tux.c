@@ -176,7 +176,7 @@ static char *sapi_tux_read_cookies(void)
 
 #define BUF_SIZE 512
 #define ADD_STRING(name)										\
-	php_register_variable(name, buf, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC)
+	php_register_variable(name, buf, track_vars_array TSRMLS_CC)
 
 static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 {
@@ -187,14 +187,14 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 	
 	sprintf(buf, "Server: %s", TUXAPI_version);
 	sapi_add_header_ex(buf, strlen(buf), 1, 0 TSRMLS_CC);
-	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
-	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
-	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
-	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
-	php_register_variable("DOCUMENT_ROOT", TUXAPI_docroot, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
-	php_register_variable("SERVER_NAME", TUXAPI_servername, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
-	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
-	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
+	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array TSRMLS_CC);
+	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC);
+	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_CC);
+	php_register_variable("DOCUMENT_ROOT", TUXAPI_docroot, track_vars_array TSRMLS_CC);
+	php_register_variable("SERVER_NAME", TUXAPI_servername, track_vars_array TSRMLS_CC);
+	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
+	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
 
 	p = inet_ntoa(TG(req)->client_host);
 	/* string representation of IPs are never larger than 512 bytes */
@@ -217,7 +217,7 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 
 #define CONDADD(name, field) 							\
 	if (TG(req)->field[0]) {								\
-		php_register_variable(#name, TG(req)->field, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()C); \
+		php_register_variable(#name, TG(req)->field, track_vars_array TSRMLS_CC); \
 	}
 
 	CONDADD(HTTP_REFERER, referer);
@@ -237,7 +237,7 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 
 #if 0
 	if (TG(hc)->authorization[0])
-		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()C);
+		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_CC);
 #endif
 }
 
@@ -288,7 +288,7 @@ static void tux_module_main(TSRMLS_D)
 		return;
 	}
 	
-	php_execute_script(&file_handle TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_execute_script(&file_handle TSRMLS_CC);
 	php_request_shutdown(NULL);
 }
 
