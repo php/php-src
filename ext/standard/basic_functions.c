@@ -129,6 +129,7 @@ function_entry basic_functions[] = {
 	{"md5",					php3_md5,			NULL},
 
 	{"iptcparse",	php3_iptcparse,				NULL},
+	{"iptcembed",	php3_iptcembed,				NULL},
 	{"parse_url",	php3_parse_url,				NULL},
 
 	{"parse_str",	php3_parsestr,				NULL},
