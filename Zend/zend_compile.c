@@ -1311,36 +1311,27 @@ void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *cla
 	result->u.constant.value.str.len = length;
 }
 
-void zend_do_begin_class_member_function_call(TSRMLS_D)
+void zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC)
 {
 	unsigned char *ptr = NULL;
-	long fetch_const_op_number = get_next_op_number(CG(active_op_array));
-	zend_op *last_op = &CG(active_op_array)->opcodes[fetch_const_op_number-1];
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	if (last_op->opcode == ZEND_FETCH_CONSTANT) { /* regular method call */
-		/* a tmp var is leaked here */
-		last_op->opcode = ZEND_INIT_STATIC_METHOD_CALL;
-		if(last_op->op2.op_type == IS_CONST &&
-		   (sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(last_op->op2.u.constant) &&
-		   memcmp(Z_STRVAL(last_op->op2.u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
-			zval_dtor(&last_op->op2.u.constant);
-			SET_UNUSED(last_op->op2);
+	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
+	opline->op1 = *class_name;
+	opline->op2 = *method_name;
+
+	if (opline->op2.op_type == IS_CONST) {
+		if ((sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(opline->op2.u.constant) &&
+		    memcmp(Z_STRVAL(opline->op2.u.constant), ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == 0) {
+			zval_dtor(&opline->op2.u.constant);
+			SET_UNUSED(opline->op2);
 		} else {
-			zend_lowercase_znode_if_const(&last_op->op2);
+			zend_str_tolower(opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len);
 		}
-	} else if (last_op->opcode == ZEND_FETCH_R) { /* indirect method call */
-		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-		last_op->op2.u.EA.type = ZEND_FETCH_LOCAL;
-		opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
-		opline->op1 = last_op->op2;
-		opline->op2 = last_op->result;
-	} else {
-		zend_error(E_COMPILE_ERROR, "Internal compiler error - please report!");
 	}
 
-
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
+	zend_do_extended_fcall_begin(TSRMLS_C);
 }
 
 
