@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fixed a bug in ODBC error reporting (Zeev)
+  Added PHP_Logo_GUID() and Zend_Logo_GUID() functions, that return the GUIDs
+  of the PHP and Zend logos used in phpinfo() (Zeev)
+- Added GNU Pth support (Sascha, TSRM library)
 - Removed select(), fd_set() and fd_isset() - will be reimplemented soon! (Thies)
 - Improved Win32 performance significantly by using different mutexes (Zeev,
   TSRM library)
