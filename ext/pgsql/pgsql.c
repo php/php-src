@@ -804,9 +804,13 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 		default:
 			RETURN_FALSE;
 	}
-	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-	Z_STRVAL_P(return_value) = (char *) estrdup(Z_STRVAL_P(return_value));
-	Z_TYPE_P(return_value) = IS_STRING;
+	if (Z_STRVAL_P(return_value)) {
+		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+		Z_STRVAL_P(return_value) = (char *) estrdup(Z_STRVAL_P(return_value));
+	} else {
+		Z_STRLEN_P(return_value) = 0;
+		Z_STRVAL_P(return_value) = (char *) estrdup("");
+	}
 }
 /* }}} */
 
