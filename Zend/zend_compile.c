@@ -1193,8 +1193,10 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 		zend_function tmp_zend_function;
 		zval *tmp;
 
+		zend_str_tolower(parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len);
+
 		if (zend_hash_find(CG(class_table), parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len+1, (void **) &parent_class)==FAILURE) {
-			zend_error(E_ERROR, "Undefined parent class '%s'", parent_class_name->u.constant.value.str.val);
+			zend_error(E_COMPILE_ERROR, "Undefined parent class '%s'", parent_class_name->u.constant.value.str.val);
 			return;
 		}
 		/* copy functions */
