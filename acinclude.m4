@@ -1025,7 +1025,7 @@ dnl line. if before is 1, the framework is added
 dnl to the beginning of the line.
 
 AC_DEFUN(PHP_ADD_FRAMEWORK, [
-  AC_PHP_ONCE(FRAMEWORK, $1, [
+  AC_PHP_ONCE(FRAMEWORKS, $1, [
     if test "$2"; then
       PHP_FRAMEWORKS="-framework $1 $PHP_FRAMEWORKS"
     else
@@ -1049,9 +1049,9 @@ AC_DEFUN(PHP_ADD_FRAMEWORKPATH, [
   PHP_EXPAND_PATH($1, ai_p)
   AC_PHP_ONCE(FRAMEWORKPATH, $ai_p, [
     if test "$2"; then
-      PHP_FRAMEWORKS="-F$ai_p $PHP_FRAMEWORKS"
+      PHP_FRAMEWORKPATH="-F$ai_p $PHP_FRAMEWORKPATH"
     else
-      PHP_FRAMEWORKS="$PHP_FRAMEWORKS -F$ai_p"
+      PHP_FRAMEWORKPATH="$PHP_FRAMEWORKPATH -F$ai_p"
     fi
   ])
 ])
