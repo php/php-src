@@ -1218,35 +1218,30 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length)
 }
 
 
-ZEND_API int zend_binary_strcmp(zval *s1, zval *s2)
+ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
 {
 	int retval;
 	
-	retval = memcmp(s1->value.str.val, s2->value.str.val, MIN(s1->value.str.len,s2->value.str.len));
+	retval = memcmp(s1, s2, MIN(len1, len2));
 	if (!retval) {
-		return (s1->value.str.len - s2->value.str.len);
+		return (len1 - len2);
 	} else {
 		return retval;
 	}
 }
 
 
-ZEND_API int zend_binary_strcasecmp(zval *s1, zval *s2)
+ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 {
-	const unsigned char *p1 = (const unsigned char *)s1->value.str.val;
-	const unsigned char *p2 = (const unsigned char *)s2->value.str.val;
 	unsigned char c1 = 0, c2 = 0;
-	int len1, len2;
 
-	len1 = s1->value.str.len;
-	len2 = s2->value.str.len;
 	if (len1 != len2 || !len1) {
 		return len1 - len2;
 	}
 
 	while (len1--) {
-		c1 = tolower(*p1++);
-		c2 = tolower(*p2++);
+		c1 = tolower(*s1++);
+		c2 = tolower(*s2++);
 		if (c1 != c2) {
 			break;
 		}
@@ -1254,6 +1249,20 @@ ZEND_API int zend_binary_strcasecmp(zval *s1, zval *s2)
 
 	return c1 - c2;
 }
+
+
+ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2)
+{
+	return zend_binary_strcmp(s1->value.str.val, s1->value.str.len, s2->value.str.val, s2->value.str.len);
+}
+
+
+ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2)
+{
+	return zend_binary_strcasecmp(s1->value.str.val, s1->value.str.len, s2->value.str.val, s2->value.str.len);
+}
+
+
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 {
@@ -1291,7 +1300,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 			result->type = IS_LONG;
 		}
 	} else {
-		result->value.lval = zend_binary_strcmp(s1,s2);
+		result->value.lval = zend_binary_zval_strcmp(s1, s2);
 		result->type = IS_LONG;
 	}
 	return;	

@@ -58,12 +58,19 @@ END_EXTERN_C()
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
-	
+
+
+typedef struct _zend_declarables {
+	zval ticks;
+} zend_declarables;
+
+
 struct _zend_compiler_globals {
 	zend_stack bp_stack;
 	zend_stack switch_cond_stack;
 	zend_stack foreach_copy_stack;
 	zend_stack object_stack;
+	zend_stack declare_stack;
 
 	zend_class_entry class_entry, *active_class_entry;
 
@@ -92,6 +99,8 @@ struct _zend_compiler_globals {
 	zend_bool short_tags;
 	zend_bool asp_tags;
 	zend_bool allow_call_time_pass_reference;
+
+	zend_declarables declarables;
 
 	/* For extensions support */
 	zend_bool extended_info;	/* generate extension information for debugger/profiler */
@@ -151,6 +160,8 @@ struct _zend_executor_globals {
 	HashTable *zend_constants;	/* constants table */
 
 	long precision;
+
+	int ticks_count;
 
 	/* for extended information support */
 	zend_bool no_extensions;

@@ -2245,6 +2245,14 @@ send_by_ref:
 			case ZEND_DECLARE_FUNCTION_OR_CLASS:
 				do_bind_function_or_class(opline, EG(function_table), EG(class_table), 0);
 				break;
+			case ZEND_TICKS:
+				if (++EG(ticks_count)==opline->op1.u.constant.value.lval) {
+					EG(ticks_count)=0;
+					if (zend_ticks_function) {
+						zend_ticks_function(opline->op1.u.constant.value.lval);
+					}
+				}
+				break;
 			case ZEND_EXT_NOP:
 			case ZEND_NOP:
 				break;

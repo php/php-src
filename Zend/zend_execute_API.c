@@ -114,6 +114,8 @@ void init_executor(CLS_D ELS_DC)
 	EG(suspend_garbage) = 0;
 
 	zend_hash_init(&EG(imported_files), 5, NULL, NULL, 0);
+
+	EG(ticks_count) = 0;
 }
 
 

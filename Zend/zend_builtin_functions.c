@@ -196,7 +196,7 @@ ZEND_FUNCTION(strcmp)
 	}
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
-	RETURN_LONG(zend_binary_strcmp(*s1,*s2));
+	RETURN_LONG(zend_binary_zval_strcmp(*s1,*s2));
 }
 /* }}} */
 
@@ -211,7 +211,7 @@ ZEND_FUNCTION(strcasecmp)
 	}
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
-	RETURN_LONG(zend_binary_strcasecmp(*s1, *s2));
+	RETURN_LONG(zend_binary_zval_strcasecmp(*s1, *s2));
 }
 /* }}} */
 

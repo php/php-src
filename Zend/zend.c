@@ -48,6 +48,7 @@ ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
+void (*zend_ticks_function)(int ticks);
 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
@@ -318,6 +319,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	zend_block_interruptions = utility_functions->block_interruptions;
 	zend_unblock_interruptions = utility_functions->unblock_interruptions;
 	zend_get_ini_entry = utility_functions->get_ini_entry;
+	zend_ticks_function = utility_functions->ticks_function;
 
 	zend_compile_files = compile_files;
 	zend_execute = execute;
