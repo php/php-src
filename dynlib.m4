@@ -35,7 +35,7 @@ AC_DEFUN(LIB_BUILD,[
   lib_makefile="$1/libs.mk"
   lib_target=""
   
-  test -d $1 || $php_shtool mkdir -p $1
+  $php_shtool mkdir -p $1
   cat >$lib_makefile<<EOF
 LTLIBRARY_OBJECTS = \$(LTLIBRARY_SOURCES:.c=.lo)
 LTLIBRARY_SHARED_OBJECTS = \$(LTLIBRARY_OBJECTS:.lo=.slo)
