@@ -226,7 +226,14 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op TSRM
 	opline_ptr->op1 = *varname;
 	*result = opline_ptr->result;
 	SET_UNUSED(opline_ptr->op2);
-	opline_ptr->op2.u.fetch_type = ZEND_FETCH_LOCAL;
+
+	if (varname->op_type == IS_CONST
+		&& varname->u.constant.type == IS_STRING
+		&& zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
+		opline_ptr->op2.u.fetch_type = ZEND_FETCH_GLOBAL;
+	} else {
+		opline_ptr->op2.u.fetch_type = ZEND_FETCH_LOCAL;
+	}
 
 	if (bp) {
 		zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
@@ -2366,6 +2373,7 @@ void zend_do_extended_fcall_end(TSRMLS_D)
 	SET_UNUSED(opline->op2);
 }
 
+
 void zend_do_ticks(TSRMLS_D)
 {
 	if (CG(declarables).ticks.value.lval) {
@@ -2376,6 +2384,12 @@ void zend_do_ticks(TSRMLS_D)
 		opline->op1.op_type = IS_CONST;
 		SET_UNUSED(opline->op2);
 	}
+}
+
+
+int zend_register_auto_global(char *name, uint name_len TSRMLS_DC)
+{
+	return zend_hash_add_empty_element(CG(auto_globals), name, name_len+1);
 }
 
 
