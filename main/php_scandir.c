@@ -42,7 +42,9 @@
 #endif  
 
 #include <stdlib.h>
+#ifndef NETWARE
 #include <search.h>
+#endif
 
 #endif /* HAVE_SCANDIR */
 
