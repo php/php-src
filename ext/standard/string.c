@@ -857,30 +857,45 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 }
 /* }}} */
 
-/* {{{ proto string implode(string glue, array pieces)
+/* {{{ proto string implode([string glue,] array pieces)
    Joins array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
-	zval **arg1, **arg2, *delim, *arr;
-	
-	if (ZEND_NUM_ARGS() != 2 || 
-		zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	zval **arg1 = NULL, **arg2 = NULL, *delim, *arr;
+	int argc = ZEND_NUM_ARGS();
+
+	if (argc < 1 || argc > 2 ||
+		zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	if (Z_TYPE_PP(arg1) == IS_ARRAY) {
+	if (argc == 1) {
+		MAKE_STD_ZVAL(delim);
+#define _IMPL_EMPTY ""
+		ZVAL_STRINGL(delim, _IMPL_EMPTY, sizeof(_IMPL_EMPTY) - 1, 0);
+
+		if (Z_TYPE_PP(arg1) != IS_ARRAY) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument to implode must be an array");
+			return;
+		}
+
 		SEPARATE_ZVAL(arg1);
 		arr = *arg1;
-		convert_to_string_ex(arg2);
-		delim = *arg2;
-	} else if (Z_TYPE_PP(arg2) == IS_ARRAY) {
-		SEPARATE_ZVAL(arg2)
-		arr = *arg2;
-		convert_to_string_ex(arg1);
-		delim = *arg1;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad arguments.");
-		return;
+		if (Z_TYPE_PP(arg1) == IS_ARRAY) {
+			SEPARATE_ZVAL(arg1);
+			arr = *arg1;
+			convert_to_string_ex(arg2);
+			delim = *arg2;
+		} else if (Z_TYPE_PP(arg2) == IS_ARRAY) {
+			SEPARATE_ZVAL(arg2);
+			arr = *arg2;
+			convert_to_string_ex(arg1);
+			delim = *arg1;
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad arguments.");
+			return;
+		}
 	}
 
 	php_implode(delim, arr, return_value);
