@@ -837,11 +837,12 @@ session.serialize_handler = php
 
 ; Define the probability that the 'garbage collection' process is started
 ; on every session initialization.
-; The probability is calculated by using gc_probability/gc_dividend,
-; e.g. 1/100 means 1%.
+; The probability is calculated by using gc_probability/gc_divisor,
+; e.g. 1/100 means there is a 1% chance that the GC process starts
+; on each request.
 
 session.gc_probability = 1
-session.gc_dividend    = 1000
+session.gc_divisor     = 1000
 
 ; After this number of seconds, stored data will be seen as 'garbage' and
 ; cleaned up by the garbage collection process.
