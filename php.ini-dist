@@ -151,6 +151,7 @@ safe_mode_exec_dir =
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
 ; or per-virtualhost web server configuration file.
+; Note: Used only when safe_mode is on.
 ;
 ;open_basedir =
 
