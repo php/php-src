@@ -297,15 +297,15 @@ function_entry basic_functions[] = {
 	PHP_FE(in_array,					NULL)
 	PHP_FE(extract,						NULL)
 	PHP_FE(compact,						NULL)
-	PHP_FE(push,						first_arg_force_ref)
-	PHP_FE(pop,							first_arg_force_ref)
-	PHP_FE(shift,						first_arg_force_ref)
-	PHP_FE(unshift,						first_arg_force_ref)
-	PHP_FE(splice,						first_arg_force_ref)
-	PHP_FE(slice,						NULL)
+	PHP_FE(array_push,					first_arg_force_ref)
+	PHP_FE(array_pop,					first_arg_force_ref)
+	PHP_FE(array_shift,					first_arg_force_ref)
+	PHP_FE(array_unshift,				first_arg_force_ref)
+	PHP_FE(array_splice,				first_arg_force_ref)
+	PHP_FE(array_slice,					NULL)
 	PHP_FE(array_merge,					NULL)
-	PHP_FE(keys,						NULL)
-	PHP_FE(values,						NULL)
+	PHP_FE(array_keys,					NULL)
+	PHP_FE(array_values,				NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -2520,9 +2520,9 @@ HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
 /* }}} */
 
 
-/* {{{ proto int push(array stack, mixed var [, ...])
+/* {{{ proto int array_push(array stack, mixed var [, ...])
    Pushes elements onto the end of the array */
-PHP_FUNCTION(push)
+PHP_FUNCTION(array_push)
 {
 	zval	   **args,		/* Function arguments array */
 				*stack,		/* Input array */
@@ -2610,27 +2610,27 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 /* }}} */
 
 
-/* {{{ proto mixed pop(array stack)
+/* {{{ proto mixed array_pop(array stack)
    Pops an element off the end of the array */
-PHP_FUNCTION(pop)
+PHP_FUNCTION(array_pop)
 {
 	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
 
-/* {{{ proto mixed shift(array stack)
+/* {{{ proto mixed array_shift(array stack)
    Pops an element off the beginning of the array */
-PHP_FUNCTION(shift)
+PHP_FUNCTION(array_shift)
 {
 	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
 
-/* {{{ proto int unshift(array stack, mixed var [, ...])
+/* {{{ proto int array_unshift(array stack, mixed var [, ...])
    Pushes elements onto the beginning of the array */
-PHP_FUNCTION(unshift)
+PHP_FUNCTION(array_unshift)
 {
 	zval	   **args,		/* Function arguments array */
 				*stack;		/* Input stack */
@@ -2672,10 +2672,10 @@ PHP_FUNCTION(unshift)
 /* }}} */
 
 
-/* {{{ proto array splice(array input, int offset [, int length, mixed var [, ...] ])
+/* {{{ proto array array_splice(array input, int offset [, int length, mixed var [, ...] ])
    Removes the elements designated by offset and length and replace them with
    var's if supplied */
-PHP_FUNCTION(splice)
+PHP_FUNCTION(array_splice)
 {
 	zval	   **args,				/* Function arguments array */
 				*array;				/* Input array */
@@ -2735,9 +2735,9 @@ PHP_FUNCTION(splice)
 /* }}} */
 
 
-/* {{{ proto array slice(array input, int offset [, int length])
+/* {{{ proto array array_slice(array input, int offset [, int length])
    Returns elements specified by offset and length */
-PHP_FUNCTION(slice)
+PHP_FUNCTION(array_slice)
 {
 	zval		*input,			/* Input array */
 				*offset,		/* Offset to get elements from */
@@ -2888,9 +2888,9 @@ PHP_FUNCTION(array_merge)
 /* }}} */
 
 
-/* {{{ proto array keys(array input)
+/* {{{ proto array array_keys(array input)
    Return just the keys from the input array */
-PHP_FUNCTION(keys)
+PHP_FUNCTION(array_keys)
 {
 	zval		*input,			/* Input array */
 			   **entry,			/* An entry in the input array */
@@ -2941,9 +2941,9 @@ PHP_FUNCTION(keys)
 /* }}} */
 
 
-/* {{{ proto array values(array input)
+/* {{{ proto array array_values(array input)
    Return just the values from the input array */
-PHP_FUNCTION(values)
+PHP_FUNCTION(array_values)
 {
 	zval		*input,		/* Input array */
 			   **entry;		/* An entry in the input array */

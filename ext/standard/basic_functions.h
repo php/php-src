@@ -122,15 +122,15 @@ PHP_FUNCTION(function_exists);
 PHP_FUNCTION(in_array);
 PHP_FUNCTION(extract);
 PHP_FUNCTION(compact);
-PHP_FUNCTION(push);
-PHP_FUNCTION(pop);
-PHP_FUNCTION(shift);
-PHP_FUNCTION(unshift);
-PHP_FUNCTION(splice);
-PHP_FUNCTION(slice);
+PHP_FUNCTION(array_push);
+PHP_FUNCTION(array_pop);
+PHP_FUNCTION(array_shift);
+PHP_FUNCTION(array_unshift);
+PHP_FUNCTION(array_splice);
+PHP_FUNCTION(array_slice);
 PHP_FUNCTION(array_merge);
-PHP_FUNCTION(keys);
-PHP_FUNCTION(values);
+PHP_FUNCTION(array_keys);
+PHP_FUNCTION(array_values);
 
 #if HAVE_PUTENV
 typedef struct {
