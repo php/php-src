@@ -2943,7 +2943,7 @@ PHP_FUNCTION(domxml_doc_implementation)
    Returns root node of document */
 PHP_FUNCTION(domxml_doc_document_element)
 {
-	zval *id, *rv;
+	zval *id, *rv = NULL;
 	xmlDoc *docp;
 	xmlNode *root;
 	int ret;
