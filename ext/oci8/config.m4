@@ -7,7 +7,12 @@ AC_DEFUN(AC_ORACLE_VERSION,[
 	ORACLE_VERSION=`grep '"ocommon"' $ORACLEINST_TOP/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$ORACLE_VERSION" && ORACLE_VERSION=7.3
   else
-    ORACLE_VERSION=8.0
+    if test -f "$ORACLEINST_TOP/lib/libclntsh.so.8.0"
+    then
+	ORACLE_VERSION=8.1
+    else
+	ORACLE_VERSION=8.0
+    fi
   fi
   AC_MSG_RESULT($ORACLE_VERSION)
 ])
@@ -143,6 +148,10 @@ AC_ARG_WITH(oci8,
     	fi
         AC_DEFINE(HAVE_OCI8)
     	;;
+      8.1)
+	ORACLE_SHLIBS="-lclntsh $ORA_SYSLIB"
+	AC_DEFINE(HAVE_OCI8)
+	;;
       *)
   	ORACLE_SHLIBS=
   	;;
