@@ -464,6 +464,10 @@ enable_dl = On
 ; **You CAN safely turn this off for IIS, in fact, you MUST.**
 ; cgi.force_redirect = 1
 
+; if cgi.nph is enabled it will force cgi to always sent Status: 200 with
+; every request.
+; cgi.nph = 1
+
 ; if cgi.force_redirect is turned on, and you are not running under Apache or Netscape 
 ; (iPlanet) web servers, you MAY need to set an environment variable name that PHP
 ; will look for to know it is OK to continue execution.  Setting this variable MAY
