@@ -13,6 +13,7 @@
 #endif
 
 #include "php_virtual_cwd.h"
+#include "php_reentrancy.h" /* for strtok_r */
 
 #define VIRTUAL_CWD_DEBUG 0
 
