@@ -81,6 +81,14 @@ documentation
     * Add developer documentation.
     * Add detailed documentation for Java extension.
 
+ext/bz2
+-------
+    * Add ini setting for decompression buffer size. The default 4k is to small
+      for big files and takes ages to decompress. However, 40k which perform
+      quite good with big files may be to much under certain environments as
+      default setting. There should be consideren different default sizes for
+      different SAPIS (e.g. apache and cli).
+
 ext/curl
 --------
     * Have a warning scheme for when people use unsupported features.
