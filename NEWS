@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Added --version option to php-config (Stig)
 - Improved support for thttpd-2.21b by incorporating patches for all known
   bugs (Sascha)
 - Added ircg_get_username, a roomkey argument to ircg_join, error fetching
