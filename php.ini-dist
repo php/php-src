@@ -44,6 +44,18 @@ output_buffering	= Off	; Output buffering allows you to send header lines (inclu
 							; You can enable output buffering by in runtime by calling the output
 							; buffering functions, or enable output buffering for all files
 							; by setting this directive to On.
+allow_call_time_pass_reference	= On	; whether to enable the ability to force arguments to be 
+										; passed by reference at function-call time.  This method
+										; is deprecated, and is likely to be unsupported in future
+										; versions of PHP/Zend.  The encouraged method of specifying
+										; which arguments should be passed by reference is in the
+										; function declaration.  You're encouraged to try and
+										; turn this option Off, and make sure your scripts work
+										; properly with it, to ensure they will work with future
+										; versions of the language (you will receive a warning
+										; each time you use this feature, and the argument will
+										; be passed by value instead of by reference).
+
 ; Safe Mode
 safe_mode		=	Off
 safe_mode_exec_dir	=

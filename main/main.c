@@ -187,6 +187,7 @@ static PHP_INI_MH(OnUpdateErrorReporting)
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("short_open_tag",	"1",		PHP_INI_ALL,		OnUpdateBool,		short_tags,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("asp_tags",			"0",		PHP_INI_ALL,		OnUpdateBool,		asp_tags,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference",	"1",	PHP_INI_ALL,	OnUpdateBool,	allow_call_time_pass_reference, php_core_globals, core_globals)
 	PHP_INI_ENTRY("precision",			"14",		PHP_INI_ALL,		OnSetPrecision)
 	STD_PHP_INI_BOOLEAN("output_buffering",	"0",	PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	output_buffering,	php_core_globals,	core_globals)
 
@@ -985,8 +986,9 @@ int php_module_startup(sapi_module_struct *sf)
 
 	REGISTER_INI_ENTRIES();
 
-	zuv.short_tags = (unsigned char) PG(short_tags);
-	zuv.asp_tags = (unsigned char) PG(asp_tags);
+	zuv.short_tags = (zend_bool) PG(short_tags);
+	zuv.asp_tags = (zend_bool) PG(asp_tags);
+	zuv.allow_call_time_pass_reference = PG(allow_call_time_pass_reference);
 	zuv.import_use_extension = ".php";
 	zend_set_utility_values(&zuv);
 	php_startup_SAPI_content_types();
