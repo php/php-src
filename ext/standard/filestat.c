@@ -539,7 +539,7 @@ PHP_FUNCTION(clearstatcache)
 }
 /* }}} */
 
-#define IS_LINK_OPERATION() (type == 8 /* filetype */ || type == 14 /* is_link */ || type == 16 /* lstat */)
+#define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
 #define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
 
 /* {{{ php_stat
@@ -569,22 +569,24 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
 #endif
 		if (VCWD_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
-			if (!IS_LINK_OPERATION() && (!IS_EXISTS_CHECK(type) || errno != ENOENT)) { /* fileexists() test must print no error */
+			if (!IS_LINK_OPERATION(type) && (!IS_EXISTS_CHECK(type) || errno != ENOENT)) { /* fileexists() test must print no error */
 				php_error(E_WARNING, "stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			efree(BG(CurrentStatFile));
 			BG(CurrentStatFile) = NULL;
-			if (!IS_LINK_OPERATION()) { /* Don't require success for link operation */
+			if (!IS_LINK_OPERATION(type)) { /* Don't require success for link operation */
 				RETURN_FALSE;
 			}
 		}
 	}
 
 #if HAVE_SYMLINK
-	if (IS_LINK_OPERATION() && !BG(lsb).st_mode) {
+	if (IS_LINK_OPERATION(type) && !BG(lsb).st_mode) {
 		/* do lstat if the buffer is empty */
 		if (VCWD_LSTAT(filename, &BG(lsb)) == -1) {
-			php_error(E_WARNING, "lstat failed for %s (errno=%d - %s)", filename, errno, strerror(errno));
+			if (!IS_EXISTS_CHECK(type) || errno != ENOENT) { /* fileexists() test must print no error */
+				php_error(E_WARNING, "lstat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
+			}
 			RETURN_FALSE;
 		}
 	}
@@ -658,26 +660,26 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
 		if (getuid()==0) {
-			RETURN_LONG(1); /* root */
+			RETURN_TRUE; /* root */
 		}
-		RETURN_LONG((BG(sb).st_mode & wmask) != 0);
+		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
 	case FS_IS_R:
 		if (getuid()==0) {
-			RETURN_LONG(1); /* root */
+			RETURN_TRUE; /* root */
 		}
-		RETURN_LONG((BG(sb).st_mode&rmask)!=0);
+		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
 	case FS_IS_X:
 		if (getuid()==0) {
 			xmask = S_IXROOT; /* root */
 		}
-		RETURN_LONG((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
+		RETURN_BOOL((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case FS_IS_FILE:
-		RETURN_LONG(S_ISREG(BG(sb).st_mode));
+		RETURN_BOOL(S_ISREG(BG(sb).st_mode));
 	case FS_IS_DIR:
-		RETURN_LONG(S_ISDIR(BG(sb).st_mode));
+		RETURN_BOOL(S_ISDIR(BG(sb).st_mode));
 	case FS_IS_LINK:
 #if HAVE_SYMLINK
-		RETURN_LONG(S_ISLNK(BG(lsb).st_mode));
+		RETURN_BOOL(S_ISLNK(BG(lsb).st_mode));
 #else
 		RETURN_FALSE;
 #endif
@@ -812,32 +814,32 @@ FileFunction(PHP_FN(filectime), FS_CTIME)
 FileFunction(PHP_FN(filetype), FS_TYPE)
 /* }}} */
 
-/* {{{ proto int is_writable(string filename)
+/* {{{ proto bool is_writable(string filename)
    Returns true if file can be written */
 FileFunction(PHP_FN(is_writable), FS_IS_W)
 /* }}} */
 
-/* {{{ proto int is_readable(string filename)
+/* {{{ proto bool is_readable(string filename)
    Returns true if file can be read */
 FileFunction(PHP_FN(is_readable), FS_IS_R)
 /* }}} */
 
-/* {{{ proto int is_executable(string filename)
+/* {{{ proto bool is_executable(string filename)
    Returns true if file is executable */
 FileFunction(PHP_FN(is_executable), FS_IS_X)
 /* }}} */
 
-/* {{{ proto int is_file(string filename)
+/* {{{ proto bool is_file(string filename)
    Returns true if file is a regular file */
 FileFunction(PHP_FN(is_file), FS_IS_FILE)
 /* }}} */
 
-/* {{{ proto int is_dir(string filename)
+/* {{{ proto bool is_dir(string filename)
    Returns true if file is directory */
 FileFunction(PHP_FN(is_dir), FS_IS_DIR)
 /* }}} */
 
-/* {{{ proto int is_link(string filename)
+/* {{{ proto bool is_link(string filename)
    Returns true if file is symbolic link */
 FileFunction(PHP_FN(is_link), FS_IS_LINK)
 /* }}} */
