@@ -2224,7 +2224,7 @@ void delete_sdl(void *handle)
 {
 	sdlPtr tmp = *((sdlPtr*)handle);
 
-	xmlFreeDoc(tmp->doc);
+	zend_hash_destroy(&tmp->docs);
 	if (tmp->source) {
 		free(tmp->source);
 	}

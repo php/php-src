@@ -124,7 +124,7 @@ static int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType,
 			smart_str_0(&key);
 		}
 
-		zend_hash_add(ht, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
+		zend_hash_update(ht, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
 		cur_type = (*ptr);
 		create_encoder((*sdl), cur_type, ns->children->content, name->children->content);
 		smart_str_free(&key);
@@ -783,7 +783,7 @@ static int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, 
 			smart_str_0(&key);
 		}
 
-		zend_hash_add(ht, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
+		zend_hash_update(ht, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
 		cur_type = (*ptr);
 		create_encoder((*sdl), cur_type, ns->children->content, name->children->content);
 		smart_str_free(&key);
@@ -896,7 +896,7 @@ static int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTy
 		}
 
 		smart_str_0(&key);
-		zend_hash_add(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&tmp);
+		zend_hash_update(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 		cur_type = (*tmp);
 /*
 		create_encoder((*sdl), cur_type, ns->children->content, name->children->content);
