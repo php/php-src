@@ -111,7 +111,13 @@ zend_module_entry domxml_module_entry = {
 ZEND_GET_MODULE(domxml)
 #endif
 
-void _free_node(xmlNode *tmp) {
+static void php_free_xml_doc(zend_rsrc_list_entry *rsrc)
+{
+	xmlDoc *doc = (xmlDoc *)rsrc->ptr;
+	xmlFreeDoc(doc);
+}
+
+void _free_node(zend_rsrc_list_entry *rsrc) {
 /*fprintf(stderr, "Freeing node: %s\n", tmp->name);*/
 }
 
@@ -127,12 +133,12 @@ PHP_MINIT_FUNCTION(domxml)
   domxmltestnode_class_startup();
 #endif
 
-	le_domxmldocp = register_list_destructors(xmlFreeDoc, NULL);
+	le_domxmldocp = register_list_destructors(xmlFreeDoc, NULL, "domxml document");
 	/* Freeing the document contains freeing the complete tree.
 	   Therefore nodes, attributes etc. may not be freed seperately.
 	*/
-	le_domxmlnodep = register_list_destructors(_free_node, NULL);
-	le_domxmlattrp = register_list_destructors(NULL, NULL);
+	le_domxmlnodep = register_list_destructors(_free_node, NULL, "domxml node");
+	le_domxmlattrp = register_list_destructors(NULL, NULL, "domxml attribute");
 /*	le_domxmlnsp = register_list_destructors(NULL, NULL); */
 
 	INIT_CLASS_ENTRY(domxmldoc_class_entry, "DomDocument", php_domxmldoc_class_functions);

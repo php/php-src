@@ -132,8 +132,9 @@ static int _clean_invalid_results(list_entry *le)
 }
 
 
-static void _free_sybase_result(sybase_result *result)
+static void _free_sybase_result(zend_rsrc_list_entry *rsrc)
 {
+	sybase_result *result = (sybase_result *)rsrc->ptr;
 	int i,j;
 	
 	if (result->data) {
@@ -157,8 +158,9 @@ static void _free_sybase_result(sybase_result *result)
 }
 
 
-static void _close_sybase_link(sybase_link *sybase_ptr)
+static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
 {
+	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
 	ELS_FETCH();
 
 	sybase_ptr->valid = 0;
@@ -177,8 +179,9 @@ static void _close_sybase_link(sybase_link *sybase_ptr)
 }
 
 
-static void _close_sybase_plink(sybase_link *sybase_ptr)
+static void _close_sybase_plink(zend_rsrc_list_entry *rsrc)
 {
+	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
 	dbclose(sybase_ptr->link);
 	dbloginfree(sybase_ptr->login);
 	free(sybase_ptr);
@@ -220,9 +223,9 @@ PHP_MINIT_FUNCTION(sybase)
 	}
 	
 	php_sybase_module.num_persistent=0;
-	php_sybase_module.le_link = register_list_destructors(_close_sybase_link,NULL);
-	php_sybase_module.le_plink = register_list_destructors(NULL,_close_sybase_plink);
-	php_sybase_module.le_result = register_list_destructors(_free_sybase_result,NULL);
+	php_sybase_module.le_link = register_list_destructors(_close_sybase_link,NULL, "sybase-db link");
+	php_sybase_module.le_plink = register_list_destructors(NULL,_close_sybase_plink, "sybase-db link persistent");
+	php_sybase_module.le_result = register_list_destructors(_free_sybase_result,NULL, "sybase-db result");
 	
 	return SUCCESS;
 }

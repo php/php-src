@@ -32,7 +32,7 @@
 #include "php_sablot.h"
 
 /* Functions related to PHP's list handling */
-static void _php_sablot_free_processor(php_sablot *);
+static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc);
 
 /* SAX Handlers */
 static void _php_sablot_handler_pair(php_sablot *, zval **, zval **, zval **);
@@ -140,7 +140,7 @@ ZEND_GET_MODULE(sablot)
 PHP_MINIT_FUNCTION(sablot)
 {
 	SABLOTLS_FETCH();
-	SABLOTG(le_sablot) = register_list_destructors(_php_sablot_free_processor, NULL);
+	SABLOTG(le_sablot) = register_list_destructors(_php_sablot_free_processor, NULL, "sablotron");
 	return SUCCESS;
 }
 
@@ -1058,8 +1058,9 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
 
 /* {{{ _php_sablot_free_processor()
    Free a Sablot handle */
-static void _php_sablot_free_processor(php_sablot *handle)
+static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc)
 {
+	php_sablot *handle = (php_sablot *)rsrc->ptr;
 	if (handle->p) {
 		SablotUnregHandler(handle->p, HLR_MESSAGE, NULL, NULL);
 		SablotUnregHandler(handle->p, HLR_SAX, NULL, NULL);

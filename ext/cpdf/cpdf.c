@@ -162,19 +162,20 @@ zend_module_entry cpdf_module_entry = {
 ZEND_GET_MODULE(cpdf)
 #endif
 
-static void _free_outline(CPDFoutlineEntry *outline)
+static void _free_outline(zend_rsrc_list_entry *rsrc)
 {
 }
 
-static void _free_doc(CPDFdoc *pdf)
+static void _free_doc(zend_rsrc_list_entry *rsrc)
 {
+	CPDFdoc *pdf = (CPDFdoc *)rsrc->ptr;
 	cpdf_close(pdf);
 }
 
 PHP_MINIT_FUNCTION(cpdf)
 {
-	CPDF_GLOBAL(le_outline) = register_list_destructors(_free_outline, NULL);
-	CPDF_GLOBAL(le_cpdf) = register_list_destructors(_free_doc, NULL);
+	CPDF_GLOBAL(le_outline) = register_list_destructors(_free_outline, NULL,"cpdf outline");
+	CPDF_GLOBAL(le_cpdf) = register_list_destructors(_free_doc, NULL,"cpdf");
 	return SUCCESS;
 }
 

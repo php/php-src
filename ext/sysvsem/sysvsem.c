@@ -87,8 +87,9 @@ THREAD_LS sysvsem_module php_sysvsem_module;
 #define SYSVSEM_SETVAL	2
 
 
-static void release_sysvsem_sem(sysvsem_sem *sem_ptr)
+static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc)
 {
+	sysvsem_sem *sem_ptr = (sysvsem_sem *)rsrc->ptr;
 	struct sembuf sop[2];
 
 	/* Decrement the usage count. */
@@ -116,7 +117,7 @@ static void release_sysvsem_sem(sysvsem_sem *sem_ptr)
 
 PHP_MINIT_FUNCTION(sysvsem)
 {
-	php_sysvsem_module.le_sem = register_list_destructors(release_sysvsem_sem, NULL);
+	php_sysvsem_module.le_sem = register_list_destructors(release_sysvsem_sem, NULL, "sysvsem");
 
 	return SUCCESS;
 }

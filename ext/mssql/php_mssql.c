@@ -133,8 +133,9 @@ static int _clean_invalid_results(list_entry *le)
 	return 0;
 }
 
-static void _free_mssql_result(mssql_result *result)
+static void _free_mssql_result(zend_rsrc_list_entry *rsrc)
 {
+	mssql_result *result = (mssql_result *)rsrc->ptr;
 	int i,j;
 
 	if (result->data) {
@@ -168,8 +169,9 @@ static void php_mssql_set_default_link(int id)
 	zend_list_addref(id);
 }
 
-static void _close_mssql_link(mssql_link *mssql_ptr)
+static void _close_mssql_link(zend_rsrc_list_entry *rsrc)
 {
+	mssql_link *mssql_ptr = (mssql_link *)rsrc->ptr;
 	MSSQLLS_FETCH();
 	ELS_FETCH();
 
@@ -182,8 +184,9 @@ static void _close_mssql_link(mssql_link *mssql_ptr)
 }
 
 
-static void _close_mssql_plink(mssql_link *mssql_ptr)
+static void _close_mssql_plink(zend_rsrc_list_entry *rsrc)
 {
+	mssql_link *mssql_ptr = (mssql_link *)rsrc->ptr;
 	MSSQLLS_FETCH();
 
 	dbclose(mssql_ptr->link);
@@ -217,9 +220,9 @@ PHP_MINIT_FUNCTION(mssql)
 #endif
 
 	REGISTER_INI_ENTRIES();
-	le_result = register_list_destructors(_free_mssql_result, NULL);
-	le_link = register_list_destructors(_close_mssql_link, NULL);
-	le_plink = register_list_destructors(NULL, _close_mssql_plink);
+	le_result = register_list_destructors(_free_mssql_result, NULL, "mssql result");
+	le_link = register_list_destructors(_close_mssql_link, NULL, "mssql link");
+	le_plink = register_list_destructors(NULL, _close_mssql_plink, "mssql link persistent");
 	mssql_module_entry.type = type;
 
 	if (dbinit()==FAIL) {

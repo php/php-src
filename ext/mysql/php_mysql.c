@@ -164,8 +164,9 @@ void timeout(int sig);
  * This wrapper is required since mysql_free_result() returns an integer, and
  * thus, cannot be used directly
  */
-static void _free_mysql_result(MYSQL_RES *mysql_result)
+static void _free_mysql_result(zend_rsrc_list_entry *rsrc)
 {
+	MYSQL_RES *mysql_result = (MYSQL_RES *)rsrc->ptr;
 	mysql_free_result(mysql_result);
 }
 
@@ -182,8 +183,9 @@ static void php_mysql_set_default_link(int id)
 }
 
 
-static void _close_mysql_link(MYSQL *link)
+static void _close_mysql_link(zend_rsrc_list_entry *rsrc)
 {
+	MYSQL *link = (MYSQL *)rsrc->ptr;
 	void (*handler) (int);   
 	MySLS_FETCH();
 
@@ -194,8 +196,9 @@ static void _close_mysql_link(MYSQL *link)
 	MySG(num_links)--;
 }
 
-static void _close_mysql_plink(MYSQL *link)
+static void _close_mysql_plink(zend_rsrc_list_entry *rsrc)
 {
+	MYSQL *link = (MYSQL *)rsrc->ptr;
 	void (*handler) (int);
 	MySLS_FETCH();
 
@@ -258,9 +261,9 @@ PHP_MINIT_FUNCTION(mysql)
 	ZEND_INIT_MODULE_GLOBALS(mysql, php_mysql_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
-	le_result = register_list_destructors(_free_mysql_result,NULL);
-	le_link = register_list_destructors(_close_mysql_link,NULL);
-	le_plink = register_list_destructors(NULL,_close_mysql_plink);
+	le_result = register_list_destructors(_free_mysql_result,NULL,"mysql result");
+	le_link = register_list_destructors(_close_mysql_link,NULL, "mysql link");
+	le_plink = register_list_destructors(NULL,_close_mysql_plink, "mysql link persistent");
 	mysql_module_entry.type = type;
 	
 	REGISTER_LONG_CONSTANT("MYSQL_ASSOC", MYSQL_ASSOC, CONST_CS | CONST_PERSISTENT);

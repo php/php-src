@@ -52,15 +52,16 @@ zend_module_entry aspell_module_entry = {
 ZEND_GET_MODULE(aspell)
 #endif
 
-static void php_aspell_close(aspell *sc)
+static void php_aspell_close(zend_rsrc_list_entry *rsrc)
 {
+	aspell *sc = (aspell *)rsrc->ptr;
 	aspell_free(sc);
 }
 
 
 PHP_MINIT_FUNCTION(aspell)
 {
-    le_aspell = register_list_destructors(php_aspell_close,NULL);
+    le_aspell = register_list_destructors(php_aspell_close,NULL,"aspell");
 	return SUCCESS;
 
 }

@@ -114,10 +114,10 @@ static int oci_ping(oci_server *server);
 static void oci_debug(const char *format, ...);
 
 static void _oci_conn_list_dtor(oci_connection *connection);
-static void _oci_stmt_list_dtor(oci_statement *statement);
-static void _oci_descriptor_list_dtor(oci_descriptor *descriptor);
-static void _oci_server_list_dtor(oci_server *server);
-static void _oci_session_list_dtor(oci_session *session);
+static void _oci_stmt_list_dtor(zend_rsrc_list_entry *rsrc);
+static void _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc);
+static void _oci_server_list_dtor(zend_rsrc_list_entry *rsrc);
+static void _oci_session_list_dtor(zend_rsrc_list_entry *rsrc);
 
 static void _oci_column_hash_dtor(void *data);
 static void _oci_define_hash_dtor(void *data);
@@ -361,11 +361,11 @@ PHP_MINIT_FUNCTION(oci)
 	php_oci_init_globals(OCILS_C);
 #endif
 
-	le_stmt = register_list_destructors(_oci_stmt_list_dtor, NULL);
-	le_conn = register_list_destructors(_oci_conn_list_dtor, NULL);
-	le_desc = register_list_destructors(_oci_descriptor_list_dtor, NULL);
-	le_server = register_list_destructors(_oci_server_list_dtor, NULL);
-	le_session = register_list_destructors(_oci_session_list_dtor, NULL);
+	le_stmt = register_list_destructors(_oci_stmt_list_dtor, NULL, "oci8 statement");
+	le_conn = register_list_destructors(php_oci_free_conn_list, NULL, "oci8 connection");
+	le_desc = register_list_destructors(_oci_descriptor_list_dtor, NULL, "oci8 descriptor");
+	le_server = register_list_destructors(_oci_server_list_dtor, NULL, "oci8 server");
+	le_session = register_list_destructors(_oci_session_list_dtor, NULL, "oci8 session");
 
 	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
 
@@ -596,8 +596,9 @@ _oci_column_hash_dtor(void *data)
 /* {{{ _oci_stmt_list_dtor() */
  
 static void
-_oci_stmt_list_dtor(oci_statement *statement)
+_oci_stmt_list_dtor(zend_rsrc_list_entry *rsrc)
 {
+	oci_statement *statement = (oci_statement *)rsrc->ptr;
 	oci_debug("START _oci_stmt_list_dtor: id=%d last_query=\"%s\"",statement->id,SAFE_STRING(statement->last_query));
 
  	if (statement->pStmt) {
@@ -677,12 +678,20 @@ _oci_conn_list_dtor(oci_connection *connection)
 }
 
 /* }}} */
+
+static void php_oci_free_conn_list(zend_rsrc_list_entry *rsrc)
+{
+	oci_connection *conn = (oci_connection *)rsrc->ptr;
+	_oci_conn_list_dtor(conn);
+}
+
 /* {{{ _oci_descriptor_list_dtor()
  */
 
 static void 
-_oci_descriptor_list_dtor(oci_descriptor *descr)
+_oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc)
 {
+	oci_descriptor *descr = (oci_descriptor *)rsrc->ptr;
     oci_debug("START _oci_descriptor_list_dtor: %d",descr->id);
 
 	zend_list_delete(descr->conn->id);
@@ -699,8 +708,9 @@ _oci_descriptor_list_dtor(oci_descriptor *descr)
  */
 
 static void 
-_oci_server_list_dtor(oci_server *server)
+_oci_server_list_dtor(zend_rsrc_list_entry *rsrc)
 {
+	oci_server *server = (oci_server *)rsrc->ptr;
 	if (server->persistent)
 		return;
 
@@ -712,8 +722,9 @@ _oci_server_list_dtor(oci_server *server)
  */
 
 static void 
-_oci_session_list_dtor(oci_session *session)
+_oci_session_list_dtor(zend_rsrc_list_entry *rsrc)
 {
+	oci_session *session = (oci_session *)rsrc->ptr;
    	if (session->persistent)
 		return;
 

@@ -108,10 +108,6 @@ int file_globals_id;
 php_file_globals file_globals;
 #endif
 
-static void _file_fopen_dtor(FILE *pipe);
-static void _file_popen_dtor(FILE *pipe);
-static void _file_socket_dtor(int *sock);
-
 /* sharing globals is *evil* */
 static int le_fopen, le_popen, le_socket; 
 
@@ -119,15 +115,17 @@ static int le_fopen, le_popen, le_socket;
 /* }}} */
 /* {{{ Module-Stuff */
 
-static void _file_popen_dtor(FILE *pipe)
+static void _file_popen_dtor(zend_rsrc_list_entry *rsrc)
 {
+	FILE *pipe = (FILE *)rsrc->ptr;
 	FIL_FETCH();
 	FIL(pclose_ret) = pclose(pipe);
 }
 
 
-static void _file_socket_dtor(int *sock) 
+static void _file_socket_dtor(zend_rsrc_list_entry *rsrc) 
 {
+	int *sock = (int *)rsrc->ptr;
 	SOCK_FCLOSE(*sock);
 #if HAVE_SHUTDOWN
 	shutdown(*sock, 0);
@@ -136,8 +134,9 @@ static void _file_socket_dtor(int *sock)
 }
 
 
-static void _file_fopen_dtor(FILE *fp) 
+static void _file_fopen_dtor(zend_rsrc_list_entry *rsrc) 
 {
+	FILE *fp = (FILE *)rsrc->ptr;
 	fclose(fp);
 }
 
@@ -169,9 +168,9 @@ static void php_file_init_globals(php_file_globals *file_globals)
 
 PHP_MINIT_FUNCTION(file)
 {
-	le_fopen = register_list_destructors(_file_fopen_dtor, NULL);
-	le_popen = register_list_destructors(_file_popen_dtor, NULL);
-	le_socket = register_list_destructors(_file_socket_dtor, NULL);
+	le_fopen = register_list_destructors(_file_fopen_dtor, NULL, "file");
+	le_popen = register_list_destructors(_file_popen_dtor, NULL, "pipe");
+	le_socket = register_list_destructors(_file_socket_dtor, NULL, "socket");
 
 #ifdef ZTS
 	file_globals_id = ts_allocate_id(sizeof(php_file_globals), (ts_allocate_ctor) php_file_init_globals, NULL);

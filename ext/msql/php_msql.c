@@ -116,9 +116,9 @@ typedef struct {
 	ZEND_FETCH_RESOURCE(msql_query, m_query *, &res, -1, "mSQL result", msql_globals.le_query);	\
 	msql_result = msql_query->result
 
-static void _delete_query(void *arg)
+static void _delete_query(zend_rsrc_list_entry *rsrc)
 {
-	m_query *query = (m_query *) arg;
+	m_query *query = (m_query *)rsrc->ptr;
 
 	if(query->result) msqlFreeResult(query->result);
 	efree(arg);
@@ -134,15 +134,17 @@ static m_query *php_msql_query_wrapper(m_result *res, int af_rows)
 	return query;
 }
 
-static void _close_msql_link(int link)
+static void _close_msql_link(zend_rsrc_list_entry *rsrc)
 {
+	int link = (int)rsrc->ptr;
 	msqlClose(link);
 	msql_globals.num_links--;
 }
 
 
-static void _close_msql_plink(int link)
+static void _close_msql_plink(zend_rsrc_list_entry *rsrc)
 {
+	int link = (int)rsrc->ptr;
 	msqlClose(link);
 	msql_globals.num_persistent--;
 	msql_globals.num_links--;
@@ -160,9 +162,9 @@ DLEXPORT PHP_MINIT_FUNCTION(msql)
 		msql_globals.max_links=-1;
 	}
 	msql_globals.num_persistent=0;
-	msql_globals.le_query = register_list_destructors(_delete_query,NULL);
-	msql_globals.le_link = register_list_destructors(_close_msql_link,NULL);
-	msql_globals.le_plink = register_list_destructors(NULL,_close_msql_plink);
+	msql_globals.le_query = register_list_destructors(_delete_query,NULL,"msql query");
+	msql_globals.le_link = register_list_destructors(_close_msql_link,NULL,"msql link");
+	msql_globals.le_plink = register_list_destructors(NULL,_close_msql_plink, "msql link persistent");
 	
 	msql_module_entry.type = type;
 

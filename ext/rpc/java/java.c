@@ -592,7 +592,9 @@ int java_set_property_handler
 
 /***************************************************************************/
 
-static void _php_java_destructor(void *jobject) {
+static void _php_java_destructor(zend_rsrc_list_entry *rsrc)
+{
+	void *jobject = (void *)rsrc->ptr;
   JG_FETCH();
   if (JG(jenv)) (*JG(jenv))->DeleteGlobalRef(JG(jenv), jobject);
 }
@@ -611,7 +613,7 @@ PHP_MINIT_FUNCTION(java) {
 
   zend_register_internal_class(&java_class_entry);
 
-  le_jobject = register_list_destructors(_php_java_destructor,NULL);
+  le_jobject = register_list_destructors(_php_java_destructor,NULL,"java");
 
   REGISTER_INI_ENTRIES();
 

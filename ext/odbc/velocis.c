@@ -73,15 +73,17 @@ ZEND_GET_MODULE(velocis)
 THREAD_LS velocis_module php_velocis_module;
 THREAD_LS static HENV henv;
 
-static void _close_velocis_link(VConn *conn)
+static void _close_velocis_link(zend_rsrc_list_entry *rsrc)
 {
+	VConn *conn = (VConn *)rsrc->ptr;
 	if ( conn ) {
 		efree(conn);
 	}
 }
 
-static void _free_velocis_result(Vresult *res)
+static void _free_velocis_result(zend_rsrc_list_entry *rsrc)
 {
+	Vresult *res = (Vresult *)rsrc->ptr;
 	if ( res && res->values ) {
 		register int i;
 		for ( i=0; i < res->numcols; i++ ) {
@@ -102,8 +104,8 @@ PHP_MINIT_FUNCTION(velocis)
 		php_velocis_module.max_links = -1;
 	}
 	php_velocis_module.num_links = 0;
-	php_velocis_module.le_link   = register_list_destructors(_close_velocis_link,NULL);
-	php_velocis_module.le_result = register_list_destructors(_free_velocis_result,NULL);
+	php_velocis_module.le_link   = register_list_destructors(_close_velocis_link,NULL,"velocis link");
+	php_velocis_module.le_result = register_list_destructors(_free_velocis_result,NULL,"velocis result");
 
 	return SUCCESS;
 }

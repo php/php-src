@@ -223,6 +223,11 @@ static void _php_free_packet_chunk(void *data)
 }
 /* }}} */
 
+static void php_free_wddx_packet(zend_rsrc_list_entry *rsrc)
+{
+	wddx_packet *packet = (wddx_packet *)rsrc->ptr;
+	php_wddx_destructor(packet);
+}
 
 /* {{{ php_wddx_destructor */
 void php_wddx_destructor(wddx_packet *packet)
@@ -237,7 +242,7 @@ void php_wddx_destructor(wddx_packet *packet)
 /* {{{ php_minit_wddx */
 PHP_MINIT_FUNCTION(wddx)
 {
-	le_wddx = register_list_destructors(php_wddx_destructor, NULL);
+	le_wddx = register_list_destructors(php_free_wddx_packet, NULL, "wddx");
 	
 	return SUCCESS;
 }

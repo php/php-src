@@ -178,18 +178,20 @@ zend_module_entry pdf_module_entry = {
 ZEND_GET_MODULE(pdf)
 #endif
 
-static void _free_pdf_image(int image)
+static void _free_pdf_image(zend_rsrc_list_entry *rsrc)
 {
 }
 
-static void _free_pdf_doc(PDF *pdf)
+static void _free_pdf_doc(zend_rsrc_list_entry *rsrc)
 {
+	PDF *pdf = (PDF *)rsrc->ptr;
 	PDF_close(pdf);
 	PDF_delete(pdf);
 }
 
-static void _free_outline(int *outline)
+static void _free_outline(zend_rsrc_list_entry *rsrc)
 {
+	int *outline = (int *)rsrc->ptr;
 	if(outline) efree(outline);
 }
 
@@ -235,9 +237,9 @@ static size_t pdf_flushwrite(PDF *p, void *data, size_t size){
 
 PHP_MINIT_FUNCTION(pdf)
 {
-	PDF_GLOBAL(le_pdf_image) = register_list_destructors(_free_pdf_image, NULL);
-	PDF_GLOBAL(le_outline) = register_list_destructors(_free_outline, NULL);
-	PDF_GLOBAL(le_pdf) = register_list_destructors(_free_pdf_doc, NULL);
+	PDF_GLOBAL(le_pdf_image) = register_list_destructors(_free_pdf_image, NULL, "pdf image");
+	PDF_GLOBAL(le_outline) = register_list_destructors(_free_outline, NULL, "pdf outline");
+	PDF_GLOBAL(le_pdf) = register_list_destructors(_free_pdf_doc, NULL, "pdf document");
 	return SUCCESS;
 }
 

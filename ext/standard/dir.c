@@ -107,8 +107,9 @@ static void php_set_default_dir(int id DIRLS_DC)
 }
 
 
-static void _dir_dtor(php_dir *dirp)
+static void _dir_dtor(zend_rsrc_list_entry *rsrc)
 {
+	php_dir *dirp = (php_dir *)rsrc->ptr;
 	closedir(dirp->dir);
 	efree(dirp);
 }
@@ -125,7 +126,7 @@ PHP_MINIT_FUNCTION(dir)
 {
 	zend_class_entry dir_class_entry;
 
-	le_dirp = register_list_destructors(_dir_dtor,NULL);
+	le_dirp = register_list_destructors(_dir_dtor,NULL, "dir");
 
 	INIT_CLASS_ENTRY(dir_class_entry, "Directory", php_dir_class_functions);
 	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
