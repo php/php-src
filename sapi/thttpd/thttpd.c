@@ -260,7 +260,7 @@ static void thttpd_module_main(TSRMLS_D)
 	php_request_shutdown(NULL);
 }
 
-static void thttpd_request_ctor(TSRMLS_D TSRMLS_DC)
+static void thttpd_request_ctor(TSRMLS_D)
 {
 	int offset;
 	smart_str s = {0};
@@ -295,7 +295,7 @@ static void thttpd_request_ctor(TSRMLS_D TSRMLS_DC)
 	}
 }
 
-static void thttpd_request_dtor(TSRMLS_D TSRMLS_DC)
+static void thttpd_request_dtor(TSRMLS_D)
 {
 	if (SG(request_info).query_string)
 		free(SG(request_info).query_string);

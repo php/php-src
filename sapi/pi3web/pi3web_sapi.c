@@ -180,7 +180,6 @@ static int sapi_pi3web_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	char *combined_headers, *combined_headers_ptr;
 	LPCONTROL_BLOCK lpCB = (LPCONTROL_BLOCK) SG(server_context);
 	sapi_header_struct default_content_type;
-	TSRMLS_FETCH();
 	
 	if ( !IWasLoaded ) return SAPI_HEADER_SENT_SUCCESSFULLY;
 
@@ -320,7 +319,7 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPCONTROL_BLOCK
 	SG(sapi_headers).http_response_code = 200;
 }
 
-static void hash_pi3web_variables(TSRMLS_D TSRMLS_DC)
+static void hash_pi3web_variables(TSRMLS_D)
 {
 	char static_variable_buf[PI3WEB_SERVER_VAR_BUF_SIZE];
 	char *variable_buf;
