@@ -1864,7 +1864,7 @@ binary_assign_op_addr_obj:
 				}
 			case ZEND_INIT_CTOR_CALL:
 				{
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
 					if (EX(opline)->op1.op_type == IS_VAR) {
 						SELECTIVE_PZVAL_LOCK(*EX(Ts)[EX(opline)->op1.u.var].var.ptr_ptr, &EX(opline)->op1);
@@ -1901,7 +1901,7 @@ binary_assign_op_addr_obj:
 					char *function_name_strval;
 					int function_name_strlen;
 					
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
 					function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 					function_name_strval = function_name->value.str.val;
@@ -1958,7 +1958,7 @@ binary_assign_op_addr_obj:
 					char *function_name_strval;
 					int function_name_strlen;
 
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
 					is_const = (EX(opline)->op2.op_type == IS_CONST);
 
@@ -2007,7 +2007,7 @@ binary_assign_op_addr_obj:
 					char *function_name_strval;
 					int function_name_strlen;
 
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
 					is_const = (EX(opline)->op2.op_type == IS_CONST);
 
@@ -2058,7 +2058,7 @@ binary_assign_op_addr_obj:
 			case ZEND_DO_FCALL: {
 					zval *fname = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 					
-					zend_ptr_stack_push(&EG(arg_types_stack), EX(object));
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
 					do {
 						if (EG(scope)) {
@@ -2161,11 +2161,8 @@ do_fcall_common:
 							zval_ptr_dtor(&EX(Ts)[EX(opline)->result.u.var].var.ptr);
 						}
 					}
-					if (EX(opline)->opcode == ZEND_DO_FCALL_BY_NAME) {
-						zend_ptr_stack_n_pop(&EG(arg_types_stack), 2, &EX(object), &EX(fbc));
-					} else {
-						EX(object) = zend_ptr_stack_pop(&EG(arg_types_stack));
-					}
+					zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
+					
 					EX(function_state).function = (zend_function *) op_array;
 					EG(function_state_ptr) = &EX(function_state);
 					zend_ptr_stack_clear_multiple(TSRMLS_C);
