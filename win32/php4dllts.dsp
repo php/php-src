@@ -527,14 +527,6 @@ SOURCE=..\ext\standard\rand.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\rand_mt.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\rand_sys.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\reg.c
 # End Source File
 # Begin Source File
