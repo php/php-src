@@ -1430,7 +1430,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				}
 
 				if (result->binmode == 1) {
-					sql_c-type = SQL_C_BINARY;
+					sql_c_type = SQL_C_BINARY;
 				}
 			case SQL_LONGVARCHAR:
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
