@@ -69,7 +69,7 @@ typedef struct _string {
 	int alloced;
 } string;
 
-void string_init(string *str)
+static void string_init(string *str)
 {
 	str->string = (char *) emalloc(1024);
 	str->len = 1;
@@ -77,7 +77,7 @@ void string_init(string *str)
 	*str->string = '\0';
 }
 	
-string *string_printf(string *str, const char *format, ...)
+static string *string_printf(string *str, const char *format, ...)
 {
 	int len;
 	va_list arg;
@@ -99,7 +99,7 @@ string *string_printf(string *str, const char *format, ...)
 	return str;
 }
 
-string *string_write(string *str, char *buf, int len)
+static string *string_write(string *str, char *buf, int len)
 {
 	register int nlen = (str->len + len + (1024 - 1)) & ~(1024 - 1);
 	if (str->alloced < nlen) {
