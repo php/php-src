@@ -1,3 +1,41 @@
+1999-11-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url.c:
+    (PHP urldecode) Fix for #2788, function changed parameter in place
+
+1999-11-21  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/array.c:    convert_to_long() after compare_function() destroys float-compares!
+
+1999-11-21  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/array.c
+      ext/standard/html.c: Maybe later on today. Must buy some beer first.
+
+1999-11-21  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/html.c
+      ext/standard/html.h:    (PHP get_html_translation_table) new function.
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:    (PHP array_flip) new function. no clash detection, only works for IS_STRING and IS_LONG datatypes in src-array.
+
+    * ext/standard/array.c: -renamed some macros
+    -return_value_used now used in a few more functions
+
+    * ext/standard/string.c: (PHP strtr) little smarter
+
+1999-11-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/config.m4
+      ext/gd/gdttf.c
+      stamp-h.in: Fix gd problems
+
+1999-11-21  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
 1999-11-20  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/dba/config.h.stub
