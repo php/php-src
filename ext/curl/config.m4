@@ -28,6 +28,10 @@ if test "$PHP_CURL" != "no"; then
 
   if ${CURL_DIR}/bin/curl-config --libs print > /dev/null 2>&1; then
     CURL_CONFIG=${CURL_DIR}/bin/curl-config
+  else
+    if ${CURL_DIR}/curl-config --libs print > /dev/null 2>&1; then
+       CURL_CONFIG=${CURL_DIR}/curl-config
+    fi
   fi
 
   curl_version_full=`$CURL_CONFIG --version`
