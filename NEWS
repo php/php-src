@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Changed SQLite extension to use studlyCaps convention in its OO API. (Marcus)
 - Changed __construct() to always take precedence over old style constructor.
   (Dmitry)
+- Fixed bug #27821 xml_parse segfaults when xml_set_object called from 
+  class method. (Andi, Rob)
 - Fixed bug #27742 (WDSL SOAP Parsing Schema bug). (Dmitry)
 - Fixed bug #27722 (Segfault on schema without targetNamespace). (Dmitry)
 - Fixed bug #27719 (mktime issues on and around DST changeover). (Rasmus)
