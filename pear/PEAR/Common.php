@@ -1121,7 +1121,7 @@ class PEAR_Common extends PEAR
         }
         $pn = $info['package'];
         $pnl = strlen($pn);
-        foreach ($this->pkginfo['provides'] as $key => $what) {
+        foreach ((array)$this->pkginfo['provides'] as $key => $what) {
             if (isset($what['explicit'])) {
                 // skip conformance checks if the provides entry is
                 // specified in the package.xml file
