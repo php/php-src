@@ -94,7 +94,8 @@ size_t errbuf_size;
 		if (errbuf_size > len)
 			(void) strcpy(errbuf, s);
 		else {
-			(void) strlcpy(errbuf, s, errbuf_size);
+			(void) strncpy(errbuf, s, errbuf_size-1);
+			errbuf[errbuf_size-1] = '\0';
 		}
 	}
 
