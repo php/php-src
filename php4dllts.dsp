@@ -471,6 +471,10 @@ SOURCE=.\ext\standard\html.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\info.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\md5.h
 # End Source File
 # Begin Source File
@@ -781,6 +785,14 @@ InputPath=".\configuration-scanner.l"
 
 !ENDIF 
 
+# End Source File
+# End Group
+# Begin Group "Text Files"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\LICENSE
 # End Source File
 # End Group
 # End Target
