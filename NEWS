@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Added support for multiple databases into ibase_trans()
   . Added support for CREATE DATABASE, SET TRANSACTION and EXECUTE PROCEDURE
     statements into ibase_query()
+  . Added ability to bind PHP arrays to native Interbase arrays
   . Added ibase_commit_ret() and ibase_rollback_ret()
   . Added ibase_drop_db() 
   . Added ibase_gen_id()
