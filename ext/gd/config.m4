@@ -250,10 +250,10 @@ dnl
 if test "$PHP_GD" = "yes"; then
   GD_MODULE_TYPE=builtin
   extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
-        libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_png.c libgd/gd_jpeg.c \
-		libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c libgd/gdfontmb.c libgd/gdfontl.c \
-		libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
-		libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c libgd/gd_gif_in.c"
+                 libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_png.c libgd/gd_jpeg.c \
+                 libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c libgd/gdfontmb.c libgd/gdfontl.c \
+                 libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
+                 libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c libgd/gd_gif_in.c"
 
 dnl check for fabsf and floorf which are available since C99
   AC_CHECK_FUNCS(fabsf floorf)
