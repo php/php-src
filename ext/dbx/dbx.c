@@ -536,14 +536,18 @@ ZEND_FUNCTION(dbx_error)
 */
 ZEND_FUNCTION(dbx_cmp_asc)
 {
-    int number_of_arguments=3;
+    int min_number_of_arguments=3;
+    int max_number_of_arguments=4;
+    int number_of_arguments=-1;
+    int comparison_type=0;
     double dtemp;
     long ltemp;
-    zval ** arguments[3];
+    zval ** arguments[4];
     zval ** zv_a;
     zval ** zv_b;
     int result=0;
-    if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
+    number_of_arguments=ZEND_NUM_ARGS();
+    if (number_of_arguments<min_number_of_arguments || number_of_arguments>max_number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	    }
 
@@ -553,6 +557,11 @@ ZEND_FUNCTION(dbx_cmp_asc)
         RETURN_LONG(0);
         }
     convert_to_string_ex(arguments[2]); /*/ field name /*/
+    comparison_type = 0; // default, text
+    if (number_of_arguments>3) {
+        convert_to_string_ex(arguments[3]); /*/ comparison type /*/
+        if (!strcmp((*arguments[3])->value.str.val, "number")) comparison_type=1;
+        }
 
     if (zend_hash_find((*arguments[0])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_a)==FAILURE
     || zend_hash_find((*arguments[1])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_b)==FAILURE)  {
@@ -560,23 +569,18 @@ ZEND_FUNCTION(dbx_cmp_asc)
         RETURN_LONG(0);
         }
 
-    if ((*zv_a)->type != (*zv_b)->type) {
-        convert_to_string_ex(zv_a);
-        convert_to_string_ex(zv_b);
-        }
-    switch ((*zv_a)->type) {
-        case IS_LONG:
-        case IS_BOOL:
-            ltemp = (*zv_a)->value.lval - (*zv_b)->value.lval;
-            result = (ltemp==0?0: (ltemp>0?1:-1));
-            break;
-        case IS_DOUBLE:
-            dtemp = ((*zv_a)->value.dval - (*zv_b)->value.dval);
-            result = (dtemp==0?0: (dtemp>0?1:-1));
-            break;
-        case IS_STRING:
+    switch (comparison_type) {
+        case 0:
+            convert_to_string_ex(zv_a);
+            convert_to_string_ex(zv_b);
             ltemp = strcmp((*zv_a)->value.str.val, (*zv_b)->value.str.val);
             result = (ltemp==0?0: (ltemp>0?1:-1));
+            break;
+        case 1:
+            convert_to_double_ex(zv_a);
+            convert_to_double_ex(zv_b);
+            dtemp = ((*zv_a)->value.dval - (*zv_b)->value.dval);
+            result = (dtemp==0?0: (dtemp>0?1:-1));
             break;
         default:
             result=0;
@@ -591,14 +595,18 @@ ZEND_FUNCTION(dbx_cmp_asc)
 */
 ZEND_FUNCTION(dbx_cmp_desc)
 {
-    int number_of_arguments=3;
+    int min_number_of_arguments=3;
+    int max_number_of_arguments=4;
+    int number_of_arguments=-1;
+    int comparison_type=0;
     double dtemp;
     long ltemp;
-    zval ** arguments[3];
+    zval ** arguments[4];
     zval ** zv_a;
     zval ** zv_b;
     int result=0;
-    if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
+    number_of_arguments=ZEND_NUM_ARGS();
+    if (number_of_arguments<min_number_of_arguments || number_of_arguments>max_number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	    }
 
@@ -608,6 +616,11 @@ ZEND_FUNCTION(dbx_cmp_desc)
         RETURN_LONG(0);
         }
     convert_to_string_ex(arguments[2]); /*/ field name /*/
+    comparison_type = 0; // default, text
+    if (number_of_arguments>3) {
+        convert_to_string_ex(arguments[3]); /*/ comparison type /*/
+        if (!strcmp((*arguments[3])->value.str.val, "number")) comparison_type=1;
+        }
 
     if (zend_hash_find((*arguments[0])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_a)==FAILURE
     || zend_hash_find((*arguments[1])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_b)==FAILURE)  {
@@ -615,23 +628,18 @@ ZEND_FUNCTION(dbx_cmp_desc)
         RETURN_LONG(0);
         }
 
-    if ((*zv_a)->type != (*zv_b)->type) {
-        convert_to_string_ex(zv_a);
-        convert_to_string_ex(zv_b);
-        }
-    switch ((*zv_a)->type) {
-        case IS_LONG:
-        case IS_BOOL:
-            ltemp = (*zv_b)->value.lval - (*zv_a)->value.lval;
-            result = (ltemp==0?0: (ltemp>0?1:-1));
-            break;
-        case IS_DOUBLE:
-            dtemp = ((*zv_b)->value.dval - (*zv_a)->value.dval);
-            result = (dtemp==0?0: (dtemp>0?1:-1));
-            break;
-        case IS_STRING:
+    switch (comparison_type) {
+        case 0:
+            convert_to_string_ex(zv_a);
+            convert_to_string_ex(zv_b);
             ltemp = strcmp((*zv_b)->value.str.val, (*zv_a)->value.str.val);
             result = (ltemp==0?0: (ltemp>0?1:-1));
+            break;
+        case 1:
+            convert_to_double_ex(zv_a);
+            convert_to_double_ex(zv_b);
+            dtemp = ((*zv_b)->value.dval - (*zv_a)->value.dval);
+            result = (dtemp==0?0: (dtemp>0?1:-1));
             break;
         default:
             result=0;
