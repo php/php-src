@@ -242,7 +242,9 @@ function_entry basic_functions[] = {
 
 	PHP_FE(microtime,								NULL)
 	PHP_FE(gettimeofday,							NULL)
+#ifdef HAVE_GETRUSAGE
 	PHP_FE(getrusage,								NULL)
+#endif
 	
 	PHP_FE(uniqid,									NULL)
 		

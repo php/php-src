@@ -90,11 +90,11 @@ PHP_FUNCTION(gettimeofday)
 }
 /* }}} */
 
+#ifdef HAVE_GETRUSAGE
 /* {{{ proto array getrusage([ int who ])
    returns an array of usage statistics */
 PHP_FUNCTION(getrusage)
 {
-#if HAVE_GETRUSAGE
 	struct rusage usg;
 	int ac = ARG_COUNT(ht);
 	pval **pwho;
@@ -134,8 +134,9 @@ PHP_FUNCTION(getrusage)
 	PHP3_RUSAGE_PARA(ru_stime.tv_usec);
 	PHP3_RUSAGE_PARA(ru_stime.tv_sec);
 #undef PHP3_RUSAGE_PARA
-#endif /* HAVE_GETRUSAGE */
 }
+#endif /* HAVE_GETRUSAGE */
+
 /* }}} */
 
 
