@@ -299,7 +299,7 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 
 	if (var->value.str.len > 0) {
 		i = 0;
-		buf = (char *)emalloc(var->value.str.len);
+		buf = (char *)emalloc(var->value.str.len+1);
 		for(c=var->value.str.val; *c!='\0'; c++)
 		{
 			if (iscntrl((int)*c))
