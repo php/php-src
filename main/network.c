@@ -37,6 +37,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
 #ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
