@@ -1,38 +1,26 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
+- Added CLI (command line intrerface) sapi based on a cut-down version
+  of the CGI sapi which is more suited for writing shell scripts. Some of
+  the differences are: it prints no HTTP headers, displays plain text
+  error messages, does not change working directory, etc. "make install"
+  will install CLI SAPI version of php in {PREFIX}/bin/php while
+  CGI is renamed and installed as {PREFIX}/bin/php-cgi. (Edin)
 - Clean up posix extension (no more unwanted warning messages, introduce
   posix_errno() and posix_strerror() for fetching error messages); changed the
   way posix_getgrnam() and posix_getgrgid() return their values (breaks BC but
   makes more sense); do not include functions in symbol table which aren't
   supported on host system. (Markus)
-- TIFF support for GetImageSize (Marcus)
+- Fixed HTTP file upload support to handle big files better. (Jani)
+- Added TIFF support for getimagesize(). (Marcus)
+- Added TIFF support for read_exif_data(). (Marcus)
 - Changed the Velocis extension namespace to Birdstep to reflect new product 
   name. Added aliases for BC. (James)
-- Added test.php/txt to have a possibility to check ext/exif
-  (Marcus)
-- Added TIFF support
-  Changed parameters after checking bugdatabase and discussion with Rasmus
-  1st=Filename, 2nd=NeededSections
-  If the 2nd parameter is not present or 0 or '' the function will return
-  a result array even if no data was read from file.
-  If the 2nd parameter is a string then that string describes which
-  sections have to be present in the file to generate a result array.
-  If none of the needed section is found the result will be false.
-  Section strings are "ANY_TAG","IFD0","COMMENT","EXIF","GPS","INTEROP"
-  "FPIX","APP12". Each string has to be separated by a colon. So
-  "COMMENT,EXIF" returns an array if either a comment or an Exif
-  section is present. "IFD0" is standard datastructure in a TIFF/JPEG
-  file that contains image information. "EXIF" is the Exif structure
-  of TIFF/JPEG (IFD0 subdirectory). "GPS", "INTEROP", "FPIX", "APP12"
-  are additional IFD0 subdirectories. The APP12 support is an
-  		 experimental Olympus support.
-  (Marcus)
 - Added safe_mode checks for opendir(). (jflemer)
-- Make the 2nd parameter to pgsql_fetch_* support NULL in case 3
-  parameters are supplied, but you do not want to provide a row number
-  yourself. (Derick)
-- Improved iconv with libc's iconv. (Yasuo)
+- Make the 2nd parameter to pgsql_fetch_* support NULL in case 3 parameters 
+  are supplied, but you do not want to provide a row number yourself. (Derick)
+- Improved iconv() when using libc's iconv. (Yasuo)
 - Added PHP_SAPI constant which contains the name of running SAPI. (Edin)
 - Added ob_get_status() to get array of buffers and it's status. (Yasuo)
 - Fixed crash bug with ob_end_*() function. ob_end_*() will not delete
@@ -48,34 +36,26 @@ PHP 4                                                                      NEWS
   internal information such as refcounts and true type names. (Jason)
 - Added Andrei's tokenizer extension. (Stig)
 - Removed ext/satellite. It is now part of PEAR. (eriksson)
-- Changed php.ini directive 'safe_mode_include_dir' to accept a
-  (semi)colon separated path (like 'include_path') rather than
-  a single directory. (jflemer)
+- Changed php.ini directive 'safe_mode_include_dir' to accept a (semi)colon 
+  separated path (like 'include_path') rather than a single directory. 
+  (jflemer)
 - Added is_a() function that can be used to test whether object is of a certain
   class or is derived from it. (Andrei, Zend Engine)
-- Added optional parameter to highlight_string and highlight_file which
+- Added optional parameter to highlight_string() and highlight_file() which
   makes these functions return a highlighted string instead of dumping
   to standard output. (Derick)
-- Added EXTR_IF_EXISTS and EXTR_PREFIX_IF_EXISTS flags to extract()
-  EXTR_IF_EXISTS only extracts a variable if it already exists
-  EXTR_PREFIX_IF_EXISTS only extracts the variable if it exists and
-  then it prepends the prefix to it.  ie. if $PATH exists then
-  extract($_ENV,EXTR_PREFIX_IF_EXISTS,'e') would result in $e_PATH
-  This lets you do $a = $b = $c = true; extract($_REQUEST,EXTR_IF_EXISTS);
-  and you only get the global request variables you have defined imported
-  into your symbol table.  (Rasmus)
+- Added EXTR_IF_EXISTS and EXTR_PREFIX_IF_EXISTS flags to extract(). (Rasmus)
 - Fixed pg_pconnect(). It catches broken connection and reconnects to
   PostgreSQL server always. When PostgreSQL is rebooted, web server reboot is
   not needed to avoid errors. (Yasuo)
 - Fix --enable-safe-mode. This configure option was not working. (Yasuo)
-- Added function domxml_dump_node($doc,$node). Dumps a node plus all
-  children into a string. (chregu)
+- Added function domxml_dump_node($doc,$node). Dumps a node plus all children 
+  into a string. (chregu)
 - Added function domxml_node_get_content(). (chregu)
 - Added function domxml_dump_file($filename,[$compression]). Dumps XML to
   a file and uses compression, if specified. (chregu)
-- Added exslt integration (see http://exslt.org for details). To be
-  configured with --with-dom-exslt[=DIR] (and --with-dom-xslt). (chregu,
-  jaroslaw)
+- Added exslt integration (see http://exslt.org for details). To be configured 
+  with --with-dom-exslt[=DIR] (and --with-dom-xslt). (chregu,jaroslaw)
 - Don't touch any globals in session_unset() if register_globals is set
   to off. (Thies)
 - Added 3 new optional parameters to OCIFetchStatement(). They control
@@ -86,7 +66,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug in preg_match()/preg_match_all() when matching strings containing
   null bytes. (Andrei)
 - Added xpath_register_ns() function. This makes it possible to issue XPath 
-  queries with namespaces like for example: "//namespace:sampletag" .
+  queries with namespaces like for example: "//namespace:sampletag".
   (Chris Jarecki)
 - Added multi-byte enabled regular expression functions. (Rui)
 - Added second parameter to count() that can be used to specify either normal
@@ -95,12 +75,6 @@ PHP 4                                                                      NEWS
 - Added async query functions to PostgreSQL module. (Yasuo)
 - Added pg_copy_to()/pg_copy_from() for PostgreSQL module. (Youichi, Yasuo)
 - Added IPv6 support in FTP extension. (Stig Venaas)
-- Added CLI (command line intrerface) sapi based on a cut-down version
-  of the CGI sapi which is more suited for writing shell scripts. Some of
-  the differences are: it prints no HTTP headers, displays plain text
-  error messages, does not change working directory, etc. "make install"
-  will install CLI SAPI version of php in {PREFIX}/bin/php while
-  CGI is renamed and installed as {PREFIX}/bin/php-cgi. (Edin)
 - Improved the speed of wordwrap() significantly. (Jim)
 - Fixed pow()'s incorrect behaviour when dealing with powers of 0. (Jim)
 - Added is_finite(), is_infinite(), and is_nan(). (Jim)
@@ -154,7 +128,6 @@ PHP 4                                                                      NEWS
 - Fixed mnoGoSearch extension to support mnogosearch-3.2.x. (gluke)
 - Made fbsql_num_rows() to return the correct value on all select statements.
   (Frank)
-- Fixed HTTP file upload support to handle big files better. (Jani)
 - Added array_chunk() function that splits an array into chunks of specified
   size. (Andrei)
 - Fixed a bug which caused $HTTP_RAW_POST_DATA not to be populated on a missing
