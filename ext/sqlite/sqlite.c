@@ -119,19 +119,7 @@ PHP_INI_END()
 
 #define SQLITE_THROW(message) \
 	PG(suppress_errors) = 0; \
-	EG(exception) = sqlite_instanciate(sqlite_ce_exception, NULL TSRMLS_CC); \
-	{ \
-		zval *tmp; \
-		MAKE_STD_ZVAL(tmp); \
-		ZVAL_STRING(tmp, message, 1); \
-		zend_hash_update(Z_OBJPROP_P(EG(exception)), "message", sizeof("message"), (void **) message, sizeof(zval *), NULL); \
-		MAKE_STD_ZVAL(tmp); \
-		ZVAL_STRING(tmp, zend_get_executed_filename(TSRMLS_C), 1); \
-		zend_hash_update(Z_OBJPROP_P(EG(exception)), "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL); \
-		MAKE_STD_ZVAL(tmp); \
-		ZVAL_LONG(tmp, zend_get_executed_lineno(TSRMLS_C)); \
-		zend_hash_update(Z_OBJPROP_P(EG(exception)), "line", sizeof("line"), (void **) &tmp, sizeof(zval *), NULL); \
-	}
+	EG(exception) = zend_throw_exception(sqlite_ce_exception, message, 0 TSRMLS_CC);
 
 struct php_sqlite_result {
 	struct php_sqlite_db *db;
@@ -1115,7 +1103,7 @@ PHP_FUNCTION(sqlite_open)
 	zval *errmsg = NULL;
 	zval *object = getThis();
 
-	php_set_error_handling(object ? EH_THROW : EH_NORMAL, zend_exception_get_default() TSRMLS_CC);
+	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
