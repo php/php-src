@@ -2697,7 +2697,7 @@ ZEND_GET_MODULE(ming)
 PHP_MINFO_FUNCTION(ming)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Ming SWF output library", "the funk in your trunk");
+	php_info_print_table_row(2, "Ming SWF output library", "enabled");
 	php_info_print_table_row(2, "Version", MING_VERSION_TEXT);
 	php_info_print_table_end();
 }
