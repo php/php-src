@@ -12,7 +12,7 @@ if(!$xsl) {
   exit;
 }
 $proc = new xsltprocessor;
-if(!$xsl) {
+if(!$proc) {
   echo "Error while making xsltprocessor object\n";
   exit;
 }
