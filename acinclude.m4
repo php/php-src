@@ -1535,7 +1535,8 @@ dnl Wrapper for AC_CHECK_LIB
 dnl
 AC_DEFUN([PHP_CHECK_LIBRARY], [
   save_old_LDFLAGS=$LDFLAGS
-  LDFLAGS="$5 $LDFLAGS"
+  ac_stuff="$5"
+  PHP_EVAL_LIBLINE([$]ac_stuff, LDFLAGS)
   AC_CHECK_LIB([$1],[$2],[
     LDFLAGS=$save_old_LDFLAGS
     $3
