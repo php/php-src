@@ -6,7 +6,7 @@ PHP 4                                                                      NEWS
   on register_globals). (Ilia)
 - Fixed bug #25081 (odbc_fetch_array() may mangle numeric fields). (Ilia)
 - Fixed bug #25044 (header("Location:") changing HTTP status). (Marcus)
-- Fixed bug #25037 (win23 mail(): Possible infinite loop inside SendText()).
+- Fixed bug #25037 (win32 mail(): Possible infinite loop inside SendText()).
   (Ilia)
 - Fixed bug #25007 (rand() & mt_rand() seed RNG every call). (Jani)
 - Fixed bug #24989 (external libexpat conflicts with bundled libexpat). (Jani)
