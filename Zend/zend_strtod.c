@@ -89,6 +89,8 @@
  *	directly -- and assumed always to succeed.
  */
 
+/* $Id$ */
+
 #include <zend_strtod.h>
 
 #if defined(HAVE_INTTYPES_H)
