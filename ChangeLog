@@ -1,3 +1,59 @@
+2000-08-17  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.c:
+    Reorder call to ELS_FETCH to be after declarations
+
+2000-08-17  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    Reverting the pemalloc -> malloc change until we figure out why it breaks.
+
+    * ext/pcre/php_pcre.c: No need to have persistent allocation.
+
+2000-08-17  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c:
+    prevent mail_criteria from munging the variable passed in containing the
+    query - just had to add a cpystr(). if this isn't the right fix, let me
+    know, but it does work.
+
+2000-08-17  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c:
+    (send_headers) Removed code freeing http_status_line, this is performed
+                   in sapi_send_headers()
+
+2000-08-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/url_scanner.c: additional include should fix bug #6086
+
+2000-08-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/Makefile.in:
+    Fix dependency. PEAR.php needs to be created before it can be installed.
+
+2000-08-17  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/java.c
+      ext/java/java.dsp
+      sapi/servlet/servlet.dsp:
+    Better error reporting when dll/shared library is not able to be loaded.
+    Submitted by: Bård Farstad <bf@ez.no>
+
+2000-08-17  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/string.c: Fix chunk_split (#6208)
+
+2000-08-17  Andi Gutmans  <andi@php.net>
+
+    * ext/curl/curl.c
+      win32/php4dllts.dsp: - It should be #ifdef PHP_WIN32
+
+2000-08-17  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h: ts issues.
+
 2000-08-16  Andi Gutmans  <andi@php.net>
 
     * main/fopen-wrappers.c
