@@ -399,13 +399,9 @@ static int _pcre_get_backref(const char *walk, int *backref)
 /* }}} */
 
 
-/* {{{ proto pcre_replace()
-    */
-PHP_FUNCTION(pcre_replace)
+/* {{{ char *_php_pcre_replace(char *regex, char *subject, char *replace) */
+char *_php_pcre_replace(char *regex, char *subject, char *replace)
 {
-	zval			*regex,
-					*replace,
-					*subject;
 	pcre			*re = NULL;
 	pcre_extra		*extra = NULL;
 	int			 	 exoptions = 0;
@@ -423,25 +419,15 @@ PHP_FUNCTION(pcre_replace)
 					*walkbuf,
 					*walk;
 
-	/* Get function parameters and do error-checking. */
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &regex, &replace, &subject) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	/* Make sure we're dealing with strings. */
-	convert_to_string(regex);
-	convert_to_string(replace);	
-	convert_to_string(subject);
-
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL)
-		return;
+	if ((re = _pcre_get_compiled_regex(regex, extra)) == NULL)
+		return NULL;
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
 	
-	subject_len = subject->value.str.len;
+	subject_len = strlen(subject);
 
 	alloc_len = 2 * subject_len + 1;
 	result = emalloc(alloc_len * sizeof(char));
@@ -449,7 +435,7 @@ PHP_FUNCTION(pcre_replace)
 		zend_error(E_WARNING, "Unable to allocate memory in pcre_replace");
 		efree(re);
 		efree(offsets);
-		return;
+		return NULL;
 	}
 
 	subject_offset = 0;
@@ -457,8 +443,8 @@ PHP_FUNCTION(pcre_replace)
 	
 	while (count >= 0) {
 		/* Execute the regular expression. */
-		count = pcre_exec(re, extra, &subject->value.str.val[subject_offset],
-							subject->value.str.len-subject_offset,
+		count = pcre_exec(re, extra, &subject[subject_offset],
+							subject_len-subject_offset,
 						  	(subject_offset ? exoptions|PCRE_NOTBOL : exoptions),
 							offsets, size_offsets);
 
@@ -470,7 +456,7 @@ PHP_FUNCTION(pcre_replace)
 
 		if (count > 0) {
 			new_len = strlen(result) + offsets[0]; /* part before the match */
-			walk = replace->value.str.val;
+			walk = replace;
 			while (*walk)
 				if ('\\' == *walk &&
 					_pcre_get_backref(walk+1, &backref) &&
@@ -491,18 +477,18 @@ PHP_FUNCTION(pcre_replace)
 			}
 			result_len = strlen(result);
 			/* copy the part of the string before the match */
-			strncat(result, &subject->value.str.val[subject_offset], offsets[0]);
+			strncat(result, &subject[subject_offset], offsets[0]);
 
 			/* copy replacement and backrefs */
 			walkbuf = &result[result_len + offsets[0]];
-			walk = replace->value.str.val;
+			walk = replace;
 			while (*walk)
 				if ('\\' == *walk &&
 					_pcre_get_backref(walk+1, &backref) &&
 					backref < count) {
 					result_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 					memcpy (walkbuf,
-							&subject->value.str.val[subject_offset + offsets[backref<<1]],
+							&subject[subject_offset + offsets[backref<<1]],
 							result_len);
 					walkbuf += result_len;
 					walk += (backref > 9) ? 3 : 2;
@@ -523,13 +509,13 @@ PHP_FUNCTION(pcre_replace)
 					result = new_buf;
 				}
 				subject_offset += offsets[1] + 1;
-				result [new_len-1] = subject->value.str.val [subject_offset-1];
+				result [new_len-1] = subject[subject_offset-1];
 				result [new_len] = '\0';
 			} else {
 				subject_offset += offsets[1];
 			}
 		} else {
-			new_len = strlen(result) + strlen(&subject->value.str.val[subject_offset]);
+			new_len = strlen(result) + strlen(&subject[subject_offset]);
 			if (new_len + 1 > alloc_len) {
 				alloc_len = new_len + 1; /* now we know exactly how long it is */
 				new_buf = emalloc(alloc_len * sizeof(char));
@@ -538,14 +524,132 @@ PHP_FUNCTION(pcre_replace)
 				result = new_buf;
 			}
 			/* stick that last bit of string on our output */
-			strcat(result, &subject->value.str.val[subject_offset]);
+			strcat(result, &subject[subject_offset]);
 		}
 	}
 	
 	efree(offsets);
+
+	return result;
+}
+/* }}} */
+
+
+static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
+{
+	zval		**regex_entry_ptr,
+				*regex_entry,
+				**replace_entry_ptr,
+				*replace_entry;
+	char		*replace_value,
+				*subject_value,
+				*result;
 	
-	RETVAL_STRING(result, 1);
-	efree(result);
+	convert_to_string(subject);
+	
+	if (regex->type == IS_ARRAY) {
+		subject_value = estrdup(subject->value.str.val);
+		zend_hash_internal_pointer_reset(regex->value.ht);
+
+		if (replace->type == IS_ARRAY)
+			zend_hash_internal_pointer_reset(replace->value.ht);
+		else
+			replace_value = replace->value.str.val;
+		
+		while (zend_hash_get_current_data(regex->value.ht, (void **)&regex_entry_ptr) == SUCCESS) {
+			regex_entry = *regex_entry_ptr;
+			convert_to_string(regex_entry);
+		
+			if (replace->type == IS_ARRAY) {
+				if (zend_hash_get_current_data(replace->value.ht, (void **)&replace_entry_ptr) == SUCCESS) {
+					replace_entry = *replace_entry_ptr;
+					convert_to_string(replace_entry);
+					replace_value = replace_entry->value.str.val;
+
+					zend_hash_move_forward(replace->value.ht);
+				}
+				else
+					replace_value = empty_string;
+			}
+			if ((result = _php_pcre_replace(regex_entry->value.str.val,
+											subject_value,
+											replace_value)) != NULL) {
+				efree(subject_value);
+				subject_value = result;
+			}
+			
+			zend_hash_move_forward(regex->value.ht);
+		}
+
+		return subject_value;
+	}
+	else {
+		convert_to_string(replace);
+		result = _php_pcre_replace(regex->value.str.val,
+									subject->value.str.val,
+									replace->value.str.val);
+		return result;
+	}
+}
+
+
+/* {{{ proto pcre_replace()
+    Perform Perl-style regular expression replacement */
+PHP_FUNCTION(pcre_replace)
+{
+	zval			*regex,
+					*replace,
+					*subject,
+					**subject_entry_ptr,
+					*subject_entry,
+					*return_entry;
+	char			*result;
+	
+	/* Get function parameters and do error-checking. */
+	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &regex, &replace, &subject) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (subject->type == IS_ARRAY) {
+		array_init(return_value);
+		zend_hash_internal_pointer_reset(subject->value.ht);
+		
+		while (zend_hash_get_current_data(subject->value.ht, (void **)&subject_entry_ptr) == SUCCESS) {
+			subject_entry = *subject_entry_ptr;
+			if ((result = _php_replace_in_subject(regex, replace, subject_entry)) != NULL)
+				add_next_index_string(return_value, result, 0);
+			zend_hash_move_forward(subject->value.ht);
+		}
+	}
+	else {
+		result = _php_replace_in_subject(regex, replace, subject);
+		RETVAL_STRING(result, 1);
+		efree(result);
+	}
+	
+	/*
+		if subject is an array
+			do for each entry in subject array
+				convert subject entry to string
+				if regex is an array
+					do for each entry in regex array
+						convert regex entry to string
+						if replace is an array
+							get corresponding entry for regex from replace array
+							if current regex index is greater than the number of entries in the replace array, use empty string
+							do pcre_replace with regex entry and replace entry
+						else
+							do pcre_replace with regex entry and replace string
+						endif
+					enddo
+				else
+					do pcre_replace with regex string and replace string
+				endif
+			enddo
+		else
+			do pcre_replace with strings
+		endif
+	*/
 }
 /* }}} */
 
