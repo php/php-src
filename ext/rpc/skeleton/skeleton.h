@@ -32,4 +32,12 @@ ZEND_MINFO_FUNCTION(skeleton);
 ZEND_FUNCTION(skeleton_function);
 /**/
 
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * tab-width: 4
+ * End:
+ * vim600: fdm=marker
+ * vim: sw=4 ts=4 noet
+ */
 #endif /* SKELETON_H */

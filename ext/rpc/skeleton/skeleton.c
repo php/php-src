@@ -120,6 +120,9 @@ ZEND_GET_MODULE(skeleton);
 #endif
 
 /* rpc handler functions */
+
+/* {{{ skeleton_hash
+ */
 static int skeleton_hash(rpc_string name, rpc_string *hash, void *data, int num_args, char *arg_types, int type)
 {
 	/* TODO: implement your hash function here. if you have specified any of the HASH_AS_INT constants, simply set
@@ -133,13 +136,19 @@ static int skeleton_hash(rpc_string name, rpc_string *hash, void *data, int num_
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_name
+ */
 static int skeleton_name(rpc_string hash, rpc_string *name, void *data, int type)
 {
 	/* TODO: do the opposite of what you did above */
 	return FAILURE;
 }
+/* }}} */
 
+/* {{{ skeleton_ctor
+ */
 static int skeleton_ctor(rpc_string class_name, void **data, int num_args, zval **args[])
 {
 	/* TODO: use *data as a pointer to your internal data. if you want to enable your instances for
@@ -154,13 +163,19 @@ static int skeleton_ctor(rpc_string class_name, void **data, int num_args, zval 
 	 */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_dtor
+ */
 static int skeleton_dtor(void *data)
 {
 	/* TODO: free everything you alloc'ed above */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_describe
+ */
 static int skeleton_describe(rpc_string method_name, void *data, char **arg_types, unsigned char **ref_types)
 {
 	/* TODO: return a zend_parse_parameters() like string in arg_types to describe the
@@ -170,7 +185,10 @@ static int skeleton_describe(rpc_string method_name, void *data, char **arg_type
 	 */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_call
+ */
 static int skeleton_call(rpc_string method_name, void **data, zval *return_value, int num_args, zval **args[])
 {
 	/* TODO: implement call handler. if you passed back an arg_types string in the describe function the arguments
@@ -179,45 +197,73 @@ static int skeleton_call(rpc_string method_name, void **data, zval *return_value
 	 */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_get
+ */
 static int skeleton_get(rpc_string property_name, zval *return_value, void **data)
 {
 	/* TODO: implement get handler */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_set
+ */
 static int skeleton_set(rpc_string property_name, zval *value, void **data)
 {
 	/* TODO: implement set handler */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_compare
+ */
 static int skeleton_compare(void **data1, void **data2)
 {
 	/* TODO: implement compare handler */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_has_property
+ */
 static int skeleton_has_property(rpc_string property_name, void **data)
 {
 	/* TODO: implement has property handler */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_unset_property
+ */
 static int skeleton_unset_property(rpc_string property_name, void **data)
 {
 	/* TODO: implement unset property handler */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ skeleton_get_properties
+ */
 static int skeleton_get_properties(HashTable **properties, void **data)
 {
 	/* TODO: implement get properties handler */
 	return SUCCESS;
 }
+/* }}} */
 
 
 /* custom functions */
 ZEND_FUNCTION(skeleton_function)
 {
 }
+
+/*
+ * Local variables:
+ * c-basic-offset: 4
+ * tab-width: 4
+ * End:
+ * vim600: fdm=marker
+ * vim: sw=4 ts=4 noet
+ */
