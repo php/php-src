@@ -137,9 +137,9 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_errors,			NULL)
 	PHP_FE(imap_last_error,		NULL)
 #ifndef PHP_WIN32
-	PHP_FALIAS(imap_mail, warn_not_available, NULL)
-#else
 	PHP_FE(imap_mail,           NULL)
+#else
+	PHP_FALIAS(imap_mail, warn_not_available, NULL)
 #endif
 	PHP_FE(imap_search,			NULL)
 	PHP_FE(imap_utf7_decode,	NULL)
