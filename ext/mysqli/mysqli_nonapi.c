@@ -40,7 +40,6 @@ PHP_FUNCTION(mysqli_connect)
 	unsigned int 		hostname_len, username_len, passwd_len, dbname_len, socket_len;
 	long				port=0;
 
-
 	if (getThis() && !ZEND_NUM_ARGS()) {
 		RETURN_NULL();
 	}
@@ -89,6 +88,9 @@ PHP_FUNCTION(mysqli_connect)
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *) mysql_error(mysql->mysql) TSRMLS_CC);
 
 	mysql->mysql->reconnect = MyG(reconnect);
+
+	/* set our own local_infile handler */
+	php_set_local_infile_handler_default(mysql);
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
@@ -246,7 +248,6 @@ PHP_FUNCTION(mysqli_query)
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
-
 
 	if (!mysql_field_count(mysql->mysql)) {
 		if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {

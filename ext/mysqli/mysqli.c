@@ -107,16 +107,11 @@ void php_clear_stmt_bind(MY_STMT *stmt)
 
 /* {{{ php_clear_mysql */
 void php_clear_mysql(MY_MYSQL *mysql) {
-	int i;
-
-	for (i=0; i < 3; i++) {
-		if (&mysql->callback_func[i]) {
-			zval_dtor(&mysql->callback_func[i]);
-		}
-	}
-
-	if (mysql->local_infile) {
-		zval_ptr_dtor(&mysql->local_infile);
+	if (mysql->li_read) {
+		printf("freeing...\n");
+		efree(Z_STRVAL_P(mysql->li_read));
+		FREE_ZVAL(mysql->li_read);
+		mysql->li_read = NULL;
 	}
 }
 /* }}} */
@@ -774,15 +769,23 @@ if (a) {\
 memset(source, 0, LOCAL_INFILE_ERROR_LEN);\
 memcpy(source, dest, LOCAL_INFILE_ERROR_LEN-1);
 
+/* {{{ void php_set_local_infile_handler_default 
+*/
+void php_set_local_infile_handler_default(MY_MYSQL *mysql) {
+	/* register internal callback functions */
+	mysql_set_local_infile_handler(mysql->mysql, &php_local_infile_init, &php_local_infile_read,
+				&php_local_infile_end, &php_local_infile_error, (void *)mysql);
+	mysql->li_read = NULL;
+}
+/* }}} */
+
 /* {{{ php_local_infile_init
  */
 int php_local_infile_init(void **ptr, const char *filename, void *userdata)
 {
 	mysqli_local_infile			*data;
 	MY_MYSQL 					*mysql;
-	zval						***callback_args;
-	int							argc = 2;
-	int							i, rc = 0;
+	php_stream_context 			*context = NULL;
 
 	TSRMLS_FETCH();
 
@@ -791,45 +794,28 @@ int php_local_infile_init(void **ptr, const char *filename, void *userdata)
 		return 1;
 	}
 
-	if (!(mysql = data->userdata = userdata)) {
+	if (!(mysql = (MY_MYSQL *)userdata)) {
 		LOCAL_INFILE_ERROR_MSG(data->error_msg, ER(CR_UNKNOWN_ERROR));
 		return 1;
 	}
 
-	ALLOC_CALLBACK_ARGS(callback_args, 0, argc);
-
-	ZVAL_STRING(*callback_args[0], (char *)filename, 1);	
-	ZVAL_STRING(*callback_args[1], "", 1);	
-
-	if (call_user_function_ex(EG(function_table), 
-						NULL,
-						&mysql->callback_func[0],
-						&mysql->local_infile,
-						argc,	 	
-						callback_args,
-						0,
-						NULL TSRMLS_CC) == SUCCESS) {
-
-		/* check if user callback function returned a valid filehandle */ 
-		convert_to_string_ex(callback_args[1]);
-
-		if (Z_TYPE_P(mysql->local_infile) != IS_RESOURCE) {
-			if (!strlen(Z_STRVAL_P(*callback_args[1]))) {
-				LOCAL_INFILE_ERROR_MSG(data->error_msg, ER(CR_UNKNOWN_ERROR));
-			} else {
-				LOCAL_INFILE_ERROR_MSG(data->error_msg, Z_STRVAL_P(*callback_args[1]));
-			}
-			rc = 1;
-		} else {
+	/* check open_basedir */
+	if (PG(open_basedir)) {
+		if (php_check_open_basedir_ex(filename, 0 TSRMLS_CC) == -1) {
+			LOCAL_INFILE_ERROR_MSG(data->error_msg, "open_basedir restriction in effect. Unable to open file");
+			return 1;
 		}
-	} else {
-		LOCAL_INFILE_ERROR_MSG(data->error_msg, "Can't execute load data local init callback function");
-		rc = 1;
 	}
 
-	FREE_CALLBACK_ARGS(callback_args, 0, argc);
+	mysql->li_stream = php_stream_open_wrapper_ex((char *)filename, "r", 0, NULL, context);
 
-	return rc;
+	if (mysql->li_stream == NULL) {
+		return 1;
+	}
+
+	data->userdata = mysql;
+
+	return 0;
 }
 /* }}} */
 
@@ -838,7 +824,8 @@ int php_local_infile_read(void *ptr, char *buf, uint buf_len)
 	mysqli_local_infile 		*data;
 	MY_MYSQL 					*mysql;
 	zval						***callback_args;
-	zval						*retval;	
+	zval						*retval;
+	zval						*fp;
 	int							argc = 4;
 	int							i;
 	long						rc;
@@ -846,21 +833,35 @@ int php_local_infile_read(void *ptr, char *buf, uint buf_len)
 	TSRMLS_FETCH();
 
 	data= (mysqli_local_infile *)ptr;
-
 	mysql = data->userdata;
+
+	/* default processing */
+	if (!mysql->li_read) {
+		int			count;
+
+		count = (int)php_stream_read(mysql->li_stream, buf, buf_len);
+
+		if (count < 0) {
+			LOCAL_INFILE_ERROR_MSG(data->error_msg, ER(2));
+		}
+
+		return count;
+	}
 
 	ALLOC_CALLBACK_ARGS(callback_args, 1, argc);
 	
 	/* set parameters: filepointer, buffer, buffer_len, errormsg */
 
-	callback_args[0] = &mysql->local_infile;	
+	MAKE_STD_ZVAL(fp);
+	php_stream_to_zval(mysql->li_stream, fp);
+	callback_args[0] = &fp;
 	ZVAL_STRING(*callback_args[1], "", 1);	
 	ZVAL_LONG(*callback_args[2], buf_len);	
 	ZVAL_STRING(*callback_args[3], "", 1);	
 	
 	if (call_user_function_ex(EG(function_table), 
 						NULL,
-						&mysql->callback_func[1],
+						mysql->li_read,
 						&retval,
 						argc,	 	
 						callback_args,
@@ -888,6 +889,7 @@ int php_local_infile_read(void *ptr, char *buf, uint buf_len)
 	}
 	
 	FREE_CALLBACK_ARGS(callback_args, 1, argc);
+	efree(fp);
 	return rc;
 }
 
@@ -896,6 +898,7 @@ int php_local_infile_read(void *ptr, char *buf, uint buf_len)
 int php_local_infile_error(void *ptr, char *error_msg, uint error_msg_len)
 {
 	mysqli_local_infile *data = (mysqli_local_infile *) ptr;
+
 	if (data) {
 		strcpy(error_msg, data->error_msg);
 		return 2000;
@@ -911,42 +914,19 @@ void php_local_infile_end(void *ptr)
 {
 	mysqli_local_infile			*data;
 	MY_MYSQL 					*mysql;
-	zval						***callback_args;
-	zval						*retval;	
-	int							argc = 1;
-	int							i;
 
 	TSRMLS_FETCH();
 
 	data= (mysqli_local_infile *)ptr;
 
-	mysql = data->userdata;
-
-	ALLOC_CALLBACK_ARGS(callback_args, 1, argc);
-	
-	/* set parameters: filepointer, buffer, buffer_len, errormsg */
-
-	callback_args[0] = &mysql->local_infile;	
-
-	call_user_function_ex(EG(function_table), 
-						NULL,
-						&mysql->callback_func[2],
-						&retval,
-						argc,	 	
-						callback_args,
-						0,
-						NULL TSRMLS_CC);
-
-	if (retval) {
-		zval_ptr_dtor(&retval);
+	if (!(mysql = data->userdata)) {
+		efree(data);
+		return;
 	}
 
-	if (mysql->local_infile) {
-		zval_ptr_dtor(&mysql->local_infile);
-	}
-
-	FREE_CALLBACK_ARGS(callback_args, 1, argc);
-//	efree(data);
+	php_stream_close(mysql->li_stream);
+	//efree(data);
+	return;	
 }
 /* }}} */
 
