@@ -1,3 +1,19 @@
+2002-03-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Add 'import const' example.
+
+2002-03-08  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c: - Support importing constants. e.g.:
+    <?php
+
+    	class MyOuterClass {
+    		const Hello = "Hello, World\n";
+    	}
+
+    	import const Hello from MyOuterClass;
+    	print Hello;
+
 2002-03-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES:
