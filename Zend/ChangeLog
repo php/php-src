@@ -1,3 +1,8 @@
+2004-08-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Remove unnecessary check
+
 2004-08-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c:

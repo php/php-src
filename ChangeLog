@@ -1,3 +1,14 @@
+2004-08-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Remove unnecessary check
+
+2004-08-15  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      fixed default for mysqli_fetch_array
+
 2004-08-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_compile.c:
