@@ -1,3 +1,12 @@
+2003-06-22  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c
+      zend_language_parser.y:
+      Fix complex expressions for class names in NEW
+
+    * zend_language_parser.y:
+      Simplify
+
 2003-06-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_language_parser.y:
