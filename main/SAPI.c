@@ -284,6 +284,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(sapi_headers).http_response_code = 200;
 	*/
 	SG(sapi_headers).http_status_line = NULL;
+	SG(sapi_headers).mimetype = NULL;
 	SG(headers_sent) = 0;
 	SG(read_post_bytes) = 0;
 	SG(request_info).post_data = NULL;
@@ -448,6 +449,10 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 				}
 				mimetype = estrdup(ptr);
 				newlen = sapi_apply_default_charset(&mimetype, len TSRMLS_CC);
+				if (!SG(sapi_headers).mimetype){
+					SG(sapi_headers).mimetype = estrdup(mimetype);
+				}
+
 				if (newlen != 0) {
 					newlen += sizeof("Content-type: ");
 					newheader = emalloc(newlen);
@@ -459,6 +464,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 					*colon_offset = '\0';
 					efree(header_line);
 				}
+				
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
 			} else if (!STRCASECMP(header_line, "Location")) {
@@ -627,6 +633,9 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	
 	if (SG(sapi_headers).http_status_line) {
 		efree(SG(sapi_headers).http_status_line);
+	}
+	if (SG(sapi_headers).mimetype) {
+		efree(SG(sapi_headers).mimetype);
 	}
 	
 	return ret;
