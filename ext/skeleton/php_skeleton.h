@@ -43,9 +43,11 @@ ZEND_END_MODULE_GLOBALS(extname)
 */
 
 #ifdef ZTS
+#define EXTNAMEG_HANDLE (*extname_globals)
 #define EXTNAMEG(v) (extname_globals->v)
 #define EXTNAMELS_FETCH() php_extname_globals *extname_globals = ts_resource(extname_globals_id)
 #else
+#define EXTNAMEG_HANDLE (extname_globals)
 #define EXTNAMEG(v) (extname_globals.v)
 #define EXTNAMELS_FETCH()
 #endif
