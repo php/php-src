@@ -31,9 +31,9 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.11-dev</version>
+    <version>0.11</version>
     <state>beta</state>
-    <date>YYYY-MM-DD</date>
+    <date>2002-05-28</date>
     <notes>
 * fix: "help" command was broken
 * new command: "info"
