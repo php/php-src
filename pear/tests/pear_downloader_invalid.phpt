@@ -299,7 +299,7 @@ array(0) {
 array(0) {
 }
 Test download of invalid release state:
-Caught error: Invalid postfix '-burgerking', be sure to pass a valid PEAR version number or release state
+Caught error: Invalid suffix '-burgerking', be sure to pass a valid PEAR version number or release state
 string(10) "pear_error"
 array(0) {
 }

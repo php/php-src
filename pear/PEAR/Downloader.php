@@ -456,9 +456,9 @@ class PEAR_Downloader extends PEAR_Common
                 if ($version == 0) {
                     return $this->raiseError("No release with state '$state' found for '$pkgfile'");
                 }
-            // invalid postfix passed
+            // invalid suffix passed
             } else {
-                return $this->raiseError("Invalid postfix '-$version', be sure to pass a valid PEAR ".
+                return $this->raiseError("Invalid suffix '-$version', be sure to pass a valid PEAR ".
                                          "version number or release state");
             }
         // Guess what to download
