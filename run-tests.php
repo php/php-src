@@ -138,9 +138,9 @@ if (function_exists('is_executable') && !@is_executable($php)) {
 
 // Check whether a detailed log is wanted.
 if (getenv('TEST_PHP_DETAILED')) {
-	define('DETAILED', getenv('TEST_PHP_DETAILED'));
+	$DETAILED = getenv('TEST_PHP_DETAILED');
 } else {
-	define('DETAILED', 0);
+	$DETAILED = 0;
 }
 
 // Check whether user test dirs are requested.
@@ -163,7 +163,6 @@ More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 save_text($info_file, $php_info);
 $ini_overwrites = array(
 		'output_handler=',
-		'zlib.output_compression=Off',
 		'open_basedir=',
 		'safe_mode=0',
 		'disable_functions=',
@@ -182,8 +181,6 @@ $ini_overwrites = array(
 		'auto_prepend_file=',
 		'auto_append_file=',
 		'magic_quotes_runtime=0',
-		'xdebug.default_enable=0',
-		'session.auto_start=0'
 	);
 $info_params = array();
 settings2array($ini_overwrites,$info_params);
@@ -191,6 +188,22 @@ settings2params($info_params);
 $php_info = `$php $info_params $info_file`;
 @unlink($info_file);
 define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
+
+// check for extensions that need special handling and regenerate
+$php_extenions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
+save_text($info_file, $php_extenions);
+$php_extenions = explode(',',`$php $info_params $info_file`);
+$info_params_ex = array(
+		'session' => array('session.auto_start=0'),
+		'zlib' => array('zlib.output_compression=Off'),
+		'xdebug' => array('xdebug.default_enable=0'),
+	);
+foreach($info_params_ex as $ext => $ini_overwrites_ex) {
+	if (in_array($ext, $php_extenions)) {
+		$ini_overwrites = array_merge($ini_overwrites, $ini_overwrites_ex);
+	}
+}
+@unlink($info_file);
 
 // Write test context information.
 function write_information()
@@ -235,6 +248,9 @@ if (isset($argc) && $argc > 1) {
 						break;
 					}
 					$i--;
+				case 'v':
+					$DETAILED = true;
+					break;
 				case 'w':
 					$failed_tests_file = fopen($argv[++$i], 'w+t');
 					break;
@@ -275,6 +291,8 @@ Options:
 
     -d foo=bar  Pass -d option to the php binary (Define INI entry foo
                 with value 'bar')
+
+    -v          Verbose mode.
 
     -h <file>   This Help.
 
@@ -587,10 +605,12 @@ function mail_qa_team($data, $compression, $status = FALSE)
 
 function save_text($filename,$text)
 {
+	global $DETAILED;
+
 	$fp = @fopen($filename,'w') or error("Cannot open file '" . $filename . "' (save_text)");
 	fwrite($fp,$text);
 	fclose($fp);
-	if (1 < DETAILED) echo "
+	if (1 < $DETAILED) echo "
 FILE $filename {{{
 $text
 }}} 
@@ -667,9 +687,9 @@ function system_with_timeout($commandline)
 
 function run_test($php, $file, $test_cnt, $test_idx)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED;
 
-	if (DETAILED) echo "
+	if ($DETAILED) echo "
 =================
 TEST $file
 ";
@@ -844,7 +864,7 @@ TEST $file
 		$cmd = "$php$pass_options$ini_settings -f \"$tmp_file\" $args 2>&1";
 	}
 
-	if (DETAILED) echo "
+	if ($DETAILED) echo "
 CONTENT_LENGTH  = " . getenv("CONTENT_LENGTH") . "
 CONTENT_TYPE    = " . getenv("CONTENT_TYPE") . "
 PATH_TRANSLATED = " . getenv("PATH_TRANSLATED") . "
