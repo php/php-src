@@ -76,7 +76,7 @@ PHP_FUNCTION(dom_text_text)
 
 /* {{{ proto wholeText	string	
 readonly=yes 
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Text3-wholeText
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
 Since: DOM Level 3
 */
 int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -98,10 +98,8 @@ int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 
-
-
 /* {{{ proto domtext dom_text_split_text(unsigned long offset);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-38853C1D
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since: 
 */
 PHP_FUNCTION(dom_text_split_text)
@@ -148,9 +146,11 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlFree(first);
 	xmlFree(second);
 
-	nnode->type = XML_ELEMENT_NODE;
-	xmlAddNextSibling(node, nnode);
-	nnode->type = XML_TEXT_NODE;
+	if (node->parent != NULL) {
+		nnode->type = XML_ELEMENT_NODE;
+		xmlAddNextSibling(node, nnode);
+		nnode->type = XML_TEXT_NODE;
+	}
 	
 	return_value = php_dom_create_object(nnode, &ret, NULL, return_value, intern TSRMLS_CC);
 }
@@ -158,18 +158,29 @@ PHP_FUNCTION(dom_text_split_text)
 
 
 /* {{{ proto boolean dom_text_is_whitespace_in_element_content();
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Text3-isWhitespaceInElementContent
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 {
- DOM_NOT_IMPLEMENTED();
+	xmlNodePtr  node;
+	dom_object	*intern;
+
+	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr, intern);
+
+	DOM_NO_ARGS();
+
+	if (xmlIsBlankNode(node)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} end dom_text_is_whitespace_in_element_content */
 
 
 /* {{{ proto domtext dom_text_replace_whole_text(string content);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Text3-replaceWholeText
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-replaceWholeText
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_text_replace_whole_text)
