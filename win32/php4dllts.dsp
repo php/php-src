@@ -1907,10 +1907,6 @@ SOURCE=..\ext\standard\php_mail.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\mcal\php_mcal.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\odbc\php_odbc.h
 # End Source File
 # Begin Source File
