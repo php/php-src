@@ -1,7 +1,7 @@
 <!--
   -->
 
-<!ELEMENT extension (name|summary|description|license|maintainers|logo|release|changelog|functions|constants|globals|deps|resources)*>
+<!ELEMENT extension (name|summary|description|license|maintainers|logo|release|changelog|functions|constants|globals|deps|resources|code)*>
 
 <!ELEMENT name (#PCDATA)>
 
@@ -13,9 +13,9 @@
 
 <!ELEMENT maintainer (user|role|name|email)*>
 
-<!ELEMENT logo>
+<!ELEMENT logo (#PCDATA)>
 <!ATTLIST logo
-  src CDATA #REQURED
+  src CDATA #REQUIRED
 >
 
 <!ELEMENT user (#PCDATA)>
@@ -46,7 +46,9 @@
 >
 <!ELEMENT proto (#PCDATA)>  
 <!ELEMENT code  (#PCDATA)>  
-
+<!ATTLIST code  
+  role (header|code) "code"
+>
 <!ELEMENT constants (constant)*>
 <!ELEMENT constant (#PCDATA)>
 <!ATTLIST constant
@@ -85,7 +87,7 @@
 >
 
 <!ELEMENT resources (resource)*>
-<!ELEMENT resource (destruct)?>
+<!ELEMENT resource (description?, destruct?)>
 <!ATTLIST resource
   name       CDATA #REQUIRED
   payload    CDATA #IMPLIED
