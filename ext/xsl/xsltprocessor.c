@@ -35,13 +35,13 @@
 */
 
 zend_function_entry php_xsl_xsltprocessor_class_functions[] = {
-	PHP_FALIAS(import_stylesheet, xsl_xsltprocessor_import_stylesheet, NULL)
-	PHP_FALIAS(transform_to_doc, xsl_xsltprocessor_transform_to_doc, NULL)
-	PHP_FALIAS(transform_to_uri, xsl_xsltprocessor_transform_to_uri, NULL)
-	PHP_FALIAS(transform_to_xml, xsl_xsltprocessor_transform_to_xml, NULL)
-	PHP_FALIAS(set_parameter, xsl_xsltprocessor_set_parameter, NULL)
-	PHP_FALIAS(get_parameter, xsl_xsltprocessor_get_parameter, NULL)
-	PHP_FALIAS(remove_parameter, xsl_xsltprocessor_remove_parameter, NULL)
+	PHP_FALIAS(importStylesheet, xsl_xsltprocessor_import_stylesheet, NULL)
+	PHP_FALIAS(transformToDoc, xsl_xsltprocessor_transform_to_doc, NULL)
+	PHP_FALIAS(transformToUri, xsl_xsltprocessor_transform_to_uri, NULL)
+	PHP_FALIAS(transformToXml, xsl_xsltprocessor_transform_to_xml, NULL)
+	PHP_FALIAS(setParameter, xsl_xsltprocessor_set_parameter, NULL)
+	PHP_FALIAS(getParameter, xsl_xsltprocessor_get_parameter, NULL)
+	PHP_FALIAS(removeParameter, xsl_xsltprocessor_remove_parameter, NULL)
 	{NULL, NULL, NULL}
 };
 
