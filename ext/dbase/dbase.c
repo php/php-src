@@ -132,7 +132,7 @@ PHP_FUNCTION(dbase_open) {
 		RETURN_FALSE;
 	}
 	
-	if (php_check_open_basedir(dbf_name->value.str.val)) {
+	if (php_check_open_basedir(dbf_name->value.str.val TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -599,7 +599,7 @@ PHP_FUNCTION(dbase_create) {
 		RETURN_FALSE;
 	}
 	
-	if (php_check_open_basedir(Z_STRVAL_P(filename))) {
+	if (php_check_open_basedir(Z_STRVAL_P(filename) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 

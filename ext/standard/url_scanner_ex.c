@@ -887,12 +887,9 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 PHP_MINIT_FUNCTION(url_scanner)
 {
 	url_adapt_state_ex_t *ctx;
-	//TSRMLS_FETCH();
 	
 	ctx = &BG(url_adapt_state_ex);
-
-	ctx->tags = NULL;
-	
+	ctx->tags = NULL;	
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }

@@ -707,7 +707,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			}
 		}
 		if (cgi || SG(request_info).path_translated) {
-			retval = php_fopen_primary_script(&file_handle);
+			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 		}
 
 		if (cgi && (retval == FAILURE)) {

@@ -33,7 +33,7 @@
 
 /* {{{ php_fopen_url_wrap_php
  */
-FILE *php_fopen_url_wrap_php(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+FILE *php_fopen_url_wrap_php(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
 {
 	const char *res = path + 6;
 

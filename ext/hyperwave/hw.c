@@ -2800,7 +2800,8 @@ PHP_FUNCTION(hw_insertdocument) {
 
 /* {{{ proto hwdoc hw_new_document(string objrec, string data, int size)
    Create a new document */
-PHP_FUNCTION(hw_new_document) {
+PHP_FUNCTION(hw_new_document)
+{
 	pval *arg1, *arg2, *arg3;
 	char *ptr;
 	hw_document *doc;
@@ -2835,7 +2836,8 @@ PHP_FUNCTION(hw_new_document) {
 #define BUFSIZE 8192
 /* {{{ proto hwdoc hw_new_document_from_file(string objrec, string filename)
    Create a new document from a file */
-PHP_FUNCTION(hw_new_document_from_file) {
+PHP_FUNCTION(hw_new_document_from_file)
+{
 	pval **arg1, **arg2;
 	int len, type;
 	char *ptr;
@@ -2854,7 +2856,7 @@ PHP_FUNCTION(hw_new_document_from_file) {
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
 
-	fp = php_fopen_wrapper((*arg2)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper((*arg2)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
 	if (!fp && !socketd){
 		if (issock != BAD_URL) {
 			char *tmp = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));

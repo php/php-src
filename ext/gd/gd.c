@@ -409,7 +409,7 @@ PHP_FUNCTION(imageloadfont)
 #ifdef PHP_WIN32
 	fp = VCWD_FOPEN(Z_STRVAL_PP(file), "rb");
 #else
-	fp = php_fopen_wrapper(Z_STRVAL_PP(file), "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper(Z_STRVAL_PP(file), "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL TSRMLS_CC);
 #endif
 	if (fp == NULL) {
 		php_error(E_WARNING, "ImageFontLoad: unable to open file");
@@ -1100,7 +1100,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 #ifdef PHP_WIN32
 	fp = VCWD_FOPEN(fn, "rb");
 #else
-	fp = php_fopen_wrapper(fn, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
+	fp = php_fopen_wrapper(fn, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL TSRMLS_CC);
 #endif
 	if (!fp && !socketd) {
 		php_strip_url_passwd(fn);
@@ -1312,7 +1312,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	}
 
 	if ((argc == 2) || (argc == 3 && Z_STRLEN_PP(file))) {
-		if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
+		if (!fn || fn == empty_string || php_check_open_basedir(fn TSRMLS_CC)) {
 			php_error(E_WARNING, "%s: invalid filename '%s'", get_active_function_name(TSRMLS_C), fn);
 			RETURN_FALSE;
 		}
@@ -3404,13 +3404,13 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 		}
 
 		/* Check origin file */
-		if (!fn_org || fn_org == empty_string || php_check_open_basedir(fn_org)) {
+		if (!fn_org || fn_org == empty_string || php_check_open_basedir(fn_org TSRMLS_CC)) {
 			php_error (E_WARNING, "%s: invalid origin filename '%s'", get_active_function_name(TSRMLS_C), fn_org);
 			RETURN_FALSE;
 		}
 
 		/* Check destination file */
-		if (!fn_dest || fn_dest == empty_string || php_check_open_basedir(fn_dest)) {
+		if (!fn_dest || fn_dest == empty_string || php_check_open_basedir(fn_dest TSRMLS_CC)) {
 			php_error (E_WARNING, "%s: invalid destination filename '%s'", get_active_function_name(TSRMLS_C), fn_dest);
 			RETURN_FALSE;
 		}

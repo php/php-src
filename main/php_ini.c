@@ -251,7 +251,7 @@ int php_init_config(char *php_ini_path_override)
 	PG(safe_mode) = 0;
 	PG(open_basedir) = NULL;
 	
-	fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path);
+	fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
 	if (free_ini_search_path) {
 		efree(php_ini_search_path);
 	}
