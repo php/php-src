@@ -412,7 +412,7 @@ PHPAPI int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC) {
 }
 /* }}} */
 
-/* {{{ php_mb_parse_encoding_array
+/* {{{ static int php_mb_parse_encoding_array()
  *  Return 0 if input contains any illegal encoding, otherwise 1.
  *  Even if any illegal encoding is detected the result may contain a list 
  *  of parsed encodings.
@@ -489,7 +489,7 @@ php_mb_parse_encoding_array(zval *array, int **return_list, int *return_size, in
 /* }}} */
 
 #if HAVE_MBREGEX
-/* {{{ php_mbregex_free_cache */
+/* {{{ static void php_mbregex_free_cache() */
 static void
 php_mbregex_free_cache(mb_regex_t *pre) 
 {
@@ -1509,38 +1509,6 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 
 #define IS_SJIS1(c) ((((c)>=0x81 && (c)<=0x9f) || ((c)>=0xe0 && (c)<=0xf5)) ? 1 : 0)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
-
-/* {{{ PHPAPI char *php_mb_strrchr() */
-PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC)
-{
-	unsigned char *p = (unsigned char *)s, *last = NULL;
-	while(*p++) {
-		if (*p == c) {
-			last = p;
-		}
-		if (*p == '\0'){
-			break;
-		}
-		if (MBSTRG(current_language) == mbfl_no_language_japanese 
-			&& IS_SJIS1(*p) && IS_SJIS2(*(p+1))) {
-			p++;
-		}
-	}
-	return last;
-}
-/* }}} */
-
-/* {{{ PHPAPI int php_mb_is_mb_leadbyte() */
-PHPAPI int php_mb_is_mb_leadbyte(const char *s TSRMLS_DC)
-{
-	unsigned char *p = (unsigned char *)s;
-	if (MBSTRG(current_language) == mbfl_no_language_japanese 
-		&& IS_SJIS1(*p) && IS_SJIS2(*(p+1))) {
-		return 1;
-	}
-	return 0;
-}
-/* }}} */
 
 /* {{{ SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
  * http input processing */
@@ -3474,6 +3442,79 @@ PHP_FUNCTION(mb_get_info)
 PHPAPI int php_mb_encoding_translation(TSRMLS_D) 
 {
 	return MBSTRG(encoding_translation);
+}
+/* }}} */
+
+/* {{{ PHPAPI size_t php_mb_mbchar_bytes_ex() */
+PHPAPI size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
+{
+	if (enc != NULL) {
+		if(enc->flag & MBFL_ENCTYPE_MBCS) {
+			if(enc->mblen_table != NULL) {
+				if (*s != '\0') return enc->mblen_table[*(unsigned char *)s];
+			}
+		} else if (enc->flag & (MBFL_ENCTYPE_WCS2BE | MBFL_ENCTYPE_WCS2LE)) {
+			return 2;
+		} else if (enc->flag & (MBFL_ENCTYPE_WCS4BE | MBFL_ENCTYPE_WCS4LE)) {
+			return 4;
+		}
+	}
+	return 1;
+}
+/* }}} */
+
+/* {{{ PHPAPI size_t php_mb_mbchar_bytes() */
+PHPAPI size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC)
+{
+	return php_mb_mbchar_bytes_ex(s,
+		mbfl_no2encoding(MBSTRG(internal_encoding)));
+}
+/* }}} */
+
+/* {{{ PHPAPI char *php_mb_safe_strrchr_ex() */
+PHPAPI char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
+{
+	register const char *p = s;
+	char *last;
+
+	if (nbytes == (size_t)-1) {
+		while (*p != '\0') {
+			if (*p == c) {
+				last = (char *)p;
+			}
+			p += php_mb_mbchar_bytes_ex(p, enc);
+		}
+	} else {
+		register size_t bcnt = nbytes;
+		register size_t nbytes_char;
+		while (bcnt > 0) {
+			if (*p == c) {
+				last = (char *)p;
+			}
+			nbytes_char = php_mb_mbchar_bytes_ex(p, enc);
+			if (bcnt < nbytes_char) {
+				return NULL;
+			}
+			p += nbytes_char;
+			bcnt -= nbytes_char;
+		}
+	}
+	return last;
+}
+/* }}} */
+
+/* {{{ PHPAPI char *php_mb_safe_strrchr() */
+PHPAPI char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes TSRMLS_DC)
+{
+	return php_mb_safe_strrchr_ex(s, c, nbytes,
+		mbfl_no2encoding(MBSTRG(internal_encoding)));
+}
+/* }}} */
+
+/* {{{ PHPAPI char *php_mb_strrchr() */
+PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC)
+{
+	return php_mb_safe_strrchr(s, c, -1 TSRMLS_CC);
 }
 /* }}} */
 
