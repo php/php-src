@@ -2059,7 +2059,9 @@ send_by_ref:
 										new_op_array = compile_files(1 CLS_CC, 1, &file_handle);
 										if (new_op_array) {
 											pass_include_eval(new_op_array);
-										}	
+										} else {
+											fclose(file_handle.handle.fp);
+										}
 									} else {
 										fclose(file_handle.handle.fp);
 									}
