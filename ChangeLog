@@ -1,3 +1,59 @@
+2001-05-16  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/config.m4
+      ext/curl/curl.c
+      ext/curl/php_curl.h:
+    Add a compile check for the cURL version and fix the compile in general.
+
+2001-05-16  James Moore  <James@phpuk.org>
+
+    * ext/gd/php_gd.h:  - Sync prototype and definition of phpi_get_le_gd
+
+2001-05-16  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * sapi/apache/mod_php4.c:
+
+    * sapi/apache/mod_php4.c: MFH
+
+    * sapi/apache/mod_php4.c: Remove redundancy
+
+
+    * sapi/apache/mod_php4.c: fix windows build.
+
+
+2001-05-16  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/Log/file.php:
+    Close the logfile after each write to prevent blocking due to concurrency.
+
+2001-05-16  James Moore  <James@phpuk.org>
+
+    * win32/php_modules.dsw:  - Add dbx extension to php_modules workspace
+
+2001-05-16  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c: Merge memory usage into memory limit
+
+2001-05-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/gd/Makefile.in: MFH r1.9
+
+    * ext/gd/Makefile.in: Fix for #10900.
+
+    Submitted by: cech@debian.org
+
+2001-05-16  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/apache/mod_php4.c: MFH
+
+    * sapi/apache/mod_php4.c: add missing apls_fetch
+
+2001-05-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/image.c: MFH
+
+    * ext/standard/image.c: Fixed bugs: #10297, #10615, #10783, #10880
+
 2001-05-15  Jon Parise  <jon@csh.rit.edu>
 
     * ext/standard/basic_functions.c
