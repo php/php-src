@@ -626,7 +626,7 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(fopenstream, warn_not_available,								NULL)
 #endif
 
-#if HAVE_SYS_TIME_H
+#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 	PHP_FE(socket_set_timeout,												NULL)
 #else
 	PHP_FALIAS(socket_set_timeout, warn_not_available,						NULL)

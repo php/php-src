@@ -878,7 +878,7 @@ PHP_FUNCTION(set_socket_blocking)
    Set timeout on socket read to seconds + microseonds */
 PHP_FUNCTION(socket_set_timeout)
 {
-#if HAVE_SYS_TIME_H
+#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 	zval **socket, **seconds, **microseconds;
 	int type;
 	void *what;
