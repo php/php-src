@@ -74,7 +74,6 @@ void init_executor(CLS_D ELS_DC)
 	EG(error_zval).refcount = 1;
 	EG(error_zval).is_ref=0;
 	EG(error_zval_ptr)=&EG(error_zval);
-	zend_ptr_stack_init(&EG(function_symbol_table_stack));
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
@@ -112,7 +111,6 @@ void init_executor(CLS_D ELS_DC)
 
 void shutdown_executor(ELS_D)
 {
-	zend_ptr_stack_destroy(&EG(function_symbol_table_stack));
 	zend_ptr_stack_destroy(&EG(arg_types_stack));
 	zend_stack_destroy(&EG(overloaded_objects_stack));
 			
@@ -280,7 +278,6 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		return FAILURE;
 	}
 
-	zend_ptr_stack_push(&EG(function_symbol_table_stack), function_state.function_symbol_table);
 	function_state.function_symbol_table = (HashTable *) emalloc(sizeof(HashTable));
 	zend_hash_init(function_state.function_symbol_table, 0, NULL, PVAL_PTR_DTOR, 0);
 
@@ -326,7 +323,6 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 	efree(EG(active_symbol_table));
 	EG(active_symbol_table) = calling_symbol_table;
 	EG(function_state_ptr) = original_function_state_ptr;
-	function_state.function_symbol_table = zend_ptr_stack_pop(&EG(function_symbol_table_stack));
 
 	return SUCCESS;
 }

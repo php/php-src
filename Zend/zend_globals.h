@@ -148,7 +148,6 @@ struct _zend_executor_globals {
 	zval *error_zval_ptr;
 
 	zend_function_state *function_state_ptr;
-	zend_ptr_stack function_symbol_table_stack;
 	zend_ptr_stack arg_types_stack;
 	zend_stack overloaded_objects_stack;
 	zval global_return_value;
