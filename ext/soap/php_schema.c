@@ -358,8 +358,9 @@ static int schema_restriction_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNode
 	xmlAttrPtr base;
 
 	base = get_attribute(restType->properties, "base");
-	if (base != NULL)
+	if (base != NULL) {
 		cur_type->encode = get_encoder_from_prefix((*sdl), restType, base->children->content);
+	}
 
 	content = get_node(restType->children, "simpleType");
 	if (content != NULL) {
