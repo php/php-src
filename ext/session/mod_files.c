@@ -49,6 +49,7 @@ typedef struct {
 	char *basedir;
 	size_t basedir_len;
 	int dirdepth;
+	size_t st_size;
 } ps_files;
 
 ps_module ps_mod_files = {
@@ -140,21 +141,18 @@ static void ps_files_open(ps_files *data, const char *key)
 		
 #ifdef O_EXCL
 		data->fd = VCWD_OPEN((buf, O_RDWR | O_BINARY));
-		if (data->fd == -1) {
-			if (errno == ENOENT) {
-				data->fd = VCWD_OPEN((buf, O_EXCL | O_RDWR | O_CREAT | O_BINARY, 0600));
-			}
-		} else {
-			flock(data->fd, LOCK_EX);
-		}
+		
+		if (data->fd == -1 && errno == ENOENT) 
+			data->fd = VCWD_OPEN((buf, O_EXCL | O_RDWR | O_CREAT | O_BINARY, 0600));
 #else
 		data->fd = VCWD_OPEN((buf, O_CREAT | O_RDWR | O_BINARY, 0600));
-		if (data->fd != -1)
-			flock(data->fd, LOCK_EX);
 #endif
+		if (data->fd != -1) 
+			flock(data->fd, LOCK_EX);
 
 		if (data->fd == -1)
-			php_error(E_WARNING, "open(%s, O_RDWR) failed: %m (%d)", buf, errno);
+			php_error(E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, 
+					strerror(errno), errno);
 	}
 }
 
@@ -171,7 +169,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 
 	dir = opendir(dirname);
 	if (!dir) {
-		php_error(E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %m (%d)\n", dirname, errno);
+		php_error(E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %s (%d)\n", dirname, strerror(errno), errno);
 		return (0);
 	}
 
@@ -248,7 +246,7 @@ PS_CLOSE_FUNC(files)
 
 PS_READ_FUNC(files)
 {
-	int n;
+	ssize_t n;
 	struct stat sbuf;
 	PS_FILES_DATA;
 
@@ -259,12 +257,15 @@ PS_READ_FUNC(files)
 	if (fstat(data->fd, &sbuf))
 		return FAILURE;
 	
-	lseek(data->fd, 0, SEEK_SET);
-
-	*vallen = sbuf.st_size;
+	data->st_size = *vallen = sbuf.st_size;
 	*val = emalloc(sbuf.st_size);
 
+#ifdef HAVE_PREAD
+	n = pread(data->fd, *val, sbuf.st_size, 0);
+#else
+	lseek(data->fd, 0, SEEK_SET);
 	n = read(data->fd, *val, sbuf.st_size);
+#endif
 	if (n != sbuf.st_size) {
 		efree(*val);
 		return FAILURE;
@@ -275,16 +276,30 @@ PS_READ_FUNC(files)
 
 PS_WRITE_FUNC(files)
 {
+	ssize_t n;
 	PS_FILES_DATA;
 
 	ps_files_open(data, key);
 	if (data->fd < 0)
 		return FAILURE;
 
-	ftruncate(data->fd, 0);
+	/* 
+	 * truncate file, if the amount of new data is smaller than
+	 * the existing data set.
+	 */
+	
+	if (vallen < data->st_size)
+		ftruncate(data->fd, 0);
+
+#ifdef HAVE_PWRITE
+	n = pwrite(data->fd, val, vallen, 0);
+#else
 	lseek(data->fd, 0, SEEK_SET);
-	if (write(data->fd, val, vallen) != vallen) {
-		php_error(E_WARNING, "write failed: %m (%d)", errno);
+	n = write(data->fd, val, vallen);
+#endif
+
+	if (n != vallen) {
+		php_error(E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
 		return FAILURE;
 	}
 
