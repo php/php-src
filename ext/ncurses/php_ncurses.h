@@ -22,10 +22,6 @@
 
 #include <curses.h>
 
-#define _STRING(x) ((*x)->value.str.val)
-#define _INT(x)    ((*x)->value.lval)
-#define _HASH(x)   ((*x)->value.ht)
-
 extern int le_ncurses;
 
 extern zend_module_entry ncurses_module_entry;

@@ -146,30 +146,6 @@ PHP_MINFO_FUNCTION(ncurses)
    so that your module can be compiled into PHP, it exists only for testing
    purposes. */
 
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_ncurses_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_ncurses_compiled)
-{
-    zval **arg;
-    int len;
-    char string[256];
-
-    if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
-
-    convert_to_string_ex(arg);
-
-    len = sprintf(string, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "ncurses", Z_STRVAL_PP(arg));
-    RETURN_STRINGL(string, len, 1);
-}
-/* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and 
-   unfold functions in source code. See the corresponding marks just before 
-   function definition, where the functions purpose is also documented. Please 
-   follow this convention for the convenience of others editing your code.
-*/
 
 
 /*
