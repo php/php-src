@@ -59,6 +59,14 @@ typedef struct _znode {
 	} u;
 } znode;
 
+typedef struct _zend_execute_data zend_execute_data;
+
+#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data, zend_op_array *op_array TSRMLS_DC
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data, op_array TSRMLS_CC
+
+typedef int (*opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
+
+extern opcode_handler_t zend_opcode_handlers[512];
 
 typedef struct _zend_op {
 	zend_uchar opcode;
@@ -67,6 +75,7 @@ typedef struct _zend_op {
 	znode op2;
 	ulong extended_value;
 	uint lineno;
+	opcode_handler_t handler;
 } zend_op;
 
 
