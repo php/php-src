@@ -233,17 +233,17 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_parser,												NULL)
 	PHP_FE(domxml_parser_add_chunk,										NULL)
 	PHP_FE(domxml_parser_end,											NULL)
-	PHP_FE(domxml_parser_start_element,											NULL)
-	PHP_FE(domxml_parser_end_element,											NULL)
-	PHP_FE(domxml_parser_comment,											NULL)
-	PHP_FE(domxml_parser_characters,											NULL)
-	PHP_FE(domxml_parser_entity_reference,											NULL)
-	PHP_FE(domxml_parser_processing_instruction,											NULL)
-	PHP_FE(domxml_parser_cdata_section,											NULL)
-	PHP_FE(domxml_parser_namespace_decl,											NULL)
-	PHP_FE(domxml_parser_start_document,											NULL)
-	PHP_FE(domxml_parser_end_document,											NULL)
-	PHP_FE(domxml_parser_get_document,											NULL)
+	PHP_FE(domxml_parser_start_element,									NULL)
+	PHP_FE(domxml_parser_end_element,									NULL)
+	PHP_FE(domxml_parser_comment,										NULL)
+	PHP_FE(domxml_parser_characters,									NULL)
+	PHP_FE(domxml_parser_entity_reference,								NULL)
+	PHP_FE(domxml_parser_processing_instruction,						NULL)
+	PHP_FE(domxml_parser_cdata_section,									NULL)
+	PHP_FE(domxml_parser_namespace_decl,								NULL)
+	PHP_FE(domxml_parser_start_document,								NULL)
+	PHP_FE(domxml_parser_end_document,									NULL)
+	PHP_FE(domxml_parser_get_document,									NULL)
 
 #if defined(LIBXML_XPATH_ENABLED)
 	PHP_FE(xpath_new_context,											NULL)
@@ -311,7 +311,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(dumpmem,					domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem,				domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem_file,			domxml_dump_mem_file,			NULL)
-	PHP_FALIAS(dump_file,			domxml_dump_mem_file,			NULL)
+	PHP_FALIAS(dump_file,				domxml_dump_mem_file,			NULL)
 #if defined(LIBXML_HTML_ENABLED)
 	PHP_FALIAS(html_dump_mem,			domxml_html_dump_mem,			NULL)
 #endif
@@ -320,7 +320,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(xpath_new_context,		xpath_new_context,				NULL)
 	PHP_FALIAS(xptr_new_context,		xptr_new_context,				NULL)
 #endif
-	PHP_FALIAS(validate,			domxml_doc_validate,				first_arg_force_ref)
+	PHP_FALIAS(validate,				domxml_doc_validate,				first_arg_force_ref)
 
 	{NULL, NULL, NULL}
 };
@@ -1065,6 +1065,7 @@ static char **php_xmlparser_make_params(zval *idvars TSRMLS_DC)
 
 	return params;
 }
+/* }}} */
 /* end parser stuff */
 
 void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
@@ -1499,7 +1500,8 @@ PHP_RINIT_FUNCTION(domxml)
 	return SUCCESS;
 }
 
-
+/* PHP_MINIT_FUNCTION(domxml)
+ */
 PHP_MINIT_FUNCTION(domxml)
 {
 	zend_class_entry ce;
@@ -1649,10 +1651,9 @@ PHP_MINIT_FUNCTION(domxml)
 #endif
 #endif
 
-
 	return SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ proto int domxml_test(int id)
    Unity function for testing */
@@ -1668,14 +1669,18 @@ PHP_FUNCTION(domxml_test)
 }
 /* }}} */
 
-
+/* {{{ PHP_MINFO_FUNCTION(domxml)
+ */
 PHP_MINFO_FUNCTION(domxml)
 {
+	char buffer[128];
+	int major, minor, subminor;
 	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
 	php_info_print_table_start();
 	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "DOM/XML API Version", DOMXML_API_VERSION);
-	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
+/*	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION); */
+	php_info_print_table_row(2, "libxml Version", xmlParserVersion);
 #if defined(LIBXML_HTML_ENABLED)
 	php_info_print_table_row(2, "HTML Support", "enabled");
 #endif
@@ -1687,7 +1692,17 @@ PHP_MINFO_FUNCTION(domxml)
 #endif
 #if HAVE_DOMXSLT
 	php_info_print_table_row(2, "DOM/XSLT", "enabled");
-	php_info_print_table_row(2, "libxslt Version", LIBXSLT_DOTTED_VERSION);
+/*	php_info_print_table_row(2, "libxslt Version", LIBXSLT_DOTTED_VERSION); */
+	major = xsltLibxsltVersion/10000;
+	minor = (xsltLibxsltVersion - major * 10000) / 100;
+	subminor = (xsltLibxsltVersion - major * 10000 - minor * 100);
+	snprintf(buffer, 128, "%d.%d.%d", major, minor, subminor);
+	php_info_print_table_row(2, "libxslt Version", buffer);
+	major = xsltLibxmlVersion/10000;
+	minor = (xsltLibxmlVersion - major * 10000) / 100;
+	subminor = (xsltLibxmlVersion - major * 10000 - minor * 100);
+	snprintf(buffer, 128, "%d.%d.%d", major, minor, subminor);
+	php_info_print_table_row(2, "libxslt compiled against libxml Version", buffer);
 #if HAVE_DOMEXSLT
 	php_info_print_table_row(2, "DOM/EXSLT", "enabled");
 	php_info_print_table_row(2, "libexslt Version", LIBEXSLT_DOTTED_VERSION);
@@ -1696,6 +1711,7 @@ PHP_MINFO_FUNCTION(domxml)
 
 	php_info_print_table_end();
 }
+/* }}} */
 
 /* {{{ Methods of Class DomAttribute */
 
@@ -3556,6 +3572,8 @@ PHP_FUNCTION(domxml_dump_node)
 }
 /* }}} */
 
+/* {{{ idsHashScanner2(void *payload, void *data, xmlChar *name)
+ */
 static void idsHashScanner2(void *payload, void *data, xmlChar *name)
 {
 	zval *return_value = (zval *) data;
@@ -3569,6 +3587,7 @@ static void idsHashScanner2(void *payload, void *data, xmlChar *name)
 	child = php_domobject_new(nodep, &ret, NULL TSRMLS_CC);
 	add_next_index_zval(return_value, child);
 }
+/* }}} */
 
 /* {{{ proto string domxml_doc_ids(object doc_handle)
    Returns array of ids */
@@ -4022,9 +4041,6 @@ PHP_FUNCTION(domxml_parser_start_document)
 {
 	zval *id;
 	xmlParserCtxtPtr parserp;
-	char *chunk;
-	int chunk_len, error;
-	xmlChar **atts;
 	
 	DOMXML_PARAM_NONE(parserp, id, le_domxmlparserp);
 	startDocument(parserp);
@@ -4037,9 +4053,8 @@ PHP_FUNCTION(domxml_parser_start_document)
    ends a document */
 PHP_FUNCTION(domxml_parser_end_document)
 {
-	zval *id, *rv;
+	zval *id;
 	xmlParserCtxtPtr parserp;
-	int error, ret;
 	
 	DOMXML_PARAM_NONE(parserp, id, le_domxmlparserp);
 	endDocument(parserp);
@@ -4054,7 +4069,7 @@ PHP_FUNCTION(domxml_parser_start_element)
 	zval *id,*params = NULL;
 	xmlParserCtxtPtr parserp;
 	char *tagname;
-	int tagname_len, error;
+	int tagname_len;
 	char **atts = NULL;
 		
 	DOMXML_PARAM_THREE(parserp, id, le_domxmlparserp,"s|a", &tagname, &tagname_len, &params);
@@ -4078,7 +4093,7 @@ PHP_FUNCTION(domxml_parser_end_element)
 	zval *id;
 	xmlParserCtxtPtr parserp;
 	char *tagname;
-	int tagname_len, error;
+	int tagname_len;
 	
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &tagname, &tagname_len);
 
@@ -4100,7 +4115,7 @@ PHP_FUNCTION(domxml_parser_comment)
 	zval *id;
 	xmlParserCtxtPtr parserp;
 	char *commentstring;
-	int commentstring_len, error;
+	int commentstring_len;
 	
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &commentstring, &commentstring_len);
 
@@ -4122,7 +4137,7 @@ PHP_FUNCTION(domxml_parser_cdata_section)
 	zval *id;
 	xmlParserCtxtPtr parserp;
 	char *chunk;
-	int chunk_len, error;
+	int chunk_len;
 	
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &chunk, &chunk_len);
 
@@ -4144,7 +4159,7 @@ PHP_FUNCTION(domxml_parser_characters)
 	zval *id;
 	xmlParserCtxtPtr parserp;
 	char *charactersstring;
-	int characters_len, error;
+	int characters_len;
 	
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &charactersstring, &characters_len);
 
@@ -4166,7 +4181,7 @@ PHP_FUNCTION(domxml_parser_entity_reference)
 	zval *id;
 	xmlParserCtxtPtr parserp;
 	char *referencestring;
-	int reference_len, error;
+	int reference_len;
 	
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &referencestring, &reference_len);
 
@@ -4225,7 +4240,6 @@ PHP_FUNCTION(domxml_parser_namespace_decl)
 }
 /* }}} */
 
-
 /* {{{ proto bool domxml_parser_add_chunk(string chunk)
    adds xml-chunk to parser */
 PHP_FUNCTION(domxml_parser_add_chunk)
@@ -4271,15 +4285,12 @@ PHP_FUNCTION(domxml_parser_end)
 }
 /* }}} */
 
-
 /* {{{ proto object domxml_parser_get_document()
    Returns DomDocument from parser */
 PHP_FUNCTION(domxml_parser_get_document)
 {
 	zval *id,*rv = NULL;
 	xmlParserCtxtPtr parserp;
-	char *chunk = NULL;
-	int chunk_len = 0, error;
 	int ret;
 
 	DOMXML_PARAM_NONE(parserp, id, le_domxmlparserp);
@@ -4292,6 +4303,7 @@ PHP_FUNCTION(domxml_parser_get_document)
 	}
 }
 /* }}} */
+
 /* {{{ proto bool domxml_parser_set_keep_blanks(bool mode)
    Determines how to handle blanks */
 PHP_FUNCTION(domxml_parser_set_keep_blanks)
