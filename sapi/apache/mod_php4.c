@@ -1278,7 +1278,7 @@ handler_rec php_handlers[] =
 	{"application/x-httpd-php", send_parsed_php},
 	{"application/x-httpd-php-source", send_parsed_php_source},
 	{"text/html", php_xbithack_handler},
-//    {"php-script", php_response_handler},
+        {"php-script", php_response_handler},
 	{NULL}
 };
 /* }}} */
