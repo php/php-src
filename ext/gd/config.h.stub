@@ -4,6 +4,8 @@
 /* Define if you have the gd version 1.3 library (-lgd). */
 #define HAVE_LIBGD13 0
 
+#undef HAVE_GDIMAGECOLORRESOLVE
 #undef FREETYPE_4BIT_ANTIALIAS_HACK
 #undef HAVE_LIBFREETYPE
 #undef HAVE_LIBTTF
+#undef HAVE_GD_PNG

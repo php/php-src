@@ -98,7 +98,13 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecopy,								NULL)
 	PHP_FE(imagecopyresized,						NULL)
 	PHP_FE(imagecreate,								NULL)
+#ifdef HAVE_GD_PNG
+	PHP_FE(imagecreatefrompng,						NULL)
+	PHP_FE(imagepng,								NULL)
+#else
 	PHP_FE(imagecreatefromgif,						NULL)
+	PHP_FE(imagegif,								NULL)
+#endif
 	PHP_FE(imagedestroy,							NULL)
 	PHP_FE(imagefill,								NULL)
 	PHP_FE(imagefilledpolygon,						NULL)
@@ -106,7 +112,6 @@ function_entry gd_functions[] = {
 	PHP_FE(imagefilltoborder,						NULL)
 	PHP_FE(imagefontwidth,							NULL)
 	PHP_FE(imagefontheight,							NULL)
-	PHP_FE(imagegif,								NULL)
 	PHP_FE(imageinterlace,							NULL)
 	PHP_FE(imageline,								NULL)
 	PHP_FE(imageloadfont,							NULL)
@@ -204,6 +209,8 @@ PHPAPI int phpi_get_le_gd(void){
 	return GD_GLOBAL(le_gd);
 }
 
+#ifndef HAVE_GDIMAGECOLORRESOLVE
+
 /********************************************************************/
 /* gdImageColorResolve is a replacement for the old fragment:       */
 /*                                                                  */
@@ -253,6 +260,8 @@ gdImageColorResolve(gdImagePtr im, int r, int g, int b)
 	im->open [op] = 0;
 	return op;                  /* Return newly allocated color */
 }
+
+#endif
 
 void php3_free_gd_font(gdFontPtr fp)
 {
@@ -367,6 +376,111 @@ PHP_FUNCTION(imagecreate)
 }
 /* }}} */
 
+#ifdef HAVE_GD_PNG
+
+/* {{{ proto int imagecreatefrompng(string filename)
+Create a new image from file or URL */
+void php3_imagecreatefrompng (INTERNAL_FUNCTION_PARAMETERS) {
+      pval *file;
+      int ind;
+      gdImagePtr im;
+      char *fn=NULL;
+      FILE *fp;
+      int issock=0, socketd=0;
+      GD_TLS_VARS;
+      if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &file) == FAILURE) {
+              WRONG_PARAM_COUNT;
+      }
+      convert_to_string(file);
+      fn = file->value.str.val;
+#if WIN32|WINNT
+      fp = fopen(file->value.str.val, "rb");
+#else
+      fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd);
+#endif
+      if (!fp) {
+              php3_strip_url_passwd(fn);
+              php3_error(E_WARNING,
+                                      "ImageCreateFromPng: Unable to open %s for reading", fn);
+              RETURN_FALSE;
+      }
+      im = gdImageCreateFromPng (fp);
+      fflush(fp);
+      fclose(fp);
+      ind = php3_list_insert(im, GD_GLOBAL(le_gd));
+      RETURN_LONG(ind);
+}
+/* }}} */
+
+/* {{{ proto int imagepng(int im, string filename)
+Output image to browser or file */
+void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
+      pval *imgind, *file;
+      gdImagePtr im;
+      char *fn=NULL;
+      FILE *fp;
+      int argc;
+      int ind_type;
+      int output=1;
+      GD_TLS_VARS;
+      argc = ARG_COUNT(ht);
+      if (argc < 1 || argc > 2 || getParameters(ht, argc, &imgind, &file) == FAILURE) {
+              WRONG_PARAM_COUNT;
+      }
+      convert_to_long(imgind);
+      if (argc == 2) {
+              convert_to_string(file);
+              fn = file->value.str.val;
+              if (!fn || fn == empty_string || _php3_check_open_basedir(fn)) {
+                      php3_error(E_WARNING, "ImagePng: Invalid filename");
+                      RETURN_FALSE;
+              }
+      }
+      im = php3_list_find(imgind->value.lval, &ind_type);
+      if (!im || ind_type != GD_GLOBAL(le_gd)) {
+              php3_error(E_WARNING, "ImagePng: unable to find image pointer");
+              RETURN_FALSE;
+      }
+      if (argc == 2) {
+              fp = fopen(fn, "wb");
+              if (!fp) {
+                      php3_error(E_WARNING, "ImagePng: unable to open %s for writing", fn);
+                      RETURN_FALSE;
+              }
+              gdImagePng (im,fp);
+              fflush(fp);
+              fclose(fp);
+      }
+      else {
+              int   b;
+              FILE *tmp;
+              char  buf[4096];
+              tmp = tmpfile();
+              if (tmp == NULL) {
+                      php3_error(E_WARNING, "Unable to open temporary file");
+                      RETURN_FALSE;
+              }
+              output = php3_header();
+              if (output) {
+                      gdImagePng (im, tmp);
+            fseek(tmp, 0, SEEK_SET);
+#if APACHE && defined(CHARSET_EBCDIC)
+            /* This is a binary file already: avoid EBCDIC->ASCII conversion */
+            ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
+#endif
+            while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
+                php3_write(buf, b);
+            }
+        }
+        fclose(tmp);
+        /* the temporary file is automatically deleted */
+    }
+    RETURN_TRUE;
+}
+/* }}} */
+
+#else
+
 /* {{{ proto int imagecreatefromgif(string filename)
 Create a new image from file or URL */
 PHP_FUNCTION(imagecreatefromgif )
@@ -409,6 +523,88 @@ PHP_FUNCTION(imagecreatefromgif )
 	RETURN_LONG(ind);
 }
 /* }}} */
+
+/* {{{ proto int imagegif(int im, string filename)
+Output image to browser or file */
+PHP_FUNCTION(imagegif )
+{
+	pval *imgind, *file;
+	gdImagePtr im;
+	char *fn=NULL;
+	FILE *fp;
+	int argc;
+	int ind_type;
+	int output=1;
+	GD_TLS_VARS;
+
+	argc = ARG_COUNT(ht);
+	if (argc < 1 || argc > 2 || getParameters(ht, argc, &imgind, &file) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(imgind);
+
+	if (argc == 2) {
+		convert_to_string(file);
+		fn = file->value.str.val;
+		if (!fn || fn == empty_string || _php3_check_open_basedir(fn)) {
+			php_error(E_WARNING, "ImageGif: Invalid filename");
+			RETURN_FALSE;
+		}
+	}
+
+	im = php3_list_find(imgind->value.lval, &ind_type);
+	if (!im || ind_type != GD_GLOBAL(le_gd)) {
+		php_error(E_WARNING, "ImageGif: unable to find image pointer");
+		RETURN_FALSE;
+	}
+
+	if (argc == 2) {
+		fp = fopen(fn, "wb");
+		if (!fp) {
+			php_error(E_WARNING, "ImageGif: unable to open %s for writing", fn);
+			RETURN_FALSE;
+		}
+		gdImageGif (im,fp);
+		fflush(fp);
+		fclose(fp);
+	}
+	else {
+		int   b;
+		FILE *tmp;
+		char  buf[4096];
+
+		tmp = tmpfile();
+		if (tmp == NULL) {
+			php_error(E_WARNING, "Unable to open temporary file");
+			RETURN_FALSE;
+		}
+
+		output = php3_header();
+
+		if (output) {
+			SLS_FETCH();
+			
+			gdImageGif (im, tmp);
+			fseek(tmp, 0, SEEK_SET);
+#if APACHE && defined(CHARSET_EBCDIC)
+			/* This is a binary file already: avoid EBCDIC->ASCII conversion */
+			ap_bsetflag(((request_rec *) SG(server_context))->connection->client, B_EBCDIC2ASCII, 0);
+#endif
+			while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
+				php3_write(buf, b);
+			}
+		}
+
+		fclose(tmp);
+		/* the temporary file is automatically deleted */
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+#endif /* HAVE_IMAGECREATEFROMPNG */
 
 /* {{{ proto int imagedestroy(int im)
 Destroy an image */
@@ -724,86 +920,6 @@ PHP_FUNCTION(imagecolorsforindex)
 		php_error(E_WARNING, "Color index out of range");
 		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-/* {{{ proto int imagegif(int im, string filename)
-Output image to browser or file */
-PHP_FUNCTION(imagegif )
-{
-	pval *imgind, *file;
-	gdImagePtr im;
-	char *fn=NULL;
-	FILE *fp;
-	int argc;
-	int ind_type;
-	int output=1;
-	GD_TLS_VARS;
-
-	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 2 || getParameters(ht, argc, &imgind, &file) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_long(imgind);
-
-	if (argc == 2) {
-		convert_to_string(file);
-		fn = file->value.str.val;
-		if (!fn || fn == empty_string || _php3_check_open_basedir(fn)) {
-			php_error(E_WARNING, "ImageGif: Invalid filename");
-			RETURN_FALSE;
-		}
-	}
-
-	im = php3_list_find(imgind->value.lval, &ind_type);
-	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "ImageGif: unable to find image pointer");
-		RETURN_FALSE;
-	}
-
-	if (argc == 2) {
-		fp = fopen(fn, "wb");
-		if (!fp) {
-			php_error(E_WARNING, "ImageGif: unable to open %s for writing", fn);
-			RETURN_FALSE;
-		}
-		gdImageGif (im,fp);
-		fflush(fp);
-		fclose(fp);
-	}
-	else {
-		int   b;
-		FILE *tmp;
-		char  buf[4096];
-
-		tmp = tmpfile();
-		if (tmp == NULL) {
-			php_error(E_WARNING, "Unable to open temporary file");
-			RETURN_FALSE;
-		}
-
-		output = php3_header();
-
-		if (output) {
-			SLS_FETCH();
-			
-			gdImageGif (im, tmp);
-			fseek(tmp, 0, SEEK_SET);
-#if APACHE && defined(CHARSET_EBCDIC)
-			/* This is a binary file already: avoid EBCDIC->ASCII conversion */
-			ap_bsetflag(((request_rec *) SG(server_context))->connection->client, B_EBCDIC2ASCII, 0);
-#endif
-			while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
-				php3_write(buf, b);
-			}
-		}
-
-		fclose(tmp);
-		/* the temporary file is automatically deleted */
-	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
