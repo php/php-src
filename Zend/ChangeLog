@@ -1,3 +1,8 @@
+2003-12-31  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_default_classes.c:
+      Make default message look better.
+
 2003-12-30  Andi Gutmans  <andi@zend.com>
 
     * ZEND_CHANGES:
