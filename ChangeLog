@@ -1,3 +1,73 @@
+2000-12-15  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * run-tests.php:
+    removed a warning when testing against a single .phpt file
+
+2000-12-15  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c:
+    Attempt by Matt Bonneau to get thumbnail extraction working
+    (no need to bring this into the 4.0.4 branch)
+
+2000-12-15  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c:
+    Fix Zeus' behaviour with URL, SCRIPT_NAME, SCRIPT_FILENAME, REQUEST_URI
+    environment variables
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2000-12-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/tests/001.phpt: - Added test for bug #8040
+
+    * ext/mcrypt/config.m4:
+    - Added a patch that changed the checking of which version of libmcrypt is
+      installed (Thanks to: Anil Madhavapeddy <anil@recoil.org>)
+
+2000-12-15  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c: Removed unused variables.
+
+2000-12-15  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/standard/basic_functions.c:
+    Fixing compilation on Win32. (and others)
+
+2000-12-15  Stig Bakken  <ssb@fast.no>
+
+    * ext/db/tests/.cvsignore
+      run-tests.php:
+    * run-tests.php: fixed a few bugs, including the POST/GET problem reported by
+      Stas
+
+    * pear/DB/mysql.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/tests/db_factory.phpt
+      pear/DB/tests/errors.inc
+      pear/DB/tests/mysql/010.phpt
+      pear/DB/tests/numrows.inc
+      pear/DB/tests/pgsql/005.phpt
+      pear/DB/tests/pgsql/010.phpt:
+    * implemented error mapping for postgres (very early version) and tests
+      for mysql and pgsql
+
+    * pear/DB/oci8.php:
+    * DB_oci8: rewrite "SELECT 1+2" to "SELECT 1+2 FROM dual"
+
+    * ext/standard/tests/string/001.phpt
+      ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/tests/file/.cvsignore:
+    Added iconv() function (using libc or libiconv) 
+
+    * ext/odbc/php_odbc.c: Added ODBC_TYPE constant 
+
 2000-12-14  Andi Gutmans  <andi@zend.com>
 
     * main/fopen-wrappers.c: - This is the correct way of doing it
