@@ -97,6 +97,10 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "ext/standard/file.h"
 
+#if HAVE_OPENSSL_EXT
+static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC);
+#endif
+
 #ifdef PHP_WIN32
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
@@ -715,15 +719,20 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 		}
 	}
 
-	if (activate)	{
-		if (SSL_connect(sock->ssl_handle) <= 0)	{
+	if (activate) {
+		int err;
+
+		do {
+			err = SSL_connect(sock->ssl_handle);
+		} while (err != 1 && handle_ssl_error(stream, err TSRMLS_CC)); 
+		
+		if (err != 1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: SSL handshake/connection failed");
 			SSL_shutdown(sock->ssl_handle);
 			return FAILURE;
 		}
 		sock->ssl_active = activate;
-	}
-	else	{
+	} else {
 		SSL_shutdown(sock->ssl_handle);
 		sock->ssl_active = 0;
 	}
@@ -827,10 +836,10 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 				memcpy(wptr, esbuf, code + 1);
 				wptr += code;
 			}
-
+			
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"SSL operation failed with code %d.%s%s",
-					err,
+					err, 
 					ebuf ? "OpenSSL Error messages:\n" : "",
 					ebuf ? ebuf : "");
 				
@@ -845,7 +854,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	size_t didwrite;
+	int didwrite;
 	
 #if HAVE_OPENSSL_EXT
 	if (sock->ssl_active) {
@@ -927,7 +936,7 @@ DUMP_SOCK_STATE("wait_for_data: done", sock);
 static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	size_t nr_bytes = 0;
+	int nr_bytes = 0;
 
 #if HAVE_OPENSSL_EXT
 	if (sock->ssl_active) {

@@ -637,7 +637,7 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c TSRMLS_DC)
 
 PHPAPI int _php_stream_getc(php_stream *stream TSRMLS_DC)
 {
-	char buf;
+	unsigned char buf;
 
 	if (php_stream_read(stream, &buf, 1) > 0) {
 		return buf & 0xff;
