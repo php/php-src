@@ -139,45 +139,6 @@ ZEND_API void convert_scalar_to_number(zval *op)
 	} \
 
 
-static inline void zendi_convert_to_string(zval **op_ptr, zval *holder)
-{
-	zval *op = *op_ptr;
-	ELS_FETCH();
-
-	if (op->type != IS_STRING) {
-		switch (op->type) {
-			case IS_BOOL:
-				holder->value.str.val = (op->value.lval?estrndup("1",1):estrndup("0",1));
-				holder->value.str.len = 1;
-				break;
-			case IS_RESOURCE:
-			case IS_LONG:
-				holder->value.str.val = (char *) emalloc(MAX_LENGTH_OF_LONG + 1);
-				holder->value.str.len = zend_sprintf(holder->value.str.val, "%ld", op->value.lval);  /* SAFE */
-				break;
-			case IS_DOUBLE: {
-				holder->value.str.val = (char *) emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
-				holder->value.str.len = zend_sprintf(holder->value.str.val, "%.*G", (int) EG(precision), op->value.dval);  /* SAFE */
-				/* %G already handles removing trailing zeros from the fractional part, yay */
-				break;
-			}
-			case IS_ARRAY:
-				holder->value.str.val = estrndup("Array",sizeof("Array")-1);
-				holder->value.str.len = sizeof("Array")-1;
-				break;
-			case IS_OBJECT:
-				holder->value.str.val = estrndup("Object",sizeof("Object")-1);
-				holder->value.str.len = sizeof("Object")-1;
-				break;
-			default:
-				var_reset(holder);
-				break;
-		}
-		holder->type = IS_STRING;
-		*op_ptr = holder;
-	}
-}	
-
 ZEND_API void convert_to_long(zval *op)
 {
 	convert_to_long_base(op, 10);
@@ -851,10 +812,18 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
 	zval *orig_op1=op1, *orig_op2=op2;
-	
-	zendi_convert_to_string(&op1, &op1_copy);
-	zendi_convert_to_string(&op2, &op2_copy);
+	int use_copy1, use_copy2;
 
+
+	zend_make_printable_zval(op1, &op1_copy, &use_copy1);
+	zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+
+	if (use_copy1) {
+		op1 = &op1_copy;
+	}
+	if (use_copy2) {
+		op2 = &op2_copy;
+	}
 	if (result==op1) {	/* special case, perform operations on result */
 		uint res_len = op1->value.str.len + op2->value.str.len;
 		
@@ -875,10 +844,10 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2)
 		result->value.str.val[result->value.str.len] = 0;
 		result->type = IS_STRING;
 	}
-	if (orig_op1 != op1) {
+	if (use_copy1) {
 		zval_dtor(op1);
 	}
-	if (orig_op2 != op2) {
+	if (use_copy2) {
 		zval_dtor(op2);
 	}
 	return SUCCESS;
