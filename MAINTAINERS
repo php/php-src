@@ -78,6 +78,10 @@ EXTENSION:           oci8
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           odbc
+PRIMARY MAINTAINER:  Andreas Karajannis <Karajannis@gmd.de>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           oracle
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
 STATUS:              Maintained
