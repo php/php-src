@@ -288,6 +288,12 @@ PHP_FUNCTION(pspell_new_config)
 
 	convert_to_long_ex(conf);
 	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(conf), &type);
+
+	if (config == NULL || type != le_pspell_config) {
+		php_error(E_WARNING, "%d is not a PSPELL config index", Z_LVAL_PP(conf));
+		RETURN_FALSE;
+	}
+	
 	ret = new_pspell_manager(config);
 
 	if(pspell_error_number(ret) != 0){
@@ -319,7 +325,7 @@ PHP_FUNCTION(pspell_check)
 	convert_to_string_ex(word);
 	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",Z_LVAL_PP(scin));
+		php_error(E_WARNING, "%d is not a PSPELL result index",Z_LVAL_PP(scin));
 		RETURN_FALSE;
 	}
 
@@ -351,13 +357,11 @@ PHP_FUNCTION(pspell_suggest)
 	convert_to_string_ex(word);
 	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",Z_LVAL_PP(scin));
+		php_error(E_WARNING, "%d is not a PSPELL result index",Z_LVAL_PP(scin));
 	RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE){
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	wl = pspell_manager_suggest(manager, Z_STRVAL_PP(word));
 	if(wl){
@@ -392,7 +396,7 @@ PHP_FUNCTION(pspell_store_replacement)
 	convert_to_string_ex(corr);
 	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",Z_LVAL_PP(scin));
+		php_error(E_WARNING, "%d is not a PSPELL result index",Z_LVAL_PP(scin));
 		RETURN_FALSE;
 	}
 
@@ -424,7 +428,7 @@ PHP_FUNCTION(pspell_add_to_personal)
 	convert_to_string_ex(word);
 	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",Z_LVAL_PP(scin));
+		php_error(E_WARNING, "%d is not a PSPELL result index",Z_LVAL_PP(scin));
 		RETURN_FALSE;
 	}
 
@@ -461,7 +465,7 @@ PHP_FUNCTION(pspell_add_to_session)
 	convert_to_string_ex(word);
 	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",Z_LVAL_PP(scin));
+		php_error(E_WARNING, "%d is not a PSPELL result index",Z_LVAL_PP(scin));
 		RETURN_FALSE;
 	}
 
@@ -497,7 +501,7 @@ PHP_FUNCTION(pspell_clear_session)
 	convert_to_long_ex(scin);
 	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",Z_LVAL_PP(scin));
+		php_error(E_WARNING, "%d is not a PSPELL result index",Z_LVAL_PP(scin));
 		RETURN_FALSE;
 	}
 
@@ -528,7 +532,7 @@ PHP_FUNCTION(pspell_save_wordlist)
 	convert_to_long_ex(scin);
 	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(scin), &type);
 	if(!manager){
-		php_error(E_WARNING, "%d is not an PSPELL result index",Z_LVAL_PP(scin));
+		php_error(E_WARNING, "%d is not a PSPELL result index",Z_LVAL_PP(scin));
 		RETURN_FALSE;
 	}
 
@@ -611,7 +615,7 @@ PHP_FUNCTION(pspell_config_runtogether)
 	convert_to_long_ex(sccin);
 	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
 	if(!config){
-		php_error(E_WARNING, "%d is not an PSPELL config index",Z_LVAL_PP(sccin));
+		php_error(E_WARNING, "%d is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
@@ -640,7 +644,7 @@ PHP_FUNCTION(pspell_config_mode)
 	convert_to_long_ex(sccin);
 	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
 	if(!config){
-		php_error(E_WARNING, "%d is not an PSPELL config index",Z_LVAL_PP(sccin));
+		php_error(E_WARNING, "%d is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
@@ -682,7 +686,7 @@ PHP_FUNCTION(pspell_config_ignore)
 	convert_to_long_ex(sccin);
 	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
 	if(!config){
-		php_error(E_WARNING, "%d is not an PSPELL config index",Z_LVAL_PP(sccin));
+		php_error(E_WARNING, "%d is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
@@ -728,7 +732,7 @@ PHP_FUNCTION(pspell_config_personal)
 	convert_to_long_ex(sccin);
 	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
 	if(!config){
-		php_error(E_WARNING, "%d is not an PSPELL config index",Z_LVAL_PP(sccin));
+		php_error(E_WARNING, "%d is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
@@ -757,7 +761,7 @@ PHP_FUNCTION(pspell_config_repl)
 	convert_to_long_ex(sccin);
 	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
 	if(!config){
-		php_error(E_WARNING, "%d is not an PSPELL config index",Z_LVAL_PP(sccin));
+		php_error(E_WARNING, "%d is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
@@ -788,7 +792,7 @@ PHP_FUNCTION(pspell_config_save_repl)
 	convert_to_long_ex(sccin);
 	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
 	if(!config){
-		php_error(E_WARNING, "%d is not an PSPELL config index",Z_LVAL_PP(sccin));
+		php_error(E_WARNING, "%d is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
