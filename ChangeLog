@@ -1,3 +1,35 @@
+2003-05-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var_unserializer.c:
+      Update after fix
+
+    * ext/standard/tests/serialize/005.phpt:
+      Add new test
+
+    * ext/standard/var_unserializer.re:
+      Fix namespace related problems
+
+    * configure.in:
+      Fix speling found by Allowee <php@allowee.no-ip.com>
+
+2003-05-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h
+      main/internal_functions_win32.c
+      win32/php4dll.dsp
+      win32/php4dllts.dsp:
+      Get rid of references to expat in MSVC project files. For now this expects
+      libxml2 (library and includes) in one of the MSVC default include/library
+      directories. Right now it doesn't link, dunno why -- working on it.
+
+2003-05-24  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/network.c:
+      Adjust error message to encourage people with apparently broken IPV6
+      systems to
+      build PHP without IPV6 support.
+
 2003-05-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * tests/lang/bug17115.phpt:
