@@ -419,17 +419,25 @@ class System
     */
     function which($program, $fallback = false)
     {
+    	// is_executable() is not available on windows
+    	if (OS_WINDOWS) {
+            $pear_is_executable = 'is_file';
+        } else {
+            $pear_is_executable = 'is_executable';
+        }
+
         // full path given
         if (basename($program) != $program) {
-            return (@is_executable($program)) ? $program : $fallback;
+            return (@$pear_is_executable($program)) ? $program : $fallback;
         }
+
         // XXX FIXME honor safe mode
         $path_delim = OS_WINDOWS ? ';' : ':';
         $exe_suffix = OS_WINDOWS ? '.exe' : '';
         $path_elements = explode($path_delim, getenv('PATH'));
         foreach ($path_elements as $dir) {
             $file = $dir . DIRECTORY_SEPARATOR . $program . $exe_suffix;
-            if (@is_file($file) && @is_executable($file)) {
+            if (@is_file($file) && @$pear_is_executable($file)) {
                 return $file;
             }
         }
