@@ -45,7 +45,9 @@ if test "$PHP_INTERBASE" != "no"; then
       AC_MSG_RESULT([Interbase version 6 API has been enabled.])
     ], [
       AC_MSG_RESULT([Interbase version 6 API has NOT been enabled.])
-    ], [ ])
+    ], [
+      -L$IBASE_LIBDIR
+    ])
   fi
 
   PHP_ADD_LIBRARY_WITH_PATH($IBASE_LIBNAME, $IBASE_LIBDIR, INTERBASE_SHARED_LIBADD)
