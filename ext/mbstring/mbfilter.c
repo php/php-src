@@ -3587,7 +3587,7 @@ static void
 mbfl_filt_conv_html_dec_ctor(mbfl_convert_filter *filter TSRMLS_DC)
 {
 	filter->status = 0;
-	filter->cache = (int)mbfl_malloc(html_enc_buffer_size);
+	filter->cache = (int)mbfl_malloc(html_enc_buffer_size+1);
 }
 	
 static void 
