@@ -20,8 +20,6 @@
 
 #include "php.h"
 
-#if HAVE_SYSVSEM || HAVE_SYSVSHM  || HAVE_SHMOP
-
 #include <sys/types.h>                                                                                                        
 #include <sys/ipc.h>
 
@@ -55,8 +53,6 @@ PHP_FUNCTION(ftok)
     RETURN_LONG(k);
 }
 /* }}} */
-
-#endif
 
 /*
  * Local variables:

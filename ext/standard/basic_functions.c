@@ -832,9 +832,7 @@ function_entry basic_functions[] = {
     PHP_FE(version_compare,													NULL)
 
 	/* functions from ftok.c*/
-#if HAVE_SYSVSEM || HAVE_SYSVSHM  || HAVE_SHMOP
 	PHP_FE(ftok,	NULL)
-#endif	
 
 	PHP_FE(str_rot13, NULL)
 
