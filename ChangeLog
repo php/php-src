@@ -1,3 +1,35 @@
+2005-03-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/session/tests/007.phpt
+      ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/009.phpt:
+      These tests require register_long_arrays=1
+
+    * pear/tests/pear_config.phpt
+      pear/tests/pear_config_1.1.phpt
+      pear/tests/pear_registry.phpt
+      pear/tests/pear_registry_1.1.phpt:
+      fix some skip conditions..
+
+2005-03-31  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_API.c:
+      - MFH: internal_function->fn_flags is not initialized at this point
+
+2005-03-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_config.w32.h
+      Zend/zend_operators.c
+      Zend/zend_operators.h
+      ext/standard/array.c:
+      MFH: Added SORT_LOCALE_STRING for array sorting
+
+    * main/snprintf.h:
+      C++ fix
+
 2005-03-30  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_0)
