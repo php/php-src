@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Added array_filter(), which allows filtering of array elements via
+  the specified callback. (Andrei)
+- Fixed all relevant array functions to avoid moving the internal array
+  pointer during operations. (Andrei)
 - IMPORTANT: removed /F modifier handling from preg_replace(). Instead
   one should use new preg_replace_callback() function. (Andrei)
 - Added mysql_unbuffered_query(), which is useful for very large result sets
