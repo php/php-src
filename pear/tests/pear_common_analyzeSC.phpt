@@ -2,10 +2,12 @@
 PEAR_Common::analyzeSourceCode test
 --SKIPIF--
 <?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
 if (!function_exists('token_get_all')) {
     echo 'skip';
 }
-echo 'skip';
 ?>
 --FILE--
 <?php

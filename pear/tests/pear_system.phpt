@@ -1,7 +1,11 @@
 --TEST--
 System commands tests
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php
 error_reporting(E_ALL);
