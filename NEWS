@@ -56,11 +56,10 @@ PHP 4                                                                      NEWS
 - Added array_diff_assoc() and array_intersect_assoc(). (Andrey)
 - Fixed bug #17825 (ob_start() chunk size option didn't work well). (Yasuo)
 - Fixed output buffer infinite loop when buffer_size became 0. (Marcus, Wez)
-- Fixed output buffering implicit flush. (Yasuo) 
 - Added getopt() for parsing command line options and arguments. (Jon)
 - Added pg_fetch_assoc(), pg_fetch_all(), pg_ping(), pg_meta_data(), pg_convert(), 
-  pg_insert(), pg_select(), pg_update(), pg_delete(), pg_result_seek() and
-  pg_unescape_bytea(). (Yasuo)
+  pg_insert(), pg_select(), pg_update(), pg_delete(), pg_result_seek(),
+  pg_unescape_bytea() and pg_get_notify(). (Yasuo)
 - Fixed bug #17281 (Sanity checks for encoding sessions). (Ilia)
 - Fixed bug #16995 and #19392 (Prevent crash if $HTTP_SESSION_VARS != ARRAY).
   (Ilia)
