@@ -2,7 +2,7 @@ dnl $Id$
 
 AC_MSG_CHECKING(whether to include DOM support)
 AC_ARG_WITH(dom,
-[  --with-dom[=DIR]       Include DOM support (requires libxml >= 1.0).
+[  --with-dom[=DIR]        Include DOM support (requires libxml >= 1.0).
                           DIR is the libxml install directory,
                           defaults to /usr.],
 [

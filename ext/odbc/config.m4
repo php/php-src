@@ -100,7 +100,7 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Solid support)
 AC_ARG_WITH(solid,
 [  --with-solid[=DIR]      Include Solid support.  DIR is the Solid base
-              install directory, defaults to /usr/local/solid],
+                          install directory, defaults to /usr/local/solid],
 [
   if test "$withval" = "yes"; then
     withval=/usr/local/solid
@@ -354,8 +354,7 @@ AC_ARG_WITH(dbmaker,
 [  --with-dbmaker[=DIR]    Include DBMaker support.  DIR is the DBMaker base
                           install directory, defaults to where the latest 
                           version of DBMaker is installed (such as
-                          /home/dbmaker/3.6).
-],
+                          /home/dbmaker/3.6).],
 [
   if test "$withval" = "yes"; then
     # find dbmaker's home directory

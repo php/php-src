@@ -5,7 +5,7 @@ dnl don't forget to call PHP_EXTENSION(readline)
 
 AC_MSG_CHECKING(for readline support)
 AC_ARG_WITH(readline,
-[  --with-readline[=DIR]  Include readline support.  DIR is the readline
+[  --with-readline[=DIR]   Include readline support.  DIR is the readline
                           install directory.],
 [
   if test "$withval" != "no"; then
