@@ -258,7 +258,6 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 	zend_function_state *original_function_state_ptr;
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
-	zval *this=NULL;
 	CLS_FETCH();
 	ELS_FETCH();
 
