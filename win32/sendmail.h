@@ -1,6 +1,8 @@
 #if !defined(sendmail_h)		/* Sentry, use file only if it's not already included. */
 #define sendmail_h
+#ifndef NETWARE
 #include <windows.h>
+#endif
 
 #define HOST_NAME_LEN	256
 #define MAX_APPNAME_LENGHT 100
@@ -39,9 +41,17 @@ char *GetSMErrorText(int index);
 
 int MailConnect();
 int PostHeader(char *, char *, char *, char *, char *);
+#ifndef NETWARE
 int Post(LPCSTR);
+#else
+int Post(char *);
+#endif
 int Ack();
+#ifndef NETWARE
 unsigned long GetAddr(LPSTR szHost);
+#else
+unsigned long GetAddr(char * szHost);
+#endif
 
 
 

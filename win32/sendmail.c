@@ -1,6 +1,6 @@
 
 /* 
- *    PHP Sendmail for Windows.
+ *    PHP Sendmail for Windows and NetWare.
  *
  *  This file is rewriten specificly for PHPFI.  Some functionality
  *  has been removed (MIME and file attachments).  This code was 
@@ -23,12 +23,26 @@
 #include "php.h"				/*php specific */
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef NETWARE
 #include <winsock.h>
+#else	/* NETWARE */
+#ifdef USE_WINSOCK
+/*#include <ws2nlm.h>*/
+#include <novsock2.h>
+#else
+#include <sys/socket.h>	/* For struct sockaddr, 'PF_INET' and 'AF_INET' */
+#include <netinet\in.h>	/* For struct sockaddr_in */
+#include <netdb.h>		/* For struct hostent */
+/*#include <ws2name.h>*/
+#endif	/* USE_WINSOCK */
+#endif	/* NETWARE */
 #include "time.h"
 #include <string.h>
+#ifndef NETWARE
 #include <malloc.h>
 #include <memory.h>
 #include <winbase.h>
+#endif	/* NETWARE */
 #include "sendmail.h"
 #include "php_ini.h"
 
@@ -51,18 +65,34 @@ static char *months[] =
 char Buffer[MAIL_BUFFER_SIZE];
 
 /* socket related data */
+#ifdef NETWARE
+typedef int SOCKET;	/* Borrowed from winsock\novsock2.h */
+typedef struct sockaddr_in SOCKADDR_IN;
+typedef struct sockaddr * LPSOCKADDR;
+typedef struct hostent * LPHOSTENT;
+
+#define INVALID_SOCKET  (SOCKET)(~0)	/* Borrowed from winsock\novsock2.h */
+#endif	/* NETWARE */
 SOCKET sc;
+#ifndef NETWARE
 WSADATA Data;
 struct hostent *adr;
+#endif	/* NETWARE */
 SOCKADDR_IN sock_in;
+#ifndef NETWARE
 int WinsockStarted;
 /* values set by the constructor */
 char *AppName;
+#endif	/* NETWARE */
 char MailHost[HOST_NAME_LEN];
 char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
+#ifndef NETWARE
 char *php_mailer = "PHP 4.0 WIN32";
+#else
+char *php_mailer = "PHP 4.0 NetWare";
+#endif	/* NETWARE */
 
 char *get_header(char *h, char *headers);
 
@@ -89,6 +119,7 @@ static char *ErrorMessages[] =
 	{"Bad Mail Host"},
 	{"Bad Message File"},
 	{"\"sendmail_from\" NOT set in php.ini"},
+
 	{"Mailserver rejected our \"sendmail_from\" setting"} /* 20 */
 };
 
@@ -113,7 +144,9 @@ int TSendMail(char *host, int *error,
 	int ret;
 	char *RPath = NULL;
 
+#ifndef NETWARE
 	WinsockStarted = FALSE;
+#endif
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
@@ -128,7 +161,9 @@ int TSendMail(char *host, int *error,
 	if (INI_STR("sendmail_from")){
 		RPath = estrdup(INI_STR("sendmail_from"));
 		} else {
+
 			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
+
 			return FAILURE;
 	}
 
@@ -166,7 +201,14 @@ void TSMClose()
 	*/
 
 	shutdown(sc, 0); 
+#ifndef NETWARE
 	closesocket(sc);
+#else
+	/*	closesocket commented out since it was giving undefined symbol linker error
+		close added in its place
+	*/
+	close(sc);
+#endif	/* NETWARE */
 }
 
 
@@ -181,10 +223,13 @@ void TSMClose()
 char *GetSMErrorText(int index)
 {
 
+
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
+
 	} else {
 		return (ErrorMessages[UNKNOWN_ERROR]);
+
 	}
 }
 
@@ -259,9 +304,12 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	efree(tempMailTo);
 	if (headers && (pos1 = strstr(headers, "Cc:"))) {
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
+
 			tempMailTo = estrndup(pos1, strlen(pos1));
+
 		} else {
 			tempMailTo = estrndup(pos1, pos2-pos1);
+
 		}
 
 		token = strtok(tempMailTo, ",");
@@ -454,7 +502,11 @@ int MailConnect()
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
+#ifndef NETWARE
 int Post(LPCSTR msg)
+#else
+int Post(char * msg)
+#endif	/* NETWARE */
 {
 	int len = strlen(msg);
 	int slen;
@@ -529,7 +581,11 @@ int Ack()
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
+#ifndef NETWARE
 unsigned long GetAddr(LPSTR szHost)
+#else
+unsigned long GetAddr(char * szHost)
+#endif	/* NETWARE */
 {
 	LPHOSTENT lpstHost;
 	u_long lAddr = INADDR_ANY;
@@ -545,7 +601,11 @@ unsigned long GetAddr(LPSTR szHost)
 
 			lpstHost = gethostbyname(szHost);
 			if (lpstHost) {		/* success */
+#ifndef NETWARE
 				lAddr = *((u_long FAR *) (lpstHost->h_addr));
+#else
+				lAddr = *((u_long *) (lpstHost->h_addr));
+#endif	/* NETWARE */
 			} else {
 				lAddr = INADDR_ANY;		/* failure */
 			}
