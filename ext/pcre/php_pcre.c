@@ -33,13 +33,14 @@
 
 #include "ext/standard/php_string.h"
 
-#define PREG_PATTERN_ORDER	0
-#define PREG_SET_ORDER		1
+#define PREG_PATTERN_ORDER			0
+#define PREG_SET_ORDER				1
 
-#define	PREG_SPLIT_NO_EMPTY	(1<<0)
+#define	PREG_SPLIT_NO_EMPTY			(1<<0)
+#define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
 
-#define PREG_REPLACE_EVAL	(1<<0)
-#define PREG_REPLACE_FUNC	(1<<1)
+#define PREG_REPLACE_EVAL			(1<<0)
+#define PREG_REPLACE_FUNC			(1<<1)
 
 #ifdef ZTS
 int pcre_globals_id;
@@ -110,6 +111,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -1064,8 +1066,9 @@ PHP_FUNCTION(preg_split)
 	int				 exoptions = 0;		/* Execution options */
 	int			 	 preg_options = 0;	/* Custom preg options */
 	int				 argc;				/* Argument count */
-	int				 limit_val;			/* Integer value of limit */
+	int				 limit_val = -1;	/* Integer value of limit */
 	int				 no_empty = 0;		/* If NO_EMPTY flag is set */
+	int				 delim_capture = 0; /* If delimiters should be captured */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				 start_offset;		/* Where the new search starts */
 	int				 g_notempty = 0;	/* If the match should not be empty */
@@ -1078,16 +1081,15 @@ PHP_FUNCTION(preg_split)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (argc == 3) {
+	if (argc > 2) {
 		convert_to_long_ex(limit);
 		limit_val = Z_LVAL_PP(limit);
-	}
-	else
-		limit_val = -1;
-	
-	if (argc == 4) {
-		convert_to_long_ex(flags);
-		no_empty = Z_LVAL_PP(flags) & PREG_SPLIT_NO_EMPTY;
+
+		if (argc > 3) {
+			convert_to_long_ex(flags);
+			no_empty = Z_LVAL_PP(flags) & PREG_SPLIT_NO_EMPTY;
+			delim_capture = Z_LVAL_PP(flags) & PREG_SPLIT_DELIM_CAPTURE;
+		}
 	}
 	
 	/* Make sure we're dealing with strings */
@@ -1133,6 +1135,17 @@ PHP_FUNCTION(preg_split)
 									   &Z_STRVAL_PP(subject)[offsets[0]]-last_match, 1);
 			
 			last_match = &Z_STRVAL_PP(subject)[offsets[1]];
+
+			if (delim_capture) {
+				int i, match_len;
+				for (i = 1; i < count; i++) {
+					match_len = offsets[(i<<1)+1] - offsets[i<<1];
+					if (!no_empty || match_len > 0)
+						add_next_index_stringl(return_value,
+											   &Z_STRVAL_PP(subject)[offsets[i<<1]],
+											   match_len, 1);
+				}
+			}
 			
 			/* One less left to do */
 			if (limit_val != -1)

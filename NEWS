@@ -2,8 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
-- pspell .12 fix (Hugh Jones)
-- Fix strip_tags to not strip a lone > character (Rasmus)
+- Added PREG_SPLIT_DELIM_CAPTURE flag to preg_split() that allows for Perl-like
+  functionality of capturing parenthesized delimiter expression. (Andrei)
+- Fixed strip_tags() to not strip a lone > character. (Rasmus)
 - Added new UDM_PARAM_STOPTABLE and UDM_PARAM_STOPFILE parameters
   for Udm_Set_Agent_Params mnoGoSearch module. Now it can use stopwords
   stored either in database or in the plain text files. Added php warnings.
