@@ -43,7 +43,11 @@ extern "C" {
 #include "php_variables.h"
 #include "php_ini.h"
 #include "php4activescript.h"
+#define PHP_COM_DONT_DECLARE_RPC_HANDLER 1
+#include "ext/rpc/php_rpc.h"
+#include "ext/rpc/rpc_proxy.h"
 #include "ext/rpc/com/com.h"
+#include "ext/rpc/com/com_wrapper.h"
 #include "ext/rpc/com/php_COM.h"
 #include "ext/rpc/com/conversion.h"
 }
@@ -612,7 +616,7 @@ static int execute_code_fragment(code_frag *frag,
 	
 	if (retval_ptr) {
 		if (varResult)
-			php_pval_to_variant(retval_ptr, varResult, CP_ACP TSRMLS_CC);
+			php_zval_to_variant(retval_ptr, varResult, CP_ACP);
 		zval_ptr_dtor(&retval_ptr);
 	}
 
@@ -792,7 +796,7 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 
 				if (SUCCEEDED(LoadRegTypeLib(*info->rguidTypeLib, (USHORT)info->dwMajor,
 								(USHORT)info->dwMinor, LANG_NEUTRAL, &TypeLib))) {
-					php_COM_load_typelib(TypeLib, CONST_CS TSRMLS_CC);
+					php_COM_load_typelib(TypeLib, CONST_CS);
 					TypeLib->Release();
 				}
 			}
@@ -1013,7 +1017,7 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 						if (Z_TYPE_PP(tmp) == IS_OBJECT) {
 							/* FIXME: if this causes an allocation (emalloc) and we are
 							 * not in the engine thread, things could get ugly!!! */
-							disp = php_COM_export_object(*tmp TSRMLS_CC);
+							disp = php_COM_export_object(*tmp);
 						}
 					}
 
@@ -1269,7 +1273,7 @@ void TPHPScriptingEngine::add_to_global_namespace(IDispatch *disp, DWORD flags, 
 
 trace("Add %s to global namespace\n", name);
 	
-	val = php_COM_object_from_dispatch(disp, NULL TSRMLS_CC);
+	val = php_COM_object_from_dispatch(disp);
 	
 	if (val == NULL) {
 		disp->Release();
@@ -1312,7 +1316,7 @@ trace("Add %s to global namespace\n", name);
 						if (SUCCEEDED(disp->Invoke(func->memid, IID_NULL, 0, func->invkind,
 										&dispparams, &vres, NULL, NULL))) {
 
-							/* Get it's dispatch */
+							/* Get its dispatch */
 							IDispatch *sub = NULL;
 
 							if (V_VT(&vres) == VT_UNKNOWN)
@@ -1321,12 +1325,12 @@ trace("Add %s to global namespace\n", name);
 								sub = V_DISPATCH(&vres);
 
 							if (sub) {
-								/* find out it's name */
+								/* find out its name */
 								typ->GetDocumentation(func->memid, &funcname, NULL, NULL, NULL);
-								name = php_OLECHAR_to_char(funcname, &namelen, CP_ACP TSRMLS_CC);
+								name = php_OLECHAR_to_char(funcname, &namelen, CP_ACP, 0);
 
 								/* add to namespace */
-								zval *subval = php_COM_object_from_dispatch(sub, NULL TSRMLS_CC);
+								zval *subval = php_COM_object_from_dispatch(sub);
 								if (subval) {
 									ZEND_SET_SYMBOL(&EG(symbol_table), name, subval);	
 								}
