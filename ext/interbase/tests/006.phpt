@@ -111,7 +111,7 @@ InterBase: binding (may take a while)
 	for($iter = 0; $iter < 3; $iter++) {
 		/* prepare data  */
 		$v_char = rand_str(1000);
-		$v_date = rand_datetime();
+		$v_date = (int)rand_number(10,0,0);
 		$v_decimal = rand_number(12,3);
 		$v_double  = rand_number(20);
 		$v_float   = rand_number(7);
@@ -127,8 +127,8 @@ InterBase: binding (may take a while)
 		ibase_query("insert into test6
 			(iter, v_char,v_date,v_decimal,
 			v_integer,v_numeric,v_smallint,v_varchar)
-			values (666, '$v_char','$v_date',$v_decimal, $v_integer,
-			$v_numeric, $v_smallint, '$v_varchar')");
+			values (666, '$v_char',?,$v_decimal, $v_integer,
+			$v_numeric, $v_smallint, '$v_varchar')",$v_date);
 
 		/* test all types */
 		if(!($sel = ibase_query(
