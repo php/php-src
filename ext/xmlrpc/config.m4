@@ -32,6 +32,7 @@ if test "$PHP_XMLRPC" != "no"; then
     AC_MSG_ERROR(XML-RPC support requires libexpat. Use --with-expat-dir=<DIR>)
   fi
 
+  PHP_ICONV=yes
   PHP_SETUP_ICONV(XMLRPC_SHARED_LIBADD, [], [
     AC_MSG_ERROR([iconv not found, in order to build xmlrpc you need the iconv library])
   ])
