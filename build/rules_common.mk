@@ -27,6 +27,7 @@ SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CC) $(COMMON_FLAGS) $(CFLAGS
 CXX_SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CXX) $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) -prefer-pic $(EXTRA_CXXFLAGS) -c $< && touch $@
 
 LINK = $(LIBTOOL) --mode=link $(COMPILE) $(LDFLAGS) -o $@
+LINK_CLEAN = $(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@
 
 mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
