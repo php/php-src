@@ -436,6 +436,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	php3_header();			/* Make sure headers have been sent */
 	php_request_shutdown((void *) 0);
 	php_module_shutdown();
+	tsrm_shutdown();
 	return SUCCESS;
 }
 
