@@ -2,13 +2,15 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added disable_functions php.ini directive, to allow administrators to disable
+  certain functions for security reasons (Zeev)
 - Fixed sessions on Win32. When setting the directory depth parameter in
   save_path you need to now delimit it with a ';' instead of ':', e.g
   "5;/tmp" instead of "5:/tmp" (Andi)
 - Changed the Apache handler's return status to 'Declined' when a requested
   PHP file could not be found.  Returning 'Not Found' caused problems
   in the ErrorDocument handler stage in that $REDIRECT_REDIRECT_ERROR_NOTES
-  was not getting set at all.  Moving to 'Declined' shoudl fix this and I
+  was not getting set at all.  Moving to 'Declined' should fix this and I
   can't see any other side effects.  (Rasmus)
 - Fixed scanning decimal numbers in internationalized environments. They should
   always be in standard US format e.g. 23.3. (Andi, Zend Engine)
