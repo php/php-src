@@ -873,7 +873,7 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ _infoFromAny()
 
-    function _infoFromAny($any)
+    function _infoFromAny($info)
     {
         if (is_string($info) && file_exists($info)) {
             $tmp = substr($info, -4);
@@ -1127,7 +1127,7 @@ class PEAR_Common extends PEAR
         }
         $deps = array();
         foreach ($info['filelist'] as $file => $fa) {
-            
+
         }
     }
 
