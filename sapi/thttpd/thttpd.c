@@ -633,8 +633,10 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 	TG(hc) = hc;
 	hc->bytes_sent = 0;
 
-	if (hc->method == METHOD_POST)
+	if (hc->contentlength != -1) {
 		hc->should_linger = 1;
+		hc->do_keep_alive = 0;
+	}
 	
 	if (hc->contentlength != -1
 			&& SIZEOF_UNCONSUMED_BYTES() < hc->contentlength) {
