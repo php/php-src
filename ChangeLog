@@ -1,3 +1,41 @@
+2001-10-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/servlet.java: Leftover.
+
+    * sapi/servlet/formatter.java
+      sapi/servlet/servlet.java: Whitespace changes.
+
+2001-10-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Registry.php: * added listPackages
+    * made packageInfo param optional, if not specified returns info for
+      all packages
+
+    * pear/PEAR/Registry.php
+      pear/scripts/pear.in
+      pear/PEAR/Packlist.php:
+    * nuked PEAR_Packlist class and added PEAR_Registry instead
+
+2001-10-28  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c: Whitespace fixes
+
+    Don't Adafy the code, Jani :)
+
+2001-10-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/README: Refinements.
+
+    * sapi/servlet/README: More work on the README.
+
+    * sapi/servlet/servlet.dsp:
+    javac 1.3 could not find reflect.class before. Also use -O flag when compiling a Release build.
+
+    * sapi/servlet/README: Add missing footnotes.
+
+    * sapi/servlet/README:
+    More work on the sapi/servlet documentation. This is still a work in progress.
+
 2001-10-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * sapi/servlet/README: Another fix for Tomcat 4.
