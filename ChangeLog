@@ -1,3 +1,20 @@
+2003-09-28  Tal Peer  <tal@twisthost.com>
+
+    * build/buildcheck.sh:
+      Fix buildconf for systems using coreutils-5.0
+
+2003-09-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/ircg/ircg.c:
+      Use correct allocator
+
+2003-09-28  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Registry.php:
+      fixed #39 commands that need LOCK_SH fail as non-root
+
 2003-09-27  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ext/gd/config.m4:
