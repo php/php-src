@@ -23,6 +23,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #25166 (WDDX serializer handler missing in win32). (Jani)
 - Fixed bug #25109 (Possible crash when fetching field names in pgsql). (Ilia)
 - Fixed bug #25218 ("deflate" compressed pages had a gzip header). (Stefan)
+- Fixed bug #23326 (ext/domxml: Attributes via append_child not supported).
+  (Melvyn)
 
 25 Aug 2003, Version 4.3.3
 - Upgraded the bundled Expat library to version 1.95.6. (Jani)
