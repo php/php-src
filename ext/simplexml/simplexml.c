@@ -65,13 +65,6 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
 }
 /* }}} */
 
-#define GET_NODE(__s, __n) \
-	if ((__s)->node) { \
-		(__n) = (__s)->node->xmlChildrenNode; \
-	} else { \
-		(__n) = (__s)->node = xmlDocGetRootElement((__s)->document)->xmlChildrenNode; \
-	}
-
 #define APPEND_PREV_ELEMENT(__c, __v) \
 	if ((__c) == 1) { \
 		array_init(return_value); \
@@ -113,7 +106,11 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 		return return_value;
 	}
 
-	GET_NODE(sxe, node);
+	if (sxe->node) {
+		node = sxe->node->xmlChildrenNode;
+	} else {
+		node = sxe->node = xmlDocGetRootElement(sxe->document)->xmlChildrenNode;
+	}
 
 	attr = sxe->node->properties;
 	while (attr) {
@@ -152,6 +149,27 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ change_node_zval()
+ */
+static void
+change_node_zval(xmlNodePtr node, zval *value)
+{
+	switch (Z_TYPE_P(value)) {
+		case IS_LONG:
+		case IS_BOOL:
+		case IS_DOUBLE:
+		case IS_NULL:
+			convert_to_string(value);
+		case IS_STRING:
+			node->children->content = xmlStrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
+			break;
+		default:
+			php_error(E_WARNING, "It is not yet possible to assign complex types to attributes");
+			break;
+	}
+}
+/* }}} */
+
 /* {{{ sxe_property_write()
  */
 static void
@@ -160,11 +178,29 @@ sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	php_sxe_object *sxe;
 	char           *name;
 	xmlNodePtr      node;
+	xmlNodePtr      newnode;
+	int             counter = 0;
 	
 	name = Z_STRVAL_P(member);
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
-	GET_NODE(sxe, node);
+	node = sxe->node ? sxe->node->xmlChildrenNode : xmlDocGetRootElement(sxe->document)->xmlChildrenNode;
+
+	while (node) {
+		if (!xmlStrcmp(node->name, name)) {
+			newnode = node;
+			++counter;
+		}
+
+		node = node->next;
+	}
+
+	if (counter == 1) {
+		change_node_zval(newnode, value);
+	} else if (counter > 1) {
+		php_error(E_WARNING, "Cannot assign to an array of nodes\n");
+	}
+		
 }
 /* }}} */
 
