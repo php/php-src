@@ -56,7 +56,7 @@ struct _zend_object_iterator {
 typedef zval *(*zend_object_new_iterator_t)(zend_class_entry *ce, zval *object TSRMLS_DC);
 
 typedef struct _zend_class_iterator_funcs {
-	zend_object_iterator_funcs funcs;
+	zend_object_iterator_funcs  *funcs;
 	zend_object_new_iterator_t  new_iterator;
 	union _zend_function *zf_new_iterator;
 	union _zend_function *zf_has_more;

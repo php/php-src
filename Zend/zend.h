@@ -333,7 +333,7 @@ struct _zend_class_entry {
 	union _zend_function *__set;
 	union _zend_function *__call;
 
-	zend_class_iterator_funcs *iterator_funcs;
+	zend_class_iterator_funcs iterator_funcs;
 
 	/* handlers */
 	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
