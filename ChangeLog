@@ -1,3 +1,29 @@
+2005-03-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      These entries do not belong in NEWS file (internal issues)
+
+2005-03-25  Andi Gutmans  <andi@zend.com>
+
+    * LICENSE:
+      - Increment year in copyright notice
+
+2005-03-25  Christopher Kings-Lynne  <chriskl@users.sourceforge.net>
+
+    * NEWS
+      ext/pgsql/config.m4
+      ext/pgsql/config.w32
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/25async_query_params.phpt:
+      (PHP pg_unescape_bytea) Use libpq version of PQunescapeBytea if it exists.
+      
+
+2005-03-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      Slightly safer code.
+
 2005-03-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_vm_execute.h:
