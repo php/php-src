@@ -73,7 +73,7 @@
 # include <sys/mman.h>
 #endif
 
-#ifdef HAVE_GETOPT_H
+#ifdef HARTMUT_0
 #include <getopt.h>
 #endif
 
@@ -1373,7 +1373,7 @@ static void free_argv(char **argv, int argc)
 }
 /* }}} */
 
-#ifdef HAVE_GETOPT_LONG
+#ifdef HARTMUT_0
 /* {{{ free_longopts
    Free the memory allocated to an longopt array. */
 static void free_longopts(struct option *longopts)
@@ -1400,7 +1400,7 @@ PHP_FUNCTION(getopt)
 	char *optname;
 	int argc = 0, options_len = 0, o;
 	zval *val, **args = NULL, *p_longopts = NULL;
-#ifdef HAVE_GETOPT_LONG
+#ifdef HARTMUT_0
 	struct option *longopts = NULL;
 	int longindex = 0;
 #endif
@@ -1451,7 +1451,7 @@ PHP_FUNCTION(getopt)
 	}
 
 	if(p_longopts) {
-#ifdef HAVE_GETOPT_LONG
+#ifdef HARTMUT_0
 		int len, c = zend_hash_num_elements(Z_ARRVAL_P(p_longopts));
 		struct option *p;
 		zval **arg;
@@ -1505,7 +1505,7 @@ PHP_FUNCTION(getopt)
 	optind = 0;
 
 	/* Invoke getopt(3) on the argument array. */
-#ifdef HAVE_GETOPT_LONG
+#ifdef HARTMUT_0
 	while ((o = getopt_long(argc, argv, options, longopts, &longindex)) != -1) {
 #else
 	while ((o = getopt(argc, argv, options)) != -1) {
@@ -1517,7 +1517,7 @@ PHP_FUNCTION(getopt)
 
 		/* Prepare the option character and the argument string. */
 		if(o == 0) {
-#ifdef HAVE_GETOPT_LONG
+#ifdef HARTMUT_0
 			optname = (char *)longopts[longindex].name;
 #endif
 		} else {		
@@ -1546,7 +1546,7 @@ PHP_FUNCTION(getopt)
 	}
 
 	free_argv(argv, argc);
-#ifdef HAVE_GETOPT_LONG
+#ifdef HARTMUT_0
 	free_longopts(longopts);
 #endif
 }
