@@ -1,3 +1,117 @@
+2000-09-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: .
+
+    * ext/session/mod_mm.c: Return SUCCESS from write handler, if vallen is 0.
+
+    Submitted by: tcarroll@chc-chimes.com
+    PR: #6958
+
+2000-09-29  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Benchmark/Benchmark.php
+      pear/Benchmark/Iterate.php: make filename match classname
+
+2000-09-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/mod_php4.c:
+    UnixWare defines shutdown to _shutdown, which causes problems later
+    on when using a structure member named shutdown. Since this source
+    file does not use the system call shutdown, it is safe to #undef it.
+
+    PR: #6008, #6362
+
+2000-09-29  Dan Kalowsky  <dkalowsky@wgate.com>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    corrected lines for Solid 2.3 systems after some advice from users, please test...
+
+2000-09-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var.c: Don't try to serialize references.
+
+    Circular references would otherwise kill PHP, as the serializer
+    would overrun the stack.
+
+2000-09-29  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/Benchmark/Benchmark.php:
+    Renamed Benchmark::Benchmark to Benchmark::Iterate.
+
+2000-09-29  Hénot David  <henot@iie.cnam.fr>
+
+    * ext/ingres_ii/ii.c
+      ext/ingres_ii/ii.h:
+    Added clean up code for persistent connections to avoid some problems with
+    autocommit.
+
+2000-09-29  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/Benchmark/Benchmark.php
+      pear/Benchmark/Timer.php: Tweaked inline documentation a bit.
+
+    * pear/Benchmark/Benchmark.php: Benchmark now extends Benchmark_Timer.
+
+2000-09-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/config.m4: Fix configure (with Solaris).
+
+2000-09-28  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/gd/gd.dsp: a little cleanup
+
+    * ext/java/java.dsp: added tsrm dir to include path
+
+    * ext/pgsql/pgsql.dsp: removed ignoring msvcrt(d) libary
+
+    * ext/mcrypt/mcrypt.dsp: major cleanup
+
+2000-09-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/db/config.m4: - Changed ext/db not to be enabled by default 
+
+2000-09-28  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/odbc/php_odbc.c:
+    Having odbc_tables() and odbc_columns() match the documentation with parameters optionel from the right
+
+2000-09-28  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/Benchmark/Benchmark.php
+      pear/Benchmark/Timer.php: Fixed some typos.
+
+    * pear/Benchmark/Benchmark.php: First draft of Benchmark::Benchmark.
+
+2000-09-28  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Benchmark/Timer.php
+      pear/Makefile.in
+      pear/Timer.php:
+    move the timer class to Benchmark/Timer.php, and add it to Makefile.in so it
+    gets installed.
+
+2000-09-28  Andi Gutmans  <andi@zend.com>
+
+    * ext/odbc/config.m4: - Fix build of db2
+
+2000-09-28  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/Timer.php:
+    Removed profiling_information() in favour of a more generalized approach with get_profiling().
+
+2000-09-28  Stefan Roehrich  <sr@linux.de>
+
+    * ext/gd/config.m4:
+    Line seems to be missing and causing configure test failures for other extensions.
+
+2000-09-28  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/Timer.php: Hopefully converted all TABs to SPACEs
+
+    * pear/Timer.php:
+    Added PEAR/Timer class for timing script execution and generating profiling information. This class is based upon a concept by Allan Kent shown in his article on PHPBuilder.com
+
 2000-09-27  Zeev Suraski  <zeev@zend.com>
 
     * main/main.c: complementary PHP patch
