@@ -127,7 +127,7 @@ int php_mbregex_name2mbctype(const char *pname);
 
 char *mbstr_strrchr(const char *s, char c TSRMLS_DC);
 int mbstr_is_mb_leadbyte(const char *s TSRMLS_DC);
-int mbstr_encoding_translation(TSRMLS_DC) ;
+int mbstr_encoding_translation(TSRMLS_D);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int language;

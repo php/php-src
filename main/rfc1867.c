@@ -460,7 +460,7 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 		} else {
 			*resp++ = start[i];
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-			if (mbstr_encoding_translation(TSRMLS_CC) && 
+			if (mbstr_encoding_translation(TSRMLS_C) && 
 				mbstr_is_mb_leadbyte(start+i TSRMLS_CC)) {
 				*resp++ = start[++i];
 			}
@@ -842,7 +842,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			}
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-			if (mbstr_encoding_translation(TSRMLS_CC)) {
+			if (mbstr_encoding_translation(TSRMLS_C)) {
 				s = mbstr_strrchr(filename, '\\' TSRMLS_CC);
 			} else {
 				s = strrchr(filename, '\\');

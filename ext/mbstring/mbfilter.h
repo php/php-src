@@ -221,7 +221,7 @@ typedef struct _mbfl_encoding {
 #define MBFL_ENCTYPE_WCS4LE		0x00000200
 #define MBFL_ENCTYPE_MWC4BE		0x00000400
 #define MBFL_ENCTYPE_MWC4LE		0x00000800
-#define MBFL_ENCTYPE_SHFTCODE	0x00001000
+#define MBFL_ENCTYPE_SHFTCODE	0x00001000 
 
 /* wchar plane, special charactor */
 #define MBFL_WCSPLANE_MASK			0xffff
@@ -277,8 +277,8 @@ void mbfl_string_clear(mbfl_string *string);
 /*
  * language resolver
  */
-mbfl_language * mbfl_name2language(const char *name);
-mbfl_language * mbfl_no2language(enum mbfl_no_language no_language);
+const mbfl_language * mbfl_name2language(const char *name);
+const mbfl_language * mbfl_no2language(enum mbfl_no_language no_language);
 enum mbfl_no_language mbfl_name2no_language(const char *name);
 const char * mbfl_no_language2name(enum mbfl_no_language no_language);
 
@@ -286,8 +286,8 @@ const char * mbfl_no_language2name(enum mbfl_no_language no_language);
 /*
  * encoding resolver
  */
-mbfl_encoding * mbfl_name2encoding(const char *name);
-mbfl_encoding * mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
+const mbfl_encoding * mbfl_name2encoding(const char *name);
+const mbfl_encoding * mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);
 const char * mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
 const char * mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
@@ -348,8 +348,8 @@ struct _mbfl_convert_filter {
 	void *data;
 	int status;
 	int cache;
-	mbfl_encoding *from;
-	mbfl_encoding *to;
+	const mbfl_encoding *from;
+	const mbfl_encoding *to;
 	int illegal_mode;
 	int illegal_substchar;
 };
@@ -390,7 +390,7 @@ struct _mbfl_identify_filter {
 	int status;
 	int flag;
 	int score;
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 };
 
 struct mbfl_identify_vtbl {
@@ -413,8 +413,8 @@ struct _mbfl_buffer_converter {
 	mbfl_convert_filter *filter1;
 	mbfl_convert_filter *filter2;
 	mbfl_memory_device device;
-	mbfl_encoding *from;
-	mbfl_encoding *to;
+	const mbfl_encoding *from;
+	const mbfl_encoding *to;
 };
 
 mbfl_buffer_converter * mbfl_buffer_converter_new(enum mbfl_no_encoding from, enum mbfl_no_encoding to, int buf_initsz TSRMLS_DC);
@@ -456,13 +456,13 @@ mbfl_convert_encoding(mbfl_string *string, mbfl_string *result, enum mbfl_no_enc
 /*
  * identify encoding
  */
-mbfl_encoding *
+const mbfl_encoding *
 mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC);
 
 const char *
 mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC);
 
-enum mbfl_no_encoding
+const enum mbfl_no_encoding
 mbfl_identify_encoding_no(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC);
 
 /*
