@@ -353,6 +353,7 @@ PHP_FUNCTION(stream_get_transports)
 	HashTable *stream_xport_hash;
 	char *stream_xport;
 	int stream_xport_len;
+	ulong num_key;
 
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
@@ -363,7 +364,7 @@ PHP_FUNCTION(stream_get_transports)
 		zend_hash_internal_pointer_reset(stream_xport_hash);
 		while (zend_hash_get_current_key_ex(stream_xport_hash,
 					&stream_xport, &stream_xport_len,
-					NULL, 0, NULL) == HASH_KEY_IS_STRING) {
+					&num_key, 0, NULL) == HASH_KEY_IS_STRING) {
 			add_next_index_stringl(return_value, stream_xport, stream_xport_len, 1);
 			zend_hash_move_forward(stream_xport_hash);
 		}
@@ -380,6 +381,7 @@ PHP_FUNCTION(stream_get_wrappers)
 	HashTable *url_stream_wrappers_hash;
 	char *stream_protocol;
 	int key_flags, stream_protocol_len = 0;
+	ulong num_key;
 
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
@@ -388,7 +390,7 @@ PHP_FUNCTION(stream_get_wrappers)
 	if ((url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash())) {
 		array_init(return_value);
 		for(zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
-			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, NULL, 0, NULL)) != HASH_KEY_NON_EXISTANT;
+			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
 			zend_hash_move_forward(url_stream_wrappers_hash)) {
 				if (key_flags == HASH_KEY_IS_STRING) {
 					add_next_index_stringl(return_value, stream_protocol, stream_protocol_len, 1);
@@ -640,16 +642,17 @@ static int parse_context_options(php_stream_context *context, zval *options)
 	char *wkey, *okey;
 	int wkey_len, okey_len;
 	int ret = SUCCESS;
+	ulong num_key;
 	
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(options), &pos);
 	while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_P(options), (void**)&wval, &pos)) {
-		if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_P(options), &wkey, &wkey_len, NULL, 0, &pos)
+		if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_P(options), &wkey, &wkey_len, &num_key, 0, &pos)
 				&& Z_TYPE_PP(wval) == IS_ARRAY) {
 
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(wval), &opos);
 			while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(wval), (void**)&oval, &opos)) {
 
-				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_PP(wval), &okey, &okey_len, NULL, 0, &opos)) {
+				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_PP(wval), &okey, &okey_len, &num_key, 0, &opos)) {
 					php_stream_context_set_option(context, wkey, okey, *oval);
 				}
 				zend_hash_move_forward_ex(Z_ARRVAL_PP(wval), &opos);
