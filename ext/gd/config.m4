@@ -2,10 +2,39 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PHP_GD_JPEG,[
-  PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
-  [  --with-jpeg-dir=DIR       GD: Set the path to libjpeg install prefix.])
+dnl
+dnl Configure options
+dnl 
 
+PHP_ARG_WITH(gd, for GD support,
+[  --with-gd[=DIR]         Include GD support (DIR is GD's install dir).])
+
+PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
+[  --with-jpeg-dir=DIR       GD: Set the path to libjpeg install prefix.])
+
+PHP_ARG_WITH(png-dir, for the location of libpng,
+[  --with-png-dir=DIR        GD: Set the path to libpng install prefix.])
+
+PHP_ARG_WITH(xpm-dir, for the location of libXpm,
+[  --with-xpm-dir=DIR        GD: Set the path to libXpm install prefix.])
+
+PHP_ARG_WITH(ttf,for FreeType 1.x support,
+[  --with-ttf[=DIR]          GD: Include FreeType 1.x support])
+  
+PHP_ARG_WITH(freetype-dir, for freetype(2),
+[  --with-freetype-dir=DIR   GD: Set the path to freetype2 install prefix.])
+
+PHP_ARG_WITH(t1lib, for T1lib support,
+[  --with-t1lib[=DIR]        GD: Include T1lib support.])
+
+PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
+[  --enable-gd-native-ttf    GD: Enable TrueType string function.])
+
+dnl  
+dnl Checks for the configure options 
+dnl 
+
+AC_DEFUN(PHP_GD_JPEG,[
   if test "$PHP_JPEG_DIR" != "no"; then
 
     for i in /usr /usr/local $PHP_JPEG_DIR; do
@@ -30,9 +59,6 @@ AC_DEFUN(PHP_GD_JPEG,[
 ])
 
 AC_DEFUN(PHP_GD_PNG,[
-  PHP_ARG_WITH(png-dir, for the location of libpng,
-  [  --with-png-dir=DIR        GD: Set the path to libpng install prefix.])
-
   if test "$PHP_PNG_DIR" != "no"; then
 
     for i in /usr /usr/local $PHP_PNG_DIR; do
@@ -63,9 +89,6 @@ AC_DEFUN(PHP_GD_PNG,[
 ])
 
 AC_DEFUN(PHP_GD_XPM,[
-  PHP_ARG_WITH(xpm-dir, for the location of libXpm,
-  [  --with-xpm-dir=DIR        GD: Set the path to libXpm install prefix.])
-
   if test "$PHP_XPM_DIR" != "no"; then
 
     for i in /usr /usr/local /usr/X11R6 $PHP_XPM_DIR; do
@@ -91,9 +114,6 @@ AC_DEFUN(PHP_GD_XPM,[
 ])
 
 AC_DEFUN(PHP_GD_FREETYPE1,[
-  PHP_ARG_WITH(ttf,for FreeType 1.x support,
-  [  --with-ttf[=DIR]          GD: Include FreeType 1.x support])
-  
   if test "$PHP_TTF" != "no"; then
     if test "$PHP_FREETYPE_DIR" = "no" -o "$PHP_FREETYPE_DIR" = ""; then
       if test -n "$PHP_TTF" ; then
@@ -123,9 +143,6 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
 ])
 
 AC_DEFUN(PHP_GD_FREETYPE2,[
-  PHP_ARG_WITH(freetype-dir, for freetype(2),
-  [  --with-freetype-dir=DIR   GD: Set the path to freetype2 install prefix.])
-
   if test "$PHP_FREETYPE_DIR" != "no"; then
     for i in /usr /usr/local $PHP_FREETYPE_DIR; do
       if test -f "$i/include/freetype2/freetype/freetype.h"; then
@@ -148,9 +165,6 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
 ])
 
 AC_DEFUN(PHP_GD_T1LIB,[
-  PHP_ARG_WITH(t1lib, for T1lib support,
-  [  --with-t1lib[=DIR]        GD: Include T1lib support.])
-
   if test "$PHP_T1LIB" != "no"; then
 
     for i in /usr /usr/local $PHP_T1LIB; do
@@ -175,9 +189,6 @@ AC_DEFUN(PHP_GD_T1LIB,[
 ])
 
 AC_DEFUN(PHP_GD_TTSTR,[
-  PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
-  [  --enable-gd-native-ttf    GD: Enable TrueType string function.])
-  
   if test "$PHP_GD_NATIVE_TTF" = "yes"; then
     AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
   fi
@@ -205,8 +216,9 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
 ])
 
 
-PHP_ARG_WITH(gd, for GD support,
-[  --with-gd[=DIR]         Include GD support (DIR is GD's install dir).])
+dnl
+dnl Main GD configure
+dnl 
 
 if test "$PHP_GD" = "php"; then
   GD_MODULE_TYPE=builtin
@@ -215,9 +227,14 @@ if test "$PHP_GD" = "php"; then
 		libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c libgd/gdfontmb.c libgd/gdfontl.c \
 		libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
 		libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c"
-  PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c gdt1.c $sources, $ext_shared,,-I@ext_srcdir@/libgd)
+
+  PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c gdt1.c $sources, $ext_shared,, \\$(GDLIB_CFLAGS))
+  PHP_ADD_INCLUDE($ext_srcdir/libgd)
   PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
+dnl PNG is required by GD library
+  test "$PHP_PNG_DIR" = "no" && PHP_PNG_DIR=yes
+      
 dnl Various checks for GD features
   PHP_GD_TTSTR
   PHP_GD_JPEG
@@ -227,7 +244,44 @@ dnl Various checks for GD features
   PHP_GD_FREETYPE1
   PHP_GD_T1LIB
 
+dnl These are always available with bundled library
+  AC_DEFINE(HAVE_LIBGD,               1, [ ])
+  AC_DEFINE(HAVE_LIBGD13,             1, [ ])
+  AC_DEFINE(HAVE_LIBGD15,             1, [ ])
+  AC_DEFINE(HAVE_LIBGD20,             1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])
+  AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])
+  AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])
+  AC_DEFINE(HAVE_GD_WBMP,             1, [ ])
+  AC_DEFINE(HAVE_GD_GD2,              1, [ ])
+  AC_DEFINE(HAVE_GD_PNG,              1, [ ])
+
+  GDLIB_CFLAGS="-DHAVE_LIBPNG"
+
+dnl Depending which libraries were included to PHP configure,
+dnl enable the support in bundled GD library
+
+  if test -n "$GD_JPG_DIR"; then
+    AC_DEFINE(HAVE_GD_JPG, 1, [ ])
+    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBJPEG"
+  fi
+
+  if test -n "$GD_XPM_DIR"; then
+    AC_DEFINE(HAVE_GD_XPM, 1, [ ])
+    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_XPM"
+  fi
+  
+  if test -n "$FREETYPE2_DIR"; then
+    AC_DEFINE(HAVE_GD_STRINGFT,   1, [ ])
+    AC_DEFINE(HAVE_GD_STRINGFTEX, 1, [ ])
+    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBFREETYPE"
+  fi
+
+  PHP_SUBST(GDLIB_CFLAGS)
+
 else
+
  if test "$PHP_GD" != "no"; then
 
   PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c gdt1.c, $ext_shared)
