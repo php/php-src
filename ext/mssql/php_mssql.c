@@ -742,7 +742,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			unsigned char *res_buf;
 			int res_length = dbdatlen(mssql_ptr->link, offset);
 
-			res_buf = (unsigned char *) emalloc(res_length);
+			res_buf = (unsigned char *) emalloc(res_length + 1);
 			bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 			memcpy(res_buf,bin,res_length);
 			res_buf[res_length] = '\0';
@@ -755,11 +755,11 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 		default: {
 			if (dbwillconvert(column_type,SQLCHAR)) {
 				char *res_buf;
-				int res_length = dbdatlen(mssql_ptr->link,offset) + 1;
+				int res_length = dbdatlen(mssql_ptr->link,offset);
 				if (column_type == SQLDATETIM4) res_length += 14;
 				if (column_type == SQLDATETIME) res_length += 10;
 			
-				res_buf = (char *) emalloc(res_length);
+				res_buf = (char *) emalloc(res_length + 1);
 				res_length = dbconvert(NULL,column_type,dbdata(mssql_ptr->link,offset), res_length,SQLCHAR,res_buf,-1);
 
 				result->value.str.val = res_buf;
@@ -787,7 +787,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		unsigned char *res_buf;
 		int res_length = dbdatlen(mssql_ptr->link, offset);
 
-		res_buf = (unsigned char *) emalloc(res_length);
+		res_buf = (unsigned char *) emalloc(res_length + 1);
 		bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 		memcpy(res_buf, bin, res_length);
 		res_buf[res_length] = '\0';
@@ -797,11 +797,11 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 	}
 	else if  (dbwillconvert(coltype(offset),SQLCHAR)) {
 		unsigned char *res_buf;
-		int res_length = dbdatlen(mssql_ptr->link,offset) + 1;
+		int res_length = dbdatlen(mssql_ptr->link,offset);
 		if (column_type == SQLDATETIM4) res_length += 14;
 		if (column_type == SQLDATETIME) res_length += 10;
 		
-		res_buf = (unsigned char *) emalloc(res_length);
+		res_buf = (unsigned char *) emalloc(res_length + 1);
 		res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
 
 		result->value.str.val = res_buf;
