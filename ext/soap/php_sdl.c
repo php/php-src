@@ -178,6 +178,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 	if (!wsdl) {
 		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Couldn't load from '%s'", struri);
 	}
+	cleanup_xml(wsdl);
 
 	zend_hash_add(&tmpsdl->docs, struri, strlen(struri)+1, (void**)&wsdl, sizeof(xmlDocPtr), NULL);
 

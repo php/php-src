@@ -41,6 +41,8 @@ xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns
 xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns);
 int parse_namespace(const char *inval,char **value,char **namespace);
 
+void cleanup_xml(xmlDocPtr doc);
+
 int php_stream_xmlIO_match_wrapper(const char *filename);
 void *php_stream_xmlIO_open_wrapper(const char *filename);
 int php_stream_xmlIO_read(void *context, char *buffer, int len);
