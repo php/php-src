@@ -19,10 +19,13 @@
 */
 /* $Id$ */
 
+#ifdef PIC
+# define COMPILE_DL 1
+#endif
+
 #include "php.h"
 #if defined(COMPILE_DL)
-#include "phpdl.h"
-#include "functions/dl.h"
+#include "dl/phpdl.h"
 #endif
 #include "php3_snmp.h"
 #include <sys/types.h>
