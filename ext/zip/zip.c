@@ -176,7 +176,7 @@ PHP_FUNCTION(zip_close)
 	}
 	ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *, &zzip_dp, -1, le_zip_dir_name, le_zip_dir);
 
-	zend_list_delete(Z_LVAL_PP(zzip_dp));
+	zend_list_delete(Z_LVAL_P(zzip_dp));
 }
 /* }}} */
 
@@ -259,7 +259,7 @@ PHP_FUNCTION(zip_entry_open)
 
 	entry->fp = zzip_file_open(archive_p, entry->dirent.d_name, O_RDONLY | O_BINARY);
 
-	RETURN_BOOL(entry->fp);
+	RETURN_BOOL((int) entry->fp);
 }
 /* }}} */
 
