@@ -66,7 +66,7 @@ END {
 		useswitch = maxargs[i] - minargs[i]
 		funcvals = resources = handleargs = ""
 
-		proto = "/* {{{ #proto " types[i] " " funcs[i] "("
+		proto = "/* {{{ proto " types[i] " " funcs[i] "("
 
 		if (maxargs[i]) {
 			zvals = "\tzval "
@@ -98,9 +98,9 @@ END {
 
 			if (useswitch) {
 				if (j > minargs[i]-1) {
-					handleargs = "\t\tcase " j+1 ";\n\t\t\t" convert(argtypes[i,j], argnames[i,j]) "\t\t\t/* Fall-through. */\n" handleargs
+					handleargs = "\t\tcase " j+1 ":\n\t\t\t" convert(argtypes[i,j], argnames[i,j]) "\t\t\t/* Fall-through. */\n" handleargs
 				} else if (j >= minargs[i]-1) {
-					handleargs = "\t\tcase " j+1 ";\n\t\t\t" convert(argtypes[i,j], argnames[i,j]) handleargs
+					handleargs = "\t\tcase " j+1 ":\n\t\t\t" convert(argtypes[i,j], argnames[i,j]) handleargs
 				} else {
 					handleargs = "\t\t\t" convert(argtypes[i,j], argnames[i,j]) handleargs
 				}
@@ -112,21 +112,24 @@ END {
 		proto = proto closeopts ")\n    */\nPHP_FUNCTION(" funcs[i] ")\n{"
 		if (maxargs[i]) {
 			zvals = zvals ";"
-			fetchargs = fetchargs ") == FAILURE) {\n\t\tWRONG_PARAM_COUNT();\n\t}\n"
+			fetchargs = fetchargs ") == FAILURE) {\n\t\tWRONG_PARAM_COUNT;\n\t}\n"
 		}
 		if (resources ) funcvals = funcvals "\t???LS_FETCH();\n"
-		if (useswitch) handleargs = "\tswitch (argc) {\n" handleargs "\t\t\tbreak;\n\t}"
+		if (useswitch) handleargs = "\tswitch (argc) {\n" handleargs "\t\t\tbreak;\n\t\tdefault:\n\t\t\tWRONG_PARAM_COUNT;\n\t}"
 
-		print proto > "function_stubs"
-		if (zvals) print zvals > "function_stubs"
-  	if (funcvals) print funcvals > "function_stubs"
-		if (fetchargs) print fetchargs > "function_stubs"
-		if (resources) print resources > "function_stubs"
-		if (handleargs) print handleargs > "function_stubs"
-		print "\n\tphp_error(E_WARNING, \"" funcs[i] ": not yet implemented\");" > "function_stubs"
-		print "}\n/* }}} */\n" > "function_stubs"
-		print "PHP_FUNCTION(" funcs[i] ");" > "function_declarations"
-		print "\tPHP_FE(" funcs[i] ",\tNULL)" > "function_entries"
+		print proto > extname "/function_stubs"
+		if (zvals) print zvals > extname "/function_stubs"
+  	if (funcvals) print funcvals > extname "/function_stubs"
+		if (fetchargs) print fetchargs > extname "/function_stubs"
+		if (resources) {
+				print resources > extname "/function_stubs"
+				print "" > extname "/function_warning"
+		}
+		if (handleargs) print handleargs > extname "/function_stubs"
+		print "\n\tphp_error(E_WARNING, \"" funcs[i] ": not yet implemented\");" > extname "/function_stubs"
+		print "}\n/* }}} */\n" > extname "/function_stubs"
+		print "PHP_FUNCTION(" funcs[i] ");" > extname "/function_declarations"
+		print "\tPHP_FE(" funcs[i] ",\tNULL)" > extname "/function_entries"
 	}
 }
 
