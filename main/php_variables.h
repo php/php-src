@@ -37,5 +37,9 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array T
 PHPAPI void php_register_variable_safe(char *var, char *val, int val_len, pval *track_vars_array TSRMLS_DC);
 PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_array TSRMLS_DC);
 
+int php_hash_environment(TSRMLS_D);
+
+
+#define NUM_TRACK_VARS	6
 
 #endif /* PHP_VARIABLES_H */
