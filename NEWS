@@ -3,6 +3,11 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+- IIS Admin mudule added
+- OCIBindByName() now does better parameter-checking. (Thies)
+- Attempted to make compile fixes for Solaris in ext/sockets/sockets.c (Chris Vandomelen)
+- Made read() binary-safe in sockets.c (Chris Vandomelen)
+- Attempted fixing some compile failures (Chris Vandomelen)
 - Made array_intersect and array_diff not alter order (Stig Venaas)
 - Made ldap_connect() accept URL in host parameter when using OpenLDAP
   2.x. To use SSL, use ldaps://host/ as URL. (Stig Venaas)
