@@ -533,6 +533,21 @@ CWD_API int virtual_rmdir(const char *pathname)
 	return retval;
 }
 
+CWD_API DIR *virtual_opendir(const char *pathname)
+{
+	cwd_state new_state;
+	DIR *retval;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	virtual_file_ex(&new_state, pathname, NULL);
+
+	retval = opendir(new_state.cwd);
+
+	CWD_STATE_FREE(&new_state);
+	return retval;
+}
+
 #if 0
 
 main(void)

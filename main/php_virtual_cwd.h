@@ -11,6 +11,13 @@
 #include <unistd.h>
 #endif
 
+#ifdef ZEND_WIN32
+#include "win32/readdir.h"
+#else
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+#endif
 
 #ifdef PHP_EXPORTS
 #define CWD_EXPORTS
@@ -51,6 +58,7 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf);
 CWD_API int virtual_unlink(const char *path);
 CWD_API int virtual_mkdir(const char *pathname, mode_t mode);
 CWD_API int virtual_rmdir(const char *pathname);
+CWD_API DIR *virtual_opendir(const char *pathname);
 
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path);
 
