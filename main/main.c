@@ -624,7 +624,8 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	php_output_startup();
 
 	/* initialize global variables */
-	PG(header_is_being_sent)=0;
+	PG(header_is_being_sent) = 0;
+	PG(already_in_shutdown) = 0;
 	
 	zend_activate(CLS_C ELS_CC);
 	sapi_activate(SLS_C);	
@@ -658,11 +659,15 @@ void php_request_shutdown(void *dummy)
 	CLS_FETCH();
 	ELS_FETCH();
 	SLS_FETCH();
+	PLS_FETCH();
 
 	sapi_send_headers();
 	php_end_ob_buffering(SG(request_info).headers_only?0:1);
 
-	php_call_shutdown_functions();
+	if (!PG(already_in_shutdown)) {
+		PG(already_in_shutdown) = 1;
+		php_call_shutdown_functions();
+	}
 	
 	php_ini_rshutdown();
 

@@ -97,6 +97,7 @@ struct _php_core_globals {
 	long max_execution_time;
 
 	unsigned char header_is_being_sent;
+	zend_bool already_in_shutdown;
 };
 
 
