@@ -1232,6 +1232,7 @@ PHP_FUNCTION(fwrite)
 	int issock=0;
 	int socketd=0;
 	void *what;
+	char *buffer = NULL;
 
 	switch (ZEND_NUM_ARGS()) {
 	case 2:
@@ -1265,26 +1266,29 @@ PHP_FUNCTION(fwrite)
 	}
 
 	if (!arg3 && PG(magic_quotes_runtime)) {
-		zval_copy_ctor(*arg2);
-		php_stripslashes(Z_STRVAL_PP(arg2), &num_bytes TSRMLS_CC);
+		buffer = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
+		php_stripslashes(buffer, &num_bytes TSRMLS_CC);
 	}
 
 #if HAVE_PHP_STREAM
 	if (type == le_stream)	{
-		ret = php_stream_write((php_stream *) what, Z_STRVAL_PP(arg2), num_bytes);
+		ret = php_stream_write((php_stream *) what, buffer, num_bytes);
 	}
 	else
 #endif
 	
 	if (issock){
-		ret = SOCK_WRITEL(Z_STRVAL_PP(arg2), num_bytes, socketd);
+		ret = SOCK_WRITEL(buffer, num_bytes, socketd);
 	} else {
 #ifdef HAVE_FLUSHIO
 		if (type == le_fopen) {
 			fseek((FILE *) what, 0, SEEK_CUR);
 		}
 #endif
-		ret = fwrite(Z_STRVAL_PP(arg2), 1, num_bytes, (FILE *) what);
+		ret = fwrite(buffer, 1, num_bytes, (FILE *) what);
+	}
+	if (buffer) {
+		efree(buffer);
 	}
 	RETURN_LONG(ret);
 }

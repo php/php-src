@@ -29,8 +29,8 @@ $fp = fopen($name, "w");
 fwrite($fp, $data);
 fclose($fp);
 
-//readfile($name);
-echo file_get_contents($name);
+readfile($name);
+//echo file_get_contents($name);
 
 unlink($name);
 
