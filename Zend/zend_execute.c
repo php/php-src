@@ -1487,9 +1487,24 @@ binary_assign_op_addr: {
 			case ZEND_FETCH_CLASS:
 				{
 					if (EX(opline)->op1.op_type == IS_UNUSED) {
-						if (zend_hash_find(EG(class_table), EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
-							zend_error(E_ERROR, "Class '%s' not found", EX(opline)->op2.u.constant.value.str.val);
+						zval tmp;
+						zval *class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+
+						if (class_name->type != IS_STRING) {
+							tmp = *class_name;
+							zval_copy_ctor(&tmp);
+							convert_to_string(&tmp);
+							class_name = &tmp;
+							zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 						}
+
+						if (zend_hash_find(EG(class_table), class_name->value.str.val, class_name->value.str.len+1, &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
+							zend_error(E_ERROR, "Class '%s' not found", class_name->value.str.val);
+						}
+						if (class_name == &tmp) {
+							zval_dtor(&tmp);
+						}
+						FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 					} else {
 						if (zend_hash_find(&EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->class_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
 							zend_error(E_ERROR, "Class '%s' not found", EX(opline)->op2.u.constant.value.str.val);
@@ -2015,26 +2030,13 @@ send_by_ref:
 			case ZEND_SWITCH_FREE:
 				zend_switch_free(EX(opline), EX(Ts) TSRMLS_CC);
 				NEXT_OPCODE();
-			case ZEND_NEW: {
-					zval *tmp = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-					zval class_name;
-					zend_class_entry *ce;
-
-					class_name = *tmp;
-					zval_copy_ctor(&class_name);
-					convert_to_string(&class_name);
-					zend_str_tolower(class_name.value.str.val, class_name.value.str.len);
-
-					if (zend_hash_find(EG(class_table), class_name.value.str.val, class_name.value.str.len+1, (void **) &ce)==FAILURE) {
-						zend_error(E_ERROR, "Cannot instantiate non-existent class:  %s", class_name.value.str.val);
-					}
+			case ZEND_NEW:
+				{
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 					ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
-					object_init_ex(EX(Ts)[EX(opline)->result.u.var].var.ptr, ce);
+					object_init_ex(EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(Ts)[EX(opline)->op1.u.var].EA.class_entry);
 					EX(Ts)[EX(opline)->result.u.var].var.ptr->refcount=1;
 					EX(Ts)[EX(opline)->result.u.var].var.ptr->is_ref=1;
-					zval_dtor(&class_name);
-					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 				}
 				NEXT_OPCODE();
 			case ZEND_FETCH_CONSTANT:
