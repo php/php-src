@@ -45,18 +45,18 @@
    documentation and/or software.
  */
 
-#include "php_global.h"
+#include "ext/standard/basic_functions.h"
 
 /* MD5 context. */
 typedef struct {
-	UINT4 state[4];				/* state (ABCD) */
-	UINT4 count[2];				/* number of bits, modulo 2^64 (lsb first) */
+	php_uint32 state[4];				/* state (ABCD) */
+	php_uint32 count[2];				/* number of bits, modulo 2^64 (lsb first) */
 	unsigned char buffer[64];	/* input buffer */
 } PHP_MD5_CTX;
 
-void PHP_MD5Init PROTO_LIST((PHP_MD5_CTX *));
-void PHP_MD5Update PROTO_LIST((PHP_MD5_CTX *, const unsigned char *, unsigned int));
-void PHP_MD5Final PROTO_LIST((unsigned char[16], PHP_MD5_CTX *));
+void PHP_MD5Init(PHP_MD5_CTX *);
+void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, unsigned int);
+void PHP_MD5Final(unsigned char[16], PHP_MD5_CTX *);
 
 PHP_NAMED_FUNCTION(php_if_md5);
 
