@@ -2578,7 +2578,13 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 		goto CLEANUP;
 	}
 
-	persistent = server->persistent; /* if our server-context is not persistent we can't */
+	if (exclusive) {
+		/* exlusive session can never be persistent!*/
+		persistent = 0;
+	} else {
+		/* if our server-context is not persistent we can't */
+		persistent = server->persistent; 
+	}
 
 	session = _oci_open_session(server,username,password,persistent,exclusive);
 
