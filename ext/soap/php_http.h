@@ -12,7 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Dmitry Stogov <dmitry@php.net>                               |
+  | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
+  |          Shane Caraveo <shane@caraveo.com>                           |
+  |          Dmitry Stogov <dmitry@zend.com>                             |
   +----------------------------------------------------------------------+
 */
 /* $Id$ */
