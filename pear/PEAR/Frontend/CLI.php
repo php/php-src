@@ -33,7 +33,6 @@ class PEAR_Frontend_CLI extends PEAR
     var $type = 'CLI';
     var $lp = ''; // line prefix
 
-    var $omode = 'plain';
     var $params = array();
     var $term = array(
         'bold' => '',
@@ -68,7 +67,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayLine($text)
     {
-        trigger_error("Frontend::displayLine deprecated", E_USER_ERROR);
+        trigger_error("PEAR_Frontend_CLI::displayLine deprecated", E_USER_ERROR);
     }
 
     function _displayLine($text)
@@ -81,7 +80,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function display($text)
     {
-        trigger_error("Frontend::display deprecated", E_USER_ERROR);
+        trigger_error("PEAR_Frontend_CLI::display deprecated", E_USER_ERROR);
     }
 
     function _display($text)
@@ -111,7 +110,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayHeading($title)
     {
-        trigger_error("Frontend::displayHeading deprecated", E_USER_ERROR);
+        trigger_error("PEAR_Frontend_CLI::displayHeading deprecated", E_USER_ERROR);
     }
 
     function _displayHeading($title)
@@ -160,7 +159,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function userConfirm($prompt, $default = 'yes')
     {
-        trigger_error("Frontend::userConfirm not yet converted", E_USER_ERROR);
+        trigger_error("PEAR_Frontend_CLI::userConfirm not yet converted", E_USER_ERROR);
         static $positives = array('y', 'yes', 'on', '1');
         static $negatives = array('n', 'no', 'off', '0');
         print "$this->lp$prompt [$default] : ";
@@ -188,12 +187,11 @@ class PEAR_Frontend_CLI extends PEAR
 
     function startTable($params = array())
     {
-        trigger_error("Frontend::startTable deprecated", E_USER_ERROR);
+        trigger_error("PEAR_Frontend_CLI::startTable deprecated", E_USER_ERROR);
     }
 
     function _startTable($params = array())
     {
-        $this->omode = 'table';
         $params['table_data'] = array();
         $params['widest'] = array();  // indexed by column
         $params['highest'] = array(); // indexed by row
@@ -206,7 +204,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function tableRow($columns, $rowparams = array(), $colparams = array())
     {
-        trigger_error("Frontend::tableRow deprecated", E_USER_ERROR);
+        trigger_error("PEAR_Frontend_CLI::tableRow deprecated", E_USER_ERROR);
     }
 
     function _tableRow($columns, $rowparams = array(), $colparams = array())
@@ -256,12 +254,11 @@ class PEAR_Frontend_CLI extends PEAR
 
     function endTable()
     {
-        trigger_error("Frontend::tableRow deprecated", E_USER_ERROR);
+        trigger_error("PEAR_Frontend_CLI::tableRow deprecated", E_USER_ERROR);
     }
 
     function _endTable()
     {
-        $this->omode = '';
         extract($this->params);
         if (!empty($caption)) {
             $this->_displayHeading($caption);
