@@ -1,3 +1,89 @@
+2002-06-13  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/gd/gd_bundled.dsp:
+    - Initial MSVC makefile to create a php_gd2.dll based on the bundled libgd,
+      works out of the box here with the right image libs and headers.
+
+    * win32/sendmail.c:
+    - We don't need the check here because the regex makes sure we never have \r\n
+      at the end of the header.
+
+2002-06-13  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/mod_php4.c:
+    Fixes bugs: #16653, #14534, #14370
+
+2002-06-13  Pierre-Alain Joye  <pajoye@phpindex.com>
+
+    * pear/Date/Calc.php:
+    Fix isValid method : wrong order for the params to checkdate()
+
+2002-06-13  Stefan Esser  <s.esser@e-matters.de>
+
+    * win32/sendmail.c: Typo: == instead of =
+
+    * win32/sendmail.c: - should fix bug#17753
+
+2002-06-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/openssl/openssl.c: Fixed bug: #17751 (typo)
+
+2002-06-13  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/mail.c:
+    Fixed: possible bufferunderrun (worst case == invalid free bytes counter)
+
+    Fixed: isXXXX macros need (unsigned char) cast
+
+    Fixed: bug#17746 - control chars are now filtered within "to" and "subject" parameters
+
+2002-06-13  Andrei Zmievski  <andrei@php.net>
+
+    * ext/bz2/bz2.c: Typo.
+
+2002-06-13  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Registry.php: Change a little the dep db structure
+    Comment the code and some clean up's
+
+2002-06-13  Andrei Zmievski  <andrei@php.net>
+
+    * ext/bz2/bz2.c: Fix #17650.
+
+2002-06-13  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Registry.php:
+    More work on the dependencies DB (still not tested/used)
+
+2002-06-13  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    - Added DOMXML_LOAD_DONT_KEEP_BLANKS as possible mode, if one wants really nicely
+      formatted XML-Documents (but this can have sideeffects, if you depend on whitespaces..)
+    - bumped up domxml-api-version number.
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+     - Added better error-messages (3rd parameter) and validating of DTDs (2nd parameter) to
+       domxml_open_mem(string xml[, int mode[, array errors]]) and domxml_open_file(string filename[, int mode[, array errors]]).
+     - Added domxml_doc_validate([array errors]) for validating existing DomDocuments with a DTD.
+
+2002-06-13  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/php_cli.c: MFH (fix for #17733)
+
+    * sapi/cli/php_cli.c: Fix exit code (bug #17733).
+
+2002-06-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/imap/php_imap.c:
+    - Fix for bug #14410 (Patch by C. McCohy <mccohy@kyberdigi.cz>).
+
+2002-06-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pcre/php_pcre.c: Fix build in ZTS mode
+
 2002-06-12  Jason Greene  <jason@inetgurus.net>
 
     * NEWS: Fix entry
