@@ -217,6 +217,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		PHPWRITE_H("\r\n", 2);
 		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
+	PHPWRITE_H("\r\n", 2);
 
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
