@@ -6,7 +6,7 @@
 #include <php.h>
 #include <php_globals.h>
 #include <zend_API.h>
-/* #include "ext/standard/php3_standard.h" */
+#include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
 
 #include <sqlcli.h>
