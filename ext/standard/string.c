@@ -573,6 +573,8 @@ PHP_FUNCTION(stristr)
 {
 	zval **haystack, **needle;
 	char *found = NULL;
+	int  found_offset;
+	char *haystack_orig;
 	char needle_char[2];
 	
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &haystack, &needle) ==
@@ -583,10 +585,13 @@ PHP_FUNCTION(stristr)
 	SEPARATE_ZVAL(haystack);
 	SEPARATE_ZVAL(needle);
 	convert_to_string_ex(haystack);
+	haystack_orig = estrndup((*haystack)->value.str.val,
+							 (*haystack)->value.str.len);
 
 	if ((*needle)->type == IS_STRING) {
 		if ((*needle)->value.str.len==0) {
 			php_error(E_WARNING,"Empty delimiter");
+			efree(haystack_orig);
 			RETURN_FALSE;
 		}
 
@@ -602,10 +607,13 @@ PHP_FUNCTION(stristr)
 	}
 
 	if (found) {
-		RETVAL_STRING(found, 1);
+		found_offset = found - (*haystack)->value.str.val;
+		RETVAL_STRINGL(haystack_orig + found_offset,
+					   (*haystack)->value.str.len - found_offset, 1);
 	} else {
 		RETVAL_FALSE;
 	}
+	efree(haystack_orig);
 }
 /* }}} */
 
