@@ -800,7 +800,6 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 }
 #endif
 
-
 /*
  * Local variables:
  * tab-width: 4
