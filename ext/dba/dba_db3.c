@@ -166,7 +166,7 @@ DBA_FIRSTKEY_FUNC(db3)
 	}
 
 	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db3(info, newlen);
+	return dba_nextkey_db3(info, newlen TSRMLS_CC);
 }
 
 DBA_NEXTKEY_FUNC(db3)

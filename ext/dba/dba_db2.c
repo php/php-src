@@ -158,7 +158,7 @@ DBA_FIRSTKEY_FUNC(db2)
 	}
 
 	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db2(info, newlen);
+	return dba_nextkey_db2(info, newlen TSRMLS_CC);
 }
 
 DBA_NEXTKEY_FUNC(db2)

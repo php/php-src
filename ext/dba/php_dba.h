@@ -50,23 +50,23 @@ extern zend_module_entry dba_module_entry;
 #define DBA_OPEN_FUNC(x) \
 	int dba_open_##x(dba_info *info TSRMLS_DC)
 #define DBA_CLOSE_FUNC(x) \
-	void dba_close_##x(dba_info *info)
+	void dba_close_##x(dba_info *info TSRMLS_DC)
 #define DBA_FETCH_FUNC(x) \
-	char *dba_fetch_##x(dba_info *info, char *key, int keylen, int skip, int *newlen)
+	char *dba_fetch_##x(dba_info *info, char *key, int keylen, int skip, int *newlen TSRMLS_DC)
 #define DBA_UPDATE_FUNC(x) \
-	int dba_update_##x(dba_info *info, char *key, int keylen, char *val, int vallen, int mode)
+	int dba_update_##x(dba_info *info, char *key, int keylen, char *val, int vallen, int mode TSRMLS_DC)
 #define DBA_EXISTS_FUNC(x) \
-	int dba_exists_##x(dba_info *info, char *key, int keylen)
+	int dba_exists_##x(dba_info *info, char *key, int keylen TSRMLS_DC)
 #define DBA_DELETE_FUNC(x) \
-	int dba_delete_##x(dba_info *info, char *key, int keylen)
+	int dba_delete_##x(dba_info *info, char *key, int keylen TSRMLS_DC)
 #define DBA_FIRSTKEY_FUNC(x) \
-	char *dba_firstkey_##x(dba_info *info, int *newlen)
+	char *dba_firstkey_##x(dba_info *info, int *newlen TSRMLS_DC)
 #define DBA_NEXTKEY_FUNC(x) \
-	char *dba_nextkey_##x(dba_info *info, int *newlen)
+	char *dba_nextkey_##x(dba_info *info, int *newlen TSRMLS_DC)
 #define DBA_OPTIMIZE_FUNC(x) \
-	int dba_optimize_##x(dba_info *info)
+	int dba_optimize_##x(dba_info *info TSRMLS_DC)
 #define DBA_SYNC_FUNC(x) \
-	int dba_sync_##x(dba_info *info)
+	int dba_sync_##x(dba_info *info TSRMLS_DC)
 
 #define DBA_FUNCS(x) \
 	DBA_OPEN_FUNC(x); \
