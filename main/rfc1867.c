@@ -513,7 +513,7 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 			if (php_mb_encoding_translation(TSRMLS_C)) {
 				size_t j = php_mb_mbchar_bytes(start+i TSRMLS_CC);
-				while (j-- > 0) {
+				while (j-- > 0 && i < len) {
 					*resp++ = start[i++];
 				}
 				--i;
