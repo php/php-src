@@ -208,7 +208,7 @@ void shutdown_executor(TSRMLS_D)
 		}
 */
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator TSRMLS_CC);
-
+		zend_objects_store_call_destructors(&EG(objects_store) TSRMLS_CC);
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 	} zend_end_try();
 
@@ -271,6 +271,7 @@ void shutdown_executor(TSRMLS_D)
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
 			EG(symtable_cache_ptr)--;
 		}
+		zend_objects_store_free_object_storage(&EG(objects_store) TSRMLS_CC);
 	} zend_end_try();
 
 	zend_try {

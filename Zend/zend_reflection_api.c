@@ -223,7 +223,7 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	retval.handle = zend_objects_store_put(intern, reflection_objects_dtor, reflection_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, reflection_objects_dtor, NULL, reflection_objects_clone TSRMLS_CC);
 	retval.handlers = &reflection_object_handlers;
 	return retval;
 }

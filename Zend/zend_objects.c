@@ -78,6 +78,10 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 
 		zend_call_method_with_0_params(&obj, object->ce, NULL, "__destruct", NULL);
 	}
+}
+
+ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
+{
 	zend_nuke_object(object TSRMLS_CC);
 }
 
@@ -87,7 +91,7 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 
 	*object = emalloc(sizeof(zend_object));
 	(*object)->ce = class_type;
-	retval.handle = zend_objects_store_put(*object, (zend_objects_store_dtor_t) zend_objects_destroy_object, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(*object, (zend_objects_store_dtor_t) zend_objects_destroy_object, (zend_objects_free_object_storage_t) zend_objects_free_object_storage, NULL TSRMLS_CC);
 	retval.handlers = &std_object_handlers;
 	(*object)->in_get = 0;
 	(*object)->in_set = 0;
