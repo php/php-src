@@ -1,5 +1,5 @@
 --TEST--
-Bug #30209 ()
+Bug #30209 (ReflectionClass::getMethod() lowercases attribute)
 --FILE--
 <?php
 
