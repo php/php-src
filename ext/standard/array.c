@@ -257,8 +257,7 @@ PHP_FUNCTION(count)
  * anyway doesn't make much sense to compare two different data types.
  * This keeps it consistant and simple.
  *
- * This is not correct any more, if you want this behavior, use
- * array_type_data_compare().
+ * This is not correct any more, depends on what compare_func is set to.
  */
 static int array_data_compare(const void *a, const void *b)
 {
@@ -347,53 +346,6 @@ static int array_natural_compare(const void *a, const void *b)
 static int array_natural_case_compare(const void *a, const void *b)
 {
 	return array_natural_general_compare(a, b, 1);
-}
-
-/* Compare types first, if exactly one argument is a string, return the
- * type difference, thus numbers are always smaller than strings */
-static int array_type_data_compare(const void *a, const void *b)
-{
-	Bucket *f;
-	Bucket *s;
-	pval result;
-	pval *first;
-	pval *second;
-	int diff;
-	ARRAYLS_FETCH();
- 
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
- 
-	first = *((pval **) f->pData);
-	second = *((pval **) s->pData);
-
-	diff = Z_TYPE_P(first) - Z_TYPE_P(second);
-	if (diff && ((Z_TYPE_P(first) == IS_STRING) || (Z_TYPE_P(second) == IS_STRING)))
-		return diff;
-
-    if (ARRAYG(compare_func)(&result, first, second) == FAILURE) {
-        return 0;
-    } 
-
-    if (Z_TYPE(result) == IS_DOUBLE) {
-        if (Z_DVAL(result) < 0) {
-			return -1;
-        } else if (Z_DVAL(result) > 0) {
-			return 1;
-        } else {
-			return 0;
-		}
-    }
-
-	convert_to_long(&result);
-
-	if (Z_LVAL(result) < 0) {
-		return -1;
-	} else if (Z_LVAL(result) > 0) {
-		return 1;
-	} 
-
-	return 0;
 }
 
 static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
@@ -2240,13 +2192,13 @@ PHP_FUNCTION(array_unique)
 	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext)
 		arTmp[i] = p;
 	arTmp[i] = NULL;
-    set_compare_func(SORT_REGULAR);
-	qsort((void *) arTmp, i, sizeof(Bucket *), array_type_data_compare);
+    set_compare_func(SORT_STRING);
+	qsort((void *) arTmp, i, sizeof(Bucket *), array_data_compare);
 
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; *cmpdata; cmpdata++) {
-		if (array_type_data_compare(lastkept, cmpdata)) {
+		if (array_data_compare(lastkept, cmpdata)) {
 		        lastkept = cmpdata;
 		} else {
 			p = *cmpdata;
@@ -2283,7 +2235,7 @@ PHP_FUNCTION(array_intersect)
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket ***)emalloc(argc * sizeof(Bucket **));
 	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
-    set_compare_func(SORT_REGULAR);
+    set_compare_func(SORT_STRING);
 	for (i=0; i<argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error(E_WARNING, "Argument #%d to array_intersect() is not an array", i+1);
@@ -2299,7 +2251,7 @@ PHP_FUNCTION(array_intersect)
 		for (p = hash->pListHead; p; p = p->pListNext)
 			*list++ = p;
 		*list = NULL;
-		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_type_data_compare);
+		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare);
 	}
 
 	/* copy the argument array */
@@ -2309,7 +2261,7 @@ PHP_FUNCTION(array_intersect)
 	/* go through the lists and look for common values */
 	while (*ptrs[0]) {
 		for (i=1; i<argc; i++) {
-			while (*ptrs[i] && (0 < (c = array_type_data_compare(ptrs[0], ptrs[i]))))
+			while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i]))))
 				ptrs[i]++;
 			if (!*ptrs[i]) {
 				/* delete any values corresponding to remains of ptrs[0] */
@@ -2339,7 +2291,7 @@ PHP_FUNCTION(array_intersect)
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				if (!*++ptrs[0])
 					goto out;
-				if (0 <= array_type_data_compare(ptrs[0], ptrs[i]))
+				if (0 <= array_data_compare(ptrs[0], ptrs[i]))
 					break;
 			}
 		} else {
@@ -2348,7 +2300,7 @@ PHP_FUNCTION(array_intersect)
 			for (;;) {
 				if (!*++ptrs[0])
 					goto out;
-				if (array_type_data_compare(ptrs[0]-1, ptrs[0]))
+				if (array_data_compare(ptrs[0]-1, ptrs[0]))
 					break;
 			}
 		}
@@ -2356,7 +2308,7 @@ PHP_FUNCTION(array_intersect)
 
 out:
 	for (i=0; i<argc; i++) {
-	        hash = HASH_OF(*args[i]);
+		hash = HASH_OF(*args[i]);
 		pefree(lists[i], hash->persistent);
 	}
 	efree(ptrs);
@@ -2369,7 +2321,7 @@ out:
    Returns the entries of arr1 that have values which are not present in any of the others arguments */
 PHP_FUNCTION(array_diff)
 {
-        zval ***args = NULL;
+	zval ***args = NULL;
 	HashTable *hash;
 	int argc, i, c;
 	Bucket ***lists, **list, ***ptrs, *p;
@@ -2388,7 +2340,7 @@ PHP_FUNCTION(array_diff)
 	/* for each argument, create and sort list with pointers to the hash buckets */
 	lists = (Bucket ***)emalloc(argc * sizeof(Bucket **));
 	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
-    set_compare_func(SORT_REGULAR);
+    set_compare_func(SORT_STRING);
 	for (i=0; i<argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error(E_WARNING, "Argument #%d to array_diff() is not an array", i+1);
@@ -2404,7 +2356,7 @@ PHP_FUNCTION(array_diff)
 		for (p = hash->pListHead; p; p = p->pListNext)
 		        *list++ = p;
 		*list = NULL;
-		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_type_data_compare);
+		qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare);
 	}
 
 	/* copy the argument array */
@@ -2414,14 +2366,14 @@ PHP_FUNCTION(array_diff)
 	/* go through the lists and look for values of ptr[0]
            that are not in the others */
 	while (*ptrs[0]) {
-	        c = 1;
+		c = 1;
 		for (i=1; i<argc; i++) {
-		        while (*ptrs[i] && (0 < (c = array_type_data_compare(ptrs[0], ptrs[i]))))
-			        ptrs[i]++;
+			while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i]))))
+				ptrs[i]++;
 			if (!c) {
-			        if (*ptrs[i])
-				        ptrs[i]++;
-			        break;
+				if (*ptrs[i])
+					ptrs[i]++;
+				break;
 			}
 		}
 		if (!c) {
@@ -2435,7 +2387,7 @@ PHP_FUNCTION(array_diff)
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				if (!*++ptrs[0])
 					goto out;
-				if (array_type_data_compare(ptrs[0]-1, ptrs[0]))
+				if (array_data_compare(ptrs[0]-1, ptrs[0]))
 					break;
 			}
 		} else {
@@ -2444,7 +2396,7 @@ PHP_FUNCTION(array_diff)
 			for (;;) {
 				if (!*++ptrs[0])
 					goto out;
-				if (array_type_data_compare(ptrs[0]-1, ptrs[0]))
+				if (array_data_compare(ptrs[0]-1, ptrs[0]))
 					break;
 			}
 		}
