@@ -101,9 +101,17 @@ AC_DEFUN(PHP_GD_XPM,[
       AC_MSG_ERROR([libXpm.(a|so) not found.])
     fi
 
+    for i in include include/X11; do
+      test -f $GD_XPM_DIR/$i/xpm.h && GD_XPM_INC=$GD_XPM_DIR/$i
+    done
+
+    if test -z "$GD_XPM_INC"; then
+      AC_MSG_ERROR([xpm.h not found.])
+    fi
+
     PHP_CHECK_LIBRARY(Xpm,XpmFreeXpmImage, 
     [
-      PHP_ADD_INCLUDE($GD_XPM_DIR/include)
+      PHP_ADD_INCLUDE($GD_XPM_INC)
       PHP_ADD_LIBRARY_WITH_PATH(Xpm, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(X11, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
     ],[
