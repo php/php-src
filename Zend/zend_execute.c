@@ -2476,7 +2476,7 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
-		if (!PZVAL_IS_REF(EX(object))) {
+		if (!PZVAL_IS_REF(EX(object)) || !EG(implicit_clone)) {
 			EX(object)->refcount++; /* For $this pointer */
 		} else {
 			zval *this_ptr;
