@@ -933,9 +933,7 @@ PHP_FUNCTION(stream_context_get_options)
 		RETURN_FALSE;
 	}
 
-	*return_value = *context->options;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
+	RETURN_ZVAL(context->options, 1, 0);
 }
 /* }}} */
 
