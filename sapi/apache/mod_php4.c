@@ -440,11 +440,6 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	if (setjmp(EG(bailout))!=0) {
 		return OK;
 	}
-	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
-	if (per_dir_conf) {
-		zend_hash_apply((HashTable *) per_dir_conf, (int (*)(void *)) php_apache_alter_ini_entries);
-	}
-
 	/* We don't accept OPTIONS requests, but take everything else */
 	if (r->method_number == M_OPTIONS) {
 		r->allowed |= (1 << METHODS) - 1;
@@ -456,12 +451,20 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 		return DECLINED;
 	}
 
+	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
+	if (per_dir_conf) {
+		zend_hash_apply((HashTable *) per_dir_conf, (int (*)(void *)) php_apache_alter_ini_entries);
+	}
+
 	/* If PHP parser engine has been turned off with an "engine off"
 	 * directive, then decline to handle this request
 	 */
 	if (!AP(engine)) {
 		r->content_type = php_apache_get_default_mimetype(r SLS_CC);
 		r->allowed |= (1 << METHODS) - 1;
+		if (setjmp(EG(bailout))==0) {
+			zend_ini_deactivate(ELS_C);
+		}
 		return DECLINED;
 	}
 	if (filename == NULL) {
