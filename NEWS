@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Put an end to BUG#4615 (kalowsky & Eric Veldhuyzen)
+- Fixed realpath() in Virtual Directory mode (Daniel)
 - Integrated the Phil Nelson's bc math library routines into PHP, now that
   the license allows it (Phil Nelson <phil@cs.wwu.edu>)
 - Added the xslt_set_error_handler() function to the Sablotron extension.
