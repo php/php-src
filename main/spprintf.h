@@ -16,6 +16,19 @@
    +----------------------------------------------------------------------+
  */
 
+/* 
+
+The pbuf parameter of all spprintf version receives a pointer to the allocated
+buffer. This buffer must be freed manually after usage using efree() function.
+The buffer will allways be terminated by a zero character. When pbuf is NULL
+the function can be used to calculate the required size of the buffer but for
+that purpose snprintf is faster. When both pbuf and the return value are 0
+than you are out of memory.
+
+There is also snprintf: See difference explained in snprintf.h
+
+*/
+
 #ifndef SPPRINTF_H
 #define SPPRINTF_H
 
