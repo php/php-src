@@ -126,15 +126,15 @@ int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset
 		php_error(E_WARNING, "iconv: cannot convert from `%s' to `%s'",
 				  in_charset, out_charset);
 		efree(out_buffer);
-		return -1;
+		return FAILURE;
 	}
 	
 	result = icv(cd, (const char **) &in_p, &in_size, (char **)
 				   &out_p, &out_size);
 
     if (result == (size_t)(-1)) {
-        sprintf(out_buffer, "???") ;
-		return -1;
+		 efree(out_buffer);
+		return FAILURE;
     }
 
     icv_close(cd);
