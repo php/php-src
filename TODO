@@ -47,6 +47,10 @@ ext/oci8
 --------
     * all OCIFetch*() functions should return 0 for no more data and false on error.
 
+ext/snmp
+--------
+    * port to latest UCD-SNMP 4.1 (even doesn't compile)
+	
 ext/standard
 ------------
     * array_add(), array_rand() (Andrei)
