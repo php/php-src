@@ -16,19 +16,17 @@
   } else {
     echo "Your browser is sending the following cookies:<br>\n";
 
-    for ($cookie=current($cookies); $cookie; $cookie=next($cookies)) {
+    while (list($i,$cookie) = each($cookies)) {
       echo "Cookie Name: $cookie->name<br>Cookie value: $cookie->value<br>\n";
     }
   }
 
   // set a cookie
 
-  $name = $request->getParameter("cookieName");
-  if ($name) {
-    $value = $request->getParameter("cookieValue");
-    $response->addCookie(new Java("javax.servlet.http.Cookie", $name, $value));
+  if ($cookieName) {
+    $response->addCookie(new Java("javax.servlet.http.Cookie", $cookieName, $cookieValue));
     echo "<p>You just sent the following cookie to your browser:<br>\n";
-    echo "Name: $name<br>Value: $value<P>\n";
+    echo "Name: $cookieName<br>Value: $cookieValue<P>\n";
   }
 
 ?>

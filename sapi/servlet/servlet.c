@@ -171,25 +171,29 @@ static void sapi_servlet_send_header(sapi_header_struct *sapi_header, void *serv
 
 static int sapi_servlet_read_post(char *buffer, uint count_bytes SLS_DC)
 {
-	JNIEnv *jenv = ((servlet_request*)SG(server_context))->jenv;
-	jobject servlet = ((servlet_request*)SG(server_context))->servlet;
+	if (count_bytes == 0) {
+		return 0;
+	} else {
+		JNIEnv *jenv = ((servlet_request*)SG(server_context))->jenv;
+		jobject servlet = ((servlet_request*)SG(server_context))->servlet;
 
-	jclass servletClass = (*jenv)->GetObjectClass(jenv, servlet);
-	jmethodID readPost = (*jenv)->GetMethodID(jenv, servletClass, "readPost",
-		"(I)Ljava/lang/String;");
-	jstring post = (*jenv)->CallObjectMethod(jenv, servlet, readPost, 
-		count_bytes);
-
-	const char *postAsUTF = (*jenv)->GetStringUTFChars(jenv, post, 0);
-	uint read_bytes=(*jenv)->GetStringLength(jenv, post);
-	if (read_bytes>count_bytes) read_bytes=count_bytes;
-
-	memcpy(buffer, postAsUTF, read_bytes);
-	if (read_bytes<count_bytes) buffer[read_bytes]=0;
-
-	(*jenv)->ReleaseStringUTFChars(jenv, post, postAsUTF);
-
-	return read_bytes;
+		jclass servletClass = (*jenv)->GetObjectClass(jenv, servlet);
+		jmethodID readPost = (*jenv)->GetMethodID(jenv, servletClass, 
+			"readPost", "(I)Ljava/lang/String;");
+		jstring post = (*jenv)->CallObjectMethod(jenv, servlet, readPost, 
+			count_bytes);
+	
+		const char *postAsUTF = (*jenv)->GetStringUTFChars(jenv, post, 0);
+		uint read_bytes=(*jenv)->GetStringLength(jenv, post);
+		if (read_bytes>count_bytes) read_bytes=count_bytes;
+	
+		memcpy(buffer, postAsUTF, read_bytes);
+		if (read_bytes<count_bytes) buffer[read_bytes]=0;
+	
+		(*jenv)->ReleaseStringUTFChars(jenv, post, postAsUTF);
+	
+		return read_bytes;
+	}
 }
 
 

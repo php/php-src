@@ -19,11 +19,7 @@
 
   // set session info if needed
 
-  $dataName = $request->getParameter("dataName");
-  if ($dataName) {
-    $dataValue = $request->getParameter("dataValue");
-    $session->setAttribute($dataName, $dataValue);
-  }
+  if ($dataName) $session->setAttribute($dataName, $dataValue);
 
   // print session contents
 
