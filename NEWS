@@ -1,54 +1,54 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-14 Sep 2004, Version 4.3.9RC3
+22 Sep 2004, Version 4.3.9
 - GPC input processing fixes (Stefano Di Paola, Rasmus, Stefan)
-- Fixed bug #30050 (Possible crash inside php_shutdown_config()). 
-  (Ilia, nw at softwarekombinat dot de)
-
-31 Aug 2004, Version 4.3.9RC2
-- Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
+- Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory 
   exhaustion. (Andrei)
 - Fixed bug with raw_post_data not getting set (Brian)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
+- Rewritten UNIX and Windows install help files. (Documentation Team)
+- Updated PCRE to provide better error handling in certain cases. (Andrei)
+- NSAPI: added "bucket" parameter to list of non-php.ini-keys of php4_execute 
+  for doing performance stats without warnings in server-log. (Uwe Schindler)
+- Fixed leap year checking with idate(). (Christian Schneider, Derick)
+- Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
+- Fixed funny forking effect in FastCGI when PHP_FCGI_CHILDREN was not set.
+- Fixed bug #30050 (Possible crash inside php_shutdown_config()). 
+  (Ilia, nw at softwarekombinat dot de)
+- Fixed bug #29882 (isset crashes on arrays). (Marcus)
 - Fixed bug #29753 (mcal_fetch_event() allows 2nd argument to be optional).
   (Ilia, Vrana)
 - Fixed bug #29727 (Added missing CURL authentication directives). (Ilia)
 - Fixed bug #29719 (fgetcsv() has problem parsing strings ending with escaped
   enclosures). (Ilia)
+- Fixed bug #29607 (highlighting code with HEREDOC produces invalid output).
+  (Ilia)
 - Fixed bug #29599 (domxml_error segfaults another apache module). (Rob)
 - Fixed bug #29594 (Use PHP's own tmpfile() implementation). (Ilia)
-
-11 Aug 2004, Version 4.3.9RC1
-- Rewritten UNIX and Windows install help files. (Documentation Team)
-- Updated PCRE to provide better error handling in certain cases. (Andrei)
-- NSAPI: added "bucket" parameter to list of non-php.ini-keys of php4_execute
-  for doing performance stats without warnings in server-log. (Uwe Schindler)
-- Fixed bug #29882 (isset crashes on arrays). (Marcus)
-- Fixed bug #29607 (highlighting code with HEREDOC produces invalid
-  output). (Ilia)
 - Fixed bug #29581 (Typo inside php.ini comments for mysql.trace_mode). (Ilia)
-- Fixed bug #29493 (extract(array, EXTR_REFS) misbehaves with elements
-  referred twice or more times). (Moriyoshi)
+- Fixed bug #29493 (extract(array, EXTR_REFS) misbehaves with elements referred
+  twice or more times). (Moriyoshi)
 - Fixed bug #29443 (Sanity check for wbmp detection). (Ilia)
 - Fixed bug #29369 (Uploaded files with ' or " in their names get their names
   truncated at those characters). (Ilia)
 - Fixed bug #29349 (imagecreatefromstring() crashes with external GD library).
   (Ilia, adconrad at debian dot org)
 - Fixed bug #29333 (output_buffering+trans_sess_id can corrupt output). (Ilia)
-- Fixed bug #29226 (ctype_* functions missing validation of numeric string 
+- Fixed bug #29226 (ctype_* functions missing validation of numeric string
   representations). (Ilia)
-- Fixed bug #29209 (imap_fetchbody() doesn't check message index). (Ilia,
-  tony2001 at phpclub dot net)
-- Fixed bug #29116 (Zend constant warning uses memory after free). (Marcus,
-  jdolecek at NetBSD dot org)
+- Fixed bug #29209 (imap_fetchbody() doesn't check message index).
+  (Ilia, tony2001 at phpclub dot net)
+- Fixed bug #29116 (Zend constant warning uses memory after free).
+  (Marcus, jdolecek at NetBSD dot org)
 - Fixed bug #29114 (Potential double free in php_stat). (Sara)
-- Fixed bug #29075 (strnatcmp() incorrectly handles whitespace). (Curt, Ilia)
-- Fixed bug #29049 (array sorting via user function/method does not validate 
-  it). (Ilia)
+- Fixed bug #29075 (strnatcmp() incorrectly handles whitespace).
+  (Curt, Ilia)
+- Fixed bug #29049 (array sorting via user function/method does not 
+  validate it). (Ilia)
 - Fixed bug #29038 (extract() with EXTR_PREFIX_SAME prefixes empty strings).
   (Andrey)
 - Fixed bug #29034 (wordwrap() returns a boolean when passed empty string).
-  (Ilia)
+ (Ilia)
 - Fixed bug #28974 (overflow in array_slice(), array_splice(), substr,
   substr_replace(), strspn(), strcspn()). (Andrey)
 - Fixed bug #28897 (ibase: -1 returned as -0.000 for 64-bit scaled int). (Ard)
@@ -64,8 +64,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #28692 (\0 in Authenticate header passed via safe_mode). (Ilia)
 - Fixed bug #28670 (WWW-Authentication header mangling with PCRE in safe_mode
   adds extra spaces). (Ilia)
-- Fixed bug #28668 (glob() does not work with relative paths on Windows).
-  (Ilia)
+- Fixed bug #28668 (glob() does not work with relative paths on Windows). (Ilia)
 - Fixed bug #28649 (Proper glob() return value on Linux when there are no
   matches). (Ilia)
 - Fixed bug #28633 (sprintf incorrectly adding padding to floats). (Ilia)
@@ -78,9 +77,6 @@ PHP 4                                                                      NEWS
   (Moriyoshi)
 - Fixed bug #28175 (Allow bundled GD to compile against freetype 2.1.2).
   (Elf, Ilia)
-- Fixed leap year checking with idate(). (Christian Schneider, Derick)
-- Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
-- Fixed funny forking effect in FastCGI when PHP_FCGI_CHILDREN was not set.
 
 14 Jul 2004, Version 4.3.8
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
