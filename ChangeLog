@@ -1,3 +1,65 @@
+2002-05-30  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c:
+    * ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/com/dispatch.c
+      ext/com/COM.c:
+     Added missing AddRef() calls in the COM extension. This should
+     fix weird behaviour (in particular with ADODB). 
+
+
+2002-05-30  Sander Roobol  <phy@wanadoo.nl>
+
+    * pear/Console/tests/.cvsignore: Add missing .cvsignore
+
+2002-05-30  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/session/mod_files.c:
+    - Tell the user why his session doesn't work if he uses custom session_id()s.
+
+    * win32/install.txt: - Typo
+
+    * win32/install.txt:
+    - Give some useful updates to Win32/Apache/PHP4 installation. Also mention
+      strace for advanced users.
+
+2002-05-30  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php:
+    fix a typo. add some information to config-show
+
+2002-05-30  Den V. Tsopa  <tdv@edisoft.ru>
+
+    * ext/mbstring/mbfilter_ru.c: Fixes some dummy errors (again).
+
+2002-05-30  Jan Lehnardt  <jan@dasmoped.net>
+
+    * pear/tests/pear_error4.phpt:  - add testcase for PEAR::delExpect()
+
+2002-05-30  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php: * organize configuration_info array by group
+
+2002-05-30  Venkat Raghavan S  <rvenkat@novell.com>
+
+    * netware/ZendEngine2.mak
+      netware/build.bat: NetWare changes for ZE2
+
+2002-05-30  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php
+      pear/tests/pear_config.phpt:
+    * applied Alan's patch adding groups and prompts
+
+2002-05-30  Cliff Woolley  <jwoolley@apache.org>
+
+    * sapi/apache2filter/php_functions.c:
+    That macro is and always was hopelessly broken, which is why it's
+    now deprecated.
+
 2002-05-29  Jan Lehnardt  <jan@dasmoped.net>
 
     * pear/PEAR.php:  - minor improvement of readability,
