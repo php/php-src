@@ -448,7 +448,6 @@ static void php_xpath_set_object(zval *wrapper, void *obj, int rsrc_type)
 static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found TSRMLS_DC) 
 {
 	zval *wrapper;
-	int rsrc_type;
 
 	*found = 0;
 	if (!obj) {
@@ -2198,7 +2197,7 @@ PHP_FUNCTION(domxml_node_text_concat)
 	convert_to_string(content);
 
 	if(Z_STRLEN_P(content))
-		xmlTextConcat(nodep, Z_STRVAL_P(content), Z_STRVAL_P(content));
+		xmlTextConcat(nodep, Z_STRVAL_P(content), Z_STRLEN_P(content));
 
 	RETURN_TRUE;
 }
