@@ -1,6 +1,10 @@
 - Implement an aggregating php function handler for use in SQL statements and
   triggers etc.
 
-- Make a release
+- Add user-space callback for the authorizer function (this is potentially
+  very slow, so it needs to be implemented carefully).
+
+- Add an unbuffered query mode to stream data through PHP, rather than
+  fetching it all at the start.
 
 vim:tw=78
