@@ -12,10 +12,10 @@ AC_ARG_ENABLE(bcmath,
     PHP_EXTENSION(bcmath)
 	if test -f $srcdir/ext/bcmath/number.c; then
 		if grep "Dummy File" $srcdir/ext/bcmath/number.c >/dev/null; then
-		  AC_MSG_ERROR(You do not have the bcmath package. Please read the README-BCMATH.)
+		  AC_MSG_ERROR(You do not have the bcmath package. Please read the README-BCMATH file.)
 		fi
 	else
-		AC_MSG_ERROR(You do not have the bcmath package. Please read the README-BCMATH.)
+		AC_MSG_ERROR(You do not have the bcmath package. Please read the README-BCMATH file.)
 	fi
   else
     AC_DEFINE(WITH_BCMATH, 0,[ ])
