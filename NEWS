@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- updated FDF extension to work with current Adodeb fdftk 5.0 (hartmut)
+- raw POST data is now available as php://input stream (hartmut)
+- Added mb_strtolower() and mb_strtoupper(). (Moriyoshi)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
