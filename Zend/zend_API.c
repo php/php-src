@@ -1736,9 +1736,6 @@ ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object,
 	ALLOC_ZVAL(tmp);
 	tmp->is_ref = 0;
 	tmp->refcount = 0;
-	if (!value) {
-		value = "";
-	}
 	ZVAL_STRING(tmp, value, 1);
 	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
