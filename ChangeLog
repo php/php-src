@@ -1,3 +1,72 @@
+2001-07-10  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c:
+    changed return value from fbsql_query to be booloan
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+    Fixing return value from fbsql_query after a DELETE FROM with success.
+
+2001-07-10  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php:
+    fix bug when call excute multiple times (thanks to Oleg Rekutin and Paul
+    DuBois)
+
+    * pear/DB.php: added NEED_MORE_DATA error message to $errorMessages
+
+2001-07-10  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen_wrappers.c: - Nuke fprintf()
+
+    * main/fopen_wrappers.c:
+    - Commit patch which checks for an include file in the calling scripts'
+      current working directory if everything else fails (include_path).
+    - Right now this also effects things like opening php.ini. It'll now always
+      check in the current working directory for php.ini. I think this doesn't
+      screw up todays behavior.
+
+2001-07-10  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c:
+    * ext/curl/curl.c:
+    If the transfer fails, still free the buffer if it exists.
+
+2001-07-10  Zeev Suraski  <zeev@zend.com>
+
+    * main/fopen_wrappers.c: Whitespace
+
+2001-07-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/main.c
+      main/php_globals.h
+      NEWS: Allow errors to be returned as XMLRPC fault packets.
+
+    Submitted by: Matt Allen <matt@investigationmarketplace.com>
+
+2001-07-10  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB/mssql.php: Suppress error messages from the connect function
+
+2001-07-10  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/file.php: patch suggested by yavor
+    makes more sanity checks on cache_dir
+
+2001-07-10  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: manual update
+
+2001-07-10  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mcrypt/mcrypt.c: Fix a couple of buffer overflows in mcrypt.c
+
+    * pear/HTML/IT_Error.php: Fix bug #11823 (appears to be legit)
+
+2001-07-10  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB.php: minor in-line doc fix
+
 2001-07-09  Adam Daniel  <adaniel2@cinci.rr.com>
 
     * pear/HTML/Page.php:
