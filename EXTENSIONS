@@ -275,10 +275,10 @@ PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           com
-PRIMARY MAINTAINER:  Harald Radi <h.radi@nme.at>
+EXTENSION:           com_dotnet
+PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Working
+STATUS:              Windows
 -------------------------------------------------------------------------------
 EXTENSION:           cpdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
