@@ -4,7 +4,7 @@ aggregating methods specified in the list
 --GET--
 --FILE--
 <?php
-include "./ext/standard/tests/aggregation/aggregate.lib.php";
+include "./ext/standard/tests/aggregation/aggregate.lib";
 
 $obj = new simple();
 aggregate_methods_by_list($obj, 'helper', array('just_another_method'));

@@ -4,7 +4,7 @@ aggregating all default properties
 --GET--
 --FILE--
 <?php
-include "./ext/standard/tests/aggregation/aggregate.lib.php";
+include "./ext/standard/tests/aggregation/aggregate.lib";
 
 $obj = new simple();
 aggregate_properties($obj, 'mixin');
