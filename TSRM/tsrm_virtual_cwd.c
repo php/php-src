@@ -309,7 +309,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	 * This can happen under solaris when a dir does not have read permissions
 	 * but *does* have execute permissions */
 	if (IS_ABSOLUTE_PATH(path, path_length) || (state->cwd_length < 1)) {
-		if (use_realpath)
+		if (use_realpath) {
 			if (realpath(path, resolved_path)) {
 				path = resolved_path;
 				path_length = strlen(path);
