@@ -260,10 +260,7 @@ PHP_FUNCTION(zip_entry_open)
 
     entry->fp = zzip_file_open(archive_p, entry->dirent.d_name, O_RDONLY | O_BINARY);
 
-    if (entry->fp)
-    RETURN_TRUE;
-    else
-    RETURN_FALSE;
+	RETURN_BOOL(entry->fp);
 }
 /* }}} */
 
