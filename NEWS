@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed CLOB handling in OCI8 driver when using variable-width
+  character sets. (Thies)
+- Add 4th optional parameter to sybase_[p]connect to specify the charset
+  for the connection (alf@alpha.ulatina.ac.cr)
 - Fixed support for current thttpd releases. (Sascha)
 - Virtualize realpath, chmod, chown and utime (Stas)
 - Support content-encoding headers in file upload MIME parts
