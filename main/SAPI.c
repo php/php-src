@@ -121,6 +121,7 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 {
 	int retval;
 	sapi_header_struct sapi_header;
+	char *colon_offset;
 	SLS_FETCH();
 
 	if (SG(headers_sent)) {
@@ -132,6 +133,17 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
 
+	colon_offset = strchr(header_line, ':');
+	if (colon_offset) {
+		*colon_offset = 0;
+		if (!STRCASECMP(header_line, "Content-Type")) {
+			SG(sapi_headers).send_default_content_type = 0;
+		} else if (!STRCASECMP(header_line, "Location")) {
+			SG(sapi_headers).http_response_code = 302; /* redirect */
+		}
+		*colon_offset = ':';
+	}
+
 	if (sapi_module.header_handler) {
 		retval = sapi_module.header_handler(&sapi_header, &SG(sapi_headers) SLS_CC);
 	} else {
@@ -142,15 +154,6 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 		zend_llist_clean(&SG(sapi_headers).headers);
 	}
 	if (retval & SAPI_HEADER_ADD) {
-		char *colon_offset = strchr(header_line, ':');
-
-		if (colon_offset) {
-			*colon_offset = 0;
-			if (!STRCASECMP(header_line, "Content-Type")) {
-				SG(sapi_headers).send_default_content_type = 0;
-			}
-			*colon_offset = ':';
-		}
 		zend_llist_add_element(&SG(sapi_headers).headers, (void *) &sapi_header);
 	}
 	return SUCCESS;
