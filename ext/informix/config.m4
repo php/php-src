@@ -2,37 +2,35 @@ dnl $Id$
 
 PHPIFXLIB=ext/informix/libphp_ifx.a
 	
-AC_MSG_CHECKING(for Informix support)
-AC_ARG_WITH(informix,
+PHP_ARG_WITH(informix,for Informix support,
 [  --with-informix[=DIR]   Include Informix support.  DIR is the Informix base
-                          install directory, defaults to ${INFORMIXDIR:-nothing}.],
-[
-  if test "$withval" != "no"; then
+                          install directory, defaults to ${INFORMIXDIR:-nothing}.])
+
+  if test "$PHP_INFORMIX" != "no"; then
     if test "$INFORMIXDIR" = ""; then
       INFORMIX_WARNING="
 WARNING: You asked for Informix support, but don't have \\\$INFORMIXDIR
    environment value set up. Configuring and compiling Informix
    support to PHP is impossible and has been turned off. Please
    try again after setting up your environment."
-      AC_MSG_RESULT(no)
     else
-      if test "$withval" = "yes"; then
+      if test "$PHP_INFORMIX" = "yes"; then
         IFX_INCDIR=$INFORMIXDIR/incl/esql
         if test -z "$IFX_LIBDIR"; then
-          AC_ADD_LIBPATH($INFORMIXDIR/lib)
-          AC_ADD_LIBPATH($INFORMIXDIR/lib/esql)
+          AC_ADD_LIBPATH($INFORMIXDIR/lib, INFORMIX_SHARED_LIBADD)
+          AC_ADD_LIBPATH($INFORMIXDIR/lib/esql, INFORMIX_SHARED_LIBADD)
         else
           IFX_LIBDIR="$IFX_LIBDIR"
         fi
       else
-        IFX_INCDIR=$withval/incl/esql
+        IFX_INCDIR=$PHP_INFORMIX/incl/esql
         if test -z "$IFX_LIBDIR"; then
-          AC_ADD_LIBPATH($withval/lib)
-          AC_ADD_LIBPATH($withval/lib/esql)
+          AC_ADD_LIBPATH($PHP_INFORMIX/lib, INFORMIX_SHARED_LIBADD)
+          AC_ADD_LIBPATH($PHP_INFORMIX/lib/esql, INFORMIX_SHARED_LIBADD)
         else
           IFX_LIBDIR="$IFX_LIBDIR"
         fi
-        if test "$withval" != "$INFORMIXDIR"; then
+        if test "$PHP_INFORMIX" != "$INFORMIXDIR"; then
           INFORMIX_WARNING="
 WARNING: You specified Informix base install directory that is different
    than your \\\$INFORMIXDIR environment variable. You'd better know
@@ -54,9 +52,11 @@ WARNING: You specified Informix base install directory that is different
       CFLAGS="$CFLAGS $IFX_INCLUDE"
       LDFLAGS="$LDFLAGS $IFX_LFLAGS"
 
-        if test "`uname -s 2>/dev/null`" = "AIX"; then
-        CFLAGS="$CFLAGS -D__H_LOCALEDEF"
-      fi
+      case "$host_alias" in
+	  *aix*)
+        CPPFLAGS="$CPPFLAGS -D__H_LOCALEDEF";;
+      esac
+
       AC_DEFINE(HAVE_IFX,1,[ ])
       AC_MSG_CHECKING([Informix version])
       IFX_VERSION=[`esql -V | sed -ne '1 s/^[^0-9]*\([0-9]\)\.\([0-9]*\).*/\1\2/p'`]
@@ -67,22 +67,22 @@ WARNING: You specified Informix base install directory that is different
         IFX_ESQL_FLAGS="-EUHAVE_IFX_IUS"
       fi
       PHP_SUBST(IFX_ESQL_FLAGS)
+	  PHP_SUBST(INFORMIX_SHARED_LIBADD)
       AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION, [ ])
-      AC_MSG_RESULT(yes)
-      PHP_EXTENSION(informix)
+      PHP_EXTENSION(informix, $ext_shared)
       for i in $IFX_LIBS; do
         case "$i" in
         *.o)
-            AC_ADD_LIBPATH($abs_builddir/ext/informix)
-            AC_ADD_LIBRARY(php_ifx, 1)
-            $srcdir/build/shtool mkdir -f -p ext/informix
+            AC_ADD_LIBPATH($abs_builddir/ext/informix, INFORMIX_SHARED_LIBADD)
+            AC_ADD_LIBRARY(php_ifx, 1, INFORMIX_SHARED_LIBADD)
+            $srcdir/build/shtool mkdir -p ext/informix
             cd ext/informix
             ar r libphp_ifx.a $i
             ranlib libphp_ifx.a
             cd ../..;;
         -l*)
             lib=`echo $i|sed 's/^-l//'`
-            AC_ADD_LIBRARY($lib, 1);;
+            AC_ADD_LIBRARY($lib, 1, INFORMIX_SHARED_LIBADD);;
         *)
             IFX_LIBADD="$IFX_LIBADD $i";;
         esac
@@ -90,13 +90,7 @@ WARNING: You specified Informix base install directory that is different
       IFX_LIBS="$IFX_LFLAGS $IFX_LIBADD"
       INCLUDES="$INCLUDES $IFX_INCLUDE"
     fi
-  else
-    INFORMIXDIR=
-    AC_MSG_RESULT(no)
   fi
-],[
-  AC_MSG_RESULT(no)
-])
 PHP_SUBST(INFORMIXDIR)
 PHP_SUBST(IFX_LIBS)
 	

@@ -33,7 +33,7 @@
  */
 
 
-#if defined(COMPILE_DL)
+#ifdef COMPILE_DL_INFORMIX
 #include "dl/phpdl.h"
 #endif
 
@@ -163,7 +163,7 @@ $endif;
     {NULL,  NULL,                  NULL}
 };
 
-php3_module_entry ifx_module_entry = {
+zend_module_entry ifx_module_entry = {
     "Informix", 
     ifx_functions, 
     PHP_MINIT(ifx), 
@@ -177,8 +177,8 @@ php3_module_entry ifx_module_entry = {
 static php_ifx_listids ifx_listids;	/* these are globals, no thread safety needed says zeeev */
 
 
-#ifdef COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &ifx_module_entry; }
+#ifdef COMPILE_DL_INFORMIX
+ZEND_GET_MODULE(ifx)
 #if 0
 BOOL WINAPI DllMain(HANDLE hModule, 
                       DWORD  ul_reason_for_call, 
