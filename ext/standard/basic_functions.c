@@ -327,6 +327,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_keys,					NULL)
 	PHP_FE(array_values,				NULL)
 	PHP_FE(array_count_values,		   	NULL)
+	PHP_FE(array_reverse,				NULL)
 
 	PHP_FE(connection_aborted,			NULL)
 	PHP_FE(connection_timeout,			NULL)
@@ -3103,6 +3104,49 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
+/* {{{ proto array array_reverse(array input)
+   Return input as a new array with the order of the entries reversed */
+PHP_FUNCTION(array_reverse)
+{
+	zval	   **input,			/* Input array */
+			   **entry;			/* An entry in the input array */
+	char		*string_key;
+	ulong		 num_key;
+	
+	/* Get arguments and do error-checking */
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &input) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if ((*input)->type != IS_ARRAY) {
+		zend_error(E_WARNING, "Argument to array_reverse() should be an array");
+		return;
+	}
+	
+	/* Initialize return array */
+	array_init(return_value);
+	
+	zend_hash_internal_pointer_end((*input)->value.ht);
+	while(zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
+		(*entry)->refcount++;
+		
+		switch (zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key)) {
+			case HASH_KEY_IS_STRING:
+				zend_hash_update(return_value->value.ht, string_key, strlen(string_key)+1,
+								 entry, sizeof(zval *), NULL);
+				efree(string_key);
+				break;
+
+			case HASH_KEY_IS_LONG:
+				zend_hash_next_index_insert(return_value->value.ht,
+											entry, sizeof(zval *), NULL);
+				break;
+		}
+		
+		zend_hash_move_backwards((*input)->value.ht);
+	}
+}
+/* }}} */
 
 /*
  * Local variables:
