@@ -5,6 +5,8 @@ mb_split()
 extension_loaded('mbstring') or die('skip mbstring not available');
 function_exists('mb_split') or die("skip mb_split() is not available in this build");
 ?>
+--INI--
+mbstring.func_overload=0
 --FILE--
 <?php
 	mb_regex_set_options( '' );
