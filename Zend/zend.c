@@ -26,6 +26,7 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 #include "zend_API.h"
+#include "zend_builtin_functions.h"
 
 #ifdef ZTS
 #	define GLOBAL_FUNCTION_TABLE	global_function_table
@@ -344,6 +345,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 #ifndef ZTS
 	init_resource_plist(ELS_C);
 #endif
+
+	zend_startup_builtin_functions();
 
 	return SUCCESS;
 }
