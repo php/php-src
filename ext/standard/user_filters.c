@@ -287,9 +287,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 					filtername, fdat->classname);
 			return NULL;
 		}
-#ifdef ZEND_ENGINE_2
 		fdat->ce = *(zend_class_entry**)fdat->ce;
-#endif
 
 	}
 
