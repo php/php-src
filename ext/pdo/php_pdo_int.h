@@ -31,7 +31,7 @@ extern zend_class_entry *pdo_dbh_ce;
 extern zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC);
 extern function_entry pdo_dbstmt_functions[];
 extern zend_class_entry *pdo_dbstmt_ce;
-void pdo_dbstmt_free_storage(void *object TSRMLS_DC);
+void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC);
 extern zend_object_handlers pdo_dbstmt_object_handlers;
 
 extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);

@@ -392,7 +392,7 @@ static zend_object_handlers pdo_dbh_object_handlers = {
 	NULL
 };
 
-static void pdo_dbh_free_storage(void *object TSRMLS_DC)
+static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 {
 	pdo_dbh_t *dbh = (pdo_dbh_t*)object;
 
