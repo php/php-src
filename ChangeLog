@@ -1,3 +1,54 @@
+2000-10-05  Andi Gutmans  <andi@zend.com>
+
+    * NEWS
+      ext/ftp/ftp.dsp
+      main/config.w32.h
+      main/internal_functions_win32.c
+      win32/php4dllts.dsp
+      win32/php_modules.dsw: - Add FTP extension to default Win32 build
+
+    * CREDITS: - Update link
+
+    * php4ext.dsw: - Remove old dsw
+
+2000-10-05  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/php_skeleton.h
+      ext/skeleton/skeleton.c: Get ext_skel working again
+
+2000-10-05  Andi Gutmans  <andi@zend.com>
+
+    * NEWS
+      ext/posix/posix.c: - Clean-up original code and add to NEWS.
+
+2000-10-05  Brendan W. McAdams  <rit@jacked-in.org>
+
+    * ext/ccvs/ccvs.c
+      ext/ccvs/ccvs.h: Updated email address to reflect my php.net address.
+    I am no longer associated with Plexus InterActive (my plexmedia.com address) so
+    the old address is no longer any good.
+
+2000-10-05  Alexander Feldman  <alex@zend.com>
+
+    * ext/posix/posix.c:
+    Fixed posix_addlimit() when adding the string "unlimited" to the result.
+    Now the posix_getrlimit() function does not cause core dump.
+
+2000-10-05  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    - List entry types should be true globals.
+
+2000-10-05  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+    Add more missing protos and make folding style closer to mysql module.
+
+2000-10-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/config.m4: Now it really checks that libxml version is >= 2.0
+
 2000-10-04  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/skeleton/skeleton.c:
