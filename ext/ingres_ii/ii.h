@@ -46,7 +46,6 @@ static int _close_statement(II_LINK *link);
 static int _rollback_transaction(II_LINK *link);
 static void _close_ii_link(II_LINK *link);
 static void _close_ii_plink(zend_rsrc_list_entry *link);
-static void _clean_ii_plink(zend_rsrc_list_entry *link);
 static int php_ii_get_default_link(INTERNAL_FUNCTION_PARAMETERS IILS_DC);
 static void php_ii_set_default_link(int id);
 static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);

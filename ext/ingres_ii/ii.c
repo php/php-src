@@ -143,7 +143,7 @@ static int _rollback_transaction(II_LINK *link)
   return 0;
 }
 
-static void close_ii_link(II_LINK *link)
+static void _close_ii_link(II_LINK *link)
 {
   IIAPI_DISCONNPARM disconnParm;
   IILS_FETCH();
@@ -170,7 +170,7 @@ static void close_ii_link(II_LINK *link)
 static void php_close_ii_link(zend_rsrc_list_entry *rsrc)
 {
 	II_LINK *link = (II_LINK *)rsrc->ptr;
-	close_ii_link(link);
+	_close_ii_link(link);
 }
 
 
@@ -181,7 +181,7 @@ static void _close_ii_plink(zend_rsrc_list_entry *rsrc)
 	II_LINK *link = (II_LINK *)rsrc->ptr;
 	IILS_FETCH();
 	
-	close_ii_link(link);
+	_close_ii_link(link);
 	IIG(num_persistent)--;
 }
 
@@ -252,12 +252,7 @@ static int php_ii_get_default_link(INTERNAL_FUNCTION_PARAMETERS IILS_DC)
 */
 PHP_MINIT_FUNCTION(ii)
 {
-  IIAPI_INITPARM initParm = {
-    -1,                /* timeout in ms, -1 = no timeout */
-    IIAPI_VERSION_1,   /* api version used */
-    0                  /* status (output) */
-  };
-  IILS_FETCH();
+  IIAPI_INITPARM initParm;
   
   REGISTER_INI_ENTRIES();
   
@@ -271,8 +266,10 @@ PHP_MINIT_FUNCTION(ii)
   REGISTER_LONG_CONSTANT("INGRES_NUM", II_NUM, CONST_CS | CONST_PERSISTENT);
   REGISTER_LONG_CONSTANT("INGRES_BOTH", II_BOTH, CONST_CS | CONST_PERSISTENT);
 
-
   /* Ingres api initialization */
+  initParm.in_timeout = -1;					/* timeout in ms, -1 = no timeout */
+  initParm.in_version = IIAPI_VERSION_1;	/* api version used */
+
   IIapi_initialize(&initParm);
   if (initParm.in_status==IIAPI_ST_SUCCESS) {
     return SUCCESS;

@@ -3,12 +3,12 @@ dnl config.m4 for extension ingres_ii
 
 PHP_ARG_WITH(ingres, for Ingres II support,
 [  --with-ingres[=DIR]     Include Ingres II support. DIR is the Ingres
-                          base directory (default $II_SYSTEM/II/ingres)],
-no)
+                          base directory (default $II_SYSTEM/II/ingres)])
 
 if test "$PHP_INGRES" != "no"; then
   AC_DEFINE(HAVE_II, 1, [Whether you have Ingres II])
   PHP_EXTENSION(ingres_ii, $ext_shared)
+  PHP_SUBST(II_SHARED_LIBADD)
 
   if test "$PHP_INGRES" = "yes"; then
     II_DIR=$II_SYSTEM/ingres
@@ -30,7 +30,5 @@ if test "$PHP_INGRES" != "no"; then
 
   PHP_ADD_LIBRARY_WITH_PATH(iiapi, $II_LIB_DIR, II_SHARED_LIBADD)
   PHP_ADD_LIBRARY_WITH_PATH(ingres, $II_LIB_DIR, II_SHARED_LIBADD)
-
   PHP_ADD_INCLUDE($II_INC_DIR)
 fi
-PHP_SUBST(II_SHARED_LIBADD)
