@@ -23,7 +23,10 @@
 
 #include <stdio.h>
 
+#ifdef ZTS
 #include "../TSRM/TSRM.h"
+#endif
+
 #include "zend_globals_macros.h"
 
 #define MEM_BLOCK_START_MAGIC	0x7312F8DCL
