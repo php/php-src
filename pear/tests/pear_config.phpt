@@ -200,7 +200,7 @@ string(9) "directory"
 #8 testing: getDocs
 master_server: name of the main PEAR server
 #9 testing: getKeys
-doc_dir ext_dir master_server password php_dir testset1 username verbose
+doc_dir ext_dir master_server password php_dir preferred_state username verbose
 #10 testing: definedBy
 string(7) "default"
 string(4) "user"
