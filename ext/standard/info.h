@@ -32,6 +32,10 @@
 #ifndef _INFO_H
 #define _INFO_H
 
+#define PHP_ENTRY_NAME_COLOR "#999999"
+#define PHP_CONTENTS_COLOR "#DDDDDD"
+#define PHP_HEADER_COLOR "#00DDDD"
+
 void php3_version(INTERNAL_FUNCTION_PARAMETERS);
 void php3_info(INTERNAL_FUNCTION_PARAMETERS);
 PHPAPI void _php3_info(void);
