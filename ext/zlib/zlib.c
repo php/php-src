@@ -122,7 +122,7 @@ zend_module_entry php_zlib_module_entry = {
 	PHP_RINIT(zlib),
 	NULL,
 	PHP_MINFO(zlib),
-    NO_VERSION_YET,
+    "1.1",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -151,9 +151,21 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 }
 /* }}} */
 
+/* {{{ OnUpdate_zlib_output_compression_level */
+static PHP_INI_MH(OnUpdate_zlib_output_compression_level)
+{
+	char *ini_value;
+
+	OnUpdateInt(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+
+	return SUCCESS;
+}
+/* }}} */
+
 
 PHP_INI_BEGIN()
     STD_PHP_INI_BOOLEAN("zlib.output_compression", "0", PHP_INI_ALL, OnUpdate_zlib_output_compression, output_compression, zend_zlib_globals, zlib_globals)
+	STD_PHP_INI_ENTRY("zlib.output_compression_level", "-1", PHP_INI_ALL, OnUpdate_zlib_output_compression_level, output_compression_level, zend_zlib_globals, zlib_globals)
 PHP_INI_END()
 
 /* {{{ phpi_destructor_gzclose
@@ -690,7 +702,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 
 /* {{{ php_deflate_string
  */
-int php_deflate_string(const char *str, uint str_length, char **newstr, uint *new_length, int coding, zend_bool do_start, zend_bool do_end TSRMLS_DC)
+int php_deflate_string(const char *str, uint str_length, char **newstr, uint *new_length, int coding, zend_bool do_start, zend_bool do_end, int compression_level TSRMLS_DC)
 {
 	int err;
 
@@ -703,7 +715,7 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 		switch (coding) {
 			case CODING_GZIP:
 				/* windowBits is passed < 0 to suppress zlib header & trailer */
-				if (deflateInit2(&ZLIBG(stream), Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+				if (deflateInit2(&ZLIBG(stream), compression_level, Z_DEFLATED,
 						-MAX_WBITS, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY)
 							!= Z_OK) {
 					/* TODO: print out error */
@@ -713,7 +725,7 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 				ZLIBG(crc) = crc32(0L, Z_NULL, 0);
 				break;
 			case CODING_DEFLATE:
-				if (deflateInit(&ZLIBG(stream), Z_DEFAULT_COMPRESSION) != Z_OK) {
+				if (deflateInit(&ZLIBG(stream), compression_level) != Z_OK) {
 					/* TODO: print out error */
 					return FAILURE;
 				}
@@ -905,7 +917,7 @@ PHP_FUNCTION(ob_gzhandler)
 	do_end = ((Z_LVAL_PP(zv_mode) & PHP_OUTPUT_HANDLER_END) ? 1 : 0);
 	Z_STRVAL_P(return_value) = NULL;
 	Z_STRLEN_P(return_value) = 0;
-	if (php_deflate_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string), &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), coding, do_start, do_end TSRMLS_CC)==SUCCESS) {
+	if (php_deflate_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string), &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), coding, do_start, do_end, ZLIBG(output_compression_level) TSRMLS_CC)==SUCCESS) {
 		Z_TYPE_P(return_value) = IS_STRING;
 		if (do_start) {
 			switch (coding) {
@@ -959,7 +971,7 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 
 	do_start = (mode & PHP_OUTPUT_HANDLER_START ? 1 : 0);
 	do_end = (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0);
-	if (php_deflate_string(output, output_len, handled_output, handled_output_len, ZLIBG(ob_gzip_coding), do_start, do_end TSRMLS_CC)!=SUCCESS) {
+	if (php_deflate_string(output, output_len, handled_output, handled_output_len, ZLIBG(ob_gzip_coding), do_start, do_end, ZLIBG(output_compression_level) TSRMLS_CC)!=SUCCESS) {
 		zend_error(E_ERROR, "Compression failed");
 	}
 }

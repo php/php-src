@@ -26,12 +26,13 @@
 
 ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	/* variables for transparent gzip encoding */
-    int compression_coding;
-    z_stream stream;
-    uLong crc;
+	int compression_coding;
+	z_stream stream;
+	uLong crc;
 	int ob_gzhandler_status;
 	int ob_gzip_coding;
 	int output_compression;
+	int output_compression_level;
 ZEND_END_MODULE_GLOBALS(zlib)
 
 extern zend_module_entry php_zlib_module_entry;
@@ -66,3 +67,11 @@ extern php_stream_wrapper php_stream_gzip_wrapper;
 #define phpext_zlib_ptr zlib_module_ptr
 
 #endif /* PHP_ZLIB_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */
