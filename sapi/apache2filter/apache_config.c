@@ -32,6 +32,12 @@
 #include "util_script.h"
 #include "http_core.h"                         
 
+#ifdef PHP_AP_DEBUG
+#define phpapdebug(a) fprintf a
+#else
+#define phpapdebug(a)
+#endif
+
 typedef struct {
 	HashTable config;
 } php_conf_rec;
@@ -49,7 +55,7 @@ static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name,
 	php_dir_entry *pe;
 	size_t str_len;
 
-	fprintf(stderr, "Getting %s=%s for %p (%d)\n", name, value, dummy, zend_hash_num_elements(&d->config));
+	phpapdebug((stderr, "Getting %s=%s for %p (%d)\n", name, value, dummy, zend_hash_num_elements(&d->config)));
 	e.value = apr_pstrdup(cmd->pool, value);
 	e.value_len = strlen(value);
 	e.status = status;
@@ -85,7 +91,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	ulong str_len;
 	ulong num_index;
 
-	fprintf(stderr, "Merge dir (%p) (%p)\n", base_conf, new_conf);
+	phpapdebug((stderr, "Merge dir (%p) (%p)\n", base_conf, new_conf));
 	for (zend_hash_internal_pointer_reset(&d->config);
 			zend_hash_get_current_key_ex(&d->config, &str, &str_len, &num_index, 0, NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
@@ -95,7 +101,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 			if (pe->status >= data->status) continue;
 		}
 		zend_hash_update(&e->config, str, str_len, data, sizeof(*data), NULL);
-		fprintf(stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str, data->status, pe?pe->status:-1);
+		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str, data->status, pe?pe->status:-1));
 	}
 	return new_conf;
 }
@@ -111,10 +117,10 @@ void apply_config(void *dummy)
 			zend_hash_get_current_key_ex(&d->config, &str, &str_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
 		zend_hash_get_current_data(&d->config, (void **) &data);
-		fprintf(stderr, "APPLYING (%s)(%s)\n", str, data->value);
+		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
 		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len + 1, 
 				data->status, PHP_INI_STAGE_RUNTIME) == FAILURE)
-			fprintf(stderr, "..FAILED\n");
+			phpapdebug((stderr, "..FAILED\n"));
 	}
 }
 
@@ -131,7 +137,7 @@ static apr_status_t destroy_php_config(void *data)
 {
 	php_conf_rec *d = data;
 
-	fprintf(stderr, "Destroying config %p\n", data);	
+	phpapdebug((stderr, "Destroying config %p\n", data));	
 	zend_hash_destroy(&d->config);
 
 	return APR_SUCCESS;
@@ -142,9 +148,9 @@ void *create_php_config(apr_pool_t *p, char *dummy)
     php_conf_rec *newx =
     (php_conf_rec *) apr_pcalloc(p, sizeof(*newx));
 
-	fprintf(stderr, "Creating new config (%p) for %s\n", newx, dummy);
+	phpapdebug((stderr, "Creating new config (%p) for %s\n", newx, dummy));
 	zend_hash_init(&newx->config, 0, NULL, NULL, 1);
 	apr_register_cleanup(p, newx, destroy_php_config, NULL);
-    return (void *) newx;
+	return (void *) newx;
 }
 
