@@ -376,14 +376,16 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
 						zend_hash_move_forward(url_stream_wrappers_hash)) {
 					if (NULL == (stream_protocols_buf = erealloc(stream_protocols_buf,
-									stream_protocols_buf_len + stream_protocol_len + 1 /* "\n" */ + 1 /* 0 byte at end */))) {
+									stream_protocols_buf_len + stream_protocol_len + 2 /* ", " */ + 1 /* 0 byte at end */))) {
 						break;
 					}
 					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len);
-					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len] = ' ';
-					stream_protocols_buf_len += stream_protocol_len + 1;
+					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len] = ',';
+					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len + 1] = ' ';
+					stream_protocols_buf_len += stream_protocol_len + 2;
 				}
 				if (stream_protocols_buf) {
+					stream_protocols_buf[stream_protocols_buf_len - 2] = ' ';
 					stream_protocols_buf[stream_protocols_buf_len] = 0;
 					php_info_print_table_row(2, "Registered PHP Streams", stream_protocols_buf);
 					efree(stream_protocols_buf);
