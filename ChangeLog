@@ -1,3 +1,48 @@
+2002-01-21  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    Added domxml_substitute_entities_default() function
+
+2002-01-21  Chris Jarecki  <zenderx@ipro.pl>
+
+    * ext/domxml/php_domxml.c:
+    - fixed bug caused by libxml2 in xpath_register_ns()
+    - registered namespaces are now persistent
+
+2002-01-21  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/Archive/Tar.php
+      pear/Makefile.in:
+    Adding Archive/Tar.php to php4/pear/.  This is needed in order for the
+    phptar script (php4/pear/scripts/phptar) to be useful, so it makes sense
+    to make Archive/Tar.php a standard component.
+
+2002-01-21  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/IT.php: * Add possibility to load external files in template.
+      (Patch by Christian Dickmann <chrisdicki@gmx.de>.)
+
+2002-01-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * acinclude.m4: removed check macros no longer needed due to CLI work
+    (plus reverting last commit, was in wrong dir :( )
+
+    * acinclude.m4: removed check macros no longer needed due to CLI work
+
+2002-01-21  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c: this closes off a number of ODBC bugs.
+
+2002-01-21  Derick Rethans  <derick@vl-srm.net>
+
+    * main/network.c:
+    - Fix for bug #15057: getimagesize() crashes when offline (on MacOSX)
+
+2002-01-21  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Fixed typo and proto
+
 2002-01-20  Edin Kadribasic  <edink@proventum.net>
 
     * sapi/cgi/cgi_main.c:
