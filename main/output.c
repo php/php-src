@@ -135,7 +135,7 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool 
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		return FAILURE;
 	}
-	if (OG(ob_nesting_level)==0 && PG(double_buffering)) {		
+	if (OG(ob_nesting_level)==0 && PG(double_buffering) && chunk_size) {		
 		initial_chunk_size = php_ob_default_buffer_size(TSRMLS_C);
 		initial_size = 4*initial_chunk_size;
 		block_size = initial_chunk_size;
