@@ -41,6 +41,17 @@
 #include <stdio.h>
 
 #include "ext/standard/reg.h"
+#include "ext/standard/dl.h"
+#include "ext/standard/file.h"
+#include "ext/standard/fsock.h"
+#include "ext/standard/head.h"
+#include "ext/standard/pack.h"
+#include "ext/standard/php3_browscap.h"
+#include "ext/standard/php3_crypt.h"
+#include "ext/standard/php3_dir.h"
+#include "ext/standard/php3_filestat.h"
+#include "ext/standard/php3_mail.h"
+#include "ext/standard/php3_syslog.h"
 @EXT_INCLUDE_CODE@
 
 /* SNMP has to be moved to ext */
@@ -53,6 +64,17 @@ unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
 
 zend_module_entry *php3_builtin_modules[] = {
 	phpext_regex_ptr,
+	phpext_dl_ptr,
+	phpext_file_ptr,
+	phpext_fsock_ptr,
+	phpext_head_ptr,
+	phpext_pack_ptr,
+	phpext_browscap_ptr,
+	phpext_crypt_ptr,
+	phpext_dir_ptr,
+	phpext_filestat_ptr,
+	phpext_mail_ptr,
+	phpext_syslog_ptr,
 @EXT_MODULE_PTRS@
 };
 

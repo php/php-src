@@ -61,4 +61,6 @@ extern void php3_touch(INTERNAL_FUNCTION_PARAMETERS);
 extern php3_module_entry php3_filestat_module_entry;
 #define php3_filestat_module_ptr &php3_filestat_module_entry
 
+#define phpext_filestat_ptr php3_filestat_module_ptr
+
 #endif /* _FILESTAT_H */

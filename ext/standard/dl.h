@@ -56,5 +56,6 @@ extern void php3_info_dl(ZEND_MODULE_INFO_FUNC_ARGS);
 
 #endif
 
+#define phpext_dl_ptr dl_module_ptr
 
 #endif /* _DL_H */

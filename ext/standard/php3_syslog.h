@@ -27,6 +27,10 @@
    |                                                                      |
    +----------------------------------------------------------------------+
  */
+
+#ifndef _PHP_SYSLOG_H
+#define _PHP_SYSLOG_H
+
 #if HAVE_SYSLOG_H
 extern php3_module_entry syslog_module_entry;
 #define syslog_module_ptr &syslog_module_entry
@@ -42,3 +46,7 @@ extern void php3_define_syslog_variables(INTERNAL_FUNCTION_PARAMETERS);
 #else
 #define syslog_module_ptr NULL
 #endif
+
+#define phpext_syslog_ptr syslog_module_ptr
+
+#endif /* _PHP_SYSLOG_H */

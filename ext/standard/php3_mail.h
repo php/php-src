@@ -43,4 +43,7 @@ extern int _php3_mail(char *to, char *subject, char *message, char *headers);
 #else
 #define mail_module_ptr NULL
 #endif
+
+#define phpext_mail_ptr mail_module_ptr
+
 #endif /* _MAIL_H */
