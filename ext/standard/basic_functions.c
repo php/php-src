@@ -2237,8 +2237,7 @@ static int _valid_var_name(char *varname)
 PHP_FUNCTION(extract)
 {
 	zval **var_array, **etype, **prefix;
-	zval **entry_ptr, *entry, *exist;
-	zval *data;
+	zval **entry, *exist, *data;
 	char *varname, *finalname;
 	ulong lkey;
 	int res, extype;
@@ -2288,8 +2287,7 @@ PHP_FUNCTION(extract)
 	}
 		
 	zend_hash_internal_pointer_reset((*var_array)->value.ht);
-	while(zend_hash_get_current_data((*var_array)->value.ht, (void **)&entry_ptr) == SUCCESS) {
-		entry = *entry_ptr;
+	while(zend_hash_get_current_data((*var_array)->value.ht, (void **)&entry) == SUCCESS) {
 
 		if (zend_hash_get_current_key((*var_array)->value.ht, &varname, &lkey) == HASH_KEY_IS_STRING) {
 
@@ -2297,7 +2295,7 @@ PHP_FUNCTION(extract)
 				finalname = NULL;
 
 				res = zend_hash_find(EG(active_symbol_table),
-									  varname, strlen(varname)+1, (void**)&exist);
+									 varname, strlen(varname)+1, (void**)&exist);
 				switch (extype) {
 					case EXTR_OVERWRITE:
 						finalname = estrdup(varname);
@@ -2324,13 +2322,11 @@ PHP_FUNCTION(extract)
 				}
 
 				if (finalname) {
-					data = (zval *)emalloc(sizeof(zval));
-					*data = *entry;
+					MAKE_STD_ZVAL(data);
+					*data = **entry;
 					zval_copy_ctor(data);
-					INIT_PZVAL(data);
 
-					zend_hash_update(EG(active_symbol_table), finalname,
-									  strlen(finalname)+1, &data, sizeof(zval *), NULL);
+					ZEND_SET_SYMBOL(EG(active_symbol_table), finalname, data);
 					efree(finalname);
 				}
 			}
