@@ -1022,7 +1022,7 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
     memset(ImageInfo, 0, sizeof(*ImageInfo));
     memset(Sections, 0, sizeof(*Sections));
 
-	tmp = php_basename(FileName,strlen(FileName));
+	tmp = php_basename(FileName,strlen(FileName),NULL,0);
     strlcpy(ImageInfo->FileName, tmp, sizeof(ImageInfo->FileName));
 	efree(tmp);
     ImageInfo->FocalLength = 0;
