@@ -101,6 +101,7 @@ const static ps_serializer ps_serializers[] = {
 PHP_MINIT_FUNCTION(session);
 PHP_RINIT_FUNCTION(session);
 PHP_MSHUTDOWN_FUNCTION(session);
+PHP_RSHUTDOWN_FUNCTION(session);
 PHP_MINFO_FUNCTION(session);
 
 static void php_rinit_session_globals(PSLS_D);
@@ -110,7 +111,7 @@ zend_module_entry session_module_entry = {
 	"Session Management",
 	session_functions,
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
-	PHP_RINIT(session), NULL,
+	PHP_RINIT(session), PHP_RSHUTDOWN(session),
 	PHP_MINFO(session),
 	STANDARD_MODULE_PROPERTIES,
 };
@@ -1178,17 +1179,6 @@ static void php_rshutdown_session_globals(PSLS_D)
 }
 
 
-void _php_session_shutdown(void *data)
-{
-	PSLS_FETCH();
-
-	if(PS(nr_open_sessions) > 0) {
-		_php_session_save_current_state(PSLS_C);
-		PS(nr_open_sessions)--;
-	}
-	php_rshutdown_session_globals(PSLS_C);
-}
-
 PHP_RINIT_FUNCTION(session)
 {
 	PSLS_FETCH();
@@ -1206,10 +1196,23 @@ PHP_RINIT_FUNCTION(session)
 		_php_session_start(PSLS_C);
 	}
 
-	php_register_pre_request_shutdown(_php_session_shutdown, NULL);
-
 	return SUCCESS;
 }
+
+
+PHP_RSHUTDOWN_FUNCTION(session)
+{
+	PSLS_FETCH();
+
+	if(PS(nr_open_sessions) > 0) {
+		_php_session_save_current_state(PSLS_C);
+		PS(nr_open_sessions)--;
+	}
+	php_rshutdown_session_globals(PSLS_C);
+	return SUCCESS;
+}
+
+
 
 PHP_MINIT_FUNCTION(session)
 {

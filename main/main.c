@@ -654,39 +654,6 @@ static void php_message_handler_for_zend(long message, void *data)
 	}
 }
 
-static void php_start_request_hook(void *data)
-{
-	php_request_hook *ptr = (php_request_hook *) data;
-
-	ptr->func(ptr->userdata);
-}
-
-static void php_execute_pre_request_shutdown(PLS_D)
-{
-	if (PG(pre_request_shutdown_ok)) {
-		zend_llist_apply(&PG(ll_pre_request_shutdown), php_start_request_hook);
-		zend_llist_destroy(&PG(ll_pre_request_shutdown));
-		PG(pre_request_shutdown_ok) = 0;
-	}
-}
-
-
-void php_register_pre_request_shutdown(void (*func)(void *), void *userdata)
-{
-	php_request_hook ptr;
-	PLS_FETCH();
-
-	if (!PG(pre_request_shutdown_ok)) {
-		zend_llist_init(&PG(ll_pre_request_shutdown), sizeof(php_request_hook), NULL, 0);
-		PG(pre_request_shutdown_ok) = 1;
-	}
-	
-	ptr.func = func;
-	ptr.userdata = userdata;
-	
-	zend_llist_add_element(&PG(ll_pre_request_shutdown), &ptr);
-}
-
 
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
@@ -772,8 +739,6 @@ void php_request_shutdown(void *dummy)
 	ELS_FETCH();
 	SLS_FETCH();
 	PLS_FETCH();
-
-	php_execute_pre_request_shutdown(PLS_C);
 
 	sapi_send_headers();
 	php_end_ob_buffering(SG(request_info).headers_only?0:1);
