@@ -1092,10 +1092,8 @@ PHP_FUNCTION(dom_document_document)
 	dom_object *intern;
 	char *encoding, *version = NULL;
 	int encoding_len = 0, version_len = 0, refcount;
-
-	id = getThis();
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ss", &id, dom_document_class_entry, &version, &version_len, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 

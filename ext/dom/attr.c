@@ -54,12 +54,11 @@ PHP_FUNCTION(dom_attr_attr)
 	char *name, *value = NULL;
 	int name_len, value_len;
 
-	id = getThis();
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
+
+	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 
 	if (name_len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute name is required");
