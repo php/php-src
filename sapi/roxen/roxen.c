@@ -254,7 +254,7 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
     zend_bailout();
   }
-  fprintf(stderr, "low_write done.\n");
+  /*  fprintf(stderr, "low_write done.\n");*/
   return sent_bytes;
 }
 
@@ -301,7 +301,7 @@ php_roxen_sapi_ub_write(const char *str, uint str_length)
     THREAD_SAFE_RUN(sent_bytes = php_roxen_low_ub_write(str, str_length),
 		    "write");
   }
-  fprintf(stderr, "write done.\n");
+  /*  fprintf(stderr, "write done.\n"); */
   return sent_bytes;
 }
 
@@ -361,8 +361,8 @@ php_roxen_sapi_header_handler(sapi_header_struct *sapi_header,
     header_content++;
   } while(*header_content == ' ');
   THREAD_SAFE_RUN(php_roxen_set_header(header_name, header_content, p), "header handler");
-  efree(sapi_header->header);
-  return 1;
+  sapi_free_header(sapi_header);
+  return 0;
 }
 
 /*
