@@ -167,6 +167,10 @@ SOURCE=.\zend_indent.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_ini.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_list.c
 # End Source File
 # Begin Source File
@@ -288,6 +292,10 @@ SOURCE=.\zend_highlight.h
 # Begin Source File
 
 SOURCE=.\zend_indent.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ini.h
 # End Source File
 # Begin Source File
 

@@ -718,7 +718,7 @@ static int php_body_write_wrapper(const char *str, uint str_length)
 #ifdef ZTS
 static void php_new_thread_end_handler(THREAD_T thread_id)
 {
-	php_ini_refresh_caches(PHP_INI_STAGE_STARTUP);
+	zend_ini_refresh_caches(PHP_INI_STAGE_STARTUP);
 }
 #endif
 
