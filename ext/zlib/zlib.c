@@ -171,7 +171,6 @@ static void phpi_destructor_gzclose(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 static void php_zlib_init_globals(zend_zlib_globals *zlib_globals_p TSRMLS_DC)
 {
-	ZLIBG(gzgetss_state) = 0;
 }
 /* }}} */
 #endif
@@ -182,8 +181,6 @@ PHP_MINIT_FUNCTION(zlib)
 {
 #ifdef ZTS
 	ts_allocate_id(&zlib_globals_id, sizeof(zend_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
-#else
-	ZLIBG(gzgetss_state)=0;
 #endif
 	le_zp = zend_register_list_destructors_ex(phpi_destructor_gzclose, NULL, "zlib", module_number);
 
