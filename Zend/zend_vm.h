@@ -39,7 +39,7 @@
 #  ifdef __GNUC__
 #    define ZEND_VM_KIND           ZEND_VM_KIND_GOTO
 #  else
-#    define ZEND_VM_KIND           ZEND_VM_KIND_SWITCH
+#    define ZEND_VM_KIND           ZEND_VM_KIND_CALL
 #  endif
 #endif
 
