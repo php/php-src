@@ -248,15 +248,45 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 	return 1;
 }
 
+static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	PGresult *res;
+	int ret = 1;
+
+	res = PQexec(H->server, cmd);
+
+	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+	  ret = 0;
+	}
+
+	PQclear(res);
+	return ret;
+}
+
+static int pgsql_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+{
+  return pdo_pgsql_transaction_cmd("BEGIN", dbh TSRMLS_CC);
+}
+
+static int pgsql_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+{
+  return pdo_pgsql_transaction_cmd("COMMIT", dbh TSRMLS_CC);
+}
+
+static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+{
+  return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
+}
 
 static struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_closer,
 	pgsql_handle_preparer,
 	pgsql_handle_doer,
 	pgsql_handle_quoter,
-	NULL,
-	NULL,
-	NULL,
+	pgsql_handle_begin,
+	pgsql_handle_commit,
+	pgsql_handle_rollback,
 	NULL,
 	pdo_pgsql_last_insert_id,
 	pdo_pgsql_fetch_error_func,
