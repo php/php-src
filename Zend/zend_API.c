@@ -936,6 +936,7 @@ ZEND_API int add_get_index_stringl(zval *arg, uint index, char *str, uint length
 ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long n)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_LONG(tmp, n);
@@ -946,6 +947,7 @@ ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long n)
 ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_BOOL(tmp, b);
@@ -956,6 +958,7 @@ ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b)
 ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 	
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_NULL(tmp);
@@ -966,6 +969,7 @@ ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len)
 ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 	
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_RESOURCE(tmp, n);
@@ -977,7 +981,8 @@ ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long n
 ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d)
 {
 	zval *tmp;
-	
+	TSRMLS_FETCH();
+
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_DOUBLE(tmp, d);
 
@@ -988,6 +993,7 @@ ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d
 ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRING(tmp, str, duplicate);
@@ -998,6 +1004,7 @@ ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *st
 ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate)
 {
 	zval *tmp;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRINGL(tmp, str, length, duplicate);
@@ -1007,6 +1014,8 @@ ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *s
 
 ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value)
 {
+	TSRMLS_FETCH();
+
 	return zend_hash_update(Z_OBJPROP_P(arg), key, key_len, (void *) &value, sizeof(zval *), NULL);
 }
 
