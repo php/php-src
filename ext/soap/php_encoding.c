@@ -719,6 +719,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 					val = master_to_zval(enc, node);
 					if ((node = get_node(node->next, model->u.element->name)) != NULL) {
 						zval *array;
+
 						MAKE_STD_ZVAL(array);
 						array_init(array);
 						add_next_index_zval(array, val);
@@ -835,12 +836,22 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 			while (zend_hash_get_current_data(sdlType->attributes, (void**)&attr) == SUCCESS) {
 				if ((*attr)->name) {
 					xmlAttrPtr val = get_attribute(data->properties, (*attr)->name);
+					xmlChar *str_val = NULL;
+
 					if (val && val->children && val->children->content) {
+						str_val = val->children->content;
+						if ((*attr)->fixed && strcmp((*attr)->fixed,str_val) != 0) {
+							php_error(E_ERROR,"Attribute '%s' has fixed value '%s' (value '%s' is not allowed)",(*attr)->name,(*attr)->fixed,str_val);
+						}
+					} else if ((*attr)->def) {
+						str_val = (*attr)->def;
+					}
+					if (str_val) {
 						xmlNodePtr dummy;
 						zval *data;
 
 						dummy = xmlNewNode(NULL, "BOGUS");
-						xmlNodeSetContent(dummy, val->children->content);
+						xmlNodeSetContent(dummy, str_val);
 						data = master_to_zval((*attr)->encode, dummy);
 						xmlFreeNode(dummy);
 #ifdef ZEND_ENGINE_2
@@ -1069,6 +1080,9 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style)
 
 							dummy = master_to_xml((*attr)->encode, *data, SOAP_LITERAL);
 							if (dummy->children && dummy->children->content) {
+								if ((*attr)->fixed && strcmp((*attr)->fixed,dummy->children->content) != 0) {
+									php_error(E_ERROR,"Attribute '%s' has fixed value '%s' (value '%s' is not allowed)",(*attr)->name,(*attr)->fixed,dummy->children->content);
+								}
 								xmlSetProp(xmlParam, (*attr)->name, dummy->children->content);
 							}
 							xmlFreeNode(dummy);
@@ -1760,8 +1774,6 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style)
 
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		i = zend_hash_num_elements(Z_ARRVAL_P(data));
-		/* TODO: Register namespace...??? */
-//		xmlSetProp(xmlParam, APACHE_NS_PREFIX, APACHE_NAMESPACE);
 		zend_hash_internal_pointer_reset(data->value.ht);
 		for (;i > 0;i--) {
 			xmlNodePtr xparam, item;
@@ -2034,6 +2046,16 @@ static zval* to_zval_list(encodeTypePtr enc, xmlNodePtr data) {
 
 static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style) {
 	xmlNodePtr ret;
+	encodePtr list_enc = NULL;
+
+	if (enc->sdl_type && enc->sdl_type->kind == XSD_TYPEKIND_LIST && enc->sdl_type->elements) {
+		sdlTypePtr *type;
+
+		zend_hash_internal_pointer_reset(enc->sdl_type->elements);
+		if (zend_hash_get_current_data(enc->sdl_type->elements, (void**)&type) == SUCCESS) {
+			list_enc = (*type)->encode;
+		}
+	}
 
 	ret = xmlNewNode(NULL, "BOGUS");
 	FIND_ZVAL_NULL(data, ret, style);
@@ -2044,32 +2066,62 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style) {
 
 		zend_hash_internal_pointer_reset(ht);
 		while (zend_hash_get_current_data(ht, (void**)&tmp) == SUCCESS) {
-			if (list.len != 0) {
-				smart_str_appendc(&list, ' ');
-			}
-			if (Z_TYPE_PP(tmp) == IS_STRING) {
-				smart_str_appendl(&list, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+			xmlNodePtr dummy = master_to_xml(list_enc, *tmp, style);
+			if (dummy && dummy->children && dummy->children->content) {
+				if (list.len != 0) {
+					smart_str_appendc(&list, ' ');
+				}
+				smart_str_appends(&list, dummy->children->content);
 			} else {
-				zval copy = **tmp;
-				zval_copy_ctor(&copy);
-				convert_to_string(&copy);
-				smart_str_appendl(&list, Z_STRVAL(copy), Z_STRLEN(copy));
-				zval_dtor(&copy);
+				php_error(E_ERROR,"Violation of encoding rules");
 			}
+			xmlFreeNode(dummy);
 			zend_hash_move_forward(ht);
 		}
 		smart_str_0(&list);
 		xmlNodeSetContentLen(ret, list.c, list.len);
 		smart_str_free(&list);
-	} else if (Z_TYPE_P(data) == IS_STRING) {
-		xmlNodeSetContentLen(ret, Z_STRVAL_P(data), Z_STRLEN_P(data));
 	} else {
 		zval tmp = *data;
+		char *str, *start, *next;
+		smart_str list = {0};
+		
+		if (Z_TYPE_P(data) != IS_STRING) {
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			data = &tmp;
+		}
+		str = estrndup(Z_STRVAL_P(data), Z_STRLEN_P(data));
+		whiteSpace_collapse(str);
+		start = str;
+		while (start != NULL && *start != '\0') {
+			xmlNodePtr dummy;
+			zval dummy_zval;
 
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		xmlNodeSetContentLen(ret, Z_STRVAL(tmp), Z_STRLEN(tmp));
-		zval_dtor(&tmp);
+			next = strchr(start,' ');
+			if (next != NULL) {
+			  *next = '\0';
+			  next++;
+			}
+			ZVAL_STRING(&dummy_zval, start, 0);
+			dummy = master_to_xml(list_enc, &dummy_zval, style);
+			if (dummy && dummy->children && dummy->children->content) {
+				if (list.len != 0) {
+					smart_str_appendc(&list, ' ');
+				}
+				smart_str_appends(&list, dummy->children->content);
+			} else {
+				php_error(E_ERROR,"Violation of encoding rules");
+			}
+			xmlFreeNode(dummy);
+
+			start = next;
+		}
+		smart_str_0(&list);
+		xmlNodeSetContentLen(ret, list.c, list.len);
+		smart_str_free(&list);
+		efree(str);
+		if (data == &tmp) {zval_dtor(&tmp);}
 	}
 	return ret;
 }
@@ -2084,7 +2136,7 @@ static zval* to_zval_union(encodeTypePtr enc, xmlNodePtr data) {
 	return to_zval_list(enc, data);
 }
 
-static xmlNodePtr to_xml_union(encodeTypePtr enc, zval *data, int style) {
+static xmlNodePtr to_xml_union(encodeTypePtr enc, zval *data, int style) {	
 	/*FIXME*/
 	return to_xml_list(enc,data,style);
 }
