@@ -1,0 +1,114 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998, 1999 Andi Gutmans, Zeev Suraski                  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+#include "zend.h"
+#include "zend_stack.h"
+
+ZEND_API int zend_stack_init(zend_stack *stack)
+{
+	stack->top = 0;
+	stack->elements = (void **) emalloc(sizeof(void **) * STACK_BLOCK_SIZE);
+	if (!stack->elements) {
+		return FAILURE;
+	} else {
+		stack->max = STACK_BLOCK_SIZE;
+		return SUCCESS;
+	}
+}
+
+ZEND_API int zend_stack_push(zend_stack *stack, void *element, int size)
+{
+	if (stack->top >= stack->max) {		/* we need to allocate more memory */
+		stack->elements = (void **) erealloc(stack->elements,
+				   (sizeof(void **) * (stack->max += STACK_BLOCK_SIZE)));
+		if (!stack->elements) {
+			return FAILURE;
+		}
+	}
+	stack->elements[stack->top] = (void *) emalloc(size);
+	memcpy(stack->elements[stack->top], element, size);
+	return stack->top++;
+}
+
+
+ZEND_API int zend_stack_top(zend_stack *stack, void **element)
+{
+	if (stack->top > 0) {
+		*element = stack->elements[stack->top - 1];
+		return SUCCESS;
+	} else {
+		*element = NULL;
+		return FAILURE;
+	}
+}
+
+
+ZEND_API int zend_stack_del_top(zend_stack *stack)
+{
+	if (stack->top > 0) {
+		efree(stack->elements[--stack->top]);
+	}
+	return SUCCESS;
+}
+
+
+ZEND_API int zend_stack_int_top(zend_stack *stack)
+{
+	int *e;
+
+	if (zend_stack_top(stack, (void **) &e) == FAILURE) {
+		return FAILURE;			/* this must be a negative number, since negative numbers can't be address numbers */
+	} else {
+		return *e;
+	}
+}
+
+
+ZEND_API int zend_stack_is_empty(zend_stack *stack)
+{
+	if (stack->top == 0) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+
+ZEND_API int zend_stack_destroy(zend_stack *stack)
+{
+	register int i;
+
+	for (i = 0; i < stack->top; i++) {
+		efree(stack->elements[i]);
+	}
+
+	if (stack->elements) {
+		efree(stack->elements);
+	}
+	return SUCCESS;
+}
+
+
+ZEND_API void **zend_stack_base(zend_stack *stack)
+{
+	return stack->elements;
+}
+
+
+ZEND_API int zend_stack_count(zend_stack *stack)
+{
+	return stack->top;
+}

@@ -1,0 +1,209 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998, 1999 Andi Gutmans, Zeev Suraski                  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+#ifndef _ZEND_GLOBALS_H
+#define _ZEND_GLOBALS_H
+
+#include <setjmp.h>
+
+#include "zend_stack.h"
+#include "zend_ptr_stack.h"
+#include "zend_hash.h"
+#include "zend_llist.h"
+
+#undef ZTS
+
+#ifdef ZTS
+#include "SAPI.h"
+
+extern int compiler_globals_id;
+extern int executor_globals_id;
+#endif
+
+typedef struct _zend_compiler_globals zend_compiler_globals;
+typedef struct _zend_executor_globals zend_executor_globals;
+typedef struct _zend_alloc_globals zend_alloc_globals;
+
+#define SYMTABLE_CACHE_SIZE 32
+
+
+/* Compiler */
+#ifdef ZTS
+# define CLS_D	zend_compiler_globals *compiler_globals
+# define CLS_DC	, CLS_D
+# define CLS_C	compiler_globals
+# define CLS_CC , CLS_C
+# define CG(v) (((zend_compiler_globals *) compiler_globals)->v)
+# define CLS_FETCH()	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id)
+# define YYPARSE_PARAM compiler_globals
+# define YYLEX_PARAM compiler_globals
+int zendparse(void *compiler_globals);
+#else
+# define CLS_D
+# define CLS_DC
+# define CLS_C
+# define CLS_CC
+# define CG(v) (compiler_globals.v)
+# define CLS_FETCH()
+extern ZEND_API zend_compiler_globals compiler_globals;
+int zendparse();
+#endif
+
+
+/* Executor */
+#ifdef ZTS
+# define ELS_D	zend_executor_globals *executor_globals
+# define ELS_DC	, ELS_D
+# define ELS_C	executor_globals
+# define ELS_CC , ELS_C
+# define EG(v) (executor_globals->v)
+# define ELS_FETCH()	zend_executor_globals *executor_globals = ts_resource(executor_globals_id)
+#else
+# define ELS_D
+# define ELS_DC
+# define ELS_C
+# define ELS_CC
+# define EG(v) (executor_globals.v)
+# define ELS_FETCH()
+extern ZEND_API zend_executor_globals executor_globals;
+#endif
+
+
+/* Memory Manager */
+#ifdef ZTS
+# define ALS_D	zend_alloc_globals *alloc_globals
+# define ALS_DC	, ALS_D
+# define ALS_C	alloc_globals
+# define ALS_CC , ALS_C
+# define AG(v) (((zend_alloc_globals *) alloc_globals)->v)
+# define ALS_FETCH()	zend_alloc_globals *alloc_globals = ts_resource(alloc_globals_id)
+#else
+# define ALS_D
+# define ALS_DC
+# define ALS_C
+# define ALS_CC
+# define AG(v) (alloc_globals.v)
+# define ALS_FETCH()
+#endif
+
+
+#include "zend_compile.h"
+#include "zend_execute.h"
+
+struct _zend_compiler_globals {
+	zend_stack bp_stack;
+	zend_stack switch_cond_stack;
+	zend_stack object_stack;
+
+	zend_class_entry class_entry, *active_class_entry;
+
+	/* variables for list() compilation */
+	zend_llist list_llist;
+	zend_llist dimension_llist;
+
+	zend_stack function_call_stack;
+
+	char *compiled_filename;
+
+	int zend_lineno;
+	char *heredoc;
+	int heredoc_len;
+
+	zend_op_array *active_op_array;
+
+	HashTable *function_table;	/* function symbol table */
+	HashTable *class_table;		/* class table */
+
+	zend_llist filenames_list;
+
+	unsigned char short_tags;
+	unsigned char asp_tags;
+
+	/* For extensions support */
+	unsigned char extended_info;	/* generate extension information for debugger/profiler */
+	unsigned char handle_op_arrays;	/* run op_arrays through op_array handlers */
+};
+
+
+struct _zend_executor_globals {
+	zval *return_value;
+
+	zval uninitialized_zval;
+	zval *uninitialized_zval_ptr;
+
+	zval error_zval;
+	zval *error_zval_ptr;
+
+	zend_function_state *function_state_ptr;
+	zend_ptr_stack function_symbol_table_stack;
+	zend_ptr_stack arg_types_stack;
+	zend_stack overloaded_objects_stack;
+	zval global_return_value;
+
+	/* symbol table cache */
+	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];
+	HashTable **symtable_cache_limit;
+	HashTable **symtable_cache_ptr;
+
+	zend_op **opline_ptr;
+
+	HashTable *active_symbol_table;
+	HashTable symbol_table;		/* main symbol table */
+
+	jmp_buf bailout;
+
+	int error_reporting;
+
+	zend_op_array *active_op_array;
+	zend_op_array *main_op_array;
+
+	HashTable *function_table;	/* function symbol table */
+	HashTable *class_table;		/* class table */
+	HashTable *zend_constants;	/* constants table */
+
+	long precision;
+
+	unsigned int AiCount;
+
+	zend_ptr_stack garbage;
+
+	/* for extended information support */
+	unsigned char no_extensions;
+
+	HashTable regular_list;
+	HashTable persistent_list;
+
+#if SUPPORT_INTERACTIVE
+	int interactive;
+#endif
+};
+
+
+
+struct _zend_alloc_globals {
+	mem_header *head;		/* standard list */
+	mem_header *phead;		/* persistent list */
+	void *cache[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
+	unsigned char cache_count[MAX_CACHED_MEMORY];
+
+# if MEMORY_LIMIT
+	unsigned int allocated_memory;
+	unsigned char memory_exhausted;
+#endif
+};
+
+
+#endif /* _ZEND_GLOBALS_H */

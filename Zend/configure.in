@@ -1,0 +1,194 @@
+dnl $Id$
+dnl Process this file with autoconf to produce a configure script.
+
+AC_INIT(zend.c)
+
+AC_CONFIG_HEADER(config.h)
+AM_SANITY_CHECK
+
+dnl We want this one before the checks, so the checks can modify CFLAGS.
+test -z "$CFLAGS" && auto_cflags=1
+
+dnl Checks for programs.
+AC_PROG_YACC
+if test "$YACC" != "bison -y"; then
+    AC_MSG_WARN(You will need bison if you'd want to regenerate the PHP 3.0 parsers.)
+else
+    AC_MSG_CHECKING(bison version)
+    set `bison --version| sed -e 's/^GNU Bison version //' -e 's/\./ /'`
+    if test "$1" = "1" -a "$2" -lt "25"; then
+        AC_MSG_WARN(You will need bison 1.25 if you'd want to regenerate the PHP 3.0 parsers (found $1.$2).)
+    fi
+    AC_MSG_RESULT($1.$2 (ok))
+fi
+AC_PROG_CC
+AC_PROG_RANLIB
+AC_PROG_CC_C_O
+AC_PATH_PROG(PERL_PATH, perl)
+
+dnl Ugly hack to get around a problem with gcc on AIX.
+if test "$CC" = "gcc" -a "$ac_cv_prog_cc_g" = "yes" -a \
+   "`uname -sv`" = "AIX 4"; then
+	CFLAGS=`echo $CFLAGS | sed -e 's/-g//'`
+fi
+
+dnl check for -R, etc. switch
+AC_MSG_CHECKING(if compiler supports -R)
+AC_CACHE_VAL(php_cv_cc_dashr,[
+	SAVE_LIBS="${LIBS}"
+	LIBS="-R /usr/lib ${LIBS}"
+	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
+	LIBS="${SAVE_LIBS}"])
+AC_MSG_RESULT($php_cv_cc_dashr)
+if test $php_cv_cc_dashr = "yes"; then
+	ld_runpath_switch="-R"
+	apxs_runpath_switch="-Wl,-R'"
+else
+	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
+	AC_CACHE_VAL(php_cv_cc_rpath,[
+		SAVE_LIBS="${LIBS}"
+		LIBS="-Wl,-rpath,/usr/lib ${LIBS}"
+		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
+		LIBS="${SAVE_LIBS}"])
+	AC_MSG_RESULT($php_cv_cc_rpath)
+	if test $php_cv_cc_rpath = "yes"; then
+		ld_runpath_switch="-Wl,-rpath,"
+		apxs_runpath_switch="-Wl,'-rpath "
+	else
+		dnl something innocuous
+		ld_runpath_switch="-L"
+		apxs_runpath_switch="-L'"
+	fi
+fi
+
+dnl
+dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary
+dnl and source packages.  This should be harmless on other OSs.
+dnl
+if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
+       CFLAGS="$CFLAGS -I/usr/pkg/include"
+       LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
+fi
+
+AC_CHECK_LIB(nsl, gethostname, [
+  LIBS="-lnsl $LIBS"
+  AC_DEFINE(HAVE_LIBNSL) ], [])
+
+AC_CHECK_LIB(c, socket, [:], [
+ AC_CHECK_LIB(socket, socket, [
+  LIBS="-lsocket $LIBS"
+  AC_DEFINE(HAVE_LIBSOCKET) ], []) ])
+
+AC_CHECK_LIB(c, gethostbyaddr, [:], [
+ AC_CHECK_LIB(nsl, gethostbyaddr, [
+  LIBS="-lnsl $LIBS"
+  AC_DEFINE(HAVE_LIBNSL) ], []) ])
+
+AC_CHECK_LIB(c, dlopen, [
+ # fake it
+ AC_DEFINE(HAVE_LIBDL) ], [
+ AC_CHECK_LIB(dl, dlopen, [
+  LIBS="-ldl $LIBS"
+  AC_DEFINE(HAVE_LIBDL) ], []) ])
+
+dnl The sin may be in a library which need not be specifed
+dnl as well as res_search resides in libsocket
+AC_CHECK_LIB(c, sin, [:], [
+ AC_CHECK_LIB(m, sin) ])
+
+dnl The res_search may be in libsocket as well, and if it is
+dnl make sure to check for dn_skipname in libresolv, or if res_search
+dnl is in neither of these libs, still check for dn_skipname in libresolv
+AC_CHECK_LIB(socket, res_search, [
+ AC_CHECK_LIB(resolv, dn_skipname)
+ AC_CHECK_LIB(resolv, __dn_skipname)
+ LIBS="$LIBS -lsocket"
+ AC_DEFINE(HAVE_LIBSOCKET) 
+], [
+ AC_CHECK_LIB(resolv, res_search, [
+  LIBS="$LIBS -lresolv"
+  AC_DEFINE(HAVE_LIBRESOLV) 
+ ], [
+  AC_CHECK_LIB(resolv, dn_skipname)
+  AC_CHECK_LIB(resolv, __dn_skipname)
+ ]) 
+])
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+dnl In QNX opendir resides in libc but dirent.h is still required
+if test "`uname -s 2>/dev/null`" != "QNX"; then
+	AC_HEADER_DIRENT
+else
+	AC_CHECK_HEADERS(dirent.h)
+fi
+dnl QNX requires unix.h to allow functions in libunix to work properly
+AC_CHECK_HEADERS(fcntl.h unistd.h crypt.h sys/file.h memory.h pwd.h grp.h sys/socket.h sys/wait.h syslog.h string.h sys/varargs.h stdarg.h sys/resource.h sys/time.h signal.h netinet/in.h dlfcn.h limits.h sys/types.h sys/statvfs.h sys/statfs.h unix.h db.h ndbm.h)
+
+dnl Checks for types
+AC_TYPE_SIZE_T
+
+dnl This is required for QNX and may be some BSD derived systems
+AC_CHECK_TYPE( uint, unsigned int )
+AC_CHECK_TYPE( ulong, unsigned long )
+
+dnl Checks for library functions.
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS(memcpy memmove strdup strerror strcasecmp strstr flock lockf putenv tempnam usleep setlocale gettimeofday setvbuf srand48 lrand48 srandom random link symlink regcomp getlogin cuserid vsnprintf snprintf gcvt utime crypt setitimer rint unsetenv strftime setsockopt tzset statvfs statfs inet_aton)
+AC_FUNC_UTIME_NULL
+AC_FUNC_ALLOCA
+AC_BROKEN_SPRINTF
+AC_REPLACE_FUNCS(getopt)
+
+AC_MSG_CHECKING(whether to include debugging symbols)
+AC_ARG_ENABLE(debug,
+[  --enable-debug          Compile with debugging symbols],
+[
+  if test "$enableval" = "yes"; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(ZEND_DEBUG,1)
+    DEBUG_CFLAGS="-g"
+    test -n "$GCC" && DEBUG_CFLAGS="$DEBUG_CFLAGS -Wall"
+    test -n "$GCC" && test "$USE_MAINTAINER_MODE" = "yes" && \
+      DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"
+  else
+    AC_MSG_RESULT(no)
+    AC_DEFINE(ZEND_DEBUG,0)
+    DEBUG_CFLAGS=""
+  fi
+],[
+  AC_MSG_RESULT(no)
+  AC_DEFINE(ZEND_DEBUG,0)
+  DEBUG_CFLAGS=""
+]) 
+AC_SUBST(DEBUG_CFLAGS)
+
+
+AC_MSG_CHECKING(whether to enable a memory limit)
+AC_ARG_ENABLE(memory-limit,
+[  --enable-memory-limit   Compile with memory limit support. ],
+[
+  if test "$enableval" = "yes"; then
+    AC_DEFINE(MEMORY_LIMIT, 1)
+    AC_MSG_RESULT(yes)
+  else
+    AC_DEFINE(MEMORY_LIMIT, 0)
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_DEFINE(MEMORY_LIMIT, 0)
+  AC_MSG_RESULT(no)
+]) 
+
+
+AC_SUBST(CFLAGS_SHLIB)
+AC_SUBST(LDFLAGS_SHLIB)
+AC_SUBST(LDFLAGS_SHLIB_EXPORT)
+
+AC_OUTPUT(Makefile, [], [])
+
+
+# Local Variables:
+# tab-width: 4
+# End:
