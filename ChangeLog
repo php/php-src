@@ -1,3 +1,213 @@
+2003-04-03  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml:
+      - pear.in is renamed to pearcmd.php
+
+    * pear/package-PEAR.xml
+      pear/scripts/.cvsignore
+      pear/scripts/pear.in
+      pear/scripts/pear_unices
+      pear/scripts/pearcmd.php:
+      - paj's last Windows install fixes
+
+    * pear/scripts/pear.bat:
+      - use PHP_PEAR_* environment variables (paj)
+
+    * pear/PEAR/Frontend/CLI.php:
+      - disable table borders in output to save width
+
+    * pear/OS/Guess.php:
+      - windows bugfix
+
+    * pear/PEAR.php:
+      - support both error codes and messages in the second parameter to
+        PEAR::isError()
+
+2003-04-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c:
+      Use php_error_docref.
+
+2003-04-03  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Registry.php:
+      - remove track_errors ini fiddling, was a PHP bug that should be fixed now
+
+    * pear/PEAR/Common.php:
+      - initialize pkginfo with an empty provides array
+
+2003-04-03  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/exif/exif.c:
+      MFB
+
+2003-04-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in:
+      Check for flex version 2.5.4
+
+2003-04-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      one in socket_select
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      augment summary with fixes which predate the list
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      add chunk_split
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      another one fixed, a new one found
+
+    * ext/gd/gd.c:
+      Fix segfaults in imagecreate/imagecreatetruecolor
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      fix
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      update regarding dbase extension
+
+2003-04-03  Jani Taskinen  <sniper@iki.fi>
+
+    * main/output.c:
+      WS & CS fix
+
+2003-04-03  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/array.c:
+      Kludgy fix for floating point drift causing problems like
+      range(1.0,1.5,0.1) == array(1.0,1.1,1.2,1.3,1.4);
+
+2003-04-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Update - we purged the full list\!
+
+    * main/output.c:
+      Add some checks and avoid passing invalid data to call_user_function_ex.
+      
+      Fixes some heap corruption and allocation of negative amounts of memory.
+
+    * ext/standard/basic_functions.c:
+      Prevent entering of anything but arrays/strings in register_shutdown_func
+      
+      Noticed by: Jan Schneider
+
+2003-04-03  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/exif/exif.c:
+      Clean up the parameter handling here
+
+2003-04-03  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      reorder
+
+2003-04-03  Christian Stocker  <chregu@phant.ch>
+
+    * NEWS:
+      new domxml_elem_set_attribute_node() should have gone into NEWS, but I
+      forgot..
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+      - Added domxml_elem_set_attribute_node() method. (Rob Richards)
+
+2003-04-03  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_api.c:
+      fixed mysqli_prepare_result
+
+    * ext/mysqli/tests/047.phpt:
+      fixed output
+
+2003-04-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c
+      ext/standard/string.c:
+      - CS
+
+2003-04-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bcmath/bcmath.c:
+      Another CS fix.
+
+    * ext/standard/basic_functions.c:
+      CS fix
+
+2003-04-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Unable to reproduce..
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      segfault busting news
+
+    * (PHP_4_3)
+      ext/xml/xml.c:
+      MFH(r-1.117): fixed segfault in xml_parser_create()
+
+    * ext/xml/xml.c:
+      Fixed segfault in xml_parser_create()
+
+2003-04-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      ext/ftp/php_ftp.c:
+      Fixed bug #23004 (When ftp_close() is called, sent QUIT to the ftp server)
+
+2003-04-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      main/output.c:
+      MFH(r-1.152): fixed memleak in output buffering facility
+
+    * main/output.c:
+      Fixed memleak in output buffering facility
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Removed i18n_convert() from the entries because that is an alias for
+      mb_convert_encoding()
+
+2003-04-03  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Update
+
+2003-04-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/php_mbregex.c:
+      MFH(r-1.38): fixed segfault in mb_ereg_match()
+
+    * ext/mbstring/php_mbregex.c:
+      Fixed segfault in mb_ereg_match()
+
+    * (PHP_4_3)
+      ext/mbstring/php_mbregex.c:
+      MFH(r-1.37): fixed lots of crashes in mbregex
+
+    * ext/mbstring/php_mbregex.c:
+      Fixed lots of crashes in mbregex.
+
 2003-04-02  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * ext/bcmath/bcmath.c:
