@@ -28,6 +28,7 @@ if test "$PHP_SATELLITE" != "no"; then
       dnl Save directory and report result
       ORBIT_PATH=$i
       AC_MSG_RESULT(found in $i)
+      break
 
     fi
   done
