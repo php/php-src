@@ -22,7 +22,6 @@ PEAR_SUBDIRS = \
 	Image \
 	Mail \
 	Net \
-	Payment \
 	PEAR \
 	Schedule \
 	XML 
@@ -93,7 +92,6 @@ PEAR_FILES = \
 	PEAR/Registry.php \
 	PEAR/Remote.php \
 	PEAR/Uploader.php \
-	Payment/Verisign.php \
 	Schedule/At.php \
 	System.php \
 	XML/Parser.php 
