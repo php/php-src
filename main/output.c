@@ -698,6 +698,9 @@ PHPAPI int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
 	int result = 0;
 
 	if (SG(request_info).headers_only) {
+		if(SG(headers_sent)) {
+			return 0;
+		}
 		php_header(TSRMLS_C);
 		zend_bailout();
 	}
