@@ -1,3 +1,15 @@
+2000-04-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/string.c: Small proto fix.
+
+2000-04-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c
+      TODO
+      ext/pcre/php_pcre.c: Added substr_count() from Peter Kovacs. 
+
 2000-04-24  Andrew Skalski  <askalski@chek.com>
 
     * ext/imap/php_imap.c: * typecast fs_give parameter to void**
