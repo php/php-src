@@ -552,7 +552,7 @@ static pval _java_getset_property
     0, (void **) &pobject);
   obj = zend_list_find((*pobject)->value.lval,&type);
   result = (jlong)(long) &presult;
-  var_uninit(&presult);
+  presult.type = IS_NULL;
 
   if (!obj || (type!=le_jobject)) {
     php_error(E_ERROR,

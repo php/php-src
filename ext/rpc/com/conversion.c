@@ -552,7 +552,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 	else switch(var_arg->vt & ~VT_BYREF)
 	{		
 		case VT_EMPTY:
-			var_uninit(pval_arg);
+			pval_arg->type = IS_NULL;
 			break;
 
 		case VT_UI1:
