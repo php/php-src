@@ -70,8 +70,6 @@ PHP 4                                                                      NEWS
   (wendland at scan-plus dot de)
 - Fixed bug #28451 (corupt EXIF headers have unlimited recursive IFD directory
   entries). (Andrei)
-- Fixed bug #28227 (PHP CGI depends upon non-standard SCRIPT_FILENAME). 
-  (lukem at NetBSD dot org)
 - Fixed bug #28086 (crash inside overload() function). (Tony) 
 - Fixed bug #28074 (FastCGI: stderr should be written in a FCGI stderr stream).
   (chris at ex-parrot dot com)
