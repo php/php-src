@@ -235,7 +235,7 @@ ZEND_GET_MODULE(mime_magic)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-STD_PHP_INI_ENTRY("mime_magic.magicfile", "/usr/share/misc/magic.mime", PHP_INI_SYSTEM, OnUpdateString, magicfile, zend_mime_magic_globals, mime_magic_globals)
+STD_PHP_INI_ENTRY("mime_magic.magicfile", PHP_MIME_MAGIC_FILE_PATH, PHP_INI_SYSTEM, OnUpdateString, magicfile, zend_mime_magic_globals, mime_magic_globals)
 PHP_INI_END()
 /* }}} */
 
