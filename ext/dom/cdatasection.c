@@ -67,7 +67,7 @@ PHP_FUNCTION(dom_cdatasection_cdatasection)
 		if (oldnode != NULL) {
 			node_free_resource(oldnode  TSRMLS_CC);
 		}
-		php_dom_set_object(id, nodep TSRMLS_CC);
+		php_dom_set_object(intern, nodep TSRMLS_CC);
 	}
 }
 /* }}} end dom_cdatasection_cdatasection */

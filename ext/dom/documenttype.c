@@ -108,13 +108,9 @@ int dom_documenttype_entities_read(dom_object *obj, zval **retval TSRMLS_DC)
 				index++;
 				nodep = iter->node;
 				if (nodep != NULL) {
-					zval *child = NULL;
-					zval *wrapper;
-					wrapper = dom_object_get_data(nodep);
-					if (wrapper == NULL) {
-						MAKE_STD_ZVAL(child);
-					}
-					child = php_dom_create_object(nodep, &ret, wrapper, child TSRMLS_CC);
+					zval *child;
+					MAKE_STD_ZVAL(child);
+					child = php_dom_create_object(nodep, &ret, NULL, child, obj TSRMLS_CC);
 					add_assoc_zval(*retval, (char *) nodep->name, child);
 				}
 			}
@@ -158,13 +154,9 @@ int dom_documenttype_notations_read(dom_object *obj, zval **retval TSRMLS_DC)
 				index++;
 				nodep = iter->node;
 				if (nodep != NULL) {
-					zval *child = NULL;
-					zval *wrapper;
-					wrapper = dom_object_get_data(nodep);
-					if (wrapper == NULL) {
-						MAKE_STD_ZVAL(child);
-					}
-					child = php_dom_create_object(nodep, &ret, wrapper, child TSRMLS_CC);
+					zval *child;
+					MAKE_STD_ZVAL(child);
+					child = php_dom_create_object(nodep, &ret, NULL, child, obj TSRMLS_CC);
 					add_assoc_zval(*retval, (char *) nodep->name, child);
 				}
 			}

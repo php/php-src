@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Christian Stocker <chregu@php.net>                          |
-   |          Rob Richards <rrichards@php.net>							  |
+   |          Rob Richards <rrichards@php.net>                            |
    |          Marcus Borger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
@@ -75,81 +75,110 @@ static zend_function_entry dom_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+
+/* {{{ void increment_document_reference(dom_object *object) */
+int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC) {
+	int ret_refcount = -1;
+
+	if (object->document != NULL) {
+		object->document->refcount++;
+		ret_refcount = object->document->refcount;
+	} else if (docp != NULL) {
+		object->document = emalloc(sizeof(dom_ref_obj));
+		object->document->ptr = docp;
+		object->document->refcount = 1;
+		object->document->node_list = NULL;
+	}
+
+	return ret_refcount;
+}
+/* }}} end increment_document_reference */
+
+/* {{{ void decrement_document_reference(dom_object *object) */
+int decrement_document_reference(dom_object *object TSRMLS_DC) {
+	int ret_refcount = -1;
+
+	if (object != NULL && object->document != NULL) {
+		object->document->refcount--;
+		ret_refcount = object->document->refcount;
+		if (ret_refcount == 0) {
+			dom_clean_nodes(object TSRMLS_CC);
+			node_free_resource(object->document->ptr TSRMLS_CC);
+			efree(object->document);
+			object->document = NULL;
+		}
+	}
+
+	return ret_refcount;
+}
+/* }}} end decrement_document_reference */
+
 /* {{{ dom_object_set_data */
-static void dom_object_set_data(xmlNodePtr obj, zval *wrapper TSRMLS_DC)
+static void dom_object_set_data(xmlNodePtr obj, dom_object *wrapper TSRMLS_DC)
 {
 
 	obj->_private = wrapper;
 }
-/* }}} */
+/* }}} end dom_object_set_data */
 
 /* {{{ dom_object_get_data */
-zval *dom_object_get_data(xmlNodePtr obj)
+dom_object *dom_object_get_data(xmlNodePtr obj)
 {
-	return (zval *) obj->_private;
+	return (dom_object *) obj->_private;
 }
-/* }}} */
+/* }}} end dom_object_get_data */
 
 /* {{{ php_dom_clear_object */
-static void php_dom_clear_object(zval *wrapper TSRMLS_DC)
+static void php_dom_clear_object(dom_object *object TSRMLS_DC)
 {
-	dom_object *object;
-
-	object = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
 	object->ptr = NULL;
 	if (object->prop_handler) {
 		object->prop_handler = NULL;
 	}
+	decrement_document_reference(object TSRMLS_CC);
+	object->document = NULL;
 }
-/* }}} */
+/* }}} end dom_object_get_data */
 
 /* {{{ php_dom_set_object */
-void php_dom_set_object(zval *wrapper, void *obj TSRMLS_DC)
+void php_dom_set_object(dom_object *object, void *obj TSRMLS_DC)
 {
-	dom_object *object;
-
-	object = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
 	object->ptr = obj;
-	dom_object_set_data(obj, wrapper TSRMLS_CC);
+	dom_object_set_data(obj, object TSRMLS_CC);
 }
-/* }}} */
+/* }}} end php_dom_set_object */
 
 /* {{{ dom_unregister_node */
 void dom_unregister_node(xmlNodePtr nodep TSRMLS_DC)
 {
-	zval *wrapper;
+	dom_object *wrapper;
 
 	wrapper = dom_object_get_data(nodep);
 	if (wrapper != NULL ) {
 		if (nodep->parent == NULL && nodep->doc != NULL && (xmlNodePtr) nodep->doc != nodep) {
-			dom_del_from_list(nodep, (xmlDocPtr) nodep->doc TSRMLS_CC);
+			dom_del_from_list(nodep, wrapper TSRMLS_CC);
 		}
 		dom_object_set_data(nodep, NULL TSRMLS_CC);
 		php_dom_clear_object(wrapper TSRMLS_CC);
 	}
 }
-/* }}} */
+/* }}} end dom_unregister_node */
 
 /* {{{ dom_del_from_list */
-void dom_del_from_list(xmlNodePtr nodep, xmlDocPtr docp TSRMLS_DC)
+void dom_del_from_list(xmlNodePtr nodep, dom_object *object TSRMLS_DC)
 {
-	zval *wrapper;
-	dom_object *object;
 	xmlNodePtr cur;
 	node_list_pointer *cur_element, *prev;
 
-	if (docp != NULL && nodep != NULL) {
-		wrapper = dom_object_get_data((xmlNodePtr) docp);
-
-		if (wrapper != NULL) {
-			object = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
-			cur_element = object->node_list;
+	if (object != NULL && nodep != NULL) {
+		if (object->document != NULL) {
+			cur_element = object->document->node_list;
 			prev = NULL;
 			while (cur_element != NULL) {
 				cur = cur_element->nodep;
 				if (cur == nodep) {
 					if (prev == NULL) {
-						object->node_list = cur_element->next;
+						object->document->node_list = cur_element->next;
 					} else {
 						prev->next = cur_element->next;
 					}
@@ -166,25 +195,21 @@ void dom_del_from_list(xmlNodePtr nodep, xmlDocPtr docp TSRMLS_DC)
 /* }}} */
 
 /* {{{ dom_add_to_list */
-void dom_add_to_list(xmlNodePtr nodep, xmlDocPtr docp TSRMLS_DC)
+void dom_add_to_list(xmlNodePtr nodep, dom_object *object TSRMLS_DC)
 {
-	zval *wrapper;
-	dom_object *object;
 	node_list_pointer *cur_element;
 
-	if (docp != NULL && nodep != NULL) {
+	if (object != NULL && nodep != NULL) {
 		if (nodep->parent == NULL) {
-			wrapper = dom_object_get_data((xmlNodePtr) docp);
-			if (wrapper != NULL) {
-				object = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
-				dom_del_from_list(nodep, docp TSRMLS_CC);
+			if (object->document != NULL) {
+				dom_del_from_list(nodep, object TSRMLS_CC);
 				cur_element = emalloc(sizeof(node_list_pointer));
 				cur_element->nodep = nodep;
 				cur_element->next = NULL;
-				if (object->node_list != NULL) {
-					cur_element->next = object->node_list;
+				if (object->document->node_list != NULL) {
+					cur_element->next = object->document->node_list;
 				}
-				object->node_list = cur_element;
+				object->document->node_list = cur_element;
 			}
 		}
 	}
@@ -615,21 +640,15 @@ PHP_MSHUTDOWN_FUNCTION(dom)
 }
 
 /* {{{ dom_clean_nodes */
-void dom_clean_nodes(xmlNodePtr nodep TSRMLS_DC)
+void dom_clean_nodes(dom_object *object TSRMLS_DC)
 {
 	node_list_pointer *l;
-	zval *wrapper;
-	dom_object *object;
 
-	if (nodep != NULL) {
-		wrapper = dom_object_get_data(nodep);
-		if (wrapper != NULL) {
-			object = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
-			l = object->node_list;
-			while (l != NULL) {
-				node_free_resource(l->nodep TSRMLS_CC);
-				l = object->node_list;
-			}
+	if (object != NULL && object->document != NULL) {
+		l = object->document->node_list;
+		while (l != NULL) {
+			node_free_resource(l->nodep TSRMLS_CC);
+			l = object->document->node_list;
 		}
 	}
 }
@@ -638,14 +657,14 @@ void dom_clean_nodes(xmlNodePtr nodep TSRMLS_DC)
 /* {{{ node_list_unlink */
 void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 {
-	zval *wrapper;
+	dom_object *wrapper;
 
 	while (node != NULL) {
 
 		wrapper = dom_object_get_data(node);
 
 		if (wrapper != NULL ) {
-			dom_add_to_list(node, node->doc TSRMLS_CC);
+			dom_add_to_list(node, wrapper TSRMLS_CC);
 			xmlUnlinkNode(node);
 		} else {
 			node_list_unlink(node->children TSRMLS_CC);
@@ -712,9 +731,9 @@ void node_free_list(xmlNodePtr node TSRMLS_DC)
 					node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
 			}
 			
-			dom_unregister_node(node TSRMLS_CC);
 			curnode = node->next;
 			xmlUnlinkNode(node);
+			dom_unregister_node(node TSRMLS_CC);
 			dom_node_free(node);
 		}
 	}
@@ -736,7 +755,6 @@ void node_free_resource(xmlNodePtr node TSRMLS_DC)
 		case XML_HTML_DOCUMENT_NODE:
 		{
 			docp = (xmlDocPtr) node;
-			dom_clean_nodes(node TSRMLS_CC);
 			if (docp->ids != NULL) xmlFreeIDTable((xmlIDTablePtr) docp->ids);
 			docp->ids = NULL;
 			if (docp->refs != NULL) xmlFreeRefTable((xmlRefTablePtr) docp->refs);
@@ -803,14 +821,26 @@ void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
 void dom_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
 	dom_object *intern = (dom_object *)object;
+	int retcount;
 
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
 
+
+
 	if (intern->ptr) {
-		node_free_resource(intern->ptr TSRMLS_CC);
+		if (((xmlNodePtr) intern->ptr)->type != XML_DOCUMENT_NODE && ((xmlNodePtr) intern->ptr)->type != XML_HTML_DOCUMENT_NODE) {
+			node_free_resource(intern->ptr TSRMLS_CC);
+		} else {
+			retcount = decrement_document_reference(intern TSRMLS_CC);
+			if (retcount != 0) {
+				dom_object_set_data(intern->ptr, NULL TSRMLS_CC);
+			}
+			intern->document = NULL;
+		}
 		intern->ptr = NULL;
 	}
+
 	efree(object);
 }
 /* }}} */
@@ -828,7 +858,6 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->std.in_get = 0;
 	intern->std.in_set = 0;
 	intern->ptr = NULL;
-	intern->node_list = NULL;
 	intern->prop_handler = NULL;
 	intern->document = NULL;
 	
@@ -844,6 +873,7 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(intern, dom_objects_dtor, dom_objects_clone TSRMLS_CC);
+	intern->handle = retval.handle;
 	retval.handlers = &dom_object_handlers;
 
 	return retval;
@@ -851,41 +881,31 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 /* }}} */
 
 /* {{{ php_domobject_new */
-zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value  TSRMLS_DC)
+zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value, dom_object *domobj TSRMLS_DC)
 {
 	zval *wrapper;
 	zend_class_entry *ce;
+	dom_object *intern;
 
 	*found = 0;
 
 	if (!obj) {
-		if(!wrapper_in) {
-			ALLOC_ZVAL(wrapper);
-		} else {
-			wrapper = wrapper_in;
-		}
+		ALLOC_ZVAL(wrapper);
 		ZVAL_NULL(wrapper);
 		return wrapper;
 	}
 
-	if ((wrapper = (zval *) dom_object_get_data((void *) obj))) {
-		if (wrapper_in) {
-			zval_add_ref(&wrapper);
-			*found = 1;
-			return wrapper;
-		} else {
-			*return_value = *wrapper;
-			zval_copy_ctor(return_value);
-			*found = 1;
-			return return_value;
-		}
+	if ((intern = (dom_object *) dom_object_get_data((void *) obj))) {
+		return_value->type = IS_OBJECT;
+		return_value->is_ref = 1;
+		return_value->value.obj.handle = intern->handle;
+		return_value->value.obj.handlers = &dom_object_handlers;
+		zval_copy_ctor(return_value);
+		*found = 1;
+		return return_value;
 	}
 
-	if(!wrapper_in) {
-		wrapper = return_value;
-	} else {
-		wrapper = wrapper_in;
-	}
+	wrapper = return_value;
 
 	switch (obj->type) {
 		case XML_DOCUMENT_NODE:
@@ -957,11 +977,17 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 			return wrapper;
 	}
 
-	if(!wrapper_in) {
-		object_init_ex(wrapper, ce);
+
+	object_init_ex(wrapper, ce);
+	intern = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
+	if (obj->doc != NULL) {
+		if (domobj != NULL) {
+			intern->document = domobj->document;
+		}
+		increment_document_reference(intern, obj->doc TSRMLS_CC);
 	}
 
-	php_dom_set_object(wrapper, (void *) obj TSRMLS_CC);
+	php_dom_set_object(intern, (void *) obj TSRMLS_CC);
 	return (wrapper);
 }
 /* }}} end php_domobject_new */
@@ -994,9 +1020,9 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child)
 /* }}} end dom_hierarchy */
 
 /* {{{ void dom_element_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval  TSRMLS_DC) */
-void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval  TSRMLS_DC)
+void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval, dom_object *intern  TSRMLS_DC)
 {
-	zval *wrapper;
+	dom_object *wrapper;
 	int ret;
 
 	while (nodep != NULL) {
@@ -1008,11 +1034,11 @@ void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local
 					MAKE_STD_ZVAL(child);
 				}
 
-				child = php_dom_create_object(nodep, &ret, wrapper, child TSRMLS_CC);
+				child = php_dom_create_object(nodep, &ret, NULL, child, intern TSRMLS_CC);
 				add_next_index_zval(*retval, child);
 			}
 		}
-		dom_get_elements_by_tag_name_ns_raw(nodep->children, ns, local, retval TSRMLS_CC);
+		dom_get_elements_by_tag_name_ns_raw(nodep->children, ns, local, retval, intern TSRMLS_CC);
 		nodep = nodep->next;
 	}
 }

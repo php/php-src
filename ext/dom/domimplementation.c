@@ -105,7 +105,7 @@ PHP_FUNCTION(dom_domimplementation_create_document_type)
 	doctype = xmlCreateIntSubset(NULL, localname, pch1, pch2);
 	xmlFree(localname);
 
-	DOM_RET_OBJ(rv, (xmlNodePtr) doctype, &ret);
+	DOM_RET_OBJ(rv, (xmlNodePtr) doctype, &ret, NULL);
 }
 /* }}} end dom_domimplementation_create_document_type */
 
@@ -125,13 +125,14 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 	char *uri, *name;
 	xmlChar *prefix = NULL, *localname = NULL;
 	xmlURIPtr uristruct;
+	dom_object *doctobj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sso", &uri, &uri_len, &name, &name_len, &node) == FAILURE) {
 		return;
 	}
 
 	if (doctype != NULL) {
-		DOM_GET_OBJ(doctype, node, xmlDtdPtr);
+		DOM_GET_OBJ(doctype, node, xmlDtdPtr, doctobj);
 		if (doctype->type == XML_DOCUMENT_TYPE_NODE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid DocumentType object");
 			RETURN_FALSE;
@@ -228,7 +229,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 		xmlFree(localname);
 	}
 
-	DOM_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+	DOM_RET_OBJ(rv, (xmlNodePtr) docp, &ret, NULL);
 }
 /* }}} end dom_domimplementation_create_document */
 

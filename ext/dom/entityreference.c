@@ -71,7 +71,7 @@ PHP_FUNCTION(dom_entityreference_entityreference)
 		if (oldnode != NULL) {
 			node_free_resource(oldnode  TSRMLS_CC);
 		}
-		php_dom_set_object(id, node TSRMLS_CC);
+		php_dom_set_object(intern, node TSRMLS_CC);
 	}
 }
 

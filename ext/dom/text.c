@@ -69,7 +69,7 @@ PHP_FUNCTION(dom_text_text)
 		if (oldnode != NULL) {
 			node_free_resource(oldnode  TSRMLS_CC);
 		}
-		php_dom_set_object(id, nodep TSRMLS_CC);
+		php_dom_set_object(intern, nodep TSRMLS_CC);
 	}
 }
 /* }}} end dom_text_text */
@@ -110,8 +110,9 @@ PHP_FUNCTION(dom_text_split_text)
 	long        offset;
 	int         ret;
 	int         length;
+	dom_object	*intern;
 
-	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr);
+	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &offset) == FAILURE) {
 		return;
@@ -143,7 +144,7 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlAddNextSibling(node, nnode);
 	nnode->type = XML_TEXT_NODE;
 	
-	return_value = php_dom_create_object(nnode, &ret, NULL, return_value TSRMLS_CC);
+	return_value = php_dom_create_object(nnode, &ret, NULL, return_value, intern TSRMLS_CC);
 }
 /* }}} end dom_text_split_text */
 
