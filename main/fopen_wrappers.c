@@ -327,7 +327,8 @@ PHPAPI FILE *php_fopen_primary_script(void)
 #endif
 #ifdef PHP_WIN32
 	if (PG(doc_root) && path_info && (IS_SLASH(*PG(doc_root))
-		|| strstr(PG(doc_root),":\\") || strstr(PG(doc_root),":/"))) {
+		/* Check for absolute path. This should also use virtual cwd macros */
+		|| (PG(doc_root)[1] == ':' && IS_SLASH(PG(doc_root)[2]))) {
 #else
 	if (PG(doc_root) && path_info && IS_SLASH(*PG(doc_root))) {
 #endif
