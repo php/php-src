@@ -40,9 +40,10 @@
 #include "ext/standard/php_rand.h"                   /* for RAND_MAX */
 #include "ext/standard/info.h"
 
-#include "modules.c"
-
 #include "ext/standard/php_smart_str.h"
+
+#include "mod_files.h"
+#include "mod_user.h"
 
 function_entry session_functions[] = {
 	PHP_FE(session_name, NULL)
@@ -131,6 +132,13 @@ static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 	PS_SERIALIZER_ENTRY(php_binary)
 };
 
+#define MAX_MODULES 10
+
+static ps_module *ps_modules[MAX_MODULES + 1] = {
+	ps_files_ptr,
+	ps_user_ptr
+};
+
 int php_session_register_serializer(const char *name, 
 		int (*encode)(PS_SERIALIZER_ENCODE_ARGS),
 		int (*decode)(PS_SERIALIZER_DECODE_ARGS))
@@ -152,6 +160,21 @@ int php_session_register_serializer(const char *name,
 	return ret;
 }
 
+int php_session_register_module(ps_module *ptr)
+{
+	int ret = -1;
+	int i;
+
+	for (i = 0; i < MAX_MODULES; i++) {
+		if (!ps_modules[i]) {
+			ps_modules[i] = ptr;
+			ret = 0;
+			break;
+		}	
+	}
+	
+	return ret;
+}
 
 PHP_MINIT_FUNCTION(session);
 PHP_RINIT_FUNCTION(session);
@@ -713,9 +736,9 @@ static ps_module *_php_find_ps_module(char *name PSLS_DC)
 {
 	ps_module *ret = NULL;
 	ps_module **mod;
-	ps_module **end = ps_modules + (sizeof(ps_modules)/sizeof(ps_module*));
+	int i;
 
-	for (mod = ps_modules; mod < end; mod++)
+	for (i = 0, mod = ps_modules; i < MAX_MODULES; i++, mod++)
 		if (*mod && !strcasecmp(name, (*mod)->name)) {
 			ret = *mod;
 			break;
