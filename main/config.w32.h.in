@@ -42,13 +42,13 @@
 #define HAVE_FTP 1
 
 /* Enable / Disable MBSTRING extension (default: disabled) */
-#define HAVE_MBSTRING 0 
-#define HAVE_MBREGEX  0 
-#define HAVE_MBSTR_CN 0 
-#define HAVE_MBSTR_JA 0 
-#define HAVE_MBSTR_KR 0 
-#define HAVE_MBSTR_RU 0 
-#define HAVE_MBSTR_TW 0 
+/* #define HAVE_MBSTRING 0 */ 
+/* #define HAVE_MBREGEX  0 */ 
+/* #define HAVE_MBSTR_CN 0 */ 
+/* #define HAVE_MBSTR_JA 0 */ 
+/* #define HAVE_MBSTR_KR 0 */
+/* #define HAVE_MBSTR_RU 0 */
+/* #define HAVE_MBSTR_TW 0 */ 
 
 /* Enable / Disable MySQL extension (default: enabled) */
 #define HAVE_MYSQL 1
