@@ -1739,7 +1739,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		zend_error(E_COMPILE_ERROR, "Can't inherit abstract function %s::%s() (previously declared abstract in %s)", 
 			parent->common.scope->name,
 			child->common.function_name,
-			child->common.scope->name);
+			child->common.prototype ? child->common.prototype->common.scope->name : child->common.scope->name);
 	}
 
 	if (parent_flags & ZEND_ACC_FINAL) {
@@ -1935,9 +1935,19 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRML
 }
 
 
+static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zval *parent_constant, zend_hash_key *hash_key, zend_class_entry *iface)
+{
+	if (zend_hash_quick_exists(child_constants_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
+		zend_error(E_COMPILE_ERROR, "Cannot inherit previously-inherited constant %s from interface %s", hash_key->arKey, iface->name);
+		return 0; 
+	}
+	return 1;
+}
+
+
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
 {
-	zend_hash_merge(&ce->constants_table, &iface->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
+	zend_hash_merge_ex(&ce->constants_table, &iface->constants_table, (copy_ctor_func_t) zval_add_ref, sizeof(zval *), do_inherit_constant_check, iface);
 	zend_hash_merge_ex(&ce->function_table, &iface->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
 
 	do_implement_interface(ce, iface TSRMLS_CC);
