@@ -377,6 +377,7 @@ int main(int argc, char *argv[])
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
+	int module_started = 0;
 	char *exec_direct=NULL;
 	char *param_error=NULL;
 /* end of temporary locals */
@@ -430,8 +431,9 @@ int main(int argc, char *argv[])
 
 	/* startup after we get the above ini override se we get things right */
 	if (php_module_startup(&cli_sapi_module, NULL, 0)==FAILURE) {
-		return FAILURE;
+		goto err;
 	}
+	module_started = 1;
 
 #ifdef ZTS
 	compiler_globals = ts_resource(compiler_globals_id);
@@ -518,8 +520,7 @@ int main(int argc, char *argv[])
 
 			case 'i': /* php info & quit */
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
-					php_module_shutdown(TSRMLS_C);
-					return FAILURE;
+					goto err;
 				}
 				if (no_headers) {
 					SG(headers_sent) = 1;
@@ -584,8 +585,7 @@ int main(int argc, char *argv[])
 			case 'v': /* show php version & quit */
 				no_headers = 1;
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
-					php_module_shutdown(TSRMLS_C);
-					return FAILURE;
+					goto err;
 				}
 				if (no_headers) {
 					SG(headers_sent) = 1;
@@ -633,7 +633,7 @@ int main(int argc, char *argv[])
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
 				PUTS("Could not open input file.\n");
-				return FAILURE;
+				goto err;
 			}
 			file_handle.filename = script_file;
 			script_filename = script_file;
@@ -671,9 +671,8 @@ int main(int argc, char *argv[])
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
 			php_request_shutdown((void *) 0);
-			php_module_shutdown(TSRMLS_C);
 			PUTS("Could not startup.\n");
-			return FAILURE;
+			goto err;
 		}
 		*arg_excp = arg_free; /* reconstuct argv */
 		if (no_headers) {
@@ -707,7 +706,7 @@ int main(int argc, char *argv[])
 				zend_strip(TSRMLS_C);
 				fclose(file_handle.handle.fp);
 			}
-			return SUCCESS;
+			goto out;
 			break;
 		case PHP_MODE_HIGHLIGHT:
 			{
@@ -718,7 +717,7 @@ int main(int argc, char *argv[])
 					zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
 					fclose(file_handle.handle.fp);
 				}
-				return SUCCESS;
+				goto out;
 			}
 			break;
 #if 0
@@ -727,7 +726,7 @@ int main(int argc, char *argv[])
 			open_file_for_scanning(&file_handle TSRMLS_CC);
 			zend_indent();
 			fclose(file_handle.handle.fp);
-			return SUCCESS;
+			goto out;
 			break;
 #endif
 		case PHP_MODE_CLI_DIRECT:
@@ -748,13 +747,19 @@ int main(int argc, char *argv[])
 		exit_status = EG(exit_status);
 	} zend_end_try();
 
-	php_module_shutdown(TSRMLS_C);
-
+out:
+	if (module_started)
+		php_module_shutdown(TSRMLS_C);
+	sapi_shutdown();
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
 
-	return exit_status;
+	exit(exit_status);
+
+err:
+	exit_status = 1;
+	goto out;
 }
 /* }}} */
 
