@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Added ftp_exec to the ftp functions (thanks to <jhennebicq@i-d.net>)
+- (Derick)
+- PEAR: add last executed query as debug info in DB errors (Stig)
+- PEAR: allow multiple modes in PEAR_Error (Stig)
 - Made the Sybase CT module thread safe (Zeev)
 - Added second argument to array_reverse() that indicatese whether
   the original array keys should be preserved. (Andrei)
