@@ -200,9 +200,8 @@ zend_class_entry *xpathobject_class_entry;
 #endif
 #if HAVE_DOMXSLT
 zend_class_entry *domxsltstylesheet_class_entry;
-#endif
-
 static int xslt_has_xsl_keys (xmlDocPtr doc);
+#endif
 
 static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC);
 static int node_children(zval **children, xmlNode *nodep TSRMLS_DC);
@@ -4683,21 +4682,6 @@ static int node_namespace(zval **attributes, xmlNode *nodep TSRMLS_DC)
 /* }}} */
 #endif
 
-static int xslt_has_xsl_keys (xmlDocPtr doc) {
-	
-	xmlNode *nodep;
-	nodep = xmlDocGetRootElement(doc)->children;
-	while (nodep) {
-		if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, "key") && xmlStrEqual(nodep->ns->href, XSLT_NAMESPACE)) {
-				return 1;
-				break;
-			}
-		nodep = nodep->next;
-	}
-	return 0;
-}
-
-
 /* {{{ int node_attributes(zval **attributes, int node)
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
@@ -5340,6 +5324,21 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params TSRMLS_DC)
 	return params;
 }
 /* }}} */
+
+static int xslt_has_xsl_keys (xmlDocPtr doc) {
+	
+	xmlNode *nodep;
+	nodep = xmlDocGetRootElement(doc)->children;
+	while (nodep) {
+		if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, "key") && xmlStrEqual(nodep->ns->href, XSLT_NAMESPACE)) {
+				return 1;
+				break;
+			}
+		nodep = nodep->next;
+	}
+	return 0;
+}
+
 
 /* {{{ proto object domxml_xslt_process(object xslstylesheet, object xmldoc [, array xslt_parameters [, bool xpath_parameters [, string profileFilename]]])
    Perform an XSLT transformation */
