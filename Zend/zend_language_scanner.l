@@ -354,7 +354,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type CLS
 		CG(active_op_array) = op_array;
 		compiler_result = zendparse(CLS_C);
 		zend_do_return(&retval_znode, 0 CLS_CC);
-		restore_lexical_state(&original_lex_state CLS_CC);
 		CG(in_compilation) = original_in_compilation;
 		if (compiler_result==1) { /* parser error */
 			CG(unclean_shutdown) = 1;
@@ -371,6 +370,9 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type CLS
 			efree(op_array);
 			retval = NULL;
 		}
+	}
+	if (compilation_successful) {
+		restore_lexical_state(&original_lex_state CLS_CC);
 	}
 	return retval;
 }
