@@ -69,14 +69,14 @@ echo "\n";
 
 /* The following builds a xml document from scratch */
 echo "Test 3: building a xml document from scratch\n";
-$doc = newxmldoc("1.0");
-$root = $doc->addroot("HTML");
-$head = $root->newchild("HEAD", "");
-$head->newchild("TITLE", "Hier der Titel");
-$body = $root->newchild("BODY", "");
-$table = $body->newchild("TABLE", "");
+$doc = new_xmldoc("1.0");
+$root = $doc->add_root("HTML");
+$head = $root->new_child("HEAD", "");
+$head->new_child("TITLE", "Hier der Titel");
+$body = $root->new_child("BODY", "");
+$table = $body->new_child("TABLE", "");
 $table->setattr("WIDTH", "100%");
-$table->newchild("TR", " ");
+$table->new_child("TR", " ");
 echo $doc->dumpmem();
 
 ?>

@@ -38,23 +38,23 @@ static zend_function_entry php_domxml_functions[] = {
 	PHP_FE(xmldocfile,	NULL)
 	PHP_FE(xmltree,	NULL)
 	PHP_FE(domxml_root,	NULL)
-	PHP_FE(domxml_addroot,	NULL)
+	PHP_FE(domxml_add_root,	NULL)
 	PHP_FE(domxml_dumpmem,	NULL)
 	PHP_FE(domxml_attributes,	NULL)
 	PHP_FE(domxml_getattr,	NULL)
 	PHP_FE(domxml_setattr,	NULL)
 	PHP_FE(domxml_children,	NULL)
-	PHP_FE(domxml_newchild,	NULL)
+	PHP_FE(domxml_new_child,	NULL)
 	PHP_FE(domxml_node,	NULL)
-	PHP_FE(domxml_newxmldoc,	NULL)
-	PHP_FALIAS(newxmldoc, domxml_newxmldoc,	NULL)
+	PHP_FE(domxml_new_xmldoc,	NULL)
+	PHP_FALIAS(new_xmldoc, domxml_new_xmldoc,	NULL)
 	{NULL, NULL, NULL}
 };
 
 
 static zend_function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(root,	domxml_root,	NULL)
-	PHP_FALIAS(addroot,	domxml_addroot,	NULL)
+	PHP_FALIAS(add_root,	domxml_add_root,	NULL)
 	PHP_FALIAS(dtd,	domxml_intdtd,	NULL)
 	PHP_FALIAS(dumpmem,	domxml_dumpmem,	NULL)
 	{NULL, NULL, NULL}
@@ -72,7 +72,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(lastchild,	domxml_lastchild,	NULL)
 	PHP_FALIAS(children,	domxml_children,	NULL)
 	PHP_FALIAS(parent,	domxml_parent,		NULL)
-	PHP_FALIAS(newchild,	domxml_newchild,		NULL)
+	PHP_FALIAS(new_child,	domxml_new_child,		NULL)
 	PHP_FALIAS(getattr,	domxml_getattr,		NULL)
 	PHP_FALIAS(setattr,	domxml_setattr,		NULL)
 	PHP_FALIAS(attributes,	domxml_attributes,	NULL)
@@ -738,9 +738,9 @@ PHP_FUNCTION(xmldocfile)
 }
 /* }}} */
 
-/* {{{ proto string domxml_newchild([int node_handle], string name, string content)
+/* {{{ proto string domxml_new_child([int node_handle], string name, string content)
    Adds child node to parent node */
-PHP_FUNCTION(domxml_newchild)
+PHP_FUNCTION(domxml_new_child)
 {
 	zval *id, *name, *content, **tmp;
 	int id_to_find;
@@ -796,9 +796,9 @@ PHP_FUNCTION(domxml_newchild)
 }
 /* }}} */
 
-/* {{{ proto string domxml_addroot([int doc_handle], string name)
+/* {{{ proto string domxml_add_root([int doc_handle], string name)
    Adds root node to document */
-PHP_FUNCTION(domxml_addroot)
+PHP_FUNCTION(domxml_add_root)
 {
 	zval *id, *name, **tmp;
 	int id_to_find;
@@ -852,9 +852,9 @@ PHP_FUNCTION(domxml_addroot)
 }
 /* }}} */
 
-/* {{{ proto class domxml_newxmldoc(string version)
+/* {{{ proto class domxml_new_xmldoc(string version)
    Creates new xmldoc */
-PHP_FUNCTION(domxml_newxmldoc)
+PHP_FUNCTION(domxml_new_xmldoc)
 {
 	zval *arg;
 	xmlDoc *docp;
