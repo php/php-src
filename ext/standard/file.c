@@ -179,7 +179,7 @@ PHP_MINIT_FUNCTION(file)
 #endif
 
 	REGISTER_INI_ENTRIES();
-	
+
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
@@ -196,11 +196,11 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_REDIRECTED",		PHP_STREAM_NOTIFY_REDIRECTED,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_PROGRESS",		PHP_STREAM_NOTIFY_PROGRESS,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_FAILURE",			PHP_STREAM_NOTIFY_FAILURE,			CONST_CS | CONST_PERSISTENT);
-	
+
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,  CONST_CS | CONST_PERSISTENT);
-	
+
 #ifdef HAVE_FNMATCH
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FNM_PATHNAME", FNM_PATHNAME, CONST_CS | CONST_PERSISTENT);
@@ -267,7 +267,7 @@ PHP_FUNCTION(flock)
 			Z_LVAL_PP(arg3) = 1;
 		} else {
 			RETURN_FALSE;
-		}	
+		}
 	}
 	RETURN_TRUE;
 }
@@ -396,7 +396,7 @@ PHP_FUNCTION(get_meta_tags)
 				/* For BC */
 				php_strtolower(name, strlen(name));
 				if (have_content) {
-					add_assoc_string(return_value, name, value, 0); 
+					add_assoc_string(return_value, name, value, 0);
 				} else {
 					add_assoc_string(return_value, name, empty_string, 0);
 				}
@@ -407,7 +407,7 @@ PHP_FUNCTION(get_meta_tags)
 			}
 
 			name = value = NULL;
-				
+
 			/* Reset all of our flags */
 			in_tag = looking_for_val = 0;
 			have_name = saw_name = 0;
@@ -445,7 +445,7 @@ PHP_FUNCTION(file_get_contents)
 		return;
 	}
 
-	stream = php_stream_open_wrapper(filename, "rb", 
+	stream = php_stream_open_wrapper(filename, "rb",
 			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	if (!stream) {
@@ -472,7 +472,7 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	php_stream_close(stream);
-	
+
 }
 /* }}} */
 
@@ -498,7 +498,7 @@ PHP_FUNCTION(file)
 		return;
 	}
 
-	stream = php_stream_open_wrapper(filename, "rb", 
+	stream = php_stream_open_wrapper(filename, "rb",
 			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	if (!stream) {
@@ -511,16 +511,16 @@ PHP_FUNCTION(file)
  	if ((target_len = php_stream_copy_to_mem(stream, &target_buf, PHP_STREAM_COPY_ALL, 0))) {
  		s = target_buf;
  		e = target_buf + target_len;
- 	
+
  		if (!(p = php_stream_locate_eol(stream, target_buf, target_len TSRMLS_CC))) {
  			p = e;
  			goto parse_eol;
   		}
-  		
+
  		if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
   			eol_marker = '\r';
- 		}	
- 	
+ 		}
+
  		do {
  			p++;
 parse_eol:
@@ -533,7 +533,7 @@ parse_eol:
   			}
  			s = p;
  		} while ((p = memchr(p, eol_marker, (e-p))));
- 		
+
  		/* handle any left overs of files without new lines */
  		if (s != e) {
  			p = e;
@@ -543,7 +543,7 @@ parse_eol:
 
  	if (target_buf) {
  		efree(target_buf);
- 	}	
+ 	}
 	php_stream_close(stream);
 }
 /* }}} */
@@ -567,7 +567,7 @@ PHP_FUNCTION(tempnam)
 	if (php_check_open_basedir(Z_STRVAL_PP(arg1) TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	
+
 	d = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
 	strlcpy(p, Z_STRVAL_PP(arg2), sizeof(p));
 
@@ -586,7 +586,7 @@ PHP_FUNCTION(tempnam)
 PHP_NAMED_FUNCTION(php_if_tmpfile)
 {
 	php_stream *stream;
-	
+
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
@@ -616,7 +616,7 @@ PHP_FUNCTION(stream_get_meta_data)
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	array_init(return_value);
-	
+
 	if (stream->wrapperdata) {
 		MAKE_STD_ZVAL(newval);
 		*newval = *(stream->wrapperdata);
@@ -632,19 +632,19 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	if (stream->filterhead) {
 		php_stream_filter *filter;
-		
+
 		MAKE_STD_ZVAL(newval);
 		array_init(newval);
-		
+
 		for (filter = stream->filterhead; filter != NULL; filter = filter->next) {
 			add_next_index_string(newval, (char *)filter->fops->label, 1);
 		}
 
 		add_assoc_zval(return_value, "filters", newval);
 	}
-	
+
 	add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
-	
+
 	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
 		php_netstream_data_t *sock = PHP_NETSTREAM_DATA_FROM_STREAM(stream);
 
@@ -705,7 +705,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 
 	ALLOC_HASHTABLE(new_hash);
 	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
-	
+
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream_array));
 		 zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == SUCCESS;
 		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
@@ -714,7 +714,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		if (stream == NULL)
 			continue;
 
-		/* get the fd 
+		/* get the fd
 		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
@@ -736,7 +736,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 
 	zend_hash_internal_pointer_reset(new_hash);
 	Z_ARRVAL_P(stream_array) = new_hash;
-	
+
 	return ret;
 }
 
@@ -752,7 +752,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 
 	ALLOC_HASHTABLE(new_hash);
 	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
-	
+
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream_array));
 		 zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == SUCCESS;
 		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
@@ -787,7 +787,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 		zend_hash_destroy(new_hash);
 		FREE_HASHTABLE(new_hash);
 	}
-	
+
 	return ret;
 }
 /* }}} */
@@ -844,7 +844,7 @@ PHP_FUNCTION(stream_select)
 			RETURN_LONG(retval);
 		}
 	}
-	
+
 	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
@@ -871,13 +871,13 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	zval *ps[6];
 	zval **ptps[6];
 	int i;
-	
+
 	for (i = 0; i < 6; i++) {
 		INIT_ZVAL(zvs[i]);
 		ps[i] = &zvs[i];
 		ptps[i] = &ps[i];
 	}
-		
+
 	ZVAL_LONG(ps[0], notifycode);
 	ZVAL_LONG(ps[1], severity);
 	if (xmsg) {
@@ -912,7 +912,7 @@ static int parse_context_options(php_stream_context *context, zval *options)
 	int wkey_len, okey_len;
 	int ret = SUCCESS;
 	ulong num_key;
-	
+
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(options), &pos);
 	while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_P(options), (void**)&wval, &pos)) {
 		if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_P(options), &wkey, &wkey_len, &num_key, 0, &pos)
@@ -942,7 +942,7 @@ static int parse_context_params(php_stream_context *context, zval *params)
 	zval **tmp;
 
 	if ((ret = zend_hash_find(Z_ARRVAL_P(params), "notification", sizeof("notification"), (void**)&tmp)) == SUCCESS) {
-		
+
 		if (context->notifier) {
 			php_stream_notification_free(context->notifier);
 			context->notifier = NULL;
@@ -1069,12 +1069,12 @@ PHP_FUNCTION(stream_context_create)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &params) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	context = php_stream_context_alloc();
-	
+
 	if (params)
 		parse_context_options(context, params);
-	
+
 	ZEND_REGISTER_RESOURCE(return_value, context, le_stream_context);
 }
 /* }}} */
@@ -1094,7 +1094,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &zstream);
-	
+
 	filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
 	if (filter == NULL)
 		RETURN_FALSE;
@@ -1142,7 +1142,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	if (zcontext) {
 		ZEND_FETCH_RESOURCE(context, php_stream_context*, &zcontext, -1, "stream-context", le_stream_context);
 	}
-	
+
 	stream = php_stream_open_wrapper_ex(filename, mode,
 				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL, context);
@@ -1191,7 +1191,7 @@ PHP_FUNCTION(popen)
 	char *p, *tmp = NULL;
 	char *b, buf[1024];
 	php_stream *stream;
-	
+
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1253,7 +1253,7 @@ PHP_FUNCTION(pclose)
 {
 	zval **arg1;
 	php_stream *stream;
-	
+
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1390,7 +1390,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		if (php_stream_get_line(stream, buf, len, &line_len) == NULL)
 			goto exit_failed;
 	}
-	
+
 	if (PG(magic_quotes_runtime)) {
 		Z_STRVAL_P(return_value) = php_addslashes(buf, line_len, &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
 		Z_TYPE_P(return_value) = IS_STRING;
@@ -1650,9 +1650,9 @@ PHP_FUNCTION(stream_set_write_buffer)
 		/* NOTREACHED */
 		break;
 	}
-	
+
 	PHP_STREAM_TO_ZVAL(stream, arg1);
-	
+
 	convert_to_long_ex(arg2);
 	buff = Z_LVAL_PP(arg2);
 
@@ -1802,7 +1802,7 @@ PHP_FUNCTION(readfile)
 	int size=0;
 	int use_include_path=0;
 	php_stream *stream;
-	
+
 	/* check args */
 	switch (ZEND_NUM_ARGS()) {
 	case 1:
@@ -1918,7 +1918,7 @@ PHP_FUNCTION(rename)
 				RETURN_TRUE;
 			}
 		}
-#endif	
+#endif
 		php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
@@ -1996,7 +1996,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
 	php_stream *stream;
 	php_stream_statbuf stat_ssb;
-	
+
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 				  "size", "atime", "mtime", "ctime", "blksize", "blocks"};
 
@@ -2019,16 +2019,16 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	MAKE_LONG_ZVAL_INCREF(stat_uid, stat_ssb.sb.st_uid);
 	MAKE_LONG_ZVAL_INCREF(stat_gid, stat_ssb.sb.st_gid);
 #ifdef HAVE_ST_RDEV
-	MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev); 
+	MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev);
 #else
-	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
+	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
 #endif
 	MAKE_LONG_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
 	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime);
 	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime);
 	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime);
 #ifdef HAVE_ST_BLKSIZE
-	MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_ssb.sb.st_blksize); 
+	MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_ssb.sb.st_blksize);
 #else
 	MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
 #endif
@@ -2105,14 +2105,14 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
 
-	srcstream = php_stream_open_wrapper(src, "rb", 
+	srcstream = php_stream_open_wrapper(src, "rb",
 				STREAM_DISABLE_OPEN_BASEDIR | REPORT_ERRORS,
 				NULL);
-	
-	if (!srcstream) 
+
+	if (!srcstream)
 		return ret;
 
-	deststream = php_stream_open_wrapper(dest, "wb", 
+	deststream = php_stream_open_wrapper(dest, "wb",
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL);
 
@@ -2156,7 +2156,7 @@ PHPAPI PHP_FUNCTION(fread)
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
 
 	if (PG(magic_quotes_runtime)) {
-		Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value), 
+		Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value),
 				Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
 	}
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -2245,7 +2245,7 @@ PHP_FUNCTION(fgetcsv)
 	/* first section exactly as php_fgetss */
 
 	zval **fd, **bytes, **p_delim, **p_enclosure;
-	int len, buf_len;
+	size_t len, buf_len;
 	char *buf, *p, *s, *e, *re, *buf2=NULL;
 	php_stream *stream;
 
@@ -2580,13 +2580,13 @@ PHP_FUNCTION(fnmatch)
 	int filename_len;
 	long flags=0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", 
-							  &pattern, &pattern_len, 
-							  &filename, &filename_len, 
-							  &flags) 
-		== FAILURE) 
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l",
+							  &pattern, &pattern_len,
+							  &filename, &filename_len,
+							  &flags)
+		== FAILURE)
 		return;
-	
+
 	RETURN_BOOL( ! fnmatch( pattern, filename, flags ));
 }
 /* }}} */
