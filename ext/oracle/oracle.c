@@ -317,7 +317,6 @@ static void php_ora_init_globals(php_ora_globals *ora_globals_p TSRMLS_DC)
  */
 PHP_MINIT_FUNCTION(oracle)
 {
-
 #ifdef ZTS
 	ts_allocate_id(&ora_globals_id, sizeof(php_ora_globals), (ts_allocate_ctor) php_ora_init_globals, NULL);
 #else

@@ -71,17 +71,14 @@ ZEND_GET_MODULE(qtdom)
  */
 PHP_MINIT_FUNCTION(qtdom)
 {
-/* Remove comments if you have entries in php.ini
-	REGISTER_INI_ENTRIES();
-*/
 	zend_class_entry qdomdoc_class_entry;
 	zend_class_entry qdomnode_class_entry;
 
 	INIT_CLASS_ENTRY(qdomdoc_class_entry, "QDomDocument", qdomdoc_class_functions);
 	INIT_CLASS_ENTRY(qdomnode_class_entry, "QDomNode", qdomnode_class_functions);
 
-	qdomdoc_class_entry_ptr = zend_register_internal_class(&qdomdoc_class_entry);
-	qdomnode_class_entry_ptr = zend_register_internal_class(&qdomnode_class_entry);
+	qdomdoc_class_entry_ptr = zend_register_internal_class(&qdomdoc_class_entry TSRMLS_CC);
+	qdomnode_class_entry_ptr = zend_register_internal_class(&qdomnode_class_entry TSRMLS_CC);
 
     qdom_init();
 

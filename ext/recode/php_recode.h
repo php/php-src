@@ -54,12 +54,12 @@
 extern zend_module_entry recode_module_entry;
 #define phpext_recode_ptr &recode_module_entry
 
-extern PHP_MINIT_FUNCTION(recode);
-extern PHP_MSHUTDOWN_FUNCTION(recode);
-extern PHP_MINFO_FUNCTION(recode);
+PHP_MINIT_FUNCTION(recode);
+PHP_MSHUTDOWN_FUNCTION(recode);
+PHP_MINFO_FUNCTION(recode);
 
-extern PHP_FUNCTION(recode_string);
-extern PHP_FUNCTION(recode_file);
+PHP_FUNCTION(recode_string);
+PHP_FUNCTION(recode_file);
 
 typedef struct {
 	RECODE_OUTER   outer;

@@ -426,14 +426,16 @@ static void php_variant_destructor(zend_rsrc_list_entry *rsrc)
 	efree(rsrc);
 }
 
-void php_register_VARIANT_class()
+void php_register_VARIANT_class(void)
 {
+	TSRMLS_FETCH();
+
 	INIT_OVERLOADED_CLASS_ENTRY(VARIANT_class_entry, "VARIANT", NULL,
 								php_VARIANT_call_function_handler,
 								php_VARIANT_get_property_handler,
 								php_VARIANT_set_property_handler);
 
-	zend_register_internal_class(&VARIANT_class_entry);
+	zend_register_internal_class(&VARIANT_class_entry TSRMLS_CC);
 }
 
 #endif /* PHP_WIN32 */

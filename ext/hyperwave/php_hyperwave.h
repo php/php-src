@@ -65,8 +65,8 @@ typedef struct {
         char *bodytag;
 } hw_document;
 
-extern PHP_MINIT_FUNCTION(hw);
-extern PHP_MSHUTDOWN_FUNCTION(hw);
+PHP_MINIT_FUNCTION(hw);
+PHP_MSHUTDOWN_FUNCTION(hw);
 PHP_MINFO_FUNCTION(hw);
 
 PHP_FUNCTION(hw_connect);

@@ -75,10 +75,6 @@ PHP_INI_END()
  */
 PHP_MINIT_FUNCTION(ncurses)
 {
-/* Remove comments if you have entries in php.ini
-	REGISTER_INI_ENTRIES();
-*/
-
 	PHP_NCURSES_CONST(COLOR_BLACK);
 	PHP_NCURSES_CONST(COLOR_RED);
 	PHP_NCURSES_CONST(COLOR_GREEN);

@@ -76,6 +76,7 @@ ZEND_GET_MODULE(shmop)
 static void rsclean(zend_rsrc_list_entry *rsrc)
 {
 	struct php_shmop *shmop = (struct php_shmop *)rsrc->ptr;
+
 	shmdt(shmop->addr);
 	efree(shmop);
 }

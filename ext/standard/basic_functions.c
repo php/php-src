@@ -1879,7 +1879,7 @@ void php_call_shutdown_functions(void)
 	TSRMLS_FETCH();
 
 	if (BG(user_shutdown_function_names)) zend_try {
-		zend_hash_apply(BG(user_shutdown_function_names), (apply_func_t)user_shutdown_function_call);
+		zend_hash_apply(BG(user_shutdown_function_names), (apply_func_t) user_shutdown_function_call);
 		memcpy(&EG(bailout), &orig_bailout, sizeof(jmp_buf));
 		zend_hash_destroy(BG(user_shutdown_function_names));
 		efree(BG(user_shutdown_function_names));
@@ -1965,7 +1965,7 @@ PHP_FUNCTION(highlight_string)
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
-	hicompiled_string_description = zend_make_compiled_string_description("highlighted code");
+	hicompiled_string_description = zend_make_compiled_string_description("highlighted code" TSRMLS_CC);
 
 	if (highlight_string(*expr, &syntax_highlighter_ini, hicompiled_string_description)==FAILURE) {
 		efree(hicompiled_string_description);
@@ -2086,16 +2086,17 @@ void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_refere
 }
 
 
-void test_class_startup()
+void test_class_startup(void)
 {
 	zend_class_entry test_class_entry;
+	TSRMLS_FETCH();
 
 	INIT_OVERLOADED_CLASS_ENTRY(test_class_entry, "OverloadedTestClass", NULL,
 								test_class_call_function,
 								test_class_get_property,
 								test_class_set_property);
 
-	zend_register_internal_class(&test_class_entry);
+	zend_register_internal_class(&test_class_entry TSRMLS_CC);
 }
 
 /* {{{ proto string ini_get(string varname)

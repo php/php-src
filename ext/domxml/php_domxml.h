@@ -34,9 +34,9 @@ extern zend_module_entry domxml_module_entry;
 #define domxml_module_ptr &domxml_module_entry
 
 /* directory functions */
-extern PHP_MINIT_FUNCTION(domxml);
-extern PHP_RINIT_FUNCTION(domxml);
-extern PHP_MINFO_FUNCTION(domxml);
+PHP_MINIT_FUNCTION(domxml);
+PHP_RINIT_FUNCTION(domxml);
+PHP_MINFO_FUNCTION(domxml);
 PHP_FUNCTION(domxml_version);
 PHP_FUNCTION(xmldoc);
 PHP_FUNCTION(xmldocfile);

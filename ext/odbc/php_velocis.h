@@ -57,10 +57,10 @@ extern zend_module_entry velocis_module_entry;
 #define velocis_module_ptr &velocis_module_entry
 
 /* velocis.c functions */
-extern PHP_MINIT_FUNCTION(velocis);
-extern PHP_RINIT_FUNCTION(velocis);
+PHP_MINIT_FUNCTION(velocis);
+PHP_RINIT_FUNCTION(velocis);
 PHP_MINFO_FUNCTION(velocis);
-extern PHP_MSHUTDOWN_FUNCTION(velocis);
+PHP_MSHUTDOWN_FUNCTION(velocis);
 
 PHP_FUNCTION(velocis_connect);
 PHP_FUNCTION(velocis_close);

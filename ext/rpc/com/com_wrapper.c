@@ -1686,14 +1686,16 @@ PHP_FUNCTION(com_isenum)
 }
 /* }}} */
 
-void php_register_COM_class()
+void php_register_COM_class(void)
 {
+	TSRMLS_FETCH();
+
 	INIT_OVERLOADED_CLASS_ENTRY(com_class_entry, "COM", NULL,
 								php_COM_call_function_handler,
 								php_COM_get_property_handler,
 								php_COM_set_property_handler);
 
-	zend_register_internal_class(&com_class_entry);
+	zend_register_internal_class(&com_class_entry TSRMLS_CC);
 }
 
 PHP_MINIT_FUNCTION(COM)

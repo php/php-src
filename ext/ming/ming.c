@@ -3015,19 +3015,19 @@ PHP_MINIT_FUNCTION(ming)
   INIT_CLASS_ENTRY(morph_class_entry, "swfmorph", swfmorph_functions);
   INIT_CLASS_ENTRY(sprite_class_entry, "swfsprite", swfsprite_functions);
 
-  zend_register_internal_class(&shape_class_entry);
-  zend_register_internal_class(&fill_class_entry);
-  zend_register_internal_class(&gradient_class_entry);
-  zend_register_internal_class(&bitmap_class_entry);
-  zend_register_internal_class(&text_class_entry);
-  zend_register_internal_class(&textfield_class_entry);
-  zend_register_internal_class(&font_class_entry);
-  zend_register_internal_class(&displayitem_class_entry);
-  zend_register_internal_class(&movie_class_entry);
-  zend_register_internal_class(&button_class_entry);
-  zend_register_internal_class(&action_class_entry);
-  zend_register_internal_class(&morph_class_entry);
-  zend_register_internal_class(&sprite_class_entry);
+  zend_register_internal_class(&shape_class_entry TSRMLS_CC);
+  zend_register_internal_class(&fill_class_entry TSRMLS_CC);
+  zend_register_internal_class(&gradient_class_entry TSRMLS_CC);
+  zend_register_internal_class(&bitmap_class_entry TSRMLS_CC);
+  zend_register_internal_class(&text_class_entry TSRMLS_CC);
+  zend_register_internal_class(&textfield_class_entry TSRMLS_CC);
+  zend_register_internal_class(&font_class_entry TSRMLS_CC);
+  zend_register_internal_class(&displayitem_class_entry TSRMLS_CC);
+  zend_register_internal_class(&movie_class_entry TSRMLS_CC);
+  zend_register_internal_class(&button_class_entry TSRMLS_CC);
+  zend_register_internal_class(&action_class_entry TSRMLS_CC);
+  zend_register_internal_class(&morph_class_entry TSRMLS_CC);
+  zend_register_internal_class(&sprite_class_entry TSRMLS_CC);
 
   return SUCCESS;
 }

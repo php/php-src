@@ -34,10 +34,10 @@
 extern zend_module_entry cpdf_module_entry;
 #define cpdf_module_ptr &cpdf_module_entry
 
-extern PHP_MINFO_FUNCTION(cpdf);
-extern PHP_MINIT_FUNCTION(cpdf);
-extern PHP_RINIT_FUNCTION(cpdf);
-extern PHP_MSHUTDOWN_FUNCTION(cpdf);
+PHP_MINFO_FUNCTION(cpdf);
+PHP_MINIT_FUNCTION(cpdf);
+PHP_RINIT_FUNCTION(cpdf);
+PHP_MSHUTDOWN_FUNCTION(cpdf);
 PHP_FUNCTION(cpdf_global_set_document_limits);
 PHP_FUNCTION(cpdf_set_creator);
 PHP_FUNCTION(cpdf_set_title);

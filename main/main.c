@@ -700,7 +700,7 @@ void php_request_shutdown(void *dummy)
 	} zend_end_try();
 	
 	if (PG(modules_activated)) {
-		zend_deactivate_modules();
+		zend_deactivate_modules(TSRMLS_C);
 	}
 		
 	zend_deactivate(TSRMLS_C);

@@ -34,10 +34,10 @@ extern zend_module_entry ibase_module_entry;
 #define PHP_IBASE_API
 #endif
 
-extern PHP_MINIT_FUNCTION(ibase);
-extern PHP_RINIT_FUNCTION(ibase);
-extern PHP_MSHUTDOWN_FUNCTION(ibase);
-extern PHP_RSHUTDOWN_FUNCTION(ibase);
+PHP_MINIT_FUNCTION(ibase);
+PHP_RINIT_FUNCTION(ibase);
+PHP_MSHUTDOWN_FUNCTION(ibase);
+PHP_RSHUTDOWN_FUNCTION(ibase);
 PHP_MINFO_FUNCTION(ibase);
 
 PHP_FUNCTION(ibase_connect);

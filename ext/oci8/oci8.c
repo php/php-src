@@ -452,9 +452,9 @@ PHP_MINIT_FUNCTION(oci)
     INIT_CLASS_ENTRY(oci_coll_class_entry, "OCI-Collection", php_oci_coll_class_functions);
 #endif
 
- 	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry);
+ 	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry TSRMLS_CC);
 #ifdef WITH_COLLECTIONS
-    oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry);
+    oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry TSRMLS_CC);
 #endif
 
 /* thies@thieso.net 990203 i do not think that we will need all of them - just in here for completeness for now! */
@@ -541,8 +541,8 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 
     oci_debug("START php_mshutdown_oci");
 
-	zend_hash_apply(OCI(user),(int (*)(void *))_session_pcleanup);
-	zend_hash_apply(OCI(server),(int (*)(void *))_server_pcleanup);
+	zend_hash_apply(OCI(user), (apply_func_t)_session_pcleanup);
+	zend_hash_apply(OCI(server), (apply_func_t)_server_pcleanup);
 
 	zend_hash_destroy(OCI(user));
 	zend_hash_destroy(OCI(server));
@@ -564,8 +564,8 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 #if 0
 	/* XXX free all statements, rollback all outstanding transactions */
 
-	zend_hash_apply(OCI(user),(int (*)(void *))_session_cleanup);
-	zend_hash_apply(OCI(server),(int (*)(void *))_server_cleanup);
+	zend_hash_apply(OCI(user), (apply_func_t) _session_cleanup);
+	zend_hash_apply(OCI(server), (apply_func_t) _server_cleanup);
 #endif
 
     oci_debug("END   php_rshutdown_oci");
@@ -1348,7 +1348,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 		   we don't want to execute!!! */
 
 		if (statement->binds) {
-			zend_hash_apply(statement->binds, (int (*)(void *)) _oci_bind_pre_exec);
+			zend_hash_apply(statement->binds, (apply_func_t) _oci_bind_pre_exec);
 		}
 
 		statement->error = 
@@ -1363,7 +1363,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 									 NULL,
 									 mode));
 		if (statement->binds) {
-			zend_hash_apply(statement->binds, (int (*)(void *)) _oci_bind_post_exec);
+			zend_hash_apply(statement->binds, (apply_func_t) _oci_bind_post_exec);
 		}
 
 		oci_handle_error(statement->conn, statement->error);
@@ -1633,7 +1633,7 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 	oci_out_column *column;
 
 	if (statement->columns) {
-		zend_hash_apply(statement->columns, (int (*)(void *)) _oci_column_pre_fetch);
+		zend_hash_apply(statement->columns, (apply_func_t) _oci_column_pre_fetch);
 	}
 
 	statement->error =
@@ -2363,7 +2363,7 @@ _oci_close_server(oci_server *server)
 	oldopen = server->is_open;
 	server->is_open = 2;
 	if (! OCI(shutdown)) {
-		zend_hash_apply(&EG(regular_list),_oci_session_cleanup);
+		zend_hash_apply(&EG(regular_list), _oci_session_cleanup);
 	}
 	server->is_open = oldopen;
 
@@ -3919,7 +3919,7 @@ PHP_FUNCTION(ocilogoff)
 
 	connection->is_open = 0;
 
-	zend_hash_apply(list,(int (*)(void *))_stmt_cleanup);
+	zend_hash_apply(list, (apply_func_t) _stmt_cleanup);
 
 	if (zend_list_delete(connection->id) == SUCCESS) {
 		RETURN_TRUE;

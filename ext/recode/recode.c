@@ -74,8 +74,6 @@ ZEND_GET_MODULE(recode)
 
 PHP_MINIT_FUNCTION(recode)
 {
-	TSRMLS_FETCH();
-
 	ReSG(outer)	  = recode_new_outer(true);
 	if (ReSG(outer) == NULL)
 		return FAILURE;

@@ -60,7 +60,7 @@
 #include "ext/xml/php_xml.h"
 #include "ext/wddx/php_wddx.h"
 #include "ext/mysql/php_mysql.h"
-#include "ext/mysql/mbstring.h"
+#include "ext/mbstring/mbstring.h"
 /* }}} */
 
 /* {{{ php_builtin_extensions[]

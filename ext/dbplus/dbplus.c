@@ -134,10 +134,6 @@ PHP_INI_END()
 
 PHP_MINIT_FUNCTION(dbplus)
 {
-/* Remove comments if you have entries in php.ini
-	REGISTER_INI_ENTRIES();
-*/
-
 	/* resource id for cdb connections */
 	le_dbplus_relation = zend_register_list_destructors_ex(dbplus_destruct_relation, NULL, "dbplus_relation", module_number);
 	le_dbplus_tupel    = zend_register_list_destructors_ex(dbplus_destruct_tupel   , NULL, "dbplus_tuple"   , module_number);

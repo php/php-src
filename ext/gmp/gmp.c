@@ -137,9 +137,6 @@ static void gmp_efree(void *ptr, size_t size)
  */
 ZEND_MINIT_FUNCTION(gmp)
 {
-/* Remove comments if you have entries in php.ini
-	REGISTER_INI_ENTRIES();
-*/
 	le_gmp = zend_register_list_destructors_ex(_php_gmpnum_free, NULL,
 											   GMP_RESOURCE_NAME,
                                                    module_number);

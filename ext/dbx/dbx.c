@@ -469,8 +469,11 @@ ZEND_FUNCTION(dbx_query)
                     zend_hash_index_find((*inforow_ptr)->value.ht, col_index, (void **) &columnname_ptr);
                     zend_hash_index_find((*row_ptr)->value.ht, col_index, (void **) &actual_ptr);
                     (*actual_ptr)->refcount+=1;
+
                     (*actual_ptr)->is_ref=1;
+
                     zend_hash_update((*row_ptr)->value.ht, (*columnname_ptr)->value.str.val, (*columnname_ptr)->value.str.len + 1, actual_ptr, sizeof(zval *), NULL);
+
                     }
                 }
             ++row_count;

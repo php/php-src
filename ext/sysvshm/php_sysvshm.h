@@ -68,9 +68,9 @@ PHP_FUNCTION(shm_remove);
 PHP_FUNCTION(shm_put_var);
 PHP_FUNCTION(shm_get_var);
 PHP_FUNCTION(shm_remove_var);
-extern int php_put_shm_data(sysvshm_chunk_head *ptr,long key,char *data, long len);
-extern long php_check_shm_data(sysvshm_chunk_head *ptr, long key);
-extern int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos);
+int php_put_shm_data(sysvshm_chunk_head *ptr,long key,char *data, long len);
+long php_check_shm_data(sysvshm_chunk_head *ptr, long key);
+int php_remove_shm_data(sysvshm_chunk_head *ptr, long shm_varpos);
 
 extern sysvshm_module php_sysvshm;
 

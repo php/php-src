@@ -186,10 +186,10 @@ extern zend_module_entry odbc_module_entry;
 
 
 /* user functions */
-extern PHP_MINIT_FUNCTION(odbc);
-extern PHP_MSHUTDOWN_FUNCTION(odbc);
-extern PHP_RINIT_FUNCTION(odbc);
-extern PHP_RSHUTDOWN_FUNCTION(odbc);
+PHP_MINIT_FUNCTION(odbc);
+PHP_MSHUTDOWN_FUNCTION(odbc);
+PHP_RINIT_FUNCTION(odbc);
+PHP_RSHUTDOWN_FUNCTION(odbc);
 PHP_MINFO_FUNCTION(odbc);
 
 PHP_FUNCTION(odbc_error);

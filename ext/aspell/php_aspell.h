@@ -24,8 +24,8 @@
 extern zend_module_entry aspell_module_entry;
 #define aspell_module_ptr &aspell_module_entry
 
-extern PHP_MINIT_FUNCTION(aspell);
-extern PHP_MINFO_FUNCTION(aspell);
+PHP_MINIT_FUNCTION(aspell);
+PHP_MINFO_FUNCTION(aspell);
 
 PHP_FUNCTION(aspell_new);
 PHP_FUNCTION(aspell_check);

@@ -9,7 +9,7 @@
 #include "build-defs.h"
 #endif
 
-extern PHP_MINIT_FUNCTION(icap);
+PHP_MINIT_FUNCTION(icap);
 PHP_MINFO_FUNCTION(icap);
 
 /* Functions accessable to PHP */

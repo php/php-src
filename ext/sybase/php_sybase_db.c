@@ -177,7 +177,7 @@ static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
       will *not* be in a consistent state. thies@thieso.net
     */
 
-	zend_hash_apply(&EG(regular_list),(int (*)(void *))_clean_invalid_results);
+	zend_hash_apply(&EG(regular_list), (apply_func_t) _clean_invalid_results);
 	dbclose(sybase_ptr->link);
 	dbloginfree(sybase_ptr->login);
 	efree(sybase_ptr);
