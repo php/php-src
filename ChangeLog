@@ -1,3 +1,68 @@
+2000-07-17  Hénot David  <henot@iie.cnam.fr>
+
+    * ext/ingres_ii/ii.c
+      ext/ingres_ii/php_ii.h: Added new function ii_autocommit()
+
+    * MAINTAINERS
+      ext/ingres_ii/Makefile.in
+      ext/ingres_ii/config.m4
+      ext/ingres_ii/ii.c
+      ext/ingres_ii/php_ii.h: Made ingres_ii module compile with its new name
+
+2000-07-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.in
+      pear/pear.in:
+    Added "pear" executable, requires CGI version installed 
+
+2000-07-17  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ingres_ii/ii.c:
+    Fixed some protos. Only one line for the description.
+
+2000-07-17  Hénot David  <henot@iie.cnam.fr>
+
+    * MAINTAINERS
+      ext/ingres_ii/.cvsignore
+      ext/ingres_ii/Makefile.in
+      ext/ingres_ii/README
+      ext/ingres_ii/config.m4
+      ext/ingres_ii/ii.c
+      ext/ingres_ii/ii.h
+      ext/ingres_ii/php_ii.h
+      php.ini-dist
+      php.ini-optimized: Added extension ii for Ingres II native support.
+
+2000-07-17  Zeev Suraski  <zeev@php.net>
+
+    * ext/interbase/interbase.dsp: Build fixes
+
+    * ext/interbase/interbase.c
+      ext/interbase/interbase.dsp
+      ext/interbase/php_interbase.h:
+    - Made Interbase compile under Win32, cleaned warnings
+    - Added Win32 project for the Interbase module 
+
+2000-07-17  Ben Mansell  <ben@zeus.com>
+
+    * README.Zeus: Minor adjustments to compile-advice
+
+2000-07-17  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pfpro/test.output
+      ext/pfpro/test.php:
+    - Cannot see any good reason why the test script in the dir of
+      the extension, though it is in tests as well
+
+2000-07-17  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      NEWS: *** empty log message ***
+
+2000-07-17  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/string.c: Fix crash in stripcslashes("") (#5628)
+
 2000-07-16  Zeev Suraski  <zeev@php.net>
 
     * NEWS: Update news
