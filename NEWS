@@ -18,6 +18,7 @@ PHP 4                                                                      NEWS
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
 - NSAPI: added "bucket" parameter to list of non-php.ini-keys of php4_execute
   for doing performance stats without warnings in server-log. (Uwe Schindler)
+- Fixed bug #29882 (isset crashes on arrays). (Marcus)
 - Fixed bug #29607 (highlighting code with HEREDOC produces invalid
   output). (Ilia)
 - Fixed bug #29581 (Typo inside php.ini comments for mysql.trace_mode). (Ilia)
