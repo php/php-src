@@ -37,7 +37,7 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 	if (zvalue->type==IS_LONG) {
 		return;
 	}
-	switch(zvalue->type) {
+	switch(zvalue->type & ~IS_CONSTANT_INDEX) {
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(zvalue);
