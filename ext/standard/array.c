@@ -1062,6 +1062,10 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist", func_name);
 				}
 
+				if (key) {
+					zval_ptr_dtor(&key);
+					key = NULL;
+				}
 				efree(func_name);
 				break;
 			}
