@@ -58,12 +58,17 @@ if test "$PHP_XMLRPC" = "yes"; then
 elif test "$PHP_XMLRPC" != "no"; then
 
   if test -r $PHP_XMLRPC/include/xmlrpc.h; then
-    XMLRPC_DIR=$PHP_XMLRPC
+    XMLRPC_DIR=$PHP_XMLRPC/include
+  elif test -r $PHP_XMLRPC/include/xmlrpc-epi/xmlrpc.h; then
+dnl some xmlrpc-epi header files have generic file names like
+dnl queue.h or base64.h. Distributions have to create dir
+dnl for xmlrpc-epi because of this.
+    XMLRPC_DIR=$PHP_XMLRPC/include/xmlrpc-epi
   else
     AC_MSG_CHECKING(for XMLRPC-EPI in default path)
     for i in /usr/local /usr; do
       if test -r $i/include/xmlrpc.h; then
-        XMLRPC_DIR=$i
+        XMLRPC_DIR=$i/include
         AC_MSG_RESULT(found in $i)
       fi
     done
@@ -74,7 +79,7 @@ elif test "$PHP_XMLRPC" != "no"; then
     AC_MSG_ERROR(Please reinstall the XMLRPC-EPI distribution)
   fi
 
-  PHP_ADD_INCLUDE($XMLRPC_DIR/include)
+  PHP_ADD_INCLUDE($XMLRPC_DIR)
   PHP_ADD_LIBRARY_WITH_PATH(xmlrpc, $XMLRPC_DIR/lib, XMLRPC_SHARED_LIBADD)
   
 fi
