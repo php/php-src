@@ -284,7 +284,10 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define PUTS_H(str)					php_header_write((str), strlen((str)))
 #define PUTC_H(c)					(php_header_write(&(c), 1), (c))
 
+#ifdef ZTS
 #define VIRTUAL_DIR
+#endif
+
 #include "php_virtual_cwd.h"
 
 /* Virtual current directory support */
@@ -308,12 +311,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
 #define V_RMDIR(pathname) virtual_rmdir(pathname)
 #define V_OPENDIR(pathname) virtual_opendir(pathname)
-#ifdef PHP_WIN32
-/* Under Windows the "cd /cwd ; command" trick doesn't work */
-#define V_POPEN(command, type) popen(command, type)
-#else
 #define V_POPEN(command, type) virtual_popen(command, type)
-#endif
 
 #else
 

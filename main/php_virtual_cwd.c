@@ -12,10 +12,11 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   |                                                                      |
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Sascha Schumann <ss@schumann.cx>                            |
    +----------------------------------------------------------------------+
- */
+*/
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -37,6 +38,11 @@
 
 #ifdef ZTS
 #include "TSRM.h"
+#endif
+
+/* Only need mutex for popen() in Windows because it doesn't chdir() on UNIX */
+#ifdef ZEND_WIN32
+MUTEX_T cwd_mutex;
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(cwd);
@@ -158,7 +164,7 @@ static void cwd_globals_dtor(zend_cwd_globals *cwd_globals)
 
 CWD_API void virtual_cwd_startup(void)
 {
-	char cwd[1024]; /* Should probably use system define here */
+	char cwd[MAXPATHLEN]; /* Should probably use system define here */
 	char *result;
 
 	result = getcwd(cwd, sizeof(cwd));	
@@ -169,6 +175,9 @@ CWD_API void virtual_cwd_startup(void)
 	main_cwd_state.cwd_length = strlen(cwd);
 
 	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, cwd_globals_dtor);
+#ifdef ZEND_WIN32
+	cwd_mutex = tsrm_mutex_alloc();
+#endif
 }
 
 CWD_API void virtual_cwd_activate(char *filename)
@@ -186,6 +195,10 @@ CWD_API void virtual_cwd_shutdown(void)
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals);
 #endif
+#ifdef ZEND_WIN32
+	tsrm_mutex_free(cwd_mutex);
+#endif
+
 	free(main_cwd_state.cwd); /* Don't use CWD_STATE_FREE because the non global states will probably use emalloc()/efree() */
 }
 
@@ -559,6 +572,8 @@ CWD_API DIR *virtual_opendir(const char *pathname)
 	return retval;
 }
 
+#ifndef ZEND_WIN32
+
 CWD_API FILE *virtual_popen(const char *command, const char *type)
 {
 	int command_length;
@@ -592,6 +607,36 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 	free(command_line);
 	return retval;
 }
+
+#else
+
+/* On Windows the trick of prepending "cd cwd; " doesn't work so we need to perform
+   a real chdir() and mutex it
+ */
+CWD_API FILE *virtual_popen(const char *command, const char *type)
+{
+	char prev_cwd[MAXPATHLEN];
+	char *getcwd_result;
+	FILE *retval;
+	CWDLS_FETCH();
+
+	getcwd_result = getcwd(prev_cwd, MAXPATHLEN);
+	if (!getcwd_result) {
+		return NULL;
+	}
+	
+	tsrm_mutex_lock(cwd_mutex);
+
+	chdir(CWDG(cwd).cwd);
+	retval = popen(command, type);
+	chdir(prev_cwd);
+
+	tsrm_mutex_unlock(cwd_mutex);
+
+	return retval;
+}
+
+#endif
 
 #if 0
 
