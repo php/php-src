@@ -51,6 +51,10 @@
 #include <gnu/libc-version.h>
 #endif
 
+#ifdef HAVE_LIBICONV
+#undef iconv
+#endif
+
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
@@ -116,6 +120,10 @@ typedef enum _php_iconv_enc_scheme_t {
 	PHP_ICONV_ENC_SCHEME_QPRINT
 } php_iconv_enc_scheme_t;
 /* }}} */
+
+#ifdef HAVE_LIBICONV
+#define iconv libiconv
+#endif
 
 /* {{{ prototypes */ 
 static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l, iconv_t cd);
