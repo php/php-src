@@ -61,7 +61,7 @@ Changes in the Zend Engine 2.0
         $obj->printHello();
         ?>
 
-    * Object Cloning
+    * Object Cloning.
 
       The Zend Engine 1.0 offered no way a user could decide what copy
       constructor to run when an object is duplicated. During
