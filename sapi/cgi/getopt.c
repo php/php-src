@@ -1,7 +1,5 @@
 /* Borrowed from Apache NT Port */
 
-#if !APACHE
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -12,16 +10,16 @@
 #define OPTERRARG (3)
 
 
-PHPAPI char *optarg;
-PHPAPI int optind = 1;
-static int opterr = 1;
-static int optopt;
+PHPAPI char *ap_php_optarg;
+PHPAPI int ap_php_optind = 1;
+static int ap_php_opterr = 1;
+static int ap_php_optopt;
 
 static int
-optiserr(int argc, char * const *argv, int oint, const char *optstr,
+ap_php_optiserr(int argc, char * const *argv, int oint, const char *optstr,
          int optchr, int err)
 {
-    if (opterr)
+    if (ap_php_opterr)
     {
         fprintf(stderr, "Error in argument %d, char %d: ", oint, optchr+1);
         switch(err)
@@ -40,22 +38,22 @@ optiserr(int argc, char * const *argv, int oint, const char *optstr,
             break;
         }
     }
-    optopt = argv[oint][optchr];
+    ap_php_optopt = argv[oint][optchr];
     return('?');
 }
     
-PHPAPI int getopt(int argc, char* const *argv, const char *optstr)
+PHPAPI int ap_php_getopt(int argc, char* const *argv, const char *optstr)
 {
     static int optchr = 0;
     static int dash = 0; /* have already seen the - */
 
     char *cp;
 
-    if (optind >= argc)
+    if (ap_php_optind >= argc)
         return(EOF);
-    if (!dash && (argv[optind][0] !=  '-'))
+    if (!dash && (argv[ap_php_optind][0] !=  '-'))
         return(EOF);
-    if (!dash && (argv[optind][0] ==  '-') && !argv[optind][1])
+    if (!dash && (argv[ap_php_optind][0] ==  '-') && !argv[ap_php_optind][1])
     {
         /*
          * use to specify stdin. Need to let pgm process this and
@@ -63,56 +61,56 @@ PHPAPI int getopt(int argc, char* const *argv, const char *optstr)
          */
         return(EOF);
     }
-    if ((argv[optind][0] == '-') && (argv[optind][1] == '-'))
+    if ((argv[ap_php_optind][0] == '-') && (argv[ap_php_optind][1] == '-'))
     {
         /* -- indicates end of args */
-        optind++;
+        ap_php_optind++;
         return(EOF);
     }
     if (!dash)
     {
-        assert((argv[optind][0] == '-') && argv[optind][1]);
+        assert((argv[ap_php_optind][0] == '-') && argv[ap_php_optind][1]);
         dash = 1;
         optchr = 1;
     }
 
     /* Check if the guy tries to do a -: kind of flag */
     assert(dash);
-    if (argv[optind][optchr] == ':')
+    if (argv[ap_php_optind][optchr] == ':')
     {
         dash = 0;
-        optind++;
-        return(optiserr(argc, argv, optind-1, optstr, optchr, OPTERRCOLON));
+        ap_php_optind++;
+        return(ap_php_optiserr(argc, argv, ap_php_optind-1, optstr, optchr, OPTERRCOLON));
     }
-    if (!(cp = strchr(optstr, argv[optind][optchr])))
+    if (!(cp = strchr(optstr, argv[ap_php_optind][optchr])))
     {
-        int errind = optind;
+        int errind = ap_php_optind;
         int errchr = optchr;
 
-        if (!argv[optind][optchr+1])
+        if (!argv[ap_php_optind][optchr+1])
         {
             dash = 0;
-            optind++;
+            ap_php_optind++;
         }
         else
             optchr++;
-        return(optiserr(argc, argv, errind, optstr, errchr, OPTERRNF));
+        return(ap_php_optiserr(argc, argv, errind, optstr, errchr, OPTERRNF));
     }
     if (cp[1] == ':')
     {
         dash = 0;
-        optind++;
-        if (optind == argc)
-            return(optiserr(argc, argv, optind-1, optstr, optchr, OPTERRARG));
-        optarg = argv[optind++];
+        ap_php_optind++;
+        if (ap_php_optind == argc)
+            return(ap_php_optiserr(argc, argv, ap_php_optind-1, optstr, optchr, OPTERRARG));
+        ap_php_optarg = argv[ap_php_optind++];
         return(*cp);
     }
     else
     {
-        if (!argv[optind][optchr+1])
+        if (!argv[ap_php_optind][optchr+1])
         {
             dash = 0;
-            optind++;
+            ap_php_optind++;
         }
         else
             optchr++;
@@ -122,21 +120,19 @@ PHPAPI int getopt(int argc, char* const *argv, const char *optstr)
     return(0);
 }
 
-#endif /* !APACHE */
-
 #ifdef TESTGETOPT
 int
  main (int argc, char **argv)
  {
       int c;
-      extern char *optarg;
-      extern int optind;
+      extern char *ap_php_optarg;
+      extern int ap_php_optind;
       int aflg = 0;
       int bflg = 0;
       int errflg = 0;
       char *ofile = NULL;
 
-      while ((c = getopt(argc, argv, "abo:")) != EOF)
+      while ((c = ap_php_getopt(argc, argv, "abo:")) != EOF)
            switch (c) {
            case 'a':
                 if (bflg)
@@ -151,7 +147,7 @@ int
                      bflg++;
                 break;
            case 'o':
-                ofile = optarg;
+                ofile = ap_php_optarg;
                 (void)printf("ofile = %s\n", ofile);
                 break;
            case '?':
@@ -162,8 +158,8 @@ int
                 "usage: cmd [-a|-b] [-o <filename>] files...\n");
            exit (2);
       }
-      for ( ; optind < argc; optind++)
-           (void)printf("%s\n", argv[optind]);
+      for ( ; ap_php_optind < argc; ap_php_optind++)
+           (void)printf("%s\n", argv[ap_php_optind]);
       return 0;
  }
 

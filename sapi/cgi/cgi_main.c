@@ -70,9 +70,7 @@
 #include "zend_indent.h"
 
 
-#if MSVC5 || !defined(HAVE_GETOPT)
 #include "php_getopt.h"
-#endif
 
 PHPAPI extern char *php_ini_path;
 
@@ -80,8 +78,8 @@ PHPAPI extern char *php_ini_path;
 #define PHP_MODE_HIGHLIGHT	2
 #define PHP_MODE_INDENT		3
 
-PHPAPI extern char *optarg;
-PHPAPI extern int optind;
+PHPAPI extern char *ap_php_optarg;
+PHPAPI extern int ap_php_optind;
 
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
@@ -266,8 +264,8 @@ int main(int argc, char *argv[])
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=0;
 	int free_path_translated=0;
-	int orig_optind=optind;
-	char *orig_optarg=optarg;
+	int orig_optind=ap_php_optind;
+	char *orig_optarg=ap_php_optarg;
 #if SUPPORT_INTERACTIVE
 	int interactive=0;
 #endif
@@ -335,15 +333,15 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	if (!cgi) {
-		while ((c=getopt(argc, argv, "c:d:qvisnaeh?vf:"))!=-1) {
+		while ((c=ap_php_getopt(argc, argv, "c:d:qvisnaeh?vf:"))!=-1) {
 			switch (c) {
 				case 'c':
-					php_ini_path = strdup(optarg);		/* intentional leak */
+					php_ini_path = strdup(ap_php_optarg);		/* intentional leak */
 					break;
 			}
 		}
-		optind = orig_optind;
-		optarg = orig_optarg;
+		ap_php_optind = orig_optind;
+		ap_php_optarg = orig_optarg;
 	}
 			
 			
@@ -366,7 +364,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	if (!cgi) {					/* never execute the arguments if you are a CGI */
 		request_info.php_argv0 = NULL;
-		while ((c = getopt(argc, argv, "c:d:qvisnaeh?vf:")) != -1) {
+		while ((c = ap_php_getopt(argc, argv, "c:d:qvisnaeh?vf:")) != -1) {
 			switch (c) {
 				case 'f':
 					if (!cgi_started){ 
@@ -379,7 +377,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 						SG(headers_sent) = 1;
 					}
 					cgi_started=1;
-					SG(request_info).path_translated = estrdup(optarg);
+					SG(request_info).path_translated = estrdup(ap_php_optarg);
 					free_path_translated=1;
 					/* break missing intentionally */
 				case 'q':
@@ -437,7 +435,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					exit(1);
 					break;
 				case 'd':
-					define_command_line_ini_entry(optarg);
+					define_command_line_ini_entry(ap_php_optarg);
 					break;
 				default:
 					break;
@@ -465,20 +463,20 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	if (!cgi) {
 		if (!SG(request_info).query_string) {
-			for (i = optind, len = 0; i < argc; i++)
+			for (i = ap_php_optind, len = 0; i < argc; i++)
 				len += strlen(argv[i]) + 1;
 
 			s = malloc(len + 1);	/* leak - but only for command line version, so ok */
 			*s = '\0';			/* we are pretending it came from the environment  */
-			for (i = optind, len = 0; i < argc; i++) {
+			for (i = ap_php_optind, len = 0; i < argc; i++) {
 				strcat(s, argv[i]);
 				if (i < (argc - 1))
 					strcat(s, "+");
 			}
 			SG(request_info).query_string = s;
 		}
-		if (!SG(request_info).path_translated && argc > optind)
-			SG(request_info).path_translated = argv[optind];
+		if (!SG(request_info).path_translated && argc > ap_php_optind)
+			SG(request_info).path_translated = argv[ap_php_optind];
 	}
 	/* If for some reason the CGI interface is not setting the
 	   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.

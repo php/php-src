@@ -5,6 +5,6 @@ srcdir    = @srcdir@
 VPATH     = @srcdir@
 
 LTLIBRARY_NAME    = libsapi.la
-LTLIBRARY_SOURCES = cgi_main.c
+LTLIBRARY_SOURCES = cgi_main.c getopt.c
 
 include $(topsrcdir)/build/ltlib.mk
