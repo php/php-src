@@ -38,20 +38,10 @@ typedef enum {
 	NO = 0, YES = 1
 } boolean_e;
 
-#ifdef HAVE_GCVT
-
-#define ap_php_ecvt ecvt
-#define ap_php_fcvt fcvt
-#define ap_php_gcvt gcvt
-
-#else
-
 extern char * ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf);
 extern char * ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf);
 extern char * ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf);
 extern char * ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform);
-
-#endif
 
 #define WIDE_INT		long
 typedef WIDE_INT wide_int;
