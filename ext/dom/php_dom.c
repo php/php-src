@@ -331,26 +331,6 @@ zend_module_entry dom_module_entry = {
 ZEND_GET_MODULE(dom)
 #endif
 
-/* {{{ php_dom_error_func */
-static void php_dom_error_func(void *ctx, const char *msg, ...) {
-	va_list ap;
-	char *buf;
-	int len;
-	TSRMLS_FETCH();
-
-	va_start(ap, msg);
-	len = vspprintf(&buf, 0, msg, ap);
-	va_end(ap);
-	
-	/* remove any trailing \n */
-	while (len && buf[--len] == '\n') {
-		buf[len] = '\0';
-	}
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", buf);
-	efree(buf);
-}
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION(dom) */
 PHP_MINIT_FUNCTION(dom)
 {
@@ -587,7 +567,6 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NOTATION",	XML_ATTRIBUTE_NOTATION,		CONST_CS | CONST_PERSISTENT);
 
 	xmlInitParser();
-	xmlSetGenericErrorFunc((void*) NULL, php_dom_error_func);
 
 	return SUCCESS;
 }
@@ -932,7 +911,7 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 	object_init_ex(wrapper, ce);
 	/* Add object properties not needing function calls */
 	if (obj->type == XML_DOCUMENT_NODE || obj->type == XML_HTML_DOCUMENT_NODE) {
-		add_property_bool(wrapper, "formatOutput", 0);
+		add_domdocument_properties(wrapper TSRMLS_CC);
 	}
 	intern = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
 	if (obj->doc != NULL) {
