@@ -934,7 +934,7 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
                     fseek(infile, cp, SEEK_SET);
 
                     size = ep-cp;
-                    Data = (uchar *)malloc(size);
+                    Data = (uchar *)emalloc(size);
                     if (Data == NULL) {
                         php_error(E_WARNING,"could not allocate data for entire image");
 						return FALSE;
@@ -953,6 +953,7 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
 					/*
                     *HaveAll = 1;
 					*/
+					efree(Data);
                 }
                 return TRUE;
 
