@@ -919,7 +919,8 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
     return ret;
 }
 
-PHPAPI int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll) {
+int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
+{
 	Section_t Sections[20];
 	int SectionsRead;
 	char *LastExifRefd=NULL;
