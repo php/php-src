@@ -1,3 +1,8 @@
+2004-04-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      show ini entries and classes for extensions.
+
 2004-04-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c:
