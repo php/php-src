@@ -3,13 +3,15 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26458 (var_dump(), var_export(), debug_zval_dump() not binary
+  safe for array keys). (Ilia)
 - Fixed bug #26446 (domxml_open_file() returns an empty error-Array). (Rob)
 - Fixed bug #26438 (error in thttpd SAPI installation). (Jani)
 - Fixed bug #26440 (MFH missing context options). (Ilia)
 - Fixed bug #25963 (PostgreSQL error message include \n characters).
   (Marcus, Ilia)
 - Fixed bug #26376 (typo in ext/odbc/config.m4: DBMaker test fails). (Jani)
-- Fixed bug #26384 (crash in domxslt->process()). (Ilia)
+- Fixed bug #26384 (crash in domxslt->process()). (Christian)
 - Fixed bug #26355 (flock() doesn't initialize the wouldblock argument). (Ilia)
 - Fixed bug #26309 (Fixed argument parsing for imageftbbox()). (Ilia)
 - Fixed bug #26285 (escapeshellarg() uses wrong quotes on windows). (Ilia)
@@ -41,6 +43,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #26025 (Segfault on glob() without GLOB_NOCHECK or GLOB_NOMAGIC
   under *BSD platforms). (Moriyoshi)
 - Fixed bug #26003 (Make fgetcsv() binary safe). (Ilia, Moriyoshi)
+- Fixed bug #25939 (feof() not working correctly for sockets). (Wez)
 - Fixed bug #25794 (Cannot open existing hash db3 file with write" ext/dba).
   (Marcus)
 - Fixed Bug #25694 (round() and number_format() give inconsistent results).
