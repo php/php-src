@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Added man page for CLI version of PHP. (Marcus)
 - Added --clean option into phpize. (Jani)
 - Added --ldflags option into php-config. (Jani)
 - Added zlib_get_coding_type() function. Returns the coding type used for 
