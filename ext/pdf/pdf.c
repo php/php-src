@@ -2368,7 +2368,7 @@ PHP_FUNCTION(pdf_open_ccitt) {
 	convert_to_long_ex(arg6);
 	convert_to_long_ex(arg7);
 
-	pdf_image = PDF_open_ccitt(pdf,
+	pdf_image = PDF_open_CCITT(pdf,
 	    image,
 	    Z_LVAL_PP(arg3),
 	    Z_LVAL_PP(arg4),
