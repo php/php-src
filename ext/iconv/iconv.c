@@ -138,12 +138,12 @@ static int php_iconv_string(char *in_p, unsigned int in_len,
     /*
 	  FIXME: This is not the right way to get output size...
 	  This is not space efficient for large text.
-	  This is also problem encoding like UTF-7/UTF-8/ISO-2022 which
+	  This is also problem for encoding like UTF-7/UTF-8/ISO-2022 which
 	  a single char can be more than 4 bytes.
 	  I added 15 extra bytes for safety. <yohgaki@php.net>
 	*/
     out_size = in_len * sizeof(ucs4_t) + 16;
-    out_buffer = (char *) ecalloc(1, out_size);
+    out_buffer = (char *) emalloc(out_size);
 
 	*out = out_buffer;
     out_p = out_buffer;
@@ -167,7 +167,7 @@ static int php_iconv_string(char *in_p, unsigned int in_len,
     }
 
 	*out_len = out_size - out_left;
-	out[*out_len] = '\0';
+	out_buffer[*out_len] = '\0';
     icv_close(cd);
 
     return SUCCESS;
@@ -193,7 +193,7 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 	if (php_iconv_string(Z_STRVAL_PP(in_buffer), Z_STRLEN_PP(in_buffer),
 						 &out_buffer,  &out_len,
 						 Z_STRVAL_PP(in_charset), Z_STRVAL_PP(out_charset)) == SUCCESS) {
-		RETVAL_STRINGL(out_buffer, out_len + 1, 0);
+		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
 		RETURN_FALSE;
 	}
