@@ -200,7 +200,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	DECLARE_CACHE_VARS();
 	ALS_FETCH();
 
-#if defined(ZTS) && ZEND_DEBUG
+#if defined(ZTS) && TSRM_DEBUG
 	if (p->thread_id != tsrm_thread_id()) {
 		tsrm_error(TSRM_ERROR_LEVEL_ERROR, "Memory block allocated at %s:(%d) on thread %x freed at %s:(%d) on thread %x, ignoring",
 			p->filename, p->lineno, p->thread_id,
