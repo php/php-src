@@ -114,7 +114,7 @@ static void php_pgsql_set_default_link(int id)
 {   
 	PGLS_FETCH();
 
-    if ((PGG(default_link) != -1) && (PGG(default_link) != id)) {
+    if (PGG(default_link) != -1) {
         zend_list_delete(PGG(default_link));
     }
 
@@ -423,9 +423,9 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				return_value->value.lval = link;
+				zend_list_addref(link);
 				php_pgsql_set_default_link(link);
 				return_value->type = IS_RESOURCE;
-				zend_list_addref(link);
 				efree(hashed_details);
 				return;
 			} else {
