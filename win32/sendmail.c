@@ -693,7 +693,7 @@ int Ack(char **server_response)
 		                           And not contain a space followed by a '-' */
 
 	if (buf[0] > '3') {
-		/* If we've a valid pointer, return the SMTP server response so the error messages give away more information */
+		/* If we've a valid pointer, return the SMTP server response so the error message contains more information */
 		if (server_response) {
 			int dec = 0;
 			/* See if we have something like \r, \n, \r\n or \n\r at the end of the message and chop it off */
