@@ -57,9 +57,9 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC);
 int php_dbm_insert(dbm_info *info, char *key, char *value TSRMLS_DC);
 char *php_dbm_fetch(dbm_info *info, char *key TSRMLS_DC);
 int php_dbm_replace(dbm_info *info, char *key, char *value TSRMLS_DC);
-int php_dbm_exists(dbm_info *info, char *key);
-int php_dbm_delete(dbm_info *info, char *key);
-char *php_dbm_first_key(dbm_info *info);
+int php_dbm_exists(dbm_info *info, char *key TSRMLS_DC);
+int php_dbm_delete(dbm_info *info, char *key TSRMLS_DC);
+char *php_dbm_first_key(dbm_info *info TSRMLS_DC);
 char *php_dbm_nextkey(dbm_info *info, char *key TSRMLS_DC);
 
 /* db file functions */
