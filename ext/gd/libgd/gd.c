@@ -244,7 +244,7 @@ gdImageColorClosestAlpha (gdImagePtr im, int r, int g, int b, int a)
 #define RETURN_HWB(h, w, b) {HWB->H = h; HWB->W = w; HWB->B = b; return HWB;}
 #define RETURN_RGB(r, g, b) {RGB->R = r; RGB->G = g; RGB->B = b; return RGB;}
 #define HWB_UNDEFINED -1
-#define SETUP_RGB(s, r, g, b) {s.R = r/255.0; s.G = g/255.0; s.B = b/255.0;}
+#define SETUP_RGB(s, r, g, b) {s.R = r/255.0f; s.G = g/255.0f; s.B = b/255.0f;}
 
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
@@ -319,7 +319,7 @@ HWB_Diff (int r1, int g1, int b1, int r2, int g2, int b2)
     }
   else
     {
-      diff = abs (HWB1.H - HWB2.H);
+      diff = fabsf(HWB1.H - HWB2.H);
       if (diff > 3)
 	{
 	  diff = 6 - diff;	/* Remember, it's a colour circle */
@@ -878,7 +878,7 @@ gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
       if ((dx == 0) && (dy == 0)) {
         wid = 1;
       } else {
-        wid = thick * cos (atan2 (dy, dx));
+        wid = (int)(thick * cos (atan2 (dy, dx)));
         if (wid == 0) {
           wid = 1;
         }
@@ -948,7 +948,7 @@ gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
   else
     {
       /* More-or-less vertical. use wid for horizontal stroke */
-      wid = thick * sin (atan2 (dy, dx));
+      wid = (int)(thick * sin (atan2 (dy, dx)));
       if (wid == 0)
 	wid = 1;
 
@@ -1033,7 +1033,7 @@ gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
   if (dy <= dx)
     {
       /* More-or-less horizontal. use wid for vertical stroke */
-      wid = thick * sin (atan2 (dy, dx));
+      wid = (int)(thick * sin (atan2 (dy, dx)));
       vert = 1;
 
       d = 2 * dy - dx;
@@ -1880,12 +1880,12 @@ gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, 
 	    {
 	      dc = gdImageGetPixel (dst, tox, toy);
 
-	      ncR = gdImageRed (src, c) * (pct / 100.0)
-		+ gdImageRed (dst, dc) * ((100 - pct) / 100.0);
-	      ncG = gdImageGreen (src, c) * (pct / 100.0)
-		+ gdImageGreen (dst, dc) * ((100 - pct) / 100.0);
-	      ncB = gdImageBlue (src, c) * (pct / 100.0)
-		+ gdImageBlue (dst, dc) * ((100 - pct) / 100.0);
+	      ncR = (int)(gdImageRed (src, c) * (pct / 100.0f)
+		+ gdImageRed (dst, dc) * ((100 - pct) / 100.0f));
+	      ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f)
+		+ gdImageGreen (dst, dc) * ((100 - pct) / 100.0f));
+	      ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f)
+		+ gdImageBlue (dst, dc) * ((100 - pct) / 100.0f));
 
 	      /* Find a reasonable color */
 	      nc = gdImageColorResolve (dst, ncR, ncG, ncB);
@@ -1930,19 +1930,19 @@ gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int sr
 	  else
 	    {
 	      dc = gdImageGetPixel (dst, tox, toy);
-	      g = 0.29900 * dst->red[dc]
-		+ 0.58700 * dst->green[dc]
-		+ 0.11400 * dst->blue[dc];
+	      g = (0.29900f * dst->red[dc])
+		+ (0.58700f * dst->green[dc])
+		+ (0.11400f * dst->blue[dc]);
 
-	      ncR = gdImageRed (src, c) * (pct / 100.0)
+	      ncR = (int)(gdImageRed (src, c) * (pct / 100.0f)
 		+ gdImageRed (dst, dc) * g *
-		((100 - pct) / 100.0);
-	      ncG = gdImageGreen (src, c) * (pct / 100.0)
+		((100 - pct) / 100.0f));
+	      ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f)
 		+ gdImageGreen (dst, dc) * g *
-		((100 - pct) / 100.0);
-	      ncB = gdImageBlue (src, c) * (pct / 100.0)
+		((100 - pct) / 100.0f));
+	      ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f)
 		+ gdImageBlue (dst, dc) * g *
-		((100 - pct) / 100.0);
+		((100 - pct) / 100.0f));
 
 	      /* First look for an exact match */
 	      nc = gdImageColorExact (dst, ncR, ncG, ncB);
@@ -2123,22 +2123,22 @@ gdImageCopyResampled (gdImagePtr dst,
 	  do
 	    {
 	      float yportion;
-	      if (floor (sy) == floor (sy1))
+	      if (floorf (sy) == floorf (sy1))
 		{
-		  yportion = 1.0 - (sy - floor (sy));
+		  yportion = 1.0f - (sy - floorf (sy));
 		  if (yportion > sy2 - sy1)
 		    {
 		      yportion = sy2 - sy1;
 		    }
-		  sy = floor (sy);
+		  sy = floorf (sy);
 		}
-	      else if (sy == floor (sy2))
+	      else if (sy == floorf (sy2))
 		{
-		  yportion = sy2 - floor (sy2);
+		  yportion = sy2 - floorf (sy2);
 		}
 	      else
 		{
-		  yportion = 1.0;
+		  yportion = 1.0f;
 		}
 	      sx1 = ((float) x - (float) dstX) * (float) srcW /
 		dstW;
@@ -2150,22 +2150,22 @@ gdImageCopyResampled (gdImagePtr dst,
 		  float xportion;
 		  float pcontribution;
 		  int p;
-		  if (floor (sx) == floor (sx1))
+		  if (floorf (sx) == floorf (sx1))
 		    {
-		      xportion = 1.0 - (sx - floor (sx));
+		      xportion = 1.0f - (sx - floorf (sx));
 		      if (xportion > sx2 - sx1)
 			{
 			  xportion = sx2 - sx1;
 			}
-		      sx = floor (sx);
+		      sx = floorf (sx);
 		    }
-		  else if (sx == floor (sx2))
+		  else if (sx == floorf (sx2))
 		    {
-		      xportion = sx2 - floor (sx2);
+		      xportion = sx2 - floorf (sx2);
 		    }
 		  else
 		    {
-		      xportion = 1.0;
+		      xportion = 1.0f;
 		    }
 		  pcontribution = xportion * yportion;
 		  p = gdImageGetTrueColorPixel (
@@ -3444,9 +3444,9 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 			new_g = (new_g/filter_div)+offset;
 			new_b = (new_b/filter_div)+offset;
 
-			new_r = (new_r > 255.0)? 255.0 : ((new_r < 0.0)? 0.0:new_r);
-			new_g = (new_g > 255.0)? 255.0 : ((new_g < 0.0)? 0.0:new_g);
-			new_b = (new_b > 255.0)? 255.0 : ((new_b < 0.0)? 0.0:new_b);
+			new_r = (new_r > 255.0f)? 255.0f : ((new_r < 0.0f)? 0.0f:new_r);
+			new_g = (new_g > 255.0f)? 255.0f : ((new_g < 0.0f)? 0.0f:new_g);
+			new_b = (new_b > 255.0f)? 255.0f : ((new_b < 0.0f)? 0.0f:new_b);
 
 			new_pxl = gdImageColorAllocateAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
 			if (new_pxl == -1) {
@@ -3504,35 +3504,35 @@ int gdImageSelectiveBlur( gdImagePtr src)
 
 						new_r = ((float)gdImageRed(srcback, cpxl)) - ((float)gdImageRed (srcback, pxl));
 						
-						if (new_r < 0.0) {
+						if (new_r < 0.0f) {
 							new_r = -new_r;
 						}	
 						if (new_r != 0) {
-							flt_r[j][i] = 1.0/new_r;
+							flt_r[j][i] = 1.0f/new_r;
 						} else {
-							flt_r[j][i] = 1.0;
+							flt_r[j][i] = 1.0f;
 						}	
 
 						new_g = ((float)gdImageGreen(srcback, cpxl)) - ((float)gdImageGreen(srcback, pxl));
 						
-						if (new_g < 0.0) {
+						if (new_g < 0.0f) {
 							new_g = -new_g;
 						}	
 						if (new_g != 0) {
-							flt_g[j][i] = 1.0/new_g;
+							flt_g[j][i] = 1.0f/new_g;
 						} else {
-							flt_g[j][i] = 1.0;
+							flt_g[j][i] = 1.0f;
 						}	
 
 						new_b = ((float)gdImageBlue(srcback, cpxl)) - ((float)gdImageBlue(srcback, pxl));
 
-						if (new_b < 0.0) {
+						if (new_b < 0.0f) {
 							new_b = -new_b;
 						}	
 						if (new_b != 0) {
-							flt_b[j][i] = 1.0/new_b;
+							flt_b[j][i] = 1.0f/new_b;
 						} else {
-							flt_b[j][i] = 1.0;
+							flt_b[j][i] = 1.0f;
 						}
 					}
 						
@@ -3567,9 +3567,9 @@ int gdImageSelectiveBlur( gdImagePtr src)
 				}
 			}
 
-			new_r = (new_r > 255.0)? 255.0 : ((new_r < 0.0)? 0.0:new_r);
-			new_g = (new_g > 255.0)? 255.0 : ((new_g < 0.0)? 0.0:new_g);
-			new_b = (new_b > 255.0)? 255.0 : ((new_b < 0.0)? 0.0:new_b);
+			new_r = (new_r > 255.0f)? 255.0f : ((new_r < 0.0f)? 0.0f:new_r);
+			new_g = (new_g > 255.0f)? 255.0f : ((new_g < 0.0f)? 0.0f:new_g);
+			new_b = (new_b > 255.0f)? 255.0f : ((new_b < 0.0f)? 0.0f:new_b);
 			new_pxl = gdImageColorAllocateAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);
 			if (new_pxl == -1) {
 				new_pxl = gdImageColorClosestAlpha(src, (int)new_r, (int)new_g, (int)new_b, new_a);

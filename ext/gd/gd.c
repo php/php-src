@@ -3988,7 +3988,7 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 	if (im_src==NULL) {
 		RETURN_FALSE;
 	}
-	if (gdImageSmooth(im_src, weight)==1) {
+	if (gdImageSmooth(im_src, (float)weight)==1) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
