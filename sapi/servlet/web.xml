@@ -21,4 +21,21 @@
             *.php
         </url-pattern>
     </servlet-mapping>
+
+    <servlet>
+      <servlet-name>
+          php-formatter
+      </servlet-name>
+      <servlet-class>
+          net.php.formatter
+      </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>
+            php-formatter
+        </servlet-name>
+        <url-pattern>
+            *.phps
+        </url-pattern>
+    </servlet-mapping>
 </web-app>

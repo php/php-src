@@ -108,13 +108,11 @@ static zend_module_entry *additional_php_extensions[] = {
 void ThrowIOException (JNIEnv *jenv, char *msg) {
 	jclass iox = (*jenv)->FindClass (jenv, "java/io/IOException");
 	(*jenv)->ThrowNew (jenv, iox, (msg?msg:"null") );
-	printf("IOException: %s\n", msg);
 }
 
 void ThrowServletException (JNIEnv *jenv, char *msg) {
 	jclass sx = (*jenv)->FindClass (jenv, "javax/servlet/ServletException");
 	(*jenv)->ThrowNew (jenv, sx, msg);
-	printf("ServletException: %s\n", msg);
 }
 
 /***************************************************************************/
@@ -138,7 +136,12 @@ static int sapi_servlet_ub_write(const char *str, uint str_length)
 	jclass servletClass = (*jenv)->GetObjectClass(jenv, servlet);
 	jmethodID write = (*jenv)->GetMethodID(jenv, servletClass, "write",
 		"(Ljava/lang/String;)V");
-	jstring arg=(*jenv)->NewStringUTF(jenv, str);
+	char *copy = malloc(str_length+1);
+	jstring arg;
+	memcpy(copy, str, str_length);
+	copy[str_length] = 0;
+	arg=(*jenv)->NewStringUTF(jenv, copy);
+	free(copy);
 	(*jenv)->CallVoidMethod(jenv, servlet, write, arg);
 	(*jenv)->DeleteLocalRef(jenv, arg);
 	return str_length;
@@ -315,7 +318,8 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	(JNIEnv *jenv, jobject self, 
 	 jstring requestMethod, jstring queryString,
 	 jstring pathInfo, jstring pathTranslated,
-	 jstring contentType, jint contentLength, jstring authUser)
+	 jstring contentType, jint contentLength, 
+	 jstring authUser, jboolean display_source_mode)
 {
 
 	zend_file_handle file_handle;
@@ -376,12 +380,23 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	 * Execute the request
 	 */
 	Java_net_php_reflect_setEnv(jenv, 0);
-	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+
+    if (display_source_mode) {
+        zend_syntax_highlighter_ini syntax_highlighter_ini;
+
+        if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
+            php_get_highlight_struct(&syntax_highlighter_ini);
+	    sapi_send_headers();
+            zend_highlight(&syntax_highlighter_ini);
+        }
+    } else {
+	    php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+	    php_header();			/* Make sure headers have been sent */
+    }
 
 	/*
 	 * Clean up
 	 */
-	php_header();			/* Make sure headers have been sent */
 	
 	FREESTRING(SG(request_info).request_method);
 	FREESTRING(SG(request_info).query_string);
@@ -392,6 +407,6 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	efree(SG(server_context));
 	SG(server_context)=0;
 
-	php_request_shutdown((void *) 0);
+    if (!display_source_mode) php_request_shutdown((void *) 0);
 }
 
