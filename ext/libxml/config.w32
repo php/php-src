@@ -15,7 +15,6 @@ if (PHP_LIBXML == "yes") {
 		if (!PHP_LIBXML_SHARED) {
 			ADD_DEF_FILE("ext\\libxml\\php_libxml2.def");
 		}
-		ADD_EXTENSION_DEP('libxml', 'iconv');
 	}
 }
 
