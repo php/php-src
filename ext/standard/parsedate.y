@@ -26,7 +26,7 @@
 # include "win32/time.h"
 #endif
 
-#include <php_parsedate.h>
+#include "php_parsedate.h"
 
 #if HAVE_STDLIB_H
 # include <stdlib.h> /* for `free'; used by Bison 1.27 */
