@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP version 4.0                                                      |
+   | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997, 1998, 1999, 2000, 2001 The PHP Group             |
    +----------------------------------------------------------------------+
@@ -12,8 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   | Wez Furlong (wez@thebrainroom.com)                                   |
+   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
    | Credit also given to Double Precision Inc. who wrote the code that   |
    | the support routines for this extension were based upon.             |
    +----------------------------------------------------------------------+
