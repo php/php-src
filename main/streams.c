@@ -1517,7 +1517,7 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 	switch (castas)	{
 		case PHP_STREAM_AS_STDIO:
 			if (ret) {
-				*ret = data->file;
+				*(FILE**)ret = data->file;
 				data->fd = -1;
 			}
 			return SUCCESS;
@@ -1532,7 +1532,7 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 			}
 			if (ret) {
 				fflush(data->file);
-				*ret = (void*)fd;
+				*(int**)ret = fd;
 			}
 			return SUCCESS;
 		default:
@@ -1959,7 +1959,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	if (castas == PHP_STREAM_AS_STDIO) {
 		if (stream->stdiocast) {
 			if (ret) {
-				*ret = stream->stdiocast;
+				*(FILE**)ret = stream->stdiocast;
 			}
 			goto exit_success;
 		}
@@ -1979,7 +1979,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		if (ret == NULL)
 			goto exit_success;
 
-		*ret = fopencookie(stream, stream->mode, PHP_STREAM_COOKIE_FUNCTIONS);
+		*(FILE**)ret = fopencookie(stream, stream->mode, PHP_STREAM_COOKIE_FUNCTIONS);
 
 		if (*ret != NULL) {
 			off_t pos;
@@ -2022,7 +2022,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 					int retcode = php_stream_cast(newstream, castas | flags, ret, show_err);
 
 					if (retcode == SUCCESS)
-						rewind((FILE*)*ret);
+						rewind(*(FILE**)ret);
 					
 					/* do some specialized cleanup */
 					if ((flags & PHP_STREAM_CAST_RELEASE)) {
@@ -2071,7 +2071,7 @@ exit_success:
 	}
 	
 	if (castas == PHP_STREAM_AS_STDIO && ret)
-		stream->stdiocast = *ret;
+		stream->stdiocast = *(FILE**)ret;
 	
 	if (flags & PHP_STREAM_CAST_RELEASE) {
 		php_stream_free(stream, PHP_STREAM_FREE_CLOSE_CASTED);

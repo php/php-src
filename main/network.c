@@ -1081,7 +1081,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 				return FAILURE;
 #endif
 			if (ret)	{
-				*ret = fdopen(sock->socket, stream->mode);
+				*(FILE**)ret = fdopen(sock->socket, stream->mode);
 				if (*ret)
 					return SUCCESS;
 				return FAILURE;
@@ -1094,7 +1094,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 				return FAILURE;
 #endif
 			if (ret)
-				*ret = (void*)sock->socket;
+				*(int*)ret = sock->socket;
 			return SUCCESS;
 		default:
 			return FAILURE;
