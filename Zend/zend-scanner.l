@@ -637,7 +637,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 <LOOKING_FOR_PROPERTY>. {
 	/*unput(yytext[0]);*/
-	yyless(1);
+	yyless(0);
 	yy_pop_state();
 }
 
@@ -848,8 +848,8 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <LOOKING_FOR_VARNAME>. {
-	/*yyless(1);*/
-	unput(yytext[0]);
+	/*unput(yytext[0]);*/
+	yyless(0);
 	yy_pop_state();
 	yy_push_state(IN_SCRIPTING);
 }
