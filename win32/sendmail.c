@@ -589,7 +589,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 	time_t tNow = time(NULL);
 	struct tm *tm = localtime(&tNow);
 	int zoneh = abs(_timezone);
-	int zonem, res;
+	int zonem, res, len;
 	char *header_buffer;
 	char *headers_lc = NULL;
 	size_t i;
@@ -646,9 +646,15 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		}
 	}
 	if(xheaders){
-		if (!addToHeader(&header_buffer, "%s", xheaders)) {
+		if (!addToHeader(&header_buffer, "%s\r\n", xheaders)) {
 			goto PostHeader_outofmem;
 		}
+		
+len = strlen(header_buffer);
+		if ((len > 4)&&(header_buffer[len-4]=='\r')) {
+			header_buffer[len-2]=='\0';
+		}
+
 	}
 
 	if (headers_lc) {
