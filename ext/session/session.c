@@ -809,7 +809,8 @@ static void php_session_start(TSRMLS_D)
 	int module_number = PS(module_number);
 	int nrand;
 	int lensess;
-	int register_trans_sid_handler = PS(use_trans_sid);
+
+	PS(apply_trans_sid) = PS(use_trans_sid);
 
 	if (PS(session_status) != php_session_none) 
 		return;
@@ -829,7 +830,7 @@ static void php_session_start(TSRMLS_D)
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
-			register_trans_sid_handler = 0;
+			PS(apply_trans_sid) = 0;
 			send_cookie = 0;
 		}
 
@@ -884,14 +885,14 @@ static void php_session_start(TSRMLS_D)
 		efree(PS(id));
 		PS(id) = NULL;
 		send_cookie = 1;
-		register_trans_sid_handler = 1;
+		PS(apply_trans_sid) = 1;
 	}
 	
 	if (!PS(id))
 		PS(id) = _php_create_id(NULL TSRMLS_CC);
 	
 	if (!PS(use_cookies) && send_cookie) {
-		register_trans_sid_handler = 1;
+		PS(apply_trans_sid) = 1;
 		send_cookie = 0;
 	}
 	
@@ -900,7 +901,7 @@ static void php_session_start(TSRMLS_D)
 	}
 
 
-	if (register_trans_sid_handler) {
+	if (PS(apply_trans_sid)) {
 		smart_str var = {0};
 
 		smart_str_appends(&var, PS(session_name));
@@ -913,7 +914,7 @@ static void php_session_start(TSRMLS_D)
 	}
 
 	PS(session_status) = php_session_active;
-	if (register_trans_sid_handler) {
+	if (PS(apply_trans_sid)) {
 		php_session_start_output_handler(4096 TSRMLS_CC);
 	}
 
@@ -1337,6 +1338,15 @@ PHP_FUNCTION(session_unset)
 	zend_hash_clean(Z_ARRVAL_P(PS(http_session_vars)));
 }
 /* }}} */
+
+
+PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC)
+{
+	if (PS(apply_trans_sid) && (PS(session_status) == php_session_active)) {
+		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen TSRMLS_CC);
+	}
+}
+
 
 static void php_rinit_session_globals(TSRMLS_D)
 {		
