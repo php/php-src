@@ -923,6 +923,10 @@ SOURCE=..\ext\mbstring\mbfilter_kr.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\mbstring\mbfilter_ru.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\mbstring\mbfilter_tw.c
 # End Source File
 # Begin Source File
