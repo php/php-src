@@ -139,19 +139,9 @@ PHPAPI char *xml_utf8_decode(const XML_Char *, int, int *, const XML_Char *);
 #define phpext_xml_ptr xml_module_ptr
 
 #ifdef ZTS
-#define XMLLS_D php_xml_globals *xml_globals
-#define XMLLS_DC , PSLS_D
-#define XMLLS_C xml_globals
-#define XMLLS_CC , XMLLS_C
-#define XML(v) (xml_globals->v)
-#define XMLLS_FETCH() php_xml_globals *xml_globals = ts_resource(xml_globals_id)
+#define XML(v) TSRMG(xml_globals_id, php_xml_globals *, v)
 #else
-#define XMLLS_D
-#define XMLLS_DC
-#define XMLLS_C
-#define XMLLS_CC
 #define XML(v) (xml_globals.v)
-#define XMLLS_FETCH()
 #endif
 
 #endif /* PHP_XML_H */

@@ -50,7 +50,7 @@ static int php_default_output_func(const char *str, uint str_len)
 }
 
 
-static void php_output_init_globals(OLS_D TSRMLS_DC)
+static void php_output_init_globals(php_output_globals *output_globals_p TSRMLS_DC)
 {
  	OG(php_body_write) = php_default_output_func;
 	OG(php_header_write) = php_default_output_func;
@@ -66,14 +66,14 @@ PHPAPI void php_output_startup(void)
 #ifdef ZTS
 	ts_allocate_id(&output_globals_id, sizeof(php_output_globals), (ts_allocate_ctor) php_output_init_globals, NULL);
 #else 
-	php_output_init_globals(OLS_C TSRMLS_CC);
+	php_output_init_globals(&output_globals TSRMLS_CC);
 #endif
 }
 
 
 PHPAPI void php_output_activate(void)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	OG(php_body_write) = php_ub_body_write;
 	OG(php_header_write) = sapi_module.ub_write;
@@ -85,7 +85,7 @@ PHPAPI void php_output_activate(void)
 
 PHPAPI void php_output_set_status(zend_bool status)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	OG(disable_output) = !status;
 }
@@ -103,13 +103,13 @@ void php_output_register_constants()
 
 PHPAPI int php_body_write(const char *str, uint str_length)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 	return OG(php_body_write)(str, str_length);	
 }
 
 PHPAPI int php_header_write(const char *str, uint str_length)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 	if (OG(disable_output)) {
 		return 0;
 	} else {
@@ -121,7 +121,7 @@ PHPAPI int php_header_write(const char *str, uint str_length)
  * Start output buffering */
 PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (OG(ob_lock)) {
 		return FAILURE;
@@ -146,8 +146,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 	char *to_be_destroyed_buffer;
 	char *to_be_destroyed_handled_output[2] = { 0, 0 };
 	int status;
-	SLS_FETCH();
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (OG(ob_nesting_level)==0) {
 		return;
@@ -171,7 +170,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 		zval **params[2];
 		zval *orig_buffer;
 		zval *z_status;
-		CLS_FETCH();
+		TSRMLS_FETCH();
 
 		ALLOC_INIT_ZVAL(orig_buffer);
 		ZVAL_STRINGL(orig_buffer,OG(active_ob_buffer).buffer,OG(active_ob_buffer).text_length,0);
@@ -263,8 +262,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
  * End output buffering (all buffers) */
 PHPAPI void php_end_ob_buffers(zend_bool send_buffer)
 {
-	OLS_FETCH();
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	while (OG(ob_nesting_level)!=0) {
 		php_end_ob_buffer(send_buffer, 0);
@@ -280,7 +278,7 @@ PHPAPI void php_end_ob_buffers(zend_bool send_buffer)
  */
 PHPAPI void php_start_implicit_flush()
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	php_end_ob_buffer(1, 0);		/* Switch out of output buffering if we're in it */
 	OG(implicit_flush)=1;
@@ -291,7 +289,7 @@ PHPAPI void php_start_implicit_flush()
  */
 PHPAPI void php_end_implicit_flush()
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	OG(implicit_flush)=0;
 }
@@ -301,7 +299,7 @@ PHPAPI void php_end_implicit_flush()
  */
 PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (OG(ob_nesting_level)==0) {
 		return;
@@ -321,7 +319,7 @@ PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_outpu
  */
 static inline void php_ob_allocate(void)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (OG(active_ob_buffer).size<OG(active_ob_buffer).text_length) {
 		while (OG(active_ob_buffer).size <= OG(active_ob_buffer).text_length) {
@@ -337,7 +335,7 @@ static inline void php_ob_allocate(void)
  */
 static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (OG(ob_nesting_level)>0) {
 		if (OG(ob_nesting_level)==1) { /* initialize stack */
@@ -363,7 +361,7 @@ static void php_ob_append(const char *text, uint text_length)
 {
 	char *target;
 	int original_ob_text_length;
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	original_ob_text_length=OG(active_ob_buffer).text_length;
 	OG(active_ob_buffer).text_length = OG(active_ob_buffer).text_length + text_length;
@@ -390,7 +388,7 @@ static void php_ob_append(const char *text, uint text_length)
 static void php_ob_prepend(const char *text, uint text_length)
 {
 	char *p, *start;
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	OG(active_ob_buffer).text_length += text_length;
 	php_ob_allocate();
@@ -412,7 +410,7 @@ static void php_ob_prepend(const char *text, uint text_length)
  * Return the current output buffer */
 int php_ob_get_buffer(pval *p)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (OG(ob_nesting_level)==0) {
 		return FAILURE;
@@ -426,7 +424,7 @@ int php_ob_get_buffer(pval *p)
  * Return the size of the current output buffer */
 int php_ob_get_length(pval *p)
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (OG(ob_nesting_level) == 0) {
 		return FAILURE;
@@ -455,8 +453,7 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 	char *newstr = NULL;
 	size_t new_length=0;
 	int result;
-	OLS_FETCH();
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (OG(disable_output)) {
 		return 0;
@@ -485,8 +482,7 @@ static int php_ub_body_write_no_header(const char *str, uint str_length)
 static int php_ub_body_write(const char *str, uint str_length)
 {
 	int result = 0;
-	SLS_FETCH();
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (SG(request_info).headers_only) {
 		php_header();
@@ -494,10 +490,10 @@ static int php_ub_body_write(const char *str, uint str_length)
 	}
 	if (php_header()) {
 		if (zend_is_compiling()) {
-			CLS_FETCH();
+			TSRMLS_FETCH();
 
-			OG(output_start_filename) = zend_get_compiled_filename(CLS_C);
-			OG(output_start_lineno) = zend_get_compiled_lineno(CLS_C);
+			OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C);
+			OG(output_start_lineno) = zend_get_compiled_lineno(TSRMLS_C);
 		} else if (zend_is_executing()) {
 			TSRMLS_FETCH();
 
@@ -557,8 +553,7 @@ PHP_FUNCTION(ob_start)
 			break;
 	}
 	if (php_start_ob_buffer(output_handler, chunk_size)==FAILURE) {
-		SLS_FETCH();
-		OLS_FETCH();
+		TSRMLS_FETCH();
 
 		if (SG(headers_sent) && !SG(request_info).headers_only) {
 			OG(php_body_write) = php_ub_body_write_no_header;
@@ -641,7 +636,7 @@ PHP_FUNCTION(ob_implicit_flush)
 
 PHPAPI char *php_get_output_start_filename()
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	return OG(output_start_filename);
 }
@@ -649,7 +644,7 @@ PHPAPI char *php_get_output_start_filename()
 
 PHPAPI int php_get_output_start_lineno()
 {
-	OLS_FETCH();
+	TSRMLS_FETCH();
 
 	return OG(output_start_lineno);
 }

@@ -30,12 +30,12 @@
 #define PARSE_COOKIE 2
 #define PARSE_STRING 3
 
-void php_treat_data(int arg, char *str, zval* destArray TSRMLS_DC PLS_DC SLS_DC);
-PHPAPI void php_import_environment_variables(zval *array_ptr TSRMLS_DC PLS_DC);
-PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array TSRMLS_DC PLS_DC);
+void php_treat_data(int arg, char *str, zval* destArray TSRMLS_DC);
+PHPAPI void php_import_environment_variables(zval *array_ptr TSRMLS_DC);
+PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array TSRMLS_DC);
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *val, int val_len, pval *track_vars_array TSRMLS_DC PLS_DC);
-PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_array TSRMLS_DC PLS_DC);
+PHPAPI void php_register_variable_safe(char *var, char *val, int val_len, pval *track_vars_array TSRMLS_DC);
+PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_array TSRMLS_DC);
 
 
 #endif /* PHP_VARIABLES_H */

@@ -116,7 +116,7 @@ void ThrowServletException (JNIEnv *jenv, char *msg) {
 
 static int sapi_servlet_ub_write(const char *str, uint str_length)
 {
-	SLS_FETCH();
+	TSRMLS_FETCH();
 	if (!SG(server_context)) {
 		fprintf(stderr, str);
 		return 0;
@@ -144,7 +144,7 @@ static int sapi_servlet_ub_write(const char *str, uint str_length)
 
 static void sapi_servlet_send_header(sapi_header_struct *sapi_header, void *server_context)
 {
-	SLS_FETCH();
+	TSRMLS_FETCH();
 	if (!sapi_header) return;
 	if (!SG(server_context)) return;
 
@@ -162,7 +162,7 @@ static void sapi_servlet_send_header(sapi_header_struct *sapi_header, void *serv
 }
 
 
-static int sapi_servlet_read_post(char *buffer, uint count_bytes SLS_DC)
+static int sapi_servlet_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	if (count_bytes == 0) {
 		return 0;
@@ -190,7 +190,7 @@ static int sapi_servlet_read_post(char *buffer, uint count_bytes SLS_DC)
 }
 
 
-static char *sapi_servlet_read_cookies(SLS_D)
+static char *sapi_servlet_read_cookies(TSRMLS_D)
 {
 	JNIEnv *jenv = ((servlet_request*)SG(server_context))->jenv;
 	jobject servlet = ((servlet_request*)SG(server_context))->servlet;
@@ -318,9 +318,8 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 #ifndef VIRTUAL_DIR
 	char cwd[MAXPATHLEN];
 #endif
-	SLS_FETCH();
-	PLS_FETCH();
-	CLS_FETCH();
+	TSRMLS_FETCH();
+	TSRMLS_FETCH();
 	TSRMLS_FETCH();
 
 	zend_try {
@@ -342,7 +341,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		SG(sapi_headers).http_response_code = 200;
 		SG(request_info).content_length = contentLength;
 		SG(request_info).auth_password = NULL;
-		if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC)==FAILURE) {
+		if (php_request_startup(TSRMLS_C)==FAILURE) {
 			ThrowServletException(jenv,"request startup failure");
 			return;
 		}
@@ -379,13 +378,13 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		if (display_source_mode) {
 			zend_syntax_highlighter_ini syntax_highlighter_ini;
 
-			if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
+			if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
 				php_get_highlight_struct(&syntax_highlighter_ini);
 				sapi_send_headers();
 				zend_highlight(&syntax_highlighter_ini);
 			}
 		} else {
-			php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
+			php_execute_script(&file_handle TSRMLS_CC);
 			php_header();			/* Make sure headers have been sent */
 		}
 

@@ -274,7 +274,6 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 		zval *argv[2];
 		zval *retval;
 		int   error;
-		TSRMLS_FETCH();
 
 		MAKE_STD_ZVAL(argv[0]);
 		MAKE_STD_ZVAL(argv[1]);

@@ -352,7 +352,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 	char *typelib_name_buffer;
 	char *strtok_buf = NULL;
 	int interactive;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	interactive = CG(interactive);
 

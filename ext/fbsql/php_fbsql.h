@@ -113,19 +113,9 @@ ZEND_BEGIN_MODULE_GLOBALS(fbsql)
 ZEND_END_MODULE_GLOBALS(fbsql)
 
 #ifdef ZTS
-# define FBSQLLS_D		zend_fbsql_globals *fbsql_globals
-# define FBSQLLS_DC		, FBSQLLS_D
-# define FBSQLLS_C		fbsql_globals
-# define FBSQLLS_CC		, FBSQLLS_C
-# define FB_SQL_G(v)	(fbsql_globals->v)
-# define FBSQLLS_FETCH()	zend_fbsql_globals *fbsql_globals = ts_resource(fbsql_globals_id)
+# define FB_SQL_G(v) TSRMG(fbsql_globals_id, zend_fbsql_globals *, v)
 #else
-# define FBSQLLS_D
-# define FBSQLLS_DC
-# define FBSQLLS_C
-# define FBSQLLS_CC
 # define FB_SQL_G(v)	(fbsql_globals.v)
-# define FBSQLLS_FETCH()
 #endif
 
 

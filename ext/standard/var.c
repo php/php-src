@@ -184,7 +184,7 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 	int i;
 	ulong *var_already;
 	HashTable *myht;
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	if(var_hash != NULL && php_add_var_hash(var_hash,*struc,(void *)&var_already) == FAILURE && (*struc)->is_ref) {
 		slen = sprintf(s,"R:%ld;",*var_already);
@@ -208,7 +208,6 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 			return;
 
 		case IS_DOUBLE: {
-				TSRMLS_FETCH();
 				slen = sprintf(s, "d:%.*G;",(int) EG(precision), Z_DVAL_PP(struc));
 				STR_CAT(buf, s, slen);
 			}
@@ -236,7 +235,6 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 				zval *fname;
 				int res;
 				PHP_CLASS_ATTRIBUTES;
-				CLS_FETCH();
 
 				MAKE_STD_ZVAL(fname);
 				ZVAL_STRING(fname,"__sleep",1);
@@ -365,9 +363,7 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 	ulong id;
 	HashTable *myht;
 	zval **rval_ref;
-
 	TSRMLS_FETCH();
-	BLS_FETCH();
 
 	if (var_hash && **p != 'R') {  /* references aren't counted by serializer! */
 		zend_hash_next_index_insert(var_hash, rval, sizeof(*rval), NULL);
@@ -583,7 +579,6 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 			if ((*rval)->type == IS_OBJECT) {
 				zval *retval_ptr = NULL;
 				zval *fname;
-				CLS_FETCH();
 
 				MAKE_STD_ZVAL(fname);
 				ZVAL_STRING(fname,"__wakeup",1);

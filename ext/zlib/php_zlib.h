@@ -70,19 +70,10 @@ int php_enable_output_compression(int buffer_size);
 
 
 #ifdef ZTS
-#define ZLIBLS_D php_zlib_globals *zlib_globals
-#define ZLIBLS_DC , ZLIBLS_D
-#define ZLIBLS_C zlib_globals
-#define ZLIBLS_CC , ZLIBLS_C
 #define ZLIBG(v) (zlib_globals->v)
-#define ZLIBLS_FETCH() php_zlib_globals *zlib_globals = ts_resource(zlib_globals_id)
+#define ZLIBG(v) TSRMG(zlib_globals_id, zend_zlib_globals *, v)
 #else
-#define ZLIBLS_D
-#define ZLIBLS_DC
-#define ZLIBLS_C
-#define ZLIBLS_CC
 #define ZLIBG(v) (zlib_globals.v)
-#define ZLIBLS_FETCH()
 #endif
 
 #define phpext_zlib_ptr zlib_module_ptr

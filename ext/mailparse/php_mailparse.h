@@ -71,11 +71,9 @@ extern ZEND_DECLARE_MODULE_GLOBALS(mailparse);
 
 
 #ifdef ZTS
-#define MAILPARSEG(v) (mailparse_globals->v)
-#define MAILPARSELS_FETCH() zend_mailparse_globals *mailparse_globals = ts_resource(mailparse_globals_id)
+#define MAILPARSEG(v) TSRMG(mailparse_globals_id, zend_mailparse_globals *, v)
 #else
 #define MAILPARSEG(v) (mailparse_globals.v)
-#define MAILPARSELS_FETCH()
 #endif
 
 #endif

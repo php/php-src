@@ -92,7 +92,7 @@ HashTable fopen_url_wrappers_hash;
  */
 PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path))
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if(PG(allow_url_fopen)) {
 		return zend_hash_add(&fopen_url_wrappers_hash, protocol, strlen(protocol), &wrapper, sizeof(wrapper), NULL);
@@ -106,7 +106,7 @@ PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path
  */
 PHPAPI int php_unregister_url_wrapper(char *protocol)
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if(PG(allow_url_fopen)) {
 		return zend_hash_del(&fopen_url_wrappers_hash, protocol, strlen(protocol));
@@ -120,7 +120,7 @@ PHPAPI int php_unregister_url_wrapper(char *protocol)
  */
 int php_init_fopen_wrappers(void) 
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if(PG(allow_url_fopen)) 
 		return zend_hash_init(&fopen_url_wrappers_hash, 0, NULL, NULL, 1);
@@ -133,7 +133,7 @@ int php_init_fopen_wrappers(void)
  */
 int php_shutdown_fopen_wrappers(void) 
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if(PG(allow_url_fopen)) {
 		zend_hash_destroy(&fopen_url_wrappers_hash);
@@ -149,13 +149,12 @@ int php_shutdown_fopen_wrappers(void)
 	
 	When open_basedir is NULL, always return 0
 */
-PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
+PHPAPI int php_check_specific_open_basedir(char *basedir, char *path TSRMLS_DC)
 {
 	char resolved_name[MAXPATHLEN];
 	char resolved_basedir[MAXPATHLEN];
 	char local_open_basedir[MAXPATHLEN];
 	int local_open_basedir_pos;
-	SLS_FETCH();
 	
 	/* Special case basedir==".": Use script-directory */
 	if ((strcmp(basedir, ".") == 0) && 
@@ -199,7 +198,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
  */
 PHPAPI int php_check_open_basedir(char *path)
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	/* Only check when open_basedir is available */
 	if (PG(open_basedir) && *PG(open_basedir)) {
@@ -218,7 +217,7 @@ PHPAPI int php_check_open_basedir(char *path)
 				end++;
 			}
 
-			if (php_check_specific_open_basedir(ptr, path PLS_CC) == 0) {
+			if (php_check_specific_open_basedir(ptr, path TSRMLS_CC) == 0) {
 				efree(pathbuf);
 				return 0;
 			}
@@ -257,7 +256,7 @@ static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **
  */
 PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
     if(!path) return NULL;
 	if(!*path) return NULL;
@@ -291,8 +290,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	struct stat st;
 	char *path_info, *filename;
 	int length;
-	PLS_FETCH();
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	filename = SG(request_info).path_translated;
 	path_info = SG(request_info).request_uri;
@@ -400,7 +398,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	int filename_length;
 	int safe_mode_include_dir_length;
 	int exec_fname_length;
-	PLS_FETCH();
 	TSRMLS_FETCH();
 
 	if (opened_path) {
@@ -560,7 +557,7 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 	} 
 
 	if (!protocol || !strncasecmp(protocol, "file",n)){
-		PLS_FETCH();
+		TSRMLS_FETCH();
 		
 		*issock = 0;
 		

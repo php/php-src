@@ -15,7 +15,7 @@ int rfc2045_ac_check(struct rfc2045 *p, int rwmode)
 			/* hasnon7bit: 8bit chars in this section or subsections */
 	const char *te;
 	int	is8bitte;
-	MAILPARSELS_FETCH();
+	TSRMLS_FETCH();
 
 	for (c=p->firstpart; c; c=c->next)
 		if (!c->isdummy)

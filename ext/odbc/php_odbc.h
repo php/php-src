@@ -324,19 +324,9 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 #define IS_SQL_BINARY(x) (x == SQL_BINARY || x == SQL_VARBINARY || x == SQL_LONGVARBINARY)
 
 #ifdef ZTS
-# define ODBCLS_D	php_odbc_globals *odbc_globals
-# define ODBCLS_DC	, ODBCLS_D
-# define ODBCLS_C	odbc_globals
-# define ODBCLS_CC , ODBCLS_C
-# define ODBCG(v) (odbc_globals->v)
-# define ODBCLS_FETCH()	php_odbc_globals *odbc_globals = ts_resource(odbc_globals_id)
+# define ODBCG(v) TSRMG(odbc_globals_id, php_odbc_globals *, v)
 #else
-# define ODBCLS_D
-# define ODBCLS_DC
-# define ODBCLS_C
-# define ODBCLS_CC
 # define ODBCG(v) (odbc_globals.v)
-# define ODBCLS_FETCH()
 extern ZEND_API php_odbc_globals odbc_globals;
 #endif
 

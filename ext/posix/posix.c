@@ -657,7 +657,6 @@ PHP_FUNCTION(posix_mkfifo)
 	pval   *path;
 	pval   *mode;
 	int     result;
-	PLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters(ht, 2, &path, &mode) == FAILURE) {
 		WRONG_PARAM_COUNT;

@@ -45,15 +45,9 @@ ZEND_BEGIN_MODULE_GLOBALS(iconv)
 ZEND_END_MODULE_GLOBALS(iconv)
 
 #ifdef ZTS
-#define ICONVLS_D zend_iconv_globals *iconv_globals
-#define ICONVLS_C iconv_globals
-#define ICONVG(v) (iconv_globals->v)
-#define ICONVLS_FETCH() zend_iconv_globals *iconv_globals = ts_resource(iconv_globals_id)
+#define ICONVG(v) TSRMG(iconv_globals_id, zend_iconv_globals *, v)
 #else
-#define ICONVLS_D
-#define ICONVLS_C
 #define ICONVG(v) (iconv_globals.v)
-#define ICONVLS_FETCH()
 #endif
 
 #define ICONV_INPUT_ENCODING "ISO-8859-1" 

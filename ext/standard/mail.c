@@ -81,7 +81,6 @@ PHP_FUNCTION(mail)
 	pval **argv[5];
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
 	int argc;
-	PLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 	if (argc < 3 || argc > 5 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {

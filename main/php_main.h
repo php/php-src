@@ -28,7 +28,7 @@
 #include "php_globals.h"
 #include "SAPI.h"
 
-PHPAPI int php_request_startup(CLS_D TSRMLS_DC PLS_DC SLS_DC);
+PHPAPI int php_request_startup(TSRMLS_D);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI void php_request_shutdown_for_exec(void *dummy);
 PHPAPI int php_module_startup(sapi_module_struct *sf);
@@ -38,12 +38,12 @@ PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 
 PHPAPI int php_startup_extensions(zend_module_entry **ptr, int count);
 
-PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC TSRMLS_DC PLS_DC);
-PHPAPI int php_handle_special_queries(SLS_D PLS_DC);
-PHPAPI int php_lint_script(zend_file_handle *file CLS_DC TSRMLS_DC PLS_DC);
+PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC);
+PHPAPI int php_handle_special_queries(TSRMLS_D);
+PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC);
 
 PHPAPI void php_handle_aborted_connection(void);
-PHPAPI int php_handle_auth_data(const char *auth SLS_DC);
+PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC);
 
 extern void php_call_shutdown_functions(void);
 

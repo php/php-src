@@ -139,7 +139,7 @@ ZEND_GET_MODULE(ldap)
 static void _close_ldap_link(zend_rsrc_list_entry *rsrc)
 {
 	LDAP *ld = (LDAP *)rsrc->ptr;
-	LDAPLS_FETCH();
+	TSRMLS_FETCH();
 
 	ldap_unbind_s(ld);
 	LDAPG(num_links)--;
@@ -238,8 +238,6 @@ PHP_MINFO_FUNCTION(ldap)
 	double SDKVersion;
 #endif
 
-	LDAPLS_FETCH();
-
 #if HAVE_NSLDAP
 /* Print version information */
 	SDKVersion = ldap_version( &ver );
@@ -303,7 +301,6 @@ PHP_FUNCTION(ldap_connect)
 	/*	char *hashed_details;
 	int hashed_details_length;*/
 	LDAP *ldap;
-	LDAPLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0: 
@@ -550,7 +547,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	int num_attribs = 0;
 	int i, errno;
 	int myargcount = ZEND_NUM_ARGS();
-	LDAPLS_FETCH();
   
 	if (myargcount < 3 || myargcount > 8 || zend_get_parameters_ex(myargcount, &link, &base_dn, &filter, &attrs, &attrsonly, &sizelimit, &timelimit, &deref) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -846,7 +842,6 @@ PHP_FUNCTION(ldap_first_entry)
 	pval **link, **result;
 	LDAP *ldap;
 	LDAPMessage *ldap_result, *ldap_result_entry;
-	LDAPLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -870,7 +865,6 @@ PHP_FUNCTION(ldap_next_entry)
 	pval **link, **result_entry;
 	LDAP *ldap;
 	LDAPMessage *ldap_result_entry, *ldap_result_entry_next;
-	LDAPLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -984,7 +978,6 @@ PHP_FUNCTION(ldap_first_attribute)
 	LDAPMessage *ldap_result_entry;
 	BerElement *ber;
 	char *attribute;
-	LDAPLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link, &result, &berp) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1834,7 +1827,6 @@ PHP_FUNCTION(ldap_first_reference)
 	LDAP *ldap;
 	LDAPMessage *ldap_result;
 	LDAPMessage *ldap_result_entry;
-	LDAPLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1858,7 +1850,6 @@ PHP_FUNCTION(ldap_next_reference)
 	pval **link, **result_entry;
 	LDAP *ldap;
 	LDAPMessage *ldap_result_entry, *ldap_result_entry_next;
-	LDAPLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
 		WRONG_PARAM_COUNT;

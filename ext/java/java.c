@@ -619,7 +619,7 @@ PHP_MINIT_FUNCTION(java) {
   if (!classpath) classpath = getenv("CLASSPATH");
 
   if (!libpath) {
-    PLS_FETCH();
+    TSRMLS_FETCH();
     libpath=PG(extension_dir);
   }
 

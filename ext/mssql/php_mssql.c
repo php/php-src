@@ -136,7 +136,8 @@ PHP_INI_END()
 /* error handler */
 static int php_mssql_error_handler(DBPROCESS *dbproc, int severity, int dberr, int oserr, char *dberrstr, char *oserrstr)
 {
-	MSSQLLS_FETCH();
+	TSRMLS_FETCH();
+
 	if (severity >= MS_SQL_G(min_error_severity)) {
 		php_error(E_WARNING,"MS SQL error:  %s (severity %d)", dberrstr, severity);
 	}
@@ -146,7 +147,8 @@ static int php_mssql_error_handler(DBPROCESS *dbproc, int severity, int dberr, i
 /* message handler */
 static int php_mssql_message_handler(DBPROCESS *dbproc, DBINT msgno,int msgstate, int severity,char *msgtext,char *srvname, char *procname,DBUSMALLINT line)
 {
-	MSSQLLS_FETCH();
+	TSRMLS_FETCH();
+
 	if (severity >= MS_SQL_G(min_message_severity)) {
 		php_error(E_WARNING,"MS SQL message:  %s (severity %d)", msgtext, severity);
 	}
@@ -157,7 +159,8 @@ static int php_mssql_message_handler(DBPROCESS *dbproc, DBINT msgno,int msgstate
 
 static int _clean_invalid_results(list_entry *le)
 {
-	MSSQLLS_FETCH();
+	TSRMLS_FETCH();
+
 	if (le->type == le_result) {
 		mssql_link *mssql_ptr = ((mssql_result *) le->ptr)->mssql_ptr;
 		
@@ -214,7 +217,7 @@ static void _free_mssql_result(zend_rsrc_list_entry *rsrc)
 
 static void php_mssql_set_default_link(int id)
 {
-	MSSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (MS_SQL_G(default_link)!=-1) {
 		zend_list_delete(MS_SQL_G(default_link));
@@ -226,7 +229,6 @@ static void php_mssql_set_default_link(int id)
 static void _close_mssql_link(zend_rsrc_list_entry *rsrc)
 {
 	mssql_link *mssql_ptr = (mssql_link *)rsrc->ptr;
-	MSSQLLS_FETCH();
 	TSRMLS_FETCH();
 
 	mssql_ptr->valid = 0;
@@ -241,7 +243,7 @@ static void _close_mssql_link(zend_rsrc_list_entry *rsrc)
 static void _close_mssql_plink(zend_rsrc_list_entry *rsrc)
 {
 	mssql_link *mssql_ptr = (mssql_link *)rsrc->ptr;
-	MSSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	dbclose(mssql_ptr->link);
 	dbfreelogin(mssql_ptr->login);
@@ -330,8 +332,6 @@ PHP_MSHUTDOWN_FUNCTION(mssql)
 
 PHP_RINIT_FUNCTION(mssql)
 {
-	MSSQLLS_FETCH();
-	
 	MS_SQL_G(default_link) = -1;
 	MS_SQL_G(num_links) = MS_SQL_G(num_persistent);
 	MS_SQL_G(appname) = estrndup("PHP 4.0",7);
@@ -348,7 +348,7 @@ PHP_RINIT_FUNCTION(mssql)
 
 PHP_RSHUTDOWN_FUNCTION(mssql)
 {
-	MSSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	STR_FREE(MS_SQL_G(appname));
 	if (MS_SQL_G(server_message)) {
@@ -360,7 +360,7 @@ PHP_RSHUTDOWN_FUNCTION(mssql)
 PHP_MINFO_FUNCTION(mssql)
 {
 	char buf[32];
-	MSSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MSSQL Support", "enabled");
@@ -384,8 +384,6 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length;
 	mssql_link mssql, *mssql_ptr;
 	char buffer[32];
-	MSSQLLS_FETCH();
-/*	PLS_FETCH(); */
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0: /* defaults */
@@ -653,7 +651,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 
 
-static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MSSQLLS_DC)
+static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS TSRMLS_DC)
 {
 	if (MS_SQL_G(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -687,12 +685,10 @@ PHP_FUNCTION(mssql_close)
 	zval **mssql_link_index=NULL;
 	int id;
 	mssql_link *mssql_ptr;
-	MSSQLLS_FETCH();
-
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MSSQLLS_CC);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -724,15 +720,13 @@ PHP_FUNCTION(mssql_select_db)
 	zval **db, **mssql_link_index;
 	int id;
 	mssql_link  *mssql_ptr;
-	MSSQLLS_FETCH();
-
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MSSQLLS_CC);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -880,7 +874,7 @@ int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int retvalue
 	int i, j = 0;
 	int *column_types;
 	char computed_buf[16];
-	MSSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	column_types = (int *) emalloc(sizeof(int) * result->num_fields);
 	for (i=0; i<result->num_fields; i++) {
@@ -955,12 +949,11 @@ int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int retvalue
 
 /* {{{ proto int mssql_fetch_batch(string result_index)
    Returns the next batch of records */
-PHP_FUNCTION(mssql_fetch_batch) {
+PHP_FUNCTION(mssql_fetch_batch)
+{
 	zval **mssql_result_index;
 	mssql_result *result;
 	mssql_link *mssql_ptr;
-	MSSQLLS_FETCH();
-
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -989,7 +982,6 @@ PHP_FUNCTION(mssql_query)
 	mssql_result *result;
 	int id, num_fields;
 	int batchsize;
-	MSSQLLS_FETCH();
 
 	batchsize = MS_SQL_G(batchsize);
 	switch(ZEND_NUM_ARGS()) {
@@ -997,7 +989,7 @@ PHP_FUNCTION(mssql_query)
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MSSQLLS_CC);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -1066,10 +1058,10 @@ PHP_FUNCTION(mssql_query)
 
 /* {{{ proto int mssql_rows_affected(int conn_id)
    Returns the number of records affected by the query */
-PHP_FUNCTION(mssql_rows_affected) {
+PHP_FUNCTION(mssql_rows_affected)
+{
 	zval **mssql_link_index;
 	mssql_link *mssql_ptr;
-	MSSQLLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_link_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1087,8 +1079,6 @@ PHP_FUNCTION(mssql_free_result)
 {
 	zval **mssql_result_index;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1109,8 +1099,6 @@ PHP_FUNCTION(mssql_free_result)
    Gets the last message from the MS-SQL server */
 PHP_FUNCTION(mssql_get_last_message)
 {
-	MSSQLLS_FETCH();
-
 	RETURN_STRING(MS_SQL_G(server_message),1);
 }
 
@@ -1122,8 +1110,6 @@ PHP_FUNCTION(mssql_num_rows)
 {
 	zval **mssql_result_index;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1143,8 +1129,6 @@ PHP_FUNCTION(mssql_num_fields)
 {
 	zval **mssql_result_index;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1163,8 +1147,6 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	zval **mssql_result_index, **resulttype = NULL;
 	mssql_result *result;
 	int i;
-	MSSQLLS_FETCH();
-	PLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1289,8 +1271,6 @@ PHP_FUNCTION(mssql_data_seek)
 {
 	zval **mssql_result_index, **offset;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1367,8 +1347,6 @@ PHP_FUNCTION(mssql_fetch_field)
 	zval **mssql_result_index, **offset;
 	int field_offset;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1422,8 +1400,6 @@ PHP_FUNCTION(mssql_field_length)
 	zval **mssql_result_index, **offset;
 	int field_offset;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1471,8 +1447,6 @@ PHP_FUNCTION(mssql_field_name)
 	zval **mssql_result_index, **offset;
 	int field_offset;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1521,8 +1495,6 @@ PHP_FUNCTION(mssql_field_type)
 	zval **mssql_result_index, **offset;
 	int field_offset;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1571,8 +1543,6 @@ PHP_FUNCTION(mssql_field_seek)
 	zval **mssql_result_index, **offset;
 	int field_offset;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1601,8 +1571,6 @@ PHP_FUNCTION(mssql_result)
 	zval **row, **field, **mssql_result_index;
 	int field_offset=0;
 	mssql_result *result;
-	MSSQLLS_FETCH();
-
 
 	if (ZEND_NUM_ARGS()!=3 || zend_get_parameters_ex(3, &mssql_result_index, &row, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1655,8 +1623,6 @@ PHP_FUNCTION(mssql_next_result)
 	int retvalue;
 	mssql_result *result;
 	mssql_link *mssql_ptr;
-	MSSQLLS_FETCH();
-
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1690,8 +1656,6 @@ PHP_FUNCTION(mssql_next_result)
 PHP_FUNCTION(mssql_min_error_severity)
 {
 	zval **severity;
-	MSSQLLS_FETCH();
-
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &severity)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1707,8 +1671,6 @@ PHP_FUNCTION(mssql_min_error_severity)
 PHP_FUNCTION(mssql_min_message_severity)
 {
 	zval **severity;
-	MSSQLLS_FETCH();
-
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &severity)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1726,14 +1688,13 @@ PHP_FUNCTION(mssql_init)
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
 	int id;
-	MSSQLLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &sp_name)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MSSQLLS_CC);
+			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 
@@ -1787,9 +1748,7 @@ PHP_FUNCTION(mssql_bind)
 	mssql_statement *statement;
 	mssql_bind bind,*bindp;
 	int id, status;
-
 	LPBYTE value;
-	MSSQLLS_FETCH();
 
 	id=0;
 	status=0;
@@ -1955,7 +1914,6 @@ PHP_FUNCTION(mssql_execute)
 	int batchsize;
 	int ac = ZEND_NUM_ARGS();
 	char *parameter;
-	MSSQLLS_FETCH();
 
 	batchsize = MS_SQL_G(batchsize);
 	if (ac !=1 || zend_get_parameters_ex(1, &stmt)==FAILURE) {
@@ -2088,7 +2046,6 @@ PHP_FUNCTION(mssql_guid_string)
 	int sf = 0;
 	char buffer[32+1];
 	char buffer2[36+1];
-	MSSQLLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:

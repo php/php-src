@@ -75,11 +75,9 @@ ZEND_END_MODULE_GLOBALS(muscat)
 */
 
 #ifdef ZTS
-#define MUSCATG(v) (muscat_globals->v)
-#define MUSCATLS_FETCH() php_muscat_globals *muscat_globals = ts_resource(muscat_globals_id)
+#define MUSCATG(v) TSRMG(muscat_globals_id, php_muscat_globals *, v)
 #else
 #define MUSCATG(v) (muscat_globals.v)
-#define MUSCATLS_FETCH()
 #endif
 
 #else

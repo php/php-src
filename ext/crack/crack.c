@@ -65,8 +65,7 @@ long _crack_open_dict(char *dictpath)
 {
 	PWDICT *pwdict;
 	long resource;
-
-	CRACKLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (CRACKG(current_id) != -1) {
 		zend_error(E_WARNING, "Can not use more than one open dictionary with this implementation of libcrack");
@@ -111,8 +110,6 @@ ZEND_MSHUTDOWN_FUNCTION(crack)
 
 ZEND_RINIT_FUNCTION(crack)
 {
-	CRACKLS_FETCH();
-
 	CRACKG(last_message) = NULL;
 	CRACKG(current_id) = -1;
 
@@ -121,7 +118,7 @@ ZEND_RINIT_FUNCTION(crack)
 
 ZEND_RSHUTDOWN_FUNCTION(crack)
 {
-	CRACKLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (NULL != CRACKG(last_message)) {
 		efree(CRACKG(last_message));
@@ -168,8 +165,6 @@ ZEND_FUNCTION(crack_closedict)
 	zval **dictionary;
 	long id;
 
-	CRACKLS_FETCH();
-
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			id = CRACKG(current_id);
@@ -204,8 +199,6 @@ ZEND_FUNCTION(crack_check)
 	char *message;
 	PWDICT *pwdict;
 	long id;
-
-	CRACKLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -254,8 +247,6 @@ ZEND_FUNCTION(crack_check)
    Returns the message from the last obscure check. */
 ZEND_FUNCTION(crack_getlastmessage)
 {
-	CRACKLS_FETCH();
-
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}

@@ -88,7 +88,7 @@ static zval incomplete_class_get_property(zend_property_reference *property_refe
 
 /* {{{ php_create_incomplete_class
  */
-zend_class_entry *php_create_incomplete_class(BLS_D)
+zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 {
 	zend_class_entry incomplete_class;
 

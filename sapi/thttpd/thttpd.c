@@ -37,27 +37,27 @@ typedef struct {
 
 #ifdef ZTS
 static int thttpd_globals_id;
-#define TLS_D php_thttpd_globals *thttpd_context
-#define TLS_DC , TLS_D
-#define TLS_C thttpd_context
-#define TLS_CC , thttpd_context
+#define TSRMLS_D php_thttpd_globals *thttpd_context
+#define TSRMLS_DC , TSRMLS_D
+#define TSRMLS_C thttpd_context
+#define TSRMLS_CC , thttpd_context
 #define TG(v) (thttpd_context->v)
-#define TLS_FETCH() TLS_D = ts_resource(thttpd_globals_id)
+#define TSRMLS_FETCH() TSRMLS_D = ts_resource(thttpd_globals_id)
 #else
 static php_thttpd_globals thttpd_globals;
-#define TLS_D
-#define TLS_DC
-#define TLS_C
-#define TLS_CC
+#define TSRMLS_D
+#define TSRMLS_DC
+#define TSRMLS_C
+#define TSRMLS_CC
 #define TG(v) (thttpd_globals.v)
-#define TLS_FETCH()
+#define TSRMLS_FETCH()
 #endif
 
 static int sapi_thttpd_ub_write(const char *str, uint str_length)
 {
 	int n;
 	uint sent = 0;	
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	
 	while (str_length > 0) {
 		n = send(TG(hc)->conn_fd, str, str_length, 0);
@@ -80,7 +80,7 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length)
 
 #define COMBINE_HEADERS 30
 
-static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char buf[1024];
 	struct iovec vec[COMBINE_HEADERS];
@@ -88,7 +88,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	zend_llist_position pos;
 	sapi_header_struct *h;
 	size_t len;
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	
 	if (!SG(sapi_headers).http_status_line) {
 		snprintf(buf, 1023, "HTTP/1.0 %d Something\r\n", SG(sapi_headers).http_response_code);
@@ -133,11 +133,11 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
-static int sapi_thttpd_read_post(char *buffer, uint count_bytes SLS_DC)
+static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	size_t read_bytes = 0, tmp;
 	int c;
-	TLS_FETCH();
+	TSRMLS_FETCH();
 
 	/* to understand this, read cgi_interpose_input() in libhttpd.c */
 	c = TG(hc)->read_idx - TG(hc)->checked_idx;
@@ -162,29 +162,29 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes SLS_DC)
 	return read_bytes;
 }
 
-static char *sapi_thttpd_read_cookies(SLS_D)
+static char *sapi_thttpd_read_cookies(TSRMLS_D)
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	
 	return TG(hc)->cookie;
 }
 
 #define BUF_SIZE 512
 #define ADD_STRING(name)										\
-	php_register_variable(name, buf, track_vars_array TSRMLS_CC PLS_CC)
+	php_register_variable(name, buf, track_vars_array TSRMLS_CC)
 
-static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
+static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
-	TLS_FETCH();
+	TSRMLS_FETCH();
 
-	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
+	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array TSRMLS_CC);
+	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC);
+	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_CC);
+	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
+	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
 
 	p = inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr);
 	/* string representation of IPs are never larger than 512 bytes */
@@ -205,7 +205,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC SLS_
 
 #define CONDADD(name, field) 							\
 	if (TG(hc)->field[0]) {								\
-		php_register_variable(#name, TG(hc)->field, track_vars_array TSRMLS_CC PLS_CC); \
+		php_register_variable(#name, TG(hc)->field, track_vars_array TSRMLS_CC); \
 	}
 
 	CONDADD(HTTP_REFERER, referer);
@@ -223,7 +223,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC SLS_
 	}
 
 	if (TG(hc)->authorization[0])
-		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_CC PLS_CC);
+		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_CC);
 }
 
 static sapi_module_struct thttpd_sapi_module = {
@@ -258,27 +258,26 @@ static sapi_module_struct thttpd_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void thttpd_module_main(TLS_D SLS_DC)
+static void thttpd_module_main(TSRMLS_D TSRMLS_DC)
 {
 	zend_file_handle file_handle;
-	CLS_FETCH();
 	TSRMLS_FETCH();
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC) == FAILURE) {
+	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return;
 	}
 	
-	php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
+	php_execute_script(&file_handle TSRMLS_CC);
 	php_request_shutdown(NULL);
 }
 
-static void thttpd_request_ctor(TLS_D SLS_DC)
+static void thttpd_request_ctor(TSRMLS_D TSRMLS_DC)
 {
 	int offset;
 	smart_str s = {0};
@@ -300,7 +299,7 @@ static void thttpd_request_ctor(TLS_D SLS_DC)
 	SG(request_info).content_type = TG(hc)->contenttype;
 	SG(request_info).content_length = TG(hc)->contentlength;
 	
-	php_handle_auth_data(TG(hc)->authorization SLS_CC);
+	php_handle_auth_data(TG(hc)->authorization TSRMLS_CC);
 
 	TG(post_off) = TG(hc)->read_idx - TG(hc)->checked_idx;
 
@@ -313,7 +312,7 @@ static void thttpd_request_ctor(TLS_D SLS_DC)
 	}
 }
 
-static void thttpd_request_dtor(TLS_D SLS_DC)
+static void thttpd_request_dtor(TSRMLS_D TSRMLS_DC)
 {
 	if (SG(request_info).query_string)
 		free(SG(request_info).query_string);
@@ -440,14 +439,14 @@ static void queue_request(httpd_conn *hc)
 	tsrm_mutex_unlock(qr_lock);
 }
 
-static off_t thttpd_real_php_request(httpd_conn *hc TLS_DC SLS_DC);
+static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC TSRMLS_DC);
 
 static void *worker_thread(void *dummy)
 {
 	int do_work = 50;
 	httpd_conn *hc;
-	SLS_FETCH();
-	TLS_FETCH();
+	TSRMLS_FETCH();
+	TSRMLS_FETCH();
 
 	while (do_work) {
 		hc = dequeue_request();
@@ -461,7 +460,7 @@ static void *worker_thread(void *dummy)
 
 		thread_atomic_dec(nr_free_threads);
 
-		thttpd_real_php_request(hc TLS_CC SLS_CC);
+		thttpd_real_php_request(hc TSRMLS_CC TSRMLS_CC);
 		shutdown(hc->conn_fd, 0);
 		destroy_conn(hc);
 		free(hc);
@@ -500,16 +499,16 @@ static void remove_dead_conn(int fd)
 
 #endif
 
-static off_t thttpd_real_php_request(httpd_conn *hc TLS_DC SLS_DC)
+static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC TSRMLS_DC)
 {
 	TG(hc) = hc;
 	hc->bytes_sent = 0;
 	
-	thttpd_request_ctor(TLS_C SLS_CC);
+	thttpd_request_ctor(TSRMLS_C);
 
-	thttpd_module_main(TLS_C SLS_CC);
+	thttpd_module_main(TSRMLS_C);
 
-	thttpd_request_dtor(TLS_C SLS_CC);
+	thttpd_request_dtor(TSRMLS_C);
 
 	return 0;
 }
@@ -519,33 +518,33 @@ off_t thttpd_php_request(httpd_conn *hc)
 #ifdef ZTS
 	queue_request(hc);
 #else
-	SLS_FETCH();
-	TLS_FETCH();
-	return thttpd_real_php_request(hc TLS_CC SLS_CC);
+	TSRMLS_FETCH();
+	TSRMLS_FETCH();
+	return thttpd_real_php_request(hc TSRMLS_CC TSRMLS_CC);
 #endif
 }
 
 void thttpd_register_on_close(void (*arg)(int)) 
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	TG(on_close) = arg;
 }
 
 void thttpd_closed_conn(int fd)
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	if (TG(on_close)) TG(on_close)(fd);
 }
 
 int thttpd_get_fd(void)
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	return TG(hc)->conn_fd;
 }
 
 void thttpd_set_dont_close(void)
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	TG(hc)->file_address = (char *) 1;
 }
 
@@ -561,14 +560,14 @@ void thttpd_php_init(void)
 	sapi_startup(&thttpd_sapi_module);
 	thttpd_sapi_module.startup(&thttpd_sapi_module);
 	{
-		SLS_FETCH();
+		TSRMLS_FETCH();
 		SG(server_context) = (void *) 1;
 	}
 }
 
 void thttpd_php_shutdown(void)
 {
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (SG(server_context) != NULL) {
 		thttpd_sapi_module.shutdown(&thttpd_sapi_module);

@@ -107,13 +107,9 @@ ZEND_BEGIN_MODULE_GLOBALS(swf)
 ZEND_END_MODULE_GLOBALS(swf)
 
 #ifdef ZTS
-#define SWFLS_D zend_swf_globals *swf_globals
-#define SWFG(v) (swf_globals->v)
-#define SWFLS_FETCH() zend_swf_globals *swf_globals = ts_resource(swf_globals_id)
+#define SWFG(v) TSRMG(swf_globals_id, zend_swf_globals *, v)
 #else
-#define SWFLS_D
 #define SWFG(v) (swf_globals.v)
-#define SWFLS_FETCH()
 #endif
 
 #else

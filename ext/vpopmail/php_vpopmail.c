@@ -125,8 +125,6 @@ PHP_MSHUTDOWN_FUNCTION(vpopmail)
 
 PHP_RINIT_FUNCTION(vpopmail)
 {
-	VPOPMAILLS_FETCH();
-
 	VPOPMAILG(vpopmail_open) = 0;
 	VPOPMAILG(vpopmail_errno) = 0;
 
@@ -139,7 +137,7 @@ void vclose();
 
 PHP_RSHUTDOWN_FUNCTION(vpopmail)
 {
-	VPOPMAILLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (VPOPMAILG(vpopmail_open) != 0) {
 		vclose();
@@ -195,7 +193,6 @@ PHP_FUNCTION(vpopmail_add_domain)
 	convert_to_long_ex(uid);
 	convert_to_long_ex(gid);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = vadddomain(Z_STRVAL_PP(domain),
@@ -230,7 +227,6 @@ PHP_FUNCTION(vpopmail_del_domain)
 
 	convert_to_string_ex(domain);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = vdeldomain(Z_STRVAL_PP(domain));
@@ -267,7 +263,7 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
 	php_strtolower(Z_STRVAL_PP(domain), Z_STRLEN_PP(domain));
 	php_strtolower(Z_STRVAL_PP(aliasdomain), Z_STRLEN_PP(aliasdomain));
 
-	VPOPMAILLS_FETCH();
+	TSRMLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	tmpstr = vget_assign(Z_STRVAL_PP(domain), Dir, 156, &uid, &gid);
@@ -309,7 +305,8 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
 
 /* {{{ proto bool vpopmail_add_domain_ex(string domain, string passwd [, string quota [, string bounce [, bool apop]]])
    Add a new virtual domain */
-PHP_FUNCTION(vpopmail_add_domain_ex) {
+PHP_FUNCTION(vpopmail_add_domain_ex)
+{
 	zval **domain, **passwd, **quota, **bounce, **apop;
 	int retval,len=0,argc=ZEND_NUM_ARGS(),is_bounce_email;
 	int fr_bounce=0,fr_quota=0;
@@ -319,8 +316,6 @@ PHP_FUNCTION(vpopmail_add_domain_ex) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	VPOPMAILLS_FETCH();
-
 	switch (argc) {
 		case 5:
 			convert_to_long_ex(apop);
@@ -444,8 +439,6 @@ PHP_FUNCTION(vpopmail_del_domain_ex) {
 		WRONG_PARAM_COUNT;
 	}
 
-	VPOPMAILLS_FETCH();
-
 	convert_to_string_ex(domain);
 
 	escdomain=php_escape_shell_cmd(Z_STRVAL_PP(domain));
@@ -487,8 +480,6 @@ PHP_FUNCTION(vpopmail_add_alias_domain_ex) {
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &olddomain, &newdomain) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
-
-	VPOPMAILLS_FETCH();
 
 	convert_to_string_ex(olddomain);
 	convert_to_string_ex(newdomain);
@@ -569,7 +560,6 @@ PHP_FUNCTION(vpopmail_add_user)
 		convert_to_string_ex(password);
 	}
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = vadduser(Z_STRVAL_PP(user),
@@ -604,7 +594,6 @@ PHP_FUNCTION(vpopmail_del_user)
 	convert_to_string_ex(user);
 	convert_to_string_ex(domain);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = vdeluser(Z_STRVAL_PP(user),
@@ -645,7 +634,6 @@ PHP_FUNCTION(vpopmail_passwd)
 	convert_to_string_ex(domain);
 	convert_to_string_ex(password);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = vpasswd(Z_STRVAL_PP(user),
@@ -681,7 +669,6 @@ PHP_FUNCTION(vpopmail_set_user_quota)
 	convert_to_string_ex(domain);
 	convert_to_string_ex(quota);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = vsetuserquota(Z_STRVAL_PP(user),
@@ -722,7 +709,6 @@ PHP_FUNCTION(vpopmail_auth_user)
 	convert_to_string_ex(domain);
 	convert_to_string_ex(password);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 	VPOPMAILG(vpopmail_errno) = 0;
 
@@ -769,7 +755,6 @@ PHP_FUNCTION(vpopmail_alias_add)
 	convert_to_string_ex(domain);
 	convert_to_string_ex(alias);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = valias_insert(Z_STRVAL_PP(user),
@@ -802,7 +787,6 @@ PHP_FUNCTION(vpopmail_alias_del)
 	convert_to_string_ex(user);
 	convert_to_string_ex(domain);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = valias_delete(Z_STRVAL_PP(user), Z_STRVAL_PP(domain));
@@ -832,7 +816,6 @@ PHP_FUNCTION(vpopmail_alias_del_domain)
 
 	convert_to_string_ex(domain);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = valias_delete_domain(Z_STRVAL_PP(domain));
@@ -865,7 +848,6 @@ PHP_FUNCTION(vpopmail_alias_get)
 	convert_to_string_ex(alias);
 	convert_to_string_ex(domain);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	if (array_init(return_value)!=SUCCESS) {
@@ -898,7 +880,6 @@ PHP_FUNCTION(vpopmail_alias_get_all)
 
 	convert_to_string_ex(domain);
 
-	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
 
 	if (array_init(return_value)!=SUCCESS) {
@@ -936,8 +917,6 @@ PHP_FUNCTION(vpopmail_error)
 	if (ZEND_NUM_ARGS() != 0)
 		WRONG_PARAM_COUNT;
 	
-	VPOPMAILLS_FETCH();
-
 	RETURN_STRING(verror(VPOPMAILG(vpopmail_errno)),1);
 }
 /* }}} */

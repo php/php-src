@@ -762,7 +762,6 @@ PHP_FUNCTION(msql_result)
 	m_query *msql_query;
 	m_row sql_row;
 	int field_offset=0;
-	PLS_FETCH();
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -901,7 +900,6 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	m_query *msql_query;
 	int num_fields;
 	int i;
-	PLS_FETCH();
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 1:

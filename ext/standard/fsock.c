@@ -126,7 +126,7 @@ PHPAPI int php_lookup_hostname(const char *addr, struct in_addr *in)
 PHPAPI int php_is_persistent_sock(int sock)
 {
 	char *key;
-	FLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_find(&FG(ht_fsock_socks), (char *) &sock, sizeof(sock),
 				(void **) &key) == SUCCESS) {
@@ -153,7 +153,6 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	unsigned short portno;
 	unsigned long conv;
 	char *key = NULL;
-	FLS_FETCH();
 
 	if (arg_count > 5 || arg_count < 2 || zend_get_parameters_array_ex(arg_count,args)==FAILURE) {
 		CLOSE_SOCK(1);
@@ -304,7 +303,7 @@ PHP_FUNCTION(pfsockopen)
 			FG(phpsockbuf) = sock->next; \
 		pefree(sock, sock->persistent)
 
-PHPAPI void php_cleanup_sockbuf(int persistent FLS_DC)
+PHPAPI void php_cleanup_sockbuf(int persistent TSRMLS_DC)
 {
 	php_sockbuf *now, *next;
 
@@ -321,11 +320,11 @@ PHPAPI void php_cleanup_sockbuf(int persistent FLS_DC)
 #define WRITEPTR(sock) ((sock)->readbuf + (sock)->writepos)
 #define SOCK_FIND(sock,socket) \
       php_sockbuf *sock; \
-      FLS_FETCH(); \
-      sock = php_sockfind(socket FLS_CC); \
-      if(!sock) sock = php_sockcreate(socket FLS_CC)
+      TSRMLS_FETCH(); \
+      sock = php_sockfind(socket TSRMLS_CC); \
+      if(!sock) sock = php_sockcreate(socket TSRMLS_CC)
 
-static php_sockbuf *php_sockfind(int socket FLS_DC)
+static php_sockbuf *php_sockfind(int socket TSRMLS_DC)
 {
 	php_sockbuf *buf = NULL, *tmp;
 
@@ -338,7 +337,7 @@ static php_sockbuf *php_sockfind(int socket FLS_DC)
 	return buf;
 }
 
-static php_sockbuf *php_sockcreate(int socket FLS_DC)
+static php_sockbuf *php_sockcreate(int socket TSRMLS_DC)
 {
 	php_sockbuf *sock;
 	int persistent = php_is_persistent_sock(socket);
@@ -365,7 +364,7 @@ PHPAPI php_sockbuf *php_get_socket(int socket)
 PHPAPI size_t php_sock_set_def_chunk_size(size_t size)
 {
 	size_t old;
-	FLS_FETCH();
+	TSRMLS_FETCH();
 
 	old = FG(def_chunk_size);
 
@@ -379,9 +378,9 @@ PHPAPI int php_sockdestroy(int socket)
 {
 	int ret = 0;
 	php_sockbuf *sock;
-	FLS_FETCH();
+	TSRMLS_FETCH();
 
-	sock = php_sockfind(socket FLS_CC);
+	sock = php_sockfind(socket TSRMLS_CC);
 	if(sock) {
 		ret = 1;
 		SOCK_DESTROY(sock);
@@ -406,9 +405,9 @@ PHPAPI int php_sock_close(int socket)
 {
 	int ret = 0;
 	php_sockbuf *sock;
-	FLS_FETCH();
+	TSRMLS_FETCH();
 
-	sock = php_sockfind(socket FLS_CC);
+	sock = php_sockfind(socket TSRMLS_CC);
 	if(sock) {
 		if(!sock->persistent) {
 			SOCK_CLOSE(sock->socket);
@@ -753,9 +752,9 @@ PHPAPI void php_msock_destroy(int *data)
 
 PHP_RSHUTDOWN_FUNCTION(fsock)
 {
-	FLS_FETCH();
+	TSRMLS_FETCH();
 
-	php_cleanup_sockbuf(0 FLS_CC);
+	php_cleanup_sockbuf(0 TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */

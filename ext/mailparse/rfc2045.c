@@ -1076,7 +1076,7 @@ void rfc2045_mimeinfo(const struct rfc2045 *p,
 		const char **charset_s)
 {
 	const char *c;
-	MAILPARSELS_FETCH();
+	TSRMLS_FETCH();
 
 	*content_type_s=GETINFO(p->content_type, "text/plain");
 	*content_transfer_encoding_s=GETINFO(p->content_transfer_encoding,

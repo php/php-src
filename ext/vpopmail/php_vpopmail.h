@@ -75,11 +75,9 @@ ZEND_BEGIN_MODULE_GLOBALS(vpopmail)
 ZEND_END_MODULE_GLOBALS(vpopmail)
 
 #ifdef ZTS
-#define VPOPMAILG(v) (vpopmail_globals->v)
-#define VPOPMAILLS_FETCH() php_vpopmail_globals *vpopmail_globals = ts_resource(gd_vpopmail_id)
+#define VPOPMAILG(v) TSRMG(gd_vpopmail_id, php_vpopmail_globals *, v)
 #else
 #define VPOPMAILG(v) (vpopmail_globals.v)
-#define VPOPMAILLS_FETCH()
 #endif
 
 #else

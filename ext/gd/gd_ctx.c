@@ -69,7 +69,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 
 #if APACHE && defined(CHARSET_EBCDIC)
 		/* XXX this is unlikely to work any more thies@thieso.net */
-		SLS_FETCH();
 		/* This is a binary file already: avoid EBCDIC->ASCII conversion */
 		ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
 #endif

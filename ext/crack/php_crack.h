@@ -30,11 +30,9 @@ ZEND_BEGIN_MODULE_GLOBALS(crack)
 ZEND_END_MODULE_GLOBALS(crack)
 
 #ifdef ZTS
-#define CRACKG(v) (crack_globals->v)
-#define CRACKLS_FETCH() zend_crack_globals *crack_globals = ts_resource(crack_globals_id)
+#define CRACKG(v) TSRMG(crack_globals_id, zend_crack_globals *, v)
 #else
 #define CRACKG(v) (crack_globals.v)
-#define CRACKLS_FETCH()
 #endif
 
 #else

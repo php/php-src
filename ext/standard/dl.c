@@ -56,7 +56,6 @@
 PHP_FUNCTION(dl)
 {
 	pval **file;
-	PLS_FETCH();
 
 #ifdef ZTS
 	if (strcmp(sapi_module.name, "cgi")!=0) {
@@ -101,9 +100,7 @@ void php_dl(pval *file, int type, pval *return_value)
 	zend_module_entry *(*get_module)(void);
 	int error_type;
 	char *extension_dir;
-	PLS_FETCH();
 	TSRMLS_FETCH();
-
 
 	if (type==MODULE_PERSISTENT) {
 		/* Use the configuration hash directly, the INI mechanism is not yet initialized */

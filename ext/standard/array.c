@@ -98,7 +98,7 @@ PHP_MSHUTDOWN_FUNCTION(array)
 
 static void set_compare_func(int sort_type)
 {
-	ARRAYLS_FETCH();
+	TSRMLS_FETCH();
 
 	switch (sort_type) {
 		case SORT_NUMERIC:
@@ -123,7 +123,7 @@ static int array_key_compare(const void *a, const void *b)
 	pval result;
 	pval first;
 	pval second;
-	ARRAYLS_FETCH();
+	TSRMLS_FETCH();
  
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -270,7 +270,7 @@ static int array_data_compare(const void *a, const void *b)
 	pval result;
 	pval *first;
 	pval *second;
-	ARRAYLS_FETCH();
+	TSRMLS_FETCH();
  
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -523,7 +523,6 @@ static int array_user_compare(const void *a, const void *b)
 	pval **args[2];
 	pval *retval_ptr;
 	TSRMLS_FETCH();
-	BLS_FETCH();
 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -551,7 +550,6 @@ PHP_FUNCTION(usort)
 	pval **array;
 	pval **old_compare_func;
 	HashTable *target_hash;
-	BLS_FETCH();
 
 	old_compare_func = BG(user_compare_func_name);
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
@@ -580,7 +578,6 @@ PHP_FUNCTION(uasort)
 	pval **array;
 	pval **old_compare_func;
 	HashTable *target_hash;
-	BLS_FETCH();
 
 	old_compare_func = BG(user_compare_func_name);
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
@@ -611,7 +608,6 @@ static int array_user_key_compare(const void *a, const void *b)
 	pval retval;
 	int status;
 	TSRMLS_FETCH();
-	BLS_FETCH();
 
 	args[0] = &key1;
 	args[1] = &key2;
@@ -658,7 +654,6 @@ PHP_FUNCTION(uksort)
 	pval **array;
 	pval **old_compare_func;
 	HashTable *target_hash;
-	BLS_FETCH();
 
 	old_compare_func = BG(user_compare_func_name);
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
@@ -958,7 +953,6 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	ulong  string_key_len;
 	ulong  num_key;
 	HashPosition pos;
-	BLS_FETCH();
 	TSRMLS_FETCH();
 
 	/* Allocate space for key */
@@ -1000,13 +994,13 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 
 /* {{{ proto int array_walk(array input, string funcname [, mixed userdata])
    Apply a user function to every member of an array */
-PHP_FUNCTION(array_walk) {
+PHP_FUNCTION(array_walk)
+{
 	int    argc;
 	zval **array,
 		 **userdata = NULL,
 		 **old_walk_func_name;
 	HashTable *target_hash;
-	BLS_FETCH();
 
 	argc = ZEND_NUM_ARGS();
 	old_walk_func_name = BG(array_walk_func_name);
@@ -2513,7 +2507,7 @@ int multisort_compare(const void *a, const void *b)
 	int			  r;
 	int			  result = 0;
 	zval		  temp;
-	ARRAYLS_FETCH();
+	TSRMLS_FETCH();
 	
 	r = 0;
 	do {
@@ -2552,7 +2546,6 @@ PHP_FUNCTION(array_multisort)
 	int				sort_order = SORT_ASC;
 	int				sort_type  = SORT_REGULAR;
 	int				i, k;
-	ARRAYLS_FETCH();
 	
 	/* Get the argument count and check it */
 	argc = ZEND_NUM_ARGS();

@@ -66,19 +66,9 @@ typedef struct {
 } php_recode_globals;
 
 #ifdef ZTS
-# define ReSLS_D	php_recode_globals *recode_globals
-# define ReSLS_DC	, ReSLS_D
-# define ReSLS_C	recode_globals
-# define ReSLS_CC , ReSLS_C
-# define ReSG(v) (recode_globals->v)
-# define ReSLS_FETCH()	php_recode_globals *recode_globals = ts_resource(recode_globals_id)
+# define ReSG(v) TSRMG(recode_globals_id, php_recode_globals *, v)
 #else
-# define ReSLS_D
-# define ReSLS_DC
-# define ReSLS_C
-# define ReSLS_CC
 # define ReSG(v) (recode_globals.v)
-# define ReSLS_FETCH()
 extern PHP_MYSQL_API php_recode_globals recode_globals;
 #endif
 

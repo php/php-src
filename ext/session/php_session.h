@@ -114,23 +114,13 @@ PHP_FUNCTION(session_get_cookie_params);
 PHP_FUNCTION(session_write_close);
 
 #ifdef ZTS
-#define PSLS_D php_ps_globals *ps_globals
-#define PSLS_DC , PSLS_D
-#define PSLS_C ps_globals
-#define PSLS_CC , PSLS_C
-#define PS(v) (ps_globals->v)
-#define PSLS_FETCH() php_ps_globals *ps_globals = ts_resource(ps_globals_id)
+#define PS(v) TSRMG(ps_globals_id, php_ps_globals *, v)
 #else
-#define PSLS_D	void
-#define PSLS_DC
-#define PSLS_C
-#define PSLS_CC
 #define PS(v) (ps_globals.v)
-#define PSLS_FETCH()
 #endif
 
-#define PS_SERIALIZER_ENCODE_ARGS char **newstr, int *newlen PSLS_DC
-#define PS_SERIALIZER_DECODE_ARGS const char *val, int vallen PSLS_DC
+#define PS_SERIALIZER_ENCODE_ARGS char **newstr, int *newlen TSRMLS_DC
+#define PS_SERIALIZER_DECODE_ARGS const char *val, int vallen TSRMLS_DC
 
 typedef struct ps_serializer_struct {
 	const char *name;
@@ -163,8 +153,8 @@ void session_adapt_flush(int (*)(const char *, uint));
 #define session_adapt_flush(a) do { } while(0)
 #endif
 
-void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash PSLS_DC);
-int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSLS_DC TSRMLS_DC);
+void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash TSRMLS_DC);
+int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC);
 
 int php_session_register_module(ps_module *);
 
@@ -186,16 +176,14 @@ int php_session_register_serializer(const char *name,
 	char *key;													\
 	ulong key_length;											\
 	ulong num_key;												\
-	zval **struc;												\
-	TSRMLS_FETCH();												\
-	PLS_FETCH()
+	zval **struc;
 
 #define PS_ENCODE_LOOP(code)										\
 	for (zend_hash_internal_pointer_reset(&PS(vars));			\
 			zend_hash_get_current_key_ex(&PS(vars), &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
 			zend_hash_move_forward(&PS(vars))) {				\
 			key_length--;										\
-		if (php_get_session_var(key, key_length, &struc PLS_CC PSLS_CC TSRMLS_CC) == SUCCESS) { \
+		if (php_get_session_var(key, key_length, &struc TSRMLS_CC) == SUCCESS) { \
 			code;		 										\
 		} 														\
 	}

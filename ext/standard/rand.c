@@ -96,7 +96,7 @@
 
 /* {{{ seedMT
  */
-static void seedMT(php_uint32 seed BLS_DC)
+static void seedMT(php_uint32 seed TSRMLS_DC)
 {
     /*
        We initialize state[0..(N-1)] via the generator
@@ -152,13 +152,13 @@ static void seedMT(php_uint32 seed BLS_DC)
 }
 /* }}} */
 
-static php_uint32 reloadMT(BLS_D)
+static php_uint32 reloadMT(TSRMLS_D)
 {
     register php_uint32 *p0=BG(state), *p2=BG(state)+2, *pM=BG(state)+M, s0, s1;
     register int    j;
 
     if(BG(left) < -1)
-        seedMT(4357U BLS_CC);
+        seedMT(4357U TSRMLS_CC);
 
     BG(left)=N-1, BG(next)=BG(state)+1;
 
@@ -179,10 +179,10 @@ static php_uint32 reloadMT(BLS_D)
 static inline php_uint32 randomMT(void)
 {
     php_uint32 y;
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
     if(--BG(left) < 0)
-        return(reloadMT(BLS_C));
+        return(reloadMT(TSRMLS_C));
 
     y  = *BG(next)++;
     y ^= (y >> 11);
@@ -210,13 +210,12 @@ PHP_FUNCTION(srand)
 PHP_FUNCTION(mt_srand)
 {
 	pval **arg;
-	BLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg);
-	seedMT((*arg)->value.lval BLS_CC);
+	seedMT((*arg)->value.lval TSRMLS_CC);
 }
 /* }}} */
 

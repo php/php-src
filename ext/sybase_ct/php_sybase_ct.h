@@ -96,19 +96,9 @@ typedef struct {
 
 
 #ifdef ZTS
-# define SybCtLS_D	zend_sybase_globals *sybase_globals
-# define SybCtLS_DC	, SybCtLS_D
-# define SybCtLS_C	sybase_globals
-# define SybCtLS_CC , SybCtLS_C
-# define SybCtG(v) (sybase_globals->v)
-# define SybCtLS_FETCH()	zend_sybase_globals *sybase_globals = ts_resource(sybase_globals_id)
+# define SybCtG(v) TSRMG(sybase_globals_id, zend_sybase_globals *, v)
 #else
-# define SybCtLS_D
-# define SybCtLS_DC
-# define SybCtLS_C
-# define SybCtLS_CC
 # define SybCtG(v) (sybase_globals.v)
-# define SybCtLS_FETCH()
 #endif
 
 #else

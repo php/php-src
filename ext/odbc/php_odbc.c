@@ -210,7 +210,7 @@ static void _close_odbc_conn(zend_rsrc_list_entry *rsrc)
 {
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
 
-	ODBCLS_FETCH();
+	TSRMLS_FETCH();
 
    	safe_odbc_disconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
@@ -223,7 +223,7 @@ static void _close_odbc_conn(zend_rsrc_list_entry *rsrc)
 static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc)
 {
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
-	ODBCLS_FETCH();
+	TSRMLS_FETCH();
 	
 	safe_odbc_disconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
@@ -348,7 +348,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 #ifdef ZTS
-static void php_odbc_init_globals(php_odbc_globals *odbc_globals TSRMLS_DC)
+static void php_odbc_init_globals(php_odbc_globals *odbc_globals_p TSRMLS_DC)
 {
 	ODBCG(num_persistent) = 0;
 }
@@ -356,7 +356,6 @@ static void php_odbc_init_globals(php_odbc_globals *odbc_globals TSRMLS_DC)
 
 PHP_MINIT_FUNCTION(odbc)
 {
-	ODBCLS_D;
 #ifdef SQLANY_BUG
 	ODBC_SQL_CONN_T foobar;
 	RETCODE rc;
@@ -364,7 +363,6 @@ PHP_MINIT_FUNCTION(odbc)
 
 #ifdef ZTS
 	ts_allocate_id(&odbc_globals_id, sizeof(php_odbc_globals), php_odbc_init_globals, NULL);
-	odbc_globals = ts_resource(odbc_globals_id);
 #else
 	ODBCG(num_persistent) = 0;
 #endif
@@ -455,8 +453,6 @@ PHP_MINIT_FUNCTION(odbc)
 
 PHP_RINIT_FUNCTION(odbc)
 {
-	ODBCLS_FETCH();
-	
 	ODBCG(defConn) = -1;
 	ODBCG(num_links) = ODBCG(num_persistent);
     memset(ODBCG(laststate), '\0', 6);
@@ -471,7 +467,7 @@ PHP_RSHUTDOWN_FUNCTION(odbc)
 
 PHP_MSHUTDOWN_FUNCTION(odbc)
 {
-	ODBCLS_FETCH();
+	TSRMLS_FETCH();
 
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -480,7 +476,7 @@ PHP_MSHUTDOWN_FUNCTION(odbc)
 PHP_MINFO_FUNCTION(odbc)
 {
 	char buf[32];
-	ODBCLS_FETCH();
+	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "ODBC Support", "enabled");
@@ -509,7 +505,7 @@ void odbc_sql_error(ODBC_SQL_ERROR_PARAMS)
 	RETCODE rc;
     ODBC_SQL_ENV_T henv;
     ODBC_SQL_CONN_T conn;
-	ODBCLS_FETCH();
+	TSRMLS_FETCH();
 
     if (conn_resource) {
         henv = conn_resource->henv;
@@ -549,8 +545,6 @@ void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_result *result;
 	pval **pv_res, **pv_flag;
-	ODBCLS_FETCH();
-	PLS_FETCH();
 
 	if (zend_get_parameters_ex(2, &pv_res, &pv_flag) == FAILURE)
 		WRONG_PARAM_COUNT;
@@ -579,7 +573,7 @@ int odbc_bindcols(odbc_result *result)
     int i;
     SWORD       colnamelen; /* Not used */
 	SDWORD      displaysize;
-	ODBCLS_FETCH();
+	TSRMLS_FETCH();
 
     result->values = (odbc_result_value *)
 		emalloc(sizeof(odbc_result_value)*result->numcols);
@@ -638,7 +632,6 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 	odbc_connection *conn;
 	RETCODE rc;
 	pval **pv_conn;
-	ODBCLS_FETCH();
 	
  	if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -780,7 +773,6 @@ PHP_FUNCTION(odbc_prepare)
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	UDWORD      scrollopts;
 #endif
-	ODBCLS_FETCH();
 
 	if (zend_get_parameters_ex(2, &pv_conn, &pv_query) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -885,7 +877,6 @@ PHP_FUNCTION(odbc_execute)
    	odbc_result   *result;
 	int numArgs, i, ne;
 	RETCODE rc;
-	ODBCLS_FETCH();
 	
 	numArgs = ZEND_NUM_ARGS();
 	switch(numArgs) {
@@ -1054,7 +1045,6 @@ PHP_FUNCTION(odbc_cursor)
 	char *cursorname;
    	odbc_result *result;
 	RETCODE rc;
-	ODBCLS_FETCH();
 
 	if (zend_get_parameters_ex(1, &pv_res) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1080,7 +1070,6 @@ PHP_FUNCTION(odbc_cursor)
 	 		SDWORD  error;        /* Not used */
 			char    errormsg[255];
 			SWORD   errormsgsize; /* Not used */
-			ODBCLS_FETCH();
 
 			SQLError( result->conn_ptr->henv, result->conn_ptr->hdbc,
 						result->stmt, state, &error, errormsg,
@@ -1924,7 +1913,7 @@ PHP_FUNCTION(odbc_pconnect)
 }
 /* }}} */
 
-int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int cur_opt, int persistent ODBCLS_DC)
+int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int cur_opt, int persistent TSRMLS_DC)
 {
 	RETCODE rc;
 	
@@ -2023,8 +2012,6 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	odbc_connection *db_conn;
 	char *hashed_details;
 	int hashed_len, len, cur_opt;
-	ODBCLS_FETCH();
-	PLS_FETCH();
 
 	/*  Now an optional 4th parameter specifying the cursor type
 	 *  defaulting to the cursors default
@@ -2107,7 +2094,7 @@ try_and_get_another_connection:
 				RETURN_FALSE;
 			}
 			
-			if (!odbc_sqlconnect(&db_conn, db, uid, pwd, cur_opt, 1 ODBCLS_CC)) {
+			if (!odbc_sqlconnect(&db_conn, db, uid, pwd, cur_opt, 1 TSRMLS_CC)) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -2181,7 +2168,7 @@ try_and_get_another_connection:
 			RETURN_FALSE;
 		}
 
-		if (!odbc_sqlconnect(&db_conn, db, uid, pwd, cur_opt, 0 ODBCLS_CC)) {
+		if (!odbc_sqlconnect(&db_conn, db, uid, pwd, cur_opt, 0 TSRMLS_CC)) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -2212,7 +2199,6 @@ PHP_FUNCTION(odbc_close)
 	int type;
 	int is_pconn = 0;
 	int found_resource_type = le_conn;
-	ODBCLS_FETCH();
 
     if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2542,8 +2528,6 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
             strlcpy(ptr, conn->lasterrormsg, len+1);
         }
     } else {
-		ODBCLS_FETCH();
-
         if (mode == 0) {
             strlcpy(ptr, ODBCG(laststate), len+1);
         } else {

@@ -21,8 +21,8 @@
 #ifndef PHP_TICKS_H
 #define PHP_TICKS_H
 
-int php_startup_ticks(PLS_D);
-void php_shutdown_ticks(PLS_D);
+int php_startup_ticks(TSRMLS_D);
+void php_shutdown_ticks(TSRMLS_D);
 void php_run_ticks(int count);
 PHPAPI void php_add_tick_function(void (*func)(int));
 PHPAPI void php_remove_tick_function(void (*func)(int));

@@ -814,7 +814,6 @@ PHP_FUNCTION(strtok)
 	char *token = NULL, *tokp=NULL;
 	char *first = NULL;
 	int argc;
-	BLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -2026,7 +2025,7 @@ PHPAPI void php_stripslashes(char *str, int *len)
 	char *s, *t;
 	int l;
 	char escape_char='\\';
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (PG(magic_quotes_sybase)) {
 		escape_char='\'';
@@ -2156,7 +2155,7 @@ char *php_strerror(int errnum)
 {
 	extern int sys_nerr;
 	extern char *sys_errlist[];
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	if ((unsigned int)errnum < sys_nerr) return(sys_errlist[errnum]);
 	(void)sprintf(BG(str_ebuf), "Unknown error: %d", errnum);
@@ -2298,7 +2297,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	char *source,*target;
 	char *end;
 	char c;
-	PLS_FETCH();
+	TSRMLS_FETCH();
  	
 	if (!str) {
 		*new_length = 0;
@@ -2907,7 +2906,6 @@ PHP_FUNCTION(setlocale)
 	zval *category, *locale;
 	int cat;
 	char *loc, *retval;
-	BLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &pcategory, &plocale)==FAILURE)
 		WRONG_PARAM_COUNT;
@@ -2976,9 +2974,6 @@ PHP_FUNCTION(parse_str)
 	char *res = NULL;
 	int argCount;
 	int old_rg;
-	
-	PLS_FETCH();
-	SLS_FETCH();
 
 	argCount = ARG_COUNT(ht);
 	if(argCount < 1 || argCount > 2 || zend_get_parameters_ex(argCount, &arg, &arrayArg) == FAILURE) {
@@ -2994,14 +2989,14 @@ PHP_FUNCTION(parse_str)
 	old_rg = PG(register_globals);
 	if(argCount == 1) {
 		PG(register_globals) = 1;
-		php_treat_data(PARSE_STRING, res, NULL TSRMLS_CC PLS_CC SLS_CC);
+		php_treat_data(PARSE_STRING, res, NULL TSRMLS_CC);
 	} else 	{
 		PG(register_globals) = 0;
 		/* Clear out the array that was passed in. */
 		zval_dtor(*arrayArg);
 		array_init(*arrayArg);
 		
-		php_treat_data(PARSE_STRING, res, *arrayArg TSRMLS_CC PLS_CC SLS_CC);
+		php_treat_data(PARSE_STRING, res, *arrayArg TSRMLS_CC);
 	}
 	PG(register_globals) = old_rg;
 }

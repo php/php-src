@@ -50,7 +50,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	long uid=0L, gid=0L, duid=0L, dgid=0L;
 	char path[MAXPATHLEN];
 	char *s;
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (!filename) {
 		return 0; /* path must be provided */
@@ -126,7 +126,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
  		} else if (PG(safe_mode_gid) && dgid == php_getgid()) {
  			return 1;
 		} else {
-			SLS_FETCH();
+			TSRMLS_FETCH();
 
 			if (SG(rfc1867_uploaded_files)) {
 				if (zend_hash_exists(SG(rfc1867_uploaded_files), (char *) filename, strlen(filename)+1)) {
@@ -156,7 +156,7 @@ PHPAPI char *php_get_current_user()
 {
 	struct passwd *pwd;
 	struct stat *pstat;
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (SG(request_info).current_user) {
 		return SG(request_info).current_user;

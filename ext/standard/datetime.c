@@ -652,7 +652,7 @@ char *php_std_date(time_t t)
 {
 	struct tm *tm1, tmbuf;
 	char *str;
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	tm1 = php_gmtime_r(&t, &tmbuf);
 	str = emalloc(81);

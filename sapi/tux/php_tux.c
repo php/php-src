@@ -47,18 +47,13 @@ typedef struct {
 
 static php_tux_globals tux_globals;
 
-#define TLS_D
-#define TLS_DC
-#define TLS_C
-#define TLS_CC
 #define TG(v) (tux_globals.v)
-#define TLS_FETCH()
 
 static int sapi_tux_ub_write(const char *str, uint str_length)
 {
 	int n;
 	uint sent = 0;	
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	
 	/* combine headers and body */
 	if (TG(number_vec)) {
@@ -94,7 +89,7 @@ static int sapi_tux_ub_write(const char *str, uint str_length)
 	return sent;
 }
 
-static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
 {
 	char buf[1024];
 	struct iovec *vec;
@@ -105,7 +100,7 @@ static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	size_t len;
 	char *status_line;
 	int locate_cl;
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	
 	max_headers = 30;
 	snprintf(buf, 1023, "HTTP/1.1 %d NA\r\n", SG(sapi_headers).http_response_code);
@@ -153,11 +148,11 @@ static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
-static int sapi_tux_read_post(char *buffer, uint count_bytes SLS_DC)
+static int sapi_tux_read_post(char *buffer, uint count_bytes)
 {
 #if 0
 	int amount = 0;
-	TLS_FETCH();
+	TSRMLS_FETCH();
 
 	TG(req)->objectlen = count_bytes;
 	TG(req)->object_addr = buffer;
@@ -172,34 +167,34 @@ static int sapi_tux_read_post(char *buffer, uint count_bytes SLS_DC)
 #endif
 }
 
-static char *sapi_tux_read_cookies(SLS_D)
+static char *sapi_tux_read_cookies(void)
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	
 	return TG(req)->cookies;
 }
 
 #define BUF_SIZE 512
 #define ADD_STRING(name)										\
-	php_register_variable(name, buf, track_vars_array TSRMLS_CC PLS_CC)
+	php_register_variable(name, buf, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC)
 
-static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
+static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
-	TLS_FETCH();
+	TSRMLS_FETCH();
 
 	
 	sprintf(buf, "Server: %s", TUXAPI_version);
 	sapi_add_header_ex(buf, strlen(buf), 1, 0);
-	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("DOCUMENT_ROOT", TUXAPI_docroot, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("SERVER_NAME", TUXAPI_servername, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC PLS_CC);
-	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_register_variable("DOCUMENT_ROOT", TUXAPI_docroot, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_register_variable("SERVER_NAME", TUXAPI_servername, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
+	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
 
 	p = inet_ntoa(TG(req)->client_host);
 	/* string representation of IPs are never larger than 512 bytes */
@@ -222,7 +217,7 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC 
 
 #define CONDADD(name, field) 							\
 	if (TG(req)->field[0]) {								\
-		php_register_variable(#name, TG(req)->field, track_vars_array TSRMLS_CC PLS_C); \
+		php_register_variable(#name, TG(req)->field, track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()C); \
 	}
 
 	CONDADD(HTTP_REFERER, referer);
@@ -242,7 +237,7 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC 
 
 #if 0
 	if (TG(hc)->authorization[0])
-		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_CC PLS_C);
+		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_FETCH()CC TSRMLS_FETCH()C);
 #endif
 }
 
@@ -278,27 +273,26 @@ static sapi_module_struct tux_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void tux_module_main(TLS_D SLS_DC)
+static void tux_module_main(TSRMLS_D)
 {
 	zend_file_handle file_handle;
-	CLS_FETCH();
-	TSRMLS_FETCH();
-	PLS_FETCH();
+	TSRMLS_FETCH()FETCH();
+	TSRMLS_FETCH()FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC) == FAILURE) {
+	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return;
 	}
 	
-	php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
+	php_execute_script(&file_handle TSRMLS_FETCH()CC TSRMLS_FETCH()CC);
 	php_request_shutdown(NULL);
 }
 
-static void tux_request_ctor(TLS_D SLS_DC)
+static void tux_request_ctor(TSRMLS_D)
 {
 	char buf[1024];
 	int offset;
@@ -329,11 +323,11 @@ static void tux_request_ctor(TLS_D SLS_DC)
 	SG(request_info).content_length = 0; // TG(req)->contentlength;
 
 #if 0
-	php_handle_auth_data(TG(hc)->authorization SLS_CC);
+	php_handle_auth_data(TG(hc)->authorization TSRMLS_CC);
 #endif
 }
 
-static void tux_request_dtor(TLS_D SLS_DC)
+static void tux_request_dtor(TSRMLS_D)
 {
 	if (TG(header_vec))
 		free(TG(header_vec));
@@ -367,8 +361,7 @@ static void *separate_thread(void *bla)
 
 int TUXAPI_handle_events(user_req_t *req)
 {
-	SLS_FETCH();
-	TLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (req->event == PHP_TUX_BACKGROUND_CONN) {
 		tux_closed_conn(req->sock);
@@ -378,11 +371,11 @@ int TUXAPI_handle_events(user_req_t *req)
 	TG(req) = req;
 	TG(tux_action) = TUX_ACTION_FINISH_CLOSE_REQ;
 	
-	tux_request_ctor(TLS_C SLS_CC);
+	tux_request_ctor(TSRMLS_C);
 
-	tux_module_main(TLS_C SLS_CC);
+	tux_module_main(TSRMLS_C);
 
-	tux_request_dtor(TLS_C SLS_CC);
+	tux_request_dtor(TSRMLS_C);
 
 	return tux(TG(tux_action), req);
 }
@@ -394,21 +387,21 @@ void tux_register_on_close(void (*arg)(int))
 
 void tux_closed_conn(int fd)
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (TG(on_close)) TG(on_close)(fd);
 }
 
 int tux_get_fd(void)
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 	
 	return TG(req)->sock;
 }
 
 void tux_set_dont_close(void)
 {
-	TLS_FETCH();
+	TSRMLS_FETCH();
 
 	TG(req)->event = PHP_TUX_BACKGROUND_CONN;
 	tux(TUX_ACTION_POSTPONE_REQ, TG(req));
