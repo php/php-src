@@ -60,7 +60,7 @@ PHP_FUNCTION(fdf_set_file);
 PHP_FUNCTION(fdf_get_file);
 PHP_FUNCTION(fdf_add_template);
 #else
-#define phpext_fdf_ptr NULL
+#define fdf_module_ptr NULL
 #endif
 #define phpext_fdf_ptr fdf_module_ptr
 #endif /* PHP_FDF_H */
