@@ -1,3 +1,105 @@
+2003-10-20  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/ZEND_CHANGES:
+      - Add comment from Timm
+
+2003-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      RC2 is a go.
+
+2003-10-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/dom_ce.h
+      ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/xpath.c:
+      implement namespace nodes
+      fix getElementsByTagName
+      fixes to attribute namespaces
+      remove safemode stuff as its handled in streams
+
+2003-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+2003-10-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/file/bug20424.phpt:
+      Fix typo
+
+2003-10-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fix bug #25900 (document->get_elements_by_tag_name with default xmlns)
+
+2003-10-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/wddx/wddx.c:
+      Fix compiler warnings
+
+2003-10-20  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * (RELEASE_1_3b3)
+      pear/package-PEAR.xml:
+      go with 1.3b3 (will shipped with PHP4.3.4RC2)
+
+2003-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mime_magic/mime_magic.c:
+      MFH: Fixed bug #25918 (Possible crash in mime_content_type()).
+
+    * ext/mime_magic/mime_magic.c:
+      Fixed bug #25918 (Possible crash in mime_content_type()).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/mail.c:
+      MFH: Fixed bug #25923 (mail() modifies the to & subject arguments).
+
+    * ext/standard/mail.c:
+      Fixed bug #25923 (mail() modifies the to & subject arguments).
+
+2003-10-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/ZEND_CHANGES
+      ZendEngine2/ZEND_CHANGES:
+      Update
+
+2003-10-20  Kai Schröder  <cyberian@arcor.de>
+
+    * tests/classes/abstract_redeclare.phpt:
+      Fixed typo
+
+2003-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_ini.c:
+      Fixed unused variable warning on *nix.
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c:
+      MFH: Fixed bug #25895 (Incorrect detection of safe_mode limited ini
+      options)
+
+    * ext/standard/basic_functions.c:
+      Fixed bug #25895 (Incorrect detection of safe_mode limited ini options)
+
 2003-10-19  Shane Caraveo  <shane@caraveo.com>
 
     * ext/dom/php_dom.c

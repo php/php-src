@@ -1,3 +1,14 @@
+2003-10-20  Andi Gutmans  <andi@zend.com>
+
+    * ZEND_CHANGES:
+      - Add comment from Timm
+
+2003-10-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZEND_CHANGES
+      ZEND_CHANGES:
+      Update
+
 2003-10-19  Andi Gutmans  <andi@zend.com>
 
     * zend_language_parser.y:
