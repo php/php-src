@@ -1170,6 +1170,15 @@ dnl  else
 dnl      rm -f main/internal_functions.c.old
 dnl  fi
 
+  if test $UNAME = "FreeBSD" && test $PHP_SAPI = "apache2filter" && test $TSRM_PTH != "pth-config" ; then
+    echo "+--------------------------------------------------------------------+"
+    echo "|                        *** WARNING ***                             |"
+    echo "|                                                                    |"
+    echo "| In order to build PHP as a Apache2 module on FreeBSD, you have to  |"
+    echo "| add  --with-tsrm-pth to your ./configure line. Therefore you need  |"
+    echo "| to install gnu-pth from /usr/ports/devel/pth.                      |"
+  fi
+
   if test -n "$PHP_APXS_BROKEN"; then
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
