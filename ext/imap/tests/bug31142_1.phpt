@@ -41,14 +41,14 @@ cc: bar@example.com
 MIME-Version: 1.0
 Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 
----%s
+--%s
 Content-Type: APPLICATION/octet-stream
 Content-Transfer-Encoding: BASE64
 Content-Description: some file
 
 QUJD
 
----%s
+--%s
 Content-Type: TEXT/plain; CHARSET=US-ASCII
 Content-Description: description3
 
@@ -56,4 +56,4 @@ contents.data3
 
 
 	
----%s--
+--%s--
