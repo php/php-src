@@ -3,9 +3,9 @@ dnl ## Process this file with autoconf to produce a configure script.
 
 divert(1)
 
-AC_INIT(main.c)
+AC_INIT(README.CVS-RULES)
 
-PHP_FAST_OUTPUT(sapi/Makefile ext/Makefile Makefile pear/Makefile) 
+PHP_FAST_OUTPUT(sapi/Makefile ext/Makefile Makefile pear/Makefile core/Makefile)
 
 if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
   AC_MSG_ERROR(--with-shared-apache is not supported. Please refer to the documentation for using APXS)
@@ -629,7 +629,7 @@ else
 fi
 
 if test "$abs_srcdir" != "$abs_builddir"; then
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/Zend"
+  INCLUDES="$INCLUDES -I\$(top_srcdir)/core -I\$(top_srcdir)/Zend"
   if test "$PHP_THREAD_SAFETY" = "yes"; then
     INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
   fi
@@ -827,15 +827,15 @@ FEO
 if true; then
   # Hacking while airborne considered harmful.
   #
-  echo "creating internal_functions.c"
+  echo "creating core/internal_functions.c"
   extensions=\`grep '^s.@EXT_STATIC@' \$0|sed -e 's/^.*@% *//' -e 's/%.*$//'\`
-  mv -f internal_functions.c internal_functions.c.old 2>/dev/null
-  sh $srcdir/genif.sh $srcdir/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" \$extensions > internal_functions.c
-  if cmp internal_functions.c.old internal_functions.c > /dev/null 2>&1; then
-      echo "internal_functions.c is unchanged"
-      mv internal_functions.c.old internal_functions.c
+  mv -f core/internal_functions.c core/internal_functions.c.old 2>/dev/null
+  sh $srcdir/genif.sh $srcdir/core/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" \$extensions > core/internal_functions.c
+  if cmp core/internal_functions.c.old core/internal_functions.c > /dev/null 2>&1; then
+      echo "core/internal_functions.c is unchanged"
+      mv core/internal_functions.c.old core/internal_functions.c
   else
-      rm -f internal_functions.c.old
+      rm -f core/internal_functions.c.old
   fi
 
   if test -n "$PHP_APXS_BROKEN"; then

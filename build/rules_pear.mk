@@ -34,7 +34,7 @@ mkinstalldirs = $(top_srcdir)/build/shtool mkdir -f -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
 SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c $< && touch $@
-DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I$(top_builddir)
+DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I$(top_builddir) -I$(top_builddir)/core
 
 moduledir    = $(EXTENSION_DIR)
 

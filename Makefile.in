@@ -1,19 +1,14 @@
 
 ZEND_DIR = $(srcdir)/Zend
-SUBDIRS = Zend ext sapi $(TSRM_DIR) $(REGEX_DIR) . $(PEAR_DIR)
+SUBDIRS = Zend core ext sapi $(TSRM_DIR) $(REGEX_DIR) . $(PEAR_DIR)
 
 LTLIBRARY_NAME = libphp4.la
-
-LTLIBRARY_SOURCES = \
-       main.c internal_functions.c snprintf.c php_sprintf.c \
-       configuration-parser.c configuration-scanner.c \
-       safe_mode.c fopen-wrappers.c php_realpath.c alloca.c \
-       php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-       strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c php_virtual_cwd.c
+LTLIBRARY_SOURCES = stub.c
 
 LTLIBRARY_DEPENDENCIES = \
 		Zend/libZend.la \
 		sapi/$(PHP_SAPI)/libsapi.la \
+		core/libcore.la \
 		$(REGEX_LIB) \
 		$(EXT_LTLIBS) \
 		$(TSRM_LIB)
@@ -57,14 +52,5 @@ install-modules:
 
 install-su: install-modules
 	(cd pear && $(MAKE) install)
-
-configuration-parser.h configuration-parser.c: $(srcdir)/configuration-parser.y
-	$(YACC) -p cfg -v -d $< -o configuration-parser.c
-
-configuration-scanner.c: $(srcdir)/configuration-scanner.l
-	$(LEX) -Pcfg -o$@ -i $<
-
-internal_functions.c: internal_functions.c.in config.status
-	CONFIG_FILES= CONFIG_HEADERS= ./config.status
 
 .NOEXPORT:
