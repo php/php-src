@@ -12,6 +12,9 @@ session_id("test");
 session_start();
 session_decode('baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}');
 
+$baz->method();
+$arr[3]->method();
+
 var_dump($baz);
 var_dump($arr);
 session_destroy();
@@ -20,14 +23,14 @@ object(foo)(2) {
   ["bar"]=>
   string(2) "ok"
   ["yes"]=>
-  int(1)
+  int(2)
 }
 array(1) {
   [3]=>
-  object(foo)(2) {
+  &object(foo)(2) {
     ["bar"]=>
     string(2) "ok"
     ["yes"]=>
-    int(1)
+    int(2)
   }
 }
