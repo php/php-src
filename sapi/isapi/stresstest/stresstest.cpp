@@ -36,11 +36,18 @@ HANDLE StartNow;
 // quick and dirty environment
 typedef CMapStringToString TEnvironment;
 TEnvironment IsapiEnvironment;
+
+typedef struct _TResults {
+	LONG ok;
+	LONG bad;
+} TResults;
+
 CStringArray IsapiFileList;  // list of filenames
 CStringArray TestNames;      // --TEST--
 CStringArray IsapiGetData;   // --GET--
 CStringArray IsapiPostData;  // --POST--
 CStringArray IsapiMatchData; // --EXPECT--
+CArray<TResults, TResults> Results;
 
 typedef struct _TIsapiContext {
 	HANDLE in;
@@ -207,6 +214,10 @@ BOOL ParseTestFile(const char *path, const char *fn)
 	enum state {none, test, skipif, post, get, file, expect} parsestate = none;
 
 	FILE *fp = fopen(filename, "r");
+	char *tn = _tempnam(temppath,"pht.");
+	char *en = _tempnam(temppath,"exp.");
+	FILE *ft = fopen(tn, "w+");
+	FILE *fe = fopen(en, "w+");
 	if (fp) {
 		while (fgets(line,sizeof(line)-1,fp)) {
 			if (line[0]=='-') {
@@ -245,36 +256,25 @@ BOOL ParseTestFile(const char *path, const char *fn)
 				cGet += line;
 				break;
 			case file:
-				cFile += line;
+				fputs(line, ft);
 				break;
 			case expect:
-				cExpect += line;
+				fputs(line, fe);
 				break;
 			}
 		}		
 
 		fclose(fp);
+		fclose(ft);
+		fclose(fe);
 
-		if (!cTest.IsEmpty() && !cFile.IsEmpty() && !cExpect.IsEmpty()) {
-			BOOL created = FALSE;
-			char *fn = _tempnam(temppath,"pht.");
-			char *en = _tempnam(temppath,"exp.");
-			FILE *fp = fopen(fn, "w+");
-			FILE *fe = fopen(en, "w+");
-			if (fp && en) {
-				fwrite(cFile, cFile.GetLength(), 1, fp);
-				fwrite(cExpect, cExpect.GetLength(), 1, fe);
-				IsapiFileList.Add(fn);
-				TestNames.Add(cTest);
-				IsapiGetData.Add(cGet);
-				IsapiPostData.Add(cPost);
-				IsapiMatchData.Add(en);
-				created = TRUE;
-			}
-			if (fp) fclose(fp);
-			if (fe) fclose(fe);
-
-			return created;
+		if (!cTest.IsEmpty()) {
+			IsapiFileList.Add(tn);
+			TestNames.Add(cTest);
+			IsapiGetData.Add(cGet);
+			IsapiPostData.Add(cPost);
+			IsapiMatchData.Add(en);
+			return TRUE;
 		}
 	}
 	return FALSE;
@@ -322,9 +322,19 @@ void DoTestFiles(const char *filelist, const char *environment)
 		return;
 	}
 
+	Results.SetSize(IsapiFileList.GetSize());
+
 	ReadGlobalEnvironment(environment);
 
 	DoThreads();
+
+	printf("\r\nRESULTS:\r\n");
+	// show results:
+	DWORD r = Results.GetSize();
+	for (DWORD i=0; i< r; i++) {
+		TResults result = Results.GetAt(i);
+		printf("%s\r\nOK: %d FAILED: %d\r\n", TestNames.GetAt(i), result.ok, result.bad);
+	}
 }
 
 int main(int argc, char* argv[]) {
@@ -409,11 +419,15 @@ DWORD CALLBACK IsapiThread(void *p)
 		for (DWORD i=0; i<filecount; i++) {
 			// execute each file
 			printf("Thread %d File %s\n", GetCurrentThreadId(), IsapiFileList.GetAt(i));
-			stress_main(IsapiFileList.GetAt(i), 
+
+			if (stress_main(IsapiFileList.GetAt(i), 
 						IsapiGetData.GetAt(i), 
 						IsapiPostData.GetAt(i),
 						IsapiMatchData.GetAt(i),
-						TestNames.GetAt(i));
+						TestNames.GetAt(i)))
+				InterlockedIncrement(&Results[i].ok);
+			else
+				InterlockedIncrement(&Results[i].bad);
 			Sleep(10);
 		}
 	}
@@ -430,7 +444,7 @@ DWORD CALLBACK IsapiThread(void *p)
  * the DLL to load. There is no recompilation required.                    *
  * ======================================================================= *
 */
-int stress_main(const char *filename, 
+BOOL stress_main(const char *filename, 
 				const char *arg, 
 				const char *postdata,
 				const char *matchdata,
@@ -497,6 +511,7 @@ int stress_main(const char *filename,
 	free(ECB.lpszPathTranslated);
 	free(ECB.lpszQueryString);
 
+	BOOL ok = TRUE;
 
 	// compare the output with the EXPECT section
 	if (matchdata && *matchdata != 0) {
@@ -510,6 +525,7 @@ int stress_main(const char *filename,
 				printf("%s OK\r\n", testname);
 			} else {
 				printf("%s FAILED\r\n", testname);
+				ok = FALSE;
 			}
 		}
 	}
@@ -519,7 +535,7 @@ int stress_main(const char *filename,
 	//if (rc == HSE_STATUS_PENDING) // We will exit in ServerSupportFunction
 	//	Sleep(INFINITE);
 
-	return 0;
+	return ok;
 		
 }
 //
