@@ -16,6 +16,8 @@ if test -d "$extname" ; then
 	givup "Directory $extname already exists."
 fi
 
+test -f ext_skel || givup "ext_skel must be in the current directory"
+
 if echo '\c' | grep -s c >/dev/null 2>&1
 then
     ECHO_N="echo -n"
@@ -40,6 +42,8 @@ dnl \$Id\$
 dnl config.m4 for extension $extname
 dnl don't forget to call PHP_EXTENSION($extname)
 
+PHP_EXTENSION($extname)
+
 eof
 
 $ECHO_N " Makefile.am$ECHO_C"
@@ -58,6 +62,7 @@ cat >.cvsignore <<eof
 .deps
 Makefile.in
 Makefile
+*.o
 *.lo
 *.la
 .libs
@@ -73,3 +78,16 @@ chmod 644 *
 
 echo " [done]."
 
+cat <<eof
+
+To use your new extension, you will have to execute the following steps:
+
+    $ cd ..
+    $ ./buildconf
+    $ ./configure                 (your extension is automatically enabled)
+    $ vi ext/$extname/$extname.c
+    $ make
+
+Repeat the last two steps as often as necessary.
+
+eof
