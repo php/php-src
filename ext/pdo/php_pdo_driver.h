@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20040925
+#define PDO_DRIVER_API	20041027
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -43,16 +43,20 @@ enum pdo_param_type {
 	PDO_PARAM_STR,
 	PDO_PARAM_LOB,
 	PDO_PARAM_STMT, /* hierarchical result set */
-
 };
 
 enum pdo_fetch_type {
+	PDO_FETCH_USE_DEFAULT,
 	PDO_FETCH_LAZY,
 	PDO_FETCH_ASSOC,
 	PDO_FETCH_NUM,
 	PDO_FETCH_BOTH,
 	PDO_FETCH_OBJ,
 	PDO_FETCH_BOUND, /* return true/false only; rely on bound columns */
+	PDO_FETCH_COLUMN,	/* fetch a numbered column only */
+	PDO_FETCH_CLASS,	/* create an instance of named class, call ctor and set properties */
+	PDO_FETCH_INTO,		/* fetch row into an existing object */
+	PDO_FETCH__MAX /* must be last */
 };
 
 enum pdo_attribute_type {
@@ -358,6 +362,7 @@ struct _pdo_dbh_t {
 	const char *persistent_id;
 	int persistent_id_len;
 	unsigned int refcount;
+
 };
 
 /* describes a column */
@@ -434,6 +439,17 @@ struct _pdo_stmt_t {
 	 * Let's keep it here. */
 	zval lazy_object_ref;
 	unsigned long refcount;
+
+	/* defaults for fetches */
+	enum pdo_fetch_type default_fetch_type;
+	union {
+		int column;
+		struct {
+			zend_class_entry *ce;	
+			zval *ctor_args;
+		} cls;
+		zval *into;
+	} fetch;
 };
 
 /* call this in MINIT to register your PDO driver */

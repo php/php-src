@@ -348,6 +348,8 @@ static PHP_METHOD(PDO, prepare)
 	/* unconditionally keep this for later reference */
 	stmt->query_string = estrndup(statement, statement_len);
 	stmt->query_stringlen = statement_len;
+	stmt->default_fetch_type = PDO_FETCH_BOTH;
+
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options, driver_options TSRMLS_CC)) {
 		/* prepared; create a statement object for PHP land to access it */
 		Z_TYPE_P(return_value) = IS_OBJECT;
@@ -630,6 +632,76 @@ static PHP_METHOD(PDO, errorInfo)
 }
 /* }}} */
 
+/* {{{ proto object PDO::queryAndIterate(string sql [, PDOStatement::setFetchMode() args])
+   Prepare and execute $sql; returns the statement object for iteration */
+static PHP_METHOD(PDO, queryAndIterate)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	pdo_stmt_t *stmt;
+	char *statement;
+	int statement_len;
+	zval *driver_options = NULL;
+	long options = 0;
+
+	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s", &statement,
+			&statement_len)) {
+		RETURN_FALSE;
+	}
+	
+	PDO_DBH_CLEAR_ERR();
+	stmt = ecalloc(1, sizeof(*stmt));
+	/* unconditionally keep this for later reference */
+	stmt->query_string = estrndup(statement, statement_len);
+	stmt->query_stringlen = statement_len;
+	stmt->default_fetch_type = PDO_FETCH_BOTH;
+
+	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options, driver_options TSRMLS_CC)) {
+		/* prepared; create a statement object for PHP land to access it */
+		Z_TYPE_P(return_value) = IS_OBJECT;
+		Z_OBJ_HANDLE_P(return_value) = zend_objects_store_put(stmt, NULL, pdo_dbstmt_free_storage, NULL TSRMLS_CC);
+		Z_OBJ_HT_P(return_value) = &pdo_dbstmt_object_handlers;
+
+		/* give it a reference to me */
+		stmt->database_object_handle = *getThis();
+		zend_objects_store_add_ref(getThis() TSRMLS_CC);
+		stmt->dbh = dbh;
+
+		/* we haven't created a lazy object yet */
+		ZVAL_NULL(&stmt->lazy_object_ref);
+
+		stmt->refcount = 1;
+
+		if (ZEND_NUM_ARGS() == 1 ||
+				SUCCESS == pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+				stmt, 1)) {
+			PDO_STMT_CLEAR_ERR();
+
+			/* now execute the statement */
+			PDO_STMT_CLEAR_ERR();
+			if (stmt->methods->executer(stmt TSRMLS_CC)) {
+				int ret = 1;
+				if (!stmt->executed) {
+					if (stmt->dbh->alloc_own_columns) {
+						ret = pdo_stmt_describe_columns(stmt TSRMLS_CC);
+					}
+					stmt->executed = 1;
+				}
+				if (ret) {
+					return;
+				}
+			}
+		}
+		/* something broke */
+		PDO_HANDLE_STMT_ERR();
+		
+		/* TODO: kill the object handle for the stmt here */
+	} else {
+		efree(stmt);
+		PDO_HANDLE_DBH_ERR();
+	}
+	RETURN_FALSE;
+}
+/* }}} */
 
 function_entry pdo_dbh_functions[] = {
 	PHP_ME_MAPPING(__construct, dbh_constructor,	NULL)
@@ -644,6 +716,7 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, getAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, queryAndIterate,NULL,					ZEND_ACC_PUBLIC)
 
 	{NULL, NULL, NULL}
 };

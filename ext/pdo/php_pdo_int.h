@@ -34,7 +34,10 @@ extern zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC);
 extern function_entry pdo_dbstmt_functions[];
 extern zend_class_entry *pdo_dbstmt_ce;
 void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC);
+zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC);
 extern zend_object_handlers pdo_dbstmt_object_handlers;
+int pdo_stmt_describe_columns(pdo_stmt_t *stmt TSRMLS_DC);
+int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip_first_arg);
 
 extern zend_object_value pdo_row_new(zend_class_entry *ce TSRMLS_DC);
 extern function_entry pdo_row_functions[];
