@@ -205,7 +205,7 @@ ZEND_MODULE_INFO_D(gmp)
 if(Z_TYPE_PP(zval) == IS_RESOURCE) { \
 	ZEND_FETCH_RESOURCE(gmpnumber, mpz_t *, zval, -1, GMP_RESOURCE_NAME, le_gmp);\
 } else {\
-	if(convert_to_gmp(&gmpnumber, zval, 0) == FAILURE) {\
+	if(convert_to_gmp(&gmpnumber, zval, 0 TSRMLS_CC) == FAILURE) {\
 		RETURN_FALSE;\
 	}\
 	ZEND_REGISTER_RESOURCE(NULL, gmpnumber, le_gmp);\
@@ -217,7 +217,7 @@ if(Z_TYPE_PP(zval) == IS_RESOURCE) { \
 
 /* {{{ convert_to_gmp
  * Convert zval to be gmp number */
-static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base) 
+static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base TSRMLS_DC) 
 {
 	int ret = 0;
 	int skip_lead = 0;
@@ -509,7 +509,7 @@ ZEND_FUNCTION(gmp_init)
 		}
 	}
 
-	if(convert_to_gmp(&gmpnumber, number_arg, base) == FAILURE) {
+	if(convert_to_gmp(&gmpnumber, number_arg, base TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 
