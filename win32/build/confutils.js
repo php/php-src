@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.6 2003-12-03 14:55:03 wez Exp $
+// $Id: confutils.js,v 1.7 2003-12-03 17:04:30 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -359,6 +359,9 @@ function CHECK_LIB(libname, target, path_to_check)
 		ADD_FLAG("LDFLAGS_" + target.toUpperCase(), '/libpath:"' + p + '" ');
 		ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
 		have = 1;
+	} else if (p == true) {
+		ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
+		have = 1;
 	}
 
 //	AC_DEFINE("HAVE_" + header_name.toUpperCase().replace(new RegExp("/\\\\-\.", "g"), "_"), have);
@@ -676,8 +679,10 @@ function generate_makefile()
 		// The trailing space is needed to prevent the trailing backslash
 		// that is part of the build dir flags (CFLAGS_BD_XXX) from being
 		// seen as a line continuation character
-		MF.WriteLine(keys[i] + "=" + word_wrap_and_indent(1,
-		   	configure_subst.Item(keys[i]), ' \\', '\t') + " ");
+		MF.WriteLine(keys[i] + "=" + 
+			//word_wrap_and_indent(1, configure_subst.Item(keys[i]), ' \\', '\t') + " "
+			configure_subst.Item(keys[i]) + " "
+			);
 		MF.WriteBlankLines(1);
 	}
 
