@@ -2061,7 +2061,8 @@ PHP_FUNCTION(ncurses_new_panel)
 		efree(panel);
 		RETURN_FALSE;
 	} else {
-		ZEND_REGISTER_RESOURCE(return_value, panel, le_ncurses_panels);
+		long id = ZEND_REGISTER_RESOURCE(return_value, panel, le_ncurses_panels);
+		set_panel_userptr(*panel, (void*)id);
 	}
 
 }
@@ -2196,7 +2197,7 @@ PHP_FUNCTION(ncurses_panel_above)
 {
 	zval *phandle = NULL;
 	PANEL **panel;
-	PANEL **above = (PANEL **)emalloc(sizeof(PANEL *));
+	PANEL *above;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r!", &phandle)) {
 		return;
@@ -2204,16 +2205,18 @@ PHP_FUNCTION(ncurses_panel_above)
 
 	if (phandle) {
 		FETCH_PANEL(panel, &phandle);
-		*above = panel_above(*panel);
+		above = panel_above(*panel);
 	} else {
-		*above = panel_above((PANEL *)0);
+		above = panel_above((PANEL *)0);
 	}
 
-	if (*above == NULL) {
-		efree(above);
+	if (above) {
+		long id = (long)panel_userptr(above);
+		zend_list_addref(id);
+		RETURN_RESOURCE(id);
+	} else {
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, above, le_ncurses_panels);
 }
 /* }}} */
 
@@ -2223,7 +2226,7 @@ PHP_FUNCTION(ncurses_panel_below)
 {
 	zval *phandle = NULL;
 	PANEL **panel;
-	PANEL **below = (PANEL **)emalloc(sizeof(PANEL *));
+	PANEL *below;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r!", &phandle)) {
 		return;
@@ -2231,16 +2234,17 @@ PHP_FUNCTION(ncurses_panel_below)
 
 	if (phandle) {
 		FETCH_PANEL(panel, &phandle);
-		*below = panel_below(*panel);
+		below = panel_below(*panel);
 	} else {
-		*below = panel_below((PANEL *)0);
+		below = panel_below((PANEL *)0);
 	}
-
-	if (*below == NULL) {
-		efree(below);
+	if (below) {
+		long id = (long)panel_userptr(below);
+		zend_list_addref(id);
+		RETURN_RESOURCE(id);
+	} else {
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, below, le_ncurses_panels);
 }
 /* }}} */
 
