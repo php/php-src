@@ -1,7 +1,7 @@
 --TEST--
 References between variables in sessions
 --SKIPIF--
-<?php include('./ext/session/tests/skipif.inc'); ?>
+<?php include('skipif.inc'); ?>
 --FILE--
 <?php
 error_reporting(E_ALL & ~E_NOTICE);

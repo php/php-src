@@ -1,7 +1,7 @@
 --TEST--
 Session Object Serialization
 --SKIPIF--
-<?php include('./ext/session/tests/skipif.inc'); ?>
+<?php include('skipif.inc'); ?>
 --FILE--
 <?php
 
