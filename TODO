@@ -85,7 +85,6 @@ ext/standard
     * implement regex-cache for url-functions.
     * strcase_replace(). (Andrei)
     * move socket related functions to fsock.c.
-    * get_defined_funcs(), get_defined_vars().
     * NOT binary safe:
         strtok()
         basename()
