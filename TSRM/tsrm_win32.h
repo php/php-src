@@ -101,4 +101,5 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags);
 TSRM_API int shmdt(const void *shmaddr);
 TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf);
 
+TSRM_API char *realpath(char *orig_path, char *buffer);
 #endif
