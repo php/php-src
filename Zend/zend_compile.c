@@ -649,7 +649,7 @@ void do_receive_arg(int op, znode *var, znode *offset, znode *initialization, un
 	opline->opcode = op;
 	opline->result = *var;
 	opline->op1 = *offset;
-	if (initialization) {
+	if ((op == ZEND_RECV_INIT) && initialization) {
 		opline->op2 = *initialization;
 	} else {
 		SET_UNUSED(opline->op2);

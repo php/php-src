@@ -17,7 +17,7 @@ typedef unsigned int uint;
 #undef inline
 #endif
 
-#define ZEND_DEBUG 0
+#define ZEND_DEBUG 1
 
 #define zend_sprintf sprintf
 
