@@ -91,6 +91,7 @@
 typedef struct _php_stream php_stream;
 typedef struct _php_stream_wrapper php_stream_wrapper;
 typedef struct _php_stream_context php_stream_context;
+typedef struct _php_stream_filter php_stream_filter;
 
 /* callback for status notifications */
 typedef void (*php_stream_notification_func)(php_stream_context *context,
@@ -176,13 +177,51 @@ struct _php_stream_wrapper	{
 	char **err_stack;
 };
 
-/* pushes an error message onto the stack for a wrapper instance */
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...);
+typedef struct _php_stream_filter_ops {
+	size_t (*write)(php_stream *stream, php_stream_filter *thisfilter,
+			const char *buf, size_t count TSRMLS_DC);
+	size_t (*read)(php_stream *stream, php_stream_filter *thisfilter,
+			char *buf, size_t count TSRMLS_DC);
+	int (*flush)(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC);
+	int (*eof)(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC);
+	void (*dtor)(php_stream_filter *thisfilter TSRMLS_DC);
+	const char *label;
+} php_stream_filter_ops;
 
+struct _php_stream_filter {
+	php_stream_filter_ops *fops;
+	void *abstract; /* for use by filter implementation */
+	php_stream_filter *next;
+	php_stream_filter *prev;
+	int is_persistent;
+	php_stream *stream;
+};
+
+#define php_stream_filter_write_next(stream, thisfilter, buf, size) \
+	(thisfilter)->next ? (thisfilter)->next->fops->write((stream), (thisfilter)->next, (buf), (size) TSRMLS_CC) \
+	: (stream)->ops->write((stream), (buf), (size) TSRMLS_CC)
+
+#define php_stream_filter_read_next(stream, thisfilter, buf, size) \
+	(thisfilter)->next ? (thisfilter)->next->fops->read((stream), (thisfilter)->next, (buf), (size) TSRMLS_CC) \
+	: (stream)->ops->read((stream), (buf), (size) TSRMLS_CC)
+
+#define php_stream_filter_flush_next(stream, thisfilter) \
+	(thisfilter)->next ? (thisfilter)->next->fops->flush((stream), (thisfilter) TSRMLS_CC) \
+	: (stream)->ops->flush((stream) TSRMLS_CC)
+
+#define php_stream_filter_eof_next(stream, thisfilter) \
+	(thisfilter)->next ? (thisfilter)->next->fops->eof((stream), (thisfilter) TSRMLS_CC) \
+	: (stream)->ops->read((stream), NULL, 0 TSRMLS_CC) == EOF ? 1 : 0
+
+
+	
 struct _php_stream  {
 	php_stream_ops *ops;
 	void *abstract;  		/* convenience pointer for abstraction */
 
+	php_stream_filter *filterhead;
+	php_stream_filter *filtertail;
+	
 	php_stream_wrapper *wrapper; /* which wrapper was used to open the stream */
 	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
 	zval *wrapperdata;		/* fgetwrapperdata retrieves this */
@@ -198,6 +237,7 @@ struct _php_stream  {
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
 #if ZEND_DEBUG
 	int __exposed;	/* non-zero if exposed as a zval somewhere */
+	char *__orig_path; /* it really helps when debugging "unclosed" streams */
 #endif
 
 	php_stream_context *context;
@@ -213,8 +253,28 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 		int persistent, const char *mode STREAMS_DC TSRMLS_DC);
 #define php_stream_alloc(ops, thisptr, persistent, mode)	_php_stream_alloc((ops), (thisptr), (persistent), (mode) STREAMS_CC TSRMLS_CC)
 
-#define php_stream_get_resource_id(stream)		(stream)->rsrc_id
+/* stack filter onto a stream */
+PHPAPI void php_stream_filter_prepend(php_stream *stream, php_stream_filter *filter);
+PHPAPI void php_stream_filter_append(php_stream *stream, php_stream_filter *filter);
+PHPAPI php_stream_filter *php_stream_filter_remove(php_stream *stream, php_stream_filter *filter, int call_dtor TSRMLS_DC);
+PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC);
+PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC TSRMLS_DC);
+#define php_stream_filter_alloc(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_CC TSRMLS_CC)
+#define php_stream_filter_alloc_rel(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_REL_CC TSRMLS_CC)
 
+#define php_stream_filter_remove_head(stream, call_dtor)	php_stream_filter_remove((stream), (stream)->filterhead, (call_dtor) TSRMLS_CC)
+#define php_stream_filter_remove_tail(stream, call_dtor)	php_stream_filter_remove((stream), (stream)->filtertail, (call_dtor) TSRMLS_CC)
+
+typedef struct _php_stream_filter_factory {
+	php_stream_filter *(*create_filter)(const char *filtername, const char *filterparams, int filterparamslen, int persistent TSRMLS_DC);
+} php_stream_filter_factory;
+
+PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC);
+PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS_DC);
+PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, const char *filterparams, int filterparamslen, int persistent TSRMLS_DC);
+
+
+#define php_stream_get_resource_id(stream)		(stream)->rsrc_id
 #if ZEND_DEBUG
 /* use this to tell the stream that it is OK if we don't explicitly close it */
 # define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
@@ -403,13 +463,17 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)
 
+/* pushes an error message onto the stack for a wrapper instance */
+PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...);
+
+
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
 #define PHP_STREAM_FAILED		2 /* an error occurred while attempting conversion */
 #define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
-/* DO NOT call this on streams that are referenced by resources! */
 #define PHP_STREAM_NO_PREFERENCE	0
 #define PHP_STREAM_PREFER_STDIO		1
+/* DO NOT call this on streams that are referenced by resources! */
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC);
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC TSRMLS_CC)
 
