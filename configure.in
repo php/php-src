@@ -852,7 +852,8 @@ if true; then
     if test "$REDIRECT" = "0"; then
       if test "$DISCARD_PATH" = "0"; then
         echo "+--------------------------------------------------------------------+"
-        echo "| Warning:                                                           |"
+        echo "|                        *** WARNING ***                             |"
+        echo "|                                                                    |"
         echo "| You will be compiling the CGI version of PHP without any           |"
         echo "| redirection checking.  By putting this cgi binary somewhere in     |"
         echo "| your web space, users may be able to circumvent existing .htaccess |"
@@ -867,7 +868,8 @@ if true; then
     rm -f config.cache
 cat <<X
 +--------------------------------------------------------------------+
-| ATTENTION!                                                         |
+|                       *** ATTENTION ***                            |
+|                                                                    |
 | Something is likely to be messed up here, because the configure    |
 | script was not able to detect a simple feature on your platform.   |
 | This is often caused by incorrect configuration parameters. Please |
@@ -876,6 +878,20 @@ cat <<X
 | If you are unable to fix this, send the file debug.log to the      |
 | php-install@lists.php.net mailing list and include appropiate      |
 | information about your setup.                                      |
+X
+  fi
+
+  if test "$MYSQL_MODULE_TYPE" = "builtin" ; then
+cat <<X
++--------------------------------------------------------------------+
+|                        *** WARNING ***                             |
+|                                                                    |
+| You chose to compile PHP with the built-in MySQL support.  If you  |
+| are compiling a server module, and intend to use other server      |
+| modules that also use MySQL (e.g, mod_auth_mysql, PHP 3.0,         |
+| mod_perl) you must NOT rely on PHP's built-in MySQL support, and   |
+| instead build it with your local MySQL support files, by adding    |
+| --with-mysql=/path/to/mysql to your configure line.                |
 X
   fi
 
