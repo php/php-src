@@ -12,6 +12,10 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	like IMP 2.2.0 without any problems). Its original intention was to
 	demonstrate the ability of PHP to work in every web server environment.
 
+	NOTE: All requests will be serialized. That means, one long running
+	      script will block all other requests. Choose another web-server,
+	      if you want to execute arbitrary scripts.
+
 REQUIRED DOWNLOADS
 
 	1. thttpd 2.xx
