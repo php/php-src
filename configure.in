@@ -1288,11 +1288,6 @@ cat<<X
 | If you do not agree with the terms of this license, you must abort |
 | the installation process at this point.                            |
 +--------------------------------------------------------------------+
-|                              *** WARNING ***                       |
-|                                                                    |
-| Remember to enable register_globals in your PHP.INI file, if your  |
-| software depends on it.                                            |
-+--------------------------------------------------------------------+
 
 
 Thank you for using PHP.
