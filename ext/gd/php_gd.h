@@ -97,8 +97,7 @@ PHP_FUNCTION(imagesx);
 PHP_FUNCTION(imagesy);
 PHP_FUNCTION(imagecreatefrompng);
 PHP_FUNCTION(imagepng);
-void php3_free_gd_font(gdFontPtr);
-void _php3_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
+void php_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
 PHP_FUNCTION(imagedashedline);
 #ifdef ENABLE_GD_TTF
 PHP_FUNCTION(imagettfbbox);
