@@ -24,6 +24,13 @@ InterBase: binding (may take a while)
             v_smallint  smallint,
             v_varchar   varchar(10000)
             )");
+    ibase_query(
+    	"create procedure add1 (arg integer)
+    	returns (result integer)
+    	as 
+    	begin
+    		result = arg +1;
+    	end");
     ibase_commit();
 
     /* if timefmt not supported, hide error */
@@ -181,6 +188,19 @@ InterBase: binding (may take a while)
     ibase_free_result($res);
 
     ibase_free_query($query);
+    
+    /* test execute procedure */
+    $query = ibase_prepare("execute procedure add1(?)");
+    $res = array();
+    for ($i = 0; $i < 10; $i++) {
+    	$res[] = ibase_execute($query,$i);
+    }
+    ibase_free_query($query);
+	foreach ($res as $r) {
+    	out_result($r, "proc add1");
+	    ibase_free_result($r);
+    }
+
     ibase_close();
     echo "end of test\n";
 ?>
@@ -219,6 +239,36 @@ prepare and exec select
 						5				
 						6				
 						7				
+---
+--- proc add1 ---
+1	
+---
+--- proc add1 ---
+2	
+---
+--- proc add1 ---
+3	
+---
+--- proc add1 ---
+4	
+---
+--- proc add1 ---
+5	
+---
+--- proc add1 ---
+6	
+---
+--- proc add1 ---
+7	
+---
+--- proc add1 ---
+8	
+---
+--- proc add1 ---
+9	
+---
+--- proc add1 ---
+10	
 ---
 end of test
 
