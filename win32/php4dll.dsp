@@ -569,6 +569,7 @@ SOURCE=..\ext\standard\url_scanner.c
 # Begin Source File
 
 SOURCE=..\ext\standard\url_scanner_ex.c
+# ADD CPP /W2
 # End Source File
 # Begin Source File
 
@@ -577,6 +578,7 @@ SOURCE=..\ext\standard\var.c
 # Begin Source File
 
 SOURCE=..\ext\standard\var_unserializer.c
+# ADD CPP /W2
 # End Source File
 # Begin Source File
 
