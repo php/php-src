@@ -69,11 +69,12 @@ PHP_FUNCTION(array_pad);
 PHP_FUNCTION(array_flip);
 PHP_FUNCTION(array_rand);
 
-HashTable* _phpi_splice(HashTable *, int, int, zval ***, int, HashTable **);
+HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
 int multisort_compare(const void *a, const void *b);
 
 typedef struct {
 	int *multisort_flags;
+	int (*compare_func)(zval *result, zval *op1, zval *op2);
 } php_array_globals;
 
 #ifdef ZTS
