@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Release Candidate 1
+- Fixed crash with foreach and temporary objects($obj->method()->a ...) where
+  method returns a non-referenced object. (Andi, Zeev)
 - Compatibility mode directive has been renamed to zend.ze2_compatibility_mode,
   as it doesn't only affect implicit cloning. (Andi, Zeev)
 - Methods that override parent methods are now subject to prototype checking,
