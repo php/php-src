@@ -34,12 +34,21 @@
 #include "php_ini.h"
 #include "php_globals.h"
 
-#ifdef PHP_WIN32
-  #include "win32/winutil.h"
-  #define DL_ERROR php_win_err()
+/* #if defined(__MacOSX__) */
+#if HAVE_JAVAVM_JAVAVM_H
+#include <JavaVM/JavaVM.h>
+#define JAVALIB "libjvm.dylib"
+#define JNI_12
+#else
+#include <jni.h>
 #endif
 
-#include <jni.h>
+
+#ifdef PHP_WIN32
+#include "win32/winutil.h"
+#define DL_ERROR php_win_err()
+#endif
+
 
 #include <stdio.h>
 

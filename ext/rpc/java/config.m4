@@ -126,6 +126,7 @@ dnl
    fi
 
    JAVA_CFLAGS="$JAVA_CFLAGS -D_REENTRANT"
+   AC_MSG_RESULT([$JAVA_LIBPATH])
  fi
 ])
 
