@@ -111,6 +111,8 @@ PHP                                                                        NEWS
 - Fixed bug #29061 (soap extension segfaults). (Dmitry)
 - Fixed bug #28985 (__getTypes() returning nothing on complex WSDL). (Dmitry)
 - Fixed bug #28969 (Wrong data encoding of special characters). (Dmitry)
+- Fixed bug #28839 (SIGSEGV in interactive mode (php -a)). 
+  (kameshj at fastmail dot fm)
 - Fixed bug #28568 (SAPI::known_post_content_types is not thread safe).
   (Moriyoshi)
 
