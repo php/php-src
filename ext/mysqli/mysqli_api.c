@@ -134,11 +134,16 @@ PHP_FUNCTION(mysqli_bind_param)
 
 
 	/* prevent leak if variables are already bound */
+#if HHOLZGRA_0
+	/* this would prevent using both bind_param and bind_result on SELECT
+		queries so it is disabled for now */
 	if (stmt->var_cnt) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variables already bound");
 		efree(args);
 		RETURN_FALSE;
 	}
+#endif
+
 	stmt->is_null = ecalloc(num_vars, sizeof(char));
 	bind = (MYSQL_BIND *)ecalloc(num_vars, sizeof(MYSQL_BIND));
 
@@ -265,11 +270,15 @@ PHP_FUNCTION(mysqli_bind_result)
 	var_cnt = argc - start;
 
 	/* prevent leak if variables are already bound */
+#if HHOLZGRA_0
+	/* this would prevent using both bind_param and bind_result on SELECT
+		queries so it is disabled for now */
 	if (stmt->var_cnt) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variables already bound");
 		efree(args);
 		RETURN_FALSE;
 	}
+#endif
 
 	bind = (MYSQL_BIND *)ecalloc(var_cnt, sizeof(MYSQL_BIND));
 	stmt->bind = (BIND_BUFFER *)ecalloc(var_cnt,sizeof(BIND_BUFFER));
