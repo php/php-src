@@ -274,6 +274,7 @@ ZEND_API void zval_update_constant(zval *p)
 {
 	if (p->type == IS_CONSTANT) {
 		zval c;
+		int refcount = p->refcount;
 
 		if (!zend_get_constant(p->value.str.val, p->value.str.len, &c)) {
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
@@ -285,6 +286,7 @@ ZEND_API void zval_update_constant(zval *p)
 			*p = c;
 		}
 		INIT_PZVAL(p);
+		p->refcount = refcount;
 	}
 }
 
