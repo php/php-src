@@ -136,6 +136,34 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 	return NULL;
 }
 
+static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *should_free ELS_DC)
+{
+	switch(node->op_type) {
+		case IS_TMP_VAR:
+			*should_free = 1;
+			return &Ts[node->u.var].tmp_var;
+			break;
+		case IS_VAR:
+			if (Ts[node->u.var].var) {
+				PZVAL_UNLOCK(*Ts[node->u.var].var);
+				*should_free = 0;
+				return *Ts[node->u.var].var;
+			} else {
+				*should_free = 1;
+				return NULL;
+			}
+			break;
+		case IS_UNUSED:
+			return NULL;
+			break;
+#if DEBUG_ZEND
+		default:
+			zend_error(E_ERROR, "Unknown temporary variable type");
+			break;
+#endif
+	}
+	return NULL;
+}
 
 static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 {
@@ -720,7 +748,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 		zend_property_reference property_reference;
 		zend_overloaded_element overloaded_element;
 
-		property_reference.object = container_ptr;
+		property_reference.object = container;
 		property_reference.type = type;
 		zend_llist_init(&property_reference.elements_list, sizeof(zend_overloaded_element), NULL, 0);
 		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
@@ -791,7 +819,7 @@ static zval get_overloaded_property(ELS_D)
 	zval result;
 
 	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-	result = (*(property_reference->object))->value.obj.ce->handle_property_get(property_reference);
+	result = (property_reference->object)->value.obj.ce->handle_property_get(property_reference);
 
 	zend_llist_destroy(&property_reference->elements_list);
 
@@ -805,7 +833,7 @@ static void set_overloaded_property(zval *value ELS_DC)
 	zend_property_reference *property_reference;
 
 	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-	(*(property_reference->object))->value.obj.ce->handle_property_set(property_reference, value);
+	(property_reference->object)->value.obj.ce->handle_property_set(property_reference, value);
 
 	zend_llist_destroy(&property_reference->elements_list);
 
@@ -818,7 +846,7 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 	zend_property_reference *property_reference;
 
 	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-	(*(property_reference->object))->value.obj.ce->handle_function_call(arg_count, return_value, list, plist, *property_reference->object, property_reference);
+	(property_reference->object)->value.obj.ce->handle_function_call(arg_count, return_value, list, plist, property_reference->object, property_reference);
 	zend_llist_destroy(&property_reference->elements_list);
 
 	zend_stack_del_top(&EG(overloaded_objects_stack));
@@ -1297,7 +1325,7 @@ binary_assign_op_addr: {
 								object_ptr=NULL;
 							}
 						} else { /* used for member function calls */
-							object_ptr = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+							object_ptr = _get_object_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
 							
 
 							if (!object_ptr
@@ -1376,13 +1404,23 @@ do_fcall_common:
 						if (opline->opcode==ZEND_DO_FCALL_BY_NAME
 							&& object_ptr
 							&& function_being_called->type!=ZEND_OVERLOADED_FUNCTION) {
-							/*zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
+							/*
+							zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
 
 							var_uninit(dummy);
 							INIT_PZVAL(dummy);
 							zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
 							zend_assign_to_variable_reference(NULL, this_ptr, object_ptr, NULL ELS_CC);
 							*/
+							//zval *dummy = (zval *) emalloc(sizeof(zval));
+							zval **this_ptr;
+
+							//var_uninit(dummy);
+							//INIT_PZVAL(dummy);
+							zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), NULL, sizeof(zval *), (void **) &this_ptr);
+							*this_ptr = object_ptr;
+							object_ptr->refcount++;
+							//zend_assign_to_variable_reference(NULL, this_ptr, object_ptr, NULL ELS_CC);
 							object_ptr = NULL;
 						}
 						original_return_value = EG(return_value);
