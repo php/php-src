@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Add array_init() function (Rasmus)
+- Hide Authorization header from phpinfo() output in safe_mode (Rasmus)
 - Re-instated safe-mode realm mangling (Rasmus)
 - Fixed a bug in preg_replace() that would change the type of the replacement
   array entries to string. (Andrei)
