@@ -2229,7 +2229,7 @@ PHP_FUNCTION(mssql_guid_string)
 			break;
 	}
 
-	dbconvert(NULL, SQLBINARY, (BYTE*)Z_STRVAL_PP(binary), min(16, Z_STRLEN_PP(binary)), SQLCHAR, buffer, -1);
+	dbconvert(NULL, SQLBINARY, (BYTE*)Z_STRVAL_PP(binary), MIN(16, Z_STRLEN_PP(binary)), SQLCHAR, buffer, -1);
 
 	if (sf) {
 		php_strtoupper(buffer, 32);
