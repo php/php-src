@@ -46,7 +46,7 @@ END {
 		print "#ifndef " IFNDEF_NAME
 	}
 
-	print "static const unsigned int " TABLE_NAME "[] = {"
+	print "static const int " TABLE_NAME "[] = {"
 	i = 160;
 	for (;;) {
 		printf("\t0x%04x, 0x%04x, 0x%04x, 0x%04x, 0x%04x, 0x%04x, 0x%04x, 0x%04x", tbl[i++], tbl[i++], tbl[i++], tbl[i++], tbl[i++], tbl[i++], tbl[i++], tbl[i++]);
