@@ -1,3 +1,7 @@
+2002-09-09  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c: remove comment
+
 2002-09-08  Andi Gutmans  <andi@zend.com>
 
     * zend.h: - Prepare for alpha 3

@@ -1,3 +1,112 @@
+2002-09-09  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: consistent..
+
+2002-09-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/packages/DB-1.2.tar
+      pear/packages/DB-1.3.tar
+      pear/packages/Mail-1.0.1.tar
+      pear/packages/Mail-1.0.tar: * upgrade DB and Mail packages
+
+    * pear/package-PEAR.xml: * 0.91 changelog
+
+    * pear/PEAR/Frontend/Gtk.php: * no longer needed
+
+    * pear/PEAR/Command/Install.php: * more consistent output
+
+    * pear/PEAR/Packager.php: * remove debug output
+
+    * pear/PEAR/Installer.php: * how did those DOS newlines get here?
+
+2002-09-09  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/imap/php_imap.c: missed one section for #15630
+
+    * ext/imap/php_imap.c: Now this is correct for bug #15630
+
+    * ext/imap/php_imap.c:
+    Revert that last change, it had code that wasn't ment to go in
+
+    * ext/imap/php_imap.c: Re-applying compiler fix for IRIX, bug #15630
+
+2002-09-09  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    chregu: Can you please use the new php_error_docref in new code?
+
+    * ext/domxml/php_domxml.c:
+    Fix for bug 19266 (don't allow appending nodes from 2 different documents)
+
+2002-09-09  Andrei Zmievski  <andrei@php.net>
+
+    * ext/standard/array.c:
+    - Added ability to extract() variables as references via OR'able EXTR_REFS
+      flag. 
+
+2002-09-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/parsedate.y: put that back...
+
+    * ext/standard/parsedate.y: Revert Dericks accidental commit :-)
+    Add an Id tag so we can see at a glance who is to blame.
+
+2002-09-09  Dan Kalowsky  <dank@deadmime.org>
+
+    * NEWS: Updated for OCI8 patch
+
+    * ext/oci8/config.m4:
+    Patch for Bug #18640 (submitted by michael.mauch@gmx.de)
+
+2002-09-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xslt/config.m4: Version check for Sablotron.
+
+2002-09-09  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+    - renamed rollback function to _restore_connection_default
+    - in _restore_connection_default:
+      - unset the selected database (thx to Paul DuBois)
+      - set session variable autocommit to default (=1)
+
+2002-09-09  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Added the 4.2.3 entries.
+
+    * main/php_version.h
+      configure.in: Make this 4.2.4-dev for now..just in case we need it.
+
+2002-09-09  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/php_syslog.h
+      main/php_open_temporary_file.c
+      main/php_ini.c
+      main/php.h
+      main/network.c
+      main/mergesort.c
+      main/main.c
+      main/fopen_wrappers.c
+      ext/standard/basic_functions.c: NetWare related changes/modifications
+
+2002-09-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/fribidi/php_fribidi.h: - Consistent use of macros
+
+    * CODING_STANDARDS: - spaces instead of tabs
+
+    * CODING_STANDARDS: - Use PHP_ instead of ZEND_
+
+2002-09-09  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Oops. Last commit was not intentinal. It seems 4.3.0-dev
+    has all fixes needed already. Mention Content-Type fix.
+
+    * main/SAPI.c: Fixed typo.
+
+    * ext/mbstring/mbstring.c:
+    MFH. This should fix all var initilization problems finally.
+
 2002-09-08  Jon Parise  <jon@csh.rit.edu>
 
     * CODING_STANDARDS: Reword item 10 for greater clarity.
