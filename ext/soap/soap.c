@@ -1993,10 +1993,18 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	ZVAL_STRINGL(params[0], buf, buf_size, 0);
 	INIT_ZVAL(param1);
 	params[1] = &param1;
-	ZVAL_STRING(params[1], location, 0);
+	if (location == NULL) {
+		ZVAL_NULL(params[1]);
+	} else {
+		ZVAL_STRING(params[1], location, 0);
+	}
 	INIT_ZVAL(param2);
 	params[2] = &param2;
-	ZVAL_STRING(params[2], action, 0);
+	if (action == NULL) {
+		ZVAL_NULL(params[2]);
+	} else {
+		ZVAL_STRING(params[2], action, 0);
+	}
 	INIT_ZVAL(param3);
 	params[3] = &param3;
 	ZVAL_LONG(params[3], version);
