@@ -478,6 +478,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 
 	if (Z_STRLEN_PP(key) == 0) {
 		php_error (E_WARNING, "key size is 0");
+		zend_list_delete (Z_LVAL_PP(mcryptind));
 		RETURN_FALSE;
 	}
 
