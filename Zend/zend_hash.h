@@ -104,6 +104,8 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 #define zend_hash_next_index_insert(ht,pData,nDataSize,pDest) \
 		zend_hash_index_update_or_next_insert(ht,0,pData,nDataSize,pDest,HASH_NEXT_INSERT)
 
+ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLength);
+
 typedef struct _zend_hash_key {
 	char *arKey;
 	uint nKeyLength;
