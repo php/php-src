@@ -1,3 +1,26 @@
+2002-06-20  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/mime_magic/mime_magic.c: ZTS fixes
+
+2002-06-20  James Cox  <james@blog.at>
+
+    * build/build.mk: oops..
+
+    * build/build.mk: make "make snapshot" work again..
+
+    * build/build.mk: fixing to permit builds with ZE2
+
+2002-06-20  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c:
+    - take version of libxslt and libxml from runtime variables to make
+      sure the reported versions correspond to the actually installed
+    	versions of libxml and libxslt
+
+2002-06-20  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Added missing NEWS entry for a bug fix.
+
 2002-06-19  Tomas V.V.Cox  <cox@idecnet.com>
 
     * pear/PEAR/Frontend/CLI.php
