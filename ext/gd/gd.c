@@ -3978,20 +3978,20 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 /* Section Filters */
 #ifdef HAVE_GD_BUNDLED
 
+#define PHP_GD_SINGLE_RES	\
+	zval **SIM;	\
+	gdImagePtr im_src;	\
+	if (zend_get_parameters_ex(1, &SIM) == FAILURE) {	\
+		RETURN_FALSE;	\
+	}	\
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);	\
+	if (im_src == NULL) {	\
+		RETURN_FALSE;	\
+	}
+
 static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval **SIM;
-	gdImagePtr im_src;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
+	PHP_GD_SINGLE_RES
 
 	if (gdImageNegate(im_src) == 1) {
 		RETURN_TRUE;
@@ -4002,18 +4002,7 @@ static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS)
 
 static void php_image_filter_grayscale(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval **SIM;
-	gdImagePtr im_src;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_array_ex(1, &SIM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
+	PHP_GD_SINGLE_RES
 
 	if (gdImageGrayScale(im_src) == 1) {
 		RETURN_TRUE;
@@ -4028,8 +4017,8 @@ static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
 	gdImagePtr im_src;
 	long brightness, tmp;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_parse_parameters(3 TSRMLS_CC, "zll", &SIM, &tmp, &brightness) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zll", &SIM, &tmp, &brightness) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
@@ -4051,8 +4040,8 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 	gdImagePtr im_src;
 	long contrast, tmp;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_parse_parameters(3 TSRMLS_CC, "rll", &SIM, &tmp, &contrast) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &SIM, &tmp, &contrast) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
@@ -4061,7 +4050,7 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (gdImageBrightness(im_src, (int)contrast) == 1) {
+	if (gdImageContrast(im_src, (int)contrast) == 1) {
 		RETURN_TRUE;
 	}
 
@@ -4074,8 +4063,8 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 	gdImagePtr im_src;
 	long r,g,b,tmp;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_parse_parameters(5 TSRMLS_CC, "rllll", &SIM, &tmp, &r, &g, &b) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &SIM, &tmp, &r, &g, &b) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
@@ -4093,18 +4082,7 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 
 static void php_image_filter_edgedetect(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval **SIM;
-	gdImagePtr im_src;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
+	PHP_GD_SINGLE_RES
 
 	if (gdImageEdgeDetectQuick(im_src) == 1) {
 		RETURN_TRUE;
@@ -4115,18 +4093,7 @@ static void php_image_filter_edgedetect(INTERNAL_FUNCTION_PARAMETERS)
 
 static void php_image_filter_emboss(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval **SIM;
-	gdImagePtr im_src;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
+	PHP_GD_SINGLE_RES
 
 	if (gdImageEmboss(im_src) == 1) {
 		RETURN_TRUE;
@@ -4137,18 +4104,7 @@ static void php_image_filter_emboss(INTERNAL_FUNCTION_PARAMETERS)
 
 static void php_image_filter_gaussian_blur(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval **SIM;
-	gdImagePtr im_src;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
+	PHP_GD_SINGLE_RES
 
 	if (gdImageGaussianBlur(im_src) == 1) {
 		RETURN_TRUE;
@@ -4159,18 +4115,7 @@ static void php_image_filter_gaussian_blur(INTERNAL_FUNCTION_PARAMETERS)
 
 static void php_image_filter_selective_blur(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval **SIM;
-	gdImagePtr im_src;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(1, &SIM) == FAILURE){
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-
-	if (im_src==NULL) {
-		RETURN_FALSE;
-	}
+	PHP_GD_SINGLE_RES
 
 	if (gdImageSelectiveBlur(im_src) == 1) {
 		RETURN_TRUE;
@@ -4181,18 +4126,7 @@ static void php_image_filter_selective_blur(INTERNAL_FUNCTION_PARAMETERS)
 
 static void php_image_filter_mean_removal(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval **SIM;
-	gdImagePtr im_src;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(1, &SIM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
-
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
+	PHP_GD_SINGLE_RES
 
 	if (gdImageMeanRemoval(im_src) == 1) {
 		RETURN_TRUE;
@@ -4208,8 +4142,8 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 	gdImagePtr im_src;
 	double weight;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_parse_parameters(3 TSRMLS_CC, "rld", &SIM, &tmp, &weight) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rld", &SIM, &tmp, &weight) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
