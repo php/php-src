@@ -23,10 +23,11 @@
 
 ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor, unsigned char persistent)
 {
-	l->head = NULL;
-	l->tail = NULL;
-	l->size = size;
-	l->dtor = dtor;
+	l->head  = NULL;
+	l->tail  = NULL;
+	l->count = 0;
+	l->size  = size;
+	l->dtor  = dtor;
 	l->persistent = persistent;
 }
 
@@ -44,6 +45,8 @@ ZEND_API void zend_llist_add_element(zend_llist *l, void *element)
 	}
 	l->tail = tmp;
 	memcpy(tmp->data, element, l->size);
+
+	++l->count;
 }
 
 
@@ -60,6 +63,8 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
 	}
 	l->head = tmp;
 	memcpy(tmp->data, element, l->size);
+
+	++l->count;
 }
 
 
@@ -77,7 +82,8 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
 			if ((l)->dtor) {\
 				(l)->dtor((current)->data);\
 				pefree((current), (l)->persistent);\
-			}
+			}\
+			--l->count;
 
 
 ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare)(void *element1, void *element2))
@@ -108,6 +114,8 @@ ZEND_API void zend_llist_destroy(zend_llist *l)
 		pefree(current, l->persistent);
 		current = next;
 	}
+
+	l->count = 0;
 }
 
 
@@ -128,13 +136,12 @@ ZEND_API void *zend_llist_remove_tail(zend_llist *l)
 			l->tail->prev->next = NULL;
 		}
         
-		/* Save the data, this doesn't get free'd, 
-		 * the pointer is just removed from the list
-		 */
 		data = old_tail->data;
 
 		l->tail = l->tail->prev;
 		pefree(old_tail, l->persistent);
+
+		--l->count;
 
 		return data;
 	}
@@ -182,20 +189,16 @@ ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC)
 
 ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
 {
-	int list_size=0, i;
+	int i;
 
 	zend_llist_element **elements;
 	zend_llist_element *element, **ptr;
 
-	for (element=l->head; element; element=element->next) {
-		list_size++;
-	}
-
-	if (list_size == 0) {
+	if (l->count <= 0) {
 		return;
 	}
 
-	elements = (zend_llist_element **) emalloc(list_size*sizeof(zend_llist_element *));
+	elements = (zend_llist_element **) emalloc(l->count * sizeof(zend_llist_element *));
 
 	ptr = &elements[0];
 
@@ -203,12 +206,12 @@ ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
 		*ptr++ = element;
 	}
 
-	qsort(elements, list_size, sizeof(zend_llist_element *), (int (*)(const void *, const void *)) comp_func);
+	qsort(elements, l->count, sizeof(zend_llist_element *), (int (*)(const void *, const void *)) comp_func);
 
 	l->head = elements[0];
 	elements[0]->prev = NULL;
 
-	for (i=1; i<list_size; i++) {
+	for (i = 1; i < l->count; i++) {
 		elements[i]->prev = elements[i-1];
 		elements[i-1]->next = elements[i];
 	}
@@ -243,13 +246,7 @@ ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_ar
 
 ZEND_API int zend_llist_count(zend_llist *l)
 {
-	zend_llist_element *element;
-	int element_count=0;
-
-	for (element=l->head; element; element=element->next) {
-		element_count++;
-	}
-	return element_count;
+	return l->count;
 }
 
 
