@@ -1,3 +1,21 @@
+2002-07-16  Andi Gutmans  <andi@pb1.pair.com>
+
+    * ZEND_CHANGES: - Before I forget to list it, this was also added.
+
+    * zend_language_scanner.l:
+    - Syntactic sugar - Add "public" as a synonym for "var".
+    - Now we have the three P's.
+    You can do:
+
+    <?
+    	class MyClass {
+    		public $a;
+    		private $b;
+    		protected $c;
+    	}
+
+    ?>
+
 2002-07-15  derick  <derick@pb1.pair.com>
 
     * zend_operators.c: - MFH of the crap removal
