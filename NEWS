@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Added get_defined_constants() function to return an associative array of
+  constants mapped to their values. (Sean)
 - New mailparse extension for parsing and manipulating MIME mail (Wez)
 - Define HAVE_CONFIG_H when building standalone DSO extensions (Stig)
 - Added the 'u' modifier to printf/sprintf which prints unsigned longs.
