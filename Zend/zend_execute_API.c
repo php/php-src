@@ -189,15 +189,23 @@ void init_executor(TSRMLS_D)
 void shutdown_executor(TSRMLS_D)
 {
 	zend_try {
-		zend_objects_store_call_destructors(&EG(objects_store) TSRMLS_CC);
-
 		zend_ptr_stack_destroy(&EG(arg_types_stack));
-				
-		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
+
+/* Removed because this can not be safely done, e.g. in this situation:
+   Object 1 creates object 2
+   Object 3 holds reference to object 2.
+   Now when 1 and 2 are destroyed, 3 can still access 2 in its destructor, with
+   very problematic results */
+/* 		zend_objects_store_call_destructors(&EG(objects_store) TSRMLS_CC); */
+
+/* Moved after symbol table cleaners, because  some of the cleaners can call
+   destructors, which would use EG(symtable_cache_ptr) and thus leave leaks */
+/*		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 			zend_hash_destroy(*EG(symtable_cache_ptr));
 			efree(*EG(symtable_cache_ptr));
 			EG(symtable_cache_ptr)--;
 		}
+*/
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator TSRMLS_CC);
 
 		zend_hash_destroy(&EG(symbol_table));
@@ -217,6 +225,12 @@ void shutdown_executor(TSRMLS_D)
 		} else {
 			zend_hash_reverse_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
 			zend_hash_reverse_apply(EG(class_table), (apply_func_t) is_not_internal_class TSRMLS_CC);
+		}
+
+		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
+			zend_hash_destroy(*EG(symtable_cache_ptr));
+			efree(*EG(symtable_cache_ptr));
+			EG(symtable_cache_ptr)--;
 		}
 	} zend_end_try();
 
