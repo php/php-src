@@ -1,5 +1,11 @@
 --TEST--
 Bug #24482: GLOB_ONLYDIR not working
+--SKIPIF--
+<?php
+if (!function_exists("glob")) {
+    die('skip glob() not available');
+}
+?>
 --FILE--
 <?php
 $globdirs = glob("*", GLOB_ONLYDIR);
