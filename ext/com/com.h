@@ -51,8 +51,7 @@ END_EXTERN_C()
 #define RETURN_COM(o)	RETVAL_COM(o)												\
 						return;
 
-#define ALLOC_COM(z)	(z) = (comval *) ecalloc(1, sizeof(comval));					\
-						C_REFCOUNT(z) = 0;
+#define ALLOC_COM(z)	(z) = (comval *) ecalloc(1, sizeof(comval));
 
 #define FREE_COM(z)		php_COM_destruct(z TSRMLS_CC);
 

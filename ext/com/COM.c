@@ -896,7 +896,7 @@ static int do_COM_invoke(comval *obj, WORD dispflags, pval *function_name, VARIA
 		efree(funcname);
 		for (current_arg=0;current_arg<arg_count;current_arg++) {
 			/* don't release IDispatch pointers as they are used afterwards */
-			if (V_VT(&variant_args[current_arg]) != VT_DISPATCH) {
+			if (V_VT(&(variant_args[current_arg])) != VT_DISPATCH) {
 				/* @todo review this: what happens to an array of IDispatchs or a VARIANT->IDispatch */
 				VariantClear(&variant_args[current_arg]);
 			}
@@ -1789,7 +1789,6 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 	pval retval;
-	pval *return_value = &retval;
 	pval **comval_handle;
 	pval *object = property_reference->object;
 	int type;
@@ -1835,18 +1834,18 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 				FREE_VARIANT(var_result);
 
 				if (obj != obj_prop) {
-					FREE_COM(obj_prop);
+					efree(obj_prop);
 
 					retval = *object;
-					ZVAL_ADDREF(return_value);
+					zval_copy_ctor(&retval);
 				} else {
-					RETVAL_COM(obj);
+					ZVAL_COM(&retval, obj);
 				}
 
 				return retval;
 		}
 
-		pval_destructor(&overloaded_property->element);
+		zval_dtor(&overloaded_property->element);
 
 		if (V_VT(var_result) == VT_DISPATCH) {
 			if (V_DISPATCH(var_result) == NULL) {
@@ -1860,7 +1859,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 			php_COM_set(obj, &V_DISPATCH(var_result), TRUE TSRMLS_CC);
 			VariantInit(var_result);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
 		} else {
-			php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
+			php_variant_to_pval(var_result, &retval, codepage TSRMLS_CC);
 
 			FREE_COM(obj_prop);
 			obj_prop = NULL;
@@ -1868,7 +1867,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 	}
 
 	if (obj_prop != NULL) {
-		RETVAL_COM(obj);
+		ZVAL_COM(&retval, obj);
 	}
 
 
@@ -1944,7 +1943,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 		}
 
 		VariantInit(var_result);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
-		pval_destructor(&overloaded_property->element);
+		zval_dtor(&overloaded_property->element);
 	}
 	FREE_VARIANT(var_result);
 
@@ -1952,7 +1951,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 	do_COM_propput(NULL, obj, &overloaded_property->element, value TSRMLS_CC);
 	FREE_COM(obj_prop);
 
-	pval_destructor(&overloaded_property->element);
+	zval_dtor(&overloaded_property->element);
 
 	return SUCCESS;
 }
@@ -1984,9 +1983,14 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		&& !strcmp(Z_STRVAL(function_name->element), "com")) {
 		/* constructor */
 		PHP_FN(com_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		/* free instance created by 'new' */
+		zval_dtor(object);
+
+		/* and override it with the instance created by 'com_load()' */
 		*object = *return_value;
-		pval_copy_constructor(object);
-		pval_destructor(&function_name->element);
+		INIT_ZVAL(*return_value);
+
+		zval_dtor(&function_name->element);
 		return;
 	}
 
@@ -1994,8 +1998,8 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 	property = php_COM_get_property_handler(property_reference);
 
 	if (Z_TYPE(property) != IS_OBJECT) {
-		pval_destructor(&property);
-		pval_destructor(&function_name->element);
+		zval_dtor(&property);
+		zval_dtor(&function_name->element);
 
 		/* error message - function call on a non-object */
 		return;
@@ -2005,8 +2009,8 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 	obj = (comval *)zend_list_find(Z_LVAL_PP(handle), &type);
 
 	if (!obj || (type != IS_COM)) {
-		pval_destructor(&property);
-		pval_destructor(&function_name->element);
+		zval_dtor(&property);
+		zval_dtor(&function_name->element);
 
 		return;
 	}
@@ -2024,7 +2028,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 
 		ALLOC_VARIANT(var_result);
 
-		arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
+		arguments = (zval **) emalloc(sizeof(zval *)*arg_count);
 		zend_get_parameters_array(ht, arg_count, arguments);
 
 		if (do_COM_invoke(obj , DISPATCH_METHOD|DISPATCH_PROPERTYGET, &function_name->element, var_result, arguments, arg_count TSRMLS_CC) == SUCCESS) {
@@ -2036,13 +2040,8 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		efree(arguments);
 	}
 
-	if (zend_llist_count(property_reference->elements_list) > 1) {
-		/* destruct temporary object */
-		zend_list_delete(Z_LVAL_PP(handle));
-		pval_destructor(&property);
-	}
-	
-	pval_destructor(&function_name->element);
+	zval_dtor(&property);
+	zval_dtor(&function_name->element);
 }
 
 
