@@ -923,7 +923,7 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
             if (!(flags & SCAN_SUPPRESS)) {
                 if (numVars) {
                     current = args[objIndex++];
-                    convert_to_string( *current );
+                    zval_dtor( *current );
                     ZVAL_STRINGL( *current, string, end-string, 1);
                 } else {
                     add_index_stringl(*return_value, objIndex++, string, end-string, 1);
