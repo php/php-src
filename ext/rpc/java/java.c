@@ -407,7 +407,7 @@ static jobjectArray _java_makeArray(int argc, pval** argv TSRMLS_DC)
 
 /* {{{ checkError 
  */
-static int checkError(pval *value)
+static int checkError(pval *value TSRMLS_DC)
 {
   if (Z_TYPE_P(value) == IS_EXCEPTION) {
     php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", Z_STRVAL_P(value));
@@ -493,7 +493,7 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
   efree(arguments);
   pval_destructor(&function_name->element);
 
-  checkError((pval*)(long)result);
+  checkError((pval*)(long)result TSRMLS_CC);
 }
 /* }}} */
 
@@ -593,7 +593,7 @@ pval java_get_property_handler(zend_property_reference *property_reference)
   TSRMLS_FETCH();
 
   presult = _java_getset_property(property_reference, 0 TSRMLS_CC);
-  checkError(&presult);
+  checkError(&presult TSRMLS_CC);
   return presult;
 }
 /* }}} */
@@ -606,7 +606,7 @@ int java_set_property_handler(zend_property_reference *property_reference, pval 
   TSRMLS_FETCH();
 
   presult = _java_getset_property(property_reference, _java_makeArray(1, &value TSRMLS_CC) TSRMLS_CC);
-  return checkError(&presult) ? FAILURE : SUCCESS;
+  return checkError(&presult TSRMLS_CC) ? FAILURE : SUCCESS;
 }
 /* }}} */
 
