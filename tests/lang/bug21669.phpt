@@ -1,5 +1,5 @@
 --TEST--
-Bug #21669	"$obj = new $this->var;" doesn't work
+Bug #21669 ("$obj = new $this->var;" doesn't work)
 --FILE--
 <?php
 class Test {
