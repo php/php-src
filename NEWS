@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+?? ??? 2000, Version 4.0.3-dev
+- [placeholder]
+
 29 Aug 2000, Version 4.0.2 
 - PHP 3 regression testing framework re-born (Stig)
 - Added php_uname() function (Stig)
