@@ -34,7 +34,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_pcntl.h"
-#include "zend_extensions.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 
