@@ -389,6 +389,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
 	CLS_FETCH();
+	BLS_FETCH();
 
 	MAKE_STD_ZVAL(fname);
 	ZVAL_STRING(fname, "__sleep", 1);
