@@ -80,11 +80,11 @@ function_entry odbc_functions[] = {
 php3_module_entry odbc_module_entry = {
     "ODBC", 
 	odbc_functions, 
-	php3_minit_odbc, 
-	php3_mshutdown_odbc,
-    php3_rinit_odbc, 
+	PHP_MINIT(odbc), 
+	PHP_MSHUTDOWN(odbc),
+    PHP_RINIT(odbc), 
 	NULL, 
-	php3_info_odbc, 
+	PHP_MINFO(odbc), 
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -209,7 +209,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 
-int php3_minit_odbc(INIT_FUNC_ARGS) 
+PHP_MINIT_FUNCTION(odbc)
 {
 #ifdef SQLANY_BUG
 	HDBC    foobar;
@@ -256,7 +256,7 @@ int php3_minit_odbc(INIT_FUNC_ARGS)
 }
 
 
-int php3_rinit_odbc(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(odbc)
 {
 	ODBC_TLS_VARS;
 
@@ -266,7 +266,7 @@ int php3_rinit_odbc(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php3_mshutdown_odbc(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(odbc)
 {
 	ODBC_TLS_VARS;
 
@@ -276,7 +276,7 @@ int php3_mshutdown_odbc(SHUTDOWN_FUNC_ARGS)
 }
 
 
-void php3_info_odbc(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(odbc)
 {
 	ODBC_TLS_VARS;
 

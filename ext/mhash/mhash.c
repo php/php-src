@@ -32,12 +32,12 @@ function_entry mhash_functions[] = {
 	{0},
 };
 
-static int php_minit_mhash(INIT_FUNC_ARGS);
+static PHP_MINIT_FUNCTION(mhash);
 
 zend_module_entry mhash_module_entry = {
 	"mhash", 
 	mhash_functions,
-	php_minit_mhash, NULL,
+	PHP_MINIT(mhash), NULL,
 	NULL, NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES,
@@ -45,7 +45,7 @@ zend_module_entry mhash_module_entry = {
 
 #define MHASH_FAILED_MSG "mhash initialization failed"
 
-static int php_minit_mhash(INIT_FUNC_ARGS)
+static PHP_MINIT_FUNCTION(mhash)
 {
 	int i;
 	char *name;

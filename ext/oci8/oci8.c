@@ -152,11 +152,11 @@ BOOL WINAPI DllMain(HANDLE hModule, DWORD  ul_reason_for_call,
 #define ZEND_MODULE_INFO_FUNC_ARGS void
 #endif
 
-int php3_minit_oci8(INIT_FUNC_ARGS);
-int php3_rinit_oci8(INIT_FUNC_ARGS);
-int php3_mshutdown_oci8(SHUTDOWN_FUNC_ARGS);
-int php3_rshutdown_oci8(SHUTDOWN_FUNC_ARGS);
-void php3_info_oci8(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_MINIT_FUNCTION(oci8);
+PHP_RINIT_FUNCTION(oci8);
+PHP_MSHUTDOWN_FUNCTION(oci8);
+PHP_RSHUTDOWN_FUNCTION(oci8);
+PHP_MINFO_FUNCTION(oci8);
 
 static ub4 oci8_error(OCIError *err_p, char *what, sword status);
 /* static int oci8_ping(oci8_connection *conn); XXX NYI */
@@ -289,11 +289,11 @@ function_entry oci8_functions[] = {
 php3_module_entry oci8_module_entry = {
     "OCI8",                /* extension name */
     oci8_functions,        /* extension function list */
-    php3_minit_oci8,       /* extension-wide startup function */
-    php3_mshutdown_oci8,   /* extension-wide shutdown function */
-    php3_rinit_oci8,       /* per-request startup function */
-    php3_rshutdown_oci8,   /* per-request shutdown function */
-    php3_info_oci8,        /* information function */
+    PHP_MINIT(oci8),       /* extension-wide startup function */
+    PHP_MSHUTDOWN(oci8),   /* extension-wide shutdown function */
+    PHP_RINIT(oci8),       /* per-request startup function */
+    PHP_RSHUTDOWN(oci8),   /* per-request shutdown function */
+    PHP_MINFO(oci8),       /* information function */
     STANDARD_MODULE_PROPERTIES
 };
 
@@ -327,7 +327,7 @@ CONST void ocifree(dvoid *ctx, dvoid *ptr)
 /* }}} */
 /* {{{ startup, shutdown and info functions */
 
-int php3_minit_oci8(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(oci8)
 {
 #ifdef THREAD_SAFE
 	oci8_global_struct *oci8_globals;
@@ -443,7 +443,7 @@ int php3_minit_oci8(INIT_FUNC_ARGS)
 /* ----------------------------------------------------------------- */
 
 
-int php3_rinit_oci8(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(oci8)
 {
 	OCI8_TLS_VARS;
 	
@@ -473,7 +473,7 @@ static int _server_pcleanup(oci8_server *server)
 	return 1;
 }
 
-int php3_mshutdown_oci8(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(oci8)
 {
     oci8_debug("php3_mshutdown_oci8");
 
@@ -546,7 +546,7 @@ static int _server_cleanup(oci8_server *server)
 	return 1;
 }
 
-int php3_rshutdown_oci8(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(oci8)
 {
 	OCI8_TLS_VARS;
 
@@ -561,7 +561,7 @@ int php3_rshutdown_oci8(SHUTDOWN_FUNC_ARGS)
 }
 
 
-void php3_info_oci8(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(oci8)
 {
 #if !(WIN32|WINNT)
 	php3_printf("Oracle version: %s<br>\n"

@@ -74,10 +74,11 @@ extern php3_module_entry velocis_module_entry;
 #define velocis_module_ptr &velocis_module_entry
 
 /* velocis.c functions */
-extern int php3_minit_velocis(INIT_FUNC_ARGS);
-extern int php3_rinit_velocis(INIT_FUNC_ARGS);
-void php3_info_velocis(ZEND_MODULE_INFO_FUNC_ARGS);
-extern int php3_shutdown_velocis(SHUTDOWN_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(velocis);
+extern PHP_RINIT_FUNCTION(velocis);
+PHP_MINFO_FUNCTION(velocis);
+extern PHP_MSHUTDOWN_FUNCTION(velocis);
+
 PHP_FUNCTION(velocis_connect);
 PHP_FUNCTION(velocis_close);
 PHP_FUNCTION(velocis_exec);

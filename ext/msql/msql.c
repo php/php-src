@@ -64,60 +64,64 @@ msql_module php3_msql_module;
 
 
 function_entry msql_functions[] = {
-	{"msql_connect",		php3_msql_connect,			NULL},
-	{"msql_pconnect",		php3_msql_pconnect,			NULL},
-	{"msql_close",			php3_msql_close,			NULL},
-	{"msql_select_db",		php3_msql_select_db,		NULL},
-	{"msql_create_db",		php3_msql_create_db,		NULL},
-	{"msql_drop_db",		php3_msql_drop_db,			NULL},
-	{"msql_query",			php3_msql_query,			NULL},
-	{"msql_db_query",		php3_msql_db_query,			NULL},
-	{"msql_list_dbs",		php3_msql_list_dbs,			NULL},
-	{"msql_list_tables",	php3_msql_list_tables,		NULL},
-	{"msql_list_fields",	php3_msql_list_fields,		NULL},
-	{"msql_error",			php3_msql_error,			NULL},
-	{"msql_result",			php3_msql_result,			NULL},
-	{"msql_num_rows",		php3_msql_num_rows,			NULL},
-	{"msql_num_fields",		php3_msql_num_fields,		NULL},
-	{"msql_fetch_row",		php3_msql_fetch_row,		NULL},
-	{"msql_fetch_array",	php3_msql_fetch_array,		NULL},
-	{"msql_fetch_object",	php3_msql_fetch_object,		NULL},
-	{"msql_data_seek",		php3_msql_data_seek,		NULL},
-	{"msql_fetch_field",	php3_msql_fetch_field,		NULL},
-	{"msql_field_seek",		php3_msql_field_seek,		NULL},
-	{"msql_free_result",	php3_msql_free_result,		NULL},
-	{"msql_field_name",		php3_msql_field_name,		NULL},
-	{"msql_field_table",	php3_msql_field_table,		NULL},
-	{"msql_field_len",		php3_msql_field_len,		NULL},
-	{"msql_field_type",		php3_msql_field_type,		NULL},
-	{"msql_field_flags",	php3_msql_field_flags,		NULL},
-	{"msql_fieldname",		php3_msql_field_name,		NULL},
-	{"msql_fieldtable",		php3_msql_field_table,		NULL},
-	{"msql_fieldlen",		php3_msql_field_len,		NULL},
-	{"msql_fieldtype",		php3_msql_field_type,		NULL},
-	{"msql_fieldflags",		php3_msql_field_flags,		NULL},
+	PHP_FE(msql_connect,							NULL)
+	PHP_FE(msql_pconnect,							NULL)
+	PHP_FE(msql_close,								NULL)
+	PHP_FE(msql_select_db,							NULL)
+	PHP_FE(msql_create_db,							NULL)
+	PHP_FE(msql_drop_db,							NULL)
+	PHP_FE(msql_query,								NULL)
+	PHP_FE(msql_db_query,							NULL)
+	PHP_FE(msql_list_dbs,							NULL)
+	PHP_FE(msql_list_tables,						NULL)
+	PHP_FE(msql_list_fields,						NULL)
+	PHP_FE(msql_error,								NULL)
+	PHP_FE(msql_result,								NULL)
+	PHP_FE(msql_num_rows,							NULL)
+	PHP_FE(msql_num_fields,							NULL)
+	PHP_FE(msql_fetch_row,							NULL)
+	PHP_FE(msql_fetch_array,						NULL)
+	PHP_FE(msql_fetch_object,						NULL)
+	PHP_FE(msql_data_seek,							NULL)
+	PHP_FE(msql_fetch_field,						NULL)
+	PHP_FE(msql_field_seek,							NULL)
+	PHP_FE(msql_free_result,						NULL)
+	PHP_FE(msql_field_name,							NULL)
+	PHP_FE(msql_field_table,						NULL)
+	PHP_FE(msql_field_len,							NULL)
+	PHP_FE(msql_field_type,							NULL)
+	PHP_FE(msql_field_flags,						NULL)
 	
-	{"msql_regcase",		php3_sql_regcase,			NULL},
-	{"msql_affected_rows",	php3_msql_affected_rows,	NULL},
+	PHP_FALIAS(msql_fieldname,		msql_field_name,		NULL)
+	PHP_FALIAS(msql_fieldtable,		msql_field_table,		NULL)
+	PHP_FALIAS(msql_fieldlen,		msql_field_len,			NULL)
+	PHP_FALIAS(msql_fieldtype,		msql_field_type,		NULL)
+	PHP_FALIAS(msql_fieldflags,		msql_field_flags,		NULL)
+	
+	PHP_FALIAS(msql_regcase,		sql_regcase,			NULL)
+	
+	PHP_FALIAS(msql_affected_rows,	msql_affected_rows,		NULL)
+	
 	/* for downwards compatability */
-	{"msql",				php3_msql_db_query,			NULL},
-	{"msql_selectdb",		php3_msql_select_db,		NULL},
-	{"msql_createdb",		php3_msql_create_db,		NULL},
-	{"msql_dropdb",			php3_msql_drop_db,			NULL},
-	{"msql_freeresult",		php3_msql_free_result,		NULL},
-	{"msql_numfields",		php3_msql_num_fields,		NULL},
-	{"msql_numrows",		php3_msql_num_rows,			NULL},
-	{"msql_listdbs",		php3_msql_list_dbs,			NULL},
-	{"msql_listtables",		php3_msql_list_tables,		NULL},
-	{"msql_listfields",		php3_msql_list_fields,		NULL},
-	{"msql_dbname",			php3_msql_result,			NULL},
-	{"msql_tablename",		php3_msql_result,			NULL},
+	PHP_FALIAS(msql,				msql_db_query,			NULL)
+	PHP_FALIAS(msql_selectdb,		msql_select_db,			NULL)
+	PHP_FALIAS(msql_createdb,		msql_create_db,			NULL)
+	PHP_FALIAS(msql_dropdb,			msql_drop_db,			NULL)
+	PHP_FALIAS(msql_freeresult,		msql_free_result,		NULL)
+	PHP_FALIAS(msql_numfields,		msql_num_fields,		NULL)
+	PHP_FALIAS(msql_numrows,		msql_num_rows,			NULL)
+	PHP_FALIAS(msql_listdbs,		msql_list_dbs,			NULL)
+	PHP_FALIAS(msql_listtables,		msql_list_tables,		NULL)
+	PHP_FALIAS(msql_listfields,		msql_list_fields,		NULL)
+	PHP_FALIAS(msql_dbname,			msql_result,			NULL)
+	PHP_FALIAS(msql_tablename,		msql_result,			NULL)
 	{NULL, NULL, NULL}
 };
 
 
 php3_module_entry msql_module_entry = {
-	"mSQL", msql_functions, php3_minit_msql, php3_mshutdown_msql, php3_rinit_msql, NULL, php3_info_msql, STANDARD_MODULE_PROPERTIES
+	"mSQL", msql_functions, PHP_MINIT(msql), PHP_MSHUTDOWN(msql), PHP_RINIT(msql), NULL,
+			PHP_MINFO(msql), STANDARD_MODULE_PROPERTIES
 };
 
 
@@ -205,7 +209,7 @@ static void _close_msql_plink(int link)
 	MSQL_GLOBAL(php3_msql_module).num_links--;
 }
 
-DLEXPORT int php3_minit_msql(INIT_FUNC_ARGS)
+DLEXPORT PHP_MINIT_FUNCTION(msql)
 {
 #ifdef THREAD_SAFE
 	msql_global_struct *msql_globals;
@@ -247,7 +251,7 @@ DLEXPORT int php3_minit_msql(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-DLEXPORT int php3_mshutdown_msql(SHUTDOWN_FUNC_ARGS){
+DLEXPORT PHP_MSHUTDOWN_FUNCTION(msql)
 #ifdef THREAD_SAFE
 	msql_global_struct *msql_globals;
 	msql_globals = TlsGetValue(MSQLTls); 
@@ -267,7 +271,7 @@ DLEXPORT int php3_mshutdown_msql(SHUTDOWN_FUNC_ARGS){
 	return SUCCESS;
 }
 
-DLEXPORT int php3_rinit_msql(INIT_FUNC_ARGS)
+DLEXPORT PHP_RINIT_FUNCTION(msql)
 {
 	MSQL_TLS_VARS;
 	MSQL_GLOBAL(php3_msql_module).default_link=-1;
@@ -276,7 +280,7 @@ DLEXPORT int php3_rinit_msql(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-DLEXPORT void php3_info_msql(ZEND_MODULE_INFO_FUNC_ARGS)
+DLEXPORT PHP_MINFO_FUNCTION(msql)
 {
 	char maxp[16],maxl[16];
 	MSQL_TLS_VARS;
