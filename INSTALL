@@ -52,10 +52,6 @@ Installing PHP can be done in four simple steps:
    You now have to choose the options you would like.  There are quite
    a few of them.  To see a list, type: ./configure --help
 
-   You can also use the supplied 'setup' script, which will ask you
-   a series of questions and automatically run the configure script
-   for you.
-
    The only options that you are likely to want to use are the ones in
    the last section entitled, "--enable and --with options recognized:"
 
