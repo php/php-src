@@ -94,11 +94,6 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayError($eobj)
     {
-        trigger_error("Frontend::displayError deprecated", E_USER_ERROR);
-    }
-
-    function _displayError($eobj)
-    {
         return $this->_displayLine($eobj->getMessage());
     }
 
@@ -106,11 +101,6 @@ class PEAR_Frontend_CLI extends PEAR
     // {{{ displayFatalError(eobj)
 
     function displayFatalError($eobj)
-    {
-        trigger_error("Frontend::displayFatalError deprecated", E_USER_ERROR);
-    }
-
-    function _displayFatalError($eobj)
     {
         $this->_displayError($eobj);
         exit(1);
