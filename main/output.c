@@ -752,28 +752,6 @@ PHP_FUNCTION(ob_flush)
 }
 /* }}} */
 
-/* {{{ proto bool ob_flush_all(void)
-   Flush (send) contents of output buffers. All buffered contents will be written/sent */
-PHP_FUNCTION(ob_flush_all)
-{
-	int orig;
-	
-	if (ZEND_NUM_ARGS() != 0)
-			WRONG_PARAM_COUNT;
-
-	if (!OG(ob_nesting_level)) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to flush buffer. No buffer to flush.");
-		RETURN_FALSE;
-	}
-
-	orig = OG(implicit_flush); /* save current implicit flush state */
-	php_start_implicit_flush(TSRMLS_C);
-	php_end_ob_buffer(1, 1 TSRMLS_CC);
-	OG(implicit_flush) = orig;
-	
-	RETURN_TRUE;
-}
-/* }}} */
 
 /* {{{ proto bool ob_clean(void)
    Clean (delete) the current output buffer */
