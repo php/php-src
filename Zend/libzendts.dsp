@@ -350,10 +350,6 @@ SOURCE=.\ZEND_BUGS
 
 SOURCE=.\ZEND_CHANGES
 # End Source File
-# Begin Source File
-
-SOURCE=.\ZEND_TODO
-# End Source File
 # End Group
 # Begin Group "Resources"
 
