@@ -1,3 +1,48 @@
+2001-02-13  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php: initialize two variables
+
+2001-02-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/pgsql/pgsql.c: remove stupid PGSQL warning
+
+2001-02-13  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+    Bug fix: Record retrieval (present) is termiated on error.
+
+2001-02-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    - PostgreSQL now does a rollback at the end of a request on every
+      persistent connection. This is done by doing an "empty" transaction
+      on the connection (This was advised by someone from the PostgreSQL
+      core-team). If you leave transactions open on your page you will see a
+      "NOTICE:  BEGIN: already a transaction in progress" message in your
+      apache error_log. This message is created by the PostgreSQL libs - we can
+      do nothing about it. 
+
+    * ext/pgsql/pgsql.c:
+    - fixes PostgeSQL pg_connect() bug. We would sometimes close the default
+      link by acciedent. (Patch by: aja@nlgroup.ca)
+
+2001-02-13  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/config.m4: Misplaced if spotted by Sascha
+
+2001-02-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * main/internal_functions.c.in
+      main/internal_functions_win32.c: remove unneded comments
+
+2001-02-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/midgard/config.m4: Outcomment everything contained in here.
+
+    This file must not perform any checks, unless the user has enabled
+    Midgard.
+
 2001-02-12  Adam Dickmeiss  <adam@indexdata.dk>
 
     * ext/yaz/php_yaz.c
