@@ -217,6 +217,16 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	zval 		*mysql_stmt;
 	MYSQL_BIND 	*bind;
 
+	if (getThis()) {
+		start = 0;
+	}
+
+	if (zend_parse_method_parameters((getThis()) ? 0:1 TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;	
+	}
+
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
+
 	if (argc < (getThis() ? 1 : 2))  {
 		WRONG_PARAM_COUNT;
 	}
@@ -228,16 +238,6 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (getThis()) {
-		start = 0;
-	}
-
-	if (zend_parse_method_parameters((getThis()) ? 0:1 TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
-		return;	
-	}
-
-	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
-	
 	var_cnt = argc - start;
 
 	if (var_cnt != mysql_stmt_field_count(stmt->stmt)) {
