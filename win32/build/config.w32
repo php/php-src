@@ -218,7 +218,7 @@ AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 /* this allows up to 256 sockets to be select()ed in a single
  * call to select(), instead of the usual 64 */
 ARG_ENABLE('fd-setsize', "Set maximum number of sockets for select(2)", "256");
-AC_DEFINE('FD_SETSIZE', PHP_FD_SETSIZE);
+ADD_FLAG("CFLAGS", "/D FD_SETSIZE=" + parseInt(PHP_FD_SETSIZE));
 
 ARG_ENABLE("memory-limit", "Enable memory limit checking code", "no");
 
