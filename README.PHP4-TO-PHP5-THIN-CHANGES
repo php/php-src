@@ -53,7 +53,7 @@
    variables_order setting.  As in, the CLI version will now always populate
    the global $argc and $argv variables.
 
-8. Classes should be declared before used :
+8. Classes must be declared before used:
    <?php
    $test = new fubar();
    $test->echo();
