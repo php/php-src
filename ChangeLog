@@ -1,3 +1,46 @@
+2000-07-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c:
+    Add IMG_GIF, IMG_JPG, IMG_JPEG, IMG_PNG and IMG_WBMP constants for
+    imagetypes() function
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+    Add ImageTypes() function which returns a bitfield with the supported
+    image formats.  1=gif, 2=jpeg, 4=png and 8=wbmp
+
+2000-07-14  Zeev Suraski  <zeev@php.net>
+
+    * win32/README.txt:
+    Hopefully this will stop the php_mysql.dll questions that haunt us...
+
+2000-07-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/math.c:
+    Make it possible to specify an empty string as a thousands-seperator
+    in number_format()
+
+2000-07-14  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mcal/php_mcal.c: Protos fixed.
+
+2000-07-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/ldap/Makefile.in
+      ext/ldap/config.m4: Shared module support for LDAP extension
+
+2000-07-14  Mike Waychison  <mwaychison@cobalt.com>
+
+    * ext/imap/php_imap.c:
+    (imap_mail) Fixed a sizing of the arg parameter array.  Was causing
+                Seg-Faults if rpath was specified.
+
+2000-07-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/datetime.c:
+    Use dashes and short day name in cookies since some browsers seem picky
+    about this
+
 2000-07-13  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/ftp/php_ftp.c: The description for protos need no period.
