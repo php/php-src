@@ -187,6 +187,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 	 * Flag variables
 	 */
 	boolean_e is_long;
+	boolean_e is_size_t;
 	boolean_e alternate_form;
 	boolean_e print_sign;
 	boolean_e print_blank;
@@ -276,9 +277,16 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 			 */
 			if (*fmt == 'l') {
 				is_long = YES;
+				is_size_t = NO;
 				fmt++;
-			} else
+			} else if (*fmt == 'z') {
+				is_size_t = YES;
 				is_long = NO;
+				fmt++;
+			} else {
+				is_size_t = NO;
+				is_long = NO;
+			}
 
 			/*
 			 * Argument extraction and printing.
@@ -295,6 +303,8 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 				case 'u':
 					if (is_long)
 						i_num = va_arg(ap, u_wide_int);
+					else if (is_size_t)
+						i_num = (wide_int) va_arg(ap, size_t);
 					else
 						i_num = (wide_int) va_arg(ap, unsigned int);
 					/*
@@ -309,6 +319,8 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 					if ((*fmt) != 'u') {
 						if (is_long)
 							i_num = va_arg(ap, wide_int);
+						else if (is_size_t)
+							i_num = (wide_int) va_arg(ap, size_t);
 						else
 							i_num = (wide_int) va_arg(ap, int);
 					};
@@ -330,6 +342,8 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 				case 'o':
 					if (is_long)
 						ui_num = va_arg(ap, u_wide_int);
+					else if (is_size_t)
+						ui_num = (u_wide_int) va_arg(ap, size_t);
 					else
 						ui_num = (u_wide_int) va_arg(ap, unsigned int);
 					s = ap_php_conv_p2(ui_num, 3, *fmt,
@@ -344,8 +358,13 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 
 				case 'x':
 				case 'X':
+					/*
+					 * Get the arg if we haven't already.
+					 */
 					if (is_long)
 						ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+					else if (is_size_t)
+						ui_num = (u_wide_int) va_arg(ap, size_t);
 					else
 						ui_num = (u_wide_int) va_arg(ap, unsigned int);
 					s = ap_php_conv_p2(ui_num, 4, *fmt,
@@ -454,11 +473,16 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
-					ui_num = (u_wide_int) va_arg(ap, char *);
-
-					if (sizeof(char *) <= sizeof(u_wide_int))
-						s = ap_php_conv_p2(ui_num, 4, 'x', &num_buf[NUM_BUF_SIZE], &s_len);
-					else {
+					if (sizeof(char *) <= sizeof(u_wide_int)) {
+						ui_num = (u_wide_int) va_arg(ap, char *);
+						s = ap_php_conv_p2(ui_num, 4, 'x', 
+								&num_buf[NUM_BUF_SIZE], &s_len);
+						if (i_num != 0) {
+							*--s = 'x';
+							*--s = '0';
+							s_len += 2;
+						}
+					} else {
 						s = "%p";
 						s_len = 2;
 					}
