@@ -1,3 +1,116 @@
+2003-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c
+      ext/dba/php_dba.h:
+      Use stream locking support
+
+2003-03-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * README.STREAMS:
+      Added notes about locking functions.
+
+2003-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_cdb_make.phpt
+      ext/dba/tests/dba_cdb_read.phpt
+      ext/dba/tests/dba_db2.phpt
+      ext/dba/tests/dba_db3.phpt
+      ext/dba/tests/dba_db4.phpt
+      ext/dba/tests/dba_dbm.phpt
+      ext/dba/tests/dba_flatfile.phpt
+      ext/dba/tests/dba_gdbm.phpt
+      ext/dba/tests/dba_inifile.phpt
+      ext/dba/tests/dba_ndbm.phpt
+      ext/dba/tests/skipif.inc
+      ext/dba/tests/test.inc:
+      Support all possible configurations and simplify includes
+
+    * ext/dba/dba.c:
+      fix dba by fixing key_len retrieval
+
+2003-03-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug22510.phpt:
+      
+      Added a test case for bug #22510
+
+2003-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      do not use $GLOBAL[]
+
+2003-03-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/hyperwave/hw.c:
+      typofix
+
+2003-03-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/__call_001.phpt:
+      If this doesn't show "3.4" there is another error
+
+2003-03-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      64bit long fix
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c:
+      64bit long fix: patch by Dave Hill
+
+2003-03-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/odbc/php_odbc.c:
+      Fixed bug #22437.
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      main/streams.c:
+      Compiler warning fix.
+
+    * ext/standard/http_fopen_wrapper.c:
+      Added support for http redirects to ftp.
+      Fixed bug #22508 (Added protection against circular HTML redirects).
+
+    * ext/standard/tests/file/bug22414.phpt:
+      Skip test if running under safe-mode.
+
+2003-03-04  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      adding news entry for disable_classes addition
+
+    * NEWS:
+      These are in the branch.
+
+    * main/main.c:
+      ws & CS
+
+    * NEWS:
+      remove this from here as it belongs elsewhere
+
+2003-03-04  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+      MFB (make it really W3C compatible (unlink node, when in tree...))
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      make it really W3C compatible (unlink node, when in tree...)
+
+2003-03-04  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h
+      sapi/apache2filter/CREDITS
+      sapi/apache2handler/CREDITS:
+      Credits update.
+
 2003-03-03  Georg Richter  <georg.richter@phpev.de>
 
     * ext/mysqli/php_mysqli.h:
