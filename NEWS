@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? March 2004, PHP 5 Release Candidate 1
-- Fixed bug #27457 (handling of numeric indexes in strtr()). (Dmitry)
 - Replaced the exec_finished hook by the zend_post_deactive hook for
   extensions. The new hook will be run after the symbol table and destructors
   are run. (Derick)
@@ -62,6 +61,7 @@ PHP                                                                        NEWS
 - Fixed bug #27537 (Objects pointing to each other segfaults). (Dmitry)
 - Fixed bug #27535 (Problem with object freeing mechanism). (Dmitry)
 - Fixed bug #27504 (Visibility bugs in call_user_function()). (Dmitry)
+- Fixed bug #27457 (handling of numeric indexes in strtr()). (Dmitry)
 - Fixed bug #27338 (memory leak inside tsrm_virtual_cwd.c on win32). (Ilia)
 - Fixed bug #27291 (get_browser matches browscap.ini patterns incorrectly). 
   (Jay)
