@@ -1,3 +1,71 @@
+2003-03-12  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      We should get this out before April..
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      - Backup to 4.3.2RC
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      - Bump the version to RC1.
+
+2003-03-12  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/main.c:
+      reverting half the patch (it is not that simple)
+
+2003-03-12  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h:
+      
+
+2003-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/odbc/php_odbc.c:
+      Fixed spprintf() usage.
+      Fixed compiler warnings.
+
+2003-03-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c:
+      Added the type constants for imagegd2()
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c:
+      Fix bug #22646
+
+    * acinclude.m4:
+      prevent warning
+
+    * NEWS:
+      This was merged into PHP_4_3 branch..
+
+2003-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/xbm.c:
+      Style fixes.
+
+2003-03-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/interface_class.phpt
+      tests/classes/interface_doubled.phpt
+      tests/classes/interface_implemented.phpt
+      tests/classes/interface_instantiate.phpt
+      tests/classes/interface_member.phpt
+      tests/classes/interface_method.phpt
+      tests/classes/interface_method_final.phpt
+      tests/classes/interface_method_private.phpt
+      tests/classes/interface_must_be_implemented.phpt:
+      Added some interface tests
+
 2003-03-11  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)
