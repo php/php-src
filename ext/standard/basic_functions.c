@@ -2180,12 +2180,12 @@ PHP_FUNCTION(in_array)
 	}
 	
 	if ((*value)->type == IS_ARRAY || (*value)->type == IS_OBJECT) {
-		zend_error(E_WARNING, "Wrong datatype for first argument in call to in_array()");
+		php_error(E_WARNING, "Wrong datatype for first argument in call to in_array()");
 		return;
 	}
 	
 	if ((*array)->type != IS_ARRAY) {
-		zend_error(E_WARNING, "Wrong datatype for second argument in call to in_array()");
+		php_error(E_WARNING, "Wrong datatype for second argument in call to in_array()");
 		return;
 	}
 
@@ -2278,12 +2278,12 @@ PHP_FUNCTION(extract)
 	}
 	
 	if (extype < EXTR_OVERWRITE || extype > EXTR_PREFIX_ALL) {
-		zend_error(E_WARNING, "Wrong argument in call to extract()");
+		php_error(E_WARNING, "Wrong argument in call to extract()");
 		return;
 	}
 	
 	if ((*var_array)->type != IS_ARRAY) {
-		zend_error(E_WARNING, "Wrong datatype in call to extract()");
+		php_error(E_WARNING, "Wrong datatype in call to extract()");
 		return;
 	}
 		
@@ -2582,7 +2582,7 @@ PHP_FUNCTION(array_push)
 	/* Get first argument and check that it's an array */	
 	stack = *args[0];
 	if (stack->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to array_push() needs to be an array");
+		php_error(E_WARNING, "First argument to array_push() needs to be an array");
 		RETURN_FALSE;
 	}
 
@@ -2615,7 +2615,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	}
 	
 	if ((*stack)->type != IS_ARRAY) {
-		zend_error(E_WARNING, "The argument needs to be an array");
+		php_error(E_WARNING, "The argument needs to be an array");
 		return;
 	}
 
@@ -2686,7 +2686,7 @@ PHP_FUNCTION(array_unshift)
 	/* Get first argument and check that it's an array */
 	stack = *args[0];
 	if (stack->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to array_unshift() needs to be an array");
+		php_error(E_WARNING, "First argument to array_unshift() needs to be an array");
 		RETURN_FALSE;
 	}
 
@@ -2736,7 +2736,7 @@ PHP_FUNCTION(array_splice)
 	/* Get first argument and check that it's an array */
 	array = *args[0];
 	if (array->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to array_splice() should be an array");
+		php_error(E_WARNING, "First argument to array_splice() should be an array");
 		efree(args);
 		return;
 	}
@@ -2809,7 +2809,7 @@ PHP_FUNCTION(array_slice)
 	}
 	
 	if ((*input)->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to array_slice() should be an array");
+		php_error(E_WARNING, "First argument to array_slice() should be an array");
 		return;
 	}
 	
@@ -2908,7 +2908,7 @@ PHP_FUNCTION(array_merge)
 	
 	for (i=0; i<argc; i++) {
 		if ((*args[i])->type != IS_ARRAY) {
-			zend_error(E_WARNING, "Skipping argument #%d to array_merge(), since it's not an array", i+1);
+			php_error(E_WARNING, "Skipping argument #%d to array_merge(), since it's not an array", i+1);
 			continue;
 		}
 		hash = (*args[i])->value.ht;
@@ -2962,7 +2962,7 @@ PHP_FUNCTION(array_keys)
 	}
 	
 	if ((*input)->type != IS_ARRAY) {
-		zend_error(E_WARNING, "First argument to array_keys() should be an array");
+		php_error(E_WARNING, "First argument to array_keys() should be an array");
 		return;
 	}
 	
@@ -3018,7 +3018,7 @@ PHP_FUNCTION(array_values)
 	}
 	
 	if ((*input)->type != IS_ARRAY) {
-		zend_error(E_WARNING, "Argument to array_values() should be an array");
+		php_error(E_WARNING, "Argument to array_values() should be an array");
 		return;
 	}
 	
@@ -3053,7 +3053,7 @@ PHP_FUNCTION(array_count_values)
 	}
 	
 	if ((*input)->type != IS_ARRAY) {
-		zend_error(E_WARNING, "Argument to array_count_values() should be an array");
+		php_error(E_WARNING, "Argument to array_count_values() should be an array");
 		return;
 	}
 	
@@ -3090,7 +3090,7 @@ PHP_FUNCTION(array_count_values)
 				(*tmp)->value.lval++;
 			}
 		} else {
-			zend_error(E_WARNING, "Can only count STRING and INTEGER values!");
+			php_error(E_WARNING, "Can only count STRING and INTEGER values!");
 		}
 
 		zend_hash_move_forward(myht);
@@ -3113,7 +3113,7 @@ PHP_FUNCTION(array_reverse)
 	}
 	
 	if ((*input)->type != IS_ARRAY) {
-		zend_error(E_WARNING, "Argument to array_reverse() should be an array");
+		php_error(E_WARNING, "Argument to array_reverse() should be an array");
 		return;
 	}
 	
@@ -3154,6 +3154,11 @@ PHP_FUNCTION(array_map)
 	
 	if (argc < 2 || argc > 3 || getParametersEx(ht, &input, &value_exp, &key_exp) == FAILURE) {
 		WRONG_PARAM_COUNT;
+	}
+	
+	if ((*input)->type != IS_ARRAY) {
+		php_error(E_WARNING, "First argument to %s should be an array",
+				get_active_function_name());
 	}
 }
 
