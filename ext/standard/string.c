@@ -176,10 +176,6 @@ PHPAPI void php_trim(zval *str, zval * return_value, int mode)
    An alias for chop */
 /* }}} */
 
-/* {{{ proto string chomp(string str)
-   An alias for chop */
-/* }}} */
-
 /* {{{ proto string chop(string str)
    Remove trailing whitespace */
 PHP_FUNCTION(chop)
