@@ -481,7 +481,6 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 #define IGNORE_PATH			0
 #define USE_PATH			1
 #define IGNORE_URL			2
-/* There's no USE_URL. */
 #define ENFORCE_SAFE_MODE 	4
 #define REPORT_ERRORS		8
 /* If you don't need to write to the stream, but really need to
@@ -501,6 +500,12 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_INCLUDE		128
+
+/* this flag tells streams to ONLY open urls */
+#define STREAM_USE_URL			256
+
+/* this flag is used when only the headers from HTTP request are to be fetched */
+#define STREAM_ONLY_GET_HEADERS		512
 
 /* Antique - no longer has meaning */
 #define IGNORE_URL_WIN 0
