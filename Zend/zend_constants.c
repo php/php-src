@@ -114,25 +114,25 @@ void zend_register_standard_constants(TSRMLS_D)
 		c.flags = CONST_PERSISTENT;
 		c.module_number = 0;
 
-		c.name = zend_strndup(ZEND_STRL("TRUE"));
+		c.name = zend_strndup(ZEND_STRS("TRUE"));
 		c.name_len = sizeof("TRUE");
 		c.value.value.lval = 1;
 		c.value.type = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 		
-		c.name = zend_strndup(ZEND_STRL("FALSE"));
+		c.name = zend_strndup(ZEND_STRS("FALSE"));
 		c.name_len = sizeof("FALSE");
 		c.value.value.lval = 0;
 		c.value.type = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
-		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
+		c.name = zend_strndup(ZEND_STRS("ZEND_THREAD_SAFE"));
 		c.name_len = sizeof("ZEND_THREAD_SAFE");
 		c.value.value.lval = ZTS_V;
 		c.value.type = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
-		c.name = zend_strndup(ZEND_STRL("NULL"));
+		c.name = zend_strndup(ZEND_STRS("NULL"));
 		c.name_len = sizeof("NULL");
 		c.value.type = IS_NULL;
 		zend_register_constant(&c TSRMLS_CC);
