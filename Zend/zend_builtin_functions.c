@@ -180,6 +180,11 @@ ZEND_FUNCTION(func_get_arg)
 	convert_to_long_ex(z_requested_offset);
 	requested_offset = (*z_requested_offset)->value.lval;
 
+	if (requested_offset < 0) {
+		zend_error(E_WARNING, "func_get_arg():  The argument number should be >= 0");
+		RETURN_FALSE;
+	}
+
 	p = EG(argument_stack).top_element-1-1;
 	arg_count = (ulong) *p;		/* this is the amount of arguments passed to func_get_arg(); */
 	p -= 1+arg_count;
