@@ -21,6 +21,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #23792 (imagerotate() problems with limited platte, the function
   will always return true color image from now on). (Pierre-Alain Joye)
 - Fixed bug #23664 (FastCGI socket listenting). (Shane)
+- Fixed bug #21074 (Apache2: "ErrorDocument xxx /error.php" broken). (Jani)
 
 19 Jun 2003, Version 4.3.3RC1
 - Synchronized bundled GD library with GD 2.0.15. (Ilia)
