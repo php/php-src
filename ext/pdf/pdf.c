@@ -1838,7 +1838,11 @@ static void _php_pdf_open_image(INTERNAL_FUNCTION_PARAMETERS, char *type)
 #else
 	image = Z_STRVAL_PP(arg2);
 #endif  
-        
+
+	if (php_check_open_basedir(image TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(image, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	pdf_image = PDF_open_image_file(pdf, type, image, "", 0);
 
 	RETURN_LONG(pdf_image+PDFLIB_IMAGE_OFFSET);
@@ -1911,6 +1915,10 @@ PHP_FUNCTION(pdf_open_image_file)
 #else
 	image = Z_STRVAL_PP(arg3);
 #endif  
+
+	if (php_check_open_basedir(image TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(image, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
 
 	if (argc == 3) {
 		pdf_image = PDF_open_image_file(pdf, Z_STRVAL_PP(arg2), image, "", 0);
@@ -2535,6 +2543,10 @@ PHP_FUNCTION(pdf_open_ccitt)
 	image = Z_STRVAL_PP(arg2);
 #endif  
 
+	if (php_check_open_basedir(image TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(image, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	convert_to_long_ex(arg3);
 	convert_to_long_ex(arg4);
 	convert_to_long_ex(arg5);
@@ -2584,6 +2596,10 @@ PHP_FUNCTION(pdf_open_image)
 	image = Z_STRVAL_PP(arg4);
 #endif  
 
+	if (php_check_open_basedir(image TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(image, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	pdf_image = PDF_open_image(pdf,
 		Z_STRVAL_PP(arg2),
 		Z_STRVAL_PP(arg3),
@@ -2621,6 +2637,10 @@ PHP_FUNCTION(pdf_attach_file)
 	convert_to_string_ex(arg8);
 	convert_to_string_ex(arg9);
 	convert_to_string_ex(arg10);
+
+	if (php_check_open_basedir(Z_STRVAL_PP(arg6) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(arg6), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
 
 	PDF_attach_file(pdf,
 		(float) Z_DVAL_PP(arg2),
@@ -2761,6 +2781,10 @@ PHP_FUNCTION(pdf_open_pdi)
 #else
 	file = Z_STRVAL_PP(arg2);
 #endif  
+
+	if (php_check_open_basedir(file TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(file, "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
 
 	pdi_handle = PDF_open_pdi(pdf,
 		file,
