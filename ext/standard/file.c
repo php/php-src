@@ -1117,6 +1117,43 @@ PHP_FUNCTION(fwrite)
 }
 
 /* }}} */	
+/* {{{ proto int fflush(int fp)
+   flushes output */
+
+PHP_FUNCTION(fflush)
+{
+	pval **arg1;
+	int ret,type;
+	int issock=0;
+	int socketd=0;
+	void *what;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+	ZEND_VERIFY_RESOURCE(what);
+
+	if (type == le_socket) {
+		issock=1;
+		socketd=*(int*)what;
+	}
+
+	if (issock){
+		ret = fsync(socketd);
+	} else {
+		ret = fflush((FILE*)what);
+	}
+
+	if (ret) {
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+
+/* }}} */	
 /* {{{ proto int set_file_buffer(int fp, int buffer)
    Set file write buffer */
 

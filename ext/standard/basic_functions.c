@@ -361,6 +361,7 @@ function_entry basic_functions[] = {
 	PHP_FE(fstat,    			NULL)
 	PHP_FE(fseek,				NULL)
 	PHP_FE(ftell,				NULL)
+	PHP_FE(fflush,				NULL)
 	PHP_FE(fwrite,				NULL)
 	PHP_FALIAS(fputs,	fwrite,	NULL)
 	PHP_FE(mkdir,				NULL)
