@@ -1,3 +1,8 @@
+2004-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_scanner.l:
+      Need {} here
+
 2004-06-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_language_scanner.l:
