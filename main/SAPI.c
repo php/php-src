@@ -185,15 +185,26 @@ SAPI_API char *sapi_get_default_content_type(SLS_D)
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
 	if (strncasecmp(mimetype, "text/", 5) == 0 && strcasecmp(charset, "none") != 0) {
-		int len = strlen(mimetype) + sizeof(";charset=") + strlen(charset);
+		int len = strlen(mimetype) + sizeof("; charset=") + strlen(charset);
 		content_type = emalloc(len);
-		strlcpy(content_type, mimetype, len);
-		strlcat(content_type, ";charset=", len);
-		strlcat(content_type, charset, len);
+		snprintf(content_type, len, "%s; charset=%s", mimetype, charset);
 	} else {
 		content_type = estrdup(mimetype);
 	}
 	return content_type;
+}
+
+
+SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header SLS_DC)
+{
+	char *default_content_type = sapi_get_default_content_type(SLS_C);
+	int default_content_type_len = strlen(default_content_type);
+
+	default_header->header_len = (sizeof("Content-type: ")-1) + default_content_type_len;
+	default_header->header = emalloc(default_header->header_len+1);
+	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: "));
+	memcpy(default_header->header+sizeof("Content-type: ")-1, default_content_type, default_content_type_len);
+	default_header->header[default_header->header_len] = 0;
 }
 
 /*
@@ -285,9 +296,6 @@ SAPI_API void sapi_deactivate(SLS_D)
 	}
 	if (SG(request_info).current_user) {
 		efree(SG(request_info).current_user);
-	}
-	if (SG(sapi_headers).default_content_type) {
-		efree(SG(sapi_headers).default_content_type);
 	}
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate(SLS_C);
@@ -436,21 +444,13 @@ SAPI_API int sapi_send_headers()
 			}
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) sapi_module.send_header, SG(server_context));
 			if(SG(sapi_headers).send_default_content_type) {
-				if (SG(sapi_headers).default_content_type != NULL) {
-					sapi_header_struct default_header;
-					int len = SG(sapi_headers).default_content_type_size + sizeof("Content-type: ");
+				char *default_content_type = sapi_get_default_content_type(SLS_C);
+				int default_content_type_len = strlen(default_content_type);
+				sapi_header_struct default_header;
 
-					default_header.header = emalloc(len);
-					strcpy(default_header.header, "Content-type: ");
-					strlcat(default_header.header, SG(sapi_headers).default_content_type, len);
-					default_header.header[len - 1] = '\0';
-					default_header.header_len = len - 1;
-					sapi_module.send_header(&default_header,SG(server_context));
-					efree(default_header.header);
-				} else {
-					sapi_header_struct default_header = { SAPI_DEFAULT_CONTENT_TYPE_HEADER, sizeof(SAPI_DEFAULT_CONTENT_TYPE_HEADER) - 1 };
-					sapi_module.send_header(&default_header,SG(server_context));
-				}
+				sapi_get_default_content_type_header(&default_header SLS_CC);
+				sapi_module.send_header(&default_header, SG(server_context));
+				sapi_free_header(&default_header);
 			}
 			sapi_module.send_header(NULL, SG(server_context));
 			SG(headers_sent) = 1;
