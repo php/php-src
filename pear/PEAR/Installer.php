@@ -164,7 +164,8 @@ class PEAR_Installer extends PEAR_Common
             case 'data':
             case 'test':
                 $dest_dir = $this->config->get($atts['role'] . '_dir') .
-                    DIRECTORY_SEPARATOR . $this->pkginfo['package'];
+                            DIRECTORY_SEPARATOR . $this->pkginfo['package'];
+                unset($atts['baseinstalldir']);
                 break;
             case 'ext':
             case 'php':
@@ -183,7 +184,7 @@ class PEAR_Installer extends PEAR_Common
         if (!empty($atts['baseinstalldir'])) {
             $dest_dir .= DIRECTORY_SEPARATOR . $atts['baseinstalldir'];
         }
-        if (dirname($file) != '.' && empty($atts['install-as']) && empty($atts['baseinstalldir'])) {
+        if (dirname($file) != '.' && empty($atts['install-as'])) {
             $dest_dir .= DIRECTORY_SEPARATOR . dirname($file);
         }
         if (empty($atts['install-as'])) {
@@ -191,7 +192,10 @@ class PEAR_Installer extends PEAR_Common
         } else {
             $dest_file = $dest_dir . DIRECTORY_SEPARATOR . $atts['install-as'];
         }
-        $dest_file = preg_replace('!//+!', '/', $dest_file);
+        $ds2 = str_repeat(DIRECTORY_SEPARATOR, 2);
+        $dest_file = preg_replace(array('!\\\\!', '!/!', "!$ds2+!"),
+                                  DIRECTORY_SEPARATOR,
+                                  $dest_file);
         $dest_dir = dirname($dest_file);
         if (!@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
@@ -572,7 +576,7 @@ class PEAR_Installer extends PEAR_Common
     function _buildCallback($what, $data)
     {
         switch ($what) {
-            
+
         }
         if (($what == 'cmdoutput' && $this->debug > 1) ||
             ($what == 'output' && $this->debug > 0)) {
