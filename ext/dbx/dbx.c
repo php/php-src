@@ -78,7 +78,7 @@ int get_module_identifier(char * module_name) {
     return DBX_UNKNOWN;
     }
 
-int split_dbx_handle_object(zval ** dbx_object, zval *** pdbx_handle, zval *** pdbx_module, zval *** pdbx_database) {
+int split_dbx_handle_object(zval **dbx_object, zval *** pdbx_handle, zval *** pdbx_module, zval *** pdbx_database) {
     convert_to_object_ex(dbx_object);
     if (zend_hash_find(Z_OBJPROP_PP(dbx_object), "handle", 7, (void **) pdbx_handle)==FAILURE
     || zend_hash_find(Z_OBJPROP_PP(dbx_object), "module", 7, (void **) pdbx_module)==FAILURE
@@ -89,7 +89,7 @@ int split_dbx_handle_object(zval ** dbx_object, zval *** pdbx_handle, zval *** p
     }
 
 /* from dbx.h, to be used in support-files (dbx_mysql.c etc...) */
-void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, zval ** returnvalue, int number_of_arguments, zval ***params)
+void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, zval **returnvalue, int number_of_arguments, zval ***params)
 {
     zval * zval_function_name;
 
@@ -110,23 +110,23 @@ void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, z
  * do NOT use the return_value parameter from INTERNAL_FUNCTION_PARAMETERS
  * you can additionally return 0 or 1 for failure or success which will also be returned by the switches
  */
-int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_connect(zval **rv, zval **host, zval **db, zval **username, zval **password, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns connection handle as resource on success or 0 as long on failure */
-int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_pconnect(zval **rv, zval **host, zval **db, zval **username, zval **password, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns persistent connection handle as resource on success or 0 as long on failure */
-int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns 1 as long on success or 0 as long on failure */
-int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns 1 as long or result identifier as resource on success or 0 as long on failure */
-int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_getcolumncount(zval **rv, zval **result_handle, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns column-count as long on success or 0 as long on failure */
-int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_getcolumnname(zval **rv, zval **result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns column-name as string on success or 0 as long on failure */
-int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_getcolumntype(zval **rv, zval **result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns column-type as string on success or 0 as long on failure */
-int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns array[0..columncount-1] as strings on success or 0 as long on failure */
-int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module);
     /* returns string */
 
 /* Every user visible function must have an entry in dbx_functions[].
@@ -219,7 +219,7 @@ ZEND_MINFO_FUNCTION(dbx)
 ZEND_FUNCTION(dbx_connect)
 {
     int number_of_arguments=5;
-    zval ** arguments[6];
+    zval **arguments[6];
 
     int result;
     long module_identifier;
@@ -301,12 +301,12 @@ ZEND_FUNCTION(dbx_connect)
 ZEND_FUNCTION(dbx_close)
 {
     int number_of_arguments=1;
-    zval ** arguments[1];
+    zval **arguments[1];
 
     int result;
-    zval ** dbx_handle;
-    zval ** dbx_module;
-    zval ** dbx_database;
+    zval **dbx_handle;
+    zval **dbx_module;
+    zval **dbx_database;
     zval * rv_success;
 
     if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
@@ -338,12 +338,12 @@ ZEND_FUNCTION(dbx_query)
 {
     int min_number_of_arguments=2;
     int number_of_arguments=3;
-    zval ** arguments[3];
+    zval **arguments[3];
 
     int result;
-    zval ** dbx_handle;
-    zval ** dbx_module;
-    zval ** dbx_database;
+    zval **dbx_handle;
+    zval **dbx_module;
+    zval **dbx_database;
     zval * rv_result_handle;
     zval * rv_column_count;
     long col_index;
@@ -351,8 +351,8 @@ ZEND_FUNCTION(dbx_query)
     zval * info;
     long info_flags;
     zval * data;
-    zval ** row_ptr;
-    zval ** inforow_ptr;
+    zval **row_ptr;
+    zval **inforow_ptr;
 
     if (ZEND_NUM_ARGS()<min_number_of_arguments || ZEND_NUM_ARGS()>number_of_arguments || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -507,12 +507,12 @@ ZEND_FUNCTION(dbx_query)
 ZEND_FUNCTION(dbx_error)
 {
     int number_of_arguments=1;
-    zval ** arguments[1];
+    zval **arguments[1];
 
     int result;
-    zval ** dbx_handle;
-    zval ** dbx_module;
-    zval ** dbx_database;
+    zval **dbx_handle;
+    zval **dbx_module;
+    zval **dbx_database;
     zval * rv_errormsg;
 
     if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
@@ -550,9 +550,9 @@ ZEND_FUNCTION(dbx_compare)
     long comparison_type=DBX_CMP_NATIVE;
     double dtemp;
     long ltemp;
-    zval ** arguments[4];
-    zval ** zv_a;
-    zval ** zv_b;
+    zval **arguments[4];
+    zval **zv_a;
+    zval **zv_b;
     int result=0;
     number_of_arguments=ZEND_NUM_ARGS();
     if (number_of_arguments<min_number_of_arguments || number_of_arguments>max_number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
@@ -636,8 +636,8 @@ ZEND_FUNCTION(dbx_compare)
 ZEND_FUNCTION(dbx_sort)
 {
     int number_of_arguments=2;
-    zval ** arguments[2];
-    zval ** zval_data;
+    zval **arguments[2];
+    zval **zval_data;
     zval * returned_zval;
     int result=0;
     if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
@@ -668,7 +668,7 @@ ZEND_FUNCTION(dbx_sort)
 /*
  * switch_dbx functions
  */
-int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_connect(zval **rv, zval **host, zval **db, zval **username, zval **password, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns connection handle as resource on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -682,7 +682,7 @@ int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, z
     return 0;
     }
 
-int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_pconnect(zval **rv, zval **host, zval **db, zval **username, zval **password, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns persistent connection handle as resource on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -696,7 +696,7 @@ int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, 
     return 0;
     }
 
-int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns 1 as long on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -710,7 +710,7 @@ int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETER
     return 0;
     }
 
-int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns 1 as long or result identifier as resource on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -724,7 +724,7 @@ int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sq
     return 0;
     }
 
-int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_getcolumncount(zval **rv, zval **result_handle, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns column-count as long on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -738,7 +738,7 @@ int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTI
     return 0;
     }
 
-int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_getcolumnname(zval **rv, zval **result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns column-name as string on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -752,7 +752,7 @@ int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_inde
     return 0;
     }
 
-int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_getcolumntype(zval **rv, zval **result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns column-type as string on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -766,7 +766,7 @@ int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_inde
     return 0;
     }
 
-int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns array[0..columncount-1] as strings on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -780,7 +780,7 @@ int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERN
     return 0;
     }
 
-int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     /* returns string */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        

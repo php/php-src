@@ -135,7 +135,7 @@ ZEND_MINFO_FUNCTION(dbx)
 </pre>
 Finally, for the implementation of all switch_dbx_XXXXX functions, copy a 'case'-line for every function that you support (should be all functions!). Here is an example for only the switch_dbx_connect function:<br>
 <pre class="code">
-int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_connect(zval **rv, zval **host, zval **db, zval **username, zval **password, INTERNAL_FUNCTION_PARAMETERS, zval **dbx_module) {
     // returns connection handle as resource on success or 0 as long on failure
     switch ((*dbx_module)-&gt;value.lval) {
         case DBX_MYSQL: return dbx_mysql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -177,11 +177,11 @@ In dbx.h one macro and one function are defined to make the calling of external 
 <p>
  The details of what each of the functions do, what parameters they get, and what parameters they should return are discussed below. But first, the dbx_mysql_connect function is presented and explained, so you get an idea of how things work.<br>
 <pre class="code">
-int dbx_mysql_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS) {
+int dbx_mysql_connect(zval **rv, zval **host, zval **db, zval **username, zval **password, INTERNAL_FUNCTION_PARAMETERS) {
     // returns connection handle as resource on success or 0 as long on 
     // failure
     int number_of_arguments;
-    zval ** arguments[3];
+    zval **arguments[3];
     zval * returned_zval=NULL;
     zval * select_db_zval=NULL;
 
@@ -208,11 +208,11 @@ int dbx_mysql_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zv
 First of all, all functions return 0 on failure and 1 on success. These values are used in the dbx-routines, they are never actually given back to the PHP-script writer that calls the dbx_connect function.<br>
 The actual value that is of interest to the caller is returned in the <span class="bold">rv</span> parameter. In this case it is a connection handle (or link identifier, in mysql-speak), that is also returned if the database selection doesn't succeed. <br>
 The parameters that are of interest to the function are located between the <span class="bold">rv</span> and <span class="bold">INTERNAL_FUNCTION_PARAMETERS</span> parameters, in this case it is a <span class="bold">host</span> name, a <span class="bold">db</span> name, a <span class="bold">username</span> and a <span class="bold">password</span>. These are the values that the user specifies if he calls dbx_connect(); These parameters are used in the calls to the mysql-database functions. The user actually also specifies a module-name, that decides which connect-function should be called. Here, he specified 'mysql'.<br>
-To actually call a mysql module function, you can use <span class="bold">dbx_call_any_function</span> where you specify the function name (it is used twice in dbx_mysql_connect, see <span class="bold">'mysql_connect'</span> and <span class="bold">'mysql_select_db'</span>, they are printed bold in the code). The value that is returned from the function will be stored in the next argument, a zval * (e.g. <span class="bold">returned_zval</span>) parameter that you must declare locally. To actually return such a parameter, use the <span class="bold">MOVE_RETURNED_TO_RV(rv, returned_zval)</span> macro, which copies the values to <span class="bold">rv</span> and frees anything that may be left in <span class="bold">returned_zval</span>. Parameters that must be passed to the mysql-function are stored in the <span class="bold">arguments</span> array, which must be large enough to hold all parameters to the function-call that requires the most parameters (in this case, mysql_connect expects 3 parameters, mysql_select_db expects two parameters, so the <span class="bold">arguments</span> array is defined 'zval ** arguments[<span class="bold">3</span>]'). The <span class="bold">number_of_arguments</span> parameter is set to the actual number of arguments that the function-call requires. As you can see it is initialized to 3, for the first call to mysql_connect. Then it is set to 2, for the call to mysql_select_db. If you call a function that retrieves a value, and you don't return it with MOVE_RETURNED_TO_RV, then you must free the value using <span class="bold">zval_ptr_dtor</span>, as can be seen right after the call to mysql_select_db. This can also be seen directly after the call to mysql_connect, if somehow this function failed or didn't return a resource (on a successful connect mysql_connect returns a resource) the returned value is freed as well (and 0 is returned because the connection failed).<br>
+To actually call a mysql module function, you can use <span class="bold">dbx_call_any_function</span> where you specify the function name (it is used twice in dbx_mysql_connect, see <span class="bold">'mysql_connect'</span> and <span class="bold">'mysql_select_db'</span>, they are printed bold in the code). The value that is returned from the function will be stored in the next argument, a zval * (e.g. <span class="bold">returned_zval</span>) parameter that you must declare locally. To actually return such a parameter, use the <span class="bold">MOVE_RETURNED_TO_RV(rv, returned_zval)</span> macro, which copies the values to <span class="bold">rv</span> and frees anything that may be left in <span class="bold">returned_zval</span>. Parameters that must be passed to the mysql-function are stored in the <span class="bold">arguments</span> array, which must be large enough to hold all parameters to the function-call that requires the most parameters (in this case, mysql_connect expects 3 parameters, mysql_select_db expects two parameters, so the <span class="bold">arguments</span> array is defined 'zval **arguments[<span class="bold">3</span>]'). The <span class="bold">number_of_arguments</span> parameter is set to the actual number of arguments that the function-call requires. As you can see it is initialized to 3, for the first call to mysql_connect. Then it is set to 2, for the call to mysql_select_db. If you call a function that retrieves a value, and you don't return it with MOVE_RETURNED_TO_RV, then you must free the value using <span class="bold">zval_ptr_dtor</span>, as can be seen right after the call to mysql_select_db. This can also be seen directly after the call to mysql_connect, if somehow this function failed or didn't return a resource (on a successful connect mysql_connect returns a resource) the returned value is freed as well (and 0 is returned because the connection failed).<br>
 <p>
 OK, now the description of all functions that you should implement, and what is expected of them...<br>
 <a name="connect"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_connect</span>(zval ** rv, zval ** <span class="fn-param">host</span>, zval ** <span class="fn-param">db</span>, zval ** <span class="fn-param">username</span>, zval ** <span class="fn-param">password</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_connect</span>(zval **rv, zval **<span class="fn-param">host</span>, zval **<span class="fn-param">db</span>, zval **<span class="fn-param">username</span>, zval **<span class="fn-param">password</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on connect-failure and 1 on success
 // rv: connection handle as resource on success or nothing on failure
 </pre>
@@ -223,14 +223,14 @@ The host (string) is the name of the machine the server is run on, but it may be
 The db (string) is the name of the database to select, or, for e.g. ODBC, the identifier that is needed to actually select the database.<br>
 The username (string) and password (string) are used for authentication.<br>
 <a name="pconnect"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_pconnect</span>(zval ** rv, zval ** <span class="fn-param">host</span>, zval ** <span class="fn-param">db</span>, zval ** <span class="fn-param">username</span>, zval ** <span class="fn-param">password</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_pconnect</span>(zval **rv, zval **<span class="fn-param">host</span>, zval **<span class="fn-param">db</span>, zval **<span class="fn-param">username</span>, zval **<span class="fn-param">password</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on pconnect-failure and 1 on success
 // rv: persistent connection handle as resource on success or nothing
 // on failure
 </pre>
 dbx_blabla_pconnect is identical to dbx_blabla_connect except that it will create a persistent connection.<br>
 <a name="close"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_close</span>(zval ** rv, zval ** <span class="fn-param">dbx_handle</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_close</span>(zval **rv, zval **<span class="fn-param">dbx_handle</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on close-failure and 1 on success
 // rv: 1 as bool on success or nothing on failure
 </pre>
@@ -239,7 +239,7 @@ What must be returned (in <span class="bold">rv</span>) is a boolean true that i
 What must be returned from the function is a 1 on success and a 0 on failure. Note that an unsuccessful close is still a succeeded function call.<br>
 The dbx_handle is the same value that you returned from dbx_blabla_connect or dbx_blabla_pconnect.<br>
 <a name="query"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_query</span>(zval ** rv, zval ** <span class="fn-param">dbx_handle</span>, zval ** <span class="fn-param">sql_statement</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_query</span>(zval **rv, zval **<span class="fn-param">dbx_handle</span>, zval **<span class="fn-param">sql_statement</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on query-failure and 1 on success
 // rv: 1 as bool or a result identifier as resource on success 
 // or nothing on failure
@@ -250,7 +250,7 @@ What must be returned from the function is a 1 on success and a 0 on failure. No
 The dbx_handle is the same value that you returned from dbx_blabla_connect or dbx_blabla_pconnect.<br>
 The sql_statement (string) can have any value.<br>
 <a name="getcolumncount"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_getcolumncount</span>(zval ** rv, zval ** <span class="fn-param">result_handle</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_getcolumncount</span>(zval **rv, zval **<span class="fn-param">result_handle</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on query-failure and 1 on success
 // returns column-count as long on success or nothing on failure
 </pre>
@@ -259,7 +259,7 @@ What must be returned (in <span class="bold">rv</span>) is the number of fields 
 What must be returned from the function is a 1 on success and a 0 on failure. <br>
 The result_handle is the same value that you returned from dbx_query.<br>
 <a name="getcolumnname"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_getcolumnname</span>(zval ** rv, zval ** <span class="fn-param">result_handle</span>, long <span class="fn-param">column_index</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_getcolumnname</span>(zval **rv, zval **<span class="fn-param">result_handle</span>, long <span class="fn-param">column_index</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on failure and 1 on success
 // returns column-name as string on success or nothing on failure
 </pre>
@@ -269,7 +269,7 @@ What must be returned from the function is a 1 on success and a 0 on failure. <b
 The result_handle is the same value that you returned from dbx_query.<br>
 The column_index is a long that ranges from 0 to the value you returned from dbx_blabla_getcolumncount minus 1 [0..columncount-1].<br>
 <a name="getcolumntype"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_getcolumntype</span>(zval ** rv, zval ** <span class="fn-param">result_handle</span>, long <span class="fn-param">column_index</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_getcolumntype</span>(zval **rv, zval **<span class="fn-param">result_handle</span>, long <span class="fn-param">column_index</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on failure and 1 on success
 // returns column-type as string on success or nothing on failure
 </pre>
@@ -279,7 +279,7 @@ What must be returned from the function is a 1 on success and a 0 on failure. <b
 The result_handle is the same value that you returned from dbx_query.<br>
 The column_index is a long that ranges from 0 to the value you returned from dbx_blabla_getcolumncount minus 1 [0..columncount-1].<br>
 <a name="getrow"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_getrow</span>(zval ** rv, zval ** <span class="fn-param">result_handle</span>, long <span class="fn-param">row_number</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_getrow</span>(zval **rv, zval **<span class="fn-param">result_handle</span>, long <span class="fn-param">row_number</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on failure and 1 on success
 // returns array[0..columncount-1] as strings on success or 0 as long 
 // on failure
@@ -290,7 +290,7 @@ What must be returned (in <span class="bold">rv</span>) is an indexed array[0..c
 What must be returned from the function is a 1 on success and a 0 on failure (function failed or there are no more rows available). <br>
 The result_handle is the same value that you returned from dbx_query.<br>
 <a name="error"></a><pre class="code">
-int <span class="fn-name">dbx_blabla_error</span>(zval ** rv, zval ** <span class="fn-param">dbx_handle</span>, INTERNAL_FUNCTION_PARAMETERS);
+int <span class="fn-name">dbx_blabla_error</span>(zval **rv, zval **<span class="fn-param">dbx_handle</span>, INTERNAL_FUNCTION_PARAMETERS);
 // int: returns 0 on failure and 1 on success
 // returns error message as string
 </pre>
