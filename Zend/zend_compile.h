@@ -103,6 +103,8 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_ABSTRACT		0x02
 #define ZEND_ACC_FINAL			0x04
 #define ZEND_ACC_INTERFACE		0x08
+/* ZEND_ACC_ABSTRACT is used for abstract classes and methods. Abstract checks work only on this flag. */
+/* ZEND_ACC_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract be using the keyword. */
 #define ZEND_ACC_ABSTRACT_CLASS	0x10
 #define ZEND_ACC_FINAL_CLASS	0x20
 #define ZEND_ACC_IMPLEMENTED_ABSTRACT	0x40
