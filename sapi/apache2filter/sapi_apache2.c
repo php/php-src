@@ -187,7 +187,7 @@ static void php_apache_sapi_log_message(char *msg)
 	apr_puts(msg, ctx->f->r->server->error_log);
 }
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct apache2_sapi_module = {
 	"apache2filter",
 	"Apache 2.0 Filter",
 
@@ -420,7 +420,7 @@ ok:
 static apr_status_t
 php_apache_server_shutdown(void *tmp)
 {
-	sapi_module.shutdown(&sapi_module);
+	apache2_sapi_module.shutdown(&apache2_sapi_module);
 	sapi_shutdown();
 	tsrm_shutdown();
 	return APR_SUCCESS;
@@ -430,8 +430,8 @@ static void
 php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
 {
 	tsrm_startup(1, 1, 0, NULL);
-	sapi_startup(&sapi_module);
-	sapi_module.startup(&sapi_module);
+	sapi_startup(&apache1_sapi_module);
+	apache2_sapi_module.startup(&apache2_sapi_module);
 	apr_register_cleanup(pchild, NULL, php_apache_server_shutdown, NULL);
 	php_apache_register_module();
 }

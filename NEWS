@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Made the php.ini path reported in phpinfo() always point to the absolute
+  path that was opened (Zeev)
+- Made the INI mechanism thread safe (Zeev, Zend engine)
 - Changed setlocale() to use LC_* constants. (Jani)
 - ctype functions now follow the extension naming conventions (Hartmut)
 - Added iconv() function (using libc or libiconv) (Stig)

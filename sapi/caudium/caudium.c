@@ -491,7 +491,7 @@ static zend_module_entry php_caudium_module = {
 
 
 /* this structure is static (as in "it does not change") */
-static sapi_module_struct sapi_module = {
+static sapi_module_struct caudium_sapi_module = {
   "caudium",
   "Caudium",
   php_module_startup,			/* startup */
@@ -781,8 +781,8 @@ void pike_module_init( void )
     caudium_php_initialized = 1;
     tsrm_startup(1, 1, 0, NULL);
     caudium_globals_id = ts_allocate_id(sizeof(php_caudium_request), NULL, NULL);
-    sapi_startup(&sapi_module);
-    sapi_module.startup(&sapi_module);
+    sapi_startup(&caudium_sapi_module);
+    sapi_module.startup(&caudium_sapi_module);
     zend_startup_module(&php_caudium_module);
     PHP_INIT_LOCK();
   }
@@ -800,7 +800,7 @@ void pike_module_init( void )
 void pike_module_exit(void)
 {
   caudium_php_initialized = 0;
-  sapi_module.shutdown(&sapi_module);
+  sapi_module.shutdown(&caudium_sapi_module);
   if(php_program)  free_program(php_program);
   tsrm_shutdown();
   PHP_DESTROY();

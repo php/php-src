@@ -489,7 +489,7 @@ static int php_roxen_startup(sapi_module_struct *sapi_module)
 
 /* this structure is static (as in "it does not change") */
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct roxen_sapi_module = {
   "roxen",
   "Roxen",
   php_module_startup,			/* startup */
@@ -708,8 +708,8 @@ void pike_module_init( void )
     roxen_globals_id = ts_allocate_id(sizeof(php_roxen_request), NULL, NULL);
 #endif	 
 #endif
-    sapi_startup(&sapi_module);
-    php_roxen_startup(&sapi_module);
+    sapi_startup(&roxen_sapi_module);
+    php_roxen_startup(&roxen_sapi_module);
     roxen_php_initialized = 1;
     PHP_INIT_LOCK();
   }
@@ -729,7 +729,7 @@ void pike_module_init( void )
 void pike_module_exit(void)
 {
   roxen_php_initialized = 0;
-  sapi_module.shutdown(&sapi_module);
+  roxen_sapi_module.shutdown(&roxen_sapi_module);
   if(php_program)  free_program(php_program);
 #ifdef ZTS
   tsrm_shutdown();

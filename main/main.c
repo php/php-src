@@ -106,8 +106,6 @@ void *gLock;					/*mutex variable */
 
 /* True globals (no need for thread safety) */
 HashTable configuration_hash;
-PHPAPI char *php_ini_path = NULL;
-
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
@@ -700,15 +698,6 @@ void php_request_shutdown(void *dummy)
 	}
 }
 
-
-static int php_config_ini_startup(void)
-{
-	if (php_init_config() == FAILURE) {
-		php_printf("PHP:  Unable to parse configuration file.\n");
-		return FAILURE;
-	}
-	return SUCCESS;
-}
  
 static void php_config_ini_shutdown(void)
 {
@@ -860,7 +849,7 @@ int php_module_startup(sapi_module_struct *sf)
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
 	FREE_MUTEX(gLock);
 
-	if (php_config_ini_startup() == FAILURE) {
+	if (php_init_config(sf->php_ini_path_override) == FAILURE) {
 		return FAILURE;
 	}
 

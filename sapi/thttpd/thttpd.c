@@ -164,7 +164,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 		php_register_variable("AUTH_TYPE", "Basic", track_vars_array ELS_CC PLS_C);
 }
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct thttpd_sapi_module = {
 	"thttpd",
 	"thttpd",
 	
@@ -306,15 +306,15 @@ void thttpd_set_dont_close(void)
 
 void thttpd_php_init(void)
 {
-	sapi_startup(&sapi_module);
-	sapi_module.startup(&sapi_module);
+	sapi_startup(&thttpd_sapi_module);
+	thttpd_sapi_module.startup(&thttpd_sapi_module);
 	SG(server_context) = (void *) 1;
 }
 
 void thttpd_php_shutdown(void)
 {
 	if (SG(server_context) != NULL) {
-		sapi_module.shutdown(&sapi_module);
+		thttpd_sapi_module.shutdown(&thttpd_sapi_module);
 		sapi_shutdown();
 	}
 }

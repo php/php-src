@@ -75,8 +75,6 @@
 
 #include "php_getopt.h"
 
-PHPAPI extern char *php_ini_path;
-
 #define PHP_MODE_STANDARD	1
 #define PHP_MODE_HIGHLIGHT	2
 #define PHP_MODE_INDENT		3
@@ -201,7 +199,7 @@ static int sapi_cgi_deactivate(SLS_D)
 
 
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct cgi_sapi_module = {
 	"cgi",							/* name */
 	"CGI",							/* pretty name */
 									
@@ -412,7 +410,7 @@ int main(int argc, char *argv[])
 	tsrm_startup(1,1,0, NULL);
 #endif
 
-	sapi_startup(&sapi_module);
+	sapi_startup(&cgi_sapi_module);
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
@@ -468,7 +466,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
 			switch (c) {
 				case 'c':
-					php_ini_path = strdup(ap_php_optarg);		/* intentional leak */
+					cgi_sapi_module.php_ini_path_override = strdup(ap_php_optarg);
 					break;
 			}
 
@@ -477,7 +475,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		ap_php_optarg = orig_optarg;
 	}
 
-	if (php_module_startup(&sapi_module)==FAILURE) {
+	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
 		return FAILURE;
 	}
 #ifdef ZTS
@@ -773,6 +771,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	STR_FREE(SG(request_info).path_translated);
 
+	if (cgi_sapi_module.php_ini_path_override) {
+		free(cgi_sapi_module.php_ini_path_override);
+	}
 #ifdef ZTS
 	tsrm_shutdown();
 #endif

@@ -65,8 +65,6 @@
 #include "zend_highlight.h"
 #include "zend_indent.h"
 
-PHPAPI extern char *php_ini_path;
-
 JNIEXPORT void JNICALL Java_net_php_reflect_setEnv
   (JNIEnv *newJenv, jclass self);
 
@@ -216,7 +214,7 @@ static char *sapi_servlet_read_cookies(SLS_D)
  * sapi maintenance
  */
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct servlet_sapi_module = {
 	"java_servlet",					/* name */
 	"Java Servlet",					/* pretty name */
 									
@@ -263,9 +261,9 @@ JNIEXPORT void JNICALL Java_net_php_servlet_startup
 	}
 #endif
 
-	sapi_startup(&sapi_module);
+	sapi_startup(&servlet_sapi_module);
 
-	if (php_module_startup(&sapi_module)==FAILURE) {
+	if (php_module_startup(&servlet_sapi_module)==FAILURE) {
 		ThrowServletException(jenv,"module startup failure");
 		return;
 	}

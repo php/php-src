@@ -21,7 +21,7 @@
 
 #include "zend_ini.h"
 
-int php_init_config(void);
+int php_init_config(char *php_ini_path_override);
 int php_shutdown_config(void);
 
 #define PHP_INI_USER	ZEND_INI_USER

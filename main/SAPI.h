@@ -57,7 +57,7 @@ typedef struct _sapi_post_entry sapi_post_entry;
 typedef struct _sapi_module_struct sapi_module_struct;
 
 
-extern sapi_module_struct sapi_module;  /* true global */
+extern SAPI_API sapi_module_struct sapi_module;  /* true global */
 
 /* Some values in this structure needs to be filled in before
  * calling sapi_activate(). We WILL change the `char *' entries,
@@ -188,6 +188,8 @@ struct _sapi_module_struct {
 	void (*register_server_variables)(zval *track_vars_array ELS_DC SLS_DC PLS_DC);
 	void (*log_message)(char *message);
 
+	char *php_ini_path_override;
+
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 
@@ -222,7 +224,7 @@ struct _sapi_post_entry {
 SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_POST_READER_FUNC(php_default_post_reader);
 
-#define STANDARD_SAPI_MODULE_PROPERTIES NULL
+#define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL
 
 #endif /* SAPI_H */
 

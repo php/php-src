@@ -24,8 +24,9 @@
 #include "ext/standard/dl.h"
 #include "zend_extensions.h"
 
+/* True globals */
 static HashTable configuration_hash;
-PHPAPI extern char *php_ini_path;
+PHPAPI char *php_ini_opened_path=NULL;
 
 
 static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
@@ -145,96 +146,79 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 }
 
 
-int php_init_config(void)
+int php_init_config(char *php_ini_path_override)
 {
+	char *env_location, *php_ini_search_path;
+	int safe_mode_state;
+	char *open_basedir;
+	int free_ini_search_path=0;
+	zend_file_handle fh;
 	PLS_FETCH();
 
 	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1)==FAILURE) {
 		return FAILURE;
 	}
 
-#if USE_CONFIG_FILE
-	{
-		char *env_location,*default_location,*php_ini_search_path;
-		int safe_mode_state = PG(safe_mode);
-		char *open_basedir = PG(open_basedir);
-		char *opened_path;
-		int free_default_location=0;
-		zend_file_handle fh;
-		
-		env_location = getenv("PHPRC");
-		if (!env_location) {
-			env_location="";
-		}
+	safe_mode_state = PG(safe_mode);
+	open_basedir = PG(open_basedir);
+
+	env_location = getenv("PHPRC");
+	if (!env_location) {
+		env_location="";
+	}
+	if (php_ini_path_override) {
+		php_ini_search_path = php_ini_path_override;
+		free_ini_search_path = 0;
+	} else {
+		char *default_location;
+		int free_default_location;
+
 #ifdef PHP_WIN32
-		{
-			if (php_ini_path) {
-				default_location = php_ini_path;
-			} else {
-				default_location = (char *) malloc(512);
-			
-				if (!GetWindowsDirectory(default_location,255)) {
-					default_location[0]=0;
-				}
-				free_default_location=1;
-			}
+		default_location = (char *) emalloc(512);
+	
+		if (!GetWindowsDirectory(default_location,255)) {
+			default_location[0]=0;
 		}
+		free_default_location=1;
 #else
-		if (!php_ini_path) {
-			default_location = CONFIGURATION_FILE_PATH;
-		} else {
-			default_location = php_ini_path;
-		}
+		default_location = CONFIGURATION_FILE_PATH;
+		free_default_location=0;
 #endif
-
-/* build a path */
-		php_ini_search_path = (char *) malloc(sizeof(".")+strlen(env_location)+strlen(default_location)+2+1);
-
-		if (!php_ini_path) {
-#ifdef PHP_WIN32
-			sprintf(php_ini_search_path,".;%s;%s",env_location,default_location);
-#else
-			sprintf(php_ini_search_path,".:%s:%s",env_location,default_location);
-#endif
-		} else {
-			/* if path was set via -c flag, only look there */
-			strcpy(php_ini_search_path,default_location);
-		}
-		PG(safe_mode) = 0;
-		PG(open_basedir) = NULL;
-
-		
-		fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &opened_path);
-		free(php_ini_search_path);
+		php_ini_search_path = (char *) emalloc(sizeof(".")+strlen(env_location)+strlen(default_location)+2+1);
+		free_ini_search_path = 1;
+		sprintf(php_ini_search_path, ".%c%s%c%s", ZEND_PATHS_SEPARATOR, env_location, ZEND_PATHS_SEPARATOR, default_location);
 		if (free_default_location) {
-			free(default_location);
-		}
-		PG(safe_mode) = safe_mode_state;
-		PG(open_basedir) = open_basedir;
-
-		if (!fh.handle.fp) {
-			return SUCCESS;  /* having no configuration file is ok */
-		}
-		fh.type = ZEND_HANDLE_FP;
-		fh.filename = opened_path;
-
-		zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, NULL);
-
-		if (opened_path) {
-			zval tmp;
-			
-			tmp.value.str.val = strdup(opened_path);
-			tmp.value.str.len = strlen(opened_path);
-			tmp.type = IS_STRING;
-			zend_hash_update(&configuration_hash,"cfg_file_path",sizeof("cfg_file_path"),(void *) &tmp,sizeof(zval),NULL);
-#if DEBUG_CFG_PARSER
-			php_printf("INI file opened at '%s'\n",opened_path);
-#endif
-			efree(opened_path);
+			efree(default_location);
 		}
 	}
+
+	PG(safe_mode) = 0;
+	PG(open_basedir) = NULL;
 	
-#endif
+	fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path);
+	if (free_ini_search_path) {
+		efree(php_ini_search_path);
+	}
+	PG(safe_mode) = safe_mode_state;
+	PG(open_basedir) = open_basedir;
+
+	if (!fh.handle.fp) {
+		return SUCCESS;  /* having no configuration file is ok */
+	}
+	fh.type = ZEND_HANDLE_FP;
+	fh.filename = php_ini_opened_path;
+
+	zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, NULL);
+
+	if (php_ini_opened_path) {
+		zval tmp;
+		
+		tmp.value.str.len = strlen(php_ini_opened_path);
+		tmp.value.str.val = zend_strndup(php_ini_opened_path, tmp.value.str.len);
+		tmp.type = IS_STRING;
+		zend_hash_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path"),(void *) &tmp,sizeof(zval), NULL);
+		persist_alloc(php_ini_opened_path);
+	}
 	
 	return SUCCESS;
 }
@@ -243,6 +227,9 @@ int php_init_config(void)
 int php_shutdown_config(void)
 {
 	zend_hash_destroy(&configuration_hash);
+	if (php_ini_opened_path) {
+		efree(php_ini_opened_path);
+	}
 	return SUCCESS;
 }
 

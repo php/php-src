@@ -54,7 +54,7 @@ static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
 }
 
 /* True globals (no need for thread safety) */
-sapi_module_struct sapi_module;
+SAPI_API sapi_module_struct sapi_module;
 SAPI_API void (*sapi_error)(int error_type, const char *message, ...);
 
 
