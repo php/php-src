@@ -172,7 +172,7 @@ static int array_reverse_key_compare(const void *a, const void *b)
 	return array_key_compare(a,b)*-1;
 }
 
-/* {{{ proto int krsort(array array_arg)
+/* {{{ proto int krsort(array array_arg, int sort_flags)
    Sort an array reverse by key */
 PHP_FUNCTION(krsort)
 {
@@ -201,7 +201,7 @@ PHP_FUNCTION(krsort)
 }
 /* }}} */
 
-/* {{{ proto int ksort(array array_arg)
+/* {{{ proto int ksort(array array_arg, int sort_flags)
    Sort an array by key */
 PHP_FUNCTION(ksort)
 {
@@ -393,7 +393,7 @@ PHP_FUNCTION(natcasesort)
 /* }}} */
 
 
-/* {{{ proto void asort(array array_arg)
+/* {{{ proto void asort(array array_arg, int sort_flags)
    Sort an array and maintain index association */
 PHP_FUNCTION(asort)
 {
@@ -422,7 +422,7 @@ PHP_FUNCTION(asort)
 }
 /* }}} */
 
-/* {{{ proto void arsort(array array_arg)
+/* {{{ proto void arsort(array array_arg, int sort_flags)
    Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
@@ -451,7 +451,7 @@ PHP_FUNCTION(arsort)
 }
 /* }}} */
 
-/* {{{ proto void sort(array array_arg)
+/* {{{ proto void sort(array array_arg, int sort_flags)
    Sort an array */
 PHP_FUNCTION(sort)
 {
@@ -480,7 +480,7 @@ PHP_FUNCTION(sort)
 }
 /* }}} */
 
-/* {{{ proto void rsort(array array_arg)
+/* {{{ proto void rsort(array array_arg, int sort_flags)
    Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
