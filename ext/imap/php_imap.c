@@ -2675,7 +2675,7 @@ PHP_FUNCTION(imap_fetchheader)
 PHP_FUNCTION(imap_uid)
 {
  	zval **streamind, **msgno;
- 	int ind, ind_type;
+ 	int ind, ind_type, msgindex;
 	pils *imap_le_struct;
  
  	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &streamind, &msgno) == FAILURE) {
@@ -2694,6 +2694,12 @@ PHP_FUNCTION(imap_uid)
 		RETURN_FALSE;
 	}
  
+    	msgindex = Z_LVAL_PP(msgno);
+	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
+		php_error(E_WARNING, "Bad message number");
+		RETURN_FALSE;
+	}
+    
 	RETURN_LONG(mail_uid(imap_le_struct->imap_stream, Z_LVAL_PP(msgno)));
 }
 /* }}} */
