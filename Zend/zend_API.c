@@ -1103,14 +1103,14 @@ void module_destructor(zend_module_entry *module)
 		zend_clean_module_rsrc_dtors(module->module_number);
 		clean_module_constants(module->module_number);
 		if (module->request_shutdown_func)
-			module->request_shutdown_func(module->type, module->module_number);
+			module->request_shutdown_func(module->type, module->module_number TSRMLS_CC);
 	}
 
 	if (module->module_started && module->module_shutdown_func) {
 #if 0
 		zend_printf("%s:  Module shutdown\n",module->name);
 #endif
-		module->module_shutdown_func(module->type, module->module_number);
+		module->module_shutdown_func(module->type, module->module_number TSRMLS_CC);
 	}
 	module->module_started=0;
 	if (module->functions) {
@@ -1148,13 +1148,15 @@ int module_registry_request_startup(zend_module_entry *module)
  */
 int module_registry_cleanup(zend_module_entry *module)
 {
+	TSRMLS_FETCH();
+
 	switch(module->type) {
 		case MODULE_PERSISTENT:
 			if (module->request_shutdown_func) {
 #if 0
 				zend_printf("%s:  Request shutdown\n",module->name);
 #endif
-				module->request_shutdown_func(module->type, module->module_number);
+				module->request_shutdown_func(module->type, module->module_number TSRMLS_CC);
 			}
 			return 0;
 			break;
