@@ -2102,6 +2102,10 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 			break;
 		}
 
+		if (decoded_header.c != NULL) {
+			break;
+		}
+
 		limit = decoded_header.c + decoded_header.len;
 		for (p = decoded_header.c; p < limit; p++) {
 			if (*p == ':') {
