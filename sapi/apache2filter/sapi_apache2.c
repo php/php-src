@@ -54,7 +54,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length)
 
 	ctx = SG(server_context);
 
-	if (!str_length) return 0;
+	if (str_length == 0) return 0;
 	
 	bb = apr_brigade_create(ctx->f->r->pool);
 	while (str_length > 0) {

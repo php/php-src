@@ -1,6 +1,6 @@
 WHAT IS THIS?
 
-    It is an output filter for Apache 2.0.
+    This module exploits the layered I/O support in Apache 2.0.
 
 HOW DOES IT WORK?
     
