@@ -80,7 +80,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session_auto_start", "0", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_gc_probability", "1", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session_lifetime", "60", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session_lifetime", "0", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 
