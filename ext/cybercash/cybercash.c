@@ -44,7 +44,7 @@ function_entry cybercash_functions[] = {
   };
 
 zend_module_entry cybercash_module_entry = {
-	"CyberCash",
+	"cybercash",
 	cybercash_functions,
 	NULL,NULL,
 	NULL,NULL,

@@ -98,7 +98,7 @@ void domxmltestnode_class_startup();
 #endif
 
 zend_module_entry php_domxml_module_entry = {
-	"DOM", php_domxml_functions, PHP_MINIT(domxml), NULL, NULL, NULL, PHP_MINFO(domxml), STANDARD_MODULE_PROPERTIES
+	"domxml", php_domxml_functions, PHP_MINIT(domxml), NULL, NULL, NULL, PHP_MINFO(domxml), STANDARD_MODULE_PROPERTIES
 };
 
 void _free_node(xmlNode *tmp) {

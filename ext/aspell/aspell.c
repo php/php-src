@@ -42,7 +42,7 @@ function_entry aspell_functions[] = {
 static int le_aspell;
 
 zend_module_entry aspell_module_entry = {
-	"Aspell", aspell_functions, PHP_MINIT(aspell), NULL, NULL, NULL, PHP_MINFO(aspell), STANDARD_MODULE_PROPERTIES
+	"aspell", aspell_functions, PHP_MINIT(aspell), NULL, NULL, NULL, PHP_MINFO(aspell), STANDARD_MODULE_PROPERTIES
 };
 
 

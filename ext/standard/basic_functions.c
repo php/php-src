@@ -353,7 +353,7 @@ PHP_INI_END()
 
 
 zend_module_entry basic_functions_module = {
-	"Basic Functions",			/* extension name */
+	"standard",					/* extension name */
 	basic_functions,			/* function list */
 	PHP_MINIT(basic),			/* process startup */
 	PHP_MSHUTDOWN(basic),		/* process shutdown */

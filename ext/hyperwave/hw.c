@@ -116,7 +116,7 @@ function_entry hw_functions[] = {
 };
 
 zend_module_entry hw_module_entry = {
-	"HyperWave", hw_functions, PHP_MINIT(hw), PHP_MSHUTDOWN(hw), NULL, NULL, PHP_MINFO(hw), 0, 0, 0, NULL
+	"hyperwave", hw_functions, PHP_MINIT(hw), PHP_MSHUTDOWN(hw), NULL, NULL, PHP_MINFO(hw), 0, 0, 0, NULL
 };
 
 #ifdef ZTS

@@ -73,7 +73,7 @@ static PHP_MINFO_FUNCTION(COM)
 
 
 zend_module_entry COM_module_entry = {
-	"Win32 COM", COM_functions, PHP_MINIT(COM), PHP_MSHUTDOWN(COM), NULL, NULL, PHP_MINFO(COM), STANDARD_MODULE_PROPERTIES
+	"com", COM_functions, PHP_MINIT(COM), PHP_MSHUTDOWN(COM), NULL, NULL, PHP_MINFO(COM), STANDARD_MODULE_PROPERTIES
 };
 
 void php_register_COM_class();

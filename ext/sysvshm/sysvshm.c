@@ -42,7 +42,7 @@ function_entry sysvshm_functions[] = {
 };
 
 zend_module_entry sysvshm_module_entry = {
-	"System V Shared-Memory", sysvshm_functions, 
+	"sysvshm", sysvshm_functions, 
 	PHP_MINIT(sysvshm), NULL,
 	NULL, NULL,
 	NULL,

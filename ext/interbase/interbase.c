@@ -48,7 +48,7 @@ function_entry ibase_functions[] = {
 
 zend_module_entry ibase_module_entry =
 {
-	"InterBase",
+	"interbase",
 	ibase_functions,
 	PHP_MINIT(ibase),
 	NULL,

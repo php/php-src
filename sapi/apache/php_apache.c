@@ -116,7 +116,7 @@ static PHP_MSHUTDOWN_FUNCTION(apache)
 
 
 zend_module_entry apache_module_entry = {
-	"Apache", apache_functions, PHP_MINIT(apache), PHP_MSHUTDOWN(apache), NULL, NULL, PHP_MINFO(apache), STANDARD_MODULE_PROPERTIES
+	"apache", apache_functions, PHP_MINIT(apache), PHP_MSHUTDOWN(apache), NULL, NULL, PHP_MINFO(apache), STANDARD_MODULE_PROPERTIES
 };
 
 /* {{{ proto string apache_note(string note_name [, string note_value])

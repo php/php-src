@@ -57,7 +57,7 @@ function_entry sysvsem_functions[] = {
 };
 
 zend_module_entry sysvsem_module_entry = {
-	"System V semaphores", sysvsem_functions, PHP_MINIT(sysvsem), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"sysvsem", sysvsem_functions, PHP_MINIT(sysvsem), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL

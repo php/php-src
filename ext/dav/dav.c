@@ -88,7 +88,7 @@ function_entry phpdav_functions[] = {
 };
 
 zend_module_entry phpdav_module_entry = {
-    "DAV",                   /* extension name */
+    "dav",                   /* extension name */
     phpdav_functions,        /* extension function list */
     PHP_MINIT(phpdav),       /* extension-wide startup function */
     PHP_MSHUTDOWN(phpdav),   /* extension-wide shutdown function */

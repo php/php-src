@@ -63,12 +63,12 @@ static PHP_MSHUTDOWN_FUNCTION(dba);
 static PHP_MINFO_FUNCTION(dba);
 
 zend_module_entry dba_module_entry = {
-	    "DataBase API", dba_functions, 
-		PHP_MINIT(dba), 
-		PHP_MSHUTDOWN(dba), 
-		NULL, NULL,
-		PHP_MINFO(dba),
-		STANDARD_MODULE_PROPERTIES
+	"dba", dba_functions, 
+	PHP_MINIT(dba), 
+	PHP_MSHUTDOWN(dba), 
+	NULL, NULL,
+	PHP_MINFO(dba),
+	STANDARD_MODULE_PROPERTIES
 };
 
 typedef struct dba_handler {

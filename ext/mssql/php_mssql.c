@@ -63,7 +63,7 @@ function_entry mssql_functions[] = {
 };
 
 zend_module_entry mssql_module_entry = {
-	"Microsoft SQL Server", 
+	"mssql", 
 	mssql_functions, 
 	PHP_MINIT(mssql), 
 	PHP_MSHUTDOWN(mssql), 

@@ -195,7 +195,7 @@ function_entry imap_functions[] = {
 
 
 zend_module_entry imap_module_entry = {
-	IMAPVER, imap_functions, PHP_MINIT(imap), NULL, PHP_RINIT(imap), PHP_RSHUTDOWN(imap),PHP_MINFO(imap), STANDARD_MODULE_PROPERTIES
+    "imap", imap_functions, PHP_MINIT(imap), NULL, PHP_RINIT(imap), PHP_RSHUTDOWN(imap),PHP_MINFO(imap), STANDARD_MODULE_PROPERTIES
 };
 
 
