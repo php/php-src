@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
-   |	        Kevin N. Shallow <kshallow@tampabay.rr.com> Birdstep Support |
+   |	      Kevin N. Shallow <kshallow@tampabay.rr.com> (Birdstep)      |
    +----------------------------------------------------------------------+
 */
 
