@@ -284,8 +284,10 @@ static void _close_ifx_link(link)
     IFXLS_FETCH();
 
     EXEC SQL SET CONNECTION :link;
-    EXEC SQL close database;
-    EXEC SQL DISCONNECT CURRENT;
+    if (ifx_check() >= 0) {
+      EXEC SQL close database;
+      EXEC SQL DISCONNECT CURRENT;
+    }
     efree(link);
     IFXG(num_links)--;
 }
@@ -299,9 +301,10 @@ EXEC SQL END DECLARE SECTION;
     IFXLS_FETCH();
 
     EXEC SQL SET CONNECTION :link;
-    EXEC SQL close database;
-    EXEC SQL DISCONNECT CURRENT;
-
+    if (ifx_check() >= 0) {
+      EXEC SQL close database;
+      EXEC SQL DISCONNECT CURRENT;
+    }
     free(link);
     IFXG(num_persistent)--;
     IFXG(num_links)--;
