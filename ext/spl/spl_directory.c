@@ -1152,7 +1152,7 @@ SPL_METHOD(File, getChildren)
 	/* return NULL */
 } /* }}} */
 
-static int spl_file_object_call(INTERNAL_FUNCTION_PARAMETERS, spl_file_object *intern, zend_function *func_ptr) /* {{{ */
+static int spl_file_object_call(INTERNAL_FUNCTION_PARAMETERS, spl_file_object *intern, zend_function *func_ptr, zval *arg2) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
@@ -1160,11 +1160,15 @@ static int spl_file_object_call(INTERNAL_FUNCTION_PARAMETERS, spl_file_object *i
 	zval * zresource_ptr = &intern->zresource, *retval;
 	int result;
 
-	zval ***params = (zval***)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval**), sizeof(zval**));
+	zval ***params = (zval***)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval**), (arg2 ? 2 : 1) * sizeof(zval**));
 
 	params[0] = &zresource_ptr;
+	
+	if (arg2) {
+		params[1] = &arg2;
+	}
 
-	zend_get_parameters_array_ex(ZEND_NUM_ARGS(), params+1);
+	zend_get_parameters_array_ex(ZEND_NUM_ARGS(), params+(arg2 ? 2 : 1));
 
 	ZVAL_STRING(&z_fname, func_ptr->common.function_name, 0);
 
@@ -1173,7 +1177,7 @@ static int spl_file_object_call(INTERNAL_FUNCTION_PARAMETERS, spl_file_object *i
 	fci.object_pp = NULL;
 	fci.function_name = &z_fname;
 	fci.retval_ptr_ptr = &retval;
-	fci.param_count = ZEND_NUM_ARGS() + 1;
+	fci.param_count = ZEND_NUM_ARGS() + (arg2 ? 2 : 1);
 	fci.params = params;
 	fci.no_separation = 1;
 	fci.symbol_table = NULL;
@@ -1191,20 +1195,33 @@ static int spl_file_object_call(INTERNAL_FUNCTION_PARAMETERS, spl_file_object *i
 	return result;
 } /* }}} */
 
+#define FileFunctionCall(func_name, arg2) \
+	zend_function *func_ptr; \
+	zend_hash_find(EG(function_table), #func_name, sizeof(#func_name), (void **) &func_ptr); \
+	spl_file_object_call(INTERNAL_FUNCTION_PARAM_PASSTHRU, intern, func_ptr, arg2)
+
 /* {{{ FileFunction */
 #define FileFunction(func_name) \
 SPL_METHOD(File, func_name) \
 { \
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
-	zend_function *func_ptr; \
-	zend_hash_find(EG(function_table), #func_name, sizeof(#func_name), (void **) &func_ptr); \
-	spl_file_object_call(INTERNAL_FUNCTION_PARAM_PASSTHRU, intern, func_ptr); \
+	FileFunctionCall(func_name, NULL); \
 }
 /* }}} */
 
-/* {{{ proto array File::fgetcsv([int length [, string delimiter [, string enclosure]]])
+/* {{{ proto array File::fgetcsv([string delimiter [, string enclosure]])
    Return current line as csv */
-FileFunction(fgetcsv)
+SPL_METHOD(File, fgetcsv)
+{
+	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	zval *arg2 = NULL;
+	MAKE_STD_ZVAL(arg2);
+	ZVAL_LONG(arg2, intern->max_line_len);
+
+	FileFunctionCall(fgetcsv, arg2);
+
+	zval_ptr_dtor(&arg2);
+}
 /* }}} */
 
 static
@@ -1227,7 +1244,6 @@ ZEND_END_ARG_INFO();
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetcsv, 0, 0, 0) 
-	ZEND_ARG_INFO(0, length)
 	ZEND_ARG_INFO(0, delimiter)
 	ZEND_ARG_INFO(0, enclosure)
 ZEND_END_ARG_INFO();
