@@ -58,7 +58,7 @@ ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 
-ZEND_API int is_type_function(zval *result, zval *op1, zend_class_entry *ce, int type TSRMLS_DC);
+ZEND_API int is_class_function(zval *result, zval *op1, zend_class_entry *ce TSRMLS_DC);
 
 static inline zend_bool is_numeric_string(char *str, int length, long *lval, double *dval, zend_bool allow_errors)
 {

@@ -1358,57 +1358,18 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 }
 
 
-ZEND_API int is_type_function(zval *result, zval *op1, zend_class_entry *class, int type TSRMLS_DC)
+ZEND_API int is_class_function(zval *result, zval *op1, zend_class_entry *class TSRMLS_DC)
 {
-	if (class) {
-		if (Z_TYPE_P(op1) == IS_OBJECT) {
-			zend_class_entry *ce;
-			for (ce = Z_OBJCE_P(op1); ce != NULL; ce = ce->parent) {
-				if (ce == class) {
-					ZVAL_BOOL(result, 1);
-					return SUCCESS;
-				}
+	if (Z_TYPE_P(op1) == IS_OBJECT) {
+		zend_class_entry *ce;
+		for (ce = Z_OBJCE_P(op1); ce != NULL; ce = ce->parent) {
+			if (ce == class) {
+				ZVAL_BOOL(result, 1);
+				return SUCCESS;
 			}
-			ZVAL_BOOL(result, 0);
-		} else {
-			ZVAL_BOOL(result, 0);
 		}
-		return SUCCESS;
 	}
-
-	switch (type) {
-		case IS_NULL:
-			ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_NULL);
-			break;
-
-		case IS_LONG:
-			ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_LONG);
-			break;
-
-		case IS_DOUBLE:
-			ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_DOUBLE);
-			break;
-
-		case IS_STRING:
-			ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_STRING);
-			break;
-
-		case IS_ARRAY:
-			ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_ARRAY);
-			break;
-
-		case IS_OBJECT:
-			ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_OBJECT);
-			break;
-
-		case IS_BOOL:
-			ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_BOOL);
-			break;
-
-		default:
-			zend_error(E_ERROR, "Unknown operand type");
-			return FAILURE;
-	}
+	ZVAL_BOOL(result, 0);
 	return SUCCESS;
 }
 
