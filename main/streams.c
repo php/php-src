@@ -51,6 +51,8 @@
 
 #define STREAM_WRAPPER_PLAIN_FILES	((php_stream_wrapper*)-1)
 
+#undef HAVE_FOPENCOOKIE
+
 /* {{{ some macros to help track leaks */
 #if ZEND_DEBUG
 #define emalloc_rel_orig(size)	\
@@ -1826,14 +1828,40 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 	}
 
-	if (stream->filterhead) {
+	if (stream->filterhead && (flags & PHP_STREAM_CAST_TRY_HARD) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot cast a filtered stream on this system");
 		return FAILURE;
+	} else if (!stream->filterhead) {
+		if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS) {
+			goto exit_success;
+		}
+	}
+
+	if ((flags & PHP_STREAM_CAST_TRY_HARD) && castas == PHP_STREAM_AS_STDIO) {
+		php_stream *newstream;
+
+		newstream = php_stream_fopen_tmpfile();
+		if (newstream) {
+			size_t copied = php_stream_copy_to_stream(stream, newstream, PHP_STREAM_COPY_ALL);
+
+			if (copied == 0) {
+				php_stream_close(newstream);
+			} else {
+				int retcode = php_stream_cast(newstream, castas | flags, ret, show_err TSRMLS_CC);
+
+				if (retcode == SUCCESS)
+					rewind((FILE*)*ret);
+				
+				/* do some specialized cleanup */
+				if (flags & PHP_STREAM_CAST_RELEASE) {
+					php_stream_free(stream, PHP_STREAM_FREE_PRESERVE_HANDLE | PHP_STREAM_FREE_CLOSE);
+				}
+
+				return retcode;
+			}
+		}
 	}
 	
-	if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS)
-		goto exit_success;
-
 	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
 		static const char *cast_names[3] = {
@@ -2290,7 +2318,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 
 	*newstream = NULL;
 	
-	if (origstream->ops->seek != NULL) {
+	if ((flags & PHP_STREAM_FORCE_CONVERSION == 0) && origstream->ops->seek != NULL) {
 		*newstream = origstream;
 		return PHP_STREAM_UNCHANGED;
 	}

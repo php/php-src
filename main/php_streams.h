@@ -456,7 +456,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 /* cast as a socketd */
 #define PHP_STREAM_AS_SOCKETD	2
 
-/* try really, really hard to make sure the cast happens (socketpair) */
+/* try really, really hard to make sure the cast happens (avoid using this flag if possible) */
 #define PHP_STREAM_CAST_TRY_HARD	0x80000000
 #define PHP_STREAM_CAST_RELEASE		0x40000000	/* stream becomes invalid on success */
 #define PHP_STREAM_CAST_INTERNAL	0x20000000	/* stream cast for internal use */
@@ -528,6 +528,7 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 #define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
 #define PHP_STREAM_NO_PREFERENCE	0
 #define PHP_STREAM_PREFER_STDIO		1
+#define PHP_STREAM_FORCE_CONVERSION	2
 /* DO NOT call this on streams that are referenced by resources! */
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC);
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC TSRMLS_CC)
