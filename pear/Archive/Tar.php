@@ -61,15 +61,23 @@ class Archive_Tar extends PEAR
     * @param    boolean $p_compress if true, the archive will be gezip(ped)
     * @access public
     */
-    function Archive_Tar($p_tarname, $p_compress = false)
+    function Archive_Tar($p_tarname, $p_compress = null)
     {
         $this->PEAR();
+        if ($p_compress === null) {
+            if (substr($p_tarname, -4) == '.tar') {
+                $p_compress = false;
+            }
+        }
         $this->_tarname = $p_tarname;
         if ($p_compress) { // assert zlib extension support
             $extname = 'zlib';
             if (!extension_loaded($extname)) {
-                $dlext = (OS_WINDOWS) ? '.dll' : '.so';
-                @dl($extname . $dlext);
+                if (OS_WINDOWS) {
+                    @dl("php_$extname.dll");
+                } else {
+                    @dl("$extname.so");
+                }
             }
             if (!extension_loaded($extname)) {
                 die("The extension '$extname' couldn't be found.\n".

@@ -24,9 +24,9 @@ loaded.
     </maintainer>
   </maintainers>
   <release>
-    <version>0.4</version>
-    <date>2002-05-20</date>
-    <notes>Windows bugfix: use forward slashes inside archives</notes>
+    <version>0.5</version>
+    <date>2002-05-27</date>
+    <notes>Less dependant on the zlib extension</notes>
     <state>stable</state>
     <filelist>
       <dir name="Archive">
@@ -35,6 +35,12 @@ loaded.
     </filelist>
   </release>
   <changelog>
+    <release>
+      <version>0.4</version>
+      <date>2002-05-20</date>
+      <notes>Windows bugfix: use forward slashes inside archives</notes>
+      <state>stable</state>
+    </release>
     <release>
       <version>0.2</version>
       <date>2002-02-18</date>
