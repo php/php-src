@@ -877,14 +877,14 @@ void do_begin_class_member_function_call(znode *class_name, znode *function_name
 
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
-	if (class_name->u.constant.value.str.len==6
-		&& !memcmp(class_name->u.constant.value.str.val, "parent", 6)) {
+	if ((class_name->u.constant.value.str.len == sizeof("parent")-1)
+		&& !memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent")-1)) {
 		if (!CG(active_class_entry) || !CG(active_class_entry)->parent) {
 			zend_error(E_COMPILE_ERROR, "No parent class available in this context");
 		}
 		efree(class_name->u.constant.value.str.val);
-		class_name->u.constant.value.str.val = estrdup(CG(active_class_entry)->parent->name);
 		class_name->u.constant.value.str.len = CG(active_class_entry)->parent->name_length;
+		class_name->u.constant.value.str.val = estrndup(CG(active_class_entry)->parent->name, class_name->u.constant.value.str.len);
 	}
 	opline->op1 = *class_name;
 	opline->op2 = *function_name;
