@@ -59,6 +59,7 @@ static zend_function_entry php_dir_class_functions[] = {
 	PHP_FALIAS(close,	closedir,	NULL)
 	PHP_FALIAS(rewind,	rewinddir,	NULL)
 	PHP_FALIAS(read,	readdir,	NULL)
+	{NULL, NULL, NULL}
 };
 
 

@@ -771,6 +771,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zend_utility_values zuv;
 	int module_number=0;	/* for REGISTER_INI_ENTRIES() */
 #ifdef ZTS
+	zend_executor_globals *executor_globals;
 	php_core_globals *core_globals;
 	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id);
 #endif
@@ -778,7 +779,6 @@ int php_module_startup(sapi_module_struct *sf)
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 #endif
-	ELS_FETCH();
 
 	SG(server_context) = NULL;
 	SG(request_info).request_method = NULL;
@@ -788,8 +788,6 @@ int php_module_startup(sapi_module_struct *sf)
 		return SUCCESS;
 	}
 
-	EG(error_reporting) = E_ALL & ~E_NOTICE;
-	
 	sapi_module = *sf;
 
 	zend_output_startup();
@@ -806,10 +804,12 @@ int php_module_startup(sapi_module_struct *sf)
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(php_new_thread_end_handler);
+	executor_globals = ts_resource(executor_globals_id);
 	core_globals_id = ts_allocate_id(sizeof(php_core_globals), NULL, NULL);
 	core_globals = ts_resource(core_globals_id);
 #endif
-
+	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	
 	PG(header_is_being_sent) = 0;
 	SG(request_info).headers_only = 0;
 
