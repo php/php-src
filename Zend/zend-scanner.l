@@ -539,6 +539,10 @@ int require_filename(char *filename, zend_bool unique CLS_DC)
 
 int use_filename(char *filename, uint filename_length CLS_DC)
 {
+	zend_error(E_COMPILE_ERROR,"use: Not yet supported. Please use include_once() or require_once()");
+	return FAILURE;
+
+#if 0
 	zend_file_handle file_handle;
 
 	file_handle.filename = (char *) emalloc(filename_length + zend_uv.import_use_extension_length);
@@ -554,6 +558,7 @@ int use_filename(char *filename, uint filename_length CLS_DC)
 		return FAILURE; /* will never get here */
 	}
 	return SUCCESS;
+#endif
 }
 
 
