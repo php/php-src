@@ -1,3 +1,12 @@
+2004-06-07  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Go back to -dev (Shouldn't need another RC)
+
+    * (php_5_0_0RC3)
+      zend.h:
+      - Roll RC3
+
 2004-06-06  Stefan Esser  <sesser@suspekt.org>
 
     * zend_compile.h
