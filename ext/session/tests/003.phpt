@@ -3,6 +3,8 @@ Session Object Deserialization
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
+session.use_cookies=0
+session.cache_limiter=
 register_globals=1
 --FILE--
 <?php

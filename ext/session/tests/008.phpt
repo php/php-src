@@ -3,6 +3,8 @@ Verify PHP 4.2 compatibility: global is used albeit register_globals=0
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
+session.use_cookies=0
+session.cache_limiter=
 register_globals=0
 session.bug_compat_42=1
 session.bug_compat_warn=0
