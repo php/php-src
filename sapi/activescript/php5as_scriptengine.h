@@ -18,7 +18,9 @@
 /* $Id$ */
 
 #include <activscp.h>
-#include <objsafe.h>
+#if ACTIVEPHP_OBJECT_SAFETY
+# include <objsafe.h>
+#endif
 #include "zend.h"
 #include <setjmp.h>
 
