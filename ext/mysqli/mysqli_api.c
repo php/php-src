@@ -776,7 +776,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_fetch_field_direct (object result, int offset)
+/* {{{ proto array mysqli_fetch_field_direct (object result, int offset)
    Fetch meta-data for a single field */
 PHP_FUNCTION(mysqli_fetch_field_direct) 
 {
@@ -1130,7 +1130,7 @@ PHP_FUNCTION(mysqli_num_fields)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_num_rows(object result)
+/* {{{ proto mixed mysqli_num_rows(object result)
    Get number of rows in result */
 PHP_FUNCTION(mysqli_num_rows)
 {
@@ -1148,8 +1148,7 @@ PHP_FUNCTION(mysqli_num_rows)
 		RETURN_LONG(0);
 	}
 
-	rc = mysql_num_rows(result);
-	RETURN_LONG(rc);
+	MYSQLI_RETURN_LONG_LONG(mysql_num_rows(result));
 }
 /* }}} */
 
