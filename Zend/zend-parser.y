@@ -164,7 +164,7 @@ statement:
 	|	T_IF '(' expr ')' { do_if_cond(&$3, &$4 CLS_CC); } statement { do_if_after_statement(&$4, 1 CLS_CC); } elseif_list else_single { do_if_end(CLS_C); }
 	|	T_IF '(' expr ')' ':' { do_if_cond(&$3, &$4 CLS_CC); } inner_statement_list { do_if_after_statement(&$4, 1 CLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { do_if_end(CLS_C); }
 	|	T_WHILE '(' { $1.u.opline_num = get_next_op_number(CG(active_op_array));  } expr  ')' { do_while_cond(&$4, &$5 CLS_CC); } while_statement { do_while_end(&$1, &$5 CLS_CC); }
-	|	T_DO { $1.u.opline_num = get_next_op_number(CG(active_op_array));  do_do_while_begin(CLS_C); } statement T_WHILE '(' expr ')' ';' { do_do_while_end(&$1, &$6 CLS_CC); }
+	|	T_DO { $1.u.opline_num = get_next_op_number(CG(active_op_array));  do_do_while_begin(CLS_C); } statement T_WHILE '(' { $5.u.opline_num = get_next_op_number(CG(active_op_array)); } expr ')' ';' { do_do_while_end(&$1, &$5, &$7 CLS_CC); }
 	|	T_FOR 
 			'('
 				for_expr

@@ -1220,7 +1220,7 @@ void do_do_while_begin(CLS_D)
 }
 
 
-void do_do_while_end(znode *do_token, znode *expr CLS_DC)
+void do_do_while_end(znode *do_token, znode *expr_open_bracket, znode *expr CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
@@ -1229,7 +1229,7 @@ void do_do_while_end(znode *do_token, znode *expr CLS_DC)
 	opline->op2.u.opline_num = do_token->u.opline_num;
 	SET_UNUSED(opline->op2);
 
-	do_end_loop(do_token->u.opline_num CLS_CC);
+	do_end_loop(expr_open_bracket->u.opline_num CLS_CC);
 
 	DEC_BPC(CG(active_op_array));
 }

@@ -237,7 +237,7 @@ ZEND_API void *get_binary_op(int opcode);
 void do_while_cond(znode *expr, znode *close_bracket_token CLS_DC);
 void do_while_end(znode *while_token, znode *close_bracket_token CLS_DC);
 void do_do_while_begin(CLS_D);
-void do_do_while_end(znode *do_token, znode *expr CLS_DC);
+void do_do_while_end(znode *do_token, znode *expr_open_bracket, znode *expr CLS_DC);
 
 
 void do_if_cond(znode *cond, znode *closing_bracket_token CLS_DC);

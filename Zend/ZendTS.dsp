@@ -230,6 +230,10 @@ SOURCE=.\zend_extensions.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_fast_cache.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_globals.h
 # End Source File
 # Begin Source File
@@ -271,10 +275,6 @@ SOURCE=.\zend_stack.h
 # Begin Source File
 
 SOURCE=.\zend_variables.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zend_fast_cache.h
 # End Source File
 # End Group
 # Begin Group "Parsers"
