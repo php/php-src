@@ -104,15 +104,15 @@ PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
 	errno = 0;
 
 	ret = readdir_r(dirp, entry);
-	
-	if (ret == 0)
-		*result = entry;
-	else if (errno == 0) {
+
+	if (!ret || errno != 0) {
 		*result = NULL;
-		ret = 0;
+	} else {
+		*result = entry;
 	}
 
-	return ret;
+	return errno;
+
 #else
 	struct dirent *ptr;
 	int ret = 0;
