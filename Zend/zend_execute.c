@@ -195,6 +195,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *
 				if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
 					switch (type) {
 						case BP_VAR_R:
+						case BP_VAR_UNSET:
 							zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
 							/* break missing intentionally */
 						case BP_VAR_IS:
@@ -228,6 +229,7 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free
 			if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
 				switch (type) {
 					case BP_VAR_R:
+					case BP_VAR_UNSET:
 						zend_error(E_NOTICE, "Undefined variable:  %s", cv->name);
 						/* break missing intentionally */
 					case BP_VAR_IS:
@@ -315,6 +317,7 @@ static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, zend_free_o
 		if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
+				case BP_VAR_UNSET:
 					zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
 					/* break missing intentionally */
 				case BP_VAR_IS:
@@ -373,6 +376,7 @@ static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, zend_f
 		if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
+				case BP_VAR_UNSET:
 					zend_error(E_NOTICE, "Undefined variable:  %s", cv->name);
 					/* break missing intentionally */
 				case BP_VAR_IS:

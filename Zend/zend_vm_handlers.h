@@ -3238,13 +3238,16 @@ ZEND_VM_HANDLER(ZEND_UNSET_DIM_OBJ)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
-	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_R);
+	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	long index;
 
 	if (container) {
 		HashTable *ht;
 
+		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+			SEPARATE_ZVAL_IF_NOT_REF(container);
+		}
 		if (opline->extended_value == ZEND_UNSET_DIM) {
 			switch (Z_TYPE_PP(container)) {
 				case IS_ARRAY:
