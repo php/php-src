@@ -29,13 +29,8 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FETCH_DIM_RW);
 #endif
 
 #ifdef SPL_ARRAY_WRITE
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN);
+ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN_DIM);
 #endif
-
-SPL_CLASS_FUNCTION(array_writer_default, __construct);
-SPL_CLASS_FUNCTION(array_writer_default, set);
-
-zend_object_value spl_array_writer_default_create(zend_class_entry *class_type TSRMLS_DC);
 
 #endif /* SPL_ARRAY_H */
 

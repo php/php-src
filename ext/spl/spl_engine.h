@@ -50,10 +50,10 @@ static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
 /* }}} */
 
 /* {{{ spl_begin_method_call_arg */
-static inline int spl_begin_method_call_arg(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval *retval, zval *arg1 TSRMLS_DC)
+static inline int spl_begin_method_call_arg(zval **obj, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval *retval, zval *arg1 TSRMLS_DC)
 {
 	zval *local_retval;
-	int ret = spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, &local_retval, NULL TSRMLS_CC, 1, arg1);
+	int ret = spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, &local_retval, NULL TSRMLS_CC, 1, arg1);
 	if (local_retval) {
 		COPY_PZVAL_TO_ZVAL(*retval, local_retval);
 	} else {
@@ -64,10 +64,10 @@ static inline int spl_begin_method_call_arg(zval **ce, zend_class_entry *obj_ce,
 /* }}} */
 
 /* {{{ spl_begin_method_call_no_retval */
-static inline int spl_begin_method_call_no_retval(zval **ce, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len TSRMLS_DC)
+static inline int spl_begin_method_call_no_retval(zval **obj, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len TSRMLS_DC)
 {
 	zval *retval;
-	int ret = spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, &retval, NULL TSRMLS_CC, 0);
+	int ret = spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, &retval, NULL TSRMLS_CC, 0);
 	if (retval) {
 		zval_dtor(retval);
 		FREE_ZVAL(retval);
@@ -76,14 +76,14 @@ static inline int spl_begin_method_call_no_retval(zval **ce, zend_class_entry *o
 }
 /* }}} */
 
-#define spl_begin_method_call_ex(ce, obj_ce, fn_proxy, function_name, fname_len, retval) \
-	spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 0)
+#define spl_begin_method_call_ex(obj, obj_ce, fn_proxy, function_name, fname_len, retval) \
+	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 0)
 
-#define spl_begin_method_call_arg_ex1(ce, obj_ce, fn_proxy, function_name, fname_len, retval, arg1) \
-	spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 1, arg1)
+#define spl_begin_method_call_arg_ex1(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1) \
+	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 1, arg1)
 
-#define spl_begin_method_call_arg_ex2(ce, obj_ce, fn_proxy, function_name, fname_len, retval, arg1, arg2) \
-	spl_call_method(ce, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 2, arg1, arg2)
+#define spl_begin_method_call_arg_ex2(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1, arg2) \
+	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, NULL TSRMLS_CC, 2, arg1, arg2)
 
 void spl_instanciate(zend_class_entry *pce, zval **object TSRMLS_DC);
 int spl_instanciate_arg_ex2(zend_class_entry *pce, zval **retval, zval *arg1, zval *arg2, HashTable *symbol_table TSRMLS_DC);
@@ -95,10 +95,12 @@ zval * spl_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRML
 int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC);
 
 typedef enum {
-	SPL_IS_A_ITERATOR = 1,
-	SPL_IS_A_FORWARD  = 2,
-	SPL_IS_A_ASSOC    = 4,
-	SPL_IS_A_SEQUENCE = 8
+	SPL_IS_A_ITERATOR        = 0x01,
+	SPL_IS_A_FORWARD         = 0x02,
+	SPL_IS_A_ASSOC           = 0x04,
+	SPL_IS_A_SEQUENCE        = 0x08,
+	SPL_IS_A_ARRAY_READ      = 0x10,
+	SPL_IS_A_ARRAY_ACCESS    = 0x20
 } spl_is_a;
 
 spl_is_a spl_implements(zend_class_entry *ce);

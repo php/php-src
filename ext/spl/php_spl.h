@@ -70,7 +70,7 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 	ZEND_EXECUTE_HOOK_PTR(ZEND_FETCH_DIM_RW);
 #endif
 #ifdef SPL_ARRAY_WRITE
-	ZEND_EXECUTE_HOOK_PTR(ZEND_ASSIGN);
+	ZEND_EXECUTE_HOOK_PTR(ZEND_ASSIGN_DIM);
 #endif
 ZEND_END_MODULE_GLOBALS(spl)
 
@@ -90,11 +90,6 @@ extern zend_class_entry *spl_ce_forward_assoc;
 extern zend_class_entry *spl_ce_sequence_assoc;
 extern zend_class_entry *spl_ce_array_read;
 extern zend_class_entry *spl_ce_array_access;
-extern zend_class_entry *spl_ce_array_access_ex;
-extern zend_class_entry *spl_ce_array_writer;
-#ifdef SPL_ARRAY_WRITE
-extern zend_class_entry *spl_ce_array_writer_default;
-#endif /* SPL_ARRAY_WRITE */
 
 PHP_FUNCTION(spl_classes);
 PHP_FUNCTION(class_parents);

@@ -226,79 +226,11 @@ interface spl_array_read {
 	}
    \endcode
  */
-interface spl_array_access extends spl_array_read {
+interface spl_array_access implements spl_array_read {
 
 	/*! Set the value identified by $index to $value.
 	 */
 	function set($value, $index);
-}
-
-/*! \brief array read/write access with customized array_writer
- *
- * The internal structure requires that write access via interfaces
- * is divided into two parts. First the index is used to create an
- * array_writer which will later receive the new value and calls the
- * containers set() method with appropriate parameters.
- *
- * Sometimes it is helpfull to overwrite this behavior and have your
- * own implementation for the array_writer.
- *
- * The following example shows how to use a customized array_writer:
- * \code 
-	class array_emulation_ex extends array_emulation implemets spl_array_access_ex {
-		private $last_index = NULL;
-		function new_writer($index) {
-			$last_index = $index;
-			return new array_write(&$this, $index);
-		}
-	}
-   \endcode
- */
-interface spl_array_access_ex extends spl_array_access {
-
-	/*! Create an array_writer interface for the specified index.
-	 *
-	 * If your container uses array_access instead of array_access_ex
-	 * the following code would be equal to the internal new_writer()
-	 * method:
-	   \code
-		function new_writer($index) {
-			return new array_write(&$this, $index);
-		}
-	   \endcode
-	 */
-	function new_writer($index);
-}
-
-/*! \brief array writer interface
- *
- * for every write access to an array_access instance an array_writer
- * is created which receives the originating object and the index as
- * parameters for the constructor call.
- *
- * The following shows the equivalent php code for the default 
- * implementation array_write.
- * \code 
- 	class array_write implements array_writer {
- 		private $obj;
- 		private $idx;
- 		function __construct(&$obj, $index = null) {
- 			$this->obj = $obj;
- 			$this->idx = $index;
- 		}
- 		function set($value) {
- 			return $this->obj->set($this->idx, $value);
- 		}
-	}
-   \endcode
- *
- * See array_access for more.
- */
-interface spl_array_writer {
-
-	/*! Set the corresponding value to $value.
-	 */
-	function set($value);
 }
 
 ?>
