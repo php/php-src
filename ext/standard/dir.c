@@ -253,23 +253,22 @@ PHP_FUNCTION(chroot)
 /* }}} */
 #endif
 
-/* {{{ proto int chdir(string directory)
+/* {{{ proto bool chdir(string directory)
    Change the current directory */
 
 PHP_FUNCTION(chdir)
 {
-	pval **arg;
-	int ret;
+	char *str;
+	int ret, str_len;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(arg);
-
-	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(arg), NULL, CHECKUID_ALLOW_ONLY_FILE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	ret = VCWD_CHDIR(Z_STRVAL_PP(arg));
+
+	if (PG(safe_mode) && !php_checkuid(str, NULL, CHECKUID_ALLOW_ONLY_FILE)) {
+		RETURN_FALSE;
+	}
+	ret = VCWD_CHDIR(str);
 	
 	if (ret != 0) {
 		php_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);
