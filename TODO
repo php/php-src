@@ -91,6 +91,8 @@ ext/standard
         strrpos()
         strrchr()
         strip_tags()
+    * rewrite win32 SMTP code to be useable for *ix to, maybe as a (default)
+      module of its own (Hartmut)
 
 ext/wddx
 --------
