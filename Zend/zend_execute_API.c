@@ -227,8 +227,8 @@ void shutdown_executor(TSRMLS_D)
 		   So we want first of all to clean up all data and then move to tables destruction.
 		   Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */
-		zend_hash_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data);
-		zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data);
+		zend_hash_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
+		zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
 			zend_hash_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
