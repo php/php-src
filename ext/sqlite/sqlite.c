@@ -47,10 +47,6 @@
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
 #endif
 
-#ifndef ZEND_ENGINE_2
-# define OnUpdateLong OnUpdateInt
-#endif
-
 ZEND_DECLARE_MODULE_GLOBALS(sqlite)
 
 #if HAVE_PHP_SESSION
