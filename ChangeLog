@@ -1,3 +1,129 @@
+2004-01-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      - Export struct zend_user_iterator
+      - Ad 'it' to function prefix to prevent naming clashes
+      - Export zend_user_it_free_current
+
+    * NEWS:
+      Fixed bug #27042 (SPL: SeekableIterator seek() broken).
+
+2004-01-26  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      fixed compiler warning (thx to Marcus Boerger)
+
+2004-01-26  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      change to use different allocator (Sascha, thanks =) )
+
+    * ext/oci8/oci8.c:
+      fix this annoying notice about limited range
+
+    * ext/oci8/oci8.c:
+      improve debug messages
+
+    * ext/oci8/oci8.c:
+      oops =(
+      forgot these brackets..
+
+    * ext/oci8/oci8.c:
+      fix oci_field_type_raw's proto
+      oci_collection_element_get should return FALSE only if there is no such
+      element and NULL, if it's null
+
+2004-01-26  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/config.m4
+      ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h:
+      New function yaz_es that creates Z39.50 Extended Service Package to
+      facilitate record update, database create, database drop.
+
+2004-01-26  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c:
+      proto fixes
+      removed mysqli_read_query_result (will be removed in libmysql)
+
+2004-01-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * CODING_STANDARDS:
+      Update URL.
+
+2004-01-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/README:
+      
+      Add README
+
+2004-01-26  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c:
+      more prototype fixes.
+      fixed a bug in mysqli_send_long_data
+
+2004-01-26  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/curl/interface.c:
+      - Fixed compile problem with CURLOPT_HTTPAUTH
+
+    * tests/lang/bug26900.phpt:
+      test for bug #26900
+
+    * php.ini-dist
+      php.ini-recommended
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c:
+      - Remove gpc_order since it doesn't serve any purpose.
+
+2004-01-26  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (RELEASE_1_3b6)
+      pear/scripts/pearcmd.php:
+      - "Fix" the command name in the usage text
+
+    * (RELEASE_1_3b6)
+      pear/package-PEAR.xml:
+      - # 521 entry
+
+    * (RELEASE_1_3b6)
+      pear/PEAR/Common.php:
+      - Remove useless property
+
+    * pear/PEAR/Common.php:
+      - Fix #521, incorrect filename in CS warnings
+
+2004-01-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2004-01-26  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/curl/curl.c:
+      MFH: - Fixed bug #27040 (passing an array of form-fields to
+      CURLOPT_POSTFIELDS does not work).
+
+    * ext/curl/interface.c:
+      - Fixed bug #27040 (passing an array of form-fields to CURLOPT_POSTFIELDS
+      does not work).
+
+2004-01-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      A better bug description, for people without the official Ilia decoder
+      ring.
+
 2004-01-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
