@@ -12,9 +12,17 @@ if (PHP_SQLITE != "no") {
 	
 	FSO.CopyFile(configure_module_dirname + "\\libsqlite\\src\\sqlite_config.w32.h",
 	   	configure_module_dirname + "\\libsqlite\\src\\config.h");
+
+	if (FSO.FileExists(configure_module_dirname + "\\..\\pdo\\php_pdo_driver.h")) {
+		PHP_SQLITE2_PDO_CFLAGS = " /DPHP_SQLITE2_HAVE_PDO=1 /I " + configure_module_dirname + "\\..";
+		ADD_EXTENSION_DEP('sqlite', 'pdo')
+	} else {
+		PHP_SQLITE2_PDO_CFLAGS = "";
+	}
 	
 	EXTENSION("sqlite", "sqlite.c sess_sqlite.c pdo_sqlite2.c", null,
-		"/D PHP_SQLITE_EXPORTS /I " + configure_module_dirname + "/libsqlite/src");
+		"/D PHP_SQLITE_EXPORTS /I " + configure_module_dirname + "/libsqlite/src" +
+		PHP_SQLITE2_PDO_CFLAGS);
 		
 	
 	ADD_SOURCES(configure_module_dirname + "/libsqlite/src", "opcodes.c parse.c encode.c \
