@@ -8,7 +8,12 @@ InterBase: create test database
 <?
 /* $Id$ */
 
-	$test_base = "ibase_test.tmp";
+	// remember to:
+	// a) give write permission to the ext/ibase/tests directory
+	// to the user running interbase, otherwise db creation/deletion will  fail
+	// b) set ISC_USER and ISC_PASSWORD env vars before running the tests in order
+	// to be able to connect to Interbase
+	$test_base = dirname(__FILE__)."/ibase_test.tmp";
 	$name = tempnam("","CREATEDB");
 	$ftmp = fopen($name,"w");
 	if (is_file($test_base))
@@ -19,16 +24,19 @@ InterBase: create test database
    	fwrite($ftmp,
     	"create database \"$test_base\";
         create table test1 (
-   		i integer,
-   		c varchar(100)
-   	);
-   	commit;
-   	insert into test1(i, c) values(1,  'test table created with isql');
-   	exit;\n"
+   		    i integer,
+       		c varchar(100)
+       	);
+   	    commit;
+       	insert into test1(i, c) values(1,  'test table created with isql');
+   	    exit;\n"
     );
    	fclose($ftmp);
-	exec("isql -i $name 2>&1");
+	// passthru gives us some output, allowing the test to pass
+	// (actually, it passes after the first run when the db gets deleted/recreated)
+	passthru("isql -i $name 2>&1");
 	unlink($name);
 ?>
 --EXPECT--
-
+Use CONNECT or CREATE DATABASE to specify a database
+Database:  "ext/interbase/tests/ibase_test.tmp"

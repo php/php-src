@@ -8,9 +8,9 @@ InterBase: misc sql types (may take a while)
 <?
 /* $Id$ */
 
-    require("interbase/interbase.inc");
+    require(dirname(__FILE__)."/interbase.inc");
     
-	$test_base = "ibase_test.tmp";
+	$test_base = dirname(__FILE__)."/ibase_test.tmp";
     
     ibase_connect($test_base);
     
@@ -18,7 +18,7 @@ InterBase: misc sql types (may take a while)
     	"create table test3 (
             iter		integer,
             v_char		char(1000),
-            v_date      date,
+            v_date      timestamp,
             v_decimal   decimal(12,3),
             v_double  	double precision,
             v_float     float,
@@ -37,7 +37,7 @@ InterBase: misc sql types (may take a while)
     	$v_char = rand_str(1000);
     	$v_date = rand_datetime();
     	$v_decimal = rand_number(12,3);
-    	$v_double  = rand_number(20);
+    	$v_double  = rand_number(18);
     	$v_float   = rand_number(7);
     	$v_integer = rand_number(9,0);
     	$v_numeric = rand_number(4,2);
@@ -48,7 +48,7 @@ InterBase: misc sql types (may take a while)
     	"insert into test3 (iter, v_char,v_date,v_decimal,v_double,v_float,v_integer,v_numeric,v_smallint,v_varchar)
     	values ($iter, '$v_char','$v_date',$v_decimal,$v_double,$v_float,$v_integer,$v_numeric,$v_smallint,'$v_varchar')");
     	$sel = ibase_query("select * from test3 where iter = $iter");
-
+    	$sel = ibase_query("select * from test3 where iter = $iter");
     	$row = ibase_fetch_object($sel);
     	if(substr($row->V_CHAR,0,strlen($v_char)) != $v_char){
         	echo " CHAR fail:\n";
