@@ -32,7 +32,7 @@ require_once "PEAR.php";
  * version of it in DB::errorMessage().
  */
 
-define("DB_OK",                         0);
+define("DB_OK",                         1);
 define("DB_ERROR",                     -1);
 define("DB_ERROR_SYNTAX",              -2);
 define("DB_ERROR_CONSTRAINT",          -3);
