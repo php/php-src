@@ -433,11 +433,11 @@ PHP_FUNCTION(glob)
 		if (flags & GLOB_ONLYDIR) {
 			struct stat s;
 
-			if (0 != stat(globbuf.gl_pathv[n], &s)) {
+			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
 				continue;
 			}
 
-			if (!S_ISDIR(s.st_mode)) {
+			if (S_IFDIR != s.st_mode & S_IFMT) {
 				continue;
 			}
 		}
