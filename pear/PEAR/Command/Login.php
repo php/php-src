@@ -35,7 +35,7 @@ class PEAR_Command_Login extends PEAR_Command_Common
      *
      * @access public
      */
-    function PEAR_Command_Login($ui)
+    function PEAR_Command_Login(&$ui, &$config)
     {
         parent::PEAR_Command_Common($ui);
     }
@@ -70,7 +70,7 @@ class PEAR_Command_Login extends PEAR_Command_Common
      *
      * @access public
      */
-    function run($command, $options, $params)
+    function run($command, $params)
     {
         $cf = $this->config;
         $failmsg = '';
@@ -83,7 +83,7 @@ class PEAR_Command_Login extends PEAR_Command_Common
                 }
                 $this->ui->displayLine("Logging in to $server.");
                 $username = trim($this->ui->userDialog('Username', 'text', $username));
-                
+
                 $cf->set('username', $username);
                 $password = trim($this->ui->userDialog('Password', 'password'));
                 $cf->set('password', $password);

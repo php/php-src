@@ -37,9 +37,9 @@ class PEAR_Command_Config extends PEAR_Command_Common
      *
      * @access public
      */
-    function PEAR_Command_Config($ui)
+    function PEAR_Command_Config(&$ui, &$config)
     {
-        parent::PEAR_Command_Common($ui);
+        parent::PEAR_Command_Common($ui, $config);
     }
 
     // }}}
@@ -59,9 +59,9 @@ class PEAR_Command_Config extends PEAR_Command_Common
     // }}}
     // {{{ run()
 
-    function run($command, $options, $params)
+    function run($command, $params)
     {
-        $cf = $this->config;
+        $cf =& $this->config;
         $failmsg = '';
         switch ($command) {
             case 'config-show': {
