@@ -123,6 +123,11 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
 	if (data) {
 		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, data, &lst);
 		if (err != 0) {
