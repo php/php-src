@@ -77,6 +77,10 @@ static int le_result, le_link, le_plink;
 #define MYSQL_HAS_TINY
 #endif
 
+#if MYSQL_VERSION_ID > 32200
+#define MYSQL_HAS_YEAR
+#endif
+
 #define MYSQL_ASSOC		1<<0
 #define MYSQL_NUM		1<<1
 #define MYSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
@@ -1549,6 +1553,11 @@ static char *php_mysql_get_field_name(int field_type)
 		case FIELD_TYPE_TIMESTAMP:
 			return "timestamp";
 			break;
+#ifdef MYSQL_HAS_YEAR
+		case FIELD_TYPE_YEAR:
+			return "year";
+			break;
+#endif
 		case FIELD_TYPE_DATE:
 			return "date";
 			break;
