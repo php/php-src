@@ -15,11 +15,13 @@ Fixed:
     bcsub (Rasmus)
     mb_ereg, mb_ereg_match, mb_eregi, mb_split (Moriyoshi)
     xml_parser_create (Moriyoshi)
-    ob_start (3) (Sascha)
-
+    ob_start (Sascha)
+    imagecreate/-truecolor (Sascha)
+	
 Open:
 
-    the dbase extension(1)
+    the dbase extension         (1)
+    mb_strcut('', 2147483647);  (2)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -38,6 +40,12 @@ dbase_numfields
 dbase_numrecords
 dbase_open
 X 
+
+(2) backtrace:
+#0  0x080b828e in mbfl_strcut (string=0xbfffbde0, result=0xbfffbdd0, 
+		    from=2147483647, length=0)
+    at /home/sas/src/php4/ext/mbstring/mbfilter.c:8258
+	8258                                    (*encoder->filter_function)(*p++, encoder TSRMLS_CC);
 
 	
 Methodology
