@@ -38,20 +38,20 @@
 
 #define INLINE inline
 
-zend_class_entry *spl_ce_RecursiveIterator;
-zend_class_entry *spl_ce_RecursiveIteratorIterator;
-zend_class_entry *spl_ce_FilterIterator;
-zend_class_entry *spl_ce_ParentIterator;
-zend_class_entry *spl_ce_SeekableIterator;
-zend_class_entry *spl_ce_LimitIterator;
-zend_class_entry *spl_ce_CachingIterator;
-zend_class_entry *spl_ce_CachingRecursiveIterator;
-zend_class_entry *spl_ce_OuterIterator;
-zend_class_entry *spl_ce_IteratorIterator;
-zend_class_entry *spl_ce_NoRewindIterator;
-zend_class_entry *spl_ce_InfiniteIterator;
-zend_class_entry *spl_ce_EmptyIterator;
-zend_class_entry *spl_ce_AppendIterator;
+PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
+PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
+PHPAPI zend_class_entry *spl_ce_FilterIterator;
+PHPAPI zend_class_entry *spl_ce_ParentIterator;
+PHPAPI zend_class_entry *spl_ce_SeekableIterator;
+PHPAPI zend_class_entry *spl_ce_LimitIterator;
+PHPAPI zend_class_entry *spl_ce_CachingIterator;
+PHPAPI zend_class_entry *spl_ce_CachingRecursiveIterator;
+PHPAPI zend_class_entry *spl_ce_OuterIterator;
+PHPAPI zend_class_entry *spl_ce_IteratorIterator;
+PHPAPI zend_class_entry *spl_ce_NoRewindIterator;
+PHPAPI zend_class_entry *spl_ce_InfiniteIterator;
+PHPAPI zend_class_entry *spl_ce_EmptyIterator;
+PHPAPI zend_class_entry *spl_ce_AppendIterator;
 
 function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
