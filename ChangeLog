@@ -1,3 +1,49 @@
+1999-12-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: And still more stuff.
+
+    * TODO: More stuff for me to do.
+
+    * NEWS: NEWS notice.
+
+1999-12-15  Zeev Suraski  <zeev@php.net>
+
+    * main.c
+      php.ini-dist
+      php_globals.h:
+    - Implement ability to turn off support for call-time pass by reference
+
+1999-12-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c: switched to Ex Api
+
+1999-12-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * main.c:
+    (return_one) removed.
+    (OnChangeMemoryLimit) Only defined if MEMORY_LIMIT is defined.
+
+    * main.c:
+    Added date/time stamping to PHP error log file. Idea credit goes
+    to Joey.
+
+1999-12-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/fdf.c: fixed some compile errors.
+
+1999-12-15  Evan Klinger  <evan715@sirius.com>
+
+    * ext/fdf/fdf.c: Ex API
+
+    * ext/yp/yp.c: I would've compiled first, I swear...
+
+    * ext/yp/php_yp.h
+      ext/yp/yp.c: Ex API
+
+1999-12-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Not yet, Joey.
+
 1999-12-14  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c
