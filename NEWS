@@ -4,6 +4,7 @@ PHP 4.0                                                                    NEWS
 ?? ??? 2000, Version 4.0.3-dev
 - Added the pathinfo() function. (Sterling)
 - Updated sybase_ct module and its sybase_query to use high performance API.
+  (Joey)
 - Added a more configurable error reporting interface to DB. (Stig)
 - Added is_uploaded_file() and move_uploaded_file() (Zeev)
 - Added several directives to php.ini - post_max_size, file_uploads,
