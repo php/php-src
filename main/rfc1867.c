@@ -451,7 +451,7 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 		} else {
 			*resp++ = start[i];
 #if HAVE_MBSTRING
-			if (mbstr_is_mb_leadbyte(start+i) TSRMLS_CC){
+			if (mbstr_is_mb_leadbyte(start+i TSRMLS_CC)) {
 				*resp++ = start[++i];
 			}
 #endif
