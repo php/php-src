@@ -43,6 +43,7 @@ PHP                                                                        NEWS
   timezone).  (Wez)
 - Fixed bug #29256 (error when sending large packets on a socket). (Dmitry)
 - Fixed bug #29236 (memory error when wsdl-cache is enabled). (Dmitry)
+- Fixed bug #29147 (Compile Error in mnoGoSearch functions). (Sergey, Antony)
 - Fixed bug #29132 ($_SERVER["PHP_AUTH_USER"] isn't defined). (Stefan)
 - Fixed bug #29119 (html_entity_decode() misbehaves with UTF-8). (Moriyoshi)
 - Fixed bug #29109 (SoapFault exception: [WSDL] Out of memory). (Dmitry)
