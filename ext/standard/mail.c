@@ -173,7 +173,8 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_error(E_WARNING, "Could not execute mail delivery program");
 		return 0;
 	}
-	return 1;
+
+	return 1;	/* never reached */
 }
 /* }}} */
 
