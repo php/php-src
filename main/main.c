@@ -558,12 +558,6 @@ static int php_get_ini_entry_for_zend(char *name, uint name_length, zval *conten
 static void php_message_handler_for_zend(long message, void *data)
 {
 	switch (message) {
-		case ZMSG_ENABLE_TRACK_VARS: {
-				PLS_FETCH();
-				
-				PG(track_vars) = 1;
-			}
-			break;
 		case ZMSG_FAILED_INCLUDE_FOPEN: {
 				PLS_FETCH();
 
