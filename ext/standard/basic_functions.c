@@ -542,6 +542,7 @@ function_entry basic_functions[] = {
 	PHP_FE(highlight_string,												NULL)
 
 	PHP_FE(ini_get,															NULL)
+	PHP_FE(ini_get_all,														NULL)
 	PHP_FE(ini_set,															NULL)
 	PHP_FALIAS(ini_alter,			ini_set,								NULL)
 	PHP_FE(ini_restore,														NULL)
@@ -902,6 +903,11 @@ PHP_MINIT_FUNCTION(basic)
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_TIMEOUT", PHP_CONNECTION_TIMEOUT, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("INI_USER",   ZEND_INI_USER,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INI_PERDIR", ZEND_INI_PERDIR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INI_SYSTEM", ZEND_INI_SYSTEM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INI_ALL",    ZEND_INI_ALL,    CONST_CS | CONST_PERSISTENT);
 
 #define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
 	REGISTER_MATH_CONSTANT(M_E);
@@ -2191,6 +2197,68 @@ PHP_FUNCTION(ini_get)
 	}
 
 	RETURN_STRING(str, 1);
+}
+/* }}} */
+
+
+static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	zval *ini_array = va_arg(args, zval *);
+	int module_number = va_arg(args, int);
+	zval *option;
+
+	if(module_number != 0 && ini_entry->module_number != module_number) {
+		return 0;
+	}
+
+	if (hash_key->nKeyLength == 0 || hash_key->arKey[0] != 0) {
+
+		MAKE_STD_ZVAL(option);
+		array_init(option);
+
+		if(ini_entry->value) {
+			add_assoc_stringl(option, "global_value", ini_entry->value, ini_entry->value_length, 1);
+		} else {
+			add_assoc_null(option, "global_value");
+		}
+
+		if(ini_entry->orig_value) {
+			add_assoc_stringl(option, "local_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
+		} else {
+			add_assoc_null(option, "local_value");
+		}
+
+		add_assoc_long(option, "access", ini_entry->modifyable);
+
+		add_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, option);
+	}
+	return 0;
+}
+
+/* {{{ proto array ini_get_all([string extension])
+   Get all configuration options */
+PHP_FUNCTION(ini_get_all)
+{
+	char *extname = NULL;
+	int extname_len = 0, extnumber = 0;
+	zend_module_entry *module;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &extname, &extname_len) == FAILURE) {
+		return;
+	}
+
+	zend_ini_sort_entries(TSRMLS_C);
+
+	if(extname) {
+		if (zend_hash_find(&module_registry, extname, extname_len + 1, (void **) &module) == FAILURE) {
+			php_error(E_WARNING, "Unable to find extension '%s'", extname);
+			RETURN_FALSE;
+		}
+		extnumber = module->module_number;
+	}
+
+	array_init(return_value);
+	zend_hash_apply_with_arguments(&EG(ini_directives), (apply_func_args_t) php_ini_get_option, 2, return_value, extnumber TSRMLS_CC);
 }
 /* }}} */
 
