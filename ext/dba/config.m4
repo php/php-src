@@ -33,7 +33,15 @@ AC_DEFUN(AC_DBA_STD_CHECK,[
 dnl Attach THIS_x to DBA_x
 AC_DEFUN(AC_DBA_STD_ATTACH,[
   AC_ADD_INCLUDE($THIS_INCLUDE)
-  AC_ADD_LIBRARY_WITH_PATH($THIS_LIBS, $THIS_LFLAGS)
+  if test "$ext_shared" = "yes"; then
+    if test -z "$THIS_LFLAGS"; then
+      DBA_SHARED_LIBADD="$DBA_SHARED_LIBADD -l$THIS_LIBS"
+    else
+      DBA_SHARED_LIBADD="$DBA_SHARED_LIBADD -R$THIS_LFLAGS -L$THIS_LFLAGS -l$THIS_LIBS"
+    fi
+  else
+    AC_ADD_LIBRARY_WITH_PATH($THIS_LIBS, $THIS_LFLAGS)
+  fi
 
   THIS_INCLUDE=""
   THIS_LIBS=""
@@ -52,7 +60,8 @@ AC_DEFUN(AC_DBA_STD_RESULT,[
   THIS_RESULT=""
 ])
 
-
+PHP_ARG_ENABLE(dba,whether to enable DBA,
+[  --enable-dba=shared     Build DBA as a shared module])
 
 AC_ARG_WITH(gdbm,
 [  --with-gdbm[=DIR]       Include GDBM support],[
@@ -230,7 +239,8 @@ AC_MSG_CHECKING(whether to enable DBA interface)
 if test "$HAVE_DBA" = "1"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_EXTENSION(dba)
+  PHP_EXTENSION(dba,$ext_shared)
+  PHP_SUBST(DBA_SHARED_LIBADD)
 else
   AC_MSG_RESULT(no)
   AC_DEFINE(HAVE_DBA, 0, [ ])

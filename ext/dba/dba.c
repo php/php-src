@@ -72,6 +72,10 @@ zend_module_entry dba_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef COMPILE_DL_DBA
+ZEND_GET_MODULE(dba)
+#endif
+
 typedef struct dba_handler {
 	char *name;
 	int (*open)(dba_info *);
