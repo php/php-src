@@ -87,6 +87,7 @@ function_entry basic_functions[] = {
 	PHP_FE(gmmktime,								NULL)
 #if HAVE_STRFTIME
 	PHP_FE(strftime,								NULL)
+	PHP_FE(gmstrftime,								NULL)
 #endif
 	PHP_FE(strtotime,								NULL)
 	PHP_FE(date,									NULL)
