@@ -55,14 +55,16 @@ static int le_result, le_link, le_plink;
 
 #include "php_ini.h"
 
-# if HAVE_MYSQL_MYSQL_H
-#  include <mysql/mysql.h>
-# else
-#  include <mysql.h>
-# endif
+#if HAVE_MYSQL_MYSQL_H
+# include <mysql/mysql.h>
+#else
+# include <mysql.h>
+#endif
 
-#ifdef HAVE_ERRMSG_H
-#include <errmsg.h>
+#ifdef HAVE_MYSQL_REAL_CONNECT
+# ifdef HAVE_ERRMSG_H
+#  include <errmsg.h>
+# endif
 #endif
 
 #define SAFE_STRING(s) ((s)?(s):"")
