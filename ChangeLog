@@ -1,3 +1,46 @@
+2004-11-09  Andrei Zmievski  <andreiz@gravitonic.com>
+
+    * ZendEngine2/zend_ini_parser.y:
+      Revert inadvertent commit.
+
+    * acinclude.m4
+      ZendEngine2/zend_ini_parser.y:
+      .dylib extension are Mach-O shared libraries that meant for linking
+      against. Loadable modules (aka bundles) can have any extension, so we
+      should probably stick with .so
+      
+      http://fink.sourceforge.net/doc/porting/shared.php?phpLang=en#lib-and-mod
+
+2004-11-09  Joe Orton  <jorton@redhat.com>
+
+    * ext/recode/config9.m4:
+      Fix --with-recode since PHP_YAZ is never defined.
+
+    * ext/standard/config.m4:
+      Make the "rounding fuzz" check work again with gcc 3.3 and later,
+      fixing the bug24142 test.
+
+2004-11-09  Frank M. Kromann  <frank@kromann.info>
+
+    * sapi/cli/php.1.in:
+      Fix typo in man page. Bug #30727. Patch by Jakub Vrana
+
+2004-11-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #29211 (SoapClient doesn't request wsdl through proxy). (Rob)
+
+2004-11-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/cpdf/cpdf.c
+      ext/cpdf/cpdf.c:
+      MFH: Fixed crash inside cpdf_setdash() if called before page init.
+
+    * ext/cpdf/cpdf.c:
+      Fixed crash inside cpdf_setdash() if called before page init.
+
 2004-11-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
