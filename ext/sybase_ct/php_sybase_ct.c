@@ -1133,7 +1133,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 						/* This signals we have an integer datatype, but we need to convert to double if we 
 						 * overflow. 
 						 */
-						convert_scalar_to_number(&result->data[i][j]);
+						convert_scalar_to_number(&result->data[i][j] TSRMLS_CC);
 						break;
 				}
 			}
