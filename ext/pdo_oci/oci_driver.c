@@ -218,7 +218,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 	return 1;
 }
 
-static int oci_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
+static long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	OCIStmt		*stmt;
