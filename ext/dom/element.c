@@ -65,10 +65,13 @@ PHP_FUNCTION(dom_element_element)
 	zval *id;
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
-	char *name, *value = NULL;
+	char *name, *value = NULL, *uri = NULL;
+	char *localname = NULL, *prefix = NULL;
+	int errorcode = 0, uri_len = 0;
 	int name_len, value_len = 0;
+	xmlNsPtr nsptr = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_element_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s!s", &id, dom_element_class_entry, &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
 		return;
 	}
 
@@ -77,7 +80,30 @@ PHP_FUNCTION(dom_element_element)
 		RETURN_FALSE;
 	}
 
-	nodep = xmlNewNode(NULL, (xmlChar *) name);
+	/* Namespace logic is seperate and only when uri passed in to insure no BC breakage */
+	if (uri_len > 0) {
+		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
+		if (errorcode == 0) {
+			nodep = xmlNewNode (NULL, localname);
+			if (nodep != NULL && uri != NULL) {
+				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
+				xmlSetNs(nodep, nsptr);
+			}
+		}
+		xmlFree(localname);
+		if (prefix != NULL) {
+			xmlFree(prefix);
+		}
+		if (errorcode != 0) {
+			if (nodep != NULL) {
+				xmlFree(nodep);
+			}
+			php_dom_throw_error(errorcode, 0 TSRMLS_CC);
+			RETURN_FALSE;
+		}
+	} else {
+		nodep = xmlNewNode(NULL, (xmlChar *) name);
+	}
 
 	if (!nodep)
 		RETURN_FALSE;
