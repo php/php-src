@@ -110,32 +110,9 @@ AC_ARG_WITH(apache,
         AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
       fi
     # For Apache 2.0.x
-    elif test -f $withval/src/include/httpd.h &&
-         test -f $withval/src/lib/apr/include/apr_general.h ; then
-      APACHE_HAS_REGEX=1
-      APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix -I$withval/src/lib/apr/include"
-      APACHE_TARGET=$withval/src/modules/php4
-      if test ! -d $APACHE_TARGET; then
-        mkdir $APACHE_TARGET
-      fi
-      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php4.c php_apache.c)
-      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-      PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-      AC_MSG_RESULT(yes - Apache 2.0.X)
-      STRONGHOLD=
-      if test -f $withval/src/include/ap_config.h; then
-        AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
-      fi
-      if test -f $withval/src/include/ap_compat.h; then
-        AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
-        if test ! -f $withval/src/include/ap_config_auto.h; then
-          AC_MSG_ERROR(Please run Apache\'s configure or src/Configure program once and try again)
-        fi
-      else
-        if test -f $withval/src/include/compat.h; then
-          AC_DEFINE(HAVE_OLD_COMPAT_H,1,[ ])
-        fi
-      fi
+    elif test -f $withval/include/httpd.h &&
+         test -f $withval/srclib/apr/include/apr_general.h ; then
+      AC_MSG_ERROR([Use --with-apache2 with Apache 2.x!])
     # For Apache 1.3.x
     elif test -f $withval/src/main/httpd.h; then
       APACHE_HAS_REGEX=1
