@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Fixed infinite recursion when serializing $GLOBALS[] in WDDX. (Andrei)
+- Made WDDX serialization properly escape <, >, and &. Also speeded up
+  the serialization in general. (Andrei)
 - Moved install-local to install-sapi for clarity. (Joey)
 - Improved extension build framework. Refer to README.SELF-CONTAINED-EXTENSIONS
   for an introduction. (Sascha)
