@@ -1495,7 +1495,6 @@ PHP_FUNCTION(imap_listscan)
 /* }}} */
 
 /* {{{ proto object imap_check(int stream_id)
-
    Get mailbox properties */
 PHP_FUNCTION(imap_check)
 {
@@ -1536,7 +1535,7 @@ PHP_FUNCTION(imap_check)
 
 /* }}} */
 
-/* {{{ proto int imap_delete(int stream_id, int msg_no [, int flags ])
+/* {{{ proto int imap_delete(int stream_id, int msg_no [, int flags])
    Mark a message for deletion */
 PHP_FUNCTION(imap_delete)
 {
