@@ -1263,8 +1263,8 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 	if (!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 
-		if (z->type == IS_OBJECT && Z_OBJ_HT_P(object)->get) {
-			zval *value = Z_OBJ_HT_P(object)->get(z TSRMLS_CC);
+		if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+			zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 			if (z->refcount == 0) {
 				zval_dtor(z);
