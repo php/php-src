@@ -1,3 +1,113 @@
+2004-06-01  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c:
+      Don't be too strict if the number of binding arguments provided exceeds the
+      expected number
+
+2004-06-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/ldap/ldap.c:
+      MFH: No need to NULL terminate manually, snprintf() does it for us already.
+
+    * ext/ldap/ldap.c:
+      No need to NULL terminate manually, snprintf() does it for us already.
+
+    * (PHP_4_3)
+      NEWS
+      ext/xmlrpc/libxmlrpc/xml_element.c:
+      MFH: Fixed bug #28597 (xmlrpc_encode_request() incorrectly encodes chars in
+      200-210 range).
+
+    * ext/xmlrpc/libxmlrpc/xml_element.c:
+      Fixed bug #28597 (xmlrpc_encode_request() incorrectly encodes chars in
+      200-210 range).
+      Patch by: fernando dot nemec at folha dot com dot br
+
+2004-06-01  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c:
+      Removed debugging code
+
+2004-06-01  Andrei Zmievski  <andreiz@gmail.com>
+
+    * (PHP_4_3)
+      NEWS:
+      -** empty log message ***
+
+    * (PHP_4_3)
+      Zend/zend.c:
+      MFH (If user error handler returns "false" then we relay to the built in
+      error handler)
+
+2004-06-01  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/package-PEARtests.xml:
+      update dependency to PEAR 1.4.0dev5
+
+    * pear/tests/package-PEARtests.xml
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error2.phpt
+      pear/tests/pear_error3.phpt
+      pear/tests/pear_error4.phpt
+      pear/tests/pear_installer1.phpt
+      pear/tests/pear_installer_install_channels.phpt
+      pear/tests/pear_registry.phpt
+      pear/tests/pear_registry_1.1.phpt:
+      test files for PEAR are now installable!
+
+    * pear/tests/pear_registry_inc.php.inc:
+      file needed for registry test
+
+    * pear/tests/package-PEARtests.xml:
+      update to include all new unit tests and files
+
+    * pear/tests/package-PEARtests.xml:
+      begin work on making the tests installable
+
+    * pear/tests/pear_packager.phpt:
+      prepare for actual installable unit tests
+
+    * pear/tests/pear_dependency_checkPackageUninstall.phpt
+      pear/tests/pear_downloader_invalid.phpt:
+      fix unit tests for 1.4.0dev4
+
+2004-06-01  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Reorder
+
+2004-06-01  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - NEWS
+
+    * ZendEngine2/zend.c:
+      - If user error handler returns "false" then we relay to the built in error
+        handler
+
+2004-06-01  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h
+      ext/interbase/tests/interbase.inc:
+      Use constant IBASE_CREATE instead of just 0
+
+    * (PHP_4_3)
+      NEWS:
+      
+
+    * (PHP_4_3)
+      ext/informix/ifx.ec:
+      MFH: Fixed bug #28569 (connection id is not thread safe)
+
+    * ext/informix/ifx.ec:
+      Woops, missed one
+
+    * ext/informix/ifx.ec:
+      Fixed bug #28569 (connection id is not thread safe)
+
 2004-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:
