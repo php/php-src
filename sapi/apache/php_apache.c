@@ -1108,45 +1108,143 @@ PHP_FUNCTION(apache_request_discard_request_body)
 
 /* http_log.h */
 
+/* {{{ proto boolean apache_request_log_error(string message, [long facility])
+ */
 PHP_FUNCTION(apache_request_log_error)
 {
-    
-}
+    zval *id;
+    zval **z_errstr, **z_facility;
+    request_rec *r;
+    int facility = APLOG_ERR;
 
-PHP_FUNCTION(apache_request_log_rerror)
-{
+    TSRMLS_FETCH();
+    switch(ARG_COUNT(ht)) {
+        case 1:
+            if(zend_get_parameters_ex(1, &z_errstr) == FAILURE) {
+                RETURN_FALSE;
+            }
+            break;
+        case 2:
+            if(zend_get_parameters_ex(1, &z_errstr, &z_facility) == FAILURE) {
+                RETURN_FALSE;
+            }
+            convert_to_long_ex(z_facility);
+            facility = Z_LVAL_PP(z_facility);
+            break;
+        default:
+            WRONG_PARAM_COUNT;
+            break;
+    }
+    APREQ_GET_REQUEST(id, r);
+    convert_to_string_ex(z_errstr);
+    ap_log_error(APLOG_MARK, facility, r->server, "%s", Z_STRVAL_PP(z_errstr));
+    RETURN_TRUE;
 }
-
+/* }}} */
 /* http_main.h */
 
+/* {{{ proto object apache_request_sub_req_lookup_uri(string uri)
+    Returns sub-request for the specified uri.  You would
+    need to run it yourself with run()
+*/
 PHP_FUNCTION(apache_request_sub_req_lookup_uri)
 {
-    RETURN_TRUE;
+    zval *id, *ret;
+    zval **file;
+    request_rec *r, *sub_r;
+    TSRMLS_FETCH();
+    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    APREQ_GET_REQUEST(id, r);
+    convert_to_string_ex(file);
+    sub_r = ap_sub_req_lookup_uri(Z_STRVAL_PP(file), r);
+    if(!sub_r) {
+        RETURN_FALSE;
+    }
+    return_value = php_apache_request_new(sub_r);
 }
+/* }}} */
 
+/* {{{ proto object apache_request_sub_req_lookup_file(string file)
+    Returns sub-request for the specified file.  You would
+    need to run it yourself with run().
+*/
 PHP_FUNCTION(apache_request_sub_req_lookup_file)
 {
-    RETURN_TRUE;
+    zval *id, *ret;
+    zval **file;
+    request_rec *r, *sub_r;
+    TSRMLS_FETCH();
+    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    APREQ_GET_REQUEST(id, r);
+    convert_to_string_ex(file);
+    sub_r = ap_sub_req_lookup_file(Z_STRVAL_PP(file), r);
+    if(!sub_r) {
+        RETURN_FALSE;
+    }
+    return_value = php_apache_request_new(sub_r);
 }
+/* }}} */
 
+/* {{{ proto object apache_request_sub_req_method_uri(string method, string uri)
+    Returns sub-request for the specified file.  You would
+    need to run it yourself with run().
+*/
 PHP_FUNCTION(apache_request_sub_req_method_uri)
 {
-    RETURN_TRUE;
+    zval *id;
+    zval **file, **method;
+    request_rec *r, *sub_r;
+    TSRMLS_FETCH();
+    if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &method, &file) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    APREQ_GET_REQUEST(id, r);
+    convert_to_string_ex(method);
+    convert_to_string_ex(file);
+    sub_r = ap_sub_req_method_uri(Z_STRVAL_PP(method),Z_STRVAL_PP(file), r);
+    if(!sub_r) {
+        RETURN_FALSE;
+    }
+    return_value = php_apache_request_new(sub_r);
 }
+/* }}} */
 
-PHP_FUNCTION(apache_request_run_sub_req)
+/* {{{ proto long apache_request_run
+    This is a wrapper for ap_sub_run_req and ap_destory_sub_req.  It takes 
+    sub_request, runs it, destroys it, and returns it's status.
+*/
+PHP_FUNCTION(apache_request_run)
 {
-    RETURN_TRUE;
-}
+    zval *id;
+    request_rec *r;
+    int status;
 
-PHP_FUNCTION(apache_request_destroy_sub_req)
-{
-    RETURN_TRUE;
+    TSRMLS_FETCH();
+    APREQ_GET_REQUEST(id, r);
+    if(!r || ap_is_initial_req(r))
+        RETURN_FALSE;
+    status = ap_run_sub_req(r);
+    ap_destroy_sub_req(r);
+    RETURN_LONG(status);
 }
+/* }}} */
 
 PHP_FUNCTION(apache_request_internal_redirect)
 {
-    RETURN_TRUE;
+    zval *id;
+    zval **new_uri;
+    request_rec *r, *sub_r;
+    TSRMLS_FETCH();
+    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &new_uri) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    APREQ_GET_REQUEST(id, r);
+    convert_to_string_ex(new_uri);
+    ap_internal_redirect(Z_STRVAL_PP(new_uri), r);
 }
 
 PHP_FUNCTION(apache_request_send_header_field)
@@ -1234,7 +1332,11 @@ static function_entry php_apache_request_class_functions[] = {
 #undef set_keepalive
 #undef rputs
 #undef log_error
-#undef log_rerror
+#undef lookup_uri
+#undef lookup_file
+#undef method_uri
+#undef run
+#undef internal_redirect
 	PHP_FALIAS(auth_name,					apache_request_auth_name,				NULL)
 	PHP_FALIAS(auth_type,					apache_request_auth_type,				NULL)
 	PHP_FALIAS(basic_auth_pw,				apache_request_basic_auth_pw,			NULL)
@@ -1258,12 +1360,10 @@ static function_entry php_apache_request_class_functions[] = {
     PHP_FALIAS(set_keepalive,               apache_request_set_keepalive,           NULL)
     PHP_FALIAS(rputs,                       apache_request_rputs,                   NULL)
     PHP_FALIAS(log_error,                   apache_request_log_error,               NULL)
-    PHP_FALIAS(log_rerror,                  apache_request_log_rerror,              NULL)
-    PHP_FALIAS(sub_req_lookup_uri,          apache_request_sub_req_lookup_uri,      NULL)
-    PHP_FALIAS(sub_req_lookup_file,         apache_request_sub_req_lookup_file,     NULL)
-    PHP_FALIAS(sub_req_method_uri,          apache_request_sub_req_method_uri,      NULL)
-    PHP_FALIAS(run_sub_req,                 apache_request_run_sub_req,             NULL)
-    PHP_FALIAS(destroy_sub_req,             apache_request_destroy_sub_req,         NULL)
+    PHP_FALIAS(lookup_uri,                  apache_request_sub_req_lookup_uri,      NULL)
+    PHP_FALIAS(lookup_file,                 apache_request_sub_req_lookup_file,     NULL)
+    PHP_FALIAS(method_uri,                  apache_request_sub_req_method_uri,      NULL)
+    PHP_FALIAS(run,                         apache_request_run,                     NULL)
     PHP_FALIAS(internal_redirect,           apache_request_internal_redirect,       NULL)
 	{ NULL, NULL, NULL }
 };
@@ -1295,7 +1395,61 @@ static PHP_MINIT_FUNCTION(apache)
 	REGISTER_LONG_CONSTANT("REDIRECT",			REDIRECT,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("BAD_REQUEST",		BAD_REQUEST,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("NOT_FOUND",			NOT_FOUND,			CONST_CS | CONST_PERSISTENT);
-
+    REGISTER_LONG_CONSTANT("HTTP_CONTINUE",     HTTP_CONTINUE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_SWITCHING_PROTOCOLS",     HTTP_SWITCHING_PROTOCOLS,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_PROCESSING",     HTTP_PROCESSING,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_OK",     HTTP_OK,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_CREATED",     HTTP_CREATED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_ACCEPTED",     HTTP_ACCEPTED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_NON_AUTHORITATIVE",     HTTP_NON_AUTHORITATIVE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_NO_CONTENT",     HTTP_NO_CONTENT,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_RESET_CONTENT",     HTTP_RESET_CONTENT,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_PARTIAL_CONTENT",     HTTP_PARTIAL_CONTENT,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_MULTI_STATUS",     HTTP_MULTI_STATUS,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_MULTIPLE_CHOICES",     HTTP_MULTIPLE_CHOICES,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_MOVED_PERMANENTLY",     HTTP_MOVED_PERMANENTLY,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_MOVED_TEMPORARILY",     HTTP_MOVED_TEMPORARILY,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_SEE_OTHER",     HTTP_SEE_OTHER,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_NOT_MODIFIED",     HTTP_NOT_MODIFIED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_USE_PROXY",     HTTP_USE_PROXY,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_TEMPORARY_REDIRECT",     HTTP_TEMPORARY_REDIRECT,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_BAD_REQUEST",     HTTP_BAD_REQUEST,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_UNAUTHORIZED",     HTTP_UNAUTHORIZED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_PAYMENT_REQUIRED",     HTTP_PAYMENT_REQUIRED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_FORBIDDEN",     HTTP_FORBIDDEN,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_NOT_FOUND",     HTTP_NOT_FOUND,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_METHOD_NOT_ALLOWED",     HTTP_METHOD_NOT_ALLOWED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_NOT_ACCEPTABLE",     HTTP_NOT_ACCEPTABLE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_PROXY_AUTHENTICATION_REQUIRED",     HTTP_PROXY_AUTHENTICATION_REQUIRED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_REQUEST_TIME_OUT",     HTTP_REQUEST_TIME_OUT,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_CONFLICT",     HTTP_CONFLICT,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_GONE",     HTTP_GONE,   CONST_CS | CONST_PERSISTENT);REGISTER_LONG_CONSTANT("HTTP_LENGTH_REQUIRED",     HTTP_LENGTH_REQUIRED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_PRECONDITION_FAILED",     HTTP_PRECONDITION_FAILED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_REQUEST_ENTITY_TOO_LARGE",     HTTP_REQUEST_ENTITY_TOO_LARGE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_REQUEST_URI_TOO_LARGE",     HTTP_REQUEST_URI_TOO_LARGE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_UNSUPPORTED_MEDIA_TYPE",     HTTP_UNSUPPORTED_MEDIA_TYPE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_RANGE_NOT_SATISFIABLE",     HTTP_RANGE_NOT_SATISFIABLE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_EXPECTATION_FAILED",     HTTP_EXPECTATION_FAILED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_UNPROCESSABLE_ENTITY",     HTTP_UNPROCESSABLE_ENTITY,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_LOCKED",     HTTP_LOCKED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_FAILED_DEPENDENCY",     HTTP_FAILED_DEPENDENCY,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_INTERNAL_SERVER_ERROR",     HTTP_INTERNAL_SERVER_ERROR,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_NOT_IMPLEMENTED",     HTTP_NOT_IMPLEMENTED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_BAD_GATEWAY",     HTTP_BAD_GATEWAY,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_SERVICE_UNAVAILABLE",     HTTP_SERVICE_UNAVAILABLE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_GATEWAY_TIME_OUT",     HTTP_GATEWAY_TIME_OUT,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_VERSION_NOT_SUPPORTED",     HTTP_VERSION_NOT_SUPPORTED,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_VARIANT_ALSO_VARIES",     HTTP_VARIANT_ALSO_VARIES,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_INSUFFICIENT_STORAGE",     HTTP_INSUFFICIENT_STORAGE,   CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTTP_NOT_EXTENDED",     HTTP_NOT_EXTENDED,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("APLOG_EMERG",		APLOG_EMERG,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("APLOG_ALERT",		APLOG_ALERT,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("APLOG_CRIT",		APLOG_CRIT,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("APLOG_ERR",			APLOG_ERR,  		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("APLOG_WARNING",		APLOG_WARNING,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("APLOG_NOTICE",		APLOG_NOTICE,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("APLOG_INFO",		APLOG_INFO,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("APLOG_DEBUG",		APLOG_DEBUG,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("M_GET",				M_GET,				CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("M_PUT",				M_PUT,				CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("M_POST",			M_POST,				CONST_CS | CONST_PERSISTENT);
