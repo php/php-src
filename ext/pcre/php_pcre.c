@@ -99,8 +99,6 @@ PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
-	ELS_FETCH();
-
 #ifdef ZTS
 	pcre_globals_id = ts_allocate_id(
 							sizeof(php_pcre_globals),

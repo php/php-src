@@ -375,7 +375,7 @@ PHP_FUNCTION(ldap_connect)
 /* }}} */
 
 
-static LDAP * _get_ldap_link(pval **link, HashTable *list)
+static LDAP * _get_ldap_link(pval **link)
 {
 	LDAP *ldap;
 	int type;
@@ -392,7 +392,7 @@ static LDAP * _get_ldap_link(pval **link, HashTable *list)
 }
 
 
-static LDAPMessage * _get_ldap_result(pval **result, HashTable *list)
+static LDAPMessage * _get_ldap_result(pval **result)
 {
 	LDAPMessage *ldap_result;
 	int type;
@@ -410,7 +410,7 @@ static LDAPMessage * _get_ldap_result(pval **result, HashTable *list)
 }
 
 
-static LDAPMessage * _get_ldap_result_entry(pval **result, HashTable *list)
+static LDAPMessage * _get_ldap_result_entry(pval **result)
 {
 	LDAPMessage *ldap_result_entry;
 	int type;
@@ -428,7 +428,7 @@ static LDAPMessage * _get_ldap_result_entry(pval **result, HashTable *list)
 }
 
 
-static BerElement * _get_ber_entry(pval **berp, HashTable *list)
+static BerElement * _get_ber_entry(pval **berp)
 {
 	BerElement *ber;
 	int type;
@@ -496,7 +496,7 @@ PHP_FUNCTION(ldap_bind)
 			break;
 	}	
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
 	if (ldap_bind_s(ldap, ldap_bind_rdn, ldap_bind_pw, LDAP_AUTH_SIMPLE) != LDAP_SUCCESS) {
@@ -528,7 +528,7 @@ PHP_FUNCTION(ldap_unbind)
 
 	convert_to_long_ex(link);
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
 	zend_list_delete((*link)->value.lval);
@@ -610,7 +610,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	  ldap_base_dn = NULL;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
 	/* Is it useful to only get the attributes ? */
@@ -674,7 +674,7 @@ PHP_FUNCTION(ldap_free_result)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap_result = _get_ldap_result(result, list);
+	ldap_result = _get_ldap_result(result);
 	if (ldap_result == NULL) {
 		RETVAL_FALSE;
 	} else {
@@ -697,10 +697,10 @@ PHP_FUNCTION(ldap_count_entries)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	ldap_result = _get_ldap_result(result, list);
+	ldap_result = _get_ldap_result(result);
 	if (ldap_result == NULL) RETURN_FALSE;
 
 	RETURN_LONG(ldap_count_entries(ldap, ldap_result));
@@ -721,10 +721,10 @@ PHP_FUNCTION(ldap_first_entry)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	ldap_result = _get_ldap_result(result, list);
+	ldap_result = _get_ldap_result(result);
 	if (ldap_result == NULL) RETURN_FALSE;
 
 	if ((ldap_result_entry = ldap_first_entry(ldap, ldap_result)) == NULL) {
@@ -748,10 +748,10 @@ PHP_FUNCTION(ldap_next_entry)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	ldap_result_entry = _get_ldap_result_entry(result_entry, list);
+	ldap_result_entry = _get_ldap_result_entry(result_entry);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
 
 	if ((ldap_result_entry_next = ldap_next_entry(ldap, ldap_result_entry)) == NULL) {
@@ -782,10 +782,10 @@ PHP_FUNCTION(ldap_get_entries)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	ldap_result = _get_ldap_result(result, list);
+	ldap_result = _get_ldap_result(result);
 	if (ldap_result == NULL) RETURN_FALSE;
 
 	num_entries = ldap_count_entries(ldap, ldap_result);
@@ -864,10 +864,10 @@ PHP_FUNCTION(ldap_first_attribute)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link,list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	ldap_result_entry = _get_ldap_result_entry(result,list);
+	ldap_result_entry = _get_ldap_result_entry(result);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
 
 	if ((attribute = ldap_first_attribute(ldap, ldap_result_entry, &ber)) == NULL) {
@@ -899,13 +899,13 @@ PHP_FUNCTION(ldap_next_attribute)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link,list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	ldap_result_entry = _get_ldap_result_entry(result,list);
+	ldap_result_entry = _get_ldap_result_entry(result);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
 
-	ber = _get_ber_entry(berp,list);
+	ber = _get_ber_entry(berp);
 
 	if ((attribute = ldap_next_attribute(ldap, ldap_result_entry, ber)) == NULL) {
 		RETURN_FALSE;
@@ -935,10 +935,10 @@ PHP_FUNCTION(ldap_get_attributes)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	ldap_result_entry = _get_ldap_result_entry(result_entry, list);
+	ldap_result_entry = _get_ldap_result_entry(result_entry);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
 
 	num_attrib = 0;
@@ -991,10 +991,10 @@ PHP_FUNCTION(ldap_get_values)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	ldap_result_entry = _get_ldap_result_entry(result_entry, list);
+	ldap_result_entry = _get_ldap_result_entry(result_entry);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
 
 	convert_to_string_ex(attr);
@@ -1040,10 +1040,10 @@ PHP_FUNCTION(ldap_get_dn)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ld = _get_ldap_link(link, list);
+	ld = _get_ldap_link(link);
 	if (ld == NULL) RETURN_FALSE;
 
-	entry = _get_ldap_result_entry(entryp, list);
+	entry = _get_ldap_result_entry(entryp);
 	if (entry == NULL) RETURN_FALSE;
 
 	text = ldap_get_dn(ld, entry);
@@ -1142,7 +1142,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		RETURN_FALSE;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
 	convert_to_string_ex(dn);
@@ -1287,7 +1287,7 @@ PHP_FUNCTION(ldap_delete)
 		WRONG_PARAM_COUNT;
 	}
 
-	ldap = _get_ldap_link(link, list);
+	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
 	convert_to_string_ex(dn);

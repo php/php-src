@@ -78,7 +78,6 @@ zend_module_entry *get_module() { return &sybase_module_entry; }
 
 php_sybase_globals sybase_globals;
 static CS_CONTEXT *context;
-static HashTable *resource_list,*resource_plist;
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"Sybase:  A link to the server could not be established"); RETURN_FALSE; } }
 
@@ -125,15 +124,11 @@ static void _free_sybase_result(sybase_result *result)
 static void _close_sybase_link(sybase_link *sybase_ptr)
 {
 	CS_INT con_status;
+	ELS_FETCH();
 
 	sybase_ptr->valid = 0;
 
-	/* 
-	  this can cause crashes in the current model.
-	  if the resource gets destroyed via destroy_resource_list() resource_list 
-	  will *not* be in a consistent state. thies@digicol.de
-    */
-	zend_hash_apply(resource_list,(int (*)(void *))_clean_invalid_results);
+	zend_hash_apply(&EG(regular_list),(int (*)(void *))_clean_invalid_results);
 
 	/* Non-persistent connections will always be connected or we wouldn't
 	 * get here, but since we want to check the death status anyway
@@ -397,10 +392,8 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	char *hashed_details;
 	int hashed_details_length;
 	sybase_link *sybase_ptr;
+	ELS_FETCH();
 
-	resource_list = list;
-	resource_plist = plist;
-		
 	switch(ARG_COUNT(ht)) {
 		case 0: /* defaults */
 			host=user=passwd=NULL;
@@ -468,7 +461,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 
 			if (sybase_globals.max_links!=-1 && sybase_globals.num_links>=sybase_globals.max_links) {
@@ -492,7 +485,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			/* hash it up */
 			new_le.type = sybase_globals.le_plink;
 			new_le.ptr = sybase_ptr;
-			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
 				ct_close(sybase_ptr->connection, CS_UNUSED);
 				ct_con_drop(sybase_ptr->connection);
 				free(sybase_ptr);
@@ -554,7 +547,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		 * if it doesn't, open a new sybase link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -570,7 +563,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				zend_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
 			}
 		}
 		if (sybase_globals.max_links!=-1 && sybase_globals.num_links>=sybase_globals.max_links) {
@@ -592,7 +585,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
 			ct_close(sybase_ptr->connection, CS_UNUSED);
 			ct_con_drop(sybase_ptr->connection);
 			efree(sybase_ptr);

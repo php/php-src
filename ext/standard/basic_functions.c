@@ -405,9 +405,8 @@ static void basic_globals_dtor(BLS_D)
 
 PHP_MINIT_FUNCTION(basic)
 {
-	ELS_FETCH();
 #ifdef ZTS
-	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, basic_globals_dtor);
+	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
 #else
 	basic_globals_ctor(BLS_C);
 #endif
