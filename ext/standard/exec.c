@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Rasmus Lerdorf                                               |
+   | Author: Rasmus Lerdorf <rasmus@php.net>                              |
+   |         Ilia Alshanetsky <iliaa@php.net>                             |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -49,278 +50,201 @@
 #include <unistd.h>
 #endif
 
-/* {{{ php_Exec
+/* {{{ php_exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
  * If type==2, all lines will be saved to given array (exec with &$array)
  * If type==3, output will be printed binary, no lines will be saved or returned (passthru)
  *
  */
-int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
+int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 {
 	FILE *fp;
 	char *buf, *tmp=NULL;
-	int buflen = 0;
-	int t, l, output=1;
-	int overflow_limit, lcmd, ldir;
-	char *b, *c, *d=NULL;
-	php_stream *stream = NULL;
-	int pclose_return = 0;
+	int buflen, l, pclose_return;
+	char *cmd_p, *b, *c, *d=NULL;
+	php_stream *stream;
+	size_t bufl = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)();
 #endif
 
-	buf = (char *) emalloc(EXEC_INPUT_BUF);
-	buflen = EXEC_INPUT_BUF;
-
 	if (PG(safe_mode)) {
-		lcmd = strlen(cmd);
-		ldir = strlen(PG(safe_mode_exec_dir));
-		l = lcmd + ldir + 2;
-		overflow_limit = l;
-		c = strchr(cmd, ' ');
-		if (c) *c = '\0';
+		if ((c = strchr(cmd, ' '))) {
+			*c = '\0';
+			c++;
+		}
 		if (strstr(cmd, "..")) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
-			efree(buf);
-			return -1;
+			goto err;
 		}
-		d = emalloc(l);
-		strcpy(d, PG(safe_mode_exec_dir));
-		overflow_limit -= ldir;
 		b = strrchr(cmd, PHP_DIR_SEPARATOR);
-		if (b) {
-			strcat(d, b);
-			overflow_limit -= strlen(b);
-		} else {
-			strcat(d, "/");
-			strcat(d, cmd);
-			overflow_limit-=(strlen(cmd)+1);
-		}
+		spprintf(&d, 0, "%s%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : cmd), (c ? " " : ""), (c ? c : ""));
 		if (c) {
-			*c = ' ';
-			strncat(d, c, overflow_limit);
+			*(c - 1) = ' ';
 		}
-		tmp = php_escape_shell_cmd(d);
+		cmd_p = php_escape_shell_cmd(d);
 		efree(d);
-		d = tmp;
-#if PHP_SIGCHILD
-		sig_handler = signal (SIGCHLD, SIG_DFL);
-#endif
-#ifdef PHP_WIN32
-		fp = VCWD_POPEN(d, "rb");
-#else
-		fp = VCWD_POPEN(d, "r");
-#endif
-		if (!fp) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to fork [%s]", d);
-			efree(d);
-			efree(buf);
-#if PHP_SIGCHILD
-			signal (SIGCHLD, sig_handler);
-#endif
-			return -1;
-		}
-
-	} else { /* not safe_mode */
-#if PHP_SIGCHILD
-		sig_handler = signal (SIGCHLD, SIG_DFL);
-#endif
-#ifdef PHP_WIN32
-		fp = VCWD_POPEN(cmd, "rb");
-#else
-		fp = VCWD_POPEN(cmd, "r");
-#endif
-		if (!fp) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to fork [%s]", cmd);
-			efree(buf);
-#if PHP_SIGCHILD
-			signal (SIGCHLD, sig_handler);
-#endif
-			return -1;
-		}
-	}
-	buf[0] = '\0';
-	if (type==2) {
-		if (Z_TYPE_P(array) != IS_ARRAY) {
-			pval_destructor(array);
-			array_init(array);
-		}
+		d = cmd_p;
+	} else {
+		cmd_p = cmd;
 	}
 
-	/* we register the resource so that case of an aborted connection the 
-	 * fd gets pclosed
-	 */
+#if PHP_SIGCHILD
+	sig_handler = signal (SIGCHLD, SIG_DFL);
+#endif
+
+#ifdef PHP_WIN32
+	fp = VCWD_POPEN(cmd_p, "rb");
+#else
+	fp = VCWD_POPEN(cmd_p, "r");
+#endif
+	if (!fp) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to fork [%s]", cmd);
+		goto err;
+	}
 
 	stream = php_stream_fopen_from_pipe(fp, "rb");
 
+	buf = (char *) emalloc(EXEC_INPUT_BUF);
+	buflen = EXEC_INPUT_BUF;
+
 	if (type != 3) {
-		l=0;
-		while ( !feof(fp) || l != 0 ) {
-			l = 0;
-			/* Read a line or fill the buffer, whichever comes first */
-			do {
-				if ( buflen <= (l+1) ) {
-					buf = erealloc(buf, buflen + EXEC_INPUT_BUF);
-					buflen += EXEC_INPUT_BUF;
-				}
-
-				if ( fgets(&(buf[l]), buflen - l, fp) == NULL ) {
-					/* eof */
-					break;
-				}
-				l += strlen(&(buf[l]));
-			} while ( (l > 0) && (buf[l-1] != '\n') );
-
-			if ( feof(fp) && (l == 0) ) {
-				break;
-			}
-
+		b = buf;
 		
-			if (type == 1) {
-				if (output) PUTS(buf);
-				sapi_flush(TSRMLS_C);
-			}
-			else if (type == 2) {
-				/* strip trailing whitespaces */	
-				l = strlen(buf);
-				t = l;
-				while (l-- && isspace((int)buf[l]));
-				if (l < t) {
-					buf[l + 1] = '\0';
+		while (php_stream_get_line(stream, b, EXEC_INPUT_BUF, &bufl)) {
+			/* no new line found, let's read some more */
+			if (b[bufl - 1] != '\n' && !php_stream_eof(stream)) {
+				if (buflen < (bufl + EXEC_INPUT_BUF)) {
+					bufl += b - buf;
+					buflen = bufl + EXEC_INPUT_BUF;
+					buf = erealloc(buf, buflen);
+					b = buf + bufl;
+				} else {
+					b += bufl;
 				}
-				add_next_index_string(array, buf, 1);
+				continue;
+			} else if (b != buf) {
+				bufl += buflen - EXEC_INPUT_BUF;
 			}
+
+			if (type == 1) {
+				PHPWRITE(buf, bufl);
+				sapi_flush(TSRMLS_C);
+			} else if (type == 2) {
+				/* strip trailing whitespaces */	
+				l = bufl;
+				while (l-- && isspace(buf[l]));
+				if (l != (bufl - 1)) {
+					bufl = l + 1;
+					buf[bufl] = '\0';
+				}
+				add_next_index_stringl(array, buf, bufl, 1);
+			}
+			b = buf;
 		}
+		if (bufl) {
+			/* strip trailing whitespaces if we have not done so already */	
+			if (type != 2) {
+				l = bufl;
+				while (l-- && isspace(buf[l]));
+				if (l != (bufl - 1)) {
+					bufl = l + 1;
+					buf[bufl] = '\0';
+				}
+			}
 
-		/* strip trailing spaces */
-		l = strlen(buf);
-		t = l;
-		while (l && isspace((int)buf[l - 1])) {
-			l--;
-		}
-		if (l < t) buf[l] = '\0';
-
-		/* Return last line from the shell command */
-		if (PG(magic_quotes_runtime)) {
-			int len;
-
-			tmp = php_addslashes(buf, 0, &len, 0 TSRMLS_CC);
-			RETVAL_STRINGL(tmp, len, 0);
-		} else {
-			RETVAL_STRINGL(buf, l, 1);
+			/* Return last line from the shell command */
+			if (PG(magic_quotes_runtime)) {
+				int len;
+	
+				tmp = php_addslashes(buf, bufl, &len, 0 TSRMLS_CC);
+				RETVAL_STRINGL(tmp, len, 0);
+			} else {
+				RETVAL_STRINGL(buf, bufl, 1);
+			}
+		} else { /* should return NULL, but for BC we return "" */
+			RETVAL_EMPTY_STRING();
 		}
 	} else {
-		size_t b;
-
-		while((b = php_stream_read(stream, buf, EXEC_INPUT_BUF)) > 0) {
-			if (output) {
-				PHPWRITE(buf, b);
-			}
+		while((bufl = php_stream_read(stream, buf, EXEC_INPUT_BUF)) > 0) {
+			PHPWRITE(buf, bufl);
 		}
 	}
 
 	pclose_return = php_stream_close(stream); 
+	efree(buf);
 
+done:
 #if PHP_SIGCHILD
 	signal (SIGCHLD, sig_handler);
 #endif
 	if (d) {
 		efree(d);
 	}
-	efree(buf);
 	return pclose_return;
+err:
+	pclose_return = -1;
+	goto done;
 }
 /* }}} */
 
-/* {{{ proto string exec(string command [, array output [, int return_value]])
+static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode)
+{
+	char *cmd;
+	int cmd_len;
+	zval *ret_code=NULL, *ret_array=NULL;
+	int ret;
+
+	if (mode) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &cmd, &cmd_len, &ret_code) == FAILURE) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zz", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+	if (!cmd_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute a blank command");
+		RETURN_FALSE;
+	}
+
+	if (!ret_array) {
+		ret = php_exec(mode, cmd, NULL, return_value TSRMLS_CC);
+	} else {
+		zval_dtor(ret_array);
+		array_init(ret_array);
+		ret = php_exec(2, cmd, ret_array, return_value TSRMLS_CC);
+	}
+	if (ret_code) {
+		zval_dtor(ret_code);
+		ZVAL_LONG(ret_code, ret);
+	}
+}
+
+/* {{{ proto string exec(string command [, array &output [, int &return_value]])
    Execute an external program */
 PHP_FUNCTION(exec)
 {
-	pval **arg1, **arg2, **arg3;
-	int arg_count = ZEND_NUM_ARGS();
-	int ret;
-
-	if (arg_count < 1 || arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (!Z_STRLEN_PP(arg1)) {
-		PHP_EMPTY_EXEC_PARAM;
-	}
-	
-	switch (arg_count) {
-		case 1:
-			ret = php_Exec(0, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
-			break;
-		case 2:
-			ret = php_Exec(2, Z_STRVAL_PP(arg1), *arg2, return_value TSRMLS_CC);
-			break;
-		case 3:
-			ret = php_Exec(2, Z_STRVAL_PP(arg1), *arg2, return_value TSRMLS_CC);
-			Z_TYPE_PP(arg3) = IS_LONG;
-			Z_LVAL_PP(arg3)=ret;
-			break;
-	}
+	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
 /* }}} */
 
-/* {{{ proto int system(string command [, int return_value])
+/* {{{ proto int system(string command [, int &return_value])
    Execute an external program and display output */
 PHP_FUNCTION(system)
 {
-	pval **arg1, **arg2;
-	int arg_count = ZEND_NUM_ARGS();
-	int ret;
-
-	if (arg_count < 1 || arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (!Z_STRLEN_PP(arg1)) {
-		PHP_EMPTY_EXEC_PARAM;
-	}
-	
-	switch (arg_count) {
-		case 1:
-			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
-			break;
-		case 2:
-			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
-			Z_TYPE_PP(arg2) = IS_LONG;
-			Z_LVAL_PP(arg2)=ret;
-			break;
-	}
+	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
-/* {{{ proto void passthru(string command [, int return_value])
+/* {{{ proto void passthru(string command [, int &return_value])
    Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
-	pval **arg1, **arg2;
-	int arg_count = ZEND_NUM_ARGS();
-	int ret;
-
-	if (arg_count < 1 || arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	if (!Z_STRLEN_PP(arg1)) {
-		PHP_EMPTY_EXEC_PARAM;
-	}
-	
-	switch (arg_count) {
-		case 1:
-			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
-			break;
-		case 2:
-			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
-			Z_TYPE_PP(arg2) = IS_LONG;
-			Z_LVAL_PP(arg2)=ret;
-			break;
-	}
+	php_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
 /* }}} */
 
