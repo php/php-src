@@ -1,5 +1,8 @@
 #!/bin/sh
 
+test -d libzend || ln -s ../libzend .
+test -f TSRM || ln -s ../TSRM .
+
 ./scripts/preconfig
 
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
