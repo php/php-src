@@ -445,7 +445,10 @@ class PEAR_Installer extends PEAR_Common
             // <== XXX This part should be removed later on
 
             foreach ($pkginfo['filelist'] as $file => $atts) {
-                $this->_installFile($file, $atts, $tmp_path);
+                $res = $this->_installFile($file, $atts, $tmp_path);
+                if (!$res && empty($options['force'])) {
+                    return null;
+                }
             }
         }
 
