@@ -9,23 +9,33 @@ function gobble(s, x)
 	return x 
 }
 
-function convert(t, n, o, i)
+function convert(i, j)
 {
-	if (t == "int") x = "convert_to_long_ex(" n ");\n"
-	else if (t == "double") x = "convert_to_double_ex(" n ");\n"
-	else if (t == "string") x = "convert_to_string_ex(" n ");\n"
-	else if (t == "array") x = "convert_to_array_ex(" n ");\n"
-	else if (t == "resource") {
-		x = "/* " n ": fetching resources already handled. */\n"
-		if (o) {
-				resources = resources "\tif (argc > " i ") {\n\t\tZEND_FETCH_RESOURCE(???, ???, " n ", " n "_id, \"???\", ???G());\n\t}\n"
+	type = argtypes[i,j]
+	name = argnames[i,j]
+  opt  = optionals[i,j]
+	x = ""
+
+	if (type == "int") {
+		x = "convert_to_long_ex(" name ");\n"
+	} else if (type == "double") {
+		x = "convert_to_double_ex(" name ");\n"
+	} else if (type == "string") {
+		x = "convert_to_string_ex(" name ");\n"
+	} else if (type == "array") {
+		x = "convert_to_array_ex(" name ");\n"
+	} else if (type == "resource") {
+		if (opt && i) {
+			resources = resources "\tif (argc < " j+1 ") {\n\t\t/* Argument not given, do something before\n\t\t   trying to fetch resource " name ". */\n\t}\n\tZEND_FETCH_RESOURCE(???, ???, " name ", " name "_id, \"???\", ???G());\n"
 		} else {
-				resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " n ", " n "_id, \"???\", ???G());\n"
+			resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " name ", " name "_id, \"???\", ???G());\n"
 		}
-		funcvals = funcvals "\tint " n "_id = -1;\n"
+		funcvals = funcvals "\tint " name "_id = -1;\n"
+	} else {
+		x = "/* Write your own code here to handle argument " name ". */\n"
 	}
-	else x = "/* You must write your own code here to handle argument " n ". */\n"
-	return x
+
+	if (x) return x
 }
 
 BEGIN {
@@ -50,12 +60,17 @@ BEGIN {
 
 			args_max++
 			if (optional) {
-					optionals[num_funcs,i] = optional
+				optionals[num_funcs,i] = optional
+				if (arg_type != "resource") {
+					useswitch[num_funcs] = 1
+				}
 			} else {
 					args_min++
 			}
 
-			if (gobble("\\[")) optional++
+			if (x = gobble("\\[")) {
+				optional++
+			}
 
 			gobble(",")
 			i++
@@ -73,16 +88,20 @@ BEGIN {
 END {
 	for (i = 0; i < num_funcs; i++) {
 		
-		useswitch = maxargs[i] - minargs[i]
-		funcvals = resources = handleargs = ""
+		compareargc = maxargs[i] - minargs[i]
+		funcvals = resources = handleargs = closeopts = ""
 
 		proto = "/* {{{ proto " types[i] " " funcs[i] "("
 
 		if (maxargs[i]) {
 			zvals = "\tzval "
-			if (useswitch) {
+			if (compareargc) {
 				funcvals = "\tint argc;\n"
-				fetchargs = "\targc = ZEND_NUM_ARGS();\n\tif (argc < " minargs[i] " || argc > " maxargs[i] " || zend_get_parameters_ex(argc, "
+				if (minargs[i]) {
+					fetchargs = "\targc = ZEND_NUM_ARGS();\n\tif (argc < " minargs[i] " || argc > " maxargs[i] " || zend_get_parameters_ex(argc, "
+				} else {
+					fetchargs = "\targc = ZEND_NUM_ARGS();\n\tif ((argc && argc < " maxargs[i]+1 " || zend_get_parameters_ex(argc, "
+				}
 			} else {
 				fetchargs = "\tif (ZEND_NUM_ARGS() != " maxargs[i] " || zend_get_parameters_ex(" maxargs[i] ", "
 			}
@@ -99,23 +118,34 @@ END {
 			fetchargs = fetchargs "&" argnames[i,j]
 
 			if (j > minargs[i]-1) {
+				if (j) proto = proto " "
 				proto = proto "["
 				closeopts = closeopts "]"
 			}
 
-			if (j) proto = proto ", "
+			if (j > 0) proto = proto ", "
 			proto = proto argtypes[i,j] " " argnames[i,j]
 
-			if (useswitch) {
+			code = convert(i, j)
+				
+			if (useswitch[i]) {
 				if (j > minargs[i]-1) {
-					handleargs = "\t\tcase " j+1 ":\n\t\t\t" convert(argtypes[i,j], argnames[i,j], optionals[i,j], j) "\t\t\t/* Fall-through. */\n" handleargs
+					if (code) {
+						handleargs = "\t\tcase " j+1 ":\n\t\t\t" code "\t\t\t/* Fall-through. */\n" handleargs
+					} else {
+						handleargs = "\t\tcase " j+1 ":\t/* Fall-through. */\n" handleargs
+					}
 				} else if (j >= minargs[i]-1) {
-					handleargs = "\t\tcase " j+1 ":\n\t\t\t" convert(argtypes[i,j], argnames[i,j], optionals[i,j], j) handleargs
+					if (code) {
+						handleargs = "\t\tcase " j+1 ":\n\t\t\t" code handleargs
+					} else {
+						handleargs = "\t\tcase " j+1 ":\n" handleargs
+					}
 				} else {
-					handleargs = "\t\t\t" convert(argtypes[i,j], argnames[i,j], optionals[i,j], j) handleargs
+					handleargs = "\t\t\t" code handleargs
 				}
 			} else {
-				handleargs = handleargs "\t" convert(argtypes[i,j], argnames[i,j], optionals[i,j], j)
+				if (code) handleargs = handleargs "\t" code
 			}
 		}
 
@@ -125,7 +155,7 @@ END {
 			fetchargs = fetchargs ") == FAILURE) {\n\t\tWRONG_PARAM_COUNT;\n\t}\n"
 		}
 		if (resources ) funcvals = funcvals "\t???LS_FETCH();\n"
-		if (useswitch) handleargs = "\tswitch (argc) {\n" handleargs "\t\t\tbreak;\n\t\tdefault:\n\t\t\tWRONG_PARAM_COUNT;\n\t}"
+		if (useswitch[i]) handleargs = "\tswitch (argc) {\n" handleargs "\t\t\tbreak;\n\t\tdefault:\n\t\t\tWRONG_PARAM_COUNT;\n\t}"
 
 		print proto > extname "/function_stubs"
 		if (zvals) print zvals > extname "/function_stubs"
@@ -146,5 +176,6 @@ END {
 #
 # Local variables:
 # tab-width: 2
+# c-basic-offset: 2
 # End:
 #
