@@ -23,12 +23,12 @@
 
 #include "zend_ini.h"
 
-BEGIN_EXTERN_C();
+BEGIN_EXTERN_C()
 int php_init_config();
 int php_shutdown_config(void);
 void php_ini_delayed_modules_startup(TSRMLS_D);
 zval *cfg_get_entry(char *name, uint name_length);
-END_EXTERN_C();
+END_EXTERN_C()
 
 #define PHP_INI_USER	ZEND_INI_USER
 #define PHP_INI_PERDIR	ZEND_INI_PERDIR
