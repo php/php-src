@@ -1,3 +1,414 @@
+2004-01-17  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/simplexml/tests/profile08.phpt
+      ext/simplexml/tests/profile11.phpt:
+      update the tests proper-like
+
+    * ext/simplexml/examples/security.php
+      ext/simplexml/examples/xpath.php:
+      update the examples
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/profile04.phpt
+      ext/simplexml/tests/profile05.phpt
+      ext/simplexml/tests/profile06.phpt
+      ext/simplexml/tests/profile07.phpt
+      ext/simplexml/tests/profile10.phpt:
+      namespace accesses are now soley URI based as opposed to prefix based.
+
+2004-01-17  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/sqlite/Makefile.frag:
+      Make the compilation of vdbeaux.c dependent on the generation of sqlite.h.
+      An incremental 'make -j' build will now complete successfully.
+
+2004-01-17  Andrey Hristov  <php@hristov.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      use Rasmus' words
+
+2004-01-17  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/simplexml/README:
+      - Fix typoes
+
+2004-01-17  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/simplexml/README:
+      Spell 'element' correctly.
+
+2004-01-17  Andrey Hristov  <php@hristov.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      adding info about $argc and $argv in CLI mode
+
+2004-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/CREDITS
+      ext/simplexml/README
+      ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/008.phpt
+      ext/simplexml/tests/011.phpt
+      ext/simplexml/tests/012.phpt
+      ext/simplexml/tests/014.phpt
+      ext/simplexml/tests/014a.phpt
+      ext/simplexml/tests/014b.phpt
+      ext/simplexml/tests/015.phpt
+      ext/simplexml/tests/016.phpt
+      ext/simplexml/tests/017.phpt
+      ext/simplexml/tests/018.phpt
+      ext/simplexml/tests/019.phpt
+      ext/simplexml/tests/bug25756.phpt:
+      Major bugfix for consistency.
+
+2004-01-17  Andrey Hristov  <php@hristov.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      Clarification about phpDoc comments. Spotted by Greag Beaver.
+
+2004-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      No longer needed
+
+2004-01-17  Andrey Hristov  <php@hristov.com>
+
+    * ext/tokenizer/tokenizer.c
+      ext/xml/xml.c:
+      HEAD is bundled with ZE2
+
+2004-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/005.xml
+      ext/simplexml/tests/006.xml
+      ext/simplexml/tests/009.xml:
+      Drop the external xml files no longer needed
+
+    * ext/simplexml/tests/005.phpt
+      ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/009.phpt:
+      No external xml files
+
+    * ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/004.xml:
+      Don't use external xml files
+
+2004-01-17  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Common.php:
+      fix Bug #594 PEAR_Common::analyzeSourceCode fails on string with $var and {
+      also fixes SOAP packaging error
+
+2004-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      
+
+2004-01-17  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/simplexml/tests/profile06.phpt
+      ext/simplexml/tests/profile07.phpt
+      ext/simplexml/tests/profile10.phpt:
+      remove the parser errors here, so they accurately reflect what should
+      happen.
+
+2004-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      Fix inheritance rule for interface Traversable
+
+    * ext/simplexml/simplexml.c:
+      Fix parameter list and protos
+
+    * ext/simplexml/tests/010.phpt:
+      Add test for inherited simplexml classes
+
+    * ext/simplexml/simplexml.c:
+      Make inherited sxe classes work
+
+2004-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ChangeLog
+      README.PHP4-TO-PHP5-THIN-CHANGES
+      README.Zeus
+      configure.in
+      php4.spec.in
+      php5.spec.in
+      ZendEngine2/tests/bug26802.phpt
+      ext/bz2/bz2.dsp
+      ext/com_dotnet/README
+      ext/cpdf/cpdf.dsp
+      ext/ctype/ctype.dsp
+      ext/curl/curl.dsp
+      ext/dba/dba.dsp
+      ext/dbase/dbase.dsp
+      ext/dbx/dbx.dsp
+      ext/dio/tests/001.phpt
+      ext/dom/dom.dsp
+      ext/exif/exif.dsp
+      ext/fbsql/fbsql.dsp
+      ext/fdf/fdf.dsp
+      ext/filepro/filepro.dsp
+      ext/gd/gd.dsp
+      ext/gettext/gettext.dsp
+      ext/gmp/tests/001.phpt
+      ext/iconv/iconv.dsp
+      ext/imap/imap.dsp
+      ext/informix/ifx.dsp
+      ext/informix/ifx.ec
+      ext/ingres_ii/README
+      ext/ingres_ii/ingres.dsp
+      ext/interbase/interbase.dsp
+      ext/ldap/LDAP_Win32_HOWTO.txt
+      ext/ldap/ldap.dsp
+      ext/ldap/ldap.mak
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.dsp
+      ext/mbstring/mbstring.h
+      ext/mcrypt/mcrypt.dsp
+      ext/mcve/config.m4
+      ext/mcve/mcve.dsp
+      ext/mcve/tests/001.phpt
+      ext/mhash/mhash.dsp
+      ext/mime_magic/mime_magic.dsp
+      ext/ming/ming.dsp
+      ext/mnogosearch/README
+      ext/mnogosearch/index.php
+      ext/msql/msql.dsp
+      ext/mssql/mssql.dsp
+      ext/mssql/mssql_win32_howto.txt
+      ext/mssql/php_mssql.c
+      ext/mysql/mysql.dsp
+      ext/mysqli/mysqli.dsp
+      ext/ncurses/tests/001.phpt
+      ext/oci8/oci8.dsp
+      ext/odbc/config.m4
+      ext/openssl/README
+      ext/openssl/openssl.dsp
+      ext/oracle/oracle.dsp
+      ext/pdf/pdf.dsp
+      ext/pgsql/pgsql.dsp
+      ext/pspell/README
+      ext/pspell/pspell.dsp
+      ext/shmop/README
+      ext/shmop/shmop.dsp
+      ext/simplexml/simplexml.dsp
+      ext/skeleton/skeleton.dsp
+      ext/skeleton/tests/001.phpt
+      ext/snmp/snmp.dsp
+      ext/sockets/sockets.dsp
+      ext/sqlite/sqlite.dsp
+      ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/sybase_ct.dsp
+      ext/tokenizer/tokenizer.dsp
+      ext/w32api/w32api.c
+      ext/w32api/w32api.dsp
+      ext/xml/xml.mak
+      ext/xmlrpc/xmlrpc.dsp
+      ext/xsl/xsl.dsp
+      ext/yaz/yaz.dsp
+      ext/zlib/zlib.dsp
+      ext/zlib/zlib_win32_howto.txt
+      netware/buildsapi.bat
+      netware/php4apache.mak
+      netware/php4apache2filter.mak
+      netware/php4cli.mak
+      netware/php5apache.mak
+      netware/php5apache2filter.mak
+      netware/php5cli.mak
+      netware/phplib.mak
+      sapi/activescript/README
+      sapi/activescript/classfactory.cpp
+      sapi/activescript/config.w32
+      sapi/activescript/php4activescript.c
+      sapi/activescript/php4activescript.def
+      sapi/activescript/php4activescript.dsp
+      sapi/activescript/php4activescript.h
+      sapi/activescript/php4as_classfactory.h
+      sapi/activescript/php4as_scriptengine.h
+      sapi/activescript/php5activescript.c
+      sapi/activescript/php5activescript.def
+      sapi/activescript/php5activescript.dsp
+      sapi/activescript/php5activescript.h
+      sapi/activescript/php5as_classfactory.h
+      sapi/activescript/php5as_scriptengine.h
+      sapi/activescript/scriptengine.cpp
+      sapi/aolserver/README
+      sapi/aolserver/php4aolserver.dsp
+      sapi/aolserver/php5aolserver.dsp
+      sapi/apache/config.w32
+      sapi/apache/php4apache.dsp
+      sapi/apache/php5apache.dsp
+      sapi/apache2filter/.cvsignore
+      sapi/apache2handler/.cvsignore
+      sapi/apache2handler/php4apache2.dsp
+      sapi/apache2handler/php5apache2.dsp
+      sapi/apache_hooks/.cvsignore
+      sapi/apache_hooks/apMakefile.tmpl
+      sapi/apache_hooks/config.m4
+      sapi/apache_hooks/config.w32
+      sapi/apache_hooks/libphp4.module.in
+      sapi/apache_hooks/libphp5.module.in
+      sapi/apache_hooks/mod_php4.c
+      sapi/apache_hooks/mod_php4.exp
+      sapi/apache_hooks/mod_php4.h
+      sapi/apache_hooks/mod_php5.c
+      sapi/apache_hooks/mod_php5.exp
+      sapi/apache_hooks/mod_php5.h
+      sapi/apache_hooks/php.sym
+      sapi/apache_hooks/php4apache_hooks.dsp
+      sapi/apache_hooks/php5apache_hooks.dsp
+      sapi/apache_hooks/php_apache_http.h
+      sapi/caudium/.cvsignore
+      sapi/caudium/caudium.c
+      sapi/caudium/config.m4
+      sapi/cgi/README.FastCGI
+      sapi/embed/php4embed.dsp
+      sapi/embed/php5embed.dsp
+      sapi/isapi/config.m4
+      sapi/isapi/config.w32
+      sapi/isapi/php4isapi.c
+      sapi/isapi/php4isapi.def
+      sapi/isapi/php4isapi.dsp
+      sapi/isapi/php5isapi.c
+      sapi/isapi/php5isapi.def
+      sapi/isapi/php5isapi.dsp
+      sapi/isapi/stresstest/notes.txt
+      sapi/isapi/stresstest/stresstest.cpp
+      sapi/nsapi/php4nsapi.dsp
+      sapi/nsapi/php5nsapi.dsp
+      sapi/pi3web/README
+      sapi/pi3web/config.m4
+      sapi/pi3web/config.w32
+      sapi/pi3web/php4pi3web.dsp
+      sapi/pi3web/php5pi3web.dsp
+      sapi/pi3web/pi3web_sapi.c
+      sapi/pi3web/pi3web_sapi.h
+      sapi/roxen/.cvsignore
+      sapi/roxen/README
+      sapi/roxen/TODO
+      sapi/roxen/config.m4
+      sapi/roxen/roxen.c
+      sapi/thttpd/config.m4
+      sapi/thttpd/thttpd_patch
+      sapi/tux/README
+      sapi/tux/config.m4
+      sapi/webjames/README
+      scripts/dev/credits
+      tests/test.php4
+      tests/classes/inheritance_002.phpt
+      win32/install.txt
+      win32/php4.dsp
+      win32/php4.dsw
+      win32/php4dll.dsp
+      win32/php4dllts.dsp
+      win32/php4dllts.rc
+      win32/php4dllts.rc2
+      win32/php4ts.dsp
+      win32/php4ts.rc
+      win32/php4ts.rc2
+      win32/php4ts_cli.dsp
+      win32/php4ts_cli.rc
+      win32/php4ts_cli.rc2
+      win32/php5.dsp
+      win32/php5.dsw
+      win32/php5dll.dsp
+      win32/php5dllts.dsp
+      win32/php5dllts.rc
+      win32/php5dllts.rc2
+      win32/php5ts.dsp
+      win32/php5ts.dsw
+      win32/php5ts.rc
+      win32/php5ts.rc2
+      win32/php5ts_cli.dsp
+      win32/php5ts_cli.rc
+      win32/php5ts_cli.rc2
+      win32/pws-php4cgi.reg
+      win32/pws-php4isapi.reg
+      win32/pws-php5cgi.reg
+      win32/pws-php5isapi.reg
+      win32/resource.h
+      win32/signal.h
+      win32/installer/README
+      win32/installer/gen-nsis.php:
+      - Renamed all *php4* files to *php5*, changed all php4/PHP4 to php5/PHP5
+
+2004-01-17  Tim Toohey  <php@toowards.com>
+
+    * ext/gd/libgd/gd.c:
+      (gdImageSetPixel) Tidied 'normal' blending effect
+
+2004-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * tests/classes/destructor_and_references.phpt:
+      typofix
+
+2004-01-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PECL_4_3)
+      ext/sqlite/package.xml:
+      bah bah
+
+    * (PECL_4_3)
+      ext/sqlite/package.xml:
+      I will test package even at 1am...
+
+    * (PECL_4_3)
+      ext/sqlite/package.xml:
+      update for release
+
+2004-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      Expose zend_std_call_user_call(), needed for implementation of things like
+      __call handlers.
+
+2004-01-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.dsp:
+      better fix
+
+2004-01-17  Edin Kadribasic  <edink@emini.dk>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c:
+      Not everybody has this ;)
+
+2004-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.l:
+      Nuke compile warning by using the LANG_SCNG macro instead
+
+2004-01-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.dsp:
+      fix win32 build
+
+2004-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/imap/config.m4:
+      MFH: Fixed bug #26923 (ext/imap: pam and crypt libraries missing when build
+      as shared)
+
+    * ext/imap/config.m4:
+      Fixed bug #26923 (ext/imap: pam and crypt libraries missing when build as
+      shared)
+
 2004-01-16  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/sqlite/libsqlite/src/sqlite.w32.h:

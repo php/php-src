@@ -1,3 +1,30 @@
+2004-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c:
+      
+
+    * zend_interfaces.c:
+      Fix inheritance rule for interface Traversable
+
+2004-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * tests/bug26802.phpt:
+      - Renamed all *php4* files to *php5*, changed all php4/PHP4 to php5/PHP5
+
+2004-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_object_handlers.c
+      zend_object_handlers.h:
+      Expose zend_std_call_user_call(), needed for implementation of things like
+      __call handlers.
+
+2004-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_compile.c
+      zend_language_scanner.h
+      zend_language_scanner.l:
+      Nuke compile warning by using the LANG_SCNG macro instead
+
 2004-01-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * zend_reflection_api.c:
