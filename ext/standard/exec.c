@@ -23,6 +23,7 @@
 #include "php_string.h"
 #include "safe_mode.h"
 #include "ext/standard/head.h"
+#include "ext/standard/file.h"
 #include "exec.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -45,6 +46,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 	int buflen = 0;
 	int t, l, ret, output=1;
 	int overflow_limit, lcmd, ldir;
+	int rsrc_id;
 	char *b, *c, *d=NULL;
 	PLS_FETCH();
 
@@ -116,6 +118,13 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 			array_init(array);
 		}
 	}
+
+	/* we register the resource so that case of an aborted connection the 
+	 * fd gets pclosed
+	 */
+
+	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_fopen());
+
 	if (type != 3) {
 		l=0;
 		while ( !feof(fp) || l != 0 ) {
@@ -183,8 +192,10 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 				if (output) (void)PUTC(buf[i]);
 		}
 	}
+
+	/* the zend_list_delete will pclose our popen'ed process */
+	zend_list_delete(rsrc_id); 
 	
-	ret = pclose(fp);
 #if HAVE_SYS_WAIT_H
 	if (WIFEXITED(ret)) {
 		ret = WEXITSTATUS(ret);
