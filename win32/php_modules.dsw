@@ -27,6 +27,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "crack"=..\ext\crack\crack.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "ctype"=..\ext\ctype\ctype.dsp - Package Owner=<4>
 
 Package=<5>
@@ -100,18 +112,6 @@ Package=<4>
 ###############################################################################
 
 Project: "domxml"=..\ext\domxml\domxml.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "dotnet"=..\ext\dotnet\dotnet.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -279,18 +279,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "java"=..\ext\java\java.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "ldap"=..\ext\ldap\ldap.dsp - Package Owner=<4>
 
 Package=<5>
@@ -328,6 +316,18 @@ Package=<4>
 ###############################################################################
 
 Project: "mhash"=..\ext\mhash\mhash.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "mime_magic"=..\ext\mime_magic\mime_magic.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -555,7 +555,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "zlib"=..\ext\zlib\zlib.dsp - Package Owner=<4>
+Project: "zip"=..\ext\zip\zip.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
