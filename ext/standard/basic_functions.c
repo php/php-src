@@ -653,7 +653,7 @@ function_entry basic_functions[] = {
 	PHP_FE(closedir,														NULL)
 	PHP_FE(chdir,															NULL)
 
-#if defined(HAVE_CHROOT) && !defined(ZTS)
+#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
 	PHP_FE(chroot,															NULL)
 #else
 	PHP_FALIAS(chroot,				warn_not_available,						NULL)

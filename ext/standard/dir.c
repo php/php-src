@@ -221,7 +221,7 @@ PHP_FUNCTION(closedir)
 
 /* }}} */
 
-#if defined(HAVE_CHROOT) && !defined(ZTS)
+#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
 /* {{{ proto int chroot(string directory)
    Change root directory */
 
