@@ -155,12 +155,12 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
-variables_order		=	"EGPCBS"; This directive describes the order in which PHP registers
+variables_order		=	"EGPCS"	; This directive describes the order in which PHP registers
 								; GET, POST, Cookie, Environment and Built-in variables (G, P,
-								; C, E & B respectively, often referred to as EGPCB or GPC).
+								; C, E & S respectively, often referred to as EGPCS or GPC).
 								; Registration is done from left to right, newer values override
 								; older values.
-register_globals	=	On		; Whether or not to register the EGPCB variables as global
+register_globals	=	On		; Whether or not to register the EGPCS variables as global
 								; variables.  You may want to turn this off if you don't want
 								; to clutter your scripts' global scope with user data.  This makes
 								; most sense when coupled with track_vars - in which case you can
