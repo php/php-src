@@ -55,6 +55,7 @@
 #include "mbstring.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"
+#include "ext/standard/php_smart_str.h"
 #include "ext/standard/url.h"
 #include "main/php_output.h"
 #include "ext/standard/info.h"
@@ -2648,6 +2649,194 @@ PHP_FUNCTION(mb_decode_numericentity)
  *  Sends an email message with MIME scheme
  */
 #if HAVE_SENDMAIL
+
+#define APPEND_ONE_CHAR(ch) do { \
+	if (token.a > 0) { \
+		smart_str_appendc(&token, ch); \
+	} else {\
+		token.len++; \
+	} \
+} while (0)
+
+#define SEPARATE_SMART_STR(str) do {\
+	if ((str)->a == 0) { \
+		char *tmp_ptr; \
+		(str)->a = 1; \
+		while ((str)->a < (str)->len) { \
+			(str)->a <<= 1; \
+		} \
+		tmp_ptr = emalloc((str)->a + 1); \
+		memcpy(tmp_ptr, (str)->c, (str)->len); \
+		(str)->c = tmp_ptr; \
+	} \
+} while (0)
+
+static void my_smart_str_dtor(smart_str *s)
+{
+	if (s->a > 0) {
+		smart_str_free(s);
+	}
+}
+
+static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t str_len)
+{
+	const char *ps;
+	size_t icnt;
+	int state = 0;
+	int crlf_state = -1;
+
+	smart_str token = { 0, 0, 0 };
+	smart_str fld_name = { 0, 0, 0 }, fld_val = { 0, 0, 0 };
+
+	ps = str;
+	icnt = str_len;
+
+	while (icnt > 0) {
+		switch (*ps) {
+			case ':':
+				if (crlf_state == 1) {
+					APPEND_ONE_CHAR('\r');
+				}
+
+				if (state == 0 || state == 1) {
+					fld_name = token;
+
+					state = 2;
+				} else {
+					APPEND_ONE_CHAR(*ps);
+				}
+
+				crlf_state = 0;
+				break;
+
+			case '\n':
+				if (crlf_state == -1) {
+					goto out;
+				}
+				crlf_state = -1;
+				break;
+
+			case '\r':
+				if (crlf_state == 1) {
+					APPEND_ONE_CHAR('\r');
+				} else {
+					crlf_state = 1;
+				}
+				break;
+
+			case ' ': case '\t':
+				if (crlf_state == -1) {
+					if (state == 3) {
+						/* continuing from the previous line */
+						SEPARATE_SMART_STR(&token);
+						state = 4;
+					} else {
+						/* simply skipping this new line */
+						state = 5;
+					}
+				} else {
+					if (crlf_state == 1) {
+						APPEND_ONE_CHAR('\r');
+					}
+					if (state == 1 || state == 3) {
+						APPEND_ONE_CHAR(*ps);
+					}
+				}
+				crlf_state = 0;
+				break;
+
+			default:
+				switch (state) {
+					case 0:
+						token.c = (char *)ps;
+						token.len = 0;
+						token.a = 0;
+						state = 1;
+						break;
+					
+					case 2:
+						if (crlf_state != -1) {
+							token.c = (char *)ps;
+							token.len = 0;
+							token.a = 0;
+
+							state = 3;
+							break;
+						}
+						/* break is missing intentionally */
+
+					case 3:
+						if (crlf_state == -1) {
+							fld_val = token;
+
+							if (fld_name.c != NULL && fld_val.c != NULL) {
+								char *dummy;
+
+								/* FIXME: some locale free implementation is
+								 * really required here,,, */
+								SEPARATE_SMART_STR(&fld_name);
+								php_strtoupper(fld_name.c, fld_name.len);
+
+								zend_hash_update(ht, (char *)fld_name.c, fld_name.len, &fld_val, sizeof(smart_str), (void **)&dummy);
+
+								my_smart_str_dtor(&fld_name);
+							}
+
+							memset(&fld_name, 0, sizeof(smart_str));
+							memset(&fld_val, 0, sizeof(smart_str));
+
+							token.c = (char *)ps;
+							token.len = 0;
+							token.a = 0;
+
+							state = 1;
+						}
+						break;
+
+					case 4:
+						APPEND_ONE_CHAR(' ');
+						state = 3;
+						break;
+				}
+
+				if (crlf_state == 1) {
+					APPEND_ONE_CHAR('\r');
+				}
+
+				APPEND_ONE_CHAR(*ps);
+
+				crlf_state = 0;
+				break;
+		}
+		ps++, icnt--;
+	}
+out:
+	if (state == 2) {
+		token.c = "";
+		token.len = 0;
+		token.a = 0;
+
+		state = 3;
+	}
+	if (state == 3) {
+		fld_val = token;
+
+		if (fld_name.c != NULL && fld_val.c != NULL) {
+			void *dummy;
+
+			/* FIXME: some locale free implementation is
+			 * really required here,,, */
+			SEPARATE_SMART_STR(&fld_name);
+			php_strtoupper(fld_name.c, fld_name.len);
+
+			zend_hash_update(ht, (char *)fld_name.c, fld_name.len, &fld_val, sizeof(smart_str), (void **)&dummy);
+
+			my_smart_str_dtor(&fld_name);
+		}
+	}
+	return state;
+}
+
 PHP_FUNCTION(mb_send_mail)
 {
 	int n;
@@ -2661,6 +2850,10 @@ PHP_FUNCTION(mb_send_mail)
 	int subject_len;
 	char *extra_cmd=NULL;
 	int extra_cmd_len;
+	struct {
+		int cnt_type:1;
+		int cnt_trans_enc:1;
+	} suppressed_hdrs = { 0, 0 };
 
 	char *message_buf=NULL, *subject_buf=NULL, *p;
 	mbfl_string orig_str, conv_str;
@@ -2672,7 +2865,10 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
 	const mbfl_language *lang;
 	int err = 0;
-
+	HashTable ht_headers;
+	smart_str *s;
+	extern void mbfl_memory_device_unput(mbfl_memory_device *device TSRMLS_DC);
+	
 	/* initialize */
 	mbfl_memory_device_init(&device, 0, 0 TSRMLS_CC);
 	mbfl_string_init(&orig_str);
@@ -2691,6 +2887,71 @@ PHP_FUNCTION(mb_send_mail)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss", &to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE) {
 		return;
+	}
+
+	zend_hash_init(&ht_headers, 0, NULL, (dtor_func_t) my_smart_str_dtor, 0);
+
+	if (headers != NULL) {
+		_php_mbstr_parse_mail_headers(&ht_headers, headers, headers_len);
+	}
+
+	if (zend_hash_find(&ht_headers, "CONTENT-TYPE", sizeof("CONTENT-TYPE") - 1, (void **)&s) == SUCCESS) {
+		char *tmp;
+		char *param_name;
+		char *charset = NULL;
+
+		SEPARATE_SMART_STR(s);
+		smart_str_0(s);
+
+		p = strchr(s->c, ';');
+
+		if (p != NULL) {
+			/* skipping the padded spaces */
+			do {
+				++p;
+			} while (*p == ' ' || *p == '\t');
+
+			if (*p != '\0') {
+				if ((param_name = php_strtok_r(p, "= ", &tmp)) != NULL) {
+					if (strcasecmp(param_name, "charset") == 0) {
+						enum mbfl_no_encoding _tran_cs = tran_cs;
+						
+						charset = php_strtok_r(NULL, "= ", &tmp);
+						if (charset != NULL) {
+							_tran_cs = mbfl_name2no_encoding(charset);
+						}
+
+						if (_tran_cs == mbfl_no_encoding_invalid) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported charset \"%s\" - will be regarded as ascii", charset); 
+							_tran_cs = mbfl_no_encoding_ascii;
+						}
+						tran_cs = _tran_cs;
+					}
+				}
+			}
+		}
+		suppressed_hdrs.cnt_type = 1;
+	}
+
+	if (zend_hash_find(&ht_headers, "CONTENT-TRANSFER-ENCODING", sizeof("CONTENT-TRANSFER-ENCODING") - 1, (void **)&s) == SUCCESS) {
+		enum mbfl_no_encoding _body_enc;
+		SEPARATE_SMART_STR(s);
+		smart_str_0(s);
+
+		_body_enc = mbfl_name2no_encoding(s->c);
+		switch (_body_enc) {
+			case mbfl_no_encoding_base64:
+			case mbfl_no_encoding_7bit:
+			case mbfl_no_encoding_8bit:
+				body_enc = _body_enc;
+				break;
+
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported transfer encoding \"%s\" - will be regarded as 8bit", s->c); 
+				body_enc =	mbfl_no_encoding_8bit;
+				break;
+		}
+		suppressed_hdrs.cnt_trans_enc = 1;
 	}
 
 	/* To: */
@@ -2750,29 +3011,43 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	/* other headers */
-#define PHP_MBSTR_MAIL_MIME_HEADER1 "Mime-Version: 1.0\nContent-Type: text/plain"
-#define PHP_MBSTR_MAIL_MIME_HEADER2 "; charset="
-#define PHP_MBSTR_MAIL_MIME_HEADER3 "\nContent-Transfer-Encoding: "
+#define PHP_MBSTR_MAIL_MIME_HEADER1 "Mime-Version: 1.0"
+#define PHP_MBSTR_MAIL_MIME_HEADER2 "Content-Type: text/plain"
+#define PHP_MBSTR_MAIL_MIME_HEADER3 "; charset="
+#define PHP_MBSTR_MAIL_MIME_HEADER4 "Content-Transfer-Encoding: "
 	if (headers != NULL) {
 		p = headers;
 		n = headers_len;
 		mbfl_memory_device_strncat(&device, p, n TSRMLS_CC);
-		if (p[n - 1] != '\n') {
+		if (n > 0 && p[n - 1] != '\n') {
 			mbfl_memory_device_strncat(&device, "\n", 1 TSRMLS_CC);
 		}
 	}
+
 	mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1 TSRMLS_CC);
-	p = (char *)mbfl_no2preferred_mime_name(tran_cs);
-	if (p != NULL) {
+	mbfl_memory_device_strncat(&device, "\n", 1 TSRMLS_CC);
+
+	if (!suppressed_hdrs.cnt_type) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER2, sizeof(PHP_MBSTR_MAIL_MIME_HEADER2) - 1 TSRMLS_CC);
+
+		p = (char *)mbfl_no2preferred_mime_name(tran_cs);
+		if (p != NULL) {
+			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1 TSRMLS_CC);
+			mbfl_memory_device_strcat(&device, p TSRMLS_CC);
+		}
+		mbfl_memory_device_strncat(&device, "\n", 1 TSRMLS_CC);
+	}
+	if (!suppressed_hdrs.cnt_trans_enc) {
+		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1 TSRMLS_CC);
+		p = (char *)mbfl_no2preferred_mime_name(body_enc);
+		if (p == NULL) {
+			p = "7bit";
+		}
 		mbfl_memory_device_strcat(&device, p TSRMLS_CC);
+		mbfl_memory_device_strncat(&device, "\n", 1 TSRMLS_CC);
 	}
-	mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1 TSRMLS_CC);
-	p = (char *)mbfl_no2preferred_mime_name(body_enc);
-	if (p == NULL) {
-		p = "7bit";
-	}
-	mbfl_memory_device_strcat(&device, p TSRMLS_CC);
+
+	mbfl_memory_device_unput(&device TSRMLS_CC);
 	mbfl_memory_device_output('\0', &device TSRMLS_CC);
 	headers = (char *)device.buffer;
 
@@ -2789,7 +3064,15 @@ PHP_FUNCTION(mb_send_mail)
 		efree((void *)message_buf);
 	}
 	mbfl_memory_device_clear(&device TSRMLS_CC);
+	zend_hash_destroy(&ht_headers);
 }
+
+#undef APPEND_ONE_CHAR
+#undef SEPARATE_SMART_STR
+#undef PHP_MBSTR_MAIL_MIME_HEADER1
+#undef PHP_MBSTR_MAIL_MIME_HEADER2
+#undef PHP_MBSTR_MAIL_MIME_HEADER3
+#undef PHP_MBSTR_MAIL_MIME_HEADER4
 
 #else	/* HAVE_SENDMAIL */
 
