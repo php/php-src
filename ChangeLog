@@ -1,3 +1,60 @@
+2004-04-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.m4:
+      - Let it work safely
+
+    * (PHP_4_3)
+      ext/wddx/tests/001.phpt
+      ext/wddx/tests/wddx.xml:
+      - Remove test, as it's never worked as expected.
+
+2004-04-04  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/mbstring/config.m4:
+      - Fixed test
+
+2004-04-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_objects_API.c:
+      Removed unused variable.
+
+2004-04-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/wddx/tests/001.phpt:
+      - Fix test: Any datetime value that exceeds the unix time range should
+        not be unserialized.
+
+2004-04-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gd.c:
+      MFH: Fixed a bug that prevented building of the GD extension against
+      external GD lib 1.X.
+
+    * ext/gd/gd.c:
+      Fixed a bug that prevented building of gd extension against external GD
+      lib 1.X.
+
+2004-04-04  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/php_ibase_includes.h:
+      CS
+
+2004-04-04  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/tests/time/bug21966.phpt:
+      - Fixed comment and double 0
+
+    * ext/standard/tests/time/bug21966.phpt:
+      
+      - One more test for a date/time related bug.
+
+2004-04-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/config.m4:
+      Add a comment why it is in
+
 2004-04-03  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_builtin_functions.c:
